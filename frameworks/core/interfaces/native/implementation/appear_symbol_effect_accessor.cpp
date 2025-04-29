@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-#include "arkoala_api_generated.h"
-
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/symbol_effect_peer.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/symbol_effect_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AppearSymbolEffectAccessor {
 void DestroyPeerImpl(Ark_AppearSymbolEffect peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_AppearSymbolEffect CtorImpl(const Opt_EffectScope* scope)
 {
@@ -31,33 +31,25 @@ Ark_AppearSymbolEffect CtorImpl(const Opt_EffectScope* scope)
     if (scope) {
         optScope = Converter::OptConvert<OHOS::Ace::ScopeType>(*scope);
     }
-    return new AppearSymbolEffectPeer(optScope);
+    return PeerUtils::CreatePeer<AppearSymbolEffectPeer>(optScope);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void*>(&DestroyPeerImpl);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Opt_EffectScope GetScopeImpl(Ark_AppearSymbolEffect peer)
 {
-    //ToDo need check
-    Opt_EffectScope effectScope { INTEROP_TAG_INT32, ARK_EFFECT_SCOPE_LAYER };
-    CHECK_NULL_RETURN(peer, effectScope);
-    CHECK_NULL_RETURN(peer->scope, effectScope);
-    switch (peer->scope.value()) {
-        case OHOS::Ace::ScopeType::WHOLE:
-            effectScope.value = ARK_EFFECT_SCOPE_WHOLE;
-            break;
-        default:
-            break;
-    }
-    return effectScope;
+    auto invalid = Converter::ArkValue<Opt_EffectScope>();
+    CHECK_NULL_RETURN(peer, invalid);
+    return Converter::ArkValue<Opt_EffectScope>(peer->scope);
 }
-void SetScopeImpl(Ark_AppearSymbolEffect peer, Ark_EffectScope scope)
+void SetScopeImpl(Ark_AppearSymbolEffect peer,
+                  Ark_EffectScope scope)
 {
     CHECK_NULL_VOID(peer);
     peer->scope = Converter::OptConvert<OHOS::Ace::ScopeType>(scope);
 }
-} // namespace AppearSymbolEffectAccessor
+} // AppearSymbolEffectAccessor
 const GENERATED_ArkUIAppearSymbolEffectAccessor* GetAppearSymbolEffectAccessor()
 {
     static const GENERATED_ArkUIAppearSymbolEffectAccessor AppearSymbolEffectAccessorImpl {
@@ -69,8 +61,4 @@ const GENERATED_ArkUIAppearSymbolEffectAccessor* GetAppearSymbolEffectAccessor()
     };
     return &AppearSymbolEffectAccessorImpl;
 }
-
-struct AppearSymbolEffectPeer {
-    virtual ~AppearSymbolEffectPeer() = default;
-};
-} // namespace OHOS::Ace::NG::GeneratedModifier
+}

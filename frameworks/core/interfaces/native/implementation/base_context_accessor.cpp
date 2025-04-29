@@ -51,7 +51,4 @@ const GENERATED_ArkUIBaseContextAccessor* GetBaseContextAccessor()
     return &BaseContextAccessorImpl;
 }
 
-struct BaseContextPeer {
-    virtual ~BaseContextPeer() = default;
-};
 }

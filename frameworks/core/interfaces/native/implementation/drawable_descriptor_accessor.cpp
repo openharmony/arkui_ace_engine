@@ -46,7 +46,4 @@ const GENERATED_ArkUIDrawableDescriptorAccessor* GetDrawableDescriptorAccessor()
     return &DrawableDescriptorAccessorImpl;
 }
 
-struct DrawableDescriptorPeer {
-    virtual ~DrawableDescriptorPeer() = default;
-};
 }

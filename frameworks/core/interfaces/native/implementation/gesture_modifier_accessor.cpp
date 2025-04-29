@@ -46,7 +46,4 @@ const GENERATED_ArkUIGestureModifierAccessor* GetGestureModifierAccessor()
     return &GestureModifierAccessorImpl;
 }
 
-struct GestureModifierPeer {
-    virtual ~GestureModifierPeer() = default;
-};
 }

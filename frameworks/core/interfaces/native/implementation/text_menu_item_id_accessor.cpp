@@ -24,11 +24,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextMenuItemIdAccessor {
 void DestroyPeerImpl(Ark_TextMenuItemId peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_TextMenuItemId CtorImpl()
 {
-    return new TextMenuItemIdPeer();
+    return PeerUtils::CreatePeer<TextMenuItemIdPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -90,15 +90,21 @@ Ark_TextMenuItemId GetAI_WRITERImpl()
 }
 Ark_TextMenuItemId GetTRANSLATEImpl()
 {
-    return {};
+    auto peer = CtorImpl();
+    peer->id = "OH_DEFAULT_TRANSLATE";
+    return peer;
 }
 Ark_TextMenuItemId GetSEARCHImpl()
 {
-    return {};
+    auto peer = CtorImpl();
+    peer->id = "OH_DEFAULT_SEARCH";
+    return peer;
 }
 Ark_TextMenuItemId GetSHAREImpl()
 {
-    return {};
+    auto peer = CtorImpl();
+    peer->id = "OH_DEFAULT_SHARE";
+    return peer;
 }
 } // TextMenuItemIdAccessor
 const GENERATED_ArkUITextMenuItemIdAccessor* GetTextMenuItemIdAccessor()

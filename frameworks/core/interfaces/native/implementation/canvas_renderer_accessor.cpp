@@ -79,7 +79,7 @@ void DrawImage0Impl(Ark_CanvasRenderer peer,
                 peerImpl->DrawImage(bitmap, params);
             }
         },
-        [&params, peerImpl](const Ark_NativePointer& pixelMap) {
+        [&params, peerImpl](const Ark_PixelMap& pixelMap) {
             CHECK_NULL_VOID(pixelMap);
             peerImpl->DrawPixelMap(pixelMap, params);
         },
@@ -116,7 +116,7 @@ void DrawImage1Impl(Ark_CanvasRenderer peer,
                 peerImpl->DrawImage(bitmap, params);
             }
         },
-        [&params, peerImpl](const Ark_NativePointer& pixelMap) {
+        [&params, peerImpl](const Ark_PixelMap& pixelMap) {
             CHECK_NULL_VOID(pixelMap);
             peerImpl->DrawPixelMap(pixelMap, params);
         },
@@ -165,7 +165,7 @@ void DrawImage2Impl(Ark_CanvasRenderer peer,
                 peerImpl->DrawImage(bitmap, params);
             }
         },
-        [&params, peerImpl](const Ark_NativePointer& pixelMap) {
+        [&params, peerImpl](const Ark_PixelMap& pixelMap) {
             CHECK_NULL_VOID(pixelMap);
             peerImpl->DrawPixelMap(pixelMap, params);
         },
@@ -409,11 +409,11 @@ Ark_ImageData GetImageDataImpl(Ark_CanvasRenderer peer,
     auto arkHeight = Converter::ArkValue<Ark_Number>(height);
     return GetImageDataAccessor()->ctor(&arkWidth, &arkHeight, &optBuffer);
 }
-Ark_NativePointer GetPixelMapImpl(Ark_CanvasRenderer peer,
-                                  const Ark_Number* sx,
-                                  const Ark_Number* sy,
-                                  const Ark_Number* sw,
-                                  const Ark_Number* sh)
+Ark_PixelMap GetPixelMapImpl(Ark_CanvasRenderer peer,
+                             const Ark_Number* sx,
+                             const Ark_Number* sy,
+                             const Ark_Number* sw,
+                             const Ark_Number* sh)
 {
     CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
@@ -428,7 +428,10 @@ Ark_NativePointer GetPixelMapImpl(Ark_CanvasRenderer peer,
     auto height = static_cast<double>(Converter::Convert<float>(*sh));
     auto pixelMap = peerImpl->GetPixelMap(x, y, width, height);
     CHECK_NULL_RETURN(pixelMap, {});
-    return static_cast<void*>(pixelMap);
+    auto pixelMapPeer = GetPixelMapAccessor()->ctor();
+    CHECK_NULL_RETURN(pixelMapPeer, {});
+    pixelMapPeer->pixelMap = pixelMap;
+    return pixelMapPeer;
 }
 void PutImageData0Impl(Ark_CanvasRenderer peer,
                        Ark_ImageData imagedata,
@@ -677,8 +680,8 @@ void SetTransform0Impl(Ark_CanvasRenderer peer,
     }
     auto param = TransformParam {
         .scaleX = static_cast<double>(Converter::Convert<float>(*a)),
-        .skewX = static_cast<double>(Converter::Convert<float>(*c)),
-        .skewY = static_cast<double>(Converter::Convert<float>(*b)),
+        .skewX = static_cast<double>(Converter::Convert<float>(*b)),
+        .skewY = static_cast<double>(Converter::Convert<float>(*c)),
         .scaleY = static_cast<double>(Converter::Convert<float>(*d)),
         .translateX = static_cast<double>(Converter::Convert<float>(*e)),
         .translateY = static_cast<double>(Converter::Convert<float>(*f)) };
@@ -733,16 +736,18 @@ void TranslateImpl(Ark_CanvasRenderer peer,
     peerImpl->Translate(transX, transY);
 }
 void SetPixelMapImpl(Ark_CanvasRenderer peer,
-                     const Opt_NativePointer* value)
+                     const Opt_PixelMap* value)
 {
 #ifdef PIXEL_MAP_SUPPORTED
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(value);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    void* nativePixelMap = static_cast<void*>(value->value);
-    CHECK_NULL_VOID(nativePixelMap);
-    peerImpl->SetPixelMap(nativePixelMap);
+    auto opt = Converter::OptConvert<Ark_PixelMap>(*value);
+    CHECK_NULL_VOID(opt);
+    auto pixelMapPeer = opt.value();
+    CHECK_NULL_VOID(pixelMapPeer);
+    peerImpl->SetPixelMap(pixelMapPeer->pixelMap);
 #else
     LOGE("ARKOALA CanvasRendererAccessor::SetPixelMapImpl function 'setPixelMap'"
          " is not supported on the current platform.");
@@ -776,6 +781,29 @@ void ResetImpl(Ark_CanvasRenderer peer)
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     peerImpl->Reset();
+}
+Ark_Union_LengthMetrics_String GetLetterSpacingImpl(Ark_CanvasRenderer peer)
+{
+    return {};
+}
+void SetLetterSpacingImpl(Ark_CanvasRenderer peer,
+                          const Ark_Union_LengthMetrics_String* letterSpacing)
+{
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(letterSpacing);
+    Converter::VisitUnion(
+        *letterSpacing,
+        [peerImpl](const Ark_String& str) {
+            auto spacing = Converter::Convert<std::string>(str);
+            peerImpl->SetLetterSpacing(spacing);
+        },
+        [peerImpl](const Ark_LengthMetrics& metrics) {
+            Dimension spacing = Converter::OptConvert<Dimension>(metrics).value_or(Dimension());
+            peerImpl->SetLetterSpacing(spacing);
+        },
+        []() {});
 }
 Ark_Number GetGlobalAlphaImpl(Ark_CanvasRenderer peer)
 {
@@ -1135,17 +1163,6 @@ void SetTextBaselineImpl(Ark_CanvasRenderer peer,
     auto baseLineStr = Converter::Convert<std::string>(*textBaseline);
     peerImpl->SetTextBaseline(baseLineStr);
 }
-Ark_Union_LengthMetrics_String GetLetterSpacingImpl(Ark_CanvasRenderer peer)
-{
-    LOGE("ARKOALA CanvasRendererAccessor::GetLetterSpacingImpl is not implemented.");
-    return {};
-}
-void SetLetterSpacingImpl(Ark_CanvasRenderer peer,
-    const Ark_Union_LengthMetrics_String* letterSpacing)
-{
-    LOGE("ARKOALA CanvasRendererAccessor::SetLetterSpacingImpl is not implemented.");
-}
-
 } // CanvasRendererAccessor
 const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor()
 {

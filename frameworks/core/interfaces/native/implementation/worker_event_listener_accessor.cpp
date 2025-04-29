@@ -46,7 +46,4 @@ const GENERATED_ArkUIWorkerEventListenerAccessor* GetWorkerEventListenerAccessor
     return &WorkerEventListenerAccessorImpl;
 }
 
-struct WorkerEventListenerPeer {
-    virtual ~WorkerEventListenerPeer() = default;
-};
 }

@@ -22,7 +22,7 @@
 struct FrameNodePeer {
     OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> node;
 
-    static FrameNodePeer *Create(const Ark_UIContext* uiContext)
+    static FrameNodePeer *Create(Ark_UIContext uiContext)
     {
         return new FrameNodePeer;
     }

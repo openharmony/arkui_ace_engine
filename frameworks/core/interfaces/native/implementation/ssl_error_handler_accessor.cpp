@@ -22,8 +22,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SslErrorHandlerAccessor {
 void DestroyPeerImpl(Ark_SslErrorHandler peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
     delete peer;
 }
 Ark_SslErrorHandler CtorImpl()
@@ -57,7 +55,4 @@ const GENERATED_ArkUISslErrorHandlerAccessor* GetSslErrorHandlerAccessor()
     return &SslErrorHandlerAccessorImpl;
 }
 
-struct SslErrorHandlerPeer {
-    virtual ~SslErrorHandlerPeer() = default;
-};
 }

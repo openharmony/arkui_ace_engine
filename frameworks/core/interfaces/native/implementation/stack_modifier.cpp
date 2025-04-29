@@ -13,11 +13,9 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
-
 #include "core/interfaces/native/utility/ace_engine_types.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
@@ -57,12 +55,9 @@ void SetStackOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if(options->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
-        StackModelNG::SetAlignment(frameNode, Alignment::CENTER);
-        return;
-    }
     auto opts = Converter::OptConvert<StackOptions>(*options);
     auto align = opts ? opts->alignContent : std::nullopt;
+    // TODO: Reset value
     StackModelNG::SetAlignment(frameNode, align.value_or(Alignment::CENTER));
 }
 } // StackInterfaceModifier
@@ -72,15 +67,44 @@ void AlignContentImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if(value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
-        StackModelNG::SetAlignment(frameNode, Alignment::CENTER);
-        return;
-    }
-    StackModelNG::SetAlignment(frameNode, Converter::ConvertOrDefault(value->value, Alignment::CENTER));
+    // TODO: Reset value
+    StackModelNG::SetAlignment(frameNode, Converter::ConvertOrDefault(*value, Alignment::CENTER));
 }
 void PointLightImpl(Ark_NativePointer node,
                     const Opt_PointLightStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+#ifdef POINT_LIGHT_ENABLE
+    auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
+    auto uiNode = reinterpret_cast<Ark_NodeHandle>(node);
+    auto themeConstants = Converter::GetThemeConstants(uiNode, "", "");
+    CHECK_NULL_VOID(themeConstants);
+    if (pointLightStyle) {
+        if (pointLightStyle->lightSource) {
+            ViewAbstractModelNG::SetLightPosition(frameNode, pointLightStyle->lightSource->x,
+                pointLightStyle->lightSource->y,
+                pointLightStyle->lightSource->z);
+            ViewAbstractModelNG::SetLightIntensity(frameNode,
+                pointLightStyle->lightSource->intensity);
+            ViewAbstractModelNG::SetLightColor(frameNode, pointLightStyle->lightSource->lightColor);
+        } else {
+            ViewAbstractModelNG::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
+            ViewAbstractModelNG::SetLightIntensity(frameNode, std::nullopt);
+            ViewAbstractModelNG::SetLightColor(frameNode, std::nullopt);
+        }
+        // illuminated
+        ViewAbstractModelNG::SetLightIlluminated(frameNode, pointLightStyle->illuminationType, themeConstants);
+        // bloom
+        ViewAbstractModelNG::SetBloom(frameNode, pointLightStyle->bloom, themeConstants);
+    } else {
+        ViewAbstractModelNG::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
+        ViewAbstractModelNG::SetLightIntensity(frameNode, std::nullopt);
+        ViewAbstractModelNG::SetLightColor(frameNode, std::nullopt);
+        ViewAbstractModelNG::SetLightIlluminated(frameNode, std::nullopt, themeConstants);
+        ViewAbstractModelNG::SetBloom(frameNode, std::nullopt, themeConstants);
+    }
+#endif
 }
 } // StackAttributeModifier
 const GENERATED_ArkUIStackModifier* GetStackModifier()

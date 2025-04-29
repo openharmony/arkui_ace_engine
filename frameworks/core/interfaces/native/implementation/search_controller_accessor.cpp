@@ -13,18 +13,14 @@
  * limitations under the License.
  */
 
-#include "arkoala_api_generated.h"
 #include "search_controller_accessor_peer.h"
-
-#include "core/components_ng/base/frame_node.h"
+#include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SearchControllerAccessor {
 void DestroyPeerImpl(Ark_SearchController peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->controller_ = nullptr;
     delete peer;
 }
 Ark_SearchController CtorImpl()
@@ -33,9 +29,10 @@ Ark_SearchController CtorImpl()
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void*>(&DestroyPeerImpl);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void CaretPositionImpl(Ark_SearchController peer, const Ark_Number* value)
+void CaretPositionImpl(Ark_SearchController peer,
+                       const Ark_Number* value)
 {
     CHECK_NULL_VOID(peer && value && peer->controller_);
     peer->controller_->CaretPosition(std::max(Converter::Convert<int32_t>(*value), 0));
@@ -45,15 +42,19 @@ void StopEditingImpl(Ark_SearchController peer)
     CHECK_NULL_VOID(peer && peer->controller_);
     peer->controller_->StopEditing();
 }
-void SetTextSelectionImpl(Ark_SearchController peer, const Ark_Number* selectionStart, const Ark_Number* selectionEnd,
-    const Opt_SelectionOptions* options)
+void SetTextSelectionImpl(Ark_SearchController peer,
+                          const Ark_Number* selectionStart,
+                          const Ark_Number* selectionEnd,
+                          const Opt_SelectionOptions* options)
 {
     CHECK_NULL_VOID(peer && selectionStart && selectionEnd && peer->controller_);
     auto selectionOptions = options ? Converter::OptConvert<SelectionOptions>(*options) : std::nullopt;
     peer->controller_->SetTextSelection(
-        Converter::Convert<int32_t>(*selectionStart), Converter::Convert<int32_t>(*selectionEnd), selectionOptions);
+        Converter::Convert<int32_t>(*selectionStart),
+        Converter::Convert<int32_t>(*selectionEnd),
+        selectionOptions);
 }
-} // namespace SearchControllerAccessor
+} // SearchControllerAccessor
 const GENERATED_ArkUISearchControllerAccessor* GetSearchControllerAccessor()
 {
     static const GENERATED_ArkUISearchControllerAccessor SearchControllerAccessorImpl {
@@ -67,7 +68,4 @@ const GENERATED_ArkUISearchControllerAccessor* GetSearchControllerAccessor()
     return &SearchControllerAccessorImpl;
 }
 
-struct SearchControllerPeer {
-    virtual ~SearchControllerPeer() = default;
-};
-} // namespace OHOS::Ace::NG::GeneratedModifier
+}

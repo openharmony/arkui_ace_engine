@@ -22,8 +22,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EventResultAccessor {
 void DestroyPeerImpl(Ark_EventResult peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
     delete peer;
 }
 Ark_EventResult CtorImpl()
@@ -42,7 +40,7 @@ void SetGestureEventResult0Impl(Ark_EventResult peer,
         Converter::Convert<bool>(result)
     );
 }
-void SetGestureEventResult1Impl(Ark_EventResult peer,
+void SetGestureEventResult1Impl(EventResultPeer* peer,
                                 Ark_Boolean result,
                                 Ark_Boolean stopPropagation)
 {
@@ -60,7 +58,4 @@ const GENERATED_ArkUIEventResultAccessor* GetEventResultAccessor()
     return &EventResultAccessorImpl;
 }
 
-struct EventResultPeer {
-    virtual ~EventResultPeer() = default;
-};
 }

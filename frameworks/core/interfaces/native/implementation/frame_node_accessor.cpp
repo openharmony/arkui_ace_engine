@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
-#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/property/property.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FrameNodeAccessor {
@@ -29,18 +29,18 @@ void DestroyPeerImpl(Ark_FrameNode peer)
 {
     FrameNodePeer::Destroy(peer);
 }
-Ark_FrameNode CtorImpl()
+Ark_FrameNode CtorImpl(Ark_UIContext uiContext)
 {
+    auto peer = FrameNodePeer::Create(uiContext);
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto customFrameNode = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
-    customFrameNode->SetExclusiveEventForChild(true);
-    customFrameNode->SetIsArkTsFrameNode(true);
-    auto peer = FrameNodePeer::Create(customFrameNode);
+    peer->node = NG::CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
+    peer->node->SetExclusiveEventForChild(true);
+    peer->node->SetIsArkTsFrameNode(true);
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void*>(&DestroyPeerImpl);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_Boolean IsModifiableImpl(Ark_FrameNode peer)
 {
@@ -49,7 +49,8 @@ Ark_Boolean IsModifiableImpl(Ark_FrameNode peer)
     auto isModifiable = peer->node->GetTag() == "CustomFrameNode";
     return Converter::ArkValue<Ark_Boolean>(isModifiable);
 }
-void AppendChildImpl(Ark_FrameNode peer, Ark_FrameNode node)
+void AppendChildImpl(Ark_FrameNode peer,
+                     Ark_FrameNode node)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->node);
@@ -65,7 +66,9 @@ void AppendChildImpl(Ark_FrameNode peer, Ark_FrameNode node)
     currentUINodeRef->AddChild(childNode);
     currentUINodeRef->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
-void InsertChildAfterImpl(Ark_FrameNode peer, Ark_FrameNode child, Ark_FrameNode sibling)
+void InsertChildAfterImpl(Ark_FrameNode peer,
+                          Ark_FrameNode child,
+                          Ark_FrameNode sibling)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->node);
@@ -84,7 +87,8 @@ void InsertChildAfterImpl(Ark_FrameNode peer, Ark_FrameNode child, Ark_FrameNode
     currentUINodeRef->AddChild(childNode, index + 1);
     currentUINodeRef->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
-void RemoveChildImpl(Ark_FrameNode peer, Ark_FrameNode node)
+void RemoveChildImpl(Ark_FrameNode peer,
+                     Ark_FrameNode node)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->node);
@@ -107,7 +111,8 @@ void ClearChildrenImpl(Ark_FrameNode peer)
     currentUINodeRef->Clean();
     currentUINodeRef->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
-Ark_FrameNode GetChildImpl(Ark_FrameNode peer, const Ark_Number* index)
+Ark_FrameNode GetChildImpl(Ark_FrameNode peer,
+                           const Ark_Number* index)
 {
     CHECK_NULL_RETURN(peer, nullptr);
     CHECK_NULL_RETURN(peer->node, nullptr);
@@ -132,8 +137,7 @@ RefPtr<FrameNode> GetParentNode(RefPtr<FrameNode> nodeRef)
         parent = parent->GetParent();
     }
     return (parent == nullptr || parent->GetTag() == V2::PAGE_ETS_TAG || parent->GetTag() == V2::STAGE_ETS_TAG)
-               ? nullptr
-               : AceType::DynamicCast<FrameNode>(parent);
+               ? nullptr : AceType::DynamicCast<FrameNode>(parent);
 }
 Ark_FrameNode GetNextSiblingImpl(Ark_FrameNode peer)
 {
@@ -205,7 +209,7 @@ Ark_FrameNode GetFrameNodeByKeyImpl(const Ark_String* name)
     auto node = NG::Inspector::GetFrameNodeByKey(valueName, true);
     return FrameNodePeer::Create(OHOS::Ace::AceType::RawPtr(node));
 }
-} // namespace FrameNodeAccessor
+} // FrameNodeAccessor
 const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
 {
     static const GENERATED_ArkUIFrameNodeAccessor FrameNodeAccessorImpl {
@@ -231,4 +235,4 @@ const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
     return &FrameNodeAccessorImpl;
 }
 
-} // namespace OHOS::Ace::NG::GeneratedModifier
+}

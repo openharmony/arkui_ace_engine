@@ -14,34 +14,64 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/node/nav_router_modifier.h"
+#include "core/components_ng/pattern/navrouter/navrouter_model_ng.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/generated/interface/node_api.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavRouterModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return {};
+    auto frameNode = NavRouterModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // NavRouterModifier
 namespace NavRouterInterfaceModifier {
 void SetNavRouterOptions0Impl(Ark_NativePointer node)
 {
+    // still it empty for save default values
 }
 void SetNavRouterOptions1Impl(Ark_NativePointer node,
                               const Ark_RouteInfo* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //NavRouterModelNG::SetSetNavRouterOptions1(frameNode, convValue);
+    LOGE("ARKOALA SetNavRouterOptions1 -> Method is not implemented.");
 }
 } // NavRouterInterfaceModifier
 namespace NavRouterAttributeModifier {
 void OnStateChangeImpl(Ark_NativePointer node,
                        const Opt_Callback_Boolean_Void* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onStateChangeCallback = [arkCallback = CallbackHelper(*optValue)](const bool isActivated) {
+        auto arkIsActivated = Converter::ArkValue<Ark_Boolean>(isActivated);
+        arkCallback.Invoke(arkIsActivated);
+    };
+    NavRouterModelNG::SetOnStateChange(frameNode, onStateChangeCallback);
 }
 void ModeImpl(Ark_NativePointer node,
               const Opt_NavRouteMode* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto enumMode = Converter::OptConvert<NavRouteMode>(*value);
+    NavRouterModelNG::SetNavRouteMode(frameNode, EnumToInt(enumMode));
 }
 } // NavRouterAttributeModifier
 const GENERATED_ArkUINavRouterModifier* GetNavRouterModifier()

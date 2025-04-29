@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/generated/interface/node_api.h"
 
 namespace OHOS::Ace::NG {
 struct RectOptions {
@@ -133,8 +134,6 @@ void RadiusWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    CHECK_EQUAL_VOID(value->tag, InteropTag::INTEROP_TAG_UNDEFINED);
     auto radiusWidth = Converter::OptConvert<Dimension>(*value);
     CHECK_NULL_VOID(radiusWidth);
     RectModelNG::SetRadiusWidth(frameNode, radiusWidth.value());
@@ -144,9 +143,7 @@ void RadiusHeightImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    CHECK_EQUAL_VOID(value->tag, InteropTag::INTEROP_TAG_UNDEFINED);
-    auto radiusHeight = Converter::OptConvert<Dimension>(value->value);
+    auto radiusHeight = Converter::OptConvert<Dimension>(*value);
     CHECK_NULL_VOID(radiusHeight);
     RectModelNG::SetRadiusHeight(frameNode, radiusHeight.value());
 }
@@ -155,12 +152,10 @@ void RadiusImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    CHECK_EQUAL_VOID(value->tag, InteropTag::INTEROP_TAG_UNDEFINED);
-    auto radius = Converter::OptConvert<RectRadius>(value->value);
+    auto radius = Converter::OptConvert<RectRadius>(*value);
     CHECK_NULL_VOID(radius);
-    CHECK_NULL_VOID(radius->radiusWidth);
     CHECK_NULL_VOID(radius->radiusHeight);
+    CHECK_NULL_VOID(radius->radiusWidth);
     RectModelNG::SetRadiusWidth(frameNode, radius->radiusWidth.value());
     RectModelNG::SetRadiusHeight(frameNode, radius->radiusHeight.value());
 }

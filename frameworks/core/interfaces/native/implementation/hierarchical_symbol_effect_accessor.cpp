@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-#include "arkoala_api_generated.h"
-
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/symbol_effect_peer.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/symbol_effect_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace HierarchicalSymbolEffectAccessor {
 void DestroyPeerImpl(Ark_HierarchicalSymbolEffect peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_HierarchicalSymbolEffect CtorImpl(const Opt_EffectFillStyle* fillStyle)
 {
@@ -31,7 +31,7 @@ Ark_HierarchicalSymbolEffect CtorImpl(const Opt_EffectFillStyle* fillStyle)
     if (fillStyle) {
         optFillStyle = Converter::OptConvert<OHOS::Ace::FillStyle>(*fillStyle);
     }
-    return new HierarchicalSymbolEffectPeer(optFillStyle);
+    return PeerUtils::CreatePeer<HierarchicalSymbolEffectPeer>(optFillStyle);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -39,18 +39,17 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Opt_EffectFillStyle GetFillStyleImpl(Ark_HierarchicalSymbolEffect peer)
 {
-    //ToDo need check
-    Opt_EffectFillStyle effectFillStyle = { INTEROP_TAG_INT32, ARK_EFFECT_FILL_STYLE_CUMULATIVE };
-    CHECK_NULL_RETURN(peer, effectFillStyle);
-    CHECK_NULL_RETURN(peer->fillStyle, effectFillStyle);
+    auto invalid = Converter::ArkValue<Opt_EffectFillStyle>();
+    CHECK_NULL_RETURN(peer, invalid);
+    CHECK_NULL_RETURN(peer->fillStyle, invalid);
     switch (peer->fillStyle.value()) {
+        case OHOS::Ace::FillStyle::CUMULATIVE:
+            return Converter::ArkValue<Opt_EffectFillStyle>(ARK_EFFECT_FILL_STYLE_CUMULATIVE);
         case OHOS::Ace::FillStyle::ITERATIVE:
-            effectFillStyle.value = ARK_EFFECT_FILL_STYLE_ITERATIVE;
-            break;
+            return Converter::ArkValue<Opt_EffectFillStyle>(ARK_EFFECT_FILL_STYLE_ITERATIVE);
         default:
-            break;
+            return invalid;
     }
-    return effectFillStyle;
 }
 void SetFillStyleImpl(Ark_HierarchicalSymbolEffect peer,
                       Ark_EffectFillStyle fillStyle)
@@ -70,8 +69,4 @@ const GENERATED_ArkUIHierarchicalSymbolEffectAccessor* GetHierarchicalSymbolEffe
     };
     return &HierarchicalSymbolEffectAccessorImpl;
 }
-
-struct HierarchicalSymbolEffectPeer {
-    virtual ~HierarchicalSymbolEffectPeer() = default;
-};
 }

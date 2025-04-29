@@ -47,7 +47,4 @@ const GENERATED_ArkUIViewAccessor* GetViewAccessor()
     return &ViewAccessorImpl;
 }
 
-struct ViewPeer {
-    virtual ~ViewPeer() = default;
-};
 }

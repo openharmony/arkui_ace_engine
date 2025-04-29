@@ -21,19 +21,15 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace Matrix2DAccessor {
-const auto ERROR_VALUE = Converter::ArkValue<Ark_Number>(0);
+const auto ERROR_VALUE = Converter::ArkValue<Opt_Number>();
 
 void DestroyPeerImpl(Ark_Matrix2D peer)
 {
-    if (peer) {
-        peer->DecRefCount();
-    }
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_Matrix2D CtorImpl()
 {
-    auto peer = Referenced::MakeRefPtr<Matrix2DPeer>();
-    peer->IncRefCount();
-    return reinterpret_cast<Matrix2DPeer*>(Referenced::RawPtr(peer));
+    return PeerUtils::CreatePeer<Matrix2DPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -105,7 +101,7 @@ Ark_Matrix2D ScaleImpl(Ark_Matrix2D peer,
 }
 Opt_Number GetScaleXImpl(Ark_Matrix2D peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_Number>(ERROR_VALUE));
+    CHECK_NULL_RETURN(peer, ERROR_VALUE);
     return Converter::ArkValue<Opt_Number>(peer->GetScaleX());
 }
 void SetScaleXImpl(Ark_Matrix2D peer,
@@ -118,7 +114,7 @@ void SetScaleXImpl(Ark_Matrix2D peer,
 }
 Opt_Number GetRotateYImpl(Ark_Matrix2D peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_Number>(ERROR_VALUE));
+    CHECK_NULL_RETURN(peer, ERROR_VALUE);
     return Converter::ArkValue<Opt_Number>(peer->GetRotateY());
 }
 void SetRotateYImpl(Ark_Matrix2D peer,
@@ -131,7 +127,7 @@ void SetRotateYImpl(Ark_Matrix2D peer,
 }
 Opt_Number GetRotateXImpl(Ark_Matrix2D peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_Number>(ERROR_VALUE));
+    CHECK_NULL_RETURN(peer, ERROR_VALUE);
     return Converter::ArkValue<Opt_Number>(peer->GetRotateX());
 }
 void SetRotateXImpl(Ark_Matrix2D peer,
@@ -144,7 +140,7 @@ void SetRotateXImpl(Ark_Matrix2D peer,
 }
 Opt_Number GetScaleYImpl(Ark_Matrix2D peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_Number>(ERROR_VALUE));
+    CHECK_NULL_RETURN(peer, ERROR_VALUE);
     return Converter::ArkValue<Opt_Number>(peer->GetScaleX());
 }
 void SetScaleYImpl(Ark_Matrix2D peer,
@@ -157,7 +153,7 @@ void SetScaleYImpl(Ark_Matrix2D peer,
 }
 Opt_Number GetTranslateXImpl(Ark_Matrix2D peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_Number>(ERROR_VALUE));
+    CHECK_NULL_RETURN(peer, ERROR_VALUE);
     return Converter::ArkValue<Opt_Number>(peer->GetTranslateX());
 }
 void SetTranslateXImpl(Ark_Matrix2D peer,
@@ -170,7 +166,7 @@ void SetTranslateXImpl(Ark_Matrix2D peer,
 }
 Opt_Number GetTranslateYImpl(Ark_Matrix2D peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_Number>(ERROR_VALUE));
+    CHECK_NULL_RETURN(peer, ERROR_VALUE);
     return Converter::ArkValue<Opt_Number>(peer->GetTranslateY());
 }
 void SetTranslateYImpl(Ark_Matrix2D peer,
@@ -211,7 +207,4 @@ const GENERATED_ArkUIMatrix2DAccessor* GetMatrix2DAccessor()
     return &Matrix2DAccessorImpl;
 }
 
-struct Matrix2DPeer {
-    virtual ~Matrix2DPeer() = default;
-};
 }

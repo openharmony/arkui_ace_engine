@@ -19,6 +19,18 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier::NavigationContext {
+void PathInfo::InvokeOnPop(const PopInfo& popInfo)
+{
+    Ark_PopInfo arkPopInfo {
+        .info = ::OHOS::Ace::NG::Converter::ArkValue<Ark_NavPathInfo>(popInfo.info),
+#ifndef WRONG_GEN
+        .result = ::OHOS::Ace::NG::Converter::ArkValue<Ark_Object>(popInfo.result),
+#else
+        .result = Ark_CustomObject{},
+#endif
+    };
+    onPop_.Invoke(arkPopInfo);
+}
 
 int PathStack::GetJsIndexFromNativeIndex(int index)
 {
@@ -54,7 +66,7 @@ std::pair<int, std::optional<std::string>> PathStack::FindInPopArray(const std::
     for (int i = popArray_.size() - 1; i >= 0; i--) {
         if (name == popArray_[i].name_) {
             auto info = popArray_[i];
-            popArray_.erase(popArray_.begin() + i);
+            popArray_.erase(std::next(pathArray_.begin(), i));
             return {info.index_, info.navDestinationId_};
         }
     }
@@ -233,6 +245,10 @@ PathInfo PathStack::Pop(const PopResultType& result, const std::optional<bool>& 
     pathArray_.pop_back();
     popArray_.push_back(pathInfo);
     isReplace_ = NO_ANIM_NO_REPLACE;
+    if (result) {
+        PopInfo popInfo = { currentPathInfo, result };
+        currentPathInfo.InvokeOnPop(popInfo);
+    }
     animated_ = animated.value_or(DEFAULT_ANIMATED);
 
     InvokeOnStateChanged();
@@ -270,6 +286,11 @@ void PathStack::PopToInternal(std::vector<PathInfo>::iterator it,
     auto currentPathInfo = pathArray_.back();
     pathArray_.erase(std::next(it, 1), pathArray_.end());
     isReplace_ = NO_ANIM_NO_REPLACE;
+
+    if (result) {
+        PopInfo popInfo = {currentPathInfo, result};
+        currentPathInfo.InvokeOnPop(popInfo);
+    }
     animated_ = animated.value_or(DEFAULT_ANIMATED);
     InvokeOnStateChanged();
 }
@@ -402,10 +423,10 @@ std::vector<ParamType> PathStack::GetParamByName(const std::string& name)
     return array;
 }
 
-std::vector<uint32_t> PathStack::GetIndexByName(const std::string& name)
+std::vector<size_t> PathStack::GetIndexByName(const std::string& name)
 {
-    std::vector<uint32_t> array;
-    for (uint32_t index = 0; index < static_cast<uint32_t>(pathArray_.size()); index++) {
+    std::vector<size_t> array;
+    for (size_t index = 0; index < pathArray_.size(); index++) {
         if (pathArray_[index].name_ == name) {
             array.push_back(index);
         }
@@ -413,7 +434,7 @@ std::vector<uint32_t> PathStack::GetIndexByName(const std::string& name)
     return array;
 }
 
-size_t PathStack::GetSize() const
+size_t PathStack::Size() const
 {
     return pathArray_.size();
 }
@@ -464,6 +485,11 @@ void NavigationStack::SetDataSourceObj(const RefPtr<PathStack>& dataSourceObj)
 const RefPtr<PathStack>& NavigationStack::GetDataSourceObj()
 {
     return dataSourceObj_;
+}
+
+void NavigationStack::SetNavDestBuilderFunc(const NavDestBuildCallback& navDestBuilderFunc)
+{
+    navDestBuilderFunc_ = navDestBuilderFunc;
 }
 
 bool NavigationStack::IsEmpty()
@@ -544,19 +570,15 @@ bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>
     auto isEntry = pathInfo->isEntry_;
     RefPtr<NG::UINode> targetNode;
     RefPtr<NG::NavDestinationGroupNode> desNode;
-    int32_t errorCode = ERROR_CODE_DESTINATION_NOT_FOUND;
-    for (auto iter = nodes_.begin(); iter != nodes_.end(); iter++) {
-        if (iter->first == index) {
-            targetNode = iter->second;
-            break;
-        }
-    }
-    if (GetNavDestinationNodeInUINode(targetNode, desNode)) {
-        errorCode = ERROR_CODE_NO_ERROR;
+    int32_t errorCode = LoadDestination(name, param, customNode, targetNode, desNode);
+    // isRemove true, set destination info, false, current destination create failed
+    bool isRemove = true; // Remove of destination may be here
+    if (!isRemove) {
+        return false;
     }
     if (errorCode != ERROR_CODE_NO_ERROR) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't find target destination by index, create empty node");
-        // node = AceType::DynamicCast<NG::UINode>(NavDestinationModelNG::CreateFrameNode(0));
+        node = AceType::DynamicCast<NG::UINode>(NavDestinationModelNG::CreateFrameNode(0));
         return true;
     }
     node = targetNode;
@@ -576,7 +598,28 @@ bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>
 RefPtr<NG::UINode> NavigationStack::CreateNodeByRouteInfo(const RefPtr<NG::RouteInfo>& routeInfo,
     const WeakPtr<NG::UINode>& customNode)
 {
-    return nullptr;
+    // the inherited from RouteInfo class required here for store the external specific type parameter
+    auto extRouteInfo = AceType::DynamicCast<RouteInfo>(routeInfo);
+    if (!extRouteInfo) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "route info is invalid");
+        return AceType::DynamicCast<NG::UINode>(NavDestinationModelNG::CreateFrameNode(0));
+    }
+    auto name = extRouteInfo->GetName();
+    auto param = ParamType(); // getting of the external specific type parameter may be here
+    RefPtr<NG::UINode> node;
+    RefPtr<NG::NavDestinationGroupNode> desNode;
+    int32_t errorCode = LoadDestination(name, param, customNode, node, desNode);
+    if (errorCode == ERROR_CODE_NO_ERROR && desNode) {
+        auto pattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
+        if (pattern) {
+            auto pathInfo = AceType::MakeRefPtr<NavPathInfo>(name); // `param`data may be added
+            pattern->SetNavPathInfo(pathInfo);
+            pattern->SetName(name);
+            pattern->SetNavigationStack(WeakClaim(this));
+        }
+        return node;
+    }
+    return AceType::DynamicCast<NG::UINode>(NavDestinationModelNG::CreateFrameNode(0));
 }
 
 std::string NavigationStack::GetNameByIndex(int32_t index) const
@@ -619,12 +662,17 @@ void NavigationStack::UpdateReplaceValue(int32_t replaceValue) const
 
 std::string NavigationStack::GetRouteParam() const
 {
-    auto size = PathStack::GetSize();
+    auto size = GetSize();
     if (size > 0) {
         auto param = GetParamByIndex(size - 1);
         return ConvertParamToString(param, true);
     }
     return "";
+}
+
+int32_t NavigationStack::GetSize() const
+{
+    return PathStack::Size();
 }
 
 std::string NavigationStack::ConvertParamToString(const ParamType& param, bool needLimit) const
@@ -687,6 +735,41 @@ void NavigationStack::FireNavigationInterception(bool isBefore, const RefPtr<NG:
 void NavigationStack::FireNavigationModeChange(NG::NavigationMode mode)
 {
     APP_LOGE("NavigationContext::NavigationStack::FireNavigationModeChange - not implemented");
+}
+
+int32_t NavigationStack::LoadDestination(const std::string& name, const ParamType& param,
+    const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node,
+    RefPtr<NG::NavDestinationGroupNode>& desNode)
+{
+    // execute navdestination attribute builder
+    if (LoadDestinationByBuilder(name, param, node, desNode)) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "load destination by buildermap");
+        return ERROR_CODE_NO_ERROR;
+    }
+    TAG_LOGE(AceLogTag::ACE_NAVIGATION, "NavigationContext::NavigationStack::LoadDestination"
+        ", loading by URL not implemneted");
+    APP_LOGE("NavigationContext::NavigationStack::LoadDestination"
+        ", loading by URL not implemneted");
+    return ERROR_CODE_DESTINATION_NOT_FOUND;
+}
+
+bool NavigationStack::LoadDestinationByBuilder(const std::string& name, const ParamType& param,
+    RefPtr<NG::UINode>& node, RefPtr<NG::NavDestinationGroupNode>& desNode)
+{
+    if (!navDestBuilderFunc_.IsValid()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Builder function is empty");
+        return false;
+    }
+    auto arkName = Converter::ArkValue<Ark_String>(name);
+    auto arkParam = Converter::ArkValue<Opt_Object>(param);
+    navDestBuilderFunc_.Invoke(arkName, arkParam);
+    TAG_LOGE(AceLogTag::ACE_NAVIGATION, "NavigationContext::NavigationStack::LoadDestination"
+        ", No way to obtain the FrameNode in result of the build func execution.");
+    APP_LOGE("NavigationContext::NavigationStack::LoadDestination"
+        ", No way to obtain the FrameNode in result of the build func execution.");
+    RefPtr<NG::UINode> resultNode = nullptr;
+    node = resultNode;
+    return GetNavDestinationNodeInUINode(node, desNode);
 }
 
 bool NavigationStack::GetNavDestinationNodeInUINode(

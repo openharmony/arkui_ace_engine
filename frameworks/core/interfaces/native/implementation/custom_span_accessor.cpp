@@ -57,7 +57,4 @@ const GENERATED_ArkUICustomSpanAccessor* GetCustomSpanAccessor()
     return &CustomSpanAccessorImpl;
 }
 
-struct CustomSpanPeer {
-    virtual ~CustomSpanPeer() = default;
-};
 }

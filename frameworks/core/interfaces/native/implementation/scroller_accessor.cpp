@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
-#include "arkoala_api_generated.h"
 #include "scroller_peer_impl.h"
-
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollerAccessor {
 void DestroyPeerImpl(Ark_Scroller peer)
 {
+    if (peer) {
+        peer->DecRefCount();
+    }
 }
 Ark_Scroller CtorImpl()
 {
@@ -37,28 +37,43 @@ Ark_NativePointer GetFinalizerImpl()
 void ScrollToImpl(Ark_Scroller peer,
                   const Ark_ScrollOptions* options)
 {
+    CHECK_NULL_VOID(peer);
+    peer->TriggerScrollTo(options);
 }
 void ScrollEdgeImpl(Ark_Scroller peer,
                     Ark_Edge value,
                     const Opt_ScrollEdgeOptions* options)
 {
+    CHECK_NULL_VOID(peer);
+    peer->TriggerScrollEdge(value, options);
 }
 void FlingImpl(Ark_VMContext vmContext,
                Ark_Scroller peer,
                const Ark_Number* velocity)
 {
+    CHECK_NULL_VOID(peer);
+    peer->TriggerFling(velocity);
 }
 void ScrollPage0Impl(Ark_Scroller peer,
                      const Ark_ScrollPageOptions* value)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(value);
+    bool next = Converter::Convert<bool>(value->next);
+    peer->TriggerScrollPage0(next);
 }
 void ScrollPage1Impl(Ark_Scroller peer,
                      const Ark_Literal_Boolean_next_Axis_direction* value)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(value);
+    bool next = Converter::Convert<bool>(value->next);
+    peer->TriggerScrollPage1(next);
 }
 Ark_OffsetResult CurrentOffsetImpl(Ark_Scroller peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    return peer->TriggerCurrentOffset();
 }
 void ScrollToIndexImpl(Ark_Scroller peer,
                        const Ark_Number* value,
@@ -66,28 +81,37 @@ void ScrollToIndexImpl(Ark_Scroller peer,
                        const Opt_ScrollAlign* align,
                        const Opt_ScrollToIndexOptions* options)
 {
+    CHECK_NULL_VOID(peer);
+    peer->TriggerScrollToIndex(value, smooth, align, options);
 }
 void ScrollByImpl(Ark_Scroller peer,
                   const Ark_Length* dx,
                   const Ark_Length* dy)
 {
+    CHECK_NULL_VOID(peer);
+    peer->TriggerScrollBy(dx, dy);
 }
 Ark_Boolean IsAtEndImpl(Ark_Scroller peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, false); // need to fix default value
+    return peer->TriggerIsAtEnd();
 }
 Ark_RectResult GetItemRectImpl(Ark_VMContext vmContext,
                                Ark_Scroller peer,
                                const Ark_Number* index)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {}); // need to fix default value
+    return peer->TriggerGetItemRect(index);
 }
 Ark_Number GetItemIndexImpl(Ark_VMContext vmContext,
                             Ark_Scroller peer,
                             const Ark_Number* x,
                             const Ark_Number* y)
 {
-    return {};
+    const auto errValue = Converter::ArkValue<Ark_Number>(-1);
+    CHECK_NULL_RETURN(peer, errValue); // need to fix default value
+    auto res = peer->TriggerGetItemIndex(x, y);
+    return Converter::ArkValue<Ark_Number>(res);
 }
 } // ScrollerAccessor
 const GENERATED_ArkUIScrollerAccessor* GetScrollerAccessor()
@@ -111,7 +135,4 @@ const GENERATED_ArkUIScrollerAccessor* GetScrollerAccessor()
     return &ScrollerAccessorImpl;
 }
 
-struct ScrollerPeer {
-    virtual ~ScrollerPeer() = default;
-};
 }

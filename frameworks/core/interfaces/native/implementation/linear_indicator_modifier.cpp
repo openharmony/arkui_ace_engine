@@ -30,20 +30,37 @@ void SetLinearIndicatorOptionsImpl(Ark_NativePointer node,
                                    const Opt_Number* count,
                                    const Opt_LinearIndicatorController* controller)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(count);
+    //auto convValue = Converter::OptConvert<type>(count); // for enums
+    //LinearIndicatorModelNG::SetSetLinearIndicatorOptions(frameNode, convValue);
 }
 } // LinearIndicatorInterfaceModifier
 namespace LinearIndicatorAttributeModifier {
 void IndicatorStyleImpl(Ark_NativePointer node,
                         const Opt_LinearIndicatorStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //LinearIndicatorModelNG::SetIndicatorStyle(frameNode, convValue);
 }
 void IndicatorLoopImpl(Ark_NativePointer node,
                        const Opt_Boolean* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //LinearIndicatorModelNG::SetIndicatorLoop(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
                   const Opt_OnLinearIndicatorChangeCallback* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //LinearIndicatorModelNG::SetOnChange(frameNode, convValue);
 }
 } // LinearIndicatorAttributeModifier
 const GENERATED_ArkUILinearIndicatorModifier* GetLinearIndicatorModifier()

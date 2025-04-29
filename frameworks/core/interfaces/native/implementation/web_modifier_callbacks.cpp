@@ -14,6 +14,19 @@
  */
 #ifdef WEB_SUPPORTED
 
+#ifndef PREVIEW
+#ifdef ARKUI_CAPI_UNITTEST
+#include "base/image/pixel_map.h"
+#include "test/unittest/capi/stubs/mock_image_source.h"
+#else
+#include "pixel_map.h"
+#include "image_source.h"
+#endif // ARKUI_CAPI_UNITTEST
+#else
+#include "image_source_preview.h"
+#endif // PREVIEW
+
+#include "core/components_ng/pattern/web/web_model_ng.h"
 #include "core/interfaces/native/implementation/web_modifier_callbacks.h"
 
 #include "core/interfaces/native/implementation/console_message_peer_impl.h"
@@ -28,6 +41,7 @@
 #include "core/interfaces/native/implementation/js_result_peer_impl.h"
 #include "core/interfaces/native/implementation/http_auth_handler_peer_impl.h"
 #include "core/interfaces/native/implementation/permission_request_peer_impl.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/screen_capture_handler_peer_impl.h"
 #include "core/interfaces/native/implementation/ssl_error_handler_peer_impl.h"
 #include "core/interfaces/native/implementation/web_context_menu_param_peer_impl.h"
@@ -36,12 +50,14 @@
 #include "core/interfaces/native/implementation/web_resource_error_peer_impl.h"
 #include "core/interfaces/native/implementation/web_resource_request_peer_impl.h"
 #include "core/interfaces/native/implementation/web_resource_response_peer_impl.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier {
 
-void OnPageEnd(const CallbackHelper<Callback_OnPageEndEvent_Void>& arkCallback,
+void OnPageEnd(const Callback_OnPageEndEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -52,10 +68,11 @@ void OnPageEnd(const CallbackHelper<Callback_OnPageEndEvent_Void>& arkCallback,
     CHECK_NULL_VOID(eventInfo);
     Ark_OnPageEndEvent parameter;
     parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetLoadedUrl());
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
 
-void OnPageBegin(const CallbackHelper<Callback_OnPageBeginEvent_Void>& arkCallback,
+void OnPageBegin(const Callback_OnPageBeginEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -66,10 +83,11 @@ void OnPageBegin(const CallbackHelper<Callback_OnPageBeginEvent_Void>& arkCallba
     CHECK_NULL_VOID(eventInfo);
     Ark_OnPageBeginEvent parameter;
     parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetLoadedUrl());
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
 
-void OnProgressChange(const CallbackHelper<Callback_OnProgressChangeEvent_Void>& arkCallback,
+void OnProgressChange(const Callback_OnProgressChangeEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -80,10 +98,11 @@ void OnProgressChange(const CallbackHelper<Callback_OnProgressChangeEvent_Void>&
     CHECK_NULL_VOID(eventInfo);
     Ark_OnProgressChangeEvent parameter;
     parameter.newProgress = Converter::ArkValue<Ark_Number>(eventInfo->GetNewProgress());
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
 
-void OnTitleReceive(const CallbackHelper<Callback_OnTitleReceiveEvent_Void>& arkCallback,
+void OnTitleReceive(const Callback_OnTitleReceiveEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -94,20 +113,22 @@ void OnTitleReceive(const CallbackHelper<Callback_OnTitleReceiveEvent_Void>& ark
     CHECK_NULL_VOID(eventInfo);
     Ark_OnTitleReceiveEvent parameter;
     parameter.title = Converter::ArkValue<Ark_String>(eventInfo->GetTitle());
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
 
-void OnGeolocationHide(const CallbackHelper<Callback_Void>& arkCallback,
+void OnGeolocationHide(const Callback_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke();
 }
 
-void OnGeolocationShow(const CallbackHelper<Callback_OnGeolocationShowEvent_Void>& arkCallback,
+void OnGeolocationShow(const Callback_OnGeolocationShowEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -121,19 +142,21 @@ void OnGeolocationShow(const CallbackHelper<Callback_OnGeolocationShowEvent_Void
     auto peer = new JsGeolocationPeer();
     peer->webGeolocation = eventInfo->GetWebGeolocation();
     parameter.geolocation = peer;
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
 
-void OnRequestSelected(const CallbackHelper<Callback_Void>& arkCallback,
+void OnRequestSelected(const Callback_Void* value,
     WeakPtr<FrameNode> weakNode, const BaseEventInfo* info)
 {
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke();
 }
 
-bool OnAlert(const CallbackHelper<Callback_OnAlertEvent_Boolean>& arkCallback,
+bool OnAlert(const Callback_OnAlertEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     const auto refNode = weakNode.Upgrade();
@@ -150,11 +173,12 @@ bool OnAlert(const CallbackHelper<Callback_OnAlertEvent_Boolean>& arkCallback,
     auto peer = new JsResultPeer();
     peer->result = eventInfo->GetResult();
     parameter.result = peer;
+    auto arkCallback = CallbackHelper(*value);
     const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
-bool OnBeforeUnload(const CallbackHelper<Callback_OnBeforeUnloadEvent_Boolean>& arkCallback,
+bool OnBeforeUnload(const Callback_OnBeforeUnloadEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     const auto refNode = weakNode.Upgrade();
@@ -171,11 +195,12 @@ bool OnBeforeUnload(const CallbackHelper<Callback_OnBeforeUnloadEvent_Boolean>& 
     auto peer = new JsResultPeer();
     peer->result = eventInfo->GetResult();
     parameter.result = peer;
+    auto arkCallback = CallbackHelper(*value);
     const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
-bool OnConfirm(const CallbackHelper<Callback_OnConfirmEvent_Boolean>& arkCallback,
+bool OnConfirm(const Callback_OnConfirmEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     const auto refNode = weakNode.Upgrade();
@@ -192,11 +217,12 @@ bool OnConfirm(const CallbackHelper<Callback_OnConfirmEvent_Boolean>& arkCallbac
     auto peer = new JsResultPeer();
     peer->result = eventInfo->GetResult();
     parameter.result = peer;
+    auto arkCallback = CallbackHelper(*value);
     const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
-bool OnPrompt(const CallbackHelper<Callback_OnPromptEvent_Boolean>& arkCallback,
+bool OnPrompt(const Callback_OnPromptEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     const auto refNode = weakNode.Upgrade();
@@ -213,11 +239,12 @@ bool OnPrompt(const CallbackHelper<Callback_OnPromptEvent_Boolean>& arkCallback,
     auto peer = new JsResultPeer();
     peer->result = eventInfo->GetResult();
     parameter.result = peer;
+    auto arkCallback = CallbackHelper(*value);
     const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
-bool OnConsole(const CallbackHelper<Callback_OnConsoleEvent_Boolean>& arkCallback,
+bool OnConsole(const Callback_OnConsoleEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, const BaseEventInfo* info)
 {
     const auto refNode = weakNode.Upgrade();
@@ -231,11 +258,12 @@ bool OnConsole(const CallbackHelper<Callback_OnConsoleEvent_Boolean>& arkCallbac
     auto peer = new ConsoleMessagePeer();
     peer->webConsoleLog = eventInfo->GetMessage();
     parameter.message = peer;
+    auto arkCallback = CallbackHelper(*value);
     const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
-void OnErrorReceive(const CallbackHelper<Callback_OnErrorReceiveEvent_Void>& arkCallback,
+void OnErrorReceive(const Callback_OnErrorReceiveEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -251,10 +279,11 @@ void OnErrorReceive(const CallbackHelper<Callback_OnErrorReceiveEvent_Void>& ark
     auto requestPeer = new WebResourceRequestPeer();
     requestPeer->webRequest = eventInfo->GetRequest();
     parameter.request = requestPeer;
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
 
-void OnHttpErrorReceive(const CallbackHelper<Callback_OnHttpErrorReceiveEvent_Void>& arkCallback,
+void OnHttpErrorReceive(const Callback_OnHttpErrorReceiveEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -270,10 +299,11 @@ void OnHttpErrorReceive(const CallbackHelper<Callback_OnHttpErrorReceiveEvent_Vo
     auto responsePeer = new WebResourceResponsePeer();
     responsePeer->handler = eventInfo->GetResponse();
     parameter.response = responsePeer;
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
 
-void OnDownloadStart(const CallbackHelper<Callback_OnDownloadStartEvent_Void>& arkCallback,
+void OnDownloadStart(const Callback_OnDownloadStartEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -288,10 +318,11 @@ void OnDownloadStart(const CallbackHelper<Callback_OnDownloadStartEvent_Void>& a
     parameter.contentDisposition = Converter::ArkValue<Ark_String>(eventInfo->GetContentDisposition());
     parameter.userAgent = Converter::ArkValue<Ark_String>(eventInfo->GetUserAgent());
     parameter.contentLength = Converter::ArkValue<Ark_Number>(eventInfo->GetContentLength());
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
 
-void OnRefreshAccessedHistory(const CallbackHelper<Callback_OnRefreshAccessedHistoryEvent_Void>& arkCallback,
+void OnRefreshAccessedHistory(const Callback_OnRefreshAccessedHistoryEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -303,10 +334,11 @@ void OnRefreshAccessedHistory(const CallbackHelper<Callback_OnRefreshAccessedHis
     Ark_OnRefreshAccessedHistoryEvent parameter;
     parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetVisitedUrl());
     parameter.isRefreshed = Converter::ArkValue<Ark_Boolean>(eventInfo->IsRefreshed());
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
 
-bool OnUrlLoadIntercept(const CallbackHelper<Type_WebAttribute_onUrlLoadIntercept_callback>& arkCallback,
+bool OnUrlLoadIntercept(const Type_WebAttribute_onUrlLoadIntercept_callback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     const auto refNode = weakNode.Upgrade();
@@ -321,11 +353,12 @@ bool OnUrlLoadIntercept(const CallbackHelper<Type_WebAttribute_onUrlLoadIntercep
     parameter.data = Converter::ArkUnion<Ark_Union_String_WebResourceRequest, Ark_String>(
         Converter::ArkValue<Ark_String>(eventInfo->GetData()));
     auto optParam = Converter::ArkValue<Opt_Literal_Union_String_WebResourceRequest_data>(parameter);
+    auto arkCallback = CallbackHelper(*value);
     const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(optParam);
     return result.value_or(false);
 }
 
-void OnRenderExited(const CallbackHelper<Callback_OnRenderExitedEvent_Void>& arkCallback,
+void OnRenderExited(const Callback_OnRenderExitedEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -337,10 +370,11 @@ void OnRenderExited(const CallbackHelper<Callback_OnRenderExitedEvent_Void>& ark
     Ark_OnRenderExitedEvent parameter;
     parameter.renderExitReason = Converter::ArkValue<Ark_RenderExitReason>(
         static_cast<Converter::RenderExitReason>(eventInfo->GetExitedReason()));
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
 
-bool OnShowFileSelector(const CallbackHelper<Callback_OnShowFileSelectorEvent_Boolean>& arkCallback,
+bool OnShowFileSelector(const Callback_OnShowFileSelectorEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     const auto refNode = weakNode.Upgrade();
@@ -358,11 +392,12 @@ bool OnShowFileSelector(const CallbackHelper<Callback_OnShowFileSelectorEvent_Bo
     auto resultPeer = new FileSelectorResultPeer();
     resultPeer->handler = eventInfo->GetFileSelectorResult();
     parameter.result = resultPeer;
+    auto arkCallback = CallbackHelper(*value);
     const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
-void OnResourceLoad(const CallbackHelper<Callback_OnResourceLoadEvent_Void>& arkCallback,
+void OnResourceLoad(const Callback_OnResourceLoadEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -373,20 +408,22 @@ void OnResourceLoad(const CallbackHelper<Callback_OnResourceLoadEvent_Void>& ark
     CHECK_NULL_VOID(eventInfo);
     Ark_OnResourceLoadEvent parameter;
     parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetOnResourceLoadUrl());
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
 
-void OnFullScreenExit(const CallbackHelper<Callback_Void>& arkCallback,
+void OnFullScreenExit(const Callback_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke();
 }
 
-void OnFullScreenEnter(const CallbackHelper<OnFullScreenEnterCallback>& arkCallback,
+void OnFullScreenEnter(const OnFullScreenEnterCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -401,10 +438,11 @@ void OnFullScreenEnter(const CallbackHelper<OnFullScreenEnterCallback>& arkCallb
     auto peer = new FullScreenExitHandlerPeer();
     peer->handler = eventInfo->GetHandler();
     parameter.handler = peer;
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
 
-void OnScaleChange(const CallbackHelper<Callback_OnScaleChangeEvent_Void>& arkCallback,
+void OnScaleChange(const Callback_OnScaleChangeEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -416,10 +454,11 @@ void OnScaleChange(const CallbackHelper<Callback_OnScaleChangeEvent_Void>& arkCa
     Ark_OnScaleChangeEvent parameter;
     parameter.newScale = Converter::ArkValue<Ark_Number>(eventInfo->GetOnScaleChangeNewScale());
     parameter.oldScale = Converter::ArkValue<Ark_Number>(eventInfo->GetOnScaleChangeOldScale());
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
 
-bool OnHttpAuthRequest(const CallbackHelper<Callback_OnHttpAuthRequestEvent_Boolean>& arkCallback,
+bool OnHttpAuthRequest(const Callback_OnHttpAuthRequestEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     const auto refNode = weakNode.Upgrade();
@@ -436,12 +475,12 @@ bool OnHttpAuthRequest(const CallbackHelper<Callback_OnHttpAuthRequestEvent_Bool
     auto peer = new HttpAuthHandlerPeer();
     peer->handler = eventInfo->GetResult();
     parameter.handler = peer;
+    auto arkCallback = CallbackHelper(*value);
     const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
-RefPtr<WebResponse> OnInterceptRequest(
-    const CallbackHelper<Callback_OnInterceptRequestEvent_WebResourceResponse>& arkCallback,
+RefPtr<WebResponse> OnInterceptRequest(const Callback_OnInterceptRequestEvent_WebResourceResponse* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     const auto refNode = weakNode.Upgrade();
@@ -456,13 +495,14 @@ RefPtr<WebResponse> OnInterceptRequest(
     auto peer = new WebResourceRequestPeer();
     peer->webRequest = eventInfo->GetRequest();
     parameter.request = peer;
+    auto arkCallback = CallbackHelper(*value);
     const auto arkResult = arkCallback.InvokeWithObtainResult<Ark_WebResourceResponse,
         Callback_WebResourceResponse_Void>(parameter);
     CHECK_NULL_RETURN(arkResult, nullptr);
     return arkResult->handler;
 }
 
-void OnPermissionRequest(const CallbackHelper<Callback_OnPermissionRequestEvent_Void>& arkCallback,
+void OnPermissionRequest(const Callback_OnPermissionRequestEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -475,10 +515,11 @@ void OnPermissionRequest(const CallbackHelper<Callback_OnPermissionRequestEvent_
     auto peer = new PermissionRequestPeer();
     peer->handler = eventInfo->GetWebPermissionRequest();
     parameter.request = peer;
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
 
-void OnScreenCaptureRequest(const CallbackHelper<Callback_OnScreenCaptureRequestEvent_Void>& arkCallback,
+void OnScreenCaptureRequest(const Callback_OnScreenCaptureRequestEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -491,10 +532,11 @@ void OnScreenCaptureRequest(const CallbackHelper<Callback_OnScreenCaptureRequest
     auto peer = new ScreenCaptureHandlerPeer();
     peer->handler = eventInfo->GetWebScreenCaptureRequest();
     parameter.handler = peer;
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
 
-bool OnContextMenuShow(const CallbackHelper<Callback_OnContextMenuShowEvent_Boolean>& arkCallback,
+bool OnContextMenuShow(const Callback_OnContextMenuShowEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     const auto refNode = weakNode.Upgrade();
@@ -512,21 +554,23 @@ bool OnContextMenuShow(const CallbackHelper<Callback_OnContextMenuShowEvent_Bool
     auto resultPeer = new WebContextMenuResultPeer();
     resultPeer->handler = eventInfo->GetContextMenuResult();
     parameter.result = resultPeer;
+    auto arkCallback = CallbackHelper(*value);
     const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
-void OnContextMenuHide(const CallbackHelper<OnContextMenuHideCallback>& arkCallback,
+void OnContextMenuHide(const OnContextMenuHideCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke();
 }
 
-void OnSearchResultReceive(const CallbackHelper<Callback_OnSearchResultReceiveEvent_Void>& arkCallback,
+void OnSearchResultReceive(const Callback_OnSearchResultReceiveEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -539,10 +583,11 @@ void OnSearchResultReceive(const CallbackHelper<Callback_OnSearchResultReceiveEv
     parameter.activeMatchOrdinal = Converter::ArkValue<Ark_Number>(eventInfo->GetActiveMatchOrdinal());
     parameter.numberOfMatches = Converter::ArkValue<Ark_Number>(eventInfo->GetNumberOfMatches());
     parameter.isDoneCounting = Converter::ArkValue<Ark_Boolean>(eventInfo->GetIsDoneCounting());
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
 
-void OnScroll(const CallbackHelper<Callback_OnScrollEvent_Void>& arkCallback,
+void OnScroll(const Callback_OnScrollEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -554,10 +599,11 @@ void OnScroll(const CallbackHelper<Callback_OnScrollEvent_Void>& arkCallback,
     Ark_OnScrollEvent parameter;
     parameter.xOffset = Converter::ArkValue<Ark_Number>(eventInfo->GetX());
     parameter.yOffset = Converter::ArkValue<Ark_Number>(eventInfo->GetY());
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
 
-bool OnSslErrorEventReceive(const CallbackHelper<Callback_OnSslErrorEventReceiveEvent_Void>& arkCallback,
+bool OnSslErrorEventReceive(const Callback_OnSslErrorEventReceiveEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -569,15 +615,16 @@ bool OnSslErrorEventReceive(const CallbackHelper<Callback_OnSslErrorEventReceive
     Ark_OnSslErrorEventReceiveEvent parameter;
     parameter.error = Converter::ArkValue<Ark_SslError>(static_cast<Converter::SslError>(eventInfo->GetError()));
     Converter::ArkArrayHolder<Array_Buffer> vecHolder(eventInfo->GetCertChainData());
-    parameter.certChainData = Converter::ArkValue<Opt_Array_Buffer>(vecHolder.ArkValue());
+    parameter.certChainData = vecHolder.OptValue<Opt_Array_Buffer>();
     auto peer = new SslErrorHandlerPeer();
     peer->handler = eventInfo->GetResult();
     parameter.handler = peer;
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
     return true;
 }
 
-bool OnSslError(const CallbackHelper<OnSslErrorEventCallback>& arkCallback,
+bool OnSslError(const OnSslErrorEventCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -597,14 +644,14 @@ bool OnSslError(const CallbackHelper<OnSslErrorEventCallback>& arkCallback,
     auto url = eventInfo->GetUrl();
     parameter.url = Converter::ArkValue<Ark_String>(url);
     auto peer = new SslErrorHandlerPeer();
-    // need check
-    // peer->handler = eventInfo->GetResult();
+    peer->handler = eventInfo->GetResult();
     parameter.handler = peer;
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
     return true;
 }
 
-bool OnClientAuthentication(const CallbackHelper<Callback_OnClientAuthenticationEvent_Void>& arkCallback,
+bool OnClientAuthentication(const Callback_OnClientAuthenticationEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -625,11 +672,12 @@ bool OnClientAuthentication(const CallbackHelper<Callback_OnClientAuthentication
         auto peer = new ClientAuthenticationHandlerPeer();
     peer->handler = eventInfo->GetResult();
     parameter.handler = peer;
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
     return false;
 }
 
-void OnWindowNew(const CallbackHelper<Callback_OnWindowNewEvent_Void>& arkCallback,
+void OnWindowNew(const Callback_OnWindowNewEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
     ContainerScope scope(instanceId);
@@ -645,20 +693,22 @@ void OnWindowNew(const CallbackHelper<Callback_OnWindowNewEvent_Void>& arkCallba
     auto peer = new ControllerHandlerPeer();
     peer->handler = eventInfo->GetWebWindowNewHandler();
     parameter.handler = peer;
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
 
-void OnWindowExit(const CallbackHelper<Callback_Void>& arkCallback,
+void OnWindowExit(const Callback_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke();
 }
 
-bool OnInterceptKey(const CallbackHelper<Callback_KeyEvent_Boolean>& arkCallback,
+bool OnInterceptKey(const Callback_KeyEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, KeyEventInfo& keyEventInfo)
 {
     const auto refNode = weakNode.Upgrade();
@@ -667,18 +717,20 @@ bool OnInterceptKey(const CallbackHelper<Callback_KeyEvent_Boolean>& arkCallback
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     const auto event = Converter::ArkKeyEventSync(keyEventInfo);
+    auto arkCallback = CallbackHelper(*value);
     const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(
         event.ArkValue());
     return result.value_or(false);
 }
 
-void OnTouchIconUrlReceived(const CallbackHelper<Callback_OnTouchIconUrlReceivedEvent_Void>& arkCallback,
+void OnTouchIconUrlReceived(const Callback_OnTouchIconUrlReceivedEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto arkCallback = CallbackHelper(*value);
     auto func = [arkCallback, info]() {
         auto* eventInfo = TypeInfoHelper::DynamicCast<TouchIconUrlEvent>(info.get());
         CHECK_NULL_VOID(eventInfo);
@@ -694,27 +746,98 @@ void OnTouchIconUrlReceived(const CallbackHelper<Callback_OnTouchIconUrlReceived
 #endif // ARKUI_CAPI_UNITTEST
 }
 
-void OnFaviconReceived(const CallbackHelper<Callback_OnFaviconReceivedEvent_Void>& arkCallback,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
+Media::PixelFormat GetPixelFormat(NG::TransImageColorType colorType)
 {
-    ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->UpdateCurrentActiveNode(weakNode);
-    pipelineContext->PostAsyncEvent([arkCallback]() {
-        Ark_OnFaviconReceivedEvent parameter;
-        LOGE("WebAttributeModifier::OnFaviconReceivedImpl PixelMap supporting is not implemented yet");
-        arkCallback.Invoke(parameter);
-        }, "ArkUIWebFaviconReceived");
+    Media::PixelFormat pixelFormat;
+    switch (colorType) {
+        case NG::TransImageColorType::COLOR_TYPE_UNKNOWN:
+            pixelFormat = Media::PixelFormat::UNKNOWN;
+            break;
+        case NG::TransImageColorType::COLOR_TYPE_RGBA_8888:
+            pixelFormat = Media::PixelFormat::RGBA_8888;
+            break;
+        case NG::TransImageColorType::COLOR_TYPE_BGRA_8888:
+            pixelFormat = Media::PixelFormat::BGRA_8888;
+            break;
+        default:
+            pixelFormat = Media::PixelFormat::UNKNOWN;
+            break;
+    }
+    return pixelFormat;
 }
 
-void OnPageVisible(const CallbackHelper<Callback_OnPageVisibleEvent_Void>& arkCallback,
+Media::AlphaType GetAlphaType(NG::TransImageAlphaType alphaType)
+{
+    Media::AlphaType imageAlphaType;
+    switch (alphaType) {
+        case NG::TransImageAlphaType::ALPHA_TYPE_UNKNOWN:
+            imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
+            break;
+        case NG::TransImageAlphaType::ALPHA_TYPE_OPAQUE:
+            imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+            break;
+        case NG::TransImageAlphaType::ALPHA_TYPE_PREMULTIPLIED:
+            imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
+            break;
+        case NG::TransImageAlphaType::ALPHA_TYPE_POSTMULTIPLIED:
+            imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNPREMUL;
+            break;
+        default:
+            imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
+            break;
+    }
+    return imageAlphaType;
+}
+
+void OnFaviconReceived(const Callback_OnFaviconReceivedEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto arkCallback = CallbackHelper(*value);
+    auto func = [arkCallback, info]() {
+        Ark_OnFaviconReceivedEvent parameter;
+        auto* eventInfo = TypeInfoHelper::DynamicCast<FaviconReceivedEvent>(info.get());
+        auto data = eventInfo->GetHandler()->GetData();
+        size_t width = eventInfo->GetHandler()->GetWidth();
+        size_t height = eventInfo->GetHandler()->GetHeight();
+        int colorType = eventInfo->GetHandler()->GetColorType();
+        int alphaType = eventInfo->GetHandler()->GetAlphaType();
+
+        Media::InitializationOptions opt;
+        opt.size.width = static_cast<int32_t>(width);
+        opt.size.height = static_cast<int32_t>(height);
+        opt.pixelFormat = GetPixelFormat(NG::TransImageColorType(colorType));
+        opt.alphaType = GetAlphaType(NG::TransImageAlphaType(alphaType));
+        opt.editable = true;
+        auto pixelMap = Media::PixelMap::Create(opt);
+        CHECK_NULL_VOID(pixelMap);
+        uint32_t stride = width << 2;
+        uint64_t bufferSize = stride * height;
+        pixelMap->WritePixels(static_cast<const uint8_t*>(data), bufferSize);
+        parameter.favicon = PeerUtils::CreatePeer<PixelMapPeer>();
+        CHECK_NULL_VOID(parameter.favicon);
+        parameter.favicon->pixelMap = PixelMap::Create(std::move(pixelMap));
+        CHECK_NULL_VOID(parameter.favicon->pixelMap);
+        arkCallback.Invoke(parameter);
+    };
+#ifdef ARKUI_CAPI_UNITTEST
+    func();
+#else
+    pipelineContext->PostAsyncEvent([func]() { func(); }, "ArkUIWebFaviconReceived");
+#endif // ARKUI_CAPI_UNITTEST
+}
+
+void OnPageVisible(const Callback_OnPageVisibleEvent_Void* value,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
+{
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto arkCallback = CallbackHelper(*value);
     auto func = [arkCallback, info]() {
         auto* eventInfo = TypeInfoHelper::DynamicCast<PageVisibleEvent>(info.get());
         CHECK_NULL_VOID(eventInfo);
@@ -729,13 +852,14 @@ void OnPageVisible(const CallbackHelper<Callback_OnPageVisibleEvent_Void>& arkCa
 #endif // ARKUI_CAPI_UNITTEST
 }
 
-void OnDataResubmitted(const CallbackHelper<Callback_OnDataResubmittedEvent_Void>& arkCallback,
+void OnDataResubmitted(const Callback_OnDataResubmittedEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto arkCallback = CallbackHelper(*value);
     auto func = [arkCallback, info]() {
         auto* eventInfo = TypeInfoHelper::DynamicCast<DataResubmittedEvent>(info.get());
         CHECK_NULL_VOID(eventInfo);
@@ -752,7 +876,7 @@ void OnDataResubmitted(const CallbackHelper<Callback_OnDataResubmittedEvent_Void
 #endif // ARKUI_CAPI_UNITTEST
 }
 
-void OnAudioStateChanged(const CallbackHelper<Callback_OnAudioStateChangedEvent_Void>& arkCallback,
+void OnAudioStateChanged(const Callback_OnAudioStateChangedEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
     ContainerScope scope(instanceId);
@@ -763,16 +887,18 @@ void OnAudioStateChanged(const CallbackHelper<Callback_OnAudioStateChangedEvent_
     CHECK_NULL_VOID(eventInfo);
     Ark_OnAudioStateChangedEvent parameter;
     parameter.playing = Converter::ArkValue<Ark_Boolean>(eventInfo->IsPlaying());
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
 
-void OnFirstContentfulPaint(const CallbackHelper<Callback_OnFirstContentfulPaintEvent_Void>& arkCallback,
+void OnFirstContentfulPaint(const Callback_OnFirstContentfulPaintEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto arkCallback = CallbackHelper(*value);
     auto func = [arkCallback, info]() {
         auto* eventInfo = TypeInfoHelper::DynamicCast<FirstContentfulPaintEvent>(info.get());
         CHECK_NULL_VOID(eventInfo);
@@ -789,13 +915,14 @@ void OnFirstContentfulPaint(const CallbackHelper<Callback_OnFirstContentfulPaint
 #endif // ARKUI_CAPI_UNITTEST
 }
 
-void OnFirstMeaningfulPaint(const CallbackHelper<OnFirstMeaningfulPaintCallback>& arkCallback,
+void OnFirstMeaningfulPaint(const OnFirstMeaningfulPaintCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto arkCallback = CallbackHelper(*value);
     auto func = [arkCallback, info]() {
         auto* eventInfo = TypeInfoHelper::DynamicCast<FirstMeaningfulPaintEvent>(info.get());
         CHECK_NULL_VOID(eventInfo);
@@ -811,13 +938,14 @@ void OnFirstMeaningfulPaint(const CallbackHelper<OnFirstMeaningfulPaintCallback>
 #endif // ARKUI_CAPI_UNITTEST
 }
 
-void OnLargestContentfulPaint(const CallbackHelper<OnLargestContentfulPaintCallback>& arkCallback,
+void OnLargestContentfulPaint(const OnLargestContentfulPaintCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto arkCallback = CallbackHelper(*value);
     auto func = [arkCallback, info]() {
         auto* eventInfo = TypeInfoHelper::DynamicCast<LargestContentfulPaintEvent>(info.get());
         CHECK_NULL_VOID(eventInfo);
@@ -838,7 +966,7 @@ void OnLargestContentfulPaint(const CallbackHelper<OnLargestContentfulPaintCallb
 #endif // ARKUI_CAPI_UNITTEST
 }
 
-bool OnLoadIntercept(const CallbackHelper<Callback_OnLoadInterceptEvent_Boolean>& arkCallback,
+bool OnLoadIntercept(const Callback_OnLoadInterceptEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     const auto refNode = weakNode.Upgrade();
@@ -853,17 +981,18 @@ bool OnLoadIntercept(const CallbackHelper<Callback_OnLoadInterceptEvent_Boolean>
     auto peer = new WebResourceRequestPeer();
     peer->webRequest = eventInfo->GetRequest();
     parameter.data = peer;
+    auto arkCallback = CallbackHelper(*value);
     const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
-void OnControllerAttached(const CallbackHelper<Callback_Void>& arkCallback,
-                          WeakPtr<FrameNode> weakNode, int32_t instanceId)
+void OnControllerAttached(const Callback_Void* value, WeakPtr<FrameNode> weakNode, int32_t instanceId)
 {
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto arkCallback = CallbackHelper(*value);
     auto func = [arkCallback]() {
         arkCallback.Invoke();
     };
@@ -874,7 +1003,7 @@ void OnControllerAttached(const CallbackHelper<Callback_Void>& arkCallback,
 #endif // ARKUI_CAPI_UNITTEST
 }
 
-void OnOverScroll(const CallbackHelper<Callback_OnOverScrollEvent_Void>& arkCallback,
+void OnOverScroll(const Callback_OnOverScrollEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -886,16 +1015,18 @@ void OnOverScroll(const CallbackHelper<Callback_OnOverScrollEvent_Void>& arkCall
     Ark_OnOverScrollEvent parameter;
     parameter.xOffset = Converter::ArkValue<Ark_Number>(eventInfo->GetX());
     parameter.yOffset = Converter::ArkValue<Ark_Number>(eventInfo->GetY());
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
 
-void OnSafeBrowsingCheckResult(const CallbackHelper<OnSafeBrowsingCheckResultCallback>& arkCallback,
+void OnSafeBrowsingCheckResult(const OnSafeBrowsingCheckResultCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto arkCallback = CallbackHelper(*value);
     auto func = [arkCallback, info]() {
         auto* eventInfo = TypeInfoHelper::DynamicCast<SafeBrowsingCheckResultEvent>(info.get());
         CHECK_NULL_VOID(eventInfo);
@@ -910,13 +1041,14 @@ void OnSafeBrowsingCheckResult(const CallbackHelper<OnSafeBrowsingCheckResultCal
 #endif // ARKUI_CAPI_UNITTEST
 }
 
-void OnNavigationEntryCommitted(const CallbackHelper<OnNavigationEntryCommittedCallback>& arkCallback,
+void OnNavigationEntryCommitted(const OnNavigationEntryCommittedCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto arkCallback = CallbackHelper(*value);
     auto func = [arkCallback, info]() {
         auto* eventInfo = TypeInfoHelper::DynamicCast<NavigationEntryCommittedEvent>(info.get());
         CHECK_NULL_VOID(eventInfo);
@@ -935,13 +1067,14 @@ void OnNavigationEntryCommitted(const CallbackHelper<OnNavigationEntryCommittedC
 #endif // ARKUI_CAPI_UNITTEST
 }
 
-void OnIntelligentTrackingPrevention(const CallbackHelper<OnIntelligentTrackingPreventionCallback>& arkCallback,
+void OnIntelligentTrackingPrevention(const OnIntelligentTrackingPreventionCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto arkCallback = CallbackHelper(*value);
     auto func = [arkCallback, info]() {
         auto* eventInfo = TypeInfoHelper::DynamicCast<IntelligentTrackingPreventionResultEvent>(info.get());
         CHECK_NULL_VOID(eventInfo);
@@ -957,7 +1090,7 @@ void OnIntelligentTrackingPrevention(const CallbackHelper<OnIntelligentTrackingP
 #endif // ARKUI_CAPI_UNITTEST
 }
 
-void OnNativeEmbedDataInfo(const CallbackHelper<Callback_NativeEmbedDataInfo_Void>& arkCallback,
+void OnNativeEmbedDataInfo(const Callback_NativeEmbedDataInfo_Void* valueInfo,
     int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -986,10 +1119,11 @@ void OnNativeEmbedDataInfo(const CallbackHelper<Callback_NativeEmbedDataInfo_Voi
     parameter.info = Converter::ArkValue<Opt_NativeEmbedInfo>(arkInfo);
     parameter.status = Converter::ArkValue<Opt_NativeEmbedStatus>(eventInfo->GetStatus());
     parameter.surfaceId = Converter::ArkValue<Opt_String>(eventInfo->GetSurfaceId());
+    auto arkCallback = CallbackHelper(*valueInfo);
     arkCallback.Invoke(parameter);
 }
 
-void OnNativeEmbedVisibilityChange(const CallbackHelper<OnNativeEmbedVisibilityChangeCallback>& arkCallback,
+void OnNativeEmbedVisibilityChange(const OnNativeEmbedVisibilityChangeCallback* value,
     int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -998,10 +1132,11 @@ void OnNativeEmbedVisibilityChange(const CallbackHelper<OnNativeEmbedVisibilityC
     Ark_NativeEmbedVisibilityInfo parameter;
     parameter.embedId = Converter::ArkValue<Ark_String>(eventInfo->GetEmbedId());
     parameter.visibility = Converter::ArkValue<Ark_Boolean>(eventInfo->GetVisibility());
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
 
-void OnNativeEmbedTouchInfo(const CallbackHelper<Callback_NativeEmbedTouchInfo_Void>& arkCallback,
+void OnNativeEmbedTouchInfo(const Callback_NativeEmbedTouchInfo_Void* value,
     int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -1017,10 +1152,11 @@ void OnNativeEmbedTouchInfo(const CallbackHelper<Callback_NativeEmbedTouchInfo_V
     peer->handler = eventInfo->GetResult();
     arkEventResult = peer;
     parameter.result = Converter::ArkValue<Opt_EventResult>(arkEventResult);
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.InvokeSync(parameter);
 }
 
-bool OnOverrideUrlLoading(const CallbackHelper<OnOverrideUrlLoadingCallback>& arkCallback,
+bool OnOverrideUrlLoading(const OnOverrideUrlLoadingCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     const auto refNode = weakNode.Upgrade();
@@ -1035,11 +1171,12 @@ bool OnOverrideUrlLoading(const CallbackHelper<OnOverrideUrlLoadingCallback>& ar
     auto peer = new WebResourceRequestPeer();
     peer->webRequest = eventInfo->GetRequest();
     parameter = peer;
+    auto arkCallback = CallbackHelper(*value);
     const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
     return result.value_or(false);
 }
 
-void OnRenderProcessNotResponding(const CallbackHelper<OnRenderProcessNotRespondingCallback>& arkCallback,
+void OnRenderProcessNotResponding(const OnRenderProcessNotRespondingCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -1053,20 +1190,22 @@ void OnRenderProcessNotResponding(const CallbackHelper<OnRenderProcessNotRespond
     parameter.pid = Converter::ArkValue<Ark_Number>(eventInfo->GetPid());
     parameter.reason = Converter::ArkValue<Ark_RenderProcessNotRespondingReason>(
         static_cast<RenderProcessNotRespondingReason>(eventInfo->GetReason()));
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
 
-void OnRenderProcessResponding(const CallbackHelper<OnRenderProcessRespondingCallback>& arkCallback,
+void OnRenderProcessResponding(const OnRenderProcessRespondingCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke();
 }
 
-void OnViewportFitChanged(const CallbackHelper<OnViewportFitChangedCallback>& arkCallback,
+void OnViewportFitChanged(const OnViewportFitChangedCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -1077,10 +1216,11 @@ void OnViewportFitChanged(const CallbackHelper<OnViewportFitChangedCallback>& ar
     CHECK_NULL_VOID(eventInfo);
     Ark_ViewportFit parameter = Converter::ArkValue<Ark_ViewportFit>(
         static_cast<ViewportFit>(eventInfo->GetViewportFit()));
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
 
-WebKeyboardOption OnWebKeyboard(const CallbackHelper<WebKeyboardCallback>& arkCallback,
+WebKeyboardOption OnWebKeyboard(const WebKeyboardCallback* valueCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     WebKeyboardOption opt;
@@ -1114,7 +1254,8 @@ WebKeyboardOption OnWebKeyboard(const CallbackHelper<WebKeyboardCallback>& arkCa
     attributes.values = arkValues.array;
     parameter.attributes = attributes;
 
-    auto frameNode = refNode.GetRawPtr();
+    auto frameNode = Referenced::RawPtr(refNode);
+    auto arkCallback = CallbackHelper(*valueCallback);
     const auto arkResult = arkCallback.InvokeWithObtainResult<Ark_WebKeyboardOptions,
         Callback_WebKeyboardOptions_Void>(parameter);
     opt.isSystemKeyboard_ = Converter::Convert<bool>(arkResult.useSystemKeyboard);
@@ -1133,7 +1274,7 @@ WebKeyboardOption OnWebKeyboard(const CallbackHelper<WebKeyboardCallback>& arkCa
     return opt;
 }
 
-void OnAdsBlocked(const CallbackHelper<OnAdsBlockedCallback>& arkCallback,
+void OnAdsBlocked(const OnAdsBlockedCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
@@ -1147,6 +1288,7 @@ void OnAdsBlocked(const CallbackHelper<OnAdsBlockedCallback>& arkCallback,
     std::vector<std::string> adsBlocked = eventInfo->GetAdsBlocked();
     Converter::ArkArrayHolder<Array_String> adsBlockedHolder(adsBlocked);
     parameter.adsBlocked = adsBlockedHolder.ArkValue();
+    auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter);
 }
 

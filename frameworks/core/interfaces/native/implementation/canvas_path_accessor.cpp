@@ -238,7 +238,4 @@ const GENERATED_ArkUICanvasPathAccessor* GetCanvasPathAccessor()
     return &CanvasPathAccessorImpl;
 }
 
-struct CanvasPathPeer {
-    virtual ~CanvasPathPeer() = default;
-};
 }

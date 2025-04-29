@@ -13,27 +13,28 @@
  * limitations under the License.
  */
 
-#include "arkoala_api_generated.h"
-
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace HyperlinkModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
     auto frameNode = HyperlinkModelNG::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
-} // namespace HyperlinkModifier
+} // HyperlinkModifier
 namespace HyperlinkInterfaceModifier {
-void SetHyperlinkOptionsImpl(
-    Ark_NativePointer node, const Ark_Union_String_Resource* address, const Opt_Union_String_Resource* content)
+void SetHyperlinkOptionsImpl(Ark_NativePointer node,
+                             const Ark_Union_String_Resource* address,
+                             const Opt_Union_String_Resource* content)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(address);
     auto convAddress = Converter::OptConvert<std::string>(*address);
@@ -42,17 +43,17 @@ void SetHyperlinkOptionsImpl(
         HyperlinkModelNG::SetTextStyle(frameNode, convAddress.value(), convContent);
     }
 }
-} // namespace HyperlinkInterfaceModifier
+} // HyperlinkInterfaceModifier
 namespace HyperlinkAttributeModifier {
-void ColorImpl(Ark_NativePointer node, const Opt_Union_Color_Number_String_Resource* value)
+void ColorImpl(Ark_NativePointer node,
+               const Opt_Union_Color_Number_String_Resource* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Color>(*value);
     HyperlinkModelNG::SetColor(frameNode, convValue);
 }
-} // namespace HyperlinkAttributeModifier
+} // HyperlinkAttributeModifier
 const GENERATED_ArkUIHyperlinkModifier* GetHyperlinkModifier()
 {
     static const GENERATED_ArkUIHyperlinkModifier ArkUIHyperlinkModifierImpl {
@@ -63,4 +64,4 @@ const GENERATED_ArkUIHyperlinkModifier* GetHyperlinkModifier()
     return &ArkUIHyperlinkModifierImpl;
 }
 
-} // namespace OHOS::Ace::NG::GeneratedModifier
+}

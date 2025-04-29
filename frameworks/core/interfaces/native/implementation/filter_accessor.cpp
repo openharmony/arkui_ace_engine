@@ -77,7 +77,4 @@ const GENERATED_ArkUIFilterAccessor* GetFilterAccessor()
     return &FilterAccessorImpl;
 }
 
-struct FilterPeer {
-    virtual ~FilterPeer() = default;
-};
 }

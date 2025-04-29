@@ -141,7 +141,4 @@ const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
     return &AxisEventAccessorImpl;
 }
 
-struct AxisEventPeer {
-    virtual ~AxisEventPeer() = default;
-};
 }

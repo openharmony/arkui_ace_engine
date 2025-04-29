@@ -52,7 +52,4 @@ const GENERATED_ArkUIDrawingLatticeAccessor* GetDrawingLatticeAccessor()
     return &DrawingLatticeAccessorImpl;
 }
 
-struct DrawingLatticePeer {
-    virtual ~DrawingLatticePeer() = default;
-};
 }
