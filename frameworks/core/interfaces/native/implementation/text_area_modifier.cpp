@@ -652,16 +652,20 @@ void OnWillChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextAreaModelNG::SetOnWillChange(frameNode, convValue);
+    auto onCallback = [arkCallback = CallbackHelper(*value)](const ChangeValueInfo& param) -> bool {
+        auto data = Converter::ArkValue<Ark_EditableTextChangeValue>(param, Converter::FC);
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(data);
+        return Converter::Convert<bool>(result);
+    };
+    TextFieldModelNG::SetOnWillChangeEvent(frameNode, std::move(onCallback));
 }
 void KeyboardAppearanceImpl(Ark_NativePointer node,
                             const Opt_KeyboardAppearance* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TextAreaModelNG::SetKeyboardAppearance(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<KeyboardAppearance>(*value) : std::nullopt;
+    TextFieldModelNG::SetKeyboardAppearance(frameNode, convValue);
 }
 void InputFilterImpl(Ark_NativePointer node,
                      const Ark_ResourceStr* value,

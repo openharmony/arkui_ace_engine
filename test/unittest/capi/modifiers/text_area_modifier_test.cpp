@@ -43,6 +43,8 @@ const auto ATTRIBUTE_PLACEHOLDER_VALUE = "xxx";
 const auto ATTRIBUTE_TEXT_VALUE = "yyy";
 const auto ATTRIBUTE_INPUT_FILTER_NAME("inputFilter");
 const auto ATTRIBUTE_TEXT_OVERFLOW_NAME = "textOverflow";
+const auto ATTRIBUTE_KEYBOARD_APPEARANCE_NAME = "keyboardAppearance";
+const auto ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT = "0";
 const std::u16string ERROR_TEXT = u"error_text";
 const std::u16string ERROR_TEXT2 = u"error_text2";
 const std::string STR_TEST_TEXT("test_text");
@@ -2018,5 +2020,94 @@ HWTEST_F(TextAreaModifierTest, setEditMenuOptionsTest, TestSize.Level1)
     ASSERT_NE(selectOverlayInfo.onCreateCallback.onMenuItemClick, nullptr);
     EXPECT_TRUE(selectOverlayInfo.onCreateCallback.onMenuItemClick(params[0]));
     EXPECT_FALSE(selectOverlayInfo.onCreateCallback.onMenuItemClick(params[1]));
+}
+
+/**
+ * @tc.name: OnWillChangeTest
+ * @tc.desc: setOnWillChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, setOnWillChangeTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnWillChange, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    struct CheckEvent {
+        int32_t resourceId;
+        ChangeValueInfo info;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    int32_t expectedResourceId = 123321;
+    auto expectedChangeValueInfo = ChangeValueInfo {
+        .value = u"test content", .previewText.offset = 2, .previewText.value = u"previewText",
+        .oldPreviewText.offset = 1, .oldPreviewText.value = u"oldPreviewText", .oldContent = u"oldContent",
+        .rangeBefore.start = 1, .rangeBefore.end = 6, .rangeAfter.start = 2, .rangeAfter.end = 5};
+
+    auto inputCallback = [] (Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_EditableTextChangeValue parameter, const Callback_Boolean_Void continuation) {
+        auto value = Converter::Convert<ChangeValueInfo>(parameter);
+        checkEvent = CheckEvent {resourceId, value};
+        CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(true));
+    };
+
+    auto func = Converter::ArkValue<Callback_EditableTextChangeValue_Boolean>(nullptr,
+        inputCallback, expectedResourceId);
+    modifier_->setOnWillChange(node_, &func);
+
+    auto eventHub = frameNode->GetEventHub<NG::TextFieldEventHub>();
+    ASSERT_TRUE(eventHub);
+    auto result = eventHub->FireOnWillChangeEvent(expectedChangeValueInfo);
+    EXPECT_TRUE(result);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->resourceId, expectedResourceId);
+    EXPECT_EQ(checkEvent->info.value, expectedChangeValueInfo.value);
+    EXPECT_EQ(checkEvent->info.previewText.offset, expectedChangeValueInfo.previewText.offset);
+    EXPECT_EQ(checkEvent->info.previewText.value, expectedChangeValueInfo.previewText.value);
+    EXPECT_EQ(checkEvent->info.oldPreviewText.offset, expectedChangeValueInfo.oldPreviewText.offset);
+    EXPECT_EQ(checkEvent->info.oldPreviewText.value, expectedChangeValueInfo.oldPreviewText.value);
+    EXPECT_EQ(checkEvent->info.oldContent, expectedChangeValueInfo.oldContent);
+    EXPECT_EQ(checkEvent->info.rangeBefore.start, expectedChangeValueInfo.rangeBefore.start);
+    EXPECT_EQ(checkEvent->info.rangeBefore.end, expectedChangeValueInfo.rangeBefore.end);
+    EXPECT_EQ(checkEvent->info.rangeAfter.start, expectedChangeValueInfo.rangeAfter.start);
+    EXPECT_EQ(checkEvent->info.rangeAfter.end, expectedChangeValueInfo.rangeAfter.end);
+}
+
+/**
+ * @tc.name: setKeyboardAppearanceTest
+ * @tc.desc: Check the functionality of setKeyboardAppearance
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, setKeyboardAppearanceTest, TestSize.Level1)
+{
+    typedef std::tuple<Opt_KeyboardAppearance, std::string> TestStep;
+    const std::vector<TestStep> TEST_PLAN = {
+        { Converter::ArkValue<Opt_KeyboardAppearance>(
+            Ark_KeyboardAppearance::ARK_KEYBOARD_APPEARANCE_IMMERSIVE), "1" },
+        { Converter::ArkValue<Opt_KeyboardAppearance>(
+            Ark_KeyboardAppearance::ARK_KEYBOARD_APPEARANCE_NONE_IMMERSIVE), "0" },
+        { Converter::ArkValue<Opt_KeyboardAppearance>(
+            Ark_KeyboardAppearance::ARK_KEYBOARD_APPEARANCE_LIGHT_IMMERSIVE), "2" },
+            { Converter::ArkValue<Opt_KeyboardAppearance>(Ark_Empty()), ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT },
+        { Converter::ArkValue<Opt_KeyboardAppearance>(
+            Ark_KeyboardAppearance::ARK_KEYBOARD_APPEARANCE_DARK_IMMERSIVE), "3" }};
+
+    ASSERT_NE(modifier_->setKeyboardAppearance, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto jsonValue = GetJsonValue(node_);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_APPEARANCE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT);
+
+    for (auto& [value, expected] : TEST_PLAN) {
+        modifier_->setKeyboardAppearance(node_, &value);
+        jsonValue = GetJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_APPEARANCE_NAME);
+        EXPECT_EQ(resultStr, expected);
+    }
+
+    modifier_->setKeyboardAppearance(node_, nullptr);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_KEYBOARD_APPEARANCE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_KEYBOARD_APPEARANCE_DEFAULT);
 }
 } // namespace OHOS::Ace::NG

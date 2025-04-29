@@ -2101,12 +2101,12 @@ bool TextFieldModelNG::GetBlurOnSubmit(FrameNode* frameNode)
     return pattern->GetBlurOnSubmit();
 }
 
-void TextFieldModelNG::SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value)
+void TextFieldModelNG::SetKeyboardAppearance(FrameNode* frameNode, const std::optional<KeyboardAppearance>& value)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetKeyboardAppearance(value);
+    pattern->SetKeyboardAppearance(value.value_or(KeyboardAppearance::NONE_IMMERSIVE));
 }
 
 int32_t TextFieldModelNG::GetKeyboardAppearance(FrameNode* frameNode)

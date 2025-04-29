@@ -459,6 +459,7 @@ namespace Converter {
     template<> CalcLength Convert(const Ark_Length& src);
     template<> CalcLength Convert(const Ark_LengthMetrics& src);
     template<> CaretStyle Convert(const Ark_CaretStyle& src);
+    template<> ChangeValueInfo Convert(const Ark_EditableTextChangeValue& src);
     template<> CheckboxSettingData Convert(const Ark_LunarSwitchStyle& src);
     template<> Color Convert(const Ark_Number& src);
     template<> Color Convert(const Ark_String& src);
@@ -520,6 +521,7 @@ namespace Converter {
     template<> Point Convert(const Ark_Tuple_Number_Number& src);
     template<> PointLightStyle Convert(const Ark_PointLightStyle& src);
     template<> PointT<int32_t> Convert(const Ark_Point& src);
+    template<> PreviewText Convert(const Ark_PreviewText& src);
     template<> RadioStyle Convert(const Ark_RadioStyle& src);
     template<> Radius Convert(const Ark_Vector2& src);
     template<> RangeContent Convert(const Ark_TextPickerRangeContent& src);

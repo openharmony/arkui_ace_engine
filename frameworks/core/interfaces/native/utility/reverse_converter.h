@@ -197,6 +197,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_DragBehavior& dst, const DragBehavior& src);
     void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>& info);
     void AssignArkValue(Ark_DragResult& dst, const DragRet& src);
+    void AssignArkValue(Ark_EditableTextChangeValue& dst, const ChangeValueInfo& src, Converter::ConvContext *ctx);
     void AssignArkValue(Ark_Edge& dst, const ScrollEdge& src);
     void AssignArkValue(Ark_EdgeEffect& dst, const EdgeEffect& src);
     void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src);
