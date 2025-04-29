@@ -3849,6 +3849,30 @@ bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackP
     return true;
 }
 
+bool OverlayManager::RemoveDialogWithContent(
+    const RefPtr<FrameNode>& overlay, const DialogProperties& props, bool isBackPressed, bool isPageRouter)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove dialog enter");
+    if (overlay->IsRemoving()) {
+        return false;
+    }
+    if (FireBackPressEvent()) {
+        return true;
+    }
+    auto hub = overlay->GetOrCreateEventHub<DialogEventHub>();
+    if (!isPageRouter && hub) {
+        hub->FireCancelEvent();
+    }
+    if (props.isMask) {
+        PopModalDialog(overlay->GetId());
+    }
+    CloseDialog(overlay);
+    if (isBackPressed) {
+        SetBackPressEvent(nullptr);
+    }
+    return true;
+}
+
 bool OverlayManager::PopupInteractiveDismiss(const RefPtr<FrameNode>& overlay)
 {
     auto bubblePattern = overlay->GetPattern<BubblePattern>();
@@ -3989,23 +4013,21 @@ int32_t OverlayManager::RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, 
             return OVERLAY_EXISTS;
         }
         auto dialogPattern = DynamicCast<DialogPattern>(pattern);
+        CHECK_NULL_RETURN(dialogPattern, OVERLAY_EXISTS);
         if (dialogPattern->GetDialogProperties().isUECHostMask) {
             OverlayMaskManager::GetInstance().SendDialogMaskEventToUEA(overlay, UECHostMaskAction::PRESS_BACK);
             return OVERLAY_REMOVE;
         }
 
-        CHECK_NULL_RETURN(dialogPattern, OVERLAY_EXISTS);
         if (dialogPattern->CallDismissInNDK(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK))) {
             return OVERLAY_REMOVE;
         } else if (dialogPattern->ShouldDismiss()) {
             OverlayDoDismiss(overlay, pattern);
             return OVERLAY_REMOVE;
         }
-
-        if (dialogPattern->GetDialogProperties().isMask) {
-            dialogPattern->CloseDialog();
-        }
-        return RemoveDialog(overlay, isBackPressed, isPageRouter) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
+        return RemoveDialogWithContent(overlay, dialogPattern->GetDialogProperties(), isBackPressed, isPageRouter)
+                   ? OVERLAY_REMOVE
+                   : OVERLAY_EXISTS;
     }
     if (InstanceOf<BubblePattern>(pattern)) {
         return RemoveBubble(overlay) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
