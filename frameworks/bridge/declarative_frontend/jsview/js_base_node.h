@@ -44,6 +44,7 @@ public:
     void BuildNode(const JSCallbackInfo& info);
     void ProccessNode(bool isSupportExportTexture, bool isSupportLazyBuild);
     void PostTouchEvent(const JSCallbackInfo& info);
+    void PostInputEvent(const JSCallbackInfo& info);
     void UpdateStart(const JSCallbackInfo& info);
     void UpdateEnd(const JSCallbackInfo& info);
     void OnRecycleWithBindThis(const JSCallbackInfo& info);
@@ -55,7 +56,11 @@ public:
     }
 
 private:
-    TouchEvent InitTouchEvent(const JSCallbackInfo& info);
+    TouchEvent InitTouchEvent(const JSCallbackInfo& info, bool isPostTouchEvent);
+    MouseEvent InitMouseEvent(const JSCallbackInfo& info);
+    AxisEvent InitAxisEvent(const JSCallbackInfo& info);
+    void GetTouches(const JSCallbackInfo& info, TouchEvent& touchEvent);
+    void GetInputTouches(const JSCallbackInfo& info, TouchEvent& touchEvent);
     RefPtr<NG::FrameNode> viewNode_;
     RefPtr<NG::UINode> realNode_;
     NG::OptionalSizeF size_;

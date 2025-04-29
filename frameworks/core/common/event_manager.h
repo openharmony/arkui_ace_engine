@@ -38,6 +38,46 @@
 #include "core/event/resample_algo.h"
 
 namespace OHOS::Ace {
+struct PressMouseInfo {
+    int32_t id;
+    MouseButton mouseButton;
+
+    bool operator==(const PressMouseInfo& other) const noexcept
+    {
+        return id == other.id && mouseButton == other.mouseButton;
+    }
+
+    bool operator<(const PressMouseInfo& other) const noexcept
+    {
+        return id < other.id && mouseButton < other.mouseButton;
+    }
+};
+} // namespace OHOS::Ace
+
+namespace std {
+template<>
+struct hash<OHOS::Ace::PressMouseInfo> {
+    size_t operator()(OHOS::Ace::PressMouseInfo const& info) const noexcept
+    {
+#if SIZE_MAX > 0xFFFFFFFFUL
+        // Use a 64-bit golden ratio constant if the platform supports 64-bit size_t.
+        constexpr size_t kMagic = 0x9e3779b97f4a7c15ULL;
+#else
+        // Use a 32-bit golden ratio constant for 32-bit platforms.
+        constexpr size_t kMagic = 0x9e3779b9u;
+#endif
+
+        size_t seed = std::hash<int32_t>()(info.id);
+        size_t buttonHash = static_cast<size_t>(info.mouseButton);
+        // Combine the two hash values using a variation of boost::hash_combine.
+        // This improves hash distribution and reduces collisions.
+        seed ^= buttonHash + kMagic + (seed << 6) + (seed >> 2);
+        return seed;
+    }
+};
+} // namespace std
+
+namespace OHOS::Ace {
 namespace NG {
 class FrameNode;
 class SelectOverlayManager;
@@ -369,7 +409,7 @@ private:
     void FalsifyHoverCancelEventAndDispatch(const TouchEvent& touchPoint);
     void UpdateDragInfo(TouchEvent& point);
     void UpdateInfoWhenFinishDispatch(const TouchEvent& point, bool sendOnTouch);
-    void DoSingleMouseActionRelease(MouseButton button);
+    void DoSingleMouseActionRelease(const PressMouseInfo& pressMouseInfo);
     bool DispatchMouseEventInGreatOrEqualAPI13(const MouseEvent& event);
     bool DispatchMouseEventInLessAPI13(const MouseEvent& event);
     void DispatchMouseEventToPressResults(const MouseEvent& event, const MouseTestResult& targetResults,
@@ -385,7 +425,7 @@ private:
     // used less than API13
     MouseTestResult pressMouseTestResults_;
     // used great or equal API13
-    std::unordered_map<MouseButton, MouseTestResult> pressMouseTestResultsMap_;
+    std::unordered_map<PressMouseInfo, MouseTestResult> pressMouseTestResultsMap_;
     HoverTestResult currHoverTestResults_;
     HoverTestResult lastHoverTestResults_;
     HoverTestResult curAccessibilityHoverResults_;

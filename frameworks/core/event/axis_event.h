@@ -47,6 +47,9 @@ struct PointerEvent : public UIInputEvent {
     float y = {};
     float screenX = {};
     float screenY = {};
+    bool passThrough = {};
+    // ID of the node to which this event is being explicitly posted (not necessarily the original target)
+    int32_t postEventNodeId = {};
 };
 
 struct AxisEvent final : public PointerEvent {
