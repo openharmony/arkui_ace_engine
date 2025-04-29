@@ -44,6 +44,7 @@ const float DISPLAY_Y = 1.0f;
 const float VELOCITY_X = 1.0f;
 const float VELOCITY_Y = 1.0f;
 const float VELOCITY = 1.0f;
+const int32_t DISPLAYID = 0;
 } // namespace
 class DragAndDropTest : public testing::Test {
 public:
@@ -1183,5 +1184,27 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0042, TestSize.Level1)
     EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(ret2, ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED);
     EXPECT_EQ(dragEvent.isDragEndPending, false);
+}
+
+/**
+ * @tc.name: DragAndDropTest0043
+ * @tc.desc: test set DragEvent property function;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0043, TestSize.Level1)
+{
+    /**
+     *@tc.steps : step1.create and set property.
+     */
+    ArkUIDragEvent dragEvent;
+    dragEvent.displayId = DISPLAYID;
+    auto* drag_Event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
+    int32_t displayId = -1;
+    auto ret1 = OH_ArkUI_DragEvent_GetDisplayId(drag_Event, &displayId);
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(displayId, DISPLAYID);
 }
 } // namespace OHOS::Ace

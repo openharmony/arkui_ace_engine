@@ -454,7 +454,7 @@ float OH_ArkUI_DragEvent_GetVelocity(ArkUI_DragEvent* event);
 int32_t OH_ArkUI_DragEvent_GetModifierKeyStates(ArkUI_DragEvent* event, uint64_t* keys);
 
 /**
- * @brief Obtains the display ID of the screen for thee specified drag event.
+ * @brief Obtains the display ID of the screen for the specified drag event.
  *
  * @param event Pointer to an <b>ArkUI_DragEvent</b> object.
  * @param displayId Display ID of the event occurs in.
