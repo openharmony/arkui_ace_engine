@@ -41,7 +41,7 @@ public:
     static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize);
     static void SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& fontWeight);
     static void SetRenderingStrategy(FrameNode* frameNode, const std::optional<uint32_t>& renderingStrategy);
-    static void SetSymbolEffect(FrameNode* frameNode, const std::uint32_t effectStrategy);
+    static void SetSymbolEffect(FrameNode* frameNode, const std::optional<uint32_t>& effectStrategy);
     static void InitialSymbol(FrameNode* frameNode, const std::uint32_t& unicode);
     static void InitialCustomSymbol(FrameNode* frameNode, const std::uint32_t& unicode, const char* fontFamilyName);
     static void SetSymbolEffectOptions(FrameNode* frameNode, NG::SymbolEffectOptions& symbolEffectOptions);
