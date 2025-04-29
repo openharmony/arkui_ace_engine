@@ -4809,9 +4809,6 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     modalPagePattern->SetProhibitedRemoveByNavigation(modalStyle.prohibitedRemoveByNavigation);
     modalPagePattern->SetHasTransitionEffect(contentCoverParam.transitionEffect != nullptr);
     modalNode->GetRenderContext()->UpdateChainedTransition(contentCoverParam.transitionEffect);
-    modalStack_.push(WeakClaim(RawPtr(modalNode)));
-    modalList_.emplace_back(WeakClaim(RawPtr(modalNode)));
-    SaveLastModalNode();
     auto levelOrder = GetLevelOrder(modalNode);
     if (targetId < 0) {
         // modaluiextention node mounting
@@ -4821,7 +4818,13 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     }
     modalNode->AddChild(builder);
     auto modalNodeParent = modalNode->GetParent();
-    CHECK_NULL_VOID(modalNodeParent);
+    if (!modalNodeParent) {
+        TAG_LOGE(AceLogTag::ACE_SHEET, "ModalPage MountToParent error");
+        return;
+    }
+    modalStack_.push(WeakClaim(RawPtr(modalNode)));
+    modalList_.emplace_back(WeakClaim(RawPtr(modalNode)));
+    SaveLastModalNode();
     if (!isAllowedBeCovered_) {
         TAG_LOGI(AceLogTag::ACE_OVERLAY,
             "modalNode->GetParent() %{public}d mark IsProhibitedAddChildNode when sessionId %{public}d,"
