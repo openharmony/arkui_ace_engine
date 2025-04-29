@@ -4059,6 +4059,14 @@ void AceContainer::DispatchUIExtDataConsume(
     }
 }
 
+void AceContainer::DispatchExtensionDataToHostWindow(uint32_t code, const AAFwk::Want& data, int32_t persistenId)
+{
+    CHECK_NULL_VOID(uiWindow_);
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "DispatchExtensionDataToHostWindow code=%{public}u, want=%{public}s, persistenId=%{public}d.",
+        code, data.ToString().c_str(), persistenId);
+}
+
 bool AceContainer::FireUIExtDataSendToHost(
     NG::UIContentBusinessCode code, const AAFwk::Want& data, NG::BusinessDataSendType type)
 {

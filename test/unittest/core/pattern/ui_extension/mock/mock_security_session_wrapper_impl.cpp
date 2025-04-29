@@ -288,4 +288,8 @@ bool SecuritySessionWrapperImpl::SendBusinessData(
 }
 
 void SecuritySessionWrapperImpl::ReDispatchWantParams() {}
+
+void SecuritySessionWrapperImpl::DispatchExtensionDataToHostWindow(uint32_t customId, const AAFwk::Want& data)
+{
+}
 } // namespace OHOS::Ace::NG
