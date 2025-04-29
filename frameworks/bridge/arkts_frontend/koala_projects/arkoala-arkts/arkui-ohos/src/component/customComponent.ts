@@ -135,7 +135,7 @@ export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T
         content?: () => void,
         reuseKey?: string
     ): void {
-        CustomDelegate._instantiate(undefined, () => new CustomDelegate<S, S_Options>(factory()), undefined, initializers, reuseKey);
+        CustomDelegate._instantiate(undefined, () => new CustomDelegate<S, S_Options>(factory()), content, initializers, reuseKey);
     }
 
     __initializeStruct(
