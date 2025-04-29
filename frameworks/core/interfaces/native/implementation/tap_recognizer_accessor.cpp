@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 #include "tap_recognizer_peer.h"
 
@@ -27,7 +28,7 @@ void DestroyPeerImpl(Ark_TapRecognizer peer)
 Ark_TapRecognizer CtorImpl()
 {
     auto* peer = new TapRecognizerPeer();
-    peer->recognizer = Ace::MakeRefPtr<Ace::NG::ClickRecognizer>();
+    peer->tapRecognizer = AceType::MakeRefPtr<Ace::NG::ClickRecognizer>();
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -36,10 +37,11 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Number GetTapCountImpl(Ark_TapRecognizer peer)
 {
-    if (!peer || !peer->recognizer) {
+    if (!peer || !peer->tapRecognizer) {
         return Converter::ArkValue<Ark_Number>(0);
     }
-    return Converter::ArkValue<Ark_Number>(peer->tapRecognizer->GetTapCount());
+    auto tapRecognizer = peer->tapRecognizer;
+    return Converter::ArkValue<Ark_Number>(tapRecognizer->GetCount());
 }
 } // TapRecognizerAccessor
 const GENERATED_ArkUITapRecognizerAccessor* GetTapRecognizerAccessor()

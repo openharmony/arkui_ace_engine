@@ -18,14 +18,9 @@
 #include "core/components_ng/gestures/tap_gesture.h"
 
 struct TapRecognizerPeer final {
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::ClickRecognizer> GetTapRecognizer() const
-    {
-        return tapRecognizer_; 
-    };
     // Колбэки для взаимодействия с ArkUI
     std::function<void()> onClick;
     std::function<void()> onRemoteMessage;
     std::function<void()> onAccessibility;
-private:
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::ClickRecognizer> tapRecognizer_;
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::ClickRecognizer> tapRecognizer;
 };
