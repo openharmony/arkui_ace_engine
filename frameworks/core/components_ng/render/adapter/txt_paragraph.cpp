@@ -22,7 +22,6 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/base/log/log_wrapper.h"
 
 namespace OHOS::Ace::NG {
 namespace {

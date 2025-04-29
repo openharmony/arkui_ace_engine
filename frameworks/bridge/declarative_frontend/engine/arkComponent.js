@@ -13317,7 +13317,7 @@ class ArkTextComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextLineSpacingModifier.identity, TextLineSpacingModifier, arkLineSpacing);
     return this;
   }
-  OptimizeTrailingSpace(value) {
+  optimizeTrailingSpace(value) {
     modifierWithKey(this._modifiersWithKeys, TextOptimizeTrailingSpaceModifier.identity, 
       TextOptimizeTrailingSpaceModifier, value);
     return this;

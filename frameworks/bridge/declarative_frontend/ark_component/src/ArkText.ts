@@ -430,10 +430,10 @@ class TextOptimizeTrailingSpaceModifier extends ModifierWithKey<boolean> {
   }
   static identity: Symbol = Symbol('textOptimizeTrailingSpace');
   applyPeer(node: KNode, reset: boolean): void {
-    if(reset) {
+    if (reset) {
       getUINativeModule().text.resetOptimizeTrailingSpace(node);
     } else {
-      getUINativeModule().text.setOptimizeTrailingSpace(node, this.value!)
+      getUINativeModule().text.setOptimizeTrailingSpace(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
