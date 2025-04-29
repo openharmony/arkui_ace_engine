@@ -17,6 +17,7 @@
 
 #include "animated_drawable_descriptor_peer.h"
 #include "core/interfaces/native/implementation/image_common_methods.h"
+#include "core/interfaces/native/implementation/matrix4_transit_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -199,9 +200,8 @@ void ImageMatrixImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //ImageModelNG::SetImageMatrix(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    ImageModelNG::SetImageMatrix(frameNode, value->matrix);
 }
 void ObjectRepeatImpl(Ark_NativePointer node,
                       Ark_ImageRepeat value)

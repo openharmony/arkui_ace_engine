@@ -117,7 +117,7 @@ void MarkTodayImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //CalendarPickerModelNG::SetMarkToday(frameNode, convValue);
+    CalendarPickerModelNG::SetMarkToday(frameNode, convValue);
 }
 void EdgeAlign0Impl(Ark_NativePointer node,
                     Ark_CalendarAlign alignType,

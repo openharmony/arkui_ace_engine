@@ -488,6 +488,17 @@ std::vector<std::tuple<std::string, Ark_CacheMode>> testFixtureEnumCacheModeInva
     { "INT_MAX", static_cast<Ark_CacheMode>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_CalendarAlign, std::string>> testFixtureEnumCalendarAlignValidValues = {
+    { "ARK_CALENDAR_ALIGN_START", ARK_CALENDAR_ALIGN_START, "CalendarAlign.START" },
+    { "ARK_CALENDAR_ALIGN_CENTER", ARK_CALENDAR_ALIGN_CENTER, "CalendarAlign.CENTER" },
+    { "ARK_CALENDAR_ALIGN_END", ARK_CALENDAR_ALIGN_END, "CalendarAlign.END" },
+};
+
+std::vector<std::tuple<std::string, Ark_CalendarAlign>> testFixtureEnumCalendarAlignInvalidValues = {
+    { "-1", static_cast<Ark_CalendarAlign>(-1) },
+    { "INT_MAX", static_cast<Ark_CalendarAlign>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_ChainStyle, std::string>> testFixtureEnumChainStyleValidValues = {
     { "ARK_CHAIN_STYLE_SPREAD", ARK_CHAIN_STYLE_SPREAD, "ChainStyle.SPREAD" },
     { "ARK_CHAIN_STYLE_SPREAD_INSIDE", ARK_CHAIN_STYLE_SPREAD_INSIDE, "ChainStyle.SPREAD_INSIDE" },

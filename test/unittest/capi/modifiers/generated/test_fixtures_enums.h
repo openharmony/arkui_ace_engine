@@ -71,6 +71,8 @@ extern std::vector<std::tuple<std::string, Ark_ButtonType, std::string>> testFix
 extern std::vector<std::tuple<std::string, Ark_ButtonType>> testFixtureEnumButtonTypeInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_CacheMode, std::string>> testFixtureEnumCacheModeValidValues;
 extern std::vector<std::tuple<std::string, Ark_CacheMode>> testFixtureEnumCacheModeInvalidValues;
+extern std::vector<std::tuple<std::string, Ark_CalendarAlign, std::string>> testFixtureEnumCalendarAlignValidValues;
+extern std::vector<std::tuple<std::string, Ark_CalendarAlign>> testFixtureEnumCalendarAlignInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ChainStyle, std::string>> testFixtureEnumChainStyleValidValues;
 extern std::vector<std::tuple<std::string, Ark_ChainStyle>> testFixtureEnumChainStyleInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ClickEffectLevel, std::string>>

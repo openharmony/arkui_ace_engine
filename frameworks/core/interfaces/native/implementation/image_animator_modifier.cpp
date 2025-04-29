@@ -172,7 +172,7 @@ void MonitorInvisibleAreaImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //ImageAnimatorModelNG::SetMonitorInvisibleArea(frameNode, convValue);
+    ImageAnimatorModelNG::SetAutoMonitorInvisibleArea(frameNode, convValue);
 }
 void OnStartImpl(Ark_NativePointer node,
                  const Callback_Void* value)

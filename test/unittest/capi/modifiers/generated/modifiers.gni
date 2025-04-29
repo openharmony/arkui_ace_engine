@@ -18,6 +18,7 @@ generated_sources = [
   "blank_modifier_test.cpp",
   "button_modifier_test_1.cpp",
   "button_modifier_test_2.cpp",
+  "calendar_picker_modifier_test.cpp",
   "column_split_modifier_test.cpp",
   "common_method_modifier_test_1.cpp",
   "common_method_modifier_test_2.cpp",

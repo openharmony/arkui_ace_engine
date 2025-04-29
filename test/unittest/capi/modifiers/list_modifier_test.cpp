@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
+#include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/components_v2/list/list_properties.h"
 
@@ -1426,5 +1427,30 @@ HWTEST_F(ListModifierTest, setOnScrollVisibleContentChangeTest, TestSize.Level1)
     EXPECT_EQ(checkEvent->end.index, 77);
     EXPECT_EQ(checkEvent->end.area, ListItemGroupArea::IN_FOOTER_AREA);
     EXPECT_EQ(checkEvent->end.indexInGroup, 99);
+}
+
+/*
+ * @tc.name: setStackFromEndTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModifierTest, setStackFromEndTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto property = frameNode->GetLayoutProperty<ListLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+
+    std::optional<bool> result;
+
+    modifier_->setStackFromEnd(node_, Converter::ArkValue<Ark_Boolean>(true));
+    result = property->GetStackFromEnd();
+    ASSERT_TRUE(result);
+    EXPECT_EQ(result.value(), true);
+
+    modifier_->setStackFromEnd(node_, Converter::ArkValue<Ark_Boolean>(false));
+    result = property->GetStackFromEnd();
+    ASSERT_TRUE(result);
+    EXPECT_EQ(result.value(), false);
 }
 } // namespace OHOS::Ace::NG

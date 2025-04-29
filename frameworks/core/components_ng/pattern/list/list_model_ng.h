@@ -105,6 +105,7 @@ public:
     static void SetListFriction(FrameNode* frameNode, const std::optional<double>& friction);
     static void SetListMaintainVisibleContentPosition(FrameNode* frameNode, bool enabled);
     static bool GetListMaintainVisibleContentPosition(FrameNode* frameNode);
+    static void SetStackFromEnd(FrameNode* frameNode, bool enabled);
     static void SetListNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
     static void SetListNestedScroll(FrameNode* frameNode, const std::optional<NestedScrollMode>& forward,
         const std::optional<NestedScrollMode>& backward);
