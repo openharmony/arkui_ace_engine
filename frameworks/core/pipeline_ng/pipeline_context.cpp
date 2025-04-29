@@ -542,7 +542,12 @@ void PipelineContext::FlushDragEvents()
     }
     canUseLongPredictTask_ = false;
     for (auto iter = dragEvents.begin(); iter != dragEvents.end(); ++iter) {
-        FlushDragEvents(manager, extraInfo, iter->first, iter->second);
+        if (!iter->first.Invalid()) {
+            RefPtr<FrameNode> node = iter->first.Upgrade();
+            if (node) {
+                FlushDragEvents(manager, extraInfo, node, iter->second);
+            }
+        }
     }
 }
 
@@ -590,7 +595,7 @@ void PipelineContext::FlushDragEvents(const RefPtr<DragDropManager>& manager,
     std::unordered_map<int, DragPointerEvent> &idToPoints,
     const RefPtr<FrameNode>& node)
 {
-    std::map<RefPtr<FrameNode>, std::vector<DragPointerEvent>> nodeToPointEvent;
+    std::map<WeakPtr<FrameNode>, std::vector<DragPointerEvent>> nodeToPointEvent;
     std::list<DragPointerEvent> dragPoint;
     for (const auto& iter : idToPoints) {
         auto lastDispatchTime = eventManager_->GetLastDispatchTime();
@@ -3741,7 +3746,12 @@ void PipelineContext::OnFlushMouseEvent(TouchRestrict& touchRestrict)
     }
     canUseLongPredictTask_ = false;
     for (auto iter = mouseEvents.begin(); iter != mouseEvents.end(); ++iter) {
-        OnFlushMouseEvent(iter->first, iter->second, touchRestrict);
+        if (!iter->first.Invalid()) {
+            RefPtr<FrameNode> node = iter->first.Upgrade();
+            if (node) {
+                OnFlushMouseEvent(node, iter->second, touchRestrict);
+            }
+        }
     }
 }
 
@@ -3756,7 +3766,7 @@ void PipelineContext::OnFlushMouseEvent(
     std::unordered_map<int, MouseEvent> idToMousePoints;
     bool needInterpolation = true;
     std::unordered_map<int32_t, MouseEvent> newIdMousePoints;
-    std::map<RefPtr<FrameNode>, std::vector<MouseEvent>> nodeToMousePoints;
+    std::map<WeakPtr<FrameNode>, std::vector<MouseEvent>> nodeToMousePoints;
     for (auto iter = mouseEvents.rbegin(); iter != mouseEvents.rend(); ++iter) {
         auto scaleEvent = (*iter).CreateScaleEvent(GetViewScale());
         idToMousePoints.emplace(scaleEvent.id, scaleEvent);
