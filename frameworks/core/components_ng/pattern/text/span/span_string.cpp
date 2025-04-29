@@ -1015,7 +1015,7 @@ bool SpanString::EncodeTlv(std::vector<uint8_t>& buff)
     TLVUtil::WriteString(buff, UtfUtils::Str16DebugToStr8(text_));
     TLVUtil::WriteUint8(buff, TLV_END);
     std::vector<uint8_t> otherInfo;
-    TLVUtil::WriteInt32(otherInfo, isFromStyledStringMode? 1 : 0);
+    TLVUtil::WriteInt32(otherInfo, isFromStyledStringMode ? 1 : 0);
     TLVUtil::WriteUint8(buff, TLV_SPAN_STRING_MODE_FLAG);
     TLVUtil::WriteInt32(buff, static_cast<int32_t>(otherInfo.size()));
     buff.insert(buff.end(), otherInfo.begin(), otherInfo.end());
@@ -1057,9 +1057,7 @@ void SpanString::DecodeTlvExt(std::vector<uint8_t>& buff, SpanString* spanString
         auto lastCursor = cursor;
         switch (tag) {
             case TLV_CUSTOM_MARSHALL_BUFFER_START: {
-                if (!unmarshallCallback) {
-                    break;
-                }
+                CHECK_NULL_BREAK(unmarshallCallback);
                 auto start = TLVUtil::ReadInt32(buff, cursor);
                 auto length = TLVUtil::ReadInt32(buff, cursor);
                 auto endOfUserDataArrBuff = buffLength + cursor + cursor - lastCursor;

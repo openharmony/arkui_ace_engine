@@ -697,6 +697,7 @@ void TextPattern::AsyncHandleOnCopySpanStringHtml(RefPtr<SpanString>& subSpanStr
             multiTypeRecordImpl->SetHtmlText(htmlText);
 
             auto uiTaskExecutor = task.Upgrade();
+            CHECK_NULL_VOID(uiTaskExecutor);
             uiTaskExecutor->PostTask(
                 [weak, multiTypeRecordImpl, tlvData]() {
                     auto textPattern = weak.Upgrade();
@@ -792,6 +793,7 @@ void TextPattern::AsyncHandleOnCopyWithoutSpanStringHtml(const std::string& past
             }
             multiTypeRecordImpl->SetHtmlText(htmlText);
             auto uiTaskExecutor = task.Upgrade();
+            CHECK_NULL_VOID(uiTaskExecutor);
             uiTaskExecutor->PostTask(
                 [weak, multiTypeRecordImpl]() {
                     auto textPattern = weak.Upgrade();
