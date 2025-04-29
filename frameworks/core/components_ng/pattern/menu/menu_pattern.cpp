@@ -2440,4 +2440,34 @@ bool MenuPattern::IsSelectOverlayDefaultModeRightClickMenu()
     CHECK_NULL_RETURN(menuWrapperPattern, false);
     return !menuWrapperPattern->GetIsSelectOverlaySubWindowWrapper();
 }
+
+void MenuPattern::RegisterAccessibilityChildActionNotify()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetNotifyChildAction(
+        [menu = WeakPtr<FrameNode>(host)] (NotifyChildActionType childActionType) {
+            auto result = AccessibilityActionResult::ACTION_ERROR;
+            auto frameNode = menu.Upgrade();
+            CHECK_NULL_RETURN(frameNode, result);
+            auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+            CHECK_NULL_RETURN(eventHub, result);
+            auto gesture = eventHub->GetGestureEventHub();
+            CHECK_NULL_RETURN(gesture, result);
+            TouchEvent event;
+            event.id = frameNode->GetId();
+            event.postEventNodeId = frameNode->GetId();
+            event.type = TouchType::DOWN;
+            event.isInterpolated = true;
+            std::chrono::microseconds microseconds(GetMicroTickCount());
+            TimeStamp time(microseconds);
+            event.time = time;
+            result = gesture->TriggerTouchEvent(event) ?
+                AccessibilityActionResult::ACTION_OK : AccessibilityActionResult::ACTION_ERROR;
+            TAG_LOGI(AceLogTag::ACE_MENU, "trigger notify child action.");
+            return result;
+    });
+}
 } // namespace OHOS::Ace::NG
