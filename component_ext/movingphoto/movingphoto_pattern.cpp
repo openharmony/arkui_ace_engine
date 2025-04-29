@@ -14,6 +14,7 @@
  */
 
 #include <unistd.h>
+#include <charconv>
 
 #include "movingphoto_pattern.h"
 #include "movingphoto_node.h"
@@ -977,29 +978,34 @@ SizeF MovingPhotoPattern::GetRawImageSize()
     return imagePattern->GetRawImageSize();
 }
 
-void MovingPhotoPattern::GetXmageHeight()
+int32_t MovingPhotoPattern::GetImageFd()
 {
     if (!isPlayWithMask_) {
-        TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto GetXmageHeight.%{public}d", isPlayWithMask_);
-        return;
+        TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto GetImageFd.%{public}d", isPlayWithMask_);
+        return -1;
     }
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto layoutProperty = AceType::DynamicCast<MovingPhotoLayoutProperty>(frameNode->GetLayoutProperty());
-    CHECK_NULL_VOID(layoutProperty);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1);
+    auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, -1);
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_RETURN(pipeline, -1);
     auto dataProvider = AceType::DynamicCast<DataProviderManagerStandard>(pipeline->GetDataProviderManager());
-    CHECK_NULL_VOID(dataProvider);
+    CHECK_NULL_RETURN(dataProvider, -1);
 
     if (!layoutProperty->HasMovingPhotoUri()) {
-        TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto GetXmageHeight uri is null");
-        return;
+        TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto GetImageFd uri is null");
+        return -1;
     }
     std::string uriValue = layoutProperty->GetMovingPhotoUri().value();
     int32_t fd = dataProvider->GetDataProviderFile(uriValue, "r");
-    CHECK_NULL_VOID(fd >= 0);
+    return fd;
+}
 
+void MovingPhotoPattern::GetXmageHeight()
+{
+    int32_t fd = GetImageFd();
+    CHECK_NULL_VOID(fd >= 0);
     auto imageSrc = ImageSource::Create(fd);
     close(fd);
     CHECK_NULL_VOID(imageSrc);
@@ -1011,6 +1017,13 @@ void MovingPhotoPattern::GetXmageHeight()
         return;
     }
 
+    int32_t imageW = 0;
+    auto resW = std::from_chars(imageWidth.data(), imageWidth.data() + imageWidth.size(), imageW);
+    CHECK_NULL_VOID(resW.ec == std::errc());
+    int32_t imageL = 0;
+    auto resL = std::from_chars(imageLength.data(), imageLength.data() + imageLength.size(), imageL);
+    CHECK_NULL_VOID(resL.ec == std::errc());
+
     std::string modeValue = imageSrc->GetProperty(HW_MNOTE_XMAGE_MODE);
     SizeF imageSize = SizeF(-1, -1);
     if (!modeValue.empty() && modeValue != DEFAULT_EXIF_VALUE) {
@@ -1020,11 +1033,13 @@ void MovingPhotoPattern::GetXmageHeight()
             TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto bottomValue is null");
             return;
         }
-        imageSize = SizeF(std::stof(imageWidth), std::stof(bottomValue));
-        float xmageHeight = std::stof(imageLength) - std::stof(bottomValue);
-        ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, XmageHeight, xmageHeight);
+        int32_t bottomV = 0;
+        auto resB = std::from_chars(bottomValue.data(), bottomValue.data() + bottomValue.size(), bottomV);
+        CHECK_NULL_VOID(resB.ec == std::errc());
+        imageSize = SizeF(imageW, bottomV);
+        ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, XmageHeight, imageL - bottomV);
     } else {
-        imageSize = SizeF(std::stof(imageWidth), std::stof(imageLength));
+        imageSize = SizeF(imageW, imageL);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSize, imageSize);
 }
