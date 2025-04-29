@@ -53,6 +53,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 #include "core/components_v2/list/list_properties.h"
 #include "core/interfaces/native/implementation/accessiblt_hover_event_peer.h"
+#include "core/interfaces/native/implementation/axis_event_peer.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/click_event_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
@@ -796,6 +797,7 @@ namespace OHOS::Ace::NG::Converter {
     };
 
     using ArkAccessibilityHoverEventSync = SyncEvent<Ark_AccessibilityHoverEvent>;
+    using ArkAxisEventSync = SyncEvent<Ark_AxisEvent>;
     using ArkClickEventSync = SyncEvent<Ark_ClickEvent>;
     using ArkFocusAxisEventSync = SyncEvent<Ark_FocusAxisEvent>;
     using ArkGestureEventSync = SyncEvent<Ark_GestureEvent>;

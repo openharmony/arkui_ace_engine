@@ -1677,7 +1677,7 @@ public:
     static void SetAccessibilityDefaultFocus(FrameNode* frameNode, bool isFocus);
     static void SetAccessibilityUseSamePage(FrameNode* frameNode, const std::string& pageMode);
     static void SetAccessibilityScrollTriggerable(FrameNode* frameNode, bool triggerable, bool resetValue);
-    static void SetAccessibilityFocusDrawLevel(FrameNode* frameNode, int32_t drawLevel);
+    static void SetAccessibilityFocusDrawLevel(FrameNode* frameNode, const std::optional<int32_t>& drawLevel);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
     {

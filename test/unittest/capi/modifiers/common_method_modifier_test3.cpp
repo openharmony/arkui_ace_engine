@@ -586,25 +586,30 @@ HWTEST_F(CommonMethodModifierTest3, setMask0ValidValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setMask1PartForProgressMaskValidValues
+ * @tc.name: setMask1ValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-#ifdef WRONG_OVERRIDE
-HWTEST_F(CommonMethodModifierTest3, setMask1PartForProgressMaskValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest3, setMask1ValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setMask1, nullptr);
     const std::vector<ProgressMaskTestPlan> validValues {
         {
-            Converter::ArkValue<Ark_Number>(255), "255",
-            Converter::ArkValue<Ark_Number>(99.5f), "99.5",
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_TRANSPARENT), Color::TRANSPARENT.ToString(),
-            Converter::ArkValue<Ark_Boolean>(true), "true"
+            Converter::ArkValue<Ark_Number>(0), "0",
+            Converter::ArkValue<Ark_Number>(100), "100",
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_RED), Color::RED.ToString(),
+            Converter::ArkValue<Ark_Boolean>(false), "false"
         },
         {
             Converter::ArkValue<Ark_Number>(20.5f), "20.5",
-            Converter::ArkValue<Ark_Number>(20.5f), "20.5",
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xff123456), Color(0xff123456).ToString(),
+            Converter::ArkValue<Ark_Number>(200.25f), "200.25",
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xff0000ff), Color(0xff0000ff).ToString(),
+            Converter::ArkValue<Ark_Boolean>(true), "true"
+        },
+        {
+            Converter::ArkValue<Ark_Number>(65535), "65535",
+            Converter::ArkValue<Ark_Number>(32267), "32267",
+            Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#123456"), Color::FromString("#123456").ToString(),
             Converter::ArkValue<Ark_Boolean>(false), "false"
         },
     };
@@ -612,9 +617,8 @@ HWTEST_F(CommonMethodModifierTest3, setMask1PartForProgressMaskValidValues, Test
         AutoProgressMaskPeer peer(fullAPI_, &plan.inputValue, &plan.inputTotal, &plan.inputColor);
         ASSERT_NE(peer.ptr, nullptr);
         peer.accessor->enableBreathingAnimation(peer.ptr, plan.inputEnableBreathe);
-        const auto materialized = peer.GetArkValue();
-        const auto maskValue = Converter::ArkUnion<Ark_Type_CommonMethod_mask_value, Ark_ProgressMask>(materialized);
-        modifier_->setMask2(node_, &maskValue);
+        const auto materialized = Converter::ArkValue<Opt_ProgressMask>(peer.GetArkValue());
+        modifier_->setMask1(node_, &materialized);
         const auto json = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(json, ATTRIBUTE_PROGRESS_MASK_VALUE_NAME);
         EXPECT_EQ(resultValue, plan.expectedValue);
@@ -626,7 +630,6 @@ HWTEST_F(CommonMethodModifierTest3, setMask1PartForProgressMaskValidValues, Test
         EXPECT_EQ(resultValue, plan.expectedEnableBreathe);
     }
 }
-#endif
 
 /*
  * @tc.name: setFocusBoxTest

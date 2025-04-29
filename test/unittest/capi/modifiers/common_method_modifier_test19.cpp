@@ -23,6 +23,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
+#include "test/mock/core/render/mock_render_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -30,6 +31,20 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 
 namespace {
+const auto PROP_NAME_MASK = "mask";
+const auto PROP_NAME_SHAPE = "shape";
+const auto EMPTY_JSON = "{}";
+const auto SHAPE_TYPE_RECT = "Rect";
+const auto SHAPE_TYPE_ELLIPSE = "Ellipse";
+const auto SHAPE_TYPE_CIRCLE = "Circle";
+const auto SHAPE_TYPE_PATH = "Path";
+const auto FOCUS_DRAW_LEVEL_TOP = 1;
+const auto FOCUS_DRAW_LEVEL_SELF = 0;
+const auto MIN_RATIO = 0.0f;
+const auto MAX_RATIO = 1.0f;
+const auto EXPECTED_RATIO = 0.7f;
+const auto EXPECTED_PERIOD = 250;
+const auto DEFAULT_PERIOD = 1000;
 static const std::unordered_map<Ark_AccessibilityRoleType, std::string> ACCESSIBILITY_ROLE_MAP {
     { ARK_ACCESSIBILITY_ROLE_TYPE_ACTION_SHEET, "actionsheet" },
     { ARK_ACCESSIBILITY_ROLE_TYPE_ALERT_DIALOG, "alertdialog" },
@@ -200,6 +215,13 @@ public:
     void* CreateNodeImpl() override
     {
         return nodeModifiers_->getBlankModifier()->construct(GetId(), 0);
+    }
+    RefPtr<MockRenderContext> GetMockRenderContext()
+    {
+        if (auto fnode = reinterpret_cast<FrameNode *>(node_); fnode) {
+            return AceType::DynamicCast<MockRenderContext>(fnode->GetRenderContext());
+        }
+        return nullptr;
     }
 };
 
@@ -539,6 +561,694 @@ HWTEST_F(CommonMethodModifierTest19, NextFocusTest, TestSize.Level1)
             expectedValue.second);
         }
     }
+}
+
+/*
+ * @tc.name: SetOnHoverMoveTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, SetOnHoverMoveTest, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setOnHoverMove);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    static const std::string expectedType = "onHover";
+    static const int expectedResId = 123;
+
+    struct CheckEvent {
+        int32_t nodeId;
+        SourceType deviceType;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+
+    auto onHoverMoveFunc = [](Ark_VMContext, const Ark_Int32 resourceId,
+            const Ark_HoverEvent peer) {
+        ASSERT_NE(peer, nullptr);
+        auto hoverEventInfo = peer->GetEventInfo();
+        ASSERT_NE(hoverEventInfo, nullptr);
+        EXPECT_EQ(hoverEventInfo->GetType(), expectedType);
+        checkEvent = {
+            .nodeId = resourceId,
+            .deviceType = hoverEventInfo->GetSourceDevice()
+        };
+    };
+
+    auto callbackValue =
+        Converter::ArkValue<Callback_HoverEvent_Void>(onHoverMoveFunc, expectedResId);
+
+    auto test = [this, &callbackValue, eventHub, frameNode](SourceType type) {
+        checkEvent = std::nullopt;
+        modifier_->setOnHoverMove(node_, &callbackValue);
+        ASSERT_FALSE(checkEvent.has_value());
+        auto inputEventHub = eventHub->GetInputEventHub();
+        ASSERT_NE(inputEventHub, nullptr);
+
+        OffsetF offset;
+        TouchTestResult result;
+        inputEventHub->ProcessPenHoverTestHit(offset, result);
+        for (const auto& resultData : result) {
+            auto hoverResult = AceType::DynamicCast<HoverEventTarget>(resultData);
+            ASSERT_NE(hoverResult, nullptr);
+            TouchEvent touchEvent;
+            touchEvent.sourceType = type;
+            hoverResult->HandlePenHoverMoveEvent(touchEvent);
+        }
+        ASSERT_TRUE(checkEvent.has_value());
+        EXPECT_EQ(checkEvent->nodeId, expectedResId);
+        EXPECT_EQ(checkEvent->deviceType, type);
+    };
+    test(SourceType::MOUSE);
+    test(SourceType::JOYSTICK);
+}
+
+/*
+ * @tc.name: setOnAxisEventTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setOnAxisEventTest, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setOnAxisEvent);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    AxisInfo eventInfo;
+    static const std::string expectedType = "onAxis";
+    static const int expectedResId = 123;
+
+    struct CheckEvent {
+        int32_t nodeId;
+        AxisAction action;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+
+    auto onAxisCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_AxisEvent peer) {
+        ASSERT_TRUE(peer);
+        auto eventInfo =  peer->GetEventInfo();
+        ASSERT_TRUE(eventInfo);
+        EXPECT_EQ(eventInfo->GetType(), expectedType);
+        checkEvent = {
+            .nodeId = resourceId,
+            .action = eventInfo->GetAction()
+        };
+    };
+
+    auto callback =  Converter::ArkValue<Callback_AxisEvent_Void>(onAxisCallback, expectedResId);
+    modifier_->setOnAxisEvent(node_, &callback);
+    ASSERT_FALSE(checkEvent.has_value());
+    auto inputEventHub = eventHub->GetInputEventHub();
+    ASSERT_NE(inputEventHub, nullptr);
+    OffsetF offset;
+    AxisTestResult result;
+    inputEventHub->ProcessAxisTestHit(offset, result);
+
+    for (const auto& resultData : result) {
+        auto axisResult = AceType::DynamicCast<AxisEventTarget>(resultData);
+        ASSERT_NE(axisResult, nullptr);
+        AxisEvent axisEvent;
+        axisEvent.action = AxisAction::UPDATE;
+        axisResult->HandleAxisEvent(axisEvent);
+    }
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->nodeId, expectedResId);
+    EXPECT_EQ(checkEvent->action, AxisAction::UPDATE);
+}
+
+/*
+ * @tc.name: setBackgroundBlurStyle1TestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle1TestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBackgroundBlurStyle1, nullptr);
+
+    const BlurStyleOption expected {
+        .blurStyle = BlurStyle::BACKGROUND_REGULAR,
+        .colorMode = ThemeColorMode::DARK,
+        .scale = 0.123,
+        .adaptiveColor = AdaptiveColor::AVERAGE,
+        .blurOption = {.grayscale = {20, 30}},
+        .policy = BlurStyleActivePolicy::ALWAYS_ACTIVE,
+        .blurType = BlurType::WITHIN_WINDOW,
+        .inactiveColor = Color(0xFF00FFFF),
+    };
+    auto styleValid = ARK_BLUR_STYLE_BACKGROUND_REGULAR;
+    auto inputStyleValid = Converter::ArkValue<Opt_BlurStyle>(styleValid);
+    auto inputOptionValid = Converter::ArkValue<Opt_BackgroundBlurStyleOptions>(
+        Ark_BackgroundBlurStyleOptions {
+            .colorMode  = Converter::ArkValue<Opt_ThemeColorMode>(ARK_THEME_COLOR_MODE_DARK),
+            .adaptiveColor = Converter::ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
+            .scale = Converter::ArkValue<Opt_Number>(0.123f),
+            .blurOptions = Converter::ArkValue<Opt_BlurOptions>(Ark_BlurOptions{
+                .grayscale = {Converter::ArkValue<Ark_Number>(20), Converter::ArkValue<Ark_Number>(30)}
+            }),
+            .policy =
+                Converter::ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE),
+            .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
+        }
+    );
+    modifier_->setBackgroundBlurStyle1(node_, &inputStyleValid, &inputOptionValid);
+
+    auto renderMock = GetMockRenderContext();
+    ASSERT_NE(renderMock, nullptr);
+    ASSERT_TRUE(renderMock->GetBackBlurStyle().has_value());
+    EXPECT_EQ(renderMock->GetBackBlurStyle().value(), expected);
+}
+
+/*
+ * @tc.name: setBackgroundBlurStyleTest1InvalidValues1
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle1TestInvalidValues1, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBackgroundBlurStyle1, nullptr);
+    const BlurStyleOption expected;
+    modifier_->setBackgroundBlurStyle1(node_, nullptr, nullptr);
+    auto renderMock = GetMockRenderContext();
+    ASSERT_NE(renderMock, nullptr);
+    ASSERT_TRUE(renderMock->GetBackBlurStyle().has_value());
+    EXPECT_EQ(renderMock->GetBackBlurStyle().value(), expected);
+}
+
+/*
+ * @tc.name: setBackgroundBlurStyleTest1InvalidValues2
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle1TestInvalidValues2, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBackgroundBlurStyle1, nullptr);
+    const BlurStyleOption expected {
+        .blurStyle = BlurStyle::BACKGROUND_REGULAR,
+    };
+    auto styleValid = ARK_BLUR_STYLE_BACKGROUND_REGULAR;
+    auto inputStyleValid = Converter::ArkValue<Opt_BlurStyle>(styleValid);
+    modifier_->setBackgroundBlurStyle1(node_, &inputStyleValid, nullptr);
+    auto renderMock = GetMockRenderContext();
+    ASSERT_NE(renderMock, nullptr);
+    ASSERT_TRUE(renderMock->GetBackBlurStyle().has_value());
+    EXPECT_EQ(renderMock->GetBackBlurStyle().value(), expected);
+}
+
+/*
+ * @tc.name: setBackgroundBlurStyleTest1InvalidValues3
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle1TestInvalidValues3, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBackgroundBlurStyle1, nullptr);
+    const BlurStyleOption expected {
+        .colorMode = ThemeColorMode::DARK,
+        .scale = 0.123,
+        .adaptiveColor = AdaptiveColor::AVERAGE,
+        .blurOption = {.grayscale = {20, 30}},
+        .policy = BlurStyleActivePolicy::ALWAYS_ACTIVE,
+        .blurType = BlurType::WITHIN_WINDOW,
+        .inactiveColor = Color(0xFF00FFFF),
+    };
+    auto inputOptionValid = Converter::ArkValue<Opt_BackgroundBlurStyleOptions>(
+        Ark_BackgroundBlurStyleOptions {
+            .colorMode  = Converter::ArkValue<Opt_ThemeColorMode>(ARK_THEME_COLOR_MODE_DARK),
+            .adaptiveColor = Converter::ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
+            .scale = Converter::ArkValue<Opt_Number>(0.123f),
+            .blurOptions = Converter::ArkValue<Opt_BlurOptions>(Ark_BlurOptions{
+                .grayscale = {Converter::ArkValue<Ark_Number>(20), Converter::ArkValue<Ark_Number>(30)}
+            }),
+            .policy =
+                Converter::ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE),
+            .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
+        }
+    );
+    modifier_->setBackgroundBlurStyle1(node_, nullptr, &inputOptionValid);
+    auto renderMock = GetMockRenderContext();
+    ASSERT_NE(renderMock, nullptr);
+    ASSERT_TRUE(renderMock->GetBackBlurStyle().has_value());
+    EXPECT_EQ(renderMock->GetBackBlurStyle().value(), expected);
+}
+
+/*
+ * @tc.name: setBackgroundBlurStyleTest1InvalidValues4
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle1TestInvalidValues4, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBackgroundBlurStyle1, nullptr);
+    const BlurStyleOption expected;
+    auto inputStyleInvalid = Converter::ArkValue<Opt_BlurStyle>();
+    auto inputOptionInvalid = Converter::ArkValue<Opt_BackgroundBlurStyleOptions>();
+    modifier_->setBackgroundBlurStyle1(node_, &inputStyleInvalid, &inputOptionInvalid);
+    auto renderMock = GetMockRenderContext();
+    ASSERT_NE(renderMock, nullptr);
+    ASSERT_TRUE(renderMock->GetBackBlurStyle().has_value());
+    EXPECT_EQ(renderMock->GetBackBlurStyle().value(), expected);
+}
+
+/*
+ * @tc.name: setBackgroundBlurStyleTest1InvalidValues5
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle1TestInvalidValues5, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBackgroundBlurStyle1, nullptr);
+    const BlurStyleOption expected {
+        .blurStyle = BlurStyle::BACKGROUND_REGULAR,
+    };
+    auto styleValid = ARK_BLUR_STYLE_BACKGROUND_REGULAR;
+    auto inputStyleValid = Converter::ArkValue<Opt_BlurStyle>(styleValid);
+    auto inputOptionInvalid = Converter::ArkValue<Opt_BackgroundBlurStyleOptions>();
+    modifier_->setBackgroundBlurStyle1(node_, &inputStyleValid, &inputOptionInvalid);
+    auto renderMock = GetMockRenderContext();
+    ASSERT_NE(renderMock, nullptr);
+    ASSERT_TRUE(renderMock->GetBackBlurStyle().has_value());
+    EXPECT_EQ(renderMock->GetBackBlurStyle().value(), expected);
+}
+
+/*
+ * @tc.name: setBackgroundBlurStyleTest1InvalidValues6
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle1TestInvalidValues6, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBackgroundBlurStyle1, nullptr);
+    const BlurStyleOption expected {
+        .colorMode = ThemeColorMode::DARK,
+        .scale = 0.123,
+        .adaptiveColor = AdaptiveColor::AVERAGE,
+        .blurOption = {.grayscale = {20, 30}},
+        .policy = BlurStyleActivePolicy::ALWAYS_ACTIVE,
+        .blurType = BlurType::WITHIN_WINDOW,
+        .inactiveColor = Color(0xFF00FFFF),
+    };
+    auto inputOptionValid = Converter::ArkValue<Opt_BackgroundBlurStyleOptions>(
+        Ark_BackgroundBlurStyleOptions {
+            .colorMode  = Converter::ArkValue<Opt_ThemeColorMode>(ARK_THEME_COLOR_MODE_DARK),
+            .adaptiveColor = Converter::ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
+            .scale = Converter::ArkValue<Opt_Number>(0.123f),
+            .blurOptions = Converter::ArkValue<Opt_BlurOptions>(Ark_BlurOptions{
+                .grayscale = {Converter::ArkValue<Ark_Number>(20), Converter::ArkValue<Ark_Number>(30)}
+            }),
+            .policy =
+                Converter::ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE),
+            .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
+        }
+    );
+    auto inputStyleInvalid = Converter::ArkValue<Opt_BlurStyle>();
+    modifier_->setBackgroundBlurStyle1(node_, &inputStyleInvalid, &inputOptionValid);
+    auto renderMock = GetMockRenderContext();
+    ASSERT_NE(renderMock, nullptr);
+    ASSERT_TRUE(renderMock->GetBackBlurStyle().has_value());
+    EXPECT_EQ(renderMock->GetBackBlurStyle().value(), expected);
+}
+
+/*
+ * @tc.name: setMaskShape1TestValidValues1
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setMaskShape1TestValidValues1, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMaskShape1, nullptr);
+    Ark_RectShape peer = PeerUtils::CreatePeer<RectShapePeer>();
+    ASSERT_NE(peer, nullptr);
+    peer->shape = Referenced::MakeRefPtr<ShapeRect>();
+    auto maskShape = Converter::ArkUnion<Ark_Union_CircleShape_EllipseShape_PathShape_RectShape, Ark_RectShape>(peer);
+    auto optMaskShape = Converter::ArkValue<Opt_Union_CircleShape_EllipseShape_PathShape_RectShape>(maskShape);
+    modifier_->setMaskShape1(node_, &optMaskShape);
+    auto jsonValue = GetJsonValue(node_);
+    auto maskObject = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, PROP_NAME_MASK);
+    auto shapeType = GetAttrValue<std::string>(maskObject, PROP_NAME_SHAPE);
+    EXPECT_EQ(shapeType, SHAPE_TYPE_RECT);
+    PeerUtils::DestroyPeer(peer);
+}
+
+/*
+ * @tc.name: setMaskShape1TestValidValues2
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setMaskShape1TestValidValues2, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMaskShape1, nullptr);
+    Ark_EllipseShape peer = PeerUtils::CreatePeer<EllipseShapePeer>();
+    ASSERT_NE(peer, nullptr);
+    peer->shape = Referenced::MakeRefPtr<Ellipse>();
+    auto maskShape =
+        Converter::ArkUnion<Ark_Union_CircleShape_EllipseShape_PathShape_RectShape, Ark_EllipseShape>(peer);
+    auto optMaskShape = Converter::ArkValue<Opt_Union_CircleShape_EllipseShape_PathShape_RectShape>(maskShape);
+    modifier_->setMaskShape1(node_, &optMaskShape);
+    auto jsonValue = GetJsonValue(node_);
+    auto maskObject = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, PROP_NAME_MASK);
+    auto shapeType = GetAttrValue<std::string>(maskObject, PROP_NAME_SHAPE);
+    EXPECT_EQ(shapeType, SHAPE_TYPE_ELLIPSE);
+    PeerUtils::DestroyPeer(peer);
+}
+
+/*
+ * @tc.name: setMaskShape1TestValidValues3
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setMaskShape1TestValidValues3, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMaskShape1, nullptr);
+    Ark_CircleShape peer = PeerUtils::CreatePeer<CircleShapePeer>();
+    ASSERT_NE(peer, nullptr);
+    peer->shape = Referenced::MakeRefPtr<Circle>();
+    auto maskShape =
+        Converter::ArkUnion<Ark_Union_CircleShape_EllipseShape_PathShape_RectShape, Ark_CircleShape>(peer);
+    auto optMaskShape = Converter::ArkValue<Opt_Union_CircleShape_EllipseShape_PathShape_RectShape>(maskShape);
+    modifier_->setMaskShape1(node_, &optMaskShape);
+    auto jsonValue = GetJsonValue(node_);
+    auto maskObject = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, PROP_NAME_MASK);
+    auto shapeType = GetAttrValue<std::string>(maskObject, PROP_NAME_SHAPE);
+    EXPECT_EQ(shapeType, SHAPE_TYPE_CIRCLE);
+    PeerUtils::DestroyPeer(peer);
+}
+
+/*
+ * @tc.name: setMaskShape1TestValidValues4
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setMaskShape1TestValidValues4, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMaskShape1, nullptr);
+    Ark_PathShape peer = PeerUtils::CreatePeer<PathShapePeer>();
+    ASSERT_NE(peer, nullptr);
+    peer->shape = Referenced::MakeRefPtr<Path>();
+    auto maskShape =
+        Converter::ArkUnion<Ark_Union_CircleShape_EllipseShape_PathShape_RectShape, Ark_PathShape>(peer);
+    auto optMaskShape = Converter::ArkValue<Opt_Union_CircleShape_EllipseShape_PathShape_RectShape>(maskShape);
+    modifier_->setMaskShape1(node_, &optMaskShape);
+    auto jsonValue = GetJsonValue(node_);
+    auto maskObject = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, PROP_NAME_MASK);
+    auto shapeType = GetAttrValue<std::string>(maskObject, PROP_NAME_SHAPE);
+    EXPECT_EQ(shapeType, SHAPE_TYPE_PATH);
+    PeerUtils::DestroyPeer(peer);
+}
+
+/*
+ * @tc.name: setMaskShape1TestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setMaskShape1TestInvalidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMaskShape1, nullptr);
+    auto optMaskShape = Converter::ArkValue<Opt_Union_CircleShape_EllipseShape_PathShape_RectShape>();
+    modifier_->setMaskShape1(node_, &optMaskShape);
+    auto jsonValue = GetJsonValue(node_);
+    auto maskObject = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, PROP_NAME_MASK);
+    EXPECT_EQ(maskObject->ToString(), EMPTY_JSON);
+
+    modifier_->setMaskShape1(node_, nullptr);
+    jsonValue = GetJsonValue(node_);
+    maskObject = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, PROP_NAME_MASK);
+    EXPECT_EQ(maskObject->ToString(), EMPTY_JSON);
+
+    Ark_PathShape peer = PeerUtils::CreatePeer<PathShapePeer>();
+    ASSERT_NE(peer, nullptr);
+    peer->shape = Referenced::MakeRefPtr<Path>();
+    auto maskShape = Converter::ArkUnion<Ark_Union_CircleShape_EllipseShape_PathShape_RectShape, Ark_PathShape>(peer);
+    optMaskShape = Converter::ArkValue<Opt_Union_CircleShape_EllipseShape_PathShape_RectShape>(maskShape);
+    modifier_->setMaskShape1(nullptr, &optMaskShape);
+    jsonValue = GetJsonValue(node_);
+    maskObject = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, PROP_NAME_MASK);
+    EXPECT_EQ(maskObject->ToString(), EMPTY_JSON);
+
+    modifier_->setMaskShape1(nullptr, nullptr);
+    jsonValue = GetJsonValue(node_);
+    maskObject = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, PROP_NAME_MASK);
+    EXPECT_EQ(maskObject->ToString(), EMPTY_JSON);
+}
+
+/*
+ * @tc.name: setMaskShapeTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setMaskShapeTestDefaultValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMaskShape1, nullptr);
+    auto jsonValue = GetJsonValue(node_);
+    auto maskObject = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, PROP_NAME_MASK);
+    EXPECT_EQ(maskObject->ToString(), EMPTY_JSON);
+}
+
+/*
+ * @tc.name: setMaskShape0TestValidValues1
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setMaskShape0TestValidValues1, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMaskShape1, nullptr);
+    Ark_RectShape peer = PeerUtils::CreatePeer<RectShapePeer>();
+    ASSERT_NE(peer, nullptr);
+    peer->shape = Referenced::MakeRefPtr<ShapeRect>();
+    auto maskShape = Converter::ArkUnion<Ark_Union_CircleShape_EllipseShape_PathShape_RectShape, Ark_RectShape>(peer);
+    modifier_->setMaskShape0(node_, &maskShape);
+    auto jsonValue = GetJsonValue(node_);
+    auto maskObject = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, PROP_NAME_MASK);
+    auto shapeType = GetAttrValue<std::string>(maskObject, PROP_NAME_SHAPE);
+    EXPECT_EQ(shapeType, SHAPE_TYPE_RECT);
+    PeerUtils::DestroyPeer(peer);
+}
+
+/*
+ * @tc.name: setMaskShape0TestValidValues2
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setMaskShape0TestValidValues2, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMaskShape1, nullptr);
+    Ark_EllipseShape peer = PeerUtils::CreatePeer<EllipseShapePeer>();
+    ASSERT_NE(peer, nullptr);
+    peer->shape = Referenced::MakeRefPtr<Ellipse>();
+    auto maskShape =
+        Converter::ArkUnion<Ark_Union_CircleShape_EllipseShape_PathShape_RectShape, Ark_EllipseShape>(peer);
+    modifier_->setMaskShape0(node_, &maskShape);
+    auto jsonValue = GetJsonValue(node_);
+    auto maskObject = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, PROP_NAME_MASK);
+    auto shapeType = GetAttrValue<std::string>(maskObject, PROP_NAME_SHAPE);
+    EXPECT_EQ(shapeType, SHAPE_TYPE_ELLIPSE);
+    PeerUtils::DestroyPeer(peer);
+}
+
+/*
+ * @tc.name: setMaskShape0TestValidValues3
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setMaskShape0TestValidValues3, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMaskShape1, nullptr);
+    Ark_CircleShape peer = PeerUtils::CreatePeer<CircleShapePeer>();
+    ASSERT_NE(peer, nullptr);
+    peer->shape = Referenced::MakeRefPtr<Circle>();
+    auto maskShape =
+        Converter::ArkUnion<Ark_Union_CircleShape_EllipseShape_PathShape_RectShape, Ark_CircleShape>(peer);
+    modifier_->setMaskShape0(node_, &maskShape);
+    auto jsonValue = GetJsonValue(node_);
+    auto maskObject = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, PROP_NAME_MASK);
+    auto shapeType = GetAttrValue<std::string>(maskObject, PROP_NAME_SHAPE);
+    EXPECT_EQ(shapeType, SHAPE_TYPE_CIRCLE);
+    PeerUtils::DestroyPeer(peer);
+}
+
+/*
+ * @tc.name: setMaskShape0TestValidValues4
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setMaskShape0TestValidValues4, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMaskShape1, nullptr);
+    Ark_PathShape peer = PeerUtils::CreatePeer<PathShapePeer>();
+    ASSERT_NE(peer, nullptr);
+    peer->shape = Referenced::MakeRefPtr<Path>();
+    auto maskShape =
+        Converter::ArkUnion<Ark_Union_CircleShape_EllipseShape_PathShape_RectShape, Ark_PathShape>(peer);
+    modifier_->setMaskShape0(node_, &maskShape);
+    auto jsonValue = GetJsonValue(node_);
+    auto maskObject = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, PROP_NAME_MASK);
+    auto shapeType = GetAttrValue<std::string>(maskObject, PROP_NAME_SHAPE);
+    EXPECT_EQ(shapeType, SHAPE_TYPE_PATH);
+    PeerUtils::DestroyPeer(peer);
+}
+
+/*
+ * @tc.name: setMaskShape0TestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setMaskShape0TestInvalidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMaskShape1, nullptr);
+
+    modifier_->setMaskShape0(node_, nullptr);
+    auto jsonValue = GetJsonValue(node_);
+    auto maskObject = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, PROP_NAME_MASK);
+    EXPECT_EQ(maskObject->ToString(), EMPTY_JSON);
+
+    Ark_PathShape peer = PeerUtils::CreatePeer<PathShapePeer>();
+    ASSERT_NE(peer, nullptr);
+    peer->shape = Referenced::MakeRefPtr<Path>();
+    auto maskShape = Converter::ArkUnion<Ark_Union_CircleShape_EllipseShape_PathShape_RectShape, Ark_PathShape>(peer);
+    modifier_->setMaskShape0(nullptr, &maskShape);
+    jsonValue = GetJsonValue(node_);
+    maskObject = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, PROP_NAME_MASK);
+    EXPECT_EQ(maskObject->ToString(), EMPTY_JSON);
+    PeerUtils::DestroyPeer(peer);
+
+    modifier_->setMaskShape0(nullptr, nullptr);
+    jsonValue = GetJsonValue(node_);
+    maskObject = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, PROP_NAME_MASK);
+    EXPECT_EQ(maskObject->ToString(), EMPTY_JSON);
+}
+
+/*
+ * @tc.name: setAccessibilityScrollTriggerableTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setAccessibilityScrollTriggerableTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setAccessibilityScrollTriggerable, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_TRUE(accessibilityProperty->HasUserScrollTriggerable());
+    EXPECT_TRUE(accessibilityProperty->IsUserScrollTriggerable());
+    modifier_->setAccessibilityScrollTriggerable(node_, Converter::ArkValue<Ark_Boolean>(false));
+    EXPECT_FALSE(accessibilityProperty->IsUserScrollTriggerable());
+    modifier_->setAccessibilityScrollTriggerable(node_, Converter::ArkValue<Ark_Boolean>(true));
+    EXPECT_TRUE(accessibilityProperty->IsUserScrollTriggerable());
+}
+
+/*
+ * @tc.name: setAccessibilityFocusDrawLevelTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setAccessibilityFocusDrawLevelTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setAccessibilityFocusDrawLevel, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetFocusDrawLevel(), FOCUS_DRAW_LEVEL_SELF);
+    modifier_->setAccessibilityFocusDrawLevel(node_, ARK_FOCUS_DRAW_LEVEL_TOP);
+    EXPECT_EQ(accessibilityProperty->GetFocusDrawLevel(), FOCUS_DRAW_LEVEL_TOP);
+    modifier_->setAccessibilityFocusDrawLevel(node_, ARK_FOCUS_DRAW_LEVEL_SELF);
+    EXPECT_EQ(accessibilityProperty->GetFocusDrawLevel(), FOCUS_DRAW_LEVEL_SELF);
+}
+
+/*
+ * @tc.name: setOnVisibleAreaApproximateChangeTest1
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setOnVisibleAreaApproximateChangeTest1, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnVisibleAreaApproximateChange, nullptr);
+    struct CheckEvent {
+        int32_t nodeId;
+        bool isExpanding;
+        float currentRatio;
+    };
+    static std::vector<CheckEvent> checkEvent;
+    void (*checkCallback)(const Ark_Int32, const Ark_Boolean, const Ark_Number) =
+        [](const Ark_Int32 resourceId, const Ark_Boolean isExpanding, const Ark_Number currentRatio) {
+            checkEvent.push_back({
+                .nodeId = resourceId,
+                .isExpanding = Converter::Convert<bool>(isExpanding),
+                .currentRatio = Converter::Convert<float>(currentRatio)
+            });
+        };
+    const int32_t contextId = 123;
+    auto arkfunc = Converter::ArkValue<VisibleAreaChangeCallback>(checkCallback, contextId);
+    auto func = Converter::ArkValue<Opt_VisibleAreaChangeCallback>(arkfunc);
+
+    std::vector<float> ratioVec;
+    ratioVec.push_back(0.5f);
+    ratioVec.push_back(-0.5f);
+    ratioVec.push_back(1.5f);
+    Converter::ArkArrayHolder<Array_Number> vecHolder(ratioVec);
+    Ark_VisibleAreaEventOptions option;
+    option.ratios = vecHolder.ArkValue();
+    option.expectedUpdateInterval = Converter::ArkValue<Opt_Number>(EXPECTED_PERIOD);
+
+    EXPECT_EQ(checkEvent.size(), 0);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto cbInfoIni = eventHub->GetThrottledVisibleAreaCallback();
+    EXPECT_EQ(cbInfoIni.callback, nullptr);
+    modifier_->setOnVisibleAreaApproximateChange(node_, &option, &func);
+    auto cbInfo = eventHub->GetThrottledVisibleAreaCallback();
+    EXPECT_EQ(static_cast<int32_t>(cbInfo.period), EXPECTED_PERIOD);
+    ASSERT_NE(cbInfo.callback, nullptr);
+    cbInfo.callback(false, EXPECTED_RATIO);
+    EXPECT_EQ(checkEvent.size(), 1);
+    EXPECT_EQ(checkEvent[0].nodeId, contextId);
+    EXPECT_EQ(checkEvent[0].isExpanding, false);
+    EXPECT_EQ(checkEvent[0].currentRatio, EXPECTED_RATIO);
+    auto ratios = eventHub->GetThrottledVisibleAreaRatios();
+    EXPECT_EQ(ratios.size(), ratioVec.size());
+    EXPECT_EQ(ratios[0], ratioVec[0]);
+    EXPECT_EQ(ratios[1], MIN_RATIO);
+    EXPECT_EQ(ratios[2], MAX_RATIO);
+}
+
+/*
+ * @tc.name: setOnVisibleAreaApproximateChangeTest2
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setOnVisibleAreaApproximateChangeTest2, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnVisibleAreaApproximateChange, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto func = Converter::ArkValue<Opt_VisibleAreaChangeCallback>();
+    std::vector<float> ratioVec;
+    ratioVec.push_back(0.5f);
+    Converter::ArkArrayHolder<Array_Number> vecHolder(ratioVec);
+    Ark_VisibleAreaEventOptions option;
+    option.ratios = vecHolder.ArkValue();
+    option.expectedUpdateInterval = Converter::ArkValue<Opt_Number>();
+    auto cbInfoIni = eventHub->GetThrottledVisibleAreaCallback();
+    EXPECT_EQ(cbInfoIni.callback, nullptr);
+    EXPECT_EQ(static_cast<int32_t>(cbInfoIni.period), 0);
+    modifier_->setOnVisibleAreaApproximateChange(node_, &option, &func);
+    auto cbInfo = eventHub->GetThrottledVisibleAreaCallback();
+    EXPECT_EQ(cbInfo.callback, nullptr);
+    EXPECT_EQ(static_cast<int32_t>(cbInfo.period), 0);
+
+    void (*emptyCallback)(const Ark_Int32, const Ark_Boolean, const Ark_Number) =
+    [](const Ark_Int32 resourceId, const Ark_Boolean isExpanding, const Ark_Number currentRatio) {
+    };
+    const int32_t contextId = 123;
+    auto arkEmptyfunc = Converter::ArkValue<VisibleAreaChangeCallback>(emptyCallback, contextId);
+    auto emptyFunc = Converter::ArkValue<Opt_VisibleAreaChangeCallback>(arkEmptyfunc);
+    modifier_->setOnVisibleAreaApproximateChange(node_, &option, &emptyFunc);
+    auto cbInfo2 = eventHub->GetThrottledVisibleAreaCallback();
+    EXPECT_NE(cbInfo2.callback, nullptr);
+    EXPECT_EQ(static_cast<int32_t>(cbInfo2.period), DEFAULT_PERIOD);
 }
 
 } // namespace OHOS::Ace::NG
