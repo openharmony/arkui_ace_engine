@@ -4909,14 +4909,16 @@ void UIContentImpl::SetForceSplitEnable(bool isForceSplit, const std::string& ho
     auto forceSplitTask = [weakContext = WeakPtr(context), isForceSplit, homePage]() {
         auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
-        context->SetForceSplitEnable(isForceSplit, homePage);
+        auto stageManager = context->GetStageManager();
+        CHECK_NULL_VOID(stageManager);
+        stageManager->SetForceSplitEnable(isForceSplit, homePage);
     };
     if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         forceSplitTask();
         return;
     }
     taskExecutor->PostTask(std::move(forceSplitTask), TaskExecutor::TaskType::UI,
-        "ArkUISetForceSplitEnable", PriorityType::VIP);
+        "ArkUISetForceSplitEnable");
 }
 
 void UIContentImpl::ProcessDestructCallbacks()

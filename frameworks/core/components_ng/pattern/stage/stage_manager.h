@@ -75,6 +75,23 @@ public:
         stageInTrasition_ = stageInTrasition;
     }
 
+    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage);
+
+    bool GetForceSplitEnable() const
+    {
+        return isForceSplit_;
+    }
+
+    std::string GetHomePageConfig() const
+    {
+        return homePageConfig_;
+    }
+
+    bool GetDetectPrimaryPageEnable() const
+    {
+        return isDetectPrimaryPage_;
+    }
+
     void OnForceSplitConfigUpdate()
     {
         CHECK_NULL_VOID(stagePattern_);
@@ -157,6 +174,11 @@ protected:
     std::function<std::string(const std::string& url)> getPagePathCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(StageManager);
+
+private:
+    bool isForceSplit_ = false;
+    std::string homePageConfig_;
+    bool isDetectPrimaryPage_ = false;
 };
 } // namespace OHOS::Ace::NG
 

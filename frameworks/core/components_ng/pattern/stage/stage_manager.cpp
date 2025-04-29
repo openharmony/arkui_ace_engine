@@ -755,4 +755,18 @@ std::string StageManager::GetPagePath(const RefPtr<FrameNode>& pageNode)
     return info->GetPagePath();
 }
 
+void StageManager::SetForceSplitEnable(bool isForceSplit, const std::string& homePage)
+{
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "SetForceSplitEnable, isForceSplit: %{public}u, homePage: %{public}s",
+        isForceSplit, homePage.c_str());
+    //app support split mode, whether force split is enable or disable, the homepage will be recognized
+    isDetectPrimaryPage_ = true;
+    if (isForceSplit_ == isForceSplit && homePageConfig_ == homePage) {
+        return;
+    }
+    isForceSplit_ = isForceSplit;
+    homePageConfig_ = homePage;
+    OnForceSplitConfigUpdate();
+}
+
 } // namespace OHOS::Ace::NG

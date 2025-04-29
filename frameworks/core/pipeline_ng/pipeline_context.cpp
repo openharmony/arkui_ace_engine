@@ -5998,19 +5998,4 @@ void PipelineContext::OnRotationAnimationEnd()
         }
     }
 }
-
-void PipelineContext::SetForceSplitEnable(bool isForceSplit, const std::string& homePage)
-{
-    TAG_LOGI(AceLogTag::ACE_ROUTER, "SetForceSplitEnable, isForceSplit: %{public}u, homePage: %{public}s",
-        isForceSplit, homePage.c_str());
-    //app support split mode, whether force split is enable or disable, the homepage will be recognized
-    isDetectPrimaryPage_ = true;
-    if (isForceSplit_ == isForceSplit && homePageConfig_ == homePage) {
-        return;
-    }
-    isForceSplit_ = isForceSplit;
-    homePageConfig_ = homePage;
-    CHECK_NULL_VOID(stageManager_);
-    stageManager_->OnForceSplitConfigUpdate();
-}
 } // namespace OHOS::Ace::NG

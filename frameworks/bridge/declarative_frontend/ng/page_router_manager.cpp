@@ -1211,7 +1211,9 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
     }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE && !context->GetForceSplitEnable()) {
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE && !stageManager->GetForceSplitEnable()) {
         TAG_LOGW(AceLogTag::ACE_ROUTER, "StartPush exceeds maxStackSize.");
         if (target.errorCallback != nullptr) {
             target.errorCallback("The pages are pushed too much.", ERROR_CODE_PAGE_STACK_FULL);
