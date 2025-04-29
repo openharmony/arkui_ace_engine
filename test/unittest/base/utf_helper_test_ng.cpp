@@ -705,7 +705,7 @@ HWTEST_F(UtfHelperTestNg, IsIndexInPairedSurrogates005, TestSize.Level1)
 
     EXPECT_TRUE(IsIndexInPairedSurrogates(1, str));
     EXPECT_TRUE(IsIndexInPairedSurrogates(3, str));
-    EXPECT_FALSE(IsIndexInPairedSurrogates(2, str)); 
+    EXPECT_FALSE(IsIndexInPairedSurrogates(2, str));
 }
 
 /**
