@@ -768,8 +768,8 @@ void ArcSwiperPattern::HandlePropertyTranslateCallback(float translate, int32_t 
         Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
     info.targetOffset = GetCustomPropertyTargetOffset() - Dimension(translate, DimensionUnit::PX).ConvertToVp();
     if (IsHorizontalAndRightToLeft()) {
-        info.currentOffset = GetCustomPropertyOffset() +
-            Dimension(-currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
+        info.currentOffset =
+            GetCustomPropertyOffset() + Dimension(-currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
     }
 
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -1422,6 +1422,15 @@ int32_t ArcSwiperPattern::CalcTime(int32_t time)
     return time * duration / baseTime;
 }
 
+bool ArcSwiperPattern::GetDisableFlushFocus()
+{
+    bool ret = isDisableFlushFocus_;
+    if (isDisableFlushFocus_) {
+        isDisableFlushFocus_ = false;
+    }
+    return ret;
+}
+
 #ifdef SUPPORT_DIGITAL_CROWN
 void ArcSwiperPattern::SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
 {
@@ -1473,7 +1482,7 @@ void ArcSwiperPattern::HandleCrownEvent(const CrownEvent& event, const OffsetF& 
     double mainDelta = GetCrownRotatePx(event);
     switch (event.action) {
         case CrownAction::BEGIN:
-            HandleCrownActionBegin(event.degree, mainDelta, info);
+            HandleCrownActionBegin(event.degree, mainDelta, info, offset);
             break;
         case CrownAction::UPDATE:
             HandleCrownActionUpdate(event.degree, mainDelta, info, offset);
@@ -1488,10 +1497,25 @@ void ArcSwiperPattern::HandleCrownEvent(const CrownEvent& event, const OffsetF& 
 }
 
 void ArcSwiperPattern::HandleCrownActionBegin(double degree, double mainDelta,
-    GestureEvent& info)
+    GestureEvent& info, const OffsetF& offset)
 {
     if (IsPropertyAnimationRunning() || IsTranslateAnimationRunning()) {
-        return;
+        UpdateCrownVelocity(degree, mainDelta);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipelineContext = host->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        CHECK_NULL_VOID(theme);
+        if (std::abs(degree) < theme->GetSpringVelocityThreshold()) {
+            auto length = (direction_ == Axis::HORIZONTAL ? info.GetGlobalLocation().GetX() - offset.GetX():
+                        info.GetGlobalLocation().GetY() - offset.GetY()) * 2;
+            double offsetLen = direction_ == Axis::VERTICAL ? accumulativeCrownPx_.GetY() : accumulativeCrownPx_.GetX();
+            if (std::abs(offsetLen) < length * theme->GetCrownTranslocationRatio()) {
+                return;
+            }
+        }
+        isDisableFlushFocus_ = true;
     }
     accumulativeCrownPx_.Reset();
     UpdateCrownVelocity(degree, mainDelta);
@@ -1515,10 +1539,18 @@ void ArcSwiperPattern::HandleCrownActionUpdate(double degree, double mainDelta,
     if (isCrownSpring_) {
         return;
     }
-    if (!isDragging_) {
-        HandleCrownActionBegin(degree, mainDelta, info);
+    if (isChanged_ && oldCurrentIndex_ == currentIndex_ &&
+        !(degree > 0 && currentIndex_ == 0) &&
+        !(degree < 0 && currentIndex_ == TotalCount() - 1)) {
         return;
     }
+    isChanged_ = false;
+    if (!isDragging_) {
+        HandleCrownActionBegin(degree, mainDelta, info, offset);
+        return;
+    }
+
+    oldCurrentIndex_ = currentIndex_;
     UpdateCrownVelocity(degree, mainDelta);
     info.SetMainDelta(mainDelta);
     info.SetMainVelocity(crownVelocity_);
@@ -1536,18 +1568,23 @@ void ArcSwiperPattern::HandleCrownActionUpdate(double degree, double mainDelta,
             HandleDragEnd(crownTurnVelocity_);
             StartVibrator(degree > 0);
             HandleTouchUp();
+            isChanged_ = true;
+            accumulativeCrownPx_.Reset();
         }
     } else {
         isCrownSpring_ = true;
         HandleDragEnd(crownVelocity_);
         StartVibrator(degree > 0);
         HandleTouchUp();
+        isChanged_ = true;
+        accumulativeCrownPx_.Reset();
     }
 }
 
 void ArcSwiperPattern::HandleCrownActionEnd(
     double degree, double mainDelta, GestureEvent& info, const OffsetF& offset)
 {
+    isChanged_ = false;
     if (!isDragging_ || isHandleCrownActionEnd_) {
         return;
     }
@@ -1577,6 +1614,7 @@ void ArcSwiperPattern::HandleCrownActionEnd(
         StartVibrator(degree > 0);
         HandleTouchUp();
     }
+    accumulativeCrownPx_.Reset();
 }
 
 void ArcSwiperPattern::StartVibrator(bool isLeft)
@@ -1589,6 +1627,7 @@ void ArcSwiperPattern::StartVibrator(bool isLeft)
 
 void ArcSwiperPattern::HandleCrownActionCancel()
 {
+    isChanged_ = false;
     isCrownSpring_ = false;
     isHandleCrownActionEnd_ = false;
     if (!isDragging_) {
@@ -1598,6 +1637,7 @@ void ArcSwiperPattern::HandleCrownActionCancel()
     HandleDragEnd(0.0);
     HandleTouchUp();
     isDragging_ = false;
+    accumulativeCrownPx_.Reset();
 }
 
 double ArcSwiperPattern::GetCrownRotatePx(const CrownEvent& event) const
