@@ -89,13 +89,13 @@ void SetTextInputOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    std::optional<std::string> placeholder;
-    std::optional<std::string> text;
+    std::optional<std::u16string> placeholder;
+    std::optional<std::u16string> text;
     TextInputControllerPeer* peerPtr = nullptr;
     auto textInputOptions = Converter::OptConvert<Ark_TextInputOptions>(*value);
     if (textInputOptions) {
-        placeholder = Converter::OptConvert<std::string>(textInputOptions.value().placeholder);
-        text = Converter::OptConvert<std::string>(textInputOptions.value().text);
+        placeholder = Converter::OptConvert<std::u16string>(textInputOptions.value().placeholder);
+        text = Converter::OptConvert<std::u16string>(textInputOptions.value().text);
         auto controller = Converter::OptConvert<Ark_TextInputController>(textInputOptions.value().controller);
         if (controller.has_value()) {
             peerPtr = controller.value();
