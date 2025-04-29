@@ -296,6 +296,22 @@ OffsetF SheetWrapperLayoutAlgorithm::GetPopupStyleSheetOffset(LayoutWrapper* lay
         targetSize = targetNode->GetPaintRectWithTransform().GetSize();
     }
     auto targetOffset = targetNode->GetPaintRectOffset();
+    if (sheetWrapperPattern->GetSubWindowId() != INVALID_SUBWINDOW_ID) {
+        if (sheetWrapperPattern->ShowInUEC()) {
+            auto UECId = SubwindowManager::GetInstance()->GetParentContainerId(sheetWrapperPattern->GetSubWindowId());
+            auto container = AceEngine::Get().GetContainer(UECId);
+            CHECK_NULL_RETURN(container, OffsetF());
+            auto mainWindowContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_RETURN(mainWindowContext, OffsetF());
+            auto UECWindowGlobalRect = mainWindowContext->GetDisplayWindowRectInfo();
+            targetOffset = OffsetF(targetNode->GetPaintRectOffset().GetX() + UECWindowGlobalRect.Left(),
+                targetNode->GetPaintRectOffset().GetY() + UECWindowGlobalRect.Top());
+        } else {
+            auto mainWindowRect = sheetWrapperPattern->GetMainWindowRect();
+            targetOffset = OffsetF(targetNode->GetPaintRectOffset().GetX() + mainWindowRect.Left(),
+                targetNode->GetPaintRectOffset().GetY() + mainWindowRect.Top());
+        }
+    }
     return GetOffsetInAvoidanceRule(layoutWrapper, targetSize, targetOffset);
 }
 
@@ -1043,7 +1059,13 @@ void SheetWrapperLayoutAlgorithm::LayoutMaskNode(LayoutWrapper* layoutWrapper)
     auto maskWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(maskWrapper);
     auto rect = sheetWrapperPattern->GetMainWindowRect();
-    auto contentOffset = OffsetF(rect.GetX(), rect.GetY());
+    auto subContainer = AceEngine::Get().GetContainer(sheetWrapperPattern->GetSubWindowId());
+    CHECK_NULL_VOID(subContainer);
+    auto subWindowContext = AceType::DynamicCast<NG::PipelineContext>(subContainer->GetPipelineContext());
+    CHECK_NULL_VOID(subWindowContext);
+    auto subWindowGlobalRect = subWindowContext->GetDisplayWindowRectInfo();
+    auto contentOffset = OffsetF(rect.GetX() - subWindowGlobalRect.Left(),
+        rect.GetY() - subWindowGlobalRect.Top());
     auto geometryNode = maskWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetMarginFrameOffset(contentOffset);
