@@ -399,9 +399,8 @@ panda::Local<panda::JSValueRef> JsiClass<C>::InternalMemberFunctionCallback(pand
     STATIC_API_DURATION();
     ACE_BUILD_TRACE_BEGIN("[%s][%s]", ThisJSClass::JSName(), binding->Name());
     auto fnPtr = binding->Get();
-    panda::Local<panda::JSValueRef> retVal = (instance->*fnPtr)(runtimeCallInfo);
+    (instance->*fnPtr)(runtimeCallInfo);
     ACE_BUILD_TRACE_END()
-    return retVal;
 }
 
 template<typename C>
