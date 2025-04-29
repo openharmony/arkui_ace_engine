@@ -33,12 +33,16 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/ace_form_ability.cpp",
       "$ace_root/adapter/ohos/entrance/ace_new_pipe_judgement.cpp",
       "$ace_root/adapter/ohos/entrance/ace_service_ability.cpp",
+      "$ace_root/adapter/ohos/entrance/ace_translate_manager.cpp",
       "$ace_root/adapter/ohos/entrance/ace_view_ohos.cpp",
+      "$ace_root/adapter/ohos/entrance/aps_monitor_impl.cpp",
       "$ace_root/adapter/ohos/entrance/capability_registry.cpp",
       "$ace_root/adapter/ohos/entrance/data_ability_helper_standard.cpp",
       "$ace_root/adapter/ohos/entrance/dialog_container.cpp",
+      "$ace_root/adapter/ohos/entrance/event_pass_through_subscriber.cpp",
       "$ace_root/adapter/ohos/entrance/file_asset_provider_impl.cpp",
       "$ace_root/adapter/ohos/entrance/form_utils_impl.cpp",
+      "$ace_root/adapter/ohos/entrance/global_pipeline_context_manager.cpp",
       "$ace_root/adapter/ohos/entrance/hap_asset_provider_impl.cpp",
       "$ace_root/adapter/ohos/entrance/mmi_event_convertor.cpp",
       "$ace_root/adapter/ohos/entrance/navigation_controller_helper.cpp",
@@ -47,6 +51,7 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/subwindow/subwindow_ohos.cpp",
       "$ace_root/adapter/ohos/entrance/touch_event_convertor.cpp",
       "$ace_root/adapter/ohos/entrance/window/foldable_window_ohos.cpp",
+      "$ace_root/adapter/ohos/entrance/window_free_container.cpp",
 
       # innerkits impl
       "$ace_root/adapter/ohos/entrance/ui_content_impl.cpp",
@@ -70,13 +75,13 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/cj_utils/cj_utils.cpp",
 
       # AudioHaptic
-      "$ace_root/adapter/ohos/entrance/timepicker/timepicker_haptic_factory.cpp",
+      "$ace_root/adapter/ohos/entrance/picker/picker_haptic_factory.cpp",
     ]
 
     if (enable_audio_framework && enable_player_framework) {
       sources += [
-        "$ace_root/adapter/ohos/entrance/timepicker/timepicker_haptic_controller.cpp",
-        "$ace_root/adapter/ohos/entrance/timepicker/timepicker_haptic_impl.cpp",
+        "$ace_root/adapter/ohos/entrance/picker/picker_haptic_controller.cpp",
+        "$ace_root/adapter/ohos/entrance/picker/picker_haptic_impl.cpp",
       ]
     }
 
@@ -89,7 +94,10 @@ template("ace_ohos_standard_source_set") {
 
     configs = [ "$ace_root:ace_config" ]
 
-    include_dirs = [ "$ace_root/interfaces/inner_api/ui_session" ]
+    include_dirs = [
+      "$ace_root/interfaces/inner_api/ui_session",
+      "$ace_root",
+    ]
 
     deps = [
       "$ace_root/adapter/ohos/capability:ace_capability_ohos",
@@ -107,6 +115,7 @@ template("ace_ohos_standard_source_set") {
       "ability_runtime:ability_context_native",
       "ability_runtime:ability_manager",
       "ability_runtime:abilitykit_native",
+      "ability_runtime:app_context",
       "ability_runtime:auto_fill_manager",
       "ability_runtime:data_ability_helper",
       "ability_runtime:napi_common",
@@ -128,6 +137,8 @@ template("ace_ohos_standard_source_set") {
       "relational_store:native_dataability",
       "relational_store:native_rdb",
       "resource_management:global_resmgr",
+      "safwk:system_ability_fwk",
+      "samgr:samgr_proxy",
       "window_manager:libdm",
       "window_manager:libwm",
       "window_manager:libwsutils",
@@ -138,6 +149,12 @@ template("ace_ohos_standard_source_set") {
     defines += [ "INDEXER_SUPPORT_VIBRATOR" ]
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       external_deps += [ "graphic_2d:librender_service_base" ]
+    }
+
+    if (defined(global_parts_info) &&
+        defined(global_parts_info.resourceschedule_resource_schedule_service)) {
+      external_deps += [ "resource_schedule_service:ressched_client" ]
+      defines += [ "RESOURCE_SCHEDULE_SERVICE_ENABLE" ]
     }
 
     if (form_fwk_enable) {
@@ -160,9 +177,16 @@ template("ace_ohos_standard_source_set") {
       external_deps += [ "player_framework:audio_haptic" ]
     }
 
-    if (enable_graphic_text_gine) {
-      external_deps += [ "graphic_2d:rosen_text" ]
+    if (os_account_exists) {
+      external_deps += [ "os_account:os_account_innerkits" ]
     }
+
+    if (defined(config.accessibility_support) && config.accessibility_support) {
+      external_deps += [ "accessibility:accessibilityconfig" ]
+    }
+
+    deps +=
+        [ "$ace_root/interfaces/inner_api/ui_service_manager:ui_service_mgr" ]
   }
 }
 

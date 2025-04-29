@@ -23,12 +23,16 @@
 #include "base/geometry/ng/rect_t.h"
 
 namespace OHOS::Ace::NG {
-struct RichEditorDragInfo {
+struct TextDragInfo {
     std::optional<Color> handleColor;
     std::optional<Color> selectedBackgroundColor;
     RectF firstHandle;
     RectF secondHandle;
-    float selectedWidth = 0.0f;
+    float maxSelectedWidth = 0.0f;
+    bool isFirstHandleAnimation = true;
+    bool isSecondHandleAnimation = true;
+    std::optional<Color> dragBackgroundColor;
+    bool isDragShadowNeeded = true;
 };
 } // namespace OHOS::Ace::NG
 

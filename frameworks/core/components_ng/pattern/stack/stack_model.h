@@ -41,11 +41,6 @@ public:
     virtual void SetAlignment(Alignment align) = 0;
     virtual void SetHasHeight() = 0;
     virtual void SetHasWidth() = 0;
-
-private:
-    static std::unique_ptr<StackModel> instance_;
-    static std::mutex mutex_;
 };
-
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STACK_STACK_MODEL_H

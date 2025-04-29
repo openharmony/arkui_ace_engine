@@ -15,42 +15,20 @@
 
 #include "frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h"
 
-#include <atomic>
-#include <regex>
-#include <string>
-
-#include "base/i18n/localization.h"
-#include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "base/resource/ace_res_config.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/utils/measure_util.h"
-#include "base/utils/utils.h"
-#include "bridge/common/manifest/manifest_parser.h"
 #include "bridge/common/utils/engine_helper.h"
-#include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
-#include "bridge/declarative_frontend/ng/page_router_manager.h"
-#include "bridge/js_frontend/js_ace_page.h"
-#include "core/common/ace_application_info.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
-#include "core/common/platform_bridge.h"
-#include "core/common/thread_checker.h"
-#include "core/components/dialog/dialog_component.h"
 #include "core/components/toast/toast_component.h"
-#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_model.h"
-#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "engine/jsi/jsi_types.h"
 #include "frameworks/core/common/ace_engine.h"
 #include "jsview/js_view_abstract.h"
+#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -66,6 +44,7 @@ constexpr int32_t CALLBACK_ERRORCODE_SUCCESS = 0;
 constexpr int32_t CALLBACK_ERRORCODE_CANCEL = 1;
 constexpr int32_t CALLBACK_ERRORCODE_COMPLETE = 2;
 constexpr int32_t CALLBACK_DATACODE_ZERO = 0;
+constexpr int32_t USELESS_CHARACTER_SIZE = 2;
 
 const char MANIFEST_JSON[] = "manifest.json";
 const char PAGES_JSON[] = "main_pages.json";
@@ -77,13 +56,17 @@ const char I18N_FILE_SUFFIX[] = "/properties/string.json";
 
 // helper function to run OverlayManager task
 // ensures that the task runs in subwindow instead of main Window
-void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, const std::string& name)
+void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, const std::string& name,
+    const RefPtr<NG::OverlayManager>& overlay)
 {
     auto currentId = Container::CurrentId();
     ContainerScope scope(currentId);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
+    if (overlay) {
+        overlayManager = overlay;
+    }
     context->GetTaskExecutor()->PostTask(
         [task = std::move(task), weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
@@ -92,6 +75,23 @@ void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, c
         TaskExecutor::TaskType::UI, name);
 }
 
+struct DialogStrings {
+    std::string confirm;
+    std::string cancel;
+};
+
+DialogStrings GetDialogStrings()
+{
+    DialogStrings strs = {"", ""};
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, strs);
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, strs);
+
+    strs.confirm = dialogTheme->GetConfirmText();
+    strs.cancel = dialogTheme->GetCancelText();
+    return strs;
+}
 } // namespace
 
 int32_t FrontendDelegateDeclarative::GenerateNextPageId()
@@ -150,7 +150,7 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
 FrontendDelegateDeclarative::~FrontendDelegateDeclarative()
 {
     CHECK_RUN_ON(JS);
-    LOG_DESTROY();
+    LOGI("DelegateDeclarative destroyed");
 }
 
 int32_t FrontendDelegateDeclarative::GetMinPlatformVersion()
@@ -188,9 +188,14 @@ UIContentErrorCode FrontendDelegateDeclarative::RunPage(
         CHECK_NULL_RETURN(pageRouterManager_, UIContentErrorCode::NULL_PAGE_ROUTER);
         pageRouterManager_->SetManifestParser(manifestParser_);
         taskExecutor_->PostTask(
-            [weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), url, params, isNamedRouter]() {
+            [weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), url, params, isNamedRouter,
+                weak = AceType::WeakClaim(this)]() {
                 auto pageRouterManager = weakPtr.Upgrade();
                 CHECK_NULL_VOID(pageRouterManager);
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    NG::AppBarView::BuildAppbar(delegate->GetPipelineContext());
+                }
                 if (isNamedRouter) {
                     pageRouterManager->RunPageByNamedRouter(url, params);
                 } else {
@@ -205,7 +210,11 @@ UIContentErrorCode FrontendDelegateDeclarative::RunPage(
     } else {
         mainPagePath_ = manifestParser_->GetRouter()->GetEntry();
     }
-    AddRouterTask(RouterTask { RouterAction::PUSH, PageTarget(mainPagePath_), params });
+    RouterTask routerTask;
+    routerTask.action = RouterAction::PUSH;
+    routerTask.target = PageTarget(mainPagePath_);
+    routerTask.params = params;
+    AddRouterTask(routerTask);
     return LoadPage(GenerateNextPageId(), PageTarget(mainPagePath_), true, params);
 }
 
@@ -510,14 +519,14 @@ void FrontendDelegateDeclarative::NotifyAppStorage(
 
 void FrontendDelegateDeclarative::OnBackGround()
 {
-    OnPageHide();
+    OnPageHide(true);
 }
 
 void FrontendDelegateDeclarative::OnForeground()
 {
     // first page show will be called by push page successfully
     if (Container::IsCurrentUseNewPipeline() || !isFirstNotifyShow_) {
-        OnPageShow();
+        OnPageShow(true);
     }
     isFirstNotifyShow_ = false;
 }
@@ -818,7 +827,11 @@ void FrontendDelegateDeclarative::Push(const std::string& uri, const std::string
         auto currentId = GetEffectiveContainerId();
         CHECK_EQUAL_VOID(currentId.has_value(), false);
         ContainerScope scope(currentId.value());
-        pageRouterManager_->Push(NG::RouterPageInfo({ uri, params, true }));
+        NG::RouterPageInfo routerPageInfo;
+        routerPageInfo.url = uri;
+        routerPageInfo.params = params;
+        routerPageInfo.recoverable = true;
+        pageRouterManager_->Push(routerPageInfo);
         OnMediaQueryUpdate();
         return;
     }
@@ -833,8 +846,12 @@ void FrontendDelegateDeclarative::PushWithMode(const std::string& uri, const std
         auto currentId = GetEffectiveContainerId();
         CHECK_EQUAL_VOID(currentId.has_value(), false);
         ContainerScope scope(currentId.value());
-        pageRouterManager_->Push(
-            NG::RouterPageInfo({ uri, params, true, static_cast<NG::RouterMode>(routerMode) }));
+        NG::RouterPageInfo routerPageInfo;
+        routerPageInfo.url = uri;
+        routerPageInfo.params = params;
+        routerPageInfo.recoverable = true;
+        routerPageInfo.routerMode = static_cast<NG::RouterMode>(routerMode);
+        pageRouterManager_->Push(routerPageInfo);
         OnMediaQueryUpdate();
         return;
     }
@@ -849,8 +866,13 @@ void FrontendDelegateDeclarative::PushWithCallback(const std::string& uri, const
         auto currentId = GetEffectiveContainerId();
         CHECK_EQUAL_VOID(currentId.has_value(), false);
         ContainerScope scope(currentId.value());
-        pageRouterManager_->Push(
-            NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+        NG::RouterPageInfo routerPageInfo;
+        routerPageInfo.url = uri;
+        routerPageInfo.params = params;
+        routerPageInfo.recoverable = recoverable;
+        routerPageInfo.routerMode = static_cast<NG::RouterMode>(routerMode);
+        routerPageInfo.errorCallback = errorCallback;
+        pageRouterManager_->Push(routerPageInfo);
         OnMediaQueryUpdate();
         return;
     }
@@ -864,8 +886,13 @@ void FrontendDelegateDeclarative::PushNamedRoute(const std::string& uri, const s
     auto currentId = GetEffectiveContainerId();
     CHECK_EQUAL_VOID(currentId.has_value(), false);
     ContainerScope scope(currentId.value());
-    pageRouterManager_->PushNamedRoute(
-        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = uri;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = recoverable;
+    routerPageInfo.routerMode = static_cast<NG::RouterMode>(routerMode);
+    routerPageInfo.errorCallback = errorCallback;
+    pageRouterManager_->PushNamedRoute(routerPageInfo);
     OnMediaQueryUpdate();
 }
 
@@ -876,7 +903,11 @@ void FrontendDelegateDeclarative::Replace(const std::string& uri, const std::str
         auto currentId = GetEffectiveContainerId();
         CHECK_EQUAL_VOID(currentId.has_value(), false);
         ContainerScope scope(currentId.value());
-        pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params, true }));
+        NG::RouterPageInfo routerPageInfo;
+        routerPageInfo.url = uri;
+        routerPageInfo.params = params;
+        routerPageInfo.recoverable = true;
+        pageRouterManager_->Replace(routerPageInfo);
         OnMediaQueryUpdate();
         return;
     }
@@ -891,8 +922,12 @@ void FrontendDelegateDeclarative::ReplaceWithMode(
         auto currentId = GetEffectiveContainerId();
         CHECK_EQUAL_VOID(currentId.has_value(), false);
         ContainerScope scope(currentId.value());
-        pageRouterManager_->Replace(
-            NG::RouterPageInfo({ uri, params, true, static_cast<NG::RouterMode>(routerMode) }));
+        NG::RouterPageInfo routerPageInfo;
+        routerPageInfo.url = uri;
+        routerPageInfo.params = params;
+        routerPageInfo.recoverable = true;
+        routerPageInfo.routerMode = static_cast<NG::RouterMode>(routerMode);
+        pageRouterManager_->Replace(routerPageInfo);
         OnMediaQueryUpdate();
         return;
     }
@@ -907,8 +942,13 @@ void FrontendDelegateDeclarative::ReplaceWithCallback(const std::string& uri, co
         auto currentId = GetEffectiveContainerId();
         CHECK_EQUAL_VOID(currentId.has_value(), false);
         ContainerScope scope(currentId.value());
-        pageRouterManager_->Replace(
-            NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+        NG::RouterPageInfo routerPageInfo;
+        routerPageInfo.url = uri;
+        routerPageInfo.params = params;
+        routerPageInfo.recoverable = recoverable;
+        routerPageInfo.routerMode = static_cast<NG::RouterMode>(routerMode);
+        routerPageInfo.errorCallback = errorCallback;
+        pageRouterManager_->Replace(routerPageInfo);
         OnMediaQueryUpdate();
         return;
     }
@@ -922,8 +962,13 @@ void FrontendDelegateDeclarative::ReplaceNamedRoute(const std::string& uri, cons
     auto currentId = GetEffectiveContainerId();
     CHECK_EQUAL_VOID(currentId.has_value(), false);
     ContainerScope scope(currentId.value());
-    pageRouterManager_->ReplaceNamedRoute(
-        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = uri;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = recoverable;
+    routerPageInfo.routerMode = static_cast<NG::RouterMode>(routerMode);
+    routerPageInfo.errorCallback = errorCallback;
+    pageRouterManager_->ReplaceNamedRoute(routerPageInfo);
     OnMediaQueryUpdate();
 }
 
@@ -934,7 +979,10 @@ void FrontendDelegateDeclarative::Back(const std::string& uri, const std::string
         auto currentId = GetEffectiveContainerId();
         CHECK_EQUAL_VOID(currentId.has_value(), false);
         ContainerScope scope(currentId.value());
-        pageRouterManager_->BackWithTarget(NG::RouterPageInfo({ uri, params }));
+        NG::RouterPageInfo routerPageInfo;
+        routerPageInfo.url = uri;
+        routerPageInfo.params = params;
+        pageRouterManager_->BackWithTarget(routerPageInfo);
         OnMediaQueryUpdate();
         return;
     }
@@ -989,10 +1037,14 @@ void FrontendDelegateDeclarative::Clear()
     {
         std::lock_guard<std::mutex> lock(routerQueueMutex_);
         if (!routerQueue_.empty()) {
-            AddRouterTask(RouterTask { RouterAction::CLEAR });
+            RouterTask routerTask;
+            routerTask.action = RouterAction::CLEAR;
+            AddRouterTask(routerTask);
             return;
         }
-        AddRouterTask(RouterTask { RouterAction::CLEAR });
+        RouterTask routerTask;
+        routerTask.action = RouterAction::CLEAR;
+        AddRouterTask(routerTask);
     }
     ClearInvisiblePages();
 }
@@ -1392,10 +1444,18 @@ void FrontendDelegateDeclarative::BackWithTarget(const PageTarget& target, const
     {
         std::lock_guard<std::mutex> lock(routerQueueMutex_);
         if (!routerQueue_.empty()) {
-            AddRouterTask(RouterTask { RouterAction::BACK, target, params });
+            RouterTask routerTask;
+            routerTask.action = RouterAction::BACK;
+            routerTask.target = target;
+            routerTask.params = params;
+            AddRouterTask(routerTask);
             return;
         }
-        AddRouterTask(RouterTask { RouterAction::BACK, target, params });
+        RouterTask routerTask;
+        routerTask.action = RouterAction::BACK;
+        routerTask.target = target;
+        routerTask.params = params;
+        AddRouterTask(routerTask);
     }
     BackCheckAlert(target, params);
 }
@@ -1577,7 +1637,7 @@ void FrontendDelegateDeclarative::ShowToast(const NG::ToastInfo& toastInfo, std:
             overlayManager->ShowToast(
                 updatedToastInfo, std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
         };
-        MainWindowOverlay(std::move(task), "ArkUIOverlayShowToast");
+        MainWindowOverlay(std::move(task), "ArkUIOverlayShowToast", nullptr);
         return;
     }
     auto pipeline = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
@@ -1649,7 +1709,12 @@ void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProper
                 CHECK_NULL_VOID(dialog);
             }
         };
-        MainWindowOverlay(std::move(task), "ArkUIOverlayShowDialog");
+        if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
+            NG::DialogManager::ShowInEmbeddedOverlay(
+                std::move(task), "ArkUIOverlayShowDialog", dialogProperties.dialogLevelUniqueId);
+        } else {
+            MainWindowOverlay(std::move(task), "ArkUIOverlayShowDialog", nullptr);
+        }
         return;
     }
     std::unordered_map<std::string, EventMarker> callbackMarkers;
@@ -1732,7 +1797,18 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .onLanguageChange = dialogAttr.onLanguageChange,
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
+        .enableHoverMode = dialogAttr.enableHoverMode,
+        .blurStyleOption = dialogAttr.blurStyleOption,
+        .effectOption = dialogAttr.effectOption,
         .maskRect = dialogAttr.maskRect,
+        .onDidAppear = dialogAttr.onDidAppear,
+        .onDidDisappear = dialogAttr.onDidDisappear,
+        .onWillAppear = dialogAttr.onWillAppear,
+        .onWillDisappear = dialogAttr.onWillDisappear,
+        .levelOrder = dialogAttr.levelOrder,
+        .dialogLevelMode = dialogAttr.dialogLevelMode,
+        .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
@@ -1756,6 +1832,9 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
     if (dialogAttr.backgroundBlurStyle.has_value()) {
         dialogProperties.backgroundBlurStyle = dialogAttr.backgroundBlurStyle.value();
     }
+    if (dialogAttr.hoverModeArea.has_value()) {
+        dialogProperties.hoverModeArea = dialogAttr.hoverModeArea.value();
+    }
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
@@ -1774,6 +1853,7 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .isModal = dialogAttr.isModal,
         .onStatusChanged = std::move(onStatusChanged),
         .maskRect = dialogAttr.maskRect,
+        .levelOrder = dialogAttr.levelOrder,
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
@@ -1791,35 +1871,16 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
-void FrontendDelegateDeclarative::RemoveCustomDialog()
+void FrontendDelegateDeclarative::RemoveCustomDialog(int32_t instanceId)
 {
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "Dismiss custom dialog, instanceId: %{public}d", instanceId);
+    ContainerScope scope(instanceId);
     NG::ViewAbstract::DismissDialog();
 }
 
-DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const PromptDialogAttr &dialogAttr)
+void FrontendDelegateDeclarative::ParsePartialPropertiesFromAttr(
+    DialogProperties& dialogProperties, const PromptDialogAttr& dialogAttr)
 {
-    DialogProperties dialogProperties = { .autoCancel = dialogAttr.autoCancel,
-        .customStyle = dialogAttr.customStyle,
-        .onWillDismiss = dialogAttr.customOnWillDismiss,
-        .maskColor = dialogAttr.maskColor,
-        .backgroundColor = dialogAttr.backgroundColor,
-        .borderRadius = dialogAttr.borderRadius,
-        .isShowInSubWindow = dialogAttr.showInSubWindow,
-        .isModal = dialogAttr.isModal,
-        .customBuilder = dialogAttr.customBuilder,
-        .borderWidth = dialogAttr.borderWidth,
-        .borderColor = dialogAttr.borderColor,
-        .borderStyle = dialogAttr.borderStyle,
-        .shadow = dialogAttr.shadow,
-        .width = dialogAttr.width,
-        .height = dialogAttr.height,
-        .maskRect = dialogAttr.maskRect,
-        .transitionEffect = dialogAttr.transitionEffect,
-        .contentNode = dialogAttr.contentNode,
-        .onDidAppear = dialogAttr.onDidAppear,
-        .onDidDisappear = dialogAttr.onDidDisappear,
-        .onWillAppear = dialogAttr.onWillAppear,
-        .onWillDisappear = dialogAttr.onWillDisappear };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
         LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
@@ -1833,6 +1894,9 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
     if (dialogAttr.offset.has_value()) {
         dialogProperties.offset = dialogAttr.offset.value();
     }
+    if (dialogAttr.hoverModeArea.has_value()) {
+        dialogProperties.hoverModeArea = dialogAttr.hoverModeArea.value();
+    }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         dialogProperties.isSysBlurStyle = false;
     } else {
@@ -1840,6 +1904,37 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
             dialogProperties.backgroundBlurStyle = dialogAttr.backgroundBlurStyle.value();
         }
     }
+}
+
+DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const PromptDialogAttr &dialogAttr)
+{
+    DialogProperties dialogProperties = {
+        .autoCancel = dialogAttr.autoCancel, .customStyle = dialogAttr.customStyle,
+        .onWillDismiss = dialogAttr.customOnWillDismiss, .maskColor = dialogAttr.maskColor,
+        .backgroundColor = dialogAttr.backgroundColor, .borderRadius = dialogAttr.borderRadius,
+        .isShowInSubWindow = dialogAttr.showInSubWindow, .isModal = dialogAttr.isModal,
+        .enableHoverMode = dialogAttr.enableHoverMode, .customBuilder = dialogAttr.customBuilder,
+        .customBuilderWithId = dialogAttr.customBuilderWithId,
+        .blurStyleOption = dialogAttr.blurStyleOption,
+        .effectOption = dialogAttr.effectOption,
+        .borderWidth = dialogAttr.borderWidth,
+        .borderColor = dialogAttr.borderColor, .borderStyle = dialogAttr.borderStyle, .shadow = dialogAttr.shadow,
+        .width = dialogAttr.width, .height = dialogAttr.height,
+        .isUserCreatedDialog = dialogAttr.isUserCreatedDialog,
+        .maskRect = dialogAttr.maskRect,
+        .transitionEffect = dialogAttr.transitionEffect, .dialogTransitionEffect = dialogAttr.dialogTransitionEffect,
+        .maskTransitionEffect = dialogAttr.maskTransitionEffect, .contentNode = dialogAttr.contentNode,
+        .onDidAppear = dialogAttr.onDidAppear, .onDidDisappear = dialogAttr.onDidDisappear,
+        .onWillAppear = dialogAttr.onWillAppear, .onWillDisappear = dialogAttr.onWillDisappear,
+        .keyboardAvoidMode = dialogAttr.keyboardAvoidMode, .dialogCallback = dialogAttr.dialogCallback,
+        .keyboardAvoidDistance = dialogAttr.keyboardAvoidDistance,
+        .levelOrder = dialogAttr.levelOrder,
+        .focusable = dialogAttr.focusable,
+        .dialogLevelMode = dialogAttr.dialogLevelMode,
+        .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
+    };
+    ParsePartialPropertiesFromAttr(dialogProperties, dialogAttr);
     return dialogProperties;
 }
 
@@ -1862,7 +1957,12 @@ void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialo
                 overlayManager->OpenCustomDialog(dialogProperties, std::move(callback));
             }
         };
-        MainWindowOverlay(std::move(task), "ArkUIOverlayOpenCustomDialog");
+        if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
+            NG::DialogManager::ShowInEmbeddedOverlay(
+                std::move(task), "ArkUIOverlayShowDialog", dialogProperties.dialogLevelUniqueId);
+        } else {
+            MainWindowOverlay(std::move(task), "ArkUIOverlayShowDialog", nullptr);
+        }
         return;
     } else {
         LOGW("not support old pipeline");
@@ -1877,20 +1977,35 @@ void FrontendDelegateDeclarative::CloseCustomDialog(const int32_t dialogId)
         overlayManager->CloseCustomDialog(dialogId);
         SubwindowManager::GetInstance()->CloseCustomDialogNG(dialogId);
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayCloseCustomDialog");
+    auto dialogNode = NG::FrameNode::GetFrameNodeOnly(V2::DIALOG_ETS_TAG, dialogId);
+    auto currentOverlay = NG::DialogManager::GetInstance().GetEmbeddedOverlayWithNode(dialogNode);
+    MainWindowOverlay(std::move(task), "ArkUIOverlayCloseCustomDialog", currentOverlay);
     return;
 }
 
 void FrontendDelegateDeclarative::CloseCustomDialog(const WeakPtr<NG::UINode>& node,
     std::function<void(int32_t)> &&callback)
 {
-    auto task = [node, callback](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
-        CHECK_NULL_VOID(overlayManager);
-        TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
-        overlayManager->CloseCustomDialog(node, std::move(callback));
-    };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayCloseCustomDialog");
-    return;
+    auto nodePtr = node.Upgrade();
+    CHECK_NULL_VOID(nodePtr);
+    auto context = nodePtr->GetContextWithCheck();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    auto parent = NG::DialogManager::GetInstance().GetDialogNodeByContentNode(nodePtr);
+    if (parent) {
+        auto currentOverlay = NG::DialogManager::GetInstance().GetEmbeddedOverlayWithNode(parent);
+        if (currentOverlay) {
+            overlayManager = currentOverlay;
+        }
+    }
+    context->GetTaskExecutor()->PostTask(
+        [node, callback, weak = WeakPtr<NG::OverlayManager>(overlayManager)]() mutable {
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
+            overlayManager->CloseCustomDialog(node, std::move(callback));
+        },
+        TaskExecutor::TaskType::UI, "ArkUIOverlayCloseCustomDialog");
 }
 
 void FrontendDelegateDeclarative::UpdateCustomDialog(
@@ -1907,14 +2022,42 @@ void FrontendDelegateDeclarative::UpdateCustomDialog(
     if (dialogAttr.offset.has_value()) {
         dialogProperties.offset = dialogAttr.offset.value();
     }
-    auto task = [dialogProperties, node, callback]
-        (const RefPtr<NG::OverlayManager>& overlayManager) mutable {
-        CHECK_NULL_VOID(overlayManager);
-        LOGI("begin to update custom dialog.");
-        overlayManager->UpdateCustomDialog(node, dialogProperties, std::move(callback));
-    };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayUpdateCustomDialog");
-    return;
+
+    auto nodePtr = node.Upgrade();
+    CHECK_NULL_VOID(nodePtr);
+    auto context = nodePtr->GetContextWithCheck();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    context->GetTaskExecutor()->PostTask(
+        [dialogProperties, node, callback, weak = WeakPtr<NG::OverlayManager>(overlayManager)]() mutable {
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to update custom dialog.");
+            overlayManager->UpdateCustomDialog(node, dialogProperties, std::move(callback));
+        },
+        TaskExecutor::TaskType::UI, "ArkUIOverlayUpdateCustomDialog");
+}
+
+std::optional<double> FrontendDelegateDeclarative::GetTopOrder()
+{
+    auto currentId = Container::CurrentId();
+    ContainerScope scope(currentId);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, std::nullopt);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, std::nullopt);
+    return overlayManager->GetTopOrder();
+}
+
+std::optional<double> FrontendDelegateDeclarative::GetBottomOrder()
+{
+    auto currentId = Container::CurrentId();
+    ContainerScope scope(currentId);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, std::nullopt);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, std::nullopt);
+    return overlayManager->GetBottomOrder();
 }
 
 void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogProperties,
@@ -1968,6 +2111,12 @@ void FrontendDelegateDeclarative::ShowActionMenuInnerNG(DialogProperties& dialog
     };
     auto context = DynamicCast<NG::PipelineContext>(pipelineContextHolder_.Get());
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
+    if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
+        auto embeddedOverlay = NG::DialogManager::GetEmbeddedOverlay(dialogProperties.dialogLevelUniqueId, context);
+        if (embeddedOverlay) {
+            overlayManager = embeddedOverlay;
+        }
+    }
     taskExecutor_->PostTask(
         [dialogProperties, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
@@ -2038,6 +2187,10 @@ void FrontendDelegateDeclarative::ShowActionMenu(const PromptDialogAttr& dialogA
         .buttons = buttons,
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
+        .maskRect = dialogAttr.maskRect,
+        .dialogLevelMode = dialogAttr.dialogLevelMode,
+        .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
@@ -2092,14 +2245,15 @@ void FrontendDelegateDeclarative::EnableAlertBeforeBackPage(
         return;
     }
 
+    auto strs = GetDialogStrings();
     auto& currentPage = pageRouteStack_.back();
     ClearAlertCallback(currentPage);
     currentPage.alertCallback = callback;
     currentPage.dialogProperties = {
         .content = message,
         .autoCancel = false,
-        .buttons = { { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" },
-            { .text = Localization::GetInstance()->GetEntryLetters("common.ok"), .textColor = "" } },
+        .buttons = { { .text = strs.cancel, .textColor = "" },
+            { .text = strs.confirm, .textColor = "" } },
         .callbacks = std::move(callbackMarkers),
     };
 }
@@ -2462,7 +2616,10 @@ void FrontendDelegateDeclarative::OnPushPageSuccess(const RefPtr<JsAcePage>& pag
 {
     std::lock_guard<std::mutex> lock(mutex_);
     AddPageLocked(page);
-    pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), page->GetUrl() });
+    PageInfo pageInfo;
+    pageInfo.pageId = page->GetPageId();
+    pageInfo.url = page->GetUrl();
+    pageRouteStack_.emplace_back(pageInfo);
     if (singlePageId_ != INVALID_PAGE_ID) {
         RecycleSinglePage();
     }
@@ -2785,7 +2942,10 @@ void FrontendDelegateDeclarative::OnReplacePageSuccess(const RefPtr<JsAcePage>& 
         ClearAlertCallback(pageRouteStack_.back());
         pageRouteStack_.pop_back();
     }
-    pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url });
+    PageInfo pageInfo;
+    pageInfo.pageId = page->GetPageId();
+    pageInfo.url = url;
+    pageRouteStack_.emplace_back(pageInfo);
     if (singlePageId_ != INVALID_PAGE_ID) {
         RecycleSinglePage();
     }
@@ -3001,9 +3161,9 @@ void FrontendDelegateDeclarative::RebuildAllPages()
     }
 }
 
-void FrontendDelegateDeclarative::OnPageShow()
+void FrontendDelegateDeclarative::OnPageShow(bool isFromWindow)
 {
-    auto task = [weak = AceType::WeakClaim(this)] {
+    auto task = [weak = AceType::WeakClaim(this), isFromWindow] {
         auto delegate = weak.Upgrade();
         CHECK_NULL_VOID(delegate);
         if (Container::IsCurrentUseNewPipeline()) {
@@ -3013,7 +3173,7 @@ void FrontendDelegateDeclarative::OnPageShow()
             CHECK_NULL_VOID(pageNode);
             auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
             CHECK_NULL_VOID(pagePattern);
-            pagePattern->OnShow();
+            pagePattern->OnShow(isFromWindow);
             return;
         }
 
@@ -3034,9 +3194,9 @@ void FrontendDelegateDeclarative::OnPageShow()
     }
 }
 
-void FrontendDelegateDeclarative::OnPageHide()
+void FrontendDelegateDeclarative::OnPageHide(bool isFromWindow)
 {
-    auto task = [weak = AceType::WeakClaim(this)] {
+    auto task = [weak = AceType::WeakClaim(this), isFromWindow] {
         auto delegate = weak.Upgrade();
         CHECK_NULL_VOID(delegate);
         if (Container::IsCurrentUseNewPipeline()) {
@@ -3046,7 +3206,7 @@ void FrontendDelegateDeclarative::OnPageHide()
             CHECK_NULL_VOID(pageNode);
             auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
             CHECK_NULL_VOID(pagePattern);
-            pagePattern->OnHide();
+            pagePattern->OnHide(isFromWindow);
             return;
         }
 
@@ -3292,7 +3452,11 @@ std::pair<RouterRecoverRecord, UIContentErrorCode> FrontendDelegateDeclarative::
         for (int32_t index = 0; index < stackSize - 1; ++index) {
             std::string url = routerStack->GetArrayItem(index)->ToString();
             // remove 2 useless character, as "XXX" to XXX
-            pageRouteStack_.emplace_back(PageInfo { GenerateNextPageId(), url.substr(1, url.size() - 2), true });
+            PageInfo pageInfo;
+            pageInfo.pageId = GenerateNextPageId();
+            pageInfo.url = url.substr(1, url.size() - USELESS_CHARACTER_SIZE);
+            pageInfo.isRestore = true;
+            pageRouteStack_.emplace_back(pageInfo);
         }
         std::string startUrl = routerStack->GetArrayItem(stackSize - 1)->ToString();
         // remove 5 useless character, as "XXX.js" to XXX
@@ -3320,6 +3484,12 @@ std::pair<RouterRecoverRecord, UIContentErrorCode> FrontendDelegateDeclarative::
             pageRouterManager_->RestoreFullPathInfo(std::move(fullPathInfo));
         }
     }
+    // restore navigation info
+    auto pipelineContextNG = AceType::DynamicCast<NG::PipelineContext>(pipelineContextHolder_.Get());
+    if (pipelineContextNG && pipelineContextNG->GetNavigationManager()) {
+        auto navigationRecoveryInfo = jsonContentInfo->GetValue("navigationInfo");
+        pipelineContextNG->GetNavigationManager()->StorageNavigationRecoveryInfo(std::move(navigationRecoveryInfo));
+    }
     return pageRouterManager_->RestoreRouterStack(std::move(routerStack), type);
 }
 
@@ -3346,6 +3516,11 @@ std::string FrontendDelegateDeclarative::GetContentInfo(ContentInfoType type)
             if (fullPathInfo) {
                 jsonContentInfo->Put("fullPathInfo", std::move(fullPathInfo));
             }
+            // add navigation stack info
+            auto navigationRecoveryInfo = GetNavigationJsonInfo();
+            if (navigationRecoveryInfo) {
+                jsonContentInfo->Put("navigationInfo", navigationRecoveryInfo);
+            }
         }
     }
 
@@ -3367,10 +3542,37 @@ void FrontendDelegateDeclarative::GetSnapshot(
 }
 
 std::pair<int32_t, std::shared_ptr<Media::PixelMap>> FrontendDelegateDeclarative::GetSyncSnapshot(
+    RefPtr<NG::FrameNode>& node, const NG::SnapshotOptions& options)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    return NG::ComponentSnapshot::GetSync(node, options);
+#endif
+    return { ERROR_CODE_INTERNAL_ERROR, nullptr };
+}
+
+std::pair<int32_t, std::shared_ptr<Media::PixelMap>> FrontendDelegateDeclarative::GetSyncSnapshot(
     const std::string& componentId, const NG::SnapshotOptions& options)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     return NG::ComponentSnapshot::GetSync(componentId, options);
+#endif
+    return {ERROR_CODE_INTERNAL_ERROR, nullptr};
+}
+
+void FrontendDelegateDeclarative::GetSnapshotByUniqueId(int32_t uniqueId,
+    std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+    const NG::SnapshotOptions& options)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    NG::ComponentSnapshot::GetByUniqueId(uniqueId, std::move(callback), options);
+#endif
+}
+
+std::pair<int32_t, std::shared_ptr<Media::PixelMap>> FrontendDelegateDeclarative::GetSyncSnapshotByUniqueId(
+    int32_t uniqueId, const NG::SnapshotOptions& options)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    return NG::ComponentSnapshot::GetSyncByUniqueId(uniqueId, options);
 #endif
     return {ERROR_CODE_INTERNAL_ERROR, nullptr};
 }
@@ -3389,6 +3591,15 @@ void FrontendDelegateDeclarative::CreateSnapshot(
 #endif
 }
 
+void FrontendDelegateDeclarative::CreateSnapshotFromComponent(const RefPtr<NG::UINode>& nodeWk,
+    NG::ComponentSnapshot::JsCallback&& callback, bool enableInspector, const NG::SnapshotParam& param)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    ViewStackModel::GetInstance()->NewScope();
+    NG::ComponentSnapshot::Create(nodeWk, std::move(callback), enableInspector, param);
+#endif
+}
+
 void FrontendDelegateDeclarative::AddFrameNodeToOverlay(const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index)
 {
     auto task = [node, index, containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
@@ -3396,7 +3607,18 @@ void FrontendDelegateDeclarative::AddFrameNodeToOverlay(const RefPtr<NG::FrameNo
         ContainerScope scope(containerId);
         overlayManager->AddFrameNodeToOverlay(node, index);
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayAddFrameNode");
+    MainWindowOverlay(std::move(task), "ArkUIOverlayAddFrameNode", nullptr);
+}
+
+void FrontendDelegateDeclarative::AddFrameNodeWithOrder(const RefPtr<NG::FrameNode>& node,
+    std::optional<double> levelOrder)
+{
+    CHECK_NULL_VOID(node);
+    auto pipelineContext = node->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->AddFrameNodeWithOrder(node, levelOrder);
 }
 
 void FrontendDelegateDeclarative::RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
@@ -3406,7 +3628,7 @@ void FrontendDelegateDeclarative::RemoveFrameNodeOnOverlay(const RefPtr<NG::Fram
         ContainerScope scope(containerId);
         overlayManager->RemoveFrameNodeOnOverlay(node);
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayRemoveFrameNode");
+    MainWindowOverlay(std::move(task), "ArkUIOverlayRemoveFrameNode", nullptr);
 }
 
 void FrontendDelegateDeclarative::ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
@@ -3416,7 +3638,7 @@ void FrontendDelegateDeclarative::ShowNodeOnOverlay(const RefPtr<NG::FrameNode>&
         ContainerScope scope(containerId);
         overlayManager->ShowNodeOnOverlay(node);
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayShowNode");
+    MainWindowOverlay(std::move(task), "ArkUIOverlayShowNode", nullptr);
 }
 
 void FrontendDelegateDeclarative::HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
@@ -3426,7 +3648,7 @@ void FrontendDelegateDeclarative::HideNodeOnOverlay(const RefPtr<NG::FrameNode>&
         ContainerScope scope(containerId);
         overlayManager->HideNodeOnOverlay(node);
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayHideNode");
+    MainWindowOverlay(std::move(task), "ArkUIOverlayHideNode", nullptr);
 }
 
 void FrontendDelegateDeclarative::ShowAllNodesOnOverlay()
@@ -3436,7 +3658,7 @@ void FrontendDelegateDeclarative::ShowAllNodesOnOverlay()
         ContainerScope scope(containerId);
         overlayManager->ShowAllNodesOnOverlay();
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayShowAllNodes");
+    MainWindowOverlay(std::move(task), "ArkUIOverlayShowAllNodes", nullptr);
 }
 
 void FrontendDelegateDeclarative::HideAllNodesOnOverlay()
@@ -3446,7 +3668,7 @@ void FrontendDelegateDeclarative::HideAllNodesOnOverlay()
         ContainerScope scope(containerId);
         overlayManager->HideAllNodesOnOverlay();
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayHideAllNodes");
+    MainWindowOverlay(std::move(task), "ArkUIOverlayHideAllNodes", nullptr);
 }
 
 RefPtr<NG::ChainedTransitionEffect> FrontendDelegateDeclarative::GetTransitionEffect(void* value)
@@ -3469,5 +3691,47 @@ RefPtr<NG::ChainedTransitionEffect> FrontendDelegateDeclarative::GetTransitionEf
     JsiExecutionContext context = { vm };
 
     return JSViewAbstract::ParseNapiChainedTransition(transitionObj, context);
+}
+
+std::unique_ptr<JsonValue> FrontendDelegateDeclarative::GetNavigationJsonInfo()
+{
+    auto pipelineContextNG = AceType::DynamicCast<NG::PipelineContext>(pipelineContextHolder_.Get());
+    CHECK_NULL_RETURN(pipelineContextNG, nullptr);
+    auto navigationManager = pipelineContextNG->GetNavigationManager();
+    CHECK_NULL_RETURN(navigationManager, nullptr);
+    return navigationManager->GetNavigationJsonInfo();
+}
+bool FrontendDelegateDeclarative::SetOverlayManagerOptions(const NG::OverlayManagerInfo& overlayInfo)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, false);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, false);
+    return overlayManager->SetOverlayManagerOptions(overlayInfo);
+};
+std::optional<NG::OverlayManagerInfo> FrontendDelegateDeclarative::GetOverlayManagerOptions()
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, std::nullopt);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, std::nullopt);
+    return overlayManager->GetOverlayManagerOptions();
+};
+
+std::string FrontendDelegateDeclarative::GetPagePathByUrl(const std::string& url) const
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return "";
+    }
+    CHECK_NULL_RETURN(pageRouterManager_, "");
+    auto currentId = GetEffectiveContainerId();
+    if (!currentId.has_value()) {
+        return "";
+    }
+    ContainerScope scope(currentId.value());
+    std::string name;
+    std::string path;
+    pageRouterManager_->GetPageNameAndPath(url, name, path);
+    return path + name;
 }
 } // namespace OHOS::Ace::Framework

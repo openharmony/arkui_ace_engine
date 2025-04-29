@@ -15,7 +15,6 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_rect.h"
 
-#include "base/utils/utils.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -27,11 +26,7 @@ RefPtr<SvgNode> SvgRect::Create()
     return AceType::MakeRefPtr<SvgRect>();
 }
 
-#ifndef USE_ROSEN_DRAWING
-SkPath SvgRect::AsPath(const Size& viewPort) const
-#else
 RSRecordingPath SvgRect::AsPath(const Size& viewPort) const
-#endif
 {
     double rx = 0.0;
     if (GreatOrEqual(rectAttr_.rx.Value(), 0.0)) {
@@ -49,16 +44,6 @@ RSRecordingPath SvgRect::AsPath(const Size& viewPort) const
             ry = ConvertDimensionToPx(rectAttr_.rx, viewPort, SvgLengthType::HORIZONTAL);
         }
     }
-#ifndef USE_ROSEN_DRAWING
-    SkRRect roundRect = SkRRect::MakeRectXY(
-        SkRect::MakeXYWH(ConvertDimensionToPx(rectAttr_.x, viewPort, SvgLengthType::HORIZONTAL),
-            ConvertDimensionToPx(rectAttr_.y, viewPort, SvgLengthType::VERTICAL),
-            ConvertDimensionToPx(rectAttr_.width, viewPort, SvgLengthType::HORIZONTAL),
-            ConvertDimensionToPx(rectAttr_.height, viewPort, SvgLengthType::VERTICAL)),
-        rx, ry);
-    SkPath path;
-    path.addRRect(roundRect);
-#else
     RSScalar left = ConvertDimensionToPx(rectAttr_.x, viewPort, SvgLengthType::HORIZONTAL);
     RSScalar top = ConvertDimensionToPx(rectAttr_.y, viewPort, SvgLengthType::VERTICAL);
     RSScalar width = ConvertDimensionToPx(rectAttr_.width, viewPort, SvgLengthType::HORIZONTAL);
@@ -66,7 +51,34 @@ RSRecordingPath SvgRect::AsPath(const Size& viewPort) const
     RSRoundRect roundRect = RSRoundRect(RSRect(left, top, width + left, height + top), rx, ry);
     RSRecordingPath path;
     path.AddRoundRect(roundRect);
-#endif
+    return path;
+}
+
+RSRecordingPath SvgRect::AsPath(const SvgLengthScaleRule& lengthRule)
+{
+    /* re-generate the Path for pathTransform(true). AsPath come from clip-path */
+    if (path_.has_value() && lengthRule_ == lengthRule && !lengthRule.GetPathTransform()) {
+        return path_.value();
+    }
+    auto rx = GreatNotEqual(rectAttr_.rx.Value(), 0.0) ?
+              GetMeasuredLength(rectAttr_.rx, lengthRule, SvgLengthType::HORIZONTAL) : 0.0;
+    auto ry = GreatNotEqual(rectAttr_.ry.Value(), 0.0) ?
+              GetMeasuredLength(rectAttr_.ry, lengthRule, SvgLengthType::VERTICAL) : 0.0;
+    rx = GreatNotEqual(rx, 0.0) ? rx : ry;
+    ry = GreatNotEqual(ry, 0.0) ? ry : rx;
+    RSScalar left, top;
+    left = GetMeasuredPosition(rectAttr_.x, lengthRule, SvgLengthType::HORIZONTAL) ;
+    top = GetMeasuredPosition(rectAttr_.y, lengthRule, SvgLengthType::VERTICAL) ;
+    RSScalar width = GetMeasuredLength(rectAttr_.width, lengthRule, SvgLengthType::HORIZONTAL);
+    RSScalar height = GetMeasuredLength(rectAttr_.height, lengthRule, SvgLengthType::VERTICAL);
+    RSRoundRect roundRect = RSRoundRect(RSRect(left, top, width + left, height + top), rx, ry);
+    RSRecordingPath path;
+    path.AddRoundRect(roundRect);
+    path_ = path;
+    /* Apply path transform for clip-path only */
+    if (lengthRule.GetPathTransform()) {
+        ApplyTransform(path);
+    }
     return path;
 }
 

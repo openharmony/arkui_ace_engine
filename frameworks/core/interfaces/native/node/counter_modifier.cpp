@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,11 +14,7 @@
  */
 #include "core/interfaces/native/node/counter_modifier.h"
 
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 void SetEnableInc(ArkUINodeHandle node, ArkUI_Bool enableInc)
@@ -70,25 +66,95 @@ void SetCounterBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
     CHECK_NULL_VOID(frameNode);
     CounterModelNG::SetBackgroundColor(frameNode, Color(color));
 }
-void ResetCounterBackgroundColor(ArkUINodeHandle node) {}
+
+void ResetCounterBackgroundColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CounterModelNG::ResetBackgroundColor(frameNode);
+}
+
+void SetCounterOnInc(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onInc = reinterpret_cast<CounterModel::CounterEventFunc*>(callback);
+        CounterModelNG::SetOnInc(frameNode, std::move(*onInc));
+    } else {
+        CounterModelNG::SetOnInc(frameNode, nullptr);
+    }
+}
+
+void ResetCounterOnInc(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CounterModelNG::SetOnInc(frameNode, nullptr);
+}
+
+void SetCounterOnDec(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onDec = reinterpret_cast<CounterModel::CounterEventFunc*>(callback);
+        CounterModelNG::SetOnDec(frameNode, std::move(*onDec));
+    } else {
+        CounterModelNG::SetOnDec(frameNode, nullptr);
+    }
+}
+
+void ResetCounterOnDec(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CounterModelNG::SetOnDec(frameNode, nullptr);
+}
 
 namespace NodeModifier {
 const ArkUICounterModifier* GetCounterModifier()
 {
-    static const ArkUICounterModifier modifier = { SetEnableInc, ResetEnableInc, SetEnableDec, ResetEnableDec,
-        SetCounterHeight, ResetCounterHeight, SetCounterWidth, ResetCounterWidth, SetCounterBackgroundColor,
-        ResetCounterBackgroundColor };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUICounterModifier modifier = {
+        .setEnableInc = SetEnableInc,
+        .resetEnableInc = ResetEnableInc,
+        .setEnableDec = SetEnableDec,
+        .resetEnableDec = ResetEnableDec,
+        .setCounterHeight = SetCounterHeight,
+        .resetCounterHeight = ResetCounterHeight,
+        .setCounterWidth = SetCounterWidth,
+        .resetCounterWidth = ResetCounterWidth,
+        .setCounterBackgroundColor = SetCounterBackgroundColor,
+        .resetCounterBackgroundColor = ResetCounterBackgroundColor,
+        .setCounterOnInc = SetCounterOnInc,
+        .resetCounterOnInc = ResetCounterOnInc,
+        .setCounterOnDec = SetCounterOnDec,
+        .resetCounterOnDec = ResetCounterOnDec,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUICounterModifier* GetCJUICounterModifier()
 {
-    static const CJUICounterModifier modifier = { SetEnableInc, ResetEnableInc, SetEnableDec, ResetEnableDec,
-        SetCounterHeight, ResetCounterHeight, SetCounterWidth, ResetCounterWidth, SetCounterBackgroundColor,
-        ResetCounterBackgroundColor };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUICounterModifier modifier = {
+        .setEnableInc = SetEnableInc,
+        .resetEnableInc = ResetEnableInc,
+        .setEnableDec = SetEnableDec,
+        .resetEnableDec = ResetEnableDec,
+        .setCounterHeight = SetCounterHeight,
+        .resetCounterHeight = ResetCounterHeight,
+        .setCounterWidth = SetCounterWidth,
+        .resetCounterWidth = ResetCounterWidth,
+        .setCounterBackgroundColor = SetCounterBackgroundColor,
+        .resetCounterBackgroundColor = ResetCounterBackgroundColor,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
-}
+} // namespace NodeModifier
 } // namespace OHOS::Ace::NG

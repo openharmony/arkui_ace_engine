@@ -50,9 +50,14 @@ public:
 
     int32_t OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos) override;
 
-    int32_t OnGetRectRelativeToWindow(int32_t &top, int32_t &left) override;
+    int32_t OnGetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo) override;
+
+    int32_t OnCheckManagerDelegate(bool &checkFlag) override;
+
+    int32_t OnUpdateFormDone(const int64_t formId) override;
 private:
     static bool WriteInterfaceToken(MessageParcel& data);
+    int32_t SendRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);
 
     static inline BrokerDelegator<FormRendererDelegateProxy> delegator_;
 };

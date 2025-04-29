@@ -14,12 +14,6 @@
  */
 #include "core/components_ng/pattern/folder_stack/hover_stack_node.h"
 
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-
 namespace OHOS::Ace::NG {
 RefPtr<HoverStackNode> HoverStackNode::GetOrCreateHoverStackNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)

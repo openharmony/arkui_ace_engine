@@ -36,22 +36,28 @@ class ACE_EXPORT SpanString : public SpanStringBase {
     DECLARE_ACE_TYPE(SpanString, SpanStringBase);
 
 public:
-    explicit SpanString(const std::string& text);
+    explicit SpanString(const std::u16string& text);
     explicit SpanString(const ImageSpanOptions& options);
     explicit SpanString(RefPtr<CustomSpan>& span);
     ~SpanString() override;
-    const std::string& GetString() const;
-    std::wstring GetWideString();
+    const std::string GetString() const;
+    const std::u16string& GetU16string() const;
     int32_t GetLength() const;
-    void SetString(const std::string& text);
+    void SetString(const std::u16string& text);
+    void SetFramNode(const WeakPtr<NG::FrameNode>& frameNode);
+    void MarkDirtyFrameNode();
+    void AddCustomSpan();
+    void RemoveCustomSpan();
     void SetGroupId(const RefPtr<SpanBase>& span);
     void SetSpanItems(const std::list<RefPtr<NG::SpanItem>>&& spanItems);
     void SetSpanMap(std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>>&& spansMap);
     const std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>>& GetSpansMap() const;
     bool IsEqualToSpanString(const RefPtr<SpanString>& other) const;
-    RefPtr<SpanString> GetSubSpanString(int32_t start, int32_t length) const;
+    RefPtr<SpanString> GetSubSpanString(int32_t start, int32_t length, bool includeStartHalf = false,
+        bool includeEndHalf = true, bool rangeNeedNotChange = true) const;
     std::vector<RefPtr<SpanBase>> GetSpans(int32_t start, int32_t length) const;
     std::vector<RefPtr<SpanBase>> GetSpans(int32_t start, int32_t length, SpanType spanType) const;
+    RefPtr<SpanBase> GetSpan(int32_t start, int32_t length, SpanType spanType) const;
     bool operator==(const SpanString& other) const;
     std::list<RefPtr<NG::SpanItem>> GetSpanItems() const;
     void AddSpan(const RefPtr<SpanBase>& span);
@@ -60,11 +66,34 @@ public:
     void BindWithSpans(const std::vector<RefPtr<SpanBase>>& spans);
     bool EncodeTlv(std::vector<uint8_t>& buff);
     static RefPtr<SpanString> DecodeTlv(std::vector<uint8_t>& buff);
+    static RefPtr<SpanString> DecodeTlv(std::vector<uint8_t>& buff,
+        const std::function<RefPtr<ExtSpan>(const std::vector<uint8_t>&, int32_t, int32_t)>&& unmarshallCallback,
+        int32_t instanceId = -1);
+    static void DecodeTlvOldExt(std::vector<uint8_t>& buff, SpanString* spanString, int32_t& cursor);
+    static void DecodeTlvExt(std::vector<uint8_t>& buff, SpanString* spanString,
+        const std::function<RefPtr<ExtSpan>(const std::vector<uint8_t>&, int32_t, int32_t)>&& unmarshallCallback,
+        int32_t instanceId = -1);
     static void DecodeSpanItemList(std::vector<uint8_t>& buff, int32_t& cursor, RefPtr<SpanString>& spanStr);
+    static void DecodeSpanItemListExt(std::vector<uint8_t>& buff, int32_t& cursor, SpanString* spanStr);
     void ClearSpans();
     void AppendSpanItem(const RefPtr<NG::SpanItem>& spanItem);
+    void UpdateSpansMap();
+    RefPtr<LineHeightSpan> ToLineHeightSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
+    RefPtr<BackgroundColorSpan> ToBackgroundColorSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
+    RefPtr<ParagraphStyleSpan> ToParagraphStyleSpan(
+        const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
+    RefPtr<ImageSpan> ToImageSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
+    RefPtr<TextShadowSpan> ToTextShadowSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
+    RefPtr<GestureSpan> ToGestureSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
+    RefPtr<LetterSpacingSpan> ToLetterSpacingSpan(
+        const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
+    RefPtr<BaselineOffsetSpan> ToBaselineOffsetSpan(
+        const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
+    RefPtr<DecorationSpan> ToDecorationSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
+    RefPtr<FontSpan> ToFontSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
+    RefPtr<UrlSpan> ToUrlSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
+    std::string ToString();
 protected:
-    RefPtr<SpanBase> GetSpan(int32_t start, int32_t length, SpanType spanType) const;
     std::list<RefPtr<SpanBase>> GetSubSpanList(
         int32_t start, int32_t length, const std::list<RefPtr<SpanBase>>& spans) const;
     void MergeIntervals(std::list<RefPtr<SpanBase>>& spans);
@@ -72,9 +101,9 @@ protected:
     void ApplyToSpans(const RefPtr<SpanBase>& span, std::pair<int32_t, int32_t> interval, SpanOperation operation);
     void SortSpans(std::list<RefPtr<SpanBase>>& spans);
     bool CanMerge(const RefPtr<SpanBase>& a, const RefPtr<SpanBase>& b);
-    static RefPtr<NG::SpanItem> GetDefaultSpanItem(const std::string& text);
+    static RefPtr<NG::SpanItem> GetDefaultSpanItem(const std::u16string& text);
     static RefPtr<SpanBase> GetDefaultSpan(SpanType type);
-    void AddSpecialSpan(const RefPtr<SpanBase>& span, SpanType type);
+    void AddSpecialSpan(const RefPtr<SpanBase>& span, SpanType type, int32_t start);
     int32_t GetStepsByPosition(int32_t pos);
     void UpdateSpansWithOffset(int32_t start, int32_t offset);
     void UpdateSpanMapWithOffset(int32_t start, int32_t offset);
@@ -82,8 +111,8 @@ protected:
     void RemoveSpecialSpan(int32_t start, int32_t end, SpanType type);
     // For the scene after image remove
     bool CheckRange(const RefPtr<SpanBase>& spanBase) const;
-    static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start);
-    static std::wstring GetWideStringSubstr(const std::wstring& content, int32_t start, int32_t length);
+    static std::u16string GetWideStringSubstr(const std::u16string& content, int32_t start);
+    static std::u16string GetWideStringSubstr(const std::u16string& content, int32_t start, int32_t length);
     std::list<RefPtr<NG::SpanItem>>::iterator SplitSpansAndForward(std::list<RefPtr<NG::SpanItem>>::iterator& it);
     RefPtr<NG::ImageSpanItem> MakeImageSpanItem(const RefPtr<ImageSpan>& imageSpan);
     RefPtr<NG::CustomSpanItem> MakeCustomSpanItem(const RefPtr<CustomSpan>& customSpan);
@@ -92,9 +121,10 @@ protected:
     bool ContainSpecialNode(int32_t start, int32_t length);
     bool IsSpecialNode(RefPtr<SpanBase> span);
 
-    std::string text_;
+    std::u16string text_;
     std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>> spansMap_;
     std::list<RefPtr<NG::SpanItem>> spans_;
+    WeakPtr<NG::FrameNode> framNode_;
     int32_t groupId_ = 0;
 };
 } // namespace OHOS::Ace

@@ -15,13 +15,7 @@
 
 #include "core/components/rating/rosen_render_rating.h"
 
-#ifndef USE_ROSEN_DRAWING
-#include "include/core/SkClipOp.h"
-#include "include/core/SkMaskFilter.h"
-#include "include/core/SkRRect.h"
-#else
 #include "core/components_ng/render/drawing.h"
-#endif
 
 #include "core/components/common/painter/rosen_universal_painter.h"
 #include "core/pipeline/base/rosen_render_context.h"
@@ -76,11 +70,7 @@ void RosenRenderRating::Paint(RenderContext& context, const Offset& offset)
     PaintRatingBar(context, canvas);
 }
 
-#ifndef USE_ROSEN_DRAWING
-void RosenRenderRating::PaintHoverRect(SkCanvas* canvas)
-#else
 void RosenRenderRating::PaintHoverRect(RSCanvas* canvas)
-#endif
 {
     Size hoverSize = Size(singleWidth_, ratingSize_.Height());
     for (auto& item : hoverColorMap_) {
@@ -93,11 +83,7 @@ void RosenRenderRating::PaintHoverRect(RSCanvas* canvas)
     }
 }
 
-#ifndef USE_ROSEN_DRAWING
-void RosenRenderRating::PaintRatingBar(RenderContext& context, SkCanvas* canvas)
-#else
 void RosenRenderRating::PaintRatingBar(RenderContext& context, RSCanvas* canvas)
-#endif
 {
     double imageVerticalOffset = ratingSize_.Width() * paddingVertical_.Value() / defaultHeight_.Value() / starNum_;
     auto imageOffset = offsetDelta_ + Offset(0.0, imageVerticalOffset);
@@ -146,24 +132,6 @@ void RosenRenderRating::PaintRatingBar(RenderContext& context, RSCanvas* canvas)
     }
 }
 
-#ifndef USE_ROSEN_DRAWING
-void RosenRenderRating::PaintImageArea(RenderContext& context, const RefPtr<RenderImage>& renderImage, SkCanvas* canvas,
-    const ImageAreaProperties& properties)
-{
-    canvas->save();
-    auto clipOffset = properties.clipOffset;
-    auto drawOffset = properties.drawOffset;
-    auto imageAreaSize = properties.imageAreaSize;
-    canvas->clipRect({ clipOffset.GetX(), clipOffset.GetY(), clipOffset.GetX() + imageAreaSize.Width(),
-                         clipOffset.GetY() + imageAreaSize.Height() },
-        SkClipOp::kIntersect, true);
-    for (int i = 0; i < properties.repeatNum; ++i) {
-        renderImage->SetAdaptiveFrameRectFlag(false);
-        renderImage->RenderWithContext(context, drawOffset + Offset(singleWidth_ * i, 0.0));
-    }
-    canvas->restore();
-}
-#else
 void RosenRenderRating::PaintImageArea(RenderContext& context, const RefPtr<RenderImage>& renderImage,
     RSCanvas* canvas, const ImageAreaProperties& properties)
 {
@@ -181,7 +149,6 @@ void RosenRenderRating::PaintImageArea(RenderContext& context, const RefPtr<Rend
     }
     canvas->Restore();
 }
-#endif
 
 void RosenRenderRating::PaintFocus(
     const Offset& offset, double rRectRadius, const Size& boardSize, RenderContext& context)
@@ -191,16 +158,6 @@ void RosenRenderRating::PaintFocus(
         LOGE("Paint canvas is null");
         return;
     }
-#ifndef USE_ROSEN_DRAWING
-    SkPaint paint;
-    SkRRect rRect;
-    paint.setColor(RATING_FOCUS_BOARD_COLOR);
-    paint.setStyle(SkPaint::Style::kFill_Style);
-    paint.setMaskFilter(SkMaskFilter::MakeBlur(SkBlurStyle::kSolid_SkBlurStyle, 1.0));
-    rRect.setRectXY(SkRect::MakeWH(boardSize.Width(), boardSize.Height()), rRectRadius, rRectRadius);
-    rRect.offset(offset.GetX(), offset.GetY());
-    canvas->drawRRect(rRect, paint);
-#else
     RSBrush brush;
     brush.SetColor(RATING_FOCUS_BOARD_COLOR);
     RSFilter filter;
@@ -213,7 +170,6 @@ void RosenRenderRating::PaintFocus(
     canvas->AttachBrush(brush);
     canvas->DrawRoundRect(rRect);
     canvas->DetachBrush();
-#endif
 }
 
 void RosenRenderRating::PaintFocusForTABLET(
@@ -224,17 +180,6 @@ void RosenRenderRating::PaintFocusForTABLET(
         LOGE("Paint canvas is null");
         return;
     }
-#ifndef USE_ROSEN_DRAWING
-    SkPaint paint;
-    SkRRect rRect;
-    paint.setColor(FOCUS_BORDER_COLOR);
-    paint.setStyle(SkPaint::Style::kStroke_Style);
-    paint.setStrokeWidth(NormalizeToPx(FOCUS_BORDER_PADDING));
-    paint.setAntiAlias(true);
-    rRect.setRectXY(SkRect::MakeWH(boardSize.Width(), boardSize.Height()), rRectRadius, rRectRadius);
-    rRect.offset(offset.GetX(), offset.GetY());
-    canvas->drawRRect(rRect, paint);
-#else
     RSPen pen;
     pen.SetColor(FOCUS_BORDER_COLOR);
     pen.SetWidth(NormalizeToPx(FOCUS_BORDER_PADDING));
@@ -245,7 +190,6 @@ void RosenRenderRating::PaintFocusForTABLET(
     canvas->AttachPen(pen);
     canvas->DrawRoundRect(rRect);
     canvas->DetachPen();
-#endif
 }
 
 void RosenRenderRating::PaintPress(

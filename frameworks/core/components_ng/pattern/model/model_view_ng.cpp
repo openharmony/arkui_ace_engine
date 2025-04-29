@@ -15,13 +15,8 @@
 
 #include "core/components_ng/pattern/model/model_view_ng.h"
 
-#include "base/geometry/dimension.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/model/model_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 void ModelViewNG::Create(const ModelViewContext& context)

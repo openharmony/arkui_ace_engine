@@ -103,9 +103,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupFont, TextStyle, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Font, TextStyle, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItemSize, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AlignStyle, NG::AlignStyle, PROPERTY_UPDATE_NORMAL);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupPositionX, Dimension, PROPERTY_UPDATE_NORMAL);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupPositionY, Dimension, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AlignStyle, NG::AlignStyle, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupPositionX, Dimension, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupPositionY, Dimension, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontSize, Dimension, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontWeight, FontWeight, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoCollapse, bool, PROPERTY_UPDATE_MEASURE);
@@ -117,6 +117,9 @@ public:
 private:
     static std::unique_ptr<JsonValue> ToJsonObjectValue(const TextStyle& textStyle);
     static std::string AlignStyleToString(const AlignStyle& alignStyle);
+
+protected:
+    void UpdateLayoutProperty(const IndexerLayoutProperty* layoutProperty);
 };
 } // namespace OHOS::Ace::NG
 

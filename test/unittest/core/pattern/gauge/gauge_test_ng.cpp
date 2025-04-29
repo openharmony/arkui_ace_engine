@@ -115,6 +115,7 @@ public:
 void GaugeTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_PROGRESS);
@@ -159,7 +160,7 @@ void GaugeTestNg::Create(float values, float min, float max, const std::function
         callback(model);
     }
     GetInstance();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 /**
@@ -674,6 +675,8 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest007, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
     Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, Save()).Times(0);
+    EXPECT_CALL(rsCanvas, Restore()).Times(0);
     gaugeModifier.PaintCircularAndIndicator(rsCanvas);
 }
 
@@ -702,6 +705,8 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest008, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
     Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, Save()).Times(0);
+    EXPECT_CALL(rsCanvas, Restore()).Times(0);
     gaugeModifier.PaintCircularAndIndicator(rsCanvas);
 }
 
@@ -730,6 +735,8 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest009, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
     Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, Save()).Times(0);
+    EXPECT_CALL(rsCanvas, Restore()).Times(0);
     gaugeModifier.PaintCircularAndIndicator(rsCanvas);
 }
 
@@ -758,6 +765,8 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest010, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
     Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, Save()).Times(0);
+    EXPECT_CALL(rsCanvas, Restore()).Times(0);
     gaugeModifier.PaintCircularAndIndicator(rsCanvas);
 }
 
@@ -1370,7 +1379,7 @@ HWTEST_F(GaugeTestNg, Measure001, TestSize.Level1)
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(Infinity<float>() / SIZE_INFINITY + 1.0f));
     ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(Infinity<float>() / SIZE_INFINITY + 1.0f));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameSize(),
         SizeF(Infinity<float>() / SIZE_INFINITY + 1.0f, Infinity<float>() / SIZE_INFINITY + 1.0f)));
 
@@ -1379,7 +1388,7 @@ HWTEST_F(GaugeTestNg, Measure001, TestSize.Level1)
      */
     ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(WIDTH_1));
     ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(HEIGHT_1));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameSize(), SizeF(WIDTH_1, HEIGHT_1)));
 }
 
@@ -2007,8 +2016,40 @@ HWTEST_F(GaugeTestNg, GaugePrivacySensitiveTest001, TestSize.Level1)
      * @tc.steps: step2. change privacy sensitive and check status.
      */
     pattern_->OnSensitiveStyleChange(false);
-    EXPECT_EQ(textPattern->IsSensitiveEnalbe(), false);
+    EXPECT_EQ(textPattern->IsSensitiveEnable(), false);
     pattern_->OnSensitiveStyleChange(true);
-    EXPECT_EQ(textPattern->IsSensitiveEnalbe(), true);
+    EXPECT_EQ(textPattern->IsSensitiveEnable(), true);
+}
+
+/**
+ * @tc.name: GaugePrivacySensitiveTest002
+ * @tc.desc: Test OnSensitiveStyleChange maxValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugeTestNg, GaugePrivacySensitiveTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GaugePattern.
+     */
+    Create(VALUE, MIN, MAX);
+    frameNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto valueTextId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, valueTextId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    pattern_->maxValueTextId_ = valueTextId;
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. change privacy sensitive false and check status.
+     */
+    pattern_->OnSensitiveStyleChange(false);
+    EXPECT_EQ(textPattern->IsSensitiveEnable(), false);
+    /**
+     * @tc.steps: step3. change privacy sensitive true and check status.
+     */
+    pattern_->OnSensitiveStyleChange(true);
+    EXPECT_EQ(textPattern->IsSensitiveEnable(), true);
 }
 } // namespace OHOS::Ace::NG

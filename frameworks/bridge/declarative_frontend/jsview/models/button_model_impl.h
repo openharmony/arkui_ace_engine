@@ -34,7 +34,7 @@ public:
     void Create(const CreateWithPara& para, std::list<RefPtr<Component>>& buttonChildren) override;
     void CreateWithChild(const CreateWithPara& para) override;
     void Padding(const NG::PaddingProperty& paddingNew, const Edge& paddingOld) override;
-    void OnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc) override;
+    void OnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc, double distanceThreshold) override;
     void BackgroundColor(const Color& color, const bool& colorFlag) override;
     void SetWidth(const Dimension& width) override;
     void SetHeight(const Dimension& height) override;

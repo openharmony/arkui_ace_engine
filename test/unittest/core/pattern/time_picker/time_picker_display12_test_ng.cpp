@@ -71,11 +71,25 @@ const int SHOW_COUNT = 7;
 const int CURRENT_INDEX_VALUE1 = 3;
 const int CURRENT_INDEX_VALUE2 = 4;
 const int CURRENT_INDEX_VALUE3 = 5;
-const std::string AM = "上午";
-const std::string PM = "下午";
+const std::string AM = "AM ";
+const std::string PM = "PM ";
 const std::string COLON = ":";
 const std::string ZERO = "0";
 const PickerTime TIME_PICKED_PREFIXZERO = PickerTime(3, 3, 3);
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return MockThemeDefault::GetPickerTheme();
+    } else if (type == ButtonTheme::TypeId()) {
+        return AceType::MakeRefPtr<ButtonTheme>();
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 class TimePickerDisplay12TestNg : public testing::Test {
 public:
@@ -123,18 +137,11 @@ void TimePickerDisplay12TestNg::TearDownTestSuite()
 void TimePickerDisplay12TestNg::SetUp()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-            if (type == IconTheme::TypeId()) {
-                return AceType::MakeRefPtr<IconTheme>();
-            } else if (type == DialogTheme::TypeId()) {
-                return AceType::MakeRefPtr<DialogTheme>();
-            } else if (type == PickerTheme::TypeId()) {
-                return MockThemeDefault::GetPickerTheme();
-            } else {
-                return nullptr;
-            }
-        });
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        return GetTheme(type);
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 

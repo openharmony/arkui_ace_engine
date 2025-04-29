@@ -18,6 +18,7 @@
 
 #include "form_renderer_dispatcher_interface.h"
 #include "iremote_proxy.h"
+#include <transaction/rs_transaction.h>
 
 #include "base/utils/macros.h"
 
@@ -38,7 +39,8 @@ public:
 
     void SetAllowUpdate(bool allowUpdate) override;
 
-    void DispatchSurfaceChangeEvent(float width, float height, float borderWidth = 0.0) override;
+    void DispatchSurfaceChangeEvent(float width, float height, uint32_t reason = 0,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, float borderWidth = 0.0) override;
 
     void SetObscured(bool isObscured) override;
     void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId) override;
@@ -46,11 +48,13 @@ public:
     void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
     void OnAccessibilityTransferHoverEvent(float pointX, float pointY, int32_t sourceType,
         int32_t eventType, int64_t timeMs) override;
+    void OnNotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
 private:
     template<typename T>
     int32_t GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);
     static bool WriteInterfaceToken(MessageParcel &data);
+    int32_t SendRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);
 
     static inline BrokerDelegator<FormRendererDispatcherProxy> delegator_;
 };

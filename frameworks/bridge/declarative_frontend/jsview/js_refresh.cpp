@@ -16,9 +16,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_refresh.h"
 
 #include <cstdint>
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_refresh.h"
@@ -59,9 +58,8 @@ RefreshModel* RefreshModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
-void ParseRefreshingObject(const JSCallbackInfo& info, const JSRef<JSObject>& refreshing)
+void ParseRefreshingObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
 {
-    JSRef<JSVal> changeEventVal = refreshing->GetProperty("changeEvent");
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
@@ -101,6 +99,7 @@ void JSRefresh::JSBind(BindingTarget globalObj)
     JSClass<JSRefresh>::StaticMethod("onRefreshing", &JSRefresh::OnRefreshing);
     JSClass<JSRefresh>::StaticMethod("onOffsetChange", &JSRefresh::OnOffsetChange);
     JSClass<JSRefresh>::StaticMethod("pullDownRatio", &JSRefresh::SetPullDownRatio);
+    JSClass<JSRefresh>::StaticMethod("maxPullDownDistance", &JSRefresh::SetMaxPullDownDistance);
     JSClass<JSRefresh>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSRefresh>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRefresh>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
@@ -123,6 +122,26 @@ void JSRefresh::SetPullDownRatio(const JSCallbackInfo& info)
     }
     pulldownRatio = std::clamp(args->ToNumber<float>(), 0.f, 1.f);
     RefreshModel::GetInstance()->SetPullDownRatio(pulldownRatio);
+}
+
+void JSRefresh::SetMaxPullDownDistance(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+
+    auto args = info[0];
+    if (!args->IsNumber()) {
+        RefreshModel::GetInstance()->SetMaxPullDownDistance(std::nullopt);
+        return;
+    }
+    float maxPullDownDistance = args->ToNumber<float>();
+    if (std::isnan(maxPullDownDistance)) {
+        RefreshModel::GetInstance()->SetMaxPullDownDistance(std::nullopt);
+        return;
+    }
+    maxPullDownDistance = std::max(maxPullDownDistance, 0.0f);
+    RefreshModel::GetInstance()->SetMaxPullDownDistance(maxPullDownDistance);
 }
 
 void JSRefresh::JsRefreshOffset(const JSCallbackInfo& info)
@@ -156,14 +175,17 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     auto jsOffset = paramObject->GetProperty("offset");
     auto friction = paramObject->GetProperty("friction");
     auto promptText = paramObject->GetProperty("promptText");
+    JSRef<JSVal> changeEventVal;
     RefreshModel::GetInstance()->Create();
-    RefreshModel::GetInstance()->SetProgressColor(theme->GetProgressColor());
 
     if (refreshing->IsBoolean()) {
         RefreshModel::GetInstance()->SetRefreshing(refreshing->ToBoolean());
+        changeEventVal = paramObject->GetProperty("$refreshing");
+        ParseRefreshingObject(info, changeEventVal);
     } else if (refreshing->IsObject()) {
         JSRef<JSObject> refreshingObj = JSRef<JSObject>::Cast(refreshing);
-        ParseRefreshingObject(info, refreshingObj);
+        changeEventVal = refreshingObj->GetProperty("changeEvent");
+        ParseRefreshingObject(info, changeEventVal);
         RefreshModel::GetInstance()->SetRefreshing(refreshingObj->GetProperty("value")->ToBoolean());
     } else {
         RefreshModel::GetInstance()->SetRefreshing(false);
@@ -207,6 +229,7 @@ bool JSRefresh::ParseRefreshingContent(const JSRef<JSObject>& paramObject)
         return false;
     }
     const auto* vm = nodeptr->GetEcmaVM();
+    CHECK_NULL_RETURN(nodeptr->GetLocalHandle()->IsNativePointer(vm), false);
     auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, false);
@@ -253,9 +276,7 @@ void JSRefresh::OnStateChange(const JSCallbackInfo& args)
         PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
         func->ExecuteJS(1, &newJSVal);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Refresh.OnStateChange");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Refresh.OnStateChange");
     };
     RefreshModel::GetInstance()->SetOnStateChange(std::move(onStateChange));
 }
@@ -286,7 +307,7 @@ void JSRefresh::OnOffsetChange(const JSCallbackInfo& args)
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto offsetChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                                const float& value) {
+                            const float& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Refresh.OnOffsetChange");
         PipelineContext::SetCallBackNode(node);

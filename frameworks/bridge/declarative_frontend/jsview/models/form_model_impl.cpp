@@ -14,12 +14,8 @@
  */
 #include "bridge/declarative_frontend/jsview/models/form_model_impl.h"
 
-#include "want.h"
-
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/form/form_component.h"
-#include "core/components/form/resource/form_request_data.h"
-#include "core/event/ace_event_handler.h"
 
 namespace OHOS::Ace::Framework {
 void FormModelImpl::Create(const RequestFormInfo& info)
@@ -112,6 +108,11 @@ void FormModelImpl::SetOnRouter(std::function<void(const std::string&)>&& onRout
 void FormModelImpl::SetOnLoad(std::function<void(const std::string&)>&& onLoad)
 {
     LOGE("Not support onLoad in old pipeline");
+}
+
+void FormModelImpl::SetOnUpdate(std::function<void(const std::string&)>&& onUpdate)
+{
+    LOGE("Not support onUpdate in old pipeline");
 }
 
 void FormModelImpl::SetObscured(const std::vector<ObscuredReasons>& reasons)

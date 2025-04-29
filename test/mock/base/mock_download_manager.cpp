@@ -41,7 +41,30 @@ public:
     {
         return false;
     }
-    bool RemoveDownloadTask(const std::string& /* url */, int32_t /*nodeId*/) override
+    bool RemoveDownloadTask(const std::string& /* url */, int32_t /*nodeId*/, bool /*isCancel = true*/) override
+    {
+        return false;
+    }
+    bool RemoveDownloadTaskWithPreload(const std::string& url, bool /*isCancel = true*/) override
+    {
+        return false;
+    }
+    bool DownloadAsyncWithPreload(
+        DownloadCallback&& /* downloadCallback */, const std::string& /* url */, int32_t /* instanceId */) override
+    {
+        return false;
+    }
+    bool DownloadSyncWithPreload(
+        DownloadCallback&& /* downloadCallback */, const std::string& /* url */, int32_t /* instanceId */) override
+    {
+        return false;
+    }
+    bool IsContains(const std::string& /* url */) override
+    {
+        return false;
+    }
+
+    bool fetchCachedResult(const std::string& /* url */, std::string& /* result */) override
     {
         return false;
     }

@@ -31,7 +31,7 @@ void InspectLabel::PackAttrAndStyle()
         styles_.insert(std::make_pair("color", "#e5000000"));
     } else if (deviceType == DeviceType::TV) {
         styles_.insert(std::make_pair("color", "#e5ffffff"));
-    } else if (deviceType == DeviceType::WATCH) {
+    } else if (deviceType == DeviceType::WEARABLE || deviceType == DeviceType::WATCH) {
         styles_.insert(std::make_pair("color", "#ffffffff"));
     }
     styles_.insert(std::make_pair("font-size", "30px"));

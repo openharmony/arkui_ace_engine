@@ -50,6 +50,7 @@ constexpr float SAFE_AREA_KEYBOARD = 500.0f;
 void ExpandSafeAreaTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
 }
 
 void ExpandSafeAreaTestNg::TearDownTestSuite()
@@ -68,7 +69,7 @@ void ExpandSafeAreaTestNg::InitSafeAreaManager(AvoidConfig config)
     safeAreaManager->SetIsFullScreen(config.isFullScreen);
     safeAreaManager->SetIsNeedAvoidWindow(config.isNeedAvoidWindow);
     safeAreaManager->SetIgnoreSafeArea(config.ignoreSafeArea);
-    safeAreaManager->SetKeyBoardAvoidMode(config.keyboardSafeAreaEnabled);
+    safeAreaManager->SetKeyBoardAvoidMode(KeyBoardAvoidMode::OFFSET);
 }
 
 void ExpandSafeAreaTestNg::TearDown()
@@ -97,7 +98,7 @@ void ExpandSafeAreaTestNg::Create(const std::function<void()>& callback, bool fl
     }
     GetInstance();
     if (flushLayout) {
-        FlushLayoutTask(frameNode_);
+        FlushUITasks(frameNode_);
     }
 }
 
@@ -170,10 +171,10 @@ void ExpandSafeAreaTestNg::InitSafeArea(SafeAreaExpandOpts opts)
     // for tdd, we assume opt type in this function is used to update one specific type
     switch (opts.type) {
         case SAFE_AREA_TYPE_SYSTEM:
-            pipeline->UpdateSystemSafeArea(insets);
+            pipeline->UpdateSystemSafeArea(insets, false);
             break;
         case SAFE_AREA_TYPE_CUTOUT:
-            pipeline->UpdateCutoutSafeArea(insets);
+            pipeline->UpdateCutoutSafeArea(insets, false);
             break;
         case SAFE_AREA_TYPE_KEYBOARD:
             safeAreaManager->UpdateKeyboardOffset(SAFE_AREA_KEYBOARD);

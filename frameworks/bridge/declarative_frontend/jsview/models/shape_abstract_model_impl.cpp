@@ -15,7 +15,6 @@
 
 #include "bridge/declarative_frontend/jsview/models/shape_abstract_model_impl.h"
 
-#include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/shape/shape_component.h"
 
@@ -41,6 +40,11 @@ void ShapeAbstractModelImpl::SetFill(const Color& color)
     }
     AnimationOption option = stack->GetImplicitAnimationOption();
     component->SetFill(color, option);
+}
+
+void ShapeAbstractModelImpl::SetForegroundColor(const Color& color)
+{
+    SetFill(color);
 }
 
 void ShapeAbstractModelImpl::SetStrokeDashOffset(const Ace::Dimension& dashOffset)

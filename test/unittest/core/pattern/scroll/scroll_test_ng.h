@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,67 +16,61 @@
 #ifndef FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_SCROLL_SCROLL_TEST_NG_H
 #define FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_SCROLL_SCROLL_TEST_NG_H
 
-#include "test/unittest/core/pattern/test_ng.h"
+#include "test/unittest/core/pattern/scrollable/scrollable_utils_test_ng.h"
 
 #define private public
 #define protected public
+#include "test/mock/core/animation/mock_animation_manager.h"
+
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 
 namespace OHOS::Ace::NG {
-using namespace testing;
-using namespace testing::ext;
-constexpr float SCROLL_WIDTH = 480.f;
-constexpr float SCROLL_HEIGHT = 800.f;
-constexpr int32_t TOTAL_ITEM_NUMBER = 10;
-constexpr int32_t VIEW_ITEM_NUMBER = 8;
-constexpr int32_t SNAP_ITEM_NUMBER = 30;
 constexpr float DEFAULT_ACTIVE_WIDTH = 8.0f;
 constexpr float DEFAULT_INACTIVE_WIDTH = 4.0f;
 constexpr float DEFAULT_NORMAL_WIDTH = 4.0f;
 constexpr float DEFAULT_TOUCH_WIDTH = 32.0f;
-constexpr float ITEM_WIDTH = 60.f;
-constexpr float ITEM_HEIGHT = 100.f;
-constexpr float VERTICAL_SCROLLABLE_DISTANCE = (TOTAL_ITEM_NUMBER - VIEW_ITEM_NUMBER) * ITEM_HEIGHT;
-constexpr float SNAP_SCROLLABLE_DISTANCE = (SNAP_ITEM_NUMBER - VIEW_ITEM_NUMBER) * ITEM_HEIGHT;
 constexpr float NORMAL_WIDTH = 4.f;
-constexpr float SCROLL_PAGING_SPEED_THRESHOLD = 1200.0f;
 
-class ScrollTestNg : public TestNG {
+constexpr float SCROLL_PAGING_SPEED_THRESHOLD = 1200.0f;
+constexpr float BAR_WIDTH = 10.f;
+constexpr char SCROLL_BAR_COLOR[] = "#66182431";
+
+class ScrollTestNg : public ScrollableUtilsTestNG {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
     void GetScroll();
-
+    RefPtr<PaintWrapper> CreateScrollDone(const RefPtr<FrameNode>& frameNode = nullptr);
     ScrollModelNG CreateScroll();
-    void CreateSnapScroll(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
-        const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide);
+    void CreateContent(float mainSize = CONTENT_MAIN_SIZE);
+    void CreateContentChild(int32_t childNumber = 10);
+    void ScrollBy(double pixelX, double pixelY, bool smooth = false) override;
 
-    void CreateContent(int32_t childNumber = TOTAL_ITEM_NUMBER);
-    RefPtr<FrameNode> GetContentChild(int32_t index);
-    void Touch(TouchType touchType, Offset offset, SourceType sourceType);
-    void Mouse(Offset location, MouseButton mouseButton = MouseButton::NONE_BUTTON,
-        MouseAction mouseAction = MouseAction::NONE);
-    void Hover(bool isHover);
-    bool OnScrollCallback(float offset, int32_t source);
-    void ScrollToEdge(ScrollEdgeType scrollEdgeType);
-    void ScrollTo(float offset);
-    Axis GetAxis();
-    float GetOffset(float childNumber);
-    AssertionResult UpdateAndVerifyPosition(float delta, int32_t source, float expectOffset);
-    AssertionResult ScrollToNode(int32_t childIndex, float expectOffset);
-    AssertionResult IsEqualCurrentPosition(float expectOffset);
-
-    RefPtr<FrameNode> frameNode_;
     RefPtr<ScrollPattern> pattern_;
     RefPtr<ScrollEventHub> eventHub_;
     RefPtr<ScrollLayoutProperty> layoutProperty_;
-    RefPtr<ScrollablePaintProperty> paintProperty_;
     RefPtr<ScrollAccessibilityProperty> accessibilityProperty_;
+    std::vector<RefPtr<FrameNode>> contentChildren_;
     RefPtr<ScrollBar> scrollBar_;
+    RefPtr<Scrollable> scrollable_;
+};
+
+class ScrollModelNGTestNg : public TestNG {
+    void SetUp() override;
+    void TearDown() override;
+};
+
+class ScrollPatternTestNg : public TestNG {
+    void SetUp() override;
+    void TearDown() override;
+};
+
+class ScrollBarOverlayTestNg : public TestNG {
+    void SetUp() override;
+    void TearDown() override;
 };
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_SCROLL_SCROLL_TEST_NG_H

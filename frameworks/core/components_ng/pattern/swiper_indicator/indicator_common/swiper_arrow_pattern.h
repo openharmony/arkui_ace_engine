@@ -75,11 +75,14 @@ public:
     void ButtonOnHover(RefPtr<FrameNode> buttonNode, bool isHovered);
     void SetButtonVisible(bool visible);
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
+
 private:
+    std::tuple<bool, bool, bool> CheckHoverStatus();
     void OnModifyDone() override;
     void InitNavigationArrow();
     void InitSwiperChangeEvent(const RefPtr<SwiperEventHub>& swiperEventHub);
-    void InitButtonEvent();
+    void InitEvent();
     void UpdateButtonNode(int32_t index);
     void ButtonTouchEvent(RefPtr<FrameNode> buttonNode, TouchType touchType);
     void ButtonClickEvent();
@@ -87,11 +90,14 @@ private:
     void InitOnKeyEvent();
     bool OnKeyEvent(const KeyEvent& event);
     void OnClick() const;
-
+    void InitAccessibilityText();
     int32_t TotalCount() const;
-    RefPtr<ClickEvent> buttonClickListenr_;
-    RefPtr<TouchEventImpl> buttonTouchListenr_;
-    RefPtr<InputEvent> buttonOnHoverListenr_;
+    RefPtr<SwiperPattern> GetSwiperPattern() const;
+
+    RefPtr<ClickEvent> buttonClickListener_;
+    RefPtr<ClickEvent> arrowClickListener_;
+    RefPtr<TouchEventImpl> buttonTouchListener_;
+    RefPtr<InputEvent> buttonOnHoverListener_;
     std::shared_ptr<ChangeEvent> swiperChangeEvent_;
 
     int32_t index_ = 0;
@@ -103,6 +109,10 @@ private:
     bool isVisible_ = false;
     bool hoverOnClickFlag_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(SwiperArrowPattern);
+    void UpdateArrowContentByImage(RefPtr<FrameNode>& buttonNode,
+        RefPtr<SwiperArrowLayoutProperty>& swiperArrowLayoutProperty);
+    void UpdateArrowContentBySymbol(RefPtr<FrameNode>& buttonNode,
+        RefPtr<SwiperArrowLayoutProperty>& swiperArrowLayoutProperty);
 };
 } // namespace OHOS::Ace::NG
 

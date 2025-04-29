@@ -99,6 +99,7 @@ public:
     void SetActiveCircleColor(const LinearColor& activeCircleColor);
     void SetActiveBackgroundRadius(float activeBackgroundRadius);
     void SetEnableWaveEffect(bool enableWaveEffect);
+    void SetEnableForeground(bool enableForeground);
 
 private:
     void DrawForApiNine(DrawingContext& context);
@@ -106,6 +107,7 @@ private:
     void PaintLockCircleForApiNine(RSCanvas& canvas, const OffsetF& offset, int32_t x, int32_t y);
     void PaintLockLine(RSCanvas& canvas, const OffsetF& offset);
     void PaintLockCircle(RSCanvas& canvas, const OffsetF& offset, int32_t x, int32_t y);
+    void PaintActiveCircle(RSCanvas& canvas, const OffsetF& offset);
     void CheckIsHoverAndPaint(RSCanvas& canvas, float offsetX, float offsetY, float radius, int32_t index);
     void PaintCircle(RSCanvas& canvas, float offsetX, float offsetY, float radius, const RSColor& circleColor);
     void PaintLightRing(RSCanvas& canvas, float offsetX, float offsetY, float radius, float alphaF);
@@ -153,6 +155,7 @@ private:
     RefPtr<PropertyBool> isMoveEventValid_;
     RefPtr<PropertyBool> isHover_;
     RefPtr<PropertyBool> enableWaveEffect_;
+    RefPtr<PropertyBool> enableForeground_;
     RefPtr<PropertyInt> hoverIndex_;
     std::optional<NG::PatternLockChallengeResult> challengeResult_;
     RefPtr<PropertyOffsetF> cellCenter_;

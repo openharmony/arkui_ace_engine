@@ -31,6 +31,7 @@
 #include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
@@ -41,13 +42,13 @@ struct TextDetectConfig {
     std::string types;
     std::function<void(const std::string&)> onResult;
     Color entityColor;
-    TextDecoration entityDecorationType;
+    TextDecoration entityDecorationType = TextDecoration::UNDERLINE;
     Color entityDecorationColor;
-    TextDecorationStyle entityDecorationStyle;
+    TextDecorationStyle entityDecorationStyle = TextDecorationStyle::SOLID;
 
     TextDetectConfig()
     {
-        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto hyperlinkTheme = pipeline->GetTheme<HyperlinkTheme>();
         CHECK_NULL_VOID(hyperlinkTheme);
@@ -59,10 +60,13 @@ struct TextDetectConfig {
     std::string ToString() const
     {
         auto jsonValue = JsonUtil::Create(true);
-        JSON_STRING_PUT_STRING(jsonValue, types);
-        JSON_STRING_PUT_STRINGABLE(jsonValue, entityColor);
-        JSON_STRING_PUT_INT(jsonValue, entityDecorationType);
-        JSON_STRING_PUT_STRINGABLE(jsonValue, entityDecorationColor);
+        jsonValue->Put("types", types.c_str());
+        jsonValue->Put("color", entityColor.ToString().c_str());
+        auto decorationJson = JsonUtil::Create(true);
+        decorationJson->Put("type", static_cast<int64_t>(entityDecorationType));
+        decorationJson->Put("color", entityDecorationColor.ToString().c_str());
+        decorationJson->Put("style", static_cast<int64_t>(entityDecorationStyle));
+        jsonValue->Put("decoration", decorationJson);
         return jsonValue->ToString();
     }
 };
@@ -75,7 +79,7 @@ class ACE_EXPORT TextControllerBase : public AceType {
 
 public:
     virtual void CloseSelectionMenu() = 0;
-    virtual void SetStyledString(const RefPtr<SpanStringBase>& value) = 0;
+    virtual void SetStyledString(const RefPtr<SpanStringBase>& value, bool closeSelectOverlay) = 0;
     virtual WeakPtr<NG::LayoutInfoInterface> GetLayoutInfoInterface() = 0;
 };
 
@@ -84,11 +88,13 @@ public:
     static TextModel* GetInstance();
     virtual ~TextModel() = default;
 
-    virtual void Create(const std::string& content) = 0;
+    virtual void Create(const std::u16string& content) {};
+    virtual void Create(const std::string& content) {};
     virtual void Create(const RefPtr<SpanStringBase>& spanString) = 0;
     virtual void SetFont(const Font& value) = 0;
     virtual void SetFontSize(const Dimension& value) = 0;
     virtual void SetTextColor(const Color& value) = 0;
+    virtual void ResetTextColor() = 0;
     virtual void SetTextShadow(const std::vector<Shadow>& value) = 0;
     virtual void SetItalicFontStyle(Ace::FontStyle value) = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
@@ -119,22 +125,18 @@ public:
     virtual void OnSetWidth() {};
     virtual void OnSetHeight() {};
     virtual void OnSetAlign() {};
-    virtual void SetOnClick(std::function<void(BaseEventInfo* info)>&& click) = 0;
+    virtual void SetOnClick(std::function<void(BaseEventInfo* info)>&& click, double distanceThreshold) = 0;
     virtual void ClearOnClick() = 0;
     virtual void SetRemoteMessage(std::function<void()>&& click) = 0;
     virtual void SetCopyOption(CopyOptions copyOption) = 0;
-    virtual void SetOnCopy(std::function<void(const std::string&)>&& func) = 0;
+    virtual void SetOnCopy(std::function<void(const std::u16string&)>&& func) = 0;
     virtual void SetEllipsisMode(EllipsisMode modal) = 0;
 
     virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
-    virtual void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) = 0;
-    virtual void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) = 0;
-    virtual void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) = 0;
-    virtual void SetOnDrop(NG::OnDragDropFunc&& onDrop) = 0;
-    virtual void SetDraggable(bool draggable) = 0;
-
     virtual void SetTextSelection(int32_t startIndex, int32_t endIndex) = 0;
     virtual void SetTextSelectableMode(TextSelectableMode textSelectable) = 0;
+    virtual void SetTextCaretColor(const Color& value) = 0;
+    virtual void SetSelectedBackgroundColor(const Color& value) = 0;
     virtual void BindSelectionMenu(NG::TextSpanType& spanType, NG::TextResponseType& responseType,
         std::function<void()>& buildFunc, NG::SelectMenuParam& menuParam) {};
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) {};
@@ -144,10 +146,13 @@ public:
     };
     virtual void SetClipEdge(bool clip) = 0;
     virtual void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) = 0;
+    virtual void SetMarqueeOptions(const NG::TextMarqueeOptions& options) = 0;
+    virtual void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) = 0;
     virtual void SetSelectionMenuOptions(
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
     virtual void SetResponseRegion(bool isUserSetResponseRegion) {};
     virtual void SetHalfLeading(bool halfLeading) = 0;
+    virtual void SetEnableHapticFeedback(bool state) = 0;
 
 private:
     static std::unique_ptr<TextModel> instance_;

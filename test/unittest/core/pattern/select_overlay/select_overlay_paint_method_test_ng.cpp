@@ -280,7 +280,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateOverlayModifier003, TestSize.Leve
     EXPECT_EQ(selectOverlayPaintMethod->hasExtensionMenu_, false);
     auto overlayModifier = pattern->selectOverlayModifier_;
     ASSERT_NE(overlayModifier, nullptr);
-    EXPECT_TRUE(overlayModifier->hasExtensionMenu_ == false);
+    EXPECT_TRUE(overlayModifier->hasExtensionMenu_->Get() == false);
 }
 
 /**
@@ -402,7 +402,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateOverlayModifier005, TestSize.Leve
     EXPECT_EQ(selectOverlayPaintMethod->isCreated_, false);
     EXPECT_EQ(selectOverlayPaintMethod->circlesAndBackArrowIsShown_, true);
     EXPECT_EQ(selectOverlayPaintMethod->hasExtensionMenu_, true);
-    EXPECT_EQ(overlayModifier->GetHasExtensionMenu(), true);
+    EXPECT_EQ(overlayModifier->hasExtensionMenu_->Get(), true);
 
     /**
      * @tc.steps: step2. call UpdateContentModifier again.
@@ -412,7 +412,7 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateOverlayModifier005, TestSize.Leve
     overlayModifier->SetHasExtensionMenu(true);
     selectOverlayPaintMethod->UpdateOverlayModifier(paintWrapper);
     EXPECT_EQ(selectOverlayPaintMethod->hasExtensionMenu_, false);
-    EXPECT_EQ(overlayModifier->GetHasExtensionMenu(), false);
+    EXPECT_EQ(overlayModifier->hasExtensionMenu_->Get(), false);
 }
 
 /**

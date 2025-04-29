@@ -32,21 +32,18 @@ std::mutex HyperlinkModel::mutex_;
 
 HyperlinkModel* HyperlinkModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::HyperlinkModelNG());
+    static NG::HyperlinkModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::HyperlinkModelNG());
-            } else {
-                instance_.reset(new Framework::HyperlinkModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::HyperlinkModelNG instance;
+        return &instance;
+    } else {
+        static Framework::HyperlinkModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 
 } // namespace OHOS::Ace
@@ -105,6 +102,9 @@ void JSHyperlink::SetColor(const JSCallbackInfo& info)
 
 void JSHyperlink::Pop()
 {
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSHyperlink][pop]", &JSHyperlink::Pop);
+    }
     if (Container::IsCurrentUseNewPipeline()) {
         ViewStackModel::GetInstance()->PopContainer();
         return;

@@ -15,13 +15,7 @@
 
 #include "navigator_event_hub.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
-#include "frameworks/core/pipeline_ng/pipeline_context.h"
-#include "core/common/recorder/event_recorder.h"
-#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -35,6 +29,7 @@ void NavigatorEventHub::NavigatePage()
             builder.SetId(id).SetType(host->GetHostTag()).SetDescription(host->GetAutoEventParamValue(""));
         }
         builder.SetEventType(Recorder::EventType::NAVIGATOR)
+            .SetHost(host)
             .SetExtra(Recorder::KEY_NAV_PAGE, url_)
             .SetExtra(Recorder::KEY_NAV_PAGE_PARAM, params_)
             .SetExtra(Recorder::KEY_NAV_PAGE_TYPE, GetNavigatorType());

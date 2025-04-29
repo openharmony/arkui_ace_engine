@@ -37,6 +37,7 @@ constexpr int64_t REGISTER_RETRY_INTERVAL = 30; // 30ms
 
 static inline RefPtr<FrameNode> GetSecCompChildNode(RefPtr<FrameNode>& parent, const std::string& tag)
 {
+    CHECK_NULL_RETURN(parent, nullptr);
     for (const auto& child : parent->GetChildren()) {
         auto node = AceType::DynamicCast<FrameNode, UINode>(child);
         CHECK_NULL_RETURN(node, nullptr);
@@ -86,6 +87,8 @@ public:
     void OnWindowHide() override;
     void OnWindowShow() override;
 
+    void OnLanguageConfigurationUpdate() override;
+
     SecurityComponentRegisterStatus regStatus_ = SecurityComponentRegisterStatus::UNREGISTERED;
     std::timed_mutex regMutex_;
     int32_t scId_ = -1;
@@ -98,10 +101,18 @@ protected:
     void OnTouch(const TouchEventInfo& info);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnModifyDone() override;
+    bool IsFontColorSet();
+    void OnColorConfigurationUpdate() override;
     void SetNodeHitTestMode(RefPtr<FrameNode>& node, HitTestMode mode);
     void InitOnClick(RefPtr<FrameNode>& secCompNode, RefPtr<FrameNode>& icon,
         RefPtr<FrameNode>& text, RefPtr<FrameNode>& button);
     void InitAppearCallback(RefPtr<FrameNode>& frameNode);
+    void ToJsonValueIconNode(std::unique_ptr<JsonValue>& json, const RefPtr<FrameNode>& iconNode,
+        const InspectorFilter& filter) const;
+    void ToJsonValueSymbolIconNode(std::unique_ptr<JsonValue>& json, const RefPtr<FrameNode>& symbolIconNode,
+        const InspectorFilter& filter) const;
+    void ToJsonValueTextNode(std::unique_ptr<JsonValue>& json, const RefPtr<FrameNode>& textNode,
+        const InspectorFilter& filter) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void ToJsonValueRect(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     bool IsParentMenu(RefPtr<FrameNode>& secCompNode);
@@ -110,16 +121,18 @@ private:
     void UpdateIconProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& iconNode);
     void UpdateTextProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& textNode);
     void UpdateButtonProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& buttonNode);
+    void HandleEnabled();
 #ifdef SECURITY_COMPONENT_ENABLE
     void RegisterSecurityComponent();
     void RegisterSecurityComponentRetry();
     void UnregisterSecurityComponent();
-    int32_t ReportSecurityComponentClickEvent(GestureEvent& event);
+    int32_t ReportSecurityComponentClickEvent(GestureEvent& event, std::string& message);
     int32_t ReportSecurityComponentClickEvent(const KeyEvent& event);
     void DoTriggerOnclick(int32_t result);
-    void DelayReleaseNode(RefPtr<FrameNode>& node);
+    void DelayReleaseNode(uint64_t index);
     std::function<int32_t(int32_t)> CreateFirstUseDialogCloseFunc(
         RefPtr<FrameNode>& frameNode, RefPtr<PipelineContext>& pipeline, const std::string& taskName);
+    void HandleReportSecCompClickEventResult(int32_t& code, std::string& message);
 #endif
     std::unique_ptr<Offset> lastTouchOffset_;
     RefPtr<ClickEvent> clickListener_;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,204 +13,8 @@
  * limitations under the License.
  */
 
-#include <array>
-#include <cstddef>
-#include <memory>
-#include <optional>
-#include <string>
-#include <unordered_map>
-#include <utility>
-#include <vector>
-
-#include "gtest/gtest.h"
-
-#define private public
-#define protected public
-
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_data_detector_mgr.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/unittest/core/pattern/test_ng.h"
-
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/offset.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/type_definition.h"
-#include "core/common/ai/data_detector_mgr.h"
-#include "core/common/ime/constant.h"
-#include "core/common/ime/text_editing_value.h"
-#include "core/common/ime/text_input_action.h"
-#include "core/common/ime/text_input_type.h"
-#include "core/common/ime/text_selection.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components/text_field/textfield_theme.h"
-#include "core/components/theme/theme_manager.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "core/components_ng/pattern/text_field/text_field_model.h"
-#include "core/components_ng/pattern/text_field/text_field_model_ng.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
-#include "core/event/key_event.h"
-#include "core/event/touch_event.h"
-#include "core/gestures/gesture_info.h"
-#include "core/components/common/properties/text_style_parser.h"
-
-#undef private
-#undef protected
-
-using namespace testing;
-using namespace testing::ext;
-
+#include "text_area_base.h"
 namespace OHOS::Ace::NG {
-namespace {
-constexpr double ICON_SIZE = 24;
-constexpr double ICON_HOT_ZONE_SIZE = 40;
-constexpr double FONT_SIZE = 16;
-constexpr float OFFSET = 3;
-constexpr int32_t DEFAULT_NODE_ID = 1;
-constexpr int32_t MIN_PLATFORM_VERSION = 10;
-const std::string DEFAULT_TEXT = "abcdefghijklmnopqrstuvwxyz";
-const std::string DEFAULT_TEXT_THREE_LINE = "abcdef\nghijkl\nmnopqr\n";
-const std::string HELLO_TEXT = "hello";
-const std::string DEFAULT_PLACE_HOLDER = "please input text here";
-const std::string LOWERCASE_FILTER = "[a-z]";
-const std::string NUMBER_FILTER = "^[0-9]*$";
-const std::string DEFAULT_INPUT_FILTER = "[a-z]";
-const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
-const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
-template<typename CheckItem, typename Expected>
-struct TestItem {
-    CheckItem item;
-    Expected expected;
-    std::string error;
-    TestItem(CheckItem checkItem, Expected expectedValue, std::string message = "")
-        : item(checkItem), expected(expectedValue), error(std::move(message))
-    {}
-    TestItem() = default;
-};
-struct ExpectParagraphParams {
-    float height = 50.f;
-    float longestLine = 460.f;
-    float maxWidth = 460.f;
-    size_t lineCount = 1;
-    bool firstCalc = true;
-    bool secondCalc = true;
-};
-} // namespace
-
-class TextAreaBase : public TestNG {
-protected:
-    static void SetUpTestSuite();
-    static void TearDownTestSuite();
-    void TearDown() override;
-
-    void CreateTextField(const std::string& text = "", const std::string& placeHolder = "",
-        const std::function<void(TextFieldModelNG&)>& callback = nullptr);
-    static void ExpectCallParagraphMethods(ExpectParagraphParams params);
-    void GetFocus();
-
-    RefPtr<FrameNode> frameNode_;
-    RefPtr<TextFieldPattern> pattern_;
-    RefPtr<TextFieldEventHub> eventHub_;
-    RefPtr<TextFieldLayoutProperty> layoutProperty_;
-    RefPtr<TextFieldAccessibilityProperty> accessibilityProperty_;
-};
-
-void TextAreaBase::SetUpTestSuite()
-{
-    TestNG::SetUpTestSuite();
-    ExpectCallParagraphMethods(ExpectParagraphParams());
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto textFieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
-    textFieldTheme->iconSize_ = Dimension(ICON_SIZE, DimensionUnit::VP);
-    textFieldTheme->iconHotZoneSize_ = Dimension(ICON_HOT_ZONE_SIZE, DimensionUnit::VP);
-    textFieldTheme->fontSize_ = Dimension(FONT_SIZE, DimensionUnit::FP);
-    textFieldTheme->fontWeight_ = FontWeight::W400;
-    textFieldTheme->textColor_ = Color::FromString("#ff182431");
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillRepeatedly([textFieldTheme = textFieldTheme](ThemeType type) -> RefPtr<Theme> {
-            if (type == ScrollBarTheme::TypeId()) {
-                return AceType::MakeRefPtr<ScrollBarTheme>();
-            }
-            return textFieldTheme;
-        });
-    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(MIN_PLATFORM_VERSION);
-    MockPipelineContext::GetCurrent()->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManagerNG>());
-    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-}
-
-void TextAreaBase::TearDownTestSuite()
-{
-    TestNG::TearDownTestSuite();
-    MockParagraph::TearDown();
-}
-
-void TextAreaBase::TearDown()
-{
-    frameNode_ = nullptr;
-    pattern_ = nullptr;
-    eventHub_ = nullptr;
-    layoutProperty_ = nullptr;
-    accessibilityProperty_ = nullptr;
-}
-
-void TextAreaBase::ExpectCallParagraphMethods(ExpectParagraphParams params)
-{
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, PushStyle(_)).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, AddText(_)).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, PopStyle()).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, Build()).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, Layout(_)).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, GetTextWidth()).WillRepeatedly(Return(params.maxWidth));
-    EXPECT_CALL(*paragraph, GetAlphabeticBaseline()).WillRepeatedly(Return(0.f));
-    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(params.height));
-    EXPECT_CALL(*paragraph, GetLongestLine()).WillRepeatedly(Return(params.longestLine));
-    EXPECT_CALL(*paragraph, GetMaxWidth()).WillRepeatedly(Return(params.maxWidth));
-    EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(params.lineCount));
-}
-
-void TextAreaBase::CreateTextField(
-    const std::string& text, const std::string& placeHolder, const std::function<void(TextFieldModelNG&)>& callback)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    stack->StartGetAccessRecordingFor(DEFAULT_NODE_ID);
-    TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextArea(placeHolder, text);
-    if (callback) {
-        callback(textFieldModelNG);
-    }
-    stack->StopGetAccessRecording();
-    frameNode_ = AceType::DynamicCast<FrameNode>(stack->Finish());
-    pattern_ = frameNode_->GetPattern<TextFieldPattern>();
-    eventHub_ = frameNode_->GetEventHub<TextFieldEventHub>();
-    layoutProperty_ = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
-    accessibilityProperty_ = frameNode_->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
-    FlushLayoutTask(frameNode_);
-}
-
-void TextAreaBase::GetFocus()
-{
-    auto focushHub = pattern_->GetFocusHub();
-    focushHub->currentFocus_ = true;
-    pattern_->HandleFocusEvent();
-    FlushLayoutTask(frameNode_);
-}
-
 class TextFieldUXTest : public TextAreaBase {};
 
 /**
@@ -304,7 +108,7 @@ HWTEST_F(TextFieldUXTest, OnTextAreaScroll001, TestSize.Level1)
      * tc.expected: step2. Check if the currentOffset_ is right.
      */
     auto accessibilityProperty = frameNode_->GetAccessibilityProperty<AccessibilityProperty>();
-    EXPECT_TRUE(accessibilityProperty->ActActionScrollForward());
+    EXPECT_FALSE(accessibilityProperty->ActActionScrollForward());
 
     /**
      * @tc.steps: step3.set contentRect_.GetY() = 1
@@ -373,6 +177,7 @@ HWTEST_F(TextFieldUXTest, CursorOperation002, TestSize.Level1)
     pattern_->inputOperations_.push(InputOperation::CURSOR_DOWN);
     auto ret = pattern_->CursorMoveDown();
     EXPECT_FALSE(ret);
+    pattern_->textRect_.height_ = pattern_->PreferredLineHeight() * 3;
     pattern_->BeforeCreateLayoutWrapper();
     EXPECT_EQ(pattern_->GetCaretIndex(), 0);
 }
@@ -519,9 +324,7 @@ HWTEST_F(TextFieldUXTest, TextAreaLetterSpacing001, TestSize.Level1)
     /**
      * @tc.steps: Create Text filed node with default text and placeholder
      */
-    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
-        model.SetLetterSpacing(1.0_fp);
-    });
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetLetterSpacing(1.0_fp); });
 
     /**
      * @tc.expected: Current caret position is end of text
@@ -556,9 +359,7 @@ HWTEST_F(TextFieldUXTest, TextAreaLineHeight001, TestSize.Level1)
     /**
      * @tc.steps: Create Text filed node with default text and placeholder
      */
-    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
-        model.SetLineHeight(2.0_fp);
-    });
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetLineHeight(2.0_fp); });
 
     /**
      * @tc.expected: Current caret position is end of text
@@ -671,6 +472,8 @@ HWTEST_F(TextFieldUXTest, OnHandleMove004, TestSize.Level1)
     pattern_->SetIsSingleHandle(false);
     RectF handleRect;
     pattern_->selectOverlay_->OnHandleMove(handleRect, true);
+    EXPECT_EQ(pattern_->selectController_->GetStartIndex(), 0);
+    EXPECT_EQ(pattern_->selectController_->GetEndIndex(), 10);
 }
 
 /**
@@ -850,8 +653,8 @@ HWTEST_F(TextFieldUXTest, OnHandleMove008, TestSize.Level1)
      * tc.expected: step2. Check if the value is created.
      */
     pattern_->HandleSetSelection(5, 10, false);
-    pattern_->SetIsSingleHandle(false);
     pattern_->ProcessOverlay();
+    pattern_->SetIsSingleHandle(false);
     RectF handleRect(5, 5, 1, 1);
     pattern_->selectOverlay_->OnHandleMove(handleRect, true);
 
@@ -962,6 +765,9 @@ HWTEST_F(TextFieldUXTest, SelectTextShowMenu001, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
+    EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
+    pattern_->selectOverlay_ = mockSelectOverlay;
 
     /**
      * @tc.steps: step2. Set menuPolicy to be MenuPolicy::SHOW
@@ -1029,6 +835,9 @@ HWTEST_F(TextFieldUXTest, SelectTextByForward, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
+    EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
+    pattern_->selectOverlay_ = mockSelectOverlay;
 
     /**
      * @tc.steps: step2. Set menuPolicy to be MenuPolicy::SHOW and isForward is true
@@ -1087,9 +896,7 @@ HWTEST_F(TextFieldUXTest, TextAreaMinFontSize001, TestSize.Level1)
     /**
      * @tc.steps: Create Text field node with default text and placeholder
      */
-    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
-        model.SetAdaptMinFontSize(1.0_fp);
-    });
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetAdaptMinFontSize(1.0_fp); });
 
     /**
      * @tc.expected: Current caret position is end of text
@@ -1124,9 +931,7 @@ HWTEST_F(TextFieldUXTest, TextAreaMaxFontSize001, TestSize.Level1)
     /**
      * @tc.steps: Create Text field node with default text and placeholder
      */
-    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
-        model.SetAdaptMaxFontSize(2.0_fp);
-    });
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetAdaptMaxFontSize(2.0_fp); });
 
     /**
      * @tc.expected: Current caret position is end of text
@@ -1161,9 +966,8 @@ HWTEST_F(TextFieldUXTest, TextAreaHeightAdaptivePolicy001, TestSize.Level1)
     /**
      * @tc.steps: Create Text field node with default text and placeholder
      */
-    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
-        model.SetHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
-    });
+    CreateTextField(DEFAULT_TEXT, "",
+        [](TextFieldModelNG model) { model.SetHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST); });
 
     /**
      * @tc.expected: Current caret position is end of text
@@ -1202,9 +1006,7 @@ HWTEST_F(TextFieldUXTest, TextInputTypeToString001, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize show number icon text input.
      */
-    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
-        model.SetType(TextInputType::NUMBER);
-    });
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::NUMBER); });
 
     /**
      * @tc.steps: step2. Call TextInputTypeToString.
@@ -1222,9 +1024,7 @@ HWTEST_F(TextFieldUXTest, TextInputTypeToString002, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize show number icon text input.
      */
-    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
-        model.SetType(TextInputType::EMAIL_ADDRESS);
-    });
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::EMAIL_ADDRESS); });
 
     /**
      * @tc.steps: step2. Call TextInputTypeToString.
@@ -1242,9 +1042,7 @@ HWTEST_F(TextFieldUXTest, TextInputTypeToString003, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize show number icon text input.
      */
-    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
-        model.SetType(TextInputType::VISIBLE_PASSWORD);
-    });
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::VISIBLE_PASSWORD); });
 
     /**
      * @tc.steps: step2. Call TextInputTypeToString.
@@ -1262,9 +1060,7 @@ HWTEST_F(TextFieldUXTest, TextInputTypeToString004, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize show number icon text input.
      */
-    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
-        model.SetType(TextInputType::USER_NAME);
-    });
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::USER_NAME); });
 
     /**
      * @tc.steps: step2. Call TextInputTypeToString.
@@ -1282,9 +1078,7 @@ HWTEST_F(TextFieldUXTest, TextInputTypeToString005, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize show number icon text input.
      */
-    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
-        model.SetType(TextInputType::NEW_PASSWORD);
-    });
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::NEW_PASSWORD); });
 
     /**
      * @tc.steps: step2. Call TextInputTypeToString.
@@ -1302,9 +1096,7 @@ HWTEST_F(TextFieldUXTest, TextInputTypeToString006, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize show number icon text input.
      */
-    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
-        model.SetType(TextInputType::URL);
-    });
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::URL); });
 
     /**
      * @tc.steps: step2. Call TextInputTypeToString.
@@ -1339,7 +1131,7 @@ HWTEST_F(TextFieldUXTest, FontFeature001, TestSize.Level1)
      * @tc.steps: step1. Initialize text area.
      */
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1363,7 +1155,7 @@ HWTEST_F(TextFieldUXTest, FontFeature002, TestSize.Level1)
      * @tc.steps: step1. Initialize text area.
      */
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -1591,7 +1383,7 @@ HWTEST_F(TextFieldUXTest, TextAreaLayout001, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
-    std::string textContent(DEFAULT_TEXT);
+    std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textAreaLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
     EXPECT_EQ(textStyle.GetWordBreak(), WordBreak::NORMAL);
@@ -1624,7 +1416,7 @@ HWTEST_F(TextFieldUXTest, TextAreaLayout002, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
-    std::string textContent(DEFAULT_TEXT);
+    std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textAreaLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
     EXPECT_EQ(textStyle.GetWordBreak(), WordBreak::BREAK_ALL);
@@ -1657,7 +1449,7 @@ HWTEST_F(TextFieldUXTest, TextAreaLayout003, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
-    std::string textContent(DEFAULT_TEXT);
+    std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textAreaLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
     EXPECT_EQ(textStyle.GetWordBreak(), WordBreak::BREAK_WORD);
@@ -1692,7 +1484,7 @@ HWTEST_F(TextFieldUXTest, TextAreaLayout004, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
-    std::string textContent(DEFAULT_TEXT);
+    std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textAreaLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
     EXPECT_EQ((uint32_t)(textStyle.GetWordBreak()), invalidValue);
@@ -1727,10 +1519,45 @@ HWTEST_F(TextFieldUXTest, TextAreaLayout005, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
-    std::string textContent(DEFAULT_TEXT);
+    std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textAreaLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
     EXPECT_EQ((int32_t)(textStyle.GetWordBreak()), invalidValue);
+}
+
+/**
+ * @tc.name: TextAreaHalfLeading001
+ * @tc.desc: test TextArea halfLeading.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaHalfLeading001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetHalfLeading(true); });
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: set TextInputAction NEW_LINE and call PerformAction
+     * @tc.expected: text halfLeading
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    auto textInputAction = pattern_->GetDefaultTextInputAction();
+    EXPECT_EQ(textInputAction, TextInputAction::NEW_LINE);
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
+    pattern_->PerformAction(textInputAction, false);
+
+    EXPECT_EQ(layoutProperty_->GetHalfLeading(), true);
 }
 
 /**
@@ -1743,9 +1570,7 @@ HWTEST_F(TextFieldUXTest, TextAreaLineSpacing001, TestSize.Level1)
     /**
      * @tc.steps: Create Text filed node with default text and placeholder
      */
-    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
-        model.SetLineSpacing(2.0_fp);
-    });
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetLineSpacing(2.0_fp); });
 
     /**
      * @tc.expected: Current caret position is end of text
@@ -1804,7 +1629,6 @@ HWTEST_F(TextFieldUXTest, TextAreaLineBreakStrategy001, TestSize.Level1)
     EXPECT_EQ(layoutProperty_->GetLineBreakStrategy(), LineBreakStrategy::BALANCED);
 }
 
-
 /**
  * @tc.name: TextAreaTextAlign001
  * @tc.desc: test testArea text align
@@ -1813,9 +1637,8 @@ HWTEST_F(TextFieldUXTest, TextAreaLineBreakStrategy001, TestSize.Level1)
 HWTEST_F(TextFieldUXTest, TextAreaTextAlign001, TestSize.Level1)
 {
     CreateTextField(DEFAULT_TEXT);
-    TextAlign textAligns[] = {TextAlign::CENTER, TextAlign::JUSTIFY, TextAlign::START,
-        TextAlign::END};
-    TextDirection textDirectoins[] = {TextDirection::LTR, TextDirection::RTL, TextDirection::AUTO};
+    TextAlign textAligns[] = { TextAlign::CENTER, TextAlign::JUSTIFY, TextAlign::START, TextAlign::END };
+    TextDirection textDirectoins[] = { TextDirection::LTR, TextDirection::RTL, TextDirection::AUTO };
     for (auto textAlign : textAligns) {
         for (auto textDirectoin : textDirectoins) {
             layoutProperty_->UpdateTextAlign(textAlign);
@@ -1826,4 +1649,88 @@ HWTEST_F(TextFieldUXTest, TextAreaTextAlign001, TestSize.Level1)
         }
     }
 }
+
+/**
+ * @tc.name: SupportTextFadeoutTest001
+ * @tc.desc: Test whether the text node has the ability to support fadeout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SupportTextFadeoutTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node with default text and placeholder.
+     * @tc.expected: Check the textArea node do not support fadeout.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_FALSE(pattern_->GetTextFadeoutCapacity());
 }
+
+/**
+ * @tc.name: TextAreaMinFontScale001
+ * @tc.desc: test TextArea minFontScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaMinFontScale001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetMinFontScale(1.0); });
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: set TextInputAction NEW_LINE and call PerformAction
+     * @tc.expected: text will wrap
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    pattern_->OnModifyDone();
+    auto textInputAction = pattern_->GetDefaultTextInputAction();
+    EXPECT_EQ(textInputAction, TextInputAction::NEW_LINE);
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
+    pattern_->PerformAction(textInputAction, false);
+
+    EXPECT_EQ(layoutProperty_->GetMinFontScale(), 1.0);
+}
+
+/**
+ * @tc.name: TextAreaMaxFontScale001
+ * @tc.desc: test TextArea maxFontScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaMaxFontScale001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetMaxFontScale(2.0); });
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: set TextInputAction NEW_LINE and call PerformAction
+     * @tc.expected: text will wrap
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    pattern_->OnModifyDone();
+    auto textInputAction = pattern_->GetDefaultTextInputAction();
+    EXPECT_EQ(textInputAction, TextInputAction::NEW_LINE);
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
+    pattern_->PerformAction(textInputAction, false);
+
+    EXPECT_EQ(layoutProperty_->GetMaxFontScale(), 2.0);
+}
+} // namespace OHOS::Ace::NG

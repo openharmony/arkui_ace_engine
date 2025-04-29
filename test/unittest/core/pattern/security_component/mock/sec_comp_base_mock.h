@@ -28,6 +28,13 @@ struct PaddingSize {
     double left;
 };
 
+struct BorderRadius {
+    double leftTop;
+    double rightTop;
+    double leftBottom;
+    double rightBottom;
+};
+
 enum SecCompType {
     UNKNOWN_SC_TYPE = 0,
     LOCATION_COMPONENT,
@@ -62,6 +69,12 @@ enum class SecCompBackground {
     MAX_BG_TYPE
 };
 
+enum CrossAxisState {
+    STATE_INVALID = 0,
+    STATE_CROSS,
+    STATE_NO_CROSS,
+};
+
 class SecCompBase {
 public:
     SecCompBase() = default;
@@ -75,6 +88,7 @@ public:
     double fontSize_;
     double iconSize_;
     PaddingSize padding_;
+    BorderRadius borderRadius_;
     double textIconSpace_;
 
     // color
@@ -87,6 +101,12 @@ public:
 
     // parent effect
     bool parentEffect_ = false;
+    bool isClipped_ = false;
+    double topClip_;
+    double bottomClip_;
+    double leftClip_;
+    double rightClip_;
+    std::string parentTag_;
 
     SecCompType type_ = UNKNOWN_SC_TYPE;
     SecCompRect rect_;
@@ -97,8 +117,18 @@ public:
     int32_t icon_;
     SecCompBackground bg_;
 
+    bool hasNonCompatibleChange_ = false;
+    double blurRadius_ = 0.0;
+    double foregroundBlurRadius_ = 0.0;
+    bool isOverlayTextSet_ = false;
+    bool isOverlayNodeCovered_ = false;
     int32_t windowId_;
+    uint64_t displayId_ = 0;
     int32_t nodeId_;
+    CrossAxisState crossAxisState_ = CrossAxisState::STATE_INVALID;
+    bool isIconExceeded_ = false;
+    bool isBorderCovered_ = false;
+    bool isWearableDevice_ = false;
 };
 }  // namespace SecurityComponent
 }  // namespace Security

@@ -17,10 +17,7 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/panel/sliding_events.h"
 #include "core/components/panel/sliding_panel_component_v2.h"
 
 namespace OHOS::Ace::Framework {

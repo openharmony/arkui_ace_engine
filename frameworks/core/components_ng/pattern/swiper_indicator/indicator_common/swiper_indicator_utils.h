@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,6 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_layout_property.h"
 
 namespace OHOS::Ace::NG {
-static SwiperIndicatorType swiperIndicatorType = SwiperIndicatorType::DOT;
 
 inline float GET_PADDING_PROPERTY_VALUE_PX(const std::optional<CalcLength>& value)
 {
@@ -39,16 +38,6 @@ class SwiperIndicatorUtils {
 public:
     SwiperIndicatorUtils() = delete;
     ~SwiperIndicatorUtils() = delete;
-
-    static SwiperIndicatorType GetSwiperIndicatorType()
-    {
-        return swiperIndicatorType;
-    }
-
-    static void SetSwiperIndicatorType(SwiperIndicatorType indicatorType)
-    {
-        swiperIndicatorType = indicatorType;
-    }
 
     static const OffsetF CalcIndicatrFrameOffSet(const RefPtr<SwiperLayoutProperty>& swiperLayoutProperty,
                                                 const RefPtr<SwiperIndicatorLayoutProperty>& indicatorLayoutProperty,
@@ -128,6 +117,19 @@ public:
         return loopIndex;
     }
 
+    static int32_t CalcLoopCount(int32_t index, int32_t totalCount)
+    {
+        if (totalCount <= 0) {
+            return 0;
+        }
+
+        if (index < 0) {
+            index++;
+        }
+
+        return std::abs(index / totalCount);
+    }
+
 private:
     static float CalcIndicatrOffSetX(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
                                     float swiperPaddingLeft, float swiperPaddingRight,
@@ -174,6 +176,8 @@ private:
         }
         return offsetY;
     }
+
+    static SwiperIndicatorType swiperIndicatorType;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_INDICATOR_SWIPER_INDICATOR_UTILS_H

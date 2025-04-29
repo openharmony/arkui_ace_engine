@@ -21,12 +21,12 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/text_layout_info.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/font_collection.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components/common/properties/text_layout_info.h"
 
 namespace OHOS::Ace::NG {
 
@@ -90,6 +90,8 @@ struct LineMetrics {
     float height = 0.0f;
     float x = 0.0f;
     float y = 0.0f;
+    int32_t startIndex = 0;
+    int32_t endIndex = 0;
 };
 
 struct LeadingMargin {
@@ -99,6 +101,11 @@ struct LeadingMargin {
     bool operator==(const LeadingMargin& other) const
     {
         return size == other.size && pixmap == other.pixmap;
+    }
+
+    bool IsValid()
+    {
+        return size.Width().IsValid() || size.Height().IsValid();
     }
 
     std::string ToString() const
@@ -138,14 +145,20 @@ struct ParagraphStyle {
     double fontSize = 14.0;
     Dimension lineHeight;
     Dimension indent;
+    bool halfLeading = false;
     Alignment leadingMarginAlign = Alignment::TOP_CENTER;
+    Dimension paragraphSpacing;
+    bool isEndAddParagraphSpacing = false;
+    int32_t textStyleUid = 0;
 
     bool operator==(const ParagraphStyle others) const
     {
         return direction == others.direction && align == others.align && maxLines == others.maxLines &&
                fontLocale == others.fontLocale && wordBreak == others.wordBreak &&
                ellipsisMode == others.ellipsisMode && textOverflow == others.textOverflow &&
-               leadingMargin == others.leadingMargin && fontSize == others.fontSize && indent == others.indent;
+               leadingMargin == others.leadingMargin && fontSize == others.fontSize &&
+               halfLeading == others.halfLeading && indent == others.indent &&
+               paragraphSpacing == others.paragraphSpacing;
     }
 
     bool operator!=(const ParagraphStyle others) const
@@ -169,6 +182,8 @@ struct ParagraphStyle {
         result += std::to_string(fontSize);
         result += ", indent: ";
         result += indent.ToString();
+        result += ", paragraphSpacing: ";
+        result += paragraphSpacing.ToString();
         return result;
     }
 };
@@ -215,6 +230,8 @@ class Paragraph : public virtual AceType {
 
 public:
     static RefPtr<Paragraph> Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection);
+    static RefPtr<Paragraph> CreateRichEditorParagraph(
+        const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection);
 
     static RefPtr<Paragraph> Create(void* paragraph);
     // whether the paragraph has been build
@@ -231,6 +248,8 @@ public:
 
     // interfaces for layout
     virtual void Layout(float width) = 0;
+    // interfaces for reLayout
+    virtual void ReLayout(float width, const ParagraphStyle& paraStyle, const std::vector<TextStyle>& textStyles) = 0;
     virtual float GetHeight() = 0;
     virtual float GetTextWidth() = 0;
     virtual size_t GetLineCount() = 0;
@@ -248,6 +267,7 @@ public:
         return finalResult;
     }
     virtual void GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) = 0;
+    virtual std::pair<size_t, size_t> GetEllipsisTextRange() = 0;
     virtual void GetTightRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) = 0;
     virtual void GetRectsForPlaceholders(std::vector<RectF>& selectedRects) = 0;
     virtual bool ComputeOffsetForCaretDownstream(
@@ -271,11 +291,16 @@ public:
     virtual void SetParagraphId(uint32_t id) = 0;
     virtual LineMetrics GetLineMetricsByRectF(RectF& rect) = 0;
     virtual TextLineMetrics GetLineMetrics(size_t lineNumber) = 0;
+    virtual RectF GetPaintRegion(float x, float y) = 0;
     virtual bool GetLineMetricsByCoordinate(const Offset& offset, LineMetrics& lineMetrics) = 0;
     virtual void UpdateColor(size_t from, size_t to, const Color& color) = 0;
     virtual void TxtGetRectsForRange(int32_t start, int32_t end,
         RectHeightStyle heightStyle, RectWidthStyle widthStyle,
         std::vector<RectF>& selectedRects, std::vector<TextDirection>& textDirections) = 0;
+    virtual bool empty() const
+    {
+        return false;
+    };
 };
 } // namespace OHOS::Ace::NG
 

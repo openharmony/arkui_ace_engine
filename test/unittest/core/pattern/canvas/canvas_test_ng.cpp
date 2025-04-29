@@ -18,8 +18,6 @@
 #include <optional>
 #include <utility>
 
-#include "base/image/image_source.h"
-#include "base/image/pixel_map.h"
 #include "gtest/gtest.h"
 
 #define protected public
@@ -30,7 +28,6 @@
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
 #include "core/components_ng/pattern/canvas/canvas_modifier.h"
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
-#include "core/components_ng/pattern/canvas/canvas_paint_op.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components_ng/pattern/canvas/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/canvas/custom_paint_util.h"
@@ -38,6 +35,9 @@
 #include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
 #undef private
 #undef protected
+
+#include "base/image/image_source.h"
+#include "base/image/pixel_map.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -197,9 +197,6 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest003, TestSize.Level1)
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetContentSize(SizeF(100.0f, 100.0f));
-    geometryNode->SetContentOffset(OffsetF(0.0f, 0.0f));
     auto pattern = frameNode->GetPattern<CanvasPattern>();
 
     /**
@@ -226,9 +223,6 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest004, TestSize.Level1)
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetContentSize(SizeF(100.0f, 100.0f));
-    geometryNode->SetContentOffset(OffsetF(0.0f, 0.0f));
     auto pattern = frameNode->GetPattern<CanvasPattern>();
 
     /**
@@ -250,14 +244,11 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest005, TestSize.Level1)
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetContentSize(SizeF(100.0f, 100.0f));
-    geometryNode->SetContentOffset(OffsetF(0.0f, 0.0f));
     auto pattern = frameNode->GetPattern<CanvasPattern>();
-    
+
     RefPtr<CanvasLayoutAlgorithm> canvasLayoutAlgorithm = AceType::MakeRefPtr<CanvasLayoutAlgorithm>();
     LayoutConstraintF layoutConstraint;
-    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, nullptr, frameNode->GetLayoutProperty());
 
     /**
      * @tc.steps: step1. IsValid() == false;
@@ -332,14 +323,8 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest006, TestSize.Level1)
  */
 HWTEST_F(CanvasTestNg, CanvasPatternTest007, TestSize.Level1)
 {
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<OffscreenCanvasPattern>(100, 100); });
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetContentSize(SizeF(100.0f, 100.0f));
-    geometryNode->SetContentOffset(OffsetF(0.0f, 0.0f));
-    auto offPattern = frameNode->GetPattern<OffscreenCanvasPattern>();
+    auto offPattern = AceType::MakeRefPtr<OffscreenCanvasPattern>(100, 100);
+    ASSERT_NE(offPattern, nullptr);
 
     /**
      * @tc.steps: step1. SetTextDirection : TextDirection::AUTO;
@@ -367,39 +352,168 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest007, TestSize.Level1)
 
 /**
  * @tc.name: CanvasPatternTest008
- * @tc.desc: CustomPaintPaintMethod::FillText && StrokeText
+ * @tc.desc: CustomPaintPaintMethod::HasShadow
  * @tc.type: FUNC
  */
 HWTEST_F(CanvasTestNg, CanvasPatternTest008, TestSize.Level1)
 {
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<OffscreenCanvasPattern>(100, 100); });
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetContentSize(SizeF(100.0f, 100.0f));
-    geometryNode->SetContentOffset(OffsetF(0.0f, 0.0f));
-    auto offPattern = frameNode->GetPattern<OffscreenCanvasPattern>();
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
 
     /**
-     * @tc.steps: step1. FillText : ret == false
-     */
-    offPattern->offscreenPaintMethod_->FillText("test", 0.0, 0.0, 50);
-    EXPECT_FALSE(offPattern->offscreenPaintMethod_->UpdateParagraph("test", false, false));
-
-    /**
-     * @tc.steps: step2. StrokeText : HasShadow() == false
+     * @tc.steps: step1. HasShadow() == false
      */
     Shadow shadow1 = Shadow(5.0f, Offset(0.0, 0.0), Color(0x32000000), ShadowStyle::OuterDefaultXS);
     Shadow shadow2 = Shadow(5.0f, Offset(10.0, 10.0), Color(0x32000000), ShadowStyle::OuterDefaultXS);
-    offPattern->offscreenPaintMethod_->state_.shadow = shadow1;
-    EXPECT_FALSE(offPattern->offscreenPaintMethod_->HasShadow());
-    offPattern->offscreenPaintMethod_->StrokeText("test", 0.0, 0.0, 50);
+    paintMethod->state_.shadow = shadow1;
+    EXPECT_FALSE(paintMethod->HasShadow());
     /**
-     * @tc.steps: step3. StrokeText : HasShadow() == true
+     * @tc.steps: step2. HasShadow() == true
      */
-    offPattern->offscreenPaintMethod_->state_.shadow = shadow2;
-    EXPECT_TRUE(offPattern->offscreenPaintMethod_->HasShadow());
-    offPattern->offscreenPaintMethod_->FillText("test", 0.0, 0.0, 50);
+    paintMethod->state_.shadow = shadow2;
+    EXPECT_TRUE(paintMethod->HasShadow());
+}
+
+/**
+* @tc.name: OnAttachToMainTreeTest
+* @tc.desc: CanvasPattern::OnAttachToMainTree
+* @tc.type: FUNC
+*/
+HWTEST_F(CanvasTestNg, OnAttachToMainTreeTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetContentSize(SizeF(100.0f, 100.0f));
+    geometryNode->SetContentOffset(OffsetF(0.0f, 0.0f));
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps2: instantiation paintMethod_.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), "test");
+    customNode->SetJSViewName("testName");
+    frameNode->SetParent(customNode);
+    auto contentModifier = AceType::MakeRefPtr<CanvasModifier>();
+    ASSERT_TRUE(contentModifier);
+    pattern->paintMethod_ = AceType::MakeRefPtr<CanvasPaintMethod>(contentModifier, frameNode);
+    ASSERT_TRUE(pattern->paintMethod_);
+    pattern->OnAttachToMainTree();
+    EXPECT_EQ(pattern->paintMethod_->customNodeName_, "testName");
+}
+
+/**
+* @tc.name: FireOnContext2DAttachTest
+* @tc.desc: CanvasPattern::FireOnContext2DAttach
+* @tc.type: FUNC
+*/
+HWTEST_F(CanvasTestNg, FireOnContext2DAttachTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetContentSize(SizeF(100.0f, 100.0f));
+    geometryNode->SetContentOffset(OffsetF(0.0f, 0.0f));
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps2: instantiation onContext2DAttach_.
+     * @tc.expected: onContext2DAttach equal 1.
+     */
+    int32_t onContext2DAttach = 0;
+    pattern->SetOnContext2DAttach([&onContext2DAttach]() {
+        ++onContext2DAttach;
+    });
+    pattern->FireOnContext2DAttach();
+    EXPECT_EQ(onContext2DAttach, 1);
+}
+
+/**
+* @tc.name: FireOnContext2DDetachTest
+* @tc.desc: CanvasPattern::FireOnContext2DDetach
+* @tc.type: FUNC
+*/
+HWTEST_F(CanvasTestNg, FireOnContext2DDetachTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetContentSize(SizeF(100.0f, 100.0f));
+    geometryNode->SetContentOffset(OffsetF(0.0f, 0.0f));
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    ASSERT_TRUE(pattern);
+    
+    /**
+     * @tc.steps2: instantiation onContext2DDetach_.
+     * @tc.expected: onContext2DDetach equal 1.
+     */
+    int32_t onContext2DDetach = 0;
+    pattern->SetOnContext2DDetach([&onContext2DDetach]() {
+        ++onContext2DDetach;
+    });
+    pattern->FireOnContext2DDetach();
+    EXPECT_EQ(onContext2DDetach, 1);
+}
+
+/**
+* @tc.name: GetImageDataTest
+* @tc.desc: CanvasPattern::GetImageData
+* @tc.type: FUNC
+*/
+HWTEST_F(CanvasTestNg, GetImageDataTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetContentSize(SizeF(100.0f, 100.0f));
+    geometryNode->SetContentOffset(OffsetF(0.0f, 0.0f));
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps2: obtains input parameters.
+     * @tc.expected: set dirtyWidth and dirtyHeight equal input value.
+     */
+    EXPECT_FALSE(pattern->paintMethod_);
+    auto imageData = pattern->GetImageData(10, 20, 30, 40);
+    EXPECT_EQ(imageData->dirtyWidth, 30);
+    EXPECT_EQ(imageData->dirtyHeight, 40);
+
+    /**
+     * @tc.steps3: obtains default parameters.
+     * @tc.expected: return nullptr.
+     */
+    auto contentModifier = AceType::MakeRefPtr<CanvasModifier>();
+    ASSERT_TRUE(contentModifier);
+    pattern->paintMethod_ = AceType::MakeRefPtr<CanvasPaintMethod>(contentModifier, frameNode);
+    ASSERT_TRUE(pattern->paintMethod_);
+    auto imageData2 = pattern->GetImageData(10, 20, 30, 40);
+    EXPECT_FALSE(imageData2);
 }
 } // namespace OHOS::Ace::NG

@@ -25,21 +25,22 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/animation/page_transition_common.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/shared_transition_option.h"
+#include "core/components/common/properties/effect_option.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/render_node/render_node_properties.h"
-#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/attraction_effect.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/particle_property.h"
+#include "core/components_ng/property/particle_property_animation.h"
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/property/particle_property_animation.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing_forward.h"
@@ -50,6 +51,15 @@ class DrawCmdList;
 class VisualEffect;
 class Filter;
 enum class Gravity;
+class BrightnessBlender;
+} // namespace OHOS::Rosen
+
+namespace OHOS::Ace {
+struct SharedTransitionOption;
+}
+
+namespace OHOS::Ace::Kit {
+class Modifier;
 }
 
 namespace OHOS::Ace::NG {
@@ -67,6 +77,16 @@ class RenderPropertyNode;
 class FrameNode;
 class InspectorFilter;
 class Modifier;
+
+struct PaintFocusExtraInfo final {
+    PaintFocusExtraInfo() = default;
+    PaintFocusExtraInfo(bool isAccessibilityFocus, bool isFocusBoxGlow)
+        : isAccessibilityFocus(isAccessibilityFocus), isFocusBoxGlow(isFocusBoxGlow)
+    {}
+    ~PaintFocusExtraInfo() = default;
+    bool isAccessibilityFocus { false };
+    bool isFocusBoxGlow { false };
+};
 
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
 using TransitionFinishCallback = std::function<void(bool)>;
@@ -87,7 +107,6 @@ public:
 
     virtual void SetHostNode(const WeakPtr<FrameNode>& host);
     RefPtr<FrameNode> GetHost() const;
-    FrameNode* GetUnsafeHost() const;
 
     virtual void SetNeedDebugBoundary(bool flag) {}
     virtual bool NeedDebugBoundary() const
@@ -102,6 +121,7 @@ public:
     virtual void FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDraw) {}
 
     virtual void FlushContentModifier(const RefPtr<Modifier>& modifier) {}
+    virtual void FlushKitContentModifier(const RefPtr<Kit::Modifier>& modifier) {}
     virtual void FlushForegroundModifier(const RefPtr<Modifier>& modifier) {}
     virtual void FlushOverlayModifier(const RefPtr<Modifier>& modifier) {}
 
@@ -137,6 +157,8 @@ public:
 
     virtual void SetOuterBorderWidth(const BorderWidthProperty& value) {};
 
+    virtual void SetExtraOffset(const std::optional<OffsetF>& offset) {};
+
     // draw self and children in sandbox origin at parent's absolute position in root, drawing in sandbox
     // will be unaffected by parent's transition.
     virtual void SetSandBox(const std::optional<OffsetF>& parentPosition, bool force = false) {};
@@ -148,7 +170,7 @@ public:
 
     virtual void SetFrameWithoutAnimation(const RectF& paintRect) {};
 
-    virtual void RegisterSharedTransition(const RefPtr<RenderContext>& other) {}
+    virtual void RegisterSharedTransition(const RefPtr<RenderContext>& other, const bool isInSameWindow) {}
     virtual void UnregisterSharedTransition(const RefPtr<RenderContext>& other) {}
 
     virtual void OnModifyDone() {}
@@ -169,6 +191,7 @@ public:
     enum class PatternType : int8_t {
         DEFAULT,
         VIDEO,
+        XCOM,
 #ifdef PLATFORM_VIEW_SUPPORTED
         PLATFORM_VIEW,
 #endif
@@ -190,6 +213,7 @@ public:
     virtual void MarkNewFrameAvailable(void* nativeWindow) {}
     virtual void AddAttachCallBack(const std::function<void(int64_t, bool)>& attachCallback) {}
     virtual void AddUpdateCallBack(const std::function<void(std::vector<float>&)>& updateCallback) {}
+    virtual void AddInitTypeCallBack(const std::function<void(int32_t&)>& initTypeCallback) {}
 
     virtual void StartRecording() {}
     virtual void StopRecordingIfNeeded() {}
@@ -206,14 +230,15 @@ public:
 
     // Paint focus state by component's setting. It will paint along the paintRect
     virtual void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth,
-        bool isAccessibilityFocus = false)
+        bool isAccessibilityFocus = false, bool isFocusBoxGlow = false)
     {}
     // Paint focus state by component's setting. It will paint along the frameRect(padding: focusPaddingVp)
     virtual void PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor,
-        const Dimension& paintWidth, bool isAccessibilityFocus = false)
+        const Dimension& paintWidth, const PaintFocusExtraInfo& paintFocusExtraInfo)
     {}
     // Paint focus state by default. It will paint along the component rect(padding: focusPaddingVp)
-    virtual void PaintFocusState(const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth)
+    virtual void PaintFocusState(const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth,
+        bool isFocusBoxGlow = false)
     {}
 
     virtual void ClearFocusState() {}
@@ -265,28 +290,38 @@ public:
         return isSynced_;
     }
 
-    virtual bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish)
-    {
-        return false;
-    }
-
     virtual void SetSharedTranslate(float xTranslate, float yTranslate) {}
     virtual void ResetSharedTranslate() {}
-    virtual void ResetPageTransitionEffect() {}
 
     virtual void AddChild(const RefPtr<RenderContext>& renderContext, int index) {}
     virtual void RemoveChild(const RefPtr<RenderContext>& renderContext) {}
     virtual void ClearChildren() {}
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
     virtual void SetContentRectToFrame(RectF rect) {}
-
+    virtual void SetSecurityLayer(bool isSecure) {}
+    virtual void SetHDRBrightness(float hdrBrightness) {}
+    virtual void SetImageHDRBrightness(float hdrBrightness) {}
+    virtual void SetImageHDRPresent(bool hdrPresent) {}
+    virtual void SetTransparentLayer(bool isTransparentLayer) {}
+    virtual void SetScreenId(uint64_t screenId) {}
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
-    virtual void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) {}
-    virtual void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) {}
-    virtual void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption) {}
+    virtual void UpdateBackBlurStyle(
+        const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions = SysOptions())
+    {}
+    virtual void UpdateBackgroundEffect(
+        const std::optional<EffectOption>& effectOption, const SysOptions& sysOptions = SysOptions())
+    {}
+    virtual void UpdateBackBlur(
+        const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions = SysOptions())
+    {}
+    virtual void UpdateNodeBackBlur(const Dimension& radius, const BlurOption& blurOption) {}
     virtual void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) {}
-    virtual void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption) {}
-    virtual void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) {}
+    virtual void UpdateFrontBlur(
+        const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions = SysOptions())
+    {}
+    virtual void UpdateFrontBlurStyle(
+        const std::optional<BlurStyleOption>& fgBlurStyle, const SysOptions& sysOptions = SysOptions())
+    {}
     virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
     virtual void ResetBackBlurStyle() {}
     virtual void ClipWithRect(const RectF& rectF) {}
@@ -296,12 +331,19 @@ public:
     virtual void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) {}
     virtual void RemoveClipWithRRect() {}
     virtual void UpdateWindowFocusState(bool isFocused) {}
+    virtual void UpdateWindowActiveState(bool isActive) {}
+    /**
+     * @brief Only clip the content & foreground layer by @c rect.
+     * @param rect - offset of @c rect is relative to FrameRect.
+     */
+    virtual void SetContentClip(const std::variant<RectF, RefPtr<ShapeRect>>& rect) {}
 
     // visual
     virtual void UpdateVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) {}
     virtual void UpdateBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) {}
     virtual void UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) {}
     virtual void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) {}
+    virtual void UpdateBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender) {}
 
     virtual void OpacityAnimation(const AnimationOption& option, double begin, double end) {}
     virtual void ScaleAnimation(const AnimationOption& option, double begin, double end) {}
@@ -337,8 +379,8 @@ public:
     {
         return {};
     }
-
-    virtual void SavePaintRect(bool isRound = true, uint8_t flag = 0) {}
+    virtual int32_t GetRotateDegree() { return 0; }
+    virtual void SavePaintRect(bool isRound = true, uint16_t flag = 0) {}
     virtual void SyncPartialRsProperties() {}
     virtual void UpdatePaintRect(const RectF& paintRect) {}
 
@@ -360,7 +402,17 @@ public:
 
     virtual void GetPointTransformRotate(PointF& point) {}
 
+    virtual Matrix4 GetMatrixWithTransformRotate()
+    {
+        return {};
+    }
+
     virtual RectF GetPaintRectWithoutTransform()
+    {
+        return {};
+    }
+
+    virtual RectF GetPaintRectWithTransformWithoutDegree()
     {
         return {};
     }
@@ -399,9 +451,13 @@ public:
 
     virtual void ClearDrawCommands() {}
 
-    virtual void DumpInfo() {}
+    virtual void RemoveContentModifier(const RefPtr<ContentModifier>& ContentModifier) {}
 
+    virtual void DumpInfo() {}
+    virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
+    virtual void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
+    virtual void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) {}
 
     void ObscuredToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
@@ -434,6 +490,10 @@ public:
     {
         return GetBackground() ? GetBackground()->propEffectOption : std::nullopt;
     }
+    std::optional<BlurOption> GetBackdropBlurOption() const
+    {
+        return GetBackground() ? GetBackground()->propBackdropBlurOption : std::nullopt;
+    }
     std::optional<BlurStyleOption> GetFrontBlurStyle() const
     {
         return GetForeground() ? GetForeground()->propBlurStyleOption : std::nullopt;
@@ -448,6 +508,8 @@ public:
     virtual void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) {};
 
     virtual void PaintAccessibilityFocus() {};
+
+    virtual void UpdateAccessibilityRoundRect() {};
 
     virtual void ClearAccessibilityFocus() {};
 
@@ -466,6 +528,7 @@ public:
     virtual void OnBackgroundColorUpdate(const Color& value) {}
     virtual void OnOpacityUpdate(double opacity) {}
     virtual void OnDynamicRangeModeUpdate(DynamicRangeMode dynamicRangeMode) {}
+    virtual void SetIsWideColorGamut(bool isWideColorGamut) {}
     virtual void SetAlphaOffscreen(bool isOffScreen) {}
     virtual void OnSphericalEffectUpdate(double radio) {}
     virtual void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) {}
@@ -484,7 +547,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(DynamicDimDegree, float);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ParticleOptionArray, std::list<ParticleOption>);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ClickEffectLevel, ClickEffectInfo);
-    virtual RefPtr<PixelMap> GetThumbnailPixelMap(bool needScale = false)
+    virtual RefPtr<PixelMap> GetThumbnailPixelMap(bool needScale = false, bool isOffline = true)
     {
         return nullptr;
     }
@@ -518,6 +581,7 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(Background, BackgroundProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImage, ImageSourceInfo);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageRepeat, ImageRepeat);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageSyncMode, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageSize, BackgroundImageSize);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImagePosition, BackgroundImagePosition);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageResizableSlice, ImageResizableSlice);
@@ -623,6 +687,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, LinearGradient, NG::Gradient);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, SweepGradient, NG::Gradient);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, RadialGradient, NG::Gradient);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, LastGradientType, NG::GradientType);
 
     // Overlay
     ACE_DEFINE_PROPERTY_GROUP(Overlay, OverlayProperty);
@@ -638,6 +703,7 @@ public:
 
     // useEffect
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseEffect, bool);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseEffectType, EffectType);
 
     // useShadowBatching
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseShadowBatching, bool);
@@ -655,10 +721,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AttractionEffect, AttractionEffect);
 
     virtual void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) {}
-    virtual std::vector<double> GetTrans()
-    {
-        return std::vector<double>();
-    }
     virtual void SetFrameGravity(OHOS::Rosen::Gravity gravity) {}
 
     virtual int32_t CalcExpectedFrameRate(const std::string& scene, float speed)
@@ -708,6 +770,39 @@ public:
         return 0;
     }
 
+    virtual bool IsDisappearing() const
+    {
+        return false;
+    }
+
+    virtual void SetRenderFit(RenderFit renderFit) {}
+
+    virtual OffsetF GetBaseTransalteInXY() const
+    {
+        return OffsetF{0.0f, 0.0f};
+    }
+    virtual void SetBaseTranslateInXY(const OffsetF& offset) {}
+    virtual float GetBaseRotateInZ() const
+    {
+        return 0.0f;
+    }
+    virtual void SetBaseRotateInZ(float degree) {}
+
+    virtual void UpdateWindowBlur() {}
+    virtual size_t GetAnimationsCount() const
+    {
+        return 0;
+    }
+    virtual void MarkUiFirstNode(bool isUiFirstNode) {}
+
+    virtual bool AddNodeToRsTree()
+    {
+        return false;
+    }
+
+    virtual void SetDrawNode() {}
+
+    virtual void UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode) {}
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
@@ -720,6 +815,7 @@ protected:
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
+    virtual void OnBackgroundImageSyncModeUpdate(bool syncMode) {}
     virtual void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) {}
     virtual void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) {}
     virtual void OnBackgroundImageResizableSliceUpdate(const ImageResizableSlice& slice) {}
@@ -773,6 +869,7 @@ protected:
     virtual void OnLinearGradientUpdate(const NG::Gradient& value) {}
     virtual void OnSweepGradientUpdate(const NG::Gradient& value) {}
     virtual void OnRadialGradientUpdate(const NG::Gradient& value) {}
+    virtual void OnLastGradientTypeUpdate(const NG::GradientType& value) {}
 
     virtual void OnFrontBrightnessUpdate(const Dimension& value) {}
     virtual void OnFrontGrayScaleUpdate(const Dimension& value) {}
@@ -796,6 +893,8 @@ protected:
     virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
     virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}
     virtual void OnUseEffectUpdate(bool useEffect) {}
+    virtual void OnUseEffectTypeUpdate(EffectType effectType) {}
+    virtual bool GetStatusByEffectTypeAndWindow() { return false; }
     virtual void OnUseShadowBatchingUpdate(bool useShadowBatching) {}
     virtual void OnFreezeUpdate(bool isFreezed) {}
     virtual void OnObscuredUpdate(const std::vector<ObscuredReasons>& reasons) {}

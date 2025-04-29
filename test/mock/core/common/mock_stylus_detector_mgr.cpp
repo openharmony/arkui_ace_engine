@@ -16,19 +16,6 @@
 #include "core/common/stylus/stylus_detector_mgr.h"
 
 namespace OHOS::Ace {
-void StylusDetectorMgr::StylusDetectorCallBack::RequestFocus(int32_t nodeId) {}
-
-void StylusDetectorMgr::StylusDetectorCallBack::SetText(int32_t nodeId, std::string args) {}
-
-std::string StylusDetectorMgr::StylusDetectorCallBack::GetText(int32_t nodeId)
-{
-    return "";
-}
-
-void StylusDetectorMgr::StylusDetectorCallBack::OnDetector(
-    const CommandType& command, std::string args, std::shared_ptr<IAceStylusCallback> callback)
-{}
-
 StylusDetectorMgr* StylusDetectorMgr::GetInstance()
 {
     static StylusDetectorMgr instance;
@@ -65,7 +52,13 @@ bool StylusDetectorMgr::IsNeedInterceptedTouchEvent(
     return false;
 }
 
-void StylusDetectorMgr::AddTextFieldFrameNode(const RefPtr<NG::FrameNode>& frameNode) {}
+bool StylusDetectorMgr::IsNeedInterceptedTouchEventForWeb(float x, float y)
+{
+    return false;
+}
+
+void StylusDetectorMgr::AddTextFieldFrameNode(const RefPtr<NG::FrameNode>& frameNode,
+    const WeakPtr<NG::LayoutInfoInterface>& layoutInfo) {}
 void StylusDetectorMgr::RemoveTextFieldFrameNode(const int32_t id) {}
 
 StylusDetectorMgr::StylusDetectorMgr() : engine_(nullptr), isRegistered_(false) {}

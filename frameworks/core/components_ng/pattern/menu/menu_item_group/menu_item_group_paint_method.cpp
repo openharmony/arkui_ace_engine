@@ -15,15 +15,8 @@
 
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_paint_method.h"
 
-#include "base/geometry/ng/offset_t.h"
-#include "base/utils/utils.h"
 #include "core/components/select/select_theme.h"
-#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_paint_property.h"
-#include "core/components_ng/pattern/menu/menu_theme.h"
-#include "core/components_ng/pattern/shape/rect_paint_property.h"
-#include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/drawing.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 CanvasDrawFunction MenuItemGroupPaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)
@@ -34,6 +27,9 @@ CanvasDrawFunction MenuItemGroupPaintMethod::GetOverlayDrawFunction(PaintWrapper
             CHECK_NULL_VOID(paintWrapper);
             auto props = DynamicCast<MenuItemGroupPaintProperty>(paintWrapper->GetPaintProperty());
             CHECK_NULL_VOID(props);
+            if (props->GetDividerModeValue(DividerMode::FLOATING_ABOVE_MENU) == DividerMode::EMBEDDED_IN_MENU) {
+                return;
+            }
             bool needHeaderPadding = props->GetNeedHeaderPadding().value_or(false);
             auto pipeline = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
@@ -62,8 +58,7 @@ GroupDividerInfo MenuItemGroupPaintMethod::PreparePaintData(
     Color dividerColor = Color::TRANSPARENT;
     GroupDividerInfo info;
     if (selectTheme) {
-        float horIntervalF = static_cast<float>(selectTheme->GetMenuIconPadding().ConvertToPx()) -
-            static_cast<float>(selectTheme->GetOutPadding().ConvertToPx());
+        float horIntervalF = static_cast<float>(selectTheme->GetMenuItemHorIntervalPadding().ConvertToPx());
         horInterval = Dimension(horIntervalF, DimensionUnit::PX);
         strokeWidth = selectTheme->GetDefaultDividerWidth();
         dividerColor =  selectTheme->GetLineColor();

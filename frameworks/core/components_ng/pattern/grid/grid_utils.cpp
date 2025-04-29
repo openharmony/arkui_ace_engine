@@ -15,9 +15,6 @@
 
 #include "core/components_ng/pattern/grid/grid_utils.h"
 
-#include <cmath>
-#include <iostream>
-
 namespace OHOS::Ace::NG {
 namespace {
 

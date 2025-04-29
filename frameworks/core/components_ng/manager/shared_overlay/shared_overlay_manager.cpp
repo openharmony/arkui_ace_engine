@@ -15,15 +15,7 @@
 
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 
-#include <sstream>
-
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -262,7 +254,7 @@ void SharedOverlayManager::PassengerAboard(
     passenger->GetRenderContext()->UpdateZIndex(effect->GetZIndex());
     passenger->GetRenderContext()->UpdatePosition(offset);
     passenger->GetRenderContext()->OnModifyDone();
-    passenger->GetEventHub<EventHub>()->SetEnabledInternal(false);
+    passenger->GetOrCreateEventHub<EventHub>()->SetEnabledInternal(false);
 }
 
 bool SharedOverlayManager::AboardShuttle(const RefPtr<SharedTransitionEffect>& effect)
@@ -318,7 +310,7 @@ void SharedOverlayManager::GetOffShuttle(const RefPtr<SharedTransitionEffect>& e
         }
         // restore initialFrameOffset for static type sharedTransition, because it may not layout again
         ReplaceFrameNode(passengerHolder, passenger);
-        passenger->GetEventHub<EventHub>()->RestoreEnabled();
+        passenger->GetOrCreateEventHub<EventHub>()->RestoreEnabled();
         auto isPassengerCurrentFocused = effect->GetPassengerCurrentFocused();
         if (isPassengerCurrentFocused) {
             auto passengerFocusHub = passenger->GetFocusHub();

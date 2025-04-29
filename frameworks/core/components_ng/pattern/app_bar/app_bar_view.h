@@ -21,17 +21,20 @@
 
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace::NG {
 /**
  * The structure of Atomic Service (install free):
  * |--AtomicService(Column)
- *   |--Stage
- *   |--MenuBarRow
- *     |--MenuBar
- *       |--menuButton
- *       |--divider
- *       |--closeButton
+ *   |--JsView
+ *     |--Stage
+ *     |--MenuBarRow
+ *       |--MenuBar
+ *          |--menuButton
+ *          |--divider
+ *          |--closeButton
+ * |--ModalPage(UEC)
  */
 
 class ACE_FORCE_EXPORT AppBarView : public Referenced {
@@ -45,13 +48,18 @@ public:
     void SetIconColor(const std::optional<Color>& color) {}
     void SetStatusBarItemColor(bool isLight);
     std::optional<RectF> GetAppBarRect();
-
+    void OnMenuClick();
+    void OnCloseClick();
+    void CreateServicePanel(const std::string& appGalleryBundleName, const std::string& abilityName,
+        std::map<std::string, std::string>& params);
+    static void BuildAppbar(RefPtr<PipelineBase> pipleline);
 private:
     RefPtr<FrameNode> BuildMenuBarRow();
     RefPtr<FrameNode> BuildMenuBar();
     RefPtr<FrameNode> BuildButton(bool isMenuButton);
     RefPtr<FrameNode> BuildIcon(bool isMenuIcon);
     RefPtr<FrameNode> BuildDivider();
+    void BindJSContainer();
     void BindMenuCallback(const RefPtr<FrameNode>& menuButton);
     void BindCloseCallback(const RefPtr<FrameNode>& closeButton);
     void CreateServicePanel(bool firstTry);
@@ -60,6 +68,7 @@ private:
     int32_t sessionId_ = 0;
 
     WeakPtr<FrameNode> atomicService_;
+    RefPtr<FrameNode> contentStage_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_APP_BAR_VIEW_H

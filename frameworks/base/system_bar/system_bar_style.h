@@ -20,13 +20,14 @@
 #include "base/memory/referenced.h"
 
 namespace OHOS::Ace {
-class SystemBarStyle : public AceType {
+class ACE_FORCE_EXPORT SystemBarStyle : public AceType {
     DECLARE_ACE_TYPE(SystemBarStyle, AceType)
 public:
     SystemBarStyle() = default;
     ~SystemBarStyle() = default;
 
     static RefPtr<SystemBarStyle> CreateStyleFromJsObj(void* env, void* value);
+    static RefPtr<SystemBarStyle> CreateStyleFromColor(const uint32_t colorValue);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_SYSTEM_BAR_SYSTEM_BAR_STYLE_H

@@ -22,6 +22,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/core/components_ng/pattern/text/span/span_string.h"
 #include "frameworks/core/components_ng/pattern/text/text_menu_extension.h"
 
 namespace OHOS::Ace::Framework {
@@ -56,6 +57,8 @@ public:
     static void SetLineBreakStrategy(const JSCallbackInfo& info);
     static void SetEllipsisMode(const JSCallbackInfo& info);
     static void SetTextSelection(const JSCallbackInfo& info);
+    static void SetTextCaretColor(const JSCallbackInfo& info);
+    static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
     static void SetTextSelectableMode(const JSCallbackInfo& info);
     static void SetTextCase(int32_t value);
     static void SetBaselineOffset(const JSCallbackInfo& info);
@@ -67,10 +70,6 @@ public:
     static void JsOnClickWithoutNGBUILD(const JSCallbackInfo& info);
     static void JsRemoteMessage(const JSCallbackInfo& info);
     static void JsOnDragStart(const JSCallbackInfo& info);
-    static void JsOnDragEnter(const JSCallbackInfo& info);
-    static void JsOnDragMove(const JSCallbackInfo& info);
-    static void JsOnDragLeave(const JSCallbackInfo& info);
-    static void JsOnDrop(const JSCallbackInfo& info);
     static void JsFocusable(const JSCallbackInfo& info);
     static void JsDraggable(const JSCallbackInfo& info);
     static void JsMenuOptionsExtension(const JSCallbackInfo& info);
@@ -80,12 +79,19 @@ public:
     static void SetOnTextSelectionChange(const JSCallbackInfo& info);
     static void ParseMenuParam(
         const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::SelectMenuParam& menuParam);
+    static std::function<void(int32_t, int32_t)> ParseMenuCallback(const WeakPtr<NG::FrameNode>& frameNode,
+        const JSRef<JSObject>& menuOptions, const JSCallbackInfo& info, const std::string& name);
+    static NG::PreviewMenuOptions ParsePreviewMenuOptions(const JSRef<JSObject>& menuOptions);
     static void JsClip(const JSCallbackInfo& info);
     static void SetFontFeature(const JSCallbackInfo &info);
     static void SetForegroundColor(const JSCallbackInfo& info);
+    static void SetMarqueeOptions(const JSCallbackInfo& info);
+    static void SetOnMarqueeStateChange(const JSCallbackInfo& info);
+    static void ParseMarqueeParam(const JSRef<JSObject>& paramObject, NG::TextMarqueeOptions& options);
     static void EditMenuOptions(const JSCallbackInfo& info);
     static void JsResponseRegion(const JSCallbackInfo& info);
     static void SetHalfLeading(const JSCallbackInfo& info);
+    static void SetEnableHapticFeedback(const JSCallbackInfo& info);
 
 private:
     static RefPtr<TextComponentV2> GetComponent();
@@ -117,12 +123,23 @@ public:
         controllerWeak_ = controller;
     }
 
+    RefPtr<SpanString> GetStyledString() const
+    {
+        return styledString_;
+    }
+
+    void ClearStyledString()
+    {
+        styledString_ = nullptr;
+    }
+
     void CloseSelectionMenu();
 
     void SetStyledString(const JSCallbackInfo& info);
     void GetLayoutManager(const JSCallbackInfo& args);
 private:
     WeakPtr<TextControllerBase> controllerWeak_;
+    RefPtr<SpanString> styledString_;
     ACE_DISALLOW_COPY_AND_MOVE(JSTextController);
 };
 

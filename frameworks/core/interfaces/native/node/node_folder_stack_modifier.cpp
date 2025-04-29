@@ -14,12 +14,7 @@
  */
 #include "core/interfaces/native/node/node_folder_stack_modifier.h"
 
-#include <cstdint>
-
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -54,23 +49,27 @@ void ResetAutoHalfFold(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIFolderStackModifier* GetFolderStackModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIFolderStackModifier modifier = {
-        SetEnableAnimation,
-        ResetEnableAnimation,
-        SetAutoHalfFold,
-        ResetAutoHalfFold
+        .setEnableAnimation = SetEnableAnimation,
+        .resetEnableAnimation = ResetEnableAnimation,
+        .setAutoHalfFold = SetAutoHalfFold,
+        .resetAutoHalfFold = ResetAutoHalfFold,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIFolderStackModifier* GetCJUIFolderStackModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIFolderStackModifier modifier = {
-        SetEnableAnimation,
-        ResetEnableAnimation,
-        SetAutoHalfFold,
-        ResetAutoHalfFold
+        .setEnableAnimation = SetEnableAnimation,
+        .resetEnableAnimation = ResetEnableAnimation,
+        .setAutoHalfFold = SetAutoHalfFold,
+        .resetAutoHalfFold = ResetAutoHalfFold,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

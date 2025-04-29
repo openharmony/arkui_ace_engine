@@ -80,6 +80,8 @@ struct SelectHandleInfo {
     bool needLayout = false;
     bool isPaintHandleWithPoints = false;
     bool isCircleShow = true;
+    bool forceDraw = false;
+    bool isTouchable = true;
     // in Global coordinates.
     RectF paintRect;
     RectF localPaintRect;
@@ -88,7 +90,8 @@ struct SelectHandleInfo {
 
     bool operator==(const SelectHandleInfo& info) const
     {
-        return (isShow == info.isShow) && (paintRect == info.paintRect) && (paintInfo == info.paintInfo);
+        return (isShow == info.isShow) && (paintRect == info.paintRect) && (paintInfo == info.paintInfo) &&
+               (localPaintRect == info.localPaintRect);
     }
 
     bool operator!=(const SelectHandleInfo& info) const
@@ -115,6 +118,7 @@ struct SelectHandleInfo {
         JSON_STRING_PUT_BOOL(jsonValue, isShow);
         JSON_STRING_PUT_BOOL(jsonValue, needLayout);
         JSON_STRING_PUT_STRINGABLE(jsonValue, paintRect);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, localPaintRect);
         return jsonValue->ToString();
     }
 };
@@ -127,6 +131,7 @@ inline constexpr SelectOverlayDirtyFlag DIRTY_ALL_MENU_ITEM = 1 << 3;
 inline constexpr SelectOverlayDirtyFlag DIRTY_COPY_ALL_ITEM = 1 << 4;
 inline constexpr SelectOverlayDirtyFlag DIRTY_SELECT_TEXT = 1 << 5;
 inline constexpr SelectOverlayDirtyFlag DIRTY_VIEWPORT = 1 << 6;
+inline constexpr SelectOverlayDirtyFlag DIRTY_HANDLE_COLOR_FLAG = 1 << 7;
 inline constexpr SelectOverlayDirtyFlag DIRTY_DOUBLE_HANDLE = DIRTY_FIRST_HANDLE | DIRTY_SECOND_HANDLE;
 inline constexpr SelectOverlayDirtyFlag DIRTY_ALL =
     DIRTY_DOUBLE_HANDLE | DIRTY_ALL_MENU_ITEM | DIRTY_SELECT_AREA | DIRTY_SELECT_TEXT | DIRTY_VIEWPORT;
@@ -134,14 +139,29 @@ inline constexpr SelectOverlayDirtyFlag DIRTY_ALL =
 inline constexpr int32_t REQUEST_RECREATE = 1;
 
 enum class OptionMenuType { NO_MENU, MOUSE_MENU, TOUCH_MENU };
-enum class OptionMenuActionId { COPY, CUT, PASTE, SELECT_ALL, CAMERA_INPUT, AI_WRITE, APPEAR, DISAPPEAR };
+enum class OptionMenuActionId {
+    COPY,
+    CUT,
+    PASTE,
+    SELECT_ALL,
+    TRANSLATE,
+    SHARE,
+    SEARCH,
+    CAMERA_INPUT,
+    AI_WRITE,
+    APPEAR,
+    DISAPPEAR
+};
 enum class CloseReason {
     CLOSE_REASON_NORMAL = 1,
     CLOSE_REASON_HOLD_BY_OTHER,
     CLOSE_REASON_BY_RECREATE,
     CLOSE_REASON_TOOL_BAR,
     CLOSE_REASON_BACK_PRESSED,
-    CLOSE_REASON_CLICK_OUTSIDE
+    CLOSE_REASON_CLICK_OUTSIDE,
+    CLOSE_REASON_DRAG_FLOATING,
+    CLOSE_REASON_WINDOW_SIZE_CHANGE,
+    CLOSE_REASON_SELECT_ALL
 };
 
 struct HoldSelectionInfo {
@@ -168,6 +188,9 @@ struct SelectMenuInfo {
     bool showPaste = true;
     bool showCopyAll = true;
     bool showCut = true;
+    bool showTranslate = false;
+    bool showShare = false;
+    bool showSearch = false;
     bool showCameraInput = false;
     bool showAIWrite = false;
     std::optional<OffsetF> menuOffset;
@@ -184,7 +207,9 @@ struct SelectMenuInfo {
             return true;
         }
         return !((showCopy == info.showCopy) && (showPaste == info.showPaste) && (showCopyAll == info.showCopyAll) &&
-                 (showCut == info.showCut) && (showCameraInput == info.showCameraInput) &&
+                 (showTranslate == info.showTranslate) &&
+                 (showCut == info.showCut) && (showSearch == info.showSearch) && (showShare == info.showShare) &&
+                 (showCameraInput == info.showCameraInput) &&
                  (showAIWrite == info.showAIWrite));
     }
 
@@ -198,6 +223,9 @@ struct SelectMenuInfo {
         JSON_STRING_PUT_BOOL(jsonValue, showPaste);
         JSON_STRING_PUT_BOOL(jsonValue, showCopyAll);
         JSON_STRING_PUT_BOOL(jsonValue, showCut);
+        JSON_STRING_PUT_BOOL(jsonValue, showTranslate);
+        JSON_STRING_PUT_BOOL(jsonValue, showSearch);
+        JSON_STRING_PUT_BOOL(jsonValue, showShare);
         JSON_STRING_PUT_BOOL(jsonValue, showCameraInput);
         return jsonValue->ToString();
     }
@@ -208,11 +236,17 @@ struct SelectMenuCallback {
     std::function<void()> onPaste;
     std::function<void()> onSelectAll;
     std::function<void()> onCut;
+    std::function<void()> onTranslate;
+    std::function<void()> onSearch;
+    std::function<void()> onShare;
     std::function<void()> onCameraInput;
     std::function<void()> onAIWrite;
 
     std::function<void()> onAppear;
     std::function<void()> onDisappear;
+    std::function<void()> onMenuShow;
+    std::function<void()> onMenuHide;
+    std::function<bool()> showMenuOnMoveDone;
 };
 
 struct SelectedByMouseInfo {
@@ -276,12 +310,18 @@ struct SelectOverlayInfo {
     std::function<void(const TouchEventInfo&)> onTouchUp;
     std::function<void(const TouchEventInfo&)> onTouchMove;
     std::function<void(const GestureEvent&, bool isFirst)> onClick;
+    std::function<void(const GestureEvent&, bool isFirst)> afterOnClick;
+    std::function<void(const MouseInfo&)> onMouseEvent;
 
     // handle move callback.
-    std::function<void(bool isFirst)> onHandleMoveStart;
+    std::function<void(const GestureEvent&, bool isFirst)> onHandleMoveStart;
     std::function<void(const RectF&, bool isFirst)> onHandleMove;
     std::function<void(const RectF&, bool isFirst)> onHandleMoveDone;
     std::function<void(bool)> onHandleReverse;
+
+    std::function<void(const GestureEvent&, bool isFirst)> onHandlePanMove;
+    std::function<void(const GestureEvent&, bool isFirst)> onHandlePanEnd;
+    std::function<OffsetF()> getDeltaHandleOffset;
 
     // menu info.
     SelectMenuInfo menuInfo;
@@ -307,10 +347,13 @@ struct SelectOverlayInfo {
     HandleLevelMode handleLevelMode = HandleLevelMode::OVERLAY;
     bool enableHandleLevel = false;
     VectorF scale = VectorF(1.0f, 1.0f);
+    bool clipHandleDrawRect = false;
+    std::optional<RectF> clipViewPort;
 
     std::string ToString() const
     {
         auto jsonValue = JsonUtil::Create(true);
+        JSON_STRING_PUT_INT(jsonValue, handleLevelMode);
         JSON_STRING_PUT_BOOL(jsonValue, isUsingMouse);
         JSON_STRING_PUT_BOOL(jsonValue, isSingleHandle);
         JSON_STRING_PUT_BOOL(jsonValue, handleReverse);
@@ -330,8 +373,28 @@ struct SelectOverlayInfo {
     void GetCallerNodeAncestorViewPort(RectF& viewPort);
     const RectF& GetFirstHandlePaintRect();
     const RectF& GetSecondHandlePaintRect();
+    bool enableSubWindowMenu = false;
+    OffsetF containerModalOffset;
 };
 
+enum class TextMenuShowMode {
+    BEGIN = -1,
+    UNSPECIFIED = BEGIN,
+    // Display the text selection menu in the current window
+    DEFAULT = 0,
+    /**
+     * Prefer to display the text selection menu in a separate window
+     * and continue to display it within the current window if a separate window is not supported
+     */
+    PREFER_WINDOW = 1,
+    END = PREFER_WINDOW,
+};
+
+TextMenuShowMode CastToTextMenuShowMode(int32_t value);
+
+struct TextMenuOptions {
+    std::optional<TextMenuShowMode> showMode;
+};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SELECT_OVERLAY_PROPERTY_H

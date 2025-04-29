@@ -15,13 +15,9 @@
 
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 
-#include <cstring>
 #include <dirent.h>
-#include <limits>
-#include <mutex>
-#include <sys/types.h>
+
 #include "base/log/ace_trace.h"
-#include "base/log/log.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {

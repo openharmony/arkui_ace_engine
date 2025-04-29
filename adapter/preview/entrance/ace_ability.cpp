@@ -38,6 +38,9 @@
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/js_frontend.h"
 #include "frameworks/core/common/ace_engine.h"
+#ifdef COMPONENT_TEST_ENABLED
+#include "frameworks/component_test/test_config.h"
+#endif // COMPONENT_TEST_ENABLED
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -186,7 +189,7 @@ public:
                     pipeline->UpdateSystemSafeArea(safeArea);
                 } else if (type == Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
                     pipeline->UpdateNavSafeArea(navSafeArea);
-                } else if (type == Rosen::AvoidAreaType::TYPE_CUTOUT && pipeline->GetUseCutout()) {
+                } else if (type == Rosen::AvoidAreaType::TYPE_CUTOUT) {
                     pipeline->UpdateCutoutSafeArea(cutoutSafeArea);
                 }
                 // for ui extension component
@@ -213,7 +216,6 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
         runArgs.deviceConfig.orientation == DeviceOrientation::PORTRAIT ? 0 : 1, runArgs.deviceConfig.density,
         runArgs.isRound);
     SystemProperties::InitDeviceType(runArgs.deviceConfig.deviceType);
-    SystemProperties::SetColorMode(runArgs.deviceConfig.colorMode);
     InitializeAppInfo();
     if (runArgs_.aceVersion == AceVersion::ACE_1_0) {
         if (runArgs_.formsEnabled) {
@@ -238,6 +240,7 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
     SetConfigChanges(runArgs.configChanges);
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     CHECK_NULL_VOID(container);
+    container->SetColorMode(runArgs.deviceConfig.colorMode);
     container->SetContainerSdkPath(runArgs.containerSdkPath);
     container->SetInstallationFree(installationFree_);
     container->SetLabelId(labelId_);
@@ -245,7 +248,7 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
     config.SetDeviceType(SystemProperties::GetDeviceType());
     config.SetOrientation(SystemProperties::GetDeviceOrientation());
     config.SetDensity(SystemProperties::GetResolution());
-    config.SetColorMode(SystemProperties::GetColorMode());
+    config.SetColorMode(container->GetColorMode());
     config.SetFontRatio(runArgs.deviceConfig.fontRatio);
     container->SetResourceConfiguration(config);
     container->SetBundleName(bundleName_);
@@ -368,9 +371,7 @@ void AceAbility::InitEnv()
     }
     container->InitializeAppConfig(runArgs_.assetPath, bundleName_, moduleName_, compileMode_);
     pipelineContext->UpdateSystemSafeArea(GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM, window));
-    if (pipelineContext->GetUseCutout()) {
-        pipelineContext->UpdateCutoutSafeArea(GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT, window));
-    }
+    pipelineContext->UpdateCutoutSafeArea(GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT, window));
     pipelineContext->UpdateNavSafeArea(GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR, window));
     AceContainer::AddRouterChangeCallback(ACE_INSTANCE_ID, runArgs_.onRouterChange);
     OHOS::Ace::Framework::InspectorClient::GetInstance().RegisterFastPreviewErrorCallback(runArgs_.onError);
@@ -450,6 +451,11 @@ void AceAbility::InitializeAppInfo()
         useNewPipeline_ =
             AceNewPipeJudgement::QueryAceNewPipeEnabledFA("", compatibleVersion_, targetVersion, releaseType);
     }
+#ifdef COMPONENT_TEST_ENABLED
+    if (runArgs_.isComponentTestMode && runArgs_.componentTestConfig != "") {
+        ComponentTest::ParseComponentTestConfig(runArgs_.componentTestConfig);
+    }
+#endif // COMPONENT_TEST_ENABLED
 }
 
 void AceAbility::SetConfigChanges(const std::string& configChanges)

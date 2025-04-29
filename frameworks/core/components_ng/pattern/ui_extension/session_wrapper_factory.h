@@ -18,9 +18,9 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/ui_extension/platform_pattern.h"
-#include "core/components_ng/pattern/ui_extension/security_ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
 
 namespace OHOS::Ace::NG {
 struct SessionCreateParam {

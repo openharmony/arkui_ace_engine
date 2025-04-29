@@ -17,24 +17,12 @@
 
 #include <mutex>
 
+#include "base/log/log_wrapper.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-
-namespace OHOS::Ace {
-CanvasModel* CanvasModel::GetInstanceNG()
-{
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
-            instance_.reset(new NG::CanvasModelNG());
-        }
-    }
-    return instance_.get();
-}
-} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
 RefPtr<AceType> CanvasModelNG::Create()
@@ -48,11 +36,16 @@ RefPtr<AceType> CanvasModelNG::Create()
     return frameNode->GetPattern<CanvasPattern>();
 }
 
+RefPtr<AceType> CanvasModelNG::GetTaskPool(RefPtr<AceType>& pattern)
+{
+    return pattern;
+}
+
 void CanvasModelNG::SetOnReady(std::function<void()>&& onReady)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<CanvasEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<CanvasEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto func = onReady;
@@ -78,10 +71,19 @@ void CanvasModelNG::SetImageAIOptions(void* options)
     pattern->SetImageAIOptions(options);
 }
 
+void CanvasModelNG::DetachRenderContext()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->DetachRenderContext();
+}
+
 void CanvasModelNG::SetOnReady(FrameNode* frameNode, std::function<void()>&& onReady)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<CanvasEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<CanvasEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto func = onReady;
     auto onReadyEvent = [func]() { func(); };

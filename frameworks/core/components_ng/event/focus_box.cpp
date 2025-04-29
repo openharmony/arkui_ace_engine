@@ -14,8 +14,6 @@
  */
 #include "focus_box.h"
 
-#include "core/components_ng/render/render_context.h"
-
 namespace OHOS::Ace::NG {
 void FocusBox::SetStyle(const FocusBoxStyle& style)
 {
@@ -28,6 +26,11 @@ void FocusBox::SetStyle(const FocusBoxStyle& style)
         paintStyle_.reset();
         return;
     }
+}
+
+std::optional<FocusBoxStyle> FocusBox::GetStyle() const
+{
+    return paintStyle_;
 }
 
 bool FocusBox::HasCustomStyle() const

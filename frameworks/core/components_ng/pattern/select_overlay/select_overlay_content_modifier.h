@@ -40,11 +40,17 @@ struct HandleDrawInfo {
     bool isCircleShow = true;
 };
 
+struct PaintHandleParams {
+    bool isHandleLineShow = true;
+    bool isCircleShow = true;
+    bool isDragging = false;
+};
+
 class SelectOverlayContentModifier : public ContentModifier {
     DECLARE_ACE_TYPE(SelectOverlayContentModifier, ContentModifier)
 
 public:
-    SelectOverlayContentModifier();
+    SelectOverlayContentModifier(const WeakPtr<Pattern>& pattern);
 
     ~SelectOverlayContentModifier() override = default;
 
@@ -190,10 +196,20 @@ public:
         scale_ = scale;
     }
 
+    void SetClipHandleDrawRect(bool isClipHandleDrawRect)
+    {
+        isClipHandleDrawRect_ = isClipHandleDrawRect;
+    }
+
+    RefPtr<Pattern> GetSelectOverlayPattern() const
+    {
+        return pattern_.Upgrade();
+    }
+
 private:
-    void PaintHandle(RSCanvas& canvas, const RectF& handleRect, bool handleOnTop, bool isHandleLineShow = true,
-        bool isCircleShow = true);
+    void PaintHandle(RSCanvas& canvas, const RectF& handleRect, bool handleOnTop, const PaintHandleParams& params);
     void PaintHandle(RSCanvas& canvas, const HandleDrawInfo& handleInfo);
+    void PaintHandleLine(RSCanvas& canvas, const HandleDrawInfo& handleInfo, Color handleColor);
 
     void PaintSingleHandle(RSCanvas& canvas);
     bool PaintSingleHandleWithPoints(RSCanvas& canvas);
@@ -204,6 +220,7 @@ private:
     void PaintDoubleHandle(RSCanvas& canvas);
 
     void ClipViewPort(RSCanvas& canvas);
+    void ClipHandleDrawRect(RSCanvas& canvas, const RectF& handleRect, bool handleOnTop, bool isDragging);
     RectF ConvertPointsToRect(const SelectHandlePaintInfo& paintInfo) const;
     RectF GetFirstPaintRect() const;
     RectF GetSecondPaintRect() const;
@@ -212,6 +229,8 @@ private:
     {
         return handleRadius_->Get() + handleStrokeWidth_->Get() / 2.0f;
     }
+    bool CheckHandleCircleIsShow(const RectF& handlRect);
+    bool IsDraggingHandle(bool isFirst);
 
     RefPtr<PropertyBool> inShowArea_;
     RefPtr<PropertyBool> handleReverse_;
@@ -236,7 +255,9 @@ private:
     SelectHandlePaintInfo firstHandlePaintInfo_;
     SelectHandlePaintInfo secondHandlePaintInfo_;
     bool isOverlayMode_ = true;
+    bool isClipHandleDrawRect_ = false;
     VectorF scale_ = VectorF(1.0f, 1.0f);
+    WeakPtr<Pattern> pattern_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayContentModifier);
 };

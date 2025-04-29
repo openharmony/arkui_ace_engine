@@ -65,12 +65,12 @@ HWTEST_F(StackNewTestNG, Example, TestSize.Level1)
         ViewAbstract::SetHeight(CalcLength(300.0f));
 
         // step: create child nodes
-        auto textBottom = CreateText("First child, show in bottom", [this](TextModelNG model) {
+        auto textBottom = CreateText(u"First child, show in bottom", [this](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(Dimension(90 / 100.0, DimensionUnit::PERCENT)));
             ViewAbstract::SetHeight(CalcLength(Dimension(100 / 100.0, DimensionUnit::PERCENT)));
             ViewAbstract::SetInspectorId("bottom");
         });
-        auto textTop = CreateText("Second child, show in top", [this](TextModelNG model) {
+        auto textTop = CreateText(u"Second child, show in top", [this](TextModelNG model) {
             ViewAbstract::SetWidth(CalcLength(Dimension(70 / 100.0, DimensionUnit::PERCENT)));
             ViewAbstract::SetHeight(CalcLength(Dimension(60 / 100.0, DimensionUnit::PERCENT)));
             ViewAbstract::SetInspectorId("top");

@@ -14,9 +14,15 @@
  */
 #include "core/common/recorder/event_recorder.h"
 
+#include <cstdint>
+#include <optional>
+#include <vector>
+
 #include "core/common/container.h"
 #include "core/common/recorder/event_controller.h"
+#include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace::Recorder {
 constexpr char IGNORE_WINDOW_NAME[] = "$HA_FLOAT_WINDOW$";
@@ -34,6 +40,12 @@ EventParamsBuilder::EventParamsBuilder()
 EventParamsBuilder& EventParamsBuilder::SetEventType(EventType eventType)
 {
     eventType_ = eventType;
+    return *this;
+}
+
+EventParamsBuilder& EventParamsBuilder::SetEventCategory(EventCategory category)
+{
+    category_ = category;
     return *this;
 }
 
@@ -106,6 +118,44 @@ EventParamsBuilder& EventParamsBuilder::SetTextArray(const std::vector<std::stri
     return *this;
 }
 
+void FillExtraTextIfNeed(EventType eventType, EventParamsBuilder& builder, const RefPtr<NG::FrameNode>& host)
+{
+    if (eventType != EventType::CLICK || !builder.GetValue(KEY_TEXT).empty()) {
+        return;
+    }
+    if (!EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_PARENT_TEXT)) {
+        return;
+    }
+    if (!host->GetChildren().empty()) {
+        return;
+    }
+    auto parent = host->GetParentFrameNode();
+    CHECK_NULL_VOID(parent);
+    auto property = parent->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(property);
+    builder.SetExtra(KEY_EXTRA_TEXT, property->GetGroupText(true));
+}
+
+EventParamsBuilder& EventParamsBuilder::SetHost(const RefPtr<NG::FrameNode>& node)
+{
+    if (!node) {
+        return *this;
+    }
+    if (EventRecorder::Get().IsRecordEnable(EventCategory::CATEGORY_RECT)) {
+        auto rect = node->GetTransformRectRelativeToWindow().ToBounds();
+        params_->emplace(Recorder::KEY_NODE_RECT, std::move(rect));
+    }
+    params_->emplace(KEY_ACE_ID, std::to_string(node->GetId()));
+    SetPageUrl(GetPageUrlByNode(node));
+    FillExtraTextIfNeed(eventType_, *this, node);
+    auto parent = node->GetParent();
+    if (parent) {
+        auto index = parent->GetFrameNodeIndex(node);
+        params_->emplace("nodeIndex", std::to_string(index));
+    }
+    return *this;
+}
+
 EventParamsBuilder& EventParamsBuilder::SetExtra(const std::string& key, const std::string& value)
 {
     if (!key.empty() && !value.empty()) {
@@ -116,6 +166,11 @@ EventParamsBuilder& EventParamsBuilder::SetExtra(const std::string& key, const s
 
 std::shared_ptr<std::unordered_map<std::string, std::string>> EventParamsBuilder::build()
 {
+    auto current = Container::Current();
+    if (current) {
+        params_->emplace(KEY_MOUDLE_NAME, current->GetModuleName());
+    }
+    params_->emplace(KEY_ABILITY_NAME, AceApplicationInfo::GetInstance().GetAbilityName());
     return params_;
 }
 
@@ -124,9 +179,14 @@ EventType EventParamsBuilder::GetEventType() const
     return eventType_;
 }
 
-std::string EventParamsBuilder::GetText() const
+EventCategory EventParamsBuilder::GetEventCategory() const
 {
-    auto iter = params_->find(KEY_TEXT);
+    return category_;
+}
+
+std::string EventParamsBuilder::GetValue(const std::string& key) const
+{
+    auto iter = params_->find(key);
     if (iter != params_->end()) {
         return iter->second;
     }
@@ -167,26 +227,51 @@ EventRecorder& EventRecorder::Get()
     return eventRecorder;
 }
 
-EventRecorder::EventRecorder() {}
+EventRecorder::EventRecorder()
+{
+    eventSwitch_.resize(static_cast<int32_t>(EventCategory::CATEGORY_END), false);
+    eventSwitch_[static_cast<int32_t>(EventCategory::CATEGORY_PAGE)] = true;
+    globalSwitch_.resize(static_cast<int32_t>(EventCategory::CATEGORY_END), true);
+}
 
-void EventRecorder::UpdateEventSwitch(const EventSwitch& eventSwitch)
+void EventRecorder::UpdateEventSwitch(const std::vector<bool>& eventSwitch)
 {
     eventSwitch_ = eventSwitch;
 }
 
+void EventRecorder::UpdateWebIdentifier(const std::unordered_map<std::string, std::string> identifierMap)
+{
+    webIdentifierMap_ = identifierMap;
+}
+
 bool EventRecorder::IsPageRecordEnable() const
 {
-    return pageEnable_ && eventSwitch_.pageEnable;
+    int32_t index = static_cast<int32_t>(EventCategory::CATEGORY_PAGE);
+    return globalSwitch_[index] && eventSwitch_[index];
+}
+
+bool EventRecorder::IsPageParamRecordEnable() const
+{
+    int32_t index = static_cast<int32_t>(EventCategory::CATEGORY_PAGE_PARAM);
+    return globalSwitch_[index] && eventSwitch_[index];
 }
 
 bool EventRecorder::IsExposureRecordEnable() const
 {
-    return exposureEnable_ && eventSwitch_.exposureEnable;
+    int32_t index = static_cast<int32_t>(EventCategory::CATEGORY_EXPOSURE);
+    return globalSwitch_[index] && eventSwitch_[index];
 }
 
 bool EventRecorder::IsComponentRecordEnable() const
 {
-    return componentEnable_ && eventSwitch_.componentEnable;
+    int32_t index = static_cast<int32_t>(EventCategory::CATEGORY_COMPONENT);
+    return globalSwitch_[index] && eventSwitch_[index];
+}
+
+bool EventRecorder::IsRecordEnable(EventCategory category) const
+{
+    int32_t index = static_cast<int32_t>(category);
+    return globalSwitch_[index] && eventSwitch_[index];
 }
 
 void EventRecorder::SetContainerInfo(const std::string& windowName, int32_t id, bool foreground)
@@ -196,37 +281,31 @@ void EventRecorder::SetContainerInfo(const std::string& windowName, int32_t id, 
     }
     if (foreground) {
         containerId_ = id;
-        containerCount_++;
-    } else {
-        containerCount_--;
-    }
-    if (containerCount_ <= 0) {
-        containerCount_ = 0;
-        containerId_ = -1;
     }
 }
 
 void EventRecorder::SetFocusContainerInfo(const std::string& windowName, int32_t id)
 {
-    isFocusContainerChanged_ = focusContainerId_ != id;
     if (windowName == IGNORE_WINDOW_NAME) {
         return;
     }
     focusContainerId_ = id;
 }
 
-int32_t EventRecorder::GetContainerId()
+int32_t EventRecorder::GetContainerId(bool isFoucs)
 {
-    if (containerId_ == -1) {
-        return -1;
+    if (isFoucs) {
+        return focusContainerId_;
+    } else {
+        return containerId_;
     }
-    return focusContainerId_;
 }
 
 const std::string& EventRecorder::GetPageUrl()
 {
-    if (pageUrl_.empty() || isFocusContainerChanged_) {
-        pageUrl_ = GetCurrentPageUrl();
+    auto pageUrl = GetPageUrlByContainerId(focusContainerId_);
+    if (!pageUrl.empty()) {
+        pageUrl_ = pageUrl;
     }
     return pageUrl_;
 }
@@ -236,23 +315,59 @@ const std::string& EventRecorder::GetNavDstName() const
     return navDstName_;
 }
 
-void EventRecorder::OnPageShow(const std::string& pageUrl, const std::string& param)
+void EventRecorder::FillWebJsCode(std::optional<WebJsItem>& scriptItems) const
+{
+    if (!IsRecordEnable(EventCategory::CATEGORY_WEB)) {
+        return;
+    }
+    auto codeList = EventController::Get().GetWebJsCodeList();
+    if (codeList.empty()) {
+        return;
+    }
+    std::vector<std::string> scriptRules = { "*" };
+    if (scriptItems.has_value()) {
+        for (const auto& code : codeList) {
+            scriptItems->emplace(std::make_pair(code, scriptRules));
+        }
+    } else {
+        WebJsItem webJsItems;
+        for (const auto& code : codeList) {
+            webJsItems.emplace(std::make_pair(code, scriptRules));
+        }
+        scriptItems = std::make_optional<WebJsItem>(webJsItems);
+    }
+}
+
+bool EventRecorder::IsMessageValid(const std::string& webCategory, const std::string& identifier)
+{
+    auto iter = webIdentifierMap_.find(webCategory);
+    if (iter == webIdentifierMap_.end()) {
+        return false;
+    }
+    return iter->second == identifier;
+}
+
+void EventRecorder::NotifyEventCacheEnd() {}
+
+void EventRecorder::OnPageShow(const std::string& pageUrl, const std::string& param, const std::string& name)
 {
     pageUrl_ = pageUrl;
     NodeDataCache::Get().OnPageShow(pageUrl);
     Recorder::EventParamsBuilder builder;
     builder.SetType(std::to_string(PageEventType::ROUTER_PAGE))
-        .SetText(pageUrl)
+        .SetPageUrl(pageUrl)
+        .SetExtra(KEY_NAME, name)
         .SetExtra(Recorder::KEY_PAGE_PARAM, param);
     EventController::Get().NotifyEvent(
         EventCategory::CATEGORY_PAGE, static_cast<int32_t>(EventType::PAGE_SHOW), std::move(builder.build()));
 }
 
-void EventRecorder::OnPageHide(const std::string& pageUrl, const int64_t duration)
+void EventRecorder::OnPageHide(const std::string& pageUrl, const int64_t duration, const std::string& name)
 {
     Recorder::EventParamsBuilder builder;
     builder.SetType(std::to_string(PageEventType::ROUTER_PAGE))
-        .SetText(pageUrl)
+        .SetPageUrl(pageUrl)
+        .SetExtra(KEY_NAME, name)
         .SetExtra(KEY_DURATION, std::to_string(duration));
     EventController::Get().NotifyEvent(
         EventCategory::CATEGORY_PAGE, static_cast<int32_t>(EventType::PAGE_HIDE), std::move(builder.build()));
@@ -266,7 +381,9 @@ void EventRecorder::OnClick(EventParamsBuilder&& builder)
         taskExecutor_ = container->GetTaskExecutor();
     }
     CHECK_NULL_VOID(taskExecutor_);
-    builder.SetPageUrl(GetPageUrl());
+    if (builder.GetValue(KEY_PAGE).empty()) {
+        builder.SetPageUrl(GetPageUrl());
+    }
     builder.SetNavDst(navDstName_);
     auto params = builder.build();
     taskExecutor_->PostTask(
@@ -279,7 +396,9 @@ void EventRecorder::OnClick(EventParamsBuilder&& builder)
 
 void EventRecorder::OnChange(EventParamsBuilder&& builder)
 {
-    builder.SetPageUrl(GetPageUrl());
+    if (builder.GetValue(KEY_PAGE).empty()) {
+        builder.SetPageUrl(GetPageUrl());
+    }
     builder.SetNavDst(navDstName_);
     auto params = builder.build();
     EventController::Get().NotifyEvent(
@@ -288,17 +407,18 @@ void EventRecorder::OnChange(EventParamsBuilder&& builder)
 
 void EventRecorder::OnEvent(EventParamsBuilder&& builder)
 {
-    builder.SetPageUrl(GetPageUrl());
+    if (builder.GetValue(KEY_PAGE).empty()) {
+        builder.SetPageUrl(GetPageUrl());
+    }
     builder.SetNavDst(navDstName_);
     auto eventType = builder.GetEventType();
     auto params = builder.build();
-    EventController::Get().NotifyEvent(
-        EventCategory::CATEGORY_COMPONENT, static_cast<int32_t>(eventType), std::move(params));
+    EventController::Get().NotifyEvent(builder.GetEventCategory(), static_cast<int32_t>(eventType), std::move(params));
 }
 
 void EventRecorder::OnNavDstShow(EventParamsBuilder&& builder)
 {
-    navDstName_ = builder.GetText();
+    navDstName_ = builder.GetValue(KEY_NAV_DST);
     navShowTime_ = GetCurrentTimestamp();
     builder.SetPageUrl(GetPageUrl());
     builder.SetType(std::to_string(PageEventType::NAV_PAGE));
@@ -309,7 +429,7 @@ void EventRecorder::OnNavDstShow(EventParamsBuilder&& builder)
 
 void EventRecorder::OnNavDstHide(EventParamsBuilder&& builder)
 {
-    if (builder.GetText() == navDstName_) {
+    if (builder.GetValue(KEY_NAV_DST) == navDstName_) {
         navDstName_ = "";
         if (navShowTime_ > 0) {
             int64_t duration = GetCurrentTimestamp() - navShowTime_;
@@ -329,5 +449,42 @@ void EventRecorder::OnExposure(EventParamsBuilder&& builder)
     auto params = builder.build();
     EventController::Get().NotifyEvent(
         EventCategory::CATEGORY_EXPOSURE, static_cast<int32_t>(EventType::EXPOSURE), std::move(params));
+}
+
+void EventRecorder::OnWebEvent(const RefPtr<NG::FrameNode>& node, const std::vector<std::string>& params)
+{
+    CHECK_NULL_VOID(node);
+    if (params.empty()) {
+        return;
+    }
+    if (params.size() == WEB_PARAM_SIZE) {
+        if (!IsRecordEnable(EventCategory::CATEGORY_WEB)) {
+            return;
+        }
+        if (!IsMessageValid(params[WEB_PARAM_INDEX_CATEGORY], params[WEB_PARAM_INDEX_IDENTIFIER])) {
+            return;
+        }
+        EventParamsBuilder builder;
+        builder.SetId(node->GetInspectorIdValue(""))
+            .SetType(node->GetHostTag())
+            .SetEventType(EventType::WEB_ACTION)
+            .SetEventCategory(EventCategory::CATEGORY_WEB)
+            .SetExtra(KEY_WEB_CATEGORY, params[WEB_PARAM_INDEX_CATEGORY])
+            .SetText(params[WEB_PARAM_INDEX_CONTENT])
+            .SetHost(node)
+            .SetDescription(node->GetAutoEventParamValue(""));
+        OnEvent(std::move(builder));
+    }
+}
+
+void EventRecorder::OnAttachWeb(const RefPtr<NG::FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    weakNodeCache_[node->GetId()] = Referenced::WeakClaim(Referenced::RawPtr(node));
+}
+
+void EventRecorder::OnDetachWeb(int32_t nodeId)
+{
+    weakNodeCache_.erase(nodeId);
 }
 } // namespace OHOS::Ace::Recorder

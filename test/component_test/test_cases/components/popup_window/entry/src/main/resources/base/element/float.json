@@ -1,0 +1,16 @@
+{
+  "float": [
+    {
+      "name": "float_1",
+      "value": "30.6"
+    },
+    {
+      "name": "actionSheet_maskRect_dx",
+      "value": "10"
+    },
+    {
+      "name": "actionSheet_maskRect_dy",
+      "value": "8"
+    }
+  ]
+}

@@ -15,7 +15,8 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_filter.h"
 
-#include "base/utils/utils.h"
+#include "core/components_ng/svg/base/svg_filter_context.h"
+#include "core/common/container.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 #include "frameworks/core/components_ng/svg/parse/svg_fe.h"
 
@@ -41,23 +42,14 @@ void SvgFilter::OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, co
 
 void SvgFilter::OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
-#ifndef USE_ROSEN_DRAWING
-    skCanvas_->saveLayer(nullptr, &filterPaint_);
-#else
     RSSaveLayerOps slo(nullptr, &filterBrush_);
     rsCanvas_->SaveLayer(slo);
-#endif
 }
 
 void SvgFilter::OnAsPaint()
 {
-#ifndef USE_ROSEN_DRAWING
-    filterPaint_.setAntiAlias(true);
-    sk_sp<SkImageFilter> imageFilter = nullptr;
-#else
     filterBrush_.SetAntiAlias(true);
     std::shared_ptr<RSImageFilter> imageFilter = nullptr;
-#endif
     SvgColorInterpolationType currentColor = SvgColorInterpolationType::SRGB;
 
     std::unordered_map<std::string, std::shared_ptr<RSImageFilter>> resultHash;
@@ -70,17 +62,19 @@ void SvgFilter::OnAsPaint()
         filterEffectsRegion.Height() * filterAttr_.height.Value()
     };
 
-    if (filterAttr_.x.Unit() != DimensionUnit::PERCENT) {
-        effectFilterArea.SetLeft(filterAttr_.x.Value());
-    }
-    if (filterAttr_.y.Unit() != DimensionUnit::PERCENT) {
-        effectFilterArea.SetTop(filterAttr_.y.Value());
-    }
-    if (filterAttr_.width.Unit() != DimensionUnit::PERCENT) {
-        effectFilterArea.SetWidth(filterAttr_.width.Value());
-    }
-    if (filterAttr_.height.Unit() != DimensionUnit::PERCENT) {
-        effectFilterArea.SetHeight(filterAttr_.height.Value());
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        if (filterAttr_.x.Unit() != DimensionUnit::PERCENT) {
+            effectFilterArea.SetLeft(filterAttr_.x.Value());
+        }
+        if (filterAttr_.y.Unit() != DimensionUnit::PERCENT) {
+            effectFilterArea.SetTop(filterAttr_.y.Value());
+        }
+        if (filterAttr_.width.Unit() != DimensionUnit::PERCENT) {
+            effectFilterArea.SetWidth(filterAttr_.width.Value());
+        }
+        if (filterAttr_.height.Unit() != DimensionUnit::PERCENT) {
+            effectFilterArea.SetHeight(filterAttr_.height.Value());
+        }
     }
 
     for (const auto& item : children_) {
@@ -92,33 +86,73 @@ void SvgFilter::OnAsPaint()
     }
 
     SvgFe::ConverImageFilterColor(imageFilter, currentColor, SvgColorInterpolationType::SRGB);
-#ifndef USE_ROSEN_DRAWING
-    filterPaint_.setImageFilter(imageFilter);
-#else
     auto filter = filterBrush_.GetFilter();
     filter.SetImageFilter(imageFilter);
     filterBrush_.SetFilter(filter);
-#endif
+}
+
+void SvgFilter::OnFilterEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext,
+    float useOffsetX, float useOffsetY)
+{
+    auto filterRule = svgCoordinateSystemContext.BuildScaleRule(filterAttr_.filterUnits);
+    auto measuredX = GetRegionPosition(filterAttr_.x, filterRule, SvgLengthType::HORIZONTAL);
+    auto measuredY = GetRegionPosition(filterAttr_.y, filterRule, SvgLengthType::VERTICAL);
+    auto measuredWidth = GetRegionLength(filterAttr_.width, filterRule, SvgLengthType::HORIZONTAL);
+    auto measuredHeight = GetRegionLength(filterAttr_.height, filterRule, SvgLengthType::VERTICAL);
+    Rect effectFilterArea = {
+        measuredX + useOffsetX,
+        measuredY + useOffsetY,
+        measuredWidth,
+        measuredHeight
+    };
+    std::shared_ptr<RSImageFilter> imageFilter = nullptr;
+    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>> resultHash;
+    auto primitiveRule = svgCoordinateSystemContext.BuildScaleRule(filterAttr_.primitiveUnits);
+    SvgFilterContext filterContext(effectFilterArea, filterRule, primitiveRule);
+    for (const auto& item : children_) {
+        auto nodeFe = AceType::DynamicCast<SvgFe>(item);
+        if (!nodeFe) {
+            continue;
+        }
+        nodeFe->SetFilterContext(filterContext);
+        nodeFe->GetImageFilter(imageFilter, resultHash);
+    }
+    auto filter = filterBrush_.GetFilter();
+    filter.SetImageFilter(imageFilter);
+    filterBrush_.SetAntiAlias(true);
+    filterBrush_.SetFilter(filter);
+    RSSaveLayerOps slo(nullptr, &filterBrush_);
+    canvas.SaveLayer(slo);
 }
 
 bool SvgFilter::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
     static const LinearMapNode<void (*)(const std::string&, SvgFilterAttribute&)> attrs[] = {
+        { SVG_FILTER_UNITS,
+            [](const std::string& val, SvgFilterAttribute& attr) {
+                attr.filterUnits = (val == "userSpaceOnUse") ? SvgLengthScaleUnit::USER_SPACE_ON_USE :
+                    SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
+            } },
         { SVG_HEIGHT,
             [](const std::string& val, SvgFilterAttribute& attr) {
-                attr.height = SvgAttributesParser::ParseDimension(val);
+                SvgAttributesParser::ParseDimension(val, attr.height);
+            } },
+        { SVG_PRIMITIVE_UNITS,
+            [](const std::string& val, SvgFilterAttribute& attr) {
+                attr.primitiveUnits = (val == "objectBoundingBox") ? SvgLengthScaleUnit::OBJECT_BOUNDING_BOX :
+                    SvgLengthScaleUnit::USER_SPACE_ON_USE;
             } },
         { SVG_WIDTH,
             [](const std::string& val, SvgFilterAttribute& attr) {
-                attr.width = SvgAttributesParser::ParseDimension(val);
+                SvgAttributesParser::ParseDimension(val, attr.width);
             } },
         { SVG_X,
             [](const std::string& val, SvgFilterAttribute& attr) {
-                attr.x = SvgAttributesParser::ParseDimension(val);
+                SvgAttributesParser::ParseDimension(val, attr.x);
             } },
         { SVG_Y,
             [](const std::string& val, SvgFilterAttribute& attr) {
-                attr.y = SvgAttributesParser::ParseDimension(val);
+                SvgAttributesParser::ParseDimension(val, attr.y);
             } },
     };
     std::string key = name;

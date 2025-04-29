@@ -19,10 +19,8 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "core/components_ng/event/click_event.h"
-#include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 class TextInputResponseArea : public virtual AceType {
@@ -53,9 +51,25 @@ public:
 
     SizeF GetFrameSize(bool withSafeArea = false);
 
+    virtual void CreateIconRect(RoundRect& paintRect, bool isFocus) {}
+
+    void SetHoverRect(RefPtr<FrameNode>& stackNode, RectF& rect, float iconSize,
+        float hoverRectHeight, bool isFocus);
+
+    virtual float GetHoverIconPadding() const
+    {
+        return 0.0f;
+    }
+
+    void SetHotZoneRect(DimensionRect& hotZoneRegion, float iconSize, float hotZoneHeight);
+
+    virtual void OnThemeScopeUpdate(const RefPtr<TextFieldTheme>& theme) {}
+
 protected:
     Alignment GetStackAlignment(const TextDirection& userDirection);
     void LayoutChild(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth);
+    virtual RefPtr<FrameNode> CreateResponseAreaImageNode(const ImageSourceInfo& imageSourceInfo, ImageFit imageFit,
+        const CalcSize& userDefinedIdealSize);
     WeakPtr<Pattern> hostPattern_;
     RectF areaRect_;
 };
@@ -92,21 +106,21 @@ public:
 
     void Refresh() override;
 
-    void ClearArea() override
-    {
-        auto hostPattern = hostPattern_.Upgrade();
-        CHECK_NULL_VOID(hostPattern);
-        auto host = hostPattern->GetHost();
-        CHECK_NULL_VOID(host);
-        CHECK_NULL_VOID(stackNode_);
-        host->RemoveChildAndReturnIndex(stackNode_);
-        passwordNode_.Reset();
-        areaRect_.Reset();
-    }
+    void ClearArea() override;
 
     const RefPtr<FrameNode> GetFrameNode() override;
 
     void OnPasswordIconClicked();
+    void UpdatePasswordIconColor(const Color& color);
+
+    void CreateIconRect(RoundRect& paintRect, bool isFocus) override;
+
+    float GetHoverIconPadding() const override
+    {
+        return hoverIconPadding_;
+    }
+
+    void OnThemeScopeUpdate(const RefPtr<TextFieldTheme>& theme) override;
 
 private:
     void LoadImageSourceInfo();
@@ -115,11 +129,15 @@ private:
     ImageSourceInfo GetDefaultSourceInfo(bool isObscured);
     void UpdateImageSource();
     void UpdateSymbolSource();
+    void UpdateSymbolColor();
     void InitSymbolEffectOptions();
     bool IsShowSymbol();
+    bool IsSymbolIcon();
+    void ReplaceNode();
     bool IsShowPasswordIcon();
     float GetIconRightOffset();
     float GetIconSize();
+    void AddIconHotZoneRect();
     RefPtr<FrameNode> CreateNode();
     std::optional<ImageSourceInfo> GetCurrentSourceInfo()
     {
@@ -130,6 +148,9 @@ private:
     std::optional<ImageSourceInfo> hideIcon_;
     RefPtr<FrameNode> stackNode_;
     WeakPtr<FrameNode> passwordNode_;
+    Color symbolColor_;
+    float passwordHoverSize_ = 0.0f;
+    float hoverIconPadding_ = 0.0f;
 };
 
 class UnitResponseArea : public TextInputResponseArea {
@@ -151,16 +172,7 @@ public:
 
     const RefPtr<FrameNode> GetFrameNode() override;
 
-    void ClearArea() override
-    {
-        auto hostPattern = hostPattern_.Upgrade();
-        CHECK_NULL_VOID(hostPattern);
-        auto host = hostPattern->GetHost();
-        CHECK_NULL_VOID(host);
-        CHECK_NULL_VOID(unitNode_);
-        host->RemoveChildAndReturnIndex(unitNode_);
-        areaRect_.Reset();
-    }
+    void ClearArea() override;
 
 private:
     bool IsShowUnit();
@@ -193,12 +205,36 @@ public:
 
     void Refresh() override;
 
+    float GetIconSize()
+    {
+        return static_cast<float>(iconSize_.ConvertToPxDistribute(std::optional<float>(), std::optional<float>()));
+    }
+
+    bool CheckUpdateCleanNode();
+
+    void CreateIconRect(RoundRect& paintRect, bool isFocus) override;
+
+    float GetHoverIconPadding() const override
+    {
+        return hoverIconPadding_;
+    }
+
+    void OnThemeScopeUpdate(const RefPtr<TextFieldTheme>& theme) override;
+
 private:
-    bool IsShowClean();
+    bool IsShowClean() const;
+    bool IsShowSymbol() const;
+    bool IsSymbolIcon() const;
+    void ReplaceNode();
+    void UpdateSymbolSource();
     void InitClickEvent(const RefPtr<FrameNode>& frameNode);
+    void SetCancelSymbolIconSize();
+    CalcDimension GetSymbolDefaultSize();
     void OnCleanNodeClicked();
     RefPtr<FrameNode> CreateNode();
     void LoadingImageProperty();
+    void LoadingCancelButtonColor();
+    void AddIconHotZoneRect();
     ImageSourceInfo CreateImageSourceInfo();
     RefPtr<FrameNode> cleanNode_;
     CalcDimension iconSize_ = 0.0_px;
@@ -207,6 +243,8 @@ private:
     std::string moduleName_;
     Color iconColor_;
     bool isShow_ = false;
+    float cancelHoverSize_ = 0.0f;
+    float hoverIconPadding_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

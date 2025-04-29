@@ -24,6 +24,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_partial_update_model.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_functions.h"
@@ -38,7 +39,7 @@ public:
     ~JSView() override = default;
     virtual void Destroy(JSView* parentCustomView) = 0;
 
-    virtual RefPtr<AceType> CreateViewNode(bool isTitleNode = false)
+    virtual RefPtr<AceType> CreateViewNode(bool isTitleNode = false, bool isCustomAppBar = false)
     {
         LOGE("Internal error. Not implemented");
         return nullptr;
@@ -92,7 +93,18 @@ public:
         LOGE("jsViewFunction_ is null");
     }
 
-    void RenderJSExecution();
+    void FireOnNewParam(const std::string &newParam)
+    {
+        if (jsViewFunction_) {
+            ACE_SCORING_EVENT("OnNewParam");
+            return jsViewFunction_->ExecuteOnNewParam(newParam);
+        }
+        TAG_LOGE(AceLogTag::ACE_ROUTER, "fire onNewParam failed, jsViewFunction_ is null!");
+    }
+
+    virtual void RenderJSExecution();
+
+    virtual void SetPrebuildPhase(PrebuildPhase prebuildPhase, int64_t deadline = 0) {};
 
     virtual void MarkNeedUpdate() = 0;
 
@@ -165,6 +177,7 @@ public:
 
     virtual void OnDumpInfo(const std::vector<std::string>& params) {}
 
+    static JSView* GetNativeView(JSRef<JSObject> obj);
 protected:
     RefPtr<ViewFunctions> jsViewFunction_;
     bool needsUpdate_ = false;
@@ -177,6 +190,7 @@ protected:
     // set on the root JSView of the card and inherited by all child JSViews
     // -1 means not part of a card
     int64_t cardId_ = -1;
+    std::function<void()> notifyRenderDone_;
 
 private:
     int32_t instanceId_ = -1;
@@ -187,7 +201,6 @@ private:
     // This can avoid crashing when the pointer in vector is corrupted.
     std::array<int32_t, PRIMARY_ID_STACK_SIZE> primaryIdStack_{};
     bool isStatic_ = false;
-    std::function<void()> notifyRenderDone_;
 };
 
 class JSViewFullUpdate : public JSView {
@@ -202,7 +215,7 @@ public:
     // TODO: delete this after the toolchain for partial update is ready.
     RefPtr<AceType> InternalRender();
 
-    RefPtr<AceType> CreateViewNode(bool isTitleNode = false) override;
+    RefPtr<AceType> CreateViewNode(bool isTitleNode = false, bool isCustomAppBar = false) override;
 
     void MarkNeedUpdate() override;
 
@@ -306,9 +319,25 @@ public:
 
     void Destroy(JSView* parentCustomView) override;
 
-    RefPtr<AceType> InitialRender();
+    void DoRenderJSExecution(int64_t deadline, bool& isTimeout);
 
-    RefPtr<AceType> CreateViewNode(bool isTitleNode = false) override;
+    /**
+     * RenderJSExecutionForPrebuild is only applicable to the PreBuild of components.
+     * Unlike RenderJSExecution, when RenderJSExecutionForPrebuild is repeatedly called,
+     * it will not execute the logic that was previously executed
+     * deadline is the input parameter. It represents the expected completion time of this function
+     * isTimeout is the output parameter. When the function is not completed before the deadline, isTimeout = true
+     * We will repeatedly call this function in the next frame until isTimeout = false
+     */
+    void RenderJSExecutionForPrebuild(int64_t deadline, bool& isTimeout);
+
+    RefPtr<AceType> InitialRender(int64_t deadline, bool& isTimeout);
+
+    void PrebuildComponentsInMultiFrame(int64_t deadline, bool& isTimeout);
+
+    void SetPrebuildPhase(PrebuildPhase prebuildPhase, int64_t deadline = 0) override;
+
+    RefPtr<AceType> CreateViewNode(bool isTitleNode = false, bool isCustomAppBar = false) override;
 
     static void Create(const JSCallbackInfo& info);
     static void CreateRecycle(const JSCallbackInfo& info);
@@ -419,6 +448,9 @@ public:
 
     void OnDumpInfo(const std::vector<std::string>& params) override;
 
+    void JSGetDialogController(const JSCallbackInfo& info);
+
+    bool JSAllowReusableV2Descendant();
 private:
     void MarkNeedUpdate() override;
 
@@ -426,6 +458,7 @@ private:
     // used for code branching in lambda given to ComposedComponent
     // render callback
     bool isFirstRender_ = true;
+    PrebuildPhase prebuildPhase_ = PrebuildPhase::NONE;
 
     /* list of update function result is a triple (tuple with three entries)
     <0> elmtId
@@ -451,6 +484,9 @@ private:
 
     bool isRecycleRerender_ = false;
     bool isV2_ = false;
+    bool executedAboutToRender_ = false;
+    bool executedOnRenderDone_ = false;
+    bool executedRender_ = false;
 };
 
 } // namespace OHOS::Ace::Framework

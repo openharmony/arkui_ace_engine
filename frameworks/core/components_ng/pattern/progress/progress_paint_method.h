@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,9 +38,10 @@ constexpr float DEFAULT_BORDER_WIDTH = 1.0f;
 class ACE_EXPORT ProgressPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ProgressPaintMethod, NodePaintMethod)
 public:
-    explicit ProgressPaintMethod(
-        ProgressType progressType, float strokeWidth, const RefPtr<ProgressModifier>& progressModifier)
-        : strokeWidth_(strokeWidth), progressType_(progressType), progressModifier_(progressModifier)
+    explicit ProgressPaintMethod(ProgressType progressType, float strokeWidth,
+        const RefPtr<ProgressModifier>& progressModifier, bool isUserInitiatedColor)
+        : strokeWidth_(strokeWidth), progressType_(progressType), progressModifier_(progressModifier),
+          isUserInitiatedColor_(isUserInitiatedColor)
     {
         progressModifier_->SetProgressType(progressType_);
     }
@@ -55,11 +56,15 @@ public:
     void UpdateContentModifier(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_VOID(progressModifier_);
-        GetThemeData();
+        GetThemeData(GetThemeScopeId(paintWrapper));
         auto paintProperty = DynamicCast<ProgressPaintProperty>(paintWrapper->GetPaintProperty());
         CHECK_NULL_VOID(paintProperty);
         auto isSensitive = paintProperty->GetIsSensitive().value_or(false);
-        color_ = paintProperty->GetColor().value_or(color_);
+        if (progressType_ != ProgressType::SCALE) {
+            color_ = isUserInitiatedColor_ ? paintProperty->GetColor().value_or(color_) : color_;
+        } else {
+            color_ = paintProperty->GetColor().value_or(color_);
+        }
         bgColor_ = paintProperty->GetBackgroundColor().value_or(bgColor_);
         borderColor_ = paintProperty->GetBorderColor().value_or(borderColor_);
         maxValue_ = paintProperty->GetMaxValue().value_or(maxValue_);
@@ -99,13 +104,20 @@ public:
             paintProperty->GetStrokeRadiusValue(Dimension(strokeWidth_ / 2.0f, DimensionUnit::VP)).ConvertToPx());
         strokeRadius = std::min(strokeWidth_ / 2, strokeRadius);
         progressModifier_->SetStrokeRadius(strokeRadius);
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+            progressModifier_->UpdateProgress();
+        }
+        SetCapsuleBorderRadius(paintWrapper);
+        UpdateCapsuleProgress(paintWrapper);
     }
 
-    void GetThemeData();
+    void GetThemeData(int32_t themeScopeId);
     void CalculateStrokeWidth(const SizeF& contentSize);
 
 private:
     Gradient GenerateRingProgressColor(PaintWrapper* paintWrapper);
+    void SetCapsuleBorderRadius(PaintWrapper* paintWrapper);
+    void UpdateCapsuleProgress(PaintWrapper* paintWrapper);
 
     Color color_ = Color::BLUE;
     Color bgColor_ = Color::GRAY;
@@ -119,14 +131,25 @@ private:
     Color ringProgressEndSideColor_ = Color::BLUE;
     Color ringProgressBeginSideColor_ = Color::BLUE;
 
+    Color capsuleBgFocusedColor_;
+    Color capsuleSelectFocusedColor_;
+    Color capsuleInprogressBgColor_;
+    Color capsuleInprogressBorderColor_;
+    Dimension capsuleInprogressBorderWidth_;
+    Color defaultBorderColor_;
+    Dimension defaultBorderWidth_;
+
     ProgressType progressType_ = ProgressType::LINEAR;
     RefPtr<ProgressModifier> progressModifier_;
     bool sweepEffect_ = false;
     bool ringSweepEffect_ = false;
     bool linearSweepEffect_ = false;
     bool isItalic_ = false;
+    bool isUserInitiatedColor_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPaintMethod);
+
+    int32_t GetThemeScopeId(PaintWrapper* paintWrapper) const;
 };
 
 } // namespace OHOS::Ace::NG

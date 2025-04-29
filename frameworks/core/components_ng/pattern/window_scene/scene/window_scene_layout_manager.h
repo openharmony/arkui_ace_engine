@@ -17,19 +17,29 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_WINDOW_SCENE_LAYOUT_MANAGER_H
 
 #include <event_handler.h>
+#include <unordered_set>
 
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Rosen {
 struct SessionUIParam;
 class RSObjAbsGeometry;
+enum class RSUINodeType : uint32_t;
 }
 
 namespace OHOS::Ace::NG {
 struct TraverseResult {
-    uint32_t zOrderCnt_ = 0;
-    std::unordered_map<int32_t, OHOS::Rosen::SessionUIParam> uiParams_;
-    uint64_t screenId_ = -1;
+    uint32_t zOrderCnt = 0;
+    std::unordered_map<int32_t, OHOS::Rosen::SessionUIParam> uiParams;
+    uint64_t screenId = -1;
+};
+
+struct TraverseInfo {
+    bool isAncestorRecent = false;
+    bool isAncestorDirty = false;
+    bool notSyncPosition = false;
+    int32_t transScenePosX = 0;
+    int32_t transScenePosY = 0;
 };
 
 class WindowSceneLayoutManager {
@@ -44,16 +54,21 @@ private:
     ~WindowSceneLayoutManager() = default;
     void Init();
     void TraverseTree(const RefPtr<FrameNode>& rootNode, TraverseResult& res,
-        bool isAncestorRecent, bool isAncestorDirty);
-    void FillWindowSceneInfo(const RefPtr<FrameNode>& node, TraverseResult& res, bool isAncestorRecent);
+        TraverseInfo& parentInfo);
+    void FillWindowSceneInfo(const RefPtr<FrameNode>& node, TraverseResult& res, TraverseInfo& ancestorInfo);
+    void FillTransScenePos(const RefPtr<FrameNode>& node, TraverseInfo& ancestorInfo);
     bool IsNodeVisible(const RefPtr<FrameNode>& node);
     bool IsNodeDirty(const RefPtr<FrameNode>& node);
     bool IsRecentContainerState(const RefPtr<FrameNode>& node);
+    bool NoNeedSyncScenePanelGlobalPosition(const RefPtr<FrameNode>& node);
     std::shared_ptr<Rosen::RSNode> GetRSNode(const RefPtr<FrameNode>& node);
     std::shared_ptr<Rosen::RSObjAbsGeometry> GetGlobalGeometry(const RefPtr<FrameNode>& node);
     std::shared_ptr<Rosen::RSObjAbsGeometry> GetLocalGeometry(const RefPtr<FrameNode>& node);
+    bool SetGeometry(const bool isAncestorRecent, const RefPtr<FrameNode>& node,
+        std::shared_ptr<Rosen::RSObjAbsGeometry>& globalGeometry,
+        std::shared_ptr<Rosen::RSObjAbsGeometry>& localGeometry);
     void UpdateGeometry(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& parentNode,
-        bool isTransformScene);
+        bool isParentTransformScene);
     int32_t GetNodeZIndex(const RefPtr<FrameNode>& node);
     uint64_t GetScreenId(const RefPtr<FrameNode>& screenNode);
     uint64_t GetRSNodeId(const RefPtr<FrameNode>& node);
@@ -67,9 +82,17 @@ private:
     void DumpNodeInfo(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& parentNode, const std::string& reason);
     void GetUINodeInfo(const RefPtr<FrameNode>& node, int32_t parentId, std::ostringstream& oss);
     void GetUITreeInfo(const RefPtr<FrameNode>& node, int32_t depth, int32_t parentId, std::ostringstream& oss);
-    void GetTotalUITreeInfo(uint64_t screenId, std::string& info);
-
-    std::unordered_map<uint64_t, RefPtr<FrameNode>> screenNodeMap_;
+    void GetTotalUITreeInfo(std::string& info);
+    void DumpRSNodeType(Rosen::RSUINodeType rsNode, std::ostringstream& oss);
+    void GetRSNodeTreeInfo(const std::shared_ptr<RSNode>& rsNode, int32_t depth,
+        std::ostringstream& oss);
+    void GetRSNodeInfo(const std::shared_ptr<RSNode>& rsNode,
+        std::ostringstream& oss);
+    void IsFrameNodeAbnormal(const RefPtr<FrameNode>& node);
+    void RemoveAbnormalId();
+    std::unordered_set<uint64_t> abnormalNodeDfxSet_;
+    std::unordered_set<uint64_t> windowSceneOnTreeDfxSet_;
+    std::unordered_map<uint64_t, WeakPtr<FrameNode>> screenNodeMap_;
     std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     bool isCoreDebugEnable_ = false;
 };

@@ -15,11 +15,13 @@
 import hilog from '@ohos.hilog';
 import abilityManager from '@ohos.app.ability.abilityManager';
 import common from '@ohos.app.ability.common';
-import { Callback } from '@ohos.base';
+import { ErrorCallback, Callback, BusinessError } from '@ohos.base';
 import AtomicServiceOptions from '@ohos.app.ability.AtomicServiceOptions';
 import commonEventManager from '@ohos.commonEventManager';
 import Base from '@ohos.base';
 
+const errCodeAbnormal: number = 100014;
+const errCodeCapabilityNotSupported: number = 801;
 @Component
 export struct FullScreenLaunchComponent {
   @BuilderParam content: Callback<void> = this.doNothingBuilder;
@@ -28,6 +30,9 @@ export struct FullScreenLaunchComponent {
   options?: AtomicServiceOptions
   @State private isShow: boolean = false;
   private subscriber: commonEventManager.CommonEventSubscriber | null = null;
+  onError?: ErrorCallback;
+  onTerminated?: Callback<TerminationInfo>;
+
   aboutToAppear() {
     let subscribeInfo: commonEventManager.CommonEventSubscribeInfo = {
       events: [commonEventManager.Support.COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT],
@@ -55,9 +60,9 @@ export struct FullScreenLaunchComponent {
               return;
             }
 
-          hilog.info(0x3900, 'FullScreenLaunchComponent', 'Received account logout event.')
-          this.isShow = false;
-        })
+            hilog.info(0x3900, 'FullScreenLaunchComponent', 'Received account logout event.')
+            this.isShow = false;
+          })
       })
   }
 
@@ -98,17 +103,25 @@ export struct FullScreenLaunchComponent {
 
   async checkAbility() {
     this.resetOptions()
-    try {
-      const res: boolean = await abilityManager.isEmbeddedOpenAllowed(this.context, this.appId)
-      if (res) {
-        this.isShow = true;
-        hilog.info(0x3900, 'FullScreenLaunchComponent', ' EmbeddedOpen is Allowed!')
-      } else {
-        this.popUp()
-      }
-    } catch (e) {
-      hilog.error(0x3900, 'FullScreenLaunchComponent', 'isEmbeddedOpenAllowed called error!%{public}s', e.message)
-    }
+    abilityManager.queryAtomicServiceStartupRule(this.context, this.appId)
+      .then((data: abilityManager.AtomicServiceStartupRule) => {
+        if (data.isOpenAllowed) {
+          if (data.isEmbeddedAllowed) {
+            this.isShow = true;
+            hilog.info(0x3900, 'FullScreenLaunchComponent', 'EmbeddedOpen is Allowed!')
+          } else {
+            this.popUp()
+            hilog.info(0x3900, 'FullScreenLaunchComponent', 'popUp is Allowed!')
+          }
+        } else {
+          hilog.info(0x3900, 'FullScreenLaunchComponent', 'is not allowed open!')
+        }
+      }).catch((err: BusinessError) => {
+        hilog.error(0x3900, 'FullScreenLaunchComponent', 'queryAtomicServiceStartupRule called error!%{public}s', err.message)
+        if (errCodeCapabilityNotSupported === err.code) {
+          this.popUp()
+        }
+      });
   }
 
   async popUp() {
@@ -142,18 +155,27 @@ export struct FullScreenLaunchComponent {
     })
       .height('100%')
       .width('100%')
-      .onRelease(
-        () => {
+      .backgroundColor($r(`sys.color.background_primary`))
+      .onError(
+        err => {
+          if (this.onError != undefined) {
+            this.onError(err);
+          }
           this.isShow = false;
+          hilog.error(0x3900, 'FullScreenLaunchComponent', 'call up UIExtension error:%{public}d!%{public}s', err.code,
+            err.message)
+          if (err.code != errCodeAbnormal) {
+            this.getUIContext().showAlertDialog({
+              message: err.message
+            })
+          }
         }
-      ).onError(
-      err => {
+      )
+      .onTerminated(info => {
         this.isShow = false;
-        hilog.error(0x3900, 'FullScreenLaunchComponent', 'call up UIExtension error!%{public}s', err.message)
-        this.getUIContext().showAlertDialog({
-          message: err.message
-        })
-      }
-    )
+        if (this.onTerminated != undefined) {
+          this.onTerminated(info)
+        }
+      })
   }
 }

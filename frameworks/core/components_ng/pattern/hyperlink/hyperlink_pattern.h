@@ -44,6 +44,10 @@ public:
         return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
     }
 
+    bool IsEnabledObscured() const override
+    {
+        return false;
+    }
 private:
     void LinkToAddress();
     void OnAttachToFrameNode() override;

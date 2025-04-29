@@ -21,6 +21,8 @@
 #include <sstream>
 
 #include "form_info_base.h"
+#include "transaction/rs_sync_transaction_controller.h"
+#include "transaction/rs_transaction.h"
 
 #include "base/log/log.h"
 #include "core/common/container.h"
@@ -53,6 +55,7 @@ constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_for
 constexpr char PARAM_FORM_MIGRATE_FORM_KEY[] = "ohos.extra.param.key.migrate_form";
 constexpr int32_t RENDER_DEAD_CODE = 16501006;
 constexpr int32_t FORM_NOT_TRUST_CODE = 16501007;
+constexpr int32_t FORM_STATUS_TIME_OUT = 16501009;
 constexpr char ALLOW_UPDATE[] = "allowUpdate";
 constexpr char IS_DYNAMIC[] = "isDynamic";
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_10S = 10000;
@@ -121,44 +124,11 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
         ResetForm();
     }
 
+    SetParamForWant(info, formInfo);
     OHOS::AppExecFwk::FormJsInfo formJsInfo;
-    wantCache_.SetElementName(info.bundleName, info.abilityName);
-
-    if (info.wantWrap) {
-        info.wantWrap->SetWantParamsFromWantWrap(reinterpret_cast<void*>(&wantCache_));
-    }
-
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY, info.id);
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_MODULE_NAME_KEY, info.moduleName);
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_NAME_KEY, info.cardName);
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TEMPORARY_KEY, info.temporary);
-    wantCache_.SetParam(
-        OHOS::AppExecFwk::Constants::ACQUIRE_TYPE, OHOS::AppExecFwk::Constants::ACQUIRE_TYPE_CREATE_FORM);
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, info.width.Value());
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, info.height.Value());
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::FORM_COMP_ID, std::to_string(info.index));
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, info.borderWidth);
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_OBSCURED_KEY, info.obscuredMode);
-    auto pipelineContext = context_.Upgrade();
-    if (pipelineContext) {
-        auto density = pipelineContext->GetDensity();
-        // 在OHOS::AppExecFwk::Constants中加类似常量
-        wantCache_.SetParam("ohos.extra.param.key.form_density", density);
-    }
-    if (info.dimension != -1) {
-        wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_DIMENSION_KEY, info.dimension);
-    }
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_RENDERINGMODE_KEY, info.renderingMode);
-
-    if (formInfo.uiSyntax == AppExecFwk::FormType::ETS) {
-        CHECK_NULL_VOID(renderDelegate_);
-        wantCache_.SetParam(FORM_RENDERER_PROCESS_ON_ADD_SURFACE, renderDelegate_->AsObject());
-        wantCache_.SetParam(ALLOW_UPDATE, info.allowUpdate);
-        wantCache_.SetParam(IS_DYNAMIC, formInfo.isDynamic);
-    }
-    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FONT_FOLLOW_SYSTEM_KEY, formInfo.fontScaleFollowSystem);
-
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
+    TAG_LOGI(AceLogTag::ACE_FORM, "Before FormMgr adding form, info.id: %{public}" PRId64, info.id);
+    std::lock_guard<std::mutex> wantCacheLock(wantCacheMutex_);
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(info.id, wantCache_, clientInstance, formJsInfo);
     if (ret != 0) {
         auto errorMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
@@ -221,18 +191,40 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
     sptr<IRemoteObject> proxy = want.GetRemoteObject(FORM_RENDERER_DISPATCHER);
     if (proxy != nullptr) {
         formRendererDispatcher_ = iface_cast<IFormRendererDispatcher>(proxy);
+        CheckWhetherSurfaceChangeFailed();
     } else {
         TAG_LOGE(AceLogTag::ACE_FORM, "want renderer dispatcher null");
     }
-
     {
         std::lock_guard<std::mutex> lock(recycleMutex_);
         recycleStatus_ = RecycleStatus::RECOVERED;
     }
-
     isDynamic_ = formInfo.isDynamic;
     if (!formInfo.isDynamic) {
         HandleSnapshotCallback(DELAY_TIME_FOR_FORM_SNAPSHOT_10S);
+    }
+}
+
+void FormManagerDelegate::CheckWhetherSurfaceChangeFailed()
+{
+    float width = 0.0f;
+    float height = 0.0f;
+    float borderWidth = 0.0f;
+    bool needRedispatch = false;
+    {
+        std::lock_guard<std::mutex> lock(surfaceChangeFailedRecordMutex_);
+        if (notifySurfaceChangeFailedRecord_.isfailed == true) {
+            TAG_LOGI(AceLogTag::ACE_FORM, "redispatch surface change event");
+            needRedispatch = true;
+            notifySurfaceChangeFailedRecord_.isfailed = false;
+            width = notifySurfaceChangeFailedRecord_.expectedWidth;
+            height = notifySurfaceChangeFailedRecord_.expectedHeight;
+            borderWidth = notifySurfaceChangeFailedRecord_.expectedBorderWidth;
+        }
+    }
+    if (needRedispatch) {
+        uint32_t reason = static_cast<uint32_t>(WindowSizeChangeReason::UNDEFINED);
+        formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height, reason, nullptr, borderWidth);
     }
 }
 
@@ -280,6 +272,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& co
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
         state_ = State::CREATEFAILED;
+        TAG_LOGE(AceLogTag::ACE_FORM, "OnFormError CREATEFAILED");
         OnFormError("internal error");
         return;
     }
@@ -295,6 +288,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& co
         auto resRegister = weakRes.Upgrade();
         auto context = delegate->context_.Upgrade();
         if (!resRegister || !context) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "OnFormError resRegister or context error");
             delegate->OnFormError("internal error");
             return;
         }
@@ -315,6 +309,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& co
         std::string param = paramStream.str();
         delegate->id_ = resRegister->CreateResource(FORM_ADAPTOR_RESOURCE_NAME, param);
         if (delegate->id_ == INVALID_ID) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "OnFormError INVALID_ID");
             delegate->OnFormError("internal error");
             return;
         }
@@ -427,7 +422,9 @@ void FormManagerDelegate::AddGetRectRelativeToWindowCallback(OnGetRectRelativeTo
 
 void FormManagerDelegate::AddActionEventHandle(const ActionEventHandle& callback)
 {
+    TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - AddActionEventHandle");
     if (!callback || state_ == State::RELEASED) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - ,state_ is RELEASED");
         return;
     }
     actionEventHandle_ = callback;
@@ -442,9 +439,29 @@ void FormManagerDelegate::AddEnableFormCallback(EnableFormCallback&& callback)
     enableFormCallback_ = std::move(callback);
 }
 
+
+void FormManagerDelegate::AddLockFormCallback(LockFormCallback&& callback)
+{
+    if (!callback || state_ == State::RELEASED) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "EnableFormCallback is null");
+        return;
+    }
+    lockFormCallback_ = std::move(callback);
+}
+
+void FormManagerDelegate::AddFormUpdateDoneCallback(UpdateFormDoneCallback&& callback)
+{
+    if (!callback || state_ == State::RELEASED) {
+        return;
+    }
+    updateFormDoneCallback_ = std::move(callback);
+}
+
 void FormManagerDelegate::OnActionEventHandle(const std::string& action)
 {
     if (actionEventHandle_) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - OnActionEventHandle ,formId: %{public}" PRId64,
+            runningCardId_);
         actionEventHandle_(action);
     }
 }
@@ -537,7 +554,11 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
 
     auto&& actionEventHandler = [weak = WeakClaim(this)](const std::string& action) {
         auto formManagerDelegate = weak.Upgrade();
-        CHECK_NULL_VOID(formManagerDelegate);
+        TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - AddActionEventHandle");
+        if (!formManagerDelegate) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "EventHandle - ,formManagerDelegate is null");
+            return;
+        }
         formManagerDelegate->OnActionEventHandle(action);
     };
     renderDelegate_->SetActionEventHandler(std::move(actionEventHandler));
@@ -570,12 +591,29 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
     };
     renderDelegate_->SetFormLinkInfoUpdateHandler(std::move(onFormLinkInfoUpdateHandler));
 
-    auto &&onGetRectRelativeToWindowHandler = [weak = WeakClaim(this)](int32_t &top, int32_t &left) {
+    auto &&onGetRectRelativeToWindowHandler = [weak = WeakClaim(this)](AccessibilityParentRectInfo& parentRectInfo) {
         auto formManagerDelegate = weak.Upgrade();
         CHECK_NULL_VOID(formManagerDelegate);
-        formManagerDelegate->OnGetRectRelativeToWindow(top, left);
+        formManagerDelegate->OnGetRectRelativeToWindow(parentRectInfo);
     };
     renderDelegate_->SetGetRectRelativeToWindowHandler(onGetRectRelativeToWindowHandler);
+
+    auto &&onCheckManagerDelegate = [weak = WeakClaim(this)](bool &checkFlag) {
+        auto formManagerDelegate = weak.Upgrade();
+        if (!formManagerDelegate) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "EventHandle - onCheckManagerDelegate formManagerDelegate is null");
+            checkFlag = false;
+        }
+    };
+    renderDelegate_->SetCheckManagerDelegate(onCheckManagerDelegate);
+
+    auto &&onUpdateFormDoneEventHandler = [weak = WeakClaim(this)](const int64_t formId) {
+        auto formManagerDelegate = weak.Upgrade();
+        CHECK_NULL_VOID(formManagerDelegate);
+        TAG_LOGD(AceLogTag::ACE_FORM, "EventHandle - onUpdateFormDoneEventHandler, formId:%{public}" PRId64, formId);
+        formManagerDelegate->OnFormUpdateDone(formId);
+    };
+    renderDelegate_->SetUpdateFormEventHandler(onUpdateFormDoneEventHandler);
 }
 
 void FormManagerDelegate::OnActionEvent(const std::string& action)
@@ -597,28 +635,10 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
 
 #ifdef OHOS_STANDARD_SYSTEM
     if (type == "router") {
-        AAFwk::Want want;
-        if (!ParseAction(action, type, want)) {
-            TAG_LOGE(AceLogTag::ACE_FORM, "action parse failed, detail action:%{public}s", action.c_str());
-        } else {
-            CHECK_NULL_VOID(formUtils_);
-            auto context = context_.Upgrade();
-            CHECK_NULL_VOID(context);
-            auto instantId = context->GetInstanceId();
-            formUtils_->RouterEvent(runningCardId_, action, instantId, wantCache_.GetElement().GetBundleName());
-        }
+        OnRouterActionEvent(action);
         return;
     } else if (type == "call") {
-        AAFwk::Want want;
-        if (!ParseAction(action, type, want)) {
-            TAG_LOGE(AceLogTag::ACE_FORM, "action parse failed, detail action:%{public}s", action.c_str());
-        } else {
-            CHECK_NULL_VOID(formUtils_);
-            auto context = context_.Upgrade();
-            CHECK_NULL_VOID(context);
-            auto instantId = context->GetInstanceId();
-            formUtils_->BackgroundEvent(runningCardId_, action, instantId, wantCache_.GetElement().GetBundleName());
-        }
+        OnCallActionEvent(action);
         return;
     }
 
@@ -683,14 +703,21 @@ void FormManagerDelegate::DispatchPointerEvent(const
     if (pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN) {
         TAG_LOGI(AceLogTag::ACE_FORM, "dispatch down event to renderer");
     }
-    auto disablePanGesture = wantCache_.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_DISABLE_GESTURE_KEY, false);
+    
+    bool disablePanGesture;
+    {
+        std::lock_guard<std::mutex> wantCacheLock(wantCacheMutex_);
+        disablePanGesture = wantCache_.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_DISABLE_GESTURE_KEY, false);
+    }
     if (!disablePanGesture) {
         formRendererDispatcher_->DispatchPointerEvent(pointerEvent, serializedGesture);
         return;
     }
 
     // pan gesture disabled, not dispatch move event, not concat serialized gesture
-    if (pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE) {
+    auto pointAction = pointerEvent->GetPointerAction();
+    if (pointAction == OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE ||
+        pointAction == OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE) {
         return;
     }
     TAG_LOGI(AceLogTag::ACE_FORM, "form pan gesture disabled, dispatch event action=%{public}d",
@@ -722,11 +749,37 @@ void FormManagerDelegate::SetAllowUpdate(bool allowUpdate)
 
 void FormManagerDelegate::NotifySurfaceChange(float width, float height, float borderWidth)
 {
-    if (formRendererDispatcher_ == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_FORM, "formRendererDispatcher_ is nullptr");
-        return;
+    OHOS::AppExecFwk::FormMgr::GetInstance().UpdateFormSize(runningCardId_, width, height, borderWidth);
+    {
+        std::lock_guard<std::mutex> lock(wantCacheMutex_);
+        wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, static_cast<double>(width));
+        wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, static_cast<double>(height));
+        wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, borderWidth);
     }
-    formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height, borderWidth);
+    {
+        std::lock_guard<std::mutex> lock(surfaceChangeFailedRecordMutex_);
+        if (formRendererDispatcher_ == nullptr) {
+            TAG_LOGW(AceLogTag::ACE_FORM, "formRendererDispatcher_ is nullptr");
+            notifySurfaceChangeFailedRecord_.isfailed = true;
+            notifySurfaceChangeFailedRecord_.expectedWidth = width;
+            notifySurfaceChangeFailedRecord_.expectedHeight = height;
+            notifySurfaceChangeFailedRecord_.expectedBorderWidth = borderWidth;
+            return;
+        }
+    }
+    WindowSizeChangeReason sizeChangeReason = WindowSizeChangeReason::UNDEFINED;
+    if (FormManager::GetInstance().IsSizeChangeByRotate()) {
+        sizeChangeReason = WindowSizeChangeReason::ROTATION;
+    }
+    std::shared_ptr<Rosen::RSTransaction> transaction;
+    if (FormManager::GetInstance().GetRSTransaction().lock()) {
+        transaction = FormManager::GetInstance().GetRSTransaction().lock();
+    } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
+        transaction = transactionController->GetRSTransaction();
+    }
+
+    formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height,
+        static_cast<uint32_t>(sizeChangeReason), transaction, borderWidth);
 }
 
 void FormManagerDelegate::OnFormSurfaceChange(float width, float height, float borderWidth)
@@ -750,10 +803,10 @@ void FormManagerDelegate::OnFormLinkInfoUpdate(const std::vector<std::string>& f
     }
 }
 
-void FormManagerDelegate::OnGetRectRelativeToWindow(int32_t &top, int32_t &left)
+void FormManagerDelegate::OnGetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo)
 {
     if (onGetRectRelativeToWindowCallback_) {
-        onGetRectRelativeToWindowCallback_(top, left);
+        onGetRectRelativeToWindowCallback_(parentRectInfo);
     }
 }
 
@@ -777,6 +830,8 @@ void FormManagerDelegate::OnFormUpdate(const std::string& param)
 void FormManagerDelegate::OnFormError(const std::string& param)
 {
     auto result = ParseMapFromString(param);
+    TAG_LOGI(AceLogTag::ACE_FORM,
+        "OnFormError, code:%{public}s, msg:%{public}s", result["code"].c_str(), result["msg"].c_str());
     if (onFormErrorCallback_) {
         onFormErrorCallback_(result["code"], result["msg"]);
     }
@@ -786,12 +841,16 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
 {
     int32_t externalErrorCode = 0;
     std::string errorMsg;
-    OHOS::AppExecFwk::FormMgr::GetInstance().GetExternalError(std::stoi(code), externalErrorCode, errorMsg);
+    int64_t parsedRequestCode = static_cast<int64_t>(StringUtils::StringToLongInt(code.c_str()));
+    OHOS::AppExecFwk::FormMgr::GetInstance().GetExternalError(parsedRequestCode, externalErrorCode, errorMsg);
     TAG_LOGI(AceLogTag::ACE_FORM,
         "OnFormError, code:%{public}s, msg:%{public}s, externalErrorCode:%{public}d, errorMsg: %{public}s",
         code.c_str(), msg.c_str(), externalErrorCode, errorMsg.c_str());
     switch (externalErrorCode) {
         case RENDER_DEAD_CODE:
+            ReAddForm();
+            break;
+        case FORM_STATUS_TIME_OUT:
             ReAddForm();
             break;
         case FORM_NOT_TRUST_CODE:
@@ -802,6 +861,13 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
                 onFormErrorCallback_(std::to_string(externalErrorCode), errorMsg);
             }
             break;
+    }
+}
+
+void FormManagerDelegate::OnFormUpdateDone(const int64_t formId)
+{
+    if (updateFormDoneCallback_) {
+        updateFormDoneCallback_(formId);
     }
 }
 
@@ -830,14 +896,25 @@ void FormManagerDelegate::HandleEnableFormCallback(const bool enable)
     enableFormCallback_(enable);
 }
 
+void FormManagerDelegate::HandleLockFormCallback(bool lock)
+{
+    if (!lockFormCallback_) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "lockFormCallback_. is null");
+        return;
+    }
+    lockFormCallback_(lock);
+}
+
 void FormManagerDelegate::ReAddForm()
 {
+    std::lock_guard<std::mutex> lock(wantCacheMutex_);
     formRendererDispatcher_ = nullptr; // formRendererDispatcher_ need reset, otherwise PointerEvent will disable
     if (wantCache_.HasParameter(PARAM_FORM_MIGRATE_FORM_KEY)) {
         TAG_LOGW(AceLogTag::ACE_FORM, "Remove migrate form key.");
         wantCache_.RemoveParam(PARAM_FORM_MIGRATE_FORM_KEY);
     }
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
+    wantCache_.SetParam(FORM_RENDERER_PROCESS_ON_ADD_SURFACE, renderDelegate_->AsObject());
     auto ret =
         OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(formJsInfo_.formId, wantCache_, clientInstance, formJsInfo_);
     if (ret != 0) {
@@ -884,6 +961,23 @@ void FormManagerDelegate::OnAccessibilityTransferHoverEvent(float pointX, float 
 bool FormManagerDelegate::CheckFormBundleForbidden(const std::string& bundleName)
 {
     return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormBundleForbidden(bundleName);
+}
+
+bool FormManagerDelegate::IsFormBundleExempt(int64_t formId)
+{
+    return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormBundleExempt(formId);
+}
+
+bool FormManagerDelegate::IsFormBundleProtected(const std::string& bundleName, int64_t formId)
+{
+    return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormBundleProtected(bundleName, formId);
+}
+
+void FormManagerDelegate::NotifyFormDump(const std::vector<std::string>& params,
+    std::vector<std::string>& info)
+{
+    CHECK_NULL_VOID(formRendererDispatcher_);
+    formRendererDispatcher_->OnNotifyDumpInfo(params, info);
 }
 
 #ifdef OHOS_STANDARD_SYSTEM
@@ -949,7 +1043,7 @@ void FormManagerDelegate::ProcessFormUpdate(const AppExecFwk::FormJsInfo& formJs
 
 void FormManagerDelegate::ReleaseRenderer()
 {
-    TAG_LOGI(AceLogTag::ACE_FORM, "FormManagerDelegate releaseForm. formId: %{public}" PRId64 ", %{public}s",
+    TAG_LOGI(AceLogTag::ACE_FORM, "FormManagerDelegate releaseRenderer. formId: %{public}" PRId64 ", %{public}s",
         runningCardId_, runningCompId_.c_str());
     if (runningCardId_ <= 0) {
         return;
@@ -970,6 +1064,7 @@ void FormManagerDelegate::ProcessFormUninstall(const int64_t formId)
 void FormManagerDelegate::OnDeathReceived()
 {
     AppExecFwk::FormJsInfo formJsInfo;
+    std::lock_guard<std::mutex> lock(wantCacheMutex_);
     OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(
         runningCardId_, wantCache_, OHOS::AppExecFwk::FormHostClient::GetInstance(), formJsInfo);
 }
@@ -1020,6 +1115,99 @@ void FormManagerDelegate::ProcessEnableForm(bool enable)
     TAG_LOGI(AceLogTag::ACE_FORM, "ProcessEnableForm, formId is %{public}s",
         std::to_string(runningCardId_).c_str());
     HandleEnableFormCallback(enable);
+}
+
+void FormManagerDelegate::SetParamForWant(const RequestFormInfo& info)
+{
+    std::lock_guard<std::mutex> lock(wantCacheMutex_);
+    wantCache_.SetElementName(info.bundleName, info.abilityName);
+
+    if (info.wantWrap) {
+        info.wantWrap->SetWantParamsFromWantWrap(reinterpret_cast<void*>(&wantCache_));
+    }
+
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_IDENTITY_KEY, info.id);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_MODULE_NAME_KEY, info.moduleName);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_NAME_KEY, info.cardName);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TEMPORARY_KEY, info.temporary);
+    wantCache_.SetParam(
+        OHOS::AppExecFwk::Constants::ACQUIRE_TYPE, OHOS::AppExecFwk::Constants::ACQUIRE_TYPE_CREATE_FORM);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, info.width.Value());
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, info.height.Value());
+    if (runningCompId_.empty()) {
+        wantCache_.SetParam(OHOS::AppExecFwk::Constants::FORM_COMP_ID, std::to_string(info.index));
+    } else {
+        // if form component not new create, just reuse runningCompId_
+        wantCache_.SetParam(OHOS::AppExecFwk::Constants::FORM_COMP_ID, runningCompId_);
+    }
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, info.borderWidth);
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_OBSCURED_KEY, info.obscuredMode);
+    auto pipelineContext = context_.Upgrade();
+    if (pipelineContext) {
+        auto density = pipelineContext->GetDensity();
+        // 在OHOS::AppExecFwk::Constants中加类似常量
+        wantCache_.SetParam("ohos.extra.param.key.form_density", density);
+    }
+    if (info.dimension != -1) {
+        wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_DIMENSION_KEY, info.dimension);
+    }
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_RENDERINGMODE_KEY, info.renderingMode);
+}
+
+void FormManagerDelegate::SetParamForWant(const RequestFormInfo& info, const AppExecFwk::FormInfo& formInfo)
+{
+    this->SetParamForWant(info);
+    std::lock_guard<std::mutex> lock(wantCacheMutex_);
+    if (formInfo.uiSyntax == AppExecFwk::FormType::ETS) {
+        CHECK_NULL_VOID(renderDelegate_);
+        wantCache_.SetParam(FORM_RENDERER_PROCESS_ON_ADD_SURFACE, renderDelegate_->AsObject());
+        wantCache_.SetParam(ALLOW_UPDATE, info.allowUpdate);
+        wantCache_.SetParam(IS_DYNAMIC, formInfo.isDynamic);
+    }
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FONT_FOLLOW_SYSTEM_KEY, formInfo.fontScaleFollowSystem);
+    auto disableBlurBackground = wantCache_.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_DISABLE_BLUR_BACKGROUND,
+        false);
+    if (disableBlurBackground) {
+        wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_ENABLE_BLUR_BACKGROUND_KEY, false);
+    } else {
+        wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_ENABLE_BLUR_BACKGROUND_KEY,
+            formInfo.enableBlurBackground);
+    }
+}
+
+
+void FormManagerDelegate::OnRouterActionEvent(const std::string& action)
+{
+    AAFwk::Want want;
+    if (!ParseAction(action, "router", want)) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "action parse failed, detail action:%{public}s", action.c_str());
+    } else {
+        CHECK_NULL_VOID(formUtils_);
+        auto context = context_.Upgrade();
+        CHECK_NULL_VOID(context);
+        auto instantId = context->GetInstanceId();
+        formUtils_->RouterEvent(runningCardId_, action, instantId, wantCache_.GetElement().GetBundleName());
+    }
+}
+
+void FormManagerDelegate::OnCallActionEvent(const std::string& action)
+{
+    AAFwk::Want want;
+    if (!ParseAction(action, "call", want)) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "action parse failed, detail action:%{public}s", action.c_str());
+    } else {
+        CHECK_NULL_VOID(formUtils_);
+        auto context = context_.Upgrade();
+        CHECK_NULL_VOID(context);
+        auto instantId = context->GetInstanceId();
+        formUtils_->BackgroundEvent(runningCardId_, action, instantId, wantCache_.GetElement().GetBundleName());
+    }
+}
+
+void FormManagerDelegate::ProcessLockForm(bool lock)
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "ProcessEnableForm, formId is %{public}" PRId64, runningCardId_);
+    HandleLockFormCallback(lock);
 }
 #endif
 } // namespace OHOS::Ace

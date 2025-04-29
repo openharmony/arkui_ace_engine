@@ -15,6 +15,9 @@
 
 #include "core/common/resource/resource_manager.h"
 
+#include "base/log/dump_log.h"
+#include "base/utils/time_util.h"
+
 namespace OHOS::Ace {
 namespace {
 const std::string DEFAULT_BUNDLE_NAME = "";
@@ -29,25 +32,46 @@ ResourceManager& ResourceManager::GetInstance()
 
 RefPtr<ResourceAdapter> ResourceManager::GetOrCreateResourceAdapter(RefPtr<ResourceObject>& resourceObject)
 {
+    int32_t instanceId = resourceObject->GetInstanceId();
     std::string bundleName = resourceObject->GetBundleName();
     std::string moduleName = resourceObject->GetModuleName();
 
-    auto resourceAdapter = GetResourceAdapter(bundleName, moduleName);
+    auto resourceAdapter = GetResourceAdapter(bundleName, moduleName, instanceId);
     if (resourceAdapter == nullptr) {
         resourceAdapter = ResourceAdapter::CreateNewResourceAdapter(bundleName, moduleName);
         if (!resourceAdapter) {
-            return GetResourceAdapter(DEFAULT_BUNDLE_NAME, DEFAULT_MODULE_NAME);
+            return GetResourceAdapter(DEFAULT_BUNDLE_NAME, DEFAULT_MODULE_NAME, instanceId);
         }
-        AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+        AddResourceAdapter(bundleName, moduleName, instanceId, resourceAdapter);
     }
     return resourceAdapter;
 }
 
-void ResourceManager::RegisterMainResourceAdapter(
-    const std::string& bundleName, const std::string& moduleName, const RefPtr<ResourceAdapter>& resAdapter)
+void ResourceManager::RegisterMainResourceAdapter(const std::string& bundleName, const std::string& moduleName,
+    int32_t instanceId, const RefPtr<ResourceAdapter>& resAdapter)
 {
     std::unique_lock<std::shared_mutex> lock(mutex_);
-    auto key = MakeCacheKey(bundleName, moduleName);
+    auto key = MakeCacheKey(bundleName, moduleName, instanceId);
     resourceAdapters_.emplace(key, resAdapter);
+}
+
+void ResourceManager::DumpResLoadError()
+{
+    std::unique_lock<std::shared_mutex> lock(errorMutex_);
+    auto resLoadErrorSize = resourceErrorList_.size();
+    DumpLog::GetInstance().Print("----------ResourceLoadWrrorInfo----------");
+    if (resLoadErrorSize == 0) {
+        DumpLog::GetInstance().Print("No resource load error have occurred.");
+        return;
+    }
+
+    DumpLog::GetInstance().Print("ResourceLoadErrorTimes: " + std::to_string(resLoadErrorSize));
+    for (const auto& nodeError : resourceErrorList_) {
+        DumpLog::GetInstance().Print(1, "Node: " + std::to_string(nodeError.nodeId) +
+            ", nodeTag: " + nodeError.nodeTag + ", sourceKey: " + nodeError.sourceKey +
+            ", sourceTag: " + nodeError.sourceTag +
+            ", errorCode: " + std::to_string(nodeError.state) + ", errorTime: " +
+            ConvertTimestampToStr(nodeError.errorTime));
+    }
 }
 } // namespace OHOS::Ace

@@ -39,18 +39,9 @@ public:
     void Destroy() const override;
     void DrawPixelMap(const RefPtr<PixelMap>& pixelMap) override;
     void DrawFrameNode(const RefPtr<NG::FrameNode>& rootNode) override;
-#ifndef USE_ROSEN_DRAWING
-    void DrawImage(void* skImage) override;
-#else
     void DrawImage(void* drawingImage) override;
-#endif
-#ifndef USE_GRAPHIC_TEXT_GINE
-    void DrawText(
-        std::shared_ptr<txt::Paragraph> paragraph, const Offset& offset, const RefPtr<RenderText>& renderText) override;
-#else
     void DrawText(std::shared_ptr<Rosen::Typography> paragraph, const Offset& offset,
         const RefPtr<RenderText>& renderText) override;
-#endif
     void DrawTextNG(const RefPtr<NG::Paragraph>& paragraph, const RefPtr<NG::TextPattern>& textPattern) override;
 
 private:

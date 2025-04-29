@@ -15,9 +15,6 @@
 
 #include "grid_container_layout_property.h"
 
-#include "base/log/log.h"
-#include "core/components_ng/base/inspector_filter.h"
-
 namespace OHOS::Ace::NG {
 
 void GridContainerLayoutProperty::RegistGridChild(const RefPtr<FrameNode>& child)

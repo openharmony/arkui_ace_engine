@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_content_modifier.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_event_hub.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_modifier.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_paint_method.h"
@@ -67,7 +68,7 @@ public:
             selectOverlayModifier_ = AceType::MakeRefPtr<SelectOverlayModifier>(defaultMenuEndOffset_, isReverse);
         }
         if (!selectOverlayContentModifier_ && CheckIfNeedHandle()) {
-            selectOverlayContentModifier_ = AceType::MakeRefPtr<SelectOverlayContentModifier>();
+            selectOverlayContentModifier_ = AceType::MakeRefPtr<SelectOverlayContentModifier>(WeakClaim(this));
         }
         SetContentModifierBounds(selectOverlayContentModifier_);
         SetSelectMenuHeight();
@@ -98,6 +99,8 @@ public:
     void UpdateSelectMenuInfo(const SelectMenuInfo& info);
 
     void UpdateSelectMenuInfo(std::function<void(SelectMenuInfo& menuInfo)> updateAction);
+
+    void UpdateAncestorViewPort(const std::optional<RectF>& ancestorViewPort) const;
 
     void UpdateShowArea(const RectF& area);
 
@@ -191,9 +194,36 @@ public:
     }
 
     void SetGestureEvent();
+    void InitMouseEvent();
 
     static float GetHandleDiameter();
     void OnDpiConfigurationUpdate() override;
+    bool IsDraggingHandle(bool isFirst)
+    {
+        if (isFirst) {
+            return firstHandleDrag_;
+        } else {
+            return secondHandleDrag_;
+        }
+    }
+    void OnColorConfigurationUpdate() override;
+    void OnLanguageConfigurationUpdate() override;
+
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<SelectOverlayEventHub>();
+    }
+    bool GetIsMenuShowInSubWindow() const
+    {
+        return isMenuShowInSubWindow_;
+    }
+
+    void SetIsMenuShowInSubWindow(bool isMenuShowInSubWindow)
+    {
+        isMenuShowInSubWindow_ = isMenuShowInSubWindow;
+    }
+
+    void DeleteHotAreas();
 
 protected:
     virtual void CheckHandleReverse();
@@ -221,6 +251,7 @@ private:
     void HandlePanMove(GestureEvent& info);
     void HandlePanEnd(GestureEvent& info);
     void HandlePanCancel();
+    void HandleMouseEvent(const MouseInfo& info);
 
     bool IsHandlesInSameLine();
     bool IsFirstHandleMoveStart(const Offset& touchOffset);
@@ -229,6 +260,8 @@ private:
     void UpdateOffsetOnMove(RectF& region, SelectHandleInfo& handleInfo, const OffsetF& offset, bool isFirst);
     void SetSelectMenuHeight();
     void SetContentModifierBounds(const RefPtr<SelectOverlayContentModifier>& modifier);
+    void SwitchHandleToOverlayMode(bool afterRender);
+    void SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
 
     RefPtr<TouchEventImpl> touchEvent_;
 
@@ -258,8 +291,8 @@ private:
 
     bool closedByGlobalTouchEvent_ = false;
     SelectOverlayMode overlayMode_ = SelectOverlayMode::ALL;
-    bool isSimulateOnClick_ = false;
-    bool clickConsumeBySimulate_ = false;
+    // Used to identify whether the menu is actually displayed in the subwindow.
+    bool isMenuShowInSubWindow_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayPattern);
 };

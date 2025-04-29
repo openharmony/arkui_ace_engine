@@ -14,11 +14,7 @@
  */
 #include "core/interfaces/native/node/plugin_modifier.h"
 
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/plugin/plugin_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 const DimensionUnit DEFAULT_UNIT = DimensionUnit::VP;
@@ -78,16 +74,32 @@ void ResetPluginSize(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIPluginModifier* GetPluginModifier()
 {
-    static const ArkUIPluginModifier modifier = {SetPluginWidth, SetPluginHeight, SetPluginSize,
-        ResetPluginWidth, ResetPluginHeight, ResetPluginSize };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIPluginModifier modifier = {
+        .setPluginWidth = SetPluginWidth,
+        .setPluginHeight = SetPluginHeight,
+        .setPluginSize = SetPluginSize,
+        .resetPluginWidth = ResetPluginWidth,
+        .resetPluginHeight = ResetPluginHeight,
+        .resetPluginSize = ResetPluginSize,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIPluginModifier* GetCJUIPluginModifier()
 {
-    static const CJUIPluginModifier modifier = {SetPluginWidth, SetPluginHeight, SetPluginSize,
-        ResetPluginWidth, ResetPluginHeight, ResetPluginSize };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIPluginModifier modifier = {
+        .setPluginWidth = SetPluginWidth,
+        .setPluginHeight = SetPluginHeight,
+        .setPluginSize = SetPluginSize,
+        .resetPluginWidth = ResetPluginWidth,
+        .resetPluginHeight = ResetPluginHeight,
+        .resetPluginSize = ResetPluginSize,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

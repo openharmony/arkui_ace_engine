@@ -15,19 +15,9 @@
 
 #include "core/components_ng/layout/box_layout_algorithm.h"
 
-#include <optional>
-
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/geometry/size.h"
-#include "base/utils/utils.h"
-#include "core/common/window.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/property/property.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -51,32 +41,7 @@ void BoxLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 std::optional<SizeF> BoxLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(host, std::nullopt);
-    if (!host->IsAtomicNode()) {
-        return std::nullopt;
-    }
-    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
-    auto measureType = layoutProperty->GetMeasureType(MeasureType::MATCH_CONTENT);
-    OptionalSizeF contentSize;
-    do {
-        // Use idea size first if it is valid.
-        contentSize.UpdateSizeWithCheck(contentConstraint.selfIdealSize);
-        if (contentSize.IsValid()) {
-            break;
-        }
-
-        if (measureType == MeasureType::MATCH_PARENT) {
-            contentSize.UpdateIllegalSizeWithCheck(contentConstraint.parentIdealSize);
-            // use max is parent ideal size is invalid.
-            contentSize.UpdateIllegalSizeWithCheck(contentConstraint.percentReference);
-            break;
-        }
-
-        // wrap content case use min size default.
-        contentSize.UpdateIllegalSizeWithCheck(contentConstraint.minSize);
-    } while (false);
-    return contentSize.ConvertToSizeT();
+    return PerformMeasureContent(contentConstraint, layoutWrapper);
 }
 
 void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
@@ -151,12 +116,14 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
 // Called to perform measure current render node.
 void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     PerformMeasureSelfWithChildList(layoutWrapper, layoutWrapper->GetAllChildrenWithBuild());
 }
 
 // Called to perform layout render node and child.
 void BoxLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     // update child position.
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
@@ -180,5 +147,36 @@ void BoxLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
         auto translate = Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align) + paddingOffset;
         content->SetOffset(translate);
     }
+}
+
+std::optional<SizeF> BoxLayoutAlgorithm::PerformMeasureContent(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    if (!host->IsAtomicNode()) {
+        return std::nullopt;
+    }
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    auto measureType = layoutProperty->GetMeasureType(MeasureType::MATCH_CONTENT);
+    OptionalSizeF contentSize;
+    do {
+        // Use idea size first if it is valid.
+        contentSize.UpdateSizeWithCheck(contentConstraint.selfIdealSize);
+        if (contentSize.IsValid()) {
+            break;
+        }
+
+        if (measureType == MeasureType::MATCH_PARENT) {
+            contentSize.UpdateIllegalSizeWithCheck(contentConstraint.parentIdealSize);
+            // use max is parent ideal size is invalid.
+            contentSize.UpdateIllegalSizeWithCheck(contentConstraint.percentReference);
+            break;
+        }
+
+        // wrap content case use min size default.
+        contentSize.UpdateIllegalSizeWithCheck(contentConstraint.minSize);
+    } while (false);
+    return contentSize.ConvertToSizeT();
 }
 } // namespace OHOS::Ace::NG

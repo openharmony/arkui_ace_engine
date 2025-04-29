@@ -17,19 +17,10 @@
 
 namespace OHOS::Ace {
 
-EnvironmentProxy* EnvironmentProxy::inst_ = nullptr;
-
-std::mutex EnvironmentProxy::mutex_;
-
 EnvironmentProxy* EnvironmentProxy::GetInstance()
 {
-    if (inst_ == nullptr) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (inst_ == nullptr) {
-            inst_ = new EnvironmentProxy();
-        }
-    }
-    return (inst_);
+    static EnvironmentProxy instance;
+    return &instance;
 }
 
 void EnvironmentProxy::SetDelegate(std::unique_ptr<EnvironmentInterface>&& delegate)

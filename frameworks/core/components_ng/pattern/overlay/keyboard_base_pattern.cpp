@@ -16,9 +16,7 @@
 #include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
 
 #include "base/log/dump_log.h"
-#include "base/utils/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 void KeyboardPattern::BeforeCreateLayoutWrapper()
@@ -74,9 +72,6 @@ void KeyboardPattern::OnModifyDone()
 
 void KeyboardPattern::OnAreaChangedInner()
 {
-    if (!supportAvoidance_) {
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto customHeight = GetKeyboardHeight();
@@ -85,15 +80,22 @@ void KeyboardPattern::OnAreaChangedInner()
     }
     auto boundaryHeight = 0.0f;
     // Check that the effective height of the keyboard is captured
-    if (std::abs(customHeight) > boundaryHeight) {
-        auto pipeline = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (std::abs(customHeight) > boundaryHeight && supportAvoidance_) {
         Rect keyboardRect = Rect(0.0f, 0.0f, 0.0f, customHeight);
+        auto safeAreaManager = pipeline->GetSafeAreaManager();
+        if (safeAreaManager) {
+            safeAreaManager->SetKeyboardInfo(customHeight);
+        }
         TAG_LOGI(ACE_KEYBOARD, "customKeyboardHeight Change to %{public}f, safeHeight: %{public}f",
             customHeight, safeHeight_);
         pipeline->OnVirtualKeyboardAreaChange(keyboardRect, nullptr, safeHeight_, supportAvoidance_, true);
     }
     keyboardHeight_ = customHeight;
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->UpdateCustomKeyboardPosition();
 }
 
 void KeyboardPattern::SetKeyboardAreaChange(bool keyboardAvoidance)
@@ -102,8 +104,12 @@ void KeyboardPattern::SetKeyboardAreaChange(bool keyboardAvoidance)
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto keyboardHeight = GetKeyboardHeight();
-        auto pipeline = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
+        auto safeAreaManager = pipeline->GetSafeAreaManager();
+        if (safeAreaManager) {
+            safeAreaManager->SetKeyboardInfo(keyboardHeight);
+        }
         Rect keyboardRect = Rect(0.0f, 0.0f, 0.0f, keyboardHeight);
         TAG_LOGI(ACE_KEYBOARD, "customKeyboardHeight Change to %{public}f, safeHeight: %{public}f",
             keyboardHeight, safeHeight_);
@@ -141,4 +147,8 @@ void KeyboardPattern::OnDetachFromFrameNode(FrameNode* node)
     pipeline->RemoveOnAreaChangeNode(node->GetId());
 }
 
+void KeyboardPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("TargetId", targetId_);
+}
 } // namespace OHOS::Ace::NG

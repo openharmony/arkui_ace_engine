@@ -60,5 +60,6 @@ HWTEST_F(ExtensionCustomNodeTestNg, ExtensionCustomNodeTestNg001, TestSize.Level
     customNode->SetLayoutCallback([](NG::OffsetF& position)->void {});
     customNode->OnMeasure(extensionLayoutConstraint);
     customNode->OnLayout(100, 100, 10, 10);
+    EXPECT_NE(customNode, nullptr);
 }
 } // namespace OHOS::Ace

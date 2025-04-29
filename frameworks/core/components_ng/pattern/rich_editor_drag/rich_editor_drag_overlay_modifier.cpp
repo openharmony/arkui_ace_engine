@@ -147,7 +147,7 @@ void RichEditorDragOverlayModifier::PaintFrameNode(DrawingContext& context, cons
     const RefPtr<Pattern>& pattern, const OffsetF& offset)
 {
     auto& canvas = context.canvas;
-    auto pixelMap = frameNode->GetPixelMap();
+    auto pixelMap = frameNode->GetDragPixelMap();
     CHECK_NULL_VOID(pixelMap);
     auto canvasImage = CanvasImage::Create(pixelMap);
     auto layoutProperty = pattern->GetLayoutProperty<LayoutProperty>();
@@ -299,9 +299,10 @@ void RichEditorDragOverlayModifier::PaintHandleHold(RSCanvas& canvas, const Rect
 
 void RichEditorDragOverlayModifier::PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas)
 {
-    if (type_ == DragAnimType::DEFAULT) {
+    if (type_ == DragAnimType::DEFAULT || !isDragShadowNeeded_) {
         return;
     }
+    canvas.Save();
     RSRecordingPath rsPath;
     rsPath.AddPath(path);
     rsPath.Offset(shadow.GetOffset().GetX(), shadow.GetOffset().GetY());
@@ -313,6 +314,7 @@ void RichEditorDragOverlayModifier::PaintShadow(const RSPath& path, const Shadow
     RSPoint3 lightPos = { bounds.GetLeft() + bounds.GetWidth() / 2.0, bounds.GetTop() + bounds.GetHeight() / 2.0,
         DEFAULT_LIGHT_HEIGHT };
     RSColor ambientColor = ToRSColor(Color(DEFAULT_AMBIENT_COLOR));
+    canvas.ClipPath(path, RSClipOp::DIFFERENCE, true);
     canvas.DrawShadowStyle(rsPath, planeParams, lightPos, DEFAULT_LIGHT_RADIUS, ambientColor, spotColor,
         RSShadowFlags::TRANSPARENT_OCCLUDER, true);
     canvas.Restore();
@@ -376,8 +378,17 @@ void RichEditorDragOverlayModifier::StartFloatingSelBackgroundAnimate()
 
 Color RichEditorDragOverlayModifier::GetDragBackgroundColor(const Color& defaultColor)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(!dragBackgroundColor_.has_value(), dragBackgroundColor_.value());
+    auto hostPattern = hostPattern_.Upgrade();
+    CHECK_NULL_RETURN(hostPattern, defaultColor);
+    auto host = hostPattern->GetHost();
+    CHECK_NULL_RETURN(host, defaultColor);
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, defaultColor);
+    if (pipeline->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>(hostPattern->GetThemeScopeId());
+        CHECK_NULL_RETURN(richEditorTheme, defaultColor);
+    }
     auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_RETURN(richEditorTheme, defaultColor);
     return richEditorTheme->GetDragBackgroundColor();

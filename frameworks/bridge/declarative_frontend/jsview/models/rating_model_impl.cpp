@@ -15,9 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/models/rating_model_impl.h"
 
-#include "core/components/box/box_component.h"
 #include "core/components/rating/rating_component.h"
-#include "core/components/rating/rating_theme.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
@@ -110,7 +108,7 @@ void RatingModelImpl::SetBackgroundSrc(const std::string& value, bool flag)
     ratingComponent->SetBackgroundSrc(value);
 }
 
-void RatingModelImpl::SetOnChange(ChangeEvent&& onChange)
+void RatingModelImpl::SetOnChange(RatingChangeEvent&& onChange)
 {
     auto ratingComponent = AceType::DynamicCast<RatingComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     CHECK_NULL_VOID(ratingComponent);

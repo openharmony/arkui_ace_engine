@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,6 @@
 #include "interfaces/inner_api/ace/navigation_controller.h"
 
 #include "base/memory/ace_type.h"
-#include "base/view_data/hint_to_type_wrap.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/shared_image_manager.h"
 #include "base/thread/task_executor.h"
@@ -34,11 +33,16 @@
 #include "base/utils/noncopyable.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "base/view_data/ace_auto_fill_error.h"
+#include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container_consts.h"
+#include "core/common/container_handler.h"
 #include "core/common/display_info.h"
+#include "core/common/display_info_utils.h"
 #include "core/common/frontend.h"
 #include "core/common/page_url_checker.h"
+#include "core/common/page_viewport_config.h"
 #include "core/common/platform_res_register.h"
 #include "core/common/resource/resource_configuration.h"
 #include "core/common/settings.h"
@@ -48,8 +52,8 @@
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/navigation/navigation_route.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
+#include "core/event/non_pointer_event.h"
 #include "core/event/pointer_event.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
@@ -57,15 +61,19 @@ using PageTask = std::function<void()>;
 using TouchEventCallback = std::function<void(const TouchEvent&, const std::function<void()>&,
     const RefPtr<NG::FrameNode>&)>;
 using KeyEventCallback = std::function<bool(const KeyEvent&)>;
+using NonPointerEventCallback = std::function<bool(const NonPointerEvent&, const std::function<void()>&)>;
 using MouseEventCallback = std::function<void(const MouseEvent&, const std::function<void()>&,
     const RefPtr<NG::FrameNode>&)>;
 using AxisEventCallback = std::function<void(const AxisEvent&, const std::function<void()>&,
     const RefPtr<NG::FrameNode>&)>;
 using RotationEventCallBack = std::function<bool(const RotationEvent&)>;
 using CardViewPositionCallBack = std::function<void(int id, float offsetX, float offsetY)>;
-using DragEventCallBack = std::function<void(const PointerEvent&, const DragEventAction&,
+using DragEventCallBack = std::function<void(const DragPointerEvent&, const DragEventAction&,
     const RefPtr<NG::FrameNode>&)>;
 using StopDragCallback = std::function<void()>;
+using CrownEventCallback = std::function<bool(const CrownEvent&, const std::function<void()>&)>;
+
+class PipelineBase;
 
 class ACE_FORCE_EXPORT Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);
@@ -77,6 +85,14 @@ public:
     virtual void Initialize() = 0;
 
     virtual void Destroy() = 0;
+
+    virtual void SetAppRunningUniqueId(const std::string& uniqueId) {};
+
+    virtual const std::string& GetAppRunningUniqueId() const
+    {
+        static const std::string res;
+        return res;
+    }
 
     virtual bool IsKeyboard()
     {
@@ -175,6 +191,13 @@ public:
         return 0;
     }
 
+    virtual void SetParentId(int32_t parentId) {}
+
+    virtual int32_t GetParentId() const
+    {
+        return 0;
+    }
+
     virtual void ProcessScreenOnEvents() {}
 
     virtual void ProcessScreenOffEvents() {}
@@ -186,32 +209,49 @@ public:
         return Orientation::UNSPECIFIED;
     }
 
-    virtual RefPtr<DisplayInfo> GetDisplayInfo()
+    void SetCurrentDisplayOrientation(DisplayOrientation orientation)
     {
-        return MakeRefPtr<DisplayInfo>();
+        displayOrientation_ = orientation;
+    }
+    DisplayOrientation GetCurrentDisplayOrientation() const
+    {
+        return displayOrientation_;
+    }
+    virtual RefPtr<PageViewportConfig> GetCurrentViewportConfig() const
+    {
+        return nullptr;
+    }
+    virtual RefPtr<PageViewportConfig> GetTargetViewportConfig(Orientation orientation,
+        bool enableStatusBar, bool statusBarAnimated, bool enableNavigationIndicator)
+    {
+        return nullptr;
+    }
+    virtual void SetRequestedOrientation(
+        Orientation orientation, bool needAnimation = true) {}
+    virtual Orientation GetRequestedOrientation()
+    {
+        return Orientation::UNSPECIFIED;
+    }
+    virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
+    virtual bool IsFullScreenWindow() const { return true; }
+    virtual bool SetSystemBarEnabled(SystemBarType type, bool enable, bool animation) { return true; }
+
+    virtual RefPtr<DisplayInfo> GetDisplayInfo();
+
+    virtual void InitIsFoldable();
+
+    virtual bool IsFoldable();
+
+    virtual FoldStatus GetCurrentFoldStatus();
+
+    virtual FoldStatus GetFoldStatusFromListener()
+    {
+        return GetCurrentFoldStatus();
     }
 
-    virtual void InitIsFoldable() {}
+    virtual void InitFoldStatusFromListener() {}
 
-    virtual bool IsFoldable() const
-    {
-        return false;
-    }
-
-    virtual FoldStatus GetCurrentFoldStatus()
-    {
-        return FoldStatus::UNKNOWN;
-    }
-
-    virtual NG::SafeAreaInsets GetKeyboardSafeArea()
-    {
-        return {};
-    }
-
-    virtual Rect GetSessionAvoidAreaByType(uint32_t safeAreaType)
-    {
-        return {};
-    }
+    virtual NG::SafeAreaInsets GetKeyboardSafeArea();
 
     virtual std::string GetHapPath() const
     {
@@ -258,19 +298,20 @@ public:
         return moduleName_;
     }
 
-    virtual bool IsMainWindow() const
+    virtual bool IsMainWindow() const { return false; }
+    virtual bool IsSubWindow() const { return false; }
+    virtual bool IsDialogWindow() const { return false; }
+    virtual bool IsSystemWindow() const { return false; }
+    virtual bool IsHostMainWindow() const { return false; }
+    virtual bool IsHostSubWindow() const { return false; }
+    virtual bool IsHostDialogWindow() const { return false; }
+    virtual bool IsHostSystemWindow() const { return false; }
+    virtual bool IsHostSceneBoardWindow() const { return false; }
+    virtual bool IsSubContainer() const { return false; }
+    virtual bool IsFormRender() const { return false; }
+    virtual uint32_t GetParentMainWindowId(uint32_t currentWindowId) const
     {
-        return false;
-    }
-
-    virtual bool IsSubContainer() const
-    {
-        return false;
-    }
-
-    virtual bool IsFormRender() const
-    {
-        return false;
+        return 0;
     }
 
     virtual void SetIsFormRender(bool isFormRender) {};
@@ -332,10 +373,12 @@ public:
     static RefPtr<Container> GetActive();
     static RefPtr<Container> GetDefault();
     static RefPtr<Container> GetFoucsed();
+    static RefPtr<Container> GetByWindowId(uint32_t windowId);
     static RefPtr<TaskExecutor> CurrentTaskExecutor();
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafely();
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafelyWithCheck();
     static void UpdateCurrent(int32_t id);
+    static ColorMode CurrentColorMode();
 
     void SetUseNewPipeline()
     {
@@ -385,10 +428,11 @@ public:
         return container ? container->IsSubContainer() : false;
     }
 
-    Window* GetWindow() const
+    Window* GetWindow() const;
+
+    virtual uint64_t GetDisplayId() const
     {
-        auto context = GetPipelineContext();
-        return context ? context->GetWindow() : nullptr;
+        return -1;
     }
 
     virtual bool IsUseStageModel() const
@@ -459,6 +503,7 @@ public:
     }
 
     virtual void NotifyConfigurationChange(bool, const ConfigurationChange& configurationChange = { false, false }) {}
+
     virtual void HotReload() {}
 
     void SetIsModule(bool isModule)
@@ -486,7 +531,12 @@ public:
         return false;
     }
 
-    virtual bool IsScenceBoardWindow()
+    virtual bool IsSceneBoardWindow()
+    {
+        return false;
+    }
+
+    virtual bool IsCrossAxisWindow()
     {
         return false;
     }
@@ -501,9 +551,7 @@ public:
         return false;
     }
 
-    virtual bool GetCurPointerEventInfo(
-        int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
-        int32_t& sourceTool, StopDragCallback&& stopDragCallback)
+    virtual bool GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, StopDragCallback&& stopDragCallback)
     {
         return false;
     }
@@ -513,10 +561,12 @@ public:
         return false;
     }
 
-    virtual bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
-        bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true)
+    virtual int32_t RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool isNewPassWord,
+        bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true,
+        const std::function<void()>& onFinish = nullptr,
+        const std::function<void()>& onUIExtNodeBindingCompleted = nullptr)
     {
-        return false;
+        return AceAutoFillError::ACE_AUTO_FILL_DEFAULT;
     }
 
     virtual bool IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType)
@@ -537,18 +587,47 @@ public:
         return nullptr;
     }
 
-    static bool LessThanAPIVersion(PlatformVersion version)
-    {
-        return PipelineBase::GetCurrentContext() &&
-               PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version);
-    }
+    /**
+     * @description: [Deprecated]. Compare whether the min compatible api version of the application is less than the
+     * incoming target version. This interface is just use before api12(not include api12), after api12 when you judge
+     * version, use LessThanAPITargetVersion(PlatformVersion version).
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
+    static bool LessThanAPIVersion(PlatformVersion version);
 
-    static bool GreatOrEqualAPIVersion(PlatformVersion version)
-    {
-        return PipelineBase::GetCurrentContext() &&
-               PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version);
-    }
+    /**
+     * @description: [Deprecated]. Compare whether the min compatible api version of the application is less than the
+     * incoming target version. This interface is just use before api12(not include api12), after api12 when you judge
+     * version, use GreatOrEqualAPITargetVersion(PlatformVersion version).
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
+    static bool GreatOrEqualAPIVersion(PlatformVersion version);
 
+    /**
+     * @description: Compare whether the min compatible api version of the application is less than the incoming target
+     * version. This interface is just for when you use LessThanAPIVersion in instance does not exist situation.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
+    static bool LessThanAPIVersionWithCheck(PlatformVersion version);
+
+    /**
+     * @description: Compare whether the min compatible api version of the application is greater than or equal to the
+     * incoming target version. This interface is just for when you use GreatOrEqualAPIVersion in instance does not
+     * exist situation.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
+    static bool GreatOrEqualAPIVersionWithCheck(PlatformVersion version);
+
+    /**
+     * @description: Compare whether the target api version of the application is less than the incoming target
+     * version.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
     static bool LessThanAPITargetVersion(PlatformVersion version)
     {
         auto container = Current();
@@ -557,6 +636,12 @@ public:
         return apiTargetVersion < static_cast<int32_t>(version);
     }
 
+    /**
+     * @description: Compare whether the target api version of the application is greater than or equal to the incoming
+     * target.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
     static bool GreatOrEqualAPITargetVersion(PlatformVersion version)
     {
         auto container = Current();
@@ -566,6 +651,15 @@ public:
         }
         auto apiTargetVersion = container->GetApiTargetVersion();
         return apiTargetVersion >= static_cast<int32_t>(version);
+    }
+
+    static int32_t GetCurrentApiTargetVersion()
+    {
+        auto container = Current();
+        if (!container) {
+            return AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
+        }
+        return container->GetApiTargetVersion();
     }
 
     void SetAppBar(const RefPtr<NG::AppBarView>& appBar)
@@ -579,17 +673,28 @@ public:
     }
 
     virtual void TerminateUIExtension() {}
-
+    virtual bool UIExtensionIsHalfScreen()
+    {
+        return false;
+    }
     template<ContainerType type>
     static int32_t GenerateId();
     static void SetFontScale(int32_t instanceId, float fontScale);
     static void SetFontWeightScale(int32_t instanceId, float fontScale);
 
+    /**
+     * @description: Get the target api version of the application.
+     * @return: The target api version of the application.
+     */
     int32_t GetApiTargetVersion() const
     {
         return apiTargetVersion_;
     }
 
+    /**
+     * @description: Set the target api version of the application.
+     * @param: The target api version of the application.
+     */
     void SetApiTargetVersion(int32_t apiTargetVersion)
     {
         apiTargetVersion_ = apiTargetVersion % 1000;
@@ -605,6 +710,85 @@ public:
         uIContentType_ = uIContentType;
     }
 
+    void DestroyToastSubwindow(int32_t instanceId);
+
+    virtual void CheckAndSetFontFamily() {};
+
+    virtual bool IsFreeMultiWindow() const
+    {
+        return false;
+    }
+
+    virtual bool IsWaterfallWindow() const
+    {
+        return false;
+    }
+
+    virtual Rect GetUIExtensionHostWindowRect(int32_t instanceId)
+    {
+        return Rect();
+    }
+
+    virtual bool IsFloatingWindow() const
+    {
+        return false;
+    }
+
+    void RegisterContainerHandler(const RefPtr<ContainerHandler>& containerHandler)
+    {
+        containerHandler_ = containerHandler;
+    }
+
+    RefPtr<ContainerHandler> GetContainerHandler()
+    {
+        return containerHandler_;
+    }
+
+    void SetCurrentDisplayId(uint64_t displayId)
+    {
+        currentDisplayId_ = displayId;
+    }
+
+    uint64_t GetCurrentDisplayId() const
+    {
+        return currentDisplayId_;
+    }
+
+    virtual void SetColorMode(ColorMode mode)
+    {
+        colorMode_ = mode;
+    }
+
+    virtual ColorMode GetColorMode() const
+    {
+        return colorMode_;
+    }
+
+    virtual ResourceConfiguration GetResourceConfiguration() const = 0;
+
+    void DestroySelectOverlaySubwindow(int32_t instanceId);
+
+    static bool IsNodeInKeyGuardWindow(const RefPtr<NG::FrameNode>& node);
+
+    virtual bool GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent)
+    {
+        return false;
+    }
+
+    virtual std::vector<Rect> GetCurrentFoldCreaseRegion();
+
+    virtual Rect GetDisplayAvailableRect() const
+    {
+        return Rect();
+    }
+
+    static bool CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes);
+
+protected:
+    bool IsFontFileExistInPath(const std::string& path);
+    std::vector<std::string> GetFontFamilyName(const std::string& path);
+    bool endsWith(std::string str, std::string suffix);
+
 private:
     static bool IsIdAvailable(int32_t id);
 
@@ -617,6 +801,9 @@ protected:
     Frontend::State state_ = Frontend::State::UNDEFINE;
     bool isFRSCardContainer_ = false;
     bool isDynamicRender_ = false;
+    // for common handler
+    RefPtr<ContainerHandler> containerHandler_;
+    RefPtr<DisplayInfoUtils> displayManager_ = AceType::MakeRefPtr<DisplayInfoUtils>();
 
 private:
     std::string bundleName_;
@@ -625,6 +812,7 @@ private:
     std::string filesDataPath_;
     std::string tempDir_;
     bool usePartialUpdate_ = false;
+    DisplayOrientation displayOrientation_ = DisplayOrientation::PORTRAIT;
     Settings settings_;
     RefPtr<PageUrlChecker> pageUrlChecker_;
     RefPtr<NG::NavigationRoute> navigationRoute_;
@@ -634,6 +822,8 @@ private:
     int32_t apiTargetVersion_ = 0;
     // Define the type of UI Content, for example, Security UIExtension.
     UIContentType uIContentType_ = UIContentType::UNDEFINED;
+    uint64_t currentDisplayId_ = 0;
+    ColorMode colorMode_ = ColorMode::LIGHT;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 

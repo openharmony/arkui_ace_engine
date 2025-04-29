@@ -16,9 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_TITLE_BAR_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_TITLE_BAR_PATTERN_H
 
-#include "core/common/container.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/navigation/custom_safe_area_expander.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navigation/title_bar_accessibility_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_algorithm.h"
@@ -27,8 +27,8 @@
 
 namespace OHOS::Ace::NG {
 
-class TitleBarPattern : public Pattern {
-    DECLARE_ACE_TYPE(TitleBarPattern, Pattern);
+class TitleBarPattern : public Pattern, public CustomSafeAreaExpander {
+    DECLARE_ACE_TYPE(TitleBarPattern, Pattern, CustomSafeAreaExpander);
 
 public:
     TitleBarPattern() = default;
@@ -44,16 +44,7 @@ public:
         return MakeRefPtr<TitleBarAccessibilityProperty>();
     }
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        auto titleBarLayoutAlgorithm = MakeRefPtr<TitleBarLayoutAlgorithm>();
-        titleBarLayoutAlgorithm->SetInitialTitleOffsetY(initialTitleOffsetY_);
-        titleBarLayoutAlgorithm->MarkIsInitialTitle(isInitialTitle_);
-        titleBarLayoutAlgorithm->SetInitialSubtitleOffsetY(initialSubtitleOffsetY_);
-        titleBarLayoutAlgorithm->MarkIsInitialSubtitle(isInitialSubtitle_);
-        titleBarLayoutAlgorithm->SetMinTitleHeight(minTitleHeight_);
-        return titleBarLayoutAlgorithm;
-    }
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
     bool IsAtomicNode() const override
     {
@@ -117,12 +108,21 @@ public:
     {
         isInitialSubtitle_ = isInitialSubtitle;
     }
-    void ProcessTitleDragStart(float offset);
+
+    void SetIsFirstTimeSetSystemTitle(bool isFirstTime)
+    {
+        isFirstTimeSetSystemTitle_ = isFirstTime;
+    }
+    bool IsFirstTimeSetSystemTitle() const
+    {
+        return isFirstTimeSetSystemTitle_;
+    }
+
     void ProcessTitleDragUpdate(float offset);
 
-    void ProcessTitleDragEnd();
-
     void OnColorConfigurationUpdate() override;
+
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     float GetCurrentOffset()
     {
@@ -217,40 +217,6 @@ public:
         isTitleChanged_ = isTitleChanged;
     }
 
-    void SetTitleBarMenuItems(const std::vector<NG::BarItem>& menuItems)
-    {
-        titleBarMenuItems_ = menuItems;
-    }
-
-    const std::vector<NG::BarItem>& GetTitleBarMenuItems() const
-    {
-        return titleBarMenuItems_;
-    }
-
-    int32_t GetMenuNodeId() const
-    {
-        return menuNodeId_.value();
-    }
-
-    void SetMenuNodeId(const int32_t menuNodeId)
-    {
-        menuNodeId_ = menuNodeId;
-    }
-
-    bool HasMenuNodeId() const
-    {
-        return menuNodeId_.has_value();
-    }
-
-    int32_t GetMaxMenuNum() const
-    {
-        return maxMenuNums_;
-    }
-
-    void SetMaxMenuNum(int32_t maxMenu)
-    {
-        maxMenuNums_ = maxMenu;
-    }
     void OnCoordScrollStart();
     float OnCoordScrollUpdate(float offset);
     void OnCoordScrollEnd();
@@ -299,8 +265,44 @@ public:
         shouldResetSubTitleProperty_ = reset;
     }
 
+    void OnLanguageConfigurationUpdate() override;
+
+    void UpdateHalfFoldHoverChangedCallbackId(std::optional<int32_t> id)
+    {
+        halfFoldHoverChangedCallbackId_ = id;
+    }
+
+    bool HasHalfFoldHoverChangedCallbackId()
+    {
+        return halfFoldHoverChangedCallbackId_.has_value();
+    }
+
+    void InitFoldCreaseRegion();
+
+    std::vector<Rect> GetFoldCreaseRects()
+    {
+        return currentFoldCreaseRegion_;
+    }
+
+    float GetTitleBarHeightLessThanMaxBarHeight() const;
+
+    void InitBackButtonLongPressEvent(const RefPtr<FrameNode>& backButtonNode);
+
+    RefPtr<FrameNode> GetBackButtonDialogNode() const
+    {
+        return dialogNode_;
+    }
+    
+    void SetBackButtonDialogNode(const RefPtr<FrameNode>& dialogNode)
+    {
+        dialogNode_ = dialogNode;
+    }
+
+    void InitMenuDragAndLongPressEvent(const RefPtr<FrameNode>& menuNode, const std::vector<NG::BarItem>& menuItems);
+
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
+    bool CustomizeExpandSafeArea() override;
 
     void ClearDragState();
     float GetSubtitleOpacity();
@@ -308,11 +310,10 @@ private:
     float GetMappedOffset(float offset);
     void SpringAnimation(float startPos, float endPos);
     void UpdateScaleByDragOverDragOffset(float overDragOffset);
-    void AnimateTo(float offset);
+    void AnimateTo(float offset, bool isFullTitleMode = false);
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
-    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
@@ -331,7 +332,6 @@ private:
     void UpdateSubTitleOpacity(const double &value);
     void UpdateTitleModeChange();
     void MountTitle(const RefPtr<TitleBarNode>& hostNode);
-    void MountMenu(const RefPtr<TitleBarNode>& hostNode, bool isWindowSizeChange = false);
 
     void UpdateTitleBarByCoordScroll(float offset);
     void SetTitleStyleByCoordScrollOffset(float offset);
@@ -351,10 +351,25 @@ private:
     void ResetMainTitleProperty(const RefPtr<FrameNode>& textNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty,
         NavigationTitleMode titleMode, bool hasSubTitle, bool parentIsNavDest);
+    void ResetSubTitleProperty(const RefPtr<FrameNode>& textNode,
+        NavigationTitleMode titleMode, bool parentIsNavDest);
     void ApplyTitleModifierIfNeeded(const RefPtr<TitleBarNode>& hostNode);
     void ApplyTitleModifier(const RefPtr<FrameNode>& textNode,
         const TextStyleApplyFunc& applyFunc, bool needCheckFontSizeIsSetted);
     void DumpInfo() override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+
+    void HandleLongPress(const RefPtr<FrameNode>& backButtonNode);
+    void HandleLongPressActionEnd();
+    void OnFontScaleConfigurationUpdate() override;
+
+    void InitMenuDragEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameNode>& menuNode,
+        const std::vector<NG::BarItem>& menuItems);
+    void InitMenuLongPressEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameNode>& menuNode,
+        const std::vector<NG::BarItem>& menuItems);
+    void HandleMenuLongPress(
+        const GestureEvent& info, const RefPtr<FrameNode>& menuNode, const std::vector<NG::BarItem>& menuItems);
+    void HandleMenuLongPressActionEnd();
 
     RefPtr<PanEvent> panEvent_;
     std::shared_ptr<AnimationUtils::Animation> springAnimation_;
@@ -386,6 +401,7 @@ private:
     double opacityRatio_ = 0.0f;
 
     float initialTitleOffsetY_ = 0.0f;
+    bool isFirstTimeSetSystemTitle_ = true;
     bool isInitialTitle_ = true;
     float initialSubtitleOffsetY_ = 0.0f;
     bool isInitialSubtitle_ = true;
@@ -406,16 +422,18 @@ private:
 
     NavigationTitlebarOptions options_;
 
-    std::vector<NG::BarItem> titleBarMenuItems_;
-    std::optional<int32_t> menuNodeId_;
-    int32_t maxMenuNums_ = -1;
-
     WeakPtr<FrameNode> largeFontPopUpDialogNode_;
     std::optional<int32_t> moveIndex_;
 
     bool isFontSizeSettedByDeveloper_ = false;
     bool shouldResetMainTitleProperty_ = true;
     bool shouldResetSubTitleProperty_ = true;
+
+    std::optional<int32_t> halfFoldHoverChangedCallbackId_;
+    std::vector<Rect> currentFoldCreaseRegion_;
+
+    RefPtr<LongPressEvent> longPressEvent_;
+    RefPtr<FrameNode> dialogNode_;
 };
 
 } // namespace OHOS::Ace::NG

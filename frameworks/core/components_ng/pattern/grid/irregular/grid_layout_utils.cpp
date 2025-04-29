@@ -14,8 +14,6 @@
  */
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 
-#include "core/components_ng/pattern/grid/grid_layout_info.h"
-#include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -49,13 +47,13 @@ GridItemSize GridLayoutUtils::GetItemSize(const GridLayoutInfo* info, const Layo
 }
 
 void GridLayoutUtils::PreloadGridItems(
-    const RefPtr<GridPattern>& pattern, std::list<int32_t>&& items, const BuildGridItemCallback& buildCb)
+    const RefPtr<GridPattern>& pattern, std::list<GridPreloadItem>&& items, const BuildGridItemCallback& buildCb)
 {
     if (items.empty()) {
         return;
     }
     CHECK_NULL_VOID(pattern);
-    const bool taskAdded = !pattern->GetPreloadItemList().empty();
+    const bool taskAdded = pattern->HasPreloadItemList();
     pattern->SetPreloadItemList(std::move(items));
     if (taskAdded) {
         // task already in queue, only need to update item list
@@ -66,18 +64,18 @@ void GridLayoutUtils::PreloadGridItems(
 
 void GridLayoutUtils::PreloadGridItemsHelper(const RefPtr<GridPattern>& pattern, const BuildGridItemCallback& buildCb)
 {
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto* context = pattern->GetContext();
     CHECK_NULL_VOID(context);
     context->AddPredictTask([weak = AceType::WeakClaim(AceType::RawPtr(pattern)), buildCb](int64_t deadline, bool _) {
         ACE_SCOPED_TRACE("Grid preload items");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        const auto& items = pattern->GetPreloadItemList();
+        const auto items = pattern->MovePreloadItemList();
         if (items.empty()) {
             return;
         }
         auto it = items.begin();
-        if (pattern->IsPredictOutOfRange(*it)) {
+        if (pattern->IsPredictOutOfCacheRange(it->idx)) {
             return;
         }
         bool needMarkDirty = false;
@@ -87,15 +85,19 @@ void GridLayoutUtils::PreloadGridItemsHelper(const RefPtr<GridPattern>& pattern,
             if (GetSysTimestamp() > deadline) {
                 break;
             }
+            if (it->buildOnly) {
+                host->GetOrCreateChildByIndex(it->idx, false, true);
+                continue;
+            }
             if (buildCb) {
-                needMarkDirty = buildCb(host, *it) || needMarkDirty;
+                needMarkDirty = buildCb(host, it->idx) || needMarkDirty;
             }
         }
         if (needMarkDirty) {
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
         if (it != items.end() && !needMarkDirty) {
-            pattern->SetPreloadItemList(std::list<int32_t>(it, items.end()));
+            pattern->SetPreloadItemList(std::list<GridPreloadItem>(it, items.end()));
             PreloadGridItemsHelper(pattern, buildCb);
         } else {
             pattern->SetPreloadItemList({});

@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
+#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 
-#ifdef USE_GRAPHIC_TEXT_GINE
 
 #define UPDATE_SPAN_FONT_STYLE_ITEM(item, name, value) (item)->fontStyle->Update##name(value)
 
@@ -40,7 +40,7 @@ RefPtr<SpanItem> SpanModelNG::CreateSpanItem(ArkUI_SpanItem* item)
         return placeholder;
     }
     auto spanItem = AceType::MakeRefPtr<SpanItem>();
-    spanItem->content = item->content;
+    spanItem->content = UtfUtils::Str8DebugToStr16(item->content);
     auto* textStyle = reinterpret_cast<RSTextStyle*>(item->textStyle);
     if (!textStyle) {
         return spanItem;
@@ -147,6 +147,5 @@ ParagraphStyle SpanModelNG::CreateParagraphStyle(ArkUI_StyledString* styledStrin
         .textOverflow = typoStyle->ellipsis == ELLIPSIS ? TextOverflow::ELLIPSIS : TextOverflow::CLIP };
     return style;
 }
-#endif
 
 } // namespace OHOS::Ace::NG

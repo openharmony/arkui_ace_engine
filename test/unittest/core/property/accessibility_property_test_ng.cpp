@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -39,6 +40,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const InspectorFilter filter;
 const size_t ARRAY_SIZE = 1;
+const OffsetF OFFSETF { 1.0, 1.0 };
 } // namespace
 
 class MockPattern : public Pattern {
@@ -443,7 +445,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest010, TestSize.Lev
     NG::PointF hoverPoint(0, 0);
     auto result = accessibilityProperty.CreateNodeSearchInfo(root, hoverPoint, ancestorGroupFlag);
     EXPECT_TRUE(root->IsRootNode());
-    
+
     auto subNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     root->AddChild(subNode);
@@ -578,7 +580,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest013, TestSize.Lev
     auto root = FrameNode::CreateFrameNode(
         V2::BUTTON_ETS_TAG, 15, AceType::MakeRefPtr<Pattern>(), true);
     std::unique_ptr<JsonValue> info = JsonUtil::Create();
-    
+
     auto result = accessibilityProperty.IsAccessibilityFocusableDebug(root, info);
     EXPECT_EQ(result, false);
 
@@ -630,17 +632,17 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest014, TestSize.Lev
     EXPECT_EQ(result, true);
 
 
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     bool isEnableBak = eventHub->IsEnabled();
     eventHub->SetEnabledInternal(false);
     result = accessibilityProperty->IsAccessibilityFocusable(frameNode);
     EXPECT_EQ(result, true);
     eventHub->SetEnabledInternal(isEnableBak);
-    
+
     auto gestureEventHubBak = eventHub->GetGestureEventHub();
     auto gestureEventHubNew = eventHub->GetOrCreateGestureEventHub();
     EXPECT_TRUE(gestureEventHubNew != nullptr);
-    
+
 
     result = accessibilityProperty->IsAccessibilityFocusable(frameNode);
     EXPECT_EQ(result, true);
@@ -842,16 +844,16 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest027, TestSize.Lev
     WeakPtr<FrameNode> hostBak = accessibilityProperty.host_;
     accessibilityProperty.SetHost(nullptr);
     std::string text = "";
-    accessibilityProperty.GetGroupTextRecursive(false, text);
+    accessibilityProperty.GetGroupTextRecursive(false, text, false);
     EXPECT_EQ(text, "");
 
     accessibilityProperty.SetHost(hostBak);
-    accessibilityProperty.GetGroupTextRecursive(false, text);
+    accessibilityProperty.GetGroupTextRecursive(false, text, false);
     EXPECT_EQ(text, "");
 
     std::string levelBak = accessibilityProperty.GetAccessibilityLevel();
     accessibilityProperty.SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
-    accessibilityProperty.GetGroupTextRecursive(false, text);
+    accessibilityProperty.GetGroupTextRecursive(false, text, false);
     EXPECT_EQ(text, "");
     size_t found = text.find(',');
     EXPECT_FALSE(found != std::string::npos);
@@ -860,14 +862,14 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest027, TestSize.Lev
     text = "";
     levelBak = accessibilityProperty.GetAccessibilityLevel();
     accessibilityProperty.SetAccessibilityLevel(AccessibilityProperty::Level::NO_HIDE_DESCENDANTS);
-    accessibilityProperty.GetGroupTextRecursive(false, text);
+    accessibilityProperty.GetGroupTextRecursive(false, text, false);
     EXPECT_EQ(text, "");
     accessibilityProperty.SetAccessibilityLevel(levelBak);
 
     text = "";
     levelBak = accessibilityProperty.GetAccessibilityLevel();
     accessibilityProperty.SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
-    accessibilityProperty.GetGroupTextRecursive(false, text);
+    accessibilityProperty.GetGroupTextRecursive(false, text, false);
     EXPECT_EQ(text, "");
     accessibilityProperty.SetAccessibilityLevel(levelBak);
 
@@ -876,7 +878,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest027, TestSize.Lev
     bool isAccessibilityGroup = accessibilityProperty.IsAccessibilityGroup();
     accessibilityProperty.SetAccessibilityLevel(AccessibilityProperty::Level::AUTO);
     accessibilityProperty.SetAccessibilityGroup(true);
-    accessibilityProperty.GetGroupTextRecursive(true, text);
+    accessibilityProperty.GetGroupTextRecursive(true, text, false);
     found = text.find(',');
     EXPECT_FALSE(found != std::string::npos);
     accessibilityProperty.SetAccessibilityLevel(levelBak);
@@ -923,7 +925,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest029, TestSize.Lev
     NG::PointF hoverPoint(0, 0);
     auto result = accessibilityProperty.CreateNodeSearchInfo(root, hoverPoint, ancestorGroupFlag);
     EXPECT_TRUE(root->IsRootNode());
-    
+
     auto subNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     root->AddChild(subNode);
@@ -966,7 +968,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest030, TestSize.Lev
     bool ancestorGroupFlag = false;
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, 14, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-  
+
     auto accessibilityPropertyNew = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     EXPECT_NE(accessibilityPropertyNew, nullptr);
     auto levelBak = accessibilityPropertyNew->GetAccessibilityLevel();
@@ -994,7 +996,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest030, TestSize.Lev
     auto accessibilityProperty2 = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     EXPECT_EQ(accessibilityProperty2, nullptr);
 
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(false);
     EXPECT_FALSE(eventHub->IsEnabled());
     result = accessibilityProperty.GetSearchStrategy(frameNode, ancestorGroupFlag);
@@ -1056,5 +1058,206 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest032, TestSize.Lev
     recursiveParam.ancestorGroupFlag = true;
     auto result = accessibilityProperty.ProcessHoverTestRecursive(hoverPoint, root, path, debugInfo, recursiveParam);
     EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest033
+ * @tc.desc: IsAccessibilityCompInResponseRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest033, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    RectF rect1 = RectF(0.0f, 0.0f, 100.0f, 100.0f);
+    RectF rect2 = RectF(-10.0f, -10.0f, 100.0f, 100.0f);
+    RectF origRect1 = RectF(-10.0f, 0.0f, 100.0f, 100.0f);
+    RectF origRect2 = RectF(0.0f, -10.0f, 100.0f, 100.0f);
+    RectF origRect3 = RectF(0.0f, 0.0f, 200.0f, 100.0f);
+    RectF origRect4 = RectF(0.0f, 0.0f, 100.0f, 200.0f);
+    RectF origRect5 = RectF(0.0f, 0.0f, 50.0f, 50.0f);
+    RectF origRect6 = RectF(0.0f, 0.0f, 50.0f, 50.0f);
+    auto result = accessibilityProperty.IsAccessibilityCompInResponseRegion(rect1, origRect1);
+    EXPECT_EQ(result, false);
+
+    auto result1 = accessibilityProperty.IsAccessibilityCompInResponseRegion(rect1, origRect2);
+    EXPECT_EQ(result1, false);
+
+    auto result2 = accessibilityProperty.IsAccessibilityCompInResponseRegion(rect1, origRect3);
+    EXPECT_EQ(result2, false);
+
+    auto result3 = accessibilityProperty.IsAccessibilityCompInResponseRegion(rect1, origRect4);
+    EXPECT_EQ(result3, false);
+
+    auto result4 = accessibilityProperty.IsAccessibilityCompInResponseRegion(rect1, origRect5);
+    EXPECT_EQ(result4, true);
+
+    auto result5 = accessibilityProperty.IsAccessibilityCompInResponseRegion(rect2, origRect6);
+    EXPECT_EQ(result5, true);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest034
+ * @tc.desc: IsMatchAccessibilityResponseRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest034, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    auto host = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    host->isActive_ = true;
+    DimensionRect responseRect(Dimension(-1), Dimension(-1), DimensionOffset(OFFSETF));
+    std::vector<DimensionRect> responseRegion;
+    responseRegion.push_back(responseRect);
+    auto gestureEventHub = host->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    gestureEventHub->SetResponseRegion(responseRegion);
+    auto paintRect = host->renderContext_->GetPaintRectWithoutTransform();
+    auto responseRegionList = host->GetResponseRegionList(paintRect, 2);
+    EXPECT_FALSE(responseRegionList.size() != 1);
+
+    auto rect = responseRegionList.back();
+    EXPECT_FALSE(rect == paintRect);
+
+    EXPECT_FALSE(!accessibilityProperty.IsAccessibilityCompInResponseRegion(rect, paintRect));
+
+    WeakPtr<FrameNode> hostBak = host;
+    accessibilityProperty.SetHost(hostBak);
+    auto result = accessibilityProperty.IsMatchAccessibilityResponseRegion(false);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest035
+ * @tc.desc: IsMatchAccessibilityResponseRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest035, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    auto host = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    host->isActive_ = true;
+    auto paintRect = host->GetTransformRectRelativeToWindow();
+    DimensionRect responseRect(Dimension(-1), Dimension(-1), DimensionOffset(OFFSETF));
+    std::vector<DimensionRect> responseRegion;
+    responseRegion.push_back(responseRect);
+    auto gestureEventHub = host->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    gestureEventHub->SetResponseRegion(responseRegion);
+
+    auto responseRegionList = host->GetResponseRegionList(paintRect, 2);
+    EXPECT_FALSE(responseRegionList.size() != 1);
+
+    auto rect = responseRegionList.back();
+    EXPECT_FALSE(rect == paintRect);
+
+    EXPECT_FALSE(!accessibilityProperty.IsAccessibilityCompInResponseRegion(rect, paintRect));
+
+    WeakPtr<FrameNode> hostBak = host;
+    accessibilityProperty.SetHost(hostBak);
+    auto result = accessibilityProperty.IsMatchAccessibilityResponseRegion(false);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest036
+ * @tc.desc: GetAccessibilityResponseRegionRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest036, TestSize.Level1)
+{
+    NG::RectT<int32_t> rectInt = RectT<int32_t>(0, 0, 0, 0);
+    AccessibilityProperty accessibilityProperty;
+    auto host = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    host->isActive_ = true;
+    WeakPtr<FrameNode> hostBak = host;
+    accessibilityProperty.SetHost(hostBak);
+
+    auto result = accessibilityProperty.GetAccessibilityResponseRegionRect(false);
+    EXPECT_EQ(result, rectInt);
+
+    auto result1 = accessibilityProperty.GetAccessibilityResponseRegionRect(true);
+    EXPECT_EQ(result1, rectInt);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest037
+ * @tc.desc: AccessibilityRole
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest037, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    AccessibilityProperty accessibilityProperty;
+    ViewAbstractModelNG viewAbstractModelNG;
+    const std::string role = "";
+    viewAbstractModelNG.SetAccessibilityRole(role, true);
+    EXPECT_EQ(accessibilityProperty.GetAccessibilityCustomRole(), "");
+    accessibilityProperty.SetAccessibilityCustomRole(role);
+    EXPECT_EQ(accessibilityProperty.GetAccessibilityCustomRole(), role);
+    accessibilityProperty.ResetAccessibilityCustomRole();
+    EXPECT_EQ(accessibilityProperty.GetAccessibilityCustomRole(), "");
+
+    const std::string customrole = "IMAGE";
+    viewAbstractModelNG.SetAccessibilityRole(customrole, false);
+    EXPECT_EQ(accessibilityProperty.GetAccessibilityCustomRole(), customrole);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest038
+ * @tc.desc: OnAccessibilityFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest038, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    ViewAbstractModelNG viewAbstractModelNG;
+    viewAbstractModelNG.ResetOnAccessibilityFocus();
+    EXPECT_EQ(accessibilityProperty.onUserAccessibilityFocusCallbackImpl_, nullptr);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest039
+ * @tc.desc: SetAccessibilityNextFocusInspectorKey and GetAccessibilityNextFocusInspectorKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest039, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    const std::string nextFocusId = "nextId";
+    accessibilityProperty.SetAccessibilityNextFocusInspectorKey(nextFocusId);
+    EXPECT_EQ(accessibilityProperty.GetAccessibilityNextFocusInspectorKey(), nextFocusId);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest040
+ * @tc.desc: SetAccessibilitySamePage, HasAccessibilitySamePage and GetAccessibilitySamePage
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest040, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    const std::string pageMode = "FULL_SILENT";
+    accessibilityProperty.SetAccessibilitySamePage(pageMode);
+    EXPECT_TRUE(accessibilityProperty.HasAccessibilitySamePage());
+    EXPECT_EQ(accessibilityProperty.GetAccessibilitySamePage(), pageMode);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest041
+ * @tc.desc: SetAccessibilitySamePage, HasAccessibilitySamePage and IsAccessibilityTextPreferred
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest041, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    const std::string pageMode = "FULL_SILENT";
+    accessibilityProperty.SetAccessibilitySamePage(pageMode);
+    EXPECT_TRUE(accessibilityProperty.HasAccessibilitySamePage());
+    accessibilityProperty.SetAccessibilityTextPreferred(true);
+    EXPECT_TRUE(accessibilityProperty.IsAccessibilityTextPreferred());
+    accessibilityProperty.SetAccessibilityTextPreferred(false);
+    EXPECT_FALSE(accessibilityProperty.IsAccessibilityTextPreferred());
 }
 } // namespace OHOS::Ace::NG

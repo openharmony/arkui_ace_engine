@@ -141,28 +141,29 @@ public:
         typeUpdateWidth_ = typeUpdateWidth;
     }
     void GetControlImageSize(Dimension& width, Dimension& height);
-    void OnWindowFocused() override
-    {
-        WindowFocus(true);
-    }
-
-    void OnWindowUnfocused() override
-    {
-        WindowFocus(false);
-    }
 
     bool GetShowSideBar() const
     {
         return showSideBar_;
     }
 
+    void SetImageInfo(ImageSourceInfo imageInfo)
+    {
+        imageInfo_ = imageInfo;
+    }
+
+    bool GetIsInDividerDrag() const
+    {
+        return isInDividerDrag_;
+    }
+
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+
 private:
-    void WindowFocus(bool isFocus);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
-    void OnColorConfigurationUpdate() override;
     void UpdateAnimDir();
     void DoAnimation();
     void CreateAnimation();
@@ -178,6 +179,7 @@ private:
     void HandleDragStart();
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
+    void FireSideBarWidthChangeEvent();
     void HandlePanEventEnd();
     void OnUpdateShowSideBar(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty);
     void OnUpdateShowControlButton(
@@ -201,10 +203,24 @@ private:
     void UpdateDividerShadow() const;
     void SetSideBarActive(bool isActive, bool onlyJsActive) const;
     void OnLanguageConfigurationUpdate() override;
-    void SetSideBarMask(bool isWindowFocus) const;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void RegisterElementInfoCallBack(const RefPtr<FrameNode>& buttonNode);
     void SetAccessibilityEvent();
+    void InitImageErrorCallback(const RefPtr<SideBarTheme>& sideBarTheme, const RefPtr<FrameNode>& imgNode);
+    void SetMouseStyle(MouseFormat format);
+    void UpdateSideBarToolBarManager(bool isShowDivider, float width);
+    void UpdateSideBarColorToolBarManager(const Color& backgroudColor);
+    void UpdateSideBarDividerToolBarManager(float dividerWidth);
+    void UpdateSideBarStatus();
+
+    void InitToolBarManager()
+    {
+        if (!toolbarManager_) {
+            auto pipeline = GetHost()->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            toolbarManager_ = pipeline->GetToolbarManager();
+        }
+    }
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<InputEvent> dividerMouseEvent_;
@@ -215,6 +231,7 @@ private:
     RefPtr<CurveAnimation<float>> rightToLeftAnimation_;
     RefPtr<CurveAnimation<float>> leftToRightAnimation_;
     RefPtr<PanEvent> dragEvent_;
+    RefPtr<ToolbarManager> toolbarManager_;
 
     float currentOffset_ = 0.0f;
     float realDividerWidth_ = 0.0f;
@@ -231,7 +248,7 @@ private:
     bool isRightToLeft_ = false;
     bool isInDividerDrag_ = false;
     bool isDividerDraggable_ = true;
-    bool isWindowFocus_ = true;
+    bool userSetShowSideBar_ = true;
 
     Dimension realSideBarWidth_ = -1.0_vp;
     Dimension preSidebarWidth_;

@@ -15,20 +15,8 @@
 
 #include "core/components_ng/pattern/panel/sliding_panel_model_ng.h"
 
-#include "base/geometry/dimension.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
-#include "core/components_ng/pattern/panel/drag_bar_pattern.h"
-#include "core/components_ng/pattern/panel/sliding_panel_node.h"
-#include "core/components_ng/pattern/panel/sliding_panel_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -188,7 +176,7 @@ void SlidingPanelModelNG::SetOnSizeChange(ChangeEvent&& changeEvent)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<SlidingPanelEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SlidingPanelEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSizeChange(std::move(changeEvent));
 }
@@ -197,7 +185,7 @@ void SlidingPanelModelNG::SetOnHeightChange(HeightChangeEvent&& onHeightChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<SlidingPanelEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SlidingPanelEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnHeightChange(std::move(onHeightChange));
 }
@@ -226,7 +214,7 @@ void SlidingPanelModelNG::SetModeChangeEvent(ChangeEvent&& modeChangeEvent)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<SlidingPanelEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SlidingPanelEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetModeChangeEvent(std::move(modeChangeEvent));
 }

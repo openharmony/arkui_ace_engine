@@ -24,28 +24,21 @@
 
 namespace OHOS::Ace {
 
-std::unique_ptr<ShapeAbstractModel> ShapeAbstractModel::instance_ = nullptr;
-std::mutex ShapeAbstractModel::mutex_;
-
 ShapeAbstractModel* ShapeAbstractModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::ShapeAbstractModelNG());
+    static NG::ShapeAbstractModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::ShapeAbstractModelNG());
-            } else {
-                instance_.reset(new Framework::ShapeAbstractModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::ShapeAbstractModelNG instance;
+        return &instance;
+    } else {
+        static Framework::ShapeAbstractModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
-
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
@@ -468,7 +461,7 @@ void JSShapeAbstract::SetForegroundColor(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetForegroundColor(Color::BLACK);
         return;
     }
-    ShapeAbstractModel::GetInstance()->SetFill(foregroundColor);
+    ShapeAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
     ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
 }
 } // namespace OHOS::Ace::Framework

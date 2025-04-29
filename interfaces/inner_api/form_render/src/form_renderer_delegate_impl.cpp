@@ -97,14 +97,39 @@ int32_t FormRendererDelegateImpl::OnFormLinkInfoUpdate(const std::vector<std::st
     return ERR_OK;
 }
 
-int32_t FormRendererDelegateImpl::OnGetRectRelativeToWindow(int32_t &top, int32_t &left)
+int32_t FormRendererDelegateImpl::OnGetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo)
 {
     HILOG_DEBUG("%{public}s called.", __func__);
     if (!getRectRelativeToWindowHandler_) {
         HILOG_ERROR("getRectRelativeToWindowHandler_ is null");
         return ERR_INVALID_DATA;
     }
-    getRectRelativeToWindowHandler_(top, left);
+    getRectRelativeToWindowHandler_(parentRectInfo);
+    return ERR_OK;
+}
+
+int32_t FormRendererDelegateImpl::OnCheckManagerDelegate(bool &checkFlag)
+{
+    if (!checkManagerDelegate_) {
+        HILOG_ERROR("checkManagerDelegate_ is null");
+        return ERR_INVALID_DATA;
+    }
+    checkManagerDelegate_(checkFlag);
+    return ERR_OK;
+}
+
+int32_t FormRendererDelegateImpl::OnUpdateFormDone(const int64_t formId)
+{
+    if (formId < 0) {
+        HILOG_ERROR("invalid formId");
+        return ERR_INVALID_DATA;
+    }
+
+    if (!updateFormEventHandler_) {
+        HILOG_ERROR("updateFormEventHandler_ is null");
+        return ERR_INVALID_DATA;
+    }
+    updateFormEventHandler_(formId);
     return ERR_OK;
 }
 
@@ -117,6 +142,7 @@ void FormRendererDelegateImpl::SetSurfaceCreateEventHandler(
 
 void FormRendererDelegateImpl::SetActionEventHandler(std::function<void(const std::string&)>&& listener)
 {
+    HILOG_INFO("EventHandle - SetActionEventHandler");
     actionEventHandler_ = std::move(listener);
 }
 
@@ -143,9 +169,20 @@ void FormRendererDelegateImpl::SetFormLinkInfoUpdateHandler(
     formLinkInfoUpdateHandler_ = std::move(listener);
 }
 
-void FormRendererDelegateImpl::SetGetRectRelativeToWindowHandler(std::function<void(int32_t&, int32_t&)>&& listener)
+void FormRendererDelegateImpl::SetGetRectRelativeToWindowHandler(
+    std::function<void(AccessibilityParentRectInfo& parentRectInfo)>&& listener)
 {
     getRectRelativeToWindowHandler_ = std::move(listener);
+}
+
+void FormRendererDelegateImpl::SetCheckManagerDelegate(std::function<void(bool&)>&& listener)
+{
+    checkManagerDelegate_ = std::move(listener);
+}
+
+void FormRendererDelegateImpl::SetUpdateFormEventHandler(std::function<void(const int64_t)>&& listener)
+{
+    updateFormEventHandler_ = std::move(listener);
 }
 } // namespace Ace
 } // namespace OHOS

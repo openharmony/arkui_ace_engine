@@ -15,8 +15,6 @@
 
 #include "adapter/ohos/osal/system_bar_style_ohos.h"
 
-#include "core/components/common/properties/color.h"
-#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Rosen {
@@ -56,6 +54,22 @@ RefPtr<SystemBarStyle> SystemBarStyle::CreateStyleFromJsObj(void* env, void* val
         reinterpret_cast<napi_env>(env), reinterpret_cast<napi_value>(value),
         style->properties_, style->propertyFlags_);
     TAG_LOGD(AceLogTag::ACE_NAVIGATION, "style from JsObj, color: %{public}s, flag: %{public}s",
+        GetStatusBarContentColor(style->properties_).c_str(),
+        GetStatusBarContentColorFlag(style->propertyFlags_).c_str());
+    return style;
+}
+
+RefPtr<SystemBarStyle> SystemBarStyle::CreateStyleFromColor(const uint32_t colorValue)
+{
+    auto style = AceType::MakeRefPtr<SystemBarStyleOhos>();
+    CHECK_NULL_RETURN(style, nullptr);
+    Rosen::SystemBarPropertyFlag flag;
+    flag.contentColorFlag = true;
+    style->propertyFlags_.emplace(Rosen::WindowType::WINDOW_TYPE_STATUS_BAR, flag);
+    Rosen::SystemBarProperty property;
+    property.contentColor_ = colorValue;
+    style->properties_.emplace(Rosen::WindowType::WINDOW_TYPE_STATUS_BAR, property);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "style from Color, color: %{public}s, flag: %{public}s",
         GetStatusBarContentColor(style->properties_).c_str(),
         GetStatusBarContentColorFlag(style->propertyFlags_).c_str());
     return style;

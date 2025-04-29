@@ -298,15 +298,15 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest004, TestSize.Level1)
     pickerPattern->SetDate(json->ToString());
     auto yearTextNode = calendarPickerModel.GetYearNode(AceType::RawPtr(frameNode));
     auto yearTextLayoutProperty = yearTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(yearTextLayoutProperty->GetContentValue(), "2000");
+    EXPECT_EQ(yearTextLayoutProperty->GetContentValue(), u"2000");
 
     auto monthTextNode = calendarPickerModel.GetMonthNode(AceType::RawPtr(frameNode));
     auto monthTextLayoutProperty = monthTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(monthTextLayoutProperty->GetContentValue(), "02");
+    EXPECT_EQ(monthTextLayoutProperty->GetContentValue(), u"02");
 
     auto dayTextNode = calendarPickerModel.GetDayNode(AceType::RawPtr(frameNode));
     auto dayTextLayoutProperty = dayTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(dayTextLayoutProperty->GetContentValue(), "29");
+    EXPECT_EQ(dayTextLayoutProperty->GetContentValue(), u"29");
 }
 
 /**
@@ -342,15 +342,15 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest005, TestSize.Level1)
 
     auto yearTextNode = calendarPickerModel.GetYearNode(AceType::RawPtr(frameNode));
     auto yearTextLayoutProperty = yearTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(yearTextLayoutProperty->GetContentValue(), "2000");
+    EXPECT_EQ(yearTextLayoutProperty->GetContentValue(), u"2000");
 
     auto monthTextNode = calendarPickerModel.GetMonthNode(AceType::RawPtr(frameNode));
     auto monthTextLayoutProperty = monthTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(monthTextLayoutProperty->GetContentValue(), "02");
+    EXPECT_EQ(monthTextLayoutProperty->GetContentValue(), u"02");
 
     auto dayTextNode = calendarPickerModel.GetDayNode(AceType::RawPtr(frameNode));
     auto dayTextLayoutProperty = dayTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(dayTextLayoutProperty->GetContentValue(), "29");
+    EXPECT_EQ(dayTextLayoutProperty->GetContentValue(), u"29");
 }
 
 /**
@@ -386,15 +386,15 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerModelNGTest006, TestSize.Level1)
 
     auto yearTextNode = calendarPickerModel.GetYearNode(AceType::RawPtr(frameNode));
     auto yearTextLayoutProperty = yearTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(yearTextLayoutProperty->GetContentValue(), "2000");
+    EXPECT_EQ(yearTextLayoutProperty->GetContentValue(), u"2000");
 
     auto monthTextNode = calendarPickerModel.GetMonthNode(AceType::RawPtr(frameNode));
     auto monthTextLayoutProperty = monthTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(monthTextLayoutProperty->GetContentValue(), "02");
+    EXPECT_EQ(monthTextLayoutProperty->GetContentValue(), u"02");
 
     auto dayTextNode = calendarPickerModel.GetDayNode(AceType::RawPtr(frameNode));
     auto dayTextLayoutProperty = dayTextNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(dayTextLayoutProperty->GetContentValue(), "29");
+    EXPECT_EQ(dayTextLayoutProperty->GetContentValue(), u"29");
 }
 
 /**
@@ -1537,9 +1537,11 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest036, TestSize.Level1)
     auto pickerPattern = AceType::MakeRefPtr<CalendarPickerPattern>();
 
     const std::string info = " ";
-    pickerPattern->GetEntryDateInfo();
+    auto oldInfo = pickerPattern->GetEntryDateInfo();
     pickerPattern->SetDate(info);
     pickerPattern->FlushTextStyle();
+    auto newInfo = pickerPattern->GetEntryDateInfo();
+    EXPECT_EQ(oldInfo, newInfo);
 }
 
 /**
@@ -1977,6 +1979,178 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest052, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalendarPickerPatternTest053
+ * @tc.desc: Test for SetStartDateWithNode and GetStartDateWithNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest053, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    ASSERT_NE(element, nullptr);
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    uint32_t startYear = 2024;
+    uint32_t startMonth = 1;
+    uint32_t startDay = 8;
+    CalendarPickerModelNG::SetStartDateWithNode(Referenced::RawPtr(frameNode), startYear, startMonth, startDay);
+    auto startPickDate = CalendarPickerModelNG::GetStartDateWithNode(Referenced::RawPtr(frameNode));
+    EXPECT_EQ(startPickDate.GetYear(), startYear);
+    EXPECT_EQ(startPickDate.GetMonth(), startMonth);
+    EXPECT_EQ(startPickDate.GetDay(), startDay);
+   
+    startDay = 40;
+    CalendarPickerModelNG::SetStartDateWithNode(Referenced::RawPtr(frameNode), startYear, startMonth, startDay);
+    startPickDate = CalendarPickerModelNG::GetStartDateWithNode(Referenced::RawPtr(frameNode));
+    EXPECT_EQ(startPickDate.GetYear(), 0);
+    EXPECT_EQ(startPickDate.GetMonth(), 0);
+    EXPECT_EQ(startPickDate.GetDay(), 0);
+
+    startDay = -1;
+    CalendarPickerModelNG::SetStartDateWithNode(Referenced::RawPtr(frameNode), startYear, startMonth, startDay);
+    startPickDate = CalendarPickerModelNG::GetStartDateWithNode(Referenced::RawPtr(frameNode));
+    EXPECT_EQ(startPickDate.GetYear(), 0);
+    EXPECT_EQ(startPickDate.GetMonth(), 0);
+    EXPECT_EQ(startPickDate.GetDay(), 0);
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest054
+ * @tc.desc: Test for SetEndDateWithNode and GetEndDateWithNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest054, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    ASSERT_NE(element, nullptr);
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    uint32_t startYear = 2024;
+    uint32_t startMonth = 1;
+    uint32_t startDay = 8;
+    CalendarPickerModelNG::SetStartDateWithNode(Referenced::RawPtr(frameNode), startYear, startMonth, startDay);
+    auto startPickDate = CalendarPickerModelNG::GetStartDateWithNode(Referenced::RawPtr(frameNode));
+    EXPECT_EQ(startPickDate.GetYear(), startYear);
+    EXPECT_EQ(startPickDate.GetMonth(), startMonth);
+    EXPECT_EQ(startPickDate.GetDay(), startDay);
+   
+    uint32_t endYear = 2024;
+    uint32_t endMonth = 1;
+    uint32_t endDay = 7;
+    CalendarPickerModelNG::SetEndDateWithNode(Referenced::RawPtr(frameNode), endYear, endMonth, endDay);
+    auto endPickDate = CalendarPickerModelNG::GetEndDateWithNode(Referenced::RawPtr(frameNode));
+    EXPECT_EQ(endPickDate.GetYear(), 0);
+    EXPECT_EQ(endPickDate.GetMonth(), 0);
+    EXPECT_EQ(endPickDate.GetDay(), 0);
+    
+    endDay = 9;
+    CalendarPickerModelNG::SetEndDateWithNode(Referenced::RawPtr(frameNode), endYear, endMonth, endDay);
+    endPickDate = CalendarPickerModelNG::GetEndDateWithNode(Referenced::RawPtr(frameNode));
+    EXPECT_EQ(endPickDate.GetYear(), endYear);
+    EXPECT_EQ(endPickDate.GetMonth(), endMonth);
+    EXPECT_EQ(endPickDate.GetDay(), endDay);
+
+    endDay = 40;
+    CalendarPickerModelNG::SetEndDateWithNode(Referenced::RawPtr(frameNode), endYear, endMonth, endDay);
+    endPickDate = CalendarPickerModelNG::GetEndDateWithNode(Referenced::RawPtr(frameNode));
+    EXPECT_EQ(endPickDate.GetYear(), 0);
+    EXPECT_EQ(endPickDate.GetMonth(), 0);
+    EXPECT_EQ(endPickDate.GetDay(), 0);
+
+    endDay = -1;
+    CalendarPickerModelNG::SetEndDateWithNode(Referenced::RawPtr(frameNode), endYear, endMonth, endDay);
+    endPickDate = CalendarPickerModelNG::GetEndDateWithNode(Referenced::RawPtr(frameNode));
+    EXPECT_EQ(endPickDate.GetYear(), 0);
+    EXPECT_EQ(endPickDate.GetMonth(), 0);
+    EXPECT_EQ(endPickDate.GetDay(), 0);
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest055
+ * @tc.desc: Test for SetMarkToday and GetMarkToday
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest055, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create calendar frameNode.
+     */
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    ASSERT_NE(element, nullptr);
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    /**
+     * @tc.steps: step2. call SetMarkToday.
+     * @tc.desc: set markToday.
+     * @tc.expected: GetMarkToday equals markToday.
+     */
+    bool markToday = true;
+    CalendarPickerModelNG::SetMarkToday(Referenced::RawPtr(frameNode), markToday);
+    EXPECT_EQ(CalendarPickerModelNG::GetMarkToday(Referenced::RawPtr(frameNode)), markToday);
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest056
+ * @tc.desc: Test for SetDisabledDateRange and GetDisabledDateRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest056, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    ASSERT_NE(element, nullptr);
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    /**
+     * @tc.steps: step2. call SetDisabledDateRange.
+     * @tc.desc: set disabledDateRange is empty.
+     * @tc.expected: GetDisabledDateRange is empty.
+     */
+    std::vector<std::pair<PickerDate, PickerDate>> disabledDateRange;
+    CalendarPickerModelNG::SetDisabledDateRange(Referenced::RawPtr(frameNode), disabledDateRange);
+    EXPECT_EQ(CalendarPickerModelNG::GetDisabledDateRange(Referenced::RawPtr(frameNode)), "");
+    /**
+     * @tc.steps: step2. call SetDisabledDateRange.
+     * @tc.desc: set disabledDateRange.
+     * @tc.expected: GetDisabledDateRange equals disabledDateRange.
+     */
+    std::pair<PickerDate, PickerDate> pair;
+    PickerDate defaultDate;
+    pair.first = defaultDate;
+    pair.second = defaultDate;
+    disabledDateRange.emplace_back(pair);
+    CalendarPickerModelNG::SetDisabledDateRange(Referenced::RawPtr(frameNode), disabledDateRange);
+    std::string ret = std::to_string(pair.first.GetYear()) + "-" + std::to_string(pair.first.GetMonth()) + "-" +
+                      std::to_string(pair.first.GetDay()) + "," + std::to_string(pair.second.GetYear()) + "-" +
+                      std::to_string(pair.second.GetMonth()) + "-" + std::to_string(pair.second.GetDay());
+    EXPECT_EQ(CalendarPickerModelNG::GetDisabledDateRange(Referenced::RawPtr(frameNode)), ret);
+}
+
+/**
  * @tc.name: CalendarDialogViewTest001
  * @tc.desc: Calendar Dialog Show Function Test
  * @tc.type: FUNC
@@ -2098,7 +2272,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest004, TestSize.Level1)
     ASSERT_NE(dialogPattern, nullptr);
     auto calendarNode = dialogPattern->GetCalendarFrameNode();
     ASSERT_NE(calendarNode, nullptr);
-    auto eventHub = calendarNode->GetEventHub<CalendarEventHub>();
+    auto eventHub = calendarNode->GetOrCreateEventHub<CalendarEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     std::string info = " ";
@@ -2235,11 +2409,60 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest008, TestSize.Level1)
      */
     auto contentNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
     ASSERT_NE(contentNode, nullptr);
+    RefPtr<CalendarTheme> theme = MockPipelineContext::GetCurrent()->GetTheme<CalendarTheme>();
+    ASSERT_NE(theme, nullptr);
     /**
      * @tc.steps: step5. test dialogNode's RenderContext's BackBlurStyle value.
-     * @tc.expected: equal COMPONENT_ULTRA_THICK.
+     * @tc.expected: equal static_cast<BlurStyle>(theme->GetCalendarPickerDialogBlurStyle()).
      */
-    EXPECT_EQ(contentNode->GetRenderContext()->GetBackBlurStyle()->blurStyle, BlurStyle::COMPONENT_ULTRA_THICK);
+    EXPECT_EQ(contentNode->GetRenderContext()->GetBackBlurStyle()->blurStyle,
+        static_cast<BlurStyle>(theme->GetCalendarPickerDialogBlurStyle()));
+}
+
+/**
+ * @tc.name: CalendarDialogViewTest009
+ * @tc.desc: Show Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. mock PlatformVersion VERSION_ELEVEN.
+     * @tc.expected: mock successfully.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    /**
+     * @tc.steps: step2. create dialogNodeProps.
+     * @tc.expected: the dialogNodeProps created successfully.
+     */
+    CalendarSettingData settingData;
+    DialogProperties properties;
+    properties.alignment = DialogAlignment::BOTTOM;
+    properties.customStyle = true;
+    properties.offset = DimensionOffset(Offset(0, -1.0f));
+    properties.backgroundBlurStyle = static_cast<int32_t>(BlurStyle::REGULAR);
+    auto selectedDate = PickerDate(2000, 1, 1);
+    settingData.selectedDate = selectedDate;
+    settingData.dayRadius = TEST_SETTING_RADIUS;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    /**
+     * @tc.steps: step3. execute CalendarDialogView::Show.
+     * @tc.expected: show successfully.
+     */
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = CalendarDialogView::Show(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    /**
+     * @tc.steps: step4. get dialogNode's grandsonNode.
+     * @tc.expected: getNode successfully.
+     */
+    auto contentNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
+    ASSERT_NE(contentNode, nullptr);
+    /**
+     * @tc.steps: step5. test dialogNode's RenderContext's BackBlurStyle value.
+     * @tc.expected: equal REGULAR.
+     */
+    EXPECT_EQ(contentNode->GetRenderContext()->GetBackBlurStyle()->blurStyle, BlurStyle::REGULAR);
 }
 
 /**
@@ -2256,7 +2479,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerEventHubTest001, TestSize.Level1)
 
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     ASSERT_NE(frameNode, nullptr);
-    auto calendarpickerEventHub = frameNode->GetEventHub<CalendarPickerEventHub>();
+    auto calendarpickerEventHub = frameNode->GetOrCreateEventHub<CalendarPickerEventHub>();
     ASSERT_NE(calendarpickerEventHub, nullptr);
     std::string info = " ";
     calendarpickerEventHub->UpdateInputChangeEvent(info);
@@ -2580,7 +2803,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest008, TestSize.Level1)
     eventHub->ProcessOnKeyEventInternal(keyEventTwo);
     dialogPattern->isFocused_ = true;
     dialogPattern->isCalendarFirstFocused_ = false;
-    dialogPattern->focusAreaID_ = 1;
+    dialogPattern->focusAreaID_ = 2;
     eventHub->ProcessOnKeyEventInternal(keyEventTwo);
     EXPECT_TRUE(dialogPattern->isCalendarFirstFocused_);
 
@@ -2588,14 +2811,14 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest008, TestSize.Level1)
     eventHub->ProcessOnKeyEventInternal(keyEventTwo);
     dialogPattern->isFocused_ = false;
     dialogPattern->isCalendarFirstFocused_ = false;
-    dialogPattern->focusAreaID_ = 1;
+    dialogPattern->focusAreaID_ = 2;
     eventHub->ProcessOnKeyEventInternal(keyEventTwo1);
 
     KeyEvent keyEventTwo2(KeyCode::KEY_TAB, KeyAction::UP);
     eventHub->ProcessOnKeyEventInternal(keyEventTwo);
     dialogPattern->isFocused_ = true;
     dialogPattern->isCalendarFirstFocused_ = true;
-    dialogPattern->focusAreaID_ = 1;
+    dialogPattern->focusAreaID_ = 2;
     eventHub->ProcessOnKeyEventInternal(keyEventTwo2);
 
     KeyEvent keyEventTwo3(KeyCode::KEY_TAB, KeyAction::UP);
@@ -2649,7 +2872,11 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest009, TestSize.Level1)
     auto eventHub = calendarDialogNode->GetOrCreateFocusHub();
     ASSERT_NE(eventHub, nullptr);
 
-    PipelineContext::GetCurrentContext()->isFocusActive_ = true;
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto focusManager = context->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
     eventHub->focusType_ = FocusType::NODE;
     eventHub->focusStyleType_ = FocusStyleType::CUSTOM_REGION;
     eventHub->PaintFocusState();
@@ -2761,13 +2988,13 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest012, TestSize.Level1)
     EXPECT_FALSE(dialogPattern->HandleKeyEvent(keyEventOne));
 
     KeyEvent keyEventLeftOne(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN);
-    dialogPattern->focusAreaID_ = 2;
+    dialogPattern->focusAreaID_ = 3;
     dialogPattern->focusAreaChildID_ = 2;
     dialogPattern->HandleKeyEvent(keyEventLeftOne);
     EXPECT_EQ(dialogPattern->focusAreaChildID_, 0);
 
     KeyEvent keyEventLeftTwo(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN);
-    dialogPattern->focusAreaID_ = 2;
+    dialogPattern->focusAreaID_ = 3;
     dialogPattern->focusAreaChildID_ = 3;
     dialogPattern->HandleKeyEvent(keyEventLeftTwo);
     EXPECT_EQ(dialogPattern->focusAreaChildID_, 2);
@@ -2785,7 +3012,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest012, TestSize.Level1)
     EXPECT_EQ(dialogPattern->focusAreaChildID_, 3);
 
     KeyEvent keyEventEnter(KeyCode::KEY_ENTER, KeyAction::DOWN);
-    dialogPattern->focusAreaID_ = 2;
+    dialogPattern->focusAreaID_ = 3;
     EXPECT_FALSE(dialogPattern->HandleKeyEvent(keyEventEnter));
 
     KeyEvent keyEventCall(KeyCode::KEY_CALL, KeyAction::DOWN);
@@ -3083,8 +3310,8 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest019, TestSize.Level1)
 {
     auto dialogPattern = AceType::MakeRefPtr<CalendarDialogPattern>();
 
-    dialogPattern->OnDirtyLayoutWrapperSwap(nullptr, true, true);
-    dialogPattern->OnDirtyLayoutWrapperSwap(nullptr, true, true);
+    EXPECT_TRUE(dialogPattern->OnDirtyLayoutWrapperSwap(nullptr, true, true));
+    EXPECT_TRUE(dialogPattern->OnDirtyLayoutWrapperSwap(nullptr, true, true));
 }
 
 /**

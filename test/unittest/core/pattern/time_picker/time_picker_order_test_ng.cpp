@@ -79,6 +79,20 @@ const std::string TIME_AMPM = "01";
 const std::string AMPM_TIME = "10";
 const PickerTime TIME_PICKED = PickerTime(14, 9, 10);
 const int32_t MINUTE_PICKED = 9;
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return MockThemeDefault::GetPickerTheme();
+    } else if (type == ButtonTheme::TypeId()) {
+        return AceType::MakeRefPtr<ButtonTheme>();
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 
 class TimePickerOrderTestNg : public testing::Test {
@@ -125,18 +139,11 @@ void TimePickerOrderTestNg::TearDownTestSuite()
 void TimePickerOrderTestNg::SetUp()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-            if (type == IconTheme::TypeId()) {
-                return AceType::MakeRefPtr<IconTheme>();
-            } else if (type == DialogTheme::TypeId()) {
-                return AceType::MakeRefPtr<DialogTheme>();
-            } else if (type == PickerTheme::TypeId()) {
-                return MockThemeDefault::GetPickerTheme();
-            } else {
-                return nullptr;
-            }
-        });
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        return GetTheme(type);
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -195,19 +202,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder001, TestSize.Level1)
     EXPECT_NE(amPmTextNode, nullptr);
     auto amPmTextPattern = amPmTextNode->GetPattern<TextPattern>();
     auto amPmTextLayoutProperty = amPmTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), "PM");
+    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), u"PM");
 
     auto hourTextNode = AceType::DynamicCast<FrameNode>(hourColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(hourTextNode, nullptr);
     auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
     auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), u"08:00:00");
 
     auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(minuteTextNode, nullptr);
     auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
     auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 }
 
 /**
@@ -259,19 +267,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder002, TestSize.Level1)
     EXPECT_NE(amPmTextNode, nullptr);
     auto amPmTextPattern = amPmTextNode->GetPattern<TextPattern>();
     auto amPmTextLayoutProperty = amPmTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 
     auto hourTextNode = AceType::DynamicCast<FrameNode>(hourColumn->GetChildAtIndex(AM_PM_INDEX));
     EXPECT_NE(hourTextNode, nullptr);
     auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
     auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "PM");
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), u"PM");
 
     auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(minuteTextNode, nullptr);
     auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
     auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), u"08:00:00");
 }
 
 /**
@@ -323,19 +332,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder003, TestSize.Level1)
     EXPECT_NE(amPmTextNode, nullptr);
     auto amPmTextPattern = amPmTextNode->GetPattern<TextPattern>();
     auto amPmTextLayoutProperty = amPmTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), "PM");
+    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), u"PM");
 
     auto hourTextNode = AceType::DynamicCast<FrameNode>(hourColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(hourTextNode, nullptr);
     auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
     auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), u"08:00:00");
 
     auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(minuteTextNode, nullptr);
     auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
     auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 }
 
 /**
@@ -387,19 +397,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder004, TestSize.Level1)
     EXPECT_NE(amPmTextNode, nullptr);
     auto amPmTextPattern = amPmTextNode->GetPattern<TextPattern>();
     auto amPmTextLayoutProperty = amPmTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), "PM");
+    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), u"PM");
 
     auto hourTextNode = AceType::DynamicCast<FrameNode>(hourColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(hourTextNode, nullptr);
     auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
     auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), u"08:00:00");
 
     auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(minuteTextNode, nullptr);
     auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
     auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 }
 
 /**
@@ -451,19 +462,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder005, TestSize.Level1)
     EXPECT_NE(amPmTextNode, nullptr);
     auto amPmTextPattern = amPmTextNode->GetPattern<TextPattern>();
     auto amPmTextLayoutProperty = amPmTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 
     auto hourTextNode = AceType::DynamicCast<FrameNode>(hourColumn->GetChildAtIndex(AM_PM_INDEX));
     EXPECT_NE(hourTextNode, nullptr);
     auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
     auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "PM");
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), u"PM");
 
     auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(minuteTextNode, nullptr);
     auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
     auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), u"08:00:00");
 }
 
 /**
@@ -515,19 +527,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder006, TestSize.Level1)
     EXPECT_NE(amPmTextNode, nullptr);
     auto amPmTextPattern = amPmTextNode->GetPattern<TextPattern>();
     auto amPmTextLayoutProperty = amPmTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 
     auto hourTextNode = AceType::DynamicCast<FrameNode>(hourColumn->GetChildAtIndex(AM_PM_INDEX));
     EXPECT_NE(hourTextNode, nullptr);
     auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
     auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "PM");
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), u"PM");
 
     auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(minuteTextNode, nullptr);
     auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
     auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), u"08:00:00");
 }
 
 /**
@@ -579,19 +592,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder007, TestSize.Level1)
     EXPECT_NE(amPmTextNode, nullptr);
     auto amPmTextPattern = amPmTextNode->GetPattern<TextPattern>();
     auto amPmTextLayoutProperty = amPmTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 
     auto hourTextNode = AceType::DynamicCast<FrameNode>(hourColumn->GetChildAtIndex(AM_PM_INDEX));
     EXPECT_NE(hourTextNode, nullptr);
     auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
     auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "PM");
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), u"PM");
 
     auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(minuteTextNode, nullptr);
     auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
     auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), u"08:00:00");
 }
 
 /**
@@ -643,19 +657,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder008, TestSize.Level1)
     EXPECT_NE(amPmTextNode, nullptr);
     auto amPmTextPattern = amPmTextNode->GetPattern<TextPattern>();
     auto amPmTextLayoutProperty = amPmTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 
     auto hourTextNode = AceType::DynamicCast<FrameNode>(hourColumn->GetChildAtIndex(AM_PM_INDEX));
     EXPECT_NE(hourTextNode, nullptr);
     auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
     auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "PM");
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), u"PM");
 
     auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(minuteTextNode, nullptr);
     auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
     auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), u"08:00:00");
 }
 
 /**
@@ -708,19 +723,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder009, TestSize.Level1)
     EXPECT_NE(amPmTextNode, nullptr);
     auto amPmTextPattern = amPmTextNode->GetPattern<TextPattern>();
     auto amPmTextLayoutProperty = amPmTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), "PM");
+    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), u"PM");
 
     auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(minuteTextNode, nullptr);
     auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
     auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 
     auto secondTextNode = AceType::DynamicCast<FrameNode>(secondColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(secondTextNode, nullptr);
     auto secondTextPattern = secondTextNode->GetPattern<TextPattern>();
     auto secondTextLayoutProperty = secondTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), u"08:00:00");
 }
 
 /**
@@ -777,19 +793,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder010, TestSize.Level1)
     EXPECT_NE(amPmTextNode, nullptr);
     auto amPmTextPattern = amPmTextNode->GetPattern<TextPattern>();
     auto amPmTextLayoutProperty = amPmTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), u"08:00:00");
 
     auto hourTextNode = AceType::DynamicCast<FrameNode>(hourColumn->GetChildAtIndex(AM_PM_INDEX));
     EXPECT_NE(hourTextNode, nullptr);
     auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
     auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "PM");
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), u"PM");
 
     auto secondTextNode = AceType::DynamicCast<FrameNode>(secondColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(secondTextNode, nullptr);
     auto secondTextPattern = secondTextNode->GetPattern<TextPattern>();
     auto secondTextLayoutProperty = secondTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 }
 
 /**
@@ -846,19 +863,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder011, TestSize.Level1)
     EXPECT_NE(amPmTextNode, nullptr);
     auto amPmTextPattern = amPmTextNode->GetPattern<TextPattern>();
     auto amPmTextLayoutProperty = amPmTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), "PM");
+    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), u"PM");
 
     auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(minuteTextNode, nullptr);
     auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
     auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 
     auto secondTextNode = AceType::DynamicCast<FrameNode>(secondColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(secondTextNode, nullptr);
     auto secondTextPattern = secondTextNode->GetPattern<TextPattern>();
     auto secondTextLayoutProperty = secondTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), u"08:00:00");
 }
 
 /**
@@ -915,19 +933,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder012, TestSize.Level1)
     EXPECT_NE(amPmTextNode, nullptr);
     auto amPmTextPattern = amPmTextNode->GetPattern<TextPattern>();
     auto amPmTextLayoutProperty = amPmTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), "PM");
+    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), u"PM");
 
     auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(minuteTextNode, nullptr);
     auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
     auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 
     auto secondTextNode = AceType::DynamicCast<FrameNode>(secondColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(secondTextNode, nullptr);
     auto secondTextPattern = secondTextNode->GetPattern<TextPattern>();
     auto secondTextLayoutProperty = secondTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), u"08:00:00");
 }
 
 /**
@@ -984,19 +1003,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder013, TestSize.Level1)
     EXPECT_NE(amPmTextNode, nullptr);
     auto amPmTextPattern = amPmTextNode->GetPattern<TextPattern>();
     auto amPmTextLayoutProperty = amPmTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), u"08:00:00");
 
     auto hourTextNode = AceType::DynamicCast<FrameNode>(hourColumn->GetChildAtIndex(AM_PM_INDEX));
     EXPECT_NE(hourTextNode, nullptr);
     auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
     auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "PM");
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), u"PM");
 
     auto secondTextNode = AceType::DynamicCast<FrameNode>(secondColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(secondTextNode, nullptr);
     auto secondTextPattern = secondTextNode->GetPattern<TextPattern>();
     auto secondTextLayoutProperty = secondTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 }
 
 /**
@@ -1053,19 +1073,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder014, TestSize.Level1)
     EXPECT_NE(amPmTextNode, nullptr);
     auto amPmTextPattern = amPmTextNode->GetPattern<TextPattern>();
     auto amPmTextLayoutProperty = amPmTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), u"08:00:00");
 
     auto hourTextNode = AceType::DynamicCast<FrameNode>(hourColumn->GetChildAtIndex(AM_PM_INDEX));
     EXPECT_NE(hourTextNode, nullptr);
     auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
     auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "PM");
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), u"PM");
 
     auto secondTextNode = AceType::DynamicCast<FrameNode>(secondColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(secondTextNode, nullptr);
     auto secondTextPattern = secondTextNode->GetPattern<TextPattern>();
     auto secondTextLayoutProperty = secondTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 }
 
 /**
@@ -1122,19 +1143,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder015, TestSize.Level1)
     EXPECT_NE(amPmTextNode, nullptr);
     auto amPmTextPattern = amPmTextNode->GetPattern<TextPattern>();
     auto amPmTextLayoutProperty = amPmTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), u"08:00:00");
 
     auto hourTextNode = AceType::DynamicCast<FrameNode>(hourColumn->GetChildAtIndex(AM_PM_INDEX));
     EXPECT_NE(hourTextNode, nullptr);
     auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
     auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "PM");
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), u"PM");
 
     auto secondTextNode = AceType::DynamicCast<FrameNode>(secondColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(secondTextNode, nullptr);
     auto secondTextPattern = secondTextNode->GetPattern<TextPattern>();
     auto secondTextLayoutProperty = secondTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 }
 
 /**
@@ -1191,19 +1213,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder016, TestSize.Level1)
     EXPECT_NE(amPmTextNode, nullptr);
     auto amPmTextPattern = amPmTextNode->GetPattern<TextPattern>();
     auto amPmTextLayoutProperty = amPmTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), u"08:00:00");
 
     auto hourTextNode = AceType::DynamicCast<FrameNode>(hourColumn->GetChildAtIndex(AM_PM_INDEX));
     EXPECT_NE(hourTextNode, nullptr);
     auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
     auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "PM");
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), u"PM");
 
     auto secondTextNode = AceType::DynamicCast<FrameNode>(secondColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(secondTextNode, nullptr);
     auto secondTextPattern = secondTextNode->GetPattern<TextPattern>();
     auto secondTextLayoutProperty = secondTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 }
 
 /**
@@ -1256,19 +1279,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder017, TestSize.Level1)
     EXPECT_NE(amPmTextNode, nullptr);
     auto amPmTextPattern = amPmTextNode->GetPattern<TextPattern>();
     auto amPmTextLayoutProperty = amPmTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), "PM");
+    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), u"PM");
 
     auto hourTextNode = AceType::DynamicCast<FrameNode>(hourColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(hourTextNode, nullptr);
     auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
     auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), u"08:00:00");
 
     auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(minuteTextNode, nullptr);
     auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
     auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 }
 
 /**
@@ -1321,19 +1345,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder018, TestSize.Level1)
     EXPECT_NE(amPmTextNode, nullptr);
     auto amPmTextPattern = amPmTextNode->GetPattern<TextPattern>();
     auto amPmTextLayoutProperty = amPmTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), "PM");
+    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), u"PM");
 
     auto hourTextNode = AceType::DynamicCast<FrameNode>(hourColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(hourTextNode, nullptr);
     auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
     auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 
     auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(minuteTextNode, nullptr);
     auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
     auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), u"08:00:00");
 }
 
 /**
@@ -1388,19 +1413,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder019, TestSize.Level1)
     EXPECT_NE(amPmTextNode, nullptr);
     auto amPmTextPattern = amPmTextNode->GetPattern<TextPattern>();
     auto amPmTextLayoutProperty = amPmTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), "PM");
+    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), u"PM");
 
     auto hourTextNode = AceType::DynamicCast<FrameNode>(hourColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(hourTextNode, nullptr);
     auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
     auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), u"08:00:00");
 
     auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(minuteTextNode, nullptr);
     auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
     auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 }
 
 /**
@@ -1455,19 +1481,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder020, TestSize.Level1)
     EXPECT_NE(amPmTextNode, nullptr);
     auto amPmTextPattern = amPmTextNode->GetPattern<TextPattern>();
     auto amPmTextLayoutProperty = amPmTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), "PM");
+    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), u"PM");
 
     auto hourTextNode = AceType::DynamicCast<FrameNode>(hourColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(hourTextNode, nullptr);
     auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
     auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), u"08:00:00");
 
     auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(minuteTextNode, nullptr);
     auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
     auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 }
 
 /**
@@ -1522,19 +1549,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder021, TestSize.Level1)
     EXPECT_NE(amPmTextNode, nullptr);
     auto amPmTextPattern = amPmTextNode->GetPattern<TextPattern>();
     auto amPmTextLayoutProperty = amPmTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), "PM");
+    EXPECT_EQ(amPmTextLayoutProperty->GetContentValue(), u"PM");
 
     auto hourTextNode = AceType::DynamicCast<FrameNode>(hourColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(hourTextNode, nullptr);
     auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
     auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), u"08:00:00");
 
     auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(minuteTextNode, nullptr);
     auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
     auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 }
 
 /**
@@ -1586,19 +1614,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder022, TestSize.Level1)
     EXPECT_NE(hourTextNode, nullptr);
     auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
     auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), u"08:00:00");
 
     auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(minuteTextNode, nullptr);
     auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
     auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 
     auto secondTextNode = AceType::DynamicCast<FrameNode>(secondColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(secondTextNode, nullptr);
     auto secondTextPattern = secondTextNode->GetPattern<TextPattern>();
     auto secondTextLayoutProperty = secondTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), u"08:00:00");
 }
 
 /**
@@ -1650,19 +1679,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder023, TestSize.Level1)
     EXPECT_NE(hourTextNode, nullptr);
     auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
     auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), u"08:00:00");
 
     auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(minuteTextNode, nullptr);
     auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
     auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 
     auto secondTextNode = AceType::DynamicCast<FrameNode>(secondColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(secondTextNode, nullptr);
     auto secondTextPattern = secondTextNode->GetPattern<TextPattern>();
     auto secondTextLayoutProperty = secondTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), u"08:00:00");
 }
 
 /**
@@ -1714,19 +1744,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder024, TestSize.Level1)
     EXPECT_NE(hourTextNode, nullptr);
     auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
     auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), u"08:00:00");
 
     auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(minuteTextNode, nullptr);
     auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
     auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 
     auto secondTextNode = AceType::DynamicCast<FrameNode>(secondColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(secondTextNode, nullptr);
     auto secondTextPattern = secondTextNode->GetPattern<TextPattern>();
     auto secondTextLayoutProperty = secondTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), u"08:00:00");
 }
 
 /**
@@ -1778,19 +1809,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder025, TestSize.Level1)
     EXPECT_NE(hourTextNode, nullptr);
     auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
     auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), u"08:00:00");
 
     auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(minuteTextNode, nullptr);
     auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
     auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 
     auto secondTextNode = AceType::DynamicCast<FrameNode>(secondColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(secondTextNode, nullptr);
     auto secondTextPattern = secondTextNode->GetPattern<TextPattern>();
     auto secondTextLayoutProperty = secondTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), u"08:00:00");
 }
 
 /**
@@ -1842,19 +1874,20 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder026, TestSize.Level1)
     EXPECT_NE(hourTextNode, nullptr);
     auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
     auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), u"08:00:00");
 
     auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(minuteTextNode, nullptr);
     auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
     auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 
     auto secondTextNode = AceType::DynamicCast<FrameNode>(secondColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(secondTextNode, nullptr);
     auto secondTextPattern = secondTextNode->GetPattern<TextPattern>();
     auto secondTextLayoutProperty = secondTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), u"08:00:00");
 }
 
 /**
@@ -1906,18 +1939,19 @@ HWTEST_F(TimePickerOrderTestNg, TimePickerOrder027, TestSize.Level1)
     EXPECT_NE(hourTextNode, nullptr);
     auto hourTextPattern = hourTextNode->GetPattern<TextPattern>();
     auto hourTextLayoutProperty = hourTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(hourTextLayoutProperty->GetContentValue(), u"08:00:00");
 
     auto minuteTextNode = AceType::DynamicCast<FrameNode>(minuteColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(minuteTextNode, nullptr);
     auto minuteTextPattern = minuteTextNode->GetPattern<TextPattern>();
     auto minuteTextLayoutProperty = minuteTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(), ZERO + std::to_string(MINUTE_PICKED));
+    EXPECT_EQ(minuteTextLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(ZERO + std::to_string(MINUTE_PICKED)));
 
     auto secondTextNode = AceType::DynamicCast<FrameNode>(secondColumn->GetChildAtIndex(CURRENT_INDEX));
     EXPECT_NE(secondTextNode, nullptr);
     auto secondTextPattern = secondTextNode->GetPattern<TextPattern>();
     auto secondTextLayoutProperty = secondTextPattern->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), "08:00:00");
+    EXPECT_EQ(secondTextLayoutProperty->GetContentValue(), u"08:00:00");
 }
 } // namespace OHOS::Ace::NG

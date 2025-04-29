@@ -14,7 +14,8 @@
  */
 
 #include "core/pipeline/pipeline_context.h"
-
+#include <cstdlib>
+#include "base/utils/utils.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_base/include/platform/common/rs_system_properties.h"
@@ -130,7 +131,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
 
 PipelineContext::~PipelineContext()
 {
-    LOG_DESTROY();
+    LOGI("PipelineContext destroyed");
 }
 
 void PipelineContext::FlushPipelineWithoutAnimation()
@@ -327,16 +328,7 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpd
     }
 }
 
-void PipelineContext::SetContainerWindow(bool isShow)
-{
-#ifdef ENABLE_ROSEN_BACKEND
-    if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
-        rsUIDirector_->SetContainerWindow(isShow, density_); // set container window show state to render service
-    }
-#endif
-}
-
-void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
+void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose)
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
         LOGW("Window modal is not container.");
@@ -348,7 +340,7 @@ void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, 
     }
     auto containerModal = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
     if (containerModal) {
-        containerModal->SetTitleButtonHide(hideSplit, hideMaximize, hideMinimize);
+        containerModal->SetTitleButtonHide(hideSplit, hideMaximize, hideMinimize, hideClose);
     }
 }
 
@@ -866,7 +858,7 @@ void PipelineContext::SetupRootElement()
     requestedRenderNode_.Reset();
 }
 
-void PipelineContext::SetupSubRootElement()
+RefPtr<Element> PipelineContext::SetupSubRootElement()
 {
     LOGI("Set up SubRootElement!");
 
@@ -893,7 +885,7 @@ void PipelineContext::SetupSubRootElement()
     if (!rootElement_) {
         LOGE("Set up SubRootElement failed!");
         EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
-        return;
+        return RefPtr<Element>();
     }
     const auto& rootRenderNode = rootElement_->GetRenderNode();
     window_->SetRootRenderNode(rootRenderNode);
@@ -910,7 +902,7 @@ void PipelineContext::SetupSubRootElement()
     cardTransitionController_->RegisterTransitionListener();
     requestedRenderNode_.Reset();
     LOGI("Set up SubRootElement success!");
-    return;
+    return rootElement_;
 }
 
 bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
@@ -1578,11 +1570,13 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 
     std::optional<TouchEvent> lastMoveEvent;
     if (scalePoint.type == TouchType::UP && !touchEvents_.empty()) {
-        for (auto iter = touchEvents_.begin(); iter != touchEvents_.end(); ++iter) {
+        for (auto iter = touchEvents_.begin(); iter != touchEvents_.end();) {
             auto movePoint = (*iter).CreateScalePoint(GetViewScale());
             if (scalePoint.id == movePoint.id) {
                 lastMoveEvent = movePoint;
                 iter = touchEvents_.erase(iter);
+            } else {
+                ++iter;
             }
         }
         if (lastMoveEvent.has_value()) {
@@ -1633,18 +1627,20 @@ void PipelineContext::FlushTouchEvents()
     }
 }
 
-bool PipelineContext::OnKeyEvent(const KeyEvent& event)
+bool PipelineContext::OnKeyEvent(const NonPointerEvent& nonPointerEvent)
 {
     CHECK_RUN_ON(UI);
+    if (nonPointerEvent.eventType != UIInputEventType::KEY) {
+        return false;
+    }
+    const auto& event = static_cast<const KeyEvent&>(nonPointerEvent);
     if (!rootElement_) {
         LOGE("the root element is nullptr");
         EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
         return false;
     }
     rootElement_->HandleSpecifiedKey(event);
-
     SetShortcutKey(event);
-
     pressedKeyCodes = event.pressedCodes;
     isKeyCtrlPressed_ = !pressedKeyCodes.empty() && (pressedKeyCodes.back() == KeyCode::KEY_CTRL_LEFT ||
                                                         pressedKeyCodes.back() == KeyCode::KEY_CTRL_RIGHT);
@@ -1666,17 +1662,62 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     if (event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN && !isTabKeyPressed_) {
         isTabKeyPressed_ = true;
     }
+    CHECK_NULL_RETURN(rootElement_, false);
     auto lastPage = GetLastPage();
+    bool isHandleByTabIndex = false;
     if (lastPage) {
-        if (!eventManager_->DispatchTabIndexEvent(event, rootElement_, lastPage)) {
-            return eventManager_->DispatchKeyEvent(event, rootElement_);
-        }
+        isHandleByTabIndex = rootElement_->HandleFocusByTabIndex(event, lastPage);
     } else {
-        if (!eventManager_->DispatchTabIndexEvent(event, rootElement_, rootElement_)) {
-            return eventManager_->DispatchKeyEvent(event, rootElement_);
-        }
+        isHandleByTabIndex = rootElement_->HandleFocusByTabIndex(event, rootElement_);
     }
-    return true;
+    if (isHandleByTabIndex) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Tab index focus system handled this event");
+        return true;
+    }
+    if (rootElement_->HandleKeyEvent(event)) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Default focus system handled this event");
+        return true;
+    }
+    return false;
+}
+
+constexpr double ANGULAR_VELOCITY_FACTOR = 0.001f;
+constexpr float ANGULAR_VELOCITY_SLOW = 0.07f;
+constexpr float ANGULAR_VELOCITY_MEDIUM = 0.2f;
+constexpr float ANGULAR_VELOCITY_FAST = 0.54f;
+constexpr float DISPLAY_CONTROL_RATIO_VERY_SLOW = 1.19f;
+constexpr float DISPLAY_CONTROL_RATIO_SLOW = 1.87f;
+constexpr float DISPLAY_CONTROL_RATIO_MEDIUM = 1.67f;
+constexpr float DISPLAY_CONTROL_RATIO_FAST = 1.59f;
+
+double GetCrownRotateVP(const CrownEvent& event)
+{
+    double velocity = std::abs(event.angularVelocity * ANGULAR_VELOCITY_FACTOR);
+    double vp = 0.0;
+    if (LessOrEqualCustomPrecision(velocity, ANGULAR_VELOCITY_SLOW, 0.01f)) { // very slow
+        vp = (Dimension(DISPLAY_CONTROL_RATIO_VERY_SLOW, DimensionUnit::VP) * event.degree).ConvertToVp();
+    } else if (LessOrEqualCustomPrecision(velocity, ANGULAR_VELOCITY_MEDIUM, 0.01f)) { // slow
+        vp = (Dimension(DISPLAY_CONTROL_RATIO_SLOW, DimensionUnit::VP) * event.degree).ConvertToVp();
+    } else if (LessOrEqualCustomPrecision(velocity, ANGULAR_VELOCITY_FAST, 0.01f)) { // medium
+        vp = (Dimension(DISPLAY_CONTROL_RATIO_MEDIUM, DimensionUnit::VP) * event.degree).ConvertToVp();
+    } else { // fast
+        vp = (Dimension(DISPLAY_CONTROL_RATIO_FAST, DimensionUnit::VP) * event.degree).ConvertToVp();
+    }
+    return vp;
+}
+
+bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& nonPointerEvent)
+{
+    CHECK_RUN_ON(UI);
+    if (nonPointerEvent.eventType == UIInputEventType::KEY) {
+        return OnKeyEvent(nonPointerEvent);
+    } else if (nonPointerEvent.eventType == UIInputEventType::CROWN) {
+        const auto& crownEvent = static_cast<const CrownEvent&>(nonPointerEvent);
+        RotationEvent rotationEvent;
+        rotationEvent.value = GetCrownRotateVP(crownEvent);
+        return OnRotationEvent(rotationEvent);
+    }
+    return false;
 }
 
 bool PipelineContext::RequestDefaultFocus()
@@ -1946,6 +1987,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         FlushAnimation(GetTimeFromExternalTimer());
         FlushPipelineWithoutAnimation();
         FlushAnimationTasks();
+        window_->FlushLayoutSize(width_, height_);
         hasIdleTasks_ = false;
     } else {
         LOGW("the surface is not ready, waiting");
@@ -2970,7 +3012,7 @@ void PipelineContext::ProcessDragEvent(
                 insertIndex_ = renderList->CalculateInsertIndex(renderList, info, selectedItemSize_);
             }
 
-            if (insertIndex_ == RenderNode::DEFAULT_INDEX) {
+            if (insertIndex_ == static_cast<int32_t>(RenderNode::DEFAULT_INDEX)) {
                 (targetDragDropNode->GetOnDragMove())(event, extraParams->ToString());
                 return;
             }
@@ -3024,7 +3066,7 @@ void PipelineContext::ProcessDragEventEnd(
             insertIndex_ = renderList->CalculateInsertIndex(renderList, info, selectedItemSize_);
         }
 
-        if (insertIndex_ == RenderNode::DEFAULT_INDEX) {
+        if (insertIndex_ == static_cast<int32_t>(RenderNode::DEFAULT_INDEX)) {
             (targetDragDropNode->GetOnDrop())(event, extraParams->ToString());
             SetPreTargetRenderNode(nullptr);
             SetInitRenderNode(nullptr);
@@ -3049,7 +3091,7 @@ void PipelineContext::ProcessDragEventEnd(
     SetInitRenderNode(nullptr);
 }
 
-void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,
+void PipelineContext::OnDragEvent(const DragPointerEvent& pointerEvent, DragEventAction action,
     const RefPtr<NG::FrameNode>& node)
 {
     if (!clipboard_) {
@@ -3093,7 +3135,7 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
         pageOffset_ = GetPageRect().GetOffset();
     }
 
-    event->SetPressedKeyCodes(pointerEvent.pressedKeyCodes_);
+    event->SetPressedKeyCodes(pointerEvent.pressedKeyCodes);
 
     if (action != DragEventAction::DRAG_EVENT_END) {
         ProcessDragEvent(renderNode, event, globalPoint);
@@ -3533,7 +3575,11 @@ void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo)
     while (child->IsValid()) {
         auto key = child->GetKey();
         auto value = child->GetString();
-        restoreNodeInfo_.try_emplace(std::stoi(key), value);
+        int vital = std::atoi(key.c_str());
+        if (vital == 0) {
+            LOGE("input %{public}s can not be converted to number.", key.c_str());
+        }
+        restoreNodeInfo_.try_emplace(vital, value);
         child = child->GetNext();
     }
 }

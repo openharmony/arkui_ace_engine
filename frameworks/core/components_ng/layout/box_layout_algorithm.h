@@ -45,6 +45,9 @@ public:
     static void PerformMeasureSelfWithChildList(
         LayoutWrapper* layoutWrapper, const std::list<RefPtr<LayoutWrapper>>& childList);
 
+    static std::optional<SizeF> PerformMeasureContent(
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(BoxLayoutAlgorithm);
 };

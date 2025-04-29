@@ -17,6 +17,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_component_id_ffi.h"
 
 #include "core/components_ng/base/inspector.h"
+#include "core/pipeline/pipeline_base.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
@@ -128,7 +129,7 @@ bool FfiOHOSAceFrameworkComponentIdSendKeyEvent(CJKeyEvent cJKeyEvent)
     }
     KeyEvent keyEvent = GetKeyEventFromCJ(cJKeyEvent);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
-        [pipelineContext, keyEvent]() { pipelineContext->OnKeyEvent(keyEvent); }, TaskExecutor::TaskType::UI,
+        [pipelineContext, keyEvent]() { pipelineContext->OnNonPointerEvent(keyEvent); }, TaskExecutor::TaskType::UI,
         "FfiOHOSAceFrameworkComponentIdSendKeyEvent");
     return result;
 }

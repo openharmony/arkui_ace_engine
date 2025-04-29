@@ -15,9 +15,19 @@
 
 #include "text_base.h"
 
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
+#include "core/components/common/properties/text_style_parser.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_ng/pattern/text/typed_text.h"
+
+
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
+} // namespace
 
 class TextTestFourNg : public TextBases {
 public:
@@ -31,7 +41,7 @@ public:
 HWTEST_F(TextTestFourNg, UpdateFontFeature002, TestSize.Level1)
 {
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
@@ -54,7 +64,7 @@ HWTEST_F(TextTestFourNg, UpdateFontFeature002, TestSize.Level1)
 HWTEST_F(TextTestFourNg, SetLineSpacing001, TestSize.Level1)
 {
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
@@ -189,7 +199,7 @@ HWTEST_F(TextTestFourNg, InitKeyEvent001, TestSize.Level1)
      * @tc.steps: step2. Initialize text and copyOption.
      */
     TextModelNG textModelNG;
-    textModelNG.Create("123456789");
+    textModelNG.Create(u"123456789");
     textModelNG.SetCopyOption(CopyOptions::InApp);
 
     /**
@@ -222,7 +232,7 @@ HWTEST_F(TextTestFourNg, HandleKeyEvent001, TestSize.Level1)
      * @tc.steps: step2. Initialize text and textSelector_.
      */
     TextModelNG textModelNG;
-    textModelNG.Create("123456789");
+    textModelNG.Create(u"123456789");
     textPattern->copyOption_ = CopyOptions::InApp;
     textPattern->textSelector_.Update(2, 6);
 
@@ -270,8 +280,16 @@ HWTEST_F(TextTestFourNg, HandleKeyEvent001, TestSize.Level1)
  */
 HWTEST_F(TextTestFourNg, GetTextRacePercent001, TestSize.Level1)
 {
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
     RefPtr<TextContentModifier> textContentModifier =
-        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()), textPattern);
     ASSERT_NE(textContentModifier, nullptr);
 
     textContentModifier->GetTextRacePercent();
@@ -523,7 +541,7 @@ HWTEST_F(TextTestFourNg, TextContentModifier004, TestSize.Level1)
     TextStyle textStyle;
     textStyle.SetFontSize(ADAPT_FONT_SIZE_VALUE);
     textStyle.SetTextColor(TEXT_COLOR_VALUE);
-    textContentModifier->SetDefaultAnimatablePropertyValue(textStyle);
+    textContentModifier->SetDefaultAnimatablePropertyValue(textStyle, textFrameNode);
     SizeF contentSize(TEXT_CONTENT_SIZE, TEXT_CONTENT_SIZE);
     textContentModifier->SetContentSize(contentSize);
     std::vector<RectF> drawObscuredRects;

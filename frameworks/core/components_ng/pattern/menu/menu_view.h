@@ -28,10 +28,15 @@
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT MenuView {
+struct OptionValueInfo {
+    std::string value;
+    bool isPasteOption = false;
+};
+
 public:
     static void BindImageNodeToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& wrapperNode,
         const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam, const RefPtr<UINode>& previewCustomNode);
-   
+
     // create menu with menuItems
     static RefPtr<FrameNode> Create(std::vector<OptionParam>&& params, int32_t targetId,
         const std::string& targetTag = "", MenuType type = MenuType::MENU, const MenuParam& menuParam = MenuParam());
@@ -42,20 +47,70 @@ public:
         const RefPtr<UINode>& previewCustomNode = nullptr);
 
     // create select's popup menu
-    static RefPtr<FrameNode> Create(
-        const std::vector<SelectParam>& params, int32_t targetId, const std::string& targetTag);
+    static RefPtr<FrameNode> Create(const std::vector<SelectParam>& params, int32_t targetId,
+        const std::string& targetTag, bool autoWrapFlag = false);
+
+    static void ShowPixelMapAnimation(const RefPtr<FrameNode>& menuNode);
+    static void GetMenuPixelMap(
+        const RefPtr<FrameNode>& targetNode, const MenuParam& menuParam, const RefPtr<FrameNode>& wrapperNode);
+    static void UpdateMenuParam(
+        const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
+    static void UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& menuNode,
+        const MenuParam& menuParam, const MenuType& type);
+    static void UpdatePreviewInfo(const RefPtr<FrameNode>& targetNode, MenuParam& menuParam);
+
+    static void CalcHoverScaleInfo(const RefPtr<FrameNode>& menuNode);
+    static RefPtr<FrameNode> CreateIcon(const std::string& icon, const RefPtr<FrameNode>& parent,
+        const RefPtr<FrameNode>& child = nullptr);
+    static RefPtr<FrameNode> CreateText(
+        const std::string& value, const RefPtr<FrameNode>& parent, bool autoWrapFlag = false);
+    static void CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& option, const RefPtr<FrameNode>& row,
+        const std::function<void()>& onClickFunc, const std::string& icon = "");
+    static RefPtr<FrameNode> CreateSelectOption(const SelectParam& param, int32_t index, bool autoWrapFlag = false);
+    static RefPtr<FrameNode> CreateSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& symbol,
+        const RefPtr<FrameNode>& parent, const RefPtr<FrameNode>& child = nullptr,
+        const std::optional<Dimension>& symbolUserDefinedIdealFontSize = std::nullopt);
+    static void UpdateMenuNodePosition(const PreparedInfoForDrag& data);
+    static void ExcuteMenuDisappearAnimation(const RefPtr<FrameNode>& menuNode, const PreparedInfoForDrag& data);
+    static void SetHasCustomOutline(
+        const RefPtr<FrameNode>& menuWrapperNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
 
 private:
     static void UpdateMenuPaintProperty(
         const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam, const MenuType& isContextMenu);
     static void UpdateMenuBackgroundEffect(const RefPtr<FrameNode>& menuNode);
-    static void UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode);
+    static void UpdateMenuBorderEffect(
+        const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam);
     static void UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
     static void NeedAgingUpdateNode(const RefPtr<FrameNode>& optionNode);
     static void ContextMenuChildMountProc(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& wrapperNode,
         const RefPtr<FrameNode>& previewNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
     static void CustomPreviewParentNodeCreate(const RefPtr<FrameNode>& stackNode, const RefPtr<FrameNode>& posNode,
         const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& previewNode);
+    static RefPtr<FrameNode> Create(int32_t index);
+    static RefPtr<FrameNode> CreateMenuOption(bool optionsHasIcon, const OptionValueInfo& value,
+        const std::function<void()>& onClickFunc, int32_t index, const std::string& icon = "");
+    static RefPtr<FrameNode> CreateMenuOption(bool optionsHasIcon, std::vector<OptionParam>& params, int32_t index);
+    static void CreateOption(bool optionsHasIcon, const std::string& value, const std::string& icon,
+        const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option, const std::function<void()>& onClickFunc);
+    static void CreateOption(bool optionsHasIcon, std::vector<OptionParam>& params, int32_t index,
+        const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option);
+    static void MountOptionToColumn(std::vector<OptionParam>& params, const RefPtr<FrameNode>& menuNode,
+        const MenuParam& menuParam, RefPtr<FrameNode> column);
+    static void UpdateMenuBackgroundStyleSub(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
+    static void UpdateMenuNodeByAnimation(const RefPtr<FrameNode>& menuNode, const PreparedInfoForDrag& data);
+    static void UpdateMenuPositionTop(MarginProperty& menuNodeMargin,
+        std::map<AlignDirection, AlignRule>& menuNodeAlignRules, AlignRule& alignMap, float biasMenuTop,
+        float biasMenuBottom);
+    static void UpdateMenuPositionLeft(MarginProperty& menuNodeMargin,
+        std::map<AlignDirection, AlignRule>& menuNodeAlignRules, AlignRule& alignMap, float biasMenuLeft,
+        float biasMenuRight);
+    static void UpdateMenuNodePositionTop(MarginProperty& menuNodeMargin,
+        std::map<AlignDirection, AlignRule>& menuNodeAlignRules, const PreparedInfoForDrag& data, float biasMenuLeft,
+        std::map<std::string, AlignRule>& alignMap);
+    static void UpdateMenuNodePositionLeft(MarginProperty& menuNodeMargin,
+        std::map<AlignDirection, AlignRule>& menuNodeAlignRules, const PreparedInfoForDrag& data, float biasMenuLeft,
+        std::map<std::string, AlignRule>& alignMap);
 };
 } // namespace OHOS::Ace::NG
 

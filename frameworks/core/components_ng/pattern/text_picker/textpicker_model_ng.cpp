@@ -32,11 +32,11 @@
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float PICKER_MAXFONTSCALE = 1.0f;
+constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK = true;
 const int32_t BUFFER_NODE_NUMBER = 2;
 
 void SetDialogProperties(DialogProperties& properties, TextPickerDialog& textPickerDialog,
@@ -55,6 +55,12 @@ void SetDialogProperties(DialogProperties& properties, TextPickerDialog& textPic
     if (textPickerDialog.backgroundBlurStyle.has_value()) {
         properties.backgroundBlurStyle = textPickerDialog.backgroundBlurStyle.value();
     }
+    if (textPickerDialog.blurStyleOption.has_value()) {
+        properties.blurStyleOption = textPickerDialog.blurStyleOption.value();
+    }
+    if (textPickerDialog.effectOption.has_value()) {
+        properties.effectOption = textPickerDialog.effectOption.value();
+    }
     if (textPickerDialog.shadow.has_value()) {
         properties.shadow = textPickerDialog.shadow.value();
     }
@@ -67,6 +73,24 @@ void SetDialogProperties(DialogProperties& properties, TextPickerDialog& textPic
     }
 
     properties.maskRect = textPickerDialog.maskRect;
+    properties.enableHoverMode = textPickerDialog.enableHoverMode;
+    if (textPickerDialog.hoverModeArea.has_value()) {
+        properties.hoverModeArea = textPickerDialog.hoverModeArea.value();
+    }
+}
+
+using TextPickerGetTextStyleFunc = const std::unique_ptr<FontStyle>& (TextPickerLayoutProperty::*)() const;
+void ResetTextPickerTextStyleColor(FrameNode* frameNode, TextPickerGetTextStyleFunc getTextStyleFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto property = frameNode->GetLayoutPropertyPtr<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    auto& textStyle = (property->*getTextStyleFunc)();
+    CHECK_NULL_VOID(textStyle);
+    if (textStyle->HasTextColor()) {
+        textStyle->ResetTextColor();
+        property->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 }
 
@@ -103,15 +127,21 @@ void TextPickerModelNG::Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnK
         stackNode->MountToParent(textPickerNode);
     }
     stack->Push(textPickerNode);
-    options_.clear();
+    if (pickerTheme->IsCircleDial()) {
+        auto renderContext = textPickerNode->GetRenderContext();
+        renderContext->UpdateBackgroundColor(pickerTheme->GetBackgroundColor());
+    }
 }
 
 void TextPickerModelNG::SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(pickerTheme);
     auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
-    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontSize, selectedStyle.GetFontSize());
-    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedColor, selectedStyle.GetTextColor());
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontSize,
+        ConvertFontScaleValue(selectedStyle.GetFontSize()));
+    ResetTextPickerTextStyleColor(frameNode, &TextPickerLayoutProperty::GetSelectedTextStyle);
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedWeight, selectedStyle.GetFontWeight());
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontFamily, selectedStyle.GetFontFamilies());
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontStyle, selectedStyle.GetFontStyle());
@@ -119,7 +149,7 @@ void TextPickerModelNG::SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTh
     auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearFontSize,
         ConvertFontScaleValue(disappearStyle.GetFontSize()));
-    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearColor, disappearStyle.GetTextColor());
+    ResetTextPickerTextStyleColor(frameNode, &TextPickerLayoutProperty::GetDisappearTextStyle);
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearWeight, disappearStyle.GetFontWeight());
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearFontFamily, disappearStyle.GetFontFamilies());
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearFontStyle, disappearStyle.GetFontStyle());
@@ -127,12 +157,13 @@ void TextPickerModelNG::SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTh
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontSize,
         ConvertFontScaleValue(normalStyle.GetFontSize()));
-    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Color, normalStyle.GetTextColor());
+    ResetTextPickerTextStyleColor(frameNode, &TextPickerLayoutProperty::GetTextStyle);
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Weight, normalStyle.GetFontWeight());
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontFamily, normalStyle.GetFontFamilies());
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontStyle, normalStyle.GetFontStyle());
-
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, CanLoop, true);
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, DigitalCrownSensitivity, pickerTheme->GetDigitalCrownSensitivity());
 }
 
 RefPtr<FrameNode> TextPickerModelNG::CreateColumnNode(uint32_t columnKind, uint32_t showCount)
@@ -215,14 +246,12 @@ RefPtr<FrameNode> TextPickerModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto textPickerNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXT_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPickerPattern>(); });
-    auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
-    textPickerPattern->SetColumnsKind(TEXT);
     auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, textPickerNode);
-    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>(textPickerNode->GetThemeScopeId());
     CHECK_NULL_RETURN(pickerTheme, textPickerNode);
+    std::lock_guard<std::shared_mutex> lock(showCountMutex_);
     showCount_ = BUFFER_NODE_NUMBER + pickerTheme->GetShowOptionCount();
-    rangeValue_.clear();
     SetDefaultAttributes(textPickerNode, pickerTheme);
     return textPickerNode;
 }
@@ -239,15 +268,36 @@ void TextPickerModelNG::SetSelected(uint32_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedIndex, values);
 }
 
+void TextPickerModelNG::SetColumnWidths(const std::vector<Dimension>& widths)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->SetColumnWidths(widths);
+}
+
+void TextPickerModelNG::SetColumnWidths(FrameNode* frameNode, const std::vector<Dimension>& widths)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->SetColumnWidths(widths);
+}
+
+std::vector<Dimension> TextPickerModelNG::GetColumnWidths(FrameNode* frameNode)
+{
+    std::vector<Dimension> columnWidths;
+    CHECK_NULL_RETURN(frameNode, columnWidths);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    columnWidths = textPickerPattern->GetColumnWidths();
+    return columnWidths;
+}
+
 void TextPickerModelNG::SetRange(const std::vector<NG::RangeContent>& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->SetRange(value);
-    for (auto& range : value) {
-        rangeValue_.emplace_back(std::move(range));
-    }
 }
 
 void TextPickerModelNG::SetDefaultPickerItemHeight(const Dimension& value)
@@ -284,8 +334,20 @@ void TextPickerModelNG::SetBackgroundColor(const Color& color)
     textPickerPattern->SetBackgroundColor(color);
 }
 
+void TextPickerModelNG::SetDisableTextStyleAnimation(const bool value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetDisableTextStyleAnimation(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisableTextStyleAnimation, value);
+}
+
 void TextPickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(pickerTheme);
     auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
@@ -295,8 +357,11 @@ void TextPickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerT
         ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearFontSize,
             ConvertFontScaleValue(disappearStyle.GetFontSize()));
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(
-        TextPickerLayoutProperty, DisappearColor, value.textColor.value_or(disappearStyle.GetTextColor()));
+    if (value.textColor.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearColor, value.textColor.value());
+    } else {
+        ResetTextPickerTextStyleColor(frameNode, &TextPickerLayoutProperty::GetDisappearTextStyle);
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, DisappearWeight, value.fontWeight.value_or(disappearStyle.GetFontWeight()));
     ACE_UPDATE_LAYOUT_PROPERTY(
@@ -307,6 +372,8 @@ void TextPickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerT
 
 void TextPickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(pickerTheme);
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
@@ -316,8 +383,11 @@ void TextPickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& pickerThem
         ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontSize,
             ConvertFontScaleValue(normalStyle.GetFontSize()));
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(
-        TextPickerLayoutProperty, Color, value.textColor.value_or(normalStyle.GetTextColor()));
+    if (value.textColor.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Color, value.textColor.value());
+    } else {
+        ResetTextPickerTextStyleColor(frameNode, &TextPickerLayoutProperty::GetTextStyle);
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, Weight, value.fontWeight.value_or(normalStyle.GetFontWeight()));
     ACE_UPDATE_LAYOUT_PROPERTY(
@@ -328,6 +398,8 @@ void TextPickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& pickerThem
 
 void TextPickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(pickerTheme);
     auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
@@ -337,14 +409,53 @@ void TextPickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTh
         ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontSize,
             ConvertFontScaleValue(selectedStyle.GetFontSize()));
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(
-        TextPickerLayoutProperty, SelectedColor, value.textColor.value_or(selectedStyle.GetTextColor()));
+    if (value.textColor.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedColor, value.textColor.value());
+    } else {
+        ResetTextPickerTextStyleColor(frameNode, &TextPickerLayoutProperty::GetSelectedTextStyle);
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, SelectedWeight, value.fontWeight.value_or(selectedStyle.GetFontWeight()));
     ACE_UPDATE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, SelectedFontFamily, value.fontFamily.value_or(selectedStyle.GetFontFamilies()));
     ACE_UPDATE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, SelectedFontStyle, value.fontStyle.value_or(selectedStyle.GetFontStyle()));
+}
+
+void TextPickerModelNG::SetDefaultTextStyle(const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value)
+{
+    CHECK_NULL_VOID(textTheme);
+    auto textStyle = textTheme->GetTextStyle();
+
+    if (value.fontSize.has_value() && value.fontSize->IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultFontSize,
+            ConvertFontScaleValue(value.fontSize.value()));
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultFontSize,
+            ConvertFontScaleValue(textStyle.GetFontSize()));
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultColor,
+        value.textColor.value_or(textStyle.GetTextColor()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultWeight,
+        value.fontWeight.value_or(textStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultFontFamily,
+        value.fontFamily.value_or(textStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultFontStyle,
+        value.fontStyle.value_or(textStyle.GetFontStyle()));
+    if (value.minFontSize.has_value() && value.minFontSize->IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultMinFontSize,
+            ConvertFontScaleValue(value.minFontSize.value()));
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultMinFontSize, Dimension());
+    }
+    if (value.maxFontSize.has_value() && value.maxFontSize->IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultMaxFontSize,
+            ConvertFontScaleValue(value.maxFontSize.value()));
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultMaxFontSize, Dimension());
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultTextOverflow,
+        value.textOverflow.value_or(textStyle.GetTextOverflow()));
 }
 
 void TextPickerModelNG::HasUserDefinedDisappearFontFamily(bool isUserDefined)
@@ -378,9 +489,27 @@ void TextPickerModelNG::SetOnCascadeChange(TextCascadeChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
+}
+
+void TextPickerModelNG::SetOnScrollStop(TextCascadeChangeEvent&& onScrollStop)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollStop(std::move(onScrollStop));
+}
+
+void TextPickerModelNG::SetOnEnterSelectedArea(TextCascadeChangeEvent&& onEnterSelectedArea)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnEnterSelectedArea(std::move(onEnterSelectedArea));
 }
 
 void TextPickerModelNG::SetValue(const std::string& value)
@@ -398,8 +527,7 @@ PickerTextStyle TextPickerModelNG::getDisappearTextStyle(FrameNode* frameNode)
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetDisappearOptionStyle();
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        TextPickerLayoutProperty, DisappearFontSize, pickerTextStyle.fontSize, frameNode,
-        ConvertFontScaleValue(style.GetFontSize()));
+        TextPickerLayoutProperty, DisappearFontSize, pickerTextStyle.fontSize, frameNode, style.GetFontSize());
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         TextPickerLayoutProperty, DisappearColor, pickerTextStyle.textColor, frameNode, style.GetTextColor());
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -421,8 +549,7 @@ PickerTextStyle TextPickerModelNG::getNormalTextStyle(FrameNode* frameNode)
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetOptionStyle(false, false);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        TextPickerLayoutProperty, FontSize, pickerTextStyle.fontSize, frameNode,
-        ConvertFontScaleValue(style.GetFontSize()));
+        TextPickerLayoutProperty, FontSize, pickerTextStyle.fontSize, frameNode, style.GetFontSize());
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         TextPickerLayoutProperty, Color, pickerTextStyle.textColor, frameNode, style.GetTextColor());
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -444,8 +571,7 @@ PickerTextStyle TextPickerModelNG::getSelectedTextStyle(FrameNode* frameNode)
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetOptionStyle(true, false);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        TextPickerLayoutProperty, SelectedFontSize, pickerTextStyle.fontSize, frameNode,
-        ConvertFontScaleValue(style.GetFontSize()));
+        TextPickerLayoutProperty, SelectedFontSize, pickerTextStyle.fontSize, frameNode, style.GetFontSize());
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         TextPickerLayoutProperty, SelectedColor, pickerTextStyle.textColor, frameNode, style.GetTextColor());
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -472,9 +598,14 @@ void TextPickerModelNG::MultiInit(const RefPtr<PickerTheme> pickerTheme)
     auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
 
     CHECK_NULL_VOID(pickerTheme);
+    std::lock_guard<std::shared_mutex> lock(showCountMutex_);
     showCount_ = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     stack->Push(textPickerNode);
-    rangeValue_.clear();
+
+    if (pickerTheme->IsCircleDial()) {
+        auto renderContext = textPickerNode->GetRenderContext();
+        renderContext->UpdateBackgroundColor(pickerTheme->GetBackgroundColor());
+    }
 }
 
 void TextPickerModelNG::SetIsCascade(bool isCascade)
@@ -483,8 +614,7 @@ void TextPickerModelNG::SetIsCascade(bool isCascade)
     CHECK_NULL_VOID(frameNode);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
-    isCascade_ = isCascade;
-    textPickerPattern->SetIsCascade(isCascade_);
+    textPickerPattern->SetIsCascade(isCascade);
 }
 
 void TextPickerModelNG::SetHasSelectAttr(bool value)
@@ -501,6 +631,7 @@ void TextPickerModelNG::SetUnCascadeColumns(const std::vector<NG::TextCascadePic
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetChildren().empty()) {
+        std::lock_guard<std::shared_mutex> lock(showCountMutex_);
         for (uint32_t i = 0; i < options.size(); i++) {
             auto columnNode = CreateColumnNode(NG::TEXT, showCount_);
             auto stackNode = CreateStackNode();
@@ -540,6 +671,7 @@ void TextPickerModelNG::SetCascadeColumns(const std::vector<NG::TextCascadePicke
 
     // Create Node
     if (frameNode->GetChildren().empty()) {
+        std::lock_guard<std::shared_mutex> lock(showCountMutex_);
         for (size_t i = 0; i < columnCount; i++) {
             auto columnNode = CreateColumnNode(NG::TEXT, showCount_);
             auto stackNode = CreateStackNode();
@@ -570,11 +702,7 @@ void TextPickerModelNG::SetCascadeColumns(const std::vector<NG::TextCascadePicke
 
 void TextPickerModelNG::SetColumns(const std::vector<NG::TextCascadePickerOptions>& options)
 {
-    options_.clear();
-    for (auto& option : options) {
-        options_.emplace_back(std::move(option));
-    }
-    if (!isCascade_) {
+    if (!IsCascade()) {
         SetUnCascadeColumns(options);
     } else {
         SetCascadeColumns(options);
@@ -583,7 +711,11 @@ void TextPickerModelNG::SetColumns(const std::vector<NG::TextCascadePickerOption
 
 bool TextPickerModelNG::IsSingle()
 {
-    return rangeValue_.size() > 0;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, false);
+    return textPickerPattern->GetRange().size() > 0;
 }
 
 bool TextPickerModelNG::IsSingle(FrameNode* frameNode)
@@ -596,10 +728,11 @@ bool TextPickerModelNG::IsSingle(FrameNode* frameNode)
 
 bool TextPickerModelNG::GetSingleRange(std::vector<NG::RangeContent>& rangeValue)
 {
-    rangeValue.clear();
-    for (auto& item : rangeValue_) {
-        rangeValue.emplace_back(std::move(item));
-    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, false);
+    rangeValue = textPickerPattern->GetRange();
     return true;
 }
 
@@ -625,10 +758,11 @@ bool TextPickerModelNG::IsCascade(FrameNode* frameNode)
 
 bool TextPickerModelNG::GetMultiOptions(std::vector<NG::TextCascadePickerOptions>& options)
 {
-    options.clear();
-    for (auto& item : options_) {
-        options.emplace_back(std::move(item));
-    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, false);
+    options = textPickerPattern->GetMultiOptions();
     return true;
 }
 
@@ -674,7 +808,7 @@ void TextPickerModelNG::SetOnValueChangeEvent(TextCascadeValueChangeEvent&& onVa
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnValueChangeEvent(std::move(onValueChangeEvent));
 }
@@ -683,7 +817,7 @@ void TextPickerModelNG::SetOnSelectedChangeEvent(TextCascadeSelectedChangeEvent&
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelectedChangeEvent(std::move(onSelectedChangeEvent));
 }
@@ -696,8 +830,9 @@ RefPtr<AceType> TextPickerDialogModelNG::CreateObject()
 void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerText,
     NG::TextPickerSettingData& settingData, std::function<void()>&& onCancel,
     std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange,
-    TextPickerDialog& textPickerDialog, TextPickerDialogEvent& textPickerDialogEvent,
-    const std::vector<ButtonInfo>& buttonInfos)
+    std::function<void(const std::string&)>&& onScrollStop,
+    std::function<void(const std::string&)>&& onEnterSelectedArea, TextPickerDialog& textPickerDialog,
+    TextPickerDialogEvent& textPickerDialogEvent, const std::vector<ButtonInfo>& buttonInfos)
 {
     auto container = Container::Current();
     if (!container) {
@@ -721,6 +856,8 @@ void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerTex
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     dialogEvent["acceptId"] = onAccept;
     dialogEvent["changeId"] = onChange;
+    dialogEvent["scrollStopId"] = onScrollStop;
+    dialogEvent["enterSelectedAreaId"] = onEnterSelectedArea;
     auto func = [onCancel](const GestureEvent& /* info */) {
         if (onCancel) {
             onCancel();
@@ -744,7 +881,8 @@ void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerTex
             overlayManager->ShowTextDialog(
                 properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos);
         },
-        TaskExecutor::TaskType::UI, "ArkUITextPickerShowTextDialog");
+        TaskExecutor::TaskType::UI, "ArkUITextPickerShowTextDialog",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void TextPickerModelNG::SetCanLoop(FrameNode* frameNode, const bool value)
@@ -762,6 +900,25 @@ int32_t TextPickerModelNG::GetCanLoop(FrameNode* frameNode)
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_RETURN(textPickerPattern, 1);
     return textPickerPattern->GetCanLoop();
+}
+
+void TextPickerModelNG::SetDigitalCrownSensitivity(int32_t crownSensitivity)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetDigitalCrownSensitivity(frameNode, crownSensitivity);
+}
+
+void TextPickerModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity)
+{
+    if (crownSensitivity < CROWN_SENSITIVITY_MIN || crownSensitivity > CROWN_SENSITIVITY_MAX) {
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetDigitalCrownSensitivity(crownSensitivity);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DigitalCrownSensitivity, crownSensitivity, frameNode);
 }
 
 void TextPickerModelNG::SetSelecteds(FrameNode* frameNode, const std::vector<uint32_t>& values)
@@ -790,6 +947,24 @@ void TextPickerModelNG::SetHasSelectAttr(FrameNode* frameNode, bool value)
     CHECK_NULL_VOID(textPickerPattern);
     textPickerPattern->SetHasSelectAttr(value);
 }
+
+void TextPickerModelNG::SetIsCascade(FrameNode* frameNode, bool isCascade)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetIsCascade(isCascade);
+}
+
+void TextPickerModelNG::SetColumnKind(FrameNode* frameNode, uint32_t columnKind)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    columnKind_ = columnKind;
+    textPickerPattern->SetColumnsKind(columnKind);
+}
+
 void TextPickerModelNG::SetNormalTextStyle(
     FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value)
 {
@@ -831,6 +1006,7 @@ void TextPickerModelNG::SetSelectedTextStyle(
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, SelectedColor,
         value.textColor.value_or(selectedStyle.GetTextColor()), frameNode);
+
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, SelectedWeight,
         value.fontWeight.value_or(selectedStyle.GetFontWeight()), frameNode);
@@ -896,7 +1072,13 @@ void TextPickerModelNG::SetRange(FrameNode* frameNode, const std::vector<NG::Ran
 {
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetChildren().empty()) {
-        auto columnNode = CreateColumnNode(TEXT, showCount_);
+        std::lock_guard<std::shared_mutex> lock(showCountMutex_);
+        RefPtr<FrameNode> columnNode = nullptr;
+        if (columnKind_ == TEXT) {
+            columnNode = CreateColumnNode(TEXT, showCount_);
+        } else if (columnKind_ == MIXTURE) {
+            columnNode = CreateColumnNode(MIXTURE, showCount_);
+        }
         auto stackNode = CreateStackNode();
         auto buttonNode = CreateButtonNode();
         auto columnBlendNode = CreateColumnNode();
@@ -911,19 +1093,11 @@ void TextPickerModelNG::SetRange(FrameNode* frameNode, const std::vector<NG::Ran
     }
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     textPickerPattern->SetRange(value);
-    rangeValue_.clear();
-    for (auto& range : value) {
-        rangeValue_.emplace_back(std::move(range));
-    }
 }
 
 void TextPickerModelNG::SetColumns(FrameNode* frameNode, const std::vector<NG::TextCascadePickerOptions>& options)
 {
-    options_.clear();
-    for (auto& option : options) {
-        options_.emplace_back(std::move(option));
-    }
-    if (!isCascade_) {
+    if (!IsCascade(frameNode)) {
         SetUnCascadeColumnsNode(frameNode, options);
     } else {
         SetCascadeColumnsNode(frameNode, options);
@@ -935,6 +1109,7 @@ void TextPickerModelNG::SetUnCascadeColumnsNode(FrameNode* frameNode,
 {
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetChildren().empty()) {
+        std::lock_guard<std::shared_mutex> lock(showCountMutex_);
         for (uint32_t i = 0; i < options.size(); i++) {
             auto columnNode = CreateColumnNode(TEXT, showCount_);
             auto stackNode = CreateStackNode();
@@ -974,6 +1149,7 @@ void TextPickerModelNG::SetCascadeColumnsNode(FrameNode* frameNode,
 
     // Create Node
     if (frameNode->GetChildren().empty()) {
+        std::lock_guard<std::shared_mutex> lock(showCountMutex_);
         for (size_t i = 0; i < columnCount; i++) {
             auto columnNode = CreateColumnNode(NG::TEXT, showCount_);
             auto stackNode = CreateStackNode();
@@ -1006,10 +1182,13 @@ void TextPickerModelNG::SetValue(FrameNode* frameNode, const std::string& value)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Value, value, frameNode);
-    auto valueIterator = std::find_if(rangeValue_.begin(), rangeValue_.end(),
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    auto rangeValue = textPickerPattern->GetRange();
+    auto valueIterator = std::find_if(rangeValue.begin(), rangeValue.end(),
         [&value](const NG::RangeContent& range) { return range.text_ == value; });
-    if (valueIterator != rangeValue_.end()) {
-        TextPickerModelNG::SetSelected(frameNode, std::distance(rangeValue_.begin(), valueIterator));
+    if (valueIterator != rangeValue.end()) {
+        TextPickerModelNG::SetSelected(frameNode, std::distance(rangeValue.begin(), valueIterator));
     }
 }
 
@@ -1020,22 +1199,23 @@ void TextPickerModelNG::SetValues(FrameNode* frameNode, const std::vector<std::s
     CHECK_NULL_VOID(textPickerPattern);
     std::vector<std::string> selectedValues;
     std::vector<uint32_t> valuesIndex;
-    for (uint32_t i = 0; i < options_.size(); i++) {
+    auto options = textPickerPattern->GetMultiOptions();
+    for (uint32_t i = 0; i < options.size(); i++) {
         if (values.size() > 0 && values.size() < i + 1) {
-            if (options_[i].rangeResult.size() > 0) {
-                selectedValues.emplace_back(options_[i].rangeResult[0]);
+            if (options[i].rangeResult.size() > 0) {
+                selectedValues.emplace_back(options[i].rangeResult[0]);
             } else {
                 selectedValues.emplace_back("");
             }
             valuesIndex.emplace_back(0);
         } else {
-            auto valueIterator = std::find(options_[i].rangeResult.begin(), options_[i].rangeResult.end(), values[i]);
-            if (valueIterator == options_[i].rangeResult.end()) {
-                selectedValues[i] = options_[i].rangeResult.front();
+            auto valueIterator = std::find(options[i].rangeResult.begin(), options[i].rangeResult.end(), values[i]);
+            if (valueIterator == options[i].rangeResult.end()) {
+                selectedValues[i] = options[i].rangeResult.front();
                 valuesIndex.emplace_back(0);
             } else {
                 selectedValues.emplace_back(values[i]);
-                valuesIndex.emplace_back(std::distance(options_[i].rangeResult.begin(), valueIterator));
+                valuesIndex.emplace_back(std::distance(options[i].rangeResult.begin(), valueIterator));
             }
         }
     }
@@ -1049,7 +1229,7 @@ void TextPickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const
     auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontSize,
         ConvertFontScaleValue(selectedStyle.GetFontSize()), frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedColor, selectedStyle.GetTextColor(), frameNode);
+    ResetTextPickerTextStyleColor(Referenced::RawPtr(frameNode), &TextPickerLayoutProperty::GetSelectedTextStyle);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedWeight, selectedStyle.GetFontWeight(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, SelectedFontFamily, selectedStyle.GetFontFamilies(), frameNode);
@@ -1060,8 +1240,7 @@ void TextPickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, DisappearFontSize,
         ConvertFontScaleValue(disappearStyle.GetFontSize()), frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-        TextPickerLayoutProperty, DisappearColor, disappearStyle.GetTextColor(), frameNode);
+    ResetTextPickerTextStyleColor(Referenced::RawPtr(frameNode), &TextPickerLayoutProperty::GetDisappearTextStyle);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, DisappearWeight, disappearStyle.GetFontWeight(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
@@ -1072,12 +1251,51 @@ void TextPickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontSize,
         ConvertFontScaleValue(normalStyle.GetFontSize()), frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Color, normalStyle.GetTextColor(), frameNode);
+    ResetTextPickerTextStyleColor(Referenced::RawPtr(frameNode), &TextPickerLayoutProperty::GetTextStyle);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Weight, normalStyle.GetFontWeight(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontFamily, normalStyle.GetFontFamilies(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontStyle, normalStyle.GetFontStyle(), frameNode);
 
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, CanLoop, true, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, DigitalCrownSensitivity, pickerTheme->GetDigitalCrownSensitivity(), frameNode);
+}
+
+void TextPickerModelNG::SetDefaultTextStyle(
+    FrameNode* frameNode, const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(textTheme);
+    auto textStyle = textTheme->GetTextStyle();
+    if (value.fontSize.has_value() && value.fontSize->IsValid()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultFontSize,
+            ConvertFontScaleValue(value.fontSize.value()), frameNode);
+    } else {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultFontSize,
+            ConvertFontScaleValue(textStyle.GetFontSize()), frameNode);
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultColor,
+        value.textColor.value_or(textStyle.GetTextColor()), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultWeight,
+        value.fontWeight.value_or(textStyle.GetFontWeight()), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultFontFamily,
+        value.fontFamily.value_or(textStyle.GetFontFamilies()), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultFontStyle,
+        value.fontStyle.value_or(textStyle.GetFontStyle()), frameNode);
+    if (value.minFontSize.has_value() && value.minFontSize->IsValid()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultMinFontSize,
+            ConvertFontScaleValue(value.minFontSize.value()), frameNode);
+    } else {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultMinFontSize, Dimension(), frameNode);
+    }
+    if (value.maxFontSize.has_value() && value.maxFontSize->IsValid()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultMaxFontSize,
+            ConvertFontScaleValue(value.maxFontSize.value()), frameNode);
+    } else {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultMaxFontSize, Dimension(), frameNode);
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultTextOverflow,
+        value.textOverflow.value_or(textStyle.GetTextOverflow()), frameNode);
 }
 
 std::string TextPickerModelNG::getTextPickerValue(FrameNode* frameNode)
@@ -1089,27 +1307,9 @@ std::string TextPickerModelNG::getTextPickerValue(FrameNode* frameNode)
 std::string TextPickerModelNG::getTextPickerRange(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, "");
-    std::string result;
-    if (isSingleRange_) {
-        for (auto range : rangeValue_) {
-            result.append(range.text_ + ";");
-        }
-        if (result.length() > 0) {
-            result = result.substr(0, result.length() > 0 ? result.length() - 1 : 0);
-        }
-    } else {
-        for (auto option : options_) {
-            for (auto range : option.rangeResult) {
-                result.append(range + ",");
-            }
-            result = result.substr(0, result.length() > 0 ? result.length() - 1 : 0);
-            result.append(";");
-        }
-        if (result.length() > 0) {
-            result = result.substr(0, result.length() - 1);
-        }
-    }
-    return result;
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, "");
+    return textPickerPattern->GetTextPickerRange();
 }
 
 void TextPickerModelNG::SetDivider(const ItemDivider& divider)
@@ -1142,12 +1342,29 @@ void TextPickerModelNG::SetGradientHeight(FrameNode* frameNode, const Dimension&
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, GradientHeight, value, frameNode);
 }
 
+void TextPickerModelNG::SetDisableTextStyleAnimation(FrameNode* frameNode, const bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetDisableTextStyleAnimation(value);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisableTextStyleAnimation, value, frameNode);
+}
+
 void TextPickerModelNG::SetOnCascadeChange(FrameNode* frameNode, TextCascadeChangeEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
+}
+
+void TextPickerModelNG::SetOnScrollStop(FrameNode* frameNode, TextCascadeChangeEvent&& onScrollStop)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollStop(std::move(onScrollStop));
 }
 
 int32_t TextPickerModelNG::GetSelectedSize(FrameNode* frameNode)
@@ -1156,6 +1373,14 @@ int32_t TextPickerModelNG::GetSelectedSize(FrameNode* frameNode)
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_RETURN(textPickerPattern, 0);
     return textPickerPattern->GetSelecteds().size();
+}
+
+int32_t TextPickerModelNG::GetColumnWidthsSize(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, 0);
+    return textPickerPattern->GetColumnWidths().size();
 }
 
 std::string TextPickerModelNG::getTextPickerValues(FrameNode* frameNode)
@@ -1202,18 +1427,80 @@ const Dimension TextPickerModelNG::ConvertFontScaleValue(const Dimension& fontSi
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, fontSizeValue);
-
-    float fontScaleValue = pipeline->GetFontScale();
-    if (fontScaleValue == 0) {
+    auto maxAppFontScale = pipeline->GetMaxAppFontScale();
+    auto follow = pipeline->IsFollowSystem();
+    float fontScale = pipeline->GetFontScale();
+    if (NearZero(fontScale) || (fontSizeValue.Unit() == DimensionUnit::VP)) {
         return fontSizeValue;
     }
-
-    if (GreatOrEqualCustomPrecision(fontScaleValue, PICKER_MAXFONTSCALE)) {
-        if (fontSizeValue.Unit() != DimensionUnit::VP) {
-            return Dimension(fontSizeValue / fontScaleValue);
+    if (GreatOrEqualCustomPrecision(fontScale, PICKER_MAXFONTSCALE) && follow) {
+        fontScale = std::clamp(fontScale, 0.0f, maxAppFontScale);
+        if (fontScale != 0.0f) {
+            return Dimension(fontSizeValue / fontScale);
         }
     }
     return fontSizeValue;
 }
 
+void TextPickerModelNG::HasUserDefinedOpacity()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    textPickerPattern->SetUserDefinedOpacity(renderContext->GetOpacityValue(1.0));
+}
+
+void TextPickerModelNG::SetEnableHapticFeedback(bool isEnableHapticFeedback)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetEnableHapticFeedback(frameNode, isEnableHapticFeedback);
+}
+
+void TextPickerModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetIsEnableHaptic(isEnableHapticFeedback);
+}
+
+bool TextPickerModelNG::GetEnableHapticFeedback(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, DEFAULT_ENABLE_HAPTIC_FEEDBACK);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, DEFAULT_ENABLE_HAPTIC_FEEDBACK);
+    return textPickerPattern->GetIsEnableHaptic();
+}
+
+bool TextPickerModelNG::IsCascade()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, false);
+    return textPickerPattern->GetIsCascade();
+}
+
+void TextPickerModelNG::SetSingleRange(bool isSingleRange)
+{
+    std::lock_guard<std::shared_mutex> lock(isSingleMutex_);
+    isSingleRange_ = isSingleRange;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetSingleRange(isSingleRange);
+}
+
+void TextPickerModelNG::UpdateUserSetSelectColor()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->UpdateUserSetSelectColor();
+}
 } // namespace OHOS::Ace::NG

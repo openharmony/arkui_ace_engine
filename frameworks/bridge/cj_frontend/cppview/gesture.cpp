@@ -15,17 +15,12 @@
 
 #include "bridge/cj_frontend/cppview/gesture.h"
 
-#include <cinttypes>
-
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/gestures/gesture_group.h"
 #include "core/gestures/long_press_gesture.h"
 #include "core/gestures/pan_gesture.h"
-#include "core/gestures/parallel_recognizer.h"
 #include "core/gestures/pinch_gesture.h"
 #include "core/gestures/rotation_gesture.h"
 #include "core/gestures/slide_gesture.h"
-#include "core/gestures/tap_gesture.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -116,8 +111,7 @@ void Gesture::HandlerOnGestureEvent(
     auto impl = inspector->GetInspectorFunctionImpl();
 
     if (action == CJGestureEvent::CANCEL) {
-        auto onActionCancelFunc = [callback = std::move(callback), impl]() {
-            auto info = GestureEvent();
+        auto onActionCancelFunc = [callback = std::move(callback), impl](GestureEvent& info) {
             if (impl) {
                 impl->UpdateEventInfo(info);
             }

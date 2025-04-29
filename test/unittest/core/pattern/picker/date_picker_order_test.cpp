@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#include <functional>
-#include <optional>
-#include <utility>
 
 #include "gtest/gtest.h"
 
@@ -27,38 +24,15 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/dimension_offset.h"
-#include "base/geometry/point.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/system_properties.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/dialog/dialog_properties.h"
-#include "core/components/picker/picker_data.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/input_event.h"
-#include "core/components_ng/event/touch_event.h"
-#include "core/components_ng/layout/layout_property.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/picker/date_time_animation_controller.h"
-#include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
-#include "core/components_ng/pattern/picker/picker_model.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/ace_events.h"
 #undef private
 #undef protected
 
@@ -78,6 +52,29 @@ const std::string CONNECTER = "-";
 const std::vector<int> DEFAULT_MONTH_DAY = { 1, 2, 3 };
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
 constexpr uint8_t PIXEL_ROUND = 18;
+const std::unordered_map<std::string, std::string> EXPECT_DATE_ORDER_MAP = {
+    { "ug", "y-d-M" },
+    { "ar", "y-M-d" },
+    { "fa", "y-M-d" },
+    { "ur", "y-M-d" },
+    { "iw", "y-M-d" },
+    { "he", "y-M-d" },
+};
+
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return MockThemeDefault::GetPickerTheme();
+    } else if (type == ButtonTheme::TypeId()) {
+        return AceType::MakeRefPtr<ButtonTheme>();
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 
 class DatePickerOrderTest : public testing::Test {
@@ -86,9 +83,7 @@ public:
     static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
-    static void CreateMonthOrDayColumnNode(
-        const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& dateNode, Color buttonBackgroundColor);
-    static void CreateYearColumnNode(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& dateNode);
+    static void CreateDateColumn(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& dateNode);
     static RefPtr<FrameNode> CreateYearColumnNode(RefPtr<DatePickerPattern>& pattern, uint32_t count);
     static RefPtr<FrameNode> CreateMonthColumnNode(RefPtr<DatePickerPattern>& pattern, uint32_t count);
     static RefPtr<FrameNode> CreateDayColumnNode(RefPtr<DatePickerPattern>& pattern, uint32_t count);
@@ -132,18 +127,10 @@ void DatePickerOrderTest::SetUp()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else if (type == PickerTheme::TypeId()) {
-            return MockThemeDefault::GetPickerTheme();
-        } else if (type == ButtonTheme::TypeId()) {
-            return AceType::MakeRefPtr<ButtonTheme>();
-        } else {
-            return nullptr;
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -153,30 +140,7 @@ void DatePickerOrderTest::TearDown()
     ViewStackProcessor::GetInstance()->ClearStack();
 }
 
-void DatePickerOrderTest::CreateMonthOrDayColumnNode(
-    const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& dateNode, Color buttonBackgroundColor)
-{
-    auto stackId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto stackNode = FrameNode::GetOrCreateFrameNode(
-        V2::STACK_ETS_TAG, stackId, []() { return AceType::MakeRefPtr<StackPattern>(); });
-    auto columnId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto blendNode = FrameNode::GetOrCreateFrameNode(
-        V2::COLUMN_ETS_TAG, columnId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    auto buttonId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(
-        V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    buttonNode->GetRenderContext()->UpdateBackgroundColor(buttonBackgroundColor);
-    buttonNode->MountToParent(stackNode);
-    columnNode->MountToParent(blendNode);
-    blendNode->MountToParent(stackNode);
-    auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
-    layoutProperty->UpdateAlignment(Alignment::CENTER);
-    layoutProperty->UpdateLayoutWeight(1);
-    stackNode->MountToParent(dateNode);
-    columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
-}
-
-void DatePickerOrderTest::CreateYearColumnNode(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& dateNode)
+void DatePickerOrderTest::CreateDateColumn(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& dateNode)
 {
     auto stackId = ElementRegister::GetInstance()->MakeUniqueId();
     auto stackNode = FrameNode::GetOrCreateFrameNode(
@@ -316,7 +280,8 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder001, TestSize.Level1)
     DateTime date;
     date.month = DEFAULT_MONTH_DAY.at(YEARINDEX);
     date.day = DEFAULT_MONTH_DAY.at(YEARINDEX);
-    EXPECT_EQ(textLayoutProperty->GetContentValue(), Localization::GetInstance()->FormatDateTime(date, "MMdd"));
+    EXPECT_EQ(textLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(Localization::GetInstance()->FormatDateTime(date, "MMdd")));
 }
 
 /**
@@ -378,7 +343,8 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder002, TestSize.Level1)
     DateTime date;
     date.month = DEFAULT_MONTH_DAY.at(YEARINDEX);
     date.day = DEFAULT_MONTH_DAY.at(YEARINDEX);
-    EXPECT_EQ(textLayoutProperty->GetContentValue(), Localization::GetInstance()->FormatDateTime(date, "MMdd"));
+    EXPECT_EQ(textLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(Localization::GetInstance()->FormatDateTime(date, "MMdd")));
 }
 
 /**
@@ -440,7 +406,8 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder003, TestSize.Level1)
     DateTime date;
     date.month = DEFAULT_MONTH_DAY.at(YEARINDEX);
     date.day = DEFAULT_MONTH_DAY.at(YEARINDEX);
-    EXPECT_EQ(textLayoutProperty->GetContentValue(), Localization::GetInstance()->FormatDateTime(date, "MMdd"));
+    EXPECT_EQ(textLayoutProperty->GetContentValue(),
+        StringUtils::Str8ToStr16(Localization::GetInstance()->FormatDateTime(date, "MMdd")));
 }
 
 /**
@@ -451,6 +418,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder003, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder004, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -460,9 +428,10 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder004, TestSize.Level1)
     auto textConfirmNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textLayoutProperty->UpdateContent(dialogTheme->GetConfirmText());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("M-d-y");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -474,27 +443,25 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder004, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -507,6 +474,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder004, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder005, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -516,9 +484,10 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder005, TestSize.Level1)
     auto textConfirmNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textLayoutProperty->UpdateContent(dialogTheme->GetConfirmText());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("y-M-d");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -530,27 +499,25 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder005, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -563,6 +530,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder005, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder006, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -572,9 +540,10 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder006, TestSize.Level1)
     auto textConfirmNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textLayoutProperty->UpdateContent(dialogTheme->GetConfirmText());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("y-d-M");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -586,27 +555,25 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder006, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -619,6 +586,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder006, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder007, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -628,9 +596,10 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder007, TestSize.Level1)
     auto textConfirmNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textLayoutProperty->UpdateContent(dialogTheme->GetConfirmText());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("M-y-d");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -642,27 +611,25 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder007, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -675,6 +642,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder007, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder008, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -684,9 +652,10 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder008, TestSize.Level1)
     auto textConfirmNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textLayoutProperty->UpdateContent(dialogTheme->GetConfirmText());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("d-M-y");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -698,27 +667,25 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder008, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -731,6 +698,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder008, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder009, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -740,9 +708,10 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder009, TestSize.Level1)
     auto textConfirmNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textLayoutProperty->UpdateContent(dialogTheme->GetConfirmText());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("d-y-M");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -754,27 +723,25 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder009, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -787,6 +754,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder009, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder010, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -797,6 +765,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder010, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("M-d-y");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -808,29 +777,28 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder010, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     auto yearColumnPattern = yearColumnNode->GetPattern<DatePickerColumnPattern>();
     yearColumnPattern->SetCurrentIndex(YEARINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear() + YEARINDEX) + CONNECTER +
-                                                    std::to_string(pickerDate.GetMonth()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+                                                    std::to_string(pickerDate.GetMonth() + YEARINDEX) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
 
@@ -842,6 +810,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder010, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder011, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -852,6 +821,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder011, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("M-d-y");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -863,29 +833,28 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder011, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     auto monthColumnPattern = monthColumnNode->GetPattern<DatePickerColumnPattern>();
     monthColumnPattern->SetCurrentIndex(MONTHINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetMonth() + MONTHINDEX) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear() + MONTHINDEX) + CONNECTER +
+                                                    std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
 
@@ -897,6 +866,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder011, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder012, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -907,6 +877,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder012, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("M-y-d");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -918,30 +889,29 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder012, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     auto dayColumnPattern = dayColumnNode->GetPattern<DatePickerColumnPattern>();
     dayColumnPattern->SetCurrentIndex(DAYINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetMonth()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetDay() + DAYINDEX));
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+                                                    std::to_string(pickerDate.GetMonth() + DAYINDEX) + CONNECTER +
+                                                    std::to_string(pickerDate.GetDay()));
 }
 
 /**
@@ -952,6 +922,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder012, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder013, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -962,6 +933,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder013, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("M-y-d");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -973,30 +945,29 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder013, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     auto yearColumnPattern = yearColumnNode->GetPattern<DatePickerColumnPattern>();
     yearColumnPattern->SetCurrentIndex(YEARINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetMonth() + YEARINDEX) + CONNECTER +
-                                                    std::to_string(pickerDate.GetDay()));
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+                                                    std::to_string(pickerDate.GetMonth()) + CONNECTER +
+                                                    std::to_string(pickerDate.GetDay() + YEARINDEX));
 }
 
 /**
@@ -1007,6 +978,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder013, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder014, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1017,6 +989,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder014, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("M-y-d");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1028,28 +1001,27 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder014, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     auto monthColumnPattern = monthColumnNode->GetPattern<DatePickerColumnPattern>();
     monthColumnPattern->SetCurrentIndex(MONTHINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear() + MONTHINDEX) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear() + MONTHINDEX) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -1062,6 +1034,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder014, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder015, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1072,6 +1045,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder015, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("M-d-y");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1083,28 +1057,27 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder015, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     auto dayColumnPattern = dayColumnNode->GetPattern<DatePickerColumnPattern>();
     dayColumnPattern->SetCurrentIndex(DAYINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay() + DAYINDEX));
 }
@@ -1117,6 +1090,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder015, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder016, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1127,6 +1101,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder016, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("d-M-y");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1138,30 +1113,29 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder016, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     auto yearColumnPattern = yearColumnNode->GetPattern<DatePickerColumnPattern>();
     yearColumnPattern->SetCurrentIndex(YEARINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetMonth()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetDay() + YEARINDEX));
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+                                                    std::to_string(pickerDate.GetMonth() + YEARINDEX) + CONNECTER +
+                                                    std::to_string(pickerDate.GetDay()));
 }
 
 /**
@@ -1172,6 +1146,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder016, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder017, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1182,6 +1157,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder017, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("d-M-y");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1193,30 +1169,29 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder017, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     auto monthColumnPattern = monthColumnNode->GetPattern<DatePickerColumnPattern>();
     monthColumnPattern->SetCurrentIndex(MONTHINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetMonth() + MONTHINDEX) + CONNECTER +
-                                                    std::to_string(pickerDate.GetDay()));
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+                                                    std::to_string(pickerDate.GetMonth()) + CONNECTER +
+                                                    std::to_string(pickerDate.GetDay() + MONTHINDEX));
 }
 
 /**
@@ -1227,6 +1202,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder017, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder018, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1237,6 +1213,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder018, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("d-M-y");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1248,28 +1225,27 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder018, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     auto dayColumnPattern = dayColumnNode->GetPattern<DatePickerColumnPattern>();
     dayColumnPattern->SetCurrentIndex(DAYINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear() + DAYINDEX) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear() + DAYINDEX) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -1282,6 +1258,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder018, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder019, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1292,6 +1269,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder019, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("d-y-M");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1303,30 +1281,29 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder019, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     auto yearColumnPattern = yearColumnNode->GetPattern<DatePickerColumnPattern>();
     yearColumnPattern->SetCurrentIndex(YEARINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetMonth() + YEARINDEX) + CONNECTER +
-                                                    std::to_string(pickerDate.GetDay()));
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+                                                    std::to_string(pickerDate.GetMonth()) + CONNECTER +
+                                                    std::to_string(pickerDate.GetDay() + YEARINDEX));
 }
 
 /**
@@ -1337,6 +1314,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder019, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder020, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1347,6 +1325,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder020, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("d-y-M");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1358,30 +1337,29 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder020, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     auto monthColumnPattern = monthColumnNode->GetPattern<DatePickerColumnPattern>();
     monthColumnPattern->SetCurrentIndex(MONTHINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetMonth()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetDay() + MONTHINDEX));
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+                                                    std::to_string(pickerDate.GetMonth() + MONTHINDEX) + CONNECTER +
+                                                    std::to_string(pickerDate.GetDay()));
 }
 
 /**
@@ -1392,6 +1370,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder020, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder021, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1402,6 +1381,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder021, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("d-y-M");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1413,28 +1393,27 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder021, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     auto dayColumnPattern = dayColumnNode->GetPattern<DatePickerColumnPattern>();
     dayColumnPattern->SetCurrentIndex(DAYINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear() + DAYINDEX) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear() + DAYINDEX) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -1447,6 +1426,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder021, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder022, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1457,6 +1437,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder022, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("y-d-M");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1468,28 +1449,27 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder022, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     auto yearColumnPattern = yearColumnNode->GetPattern<DatePickerColumnPattern>();
     yearColumnPattern->SetCurrentIndex(YEARINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear() + YEARINDEX) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear() + YEARINDEX) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -1502,6 +1482,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder022, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder023, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1512,6 +1493,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder023, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("y-d-M");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1523,28 +1505,27 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder023, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     auto monthColumnPattern = monthColumnNode->GetPattern<DatePickerColumnPattern>();
     monthColumnPattern->SetCurrentIndex(MONTHINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth() + MONTHINDEX) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -1557,6 +1538,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder023, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder024, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1567,6 +1549,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder024, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("y-d-M");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1578,28 +1561,27 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder024, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     auto dayColumnPattern = dayColumnNode->GetPattern<DatePickerColumnPattern>();
     dayColumnPattern->SetCurrentIndex(DAYINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay() + DAYINDEX));
 }
@@ -1612,6 +1594,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder024, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder025, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1622,6 +1605,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder025, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("y-M-d");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1633,28 +1617,27 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder025, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     auto yearColumnPattern = yearColumnNode->GetPattern<DatePickerColumnPattern>();
     yearColumnPattern->SetCurrentIndex(YEARINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear() + YEARINDEX) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear() + YEARINDEX) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -1667,6 +1650,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder025, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder026, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1677,6 +1661,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder026, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("y-M-d");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1688,30 +1673,29 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder026, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     auto monthColumnPattern = monthColumnNode->GetPattern<DatePickerColumnPattern>();
     monthColumnPattern->SetCurrentIndex(MONTHINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetMonth() + MONTHINDEX) + CONNECTER +
-                                                    std::to_string(pickerDate.GetDay()));
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+                                                    std::to_string(pickerDate.GetMonth()) + CONNECTER +
+                                                    std::to_string(pickerDate.GetDay() + MONTHINDEX));
 }
 
 /**
@@ -1722,6 +1706,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder026, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder027, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1732,6 +1717,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder027, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("y-M-d");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1743,30 +1729,29 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder027, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     auto dayColumnPattern = dayColumnNode->GetPattern<DatePickerColumnPattern>();
     dayColumnPattern->SetCurrentIndex(DAYINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetMonth()) + CONNECTER +
-                                                    std::to_string(pickerDate.GetDay() + DAYINDEX));
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+                                                    std::to_string(pickerDate.GetMonth() + DAYINDEX) + CONNECTER +
+                                                    std::to_string(pickerDate.GetDay()));
 }
 
 /**
@@ -1777,6 +1762,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder027, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder028, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1797,20 +1783,20 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder028, TestSize.Level1)
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     datePickerPattern->HandleReduceLunarMonthDaysChange(0);
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->HandleReduceLunarMonthDaysChange(0);
 
@@ -1836,6 +1822,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder028, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder029, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1846,6 +1833,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder029, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     bool hasYearNode = datePickerPattern->HasYearNode();
     bool hasMonthNode = datePickerPattern->HasMonthNode();
     bool hasDayNode = datePickerPattern->HasDayNode();
@@ -1855,20 +1843,20 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder029, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->HandleReduceLunarDayChange(0);
     EXPECT_NE(datePickerPattern, nullptr);
@@ -1893,6 +1881,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder029, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder030, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1903,6 +1892,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder030, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     bool hasYearNode = datePickerPattern->HasYearNode();
     bool hasMonthNode = datePickerPattern->HasMonthNode();
     bool hasDayNode = datePickerPattern->HasDayNode();
@@ -1912,20 +1902,20 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder030, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
 
     auto allChildNode = datePickerPattern->GetAllChildNode();
@@ -1945,6 +1935,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder030, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder031, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1955,6 +1946,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder031, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     bool hasYearNode = datePickerPattern->HasYearNode();
     bool hasMonthNode = datePickerPattern->HasMonthNode();
     bool hasDayNode = datePickerPattern->HasDayNode();
@@ -1964,20 +1956,20 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder031, TestSize.Level1)
     RefPtr<FrameNode> monthColumnNode = CreateMonthColumnNode(datePickerPattern, showCount);
     RefPtr<FrameNode> dayColumnNode = CreateDayColumnNode(datePickerPattern, showCount);
     if (!hasYearNode) {
-        CreateYearColumnNode(yearColumnNode, datePickerNode);
+        CreateDateColumn(yearColumnNode, datePickerNode);
     }
     if (!hasMonthNode) {
-        CreateMonthOrDayColumnNode(monthColumnNode, datePickerNode, Color::BLUE);
+        CreateDateColumn(monthColumnNode, datePickerNode);
     }
     if (!hasDayNode) {
-        CreateMonthOrDayColumnNode(dayColumnNode, datePickerNode, Color::GRAY);
+        CreateDateColumn(dayColumnNode, datePickerNode);
     }
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
 
     auto allChildNode = datePickerPattern->GetAllChildNode();
@@ -1987,5 +1979,139 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder031, TestSize.Level1)
     monthNode->GetPattern<DatePickerColumnPattern>()->SetCurrentIndex(6);
     datePickerPattern->HandleReduceLunarDayChange(0);
     EXPECT_NE(datePickerPattern, nullptr);
+}
+
+/**
+ * @tc.name: DatePickerOrder032
+ * @tc.desc: Test DatePickerDialog OnLanguageConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerOrderTest, DatePickerOrder032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Set the initial language and city.
+     */
+    const std::string language = "ug";
+    const std::string countryOrRegion = "Kashgar";
+    const std::string script = "维吾尔";
+    const std::string keywordsAndValues = "";
+
+    AceApplicationInfo::GetInstance().SetLocale(language, countryOrRegion, script, keywordsAndValues);
+
+    /**
+     * @tc.steps: steps2. Create DatePickerDialog.
+     */
+    DialogProperties dialogProperties;
+
+    DatePickerSettingData settingData;
+    settingData.lunarswitch = true;
+
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo buttonInfo;
+    buttonInfo.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(buttonInfo);
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+
+    auto firstColumnNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
+    ASSERT_NE(firstColumnNode, nullptr);
+
+    auto secondColumnNode = AceType::DynamicCast<FrameNode>(firstColumnNode->GetFirstChild());
+    ASSERT_NE(secondColumnNode, nullptr);
+
+    auto midStackNode = AceType::DynamicCast<FrameNode>(secondColumnNode->GetChildAtIndex(1));
+    ASSERT_NE(midStackNode, nullptr);
+
+    auto datePickerNode = AceType::DynamicCast<FrameNode>(midStackNode->GetFirstChild());
+    ASSERT_NE(datePickerNode, nullptr);
+
+    auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    EXPECT_EQ(datePickerPattern->dateOrder_, EXPECT_DATE_ORDER_MAP.find(language)->second);
+
+    /**
+     * @tc.steps: steps3. Switch language and city.
+     * @tc.expected: The dateOrder_ changed, and isDateOrderChange_ equals true.
+     */
+    const std::string newLanguage = "fa";
+    const std::string newCountryOrRegion = "Hamedan";
+    const std::string newScript = "哈马丹";
+    const std::string newKeywordsAndValues = "";
+    AceApplicationInfo::GetInstance().SetLocale(newLanguage, newCountryOrRegion, newScript, newKeywordsAndValues);
+
+    datePickerPattern->OnLanguageConfigurationUpdate();
+    EXPECT_EQ(datePickerPattern->dateOrder_, EXPECT_DATE_ORDER_MAP.find(newLanguage)->second);
+    EXPECT_EQ(datePickerPattern->isDateOrderChange_, true);
+
+    /**
+     * @tc.steps: steps4. OnModifyDone update the properties and layout.
+     * @tc.expected: The isDateOrderChange_ equals false.
+     */
+    datePickerPattern->OnModifyDone();
+    EXPECT_EQ(datePickerPattern->isDateOrderChange_, false);
+}
+
+/**
+ * @tc.name: DatePickerOrder033
+ * @tc.desc: Test DatePicker OnLanguageConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerOrderTest, DatePickerOrder033, TestSize.Level1)
+{
+    /**
+    * @tc.steps: steps1. Set the initial language and city.
+    */
+    const std::string language = "ug";
+    const std::string countryOrRegion = "Kashgar";
+    const std::string script = "维吾尔";
+    const std::string keywordsAndValues = "";
+
+    AceApplicationInfo::GetInstance().SetLocale(language, countryOrRegion, script, keywordsAndValues);
+
+    /**
+    * @tc.steps: steps2. Create DatePicker.
+    */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    frameNode->MarkModifyDone();
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    EXPECT_EQ(datePickerPattern->dateOrder_, EXPECT_DATE_ORDER_MAP.find(language)->second);
+
+    /**
+     * @tc.steps: steps3. Switch language and city.
+     * @tc.expected: The dateOrder_ changed, and isDateOrderChange_ equals true.
+     */
+    const std::string newLanguage = "fa";
+    const std::string newCountryOrRegion = "Hamedan";
+    const std::string newScript = "哈马丹";
+    const std::string newKeywordsAndValues = "";
+    AceApplicationInfo::GetInstance().SetLocale(newLanguage, newCountryOrRegion, newScript, newKeywordsAndValues);
+
+    datePickerPattern->OnLanguageConfigurationUpdate();
+    EXPECT_EQ(datePickerPattern->dateOrder_, EXPECT_DATE_ORDER_MAP.find(newLanguage)->second);
+    EXPECT_EQ(datePickerPattern->isDateOrderChange_, true);
+
+    /**
+    * @tc.steps: steps4. OnModifyDone update the properties and layout.
+    * @tc.expected: The isDateOrderChange_ equals false.
+    */
+    datePickerPattern->OnModifyDone();
+    EXPECT_EQ(datePickerPattern->isDateOrderChange_, false);
 }
 } // namespace OHOS::Ace::NG

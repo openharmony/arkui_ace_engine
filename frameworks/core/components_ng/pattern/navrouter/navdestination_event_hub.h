@@ -22,11 +22,13 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"
+#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "core/components_ng/pattern/navigation/nav_bar_event_hub.h"
 
 namespace OHOS::Ace::NG {
 using OnStateChangeEvent = std::function<void(bool)>;
 using namespace Framework;
-class NavDestinationEventHub : public EventHub {
+class NavDestinationEventHub : public NavBarEventHub {
     DECLARE_ACE_TYPE(NavDestinationEventHub, EventHub)
 public:
     void SetOnStateChange(const OnStateChangeEvent& changeEvent)
@@ -79,9 +81,11 @@ public:
 
     void FireOnAppear() override;
 
-    void FireDisappearCallback()
+    void FireDisappearCallback(const RefPtr<NavDestinationGroupNode>& navDestination)
     {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to onDisappear state.", name_.c_str());
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+            "%{public}s lifecycle Respond user onDisappear. navdestinationId:%{public}d, navigationId:%{public}d",
+            name_.c_str(), navDestination->GetId(), navDestination->GetNavigationNodeId());
         EventHub::FireOnDisappear();
     }
 
@@ -171,6 +175,32 @@ public:
         state_ = state;
     }
 
+    void SetOnActive(const std::function<void(int32_t)>& onActive)
+    {
+        onActive_ = onActive;
+    }
+
+    void FireOnActive(int32_t reason);
+
+    void SetOnInactive(const std::function<void(int32_t)>& onInactive)
+    {
+        onInactive_ = onInactive;
+    }
+
+    void FireOnInactive(int32_t reason);
+
+    void SetOnNewParam(NavDestinationOnNewParamCallback&& onNewParamCallback)
+    {
+        onNewParamCallback_ = onNewParamCallback;
+    }
+
+    void FireOnNewParam(napi_value param)
+    {
+        if (onNewParamCallback_) {
+            onNewParamCallback_(param);
+        }
+    }
+
 private:
     WeakPtr<AceType> GetNavDestinationPattern() const
     {
@@ -189,6 +219,9 @@ private:
     std::function<void()> onWillHide_;
     std::function<void()> onWillDisAppear_;
     std::function<bool()> onBackPressedEvent_;
+    std::function<void(int32_t)> onInactive_;
+    std::function<void(int32_t)> onActive_;
+    NavDestinationOnNewParamCallback onNewParamCallback_;
     std::function<void(RefPtr<NavDestinationContext>)> onReadyEvent_;
     std::unordered_map<int32_t, OnStateChangeEvent> onHiddenChange_;
     std::string name_;

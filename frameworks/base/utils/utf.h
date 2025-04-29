@@ -67,6 +67,7 @@ constexpr uint8_t MUTF8_3B_SECOND = 0x80;
 constexpr uint8_t MUTF8_3B_THIRD = 0x80;
 
 constexpr uint8_t MUTF8_4B_FIRST = 0xf0;
+constexpr uint8_t MUTF8_4B_FIRST_MASK = 0xf8;
 
 constexpr size_t MAX_U16 = 0xffff;
 constexpr size_t CONST_2 = 2;
@@ -103,8 +104,8 @@ constexpr uint8_t UTF8_3B_SECOND_MIN = 0xa0; // the minimum for 3 bytes is 2048,
 constexpr uint8_t UTF8_4B_FIRST = 0xf0;
 constexpr uint8_t UTF8_4B_SECOND_MIN = 0x90; // the minimum for 4 bytes is 65536, which is 0xf0908080
 
-constexpr uint8_t byteMask = 0xbf;
-constexpr uint8_t byteMark = 0x80;
+constexpr uint8_t BYTE_MASK = 0xbf;
+constexpr uint8_t BYTE_MARK = 0x80;
 
 enum UTF8BytePatterns {
     UTF8_TWO_BYTE_MASK = 0xE0,

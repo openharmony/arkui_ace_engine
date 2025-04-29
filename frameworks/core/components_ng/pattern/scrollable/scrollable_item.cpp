@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "base/utils/system_properties.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<ScrollableItem> ScrollableItem::GetOrCreateScrollableItem(

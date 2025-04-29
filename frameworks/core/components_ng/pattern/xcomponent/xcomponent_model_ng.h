@@ -20,12 +20,24 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NG {
 class FrameNode;
 
+class ArkUI_XComponent_Params final : public ArkUI_Params {
+public:
+    std::string id;
+    XComponentType type = XComponentType::SURFACE;
+    std::optional<std::string> libraryName = std::nullopt;
+    std::shared_ptr<InnerXComponentController> controller = nullptr;
+    void* aiOptions = nullptr;
+    std::optional<uint64_t> screenId = std::nullopt;
+};
+
 class ACE_EXPORT XComponentModelNG : public OHOS::Ace::XComponentModel {
 public:
+    void Create(XComponentType type) override;
     void Create(const std::optional<std::string>& id, XComponentType type,
         const std::optional<std::string>& libraryname,
         const std::shared_ptr<InnerXComponentController>& xcomponentController) override;
@@ -41,16 +53,23 @@ public:
     void RegisterOnDestroy(const RefPtr<AceType>& node, DestroyEvent&& onDestroy) override;
     bool IsTexture() override;
     void SetDetachCallback(DetachCallback&& onDetach) override;
-    void EnableAnalyzer(bool enable) override;
-    void SetImageAIOptions(void* options) override;
     void SetControllerOnCreated(SurfaceCreatedEvent&& onCreated) override;
     void SetControllerOnChanged(SurfaceChangedEvent&& onChanged) override;
     void SetControllerOnDestroyed(SurfaceDestroyedEvent&& onDestroyed) override;
+    void EnableAnalyzer(bool enable) override;
+    void SetImageAIOptions(void* options) override;
+    void SetRenderFit(RenderFit renderFit) override;
+    void EnableSecure(bool isSecure) override;
+    void HdrBrightness(float hdrBrightness) override;
+    void EnableTransparentLayer(bool isTransparentLayer) override;
+    void SetScreenId(uint64_t screenId) override;
 
     static bool IsTexture(FrameNode* frameNode);
     static XComponentType GetType(FrameNode* frameNode);
     static RefPtr<FrameNode> CreateFrameNode(
-        int32_t nodeId, const std::string& id, XComponentType type, const std::string& libraryname);
+        int32_t nodeId, const std::string& id, XComponentType type, const std::optional<std::string>& libraryname);
+    static RefPtr<FrameNode> CreateTypeNode(int32_t nodeId, ArkUI_XComponent_Params* params);
+    static void InitXComponent(FrameNode* frameNode);
     static void SetXComponentId(FrameNode* frameNode, const std::string& id);
     static void SetXComponentType(FrameNode* frameNode, XComponentType type);
     static void SetXComponentSurfaceSize(FrameNode* frameNode, uint32_t width, uint32_t height);
@@ -64,6 +83,20 @@ public:
     static void SetControllerOnDestroyed(FrameNode* frameNode, SurfaceDestroyedEvent&& onDestroyed);
     static void SetDetachCallback(FrameNode* frameNode, DetachCallback&& onDetach);
     static void SetImageAIOptions(FrameNode* frameNode, void* options);
+    static void SetOnLoad(FrameNode* frameNode, LoadEvent&& onLoad);
+    static void SetOnDestroy(FrameNode* frameNode, DestroyEvent&& onDestroy);
+    static void EnableAnalyzer(FrameNode* frameNode, bool enable);
+    static void EnableSecure(FrameNode* frameNode, bool enable);
+    static void HdrBrightness(FrameNode* frameNode, float hdrBrightness);
+    static void EnableTransparentLayer(FrameNode* frameNode, bool enable);
+    static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
+    static RenderFit GetSurfaceRenderFit(FrameNode* frameNode);
+    static void SetXComponentSurfaceRect(FrameNode* frameNode, float offsetX, float offsetY,
+        float surfaceWidth, float surfaceHeight);
+    static void GetXComponentSurfaceRect(FrameNode* frameNode, float& offsetX, float& offsetY,
+        float& surfaceWidth, float& surfaceHeight);
+    static bool GetXComponentEnableAnalyzer(FrameNode* frameNode);
+    static void SetScreenId(FrameNode* frameNode, uint64_t screenId);
 
 private:
     static XComponentType GetTypeImpl(const RefPtr<FrameNode>& frameNode);

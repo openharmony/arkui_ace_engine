@@ -14,19 +14,10 @@
  */
 
 #include "core/components_ng/pattern/loading_progress/loading_progress_modifier.h"
-#include <algorithm>
 
 #include "base/geometry/arc.h"
-#include "base/geometry/dimension.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "bridge/common/dom/dom_type.h"
-#include "core/components/common/properties/animation_option.h"
-#include "core/components/progress/progress_theme.h"
-#include "core/components_ng/base/modifier.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_utill.h"
-#include "core/components_ng/pattern/refresh/refresh_animation_state.h"
-#include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
@@ -143,7 +134,7 @@ void LoadingProgressModifier::DrawRing(DrawingContext& context, const RingParam&
     auto ringColor = color_->Get();
     ringColor.BlendOpacity(RING_ALPHA);
     pen.SetColor(ToRSColor(ringColor));
-    if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+    if (Container::CurrentColorMode() == ColorMode::DARK) {
         if (ringColor.GetValue() == DEFAULT_COLOR_DARK.GetValue()) {
             ringColor = LinearColor::WHITE;
         }
@@ -162,7 +153,7 @@ void LoadingProgressModifier::DrawRing(DrawingContext& context, const RingParam&
 #endif
         pen.SetFilter(filter);
     }
-    if (loadingProgressOwner_ == LoadingProgressOwner::REFRESH && SystemProperties::GetColorMode() == ColorMode::DARK) {
+    if (loadingProgressOwner_ == LoadingProgressOwner::REFRESH && Container::CurrentColorMode() == ColorMode::DARK) {
         filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
             RSBlurType::NORMAL, PipelineBase::GetCurrentDensity() * REFRESH_DARK_MODE_RING_BLUR_RADIUS));
         pen.SetFilter(filter);
@@ -236,7 +227,7 @@ void LoadingProgressModifier::DrawOrbit(
     matrix.MapPoints(distPoints, points, points.size());
     auto cometColor = color_->Get();
     float colorAlpha = cometColor.GetAlpha() / FULL_OPACITY;
-    if (SystemProperties::GetColorMode() == ColorMode::DARK && cometColor.GetValue() == DEFAULT_COLOR_DARK.GetValue()) {
+    if (Container::CurrentColorMode() == ColorMode::DARK && cometColor.GetValue() == DEFAULT_COLOR_DARK.GetValue()) {
         colorAlpha = OPACITY3;
     }
     auto baseAlpha = colorAlpha * cometParam.alphaScale;
@@ -280,7 +271,7 @@ void LoadingProgressModifier::StartRecycleRingAnimation()
     AnimationOption option;
     option.SetDuration(isVisible_ ? LOADING_DURATION : 0);
     option.SetCurve(previousStageCurve);
-    if (context->IsFormRender()) {
+    if (context->IsFormRender() && !IsDynamicComponent()) {
         option.SetIteration(1);
     } else {
         option.SetIteration(-1);
@@ -317,7 +308,7 @@ void LoadingProgressModifier::StartRecycleCometAnimation()
     AnimationOption option;
     option.SetDuration(isVisible_ ? LOADING_DURATION : 0);
     option.SetCurve(curve);
-    if (context->IsFormRender()) {
+    if (context->IsFormRender() && !IsDynamicComponent()) {
         option.SetIteration(1);
     } else {
         option.SetIteration(-1);
@@ -435,7 +426,7 @@ void LoadingProgressModifier::StartRecycle()
         option.SetDuration(isVisible_ ? LOADING_DURATION : 0);
         option.SetDelay(0);
         option.SetCurve(curve);
-        if (context->IsFormRender()) {
+        if (context->IsFormRender() && !IsDynamicComponent()) {
             option.SetIteration(1);
         } else {
             option.SetIteration(-1);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,19 +15,15 @@
 
 #include "core/components_ng/render/adapter/animated_image.h"
 
-#ifdef USE_ROSEN_DRAWING
-#include "drawing/engine_adapter/skia_adapter/skia_bitmap.h"
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
 #include "drawing/engine_adapter/skia_adapter/skia_image_info.h"
-#endif
-#include "core/animation/picture_animation.h"
-#ifndef USE_ROSEN_DRAWING
-#include "core/components_ng/image_provider/adapter/skia_image_data.h"
-#else
-#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
-#endif
+
+#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
+
 #include "core/components_ng/image_provider/image_utils.h"
-#include "core/image/sk_image_cache.h"
+#include "core/image/image_cache.h"
+#include "core/pipeline_ng/pipeline_context.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t STANDARD_FRAME_DURATION = 100;
@@ -45,30 +41,13 @@ inline void RSDataWrapperReleaseProc(const void*, void* context)
 }
 } // namespace
 
-#ifndef USE_ROSEN_DRAWING
-RefPtr<CanvasImage> AnimatedImage::Create(
-    const RefPtr<SkiaImageData>& data, const ResizeParam& size, const std::string& url)
-{
-    CHECK_NULL_RETURN(data, nullptr);
-    auto skData = data->GetSkData();
-    CHECK_NULL_RETURN(skData, nullptr);
-    auto codec = SkCodec::MakeFromData(skData);
-    CHECK_NULL_RETURN(codec, nullptr);
-    if (SystemProperties::GetImageFrameworkEnabled()) {
-        auto src = ImageSource::Create(skData->bytes(), skData->size());
-        CHECK_NULL_RETURN(src, nullptr);
-        return MakeRefPtr<AnimatedPixmap>(codec, src, size, url);
-    }
-    return MakeRefPtr<AnimatedSkImage>(std::move(codec), url);
-}
-#else
 RefPtr<CanvasImage> AnimatedImage::Create(
     const RefPtr<DrawingImageData>& data, const ResizeParam& size, const std::string& url)
 {
     CHECK_NULL_RETURN(data, nullptr);
     auto rsData = data->GetRSData();
     CHECK_NULL_RETURN(rsData, nullptr);
-    RSDataWrapper* wrapper = new RSDataWrapper{rsData};
+    RSDataWrapper* wrapper = new RSDataWrapper { rsData };
     auto skData = SkData::MakeWithProc(rsData->GetData(), rsData->GetSize(), RSDataWrapperReleaseProc, wrapper);
     auto codec = SkCodec::MakeFromData(skData);
     CHECK_NULL_RETURN(codec, nullptr);
@@ -79,66 +58,80 @@ RefPtr<CanvasImage> AnimatedImage::Create(
     }
     return MakeRefPtr<AnimatedRSImage>(std::move(codec), url);
 }
-#endif
 
-AnimatedImage::AnimatedImage(const std::unique_ptr<SkCodec>& codec, std::string url) : cacheKey_(std::move(url))
+AnimatedImage::AnimatedImage(const std::unique_ptr<SkCodec>& codec, std::string url)
+    : cacheKey_(std::move(url)), duration_(GenerateDuration(codec)), iteration_(GenerateIteration(codec))
+{}
+
+AnimatedImage::~AnimatedImage() = default;
+
+void AnimatedImage::PostPlayTask(uint32_t idx, int iteration)
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    animator_ = CREATE_ANIMATOR(pipelineContext);
-    animator_->PreventFrameJank();
+    if (idx == static_cast<uint32_t>(duration_.size())) {
+        iteration--;
+        idx = 0;
+    }
+    if (iteration == 0) {
+        animationState_ = false;
+        return;
+    }
+    RenderFrame(idx);
+    animationState_ = true;
+    currentIdx_ = idx;
+    iteration_ = iteration;
+    currentTask_.Reset([weak = WeakClaim(this), idx, iteration] {
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+        self->PostPlayTask(idx + 1, iteration);
+    });
+    ImageUtils::PostDelayedTaskToUI(currentTask_, duration_[idx], "ArkUIImageAnimatedPostPlayTask");
+}
 
-    // set up animator
-    int32_t totalDuration = 0;
+std::vector<int> AnimatedImage::GenerateDuration(const std::unique_ptr<SkCodec>& codec)
+{
+    std::vector<int> duration;
     auto info = codec->getFrameInfo();
     for (int32_t i = 0; i < codec->getFrameCount(); ++i) {
         if (info[i].fDuration <= 0) {
-            info[i].fDuration = STANDARD_FRAME_DURATION;
+            duration.push_back(STANDARD_FRAME_DURATION);
+        } else {
+            duration.push_back(info[i].fDuration);
         }
-        totalDuration += info[i].fDuration;
     }
-    animator_->SetDuration(totalDuration);
-    // repetition is 0 => play only once
-    auto iteration = codec->getRepetitionCount() + 1;
-    if (iteration == 0) {
-        iteration = ANIMATION_REPEAT_INFINITE;
-    }
-    animator_->SetIteration(iteration);
-    if (pipelineContext->IsFormRender() && animator_->GetIteration() != 0) {
-        animator_->SetIteration(FORM_REPEAT_COUNT);
-    }
-
-    // initialize PictureAnimation interpolator
-    auto picAnimation = MakeRefPtr<PictureAnimation<uint32_t>>();
-    CHECK_NULL_VOID(picAnimation);
-    for (int32_t i = 0; i < codec->getFrameCount(); ++i) {
-        picAnimation->AddPicture(static_cast<float>(info[i].fDuration) / totalDuration, i);
-    }
-    picAnimation->AddListener([weak = WeakClaim(this)](const uint32_t idx) {
-        auto self = weak.Upgrade();
-        CHECK_NULL_VOID(self);
-        self->RenderFrame(idx);
-    });
-    animator_->AddInterpolator(picAnimation);
-
-    animator_->Play();
+    return duration;
 }
 
-AnimatedImage::~AnimatedImage()
+int AnimatedImage::GenerateIteration(const std::unique_ptr<SkCodec>& codec)
 {
-    // animator has to destruct on UI thread
-    ImageUtils::PostToUI([animator = animator_]() mutable { animator.Reset(); }, "ArkUIImageResetAnimated");
+    auto iteration = codec->getRepetitionCount() + 1;
+    if (iteration == 0) {
+        iteration = INT_MAX;
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, 1);
+    if (pipeline->IsFormRenderExceptDynamicComponent()) {
+        iteration = FORM_REPEAT_COUNT;
+    }
+    return iteration;
 }
 
 void AnimatedImage::ControlAnimation(bool play)
 {
-    (play) ? animator_->Play() : animator_->Pause();
+    if (play && !animationState_) {
+        PostPlayTask(currentIdx_, iteration_);
+        return;
+    }
+    if (!play && animationState_) {
+        auto result = currentTask_.Cancel();
+        if (result) {
+            animationState_ = false;
+        }
+    }
 }
 
-
-Animator::Status AnimatedImage::GetAnimatorStatus() const
+bool AnimatedImage::GetIsAnimating() const
 {
-    return animator_ ? animator_->GetStatus() : Animator::Status::IDLE;
+    return animationState_;
 }
 
 void AnimatedImage::RenderFrame(uint32_t idx)
@@ -204,28 +197,16 @@ bool AnimatedImage::GetCachedFrame(uint32_t idx)
 // AnimatedSkImage implementation
 // ----------------------------------------------------------
 
-#ifndef USE_ROSEN_DRAWING
-sk_sp<SkImage> AnimatedSkImage::GetImage() const
-#else
 std::shared_ptr<RSImage> AnimatedRSImage::GetImage() const
-#endif
 {
     std::scoped_lock<std::mutex> lock(frameMtx_);
     return currentFrame_;
 }
 
-#ifndef USE_ROSEN_DRAWING
-void AnimatedSkImage::DecodeImpl(uint32_t idx)
-#else
 void AnimatedRSImage::DecodeImpl(uint32_t idx)
-#endif
 {
     SkImageInfo imageInfo = codec_->getInfo();
-#ifndef USE_ROSEN_DRAWING
-    SkBitmap bitmap;
-#else
     RSBitmap bitmap;
-#endif
 
     SkCodec::Options options;
     options.fFrameIndex = static_cast<int32_t>(idx);
@@ -238,20 +219,12 @@ void AnimatedRSImage::DecodeImpl(uint32_t idx)
         bitmap = requiredFrame_;
     } else {
         // create from empty layer
-#ifndef USE_ROSEN_DRAWING
-        bitmap.allocPixels(imageInfo);
-#else
         auto info = Rosen::Drawing::SkiaImageInfo::ConvertToRSImageInfo(imageInfo);
         bitmap.Build(info);
-#endif
     }
 
     // decode pixels from codec
-#ifndef USE_ROSEN_DRAWING
-    auto res = codec_->getPixels(imageInfo, bitmap.getPixels(), bitmap.rowBytes(), &options);
-#else
     auto res = codec_->getPixels(imageInfo, bitmap.GetPixels(), bitmap.GetRowBytes(), &options);
-#endif
     CHECK_NULL_VOID(res == SkCodec::kSuccess);
 
     // next frame will be drawn on top of this one
@@ -262,20 +235,12 @@ void AnimatedRSImage::DecodeImpl(uint32_t idx)
     // save current frame, notify redraw
     {
         std::scoped_lock<std::mutex> lock(frameMtx_);
-#ifndef USE_ROSEN_DRAWING
-        currentFrame_ = SkImage::MakeFromBitmap(bitmap);
-#else
         currentFrame_ = std::make_shared<RSImage>();
         currentFrame_->BuildFromBitmap(bitmap);
-#endif
     }
 }
 
-#ifndef USE_ROSEN_DRAWING
-void AnimatedSkImage::CacheFrame(const std::string& key)
-#else
 void AnimatedRSImage::CacheFrame(const std::string& key)
-#endif
 {
     auto ctx = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(ctx);
@@ -289,31 +254,16 @@ void AnimatedRSImage::CacheFrame(const std::string& key)
     cache->CacheImage(key, cacheNode);
 }
 
-#ifndef USE_ROSEN_DRAWING
-RefPtr<CanvasImage> AnimatedSkImage::GetCachedFrameImpl(const std::string& key)
-{
-    return SkiaImage::QueryFromCache(key);
-}
-#else
 RefPtr<CanvasImage> AnimatedRSImage::GetCachedFrameImpl(const std::string& key)
 {
     return DrawingImage::QueryFromCache(key);
 }
-#endif
 
-#ifndef USE_ROSEN_DRAWING
-void AnimatedSkImage::UseCachedFrame(RefPtr<CanvasImage>&& image)
-{
-    std::scoped_lock<std::mutex> lock(frameMtx_);
-    currentFrame_ = DynamicCast<SkiaImage>(image)->GetImage();
-}
-#else
 void AnimatedRSImage::UseCachedFrame(RefPtr<CanvasImage>&& image)
 {
     std::scoped_lock<std::mutex> lock(frameMtx_);
     currentFrame_ = DynamicCast<DrawingImage>(image)->GetImage();
 }
-#endif
 
 // ----------------------------------------------------------
 // AnimatedPixmap implementation
@@ -342,11 +292,6 @@ void AnimatedPixmap::DecodeImpl(uint32_t idx)
         intrSizeInitial_ = false;
     }
     RefPtr<PixelMap> frame;
-    if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_IMAGE,
-            "gif decode to pixmap, src=%{public}s, idx = %{public}d, resolutionQuality = %{public}s",
-            GetCacheKey().c_str(), idx, GetResolutionQuality(size_.imageQuality).c_str());
-    }
     if (size_.forceResize) {
         frame = src_->CreatePixelMap(idx, { size_.width, size_.height }, size_.imageQuality);
     } else {

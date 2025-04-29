@@ -27,6 +27,7 @@
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 #include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
+#include "bridge/declarative_frontend/jsview/js_navigation_utils.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/navigation_model_impl.h"
@@ -79,6 +80,8 @@ constexpr int32_t PARAMETER_LENGTH_ONE  = 1;
 constexpr int32_t PARAMETER_LENGTH_TWO  = 2;
 constexpr int32_t FIRST_INDEX  = 0;
 constexpr int32_t SECOND_INDEX  = 1;
+constexpr bool ENABLE_TOOLBAR_ADAPTATION_DEFULT = true;
+constexpr char MORE_BUTTON_OPTIONS_PROPERTY[] = "moreButtonOptions";
 
 JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent& eventInfo)
 {
@@ -89,6 +92,9 @@ JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent&
 
 void JSNavigation::ParseToolBarItems(const JSCallbackInfo& info, std::list<RefPtr<AceType>>& items)
 {
+    if (info[0]->IsUndefined()) {
+        return;
+    }
     JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(info[0]);
     auto length = jsArray->Length();
     for (size_t i = 0; i < length; i++) {
@@ -103,10 +109,12 @@ void JSNavigation::ParseToolBarItems(const JSCallbackInfo& info, std::list<RefPt
         if (itemValueObject->IsString()) {
             toolBarItem->value = itemValueObject->ToString();
         }
+
         auto itemIconObject = itemObject->GetProperty("icon");
         std::string icon;
         ParseJsMedia(itemIconObject, icon);
         toolBarItem->icon = icon;
+
         auto itemActionValue = itemObject->GetProperty("action");
         if (itemActionValue->IsFunction()) {
             auto onClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(itemActionValue));
@@ -132,135 +140,17 @@ void JSNavigation::ParseToolBarItems(const JSCallbackInfo& info, std::list<RefPt
     }
 }
 
-void JSNavigation::ParseBarItems(
-    const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::BarItem>& items)
-{
-    auto length = jsArray->Length();
-    for (size_t i = 0; i < length; i++) {
-        auto item = jsArray->GetValueAt(i);
-        if (!item->IsObject()) {
-            continue;
-        }
-        auto itemObject = JSRef<JSObject>::Cast(item);
-        NG::BarItem toolBarItem;
-        auto itemValueObject = itemObject->GetProperty("value");
-        if (itemValueObject->IsString()) {
-            toolBarItem.text = itemValueObject->ToString();
-        }
-
-        auto itemSymbolIconObject = itemObject->GetProperty("symbolIcon");
-        if (itemSymbolIconObject->IsObject()) {
-            std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
-            SetSymbolOptionApply(info, iconSymbol, itemSymbolIconObject);
-            toolBarItem.iconSymbol = iconSymbol;
-        }
-        auto itemIconObject = itemObject->GetProperty("icon");
-        if (itemIconObject->IsString()) {
-            toolBarItem.icon = itemIconObject->ToString();
-        }
-
-        auto itemEnabledObject = itemObject->GetProperty("isEnabled");
-        if (itemEnabledObject->IsBoolean()) {
-            toolBarItem.isEnabled = itemEnabledObject->ToBoolean();
-        }
-
-        auto itemActionValue = itemObject->GetProperty("action");
-        if (itemActionValue->IsFunction()) {
-            RefPtr<JsFunction> onClickFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(itemActionValue));
-            auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-            auto onItemClick = [execCtx = info.GetExecutionContext(), func = std::move(onClickFunc),
-                                   node = targetNode]() {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                if (func) {
-                    PipelineContext::SetCallBackNode(node);
-                    func->ExecuteJS();
-                }
-            };
-            toolBarItem.action = onItemClick;
-        }
-        items.push_back(toolBarItem);
-    }
-}
-
-void JSNavigation::ParseSymbolAndIcon(const JSCallbackInfo& info, NG::BarItem& toolBarItem,
-    const JSRef<JSObject>& itemObject)
-{
-    std::string icon;
-    std::string activeIcon;
-    auto itemSymbolIconObject = itemObject->GetProperty("symbolIcon");
-    if (itemSymbolIconObject->IsObject()) {
-        std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
-        SetSymbolOptionApply(info, iconSymbol, itemSymbolIconObject);
-        toolBarItem.iconSymbol = iconSymbol;
-    }
-    auto itemIconObject = itemObject->GetProperty("icon");
-    if (ParseJsMedia(itemIconObject, icon)) {
-        toolBarItem.icon = icon;
-    }
-
-    auto itemActiveSymbolIconObject = itemObject->GetProperty("activeSymbolIcon");
-    if (itemActiveSymbolIconObject->IsObject()) {
-        std::function<void(WeakPtr<NG::FrameNode>)> activeSymbol = nullptr;
-        SetSymbolOptionApply(info, activeSymbol, itemActiveSymbolIconObject);
-        toolBarItem.activeIconSymbol = activeSymbol;
-    }
-    auto itemActiveIconObject = itemObject->GetProperty("activeIcon");
-    if (ParseJsMedia(itemActiveIconObject, activeIcon)) {
-        toolBarItem.activeIcon = activeIcon;
-    }
-}
-
-void JSNavigation::ParseToolbarItemsConfiguration(
-    const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::BarItem>& items)
-{
-    auto length = jsArray->Length();
-    for (size_t i = 0; i < length; i++) {
-        auto item = jsArray->GetValueAt(i);
-        if (!item->IsObject()) {
-            continue;
-        }
-        NG::BarItem toolBarItem;
-        std::string text;
-
-        auto itemObject = JSRef<JSObject>::Cast(item);
-        auto itemValueObject = itemObject->GetProperty("value");
-        if (ParseJsString(itemValueObject, text)) {
-            toolBarItem.text = text;
-        }
-
-        auto itemActionValue = itemObject->GetProperty("action");
-        if (itemActionValue->IsFunction()) {
-            RefPtr<JsFunction> onClickFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(itemActionValue));
-            auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-            auto onItemClick = [execCtx = info.GetExecutionContext(), func = std::move(onClickFunc),
-                                   node = targetNode]() {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                if (func) {
-                    PipelineContext::SetCallBackNode(node);
-                    func->ExecuteJS();
-                }
-            };
-            toolBarItem.action = onItemClick;
-        }
-
-        auto itemStatusValue = itemObject->GetProperty("status");
-        if (itemStatusValue->IsNumber()) {
-            toolBarItem.status = static_cast<NG::NavToolbarItemStatus>(itemStatusValue->ToNumber<int32_t>());
-        }
-        ParseSymbolAndIcon(info, toolBarItem, itemObject);
-        items.push_back(toolBarItem);
-    }
-}
-
 bool JSNavigation::ParseCommonTitle(const JSRef<JSObject>& jsObj)
 {
     JSRef<JSVal> subtitle = jsObj->GetProperty("sub");
     JSRef<JSVal> title = jsObj->GetProperty("main");
-    bool hasSub = subtitle->IsString();
-    bool hasMain = title->IsString();
+    std::string mainTitle;
+    std::string subTitle;
+    bool hasSub = ParseJsString(subtitle, subTitle);
+    bool hasMain = ParseJsString(title, mainTitle);
     if (hasSub || hasMain) {
         return NavigationModel::GetInstance()->ParseCommonTitle(
-            hasSub, hasMain, subtitle->ToString(), title->ToString());
+            hasSub, hasMain, subTitle, mainTitle);
     }
     return false;
 }
@@ -367,6 +257,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("hideBackButton", &JSNavigation::SetHideBackButton, opt);
     JSClass<JSNavigation>::StaticMethod("hideToolBar", &JSNavigation::SetHideToolBar, opt);
     JSClass<JSNavigation>::StaticMethod("toolBar", &JSNavigation::SetToolBar);
+    JSClass<JSNavigation>::StaticMethod("enableToolBarAdaptation", &JSNavigation::SetEnableToolBarAdaptation);
     JSClass<JSNavigation>::StaticMethod("toolbarConfiguration", &JSNavigation::SetToolbarConfiguration);
     JSClass<JSNavigation>::StaticMethod("menus", &JSNavigation::SetMenus);
     JSClass<JSNavigation>::StaticMethod("menuCount", &JSNavigation::SetMenuCount);
@@ -389,6 +280,9 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("customNavContentTransition", &JSNavigation::SetCustomNavContentTransition);
     JSClass<JSNavigation>::StaticMethod("ignoreLayoutSafeArea", &JSNavigation::SetIgnoreLayoutSafeArea);
     JSClass<JSNavigation>::StaticMethod("systemBarStyle", &JSNavigation::SetSystemBarStyle);
+    JSClass<JSNavigation>::StaticMethod("recoverable", &JSNavigation::SetRecoverable);
+    JSClass<JSNavigation>::StaticMethod("enableDragBar", &JSNavigation::SetEnableDragBar);
+    JSClass<JSNavigation>::StaticMethod("enableModeChangeAnimation", &JSNavigation::SetEnableModeChangeAnimation);
     JSClass<JSNavigation>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -445,26 +339,10 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
         }
     } else {
         NavigationModel::GetInstance()->ParseCommonTitle(false, false, "", "");
-        return;
     }
 
     NG::NavigationTitlebarOptions options;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<NavigationBarTheme>();
-        CHECK_NULL_VOID(theme);
-        auto blurStyle = static_cast<BlurStyle>(theme->GetTitlebarBackgroundBlurStyle());
-        if (blurStyle != BlurStyle::NO_MATERIAL) {
-            options.bgOptions.blurStyle = blurStyle;
-            options.bgOptions.color = Color::TRANSPARENT;
-        }
-    }
-    if (info.Length() > 1) {
-        ParseBackgroundOptions(info[1], options.bgOptions);
-        ParseBarOptions(info[1], options.brOptions);
-        ParseTextOptions(info, info[1], options.textOptions);
-    }
+    JSNavigationUtils::ParseTitleBarOptions(info, true, options);
     NavigationModel::GetInstance()->SetTitlebarOptions(std::move(options));
 }
 
@@ -480,9 +358,39 @@ void JSNavigation::SetSubTitle(const std::string& subTitle)
     NavigationModel::GetInstance()->SetSubtitle(subTitle);
 }
 
-void JSNavigation::SetHideTitleBar(bool hide)
+void JSNavigation::SetHideTitleBar(const JSCallbackInfo& info)
 {
-    NavigationModel::GetInstance()->SetHideTitleBar(hide);
+    bool isHide = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        isHide = info[0]->ToBoolean();
+    }
+    bool isAnimated = false;
+    if (info.Length() > 1 && info[1]->IsBoolean()) {
+        isAnimated = info[1]->ToBoolean();
+    }
+    NavigationModel::GetInstance()->SetHideTitleBar(isHide, isAnimated);
+}
+
+void JSNavigation::SetEnableToolBarAdaptation(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        NavigationModel::GetInstance()->SetEnableToolBarAdaptation(ENABLE_TOOLBAR_ADAPTATION_DEFULT);
+        return;
+    }
+    auto enable = info[0]->ToBoolean();
+    NavigationModel::GetInstance()->SetEnableToolBarAdaptation(enable);
+}
+
+void JSNavigation::SetEnableModeChangeAnimation(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (info[0]->IsBoolean()) {
+        NavigationModel::GetInstance()->SetEnableModeChangeAnimation(info[0]->ToBoolean());
+        return;
+    }
+    NavigationModel::GetInstance()->SetEnableModeChangeAnimation(true);
 }
 
 void JSNavigation::SetHideNavBar(bool hide)
@@ -521,6 +429,15 @@ void JSNavigation::SetBackButtonIcon(const JSCallbackInfo& info)
     if (isSymbol) {
         SetSymbolOptionApply(info, iconSymbol, info[0]);
     }
+    if (info.Length() > 1) {
+        if (!info[1]->IsNull() && !info[1]->IsUndefined()) {
+            std::string backButtonAccessibilityText;
+            ParseJsString(info[1], backButtonAccessibilityText);
+            NavigationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, imageOption, pixMap, nameList,
+                true, backButtonAccessibilityText);
+            return;
+        }
+    }
     NavigationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, imageOption, pixMap, nameList);
 }
 
@@ -529,9 +446,17 @@ void JSNavigation::SetHideBackButton(bool hide)
     NavigationModel::GetInstance()->SetHideBackButton(hide);
 }
 
-void JSNavigation::SetHideToolBar(bool hide)
+void JSNavigation::SetHideToolBar(const JSCallbackInfo& info)
 {
-    NavigationModel::GetInstance()->SetHideToolBar(hide);
+    bool isHide = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        isHide = info[0]->ToBoolean();
+    }
+    bool isAnimated = false;
+    if (info.Length() > 1 && info[1]->IsBoolean()) {
+        isAnimated = info[1]->ToBoolean();
+    }
+    NavigationModel::GetInstance()->SetHideToolBar(isHide, isAnimated);
 }
 
 void JSNavigation::SetToolBar(const JSCallbackInfo& info)
@@ -561,7 +486,8 @@ void JSNavigation::SetToolBar(const JSCallbackInfo& info)
     }
     if (NavigationModel::GetInstance()->NeedSetItems()) {
         std::vector<NG::BarItem> toolBarItems;
-        ParseBarItems(info, JSRef<JSArray>::Cast(itemsValue), toolBarItems);
+        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        JSNavigationUtils::ParseBarItems(targetNode, info, JSRef<JSArray>::Cast(itemsValue), toolBarItems);
         NavigationModel::GetInstance()->SetToolBarItems(std::move(toolBarItems));
         return;
     }
@@ -572,14 +498,26 @@ void JSNavigation::SetToolBar(const JSCallbackInfo& info)
 
 void JSNavigation::SetToolbarConfiguration(const JSCallbackInfo& info)
 {
+    bool hideText = false;
+    JSNavigationUtils::ParseHideToolBarText(info, hideText);
+    NavigationModel::GetInstance()->SetHideItemText(hideText);
     if (info[0]->IsUndefined() || info[0]->IsArray()) {
         if (NavigationModel::GetInstance()->NeedSetItems()) {
             std::vector<NG::BarItem> toolbarItems;
             if (info[0]->IsUndefined()) {
                 toolbarItems = {};
             } else {
-                ParseToolbarItemsConfiguration(info, JSRef<JSArray>::Cast(info[0]), toolbarItems);
+                auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+                JSNavigationUtils::ParseToolbarItemsConfiguration(
+                    targetNode, info, JSRef<JSArray>::Cast(info[0]), toolbarItems);
             }
+            NG::MoreButtonOptions toolbarMoreButtonOptions;
+            if (info.Length() > 1 && info[1]->IsObject()) {
+                auto optObj = JSRef<JSObject>::Cast(info[1]);
+                auto moreButtonProperty = optObj->GetProperty(MORE_BUTTON_OPTIONS_PROPERTY);
+                JSNavigationUtils::ParseToolBarMoreButtonOptions(moreButtonProperty, toolbarMoreButtonOptions);
+            }
+            NavigationModel::GetInstance()->SetToolbarMorebuttonOptions(std::move(toolbarMoreButtonOptions));
             NavigationModel::GetInstance()->SetToolbarConfiguration(std::move(toolbarItems));
         } else {
             std::list<RefPtr<AceType>> items;
@@ -598,20 +536,7 @@ void JSNavigation::SetToolbarConfiguration(const JSCallbackInfo& info)
     }
 
     NG::NavigationToolbarOptions options;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<NavigationBarTheme>();
-        CHECK_NULL_VOID(theme);
-        auto blurStyle = static_cast<BlurStyle>(theme->GetToolbarBackgroundBlurStyle());
-        if (blurStyle != BlurStyle::NO_MATERIAL) {
-            options.bgOptions.blurStyle = blurStyle;
-            options.bgOptions.color = Color::TRANSPARENT;
-        }
-    }
-    if (info.Length() > 1) {
-        ParseBackgroundOptions(info[1], options.bgOptions);
-    }
+    JSNavigationUtils::ParseToolbarOptions(info, options);
     NavigationModel::GetInstance()->SetToolbarOptions(std::move(options));
 }
 
@@ -621,15 +546,23 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
         return;
     }
 
+    NG::NavigationMenuOptions options;
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        auto optObj = JSRef<JSObject>::Cast(info[1]);
+        auto moreButtonProperty = optObj->GetProperty(MORE_BUTTON_OPTIONS_PROPERTY);
+        JSNavigationUtils::ParseMenuOptions(moreButtonProperty, options);
+    }
     if (info[0]->IsUndefined() || info[0]->IsArray()) {
         if (NavigationModel::GetInstance()->NeedSetItems()) {
             std::vector<NG::BarItem> menuItems;
             if (info[0]->IsUndefined()) {
                 menuItems = {};
             } else {
-                ParseBarItems(info, JSRef<JSArray>::Cast(info[0]), menuItems);
+                auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+                JSNavigationUtils::ParseBarItems(targetNode, info, JSRef<JSArray>::Cast(info[0]), menuItems);
             }
             NavigationModel::GetInstance()->SetMenuItems(std::move(menuItems));
+            NavigationModel::GetInstance()->SetMenuOptions(std::move(options));
             return;
         }
         std::list<RefPtr<AceType>> items;
@@ -644,6 +577,7 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
             jsBuilderFunc.Execute();
             auto customNode = ViewStackModel::GetInstance()->Finish();
             NavigationModel::GetInstance()->SetCustomMenu(customNode);
+            NavigationModel::GetInstance()->SetMenuOptions(std::move(options));
         }
     }
 }
@@ -707,10 +641,43 @@ void JSNavigation::SetNavBarPosition(int32_t value)
     }
 }
 
+void ParseNavBarWidthObject(const JSCallbackInfo& info, JSRef<JSVal> arrowFunc, bool isNumber)
+{
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(arrowFunc));
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onChangeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                        node = targetNode, useNumber = isNumber](const Dimension& navBarWidth) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Navigation.onNavBarWidthChangeEvent");
+        PipelineContext::SetCallBackNode(node);
+        auto newJSVal = useNumber ? JSRef<JSVal>::Make(ToJSValue(navBarWidth.ConvertToVp())) :
+            JSRef<JSVal>::Make(ToJSValue(navBarWidth.ToString()));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    NavigationModel::GetInstance()->SetOnNavBarWidthChangeEvent(std::move(onChangeEvent));
+}
+
 void JSNavigation::SetNavBarWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
         return;
+    }
+
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
+        CalcDimension value;
+        auto navBarWidthValue = callbackObj->GetProperty("value");
+        auto navBarWidthCallbackValue = callbackObj->GetProperty("$value");
+        auto isValid = JSViewAbstract::ParseJsDimensionVpNG(navBarWidthValue, value);
+        if (value.Value() <= 0) {
+            value.SetValue(DEFAULT_NAV_BAR_WIDTH);
+        }
+        bool isNumber = navBarWidthValue->IsNumber();
+        if (isValid && navBarWidthCallbackValue->IsFunction()) {
+            NavigationModel::GetInstance()->SetNavBarWidth(value, true);
+            ParseNavBarWidthObject(info, navBarWidthCallbackValue, isNumber);
+            return;
+        }
     }
 
     CalcDimension navBarWidth;
@@ -965,5 +932,27 @@ void JSNavigation::SetSystemBarStyle(const JSCallbackInfo& info)
         }
     }
     NavigationModel::GetInstance()->SetSystemBarStyle(style);
+}
+
+void JSNavigation::SetRecoverable(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        // the default value of navigation's recoverable is false
+        NavigationModel::GetInstance()->SetRecoverable(false);
+        return;
+    }
+    auto recoverable = info[0]->ToBoolean();
+    NavigationModel::GetInstance()->SetRecoverable(recoverable);
+}
+
+void JSNavigation::SetEnableDragBar(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        // the default value of navigation's drag bar is false
+        NavigationModel::GetInstance()->SetEnableDragBar(false);
+        return;
+    }
+    auto enableDragBar = info[0]->ToBoolean();
+    NavigationModel::GetInstance()->SetEnableDragBar(enableDragBar);
 }
 } // namespace OHOS::Ace::Framework

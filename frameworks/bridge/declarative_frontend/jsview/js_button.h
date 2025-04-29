@@ -41,6 +41,7 @@ public:
     static void SetControlSize(const JSCallbackInfo& info);
     static void JsBackgroundColor(const JSCallbackInfo& info);
     static void JsRadius(const JSCallbackInfo& info);
+    static void JsRadius(const JSRef<JSVal>& jsValue);
     static void JsBorder(const JSCallbackInfo& info);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
@@ -50,6 +51,8 @@ public:
     static void JsRemoteMessage(const JSCallbackInfo& info);
     static void JsPadding(const JSCallbackInfo& info);
     static void SetRole(const JSCallbackInfo& info);
+    static void SetMinFontScale(const JSCallbackInfo& info);
+    static void SetMaxFontScale(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
     static void CreateWithChild(const JSCallbackInfo& info);
     static void CreateWithLabel(const JSCallbackInfo& info);
@@ -60,7 +63,6 @@ public:
     static constexpr char ROLE[] = "role";
 
 private:
-    static void HandleDifferentRadius(const JSRef<JSVal>& args);
     static void GetFontContent(JSRef<JSVal>& font, ButtonParameters& buttonParameters);
     static void CompleteParameters(ButtonParameters& buttonParameters);
     static CalcDimension GetSizeValue(const JSCallbackInfo& info);

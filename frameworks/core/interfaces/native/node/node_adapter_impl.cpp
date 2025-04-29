@@ -15,19 +15,7 @@
 
 #include "core/interfaces/native/node/node_adapter_impl.h"
 
-#include <cstdint>
-#include <string>
-#include <vector>
-
-#include "base/error/error_code.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/syntax/lazy_for_each_builder.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
-#include "core/pipeline/base/element_register.h"
 
 struct _ArkUINodeAdapter {
     OHOS::Ace::RefPtr<OHOS::Ace::NG::NativeLazyForEachBuilder> builder;
@@ -100,6 +88,7 @@ LazyForEachChild NativeLazyForEachBuilder::OnGetChildByIndex(
             }
             receiver_(&getIdevent);
         }
+        FlushDirtyPropertyNodes(child.second);
         return child;
     }
     ArkUINodeAdapterEvent getChildEvent {
@@ -110,7 +99,16 @@ LazyForEachChild NativeLazyForEachBuilder::OnGetChildByIndex(
     if (getChildEvent.nodeSet) {
         child.second = Claim(reinterpret_cast<UINode*>(getChildEvent.handle));
     }
+    FlushDirtyPropertyNodes(child.second);
     return child;
+}
+
+void NativeLazyForEachBuilder::FlushDirtyPropertyNodes(const RefPtr<UINode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto context = node->GetContext();
+    CHECK_NULL_VOID(context);
+    context->FlushDirtyPropertyNodes();
 }
 
 void NativeLazyForEachBuilder::OnItemDeleted(UINode* node, const std::string& key)
@@ -119,7 +117,7 @@ void NativeLazyForEachBuilder::OnItemDeleted(UINode* node, const std::string& ke
         return;
     }
     ArkUINodeAdapterEvent event {
-        .id = std::stoi(key), .idSet = false, .type = ON_REMOVE_NODE_FROM_ADAPTER, .nodeSet = false
+        .id = StringUtils::StringToInt(key), .idSet = false, .type = ON_REMOVE_NODE_FROM_ADAPTER, .nodeSet = false
     };
     event.extraParam = reinterpret_cast<intptr_t>(userData_);
     event.handle = reinterpret_cast<ArkUINodeHandle>(node);
@@ -425,17 +423,49 @@ ArkUINodeAdapterHandle GetNodeAdapter(ArkUINodeHandle host)
 
 const ArkUINodeAdapterAPI* GetNodeAdapterAPI()
 {
-    static const ArkUINodeAdapterAPI impl { Create, Dispose, SetTotalNodeCount, GetTotalNodeCount,
-        RegisterEventReceiver, UnregisterEventReceiver, NotifyItemReloaded, NotifyItemChanged, NotifyItemRemoved,
-        NotifyItemInserted, NotifyItemMoved, GetAllItem, AttachHostNode, DetachHostNode, GetNodeAdapter };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUINodeAdapterAPI impl {
+        .create = Create,
+        .dispose = Dispose,
+        .setTotalNodeCount = SetTotalNodeCount,
+        .getTotalNodeCount = GetTotalNodeCount,
+        .registerEventReceiver = RegisterEventReceiver,
+        .unregisterEventReceiver = UnregisterEventReceiver,
+        .notifyItemReloaded = NotifyItemReloaded,
+        .notifyItemChanged = NotifyItemChanged,
+        .notifyItemRemoved = NotifyItemRemoved,
+        .notifyItemInserted = NotifyItemInserted,
+        .notifyItemMoved = NotifyItemMoved,
+        .getAllItem = GetAllItem,
+        .attachHostNode = AttachHostNode,
+        .detachHostNode = DetachHostNode,
+        .getNodeAdapter = GetNodeAdapter
+    };
+    CHECK_INITIALIZED_FIELDS_END(impl, 0, 0, 0); // don't move this line
     return &impl;
 }
 
 const CJUINodeAdapterAPI* GetCJUINodeAdapterAPI()
 {
-    static const CJUINodeAdapterAPI impl { Create, Dispose, SetTotalNodeCount, GetTotalNodeCount,
-        RegisterEventReceiver, UnregisterEventReceiver, NotifyItemReloaded, NotifyItemChanged, NotifyItemRemoved,
-        NotifyItemInserted, NotifyItemMoved, GetAllItem, AttachHostNode, DetachHostNode, GetNodeAdapter };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUINodeAdapterAPI impl {
+        .create = Create,
+        .dispose = Dispose,
+        .setTotalNodeCount = SetTotalNodeCount,
+        .getTotalNodeCount = GetTotalNodeCount,
+        .registerEventReceiver = RegisterEventReceiver,
+        .unregisterEventReceiver = UnregisterEventReceiver,
+        .notifyItemReloaded = NotifyItemReloaded,
+        .notifyItemChanged = NotifyItemChanged,
+        .notifyItemRemoved = NotifyItemRemoved,
+        .notifyItemInserted = NotifyItemInserted,
+        .notifyItemMoved = NotifyItemMoved,
+        .getAllItem = GetAllItem,
+        .attachHostNode = AttachHostNode,
+        .detachHostNode = DetachHostNode,
+        .getNodeAdapter = GetNodeAdapter
+    };
+    CHECK_INITIALIZED_FIELDS_END(impl, 0, 0, 0); // don't move this line
     return &impl;
 }
 

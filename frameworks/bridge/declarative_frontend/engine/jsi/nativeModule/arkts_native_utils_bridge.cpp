@@ -28,6 +28,8 @@ constexpr uint32_t ARRAY_INDEX_RED = 0;
 constexpr uint32_t ARRAY_INDEX_GREEN = 1;
 constexpr uint32_t ARRAY_INDEX_BLUE = 2;
 constexpr uint32_t ARRAY_INDEX_ALPHA = 3;
+constexpr uint32_t ARRAY_INDEX_RESOURCE_ID = 4;
+constexpr uint32_t MAX_COLOR_ARRAY_COUNT_WITH_RESOURCE_ID = 5;
 constexpr uint32_t ARRAY_SIZE = 2;
 
 ArkUINativeModuleValue NativeUtilsBridge::CreateNativeWeakRef(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -49,7 +51,7 @@ ArkUINativeModuleValue NativeUtilsBridge::CreateWeakRef(EcmaVM* vm, const RefPtr
     auto* weak = new NativeWeakRef(AceType::RawPtr(ref));
     auto nativeWeakRef = panda::ObjectRef::New(vm);
     nativeWeakRef->SetNativePointerFieldCount(vm, 1);
-    nativeWeakRef->SetNativePointerField(vm, 0, weak, &DestructorInterceptor<NativeWeakRef>);
+    nativeWeakRef->SetConcurrentNativePointerField(vm, 0, weak, &DestructorInterceptor<NativeWeakRef>);
     nativeWeakRef->Set(vm, panda::StringRef::NewFromUtf8(vm, "invalid"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NativeUtilsBridge::WeakRefInvalid));
     nativeWeakRef->Set(vm, panda::StringRef::NewFromUtf8(vm, "getNativeHandle"),
@@ -66,7 +68,7 @@ ArkUINativeModuleValue NativeUtilsBridge::CreateStrongRef(EcmaVM* vm, const RefP
     auto* nativeRef = new NativeStrongRef(ref);
     auto nativeStrongRef = panda::ObjectRef::New(vm);
     nativeStrongRef->SetNativePointerFieldCount(vm, 1);
-    nativeStrongRef->SetNativePointerField(vm, 0, nativeRef, &DestructorInterceptor<NativeStrongRef>);
+    nativeStrongRef->SetConcurrentNativePointerField(vm, 0, nativeRef, &DestructorInterceptor<NativeStrongRef>);
     nativeStrongRef->Set(vm, panda::StringRef::NewFromUtf8(vm, "getNativeHandle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NativeUtilsBridge::GetNativeHandleForStrong));
     nativeStrongRef->Set(vm, panda::StringRef::NewFromUtf8(vm, "dispose"),
@@ -154,11 +156,12 @@ ArkUINativeModuleValue NativeUtilsBridge::ParseResourceColor(ArkUIRuntimeCallInf
     if (!ArkTSUtils::ParseJsColorFromResource(vm, firstArg, color)) {
         return panda::JSValueRef::Undefined(vm);
     }
-    Local<panda::ArrayRef> chanels = panda::ArrayRef::New(vm, MAX_COLOR_ARRAY_COUNT);
+    Local<panda::ArrayRef> chanels = panda::ArrayRef::New(vm, MAX_COLOR_ARRAY_COUNT_WITH_RESOURCE_ID);
     panda::ArrayRef::SetValueAt(vm, chanels, ARRAY_INDEX_RED, panda::NumberRef::New(vm, color.GetRed()));
     panda::ArrayRef::SetValueAt(vm, chanels, ARRAY_INDEX_GREEN, panda::NumberRef::New(vm, color.GetGreen()));
     panda::ArrayRef::SetValueAt(vm, chanels, ARRAY_INDEX_BLUE, panda::NumberRef::New(vm, color.GetBlue()));
     panda::ArrayRef::SetValueAt(vm, chanels, ARRAY_INDEX_ALPHA, panda::NumberRef::New(vm, color.GetAlpha()));
+    panda::ArrayRef::SetValueAt(vm, chanels, ARRAY_INDEX_RESOURCE_ID, panda::NumberRef::New(vm, color.GetResourceId()));
     return chanels;
 }
 

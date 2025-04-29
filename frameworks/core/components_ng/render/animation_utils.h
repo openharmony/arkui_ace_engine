@@ -16,13 +16,16 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ANIMATION_UTILS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ANIMATION_UTILS_H
 
+#include "base/utils/macros.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/render/render_context.h"
-
-#include "foundation/arkui/ace_engine/frameworks/base/utils/macros.h"
+#include "core/pipeline/base/render_context.h"
 
 namespace OHOS::Ace {
+
+namespace NG {
+class RenderContext;
+}
 
 namespace {
 
@@ -41,6 +44,7 @@ public:
     static void OpenImplicitAnimation(
         const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback);
     static bool CloseImplicitAnimation();
+    static bool CloseImplicitCancelAnimation();
     static bool IsImplicitAnimationOpen();
     static void Animate(const AnimationOption& option, const PropertyCallback& callback,
         const FinishCallback& finishCallback = nullptr, const RepeatCallback& repeatCallback = nullptr);
@@ -62,6 +66,8 @@ public:
         RefPtr<NG::RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve);
     static void PauseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
     static void ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
+    // need to reset the attribute of arkui node after Reverse in case of attribute inconsistent
+    static void ReverseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
     static void ExecuteWithoutAnimation(const PropertyCallback& callback);
 
     static std::shared_ptr<AnimationUtils::InteractiveAnimation> CreateInteractiveAnimation(
@@ -78,6 +84,12 @@ public:
 
     static void ReverseInteractiveAnimation(
         const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation);
+
+    static void AddInteractiveAnimation(
+        const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation,
+        const std::function<void()>& callback);
+
+    static void SetNavGroupNodeTransAnimationCallback();
 };
 } // namespace OHOS::Ace
 

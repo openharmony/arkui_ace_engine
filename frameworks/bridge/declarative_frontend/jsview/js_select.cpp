@@ -18,21 +18,20 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/log/ace_scoring_log.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_popups.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_symbol_modifier.h"
 #include "bridge/declarative_frontend/jsview/models/select_model_impl.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_select_theme.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/select/select_properties.h"
@@ -99,7 +98,6 @@ void JSSelect::Create(const JSCallbackInfo& info)
             }
         }
         SelectModel::GetInstance()->Create(params);
-        JSSelectTheme::ApplyTheme();
     }
 }
 
@@ -113,6 +111,7 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("value", &JSSelect::Value, opt);
     JSClass<JSSelect>::StaticMethod("font", &JSSelect::Font, opt);
     JSClass<JSSelect>::StaticMethod("fontColor", &JSSelect::FontColor, opt);
+    JSClass<JSSelect>::StaticMethod("backgroundColor", &JSSelect::BackgroundColor, opt);
     JSClass<JSSelect>::StaticMethod("selectedOptionBgColor", &JSSelect::SelectedOptionBgColor, opt);
     JSClass<JSSelect>::StaticMethod("selectedOptionFont", &JSSelect::SelectedOptionFont, opt);
     JSClass<JSSelect>::StaticMethod("selectedOptionFontColor", &JSSelect::SelectedOptionFontColor, opt);
@@ -123,6 +122,7 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("space", &JSSelect::SetSpace, opt);
     JSClass<JSSelect>::StaticMethod("arrowPosition", &JSSelect::SetArrowPosition, opt);
     JSClass<JSSelect>::StaticMethod("menuAlign", &JSSelect::SetMenuAlign, opt);
+    JSClass<JSSelect>::StaticMethod("avoidance", &JSSelect::SetAvoidance, opt);
 
     // API7 onSelected deprecated
     JSClass<JSSelect>::StaticMethod("onSelected", &JSSelect::OnSelected, opt);
@@ -140,6 +140,12 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("divider", &JSSelect::SetDivider);
     JSClass<JSSelect>::StaticMethod("controlSize", &JSSelect::SetControlSize);
     JSClass<JSSelect>::StaticMethod("direction", &JSSelect::SetDirection, opt);
+    JSClass<JSSelect>::StaticMethod("dividerStyle", &JSSelect::SetDividerStyle);
+    JSClass<JSSelect>::StaticMethod("menuOutline", &JSSelect::SetMenuOutline, opt);
+    JSClass<JSSelect>::StaticMethod("arrowModifier", &JSSelect::SetArrowModifier, opt);
+    JSClass<JSSelect>::StaticMethod("textModifier", &JSSelect::SetTextModifier, opt);
+    JSClass<JSSelect>::StaticMethod("optionTextModifier", &JSSelect::SetOptionTextModifier, opt);
+    JSClass<JSSelect>::StaticMethod("selectedOptionTextModifier", &JSSelect::SetSelectedOptionTextModifier, opt);
 
     JSClass<JSSelect>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSelect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -175,15 +181,25 @@ void JSSelect::Selected(const JSCallbackInfo& info)
     }
 
     int32_t value = 0;
-    if (info.Length() > 0) {
-        ParseJsInteger<int32_t>(info[0], value);
-    }
+
+    bool result = ParseJsInteger<int32_t>(info[0], value);
 
     if (value < -1) {
         value = -1;
     }
-    if (info.Length() > 1 && info[1]->IsFunction()) {
-        ParseSelectedObject(info, info[1]);
+    JSRef<JSVal> changeEventVal;
+    auto selectedVal = info[0];
+    if (!result && selectedVal->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(selectedVal);
+        selectedVal = obj->GetProperty("value");
+        changeEventVal = obj->GetProperty("$value");
+        ParseJsInteger<int32_t>(selectedVal, value);
+    } else if (info.Length() > 1) {
+        changeEventVal = info[1];
+    }
+
+    if (changeEventVal->IsFunction()) {
+        ParseSelectedObject(info, changeEventVal);
     }
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "set selected index %{public}d", value);
     SelectModel::GetInstance()->SetSelected(value);
@@ -213,14 +229,24 @@ void JSSelect::Value(const JSCallbackInfo& info)
     }
 
     std::string value;
-    if (info.Length() > 0) {
-        ParseJsString(info[0], value);
+    
+    bool result = ParseJsString(info[0], value);
+
+    JSRef<JSVal> changeEventVal;
+    auto selectedVal = info[0];
+    if (!result && selectedVal->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(selectedVal);
+        selectedVal = obj->GetProperty("value");
+        changeEventVal = obj->GetProperty("$value");
+        ParseJsString(selectedVal, value);
+    } else if (info.Length() > 1) {
+        changeEventVal = info[1];
     }
 
-    if (info.Length() > 1 && info[1]->IsFunction()) {
-        ParseValueObject(info, info[1]);
+    if (changeEventVal->IsFunction()) {
+        ParseValueObject(info, changeEventVal);
     }
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "set select value %{public}s", value.c_str());
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "value set by user");
     SelectModel::GetInstance()->SetValue(value);
 }
 
@@ -307,9 +333,7 @@ void JSSelect::ParseFontStyle(const JSRef<JSVal>& jsValue, SelectFontType type)
 
 void JSSelect::ResetFontSize(SelectFontType type)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    auto selectTheme = GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
     if (type == SelectFontType::OPTION) {
         SelectModel::GetInstance()->SetOptionFontSize(selectTheme->GetMenuFontSize());
@@ -339,9 +363,7 @@ void JSSelect::ResetFontWeight(SelectFontType type)
 
 void JSSelect::ResetFontFamily(SelectFontType type)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto textTheme = pipeline->GetTheme<TextTheme>();
+    auto textTheme = GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
     if (type == SelectFontType::SELECT) {
         SelectModel::GetInstance()->SetFontFamily(textTheme->GetTextStyle().GetFontFamilies());
@@ -354,9 +376,7 @@ void JSSelect::ResetFontFamily(SelectFontType type)
 
 void JSSelect::ResetFontStyle(SelectFontType type)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto textTheme = pipeline->GetTheme<TextTheme>();
+    auto textTheme = GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
     if (type == SelectFontType::SELECT) {
         SelectModel::GetInstance()->SetItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
@@ -383,18 +403,24 @@ void JSSelect::FontColor(const JSCallbackInfo& info)
 
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
-        if (info[0]->IsNull() || info[0]->IsUndefined()) {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto theme = pipeline->GetTheme<SelectTheme>();
-            CHECK_NULL_VOID(theme);
-            textColor = theme->GetFontColor();
-        } else {
-            return;
-        }
+        SelectModel::GetInstance()->ResetFontColor();
+        return;
     }
 
     SelectModel::GetInstance()->SetFontColor(textColor);
+}
+
+void JSSelect::BackgroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    Color backgroundColor;
+    if (!ParseJsColor(info[0], backgroundColor)) {
+        backgroundColor = Color::TRANSPARENT;
+    }
+
+    SelectModel::GetInstance()->BackgroundColor(backgroundColor);
 }
 
 void JSSelect::SelectedOptionBgColor(const JSCallbackInfo& info)
@@ -528,9 +554,7 @@ void JSSelect::OnSelected(const JSCallbackInfo& info)
         params[0] = JSRef<JSVal>::Make(ToJSValue(index));
         params[1] = JSRef<JSVal>::Make(ToJSValue(value));
         func->ExecuteJS(2, params);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Select.onSelect");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Select.onSelect");
     };
     SelectModel::GetInstance()->SetOnSelect(std::move(onSelect));
     info.ReturnSelf();
@@ -555,30 +579,13 @@ void JSSelect::JsPadding(const JSCallbackInfo& info)
     }
 
     if (info[0]->IsObject()) {
-        std::optional<CalcDimension> left;
-        std::optional<CalcDimension> right;
-        std::optional<CalcDimension> top;
-        std::optional<CalcDimension> bottom;
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
-
-        CalcDimension leftDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("left"), leftDimen)) {
-            left = leftDimen;
-        }
-        CalcDimension rightDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("right"), rightDimen)) {
-            right = rightDimen;
-        }
-        CalcDimension topDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("top"), topDimen)) {
-            top = topDimen;
-        }
-        CalcDimension bottomDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
-            bottom = bottomDimen;
-        }
-        if (left.has_value() || right.has_value() || top.has_value() || bottom.has_value()) {
-            ViewAbstractModel::GetInstance()->SetPaddings(top, bottom, left, right);
+        CommonCalcDimension commonCalcDimension;
+        JSViewAbstract::ParseCommonMarginOrPaddingCorner(paddingObj, commonCalcDimension);
+        if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
+            commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
+            ViewAbstractModel::GetInstance()->SetPaddings(commonCalcDimension.top, commonCalcDimension.bottom,
+                commonCalcDimension.left, commonCalcDimension.right);
             return;
         }
     }
@@ -713,6 +720,31 @@ void JSSelect::SetMenuAlign(const JSCallbackInfo& info)
     }
 
     SelectModel::GetInstance()->SetMenuAlign(menuAlignObj);
+}
+
+void JSSelect::SetAvoidance(const JSCallbackInfo& info)
+{
+    AvoidanceMode mode = AvoidanceMode::COVER_TARGET;
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        SelectModel::GetInstance()->SetAvoidance(mode);
+        return;
+    }
+
+    int32_t value = info[0]->ToNumber<int32_t>();
+    switch (value) {
+        case static_cast<int32_t>(AvoidanceMode::COVER_TARGET):
+            mode = AvoidanceMode::COVER_TARGET;
+            break;
+        case static_cast<int32_t>(AvoidanceMode::AVOID_AROUND_TARGET):
+            mode = AvoidanceMode::AVOID_AROUND_TARGET;
+            break;
+        default:
+            break;
+    }
+    SelectModel::GetInstance()->SetAvoidance(mode);
 }
 
 bool JSSelect::IsPercentStr(std::string& percent)
@@ -890,6 +922,49 @@ void JSSelect::SetDivider(const JSCallbackInfo& info)
     SelectModel::GetInstance()->SetDivider(divider);
 }
 
+void JSSelect::SetDividerStyle(const JSCallbackInfo& info)
+{
+    NG::SelectDivider divider;
+    Dimension defaultStrokeWidth = 0.0_vp;
+    Dimension defaultMargin = -1.0_vp;
+    Color defaultColor = Color::TRANSPARENT;
+    auto selectTheme = GetTheme<SelectTheme>();
+    if (selectTheme) {
+        defaultStrokeWidth = selectTheme->GetDefaultDividerWidth();
+        defaultColor = selectTheme->GetLineColor();
+        divider.strokeWidth = defaultStrokeWidth;
+        divider.color = defaultColor;
+        divider.startMargin = defaultMargin;
+        divider.endMargin = defaultMargin;
+    }
+    if (info.Length() >= 1 && info[0]->IsObject()) {
+        auto mode = DividerMode::FLOATING_ABOVE_MENU;
+        divider.isDividerStyle = true;
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        CalcDimension value;
+        if (ParseLengthMetricsToPositiveDimension(obj->GetProperty("strokeWidth"), value) && value.IsNonNegative()) {
+            divider.strokeWidth = value;
+        }
+        if (ParseLengthMetricsToPositiveDimension(obj->GetProperty("startMargin"), value) && value.IsNonNegative()) {
+            divider.startMargin = value;
+        }
+        if (ParseLengthMetricsToPositiveDimension(obj->GetProperty("endMargin"), value) && value.IsNonNegative()) {
+            divider.endMargin = value;
+        }
+        if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
+            divider.color = defaultColor;
+        }
+        auto modeVal = obj->GetProperty("mode");
+        if (modeVal->IsNumber() && modeVal->ToNumber<int32_t>() == 1) {
+            mode = DividerMode::EMBEDDED_IN_MENU;
+        }
+        SelectModel::GetInstance()->SetDividerStyle(divider, mode);
+    } else {
+        divider.isDividerStyle = false;
+        SelectModel::GetInstance()->SetDivider(divider);
+    }
+}
+
 bool JSSelect::CheckDividerValue(const Dimension &dimension)
 {
     if (dimension.Value() >= 0.0f && dimension.Unit() != DimensionUnit::PERCENT) {
@@ -911,5 +986,75 @@ void JSSelect::SetDirection(const std::string& dir)
         direction = TextDirection::AUTO;
     }
     SelectModel::GetInstance()->SetLayoutDirection(direction);
+}
+
+void JSSelect::SetMenuOutline(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto menuTheme = GetTheme<NG::MenuTheme>();
+    NG::MenuParam menuParam;
+    MenuDefaultParam(menuParam);
+    if (info[0]->IsNull() || info[0]->IsUndefined()) {
+        NG::BorderWidthProperty outlineWidth;
+        outlineWidth.SetBorderWidth(Dimension(menuTheme->GetOuterBorderWidth()));
+        menuParam.outlineWidth = outlineWidth;
+        NG::BorderColorProperty outlineColor;
+        outlineColor.SetColor(menuTheme->GetOuterBorderColor());
+        menuParam.outlineColor = outlineColor;
+    } else {
+        auto menuOptions = JSRef<JSObject>::Cast(info[0]);
+        auto outlineWidthValue = menuOptions->GetProperty("width");
+        JSViewPopups::ParseMenuOutlineWidth(outlineWidthValue, menuParam);
+        auto outlineColorValue = menuOptions->GetProperty("color");
+        JSViewPopups::ParseMenuOutlineColor(outlineColorValue, menuParam);
+    }
+    SelectModel::GetInstance()->SetMenuOutline(menuParam);
+}
+
+void JSSelect::SetArrowModifier(const JSCallbackInfo& info)
+{
+    std::function<void(WeakPtr<NG::FrameNode>)> applyFunc = nullptr;
+    if (info.Length() < 1 || info[0]->IsNull() || info[0]->IsUndefined() || !info[0]->IsObject() ||
+        !SystemProperties::IsNeedSymbol()) {
+        SelectModel::GetInstance()->SetArrowModifierApply(applyFunc);
+        return;
+    }
+    JSViewAbstract::SetSymbolOptionApply(info, applyFunc, info[0]);
+    SelectModel::GetInstance()->SetArrowModifierApply(applyFunc);
+}
+
+void JSSelect::SetTextModifier(const JSCallbackInfo& info)
+{
+    std::function<void(WeakPtr<NG::FrameNode>)> applyFunc = nullptr;
+    if (info.Length() < 1 || info[0]->IsNull() || info[0]->IsUndefined() || !info[0]->IsObject()) {
+        SelectModel::GetInstance()->SetTextModifierApply(applyFunc);
+        return;
+    }
+    JSViewAbstract::SetTextStyleApply(info, applyFunc, info[0]);
+    SelectModel::GetInstance()->SetTextModifierApply(applyFunc);
+}
+
+void JSSelect::SetOptionTextModifier(const JSCallbackInfo& info)
+{
+    std::function<void(WeakPtr<NG::FrameNode>)> applyFunc = nullptr;
+    if (info.Length() < 1 || info[0]->IsNull() || info[0]->IsUndefined() || !info[0]->IsObject()) {
+        SelectModel::GetInstance()->SetOptionTextModifier(applyFunc);
+        return;
+    }
+    JSViewAbstract::SetTextStyleApply(info, applyFunc, info[0]);
+    SelectModel::GetInstance()->SetOptionTextModifier(applyFunc);
+}
+
+void JSSelect::SetSelectedOptionTextModifier(const JSCallbackInfo& info)
+{
+    std::function<void(WeakPtr<NG::FrameNode>)> applyFunc = nullptr;
+    if (info.Length() < 1 || info[0]->IsNull() || info[0]->IsUndefined() || !info[0]->IsObject()) {
+        SelectModel::GetInstance()->SetSelectedOptionTextModifier(applyFunc);
+        return;
+    }
+    JSViewAbstract::SetTextStyleApply(info, applyFunc, info[0]);
+    SelectModel::GetInstance()->SetSelectedOptionTextModifier(applyFunc);
 }
 } // namespace OHOS::Ace::Framework

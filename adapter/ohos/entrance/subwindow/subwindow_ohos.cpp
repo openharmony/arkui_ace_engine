@@ -15,6 +15,7 @@
 
 #include "adapter/ohos/entrance/subwindow/subwindow_ohos.h"
 
+#include "display_info.h"
 #include "dm/display_manager.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
@@ -22,23 +23,26 @@
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "base/geometry/rect.h"
-#include "base/log/log_wrapper.h"
 #include "core/components/root/root_element.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
 
-#include "adapter/ohos/entrance/ace_container.h"
+#include "bundlemgr/bundle_mgr_interface.h"
+#include "iservice_registry.h"
+
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/dialog_container.h"
 #include "adapter/ohos/entrance/ui_content_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "base/log/frame_report.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/connect_server_manager.h"
@@ -56,26 +60,57 @@
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
 
+#ifdef OS_ACCOUNT_EXISTS
+#include "os_account_manager.h"
+#endif
+
+#include "system_ability_definition.h"
+
 namespace OHOS::Ace {
 namespace {
 const Rect MIN_WINDOW_HOT_AREA = Rect(0.0f, 0.0f, 1.0f, 1.0f);
+constexpr uint32_t ENABLE_SYSTEM_WINDOW_AVOID_AREA = 1;
+constexpr uint32_t ENABLE_APP_SUB_WINDOW_AVOID_AREA = 1 << 1;
 #ifndef NG_BUILD
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
 #endif
+constexpr uint64_t DEFAULT_DISPLAY_ID = 0;
 } // namespace
 
 int32_t SubwindowOhos::id_ = 0;
 static std::atomic<int32_t> gToastDialogId = 0;
+
+class SwitchFreeMultiWindowListener : public OHOS::Rosen::ISwitchFreeMultiWindowListener {
+public:
+    explicit SwitchFreeMultiWindowListener(int32_t instanceId) : instanceId_(instanceId) {}
+    ~SwitchFreeMultiWindowListener() = default;
+
+    void OnSwitchFreeMultiWindow(bool enable)
+    {
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Window status changes, freeMultiWindow is %{public}d", enable);
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        auto subWindow = SubwindowManager::GetInstance()->GetSubwindowById(instanceId_);
+        CHECK_NULL_VOID(subWindow);
+
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        ContainerScope scope(instanceId_);
+        taskExecutor->PostTask(
+            [subWindow, enable]() {
+                CHECK_NULL_VOID(subWindow);
+                subWindow->OnFreeMultiWindowSwitch(enable);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIFreeMultiWindowSwitch");
+    }
+
+private:
+    int32_t instanceId_ = -1;
+};
+
 RefPtr<Subwindow> Subwindow::CreateSubwindow(int32_t instanceId)
 {
-    auto subWindow = AceType::MakeRefPtr<SubwindowOhos>(instanceId);
-    CHECK_NULL_RETURN(subWindow, nullptr);
-    auto ret = subWindow->InitContainer();
-    if (!ret) {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "InitContainer failed, container id %{public}d", instanceId);
-        return nullptr;
-    }
-    return subWindow;
+    return AceType::MakeRefPtr<SubwindowOhos>(instanceId);
 }
 
 SubwindowOhos::SubwindowOhos(int32_t instanceId) : windowId_(id_), parentContainerId_(instanceId)
@@ -86,67 +121,184 @@ SubwindowOhos::SubwindowOhos(int32_t instanceId) : windowId_(id_), parentContain
         instanceId);
 }
 
-bool SubwindowOhos::InitContainer()
+Rosen::WindowType SubwindowOhos::GetToastRosenType(bool IsSceneBoardEnabled)
+{
+    auto toastType = GetToastWindowType();
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW,
+        "GetToastRosenType windowType: %{public}d, IsSceneBoardEnabled: %{public}d",
+        toastType, IsSceneBoardEnabled);
+    if (toastType == ToastWindowType::TOAST_IN_TYPE_APP_SUB_WINDOW) {
+        if (!IsSceneBoardEnabled && !GetIsSelectOverlaySubWindow()) {
+            return Rosen::WindowType::WINDOW_TYPE_TOAST;
+        }
+        return Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+    } else if (toastType == ToastWindowType::TOAST_IN_TYPE_SYSTEM_SUB_WINDOW) {
+        return Rosen::WindowType::WINDOW_TYPE_TOAST;
+    } else if (toastType == ToastWindowType::TOAST_IN_TYPE_SYSTEM_FLOAT) {
+        return Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT;
+    }
+    return Rosen::WindowType::WINDOW_TYPE_TOAST;
+}
+
+void SubwindowOhos::SetToastWindowOption(RefPtr<Platform::AceContainer>& parentContainer,
+    OHOS::sptr<OHOS::Rosen::WindowOption>& windowOption,
+    const Rosen::WindowType& toastWindowType, uint32_t mainWindowId)
+{
+    if (toastWindowType == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
+        windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+        if (GetIsSelectOverlaySubWindow()) {
+            windowOption->AddWindowFlag(Rosen::WindowFlag::WINDOW_FLAG_IS_TEXT_MENU);
+        } else {
+            windowOption->AddWindowFlag(Rosen::WindowFlag::WINDOW_FLAG_IS_TOAST);
+        }
+    }
+    windowOption->SetWindowType(toastWindowType);
+    if (parentContainer->IsUIExtensionWindow()) {
+        auto parentPipeline = parentContainer->GetPipelineContext();
+        CHECK_NULL_VOID(parentPipeline);
+        auto hostWindowId = parentPipeline->GetFocusWindowId();
+        windowOption->SetIsUIExtAnySubWindow(true);
+        windowOption->SetParentId(hostWindowId);
+        SetUIExtensionHostWindowId(hostWindowId);
+    } else {
+        windowOption->SetParentId(mainWindowId);
+    }
+}
+
+void SetUIExtensionSubwindowFlag(OHOS::sptr<OHOS::Rosen::WindowOption>& windowOption,
+    bool isAppSubwindow, sptr<OHOS::Rosen::Window>& parentWindow)
+{
+    if (isAppSubwindow && (parentWindow->GetIsUIExtFirstSubWindow() ||
+        parentWindow->GetIsUIExtAnySubWindow())) {
+        windowOption->SetIsUIExtAnySubWindow(true);
+    }
+}
+
+void SetSubWindowCutout(const RefPtr<PipelineBase> parentPipeline, int32_t childContainerId)
+{
+    auto parentPipelineContext = AceType::DynamicCast<NG::PipelineContext>(parentPipeline);
+    CHECK_NULL_VOID(parentPipelineContext);
+    auto parentSafeAreaManager = parentPipelineContext->GetSafeAreaManager();
+    CHECK_NULL_VOID(parentSafeAreaManager);
+    auto parentUseCutout = parentSafeAreaManager->GetUseCutout();
+
+    auto subPipelineContext = Platform::AceContainer::GetContainer(childContainerId)->GetPipelineContext();
+    auto subPipelineContextNG = AceType::DynamicCast<NG::PipelineContext>(subPipelineContext);
+    CHECK_NULL_VOID(subPipelineContextNG);
+    auto subSafeAreaManager = subPipelineContextNG->GetSafeAreaManager();
+    CHECK_NULL_VOID(subSafeAreaManager);
+    subSafeAreaManager->SetUseCutout(parentUseCutout);
+}
+
+Size GetSubWindowSize(int32_t parentContainerId, uint32_t displayId)
+{
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
+    CHECK_NULL_RETURN(defaultDisplay, Size());
+
+    auto size = Size(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+    if (!SystemProperties::IsSuperFoldDisplayDevice()) {
+        return size;
+    }
+
+    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId);
+    CHECK_NULL_RETURN(parentContainer, size);
+    if (parentContainer->GetCurrentFoldStatus() == FoldStatus::EXPAND) {
+        return size;
+    }
+
+    auto isCrossWindow = parentContainer->IsCrossAxisWindow();
+    auto isSceneBoard = parentContainer->IsSceneBoardWindow();
+    if (isCrossWindow || isSceneBoard) {
+        auto display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(DEFAULT_DISPLAY_ID);
+        if (!display) {
+            TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "failed to GetVisibleAreaDisplayInfoById");
+            return size;
+        }
+        size = Size(display->GetWidth(), display->GetHeight());
+    }
+
+    auto parentWindowId = parentContainer->GetWindowId();
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
+        "parentWindow windowId: %{public}d isSceneBoard: %{public}d isCrossWindow: %{public}d displaySize: %{public}s",
+        parentWindowId, isSceneBoard, isCrossWindow, size.ToString().c_str());
+    return size;
+}
+
+void SubwindowOhos::InitContainer()
 {
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-    CHECK_NULL_RETURN(parentContainer, false);
+    CHECK_NULL_VOID(parentContainer);
     auto parentPipeline = parentContainer->GetPipelineContext();
-    CHECK_NULL_RETURN(parentPipeline, false);
+    CHECK_NULL_VOID(parentPipeline);
     if (!window_) {
         OHOS::sptr<OHOS::Rosen::WindowOption> windowOption = new OHOS::Rosen::WindowOption();
         auto parentWindowName = parentContainer->GetWindowName();
         auto parentWindowId = parentContainer->GetWindowId();
         sptr<OHOS::Rosen::Window> parentWindow = parentContainer->GetUIWindow(parentContainerId_);
-        CHECK_NULL_RETURN(parentWindow, false);
+        CHECK_NULL_VOID(parentWindow);
         parentWindow_ = parentWindow;
         auto windowType = parentWindow->GetType();
+        std::string windowTag = "";
+        bool isAppSubwindow = false;
         if (IsSystemTopMost()) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_TOAST);
-        } else if (parentContainer->IsScenceBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
-            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
+            windowTag = "TOAST_SYSTEM_";
         } else if (GetAboveApps()) {
-            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_TOAST);
+            auto toastWindowType = GetToastRosenType(parentContainer->IsSceneBoardEnabled());
+            isAppSubwindow = toastWindowType == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+            auto isSelectOverlay = GetIsSelectOverlaySubWindow();
+            auto mainWindowId = isSelectOverlay ? parentWindowId : GetMainWindowId();
+            SetToastWindowOption(parentContainer, windowOption, toastWindowType, mainWindowId);
+            windowTag = isSelectOverlay ? "TEXT_MENU_" : "TOAST_TOPMOST_";
+        } else if (parentContainer->IsSceneBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
+            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
         } else if (windowType == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
             auto hostWindowId = parentPipeline->GetFocusWindowId();
-            auto hostWindowRect = parentWindow->GetHostWindowRect(hostWindowId);
-            auto isValid = GreatNotEqual(hostWindowRect.width_, 0) && GreatNotEqual(hostWindowRect.height_, 0);
-            if (!isValid) {
-                TAG_LOGW(AceLogTag::ACE_SUB_WINDOW,
-                    "UIExtension Window failed to obtain host window information. Please check if permissions are enabled");
-                return false;
-            }
-            windowOption->SetExtensionTag(true);
+            windowOption->SetIsUIExtFirstSubWindow(true);
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
             windowOption->SetParentId(hostWindowId);
             SetUIExtensionHostWindowId(hostWindowId);
+            isAppSubwindow = true;
         } else if (windowType >= Rosen::WindowType::SYSTEM_WINDOW_BASE) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
             windowOption->SetParentId(parentWindowId);
         } else {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
             windowOption->SetParentId(parentWindowId);
+            isAppSubwindow = true;
         }
-        auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+        auto displayId = parentContainer->GetCurrentDisplayId();
+        auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
         if (!defaultDisplay) {
-            TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "DisplayManager GetDefaultDisplay failed");
-            return false;
+            TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "DisplayManager failed to getDisplay by id: %{public}u",
+                (uint32_t)displayId);
         }
-        windowOption->SetWindowRect({ 0, 0, defaultDisplay->GetWidth(), defaultDisplay->GetHeight() });
+        CHECK_NULL_VOID(defaultDisplay);
+
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Parent window displayId: %{public}u width: %{public}d height: %{public}d",
+            (uint32_t)displayId, defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+        auto windowSize = GetSubWindowSize(parentContainerId_, displayId);
+        windowOption->SetWindowRect(
+            { 0, 0, static_cast<uint32_t>(windowSize.Width()), static_cast<uint32_t>(windowSize.Height()) });
+        windowOption->SetWindowRect({ 0, 0, static_cast<uint32_t>(defaultDisplay->GetWidth()),
+            static_cast<uint32_t>(defaultDisplay->GetHeight()) });
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
-        window_ = OHOS::Rosen::Window::Create("ARK_APP_SUBWINDOW_" + parentWindowName + std::to_string(windowId_),
-            windowOption, parentWindow->GetContext());
-        if (!window_) {
-            TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Window create failed");
-            return false;
+        SetUIExtensionSubwindowFlag(windowOption, isAppSubwindow, parentWindow);
+        windowOption->SetDisplayId(displayId);
+        OHOS::Rosen::WMError ret;
+        window_ = OHOS::Rosen::Window::Create("ARK_APP_SUBWINDOW_" + windowTag + parentWindowName +
+            std::to_string(windowId_), windowOption, parentWindow->GetContext(), ret);
+        if (!window_ || ret != OHOS::Rosen::WMError::WM_OK) {
+            SetIsRosenWindowCreate(false);
+            TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Window create failed, errCode is %{public}d", ret);
         }
+        CHECK_NULL_VOID(window_);
+        window_->RegisterWindowAttachStateChangeListener(new MenuWindowSceneListener(WeakClaim(this)));
+        defaultDisplayId_ = displayId;
     }
     std::string url = "";
     auto subSurface = window_->GetSurfaceNode();
-    if (!subSurface) {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Window get surface node failed");
-        window_->Destroy();
-        return false;
-    }
+    CHECK_NULL_VOID(subSurface);
     subSurface->SetShadowElevation(0.0f);
     window_->NapiSetUIContent(url, nullptr, nullptr, Rosen::BackupAndRestoreType::NONE);
     childContainerId_ = SubwindowManager::GetInstance()->GetContainerId(window_->GetWindowId());
@@ -155,10 +307,9 @@ bool SubwindowOhos::InitContainer()
 
     auto container = Platform::AceContainer::GetContainer(childContainerId_);
     if (!container) {
-        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Window get ace container failed");
-        window_->Destroy();
-        return false;
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Window get ace container failed");
     }
+    CHECK_NULL_VOID(container);
 
     auto parentToken = parentContainer->GetToken();
     container->SetToken(parentToken);
@@ -173,7 +324,8 @@ bool SubwindowOhos::InitContainer()
     container->SetHapPath(parentContainer->GetHapPath());
     container->SetIsSubContainer(true);
     container->InitializeSubContainer(parentContainerId_);
-
+    SetIsRosenWindowCreate(true);
+    ViewportConfig config;
     // create ace_view
     auto aceView =
         Platform::AceViewOhos::CreateView(childContainerId_, false, container->GetSettings().usePlatformAsUIThread);
@@ -188,16 +340,14 @@ bool SubwindowOhos::InitContainer()
     Ace::Platform::UIEnvCallback callback = nullptr;
     // set view
     Platform::AceContainer::SetView(aceView, density, width, height, window_, callback);
-    ViewportConfig config;
     Platform::AceViewOhos::SurfaceChanged(aceView, width, height, config.Orientation());
 
     auto uiContentImpl = reinterpret_cast<UIContentImpl*>(window_->GetUIContent());
-    if (!uiContentImpl) {
-        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Window get ui content failed");
-        window_->Destroy();
-        return false;
-    }
+    CHECK_NULL_VOID(uiContentImpl);
     uiContentImpl->SetFontScaleAndWeightScale(container, childContainerId_);
+    freeMultiWindowListener_ = new SwitchFreeMultiWindowListener(childContainerId_);
+    window_->RegisterSwitchFreeMultiWindowListener(freeMultiWindowListener_);
+    window_->SetAvoidAreaOption(ENABLE_SYSTEM_WINDOW_AVOID_AREA | ENABLE_APP_SUB_WINDOW_AVOID_AREA);
 
 #ifndef NG_BUILD
 #ifdef ENABLE_ROSEN_BACKEND
@@ -215,24 +365,47 @@ bool SubwindowOhos::InitContainer()
     }
 #endif
 #endif
-
-    auto subPipelineContext = Platform::AceContainer::GetContainer(childContainerId_)->GetPipelineContext();
-    if (!subPipelineContext) {
-        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get sub pipeline failed");
-        window_->Destroy();
-        return false;
+#ifdef NG_BUILD
+    auto subPipelineContextNG = AceType::DynamicCast<NG::PipelineContext>(
+        Platform::AceContainer::GetContainer(childContainerId_)->GetPipelineContext());
+    CHECK_NULL_VOID(subPipelineContextNG);
+    subPipelineContextNG->SetParentPipeline(parentContainer->GetPipelineContext());
+    subPipelineContextNG->SetupSubRootElement();
+    subPipelineContextNG->SetMinPlatformVersion(parentPipeline->GetMinPlatformVersion());
+    subPipelineContextNG->SetDragNodeGrayscale(parentPipeline->GetDragNodeGrayscale());
+    subPipelineContextNG->SetMaxAppFontScale(parentPipeline->GetMaxAppFontScale());
+    subPipelineContextNG->SetFollowSystem(parentPipeline->IsFollowSystem());
+    subPipelineContextNG->SetFontScale(parentPipeline->GetFontScale());
+    subPipelineContextNG->SetApiTargetVersion(parentPipeline->GetApiTargetVersion());
+#else
+    if (container->IsCurrentUseNewPipeline()) {
+        auto subPipelineContextNG = AceType::DynamicCast<NG::PipelineContext>(
+            Platform::AceContainer::GetContainer(childContainerId_)->GetPipelineContext());
+        CHECK_NULL_VOID(subPipelineContextNG);
+        subPipelineContextNG->SetParentPipeline(parentContainer->GetPipelineContext());
+        subPipelineContextNG->SetupSubRootElement();
+        subPipelineContextNG->SetMinPlatformVersion(parentPipeline->GetMinPlatformVersion());
+        subPipelineContextNG->SetKeyboardAnimationConfig(parentPipeline->GetKeyboardAnimationConfig());
+        subPipelineContextNG->SetDragNodeGrayscale(parentPipeline->GetDragNodeGrayscale());
+        subPipelineContextNG->SetMaxAppFontScale(parentPipeline->GetMaxAppFontScale());
+        subPipelineContextNG->SetFollowSystem(parentPipeline->IsFollowSystem());
+        subPipelineContextNG->SetFontScale(parentPipeline->GetFontScale());
+        subPipelineContextNG->SetApiTargetVersion(parentPipeline->GetApiTargetVersion());
+        return;
     }
+    auto subPipelineContext =
+        DynamicCast<PipelineContext>(Platform::AceContainer::GetContainer(childContainerId_)->GetPipelineContext());
+    CHECK_NULL_VOID(subPipelineContext);
     subPipelineContext->SetParentPipeline(parentContainer->GetPipelineContext());
-    subPipelineContext->SetMinPlatformVersion(parentPipeline->GetMinPlatformVersion());
     subPipelineContext->SetupSubRootElement();
+    subPipelineContext->SetMinPlatformVersion(parentPipeline->GetMinPlatformVersion());
     subPipelineContext->SetKeyboardAnimationConfig(parentPipeline->GetKeyboardAnimationConfig());
     subPipelineContext->SetDragNodeGrayscale(parentPipeline->GetDragNodeGrayscale());
     subPipelineContext->SetMaxAppFontScale(parentPipeline->GetMaxAppFontScale());
     subPipelineContext->SetFollowSystem(parentPipeline->IsFollowSystem());
-    if (!parentPipeline->IsFollowSystem()) {
-        subPipelineContext->SetFontScale(1.0f);
-    }
-    return true;
+    subPipelineContext->SetFontScale(parentPipeline->GetFontScale());
+    subPipelineContext->SetApiTargetVersion(parentPipeline->GetApiTargetVersion());
+#endif
 }
 
 RefPtr<PipelineBase> SubwindowOhos::GetChildPipelineContext() const
@@ -242,12 +415,60 @@ RefPtr<PipelineBase> SubwindowOhos::GetChildPipelineContext() const
     return aceContainer->GetPipelineContext();
 }
 
+std::function<void()> SubwindowOhos::GetInitToastDelayTask(const NG::ToastInfo& toastInfo,
+    std::function<void(int32_t)>&& callback)
+{
+    return [toastInfo, callbackParam = std::move(callback)]() {
+        int32_t posX = 0;
+        int32_t posY = 0;
+        int32_t width = 0;
+        int32_t height = 0;
+        float density = 1.0f;
+        auto subwindowOhos =
+            AceType::DynamicCast<SubwindowOhos>(SubwindowManager::GetInstance()->GetCurrentDialogWindow());
+        CHECK_NULL_VOID(subwindowOhos);
+        subwindowOhos->GetToastDialogWindowProperty(width, height, posX, posY, density);
+        auto childContainerId = subwindowOhos->GetChildContainerId();
+        auto window = Platform::DialogContainer::GetUIWindow(childContainerId);
+        auto dialogWindow = subwindowOhos->GetDialogWindow();
+        if (!dialogWindow || !window || !subwindowOhos->IsToastWindow()) {
+            bool ret = subwindowOhos->InitToastDialogWindow(width, height, posX, posY, true);
+            if (!ret) {
+                TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "init toast dialog window failed");
+                return;
+            }
+            ret = subwindowOhos->InitToastDialogView(width, height, density);
+            if (!ret) {
+                TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "init toast dialog view failed");
+                return;
+            }
+            subwindowOhos->SetIsToastWindow(true);
+        }
+        childContainerId = subwindowOhos->GetChildContainerId();
+        ContainerScope scope(childContainerId);
+        subwindowOhos->UpdateAceView(width, height, density, childContainerId);
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW,
+            "update ace view width : %{public}d,  height : %{public}d, density : %{public}f,childContainerId : "
+            "%{public}d",
+            width, height, density, childContainerId);
+        auto container = Platform::AceContainer::GetContainer(childContainerId);
+        CHECK_NULL_VOID(container);
+        container->SetFontScaleAndWeightScale(childContainerId);
+        auto ret = subwindowOhos->InitToastServiceConfig();
+        if (!ret) {
+            TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "init toast service conf failed");
+        }
+        Platform::DialogContainer::ShowToastDialogWindow(childContainerId, posX, posY, width, height, true);
+        Platform::DialogContainer::ShowToast(childContainerId, toastInfo,
+            std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
+    };
+}
+
 void SubwindowOhos::ResizeWindow()
 {
-    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    CHECK_NULL_VOID(defaultDisplay);
     CHECK_NULL_VOID(window_);
-    auto ret = window_->Resize(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+    auto windowSize = GetSubWindowSize(parentContainerId_, window_->GetDisplayId());
+    auto ret = window_->Resize(windowSize.Width(), windowSize.Height());
     if (ret != Rosen::WMError::WM_OK) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Resize window by default display failed with errCode: %{public}d",
             static_cast<int32_t>(ret));
@@ -258,13 +479,70 @@ void SubwindowOhos::ResizeWindow()
         window_->GetRect().posX_, window_->GetRect().posY_, window_->GetRect().width_, window_->GetRect().height_);
 }
 
+void SubwindowOhos::ResizeWindowForMenu()
+{
+    CHECK_NULL_VOID(window_);
+    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_VOID(parentContainer);
+    auto pipeline = DynamicCast<NG::PipelineContext>(parentContainer->GetPipelineContext());
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+
+    Rosen::WMError ret;
+    if (!(theme->GetExpandDisplay() || parentContainer->IsFreeMultiWindow()) &&
+        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+        if (parentContainer->IsUIExtensionWindow()) {
+            auto subwindow =
+                SubwindowManager::GetInstance()->GetSubwindowByType(childContainerId_, SubwindowType::TYPE_MENU);
+            CHECK_NULL_VOID(subwindow);
+            auto rect = subwindow->GetUIExtensionHostWindowRect();
+            ret = window_->Resize(rect.Width(), rect.Height());
+        } else {
+            auto rect = pipeline->GetDisplayWindowRectInfo();
+            ret = window_->Resize(rect.Width(), rect.Height());
+        }
+    } else {
+        auto windowSize = GetSubWindowSize(parentContainerId_, window_->GetDisplayId());
+        ret = window_->Resize(windowSize.Width(), windowSize.Height());
+    }
+    if (ret != Rosen::WMError::WM_OK) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Resize window by default display failed with errCode: %{public}d",
+            static_cast<int32_t>(ret));
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
+        "SubwindowOhos window rect is resized for menu to x: %{public}d, y: %{public}d, width: %{public}u, height: "
+        "%{public}u",
+        window_->GetRect().posX_, window_->GetRect().posY_, window_->GetRect().width_, window_->GetRect().height_);
+}
+
+void SubwindowOhos::SetRect(const NG::RectF& rect)
+{
+    windowRect_ = rect;
+}
+
 NG::RectF SubwindowOhos::GetRect()
 {
-    NG::RectF rect;
-    CHECK_NULL_RETURN(window_, rect);
-    rect.SetRect(
-        window_->GetRect().posX_, window_->GetRect().posY_, window_->GetRect().width_, window_->GetRect().height_);
-    return rect;
+    return windowRect_;
+}
+
+void SubwindowOhos::ResizeDialogSubwindow()
+{
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    CHECK_NULL_VOID(defaultDisplay);
+    if (!(NearEqual(defaultDisplay->GetWidth(), window_->GetRect().width_) &&
+        NearEqual(defaultDisplay->GetHeight(), window_->GetRect().height_))) {
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [this]() {
+                ResizeWindow();
+            },
+            TaskExecutor::TaskType::UI, "ArkUIResizeDialogSubwindow");
+    }
 }
 
 void SubwindowOhos::ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent)
@@ -316,6 +594,7 @@ void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo
     CHECK_NULL_VOID(window_);
     window_->SetTouchable(true);
     ContainerScope scope(childContainerId_);
+    needAvoidKeyboard_ = popupInfo.isAvoidKeyboard;
     overlayManager->ShowPopup(targetId, popupInfo, std::move(onWillDismiss), interactiveDismiss);
     window_->SetFocusable(true);
 }
@@ -338,7 +617,42 @@ void SubwindowOhos::HidePopupNG(int32_t targetId)
     context->FlushPipelineImmediately();
     HideEventColumn();
     HidePixelMap();
-    HideFilter(false);
+}
+
+void SubwindowOhos::ShowTipsNG(int32_t targetId, const NG::PopupInfo& popupInfo, int32_t appearingTime,
+    int32_t appearingTimeWithContinuousOperation, bool isSubwindow)
+{
+    popupTargetId_ = targetId;
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    ResizeWindow();
+    ShowWindow(popupInfo.focusable);
+    CHECK_NULL_VOID(window_);
+    window_->SetTouchable(true);
+    ContainerScope scope(childContainerId_);
+    overlayManager->ShowTips(targetId, popupInfo, appearingTime, appearingTimeWithContinuousOperation, isSubwindow);
+    window_->SetFocusable(true);
+}
+
+void SubwindowOhos::HideTipsNG(int32_t targetId, int32_t disappearingTime)
+{
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto popupInfo = overlayManager->GetPopupInfo(targetId == -1 ? popupTargetId_ : targetId);
+    popupInfo.markNeedUpdate = true;
+    ContainerScope scope(childContainerId_);
+    overlayManager->HideTips(targetId == -1 ? popupTargetId_ : targetId, popupInfo, disappearingTime);
+    context->FlushPipelineImmediately();
+    HideEventColumn();
+    HidePixelMap();
 }
 
 void SubwindowOhos::GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo)
@@ -387,7 +701,8 @@ void SubwindowOhos::ShowWindow(bool needFocus)
             "subwindow id:%{public}u set focusable %{public}d failed with WMError: %{public}d", window_->GetWindowId(),
             needFocus, static_cast<int32_t>(ret));
     }
-    ret = window_->Show();
+    ret = window_->Show(0, false, needFocus);
+    attachState_ = MenuWindowState::ATTACHING;
     if (ret != OHOS::Rosen::WMError::WM_OK) {
         TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Show subwindow id:%{public}u failed with WMError: %{public}d",
             window_->GetWindowId(), static_cast<int32_t>(ret));
@@ -397,6 +712,7 @@ void SubwindowOhos::ShowWindow(bool needFocus)
         RequestFocus();
     }
 
+    InitializeSafeArea();
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = aceContainer->GetPipelineContext();
@@ -416,7 +732,10 @@ void SubwindowOhos::HideWindow()
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Hide the subwindow %{public}s", window_->GetWindowName().c_str());
 
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
-    CHECK_NULL_VOID(aceContainer);
+    if (!aceContainer) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get container failed, child containerId: %{public}d", childContainerId_);
+        return;
+    }
 
 #ifdef NG_BUILD
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -425,6 +744,8 @@ void SubwindowOhos::HideWindow()
     CHECK_NULL_VOID(rootNode);
     if (!rootNode->GetChildren().empty() &&
         !(rootNode->GetChildren().size() == 1 && rootNode->GetLastChild()->GetTag() == V2::KEYBOARD_ETS_TAG)) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Subwindow has other node, the last child is %{public}s",
+            rootNode->GetLastChild()->GetTag().c_str());
         auto lastChildId = rootNode->GetLastChild()->GetId();
         auto iter = hotAreasMap_.find(lastChildId);
         if (iter != hotAreasMap_.end()) {
@@ -449,7 +770,7 @@ void SubwindowOhos::HideWindow()
         CHECK_NULL_VOID(rootNode);
         if (!rootNode->GetChildren().empty() &&
             !(rootNode->GetChildren().size() == 1 && rootNode->GetLastChild()->GetTag() == V2::KEYBOARD_ETS_TAG)) {
-            TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Subwindow has other node, the last child is %{public}s",
+            TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Subwindow has other node, the last child is %{public}s",
                 rootNode->GetLastChild()->GetTag().c_str());
             return;
         }
@@ -470,14 +791,20 @@ void SubwindowOhos::HideWindow()
     }
     OHOS::Rosen::WMError ret = window_->Hide();
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-    CHECK_NULL_VOID(parentContainer);
-    if (parentContainer->IsScenceBoardWindow()) {
+    if (!parentContainer) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get container failed, parent containerId: %{public}d", parentContainerId_);
+        return;
+    }
+    if (parentContainer->IsSceneBoardWindow()) {
         window_->SetTouchable(true);
     }
 
     if (ret != OHOS::Rosen::WMError::WM_OK) {
         TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Hide window failed with errCode: %{public}d", static_cast<int32_t>(ret));
         return;
+    }
+    if (isShowed_) {
+        detachState_ = MenuWindowState::DETACHING;
     }
     isShowed_ = false;
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Hide the subwindow successfully.");
@@ -539,12 +866,14 @@ void SubwindowOhos::ClearMenu()
 #endif
 }
 
-bool SubwindowOhos::ShowPreviewNG()
+bool SubwindowOhos::ShowPreviewNG(bool isStartDraggingFromSubWindow)
 {
     CHECK_NULL_RETURN(window_, false);
-    ShowWindow(false);
     ResizeWindow();
-    window_->SetTouchable(false);
+    ShowWindow(false);
+    if (!isStartDraggingFromSubWindow) {
+        window_->SetTouchable(false);
+    }
     return true;
 }
 
@@ -569,13 +898,12 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> customNode, const NG:
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show menu ng enter");
     CHECK_NULL_VOID(customNode);
-    CHECK_NULL_VOID(targetNode);
+    if (!targetNode) {
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "targetNode is nullptr");
+        return;
+    }
     ContainerScope scope(childContainerId_);
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto context = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_VOID(context);
-    auto overlay = context->GetOverlayManager();
+    auto overlay = GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     auto menuNode = customNode;
     if (customNode->GetTag() != V2::MENU_WRAPPER_ETS_TAG) {
@@ -585,8 +913,8 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> customNode, const NG:
         menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);
         menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
     }
+    ResizeWindowForMenu();
     ShowWindow();
-    ResizeWindow();
     CHECK_NULL_VOID(window_);
     window_->SetTouchable(true);
     overlay->ShowMenuInSubWindow(targetNode->GetId(), offset, menuNode);
@@ -596,22 +924,22 @@ void SubwindowOhos::ShowMenuNG(std::function<void()>&& buildFunc, std::function<
     const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset)
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show menu ng enter");
+    if (!targetNode) {
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "targetNode is nullptr");
+        return;
+    }
     ContainerScope scope(childContainerId_);
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto context = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_VOID(context);
-    auto overlay = context->GetOverlayManager();
+    auto overlay = GetOverlayManager();
     CHECK_NULL_VOID(overlay);
+    ResizeWindowForMenu();
     ShowWindow();
-    ResizeWindow();
     CHECK_NULL_VOID(window_);
     window_->SetTouchable(true);
     NG::ScopedViewStackProcessor builderViewStackProcessor;
     buildFunc();
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
     RefPtr<NG::UINode> previewCustomNode;
-    if (previewBuildFunc && menuParam.previewMode == MenuPreviewMode::CUSTOM) {
+    if (previewBuildFunc && menuParam.previewMode.value_or(MenuPreviewMode::NONE) == MenuPreviewMode::CUSTOM) {
         previewBuildFunc();
         previewCustomNode = NG::ViewStackProcessor::GetInstance()->Finish();
     }
@@ -631,11 +959,7 @@ void SubwindowOhos::HideMenuNG(bool showPreviewAnimation, bool startDrag)
         return;
     }
     ContainerScope scope(childContainerId_);
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto context = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_VOID(context);
-    auto overlay = context->GetOverlayManager();
+    auto overlay = GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     overlay->HideMenuInSubWindow(showPreviewAnimation, startDrag);
     HideEventColumn();
@@ -651,14 +975,9 @@ void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t target
         return;
     }
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Subwindow hide menu for target id %{public}d", targetId);
-    targetId_ = targetId;
-    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
-    CHECK_NULL_VOID(aceContainer);
-    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
-    CHECK_NULL_VOID(context);
-    auto overlay = context->GetOverlayManager();
+    auto overlay = GetOverlayManager();
     CHECK_NULL_VOID(overlay);
-    overlay->HideMenuInSubWindow(menu, targetId_);
+    overlay->HideMenuInSubWindow(menu, targetId);
     HideEventColumn();
     HidePixelMap(false, 0, 0, false);
     HideFilter(false);
@@ -668,9 +987,7 @@ void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t target
 void SubwindowOhos::UpdatePreviewPosition()
 {
     ContainerScope scope(childContainerId_);
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto overlay = pipelineContext->GetOverlayManager();
+    auto overlay = GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     if (overlay->GetHasPixelMap()) {
         return;
@@ -681,9 +998,7 @@ void SubwindowOhos::UpdatePreviewPosition()
 bool SubwindowOhos::GetMenuPreviewCenter(NG::OffsetF& offset)
 {
     ContainerScope scope(childContainerId_);
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, false);
-    auto overlay = pipelineContext->GetOverlayManager();
+    auto overlay = GetOverlayManager();
     CHECK_NULL_RETURN(overlay, false);
     return overlay->GetMenuPreviewCenter(offset);
 }
@@ -692,9 +1007,7 @@ void SubwindowOhos::UpdateHideMenuOffsetNG(
     const NG::OffsetF& offset, float menuScale, bool isRedragStart, int32_t menuWrapperId)
 {
     ContainerScope scope(childContainerId_);
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto overlay = pipelineContext->GetOverlayManager();
+    auto overlay = GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     if (overlay->IsContextMenuDragHideFinished()) {
         return;
@@ -707,9 +1020,7 @@ void SubwindowOhos::ContextMenuSwitchDragPreviewAnimationtNG(const RefPtr<NG::Fr
 {
     CHECK_NULL_VOID(dragPreviewNode);
     ContainerScope scope(childContainerId_);
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto overlay = pipelineContext->GetOverlayManager();
+    auto overlay = GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     overlay->ContextMenuSwitchDragPreviewAnimation(dragPreviewNode, offset);
 }
@@ -730,9 +1041,11 @@ void SubwindowOhos::ClearMenuNG(int32_t targetId, bool inWindow, bool showAnimat
         overlay->CleanMenuInSubWindow(targetId);
         overlay->RemoveFilter();
     }
-    overlay->EraseMenuInfo(targetId);
     HideWindow();
-    context->FlushPipelineImmediately();
+    if (overlay->GetMenuNode(targetId)) {
+        context->FlushPipelineImmediately();
+    }
+    overlay->EraseMenuInfo(targetId);
     if (inWindow) {
         HideEventColumn();
     }
@@ -750,6 +1063,20 @@ void SubwindowOhos::ClearPopupNG()
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     overlay->CleanPopupInSubWindow();
+    HideWindow();
+    context->FlushPipelineImmediately();
+}
+
+void SubwindowOhos::ClearPopupNG(bool isForceClear)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear popup ng enter");
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    overlay->CleanPopupInSubWindow(isForceClear);
     HideWindow();
     context->FlushPipelineImmediately();
 }
@@ -791,6 +1118,7 @@ RefPtr<StackElement> SubwindowOhos::GetStack()
 void SubwindowOhos::DeleteHotAreas(int32_t nodeId)
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "delete hot area %{public}d", nodeId);
+    CHECK_NULL_VOID(window_);
     hotAreasMap_.erase(nodeId);
     if (hotAreasMap_.size() == 0) {
         // Set min window hot area so that sub window can transparent event.
@@ -845,6 +1173,37 @@ void SubwindowOhos::RectConverter(const Rect& rect, Rosen::Rect& rosenRect)
         rosenRect.posX_, rosenRect.posY_, rosenRect.width_, rosenRect.height_);
 }
 
+void SubwindowOhos::ShowBindSheetNG(bool isShow, std::function<void(const std::string&)>&& callback,
+    std::function<RefPtr<NG::UINode>()>&& buildNodeFunc, std::function<RefPtr<NG::UINode>()>&& buildtitleNodeFunc,
+    NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+    std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
+    std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+    std::function<void(const float)>&& onHeightDidChange,
+    std::function<void(const float)>&& onDetentsDidChange,
+    std::function<void(const float)>&& onWidthDidChange,
+    std::function<void(const float)>&& onTypeDidChange,
+    std::function<void()>&& sheetSpringBack, const RefPtr<NG::FrameNode>& targetNode)
+{
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    ResizeWindow();
+    ShowWindow();
+    CHECK_NULL_VOID(window_);
+    window_->SetFullScreen(true);
+    window_->SetTouchable(true);
+    ContainerScope scope(childContainerId_);
+    overlay->OnBindSheet(isShow, std::move(callback), std::move(buildNodeFunc),
+        std::move(buildtitleNodeFunc), sheetStyle, std::move(onAppear), std::move(onDisappear),
+        std::move(shouldDismiss), std::move(onWillDismiss),
+        std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
+        std::move(onDetentsDidChange), std::move(onWidthDidChange), std::move(onTypeDidChange),
+        std::move(sheetSpringBack), targetNode);
+}
+
 RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     const DialogProperties& dialogProps, std::function<void()>&& buildFunc)
 {
@@ -855,24 +1214,28 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     CHECK_NULL_RETURN(context, nullptr);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_RETURN(overlay, nullptr);
+    auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_RETURN(parentAceContainer, nullptr);
     std::map<int32_t, RefPtr<NG::FrameNode>> DialogMap(overlay->GetDialogMap().begin(), overlay->GetDialogMap().end());
     int dialogMapSize = static_cast<int>(DialogMap.size());
     if (dialogMapSize == 0) {
-        auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-        CHECK_NULL_RETURN(parentAceContainer, nullptr);
         auto parentcontext = DynamicCast<NG::PipelineContext>(parentAceContainer->GetPipelineContext());
         CHECK_NULL_RETURN(parentcontext, nullptr);
         auto parentOverlay = parentcontext->GetOverlayManager();
         CHECK_NULL_RETURN(parentOverlay, nullptr);
-        parentOverlay->SetSubWindowId(SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+        parentOverlay->SetSubWindowId(childContainerId_);
     }
-    SubwindowManager::GetInstance()->SetDialogSubWindowId(
-        SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
-    ShowWindow();
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, nullptr);
+    if (dialogTheme->GetExpandDisplay() || parentAceContainer->IsFreeMultiWindow()) {
+        ResizeWindow();
+    } else {
+        window_->SetFollowParentWindowLayoutEnabled(true);
+    }
+    ShowWindow(dialogProps.focusable);
     CHECK_NULL_RETURN(window_, nullptr);
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
-    ResizeWindow();
     ContainerScope scope(childContainerId_);
     auto dialog = overlay->ShowDialog(dialogProps, std::move(buildFunc));
     CHECK_NULL_RETURN(dialog, nullptr);
@@ -890,24 +1253,28 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNGWithNode(
     CHECK_NULL_RETURN(context, nullptr);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_RETURN(overlay, nullptr);
+    auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_RETURN(parentAceContainer, nullptr);
     std::map<int32_t, RefPtr<NG::FrameNode>> DialogMap(overlay->GetDialogMap().begin(), overlay->GetDialogMap().end());
     int dialogMapSize = static_cast<int>(DialogMap.size());
     if (dialogMapSize == 0) {
-        auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-        CHECK_NULL_RETURN(parentAceContainer, nullptr);
         auto parentcontext = DynamicCast<NG::PipelineContext>(parentAceContainer->GetPipelineContext());
         CHECK_NULL_RETURN(parentcontext, nullptr);
         auto parentOverlay = parentcontext->GetOverlayManager();
         CHECK_NULL_RETURN(parentOverlay, nullptr);
-        parentOverlay->SetSubWindowId(SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+        parentOverlay->SetSubWindowId(childContainerId_);
     }
-    SubwindowManager::GetInstance()->SetDialogSubWindowId(
-        SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
-    ShowWindow();
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, nullptr);
+    if (dialogTheme->GetExpandDisplay() || parentAceContainer->IsFreeMultiWindow()) {
+        ResizeWindow();
+    } else {
+        window_->SetFollowParentWindowLayoutEnabled(true);
+    }
+    ShowWindow(dialogProps.focusable);
     CHECK_NULL_RETURN(window_, nullptr);
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
-    ResizeWindow();
     ContainerScope scope(childContainerId_);
     auto dialog = overlay->ShowDialogWithNode(dialogProps, customNode);
     CHECK_NULL_RETURN(dialog, nullptr);
@@ -937,26 +1304,30 @@ void SubwindowOhos::OpenCustomDialogNG(const DialogProperties& dialogProps, std:
     CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
+    auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_VOID(parentAceContainer);
     std::map<int32_t, RefPtr<NG::FrameNode>> DialogMap(overlay->GetDialogMap().begin(), overlay->GetDialogMap().end());
     int dialogMapSize = static_cast<int>(DialogMap.size());
     if (dialogMapSize == 0) {
-        auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-        CHECK_NULL_VOID(parentAceContainer);
         auto parentcontext = DynamicCast<NG::PipelineContext>(parentAceContainer->GetPipelineContext());
         CHECK_NULL_VOID(parentcontext);
         auto parentOverlay = parentcontext->GetOverlayManager();
         CHECK_NULL_VOID(parentOverlay);
-        parentOverlay->SetSubWindowId(SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
+        parentOverlay->SetSubWindowId(childContainerId_);
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "overlay in parent container %{public}d, SetSubWindowId %{public}d",
-            parentContainerId_, GetSubwindowId());
+            parentContainerId_, childContainerId_);
     }
-    SubwindowManager::GetInstance()->SetDialogSubWindowId(
-        SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
-    ShowWindow();
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    if (dialogTheme->GetExpandDisplay() || parentAceContainer->IsFreeMultiWindow()) {
+        ResizeWindow();
+    } else {
+        window_->SetFollowParentWindowLayoutEnabled(true);
+    }
+    ShowWindow(dialogProps.focusable);
     CHECK_NULL_VOID(window_);
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
-    ResizeWindow();
     ContainerScope scope(childContainerId_);
     overlay->OpenCustomDialog(dialogProps, std::move(callback));
     haveDialog_ = true;
@@ -1011,12 +1382,16 @@ void SubwindowOhos::HideSubWindowNG()
     CHECK_NULL_VOID(container);
     if (container->IsDialogContainer()) {
         if (IsToastWindow()) {
-            Platform::DialogContainer::HideWindow(Container::CurrentId());
+            Platform::AceContainer::HideWindow(Container::CurrentId());
         } else {
-            Platform::DialogContainer::CloseWindow(Container::CurrentId());
-            Platform::DialogContainer::DestroyContainer(Container::CurrentId());
+            Platform::AceContainer::CloseWindow(Container::CurrentId());
+            Platform::AceContainer::DestroyContainer(Container::CurrentId());
         }
     } else {
+        auto context = container->GetPipelineContext();
+        if (context) {
+            context->FlushPipelineImmediately();
+        }
         HideWindow();
     }
 }
@@ -1026,6 +1401,15 @@ void SubwindowOhos::GetToastDialogWindowProperty(
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "get toast dialog window property enter");
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    auto subwindowOhos = AceType::DynamicCast<SubwindowOhos>(SubwindowManager::GetInstance()->GetCurrentDialogWindow());
+    if (subwindowOhos) {
+        auto dialogWindow = subwindowOhos->GetDialogWindow();
+        if (dialogWindow) {
+            auto currentDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(dialogWindow->GetDisplayId());
+            defaultDisplay = currentDisplay ? currentDisplay : defaultDisplay;
+        }
+    }
+
     if (defaultDisplay) {
         posX = 0;
         posY = 0;
@@ -1038,7 +1422,7 @@ void SubwindowOhos::GetToastDialogWindowProperty(
         posY, width, height, density);
 }
 
-bool SubwindowOhos::InitToastDialogWindow(int32_t width, int32_t height, int32_t posX, int32_t posY, bool isToast)
+bool SubwindowOhos::InitToastDialogWindow(int32_t& width, int32_t& height, int32_t posX, int32_t posY, bool isToast)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "init toast dialog window enter");
     OHOS::sptr<OHOS::Rosen::WindowOption> windowOption = new OHOS::Rosen::WindowOption();
@@ -1049,14 +1433,24 @@ bool SubwindowOhos::InitToastDialogWindow(int32_t width, int32_t height, int32_t
     } else {
         windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     }
-    windowOption->SetWindowRect({ posX, posY, width, height });
+    windowOption->SetWindowRect({ posX, posY, static_cast<uint32_t>(width), static_cast<uint32_t>(height) });
     windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
     windowOption->SetFocusable(!isToast);
     int32_t dialogId = gToastDialogId.fetch_add(1, std::memory_order_relaxed);
     std::string windowName = "ARK_APP_SUBWINDOW_TOAST_DIALOG_" + std::to_string(dialogId);
-    dialogWindow_ = OHOS::Rosen::Window::Create(windowName, windowOption);
+    if (isToast) {
+        auto context = OHOS::AbilityRuntime::Context::GetApplicationContext();
+        dialogWindow_ = OHOS::Rosen::Window::Create(windowName, windowOption, context);
+    } else {
+        dialogWindow_ = OHOS::Rosen::Window::Create(windowName, windowOption);
+    }
     CHECK_NULL_RETURN(dialogWindow_, false);
     dialogWindow_->SetLayoutFullScreen(true);
+    auto focusWindowId = dialogWindow_->GetDisplayId();
+    auto focusDisplayInfo = Rosen::DisplayManager::GetInstance().GetDisplayById(focusWindowId);
+    CHECK_NULL_RETURN(focusDisplayInfo, false);
+    width = focusDisplayInfo->GetWidth();
+    height = focusDisplayInfo->GetHeight();
     return true;
 }
 
@@ -1095,16 +1489,18 @@ bool SubwindowOhos::InitToastDialogView(int32_t width, int32_t height, float den
     }
 #endif
 
-    auto pipelineContext = container->GetPipelineContext();
+    auto pipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_RETURN(pipelineContext, false);
-    pipelineContext->SetupRootElement();
+    pipelineContext->SetupSubRootElement();
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
     if (parentContainer) {
         auto parentPipeline = parentContainer->GetPipelineContext();
         CHECK_NULL_RETURN(parentPipeline, false);
         pipelineContext->SetMinPlatformVersion(parentPipeline->GetMinPlatformVersion());
+        pipelineContext->SetApiTargetVersion(parentPipeline->GetApiTargetVersion());
     } else {
         pipelineContext->SetMinPlatformVersion(PLATFORM_VERSION_TEN);
+        pipelineContext->SetApiTargetVersion(container->GetApiTargetVersion());
     }
     return true;
 #else
@@ -1112,8 +1508,39 @@ bool SubwindowOhos::InitToastDialogView(int32_t width, int32_t height, float den
 #endif
 }
 
+bool SubwindowOhos::InitToastServiceConfig()
+{
+    auto context = OHOS::AbilityRuntime::Context::GetApplicationContext();
+    CHECK_NULL_RETURN(context, false);
+    auto config = context->GetConfiguration();
+    CHECK_NULL_RETURN(config, false);
+    auto maxAppFontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::APP_FONT_MAX_SCALE);
+    auto followSystem = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE);
+    auto container = Platform::DialogContainer::GetContainer(childContainerId_);
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto isFollowSystem = followSystem == "followSystem";
+    if (!followSystem.empty()) {
+        pipelineContext->SetFollowSystem(isFollowSystem);
+    }
+    if (!maxAppFontScale.empty()) {
+        pipelineContext->SetMaxAppFontScale(StringUtils::StringToFloat(maxAppFontScale));
+    }
+    if (!isFollowSystem) {
+        pipelineContext->SetFontScale(1.0f);
+    }
+    auto fontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
+    if (!fontScale.empty()) {
+        pipelineContext->SetFontScale(StringUtils::StringToFloat(fontScale));
+    }
+
+    return true;
+}
+
 bool SubwindowOhos::CreateEventRunner()
 {
+    std::lock_guard<std::mutex> lock(eventRunnerMutex_);
     if (!eventLoop_) {
         eventLoop_ = AppExecFwk::EventRunner::Create("Subwindow_Toast_Dialog");
         CHECK_NULL_RETURN(eventLoop_, false);
@@ -1145,7 +1572,6 @@ void SubwindowOhos::ClearToast()
 void SubwindowOhos::ShowToastForAbility(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast for ability enter, containerId : %{public}d", childContainerId_);
-    SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
     SetIsToastWindow(
         toastInfo.showMode == NG::ToastShowMode::TOP_MOST || toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST);
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
@@ -1155,23 +1581,36 @@ void SubwindowOhos::ShowToastForAbility(const NG::ToastInfo& toastInfo, std::fun
     }
 
     auto engine = EngineHelper::GetEngine(aceContainer->GetInstanceId());
+    RefPtr<Framework::FrontendDelegate> delegate;
     if (!engine) {
-        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get engine failed, containerId : %{public}d",
-            aceContainer->GetInstanceId());
-        return;
-    }
-    auto delegate = engine->GetFrontend();
-    if (!delegate) {
-        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get frontend failed, child containerId : %{public}d", childContainerId_);
-        return;
+        auto frontend = AceType::DynamicCast<DeclarativeFrontend>(aceContainer->GetFrontend());
+        CHECK_NULL_VOID(frontend);
+        delegate = frontend->GetDelegate();
+        if (!delegate) {
+            TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get engine failed, containerId : %{public}d",
+                aceContainer->GetInstanceId());
+            return;
+        }
+    } else {
+        delegate = engine->GetFrontend();
+        if (!delegate) {
+            TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get frontend failed, child containerId : %{public}d",
+                childContainerId_);
+            return;
+        }
     }
     ContainerScope scope(childContainerId_);
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
     CHECK_NULL_VOID(parentContainer);
-    if (parentContainer->IsScenceBoardWindow() || toastInfo.showMode == NG::ToastShowMode::TOP_MOST ||
+    if (parentContainer->IsSceneBoardWindow() || toastInfo.showMode == NG::ToastShowMode::TOP_MOST ||
         toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST) {
         ResizeWindow();
+        // Recover current subwindow in subwindow manager to ensure popup/menu can close the right subwindow
+        auto currentWindow = SubwindowManager::GetInstance()->GetCurrentWindow();
         ShowWindow(false);
+        SubwindowManager::GetInstance()->SetCurrentSubwindow(currentWindow);
+        CHECK_NULL_VOID(window_);
+        window_->SetTouchable(false);
     }
     delegate->ShowToast(toastInfo, std::move(callback));
 }
@@ -1185,47 +1624,7 @@ void SubwindowOhos::ShowToastForService(const NG::ToastInfo& toastInfo, std::fun
     }
 
     SubwindowManager::GetInstance()->SetCurrentDialogSubwindow(AceType::Claim(this));
-    auto showDialogCallback = [toastInfo, callbackParam = std::move(callback)]() {
-        int32_t posX = 0;
-        int32_t posY = 0;
-        int32_t width = 0;
-        int32_t height = 0;
-        float density = 1.0f;
-        auto subwindowOhos =
-            AceType::DynamicCast<SubwindowOhos>(SubwindowManager::GetInstance()->GetCurrentDialogWindow());
-        CHECK_NULL_VOID(subwindowOhos);
-        subwindowOhos->GetToastDialogWindowProperty(width, height, posX, posY, density);
-        auto childContainerId = subwindowOhos->GetChildContainerId();
-        auto window = Platform::DialogContainer::GetUIWindow(childContainerId);
-        auto dialogWindow = subwindowOhos->GetDialogWindow();
-        if (!dialogWindow || !window || !subwindowOhos->IsToastWindow()) {
-            bool ret = subwindowOhos->InitToastDialogWindow(width, height, posX, posY, true);
-            if (!ret) {
-                TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "init toast dialog window failed");
-                return;
-            }
-            ret = subwindowOhos->InitToastDialogView(width, height, density);
-            if (!ret) {
-                TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "init toast dialog view failed");
-                return;
-            }
-            subwindowOhos->SetIsToastWindow(true);
-        }
-        childContainerId = subwindowOhos->GetChildContainerId();
-        ContainerScope scope(childContainerId);
-        subwindowOhos->UpdateAceView(width, height, density, childContainerId);
-        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW,
-            "update ace view width : %{public}d,  height : %{public}d, density : %{public}f,childContainerId : "
-            "%{public}d",
-            width, height, density, childContainerId);
-        auto container = Platform::DialogContainer::GetContainer(childContainerId);
-        CHECK_NULL_VOID(container);
-        container->SetFontScaleAndWeightScale(childContainerId);
-        Platform::DialogContainer::ShowToastDialogWindow(childContainerId, posX, posY, width, height, true);
-        Platform::DialogContainer::ShowToast(childContainerId, toastInfo.message, toastInfo.duration, toastInfo.bottom,
-            std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
-    };
-    if (!handler_->PostTask(showDialogCallback)) {
+    if (!handler_->PostTask(GetInitToastDelayTask(toastInfo, std::move(callback)))) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "create show dialog callback failed");
         return;
     }
@@ -1234,7 +1633,10 @@ void SubwindowOhos::ShowToastForService(const NG::ToastInfo& toastInfo, std::fun
 void SubwindowOhos::ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback)
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show toast, window parent id is %{public}d", parentContainerId_);
-    if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
+    auto isTopMost = toastInfo.showMode == NG::ToastShowMode::TOP_MOST;
+    // for pa service
+    if ((isTopMost && parentContainerId_ >= MIN_PA_SERVICE_ID && parentContainerId_ < MIN_SUBCONTAINER_ID) ||
+        (!isTopMost && parentContainerId_ >= MIN_PA_SERVICE_ID) || parentContainerId_ < 0) {
         ShowToastForService(toastInfo, std::move(callback));
     } else {
         ShowToastForAbility(toastInfo, std::move(callback));
@@ -1319,7 +1721,7 @@ void SubwindowOhos::ShowDialogForService(const std::string& title, const std::st
         }
         auto childContainerId = subwindowOhos->GetChildContainerId();
         ContainerScope scope(childContainerId);
-        auto container = Platform::DialogContainer::GetContainer(childContainerId);
+        auto container = Platform::AceContainer::GetContainer(childContainerId);
         CHECK_NULL_VOID(container);
         container->SetFontScaleAndWeightScale(childContainerId);
         Platform::DialogContainer::ShowToastDialogWindow(childContainerId, posX, posY, width, height);
@@ -1458,6 +1860,8 @@ void SubwindowOhos::OpenCustomDialog(const PromptDialogAttr& dialogAttr, std::fu
 
 void SubwindowOhos::CloseCustomDialog(const int32_t dialogId)
 {
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "close custom dialog with id, childContainerId_ is %{public}d",
+        childContainerId_);
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -1470,6 +1874,8 @@ void SubwindowOhos::CloseCustomDialog(const int32_t dialogId)
 
 void SubwindowOhos::CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback)
 {
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "close custom dialog with node, childContainerId_ is %{public}d",
+        childContainerId_);
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -1533,7 +1939,7 @@ void SubwindowOhos::ShowActionMenuForService(
         }
         auto childContainerId = subwindowOhos->GetChildContainerId();
         ContainerScope scope(childContainerId);
-        auto container = Platform::DialogContainer::GetContainer(childContainerId);
+        auto container = Platform::AceContainer::GetContainer(childContainerId);
         CHECK_NULL_VOID(container);
         container->SetFontScaleAndWeightScale(childContainerId);
         Platform::DialogContainer::ShowToastDialogWindow(childContainerId, posX, posY, width, height);
@@ -1594,6 +2000,28 @@ Rect SubwindowOhos::GetUIExtensionHostWindowRect() const
     return Rect(hostWindowRect.posX_, hostWindowRect.posY_, hostWindowRect.width_, hostWindowRect.height_);
 }
 
+Rect SubwindowOhos::GetFoldExpandAvailableRect() const
+{
+    CHECK_NULL_RETURN(window_, Rect());
+    Rosen::DMRect rect;
+    Rosen::DMError ret = Rosen::DisplayManager::GetInstance().GetExpandAvailableArea(DEFAULT_DISPLAY_ID, rect);
+    if (ret != Rosen::DMError::DM_OK) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "failed to get expandAvailableArea");
+        return Rect();
+    }
+
+    return Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
+}
+
+NG::RectF SubwindowOhos::GetWindowRect() const
+{
+    NG::RectF rect;
+    CHECK_NULL_RETURN(window_, rect);
+    rect.SetRect(window_->GetRect().posX_, window_->GetRect().posY_,
+        window_->GetRect().width_, window_->GetRect().height_);
+    return rect;
+}
+
 void SubwindowOhos::RequestFocus()
 {
     CHECK_NULL_VOID(window_);
@@ -1619,6 +2047,7 @@ bool SubwindowOhos::IsFocused()
 
 void SubwindowOhos::HideFilter(bool isInSubWindow)
 {
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "HideFilter enter, subWindow: %{public}d", isInSubWindow);
     RefPtr<Container> aceContainer = nullptr;
     if (isInSubWindow) {
         aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
@@ -1694,7 +2123,7 @@ void SubwindowOhos::ResizeWindowForFoldStatus(int32_t parentContainerId)
         CHECK_NULL_VOID(aceView);
         Platform::AceViewOhos::SurfaceChanged(aceView, defaultDisplay->GetWidth(), defaultDisplay->GetHeight(), 0);
     };
-    if (parentContainerId > 0) {
+    if (parentContainerId > 0 && parentContainerId < MIN_PA_SERVICE_ID) {
         ResizeWindowForFoldStatus();
         return;
     }
@@ -1715,7 +2144,7 @@ void SubwindowOhos::ResizeWindowForFoldStatus()
         return;
     }
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
-        "SubwindowOhos window rect is resized to x: %{public}d, y: %{public}d, width: %{public}u, height: %{public}u",
+        "foldStatus is changed, subwindowOhos is resized to [%{public}d, %{public}d, %{public}u, %{public}u]",
         window_->GetRect().posX_, window_->GetRect().posY_, window_->GetRect().width_, window_->GetRect().height_);
 }
 
@@ -1732,16 +2161,173 @@ void SubwindowOhos::MarkDirtyDialogSafeArea()
     lastChild->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
 }
 
+bool SubwindowOhos::CheckHostWindowStatus() const
+{
+    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_RETURN(parentContainer, false);
+    sptr<OHOS::Rosen::Window> parentWindow = parentContainer->GetUIWindow(parentContainerId_);
+    CHECK_NULL_RETURN(parentWindow, false);
+    if (parentWindow->GetType() == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
+        auto parentPipeline = parentContainer->GetPipelineContext();
+        CHECK_NULL_RETURN(parentPipeline, false);
+        auto hostWindowId = parentPipeline->GetFocusWindowId();
+        auto hostWindowRect = parentWindow->GetHostWindowRect(hostWindowId);
+        auto isValid = GreatNotEqual(hostWindowRect.width_, 0) && GreatNotEqual(hostWindowRect.height_, 0);
+        if (!isValid) {
+            TAG_LOGW(AceLogTag::ACE_SUB_WINDOW,
+                "UIExtension Window failed to obtain host window information. Please check if permissions are enabled");
+            return false;
+        }
+    }
+    return true;
+}
+
 bool SubwindowOhos::Close()
 {
+    if (isClosing_) {
+        return true;
+    }
+
     CHECK_NULL_RETURN(window_, false);
+    window_->UnregisterSwitchFreeMultiWindowListener(freeMultiWindowListener_);
+    isClosing_ = true;
     OHOS::Rosen::WMError ret = window_->Close();
+    isClosing_ = false;
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "SubwindowOhos fail to close the dialog subwindow.");
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "SubwindowOhos failed to close the dialog subwindow.");
         return false;
     }
     sptr<OHOS::Rosen::Window> uiWindow = nullptr;
     Ace::Platform::DialogContainer::SetUIWindow(childContainerId_, uiWindow);
+    return true;
+}
+
+bool SubwindowOhos::IsFreeMultiWindow() const
+{
+    if (!parentWindow_) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Window is null, failed to get freeMultiWindow status");
+        return false;
+    }
+
+    return parentWindow_->GetFreeMultiWindowModeEnabledState();
+}
+
+void SubwindowOhos::OnFreeMultiWindowSwitch(bool enable)
+{
+    for (auto&& [id, callback] : freeMultiWindowSwitchCallbackMap_) {
+        if (callback) {
+            callback(enable);
+        }
+    }
+}
+
+int32_t SubwindowOhos::RegisterFreeMultiWindowSwitchCallback(std::function<void(bool)>&& callback)
+{
+    if (callback) {
+        freeMultiWindowSwitchCallbackMap_.emplace(++callbackId_, std::move(callback));
+        return callbackId_;
+    }
+    return 0;
+}
+
+void SubwindowOhos::UnRegisterFreeMultiWindowSwitchCallback(int32_t callbackId)
+{
+    freeMultiWindowSwitchCallbackMap_.erase(callbackId);
+}
+
+bool SubwindowOhos::IsToastSubWindow()
+{
+    CHECK_NULL_RETURN(window_, false);
+    auto windowType = window_->GetType();
+    return windowType == Rosen::WindowType::WINDOW_TYPE_SYSTEM_TOAST ||
+           windowType == Rosen::WindowType::WINDOW_TYPE_TOAST;
+}
+
+void SubwindowOhos::DestroyWindow()
+{
+    CHECK_NULL_VOID(window_);
+    OHOS::Rosen::WMError ret = window_->Destroy();
+    if (ret != OHOS::Rosen::WMError::WM_OK) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "SubwindowOhos failed to destroy the dialog subwindow.");
+        return;
+    }
+}
+
+uint64_t SubwindowOhos::GetDisplayId()
+{
+    if (window_) {
+        return window_->GetDisplayId();
+    }
+    return 0;
+}
+
+bool SubwindowOhos::IsSameDisplayWithParentWindow(bool useInitializedId)
+{
+    CHECK_NULL_RETURN(window_, false);
+    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_RETURN(parentContainer, false);
+    auto parentWindow = parentContainer->GetUIWindow(parentContainerId_);
+    CHECK_NULL_RETURN(parentWindow, false);
+    auto displayId = useInitializedId ? defaultDisplayId_ : window_->GetDisplayId();
+    return displayId == parentWindow->GetDisplayId();
+}
+
+void SubwindowOhos::InitializeSafeArea()
+{
+    CHECK_NULL_VOID(window_);
+
+    auto container = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(container);
+    auto pipeline = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+
+    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_VOID(parentContainer);
+
+    std::optional<NG::RectF> windowRect;
+    if (theme->GetExpandDisplay() || parentContainer->IsFreeMultiWindow()) {
+        auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(window_->GetDisplayId());
+        CHECK_NULL_VOID(defaultDisplay);
+        windowRect = { 0.0, 0.0, static_cast<float>(defaultDisplay->GetWidth()),
+            static_cast<float>(defaultDisplay->GetHeight()) };
+    }
+
+    auto systemSafeArea = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM, windowRect);
+    auto navSafeArea = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR, windowRect);
+    pipeline->UpdateSystemSafeArea(systemSafeArea);
+    pipeline->UpdateNavSafeArea(navSafeArea);
+    auto cutoutSafeArea = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT, windowRect);
+    pipeline->UpdateCutoutSafeArea(cutoutSafeArea);
+
+    auto safeAreaInsets = pipeline->GetSafeAreaWithoutProcess();
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "initializeSafeArea by windowRect: %{public}s, safeAreaInsets: %{public}s",
+        windowRect.value_or(NG::RectF()).ToString().c_str(), safeAreaInsets.ToString().c_str());
+}
+
+bool SubwindowOhos::ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Show selectOverlay enter");
+    ContainerScope scope(childContainerId_);
+    CHECK_NULL_RETURN(window_, false);
+    ResizeWindow();
+    ShowWindow(false);
+    if (!isShowed_) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW,
+            "Show selectOverlay subwindow failed, subwindow not show after showWindow called.");
+        return false;
+    }
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(context, false);
+    auto rootNode = context->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, false);
+    CHECK_NULL_RETURN(overlayNode, false);
+    overlayNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    window_->SetTouchable(true);
+    window_->KeepKeyboardOnFocus(true);
+    window_->SetFocusable(false);
     return true;
 }
 } // namespace OHOS::Ace

@@ -47,6 +47,7 @@
 #include "core/components/page/page_component.h"
 #include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/components/theme/theme_manager.h"
+#include "core/components_ng/event/visible_ratio_callback.h"
 #include "core/event/event_trigger.h"
 #include "core/gestures/gesture_info.h"
 #include "core/image/image_cache.h"
@@ -92,13 +93,6 @@ struct WindowBlurInfo {
     std::vector<RRect> coords_;
 };
 
-struct VisibleCallbackInfo {
-    VisibleRatioCallback callback;
-    double visibleRatio = 1.0;
-    bool isCurrentVisible = false;
-    uint32_t period = 0;
-};
-
 using OnRouterChangeCallback = bool (*)(const std::string currentRouterPath);
 using SubscribeCtrlACallback = std::function<void()>;
 
@@ -123,7 +117,7 @@ public:
     void SetupRootElement() override;
 
     // This is used for subwindow, when the subwindow is created,a new subRootElement will be built
-    void SetupSubRootElement() override;
+    RefPtr<Element> SetupSubRootElement();
     RefPtr<DialogComponent> ShowDialog(
         const DialogProperties& dialogProperties, bool isRightToLeft, const std::string& inspectorTag = "");
     void CloseContextMenu();
@@ -218,9 +212,9 @@ public:
     // Used to determine whether the touched frameNode is the target
     bool OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe = false, const std::string& target = "") override;
 #endif
-    // Called by container when key event received.
+    // Called by container when event received.
     // if return false, then this event needs platform to handle it.
-    bool OnKeyEvent(const KeyEvent& event) override;
+    bool OnNonPointerEvent(const NonPointerEvent& event) override;
 
     // Called by view when mouse event received.
     void OnMouseEvent(const MouseEvent& event) override;
@@ -345,7 +339,7 @@ public:
 
     void ShowContainerTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) override;
 
-    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
+    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
 
     RefPtr<StageElement> GetStageElement() const;
 
@@ -663,7 +657,7 @@ public:
     }
     void StartSystemDrag(const std::string& str, const RefPtr<PixelMap>& pixmap);
     void InitDragListener();
-    void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,
+    void OnDragEvent(const DragPointerEvent& pointerEvent, DragEventAction action,
         const RefPtr<NG::FrameNode>& node = nullptr) override;
     void SetPreTargetRenderNode(const RefPtr<DragDropEvent>& preDragDropNode);
     const RefPtr<DragDropEvent>& GetPreTargetRenderNode() const;
@@ -807,8 +801,6 @@ public:
         SetRootSizeWithWidthHeight(width, height, offset);
     }
 
-    void SetContainerWindow(bool isShow) override;
-
     void SetAppTitle(const std::string& title) override;
     void SetAppIcon(const RefPtr<PixelMap>& icon) override;
     void FlushMessages() override;
@@ -816,6 +808,16 @@ public:
     bool IsDensityChanged() const override
     {
         return isDensityUpdate_;
+    }
+
+    bool IsNeedReloadDensity() const override
+    {
+        return isNeedReloadDensity_;
+    }
+
+    void SetIsNeedReloadDensity(bool isNeedReloadDensity) override
+    {
+        isNeedReloadDensity_ = isNeedReloadDensity;
     }
 
 protected:
@@ -857,6 +859,7 @@ private:
     void CreateTouchEventOnZoom(const AxisEvent& event);
     void HandleVisibleAreaChangeEvent();
     void FlushTouchEvents();
+    bool OnKeyEvent(const NonPointerEvent& nonPointerEvent);
 
     template<typename T>
     struct NodeCompare {
@@ -969,6 +972,7 @@ private:
     bool useLiteStyle_ = false;
     bool isFirstLoaded_ = true;
     bool isDensityUpdate_ = false;
+    bool isNeedReloadDensity_ = false;
     uint64_t flushAnimationTimestamp_ = 0;
     TimeProvider timeProvider_;
     int32_t modalHeight_ = 0;
@@ -981,8 +985,6 @@ private:
     int32_t frameCount_ = 0;
 #endif
 
-    int32_t width_ = 0;
-    int32_t height_ = 0;
     bool isFirstPage_ = true;
     bool buildingFirstPage_ = false;
     bool forbidPlatformQuit_ = false;

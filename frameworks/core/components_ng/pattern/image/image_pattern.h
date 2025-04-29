@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,25 +18,31 @@
 
 #include <memory>
 
+#include "interfaces/inner_api/ace/ai/image_analyzer.h"
+
 #include "base/geometry/offset.h"
+#include "base/image/drawable_descriptor.h"
+#include "base/image/image_defines.h"
+#include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
-#include "core/animation/animator.h"
 #include "core/animation/picture_animation.h"
+#include "core/common/clipboard/clipboard.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/declaration/image/image_animator_declaration.h"
 #include "core/components_ng/event/click_event.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_client.h"
 #include "core/components_ng/manager/select_overlay/selection_host.h"
+#include "core/components_ng/pattern/image/image_content_modifier.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_overlay_modifier.h"
+#include "core/components_ng/pattern/image/image_paint_method.h"
+#include "core/components_ng/pattern/image/image_properties.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/manager/select_overlay/select_overlay_client.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/image/image_source_info.h"
-#include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 namespace OHOS::Ace {
 class ImageAnalyzerManager;
@@ -49,18 +55,14 @@ class ACE_FORCE_EXPORT ImagePattern : public Pattern, public SelectOverlayClient
     DECLARE_ACE_TYPE(ImagePattern, Pattern, SelectionHost);
 
 public:
-    enum class ImageType {
-        BASE,
-        ANIMATION,
-        UNDEFINED,
-    };
+    using OnProgressCallback = std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>;
 
     ImagePattern();
     ~ImagePattern() override;
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        return RenderContext::ContextParam { RenderContext::ContextType::CANVAS };
+        return RenderContext::ContextParam { .type = RenderContext::ContextType::CANVAS, .surfaceName = std::nullopt };
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
@@ -77,7 +79,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx_, altLoadingCtx_);
+        return MakeRefPtr<ImageLayoutAlgorithm>();
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -88,10 +90,7 @@ public:
     // Called on main thread to check if need rerender of the content.
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
-    FocusPattern GetFocusPattern() const override
-    {
-        return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
-    }
+    FocusPattern GetFocusPattern() const override;
 
     const RefPtr<CanvasImage>& GetCanvasImage()
     {
@@ -108,8 +107,10 @@ public:
         return GetHost();
     }
 
+    void CreateModifier();
     void CreateObscuredImage();
     void LoadImageDataIfNeed();
+    bool RecycleImageData();
     void OnNotifyMemoryLevel(int32_t level) override;
     void OnWindowHide() override;
     void OnWindowShow() override;
@@ -133,9 +134,22 @@ public:
 
     void SetImageQuality(AIImageQuality imageQuality)
     {
-        isImageQualityChange_ = (imageQuality_ != imageQuality);
+        isImageReloadNeeded_ = isImageReloadNeeded_ | (imageQuality_ != imageQuality);
         imageQuality_ = imageQuality;
     }
+
+    void SetOrientation(ImageRotateOrientation orientation)
+    {
+        isOrientationChange_ = (userOrientation_ != orientation);
+        userOrientation_ = orientation;
+    }
+
+    ImageRotateOrientation GetOrientation()
+    {
+        return userOrientation_;
+    }
+
+    void UpdateOrientation();
 
     AIImageQuality GetImageQuality()
     {
@@ -145,39 +159,6 @@ public:
     void SetCopyOption(CopyOptions value)
     {
         copyOption_ = value;
-    }
-
-    void SetImageInterpolation(ImageInterpolation value)
-    {
-        interpolation_ = value;
-    }
-
-    std::string GetImageInterpolation()
-    {
-        switch (interpolation_) {
-            case ImageInterpolation::LOW:
-                return "LOW";
-            case ImageInterpolation::MEDIUM:
-                return "MEDIUM";
-            case ImageInterpolation::HIGH:
-                return "HIGH";
-            default:
-                return "NONE";
-        }
-    }
-
-    std::string GetDynamicModeString(DynamicRangeMode dynamicMode) const
-    {
-        switch (dynamicMode) {
-            case DynamicRangeMode::HIGH:
-                return "HIGH";
-            case DynamicRangeMode::CONSTRAINT:
-                return "CONSTRAINT";
-            case DynamicRangeMode::STANDARD:
-                return "STANDARD";
-            default:
-                return "STANDARD";
-        }
     }
 
     std::string GetImageFitStr(ImageFit value);
@@ -206,10 +187,33 @@ public:
     void SetImageAIOptions(void* options);
     void BeforeCreatePaintWrapper() override;
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpLayoutInfo();
+    void DumpImageSourceInfo(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
+    inline void DumpAltSourceInfo(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
+    inline void DumpImageFit(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
+    inline void DumpFitOriginalSize(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
+    inline void DumpSourceSize(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
+    inline void DumpAutoResize(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
+    void DumpLayoutInfo(std::unique_ptr<JsonValue>& json);
     void DumpRenderInfo();
+    inline void DumpRenderMode(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpImageRepeat(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpImageColorFilter(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpFillColor(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpDynamicRangeMode(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpMatchTextDirection(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpSmoothEdge(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpResizable(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpInterpolation(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpHdrBrightness(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    void DumpBorderRadiusProperties(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpOtherInfo();
+    void DumpRenderInfo(std::unique_ptr<JsonValue>& json);
     void DumpAdvanceInfo() override;
-
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSvgInfo();
     WeakPtr<ImageLoadingContext> GetImageLoadingContext()
     {
         return WeakClaim(AceType::RawPtr(loadingCtx_));
@@ -223,7 +227,7 @@ public:
     bool hasSceneChanged();
     void OnSensitiveStyleChange(bool isSensitive) override;
 
-    //animation
+    // animation
     struct CacheImageStruct {
         CacheImageStruct() = default;
         CacheImageStruct(const RefPtr<FrameNode>& imageNode) : imageNode(imageNode) {}
@@ -267,12 +271,12 @@ public:
 
     void StartAnimation()
     {
-        status_ = Animator::Status::RUNNING;
+        status_ = AnimatorStatus::RUNNING;
     }
 
     void StopAnimation()
     {
-        status_ = Animator::Status::STOPPED;
+        status_ = AnimatorStatus::STOPPED;
         OnAnimatedModifyDone();
     }
 
@@ -288,7 +292,7 @@ public:
 
     bool GetIsAnimation() const
     {
-        return imageType_ == ImageType::ANIMATION;
+        return imageType_ == ImageType::ANIMATED_DRAWABLE;
     }
 
     bool IsAtomicNode() const override
@@ -298,29 +302,9 @@ public:
 
     bool AllowVisibleAreaCheck() const override;
 
-    void OnInActive() override
-    {
-        if (status_ == Animator::Status::RUNNING) {
-            animator_->Pause();
-        }
-    }
+    void OnInActive() override;
 
-    void OnActive() override
-    {
-        if (status_ == Animator::Status::RUNNING && animator_->GetStatus() != Animator::Status::RUNNING) {
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            if (!animator_->HasScheduler()) {
-                auto context = host->GetContextRefPtr();
-                if (context) {
-                    animator_->AttachScheduler(context);
-                } else {
-                    TAG_LOGW(AceLogTag::ACE_IMAGE, "pipelineContext is null.");
-                }
-            }
-            animator_->Forward();
-        }
-    }
+    void OnActive() override;
 
     void SetDuration(int32_t duration);
     void SetIteration(int32_t iteration);
@@ -368,24 +352,52 @@ public:
     }
     void InitOnKeyEvent();
 
-    void SetIsComponentSnapshotNode(bool isComponentSnapshotNode = true)
+    void SetIsComponentSnapshotNode(bool isComponentSnapshotNode)
     {
         isComponentSnapshotNode_ = isComponentSnapshotNode;
     }
+
+    void SetRenderedImageInfo(const RenderedImageInfo& renderedImageInfo)
+    {
+        renderedImageInfo_ = renderedImageInfo;
+    }
+
+    // Sets the decoding format for the external domain.
+    // Note: Only NV21, RGBA_8888, RGBA_1010102, YCBCR_P010, YCRCB_P010 format is supported at this time.
+    void SetExternalDecodeFormat(PixelFormat externalDecodeFormat);
+
+    PixelFormat GetExternalDecodeFormat()
+    {
+        return externalDecodeFormat_;
+    }
+    void AddPixelMapToUiManager();
+
+    void SetDrawable(const RefPtr<DrawableDescriptor>& drawable)
+    {
+        drawable_ = drawable;
+    }
+
+    // this method for measure content
+    std::optional<SizeF> GetImageSizeForMeasure();
+
+    // this method for on complete callback execute after measuring
+    void FinishMeasureForOnComplete();
+
+    void DrawDrawable(RSCanvas& canvas);
+
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
     bool isShow_ = true;
-    bool gifAnimation_ = false;
     RefPtr<ImageOverlayModifier> overlayMod_;
+    RefPtr<ImageContentModifier> contentMod_;
 
 private:
     class ObscuredImage : public CanvasImage {
         void DrawToRSCanvas(
             RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) override
         {}
-        void DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) override
-        {}
+        void DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) override {}
         int32_t GetWidth() const override
         {
             return 0;
@@ -398,14 +410,17 @@ private:
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromMainTree() override;
 
     void OnModifyDone() override;
+    void OnPixelMapDrawableModifyDone();
+    ImagePaintConfig CreatePaintConfig();
+    void Validate();
+    void RegisterDrawableRedrawCallback();
     void UpdateGestureAndDragWhenModify();
-
-    bool IsNeedInitClickEventRecorder() const override
-    {
-        return true;
-    }
+    bool CheckImagePrivacyForCopyOption();
+    void UpdateOffsetForImageAnalyzerOverlay();
+    void SetFrameOffsetForOverlayNode();
 
     void OnLanguageConfigurationUpdate() override;
 
@@ -420,6 +435,7 @@ private:
     void OnCompleteInDataReady();
     void OnImageLoadFail(const std::string& errorMsg);
     void OnImageLoadSuccess();
+    void ApplyAIModificationsToImage();
     void SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect,
         const ImageSourceInfo& sourceInfo, int32_t frameCount = 1);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
@@ -437,7 +453,6 @@ private:
 
     void TriggerFirstVisibleAreaChange();
 
-    void UpdateFillColorIfForegroundColor();
     void UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -471,7 +486,7 @@ private:
     void ClearAltData();
     void UpdateSvgSmoothEdgeValue();
 
-    //animation
+    // animation
     RefPtr<PictureAnimation<int32_t>> CreatePictureAnimation(int32_t size);
     void AdaptSelfSize();
     void SetShowingIndex(int32_t index);
@@ -493,15 +508,16 @@ private:
     void ControlAnimation(int32_t index);
     void SetObscured();
     void OnKeyEvent();
-
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::LOW;
     bool needLoadAlt_ = true;
+    RenderedImageInfo renderedImageInfo_;
 
     RefPtr<ImageLoadingContext> loadingCtx_;
     RefPtr<CanvasImage> image_;
     RectF dstRect_;
     RectF srcRect_;
+    RefPtr<ImagePaintMethod> imagePaintMethod_ = nullptr;
 
     RefPtr<CanvasImage> obscuredImage_;
 
@@ -519,28 +535,42 @@ private:
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
     ImageDfxConfig imageDfxConfig_;
     ImageDfxConfig altImageDfxConfig_;
+    bool enableDrag_ = false;
 
     std::function<bool(const KeyEvent& event)> keyEventCallback_ = nullptr;
+    OnProgressCallback onProgressCallback_ = nullptr;
     bool syncLoad_ = false;
     bool needBorderRadius_ = false;
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
-    bool isImageQualityChange_ = false;
+    PixelFormat externalDecodeFormat_ = PixelFormat::UNKNOWN;
+    // Flag indicating whether the image needs to be reloaded due to parameter changes.
+    bool isImageReloadNeeded_ = false;
     bool isEnableAnalyzer_ = false;
     bool autoResizeDefault_ = true;
     bool isSensitive_ = false;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
+    ImageRotateOrientation userOrientation_ = ImageRotateOrientation::UP;
+    ImageRotateOrientation selfOrientation_ = ImageRotateOrientation::UP;
+    ImageRotateOrientation joinOrientation_ = ImageRotateOrientation::UP;
     Color selectedColor_;
+    float smoothEdge_ = 0.0f;
     OffsetF parentGlobalOffset_;
     bool isSelected_ = false;
 
+    // The component has an internal encapsulation class drawable of the image.
+    // The internal drawable has an external raw pointer.
+    RefPtr<DrawableDescriptor> drawable_;
+    bool isRegisterRedrawCallback_ = false;
+
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 
-    //animation
+    // After the animated drawable descriptor code goes online, need to
+    // remove all the following codes.
     ImageType imageType_ = ImageType::BASE;
     RefPtr<Animator> animator_;
     std::vector<ImageProperties> images_;
     std::list<CacheImageStruct> cacheImages_;
-    Animator::Status status_ = Animator::Status::IDLE;
+    AnimatorStatus status_ = AnimatorStatus::IDLE;
     int32_t durationTotal_ = 0;
     int32_t nowImageIndex_ = 0;
     uint64_t repeatCallbackId_ = 0;
@@ -549,6 +579,7 @@ private:
     bool isLayouted_ = false;
     int64_t formAnimationStartTime_ = 0;
     int32_t formAnimationRemainder_ = 0;
+    bool isOrientationChange_ = false;
     bool isFormAnimationStart_ = true;
     bool isFormAnimationEnd_ = false;
     bool isImageAnimator_ = false;
@@ -556,8 +587,7 @@ private:
     bool isPixelMapChanged_ = false;
     bool isSrcUndefined_ = false;
     bool isComponentSnapshotNode_ = false;
-
-    std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)> onProgressCallback_ = nullptr;
+    bool isNeedReset_ = false;
 };
 
 } // namespace OHOS::Ace::NG

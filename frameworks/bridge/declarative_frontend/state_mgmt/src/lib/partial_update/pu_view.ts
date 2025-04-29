@@ -19,6 +19,24 @@
 
 type DFXCommand = { what: string, viewId: number, isRecursive: boolean };
 type RecycleUpdateFunc = (elmtId: number, isFirstRender: boolean, recycleNode: ViewPU) => void;
+type PrebuildFunc = () => void;
+
+/**
+ * A decorator function that sets the static `isReusable_` property to `true`
+ * on the provided class. This decorator is automatically invoked when the generated component
+ * class in the transpiler has the `@Reusable` decorator prefix, as below:
+ * @Reusable
+ * class MyComponent { }
+ */
+function Reusable<T extends Constructor>(BaseClass: T): T {
+  stateMgmtConsole.debug(`@Reusable ${BaseClass.name}: Redefining isReusable_ as true.`);
+  Reflect.defineProperty(BaseClass.prototype, 'isReusable_', {
+    get: () => {
+      return true;
+    }
+  });
+  return BaseClass;
+}
 
 abstract class ViewPU extends PUV2ViewBase
   implements IViewPropertiesChangeSubscriber, IView {
@@ -31,13 +49,13 @@ abstract class ViewPU extends PUV2ViewBase
 
   private runReuse_: boolean = false;
 
-  private paramsGenerator_: () => Object;
+  public paramsGenerator_: () => Object;
 
   private watchedProps: Map<string, (propName: string) => void> = new Map<string, (propName: string) => void>();
 
   private recycleManager_: RecycleManager = undefined;
 
-  private hasBeenRecycled_: boolean = false;
+  public hasBeenRecycled_: boolean = false;
 
   private preventRecursiveRecycle_: boolean = false;
 
@@ -84,14 +102,14 @@ abstract class ViewPU extends PUV2ViewBase
         }
       });
 
-    if (this.isViewV3 === true) {
+    if (this.isViewV2 === true) {
       if (usesStateMgmtVersion === 2) {
-        const error = `${this.debugInfo__()}: mixed use of stateMgmt V2 and V3 variable decorators. Application error!`;
+        const error = `${this.debugInfo__()}: mixed use of stateMgmt V1 and V2 variable decorators. Application error!`;
         stateMgmtConsole.applicationError(error);
         throw new Error(error);
       }
     }
-    stateMgmtConsole.debug(`${this.debugInfo__()}: uses stateMgmt version ${this.isViewV3 === true ? 3 : 2}`);
+    stateMgmtConsole.debug(`${this.debugInfo__()}: uses stateMgmt version ${this.isViewV2 === true ? 3 : 2}`);
   }
 
   public get localStorage_(): LocalStorage {
@@ -119,14 +137,14 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   // FIXME
-  // indicate if this is  V2 or a V3 component
-  // V2 by default, changed to V3 by the first V3 decorated variable
-  // when splitting ViewPU and ViewV3
+  // indicate if this is  V1 or a V2 component
+  // V1 by default, changed to V2 by the first V2 decorated variable
+  // when splitting ViewPU and ViewV2
   // use instanceOf. Until then, this is a workaround.
-  // @state, @track, etc V3 decorator functions modify isViewV3 to return true
+  // @Local, @Param, @Trace, etc V2 decorator functions modify isViewV2 to return true
   // (decorator can modify functions in prototype)
   // FIXME
-  private get isViewV3(): boolean {
+  protected get isViewV2(): boolean {
     return false;
   }
 
@@ -153,9 +171,10 @@ abstract class ViewPU extends PUV2ViewBase
     //this.id_ = elmtId == UINodeRegisterProxy.notRecordingDependencies ? SubscriberManager.MakeId() : elmtId;
 
     this.localStoragebackStore_ = undefined;
+
     stateMgmtConsole.debug(`ViewPU constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
 
-    PUV2ViewBase.arkThemeScopeManager?.onViewPUCreate(this)
+    ViewBuildNodeBase.arkThemeScopeManager?.onViewPUCreate(this)
 
     if (localStorage) {
       this.localStorage_ = localStorage;
@@ -164,17 +183,6 @@ abstract class ViewPU extends PUV2ViewBase
 
     SubscriberManager.Add(this);
     stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: done`);
-  }
-
-  onGlobalThemeChanged(): void {
-    this.onWillApplyThemeInternally();
-    this.forceCompleteRerender(false)
-    this.childrenWeakrefMap_.forEach((weakRefChild) => {
-      const child = weakRefChild.deref();
-      if (child) {
-        child.onGlobalThemeChanged();
-      }
-    });
   }
 
   // inform the subscribed property
@@ -186,14 +194,6 @@ abstract class ViewPU extends PUV2ViewBase
 
   aboutToRecycle(): void { }
 
-  private onWillApplyThemeInternally(): void {
-    const theme = PUV2ViewBase.arkThemeScopeManager?.getFinalTheme(this.id__())
-    if (theme) {
-        this.onWillApplyTheme(theme)
-    }
-  }
-
-  onWillApplyTheme(theme: Theme): void {}
   // super class will call this function from
   // its aboutToBeDeleted implementation
   protected aboutToBeDeletedInternal(): void {
@@ -210,9 +210,16 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtConsole.debug(`${this.constructor.name}: aboutToBeDeletedInternal `);
 
     // purge the elmtIds owned by this viewPU from the updateFuncByElmtId and also the state variable dependent elmtIds
-    Array.from(this.updateFuncByElmtId.keys()).forEach((elmtId: number) => {
+    this.updateFuncByElmtId.forEach((_updateFun: UpdateFuncRecord, elmtId: number) => {
       this.purgeDeleteElmtId(elmtId);
-    })
+      if (ConfigureStateMgmt.instance.needsV2Observe()) {
+        delete ObserveV2.getObserve().id2cmp_[elmtId];
+      }
+    });
+
+    if (ConfigureStateMgmt.instance.needsV2Observe()) {
+      delete ObserveV2.getObserve().id2cmp_[this.id_];
+    }
 
     if (this.hasRecycleManager()) {
       this.getRecycleManager().purgeAllCachedRecycleNode();
@@ -224,17 +231,13 @@ abstract class ViewPU extends PUV2ViewBase
     // it will unregister removed elmtIds from all ViewPu, equals purgeDeletedElmtIdsRecursively
     this.purgeDeletedElmtIds();
 
-    // un-registers its own id once its children are unregistered above
-    //FIXME: Uncomment once photos app avoids rerendering of removed elementIds
-    //UINodeRegisterProxy unregisterRemovedElmtsFromViewPUs([this id__()]);
+    // un-registers its own id once all its children are unregistered
+    UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs([this.id__()]);
 
     stateMgmtConsole.debug(`${this.debugInfo__()}: onUnRegElementID  - DONE`);
 
     // in case this ViewPU is currently frozen
     PUV2ViewBase.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
-
-    // FIXME needed ?
-    MonitorV2.clearWatchesFromTarget(this);
 
     this.updateFuncByElmtId.clear();
     this.watchedProps.clear();
@@ -245,8 +248,20 @@ abstract class ViewPU extends PUV2ViewBase
     if (this.getParent()) {
       this.getParent().removeChild(this);
     }
-    PUV2ViewBase.arkThemeScopeManager?.onViewPUDelete(this);
+    ViewBuildNodeBase.arkThemeScopeManager?.onViewPUDelete(this);
     this.localStoragebackStore_ = undefined;
+    PUV2ViewBase.prebuildFuncQueues.delete(this.id__());
+  }
+
+  public purgeDeleteElmtId(rmElmtId: number): boolean {
+    stateMgmtConsole.debug(`${this.debugInfo__()} purgeDeleteElmtId (PU) is purging the rmElmtId:${rmElmtId}`);
+    const result = this.updateFuncByElmtId.delete(rmElmtId);
+    if (result) {
+      this.purgeVariableDependenciesOnElmtIdOwnFunc(rmElmtId);
+      // it means rmElmtId has finished all the unregistration from the js side, ElementIdToOwningViewPU_  does not need to keep it
+      UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(rmElmtId);
+    }
+    return result;
   }
 
   protected purgeVariableDependenciesOnElmtIdOwnFunc(elmtId: number): void {
@@ -254,7 +269,7 @@ abstract class ViewPU extends PUV2ViewBase
       stateVar.purgeDependencyOnElmtId(elmtId);
     });
   }
-  protected debugInfoStateVars(): string {
+  public debugInfoStateVars(): string {
     let result: string = `|--${this.constructor.name}[${this.id__()}]`;
     Object.getOwnPropertyNames(this)
       .filter((varName: string) => varName.startsWith('__') && !varName.startsWith(ObserveV2.OB_PREFIX))
@@ -293,11 +308,11 @@ abstract class ViewPU extends PUV2ViewBase
  * may enable the freezeWhenInActive.
  * @param active true for active, false for inactive
  */
-  public setActiveInternal(active: boolean): void {
+  public setActiveInternal(active: boolean, isReuse = false): void {
     stateMgmtProfiler.begin('ViewPU.setActive');
     if (this.isCompFreezeAllowed()) {
-      this.isActive_ = active;
-      if (this.isActive_) {
+      this.setActiveCount(active);
+      if (this.isViewActive()) {
         this.onActiveInternal();
       } else {
         this.onInactiveInternal();
@@ -306,14 +321,14 @@ abstract class ViewPU extends PUV2ViewBase
     for (const child of this.childrenWeakrefMap_.values()) {
       const childView: IView | undefined = child.deref();
       if (childView) {
-        childView.setActiveInternal(active);
+        childView.setActiveInternal(active, isReuse);
       }
     }
     stateMgmtProfiler.end();
   }
 
   private onActiveInternal(): void {
-    if (!this.isActive_) {
+    if (!this.isViewActive()) {
       return;
     }
 
@@ -325,7 +340,7 @@ abstract class ViewPU extends PUV2ViewBase
 
 
   private onInactiveInternal(): void {
-    if (this.isActive_) {
+    if (this.isViewActive()) {
       return;
     }
 
@@ -368,7 +383,18 @@ abstract class ViewPU extends PUV2ViewBase
 
     // do not process an Element that has been marked to be deleted
     const entry: UpdateFuncRecord | undefined = this.updateFuncByElmtId.get(elmtId);
-    const updateFunc = entry ? entry.getUpdateFunc() : undefined;
+    if (!entry) {
+      stateMgmtProfiler.end();
+      return;
+    }
+    let updateFunc: UpdateFunc;
+    // if the element is pending, its updateFunc will not be executed during this function call, instead mark its UpdateFuncRecord as changed
+    // when the pending element is retaken and its UpdateFuncRecord is marked changed, then it will be inserted into dirtRetakenElementIds_
+    if (entry.isPending()) {
+      entry.setIsChanged(true);
+    } else {
+      updateFunc = entry.getUpdateFunc();
+    }
 
     if (typeof updateFunc !== 'function') {
       stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement: update function of elmtId ${elmtId} not found, internal error!`);
@@ -419,9 +445,18 @@ abstract class ViewPU extends PUV2ViewBase
   // implements IMultiPropertiesChangeSubscriber
   viewPropertyHasChanged(varName: PropertyInfo, dependentElmtIds: Set<number>): void {
     stateMgmtProfiler.begin('ViewPU.viewPropertyHasChanged');
-    aceTrace.begin('ViewPU.viewPropertyHasChanged', this.constructor.name, varName, dependentElmtIds.size);
+    aceDebugTrace.begin('ViewPU.viewPropertyHasChanged', this.constructor.name, varName, dependentElmtIds.size, this.id__(), this.dirtDescendantElementIds_.size, this.runReuse_);
     if (this.isRenderInProgress) {
       stateMgmtConsole.applicationError(`${this.debugInfo__()}: State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
+    } else if (this.isPrebuilding_) {
+      const propertyChangedFunc: PrebuildFunc = () => {
+        this.viewPropertyHasChanged(varName, dependentElmtIds);
+      };
+      if (!PUV2ViewBase.propertyChangedFuncQueues.has(this.id__())) {
+        PUV2ViewBase.propertyChangedFuncQueues.set(this.id__(), new Array<PrebuildFunc>());
+      }
+      PUV2ViewBase.propertyChangedFuncQueues.get(this.id__())?.push(propertyChangedFunc);
+      return;
     }
 
     this.syncInstanceId();
@@ -453,7 +488,7 @@ abstract class ViewPU extends PUV2ViewBase
     }
 
     this.restoreInstanceId();
-    aceTrace.end();
+    aceDebugTrace.end();
     stateMgmtProfiler.end();
   }
 
@@ -461,11 +496,21 @@ abstract class ViewPU extends PUV2ViewBase
   /**
  *  inform that UINode with given elmtId needs rerender
  *  does NOT exec @Watch function.
- *  only used on V3 code path from ObserveV2.fireChange.
+ *  only used on V2 code path from ObserveV2.fireChange.
  *
  * FIXME will still use in the future?
  */
-  public uiNodeNeedUpdateV3(elmtId: number): void {
+  public uiNodeNeedUpdateV2(elmtId: number): void {
+    if (this.isPrebuilding_) {
+      const propertyChangedFunc: PrebuildFunc = () => {
+        this.uiNodeNeedUpdateV2(elmtId);
+      };
+      if (!PUV2ViewBase.propertyChangedFuncQueues.has(this.id__())) {
+        PUV2ViewBase.propertyChangedFuncQueues.set(this.id__(), new Array<PrebuildFunc>());
+      }
+      PUV2ViewBase.propertyChangedFuncQueues.get(this.id__())?.push(propertyChangedFunc);
+      return;
+    }
     if (this.isFirstRender()) {
       return;
     }
@@ -490,11 +535,11 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   private performDelayedUpdate(): void {
-    if (!this.ownObservedPropertiesStore_.size) {
+    if (!this.ownObservedPropertiesStore_.size && !this.elmtIdsDelayedUpdate.size) {
       return;
     }
     stateMgmtProfiler.begin('ViewPU.performDelayedUpdate');
-    aceTrace.begin('ViewPU.performDelayedUpdate', this.constructor.name);
+    aceDebugTrace.begin('ViewPU.performDelayedUpdate', this.constructor.name);
     stateMgmtConsole.debug(`${this.debugInfo__()}: performDelayedUpdate start ...`);
     this.syncInstanceId();
 
@@ -517,12 +562,18 @@ abstract class ViewPU extends PUV2ViewBase
         }
       }
     } // for all ownStateLinkProps_
+
+    for (let elementId of this.elmtIdsDelayedUpdate) {
+      this.dirtDescendantElementIds_.add(elementId);
+    }
+    this.elmtIdsDelayedUpdate.clear();
+
     this.restoreInstanceId();
 
     if (this.dirtDescendantElementIds_.size) {
       this.markNeedUpdate();
     }
-    aceTrace.end();
+    aceDebugTrace.end();
     stateMgmtProfiler.end();
   }
 
@@ -633,6 +684,12 @@ abstract class ViewPU extends PUV2ViewBase
       if (this.dirtDescendantElementIds_.size) {
         stateMgmtConsole.applicationError(`${this.debugInfo__()}: New UINode objects added to update queue while re-render! - Likely caused by @Component state change during build phase, not allowed. Application error!`);
       }
+
+      for (const dirtRetakenElementId of this.dirtRetakenElementIds_) {
+        this.dirtDescendantElementIds_.add(dirtRetakenElementId);
+      }
+      this.dirtRetakenElementIds_.clear();
+
     } while (this.dirtDescendantElementIds_.size);
     stateMgmtConsole.debug(`${this.debugInfo__()}: updateDirtyElements (re-render) - DONE, dump of ViewPU in next lines`);
     stateMgmtProfiler.end();
@@ -641,6 +698,14 @@ abstract class ViewPU extends PUV2ViewBase
   // executed on first render only
   // kept for backward compatibility with old ace-ets2bundle
   public observeComponentCreation(compilerAssignedUpdateFunc: UpdateFunc): void {
+    if (this.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
+      const prebuildFunc: PrebuildFunc = () => {
+        this.observeComponentCreation(compilerAssignedUpdateFunc);
+      };
+      PUV2ViewBase.prebuildFuncQueues.get(PUV2ViewBase.prebuildingElmtId_)?.push(prebuildFunc);
+      ViewStackProcessor.PushPrebuildCompCmd();
+      return;
+    }
     if (this.isDeleting_) {
       stateMgmtConsole.error(`View ${this.constructor.name} elmtId ${this.id__()} is already in process of destruction, will not execute observeComponentCreation `);
       return;
@@ -671,6 +736,14 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   public observeComponentCreation2(compilerAssignedUpdateFunc: UpdateFunc, classObject: UIClassObject): void {
+    if (this.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
+      const prebuildFunc: PrebuildFunc = () => {
+        this.observeComponentCreation2(compilerAssignedUpdateFunc, classObject);
+      };
+      PUV2ViewBase.prebuildFuncQueues.get(PUV2ViewBase.prebuildingElmtId_)?.push(prebuildFunc);
+      ViewStackProcessor.PushPrebuildCompCmd();
+      return;
+    }
     if (this.isDeleting_) {
       stateMgmtConsole.error(`View ${this.constructor.name} elmtId ${this.id__()} is already in process of destruction, will not execute observeComponentCreation2 `);
       return;
@@ -682,13 +755,13 @@ abstract class ViewPU extends PUV2ViewBase
     const _popFunc: () => void = (classObject && 'pop' in classObject) ? classObject.pop! : (): void => { };
     const updateFunc = (elmtId: number, isFirstRender: boolean): void => {
       this.syncInstanceId();
-      stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] ${!this.isViewV3 ? '(enable PU state observe) ' : ''} ${ConfigureStateMgmt.instance.needsV2Observe() ? '(enabled V2 state observe) ' : ''} - start ....`);
+      stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`} ${_componentName}[${elmtId}] ${!this.isViewV2 ? '(enable PU state observe) ' : ''} ${ConfigureStateMgmt.instance.needsV2Observe() ? '(enabled V2 state observe) ' : ''} - start ....`);
 
-      PUV2ViewBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this)
+      ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this)
 
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
 
-      if (!this.isViewV3) {
+      if (!this.isViewV2) {
         // Enable PU state tracking only in PU @Components
         this.currentlyRenderedElmtIdStack_.push(elmtId);
         stateMgmtDFX.inRenderingElementId.push(elmtId);
@@ -697,7 +770,8 @@ abstract class ViewPU extends PUV2ViewBase
       // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria),
       // enable V2 object deep observation
       // FIXME: A @Component should only use PU or V2 state, but ReactNative dynamic viewer uses both.
-      if (this.isViewV3 || ConfigureStateMgmt.instance.needsV2Observe()) {
+      if (this.isViewV2 || ConfigureStateMgmt.instance.needsV2Observe()) {
+        stateMgmtConsole.debug(`${this.debugInfo__()}: V2 dependency recording is enabled (uses ObserveV2.getObserve().startRecordDependencies, enables addRef)`)
         // FIXME: like in V2 setting bindId_ in ObserveV2 does not work with 'stacked'
         // update + initial render calls, like in if and ForEach case, convert to stack as well
         ObserveV2.getObserve().startRecordDependencies(this, elmtId);
@@ -713,16 +787,16 @@ abstract class ViewPU extends PUV2ViewBase
         (node as ArkComponent).cleanStageValue();
       }
 
-      if (this.isViewV3 || ConfigureStateMgmt.instance.needsV2Observe()) {
+      if (this.isViewV2 || ConfigureStateMgmt.instance.needsV2Observe()) {
         ObserveV2.getObserve().stopRecordDependencies();
       }
-      if (!this.isViewV3) {
+      if (!this.isViewV2) {
         this.currentlyRenderedElmtIdStack_.pop();
         stateMgmtDFX.inRenderingElementId.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
 
-      PUV2ViewBase.arkThemeScopeManager?.onComponentCreateExit(elmtId)
+      ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateExit(elmtId)
 
       stateMgmtConsole.debug(`${this.debugInfo__()}: ${isFirstRender ? `First render` : `Re-render/update`}  ${_componentName}[${elmtId}] - DONE ....`);
       this.restoreInstanceId();
@@ -788,6 +862,14 @@ abstract class ViewPU extends PUV2ViewBase
    * @return void
    */
   public observeRecycleComponentCreation(name: string, recycleUpdateFunc: RecycleUpdateFunc): void {
+    if (this.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
+      const prebuildFunc: PrebuildFunc = () => {
+        this.observeRecycleComponentCreation(name, recycleUpdateFunc);
+      };
+      PUV2ViewBase.prebuildFuncQueues.get(PUV2ViewBase.prebuildingElmtId_)?.push(prebuildFunc);
+      ViewStackProcessor.PushPrebuildCompCmd();
+      return;
+    }
     // convert recycle update func to update func
     const compilerAssignedUpdateFunc: UpdateFunc = (element, isFirstRender) => {
       recycleUpdateFunc(element, isFirstRender, undefined);
@@ -812,6 +894,7 @@ abstract class ViewPU extends PUV2ViewBase
   // param is used by BuilderNode
   aboutToReuseInternal(param?: Object) {
     this.runReuse_ = true;
+    stateMgmtConsole.debug(`ViewPU ${this.debugInfo__()} aboutToReuseInternal`);
     stateMgmtTrace.scopedTrace(() => {
       if (this.paramsGenerator_ && typeof this.paramsGenerator_ === 'function') {
         const params = param ? param : this.paramsGenerator_();
@@ -835,19 +918,7 @@ abstract class ViewPU extends PUV2ViewBase
     } else {
       this.flushDelayCompleteRerender();
     }
-    this.childrenWeakrefMap_.forEach((weakRefChild) => {
-      const child = weakRefChild.deref();
-      if (child) {
-        if (child instanceof ViewPU) {
-          if (!child.hasBeenRecycled_) {
-            child.aboutToReuseInternal();
-          }
-        } else {
-          // FIXME fix for mixed V2 - V3 Hierarchies
-          throw new Error('aboutToReuseInternal: Recycle not implemented for ViewV2, yet');
-        }
-      } // if child
-    });
+    this.traverseChildDoRecycleOrReuse(PUV2ViewBase.doReuse);
     this.runReuse_ = false;
   }
 
@@ -857,6 +928,7 @@ abstract class ViewPU extends PUV2ViewBase
 
   aboutToRecycleInternal() {
     this.runReuse_ = true;
+    stateMgmtConsole.debug(`ViewPU ${this.debugInfo__()} aboutToRecycleInternal`);
     stateMgmtTrace.scopedTrace(() => {
       this.aboutToRecycle();
     }, 'aboutToRecycle', this.constructor.name);
@@ -864,19 +936,7 @@ abstract class ViewPU extends PUV2ViewBase
       this.preventRecursiveRecycle_ = false;
       return;
     }
-    this.childrenWeakrefMap_.forEach((weakRefChild) => {
-      const child = weakRefChild.deref();
-      if (child) {
-        if (child instanceof ViewPU) {
-          if (!child.hasBeenRecycled_) {
-            child.aboutToRecycleInternal();
-          }
-        } else {
-          // FIXME fix for mixed V2 - V3 Hierarchies
-          throw new Error('aboutToRecycleInternal: Recycle not yet implemented for ViewV2');
-        }
-      } // if child
-    });
+    this.traverseChildDoRecycleOrReuse(PUV2ViewBase.doRecycle);
     this.runReuse_ = false;
   }
 
@@ -890,6 +950,10 @@ abstract class ViewPU extends PUV2ViewBase
     } else {
       this.resetRecycleCustomNode();
     }
+  }
+
+  public isRecycled() : boolean {
+    return this.hasBeenRecycled_;
   }
 
   public UpdateLazyForEachElements(elmtIds: Array<number>): void {
@@ -962,126 +1026,7 @@ abstract class ViewPU extends PUV2ViewBase
     return localStorageProp;
   }
 
-  /**
-   * onDumpInfo is used to process commands delivered by the hidumper process
-   * @param commands -  list of commands provided in the shell
-   * @returns void
-   */
-  protected onDumpInfo(commands: string[]): void {
-
-    let dfxCommands: DFXCommand[] = this.processOnDumpCommands(commands);
-
-    dfxCommands.forEach((command) => {
-      let view: ViewPU = undefined;
-      if (command.viewId) {
-        view = this.findViewPUInHierarchy(command.viewId);
-        if (!view) {
-          DumpLog.print(0, `\nTarget view: ${command.viewId} not found for command: ${command.what}\n`);
-          return;
-        }
-      } else {
-        view = this;
-        command.viewId = view.id__();
-      }
-      switch (command.what) {
-        case '-dumpAll':
-          view.printDFXHeader('ViewPU Info', command);
-          DumpLog.print(0, view.debugInfoView(command.isRecursive));
-          break;
-        case '-viewHierarchy':
-          view.printDFXHeader('ViewPU Hierarchy', command);
-          DumpLog.print(0, view.debugInfoViewHierarchy(command.isRecursive));
-          break;
-        case '-stateVariables':
-          view.printDFXHeader('ViewPU State Variables', command);
-          DumpLog.print(0, view.debugInfoStateVars());
-          break;
-        case '-registeredElementIds':
-          view.printDFXHeader('ViewPU Registered Element IDs', command);
-          DumpLog.print(0, view.debugInfoUpdateFuncByElmtId(command.isRecursive));
-          break;
-        case '-dirtyElementIds':
-          view.printDFXHeader('ViewPU Dirty Registered Element IDs', command);
-          DumpLog.print(0, view.debugInfoDirtDescendantElementIds(command.isRecursive));
-          break;
-        case '-inactiveComponents':
-          view.printDFXHeader('List of Inactive Components', command);
-          DumpLog.print(0, view.debugInfoInactiveComponents());
-          break;
-        case '-profiler':
-          view.printDFXHeader('Profiler Info', command);
-          view.dumpReport();
-          this.sendStateInfo('{}');
-          break;
-        default:
-          DumpLog.print(0, `\nUnsupported JS DFX dump command: [${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);
-      }
-    })
-  }
-
-  private printDFXHeader(header: string, command: DFXCommand): void {
-    let length: number = 50;
-    let remainder: number = length - header.length < 0 ? 0 : length - header.length;
-    DumpLog.print(0, `\n${'-'.repeat(remainder / 2)}${header}${'-'.repeat(remainder / 2)}`);
-    DumpLog.print(0, `[${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);
-  }
-
-  private processOnDumpCommands(commands: string[]): DFXCommand[] {
-    let isFlag: Function = (param: string): boolean => {
-      return '-r'.match(param) != null || param.startsWith('-viewId=');
-    }
-
-    let dfxCommands: DFXCommand[] = [];
-
-    for (var i: number = 0; i < commands.length; i++) {
-      let command = commands[i];
-      if (isFlag(command)) {
-        if (command.startsWith('-viewId=')) {
-          let dfxCommand: DFXCommand = dfxCommands[dfxCommands.length - 1];
-          if (dfxCommand) {
-            let input: string[] = command.split('=');
-            if (input[1]) {
-              let viewId: number = Number.parseInt(input[1]);
-              dfxCommand.viewId = Number.isNaN(viewId) ? UINodeRegisterProxy.notRecordingDependencies : viewId;
-            }
-          }
-        } else if (command.match('-r')) {
-          let dfxCommand: DFXCommand = dfxCommands[dfxCommands.length - 1];
-          if (dfxCommand) {
-            dfxCommand.isRecursive = true;
-          }
-        }
-      } else {
-        dfxCommands.push({
-          what: command,
-          viewId: undefined,
-          isRecursive: false,
-        });
-      }
-    }
-    return dfxCommands;
-  }
-
-  public findViewPUInHierarchy(id: number): ViewPU {
-    let weakChild = this.childrenWeakrefMap_.get(id);
-    if (weakChild) {
-      const child = weakChild.deref();
-      // found child with id, is it a ViewPU?
-      return (child instanceof ViewPU) ? child : undefined;
-    }
-
-    // did not find, continue searching
-    let retVal: ViewPU = undefined;
-    for (const [key, value] of this.childrenWeakrefMap_.entries()) {
-      retVal = value.deref().findViewPUInHierarchy(id);
-      if (retVal) {
-        break;
-      }
-    }
-    return retVal;
-  }
-
-  private debugInfoView(recursive: boolean = false): string {
+  public debugInfoView(recursive: boolean = false): string {
     return this.debugInfoViewInternal(recursive);
   }
 
@@ -1094,7 +1039,7 @@ abstract class ViewPU extends PUV2ViewBase
     return retVal;
   }
 
-  private debugInfoDirtDescendantElementIds(recursive: boolean = false): string {
+  public debugInfoDirtDescendantElementIds(recursive: boolean = false): string {
     return this.debugInfoDirtDescendantElementIdsInternal(0, recursive, { total: 0 });
   }
 
@@ -1118,33 +1063,6 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   /**
-    * onDumpInspector is invoked by native side to create Inspector tree including state variables
-    * @returns dump info
-    */
-  protected onDumpInspector(): string {
-    let res: DumpInfo = new DumpInfo();
-    res.viewInfo = { componentName: this.constructor.name, id: this.id__() };
-    Object.getOwnPropertyNames(this)
-      .filter((varName: string) => varName.startsWith('__') && !varName.startsWith(ObserveV2.OB_PREFIX))
-      .forEach((varName) => {
-        const prop: any = Reflect.get(this, varName);
-        if (typeof prop === 'object' && 'debugInfoDecorator' in prop) {
-          const observedProp: ObservedPropertyAbstractPU<any> = prop as ObservedPropertyAbstractPU<any>;
-          res.observedPropertiesInfo.push(stateMgmtDFX.getObservedPropertyInfo(observedProp, false));
-        }
-      });
-    let resInfo: string = '';
-    try {
-      resInfo = JSON.stringify(res);
-    } catch (error) {
-      stateMgmtConsole.applicationError(`${this.debugInfo__()} has error in getInspector: ${(error as Error).message}`);
-    }
-    return resInfo;
-  }
-
-
-
-  /**
    * on first render create a new Instance of Repeat
    * on re-render connect to existing instance
    * @param arr
@@ -1162,6 +1080,14 @@ abstract class ViewPU extends PUV2ViewBase
     }
 
     return repeat;
+  }
+
+  public reuseOrCreateNewComponent(params: { componentClass: any, getParams: () => Object,
+    getReuseId?: () => string, extraInfo?: ExtraInfo }): void {
+      // ViewPU should not have a ReusableV2 Component, throw error!
+      const error = `@Component cannot have a child @ReusableV2 component !`;
+      stateMgmtConsole.applicationError(error);
+      throw new Error(error);
   }
 } // class ViewPU
 

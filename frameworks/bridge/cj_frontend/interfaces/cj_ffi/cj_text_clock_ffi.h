@@ -53,13 +53,28 @@ struct NativeTextShadow {
     double offsetY;
     uint32_t color;
 };
+
+struct NativeTextShadowV2 {
+    double radius;
+    double offsetX;
+    double offsetY;
+    uint32_t color;
+    bool isFilled;
+    int32_t type;
+};
 CJ_EXPORT VectorNativeTextShadow FFICJCreateVectorNativeTextShadow(int64_t size);
+CJ_EXPORT VectorNativeTextShadow FFICJCreateVectorNativeTextShadowV2(int64_t size);
 CJ_EXPORT void FFICJVectorNativeTextShadowSetElement(
     VectorNativeTextShadow vec, int64_t index, NativeTextShadow textShadow);
+CJ_EXPORT void FFICJVectorNativeTextShadowSetElementV2(
+    VectorNativeTextShadow vec, int64_t index, NativeTextShadowV2 textShadow);
 CJ_EXPORT void FFICJVectorNativeTextShadowDelete(VectorNativeTextShadow vec);
+CJ_EXPORT void FFICJVectorNativeTextShadowDeleteV2(VectorNativeTextShadow vec);
 
 CJ_EXPORT void FfiOHOSAceFrameworkTextClockCreateDefault(int64_t controllerId);
 CJ_EXPORT void FfiOHOSAceFrameworkTextClockCreate(int32_t timeZoneOffset, int64_t controllerId);
+CJ_EXPORT void FfiOHOSAceFrameworkTextClockCreateV2(float timeZoneOffset, int64_t controllerId);
+CJ_EXPORT void FfiOHOSAceFrameworkTextClockCreateSimple(int64_t controllerId);
 CJ_EXPORT void FfiOHOSAceFrameworkTextClockFormat(const char* value);
 CJ_EXPORT void FfiOHOSAceFrameworkTextClockOnChange(void (*callback)(int64_t timeStamp));
 CJ_EXPORT void FfiOHOSAceFrameworkTextClockTextColor(uint32_t color);
@@ -68,10 +83,12 @@ CJ_EXPORT void FfiOHOSAceFrameworkTextClockFontWeight(const char* fontWeight);
 CJ_EXPORT void FfiOHOSAceFrameworkTextClockFontStyle(int32_t value);
 CJ_EXPORT void FfiOHOSAceFrameworkTextClockFontFamily(const char* fontFamily);
 CJ_EXPORT void FfiOHOSAceFrameworkTextClockTextShadow(VectorStringPtr vecContent);
+CJ_EXPORT void FfiOHOSAceFrameworkTextClockTextShadowV2(VectorStringPtr vecContent);
 CJ_EXPORT void FfiOHOSAceFrameworkTextClockFontFeature(const char* fontFeature);
 CJ_EXPORT int64_t FfiOHOSAceFrameworkTextClockControllerCtor();
 CJ_EXPORT void FfiOHOSAceFrameworkTextClockControllerStart(int64_t selfID);
 CJ_EXPORT void FfiOHOSAceFrameworkTextClockControllerStop(int64_t selfID);
+CJ_EXPORT void FfiOHOSAceFrameworkTextClockDateTimeOptions(const char* hourOptions);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_TEXT_CLOCK_FFI_H

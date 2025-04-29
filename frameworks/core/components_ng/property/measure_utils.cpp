@@ -15,14 +15,7 @@
 
 #include "core/components_ng/property/measure_utils.h"
 
-#include <memory>
-#include <optional>
-
-#include "base/geometry/ng/size_t.h"
-#include "base/geometry/size.h"
-#include "base/log/log.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/property/measure_property.h"
+#include "core/common/ace_application_info.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
@@ -30,40 +23,42 @@ namespace {
 const static int32_t PLATFORM_VERSION_TEN = 10;
 }
 
-SizeF ConvertToSize(const CalcSize& size, const ScaleProperty& scaleProperty, const SizeF& percentReference)
+SizeF ConvertToSize(const CalcSize& size, const ScaleProperty& scaleProperty, const SizeF& percentReference,
+    const std::pair<std::vector<std::string>, std::vector<std::string>>& calcRpnexp)
 {
-    auto width = ConvertToPx(size.Width(), scaleProperty, percentReference.Width());
-    auto height = ConvertToPx(size.Height(), scaleProperty, percentReference.Height());
+    auto width = ConvertToPx(size.Width(), scaleProperty, percentReference.Width(), calcRpnexp.first);
+    auto height = ConvertToPx(size.Height(), scaleProperty, percentReference.Height(), calcRpnexp.second);
     return { width.value_or(-1.0f), height.value_or(-1.0f) };
 }
 
-OptionalSizeF ConvertToOptionalSize(
-    const CalcSize& size, const ScaleProperty& scaleProperty, const SizeF& percentReference)
+OptionalSizeF ConvertToOptionalSize(const CalcSize& size, const ScaleProperty& scaleProperty,
+    const SizeF& percentReference, const std::pair<std::vector<std::string>, std::vector<std::string>>& calcRpnexp)
 {
-    auto width = ConvertToPx(size.Width(), scaleProperty, percentReference.Width());
-    auto height = ConvertToPx(size.Height(), scaleProperty, percentReference.Height());
+    auto width = ConvertToPx(size.Width(), scaleProperty, percentReference.Width(), calcRpnexp.first);
+    auto height = ConvertToPx(size.Height(), scaleProperty, percentReference.Height(), calcRpnexp.second);
     return { width, height };
 }
 
-std::optional<float> ConvertToPx(const CalcLength& value, const ScaleProperty& scaleProperty, float percentReference)
+std::optional<float> ConvertToPx(const CalcLength& value, const ScaleProperty& scaleProperty, float percentReference,
+    const std::vector<std::string>& rpnexp)
 {
     double result = -1.0;
     if (!value.NormalizeToPx(
-            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result)) {
+        scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result, rpnexp)) {
         return std::nullopt;
     }
     return static_cast<float>(result);
 }
 
-std::optional<float> ConvertToPx(
-    const std::optional<CalcLength>& value, const ScaleProperty& scaleProperty, float percentReference)
+std::optional<float> ConvertToPx(const std::optional<CalcLength>& value, const ScaleProperty& scaleProperty,
+    float percentReference, const std::vector<std::string>& rpnexp)
 {
     if (!value) {
         return std::nullopt;
     }
     double result = -1.0;
     if (!value.value().NormalizeToPx(
-            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result)) {
+            scaleProperty.vpScale, scaleProperty.fpScale, scaleProperty.lpxScale, percentReference, result, rpnexp)) {
         return std::nullopt;
     }
     return static_cast<float>(result);
@@ -489,6 +484,30 @@ OptionalSizeF CreateIdealSizeByPercentRef(
     } while (false);
     if (needToConstrain) {
         ApplyConstraint(idealSize, layoutConstraint, rawConstraint);
+    }
+    return idealSize;
+}
+
+OptionalSizeF ConstrainIdealSizeByLayoutPolicy(const LayoutConstraintF& layoutConstraint,
+    uint8_t widthLayoutPolicy, uint8_t heightLayoutPolicy, Axis axis)
+{
+    bool isHorizontal = axis == Axis::HORIZONTAL;
+    bool mainAxisMatchParent = (isHorizontal ? widthLayoutPolicy : heightLayoutPolicy) ==
+                               static_cast<uint8_t>(LayoutCalPolicy::MATCH_PARENT);
+    bool crossAxisMatchParent = (isHorizontal ? heightLayoutPolicy : widthLayoutPolicy) ==
+                                static_cast<uint8_t>(LayoutCalPolicy::MATCH_PARENT);
+    OptionalSizeF idealSize;
+    if (mainAxisMatchParent) {
+        auto parentMainSize = GetMainAxisSize(layoutConstraint.parentIdealSize, axis);
+        if (parentMainSize) {
+            SetMainAxisSize(parentMainSize.value(), axis, idealSize);
+        }
+    }
+    if (crossAxisMatchParent) {
+        auto parentCrossSize = GetCrossAxisSize(layoutConstraint.parentIdealSize, axis);
+        if (parentCrossSize) {
+            SetCrossAxisSize(parentCrossSize.value(), axis, idealSize);
+        }
     }
     return idealSize;
 }

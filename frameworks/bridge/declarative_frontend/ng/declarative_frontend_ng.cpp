@@ -17,15 +17,13 @@
 
 #include "base/log/dump_log.h"
 #include "core/common/recorder/node_data_cache.h"
-#include "core/common/thread_checker.h"
-#include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.h"
 
 namespace OHOS::Ace {
 
 DeclarativeFrontendNG::~DeclarativeFrontendNG() noexcept
 {
-    LOG_DESTROY();
+    LOGI("DeclarativeFrontend destroyed");
 }
 
 void DeclarativeFrontendNG::Destroy()
@@ -102,12 +100,13 @@ void DeclarativeFrontendNG::InitializeDelegate(const RefPtr<TaskExecutor>& taskE
 
     auto loadPageByBufferCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                         const std::shared_ptr<std::vector<uint8_t>>& content,
-                                        const std::function<void(const std::string&, int32_t)>& errorCallback) {
+                                        const std::function<void(const std::string&, int32_t)>& errorCallback,
+                                        const std::string& contentName) {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
             return false;
         }
-        return jsEngine->LoadPageSource(content, errorCallback);
+        return jsEngine->LoadPageSource(content, errorCallback, contentName);
     };
 
     auto mediaQueryCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
@@ -264,6 +263,35 @@ void DeclarativeFrontendNG::InitializeDelegate(const RefPtr<TaskExecutor>& taskE
     delegate_->SetPageRouterManager(pageRouterManager);
     if (jsEngine_) {
         delegate_->SetGroupJsBridge(jsEngine_->GetGroupJsBridge());
+    }
+    auto moduleNamecallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& pageName)->
+    std::string {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return "";
+        }
+        return jsEngine->SearchRouterRegisterMap(pageName);
+    };
+    auto navigationLoadCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+        const std::string bundleName, const std::string& moduleName, const std::string& pageSourceFile,
+        bool isSingleton) -> int32_t {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return -1;
+        }
+        return jsEngine->LoadNavDestinationSource(bundleName, moduleName, pageSourceFile, isSingleton);
+    };
+    auto container = Container::Current();
+    if (container) {
+        auto pageUrlChecker = container->GetPageUrlChecker();
+        // ArkTSCard container no SetPageUrlChecker
+        if (pageUrlChecker != nullptr) {
+            pageUrlChecker->SetModuleNameCallback(std::move(moduleNamecallback));
+        }
+        auto navigationRoute = container->GetNavigationRoute();
+        if (navigationRoute) {
+            navigationRoute->SetLoadPageCallback(std::move(navigationLoadCallback));
+        }
     }
 }
 

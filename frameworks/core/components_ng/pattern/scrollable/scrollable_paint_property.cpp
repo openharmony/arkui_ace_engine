@@ -15,11 +15,29 @@
 
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 
-#include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+std::string ScrollablePaintProperty::ContentClipToStr() const
+{
+    auto mode = propContentClip_ ? propContentClip_->first : ContentClipMode::DEFAULT;
+    if (mode == ContentClipMode::DEFAULT) {
+        mode = GetDefaultContentClip();
+    }
+    switch (mode) {
+        case ContentClipMode::CONTENT_ONLY:
+            return "ContentClipMode.CONTENT_ONLY";
+        case ContentClipMode::BOUNDARY:
+            return "ContentClipMode.BOUNDARY";
+        case ContentClipMode::CUSTOM:
+            return "RectShape";
+        case ContentClipMode::SAFE_AREA:
+            return "ContentClipMode.SAFE_AREA";
+        default:
+            return "";
+    }
+}
+
 void ScrollablePaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     PaintProperty::ToJsonValue(json, filter);
@@ -32,6 +50,7 @@ void ScrollablePaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
     json->PutExtAttr("scrollBarWidth", GetBarWidth().ToString().c_str(), filter);
     json->PutExtAttr("fadingEdge",
         propFadingEdgeProperty_ ? propFadingEdgeProperty_->propFadingEdge.value_or(false) : false, filter);
+    json->PutExtAttr("defaultFadingEdge", false, filter);
     auto fadingEdgeOption = JsonUtil::Create(true);
     fadingEdgeOption->Put("fadingEdgeLength",
         propFadingEdgeProperty_
@@ -41,11 +60,12 @@ void ScrollablePaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
                   .c_str()
             : Dimension(32.0, DimensionUnit::VP).ToString().c_str()); // 32.0: default fading edge length
     json->PutExtAttr("fadingEdgeOption", fadingEdgeOption, filter);
+    json->PutExtAttr("clipContent", ContentClipToStr().c_str(), filter);
 }
 
 Color ScrollablePaintProperty::GetBarColor() const
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, Color::TRANSPARENT);
     auto themeManager = context->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, Color::TRANSPARENT);
@@ -58,7 +78,7 @@ Color ScrollablePaintProperty::GetBarColor() const
 
 Dimension ScrollablePaintProperty::GetBarWidth() const
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, Dimension());
     auto themeManager = context->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, Dimension());
@@ -84,5 +104,34 @@ std::string ScrollablePaintProperty::GetBarStateString() const
             break;
     }
     return "BarState.Off";
+}
+
+void ScrollablePaintProperty::CloneProps(const ScrollablePaintProperty* src)
+{
+    UpdatePaintProperty(src);
+    propScrollBarProperty_ = src->CloneScrollBarProperty();
+    propFadingEdgeProperty_ = src->CloneFadingEdgeProperty();
+    propContentClip_ = src->CloneContentClip();
+}
+
+RefPtr<PaintProperty> ScrollablePaintProperty::Clone() const
+{
+    auto paintProperty = MakeRefPtr<ScrollablePaintProperty>();
+    paintProperty->CloneProps(this);
+    return paintProperty;
+}
+
+RefPtr<PaintProperty> GridPaintProperty::Clone() const
+{
+    auto paintProperty = MakeRefPtr<GridPaintProperty>();
+    paintProperty->CloneProps(this);
+    return paintProperty;
+}
+
+RefPtr<PaintProperty> ScrollPaintProperty::Clone() const
+{
+    auto paintProperty = MakeRefPtr<GridPaintProperty>();
+    paintProperty->CloneProps(this);
+    return paintProperty;
 }
 } // namespace OHOS::Ace::NG

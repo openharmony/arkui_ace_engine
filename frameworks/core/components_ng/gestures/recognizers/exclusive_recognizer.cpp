@@ -15,19 +15,7 @@
 
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
 
-#include <vector>
-
-#include "base/geometry/offset.h"
-#include "base/log/log.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/gestures/gesture_referee.h"
-#include "core/components_ng/gestures/recognizers/click_recognizer.h"
-#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
-#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
-#include "core/components_ng/gestures/recognizers/recognizer_group.h"
 
 namespace OHOS::Ace::NG {
 
@@ -105,14 +93,9 @@ void ExclusiveRecognizer::OnBlocked()
 
 bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
 {
-    if (point.type == TouchType::DOWN || point.type == TouchType::UP) {
-        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, exclusive %{public}d type: %{public}d",
-            point.touchEventId, point.id, static_cast<int32_t>(point.type));
-    }
     switch (point.type) {
         case TouchType::MOVE:
-        case TouchType::DOWN:
-        case TouchType::CANCEL: {
+        case TouchType::DOWN: {
             if (activeRecognizer_ && activeRecognizer_->CheckTouchId(point.id)) {
                 DispatchEventToActiveRecognizers(point);
             } else {
@@ -120,7 +103,8 @@ bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
             }
             break;
         }
-        case TouchType::UP: {
+        case TouchType::UP:
+        case TouchType::CANCEL: {
             DispatchEventToAllRecognizers(point);
             break;
         }
@@ -219,6 +203,10 @@ void ExclusiveRecognizer::HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>
 
     if (recognizer->GetRefereeState() != RefereeState::PENDING && CheckNeedBlocked(recognizer)) {
         recognizer->OnBlocked();
+        auto multiFingerRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(recognizer);
+        if (multiFingerRecognizer) {
+            multiFingerRecognizer->SetTouchPointsForSucceedBlock();
+        }
         return;
     }
     activeRecognizer_ = recognizer;
@@ -311,8 +299,9 @@ bool ExclusiveRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recog
 void ExclusiveRecognizer::CleanRecognizerState()
 {
     for (const auto& child : recognizers_) {
-        if (child) {
-            child->CleanRecognizerState();
+        auto childRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(child);
+        if (childRecognizer && childRecognizer->GetTouchPointsSize() <= 1) {
+            childRecognizer->CleanRecognizerState();
         }
     }
     if ((refereeState_ == RefereeState::SUCCEED ||
@@ -342,10 +331,10 @@ void ExclusiveRecognizer::DispatchEventToActiveRecognizers(const TouchEvent& poi
         auto node = activeRecognizer_->GetAttachedNode().Upgrade();
         TAG_LOGI(AceLogTag::ACE_GESTURE,
             "ExclusiveRecognizer receive down event has activeRecognizer, type: %{public}s, refereeState: "
-            "%{public}d, node tag = %{public}s, id = %{public}s",
+            "%{public}d, node tag = %{public}s, id = " SEC_PLD(%{public}s) ".",
             AceType::TypeName(activeRecognizer_), activeRecognizer_->GetRefereeState(),
             node ? node->GetTag().c_str() : "null",
-            node ? std::to_string(node->GetId()).c_str() : "invalid");
+            SEC_PARAM(node ? std::to_string(node->GetId()).c_str() : "invalid"));
     }
     auto saveRecognizer = activeRecognizer_;
     activeRecognizer_->SetEventImportGestureGroup(WeakClaim(this));
@@ -398,11 +387,31 @@ void ExclusiveRecognizer::DispatchEventToAllRecognizers(const TouchEvent& point)
                 auto node = recognizer->GetAttachedNode().Upgrade();
                 TAG_LOGI(AceLogTag::ACE_GESTURE,
                     "ExclusiveRecognizer receive down event has no activeRecognizer recognizer is not in id: "
-                    "%{public}d touchTestResult, node tag = %{public}s, id = %{public}s",
-                    point.id, node ? node->GetTag().c_str() : "null",
-                    node ? std::to_string(node->GetId()).c_str() : "invalid");
+                    "%{public}d touchTestResult, node tag = %{public}s",
+                    point.id, node ? node->GetTag().c_str() : "null");
             }
         }
+    }
+}
+
+void ExclusiveRecognizer::CheckAndSetRecognizerCleanFlag(const RefPtr<NGGestureRecognizer>& recognizer)
+{
+    if (activeRecognizer_ == recognizer) {
+        SetIsNeedResetRecognizer(true);
+    }
+}
+
+void ExclusiveRecognizer::CleanRecognizerStateVoluntarily()
+{
+    for (const auto& child : recognizers_) {
+        if (child && AceType::InstanceOf<RecognizerGroup>(child)) {
+            child->CleanRecognizerStateVoluntarily();
+        }
+    }
+    if (IsNeedResetRecognizerState()) {
+        activeRecognizer_ = nullptr;
+        refereeState_ = RefereeState::READY;
+        SetIsNeedResetRecognizer(false);
     }
 }
 } // namespace OHOS::Ace::NG

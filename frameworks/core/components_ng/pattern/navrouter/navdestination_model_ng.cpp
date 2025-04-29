@@ -16,24 +16,32 @@
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 
 #include "base/i18n/localization.h"
-#include "base/log/ace_scoring_log.h"
-#include "core/common/container.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/navigation/navdestination_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
+#include "core/components_ng/pattern/navigation/navigation_toolbar_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/tool_bar_node.h"
+#include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
-#include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "frameworks/base/system_bar/system_bar_style.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+void SetNeedResetTitleProperty(const RefPtr<FrameNode>& titleBarNode)
+{
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    titleBarPattern->SetNeedResetMainTitleProperty(true);
+    titleBarPattern->SetNeedResetSubTitleProperty(true);
+}
+} // namespace
 bool NavDestinationModelNG::ParseCommonTitle(
     bool hasSubTitle, bool hasMainTitle, const std::string& subtitle, const std::string& title)
 {
@@ -117,6 +125,44 @@ bool NavDestinationModelNG::ParseCommonTitle(
     return true;
 }
 
+void CreateContentNode(const RefPtr<NavDestinationGroupNode>& navDestinationNode)
+{
+    if (navDestinationNode->GetContentNode()) {
+        return;
+    }
+    int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId);
+    auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId,
+        []() { return AceType::MakeRefPtr<NavDestinationContentPattern>(true); });
+    navDestinationNode->AddChild(contentNode);
+    navDestinationNode->SetContentNode(contentNode);
+
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+            .edges = SAFE_AREA_EDGE_ALL };
+        contentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+    }
+}
+
+void CreateToolBarNode(const RefPtr<NavDestinationGroupNode>& navDestinationNode)
+{
+    if (navDestinationNode->GetToolBarNode()) {
+        return;
+    }
+    int32_t toolBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TOOL_BAR_ETS_TAG, toolBarNodeId);
+    auto toolBarNode = NavToolbarNode::GetOrCreateToolbarNode(
+        V2::TOOL_BAR_ETS_TAG, toolBarNodeId, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    toolBarNode->MarkModifyDone();
+    auto property = toolBarNode->GetLayoutProperty();
+    CHECK_NULL_VOID(property);
+    property->UpdateVisibility(VisibleType::GONE);
+    navDestinationNode->AddChild(toolBarNode);
+    navDestinationNode->SetToolBarNode(toolBarNode);
+    navDestinationNode->SetPreToolBarNode(toolBarNode);
+    navDestinationNode->UpdatePrevToolBarIsCustom(false);
+}
+
 void NavDestinationModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -147,7 +193,7 @@ void NavDestinationModelNG::Create()
         navDestinationNode->AddChild(contentNode);
         navDestinationNode->SetContentNode(contentNode);
     }
-
+    CreateToolBarNode(navDestinationNode);
     stack->Push(navDestinationNode);
 }
 
@@ -249,7 +295,7 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
     }
 
     // read navdestination back button
-    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+    std::string message = theme->GetNavigationBack();
     NavigationTitleUtil::SetAccessibility(backButtonNode, message);
     
     titleBarNode->AddChild(backButtonNode);
@@ -279,7 +325,8 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
         backButtonLayoutProperty->UpdatePadding(padding);
     }
 
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        SystemProperties::IsNeedSymbol()) {
         CreateSymbolBackButton(backButtonNode, titleBarNode);
     } else {
         CreateImageBackButton(backButtonNode, titleBarNode);
@@ -312,6 +359,9 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc, RefPt
             pattern->SetNavDestinationContext(context);
             return pattern;
         });
+    if (context) {
+        context->SetUniqueId(navDestinationNode->GetId());
+    }
     if (!navDestinationNode->GetTitleBarNode()) {
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             CreateImageButton(navDestinationNode);
@@ -326,27 +376,30 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc, RefPt
         }
     }
     // content node
-    if (!navDestinationNode->GetContentNode()) {
-        int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId);
-        auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId,
-            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-        navDestinationNode->AddChild(contentNode);
-        navDestinationNode->SetContentNode(contentNode);
-
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
-                .edges = SAFE_AREA_EDGE_ALL };
-            contentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
-        }
-    }
-
+    CreateContentNode(navDestinationNode);
+    // toolbar node
+    CreateToolBarNode(navDestinationNode);
     stack->Push(navDestinationNode);
 }
 
-void NavDestinationModelNG::SetHideTitleBar(bool hideTitleBar)
+void NavDestinationModelNG::SetHideTitleBar(bool hideTitleBar, bool animated)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, HideTitleBar, hideTitleBar);
+    ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, IsAnimatedTitleBar, animated);
+}
+
+void NavDestinationModelNG::SetHideBackButton(bool hideBackButton)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutPropertyPtr<NavDestinationLayoutProperty>();
+    CHECK_NULL_VOID(navDestinationLayoutProperty);
+    if (!navDestinationLayoutProperty->HasHideBackButton() ||
+        (hideBackButton != navDestinationLayoutProperty->GetHideBackButtonValue())) {
+        SetNeedResetTitleProperty(AceType::DynamicCast<FrameNode>(navDestinationGroupNode->GetTitleBarNode()));
+    }
+    navDestinationLayoutProperty->UpdateHideBackButton(hideBackButton);
 }
 
 void NavDestinationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
@@ -360,6 +413,9 @@ void NavDestinationModelNG::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
     CHECK_NULL_VOID(frameNode);
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestinationNode);
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    navDestinationPattern->SetTitleBarStyle(opt.brOptions.barStyle);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -369,7 +425,8 @@ void NavDestinationModelNG::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
 
 void NavDestinationModelNG::SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
     const std::string& src, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
-    const std::vector<std::string>& nameList)
+    const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
+    const std::string& backButtonAccessibilityText)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -386,7 +443,15 @@ void NavDestinationModelNG::SetBackButtonIcon(const std::function<void(WeakPtr<N
     titleBarLayoutProperty->UpdatePixelMap(pixMap);
     titleBarLayoutProperty->SetBackIconSymbol(symbolApply);
     titleBarLayoutProperty->UpdateIsValidImage(imageOption.isValidImage);
-    titleBarNode->MarkModifyDone();
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    CHECK_NULL_VOID(backButtonNode);
+    if (userDefinedAccessibilityText) {
+        NavigationTitleUtil::SetAccessibility(backButtonNode, backButtonAccessibilityText);
+    } else {
+        auto theme = NavigationGetTheme();
+        std::string message = theme ? theme->GetNavigationBack() : "";
+        NavigationTitleUtil::SetAccessibility(backButtonNode, message);
+    }
 }
 
 void NavDestinationModelNG::SetSubtitle(const std::string& subtitle)
@@ -421,6 +486,7 @@ void NavDestinationModelNG::SetCustomTitle(const RefPtr<AceType>& customNode)
     titleBarNode->RemoveChild(currentTitle);
     titleBarNode->SetTitle(customTitle);
     titleBarNode->AddChild(customTitle);
+    titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void NavDestinationModelNG::SetTitleHeight(const Dimension& titleHeight, bool isValid)
@@ -445,7 +511,17 @@ void NavDestinationModelNG::SetOnShown(std::function<void()>&& onShow)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(
+        frameNode->GetOrCreateEventHub<EventHub>());
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->SetOnShown(onShow);
+}
+
+void NavDestinationModelNG::SetOnShown(FrameNode* frameNode, std::function<void()>&& onShow)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(
+        frameNode->GetOrCreateEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnShown(onShow);
 }
@@ -454,7 +530,17 @@ void NavDestinationModelNG::SetOnHidden(std::function<void()>&& onHidden)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(
+        frameNode->GetOrCreateEventHub<EventHub>());
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->SetOnHidden(onHidden);
+}
+
+void NavDestinationModelNG::SetOnHidden(FrameNode* frameNode, std::function<void()>&& onHidden)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(
+        frameNode->GetOrCreateEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnHidden(onHidden);
 }
@@ -463,7 +549,8 @@ void NavDestinationModelNG::SetOnBackPressed(std::function<bool()>&& onBackPress
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(
+        frameNode->GetOrCreateEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnBackPressed(onBackPressed);
 }
@@ -472,7 +559,8 @@ void NavDestinationModelNG::SetOnReady(std::function<void(RefPtr<NavDestinationC
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(
+        frameNode->GetOrCreateEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnReady(onReady);
 }
@@ -493,9 +581,23 @@ RefPtr<AceType> NavDestinationModelNG::CreateEmpty()
     return uiNode;
 }
 
-void NavDestinationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar)
+void NavDestinationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, HideTitleBar, hideTitleBar, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, IsAnimatedTitleBar, animated, frameNode);
+}
+
+void NavDestinationModelNG::SetHideBackButton(FrameNode* frameNode, bool hideBackButton)
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutPropertyPtr<NavDestinationLayoutProperty>();
+    CHECK_NULL_VOID(navDestinationLayoutProperty);
+    if (!navDestinationLayoutProperty->HasHideBackButton() ||
+        (hideBackButton != navDestinationLayoutProperty->GetHideBackButtonValue())) {
+        SetNeedResetTitleProperty(AceType::DynamicCast<FrameNode>(navDestinationGroupNode->GetTitleBarNode()));
+    }
+    navDestinationLayoutProperty->UpdateHideBackButton(hideBackButton);
 }
 
 void NavDestinationModelNG::SetBackButtonIcon(
@@ -512,7 +614,6 @@ void NavDestinationModelNG::SetBackButtonIcon(
     titleBarLayoutProperty->UpdateImageSource(imageSourceInfo);
     titleBarLayoutProperty->UpdateNoPixMap(noPixMap);
     titleBarLayoutProperty->UpdatePixelMap(pixMap);
-    titleBarNode->MarkModifyDone();
 }
 
 void NavDestinationModelNG::SetNavDestinationMode(FrameNode* frameNode, NavDestinationMode mode)
@@ -531,29 +632,43 @@ void NavDestinationModelNG::SetNavDestinationMode(NavDestinationMode mode)
     navDestination->SetNavDestinationMode(mode);
 }
 
+void NavDestinationModelNG::SetRecoverable(FrameNode* frameNode, bool recoverable)
+{
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestination);
+    navDestination->SetRecoverable(recoverable);
+}
+
+void NavDestinationModelNG::SetRecoverable(bool recoverable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestination);
+    navDestination->SetRecoverable(recoverable);
+}
+
 void NavDestinationModelNG::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestinationGroupNode);
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
-    CHECK_NULL_VOID(titleBarNode);
     // if previous menu is custom, just remove it and create new menu, otherwise update old menu
-    if (titleBarNode->GetPrevMenuIsCustom().value_or(false)) {
-        titleBarNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
+    if (navDestinationGroupNode->GetPrevMenuIsCustom().value_or(false)) {
+        navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
     } else {
-        if (titleBarNode->GetMenu()) {
-            titleBarNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
+        if (navDestinationGroupNode->GetMenu()) {
+            navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
         } else {
-            titleBarNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
+            navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
         }
     }
-    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_VOID(titleBarPattern);
-    titleBarPattern->SetTitleBarMenuItems(menuItems);
-    titleBarPattern->SetMenuNodeId(ElementRegister::GetInstance()->MakeUniqueId());
-    titleBarNode->UpdatePrevMenuIsCustom(false);
+    auto navDestinationPattern = navDestinationGroupNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    navDestinationPattern->SetTitleBarMenuItems(menuItems);
+    navDestinationPattern->SetMenuNodeId(ElementRegister::GetInstance()->MakeUniqueId());
+    navDestinationPattern->SetLandscapeMenuNodeId(ElementRegister::GetInstance()->MakeUniqueId());
+    navDestinationGroupNode->UpdatePrevMenuIsCustom(false);
 }
 
 void NavDestinationModelNG::SetCustomMenu(const RefPtr<AceType>& customNode)
@@ -564,23 +679,32 @@ void NavDestinationModelNG::SetCustomMenu(const RefPtr<AceType>& customNode)
     CHECK_NULL_VOID(frameNode);
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestinationGroupNode);
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
-    CHECK_NULL_VOID(titleBarNode);
     // if previous menu exists, remove it if their ids are not the same
     // if previous node is not custom, their ids must not be the same
-    if (titleBarNode->GetMenu()) {
-        if (customMenu->GetId() == titleBarNode->GetMenu()->GetId()) {
-            titleBarNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
+    if (navDestinationGroupNode->GetMenu()) {
+        if (customMenu->GetId() == navDestinationGroupNode->GetMenu()->GetId()) {
+            navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
             return;
         }
-        titleBarNode->SetMenu(customMenu);
-        titleBarNode->UpdatePrevMenuIsCustom(true);
-        titleBarNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
+        navDestinationGroupNode->SetMenu(customMenu);
+        navDestinationGroupNode->UpdatePrevMenuIsCustom(true);
+        navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
         return;
     }
-    titleBarNode->SetMenu(customMenu);
-    titleBarNode->UpdatePrevMenuIsCustom(true);
-    titleBarNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
+    navDestinationGroupNode->SetMenu(customMenu);
+    navDestinationGroupNode->UpdatePrevMenuIsCustom(true);
+    navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
+}
+
+void NavDestinationModelNG::SetMenuOptions(NavigationMenuOptions&& opt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    navDestinationPattern->SetMenuOptions(std::move(opt));
 }
 
 void NavDestinationModelNG::SetBackgroundColor(const Color& color, bool isVaild)
@@ -617,7 +741,8 @@ void NavDestinationModelNG::SetOnWillAppear(std::function<void()>&& willAppear)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(
+        frameNode->GetOrCreateEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnWillAppear(willAppear);
 }
@@ -626,7 +751,8 @@ void NavDestinationModelNG::SetOnWillHide(std::function<void()>&& willHide)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(
+        frameNode->GetOrCreateEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnWillHide(willHide);
 }
@@ -635,7 +761,8 @@ void NavDestinationModelNG::SetOnWillShow(std::function<void()>&& willShow)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(
+        frameNode->GetOrCreateEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnWillShow(willShow);
 }
@@ -644,7 +771,8 @@ void NavDestinationModelNG::SetOnWillDisAppear(std::function<void()>&& willDisAp
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(
+        frameNode->GetOrCreateEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnWillDisAppear(willDisAppear);
 }
@@ -687,5 +815,441 @@ void NavDestinationModelNG::SetSystemBarStyle(const RefPtr<SystemBarStyle>& styl
     auto pattern = navDestination->GetPattern<NavDestinationPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSystemBarStyle(style);
+}
+
+void NavDestinationModelNG::ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo)
+{
+    if (!titleInfo.hasSubTitle && !titleInfo.hasMainTitle) {
+        return;
+    }
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    if (navDestinationNode->GetPrevTitleIsCustomValue(false)) {
+        // remove custom title if any.
+        titleBarNode->RemoveChild(titleBarNode->GetTitle());
+        titleBarNode->SetTitle(nullptr);
+        auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+        CHECK_NULL_VOID(titleBarLayoutProperty);
+        // reset custom title height if any.
+        if (titleBarLayoutProperty->HasTitleHeight()) {
+            titleBarLayoutProperty->ResetTitleHeight();
+        }
+    }
+    navDestinationNode->UpdatePrevTitleIsCustom(false);
+
+    auto theme = NavigationGetTheme();
+    // create or update main title
+    NavigationTitleUtil::CreateOrUpdateDestinationMainTitle(titleBarNode, titleInfo);
+
+    // create or update subtitle
+    NavigationTitleUtil::CreateOrUpdateDestinationSubtitle(titleBarNode, titleInfo);
+    return;
+}
+
+void NavDestinationModelNG::SetTitlebarOptions(FrameNode* frameNode, NavigationTitlebarOptions&& opt)
+{
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    navDestinationPattern->SetTitleBarStyle(opt.brOptions.barStyle);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    titleBarPattern->SetTitlebarOptions(std::move(opt));
+}
+
+void NavDestinationModelNG::SetHideToolBar(bool hideToolBar, bool animated)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutPropertyPtr<NavDestinationLayoutProperty>();
+    CHECK_NULL_VOID(navDestinationLayoutProperty);
+    navDestinationLayoutProperty->UpdateHideToolBar(hideToolBar);
+    navDestinationLayoutProperty->UpdateIsAnimatedToolBar(animated);
+}
+
+void NavDestinationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutPropertyPtr<NavDestinationLayoutProperty>();
+    CHECK_NULL_VOID(navDestinationLayoutProperty);
+    navDestinationLayoutProperty->UpdateHideToolBar(hideToolBar);
+    navDestinationLayoutProperty->UpdateIsAnimatedToolBar(animated);
+}
+
+void NavDestinationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navdestinationGroupNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(navdestinationGroupNode);
+    bool enabled = false;
+    auto hub = navdestinationGroupNode->GetOrCreateEventHub<EventHub>();
+    if (hub) {
+        enabled = hub->IsEnabled();
+    }
+    FieldProperty fieldProperty;
+    fieldProperty.parentId = navdestinationGroupNode->GetInspectorId().value_or("");
+    fieldProperty.field = NG::DES_FIELD;
+    NavigationToolbarUtil::SetToolbarConfiguration(
+        navdestinationGroupNode, std::move(toolBarItems), enabled, fieldProperty);
+}
+
+void NavDestinationModelNG::SetCustomToolBar(const RefPtr<AceType>& customNode)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    NavigationToolbarUtil::SetCustomToolBar(navDestinationGroupNode, customNode);
+}
+
+void NavDestinationModelNG::SetHideItemText(bool isHideItemText)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    NavigationToolbarUtil::SetHideItemText(navDestinationGroupNode, isHideItemText);
+}
+
+void NavDestinationModelNG::SetToolBarOptions(NavigationToolbarOptions&& opt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    NavigationToolbarUtil::SetToolbarOptions(navDestinationGroupNode, std::move(opt));
+}
+
+void NavDestinationModelNG::SetToolbarMorebuttonOptions(MoreButtonOptions&& opt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto navDestinationGroupNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    NavigationToolbarUtil::SetToolbarMoreButtonOptions(navDestinationGroupNode, std::move(opt));
+}
+
+void NavDestinationModelNG::SetMenuItems(FrameNode* frameNode, std::vector<NG::BarItem>&& menuItems)
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    // if previous menu is custom, just remove it and create new menu, otherwise update old menu
+    if (navDestinationGroupNode->GetPrevMenuIsCustom().value_or(false)) {
+        navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
+    } else {
+        if (navDestinationGroupNode->GetMenu()) {
+            navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
+        } else {
+            navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
+        }
+    }
+    auto navDestinationPattern = navDestinationGroupNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    navDestinationPattern->SetTitleBarMenuItems(menuItems);
+    navDestinationPattern->SetMenuNodeId(ElementRegister::GetInstance()->MakeUniqueId());
+    navDestinationPattern->SetLandscapeMenuNodeId(ElementRegister::GetInstance()->MakeUniqueId());
+    navDestinationGroupNode->UpdatePrevMenuIsCustom(false);
+}
+
+void NavDestinationModelNG::SetMenuItemAction(FrameNode* frameNode, std::function<void()>&& action, uint32_t index)
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationPattern = navDestinationGroupNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    auto menuItems = navDestinationPattern->GetTitleBarMenuItems();
+    if (menuItems.size() > index) {
+        menuItems.at(index).action = action;
+        navDestinationPattern->SetTitleBarMenuItems(menuItems);
+    }
+}
+
+void NavDestinationModelNG::SetMenuItemSymbol(FrameNode* frameNode,
+    std::function<void(WeakPtr<NG::FrameNode>)>&& symbol, uint32_t index)
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationPattern = navDestinationGroupNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    auto menuItems = navDestinationPattern->GetTitleBarMenuItems();
+    if (menuItems.size() > index) {
+        menuItems.at(index).iconSymbol = symbol;
+        navDestinationPattern->SetTitleBarMenuItems(menuItems);
+    }
+}
+
+void NavDestinationModelNG::SetSystemTransitionType(NG::NavigationSystemTransitionType type)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestination);
+    navDestination->SetSystemTransitionType(type);
+}
+
+void NavDestinationModelNG::SetSystemTransitionType(FrameNode* frameNode, NG::NavigationSystemTransitionType type)
+{
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestination);
+    navDestination->SetSystemTransitionType(type);
+}
+
+void NavDestinationModelNG::SetScrollableProcessor(
+    const std::function<RefPtr<NG::NavDestinationScrollableProcessor>()>& creator)
+{
+    CHECK_NULL_VOID(creator);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->GetScrollableProcessor()) {
+        auto processor = creator();
+        if (processor) {
+            processor->SetNodeId(node->GetId());
+            processor->SetNavDestinationPattern(WeakPtr(pattern));
+        }
+        pattern->SetScrollableProcessor(processor);
+    }
+}
+
+void NavDestinationModelNG::UpdateBindingWithScrollable(
+    std::function<void(const RefPtr<NG::NavDestinationScrollableProcessor>& processor)>&& callback)
+{
+    CHECK_NULL_VOID(callback);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto processor = pattern->GetScrollableProcessor();
+    callback(processor);
+}
+
+void NavDestinationModelNG::SetOnPop(std::function<void(const RefPtr<NavPathInfo>&)>&& onPop)
+{
+    if (!onPop) {
+        return;
+    }
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(navDestination);
+    auto pattern = navDestination->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto context = pattern->GetNavDestinationContext();
+    CHECK_NULL_VOID(context);
+    auto navPathInfo = context->GetNavPathInfo();
+    CHECK_NULL_VOID(navPathInfo);
+    onPop(navPathInfo);
+}
+
+void NavDestinationModelNG::SetCustomTitle(FrameNode* frameNode, const RefPtr<AceType>& customNode)
+{
+    auto customTitle = AceType::DynamicCast<NG::UINode>(customNode);
+    CHECK_NULL_VOID(customTitle);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    if (!navDestinationNode->GetPrevTitleIsCustomValue(false)) {
+        titleBarNode->RemoveChild(titleBarNode->GetTitle());
+        titleBarNode->RemoveChild(titleBarNode->GetSubtitle());
+        titleBarNode->SetTitle(nullptr);
+        titleBarNode->SetSubtitle(nullptr);
+    }
+    navDestinationNode->UpdatePrevTitleIsCustom(true);
+    auto currentTitle = titleBarNode->GetTitle();
+    if (currentTitle && customTitle->GetId() == currentTitle->GetId()) {
+        // do nothing
+        return;
+    }
+    // update custom title
+    titleBarNode->RemoveChild(currentTitle);
+    titleBarNode->SetTitle(customTitle);
+    titleBarNode->AddChild(customTitle);
+    titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+RefPtr<FrameNode> NavDestinationModelNG::GetCustomTitle(FrameNode* frameNode)
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_RETURN(navDestinationGroupNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
+    CHECK_NULL_RETURN(titleBarNode, nullptr);
+    auto title = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
+    return title;
+}
+
+void NavDestinationModelNG::SetTitleHeight(FrameNode* frameNode, const Dimension& titleHeight, bool isValid)
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    if (isValid) {
+        titleBarLayoutProperty->UpdateTitleHeight(titleHeight);
+    } else {
+        titleBarLayoutProperty->ResetTitleHeight();
+    }
+}
+
+void NavDestinationModelNG::SetOnCoordScrollStartAction(
+    FrameNode* frameNode, std::function<void()>&& onCoordScrollStart)
+{
+    CHECK_NULL_VOID(onCoordScrollStart);
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->SetOnCoordScrollStartAction(std::move(onCoordScrollStart));
+}
+
+void NavDestinationModelNG::SetOnCoordScrollUpdateAction(
+    FrameNode* frameNode, std::function<void(float)>&& onCoordScrollUpdate)
+{
+    CHECK_NULL_VOID(onCoordScrollUpdate);
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->SetOnCoordScrollUpdateAction(std::move(onCoordScrollUpdate));
+}
+
+void NavDestinationModelNG::SetOnCoordScrollEndAction(FrameNode* frameNode, std::function<void()>&& onCoordScrollEnd)
+{
+    CHECK_NULL_VOID(onCoordScrollEnd);
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->SetOnCoordScrollEndAction(std::move(onCoordScrollEnd));
+}
+
+void NavDestinationModelNG::SetSystemBarStyle(FrameNode* frameNode, const Color& contentColor)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto pattern = navDestinationGroupNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<SystemBarStyle> style = SystemBarStyle::CreateStyleFromColor(contentColor.GetValue());
+    pattern->SetSystemBarStyle(style);
+}
+
+void NavDestinationModelNG::SetCustomBackButtonNode(FrameNode* frameNode, FrameNode* backButtonNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto backButton = AceType::DynamicCast<UINode>(Referenced::Claim<FrameNode>(backButtonNode));
+    titleBarNode->SetCustomBackButton(backButton);
+}
+
+void NavDestinationModelNG::SetOnActive(std::function<void(int32_t)>&& onActive)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnActive(onActive);
+}
+
+void NavDestinationModelNG::SetOnInactive(std::function<void(int32_t)>&& onInactive)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnInactive(onInactive);
+}
+
+void NavDestinationModelNG::SetCustomTransition(NG::NavDestinationTransitionDelegate&& transitionDelegate)
+{
+    CHECK_NULL_VOID(transitionDelegate);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetNavDestinationTransitionDelegate(std::move(transitionDelegate));
+}
+
+void NavDestinationModelNG::SetOnNewParam(NG::NavDestinationOnNewParamCallback&& onNewParamCallback)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnNewParam(std::move(onNewParamCallback));
+}
+
+void NavDestinationModelNG::SetPreferredOrientation(const std::optional<Orientation>& ori)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetOrientation(ori);
+}
+
+void NavDestinationModelNG::SetPreferredOrientation(FrameNode* frameNode, const std::optional<Orientation>& ori)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetOrientation(ori);
+}
+
+void NavDestinationModelNG::SetEnableStatusBar(const std::optional<std::pair<bool, bool>>& statusBar)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetStatusBarConfig(statusBar);
+}
+
+void NavDestinationModelNG::SetEnableStatusBar(
+    FrameNode* frameNode, const std::optional<std::pair<bool, bool>>& statusBar)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetStatusBarConfig(statusBar);
+}
+
+void NavDestinationModelNG::SetEnableNavigationIndicator(const std::optional<bool>& navigationIndicator)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetNavigationIndicatorConfig(navigationIndicator);
+}
+
+void NavDestinationModelNG::SetEnableNavigationIndicator(
+    FrameNode* frameNode, const std::optional<bool>& navigationIndicator)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetNavigationIndicatorConfig(navigationIndicator);
 }
 } // namespace OHOS::Ace::NG

@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_accessibility_property.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -26,7 +24,8 @@ bool ScrollBarAccessibilityProperty::IsScrollable() const
     CHECK_NULL_RETURN(frameNode, false);
     auto scrollBarPattern = frameNode->GetPattern<ScrollBarPattern>();
     CHECK_NULL_RETURN(scrollBarPattern, false);
-    if (scrollBarPattern->GetAxis() != Axis::NONE && Positive(scrollBarPattern->GetControlDistance())) {
+    if (scrollBarPattern->GetAxis() != Axis::NONE && Positive(scrollBarPattern->GetControlDistance())
+        && (scrollBarPattern->UseInnerScrollBar() || Positive(scrollBarPattern->GetScrollableDistance()))) {
         return true;
     }
     return false;

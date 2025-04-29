@@ -21,8 +21,8 @@
 #include <optional>
 #include <string>
 
-#include "base/memory/referenced.h"
 #include "base/log/dump_log.h"
+#include "base/memory/referenced.h"
 #include "core/common/ai/data_detector_adapter.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
@@ -32,15 +32,15 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
-#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text/span/tlv_util.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 #include "core/components_ng/property/accessibility_property.h"
 
-#define DEFINE_SPAN_FONT_STYLE_ITEM(name, type)                              \
+#define DEFINE_SPAN_FONT_STYLE_ITEM_GET(name, type)                          \
 public:                                                                      \
     std::optional<type> Get##name() const                                    \
     {                                                                        \
@@ -62,36 +62,89 @@ public:                                                                      \
             return spanItem_->fontStyle->Get##name().value_or(defaultValue); \
         }                                                                    \
         return defaultValue;                                                 \
-    }                                                                        \
-    void Update##name(const type& value)                                     \
-    {                                                                        \
-        if (!spanItem_->fontStyle) {                                         \
-            spanItem_->fontStyle = std::make_unique<FontStyle>();            \
-        }                                                                    \
-        if (spanItem_->fontStyle->Check##name(value)) {                      \
-            return;                                                          \
-        }                                                                    \
-        spanItem_->fontStyle->Update##name(value);                           \
-        RequestTextFlushDirty();                                             \
-    }                                                                        \
-    void Reset##name()                                                       \
-    {                                                                        \
-        if (spanItem_->fontStyle) {                                          \
-            return spanItem_->fontStyle->Reset##name();                      \
-        }                                                                    \
-    }                                                                        \
-    void Update##name##WithoutFlushDirty(const type& value)                  \
-    {                                                                        \
-        if (!spanItem_->fontStyle) {                                         \
-            spanItem_->fontStyle = std::make_unique<FontStyle>();            \
-        }                                                                    \
-        if (spanItem_->fontStyle->Check##name(value)) {                      \
-            return;                                                          \
-        }                                                                    \
-        spanItem_->fontStyle->Update##name(value);                           \
     }
 
-#define DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(name, type)                             \
+#define DEFINE_SPAN_FONT_STYLE_ITEM(name, type, changeflag)       \
+    DEFINE_SPAN_FONT_STYLE_ITEM_GET(name, type)                   \
+public:                                                           \
+    void Update##name(const type& value)                          \
+    {                                                             \
+        if (!spanItem_->fontStyle) {                              \
+            spanItem_->fontStyle = std::make_unique<FontStyle>(); \
+        }                                                         \
+        if (spanItem_->fontStyle->Check##name(value)) {           \
+            return;                                               \
+        }                                                         \
+        spanItem_->fontStyle->Update##name(value);                \
+        if (changeflag == ChangeFlag::RE_CREATE) {                \
+            spanItem_->MarkDirty();                               \
+        } else {                                                  \
+            spanItem_->MarkReLayoutParagraph();                   \
+        }                                                         \
+        RequestTextFlushDirty();                                  \
+    }                                                             \
+    void Reset##name()                                            \
+    {                                                             \
+        if (spanItem_->fontStyle) {                               \
+            return spanItem_->fontStyle->Reset##name();           \
+        }                                                         \
+    }                                                             \
+    void Update##name##WithoutFlushDirty(const type& value)       \
+    {                                                             \
+        if (!spanItem_->fontStyle) {                              \
+            spanItem_->fontStyle = std::make_unique<FontStyle>(); \
+        }                                                         \
+        if (spanItem_->fontStyle->Check##name(value)) {           \
+            return;                                               \
+        }                                                         \
+        spanItem_->fontStyle->Update##name(value);                \
+    }
+
+#define DEFINE_SPAN_FONT_STYLE_ITEM_RECREATE(name, type, changeflag) \
+    DEFINE_SPAN_FONT_STYLE_ITEM_GET(name, type)                   \
+public:                                                           \
+    void Update##name(const type& value)                          \
+    {                                                             \
+        if (!spanItem_->fontStyle) {                              \
+            spanItem_->fontStyle = std::make_unique<FontStyle>(); \
+        }                                                         \
+        if (spanItem_->fontStyle->Check##name(value)) {           \
+            return;                                               \
+        }                                                         \
+        spanItem_->fontStyle->Update##name(value);                \
+        if (changeflag == ChangeFlag::RE_CREATE) {                \
+            spanItem_->MarkDirty();                               \
+        } else {                                                  \
+            spanItem_->MarkReLayoutParagraph();                   \
+        }                                                         \
+        RequestTextFlushDirty();                                  \
+        spanItem_->MarkReCreateParagraph();                       \
+    }                                                             \
+    void Reset##name()                                            \
+    {                                                             \
+        if (spanItem_->fontStyle) {                               \
+            spanItem_->fontStyle->Reset##name();                  \
+        }                                                         \
+        if (changeflag == ChangeFlag::RE_CREATE) {                \
+            spanItem_->MarkDirty();                               \
+        } else {                                                  \
+            spanItem_->MarkReLayoutParagraph();                   \
+        }                                                         \
+        spanItem_->MarkReCreateParagraph();                       \
+    }                                                             \
+    void Update##name##WithoutFlushDirty(const type& value)       \
+    {                                                             \
+        if (!spanItem_->fontStyle) {                              \
+            spanItem_->fontStyle = std::make_unique<FontStyle>(); \
+        }                                                         \
+        if (spanItem_->fontStyle->Check##name(value)) {           \
+            return;                                               \
+        }                                                         \
+        spanItem_->fontStyle->Update##name(value);                \
+        spanItem_->MarkReCreateParagraph();                       \
+    }
+
+#define DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(name, type, changeflag)                 \
 public:                                                                          \
     std::optional<type> Get##name() const                                        \
     {                                                                            \
@@ -123,12 +176,22 @@ public:                                                                         
             return;                                                              \
         }                                                                        \
         spanItem_->textLineStyle->Update##name(value);                           \
+        if (changeflag == ChangeFlag::RE_CREATE) {                               \
+            spanItem_->MarkDirty();                                              \
+        } else {                                                                 \
+            spanItem_->MarkReLayoutParagraph();                                  \
+        }                                                                        \
         RequestTextFlushDirty();                                                 \
     }                                                                            \
     void Reset##name()                                                           \
     {                                                                            \
         if (spanItem_->textLineStyle) {                                          \
-            return spanItem_->textLineStyle->Reset##name();                      \
+            spanItem_->textLineStyle->Reset##name();                             \
+        }                                                                        \
+        if (changeflag == ChangeFlag::RE_CREATE) {                               \
+            spanItem_->MarkDirty();                                              \
+        } else {                                                                 \
+            spanItem_->MarkReLayoutParagraph();                                  \
         }                                                                        \
     }                                                                            \
     void Update##name##WithoutFlushDirty(const type& value)                      \
@@ -143,14 +206,11 @@ public:                                                                         
     }
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr double DEFAULT_FONT_SIZE_VALUE = 16.0;
-}
 using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 class InspectorFilter;
 class Paragraph;
 
-enum class SpanItemType { NORMAL = 0, IMAGE = 1, CustomSpan = 2 };
+enum class SpanItemType { NORMAL = 0, IMAGE = 1, CustomSpan = 2, SYMBOL = 3, PLACEHOLDER = 4 };
 
 struct PlaceholderStyle {
     double width = 0.0f;
@@ -158,7 +218,6 @@ struct PlaceholderStyle {
     double baselineOffset = 0.0f;
     VerticalAlign verticalAlign = VerticalAlign::BOTTOM;
     TextBaseline baseline = TextBaseline::ALPHABETIC;
-    Dimension paragraphFontSize = Dimension(DEFAULT_FONT_SIZE_VALUE, DimensionUnit::FP);
 };
 
 struct CustomSpanPlaceholderInfo {
@@ -177,6 +236,12 @@ struct CustomSpanPlaceholderInfo {
         return result;
     }
 };
+
+enum class ChangeFlag {
+    RE_CREATE = 0,
+    RE_LAYOUT = 1,
+};
+
 struct SpanItem : public AceType {
     DECLARE_ACE_TYPE(SpanItem, AceType);
 
@@ -186,15 +251,15 @@ public:
     {
         children.clear();
     }
-    // position of last char + 1
     int32_t rangeStart = -1;
-    int32_t position = -1;
-    int32_t imageNodeId = -1;
+    int32_t position = -1;  // position of last char + 1
+    int32_t nodeId_ = -1;
     int32_t paragraphIndex = -1;
+    int32_t itemIndex_ = -1;
     uint32_t length = 0;
     std::string inspectId;
     std::string description;
-    std::string content;
+    std::u16string content;
     uint32_t unicode = 0;
     SpanItemType spanItemType = SpanItemType::NORMAL;
     std::pair<int32_t, int32_t> interval;
@@ -204,6 +269,8 @@ public:
     std::optional<TextBackgroundStyle> backgroundStyle;
     GestureEventFunc onClick;
     GestureEventFunc onLongPress;
+    GestureEventFunc onDoubleClick;
+    OnHoverFunc onHover;
     [[deprecated]] std::list<RefPtr<SpanItem>> children;
     std::map<int32_t, AISpan> aiSpanMap;
     int32_t placeholderIndex = -1;
@@ -213,30 +280,46 @@ public:
     bool useThemeFontColor = true;
     bool useThemeDecorationColor = true;
     std::optional<LeadingMargin> leadingMargin;
-    int32_t selectedStart = -1;
+    int32_t selectedStart = -1;  // relative offset from span, [selectedStart, selectedEnd)
     int32_t selectedEnd = -1;
+    bool needReLayoutParagraph = false;
+    bool needReLayout = false;
+    // used for Span uiNode
+    bool needReCreateParagraph_ = true;
     RefPtr<AccessibilityProperty> accessibilityProperty = MakeRefPtr<AccessibilityProperty>();
-    void UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder);
+    bool UpdateSymbolSpanFontFamily(TextStyle& symbolSpanStyle);
+    void UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle,
+        const RefPtr<Paragraph>& builder, bool isDragging = false);
     virtual int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
-        bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle(), bool isMarquee = false);
+        const TextStyle& textStyle, bool isMarquee = false);
+    virtual bool UpdateSpanTextStyle(const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode);
+    bool CheckSpanNeedReCreate(int32_t index);
+    void UpdateReLayoutTextStyle(
+        TextStyle& spanTextStyle, const TextStyle& textStyle, bool isSymbol);
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
-    virtual void UpdateTextStyleForAISpan(const std::string& content, const RefPtr<Paragraph>& builder,
+    virtual void UpdateTextStyleForAISpan(const std::u16string& content, const RefPtr<Paragraph>& builder,
         const TextStyle& textStyle, const TextStyle& aiSpanStyle);
-    virtual void UpdateTextStyle(const std::string& content, const RefPtr<Paragraph>& builder,
+    virtual void UpdateTextStyle(const std::u16string& content, const RefPtr<Paragraph>& builder,
         const TextStyle& textStyle, const int32_t selStart, const int32_t selEnd);
     virtual void UpdateContentTextStyle(
-        const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle);
+        const std::u16string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle);
     virtual void GetIndex(int32_t& start, int32_t& end) const;
     virtual void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const;
     std::string GetFont() const;
     virtual void StartDrag(int32_t start, int32_t end);
     virtual void EndDrag();
     virtual bool IsDragging();
     virtual ResultObject GetSpanResultObject(int32_t start, int32_t end);
-    TextStyle InheritParentProperties(const RefPtr<FrameNode>& frameNode, bool isSpanStringMode = false);
-    virtual RefPtr<SpanItem> GetSameStyleSpanItem() const;
+    virtual RefPtr<SpanItem> GetSameStyleSpanItem(bool isEncodeTlvS = false) const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
+    std::u16string urlAddress;
+    std::function<void()> urlOnRelease;
+    void SetUrlOnReleaseEvent(std::function<void()>&& onRelease)
+    {
+        urlOnRelease = std::move(onRelease);
+    }
     bool Contains(int32_t index)
     {
         return rangeStart < index && index < position;
@@ -269,6 +352,17 @@ public:
     {
         onLongPress = std::move(onLongPress_);
     }
+
+    void SetDoubleClickEvent(GestureEventFunc&& onDoubleClick_)
+    {
+        onDoubleClick = std::move(onDoubleClick_);
+    }
+
+    void SetHoverEvent(OnHoverFunc&& onHover_)
+    {
+        onHover = std::move(onHover_);
+    }
+
     void SetIsParentText(bool isText)
     {
         isParentText = isText;
@@ -277,8 +371,8 @@ public:
     {
         return isParentText;
     }
-    std::string GetSpanContent(const std::string& rawContent, bool isMarquee = false);
-    std::string GetSpanContent();
+    std::u16string GetSpanContent(const std::u16string& rawContent, bool isMarquee = false);
+    std::u16string GetSpanContent();
     uint32_t GetSymbolUnicode();
     std::string SymbolColorToString();
 
@@ -292,49 +386,100 @@ public:
 
     bool UpdateSpanTextColor(Color color);
 
-private:
+    bool GetSymbolEffectSwitch() const
+    {
+        return symbolEffectSwitch_;
+    }
+
+    void SetSymbolEffectSwitch(bool symbolEffectSwitch)
+    {
+        symbolEffectSwitch_ = symbolEffectSwitch;
+    }
+
+    void SetSymbolId(uint32_t symbolId)
+    {
+        symbolId_ = symbolId;
+    }
+
+    uint32_t GetSymbolId()
+    {
+        return symbolId_;
+    }
+    
+    virtual void SpanDumpInfo();
+    void SpanDumpInfoAdvance();
+    void MarkDirty()
+    {
+        needReLayout = true;
+    }
+
+    void MarkReCreateParagraph()
+    {
+        needReCreateParagraph_ = true;
+    }
+
+    void ResetNeedReCreateParagraph()
+    {
+        needReCreateParagraph_ = false;
+    }
+
+    void MarkReLayoutParagraph()
+    {
+        needReLayoutParagraph = true;
+    }
+
+    void ResetReLayout()
+    {
+        needReLayout = false;
+        needReLayoutParagraph = false;
+    }
+
+    void UpdateContent(const std::u16string& newContent)
+    {
+        if (content != newContent) {
+            MarkReCreateParagraph();
+        }
+        content = newContent;
+        MarkDirty();
+    }
+
+    void UpdateTextColorWithoutCheck(Color color)
+    {
+        fontStyle->propTextColor = color;
+        MarkReLayoutParagraph();
+    }
+
+    void UpdateTextDecorationColorWithoutCheck(Color color)
+    {
+        fontStyle->propTextDecorationColor = color;
+        MarkReLayoutParagraph();
+    }
+
+    void ResetReCreateAndReLayout()
+    {
+        needReCreateParagraph_ = false;
+        CHECK_NULL_VOID(textStyle_.has_value());
+        textStyle_.value().ResetReCreateAndReLayoutBitmap();
+    }
+
     std::optional<TextStyle> textStyle_;
+
+private:
+    void EncodeFontStyleTlv(std::vector<uint8_t>& buff) const;
+    void EncodeTextLineStyleTlv(std::vector<uint8_t>& buff) const;
     bool isParentText = false;
     RefPtr<ResourceObject> resourceObject_;
     WeakPtr<Pattern> pattern_;
-};
-
-enum class PropertyInfo {
-    FONTSIZE = 0,
-    FONTCOLOR,
-    FONTSTYLE,
-    FONTWEIGHT,
-    FONTFAMILY,
-    TEXTDECORATION,
-    TEXTCASE,
-    LETTERSPACE,
-    LINEHEIGHT,
-    TEXT_ALIGN,
-    LEADING_MARGIN,
-    NONE,
-    TEXTSHADOW,
-    SYMBOL_COLOR,
-    SYMBOL_RENDERING_STRATEGY,
-    SYMBOL_EFFECT_STRATEGY,
-    WORD_BREAK,
-    LINE_BREAK_STRATEGY,
-    FONTFEATURE,
-    BASELINE_OFFSET,
-    LINESPACING,
-    SYMBOL_EFFECT_OPTIONS,
-    HALFLEADING,
-    VARIABLE_FONT_WEIGHT,
-    ENABLE_VARIABLE_FONT_WEIGHT,
-    MIN_FONT_SCALE,
-    MAX_FONT_SCALE,
-    BACKGROUNDCOLOR,
+    bool symbolEffectSwitch_ = true;
+    uint32_t symbolId_ = 0;
 };
 
 class ACE_EXPORT BaseSpan : public virtual AceType {
     DECLARE_ACE_TYPE(BaseSpan, AceType);
 
 public:
-    explicit BaseSpan(int32_t id) : groupId_(id) {}
+    explicit BaseSpan(int32_t id) : groupId_(id)
+    {}
     virtual void MarkTextDirty() = 0;
     virtual void SetTextBackgroundStyle(const TextBackgroundStyle& style);
     virtual void UpdateTextBackgroundFromParent(const std::optional<TextBackgroundStyle>& style)
@@ -371,14 +516,29 @@ public:
     static RefPtr<SpanNode> GetOrCreateSpanNode(const std::string& tag, int32_t nodeId);
     static RefPtr<SpanNode> CreateSpanNode(int32_t nodeId);
 
-    explicit SpanNode(int32_t nodeId) : UINode(V2::SPAN_ETS_TAG, nodeId), BaseSpan(nodeId) {}
-    explicit SpanNode(const std::string& tag, int32_t nodeId) : UINode(tag, nodeId), BaseSpan(nodeId) {}
+    explicit SpanNode(int32_t nodeId) : UINode(V2::SPAN_ETS_TAG, nodeId), BaseSpan(nodeId)
+    {
+        if (spanItem_) {
+            spanItem_->nodeId_ = nodeId;
+        }
+    }
+    explicit SpanNode(const std::string& tag, int32_t nodeId) : UINode(tag, nodeId), BaseSpan(nodeId)
+    {
+        if (spanItem_) {
+            spanItem_->nodeId_ = nodeId;
+        }
+    }
     ~SpanNode() override = default;
 
     void SetTextBackgroundStyle(const TextBackgroundStyle& style) override;
     void UpdateTextBackgroundFromParent(const std::optional<TextBackgroundStyle>& style) override;
 
     bool IsAtomicNode() const override
+    {
+        return true;
+    }
+
+    bool IsSyntaxNode() const override
     {
         return true;
     }
@@ -390,20 +550,25 @@ public:
 
     void UpdateContent(const uint32_t& unicode)
     {
+        spanItem_->spanItemType = SpanItemType::SYMBOL;
         if (spanItem_->unicode == unicode) {
             return;
         }
         spanItem_->unicode = unicode;
-        RequestTextFlushDirty();
+        spanItem_->MarkDirty();
+        spanItem_->MarkReCreateParagraph();
+        RequestTextFlushDirty(true);
     }
 
-    void UpdateContent(const std::string& content)
+    void UpdateContent(const std::u16string& content)
     {
         if (spanItem_->content == content) {
             return;
         }
         spanItem_->content = content;
-        RequestTextFlushDirty();
+        spanItem_->MarkDirty();
+        spanItem_->MarkReCreateParagraph();
+        RequestTextFlushDirty(true);
     }
 
     void UpdateOnClickEvent(GestureEventFunc&& onClick)
@@ -424,36 +589,52 @@ public:
     void UpdateColorByResourceId()
     {
         spanItem_->fontStyle->UpdateColorByResourceId();
+        if (spanItem_->backgroundStyle) {
+            spanItem_->backgroundStyle->UpdateColorByResourceId();
+        }
     }
 
-    DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, DynamicColor);
-    DEFINE_SPAN_FONT_STYLE_ITEM(ItalicFontStyle, Ace::FontStyle);
-    DEFINE_SPAN_FONT_STYLE_ITEM(FontWeight, FontWeight);
-    DEFINE_SPAN_FONT_STYLE_ITEM(FontFamily, std::vector<std::string>);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, TextDecoration);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationStyle, TextDecorationStyle);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, DynamicColor);
-    DEFINE_SPAN_FONT_STYLE_ITEM(FontFeature, FONT_FEATURES_LIST);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextCase, TextCase);
-    DEFINE_SPAN_FONT_STYLE_ITEM(TextShadow, std::vector<Shadow>);
-    DEFINE_SPAN_FONT_STYLE_ITEM(LetterSpacing, Dimension);
-    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolColorList, std::vector<Color>);
-    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolRenderingStrategy, uint32_t);
-    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectStrategy, uint32_t);
-    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectOptions, SymbolEffectOptions);
-    DEFINE_SPAN_FONT_STYLE_ITEM(MinFontScale, float);
-    DEFINE_SPAN_FONT_STYLE_ITEM(MaxFontScale, float);
-    DEFINE_SPAN_FONT_STYLE_ITEM(VariableFontWeight, int32_t);
-    DEFINE_SPAN_FONT_STYLE_ITEM(EnableVariableFontWeight, bool);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(WordBreak, WordBreak);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LeadingMargin, LeadingMargin);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineBreakStrategy, LineBreakStrategy);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineSpacing, Dimension);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(HalfLeading, bool);
+    void UpdateTextColorWithoutCheck(Color color)
+    {
+        spanItem_->UpdateTextColorWithoutCheck(color);
+    }
+
+    void UpdateTextDecorationColorWithoutCheck(Color color)
+    {
+        spanItem_->UpdateTextDecorationColorWithoutCheck(color);
+    }
+
+    // ChangeFlag only for rich editor
+    DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, Color, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_FONT_STYLE_ITEM(ItalicFontStyle, Ace::FontStyle, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_FONT_STYLE_ITEM(FontWeight, FontWeight, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_FONT_STYLE_ITEM(FontFamily, std::vector<std::string>, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, TextDecoration, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationStyle, TextDecorationStyle, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, Color, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_FONT_STYLE_ITEM(FontFeature, FONT_FEATURES_LIST, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_FONT_STYLE_ITEM_RECREATE(TextCase, TextCase, ChangeFlag::RE_CREATE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(TextShadow, std::vector<Shadow>, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_FONT_STYLE_ITEM(LetterSpacing, Dimension, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolColorList, std::vector<Color>, ChangeFlag::RE_CREATE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolRenderingStrategy, uint32_t, ChangeFlag::RE_CREATE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectStrategy, uint32_t, ChangeFlag::RE_CREATE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectOptions, SymbolEffectOptions, ChangeFlag::RE_CREATE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(MinFontScale, float, ChangeFlag::RE_CREATE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(MaxFontScale, float, ChangeFlag::RE_CREATE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(VariableFontWeight, int32_t, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_FONT_STYLE_ITEM(EnableVariableFontWeight, bool, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_FONT_STYLE_ITEM_RECREATE(SymbolType, SymbolType, ChangeFlag::RE_CREATE);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(WordBreak, WordBreak, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LeadingMargin, LeadingMargin, ChangeFlag::RE_CREATE);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineBreakStrategy, LineBreakStrategy, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineSpacing, Dimension, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(HalfLeading, bool, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(ParagraphSpacing, Dimension, ChangeFlag::RE_CREATE);
 
     // Mount to the previous Span node or Text node.
     void MountToParagraph();
@@ -473,31 +654,25 @@ public:
         spanItem_->ToJsonValue(json, filter);
     }
 
-    void RequestTextFlushDirty();
-    static void RequestTextFlushDirty(const RefPtr<UINode>& node);
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override
+    {
+        spanItem_->ToTreeJson(json, config);
+    }
+
+    void RequestTextFlushDirty(bool markModifyDone = false);
+    static void RequestTextFlushDirty(const RefPtr<UINode>& node, bool markModifyDone = true);
     // The function is only used for fast preview.
     void FastPreviewUpdateChildDone() override
     {
-        RequestTextFlushDirty();
+        RequestTextFlushDirty(true);
     }
 
-    void AddPropertyInfo(PropertyInfo value)
-    {
-        propertyInfo_.insert(value);
-    }
-
-    void CleanPropertyInfo()
-    {
-        propertyInfo_.clear();
-    }
+    void SetPropertyInfoContainer();
 
     void MarkTextDirty() override
     {
         RequestTextFlushDirty();
     }
-
-    std::set<PropertyInfo> CalculateInheritPropertyInfo();
-
 
     void UpdateSpanTextColor(Color color)
     {
@@ -508,6 +683,8 @@ public:
             return;
         }
         spanItem_->fontStyle->UpdateTextColor(color);
+        auto parent = GetParent();
+        CHECK_NULL_VOID(parent);
         if (!spanItem_->UpdateSpanTextColor(color)) {
             RequestTextFlushDirty();
         }
@@ -515,11 +692,11 @@ public:
 
 protected:
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
 
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;
-    std::set<PropertyInfo> propertyInfo_;
-
     RefPtr<SpanItem> spanItem_ = MakeRefPtr<SpanItem>();
 
     ACE_DISALLOW_COPY_AND_MOVE(SpanNode);
@@ -530,33 +707,41 @@ struct PlaceholderSpanItem : public SpanItem {
 
 public:
     int32_t placeholderSpanNodeId = -1;
-    TextStyle textStyle;
     PlaceholderRun run_;
-    PlaceholderSpanItem() = default;
-    ~PlaceholderSpanItem() override = default;
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
-    int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
-        bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle(),
-        bool isMarquee = false) override;
-
-    void DumpInfo() const
+    std::optional<Color> dragBackgroundColor_;
+    bool isDragShadowNeeded_ = true;
+    PlaceholderSpanItem()
     {
-        auto& dumpLog = DumpLog::GetInstance();
-        dumpLog.AddDesc("--------------- print run info ---------------");
-        dumpLog.AddDesc(std::string("Width: ").append(std::to_string(run_.width)));
-        dumpLog.AddDesc(std::string("Height: ").append(std::to_string(run_.height)));
-        dumpLog.AddDesc(std::string("Alignment: ").append(StringUtils::ToString(run_.alignment)));
-        dumpLog.AddDesc(std::string("Baseline: ").append(StringUtils::ToString(run_.baseline)));
-        dumpLog.AddDesc(std::string("BaselineOffset: ").append(std::to_string(run_.baseline_offset)));
-        dumpLog.AddDesc("--------------- print text style ---------------");
-        dumpLog.AddDesc(std::string("FontSize: ").append(textStyle.GetFontSize().ToString()));
-        dumpLog.AddDesc(std::string("LineHeight: ").append(textStyle.GetLineHeight().ToString()));
-        dumpLog.AddDesc(std::string("LineSpacing: ").append(textStyle.GetLineSpacing().ToString()));
-        dumpLog.AddDesc(std::string("VerticalAlign: ").append(StringUtils::ToString(textStyle.GetTextVerticalAlign())));
-        dumpLog.AddDesc(std::string("HalfLeading: ").append(std::to_string(textStyle.GetHalfLeading())));
-        dumpLog.AddDesc(std::string("TextBaseline: ").append(StringUtils::ToString(textStyle.GetTextBaseline())));
+        this->spanItemType = SpanItemType::PLACEHOLDER;
     }
+    ~PlaceholderSpanItem() override = default;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override{};
+    int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
+        const TextStyle& textStyle, bool isMarquee = false) override;
+    bool UpdateSpanTextStyle(const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode) override;
+    virtual bool UpdatePlaceholderRun(PlaceholderStyle placeholderStyle);
+
+    void DumpInfo() const;
     ACE_DISALLOW_COPY_AND_MOVE(PlaceholderSpanItem);
+
+    void SetCustomNode(const RefPtr<UINode>& customNode)
+    {
+        customNode_ = customNode;
+    }
+
+    const RefPtr<UINode> GetCustomNode() const
+    {
+        return customNode_;
+    }
+
+    void UpdateColorByResourceId()
+    {
+        CHECK_NULL_VOID(dragBackgroundColor_.has_value());
+        dragBackgroundColor_.value().UpdateColorByResourceId();
+    }
+
+private:
+    RefPtr<UINode> customNode_;
 };
 
 class PlaceholderSpanPattern : public Pattern {
@@ -589,10 +774,18 @@ public:
     }
 
     PlaceholderSpanNode(const std::string& tag, int32_t nodeId) : FrameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>())
-    {}
+    {
+        if (placeholderSpanItem_) {
+            placeholderSpanItem_->nodeId_ = nodeId;
+        }
+    }
     PlaceholderSpanNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : FrameNode(tag, nodeId, pattern)
-    {}
+    {
+        if (placeholderSpanItem_) {
+            placeholderSpanItem_->nodeId_ = nodeId;
+        }
+    }
     ~PlaceholderSpanNode() override = default;
 
     const RefPtr<PlaceholderSpanItem>& GetSpanItem() const
@@ -603,6 +796,18 @@ public:
     bool IsAtomicNode() const override
     {
         return false;
+    }
+
+    void MarkModifyDone() override
+    {
+        FrameNode::MarkModifyDone();
+        placeholderSpanItem_->MarkDirty();
+    }
+
+    void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override
+    {
+        FrameNode::MarkDirtyNode(extraFlag);
+        placeholderSpanItem_->MarkDirty();
     }
 
     void DumpInfo() override
@@ -627,12 +832,17 @@ public:
         this->spanItemType = SpanItemType::CustomSpan;
     }
     ~CustomSpanItem() override = default;
-    RefPtr<SpanItem> GetSameStyleSpanItem() const override;
+    RefPtr<SpanItem> GetSameStyleSpanItem(bool isEncodeTlvS = false) const override;
     ResultObject GetSpanResultObject(int32_t start, int32_t end) override;
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override{};
     ACE_DISALLOW_COPY_AND_MOVE(CustomSpanItem);
     std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure;
     std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw;
+    void SpanDumpInfo() override
+    {
+        PlaceholderSpanItem::DumpInfo();
+    }
+    bool isFrameNode = false;
 };
 
 class ACE_EXPORT CustomSpanNode : public FrameNode {
@@ -641,26 +851,30 @@ class ACE_EXPORT CustomSpanNode : public FrameNode {
 public:
     static RefPtr<CustomSpanNode> CreateFrameNode(int32_t nodeId)
     {
-        auto customSpanNode = AceType::MakeRefPtr<CustomSpanNode>(
-            V2::CUSTOM_SPAN_NODE_ETS_TAG, nodeId);
+        auto customSpanNode = AceType::MakeRefPtr<CustomSpanNode>(V2::CUSTOM_SPAN_NODE_ETS_TAG, nodeId);
         customSpanNode->InitializePatternAndContext();
         ElementRegister::GetInstance()->AddUINode(customSpanNode);
+        customSpanNode->customSpanItem_->isFrameNode = true;
         return customSpanNode;
     }
 
-    static RefPtr<CustomSpanNode> GetOrCreateSpanNode(
-        const std::string& tag, int32_t nodeId)
+    static RefPtr<CustomSpanNode> GetOrCreateSpanNode(const std::string& tag, int32_t nodeId)
     {
         auto frameNode = GetFrameNode(tag, nodeId);
         CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<CustomSpanNode>(frameNode));
         auto customSpanNode = AceType::MakeRefPtr<CustomSpanNode>(tag, nodeId);
         customSpanNode->InitializePatternAndContext();
         ElementRegister::GetInstance()->AddUINode(customSpanNode);
+        customSpanNode->customSpanItem_->isFrameNode = true;
         return customSpanNode;
     }
 
-    CustomSpanNode(const std::string& tag, int32_t nodeId) :
-        FrameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>()) {}
+    CustomSpanNode(const std::string& tag, int32_t nodeId) : FrameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>())
+    {
+        if (customSpanItem_) {
+            customSpanItem_->nodeId_ = nodeId;
+        }
+    }
     ~CustomSpanNode() override = default;
 
     const RefPtr<CustomSpanItem>& GetSpanItem() const
@@ -695,21 +909,23 @@ public:
         this->spanItemType = SpanItemType::IMAGE;
     }
     ~ImageSpanItem() override = default;
-    int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
-        bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle(),
-        bool isMarquee = false) override;
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
+    bool UpdatePlaceholderRun(PlaceholderStyle placeholderStyle) override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override{};
     void UpdatePlaceholderBackgroundStyle(const RefPtr<FrameNode>& imageNode);
     void SetImageSpanOptions(const ImageSpanOptions& options);
     void ResetImageSpanOptions();
     ResultObject GetSpanResultObject(int32_t start, int32_t end) override;
-    RefPtr<SpanItem> GetSameStyleSpanItem() const override;
+    RefPtr<SpanItem> GetSameStyleSpanItem(bool isEncodeTlvS = false) const override;
     ACE_DISALLOW_COPY_AND_MOVE(ImageSpanItem);
 
     bool EncodeTlv(std::vector<uint8_t>& buff) override;
     static RefPtr<ImageSpanItem> DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor);
 
     ImageSpanOptions options;
+    OnHoverFunc onHover_;
+private:
+    ImageSpanOptions GetImageSpanOptionsFromImageNode() const;
+    ImageSpanAttribute CreateImageSpanAttribute(const RefPtr<ImageLayoutProperty>& layoutProperty) const;
 };
 
 class ACE_EXPORT ImageSpanNode : public FrameNode {
@@ -729,10 +945,18 @@ public:
     }
 
     ImageSpanNode(const std::string& tag, int32_t nodeId) : FrameNode(tag, nodeId, AceType::MakeRefPtr<ImagePattern>())
-    {}
+    {
+        if (imageSpanItem_) {
+            imageSpanItem_->nodeId_ = nodeId;
+        }
+    }
     ImageSpanNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : FrameNode(tag, nodeId, pattern)
-    {}
+    {
+        if (imageSpanItem_) {
+            imageSpanItem_->nodeId_ = nodeId;
+        }
+    }
     ~ImageSpanNode() override = default;
 
     const RefPtr<ImageSpanItem>& GetSpanItem() const

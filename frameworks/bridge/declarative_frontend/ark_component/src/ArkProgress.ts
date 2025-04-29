@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,6 +84,24 @@ class ArkProgressComponent extends ArkComponent implements ProgressAttribute {
     }
     return this.progressNode.getFrameNode();
   }
+  privacySensitive(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, ProgressPrivacySensitiveModifier.identity, ProgressPrivacySensitiveModifier, value);
+    return this;
+  }
+}
+
+class ProgressPrivacySensitiveModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('progressPrivacySensitive');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().progress.resetProgressPrivacySensitive(node);
+    } else {
+      getUINativeModule().progress.setProgressPrivacySensitive(node, this.value);
+    }
+  }
 }
 
 class ProgressInitializeModifier extends ModifierWithKey<ProgressParam> {
@@ -160,10 +178,11 @@ RingStyleOptions | LinearStyleOptions | ScaleRingStyleOptions | EclipseStyleOpti
       let shadow = (<RingStyleOptions> this.value).shadow;
       let status = (<RingStyleOptions> this.value).status;
       let strokeRadius = (<LinearStyleOptions> this.value).strokeRadius;
+      let borderRadius = (<CapsuleStyleOptions> this.value).borderRadius;
       getUINativeModule().progress.SetProgressStyle(
         node, strokeWidth, scaleCount, scaleWidth, enableSmoothEffect, borderColor,
         borderWidth, content, fontSize, fontWeight, fontFamily, fontStyle, fontColor,
-        enableScanEffect, showDefaultPercentage, shadow, status, strokeRadius
+        enableScanEffect, showDefaultPercentage, shadow, status, strokeRadius, borderRadius
       );
     }
   }

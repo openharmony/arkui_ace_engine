@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,22 +15,12 @@
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 
 #include "interfaces/native/node/node_model.h"
-#include "base/geometry/calc_dimension.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
-#include "core/interfaces/native/node/node_api.h"
-#include "frameworks/bridge/common/utils/utils.h"
-#include "core/components/scroll/scroll_position_controller.h"
-#include "core/animation/curves.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -311,18 +301,19 @@ ArkUI_Int32 GetScrollEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
     return SCROLL_TO_INDEX_2;
 }
 
-void SetScrollEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled)
+void SetScrollEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled, ArkUI_Int32 edge)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ScrollModelNG::SetEdgeEffect(frameNode, static_cast<EdgeEffect>(edgeEffect), alwaysEnabled);
+    ScrollModelNG::SetEdgeEffect(
+        frameNode, static_cast<EdgeEffect>(edgeEffect), alwaysEnabled, static_cast<EffectEdge>(edge));
 }
 
 void ResetScrollEdgeEffect(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ScrollModelNG::SetEdgeEffect(frameNode, EdgeEffect::NONE, true);
+    ScrollModelNG::SetEdgeEffect(frameNode, EdgeEffect::NONE, true, EffectEdge::ALL);
 }
 
 ArkUI_Bool GetEnableScrollInteraction(ArkUINodeHandle node)
@@ -385,7 +376,18 @@ void SetScrollEdge(ArkUINodeHandle node, ArkUI_Int32 value)
 {
     RefPtr<ScrollControllerBase> scrollControllerBase = GetController(node);
     CHECK_NULL_VOID(scrollControllerBase);
-    scrollControllerBase->ScrollToEdge(static_cast<ScrollEdgeType>(value), true);
+
+    constexpr ArkUI_Int32 typeSize = 4;
+    if (value >= typeSize || value < 0) {
+        return;
+    }
+    constexpr ScrollEdgeType EDGE_TYPE_TABLE[typeSize] = {
+        ScrollEdgeType::SCROLL_TOP,
+        ScrollEdgeType::SCROLL_BOTTOM,
+        ScrollEdgeType::SCROLL_TOP,
+        ScrollEdgeType::SCROLL_BOTTOM,
+    };
+    scrollControllerBase->ScrollToEdge(EDGE_TYPE_TABLE[value], true);
 }
 
 void ResetScrollTo(ArkUINodeHandle node)
@@ -502,6 +504,16 @@ void SetScrollBy(ArkUINodeHandle node, ArkUI_Float64 x, ArkUI_Float64 y)
     controller->ScrollBy(x, y, false);
 }
 
+void SetScrollFling(ArkUINodeHandle node, ArkUI_Float64 value)
+{
+    if (NearZero(value)) {
+        return;
+    }
+    RefPtr<ScrollControllerBase> scrollControllerBase = GetController(node);
+    CHECK_NULL_VOID(scrollControllerBase);
+    scrollControllerBase->Fling(value);
+}
+
 ArkUINodeHandle GetScroll(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -542,105 +554,160 @@ void ResetScrollFadingEdge(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NG::ScrollableModelNG::SetFadingEdge(frameNode, false, DEFAULT_FADING_EDGE_LENGTH);
 }
+
+void GetScrollFadingEdge(ArkUINodeHandle node, ArkUIInt32orFloat32 (*values)[2])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    (*values)[0].i32 = static_cast<int32_t>(NG::ScrollableModelNG::GetFadingEdge(frameNode));
+    (*values)[1].f32 = NG::ScrollableModelNG::GetFadingEdgeLength(frameNode);
+}
+
+void GetScrollContentSize(ArkUINodeHandle node, ArkUI_Float32 (*values)[2])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<OHOS::Ace::NG::ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    SizeF size = pattern->GetChildrenExpandedSize();
+    (*values)[0] = Dimension(size.Width(), DimensionUnit::PX).ConvertToVp();
+    (*values)[1] = Dimension(size.Height(), DimensionUnit::PX).ConvertToVp();
+}
 } // namespace
 
 namespace NodeModifier {
 const ArkUIScrollModifier* GetScrollModifier()
 {
     /* clang-format off */
-        static const ArkUIScrollModifier modifier = {
-        SetScrollNestedScroll, ResetScrollNestedScroll,
-        GetScrollEnableScroll, SetScrollEnableScroll,
-        ResetScrollEnableScroll, GetScrollFriction,
-        SetScrollFriction, ResetScrollFriction,
-        GetScrollScrollSnap, SetScrollScrollSnap,
-        ResetScrollScrollSnap, GetScrollScrollBar,
-        SetScrollScrollBar, ResetScrollScrollBar,
-        GetScrollScrollable, SetScrollScrollable,
-        ResetScrollScrollable, GetScrollScrollBarColor,
-        SetScrollScrollBarColor, ResetScrollScrollBarColor,
-        GetScrollScrollBarWidth, SetScrollScrollBarWidth,
-        ResetScrollScrollBarWidth, GetScrollEdgeEffect,
-        SetScrollEdgeEffect, ResetScrollEdgeEffect,
-        GetEnableScrollInteraction, SetEnableScrollInteraction, ResetEnableScrollInteraction,
-        SetScrollTo, SetScrollEdge,
-        ResetScrollTo, ResetScrollEdge,
-        GetScrollEnablePaging, SetScrollEnablePaging, ResetScrollEnablePaging,
-        GetScrollNestedScroll,
-        GetScrollOffset,
-        GetScrollEdge,
-        SetScrollInitialOffset, ResetScrollInitialOffset,
-        SetScrollFlingSpeedLimit, ResetScrollFlingSpeedLimit,
-        SetScrollPage,
-        SetScrollBy,
-        GetScroll,
-        SetScrollBarProxy, SetScrollToIndex,
-        SetScrollOnScrollStart, ResetScrollOnScrollStart,
-        SetScrollOnScrollEnd, ResetScrollOnScrollEnd,
-        SetScrollOnScrollStop, ResetScrollOnScrollStop,
-        SetScrollOnScroll, ResetScrollOnScroll,
-        SetScrollOnScrollEdge, ResetScrollOnScrollEdge,
-        SetScrollOnDidScrollCallBack, ResetScrollOnDidScroll,
-        SetScrollOnWillScrollCallBack, ResetScrollOnWillScrollCallBack,
-        SetOnScrollFrameBeginCallBack, ResetOnScrollFrameBeginCallBack,
-        SetScrollFadingEdge,
-        ResetScrollFadingEdge,
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIScrollModifier modifier = {
+        .setScrollNestedScroll = SetScrollNestedScroll,
+        .resetScrollNestedScroll = ResetScrollNestedScroll,
+        .getScrollEnableScroll = GetScrollEnableScroll,
+        .setScrollEnableScroll = SetScrollEnableScroll,
+        .resetScrollEnableScroll = ResetScrollEnableScroll,
+        .getScrollFriction = GetScrollFriction,
+        .setScrollFriction = SetScrollFriction,
+        .resetScrollFriction = ResetScrollFriction,
+        .getScrollScrollSnap = GetScrollScrollSnap,
+        .setScrollScrollSnap = SetScrollScrollSnap,
+        .resetScrollScrollSnap = ResetScrollScrollSnap,
+        .getScrollScrollBar = GetScrollScrollBar,
+        .setScrollScrollBar = SetScrollScrollBar,
+        .resetScrollScrollBar = ResetScrollScrollBar,
+        .getScrollScrollable = GetScrollScrollable,
+        .setScrollScrollable = SetScrollScrollable,
+        .resetScrollScrollable = ResetScrollScrollable,
+        .getScrollScrollBarColor = GetScrollScrollBarColor,
+        .setScrollScrollBarColor = SetScrollScrollBarColor,
+        .resetScrollScrollBarColor = ResetScrollScrollBarColor,
+        .getScrollScrollBarWidth = GetScrollScrollBarWidth,
+        .setScrollScrollBarWidth = SetScrollScrollBarWidth,
+        .resetScrollScrollBarWidth = ResetScrollScrollBarWidth,
+        .getScrollEdgeEffect = GetScrollEdgeEffect,
+        .setScrollEdgeEffect = SetScrollEdgeEffect,
+        .resetScrollEdgeEffect = ResetScrollEdgeEffect,
+        .getEnableScrollInteraction = GetEnableScrollInteraction,
+        .setEnableScrollInteraction = SetEnableScrollInteraction,
+        .resetEnableScrollInteraction = ResetEnableScrollInteraction,
+        .setScrollTo = SetScrollTo,
+        .setScrollEdge = SetScrollEdge,
+        .resetScrollTo = ResetScrollTo,
+        .resetScrollEdge = ResetScrollEdge,
+        .getScrollEnablePaging = GetScrollEnablePaging,
+        .setScrollEnablePaging = SetScrollEnablePaging,
+        .resetScrollEnablePaging = ResetScrollEnablePaging,
+        .getScrollNestedScroll = GetScrollNestedScroll,
+        .getScrollOffset = GetScrollOffset,
+        .getScrollEdge = GetScrollEdge,
+        .setScrollInitialOffset = SetScrollInitialOffset,
+        .resetScrollInitialOffset = ResetScrollInitialOffset,
+        .setScrollPage = SetScrollPage,
+        .setScrollBy = SetScrollBy,
+        .getScroll = GetScroll,
+        .setScrollBarProxy = SetScrollBarProxy,
+        .setScrollToIndex = SetScrollToIndex,
+        .setScrollOnScrollStart = SetScrollOnScrollStart,
+        .resetScrollOnScrollStart = ResetScrollOnScrollStart,
+        .setScrollOnScrollEnd = SetScrollOnScrollEnd,
+        .resetScrollOnScrollEnd = ResetScrollOnScrollEnd,
+        .setScrollOnScrollStop = SetScrollOnScrollStop,
+        .resetScrollOnScrollStop = ResetScrollOnScrollStop,
+        .setScrollOnScroll = SetScrollOnScroll,
+        .resetScrollOnScroll = ResetScrollOnScroll,
+        .setScrollOnScrollEdge = SetScrollOnScrollEdge,
+        .resetScrollOnScrollEdge = ResetScrollOnScrollEdge,
+        .setScrollOnDidScrollCallBack = SetScrollOnDidScrollCallBack,
+        .resetScrollOnDidScroll = ResetScrollOnDidScroll,
+        .setScrollOnWillScrollCallBack = SetScrollOnWillScrollCallBack,
+        .resetScrollOnWillScrollCallBack = ResetScrollOnWillScrollCallBack,
+        .setOnScrollFrameBeginCallBack = SetOnScrollFrameBeginCallBack,
+        .resetOnScrollFrameBeginCallBack = ResetOnScrollFrameBeginCallBack,
+        .setScrollFadingEdge = SetScrollFadingEdge,
+        .resetScrollFadingEdge = ResetScrollFadingEdge,
+        .getScrollFadingEdge = GetScrollFadingEdge,
+        .setScrollFling = SetScrollFling,
+        .getScrollContentSize = GetScrollContentSize,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     /* clang-format on */
     return &modifier;
 }
 
 const CJUIScrollModifier* GetCJUIScrollModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIScrollModifier modifier = {
-        SetScrollNestedScroll,
-        ResetScrollNestedScroll,
-        GetScrollEnableScroll,
-        SetScrollEnableScroll,
-        ResetScrollEnableScroll,
-        GetScrollFriction,
-        SetScrollFriction,
-        ResetScrollFriction,
-        GetScrollScrollSnap,
-        SetScrollScrollSnap,
-        ResetScrollScrollSnap,
-        GetScrollScrollBar,
-        SetScrollScrollBar,
-        ResetScrollScrollBar,
-        GetScrollScrollable,
-        SetScrollScrollable,
-        ResetScrollScrollable,
-        GetScrollScrollBarColor,
-        SetScrollScrollBarColor,
-        ResetScrollScrollBarColor,
-        GetScrollScrollBarWidth,
-        SetScrollScrollBarWidth,
-        ResetScrollScrollBarWidth,
-        GetScrollEdgeEffect,
-        SetScrollEdgeEffect,
-        ResetScrollEdgeEffect,
-        GetEnableScrollInteraction,
-        SetEnableScrollInteraction,
-        ResetEnableScrollInteraction,
-        SetScrollTo,
-        SetScrollEdge,
-        ResetScrollTo,
-        ResetScrollEdge,
-        GetScrollEnablePaging,
-        SetScrollEnablePaging,
-        ResetScrollEnablePaging,
-        GetScrollNestedScroll,
-        GetScrollOffset,
-        GetScrollEdge,
-        SetScrollInitialOffset,
-        ResetScrollInitialOffset,
-        SetScrollFlingSpeedLimit,
-        ResetScrollFlingSpeedLimit,
-        SetScrollPage,
-        SetScrollBy,
-        GetScroll,
-        SetScrollBarProxy, SetScrollToIndex,
+        .setScrollNestedScroll = SetScrollNestedScroll,
+        .resetScrollNestedScroll = ResetScrollNestedScroll,
+        .getScrollEnableScroll = GetScrollEnableScroll,
+        .setScrollEnableScroll = SetScrollEnableScroll,
+        .resetScrollEnableScroll = ResetScrollEnableScroll,
+        .getScrollFriction = GetScrollFriction,
+        .setScrollFriction = SetScrollFriction,
+        .resetScrollFriction = ResetScrollFriction,
+        .getScrollScrollSnap = GetScrollScrollSnap,
+        .setScrollScrollSnap = SetScrollScrollSnap,
+        .resetScrollScrollSnap = ResetScrollScrollSnap,
+        .getScrollScrollBar = GetScrollScrollBar,
+        .setScrollScrollBar = SetScrollScrollBar,
+        .resetScrollScrollBar = ResetScrollScrollBar,
+        .getScrollScrollable = GetScrollScrollable,
+        .setScrollScrollable = SetScrollScrollable,
+        .resetScrollScrollable = ResetScrollScrollable,
+        .getScrollScrollBarColor = GetScrollScrollBarColor,
+        .setScrollScrollBarColor = SetScrollScrollBarColor,
+        .resetScrollScrollBarColor = ResetScrollScrollBarColor,
+        .getScrollScrollBarWidth = GetScrollScrollBarWidth,
+        .setScrollScrollBarWidth = SetScrollScrollBarWidth,
+        .resetScrollScrollBarWidth = ResetScrollScrollBarWidth,
+        .getScrollEdgeEffect = GetScrollEdgeEffect,
+        .setScrollEdgeEffect = SetScrollEdgeEffect,
+        .resetScrollEdgeEffect = ResetScrollEdgeEffect,
+        .getEnableScrollInteraction = GetEnableScrollInteraction,
+        .setEnableScrollInteraction = SetEnableScrollInteraction,
+        .resetEnableScrollInteraction = ResetEnableScrollInteraction,
+        .setScrollTo = SetScrollTo,
+        .setScrollEdge = SetScrollEdge,
+        .resetScrollTo = ResetScrollTo,
+        .resetScrollEdge = ResetScrollEdge,
+        .getScrollEnablePaging = GetScrollEnablePaging,
+        .setScrollEnablePaging = SetScrollEnablePaging,
+        .resetScrollEnablePaging = ResetScrollEnablePaging,
+        .getScrollNestedScroll = GetScrollNestedScroll,
+        .getScrollOffset = GetScrollOffset,
+        .getScrollEdge = GetScrollEdge,
+        .setScrollInitialOffset = SetScrollInitialOffset,
+        .resetScrollInitialOffset = ResetScrollInitialOffset,
+        .setScrollFlingSpeedLimit = SetScrollFlingSpeedLimit,
+        .resetScrollFlingSpeedLimit = ResetScrollFlingSpeedLimit,
+        .setScrollPage = SetScrollPage,
+        .setScrollBy = SetScrollBy,
+        .getScroll = GetScroll,
+        .setScrollBarProxy = SetScrollBarProxy,
+        .setScrollToIndex = SetScrollToIndex,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
@@ -655,7 +722,7 @@ void SetOnScroll(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.subKind = ON_SCROLL;
         event.componentAsyncEvent.data[0].f32 = static_cast<float>(scrollX.Value());
         event.componentAsyncEvent.data[1].f32 = static_cast<float>(scrollY.Value());
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ScrollModelNG::SetOnScroll(frameNode, std::move(onScroll));
 }
@@ -674,7 +741,7 @@ void SetOnScrollFrameBegin(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.subKind = ON_SCROLL_FRAME_BEGIN;
         event.componentAsyncEvent.data[0].f32 = static_cast<float>(offset.Value());
         event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         scrollRes.offset = Dimension(event.componentAsyncEvent.data[0].f32, DimensionUnit::VP);
         return scrollRes;
     };
@@ -703,7 +770,7 @@ void SetScrollOnWillScroll(ArkUINodeHandle node, void* extraParam)
         }
         event.componentAsyncEvent.data[2].i32 = static_cast<int>(state);
         event.componentAsyncEvent.data[3].i32 = static_cast<int>(source);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         if (usePx) {
             scrollRes.xOffset = Dimension(event.componentAsyncEvent.data[0].f32, DimensionUnit::PX);
             scrollRes.yOffset = Dimension(event.componentAsyncEvent.data[1].f32, DimensionUnit::PX);
@@ -737,7 +804,7 @@ void SetScrollOnDidScroll(ArkUINodeHandle node, void* extraParam)
             event.componentAsyncEvent.data[1].f32 = static_cast<float>(yOffset.Value());
         }
         event.componentAsyncEvent.data[2].i32 = static_cast<int>(state);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ScrollModelNG::SetOnDidScroll(frameNode, std::move(onDidScroll));
 }
@@ -752,7 +819,7 @@ void SetOnScrollStart(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_SCROLL_START;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ScrollModelNG::SetOnScrollStart(frameNode, std::move(onScrollStart));
 }
@@ -767,7 +834,7 @@ void SetOnScrollStop(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_SCROLL_STOP;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ScrollModelNG::SetOnScrollStop(frameNode, std::move(onScrollStop));
 }
@@ -782,7 +849,7 @@ void SetOnScrollEdge(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.data[0].i32 = static_cast<int>(edge);
         event.componentAsyncEvent.subKind = ON_SCROLL_EDGE;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ScrollModelNG::SetOnScrollEdge(frameNode, std::move(onScroll));
 }
@@ -796,7 +863,7 @@ void SetOnScrollReachStart(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_SCROLL_REACH_START;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ScrollModelNG::SetOnReachStart(frameNode, std::move(onReachStart));
 }
@@ -810,7 +877,7 @@ void SetOnScrollReachEnd(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_SCROLL_REACH_END;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ScrollModelNG::SetOnReachEnd(frameNode, std::move(onReachEnd));
 }

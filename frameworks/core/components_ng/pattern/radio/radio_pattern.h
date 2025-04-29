@@ -20,6 +20,7 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/overlay/group_manager.h"
 #include "core/components_ng/pattern/radio/radio_accessibility_property.h"
 #include "core/components_ng/pattern/radio/radio_event_hub.h"
 #include "core/components_ng/pattern/radio/radio_layout_algorithm.h"
@@ -70,6 +71,7 @@ public:
         paintMethod->SetIsFirstCreated(isFirstCreated_);
         paintMethod->SetShowHoverEffect(showHoverEffect_);
         isFirstCreated_ = false;
+        paintMethod->SetIsUserSetUncheckBorderColor(isUserSetUncheckBorderColor_);
         return paintMethod;
     }
 
@@ -145,7 +147,7 @@ public:
         }
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto radioEventHub = host->GetEventHub<NG::RadioEventHub>();
+        auto radioEventHub = host->GetOrCreateEventHub<NG::RadioEventHub>();
         auto value = radioEventHub ? radioEventHub->GetValue() : "";
         auto group = radioEventHub ? radioEventHub->GetGroup() : "";
         json->PutExtAttr("value", value.c_str(), filter);
@@ -171,6 +173,13 @@ public:
 
     void SetRadioChecked(bool check);
     RefPtr<GroupManager> GetGroupManager();
+
+    void SetIsUserSetUncheckBorderColor(bool isUserSet)
+    {
+        isUserSetUncheckBorderColor_ = isUserSet;
+    }
+
+    void DumpInfo() override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -204,10 +213,17 @@ private:
     void SetAccessibilityAction();
     void UpdateSelectStatus(bool isSelected);
     void FireBuilder();
+    bool OnKeyEvent(const KeyEvent& event);
 
     void ImageNodeCreate();
     void startEnterAnimation();
     void startExitAnimation();
+    void InitFocusEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     ImageSourceInfo GetImageSourceInfoFromTheme(int32_t RadioIndicator);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
     void SetPrePageIdToLastPageId();
@@ -246,8 +262,10 @@ private:
     bool enabled_ = true;
     std::optional<RadioMakeCallback> makeFunc_;
     RefPtr<RadioModifier> radioModifier_;
-    bool isTouchPreventDefault_ = false;
+    bool focusEventInitialized_ = false;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
+    bool isUserSetUncheckBorderColor_ = false;
 };
 } // namespace OHOS::Ace::NG
 

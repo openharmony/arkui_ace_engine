@@ -21,49 +21,65 @@
 #include "core/components_ng/pattern/linear_indicator/linear_indicator_theme.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
-void SetLinearIndicatorIndicatorStyleSpace(ArkUINodeHandle node, ArkUI_Float32 space)
+void SetLinearIndicatorIndicatorStyleSpace(ArkUINodeHandle node, ArkUI_Float32 space, ArkUI_Int32 unit)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    LinearIndicatorModelNG::SetIndicatorStyleSpace(frameNode, Dimension(space));
+    LinearIndicatorModelNG::SetIndicatorStyleSpace(
+        frameNode, CalcDimension(space, static_cast<OHOS::Ace::DimensionUnit>(unit)));
 }
 
 void ResetLinearIndicatorIndicatorStyleSpace(ArkUINodeHandle node)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    LinearIndicatorModelNG::SetIndicatorStyleSpace(frameNode, Dimension(.0f));
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto linearIndicatorTheme = pipeline->GetTheme<LinearIndicatorTheme>();
+    CHECK_NULL_VOID(linearIndicatorTheme);
+    LinearIndicatorModelNG::SetIndicatorStyleSpace(frameNode, linearIndicatorTheme->GetDefaultSpace());
 }
 
-void SetLinearIndicatorIndicatorStyleStrokeWidth(ArkUINodeHandle node, ArkUI_Float32 strokeWidth)
+void SetLinearIndicatorIndicatorStyleStrokeWidth(ArkUINodeHandle node, ArkUI_Float32 strokeWidth, ArkUI_Int32 unit)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    LinearIndicatorModelNG::SetIndicatorStyleStrokeWidth(frameNode, Dimension(strokeWidth));
+    LinearIndicatorModelNG::SetIndicatorStyleStrokeWidth(
+        frameNode, CalcDimension(strokeWidth, static_cast<OHOS::Ace::DimensionUnit>(unit)));
 }
 
 void ResetLinearIndicatorIndicatorStyleStrokeWidth(ArkUINodeHandle node)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    LinearIndicatorModelNG::SetIndicatorStyleStrokeWidth(frameNode, Dimension(.0f));
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto linearIndicatorTheme = pipeline->GetTheme<LinearIndicatorTheme>();
+    CHECK_NULL_VOID(linearIndicatorTheme);
+    LinearIndicatorModelNG::SetIndicatorStyleStrokeWidth(frameNode, linearIndicatorTheme->GetDefaultStrokeWidth());
 }
 
-void SetLinearIndicatorIndicatorStyleStrokeRadius(ArkUINodeHandle node, ArkUI_Float32 strokeRadius)
+void SetLinearIndicatorIndicatorStyleStrokeRadius(ArkUINodeHandle node, ArkUI_Float32 strokeRadius, ArkUI_Int32 unit)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    LinearIndicatorModelNG::SetIndicatorStyleStrokeWidth(frameNode, Dimension(strokeRadius));
+    LinearIndicatorModelNG::SetIndicatorStyleStrokeRadius(
+        frameNode, CalcDimension(strokeRadius, static_cast<OHOS::Ace::DimensionUnit>(unit)));
 }
 
 void ResetLinearIndicatorIndicatorStyleStrokeRadius(ArkUINodeHandle node)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    LinearIndicatorModelNG::SetIndicatorStyleStrokeWidth(frameNode, Dimension(.0f));
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto linearIndicatorTheme = pipeline->GetTheme<LinearIndicatorTheme>();
+    CHECK_NULL_VOID(linearIndicatorTheme);
+    LinearIndicatorModelNG::SetIndicatorStyleStrokeRadius(frameNode, linearIndicatorTheme->GetDefaultStrokeRadius());
 }
 
 void SetLinearIndicatorIndicatorStyleTrackBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 trackBackgroundColor)
@@ -77,7 +93,12 @@ void ResetLinearIndicatorIndicatorStyleTrackBackgroundColor(ArkUINodeHandle node
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    LinearIndicatorModelNG::SetIndicatorStyleTrackBackgroundColor(frameNode, Color(0));
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto linearIndicatorTheme = pipeline->GetTheme<LinearIndicatorTheme>();
+    CHECK_NULL_VOID(linearIndicatorTheme);
+    Color color = linearIndicatorTheme->GetTrackBackgroundColor();
+    LinearIndicatorModelNG::SetIndicatorStyleTrackBackgroundColor(frameNode, color);
 }
 
 void SetLinearIndicatorIndicatorStyleTrackColor(ArkUINodeHandle node, ArkUI_Uint32 trackColor)
@@ -91,7 +112,12 @@ void ResetLinearIndicatorIndicatorStyleTrackColor(ArkUINodeHandle node)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    LinearIndicatorModelNG::SetIndicatorStyleTrackColor(frameNode, Color(0));
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto linearIndicatorTheme = pipeline->GetTheme<LinearIndicatorTheme>();
+    CHECK_NULL_VOID(linearIndicatorTheme);
+    Color color = linearIndicatorTheme->GetTrackColor();
+    LinearIndicatorModelNG::SetIndicatorStyleTrackColor(frameNode, color);
 }
 
 void SetLinearIndicatorIndicatorLoop(ArkUINodeHandle node, ArkUI_Bool value)
@@ -105,7 +131,11 @@ void ResetLinearIndicatorIndicatorLoop(ArkUINodeHandle node)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    LinearIndicatorModelNG::SetLoop(frameNode, true);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto linearIndicatorTheme = pipeline->GetTheme<LinearIndicatorTheme>();
+    CHECK_NULL_VOID(linearIndicatorTheme);
+    LinearIndicatorModelNG::SetLoop(frameNode, linearIndicatorTheme->GetDefaultLoop());
 }
 
 void SetLinearIndicatorOnChange(ArkUINodeHandle node, void* callback)
@@ -130,13 +160,24 @@ void ResetLinearIndicatorOnChange(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUILinearIndicatorModifier* GetLinearIndicatorModifier()
 {
-    static const ArkUILinearIndicatorModifier modifier = { SetLinearIndicatorIndicatorStyleSpace,
-        ResetLinearIndicatorIndicatorStyleSpace, SetLinearIndicatorIndicatorStyleStrokeWidth,
-        ResetLinearIndicatorIndicatorStyleStrokeWidth, SetLinearIndicatorIndicatorStyleStrokeRadius,
-        ResetLinearIndicatorIndicatorStyleStrokeRadius, SetLinearIndicatorIndicatorStyleTrackBackgroundColor,
-        ResetLinearIndicatorIndicatorStyleTrackBackgroundColor, SetLinearIndicatorIndicatorStyleTrackColor,
-        ResetLinearIndicatorIndicatorStyleTrackColor, SetLinearIndicatorIndicatorLoop,
-        ResetLinearIndicatorIndicatorLoop, SetLinearIndicatorOnChange, ResetLinearIndicatorOnChange };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUILinearIndicatorModifier modifier = {
+        .setLinearIndicatorIndicatorStyleSpace = SetLinearIndicatorIndicatorStyleSpace,
+        .resetLinearIndicatorIndicatorStyleSpace = ResetLinearIndicatorIndicatorStyleSpace,
+        .setLinearIndicatorIndicatorStyleStrokeWidth = SetLinearIndicatorIndicatorStyleStrokeWidth,
+        .resetLinearIndicatorIndicatorStyleStrokeWidth = ResetLinearIndicatorIndicatorStyleStrokeWidth,
+        .setLinearIndicatorIndicatorStyleStrokeRadius = SetLinearIndicatorIndicatorStyleStrokeRadius,
+        .resetLinearIndicatorIndicatorStyleStrokeRadius = ResetLinearIndicatorIndicatorStyleStrokeRadius,
+        .setLinearIndicatorIndicatorStyleTrackBackgroundColor = SetLinearIndicatorIndicatorStyleTrackBackgroundColor,
+        .resetLinearIndicatorIndicatorStyleTrackBackgroundColor = ResetLinearIndicatorIndicatorStyleTrackBackgroundColor,
+        .setLinearIndicatorIndicatorStyleTrackColor = SetLinearIndicatorIndicatorStyleTrackColor,
+        .resetLinearIndicatorIndicatorStyleTrackColor = ResetLinearIndicatorIndicatorStyleTrackColor,
+        .setLinearIndicatorIndicatorLoop = SetLinearIndicatorIndicatorLoop,
+        .resetLinearIndicatorIndicatorLoop = ResetLinearIndicatorIndicatorLoop,
+        .setLinearIndicatorOnChange = SetLinearIndicatorOnChange,
+        .resetLinearIndicatorOnChange = ResetLinearIndicatorOnChange
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 } // namespace NodeModifier

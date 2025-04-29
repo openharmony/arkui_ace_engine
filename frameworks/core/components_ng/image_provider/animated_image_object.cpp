@@ -13,29 +13,21 @@
  * limitations under the License.
  */
 #include "core/components_ng/image_provider/animated_image_object.h"
-
-#ifndef USE_ROSEN_DRAWING
-#include "core/components_ng/image_provider/adapter/skia_image_data.h"
-#else
-#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
-#endif
+#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "frameworks/core/components_ng/render/adapter/animated_image.h"
 
 namespace OHOS::Ace::NG {
 void AnimatedImageObject::MakeCanvasImage(
-    const RefPtr<ImageLoadingContext>& ctx, const SizeF& size, bool forceResize, bool /*syncLoad*/)
+    const WeakPtr<ImageLoadingContext>& ctxWp, const SizeF& size, bool forceResize, bool /*syncLoad*/)
 {
+    auto ctx = ctxWp.Upgrade();
+    CHECK_NULL_VOID(ctx);
     AnimatedImage::ResizeParam params { .width = size.Width(),
         .height = size.Height(),
         .forceResize = forceResize,
         .imageQuality = ctx->GetImageQuality() };
-
-#ifndef USE_ROSEN_DRAWING
-    auto image = AnimatedImage::Create(DynamicCast<SkiaImageData>(data_), params, src_.GetSrc());
-#else
-    auto image = AnimatedImage::Create(DynamicCast<DrawingImageData>(data_), params, src_.GetSrc());
-#endif
+    auto image = AnimatedImage::Create(DynamicCast<DrawingImageData>(data_), params, src_.GetKey());
     CHECK_NULL_VOID(ctx);
     if (!image) {
         ctx->FailCallback("failed to create animated image");

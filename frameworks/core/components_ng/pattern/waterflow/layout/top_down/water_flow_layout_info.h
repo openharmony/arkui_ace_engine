@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,7 +61,7 @@ public:
     int32_t GetEndIndexByOffset(float offset) const;
     float GetMaxMainHeight() const;
     float GetContentHeight() const override;
-    float EstimateContentHeight() const;
+    float EstimateTotalHeight() const override;
     bool IsAllCrossReachEnd(float mainSize) const;
 
     /**
@@ -72,22 +72,32 @@ public:
      */
     FlowItemIndex GetCrossIndexForNextItem(int32_t segmentIdx) const;
 
+    bool IsAtTopWithDelta() override;
+    bool IsAtBottomWithDelta() override;
+    
     float GetMainHeight(int32_t crossIndex, int32_t itemIndex) const;
     float GetStartMainPos(int32_t crossIndex, int32_t itemIndex) const;
     void Reset() override;
     void Reset(int32_t resetFrom);
+    void ResetFooter() override;
     int32_t GetCrossCount() const override;
     int32_t GetMainCount() const override;
     void ClearCacheAfterIndex(int32_t currentIndex);
 
     bool ReachStart(float prevOffset, bool firstLayout) const override;
-    bool ReachEnd(float prevOffset) const override;
+    bool ReachEnd(float prevOffset, bool firstLayout) const override;
     bool OutOfBounds() const override;
 
     OverScrollOffset GetOverScrolledDelta(float delta) const override;
     float CalcOverScroll(float mainSize, float delta) const override;
 
     void UpdateOffset(float delta) override;
+
+    float CalibrateOffset() override
+    {
+        /* offset always accurate */
+        return 0.0f;
+    }
 
     float CalcTargetPosition(int32_t idx, int32_t crossIdx) const override;
 
@@ -168,7 +178,7 @@ public:
      * @param mainSize waterFlow length on the main axis.
      * @param overScroll whether overScroll is allowed. Might adjust offset if not.
      */
-    void Sync(float mainSize, bool overScroll);
+    void Sync(float mainSize, bool canOverScrollStart_, bool canOverScrollEnd_);
 
     /**
      * @brief Obtain index of last item recorded in Original layout.
@@ -177,14 +187,12 @@ public:
     int32_t GetLastItem() const;
 
     void NotifyDataChange(int32_t index, int32_t count) override {};
+    void NotifySectionChange(int32_t index) override {};
     void InitSegmentsForKeepPositionMode(const std::vector<WaterFlowSections::Section>& sections,
         const std::vector<WaterFlowSections::Section>& prevSections, int32_t start) override
     {}
 
-    int32_t childrenCount_ = 0;
-
     float currentOffset_ = 0.0f;
-    float prevOffset_ = 0.0f;
     // 0.0f until itemEnd_ is true
     float maxHeight_ = 0.0f;
 
@@ -211,6 +219,15 @@ public:
     std::vector<float> segmentStartPos_ = { 0.0f };
 
     void PrintWaterFlowItems() const;
+
+private:
+    inline float TopMargin() const
+    {
+        if (margins_.empty()) {
+            return 0.0f;
+        }
+        return (axis_ == Axis::VERTICAL ? margins_.front().top : margins_.front().left).value_or(0.0f);
+    }
 };
 
 struct WaterFlowLayoutInfo::ItemInfo {

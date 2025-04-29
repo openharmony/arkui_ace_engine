@@ -13,39 +13,22 @@
  * limitations under the License.
  */
 
-#include <functional>
-#include <memory>
-#include <optional>
-
-#include "gtest/gtest.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
 
-#include "base/json/json_util.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/layout/layout_property.h"
-#define private public
-#define protected public
+#include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
-#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/symbol_span_model_ng.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#undef private
-#undef protected
-#include "core/components_ng/pattern/image/image_model_ng.h"
-#include "frameworks/core/components_ng/pattern/image/image_layout_property.h"
-#include "frameworks/core/common/ai/data_detector_mgr.h"
-
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const InspectorFilter filter;
 const std::string CREATE_VALUE = "Hello World";
+const std::u16string CREATE_VALUE_W = u"Hello World";
 const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
 const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
 const Ace::FontStyle ITALIC_FONT_STYLE_VALUE = Ace::FontStyle::ITALIC;
@@ -59,11 +42,12 @@ const Ace::TextCase TEXT_CASE_VALUE = Ace::TextCase::LOWERCASE;
 const Dimension LETTER_SPACING = Dimension(10, DimensionUnit::PX);
 void onClickFunc(const BaseEventInfo* info) {};
 const std::string FONT_SIZE = "fontSize";
-const std::string FONT_DEFAULT_VALUE = "{\"style\":\"FontStyle.Normal\",\"size\":\"16.00fp\",\"weight\":"
+const std::string FONT_DEFAULT_VALUE = "{\"style\":\"FontStyle.Normal\",\"size\":\"14.00px\",\"weight\":"
                                        "\"FontWeight.Normal\",\"family\":\"HarmonyOS Sans\"}";
 const std::string FONT_EQUALS_VALUE =
     R"({"style":"FontStyle.Italic","size":"20.10px","weight":"FontWeight.Bold","family":"cursive"})";
 const std::string TEXT_FOR_AI = "phone: 12345678900,url: www.baidu.com";
+const std::u16string U16TEXT_FOR_AI = u"phone: 12345678900,url: www.baidu.com";
 const std::string SPAN_PHONE = "12345678900";
 const std::string SPAN_URL = "www.baidu.com";
 constexpr int32_t AI_SPAN_START = 7;
@@ -86,10 +70,27 @@ constexpr double IMAGE_SOURCESIZE_WIDTH = 300.0;
 constexpr double IMAGE_SOURCESIZE_HEIGHT = 200.0;
 constexpr double WIDTH = 400.0;
 constexpr double HEIGHT = 500.0;
-const std::string IMAGE_ICON = "app.media.icon";
+const std::string SYMBOL_SPAN_FONT_FAMILY = "Symbol Test";
 } // namespace
 
-class SpanTestNg : public testing::Test {};
+class SpanTestNg : public testing::Test {
+    public:
+        void SetUp() override;
+        void TearDown() override;
+};
+    
+void SpanTestNg::SetUp()
+{
+    MockPipelineContext::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+}
+
+void SpanTestNg::TearDown()
+{
+    MockPipelineContext::TearDown();
+}
 
 class TestNode : public UINode {
     DECLARE_ACE_TYPE(TestNode, UINode);
@@ -118,7 +119,7 @@ public:
 HWTEST_F(SpanTestNg, SpanFrameNodeCreator001, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     spanModelNG.SetFontSize(FONT_SIZE_VALUE);
     spanModelNG.SetTextColor(TEXT_COLOR_VALUE);
@@ -163,10 +164,10 @@ HWTEST_F(SpanTestNg, SpanFrameNodeCreator001, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanItemToJsonValue001, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     auto json = std::make_unique<JsonValue>();
-    spanNode->spanItem_->content = "";
+    spanNode->spanItem_->content = u"";
     spanNode->spanItem_->fontStyle = nullptr;
     spanNode->spanItem_->ToJsonValue(json, filter);
     bool ret = json->Contains(FONT_SIZE);
@@ -182,10 +183,10 @@ HWTEST_F(SpanTestNg, SpanItemToJsonValue001, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanItemToJsonValue002, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     auto json = std::make_unique<JsonValue>();
-    spanNode->spanItem_->content = "";
+    spanNode->spanItem_->content = u"";
     spanNode->spanItem_->fontStyle = std::make_unique<FontStyle>();
     spanNode->spanItem_->ToJsonValue(json, filter);
     bool ret = json->Contains(FONT_SIZE);
@@ -201,7 +202,7 @@ HWTEST_F(SpanTestNg, SpanItemToJsonValue002, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanNodeGetOrCreateSpanNode001, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     auto node = spanNode->GetOrCreateSpanNode(-1);
     ASSERT_NE(node, nullptr);
@@ -215,7 +216,7 @@ HWTEST_F(SpanTestNg, SpanNodeGetOrCreateSpanNode001, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanNodeGetOrCreateSpanNode002, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     auto node = spanNode->GetOrCreateSpanNode(1);
     ASSERT_NE(node, nullptr);
@@ -231,7 +232,7 @@ HWTEST_F(SpanTestNg, SpanNodeGetOrCreateSpanNode002, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanNodeGetOrCreateSpanNode003, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     auto node = AceType::MakeRefPtr<SpanNode>(1);
     ElementRegister::GetInstance()->AddUINode(node);
@@ -247,7 +248,7 @@ HWTEST_F(SpanTestNg, SpanNodeGetOrCreateSpanNode003, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanNodeMountToParagraph001, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     spanNode->SetParent(nullptr);
     spanNode->MountToParagraph();
@@ -262,7 +263,7 @@ HWTEST_F(SpanTestNg, SpanNodeMountToParagraph001, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanNodeMountToParagraph002, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     auto node = AceType::MakeRefPtr<SpanNode>(1);
     spanNode->SetParent(node);
@@ -278,7 +279,7 @@ HWTEST_F(SpanTestNg, SpanNodeMountToParagraph002, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanNodeMountToParagraph003, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     auto pattern = AceType::MakeRefPtr<Pattern>();
     auto node = FrameNode::CreateFrameNode("Test", 1, pattern);
@@ -295,7 +296,7 @@ HWTEST_F(SpanTestNg, SpanNodeMountToParagraph003, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanNodeMountToParagraph004, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto node = FrameNode::CreateFrameNode("Test", 1, pattern);
@@ -312,7 +313,7 @@ HWTEST_F(SpanTestNg, SpanNodeMountToParagraph004, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanNodeMountToParagraph005, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     auto node = TestNode::CreateTestNode(1);
     spanNode->SetParent(node);
@@ -328,7 +329,7 @@ HWTEST_F(SpanTestNg, SpanNodeMountToParagraph005, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanNodeRequestTextFlushDirty001, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     spanNode->SetParent(nullptr);
     spanNode->RequestTextFlushDirty();
@@ -343,7 +344,7 @@ HWTEST_F(SpanTestNg, SpanNodeRequestTextFlushDirty001, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanNodeRequestTextFlushDirty002, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     auto node = AceType::MakeRefPtr<SpanNode>(1);
     spanNode->SetParent(node);
@@ -359,7 +360,7 @@ HWTEST_F(SpanTestNg, SpanNodeRequestTextFlushDirty002, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanNodeRequestTextFlushDirty003, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     auto pattern = AceType::MakeRefPtr<Pattern>();
     auto node = FrameNode::CreateFrameNode("Test", 1, pattern);
@@ -376,7 +377,7 @@ HWTEST_F(SpanTestNg, SpanNodeRequestTextFlushDirty003, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanNodeRequestTextFlushDirty004, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto node = FrameNode::CreateFrameNode("Test", 1, pattern);
@@ -393,7 +394,7 @@ HWTEST_F(SpanTestNg, SpanNodeRequestTextFlushDirty004, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanNodeRequestTextFlushDirty005, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     auto node = TestNode::CreateTestNode(1);
     spanNode->SetParent(node);
@@ -409,10 +410,10 @@ HWTEST_F(SpanTestNg, SpanNodeRequestTextFlushDirty005, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanItemUpdateParagraph001, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     auto json = std::make_unique<JsonValue>();
-    spanNode->spanItem_->content = "";
+    spanNode->spanItem_->content = u"";
     spanNode->spanItem_->fontStyle = std::make_unique<FontStyle>();
     TextStyle textStyle;
     ParagraphStyle paraStyle = { .direction = TextDirection::LTR,
@@ -422,7 +423,7 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph001, TestSize.Level1)
         .wordBreak = textStyle.GetWordBreak(),
         .textOverflow = textStyle.GetTextOverflow() };
     auto paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
-    spanNode->spanItem_->UpdateParagraph(nullptr, paragraph);
+    spanNode->spanItem_->UpdateParagraph(nullptr, paragraph, TextStyle());
     ASSERT_NE(spanNode->spanItem_->fontStyle, nullptr);
 }
 
@@ -434,10 +435,10 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph001, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanItemUpdateParagraph002, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     auto json = std::make_unique<JsonValue>();
-    spanNode->spanItem_->content = "";
+    spanNode->spanItem_->content = u"";
     spanNode->spanItem_->fontStyle = nullptr;
     TextStyle textStyle;
     ParagraphStyle paraStyle = { .direction = TextDirection::LTR,
@@ -447,7 +448,7 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph002, TestSize.Level1)
         .wordBreak = textStyle.GetWordBreak(),
         .textOverflow = textStyle.GetTextOverflow() };
     auto paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
-    spanNode->spanItem_->UpdateParagraph(nullptr, paragraph);
+    spanNode->spanItem_->UpdateParagraph(nullptr, paragraph, TextStyle());
     EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
 }
 
@@ -459,12 +460,12 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph002, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanItemUpdateParagraph003, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     auto json = std::make_unique<JsonValue>();
-    spanNode->spanItem_->content = "";
+    spanNode->spanItem_->content = u"";
     spanNode->spanItem_->fontStyle = nullptr;
-    spanNode->spanItem_->UpdateParagraph(nullptr, nullptr);
+    spanNode->spanItem_->UpdateParagraph(nullptr, nullptr, TextStyle());
     EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
 }
 
@@ -476,10 +477,10 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph003, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanItemUpdateParagraph004, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     auto json = std::make_unique<JsonValue>();
-    spanNode->spanItem_->content = "";
+    spanNode->spanItem_->content = u"";
     spanNode->spanItem_->fontStyle = nullptr;
     RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
     spanNode->spanItem_->children.push_back(spanItem);
@@ -491,7 +492,7 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph004, TestSize.Level1)
         .wordBreak = textStyle.GetWordBreak(),
         .textOverflow = textStyle.GetTextOverflow() };
     auto paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
-    spanNode->spanItem_->UpdateParagraph(nullptr, paragraph);
+    spanNode->spanItem_->UpdateParagraph(nullptr, paragraph, TextStyle());
     EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
 }
 
@@ -502,7 +503,7 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph004, TestSize.Level1)
  */
 HWTEST_F(SpanTestNg, SpanItemUpdateParagraph005, TestSize.Level1)
 {
-    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<ImageSpanItem>();
+    RefPtr<ImageSpanItem> spanItem = AceType::MakeRefPtr<ImageSpanItem>();
     ASSERT_NE(spanItem, nullptr);
     TextStyle textStyle;
     ParagraphStyle paraStyle = { .direction = TextDirection::LTR,
@@ -521,15 +522,20 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph005, TestSize.Level1)
     placeholderStyle.width = 9.0;
     placeholderStyle.height = 10.0;
     placeholderStyle.verticalAlign = VerticalAlign::TOP;
-    auto index = spanItem->UpdateParagraph(nullptr, paragraph, false, placeholderStyle);
+    spanItem->UpdatePlaceholderRun(placeholderStyle);
+    auto index = spanItem->UpdateParagraph(nullptr, paragraph, false);
     placeholderStyle.verticalAlign = VerticalAlign::CENTER;
-    index = spanItem->UpdateParagraph(nullptr, paragraph, false, placeholderStyle);
+    spanItem->UpdatePlaceholderRun(placeholderStyle);
+    index = spanItem->UpdateParagraph(nullptr, paragraph, false);
     placeholderStyle.verticalAlign = VerticalAlign::BOTTOM;
-    index = spanItem->UpdateParagraph(nullptr, paragraph, false, placeholderStyle);
+    spanItem->UpdatePlaceholderRun(placeholderStyle);
+    index = spanItem->UpdateParagraph(nullptr, paragraph, false);
     placeholderStyle.verticalAlign = VerticalAlign::BASELINE;
-    index = spanItem->UpdateParagraph(nullptr, paragraph, false, placeholderStyle);
+    spanItem->UpdatePlaceholderRun(placeholderStyle);
+    index = spanItem->UpdateParagraph(nullptr, paragraph, false);
     placeholderStyle.verticalAlign = VerticalAlign::NONE;
-    index = spanItem->UpdateParagraph(nullptr, paragraph, false, placeholderStyle);
+    spanItem->UpdatePlaceholderRun(placeholderStyle);
+    index = spanItem->UpdateParagraph(nullptr, paragraph, false);
 
     MockParagraph::TearDown();
 }
@@ -566,7 +572,7 @@ HWTEST_F(SpanTestNg, SpanSetBaselineOffsetTest001, TestSize.Level1)
      * @tc.steps: step1. create span node
      */
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
 
     /**
      * @tc.steps: step2. get span node
@@ -623,7 +629,7 @@ HWTEST_F(SpanTestNg, SpanModelSetFont001, TestSize.Level1)
      * @tc.steps: step1. Initialize SpanModelNG
      */
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
 
     /**
      * @tc.steps: step2. Set Font, call SetFont
@@ -657,9 +663,16 @@ HWTEST_F(SpanTestNg, SpanItemGetFont001, TestSize.Level1)
      * @tc.steps: step1. Initialize SpanModelNG and SpanNode
      */
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     ASSERT_NE(spanNode, nullptr);
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<TextPattern>());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    spanNode->spanItem_->SetTextPattern(textPattern);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
     spanModelNG.SetFontWeight(FontWeight::NORMAL);
 
     /**
@@ -680,20 +693,6 @@ HWTEST_F(SpanTestNg, SpanItemGetFont001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SpanDecorationStyleTest001
- * @tc.desc: test span_model_ng.cpp SetTextDecorationStyle
- * @tc.type: FUNC
- */
-HWTEST_F(SpanTestNg, SpanDecorationStyleTest001, TestSize.Level1)
-{
-    SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
-    spanModelNG.SetTextDecorationStyle(Ace::TextDecorationStyle::WAVY);
-    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_EQ(spanNode->GetTextDecorationStyle(), Ace::TextDecorationStyle::WAVY);
-}
-
-/**
  * @tc.name: SpanTextShadowTest002
  * @tc.desc: test span_model_ng.cpp SetTextShadow
  * @tc.type: FUNC
@@ -701,10 +700,23 @@ HWTEST_F(SpanTestNg, SpanDecorationStyleTest001, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanTextShadowTest002, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     spanModelNG.SetTextShadow(TEXT_SHADOWS);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_EQ(spanNode->GetTextShadow(), TEXT_SHADOWS);
+}
+/**
+ * @tc.name: SpanDecorationStyleTest001
+ * @tc.desc: test span_model_ng.cpp SetTextDecorationStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanDecorationStyleTest001, TestSize.Level1)
+{
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE_W);
+    spanModelNG.SetTextDecorationStyle(Ace::TextDecorationStyle::WAVY);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_EQ(spanNode->GetTextDecorationStyle(), Ace::TextDecorationStyle::WAVY);
 }
 
 /**
@@ -715,12 +727,14 @@ HWTEST_F(SpanTestNg, SpanTextShadowTest002, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanDecorationToJsonValue001, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     spanModelNG.SetTextDecoration(TextDecoration::LINE_THROUGH);
     spanModelNG.SetTextDecorationStyle(Ace::TextDecorationStyle::DOUBLE);
     spanModelNG.SetTextDecorationColor(TEXT_DECORATION_COLOR_VALUE);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(spanNode, nullptr);
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    spanNode->spanItem_->SetTextPattern(pattern);
     auto json = JsonUtil::Create(true);
     spanNode->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("content"));
@@ -747,10 +761,14 @@ HWTEST_F(SpanTestNg, SpanDecorationToJsonValue001, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanDecorationToJsonValue002, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     spanModelNG.SetFontSize(FONT_SIZE_VALUE);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(spanNode, nullptr);
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<TextPattern>());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    spanNode->spanItem_->SetTextPattern(textPattern);
     auto json = JsonUtil::Create(true);
     spanNode->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("content"));
@@ -779,9 +797,11 @@ HWTEST_F(SpanTestNg, SpanDecorationToJsonValue002, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanDecorationToJsonValue003, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(spanNode, nullptr);
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    spanNode->spanItem_->SetTextPattern(pattern);
     auto json = JsonUtil::Create(true);
     spanNode->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("content"));
@@ -797,7 +817,7 @@ HWTEST_F(SpanTestNg, SpanDecorationToJsonValue003, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanItemUpdateParagraph006, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     
     auto pattern = AceType::MakeRefPtr<TextPattern>();
@@ -822,7 +842,7 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph006, TestSize.Level1)
     aiSpanMap[AI_SPAN_START] = aiSpan1;
     aiSpanMap[AI_SPAN_START_II] = aiSpan2;
     spanNode->spanItem_->aiSpanMap = aiSpanMap;
-    spanNode->spanItem_->content = TEXT_FOR_AI;
+    spanNode->spanItem_->content = U16TEXT_FOR_AI;
     spanNode->spanItem_->fontStyle = nullptr;
     RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
     spanNode->spanItem_->children.push_back(spanItem);
@@ -834,7 +854,7 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph006, TestSize.Level1)
         .wordBreak = textStyle.GetWordBreak(),
         .textOverflow = textStyle.GetTextOverflow() };
     auto paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
-    spanNode->spanItem_->UpdateParagraph(nullptr, paragraph);
+    spanNode->spanItem_->UpdateParagraph(nullptr, paragraph, TextStyle());
     EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
 }
 
@@ -846,7 +866,7 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph006, TestSize.Level1)
 HWTEST_F(SpanTestNg, UpdateTextStyleForAISpan001, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     
     auto pattern = AceType::MakeRefPtr<TextPattern>();
@@ -872,8 +892,8 @@ HWTEST_F(SpanTestNg, UpdateTextStyleForAISpan001, TestSize.Level1)
     spanNode->spanItem_->aiSpanMap = aiSpanMap;
     spanNode->spanItem_->fontStyle = nullptr;
 
-    std::string spanContent = TEXT_FOR_AI;
-    spanNode->spanItem_->position = StringUtils::ToWstring(spanContent).length();
+    std::u16string spanContent = U16TEXT_FOR_AI;
+    spanNode->spanItem_->position = spanContent.length();
     TextStyle textStyle;
     ParagraphStyle paraStyle = { .direction = TextDirection::LTR,
         .align = textStyle.GetTextAlign(),
@@ -1020,6 +1040,75 @@ HWTEST_F(SpanTestNg, SymbolSpanPropertyTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SymbolSpanPropertyTest004
+ * @tc.desc: Test symbolType and fontFamily of symbolspan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SymbolSpanPropertyTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol span node
+     */
+    SymbolSpanModelNG symbolSpanModelNG;
+    symbolSpanModelNG.Create(SYMBOL_ID);
+
+    /**
+     * @tc.steps: step2. get span node
+     */
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step3. test symbolType and fontFamilies property
+     */
+    symbolSpanModelNG.SetSymbolType(SymbolType::CUSTOM);
+    EXPECT_EQ(spanNode->GetSymbolType(), SymbolType::CUSTOM);
+
+    std::vector<std::string> testFontFamilies;
+    testFontFamilies.push_back(SYMBOL_SPAN_FONT_FAMILY);
+    symbolSpanModelNG.SetFontFamilies(testFontFamilies);
+
+    auto fontFamilies = spanNode->GetFontFamily();
+    ASSERT_NE(fontFamilies->size(), 0);
+    auto familyNameValue = fontFamilies->front();
+    EXPECT_EQ(familyNameValue, SYMBOL_SPAN_FONT_FAMILY);
+}
+
+/**
+ * @tc.name: SymbolSpanPropertyTest005
+ * @tc.desc: Test InitialCustomSymbol of symbolspan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SymbolSpanPropertyTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol span node
+     */
+    auto node = SpanNode::GetOrCreateSpanNode(V2::SYMBOL_SPAN_ETS_TAG, 1);
+
+    auto* frameNode = reinterpret_cast<FrameNode*>(Referenced::RawPtr(node));
+
+    ASSERT_NE(frameNode, nullptr);
+    SymbolSpanModelNG::InitialCustomSymbol(frameNode, SYMBOL_ID, SYMBOL_SPAN_FONT_FAMILY.c_str());
+    
+    /**
+     * @tc.steps: step2. get span node
+     */
+    auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step3. test symbolType and fontFamilies property
+     */
+    EXPECT_EQ(spanNode->GetSymbolType(), SymbolType::CUSTOM);
+
+    auto fontFamilies = spanNode->GetFontFamily();
+    ASSERT_NE(fontFamilies->size(), 0);
+    auto familyNameValue = fontFamilies->front();
+    EXPECT_EQ(familyNameValue, SYMBOL_SPAN_FONT_FAMILY);
+}
+
+/**
  * @tc.name: SymbolSpanCreateTest001
  * @tc.desc: Test render strategy and effect strategy of symbolspan.
  * @tc.type: FUNC
@@ -1066,7 +1155,7 @@ HWTEST_F(SpanTestNg, ImageSpanEventTest001, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
     LoadImageSuccessEvent loadImageSuccessEvent(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT, WIDTH, HEIGHT, 1);
     eventHub->FireCompleteEvent(loadImageSuccessEvent);
@@ -1094,7 +1183,7 @@ HWTEST_F(SpanTestNg, ImageSpanEventTest002, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
     LoadImageFailEvent loadImageFailEvent(WIDTH, HEIGHT, "image load error!");
     eventHub->FireErrorEvent(loadImageFailEvent);
@@ -1112,7 +1201,7 @@ HWTEST_F(SpanTestNg, SpanModelSetFont002, TestSize.Level1)
      * @tc.steps: step1. Initialize SpanModelNG
      */
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     ASSERT_NE(spanNode, nullptr);
     /**
@@ -1121,9 +1210,9 @@ HWTEST_F(SpanTestNg, SpanModelSetFont002, TestSize.Level1)
      */
     Font font;
     std::optional<Dimension> fontSize;
-    UINode* uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode().GetRawPtr();
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     spanModelNG.SetFont(font);
-    spanModelNG.SetFont(uiNode, font);
+    spanModelNG.SetFont(AceType::RawPtr(uiNode), font);
     EXPECT_EQ(spanNode->GetFontSize(), fontSize);
     /**
      * @tc.steps: step3. Set Font, call SetFont
@@ -1133,7 +1222,7 @@ HWTEST_F(SpanTestNg, SpanModelSetFont002, TestSize.Level1)
     font.fontWeight = FontWeight::BOLD;
     font.fontFamilies = FONT_FAMILY_VALUE;
     font.fontStyle = ITALIC_FONT_STYLE_VALUE;
-    spanModelNG.SetFont(uiNode, font);
+    spanModelNG.SetFont(AceType::RawPtr(uiNode), font);
     /**
      * @tc.steps: step4. Gets the relevant properties of the Font
      * @tc.expected: Check the font value
@@ -1152,7 +1241,7 @@ HWTEST_F(SpanTestNg, SpanModelSetFont002, TestSize.Level1)
 HWTEST_F(SpanTestNg, SpanNodeGetOrCreateSpanNode004, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     auto node = spanNode->GetOrCreateSpanNode(V2::SYMBOL_SPAN_ETS_TAG, 1);
     ASSERT_NE(node, nullptr);
@@ -1173,7 +1262,7 @@ HWTEST_F(SpanTestNg, SpanNodeDumpInfo001, TestSize.Level1)
      */
     DumpLog::GetInstance().description_.clear();
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     auto symbolNode = spanNode->GetOrCreateSpanNode(V2::SYMBOL_SPAN_ETS_TAG, 1);
     /**
@@ -1189,7 +1278,7 @@ HWTEST_F(SpanTestNg, SpanNodeDumpInfo001, TestSize.Level1)
      */
     DumpLog::GetInstance().description_.clear();
     textStyle = std::optional<TextStyle>(TextStyle());
-    spanNode->spanItem_->content = "";
+    spanNode->spanItem_->content = u"";
     spanNode->spanItem_->SetTextStyle(textStyle);
     spanNode->DumpInfo();
     EXPECT_NE(DumpLog::GetInstance().description_.size(), 1);
@@ -1202,203 +1291,5 @@ HWTEST_F(SpanTestNg, SpanNodeDumpInfo001, TestSize.Level1)
     symbolNode->DumpInfo();
     EXPECT_EQ(symbolNode->GetTag(), V2::SYMBOL_SPAN_ETS_TAG);
     EXPECT_NE(DumpLog::GetInstance().description_.size(), 1);
-}
-
-/**
- * @tc.name: SpanItemUpdateParagraph007
- * @tc.desc: Test ImageSpanItem UpdateParagraph when baselineOffset is not zero.
- * @tc.type: FUNC
- */
-HWTEST_F(SpanTestNg, SpanItemUpdateParagraph007, TestSize.Level1)
-{
-    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<ImageSpanItem>();
-    ASSERT_NE(spanItem, nullptr);
-    TextStyle textStyle;
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, PushStyle).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, AddPlaceholder).WillRepeatedly(Return(50));
-    EXPECT_CALL(*paragraph, PopStyle).Times(AnyNumber());
-    PlaceholderStyle placeholderStyle;
-    placeholderStyle.width = 9.0;
-    placeholderStyle.height = 10.0;
-    placeholderStyle.verticalAlign = VerticalAlign::BASELINE;
-    placeholderStyle.baselineOffset = 1.0;
-    auto index = spanItem->UpdateParagraph(nullptr, paragraph, false, placeholderStyle);
-    EXPECT_EQ(index, 50);
-    MockParagraph::TearDown();
-}
-
-/**
- * @tc.name: SpanNodeUpdateTextStyle001
- * @tc.desc: Test SpanItem UpdateTextStyle when is dragging.
- * @tc.type: FUNC
- */
-HWTEST_F(SpanTestNg, SpanNodeUpdateTextStyle001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize spanNode and paragraph.
-     */
-    SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
-    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    pattern->SetTextDetectEnable(true);
-    auto node = FrameNode::CreateFrameNode("Test", 1, pattern);
-    spanNode->SetParent(node);
-    spanNode->MountToParagraph();
-    ASSERT_NE(spanNode->GetParent(), nullptr);
-    spanNode->spanItem_->fontStyle = nullptr;
-    spanNode->spanItem_->position = StringUtils::ToWstring(CREATE_VALUE).length();
-    TextStyle textStyle;
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, PushStyle).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, AddText).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, PopStyle).Times(AnyNumber());
-    /**
-     * @tc.steps: step2. call StartDrag
-     * @tc.expected: IsDragging() return ture
-     */
-    spanNode->spanItem_->StartDrag(1, 2);
-    EXPECT_TRUE(spanNode->spanItem_->IsDragging());
-    /**
-     * @tc.steps: step3. call UpdateTextStyle
-     * @tc.expected: cover branch content is empty.
-     */
-    std::string spanContent;
-    EXPECT_TRUE(spanNode->spanItem_->IsDragging());
-    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, 1, 2);
-    EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
-    /**
-     * @tc.steps: step4. call UpdateTextStyle
-     * @tc.expected: cover branch selStart > 0, selEnd < contentLength.
-     */
-    spanContent = CREATE_VALUE;
-    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, 1, 2);
-    EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
-    /**
-     * @tc.steps: step5. call UpdateTextStyle
-     * @tc.expected: cover branch selStart < 0, selEnd < 0.
-     */
-    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, -1, -1);
-    EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
-    /**
-     * @tc.steps: step6. call UpdateTextStyle
-     * @tc.expected: cover branch selStart > contentLength, selEnd > contentLength.
-     */
-    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, 20, 20);
-    EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
-    MockParagraph::TearDown();
-}
-
-/**
- * @tc.name: UpdateTextStyleForAISpan002
- * @tc.desc: Test SpanItem UpdateTextStyleForAISpan when children is not empty.
- * @tc.type: FUNC
- */
-HWTEST_F(SpanTestNg, UpdateTextStyleForAISpan002, TestSize.Level1)
-{
-    SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
-    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    pattern->SetTextDetectEnable(true);
-    auto node = FrameNode::CreateFrameNode("Test", 1, pattern);
-    spanNode->SetParent(node);
-    spanNode->MountToParagraph();
-    ASSERT_NE(spanNode->GetParent(), nullptr);
-
-    Ace::AISpan aiSpan1;
-    aiSpan1.start = AI_SPAN_END_II + 1;
-    aiSpan1.end = AI_SPAN_START;
-    aiSpan1.content = SPAN_PHONE;
-    aiSpan1.type = TextDataDetectType::PHONE_NUMBER;
-    Ace::AISpan aiSpan2;
-    aiSpan2.start = 0;
-    aiSpan2.end = -1;
-    aiSpan2.content = SPAN_URL;
-    aiSpan2.type = TextDataDetectType::URL;
-    std::map<int32_t, Ace::AISpan> aiSpanMap;
-    aiSpanMap[AI_SPAN_START] = aiSpan1;
-    aiSpanMap[AI_SPAN_START_II] = aiSpan2;
-    spanNode->spanItem_->aiSpanMap = aiSpanMap;
-    spanNode->spanItem_->fontStyle = nullptr;
-
-    std::string spanContent = TEXT_FOR_AI;
-    spanNode->spanItem_->position = StringUtils::ToWstring(spanContent).length();
-    TextStyle textStyle;
-    auto aiSpanStyle = textStyle;
-    pattern->ModifyAISpanStyle(aiSpanStyle);
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, PushStyle).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, AddText).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, PopStyle).Times(AnyNumber());
-
-    spanNode->spanItem_->SetNeedRemoveNewLine(true);
-    spanNode->spanItem_->UpdateTextStyleForAISpan(spanContent, paragraph, textStyle, aiSpanStyle);
-    EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
-    MockParagraph::TearDown();
-}
-
-/**
- * @tc.name: SpanNodeGetSpanResultObject001
- * @tc.desc: Test ImageSpanItem GetSpanResultObject.
- * @tc.type: FUNC
- */
-HWTEST_F(SpanTestNg, SpanNodeGetSpanResultObject001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize spanNode.
-     */
-    RefPtr<ImageSpanItem> spanItem = AceType::MakeRefPtr<ImageSpanItem>();
-    ASSERT_NE(spanItem, nullptr);
-    spanItem->interval = {0, 10};
-    auto obj = spanItem->GetSpanResultObject(1, 10);
-    EXPECT_FALSE(obj.isInit);
-    obj = spanItem->GetSpanResultObject(0, 9);
-    EXPECT_FALSE(obj.isInit);
-    /**
-     * @tc.steps: step2. call GetSpanResultObject
-     * @tc.expected: cover branch imagePixelMap and image don't have value.
-     */
-    std::optional<std::string> image;
-    std::optional<RefPtr<PixelMap>> pixelMap;
-    ImageSpanOptions options1 = { .image = image, .imagePixelMap = pixelMap };
-    spanItem->SetImageSpanOptions(options1);
-    obj = spanItem->GetSpanResultObject(0, 10);
-    EXPECT_TRUE(obj.isInit);
-    /**
-     * @tc.steps: step3. call GetSpanResultObject
-     * @tc.expected: cover branch imagePixelMap and image have value.
-     */
-    image = make_optional(IMAGE_ICON);
-    pixelMap = PixelMap::CreatePixelMap(nullptr);
-    ImageSpanOptions options2 = { .image = image, .imagePixelMap = pixelMap };
-    spanItem->SetImageSpanOptions(options2);
-    obj = spanItem->GetSpanResultObject(0, 10);
-    EXPECT_TRUE(obj.isInit);
-    EXPECT_EQ(obj.valueString, image);
-    EXPECT_EQ(obj.valuePixelMap, pixelMap.value());
-}
-
-/**
- * @tc.name: SpanNodeGetSpanResultObject002
- * @tc.desc: Test SpanItem GetSpanResultObject.
- * @tc.type: FUNC
- */
-HWTEST_F(SpanTestNg, SpanNodeGetSpanResultObject002, TestSize.Level1)
-{
-    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
-    ASSERT_NE(spanItem, nullptr);
-    spanItem->interval = {0, 10};
-    auto obj = spanItem->GetSpanResultObject(0, 10);
-    EXPECT_TRUE(obj.isInit);
-    obj = spanItem->GetSpanResultObject(1, 11);
-    EXPECT_TRUE(obj.isInit);
-    obj = spanItem->GetSpanResultObject(-1, 9);
-    EXPECT_TRUE(obj.isInit);
-    obj = spanItem->GetSpanResultObject(1, 9);
-    EXPECT_TRUE(obj.isInit);
-    obj = spanItem->GetSpanResultObject(-1, -1);
-    EXPECT_FALSE(obj.isInit);
 }
 } // namespace OHOS::Ace::NG

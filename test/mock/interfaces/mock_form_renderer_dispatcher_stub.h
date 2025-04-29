@@ -25,7 +25,8 @@ public:
     MOCK_METHOD2(DispatchPointerEvent,
         void(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, Ace::SerializedGesture& serializedGesture));
     MOCK_METHOD1(SetAllowUpdate, void(bool allowUpdate));
-    MOCK_METHOD3(DispatchSurfaceChangeEvent, void(float width, float height, float borderWidth));
+    MOCK_METHOD5(DispatchSurfaceChangeEvent, void(float width, float height, uint32_t reason,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, float borderWidth));
     MOCK_METHOD1(SetObscured, void(bool isObscured));
     MOCK_METHOD3(OnAccessibilityChildTreeRegister, void(uint32_t windowId, int32_t treeId, int64_t accessibilityId));
     MOCK_METHOD0(OnAccessibilityChildTreeDeregister, void());
@@ -33,6 +34,8 @@ public:
         OnAccessibilityDumpChildInfo, void(const std::vector<std::string>& params, std::vector<std::string>& info));
     MOCK_METHOD5(OnAccessibilityTransferHoverEvent,
         void(float pointX, float pointY, int32_t sourceType, int32_t eventType, int64_t timeMs));
+    MOCK_METHOD2(
+        OnNotifyDumpInfo, void(const std::vector<std::string>& params, std::vector<std::string>& info));
     int SendRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
     {
         SendRequest_called = true;

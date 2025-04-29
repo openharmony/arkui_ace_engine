@@ -21,8 +21,8 @@
 #include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
-
 class LinearIndicatorPattern;
+class FrameNode;
 
 enum class LinearIndicatorControllerDataState { STOP, ANIMATION, INTERVAL, ANIMATION_PAUSE, INTERVAL_PAUSE };
 
@@ -184,9 +184,19 @@ public:
         progressAnimation_ = animation;
     }
 
-    CancelableCallback<void()>& ProgressInterval()
+    const CancelableCallback<void()>& ProgressInterval() const
     {
-        return ProgressInterval_;
+        return progressInterval_;
+    }
+
+    void ProgressIntervalCancel()
+    {
+        progressInterval_.Cancel();
+    }
+
+    void ProgressIntervalReset(std::function<void()>&& callback)
+    {
+        progressInterval_.Reset(callback);
     }
 
     int32_t UpdateAnimationTag()
@@ -202,7 +212,7 @@ public:
 private:
     std::shared_ptr<AnimationUtils::Animation> progressAnimation_;
     int32_t animationTag_ = 0;
-    CancelableCallback<void()> ProgressInterval_;
+    CancelableCallback<void()> progressInterval_;
     int32_t totalAnimationTime_ = 0;
     int32_t totalIntervalTime_ = 0;
 
@@ -220,7 +230,7 @@ public:
     explicit LinearIndicatorController(const WeakPtr<LinearIndicatorPattern>& pattern)
         : pattern_(pattern), animationData_(), changeCallback_(nullptr)
     {}
-    ~LinearIndicatorController() = default;
+    ~LinearIndicatorController() override = default;
 
     void SetProgress(int32_t index, float value);
     void Start(int32_t animationTime, int32_t intervalTime);
@@ -272,8 +282,8 @@ private:
     void ProgreAnimationEnd();
     void StartProgressInterval(int32_t intervalTime);
 
-    int32_t GetProgressSize();
-    RefPtr<FrameNode> GetProgressNode(int32_t index);
+    int32_t GetProgressSize() const;
+    RefPtr<FrameNode> GetProgressNode(int32_t index) const;
     bool SetProgressComponentValue(int32_t index, float value);
     void InitProgressValue();
 
@@ -286,17 +296,15 @@ private:
     void SetValueAndCallback(float value, bool isDraw);
 
 public:
-    static const float END_VALUE;
-    static const std::string LINEAR_INDICATOR_ANIMATION_NAME;
-    static const std::string LINEAR_INDICATOR_INTERVAL_NAME;
-    static const int32_t ANIMATION_TIME_MIN;
+    static constexpr float END_VALUE = 100.0f;
+    static constexpr char LINEAR_INDICATOR_ANIMATION_NAME[] = "linear_indicator_animation";
+    static constexpr char LINEAR_INDICATOR_INTERVAL_NAME[] = "linear_indicator_interval";
+    static constexpr int32_t ANIMATION_TIME_MIN = 1;
 
 private:
     WeakPtr<LinearIndicatorPattern> pattern_;
     LinearIndicatorControllerData animationData_;
     std::function<void(int32_t index, float progress)> changeCallback_;
 };
-
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_INDICATOR_LINEAR_INDICATOR_CONTROLLER_H

@@ -17,7 +17,6 @@
 
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/navigation/bar_item_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 
@@ -31,8 +30,9 @@ constexpr uint32_t TOOLBAR_ITEMS_NUM_4 = 4;
 
 float GetToolbarContainerMaxWidth(const float& toolbarWidth, size_t toolbarItemNum)
 {
-    RefPtr<GridColumnInfo> columnInfo;
-    columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::NAVIGATION_TOOLBAR);
+    RefPtr<GridColumnInfo> columnInfo =
+        GridSystemManager::GetInstance().GetInfoByType(GridColumnType::NAVIGATION_TOOLBAR);
+    CHECK_NULL_RETURN(columnInfo, toolbarWidth);
     columnInfo->GetParent()->BuildColumnWidth();
 
     float fourGridWidth = static_cast<float>(columnInfo->GetWidth(GRID_COUNTS_4));
@@ -83,6 +83,10 @@ float CalcToolbarItemWidth(const float& toolbarWidth, size_t toolbarItemNum)
 
     float totalItemsInterval = (toolbarItemNum - 1) * (toolbarItemInterval);
     float containerWidth = GetToolbarContainerMaxWidth(toolbarWidth, toolbarItemNum);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        return (containerWidth - totalItemsInterval) / toolbarItemNum -
+            theme->GetToolbarItemLeftOrRightPadding().ConvertToPx() * BAR_ITEM_MARGIN_NUM;
+    }
     return (containerWidth - totalItemsInterval) / toolbarItemNum;
 }
 
@@ -106,7 +110,7 @@ float UpdateToolBarItemsContainer(LayoutWrapper* layoutWrapper, size_t toolbarIt
     float toolbarItemWidth = CalcToolbarItemWidth(toolbarWidth, toolbarItemNum);
 
     for (const auto& toolbarItemWrapper : containerWrapper->GetAllChildrenWithBuild()) {
-        auto layoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(toolbarItemWrapper->GetLayoutProperty());
+        auto layoutProperty = AceType::DynamicCast<LayoutProperty>(toolbarItemWrapper->GetLayoutProperty());
         layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(toolbarItemWidth), std::nullopt));
     }
 
@@ -182,8 +186,8 @@ void ToolbarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(toolbarLayoutProperty);
     auto constraint = toolbarLayoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(constraint);
-    auto toolbarWidth = constraint->selfIdealSize.Width().value();
-    auto toolbarHeight = constraint->selfIdealSize.Height().value();
+    auto toolbarWidth = constraint->selfIdealSize.Width().value_or(0.0f);
+    auto toolbarHeight = constraint->selfIdealSize.Height().value_or(0.0f);
     if (NearZero(toolbarWidth) || NearZero(toolbarHeight)) {
         return;
     }

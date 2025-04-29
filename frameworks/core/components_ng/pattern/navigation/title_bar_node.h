@@ -28,7 +28,7 @@ public:
     TitleBarNode(const std::string& tag, int32_t nodeId);
     TitleBarNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : FrameNode(tag, nodeId, pattern) {}
-    ~TitleBarNode() override = default;
+    ~TitleBarNode() override;
     static RefPtr<TitleBarNode> GetOrCreateTitleBarNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
@@ -45,6 +45,16 @@ public:
     const RefPtr<UINode>& GetBackButton() const
     {
         return backButton_;
+    }
+
+    void SetCustomBackButton(const RefPtr<UINode>& button)
+    {
+        customBackButton_ = button;
+    }
+
+    const RefPtr<UINode>& GetCustomBackButton() const
+    {
+        return customBackButton_;
     }
 
     void SetTitle(const RefPtr<UINode>& title)
@@ -77,21 +87,6 @@ public:
         return menu_;
     }
 
-    void SetPrevMenu(const RefPtr<UINode>& prevMenu)
-    {
-        prevMenu_ = prevMenu;
-    }
-
-    const RefPtr<UINode>& GetPrevMenu() const
-    {
-        return prevMenu_;
-    }
-
-    void SetMoreMenuNode(const RefPtr<UINode>& moreMenuNode)
-    {
-        moreMenuNode_ = moreMenuNode;
-    }
-
     void SetInnerParentId(const std::string& id)
     {
         innerChildId_ = id;
@@ -107,21 +102,32 @@ public:
 
     void MarkIsInitialTitle(bool isInitialTitle);
 
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PrevMenuIsCustom, bool);
-    void OnPrevMenuIsCustomUpdate(bool value) {}
-
-    // node operation related
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(MenuNodeOperation, ChildNodeOperation);
-    void OnMenuNodeOperationUpdate(ChildNodeOperation value) {}
+    void SetUseContainerModalTitleHeight(bool use)
+    {
+        useContainerModalTitleHeight_ = use;
+    }
+    bool UseContainerModalTitleHeight() const
+    {
+        return useContainerModalTitleHeight_;
+    }
+    void SetNeedAvoidContainerModal(bool need)
+    {
+        needAvoidContainerModal_ = need;
+    }
+    bool NeedAvoidContainerModal() const
+    {
+        return needAvoidContainerModal_;
+    }
 
 private:
     RefPtr<UINode> backButton_;
+    RefPtr<UINode> customBackButton_;
     RefPtr<UINode> title_;
     RefPtr<UINode> subtitle_;
     RefPtr<UINode> menu_;
-    RefPtr<UINode> prevMenu_;
-    RefPtr<UINode> moreMenuNode_;
     std::string innerChildId_;
+    bool needAvoidContainerModal_ = false;
+    bool useContainerModalTitleHeight_ = false;
 };
 
 } // namespace OHOS::Ace::NG

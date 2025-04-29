@@ -15,12 +15,9 @@
 
 #include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
 
-#include "base/geometry/ng/offset_t.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/layout/box_layout_algorithm.h"
-#include "core/components_ng/pattern/list/list_item_layout_property.h"
+#include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/property/position_property.h"
 #include "core/components_ng/property/measure_utils.h"
-
 namespace OHOS::Ace::NG {
 
 bool ListItemLayoutAlgorithm::IsRTLAndVertical(LayoutWrapper* layoutWrapper) const
@@ -42,10 +39,33 @@ float ListItemLayoutAlgorithm::SetReverseValue(LayoutWrapper* layoutWrapper, flo
     }
 }
 
-void ListItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+SizeF ListItemLayoutAlgorithm::GetContentSize(LayoutWrapper* layoutWrapper) const
 {
-    layoutWrapper->RemoveAllChildInRenderTree();
+    CHECK_NULL_RETURN(layoutWrapper, {});
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, {});
+    return geometryNode->GetPaddingSize();
+}
 
+void ListItemLayoutAlgorithm::CheckAndUpdateCurOffset(LayoutWrapper* layoutWrapper)
+{
+    if (!canUpdateCurOffset_) {
+        return;
+    }
+    float itemWidth = GetContentSize(layoutWrapper).CrossSize(axis_);
+    if (NearEqual(itemWidth, childNodeSize_)) {
+        return;
+    }
+    isCurOffsetUpdated_ = true;
+    if (Positive(curOffset_) && startNodeIndex_ >= 0) {
+        curOffset_ = itemWidth;
+    } else if (Negative(curOffset_) && endNodeIndex_ >= 0) {
+        curOffset_ = -itemWidth;
+    }
+}
+
+void ListItemLayoutAlgorithm::MeasureItemChild(LayoutWrapper* layoutWrapper)
+{
     std::list<RefPtr<LayoutWrapper>> childList;
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     auto child = layoutWrapper->GetOrCreateChildByIndex(childNodeIndex_);
@@ -54,11 +74,22 @@ void ListItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childList.push_back(child);
     }
     PerformMeasureSelfWithChildList(layoutWrapper, childList);
+    CheckAndUpdateCurOffset(layoutWrapper);
+}
+
+void ListItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    layoutWrapper->RemoveAllChildInRenderTree();
+
+    // step 1: measure item child node.
+    MeasureItemChild(layoutWrapper);
     auto mainSize = layoutWrapper->GetGeometryNode()->GetPaddingSize().MainSize(axis_);
     if (NonPositive(mainSize)) {
         curOffset_ = 0.0f;
         return;
     }
+
+    // step 2: measure swipeAction node.
     if (Positive(curOffset_) && startNodeIndex_ >= 0) {
         auto startLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
         if (!NearZero(startNodeSize_) && curOffset_ > startNodeSize_) {
@@ -70,7 +101,7 @@ void ListItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto startNode = layoutWrapper->GetOrCreateChildByIndex(startNodeIndex_);
         CHECK_NULL_VOID(startNode);
         startNode->Measure(startLayoutConstraint);
-        if (NearZero(startNodeSize_) || curOffset_ < endNodeSize_) {
+        if (NearZero(startNodeSize_) || curOffset_ < startNodeSize_) {
             startNodeSize_ = startNode->GetGeometryNode()->GetMarginFrameSize().CrossSize(axis_);
         }
         curOffset_ = NearZero(startNodeSize_) && !hasStartDeleteArea_ ? 0.0f : curOffset_;
@@ -103,6 +134,28 @@ void ListItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }
+
+    SetSwipeActionNode(layoutWrapper, size, paddingOffset);
+    auto child = layoutWrapper->GetOrCreateChildByIndex(childNodeIndex_);
+    if (child) {
+        auto translate =
+            Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetMarginFrameSize(), align) + paddingOffset;
+        OffsetF offset = axis_ == Axis::VERTICAL ? OffsetF(SetReverseValue(layoutWrapper, curOffset_), 0.0f) :
+            OffsetF(0.0f, curOffset_);
+        child->GetGeometryNode()->SetMarginFrameOffset(translate + offset);
+        child->Layout();
+    }
+    // Update content position.
+    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
+    if (content) {
+        auto translate = Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align) + paddingOffset;
+        content->SetOffset(translate);
+    }
+}
+
+void ListItemLayoutAlgorithm::SetSwipeActionNode(
+    LayoutWrapper* layoutWrapper, const SizeF& size, const OffsetF& paddingOffset)
+{
     // Update child position.
     if (Positive(curOffset_) && startNodeIndex_ >= 0) {
         auto child = layoutWrapper->GetOrCreateChildByIndex(startNodeIndex_);
@@ -124,21 +177,6 @@ void ListItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         OffsetF offset = axis_ == Axis::VERTICAL ? OffsetF(crossOffset, mainOffset) : OffsetF(mainOffset, crossOffset);
         child->GetGeometryNode()->SetMarginFrameOffset(paddingOffset + offset);
         child->Layout();
-    }
-    auto child = layoutWrapper->GetOrCreateChildByIndex(childNodeIndex_);
-    if (child) {
-        auto translate =
-            Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetMarginFrameSize(), align) + paddingOffset;
-        OffsetF offset = axis_ == Axis::VERTICAL ? OffsetF(SetReverseValue(layoutWrapper, curOffset_), 0.0f) :
-            OffsetF(0.0f, curOffset_);
-        child->GetGeometryNode()->SetMarginFrameOffset(translate + offset);
-        child->Layout();
-    }
-    // Update content position.
-    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
-    if (content) {
-        auto translate = Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align) + paddingOffset;
-        content->SetOffset(translate);
     }
 }
 } // namespace OHOS::Ace::NG

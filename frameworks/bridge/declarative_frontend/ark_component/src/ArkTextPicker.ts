@@ -49,8 +49,10 @@ class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute
   onCancel(callback: () => void): this {
     throw new Error('Method not implemented.');
   }
-  onChange(callback: (value: string | string[], index: number | number[]) => void): this {
-    throw new Error('Method not implemented.');
+  onChange(callback: Optional<OnTextPickerChangeCallback>): this {
+    modifierWithKey(
+      this._modifiersWithKeys, TextpickerOnChangeModifier.identity, TextpickerOnChangeModifier, callback);
+    return this;
   }
   selectedIndex(value: number | number[]): this {
     modifierWithKey(
@@ -67,6 +69,32 @@ class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute
       this._modifiersWithKeys, TextpickerGradientHeightModifier.identity, TextpickerGradientHeightModifier, value);
     return this;
   }
+  disableTextStyleAnimation(value: boolean): this {
+    modifierWithKey(
+      this._modifiersWithKeys, TextpickerDisableTextStyleAnimationModifier.identity, TextpickerDisableTextStyleAnimationModifier, value);
+    return this;
+  }
+  defaultTextStyle(value: PickerTextStyle): this {
+    modifierWithKey(
+      this._modifiersWithKeys, TextpickerDefaultTextStyleModifier.identity, TextpickerDefaultTextStyleModifier, value);
+    return this;
+  }
+
+  enableHapticFeedback(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextpickerEnableHapticFeedbackModifier.identity, TextpickerEnableHapticFeedbackModifier, value);
+    return this;
+  }
+
+  digitalCrownSensitivity(sensitivity: Optional<CrownSensitivity>): this {
+    modifierWithKey(
+      this._modifiersWithKeys, TextpickerDigitalCrownSensitivityModifier.identity, TextpickerDigitalCrownSensitivityModifier, value);
+    return this;
+  }
+  onScrollStop(callback: (value: string | string[], index: number | number[]) => void) : this{
+    modifierWithKey(
+      this._modifiersWithKeys, TextpickerOnScrollStopModifier.identity, TextpickerOnScrollStopModifier, callback);
+    return this;
+  }
 }
 
 class TextpickerCanLoopModifier extends ModifierWithKey<boolean> {
@@ -79,6 +107,20 @@ class TextpickerCanLoopModifier extends ModifierWithKey<boolean> {
       getUINativeModule().textpicker.resetCanLoop(node);
     } else {
       getUINativeModule().textpicker.setCanLoop(node, this.value);
+    }
+  }
+}
+
+class TextpickerDigitalCrownSensitivityModifier extends ModifierWithKey<Optional<CrownSensitivity>> {
+  constructor(value: Optional<CrownSensitivity>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textpickerDigitalCrownSensitivity');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textpicker.resetDigitalCrownSensitivity(node);
+    } else {
+      getUINativeModule().textpicker.setDigitalCrownSensitivity(node, this.value);
     }
   }
 }
@@ -143,6 +185,55 @@ class TextpickerGradientHeightModifier extends ModifierWithKey<Dimension> {
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextpickerDisableTextStyleAnimationModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textpickerDisableTextStyleAnimation');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textpicker.resetDisableTextStyleAnimation(node);
+    } else {
+      getUINativeModule().textpicker.setDisableTextStyleAnimation(node, this.value);
+    }
+  }
+}
+
+class TextpickerDefaultTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
+  constructor(value: PickerTextStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textpickerDefaultTextStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textpicker.resetDefaultTextStyle(node);
+    } else {
+      getUINativeModule().textpicker.setDefaultTextStyle(node, this.value?.color ?? undefined,
+        this.value?.font?.size ?? undefined,
+        this.value?.font?.weight ?? undefined,
+        this.value?.font?.family ?? undefined,
+        this.value?.font?.style ?? undefined,
+        this.value?.minFontSize ?? undefined,
+        this.value?.maxFontSize ?? undefined,
+        this.value?.overflow ?? undefined);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (!(this.stageValue?.font?.weight === this.value?.font?.weight &&
+      this.stageValue?.font?.style === this.value?.font?.style &&
+      this.stageValue?.overflow === this.value?.overflow)) {
+      return true;
+    } else {
+      return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
+        !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
+        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family) ||
+        !isBaseOrResourceEqual(this.stageValue?.minFontSize, this.value?.minFontSize) ||
+        !isBaseOrResourceEqual(this.stageValue?.maxFontSize, this.value?.maxFontSize);
+    }
   }
 }
 
@@ -247,6 +338,45 @@ class TextpickerDefaultPickerItemHeightModifier extends ModifierWithKey<number |
   }
 }
 
+class TextpickerEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textpickerEnableHapticFeedback');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textpicker.resetTextpickerEnableHapticFeedback(node);
+    } else {
+      getUINativeModule().textpicker.setTextpickerEnableHapticFeedback(node, this.value!);
+    }
+  }
+}
+class TextpickerOnChangeModifier extends ModifierWithKey<Optional<OnTextPickerChangeCallback>>{
+  constructor(value: Optional<OnTextPickerChangeCallback>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textpickerOnChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textpicker.resetOnChange(node);
+    } else {
+      getUINativeModule().textpicker.setOnChange(node, this.value);
+    }
+  }
+}
+class TextpickerOnScrollStopModifier extends ModifierWithKey<(value: string | string[], index: number | number[]) => void>{
+  constructor(value:(value: string | string[], index: number | number[]) => void){
+     super(value);
+  }
+  static identity: Symbol = Symbol('textpickerOnScrollStop');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textpicker.resetOnScrollStop(node);
+    } else {
+      getUINativeModule().textpicker.setOnScrollStop(node, this.value);
+    }
+  }
+}
 // @ts-ignore
 globalThis.TextPicker.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {

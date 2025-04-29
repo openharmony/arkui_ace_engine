@@ -15,9 +15,6 @@
 
 #include "core/components_ng/event/input_event_hub.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/event/input_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -50,6 +47,33 @@ bool InputEventHub::ProcessMouseTestHit(const OffsetF& coordinateOffset, TouchTe
         accessibilityHoverEventActuator_->OnCollectAccessibilityHoverEvent(
             coordinateOffset, getEventTargetImpl, result, host);
     }
+    return false;
+}
+
+bool InputEventHub::ProcessTipsMouseTestHit(const OffsetF& coordinateOffset, TouchTestResult& result)
+{
+    auto eventHub = eventHub_.Upgrade();
+    auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
+    if (hoverEventActuator_) {
+        hoverEventActuator_->OnCollectHoverEventForTips(coordinateOffset, getEventTargetImpl, result);
+    }
+    return false;
+}
+
+bool InputEventHub::ProcessPenHoverTestHit(const OffsetF& coordinateOffset, TouchTestResult& result)
+{
+    auto eventHub = eventHub_.Upgrade();
+    auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
+    auto host = GetFrameNode();
+    CHECK_NULL_RETURN(host, false);
+    if (hoverEventActuator_) {
+        hoverEventActuator_->OnCollectPenHoverEvent(coordinateOffset, getEventTargetImpl, result, host);
+    }
+
+    if (hoverMoveEventActuator_) {
+        hoverMoveEventActuator_->OnCollectPenHoverMoveEvent(coordinateOffset, getEventTargetImpl, result, host);
+    }
+
     return false;
 }
 

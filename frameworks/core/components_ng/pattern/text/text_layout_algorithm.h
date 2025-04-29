@@ -22,6 +22,7 @@
 #include <unordered_map>
 #include <utility>
 
+#include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -49,7 +50,7 @@ class ACE_EXPORT TextLayoutAlgorithm : public MultipleParagraphLayoutAlgorithm, 
 public:
     TextLayoutAlgorithm();
     explicit TextLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, RefPtr<ParagraphManager> paragraphManager_,
-        bool isSpanStringMode, bool isMarquee = false);
+        bool isSpanStringMode, const TextStyle& textStyle, const bool isMarquee = false);
     ~TextLayoutAlgorithm() override = default;
 
     void OnReset() override;
@@ -58,14 +59,16 @@ public:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
     void GetSuitableSize(SizeF& maxSize, LayoutWrapper* layoutWrapper) override {};
-    bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
+    bool CreateParagraphAndLayout(TextStyle& textStyle, const std::u16string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout = true) override;
+    bool ReLayoutParagraphs(const TextStyle& textStyle, LayoutWrapper* layoutWrapper, const SizeF& maxSize);
+    bool LayoutParagraphs(float maxWidth);
 
     float GetBaselineOffset() const override;
 
     size_t GetLineCount() const;
 
-    std::optional<TextStyle> GetTextStyle() const;
+    const TextStyle& GetTextStyle() const;
 
     RefPtr<Paragraph> GetParagraph() const override
     {
@@ -83,26 +86,27 @@ protected:
     virtual void UpdateParagraphForAISpan(
         const TextStyle& textStyle, LayoutWrapper* layoutWrapper, const RefPtr<Paragraph>& paragraph);
 
-    void GrayDisplayAISpan(const DragSpanPosition& dragSpanPosition, const std::wstring textForAI,
+    void GrayDisplayAISpan(const DragSpanPosition& dragSpanPosition, const std::u16string textForAI,
         const TextStyle& textStyle, bool isDragging, const RefPtr<Paragraph>& paragraph);
+    bool DidExceedMaxLines(const SizeF& maxSize) override;
 
-    std::string StringOutBoundProtection(int32_t position, int32_t length, std::wstring wTextForAI);
+    std::u16string StringOutBoundProtection(int32_t position, int32_t length, std::u16string wTextForAI);
 
 private:
     OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) override;
     bool UpdateSingleParagraph(LayoutWrapper* layoutWrapper, ParagraphStyle paraStyle, const TextStyle& textStyle,
-        const std::string& content, double maxWidth);
+        const std::u16string& content, double maxWidth);
     bool UpdateSymbolTextStyle(const TextStyle& textStyle, const ParagraphStyle& paraStyle,
         LayoutWrapper* layoutWrapper, RefPtr<FrameNode>& frameNode);
     void CreateParagraphDrag(
-        const TextStyle& textStyle, const std::vector<std::string>& contents, const RefPtr<Paragraph>& paragraph);
+        const TextStyle& textStyle, const std::vector<std::u16string>& contents, const RefPtr<Paragraph>& paragraph);
     void ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>>& spans);
-    bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
-        LayoutWrapper* layoutWrapper);
+    bool AdaptMinTextSize(TextStyle& textStyle, const std::u16string& content,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     bool AddPropertiesAndAnimations(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& textLayoutProperty,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
-    bool CreateParagraph(
-        const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper, double maxWidth = 0.0) override;
+    bool CreateParagraph(const TextStyle& textStyle, std::u16string content, LayoutWrapper* layoutWrapper,
+        double maxWidth = 0.0) override;
     bool BuildParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     bool BuildParagraphAdaptUseMinFontSize(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
@@ -111,11 +115,20 @@ private:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     std::optional<SizeF> BuildTextRaceParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
-    bool AdaptMaxTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
-        LayoutWrapper* layoutWrapper);
-    void UpdateSensitiveContent(std::string& content);
+    bool AdaptMaxTextSize(TextStyle& textStyle, const std::u16string& content,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    void UpdateSensitiveContent(std::u16string& content);
+    void CheckNeedReCreateParagraph(LayoutWrapper* layoutWrapper, const TextStyle& textStyle);
+    void ResetNeedReCreateParagraph(LayoutWrapper* layoutWrapper);
+    bool AlwaysReCreateParagraph(LayoutWrapper* layoutWrapper);
+    std::pair<bool, double> GetSuitableSize(TextStyle& textStyle, const std::u16string& content,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    std::pair<bool, double> GetSuitableSizeLD(TextStyle& textStyle, const std::u16string& content,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, double stepSize);
+    std::pair<bool, double> GetSuitableSizeBS(TextStyle& textStyle, const std::u16string& content,
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, double stepSize);
+    bool IsAdaptExceedLimit(const SizeF& maxSize) override;
 
-    std::optional<TextStyle> textStyle_;
     RefPtr<PropertyBool> showSelect_;
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);
 };

@@ -643,6 +643,11 @@ public:
         isNativeEmbedMode_ = isEnabled;
     }
 
+    void SetIntrinsicSizeEnabled(bool isEnabled)
+    {
+        isIntrinsicSize_ = isEnabled;
+    }
+
     const std::tuple<bool, bool>& GetNativeVideoPlayerConfig() const
     {
         return native_video_player_config_;
@@ -657,11 +662,6 @@ public:
     {
         tag_ = tag;
         tag_type_ = type;
-    }
-
-    void SetSmoothDragResizeEnabled(bool isEnabled)
-    {
-        isSmoothDragResizeEnabled_ = isEnabled;
     }
 
     using OnCommonDialogImpl = std::function<bool(const BaseEventInfo* info)>;
@@ -1059,6 +1059,17 @@ public:
         return declaration_->GetNativeEmbedLifecycleChangeId();
     }
 
+    void SetNativeEmbedVisibilityChangeId(const EventMarker& embedVisibilityChangeId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetNativeEmbedVisibilityChangeId(embedVisibilityChangeId);
+    }
+
+    const EventMarker& GetNativeEmbedVisibilityChangeId() const
+    {
+        return declaration_->GetNativeEmbedVisibilityChangeId();
+    }
+
     void SetNativeEmbedGestureEventId(const EventMarker& embedGestureEventId)
     {
         CHECK_NULL_VOID(declaration_);
@@ -1112,6 +1123,16 @@ public:
     const EventMarker& GetAdsBlockedEventId() const
     {
         return declaration_->GetAdsBlockedEventId();
+    }
+
+    void SetOptimizeParserBudgetEnabled(bool enable)
+    {
+        isParserBudgetOptimized_ = enable;
+    }
+
+    bool GetOptimizeParserBudgetEnabled() const
+    {
+        return isParserBudgetOptimized_;
     }
 
 private:
@@ -1174,7 +1195,7 @@ private:
     bool isBackgroundColor_ = false;
     bool isNeedGestureAccess_ = true;
     bool isNativeEmbedMode_ = false;
-    bool isSmoothDragResizeEnabled_ = false;
+    bool isIntrinsicSize_ = false;
     std::string tag_;
     std::string tag_type_;
     OnDragFunc onDragStartId_;
@@ -1190,6 +1211,7 @@ private:
     CopyOptions CopyOptionMode_ = CopyOptions::Distributed;
     std::tuple<bool, bool> native_video_player_config_{false, false};
     std::string shared_render_process_token_;
+    bool isParserBudgetOptimized_ = false;
 };
 
 } // namespace OHOS::Ace

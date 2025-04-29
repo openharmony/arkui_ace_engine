@@ -15,6 +15,7 @@
 
 #include "core/image/image_source_info.h"
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -22,16 +23,29 @@ namespace {
 
 constexpr uint32_t FILE_SUFFIX_LEN = 4;
 constexpr uint32_t APNG_FILE_SUFFIX_LEN = 5;
+constexpr uint32_t MAX_BASE64_LENGTH = 50; // prevent the Base64 image format from too long.
+
+bool CheckSvgExtension(const std::string& src)
+{
+    if (src.size() <= FILE_SUFFIX_LEN) {
+        return false;
+    }
+    auto srcSuffix = src.substr(src.size() - FILE_SUFFIX_LEN);
+    StringUtils::TransformStrCase(srcSuffix, StringUtils::TEXT_CASE_LOWERCASE);
+    return srcSuffix == ".svg";
+}
 
 } // namespace
 
-bool ImageSourceInfo::IsSVGSource(const std::string& src, InternalResource::ResourceId resourceId)
+bool ImageSourceInfo::IsSVGSource(const std::string& src, SrcType srcType, InternalResource::ResourceId resourceId)
 {
     // 4 is the length of ".svg".
-    if (src.size() > FILE_SUFFIX_LEN) {
-        auto srcSuffix = src.substr(src.size() - FILE_SUFFIX_LEN);
-        StringUtils::TransformStrCase(srcSuffix, StringUtils::TEXT_CASE_LOWERCASE);
-        if (srcSuffix == ".svg") {
+    if (CheckSvgExtension(src)) {
+        return true;
+    } else if (srcType == SrcType::NETWORK) {
+        size_t queryPos = src.find('?');
+        std::string cleanUrl = (queryPos != std::string::npos) ? src.substr(0, queryPos) : src;
+        if (CheckSvgExtension(cleanUrl)) {
             return true;
         }
     }
@@ -127,8 +141,9 @@ ImageSourceInfo::ImageSourceInfo(std::string imageSrc, std::string bundleName, s
     Dimension height, InternalResource::ResourceId resourceId, const RefPtr<PixelMap>& pixmap)
     : src_(std::move(imageSrc)), bundleName_(std::move(bundleName)), moduleName_(std::move(moduleName)),
       sourceWidth_(width), sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap),
-      isSvg_(IsSVGSource(src_, resourceId_)), isPng_(IsPngSource(src_, resourceId_)), srcType_(ResolveSrcType())
+      isPng_(IsPngSource(src_, resourceId_)), srcType_(ResolveSrcType())
 {
+    isSvg_ = IsSVGSource(src_, srcType_, resourceId_);
     // count how many source set.
     int32_t count = 0;
     if (!src_.empty()) {
@@ -144,25 +159,29 @@ ImageSourceInfo::ImageSourceInfo(std::string imageSrc, std::string bundleName, s
     if (count > 1) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "ImageSourceInfo: multi image source set, only one will be load.");
     }
-    GenerateCacheKey();
 
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         localColorMode_ = pipelineContext->GetLocalColorMode();
     }
+
+    GenerateCacheKey();
 }
 
 ImageSourceInfo::ImageSourceInfo(const std::shared_ptr<std::string>& imageSrc, std::string bundleName,
     std::string moduleName, Dimension width, Dimension height, InternalResource::ResourceId resourceId,
     const RefPtr<PixelMap>& pixmap)
     : srcRef_(imageSrc), bundleName_(std::move(bundleName)), moduleName_(std::move(moduleName)), sourceWidth_(width),
-      sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap), isSvg_(IsSVGSource(*srcRef_, resourceId_)),
-      isPng_(IsPngSource(*srcRef_, resourceId_)), srcType_(ResolveSrcType())
+      sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap), isPng_(IsPngSource(*srcRef_, resourceId_)),
+      srcType_(ResolveSrcType())
 {
     // count how many source set.
     int32_t count = 0;
     if (srcRef_ && !(*srcRef_).empty()) {
+        isSvg_ = IsSVGSource((*srcRef_), srcType_, resourceId_);
         ++count;
+    } else {
+        isSvg_ = IsSVGSource("", srcType_, resourceId_);
     }
     if (resourceId_ != InternalResource::ResourceId::NO_ID) {
         ++count;
@@ -174,12 +193,13 @@ ImageSourceInfo::ImageSourceInfo(const std::shared_ptr<std::string>& imageSrc, s
     if (count > 1) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "ImageSourceInfo: multi image source set, only one will be load.");
     }
-    GenerateCacheKey();
 
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         localColorMode_ = pipelineContext->GetLocalColorMode();
     }
+
+    GenerateCacheKey();
 }
 
 SrcType ImageSourceInfo::ResolveSrcType() const
@@ -199,28 +219,17 @@ SrcType ImageSourceInfo::ResolveSrcType() const
 
 void ImageSourceInfo::GenerateCacheKey()
 {
-    auto colorMode = GetColorModeToString();
-    auto name = ToString() + AceApplicationInfo::GetInstance().GetAbilityName() + bundleName_ + moduleName_;
-    cacheKey_ =
-        std::to_string(std::hash<std::string> {}(name)) + std::to_string(static_cast<int32_t>(resourceId_)) + colorMode;
+    auto name = ToString(false);
+    name.append(AceApplicationInfo::GetInstance().GetAbilityName())
+        .append(bundleName_)
+        .append(moduleName_)
+        .append(std::to_string(static_cast<int32_t>(resourceId_)))
+        .append(std::to_string(static_cast<int32_t>(Container::CurrentColorMode())))
+        .append(std::to_string(static_cast<int32_t>(localColorMode_)));
     if (srcType_ == SrcType::BASE64) {
-        cacheKey_ += "SrcType:BASE64";
+        name.append("SrcType:BASE64");
     }
-}
-
-const std::string ImageSourceInfo::GetColorModeToString()
-{
-    auto colorMode = SystemProperties::GetColorMode();
-    switch (colorMode) {
-        case ColorMode::LIGHT:
-            return "LIGHT";
-        case ColorMode::DARK:
-            return "DARK";
-        case ColorMode::COLOR_MODE_UNDEFINED:
-            return "COLOR_MODE_UNDEFINED";
-        default:
-            return "LIGHT";
-    }
+    cacheKey_ = std::to_string(std::hash<std::string> {}(name));
 }
 
 void ImageSourceInfo::SetFillColor(const Color& color)
@@ -230,12 +239,15 @@ void ImageSourceInfo::SetFillColor(const Color& color)
 
 bool ImageSourceInfo::operator==(const ImageSourceInfo& info) const
 {
+    if (localColorMode_ != info.localColorMode_) {
+        return false;
+    }
     // only svg uses fillColor
     if (isSvg_ && fillColor_ != info.fillColor_) {
         return false;
     }
-    return ((!pixmap_ && !info.pixmap_) ||
-               (pixmap_ && info.pixmap_ && pixmapBuffer_ == info.pixmap_->GetPixels())) &&
+    return ((!pixmap_ && !info.pixmap_) || (pixmap_ && info.pixmap_ && pixmapBuffer_ == info.pixmap_->GetPixels() &&
+                                               pixmap_->GetRawPixelMapPtr() == info.pixmap_->GetRawPixelMapPtr())) &&
            GetSrc() == info.GetSrc() && resourceId_ == info.resourceId_;
 }
 
@@ -249,7 +261,7 @@ void ImageSourceInfo::SetSrc(const std::string& src, std::optional<Color> fillCo
     srcRef_.reset(new std::string(src));
     srcType_ = ResolveURIType(src);
     resourceId_ = InternalResource::ResourceId::NO_ID;
-    isSvg_ = IsSVGSource(src, resourceId_);
+    isSvg_ = IsSVGSource(src, srcType_, resourceId_);
     fillColor_ = fillColor;
     pixmap_ = nullptr;
     GenerateCacheKey();
@@ -268,7 +280,7 @@ void ImageSourceInfo::SetResourceId(InternalResource::ResourceId id, std::option
     resourceId_ = id;
     srcType_ = SrcType::RESOURCE_ID;
     src_.clear();
-    isSvg_ = IsSVGSource(src_, resourceId_);
+    isSvg_ = IsSVGSource(src_, srcType_, resourceId_);
     fillColor_ = fillColor;
     pixmap_ = nullptr;
     GenerateCacheKey();
@@ -285,7 +297,7 @@ void ImageSourceInfo::SetPixMap(const RefPtr<PixelMap>& pixmap, std::optional<Co
     srcType_ = SrcType::PIXMAP;
     src_.clear();
     srcRef_.reset();
-    isSvg_ = IsSVGSource(src_, resourceId_);
+    isSvg_ = IsSVGSource(src_, srcType_, resourceId_);
     fillColor_ = fillColor;
     pixmap_ = pixmap;
 }
@@ -342,10 +354,15 @@ SrcType ImageSourceInfo::GetSrcType() const
     return srcType_;
 }
 
-std::string ImageSourceInfo::ToString() const
+std::string ImageSourceInfo::ToString(bool isNeedTruncated) const
 {
     auto& src = GetSrc();
     if (!src.empty()) {
+        // Check if the src is a base64 image
+        if (srcType_ == SrcType::BASE64 && isNeedTruncated) {
+            // Return the first 50 characters of the base64 image string
+            return src.substr(0, MAX_BASE64_LENGTH) + "...(truncated)";
+        }
         return src;
     }
     if (resourceId_ != InternalResource::ResourceId::NO_ID) {
@@ -422,4 +439,37 @@ std::string ImageSourceInfo::GetKey() const
     return cacheKey_;
 }
 
+void ImageSourceInfo::SetContainerId(int32_t containerId)
+{
+    containerId_ = containerId;
+}
+
+int32_t ImageSourceInfo::GetContainerId() const
+{
+    return containerId_;
+}
+
+std::string ImageSourceInfo::GetTaskKey() const
+{
+    // only svg sets fillColor
+    if (isSvg_ && fillColor_.has_value()) {
+        return cacheKey_ + fillColor_.value().ColorToString() + std::to_string(containerId_);
+    }
+    return cacheKey_ + std::to_string(containerId_);
+}
+
+ImageSourceInfo ImageSourceInfo::CreateImageSourceInfoWithHost(const RefPtr<NG::FrameNode>& host)
+{
+    ImageSourceInfo imageSourceInfo;
+    CHECK_NULL_RETURN(host, imageSourceInfo);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, imageSourceInfo);
+
+    std::string bundleName = context->GetBundleName();
+    std::string moduleName = context->GetModuleName();
+    imageSourceInfo.SetBundleName(bundleName);
+    imageSourceInfo.SetModuleName(moduleName);
+
+    return imageSourceInfo;
+}
 } // namespace OHOS::Ace

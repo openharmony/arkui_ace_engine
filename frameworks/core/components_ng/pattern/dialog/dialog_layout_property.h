@@ -46,6 +46,8 @@ public:
         props->propDialogButtonDirection_ = CloneDialogButtonDirection();
         props->propWidth_ = CloneWidth();
         props->propHeight_ = CloneHeight();
+        props->propEnableHoverMode_ = CloneEnableHoverMode();
+        props->propHoverModeArea_ = CloneHoverModeArea();
         return props;
     }
 
@@ -61,6 +63,8 @@ public:
         ResetIsModal();
         ResetWidth();
         ResetHeight();
+        ResetEnableHoverMode();
+        ResetHoverModeArea();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DialogAlignment, DialogAlignment, PROPERTY_UPDATE_MEASURE);
@@ -70,11 +74,13 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoCancel, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowInSubWindow, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsModal, bool, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsScenceBoardDialog, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsSceneBoardDialog, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DialogButtonDirection, DialogButtonDirection, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Width, CalcDimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Height, CalcDimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableHoverMode, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HoverModeArea, HoverModeAreaType, PROPERTY_UPDATE_MEASURE);
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         LayoutProperty::ToJsonValue(json, filter);
@@ -96,12 +102,15 @@ public:
         json->PutExtAttr("autoCancel", propAutoCancel_.value_or(true) ? "true" : "false", filter);
         json->PutExtAttr("showInSubWindow", propShowInSubWindow_.value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("isModal", propIsModal_.value_or(false) ? "true" : "false", filter);
-        json->PutExtAttr("isScenceBoardDialog", propIsScenceBoardDialog_.value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("isSceneBoardDialog", propIsSceneBoardDialog_.value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("buttonDirection", DialogButtonDirectionUtils::ConvertDialogButtonDirectionToString(
                                          propDialogButtonDirection_.value_or(DialogButtonDirection::AUTO))
                                          .c_str(), filter);
         json->PutExtAttr("width", propWidth_.value_or(CalcDimension(Dimension(-1))).Value(), filter);
         json->PutExtAttr("height", propHeight_.value_or(CalcDimension(Dimension(-1))).Value(), filter);
+        json->PutExtAttr("enableHoverMode", propEnableHoverMode_.value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("HoverModeAreaType", GetHoverModeAreaValue(HoverModeAreaType::BOTTOM_SCREEN) ==
+            HoverModeAreaType::BOTTOM_SCREEN ? "BOTTOM_SCREEN" : "TOP_SCREEN", filter);
     }
 
 private:

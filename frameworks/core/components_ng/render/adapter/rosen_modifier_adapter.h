@@ -31,6 +31,12 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/drawing.h"
+#include "ui/view/draw/content_modifier.h"
+#include "ui/view/draw/modifier.h"
+
+namespace OHOS::Ace::Kit {
+class Modifier;
+}
 
 namespace OHOS::Ace::NG {
 
@@ -65,11 +71,12 @@ public:
 
 private:
     WeakPtr<ContentModifier> modifier_;
-    std::vector<std::shared_ptr<RSPropertyBase>> attachedProperties_;
+    bool hasAttached_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ContentModifierAdapter);
 };
 
+std::shared_ptr<RSModifier> ConvertKitContentModifier(const RefPtr<Kit::Modifier>& modifier);
 std::shared_ptr<RSModifier> ConvertContentModifier(const RefPtr<Modifier>& modifier);
 std::shared_ptr<RSModifier> ConvertOverlayModifier(const RefPtr<Modifier>& modifier);
 std::shared_ptr<RSModifier> ConvertForegroundModifier(const RefPtr<Modifier>& modifier);
@@ -88,7 +95,7 @@ public:
 
 private:
     WeakPtr<OverlayModifier> modifier_;
-    std::vector<std::shared_ptr<RSPropertyBase>> attachedProperties_;
+    bool hasAttached_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(OverlayModifierAdapter);
 };
@@ -107,7 +114,7 @@ public:
 
 private:
     WeakPtr<ForegroundModifier> modifier_;
-    std::vector<std::shared_ptr<RSPropertyBase>> attachedProperties_;
+    bool hasAttached_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ForegroundModifierAdapter);
 };

@@ -92,7 +92,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag001, TestSize.Level1)
     float delta = SCROLL_BAR_CHILD_HEIGHT;
     info.SetMainDelta(-delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), 0.f);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 
@@ -102,7 +102,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag001, TestSize.Level1)
      */
     info.SetMainDelta(delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), delta);
     float expectOffset = delta * controlDistance / scrollableDistance;
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), expectOffset); // 50.f
@@ -112,7 +112,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag001, TestSize.Level1)
      * @tc.expected: Scroll down
      */
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), delta * 2);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), expectOffset * 2); // 100.f
 
@@ -122,7 +122,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag001, TestSize.Level1)
      */
     info.SetMainDelta(-delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), delta);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), expectOffset); // 50.f
 
@@ -130,7 +130,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag001, TestSize.Level1)
      * @tc.steps: step6. HandleDragEnd, drag end
      */
     HandleDragEnd(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), delta);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), expectOffset);
 }
@@ -153,6 +153,10 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag002, TestSize.Level1)
     /**
      * @tc.steps: step1. HandleDragStart, mouse wheel on scrollBar
      */
+    auto scrollable = scrollPattern_->GetScrollable();
+    auto context = scrollable->context_.Upgrade();
+    ASSERT_NE(context, nullptr);
+    scrollable->InitAxisAnimator();
     GestureEvent info;
     info.SetGlobalPoint(Point(SCROLL_WIDTH - 1.f, 1.f));
     info.SetInputEventType(InputEventType::AXIS);
@@ -165,19 +169,22 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag002, TestSize.Level1)
     float delta = -SCROLL_BAR_CHILD_HEIGHT;
     info.SetMainDelta(delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
     float expectBarPosition = -delta / controlDistance * scrollableDistance;
     EXPECT_EQ(pattern_->GetCurrentPosition(), expectBarPosition); // 512.f
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), -delta);
+    scrollable->axisAnimator_->StopAxisAnimation();
 
     /**
      * @tc.steps: step3. HandleDragUpdate, mouse wheel down continue
      * @tc.expected: Scroll down
      */
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), scrollableDistance); // 640.f
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), controlDistance);
+    scrollable->axisAnimator_->StopAxisAnimation();
 
     /**
      * @tc.steps: step4. HandleDragUpdate, mouse wheel up
@@ -185,7 +192,8 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag002, TestSize.Level1)
      */
     info.SetMainDelta(-delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), scrollableDistance - expectBarPosition); // 138
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), controlDistance + delta);              // 40.f
 
@@ -193,7 +201,8 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag002, TestSize.Level1)
      * @tc.steps: step5. HandleDragEnd, mouse wheel end
      */
     HandleDragEnd(info);
-    FlushLayoutTask(stackNode_, true);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), scrollableDistance - expectBarPosition); // 138
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), controlDistance + delta);              // 40.f
 }
@@ -210,7 +219,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag003, TestSize.Level1)
     CreateScroll(CONTENT_MAIN_SIZE, Axis::HORIZONTAL);
     CreateScrollBar(true, true, Axis::HORIZONTAL, DisplayMode::ON);
     CreateScrollBarChild();
-    CreateDone(stackNode_);
+    CreateDone();
     EXPECT_TRUE(IsEqual(GetChildRect(stackNode_, 0), RectF(0, 0, SCROLL_WIDTH, SCROLL_HEIGHT)));
     EXPECT_TRUE(IsEqual(GetChildRect(stackNode_, 1), RectF(0.f, 780.f, SCROLL_WIDTH, SCROLL_BAR_CHILD_WIDTH)));
     float controlDistance = pattern_->GetControlDistance();
@@ -231,33 +240,34 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag003, TestSize.Level1)
      * @tc.expected: Scroll left
      */
     float delta = SCROLL_BAR_CHILD_HEIGHT;
-    info.SetMainDelta(delta);
+    info.SetMainDelta(-delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), delta);
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(delta, 0.f)));
 
     /**
      * @tc.steps: step3. HandleDragUpdate, drag left continue
      * @tc.expected: Scroll left
      */
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), 0.f);
 
     /**
      * @tc.steps: step4. HandleDragUpdate, drag right
      * @tc.expected: Scroll right
      */
-    info.SetMainDelta(-delta);
+    info.SetMainDelta(delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), delta);
 
     /**
      * @tc.steps: step5. HandleDragEnd, drag end
      */
     HandleDragEnd(info);
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), delta);
 }
 
@@ -291,7 +301,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag004, TestSize.Level1)
     float delta = -SCROLL_BAR_CHILD_HEIGHT;
     info.SetMainDelta(delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), 0.f);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 
@@ -299,7 +309,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag004, TestSize.Level1)
      * @tc.steps: step3. HandleDragEnd, mouse wheel end
      */
     HandleDragEnd(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), 0.f);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 }
@@ -333,16 +343,16 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag005, TestSize.Level1)
     float delta = SCROLL_BAR_CHILD_HEIGHT;
     info.SetMainDelta(delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
-    EXPECT_EQ(pattern_->GetCurrentPosition(), delta);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetCurrentPosition(), 0);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 
     /**
      * @tc.steps: step3. HandleDragEnd, mouse wheel end
      */
     HandleDragEnd(info);
-    FlushLayoutTask(stackNode_);
-    EXPECT_EQ(pattern_->GetCurrentPosition(), delta);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetCurrentPosition(), 0);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 }
 
@@ -369,11 +379,11 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag006, TestSize.Level1)
     float delta = SCROLL_BAR_CHILD_HEIGHT;
     info.SetMainDelta(delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     info.SetMainVelocity(1200.f);
     HandleDragEnd(info);
     pattern_->frictionMotion_->NotifyListener(0.f);
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->frictionController_->IsRunning());
 
     /**
@@ -382,9 +392,9 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag006, TestSize.Level1)
      */
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     HandleDragEnd(info);
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->frictionController_->IsRunning());
 }
 
@@ -531,13 +541,13 @@ HWTEST_F(ScrollBarEventTestNg, ScrollScrollBar001, TestSize.Level1)
     CreateDone();
 
     auto scrollCallback = pattern_->scrollBar_->GetScrollPositionCallback();
-    scrollCallback(-100.f, SCROLL_FROM_BAR);
-    FlushLayoutTask(stackNode_);
+    scrollCallback(-100.f, SCROLL_FROM_BAR, false);
+    FlushUITasks();
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 100.f);
 
     auto scrollEnd = pattern_->scrollBar_->GetScrollEndCallback();
     scrollEnd();
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
 
     Container::Current()->SetApiTargetVersion(apiTargetVersion);
 }
@@ -627,7 +637,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleClickEvent001, TestSize.Level1)
     mouseInfo.SetLocalLocation(Offset());
     HandleMouseEvent(mouseInfo);
     HandleClickEvent();
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 
     /**
@@ -637,7 +647,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleClickEvent001, TestSize.Level1)
     mouseInfo.SetLocalLocation(Offset(0, SCROLL_BAR_CHILD_HEIGHT + 1.f));
     HandleMouseEvent(mouseInfo);
     HandleClickEvent();
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 
     /**
@@ -646,13 +656,13 @@ HWTEST_F(ScrollBarEventTestNg, HandleClickEvent001, TestSize.Level1)
      */
     // scroll down
     pattern_->UpdateCurrentOffset(1.f, SCROLL_FROM_BAR);
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), 1.f);
     // click above scrollBar
     mouseInfo.SetLocalLocation(Offset());
     HandleMouseEvent(mouseInfo);
     HandleClickEvent();
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_GT(scrollPattern_->GetTotalOffset(), 0.f);
     EXPECT_LT(scrollPattern_->GetTotalOffset(), 1.f);
 }
@@ -834,7 +844,8 @@ HWTEST_F(ScrollBarEventTestNg, HandleOnHover001, TestSize.Level1)
     pattern_->SetScrollBar(DisplayMode::AUTO);
     HoverInfo info;
     auto inputHub = pattern_->GetInputHub();
-    auto& inputEvents = pattern_->GetEventHub<EventHub>()->GetInputEventHub()->hoverEventActuator_->inputEvents_;
+    auto& inputEvents =
+        pattern_->GetOrCreateEventHub<EventHub>()->GetInputEventHub()->hoverEventActuator_->inputEvents_;
     EXPECT_TRUE(inputEvents.size() > 1);
     for (const auto& callback : inputEvents) {
         if (callback) {
@@ -854,5 +865,244 @@ HWTEST_F(ScrollBarEventTestNg, HandleOnHover001, TestSize.Level1)
     }
     EXPECT_EQ(pattern_->opacity_, UINT8_MAX);
     Container::Current()->SetApiTargetVersion(apiTargetVersion);
+}
+
+/**
+ * @tc.name: HandleDragEnd001
+ * @tc.desc: Test ScrollBar about HandleDragEnd in HORIZONTAL Layout and RTL Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarEventTestNg, HandleDragEnd001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    CreateStack(Alignment::BOTTOM_CENTER);
+    CreateScroll(CONTENT_MAIN_SIZE, Axis::HORIZONTAL);
+    CreateScrollBar(true, true, Axis::HORIZONTAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone();
+    EXPECT_TRUE(IsEqual(GetChildRect(stackNode_, 0), RectF(0, 0, SCROLL_WIDTH, SCROLL_HEIGHT)));
+    EXPECT_TRUE(IsEqual(GetChildRect(stackNode_, 1), RectF(0.f, 780.f, SCROLL_WIDTH, SCROLL_BAR_CHILD_WIDTH)));
+    float controlDistance = pattern_->GetControlDistance();
+    float scrollableDistance = pattern_->GetScrollableDistance();
+    EXPECT_EQ(controlDistance, CONTENT_MAIN_SIZE - SCROLL_WIDTH);          // 520.f
+    EXPECT_EQ(scrollableDistance, SCROLL_WIDTH - SCROLL_BAR_CHILD_HEIGHT); // 320.f
+    EXPECT_EQ(pattern_->GetCurrentPosition(), scrollableDistance);
+
+    /**
+     * @tc.steps: step1. HandleDragStart, drag on scrollBar
+     */
+    GestureEvent info;
+    info.SetGlobalPoint(Point(1.f, SCROLL_HEIGHT - 1.f));
+    HandleDragStart(info);
+
+    /**
+     * @tc.steps: step2. HandleDragEnd, drag left
+     * @tc.expected: Scroll left
+     */
+    info.SetMainVelocity(-1000.f);
+    HandleDragEnd(info);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_LE(pattern_->GetCurrentPosition(), 60.f);
+
+    /**
+     * @tc.steps: step2. HandleDragEnd, drag right
+     * @tc.expected: Scroll right
+     */
+    info.SetMainVelocity(1000.f);
+    HandleDragEnd(info);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetCurrentPosition(), scrollableDistance);
+}
+
+/**
+ * @tc.name: IsScrolling001
+ * @tc.desc: Test isScrolling in scrollBar without child
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarEventTestNg, IsScrolling001, TestSize.Level1)
+{
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::AUTO);
+    CreateDone();
+    EXPECT_FALSE(pattern_->isScrolling_);
+
+    /**
+     * @tc.steps: step2. inner scrollbar HandleDragStart
+     * @tc.expected: isScrolling_ is true
+     */
+    GestureEvent info;
+    pattern_->scrollBar_->HandleDragStart(info);
+    EXPECT_TRUE(pattern_->isScrolling_);
+
+    /**
+     * @tc.steps: step2. inner scrollbar HandleDragEnd
+     * @tc.expected: isScrolling_ is false
+     */
+    info.SetMainVelocity(-1000.f);
+    pattern_->scrollBar_->HandleDragEnd(info);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->isScrolling_);
+}
+
+/**
+ * @tc.name: PanDirection001
+ * @tc.desc: Test ScrollBar PanDirection with axis changing
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarEventTestNg, PanDirection001, TestSize.Level1)
+{
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone();
+    EXPECT_EQ(pattern_->panRecognizer_->direction_.type, PanDirection::VERTICAL);
+    
+    /**
+     * @tc.steps: step1. change scrollbar axis to HORIZONTAL
+     * @tc.expected: scrollBar panDirection is HORIZONTAL
+     */
+    layoutProperty_->UpdateAxis(Axis::HORIZONTAL);
+    pattern_->OnModifyDone();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->panRecognizer_->direction_.type, PanDirection::HORIZONTAL);
+}
+
+/**
+ * @tc.name: OnScrollStartStop001
+ * @tc.desc: Test OnScrollStart and OnScrollStart in drag scrollBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarEventTestNg, OnScrollStartStop001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize variables and callback
+     * @tc.expected: Variables initialized successfully.
+     */
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::AUTO);
+    CreateDone();
+
+    int32_t isScrollStartCalled = 0;
+    OnScrollStartEvent scrollStart = [&isScrollStartCalled]() { isScrollStartCalled++; };
+    int32_t isScrollStopCalled = 0;
+    int32_t stopHasStart = 0;
+    OnScrollStopEvent scrollStop = [&isScrollStopCalled, &isScrollStartCalled, &stopHasStart]() {
+        if (isScrollStartCalled - isScrollStopCalled == 1) {
+            stopHasStart++;
+        }
+        isScrollStopCalled++;
+    };
+    auto eventHub = scrollNode_->GetOrCreateEventHub<ScrollEventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    eventHub->SetOnScrollStart(std::move(scrollStart));
+    eventHub->SetOnScrollStop(std::move(scrollStop));
+
+    /**
+     * @tc.steps: step2. scrollBar dragStart
+     * @tc.expected: isScrollStartCalled should be 1.
+     */
+    GestureEvent info;
+    pattern_->scrollBar_->HandleDragStart(info);
+    FlushUITasks();
+    EXPECT_EQ(isScrollStartCalled, 1);
+    EXPECT_EQ(isScrollStopCalled, 0);
+
+    /**
+     * @tc.steps: step3. scrollBar dragUpdate.
+     * @tc.expected: isScrollStartCalled should be 1.
+     */
+    info.SetMainDelta(10.f);
+    pattern_->scrollBar_->HandleDragUpdate(info);
+    FlushUITasks();
+    EXPECT_EQ(isScrollStartCalled, 1);
+    EXPECT_EQ(isScrollStopCalled, 0);
+
+    /**
+     * @tc.steps: step4. scrollBar dragEnd.
+     * @tc.expected: isScrollStopCalled should be 1.
+     */
+    info.SetMainVelocity(0.f);
+    pattern_->scrollBar_->HandleDragEnd(info);
+    FlushUITasks();
+    EXPECT_EQ(isScrollStartCalled, 1);
+    EXPECT_EQ(isScrollStopCalled, 1);
+    EXPECT_EQ(stopHasStart, 1);
+}
+
+/**
+ * @tc.name: IsScrollSnapTrigger001
+ * @tc.desc: Test drag scrollbar with scroll snap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarEventTestNg, IsScrollSnapTrigger001, TestSize.Level1)
+{
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::AUTO);
+    scrollPattern_->SetEnablePaging(ScrollPagingStatus::VALID);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. scroll set enablePaging and scrollBar dragStart
+     * @tc.expected: IsScrollSnapTrigger should be true.
+     */
+    GestureEvent info;
+    pattern_->scrollBar_->HandleDragStart(info);
+    EXPECT_TRUE(pattern_->scrollBarProxy_->IsScrollSnapTrigger());
+
+    /**
+     * @tc.steps: step2. scrollBar dragEnd.
+     * @tc.expected: trigger scroll snap animation.
+     */
+    info.SetMainDelta(10.f);
+    info.SetMainVelocity(1000.f);
+    pattern_->scrollBar_->HandleDragEnd(info);
+    auto scrollable = scrollPattern_->GetScrollable();
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::SNAP);
+}
+
+/**
+ * @tc.name: IsScrollSnapTrigger002
+ * @tc.desc: Test drag scrollbar
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarEventTestNg, IsScrollSnapTrigger002, TestSize.Level1)
+{
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::AUTO);
+    CreateScrollBarChild();
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. scroll set enablePaging and scrollBar dragStart
+     * @tc.expected: IsScrollSnapTrigger should be true.
+     */
+    GestureEvent info;
+    pattern_->HandleDragStart(info);
+    EXPECT_TRUE(pattern_->scrollBarProxy_->IsScrollSnapTrigger());
+    info.SetMainDelta(10.f);
+    info.SetMainVelocity(0.f);
+    pattern_->HandleDragEnd(info);
+    EXPECT_FALSE(pattern_->scrollBarProxy_->IsScrollSnapTrigger());
+
+    /**
+     * @tc.steps: step2. scrollBar dragEnd.
+     * @tc.expected: trigger scroll snap animation.
+     */
+    pattern_->HandleDragStart(info);
+    EXPECT_TRUE(pattern_->scrollBarProxy_->IsScrollSnapTrigger());
+    info.SetMainVelocity(1000.f);
+    pattern_->HandleDragEnd(info);
+    EXPECT_TRUE(pattern_->scrollBarProxy_->IsScrollSnapTrigger());
 }
 } // namespace OHOS::Ace::NG

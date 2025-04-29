@@ -50,6 +50,7 @@ public:
 
     void OnModifyDone() override
     {
+        Pattern::CheckLocalized();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto paintProperty = host->GetPaintProperty<ShapePaintProperty>();
@@ -72,7 +73,7 @@ protected:
         CHECK_NULL_RETURN(curFrameNode, nullptr);
         auto childNode = curFrameNode;
         ShapePaintProperty propertiesFromAncestor;
-        auto parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame());
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame(false));
         while (parentFrameNode) {
             auto parentPaintProperty = parentFrameNode->GetPaintProperty<ShapePaintProperty>();
             if (parentPaintProperty) {
@@ -84,7 +85,7 @@ protected:
                 }
             }
             curFrameNode = parentFrameNode;
-            parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame());
+            parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame(false));
         }
         return DynamicCast<ShapePaintProperty>(propertiesFromAncestor.Clone());
     }

@@ -14,10 +14,7 @@
  */
 #include "core/interfaces/native/node/path_modifier.h"
 
-#include "core/pipeline/base/element_register.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/shape/path_model_ng.h"
-#include "core/components/common/layout/constants.h"
 
 
 namespace OHOS::Ace::NG {
@@ -40,14 +37,24 @@ void ResetPathCommands(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIPathModifier* GetPathModifier()
 {
-    static const ArkUIPathModifier modifier = {SetPathCommands, ResetPathCommands};
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIPathModifier modifier = {
+        .setPathCommands = SetPathCommands,
+        .resetPathCommands = ResetPathCommands,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIPathModifier* GetCJUIPathModifier()
 {
-    static const CJUIPathModifier modifier = {SetPathCommands, ResetPathCommands};
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIPathModifier modifier = {
+        .setPathCommands = SetPathCommands,
+        .resetPathCommands = ResetPathCommands,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

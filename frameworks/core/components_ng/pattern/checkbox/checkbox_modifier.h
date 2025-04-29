@@ -29,6 +29,7 @@
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/paint_wrapper.h"
+#include "core/components_ng/token_theme/token_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -95,8 +96,9 @@ public:
         }
     }
 
-    void InitializeParam();
+    void InitializeParam(TokenThemeScopeId themeScopeId);
     void PaintCheckBox(RSCanvas& canvas, const OffsetF& paintOffset, const SizeF& paintSize) const;
+    void DrawFocusBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
     void DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
 
     void DrawBorder(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const;
@@ -106,19 +108,16 @@ public:
     void SetUserActiveColor(const Color& color)
     {
         userActiveColor_ = color;
-        animatableBoardColor_->Set(isSelect_->Get() ? LinearColor(userActiveColor_) : LinearColor(inactivePointColor_));
     }
 
     void SetInActiveColor(const Color& color)
     {
         inactiveColor_ = color;
-        animatableBorderColor_->Set(isSelect_->Get() ? LinearColor(Color::TRANSPARENT) : LinearColor(inactiveColor_));
     }
 
     void SetPointColor(const Color& color)
     {
         pointColor_ = color;
-        animatableCheckColor_->Set(isSelect_->Get() ? LinearColor(pointColor_) : LinearColor(Color::TRANSPARENT));
     }
 
     void SetEnabled(bool enabled)
@@ -132,6 +131,13 @@ public:
     {
         if (isSelect_) {
             isSelect_->Set(isSelect);
+        }
+    }
+
+    void SetIsFocused(bool isFocused)
+    {
+        if (isFocused_) {
+            isFocused_->Set(isFocused);
         }
     }
 
@@ -204,9 +210,17 @@ public:
         }
     }
 
+    void SetHasUnselectedColor(bool hasUnselectedColor)
+    {
+        hasUnselectedColor_ = hasUnselectedColor;
+    }
+
 private:
+    void DrawRectOrCircle(RSCanvas& canvas, const RSRoundRect& rrect) const;
+
     float borderWidth_ = 0.0f;
     float borderRadius_ = 0.0f;
+    float whiteBorderRadius_ = 0.0f;
     Color pointColor_;
     Color activeColor_;
     Color inactiveColor_;
@@ -215,15 +229,24 @@ private:
     Color hoverColor_;
     Color inactivePointColor_;
     Color userActiveColor_;
+    Color focusBoardColor_;
+    Color borderFocusedColor_;
+    Color focusedBGColorUnselected_;
     Dimension hoverRadius_;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;
     Dimension defaultPaddingSize_;
+    Dimension defaultRoundPaddingSize_;
+    Dimension hoverPaddingSize_;
     Dimension shadowWidth_;
+    Dimension focusBoardSize_;
+    Dimension roundFocusBoardSize_;
     float hoverDuration_ = 0.0f;
     float hoverToTouchDuration_ = 0.0f;
     float touchDuration_ = 0.0f;
     float colorAnimationDuration_ = 0.0f;
+    bool hasUnselectedColor_ = false;
+    bool showCircleDial_ = false;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
@@ -234,6 +257,7 @@ private:
     RefPtr<PropertyBool> enabled_;
     RefPtr<PropertyBool> useContentModifier_;
     RefPtr<PropertyBool> hasBuilder_;
+    RefPtr<PropertyBool> isFocused_;
     RefPtr<AnimatablePropertyColor> animatableBoardColor_;
     RefPtr<AnimatablePropertyColor> animatableCheckColor_;
     RefPtr<AnimatablePropertyColor> animatableBorderColor_;

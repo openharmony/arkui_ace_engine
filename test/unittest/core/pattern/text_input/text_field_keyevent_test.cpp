@@ -59,7 +59,6 @@ HWTEST_F(TextFieldKeyEventTest, KeyEventChar001, TestSize.Level1)
         { KeyCode::KEY_NUMPAD_MULTIPLY, L'*' },
         { KeyCode::KEY_NUMPAD_SUBTRACT, L'-' },
         { KeyCode::KEY_NUMPAD_ADD, L'+' },
-        { KeyCode::KEY_NUMPAD_DOT, L'.' },
         { KeyCode::KEY_NUMPAD_COMMA, L',' },
         { KeyCode::KEY_NUMPAD_EQUALS, L'=' },
     };
@@ -235,6 +234,56 @@ HWTEST_F(TextFieldKeyEventTest, KeyEventChar004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: KeyEventChar005
+ * @tc.desc: Test NumLock + KEY_NUMPAD_0-9/. symbols input
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEventChar005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    CreateTextField();
+    GetFocus();
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.numLock = true;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    event.pressedCodes = presscodes;
+    const std::unordered_map<KeyCode, wchar_t> symbols = {
+        { KeyCode::KEY_NUMPAD_0, L'0' },
+        { KeyCode::KEY_NUMPAD_1, L'1' },
+        { KeyCode::KEY_NUMPAD_2, L'2' },
+        { KeyCode::KEY_NUMPAD_3, L'3' },
+        { KeyCode::KEY_NUMPAD_4, L'4' },
+        { KeyCode::KEY_NUMPAD_5, L'5' },
+        { KeyCode::KEY_NUMPAD_6, L'6' },
+        { KeyCode::KEY_NUMPAD_7, L'7' },
+        { KeyCode::KEY_NUMPAD_8, L'8' },
+        { KeyCode::KEY_NUMPAD_9, L'9' },
+        { KeyCode::KEY_NUMPAD_DOT, L'.' },
+    };
+    /**
+     * @tc.expected: Calling the keyboard event interface
+     */
+    std::string result;
+    for (auto code : symbols) {
+        event.pressedCodes.clear();
+        event.pressedCodes.push_back(code.first);
+        event.code = code.first;
+        auto ret = pattern_->OnKeyEvent(event);
+        FlushLayoutTask(frameNode_);
+        std::wstring appendElement(1, code.second);
+        result.append(StringUtils::ToString(appendElement));
+        EXPECT_EQ(pattern_->GetTextValue(), result);
+        EXPECT_TRUE(ret);
+    }
+}
+
+/**
  * @tc.name: KeyEvent001
  * @tc.desc: Test KeyEvent selections
  * @tc.type: FUNC
@@ -335,55 +384,6 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent002, TestSize.Level1)
 }
 
 /**
- * @tc.name: KeyEvent003
- * @tc.desc: Test KeyEvent ctrl + c/v
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldKeyEventTest, KeyEvent003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize textInput and get focus
-     */
-    std::string expectStr = "fghij";
-    auto onCopy = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
-    auto onPaste = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
-    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) -> void {
-        model.SetOnCopy(onCopy);
-        model.SetOnPaste(onPaste);
-    });
-
-    /**
-     * @tc.steps: step2. Create keyboard events
-     */
-    KeyEvent event;
-    event.action = KeyAction::DOWN;
-    std::vector<KeyCode> presscodes = {};
-    event.pressedCodes = presscodes;
-
-    /**
-     * @tc.expected: shift + insert to input
-     */
-    event.pressedCodes.clear();
-    event.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
-    event.pressedCodes.push_back(KeyCode::KEY_C);
-    event.code = KeyCode::KEY_C;
-    pattern_->HandleSetSelection(5, 10, false);
-    auto ret = pattern_->OnKeyEvent(event);
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(ret);
-
-    event.pressedCodes.clear();
-    event.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
-    event.pressedCodes.push_back(KeyCode::KEY_V);
-    event.code = KeyCode::KEY_V;
-    pattern_->SetCaretPosition(0);
-    ret = pattern_->OnKeyEvent(event);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetTextValue(), expectStr + DEFAULT_TEXT);
-    EXPECT_TRUE(ret);
-}
-
-/**
  * @tc.name: KeyEvent004
  * @tc.desc: Test KeyEvent ctrl + a
  * @tc.type: FUNC
@@ -419,6 +419,31 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent004, TestSize.Level1)
         << "Second index is " + std::to_string(pattern_->selectController_->GetSecondHandleInfo().index);
 }
 
+HWTEST_F(TextFieldKeyEventTest, KeyEvent010, TestSize.Level1)
+{
+    KeyEvent keyEvent;
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.code = KeyCode::KEY_TAB;
+    std::vector<KeyCode> presscodes = {};
+    keyEvent.pressedCodes = presscodes;
+    keyEvent.pressedCodes.clear();
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_A);
+    keyEvent.code = KeyCode::KEY_A;
+    CreateTextField(DEFAULT_TEXT);
+    pattern_->HandleSetSelection(5, 10, false);
+    pattern_->isFocusedBeforeClick_ = false;
+    GetFocus();
+    pattern_->needToRequestKeyboardOnFocus_  = false;
+    pattern_->needToRequestKeyboardInner_  = false;
+    auto ret = pattern_->OnKeyEvent(keyEvent);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 0);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26)
+        << "Second index is " + std::to_string(pattern_->selectController_->GetSecondHandleInfo().index);
+}
+
 /**
  * @tc.name: KeyEvent005
  * @tc.desc: Test KeyEvent ctrl + x
@@ -438,7 +463,7 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent005, TestSize.Level1)
         ACTION_COPY,
         ACTION_PASTE,
     };
-    auto callback = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
+    auto callback = [expectStr](const std::u16string& str) { EXPECT_EQ(expectStr, StringUtils::Str16ToStr8(str)); };
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) {
         model.SetOnCut(callback); });
 
@@ -469,77 +494,6 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent005, TestSize.Level1)
 }
 
 /**
- * @tc.name: KeyEvent006
- * @tc.desc: Test KeyEvent ctrl + z/y
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldKeyEventTest, KeyEvent006, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize textInput and get focus
-     */
-    std::string expectStr = "fghij";
-    auto onCopy = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
-    auto onPaste = [expectStr](const std::string& str) { EXPECT_EQ(expectStr, str); };
-    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) -> void {
-        model.SetOnCopy(onCopy);
-        model.SetOnPaste(onPaste);
-    });
-    FlushLayoutTask(frameNode_);
-
-    /**
-     * @tc.steps: step2. Create keyboard events
-     */
-    KeyEvent event;
-    event.action = KeyAction::DOWN;
-    std::vector<KeyCode> presscodes = {};
-    event.pressedCodes = presscodes;
-
-    /**
-     * @tc.expected: shift + c/v to input
-     */
-    event.pressedCodes.clear();
-    event.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
-    event.pressedCodes.push_back(KeyCode::KEY_C);
-    event.code = KeyCode::KEY_C;
-    pattern_->HandleSetSelection(5, 10, false);
-    auto ret = pattern_->OnKeyEvent(event);
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(ret);
-
-    event.pressedCodes.clear();
-    event.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
-    event.pressedCodes.push_back(KeyCode::KEY_V);
-    event.code = KeyCode::KEY_V;
-    pattern_->SetCaretPosition(0);
-    ret = pattern_->OnKeyEvent(event);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetTextValue(), expectStr + DEFAULT_TEXT);
-    EXPECT_TRUE(ret);
-
-    /**
-     * @tc.expected: shift + z/y to input
-     */
-    event.pressedCodes.clear();
-    event.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
-    event.pressedCodes.push_back(KeyCode::KEY_Z);
-    event.code = KeyCode::KEY_Z;
-    ret = pattern_->OnKeyEvent(event);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetTextValue(), "abcdefghijklmnopqrstuvwxyz");
-    EXPECT_TRUE(ret);
-
-    event.pressedCodes.clear();
-    event.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
-    event.pressedCodes.push_back(KeyCode::KEY_Y);
-    event.code = KeyCode::KEY_Y;
-    ret = pattern_->OnKeyEvent(event);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetTextValue(), "abcdefghijklmnopqrstuvwxyz");
-    EXPECT_TRUE(ret);
-}
-
-/**
  * @tc.name: KeyEvent007
  * @tc.desc: Test KeyEvent enter
  * @tc.type: FUNC
@@ -557,7 +511,7 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent007, TestSize.Level1)
         model.SetOnSubmit(onSubmit);
     });
     GetFocus();
-
+    EXPECT_TRUE(pattern_->GetCursorVisible());
     pattern_->PerformAction(TextInputAction::DONE, true);
     EXPECT_TRUE(pattern_->GetCursorVisible());
 }
@@ -574,15 +528,15 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent008, TestSize.Level1)
      */
     auto onSubmit = [](int32_t textFieldKey, NG::TextFieldCommonEvent& commonEvent) {
         EXPECT_FALSE(commonEvent.keepEditable_);
-        EXPECT_EQ(commonEvent.text_, "abcdefghijklmnopqrstuvwxyz");
+        EXPECT_EQ(StringUtils::Str16ToStr8(commonEvent.text_), "abcdefghijklmnopqrstuvwxyz");
     };
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) -> void {
         model.SetOnSubmit(onSubmit);
     });
     GetFocus();
-
-    pattern_->PerformAction(TextInputAction::DONE, true);
     EXPECT_TRUE(pattern_->GetCursorVisible());
+    pattern_->PerformAction(TextInputAction::DONE, true);
+    EXPECT_FALSE(pattern_->GetCursorVisible());
 }
 
 /**
@@ -598,7 +552,7 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent009, TestSize.Level1)
     auto onSubmit = [](int32_t textFieldKey, NG::TextFieldCommonEvent& commonEvent) {
         commonEvent.SetKeepEditable(true);
         EXPECT_TRUE(commonEvent.keepEditable_);
-        EXPECT_EQ(commonEvent.text_, "abcdefghijklmnopqrstuvwxyz");
+        EXPECT_EQ(StringUtils::Str16ToStr8(commonEvent.text_), "abcdefghijklmnopqrstuvwxyz");
     };
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) -> void {
         model.SetInputStyle(DEFAULT_INPUT_STYLE);

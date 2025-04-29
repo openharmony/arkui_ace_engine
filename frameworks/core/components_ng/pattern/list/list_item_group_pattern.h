@@ -38,6 +38,7 @@ struct ListItemGroupPaintInfo {
     float spaceWidth = 0.0f;
     float laneGutter = 0.0f;
     int32_t totalItemCount = 0;
+    float listContentSize = FLT_MAX;
 };
 
 enum ListItemGroupArea {
@@ -52,6 +53,21 @@ struct VisibleContentInfo {
     int32_t indexInGroup = -1;
 };
 
+struct ListMainSizeValues {
+    float startPos = 0.0f;
+    float endPos = 0.0f;
+    std::optional<int32_t> jumpIndexInGroup;
+    float prevContentMainSize = 0.0f;
+    ScrollAlign scrollAlign = ScrollAlign::START;
+    std::optional<float> layoutStartMainPos;
+    std::optional<float> layoutEndMainPos;
+    float referencePos = 0.0f;
+    float contentStartOffset = 0.0f;
+    float contentEndOffset = 0.0f;
+    bool forward = true;
+    bool backward = false;
+};
+
 class ACE_EXPORT ListItemGroupPattern : public Pattern {
     DECLARE_ACE_TYPE(ListItemGroupPattern, Pattern);
 
@@ -63,6 +79,7 @@ public:
     ~ListItemGroupPattern() override = default;
 
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     bool IsAtomicNode() const override
     {
         return false;
@@ -90,10 +107,13 @@ public:
         CHECK_NULL_VOID(host);
         auto prevHeader = header_.Upgrade();
         if (!prevHeader) {
-            host->AddChild(header);
-        } else {
-            host->ReplaceChild(prevHeader, header);
+            host->AddChild(header, 0);
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        } else {
+            if (header != prevHeader) {
+                host->ReplaceChild(prevHeader, header);
+                host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            }
         }
         header_ = header;
     }
@@ -103,13 +123,59 @@ public:
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto prevFooter = footer_.Upgrade();
+        auto prevHeader = header_.Upgrade();
         if (!prevFooter) {
-            host->AddChild(footer);
-        } else {
-            host->ReplaceChild(prevFooter, footer);
+            if (prevHeader) {
+                host->AddChildAfter(footer, prevHeader);
+            } else {
+                host->AddChild(footer, 0);
+            }
             host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        } else {
+            if (footer != prevFooter) {
+                host->ReplaceChild(prevFooter, footer);
+                host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            }
         }
         footer_ = footer;
+    }
+
+    void RemoveHeader()
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto prevHeader = header_.Upgrade();
+        if (prevHeader && isHeaderComponentContentExist_) {
+            host->RemoveChild(prevHeader);
+            host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            header_ = nullptr;
+            isHeaderComponentContentExist_ = false;
+        }
+    }
+
+    void RemoveFooter()
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto prevFooter = footer_.Upgrade();
+        if (prevFooter && isFooterComponentContentExist_) {
+            host->RemoveChild(prevFooter);
+            host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            footer_ = nullptr;
+            isFooterComponentContentExist_ = false;
+        }
+    }
+
+    bool IsHasHeader()
+    {
+        auto headerNode = DynamicCast<FrameNode>(header_.Upgrade());
+        return headerNode ? true : false;
+    }
+
+    bool IsHasFooter()
+    {
+        auto footerGroup = DynamicCast<FrameNode>(footer_.Upgrade());
+        return footerGroup ? true : false;
     }
 
     const ListItemGroupLayoutAlgorithm::PositionMap& GetItemPosition()
@@ -120,6 +186,16 @@ public:
     void SetIndexInList(int32_t index)
     {
         indexInList_ = index;
+    }
+
+    void SetHeaderComponentContentExist(bool isHeaderComponentContentExist)
+    {
+        isHeaderComponentContentExist_ = isHeaderComponentContentExist;
+    }
+
+    void SetFooterComponentContentExist(bool isFooterComponentContentExist)
+    {
+        isFooterComponentContentExist_ = isFooterComponentContentExist;
     }
 
     int32_t GetIndexInList() const
@@ -167,6 +243,11 @@ public:
         return lanes_;
     }
 
+    void SetLanes(int32_t num)
+    {
+        lanes_ = num;
+    }
+
     V2::ListItemGroupStyle GetListItemGroupStyle()
     {
         return listItemGroupStyle_;
@@ -182,8 +263,9 @@ public:
         return footerMainSize_;
     }
 
-    float GetEstimateOffset(float height, const std::pair<float, float>& targetPos) const;
-    float GetEstimateHeight(float& averageHeight) const;
+    float GetEstimateOffset(float height, const std::pair<float, float>& targetPos,
+        float headerMainSize, float footerMainSize) const;
+    float GetEstimateHeight(float& averageHeight, float headerMainSize, float footerMainSize, float spaceWidth) const;
     bool HasLayoutedItem() const
     {
         return layouted_ && (layoutedItemInfo_.has_value() || itemTotalCount_ == 0);
@@ -198,6 +280,13 @@ public:
         }
     }
 
+    void ResetLayoutedInfo()
+    {
+        layouted_ = false;
+        layoutedItemInfo_.reset();
+        itemPosition_.clear();
+    }
+
     void SetListItemGroupStyle(V2::ListItemGroupStyle style);
     RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize();
     void SetListChildrenMainSize(float defaultSize, const std::vector<float>& mainSize);
@@ -208,23 +297,46 @@ public:
     VisibleContentInfo GetEndListItemIndex();
     void ResetChildrenSize();
 
+    void ClearItemPosition();
+    void ClearCachedItemPosition();
     void CalculateItemStartIndex();
-    void UpdateActiveChildRange(bool forward, int32_t cacheCount);
-    int32_t UpdateForwardCachedIndex(int32_t cacheCount, bool outOfView);
-    int32_t UpdateBackwardCachedIndex(int32_t cacheCount, bool outOfView);
-    void LayoutCache(const LayoutConstraintF& constraint, bool forward, int64_t deadline, int32_t cached);
-private:
-    bool IsNeedInitClickEventRecorder() const override
+    bool NeedCacheForward(const LayoutWrapper* listWrapper) const;
+    CachedIndexInfo UpdateCachedIndex(bool outOfView, bool reCache, int32_t forwardCache, int32_t backwardCache);
+    int32_t UpdateCachedIndexForward(bool outOfView, bool show, int32_t cacheCount);
+    int32_t UpdateCachedIndexBackward(bool outOfView, bool show, int32_t cacheCount);
+    std::pair<int32_t, int32_t> UpdateCachedIndexOmni(int32_t forwardCache, int32_t backwardCache);
+    void UpdateActiveChildRange(bool forward, int32_t cacheCount, bool show);
+    void UpdateActiveChildRange(bool show);
+    void SyncItemsToCachedItemPosition();
+    bool IsVisible() const;
+    void SetRecache(bool value)
     {
-        return true;
+        reCache_ = value;
+    }
+    void LayoutCache(const LayoutConstraintF& constraint, int64_t deadline, int32_t forwardCached,
+        int32_t backwardCached, ListMainSizeValues listSizeValues);
+
+    RefPtr<UINode> GetHeader() const
+    {
+        return header_.Upgrade();
     }
 
+    RefPtr<UINode> GetFooter() const
+    {
+        return footer_.Upgrade();
+    }
+
+private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
     void SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode);
     void OnColorConfigurationUpdate() override;
     void CheckListDirectionInCardStyle();
     float GetPaddingAndMargin() const;
+    float GetListPaddingOffset(const RefPtr<FrameNode>& listNode) const;
+    bool FirstItemFullVisible(const RefPtr<FrameNode>& listNode) const;
+    bool CheckDataChangeOutOfStart(int32_t index, int32_t count, int32_t startIndex, int32_t endIndex);
+
     RefPtr<ShallowBuilder> shallowBuilder_;
     RefPtr<ListPositionMap> posMap_;
     RefPtr<ListChildrenMainSize> childrenSize_;
@@ -234,6 +346,8 @@ private:
 
     WeakPtr<UINode> header_;
     WeakPtr<UINode> footer_;
+    bool isHeaderComponentContentExist_ = false;
+    bool isFooterComponentContentExist_ = false;
     int32_t itemStartIndex_ = 0;
     int32_t headerIndex_ = -1;
     int32_t footerIndex_ = -1;
@@ -247,8 +361,12 @@ private:
     std::set<int32_t> pressedItem_;
     bool layouted_ = false;
 
+    bool reCache_ = false;
     int32_t backwardCachedIndex_ = INT_MAX;
     int32_t forwardCachedIndex_ = -1;
+    ListItemGroupLayoutAlgorithm::PositionMap cachedItemPosition_;
+    float adjustRefPos_ = 0.0f;
+    float adjustTotalSize_ = 0.0f;
 
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
     float spaceWidth_ = 0.0f;
@@ -259,7 +377,9 @@ private:
     float endFooterPos_ = 0.0f;
     TextDirection layoutDirection_ = TextDirection::LTR;
     float mainSize_ = 0.0f;
+    float listContentSize_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(ListItemGroupPattern);
+    bool isStackFromEnd_ = false;
 };
 } // namespace OHOS::Ace::NG
 

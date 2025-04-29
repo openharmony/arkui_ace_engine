@@ -15,13 +15,7 @@
 
 #include "core/components_ng/event/click_event.h"
 
-#include "base/utils/utils.h"
-#include "core/accessibility/accessibility_utils.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/event/gesture_info.h"
-#include "core/components_ng/gestures/recognizers/click_recognizer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -48,6 +42,7 @@ void ClickEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, c
     clickRecognizer_->SetOnAction(GetClickEvent());
     clickRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     clickRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+    clickRecognizer_->SetDistanceThreshold(distanceThreshold_);
     auto sysJudgeFunc = GetSysJudgeFunc();
     if (sysJudgeFunc.has_value()) {
         clickRecognizer_->SetSysGestureJudge(sysJudgeFunc.value());

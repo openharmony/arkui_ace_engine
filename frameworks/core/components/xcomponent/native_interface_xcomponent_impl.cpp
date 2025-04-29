@@ -221,6 +221,16 @@ int32_t OH_NativeXComponent::RegisterKeyEventCallback(void (*callback)(OH_Native
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }
 
+int32_t OH_NativeXComponent::RegisterKeyEventCallbackWithResult(
+    bool (*callback)(OH_NativeXComponent* component, void* window))
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    xcomponentImpl_->SetKeyEventCallbackWithResult(callback);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
 int32_t OH_NativeXComponent::RegisterBlurEventCallback(void (*callback)(OH_NativeXComponent* component, void* window))
 {
     if (xcomponentImpl_ == nullptr) {
@@ -348,4 +358,14 @@ int32_t OH_NativeXComponent::GetSourceType(int32_t pointId, OH_NativeXComponent_
     return (xcomponentImpl_ && xcomponentImpl_->GetSourceType(pointId, sourceType))
                ? OH_NATIVEXCOMPONENT_RESULT_SUCCESS
                : OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+}
+
+int32_t OH_NativeXComponent::GetAccessibilityProvider(ArkUI_AccessibilityProvider** handle)
+{
+    if (xcomponentImpl_ == nullptr || handle == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+
+    (*handle) = xcomponentImpl_->GetAccessbilityProvider().get();
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }

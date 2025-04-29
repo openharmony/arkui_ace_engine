@@ -36,6 +36,8 @@ public:
     void SetActiveCircleColor(const Color& activeCircleColor) override;
     void SetActiveCircleRadius(const Dimension& activeCircleRadius) override;
     void SetEnableWaveEffect(bool enableWaveEffect) override;
+    void SetEnableForeground(bool enableForeground) override;
+    void SetSkipUnselectedPoint(bool isSkipUnselectedPoint) override;
 
     static void SetActiveColor(FrameNode* frameNode, const Color& activeColor);
     static void SetCircleRadius(FrameNode* frameNode, const Dimension& radius);
@@ -48,6 +50,10 @@ public:
     static void SetActiveCircleColor(FrameNode* frameNode, const Color& activeCircleColor);
     static void SetActiveCircleRadius(FrameNode* frameNode, const Dimension& activeCircleRadius);
     static void SetEnableWaveEffect(FrameNode* frameNode, bool enableWaveEffect);
+    static void SetEnableForeground(FrameNode* frameNode, bool enableForeground);
+    static void SetSkipUnselectedPoint(FrameNode* frameNode, bool isSkipUnselectedPoint);
+    static void SetPatternComplete(FrameNode* frameNode, NG::PatternLockCompleteEvent&& onComplete);
+    static void SetDotConnect(FrameNode* frameNode, std::function<void(int32_t)>&& onDotConnect);
 };
 
 } // namespace OHOS::Ace::NG

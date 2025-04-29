@@ -24,6 +24,8 @@
 #include <vector>
 
 #include "base/geometry/dimension.h"
+#include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
@@ -37,6 +39,7 @@ inline constexpr ListChangeFlag LIST_UPDATE_LANES = 1 << 2;
 inline constexpr ListChangeFlag LIST_UPDATE_SPACE = 1 << 3;
 inline constexpr ListChangeFlag LIST_GROUP_UPDATE_HEADER_FOOTER = 1 << 4;
 inline constexpr ListChangeFlag LIST_UPDATE_ITEM_COUNT = 1 << 5;
+inline constexpr ListChangeFlag LIST_UPDATE_HEADER_FOOTER = 1 << 6;
 
 namespace {
 constexpr float DEFAULT_SIZE = -1.0f;
@@ -120,7 +123,24 @@ public:
         return !initialized_;
     }
 
-    float GetChildSize(int32_t index) const
+    float GetChildSize(int32_t index, bool isStackFromEnd = false)
+    {
+        index = isStackFromEnd ? static_cast<int32_t>(childrenSize_.size()) - index - 1 : index;
+        return isRoundingMode_ ? GetRoundingSize(index) : GetRealSize(index);
+    }
+
+    void ResizeChildrenSize(int32_t size)
+    {
+        childrenSize_.resize(std::max(size, 0), DEFAULT_SIZE);
+    }
+
+    void SetIsRoundingMode()
+    {
+        isRoundingMode_ = true;
+    }
+
+private:
+    float GetRealSize(int32_t index)
     {
         if (index > (static_cast<int32_t>(childrenSize_.size()) - 1) || index < 0 ||
             NearEqual(childrenSize_[index], DEFAULT_SIZE)) {
@@ -133,15 +153,23 @@ public:
         return childrenSize_[index];
     }
 
-    void ResizeChildrenSize(int32_t size)
+    float GetRoundingSize(int32_t index)
     {
-        childrenSize_.resize(std::max(size, 0), DEFAULT_SIZE);
+        if (index > (static_cast<int32_t>(childrenSize_.size()) - 1) || index < 0 ||
+            NearEqual(childrenSize_[index], DEFAULT_SIZE)) {
+            return Round(defaultSize_);
+        }
+        if (Negative(childrenSize_[index])) {
+            TAG_LOGW(AceLogTag::ACE_LIST, "ChildrenMainSize child index:%{public}d, size:%{public}f.", index,
+                childrenSize_[index]);
+        }
+        return Round(childrenSize_[index]);
     }
 
-private:
     std::vector<float> childrenSize_;
     float defaultSize_ = 0.0f;
     bool initialized_ = false;
+    bool isRoundingMode_ = false;
     std::function<void(std::tuple<int32_t, int32_t, int32_t>, ListChangeFlag)> onChildrenSizeChange_;
 };
 

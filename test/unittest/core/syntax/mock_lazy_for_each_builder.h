@@ -28,6 +28,8 @@ class MockLazyForEachBuilder : public NG::LazyForEachBuilder, public MockLazyFor
     DECLARE_ACE_TYPE(MockLazyForEachBuilder, NG::LazyForEachBuilder, MockLazyForEachActuator);
 
 public:
+    explicit MockLazyForEachBuilder(bool deleteExpiringItemImmediately = false)
+        : deleteExpiringItemImmediately_(deleteExpiringItemImmediately) {}
     void ReleaseChildGroupById(const std::string& id) override {}
     void RegisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener) override {}
     void UnregisterDataChangeListener(V2::DataChangeListener* listener) override {}
@@ -37,9 +39,9 @@ protected:
     {
         return static_cast<int32_t>(cachedItems_.size());
     }
-    std::set<std::string> GetCacheKeys(std::set<int32_t>& idleIndexes) override
+    bool DeleteExpiringItemImmediately() override
     {
-        return {};
+        return deleteExpiringItemImmediately_;
     }
     std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndex(
         int32_t index, std::unordered_map<std::string, NG::LazyForEachCacheChild>& cachedItems) override
@@ -60,6 +62,8 @@ protected:
     void NotifyDataAdded(size_t index) override {};
     void KeepRemovedItemInCache(NG::LazyForEachChild node,
         std::unordered_map<std::string, NG::LazyForEachCacheChild>& cachedItems) override {};
+private:
+    bool deleteExpiringItemImmediately_;
 };
 } // namespace OHOS::Ace::Framework
 

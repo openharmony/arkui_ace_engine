@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -56,7 +56,11 @@ template("ace_osal_ohos_source_set") {
       "data_detector_adapter.cpp",
       "data_detector_loader.cpp",
       "data_detector_mgr.cpp",
+      "data_url_analyzer_loader.cpp",
+      "data_url_analyzer_mgr.cpp",
+      "display_info_utils.cpp",
       "download_manager_ohos.cpp",
+      "drawable_descriptor_ohos.cpp",
       "event_report.cpp",
       "exception_handler.cpp",
       "frame_report.cpp",
@@ -68,19 +72,32 @@ template("ace_osal_ohos_source_set") {
       "layout_inspector.cpp",
       "log_wrapper.cpp",
       "modal_ui_extension_impl.cpp",
+      "perf_interfaces.cpp",
       "ressched_report.cpp",
       "socperf_client_impl.cpp",
+      "stylus_detector_callback.cpp",
       "stylus_detector_default.cpp",
       "stylus_detector_loader.cpp",
       "stylus_detector_mgr.cpp",
       "system_properties.cpp",
+      "text_share_adapter.cpp",
+      "text_share_loader.cpp",
+      "text_share_mgr.cpp",
+      "text_translation_adapter.cpp",
+      "text_translation_loader.cpp",
+      "text_translation_mgr.cpp",
+      "thp_extra_manager_impl.cpp",
+      "thread_priority.cpp",
       "trace_id_impl.cpp",
       "view_data_wrap_ohos.cpp",
       "want_wrap_ohos.cpp",
+      "websocket_manager.cpp",
+      "window_utils.cpp",
     ]
 
     external_deps += [
       "ability_runtime:app_manager",
+      "hicollie:libhicollie",
       "i18n:intl_util",
       "init:libbegetutil",
     ]
@@ -92,12 +109,23 @@ template("ace_osal_ohos_source_set") {
         "resource_convertor.cpp",
         "resource_theme_style.cpp",
       ]
+
+      if (ohos_indep_compiler_enable) {
+        include_dirs = indep_compile_includes
+      }
+
       deps = []
 
       if (defined(global_parts_info) &&
           defined(global_parts_info.resourceschedule_soc_perf)) {
         external_deps += [ "soc_perf:socperf_client" ]
         defines += [ "SOC_PERF_ENABLE" ]
+      }
+
+      if (defined(global_parts_info) && defined(
+              global_parts_info.resourceschedule_resource_schedule_service)) {
+        external_deps += [ "resource_schedule_service:ressched_client" ]
+        defines += [ "RESOURCE_SCHEDULE_SERVICE_ENABLE" ]
       }
 
       if (defined(resourceschedule_ffrt_support) &&
@@ -118,7 +146,11 @@ template("ace_osal_ohos_source_set") {
       ]
       if (defined(config.accessibility_support) &&
           config.accessibility_support) {
-        sources += [ "js_accessibility_manager.cpp" ]
+        sources += [
+          "js_accessibility_manager.cpp",
+          "js_third_accessibility_hover_ng.cpp",
+          "js_third_provider_interaction_operation.cpp",
+        ]
         deps += [ "$ace_root/frameworks/bridge/common/accessibility:bridge_accessibility_$platform" ]
         external_deps += [
           "accessibility:accessibility_common",
@@ -140,6 +172,7 @@ template("ace_osal_ohos_source_set") {
     }
     sources += [
       "background_task_helper_ohos.cpp",
+      "display_manager_ohos.cpp",
       "drawing_color_filter_ohos.cpp",
       "drawing_lattice_ohos.cpp",
       "file_uri_helper_ohos.cpp",
@@ -149,12 +182,17 @@ template("ace_osal_ohos_source_set") {
       "mouse_style_ohos.cpp",
       "navigation_route_ohos.cpp",
       "page_url_checker_ohos.cpp",
+      "page_viewport_config_ohos.cpp",
       "pixel_map_ohos.cpp",
       "system_bar_style_ohos.cpp",
     ]
+    if (is_ohos_standard_system) {
+      cflags = [ "-DIMAGE_COLORSPACE_FLAG" ]
+    }
     external_deps += [
       "ability_runtime:abilitykit_native",
       "ability_runtime:app_manager",
+      "ability_runtime:connect_server_manager",
       "ability_runtime:wantagent_innerkits",
       "app_file_service:fileuri_native",
       "background_task_mgr:bgtaskmgr_innerkits",

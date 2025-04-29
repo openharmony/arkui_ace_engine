@@ -21,22 +21,37 @@
 #include "pointer_event.h"
 #include "session/host/include/session.h"
 
+#include "base/geometry/ng/size_t.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/image/image_source_info.h"
+
+#include "core/components_ng/pattern/window_scene/helper/starting_window_layout_helper.h"
+#include "core/components_ng/pattern/window_scene/scene/window_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 class WindowPattern : public StackPattern {
     DECLARE_ACE_TYPE(WindowPattern, StackPattern);
 
 public:
-    WindowPattern() = default;
-    ~WindowPattern() override = default;
+    WindowPattern()
+    {
+        startingWindowLayoutHelper_ = AceType::MakeRefPtr<StartingWindowLayoutHelper>();
+    }
+    ~WindowPattern()
+    {
+        startingWindowLayoutHelper_.Reset();
+    }
 
+    bool BorderUnoccupied() const override;
     std::vector<Rosen::Rect> GetHotAreas();
     sptr<Rosen::Session> GetSession();
+    void CheckAndMeasureStartingWindow(const SizeF& currentParentSize);
 
-    static int32_t CalculateTranslateDegree(int32_t hostId);
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return MakeRefPtr<WindowLayoutAlgorithm>();
+    }
 
 protected:
     void OnAttachToFrameNode() override;
@@ -61,7 +76,7 @@ protected:
 #endif
 
     void CreateAppWindow();
-    void CreateBlankWindow();
+    void CreateBlankWindow(RefPtr<FrameNode>& window);
     void CreateStartingWindow();
     void CreateSnapshotWindow(std::optional<std::shared_ptr<Media::PixelMap>> snapshot = std::nullopt);
     void ClearImageCache(const ImageSourceInfo& sourceInfo);
@@ -76,39 +91,41 @@ protected:
     virtual void OnForeground() {}
     virtual void OnBackground() {}
     virtual void OnDisconnect() {}
+    virtual void OnLayoutFinished() {}
     virtual void OnDrawingCompleted() {}
+    virtual void OnRemoveBlank() {}
+    virtual void OnAddSnapshot() {}
+    virtual void OnRemoveSnapshot() {}
+    virtual void OnAppRemoveStartingWindow() {}
 
     RefPtr<FrameNode> startingWindow_;
+    RefPtr<StartingWindowLayoutHelper> startingWindowLayoutHelper_;
+    SizeF lastParentSize_ = { 0.0f, 0.0f };
     RefPtr<FrameNode> appWindow_;
     RefPtr<FrameNode> snapshotWindow_;
     RefPtr<FrameNode> blankWindow_;
+    RefPtr<FrameNode> newAppWindow_;
     std::string startingWindowName_ = "StartingWindow";
     std::string appWindowName_ = "AppWindow";
     std::string snapshotWindowName_ = "SnapshotWindow";
     std::string blankWindowName_ = "BlankWindow";
+    const std::string newAppWindowName_ = "NewAppWindow";
     bool attachToFrameNodeFlag_ = false;
+    bool isBlankForSnapshot_ = false;
 
     sptr<Rosen::Session> session_;
     int32_t instanceId_ = Container::CurrentId();
-    std::function<void()> coldStartCallback_;
-    std::function<void()> hotStartCallback_;
+    std::function<void()> callback_;
     std::function<void(const Rosen::Vector4f&)> boundsChangedCallback_;
 
 private:
-    void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
-    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleMouseEvent(const MouseInfo& info);
-    void HandleTouchEvent(const TouchEventInfo& info);
-    bool IsFilterTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    bool IsFilterMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    void SetWindowSceneConsumed(int32_t action);
-    void FilterInvalidPointerItem(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void UpdateSnapshotWindowProperty();
+    bool IsSnapshotSizeChanged();
+    void UpdateStartingWindowProperty(const Rosen::SessionInfo& sessionInfo,
+        Color &color, ImageSourceInfo &sourceInfo);
+    bool CheckAndAddStartingWindowAboveLocked();
 
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
-    RefPtr<TouchEventImpl> touchEvent_;
-    RefPtr<InputEvent> mouseEvent_;
-
     friend class LifecycleListener;
     friend class WindowEventProcess;
 

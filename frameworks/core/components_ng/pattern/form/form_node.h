@@ -18,6 +18,9 @@
 
 #include <optional>
 
+#include "interfaces/inner_api/ace/serialized_gesture.h"
+
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
@@ -35,11 +38,16 @@ public:
         TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, ResponseLinkResult& responseLinkResult,
         bool isDispatch = false) override;
 
+    HitTestResult AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
+        TouchRestrict& touchRestrict, AxisTestResult& axisResult) override;
+
     static RefPtr<FormNode> GetOrCreateFormNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
     void DispatchPointerEvent(const TouchEvent& touchEvent,
         SerializedGesture& serializedGesture);
+
+    void DispatchPointerEvent(const AxisEvent& axisEvent, SerializedGesture& serializedGesture);
 
     void OnDetachFromMainTree(bool, PipelineContext* = nullptr) override;
 
@@ -57,13 +65,7 @@ public:
 
     void NotifyAccessibilityChildTreeRegister();
 
-    int32_t GetImageId()
-    {
-        if (!imageId_.has_value()) {
-            imageId_ = ElementRegister::GetInstance()->MakeUniqueId();
-        }
-        return imageId_.value();
-    }
+    int32_t GetImageId();
 
     void ClearAccessibilityChildTreeRegisterFlag();
 private:

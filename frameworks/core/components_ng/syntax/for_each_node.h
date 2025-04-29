@@ -46,6 +46,8 @@ public:
 
     void CreateTempItems();
 
+    void CollectRemovingIds(std::list<int32_t>& removedElmtId);
+
     void CompareAndUpdateChildren();
 
     void FlushUpdateAndMarkDirty() override;
@@ -66,17 +68,25 @@ public:
         ids_ = std::move(ids);
     }
 
+    void SetItemDragHandler(std::function<void(int32_t)>&& onLongPress, std::function<void(int32_t)>&& onDragStart,
+        std::function<void(int32_t, int32_t)>&& onMoveThrough, std::function<void(int32_t)>&& onDrop);
     void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
     void MoveData(int32_t from, int32_t to) override;
     RefPtr<FrameNode> GetFrameNode(int32_t index) override;
     void InitDragManager(const RefPtr<UINode>& childNode);
     void InitAllChildrenDragManager(bool init);
+    void MappingChildWithId(std::unordered_set<std::string>& oldIdsSet, std::list<RefPtr<UINode>>& additionalChildComps,
+        std::map<std::string, RefPtr<UINode>>& oldNodeByIdMap);
 private:
     std::list<std::string> ids_;
 
     // temp items use to compare each update.
     std::list<std::string> tempIds_;
     std::list<RefPtr<UINode>> tempChildren_;
+    std::unordered_set<std::string> tempOldIdsSet_;
+
+    // create map id -> Node
+    std::map<std::string, RefPtr<UINode>> oldNodeByIdMap_;
 
     // RepeatNode only
     std::vector<RefPtr<UINode>> tempChildrenOfRepeat_;

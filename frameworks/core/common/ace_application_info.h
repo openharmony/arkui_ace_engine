@@ -18,15 +18,18 @@
 
 #include <chrono>
 #include <cstdint>
+#include <mutex>
 #include <set>
+#include <shared_mutex>
 #include <string>
 #include <vector>
+
+#include "interfaces/inner_api/ace/ace_forward_compatibility.h"
 
 #include "base/json/json_util.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/string_utils.h"
-#include "interfaces/inner_api/ace/ace_forward_compatibility.h"
 
 namespace OHOS::Ace {
 
@@ -39,11 +42,24 @@ enum class PlatformVersion {
     VERSION_TEN,
     VERSION_ELEVEN,
     VERSION_TWELVE,
-    VERSION_THIRTEEN
+    VERSION_THIRTEEN,
+    VERSION_FOURTEEN,
+    VERSION_FIFTEEN,
+    VERSION_SIXTEEN,
+    VERSION_SEVENTEEN,
+    VERSION_EIGHTEEN,
+    VERSION_NINETEEN,
+    VERSION_TWENTY
 };
 struct AceBundleInfo {
     uint32_t versionCode = 0;
     std::string versionName;
+};
+
+enum class TouchPassMode: int32_t {
+    DEFAULT = 0,
+    PASS_THROUGH,
+    ACCELERATE,
 };
 
 class ACE_FORCE_EXPORT AceApplicationInfo : public NonCopyable {
@@ -140,8 +156,9 @@ public:
         return script_;
     }
 
-    const std::string& GetLocaleTag() const
+    std::string GetLocaleTag()
     {
+        std::shared_lock<std::shared_mutex> lock(localeTagMutex_);
         return localeTag_;
     }
 
@@ -220,11 +237,34 @@ public:
         useNewPipeline_.emplace(useNewPipeline);
     }
 
+    void SetTouchEventPassMode(TouchPassMode mode)
+    {
+        std::unique_lock<std::shared_mutex> lock(eventsPassMutex_);
+        touchPassMode_ = mode;
+    }
+
+    TouchPassMode GetTouchEventPassMode() const
+    {
+        std::shared_lock<std::shared_mutex> lock(eventsPassMutex_);
+        return touchPassMode_;
+    }
+
+    void SetReusedNodeSkipMeasure(bool reusedNodeSkipMeasure)
+    {
+        reusedNodeSkipMeasure_= reusedNodeSkipMeasure;
+    }
+
+    bool IsReusedNodeSkipMeasure() const
+    {
+        return reusedNodeSkipMeasure_;
+    }
+
 protected:
     std::string countryOrRegion_;
     std::string language_;
     std::string script_;
     std::string localeTag_;
+    mutable std::shared_mutex localeTagMutex_;
     std::string keywordsAndValues_;
 
     std::string packageName_;
@@ -249,6 +289,9 @@ protected:
     std::string versionName_;
     uint32_t versionCode_ = 0;
     int32_t missionId_ = -1;
+    mutable std::shared_mutex eventsPassMutex_;
+    TouchPassMode touchPassMode_ = TouchPassMode::DEFAULT;
+    bool reusedNodeSkipMeasure_ = false;
 };
 
 } // namespace OHOS::Ace

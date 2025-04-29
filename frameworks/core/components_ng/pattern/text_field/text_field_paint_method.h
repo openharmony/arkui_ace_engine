@@ -24,11 +24,10 @@
 #include "base/utils/utils.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/text_field/text_field_content_modifier.h"
+#include "core/components_ng/pattern/text_field/text_field_foreground_modifier.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_overlay_modifier.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
-#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT TextFieldPaintMethod : public NodePaintMethod {
@@ -36,7 +35,8 @@ class ACE_EXPORT TextFieldPaintMethod : public NodePaintMethod {
 public:
     TextFieldPaintMethod(const WeakPtr<Pattern>& pattern,
         const RefPtr<TextFieldOverlayModifier>& textFieldOverlayModifier,
-        const RefPtr<TextFieldContentModifier>& textFieldContentModifier);
+        const RefPtr<TextFieldContentModifier>& textFieldContentModifier,
+        const RefPtr<TextFieldForegroundModifier>& textFieldForegroundModifier);
 
     ~TextFieldPaintMethod() override = default;
 
@@ -46,6 +46,9 @@ public:
     RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override;
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
+    RefPtr<Modifier> GetForegroundModifier(PaintWrapper* paintWrapper) override;
+    void UpdateForegroundModifier(PaintWrapper* paintWrapper) override;
+
     void SetScrollBar(WeakPtr<ScrollBar>&& scrollBar)
     {
         scrollBar_ = scrollBar;
@@ -53,16 +56,19 @@ public:
 
     void UpdateScrollBar();
     void SetShowUnderlineWidth();
+    void SetFloatingCursor();
 
 private:
     void UpdateTextStyleToModifier(
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme, bool isDisabled);
+    void DoTextFadeoutIfNeed(PaintWrapper* paintWrapper);
+
 private:
     WeakPtr<Pattern> pattern_;
     RefPtr<TextFieldOverlayModifier> textFieldOverlayModifier_;
     RefPtr<TextFieldContentModifier> textFieldContentModifier_;
+    RefPtr<TextFieldForegroundModifier> textFieldForegroundModifier_;
     WeakPtr<ScrollBar> scrollBar_;
-
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldPaintMethod);
 };
 

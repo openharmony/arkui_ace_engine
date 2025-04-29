@@ -15,21 +15,7 @@
 
 #include "core/components_ng/layout/layout_wrapper_node.h"
 
-#include <algorithm>
-
-#include "base/log/ace_trace.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/layout/layout_wrapper_builder.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 void LayoutWrapperNode::Update(

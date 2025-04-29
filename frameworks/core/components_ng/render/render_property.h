@@ -16,14 +16,22 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_PROPERTY_H
 
+#include <optional>
+
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/vector.h"
 #include "core/components/common/layout/position_param.h"
+#include "core/components/common/properties/background_image.h"
+#include "core/components/common/properties/blend_mode.h"
+#include "core/components/common/properties/blur_style_option.h"
+#include "core/components/common/properties/border_image.h"
+#include "core/components/common/properties/brightness_option.h"
 #include "core/components/common/properties/clip_path.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/invert.h"
+#include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/properties/shadow.h"
-#include "core/components/common/properties/blend_mode.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/gradient_property.h"
@@ -38,9 +46,11 @@ enum class BlurStyle;
 
 namespace OHOS::Ace::NG {
 
+// backdropBlur backgroundBlurStyle backgroundEffect
 struct BackgroundProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImage, ImageSourceInfo);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImageRepeat, ImageRepeat);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImageSyncMode, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImageSize, BackgroundImageSize);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImagePosition, BackgroundImagePosition);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImageResizableSlice, ImageResizableSlice);
@@ -54,12 +64,27 @@ struct BackgroundProperty {
         }
         return NearEqual(propBlurStyleOption.value(), option.value());
     }
-    bool CheckBlurRadius(const Dimension& radius) const
+    bool CheckBlurRadiusChanged(const Dimension& radius) const
     {
         if (!propBlurRadius.has_value()) {
             return false;
         }
         return NearEqual(propBlurRadius.value(), radius);
+    }
+    bool CheckBlurOptionChanged(const BlurOption& blurOption) const
+    {
+        if (!propBackdropBlurOption.has_value()) {
+            return false;
+        }
+        return NearEqual(propBackdropBlurOption->grayscale[0], blurOption.grayscale[0])
+            && NearEqual(propBackdropBlurOption->grayscale[1], blurOption.grayscale[1]);
+    }
+    bool CheckSystemAdaptationSame(const SysOptions& sysOptions) const
+    {
+        if (!propSysOptions.has_value()) {
+            return false;
+        }
+        return NearEqual(propSysOptions.value(), sysOptions);
     }
     bool CheckEffectOption(const std::optional<EffectOption>& effectOption) const
     {
@@ -74,6 +99,8 @@ struct BackgroundProperty {
     std::optional<BlurStyleOption> propBlurStyleOption;
     std::optional<Dimension> propBlurRadius;
     std::optional<EffectOption> propEffectOption;
+    std::optional<BlurOption> propBackdropBlurOption;
+    std::optional<SysOptions> propSysOptions;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };
@@ -85,6 +112,7 @@ struct CustomBackgroundProperty {
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };
 
+// blur foregroundBlurStyle foregroundEffect
 struct ForegroundProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MotionBlur, MotionBlurOption);
     bool CheckBlurStyleOption(const std::optional<BlurStyleOption>& option) const
@@ -97,15 +125,23 @@ struct ForegroundProperty {
         }
         return NearEqual(propBlurStyleOption.value(), option.value());
     }
-    bool CheckBlurRadius(const Dimension& radius) const
+    bool CheckBlurRadiusChanged(const Dimension& radius) const
     {
         if (!propBlurRadius.has_value()) {
             return false;
         }
         return NearEqual(propBlurRadius.value(), radius);
     }
+    bool CheckSysOptionsForBlurSame(const SysOptions& sysOptions) const
+    {
+        if (!propSysOptionsForBlur.has_value()) {
+            return false;
+        }
+        return NearEqual(propSysOptionsForBlur.value(), sysOptions);
+    }
     std::optional<BlurStyleOption> propBlurStyleOption;
     std::optional<Dimension> propBlurRadius;
+    std::optional<SysOptions> propSysOptionsForBlur;
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundEffect, float);
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };
@@ -137,7 +173,7 @@ struct BorderImageProperty {
         jsonBorderImage->Put(
             "outset", propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())->OutsetToString().c_str());
         jsonBorderImage->Put("repeat", REPEAT_MODE[static_cast<int>(
-            propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())->GetRepeatMode())]);
+                          propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())->GetRepeatMode())]);
         jsonBorderImage->Put("fill", propBorderImage.value_or(AceType::MakeRefPtr<BorderImage>())
             ->GetNeedFillCenter() ? "true" : "false");
         json->PutExtAttr("borderImage", jsonBorderImage->ToString().c_str(), filter);
@@ -231,6 +267,7 @@ struct GradientProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LinearGradient, NG::Gradient);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SweepGradient, NG::Gradient);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(RadialGradient, NG::Gradient);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LastGradientType, NG::GradientType);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };

@@ -42,6 +42,9 @@ void FfiOHOSAceFrameworkStepperItemSetNextLabel(const char* value)
 
 void FfiOHOSAceFrameworkStepperItemSetStatus(uint32_t value)
 {
+    if (value < 0 || value >= static_cast<int32_t>(ITEM_STATUS.size())) {
+        return;
+    }
     StepperItemModel::GetInstance()->SetStatus(ITEM_STATUS[value]);
 }
 }

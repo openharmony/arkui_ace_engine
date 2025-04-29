@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
+#include "bridge/declarative_frontend/jsview/js_image.h"
+
 #include <cstdint>
 #include <memory>
 #include <vector>
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
-#include "base/utils/utils.h"
-
-#if !defined(PREVIEW)
+#ifndef PREVIEW
 #include <dlfcn.h>
 #endif
 
+#include "interfaces/inner_api/ace/ai/image_analyzer.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
 #include "base/geometry/ng/vector.h"
+#include "base/image/drawable_descriptor.h"
 #include "base/image/drawing_color_filter.h"
 #include "base/image/drawing_lattice.h"
 #include "base/image/pixel_map.h"
@@ -39,23 +39,30 @@
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/models/image_model_impl.h"
 #include "core/common/container.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/image/image_event.h"
 #include "core/components/image/image_theme.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/image/image_source_info.h"
-#include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 namespace {
-    const std::vector<float> DEFAULT_COLORFILTER_MATRIX = {
-        1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0
-    };
-    constexpr float CEIL_SMOOTHEDGE_VALUE = 1.333f;
-    constexpr float FLOOR_SMOOTHEDGE_VALUE = 0.334f;
-    constexpr float DEFAULT_SMOOTHEDGE_VALUE = 0.0f;
-}
+const std::vector<float> DEFAULT_COLORFILTER_MATRIX = { 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0 };
+constexpr float CEIL_SMOOTHEDGE_VALUE = 1.333f;
+constexpr float FLOOR_SMOOTHEDGE_VALUE = 0.334f;
+constexpr float DEFAULT_SMOOTHEDGE_VALUE = 0.0f;
+constexpr float DEFAULT_HDR_BRIGHTNESS = 1.0f;
+constexpr float HDR_BRIGHTNESS_MIN = 0.0f;
+constexpr float HDR_BRIGHTNESS_MAX = 1.0f;
+constexpr uint32_t FIT_MATRIX = 16;
+constexpr char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
+constexpr char LAYERED_DRAWABLE_DESCRIPTOR_NAME[] = "LayeredDrawableDescriptor";
+constexpr char ANIMATED_DRAWABLE_DESCRIPTOR_NAME[] = "AnimatedDrawableDescriptor";
+constexpr char PIXELMAP_DRAWABLE_DESCRIPTOR_NAME[] = "PixelMapDrawableDescriptor";
+} // namespace
 
 namespace OHOS::Ace {
 
@@ -178,11 +185,59 @@ void JSImage::SetObjectFit(const JSCallbackInfo& args)
     }
     int32_t parseRes = 2;
     ParseJsInteger(args[0], parseRes);
-    if (parseRes < static_cast<int32_t>(ImageFit::FILL) || parseRes > static_cast<int32_t>(ImageFit::BOTTOM_END)) {
+    if (parseRes < static_cast<int32_t>(ImageFit::FILL) || parseRes > static_cast<int32_t>(ImageFit::MATRIX)) {
         parseRes = 2;
     }
     auto fit = static_cast<ImageFit>(parseRes);
+    if (parseRes == FIT_MATRIX) {
+        fit = ImageFit::MATRIX;
+    }
     ImageModel::GetInstance()->SetImageFit(fit);
+}
+
+void JSImage::SetImageMatrix(const JSCallbackInfo& args)
+{
+    if (args.Length() > 0) {
+        auto jsVal = args[0];
+        if (!jsVal->IsObject()) {
+            SetDefaultImageMatrix();
+            return;
+        }
+        JSRef<JSVal> array = JSRef<JSObject>::Cast(jsVal)->GetProperty(static_cast<int32_t>(ArkUIIndex::MATRIX4X4));
+        const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
+        if (!array->IsArray()) {
+            return;
+        }
+        JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(array);
+        if (jsArray->Length() != matrix4Len) {
+            return;
+        }
+        std::vector<float> matrix(matrix4Len);
+        for (int32_t i = 0; i < matrix4Len; i++) {
+            double value = 0.0;
+            ParseJsDouble(jsArray->GetValueAt(i), value);
+            matrix[i] = static_cast<float>(value);
+        }
+        Matrix4 setValue = Matrix4(matrix[0], matrix[4], matrix[8], matrix[12], matrix[1], matrix[5], matrix[9],
+            matrix[13], matrix[2], matrix[6], matrix[10], matrix[14], matrix[3], matrix[7], matrix[11], matrix[15]);
+        ImageModel::GetInstance()->SetImageMatrix(setValue);
+    } else {
+        SetDefaultImageMatrix();
+        return;
+    }
+}
+
+void JSImage::SetDefaultImageMatrix()
+{
+    const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
+    std::vector<float> matrix(matrix4Len);
+    const int32_t initPosition = 5;
+    for (int32_t i = 0; i < matrix4Len; i = i + initPosition) {
+        matrix[i] = 1.0f;
+    }
+    Matrix4 setValue = Matrix4(matrix[0], matrix[4], matrix[8], matrix[12], matrix[1], matrix[5], matrix[9], matrix[13],
+        matrix[2], matrix[6], matrix[10], matrix[14], matrix[3], matrix[7], matrix[11], matrix[15]);
+    ImageModel::GetInstance()->SetImageMatrix(setValue);
 }
 
 void JSImage::SetMatchTextDirection(bool value)
@@ -217,9 +272,7 @@ void JSImage::OnComplete(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Image.onComplete");
             func->Execute(info);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Image.onComplete");
-#endif
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Image.onComplete");
         };
         ImageModel::GetInstance()->SetOnComplete(std::move(onComplete));
     }
@@ -235,9 +288,7 @@ void JSImage::OnError(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Image.onError");
             func->Execute(info);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Image.onError");
-#endif
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Image.onError");
         };
 
         ImageModel::GetInstance()->SetOnError(onError);
@@ -269,40 +320,15 @@ void JSImage::Create(const JSCallbackInfo& info)
     CreateImage(info);
 }
 
-bool JSImage::CheckIsCard()
+void JSImage::CheckIsCard(std::string& src, const JSRef<JSVal>& imageInfo)
 {
+    bool isCard = false;
     auto container = Container::Current();
-    if (!container) {
-        TAG_LOGE(AceLogTag::ACE_IMAGE, "Container is null in CreateImage.");
-        return false;
+    if (container) {
+        isCard = container->IsFormRender() && !container->IsDynamicRender();
+    } else {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "check is card, container is null");
     }
-    return container->IsFormRender() && !container->IsDynamicRender();
-}
-
-bool JSImage::CheckResetImage(const JSCallbackInfo& info)
-{
-    int32_t parseRes = -1;
-    if (info.Length() < 1 || !ParseJsInteger(info[0], parseRes)) {
-        return false;
-    }
-    ImageModel::GetInstance()->ResetImage();
-    return true;
-}
-
-void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
-{
-    if (CheckResetImage(info)) {
-        return;
-    }
-    bool isCard = CheckIsCard();
-
-    // Interim programme
-    std::string bundleName;
-    std::string moduleName;
-    std::string src;
-    auto imageInfo = info[0];
-    int32_t resId = 0;
-    bool srcValid = ParseJsMediaWithBundleName(imageInfo, src, bundleName, moduleName, resId);
     if (isCard && imageInfo->IsString()) {
         SrcType srcType = ImageSourceInfo::ResolveURIType(src);
         bool notSupport = (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
@@ -310,44 +336,120 @@ void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
             src.clear();
         }
     }
+}
+
+// The image reset only when the param is ImageContent.Empty
+bool JSImage::CheckResetImage(const bool& srcValid, const JSCallbackInfo& info)
+{
+    if (!srcValid) {
+        int32_t parseRes = -1;
+        if (info.Length() < 1 || !ParseJsInteger(info[0], parseRes)) {
+            return false;
+        }
+        ImageModel::GetInstance()->ResetImage();
+        return true;
+    }
+    return false;
+}
+
+ImageType JSImage::ParseImageType(const JSRef<JSVal>& imageInfo)
+{
+    if (!imageInfo->IsObject()) {
+        return ImageType::BASE;
+    }
+
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(imageInfo);
+    if (jsObj->IsUndefined()) {
+        return ImageType::BASE;
+    }
+    JSRef<JSVal> jsTypeName = jsObj->GetProperty("typeName");
+    if (!jsTypeName->IsString()) {
+        return ImageType::BASE;
+    }
+    auto typeName = jsTypeName->ToString();
+    if (typeName == DRAWABLE_DESCRIPTOR_NAME) {
+        return ImageType::DRAWABLE;
+    } else if (typeName == LAYERED_DRAWABLE_DESCRIPTOR_NAME) {
+        return ImageType::LAYERED_DRAWABLE;
+    } else if (typeName == ANIMATED_DRAWABLE_DESCRIPTOR_NAME) {
+        return ImageType::ANIMATED_DRAWABLE;
+    } else if (typeName == PIXELMAP_DRAWABLE_DESCRIPTOR_NAME) {
+        return ImageType::PIXELMAP_DRAWABLE;
+    } else {
+        return ImageType::BASE;
+    }
+}
+
+void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
+{
+    std::string bundleName;
+    std::string moduleName;
+    std::string src;
+    auto imageInfo = info[0];
+    int32_t resId = 0;
+    bool srcValid = ParseJsMediaWithBundleName(imageInfo, src, bundleName, moduleName, resId);
+    CHECK_EQUAL_VOID(CheckResetImage(srcValid, info), true);
+    CheckIsCard(src, imageInfo);
     RefPtr<PixelMap> pixmap = nullptr;
 
-    // input is PixelMap / Drawable
-    if (!srcValid && !isCard) {
-#if defined(PIXEL_MAP_SUPPORTED)
-        std::vector<RefPtr<PixelMap>> pixelMaps;
-        int32_t duration = -1;
-        int32_t iterations = 1;
-        if (IsDrawable(imageInfo)) {
+    if (!srcValid) {
+#ifdef PIXEL_MAP_SUPPORTED
+        auto type = ParseImageType(imageInfo);
+        if (type == ImageType::ANIMATED_DRAWABLE) {
+            std::vector<RefPtr<PixelMap>> pixelMaps;
+            int32_t duration = -1;
+            int32_t iterations = 1;
             if (GetPixelMapListFromAnimatedDrawable(imageInfo, pixelMaps, duration, iterations)) {
                 CreateImageAnimation(pixelMaps, duration, iterations);
                 return;
             }
+        } else if (type == ImageType::PIXELMAP_DRAWABLE) {
+            auto* address = UnwrapNapiValue(imageInfo);
+            auto drawable = DrawableDescriptor::CreateDrawable(address);
+            if (!drawable) {
+                return;
+            }
+            if (drawable->GetDrawableSrcType() == 1) {
+                pixmap = GetDrawablePixmap(imageInfo);
+            } else {
+                ImageModel::GetInstance()->Create(drawable);
+                ParseImageAIOptions(info);
+                return;
+            }
+        } else if (type == ImageType::LAYERED_DRAWABLE || type == ImageType::DRAWABLE) {
             pixmap = GetDrawablePixmap(imageInfo);
         } else {
             pixmap = CreatePixelMapFromNapiValue(imageInfo);
         }
 #endif
     }
-    ImageInfoConfig imageInfoConfig(
-        std::make_shared<std::string>(src), bundleName, moduleName, (resId == -1), isImageSpan
-    );
-    ImageModel::GetInstance()->Create(imageInfoConfig, pixmap);
+    ImageInfoConfig config;
+    config.src = std::make_shared<std::string>(src);
+    config.bundleName = bundleName;
+    config.moduleName = moduleName;
+    config.isUriPureNumber = (resId == -1);
+    config.isImageSpan = isImageSpan;
+    ImageModel::GetInstance()->Create(config, pixmap);
+    ParseImageAIOptions(info);
+}
 
-    if (info.Length() > 1) {
-        auto options = info[1];
-        if (!options->IsObject()) {
-            return;
-        }
-        auto engine = EngineHelper::GetCurrentEngine();
-        CHECK_NULL_VOID(engine);
-        NativeEngine* nativeEngine = engine->GetNativeEngine();
-        panda::Local<JsiValue> value = options.Get().GetLocalHandle();
-        JSValueWrapper valueWrapper = value;
-        ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
-        napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
-        ImageModel::GetInstance()->SetImageAIOptions(optionsValue);
+void JSImage::ParseImageAIOptions(const JSCallbackInfo& info)
+{
+    if (info.Length() <= 1) {
+        return;
     }
+    auto options = info[1];
+    if (!options->IsObject()) {
+        return;
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    panda::Local<JsiValue> value = options.Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    ImageModel::GetInstance()->SetImageAIOptions(optionsValue);
 }
 
 bool JSImage::IsDrawable(const JSRef<JSVal>& jsValue)
@@ -367,8 +469,49 @@ bool JSImage::IsDrawable(const JSRef<JSVal>& jsValue)
 
 void JSImage::JsBorder(const JSCallbackInfo& info)
 {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        JSViewAbstract::JsBorder(info);
+        ImageModel::GetInstance()->SetBackBorder();
+        return;
+    }
+    // handles generic property logic.
     JSViewAbstract::JsBorder(info);
-    ImageModel::GetInstance()->SetBackBorder();
+    // handles the image component separately, aiming to extract and set the borderRadius property
+    if (!info[0]->IsObject()) {
+        CalcDimension borderRadius;
+        ImageModel::GetInstance()->SetBorderRadius(borderRadius);
+        return;
+    }
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+
+    auto valueRadius = object->GetProperty(static_cast<int32_t>(ArkUIIndex::RADIUS));
+    if (!valueRadius->IsUndefined()) {
+        ParseBorderRadius(valueRadius);
+    }
+}
+
+void JSImage::ParseBorderRadius(const JSRef<JSVal>& args)
+{
+    CalcDimension borderRadius;
+    if (ParseJsDimensionVp(args, borderRadius)) {
+        ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
+        ImageModel::GetInstance()->SetBorderRadius(borderRadius);
+    } else if (args->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        CalcDimension topLeft;
+        CalcDimension topRight;
+        CalcDimension bottomLeft;
+        CalcDimension bottomRight;
+        if (ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight)) {
+            ImageModel::GetInstance()->SetBorderRadius(
+                GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
+            ViewAbstractModel::GetInstance()->SetBorderRadius(
+                GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
+            return;
+        }
+        ImageModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+        ViewAbstractModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+    }
 }
 
 void JSImage::ParseResizableSlice(const JSRef<JSObject>& resizableObject)
@@ -426,9 +569,9 @@ void JSImage::JsImageResizable(const JSCallbackInfo& info)
 void JSImage::UpdateSliceResult(const JSRef<JSObject>& sliceObj, ImageResizableSlice& sliceResult)
 {
     // creatge a array has 4 elements for paresing sliceSize
-    static std::array<int32_t, 4> keys = {
-        static_cast<int32_t>(ArkUIIndex::LEFT), static_cast<int32_t>(ArkUIIndex::RIGHT),
-        static_cast<int32_t>(ArkUIIndex::TOP), static_cast<int32_t>(ArkUIIndex::BOTTOM)};
+    static std::array<int32_t, 4> keys = { static_cast<int32_t>(ArkUIIndex::LEFT),
+        static_cast<int32_t>(ArkUIIndex::RIGHT), static_cast<int32_t>(ArkUIIndex::TOP),
+        static_cast<int32_t>(ArkUIIndex::BOTTOM) };
     for (uint32_t i = 0; i < keys.size(); i++) {
         auto sliceSize = sliceObj->GetProperty(keys.at(i));
         CalcDimension sliceDimension;
@@ -460,8 +603,20 @@ void JSImage::UpdateSliceResult(const JSRef<JSObject>& sliceObj, ImageResizableS
 
 void JSImage::JsBorderRadius(const JSCallbackInfo& info)
 {
-    JSViewAbstract::JsBorderRadius(info);
-    ImageModel::GetInstance()->SetBackBorder();
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        JSViewAbstract::JsBorderRadius(info);
+        ImageModel::GetInstance()->SetBackBorder();
+        return;
+    }
+    static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
+        JSCallbackInfoType::OBJECT };
+    auto jsVal = info[0];
+    if (!CheckJSCallbackInfo("JsBorderRadius", jsVal, checkList)) {
+        ViewAbstractModel::GetInstance()->SetBorderRadius(Dimension {});
+        ImageModel::GetInstance()->SetBorderRadius(Dimension {});
+        return;
+    }
+    ParseBorderRadius(jsVal);
 }
 
 void JSImage::SetSourceSize(const JSCallbackInfo& info)
@@ -470,6 +625,16 @@ void JSImage::SetSourceSize(const JSCallbackInfo& info)
         return;
     }
     ImageModel::GetInstance()->SetImageSourceSize(JSViewAbstract::ParseSize(info));
+}
+
+bool JSImage::ParseColorContent(const JSRef<JSVal>& jsValue)
+{
+    if (jsValue.IsEmpty() || jsValue->IsNull() || !jsValue->IsObject()) {
+        return false;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(jsValue);
+    JSRef<JSVal> typeVal = paramObject->GetProperty("colorContent_");
+    return !typeVal.IsEmpty() && typeVal->IsString() && typeVal->ToString() == "ORIGIN";
 }
 
 void JSImage::SetImageFill(const JSCallbackInfo& info)
@@ -483,7 +648,11 @@ void JSImage::SetImageFill(const JSCallbackInfo& info)
 
     Color color;
     if (!ParseJsColor(info[0], color)) {
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        if (ParseColorContent(info[0])) {
+            ImageModel::GetInstance()->ResetImageFill();
+            return;
+        }
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
             return;
         }
         auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -714,6 +883,18 @@ void JSImage::SetDynamicRangeMode(const JSCallbackInfo& info)
     ImageModel::GetInstance()->SetDynamicRangeMode(dynamicRangeMode);
 }
 
+void JSImage::SetHdrBrightness(const JSCallbackInfo& info)
+{
+    float hdrBrightness = DEFAULT_HDR_BRIGHTNESS;
+    if (info[0]->IsNumber()) {
+        auto value = info[0]->ToNumber<float>();
+        if (GreatOrEqual(value, HDR_BRIGHTNESS_MIN) && LessOrEqual(value, HDR_BRIGHTNESS_MAX)) {
+            hdrBrightness = value;
+        }
+    }
+    ImageModel::GetInstance()->SetHdrBrightness(hdrBrightness);
+}
+
 void JSImage::SetEnhancedImageQuality(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -722,12 +903,27 @@ void JSImage::SetEnhancedImageQuality(const JSCallbackInfo& info)
     }
     int32_t parseRes = static_cast<int32_t>(AIImageQuality::LOW);
     ParseJsInteger(info[0], parseRes);
-    if (parseRes < static_cast<int32_t>(AIImageQuality::LOW) ||
-        parseRes > static_cast<int32_t>(AIImageQuality::HIGH)) {
+    if (parseRes < static_cast<int32_t>(AIImageQuality::LOW) || parseRes > static_cast<int32_t>(AIImageQuality::HIGH)) {
         parseRes = static_cast<int32_t>(AIImageQuality::LOW);
     }
-    AIImageQuality resolutionQuality  = static_cast<AIImageQuality>(parseRes);
+    AIImageQuality resolutionQuality = static_cast<AIImageQuality>(parseRes);
     ImageModel::GetInstance()->SetEnhancedImageQuality(resolutionQuality);
+}
+
+void JSImage::SetOrientation(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        ImageModel::GetInstance()->SetOrientation(ImageRotateOrientation::UP);
+        return;
+    }
+    int32_t parseRes = 0;
+    ParseJsInteger(info[0], parseRes);
+    if (parseRes < static_cast<int>(ImageRotateOrientation::AUTO) ||
+        parseRes > static_cast<int>(ImageRotateOrientation::LEFT)) {
+        parseRes = static_cast<int>(ImageRotateOrientation::UP);
+    }
+    auto res = static_cast<ImageRotateOrientation>(parseRes);
+    ImageModel::GetInstance()->SetOrientation(res);
 }
 
 void JSImage::CreateImageAnimation(std::vector<RefPtr<PixelMap>>& pixelMaps, int32_t duration, int32_t iterations)
@@ -748,6 +944,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("create", &JSImage::Create, opt);
     JSClass<JSImage>::StaticMethod("alt", &JSImage::SetAlt, opt);
     JSClass<JSImage>::StaticMethod("objectFit", &JSImage::SetObjectFit, opt);
+    JSClass<JSImage>::StaticMethod("imageMatrix", &JSImage::SetImageMatrix, opt);
     JSClass<JSImage>::StaticMethod("matchTextDirection", &JSImage::SetMatchTextDirection, opt);
     JSClass<JSImage>::StaticMethod("fitOriginalSize", &JSImage::SetFitOriginalSize, opt);
     JSClass<JSImage>::StaticMethod("sourceSize", &JSImage::SetSourceSize, opt);
@@ -758,7 +955,9 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("colorFilter", &JSImage::SetColorFilter, opt);
     JSClass<JSImage>::StaticMethod("edgeAntialiasing", &JSImage::SetSmoothEdge, opt);
     JSClass<JSImage>::StaticMethod("dynamicRangeMode", &JSImage::SetDynamicRangeMode, opt);
+    JSClass<JSImage>::StaticMethod("hdrBrightness", &JSImage::SetHdrBrightness, opt);
     JSClass<JSImage>::StaticMethod("enhancedImageQuality", &JSImage::SetEnhancedImageQuality, opt);
+    JSClass<JSImage>::StaticMethod("orientation", &JSImage::SetOrientation, opt);
 
     JSClass<JSImage>::StaticMethod("border", &JSImage::JsBorder);
     JSClass<JSImage>::StaticMethod("borderRadius", &JSImage::JsBorderRadius);
@@ -796,13 +995,21 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSColorFilter>::Bind(globalObj, JSColorFilter::ConstructorCallback, JSColorFilter::DestructorCallback);
 }
 
-void JSImage::JsSetDraggable(bool draggable)
+void JSImage::JsSetDraggable(const JSCallbackInfo& info)
 {
+    bool draggable = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        draggable = info[0]->ToBoolean();
+    }
     ImageModel::GetInstance()->SetDraggable(draggable);
 }
 
 void JSImage::JsOnDragStart(const JSCallbackInfo& info)
 {
+    if (!Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        JSViewAbstract::JsOnDragStart(info);
+        return;
+    }
     if (info.Length() != 1 || !info[0]->IsFunction()) {
         return;
     }
@@ -858,7 +1065,7 @@ void JSImage::EnableAnalyzer(bool isEnableAnalyzer)
     ImageModel::GetInstance()->EnableAnalyzer(isEnableAnalyzer);
 }
 
-void JSImage::AnalyzerConfig(const JSCallbackInfo &info)
+void JSImage::AnalyzerConfig(const JSCallbackInfo& info)
 {
     auto configParams = info[0];
     if (configParams->IsNull() || !configParams->IsObject()) {

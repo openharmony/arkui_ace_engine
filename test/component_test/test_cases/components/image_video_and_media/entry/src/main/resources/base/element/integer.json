@@ -1,0 +1,12 @@
+{
+  "integer": [
+    {
+      "name": "Number",
+      "value": 20
+    },
+    {
+      "name": "Min",
+      "value": 2
+    }
+  ]
+}

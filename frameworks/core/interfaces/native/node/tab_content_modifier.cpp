@@ -15,7 +15,6 @@
 #include "core/interfaces/native/node/tab_content_modifier.h"
 
 #include "bridge/common/utils/engine_helper.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/interfaces/native/node/view_model.h"
 
@@ -46,22 +45,70 @@ void SetTabContentLabel(ArkUINodeHandle node, ArkUI_CharPtr label)
     TabContentModelNG::SetTabBarLabel(frameNode, label);
 }
 
+void SetTabContentOnWillShow(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillShow = reinterpret_cast<std::function<void()>*>(callback);
+        TabContentModelNG::SetOnWillShow(frameNode, std::move(*onWillShow));
+    } else {
+        TabContentModelNG::SetOnWillShow(frameNode, nullptr);
+    }
+}
+
+void ResetTabContentOnWillShow(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabContentModelNG::SetOnWillShow(frameNode, nullptr);
+}
+
+void SetTabContentOnWillHide(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillHide = reinterpret_cast<std::function<void()>*>(callback);
+        TabContentModelNG::SetOnWillHide(frameNode, std::move(*onWillHide));
+    } else {
+        TabContentModelNG::SetOnWillHide(frameNode, nullptr);
+    }
+}
+
+void ResetTabContentOnWillHide(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabContentModelNG::SetOnWillHide(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUITabContentModifier* GetTabContentModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUITabContentModifier modifier = {
-        SetTabContentBuilder,
-        SetTabContentLabel
+        .setTabContentBuilder = SetTabContentBuilder,
+        .setTabContentLabel = SetTabContentLabel,
+        .setTabContentOnWillShow = SetTabContentOnWillShow,
+        .resetTabContentOnWillShow = ResetTabContentOnWillShow,
+        .setTabContentOnWillHide = SetTabContentOnWillHide,
+        .resetTabContentOnWillHide = ResetTabContentOnWillHide,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+
     return &modifier;
 }
 
 const CJUITabContentModifier* GetCJUITabContentModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUITabContentModifier modifier = {
-        SetTabContentBuilder,
-        SetTabContentLabel
+        .setTabContentBuilder = SetTabContentBuilder,
+        .setTabContentLabel = SetTabContentLabel,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+
     return &modifier;
 }
 }

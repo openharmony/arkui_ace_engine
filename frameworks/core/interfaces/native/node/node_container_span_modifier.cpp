@@ -14,12 +14,7 @@
  */
 #include "core/interfaces/native/node/node_container_span_modifier.h"
 
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -70,17 +65,23 @@ void ResetContainerSpanTextBackgroundStyle(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIContainerSpanModifier* GetContainerSpanModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIContainerSpanModifier modifier = {
-        SetContainerSpanTextBackgroundStyle,
-        ResetContainerSpanTextBackgroundStyle };
+        .setContainerSpanTextBackgroundStyle = SetContainerSpanTextBackgroundStyle,
+        .resetContainerSpanTextBackgroundStyle = ResetContainerSpanTextBackgroundStyle,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIContainerSpanModifier* GetCJUIContainerSpanModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIContainerSpanModifier modifier = {
-        SetContainerSpanTextBackgroundStyle,
-        ResetContainerSpanTextBackgroundStyle };
+        .setContainerSpanTextBackgroundStyle = SetContainerSpanTextBackgroundStyle,
+        .resetContainerSpanTextBackgroundStyle = ResetContainerSpanTextBackgroundStyle,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 } // namespace NodeModifier

@@ -32,6 +32,9 @@ declare_args() {
   # Enable pgo for building.
   ace_engine_feature_enable_pgo = false
 
+  # Enable pgo for building.
+  ace_engine_feature_enable_mfs = false
+
   # Set pgo profdata path
   ace_engine_feature_pgo_path = ""
 
@@ -50,23 +53,41 @@ declare_args() {
   # Set atomicservice basic engine so path
   ace_engine_feature_asbng_path = ""
 
-  # Disable in OH Core
-  ace_engine_standard_fonts_enable = true
-
   # Sanitize debug
   ace_sanitize_debug = false
 
   # Enable when build for text engine adapter
   enable_graphic_text_gine = true
 
-  # Don't use currentIdSafely in some function
-  use_origin_scope = false
-
   # Enable split_mode support
   ace_engine_feature_enable_split_mode = false
 
   # Enable navigation split mode support
   ace_engine_feature_enable_nav_split_mode = false
+
+  # Enable aps framework support
+  ace_engine_feature_enable_aps = false
+
+  # Enable wearable product support
+  ace_engine_feature_wearable = false
+
+  # Enable form size change animation
+  ace_engine_feature_enable_form_size_change_animation = true
+
+  # Enalbe form menu default, wearable product is not supported
+  ace_engine_feature_form_menu_enable = true
+
+  # Enable ace_engine circular screen
+  ace_engine_feature_enable_digital_crown = false
+
+  # Enable event extra handling
+  ace_engine_feature_enable_event_extra_handling = false
+
+  # Enable ace_engine circle feature
+  ace_engine_enable_circle_feature = true
+
+  # Enable long press gesture extra handling
+  ace_engine_feature_enable_long_press_gesture_extra_handling = false
 }
 
 enable_dump_drawcmd = false
@@ -76,7 +97,8 @@ use_mac = "${current_os}_${current_cpu}" == "mac_x64" ||
           "${current_os}_${current_cpu}" == "mac_arm64"
 use_ios = "${current_os}_${current_cpu}" == "ios_x64" ||
           "${current_os}_${current_cpu}" == "ios_arm64"
-use_linux = "${current_os}_${current_cpu}" == "linux_x64"
+use_linux = "${current_os}_${current_cpu}" == "linux_x64" ||
+            "${current_os}_${current_cpu}" == "linux_arm64"
 
 use_hilog = is_mingw || is_mac || is_linux || is_ohos || is_ohos_standard_system
 
@@ -99,11 +121,15 @@ ark_ets_path = "//arkcompiler/ets_runtime"
 crossplatform_plugin_root = "//plugins"
 crossplatform_multimedia_root = "//foundation/multimedia"
 skia_root_new = "//third_party/skia"
+c_utils_header_path = "//commonlibrary/c_utils/base/include"
+ace_graphic_surface = "//foundation/graphic/graphic_surface"
 
 # arkui-x
 flutter_root = "//third_party/flutter"
 ace_flutter_engine_root = "$flutter_root/build"
 ark_toolchain_path = "//arkcompiler/toolchain"
+ace_drag = "//base/msdp/device_status"
+acd_input = "//foundation/multimodalinput/input"
 
 # Config toolchain
 windows_buildtool = "//build/toolchain/mingw:mingw_x86_64"
@@ -185,16 +211,16 @@ if (enable_dump_drawcmd) {
   ace_common_defines += [ "DUMP_DRAW_CMD" ]
 }
 
+if (build_variant == "user") {
+  ace_common_defines += [ "IS_RELEASE_VERSION" ]
+}
+
 ace_use_new_skia = true
 
 ace_use_rosen_drawing = false
 if (defined(use_rosen_drawing) && use_rosen_drawing) {
   ace_use_rosen_drawing = true
   ace_common_defines += [ "USE_ROSEN_DRAWING" ]
-}
-
-if (enable_graphic_text_gine) {
-  ace_common_defines += [ "USE_GRAPHIC_TEXT_GINE" ]
 }
 
 if (!defined(global_parts_info) ||
@@ -240,6 +266,13 @@ if (defined(global_parts_info.multimedia_audio_framework)) {
   enable_audio_framework = false
 }
 
+if (defined(global_parts_info.thirdparty_qrcodegen)) {
+  qrcodegen_support = true
+  ace_common_defines += [ "QRCODEGEN_SUPPORT" ]
+} else {
+  qrcodegen_support = false
+}
+
 if (!defined(global_parts_info) ||
     defined(global_parts_info.security_security_component_manager)) {
   security_component_enable = true
@@ -260,6 +293,13 @@ if (defined(global_parts_info) &&
   uiservice_xcollie_enable = true
 } else {
   uiservice_xcollie_enable = false
+}
+
+if (!defined(global_parts_info) ||
+    defined(global_parts_info.graphic_graphic_2d_ext)) {
+  if (ace_engine_feature_enable_aps) {
+    ace_common_defines += [ "APS_ENABLE" ]
+  }
 }
 
 if (ace_engine_feature_asbng_path == "") {
@@ -301,15 +341,23 @@ foreach(item, ace_platforms) {
   }
 }
 
-if ((defined(use_origin_scope) && use_origin_scope) ||
-    (defined(force_scope) && force_scope)) {
-  ace_common_defines += [ "USE_ORIGIN_SCOPE" ]
-}
-
 if (ace_engine_feature_enable_split_mode) {
   ace_common_defines += [ "ENABLE_SPLIT_MODE" ]
 }
 
 if (ace_engine_feature_enable_nav_split_mode) {
   ace_common_defines += [ "ENABLE_NAV_SPLIT_MODE" ]
+}
+
+if (ace_engine_feature_wearable) {
+  ace_common_defines += [ "ARKUI_WEARABLE" ]
+}
+
+if (ohos_indep_compiler_enable) {
+  indep_compile_includes =
+      [ "//binarys/third_party/icu/innerapis/shared_icuuc/includes" ]
+}
+
+if (ace_engine_feature_enable_form_size_change_animation) {
+  ace_common_defines += [ "FORM_SIZE_CHANGE_ANIMATION" ]
 }

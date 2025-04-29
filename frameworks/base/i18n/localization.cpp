@@ -16,6 +16,9 @@
 #include "base/i18n/localization.h"
 
 #include "chnsecal.h"
+#if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
+#include "lunar_calendar.h"
+#endif
 #include "unicode/dtfmtsym.h"
 #include "unicode/dtptngen.h"
 #include "unicode/measfmt.h"
@@ -26,6 +29,7 @@
 #include "base/json/json_util.h"
 #include "base/resource/internal_resource.h"
 #include "base/utils/string_utils.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 
@@ -565,6 +569,30 @@ std::string Localization::GetRelativeDateTime(double offset)
 LunarDate Localization::GetLunarDate(Date date)
 {
     WaitingForInit();
+#if defined(IOS_PLATFORM) || defined(ANDROID_PLATFORM)
+    return GetIcuLunarDate(date);
+#else
+    LunarDate dateRet;
+    auto chineseCalendar = std::make_unique<Global::I18n::LunarCalendar>();
+    CHECK_NULL_RETURN(chineseCalendar, dateRet);
+    chineseCalendar->SetGregorianDate(date.year, date.month, date.day);
+    int32_t lunarYear = chineseCalendar->GetLunarYear();
+    CHECK_EQUAL_RETURN(lunarYear, -1, dateRet);
+    int32_t lunarMonth = chineseCalendar->GetLunarMonth();
+    CHECK_EQUAL_RETURN(lunarMonth, -1, dateRet);
+    int32_t lunarDay = chineseCalendar->GetLunarDay();
+    CHECK_EQUAL_RETURN(lunarDay, -1, dateRet);
+
+    dateRet.year = static_cast<uint32_t>(lunarYear);
+    dateRet.month = static_cast<uint32_t>(lunarMonth);
+    dateRet.day = static_cast<uint32_t>(lunarDay);
+    dateRet.isLeapMonth = chineseCalendar->IsLeapMonth();
+    return dateRet;
+#endif
+}
+
+LunarDate Localization::GetIcuLunarDate(Date date)
+{
     LunarDate dateRet;
     UErrorCode status = U_ZERO_ERROR;
     Locale locale("zh", "CN");

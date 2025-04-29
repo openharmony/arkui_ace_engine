@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/navrouter/navrouter_pattern.h"
 
-#include "core/components_ng/pattern/navrouter/navrouter_event_hub.h"
-
 namespace OHOS::Ace::NG {
 
 void NavRouterPattern::OnModifyDone()
@@ -30,7 +28,7 @@ void NavRouterPattern::OnModifyDone()
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& /*info*/) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto eventHub = pattern->GetEventHub<NavRouterEventHub>();
+        auto eventHub = pattern->GetOrCreateEventHub<NavRouterEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireDestinationChangeEvent();
     };

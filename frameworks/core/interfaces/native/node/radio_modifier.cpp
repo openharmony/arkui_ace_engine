@@ -14,17 +14,10 @@
  */
 #include "core/interfaces/native/node/radio_modifier.h"
 
-#include <string>
-
 #include "core/components/checkable/checkable_theme.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/theme/theme_manager.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
-
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -301,27 +294,111 @@ ArkUI_CharPtr GetRadioGroup(ArkUINodeHandle node)
     g_radioStrValue = RadioModelNG::GetRadioGroup(frameNode);
     return g_radioStrValue.c_str();
 }
+
+void SetRadioOptions(ArkUINodeHandle node, ArkUI_CharPtr value, ArkUI_CharPtr group, ArkUI_Uint32 indicatorType)
+{
+    if (value == nullptr || group == nullptr) {
+        return;
+    }
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (static_cast<RadioIndicatorType>(indicatorType) != RadioIndicatorType::TICK &&
+        static_cast<RadioIndicatorType>(indicatorType) != RadioIndicatorType::DOT &&
+        static_cast<RadioIndicatorType>(indicatorType) != RadioIndicatorType::CUSTOM) {
+            indicatorType = static_cast<ArkUI_Uint32>(RadioIndicatorType::TICK);
+    }
+    RadioModelNG::SetRadioOptions(frameNode, std::string(value), std::string(group), indicatorType);
+}
+
+void SetRadioOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(bool)>*>(callback);
+        RadioModelNG::SetOnChange(frameNode, std::move(*onChange));
+    } else {
+        RadioModelNG::SetOnChange(frameNode, nullptr);
+    }
+}
+
+void ResetRadioOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RadioModelNG::SetOnChange(frameNode, nullptr);
+}
+
 } // namespace
 
 namespace NodeModifier {
 const ArkUIRadioModifier* GetRadioModifier()
 {
-    static const ArkUIRadioModifier modifier = { SetRadioChecked, ResetRadioChecked, SetRadioStyle, ResetRadioStyle,
-        SetRadioWidth, ResetRadioWidth, SetRadioHeight, ResetRadioHeight, SetRadioSize, ResetRadioSize,
-        SetRadioHoverEffect, ResetRadioHoverEffect, SetRadioPadding, ResetRadioPadding, SetRadioResponseRegion,
-        ResetRadioResponseRegion, GetRadioChecked, GetRadioStyle, SetRadioValue, ResetRadioValue, GetSetRadioValue,
-        SetRadioGroup, ResetRadioGroup, GetRadioGroup };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIRadioModifier modifier = {
+        .setRadioChecked = SetRadioChecked,
+        .resetRadioChecked = ResetRadioChecked,
+        .setRadioStyle = SetRadioStyle,
+        .resetRadioStyle = ResetRadioStyle,
+        .setRadioWidth = SetRadioWidth,
+        .resetRadioWidth = ResetRadioWidth,
+        .setRadioHeight = SetRadioHeight,
+        .resetRadioHeight = ResetRadioHeight,
+        .setRadioSize = SetRadioSize,
+        .resetRadioSize = ResetRadioSize,
+        .setRadioHoverEffect = SetRadioHoverEffect,
+        .resetRadioHoverEffect = ResetRadioHoverEffect,
+        .setRadioPadding = SetRadioPadding,
+        .resetRadioPadding = ResetRadioPadding,
+        .setRadioResponseRegion = SetRadioResponseRegion,
+        .resetRadioResponseRegion = ResetRadioResponseRegion,
+        .getRadioChecked = GetRadioChecked,
+        .getRadioStyle = GetRadioStyle,
+        .setRadioValue = SetRadioValue,
+        .resetRadioValue = ResetRadioValue,
+        .getRadioValue = GetSetRadioValue,
+        .setRadioGroup = SetRadioGroup,
+        .resetRadioGroup = ResetRadioGroup,
+        .getRadioGroup = GetRadioGroup,
+        .setRadioOptions = SetRadioOptions,
+        .setRadioOnChange = SetRadioOnChange,
+        .resetRadioOnChange = ResetRadioOnChange,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIRadioModifier* GetCJUIRadioModifier()
 {
-    static const CJUIRadioModifier modifier = { SetRadioChecked, ResetRadioChecked, SetRadioStyle, ResetRadioStyle,
-        SetRadioWidth, ResetRadioWidth, SetRadioHeight, ResetRadioHeight, SetRadioSize, ResetRadioSize,
-        SetRadioHoverEffect, ResetRadioHoverEffect, SetRadioPadding, ResetRadioPadding, SetRadioResponseRegion,
-        ResetRadioResponseRegion, GetRadioChecked, GetRadioStyle, SetRadioValue, ResetRadioValue, GetSetRadioValue,
-        SetRadioGroup, ResetRadioGroup, GetRadioGroup };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIRadioModifier modifier = {
+        .setRadioChecked = SetRadioChecked,
+        .resetRadioChecked = ResetRadioChecked,
+        .setRadioStyle = SetRadioStyle,
+        .resetRadioStyle = ResetRadioStyle,
+        .setRadioWidth = SetRadioWidth,
+        .resetRadioWidth = ResetRadioWidth,
+        .setRadioHeight = SetRadioHeight,
+        .resetRadioHeight = ResetRadioHeight,
+        .setRadioSize = SetRadioSize,
+        .resetRadioSize = ResetRadioSize,
+        .setRadioHoverEffect = SetRadioHoverEffect,
+        .resetRadioHoverEffect = ResetRadioHoverEffect,
+        .setRadioPadding = SetRadioPadding,
+        .resetRadioPadding = ResetRadioPadding,
+        .setRadioResponseRegion = SetRadioResponseRegion,
+        .resetRadioResponseRegion = ResetRadioResponseRegion,
+        .getRadioChecked = GetRadioChecked,
+        .getRadioStyle = GetRadioStyle,
+        .setRadioValue = SetRadioValue,
+        .resetRadioValue = ResetRadioValue,
+        .getRadioValue = GetSetRadioValue,
+        .setRadioGroup = SetRadioGroup,
+        .resetRadioGroup = ResetRadioGroup,
+        .getRadioGroup = GetRadioGroup,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
@@ -336,7 +413,7 @@ void SetOnRadioChange(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_RADIO_CHANGE;
         event.componentAsyncEvent.data[0].i32 = static_cast<int>(value);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     RadioModelNG::SetOnChange(frameNode, std::move(onChange));
 }

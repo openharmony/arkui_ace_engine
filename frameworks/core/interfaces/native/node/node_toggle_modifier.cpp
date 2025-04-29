@@ -15,12 +15,7 @@
 #include "node_toggle_modifier.h"
 
 #include "core/components/checkable/checkable_theme.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
-#include "core/interfaces/native/node/node_api.h"
-#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -338,72 +333,106 @@ ArkUI_Uint32 GetToggleUnselectedColor(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
     return ToggleModelNG::GetUnselectedColor(frameNode).GetValue();
 }
+
+void SetToggleState(ArkUINodeHandle node, ArkUI_Bool isOn)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ToggleModelNG::SetToggleState(frameNode, static_cast<bool>(isOn));
+}
+
+void SetToggleOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(bool)>*>(callback);
+        ToggleModelNG::OnChange(frameNode, std::move(*onChange));
+    } else {
+        ToggleModelNG::OnChange(frameNode, nullptr);
+    }
+}
+
+void ResetToggleOnChange(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ToggleModelNG::OnChange(frameNode, nullptr);
+}
+
 } // namespace
 namespace NodeModifier {
 const ArkUIToggleModifier* GetToggleModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIToggleModifier modifier = {
-        SetToggleSelectedColor,
-        ResetToggleSelectedColor,
-        SetToggleSwitchPointColor,
-        ResetToggleSwitchPointColor,
-        SetToggleHeight,
-        ResetToggleHeight,
-        SetToggleResponseRegion,
-        ResetToggleResponseRegion,
-        SetTogglePadding,
-        ResetTogglePadding,
-        SetToggleBackgroundColor,
-        ResetToggleBackgroundColor,
-        SetToggleHoverEffect,
-        ResetToggleHoverEffect,
-        GetToggleSelectedColor,
-        GetToggleSwitchPointColor,
-        SetToggleIsOn,
-        ResetToggleIsOn,
-        GetToggleIsOn,
-        SetTogglePointRadius,
-        ResetTogglePointRadius,
-        SetToggleUnselectedColor,
-        ResetToggleUnselectedColor,
-        SetToggleTrackBorderRadius,
-        ResetToggleTrackBorderRadius,
-        GetToggleUnselectedColor,
+        .setToggleSelectedColor = SetToggleSelectedColor,
+        .resetToggleSelectedColor = ResetToggleSelectedColor,
+        .setToggleSwitchPointColor = SetToggleSwitchPointColor,
+        .resetToggleSwitchPointColor = ResetToggleSwitchPointColor,
+        .setToggleHeight = SetToggleHeight,
+        .resetToggleHeight = ResetToggleHeight,
+        .setToggleResponseRegion = SetToggleResponseRegion,
+        .resetToggleResponseRegion = ResetToggleResponseRegion,
+        .setTogglePadding = SetTogglePadding,
+        .resetTogglePadding = ResetTogglePadding,
+        .setToggleBackgroundColor = SetToggleBackgroundColor,
+        .resetToggleBackgroundColor = ResetToggleBackgroundColor,
+        .setToggleHoverEffect = SetToggleHoverEffect,
+        .resetToggleHoverEffect = ResetToggleHoverEffect,
+        .getToggleSelectedColor = GetToggleSelectedColor,
+        .getToggleSwitchPointColor = GetToggleSwitchPointColor,
+        .setToggleIsOn = SetToggleIsOn,
+        .resetToggleIsOn = ResetToggleIsOn,
+        .getToggleIsOn = GetToggleIsOn,
+        .setTogglePointRadius = SetTogglePointRadius,
+        .resetTogglePointRadius = ResetTogglePointRadius,
+        .setToggleUnselectedColor = SetToggleUnselectedColor,
+        .resetToggleUnselectedColor = ResetToggleUnselectedColor,
+        .setToggleTrackBorderRadius = SetToggleTrackBorderRadius,
+        .resetToggleTrackBorderRadius = ResetToggleTrackBorderRadius,
+        .getToggleUnselectedColor = GetToggleUnselectedColor,
+        .setToggleState = SetToggleState,
+        .setToggleOnChange = SetToggleOnChange,
+        .resetToggleOnChange = ResetToggleOnChange,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIToggleModifier* GetCJUIToggleModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIToggleModifier modifier = {
-        SetToggleSelectedColor,
-        ResetToggleSelectedColor,
-        SetToggleSwitchPointColor,
-        ResetToggleSwitchPointColor,
-        SetToggleHeight,
-        ResetToggleHeight,
-        SetToggleResponseRegion,
-        ResetToggleResponseRegion,
-        SetTogglePadding,
-        ResetTogglePadding,
-        SetToggleBackgroundColor,
-        ResetToggleBackgroundColor,
-        SetToggleHoverEffect,
-        ResetToggleHoverEffect,
-        GetToggleSelectedColor,
-        GetToggleSwitchPointColor,
-        SetToggleIsOn,
-        ResetToggleIsOn,
-        GetToggleIsOn,
-        SetTogglePointRadius,
-        ResetTogglePointRadius,
-        SetToggleUnselectedColor,
-        ResetToggleUnselectedColor,
-        SetToggleTrackBorderRadius,
-        ResetToggleTrackBorderRadius,
-        GetToggleUnselectedColor,
+        .setToggleSelectedColor = SetToggleSelectedColor,
+        .resetToggleSelectedColor = ResetToggleSelectedColor,
+        .setToggleSwitchPointColor = SetToggleSwitchPointColor,
+        .resetToggleSwitchPointColor = ResetToggleSwitchPointColor,
+        .setToggleHeight = SetToggleHeight,
+        .resetToggleHeight = ResetToggleHeight,
+        .setToggleResponseRegion = SetToggleResponseRegion,
+        .resetToggleResponseRegion = ResetToggleResponseRegion,
+        .setTogglePadding = SetTogglePadding,
+        .resetTogglePadding = ResetTogglePadding,
+        .setToggleBackgroundColor = SetToggleBackgroundColor,
+        .resetToggleBackgroundColor = ResetToggleBackgroundColor,
+        .setToggleHoverEffect = SetToggleHoverEffect,
+        .resetToggleHoverEffect = ResetToggleHoverEffect,
+        .getToggleSelectedColor = GetToggleSelectedColor,
+        .getToggleSwitchPointColor = GetToggleSwitchPointColor,
+        .setToggleIsOn = SetToggleIsOn,
+        .resetToggleIsOn = ResetToggleIsOn,
+        .getToggleIsOn = GetToggleIsOn,
+        .setTogglePointRadius = SetTogglePointRadius,
+        .resetTogglePointRadius = ResetTogglePointRadius,
+        .setToggleUnselectedColor = SetToggleUnselectedColor,
+        .resetToggleUnselectedColor = ResetToggleUnselectedColor,
+        .setToggleTrackBorderRadius = SetToggleTrackBorderRadius,
+        .resetToggleTrackBorderRadius = ResetToggleTrackBorderRadius,
+        .getToggleUnselectedColor = GetToggleUnselectedColor,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
@@ -418,7 +447,7 @@ void SetOnToggleChange(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_TOGGLE_CHANGE;
         event.componentAsyncEvent.data[0].u32 = isOn;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ToggleModelNG::OnChange(frameNode, std::move(onChange));
 }

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <cstdint>
 #include "native_styled_string.h"
 #include "node_extened.h"
 #include "styled_string.h"
@@ -31,6 +32,13 @@ constexpr int NUM_4 = 4;
 constexpr int NUM_5 = 5;
 constexpr int32_t MAX_DISPLAY_COUNT_MIN = 6;
 constexpr int32_t MAX_DISPLAY_COUNT_MAX = 9;
+constexpr float DEFAULT_SIZE_18 = 18.0f;
+constexpr float DEFAULT_SIZE_24 = 24.0f;
+constexpr float DEFAULT_SIZE_32 = 32.0f;
+constexpr float ARROW_SIZE_COEFFICIENT = 0.75f;
+constexpr int EXPECTED_UPDATE_INTERVAL_VALUE = 1000;
+constexpr float DEFAULT_VISIBLE_RATIO_MIN = 0.0f;
+constexpr float DEFAULT_VISIBLE_RATIO_MAX = 1.0f;
 
 ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Create()
 {
@@ -40,8 +48,8 @@ ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Create()
 
 ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Copy(const ArkUI_LayoutConstraint* constraint)
 {
-    ArkUI_LayoutConstraint* layoutConstraint = new ArkUI_LayoutConstraint { 0, 0, 0, 0, 0, 0 };
     CHECK_NULL_RETURN(constraint, nullptr);
+    ArkUI_LayoutConstraint* layoutConstraint = new ArkUI_LayoutConstraint { 0, 0, 0, 0, 0, 0 };
     layoutConstraint->minWidth = constraint->minWidth;
     layoutConstraint->maxWidth = constraint->maxWidth;
     layoutConstraint->minHeight = constraint->minHeight;
@@ -339,6 +347,7 @@ ArkUI_SwiperIndicator* OH_ArkUI_SwiperIndicator_Create(ArkUI_SwiperIndicatorType
     indicator->dimRight = ArkUI_OptionalFloat { 0, 0.0f };
     indicator->dimTop = ArkUI_OptionalFloat { 0, 0.0f };
     indicator->dimBottom = ArkUI_OptionalFloat { 0, 0.0f };
+    indicator->ignoreSizeValue = ArkUI_OptionalInt { 0, 0 };
     if (indicatorType == ARKUI_SWIPER_INDICATOR_TYPE_DOT) {
         indicator->itemWidth = ArkUI_OptionalFloat { 0, 0.0f };
         indicator->itemHeight = ArkUI_OptionalFloat { 0, 0.0f };
@@ -348,6 +357,7 @@ ArkUI_SwiperIndicator* OH_ArkUI_SwiperIndicator_Create(ArkUI_SwiperIndicatorType
         indicator->colorValue = ArkUI_OptionalUint { 0, 0xFF000000 };
         indicator->selectedColorValue = ArkUI_OptionalUint { 0, 0xFF000000 };
         indicator->maxDisplayCount = ArkUI_OptionalInt { 0, 0 };
+        indicator->dimSpace = ArkUI_OptionalFloat { 0, 8.0f };
     } else {
         return nullptr;
     }
@@ -520,6 +530,341 @@ int32_t OH_ArkUI_SwiperIndicator_GetMaxDisplayCount(ArkUI_SwiperIndicator* indic
     return indicator->maxDisplayCount.value;
 }
 
+void OH_ArkUI_SwiperIndicator_SetIgnoreSizeOfBottom(ArkUI_SwiperIndicator* indicator, int32_t ignoreSize)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->ignoreSizeValue.isSet = 1;
+    indicator->ignoreSizeValue.value = ignoreSize;
+}
+
+int32_t OH_ArkUI_SwiperIndicator_GetIgnoreSizeOfBottom(ArkUI_SwiperIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0.0f);
+    return indicator->ignoreSizeValue.value;
+}
+
+void OH_ArkUI_SwiperIndicator_SetSpace(ArkUI_SwiperIndicator* indicator, float space)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->dimSpace.isSet = 1;
+    indicator->dimSpace.value = space;
+}
+
+float OH_ArkUI_SwiperIndicator_GetSpace(ArkUI_SwiperIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 8.0f);
+    return indicator->dimSpace.value;
+}
+
+ArkUI_SwiperDigitIndicator* OH_ArkUI_SwiperDigitIndicator_Create()
+{
+    ArkUI_SwiperDigitIndicator* indicator = new ArkUI_SwiperDigitIndicator;
+    indicator->type = ARKUI_SWIPER_INDICATOR_TYPE_DIGIT;
+    indicator->dimLeft = ArkUI_OptionalFloat { 0, 0.0f };
+    indicator->dimRight = ArkUI_OptionalFloat { 0, 0.0f };
+    indicator->dimTop = ArkUI_OptionalFloat { 0, 0.0f };
+    indicator->dimBottom = ArkUI_OptionalFloat { 0, 0.0f };
+    indicator->fontColor = ArkUI_OptionalUint { 0, 0xFF000000 };
+    indicator->selectedFontColor = ArkUI_OptionalUint { 0, 0xFF000000 };
+    indicator->fontSize = ArkUI_OptionalFloat { 0, 14.0f };
+    indicator->selectedFontSize = ArkUI_OptionalFloat { 0, 14.0f };
+    indicator->fontWeight = ArkUI_OptionalUint { 0, ARKUI_FONT_WEIGHT_NORMAL };
+    indicator->selectedFontWeight = ArkUI_OptionalUint { 0, ARKUI_FONT_WEIGHT_NORMAL };
+    indicator->ignoreSizeValue = ArkUI_OptionalInt {0, 0};
+    return indicator;
+}
+
+void OH_ArkUI_SwiperDigitIndicator_Destroy(ArkUI_SwiperDigitIndicator* indicator)
+{
+    delete indicator;
+}
+
+void OH_ArkUI_SwiperDigitIndicator_SetStartPosition(ArkUI_SwiperDigitIndicator* indicator, float value)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->dimLeft.isSet = 1;
+    indicator->dimLeft.value = value;
+}
+
+float OH_ArkUI_SwiperDigitIndicator_GetStartPosition(ArkUI_SwiperDigitIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0.0f);
+    return indicator->dimLeft.value;
+}
+
+void OH_ArkUI_SwiperDigitIndicator_SetTopPosition(ArkUI_SwiperDigitIndicator* indicator, float value)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->dimTop.isSet = 1;
+    indicator->dimTop.value = value;
+}
+
+float OH_ArkUI_SwiperDigitIndicator_GetTopPosition(ArkUI_SwiperDigitIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0.0f);
+    return indicator->dimTop.value;
+}
+
+void OH_ArkUI_SwiperDigitIndicator_SetEndPosition(ArkUI_SwiperDigitIndicator* indicator, float value)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->dimRight.isSet = 1;
+    indicator->dimRight.value = value;
+}
+
+float OH_ArkUI_SwiperDigitIndicator_GetEndPosition(ArkUI_SwiperDigitIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0.0f);
+    return indicator->dimRight.value;
+}
+
+void OH_ArkUI_SwiperDigitIndicator_SetBottomPosition(ArkUI_SwiperDigitIndicator* indicator, float value)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->dimBottom.isSet = 1;
+    indicator->dimBottom.value = value;
+}
+
+float OH_ArkUI_SwiperDigitIndicator_GetBottomPosition(ArkUI_SwiperDigitIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0.0f);
+    return indicator->dimBottom.value;
+}
+
+void OH_ArkUI_SwiperDigitIndicator_SetFontColor(ArkUI_SwiperDigitIndicator* indicator, uint32_t color)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->fontColor.isSet = 1;
+    indicator->fontColor.value = color;
+}
+
+uint32_t OH_ArkUI_SwiperDigitIndicator_GetFontColor(ArkUI_SwiperDigitIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0);
+    return indicator->fontColor.value;
+}
+
+void OH_ArkUI_SwiperDigitIndicator_SetSelectedFontColor(ArkUI_SwiperDigitIndicator* indicator, uint32_t selectedColor)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->selectedFontColor.isSet = 1;
+    indicator->selectedFontColor.value = selectedColor;
+}
+
+uint32_t OH_ArkUI_SwiperDigitIndicator_GetSelectedFontColor(ArkUI_SwiperDigitIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0);
+    return indicator->selectedFontColor.value;
+}
+
+void OH_ArkUI_SwiperDigitIndicator_SetFontSize(ArkUI_SwiperDigitIndicator* indicator, float size)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->fontSize.isSet = 1;
+    indicator->fontSize.value = size;
+}
+
+float OH_ArkUI_SwiperDigitIndicator_GetFontSize(ArkUI_SwiperDigitIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0.0f);
+    return indicator->fontSize.value;
+}
+
+void OH_ArkUI_SwiperDigitIndicator_SetSelectedFontSize(ArkUI_SwiperDigitIndicator* indicator, float size)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->selectedFontSize.isSet = 1;
+    indicator->selectedFontSize.value = size;
+}
+
+float OH_ArkUI_SwiperDigitIndicator_GetSelectedFontSize(ArkUI_SwiperDigitIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0.0f);
+    return indicator->selectedFontSize.value;
+}
+
+void OH_ArkUI_SwiperDigitIndicator_SetFontWeight(ArkUI_SwiperDigitIndicator* indicator, ArkUI_FontWeight fontWeight)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->fontWeight.isSet = 1;
+    indicator->fontWeight.value = static_cast<uint32_t>(fontWeight);
+}
+
+ArkUI_FontWeight OH_ArkUI_SwiperDigitIndicator_GetFontWeight(ArkUI_SwiperDigitIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, static_cast<ArkUI_FontWeight>(0));
+    return static_cast<ArkUI_FontWeight>(indicator->fontWeight.value);
+}
+
+void OH_ArkUI_SwiperDigitIndicator_SetSelectedFontWeight(
+    ArkUI_SwiperDigitIndicator* indicator, ArkUI_FontWeight selectedFontWeight)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->selectedFontWeight.isSet = 1;
+    indicator->selectedFontWeight.value = static_cast<uint32_t>(selectedFontWeight);
+}
+
+ArkUI_FontWeight OH_ArkUI_SwiperDigitIndicator_GetSelectedFontWeight(ArkUI_SwiperDigitIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, static_cast<ArkUI_FontWeight>(0));
+    return static_cast<ArkUI_FontWeight>(indicator->selectedFontWeight.value);
+}
+
+void OH_ArkUI_SwiperDigitIndicator_SetIgnoreSizeOfBottom(ArkUI_SwiperDigitIndicator* indicator, int32_t ignoreSize)
+{
+    CHECK_NULL_VOID(indicator);
+    indicator->ignoreSizeValue.isSet = 1;
+    indicator->ignoreSizeValue.value = ignoreSize;
+}
+
+int32_t OH_ArkUI_SwiperDigitIndicator_GetIgnoreSizeOfBottom(ArkUI_SwiperDigitIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0);
+    return indicator->ignoreSizeValue.value;
+}
+
+ArkUI_SwiperArrowStyle* OH_ArkUI_SwiperArrowStyle_Create()
+{
+    ArkUI_SwiperArrowStyle* arrowStyle = new ArkUI_SwiperArrowStyle;
+    arrowStyle->showBackground = ArkUI_OptionalInt { 0, 0 };
+    arrowStyle->showSidebarMiddle = ArkUI_OptionalInt { 0, 0 };
+    arrowStyle->backgroundSize = ArkUI_OptionalFloat { 0, DEFAULT_SIZE_24 };
+    arrowStyle->backgroundColor = ArkUI_OptionalUint { 0, 0x00000000 };
+    arrowStyle->arrowSize = ArkUI_OptionalFloat { 0, DEFAULT_SIZE_18 };
+    arrowStyle->arrowColor = ArkUI_OptionalUint { 0, 0x00182431 };
+    return arrowStyle;
+}
+
+void OH_ArkUI_SwiperArrowStyle_Destroy(ArkUI_SwiperArrowStyle* arrowStyle)
+{
+    delete arrowStyle;
+}
+
+void OH_ArkUI_SwiperArrowStyle_SetShowBackground(ArkUI_SwiperArrowStyle* arrowStyle, int32_t showBackground)
+{
+    CHECK_NULL_VOID(arrowStyle);
+    if (showBackground != 0 && showBackground != 1) {
+        return;
+    }
+    arrowStyle->showBackground.isSet = 1;
+    arrowStyle->showBackground.value = showBackground;
+}
+
+int32_t OH_ArkUI_SwiperArrowStyle_GetShowBackground(ArkUI_SwiperArrowStyle* arrowStyle)
+{
+    CHECK_NULL_RETURN(arrowStyle, 0);
+    return arrowStyle->showBackground.value;
+}
+
+void OH_ArkUI_SwiperArrowStyle_SetShowSidebarMiddle(ArkUI_SwiperArrowStyle* arrowStyle, int32_t showSidebarMiddle)
+{
+    CHECK_NULL_VOID(arrowStyle);
+    if (showSidebarMiddle != 0 && showSidebarMiddle != 1) {
+        return;
+    }
+    arrowStyle->showSidebarMiddle.isSet = 1;
+    arrowStyle->showSidebarMiddle.value = showSidebarMiddle;
+    if (showSidebarMiddle == 1) {
+        if (!arrowStyle->backgroundSize.isSet) {
+            arrowStyle->backgroundSize.value = DEFAULT_SIZE_32;
+        }
+        if (!arrowStyle->backgroundColor.isSet) {
+            arrowStyle->backgroundColor.value = 0x19182431;
+        }
+        if (!arrowStyle->arrowSize.isSet) {
+            arrowStyle->arrowSize.value = DEFAULT_SIZE_24;
+        }
+    }
+}
+
+int32_t OH_ArkUI_SwiperArrowStyle_GetShowSidebarMiddle(ArkUI_SwiperArrowStyle* arrowStyle)
+{
+    CHECK_NULL_RETURN(arrowStyle, 0);
+    return arrowStyle->showSidebarMiddle.value;
+}
+
+void OH_ArkUI_SwiperArrowStyle_SetBackgroundSize(ArkUI_SwiperArrowStyle* arrowStyle, float backgroundSize)
+{
+    CHECK_NULL_VOID(arrowStyle);
+    arrowStyle->backgroundSize.isSet = 1;
+    arrowStyle->backgroundSize.value = backgroundSize;
+}
+
+float OH_ArkUI_SwiperArrowStyle_GetBackgroundSize(ArkUI_SwiperArrowStyle* arrowStyle)
+{
+    CHECK_NULL_RETURN(arrowStyle, DEFAULT_SIZE_24);
+    if (arrowStyle->showSidebarMiddle.value == 1) {
+        if (!arrowStyle->backgroundSize.isSet) {
+            return DEFAULT_SIZE_32;
+        }
+    }
+    if (!arrowStyle->backgroundSize.isSet) {
+        return DEFAULT_SIZE_24;
+    }
+    return arrowStyle->backgroundSize.value;
+}
+
+void OH_ArkUI_SwiperArrowStyle_SetBackgroundColor(ArkUI_SwiperArrowStyle* arrowStyle, uint32_t backgroundColor)
+{
+    CHECK_NULL_VOID(arrowStyle);
+    arrowStyle->backgroundColor.isSet = 1;
+    arrowStyle->backgroundColor.value = backgroundColor;
+}
+
+uint32_t OH_ArkUI_SwiperArrowStyle_GetBackgroundColor(ArkUI_SwiperArrowStyle* arrowStyle)
+{
+    CHECK_NULL_RETURN(arrowStyle, 0x00000000);
+    if (arrowStyle->showSidebarMiddle.value == 1) {
+        if (!arrowStyle->backgroundColor.isSet) {
+            return 0x19182431;
+        }
+    }
+    if (!arrowStyle->backgroundColor.isSet) {
+        return 0x00000000;
+    }
+    return arrowStyle->backgroundColor.value;
+}
+
+void OH_ArkUI_SwiperArrowStyle_SetArrowSize(ArkUI_SwiperArrowStyle* arrowStyle, float arrowSize)
+{
+    CHECK_NULL_VOID(arrowStyle);
+    if (arrowStyle->showBackground.value == 1) {
+        arrowSize = arrowStyle->backgroundSize.value * ARROW_SIZE_COEFFICIENT;
+    }
+    arrowStyle->arrowSize.isSet = 1;
+    arrowStyle->arrowSize.value = arrowSize;
+}
+
+float OH_ArkUI_SwiperArrowStyle_GetArrowSize(ArkUI_SwiperArrowStyle* arrowStyle)
+{
+    CHECK_NULL_RETURN(arrowStyle, DEFAULT_SIZE_18);
+    if (arrowStyle->showBackground.value == 1) {
+        return arrowStyle->backgroundSize.value * ARROW_SIZE_COEFFICIENT;
+    }
+    if (arrowStyle->showSidebarMiddle.value == 1) {
+        if (!arrowStyle->arrowSize.isSet) {
+            return DEFAULT_SIZE_24;
+        }
+    }
+    if (!arrowStyle->arrowSize.isSet) {
+        return DEFAULT_SIZE_18;
+    }
+    return arrowStyle->arrowSize.value;
+}
+
+void OH_ArkUI_SwiperArrowStyle_SetArrowColor(ArkUI_SwiperArrowStyle* arrowStyle, uint32_t arrowColor)
+{
+    CHECK_NULL_VOID(arrowStyle);
+    arrowStyle->arrowColor.isSet = 1;
+    arrowStyle->arrowColor.value = arrowColor;
+}
+
+uint32_t OH_ArkUI_SwiperArrowStyle_GetArrowColor(ArkUI_SwiperArrowStyle* arrowStyle)
+{
+    CHECK_NULL_RETURN(arrowStyle, 0x00182431);
+    return arrowStyle->arrowColor.value;
+}
+
 ArkUI_StyledString* OH_ArkUI_StyledString_Create(
     OH_Drawing_TypographyStyle* typoStyle, OH_Drawing_FontCollection* collection)
 {
@@ -675,6 +1020,9 @@ ArkUI_AccessibilityValue* OH_ArkUI_AccessibilityValue_Create()
     value->min = ArkUI_OptionalInt { 0, -1 };
     value->max = ArkUI_OptionalInt { 0, -1 };
     value->current = ArkUI_OptionalInt { 0, -1 };
+    value->rangeMin = ArkUI_OptionalInt { 0, -1 };
+    value->rangeMax = ArkUI_OptionalInt { 0, -1 };
+    value->rangeCurrent = ArkUI_OptionalInt { 0, -1 };
     value->text = ArkUI_OptionalCharPtr { 0, "" };
     return value;
 }
@@ -704,7 +1052,7 @@ void OH_ArkUI_AccessibilityValue_SetMax(ArkUI_AccessibilityValue* value, int32_t
     value->max.value = max;
 }
 
-int32_t OH_ArkUI_AccessibilityValue_GetMax(ArkUI_AccessibilityValue* value) 
+int32_t OH_ArkUI_AccessibilityValue_GetMax(ArkUI_AccessibilityValue* value)
 {
     CHECK_NULL_RETURN(value, -1);
     return value->max.value;
@@ -723,6 +1071,45 @@ int32_t OH_ArkUI_AccessibilityValue_GetCurrent(ArkUI_AccessibilityValue* value)
     return value->current.value;
 }
 
+void OH_ArkUI_AccessibilityValue_SetRangeMin(ArkUI_AccessibilityValue* value, int32_t rangeMin)
+{
+    CHECK_NULL_VOID(value);
+    value->rangeMin.isSet = 1;
+    value->rangeMin.value = rangeMin;
+}
+
+int32_t OH_ArkUI_AccessibilityValue_GetRangeMin(ArkUI_AccessibilityValue* value)
+{
+    CHECK_NULL_RETURN(value, -1);
+    return value->rangeMin.value;
+}
+
+void OH_ArkUI_AccessibilityValue_SetRangeMax(ArkUI_AccessibilityValue* value, int32_t rangeMax)
+{
+    CHECK_NULL_VOID(value);
+    value->rangeMax.isSet = 1;
+    value->rangeMax.value = rangeMax;
+}
+
+int32_t OH_ArkUI_AccessibilityValue_GetRangeMax(ArkUI_AccessibilityValue* value)
+{
+    CHECK_NULL_RETURN(value, -1);
+    return value->rangeMax.value;
+}
+
+void OH_ArkUI_AccessibilityValue_SetRangeCurrent(ArkUI_AccessibilityValue* value, int32_t rangeCurrent)
+{
+    CHECK_NULL_VOID(value);
+    value->rangeCurrent.isSet = 1;
+    value->rangeCurrent.value = rangeCurrent;
+}
+
+int32_t OH_ArkUI_AccessibilityValue_GetRangeCurrent(ArkUI_AccessibilityValue* value)
+{
+    CHECK_NULL_RETURN(value, -1);
+    return value->rangeCurrent.value;
+}
+
 void OH_ArkUI_AccessibilityValue_SetText(ArkUI_AccessibilityValue* value, const char* text)
 {
     CHECK_NULL_VOID(value);
@@ -734,6 +1121,75 @@ const char* OH_ArkUI_AccessibilityValue_GetText(ArkUI_AccessibilityValue* value)
 {
     CHECK_NULL_RETURN(value, "");
     return value->text.value;
+}
+
+ArkUI_VisibleAreaEventOptions* OH_ArkUI_VisibleAreaEventOptions_Create()
+{
+    ArkUI_VisibleAreaEventOptions* options = new ArkUI_VisibleAreaEventOptions;
+    options->expectedUpdateInterval = 1000;
+    return options;
+}
+
+void OH_ArkUI_VisibleAreaEventOptions_Dispose(ArkUI_VisibleAreaEventOptions* option)
+{
+    if (!option) {
+        return;
+    }
+    delete option;
+    option = nullptr;
+}
+
+int32_t OH_ArkUI_VisibleAreaEventOptions_SetRatios(ArkUI_VisibleAreaEventOptions* option, float* value, int32_t size)
+{
+    if (!option) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    option->ratios.clear();
+    for (int32_t i = 0; i < size; i++) {
+        auto ratio = value[i];
+        ratio = std::clamp(ratio, DEFAULT_VISIBLE_RATIO_MIN, DEFAULT_VISIBLE_RATIO_MAX);
+        option->ratios.push_back(ratio);
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(ArkUI_VisibleAreaEventOptions* option, int32_t value)
+{
+    if (!option) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (value < 0) {
+        value = EXPECTED_UPDATE_INTERVAL_VALUE;
+    }
+    option->expectedUpdateInterval = value;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_VisibleAreaEventOptions_GetRatios(ArkUI_VisibleAreaEventOptions* option, float* value, int32_t* size)
+{
+    if (!option || !value || !size) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    int32_t ratiosSize = static_cast<int32_t>(option->ratios.size());
+    if (*size < ratiosSize) {
+        *size = ratiosSize;
+        return ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR;
+    }
+    int32_t index = 0;
+    for (const auto& element : option->ratios) {
+        value[index] = element;
+        index++;
+    }
+    *size = static_cast<int32_t>(option->ratios.size());
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(ArkUI_VisibleAreaEventOptions* option)
+{
+    if (!option) {
+        return -1;
+    }
+    return option->expectedUpdateInterval;
 }
 #ifdef __cplusplus
 };

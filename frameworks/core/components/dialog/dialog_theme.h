@@ -16,14 +16,17 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DIALOG_DIALOG_THEME_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DIALOG_DIALOG_THEME_H
 
+#include "base/geometry/dimension.h"
 #include "base/utils/system_properties.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/layout_param.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/radius.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/dialog/dialog_properties.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
@@ -40,6 +43,8 @@ constexpr double DEFAULT_DIALOG_MAXSIZE_SCALE_PORTRAIT = 0.8f;
 constexpr int DEFAULT_DIALOG_SCROLL_FLEX_ALIGN = 1;
 constexpr int DEFAULT_DIALOG_COLUMN_MEASURE_TYPE = 1;
 constexpr int DIALOG_TITLE_MAX_LINES_VALUE = 2;
+constexpr float DEFAULT_ALIGN_DIALOG = 3.0;
+constexpr float SHADOW_NONE = 6.0;
 
 } // namespace
 /**
@@ -111,6 +116,16 @@ public:
     const Dimension& GetContentMinFontSize() const
     {
         return contentMinFontSize_;
+    }
+
+    const Dimension& GetButtonBottomTopMargin() const
+    {
+        return buttonBottomTopMargin_;
+    }
+
+    const Dimension& GetTitlePaddingHorizontal() const
+    {
+        return titlePaddingHorizontal_;
     }
 
     uint32_t GetTitleMaxLines() const
@@ -256,6 +271,11 @@ public:
     const Color& GetButtonDefaultFontColor() const
     {
         return buttonDefaultFontColor_;
+    }
+
+    int GetDialogBackgroundBlurStyle() const
+    {
+        return dialogBackgroundBlurStyle_;
     }
 
     double GetFrameStart() const
@@ -507,6 +527,76 @@ public:
         return dialogLandscapeHeightBoundary_;
     }
 
+    const Color& GetBackgroudBorderColor() const
+    {
+        return backgroundBorderColor_;
+    }
+
+    const Dimension& GetBackgroudBorderWidth()
+    {
+        return backgroundBorderWidth_;
+    }
+
+    double GetDialogRatioHeight() const
+    {
+        return dialogRatioHeight_;
+    }
+
+    int32_t GetTextAlignContent() const
+    {
+        return text_align_content_;
+    }
+
+    int32_t GetTextAlignTitle() const
+    {
+        return text_align_title_;
+    }
+
+    uint32_t GetShadowDialog() const
+    {
+        return shadowDialog_;
+    }
+
+    int32_t GetAlignDialog() const
+    {
+        return alignDialog_;
+    }
+
+    int32_t GetButtonType() const
+    {
+        return button_type_;
+    }
+
+    const Color& GetColorBgWithBlur() const
+    {
+        return colorBgWithBlur_;
+    }
+
+    const Dimension& GetPaddingTopTitle() const
+    {
+        return paddingTopTitle_;
+    }
+
+    const Dimension& GetPaddingSingleTitle() const
+    {
+        return paddingSingleTitle_;
+    }
+
+    const Dimension& GetNormalButtonFontSize() const
+    {
+        return normalButtonFontSize_;
+    }
+
+    const std::string& GetCancelText() const
+    {
+        return cancelText_;
+    }
+
+    const std::string& GetConfirmText() const
+    {
+        return confirmText_;
+    }
+
 protected:
     DialogTheme() = default;
 
@@ -518,6 +608,8 @@ private:
     TextStyle contentTextStyle_;
     Dimension titleMinFontSize_;
     Dimension contentMinFontSize_;
+    Dimension buttonBottomTopMargin_;
+    Dimension titlePaddingHorizontal_;
     uint32_t titleMaxLines_ = 1;
     Edge defaultPadding_;
     Edge adjustPadding_;
@@ -600,6 +692,21 @@ private:
     Color dialogOuterBorderColor_;
     double dialogInnerBorderWidth_ = 0.0f;
     Color dialogInnerBorderColor_;
+    Dimension paddingSingleTitle_;
+    Dimension paddingTopTitle_;
+    Dimension backgroundBorderWidth_;
+    double dialogRatioHeight_ = 0.9;
+    int32_t text_align_content_ = 0;
+    int32_t text_align_title_ = 0;
+    int32_t button_type_ = 0;
+    uint32_t shadowDialog_ = 6;
+    int32_t alignDialog_ = 3;
+    Dimension normalButtonFontSize_;
+    Color colorBgWithBlur_;
+    Color backgroundBorderColor_;
+    int dialogBackgroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
+    std::string cancelText_;
+    std::string confirmText_;
 };
 
 } // namespace OHOS::Ace

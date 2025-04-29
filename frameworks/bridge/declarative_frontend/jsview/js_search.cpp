@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,14 +17,12 @@
 
 #include <optional>
 #include <string>
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/log/ace_scoring_log.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_search_theme.h"
 #include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "bridge/declarative_frontend/jsview/js_textfield.h"
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
@@ -45,21 +43,18 @@ std::mutex SearchModel::mutex_;
 
 SearchModel* SearchModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::SearchModelNG());
+    static NG::SearchModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::SearchModelNG());
-            } else {
-                instance_.reset(new Framework::SearchModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::SearchModelNG instance;
+        return &instance;
+    } else {
+        static Framework::SearchModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 
 } // namespace OHOS::Ace
@@ -70,6 +65,26 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
 constexpr double DEFAULT_OPACITY = 0.2;
 const int32_t DEFAULT_ALPHA = 255;
 constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+const char* TOP_START_PROPERTY = "topStart";
+const char* TOP_END_PROPERTY = "topEnd";
+const char* BOTTOM_START_PROPERTY = "bottomStart";
+const char* BOTTOM_END_PROPERTY = "bottomEnd";
+
+bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
+{
+    auto value = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE));
+    if (!value->IsNumber()) {
+        return false;
+    }
+    auto unit = DimensionUnit::VP;
+    auto jsUnit = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::UNIT));
+    if (jsUnit->IsNumber()) {
+        unit = static_cast<DimensionUnit>(jsUnit->ToNumber<int32_t>());
+    }
+    CalcDimension dimension(value->ToNumber<double>(), unit);
+    result = dimension;
+    return true;
+}
 } // namespace
 
 void JSSearch::JSBind(BindingTarget globalObj)
@@ -82,6 +97,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("searchIcon", &JSSearch::SetSearchIcon, opt);
     JSClass<JSSearch>::StaticMethod("cancelButton", &JSSearch::SetCancelButton, opt);
     JSClass<JSSearch>::StaticMethod("fontColor", &JSSearch::SetTextColor, opt);
+    JSClass<JSSearch>::StaticMethod("backgroundColor", &JSSearch::SetBackgroundColor, opt);
     JSClass<JSSearch>::StaticMethod("caretStyle", &JSSearch::SetCaret, opt);
     JSClass<JSSearch>::StaticMethod("placeholderColor", &JSSearch::SetPlaceholderColor, opt);
     JSClass<JSSearch>::StaticMethod("placeholderFont", &JSSearch::SetPlaceholderFont, opt);
@@ -128,8 +144,11 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("decoration", &JSSearch::SetDecoration);
     JSClass<JSSearch>::StaticMethod("minFontSize", &JSSearch::SetMinFontSize);
     JSClass<JSSearch>::StaticMethod("maxFontSize", &JSSearch::SetMaxFontSize);
+    JSClass<JSSearch>::StaticMethod("minFontScale", &JSSearch::SetMinFontScale);
+    JSClass<JSSearch>::StaticMethod("maxFontScale", &JSSearch::SetMaxFontScale);
     JSClass<JSSearch>::StaticMethod("letterSpacing", &JSSearch::SetLetterSpacing);
     JSClass<JSSearch>::StaticMethod("lineHeight", &JSSearch::SetLineHeight);
+    JSClass<JSSearch>::StaticMethod("halfLeading", &JSSearch::SetHalfLeading);
     JSClass<JSSearch>::StaticMethod("fontFeature", &JSSearch::SetFontFeature);
     JSClass<JSSearch>::StaticMethod("id", &JSSearch::SetId);
     JSClass<JSSearch>::StaticMethod("key", &JSSearch::SetKey);
@@ -142,13 +161,18 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("onWillDelete", &JSSearch::OnWillDelete);
     JSClass<JSSearch>::StaticMethod("onDidDelete", &JSSearch::OnDidDelete);
     JSClass<JSSearch>::StaticMethod("enablePreviewText", &JSSearch::SetEnablePreviewText);
+    JSClass<JSSearch>::StaticMethod("enableHapticFeedback", &JSSearch::SetEnableHapticFeedback);
+    JSClass<JSSearch>::StaticMethod("autoCapitalizationMode", &JSSearch::SetCapitalizationMode);
+    JSClass<JSSearch>::StaticMethod("stopBackPress", &JSSearch::SetStopBackPress);
+    JSClass<JSSearch>::StaticMethod("keyboardAppearance", &JSSearch::SetKeyboardAppearance);
+    JSClass<JSSearch>::StaticMethod("onWillChange", &JSSearch::SetOnWillChange);
 }
 
 void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
 {
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
-    JsEventCallback<void(const std::string&)> onChangeEvent(
+    JsEventCallback<void(const std::u16string&)> onChangeEvent(
         info.GetExecutionContext(), JSRef<JSFunc>::Cast(changeEventVal));
     SearchModel::GetInstance()->SetOnChangeEvent(std::move(onChangeEvent));
 }
@@ -174,21 +198,21 @@ void JSSearch::SetFontFeature(const JSCallbackInfo& info)
 
 void JSSearch::Create(const JSCallbackInfo& info)
 {
-    std::optional<std::string> key;
-    std::optional<std::string> tip;
+    std::optional<std::u16string> key;
+    std::optional<std::u16string> tip;
     std::optional<std::string> src;
     JSTextEditableController* jsController = nullptr;
     JSRef<JSVal> changeEventVal;
     if (info[0]->IsObject()) {
         auto param = JSRef<JSObject>::Cast(info[0]);
-        std::string placeholder;
+        std::u16string placeholder;
         if (param->GetProperty("placeholder")->IsUndefined()) {
-            tip = "";
+            tip = u"";
         }
         if (ParseJsString(param->GetProperty("placeholder"), placeholder)) {
             tip = placeholder;
         }
-        std::string text;
+        std::u16string text;
         JSRef<JSVal> textValue = param->GetProperty("value");
         if (textValue->IsObject()) {
             JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(textValue);
@@ -199,8 +223,13 @@ void JSSearch::Create(const JSCallbackInfo& info)
             if (ParseJsString(textValue, text)) {
                 key = text;
             }
+        } else if (param->GetProperty("$value")->IsFunction()) {
+            changeEventVal = param->GetProperty("$value");
+            if (ParseJsString(textValue, text)) {
+                key = text;
+            }
         } else if (param->HasProperty("value") && textValue->IsUndefined()) {
-            key = "";
+            key = u"";
         } else {
             if (ParseJsString(textValue, text)) {
                 key = text;
@@ -224,7 +253,6 @@ void JSSearch::Create(const JSCallbackInfo& info)
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseSearchValueObject(info, changeEventVal);
     }
-    JSSeacrhTheme::ApplyTheme();
 }
 
 void JSSearch::SetSelectedBackgroundColor(const JSCallbackInfo& info)
@@ -234,11 +262,8 @@ void JSSearch::SetSelectedBackgroundColor(const JSCallbackInfo& info)
     }
     Color selectedColor;
     if (!ParseJsColor(info[0], selectedColor)) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID(theme);
-        selectedColor = theme->GetSelectedColor();
+        SearchModel::GetInstance()->ResetSelectedBackgroundColor();
+        return;
     }
     // Alpha = 255 means opaque
     if (selectedColor.GetAlpha() == DEFAULT_ALPHA) {
@@ -290,28 +315,31 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
 
         // set button font size, unit FP
         auto fontSize = param->GetProperty("fontSize");
-        CalcDimension size = theme->GetFontSize();
+        CalcDimension size = theme->GetButtonFontSize();
         if (ParseJsDimensionVpNG(fontSize, size) && size.Unit() != DimensionUnit::PERCENT &&
             GreatOrEqual(size.Value(), 0.0)) {
             ParseJsDimensionFp(fontSize, size);
         } else {
-            size = theme->GetFontSize();
+            size = theme->GetButtonFontSize();
         }
         SearchModel::GetInstance()->SetSearchButtonFontSize(size);
 
         auto fontColorProp = param->GetProperty("fontColor");
         if (fontColorProp->IsUndefined() || fontColorProp->IsNull() || !ParseJsColor(fontColorProp, fontColor)) {
-            if (!JSSeacrhTheme::ObtainSearchButtonFontColor(fontColor)) {
-                SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
-            }
+            SearchModel::GetInstance()->ResetSearchButtonFontColor();
         } else {
             SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
         }
-    } else {
-        SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetFontSize());
-        if (!JSSeacrhTheme::ObtainSearchButtonFontColor(fontColor)) {
-            SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
+        
+        auto autoDisable = param->GetProperty("autoDisable");
+        if (autoDisable->IsUndefined() || autoDisable->IsNull() || !autoDisable->IsBoolean()) {
+            SearchModel::GetInstance()->SetSearchButtonAutoDisable(false);
+        } else {
+            SearchModel::GetInstance()->SetSearchButtonAutoDisable(autoDisable->ToBoolean());
         }
+    } else {
+        SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetButtonFontSize());
+        SearchModel::GetInstance()->ResetSearchButtonFontColor();
     }
 }
 
@@ -381,15 +409,17 @@ void JSSearch::SetCancelImageIcon(const JSCallbackInfo& info)
     }
 
     // set icon color
-    Color iconColor = theme->GetSearchIconColor();
+    Color iconColor;
+    NG::IconOptions cancelIconOptions;
     auto iconColorProp = iconParam->GetProperty("color");
     if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() && ParseJsColor(iconColorProp, iconColor)) {
-        NG::IconOptions cancelIconOptions = NG::IconOptions(iconColor, iconSize, iconSrc, "", "");
-        SearchModel::GetInstance()->SetCancelImageIcon(cancelIconOptions);
+        SearchModel::GetInstance()->SetCancelIconColor(iconColor);
+        cancelIconOptions = NG::IconOptions(iconColor, iconSize, iconSrc, "", "");
     } else {
-        NG::IconOptions cancelIconOptions = NG::IconOptions(iconSize, iconSrc, "", "");
-        SearchModel::GetInstance()->SetCancelImageIcon(cancelIconOptions);
+        SearchModel::GetInstance()->ResetCancelIconColor();
+        cancelIconOptions = NG::IconOptions(iconSize, iconSrc, "", "");
     }
+    SearchModel::GetInstance()->SetCancelImageIcon(cancelIconOptions);
 }
 
 void JSSearch::SetSearchDefaultIcon()
@@ -437,18 +467,18 @@ void JSSearch::SetSearchImageIcon(const JSCallbackInfo& info)
     std::string bundleName;
     std::string moduleName;
     GetJsMediaBundleInfo(srcPathProp, bundleName, moduleName);
-
     // set icon color
-    Color colorVal = theme->GetSearchIconColor();
+    Color colorVal;
+    NG::IconOptions searchIconOptions;
     auto colorProp = param->GetProperty("color");
-    if (!colorProp->IsUndefined() && !colorProp->IsNull()) {
-        ParseJsColor(colorProp, colorVal);
-        NG::IconOptions searchIconOptions = NG::IconOptions(colorVal, size, src, bundleName, moduleName);
-        SearchModel::GetInstance()->SetSearchImageIcon(searchIconOptions);
+    if (!colorProp->IsUndefined() && !colorProp->IsNull() && ParseJsColor(colorProp, colorVal)) {
+        SearchModel::GetInstance()->SetSearchIconColor(colorVal);
+        searchIconOptions = NG::IconOptions(colorVal, size, src, bundleName, moduleName);
     } else {
-        NG::IconOptions searchIconOptions = NG::IconOptions(size, src, bundleName, moduleName);
-        SearchModel::GetInstance()->SetSearchImageIcon(searchIconOptions);
+        SearchModel::GetInstance()->ResetSearchIconColor();
+        searchIconOptions = NG::IconOptions(size, src, bundleName, moduleName);
     }
+    SearchModel::GetInstance()->SetSearchImageIcon(searchIconOptions);
 }
 
 static CancelButtonStyle ConvertStrToCancelButtonStyle(const std::string& value)
@@ -519,9 +549,23 @@ void JSSearch::SetTextColor(const JSCallbackInfo& info)
     auto value = JSRef<JSVal>::Cast(info[0]);
     Color colorVal;
     if (!ParseJsColor(value, colorVal)) {
-        colorVal = theme->GetTextColor();
+        SearchModel::GetInstance()->ResetTextColor();
+        return;
     }
     SearchModel::GetInstance()->SetTextColor(colorVal);
+}
+
+void JSSearch::SetBackgroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    Color colorVal;
+    if (!ParseJsColor(info[0], colorVal)) {
+        SearchModel::GetInstance()->ResetBackgroundColor();
+        return;
+    }
+    SearchModel::GetInstance()->SetBackgroundColor(colorVal);
 }
 
 void JSSearch::SetCaret(const JSCallbackInfo& info)
@@ -543,7 +587,8 @@ void JSSearch::SetCaret(const JSCallbackInfo& info)
         Color caretColor;
         auto caretColorProp = param->GetProperty("color");
         if (caretColorProp->IsUndefined() || caretColorProp->IsNull() || !ParseJsColor(caretColorProp, caretColor)) {
-            caretColor = textFieldTheme->GetCursorColor();
+            SearchModel::GetInstance()->ResetCaretColor();
+            return;
         }
         SearchModel::GetInstance()->SetCaretColor(caretColor);
     }
@@ -571,7 +616,7 @@ void JSSearch::SetInputFilter(const JSCallbackInfo& info)
         auto jsFunc = AceType::MakeRefPtr<JsClipboardFunction>(JSRef<JSFunc>::Cast(errInfo));
         auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto resultId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                            const std::string& info) {
+                            const std::u16string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             PipelineContext::SetCallBackNode(node);
             func->Execute(info);
@@ -604,9 +649,8 @@ void JSSearch::SetPlaceholderColor(const JSCallbackInfo& info)
     auto value = JSRef<JSVal>::Cast(info[0]);
     Color colorVal;
     if (!ParseJsColor(value, colorVal)) {
-        auto theme = GetTheme<SearchTheme>();
-        CHECK_NULL_VOID(theme);
-        colorVal = theme->GetPlaceholderColor();
+        SearchModel::GetInstance()->ResetPlaceholderColor();
+        return;
     }
     SearchModel::GetInstance()->SetPlaceholderColor(colorVal);
 }
@@ -719,8 +763,45 @@ void JSSearch::SetTextAlign(int32_t value)
 
 void JSSearch::JsBorder(const JSCallbackInfo& info)
 {
-    JSViewAbstract::JsBorder(info);
+    if (!info[0]->IsObject()) {
+        CalcDimension borderWidth;
+        ViewAbstractModel::GetInstance()->SetBorderWidth(borderWidth);
+        ViewAbstractModel::GetInstance()->SetBorderColor(Color::BLACK);
+        ViewAbstractModel::GetInstance()->SetBorderRadius(borderWidth);
+        ViewAbstractModel::GetInstance()->SetBorderStyle(BorderStyle::SOLID);
+        ViewAbstractModel::GetInstance()->SetDashGap(Dimension(-1));
+        ViewAbstractModel::GetInstance()->SetDashWidth(Dimension(-1));
+        return;
+    }
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+
+    auto valueWidth = object->GetProperty(static_cast<int32_t>(ArkUIIndex::WIDTH));
+    if (!valueWidth->IsUndefined()) {
+        JSViewAbstract::ParseBorderWidth(valueWidth);
+    }
+
+    // use default value when undefined.
+    JSViewAbstract::ParseBorderColor(object->GetProperty(static_cast<int32_t>(ArkUIIndex::COLOR)));
+
+    auto valueRadius = object->GetProperty(static_cast<int32_t>(ArkUIIndex::RADIUS));
+    if (!valueRadius->IsUndefined()) {
+        ParseBorderRadius(valueRadius);
+        SearchModel::GetInstance()->SetBackBorderRadius();
+    }
+    // use default value when undefined.
+    JSViewAbstract::ParseBorderStyle(object->GetProperty(static_cast<int32_t>(ArkUIIndex::STYLE)));
+
+    auto dashGap = object->GetProperty("dashGap");
+    if (!dashGap->IsUndefined()) {
+        JSViewAbstract::ParseDashGap(dashGap);
+    }
+    auto dashWidth = object->GetProperty("dashWidth");
+    if (!dashWidth->IsUndefined()) {
+        JSViewAbstract::ParseDashWidth(dashWidth);
+    }
+
     SearchModel::GetInstance()->SetBackBorder();
+    info.ReturnSelf();
 }
 
 void JSSearch::JsBorderWidth(const JSCallbackInfo& info)
@@ -750,27 +831,141 @@ void JSSearch::JsBorderStyle(const JSCallbackInfo& info)
     SearchModel::GetInstance()->SetBackBorder();
 }
 
+void JSSearch::GetBorderRadiusByLengthMetrics(const char* key, JSRef<JSObject>& object,
+    std::optional<CalcDimension>& radius)
+{
+    if (object->HasProperty(key) && object->GetProperty(key)->IsObject()) {
+        JSRef<JSObject> startObj = JSRef<JSObject>::Cast(object->GetProperty(key));
+        CalcDimension value;
+        ParseJsLengthMetrics(startObj, value);
+        radius = value;
+    }
+}
+
+bool JSSearch::ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft,
+    CalcDimension& topRight, CalcDimension& bottomLeft, CalcDimension& bottomRight)
+{
+    if (object->HasProperty(TOP_START_PROPERTY) || object->HasProperty(TOP_END_PROPERTY) ||
+        object->HasProperty(BOTTOM_START_PROPERTY) || object->HasProperty(BOTTOM_END_PROPERTY)) {
+        std::optional<CalcDimension> topStart;
+        std::optional<CalcDimension> topEnd;
+        std::optional<CalcDimension> bottomStart;
+        std::optional<CalcDimension> bottomEnd;
+        GetBorderRadiusByLengthMetrics(TOP_START_PROPERTY, object, topStart);
+        GetBorderRadiusByLengthMetrics(TOP_END_PROPERTY, object, topEnd);
+        GetBorderRadiusByLengthMetrics(BOTTOM_START_PROPERTY, object, bottomStart);
+        GetBorderRadiusByLengthMetrics(BOTTOM_END_PROPERTY, object, bottomEnd);
+        topLeft = topStart.has_value() ? topStart.value() : topLeft;
+        topRight = topEnd.has_value() ? topEnd.value() : topRight;
+        bottomLeft = bottomStart.has_value() ? bottomStart.value() : bottomLeft;
+        bottomRight = bottomEnd.has_value() ? bottomEnd.value() : bottomRight;
+        return true;
+    }
+    JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topLeft"), topLeft);
+    JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topRight"), topRight);
+    JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomLeft"), bottomLeft);
+    JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomRight"), bottomRight);
+    return false;
+}
+
+void JSSearch::ParseBorderRadius(const JSRef<JSVal>& args)
+{
+    CalcDimension borderRadius;
+    if (ParseJsDimensionVp(args, borderRadius)) {
+        ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
+    } else if (args->IsObject()) {
+        auto textFieldTheme = GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(textFieldTheme);
+        auto borderRadiusTheme = textFieldTheme->GetBorderRadius();
+        NG::BorderRadiusProperty defaultBorderRadius {
+            borderRadiusTheme.GetX(), borderRadiusTheme.GetY(),
+            borderRadiusTheme.GetY(), borderRadiusTheme.GetX(),
+        };
+
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        CalcDimension topLeft = defaultBorderRadius.radiusTopLeft.value();
+        CalcDimension topRight = defaultBorderRadius.radiusTopRight.value();
+        CalcDimension bottomLeft = defaultBorderRadius.radiusBottomLeft.value();
+        CalcDimension bottomRight = defaultBorderRadius.radiusBottomRight.value();
+        if (ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight)) {
+            ViewAbstractModel::GetInstance()->SetBorderRadius(
+                JSViewAbstract::GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
+                return;
+        }
+        ViewAbstractModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+    }
+}
+
 void JSSearch::JsBorderRadius(const JSCallbackInfo& info)
 {
-    JSViewAbstract::JsBorderRadius(info);
-    if (!info[0]->IsObject() && !info[0]->IsString() && !info[0]->IsNumber()) {
+    auto jsValue = info[0];
+    static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING,
+        JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
+    if (!CheckJSCallbackInfo("JsBorderRadius", jsValue, checkList)) {
+        auto textFieldTheme = GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(textFieldTheme);
+        auto borderRadiusTheme = textFieldTheme->GetBorderRadius();
+        NG::BorderRadiusProperty defaultBorderRadius {
+            borderRadiusTheme.GetX(), borderRadiusTheme.GetY(),
+            borderRadiusTheme.GetY(), borderRadiusTheme.GetX(),
+        };
+        ViewAbstractModel::GetInstance()->SetBorderRadius(defaultBorderRadius);
         return;
     }
-    SearchModel::GetInstance()->SetBackBorder();
+    ParseBorderRadius(jsValue);
+    SearchModel::GetInstance()->SetBackBorderRadius();
+}
+
+void JSSearch::CreateJsSearchCommonEvent(const JSCallbackInfo &info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        return;
+    }
+    auto jsTextFunc = AceType::MakeRefPtr<JsCommonEventFunction<NG::TextFieldCommonEvent, 2>>(
+        JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
+                        const std::u16string& value, NG::TextFieldCommonEvent& event) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onSubmit");
+        PipelineContext::SetCallBackNode(node);
+        JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+        objectTemplate->SetInternalFieldCount(2);
+        JSRef<JSObject> object = objectTemplate->NewInstance();
+        object->SetProperty<std::u16string>("text", event.GetText());
+        object->SetPropertyObject(
+            "keepEditableState", JSRef<JSFunc>::New<FunctionCallback>(JSTextField::JsKeepEditableState));
+        object->Wrap<NG::TextFieldCommonEvent>(&event);
+        JSRef<JSVal> stringValue = JSRef<JSVal>::Make(ToJSValue(value));
+        JSRef<JSVal> dataObject = JSRef<JSVal>::Cast(object);
+        JSRef<JSVal> param[2] = {stringValue, dataObject};
+        func->Execute(param);
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onSubmit");
+    };
+    SearchModel::GetInstance()->SetOnSubmit(std::move(callback));
 }
 
 void JSSearch::OnSubmit(const JSCallbackInfo& info)
 {
-    CHECK_NULL_VOID(info[0]->IsFunction());
-    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
-    SearchModel::GetInstance()->SetOnSubmit(std::move(callback));
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+#ifdef NG_BUILD
+    CreateJsSearchCommonEvent(info);
+#else
+    if (Container::IsCurrentUseNewPipeline()) {
+        CreateJsSearchCommonEvent(info);
+    } else {
+        JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
+        SearchModel::GetInstance()->SetOnSubmit(std::move(callback));
+    }
+#endif
 }
 
 JSRef<JSVal> JSSearch::CreateJsOnChangeObj(const PreviewText& previewText)
 {
     JSRef<JSObject> previewTextObj = JSRef<JSObject>::New();
     previewTextObj->SetProperty<int32_t>("offset", previewText.offset);
-    previewTextObj->SetProperty<std::string>("value", previewText.value);
+    previewTextObj->SetProperty<std::u16string>("value", previewText.value);
     return JSRef<JSVal>::Cast(previewTextObj);
 }
 
@@ -778,13 +973,27 @@ void JSSearch::OnChange(const JSCallbackInfo& info)
 {
     auto jsValue = info[0];
     CHECK_NULL_VOID(jsValue->IsFunction());
-    auto jsChangeFunc =
-        AceType::MakeRefPtr<JsCitedEventFunction<PreviewText, 2>>(JSRef<JSFunc>::Cast(jsValue), CreateJsOnChangeObj);
+    auto jsChangeFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(jsValue));
     auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsChangeFunc)](
-                        const std::string& val, PreviewText& previewText) {
+        const ChangeValueInfo& changeValueInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onChange");
-        func->Execute(val, previewText);
+        JSRef<JSVal> valueObj = JSRef<JSVal>::Make(ToJSValue(changeValueInfo.value));
+        auto previewTextObj = CreateJsOnChangeObj(changeValueInfo.previewText);
+        auto optionsObj = JSRef<JSObject>::New();
+        auto rangeBeforeObj = JSRef<JSObject>::New();
+        rangeBeforeObj->SetProperty<int32_t>("start", changeValueInfo.rangeBefore.start);
+        rangeBeforeObj->SetProperty<int32_t>("end", changeValueInfo.rangeBefore.end);
+        optionsObj->SetPropertyObject("rangeBefore", rangeBeforeObj);
+        auto rangeAfterObj = JSRef<JSObject>::New();
+        rangeAfterObj->SetProperty<int32_t>("start", changeValueInfo.rangeAfter.start);
+        rangeAfterObj->SetProperty<int32_t>("end", changeValueInfo.rangeAfter.end);
+        optionsObj->SetPropertyObject("rangeAfter", rangeAfterObj);
+        optionsObj->SetProperty<std::u16string>("oldContent", changeValueInfo.oldContent);
+        auto oldPreviewTextObj = CreateJsOnChangeObj(changeValueInfo.oldPreviewText);
+        optionsObj->SetPropertyObject("oldPreviewText", oldPreviewTextObj);
+        JSRef<JSVal> argv[] = { valueObj, previewTextObj, optionsObj };
+        func->ExecuteJS(3, argv);
     };
     SearchModel::GetInstance()->SetOnChange(std::move(onChange));
 }
@@ -820,14 +1029,14 @@ void JSSearch::SetHeight(const JSCallbackInfo& info)
 void JSSearch::SetOnCopy(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
-    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    JsEventCallback<void(const std::u16string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
     SearchModel::GetInstance()->SetOnCopy(std::move(callback));
 }
 
 void JSSearch::SetOnCut(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
-    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    JsEventCallback<void(const std::u16string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
     SearchModel::GetInstance()->SetOnCut(std::move(callback));
 }
 
@@ -848,13 +1057,11 @@ void JSSearch::SetOnPaste(const JSCallbackInfo& info)
         JSRef<JSFunc>::Cast(info[0]), CreateJSTextCommonEvent);
 
     auto onPaste = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc)](
-                       const std::string& val, NG::TextCommonEvent& info) {
+                       const std::u16string& val, NG::TextCommonEvent& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onPaste");
         func->Execute(val, info);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onPaste");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onPaste");
     };
     SearchModel::GetInstance()->SetOnPasteWithEvent(std::move(onPaste));
 }
@@ -868,7 +1075,7 @@ void JSSearch::SetCopyOption(const JSCallbackInfo& info)
         SearchModel::GetInstance()->SetCopyOption(CopyOptions::Local);
         return;
     }
-    auto copyOptions = CopyOptions::None;
+    auto copyOptions = CopyOptions::Local;
     if (info[0]->IsNumber()) {
         auto emunNumber = info[0]->ToNumber<int>();
         copyOptions = static_cast<CopyOptions>(emunNumber);
@@ -880,7 +1087,7 @@ JSRef<JSVal> JSSearch::CreateJsAboutToIMEInputObj(const InsertValueInfo& insertV
 {
     JSRef<JSObject> aboutToIMEInputObj = JSRef<JSObject>::New();
     aboutToIMEInputObj->SetProperty<int32_t>("insertOffset", insertValue.insertOffset);
-    aboutToIMEInputObj->SetProperty<std::string>("insertValue", insertValue.insertValue);
+    aboutToIMEInputObj->SetProperty<std::u16string>("insertValue", insertValue.insertValue);
     return JSRef<JSVal>::Cast(aboutToIMEInputObj);
 }
 
@@ -907,7 +1114,7 @@ JSRef<JSVal> JSSearch::CreateJsDeleteToIMEObj(const DeleteValueInfo& deleteValue
     JSRef<JSObject> aboutToIMEInputObj = JSRef<JSObject>::New();
     aboutToIMEInputObj->SetProperty<int32_t>("deleteOffset", deleteValueInfo.deleteOffset);
     aboutToIMEInputObj->SetProperty<int32_t>("direction", static_cast<int32_t>(deleteValueInfo.direction));
-    aboutToIMEInputObj->SetProperty<std::string>("deleteValue", deleteValueInfo.deleteValue);
+    aboutToIMEInputObj->SetProperty<std::u16string>("deleteValue", deleteValueInfo.deleteValue);
     return JSRef<JSVal>::Cast(aboutToIMEInputObj);
 }
 
@@ -1027,6 +1234,24 @@ void JSSearch::SetEnterKeyType(const JSCallbackInfo& info)
     SearchModel::GetInstance()->SetSearchEnterKeyType(textInputAction);
 }
 
+void JSSearch::SetCapitalizationMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto jsValue = info[0];
+    auto autoCapitalizationMode = AutoCapitalizationMode::NONE;
+    if (jsValue->IsUndefined() || !jsValue->IsNumber() || jsValue->IsNull()) {
+        SearchModel::GetInstance()->SetSearchCapitalizationMode(autoCapitalizationMode);
+        return;
+    }
+    if (jsValue->IsNumber()) {
+        auto emunNumber = jsValue->ToNumber<int32_t>();
+        autoCapitalizationMode = CastToAutoCapitalizationMode(emunNumber);
+    }
+    SearchModel::GetInstance()->SetSearchCapitalizationMode(autoCapitalizationMode);
+}
+
 void JSSearch::SetMaxLength(const JSCallbackInfo& info)
 {
     int32_t maxLength = 0;
@@ -1038,6 +1263,9 @@ void JSSearch::SetMaxLength(const JSCallbackInfo& info)
         return;
     }
     maxLength = info[0]->ToNumber<int32_t>();
+    if (std::isinf(info[0]->ToNumber<float>())) {
+        maxLength = INT32_MAX; // Infinity
+    }
     if (GreatOrEqual(maxLength, 0)) {
         SearchModel::GetInstance()->SetMaxLength(maxLength);
     } else {
@@ -1060,7 +1288,7 @@ void JSSearch::SetDecoration(const JSCallbackInfo& info)
         JSRef<JSVal> colorValue = obj->GetProperty("color");
         JSRef<JSVal> styleValue = obj->GetProperty("style");
 
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<SearchTheme>();
         CHECK_NULL_VOID(theme);
@@ -1105,7 +1333,7 @@ void JSSearch::SetMaxFontSize(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(theme);
@@ -1119,6 +1347,36 @@ void JSSearch::SetMaxFontSize(const JSCallbackInfo& info)
         maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
     }
     SearchModel::GetInstance()->SetAdaptMaxFontSize(maxFontSize);
+}
+
+void JSSearch::SetMinFontScale(const JSCallbackInfo& info)
+{
+    double minFontScale = 0.0;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], minFontScale)) {
+        return;
+    }
+    if (LessOrEqual(minFontScale, 0.0f)) {
+        SearchModel::GetInstance()->SetMinFontScale(0.0f);
+        return;
+    }
+    if (GreatOrEqual(minFontScale, 1.0f)) {
+        SearchModel::GetInstance()->SetMinFontScale(1.0f);
+        return;
+    }
+    SearchModel::GetInstance()->SetMinFontScale(static_cast<float>(minFontScale));
+}
+
+void JSSearch::SetMaxFontScale(const JSCallbackInfo& info)
+{
+    double maxFontScale = 0.0;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], maxFontScale)) {
+        return;
+    }
+    if (LessOrEqual(maxFontScale, 1.0f)) {
+        SearchModel::GetInstance()->SetMaxFontScale(1.0f);
+        return;
+    }
+    SearchModel::GetInstance()->SetMaxFontScale(static_cast<float>(maxFontScale));
 }
 
 void JSSearch::SetLetterSpacing(const JSCallbackInfo& info)
@@ -1146,6 +1404,16 @@ void JSSearch::SetLineHeight(const JSCallbackInfo& info)
     SearchModel::GetInstance()->SetLineHeight(value);
 }
 
+void JSSearch::SetHalfLeading(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto jsValue = info[0];
+    bool halfLeading = jsValue->IsBoolean() ? jsValue->ToBoolean() : false;
+    SearchModel::GetInstance()->SetHalfLeading(halfLeading);
+}
+
 void JSSearch::EditMenuOptions(const JSCallbackInfo& info)
 {
     NG::OnCreateMenuCallback onCreateMenuCallback;
@@ -1162,5 +1430,85 @@ void JSSearch::SetEnablePreviewText(const JSCallbackInfo& info)
         return;
     }
     SearchModel::GetInstance()->SetEnablePreviewText(jsValue->ToBoolean());
+}
+
+void JSSearch::SetEnableHapticFeedback(const JSCallbackInfo& info)
+{
+    bool state = true;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        state = info[0]->ToBoolean();
+    }
+    SearchModel::GetInstance()->SetEnableHapticFeedback(state);
+}
+
+void JSSearch::SetStopBackPress(const JSCallbackInfo& info)
+{
+    bool isStopBackPress = true;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        isStopBackPress = info[0]->ToBoolean();
+    }
+    SearchModel::GetInstance()->SetStopBackPress(isStopBackPress);
+}
+
+void JSSearch::SetKeyboardAppearance(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1 || !info[0]->IsNumber()) {
+        SearchModel::GetInstance()->SetKeyboardAppearance(
+            static_cast<KeyboardAppearance>(KeyboardAppearance::NONE_IMMERSIVE));
+        return;
+    }
+    auto keyboardAppearance = info[0]->ToNumber<uint32_t>();
+    if (keyboardAppearance < static_cast<uint32_t>(KeyboardAppearance::NONE_IMMERSIVE) ||
+        keyboardAppearance > static_cast<uint32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
+        SearchModel::GetInstance()->SetKeyboardAppearance(
+            static_cast<KeyboardAppearance>(KeyboardAppearance::NONE_IMMERSIVE));
+        return;
+    }
+    SearchModel::GetInstance()->SetKeyboardAppearance(
+        static_cast<KeyboardAppearance>(keyboardAppearance));
+}
+
+JSRef<JSVal> JSSearch::CreateJsOnWillChangeObj(const ChangeValueInfo& changeValueInfo)
+{
+    JSRef<JSObject> ChangeValueInfo = JSRef<JSObject>::New();
+    ChangeValueInfo->SetProperty<std::u16string>("content", changeValueInfo.value);
+
+    auto previewTextObj = CreateJsOnChangeObj(changeValueInfo.previewText);
+    ChangeValueInfo->SetPropertyObject("previewText", previewTextObj);
+
+    auto optionsObj = JSRef<JSObject>::New();
+    auto rangeBeforeObj = JSRef<JSObject>::New();
+    rangeBeforeObj->SetProperty<int32_t>("start", changeValueInfo.rangeBefore.start);
+    rangeBeforeObj->SetProperty<int32_t>("end", changeValueInfo.rangeBefore.end);
+    optionsObj->SetPropertyObject("rangeBefore", rangeBeforeObj);
+    auto rangeAfterObj = JSRef<JSObject>::New();
+    rangeAfterObj->SetProperty<int32_t>("start", changeValueInfo.rangeAfter.start);
+    rangeAfterObj->SetProperty<int32_t>("end", changeValueInfo.rangeAfter.end);
+    optionsObj->SetPropertyObject("rangeAfter", rangeAfterObj);
+    optionsObj->SetProperty<std::u16string>("oldContent", changeValueInfo.oldContent);
+    auto oldPreviewTextObj = CreateJsOnChangeObj(changeValueInfo.oldPreviewText);
+    optionsObj->SetPropertyObject("oldPreviewText", oldPreviewTextObj);
+
+    ChangeValueInfo->SetPropertyObject("options", optionsObj);
+    return JSRef<JSVal>::Cast(ChangeValueInfo);
+}
+
+void JSSearch::SetOnWillChange(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    auto jsChangeFunc = AceType::MakeRefPtr<JsEventFunction<ChangeValueInfo, 1>>(
+        JSRef<JSFunc>::Cast(jsValue), CreateJsOnWillChangeObj);
+    auto onWillChange = [execCtx = info.GetExecutionContext(), func = std::move(jsChangeFunc)](
+        const ChangeValueInfo& changeValue) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
+        ACE_SCORING_EVENT("onWillChange");
+        auto ret = func->ExecuteWithValue(changeValue);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean();
+        }
+        return true;
+    };
+    SearchModel::GetInstance()->SetOnWillChangeEvent(std::move(onWillChange));
 }
 } // namespace OHOS::Ace::Framework

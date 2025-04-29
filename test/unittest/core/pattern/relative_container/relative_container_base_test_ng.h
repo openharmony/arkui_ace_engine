@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,11 @@
 #ifndef FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_RELATIVE_CONTAINER_BASE_TEST_NG_H
 #define FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_RELATIVE_CONTAINER_BASE_TEST_NG_H
 
-#include "relative_container_common_ng.h"
+#include "old_cases/relative_container_common_ng.h"
 #include "test/unittest/core/pattern/test_ng.h"
+
+#define protected public
+#define private public
 
 #include "core/components_ng/pattern/relative_container/relative_container_layout_algorithm.h"
 #include "core/components_ng/pattern/relative_container/relative_container_layout_property.h"
@@ -27,14 +30,23 @@
 namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
+using namespace std;
 
 class RelativeContainerBaseTestNG : public TestNG {
 public:
-    static void SetUpTestSuite();
-    static void TearDownTestSuite();
-    void SetUp() override;
-    void TearDown() override;
+    static void AddAlignRule(std::map<AlignDirection, AlignRule>& alignRules, const AlignDirection& direction,
+        const std::string& id, const HorizontalAlign& horizontalRule);
+    static void AddAlignRule(std::map<AlignDirection, AlignRule>& alignRules, const AlignDirection& direction,
+        const std::string& id, const VerticalAlign& verticalRule);
     RefPtr<FrameNode> CreateRelativeContainer(const std::function<void(RelativeContainerModelNG)>& callback);
+    static void PrepareMeasureChild(LayoutWrapper* layoutWrapper, RelativeContainerLayoutAlgorithm& layoutAlgorithm);
+    static void AddGuidelineStart(std::vector<GuidelineInfo>& guidelineInfos, std::string id, LineDirection direction,
+        std::optional<Dimension> start);
+    static void AddGuidelineEnd(std::vector<GuidelineInfo>& guidelineInfos, std::string id, LineDirection direction,
+        std::optional<Dimension> end);
+    /* Help test reliedOnMap. If not find, print "Doesn't exist". Since std::set is ordered, output has lexicographic
+     * order*/
+    static string PrintReliedOnMap(unordered_map<string, set<string>>& reliedOnMap, const string& anchor);
 };
 } // namespace OHOS::Ace::NG
 

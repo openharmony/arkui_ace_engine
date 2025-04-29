@@ -19,6 +19,7 @@
 #include <cstdint>
 
 #include "base/geometry/ng/size_t.h"
+#include "base/image/pixel_map.h"
 #include "base/thread/task_executor.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_object.h"
@@ -54,6 +55,7 @@ public:
 
     /* interfaces to get properties */
     SizeF GetImageSize() const;
+    SizeF GetOriginImageSize() const;
     const RectF& GetDstRect() const;
     const RectF& GetSrcRect() const;
     ImageFit GetImageFit() const;
@@ -61,6 +63,10 @@ public:
 
     RefPtr<CanvasImage> MoveCanvasImage();
     RefPtr<ImageObject> MoveImageObject();
+    RefPtr<ImageObject> GetImageObject()
+    {
+        return imageObj_;
+    }
 
     const ImageSourceInfo& GetSourceInfo() const;
     const SizeF& GetDstSize() const;
@@ -88,21 +94,13 @@ public:
     void FailCallback(const std::string& errorMsg);
     const std::string GetCurrentLoadingState();
     void ResizableCalcDstSize();
-    void DownloadImage();
-    void PerformDownload();
-    void CacheDownloadedImage();
     bool Downloadable();
     void OnDataReady();
 
     // Needed to restore the relevant containerId from the originating thread
-    int32_t GetContainerId()
+    int32_t GetContainerId() const
     {
         return containerId_;
-    }
-
-    void SetDynamicRangeMode(DynamicRangeMode dynamicMode)
-    {
-        dynamicMode_ = dynamicMode;
     }
 
     void SetIsHdrDecoderNeed(bool isHdrDecoderNeed)
@@ -115,11 +113,6 @@ public:
         return isHdrDecoderNeed_;
     }
 
-    DynamicRangeMode GetDynamicRangeMode()
-    {
-        return dynamicMode_;
-    }
-
     void SetImageQuality(AIImageQuality imageQuality)
     {
         imageQuality_ = imageQuality;
@@ -128,6 +121,16 @@ public:
     AIImageQuality GetImageQuality()
     {
         return imageQuality_;
+    }
+
+    void SetPhotoDecodeFormat(PixelFormat photoDecodeFormat)
+    {
+        photoDecodeFormat_ = photoDecodeFormat;
+    }
+
+    PixelFormat GetPhotoDecodeFormat()
+    {
+        return photoDecodeFormat_;
     }
 
     void FinishMearuse()
@@ -150,9 +153,16 @@ public:
     }
 
 
-    ImageDfxConfig GetImageDfxConfig()
+    const ImageDfxConfig& GetImageDfxConfig()
     {
         return imageDfxConfig_;
+    }
+
+    void DownloadOnProgress(const uint32_t& dlNow, const uint32_t& dlTotal);
+
+    std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)> GetOnProgressCallback()
+    {
+        return onProgressCallback_;
     }
 
 private:
@@ -173,10 +183,6 @@ private:
     void OnMakeCanvasImage();
     void OnLoadSuccess();
     void OnLoadFail();
-    bool NotifyReadyIfCacheHit();
-    void DownloadImageSuccess(const std::string& imageData);
-    void DownloadImageFailed(const std::string& errorMessage);
-    void DownloadOnProgress(const uint32_t& dlNow, const uint32_t& dlTotal);
     // round up int to the nearest 2-fold proportion of image width
     // REQUIRE: value > 0, image width > 0
     int32_t RoundUp(int32_t value);
@@ -191,7 +197,6 @@ private:
     RefPtr<ImageStateManager> stateManager_;
     RefPtr<ImageObject> imageObj_;
     RefPtr<CanvasImage> canvasImage_;
-    std::string downloadedUrlData_;
 
     // [LoadNotifier] contains 3 tasks to notify whom uses [ImageLoadingContext] of loading results
     LoadNotifier notifiers_;
@@ -200,10 +205,10 @@ private:
     const int32_t containerId_ {0};
 
     bool isHdrDecoderNeed_ = false;
+    PixelFormat photoDecodeFormat_ = PixelFormat::UNKNOWN;
     bool autoResize_ = true;
     bool syncLoad_ = false;
 
-    DynamicRangeMode dynamicMode_ = DynamicRangeMode::STANDARD;
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
 
     RectF srcRect_;

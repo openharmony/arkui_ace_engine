@@ -30,13 +30,15 @@
 #include "base/geometry/ng/vector.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
-#include "third_party/node/src/js_native_api_types.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/event/touch_event.h"
 
 namespace OHOS::Ace {
 enum class ImageAnalyzerState;
 using OnAnalyzedCallback = std::optional<std::function<void(ImageAnalyzerState)>>;
 using OnTextSelectedCallback = std::function<void()>;
+using OnNotifySelectedStatusCallback = std::function<void(bool)>;
+using OnCanPlayCallback = std::function<void(bool)>;
 
 enum class ImageAnalyzerType {
     SUBJECT = 0,
@@ -51,6 +53,7 @@ enum class ImageAnalyzerHolder {
     VIDEO_DEFAULT,
     WEB,
     OTHERS,
+    MOVINGPHOTO,
 };
 
 enum class ImageAnalyzerState {
@@ -105,7 +108,10 @@ struct ImageAnalyzerInnerConfig {
     OnTextSelectedCallback onTextSelected;
     void* pixelmapNapiVal = nullptr;
     OHOS::Ace::TouchInfo touchInfo;
-
+    OnNotifySelectedStatusCallback onNotifySelectedStatus = nullptr;
+    bool createAIEngine = false;
+    OnCanPlayCallback onCanPlay = nullptr;
+    
     void UpdateFromInfo(const PixelMapInfo& info)
     {
         contentWidth = info.width;

@@ -24,7 +24,7 @@ namespace OHOS::Ace::AnimateModel {
 int32_t AnimateTo(ArkUI_ContextHandle context, ArkUI_AnimateOption* option, ArkUI_ContextCallback* update,
     ArkUI_AnimateCompleteCallback* complete)
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !context || !option || !update || !update->callback) {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -65,7 +65,7 @@ int32_t AnimateTo(ArkUI_ContextHandle context, ArkUI_AnimateOption* option, ArkU
 
 int32_t KeyframeAnimateTo(ArkUI_ContextHandle context, ArkUI_KeyframeAnimateOption* option)
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !context || !option || option->keyframes.size() == 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -75,6 +75,8 @@ int32_t KeyframeAnimateTo(ArkUI_ContextHandle context, ArkUI_KeyframeAnimateOpti
     animateOption.iterations = option->iterations;
     animateOption.onFinish = option->onFinish;
     animateOption.userData = option->userData;
+    animateOption.expectedFrameRateRange =
+            reinterpret_cast<ArkUIExpectedFrameRateRange*>(option->expectedFrameRateRange);
     ArkUIKeyframeState keyframes[option->keyframes.size()];
     for (size_t i = 0; i < option->keyframes.size(); i++) {
         keyframes[i].duration = option->keyframes[i].duration;
@@ -158,7 +160,7 @@ ArkUIAnimatorOption* ConvertAnimatorOption(ArkUI_AnimatorOption* option)
 
 ArkUI_AnimatorHandle CreateAnimator(ArkUI_ContextHandle context, ArkUI_AnimatorOption* option)
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !context || !option) {
         return nullptr;
     }
@@ -171,7 +173,7 @@ ArkUI_AnimatorHandle CreateAnimator(ArkUI_ContextHandle context, ArkUI_AnimatorO
 
 void DisposeAnimator(ArkUI_AnimatorHandle animatorHandle)
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!animatorHandle || !animatorHandle->animator) {
         return;
     }
@@ -190,7 +192,7 @@ void DisposeAnimator(ArkUI_AnimatorHandle animatorHandle)
 
 int32_t AnimatorReset(ArkUI_AnimatorHandle animatorHandle, ArkUI_AnimatorOption* option)
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !animatorHandle || !animatorHandle->animator || !option) {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -212,7 +214,7 @@ int32_t AnimatorReset(ArkUI_AnimatorHandle animatorHandle, ArkUI_AnimatorOption*
 
 int32_t AnimatorPlay(ArkUI_AnimatorHandle animatorHandle)
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !animatorHandle || !animatorHandle->animator) {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -222,7 +224,7 @@ int32_t AnimatorPlay(ArkUI_AnimatorHandle animatorHandle)
 
 int32_t AnimatorFinish(ArkUI_AnimatorHandle animatorHandle)
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !animatorHandle || !animatorHandle->animator) {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -232,7 +234,7 @@ int32_t AnimatorFinish(ArkUI_AnimatorHandle animatorHandle)
 
 int32_t AnimatorPause(ArkUI_AnimatorHandle animatorHandle)
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !animatorHandle || !animatorHandle->animator) {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -242,7 +244,7 @@ int32_t AnimatorPause(ArkUI_AnimatorHandle animatorHandle)
 
 int32_t AnimatorCancel(ArkUI_AnimatorHandle animatorHandle)
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !animatorHandle || !animatorHandle->animator) {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -252,7 +254,7 @@ int32_t AnimatorCancel(ArkUI_AnimatorHandle animatorHandle)
 
 int32_t AnimatorReverse(ArkUI_AnimatorHandle animatorHandle)
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !animatorHandle || !animatorHandle->animator) {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -262,7 +264,7 @@ int32_t AnimatorReverse(ArkUI_AnimatorHandle animatorHandle)
 
 ArkUI_CurveHandle InitCurve(ArkUI_AnimationCurve animationCurve)
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
         return nullptr;
     }
@@ -273,7 +275,7 @@ ArkUI_CurveHandle InitCurve(ArkUI_AnimationCurve animationCurve)
 
 ArkUI_CurveHandle StepsCurve(int32_t count, bool end)
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || count < 1) {
         return nullptr;
     }
@@ -284,7 +286,7 @@ ArkUI_CurveHandle StepsCurve(int32_t count, bool end)
 
 ArkUI_CurveHandle CubicBezierCurve(float x1, float y1, float x2, float y2)
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
         return nullptr;
     }
@@ -297,7 +299,7 @@ ArkUI_CurveHandle CubicBezierCurve(float x1, float y1, float x2, float y2)
 
 ArkUI_CurveHandle SpringCurve(float velocity, float mass, float stiffness, float damping)
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
         return nullptr;
     }
@@ -317,7 +319,7 @@ ArkUI_CurveHandle SpringCurve(float velocity, float mass, float stiffness, float
 
 ArkUI_CurveHandle SpringMotion(float response, float dampingFraction, float overlapDuration)
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
         return nullptr;
     }
@@ -340,7 +342,7 @@ ArkUI_CurveHandle SpringMotion(float response, float dampingFraction, float over
 
 ArkUI_CurveHandle ResponsiveSpringMotion(float response, float dampingFraction, float overlapDuration)
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
         return nullptr;
     }
@@ -363,7 +365,7 @@ ArkUI_CurveHandle ResponsiveSpringMotion(float response, float dampingFraction, 
 
 ArkUI_CurveHandle InterpolatingSpring(float velocity, float mass, float stiffness, float damping)
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
         return nullptr;
     }
@@ -383,7 +385,7 @@ ArkUI_CurveHandle InterpolatingSpring(float velocity, float mass, float stiffnes
 
 ArkUI_CurveHandle CustomCurve(void* userData, float (*interpolate)(float fraction, void* userdata))
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl) {
         return nullptr;
     }
@@ -394,7 +396,7 @@ ArkUI_CurveHandle CustomCurve(void* userData, float (*interpolate)(float fractio
 
 void DisposeCurve(ArkUI_CurveHandle curveHandle)
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !curveHandle) {
         return;
     }

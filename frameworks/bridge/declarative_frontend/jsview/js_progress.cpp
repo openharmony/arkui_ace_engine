@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,6 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/models/progress_model_impl.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_progress_theme.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components/text/text_theme.h"
@@ -33,21 +32,18 @@ ProgressType g_progressType = ProgressType::LINEAR;
 
 ProgressModel* ProgressModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::ProgressModelNG());
+    static NG::ProgressModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::ProgressModelNG());
-            } else {
-                instance_.reset(new Framework::ProgressModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::ProgressModelNG instance;
+        return &instance;
+    } else {
+        static Framework::ProgressModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 
 } // namespace OHOS::Ace
@@ -97,7 +93,6 @@ void JSProgress::Create(const JSCallbackInfo& info)
     }
 
     ProgressModel::GetInstance()->Create(0.0, value, 0.0, total, static_cast<NG::ProgressType>(g_progressType));
-    JSProgressTheme::ApplyTheme(progressStyle);
 }
 
 void JSProgress::JSBind(BindingTarget globalObj)
@@ -108,8 +103,6 @@ void JSProgress::JSBind(BindingTarget globalObj)
     JSClass<JSProgress>::StaticMethod("create", &JSProgress::Create, opt);
     JSClass<JSProgress>::StaticMethod("value", &JSProgress::SetValue, opt);
     JSClass<JSProgress>::StaticMethod("color", &JSProgress::SetColor, opt);
-    JSClass<JSProgress>::StaticMethod("circularStyle", &JSProgress::SetCircularStyle, opt);
-    JSClass<JSProgress>::StaticMethod("cricularStyle", &JSProgress::SetCircularStyle, opt);
     JSClass<JSProgress>::StaticMethod("style", &JSProgress::SetCircularStyle, opt);
     JSClass<JSProgress>::StaticMethod("backgroundColor", &JSProgress::JsBackgroundColor, opt);
     JSClass<JSProgress>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
@@ -149,9 +142,9 @@ void JSProgress::SetColor(const JSCallbackInfo& info)
             endColor = theme->GetRingProgressEndSideColor();
             beginColor = theme->GetRingProgressBeginSideColor();
             if (g_progressType == ProgressType::CAPSULE) {
-                colorVal = theme->GetCapsuleSelectColor();
+                colorVal = theme->GetCapsuleParseFailedSelectColor();
             } else {
-                colorVal = theme->GetTrackSelectedColor();
+                colorVal = theme->GetTrackParseFailedSelectedColor();
             }
         } else {
             endColor = colorVal;
@@ -308,11 +301,11 @@ void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
         RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
         CHECK_NULL_VOID(theme);
         if (g_progressType == ProgressType::CAPSULE) {
-            colorVal = theme->GetCapsuleBgColor();
+            colorVal = theme->GetCapsuleParseFailedBgColor();
         } else if (g_progressType == ProgressType::RING) {
-            colorVal = theme->GetRingProgressBgColor();
+            colorVal = theme->GetRingProgressParseFailedBgColor();
         } else {
-            colorVal = theme->GetTrackBgColor();
+            colorVal = theme->GetTrackParseFailedBgColor();
         }
     }
 
@@ -344,10 +337,11 @@ void JSProgress::JsSetCapsuleStyle(const JSCallbackInfo& info)
 
     auto jsBorderColor = paramObject->GetProperty("borderColor");
     Color colorVal;
-    if (!ParseJsColor(jsBorderColor, colorVal)) {
-        colorVal = theme->GetBorderColor();
+    if (ParseJsColor(jsBorderColor, colorVal)) {
+        ProgressModel::GetInstance()->SetBorderColor(colorVal);
+    } else {
+        ProgressModel::GetInstance()->ResetBorderColor();
     }
-    ProgressModel::GetInstance()->SetBorderColor(colorVal);
 
     auto jsSweepingEffect = paramObject->GetProperty("enableScanEffect");
     bool sweepingEffect = false;
@@ -372,6 +366,7 @@ void JSProgress::JsSetCapsuleStyle(const JSCallbackInfo& info)
     }
 
     JsSetFontStyle(info);
+    JsSetBorderRadius(paramObject);
 }
 
 void JSProgress::JsSetCommonOptions(const JSCallbackInfo& info)
@@ -390,15 +385,13 @@ void JSProgress::JsSetCommonOptions(const JSCallbackInfo& info)
 void JSProgress::JsSetFontStyle(const JSCallbackInfo& info)
 {
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
-    RefPtr<TextTheme> textTheme = GetTheme<TextTheme>();
     auto jsFontColor = paramObject->GetProperty("fontColor");
     Color fontColorVal;
     if (!ParseJsColor(jsFontColor, fontColorVal)) {
-        fontColorVal = theme->GetTextColor();
+        ProgressModel::GetInstance()->ResetFontColor();
+    } else {
+        ProgressModel::GetInstance()->SetFontColor(fontColorVal);
     }
-
-    ProgressModel::GetInstance()->SetFontColor(fontColorVal);
 
     auto textStyle = paramObject->GetProperty("font");
     if (!textStyle->IsObject()) {
@@ -551,4 +544,18 @@ void JSProgress::JsSetLinearStyleOptions(const JSCallbackInfo& info)
     ProgressModel::GetInstance()->SetStrokeRadius(strokeRadiusDimension);
 }
 
+void JSProgress::JsSetBorderRadius(const JSRef<JSObject>& paramObject)
+{
+    CalcDimension radiusDimension;
+    auto borderRadius = paramObject->GetProperty("borderRadius");
+    if (!borderRadius->IsObject() || !ParseJsLengthMetricsVp(JSRef<JSObject>::Cast(borderRadius), radiusDimension)) {
+        ProgressModel::GetInstance()->ResetBorderRadius();
+        return;
+    }
+    if (LessNotEqual(radiusDimension.Value(), 0.0f) || radiusDimension.Unit() == DimensionUnit::PERCENT) {
+        ProgressModel::GetInstance()->ResetBorderRadius();
+        return;
+    }
+    ProgressModel::GetInstance()->SetBorderRadius(radiusDimension);
+}
 } // namespace OHOS::Ace::Framework

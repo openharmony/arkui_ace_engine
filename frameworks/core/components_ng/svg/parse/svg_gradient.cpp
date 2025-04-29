@@ -15,7 +15,7 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_gradient.h"
 
-#include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 #include "frameworks/core/components_ng/svg/parse/svg_stop.h"
 
@@ -23,9 +23,12 @@ namespace OHOS::Ace::NG {
 namespace {
 const char DOM_SVG_SRC_GRADIENT_TRANSFORM[] = "gradientTransform";
 const char DOM_SVG_SRC_SPREAD_METHOD[] = "spreadMethod"; 
+const std::string SPREAD_METHOD_PAD = "pad";
+const std::string SPREAD_METHOD_REPEAT = "repeat";
+const std::string SPREAD_METHOD_REFLECT = "reflect";
 }
 
-SvgGradient::SvgGradient(GradientType gradientType)
+SvgGradient::SvgGradient(OHOS::Ace::GradientType gradientType)
 {
     gradientAttr_.gradient.SetType(gradientType);
     InitNoneFlag();
@@ -33,12 +36,12 @@ SvgGradient::SvgGradient(GradientType gradientType)
 
 RefPtr<SvgNode> SvgGradient::CreateLinearGradient()
 {
-    return AceType::MakeRefPtr<SvgGradient>(GradientType::LINEAR);
+    return AceType::MakeRefPtr<SvgGradient>(OHOS::Ace::GradientType::LINEAR);
 }
 
 RefPtr<SvgNode> SvgGradient::CreateRadialGradient()
 {
-    return AceType::MakeRefPtr<SvgGradient>(GradientType::RADIAL);
+    return AceType::MakeRefPtr<SvgGradient>(OHOS::Ace::GradientType::RADIAL);
 }
 
 void SvgGradient::SetAttr(const std::string& name, const std::string& value)
@@ -99,13 +102,22 @@ void SvgGradient::SetGradientTransform(const std::string& val, SvgGradientAttrib
 void SvgGradient::SetSpreadMethod(const std::string& val, SvgGradientAttribute& attr)
 {
     if (val == "pad") {
-        attr.gradient.SetSpreadMethod(SpreadMethod::PAD);
+        attr.gradient.SetSpreadMethod(OHOS::Ace::SpreadMethod::PAD);
+    }
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        if (val == "reflect") {
+            attr.gradient.SetSpreadMethod(OHOS::Ace::SpreadMethod::REFLECT);
+        }
+        if (val == "repeat") {
+            attr.gradient.SetSpreadMethod(OHOS::Ace::SpreadMethod::REPEAT);
+        }
+        return;
     }
     if (val == "reflect") {
-        attr.gradient.SetSpreadMethod(SpreadMethod::REFLECT);
+        attr.gradient.SetSpreadMethod(OHOS::Ace::SpreadMethod::REPEAT);
     }
     if (val == "repeat") {
-        attr.gradient.SetSpreadMethod(SpreadMethod::REPEAT);
+        attr.gradient.SetSpreadMethod(OHOS::Ace::SpreadMethod::REFLECT);
     }
 }
 
@@ -116,9 +128,31 @@ void SvgGradient::OnAppendChild(const RefPtr<SvgNode>& child)
     gradientAttr_.gradient.AddColor(svgStop->GetGradientColor());
 }
 
-const Gradient& SvgGradient::GetGradient() const
+const OHOS::Ace::Gradient& SvgGradient::GetGradient() const
 {
     return gradientAttr_.gradient;
 }
 
+std::vector<Ace::GradientColor> SvgGradient::GetStopColors()
+{
+    std::vector<Ace::GradientColor> colors;
+    for (auto& node : children_) {
+        auto stopNode = DynamicCast<SvgStop>(node);
+        if (stopNode) {
+            colors.push_back(stopNode->GetGradientColor());
+        }
+    }
+    return colors;
+}
+
+SvgSpreadMethod SvgGradient::ParseSpreadMethod(const std::string& spreadStr)
+{
+    if (spreadStr == SPREAD_METHOD_REPEAT) {
+        return SvgSpreadMethod::REPEAT;
+    }
+    if (spreadStr == SPREAD_METHOD_REFLECT) {
+        return SvgSpreadMethod::REFLECT;
+    }
+    return SvgSpreadMethod::PAD;
+}
 } // namespace OHOS::Ace::NG

@@ -54,6 +54,8 @@ public:
     }
     void OnModifyDone() override;
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
     FocusPattern GetFocusPattern() const override;
 
 private:

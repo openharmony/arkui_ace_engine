@@ -24,6 +24,17 @@
 
 namespace OHOS::Ace::NG {
 
+template<typename Key, typename Value>
+Value GetOrDefault(const std::map<Key, Value>& map, const Key& key, const Value& defaultValue)
+{
+    auto it = map.find(key);
+    if (it != map.end()) {
+        return it->second;
+    } else {
+        return defaultValue;
+    }
+}
+
 class GridUtils {
 public:
     GridUtils() = delete;

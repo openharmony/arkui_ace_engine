@@ -31,7 +31,8 @@ class ACE_FORCE_EXPORT PinchGesture : public Gesture {
     DECLARE_ACE_TYPE(PinchGesture, Gesture);
 
 public:
-    PinchGesture(int32_t fingers, double distance) : Gesture(fingers), distance_(distance)
+    PinchGesture(int32_t fingers, double distance, bool limitFingerCount = false) :
+        Gesture(fingers, limitFingerCount), distance_(distance)
     {
         if (gestureInfo_) {
             gestureInfo_->SetType(GestureTypeName::PINCH_GESTURE);

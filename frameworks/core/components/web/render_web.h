@@ -151,7 +151,7 @@ public:
     void PanOnActionStart(const GestureEvent& info) override;
     void PanOnActionUpdate(const GestureEvent& info) override;
     void PanOnActionEnd(const GestureEvent& info) override;
-    void PanOnActionCancel() override;
+    void PanOnActionCancel(const GestureEvent& info) override;
     DragItemInfo GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info) override;
     void InitEnhanceSurfaceFlag();
 
@@ -219,6 +219,7 @@ private:
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
     void SetRootView(int32_t width, int32_t height, int32_t offset);
+    void UpdateDelegate();
     bool needUpdateWeb_ = true;
     bool isFocus_ = false;
     bool needOnFocus_ = false;

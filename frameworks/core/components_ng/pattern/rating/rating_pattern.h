@@ -29,6 +29,8 @@
 #include "core/components_ng/pattern/rating/rating_modifier.h"
 #include "core/components_ng/pattern/rating/rating_render_property.h"
 #include "core/components_ng/render/canvas_image.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -50,8 +52,8 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<RatingLayoutAlgorithm>(
-            foregroundImageLoadingCtx_, secondaryImageLoadingCtx_, backgroundImageLoadingCtx_);
+        return MakeRefPtr<RatingLayoutAlgorithm>(foregroundImageLoadingCtx_,
+            secondaryImageLoadingCtx_, backgroundImageLoadingCtx_, backgroundImageFocusLoadingCtx_);
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
@@ -97,6 +99,18 @@ public:
 
     void SetRatingScore(double value);
 
+    RatingModifier::RatingAnimationType GetRatingState() const
+    {
+        return state_;
+    }
+
+    bool IsNeedFocusStyle()
+    {
+        return isNeedFocusStyle_;
+    }
+
+    void DumpInfo() override;
+
 private:
     void OnAttachToFrameNode() override;
     void UpdateRatingScore(double ratingScore);
@@ -109,6 +123,8 @@ private:
         const RefPtr<IconTheme>& iconTheme);
     void LoadBackground(const RefPtr<RatingLayoutProperty>& layoutProperty, const RefPtr<RatingTheme>& ratingTheme,
         const RefPtr<IconTheme>& iconTheme);
+    void LoadFocusBackground(const RefPtr<RatingLayoutProperty>& layoutProperty, const RefPtr<RatingTheme>& ratingTheme,
+        const RefPtr<IconTheme>& iconTheme);
     void UpdatePaintConfig();
     void PrepareAnimation(const RefPtr<CanvasImage>& image);
     void SetRedrawCallback(const RefPtr<CanvasImage>& image);
@@ -116,19 +132,25 @@ private:
     void OnImageLoadSuccess(int32_t imageFlag);
     void CheckImageInfoHasChangedOrNot(
         int32_t imageFlag, const ImageSourceInfo& sourceInfo, const std::string& lifeCycleTag);
+    float GetFocusRectRadius(const RefPtr<RatingLayoutProperty>& property, float& focusSpace);
 
     // Init pan recognizer to update render when drag updates, fire change event when drag ends.
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleEnabled();
 
     // Init touch event, show press effect when touch down, update render when touch up.
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
 
     // Init touch event, update render when click.
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
 
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    void OnFocusEvent();
     void OnBlurEvent();
+    void SetModifierFocus(bool isFocus);
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState(double ratingScore);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
@@ -148,6 +170,7 @@ private:
     bool IsIndicator();
     void FireBuilder();
     RefPtr<FrameNode> BuildContentModifierNode();
+    bool IsRatingImageReady(uint32_t imageStateCode);
 
     std::optional<RatingMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
@@ -156,6 +179,8 @@ private:
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<InputEvent> mouseEvent_;
+    RefPtr<PipelineContext> pipelineContext_;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 
     DataReadyNotifyTask CreateDataReadyCallback(int32_t imageFlag);
     LoadSuccessNotifyTask CreateLoadSuccessCallback(int32_t imageFlag);
@@ -164,19 +189,23 @@ private:
     RefPtr<ImageLoadingContext> foregroundImageLoadingCtx_;
     RefPtr<ImageLoadingContext> secondaryImageLoadingCtx_;
     RefPtr<ImageLoadingContext> backgroundImageLoadingCtx_;
+    RefPtr<ImageLoadingContext> backgroundImageFocusLoadingCtx_;
 
     RefPtr<RatingModifier> ratingModifier_;
     RefPtr<CanvasImage> foregroundImageCanvas_;
     RefPtr<CanvasImage> secondaryImageCanvas_;
     RefPtr<CanvasImage> backgroundImageCanvas_;
+    RefPtr<CanvasImage> backgroundImageFocusCanvas_;
     ImagePaintConfig foregroundConfig_;
     ImagePaintConfig secondaryConfig_;
     ImagePaintConfig backgroundConfig_;
+    ImagePaintConfig backgroundFocusConfig_;
     uint32_t imageReadyStateCode_ = 0;
     uint32_t imageSuccessStateCode_ = 0;
     bool hasInit_ = false;
     bool isHover_ = false;
     bool isfocus_ = false;
+    bool isNeedFocusStyle_ = false;
     double focusRatingScore_ = 0.0;
     double lastRatingScore_ = 0.0;
     RatingModifier::RatingAnimationType state_;
@@ -189,9 +218,12 @@ private:
     bool isForegroundImageInfoFromTheme_ = false;
     bool isSecondaryImageInfoFromTheme_ = false;
     bool isBackgroundImageInfoFromTheme_ = false;
+    std::optional<ImageSourceInfo> foregroundImageSourceInfo_ = std::nullopt;
+    std::optional<ImageSourceInfo> secondaryImageSourceInfo_ = std::nullopt;
+    std::optional<ImageSourceInfo> backgroundImageSourceInfo_ = std::nullopt;
+    std::optional<ImageSourceInfo> focusBackgroundImageSourceInfo_ = std::nullopt;
     // get XTS inspector value
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
-    bool isTouchPreventDefault_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(RatingPattern);
 };
 

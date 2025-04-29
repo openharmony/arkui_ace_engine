@@ -15,8 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_syscap_module.h"
 
-#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
-#include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 #include "frameworks/bridge/js_frontend/frontend_delegate.h"
 
 namespace OHOS::Ace::Framework {

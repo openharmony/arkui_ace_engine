@@ -14,11 +14,7 @@
  */
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 
-#include "base/memory/ace_type.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/button/toggle_button_paint_property.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -37,11 +33,16 @@ void ToggleButtonModelNG::SetSelectedColor(const Color& selectedColor)
     ACE_UPDATE_PAINT_PROPERTY(ToggleButtonPaintProperty, SelectedColor, selectedColor);
 }
 
+void ToggleButtonModelNG::ResetSelectedColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ToggleButtonPaintProperty, SelectedColor, PROPERTY_UPDATE_RENDER);
+}
+
 void ToggleButtonModelNG::SetIsOn(bool isOn)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ToggleButtonEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ToggleButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
 
@@ -69,6 +70,12 @@ void ToggleButtonModelNG::SetBackgroundColor(const Color& backgroundColor, bool 
 void ToggleButtonModelNG::SetSelectedColor(FrameNode* frameNode, const Color& selectedColor)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ToggleButtonPaintProperty, SelectedColor, selectedColor, frameNode);
+}
+
+void ToggleButtonModelNG::ResetSelectedColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        ToggleButtonPaintProperty, SelectedColor, PROPERTY_UPDATE_RENDER, frameNode);
 }
 
 void ToggleButtonModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& backgroundColor)

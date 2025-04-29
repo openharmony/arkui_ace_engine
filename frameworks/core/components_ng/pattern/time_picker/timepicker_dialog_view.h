@@ -30,10 +30,15 @@ public:
         const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, PickerTime> timePickerProperty,
         std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
+    static void SetStartTime(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, const PickerTime& value);
+    static void SetEndTime(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, const PickerTime& value);
     static void SetSelectedTime(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, const PickerTime& value);
     static void SetDialogTitleDate(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, const PickerDate& value);
     static void SetHour24(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, bool isUseMilitaryTime = false);
+    static void SetEnableCascade(
+        const RefPtr<TimePickerRowPattern>& timePickerRowPattern, bool isEnableCascade = false);
     static void SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
+    static void SetDialogEnterSelectedArea(const RefPtr<FrameNode>& frameNode, DialogEvent&& onEnterSelectedArea);
     static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& frameNode,
         const RefPtr<FrameNode>& timePickerNode, const std::vector<ButtonInfo>& buttonInfos,
         std::map<std::string, NG::DialogEvent> dialogEvent,
@@ -73,22 +78,23 @@ private:
 
     static RefPtr<FrameNode> CreateNextPrevButtonNode(std::function<void()>& timePickerSwitchEvent,
         const RefPtr<FrameNode>& timeNode, const std::vector<ButtonInfo>& buttonInfos);
-    static RefPtr<FrameNode> CreateButtonNodeForAging(const RefPtr<FrameNode>& frameNode,
-        const RefPtr<FrameNode>& timePickerNode, const std::vector<ButtonInfo>& buttonInfos,
-        std::map<std::string, NG::DialogEvent> dialogEvent,
+    static RefPtr<FrameNode> CreateButtonNodeForAging(const RefPtr<FrameNode>& buttonTitleNode,
+        const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& timePickerNode,
+        const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static bool NeedAdaptForAging();
-    static std::function<void()> CreateAndSetTimePickerSwitchEvent(const RefPtr<FrameNode>& timePicker,
-        const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<FrameNode>& buttonConfirmNode,
-        const RefPtr<FrameNode>& cancelNextDividerNode, const RefPtr<FrameNode>& nextConfirmDividerNode);
-    static void SwitchTimePickerPage(const RefPtr<FrameNode>& timePickerNode, const RefPtr<FrameNode>& buttonCancelNode,
+    static std::function<void()> CreateAndSetTimePickerSwitchEvent(const RefPtr<FrameNode>& buttonTitleNode,
+        const RefPtr<FrameNode>& timePicker, const RefPtr<FrameNode>& buttonCancelNode,
         const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<FrameNode>& cancelNextDividerNode,
         const RefPtr<FrameNode>& nextConfirmDividerNode);
+    static void SwitchTimePickerPage(const RefPtr<FrameNode>& buttonTitleNode, const RefPtr<FrameNode>& timePickerNode,
+        const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<FrameNode>& buttonConfirmNode,
+        const RefPtr<FrameNode>& cancelNextDividerNode, const RefPtr<FrameNode>& nextConfirmDividerNode);
     static bool GetIsUserSetTextProperties(const PickerTextProperties& properties);
     static std::function<void(const GestureEvent&)> UpdateTimePickerSwitchEvent(
         const RefPtr<FrameNode>& timeNode, const RefPtr<FrameNode>& textNode, const RefPtr<DialogTheme>& dialogTheme,
         const RefPtr<FrameNode>& buttonNode, const std::function<void()>& timePickerSwitchEvent);
-    static std::function<void()> CloseDiaglogEvent(const RefPtr<TimePickerRowPattern>& timePickerPattern,
+    static std::function<void()> CloseDialogEvent(const RefPtr<TimePickerRowPattern>& timePickerPattern,
         const RefPtr<FrameNode>& dialogNode);
     static const Dimension ConvertFontSizeLimit(const Dimension& fontSizeValue,
         const Dimension& fontSizeLimit, bool isUserSetFont = false);
@@ -103,10 +109,12 @@ private:
         const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
     static void UpdateCancelButtonTextLayoutProperty(
         const RefPtr<TextLayoutProperty>& textCancelLayoutProperty, const RefPtr<PickerTheme>& pickerTheme);
-    static bool switchFlag_;
-    static Dimension selectedTextStyleFont_;
-    static Dimension normalTextStyleFont_;
-    static Dimension disappearTextStyleFont_;
+    static std::string GetDialogAgingButtonText(bool isNext);
+    static std::string GetDialogNormalButtonText(bool isConfirm);
+    static thread_local bool switchFlag_;
+    static thread_local Dimension selectedTextStyleFont_;
+    static thread_local Dimension normalTextStyleFont_;
+    static thread_local Dimension disappearTextStyleFont_;
 };
 } // namespace OHOS::Ace::NG
 

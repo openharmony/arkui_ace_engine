@@ -14,25 +14,25 @@
  */
 
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
-
-#include "base/geometry/dimension.h"
-#include "core/components/indexer/indexer_theme.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/indexer/arc_indexer_pattern.h"
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text/text_styles.h"
-#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-void IndexerModelNG::Create(std::vector<std::string>& arrayValue, int32_t selected)
+void IndexerModelNG::Create(std::vector<std::string>& arrayValue, int32_t selected, bool isArc)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::INDEXER_ETS_TAG, nodeId);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::INDEXER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndexerPattern>(); });
+    const char* tag = isArc ? V2::ARC_INDEXER_ETS_TAG : V2::INDEXER_ETS_TAG;
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag, nodeId);
+    RefPtr<FrameNode> frameNode = nullptr;
+    if (isArc) {
+        frameNode = FrameNode::GetOrCreateFrameNode(
+            tag, nodeId, []() { return AceType::MakeRefPtr<ArcIndexerPattern>(); });
+    } else {
+        frameNode = FrameNode::GetOrCreateFrameNode(
+            tag, nodeId, []() { return AceType::MakeRefPtr<IndexerPattern>(); });
+    }
+
     stack->Push(frameNode);
     if (selected < 0 || selected >= static_cast<int32_t>(arrayValue.size())) {
         selected = 0;
@@ -94,9 +94,11 @@ void IndexerModelNG::SetUsingPopup(bool usingPopup)
 void IndexerModelNG::SetSelectedFont(std::optional<Dimension>& fontSize, std::optional<FontWeight>& fontWeight,
     std::optional<std::vector<std::string>>& fontFamily, std::optional<OHOS::Ace::FontStyle>& fontStyle)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     TextStyle selectTextStyle = indexerTheme->GetSelectTextStyle();
     TextStyle textStyle;
@@ -110,9 +112,11 @@ void IndexerModelNG::SetSelectedFont(std::optional<Dimension>& fontSize, std::op
 void IndexerModelNG::SetPopupFont(std::optional<Dimension>& fontSize, std::optional<FontWeight>& fontWeight,
     std::optional<std::vector<std::string>>& fontFamily, std::optional<OHOS::Ace::FontStyle>& fontStyle)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     TextStyle popupTextStyle = indexerTheme->GetPopupTextStyle();
     TextStyle textStyle;
@@ -126,9 +130,11 @@ void IndexerModelNG::SetPopupFont(std::optional<Dimension>& fontSize, std::optio
 void IndexerModelNG::SetFont(std::optional<Dimension>& fontSize, std::optional<FontWeight>& fontWeight,
     std::optional<std::vector<std::string>>& fontFamily, std::optional<OHOS::Ace::FontStyle>& fontStyle)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     TextStyle defaultTextStyle = indexerTheme->GetDefaultTextStyle();
     TextStyle textStyle;
@@ -236,7 +242,7 @@ void IndexerModelNG::SetOnSelected(std::function<void(const int32_t selected)>&&
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelected(std::move(onSelect));
 }
@@ -246,7 +252,7 @@ void IndexerModelNG::SetOnRequestPopupData(
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnRequestPopupData(std::move(RequestPopupData));
 }
@@ -255,7 +261,7 @@ void IndexerModelNG::SetOnPopupSelected(std::function<void(const int32_t selecte
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnPopupSelected(std::move(onPopupSelected));
 }
@@ -264,7 +270,7 @@ void IndexerModelNG::SetChangeEvent(std::function<void(const int32_t selected)>&
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(changeEvent));
 }
@@ -273,7 +279,7 @@ void IndexerModelNG::SetCreatChangeEvent(std::function<void(const int32_t select
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCreatChangeEvent(std::move(changeEvent));
 }
@@ -327,11 +333,17 @@ void IndexerModelNG::SetAdaptiveWidth(bool state)
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, AdaptiveWidth, state);
 }
 
-RefPtr<FrameNode> IndexerModelNG::CreateFrameNode(int32_t nodeId)
+RefPtr<FrameNode> IndexerModelNG::CreateFrameNode(int32_t nodeId, bool isArc)
 {
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::INDEXER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndexerPattern>(); });
-
+    const char* tag = isArc ? V2::ARC_INDEXER_ETS_TAG : V2::INDEXER_ETS_TAG;
+    RefPtr<FrameNode> frameNode = nullptr;
+    if (isArc) {
+        frameNode = FrameNode::GetOrCreateFrameNode(
+            tag, nodeId, []() { return AceType::MakeRefPtr<ArcIndexerPattern>(); });
+    } else {
+        frameNode = FrameNode::GetOrCreateFrameNode(
+            tag, nodeId, []() { return AceType::MakeRefPtr<IndexerPattern>(); });
+    }
     return frameNode;
 }
 
@@ -398,9 +410,9 @@ void IndexerModelNG::SetSelectedFont(FrameNode* frameNode, std::optional<Dimensi
     std::optional<FontWeight>& fontWeight, std::optional<std::vector<std::string>>& fontFamily,
     std::optional<OHOS::Ace::FontStyle>& fontStyle)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     TextStyle selectTextStyle = indexerTheme->GetSelectTextStyle();
     TextStyle textStyle;
@@ -415,9 +427,9 @@ void IndexerModelNG::SetPopupFont(FrameNode* frameNode, std::optional<Dimension>
     std::optional<FontWeight>& fontWeight, std::optional<std::vector<std::string>>& fontFamily,
     std::optional<OHOS::Ace::FontStyle>& fontStyle)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     TextStyle popupTextStyle = indexerTheme->GetPopupTextStyle();
     TextStyle textStyle;
@@ -432,9 +444,9 @@ void IndexerModelNG::SetFont(FrameNode* frameNode, std::optional<Dimension>& fon
     std::optional<FontWeight>& fontWeight, std::optional<std::vector<std::string>>& fontFamily,
     std::optional<OHOS::Ace::FontStyle>& fontStyle)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     TextStyle defaultTextStyle = indexerTheme->GetDefaultTextStyle();
     TextStyle textStyle;
@@ -600,7 +612,7 @@ void IndexerModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
 void IndexerModelNG::SetOnSelected(FrameNode* frameNode, std::function<void(const int32_t selected)>&& onSelect)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelected(std::move(onSelect));
 }
@@ -609,7 +621,7 @@ void IndexerModelNG::SetOnRequestPopupData(FrameNode* frameNode,
     std::function<std::vector<std::string>(const int32_t selected)>&& RequestPopupData)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnRequestPopupData(std::move(RequestPopupData));
 }
@@ -618,7 +630,7 @@ void IndexerModelNG::SetOnPopupSelected(FrameNode* frameNode,
     std::function<void(const int32_t selected)>&& onPopupSelected)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnPopupSelected(std::move(onPopupSelected));
 }
@@ -626,7 +638,7 @@ void IndexerModelNG::SetOnPopupSelected(FrameNode* frameNode,
 void IndexerModelNG::SetChangeEvent(FrameNode* frameNode, std::function<void(const int32_t selected)>&& changeEvent)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(changeEvent));
 }
@@ -635,7 +647,7 @@ void IndexerModelNG::SetCreatChangeEvent(FrameNode* frameNode,
     std::function<void(const int32_t selected)>&& changeEvent)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCreatChangeEvent(std::move(changeEvent));
 }

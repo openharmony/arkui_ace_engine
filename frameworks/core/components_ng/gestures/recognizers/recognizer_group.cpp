@@ -15,11 +15,7 @@
 
 #include "core/components_ng/gestures/recognizers/recognizer_group.h"
 
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/gesture_group.h"
 
 namespace OHOS::Ace::NG {
@@ -225,7 +221,7 @@ void RecognizerGroup::AddHittedRecognizerType(
                 continue;
             }
             hittedRecognizerInfo[AceType::TypeName(item)].emplace_back(NG::TouchTestResultInfo {
-                frameNode->GetId(), frameNode->GetTag(), frameNode->GetInspectorIdValue("") });
+                frameNode->GetId(), frameNode->GetTag(), frameNode->GetInspectorIdValue(""), "" });
         }
         auto group = AceType::DynamicCast<RecognizerGroup>(item);
         if (group) {

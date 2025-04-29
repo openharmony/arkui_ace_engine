@@ -29,6 +29,8 @@ InputEventActuator::InputEventActuator(const WeakPtr<InputEventHub>& inputEventH
     hoverEventTarget_ = MakeRefPtr<HoverEventTarget>(frameNode->GetTag(), frameNode->GetId());
     hoverEffectTarget_ = MakeRefPtr<HoverEffectTarget>(frameNode->GetTag(), frameNode->GetId());
     accessibilityHoverEventTarget_ = MakeRefPtr<HoverEventTarget>(frameNode->GetTag(), frameNode->GetId());
+    penHoverEventTarget_ = MakeRefPtr<HoverEventTarget>(frameNode->GetTag(), frameNode->GetId());
+    penHoverMoveEventTarget_ = MakeRefPtr<HoverEventTarget>(frameNode->GetTag(), frameNode->GetId());
     axisEventTarget_ = MakeRefPtr<AxisEventTarget>(frameNode->GetTag());
 }
 
@@ -38,6 +40,10 @@ void InputEventActuator::OnCollectMouseEvent(
     if (inputEvents_.empty() && !userCallback_ && !userJSFrameNodeCallback_) {
         return;
     }
+    auto inputEventHub = inputEventHub_.Upgrade();
+    CHECK_NULL_VOID(inputEventHub);
+    auto frameNode = inputEventHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
 
     auto onMouseCallback = [weak = WeakClaim(this)](MouseInfo& info) {
         auto actuator = weak.Upgrade();
@@ -57,6 +63,7 @@ void InputEventActuator::OnCollectMouseEvent(
             (*userJSFrameNodeCallback)(info);
         }
     };
+    mouseEventTarget_->AttachFrameNode(frameNode);
     mouseEventTarget_->SetCallback(onMouseCallback);
     mouseEventTarget_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     mouseEventTarget_->SetGetEventTargetImpl(getEventTargetImpl);
@@ -93,6 +100,97 @@ void InputEventActuator::OnCollectHoverEvent(
     hoverEventTarget_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     hoverEventTarget_->SetGetEventTargetImpl(getEventTargetImpl);
     result.emplace_back(hoverEventTarget_);
+}
+
+void InputEventActuator::OnCollectHoverEventForTips(
+    const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
+{
+    if (inputEvents_.empty()) {
+        return;
+    }
+
+    auto onHoverCallback = [weak = WeakClaim(this)](bool info, HoverInfo& hoverInfo) {
+        auto actuator = weak.Upgrade();
+        CHECK_NULL_VOID(actuator);
+        auto innerEvents = actuator->inputEvents_;
+        for (const auto& callback : innerEvents) {
+            if (callback && callback->GetIstips()) {
+                (*callback)(info);
+                (*callback)(info, hoverInfo);
+            }
+        }
+    };
+    hoverEventTarget_->SetCallback(onHoverCallback);
+    hoverEventTarget_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+    hoverEventTarget_->SetGetEventTargetImpl(getEventTargetImpl);
+    result.emplace_back(hoverEventTarget_);
+}
+
+void InputEventActuator::OnCollectPenHoverEvent(const OffsetF& coordinateOffset,
+    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result,
+    const RefPtr<FrameNode>& host)
+{
+    if (inputEvents_.empty() && !userCallback_ && !userJSFrameNodeCallback_) {
+        return;
+    }
+
+    auto penHoverCallback = [weakClaim = WeakClaim(this)](bool isHover, HoverInfo& penHoverInfo) {
+        auto actuator = weakClaim.Upgrade();
+        CHECK_NULL_VOID(actuator);
+        auto inputEvents = actuator->inputEvents_;
+        for (const auto& inputCallback : inputEvents) {
+            if (inputCallback) {
+                (*inputCallback)(isHover);
+                (*inputCallback)(isHover, penHoverInfo);
+            }
+        }
+        auto userCallback = actuator->userCallback_;
+        if (userCallback) {
+            (*userCallback)(isHover, penHoverInfo);
+        }
+        auto userJSCallback = actuator->userJSFrameNodeCallback_;
+        if (userJSCallback) {
+            (*userJSCallback)(isHover, penHoverInfo);
+        }
+    };
+    penHoverEventTarget_->AttachFrameNode(host);
+    penHoverEventTarget_->SetPenHoverCallback(penHoverCallback);
+    penHoverEventTarget_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+    penHoverEventTarget_->SetGetEventTargetImpl(getEventTargetImpl);
+    result.emplace_back(penHoverEventTarget_);
+}
+
+void InputEventActuator::OnCollectPenHoverMoveEvent(const OffsetF& coordinateOffset,
+    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result,
+    const RefPtr<FrameNode>& host)
+{
+    if (inputEvents_.empty() && !userCallback_ && !userJSFrameNodeCallback_) {
+        return;
+    }
+
+    auto penHoverMoveCallback = [weakClaim = WeakClaim(this)](HoverInfo& penHoverMoveInfo) {
+        auto actuator = weakClaim.Upgrade();
+        CHECK_NULL_VOID(actuator);
+        auto inputEvents = actuator->inputEvents_;
+        for (const auto& inputCallback : inputEvents) {
+            if (inputCallback) {
+                (*inputCallback)(penHoverMoveInfo);
+            }
+        }
+        auto userCallback = actuator->userCallback_;
+        if (userCallback) {
+            (*userCallback)(penHoverMoveInfo);
+        }
+        auto userJSCallback = actuator->userJSFrameNodeCallback_;
+        if (userJSCallback) {
+            (*userJSCallback)(penHoverMoveInfo);
+        }
+    };
+    penHoverMoveEventTarget_->AttachFrameNode(host);
+    penHoverMoveEventTarget_->SetPenHoverMoveCallback(penHoverMoveCallback);
+    penHoverMoveEventTarget_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+    penHoverMoveEventTarget_->SetGetEventTargetImpl(getEventTargetImpl);
+    result.emplace_back(penHoverMoveEventTarget_);
 }
 
 void InputEventActuator::OnCollectHoverEffect(

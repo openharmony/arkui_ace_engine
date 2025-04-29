@@ -14,20 +14,8 @@
  */
 #include "core/interfaces/native/node/node_common_modifier.h"
 
-#include <cstddef>
-#include <cstdint>
-#include <string>
-#include <vector>
-
-#include "interfaces/native/native_type.h"
 #include "interfaces/native/node/node_model.h"
-#include "securec.h"
 
-#include "base/geometry/ng/vector.h"
-#include "base/geometry/shape.h"
-#include "base/image/pixel_map.h"
-#include "base/log/log_wrapper.h"
-#include "base/memory/ace_type.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
@@ -44,13 +32,20 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
+#include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_ng/pattern/toggle/toggle_model_ng.h"
+#include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
+#include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/property/grid_property.h"
 #include "core/event/axis_event.h"
 #include "core/image/image_source_info.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_api.h"
+#include "core/interfaces/native/node/node_drag_modifier.h"
 #include "core/interfaces/native/node/touch_event_convertor.h"
 #include "core/interfaces/native/node/view_model.h"
 
@@ -78,6 +73,7 @@ constexpr int NUM_14 = 14;
 constexpr int NUM_15 = 15;
 constexpr int NUM_16 = 16;
 constexpr int NUM_24 = 24;
+constexpr int NUM_36 = 36;
 constexpr int DEFAULT_LENGTH = 4;
 constexpr double ROUND_UNIT = 360.0;
 constexpr TextDirection DEFAULT_COMMON_DIRECTION = TextDirection::AUTO;
@@ -105,9 +101,14 @@ constexpr int32_t OUTLINE_RIGHT_WIDTH_INDEX = 2;
 constexpr int32_t OUTLINE_BOTTOM_WIDTH_INDEX = 3;
 constexpr int32_t OUTLINE_WIDTH_VECTOR_SIZE = 4;
 const int32_t ERROR_INT_CODE = -1;
+const double DEFAULT_DASH_DIMENSION = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 constexpr int32_t MAX_POINTS = 10;
 constexpr int32_t MAX_HISTORY_EVENT_COUNT = 20;
+constexpr int32_t ERROR_CODE_NO_ERROR = 0;
+constexpr Dimension ARROW_ZERO_PERCENT = 0.0_pct;
+constexpr Dimension ARROW_HALF_PERCENT = 0.5_pct;
+constexpr Dimension ARROW_ONE_HUNDRED_PERCENT = 1.0_pct;
 const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
     OHOS::Ace::Curves::LINEAR,
     OHOS::Ace::Curves::EASE,
@@ -1007,7 +1008,7 @@ bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
 
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, false);
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = container->GetColorMode();
     shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
     return true;
 }
@@ -1128,8 +1129,8 @@ void ResetAlign(ArkUINodeHandle node)
     ViewAbstract::SetAlign(frameNode, Alignment::CENTER);
 }
 
-void SetBackdropBlur(
-    ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
+void SetBackdropBlur(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues,
+    ArkUI_Int32 blurValuesSize, ArkUI_Bool disableSystemAdaptation)
 {
     ArkUI_Float32 blur = 0.0f;
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1140,7 +1141,9 @@ void SetBackdropBlur(
     BlurOption blurOption;
     blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
     CalcDimension dimensionRadius(blur, DimensionUnit::PX);
-    ViewAbstract::SetBackdropBlur(frameNode, dimensionRadius, blurOption);
+    SysOptions sysOptions;
+    sysOptions.disableSystemAdaptation = disableSystemAdaptation;
+    ViewAbstract::SetBackdropBlur(frameNode, dimensionRadius, blurOption, sysOptions);
 }
 
 void ResetBackdropBlur(ArkUINodeHandle node)
@@ -1318,7 +1321,8 @@ void ResetBrightness(ArkUINodeHandle node)
     ViewAbstract::SetBrightness(frameNode, value);
 }
 
-void SetBlur(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
+void SetBlur(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize,
+    ArkUI_Bool disableSystemAdaptation)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1329,7 +1333,9 @@ void SetBlur(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blu
         blur = value;
     }
     CalcDimension dimensionBlur(blur, DimensionUnit::PX);
-    ViewAbstract::SetFrontBlur(frameNode, dimensionBlur, blurOption);
+    SysOptions sysOptions;
+    sysOptions.disableSystemAdaptation = disableSystemAdaptation;
+    ViewAbstract::SetFrontBlur(frameNode, dimensionBlur, blurOption, sysOptions);
 }
 
 void ResetBlur(ArkUINodeHandle node)
@@ -1589,7 +1595,7 @@ void SetBorderImageGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* val
 }
 
 void SetForegroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[3], ArkUI_Float32 scale,
-    const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
+    const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize, ArkUI_Bool disableSystemAdaptation)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1620,7 +1626,9 @@ void SetForegroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[3], Ar
         blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
         fgBlurStyle.blurOption = blurOption;
     }
-    ViewAbstract::SetForegroundBlurStyle(frameNode, fgBlurStyle);
+    SysOptions sysOptions;
+    sysOptions.disableSystemAdaptation = disableSystemAdaptation;
+    ViewAbstract::SetForegroundBlurStyle(frameNode, fgBlurStyle, sysOptions);
 }
 
 void ResetForegroundBlurStyle(ArkUINodeHandle node)
@@ -1709,14 +1717,17 @@ void ResetLinearGradientBlur(ArkUINodeHandle node)
     ViewAbstract::SetLinearGradientBlur(frameNode, blurPara);
 }
 
-void SetBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[3], ArkUI_Float32 scale,
-    const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
+void SetBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[5], ArkUI_Float32 scale,
+    const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize, ArkUI_Bool isValidColor, ArkUI_Uint32 inactiveColorArg,
+    ArkUI_Bool disableSystemAdaptation)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ArkUI_Int32 blurStyle = (*intArray)[NUM_0];
     ArkUI_Int32 colorMode = (*intArray)[NUM_1];
     ArkUI_Int32 adaptiveColor = (*intArray)[NUM_2];
+    ArkUI_Int32 policy = (*intArray)[NUM_3];
+    ArkUI_Int32 blurType = (*intArray)[NUM_4];
     BlurStyleOption bgBlurStyle;
     if (blurStyle >= 0) {
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
@@ -1739,7 +1750,14 @@ void SetBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[3], Ar
         blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
         bgBlurStyle.blurOption = blurOption;
     }
-    ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle);
+    bgBlurStyle.policy = static_cast<BlurStyleActivePolicy>(policy);
+    bgBlurStyle.blurType = static_cast<BlurType>(blurType);
+    bgBlurStyle.isValidColor = isValidColor;
+    Color inactiveColor(inactiveColorArg);
+    bgBlurStyle.inactiveColor = inactiveColor;
+    SysOptions sysOptions;
+    sysOptions.disableSystemAdaptation = disableSystemAdaptation;
+    ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle, sysOptions);
 }
 
 ArkUIBlurStyleOptionType GetBackgroundBlurStyle(ArkUINodeHandle node)
@@ -1771,21 +1789,64 @@ void ResetBackgroundBlurStyle(ArkUINodeHandle node)
     ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle);
 }
 
+void SetBorderWidth(const ArkUI_Float32* values, ArkUI_Int32 valuesSize, int32_t& offset,
+    NG::BorderWidthProperty& borderWidth, ArkUI_Bool isLocalizedBorderWidth, FrameNode* frameNode)
+{
+    if (isLocalizedBorderWidth) {
+        SetOptionalBorder(borderWidth.startDimen, values, valuesSize, offset);
+        SetOptionalBorder(borderWidth.endDimen, values, valuesSize, offset);
+    } else {
+        SetOptionalBorder(borderWidth.leftDimen, values, valuesSize, offset);
+        SetOptionalBorder(borderWidth.rightDimen, values, valuesSize, offset);
+    }
+    SetOptionalBorder(borderWidth.topDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderWidth.bottomDimen, values, valuesSize, offset);
+    borderWidth.multiValued = true;
+    if (borderWidth.leftDimen.has_value() || borderWidth.rightDimen.has_value() || borderWidth.topDimen.has_value() ||
+        borderWidth.bottomDimen.has_value() || borderWidth.startDimen.has_value() || borderWidth.endDimen.has_value()) {
+        ViewAbstract::SetBorderWidth(frameNode, borderWidth);
+    }
+}
+
+void SetBorderBorderRadius(const ArkUI_Float32* values, ArkUI_Int32 valuesSize, int32_t& offset,
+    NG::BorderRadiusProperty& borderRadius, ArkUI_Bool isLocalizedBorderRadius, FrameNode* frameNode)
+{
+    if (isLocalizedBorderRadius) {
+        SetOptionalBorder(borderRadius.radiusTopStart, values, valuesSize, offset);
+        SetOptionalBorder(borderRadius.radiusTopEnd, values, valuesSize, offset);
+        SetOptionalBorder(borderRadius.radiusBottomStart, values, valuesSize, offset);
+        SetOptionalBorder(borderRadius.radiusBottomEnd, values, valuesSize, offset);
+    } else {
+        SetOptionalBorder(borderRadius.radiusTopLeft, values, valuesSize, offset);
+        SetOptionalBorder(borderRadius.radiusTopRight, values, valuesSize, offset);
+        SetOptionalBorder(borderRadius.radiusBottomLeft, values, valuesSize, offset);
+        SetOptionalBorder(borderRadius.radiusBottomRight, values, valuesSize, offset);
+    }
+
+    borderRadius.multiValued = true;
+    if (borderRadius.radiusTopLeft.has_value() || borderRadius.radiusTopRight.has_value() ||
+        borderRadius.radiusBottomLeft.has_value() || borderRadius.radiusBottomRight.has_value() ||
+        borderRadius.radiusTopStart.has_value() || borderRadius.radiusTopEnd.has_value() ||
+        borderRadius.radiusBottomStart.has_value() || borderRadius.radiusBottomEnd.has_value()) {
+        ViewAbstract::SetBorderRadius(frameNode, borderRadius);
+    }
+}
+
 /**
  * @param src source borderWidth and and BorderRadius value
  * @param options option value
- * values[offset + 0], option[offset + 1], option[offset + 2]: borderWidth left(hasValue, value, unit)
- * values[offset + 3], option[offset + 4], option[offset + 5]: borderWidth right(hasValue, value, unit)
+ * values[offset + 0], option[offset + 1], option[offset + 2]: borderWidth start/left(hasValue, value, unit)
+ * values[offset + 3], option[offset + 4], option[offset + 5]: borderWidth end/right(hasValue, value, unit)
  * values[offset + 6], option[offset + 7], option[offset + 8]: borderWidth top(hasValue, value, unit)
  * values[offset + 9], option[offset + 10], option[offset + 11]: borderWidth bottom(hasValue, value, unit)
- * values[offset + 12], option[offset + 13], option[offset + 14] : BorderRadius TopLeft(hasValue, value, unit)
- * values[offset + 15], option[offset + 16], option[offset + 17] : BorderRadius TopRight(hasValue, value, unit)
- * values[offset + 18], option[offset + 19], option[offset + 20] : BorderRadius BottomLeft(hasValue, value, unit)
- * values[offset + 21], option[offset + 22], option[offset + 23] : BorderRadius BottomRight(hasValue, value, unit)
+ * values[offset + 12], option[offset + 13], option[offset + 14] : BorderRadius TopStart/Left(hasValue, value, unit)
+ * values[offset + 15], option[offset + 16], option[offset + 17] : BorderRadius TopEnd/Right(hasValue, value, unit)
+ * values[offset + 18], option[offset + 19], option[offset + 20] : BorderRadius BottomStart/Left(hasValue, value, unit)
+ * values[offset + 21], option[offset + 22], option[offset + 23] : BorderRadius BottomEnd/Right(hasValue, value, unit)
  * @param optionsLength options valuesSize
  * @param src source color and Style value
- * colorAndStyle[offset + 0], option[offset + 1]: borderColors leftColor(hasValue, value)
- * colorAndStyle[offset + 2], option[offset + 3]: borderColors rightColor(hasValue, value)
+ * colorAndStyle[offset + 0], option[offset + 1]: borderColors startColor/leftColor(hasValue, value)
+ * colorAndStyle[offset + 2], option[offset + 3]: borderColors endColor/rightColor(hasValue, value)
  * colorAndStyle[offset + 4], option[offset + 5]: borderColors topColor(hasValue, value)
  * colorAndStyle[offset + 6], option[offset + 7]: borderColors bottomColor(hasValue, value)
  * colorAndStyle[offset + 8], option[offset + 9]: borderStyles styleLeft(hasValue, value)
@@ -1793,9 +1854,13 @@ void ResetBackgroundBlurStyle(ArkUINodeHandle node)
  * colorAndStyle[offset + 12], option[offset + 12]: borderStyles styleTop(hasValue, value)
  * colorAndStyle[offset + 14], option[offset + 15]: borderStyles styleBottom(hasValue, value)
  * @param optionsLength options colorAndStyleSize
+ * @param isLocalizedBorderWidth options isLocalizedBorderWidth
+ * @param isLocalizedBorderColor options isLocalizedBorderColor
+ * @param isLocalizedBorderRadius options isLocalizedBorderRadius
  */
 void SetBorder(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize, const uint32_t* colorAndStyle,
-    int32_t colorAndStyleSize)
+    int32_t colorAndStyleSize, ArkUI_Bool isLocalizedBorderWidth, ArkUI_Bool isLocalizedBorderColor,
+    ArkUI_Bool isLocalizedBorderRadius)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1805,33 +1870,18 @@ void SetBorder(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 va
 
     int32_t offset = NUM_0;
     NG::BorderWidthProperty borderWidth;
-
-    SetOptionalBorder(borderWidth.leftDimen, values, valuesSize, offset);
-    SetOptionalBorder(borderWidth.rightDimen, values, valuesSize, offset);
-    SetOptionalBorder(borderWidth.topDimen, values, valuesSize, offset);
-    SetOptionalBorder(borderWidth.bottomDimen, values, valuesSize, offset);
-    borderWidth.multiValued = true;
-    if (borderWidth.leftDimen.has_value() || borderWidth.rightDimen.has_value() || borderWidth.topDimen.has_value() ||
-        borderWidth.bottomDimen.has_value()) {
-        ViewAbstract::SetBorderWidth(frameNode, borderWidth);
-    }
-
+    SetBorderWidth(values, valuesSize, offset, borderWidth, isLocalizedBorderWidth, frameNode);
     NG::BorderRadiusProperty borderRadius;
-    SetOptionalBorder(borderRadius.radiusTopLeft, values, valuesSize, offset);
-    SetOptionalBorder(borderRadius.radiusTopRight, values, valuesSize, offset);
-    SetOptionalBorder(borderRadius.radiusBottomLeft, values, valuesSize, offset);
-    SetOptionalBorder(borderRadius.radiusBottomRight, values, valuesSize, offset);
-
-    borderRadius.multiValued = true;
-    if (borderRadius.radiusTopLeft.has_value() || borderRadius.radiusTopRight.has_value() ||
-        borderRadius.radiusBottomLeft.has_value() || borderRadius.radiusBottomRight.has_value()) {
-        ViewAbstract::SetBorderRadius(frameNode, borderRadius);
-    }
-
+    SetBorderBorderRadius(values, valuesSize, offset, borderRadius, isLocalizedBorderRadius, frameNode);
     int32_t colorAndStyleOffset = NUM_0;
     NG::BorderColorProperty borderColors;
-    SetOptionalBorderColor(borderColors.leftColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
-    SetOptionalBorderColor(borderColors.rightColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    if (isLocalizedBorderColor) {
+        SetOptionalBorderColor(borderColors.startColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+        SetOptionalBorderColor(borderColors.endColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    } else {
+        SetOptionalBorderColor(borderColors.leftColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+        SetOptionalBorderColor(borderColors.rightColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    }
     SetOptionalBorderColor(borderColors.topColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
     SetOptionalBorderColor(borderColors.bottomColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
     borderColors.multiValued = true;
@@ -1888,8 +1938,8 @@ void ResetBackgroundImagePosition(ArkUINodeHandle node)
 
 void SetResizableFromVec(ImageResizableSlice& resizable, const ArkUIStringAndFloat* options)
 {
-    std::vector<ResizableOption> directions = { ResizableOption::TOP, ResizableOption::BOTTOM, ResizableOption::LEFT,
-        ResizableOption::RIGHT };
+    std::vector<ResizableOption> directions = { ResizableOption::LEFT, ResizableOption::TOP, ResizableOption::RIGHT,
+        ResizableOption::BOTTOM };
     for (unsigned int index = 0; index < NUM_12; index += NUM_3) {
         std::optional<CalcDimension> optDimension;
         SetCalcDimension(optDimension, options, NUM_13, index);
@@ -1907,6 +1957,19 @@ void SetBackgroundImageResizable(ArkUINodeHandle node, ArkUIStringAndFloat* opti
     ImageResizableSlice resizable;
     SetResizableFromVec(resizable, options);
     ViewAbstract::SetBackgroundImageResizableSlice(frameNode, resizable);
+}
+
+ArkUIImageResizableSlice GetBackgroundImageResizable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    ArkUIImageResizableSlice arkUISlice {};
+    CHECK_NULL_RETURN(frameNode, arkUISlice);
+    auto slice = ViewAbstract::GetBackgroundImageResizableSlice(frameNode);
+    arkUISlice.left = static_cast<ArkUI_Float32>(slice.left.ConvertToVp());
+    arkUISlice.top = static_cast<ArkUI_Float32>(slice.top.ConvertToVp());
+    arkUISlice.right = static_cast<ArkUI_Float32>(slice.right.ConvertToVp());
+    arkUISlice.bottom = static_cast<ArkUI_Float32>(slice.bottom.ConvertToVp());
+    return arkUISlice;
 }
 
 void ResetBackgroundImageResizable(ArkUINodeHandle node)
@@ -1985,6 +2048,20 @@ void SetBackgroundImage(
     } else {
         ViewAbstract::SetBackgroundImageRepeat(frameNode, OHOS::Ace::ImageRepeat::NO_REPEAT);
     }
+}
+
+void SetBackgroundImageSyncMode(ArkUINodeHandle node, ArkUI_Bool syncMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBackgroundImageSyncMode(frameNode, syncMode);
+}
+
+void ResetBackgroundImageSyncMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBackgroundImageSyncMode(frameNode, false);
 }
 
 void SetBackgroundImagePixelMap(ArkUINodeHandle node, void* drawableDescriptor, ArkUI_Int32 repeatIndex)
@@ -2271,6 +2348,70 @@ void ResetGeometryTransition(ArkUINodeHandle node)
     ViewAbstract::SetGeometryTransition(frameNode, "", false, true);
 }
 
+void SetBindTips(ArkUINodeHandle node, ArkUI_CharPtr message, ArkUIBindTipsOptionsTime timeOptions,
+    ArkUIBindTipsOptionsArrow arrowOptions)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto tipsParam = AceType::MakeRefPtr<PopupParam>();
+    tipsParam->SetMessage(std::string(message));
+    tipsParam->SetShowInSubWindow(true);
+    tipsParam->SetAppearingTime(timeOptions.appearingTime);
+    tipsParam->SetDisappearingTime(timeOptions.disappearingTime);
+    tipsParam->SetAppearingTimeWithContinuousOperation(timeOptions.appearingTimeWithContinuousOperation);
+    tipsParam->SetDisappearingTimeWithContinuousOperation(timeOptions.disappearingTimeWithContinuousOperation);
+    tipsParam->SetEnableArrow(arrowOptions.enableArrow);
+    tipsParam->SetKeyBoardAvoidMode(PopupKeyboardAvoidMode::DEFAULT);
+    if (arrowOptions.arrowPointPosition && arrowOptions.enableArrow) {
+        char* pEnd = nullptr;
+        std::strtod(arrowOptions.arrowPointPosition, &pEnd);
+        if (pEnd != nullptr) {
+            if (std::strcmp(pEnd, "Start") == 0) {
+                tipsParam->SetArrowOffset(ARROW_ZERO_PERCENT);
+            }
+            if (std::strcmp(pEnd, "Center") == 0) {
+                tipsParam->SetArrowOffset(ARROW_HALF_PERCENT);
+            }
+            if (std::strcmp(pEnd, "End") == 0) {
+                tipsParam->SetArrowOffset(ARROW_ONE_HUNDRED_PERCENT);
+            }
+        }
+    }
+    if (arrowOptions.enableArrow) {
+        CalcDimension arrowWidth(arrowOptions.arrowWidthValue, static_cast<DimensionUnit>(arrowOptions.arrowWidthUnit));
+        bool setArrowWidthError = true;
+        if (arrowOptions.arrowWidthValue > 0 &&
+            static_cast<DimensionUnit>(arrowOptions.arrowWidthUnit) != DimensionUnit::PERCENT) {
+            tipsParam->SetArrowWidth(arrowWidth);
+            setArrowWidthError = false;
+        }
+        tipsParam->SetErrorArrowWidth(setArrowWidthError);
+        CalcDimension arrowHeight(
+            arrowOptions.arrowHeightValue, static_cast<DimensionUnit>(arrowOptions.arrowHeightUnit));
+        bool setArrowHeightError = true;
+        if (arrowOptions.arrowHeightValue > 0 &&
+            static_cast<DimensionUnit>(arrowOptions.arrowHeightUnit) != DimensionUnit::PERCENT) {
+            tipsParam->SetArrowHeight(arrowHeight);
+            setArrowHeightError = false;
+        }
+        tipsParam->SetErrorArrowHeight(setArrowHeightError);
+    }
+    tipsParam->SetBlockEvent(false);
+    tipsParam->SetTipsFlag(true);
+    ViewAbstract::BindTips(tipsParam, AceType::Claim(frameNode), nullptr);
+}
+
+void ResetBindTips(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto tipsParam = AceType::MakeRefPtr<PopupParam>();
+    tipsParam->SetBlockEvent(false);
+    tipsParam->SetTipsFlag(true);
+    RefPtr<SpanString> styledString;
+    ViewAbstract::BindTips(tipsParam, AceType::Claim(frameNode), styledString);
+}
+
 void SetOffset(ArkUINodeHandle node, const ArkUI_Float32* number, const ArkUI_Int32* unit)
 {
     CHECK_NULL_VOID(number);
@@ -2379,6 +2520,56 @@ void ResetPadding(ArkUINodeHandle node)
     paddings.left = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
     paddings.right = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
     ViewAbstract::SetPadding(frameNode, paddings);
+}
+
+void SetSafeAreaPadding(
+    ArkUINodeHandle node, const struct ArkUIPaddingType* safeAreaPadding, ArkUI_Bool isLengthMetrics)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcLength topDimen;
+    CalcLength endDimen;
+    CalcLength bottomDimen;
+    CalcLength startDimen;
+    if (safeAreaPadding->top.string != nullptr) {
+        topDimen = CalcLength(safeAreaPadding->top.string);
+    } else {
+        topDimen = CalcLength(safeAreaPadding->top.value, static_cast<DimensionUnit>(safeAreaPadding->top.unit));
+    }
+    if (safeAreaPadding->end.string != nullptr) {
+        endDimen = CalcLength(safeAreaPadding->end.string);
+    } else {
+        endDimen = CalcLength(safeAreaPadding->end.value, static_cast<DimensionUnit>(safeAreaPadding->end.unit));
+    }
+    if (safeAreaPadding->bottom.string != nullptr) {
+        bottomDimen = CalcLength(safeAreaPadding->bottom.string);
+    } else {
+        bottomDimen =
+            CalcLength(safeAreaPadding->bottom.value, static_cast<DimensionUnit>(safeAreaPadding->bottom.unit));
+    }
+    if (safeAreaPadding->start.string != nullptr) {
+        startDimen = CalcLength(safeAreaPadding->start.string);
+    } else {
+        startDimen = CalcLength(safeAreaPadding->start.value, static_cast<DimensionUnit>(safeAreaPadding->start.unit));
+    }
+    NG::PaddingProperty paddings;
+    paddings.top = std::optional<CalcLength>(topDimen);
+    paddings.bottom = std::optional<CalcLength>(bottomDimen);
+    if (isLengthMetrics) {
+        paddings.end = std::optional<CalcLength>(endDimen);
+        paddings.start = std::optional<CalcLength>(startDimen);
+    } else {
+        paddings.right = std::optional<CalcLength>(endDimen);
+        paddings.left = std::optional<CalcLength>(startDimen);
+    }
+    ViewAbstract::SetSafeAreaPadding(frameNode, paddings);
+}
+
+void ResetSafeAreaPadding(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetSafeAreaPadding(frameNode);
 }
 
 /**
@@ -2518,18 +2709,18 @@ ArkUI_Int32 GetRenderFit(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(ViewAbstract::GetRenderFit(frameNode));
 }
 
-void SetUseEffect(ArkUINodeHandle node, ArkUI_Bool useEffect)
+void SetUseEffect(ArkUINodeHandle node, ArkUI_Bool useEffect, ArkUI_Int32 effectType)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetUseEffect(frameNode, useEffect);
+    ViewAbstract::SetUseEffect(frameNode, useEffect, static_cast<EffectType>(effectType));
 }
 
 void ResetUseEffect(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetUseEffect(frameNode, false);
+    ViewAbstract::SetUseEffect(frameNode, false, EffectType::DEFAULT);
 }
 
 void SetForegroundColor(ArkUINodeHandle node, ArkUI_Bool isColor, uint32_t color)
@@ -2635,6 +2826,9 @@ void SetFocusable(ArkUINodeHandle node, ArkUI_Bool focusable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == "Custom") {
+        ViewAbstract::SetFocusType(frameNode, focusable ? FocusType::SCOPE : FocusType::DISABLE);
+    }
     ViewAbstract::SetFocusable(frameNode, focusable);
 }
 
@@ -2850,6 +3044,24 @@ void ResetAccessibilityLevel(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelNG::SetAccessibilityImportance(frameNode, "");
+}
+
+void SetAccessibilityCustomRole(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityCustomRole(std::string(value));
+}
+
+void ResetAccessibilityCustomRole(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->ResetAccessibilityCustomRole();
 }
 
 void SetDirection(ArkUINodeHandle node, ArkUI_Int32 direction)
@@ -3381,21 +3593,13 @@ void SetResponseRegion(ArkUINodeHandle node, const ArkUI_Float32* values, const 
         DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
         region.emplace_back(dimenRect);
     }
-    if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
-        TextModelNG::SetResponseRegion(frameNode, region);
-    } else {
-        ViewAbstract::SetResponseRegion(frameNode, region);
-    }
+    ViewAbstract::SetResponseRegion(frameNode, region);
 }
 
 void ResetResponseRegion(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
-        TextModelNG::ClearResponseRegion(frameNode);
-        return;
-    }
     std::vector<DimensionRect> region;
     CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
     CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
@@ -3424,22 +3628,36 @@ void ResetForegroundEffect(ArkUINodeHandle node)
 
 void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_Float32 radiusArg, ArkUI_Float32 saturationArg,
     ArkUI_Float32 brightnessArg, ArkUI_Uint32 colorArg, ArkUI_Int32 adaptiveColorArg, const ArkUI_Float32* blurValues,
-    ArkUI_Int32 blurValuesSize)
+    ArkUI_Int32 blurValuesSize, ArkUI_Int32 policy, ArkUI_Int32 blurType, ArkUI_Bool isValidColor,
+    ArkUI_Uint32 inactiveColorArg, ArkUI_Bool disableSystemAdaptation)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-
+    CHECK_NULL_VOID(frameNode);
     CalcDimension radius;
-    radius.SetValue(radiusArg);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        radius = CalcDimension(radiusArg, DimensionUnit::VP);
+    } else {
+        radius = CalcDimension(radiusArg, DimensionUnit::PX);
+    }
     Color color(colorArg);
-
     BlurOption blurOption;
     blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
 
-    EffectOption option = { radius, saturationArg, brightnessArg, color, static_cast<AdaptiveColor>(adaptiveColorArg),
-        blurOption };
-
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetBackgroundEffect(frameNode, option);
+    EffectOption option;
+    option.radius = radius;
+    option.saturation = saturationArg;
+    option.brightness = brightnessArg;
+    option.color = color;
+    option.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColorArg);
+    option.blurOption = blurOption;
+    option.blurType = static_cast<BlurType>(blurType);
+    option.policy = static_cast<BlurStyleActivePolicy>(policy);
+    Color inactiveColor(inactiveColorArg);
+    option.inactiveColor = inactiveColor;
+    option.isValidColor = isValidColor;
+    SysOptions sysOptions;
+    sysOptions.disableSystemAdaptation = disableSystemAdaptation;
+    ViewAbstract::SetBackgroundEffect(frameNode, option, sysOptions);
 }
 
 void ResetBackgroundEffect(ArkUINodeHandle node)
@@ -3474,8 +3692,8 @@ void ResetBackgroundBrightness(ArkUINodeHandle node)
     ViewAbstract::SetDynamicLightUp(frameNode, rate, lightUpDegree);
 }
 
-void SetBackgroundBrightnessInternal(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree, 
-    ArkUI_Float32 cubicCoeff, ArkUI_Float32 quadCoeff, ArkUI_Float32 saturation, 
+void SetBackgroundBrightnessInternal(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree,
+    ArkUI_Float32 cubicCoeff, ArkUI_Float32 quadCoeff, ArkUI_Float32 saturation,
     const ArkUI_Float32* posRGBValues, ArkUI_Int32 posRGBValuesSize,
     const ArkUI_Float32* negRGBValues, ArkUI_Int32 negRGBValuesSize , ArkUI_Float32 fraction)
 {
@@ -3506,9 +3724,9 @@ void ResetBackgroundBrightnessInternal(ArkUINodeHandle node)
         saturation, posRGB, negRGB, fraction };
     ViewAbstract::SetBgDynamicBrightness(frameNode, brightnessOption);
 }
- 
-void SetForegroundBrightness(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree, 
-    ArkUI_Float32 cubicCoeff, ArkUI_Float32 quadCoeff, ArkUI_Float32 saturation, 
+
+void SetForegroundBrightness(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree,
+    ArkUI_Float32 cubicCoeff, ArkUI_Float32 quadCoeff, ArkUI_Float32 saturation,
     const ArkUI_Float32* posRGBValues, ArkUI_Int32 posRGBValuesSize,
     const ArkUI_Float32* negRGBValues, ArkUI_Int32 negRGBValuesSize, ArkUI_Float32 fraction)
 {
@@ -3542,18 +3760,33 @@ void ResetForegroundBrightness(ArkUINodeHandle node)
 
 void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValue, bool& isAuto)
 {
-    if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::AUTO)) {
-        previewOption.ResetDragPreviewMode();
-        isAuto = true;
-        return;
-    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE)) {
-        previewOption.isScaleEnabled = false;
-    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_SHADOW)) {
-        previewOption.isDefaultShadowEnabled = true;
-    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_RADIUS)) {
-        previewOption.isDefaultRadiusEnabled = true;
-    }
     isAuto = false;
+    switch (modeValue) {
+        case static_cast<int32_t>(NG::DragPreviewMode::AUTO):
+            previewOption.ResetDragPreviewMode();
+            isAuto = true;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE):
+            previewOption.isScaleEnabled = false;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_SHADOW):
+            previewOption.isDefaultShadowEnabled = true;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_RADIUS):
+            previewOption.isDefaultRadiusEnabled = true;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DRAG_ITEM_GRAY_EFFECT):
+            previewOption.isDefaultDragItemGrayEffectEnabled = true;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_MULTI_TILE_EFFECT):
+            previewOption.isMultiTiled = true;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_TOUCH_POINT_CALCULATION_BASED_ON_FINAL_PREVIEW):
+            previewOption.isTouchPointCalculationBasedOnFinalPreviewEnable = true;
+            break;
+        default:
+            break;
+    }
 }
 
 void SetDragPreviewOptions(ArkUINodeHandle node, ArkUIDragPreViewOptions dragPreviewOptions,
@@ -3579,9 +3812,13 @@ void SetDragPreviewOptions(ArkUINodeHandle node, ArkUIDragPreViewOptions dragPre
     } else {
         option.isShowBadge = dragPreviewOptions.isShowBadge;
     }
+    option.sizeChangeEffect = static_cast<NG::DraggingSizeChangeEffect>(dragPreviewOptions.sizeChangeEffect);
     option.isNumber = dragPreviewOptions.isBadgeNumber;
     option.isMultiSelectionEnabled = dragInteractionOptions.isMultiSelectionEnabled;
     option.defaultAnimationBeforeLifting = dragInteractionOptions.defaultAnimationBeforeLifting;
+    option.enableEdgeAutoScroll = dragInteractionOptions.enableEdgeAutoScroll;
+    option.enableHapticFeedback = dragInteractionOptions.enableHapticFeedback;
+    option.isLiftingDisabled = dragInteractionOptions.isLiftingDisabled;
     ViewAbstract::SetDragPreviewOptions(frameNode, option);
 }
 
@@ -3589,8 +3826,14 @@ void ResetDragPreviewOptions(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetDragPreviewOptions(frameNode,
-        { true, false, false, false, false, false, { .isShowBadge = true } });
+    ViewAbstract::SetDragPreviewOptions(frameNode, NG::DragPreviewOption());
+}
+
+void SetDisableDataPrefetch(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDisableDataPrefetch(frameNode, value);
 }
 
 void SetMouseResponseRegion(
@@ -3684,6 +3927,78 @@ void ResetAccessibilityGroup(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelNG::SetAccessibilityGroup(frameNode, false);
+}
+
+void SetAccessibilityNextFocusId(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string valueStr = value;
+    ViewAbstractModelNG::SetAccessibilityNextFocusId(frameNode, valueStr);
+}
+
+void ResetAccessibilityNextFocusId(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityNextFocusId(frameNode, "");
+}
+
+void SetAccessibilityDefaultFocus(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityDefaultFocus(frameNode, value);
+}
+
+void ResetAccessibilityDefaultFocus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityDefaultFocus(frameNode, false);
+}
+
+void SetAccessibilityUseSamePage(ArkUINodeHandle node, ArkUI_Bool isFullSilent)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string pageMode = isFullSilent ? "FULL_SILENT" : "SEMI_SILENT";
+    ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, pageMode);
+}
+
+void ResetAccessibilityUseSamePage(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, "");
+}
+
+void SetAccessibilityScrollTriggerable(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityScrollTriggerable(frameNode, value, false);
+}
+
+void ResetAccessibilityScrollTriggerable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityScrollTriggerable(frameNode, true, true);
+}
+
+void SetAccessibilityFocusDrawLevel(ArkUINodeHandle node, ArkUI_Int32 drawLevel)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(frameNode, drawLevel);
+}
+
+void ResetAccessibilityFocusDrawLevel(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(frameNode, 0);
 }
 
 void SetHoverEffect(ArkUINodeHandle node, ArkUI_Int32 hoverEffectValue)
@@ -5513,6 +5828,29 @@ void GetTranslate(ArkUINodeHandle node, ArkUI_Float32 (*values)[3], ArkUI_Int32 
     (*values)[NUM_2] = translate.z.GetNativeValue(static_cast<DimensionUnit>(unit));
 }
 
+void GetTranslateWithPercentage(
+    ArkUINodeHandle node, ArkUI_Float32 (*values)[3], ArkUI_Int32 (*units)[2], ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto translate = ViewAbstract::GetTranslate(frameNode);
+    if (translate.x.Unit() != DimensionUnit::PERCENT) {
+        (*units)[0] = NUM_0;
+        (*values)[0] = translate.x.GetNativeValue(static_cast<DimensionUnit>(unit));
+    } else {
+        (*units)[0] = NUM_1;
+        (*values)[0] = translate.x.Value();
+    }
+    if (translate.y.Unit() != DimensionUnit::PERCENT) {
+        (*units)[1] = NUM_0;
+        (*values)[1] = translate.y.GetNativeValue(static_cast<DimensionUnit>(unit));
+    } else {
+        (*units)[1] = NUM_1;
+        (*values)[1] = translate.y.Value();
+    }
+    (*values)[NUM_2] = translate.z.GetNativeValue(static_cast<DimensionUnit>(unit));
+}
+
 ArkUI_Float32 GetAspectRatio(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -5610,7 +5948,7 @@ void SetOnVisibleAreaChange(ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_
         event.componentAsyncEvent.subKind = ON_VISIBLE_AREA_CHANGE;
         event.componentAsyncEvent.data[0].i32 = visible;
         event.componentAsyncEvent.data[1].f32 = static_cast<ArkUI_Float32>(ratio);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnVisibleChange(frameNode, onEvent, ratioList);
 }
@@ -5695,7 +6033,7 @@ void ResetAccessibilityState(ArkUINodeHandle node)
         accessibilityProperty->SetUserDisabled(false);
     }
     if (accessibilityProperty->HasUserSelected()) {
-        accessibilityProperty->SetUserSelected(false); 
+        accessibilityProperty->SetUserSelected(false);
     }
     if (accessibilityProperty->HasUserCheckedType()) {
         accessibilityProperty->SetUserCheckedType(0);
@@ -5717,6 +6055,15 @@ void SetAccessibilityValue(ArkUINodeHandle node, const ArkUIAccessibilityValue& 
     if (value.current.isSet) {
         accessibilityProperty->SetUserCurrentValue(value.current.value);
     }
+    if (value.rangeMin.isSet) {
+        accessibilityProperty->SetUserRangeMinValue(value.rangeMin.value);
+    }
+    if (value.rangeMax.isSet) {
+        accessibilityProperty->SetUserRangeMaxValue(value.rangeMax.value);
+    }
+    if (value.rangeCurrent.isSet) {
+        accessibilityProperty->SetUserRangeCurrentValue(value.rangeCurrent.value);
+    }
     if (value.text.isSet) {
         accessibilityProperty->SetUserTextValue(value.text.value);
     }
@@ -5734,6 +6081,12 @@ void GetAccessibilityValue(ArkUINodeHandle node, ArkUIAccessibilityValue& value)
     value.max.value = accessibilityProperty->GetUserMaxValue();
     value.current.isSet = accessibilityProperty->HasUserCurrentValue();
     value.current.value = accessibilityProperty->GetUserCurrentValue();
+    value.rangeMin.isSet = accessibilityProperty->HasUserRangeMinValue();
+    value.rangeMin.value = accessibilityProperty->GetUserRangeMinValue();
+    value.rangeMax.isSet = accessibilityProperty->HasUserRangeMaxValue();
+    value.rangeMax.value = accessibilityProperty->GetUserRangeMaxValue();
+    value.rangeCurrent.isSet = accessibilityProperty->HasUserRangeCurrentValue();
+    value.rangeCurrent.value = accessibilityProperty->GetUserRangeCurrentValue();
     value.text.isSet = accessibilityProperty->HasUserTextValue();
     g_strValue = accessibilityProperty->GetUserTextValue();
     value.text.value = g_strValue.c_str();
@@ -5753,6 +6106,15 @@ void ResetAccessibilityValue(ArkUINodeHandle node)
     }
     if (accessibilityProperty->HasUserCurrentValue()) {
         accessibilityProperty->SetUserCurrentValue(-1);
+    }
+    if (accessibilityProperty->HasUserRangeMinValue()) {
+        accessibilityProperty->SetUserRangeMinValue(-1);
+    }
+    if (accessibilityProperty->HasUserRangeMaxValue()) {
+        accessibilityProperty->SetUserRangeMaxValue(-1);
+    }
+    if (accessibilityProperty->HasUserRangeCurrentValue()) {
+        accessibilityProperty->SetUserRangeCurrentValue(-1);
     }
     if (accessibilityProperty->HasUserTextValue()) {
         accessibilityProperty->SetUserTextValue("");
@@ -5808,12 +6170,12 @@ ArkUI_CharPtr GetAccessibilityRole(ArkUINodeHandle node)
     return g_strValue.c_str();
 }
 
-void SetFocusScopeId(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool isGroup)
+void SetFocusScopeId(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool isGroup, ArkUI_Bool arrowKeyStepOut)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::string idStr = id;
-    ViewAbstract::SetFocusScopeId(frameNode, idStr, isGroup);
+    ViewAbstract::SetFocusScopeId(frameNode, idStr, isGroup, arrowKeyStepOut);
 }
 
 void ResetFocusScopeId(ArkUINodeHandle node)
@@ -5822,7 +6184,8 @@ void ResetFocusScopeId(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     std::string id = "";
     bool isGroup = false;
-    ViewAbstract::SetFocusScopeId(frameNode, id, isGroup);
+    bool arrowKeyStepOut = true;
+    ViewAbstract::SetFocusScopeId(frameNode, id, isGroup, arrowKeyStepOut);
 }
 
 void SetFocusScopePriority(ArkUINodeHandle node, ArkUI_CharPtr scopeId, ArkUI_Int32 priority)
@@ -5886,7 +6249,23 @@ PixelRoundPolicy ConvertFloorPixelRoundPolicy(ArkUI_Int32 index)
     return ret;
 }
 
-uint8_t ConvertPixelRoundPolicy(ArkUI_Int32 value, ArkUI_Int32 index)
+PixelRoundPolicy ConvertNoPixelRoundPolicy(ArkUI_Int32 index)
+{
+    switch (index) {
+        case 0:
+            return PixelRoundPolicy::NO_FORCE_ROUND_START;
+        case 1:
+            return PixelRoundPolicy::NO_FORCE_ROUND_TOP;
+        case 2: // 2:index of end
+            return PixelRoundPolicy::NO_FORCE_ROUND_END;
+        case 3: // 3:index of bottom
+            return PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM;
+        default:
+            return PixelRoundPolicy::ALL_FORCE_ROUND;
+    }
+}
+
+uint16_t ConvertPixelRoundPolicy(ArkUI_Int32 value, ArkUI_Int32 index)
 {
     auto tmp = static_cast<PixelRoundCalcPolicy>(value);
     PixelRoundPolicy ret = static_cast<PixelRoundPolicy>(0);
@@ -5894,8 +6273,10 @@ uint8_t ConvertPixelRoundPolicy(ArkUI_Int32 value, ArkUI_Int32 index)
         ret = ConvertCeilPixelRoundPolicy(index);
     } else if (tmp == PixelRoundCalcPolicy::FORCE_FLOOR) {
         ret = ConvertFloorPixelRoundPolicy(index);
+    } else if (tmp == PixelRoundCalcPolicy::NO_FORCE_ROUND) {
+        ret = ConvertNoPixelRoundPolicy(index);
     }
-    return static_cast<uint8_t>(ret);
+    return static_cast<uint16_t>(ret);
 }
 
 void SetPixelRound(ArkUINodeHandle node, const ArkUI_Int32* values, ArkUI_Int32 length)
@@ -5903,7 +6284,7 @@ void SetPixelRound(ArkUINodeHandle node, const ArkUI_Int32* values, ArkUI_Int32 
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
-    uint8_t value = 0;
+    uint16_t value = 0;
     for (ArkUI_Int32 index = 0; index < length; index++) {
         value |= ConvertPixelRoundPolicy(values[index], index);
     }
@@ -5914,7 +6295,7 @@ void ResetPixelRound(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetPixelRound(frameNode, static_cast<uint8_t>(PixelRoundCalcPolicy::NO_FORCE_ROUND));
+    ViewAbstract::SetPixelRound(frameNode, static_cast<uint16_t>(PixelRoundCalcPolicy::NO_FORCE_ROUND));
 }
 
 RefPtr<NG::ChainedTransitionEffect> ParseTransition(ArkUITransitionEffectOption* option)
@@ -6032,6 +6413,13 @@ void SetDragPreview(ArkUINodeHandle node, ArkUIDragPreview dragPreview)
     CHECK_NULL_VOID(frameNode);
     NG::DragDropInfo dragPreviewInfo;
     dragPreviewInfo.inspectorId = dragPreview.inspectorId;
+    dragPreviewInfo.onlyForLifting = dragPreview.onlyForLifting;
+    if (dragPreview.extraInfo) {
+        dragPreviewInfo.extraInfo = dragPreview.extraInfo;
+    }
+    if (dragPreview.pixelMap) {
+        dragPreviewInfo.pixelMap = PixelMap::CreatePixelMap(dragPreview.pixelMap);
+    }
     ViewAbstract::SetDragPreview(frameNode, dragPreviewInfo);
 }
 
@@ -6055,20 +6443,29 @@ void SetBorderDashParams(ArkUINodeHandle node, const ArkUI_Float32* values, ArkU
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if ((values == nullptr) || (valuesSize != NUM_24)) {
+    if ((values == nullptr) || (valuesSize != NUM_36)) {
         return;
     }
-
+    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     int32_t offset = NUM_0;
     NG::BorderWidthProperty borderDashGap;
     SetOptionalBorder(borderDashGap.leftDimen, values, valuesSize, offset);
     SetOptionalBorder(borderDashGap.rightDimen, values, valuesSize, offset);
     SetOptionalBorder(borderDashGap.topDimen, values, valuesSize, offset);
     SetOptionalBorder(borderDashGap.bottomDimen, values, valuesSize, offset);
+    if (isRightToLeft) {
+        SetOptionalBorder(borderDashGap.rightDimen, values, valuesSize, offset);
+        SetOptionalBorder(borderDashGap.leftDimen, values, valuesSize, offset);
+    } else {
+        SetOptionalBorder(borderDashGap.leftDimen, values, valuesSize, offset);
+        SetOptionalBorder(borderDashGap.rightDimen, values, valuesSize, offset);
+    }
     borderDashGap.multiValued = true;
     if (borderDashGap.leftDimen.has_value() || borderDashGap.rightDimen.has_value() ||
         borderDashGap.topDimen.has_value() || borderDashGap.bottomDimen.has_value()) {
         ViewAbstract::SetDashGap(frameNode, borderDashGap);
+    } else {
+        ViewAbstract::SetDashGap(frameNode, Dimension(DEFAULT_DASH_DIMENSION));
     }
 
     NG::BorderWidthProperty borderDashWidth;
@@ -6076,10 +6473,19 @@ void SetBorderDashParams(ArkUINodeHandle node, const ArkUI_Float32* values, ArkU
     SetOptionalBorder(borderDashWidth.rightDimen, values, valuesSize, offset);
     SetOptionalBorder(borderDashWidth.topDimen, values, valuesSize, offset);
     SetOptionalBorder(borderDashWidth.bottomDimen, values, valuesSize, offset);
+    if (isRightToLeft) {
+        SetOptionalBorder(borderDashWidth.rightDimen, values, valuesSize, offset);
+        SetOptionalBorder(borderDashWidth.leftDimen, values, valuesSize, offset);
+    } else {
+        SetOptionalBorder(borderDashWidth.leftDimen, values, valuesSize, offset);
+        SetOptionalBorder(borderDashWidth.rightDimen, values, valuesSize, offset);
+    }
     borderDashWidth.multiValued = true;
     if (borderDashWidth.leftDimen.has_value() || borderDashWidth.rightDimen.has_value() ||
         borderDashWidth.topDimen.has_value() || borderDashWidth.bottomDimen.has_value()) {
         ViewAbstract::SetDashWidth(frameNode, borderDashWidth);
+    } else {
+        ViewAbstract::SetDashWidth(frameNode, Dimension(DEFAULT_DASH_DIMENSION));
     }
 }
 
@@ -6088,6 +6494,70 @@ ArkUI_Int32 GetNodeUniqueId(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, -1);
     return frameNode->GetId();
+}
+
+void SetNextFocus(ArkUINodeHandle node, ArkUI_CharPtr forward, ArkUI_CharPtr backward,
+    ArkUI_CharPtr up, ArkUI_CharPtr down, ArkUI_CharPtr left, ArkUI_CharPtr right, ArkUI_Uint32 hasValue)
+{
+    CHECK_NULL_VOID(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    if ((hasValue >> 5) & 1) { // 5: forward
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::TAB, forward);
+    }
+    if ((hasValue >> 4) & 1) { // 4: backward
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::SHIFT_TAB, backward);
+    }
+    if ((hasValue >> 3) & 1) { // 3: up
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::UP, up);
+    }
+    if ((hasValue >> 2) & 1) { // 2: down
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::DOWN, down);
+    }
+    if ((hasValue >> 1) & 1) { // 1: left
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::LEFT, std::string(left));
+    }
+    if ((hasValue >> 0) & 1) { // 0: right
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::RIGHT, std::string(right));
+    }
+}
+
+void SetNextFocusOneByOne(ArkUINodeHandle node, ::FocusMove idx, ArkUINodeHandle focusNode)
+{
+    CHECK_NULL_VOID(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* focusFrameNode = reinterpret_cast<FrameNode*>(focusNode);
+    auto nodePtr = AceType::WeakClaim<AceType>(focusFrameNode);
+    FocusIntension key;
+    switch (idx) {
+        case ::FocusMove::FOCUS_MOVE_FORWARD:
+            key = FocusIntension::TAB;
+            break;
+        case ::FocusMove::FOCUS_MOVE_BACKWARD:
+            key = FocusIntension::SHIFT_TAB;
+            break;
+        case ::FocusMove::FOCUS_MOVE_UP:
+            key = FocusIntension::UP;
+            break;
+        case ::FocusMove::FOCUS_MOVE_DOWN:
+            key = FocusIntension::DOWN;
+            break;
+        case ::FocusMove::FOCUS_MOVE_LEFT:
+            key = FocusIntension::LEFT;
+            break;
+        case ::FocusMove::FOCUS_MOVE_RIGHT:
+            key = FocusIntension::RIGHT;
+            break;
+        default:
+            return;
+    }
+    ViewAbstract::SetNextFocus(frameNode, key, nodePtr);
+}
+
+void ResetNextFocus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetNextFocus(frameNode);
 }
 
 void SetFocusBoxStyle(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Int32 marginUnit,
@@ -6128,6 +6598,443 @@ void ResetFocusBoxStyle(ArkUINodeHandle node)
     NG::FocusBoxStyle style;
     ViewAbstract::SetFocusBoxStyle(frameNode, style);
 }
+
+void SetClickDistance(ArkUINodeHandle node, ArkUI_Float32 valueMargin)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    double clickDistance = static_cast<double>(valueMargin);
+    ViewAbstract::SetClickDistance(frameNode, clickDistance);
+}
+
+void ResetClickDistance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetClickDistance(frameNode, std::numeric_limits<double>::infinity());
+}
+
+void SetBlendModeByBlender(ArkUINodeHandle node, ArkUINodeHandle blender, ArkUI_Int32 blendApplyTypeValue)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    OHOS::Rosen::BrightnessBlender* brightnessBlender = reinterpret_cast<OHOS::Rosen::BrightnessBlender*>(blender);
+    ViewAbstractModelNG::SetBrightnessBlender(frameNode, brightnessBlender);
+    ViewAbstractModelNG::SetBlendApplyType(frameNode, static_cast<OHOS::Ace::BlendApplyType>(blendApplyTypeValue));
+}
+
+void SetTabStop(ArkUINodeHandle node, ArkUI_Bool tabstop)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetTabStop(frameNode, tabstop);
+}
+
+void ResetTabStop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    bool tabstop = false;
+    ViewAbstract::SetTabStop(frameNode, tabstop);
+}
+
+ArkUI_Bool GetTabStop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Bool>(ViewAbstract::GetTabStop(frameNode));
+}
+
+void DispatchKeyEvent(ArkUINodeHandle node, ArkUIKeyEvent* arkUIkeyEvent)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(arkUIkeyEvent);
+    KeyEvent keyEvent;
+    keyEvent.action = static_cast<KeyAction>(arkUIkeyEvent->type);
+    keyEvent.code = static_cast<KeyCode>(arkUIkeyEvent->keyCode);
+    keyEvent.key.assign(arkUIkeyEvent->keyText);
+    keyEvent.sourceType = static_cast<SourceType>(arkUIkeyEvent->keySource);
+    keyEvent.deviceId = arkUIkeyEvent->deviceId;
+    keyEvent.unicode = arkUIkeyEvent->unicode;
+    keyEvent.numLock = arkUIkeyEvent->isNumLockOn;
+    keyEvent.scrollLock = arkUIkeyEvent->isScrollLockOn;
+    keyEvent.enableCapsLock = arkUIkeyEvent->isCapsLockOn;
+    std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(arkUIkeyEvent->timestamp));
+    TimeStamp timeStamp(nanoseconds);
+    keyEvent.timeStamp = timeStamp;
+    for (int32_t i = 0; i < arkUIkeyEvent->keyCodesLength; i ++) {
+        keyEvent.pressedCodes.push_back(static_cast<KeyCode>(arkUIkeyEvent->pressedKeyCodes[i]));
+    }
+    keyEvent.keyIntention = static_cast<KeyIntention>(arkUIkeyEvent->intentionCode);
+    ViewAbstract::DispatchKeyEvent(frameNode, keyEvent);
+}
+
+ArkUI_Int32 PostTouchEventToFrameNode(ArkUINodeHandle node, TouchEvent& touchEvent)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    if (!frameNode) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent framenode is null!");
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    auto frameNodePtr = AceType::Claim<FrameNode>(frameNode);
+    if (!frameNodePtr) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent framenodeptr is null!");
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    auto pipelineContext = frameNodePtr->GetContext();
+    if (!pipelineContext) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent pipeline context is null!");
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    auto postEventManager = pipelineContext->GetPostEventManager();
+    if (!postEventManager) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent post event manager is null!");
+        return ARKUI_ERROR_CODE_POST_CLONED_COMPONENT_STATUS_ABNORMAL;
+    }
+    bool res = postEventManager->PostEvent(frameNodePtr, touchEvent);
+    if (!res) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent post event fail!");
+        return ARKUI_ERROR_CODE_POST_CLONED_NO_COMPONENT_HIT_TO_RESPOND_TO_THE_EVENT;
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 PostTouchEvent(ArkUINodeHandle node, const ArkUITouchEvent* arkUITouchEvent)
+{
+    if (!arkUITouchEvent) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "PostTouchEvent touchevent is null!");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    TouchEvent touchEvent;
+    touchEvent.type = static_cast<TouchType>(arkUITouchEvent->action);
+    touchEvent.sourceType = static_cast<SourceType>(arkUITouchEvent->sourceType);
+    touchEvent.sourceTool = static_cast<SourceTool>(arkUITouchEvent->actionTouchPoint.toolType);
+    touchEvent.force = arkUITouchEvent->actionTouchPoint.pressure;
+    touchEvent.deviceId = arkUITouchEvent->deviceId;
+    std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(arkUITouchEvent->timeStamp));
+    TimeStamp time(nanoseconds);
+    touchEvent.time = time;
+    touchEvent.targetDisplayId = arkUITouchEvent->targetDisplayId;
+    ArkUITouchPoint* touchPointes = arkUITouchEvent->touchPointes;
+    auto density = PipelineBase::GetCurrentDensity();
+    for (size_t index = 0; index < arkUITouchEvent->touchPointSize; index++) {
+        TouchPoint point;
+        point.id = touchPointes[index].id;
+        point.x = touchPointes[index].nodeX;
+        point.y = touchPointes[index].nodeY;
+        point.screenX = touchPointes[index].screenX * density;
+        point.screenY = touchPointes[index].screenY * density;
+        point.originalId = touchPointes[index].id;
+        std::chrono::nanoseconds downNanoseconds(static_cast<int64_t>(touchPointes[index].pressedTime));
+        TimeStamp downTime(downNanoseconds);
+        point.downTime = downTime;
+        point.force = touchPointes[index].pressure;
+        touchEvent.pointers.emplace_back(point);
+    }
+    touchEvent.id = arkUITouchEvent->actionTouchPoint.id;
+    touchEvent.x = arkUITouchEvent->actionTouchPoint.nodeX;
+    touchEvent.y = arkUITouchEvent->actionTouchPoint.nodeY;
+    touchEvent.screenX = arkUITouchEvent->actionTouchPoint.screenX * density;
+    touchEvent.screenY = arkUITouchEvent->actionTouchPoint.screenY * density;
+    touchEvent.originalId = arkUITouchEvent->actionTouchPoint.id;
+    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUITouchEvent->rawPointerEvent);
+    NG::SetPostPointerEvent(pointerEvent, touchEvent);
+    return PostTouchEventToFrameNode(node, touchEvent);
+}
+
+void SetHistoryTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITouchEvent* arkUITouchEvent)
+{
+    std::array<ArkUIHistoryTouchEvent, MAX_HISTORY_EVENT_COUNT> allHistoryEvents;
+    std::array<std::array<ArkUITouchPoint, MAX_POINTS>, MAX_HISTORY_EVENT_COUNT> allHistoryPoints;
+    if (arkUITouchEvent->historySize > 0) {
+        for (size_t i = 0; i < arkUITouchEvent->historySize; i++) {
+            allHistoryEvents[i].action = arkUITouchEvent->historyEvents[i].action;
+            allHistoryEvents[i].sourceType = arkUITouchEvent->historyEvents[i].sourceType;
+            allHistoryEvents[i].timeStamp = arkUITouchEvent->historyEvents[i].timeStamp;
+            allHistoryEvents[i].actionTouchPoint.nodeX = arkUITouchEvent->historyEvents[i].actionTouchPoint.nodeX;
+            allHistoryEvents[i].actionTouchPoint.nodeY = arkUITouchEvent->historyEvents[i].actionTouchPoint.nodeY;
+            allHistoryEvents[i].actionTouchPoint.windowX = arkUITouchEvent->historyEvents[i].actionTouchPoint.windowX;
+            allHistoryEvents[i].actionTouchPoint.windowY = arkUITouchEvent->historyEvents[i].actionTouchPoint.windowY;
+            allHistoryEvents[i].actionTouchPoint.screenX = arkUITouchEvent->historyEvents[i].actionTouchPoint.screenX;
+            allHistoryEvents[i].actionTouchPoint.screenY = arkUITouchEvent->historyEvents[i].actionTouchPoint.screenY;
+            allHistoryEvents[i].actionTouchPoint.pressure =
+                arkUITouchEvent->historyEvents[i].actionTouchPoint.pressure;
+            for (size_t j = 0; j < arkUITouchEvent->historyEvents[i].touchPointSize; j++) {
+                allHistoryPoints[i][j].id = arkUITouchEvent->historyEvents[i].touchPointes[j].id;
+                allHistoryPoints[i][j].nodeX = arkUITouchEvent->historyEvents[i].touchPointes[j].nodeX;
+                allHistoryPoints[i][j].nodeY = arkUITouchEvent->historyEvents[i].touchPointes[j].nodeY;
+                allHistoryPoints[i][j].windowX = arkUITouchEvent->historyEvents[i].touchPointes[j].windowX;
+                allHistoryPoints[i][j].windowY = arkUITouchEvent->historyEvents[i].touchPointes[j].windowY;
+                allHistoryPoints[i][j].screenX = arkUITouchEvent->historyEvents[i].touchPointes[j].screenX;
+                allHistoryPoints[i][j].screenY = arkUITouchEvent->historyEvents[i].touchPointes[j].screenY;
+                allHistoryPoints[i][j].contactAreaWidth =
+                    arkUITouchEvent->historyEvents[i].touchPointes[j].contactAreaWidth;
+                allHistoryPoints[i][j].contactAreaHeight =
+                    arkUITouchEvent->historyEvents[i].touchPointes[j].contactAreaHeight;
+                allHistoryPoints[i][j].pressure = arkUITouchEvent->historyEvents[i].touchPointes[j].pressure;
+                allHistoryPoints[i][j].tiltX = arkUITouchEvent->historyEvents[i].touchPointes[j].tiltX;
+                allHistoryPoints[i][j].tiltY = arkUITouchEvent->historyEvents[i].touchPointes[j].tiltY;
+                allHistoryPoints[i][j].pressedTime =
+                    arkUITouchEvent->historyEvents[i].touchPointes[j].pressedTime;
+                allHistoryPoints[i][j].toolType = arkUITouchEvent->historyEvents[i].touchPointes[j].toolType;
+                allHistoryPoints[i][j].operatingHand =
+                    arkUITouchEvent->historyEvents[i].touchPointes[j].operatingHand;
+            }
+            if (arkUITouchEvent->historyEvents[i].touchPointSize > 0) {
+                allHistoryEvents[i].touchPointes = &(allHistoryPoints[i][0]);
+            }
+            allHistoryEvents[i].touchPointSize = arkUITouchEvent->historyEvents[i].touchPointSize;
+        }
+        arkUITouchEventCloned->historyEvents = &allHistoryEvents[0];
+        arkUITouchEventCloned->historySize = arkUITouchEvent->historySize;
+    } else {
+        arkUITouchEventCloned->historyEvents = nullptr;
+        arkUITouchEventCloned->historySize = 0;
+    }
+}
+
+void CreateClonedTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITouchEvent* arkUITouchEvent)
+{
+    if (!arkUITouchEventCloned || !arkUITouchEvent) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "CreateClonedTouchEvent touchevent is null!");
+        return;
+    }
+    arkUITouchEventCloned->target.id = arkUITouchEvent->target.id;
+    arkUITouchEventCloned->target.type = arkUITouchEvent->target.type;
+    arkUITouchEventCloned->target.area = arkUITouchEvent->target.area;
+    arkUITouchEventCloned->target.origin = arkUITouchEvent->target.origin;
+    arkUITouchEventCloned->action = arkUITouchEvent->action;
+    arkUITouchEventCloned->changedPointerId = arkUITouchEvent->changedPointerId;
+    arkUITouchEventCloned->actionTouchPoint = arkUITouchEvent->actionTouchPoint;
+    arkUITouchEventCloned->timeStamp = arkUITouchEvent->timeStamp;
+    arkUITouchEventCloned->sourceType = arkUITouchEvent->sourceType;
+    arkUITouchEventCloned->targetDisplayId = arkUITouchEvent->targetDisplayId;
+    arkUITouchEventCloned->deviceId = arkUITouchEvent->deviceId;
+    MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUITouchEvent->rawPointerEvent);
+    NG::SetClonedPointerEvent(pointerEvent, arkUITouchEventCloned);
+    std::array<ArkUITouchPoint, MAX_POINTS> touchPoints;
+    if (arkUITouchEvent->touchPointSize > 0) {
+        for (size_t i = 0; i < arkUITouchEvent->touchPointSize; i++) {
+            touchPoints[i] = arkUITouchEvent->touchPointes[i];
+        }
+        arkUITouchEventCloned->touchPointes = &touchPoints[0];
+        arkUITouchEventCloned->touchPointSize = arkUITouchEvent->touchPointSize;
+    } else {
+        arkUITouchEventCloned->touchPointes = nullptr;
+        arkUITouchEventCloned->touchPointSize = 0;
+    }
+    arkUITouchEventCloned->subKind = arkUITouchEvent->subKind;
+    SetHistoryTouchEvent(arkUITouchEventCloned, arkUITouchEvent);
+    arkUITouchEventCloned->stopPropagation = arkUITouchEvent->stopPropagation;
+}
+
+void SetOnFocusExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onFocus = [node, eventReceiver]() {
+        eventReceiver(node);
+    };
+    ViewAbstract::SetOnFocus(reinterpret_cast<FrameNode*>(node), std::move(onFocus));
+}
+
+void SetOnBlurExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onBlur = [node, eventReceiver]() {
+        eventReceiver(node);
+    };
+    ViewAbstract::SetOnBlur(reinterpret_cast<FrameNode*>(node), std::move(onBlur));
+}
+
+void SetOnTouchExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, ArkUINodeEvent event))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onTouch = [node, eventReceiver](TouchEventInfo& eventInfo) {
+        ArkUINodeEvent event;
+        auto target = eventInfo.GetTarget();
+        event.touchEvent.target.id = target.id.c_str();
+        event.touchEvent.target.type = target.type.c_str();
+        const std::list<TouchLocationInfo>& changeTouch = eventInfo.GetChangedTouches();
+        if (changeTouch.size() > 0) {
+            TouchLocationInfo front = changeTouch.front();
+            event.touchEvent.action = static_cast<int32_t>(front.GetTouchType());
+        }
+        eventReceiver(node, event);
+    };
+    ViewAbstract::SetOnTouch(reinterpret_cast<FrameNode*>(node), std::move(onTouch));
+}
+
+void SetOnHoverExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, bool isHover))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onHover = [node, eventReceiver](bool isHover, HoverInfo& info) {
+        eventReceiver(node, isHover);
+    };
+    ViewAbstract::SetOnHover(reinterpret_cast<FrameNode*>(node), std::move(onHover));
+}
+
+void SetOnHoverMoveExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onHoverMove = [node, eventReceiver](HoverInfo& info) {
+        eventReceiver(node);
+    };
+    ViewAbstract::SetOnHoverMove(reinterpret_cast<FrameNode*>(node), std::move(onHoverMove));
+}
+
+void SetOnChangeExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, bool isOn))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onChange = [node, eventReceiver](const bool isOn) {
+        eventReceiver(node, isOn);
+    };
+    if (uiNode->GetTag() == V2::SWITCH_ETS_TAG) {
+        ToggleModelNG::OnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
+    } else if (uiNode->GetTag() == V2::CHECK_BOX_ETS_TAG) {
+        CheckBoxModelNG::SetOnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
+    } else {
+        RadioModelNG::SetOnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
+    }
+}
+
+void SetOnClickExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, ArkUINodeEvent event))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onClick = [node, eventReceiver](GestureEvent& info) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.componentAsyncEvent.subKind = ON_CLICK;
+        auto target = info.GetTarget();
+        event.touchEvent.target = { target.id.c_str(), target.type.c_str(),
+            { static_cast<ArkUI_Int32>(target.area.GetOffset().GetX().Value()),
+                static_cast<ArkUI_Int32>(target.area.GetOffset().GetY().Value()),
+                static_cast<ArkUI_Int32>(target.area.GetWidth().Value()),
+                static_cast<ArkUI_Int32>(target.area.GetHeight().Value()) },
+            { static_cast<ArkUI_Int32>(target.origin.GetX().Value()),
+                static_cast<ArkUI_Int32>(target.origin.GetY().Value()) } };
+        Offset globalOffset = info.GetGlobalLocation();
+        Offset localOffset = info.GetLocalLocation();
+        Offset screenOffset = info.GetScreenLocation();
+        // x
+        event.componentAsyncEvent.data[0].f32 = localOffset.GetX();
+        // y
+        event.componentAsyncEvent.data[1].f32 = localOffset.GetY();
+        // timestamp
+        event.componentAsyncEvent.data[2].f32 = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+        // source
+        event.componentAsyncEvent.data[3].i32 = static_cast<int32_t>(info.GetSourceDevice());
+        // windowX
+        event.componentAsyncEvent.data[4].f32 = globalOffset.GetX();
+        // windowY
+        event.componentAsyncEvent.data[5].f32 = globalOffset.GetY();
+        // displayX
+        event.componentAsyncEvent.data[6].f32 = screenOffset.GetX();
+        // displayY
+        event.componentAsyncEvent.data[7].f32 = screenOffset.GetY();
+        eventReceiver(node, event);
+    };
+    if (uiNode->GetTag() == V2::SPAN_ETS_TAG) {
+        SpanModelNG::SetOnClick(uiNode, std::move(onClick));
+    } else if (uiNode->GetTag() == V2::TEXT_ETS_TAG) {
+        TextModelNG::SetOnClick(reinterpret_cast<FrameNode*>(node), std::move(onClick));
+    }  else {
+        ViewAbstract::SetOnClick(reinterpret_cast<FrameNode*>(node), std::move(onClick));
+    }
+}
+
+void SetOnAppearExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onAppear = [node, weak = AceType::WeakClaim(frameNode), eventReceiver]() {
+        eventReceiver(node);
+    };
+    ViewAbstract::SetOnAppear(frameNode, std::move(onAppear));
+}
+
+void SetNodeBackdropBlur(
+    ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
+{
+    ArkUI_Float32 blur = 0.0f;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    blur = value > 0 ? value : blur;
+    BlurOption blurOption;
+    blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
+    CalcDimension dimensionRadius(blur, DimensionUnit::PX);
+    ViewAbstract::SetNodeBackdropBlur(frameNode, dimensionRadius, blurOption);
+}
+
+void SetPrivacySensitve(ArkUINodeHandle node, ArkUI_Int32 sensitive)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetPrivacySensitive(frameNode, static_cast<bool>(sensitive));
+}
+
+void ResetPrivacySensitve(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetPrivacySensitive(frameNode, false);
+}
+
+ArkUIBackdropBlur GetNodeBackdropBlur(ArkUINodeHandle node)
+{
+    ArkUIBackdropBlur backdropBlur;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, backdropBlur);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, backdropBlur);
+    auto blur = renderContext->GetBackBlurRadius();
+    backdropBlur.dimensionRadius = blur.has_value() ? blur.value().Value() : 0.0f;
+    auto propBackdropBlurOption = renderContext->GetBackdropBlurOption();
+    if (propBackdropBlurOption.has_value() && propBackdropBlurOption->grayscale.size() >= NUM_2) {
+        backdropBlur.brighteningBlur = propBackdropBlurOption->grayscale[NUM_0];
+        backdropBlur.darkeningBlur = propBackdropBlurOption->grayscale[NUM_1];
+    }
+    return backdropBlur;
+}
+
+void SetOnVisibleAreaApproximateChange(
+    ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size, ArkUI_Int32 interval)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    std::vector<double> ratioList(values, values + size);
+    auto onEvent = [nodeId, extraParam](bool visible, double ratio) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = static_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_VISIBLE_AREA_APPROXIMATE_CHANGE;
+        event.componentAsyncEvent.data[0].i32 = visible;
+        event.componentAsyncEvent.data[1].f32 = static_cast<ArkUI_Float32>(ratio);
+        SendArkUISyncEvent(&event);
+    };
+    ViewAbstract::SetOnVisibleAreaApproximateChange(frameNode, onEvent, ratioList, interval);
+}
+
+void FreezeUINodeById(ArkUI_CharPtr id, ArkUI_Bool isFreeze)
+{
+    std::string idStr(id);
+    ViewAbstract::FreezeUINodeById(idStr, isFreeze);
+}
+
+void FreezeUINodeByUniqueId(ArkUI_Int32 uniqueId, ArkUI_Bool isFreeze)
+{
+    ViewAbstract::FreezeUINodeByUniqueId(uniqueId, isFreeze);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -6137,146 +7044,829 @@ OHOS::Ace::TouchEventInfo globalEventInfo("global");
 
 const ArkUICommonModifier* GetCommonModifier()
 {
-    static const ArkUICommonModifier modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
-        SetHeight, ResetHeight, SetBorderRadius, ResetBorderRadius, SetBorderWidth, ResetBorderWidth, SetTransform,
-        ResetTransform, SetBorderColor, ResetBorderColor, SetPosition, ResetPosition, SetPositionEdges,
-        ResetPositionEdges, SetBorderStyle, ResetBorderStyle, SetBackShadow, ResetBackShadow, SetHitTestBehavior,
-        ResetHitTestBehavior, SetZIndex, ResetZIndex, SetOpacity, ResetOpacity, SetAlign, ResetAlign, SetBackdropBlur,
-        ResetBackdropBlur, SetHueRotate, ResetHueRotate, SetInvert, ResetInvert, SetSepia, ResetSepia, SetSaturate,
-        ResetSaturate, SetColorBlend, ResetColorBlend, SetGrayscale, ResetGrayscale, SetContrast, ResetContrast,
-        SetBrightness, ResetBrightness, SetBlur, ResetBlur, SetLinearGradient, ResetLinearGradient, SetSweepGradient,
-        ResetSweepGradient, SetRadialGradient, ResetRadialGradient, SetOverlay, ResetOverlay, SetBorderImage,
-        ResetBorderImage, SetBorderImageGradient, SetForegroundBlurStyle, ResetForegroundBlurStyle,
-        SetLinearGradientBlur, ResetLinearGradientBlur, SetBackgroundBlurStyle, ResetBackgroundBlurStyle, SetBorder,
-        ResetBorder, SetBackgroundImagePosition, ResetBackgroundImagePosition, SetBackgroundImageSize,
-        ResetBackgroundImageSize, SetBackgroundImage, ResetBackgroundImage, SetTranslate, ResetTranslate, SetScale,
-        SetScaleWithoutTransformCenter, ResetScale, SetRotate, SetRotateWithoutTransformCenter, ResetRotate,
-        SetGeometryTransition, ResetGeometryTransition, SetPixelStretchEffect, ResetPixelStretchEffect,
-        SetLightUpEffect, ResetLightUpEffect, SetSphericalEffect, ResetSphericalEffect, SetRenderGroup,
-        ResetRenderGroup, SetRenderFit, ResetRenderFit, SetUseEffect, ResetUseEffect, SetForegroundColor,
-        ResetForegroundColor, SetMotionPath, ResetMotionPath, SetMotionBlur, ResetMotionBlur, SetGroupDefaultFocus,
-        ResetGroupDefaultFocus, SetFocusOnTouch, ResetFocusOnTouch, SetFocusable, ResetFocusable, SetTouchable,
-        ResetTouchable, SetDefaultFocus, ResetDefaultFocus, SetDisplayPriority, ResetDisplayPriority, SetOffset,
-        SetOffsetEdges, ResetOffset, SetPadding, ResetPadding, SetMargin, ResetMargin, SetMarkAnchor, ResetMarkAnchor,
-        SetVisibility, ResetVisibility, SetAccessibilityText, ResetAccessibilityText, SetAllowDrop, ResetAllowDrop,
-        SetAccessibilityLevel, ResetAccessibilityLevel, SetDirection, ResetDirection, SetLayoutWeight,
-        ResetLayoutWeight, SetMinWidth, ResetMinWidth, SetMaxWidth, ResetMaxWidth, SetMinHeight, ResetMinHeight,
-        SetMaxHeight, ResetMaxHeight, SetSize, ResetSize, ClearWidthOrHeight, SetAlignSelf, ResetAlignSelf,
-        SetAspectRatio, ResetAspectRatio, SetFlexGrow, ResetFlexGrow, SetFlexShrink, ResetFlexShrink, SetGridOffset,
-        ResetGridOffset, SetGridSpan, ResetGridSpan, SetExpandSafeArea, ResetExpandSafeArea, SetFlexBasis,
-        ResetFlexBasis, SetAlignRules, ResetAlignRules, SetAccessibilityDescription, ResetAccessibilityDescription,
-        SetId, ResetId, SetKey, ResetKey, SetRestoreId, ResetRestoreId, SetTabIndex, ResetTabIndex, SetObscured,
-        ResetObscured, SetResponseRegion, ResetResponseRegion, SetForegroundEffect, ResetForegroundEffect,
-        SetBackgroundEffect, ResetBackgroundEffect, SetBackgroundBrightness, ResetBackgroundBrightness,
-        SetBackgroundBrightnessInternal, ResetBackgroundBrightnessInternal, SetForegroundBrightness,
-        ResetForegroundBrightness, SetDragPreviewOptions, ResetDragPreviewOptions, SetMouseResponseRegion,
-        ResetMouseResponseRegion, SetEnabled, ResetEnabled, SetUseShadowBatching, ResetUseShadowBatching, SetDraggable,
-        ResetDraggable, SetAccessibilityGroup, ResetAccessibilityGroup, SetHoverEffect, ResetHoverEffect,
-        SetClickEffect, ResetClickEffect, SetKeyBoardShortCut, ResetKeyBoardShortCut, SetPointLightPosition,
-        ResetPointLightPosition, SetPointLightIntensity, ResetPointLightIntensity, SetPointLightColor,
-        ResetPointLightColor, SetPointLightIlluminated, ResetPointLightIlluminated, SetPointLightBloom,
-        ResetPointLightBloom, SetClip, SetClipShape, SetClipPath, ResetClip, SetTransitionCenter, SetOpacityTransition,
-        SetRotateTransition, SetScaleTransition, SetTranslateTransition, SetMaskShape, SetMaskPath, SetProgressMask,
-        SetBlendMode, ResetBlendMode, SetMonopolizeEvents, ResetMonopolizeEvents, SetConstraintSize,
-        ResetConstraintSize, SetOutlineColor, ResetOutlineColor, SetOutlineRadius, ResetOutlineRadius, SetOutlineWidth,
-        ResetOutlineWidth, SetOutlineStyle, ResetOutlineStyle, SetOutline, ResetOutline, SetBindPopup, ResetBindPopup,
-        GetFocusable, GetDefaultFocus, GetResponseRegion, GetOverlay, GetAccessibilityGroup, GetAccessibilityText,
-        GetAccessibilityDescription, GetAccessibilityLevel, SetNeedFocus, GetNeedFocus, GetOpacity, GetBorderWidth,
-        GetBorderWidthDimension, GetBorderRadius, GetBorderColor, GetBorderStyle, GetZIndex, GetVisibility, GetClip,
-        GetClipShape, GetTransform, GetHitTestBehavior, GetPosition, GetShadow, GetCustomShadow, GetSweepGradient,
-        GetRadialGradient, GetMask, GetBlendMode, GetDirection, GetAlignSelf, GetTransformCenter, GetOpacityTransition,
-        GetRotateTransition, GetScaleTransition, GetTranslateTransition, GetOffset, GetMarkAnchor, GetAlignRules,
-        GetBackgroundBlurStyle, GetBackgroundImageSize, GetBackgroundImageSizeWidthStyle, SetOutlineWidthFloat,
-        GetOutlineWidthFloat, GetDisplayPriority, SetAlignRulesWidthType, GetLayoutWeight, GetScale, GetRotate,
-        GetBrightness, GetSaturate, GetBackgroundImagePosition, GetFlexGrow, GetFlexShrink, GetFlexBasis,
-        GetConstraintSize, GetGrayScale, GetInvert, GetSepia, GetContrast, GetForegroundColor, GetBlur,
-        GetLinearGradient, GetAlign, GetWidth, GetHeight, GetBackgroundColor, GetBackgroundImage, GetPadding,
-        GetPaddingDimension, GetConfigSize, GetKey, GetEnabled, GetMargin, GetMarginDimension, GetTranslate,
-        SetMoveTransition, GetMoveTransition, ResetMask, GetAspectRatio, SetBackgroundImageResizable,
-        ResetBackgroundImageResizable, SetBackgroundImageSizeWithUnit, GetRenderFit, GetOutlineColor, GetSize,
-        GetRenderGroup, SetOnVisibleAreaChange, GetGeometryTransition, SetChainStyle, GetChainStyle, ResetChainStyle,
-        SetBias, GetBias, ResetBias, GetColorBlend, GetForegroundBlurStyle,
-        SetBackgroundImagePixelMap, SetBackgroundImagePixelMapByPixelMapPtr,
-        SetLayoutRect, GetLayoutRect, ResetLayoutRect, GetFocusOnTouch, SetSystemBarEffect,
-        GetAccessibilityID, SetAccessibilityState, GetAccessibilityState, ResetAccessibilityState,
-        SetAccessibilityValue, GetAccessibilityValue, ResetAccessibilityValue, SetAccessibilityActions,
-        ResetAccessibilityActions, GetAccessibilityActions, SetAccessibilityRole, ResetAccessibilityRole,
-        GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
-        SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition, SetDragPreview,
-        ResetDragPreview, GetNodeUniqueId, SetFocusBoxStyle, ResetFocusBoxStyle, SetDisAllowDrop };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUICommonModifier modifier = {
+        .setBackgroundColor = SetBackgroundColor,
+        .resetBackgroundColor = ResetBackgroundColor,
+        .setWidth = SetWidth,
+        .resetWidth = ResetWidth,
+        .setHeight = SetHeight,
+        .resetHeight = ResetHeight,
+        .setBorderRadius = SetBorderRadius,
+        .resetBorderRadius = ResetBorderRadius,
+        .setBorderWidth = SetBorderWidth,
+        .resetBorderWidth = ResetBorderWidth,
+        .setTransform = SetTransform,
+        .resetTransform = ResetTransform,
+        .setBorderColor = SetBorderColor,
+        .resetBorderColor = ResetBorderColor,
+        .setPosition = SetPosition,
+        .resetPosition = ResetPosition,
+        .setPositionEdges = SetPositionEdges,
+        .resetPositionEdges = ResetPositionEdges,
+        .setBorderStyle = SetBorderStyle,
+        .resetBorderStyle = ResetBorderStyle,
+        .setBackShadow = SetBackShadow,
+        .resetBackShadow = ResetBackShadow,
+        .setHitTestBehavior = SetHitTestBehavior,
+        .resetHitTestBehavior = ResetHitTestBehavior,
+        .setZIndex = SetZIndex,
+        .resetZIndex = ResetZIndex,
+        .setOpacity = SetOpacity,
+        .resetOpacity = ResetOpacity,
+        .setAlign = SetAlign,
+        .resetAlign = ResetAlign,
+        .setBackdropBlur = SetBackdropBlur,
+        .resetBackdropBlur = ResetBackdropBlur,
+        .setHueRotate = SetHueRotate,
+        .resetHueRotate = ResetHueRotate,
+        .setInvert = SetInvert,
+        .resetInvert = ResetInvert,
+        .setSepia = SetSepia,
+        .resetSepia = ResetSepia,
+        .setSaturate = SetSaturate,
+        .resetSaturate = ResetSaturate,
+        .setColorBlend = SetColorBlend,
+        .resetColorBlend = ResetColorBlend,
+        .setGrayscale = SetGrayscale,
+        .resetGrayscale = ResetGrayscale,
+        .setContrast = SetContrast,
+        .resetContrast = ResetContrast,
+        .setBrightness = SetBrightness,
+        .resetBrightness = ResetBrightness,
+        .setBlur = SetBlur,
+        .resetBlur = ResetBlur,
+        .setLinearGradient = SetLinearGradient,
+        .resetLinearGradient = ResetLinearGradient,
+        .setSweepGradient = SetSweepGradient,
+        .resetSweepGradient = ResetSweepGradient,
+        .setRadialGradient = SetRadialGradient,
+        .resetRadialGradient = ResetRadialGradient,
+        .setOverlay = SetOverlay,
+        .resetOverlay = ResetOverlay,
+        .setBorderImage = SetBorderImage,
+        .resetBorderImage = ResetBorderImage,
+        .setBorderImageGradient = SetBorderImageGradient,
+        .setForegroundBlurStyle = SetForegroundBlurStyle,
+        .resetForegroundBlurStyle = ResetForegroundBlurStyle,
+        .setLinearGradientBlur = SetLinearGradientBlur,
+        .resetLinearGradientBlur = ResetLinearGradientBlur,
+        .setBackgroundBlurStyle = SetBackgroundBlurStyle,
+        .resetBackgroundBlurStyle = ResetBackgroundBlurStyle,
+        .setBorder = SetBorder,
+        .resetBorder = ResetBorder,
+        .setBackgroundImagePosition = SetBackgroundImagePosition,
+        .resetBackgroundImagePosition = ResetBackgroundImagePosition,
+        .setBackgroundImageSize = SetBackgroundImageSize,
+        .resetBackgroundImageSize = ResetBackgroundImageSize,
+        .setBackgroundImage = SetBackgroundImage,
+        .resetBackgroundImage = ResetBackgroundImage,
+        .setBackgroundImageSyncMode = SetBackgroundImageSyncMode,
+        .resetBackgroundImageSyncMode = ResetBackgroundImageSyncMode,
+        .setTranslate = SetTranslate,
+        .resetTranslate = ResetTranslate,
+        .setScale = SetScale,
+        .setScaleWithoutTransformCenter = SetScaleWithoutTransformCenter,
+        .resetScale = ResetScale,
+        .setRotate = SetRotate,
+        .setRotateWithoutTransformCenter = SetRotateWithoutTransformCenter,
+        .resetRotate = ResetRotate,
+        .setGeometryTransition = SetGeometryTransition,
+        .resetGeometryTransition = ResetGeometryTransition,
+        .setBindTips = SetBindTips,
+        .resetBindTips = ResetBindTips,
+        .setPixelStretchEffect = SetPixelStretchEffect,
+        .resetPixelStretchEffect = ResetPixelStretchEffect,
+        .setLightUpEffect = SetLightUpEffect,
+        .resetLightUpEffect = ResetLightUpEffect,
+        .setSphericalEffect = SetSphericalEffect,
+        .resetSphericalEffect = ResetSphericalEffect,
+        .setRenderGroup = SetRenderGroup,
+        .resetRenderGroup = ResetRenderGroup,
+        .setRenderFit = SetRenderFit,
+        .resetRenderFit = ResetRenderFit,
+        .setUseEffect = SetUseEffect,
+        .resetUseEffect = ResetUseEffect,
+        .setForegroundColor = SetForegroundColor,
+        .resetForegroundColor = ResetForegroundColor,
+        .setMotionPath = SetMotionPath,
+        .resetMotionPath = ResetMotionPath,
+        .setMotionBlur = SetMotionBlur,
+        .resetMotionBlur = ResetMotionBlur,
+        .setGroupDefaultFocus = SetGroupDefaultFocus,
+        .resetGroupDefaultFocus = ResetGroupDefaultFocus,
+        .setFocusOnTouch = SetFocusOnTouch,
+        .resetFocusOnTouch = ResetFocusOnTouch,
+        .setFocusable = SetFocusable,
+        .resetFocusable = ResetFocusable,
+        .setTouchable = SetTouchable,
+        .resetTouchable = ResetTouchable,
+        .setDefaultFocus = SetDefaultFocus,
+        .resetDefaultFocus = ResetDefaultFocus,
+        .setDisplayPriority = SetDisplayPriority,
+        .resetDisplayPriority = ResetDisplayPriority,
+        .setOffset = SetOffset,
+        .setOffsetEdges = SetOffsetEdges,
+        .resetOffset = ResetOffset,
+        .setPadding = SetPadding,
+        .resetPadding = ResetPadding,
+        .setMargin = SetMargin,
+        .resetMargin = ResetMargin,
+        .setSafeAreaPadding = SetSafeAreaPadding,
+        .resetSafeAreaPadding = ResetSafeAreaPadding,
+        .setMarkAnchor = SetMarkAnchor,
+        .resetMarkAnchor = ResetMarkAnchor,
+        .setVisibility = SetVisibility,
+        .resetVisibility = ResetVisibility,
+        .setAccessibilityText = SetAccessibilityText,
+        .resetAccessibilityText = ResetAccessibilityText,
+        .setAllowDrop = SetAllowDrop,
+        .resetAllowDrop = ResetAllowDrop,
+        .setAccessibilityLevel = SetAccessibilityLevel,
+        .resetAccessibilityLevel = ResetAccessibilityLevel,
+        .setAccessibilityCustomRole = SetAccessibilityCustomRole,
+        .resetAccessibilityCustomRole = ResetAccessibilityCustomRole,
+        .setDirection = SetDirection,
+        .resetDirection = ResetDirection,
+        .setLayoutWeight = SetLayoutWeight,
+        .resetLayoutWeight = ResetLayoutWeight,
+        .setMinWidth = SetMinWidth,
+        .resetMinWidth = ResetMinWidth,
+        .setMaxWidth = SetMaxWidth,
+        .resetMaxWidth = ResetMaxWidth,
+        .setMinHeight = SetMinHeight,
+        .resetMinHeight = ResetMinHeight,
+        .setMaxHeight = SetMaxHeight,
+        .resetMaxHeight = ResetMaxHeight,
+        .setSize = SetSize,
+        .resetSize = ResetSize,
+        .clearWidthOrHeight = ClearWidthOrHeight,
+        .setAlignSelf = SetAlignSelf,
+        .resetAlignSelf = ResetAlignSelf,
+        .setAspectRatio = SetAspectRatio,
+        .resetAspectRatio = ResetAspectRatio,
+        .setFlexGrow = SetFlexGrow,
+        .resetFlexGrow = ResetFlexGrow,
+        .setFlexShrink = SetFlexShrink,
+        .resetFlexShrink = ResetFlexShrink,
+        .setGridOffset = SetGridOffset,
+        .resetGridOffset = ResetGridOffset,
+        .setGridSpan = SetGridSpan,
+        .resetGridSpan = ResetGridSpan,
+        .setExpandSafeArea = SetExpandSafeArea,
+        .resetExpandSafeArea = ResetExpandSafeArea,
+        .setFlexBasis = SetFlexBasis,
+        .resetFlexBasis = ResetFlexBasis,
+        .setAlignRules = SetAlignRules,
+        .resetAlignRules = ResetAlignRules,
+        .setAccessibilityDescription = SetAccessibilityDescription,
+        .resetAccessibilityDescription = ResetAccessibilityDescription,
+        .setId = SetId,
+        .resetId = ResetId,
+        .setKey = SetKey,
+        .resetKey = ResetKey,
+        .setRestoreId = SetRestoreId,
+        .resetRestoreId = ResetRestoreId,
+        .setTabIndex = SetTabIndex,
+        .resetTabIndex = ResetTabIndex,
+        .setObscured = SetObscured,
+        .resetObscured = ResetObscured,
+        .setResponseRegion = SetResponseRegion,
+        .resetResponseRegion = ResetResponseRegion,
+        .setForegroundEffect = SetForegroundEffect,
+        .resetForegroundEffect = ResetForegroundEffect,
+        .setBackgroundEffect = SetBackgroundEffect,
+        .resetBackgroundEffect = ResetBackgroundEffect,
+        .setBackgroundBrightness = SetBackgroundBrightness,
+        .resetBackgroundBrightness = ResetBackgroundBrightness,
+        .setBackgroundBrightnessInternal = SetBackgroundBrightnessInternal,
+        .resetBackgroundBrightnessInternal = ResetBackgroundBrightnessInternal,
+        .setForegroundBrightness = SetForegroundBrightness,
+        .resetForegroundBrightness = ResetForegroundBrightness,
+        .setDragPreviewOptions = SetDragPreviewOptions,
+        .resetDragPreviewOptions = ResetDragPreviewOptions,
+        .setMouseResponseRegion = SetMouseResponseRegion,
+        .resetMouseResponseRegion = ResetMouseResponseRegion,
+        .setEnabled = SetEnabled,
+        .resetEnabled = ResetEnabled,
+        .setUseShadowBatching = SetUseShadowBatching,
+        .resetUseShadowBatching = ResetUseShadowBatching,
+        .setDraggable = SetDraggable,
+        .resetDraggable = ResetDraggable,
+        .setAccessibilityGroup = SetAccessibilityGroup,
+        .resetAccessibilityGroup = ResetAccessibilityGroup,
+        .setAccessibilityNextFocusId = SetAccessibilityNextFocusId,
+        .resetAccessibilityNextFocusId = ResetAccessibilityNextFocusId,
+        .setAccessibilityDefaultFocus = SetAccessibilityDefaultFocus,
+        .resetAccessibilityDefaultFocus = ResetAccessibilityDefaultFocus,
+        .setAccessibilityUseSamePage = SetAccessibilityUseSamePage,
+        .resetAccessibilityUseSamePage = ResetAccessibilityUseSamePage,
+        .setAccessibilityScrollTriggerable = SetAccessibilityScrollTriggerable,
+        .resetAccessibilityScrollTriggerable = ResetAccessibilityScrollTriggerable,
+        .setAccessibilityFocusDrawLevel = SetAccessibilityFocusDrawLevel,
+        .resetAccessibilityFocusDrawLevel = ResetAccessibilityFocusDrawLevel,
+        .setHoverEffect = SetHoverEffect,
+        .resetHoverEffect = ResetHoverEffect,
+        .setClickEffect = SetClickEffect,
+        .resetClickEffect = ResetClickEffect,
+        .setKeyBoardShortCut = SetKeyBoardShortCut,
+        .resetKeyBoardShortCut = ResetKeyBoardShortCut,
+        .setPointLightPosition = SetPointLightPosition,
+        .resetPointLightPosition = ResetPointLightPosition,
+        .setPointLightIntensity = SetPointLightIntensity,
+        .resetPointLightIntensity = ResetPointLightIntensity,
+        .setPointLightColor = SetPointLightColor,
+        .resetPointLightColor = ResetPointLightColor,
+        .setPointLightIlluminated = SetPointLightIlluminated,
+        .resetPointLightIlluminated = ResetPointLightIlluminated,
+        .setPointLightBloom = SetPointLightBloom,
+        .resetPointLightBloom = ResetPointLightBloom,
+        .setClip = SetClip,
+        .setClipShape = SetClipShape,
+        .setClipPath = SetClipPath,
+        .resetClip = ResetClip,
+        .setTransitionCenter = SetTransitionCenter,
+        .setOpacityTransition = SetOpacityTransition,
+        .setRotateTransition = SetRotateTransition,
+        .setScaleTransition = SetScaleTransition,
+        .setTranslateTransition = SetTranslateTransition,
+        .setMaskShape = SetMaskShape,
+        .setMaskPath = SetMaskPath,
+        .setProgressMask = SetProgressMask,
+        .setBlendMode = SetBlendMode,
+        .resetBlendMode = ResetBlendMode,
+        .setMonopolizeEvents = SetMonopolizeEvents,
+        .resetMonopolizeEvents = ResetMonopolizeEvents,
+        .setConstraintSize = SetConstraintSize,
+        .resetConstraintSize = ResetConstraintSize,
+        .setOutlineColor = SetOutlineColor,
+        .resetOutlineColor = ResetOutlineColor,
+        .setOutlineRadius = SetOutlineRadius,
+        .resetOutlineRadius = ResetOutlineRadius,
+        .setOutlineWidth = SetOutlineWidth,
+        .resetOutlineWidth = ResetOutlineWidth,
+        .setOutlineStyle = SetOutlineStyle,
+        .resetOutlineStyle = ResetOutlineStyle,
+        .setOutline = SetOutline,
+        .resetOutline = ResetOutline,
+        .setBindPopup = SetBindPopup,
+        .resetBindPopup = ResetBindPopup,
+        .getFocusable = GetFocusable,
+        .getDefaultFocus = GetDefaultFocus,
+        .getResponseRegion = GetResponseRegion,
+        .getOverlay = GetOverlay,
+        .getAccessibilityGroup = GetAccessibilityGroup,
+        .getAccessibilityText = GetAccessibilityText,
+        .getAccessibilityDescription = GetAccessibilityDescription,
+        .getAccessibilityLevel = GetAccessibilityLevel,
+        .setNeedFocus = SetNeedFocus,
+        .getNeedFocus = GetNeedFocus,
+        .getOpacity = GetOpacity,
+        .getBorderWidth = GetBorderWidth,
+        .getBorderWidthDimension = GetBorderWidthDimension,
+        .getBorderRadius = GetBorderRadius,
+        .getBorderColor = GetBorderColor,
+        .getBorderStyle = GetBorderStyle,
+        .getZIndex = GetZIndex,
+        .getVisibility = GetVisibility,
+        .getClip = GetClip,
+        .getClipShape = GetClipShape,
+        .getTransform = GetTransform,
+        .getHitTestBehavior = GetHitTestBehavior,
+        .getPosition = GetPosition,
+        .getShadow = GetShadow,
+        .getCustomShadow = GetCustomShadow,
+        .getSweepGradient = GetSweepGradient,
+        .getRadialGradient = GetRadialGradient,
+        .getMask = GetMask,
+        .getBlendMode = GetBlendMode,
+        .getDirection = GetDirection,
+        .getAlignSelf = GetAlignSelf,
+        .getTransformCenter = GetTransformCenter,
+        .getOpacityTransition = GetOpacityTransition,
+        .getRotateTransition = GetRotateTransition,
+        .getScaleTransition = GetScaleTransition,
+        .getTranslateTransition = GetTranslateTransition,
+        .getOffset = GetOffset,
+        .getMarkAnchor = GetMarkAnchor,
+        .getAlignRules = GetAlignRules,
+        .getBackgroundBlurStyle = GetBackgroundBlurStyle,
+        .getBackgroundImageSize = GetBackgroundImageSize,
+        .getBackgroundImageSizeWithStyle = GetBackgroundImageSizeWidthStyle,
+        .setOutlineWidthFloat = SetOutlineWidthFloat,
+        .getOutlineWidthFloat = GetOutlineWidthFloat,
+        .getDisplayPriority = GetDisplayPriority,
+        .setAlignRulesWidthType = SetAlignRulesWidthType,
+        .getLayoutWeight = GetLayoutWeight,
+        .getScale = GetScale,
+        .getRotate = GetRotate,
+        .getBrightness = GetBrightness,
+        .getSaturate = GetSaturate,
+        .getBackgroundImagePosition = GetBackgroundImagePosition,
+        .getFlexGrow = GetFlexGrow,
+        .getFlexShrink = GetFlexShrink,
+        .getFlexBasis = GetFlexBasis,
+        .getConstraintSize = GetConstraintSize,
+        .getGrayScale = GetGrayScale,
+        .getInvert = GetInvert,
+        .getSepia = GetSepia,
+        .getContrast = GetContrast,
+        .getForegroundColor = GetForegroundColor,
+        .getBlur = GetBlur,
+        .getLinearGradient = GetLinearGradient,
+        .getAlign = GetAlign,
+        .getWidth = GetWidth,
+        .getHeight = GetHeight,
+        .getBackgroundColor = GetBackgroundColor,
+        .getBackgroundImage = GetBackgroundImage,
+        .getPadding = GetPadding,
+        .getPaddingDimension = GetPaddingDimension,
+        .getConfigSize = GetConfigSize,
+        .getKey = GetKey,
+        .getEnabled = GetEnabled,
+        .getMargin = GetMargin,
+        .getMarginDimension = GetMarginDimension,
+        .getTranslate = GetTranslate,
+        .getTranslateWithPercentage = GetTranslateWithPercentage,
+        .setMoveTransition = SetMoveTransition,
+        .getMoveTransition = GetMoveTransition,
+        .resetMask = ResetMask,
+        .getAspectRatio = GetAspectRatio,
+        .setBackgroundImageResizable = SetBackgroundImageResizable,
+        .getBackgroundImageResizable = GetBackgroundImageResizable,
+        .resetBackgroundImageResizable = ResetBackgroundImageResizable,
+        .setBackgroundImageSizeWithUnit = SetBackgroundImageSizeWithUnit,
+        .getRenderFit = GetRenderFit,
+        .getOutlineColor = GetOutlineColor,
+        .getSize = GetSize,
+        .getRenderGroup = GetRenderGroup,
+        .setOnVisibleAreaChange = SetOnVisibleAreaChange,
+        .getGeometryTransition = GetGeometryTransition,
+        .setChainStyle = SetChainStyle,
+        .getChainStyle = GetChainStyle,
+        .resetChainStyle = ResetChainStyle,
+        .setBias = SetBias,
+        .getBias = GetBias,
+        .resetBias = ResetBias,
+        .getColorBlend = GetColorBlend,
+        .getForegroundBlurStyle = GetForegroundBlurStyle,
+        .setBackgroundImagePixelMap = SetBackgroundImagePixelMap,
+        .setBackgroundImagePixelMapByPixelMapPtr = SetBackgroundImagePixelMapByPixelMapPtr,
+        .setLayoutRect = SetLayoutRect,
+        .getLayoutRect = GetLayoutRect,
+        .resetLayoutRect = ResetLayoutRect,
+        .getFocusOnTouch = GetFocusOnTouch,
+        .setSystemBarEffect = SetSystemBarEffect,
+        .getAccessibilityID = GetAccessibilityID,
+        .setAccessibilityState = SetAccessibilityState,
+        .getAccessibilityState = GetAccessibilityState,
+        .resetAccessibilityState = ResetAccessibilityState,
+        .setAccessibilityValue = SetAccessibilityValue,
+        .getAccessibilityValue = GetAccessibilityValue,
+        .resetAccessibilityValue = ResetAccessibilityValue,
+        .setAccessibilityActions = SetAccessibilityActions,
+        .resetAccessibilityActions = ResetAccessibilityActions,
+        .getAccessibilityActions = GetAccessibilityActions,
+        .setAccessibilityRole = SetAccessibilityRole,
+        .resetAccessibilityRole = ResetAccessibilityRole,
+        .getAccessibilityRole = GetAccessibilityRole,
+        .setFocusScopeId = SetFocusScopeId,
+        .resetFocusScopeId = ResetFocusScopeId,
+        .setFocusScopePriority = SetFocusScopePriority,
+        .resetFocusScopePriority = ResetFocusScopePriority,
+        .setPixelRound = SetPixelRound,
+        .resetPixelRound = ResetPixelRound,
+        .setBorderDashParams = SetBorderDashParams,
+        .getExpandSafeArea = GetExpandSafeArea,
+        .setTransition = SetTransition,
+        .setDragPreview = SetDragPreview,
+        .resetDragPreview = ResetDragPreview,
+        .getNodeUniqueId = GetNodeUniqueId,
+        .setNextFocus = SetNextFocus,
+        .setNextFocusOneByOne = SetNextFocusOneByOne,
+        .resetNextFocus = ResetNextFocus,
+        .setFocusBoxStyle = SetFocusBoxStyle,
+        .resetFocusBoxStyle = ResetFocusBoxStyle,
+        .setClickDistance = SetClickDistance,
+        .resetClickDistance = ResetClickDistance,
+        .setDisAllowDrop = SetDisAllowDrop,
+        .setBlendModeByBlender = SetBlendModeByBlender,
+        .setTabStop = SetTabStop,
+        .resetTabStop = ResetTabStop,
+        .getTabStop = GetTabStop,
+        .setOnFocus = SetOnFocusExt,
+        .setOnBlur = SetOnBlurExt,
+        .setOnTouch = SetOnTouchExt,
+        .setOnHover = SetOnHoverExt,
+        .setOnHoverMove = SetOnHoverMoveExt,
+        .setOnChange = SetOnChangeExt,
+        .setOnClick = SetOnClickExt,
+        .setOnAppear = SetOnAppearExt,
+        .dispatchKeyEvent = DispatchKeyEvent,
+        .postTouchEvent = PostTouchEvent,
+        .createClonedTouchEvent = CreateClonedTouchEvent,
+        .resetEnableAnalyzer = nullptr,
+        .setEnableAnalyzer = nullptr,
+        .setNodeBackdropBlur = SetNodeBackdropBlur,
+        .getNodeBackdropBlur = GetNodeBackdropBlur,
+        .setDisableDataPrefetch = SetDisableDataPrefetch,
+        .setOnVisibleAreaApproximateChange = SetOnVisibleAreaApproximateChange,
+        .setPrivacySensitive = SetPrivacySensitve,
+        .resetPrivacySensitive = ResetPrivacySensitve,
+        .freezeUINodeById = FreezeUINodeById,
+        .freezeUINodeByUniqueId = FreezeUINodeByUniqueId,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUICommonModifier* GetCJUICommonModifier()
 {
-    static const CJUICommonModifier modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
-        SetHeight, ResetHeight, SetBorderRadius, ResetBorderRadius, SetBorderWidth, ResetBorderWidth, SetTransform,
-        ResetTransform, SetBorderColor, ResetBorderColor, SetPosition, ResetPosition, SetPositionEdges,
-        ResetPositionEdges, SetBorderStyle, ResetBorderStyle, SetBackShadow, ResetBackShadow, SetHitTestBehavior,
-        ResetHitTestBehavior, SetZIndex, ResetZIndex, SetOpacity, ResetOpacity, SetAlign, ResetAlign, SetBackdropBlur,
-        ResetBackdropBlur, SetHueRotate, ResetHueRotate, SetInvert, ResetInvert, SetSepia, ResetSepia, SetSaturate,
-        ResetSaturate, SetColorBlend, ResetColorBlend, SetGrayscale, ResetGrayscale, SetContrast, ResetContrast,
-        SetBrightness, ResetBrightness, SetBlur, ResetBlur, SetLinearGradient, ResetLinearGradient, SetSweepGradient,
-        ResetSweepGradient, SetRadialGradient, ResetRadialGradient, SetOverlay, ResetOverlay, SetBorderImage,
-        ResetBorderImage, SetBorderImageGradient, SetForegroundBlurStyle, ResetForegroundBlurStyle,
-        SetLinearGradientBlur, ResetLinearGradientBlur, SetBackgroundBlurStyle, ResetBackgroundBlurStyle, SetBorder,
-        ResetBorder, SetBackgroundImagePosition, ResetBackgroundImagePosition, SetBackgroundImageSize,
-        ResetBackgroundImageSize, SetBackgroundImage, ResetBackgroundImage, SetTranslate, ResetTranslate, SetScale,
-        SetScaleWithoutTransformCenter, ResetScale, SetRotate, SetRotateWithoutTransformCenter, ResetRotate,
-        SetGeometryTransition, ResetGeometryTransition, SetPixelStretchEffect, ResetPixelStretchEffect,
-        SetLightUpEffect, ResetLightUpEffect, SetSphericalEffect, ResetSphericalEffect, SetRenderGroup,
-        ResetRenderGroup, SetRenderFit, ResetRenderFit, SetUseEffect, ResetUseEffect, SetForegroundColor,
-        ResetForegroundColor, SetMotionPath, ResetMotionPath, SetMotionBlur, ResetMotionBlur, SetGroupDefaultFocus,
-        ResetGroupDefaultFocus, SetFocusOnTouch, ResetFocusOnTouch, SetFocusable, ResetFocusable, SetTouchable,
-        ResetTouchable, SetDefaultFocus, ResetDefaultFocus, SetDisplayPriority, ResetDisplayPriority, SetOffset,
-        SetOffsetEdges, ResetOffset, SetPadding, ResetPadding, SetMargin, ResetMargin, SetMarkAnchor, ResetMarkAnchor,
-        SetVisibility, ResetVisibility, SetAccessibilityText, ResetAccessibilityText, SetAllowDrop, ResetAllowDrop,
-        SetAccessibilityLevel, ResetAccessibilityLevel, SetDirection, ResetDirection, SetLayoutWeight,
-        ResetLayoutWeight, SetMinWidth, ResetMinWidth, SetMaxWidth, ResetMaxWidth, SetMinHeight, ResetMinHeight,
-        SetMaxHeight, ResetMaxHeight, SetSize, ResetSize, ClearWidthOrHeight, SetAlignSelf, ResetAlignSelf,
-        SetAspectRatio, ResetAspectRatio, SetFlexGrow, ResetFlexGrow, SetFlexShrink, ResetFlexShrink, SetGridOffset,
-        ResetGridOffset, SetGridSpan, ResetGridSpan, SetExpandSafeArea, ResetExpandSafeArea, SetFlexBasis,
-        ResetFlexBasis, SetAlignRules, ResetAlignRules, SetAccessibilityDescription, ResetAccessibilityDescription,
-        SetId, ResetId, SetKey, ResetKey, SetRestoreId, ResetRestoreId, SetTabIndex, ResetTabIndex, SetObscured,
-        ResetObscured, SetResponseRegion, ResetResponseRegion, SetForegroundEffect, ResetForegroundEffect,
-        SetBackgroundEffect, ResetBackgroundEffect, SetBackgroundBrightness, ResetBackgroundBrightness,
-        SetBackgroundBrightnessInternal, ResetBackgroundBrightnessInternal, SetForegroundBrightness,
-        ResetForegroundBrightness, SetDragPreviewOptions, ResetDragPreviewOptions, SetMouseResponseRegion,
-        ResetMouseResponseRegion, SetEnabled, ResetEnabled, SetUseShadowBatching, ResetUseShadowBatching, SetDraggable,
-        ResetDraggable, SetAccessibilityGroup, ResetAccessibilityGroup, SetHoverEffect, ResetHoverEffect,
-        SetClickEffect, ResetClickEffect, SetKeyBoardShortCut, ResetKeyBoardShortCut, SetPointLightPosition,
-        ResetPointLightPosition, SetPointLightIntensity, ResetPointLightIntensity, SetPointLightColor,
-        ResetPointLightColor, SetPointLightIlluminated, ResetPointLightIlluminated, SetPointLightBloom,
-        ResetPointLightBloom, SetClip, SetClipShape, SetClipPath, ResetClip, SetTransitionCenter, SetOpacityTransition,
-        SetRotateTransition, SetScaleTransition, SetTranslateTransition, SetMaskShape, SetMaskPath, SetProgressMask,
-        SetBlendMode, ResetBlendMode, SetMonopolizeEvents, ResetMonopolizeEvents, SetConstraintSize,
-        ResetConstraintSize, SetOutlineColor, ResetOutlineColor, SetOutlineRadius, ResetOutlineRadius, SetOutlineWidth,
-        ResetOutlineWidth, SetOutlineStyle, ResetOutlineStyle, SetOutline, ResetOutline, SetBindPopup, ResetBindPopup,
-        GetFocusable, GetDefaultFocus, GetResponseRegion, GetOverlay, GetAccessibilityGroup, GetAccessibilityText,
-        GetAccessibilityDescription, GetAccessibilityLevel, SetNeedFocus, GetNeedFocus, GetOpacity, GetBorderWidth,
-        GetBorderWidthDimension, GetBorderRadius, GetBorderColor, GetBorderStyle, GetZIndex, GetVisibility, GetClip,
-        GetClipShape, GetTransform, GetHitTestBehavior, GetPosition, GetShadow, GetCustomShadow, GetSweepGradient,
-        GetRadialGradient, GetMask, GetBlendMode, GetDirection, GetAlignSelf, GetTransformCenter, GetOpacityTransition,
-        GetRotateTransition, GetScaleTransition, GetTranslateTransition, GetOffset, GetMarkAnchor, GetAlignRules,
-        GetBackgroundBlurStyle, GetBackgroundImageSize, GetBackgroundImageSizeWidthStyle, SetOutlineWidthFloat,
-        GetOutlineWidthFloat, GetDisplayPriority, SetAlignRulesWidthType, GetLayoutWeight, GetScale, GetRotate,
-        GetBrightness, GetSaturate, GetBackgroundImagePosition, GetFlexGrow, GetFlexShrink, GetFlexBasis,
-        GetConstraintSize, GetGrayScale, GetInvert, GetSepia, GetContrast, GetForegroundColor, GetBlur,
-        GetLinearGradient, GetAlign, GetWidth, GetHeight, GetBackgroundColor, GetBackgroundImage, GetPadding,
-        GetPaddingDimension, GetConfigSize, GetKey, GetEnabled, GetMargin, GetMarginDimension, GetTranslate,
-        SetMoveTransition, GetMoveTransition, ResetMask, GetAspectRatio, SetBackgroundImageResizable,
-        ResetBackgroundImageResizable, SetBackgroundImageSizeWithUnit, GetRenderFit, GetOutlineColor, GetSize,
-        GetRenderGroup, SetOnVisibleAreaChange, GetGeometryTransition, SetChainStyle, GetChainStyle, ResetChainStyle,
-        SetBias, GetBias, ResetBias, GetColorBlend, GetForegroundBlurStyle,
-        SetBackgroundImagePixelMap, SetBackgroundImagePixelMapByPixelMapPtr,
-        SetLayoutRect, GetLayoutRect, ResetLayoutRect, GetFocusOnTouch, SetSystemBarEffect,
-        GetAccessibilityID, SetAccessibilityState, GetAccessibilityState, ResetAccessibilityState,
-        SetAccessibilityValue, GetAccessibilityValue, ResetAccessibilityValue, SetAccessibilityActions,
-        ResetAccessibilityActions, GetAccessibilityActions, SetAccessibilityRole, ResetAccessibilityRole,
-        GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
-        SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition, SetDragPreview,
-        ResetDragPreview };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUICommonModifier modifier = {
+        .setBackgroundColor = SetBackgroundColor,
+        .resetBackgroundColor = ResetBackgroundColor,
+        .setWidth = SetWidth,
+        .resetWidth = ResetWidth,
+        .setHeight = SetHeight,
+        .resetHeight = ResetHeight,
+        .setBorderRadius = SetBorderRadius,
+        .resetBorderRadius = ResetBorderRadius,
+        .setBorderWidth = SetBorderWidth,
+        .resetBorderWidth = ResetBorderWidth,
+        .setTransform = SetTransform,
+        .resetTransform = ResetTransform,
+        .setBorderColor = SetBorderColor,
+        .resetBorderColor = ResetBorderColor,
+        .setPosition = SetPosition,
+        .resetPosition = ResetPosition,
+        .setPositionEdges = SetPositionEdges,
+        .resetPositionEdges = ResetPositionEdges,
+        .setBorderStyle = SetBorderStyle,
+        .resetBorderStyle = ResetBorderStyle,
+        .setBackShadow = SetBackShadow,
+        .resetBackShadow = ResetBackShadow,
+        .setHitTestBehavior = SetHitTestBehavior,
+        .resetHitTestBehavior = ResetHitTestBehavior,
+        .setZIndex = SetZIndex,
+        .resetZIndex = ResetZIndex,
+        .setOpacity = SetOpacity,
+        .resetOpacity = ResetOpacity,
+        .setAlign = SetAlign,
+        .resetAlign = ResetAlign,
+        .setBackdropBlur = SetBackdropBlur,
+        .resetBackdropBlur = ResetBackdropBlur,
+        .setHueRotate = SetHueRotate,
+        .resetHueRotate = ResetHueRotate,
+        .setInvert = SetInvert,
+        .resetInvert = ResetInvert,
+        .setSepia = SetSepia,
+        .resetSepia = ResetSepia,
+        .setSaturate = SetSaturate,
+        .resetSaturate = ResetSaturate,
+        .setColorBlend = SetColorBlend,
+        .resetColorBlend = ResetColorBlend,
+        .setGrayscale = SetGrayscale,
+        .resetGrayscale = ResetGrayscale,
+        .setContrast = SetContrast,
+        .resetContrast = ResetContrast,
+        .setBrightness = SetBrightness,
+        .resetBrightness = ResetBrightness,
+        .setBlur = SetBlur,
+        .resetBlur = ResetBlur,
+        .setLinearGradient = SetLinearGradient,
+        .resetLinearGradient = ResetLinearGradient,
+        .setSweepGradient = SetSweepGradient,
+        .resetSweepGradient = ResetSweepGradient,
+        .setRadialGradient = SetRadialGradient,
+        .resetRadialGradient = ResetRadialGradient,
+        .setOverlay = SetOverlay,
+        .resetOverlay = ResetOverlay,
+        .setBorderImage = SetBorderImage,
+        .resetBorderImage = ResetBorderImage,
+        .setBorderImageGradient = SetBorderImageGradient,
+        .setForegroundBlurStyle = SetForegroundBlurStyle,
+        .resetForegroundBlurStyle = ResetForegroundBlurStyle,
+        .setLinearGradientBlur = SetLinearGradientBlur,
+        .resetLinearGradientBlur = ResetLinearGradientBlur,
+        .setBackgroundBlurStyle = SetBackgroundBlurStyle,
+        .resetBackgroundBlurStyle = ResetBackgroundBlurStyle,
+        .setBorder = SetBorder,
+        .resetBorder = ResetBorder,
+        .setBackgroundImagePosition = SetBackgroundImagePosition,
+        .resetBackgroundImagePosition = ResetBackgroundImagePosition,
+        .setBackgroundImageSize = SetBackgroundImageSize,
+        .resetBackgroundImageSize = ResetBackgroundImageSize,
+        .setBackgroundImage = SetBackgroundImage,
+        .resetBackgroundImage = ResetBackgroundImage,
+        .setTranslate = SetTranslate,
+        .resetTranslate = ResetTranslate,
+        .setScale = SetScale,
+        .setScaleWithoutTransformCenter = SetScaleWithoutTransformCenter,
+        .resetScale = ResetScale,
+        .setRotate = SetRotate,
+        .setRotateWithoutTransformCenter = SetRotateWithoutTransformCenter,
+        .resetRotate = ResetRotate,
+        .setGeometryTransition = SetGeometryTransition,
+        .resetGeometryTransition = ResetGeometryTransition,
+        .setPixelStretchEffect = SetPixelStretchEffect,
+        .resetPixelStretchEffect = ResetPixelStretchEffect,
+        .setLightUpEffect = SetLightUpEffect,
+        .resetLightUpEffect = ResetLightUpEffect,
+        .setSphericalEffect = SetSphericalEffect,
+        .resetSphericalEffect = ResetSphericalEffect,
+        .setRenderGroup = SetRenderGroup,
+        .resetRenderGroup = ResetRenderGroup,
+        .setRenderFit = SetRenderFit,
+        .resetRenderFit = ResetRenderFit,
+        .setUseEffect = SetUseEffect,
+        .resetUseEffect = ResetUseEffect,
+        .setForegroundColor = SetForegroundColor,
+        .resetForegroundColor = ResetForegroundColor,
+        .setMotionPath = SetMotionPath,
+        .resetMotionPath = ResetMotionPath,
+        .setMotionBlur = SetMotionBlur,
+        .resetMotionBlur = ResetMotionBlur,
+        .setGroupDefaultFocus = SetGroupDefaultFocus,
+        .resetGroupDefaultFocus = ResetGroupDefaultFocus,
+        .setFocusOnTouch = SetFocusOnTouch,
+        .resetFocusOnTouch = ResetFocusOnTouch,
+        .setFocusable = SetFocusable,
+        .resetFocusable = ResetFocusable,
+        .setTouchable = SetTouchable,
+        .resetTouchable = ResetTouchable,
+        .setDefaultFocus = SetDefaultFocus,
+        .resetDefaultFocus = ResetDefaultFocus,
+        .setDisplayPriority = SetDisplayPriority,
+        .resetDisplayPriority = ResetDisplayPriority,
+        .setOffset = SetOffset,
+        .setOffsetEdges = SetOffsetEdges,
+        .resetOffset = ResetOffset,
+        .setPadding = SetPadding,
+        .resetPadding = ResetPadding,
+        .setMargin = SetMargin,
+        .resetMargin = ResetMargin,
+        .setMarkAnchor = SetMarkAnchor,
+        .resetMarkAnchor = ResetMarkAnchor,
+        .setVisibility = SetVisibility,
+        .resetVisibility = ResetVisibility,
+        .setAccessibilityText = SetAccessibilityText,
+        .resetAccessibilityText = ResetAccessibilityText,
+        .setAllowDrop = SetAllowDrop,
+        .resetAllowDrop = ResetAllowDrop,
+        .setAccessibilityLevel = SetAccessibilityLevel,
+        .resetAccessibilityLevel = ResetAccessibilityLevel,
+        .setAccessibilityCustomRole = SetAccessibilityCustomRole,
+        .resetAccessibilityCustomRole = ResetAccessibilityCustomRole,
+        .setDirection = SetDirection,
+        .resetDirection = ResetDirection,
+        .setLayoutWeight = SetLayoutWeight,
+        .resetLayoutWeight = ResetLayoutWeight,
+        .setMinWidth = SetMinWidth,
+        .resetMinWidth = ResetMinWidth,
+        .setMaxWidth = SetMaxWidth,
+        .resetMaxWidth = ResetMaxWidth,
+        .setMinHeight = SetMinHeight,
+        .resetMinHeight = ResetMinHeight,
+        .setMaxHeight = SetMaxHeight,
+        .resetMaxHeight = ResetMaxHeight,
+        .setSize = SetSize,
+        .resetSize = ResetSize,
+        .clearWidthOrHeight = ClearWidthOrHeight,
+        .setAlignSelf = SetAlignSelf,
+        .resetAlignSelf = ResetAlignSelf,
+        .setAspectRatio = SetAspectRatio,
+        .resetAspectRatio = ResetAspectRatio,
+        .setFlexGrow = SetFlexGrow,
+        .resetFlexGrow = ResetFlexGrow,
+        .setFlexShrink = SetFlexShrink,
+        .resetFlexShrink = ResetFlexShrink,
+        .setGridOffset = SetGridOffset,
+        .resetGridOffset = ResetGridOffset,
+        .setGridSpan = SetGridSpan,
+        .resetGridSpan = ResetGridSpan,
+        .setExpandSafeArea = SetExpandSafeArea,
+        .resetExpandSafeArea = ResetExpandSafeArea,
+        .setFlexBasis = SetFlexBasis,
+        .resetFlexBasis = ResetFlexBasis,
+        .setAlignRules = SetAlignRules,
+        .resetAlignRules = ResetAlignRules,
+        .setAccessibilityDescription = SetAccessibilityDescription,
+        .resetAccessibilityDescription = ResetAccessibilityDescription,
+        .setId = SetId,
+        .resetId = ResetId,
+        .setKey = SetKey,
+        .resetKey = ResetKey,
+        .setRestoreId = SetRestoreId,
+        .resetRestoreId = ResetRestoreId,
+        .setTabIndex = SetTabIndex,
+        .resetTabIndex = ResetTabIndex,
+        .setObscured = SetObscured,
+        .resetObscured = ResetObscured,
+        .setResponseRegion = SetResponseRegion,
+        .resetResponseRegion = ResetResponseRegion,
+        .setForegroundEffect = SetForegroundEffect,
+        .resetForegroundEffect = ResetForegroundEffect,
+        .setBackgroundEffect = SetBackgroundEffect,
+        .resetBackgroundEffect = ResetBackgroundEffect,
+        .setBackgroundBrightness = SetBackgroundBrightness,
+        .resetBackgroundBrightness = ResetBackgroundBrightness,
+        .setBackgroundBrightnessInternal = SetBackgroundBrightnessInternal,
+        .resetBackgroundBrightnessInternal = ResetBackgroundBrightnessInternal,
+        .setForegroundBrightness = SetForegroundBrightness,
+        .resetForegroundBrightness = ResetForegroundBrightness,
+        .setDragPreviewOptions = SetDragPreviewOptions,
+        .resetDragPreviewOptions = ResetDragPreviewOptions,
+        .setMouseResponseRegion = SetMouseResponseRegion,
+        .resetMouseResponseRegion = ResetMouseResponseRegion,
+        .setEnabled = SetEnabled,
+        .resetEnabled = ResetEnabled,
+        .setUseShadowBatching = SetUseShadowBatching,
+        .resetUseShadowBatching = ResetUseShadowBatching,
+        .setDraggable = SetDraggable,
+        .resetDraggable = ResetDraggable,
+        .setAccessibilityGroup = SetAccessibilityGroup,
+        .resetAccessibilityGroup = ResetAccessibilityGroup,
+        .setHoverEffect = SetHoverEffect,
+        .resetHoverEffect = ResetHoverEffect,
+        .setClickEffect = SetClickEffect,
+        .resetClickEffect = ResetClickEffect,
+        .setKeyBoardShortCut = SetKeyBoardShortCut,
+        .resetKeyBoardShortCut = ResetKeyBoardShortCut,
+        .setPointLightPosition = SetPointLightPosition,
+        .resetPointLightPosition = ResetPointLightPosition,
+        .setPointLightIntensity = SetPointLightIntensity,
+        .resetPointLightIntensity = ResetPointLightIntensity,
+        .setPointLightColor = SetPointLightColor,
+        .resetPointLightColor = ResetPointLightColor,
+        .setPointLightIlluminated = SetPointLightIlluminated,
+        .resetPointLightIlluminated = ResetPointLightIlluminated,
+        .setPointLightBloom = SetPointLightBloom,
+        .resetPointLightBloom = ResetPointLightBloom,
+        .setClip = SetClip,
+        .setClipShape = SetClipShape,
+        .setClipPath = SetClipPath,
+        .resetClip = ResetClip,
+        .setTransitionCenter = SetTransitionCenter,
+        .setOpacityTransition = SetOpacityTransition,
+        .setRotateTransition = SetRotateTransition,
+        .setScaleTransition = SetScaleTransition,
+        .setTranslateTransition = SetTranslateTransition,
+        .setMaskShape = SetMaskShape,
+        .setMaskPath = SetMaskPath,
+        .setProgressMask = SetProgressMask,
+        .setBlendMode = SetBlendMode,
+        .resetBlendMode = ResetBlendMode,
+        .setMonopolizeEvents = SetMonopolizeEvents,
+        .resetMonopolizeEvents = ResetMonopolizeEvents,
+        .setConstraintSize = SetConstraintSize,
+        .resetConstraintSize = ResetConstraintSize,
+        .setOutlineColor = SetOutlineColor,
+        .resetOutlineColor = ResetOutlineColor,
+        .setOutlineRadius = SetOutlineRadius,
+        .resetOutlineRadius = ResetOutlineRadius,
+        .setOutlineWidth = SetOutlineWidth,
+        .resetOutlineWidth = ResetOutlineWidth,
+        .setOutlineStyle = SetOutlineStyle,
+        .resetOutlineStyle = ResetOutlineStyle,
+        .setOutline = SetOutline,
+        .resetOutline = ResetOutline,
+        .setBindPopup = SetBindPopup,
+        .resetBindPopup = ResetBindPopup,
+        .getFocusable = GetFocusable,
+        .getDefaultFocus = GetDefaultFocus,
+        .getResponseRegion = GetResponseRegion,
+        .getOverlay = GetOverlay,
+        .getAccessibilityGroup = GetAccessibilityGroup,
+        .getAccessibilityText = GetAccessibilityText,
+        .getAccessibilityDescription = GetAccessibilityDescription,
+        .getAccessibilityLevel = GetAccessibilityLevel,
+        .setNeedFocus = SetNeedFocus,
+        .getNeedFocus = GetNeedFocus,
+        .getOpacity = GetOpacity,
+        .getBorderWidth = GetBorderWidth,
+        .getBorderWidthDimension = GetBorderWidthDimension,
+        .getBorderRadius = GetBorderRadius,
+        .getBorderColor = GetBorderColor,
+        .getBorderStyle = GetBorderStyle,
+        .getZIndex = GetZIndex,
+        .getVisibility = GetVisibility,
+        .getClip = GetClip,
+        .getClipShape = GetClipShape,
+        .getTransform = GetTransform,
+        .getHitTestBehavior = GetHitTestBehavior,
+        .getPosition = GetPosition,
+        .getShadow = GetShadow,
+        .getCustomShadow = GetCustomShadow,
+        .getSweepGradient = GetSweepGradient,
+        .getRadialGradient = GetRadialGradient,
+        .getMask = GetMask,
+        .getBlendMode = GetBlendMode,
+        .getDirection = GetDirection,
+        .getAlignSelf = GetAlignSelf,
+        .getTransformCenter = GetTransformCenter,
+        .getOpacityTransition = GetOpacityTransition,
+        .getRotateTransition = GetRotateTransition,
+        .getScaleTransition = GetScaleTransition,
+        .getTranslateTransition = GetTranslateTransition,
+        .getOffset = GetOffset,
+        .getMarkAnchor = GetMarkAnchor,
+        .getAlignRules = GetAlignRules,
+        .getBackgroundBlurStyle = GetBackgroundBlurStyle,
+        .getBackgroundImageSize = GetBackgroundImageSize,
+        .getBackgroundImageSizeWithStyle = GetBackgroundImageSizeWidthStyle,
+        .setOutlineWidthFloat = SetOutlineWidthFloat,
+        .getOutlineWidthFloat = GetOutlineWidthFloat,
+        .getDisplayPriority = GetDisplayPriority,
+        .setAlignRulesWidthType = SetAlignRulesWidthType,
+        .getLayoutWeight = GetLayoutWeight,
+        .getScale = GetScale,
+        .getRotate = GetRotate,
+        .getBrightness = GetBrightness,
+        .getSaturate = GetSaturate,
+        .getBackgroundImagePosition = GetBackgroundImagePosition,
+        .getFlexGrow = GetFlexGrow,
+        .getFlexShrink = GetFlexShrink,
+        .getFlexBasis = GetFlexBasis,
+        .getConstraintSize = GetConstraintSize,
+        .getGrayScale = GetGrayScale,
+        .getInvert = GetInvert,
+        .getSepia = GetSepia,
+        .getContrast = GetContrast,
+        .getForegroundColor = GetForegroundColor,
+        .getBlur = GetBlur,
+        .getLinearGradient = GetLinearGradient,
+        .getAlign = GetAlign,
+        .getWidth = GetWidth,
+        .getHeight = GetHeight,
+        .getBackgroundColor = GetBackgroundColor,
+        .getBackgroundImage = GetBackgroundImage,
+        .getPadding = GetPadding,
+        .getPaddingDimension = GetPaddingDimension,
+        .getConfigSize = GetConfigSize,
+        .getKey = GetKey,
+        .getEnabled = GetEnabled,
+        .getMargin = GetMargin,
+        .getMarginDimension = GetMarginDimension,
+        .getTranslate = GetTranslate,
+        .getTranslateWithPercentage = GetTranslateWithPercentage,
+        .setMoveTransition = SetMoveTransition,
+        .getMoveTransition = GetMoveTransition,
+        .resetMask = ResetMask,
+        .getAspectRatio = GetAspectRatio,
+        .setBackgroundImageResizable = SetBackgroundImageResizable,
+        .resetBackgroundImageResizable = ResetBackgroundImageResizable,
+        .setBackgroundImageSizeWithUnit = SetBackgroundImageSizeWithUnit,
+        .getRenderFit = GetRenderFit,
+        .getOutlineColor = GetOutlineColor,
+        .getSize = GetSize,
+        .getRenderGroup = GetRenderGroup,
+        .setOnVisibleAreaChange = SetOnVisibleAreaChange,
+        .getGeometryTransition = GetGeometryTransition,
+        .setChainStyle = SetChainStyle,
+        .getChainStyle = GetChainStyle,
+        .resetChainStyle = ResetChainStyle,
+        .setBias = SetBias,
+        .getBias = GetBias,
+        .resetBias = ResetBias,
+        .getColorBlend = GetColorBlend,
+        .getForegroundBlurStyle = GetForegroundBlurStyle,
+        .setBackgroundImagePixelMap = SetBackgroundImagePixelMap,
+        .setBackgroundImagePixelMapByPixelMapPtr = SetBackgroundImagePixelMapByPixelMapPtr,
+        .setLayoutRect = SetLayoutRect,
+        .getLayoutRect = GetLayoutRect,
+        .resetLayoutRect = ResetLayoutRect,
+        .getFocusOnTouch = GetFocusOnTouch,
+        .setSystemBarEffect = SetSystemBarEffect,
+        .getAccessibilityID = GetAccessibilityID,
+        .setAccessibilityState = SetAccessibilityState,
+        .getAccessibilityState = GetAccessibilityState,
+        .resetAccessibilityState = ResetAccessibilityState,
+        .setAccessibilityValue = SetAccessibilityValue,
+        .getAccessibilityValue = GetAccessibilityValue,
+        .resetAccessibilityValue = ResetAccessibilityValue,
+        .setAccessibilityActions = SetAccessibilityActions,
+        .resetAccessibilityActions = ResetAccessibilityActions,
+        .getAccessibilityActions = GetAccessibilityActions,
+        .setAccessibilityRole = SetAccessibilityRole,
+        .resetAccessibilityRole = ResetAccessibilityRole,
+        .getAccessibilityRole = GetAccessibilityRole,
+        .setFocusScopeId = SetFocusScopeId,
+        .resetFocusScopeId = ResetFocusScopeId,
+        .setFocusScopePriority = SetFocusScopePriority,
+        .resetFocusScopePriority = ResetFocusScopePriority,
+        .setPixelRound = SetPixelRound,
+        .resetPixelRound = ResetPixelRound,
+        .setBorderDashParams = SetBorderDashParams,
+        .getExpandSafeArea = GetExpandSafeArea,
+        .setTransition = SetTransition,
+        .setDragPreview = SetDragPreview,
+        .resetDragPreview = ResetDragPreview,
+        .freezeUINodeById = FreezeUINodeById,
+        .freezeUINodeByUniqueId = FreezeUINodeByUniqueId,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
@@ -6286,14 +7876,14 @@ void SetOnAppear(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onAppear = [frameNode, nodeId, extraParam]() {
+    auto onAppear = [node = AceType::WeakClaim(frameNode), nodeId, extraParam]() {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.nodeId = nodeId;
         event.componentAsyncEvent.subKind = ON_APPEAR;
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        SendArkUIAsyncEvent(&event);
+        PipelineContext::SetCallBackNode(node);
+        SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnAppear(frameNode, std::move(onAppear));
 }
@@ -6303,14 +7893,14 @@ void SetOnDisappear(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onDisappear = [frameNode, nodeId, extraParam]() {
+    auto onDisappear = [node = AceType::WeakClaim(frameNode), nodeId, extraParam]() {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.nodeId = nodeId;
         event.componentAsyncEvent.subKind = ON_DISAPPEAR;
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        SendArkUIAsyncEvent(&event);
+        PipelineContext::SetCallBackNode(node);
+        SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnDisappear(frameNode, std::move(onDisappear));
 }
@@ -6320,14 +7910,14 @@ void SetOnAttach(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onAttach = [frameNode, nodeId, extraParam]() {
+    auto onAttach = [node = AceType::WeakClaim(frameNode), nodeId, extraParam]() {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.nodeId = nodeId;
         event.componentAsyncEvent.subKind = ON_ATTACH;
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        SendArkUIAsyncEvent(&event);
+        PipelineContext::SetCallBackNode(node);
+        SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnAttach(frameNode, std::move(onAttach));
 }
@@ -6337,14 +7927,14 @@ void SetOnDetach(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onDetach = [frameNode, nodeId, extraParam]() {
+    auto onDetach = [node = AceType::WeakClaim(frameNode), nodeId, extraParam]() {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.nodeId = nodeId;
         event.componentAsyncEvent.subKind = ON_DETACH;
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        SendArkUIAsyncEvent(&event);
+        PipelineContext::SetCallBackNode(node);
+        SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnDetach(frameNode, std::move(onDetach));
 }
@@ -6360,7 +7950,7 @@ void SetOnFocus(ArkUINodeHandle node, void* extraParam)
         event.nodeId = nodeId;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_FOCUS;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnFocus(frameNode, std::move(onEvent));
 }
@@ -6376,7 +7966,7 @@ void SetOnBlur(ArkUINodeHandle node, void* extraParam)
         event.nodeId = nodeId;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_BLUR;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnBlur(frameNode, std::move(onEvent));
 }
@@ -6386,14 +7976,14 @@ void SetOnAreaChange(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onAreaChanged = [nodeId, frameNode, extraParam](
+    auto onAreaChanged = [nodeId, node = AceType::WeakClaim(frameNode), extraParam](
                              const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin) {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.nodeId = nodeId;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_AREA_CHANGE;
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         auto oldLocalOffset = oldRect.GetOffset();
         event.componentAsyncEvent.data[0].f32 = PipelineBase::Px2VpWithCurrentDensity(oldRect.Width());
         event.componentAsyncEvent.data[1].f32 = PipelineBase::Px2VpWithCurrentDensity(oldRect.Height());
@@ -6413,7 +8003,7 @@ void SetOnAreaChange(ArkUINodeHandle node, void* extraParam)
             PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX() + origin.GetX());
         event.componentAsyncEvent.data[11].f32 =
             PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY() + origin.GetY());
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     auto areaChangeCallback = [areaChangeFunc = std::move(onAreaChanged)](const RectF& oldRect,
                                   const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {
@@ -6422,6 +8012,72 @@ void SetOnAreaChange(ArkUINodeHandle node, void* extraParam)
             Offset(origin.GetX(), origin.GetY()));
     };
     ViewAbstract::SetOnAreaChanged(frameNode, std::move(areaChangeCallback));
+}
+
+void SetOnClickInfo(ArkUINodeEvent& event, GestureEvent& info, bool usePx)
+{
+    const auto& targetLocalOffset = info.GetTarget().area.GetOffset();
+    const auto& targetOrigin = info.GetTarget().origin;
+    // width height x y globalx globaly
+    event.clickEvent.targetPositionX =
+        usePx ? targetLocalOffset.GetX().ConvertToPx() : targetLocalOffset.GetX().ConvertToVp();
+    event.clickEvent.targetPositionY =
+        usePx ? targetLocalOffset.GetY().ConvertToPx() : targetLocalOffset.GetY().ConvertToVp();
+    event.clickEvent.targetGlobalPositionX =
+        usePx ? targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx()
+              : targetOrigin.GetX().ConvertToVp() + targetLocalOffset.GetX().ConvertToVp();
+    event.clickEvent.targetGlobalPositionY =
+        usePx ? targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx()
+              : targetOrigin.GetY().ConvertToVp() + targetLocalOffset.GetY().ConvertToVp();
+    event.clickEvent.width =
+        usePx ? info.GetTarget().area.GetWidth().ConvertToPx() : info.GetTarget().area.GetWidth().ConvertToVp();
+    event.clickEvent.height =
+        usePx ? info.GetTarget().area.GetHeight().ConvertToPx() : info.GetTarget().area.GetHeight().ConvertToVp();
+    // tiltX tiltY
+    event.clickEvent.tiltX =
+        usePx ? info.GetTiltX().value_or(0.0f) : PipelineBase::Px2VpWithCurrentDensity(info.GetTiltX().value_or(0.0f));
+    event.clickEvent.tiltY =
+        usePx ? info.GetTiltY().value_or(0.0f) : PipelineBase::Px2VpWithCurrentDensity(info.GetTiltY().value_or(0.0f));
+    // rollAngle
+    event.clickEvent.rollAngle = info.GetRollAngle().value_or(0.0f);
+    //pressure
+    event.clickEvent.pressure = info.GetForce();
+    // sourcetool
+    event.clickEvent.toolType = static_cast<int32_t>(info.GetSourceTool());
+    // deviceid
+    event.clickEvent.deviceId = info.GetDeviceId();
+    // modifierkeystates
+    event.clickEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
+    if (!info.GetFingerList().empty()) {
+        event.clickEvent.clickPointSize =
+            info.GetFingerList().size() < MAX_POINTS ? info.GetFingerList().size() : MAX_POINTS;
+    } else {
+        event.clickEvent.clickPointSize = 0;
+    }
+}
+
+void TriggerOnClickEvent(void* extraParam, int32_t nodeId, bool usePx, GestureEvent& info)
+{
+    Offset globalOffset = info.GetGlobalLocation();
+    Offset localOffset = info.GetLocalLocation();
+    Offset screenOffset = info.GetScreenLocation();
+    ArkUINodeEvent event;
+    event.kind = ArkUIEventCategory::CLICK_EVENT;
+    event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+    event.nodeId = nodeId;
+    event.clickEvent.subKind = ArkUIEventSubKind::ON_CLICK_EVENT;
+    event.clickEvent.localX = usePx ? localOffset.GetX() : PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX());
+    event.clickEvent.localY = usePx ? localOffset.GetY() : PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY());
+    event.clickEvent.timestamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+    event.clickEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());
+    event.clickEvent.windowX = usePx ? globalOffset.GetX() : PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX());
+    event.clickEvent.windowY = usePx ? globalOffset.GetY() : PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY());
+    event.clickEvent.displayX =
+        usePx ? screenOffset.GetX() : PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX());
+    event.clickEvent.displayY =
+        usePx ? screenOffset.GetY() : PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY());
+    SetOnClickInfo(event, info, usePx);
+    SendArkUISyncEvent(&event);
 }
 
 void SetOnClick(ArkUINodeHandle node, void* extraParam)
@@ -6469,7 +8125,8 @@ void SetOnClick(ArkUINodeHandle node, void* extraParam)
         //displayY
         event.componentAsyncEvent.data[7].f32 =
             usePx ? PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()) : screenOffset.GetY();
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
+        TriggerOnClickEvent(extraParam, nodeId, usePx, info);
     };
     if (uiNode->GetTag() == V2::SPAN_ETS_TAG) {
         SpanModelNG::SetOnClick(uiNode, std::move(onEvent));
@@ -6478,6 +8135,197 @@ void SetOnClick(ArkUINodeHandle node, void* extraParam)
     }  else {
         ViewAbstract::SetOnClick(reinterpret_cast<FrameNode*>(node), std::move(onEvent));
     }
+}
+
+void SetOnKeyEvent(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onKeyEvent = [frameNode, nodeId, extraParam](KeyEventInfo& info) -> bool {
+        ArkUINodeEvent event;
+        event.kind = ArkUIEventCategory::KEY_INPUT_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.keyEvent.subKind = ArkUIEventSubKind::ON_KEY_EVENT;
+        event.keyEvent.type = static_cast<int32_t>(info.GetKeyType());
+        event.keyEvent.keyCode = static_cast<int32_t>(info.GetKeyCode());
+        event.keyEvent.keyText = info.GetKeyText();
+        event.keyEvent.keySource = static_cast<int32_t>(info.GetKeySource());
+        event.keyEvent.deviceId = info.GetDeviceId();
+        event.keyEvent.unicode = info.GetUnicode();
+        event.keyEvent.timestamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+        // modifierkeystates
+        event.keyEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
+
+        std::vector<int32_t> pressKeyCodeList;
+        auto pressedKeyCodes = info.GetPressedKeyCodes();
+        event.keyEvent.keyCodesLength = static_cast<int32_t>(pressedKeyCodes.size());
+        for (auto it = pressedKeyCodes.begin(); it != pressedKeyCodes.end(); it++) {
+            pressKeyCodeList.push_back(static_cast<int32_t>(*it));
+        }
+        event.keyEvent.pressedKeyCodes = pressKeyCodeList.data();
+        event.keyEvent.intentionCode = static_cast<int32_t>(info.GetKeyIntention());
+        event.keyEvent.isNumLockOn = info.GetNumLock();
+        event.keyEvent.isCapsLockOn = info.GetCapsLock();
+        event.keyEvent.isScrollLockOn = info.GetScrollLock();
+
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        SendArkUISyncEvent(&event);
+        info.SetStopPropagation(event.keyEvent.stopPropagation);
+        return event.keyEvent.isConsumed;
+    };
+    ViewAbstract::SetOnKeyEvent(frameNode, onKeyEvent);
+}
+
+void SetOnKeyPreIme(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onPreImeEvent = [frameNode, nodeId, extraParam](KeyEventInfo& info) -> bool {
+        ArkUINodeEvent event;
+        event.kind = ArkUIEventCategory::KEY_INPUT_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.keyEvent.subKind = ON_KEY_PREIME;
+        event.keyEvent.type = static_cast<int32_t>(info.GetKeyType());
+        event.keyEvent.keyCode = static_cast<int32_t>(info.GetKeyCode());
+        event.keyEvent.keyText = info.GetKeyText();
+        event.keyEvent.keySource = static_cast<int32_t>(info.GetKeySource());
+        event.keyEvent.deviceId = info.GetDeviceId();
+        event.keyEvent.unicode = info.GetUnicode();
+        event.keyEvent.timestamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+
+        std::vector<int32_t> pressKeyCodeList;
+        auto pressedKeyCodes = info.GetPressedKeyCodes();
+        event.keyEvent.keyCodesLength = static_cast<int32_t>(pressedKeyCodes.size());
+        for (auto it = pressedKeyCodes.begin(); it != pressedKeyCodes.end(); it++) {
+            pressKeyCodeList.push_back(static_cast<int32_t>(*it));
+        }
+        event.keyEvent.pressedKeyCodes = pressKeyCodeList.data();
+        event.keyEvent.intentionCode = static_cast<int32_t>(info.GetKeyIntention());
+        event.keyEvent.isNumLockOn = info.GetNumLock();
+        event.keyEvent.isCapsLockOn = info.GetCapsLock();
+        event.keyEvent.isScrollLockOn = info.GetScrollLock();
+    
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        SendArkUISyncEvent(&event);
+        info.SetStopPropagation(event.keyEvent.stopPropagation);
+        return event.keyEvent.isConsumed;
+    };
+    NG::ViewAbstractModelNG::SetOnKeyPreIme(frameNode, std::move(onPreImeEvent));
+}
+
+void SetOnKeyEventDispatch(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onKeyEvent = [frameNode, nodeId, extraParam](KeyEventInfo& info) -> bool {
+        ArkUINodeEvent event;
+        event.kind = ArkUIEventCategory::KEY_INPUT_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.keyEvent.subKind = ArkUIEventSubKind::ON_KEY_DISPATCH;
+        event.keyEvent.type = static_cast<int32_t>(info.GetKeyType());
+        event.keyEvent.keyCode = static_cast<int32_t>(info.GetKeyCode());
+        event.keyEvent.keyText = info.GetKeyText();
+        event.keyEvent.keySource = static_cast<int32_t>(info.GetKeySource());
+        event.keyEvent.deviceId = info.GetDeviceId();
+        event.keyEvent.unicode = info.GetUnicode();
+        event.keyEvent.timestamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+
+        std::vector<int32_t> pressKeyCodeList;
+        auto pressedKeyCodes = info.GetPressedKeyCodes();
+        event.keyEvent.keyCodesLength = static_cast<int32_t>(pressedKeyCodes.size());
+        for (auto it = pressedKeyCodes.begin(); it != pressedKeyCodes.end(); it++) {
+            pressKeyCodeList.push_back(static_cast<int32_t>(*it));
+        }
+        event.keyEvent.pressedKeyCodes = pressKeyCodeList.data();
+        event.keyEvent.intentionCode = static_cast<int32_t>(info.GetKeyIntention());
+        event.keyEvent.isNumLockOn = info.GetNumLock();
+        event.keyEvent.isCapsLockOn = info.GetCapsLock();
+        event.keyEvent.isScrollLockOn = info.GetScrollLock();
+
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        SendArkUISyncEvent(&event);
+        info.SetStopPropagation(event.keyEvent.stopPropagation);
+        return event.keyEvent.isConsumed;
+    };
+    ViewAbstract::SetOnKeyEventDispatch(frameNode, onKeyEvent);
+}
+void SetOnFocusAxisEvent(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onFocusAxisEvent = [frameNode, nodeId, extraParam](FocusAxisEventInfo& info) {
+        ArkUINodeEvent event;
+        event.kind = ArkUIEventCategory::FOCUS_AXIS_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.focusAxisEvent.subKind = ArkUIEventSubKind::ON_FOCUS_AXIS;
+        event.focusAxisEvent.absXValue = info.GetAbsXValue();
+        event.focusAxisEvent.absYValue = info.GetAbsYValue();
+        event.focusAxisEvent.absZValue = info.GetAbsZValue();
+        event.focusAxisEvent.absRzValue = info.GetAbsRzValue();
+        event.focusAxisEvent.absGasValue = info.GetAbsGasValue();
+        event.focusAxisEvent.absBrakeValue = info.GetAbsBrakeValue();
+        event.focusAxisEvent.absHat0XValue = info.GetAbsHat0XValue();
+        event.focusAxisEvent.absHat0YValue = info.GetAbsHat0YValue();
+        event.focusAxisEvent.timeStamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+        event.focusAxisEvent.toolType = static_cast<int32_t>(info.GetSourceTool());
+        event.focusAxisEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());
+        event.focusAxisEvent.deviceId = info.GetDeviceId();
+        const auto& targetLocalOffset = info.GetTarget().area.GetOffset();
+        const auto& targetOrigin = info.GetTarget().origin;
+        // width height x y globalx globaly
+        event.focusAxisEvent.targetPositionX = targetLocalOffset.GetX().ConvertToPx();
+        event.focusAxisEvent.targetPositionY = targetLocalOffset.GetY().ConvertToPx();
+        event.focusAxisEvent.targetGlobalPositionX =
+            targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx();
+        event.focusAxisEvent.targetGlobalPositionY =
+            targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx();
+        event.focusAxisEvent.width = info.GetTarget().area.GetWidth().ConvertToPx();
+        event.focusAxisEvent.height = info.GetTarget().area.GetHeight().ConvertToPx();
+        // modifierkeystates
+        event.focusAxisEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
+        std::vector<int32_t> pressKeyCodeList;
+        auto pressedKeyCodes = info.GetPressedKeyCodes();
+        event.focusAxisEvent.keyCodesLength = static_cast<int32_t>(pressedKeyCodes.size());
+        for (auto it = pressedKeyCodes.begin(); it != pressedKeyCodes.end(); it++) {
+            pressKeyCodeList.push_back(static_cast<int32_t>(*it));
+        }
+        event.focusAxisEvent.pressedKeyCodes = pressKeyCodeList.data();
+        event.focusAxisEvent.targetDisplayId = info.GetTargetDisplayId();
+
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        SendArkUISyncEvent(&event);
+        info.SetStopPropagation(event.focusAxisEvent.stopPropagation);
+    };
+    ViewAbstract::SetOnFocusAxisEvent(frameNode, onFocusAxisEvent);
+}
+
+void ResetOnKeyEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnKeyEvent(frameNode);
+}
+
+void ResetOnKeyPreIme(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::ViewAbstractModelNG::DisableOnKeyPreIme(frameNode);
+}
+
+void ResetOnFocusAxisEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::ViewAbstractModelNG::DisableOnFocusAxisEvent(frameNode);
 }
 
 void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkUITouchPoint& touchPoint, bool usePx)
@@ -6498,8 +8346,10 @@ void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkU
     touchPoint.contactAreaHeight = locationInfo.GetSize();
     touchPoint.tiltX = locationInfo.GetTiltX().value_or(0.0f);
     touchPoint.tiltY = locationInfo.GetTiltY().value_or(0.0f);
+    touchPoint.rollAngle = locationInfo.GetRollAngle().value_or(0.0f);
     touchPoint.toolType = static_cast<int32_t>(locationInfo.GetSourceTool());
-    touchPoint.pressedTime = locationInfo.GetTimeStamp().time_since_epoch().count();
+    touchPoint.pressedTime = locationInfo.GetPressedTime().time_since_epoch().count();
+    touchPoint.operatingHand = locationInfo.GetOperatingHand();
 }
 
 void ConvertTouchPointsToPoints(std::vector<TouchPoint>& touchPointes,
@@ -6532,8 +8382,10 @@ void ConvertTouchPointsToPoints(std::vector<TouchPoint>& touchPointes,
         points[i].pressure = touchPoint.force;
         points[i].tiltX = touchPoint.tiltX.value_or(0.0f);
         points[i].tiltY = touchPoint.tiltY.value_or(0.0f);
+        points[i].rollAngle = touchPoint.rollAngle.value_or(0.0f);
         points[i].pressedTime = touchPoint.downTime.time_since_epoch().count();
         points[i].toolType = static_cast<int32_t>(historyLoaction.GetSourceTool());
+        points[i].operatingHand = touchPoint.operatingHand;
         i++;
     }
 }
@@ -6553,6 +8405,29 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
         auto target = eventInfo.GetTarget();
         event.touchEvent.target.id = target.id.c_str();
         event.touchEvent.target.type = target.type.c_str();
+        const auto& targetLocalOffset = eventInfo.GetTarget().area.GetOffset();
+        const auto& targetOrigin = eventInfo.GetTarget().origin;
+        // width height x y globalx globaly
+        event.touchEvent.targetPositionX =
+            usePx ? targetLocalOffset.GetX().ConvertToPx() : targetLocalOffset.GetX().ConvertToVp();
+        event.touchEvent.targetPositionY =
+            usePx ? targetLocalOffset.GetY().ConvertToPx() : targetLocalOffset.GetY().ConvertToVp();
+        event.touchEvent.targetGlobalPositionX =
+            usePx ? targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx()
+                  : targetOrigin.GetX().ConvertToVp() + targetLocalOffset.GetX().ConvertToVp();
+        event.touchEvent.targetGlobalPositionY =
+            usePx ? targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx()
+                  : targetOrigin.GetY().ConvertToVp() + targetLocalOffset.GetY().ConvertToVp();
+        event.touchEvent.width = usePx ? eventInfo.GetTarget().area.GetWidth().ConvertToPx()
+                                       : eventInfo.GetTarget().area.GetWidth().ConvertToVp();
+        event.touchEvent.height = usePx ? eventInfo.GetTarget().area.GetHeight().ConvertToPx()
+                                        : eventInfo.GetTarget().area.GetHeight().ConvertToVp();
+        // rollAngle
+        event.touchEvent.rollAngle = eventInfo.GetRollAngle().value_or(0.0f);
+        // deviceid
+        event.touchEvent.deviceId = eventInfo.GetDeviceId();
+        //modifierkeystates
+        event.touchEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(eventInfo.GetPressedKeyCodes());
         event.touchEvent.target.area = {
             static_cast<ArkUI_Int32>(target.area.GetOffset().GetX().Value()),
             static_cast<ArkUI_Int32>(target.area.GetOffset().GetY().Value()),
@@ -6567,10 +8442,14 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
         if (changeTouch.size() > 0) {
             TouchLocationInfo front = changeTouch.front();
             event.touchEvent.action = static_cast<int32_t>(front.GetTouchType());
+            event.touchEvent.changedPointerId = front.GetFingerId();
             ConvertTouchLocationInfoToPoint(front, event.touchEvent.actionTouchPoint, usePx);
         }
         event.touchEvent.timeStamp = eventInfo.GetTimeStamp().time_since_epoch().count();
         event.touchEvent.sourceType = static_cast<int32_t>(eventInfo.GetSourceDevice());
+        event.touchEvent.targetDisplayId = eventInfo.GetTargetDisplayId();
+        event.touchEvent.rawPointerEvent = eventInfo.GetPointerEvent().get();
+
         std::array<ArkUITouchPoint, MAX_POINTS> touchPoints;
         if (!eventInfo.GetTouches().empty()) {
             size_t index = 0;
@@ -6635,7 +8514,7 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
             event.touchEvent.historySize = 0;
         }
         event.touchEvent.stopPropagation = false;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         eventInfo.SetStopPropagation(event.touchEvent.stopPropagation);
     };
     ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));
@@ -6661,6 +8540,8 @@ void SetOnTouchIntercept(ArkUINodeHandle node, void* extraParam)
         }
         touchEvent.touchEvent.timeStamp = eventInfo.GetTimeStamp().time_since_epoch().count();
         touchEvent.touchEvent.sourceType = static_cast<int32_t>(eventInfo.GetSourceDevice());
+        touchEvent.touchEvent.targetDisplayId = eventInfo.GetTargetDisplayId();
+
         std::array<ArkUITouchPoint, MAX_POINTS> touchPoints;
         if (!eventInfo.GetTouches().empty()) {
             size_t index = 0;
@@ -6681,10 +8562,57 @@ void SetOnTouchIntercept(ArkUINodeHandle node, void* extraParam)
         touchEvent.touchEvent.historySize = 0;
         touchEvent.touchEvent.subKind = ON_TOUCH_INTERCEPT;
         touchEvent.touchEvent.interceptResult = 0;
-        SendArkUIAsyncEvent(&touchEvent);
+        SendArkUISyncEvent(&touchEvent);
         return static_cast<NG::HitTestMode>(touchEvent.touchEvent.interceptResult);
     };
     ViewAbstract::SetOnTouchIntercept(frameNode, std::move(onTouchIntercept));
+}
+
+void TriggerOnHoverEvent(void* extraParam, int32_t nodeId, bool isHover, HoverInfo& info)
+{
+    ArkUINodeEvent event;
+    event.kind = ArkUIEventCategory::HOVER_EVENT;
+    event.nodeId = nodeId;
+    event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+    event.hoverEvent.subKind = ON_HOVER_EVENT;
+    event.hoverEvent.isHover = isHover;
+    const auto& targetLocalOffset = info.GetTarget().area.GetOffset();
+    const auto& targetOrigin = info.GetTarget().origin;
+    bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
+    // width height x y globalx globaly
+    event.hoverEvent.targetPositionX =
+        usePx ? targetLocalOffset.GetX().ConvertToPx() : targetLocalOffset.GetX().ConvertToVp();
+    event.hoverEvent.targetPositionY =
+        usePx ? targetLocalOffset.GetY().ConvertToPx() : targetLocalOffset.GetY().ConvertToVp();
+    event.hoverEvent.targetGlobalPositionX =
+        usePx ? targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx()
+              : targetOrigin.GetX().ConvertToVp() + targetLocalOffset.GetX().ConvertToVp();
+    event.hoverEvent.targetGlobalPositionY =
+        usePx ? targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx()
+              : targetOrigin.GetY().ConvertToVp() + targetLocalOffset.GetY().ConvertToVp();
+    event.hoverEvent.width =
+        usePx ? info.GetTarget().area.GetWidth().ConvertToPx() : info.GetTarget().area.GetWidth().ConvertToVp();
+    event.hoverEvent.height =
+        usePx ? info.GetTarget().area.GetHeight().ConvertToPx() : info.GetTarget().area.GetHeight().ConvertToVp();
+    // deviceid
+    event.hoverEvent.deviceId = info.GetDeviceId();
+    // modifierkeystates
+    event.hoverEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
+    // timestamp
+    event.hoverEvent.timeStamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+    // sourcetool
+    event.hoverEvent.toolType = static_cast<int32_t>(info.GetSourceTool());
+    // source
+    event.hoverEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());
+    // tiltX tiltY
+    event.hoverEvent.tiltX = info.GetTiltX().value_or(0.0f);
+    event.hoverEvent.tiltY = info.GetTiltX().value_or(0.0f);
+    // rollAngle
+    event.hoverEvent.rollAngle = info.GetRollAngle().value_or(0.0f);
+    // stoppropagation
+    event.hoverEvent.stopPropagation = false;
+    SendArkUISyncEvent(&event);
+    info.SetStopPropagation(event.hoverEvent.stopPropagation);
 }
 
 void SetOnHover(ArkUINodeHandle node, void* extraParam)
@@ -6699,9 +8627,66 @@ void SetOnHover(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_HOVER;
         event.componentAsyncEvent.data[0].i32 = isHover;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
+        TriggerOnHoverEvent(extraParam, nodeId, isHover, info);
     };
     ViewAbstract::SetOnHover(frameNode, onEvent);
+}
+
+void SetOnHoverMove(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onEvent = [nodeId, extraParam](HoverInfo& info) {
+        ArkUINodeEvent event;
+        event.kind = TOUCH_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.touchEvent.subKind = ON_HOVER_MOVE;
+        event.touchEvent.actionTouchPoint.nodeX = info.GetLocalLocation().GetX();
+        event.touchEvent.actionTouchPoint.nodeY = info.GetLocalLocation().GetY();
+        event.touchEvent.actionTouchPoint.windowX = info.GetGlobalLocation().GetX();
+        event.touchEvent.actionTouchPoint.windowY = info.GetGlobalLocation().GetY();
+        event.touchEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX();
+        event.touchEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY();
+        event.touchEvent.actionTouchPoint.rollAngle = info.GetRollAngle().value_or(0.0f);
+        SendArkUISyncEvent(&event);
+    };
+    ViewAbstract::SetOnHoverMove(frameNode, onEvent);
+}
+
+void SetOnMouseInfo(ArkUINodeEvent& event, MouseInfo& info, bool usePx)
+{
+    const auto& targetLocalOffset = info.GetTarget().area.GetOffset();
+    const auto& targetOrigin = info.GetTarget().origin;
+    // width height x y globalx globaly
+    event.mouseEvent.targetPositionX =
+        usePx ? targetLocalOffset.GetX().ConvertToPx() : targetLocalOffset.GetX().ConvertToVp();
+    event.mouseEvent.targetPositionY =
+        usePx ? targetLocalOffset.GetY().ConvertToPx() : targetLocalOffset.GetY().ConvertToVp();
+    event.mouseEvent.targetGlobalPositionX =
+        usePx ? targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx()
+              : targetOrigin.GetX().ConvertToVp() + targetLocalOffset.GetX().ConvertToVp();
+    event.mouseEvent.targetGlobalPositionY =
+        usePx ? targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx()
+              : targetOrigin.GetY().ConvertToVp() + targetLocalOffset.GetY().ConvertToVp();
+    event.mouseEvent.width =
+        usePx ? info.GetTarget().area.GetWidth().ConvertToPx() : info.GetTarget().area.GetWidth().ConvertToVp();
+    event.mouseEvent.height =
+        usePx ? info.GetTarget().area.GetHeight().ConvertToPx() : info.GetTarget().area.GetHeight().ConvertToVp();
+    // deviceid
+    event.mouseEvent.deviceId = info.GetDeviceId();
+    // modifierkeystates
+    event.mouseEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
+    // pressure
+    event.mouseEvent.actionTouchPoint.pressure = info.GetForce();
+    // toolType
+    event.mouseEvent.actionTouchPoint.toolType = static_cast<int32_t>(info.GetSourceTool());
+    // source
+    event.mouseEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());
+    // stoppropagation
+    event.mouseEvent.stopPropagation = false;
 }
 
 void SetOnMouse(ArkUINodeHandle node, void* extraParam)
@@ -6726,9 +8711,57 @@ void SetOnMouse(ArkUINodeHandle node, void* extraParam)
         event.mouseEvent.actionTouchPoint.windowY = info.GetGlobalLocation().GetY() / density;
         event.mouseEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX() / density;
         event.mouseEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY() / density;
-        SendArkUIAsyncEvent(&event);
+        event.mouseEvent.rawDeltaX = info.GetRawDeltaX() / density;
+        event.mouseEvent.rawDeltaY = info.GetRawDeltaY() / density;
+        event.mouseEvent.targetDisplayId = info.GetTargetDisplayId();
+
+        std::vector<int32_t> pressedButtonList;
+        auto pressedButtons = info.GetPressedButtons();
+        event.mouseEvent.pressedButtonsLength = static_cast<int32_t>(pressedButtons.size());
+        for (auto it = pressedButtons.begin(); it != pressedButtons.end(); it++) {
+            pressedButtonList.push_back(static_cast<int32_t>(*it));
+        }
+        event.mouseEvent.pressedButtons = pressedButtonList.data();
+        SetOnMouseInfo(event, info, usePx);
+        SendArkUISyncEvent(&event);
+        info.SetStopPropagation(event.mouseEvent.stopPropagation);
     };
     ViewAbstract::SetOnMouse(frameNode, onEvent);
+}
+
+void SetOnAxisEvent(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onEvent = [nodeId, extraParam](AxisInfo& info) {
+        ArkUINodeEvent event;
+        event.kind = AXIS_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
+        double density = usePx ? 1 : PipelineBase::GetCurrentDensity();
+        event.axisEvent.subKind = ON_AXIS;
+        event.axisEvent.action = static_cast<int32_t>(info.GetAction());
+        event.axisEvent.timeStamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+        event.axisEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());
+        event.axisEvent.verticalAxis = static_cast<double>(info.GetVerticalAxis());
+        event.axisEvent.horizontalAxis = static_cast<double>(info.GetHorizontalAxis());
+        event.axisEvent.pinchAxisScale = static_cast<double>(info.GetPinchAxisScale());
+        event.axisEvent.scrollStep = static_cast<int32_t>(info.GetScrollStep());
+        event.axisEvent.propagation = false;
+        event.axisEvent.actionTouchPoint.nodeX = info.GetLocalLocation().GetX() / density;
+        event.axisEvent.actionTouchPoint.nodeY = info.GetLocalLocation().GetY() / density;
+        event.axisEvent.actionTouchPoint.windowX = info.GetGlobalLocation().GetX() / density;
+        event.axisEvent.actionTouchPoint.windowY = info.GetGlobalLocation().GetY() / density;
+        event.axisEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX() / density;
+        event.axisEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY() / density;
+        event.axisEvent.targetDisplayId = info.GetTargetDisplayId();
+
+        SendArkUISyncEvent(&event);
+        info.SetStopPropagation(!event.axisEvent.propagation);
+    };
+    ViewAbstract::SetOnAxisEvent(frameNode, onEvent);
 }
 
 void SetOnAccessibilityActions(ArkUINodeHandle node, void* extraParam)
@@ -6743,7 +8776,7 @@ void SetOnAccessibilityActions(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_ACCESSIBILITY_ACTIONS;
         event.componentAsyncEvent.data[0].u32 = actionType;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     accessibilityProperty->SetActions(onEvent);
@@ -6841,11 +8874,25 @@ void ResetOnHover(ArkUINodeHandle node)
     ViewAbstract::DisableOnHover(frameNode);
 }
 
+void ResetOnHoverMove(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnHoverMove(frameNode);
+}
+
 void ResetOnMouse(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::DisableOnMouse(frameNode);
+}
+
+void ResetOnAxisEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnAxisEvent(frameNode);
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

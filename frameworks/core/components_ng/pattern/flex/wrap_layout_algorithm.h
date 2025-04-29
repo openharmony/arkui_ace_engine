@@ -110,6 +110,7 @@ private:
     void CalcFlexGrowLayout(
         const RefPtr<LayoutWrapper>& itemWrapper, const FlexItemProperties& flexItemProperties, float remainSpace);
 
+    void UpdatePercentSensitive(LayoutWrapper *layoutWrapper);
     WrapDirection direction_ = WrapDirection::VERTICAL;
     WrapAlignment alignment_ = WrapAlignment::START;
     WrapAlignment mainAlignment_ = WrapAlignment::START;

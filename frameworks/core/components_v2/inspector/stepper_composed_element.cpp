@@ -17,9 +17,6 @@
 #include "core/components_v2/inspector/stepper_composed_element.h"
 
 #include "base/log/dump_log.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/stepper/render_stepper.h"
-#include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::V2 {
 namespace {
@@ -68,6 +65,7 @@ RefPtr<StepperComponent> StepperComposedElement::GetStepperComponent() const
 void StepperComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
 {
     auto stepperComponent = GetStepperComponent();
+    CHECK_NULL_VOID(stepperComponent);
     stepperComponent->InsertChild(slot, newComponent);
     auto renderStepper = GetInspectorElement<RenderStepper>(StepperElement::TypeId());
     if (!renderStepper) {

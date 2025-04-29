@@ -15,11 +15,7 @@
 
 #include "core/components_ng/pattern/plugin/plugin_node.h"
 
-#include "base/utils/utils.h"
-#include "core/components/plugin/plugin_sub_container.h"
-#include "core/components_ng/pattern/plugin/plugin_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 

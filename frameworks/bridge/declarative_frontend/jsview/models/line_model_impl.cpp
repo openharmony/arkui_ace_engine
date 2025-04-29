@@ -13,10 +13,8 @@
  * limitations under the License.
  */
 
-#include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/jsview/models/line_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/shape/shape_component.h"
 
 namespace OHOS::Ace::Framework {
 

@@ -15,8 +15,6 @@
 
 #include "core/components_ng/event/response_ctrl.h"
 
-#include "base/log/log.h"
-#include "base/log/log_wrapper.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
@@ -38,8 +36,9 @@ void ResponseCtrl::TrySetFirstResponse(const WeakPtr<NG::FrameNode>& frameNode)
         state_ = node->GetMonopolizeEvents() ? MonopolizeState::ON : MonopolizeState::OFF;
         firstResponseNode_ = frameNode;
         if (state_ == MonopolizeState::ON) {
-            TAG_LOGI(AceLogTag::ACE_GESTURE, "monopolize on by node id:%d, tag:%s, comId:%s",
-                node->GetId(), node->GetTag().c_str(), node->GetInspectorId().value_or("").c_str());
+            TAG_LOGI(
+                AceLogTag::ACE_GESTURE, "monopolize on by node id:" SEC_PLD(%{public}d) ", tag:%s",
+                    SEC_PARAM(node->GetId()), node->GetTag().c_str());
         }
     }
 }

@@ -230,6 +230,8 @@ public:
     static DecomposedTransform BlendDecomposedTransforms(
         const DecomposedTransform& to, const DecomposedTransform& from, double progress);
     static Matrix4 ComposeTransform(const DecomposedTransform& decomp);
+private:
+    static void ProcessMatrix(const Matrix4& matrix, const Matrix4& perspectiveMatrix, DecomposedTransform& out);
 };
 
 } // namespace OHOS::Ace

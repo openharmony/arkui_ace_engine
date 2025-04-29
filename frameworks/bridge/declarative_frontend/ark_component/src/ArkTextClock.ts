@@ -23,12 +23,34 @@ class ArkTextClockComponent extends ArkComponent implements TextClockAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  allowChildCount(): number {
+    return 0;
+  }
+  initialize(value: Object[]): this {
+    if (value.length === 1 && isObject(value[0])) {
+      if (value[0]?.timeZoneOffset !== undefined) {
+        modifierWithKey(this._modifiersWithKeys, TextClockTimeZoneOffsetModifier.identity, TextClockTimeZoneOffsetModifier, value[0].timeZoneOffset);
+      } else {
+        modifierWithKey(this._modifiersWithKeys, TextClockTimeZoneOffsetModifier.identity, TextClockTimeZoneOffsetModifier, undefined);
+      }
+      if (value[0]?.controller !== undefined) {
+        modifierWithKey(this._modifiersWithKeys, TextClockControllerModifier.identity, TextClockControllerModifier, value[0].controller);
+      } else {
+        modifierWithKey(this._modifiersWithKeys, TextClockControllerModifier.identity, TextClockControllerModifier, undefined);
+      }
+    } else {
+      modifierWithKey(this._modifiersWithKeys, TextClockTimeZoneOffsetModifier.identity, TextClockTimeZoneOffsetModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, TextClockControllerModifier.identity, TextClockControllerModifier, undefined);
+    }
+    return this;
+  }
   format(value: string): this {
     modifierWithKey(this._modifiersWithKeys, TextClockFormatModifier.identity, TextClockFormatModifier, value);
     return this;
   }
   onDateChange(event: (value: number) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextClockOnDateChangeModifier.identity, TextClockOnDateChangeModifier, event);
+    return this;
   }
   fontColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, TextClockFontColorModifier.identity, TextClockFontColorModifier, value);
@@ -91,6 +113,40 @@ class ArkTextClockComponent extends ArkComponent implements TextClockAttribute {
     modifierWithKey(this._modifiersWithKeys, TextClockDateTimeOptionsModifier.identity,
       TextClockDateTimeOptionsModifier, value);
     return this;
+  }
+}
+
+class TextClockTimeZoneOffsetModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textClockTimeZoneOffset');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textClock.setTextClockTimeZoneOffset(node, undefined);
+    } else {
+      getUINativeModule().textClock.setTextClockTimeZoneOffset(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextClockControllerModifier extends ModifierWithKey<TextClockController> {
+  constructor(value: TextClockController) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textClockController');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textClock.setTextClockController(node, undefined);
+    } else {
+      getUINativeModule().textClock.setTextClockController(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -272,6 +328,20 @@ class TextClockDateTimeOptionsModifier extends ModifierWithKey<DateTimeOptions> 
   }
 }
 
+declare type OnDateChangeCallback = (value: number) => void;
+class TextClockOnDateChangeModifier extends ModifierWithKey<OnDateChangeCallback> {
+  constructor(value: OnDateChangeCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textClockOnDateChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textClock.resetTextClockOnDateChange(node);
+    } else {
+      getUINativeModule().textClock.setTextClockOnDateChange(node, this.value);
+    }
+  }
+}
 // @ts-ignore
 globalThis.TextClock.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {

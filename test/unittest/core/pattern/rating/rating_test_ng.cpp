@@ -68,9 +68,7 @@ constexpr double RATING_STEP_SIZE = 0.7;
 constexpr double RATING_STEP_SIZE_1 = 1;
 constexpr double RATING_STEP_SIZE_2 = DEFAULT_STAR_NUM + DEFAULT_STAR_NUM;
 constexpr int32_t RATING_TOUCH_STAR = 3;
-constexpr int32_t RATING_DRAW_BACKGROUND_TIMES = 1;
 constexpr int32_t RATING_SAVE_TIMES = 3;
-constexpr int32_t RATING_CLIP_ROUND_RECT_TIMES = 1;
 constexpr int32_t RATING_CLIP_CLIP_RECT_TIMES = 2;
 constexpr int32_t RATING_RESTORE_TIMES = 3;
 constexpr int32_t RATING_INVALID_TOUCH_STAR = -1;
@@ -92,10 +90,12 @@ const std::string IMAGE_SOURCE_INFO_STRING = "empty source";
 const int32_t RATING_FOREGROUND_FLAG = 0b001;
 const int32_t RATING_SECONDARY_FLAG = 0b010;
 const int32_t RATING_BACKGROUND_FLAG = 0b100;
+const int32_t RATING_BACKGROUNDFOCUS_FLAG = 0b1000;
 const int32_t INVALID_IMAGE_FLAG = 0b111;
 const std::string RATING_IMAGE_LOAD_FAILED = "ImageDataFailed";
 const std::string RATING_IMAGE_LOAD_SUCCESS = "ImageDataSuccess";
 constexpr int32_t RATING_IMAGE_SUCCESS_CODE = 0b111;
+constexpr int32_t RATING_IMAGE_SUCCESS_FOCUS_CODE = 0b1111;
 const std::string RATING_FOREGROUND_IMAGE_KEY = "foregroundImageSourceInfo";
 const std::string RATING_SECONDARY_IMAGE_KEY = "secondaryImageSourceInfo";
 const std::string RATING_BACKGROUND_IMAGE_KEY = "backgroundImageSourceInfo";
@@ -344,6 +344,66 @@ HWTEST_F(RatingTestNg, RatingPatternGetImageSourceFromThemeTest007, TestSize.Lev
     ratingPattern->OnImageLoadSuccess(RATING_SECONDARY_FLAG);
     ratingPattern->OnImageLoadSuccess(RATING_BACKGROUND_FLAG);
     EXPECT_EQ(ratingPattern->imageSuccessStateCode_, RATING_IMAGE_SUCCESS_CODE);
+}
+
+/**
+ * @tc.name: RatingPatternGetImageSourceFromThemeTest008
+ * @tc.desc: success and fail callback functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingPatternGetImageSourceFromThemeTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RatingModelNG.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetBackgroundSrc(RATING_BACKGROUND_URL);
+    rating.SetForegroundSrc(RATING_FOREGROUND_URL);
+    rating.SetSecondarySrc(RATING_SECONDARY_URL);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ratingPattern->isNeedFocusStyle_ = true;
+    ratingPattern->OnModifyDone();
+    ASSERT_NE(ratingPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke CheckImageInfoHasChangedOrNot.
+     */
+    std::string lifeCycleTags[] = { RATING_IMAGE_LOAD_FAILED, RATING_IMAGE_LOAD_SUCCESS };
+    for (std::string tag : lifeCycleTags) {
+        ratingPattern->CheckImageInfoHasChangedOrNot(
+            RATING_FOREGROUND_FLAG, ImageSourceInfo(RATING_FOREGROUND_URL), tag);
+        ratingPattern->CheckImageInfoHasChangedOrNot(RATING_SECONDARY_FLAG, ImageSourceInfo(RATING_SECONDARY_URL), tag);
+        ratingPattern->CheckImageInfoHasChangedOrNot(
+            RATING_BACKGROUND_FLAG, ImageSourceInfo(RATING_BACKGROUND_URL), tag);
+        /**
+         * @tc.cases: case. cover branch switch imageFlag default branch.
+         */
+        ratingPattern->CheckImageInfoHasChangedOrNot(INVALID_IMAGE_FLAG, ImageSourceInfo(RATING_BACKGROUND_URL), tag);
+    }
+
+    /**
+     * @tc.steps: step3. Invoke OnImageLoadSuccess when the foreground, secondary and background image has been loaded
+     * successfully.
+     * @tc.expected: imageSuccessStateCode_ will be set as the success code only when 3 images have been loaded.
+     */
+    ratingPattern->OnImageDataReady(RATING_FOREGROUND_FLAG);
+    ratingPattern->OnImageDataReady(RATING_SECONDARY_FLAG);
+    ratingPattern->OnImageDataReady(RATING_BACKGROUND_FLAG);
+    EXPECT_EQ(ratingPattern->imageReadyStateCode_, RATING_IMAGE_SUCCESS_CODE);
+
+    /**
+     * @tc.steps: step4. Invoke OnImageLoadSuccess when the foreground, secondary background and focusbackground image
+     * has been loaded successfully.
+     * @tc.expected: imageSuccessStateCode_ will be set as the success code only when 4 images have been loaded.
+     */
+    ratingPattern->OnImageLoadSuccess(RATING_FOREGROUND_FLAG);
+    ratingPattern->OnImageLoadSuccess(RATING_SECONDARY_FLAG);
+    ratingPattern->OnImageLoadSuccess(RATING_BACKGROUND_FLAG);
+    ratingPattern->OnImageLoadSuccess(RATING_BACKGROUNDFOCUS_FLAG);
+    EXPECT_EQ(ratingPattern->imageSuccessStateCode_, RATING_IMAGE_SUCCESS_FOCUS_CODE);
 }
 
 /**
@@ -623,7 +683,7 @@ HWTEST_F(RatingTestNg, RatingPatternTest011, TestSize.Level1)
     ratingPattern->foregroundImageLoadingCtx_->SuccessCallback(nullptr);
     ratingPattern->secondaryImageLoadingCtx_->SuccessCallback(nullptr);
     ratingPattern->backgroundImageLoadingCtx_->SuccessCallback(nullptr);
-    EXPECT_EQ(ratingPattern->imageSuccessStateCode_, 0b111);
+    EXPECT_EQ(ratingPattern->imageSuccessStateCode_, RATING_IMAGE_SUCCESS_CODE);
     auto paintMethod3 = ratingPattern->CreateNodePaintMethod();
     ASSERT_NE(paintMethod3, nullptr);
     EXPECT_EQ(ratingPattern->ratingModifier_->foreground_.GetSrc(), RATING_SVG_URL);
@@ -652,6 +712,7 @@ HWTEST_F(RatingTestNg, RatingPatternTest012, TestSize.Level1)
     ratingPattern->foregroundImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
     ratingPattern->secondaryImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
     ratingPattern->backgroundImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
+    ratingPattern->backgroundImageFocusCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
     auto paintMethod1 = ratingPattern->CreateNodePaintMethod();
     ASSERT_NE(paintMethod1, nullptr);
     ASSERT_NE(ratingPattern->ratingModifier_, nullptr);
@@ -753,7 +814,7 @@ HWTEST_F(RatingTestNg, RatingMeasureTest013, TestSize.Level1)
     ratingLayoutProperty->UpdateStars(DEFAULT_STAR_NUM);
     ASSERT_NE(ratingLayoutProperty, nullptr);
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, nullptr, ratingLayoutProperty);
-    auto ratingLayoutAlgorithm = AceType::MakeRefPtr<RatingLayoutAlgorithm>(nullptr, nullptr, nullptr);
+    auto ratingLayoutAlgorithm = AceType::MakeRefPtr<RatingLayoutAlgorithm>(nullptr, nullptr, nullptr, nullptr);
     ASSERT_NE(ratingLayoutAlgorithm, nullptr);
     LayoutConstraintF layoutConstraint;
     auto contentNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
@@ -800,7 +861,7 @@ HWTEST_F(RatingTestNg, RatingOnChangeEventTest001, TestSize.Level1)
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
-    auto ratingEventHub = frameNode->GetEventHub<NG::RatingEventHub>();
+    auto ratingEventHub = frameNode->GetOrCreateEventHub<NG::RatingEventHub>();
     ASSERT_NE(ratingEventHub, nullptr);
     ratingEventHub->SetOnChangeEvent(onChange);
     ratingEventHub->FireChangeEvent("1");
@@ -876,6 +937,7 @@ HWTEST_F(RatingTestNg, RatingPaintPropertyTest001, TestSize.Level1)
     ratingPattern->OnImageLoadSuccess(RATING_FOREGROUND_FLAG);
     ratingPattern->OnImageLoadSuccess(RATING_SECONDARY_FLAG);
     ratingPattern->OnImageLoadSuccess(RATING_BACKGROUND_FLAG);
+    ratingPattern->OnImageLoadSuccess(RATING_BACKGROUNDFOCUS_FLAG);
     EXPECT_NE(ratingPattern->foregroundImageCanvas_, nullptr);
     EXPECT_NE(ratingPattern->secondaryImageCanvas_, nullptr);
     EXPECT_NE(ratingPattern->backgroundImageCanvas_, nullptr);
@@ -898,11 +960,12 @@ HWTEST_F(RatingTestNg, RatingPaintPropertyTest001, TestSize.Level1)
     EXPECT_EQ(ratingPaintMethod->ratingModifier_->touchStar_->Get(), RATING_TOUCH_STAR);
     auto mockCanvas = OHOS::Ace::Testing::MockCanvas();
     DrawingContext context = { mockCanvas, 10.0f, 10.0f };
-    EXPECT_CALL(mockCanvas, DrawBackground(_)).Times(RATING_DRAW_BACKGROUND_TIMES);
     EXPECT_CALL(mockCanvas, Save()).Times(AtLeast(RATING_SAVE_TIMES));
-    EXPECT_CALL(mockCanvas, ClipRoundRectImpl(_, _, _)).Times(RATING_CLIP_ROUND_RECT_TIMES);
     EXPECT_CALL(mockCanvas, Restore()).Times(AtLeast(RATING_RESTORE_TIMES));
     EXPECT_CALL(mockCanvas, ClipRect(_, _, _)).Times(RATING_CLIP_CLIP_RECT_TIMES);
+    EXPECT_CALL(mockCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(mockCanvas));
+    EXPECT_CALL(mockCanvas, DrawRoundRect(_)).WillRepeatedly(Return());
+    EXPECT_CALL(mockCanvas, DetachBrush()).WillRepeatedly(ReturnRef(mockCanvas));
     ratingPaintMethod->ratingModifier_->onDraw(context);
 
     /**
@@ -922,6 +985,9 @@ HWTEST_F(RatingTestNg, RatingPaintPropertyTest001, TestSize.Level1)
     EXPECT_CALL(mockCanvas2, Save()).Times(AtLeast(RATING_SAVE_TIMES_1));
     EXPECT_CALL(mockCanvas2, Restore()).Times(AtLeast(RATING_RESTORE_TIMES_1));
     EXPECT_CALL(mockCanvas2, ClipRect(_, _, _)).Times(RATING_CLIP_CLIP_RECT_TIMES_1);
+    EXPECT_CALL(mockCanvas2, AttachBrush(_)).WillRepeatedly(ReturnRef(mockCanvas2));
+    EXPECT_CALL(mockCanvas2, DrawRoundRect(_)).WillRepeatedly(Return());
+    EXPECT_CALL(mockCanvas2, DetachBrush()).WillRepeatedly(ReturnRef(mockCanvas2));
     ratingPaintMethod->ratingModifier_->onDraw(context2);
 
     /**
@@ -938,6 +1004,9 @@ HWTEST_F(RatingTestNg, RatingPaintPropertyTest001, TestSize.Level1)
     EXPECT_CALL(mockCanvas3, Save()).Times(AtLeast(RATING_SAVE_TIMES_1));
     EXPECT_CALL(mockCanvas3, Restore()).Times(AtLeast(RATING_RESTORE_TIMES_1));
     EXPECT_CALL(mockCanvas3, ClipRect(_, _, _)).Times(RATING_CLIP_CLIP_RECT_TIMES_1);
+    EXPECT_CALL(mockCanvas3, AttachBrush(_)).WillRepeatedly(ReturnRef(mockCanvas3));
+    EXPECT_CALL(mockCanvas3, DrawRoundRect(_)).WillRepeatedly(Return());
+    EXPECT_CALL(mockCanvas3, DetachBrush()).WillRepeatedly(ReturnRef(mockCanvas3));
     ratingPaintMethod->ratingModifier_->onDraw(context3);
 }
 
@@ -988,6 +1057,9 @@ HWTEST_F(RatingTestNg, RatingPaintPropertyTest002, TestSize.Level1)
     auto mockCanvas = OHOS::Ace::Testing::MockCanvas();
     DrawingContext context = { mockCanvas, 10.0f, 10.0f };
     ratingPaintMethod->ratingModifier_->SetUseContentModifier(true);
+    EXPECT_CALL(mockCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(mockCanvas));
+    EXPECT_CALL(mockCanvas, DrawRoundRect(_)).WillRepeatedly(Return());
+    EXPECT_CALL(mockCanvas, DetachBrush()).WillRepeatedly(ReturnRef(mockCanvas));
     ratingPaintMethod->ratingModifier_->onDraw(context);
 
     ratingPaintMethod->ratingModifier_->SetUseContentModifier(false);
@@ -1742,100 +1814,6 @@ HWTEST_F(RatingTestNg, RatingPatternTest071, TestSize.Level1)
 }
 
 /**
- * @tc.name: PreventDefault001
- * @tc.desc: test InitTouchEvent and InitClickEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RatingTestNg, PreventDefault001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create RatingModelNG.
-     */
-    RatingModelNG rating;
-    rating.Create();
-    rating.SetIndicator(RATING_INDICATOR);
-    rating.SetStepSize(RATING_STEP_SIZE_1);
-    rating.SetStars(DEFAULT_STAR_NUM);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<RatingPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    ASSERT_NE(gestureHub, nullptr);
-
-    /**
-     * @tc.steps: step2. Mock TouchEventInfo info and set preventDefault to true
-     * @tc.expected: Check the param value
-     */
-    pattern->InitTouchEvent(gestureHub);
-    TouchEventInfo touchInfo("onTouch");
-    TouchLocationInfo touchDownInfo(1);
-    touchDownInfo.SetTouchType(TouchType::DOWN);
-    touchInfo.SetPreventDefault(true);
-    touchInfo.SetSourceDevice(SourceType::TOUCH);
-    touchInfo.AddTouchLocationInfo(std::move(touchDownInfo));
-    pattern->touchEvent_->callback_(touchInfo);
-    EXPECT_TRUE(pattern->isTouchPreventDefault_);
-    /**
-     * @tc.steps: step3.Mock GestureEvent info and set preventDefault to true
-     * @tc.expected: Check the param value
-     */
-    pattern->InitClickEvent(gestureHub);
-    GestureEvent clickInfo;
-    clickInfo.SetPreventDefault(true);
-    clickInfo.SetSourceDevice(SourceType::TOUCH);
-    pattern->clickEvent_->operator()(clickInfo);
-    EXPECT_FALSE(pattern->isTouchPreventDefault_);
-}
-
-/**
- * @tc.name: PreventDefault002
- * @tc.desc: test RatingPattern::InitTouchEvent and RatingPattern::InitClickEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RatingTestNg, PreventDefault002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create RatingModelNG.
-     */
-    RatingModelNG rating;
-    rating.Create();
-    rating.SetIndicator(RATING_INDICATOR);
-    rating.SetStepSize(RATING_STEP_SIZE_1);
-    rating.SetStars(DEFAULT_STAR_NUM);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<RatingPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    ASSERT_NE(gestureHub, nullptr);
-
-    /**
-     * @tc.steps: step2. Mock TouchEvent info and set preventDefault to false
-     * @tc.expected: Check the param value
-     */
-    pattern->InitTouchEvent(gestureHub);
-    TouchEventInfo touchInfo("onTouch");
-    TouchLocationInfo touchDownInfo(1);
-    touchDownInfo.SetTouchType(TouchType::UP);
-    touchInfo.SetPreventDefault(false);
-    touchInfo.SetSourceDevice(SourceType::MOUSE);
-    touchInfo.AddTouchLocationInfo(std::move(touchDownInfo));
-    pattern->touchEvent_->callback_(touchInfo);
-    EXPECT_EQ(touchInfo.IsPreventDefault(), pattern->isTouchPreventDefault_);
-    /**
-     * @tc.steps: step3. Mock GestureEvent info and set preventDefault to false
-     * @tc.expected: Check the param value
-     */
-    pattern->InitClickEvent(gestureHub);
-    GestureEvent clickInfo;
-    clickInfo.SetPreventDefault(false);
-    clickInfo.SetSourceDevice(SourceType::TOUCH);
-    pattern->clickEvent_->operator()(clickInfo);
-    EXPECT_FALSE(pattern->isTouchPreventDefault_);
-}
-
-/**
  * @tc.name: RatingPatternTest072
  * @tc.desc: test RatingPattern::HandleClick
  * @tc.type: FUNC
@@ -1978,5 +1956,295 @@ HWTEST_F(RatingTestNg, RatingPatternTest075, TestSize.Level1)
     GestureEvent dragInfo;
     pattern->InitPanEvent(gestureHub);
     EXPECT_FALSE(LessNotEqual(dragInfo.GetLocalLocation().GetX(), 0.0));
+}
+
+/**
+ * @tc.name: RatingNGTest076
+ * @tc.desc: test SetRatingOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingNGTest076, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Rating node.
+     */
+    auto frameNode = RatingModelNG::CreateFrameNode(0);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. SetRatingOptions.
+     */
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    RatingModelNG::SetRatingOptions(node, 10, true);
+
+    /**
+     * @tc.steps: step3. Get layoutProperty and assert the value.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<RatingLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetIndicatorValue(false), true);
+    auto paintProperty = frameNode->GetPaintProperty<RatingRenderProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetRatingScoreValue(), 10.0f);
+}
+
+/**
+ * @tc.name: RatingPatternTest016
+ * @tc.desc: Test rating three images and focus image render scale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingPatternTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create rating FrameNode and Pattern, and initialize rating modifier.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetStars(DEFAULT_STAR_NUM);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    ratingPattern->isNeedFocusStyle_ = true;
+    ratingPattern->OnModifyDone();
+    /**
+     * @tc.steps: step2. Create image canvas.
+     */
+    ratingPattern->foregroundImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
+    ratingPattern->secondaryImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
+    ratingPattern->backgroundImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
+    ratingPattern->backgroundImageFocusCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
+    /**
+     * @tc.steps: step3. Update PaintConfig and invoke CreateNodePaintMethod.
+     */
+    auto paintMethod1 = ratingPattern->CreateNodePaintMethod();
+    ASSERT_NE(paintMethod1, nullptr);
+    ASSERT_NE(ratingPattern->ratingModifier_, nullptr);
+    frameNode->geometryNode_->SetFrameSize(SizeF(FRAME_WIDTH, FRAME_HEIGHT));
+    frameNode->geometryNode_->SetContentSize(CONTAINER_SIZE);
+    ratingPattern->imageSuccessStateCode_ = 0b1111;
+    auto paintMethod2 = ratingPattern->CreateNodePaintMethod();
+    ASSERT_NE(paintMethod2, nullptr);
+    ASSERT_NE(ratingPattern->ratingModifier_, nullptr);
+    /**
+     * @tc.steps: step4. calculate scale size.
+     * @tc.expected: get ImagePaintConfig and check scaleX && scaleY.
+     */
+    auto scaleX = CONTAINER_SIZE.Height() / FRAME_WIDTH / DEFAULT_STAR_NUM;
+    auto scaleY = CONTAINER_SIZE.Height() / FRAME_HEIGHT;
+    EXPECT_EQ(ratingPattern->backgroundFocusConfig_.scaleX_, scaleX);
+    EXPECT_EQ(ratingPattern->backgroundFocusConfig_.scaleY_, scaleY);
+    ASSERT_NE(ratingPattern->ratingModifier_->foregroundImageCanvas_->paintConfig_, nullptr);
+    ASSERT_NE(ratingPattern->ratingModifier_->secondaryImageCanvas_->paintConfig_, nullptr);
+    ASSERT_NE(ratingPattern->ratingModifier_->backgroundImageCanvas_->paintConfig_, nullptr);
+    ASSERT_NE(ratingPattern->ratingModifier_->backgroundImageFocusCanvas_->paintConfig_, nullptr);
+    EXPECT_EQ(ratingPattern->foregroundConfig_.scaleX_,
+        ratingPattern->ratingModifier_->foregroundImageCanvas_->GetPaintConfig().scaleX_);
+    EXPECT_EQ(ratingPattern->foregroundConfig_.scaleY_,
+        ratingPattern->ratingModifier_->foregroundImageCanvas_->GetPaintConfig().scaleY_);
+    EXPECT_EQ(ratingPattern->secondaryConfig_.scaleX_,
+        ratingPattern->ratingModifier_->secondaryImageCanvas_->GetPaintConfig().scaleX_);
+    EXPECT_EQ(ratingPattern->secondaryConfig_.scaleY_,
+        ratingPattern->ratingModifier_->secondaryImageCanvas_->GetPaintConfig().scaleY_);
+    EXPECT_EQ(ratingPattern->backgroundConfig_.scaleX_,
+        ratingPattern->ratingModifier_->backgroundImageCanvas_->GetPaintConfig().scaleX_);
+    EXPECT_EQ(ratingPattern->backgroundConfig_.scaleY_,
+        ratingPattern->ratingModifier_->backgroundImageCanvas_->GetPaintConfig().scaleY_);
+    EXPECT_EQ(ratingPattern->backgroundFocusConfig_.scaleX_,
+        ratingPattern->ratingModifier_->backgroundImageFocusCanvas_->GetPaintConfig().scaleX_);
+    EXPECT_EQ(ratingPattern->backgroundFocusConfig_.scaleY_,
+        ratingPattern->ratingModifier_->backgroundImageFocusCanvas_->GetPaintConfig().scaleY_);
+}
+
+/**
+ * @tc.name: RatingPatternTest017
+ * @tc.desc: Test OnFocusEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingPatternTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step0. Create mock theme manager
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto ratingTheme = AceType::MakeRefPtr<RatingTheme>();
+    ratingTheme->cancelAnimation_ = 1;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(ratingTheme));
+    /**
+     * @tc.steps: step1. create rating FrameNode and Pattern, and initialize rating modifier.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetStars(DEFAULT_STAR_NUM);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    ratingPattern->isNeedFocusStyle_ = true;
+    ratingPattern->OnModifyDone();
+    /**
+     * @tc.steps: step2. Create image canvas.
+     */
+    ratingPattern->foregroundImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
+    ratingPattern->secondaryImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
+    ratingPattern->backgroundImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
+    ratingPattern->backgroundImageFocusCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
+    /**
+     * @tc.steps: step3. Create RatingPaintMethod, check ratingPattern->ratingModifier_.
+     */
+    auto paintMethod1 = ratingPattern->CreateNodePaintMethod();
+    ASSERT_NE(paintMethod1, nullptr);
+    ASSERT_NE(ratingPattern->ratingModifier_, nullptr);
+    /**
+     * @tc.steps: step4. Test OnFocusEvent && SetModifierFocus.
+     * @tc.expected: Check the param value when focus.
+     */
+    ratingPattern->OnAttachToFrameNode();
+    ratingPattern->OnFocusEvent();
+    ratingPattern->AddIsFocusActiveUpdateEvent();
+    ratingPattern->SetModifierFocus(true);
+    ASSERT_NE(ratingPattern->pipelineContext_, nullptr);
+    EXPECT_TRUE(ratingPattern->isfocus_);
+    EXPECT_EQ(ratingPattern->state_, RatingModifier::RatingAnimationType::FOCUS);
+    EXPECT_EQ(ratingPattern->ratingModifier_->boardColor_->Get().ToColor(), ratingTheme->GetFocusColor());
+    EXPECT_TRUE(ratingPattern->ratingModifier_->isFocus_);
+    EXPECT_TRUE(ratingPattern->ratingModifier_->needDraw_);
+}
+
+/**
+ * @tc.name: RatingPatternTest018
+ * @tc.desc: Test OnFocusEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingPatternTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step0. Create mock theme manager
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto ratingTheme = AceType::MakeRefPtr<RatingTheme>();
+    ratingTheme->cancelAnimation_ = 1;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(ratingTheme));
+    /**
+     * @tc.steps: step1. create rating FrameNode and Pattern, and initialize rating modifier.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetStars(DEFAULT_STAR_NUM);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    ratingPattern->isNeedFocusStyle_ = true;
+    ratingPattern->OnModifyDone();
+    /**
+     * @tc.steps: step2. Create image canvas.
+     */
+    ratingPattern->foregroundImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
+    ratingPattern->secondaryImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
+    ratingPattern->backgroundImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
+    ratingPattern->backgroundImageFocusCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
+    /**
+     * @tc.steps: step3. Create RatingPaintMethod, check ratingPattern->ratingModifier.
+     */
+    auto paintMethod1 = ratingPattern->CreateNodePaintMethod();
+    ASSERT_NE(paintMethod1, nullptr);
+    ASSERT_NE(ratingPattern->ratingModifier_, nullptr);
+    /**
+     * @tc.steps: step4. Test OnBlurEvent && SetModifierFocus.
+     * @tc.expected: Check the param value when blur.
+     */
+    ratingPattern->OnAttachToFrameNode();
+    ratingPattern->OnBlurEvent();
+    ratingPattern->RemoveIsFocusActiveUpdateEvent();
+    ratingPattern->SetModifierFocus(false);
+    ASSERT_NE(ratingPattern->pipelineContext_, nullptr);
+    EXPECT_FALSE(ratingPattern->isfocus_);
+    EXPECT_EQ(ratingPattern->state_, RatingModifier::RatingAnimationType::NONE);
+    EXPECT_EQ(ratingPattern->ratingModifier_->boardColor_->Get().ToColor(), Color::TRANSPARENT);
+    EXPECT_FALSE(ratingPattern->ratingModifier_->isFocus_);
+    EXPECT_TRUE(ratingPattern->ratingModifier_->needDraw_);
+}
+
+/**
+ * @tc.name: RatingPatternTest019
+ * @tc.desc: test RatingPattern::HandleHoverEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingPatternTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step0. Create mock theme manager
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto ratingTheme = AceType::MakeRefPtr<RatingTheme>();
+    ratingTheme->cancelAnimation_ = 1;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(ratingTheme));
+    /**
+     * @tc.steps: step1. create rating FrameNode and Pattern, and initialize rating modifier.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetStars(DEFAULT_STAR_NUM);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+    ratingPattern->isNeedFocusStyle_ = true;
+    ratingPattern->OnModifyDone();
+    /**
+     * @tc.steps: step2. Create image canvas.
+     */
+    ratingPattern->foregroundImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
+    ratingPattern->secondaryImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
+    ratingPattern->backgroundImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
+    ratingPattern->backgroundImageFocusCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
+    /**
+     * @tc.steps: step3. Create RatingPaintMethod, check ratingPattern->ratingModifier.
+     */
+    auto paintMethod1 = ratingPattern->CreateNodePaintMethod();
+    ASSERT_NE(paintMethod1, nullptr);
+    ASSERT_NE(ratingPattern->ratingModifier_, nullptr);
+    /**
+     * @tc.steps: step4. Test HandleHoverEvent.
+     * @tc.expected: Check the param value when focus && hover.
+     */
+    ratingPattern->isfocus_ = true;
+    ratingPattern->HandleHoverEvent(true);
+    EXPECT_EQ(ratingPattern->state_, RatingModifier::RatingAnimationType::FOCUS);
+    ratingPattern->HandleHoverEvent(false);
+    EXPECT_EQ(ratingPattern->state_, RatingModifier::RatingAnimationType::FOCUS);
+    /**
+     * @tc.steps: step5. Test HandleHoverEvent.
+     * @tc.expected: Check the param value when blur && hover.
+     */
+    ratingPattern->isfocus_ = false;
+    ratingPattern->HandleHoverEvent(true);
+    EXPECT_EQ(ratingPattern->state_, RatingModifier::RatingAnimationType::HOVER);
+    ratingPattern->HandleHoverEvent(false);
+    EXPECT_EQ(ratingPattern->state_, RatingModifier::RatingAnimationType::NONE);
+}
+
+/**
+ * @tc.name: RatingOnChangeEventTest002
+ * @tc.desc: Test Rating onChange event
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, RatingOnChangeEventTest002, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetOrCreateEventHub<RatingEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    std::string unknownRatingScore;
+    auto onChange = [&unknownRatingScore](const std::string& ratingScore) { unknownRatingScore = ratingScore; };
+    rating.SetOnChange(frameNode, onChange);
+    EXPECT_NE(eventHub->changeEvent_, nullptr);
 }
 } // namespace OHOS::Ace::NG

@@ -111,7 +111,9 @@ public:
 
     void SetControlDistance(float controlDistance)
     {
-        controlDistanceChanged_ = Positive(controlDistance_) ? !Positive(controlDistance) : Positive(controlDistance);
+        if (Positive(controlDistance_) ? !Positive(controlDistance) : Positive(controlDistance)) {
+            controlDistanceChanged_ = true;
+        }
         controlDistance_ = controlDistance;
     }
 
@@ -127,7 +129,7 @@ public:
 
     bool IsAtTop() const;
     bool IsAtBottom() const;
-    bool UpdateCurrentOffset(float offset, int32_t source);
+    bool UpdateCurrentOffset(float offset, int32_t source, bool isMouseWheelScroll = false);
 
     /**
      * @brief Stops the motion animator of the scroll bar.
@@ -166,7 +168,7 @@ public:
 
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        ResponseLinkResult& responseLinkResult);
+        ResponseLinkResult& responseLinkResult, bool inBarRect = false);
 
     float GetMainOffset(const Offset& offset) const
     {
@@ -203,10 +205,12 @@ public:
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
         ResponseLinkResult& responseLinkResult);
     void SetScrollBar(DisplayMode displayMode);
-    void UpdateScrollBarOffset();
+    void UpdateScrollBarOffset(int32_t scrollSource);
     void HandleScrollBarOutBoundary(float scrollBarOutBoundaryExtent);
-    void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
+    void UpdateScrollBarRegion(
+        float offset, float estimatedHeight, Size viewPort, Offset viewOffset, int32_t scrollSource);
     void RegisterScrollBarEventTask();
+    void InitScrollBarGestureEvent();
     bool UpdateScrollBarDisplay();
     bool IsReverse() const;
     void SetReverse(bool reverse);
@@ -215,7 +219,7 @@ public:
     {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
-        auto hub = host->GetEventHub<EventHub>();
+        auto hub = host->GetOrCreateEventHub<EventHub>();
         CHECK_NULL_RETURN(hub, nullptr);
         return hub->GetOrCreateGestureEventHub();
     }
@@ -224,7 +228,7 @@ public:
     {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
-        auto hub = host->GetEventHub<EventHub>();
+        auto hub = host->GetOrCreateEventHub<EventHub>();
         CHECK_NULL_RETURN(hub, nullptr);
         return hub->GetOrCreateInputEventHub();
     }
@@ -293,12 +297,15 @@ public:
     void AddScrollBarLayoutInfo();
 
     void GetAxisDumpInfo();
+    void GetAxisDumpInfo(std::unique_ptr<JsonValue>& json);
 
     void GetDisplayModeDumpInfo();
+    void GetDisplayModeDumpInfo(std::unique_ptr<JsonValue>& json);
 
     void GetPanDirectionDumpInfo();
-
+    void GetPanDirectionDumpInfo(std::unique_ptr<JsonValue>& json);
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
 
     void SetScrollEnabled(bool enabled)
     {
@@ -313,8 +320,62 @@ public:
 
     void OnColorConfigurationUpdate() override;
 
-private:
+    RefPtr<ScrollBarProxy> GetScrollBarProxy()
+    {
+        return scrollBarProxy_;
+    }
+
+    void SetEnableNestedSorll(bool enableNestedSorll)
+    {
+        enableNestedSorll_ = enableNestedSorll;
+    }
+
+    bool GetEnableNestedSorll() const
+    {
+        return enableNestedSorll_;
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+
+    RefPtr<ScrollBar> GetScrollBar() const
+    {
+        return scrollBar_;
+    }
+
+    RefPtr<ScrollBarOverlayModifier> GetScrollBarOverlayModifier() const
+    {
+        return scrollBarOverlayModifier_;
+    }
+
+    virtual RefPtr<ScrollBar> CreateScrollBar() const
+    {
+        return AceType::MakeRefPtr<ScrollBar>();
+    }
+
+    virtual bool UseInnerScrollBar() const
+    {
+        return !hasChild_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE);
+    }
+
+    virtual void SetBarCollectClickAndLongPressTargetCallback();
+
     void OnModifyDone() override;
+
+    PositionMode GetPositionMode();
+
+    void SetScrollBarOverlayModifier(RefPtr<ScrollBarOverlayModifier>& scrollBarOverlayModifier)
+    {
+        scrollBarOverlayModifier_ = scrollBarOverlayModifier;
+    }
+
+private:
+    bool ScrollPositionCallback(double offset, int32_t source, bool isMouseWheelScroll = false);
+    void InitScrollEndCallback();
+    void AddScrollableEvent();
+    void SetInBarRegionCallback();
+    void SetBarCollectTouchTargetCallback();
+    void SetBarRectCollectTouchTargetCallback();
+    void SetInBarRectRegionCallback();
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void ValidateOffset();
@@ -350,7 +411,6 @@ private:
     RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<FrictionMotion> frictionMotion_;
     RefPtr<Animator> frictionController_;
-    ScrollPositionCallback scrollPositionCallback_;
     ScrollEndCallback scrollEndCallback_;
     RectF childRect_;
     uint8_t opacity_ = UINT8_MAX;
@@ -369,6 +429,7 @@ private:
 
     // dump info
     std::list<OuterScrollBarLayoutInfo> outerScrollBarLayoutInfos_;
+    bool enableNestedSorll_ = false;
 };
 
 } // namespace OHOS::Ace::NG

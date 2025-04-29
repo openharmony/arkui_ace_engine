@@ -1,0 +1,64 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "BenchMark"
+    },
+    {
+      "name": "length",
+      "value": "10"
+    },
+    {
+      "name": "vp_length",
+      "value": "10.00vp"
+    },
+    {
+      "name": "fp_length",
+      "value": "10.00fp"
+    },
+    {
+      "name": "px_length",
+      "value": "10.00px"
+    },
+    {
+      "name": "value_resource_str",
+      "value": "a"
+    },
+    {
+      "name": "line_height",
+      "value": "100"
+    },
+    {
+      "name": "fp_line_height",
+      "value": "100.00fp"
+    },
+    {
+      "name": "text",
+      "value": "50"
+    },
+    {
+      "name": "fp_text",
+      "value": "50.00fp"
+    },
+    {
+      "name": "color",
+      "value": "0xa52a2a"
+    },
+    {
+      "name": "offSet",
+      "value": "20"
+    },
+    {
+      "name": "alert_dialog_buttons_value",
+      "value": "按钮2"
+    }
+  ]
+}

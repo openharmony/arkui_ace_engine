@@ -16,9 +16,6 @@
 #include "core/components_v2/inspector/grid_container_composed_element.h"
 
 #include "base/log/dump_log.h"
-#include "core/components/box/render_box_base.h"
-#include "core/components/common/layout/grid_container_info.h"
-#include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::V2 {
 namespace {

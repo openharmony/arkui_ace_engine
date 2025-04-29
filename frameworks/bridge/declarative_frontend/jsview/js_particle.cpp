@@ -879,7 +879,7 @@ void JSParticle::JsEmitter(const JSCallbackInfo& args)
     }
     std::vector<EmitterProperty> dataArray;
     JSRef<JSArray> dataJsArray = JSRef<JSArray>::Cast(args[0]);
-    int length = dataJsArray->Length();
+    size_t length = dataJsArray->Length();
     for (size_t i = 0; i < length; i++) {
         if (dataJsArray->GetValueAt(i)->IsObject()) {
             auto jsObject = JSRef<JSObject>::Cast(dataJsArray->GetValueAt(i));

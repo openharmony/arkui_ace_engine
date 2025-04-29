@@ -29,20 +29,29 @@ namespace OHOS::Ace::NG {
 class InspectorFilter;
 
 // CustomNode is the frame node of @Component struct.
-class ACE_EXPORT CustomNode : public UINode, public CustomNodeBase {
+class ACE_FORCE_EXPORT CustomNode : public UINode, public CustomNodeBase {
     DECLARE_ACE_TYPE(CustomNode, UINode, CustomNodeBase);
 
 public:
     static RefPtr<CustomNode> CreateCustomNode(int32_t nodeId, const std::string& viewKey);
 
-    CustomNode(int32_t nodeId, const std::string& viewKey);
-    ~CustomNode() override = default;
+    CustomNode(int32_t nodeId, const std::string& viewKey)
+    : UINode(V2::JS_VIEW_ETS_TAG, nodeId, MakeRefPtr<CustomNodePattern>()), viewKey_(viewKey) {}
+    ~CustomNode() override
+    {
+        ACE_SCOPED_TRACE("CustomNode:Destroy [%d]", GetId());
+    }
 
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
 
     RefPtr<LayoutWrapperNode> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false) override;
 
     bool IsAtomicNode() const override
+    {
+        return true;
+    }
+
+    bool IsSyntaxNode() const override
     {
         return true;
     }
@@ -64,7 +73,7 @@ public:
         return 1;
     }
 
-    void Render();
+    bool Render(int64_t deadline = 0);
 
     void SetCompleteReloadFunc(RenderFunction&& func) override
     {
@@ -92,7 +101,8 @@ public:
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false,
         bool addToRenderTree = false) override;
     bool RenderCustomChild(int64_t deadline) override;
-    void SetJSViewActive(bool active, bool isLazyForEachNode = false) override;
+    void SetJSViewActive(bool active, bool isLazyForEachNode = false, bool isReuse = false) override;
+    void OnDestroyingStateChange(bool isDestroying, bool cleanStatus) override;
 
     bool GetJsActive()
     {
@@ -114,7 +124,8 @@ public:
         return extraInfos_;
     }
 
-    void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
+    void DoSetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false) override;
 
     const WeakPtr<UINode>& GetNavigationNode() const
     {
@@ -128,9 +139,15 @@ public:
 
     std::unique_ptr<JsonValue> GetStateInspectorInfo();
 
-    void DetachFromMainTree(bool recursive) override;
+    void FireCustomDisappear() override;
 
+    // called for DFX
+    void DumpInfo() override;
 private:
+    // for DFX
+    void DumpComponentInfo(std::unique_ptr<JsonValue>& componentInfo);
+    void DumpDecoratorInfo(std::unique_ptr<JsonValue>& decoratorInfo);
+
     std::string viewKey_;
     RenderFunction renderFunction_;
     RenderFunction completeReloadFunc_;
@@ -138,6 +155,8 @@ private:
     bool prevJsActive_ = true;
     std::list<ExtraInfo> extraInfos_;
     WeakPtr<UINode> navigationNode_;
+    std::unique_ptr<ViewStackProcessor> prebuildViewStackProcessor_;
+    int32_t prebuildFrameRounds_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

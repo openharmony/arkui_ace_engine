@@ -21,7 +21,9 @@
 #include "base/geometry/ng/size_t.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/border.h"
+#include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -54,6 +56,7 @@ public:
         return [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
             auto bubble = weak.Upgrade();
             if (bubble) {
+                bubble->PaintSingleBorder(canvas, paintWrapper);
                 bubble->PaintInnerBorder(canvas, paintWrapper);
                 bubble->PaintOuterBorder(canvas, paintWrapper);
             }
@@ -120,15 +123,56 @@ public:
         innerBorderWidth_ = innerBorderWidth.ConvertToPx();
     }
 
+    void SetArrowBuildPlacement(const Placement arrowBuildPlacement)
+    {
+        arrowBuildPlacement_ = arrowBuildPlacement;
+    }
+
+    void SetOutlineLinearGradient(const PopupLinearGradientProperties& outlineLinearGradient)
+    {
+        outlineLinearGradient_ = outlineLinearGradient;
+    }
+
+    const PopupLinearGradientProperties& GetOutlineLinearGradient() const
+    {
+        return outlineLinearGradient_;
+    }
+
+    void SetInnerBorderLinearGradient(const PopupLinearGradientProperties& innerBorderLinearGradient)
+    {
+        innerBorderLinearGradient_ = innerBorderLinearGradient;
+    }
+
+    const PopupLinearGradientProperties& GetInnerBorderLinearGradient() const
+    {
+        return innerBorderLinearGradient_;
+    }
+
+    void SetOuterBorderWidthByUser(const Dimension outerBorderWidthByUser)
+    {
+        outerBorderWidthByUser_ = outerBorderWidthByUser.ConvertToPx();
+    }
+
+    void SetInnerBorderWidthByUser(const Dimension innerBorderWidthByUser)
+    {
+        innerBorderWidthByUser_ = innerBorderWidthByUser.ConvertToPx();
+    }
+
     void PaintBubble(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintMask(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void ClipBubble(PaintWrapper* paintWrapper);
+    void PaintSingleBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintDoubleBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintOuterBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintInnerBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
     bool IsPaintDoubleBorder(PaintWrapper* paintWrapper);
     void DrawDashedBorder(RSCanvas& canvas, RSPen& paint);
+    std::vector<RSPoint> BorderLinearGradientPoint(int popupInnerBorderDirectionInt);
+    std::pair<std::vector<uint32_t>, std::vector<float>> BorderLinearGradientColors(
+        std::vector<PopupGradientColor> popupBorderGradientColor);
+    void PaintOuterBorderGradient(RSPen& paint);
+    void PaintInnerBorderGradient(RSPen& paint);
 
 private:
     void PaintBubbleWithArrow(RSCanvas& canvas, PaintWrapper* paintWrapper);
@@ -172,6 +216,7 @@ private:
     float arrowHeight_ = Dimension(8.0_vp).ConvertToPx();
 
     // Get from RenderProp
+    bool isTips_ = false;
     bool useCustom_ = false;
     Placement arrowPlacement_ = Placement::BOTTOM;
     bool enableArrow_ = false;
@@ -186,11 +231,16 @@ private:
     bool showArrow_ = false;
     std::string clipPath_;
     RefPtr<FrameNode> clipFrameNode_;
+    Placement arrowBuildPlacement_ = Placement::BOTTOM;
     // Get from theme
     Border border_;
     Edge padding_;
     // top right bottom left
     std::vector<float> arrowOffsetByClips_ = { 0.0f, 0.0f, 0.0f, 0.0f };
+    PopupLinearGradientProperties outlineLinearGradient_;
+    PopupLinearGradientProperties innerBorderLinearGradient_;
+    float outerBorderWidthByUser_ = Dimension(0.8_vp).ConvertToPx();
+    float innerBorderWidthByUser_ = Dimension(0.6_vp).ConvertToPx();
 
 #ifndef USE_ROSEN_DRAWING
     RSPath path_;

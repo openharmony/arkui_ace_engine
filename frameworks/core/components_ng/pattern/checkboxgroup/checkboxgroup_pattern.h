@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_modifier.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_method.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
+#include "core/components_ng/pattern/overlay/group_manager.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -60,7 +61,7 @@ public:
         CHECK_NULL_RETURN(host, nullptr);
         auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
         paintProperty->SetHost(host);
-        auto eventHub = host->GetEventHub<EventHub>();
+        auto eventHub = host->GetOrCreateEventHub<EventHub>();
         CHECK_NULL_RETURN(eventHub, nullptr);
         auto enabled = eventHub->IsEnabled();
         if (!checkBoxGroupModifier_) {
@@ -154,7 +155,7 @@ public:
         }
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto checkBoxEventHub = host->GetEventHub<NG::CheckBoxGroupEventHub>();
+        auto checkBoxEventHub = host->GetOrCreateEventHub<NG::CheckBoxGroupEventHub>();
         auto group = checkBoxEventHub ? checkBoxEventHub->GetGroupName() : "";
         json->PutExtAttr("group", group.c_str(), filter);
     }
@@ -173,6 +174,12 @@ public:
     void MarkIsSelected(bool isSelected);
     void OnAttachToMainTree() override;
     void UpdateCheckBoxStyle();
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    void DumpInfo() override;
+
+    int32_t OnInjectionEvent(const std::string& command) override;
+    void ReportChangeEvent(bool selectStatus);
+    std::optional<bool> ParseSelectStatus(const std::string& command);
 
 private:
     void OnAttachToFrameNode() override;
@@ -193,6 +200,7 @@ private:
     void UpdateCheckBoxStatus(const RefPtr<FrameNode>& frameNode, bool select);
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void AddHotZoneRect();
     void RemoveLastHotZoneRect() const;
@@ -228,7 +236,6 @@ private:
     SizeF hotZoneSize_;
     bool initSelected_ = false;
     std::optional<std::string> currentNavId_ = std::nullopt;
-    bool isTouchPreventDefault_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupPattern);
 };
 } // namespace OHOS::Ace::NG

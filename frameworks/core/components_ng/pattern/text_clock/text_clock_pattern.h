@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,6 +72,16 @@ public:
         return textClockController_;
     }
 
+    void SetJSTextClockController(const RefPtr<Referenced>& jsController)
+    {
+        jsTextClockController_ = jsController;
+    }
+
+    RefPtr<Referenced> GetJSTextClockController()
+    {
+        return jsTextClockController_.Upgrade();
+    }
+
     int32_t GetTextId()
     {
         if (!textId_.has_value()) {
@@ -112,12 +122,17 @@ public:
         return textClockLayoutProperty->GetPrefixHourValue(ZeroPrefixType::AUTO);
     }
 
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnLanguageConfigurationUpdate() override;
     void DumpInfo() override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
     void InitTextClockController();
 
     void InitUpdateTimeTextCallBack();
@@ -128,8 +143,8 @@ private:
     std::string ParseDateTime(const std::string& dateTimeValue, int32_t week, int32_t month, int32_t hour);
     void RegistVisibleAreaChangeCallback();
     void OnVisibleAreaChange(bool visible);
-    static void UpdateTextLayoutProperty(
-        RefPtr<TextClockLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
+    static void UpdateTextLayoutProperty(RefPtr<TextClockLayoutProperty>& layoutProperty,
+        RefPtr<TextLayoutProperty>& textLayoutProperty, const TextStyle& textStyleTheme);
     void ParseInputFormat();
     std::vector<std::string> ParseDateTimeValue(const std::string& strDateTimeValue);
     void GetDateTimeIndex(const char& element, TextClockFormatElement& tempFormatElement);
@@ -153,6 +168,7 @@ private:
     RefPtr<FrameNode> contentModifierNode_ = nullptr;
     int32_t nodeId_ = -1;
     RefPtr<TextClockController> textClockController_;
+    WeakPtr<Referenced> jsTextClockController_;
     float hourWest_ = 0.0f;
     long timeValue_ = 0.0f;
     std::optional<int32_t> textId_;

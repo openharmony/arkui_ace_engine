@@ -76,6 +76,7 @@ void PipelineContextTestNg::SetUpTestSuite()
     context_ = AceType::MakeRefPtr<PipelineContext>(
         window, AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
     context_->SetEventManager(AceType::MakeRefPtr<EventManager>());
+    context_->fontManager_ = FontManager::Create();
     MockContainer::SetUp();
     MockContainer::Current()->pipelineContext_ = context_;
 
@@ -309,7 +310,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
      * @tc.steps2: Init a frameNode and SetFocusType with Node, Add dirty focus and call FlushFocus
      * @tc.expected: The dirtyFocusNode_ is changed to nullptr.
      */
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -327,7 +328,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
      */
     frameNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
     frameNode_ = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
-    eventHub = frameNode_->GetEventHub<EventHub>();
+    eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -336,7 +337,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
     dirtyFocusNode = context_->dirtyFocusNode_.Upgrade();
     ASSERT_NE(dirtyFocusNode, nullptr);
     EXPECT_EQ(dirtyFocusNode->GetFocusType(), FocusType::NODE);
-    frameNode_->eventHub_->focusHub_ = nullptr;
+    frameNode_->focusHub_ = nullptr;
     context_->FlushFocus();
     EXPECT_EQ(context_->dirtyFocusNode_.Upgrade(), nullptr);
 }
@@ -519,7 +520,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg011, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -797,11 +798,28 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg017, TestSize.Level1)
     manager->currentId_ = DEFAULT_INT1;
     context_->OnDragEvent({ DEFAULT_INT10, DEFAULT_INT10 }, DragEventAction::DRAG_EVENT_MOVE);
     EXPECT_EQ(manager->currentId_, DEFAULT_INT1);
-    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    MockContainer::Current()->SetIsSceneBoardWindow(true);
     context_->OnDragEvent({ DEFAULT_INT10, DEFAULT_INT10 }, DragEventAction::DRAG_EVENT_MOVE);
     context_->SetIsDragging(false);
     EXPECT_FALSE(context_->IsDragging());
     context_->ResetDragging();
+
+    /**
+     * @tc.steps5: Call the function OnDragEvent with DRAG_EVENT_PULL_CANCEL.
+     * @tc.expected: The dragDropState_ is changed to DragDropMgrState::IDLE.
+     */
+    manager->dragDropState_ = DragDropMgrState::DRAGGING;
+    context_->OnDragEvent({ DEFAULT_INT10, DEFAULT_INT10 }, DragEventAction::DRAG_EVENT_PULL_CANCEL);
+    EXPECT_EQ(manager->dragDropState_, DragDropMgrState::IDLE);
+
+    /**
+     * @tc.steps6: Call the function OnDragEvent with DRAG_EVENT_PULL_THROW.
+     * @tc.expected: The isWindowConsumed_ is changed to false.
+     */
+    manager->isWindowConsumed_ = true;
+    MockContainer::Current()->SetIsSceneBoardWindow(false);
+    context_->OnDragEvent({ DEFAULT_INT10, DEFAULT_INT10 }, DragEventAction::DRAG_EVENT_PULL_THROW);
+    EXPECT_EQ(manager->isWindowConsumed_, false);
 }
 
 /**
@@ -998,8 +1016,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     event.action = KeyAction::DOWN;
     event.code = KeyCode::KEY_TAB;
     event.pressedCodes = { KeyCode::KEY_TAB };
-    EXPECT_FALSE(context_->OnKeyEvent(event));
-    EXPECT_TRUE(context_->GetIsFocusActive());
+    EXPECT_TRUE(context_->OnNonPointerEvent(event));
 
     /**
      * @tc.steps3: Call the function OnKeyEvent with isFocusActive_ = false, action = KeyAction::DOWN and
@@ -1009,8 +1026,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     context_->SetIsFocusActive(false);
     event.pressedCodes = { KeyCode::KEY_DPAD_UP };
     event.code = KeyCode::KEY_DPAD_UP;
-    EXPECT_FALSE(context_->OnKeyEvent(event));
-    EXPECT_FALSE(context_->GetIsFocusActive());
+    EXPECT_FALSE(context_->OnNonPointerEvent(event));
 
     /**
      * @tc.steps4: Call the function OnKeyEvent with isFocusActive_ = false, action = KeyAction::UP and
@@ -1021,8 +1037,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     event.action = KeyAction::UP;
     event.code = KeyCode::KEY_CLEAR;
     event.pressedCodes = { KeyCode::KEY_CLEAR };
-    EXPECT_FALSE(context_->OnKeyEvent(event));
-    EXPECT_FALSE(context_->GetIsFocusActive());
+    EXPECT_FALSE(context_->OnNonPointerEvent(event));
 
     /**
      * @tc.steps4: Call the function OnKeyEvent with isFocusActive_ = true, action = KeyAction::UP and
@@ -1033,8 +1048,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     event.action = KeyAction::UP;
     event.code = KeyCode::KEY_CLEAR;
     event.pressedCodes = { KeyCode::KEY_CLEAR };
-    EXPECT_FALSE(context_->OnKeyEvent(event));
-    EXPECT_TRUE(context_->GetIsFocusActive());
+    EXPECT_FALSE(context_->OnNonPointerEvent(event));
 
     /**
     * @tc.steps5: Call the function OnKeyEvent with isFocusActive_ = true, action = KeyAction::UP and
@@ -1054,11 +1068,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     pageNode->AddChild(childNode);
     context_->stageManager_->stageNode_ = pageNode;
     context_->ReDispatch(event);
-    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_FALSE(context_->OnNonPointerEvent(event));
     EXPECT_FALSE(context_->dragDropManager_->isDragCancel_);
 
     event.isPreIme = 1;
-    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_FALSE(context_->OnNonPointerEvent(event));
 }
 
 /**
@@ -1421,8 +1435,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
 
     // the first arg is rootHeight_, the second arg is the parameter of function,
     // the third arg is the expectation returns
-    std::vector<std::vector<int>> params = { { 200, 400, -300 }, { -200, 100, -100 }, { -200, -300, 300 },
-        { 200, 0, 0 } };
+    std::vector<std::vector<int>> params = { { 200, 400, -300 }, { -200, 100, -100 }, { -200, -300, 300 } };
     for (int turn = 0; turn < params.size(); turn++) {
         context_->rootHeight_ = params[turn][0];
         context_->OnVirtualKeyboardHeightChange(params[turn][1]);
@@ -1449,6 +1462,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
         context_->rootHeight_ = params[turn][2];
         context_->rootNode_->geometryNode_->frame_.rect_.y_ = params[turn][3];
         context_->safeAreaManager_->UpdateKeyboardOffset(params[turn][3]);
+        manager->SetClickPositionOffset(params[turn][3]);
         context_->OnVirtualKeyboardHeightChange(params[turn][4]);
         context_->OnVirtualKeyboardHeightChange(params[turn][4], 0, 0);
         EXPECT_EQ(context_->safeAreaManager_->GetKeyboardOffset(), params[turn][5]);
@@ -1639,26 +1653,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg032, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTestNg035
- * @tc.desc: Test ChangeMouseStyle.
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg035, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters set mouseStyleNodeId.
-     * @tc.expected: ChangePointerStyle will be called.
-     * @tc.steps1: call ChangeMouseStyle.
-     */
-    ASSERT_NE(context_, nullptr);
-    context_->onFocus_ = true;
-    context_->mouseStyleNodeId_ = 0;
-    auto mouseStyle_ = AceType::DynamicCast<MockMouseStyle>(MouseStyle::CreateMouseStyle().rawPtr_);
-    EXPECT_CALL(*mouseStyle_, ChangePointerStyle(_, _)).Times(AnyNumber());
-    context_->ChangeMouseStyle(0, MouseFormat::DEFAULT);
-}
-
-/**
  * @tc.name: PipelineContextTestNg040
  * @tc.desc: Test SetContainerButtonHide function.
  * @tc.type: FUNC
@@ -1685,24 +1679,24 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg040, TestSize.Level1)
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     ASSERT_NE(containerPattern, nullptr);
     /**
-     * @tc.steps2: call SetContainerButtonHide with params true, true, false.
+     * @tc.steps2: call SetContainerButtonHide with params true, true, false, false.
      * @tc.expected: depends on first param, hideSplitButton value is true.
      */
-    context_->SetContainerButtonHide(true, true, false);
+    context_->SetContainerButtonHide(true, true, false, false);
     EXPECT_TRUE(containerPattern->hideSplitButton_ == true);
     /**
-     * @tc.steps3: call SetContainerButtonHide with params false, true, false.
+     * @tc.steps3: call SetContainerButtonHide with params false, true, false, false.
      * @tc.expected: depends on first param, hideSplitButton value is false.
      */
-    context_->SetContainerButtonHide(false, true, false);
+    context_->SetContainerButtonHide(false, true, false, false);
     EXPECT_TRUE(containerPattern->hideSplitButton_ == false);
 
     /**
-     * @tc.steps4: call SetContainerButtonHide with params false, true, false.
+     * @tc.steps4: call SetContainerButtonHide with params false, true, false, false.
      * @tc.expected: cover branch windowModal_ is not CONTAINER_MODAL
      */
     context_->SetWindowModal(WindowModal::DIALOG_MODAL);
-    context_->SetContainerButtonHide(false, true, false);
+    context_->SetContainerButtonHide(false, true, false, false);
     EXPECT_FALSE(containerPattern->hideSplitButton_);
 }
 
@@ -1732,7 +1726,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg043, TestSize.Level1)
     CHECK_NULL_VOID(titleNode);
     auto closeButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(CLOSE_BUTTON_INDEX));
     CHECK_NULL_VOID(closeButton);
-    auto buttonEvent = closeButton->GetEventHub<ButtonEventHub>();
+    auto buttonEvent = closeButton->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEvent);
     /**
      * @tc.steps2: call SetCloseButtonStatus with params true.
@@ -1766,7 +1760,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg060, TestSize.Level1)
      * @tc.steps2: Set EnableAvoidKeyboardMode is true.
      * @tc.expected: get KeyboardSafeAreaEnabled is true.
      */
-    context_->SetEnableKeyBoardAvoidMode(true);
+    context_->SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode::RESIZE);
     EXPECT_TRUE(context_->GetSafeAreaManager()->KeyboardSafeAreaEnabled());
 
     /**
@@ -1994,7 +1988,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg094, TestSize.Level1)
     ASSERT_NE(context_, nullptr);
     context_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
 
-    SystemProperties::SetColorMode(ColorMode::DARK);
+    MockContainer::SetMockColorMode(ColorMode::DARK);
     context_->SetAppBgColor(Color::BLACK);
     context_->ChangeDarkModeBrightness();
     context_->SetIsJsCard(true);
@@ -2007,9 +2001,402 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg094, TestSize.Level1)
     context_->ChangeDarkModeBrightness();
     context_->SetAppBgColor(Color::BLUE);
     context_->ChangeDarkModeBrightness();
-    SystemProperties::SetColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+    MockContainer::SetMockColorMode(ColorMode::COLOR_MODE_UNDEFINED);
     context_->ChangeDarkModeBrightness();
     EXPECT_NE(context_->stageManager_, nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg101
+ * @tc.desc: Test the function FlushDirtyPropertyNodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg101, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    /**
+     * @tc.steps2: Call the function FlushDirtyPropertyNodes.
+     * @tc.expected: The dirtyPropertyNodes_ is empty.
+     */
+    context_->FlushDirtyPropertyNodes();
+    EXPECT_TRUE(context_->dirtyPropertyNodes_.empty());
+}
+
+/**
+ * @tc.name: PipelineContextTestNg102
+ * @tc.desc: Test the MouseHover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg102, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->rootNode_ = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    context_->mouseEvents_.clear();
+    ASSERT_NE(context_->rootNode_, nullptr);
+    ASSERT_NE(context_->lastMouseEvent_, nullptr);
+
+    /**
+     * @tc.steps2: Call the function FlushMouseEvent.
+     */
+    MouseEvent event;
+    event.x = 12.345f;
+    event.y = 12.345f;
+    context_->mouseEvents_[context_->rootNode_].emplace_back(event);
+    context_->FlushMouseEvent();
+    for (const auto& [node, mouseEvents] : context_->mouseEvents_) {
+        EXPECT_EQ(mouseEvents.size(), 1);
+        EXPECT_EQ(mouseEvents.back().x, 12.345f);
+        EXPECT_EQ(mouseEvents.back().y, 12.345f);
+    }
+    context_->mouseEvents_.clear();
+
+    /**
+     * @tc.steps2: Call the function FlushMouseEvent.
+     * @param: set lastMouseEvent_ is not null
+     */
+    context_->lastMouseEvent_ = std::make_unique<MouseEvent>(event);
+    context_->lastMouseEvent_->action = MouseAction::MOVE;
+    event.x = 54.321f;
+    event.y = 54.321f;
+    context_->mouseEvents_[context_->rootNode_].emplace_back(event);
+    EXPECT_NE(static_cast<int>(context_->lastMouseEvent_->action), 5);
+    context_->FlushMouseEvent();
+    for (const auto& [node, mouseEvents] : context_->mouseEvents_) {
+        EXPECT_EQ(mouseEvents.size(), 0);
+    }
+    context_->mouseEvents_.clear();
+}
+
+/**
+ * @tc.name: PipelineContextTestNg103
+ * @tc.desc: Test the function IsFormRenderExceptDynamicComponent
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg103, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+    bool isFormRender = context_->IsFormRenderExceptDynamicComponent();
+    ASSERT_EQ(isFormRender, true);
+}
+
+/**
+ * @tc.name: IsDirtyLayoutNodesEmpty
+ * @tc.desc: Test IsDirtyLayoutNodesEmpty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, IsDirtyLayoutNodesEmpty, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create taskScheduler.
+     */
+    UITaskScheduler taskScheduler;
+
+    /**
+     * @tc.steps2: Create some frameNode and configure the required parameters.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, 1, nullptr);
+    frameNode->layoutProperty_ = nullptr;
+    auto frameNode2 = FrameNode::GetOrCreateFrameNode(TEST_TAG, 2, nullptr);
+
+    /**
+     * @tc.steps3: Call AddDirtyLayoutNode with different parameters.
+     * @tc.expected: IsDirtyLayoutNodesEmpty return false.
+     */
+    taskScheduler.AddDirtyLayoutNode(frameNode);
+    taskScheduler.AddDirtyLayoutNode(frameNode2);
+    EXPECT_FALSE(taskScheduler.IsDirtyLayoutNodesEmpty());
+    context_->dirtyNodes_.clear();
+}
+
+/**
+ * @tc.name: IsDirtyNodesEmpty
+ * @tc.desc: Test IsDirtyNodesEmpty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, IsDirtyNodesEmpty, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.Create taskScheduler.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    UITaskScheduler taskScheduler;
+
+    /**
+     * @tc.steps2: Call the function IsDirtyNodesEmpty.
+     * @tc.expected: The dirtyNodes is not empty.
+     */
+    auto customNode_1 = CustomNode::CreateCustomNode(customNodeId_ + 20, TEST_TAG);
+    context_->AddDirtyCustomNode(customNode_1);
+    EXPECT_FALSE(context_->IsDirtyNodesEmpty());
+    taskScheduler.dirtyLayoutNodes_.clear();
+}
+
+/**
+ * @tc.name: FlushAnimationDirtysWhenExist
+ * @tc.desc: Branch: !isDirtyLayoutNodesEmpty && !IsLayouting() && !isReloading_
+ *           Condition: isDirtyLayoutNodesEmpty = false, IsLayouting() = false, isReloading_ = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, FlushAnimationDirtysWhenExist, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.Create taskScheduler.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    UITaskScheduler taskScheduler;
+
+    /**
+     * @tc.steps2: Create some frameNode and configure the required parameters.
+     */
+    auto propertyNode01 = FrameNode::GetOrCreateFrameNode(TEST_TAG, 1, nullptr);
+    auto propertyNode02 = FrameNode::GetOrCreateFrameNode(TEST_TAG, 2, nullptr);
+
+    /**
+     * @tc.steps3: Call AddDirtyPropertyNode with different parameters.
+     * @tc.expected: IsDirtyLayoutNodesEmpty return false.
+     */
+    taskScheduler.AddDirtyLayoutNode(propertyNode01);
+    taskScheduler.AddDirtyLayoutNode(propertyNode02);
+    EXPECT_FALSE(context_->IsDirtyLayoutNodesEmpty());
+
+    /**
+     * @tc.steps4: Test FlushAnimationDirtysWhenExist when start animation.
+     * @tc.expected: IsDirtyLayoutNodesEmpty return false.
+     */
+    AnimationOption option = AnimationOption();
+    option.SetDuration(10);
+    context_->FlushAnimationDirtysWhenExist(option);
+    EXPECT_FALSE(context_->IsDirtyLayoutNodesEmpty());
+
+    /**
+     * @tc.steps5: Test FlushAnimationDirtysWhenExist when start infinite animation.
+     * @tc.expected: IsDirtyLayoutNodesEmpty return false.
+     */
+    context_->isReloading_ = false;
+    taskScheduler.isLayouting_ = false;
+    option.SetIteration(-1);
+    context_->FlushAnimationDirtysWhenExist(option);
+    EXPECT_TRUE(context_->IsDirtyLayoutNodesEmpty());
+}
+
+/**
+ * @tc.name: PipelineContextTestNg110
+ * @tc.desc: Test UpdateLastMoveEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg110, TestSize.Level1)
+{
+    MouseEvent mouseEvent;
+    mouseEvent.action = MouseAction::WINDOW_LEAVE;
+    context_->lastMouseEvent_ = std::make_unique<MouseEvent>(mouseEvent);
+    context_->UpdateLastMoveEvent(mouseEvent);
+    EXPECT_EQ(context_->lastMouseEvent_->isMockWindowTransFlag, false);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg111
+ * @tc.desc: Test UpdateLastMoveEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg111, TestSize.Level1)
+{
+    MouseEvent mouseEvent;
+    context_->lastMouseEvent_ = std::make_unique<MouseEvent>(mouseEvent);
+    mouseEvent.mockFlushEvent = false;
+    context_->UpdateLastMoveEvent(mouseEvent);
+    EXPECT_EQ(context_->lastMouseEvent_->isMockWindowTransFlag, false);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg112
+ * @tc.desc: Test SetDisplayWindowRectInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg112, TestSize.Level1)
+{
+    Rect rect;
+    MouseEvent mouseEvent;
+    context_->lastMouseEvent_ = std::make_unique<MouseEvent>(mouseEvent);
+    context_->displayWindowRectInfo_ = rect;
+    context_->lastMouseEvent_->x = 0.0;
+    context_->SetDisplayWindowRectInfo(rect);
+    EXPECT_EQ(context_->lastMouseEvent_->x, 0);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg113
+ * @tc.desc: Test SetDisplayWindowRectInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg113, TestSize.Level1)
+{
+    Rect rect;
+    rect.SetLeft(10.0);
+    MouseEvent mouseEvent;
+    context_->lastMouseEvent_ = std::make_unique<MouseEvent>(mouseEvent);
+    context_->lastMouseEvent_->x = 0.0;
+    context_->displayWindowRectInfo_ = rect;
+    context_->SetDisplayWindowRectInfo(rect);
+    EXPECT_EQ(context_->lastMouseEvent_->x, 0.0);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg114
+ * @tc.desc: Test SetDisplayWindowRectInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg114, TestSize.Level1)
+{
+    Rect rect;
+    rect.SetLeft(10.0);
+    MouseEvent mouseEvent;
+    context_->lastMouseEvent_ = nullptr;
+    context_->displayWindowRectInfo_ = rect;
+    context_->SetDisplayWindowRectInfo(rect);
+    EXPECT_EQ(context_->displayWindowRectInfo_.Left(), rect.Left());
+}
+
+/**
+ * @tc.name: PipelineContextTestNg115
+ * @tc.desc: Test HandleTouchHoverOut.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg115, TestSize.Level1)
+{
+    TouchEvent event;
+    event.force = 10.0;
+    event.sourceTool = SourceTool::UNKNOWN;
+    context_->lastSourceType_ = SourceType::NONE;
+    context_->HandleTouchHoverOut(event);
+    EXPECT_EQ(context_->lastSourceType_, SourceType::NONE);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg116
+ * @tc.desc: Test HandleTouchHoverOut.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg116, TestSize.Level1)
+{
+    TouchEvent event;
+    event.force = 10.0;
+    event.sourceTool = SourceTool::FINGER;
+    context_->lastSourceType_ = SourceType::NONE;
+    context_->HandleTouchHoverOut(event);
+    EXPECT_NE(context_->lastSourceType_, SourceType::NONE);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg117
+ * @tc.desc: Test FlushMouseEventForHover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg117, TestSize.Level1)
+{
+    context_->SetIsTransFlag(false);
+    MouseEvent mouseEvent;
+    context_->lastMouseEvent_ = std::make_unique<MouseEvent>(mouseEvent);
+    context_->lastMouseEvent_->pointerEvent = nullptr;
+    context_->FlushMouseEventForHover();
+    EXPECT_FALSE(context_->lastMouseEvent_->pointerEvent);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg118
+ * @tc.desc: Test FlushMouseEventForHover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg118, TestSize.Level1)
+{
+    context_->SetIsTransFlag(true);
+    context_->lastMouseEvent_ = nullptr;
+    context_->FlushMouseEventForHover();
+    EXPECT_FALSE(context_->lastMouseEvent_);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg119
+ * @tc.desc: Test FlushMouseEventForHover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg119, TestSize.Level1)
+{
+    MouseEvent mouseEvent;
+    mouseEvent.sourceType = SourceType::TOUCH_PAD;
+    context_->lastMouseEvent_ = std::make_unique<MouseEvent>(mouseEvent);
+    context_->lastMouseEvent_->pointerEvent = nullptr;
+    context_->SetIsTransFlag(true);
+    context_->FlushMouseEventForHover();
+    EXPECT_FALSE(context_->lastMouseEvent_->pointerEvent);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg120
+ * @tc.desc: Test FlushMouseEventForHover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg120, TestSize.Level1)
+{
+    MouseEvent mouseEvent;
+    mouseEvent.sourceType = SourceType::MOUSE;
+    mouseEvent.action = MouseAction::PRESS;
+    context_->lastMouseEvent_ = std::make_unique<MouseEvent>(mouseEvent);
+    context_->lastMouseEvent_->pointerEvent = nullptr;
+    context_->SetIsTransFlag(true);
+    context_->FlushMouseEventForHover();
+    EXPECT_FALSE(context_->lastMouseEvent_->pointerEvent);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg121
+ * @tc.desc: Test FlushMouseEventForHover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg121, TestSize.Level1)
+{
+    MouseEvent mouseEvent;
+    mouseEvent.sourceType = SourceType::MOUSE;
+    mouseEvent.action = MouseAction::MOVE;
+    context_->lastMouseEvent_ = std::make_unique<MouseEvent>(mouseEvent);
+    context_->lastMouseEvent_->pointerEvent = nullptr;
+    context_->lastSourceType_ = SourceType::TOUCH;
+    context_->SetIsTransFlag(true);
+    context_->FlushMouseEventForHover();
+    EXPECT_FALSE(context_->lastMouseEvent_->pointerEvent);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg122
+ * @tc.desc: Test FlushMouseEventForHover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg122, TestSize.Level1)
+{
+    MouseEvent mouseEvent;
+    mouseEvent.sourceType = SourceType::MOUSE;
+    mouseEvent.action = MouseAction::MOVE;
+    context_->lastMouseEvent_ = std::make_unique<MouseEvent>(mouseEvent);
+    context_->lastMouseEvent_->pointerEvent = nullptr;
+    context_->lastSourceType_ = SourceType::NONE;
+    context_->lastMouseEvent_->isMockWindowTransFlag = true;
+    context_->SetIsTransFlag(true);
+    context_->FlushMouseEventForHover();
+    EXPECT_FALSE(context_->lastMouseEvent_->pointerEvent);
 }
 } // namespace NG
 } // namespace OHOS::Ace

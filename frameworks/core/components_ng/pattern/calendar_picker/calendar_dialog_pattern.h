@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,8 +19,8 @@
 #include <optional>
 
 #include "core/components/calendar/calendar_data_adapter.h"
-#include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -49,6 +49,11 @@ public:
         return dialogOffset_;
     }
 
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return MakeRefPtr<CalendarDialogLayoutAlgorithm>();
+    }
+
     void SetDialogOffset(const OffsetF& offset)
     {
         dialogOffset_ = offset;
@@ -66,21 +71,7 @@ public:
 
     void HandleClickEvent(const GestureEvent& info);
 
-    FocusPattern GetFocusPattern() const override
-    {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, FocusPattern());
-        auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-        RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
-        CHECK_NULL_RETURN(pickerTheme, FocusPattern());
-        CHECK_NULL_RETURN(calendarTheme, FocusPattern());
-        auto focusColor = pickerTheme->GetFocusColor();
-        FocusPaintParam focusPaintParams;
-        focusPaintParams.SetPaintColor(focusColor);
-        auto focusPaintWidth = calendarTheme->GetCalendarDayKeyFocusedPenWidth();
-        focusPaintParams.SetPaintWidth(focusPaintWidth);
-        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
-    }
+    FocusPattern GetFocusPattern() const override;
 
     void SetHoverState(bool state)
     {
@@ -107,6 +98,7 @@ public:
         currentSettingData_ = settingData;
     }
 
+    void OnColorConfigurationUpdate() override;
     void OnLanguageConfigurationUpdate() override;
 
     void UpdateCaretInfoToController();
@@ -124,6 +116,14 @@ public:
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
 
     void InitSurfaceChangedCallback();
+    inline void SetTitleNode(RefPtr<FrameNode>& titleNode)
+    {
+        titleNode_ = titleNode;
+    }
+
+    bool CanReportChangeEvent(const PickerDate& pickerDate);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
 private:
     void OnModifyDone() override;
@@ -174,6 +174,7 @@ private:
     void UpdateSwiperNodeFocusedDay(const CalendarDay& focusedDay, bool isPrev);
 
     int32_t focusAreaID_ = 0;
+    int32_t focusAreaIDWithoutWeek_ = 0;
     int32_t focusAreaChildID_ = 0;
     CalendarDay focusedDay_ = { .day = -1 };
     bool isFirstAddhotZoneRect_ = true;
@@ -191,6 +192,8 @@ private:
     std::vector<ButtonInfo> currentButtonInfos_;
     CalendarSettingData currentSettingData_;
     std::optional<int32_t> surfaceChangedCallbackId_;
+    PickerDate reportedPickerDate_;
+    WeakPtr<FrameNode> titleNode_;
 };
 } // namespace OHOS::Ace::NG
 

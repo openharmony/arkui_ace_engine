@@ -103,6 +103,7 @@ const PointF POINTF_CENTER { 15.0f, 15.0f };
 const OffsetF SLIDER_GLOBAL_OFFSET = { 200.0f, 200.0f };
 const SizeF BLOCK_SIZE_F(10.0f, 10.0f);
 const SizeF BLOCK_SIZE_F_ZREO(0.0f, 0.0f);
+constexpr float SLIDER_PERCENTAGE = 100.0f;
 } // namespace
 class SliderTestNg : public testing::Test {
 public:
@@ -145,7 +146,7 @@ void SliderTestNg::SetSliderContentModifier(SliderContentModifier& sliderContent
     sliderContentModifier.SetStepColor(TEST_COLOR);
     sliderContentModifier.SetStepRatio(SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     sliderContentModifier.SetBackgroundSize(POINTF_START, POINTF_END);
-    sliderContentModifier.SetSelectColor(TEST_COLOR);
+    sliderContentModifier.SetSelectColor(SliderModelNG::CreateSolidGradient(TEST_COLOR));
     sliderContentModifier.SetBlockColor(TEST_COLOR);
     SizeF blockSize;
     sliderContentModifier.SetBlockSize(blockSize);
@@ -377,7 +378,8 @@ HWTEST_F(SliderTestNg, SliderTestNg004, TestSize.Level1)
     sliderTheme->tipColor_ = Color::BLUE;
     sliderTheme->tipFontSize_ = Dimension(16.0);
     sliderTheme->tipTextColor_ = Color::BLACK;
-    EXPECT_CALL(*theme, GetTheme(_)).WillOnce(Return(sliderTheme));
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(sliderTheme));
     /**
      * @tc.steps: step3. get sliderPattern and test init parameter.
      */
@@ -401,6 +403,12 @@ HWTEST_F(SliderTestNg, SliderTestNg004, TestSize.Level1)
      */
     sliderPaintProperty->UpdateShowTips(true);
     sliderPattern->OnModifyDone();
+    sliderPaintProperty->UpdatePadding(sliderTheme->GetTipTextPadding());
+    sliderPaintProperty->UpdateTipColor(sliderTheme->GetTipColor());
+    sliderPaintProperty->UpdateTextColor(sliderTheme->GetTipTextColor());
+    sliderPaintProperty->UpdateFontSize(sliderTheme->GetTipFontSize());
+    auto content = std::to_string(static_cast<int>(std::round(sliderPattern->valueRatio_ * SLIDER_PERCENTAGE))) + '%';
+    sliderPaintProperty->UpdateContent(content);
     EXPECT_EQ(sliderPattern->showTips_, true);
     EXPECT_EQ(sliderPaintProperty->GetPaddingValue(Dimension()), Dimension(10.0));
     EXPECT_EQ(sliderPaintProperty->GetTipColorValue(Color::BLACK), Color::BLUE);
@@ -787,6 +795,8 @@ HWTEST_F(SliderTestNg, SliderTestNg012, TestSize.Level1)
     frameNode->geometryNode_->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
     auto sliderPattern = frameNode->GetPattern<SliderPattern>();
     ASSERT_NE(sliderPattern, nullptr);
+    SliderContentModifier::Parameters parameters;
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     ASSERT_NE(sliderLayoutProperty, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -1429,6 +1439,8 @@ HWTEST_F(SliderTestNg, SliderTestNgInteractionMode008, TestSize.Level1)
     PipelineBase::GetCurrentContext()->SetThemeManager(themeManager);
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    SliderContentModifier::Parameters parameters;
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
     sliderPattern->mouseHoverFlag_ = true;
     sliderPattern->showTips_ = true;
     /**
@@ -1486,6 +1498,8 @@ HWTEST_F(SliderTestNg, SliderTestNgInteractionMode009, TestSize.Level1)
     frameNode->geometryNode_->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
     auto sliderPattern = frameNode->GetPattern<SliderPattern>();
     ASSERT_NE(sliderPattern, nullptr);
+    SliderContentModifier::Parameters parameters;
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     ASSERT_NE(sliderLayoutProperty, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -1734,6 +1748,38 @@ HWTEST_F(SliderTestNg, SliderTestNgInteractionMode012, TestSize.Level1)
     EXPECT_TRUE(sliderPattern->isMinResponseExceed(info.GetLocalLocation()));
     EXPECT_NE(sliderPattern->value_, VALUE);
     sliderPattern->FireChangeEvent(SliderPattern::SliderChangeMode::End);
+}
+
+
+/**
+ * @tc.name: SliderTestNgInteractionMode013
+ * @tc.desc: Test Slider InteractionMode Set Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, SliderTestNgInteractionMode013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slider and set the properties ,and then get frameNode.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    sliderModelNG.SetSliderInteractionMode(SliderModelNG::SliderInteraction::SLIDE_AND_CLICK_UP);
+    std::function<void(float, int32_t)> eventOnChange = [](float floatValue, int32_t intValue) {};
+    sliderModelNG.SetOnChange(std::move(eventOnChange));
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get SliderIntecationMode.
+     * @tc.expected: step2. check whether the properties is correct.
+     */
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    EXPECT_NE(sliderPaintProperty, nullptr);
+    EXPECT_EQ(sliderPaintProperty->GetMax(), MAX);
+    EXPECT_EQ(sliderPaintProperty->GetMin(), MIN);
+    EXPECT_EQ(sliderPaintProperty->GetStep(), STEP);
+    EXPECT_EQ(sliderPaintProperty->GetValue(), VALUE);
+    EXPECT_EQ(sliderPaintProperty->GetSliderInteractionMode(), SliderModelNG::SliderInteraction::SLIDE_AND_CLICK_UP);
 }
 
 /**

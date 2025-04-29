@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +15,9 @@
 
 #include "core/components_ng/pattern/video/video_model_ng.h"
 
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/video/video_node.h"
-#include "core/components_ng/pattern/video/video_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -65,12 +61,24 @@ void VideoModelNG::Create(const RefPtr<VideoControllerV2>& videoController)
         CHECK_NULL_VOID(controllerRowNode);
         videoNode->AddChild(controllerRowNode);
     }
-    AddDragFrameNodeToManager();
 }
 
-void VideoModelNG::SetSrc(const std::string& src)
+void VideoModelNG::SetSrc(const std::string& src, const std::string& bundleName, const std::string& moduleName)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(VideoLayoutProperty, VideoSource, src);
+    VideoSourceInfo videoSrcInfo;
+    videoSrcInfo.src_ = src;
+    videoSrcInfo.bundleName_ = bundleName;
+    videoSrcInfo.moduleName_ = moduleName;
+    ACE_UPDATE_LAYOUT_PROPERTY(VideoLayoutProperty, VideoSource, videoSrcInfo);
+}
+
+void VideoModelNG::SetShowFirstFrame(bool showFirstFrame)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
+    videoPattern->UpdateShowFirstFrame(showFirstFrame);
 }
 
 void VideoModelNG::SetProgressRate(double progressRate)
@@ -78,6 +86,7 @@ void VideoModelNG::SetProgressRate(double progressRate)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
     videoPattern->UpdateProgressRate(progressRate);
 }
 
@@ -99,6 +108,7 @@ void VideoModelNG::SetMuted(bool muted)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
     videoPattern->UpdateMuted(muted);
 }
 
@@ -107,6 +117,7 @@ void VideoModelNG::SetAutoPlay(bool autoPlay)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
     videoPattern->UpdateAutoPlay(autoPlay);
 }
 
@@ -125,14 +136,33 @@ void VideoModelNG::SetLoop(bool loop)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
     videoPattern->UpdateLoop(loop);
+}
+
+void VideoModelNG::SetSurfaceBackgroundColor(Color color)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
+    videoPattern->SetSurfaceBackgroundColor(color);
+}
+
+void VideoModelNG::SetShortcutKeyEnabled(bool isEnableShortcutKey)
+{
+    auto* frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
+    videoPattern->SetShortcutKeyEnabled(isEnableShortcutKey);
 }
 
 void VideoModelNG::SetOnStart(VideoEventFunc&& onStart)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStart(std::move(onStart));
 }
@@ -141,7 +171,7 @@ void VideoModelNG::SetOnPause(VideoEventFunc&& onPause)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnPause(std::move(onPause));
 }
@@ -150,7 +180,7 @@ void VideoModelNG::SetOnFinish(VideoEventFunc&& onFinish)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnFinish(std::move(onFinish));
 }
@@ -159,7 +189,7 @@ void VideoModelNG::SetOnError(VideoEventFunc&& onError)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnError(std::move(onError));
 }
@@ -168,7 +198,7 @@ void VideoModelNG::SetOnPrepared(VideoEventFunc&& onPrepared)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnPrepared(std::move(onPrepared));
 }
@@ -177,7 +207,7 @@ void VideoModelNG::SetOnSeeking(VideoEventFunc&& onSeeking)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSeeking(std::move(onSeeking));
 }
@@ -186,7 +216,7 @@ void VideoModelNG::SetOnSeeked(VideoEventFunc&& onSeeked)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSeeked(std::move(onSeeked));
 }
@@ -195,7 +225,7 @@ void VideoModelNG::SetOnUpdate(VideoEventFunc&& onUpdate)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnUpdate(std::move(onUpdate));
 }
@@ -204,7 +234,7 @@ void VideoModelNG::SetOnStop(VideoEventFunc&& onStop)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStop(std::move(onStop));
 }
@@ -213,27 +243,16 @@ void VideoModelNG::SetOnFullScreenChange(VideoEventFunc&& onFullScreenChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnFullScreenChange(std::move(onFullScreenChange));
-}
-
-void VideoModelNG::AddDragFrameNodeToManager() const
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    CHECK_NULL_VOID(frameNode);
-
-    dragDropManager->AddDragFrameNode(frameNode->GetId(), frameNode);
 }
 
 void VideoModelNG::SetAutoPlay(FrameNode* frameNode, bool autoPlay)
 {
     CHECK_NULL_VOID(frameNode);
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
     videoPattern->UpdateAutoPlay(autoPlay);
 }
 
@@ -251,14 +270,32 @@ void VideoModelNG::SetMuted(FrameNode* frameNode, bool muted)
 {
     CHECK_NULL_VOID(frameNode);
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
     videoPattern->UpdateMuted(muted);
+}
+
+void VideoModelNG::SetSurfaceBackgroundColor(FrameNode* frameNode, Color color)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
+    videoPattern->SetSurfaceBackgroundColor(color);
 }
 
 void VideoModelNG::SetLoop(FrameNode* frameNode, bool loop)
 {
     CHECK_NULL_VOID(frameNode);
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
     videoPattern->UpdateLoop(loop);
+}
+
+void VideoModelNG::SetShortcutKeyEnabled(FrameNode* frameNode, bool isEnableShortcutKey)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
+    videoPattern->SetShortcutKeyEnabled(isEnableShortcutKey);
 }
 
 void VideoModelNG::EnableAnalyzer(bool enable)
@@ -266,6 +303,7 @@ void VideoModelNG::EnableAnalyzer(bool enable)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
     videoPattern->EnableAnalyzer(enable);
 }
 
@@ -274,6 +312,7 @@ void VideoModelNG::SetImageAnalyzerConfig(void* config)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
     videoPattern->SetImageAnalyzerConfig(config);
 }
 

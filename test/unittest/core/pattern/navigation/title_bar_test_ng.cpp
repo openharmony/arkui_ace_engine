@@ -18,12 +18,14 @@
 #define protected public
 #define private public
 
+#include "base/i18n/localization.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 
 #include "core/animation/spring_curve.h"
 #include "core/animation/spring_motion.h"
 
+#include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -34,8 +36,10 @@
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/bar_item_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -45,8 +49,6 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float RET_VALUE = 0.0;
-constexpr float OFFSET_HANDLED = 0.07;
-constexpr float OFFSET_VALUE = 59.001;
 constexpr float DEFAULT_SIZE_LENGTH = 20.0f;
 constexpr Color FRONT_COLOR = Color(0xff0000ff);
 const std::string BAR_ITEM_ETS_TAG = "TitleBar";
@@ -167,6 +169,313 @@ HWTEST_F(TitleBarTestNg, GetTempTitleBarHeight001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetTempTitleBarHeight002
+ * @tc.desc: Test GetTempTitleBarHeight interface after scroll by overDragging
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, GetTempTitleBarHeight002, TestSize.Level1)
+{
+    /*
+     * @tc.steps: step1. init titleBar relative environment
+     */
+    InitTitleBarTestNg();
+    MockPipelineContext::SetUp();
+    auto subtitleNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    frameNode_->SetSubtitle(subtitleNode);
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::FREE);
+    auto fullTitleHeight = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    titleBarPattern_->maxTitleBarHeight_ = fullTitleHeight;
+    EXPECT_TRUE(NearEqual(titleBarPattern_->maxTitleBarHeight_, fullTitleHeight));
+    titleBarPattern_->currentTitleBarHeight_ = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    EXPECT_TRUE(NearEqual(titleBarPattern_->currentTitleBarHeight_, fullTitleHeight));
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+
+    auto paddingTwoLines = theme->GetPaddingTopTwolines();
+    auto titleSpaceVertical = static_cast<float>(theme->GetTitleSpaceVertical().ConvertToPx());
+    auto titleSpace = fullTitleHeight - static_cast<float>(paddingTwoLines.ConvertToPx());
+    auto titleNode = frameNode_->GetTitle();
+    ASSERT_NE(titleNode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(titleNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto titleGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(titleGeometryNode, nullptr);
+    auto titleHeight = titleGeometryNode->GetFrameSize().Height();
+    frameNode = AceType::DynamicCast<FrameNode>(subtitleNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto subtitleGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(subtitleGeometryNode, nullptr);
+    auto subtitleHeight = subtitleGeometryNode->GetFrameSize().Height();
+    auto titleRealHeight = titleHeight + subtitleHeight + titleSpaceVertical;
+    float dividerOffset = 2.0f;
+    auto titleOffsetY = (titleSpace - titleRealHeight +
+        static_cast<float>(paddingTwoLines.ConvertToPx())) / dividerOffset;
+    titleBarPattern_->SetCurrentTitleOffsetY(titleOffsetY);
+    titleBarPattern_->initialTitleOffsetY_ = titleOffsetY;
+
+    /*
+     * @tc.steps: step2. start titleBar scroll and check whether tempTitleBarHeight is equal to fullTitleBarHeight.
+     */
+    titleBarPattern_->OnCoordScrollStart();
+    auto startTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    EXPECT_TRUE(NearEqual(startTempTitleBarHeight, fullTitleHeight));
+
+    /*
+     * @tc.steps: step3. start overDragging and check whether tempTitleBarHeight is changing as well.
+     */
+    float overDragDistance = 100.0f;
+    auto offsetHandled = titleBarPattern_->OnCoordScrollUpdate(overDragDistance);
+    EXPECT_TRUE(NearZero(offsetHandled));
+    auto overDragTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    auto expectedOverDragHeight = fullTitleHeight + overDragDistance / 6.0f;
+    EXPECT_TRUE(NearEqual(overDragTempTitleBarHeight, expectedOverDragHeight));
+
+    /*
+     * @tc.steps: step4. overDrag again,
+     * and check whether tempTitleBarHeight is changing as well.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(overDragDistance);
+    EXPECT_TRUE(NearZero(offsetHandled));
+    overDragTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    expectedOverDragHeight += overDragDistance / 6.0f;
+    EXPECT_TRUE(NearEqual(overDragTempTitleBarHeight, expectedOverDragHeight));
+
+    /*
+     * @tc.steps: step4. recover drag state,
+     * check whether tempTitleBarHeight is equal to fullTitleBarHeight.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(-overDragDistance * 2.0f);
+    EXPECT_TRUE(NearZero(offsetHandled));
+    overDragTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    expectedOverDragHeight = fullTitleHeight;
+    EXPECT_TRUE(NearEqual(overDragTempTitleBarHeight, expectedOverDragHeight));
+
+    /*
+     * @tc.steps: step5. overdrag and send scroll end,
+     * check whether tempTitleBarHeight recover to fullTitleBarHeight.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(overDragDistance * 3.0f);
+    EXPECT_TRUE(NearZero(offsetHandled));
+    titleBarPattern_->OnCoordScrollEnd();
+    overDragTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    expectedOverDragHeight = fullTitleHeight;
+    EXPECT_TRUE(NearEqual(overDragTempTitleBarHeight, expectedOverDragHeight));
+}
+
+/**
+ * @tc.name: GetTempTitleBarHeight003
+ * @tc.desc: Test GetTempTitleBarHeight after scrolling between min title height and max title height
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, GetTempTitleBarHeight003, TestSize.Level1)
+{
+    /*
+     * @tc.steps: step1. init titleBar relative environment
+     */
+    InitTitleBarTestNg();
+    MockPipelineContext::SetUp();
+    auto subtitleNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    frameNode_->SetSubtitle(subtitleNode);
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::FREE);
+    auto fullTitleHeight = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    titleBarPattern_->maxTitleBarHeight_ = fullTitleHeight;
+    EXPECT_TRUE(NearEqual(titleBarPattern_->maxTitleBarHeight_, fullTitleHeight));
+    titleBarPattern_->currentTitleBarHeight_ = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    EXPECT_TRUE(NearEqual(titleBarPattern_->currentTitleBarHeight_, fullTitleHeight));
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+
+    auto paddingTwoLines = theme->GetPaddingTopTwolines();
+    auto titleSpaceVertical = static_cast<float>(theme->GetTitleSpaceVertical().ConvertToPx());
+    auto titleSpace = fullTitleHeight - static_cast<float>(paddingTwoLines.ConvertToPx());
+    auto titleNode = frameNode_->GetTitle();
+    ASSERT_NE(titleNode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(titleNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto titleGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(titleGeometryNode, nullptr);
+    auto titleHeight = titleGeometryNode->GetFrameSize().Height();
+    frameNode = AceType::DynamicCast<FrameNode>(subtitleNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto subtitleGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(subtitleGeometryNode, nullptr);
+    auto subtitleHeight = subtitleGeometryNode->GetFrameSize().Height();
+    auto titleRealHeight = titleHeight + subtitleHeight + titleSpaceVertical;
+    float dividerOffset = 2.0f;
+    auto titleOffsetY = (titleSpace - titleRealHeight +
+        static_cast<float>(paddingTwoLines.ConvertToPx())) / dividerOffset;
+    titleBarPattern_->SetCurrentTitleOffsetY(titleOffsetY);
+    titleBarPattern_->initialTitleOffsetY_ = titleOffsetY;
+
+    /*
+     * @tc.steps: step2. start titleBar scroll and check whether tempTitleBarHeight is equal to fullTitleBarHeight.
+     */
+    titleBarPattern_->OnCoordScrollStart();
+    auto startTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    EXPECT_TRUE(NearEqual(startTempTitleBarHeight, fullTitleHeight));
+
+    /*
+     * @tc.steps: step3. start dragging,
+     * and check whether tempTitleBarHeight is changing between min and max titlebar height.
+     */
+    float dragDistance = -10.0f;
+    auto offsetHandled = titleBarPattern_->OnCoordScrollUpdate(dragDistance);
+    EXPECT_TRUE(NearEqual(offsetHandled, dragDistance));
+    auto dragTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    auto expectedDragHeight = fullTitleHeight + dragDistance;
+    EXPECT_TRUE(NearEqual(dragTempTitleBarHeight, expectedDragHeight));
+
+    /*
+     * @tc.steps: step4. drag again,
+     * and check whether tempTitleBarHeight is changing between min and max titlebar height.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(dragDistance);
+    EXPECT_TRUE(NearEqual(offsetHandled, dragDistance));
+    dragTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    expectedDragHeight += dragDistance;
+    EXPECT_TRUE(NearEqual(dragTempTitleBarHeight, expectedDragHeight));
+
+    /*
+     * @tc.steps: step4. recover drag state,
+     * check whether tempTitleBarHeight is equal to fullTitleBarHeight.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(-dragDistance * 2.0f);
+    EXPECT_TRUE(NearEqual(offsetHandled, -dragDistance * 2.0f));
+    dragTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    expectedDragHeight = fullTitleHeight;
+    EXPECT_TRUE(NearEqual(dragTempTitleBarHeight, expectedDragHeight));
+
+    /*
+     * @tc.steps: step5. drag and send scroll end,
+     * check whether tempTitleBarHeight recover to fullTitleBarHeight.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(dragDistance);
+    EXPECT_TRUE(NearEqual(offsetHandled, dragDistance));
+    titleBarPattern_->OnCoordScrollEnd();
+    dragTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    expectedDragHeight = fullTitleHeight;
+    EXPECT_TRUE(NearEqual(dragTempTitleBarHeight, expectedDragHeight));
+}
+
+/**
+ * @tc.name: GetTempTitleBarHeight004
+ * @tc.desc: Test GetTempTitleBarHeight after scrolling and the target height is smaller than the minHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, GetTempTitleBarHeight004, TestSize.Level1)
+{
+    /*
+     * @tc.steps: step1. init titleBar relative environment
+     */
+    InitTitleBarTestNg();
+    MockPipelineContext::SetUp();
+    auto subtitleNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    frameNode_->SetSubtitle(subtitleNode);
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::FREE);
+    auto fullTitleHeight = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    titleBarPattern_->SetMaxTitleBarHeight();
+    EXPECT_TRUE(NearEqual(titleBarPattern_->maxTitleBarHeight_, fullTitleHeight));
+    auto minTitleHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    titleBarPattern_->minTitleHeight_ = minTitleHeight;
+    EXPECT_TRUE(NearEqual(titleBarPattern_->minTitleHeight_, minTitleHeight));
+    titleBarPattern_->currentTitleBarHeight_ = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    EXPECT_TRUE(NearEqual(titleBarPattern_->currentTitleBarHeight_, fullTitleHeight));
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+
+    auto paddingTwoLines = theme->GetPaddingTopTwolines();
+    auto titleSpaceVertical = static_cast<float>(theme->GetTitleSpaceVertical().ConvertToPx());
+    auto titleSpace = fullTitleHeight - static_cast<float>(paddingTwoLines.ConvertToPx());
+    auto titleNode = frameNode_->GetTitle();
+    ASSERT_NE(titleNode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(titleNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto titleGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(titleGeometryNode, nullptr);
+    auto titleHeight = titleGeometryNode->GetFrameSize().Height();
+    frameNode = AceType::DynamicCast<FrameNode>(subtitleNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto subtitleGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(subtitleGeometryNode, nullptr);
+    auto subtitleHeight = subtitleGeometryNode->GetFrameSize().Height();
+    auto titleRealHeight = titleHeight + subtitleHeight + titleSpaceVertical;
+    float dividerOffset = 2.0f;
+    auto titleOffsetY = (titleSpace - titleRealHeight +
+        static_cast<float>(paddingTwoLines.ConvertToPx())) / dividerOffset;
+    titleBarPattern_->SetCurrentTitleOffsetY(titleOffsetY);
+    titleBarPattern_->initialTitleOffsetY_ = titleOffsetY;
+
+    /*
+     * @tc.steps: step2. start titleBar scroll and check whether tempTitleBarHeight is equal to fullTitleBarHeight.
+     */
+    titleBarPattern_->OnCoordScrollStart();
+    auto startTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    EXPECT_TRUE(NearEqual(startTempTitleBarHeight, fullTitleHeight));
+
+    /*
+     * @tc.steps: step3. start dragging to minHeight
+     * and check whether tempTitleBarHeight is equal to minHeight.
+     */
+    float dragDistance = minTitleHeight - fullTitleHeight;
+    auto offsetHandled = titleBarPattern_->OnCoordScrollUpdate(dragDistance);
+    EXPECT_TRUE(NearEqual(offsetHandled, dragDistance));
+    auto dragTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    auto expectedDragHeight = fullTitleHeight + dragDistance;
+    EXPECT_TRUE(NearEqual(dragTempTitleBarHeight, expectedDragHeight));
+
+    /*
+     * @tc.steps: step4. drag again,
+     * and check whether tempTitleBarHeight is changing between min and max titlebar height.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(dragDistance);
+    EXPECT_TRUE(NearEqual(offsetHandled, 0.0f));
+    dragTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    EXPECT_TRUE(NearEqual(dragTempTitleBarHeight, expectedDragHeight));
+
+    /*
+     * @tc.steps: step4. recover drag state,
+     * check whether tempTitleBarHeight is equal to fullTitleBarHeight.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(-dragDistance * 2.0f);
+    EXPECT_TRUE(NearEqual(offsetHandled, -dragDistance));
+    dragTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    expectedDragHeight = fullTitleHeight;
+    EXPECT_TRUE(NearEqual(dragTempTitleBarHeight, expectedDragHeight));
+
+    /*
+     * @tc.steps: step5. drag and send scroll end,
+     * check whether tempTitleBarHeight recover to minTitleHeight.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(dragDistance);
+    EXPECT_TRUE(NearEqual(offsetHandled, dragDistance));
+    titleBarPattern_->OnCoordScrollEnd();
+    dragTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    expectedDragHeight = minTitleHeight;
+    EXPECT_TRUE(NearEqual(dragTempTitleBarHeight, expectedDragHeight));
+}
+
+/**
  * @tc.name: GetDefaultTitleBarHeight001
  * @tc.desc: Test GetDefaultTitleBarHeight interface.
  * @tc.type: FUNC
@@ -188,6 +497,321 @@ HWTEST_F(TitleBarTestNg, GetTempTitleOffsetY001, TestSize.Level1)
     auto titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
     auto ret = titleBarPattern->GetTempTitleOffsetY();
     EXPECT_EQ(ret, RET_VALUE);
+}
+
+/**
+ * @tc.name: GetTempTitleOffsetY002
+ * @tc.desc: Test GetTempTitleOffsetY interface after overDragging
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, GetTempTitleOffsetY002, TestSize.Level1)
+{
+    /*
+     * @tc.steps: step1. init titleBar relative environment
+     */
+    InitTitleBarTestNg();
+    MockPipelineContext::SetUp();
+    auto subtitleNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    frameNode_->SetSubtitle(subtitleNode);
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::FREE);
+    auto fullTitleHeight = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    titleBarPattern_->SetMaxTitleBarHeight();
+    EXPECT_TRUE(NearEqual(titleBarPattern_->maxTitleBarHeight_, fullTitleHeight));
+    auto minTitleHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    titleBarPattern_->minTitleHeight_ = minTitleHeight;
+    EXPECT_TRUE(NearEqual(titleBarPattern_->minTitleHeight_, minTitleHeight));
+    titleBarPattern_->currentTitleBarHeight_ = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    EXPECT_TRUE(NearEqual(titleBarPattern_->currentTitleBarHeight_, fullTitleHeight));
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+
+    auto paddingTwoLines = theme->GetPaddingTopTwolines();
+    auto titleSpaceVertical = static_cast<float>(theme->GetTitleSpaceVertical().ConvertToPx());
+    auto titleSpace = fullTitleHeight - static_cast<float>(paddingTwoLines.ConvertToPx());
+    auto titleNode = frameNode_->GetTitle();
+    ASSERT_NE(titleNode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(titleNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto titleGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(titleGeometryNode, nullptr);
+    auto titleHeight = titleGeometryNode->GetFrameSize().Height();
+    frameNode = AceType::DynamicCast<FrameNode>(subtitleNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto subtitleGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(subtitleGeometryNode, nullptr);
+    auto subtitleHeight = subtitleGeometryNode->GetFrameSize().Height();
+    auto titleRealHeight = titleHeight + subtitleHeight + titleSpaceVertical;
+    float dividerOffset = 2.0f;
+    auto titleOffsetY = (titleSpace - titleRealHeight +
+        static_cast<float>(paddingTwoLines.ConvertToPx())) / dividerOffset;
+    titleBarPattern_->SetCurrentTitleOffsetY(titleOffsetY);
+    titleBarPattern_->initialTitleOffsetY_ = titleOffsetY;
+    
+    /*
+     * @tc.steps: step2. start titleBar scroll and check whether tempTitleOffsetY is equal to titleOffsetY.
+     */
+    titleBarPattern_->OnCoordScrollStart();
+    auto startTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    EXPECT_TRUE(NearEqual(startTempTitleOffsetY, 0.f));
+
+    /*
+     * @tc.steps: step3. start overDragging and check whether tempTitleOffsetY is changing as well.
+     */
+    float overDragDistance = 100.0f;
+    auto offsetHandled = titleBarPattern_->OnCoordScrollUpdate(overDragDistance);
+    EXPECT_TRUE(NearZero(offsetHandled));
+    auto overDragTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    auto expectedOverDragTitleOffsetY = titleOffsetY;
+    EXPECT_TRUE(NearEqual(overDragTempTitleOffsetY, expectedOverDragTitleOffsetY));
+
+    /*
+     * @tc.steps: step4. overDrag again,
+     * and check whether tempTitleOffsetY is changing as well.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(overDragDistance);
+    EXPECT_TRUE(NearZero(offsetHandled));
+    overDragTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    expectedOverDragTitleOffsetY = titleOffsetY;
+    EXPECT_TRUE(NearEqual(overDragTempTitleOffsetY, expectedOverDragTitleOffsetY));
+
+    /*
+     * @tc.steps: step4. recover drag state,
+     * check whether tempTitleOffsetY is equal to titleOffsetY.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(-overDragDistance * 2.0f);
+    EXPECT_TRUE(NearZero(offsetHandled));
+    overDragTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    expectedOverDragTitleOffsetY = titleOffsetY;
+    EXPECT_TRUE(NearEqual(overDragTempTitleOffsetY, expectedOverDragTitleOffsetY));
+
+    /*
+     * @tc.steps: step5. overdrag and send scroll end,
+     * check whether tempTitleOffsetY recover to 0.f.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(overDragDistance * 3.0f);
+    EXPECT_TRUE(NearZero(offsetHandled));
+    titleBarPattern_->OnCoordScrollEnd();
+    overDragTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    expectedOverDragTitleOffsetY = titleOffsetY;
+    EXPECT_TRUE(NearEqual(overDragTempTitleOffsetY, 0.f));
+}
+
+/**
+ * @tc.name: GetTempTitleOffsetY003
+ * @tc.desc: Test GetTempTitleOffsetY interface after scrolling between min title height and max title height
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, GetTempTitleOffsetY003, TestSize.Level1)
+{
+    /*
+     * @tc.steps: step1. init titleBar relative environment
+     */
+    InitTitleBarTestNg();
+    MockPipelineContext::SetUp();
+    auto subtitleNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    frameNode_->SetSubtitle(subtitleNode);
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::FREE);
+    auto fullTitleHeight = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    titleBarPattern_->SetMaxTitleBarHeight();
+    EXPECT_TRUE(NearEqual(titleBarPattern_->maxTitleBarHeight_, fullTitleHeight));
+    auto minTitleHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    titleBarPattern_->minTitleHeight_ = minTitleHeight;
+    EXPECT_TRUE(NearEqual(titleBarPattern_->minTitleHeight_, minTitleHeight));
+    titleBarPattern_->currentTitleBarHeight_ = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    EXPECT_TRUE(NearEqual(titleBarPattern_->currentTitleBarHeight_, fullTitleHeight));
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+
+    auto paddingTwoLines = theme->GetPaddingTopTwolines();
+    auto titleSpaceVertical = static_cast<float>(theme->GetTitleSpaceVertical().ConvertToPx());
+    auto titleSpace = fullTitleHeight - static_cast<float>(paddingTwoLines.ConvertToPx());
+    auto titleNode = frameNode_->GetTitle();
+    ASSERT_NE(titleNode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(titleNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto titleGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(titleGeometryNode, nullptr);
+    auto titleHeight = titleGeometryNode->GetFrameSize().Height();
+    frameNode = AceType::DynamicCast<FrameNode>(subtitleNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto subtitleGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(subtitleGeometryNode, nullptr);
+    auto subtitleHeight = subtitleGeometryNode->GetFrameSize().Height();
+    auto titleRealHeight = titleHeight + subtitleHeight + titleSpaceVertical;
+    float dividerOffset = 2.0f;
+    auto titleOffsetY = (titleSpace - titleRealHeight +
+        static_cast<float>(paddingTwoLines.ConvertToPx())) / dividerOffset;
+    titleBarPattern_->SetCurrentTitleOffsetY(titleOffsetY);
+    titleBarPattern_->initialTitleOffsetY_ = titleOffsetY;
+    
+    /*
+     * @tc.steps: step2. start titleBar scroll and check whether tempTitleOffsetY is equal to 0.f.
+     */
+    titleBarPattern_->OnCoordScrollStart();
+    auto startTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    EXPECT_TRUE(NearEqual(startTempTitleOffsetY, 0.f));
+    auto moveRatio = titleBarPattern_->moveRatio_;
+
+    /*
+     * @tc.steps: step3. start dragging
+     * and check whether tempTitleOffsetY is changing between min and max title offsetY.
+     */
+    float dragDistance = -10.0f;
+    auto offsetHandled = titleBarPattern_->OnCoordScrollUpdate(dragDistance);
+    EXPECT_TRUE(NearEqual(offsetHandled, dragDistance));
+    auto dragTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    auto expectedDragTitleOffsetY = titleOffsetY + dragDistance * moveRatio;
+    EXPECT_TRUE(NearEqual(dragTempTitleOffsetY, expectedDragTitleOffsetY));
+
+    /*
+     * @tc.steps: step4. drag again,
+     * and check whether tempTitleOffsetY is changing between min and max title offsetY.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(dragDistance);
+    EXPECT_TRUE(NearEqual(offsetHandled, dragDistance));
+    dragTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    expectedDragTitleOffsetY += dragDistance * moveRatio;
+    EXPECT_TRUE(NearEqual(dragTempTitleOffsetY, expectedDragTitleOffsetY));
+
+    /*
+     * @tc.steps: step4. recover drag state,
+     * check whether tempTitleOffsetY is equal to titleOffsetY.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(-dragDistance * 2.0f);
+    EXPECT_TRUE(NearEqual(offsetHandled, -dragDistance * 2.0f));
+    dragTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    expectedDragTitleOffsetY = titleOffsetY;
+    EXPECT_TRUE(NearEqual(dragTempTitleOffsetY, expectedDragTitleOffsetY));
+
+    /*
+     * @tc.steps: step5. drag and send scroll end,
+     * check whether tempTitleOffsetY recover to 0.f.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(dragDistance);
+    EXPECT_TRUE(NearEqual(offsetHandled, dragDistance));
+    titleBarPattern_->OnCoordScrollEnd();
+    dragTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    expectedDragTitleOffsetY = titleOffsetY;
+    EXPECT_TRUE(NearEqual(dragTempTitleOffsetY, 0.f));
+}
+
+/**
+ * @tc.name: GetTempTitleOffsetY004
+ * @tc.desc: Test GetTempTitleOffsetY interface after scrolling and the target height is smaller than the minHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, GetTempTitleOffsetY004, TestSize.Level1)
+{
+    /*
+     * @tc.steps: step1. init titleBar relative environment
+     */
+    InitTitleBarTestNg();
+    MockPipelineContext::SetUp();
+    auto subtitleNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    frameNode_->SetSubtitle(subtitleNode);
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::FREE);
+    auto fullTitleHeight = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    titleBarPattern_->SetMaxTitleBarHeight();
+    EXPECT_TRUE(NearEqual(titleBarPattern_->maxTitleBarHeight_, fullTitleHeight));
+    auto minTitleHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    titleBarPattern_->minTitleHeight_ = minTitleHeight;
+    EXPECT_TRUE(NearEqual(titleBarPattern_->minTitleHeight_, minTitleHeight));
+    titleBarPattern_->currentTitleBarHeight_ = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    EXPECT_TRUE(NearEqual(titleBarPattern_->currentTitleBarHeight_, fullTitleHeight));
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+
+    auto paddingTwoLines = theme->GetPaddingTopTwolines();
+    auto titleSpaceVertical = static_cast<float>(theme->GetTitleSpaceVertical().ConvertToPx());
+    auto titleSpace = fullTitleHeight - static_cast<float>(paddingTwoLines.ConvertToPx());
+    auto titleNode = frameNode_->GetTitle();
+    ASSERT_NE(titleNode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(titleNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto titleGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(titleGeometryNode, nullptr);
+    auto titleHeight = titleGeometryNode->GetFrameSize().Height();
+    frameNode = AceType::DynamicCast<FrameNode>(subtitleNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto subtitleGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(subtitleGeometryNode, nullptr);
+    auto subtitleHeight = subtitleGeometryNode->GetFrameSize().Height();
+    auto titleRealHeight = titleHeight + subtitleHeight + titleSpaceVertical;
+    float dividerOffset = 2.0f;
+    auto titleOffsetY = (titleSpace - titleRealHeight +
+        static_cast<float>(paddingTwoLines.ConvertToPx())) / dividerOffset;
+    titleBarPattern_->SetCurrentTitleOffsetY(titleOffsetY);
+    titleBarPattern_->initialTitleOffsetY_ = titleOffsetY;
+    
+    /*
+     * @tc.steps: step2. start titleBar scroll and check whether tempTitleOffsetY is equal to 0.f.
+     */
+    titleBarPattern_->OnCoordScrollStart();
+    auto startTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    EXPECT_TRUE(NearEqual(startTempTitleOffsetY, 0.f));
+    auto moveRatio = titleBarPattern_->moveRatio_;
+
+    /*
+     * @tc.steps: step3. start dragging to minHeight
+     * and check whether tempTitleOffsetY is equal to minHeight.
+     */
+    float dragDistance = minTitleHeight - fullTitleHeight;
+    auto offsetHandled = titleBarPattern_->OnCoordScrollUpdate(dragDistance);
+    EXPECT_TRUE(NearEqual(offsetHandled, dragDistance));
+    auto dragTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    auto expectedDragTitleOffsetY = titleOffsetY + dragDistance * moveRatio;
+    EXPECT_TRUE(NearEqual(dragTempTitleOffsetY, expectedDragTitleOffsetY));
+
+    /*
+     * @tc.steps: step4. drag again,
+     * and check whether tempTitleOffsetY is equal to minHeight.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(dragDistance);
+    EXPECT_TRUE(NearEqual(offsetHandled, 0.0f));
+    dragTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    EXPECT_TRUE(NearEqual(dragTempTitleOffsetY, expectedDragTitleOffsetY));
+
+    /*
+     * @tc.steps: step4. recover drag state,
+     * check whether tempTitleOffsetY is equal to titleOffsetY.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(-dragDistance * 2.0f);
+    EXPECT_TRUE(NearEqual(offsetHandled, -dragDistance));
+    dragTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    expectedDragTitleOffsetY = titleOffsetY;
+    EXPECT_TRUE(NearEqual(dragTempTitleOffsetY, expectedDragTitleOffsetY));
+
+    /*
+     * @tc.steps: step5. drag and send scroll end,
+     * check whether tempTitleOffsetY recover to min titleOffsetY.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(dragDistance);
+    EXPECT_TRUE(NearEqual(offsetHandled, dragDistance));
+    titleBarPattern_->OnCoordScrollEnd();
+    dragTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    expectedDragTitleOffsetY = titleBarPattern_->minTitleOffsetY_;
+    EXPECT_TRUE(NearEqual(dragTempTitleOffsetY, expectedDragTitleOffsetY));
 }
 
 /**
@@ -384,66 +1008,6 @@ HWTEST_F(TitleBarTestNg, TitleBarAccessibilityPropertyGetText001, TestSize.Level
 }
 
 /**
- * @tc.name: TitleBarPattern002
- * @tc.desc: Test ProcessTittleDragStart function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, TitleBarPattern002, TestSize.Level1)
-{
-    constexpr float offset = 200.0f;
-    InitTitleBarTestNg();
-    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
-    ASSERT_NE(titleBarLayoutProperty, nullptr);
-    titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
-    frameNode_->GetSubtitle();
-    titleBarPattern_->ProcessTitleDragStart(offset);
-    EXPECT_EQ(titleBarPattern_->GetTempTitleBarHeight(), titleBarPattern_->maxTitleBarHeight_);
-}
-
-/**
- * @tc.name: TitleBarPatternProcessTitleDragStartTest002
- * @tc.desc: Test ProcessTitleDragStart function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, TitleBarPatternProcessTitleDragStartTest002, TestSize.Level1)
-{
-    constexpr float offset = 200.0f;
-    InitTitleBarTestNg();
-    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
-    ASSERT_NE(titleBarLayoutProperty, nullptr);
-    titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
-    frameNode_->GetSubtitle();
-    titleBarPattern_->ProcessTitleDragStart(offset);
-    EXPECT_EQ(titleBarPattern_->GetTempTitleBarHeight(), titleBarPattern_->maxTitleBarHeight_);
-
-    titleBarPattern_->SpringAnimation(100.0f, 0);
-    titleBarPattern_->AnimateTo(offset);
-    titleBarPattern_->ProcessTitleDragStart(offset);
-    EXPECT_EQ(titleBarPattern_->GetTempTitleBarHeight(), titleBarPattern_->maxTitleBarHeight_);
-}
-
-/**
- * @tc.name: TitleBarPattern003
- * @tc.desc: Test ProcessTittleDragUpdate function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, TitleBarPattern003, TestSize.Level1)
-{
-    constexpr float offset = 190.0f;
-    InitTitleBarTestNg();
-    frameNode_->GetSubtitle();
-    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
-    ASSERT_NE(titleBarLayoutProperty, nullptr);
-    titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
-    titleBarPattern_->ProcessTitleDragUpdate(offset);
-    titleBarPattern_->ProcessTitleDragEnd();
-    titleBarPattern_->SetTempTitleOffsetY();
-    EXPECT_EQ(titleBarPattern_->GetTempTitleOffsetY(), titleBarPattern_->maxTitleOffsetY_);
-    titleBarPattern_->SetTempSubTitleOffsetY();
-    EXPECT_EQ(titleBarPattern_->GetTempSubTitleOffsetY(), titleBarPattern_->maxTitleOffsetY_);
-}
-
-/**
  * @tc.name: TitleBarPattern004
  * @tc.desc: Test SpringAnimation function.
  * @tc.type: FUNC
@@ -484,127 +1048,6 @@ HWTEST_F(TitleBarTestNg, TitleBarPattern005, TestSize.Level1)
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
     EXPECT_EQ(renderContext->GetTransformScale(), VectorF(1.0f, 1.0f));
-}
-
-/**
- * @tc.name: TitleBarPattern007
- * @tc.desc: Test CalculateHandledOffsetMinTitle function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, TitleBarPattern007, TestSize.Level1)
-{
-    auto frameNode =
-        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
-    EXPECT_NE(frameNode, nullptr);
-    auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
-    EXPECT_NE(titleBarPattern, nullptr);
-    float offset = 0.07f;
-    float lastCordScrollOffset = 56.0001f;
-    EXPECT_EQ(titleBarPattern->CalculateHandledOffsetMinTitle(offset, lastCordScrollOffset), RET_VALUE);
-}
-
-/**
- * @tc.name: TitleBarPattern008
- * @tc.desc: Test CalculateHandledOffsetMinTitle function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, TitleBarPattern008, TestSize.Level1)
-{
-    auto frameNode =
-        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
-    EXPECT_NE(frameNode, nullptr);
-    auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
-    EXPECT_NE(titleBarPattern, nullptr);
-    float offset = 0.07f;
-    float lastCordScrollOffset = 0.0001f;
-    EXPECT_EQ(titleBarPattern->CalculateHandledOffsetMinTitle(offset, lastCordScrollOffset), RET_VALUE);
-}
-
-/**
- * @tc.name: TitleBarPattern009
- * @tc.desc: Test CalculateHandledOffsetMinTitle function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, TitleBarPattern009, TestSize.Level1)
-{
-    auto frameNode =
-        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
-    EXPECT_NE(frameNode, nullptr);
-    auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
-    EXPECT_NE(titleBarPattern, nullptr);
-    float offset = 0.07f;
-    float lastCordScrollOffset = 56.01f;
-    titleBarPattern->maxTitleBarHeight_ = 59.001f;
-    EXPECT_EQ(titleBarPattern->CalculateHandledOffsetMinTitle(offset, lastCordScrollOffset), OFFSET_HANDLED);
-}
-
-/**
- * @tc.name: TitleBarPattern010
- * @tc.desc: Test CalculateHandledOffsetMaxTitle function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, TitleBarPattern010, TestSize.Level1)
-{
-    auto frameNode =
-        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
-    EXPECT_NE(frameNode, nullptr);
-    auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
-    EXPECT_NE(titleBarPattern, nullptr);
-    float offset = 0.07f;
-    float lastCordScrollOffset = 56.0001f;
-    EXPECT_EQ(titleBarPattern->CalculateHandledOffsetMaxTitle(offset, lastCordScrollOffset), RET_VALUE);
-}
-
-/**
- * @tc.name: TitleBarPattern011
- * @tc.desc: Test CalculateHandledOffsetMaxTitle function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, TitleBarPattern011, TestSize.Level1)
-{
-    auto frameNode =
-        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
-    EXPECT_NE(frameNode, nullptr);
-    auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
-    EXPECT_NE(titleBarPattern, nullptr);
-    float offset = 0.07f;
-    float lastCordScrollOffset = 0.0001f;
-    titleBarPattern->maxTitleBarHeight_ = 59.001f;
-    EXPECT_EQ(titleBarPattern->CalculateHandledOffsetMaxTitle(offset, lastCordScrollOffset), OFFSET_VALUE);
-}
-
-/**
- * @tc.name: TitleBarPattern013
- * @tc.desc: Test CalculateHandledOffsetBetweenMinAndMaxTitle function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, TitleBarPattern013, TestSize.Level1)
-{
-    auto frameNode =
-        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
-    EXPECT_NE(frameNode, nullptr);
-    auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
-    EXPECT_NE(titleBarPattern, nullptr);
-    float offset = 0.07f;
-    float lastCordScrollOffset = 0.0001f;
-    EXPECT_EQ(titleBarPattern->CalculateHandledOffsetBetweenMinAndMaxTitle(offset, lastCordScrollOffset), RET_VALUE);
-}
-
-/**
- * @tc.name: TitleBarPattern014
- * @tc.desc: Test CalculateHandledOffsetBetweenMinAndMaxTitle function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, TitleBarPattern014, TestSize.Level1)
-{
-    auto frameNode =
-        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
-    EXPECT_NE(frameNode, nullptr);
-    auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
-    EXPECT_NE(titleBarPattern, nullptr);
-    float offset = 0.07f;
-    float lastCordScrollOffset = 0.01f;
-    EXPECT_EQ(titleBarPattern->CalculateHandledOffsetBetweenMinAndMaxTitle(offset, lastCordScrollOffset), RET_VALUE);
 }
 
 /**
@@ -653,7 +1096,9 @@ HWTEST_F(TitleBarTestNg, TitleBarPattern017, TestSize.Level1)
     auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
     EXPECT_NE(titleBarPattern, nullptr);
     NavigationTitlebarOptions opt;
-    opt.bgOptions.blurStyle = std::make_optional(BlurStyle::NO_MATERIAL);
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
+    opt.bgOptions.blurStyleOption = blurStyleOption;
     titleBarPattern->SetTitlebarOptions(std::move(opt));
 }
 
@@ -671,79 +1116,6 @@ HWTEST_F(TitleBarTestNg, TitleBarPattern018, TestSize.Level1)
     EXPECT_NE(titleBarPattern, nullptr);
     float overDragOffset = -0.1;
     titleBarPattern->UpdateScaleByDragOverDragOffset(overDragOffset);
-}
-
-/**
- * @tc.name: TitleBarPatternProcessTitleDragStartTest019
- * @tc.desc: Test ProcessTitleDragStart function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, TitleBarPatternProcessTitleDragStartTest019, TestSize.Level1)
-{
-    constexpr float offset = 200.0f;
-    InitTitleBarTestNg();
-    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
-    ASSERT_NE(titleBarLayoutProperty, nullptr);
-    titleBarPattern_->overDragOffset_ = 11.01;
-    titleBarPattern_->ProcessTitleDragStart(offset);
-}
-
-/**
- * @tc.name: TitleBarPatternProcessTitleDragStartTest020
- * @tc.desc: Test ProcessTitleDragEnd function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, TitleBarPatternProcessTitleDragStartTest020, TestSize.Level1)
-{
-    InitTitleBarTestNg();
-    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
-    ASSERT_NE(titleBarLayoutProperty, nullptr);
-    titleBarPattern_->overDragOffset_ = 11.01;
-    titleBarPattern_->ProcessTitleDragEnd();
-}
-
-/**
- * @tc.name: TitleBarPatternProcessTitleDragStartTest021
- * @tc.desc: Test ProcessTitleDragEnd function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, TitleBarPatternProcessTitleDragStartTest021, TestSize.Level1)
-{
-    InitTitleBarTestNg();
-    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
-    ASSERT_NE(titleBarLayoutProperty, nullptr);
-    titleBarPattern_->CanOverDrag_ = true;
-    titleBarPattern_->isTitleScaleChange_ = true;
-    titleBarPattern_->ProcessTitleDragEnd();
-}
-
-/**
- * @tc.name: TitleBarPatternProcessTitleDragStartTest022
- * @tc.desc: Test ProcessTitleDragEnd function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, TitleBarPatternProcessTitleDragStartTest022, TestSize.Level1)
-{
-    InitTitleBarTestNg();
-    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
-    ASSERT_NE(titleBarLayoutProperty, nullptr);
-    titleBarPattern_->CanOverDrag_ = false;
-    titleBarPattern_->isTitleScaleChange_ = false;
-    titleBarPattern_->ProcessTitleDragEnd();
-}
-
-/**
- * @tc.name: TitleBarPatternOnCoordScrollStartTest023
- * @tc.desc: Test OnCoordScrollStart function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, TitleBarPatternOnCoordScrollStartTest023, TestSize.Level1)
-{
-    InitTitleBarTestNg();
-    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
-    ASSERT_NE(titleBarLayoutProperty, nullptr);
-    titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
-    titleBarPattern_->OnCoordScrollStart();
 }
 
 /**
@@ -890,7 +1262,7 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternUpdateTitleBarByCoordScrollTest032, Test
 HWTEST_F(TitleBarTestNg, TitleBarPatternTest033, TestSize.Level1)
 {
     InitTitleBarTestNg();
-    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<ButtonPattern>());
     ASSERT_NE(backButton, nullptr);
     frameNode_->SetBackButton(backButton);
     titleBarPattern_->OnColorConfigurationUpdate();
@@ -904,7 +1276,7 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternTest033, TestSize.Level1)
 HWTEST_F(TitleBarTestNg, TitleBarPatternTest034, TestSize.Level1)
 {
     InitTitleBarTestNg();
-    auto backButton = FrameNode::CreateFrameNode("Navigator", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    auto backButton = FrameNode::CreateFrameNode("Navigator", 33, AceType::MakeRefPtr<ButtonPattern>());
     ASSERT_NE(backButton, nullptr);
     frameNode_->SetBackButton(backButton);
     titleBarPattern_->OnColorConfigurationUpdate();
@@ -974,7 +1346,7 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternTest038, TestSize.Level1)
 HWTEST_F(TitleBarTestNg, TitleBarPatternTest039, TestSize.Level1)
 {
     auto frameNode =
-        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+        FrameNode::CreateFrameNode("Navigator", 33, AceType::MakeRefPtr<TitleBarPattern>());
     EXPECT_NE(frameNode, nullptr);
     auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
     EXPECT_NE(titleBarPattern, nullptr);
@@ -1051,132 +1423,11 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternTest042, TestSize.Level1)
 }
 
 /**
- * @tc.name: MountMenu001
- * @tc.desc: Test MountMenu function.
+ * @tc.name:SetMenu002
+ * @tc.desc: Test SetMenu function.
  * @tc.type: FUNC
  */
-HWTEST_F(TitleBarTestNg, MountMenu001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. initialize parameters.
-     */
-    InitTitleBarTestNg();
-
-    /**
-     * @tc.steps: step2. Call MountMenu when TitleBarParentTypeValue is not NAV_DESTINATION.
-     */
-    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
-    ASSERT_NE(titleBarLayoutProperty, nullptr);
-    titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAVBAR);
-    titleBarPattern_->MountMenu(frameNode_);
-    EXPECT_EQ(frameNode_->GetLastChild(), nullptr);
-}
-
-/**
- * @tc.name: MountMenu002
- * @tc.desc: Test MountMenu function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, MountMenu002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. initialize parameters.
-     */
-    InitTitleBarTestNg();
-
-    /**
-     * @tc.steps: step2. Call MountMenu when TitleBarParentTypeValue is NAV_DESTINATION.
-     * and MenuNodeOperationValue is REPLACE and PrevMenuIsCustomValue is true
-     */
-    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
-    ASSERT_NE(titleBarLayoutProperty, nullptr);
-    titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
-    frameNode_->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
-    frameNode_->UpdatePrevMenuIsCustom(true);
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto menuNode = AceType::MakeRefPtr<FrameNode>(TITLE_BAR_NODE_MENU, nodeId, AceType::MakeRefPtr<Pattern>());
-    ASSERT_NE(menuNode, nullptr);
-    frameNode_->SetMenu(menuNode);
-    titleBarPattern_->MountMenu(frameNode_);
-    ASSERT_NE(frameNode_->GetLastChild(), nullptr);
-    EXPECT_EQ(frameNode_->GetLastChild()->GetTag(), TITLE_BAR_NODE_MENU);
-}
-
-/**
- * @tc.name: MountMenu003
- * @tc.desc: Test MountMenu function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, MountMenu003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. initialize parameters.
-     */
-    InitTitleBarTestNg();
-    MockPipelineContext::SetUp();
-
-    /**
-     * @tc.steps: step2. Call MountMenu when TitleBarParentTypeValue is NAV_DESTINATION.
-     * and MenuNodeOperationValue is REPLACE and PrevMenuIsCustomValue is false and HasMenuNodeId
-     */
-    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
-    ASSERT_NE(titleBarLayoutProperty, nullptr);
-    titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
-    frameNode_->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
-    frameNode_->UpdatePrevMenuIsCustom(false);
-    titleBarPattern_->SetMenuNodeId(33);
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    ASSERT_NE(themeManager, nullptr);
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-
-    auto navdesGroupNode = AceType::MakeRefPtr<NavDestinationGroupNode>(NAVDES_GROUP_NODE,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<NavDestinationPattern>());
-    ASSERT_NE(navdesGroupNode, nullptr);
-    auto eventHub = navdesGroupNode->GetEventHub<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    eventHub->SetEnabled(false);
-    frameNode_->SetParent(navdesGroupNode);
-    titleBarPattern_->SetMaxMenuNum(3);
-
-    titleBarPattern_->MountMenu(frameNode_);
-    ASSERT_NE(frameNode_->GetLastChild(), nullptr);
-    EXPECT_EQ(frameNode_->GetLastChild()->GetTag(), NAVIGATION_MENU_ETS_TAG);
-    MockPipelineContext::TearDown();
-}
-
-
-/**
- * @tc.name: MountMenu004
- * @tc.desc: Test MountMenu function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, MountMenu004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. initialize parameters.
-     */
-    InitTitleBarTestNg();
-
-    /**
-     * @tc.steps: step2. Call MountMenu when TitleBarParentTypeValue is NAV_DESTINATION.
-     * and MenuNodeOperationValue is REPLACE and PrevMenuIsCustomValue is false and HasMenuNodeId is false
-     */
-    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
-    ASSERT_NE(titleBarLayoutProperty, nullptr);
-    titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
-    frameNode_->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
-    frameNode_->UpdatePrevMenuIsCustom(true);
-
-    titleBarPattern_->MountMenu(frameNode_);
-    EXPECT_EQ(frameNode_->GetLastChild(), nullptr);
-}
-
-/**
- * @tc.name:OnWindowSizeChanged001
- * @tc.desc: Test OnWindowSizeChanged function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, OnWindowSizeChanged001, TestSize.Level1)
+HWTEST_F(TitleBarTestNg, SetMenu002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. initialize parameters
@@ -1243,228 +1494,6 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternSpringAnimationTest001, TestSize.Level1)
     ASSERT_NE(titleBarPattern_->springAnimation_, nullptr);
     titleBarPattern_->OnCoordScrollStart();
     ASSERT_EQ(titleBarPattern_->springAnimation_, nullptr);
-}
-
-/**
- * @tc.name: TitleBarPatternOnModifyDone001
- * @tc.desc: Increase the coverage of OnModifyDone function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, TitleBarPatternOnModifyDone001, TestSize.Level1)
-{
-    InitTitleBarTestNg();
-    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
-    ASSERT_NE(titleBarLayoutProperty, nullptr);
-    titleBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::FREE);
-    titleBarPattern_->isInitialTitle_ = false;
-    titleBarPattern_->isTitleChanged_ = true;
-    titleBarPattern_->tempTitleBarHeight_ = 10.0_vp;
-    // Make ConvertToPx return not 0.
-    titleBarPattern_->tempTitleBarHeight_.SetUnit(DimensionUnit::NONE);
-    EXPECT_EQ(titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE), NavigationTitleMode::FREE);
-    EXPECT_TRUE(!titleBarPattern_->isInitialTitle_ && titleBarPattern_->isTitleChanged_);
-    EXPECT_FALSE(NearEqual(titleBarPattern_->GetTempTitleBarHeight(),
-        static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())));
-    EXPECT_FALSE(NearEqual(titleBarPattern_->GetTempTitleBarHeight(),
-        static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())));
-    titleBarPattern_->OnModifyDone();
-    
-    titleBarPattern_->isTitleChanged_ = true;
-    titleBarPattern_->tempTitleBarHeight_ = FULL_DOUBLE_LINE_TITLEBAR_HEIGHT;
-    EXPECT_EQ(titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE), NavigationTitleMode::FREE);
-    EXPECT_TRUE(!titleBarPattern_->isInitialTitle_ && titleBarPattern_->isTitleChanged_);
-    EXPECT_TRUE(NearEqual(titleBarPattern_->GetTempTitleBarHeight(),
-        static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())));
-    titleBarPattern_->OnModifyDone();
-    
-    titleBarPattern_->isTitleChanged_ = false;
-    EXPECT_EQ(titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE), NavigationTitleMode::FREE);
-    EXPECT_TRUE(!titleBarPattern_->isInitialTitle_ && !titleBarPattern_->isTitleChanged_);
-    titleBarPattern_->OnModifyDone();
-
-    titleBarPattern_->isInitialTitle_ = true;
-    EXPECT_EQ(titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE), NavigationTitleMode::FREE);
-    EXPECT_TRUE(titleBarPattern_->isInitialTitle_);
-    titleBarPattern_->OnModifyDone();
-
-    titleBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::MINI);
-    EXPECT_NE(titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE), NavigationTitleMode::FREE);
-    titleBarPattern_->OnModifyDone();
-}
-
-/**
- * @tc.name: TitleBarPatternUpdateScaleByDragOverDragOffset001
- * @tc.desc: Increase the coverage of UpdateScaleByDragOverDragOffset function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, UpdateScaleByDragOverDragOffset001, TestSize.Level1)
-{
-    InitTitleBarTestNg();
-    CreateNavBar();
-    titleBarPattern_->GetHost()->SetParent(navBarNode_);
-    auto navBarNode = AceType::DynamicCast<NavBarNode>(titleBarPattern_->GetHost()->GetParent());
-    ASSERT_NE(navBarNode, nullptr);
-    navBarNode->propPrevTitleIsCustom_ = false;
-    float overDragOffset = 10.0f;
-    EXPECT_FALSE(Negative(overDragOffset));
-    EXPECT_FALSE(navBarNode->GetPrevTitleIsCustomValue(true));
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(titleBarPattern_->GetHost());
-    EXPECT_EQ(titleBarNode->GetSubtitle(), nullptr);
-    titleBarPattern_->UpdateScaleByDragOverDragOffset(overDragOffset);
-
-    titleBarNode->subtitle_ = FrameNode::CreateFrameNode("SubTitle", 101, AceType::MakeRefPtr<TextPattern>());
-    EXPECT_FALSE(Negative(overDragOffset));
-    EXPECT_FALSE(navBarNode->GetPrevTitleIsCustomValue(true));
-    EXPECT_NE(titleBarNode->GetSubtitle(), nullptr);
-    titleBarPattern_->UpdateScaleByDragOverDragOffset(overDragOffset);
-
-    navBarNode->propPrevTitleIsCustom_ = true;
-    EXPECT_FALSE(Negative(overDragOffset));
-    EXPECT_TRUE(navBarNode->GetPrevTitleIsCustomValue(true));
-    titleBarPattern_->UpdateScaleByDragOverDragOffset(overDragOffset);
-
-    overDragOffset = -10.0f;
-    EXPECT_TRUE(Negative(overDragOffset));
-    titleBarPattern_->UpdateScaleByDragOverDragOffset(overDragOffset);
-}
-
-/**
- * @tc.name: OnWindowSizeChanged002
- * @tc.desc: Increase the coverage of OnWindowSizeChanged function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, OnWindowSizeChanged002, TestSize.Level1)
-{
-    InitTitleBarTestNg();
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(titleBarPattern_->GetHost());
-    ASSERT_NE(titleBarNode, nullptr);
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    ASSERT_NE(titleBarLayoutProperty, nullptr);
-    titleBarLayoutProperty->propTitleBarParentType_ = TitleBarParentType::NAV_DESTINATION;
-    titleBarPattern_->maxMenuNums_ = 0;
-    titleBarNode->propPrevMenuIsCustom_ = false;
-    WindowSizeChangeReason type = WindowSizeChangeReason::DRAG;
-
-    EXPECT_EQ(titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR),
-        TitleBarParentType::NAV_DESTINATION);
-    EXPECT_FALSE(titleBarNode->GetPrevMenuIsCustomValue(false));
-    EXPECT_FALSE(type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE);
-    ASSERT_EQ(titleBarNode->GetMenu(), nullptr);
-    titleBarPattern_->OnWindowSizeChanged(100, 100, type);
-
-    titleBarPattern_->maxMenuNums_ = SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE ?
-        MAX_MENU_NUM_LARGE : MAX_MENU_NUM_SMALL;
-    titleBarNode->menu_ = FrameNode::CreateFrameNode("Menu", 101, AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    auto buttonNode = FrameNode::CreateFrameNode("Button", 201, AceType::MakeRefPtr<ButtonPattern>());
-    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
-            V2::BAR_ITEM_ETS_TAG, 301, []() { return AceType::MakeRefPtr<Pattern>(); });
-    buttonNode->children_.emplace_back(barItemNode);
-    titleBarNode->menu_->children_.emplace_back(buttonNode);
-    EXPECT_EQ(titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR),
-        TitleBarParentType::NAV_DESTINATION);
-    EXPECT_FALSE(titleBarNode->GetPrevMenuIsCustomValue(false));
-    EXPECT_FALSE(type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE);
-    ASSERT_NE(titleBarNode->GetMenu(), nullptr);
-    titleBarPattern_->OnWindowSizeChanged(100, 100, type);
-}
-
-/**
- * @tc.name: OnWindowSizeChanged003
- * @tc.desc: Increase the coverage of OnWindowSizeChanged function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, OnWindowSizeChanged003, TestSize.Level1)
-{
-    InitTitleBarTestNg();
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(titleBarPattern_->GetHost());
-    ASSERT_NE(titleBarNode, nullptr);
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    ASSERT_NE(titleBarLayoutProperty, nullptr);
-    titleBarLayoutProperty->propTitleBarParentType_ = TitleBarParentType::NAV_DESTINATION;
-    titleBarPattern_->maxMenuNums_ = 0;
-    titleBarNode->propPrevMenuIsCustom_ = true;
-    WindowSizeChangeReason type = WindowSizeChangeReason::RESIZE;
-    titleBarNode->menu_ = FrameNode::CreateFrameNode("Menu", 101, AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    auto buttonNode = FrameNode::CreateFrameNode("Button", 201, AceType::MakeRefPtr<ButtonPattern>());
-    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
-            V2::BAR_ITEM_ETS_TAG, 301, []() { return AceType::MakeRefPtr<Pattern>(); });
-    buttonNode->children_.emplace_back(barItemNode);
-    titleBarNode->menu_->children_.emplace_back(buttonNode);
-    EXPECT_EQ(titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR),
-        TitleBarParentType::NAV_DESTINATION);
-    EXPECT_TRUE(titleBarNode->GetPrevMenuIsCustomValue(false));
-    EXPECT_EQ(type, WindowSizeChangeReason::RESIZE);
-    ASSERT_NE(titleBarNode->GetMenu(), nullptr);
-    titleBarPattern_->OnWindowSizeChanged(100, 100, type);
-
-    type = WindowSizeChangeReason::ROTATION;
-    barItemNode->isMoreItemNode_ = true;
-    EXPECT_EQ(titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR),
-        TitleBarParentType::NAV_DESTINATION);
-    EXPECT_TRUE(titleBarNode->GetPrevMenuIsCustomValue(false));
-    EXPECT_EQ(type, WindowSizeChangeReason::ROTATION);
-    titleBarPattern_->OnWindowSizeChanged(100, 100, type);
-
-    EXPECT_EQ(titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR),
-        TitleBarParentType::NAV_DESTINATION);
-    EXPECT_TRUE(titleBarNode->GetPrevMenuIsCustomValue(false));
-    titleBarPattern_->OnWindowSizeChanged(100, 100, type);
-
-    titleBarLayoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;
-    EXPECT_NE(titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR),
-        TitleBarParentType::NAV_DESTINATION);
-    titleBarPattern_->OnWindowSizeChanged(100, 100, type);
-}
-
-/**
- * @tc.name: GetFontSize001
- * @tc.desc: Increase the coverage of GetFontSize function.
- * @tc.type: FUNC
- */
-HWTEST_F(TitleBarTestNg, GetFontSize001, TestSize.Level1)
-{
-    InitTitleBarTestNg();
-    MockPipelineContext::SetUp();
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
-    
-    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TEN);
-    float singleHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
-    titleBarPattern_->maxTitleBarHeight_ = singleHeight;
-    EXPECT_FALSE(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE));
-    EXPECT_TRUE(NearZero(titleBarPattern_->maxTitleBarHeight_ - singleHeight));
-    float offset = 0.0f;
-    auto titleBarHeight = titleBarPattern_->defaultTitleBarHeight_ + offset;
-    Dimension titleL = theme->GetTitleFontSizeBig();
-    Dimension titleM = theme->GetTitleFontSize();
-    auto tempFontSize = titleM.Value() + (titleBarHeight - singleHeight) * titleBarPattern_->fontSizeRatio_;
-    EXPECT_FALSE(GreatNotEqual(tempFontSize, titleL.Value()));
-    EXPECT_FALSE(LessNotEqual(tempFontSize, titleM.Value()));
-    titleBarPattern_->GetFontSize(offset);
-
-    titleBarPattern_->defaultTitleBarHeight_ = singleHeight - 2.0f;
-    titleBarPattern_->fontSizeRatio_ = 1.0f;
-    theme->titleFontSizeBig_.SetValue(1.0f);
-    theme->titleFontSize_.SetValue(5.0f);
-    EXPECT_TRUE(NearZero(titleBarPattern_->maxTitleBarHeight_ - singleHeight));
-    titleBarHeight = titleBarPattern_->defaultTitleBarHeight_ + offset;
-    titleL = theme->GetTitleFontSizeBig();
-    titleM = theme->GetTitleFontSize();
-    tempFontSize = titleM.Value() + (titleBarHeight - singleHeight) * titleBarPattern_->fontSizeRatio_;
-    EXPECT_TRUE(GreatNotEqual(tempFontSize, titleL.Value()));
-    EXPECT_TRUE(LessNotEqual(tempFontSize, titleM.Value()));
-    titleBarPattern_->GetFontSize(offset);
-
-    titleBarPattern_->maxTitleBarHeight_ = singleHeight - 2.0f;
-    EXPECT_FALSE(NearZero(titleBarPattern_->maxTitleBarHeight_ - singleHeight));
-    titleBarPattern_->GetFontSize(offset);
-
-    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
-    EXPECT_TRUE(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE));
-    titleBarPattern_->GetFontSize(offset);
-    MockPipelineContext::TearDown();
 }
 
 /**
@@ -1649,5 +1678,1167 @@ HWTEST_F(TitleBarTestNg, TitleBarModifier003, TestSize.Level1)
     ASSERT_EQ(mainTextNode.value(), mainTitleNode);
     ASSERT_TRUE(subTextNode.has_value());
     ASSERT_EQ(subTextNode.value(), subTitleNode);
+}
+
+/**
+ * @tc.name: TitleBarPatternOnModifyDone002
+ * @tc.desc: Test SetBackButtonImgAboveVersionTen function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternOnModifyDone002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init titleBar environment and theme, set api version 12
+     */
+    MockPipelineContext::SetUp();
+    InitTitleBarTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+    MockContainer::SetUp();
+    int32_t apiTargetVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    int32_t minPlatformVersion = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    /**
+     * @tc.steps: step2. create backButtonNode and layoutProperty.
+     */
+    auto backButtonNode = FrameNode::GetOrCreateFrameNode(V2::BACK_BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(backButtonNode, nullptr);
+    frameNode_->SetBackButton(backButtonNode);
+    auto backButtonImageNode = FrameNode::CreateFrameNode(V2::BACK_BUTTON_IMAGE_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(backButtonImageNode, nullptr);
+    backButtonImageNode->MountToParent(backButtonNode);
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    ImageSourceInfo srcImageSourceInfo = ImageSourceInfo("file://data/data/com.example.test/res/example.svg",
+        Dimension(300.0), Dimension(200.0));
+    titleBarLayoutProperty->UpdateImageSource(srcImageSourceInfo);
+    bool titleBarHasImage = titleBarLayoutProperty->HasImageSource();
+    ASSERT_NE(titleBarHasImage, false);
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    titleBarLayoutProperty->UpdatePixelMap(pixelMap);
+
+    titleBarLayoutProperty->UpdateIsValidImage(true);
+    auto hasIsValidImage = titleBarLayoutProperty->HasIsValidImage();
+    ASSERT_EQ(hasIsValidImage, true);
+    auto curIsValidImage = titleBarLayoutProperty->GetIsValidImageValue();
+    ASSERT_EQ(curIsValidImage, true);
+
+    /**
+     * @tc.steps: step3. call SetBackButtonImgAboveVersionTen.
+     * @tc.expected: set image source info successfully and is equal to pixelMap.
+     */
+    titleBarPattern_->OnModifyDone();
+    backButtonImageNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetChildren().front());
+    ASSERT_NE(backButtonImageNode, nullptr);
+    auto backButtonImageProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(backButtonImageProperty, nullptr);
+    auto hasImageSourceInfo = backButtonImageProperty->HasImageSourceInfo();
+    ASSERT_NE(hasImageSourceInfo, false);
+    auto imageSourceInfo = backButtonImageProperty->GetImageSourceInfoValue();
+    auto isPixMap = imageSourceInfo.IsPixmap();
+    ASSERT_NE(isPixMap, false);
+    auto pixMapValue = imageSourceInfo.GetPixmap();
+    ASSERT_NE(pixMapValue, nullptr);
+    ASSERT_EQ(pixMapValue, pixelMap);
+
+    auto expectColor = theme->GetIconColor();
+    auto curColor = imageSourceInfo.GetFillColor();
+    ASSERT_TRUE(curColor.has_value());
+    EXPECT_EQ(expectColor, curColor.value());
+
+    /**
+     * @tc.steps: step4. recover api version
+     */
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(minPlatformVersion);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(apiTargetVersion);
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: TitleBarPatternOnModifyDone003
+ * @tc.desc: Test SetBackButtonImgAboveVersionTen function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternOnModifyDone003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init titleBar environment and theme, set api version 12
+     */
+    MockPipelineContext::SetUp();
+    InitTitleBarTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+    MockContainer::SetUp();
+    int32_t apiTargetVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    int32_t minPlatformVersion = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    /**
+     * @tc.steps: step2. create backButtonNode and layoutProperty.
+     */
+    auto backButtonNode = FrameNode::GetOrCreateFrameNode(V2::BACK_BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(backButtonNode, nullptr);
+    frameNode_->SetBackButton(backButtonNode);
+    auto backButtonImageNode = FrameNode::CreateFrameNode(V2::BACK_BUTTON_IMAGE_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(backButtonImageNode, nullptr);
+    backButtonImageNode->MountToParent(backButtonNode);
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    ImageSourceInfo srcImageSourceInfo = ImageSourceInfo("file://data/data/com.example.test/res/example.svg",
+        Dimension(300.0), Dimension(200.0));
+    titleBarLayoutProperty->UpdateImageSource(srcImageSourceInfo);
+    bool titleBarHasImage = titleBarLayoutProperty->HasImageSource();
+    ASSERT_NE(titleBarHasImage, false);
+
+    titleBarLayoutProperty->UpdateIsValidImage(true);
+    auto hasIsValidImage = titleBarLayoutProperty->HasIsValidImage();
+    ASSERT_EQ(hasIsValidImage, true);
+    auto curIsValidImage = titleBarLayoutProperty->GetIsValidImageValue();
+    ASSERT_EQ(curIsValidImage, true);
+
+    /**
+     * @tc.steps: step3. call SetBackButtonImgAboveVersionTen.
+     * @tc.expected: set image source info successfully and is equal to ImageSourceValue.
+     */
+    titleBarPattern_->OnModifyDone();
+    backButtonImageNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetChildren().front());
+    ASSERT_NE(backButtonImageNode, nullptr);
+    auto backButtonImageProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(backButtonImageProperty, nullptr);
+    auto hasImageSourceInfo = backButtonImageProperty->HasImageSourceInfo();
+    ASSERT_NE(hasImageSourceInfo, false);
+    auto imageSourceInfo = backButtonImageProperty->GetImageSourceInfoValue();
+    auto isPixMap = imageSourceInfo.IsPixmap();
+    ASSERT_NE(isPixMap, true);
+
+    auto expectColor = theme->GetIconColor();
+    auto curColor = imageSourceInfo.GetFillColor();
+    ASSERT_TRUE(curColor.has_value());
+    EXPECT_EQ(expectColor, curColor.value());
+
+    /**
+     * @tc.steps: step4. recover api version
+     */
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(minPlatformVersion);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(apiTargetVersion);
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: TitleBarPatternOnModifyDone004
+ * @tc.desc: Test SetBackButtonImgAboveVersionTen function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternOnModifyDone004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init titleBar environment and theme, set api version 9
+     */
+    MockPipelineContext::SetUp();
+    InitTitleBarTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+    MockContainer::SetUp();
+    int32_t apiTargetVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+    int32_t minPlatformVersion = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+
+    /**
+     * @tc.steps: step2. create backButtonNode and layoutProperty.
+     */
+    auto backButtonNode = FrameNode::GetOrCreateFrameNode(V2::BACK_BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(backButtonNode, nullptr);
+    frameNode_->SetBackButton(backButtonNode);
+    auto backButtonImageNode = FrameNode::CreateFrameNode(V2::BACK_BUTTON_IMAGE_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(backButtonImageNode, nullptr);
+    backButtonImageNode->MountToParent(backButtonNode);
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    ImageSourceInfo srcImageSourceInfo = ImageSourceInfo("file://data/data/com.example.test/res/example.svg",
+        Dimension(300.0), Dimension(200.0));
+    titleBarLayoutProperty->UpdateImageSource(srcImageSourceInfo);
+    bool titleBarHasImage = titleBarLayoutProperty->HasImageSource();
+    ASSERT_NE(titleBarHasImage, false);
+
+    titleBarLayoutProperty->UpdateIsValidImage(true);
+    auto hasIsValidImage = titleBarLayoutProperty->HasIsValidImage();
+    ASSERT_EQ(hasIsValidImage, true);
+    auto curIsValidImage = titleBarLayoutProperty->GetIsValidImageValue();
+    ASSERT_EQ(curIsValidImage, true);
+
+    /**
+     * @tc.steps: step3. call SetBackButtonImgAboveVersionTen.
+     * @tc.expected: set image source info successfully and is equal to ImageSourceValue.
+     */
+    titleBarPattern_->OnModifyDone();
+    backButtonImageNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetChildren().front());
+    ASSERT_NE(backButtonImageNode, nullptr);
+    auto backButtonImageProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(backButtonImageProperty, nullptr);
+    auto hasImageSourceInfo = backButtonImageProperty->HasImageSourceInfo();
+    ASSERT_NE(hasImageSourceInfo, false);
+    auto imageSourceInfo = backButtonImageProperty->GetImageSourceInfoValue();
+    auto isPixMap = imageSourceInfo.IsPixmap();
+    ASSERT_NE(isPixMap, true);
+
+    auto expectColor = theme->GetIconColor();
+    auto curColor = imageSourceInfo.GetFillColor();
+    ASSERT_TRUE(curColor.has_value());
+    EXPECT_EQ(expectColor, curColor.value());
+
+    /**
+     * @tc.steps: step4. recover api version
+     */
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(minPlatformVersion);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(apiTargetVersion);
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: TitleBarPatternOnModifyDone005
+ * @tc.desc: Test ApplyThemeIconSize function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternOnModifyDone005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init titleBar environment and theme
+     */
+    InitTitleBarTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+
+    /**
+     * @tc.steps: step2. create backButtonNode and layoutProperty.
+     */
+    auto backButtonNode = FrameNode::GetOrCreateFrameNode(V2::BACK_BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(backButtonNode, nullptr);
+    frameNode_->SetBackButton(backButtonNode);
+    auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(symbolNode, nullptr);
+    symbolNode->MountToParent(backButtonNode);
+    auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(symbolProperty, nullptr);
+    symbolProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    std::function callback = [](WeakPtr<NG::FrameNode> frameNode) {
+        return;
+    };
+    titleBarLayoutProperty->SetBackIconSymbol(callback);
+
+    /**
+     * @tc.steps: step3. call ApplyThemeIconSize.
+     * @tc.expected: update symbol icon size successfully and is equal to theme size.
+     */
+    titleBarPattern_->OnModifyDone();
+    auto expectIconSize = theme->GetIconWidth();
+    auto hasIconSize = symbolProperty->HasFontSize();
+    ASSERT_NE(hasIconSize, false);
+    Dimension defaultSize = 0.0_vp;
+    auto curIconSize = symbolProperty->GetFontSizeValue(defaultSize);
+    ASSERT_EQ(curIconSize, expectIconSize);
+}
+
+/**
+ * @tc.name: SetDefaultTitleFontSize001
+ * @tc.desc: Test SetDefaultTitleFontSize function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, SetDefaultTitleFontSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init titleBar environment and theme
+     */
+    InitTitleBarTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+
+    /**
+     * @tc.steps: step2. call SetDefaultTitleFontSize.
+     * @tc.expected: defaultTitleFontSize_ is equal to theme size.
+     */
+    titleBarPattern_->SetDefaultTitleFontSize();
+    auto expectedTitleFontSize = theme->GetTitleFontSize();
+    ASSERT_EQ(titleBarPattern_->defaultTitleFontSize_, expectedTitleFontSize);
+}
+
+/**
+ * @tc.name: GetSubTitleOffsetY001
+ * @tc.desc: Test GetSubTitleOffsetY function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, GetSubTitleOffsetY001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init titleBar environment and theme
+     */
+    InitTitleBarTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+
+    /**
+     * @tc.steps: step2. call GetSubTitleOffsetY.
+     * @tc.expected: defaultTitleFontSize_ is equal to theme size.
+     */
+    auto offsetY = titleBarPattern_->GetSubTitleOffsetY();
+    ASSERT_EQ(offsetY, 0.f);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate003
+ * @tc.desc: Test OnColorConfigurationUpdate function in api version 12.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, OnColorConfigurationUpdate003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init titleBar environment and theme, set api version 12
+     */
+    InitTitleBarTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    /**
+     * @tc.steps: step2. create backButtonNode and layoutProperty.
+     */
+    auto backButtonNode = FrameNode::GetOrCreateFrameNode(V2::BACK_BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(backButtonNode, nullptr);
+    frameNode_->SetBackButton(backButtonNode);
+    auto backButtonImageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(backButtonImageNode, nullptr);
+    backButtonImageNode->MountToParent(backButtonNode);
+
+    /**
+     * @tc.steps: step3. call OnColorConfigurationUpdate.
+     * @tc.expected: value is set successfully
+     */
+    titleBarPattern_->OnColorConfigurationUpdate();
+    auto renderContext = backButtonNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto backButtonPattern = backButtonNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(backButtonPattern, nullptr);
+
+    auto iconColor = theme->GetIconColor();
+    backButtonImageNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetChildren().front());
+    ASSERT_NE(backButtonImageNode, nullptr);
+    auto backButtonImageRender = backButtonImageNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(backButtonImageRender, nullptr);
+    auto hasSvgFillColor = backButtonImageRender->HasSvgFillColor();
+    ASSERT_NE(hasSvgFillColor, false);
+    auto defaultColor = Color::TRANSPARENT;
+    auto svgFillColor = backButtonImageRender->GetSvgFillColorValue(defaultColor);
+    ASSERT_EQ(svgFillColor, iconColor);
+
+    auto backButtonColor = theme->GetCompBackgroundColor();
+    auto hasBackgroundColor = renderContext->HasBackgroundColor();
+    ASSERT_NE(hasBackgroundColor, false);
+    auto backgroundColor = renderContext->GetBackgroundColorValue();
+    ASSERT_EQ(backgroundColor, backButtonColor);
+
+    auto backgroundPressedColor = theme->GetBackgroundPressedColor();
+    auto backgroundHoverColor = theme->GetBackgroundHoverColor();
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    auto blendClickColor = backButtonPattern->GetColorFromType(buttonTheme, 0);
+    auto blendHoverColor = backButtonPattern->GetColorFromType(buttonTheme, 1);
+    ASSERT_EQ(blendClickColor, backgroundPressedColor);
+    ASSERT_EQ(backgroundHoverColor, blendHoverColor);
+
+    /**
+     * @tc.steps: step4. recover api version
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate004
+ * @tc.desc: Test OnColorConfigurationUpdate function in api version 10.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, OnColorConfigurationUpdate004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init titleBar environment and theme, set api version 10
+     */
+    InitTitleBarTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+
+    /**
+     * @tc.steps: step2. create backButtonNode and layoutProperty.
+     */
+    auto backButtonNode = FrameNode::GetOrCreateFrameNode(V2::BACK_BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(backButtonNode, nullptr);
+    frameNode_->SetBackButton(backButtonNode);
+    auto backButtonImageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(backButtonImageNode, nullptr);
+    backButtonImageNode->MountToParent(backButtonNode);
+
+    /**
+     * @tc.steps: step3. call OnColorConfigurationUpdate.
+     * @tc.expected: defaultTitleFontSize_ is equal to theme size.
+     */
+    titleBarPattern_->OnColorConfigurationUpdate();
+    auto iconColor = theme->GetBackButtonIconColor();
+    backButtonImageNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetChildren().front());
+    ASSERT_NE(backButtonImageNode, nullptr);
+    auto backButtonImageRender = backButtonImageNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(backButtonImageRender, nullptr);
+    auto hasSvgFillColor = backButtonImageRender->HasSvgFillColor();
+    ASSERT_NE(hasSvgFillColor, false);
+    auto defaultColor = Color::TRANSPARENT;
+    auto svgFillColor = backButtonImageRender->GetSvgFillColorValue(defaultColor);
+    ASSERT_EQ(svgFillColor, iconColor);
+
+    /**
+     * @tc.steps: step4. recover api version
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: OnLanguageConfigurationUpdate001
+ * @tc.desc: Test OnLanguageConfigurationUpdate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, OnLanguageConfigurationUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init titleBar environment and theme
+     */
+    InitTitleBarTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+    auto backButtonNode = FrameNode::GetOrCreateFrameNode(V2::BACK_BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(backButtonNode, nullptr);
+    frameNode_->SetBackButton(backButtonNode);
+
+    /**
+     * @tc.steps: step2. call OnLanguageConfigurationUpdate.
+     * @tc.expected: relative value is set successfully.
+     */
+    titleBarPattern_->OnLanguageConfigurationUpdate();
+    std::string message = theme->GetNavigationBack();
+    auto accessibilityProperty = backButtonNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    auto accessibilityText = accessibilityProperty->GetAccessibilityText();
+    ASSERT_EQ(message, accessibilityText);
+    auto isAccessibilityGroup = accessibilityProperty->IsAccessibilityGroup();
+    ASSERT_EQ(isAccessibilityGroup, true);
+}
+
+/**
+ * @tc.name: TitleBarPatternLongPress001
+ * @tc.desc: Test TitleBarPattern back button long press event with fontScale 1.75.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternLongPress001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set backButton to TitleBarNode.
+     */
+    InitTitleBarTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        V2::TITLE_BAR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    ASSERT_NE(backButton, nullptr);
+    auto image = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 1, AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(image, nullptr);
+    const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
+    auto imageLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
+    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(IMAGE_SRC_URL));
+    image->MountToParent(backButton);
+    titleBarNode->SetBackButton(backButton);
+
+    /**
+     * @tc.steps: step2. Set fontScale to 1.75 scale.
+     */
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 1.75f;
+
+    /**
+     * @tc.steps: step3. call HandleLongPress.
+     * @tc.expected: dialogNode != nullptr
+     */
+    titleBarPattern->HandleLongPress(backButton);
+    auto dialogNode = titleBarPattern->dialogNode_;
+    ASSERT_EQ(dialogNode, nullptr);
+
+    /**
+     * @tc.steps: step4. call HandleLongPressActionEnd.
+     * @tc.expected: dialogNode = nullptr
+     */
+    titleBarPattern->HandleLongPressActionEnd();
+    ASSERT_EQ(titleBarPattern->dialogNode_, nullptr);
+}
+
+/**
+ * @tc.name: TitleBarPatternLongPress002
+ * @tc.desc: Test TitleBarPattern back button long press event with fontScale 2.0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternLongPress002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set backButton to TitleBarNode.
+     */
+    InitTitleBarTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        V2::TITLE_BAR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    ASSERT_NE(backButton, nullptr);
+    auto image = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 1, AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(image, nullptr);
+    const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
+    auto imageLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
+    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(IMAGE_SRC_URL));
+    image->MountToParent(backButton);
+    titleBarNode->SetBackButton(backButton);
+
+    /**
+     * @tc.steps: step2. Set fontScale to 2.0 scale.
+     */
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 2.0f;
+
+    /**
+     * @tc.steps: step3. call HandleLongPress.
+     * @tc.expected: dialogNode != nullptr
+     */
+    titleBarPattern->HandleLongPress(backButton);
+    ASSERT_EQ(titleBarPattern->dialogNode_, nullptr);
+
+    /**
+     * @tc.steps: step4. call HandleLongPressActionEnd.
+     * @tc.expected: dialogNode = nullptr
+     */
+    titleBarPattern->HandleLongPressActionEnd();
+    ASSERT_EQ(titleBarPattern->dialogNode_, nullptr);
+}
+
+/**
+ * @tc.name: TitleBarPatternLongPress003
+ * @tc.desc: Test TitleBarPattern back button long press event with fontScale 3.2.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternLongPress003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set backButton to TitleBarNode.
+     */
+    InitTitleBarTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        V2::TITLE_BAR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    ASSERT_NE(backButton, nullptr);
+    auto image = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 1, AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(image, nullptr);
+    const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
+    auto imageLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
+    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(IMAGE_SRC_URL));
+    image->MountToParent(backButton);
+    titleBarNode->SetBackButton(backButton);
+
+    /**
+     * @tc.steps: step2. Set fontScale to 3.2 scale.
+     */
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 3.2f;
+
+    /**
+     * @tc.steps: step3. call HandleLongPress.
+     * @tc.expected: dialogNode != nullptr
+     */
+    titleBarPattern->HandleLongPress(backButton);
+    auto dialogNode = titleBarPattern->dialogNode_;
+    ASSERT_EQ(dialogNode, nullptr);
+
+    /**
+     * @tc.steps: step4. call HandleLongPressActionEnd.
+     * @tc.expected: dialogNode = nullptr
+     */
+    titleBarPattern->HandleLongPressActionEnd();
+    ASSERT_EQ(titleBarPattern->dialogNode_, nullptr);
+}
+
+/**
+ * @tc.name: TitleBarHoverModeTest001
+ * @tc.desc: Test IsNeedHoverModeAction and CalculateTitlebarOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarHoverModeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters
+     */
+    CreateNavBar();
+    InitTitleBarTestNg();
+
+    /**
+     * @tc.steps: step2. itleBarParentTypeValue is NAVBAR and NavigationTitleMode is MINI.
+     * @tc.expected: Hover mode is false and offset is 0.0f.
+     */
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAVBAR);
+    titleBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::MINI);
+    bool hover = NavigationTitleUtil::IsNeedHoverModeAction(frameNode_);
+    ASSERT_FALSE(hover);
+    auto offset = NavigationTitleUtil::CalculateTitlebarOffset(frameNode_);
+    EXPECT_EQ(offset, 0.0f);
+}
+
+/**
+ * @tc.name: TitleBarHoverModeTest002
+ * @tc.desc: Test IsNeedHoverModeAction and CalculateTitlebarOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarHoverModeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters
+     */
+    InitTitleBarTestNg();
+
+    /**
+     * @tc.steps: step2. When barStyle is STANDARD or enableHoverMode is false.
+     * @tc.expected: Hover mode is false and offset is 0.0f.
+     */
+    NavigationTitlebarOptions opt1;
+    opt1.brOptions.barStyle = std::make_optional(BarStyle::STANDARD);
+    titleBarPattern_->SetTitlebarOptions(std::move(opt1));
+    bool hover1 = NavigationTitleUtil::IsNeedHoverModeAction(frameNode_);
+    ASSERT_FALSE(hover1);
+    NavigationTitlebarOptions opt2;
+    opt2.enableHoverMode = false;
+    titleBarPattern_->SetTitlebarOptions(std::move(opt2));
+    bool hover2 = NavigationTitleUtil::IsNeedHoverModeAction(frameNode_);
+    ASSERT_FALSE(hover2);
+    auto offset = NavigationTitleUtil::CalculateTitlebarOffset(frameNode_);
+    EXPECT_EQ(offset, 0.0f);
+}
+
+/**
+ * @tc.name: createBarIemTextNode
+ * @tc.desc: noBranch
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, createBarIemTextNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set text value
+     */
+    std::string text = "hello";
+    auto barItemNode = NavigationTitleUtil::CreateBarItemTextNode(text);
+    ASSERT_NE(barItemNode, nullptr);
+
+    /**
+     * @tc.steps: step2. test content value, textAlign,
+     * @tc.expected: expect value equal text, textAlign equal CENTER
+     */
+    auto layoutProperty = barItemNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto barItemText = layoutProperty->GetContent().value_or(u"");
+    EXPECT_EQ(barItemText, UtfUtils::Str8DebugToStr16(text));
+    auto alignValue = static_cast<int32_t>(layoutProperty->GetTextAlign().value());
+    EXPECT_EQ(alignValue, 1);
+}
+
+/**
+ * @tc.name: CreateBarItemIconNode
+ * @tc.desc: if (greatOrEqualTargetApiVersion(PlatformVersion::VERSION_TWELVE))  true;
+ *           if (isButtonEnable) true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, CreateBarItemIconNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create barItem, theme, setApi version
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto navigationTheme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(navigationTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(navigationTheme));
+    ASSERT_NE(navigationTheme, nullptr);
+    BarItem barItem;
+    barItem.icon = "icon";
+    bool isButtonEnable = true;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    /**
+     * @tc.steps: step2. createBarItemIconNode
+     * @tc.expected: expect equal target value
+     */
+    auto iconNode = NavigationTitleUtil::CreateBarItemIconNode(barItem, isButtonEnable, navigationTheme);
+    ASSERT_NE(iconNode, nullptr);
+    auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    auto info = imageLayoutProperty->GetImageSourceInfo().value();
+    EXPECT_EQ(navigationTheme->GetIconColor(), info.GetFillColor());
+}
+
+/**
+ * @tc.name: CreateBarItemIconNod2
+ * @tc.desc: if (greatOrEqualTargetApiVersion(PlatformVersion::VERSION_TWELVE))  false;
+ *           if (isButtonEnable) true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, CreateBarItemIconNode2, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create barItem, theme, setApi version
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto navigationTheme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(navigationTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(navigationTheme));
+    ASSERT_NE(navigationTheme, nullptr);
+    BarItem barItem;
+    barItem.icon = "icon";
+    bool isButtonEnable = true;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+
+    /**
+     * @tc.steps: step2. createBarItemIconNode
+     * @tc.expected: expect equal target value
+     */
+    auto iconNode = NavigationTitleUtil::CreateBarItemIconNode(barItem, isButtonEnable, navigationTheme);
+    ASSERT_NE(iconNode, nullptr);
+    auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    auto info = imageLayoutProperty->GetImageSourceInfo().value();
+    EXPECT_EQ(navigationTheme->GetMenuIconColor(), info.GetFillColor());
+}
+
+/**
+ * @tc.name: CreateBarItemIconNod3
+ * @tc.desc: if (greatOrEqualTargetApiVersion(PlatformVersion::VERSION_TWELVE))  true;
+ *           if (isButtonEnable) false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, CreateBarItemIconNode3, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create barItem, theme, setApi version
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto navigationTheme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(navigationTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(navigationTheme));
+    ASSERT_NE(navigationTheme, nullptr);
+    BarItem barItem;
+    barItem.icon = "icon";
+    bool isButtonEnable = false;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    /**
+     * @tc.steps: step2. createBarItemIconNode
+     * @tc.expected: expect equal target value
+     */
+    auto iconNode = NavigationTitleUtil::CreateBarItemIconNode(barItem, isButtonEnable, navigationTheme);
+    ASSERT_NE(iconNode, nullptr);
+    auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    auto info = imageLayoutProperty->GetImageSourceInfo().value();
+    auto opacity = navigationTheme->GetIconDisableAlpha();
+    EXPECT_EQ(navigationTheme->GetIconColor().BlendOpacity(opacity), info.GetFillColor());
+}
+
+/**
+ * @tc.name: CreateBarItemIconNod4
+ * @tc.desc: if (greatOrEqualTargetApiVersion(PlatformVersion::VERSION_TWELVE))  false;
+ *           if (isButtonEnable) false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, CreateBarItemIconNode4, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create barItem, theme, setApi version
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto navigationTheme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(navigationTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(navigationTheme));
+    ASSERT_NE(navigationTheme, nullptr);
+    BarItem barItem;
+    barItem.icon = "icon";
+    bool isButtonEnable = false;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+
+    /**
+     * @tc.steps: step2. createBarItemIconNode
+     * @tc.expected: expect equal target value
+     */
+    auto iconNode = NavigationTitleUtil::CreateBarItemIconNode(barItem, isButtonEnable, navigationTheme);
+    ASSERT_NE(iconNode, nullptr);
+    auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    auto info = imageLayoutProperty->GetImageSourceInfo().value();
+    auto opacity = navigationTheme->GetAlphaDisabled();
+    EXPECT_EQ(navigationTheme->GetMenuIconColor().BlendOpacity(opacity), info.GetFillColor());
+}
+
+/**
+ * @tc.name: InitTitleBarButtonEvent
+ * @tc.desc: if (menuItem.action)  true;
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, InitTitleBarButtonEvent, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create barItem, buttonNode
+     */
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+    BarItem menuItem;
+    std::function<void()> func = []() {};
+    menuItem.action = func;
+    bool isButtonEnabled = false;
+
+    /**
+     * @tc.steps: step2. call func, test clickEvent and eventhub
+     */
+    NavigationTitleUtil::InitTitleBarButtonEvent(buttonNode, nullptr, false, menuItem, isButtonEnabled);
+    auto gestureEventhub = buttonNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventhub, nullptr);
+    EXPECT_EQ(gestureEventhub->IsClickEventsEmpty(), false);
+    EXPECT_EQ(isButtonEnabled, false);
+
+    auto eventHub = buttonNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_EQ(eventHub->IsEnabled(), false);
+}
+
+/**
+ * @tc.name: InitTitleBarButtonEvent
+ * @tc.desc: if (menuItem.action)  false;
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, InitTitleBarButtonEvent2, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create barItem, buttonNode
+     */
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+    BarItem menuItem;
+    menuItem.action = nullptr;
+    bool isButtonEnabled = true;
+
+    /**
+     * @tc.steps: step2. call func, test clickEvent and eventhub
+     */
+    NavigationTitleUtil::InitTitleBarButtonEvent(buttonNode, nullptr, false, menuItem, isButtonEnabled);
+    auto gestureEventhub = buttonNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventhub, nullptr);
+    EXPECT_EQ(gestureEventhub->IsClickEventsEmpty(), true);
+    EXPECT_EQ(isButtonEnabled, true);
+
+    auto eventHub = buttonNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_EQ(eventHub->IsEnabled(), true);
+}
+
+/**
+ * @tc.name: UpdatebarItemNodeWithItem
+ * @tc.desc: if (LessThanAPIVersion(10) && barItem.text.has_vlaue() && !barItem.text.value().empty)  true;
+ *           if (barItem.icon.has_value()) || (barItem.iconSymbol.has_value() && barItem.iconSymbol.value() != nullptr)
+ * true if (barItem.action) true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, UpdatebarItemNodeWithItem, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create barItem, buttonNode
+     */
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(V2::BAR_ITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(barItemNode, nullptr);
+    BarItem barItem;
+    bool isButtonEnabled = true;
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    /**
+     * @tc.steps: step2. set apiVersion, textnode
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+    std::optional<std::string> opt1 = "Hello";
+    barItem.text = opt1;
+
+    std::optional<std::string> icon = "icon";
+    barItem.icon = icon;
+
+    std::function<void()> func = []() {};
+    barItem.action = func;
+
+    NavigationTitleUtil::UpdateBarItemNodeWithItem(barItemNode, barItem, isButtonEnabled, theme);
+    auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    EXPECT_NE(barItemNode->GetTextNode(), nullptr);
+    EXPECT_NE(barItemNode->GetIconNode(), nullptr);
+    EXPECT_NE(eventHub->itemAction_, nullptr);
+}
+
+/**
+ * @tc.name: UpdatebarItemNodeWithItem1
+ * @tc.desc: if (LessThanAPIVersion(10) && barItem.text.has_vlaue() && !barItem.text.value().empty)  true;
+ *           if (barItem.icon.has_value()) || (barItem.iconSymbol.has_value() && barItem.iconSymbol.value() != nullptr)
+ * false if (barItem.action) true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, UpdatebarItemNodeWithItem1, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create barItem, buttonNode
+     */
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(V2::BAR_ITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(barItemNode, nullptr);
+    BarItem barItem;
+    bool isButtonEnabled = true;
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    /**
+     * @tc.steps: step2. set apiVersion, textnode
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+    std::optional<std::string> opt1 = "Hello";
+    barItem.text = opt1;
+
+    std::function<void()> func = []() {};
+    barItem.action = func;
+
+    NavigationTitleUtil::UpdateBarItemNodeWithItem(barItemNode, barItem, isButtonEnabled, theme);
+    auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
+
+    EXPECT_NE(barItemNode->GetTextNode(), nullptr);
+    EXPECT_EQ(barItemNode->GetIconNode(), nullptr);
+    EXPECT_NE(eventHub->itemAction_, nullptr);
+}
+
+/**
+ * @tc.name: UpdatebarItemNodeWithItem2
+ * @tc.desc: if (LessThanAPIVersion(10) && barItem.text.has_vlaue() && !barItem.text.value().empty)  true;
+ *           if (barItem.icon.has_value()) || (barItem.iconSymbol.has_value() && barItem.iconSymbol.value() != nullptr)
+ * true if (barItem.action) false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, UpdatebarItemNodeWithItem2, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create barItem, buttonNode
+     */
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(V2::BAR_ITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(barItemNode, nullptr);
+    BarItem barItem;
+    bool isButtonEnabled = true;
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    /**
+     * @tc.steps: step2. set apiVersion, textnode
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+    std::optional<std::string> opt1 = "Hello";
+    barItem.text = opt1;
+
+    std::optional<std::string> icon = "icon";
+    barItem.icon = icon;
+    NavigationTitleUtil::UpdateBarItemNodeWithItem(barItemNode, barItem, isButtonEnabled, theme);
+    auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
+
+    EXPECT_NE(barItemNode->GetTextNode(), nullptr);
+    EXPECT_NE(barItemNode->GetIconNode(), nullptr);
+    EXPECT_EQ(eventHub->itemAction_, nullptr);
+}
+
+/**
+ * @tc.name: CreateOrUpdateMainTitle
+ * @tc.desc: if (ignoreMainTitle) true  case1
+ *           if (ignoreMainTitle) false   if (!titleInfo.hasMainTitle) case2
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, CreateOrUpdateMainTitle, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create titleBarNode
+     */
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+    auto mainTitle = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(mainTitle, nullptr);
+    titleBarNode->SetTitle(mainTitle);
+
+    /**
+     * @tc.steps: step2. setIgnoreMaintitle , still has title
+     */
+    NG::NavigationTitleInfo info = { false, true, "sub", "main" };
+    NavigationTitleUtil::CreateOrUpdateMainTitle(titleBarNode, info, true);
+    EXPECT_EQ(titleBarNode->GetTitle(), mainTitle);
+
+    info.hasMainTitle = false;
+    NavigationTitleUtil::CreateOrUpdateMainTitle(titleBarNode, info, false);
+    EXPECT_EQ(titleBarNode->GetTitle(), nullptr);
+}
+
+/**
+ * @tc.name: CreateOrUpdateMainTitle1
+ * @tc.desc: if (ignoreMainTitle) false
+ *           if (!titleInfo.hasMainTitle) fasle
+ *           if (mainTitle) true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, CreateOrUpdateMainTitle1, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create titleBarNode
+     */
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+    auto mainTitle = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(mainTitle, nullptr);
+    titleBarNode->SetTitle(mainTitle);
+
+    /**
+     * @tc.steps: step2. settitle and update it
+     */
+    NG::NavigationTitleInfo info = { false, true, "sub", "main" };
+    auto textLayout = mainTitle->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayout, nullptr);
+    textLayout->UpdateContent("test");
+
+    NavigationTitleUtil::CreateOrUpdateMainTitle(titleBarNode, info, false);
+    auto value = textLayout->GetContent().value_or(u"");
+    EXPECT_EQ(value, UtfUtils::Str8DebugToStr16("main"));
+}
+
+/**
+ * @tc.name: CreateOrUpdateMainTitle2
+ * @tc.desc: if (ignoreMainTitle) false
+ *           if (!titleInfo.hasMainTitle) fasle
+ *           if (mainTitle) false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, CreateOrUpdateMainTitle2, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create titleBarNode
+     */
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+
+    /**
+     * @tc.steps: step2. createtitle and check it
+     */
+    NG::NavigationTitleInfo info = { false, true, "sub", "main" };
+
+    NavigationTitleUtil::CreateOrUpdateMainTitle(titleBarNode, info, false);
+    ASSERT_NE(titleBarNode->GetTitle(), nullptr);
+    auto text = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
+    auto textLayout = text->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayout, nullptr);
+    auto value = textLayout->GetContent().value_or(u"");
+    EXPECT_EQ(value, UtfUtils::Str8DebugToStr16("main"));
 }
 } // namespace OHOS::Ace::NG

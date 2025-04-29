@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::Framework {
 
-void ListItemModelImpl::Create()
+void ListItemModelImpl::Create(bool isCreateArc)
 {
     auto listItemComponent = AceType::MakeRefPtr<V2::ListItemComponent>();
     ViewStackProcessor::GetInstance()->ClaimElementId(listItemComponent);
@@ -32,7 +32,8 @@ void ListItemModelImpl::Create()
     JSInteractableView::SetFocusNode(true);
 }
 
-void ListItemModelImpl::Create(std::function<void(int32_t)>&& deepRenderFunc, V2::ListItemStyle listItemStyle)
+void ListItemModelImpl::Create(
+    std::function<void(int32_t)>&& deepRenderFunc, V2::ListItemStyle listItemStyle, bool isCreateArc)
 {
     auto listItemComponent = AceType::MakeRefPtr<V2::ListItemComponent>();
     ViewStackProcessor::GetInstance()->ClaimElementId(listItemComponent);
@@ -88,7 +89,7 @@ void ListItemModelImpl::SetSelectable(bool selectable)
 }
 
 void ListItemModelImpl::SetSwiperAction(std::function<void()>&& startAction, std::function<void()>&& endAction,
-    [[maybe_unused]] OnOffsetChangeFunc&& onOffsetChangeFunc, V2::SwipeEdgeEffect edgeEffect)
+    [[maybe_unused]] OnOffsetChangeFunc&& onOffsetChangeFunc, V2::SwipeEdgeEffect edgeEffect, NG::FrameNode* node)
 {
     auto listItem = AceType::DynamicCast<V2::ListItemComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!listItem) {
@@ -117,7 +118,7 @@ void ListItemModelImpl::SetSelectCallback(OnSelectFunc&& selectCallback)
 
 void ListItemModelImpl::SetDeleteArea(std::function<void()>&& builderAction, OnDeleteEvent&& onDelete,
     OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
-    OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea) {};
+    OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea, NG::FrameNode* node) {};
 
 void ListItemModelImpl::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
 {
@@ -125,5 +126,9 @@ void ListItemModelImpl::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
     box->SetOnDragStartId(ViewAbstractModelImpl::ToDragFunc(std::move(onDragStart)));
     JSViewSetProperty(&V2::ListItemComponent::MarkIsDragStart, true);
 }
+
+void ListItemModelImpl::SetDeleteAreaWithFrameNode(const RefPtr<NG::UINode>& builderComponent, OnDeleteEvent&& onDelete,
+    OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
+    OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea, NG::FrameNode* node) {};
 
 } // namespace OHOS::Ace::Framework

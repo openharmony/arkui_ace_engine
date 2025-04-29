@@ -59,8 +59,10 @@ public:
 
 private:
     void ProcessTabBarItem();
+    Axis GetTabBarAxis() const;
     std::string ConvertFlexAlignToString(FlexAlign verticalAlign) const;
     std::string ConvertLayoutModeToString(LayoutMode layoutMode) const;
+    Dimension GetDefaultFontSize() const;
 
     std::optional<int32_t> tabBarItemId_;
     ACE_DISALLOW_COPY_AND_MOVE(TabContentNode);

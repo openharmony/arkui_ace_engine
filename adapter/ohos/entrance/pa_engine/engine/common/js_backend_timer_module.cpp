@@ -15,12 +15,7 @@
 
 #include "js_backend_timer_module.h"
 
-#include <atomic>
-#include <string>
-#include <vector>
-
 #include "base/log/log.h"
-#include "js_runtime.h"
 #include "js_runtime_utils.h"
 
 #ifdef SUPPORT_GRAPHICS
@@ -37,6 +32,7 @@ using OHOS::Ace::ContainerScope;
 namespace OHOS::Ace {
 namespace {
 std::atomic<uint32_t> g_callbackId(1);
+constexpr size_t ARGC_MIN = 2;
 
 class TraceIdScope final {
 public:
@@ -138,20 +134,19 @@ napi_value StartTimeoutOrInterval(napi_env env, napi_callback_info info, bool is
     napi_value thisVar = nullptr;
     void* data = nullptr;
     napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
-    if (argc > 0) {
-        argv = new napi_value[argc];
+    if (argc < ARGC_MIN) {
+        LOGE("Additional or equal to 2 are required for participation");
+        return result;
     }
+    argv = new napi_value[argc];
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
 
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, argv[0], &valueType);
-    if (valueType != napi_function) {
+    if (!AbilityRuntime::CheckTypeForNapiValue(env, argv[0], napi_function)) {
         LOGE("first param is not napi_function");
         delete[] argv;
         return result;
     }
-    napi_typeof(env, argv[1], &valueType);
-    if (valueType != napi_number) {
+    if (!AbilityRuntime::CheckTypeForNapiValue(env, argv[1], napi_number)) {
         LOGE("second param is not napi_number");
         delete[] argv;
         return result;
@@ -168,7 +163,6 @@ napi_value StartTimeoutOrInterval(napi_env env, napi_callback_info info, bool is
     std::string name = "JsRuntimeTimer_";
     name.append(std::to_string(callbackId));
 
-    // create timer task
     AbilityRuntime::JsRuntime& jsRuntime =
         *reinterpret_cast<AbilityRuntime::JsRuntime*>(reinterpret_cast<NativeEngine*>(env)->GetJsEngine());
     JsTimer task(jsRuntime, jsFunction, name, delayTime, isInterval);
@@ -176,7 +170,7 @@ napi_value StartTimeoutOrInterval(napi_env env, napi_callback_info info, bool is
         napi_ref value = nullptr;
         std::shared_ptr<NativeReference> valueRef;
         napi_create_reference(env, argv[index], 1, &value);
-        valueRef.reset(reinterpret_cast<NativeReference*>(ref));
+        valueRef.reset(reinterpret_cast<NativeReference*>(value));
         task.PushArgs(valueRef);
     }
 

@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/button/toggle_button_event_hub.h"
 #include "core/components_ng/pattern/button/toggle_button_paint_property.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
+#include "core/components/toggle/toggle_theme.h"
 
 namespace OHOS::Ace::NG {
 class ToggleButtonPattern : public ButtonPattern {
@@ -71,22 +72,30 @@ public:
     {
         return nodeId_;
     }
+
+    void SetIsFocus(bool focus)
+    {
+        isFocus_ = focus;
+    }
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void OnClick();
     void OnColorConfigurationUpdate() override;
     void MarkIsSelected(bool isSelected);
     void SetButtonPress(bool value);
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
 private:
     void OnAttachToFrameNode() override;
     void InitParameters();
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
-    void HandleEnabled();
     void InitClickEvent();
     void InitButtonAndText();
     void InitOnKeyEvent();
+    void HandleBlurEvent();
+    void HandleFocusEvent();
     bool OnKeyEvent(const KeyEvent& event);
     void SetAccessibilityAction();
     void UpdateSelectStatus(bool isSelected);
@@ -94,29 +103,55 @@ private:
     void OnTouchDown();
     void OnTouchUp();
     void FireBuilder();
+    void HandleOnOffStyle(bool isOnToOff, bool isFocus);
+    void HandleOverlayStyle();
+    void HandleBorderAndShadow();
+    void HandleFocusStyle();
+    void UpdateButtonStyle();
+    void SetBlurButtonStyle(RefPtr<FrameNode>& textNode, RefPtr<TextLayoutProperty>& textLayoutProperty,
+        bool isOnValueFalse, RefPtr<RenderContext>& renderContext);
+    void SetFocusButtonStyle(RefPtr<FrameNode>& textNode, RefPtr<TextLayoutProperty>& textLayoutProperty,
+        bool isOnValueFalse, RefPtr<RenderContext>& renderContext);
+    void HandleFocusShadowStyle(bool isOffState, RefPtr<RenderContext>& renderContext,
+        Shadow shadowValue, bool isbgColorFocus);
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void GetIsTextFade();
+    void UpdateTexOverflow(bool isMarqueeStart, RefPtr<TextLayoutProperty>& textLayoutProperty);
+    void InitHoverEvent();
+    void HandleHoverEvent(bool isHover);
+    void InitEvent();
+    void SetToggleScale(RefPtr<RenderContext>& renderContext);
 
     RefPtr<FrameNode> BuildContentModifierNode();
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
     std::optional<SwitchMakeCallback> toggleMakeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
     RefPtr<TouchEventImpl> touchListener_;
+    RefPtr<InputEvent> hoverListener_;
     int32_t nodeId_ = -1;
 
     RefPtr<ClickEvent> clickListener_;
+    RefPtr<ToggleTheme> toggleTheme_;
     std::optional<bool> isOn_;
     Color checkedColor_;
     Color unCheckedColor_;
     Color backgroundColor_;
-    float disabledAlpha_ { 1.0f };
     Dimension textMargin_;
-    Dimension buttonMargin_;
-    Dimension buttonHeight_;
     Dimension buttonRadius_;
     Dimension textFontSize_;
     Color textColor_;
+    bool isShadow_ = false;
+    bool isScale_ = false;
+    bool isTextColor_ = false;
+    bool isCheckedShadow_ = false;
+    bool isbgColorFocus_ = false;
+    bool isFocus_ = false;
     bool isPress_ = false;
     bool isSetClickedColor_ = false;
     bool IsNeedToHandleHoverOpacity();
-    bool isTouchPreventDefault_ = false;
+    bool isTextFadeOut_ = false;
+    bool isHover_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(ToggleButtonPattern);
 };
 } // namespace OHOS::Ace::NG

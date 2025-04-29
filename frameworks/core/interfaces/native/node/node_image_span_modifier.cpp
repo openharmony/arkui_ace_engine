@@ -14,13 +14,9 @@
  */
 #include "core/interfaces/native/node/node_image_span_modifier.h"
 
-#include "core/components/common/layout/constants.h"
 #include "core/components/image/image_component.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -29,6 +25,16 @@ constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int DEFAULT_LENGTH = 4;
+constexpr int32_t LOAD_ERROR_CODE = 401;
+constexpr int32_t IMAGE_LOAD_STATUS_INDEX = 0;
+constexpr int32_t IMAGE_WIDTH_INDEX = 1;
+constexpr int32_t IMAGE_HEIGHT_INDEX = 2;
+constexpr int32_t IMAGE_COMPONENT_WIDTH_INDEX = 3;
+constexpr int32_t IMAGE_COMPONENT_HEIGHT_INDEX = 4;
+constexpr int32_t IMAGE_CONTENT_OFFSET_X_INDEX = 5;
+constexpr int32_t IMAGE_CONTENT_OFFSET_Y_INDEX = 6;
+constexpr int32_t IMAGE_CONTENT_WIDTH_INDEX = 7;
+constexpr int32_t IMAGE_CONTENT_HEIGHT_INDEX = 8;
 constexpr VerticalAlign DEFAULT_VERTICAL_ALIGN = VerticalAlign::BOTTOM;
 constexpr ImageFit DEFAULT_OBJECT_FIT = ImageFit::COVER;
 constexpr Dimension DEFAULT_BASELINE_OFFSET { 0.0, DimensionUnit::FP };
@@ -125,7 +131,7 @@ void GetImageSpanTextBackgroundStyle(ArkUINodeHandle node, ArkUITextBackgroundSt
     options->topLeft = styleOptions.backgroundRadius->radiusTopLeft->Value();
     options->topRight = styleOptions.backgroundRadius->radiusTopRight->Value();
     options->bottomLeft = styleOptions.backgroundRadius->radiusBottomLeft->Value();
-    options->bottomLeft = styleOptions.backgroundRadius->radiusBottomLeft->Value();
+    options->bottomRight = styleOptions.backgroundRadius->radiusBottomRight->Value();
 }
 
 void SetImageSpanBaselineOffset(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
@@ -140,6 +146,13 @@ void ResetImageSpanBaselineOffset(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageSpanView::SetBaselineOffset(frameNode, DEFAULT_BASELINE_OFFSET);
+}
+
+float GetImageSpanBaselineOffset(ArkUINodeHandle node, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return ImageSpanView::GetBaselineOffset(frameNode, unit);
 }
 
 void SetImageSpanOnComplete(ArkUINodeHandle node, void *callback)
@@ -197,27 +210,130 @@ void ResetImageSpanColorFilter(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetColorFilterMatrix(frameNode, DEFAULT_COLOR_FILTER);
 }
+
+/**
+ * @param values radius values
+ * value[0] : radius value for TopLeft，value[1] : radius value for TopRight
+ * value[2] : radius value for BottomLeft，value[3] : radius value for BottomRight
+ * @param units radius units
+ * units[0]: radius unit for TopLeft ,units[1] : radius unit for TopRight
+ * units[2]: radius unit for BottomLeft, units[3] : radius unit for TopRight
+ */
+void SetImageSpanBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values,
+    const ArkUI_Int32* units, ArkUI_Int32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (length != DEFAULT_LENGTH) {
+        return;
+    }
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
+    borderRadius.radiusTopRight = Dimension(values[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
+    borderRadius.radiusBottomLeft = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
+    borderRadius.radiusBottomRight = Dimension(values[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]));
+    borderRadius.multiValued = true;
+    ImageSpanView::SetBorderRadius(frameNode, borderRadius);
+}
+
+void ResetImageSpanBorderRadius(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageSpanView::ResetBorderRadius(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
 const ArkUIImageSpanModifier* GetImageSpanModifier()
 {
-    static const ArkUIImageSpanModifier modifier = { SetImageSpanVerticalAlign, ResetImageSpanVerticalAlign,
-        SetImageSpanObjectFit, ResetImageSpanObjectFit, GetImageSpanVerticalAlign, GetImageSpanObjectFit,
-        SetImageSpanTextBackgroundStyle, ResetImageSpanTextBackgroundStyle, GetImageSpanTextBackgroundStyle,
-        SetImageSpanBaselineOffset, ResetImageSpanBaselineOffset, SetImageSpanOnComplete, ResetImageSpanOnComplete,
-        SetImageSpanOnError, ResetImageSpanOnError, SetImageSpanColorFilter, ResetImageSpanColorFilter};
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIImageSpanModifier modifier = {
+        .setImageSpanVerticalAlign = SetImageSpanVerticalAlign,
+        .resetImageSpanVerticalAlign = ResetImageSpanVerticalAlign,
+        .setImageSpanObjectFit = SetImageSpanObjectFit,
+        .resetImageSpanObjectFit = ResetImageSpanObjectFit,
+        .getImageSpanVerticalAlign = GetImageSpanVerticalAlign,
+        .getImageSpanObjectFit = GetImageSpanObjectFit,
+        .setImageSpanTextBackgroundStyle = SetImageSpanTextBackgroundStyle,
+        .resetImageSpanTextBackgroundStyle = ResetImageSpanTextBackgroundStyle,
+        .getImageSpanTextBackgroundStyle = GetImageSpanTextBackgroundStyle,
+        .setImageSpanBaselineOffset = SetImageSpanBaselineOffset,
+        .resetImageSpanBaselineOffset = ResetImageSpanBaselineOffset,
+        .setImageSpanOnComplete = SetImageSpanOnComplete,
+        .resetImageSpanOnComplete = ResetImageSpanOnComplete,
+        .setImageSpanOnError = SetImageSpanOnError,
+        .resetImageSpanOnError = ResetImageSpanOnError,
+        .setImageSpanColorFilter = SetImageSpanColorFilter,
+        .resetImageSpanColorFilter = ResetImageSpanColorFilter,
+        .setImageSpanBorderRadius = SetImageSpanBorderRadius,
+        .resetImageSpanBorderRadius = ResetImageSpanBorderRadius,
+        .getImageSpanBaselineOffset = GetImageSpanBaselineOffset,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIImageSpanModifier* GetCJUIImageSpanModifier()
 {
-    static const CJUIImageSpanModifier modifier = { SetImageSpanVerticalAlign, ResetImageSpanVerticalAlign,
-        SetImageSpanObjectFit, ResetImageSpanObjectFit, GetImageSpanVerticalAlign, GetImageSpanObjectFit,
-        SetImageSpanTextBackgroundStyle, ResetImageSpanTextBackgroundStyle, GetImageSpanTextBackgroundStyle,
-        SetImageSpanBaselineOffset, ResetImageSpanBaselineOffset, SetImageSpanOnComplete, ResetImageSpanOnComplete,
-        SetImageSpanOnError, ResetImageSpanOnError};
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIImageSpanModifier modifier = {
+        .setImageSpanVerticalAlign = SetImageSpanVerticalAlign,
+        .resetImageSpanVerticalAlign = ResetImageSpanVerticalAlign,
+        .setImageSpanObjectFit = SetImageSpanObjectFit,
+        .resetImageSpanObjectFit = ResetImageSpanObjectFit,
+        .getImageSpanVerticalAlign = GetImageSpanVerticalAlign,
+        .getImageSpanObjectFit = GetImageSpanObjectFit,
+        .setImageSpanTextBackgroundStyle = SetImageSpanTextBackgroundStyle,
+        .resetImageSpanTextBackgroundStyle = ResetImageSpanTextBackgroundStyle,
+        .getImageSpanTextBackgroundStyle = GetImageSpanTextBackgroundStyle,
+        .setImageSpanBaselineOffset = SetImageSpanBaselineOffset,
+        .resetImageSpanBaselineOffset = ResetImageSpanBaselineOffset,
+        .setImageSpanOnComplete = SetImageSpanOnComplete,
+        .resetImageSpanOnComplete = ResetImageSpanOnComplete,
+        .setImageSpanOnError = SetImageSpanOnError,
+        .resetImageSpanOnError = ResetImageSpanOnError,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
+}
+
+void SetImageSpanOnCompleteEvent(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const LoadImageSuccessEvent& info) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_IMAGE_SPAN_COMPLETE;
+        event.componentAsyncEvent.data[IMAGE_LOAD_STATUS_INDEX].i32 = info.GetLoadingStatus();
+        event.componentAsyncEvent.data[IMAGE_WIDTH_INDEX].f32 = info.GetWidth();
+        event.componentAsyncEvent.data[IMAGE_HEIGHT_INDEX].f32 = info.GetHeight();
+        event.componentAsyncEvent.data[IMAGE_COMPONENT_WIDTH_INDEX].f32 = info.GetComponentWidth();
+        event.componentAsyncEvent.data[IMAGE_COMPONENT_HEIGHT_INDEX].f32 = info.GetComponentHeight();
+        event.componentAsyncEvent.data[IMAGE_CONTENT_OFFSET_X_INDEX].f32 = info.GetContentOffsetX();
+        event.componentAsyncEvent.data[IMAGE_CONTENT_OFFSET_Y_INDEX].f32 = info.GetContentOffsetY();
+        event.componentAsyncEvent.data[IMAGE_CONTENT_WIDTH_INDEX].f32 = info.GetContentWidth();
+        event.componentAsyncEvent.data[IMAGE_CONTENT_HEIGHT_INDEX].f32 = info.GetContentHeight();
+        SendArkUISyncEvent(&event);
+    };
+    ImageSpanView::SetOnComplete(frameNode, std::move(onEvent));
+}
+
+void SetImageSpanOnErrorEvent(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const LoadImageFailEvent& info) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_IMAGE_SPAN_ERROR;
+        event.componentAsyncEvent.data[0].i32 = LOAD_ERROR_CODE;
+        SendArkUISyncEvent(&event);
+    };
+    ImageSpanView::SetOnError(frameNode, std::move(onEvent));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

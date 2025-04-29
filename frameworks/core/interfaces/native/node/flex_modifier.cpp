@@ -14,14 +14,7 @@
  */
 #include "core/interfaces/native/node/flex_modifier.h"
 
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
-#include "core/pipeline/base/element_register.h"
-#include "frameworks/core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
@@ -162,16 +155,31 @@ void SetMainSpace(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 namespace NodeModifier {
 const ArkUIFlexModifier* GetFlexModifier()
 {
-    static const ArkUIFlexModifier modifier = { SetFlexOptions, ResetFlexOptions, GetFlexOptions, setFlexCrossSpace,
-        SetMainSpace };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIFlexModifier modifier = {
+        .setFlexOptions = SetFlexOptions,
+        .resetFlexOptions = ResetFlexOptions,
+        .getFlexOptions = GetFlexOptions,
+        .setFlexCrossSpace = setFlexCrossSpace,
+        .setFlexMainSpace = SetMainSpace,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+
     return &modifier;
 }
 
 const CJUIFlexModifier* GetCJUIFlexModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIFlexModifier modifier = {
-        SetFlexOptions, ResetFlexOptions, GetFlexOptions, setFlexCrossSpace, SetMainSpace
+        .setFlexOptions = SetFlexOptions,
+        .resetFlexOptions = ResetFlexOptions,
+        .getFlexOptions = GetFlexOptions,
+        .setFlexCrossSpace = setFlexCrossSpace,
+        .setFlexMainSpace = SetMainSpace,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+
     return &modifier;
 }
 }

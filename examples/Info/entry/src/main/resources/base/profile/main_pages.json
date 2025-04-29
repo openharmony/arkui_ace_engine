@@ -1,0 +1,14 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/counter/CounterExample",
+    "pages/badge/BadgeExample",
+    "pages/datapanel/DataPanelExample",
+    "pages/gauge/GaugeExample",
+    "pages/loadingProgress/LoadingProgressExample",
+    "pages/progress/ProgressExample",
+    "pages/qrcode/QrcodeExample",
+    "pages/textclock/TextClockExample",
+    "pages/texttimer/TextTimerExample"
+  ]
+}

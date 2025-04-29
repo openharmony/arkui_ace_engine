@@ -88,7 +88,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorDragingStatusTest001, TestSize.Level1
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->ResetDragging(DragDropMgrState::DRAGGING);
-    auto globalStatus = dragEventActuator->IsGlobalStatusSuitableForDragging();
+    auto globalStatus = DragDropFuncWrapper::IsGlobalStatusSuitableForDragging();
     ASSERT_EQ(globalStatus, false);
 
     /**
@@ -287,11 +287,11 @@ HWTEST_F(DragEventTestNg, DragEventActuatorSetPixelMapTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: DragEventActuatorBrulStyleToEffectionTest001
- * @tc.desc: Test BrulStyleToEffection function.
+ * @tc.name: DragEventActuatorBlurStyleToEffectionTest001
+ * @tc.desc: Test BlurStyleToEffection function.
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventTestNg, DragEventActuatorBrulStyleToEffectionTest001, TestSize.Level1)
+HWTEST_F(DragEventTestNg, DragEventActuatorBlurStyleToEffectionTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create DragEventActuator.
@@ -308,7 +308,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorBrulStyleToEffectionTest001, TestSize
     ASSERT_NE(dragEventActuator, nullptr);
 
     /**
-     * @tc.steps: step2. Invoke BrulStyleToEffection.
+     * @tc.steps: step2. Invoke BlurStyleToEffection.
      */
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -317,7 +317,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorBrulStyleToEffectionTest001, TestSize
     ASSERT_NE(imageContext, nullptr);
     auto blurstyletmp = imageContext->GetBackBlurStyle();
     blurstyletmp->colorMode = ThemeColorMode::DARK;
-    dragEventActuator->BrulStyleToEffection(blurstyletmp);
+    DragDropFuncWrapper::BlurStyleToEffection(blurstyletmp);
     ASSERT_NE(blurstyletmp->colorMode, ThemeColorMode::SYSTEM);
 }
 
@@ -416,7 +416,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorSetImageNodeInitAttrTest001, TestSize
     auto layoutProperty = frameNode->GetLayoutProperty();
     auto shadow = Shadow::CreateShadow(ShadowStyle::None);
 
-    dragEventActuator->SetImageNodeInitAttr(frameNode, imageNode);
+    DragAnimationHelper::SetImageNodeInitAttr(frameNode, imageNode);
     EXPECT_TRUE(dragPreviewOption.defaultAnimationBeforeLifting);
     EXPECT_NE(layoutProperty, nullptr);
     EXPECT_FALSE(dragPreviewOption.options.shadow.has_value());
@@ -426,7 +426,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorSetImageNodeInitAttrTest001, TestSize
      * @tc.desc: defaultAnimationBeforeLifting = true, layoutProperty = nullptr.
      */
     frameNode->layoutProperty_ = nullptr;
-    dragEventActuator->SetImageNodeInitAttr(frameNode, imageNode);
+    DragAnimationHelper::SetImageNodeInitAttr(frameNode, imageNode);
     EXPECT_EQ(frameNode->GetLayoutProperty(), nullptr);
 
     /**
@@ -434,7 +434,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorSetImageNodeInitAttrTest001, TestSize
      * @tc.desc: defaultAnimationBeforeLifting = false, layoutProperty = nullptr.
      */
     dragPreviewOption.defaultAnimationBeforeLifting = false;
-    dragEventActuator->SetImageNodeInitAttr(frameNode, imageNode);
+    DragAnimationHelper::SetImageNodeInitAttr(frameNode, imageNode);
     EXPECT_FALSE(dragPreviewOption.defaultAnimationBeforeLifting);
 
     /**
@@ -442,7 +442,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorSetImageNodeInitAttrTest001, TestSize
      * @tc.desc: dragPreviewOption.options.shadow.has_value() = true.
      */
     dragPreviewOption.options.shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultXS);
-    dragEventActuator->SetImageNodeInitAttr(frameNode, imageNode);
+    DragAnimationHelper::SetImageNodeInitAttr(frameNode, imageNode);
     EXPECT_TRUE(dragPreviewOption.options.shadow.has_value());
 }
 
@@ -477,7 +477,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorSetImageNodeFinishAttrTest001, TestSi
     EXPECT_NE(imageContext, nullptr);
     auto dragPreviewOption = frameNode->GetDragPreviewOption();
 
-    dragEventActuator->SetImageNodeFinishAttr(frameNode, imageNode);
+    DragAnimationHelper::SetImageNodeFinishAttr(frameNode, imageNode);
     EXPECT_FALSE(dragPreviewOption.options.shadow->GetIsFilled());
     EXPECT_FALSE(dragPreviewOption.options.shadow.has_value());
 
@@ -485,7 +485,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorSetImageNodeFinishAttrTest001, TestSi
      * @tc.steps: step3. Invoke SetImageNodeFinishAttr.
      */
     dragPreviewOption.options.shadow->isFilled_ = true;
-    dragEventActuator->SetImageNodeFinishAttr(frameNode, imageNode);
+    DragAnimationHelper::SetImageNodeFinishAttr(frameNode, imageNode);
     EXPECT_TRUE(dragPreviewOption.options.shadow->GetIsFilled());
     EXPECT_FALSE(dragPreviewOption.options.shadow.has_value());
 
@@ -494,7 +494,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorSetImageNodeFinishAttrTest001, TestSi
      */
     dragPreviewOption.options.shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultXS);
     dragPreviewOption.options.shadow->isFilled_ = false;
-    dragEventActuator->SetImageNodeFinishAttr(frameNode, imageNode);
+    DragAnimationHelper::SetImageNodeFinishAttr(frameNode, imageNode);
     EXPECT_FALSE(dragPreviewOption.options.shadow->GetIsFilled());
     EXPECT_TRUE(dragPreviewOption.options.shadow.has_value());
 
@@ -503,7 +503,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorSetImageNodeFinishAttrTest001, TestSi
      */
     dragPreviewOption.options.shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultXS);
     dragPreviewOption.options.shadow->isFilled_ = true;
-    dragEventActuator->SetImageNodeFinishAttr(frameNode, imageNode);
+    DragAnimationHelper::SetImageNodeFinishAttr(frameNode, imageNode);
     EXPECT_TRUE(dragPreviewOption.options.shadow->GetIsFilled());
     EXPECT_TRUE(dragPreviewOption.options.shadow.has_value());
 }
@@ -566,7 +566,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorResetNodeTest001, TestSize.Level1)
      */
     auto dragPreviewOption = frameNode->GetDragPreviewOption();
     dragPreviewOption.defaultAnimationBeforeLifting = false;
-    dragEventActuator->ResetNode(frameNode);
+    DragDropFuncWrapper::ResetNode(frameNode);
     dragPreviewOption = frameNode->GetDragPreviewOption();
     EXPECT_FALSE(dragPreviewOption.defaultAnimationBeforeLifting);
 
@@ -575,7 +575,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorResetNodeTest001, TestSize.Level1)
      */
     dragPreviewOption.defaultAnimationBeforeLifting = true;
     frameNode->layoutProperty_ = nullptr;
-    dragEventActuator->ResetNode(frameNode);
+    DragDropFuncWrapper::ResetNode(frameNode);
     EXPECT_EQ(frameNode->GetLayoutProperty(), nullptr);
 }
 
@@ -635,7 +635,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorCreateBadgeTextNodeTest001, TestSize.
     /**
      * @tc.steps: step2. Invoke CreateBadgeTextNode.
      */
-    auto textNode = dragEventActuator->CreateBadgeTextNode(frameNode, 1, 1.05f, true);
+    auto textNode = DragAnimationHelper::CreateBadgeTextNode(1);
     EXPECT_EQ(textNode, nullptr);
 }
 
@@ -672,29 +672,29 @@ HWTEST_F(DragEventTestNg, DragEventActuatorHandleTouchMoveEventTest001, TestSize
      */
     dragEventActuator->longPressRecognizer_ =
         AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGERS_NUMBER, false, true);
-    dragEventActuator->isOnBeforeLiftingAnimation = false;
+    dragEventActuator->isOnBeforeLiftingAnimation_ = false;
     dragEventActuator->HandleTouchMoveEvent();
     EXPECT_NE(dragEventActuator->longPressRecognizer_, nullptr);
-    EXPECT_FALSE(dragEventActuator->isOnBeforeLiftingAnimation);
+    EXPECT_FALSE(dragEventActuator->isOnBeforeLiftingAnimation_);
 
     /**
      * @tc.steps: step4. Invoke HandleTouchMoveEvent.
      */
-    dragEventActuator->isOnBeforeLiftingAnimation = true;
+    dragEventActuator->isOnBeforeLiftingAnimation_ = true;
     dragEventActuator->longPressRecognizer_->disposal_ = GestureDisposal::ACCEPT;
     dragEventActuator->HandleTouchMoveEvent();
     EXPECT_NE(dragEventActuator->longPressRecognizer_, nullptr);
-    EXPECT_TRUE(dragEventActuator->isOnBeforeLiftingAnimation);
+    EXPECT_TRUE(dragEventActuator->isOnBeforeLiftingAnimation_);
     EXPECT_FALSE(dragEventActuator->longPressRecognizer_->GetGestureDisposal() == GestureDisposal::REJECT);
 
     /**
      * @tc.steps: step5. Invoke HandleTouchMoveEvent.
      */
     dragEventActuator->longPressRecognizer_->disposal_ = GestureDisposal::REJECT;
-    dragEventActuator->isOnBeforeLiftingAnimation = true;
+    dragEventActuator->isOnBeforeLiftingAnimation_ = true;
     dragEventActuator->HandleTouchMoveEvent();
     EXPECT_NE(dragEventActuator->longPressRecognizer_, nullptr);
-    EXPECT_FALSE(dragEventActuator->isOnBeforeLiftingAnimation);
+    EXPECT_FALSE(dragEventActuator->isOnBeforeLiftingAnimation_);
     EXPECT_TRUE(dragEventActuator->longPressRecognizer_->GetGestureDisposal() == GestureDisposal::REJECT);
 }
 
@@ -791,39 +791,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest002, TestSize.Leve
     dragDropManager->ResetDragging(DragDropMgrState::IDLE);
     dragEventActuator->isRedragStart_ = false;
     dragEventActuator->HandleDragDampingMove(point, info.GetTouches().front().GetFingerId(), true);
-    SUCCEED();
-}
-
-/**
- * @tc.name: DragEventActuatorMountGatherNodeTest003
- * @tc.desc: Test GetFloatImageOffset.
- * @tc.type: FUNC
- */
-HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create DragEventActuator.
-     */
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    auto framenode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
-    ASSERT_NE(framenode, nullptr);
-    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(framenode));
-    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
-    ASSERT_NE(gestureEventHub, nullptr);
-    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
-        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
-    ASSERT_NE(dragEventActuator, nullptr);
-    auto gestureHub = dragEventActuator->gestureEventHub_.Upgrade();
-    CHECK_NULL_VOID(gestureHub);
-    auto frameNode = gestureHub->GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    RefPtr<PixelMap> pixelMap = gestureHub->GetPixelMap();
-    CHECK_NULL_VOID(pixelMap);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    pipelineContext->windowModal_ = WindowModal::SEMI_MODAL;
-    dragEventActuator->GetFloatImageOffset(framenode, pixelMap);
-    SUCCEED();
+    EXPECT_EQ(dragEventActuator->isRedragStart_, true);
 }
 
 /**
@@ -850,7 +818,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest004, TestSize.Leve
     previewOption.isDefaultRadiusEnabled = true;
     framenode->SetDragPreviewOptions(previewOption);
     dragEventActuator->UpdatePreviewOptionDefaultAttr(framenode);
-    SUCCEED();
+    EXPECT_EQ(previewOption.isDefaultRadiusEnabled, true);
 }
 
 /**
@@ -878,7 +846,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest005, TestSize.Leve
     auto manager = pipelineContext->GetOverlayManager();
     manager->hasEvent_ = true;
     dragEventActuator->SetEventColumn(dragEventActuator);
-    SUCCEED();
+    EXPECT_EQ(manager->hasEvent_, true);
 }
 
 /**
@@ -908,7 +876,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest006, TestSize.Leve
     for (auto item : event) {
         (*item)(info);
     }
-    SUCCEED();
+    EXPECT_EQ(columnGestureHub->GetHitTestMode(), HitTestMode::HTMBLOCK);
 }
 
 /**
@@ -940,7 +908,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest007, TestSize.Leve
     for (auto item : event) {
         (*item)(info);
     }
-    SUCCEED();
+    EXPECT_EQ(columnGestureHub->GetHitTestMode(), HitTestMode::HTMBLOCK);
 }
 
 /**
@@ -965,11 +933,10 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest008, TestSize.Leve
         AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
     framenode->previewOption_.defaultAnimationBeforeLifting = true;
     ASSERT_NE(dragEventActuator, nullptr);
-    dragEventActuator->SetImageNodeInitAttr(framenode, framenode1);
-    SUCCEED();
+    DragAnimationHelper::SetImageNodeInitAttr(framenode, framenode1);
     framenode->layoutProperty_ = nullptr;
-    dragEventActuator->SetImageNodeInitAttr(framenode, framenode1);
-    SUCCEED();
+    DragAnimationHelper::SetImageNodeInitAttr(framenode, framenode1);
+    EXPECT_EQ(framenode->previewOption_.defaultAnimationBeforeLifting, true);
 }
 
 /**
@@ -994,12 +961,11 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest009, TestSize.Leve
     ASSERT_NE(dragEventActuator, nullptr);
     framenode->dragPreviewInfo_.inspectorId = "test";
     dragEventActuator->GetFrameNodePreviewPixelMap(framenode);
-    SUCCEED();
     RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(static_cast<void*>(new char[0]));
     framenode->dragPreviewInfo_.pixelMap = pixelMap;
     framenode->dragPreviewInfo_.inspectorId = "";
     dragEventActuator->GetFrameNodePreviewPixelMap(framenode);
-    SUCCEED();
+    EXPECT_EQ(gestureEventHub->GetDragPreviewPixelMap(), nullptr);;
 }
 
 /**
@@ -1050,7 +1016,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest010, TestSize.Leve
     auto gestureHub = dragEventActuator->gestureEventHub_.Upgrade();
     gestureHub->textDraggable_ = true;
     (*(dragEventActuator->panRecognizer_->onActionEnd_))(info);
-    SUCCEED();
+    EXPECT_EQ(gestureHub->textDraggable_, true);
 }
 
 /**
@@ -1098,12 +1064,15 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest011, TestSize.Leve
     frameNode->GetOrCreateFocusHub();
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
+    dragEventActuator->panRecognizer_->onActionCancel_ = std::make_unique<GestureEventFunc>(
+        [&unknownPropertyValue](GestureEvent& info) { unknownPropertyValue = GESTURE_EVENT_PROPERTY_VALUE; });
     ASSERT_NE(dragEventActuator->panRecognizer_->onActionCancel_, nullptr);
     unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
     dragEventActuator->isNotInPreviewState_ = true;
     auto gestureHub = dragEventActuator->gestureEventHub_.Upgrade();
     gestureHub->textDraggable_ = false;
-    (*(dragEventActuator->panRecognizer_->onActionCancel_))();
+    GestureEvent info = GestureEvent();
+    (*(dragEventActuator->panRecognizer_->onActionCancel_))(info);
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
 }
 
@@ -1152,10 +1121,10 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest012, TestSize.Leve
     SystemProperties::debugEnabled_ = true;
     GestureEvent info = GestureEvent();
     dragEventActuator->userCallback_->actionLongPress_ = actionEnd;
-    (*(dragEventActuator->longPressRecognizer_->onActionUpdate_))(info);
+    (*(dragEventActuator->longPressRecognizer_->onAction_))(info);
     EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), true);
     dragEventActuator->userCallback_ = nullptr;
-    (*(dragEventActuator->longPressRecognizer_->onActionUpdate_))(info);
+    (*(dragEventActuator->longPressRecognizer_->onAction_))(info);
     EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), true);
 }
 
@@ -1206,7 +1175,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest013, TestSize.Leve
     auto gestureHub = dragEventActuator->gestureEventHub_.Upgrade();
     gestureHub->textDraggable_ = true;
     dragEventActuator->userCallback_->actionLongPress_ = actionEnd;
-    (*(dragEventActuator->longPressRecognizer_->onActionUpdate_))(info);
+    (*(dragEventActuator->longPressRecognizer_->onAction_))(info);
     EXPECT_EQ(dragEventActuator->GetIsNotInPreviewState(), true);
 }
 
@@ -1364,7 +1333,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest016, TestSize.Leve
 
 /**
  * @tc.name: DragEventActuatorMountGatherNodeTest017
- * @tc.desc: Test BrulStyleToEffection.
+ * @tc.desc: Test BlurStyleToEffection.
  * @tc.type: FUNC
  */
 HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest017, TestSize.Level1)
@@ -1386,7 +1355,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest017, TestSize.Leve
     BlurStyleOption blurStyleInfo = { BlurStyle::NO_MATERIAL, ThemeColorMode::SYSTEM, AdaptiveColor::DEFAULT, 1.0,
         { vecGrayScale } };
     std::optional<BlurStyleOption> optBlurStyleInfo(blurStyleInfo);
-    auto optEffectOption = dragEventActuator->BrulStyleToEffection(optBlurStyleInfo);
+    auto optEffectOption = DragDropFuncWrapper::BlurStyleToEffection(optBlurStyleInfo);
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     EXPECT_EQ(optEffectOption.has_value(), false);
@@ -1409,9 +1378,9 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest017, TestSize.Leve
     EXPECT_CALL(*themeManager, GetTheme(BlurStyleTheme::TypeId())).WillRepeatedly(Return(blThemeInstance));
 
     optBlurStyleInfo->colorMode = ThemeColorMode::LIGHT;
-    optEffectOption = dragEventActuator->BrulStyleToEffection(optBlurStyleInfo);
+    optEffectOption = DragDropFuncWrapper::BlurStyleToEffection(optBlurStyleInfo);
     ASSERT_NE(optEffectOption.has_value(), true);
-    SUCCEED();
+    EXPECT_EQ(resValueWrapper.type, ThemeConstantsType::THEME);
 }
 
 /**
@@ -1440,7 +1409,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest018, TestSize.Leve
     dragEventActuator->SetFilter(dragEventActuatorTwo);
     parentNode->depth_ = 1;
     dragEventActuator->SetFilter(dragEventActuatorTwo);
-    SUCCEED();
+    EXPECT_EQ(parentNode->depth_, 1);
 }
 
 /**
@@ -1470,7 +1439,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest019, TestSize.Leve
     MockContainer::SetUp();
     dragEventActuator->SetFilter(dragEventActuatorTwo);
     auto container = MockContainer::Current();
-    container->isScenceBoardWindow_ = true;
+    container->isSceneBoardWindow_ = true;
     auto pipelineContext = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipelineContext, nullptr);
     auto manager = pipelineContext->GetOverlayManager();
@@ -1482,52 +1451,9 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest019, TestSize.Leve
     dragEventActuator->SetFilter(dragEventActuatorTwo);
     manager->hasFilter_ = true;
     dragEventActuator->SetFilter(dragEventActuatorTwo);
-    container->isScenceBoardWindow_ = false;
+    container->isSceneBoardWindow_ = false;
     MockContainer::TearDown();
-    SUCCEED();
-}
-
-/**
- * @tc.name: DragEventActuatorMountGatherNodeTest020
- * @tc.desc: Test MountPixelMap.
- * @tc.type: FUNC
- */
-HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest020, TestSize.Level1)
-{
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    ASSERT_NE(frameNode, nullptr);
-    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
-    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
-    ASSERT_NE(gestureEventHub, nullptr);
-    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
-        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
-    ASSERT_NE(dragEventActuator, nullptr);
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-    auto overlayManager = pipeline->GetOverlayManager();
-    ASSERT_NE(overlayManager, nullptr);
-    frameNode->eventHub_->SetEnabled(true);
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    ASSERT_NE(gestureHub, nullptr);
-    void* voidPtr = static_cast<void*>(new char[0]);
-    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
-    gestureHub->SetPixelMap(pixelMap);
-    ASSERT_NE(frameNode->GetPixelMap(), nullptr);
-    RefPtr<FrameNode> imageNode = nullptr;
-    dragEventActuator->CreatePreviewNode(frameNode, imageNode);
-    ASSERT_NE(imageNode, nullptr);
-    MockContainer::SetUp();
-    auto container = MockContainer::Current();
-    container->isScenceBoardWindow_ = true;
-    dragEventActuator->MountPixelMap(overlayManager, gestureHub, imageNode, nullptr);
-    container->isScenceBoardWindow_ = false;
-    dragEventActuator->MountPixelMap(overlayManager, gestureHub, imageNode, nullptr);
-    MockContainer::TearDown();
-    SUCCEED();
+    EXPECT_EQ(manager->hasFilter_, true);
 }
 
 /**
@@ -1559,14 +1485,14 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest021, TestSize.Leve
     dragEventActuator->SetPixelMap(dragEventActuator);
     MockContainer::SetUp();
     auto container = MockContainer::Current();
-    container->isScenceBoardWindow_ = true;
+    container->isSceneBoardWindow_ = true;
     manager->SetHasPixelMap(false);
     dragEventActuator->SetPixelMap(dragEventActuator);
     manager->SetHasPixelMap(false);
-    container->isScenceBoardWindow_ = false;
+    container->isSceneBoardWindow_ = false;
     dragEventActuator->SetPixelMap(dragEventActuator);
     MockContainer::TearDown();
-    SUCCEED();
+    EXPECT_EQ(container->isSceneBoardWindow_, false);
 }
 
 /**
@@ -1621,7 +1547,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest022, TestSize.Leve
     };
     framenode->SetDragPreviewOptions(previewOptions);
     dragEventActuator->UpdatePreviewOptionFromModifier(framenode);
-    SUCCEED();
+    EXPECT_EQ(previewOptions.isMultiSelectionEnabled, false);
 }
 
 /**
@@ -1668,7 +1594,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest023, TestSize.Leve
     };
     framenode->SetDragPreviewOptions(previewOptions);
     dragEventActuator->UpdatePreviewOptionFromModifier(framenode);
-    SUCCEED();
+    EXPECT_EQ(previewOptions.isMultiSelectionEnabled, false);
 }
 
 /**
@@ -1691,7 +1617,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest024, TestSize.Leve
     auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
         AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
     ASSERT_NE(dragEventActuator, nullptr);
-    dragEventActuator->ApplyNewestOptionExecutedFromModifierToNode(framenode, parentNode);
+    DragDropFuncWrapper::ApplyNewestOptionExecutedFromModifierToNode(framenode, parentNode);
     Dimension dimen(2.0);
     BlurBackGroundInfo bgBackEffect = { { dimen, 1.0f, 1.0f, Color::TRANSPARENT, AdaptiveColor::DEFAULT,
         { { 2.0f, 2.0f } } } };
@@ -1702,12 +1628,12 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest024, TestSize.Leve
     shadow.SetColor(Color::FromARGB(255, 255, 0, 0));
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(Dimension(0.1));
-    OptionsAfterApplied optionTmp = { 0, shadow, "test", borderRadius, { bgBackEffect } };
+    OptionsAfterApplied optionTmp = { 0, shadow, "test", true, borderRadius, { bgBackEffect } };
     NG::DragPreviewOption previewOptions;
     previewOptions.options = optionTmp;
     parentNode->SetDragPreviewOptions(previewOptions);
-    dragEventActuator->ApplyNewestOptionExecutedFromModifierToNode(framenode, parentNode);
-    SUCCEED();
+    DragDropFuncWrapper::ApplyNewestOptionExecutedFromModifierToNode(framenode, parentNode);
+    EXPECT_EQ(previewOptions.isMultiSelectionEnabled, false);
 }
 
 /**
@@ -1756,14 +1682,14 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest025, TestSize.Leve
     manager->hasEvent_ = false;
     MockContainer::SetUp();
     auto container = MockContainer::Current();
-    container->isScenceBoardWindow_ = true;
+    container->isSceneBoardWindow_ = true;
     (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
-    container->isScenceBoardWindow_ = false;
+    container->isSceneBoardWindow_ = false;
     manager->hasEvent_ = false;
     (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
     (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
     MockContainer::TearDown();
-    SUCCEED();
+    EXPECT_EQ(manager->hasEvent_, true);
 }
 
 /**
@@ -1799,15 +1725,15 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest026, TestSize.Leve
     shadow.SetColor(Color::FromARGB(255, 255, 0, 0));
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(Dimension(0.1));
-    OptionsAfterApplied optionTmp = { 0, shadow, "test", borderRadius, { bgBackEffect } };
+    OptionsAfterApplied optionTmp = { 0, shadow, "test", true, borderRadius, { bgBackEffect } };
     NG::DragPreviewOption previewOptions;
     previewOptions.options = optionTmp;
     framenode->SetDragPreviewOptions(previewOptions);
-    dragEventActuator->SetImageNodeInitAttr(framenode, framenodeOne);
-    dragEventActuator->SetImageNodeFinishAttr(framenode, framenodeOne);
+    DragAnimationHelper::SetImageNodeInitAttr(framenode, framenodeOne);
+    DragAnimationHelper::SetImageNodeFinishAttr(framenode, framenodeOne);
     previewOptions.options.shadow->isFilled_ = true;
     framenode->SetDragPreviewOptions(previewOptions);
-    dragEventActuator->SetImageNodeFinishAttr(framenode, framenodeOne);
+    DragAnimationHelper::SetImageNodeFinishAttr(framenode, framenodeOne);
 
     DragDropInfo dragDropInfo;
     RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(static_cast<void*>(new char[0]));
@@ -1817,7 +1743,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest026, TestSize.Leve
     framenode->SetDragPreview(dragDropInfo);
     GatherNodeChildInfo gatherNodeChildInfo;
     dragEventActuator->CreateImageNode(framenode, gatherNodeChildInfo);
-    SUCCEED();
+    EXPECT_EQ(shadow.GetBlurRadius(), 10.0);
 }
 
 /**
@@ -1851,11 +1777,11 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest027, TestSize.Leve
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo(2);
     MockContainer::SetUp();
     auto container = MockContainer::Current();
-    container->isScenceBoardWindow_ = true;
+    container->isSceneBoardWindow_ = true;
     dragEventActuator->MountGatherNode(manager, frameNode, gatherNode, gatherNodeChildrenInfo);
-    container->isScenceBoardWindow_ = false;
+    container->isSceneBoardWindow_ = false;
     MockContainer::TearDown();
-    SUCCEED();
+    EXPECT_EQ(container->isSceneBoardWindow_, false);
 }
 
 /**
@@ -1883,7 +1809,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest028, TestSize.Leve
     previewOption.isMultiSelectionEnabled = true;
     parentNode->SetDragPreviewOptions(previewOption);
     dragEventActuator->IsBelongToMultiItemNode(frameNode);
-    auto eventHubp = parentNode->GetEventHub<EventHub>();
+    auto eventHubp = parentNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHubp, nullptr);
     auto func = [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) { return DragDropInfo(); };
     eventHubp->onDragStart_ = func;
@@ -1895,7 +1821,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest028, TestSize.Leve
     childNode->SetParent(parentNodeTwo);
     dragEventActuator->FindItemParentNode(frameNode);
     dragEventActuator->FindItemParentNode(childNode);
-    SUCCEED();
+    EXPECT_EQ(previewOption.isMultiSelectionEnabled, true);
 }
 
 /**
@@ -1927,7 +1853,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest029, TestSize.Leve
     shadow.SetColor(Color::FromARGB(255, 255, 0, 0));
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(Dimension(0.1));
-    OptionsAfterApplied optionTmp = { 0, shadow, "test", borderRadius, { bgBackEffect } };
+    OptionsAfterApplied optionTmp = { 0, shadow, "test", true, borderRadius, { bgBackEffect } };
     NG::DragPreviewOption previewOptions;
     previewOptions.options = optionTmp;
     previewOptions.options.shadow->isFilled_ = true;
@@ -1945,7 +1871,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest029, TestSize.Leve
     gestureHubOne->isTextDraggable_ = true;
     gestureHubOne->textDraggable_ = true;
     dragEventActuator->PrepareShadowParametersForDragData(framenodeOne, arkExtraInfoJson, scale);
-    SUCCEED();
+    EXPECT_EQ(gestureHubOne->textDraggable_, true);
 }
 
 /**
@@ -1975,7 +1901,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest030, TestSize.Leve
     shadow.SetColor(Color::FromARGB(255, 255, 0, 0));
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(Dimension(0.1));
-    OptionsAfterApplied optionTmp = { 0, shadow, "test", borderRadius, { bgBackEffect } };
+    OptionsAfterApplied optionTmp = { 0, shadow, "test", true, borderRadius, { bgBackEffect } };
     NG::DragPreviewOption previewOptions;
     previewOptions.options = optionTmp;
     previewOptions.options.shadow->isFilled_ = true;
@@ -1986,10 +1912,10 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest030, TestSize.Leve
     Shadow shadows;
     shadows.SetIsFilled(false);
     shadows.SetOffset(Offset(5, 5));
-    optionTmp = { 0, shadows, "test", borderRadius, { bgBackEffect } };
+    optionTmp = { 0, shadows, "test", true, borderRadius, { bgBackEffect } };
     previewOptions.options = optionTmp;
     framenode->SetDragPreviewOptions(previewOptions);
     dragEventActuator->PrepareShadowParametersForDragData(framenode, arkExtraInfoJson, scale);
-    SUCCEED();
+    EXPECT_EQ(previewOptions.options.opacity, 0.0f);
 }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,9 @@
 
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 
-#include "core/components_ng/pattern/grid/grid_item_pattern.h"
+#include "core/components_ng/pattern/grid/grid_utils.h"
+#include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -32,8 +34,11 @@ void UpdateGridItemRowAndColumnInfo(const RefPtr<LayoutWrapper>& itemLayoutWrapp
 void GridScrollWithOptionsLayoutAlgorithm::AdjustRowColSpan(
     const RefPtr<LayoutWrapper>& itemLayoutWrapper, LayoutWrapper* layoutWrapper, int32_t itemIndex)
 {
-    auto result = GetCrossStartAndSpan(layoutWrapper, itemIndex);
-    if (gridLayoutInfo_.axis_ == Axis::VERTICAL) {
+    auto layoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& options = *layoutProperty->GetLayoutOptions();
+    auto result = GetCrossStartAndSpan(options, itemIndex);
+    if (info_.axis_ == Axis::VERTICAL) {
         currentItemColStart_ = result.first;
         currentItemColSpan_ = result.second;
         currentItemColEnd_ = currentItemColStart_ + currentItemColSpan_ - 1;
@@ -50,8 +55,8 @@ void GridScrollWithOptionsLayoutAlgorithm::AdjustRowColSpan(
     }
 
     if (currentItemRowSpan_ > 1 || currentItemColSpan_ > 1) {
-        gridLayoutInfo_.hasBigItem_ = true;
-        bool isVertical = gridLayoutInfo_.axis_ == Axis::VERTICAL;
+        info_.hasBigItem_ = true;
+        bool isVertical = info_.axis_ == Axis::VERTICAL;
         GridItemIndexInfo irregualItemInfo;
         irregualItemInfo.mainStart = isVertical ? currentItemRowStart_ : currentItemColStart_;
         irregualItemInfo.mainEnd = isVertical ? currentItemRowEnd_ : currentItemColEnd_;
@@ -63,14 +68,13 @@ void GridScrollWithOptionsLayoutAlgorithm::AdjustRowColSpan(
     }
 }
 
-void GridScrollWithOptionsLayoutAlgorithm::LargeItemLineHeight(
-    const RefPtr<LayoutWrapper>& itemWrapper, bool& /* hasNormalItem */)
+void GridScrollWithOptionsLayoutAlgorithm::LargeItemLineHeight(const RefPtr<LayoutWrapper>& itemWrapper)
 {
     auto itemSize = itemWrapper->GetGeometryNode()->GetMarginFrameSize();
-    auto itemMainSize = GetMainAxisSize(itemSize, gridLayoutInfo_.axis_);
+    auto itemMainSize = GetMainAxisSize(itemSize, info_.axis_);
     if (LessNotEqual(itemMainSize, 0.0f)) {
         TAG_LOGI(
-            AceLogTag::ACE_GRID, "item height of index %{public}d is less than zero", gridLayoutInfo_.endIndex_ + 1);
+            AceLogTag::ACE_GRID, "item height of index %{public}d is less than zero", info_.endIndex_ + 1);
         itemMainSize = 0.0f;
     }
     cellAveLength_ = std::max(itemMainSize, cellAveLength_);
@@ -79,27 +83,29 @@ void GridScrollWithOptionsLayoutAlgorithm::LargeItemLineHeight(
 void GridScrollWithOptionsLayoutAlgorithm::GetTargetIndexInfoWithBenchMark(
     LayoutWrapper* layoutWrapper, bool isTargetBackward, int32_t targetIndex)
 {
-    int32_t benchmarkIndex = (isTargetBackward && !gridLayoutInfo_.gridMatrix_.empty())
-                                 ? gridLayoutInfo_.gridMatrix_.rbegin()->second.rbegin()->second + 1
+    int32_t benchmarkIndex = (isTargetBackward && !info_.gridMatrix_.empty())
+                                 ? info_.gridMatrix_.rbegin()->second.rbegin()->second + 1
                                  : 0;
-    int32_t mainStartIndex = (isTargetBackward && !gridLayoutInfo_.gridMatrix_.empty())
-                                 ? gridLayoutInfo_.gridMatrix_.rbegin()->first + 1
+    int32_t mainStartIndex = (isTargetBackward && !info_.gridMatrix_.empty())
+                                 ? info_.gridMatrix_.rbegin()->first + 1
                                  : 0;
     int32_t currentIndex = benchmarkIndex;
     int32_t headOfMainStartLine = currentIndex;
-
+    auto layoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& options = *layoutProperty->GetLayoutOptions();
     while (currentIndex < targetIndex) {
-        int32_t crossGridReserve = gridLayoutInfo_.crossCount_;
+        int32_t crossGridReserve = info_.crossCount_;
         /* go through a new line */
         while ((crossGridReserve > 0) && (currentIndex <= targetIndex)) {
-            auto crossPos = GetCrossStartAndSpan(layoutWrapper, currentIndex);
+            auto crossPos = GetCrossStartAndSpan(options, currentIndex);
             auto gridSpan = crossPos.second;
             if (crossGridReserve >= gridSpan) {
                 crossGridReserve -= gridSpan;
-            } else if (gridLayoutInfo_.crossCount_ >= gridSpan) {
+            } else if (info_.crossCount_ >= gridSpan) {
                 ++mainStartIndex;
                 headOfMainStartLine = currentIndex;
-                crossGridReserve = gridLayoutInfo_.crossCount_ - gridSpan;
+                crossGridReserve = info_.crossCount_ - gridSpan;
             }
             ++currentIndex;
         }
@@ -109,25 +115,22 @@ void GridScrollWithOptionsLayoutAlgorithm::GetTargetIndexInfoWithBenchMark(
         ++mainStartIndex;
         headOfMainStartLine = currentIndex;
     }
-    gridLayoutInfo_.startMainLineIndex_ = mainStartIndex;
-    gridLayoutInfo_.startIndex_ = headOfMainStartLine;
-    gridLayoutInfo_.endIndex_ = headOfMainStartLine - 1;
-    gridLayoutInfo_.prevOffset_ = 0;
-    gridLayoutInfo_.currentOffset_ = 0;
-    gridLayoutInfo_.ResetPositionFlags();
-    gridLayoutInfo_.gridMatrix_.clear();
-    gridLayoutInfo_.lineHeightMap_.clear();
-    gridLayoutInfo_.irregularItemsPosition_.clear();
+    info_.startMainLineIndex_ = mainStartIndex;
+    info_.startIndex_ = headOfMainStartLine;
+    info_.endIndex_ = headOfMainStartLine - 1;
+    info_.prevOffset_ = 0;
+    info_.currentOffset_ = 0;
+    info_.ResetPositionFlags();
+    info_.gridMatrix_.clear();
+    info_.lineHeightMap_.clear();
+    info_.irregularItemsPosition_.clear();
 }
 
 std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::GetCrossStartAndSpan(
-    LayoutWrapper* layoutWrapper, int32_t itemIndex)
+    const GridLayoutOptions& options, int32_t itemIndex)
 {
-    auto layoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(layoutProperty, std::make_pair(-1, 1));
-    const auto& options = *layoutProperty->GetLayoutOptions();
     if (options.irregularIndexes.empty()) {
-        return std::make_pair(itemIndex % crossCount_, 1);
+        return std::make_pair(-1, 1);
     }
 
     auto firstIrregularIndex = *(options.irregularIndexes.begin());
@@ -210,10 +213,10 @@ std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::GetCrossStartA
 {
     auto crossCount = static_cast<int32_t>(crossCount_);
     InitIrregularItemsPosition(
-        gridLayoutInfo_.irregularItemsPosition_, options, firstIrregularIndex, gridLayoutInfo_.axis_, crossCount);
+        info_.irregularItemsPosition_, options, firstIrregularIndex, info_.axis_, crossCount);
     auto sum = firstIrregularIndex;
     auto lastIndex = firstIrregularIndex;
-    JumpToLastIrregularItem(gridLayoutInfo_.irregularItemsPosition_, sum, lastIndex, itemIndex);
+    JumpToLastIrregularItem(info_.irregularItemsPosition_, sum, lastIndex, itemIndex);
     auto iter = options.irregularIndexes.find(lastIndex);
     if (iter == options.irregularIndexes.end()) {
         iter = options.irregularIndexes.begin();
@@ -228,7 +231,7 @@ std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::GetCrossStartA
             continue;
         }
 
-        auto crossSpan = options.getSizeByIndex(index).GetCrossSize(gridLayoutInfo_.axis_);
+        auto crossSpan = options.getSizeByIndex(index).GetCrossSize(info_.axis_);
         ResetInvalidCrossSpan(crossCount_, crossSpan);
         auto irregularStart = (sum + index - lastIndex - 1) % crossCount;
         // put it into next line
@@ -238,12 +241,12 @@ std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::GetCrossStartA
         sum += (index - lastIndex - 1);
         sum += crossSpan;
         lastIndex = index;
-        gridLayoutInfo_.irregularItemsPosition_.emplace(index, sum);
+        info_.irregularItemsPosition_.emplace(index, sum);
     }
     sum += ((itemIndex > lastIndex) ? (itemIndex - lastIndex - 1) : 0);
     auto crossStart = sum % crossCount;
     bool isRegularItem = (options.irregularIndexes.find(itemIndex) == options.irregularIndexes.end());
-    auto crossSpan = isRegularItem ? 1 : options.getSizeByIndex(itemIndex).GetCrossSize(gridLayoutInfo_.axis_);
+    auto crossSpan = isRegularItem ? 1 : options.getSizeByIndex(itemIndex).GetCrossSize(info_.axis_);
     ResetInvalidCrossSpan(crossCount_, crossSpan);
     if (crossStart + crossSpan > crossCount) {
         sum += (crossCount - crossStart);
@@ -251,7 +254,7 @@ std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::GetCrossStartA
     }
     if (!isRegularItem) {
         sum += crossSpan;
-        gridLayoutInfo_.irregularItemsPosition_.emplace(itemIndex, sum);
+        info_.irregularItemsPosition_.emplace(itemIndex, sum);
     }
     return std::make_pair(crossStart, crossSpan);
 }
@@ -274,6 +277,210 @@ void GridScrollWithOptionsLayoutAlgorithm::SkipIrregularLines(LayoutWrapper* lay
         return GridScrollLayoutAlgorithm::SkipIrregularLines(layoutWrapper, forward);
     }
 
-    gridLayoutInfo_.SkipStartIndexByOffset(options, mainGap_);
+    info_.SkipStartIndexByOffset(options, mainGap_);
+}
+
+std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::CalculateCachedCount(
+    LayoutWrapper* layoutWrapper, int32_t cachedCount)
+{
+    if (cachedCount == 0 || info_.crossCount_ == 1) {
+        return std::make_pair(cachedCount, cachedCount);
+    }
+    int32_t cache = cachedCount * info_.crossCount_;
+
+    CHECK_NULL_RETURN(layoutWrapper, std::make_pair(cache, cache));
+    auto props = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(props, std::make_pair(cache, cache));
+
+    const auto& options = *props->GetLayoutOptions();
+    if (options.irregularIndexes.empty()) {
+        return std::make_pair(cache, cache);
+    }
+    int32_t start = CalculateStartCachedCount(options, cachedCount);
+    int32_t end = CalculateEndCachedCount(options, cachedCount);
+    return std::make_pair(start, end);
+}
+
+int32_t GridScrollWithOptionsLayoutAlgorithm::CalculateStartCachedCount(
+    const GridLayoutOptions& options, int32_t cachedCount)
+{
+    int32_t start = cachedCount * info_.crossCount_;
+
+    if (info_.startMainLineIndex_ - cachedCount <= 0) {
+        return std::min(info_.startIndex_, start);
+    }
+
+    auto startLine = info_.gridMatrix_.find(info_.startMainLineIndex_ - cachedCount);
+    if (startLine != info_.gridMatrix_.end()) {
+        auto line = startLine->second;
+        if (!line.empty()) {
+            auto index = line.begin()->second;
+            return info_.startIndex_ - index;
+        }
+    }
+
+    auto firstIrregularIndex = *(options.irregularIndexes.begin());
+    if (info_.startIndex_ <= firstIrregularIndex) {
+        return start;
+    }
+
+    if (!options.getSizeByIndex) {
+        auto iter = options.irregularIndexes.lower_bound(info_.startIndex_);
+        auto crossCount = static_cast<int32_t>(crossCount_);
+        if (iter == options.irregularIndexes.end()) {
+            return start;
+        }
+        if (*iter == info_.startIndex_ && iter != options.irregularIndexes.begin()) {
+            iter--;
+        }
+
+        int lineCount = 0;
+        int sum = 0;
+        int32_t diff = info_.startIndex_ - *(iter)-1;
+        while (lineCount < cachedCount) {
+            if (diff >= (cachedCount - lineCount) * crossCount) {
+                return (cachedCount - lineCount) * crossCount + sum;
+            }
+
+            if (diff == 0) {
+                sum++;
+                lineCount++;
+            }
+
+            if (diff > 0 && diff <= (cachedCount - lineCount - 1) * crossCount) {
+                lineCount += std::ceil(diff / crossCount) + 1;
+                sum += diff;
+            }
+
+            if (iter == options.irregularIndexes.begin()) {
+                return (cachedCount - lineCount) * crossCount + sum;
+            }
+
+            diff = (*iter) - (*(--iter)) - 1;
+        }
+        return sum;
+    }
+    return start;
+}
+
+int32_t GridScrollWithOptionsLayoutAlgorithm::CalculateEndCachedCount(
+    const GridLayoutOptions& options, int32_t cachedCount)
+{
+    if (info_.startIndex_ + cachedCount >= info_.GetChildrenCount() - 1) {
+        return info_.startIndex_;
+    }
+
+    int32_t end = cachedCount * info_.crossCount_;
+
+    auto endLine = info_.gridMatrix_.find(info_.endMainLineIndex_ + cachedCount);
+    if (endLine != info_.gridMatrix_.end()) {
+        auto line = endLine->second;
+        if (!line.empty()) {
+            auto index = line.rbegin()->second;
+            return index - info_.endIndex_;
+        }
+    }
+
+    auto lastIrregularIndex = *(options.irregularIndexes.rbegin());
+    if (info_.endIndex_ >= lastIrregularIndex) {
+        return end;
+    }
+
+    if (!options.getSizeByIndex) {
+        auto iter = options.irregularIndexes.upper_bound(info_.endIndex_);
+        auto crossCount = static_cast<int32_t>(crossCount_);
+        if (iter == options.irregularIndexes.end()) {
+            return end;
+        }
+
+        int lineCount = 0;
+        int sum = 0;
+        int32_t diff = *(iter)-info_.endIndex_ - 1;
+        while (lineCount < cachedCount) {
+            if (diff >= (cachedCount - lineCount) * crossCount) {
+                return (cachedCount - lineCount) * crossCount + sum;
+            }
+
+            if (diff == 0) {
+                sum++;
+                lineCount++;
+            }
+
+            if (diff > 0 && diff <= (cachedCount - lineCount - 1) * crossCount) {
+                lineCount += std::ceil(diff / crossCount) + 1;
+                sum += diff;
+            }
+
+            if (iter == options.irregularIndexes.end()) {
+                return (cachedCount - lineCount) * crossCount + sum;
+            }
+
+            diff = -*(iter) + *(++iter) - 1;
+        }
+        return sum;
+    }
+    return end;
+}
+
+void GridScrollWithOptionsLayoutAlgorithm::PreloadItems(LayoutWrapper* layoutWrapper)
+{
+    auto layoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& options = *layoutProperty->GetLayoutOptions();
+    std::map<int32_t, std::pair<int32_t, int32_t>> itemCrossMap;
+    for (auto item : predictBuildList_) {
+        auto result = GetCrossStartAndSpan(options, item.idx);
+        itemCrossMap.emplace(item.idx, result);
+    }
+    GridLayoutUtils::PreloadGridItems(layoutWrapper->GetHostNode()->GetPattern<GridPattern>(),
+        std::move(predictBuildList_),
+        [param = GridPredictLayoutParam { cachedChildConstraint_, itemsCrossSize_, crossGap_ }, itemCrossMap](
+            const RefPtr<FrameNode>& host, int32_t itemIdx) {
+            CHECK_NULL_RETURN(host, false);
+            return PredictBuildItem(*host, itemIdx, param, itemCrossMap);
+        });
+}
+
+namespace {
+LayoutConstraintF GenerateCacheItemConstraint(
+    std::pair<int32_t, int32_t> cross, Axis axis, const GridPredictLayoutParam& param)
+{
+    auto constraint = param.layoutConstraint;
+    int32_t crossStart = cross.first;
+    int32_t crossSpan = cross.second;
+    if (crossSpan > 1) {
+        float itemCrossSize = param.crossGap * (crossSpan - 1);
+        for (int32_t index = 0; index < crossSpan; ++index) {
+            int32_t crossIndex = (crossStart + index) % static_cast<int32_t>(param.itemsCrossSizes.size());
+            if (crossIndex >= 0 && crossIndex < static_cast<int32_t>(param.itemsCrossSizes.size())) {
+                itemCrossSize += GetOrDefault(param.itemsCrossSizes, crossIndex, 0.0f);
+            }
+        }
+        constraint.maxSize.SetCrossSize(itemCrossSize, axis);
+        constraint.selfIdealSize.SetCrossSize(itemCrossSize, axis);
+    }
+    return constraint;
+}
+} // namespace
+
+bool GridScrollWithOptionsLayoutAlgorithm::PredictBuildItem(FrameNode& host, int32_t itemIdx,
+     const GridPredictLayoutParam& param, std::map<int32_t, std::pair<int32_t, int32_t>> itemCrossMap)
+{
+    // build callback
+    auto wrapper = host.GetOrCreateChildByIndex(itemIdx, false, true);
+    CHECK_NULL_RETURN(wrapper, false);
+    auto itemCross = itemCrossMap.find(itemIdx);
+    if (itemCross == itemCrossMap.end()) {
+        return false;
+    }
+    const Axis axis = host.GetPattern<GridPattern>()->GetAxis();
+
+    auto constraint = GenerateCacheItemConstraint(itemCross->second, axis, param);
+    wrapper->SetActive(false);
+    auto frameNode = wrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    frameNode->GetGeometryNode()->SetParentLayoutConstraint(constraint);
+    FrameNode::ProcessOffscreenNode(frameNode);
+    return true;
 }
 } // namespace OHOS::Ace::NG

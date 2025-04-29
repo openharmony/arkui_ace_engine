@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_LAYOUT_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_LAYOUT_PATTERN_H
 
+#include "base/log/dump_log.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
@@ -66,13 +67,74 @@ public:
         return isVertical_;
     }
 
-    bool IsNeedInitClickEventRecorder() const override
+    void SetFlexMeasureResult(FlexMeasureResult measureResult, uintptr_t addr)
     {
-        return true;
+        measureResult_ = measureResult;
+        measuredAddress_ = addr;
+    }
+
+    FlexMeasureResult GetFlexMeasureResult()
+    {
+        return measureResult_;
+    }
+
+    void SetFlexLayoutResult(FlexLayoutResult layoutResult, uintptr_t addr)
+    {
+        layoutResult_ = layoutResult;
+        layoutedAddress_ = addr;
+    }
+
+    bool GetMeasureLayoutPaired()
+    {
+        return (measuredAddress_ && layoutedAddress_ && (measuredAddress_.value() == layoutedAddress_.value()));
+    }
+
+    void DumpInfo() override
+    {
+        DumpLog::GetInstance().AddDesc(std::string("FlexMeasureLayoutPaired: ")
+                                           .append(std::to_string(static_cast<int>(GetMeasureLayoutPaired())).c_str()));
+        DumpLog::GetInstance().AddDesc(std::string("FlexFrontSpace: ")
+                                           .append(std::to_string(layoutResult_.frontSpace).c_str())
+                                           .append(std::string(" FlexBetweenSpace: "))
+                                           .append(std::to_string(layoutResult_.betweenSpace).c_str()));
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto layoutProperty = DynamicCast<LinearLayoutProperty>(host->GetLayoutProperty());
+        CHECK_NULL_VOID(layoutProperty);
+        auto space = layoutProperty->GetSpace();
+        if (space.has_value()) {
+            DumpLog::GetInstance().AddDesc(std::string("space: ").append(space.value().ToString().c_str()));
+        }
+        auto widthLayoutPolicy = layoutProperty->GetWidthLayoutPolicy();
+        auto heightLayoutPolicy = layoutProperty->GetHeightLayoutPolicy();
+        std::string layoutPolicy = "";
+        if (widthLayoutPolicy.has_value() &&
+            widthLayoutPolicy.value() != static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) {
+            layoutPolicy.append("WidthLayoutPolicy: ").append(std::to_string(widthLayoutPolicy.value()));
+        }
+        if (heightLayoutPolicy.has_value() &&
+            heightLayoutPolicy.value() != static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) {
+            layoutPolicy.append(layoutPolicy.length() == 0 ? "HeightLayoutPolicy: " : " HeightLayoutPolicy: ")
+                .append(std::to_string(heightLayoutPolicy.value()));
+        }
+        if (layoutPolicy.length() > 0) {
+            DumpLog::GetInstance().AddDesc(layoutPolicy);
+        }
+    }
+
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override
+    {
+        json->Put("FlexMeasureLayoutPaired", GetMeasureLayoutPaired());
+        json->Put("FlexFrontSpace", static_cast<double>(layoutResult_.frontSpace));
+        json->Put("FlexBetweenSpace", static_cast<double>(layoutResult_.betweenSpace));
     }
 
 private:
     bool isVertical_ = false;
+    FlexMeasureResult measureResult_;
+    FlexLayoutResult layoutResult_;
+    std::optional<uintptr_t> measuredAddress_;
+    std::optional<uintptr_t> layoutedAddress_;
 
     ACE_DISALLOW_COPY_AND_MOVE(LinearLayoutPattern);
 };

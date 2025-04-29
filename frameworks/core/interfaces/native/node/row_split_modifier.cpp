@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/row_split_modifier.h"
-#include "core/components/common/layout/constants.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/components_ng/base/frame_node.h"
+
 #include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -37,13 +35,23 @@ void ResetRowSplitResizable(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIRowSplitModifier* GetRowSplitModifier()
 {
-    static const ArkUIRowSplitModifier modifier = { SetRowSplitResizable, ResetRowSplitResizable };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIRowSplitModifier modifier = {
+        .setRowSplitResizable = SetRowSplitResizable,
+        .resetRowSplitResizable = ResetRowSplitResizable,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIRowSplitModifier* GetCJUIRowSplitModifier()
 {
-    static const CJUIRowSplitModifier modifier = { SetRowSplitResizable, ResetRowSplitResizable };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIRowSplitModifier modifier = {
+        .setRowSplitResizable = SetRowSplitResizable,
+        .resetRowSplitResizable = ResetRowSplitResizable,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

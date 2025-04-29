@@ -45,24 +45,16 @@
 #undef DOUBLE_CLICK
 #endif
 
-#ifdef USE_ROSEN_DRAWING
 #include "pipeline/rs_recording_canvas.h"
-#endif
-#ifndef USE_GRAPHIC_TEXT_GINE
-#include "rosen_text/properties/text_style.h"
-#include "rosen_text/ui/font_collection.h"
-#include "rosen_text/ui/typography.h"
-#include "rosen_text/ui/typography_create.h"
-#else
 #include "rosen_text/font_collection.h"
 #include "rosen_text/typography.h"
 #include "rosen_text/typography_create.h"
 #include "rosen_text/typography_types.h"
 #include "rosen_text/text_style.h"
-#endif
 #include "utils/camera3d.h"
 #include "utils/point3.h"
 #include "utils/scalar.h"
+#include "utils/picture_recorder.h"
 
 namespace OHOS::Ace {
 namespace RSDrawing = Rosen::Drawing;
@@ -105,12 +97,12 @@ using RSTextBlob = Rosen::Drawing::TextBlob;
 using RSTextEncoding = Rosen::Drawing::TextEncoding;
 using RSTypeface = Rosen::Drawing::Typeface;
 using RSEncodedImageFormat = Rosen::Drawing::EncodedImageFormat;
-#ifdef USE_ROSEN_DRAWING
 using RSAutoCanvasRestore = Rosen::Drawing::AutoCanvasRestore;
 using RSCubicResampler = Rosen::Drawing::CubicResampler;
 using RSColorSpace = Rosen::Drawing::ColorSpace;
 using RSData = Rosen::Drawing::Data;
 using RSDrawCmdList = Rosen::Drawing::DrawCmdList;
+using RSHybridRenderType = Rosen::Drawing::DrawCmdList::HybridRenderType;
 using RSFilterMode = Rosen::Drawing::FilterMode;
 using RSImageFilter = Rosen::Drawing::ImageFilter;
 using RSMipmapMode = Rosen::Drawing::MipmapMode;
@@ -134,29 +126,6 @@ using RSPixmap = Rosen::Drawing::Pixmap;
 using RSImageInfo = Rosen::Drawing::ImageInfo;
 using RSRectI = Rosen::Drawing::RectI;
 using RSImageBlurType = Rosen::Drawing::ImageBlurType;
-#endif
-#ifndef USE_GRAPHIC_TEXT_GINE
-using RSPathEffect = rosen::PathEffect;
-using RSPathDirection = rosen::PathDirection;
-using RSPathDashStyle = rosen::PathDashStyle;
-using RSParagraph = rosen::Typography;
-using RSTypographyProperties = rosen::TypographyProperties;
-using RSParagraphBuilder = rosen::TypographyCreate;
-using RSFontCollection = rosen::FontCollection;
-using RSParagraphStyle = rosen::TypographyStyle;
-using RSColorQuad = rosen::ColorQuad;
-using RSShaderEffect = rosen::ShaderEffect;
-using RSTileMode = rosen::TileMode;
-using RSTextDirection = rosen::TextDirection;
-using RSTextAlign = rosen::TextAlign;
-using RSWordBreakType = rosen::WordBreakType;
-using RSTextStyle = rosen::TextStyle;
-using RSTextDecoration = rosen::TextDecoration;
-using RSTextDecorationStyle = rosen::TextDecorationStyle;
-using RSFontWeight = rosen::FontWeight;
-using RSFontStyle = rosen::FontStyle;
-using RSTextBaseline = rosen::TextBaseline;
-#else
 using RSColorQuad = Rosen::Drawing::ColorQuad;
 using RSShaderEffect = Rosen::Drawing::ShaderEffect;
 using RSTileMode = Rosen::Drawing::TileMode;
@@ -182,7 +151,16 @@ using RSTextRect = Rosen::TextRect;
 using RSEllipsisMode = Rosen::EllipsisModal;
 using RSSymbolAnimation = Rosen::RSSymbolAnimation;
 using RSSymbolAnimationConfig = Rosen::TextEngine::SymbolAnimationConfig;
-#endif
+using RSPictureRecorder = Rosen::Drawing::PictureRecorder;
+struct RSDataWrapper {
+    std::shared_ptr<RSData> data;
+};
+
+inline void RSDataWrapperReleaseProc(const void*, void* context)
+{
+    RSDataWrapper* wrapper = reinterpret_cast<RSDataWrapper*>(context);
+    delete wrapper;
+}
 } // namespace OHOS::Ace
 #else
 #include "core/components_ng/render/drawing_mock.h"

@@ -51,6 +51,22 @@ enum class Rotation : uint32_t {
 };
 
 /**
+* source is Rosen::DisplayOrientation
+*/
+enum class DisplayOrientation : uint32_t {
+    PORTRAIT = 0,
+    LANDSCAPE,
+    PORTRAIT_INVERTED,
+    LANDSCAPE_INVERTED,
+};
+
+inline bool IsValidDisplayOrientation(DisplayOrientation ori)
+{
+    return static_cast<int32_t>(DisplayOrientation::PORTRAIT) <= static_cast<int32_t>(ori) &&
+        static_cast<int32_t>(DisplayOrientation::LANDSCAPE_INVERTED) >= static_cast<int32_t>(ori);
+}
+
+/**
  * souce is Rosen::WindowStatus
  */
 enum class WindowStatus : uint32_t {
@@ -119,12 +135,34 @@ public:
         displayId_ = displayId;
     }
 
+    int32_t GetWidth() const
+    {
+        return width_;
+    }
+
+    void SetWidth(int32_t width)
+    {
+        width_ = width;
+    }
+
+    int32_t GetHeight() const
+    {
+        return height_;
+    }
+
+    void SetHeight(int32_t height)
+    {
+        height_ = height;
+    }
+
 private:
     FoldStatus foldStatus_ = FoldStatus::UNKNOWN;
     bool isFoldable_ = false;
     Rotation rotation_ = Rotation::ROTATION_0;
     std::vector<Rect> currentFoldCreaseRegion_;
     uint64_t displayId_ = 0;
+    int32_t width_ = 0;
+    int32_t height_ = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_DISPLAY_INFO_H

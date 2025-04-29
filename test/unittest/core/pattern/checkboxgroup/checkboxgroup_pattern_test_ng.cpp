@@ -68,6 +68,7 @@ void CheckBoxGroupPatternTestNG::SetUpTestCase()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CheckboxTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<CheckboxTheme>()));
     RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<Pattern>());
     auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
     MockPipelineContext::GetCurrent()->stageManager_ = stageManager;
@@ -456,7 +457,8 @@ HWTEST_F(CheckBoxGroupPatternTestNG, CheckBoxGroupPatternTest008, TestSize.Level
     auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
     EXPECT_NE(pattern, nullptr);
     RefPtr<EventHub> eventHub = AccessibilityManager::MakeRefPtr<EventHub>();
-    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(eventHub, FocusType::DISABLE, false);
+    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(
+        AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(eventHub)), FocusType::DISABLE, false);
     pattern->InitOnKeyEvent(focusHub);
 
     /*
@@ -468,91 +470,50 @@ HWTEST_F(CheckBoxGroupPatternTestNG, CheckBoxGroupPatternTest008, TestSize.Level
 }
 
 /**
- * @tc.name: PreventDefault001
- * @tc.desc: test InitTouchEvent and InitClickEvent
+ * @tc.name: OnInjectionEvent001
+ * @tc.desc: test OnInjectionEvent
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPatternTestNG, PreventDefault001, TestSize.Level1)
+HWTEST_F(CheckBoxGroupPatternTestNG, OnInjectionEvent001, TestSize.Level1)
 {
     /*
      * @tc.steps: step1. Create CheckBoxGroup model.
      */
-    CheckBoxGroupModelNG checkBoxModelNG;
-    checkBoxModelNG.Create(CHECKBOXGROUP_NAME);
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(CHECKBOXGROUP_NAME);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    ASSERT_NE(gestureHub, nullptr);
 
-    /**
-     * @tc.steps: step2. Mock TouchEventInfo info and set preventDefault to true
-     * @tc.expected: Check the param value
-     */
-    pattern->InitTouchEvent();
-    TouchEventInfo touchInfo("onTouch");
-    TouchLocationInfo touchDownInfo(1);
-    touchDownInfo.SetTouchType(TouchType::DOWN);
-    touchInfo.SetPreventDefault(true);
-    touchInfo.SetSourceDevice(SourceType::TOUCH);
-    touchInfo.AddTouchLocationInfo(std::move(touchDownInfo));
-    pattern->touchListener_->callback_(touchInfo);
-    EXPECT_TRUE(pattern->isTouchPreventDefault_);
-    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::PRESS);
-    /**
-     * @tc.steps: step3.Mock GestureEvent info and set preventDefault to true
-     * @tc.expected: Check the param value
-     */
-    pattern->InitClickEvent();
-    GestureEvent clickInfo;
-    clickInfo.SetSourceDevice(SourceType::TOUCH);
-    clickInfo.SetPreventDefault(true);
-    pattern->clickListener_->operator()(clickInfo);
-    EXPECT_FALSE(pattern->isTouchPreventDefault_);
-}
+    std::string jsonCommandFalse = R"({"cmd":"selectCheckBoxGroup","selectStatus": false})";
+    int32_t resultfalse = pattern->OnInjectionEvent(jsonCommandFalse);
+    EXPECT_EQ(resultfalse, RET_SUCCESS);
+    auto paintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto status = paintProperty->GetSelectStatus();
+    bool selectStatus = status == CheckBoxGroupPaintProperty::SelectStatus::ALL ? true : false;
+    EXPECT_EQ(selectStatus, false);
 
-/**
- * @tc.name: PreventDefault002
- * @tc.desc: test InitTouchEvent and InitClickEvent
- * @tc.type: FUNC
- */
-HWTEST_F(CheckBoxGroupPatternTestNG, PreventDefault002, TestSize.Level1)
-{
-    /*
-     * @tc.steps: step1. Create CheckBoxGroup model.
-     */
-    CheckBoxGroupModelNG checkBoxModelNG;
-    checkBoxModelNG.Create(CHECKBOXGROUP_NAME);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    ASSERT_NE(gestureHub, nullptr);
+    std::string jsonCommandTrue = R"({"cmd":"selectCheckBoxGroup","selectStatus": true})";
+    int32_t resultTrue = pattern->OnInjectionEvent(jsonCommandTrue);
+    EXPECT_EQ(resultTrue, RET_SUCCESS);
+    status = paintProperty->GetSelectStatus();
+    selectStatus = status == CheckBoxGroupPaintProperty::SelectStatus::ALL ? true : false;
+    EXPECT_EQ(selectStatus, true);
 
-    /**
-     * @tc.steps: step2. Mock TouchEvent info and set preventDefault to false
-     * @tc.expected: Check the param value
-     */
-    pattern->InitTouchEvent();
-    TouchEventInfo touchInfo("onTouch");
-    TouchLocationInfo touchDownInfo(1);
-    touchDownInfo.SetTouchType(TouchType::DOWN);
-    touchInfo.SetPreventDefault(false);
-    touchInfo.SetSourceDevice(SourceType::TOUCH);
-    touchInfo.AddTouchLocationInfo(std::move(touchDownInfo));
-    pattern->touchListener_->callback_(touchInfo);
-    EXPECT_EQ(touchInfo.IsPreventDefault(), pattern->isTouchPreventDefault_);
-    /**
-     * @tc.steps: step3. Mock GestureEvent info and set preventDefault to false
-     * @tc.expected: Check the param value
-     */
-    pattern->InitClickEvent();
-    GestureEvent clickInfo;
-    clickInfo.SetSourceDevice(SourceType::TOUCH);
-    clickInfo.SetPreventDefault(false);
-    pattern->clickListener_->operator()(clickInfo);
-    EXPECT_FALSE(pattern->isTouchPreventDefault_);
+    std::string jsonCommandUndifine = R"({"cmd":"selectCheckBoxGroup","selectStatus": "undifine"})";
+    int32_t resultUndifine = pattern->OnInjectionEvent(jsonCommandUndifine);
+    EXPECT_EQ(resultUndifine, RET_FAILED);
+    status = paintProperty->GetSelectStatus();
+    selectStatus = status == CheckBoxGroupPaintProperty::SelectStatus::ALL ? true : false;
+    EXPECT_EQ(selectStatus, true);
+
+    std::string jsonCommandCheckbox = R"({"cmd":"selectCheckBox","selectStatus": "false"})";
+    int32_t resultCheckbox = pattern->OnInjectionEvent(jsonCommandCheckbox);
+    EXPECT_EQ(resultCheckbox, RET_FAILED);
+    status = paintProperty->GetSelectStatus();
+    selectStatus = status == CheckBoxGroupPaintProperty::SelectStatus::ALL ? true : false;
+    EXPECT_EQ(selectStatus, true);
 }
 } // namespace OHOS::Ace::NG

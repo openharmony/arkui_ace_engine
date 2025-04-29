@@ -44,6 +44,7 @@ public:
         value->propIndex_ = CloneIndex();
         value->propItemSpace_ = CloneItemSpace();
         value->propCachedCount_ = CloneCachedCount();
+        value->propCachedIsShown_ = CloneCachedIsShown();
         value->propDisplayMode_ = CloneDisplayMode();
         value->propDisplayCount_ = CloneDisplayCount();
         value->propMinSize_ = CloneMinSize();
@@ -79,6 +80,7 @@ public:
         ResetIndex();
         ResetItemSpace();
         ResetCachedCount();
+        ResetCachedIsShown();
         ResetDisplayMode();
         ResetDisplayCount();
         ResetMinSize();
@@ -108,6 +110,7 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
+        CHECK_NULL_VOID(json);
         LayoutProperty::ToJsonValue(json, filter);
         /* no fixed attr below, just return */
         if (filter.IsFastFilter()) {
@@ -127,11 +130,15 @@ public:
         json->PutExtAttr("minSize",
             propMinSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
         json->PutExtAttr("prevMargin",
-            propPrevMargin_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+            ignorePrevMarginAndNextMargin_
+                ? Dimension(0.0_px).ToString().c_str()
+                : propPrevMargin_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
         json->PutExtAttr("prevMarginIgnoreBlank",
             propPrevMarginIgnoreBlank_.value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("nextMargin",
-            propNextMargin_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+            ignorePrevMarginAndNextMargin_
+                ? Dimension(0.0_px).ToString().c_str()
+                : propNextMargin_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
         json->PutExtAttr("nextMarginIgnoreBlank",
             propNextMarginIgnoreBlank_.value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("displayArrow", propDisplayArrow_.value_or(false) ? "true" : "false", filter);
@@ -154,6 +161,7 @@ public:
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override
     {
+        CHECK_NULL_VOID(json);
         static const std::unordered_map<std::string, SwiperDisplayMode> uMap {
             { "SwiperDisplayMode.AutoLinear", SwiperDisplayMode::AUTO_LINEAR },
             { "SwiperDisplayMode.Stretch", SwiperDisplayMode::STRETCH },
@@ -192,8 +200,6 @@ public:
     void MarkIgnorePrevMarginAndNextMargin()
     {
         ignorePrevMarginAndNextMargin_ = true;
-        propPrevMargin_ = Dimension(0.0_px);
-        propNextMargin_ = Dimension(0.0_px);
     }
 
     float GetCalculatedPrevMargin() const
@@ -267,6 +273,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsCustomAnimation, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisableSwipe, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SwipeByGroup, bool, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CachedIsShown, bool, PROPERTY_UPDATE_MEASURE_SELF);
 
 private:
     bool ignoreItemSpace_ = false; // displayCount and prevMargin/nextMargin have higher priorities, so itemSpace might

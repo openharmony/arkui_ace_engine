@@ -44,8 +44,11 @@ public:
     static void SetCaretPosition(const JSCallbackInfo& info);
     static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
     static void SetMaxLength(const JSCallbackInfo& info);
+    static void SetEllipsisMode(const JSCallbackInfo& info);
     static void SetFontSize(const JSCallbackInfo& info);
-    static void SetFontWeight(const std::string& value);
+    static void SetFontWeight(const JSCallbackInfo& info);
+    static void SetMinFontScale(const JSCallbackInfo& info);
+    static void SetMaxFontScale(const JSCallbackInfo& info);
     static void SetTextColor(const JSCallbackInfo& info);
     static void SetFontStyle(int32_t value);
     static void SetFontFamily(const JSCallbackInfo& info);
@@ -66,6 +69,12 @@ public:
     static void JsBorderWidth(const JSCallbackInfo& info);
     static void JsBorderColor(const JSCallbackInfo& info);
     static void JsBorderStyle(const JSCallbackInfo& info);
+
+    static void GetBorderRadiusByLengthMetrics(const char* key,
+        JSRef<JSObject>& object, std::optional<CalcDimension>& radius);
+    static bool ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft,
+        CalcDimension& topRight, CalcDimension& bottomLeft, CalcDimension& bottomRight);
+    static void ParseBorderRadius(const JSRef<JSVal>& args);
     static void JsBorderRadius(const JSCallbackInfo& info);
     static void JsHoverEffect(const JSCallbackInfo& info);
     static void SetOnEditChanged(const JSCallbackInfo& info);
@@ -120,14 +129,24 @@ public:
     static void SetHeightAdaptivePolicy(int32_t value);
     static void SetLetterSpacing(const JSCallbackInfo& info);
     static void SetLineHeight(const JSCallbackInfo& info);
+    static void SetHalfLeading(const JSCallbackInfo& info);
     static void SetLineSpacing(const JSCallbackInfo& info);
     static void SetTextOverflow(const JSCallbackInfo& info);
     static void SetTextIndent(const JSCallbackInfo& info);
     static void EditMenuOptions(const JSCallbackInfo& info);
     static void SetEnablePreviewText(const JSCallbackInfo& info);
+    static void SetEnableHapticFeedback(const JSCallbackInfo& info);
+    static void SetCapitalizationMode(const JSCallbackInfo& info);
+    static void SetStopBackPress(const JSCallbackInfo& info);
+    static void SetKeyboardAppearance(const JSCallbackInfo& info);
+    static JSRef<JSVal> CreateJsOnWillChangeObj(const ChangeValueInfo& changeValueInfo);
+    static void SetOnWillChange(const JSCallbackInfo& info);
 
 private:
     static void SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam);
+    static void SetCancelDefaultIcon();
+    static void ResetCancelIcon();
+    static void SetCancelSymbolIcon(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

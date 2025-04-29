@@ -77,7 +77,6 @@ public:
                 theme->activeCircleRadius_ = DEFAULT_ACTIVE_CIRCLE_RADIUS_API9;
                 theme->backgroundCircleRadius_ = DEFAULT_BACKGROUND_CIRCLE_RADIUS_API9;
             } else {
-                theme->sideLength_ = DEFAULT_SIDE_LENGTH;
                 theme->circleRadius_ = DEFAULT_CIRCLE_RADIUS;
                 theme->pathStrokeWidth_ = DEFAULT_PATH_STROKE_WIDTH;
                 theme->activeCircleRadius_ = DEFAULT_ACTIVE_CIRCLE_RADIUS;
@@ -102,6 +101,8 @@ public:
                 theme->pathColor_ = pattern->GetAttr<Color>("path_color", Color::BLACK);
                 theme->hoverColor_ = pattern->GetAttr<Color>("hover_color", Color::BLACK);
                 theme->focusColor_ = pattern->GetAttr<Color>("focus_color", Color::BLACK);
+                theme->passPointTxt_ = pattern->GetAttr<std::string>("pass_point", "");
+                theme->sideLength_ = pattern->GetAttr<Dimension>("patternlock_side_length", DEFAULT_SIDE_LENGTH);
             }
         }
     };
@@ -213,6 +214,10 @@ public:
         return focusPaintWidth_;
     }
 
+    std::string GetPassPointTxt() const
+    {
+        return passPointTxt_;
+    }
 protected:
     PatternLockTheme() = default;
 
@@ -236,6 +241,7 @@ private:
     Dimension hotSpotCircleRadius_;
     Dimension focusPaddingRadius_;
     Dimension focusPaintWidth_;
+    std::string passPointTxt_;
 };
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_PATTERN_LOCK_PATTERN_LOCK_THEME_H

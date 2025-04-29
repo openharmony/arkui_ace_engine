@@ -15,10 +15,6 @@
 
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 
-#include "base/geometry/ng/offset_t.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/modifier.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
@@ -172,9 +168,11 @@ void ScrollBarOverlayModifier::StartAdaptAnimation(const Rect& fgRect, bool need
     auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
     option.SetCurve(motion);
     isAdaptAnimationStop_ = false;
-    adaptAnimation_ = AnimationUtils::StartAnimation(option, [&]() {
-        SetMainModeSize(fgRect.GetSize());
-        SetMainModeOffset(fgRect.GetOffset());
+    adaptAnimation_ = AnimationUtils::StartAnimation(option, [weak = WeakClaim(this), fgRect]() {
+        auto modifier = weak.Upgrade();
+        CHECK_NULL_VOID(modifier);
+        modifier->SetMainModeSize(fgRect.GetSize());
+        modifier->SetMainModeOffset(fgRect.GetOffset());
     });
 }
 
@@ -209,9 +207,11 @@ void ScrollBarOverlayModifier::StartHoverAnimation(const Rect& fgRect, HoverAnim
     }
     hoverAnimation_ = AnimationUtils::StartAnimation(
         option,
-        [&]() {
-            SetCrossModeSize(fgRect.GetSize());
-            SetCrossModeOffset(fgRect.GetOffset());
+        [weak = WeakClaim(this), fgRect]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            modifier->SetCrossModeSize(fgRect.GetSize());
+            modifier->SetCrossModeOffset(fgRect.GetOffset());
         },
         [weak = WeakClaim(this)]() {
             auto modifier = weak.Upgrade();
@@ -242,9 +242,19 @@ void ScrollBarOverlayModifier::StartOpacityAnimation(OpacityAnimationType opacit
     } else {
         return;
     }
+    if (opacityAnimationType == OpacityAnimationType::APPEAR_WITHOUT_ANIMATION) {
+        opacityAnimatingType_ = OpacityAnimationType::NONE;
+        opacity_->Set(UINT8_MAX);
+        return;
+    }
     AnimationOption option;
     option.SetCurve(Curves::SHARP);
     if (opacityAnimationType == OpacityAnimationType::DISAPPEAR) {
+        if (!isNavDestinationShow_) {
+            opacityAnimatingType_ = OpacityAnimationType::NONE;
+            opacity_->Set(0);
+            return;
+        }
         option.SetFrameRateRange(AceType::MakeRefPtr<FrameRateRange>(
             BAR_DISAPPEAR_MIN_FRAME_RATE, BAR_DISAPPEAR_MAX_FRAME_RATE, BAR_DISAPPEAR_FRAME_RATE));
         option.SetDuration(BAR_DISAPPEAR_DURATION);
@@ -254,11 +264,13 @@ void ScrollBarOverlayModifier::StartOpacityAnimation(OpacityAnimationType opacit
     opacityAnimatingType_ = opacityAnimationType;
     opacityAnimation_ = AnimationUtils::StartAnimation(
         option,
-        [&]() {
-            if (opacityAnimatingType_ == OpacityAnimationType::DISAPPEAR) {
-                opacity_->Set(0);
-            } else if (opacityAnimatingType_ == OpacityAnimationType::APPEAR) {
-                opacity_->Set(UINT8_MAX);
+        [weak = WeakClaim(this)]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            if (modifier->opacityAnimatingType_ == OpacityAnimationType::DISAPPEAR) {
+                modifier->opacity_->Set(0);
+            } else if (modifier->opacityAnimatingType_ == OpacityAnimationType::APPEAR) {
+                modifier->opacity_->Set(UINT8_MAX);
             }
         },
         [weak = WeakClaim(this)]() {

@@ -432,6 +432,8 @@ void SelectModelImpl::SetArrowPosition(const ArrowPosition value) {}
 
 void SelectModelImpl::SetMenuAlign(const MenuAlign& menuAlign) {}
 
+void SelectModelImpl::SetAvoidance(AvoidanceMode mode) {}
+
 void SelectModelImpl::SetSelectChangeEvent(NG::SelectChangeEvent&& selectChangeEvent) {}
 
 void SelectModelImpl::SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent) {}
@@ -455,4 +457,6 @@ void SelectModelImpl::SetLayoutDirection(TextDirection value)
     CHECK_NULL_VOID(selectComponent);
     selectComponent->SetTextDirection(value);
 }
+
+void SelectModelImpl::SetMenuOutline(const NG::MenuParam& menuParam) {}
 } // namespace OHOS::Ace::Framework

@@ -90,7 +90,9 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, FocusPattern());
+        auto pipeline = host->GetContext();
         CHECK_NULL_RETURN(pipeline, FocusPattern());
         auto theme = pipeline->GetTheme<GridItemTheme>();
         CHECK_NULL_RETURN(theme, FocusPattern());
@@ -107,6 +109,7 @@ public:
             json->PutFixedAttr("selectable", selectable_ ? "true" : "false", filter, FIXED_ATTR_SELECTABLE);
             return;
         }
+        json->PutExtAttr("style", gridItemStyle_ == GridItemStyle::NONE ? "NONE" : "PLAIN", filter);
         json->PutExtAttr("forceRebuild", forceRebuild_ ? "true" : "false", filter);
         json->PutFixedAttr("selectable", selectable_ ? "true" : "false", filter, FIXED_ATTR_SELECTABLE);
         json->PutExtAttr("selected", isSelected_ ? "true" : "false", filter);
@@ -134,19 +137,17 @@ public:
     }
 
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
 
     void ResetGridItemInfo()
     {
         irregularItemInfo_.reset();
     }
 
+    void UpdateGridItemStyle(GridItemStyle gridItemStyle);
+
 protected:
     void OnModifyDone() override;
-
-    bool IsNeedInitClickEventRecorder() const override
-    {
-        return true;
-    }
 
 private:
     void SetAccessibilityAction();
@@ -159,6 +160,8 @@ private:
     void InitPressEvent();
     void HandlePressEvent(bool isPressed);
     void InitDisableStyle();
+    void InitOnFocusEvent(const RefPtr<FocusHub>& focusHub);
+    void HandleFocusEvent();
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     bool forceRebuild_ = false;

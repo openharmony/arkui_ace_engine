@@ -62,17 +62,6 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
     return true;
 }
 
-bool EventManager::DispatchTabIndexEvent(
-    const KeyEvent& event, const RefPtr<FocusNode>& focusNode, const RefPtr<FocusGroup>& curPage)
-{
-    return true;
-}
-
-bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNode>& focusNode)
-{
-    return true;
-}
-
 bool EventManager::DispatchTabIndexEventNG(
     const KeyEvent& event, const RefPtr<NG::FrameNode>& mainView)
 {
@@ -157,7 +146,8 @@ bool EventManager::HasDifferentDirectionGesture()
 
 EventManager::EventManager() {}
 
-void EventManager::DumpEvent(bool hasJson = false) const {}
+void EventManager::DumpEvent(NG::EventTreeType type, bool hasJson = false) const {}
 
-void AddGestureSnapshot(int32_t finger, int32_t depth,  const RefPtr<TouchEventTarget>& target) {}
+void AddGestureSnapshot(int32_t finger, int32_t depth, const RefPtr<TouchEventTarget>& target, NG::EventTreeType type)
+{}
 } // namespace OHOS::Ace

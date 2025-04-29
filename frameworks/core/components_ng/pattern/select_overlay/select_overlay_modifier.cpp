@@ -15,14 +15,9 @@
 
 #include "core/components_ng/pattern/select_overlay/select_overlay_modifier.h"
 
-#include <vector>
-
-#include "base/geometry/ng/offset_t.h"
-#include "base/utils/utils.h"
-#include "core/components/common/properties/color.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
-#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -277,7 +272,11 @@ void SelectOverlayModifier::onDraw(DrawingContext& drawingContext)
         return;
     }
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        return;
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);

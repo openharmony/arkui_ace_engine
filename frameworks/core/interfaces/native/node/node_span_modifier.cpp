@@ -14,18 +14,12 @@
  */
 #include "core/interfaces/native/node/node_span_modifier.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/dimension_size.h"
-#include "base/utils/utils.h"
+#include "base/utils/utf_helper.h"
 #include "bridge/common/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/pipeline/base/element_register.h"
 #include "draw/canvas.h"
+#include "frameworks/core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -33,13 +27,7 @@ constexpr TextCase DEFAULT_TEXT_CASE = TextCase::NORMAL;
 constexpr FontWeight DEFAULT_FONT_WEIGHT = FontWeight::NORMAL;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE_VALUE = Ace::FontStyle::NORMAL;
 constexpr Dimension DEFAULT_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
-constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
-constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
-constexpr Dimension DEFAULT_LETTER_SPACING_VALUE { 0.0, DimensionUnit::FP };
 constexpr Dimension DEFAULT_BASELINE_OFFSET { 0.0, DimensionUnit::FP };
-constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
-constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
-const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
 std::string g_strValue;
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
@@ -49,17 +37,18 @@ constexpr int NUM_32 = 32;
 constexpr int DEFAULT_LENGTH = 4;
 void SetSpanContent(ArkUINodeHandle node, const char* value)
 {
+    CHECK_NULL_VOID(value);
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
     std::string content(value);
-    SpanModelNG::InitSpan(uiNode, content);
+    SpanModelNG::InitSpan(uiNode, UtfUtils::Str8DebugToStr16(content));
 }
 
 const char* GetSpanContent(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_RETURN(uiNode, nullptr);
-    g_strValue = SpanModelNG::GetContent(uiNode);
+    g_strValue = UtfUtils::Str16DebugToStr8(SpanModelNG::GetContent(uiNode));
     return g_strValue.c_str();
 }
 
@@ -67,7 +56,8 @@ void SetSpanSrc(ArkUINodeHandle node, ArkUI_CharPtr src)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    SpanModelNG::InitSpan(uiNode, src);
+    std::string content(src);
+    SpanModelNG::InitSpan(uiNode, UtfUtils::Str8DebugToStr16(content));
 }
 
 void SetSpanTextCase(ArkUINodeHandle node, int32_t value)
@@ -89,7 +79,7 @@ void ResetSpanTextCase(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    SpanModelNG::SetTextCase(uiNode, DEFAULT_TEXT_CASE);
+    SpanModelNG::ResetTextCase(uiNode);
 }
 
 void SetSpanFontWeightStr(ArkUINodeHandle node, const char* value)
@@ -118,7 +108,7 @@ void ResetSpanFontWeight(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    SpanModelNG::SetFontWeight(uiNode, DEFAULT_FONT_WEIGHT);
+    SpanModelNG::ResetFontWeight(uiNode);
 }
 
 void SetSpanLineHeight(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
@@ -139,8 +129,7 @@ void ResetSpanLineHeight(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    Dimension value(0.0f);
-    SpanModelNG::SetLineHeight(uiNode, value);
+    SpanModelNG::ResetLineHeight(uiNode);
 }
 
 void SetSpanFontStyle(ArkUINodeHandle node, int32_t value)
@@ -162,7 +151,7 @@ void ResetSpanFontStyle(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    SpanModelNG::SetItalicFontStyle(uiNode, DEFAULT_FONT_STYLE_VALUE);
+    SpanModelNG::ResetItalicFontStyle(uiNode);
 }
 
 void SetSpanFontSize(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
@@ -183,7 +172,7 @@ void ResetSpanFontSize(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    SpanModelNG::SetFontSize(uiNode, DEFAULT_FONT_SIZE);
+    SpanModelNG::ResetFontSize(uiNode);
 }
 
 void SetSpanFontFamily(ArkUINodeHandle node, const char** fontFamilies, uint32_t length)
@@ -208,9 +197,7 @@ void ResetSpanFontFamily(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    std::vector<std::string> families;
-    families.emplace_back(DEFAULT_FONT_FAMILY);
-    SpanModelNG::SetFontFamily(uiNode, families);
+    SpanModelNG::ResetFontFamily(uiNode);
 }
 
 void SetSpanDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style)
@@ -236,9 +223,9 @@ void ResetSpanDecoration(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    SpanModelNG::SetTextDecoration(uiNode, DEFAULT_TEXT_DECORATION);
-    SpanModelNG::SetTextDecorationStyle(uiNode, DEFAULT_DECORATION_STYLE);
-    SpanModelNG::SetTextDecorationColor(uiNode, DEFAULT_DECORATION_COLOR);
+    SpanModelNG::ResetTextDecoration(uiNode);
+    SpanModelNG::ResetTextDecorationStyle(uiNode);
+    SpanModelNG::ResetTextDecorationColor(uiNode);
 }
 
 void SetSpanFontColor(ArkUINodeHandle node, uint32_t textColor)
@@ -259,12 +246,7 @@ void ResetSpanFontColor(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    auto pipelineContext = PipelineBase::GetCurrentContextSafely();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    uint32_t textColor = theme->GetTextStyle().GetTextColor().GetValue();
-    SpanModelNG::SetTextColor(uiNode, Color(textColor));
+    SpanModelNG::ResetTextColor(uiNode);
 }
 
 void SetSpanLetterSpacing(ArkUINodeHandle node, const struct ArkUIStringAndFloat* letterSpacingValue)
@@ -291,7 +273,7 @@ void ResetSpanLetterSpacing(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    SpanModelNG::SetLetterSpacing(uiNode, DEFAULT_LETTER_SPACING_VALUE);
+    SpanModelNG::ResetLetterSpacing(uiNode);
 }
 
 void SetSpanBaselineOffset(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
@@ -326,6 +308,9 @@ void SetSpanFont(ArkUINodeHandle node, const struct ArkUIFontStruct* fontInfo)
     font.fontWeight = static_cast<FontWeight>(fontInfo->fontWeight);
     std::vector<std::string> families;
     if (fontInfo->fontFamilies && fontInfo->familyLength > 0) {
+        if (fontInfo->familyLength > DEFAULT_MAX_FONT_FAMILY_LENGTH) {
+            return;
+        }
         families.resize(fontInfo->familyLength);
         for (uint32_t i = 0; i < fontInfo->familyLength; i++) {
             families.at(i) = std::string(*(fontInfo->fontFamilies + i));
@@ -339,14 +324,7 @@ void ResetSpanFont(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
-    Font font;
-    font.fontSize = DEFAULT_FONT_SIZE;
-    font.fontWeight = DEFAULT_FONT_WEIGHT;
-    font.fontStyle = DEFAULT_FONT_STYLE;
-    std::vector<std::string> families;
-    families.emplace_back(DEFAULT_FONT_FAMILY);
-    font.fontFamilies = families;
-    SpanModelNG::SetFont(uiNode, font);
+    SpanModelNG::ResetFont(uiNode);
 }
 
 void SetSpanTextBackgroundStyle(
@@ -394,7 +372,7 @@ void GetSpanTextBackgroundStyle(ArkUINodeHandle node, ArkUITextBackgroundStyleOp
     options->topLeft = styleOptions.backgroundRadius->radiusTopLeft->Value();
     options->topRight = styleOptions.backgroundRadius->radiusTopRight->Value();
     options->bottomLeft = styleOptions.backgroundRadius->radiusBottomLeft->Value();
-    options->bottomLeft = styleOptions.backgroundRadius->radiusBottomLeft->Value();
+    options->bottomRight= styleOptions.backgroundRadius->radiusBottomRight->Value();
 }
 
 void SetTextTextShadow(ArkUINodeHandle node, struct ArkUITextShadowStruct* shadows, ArkUI_Uint32 length)
@@ -440,10 +418,7 @@ void ResetTextTextShadow(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Shadow shadow;
-    shadow.SetOffsetX(0.0);
-    shadow.SetOffsetY(0.0);
-    SpanModelNG::SetTextShadow(frameNode, std::vector<Shadow> { shadow });
+    SpanModelNG::ResetTextShadow(frameNode);
 }
 
 void SetAccessibilityText(ArkUINodeHandle node, ArkUI_CharPtr value)
@@ -515,31 +490,108 @@ ArkUI_CharPtr GetSpanFontFamily(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUISpanModifier* GetSpanModifier()
 {
-    static const ArkUISpanModifier modifier = { SetSpanSrc, SetSpanContent, SetSpanTextCase, ResetSpanTextCase,
-        SetSpanFontWeight, ResetSpanFontWeight, SetSpanLineHeight, ResetSpanLineHeight, SetSpanFontStyle,
-        ResetSpanFontStyle, SetSpanFontSize, ResetSpanFontSize, SetSpanFontFamily, ResetSpanFontFamily,
-        SetSpanDecoration, ResetSpanDecoration, SetSpanFontColor, ResetSpanFontColor, SetSpanLetterSpacing,
-        ResetSpanLetterSpacing, SetSpanBaselineOffset, ResetSpanBaselineOffset, SetSpanFont, ResetSpanFont,
-        SetSpanFontWeightStr, GetSpanContent, GetSpanDecoration, GetSpanFontColor, GetSpanFontSize, GetSpanFontStyle,
-        GetSpanFontWeight, GetSpanLineHeight, GetSpanTextCase, GetSpanLetterSpacing, GetSpanBaselineOffset,
-        SetSpanTextBackgroundStyle, ResetSpanTextBackgroundStyle, GetSpanTextBackgroundStyle, SetTextTextShadow,
-        ResetTextTextShadow, GetTextShadow, GetSpanFontFamily,
-        SetAccessibilityText, ResetAccessibilityText, SetAccessibilityDescription, ResetAccessibilityDescription,
-        SetAccessibilityLevel, ResetAccessibilityLevel };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUISpanModifier modifier = {
+        .setSpanSrc = SetSpanSrc,
+        .setContent = SetSpanContent,
+        .setSpanTextCase = SetSpanTextCase,
+        .resetSpanTextCase = ResetSpanTextCase,
+        .setSpanFontWeight = SetSpanFontWeight,
+        .resetSpanFontWeight = ResetSpanFontWeight,
+        .setSpanLineHeight = SetSpanLineHeight,
+        .resetSpanLineHeight = ResetSpanLineHeight,
+        .setSpanFontStyle = SetSpanFontStyle,
+        .resetSpanFontStyle = ResetSpanFontStyle,
+        .setSpanFontSize = SetSpanFontSize,
+        .resetSpanFontSize = ResetSpanFontSize,
+        .setSpanFontFamily = SetSpanFontFamily,
+        .resetSpanFontFamily = ResetSpanFontFamily,
+        .setSpanDecoration = SetSpanDecoration,
+        .resetSpanDecoration = ResetSpanDecoration,
+        .setSpanFontColor = SetSpanFontColor,
+        .resetSpanFontColor = ResetSpanFontColor,
+        .setSpanLetterSpacing = SetSpanLetterSpacing,
+        .resetSpanLetterSpacing = ResetSpanLetterSpacing,
+        .setSpanBaselineOffset = SetSpanBaselineOffset,
+        .resetSpanBaselineOffset = ResetSpanBaselineOffset,
+        .setSpanFont = SetSpanFont,
+        .resetSpanFont = ResetSpanFont,
+        .setSpanFontWeightStr = SetSpanFontWeightStr,
+        .getSpanContent = GetSpanContent,
+        .getSpanDecoration = GetSpanDecoration,
+        .getSpanFontColor = GetSpanFontColor,
+        .getSpanFontSize = GetSpanFontSize,
+        .getSpanFontStyle = GetSpanFontStyle,
+        .getSpanFontWeight = GetSpanFontWeight,
+        .getSpanLineHeight = GetSpanLineHeight,
+        .getSpanTextCase = GetSpanTextCase,
+        .getSpanLetterSpacing = GetSpanLetterSpacing,
+        .getSpanBaselineOffset = GetSpanBaselineOffset,
+        .setSpanTextBackgroundStyle = SetSpanTextBackgroundStyle,
+        .resetSpanTextBackgroundStyle = ResetSpanTextBackgroundStyle,
+        .getSpanTextBackgroundStyle = GetSpanTextBackgroundStyle,
+        .setTextShadow = SetTextTextShadow,
+        .resetTextShadow = ResetTextTextShadow,
+        .getTextShadows = GetTextShadow,
+        .getSpanFontFamily = GetSpanFontFamily,
+        .setAccessibilityText = SetAccessibilityText,
+        .resetAccessibilityText = ResetAccessibilityText,
+        .setAccessibilityDescription = SetAccessibilityDescription,
+        .resetAccessibilityDescription = ResetAccessibilityDescription,
+        .setAccessibilityLevel = SetAccessibilityLevel,
+        .resetAccessibilityLevel = ResetAccessibilityLevel,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUISpanModifier* GetCJUISpanModifier()
 {
-    static const CJUISpanModifier modifier = { SetSpanSrc, SetSpanContent, SetSpanTextCase, ResetSpanTextCase,
-        SetSpanFontWeight, ResetSpanFontWeight, SetSpanLineHeight, ResetSpanLineHeight, SetSpanFontStyle,
-        ResetSpanFontStyle, SetSpanFontSize, ResetSpanFontSize, SetSpanFontFamily, ResetSpanFontFamily,
-        SetSpanDecoration, ResetSpanDecoration, SetSpanFontColor, ResetSpanFontColor, SetSpanLetterSpacing,
-        ResetSpanLetterSpacing, SetSpanBaselineOffset, ResetSpanBaselineOffset, SetSpanFont, ResetSpanFont,
-        SetSpanFontWeightStr, GetSpanContent, GetSpanDecoration, GetSpanFontColor, GetSpanFontSize, GetSpanFontStyle,
-        GetSpanFontWeight, GetSpanLineHeight, GetSpanTextCase, GetSpanLetterSpacing, GetSpanBaselineOffset,
-        SetSpanTextBackgroundStyle, ResetSpanTextBackgroundStyle, GetSpanTextBackgroundStyle, SetTextTextShadow,
-        ResetTextTextShadow, GetTextShadow };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUISpanModifier modifier = {
+        .setSpanSrc = SetSpanSrc,
+        .setContent = SetSpanContent,
+        .setSpanTextCase = SetSpanTextCase,
+        .resetSpanTextCase = ResetSpanTextCase,
+        .setSpanFontWeight = SetSpanFontWeight,
+        .resetSpanFontWeight = ResetSpanFontWeight,
+        .setSpanLineHeight = SetSpanLineHeight,
+        .resetSpanLineHeight = ResetSpanLineHeight,
+        .setSpanFontStyle = SetSpanFontStyle,
+        .resetSpanFontStyle = ResetSpanFontStyle,
+        .setSpanFontSize = SetSpanFontSize,
+        .resetSpanFontSize = ResetSpanFontSize,
+        .setSpanFontFamily = SetSpanFontFamily,
+        .resetSpanFontFamily = ResetSpanFontFamily,
+        .setSpanDecoration = SetSpanDecoration,
+        .resetSpanDecoration = ResetSpanDecoration,
+        .setSpanFontColor = SetSpanFontColor,
+        .resetSpanFontColor = ResetSpanFontColor,
+        .setSpanLetterSpacing = SetSpanLetterSpacing,
+        .resetSpanLetterSpacing = ResetSpanLetterSpacing,
+        .setSpanBaselineOffset = SetSpanBaselineOffset,
+        .resetSpanBaselineOffset = ResetSpanBaselineOffset,
+        .setSpanFont = SetSpanFont,
+        .resetSpanFont = ResetSpanFont,
+        .setSpanFontWeightStr = SetSpanFontWeightStr,
+        .getSpanContent = GetSpanContent,
+        .getSpanDecoration = GetSpanDecoration,
+        .getSpanFontColor = GetSpanFontColor,
+        .getSpanFontSize = GetSpanFontSize,
+        .getSpanFontStyle = GetSpanFontStyle,
+        .getSpanFontWeight = GetSpanFontWeight,
+        .getSpanLineHeight = GetSpanLineHeight,
+        .getSpanTextCase = GetSpanTextCase,
+        .getSpanLetterSpacing = GetSpanLetterSpacing,
+        .getSpanBaselineOffset = GetSpanBaselineOffset,
+        .setSpanTextBackgroundStyle = SetSpanTextBackgroundStyle,
+        .resetSpanTextBackgroundStyle = ResetSpanTextBackgroundStyle,
+        .getSpanTextBackgroundStyle = GetSpanTextBackgroundStyle,
+        .setTextShadow = SetTextTextShadow,
+        .resetTextShadow = ResetTextTextShadow,
+        .getTextShadows = GetTextShadow,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 

@@ -15,19 +15,10 @@
 
 #include "core/components_ng/pattern/badge/badge_layout_algorithm.h"
 
-#include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
-#include "core/common/container.h"
 #include "core/components/badge/badge_theme.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/badge/badge_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -103,6 +94,9 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     }
     
+    if (layoutProperty->GetBadgeCount().has_value()) {
+        textLayoutProperty->UpdateLayoutDirection(TextDirection::LTR);
+    }
     textLayoutProperty->UpdateFontSize(Dimension(fontSizeInit, DimensionUnit::VP));
     auto circleSize = std::make_optional(Dimension(badgeSizeInit, DimensionUnit::VP));
     auto badgeCircleDiameter = Dimension(badgeSizeInit, DimensionUnit::VP).ConvertToPx();
@@ -113,10 +107,10 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto badgeWidth = 0.0;
     auto badgeHeight = badgeCircleDiameter;
-    auto countLimit = layoutProperty->GetBadgeMaxCountValue();
-    auto badgeCircleRadius = badgeCircleDiameter / 2;
+    auto countLimit =
+        layoutProperty->HasBadgeMaxCount() ? layoutProperty->GetBadgeMaxCountValue() : badgeTheme->GetMaxCount();
 
-    std::string textData;
+    std::u16string textData;
     if (textLayoutProperty->HasContent()) {
         textData = textLayoutProperty->GetContentValue();
     }
@@ -130,7 +124,6 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 badgeCircleDiameter = std::max(static_cast<double>(textSize.Height()), badgeCircleDiameter);
                 badgeHeight = std::max(badgeCircleDiameter, badgeHeight);
             }
-            badgeCircleRadius = badgeCircleDiameter / 2;
             badgeWidth = badgeCircleDiameter;
         } else if (textData.size() > 1 || messageCount > static_cast<size_t>(countLimit)) {
             if (hasFontSize_) {
@@ -142,7 +135,6 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             }
             badgeWidth = textSize.Width() + badgeTheme->GetNumericalBadgePadding().ConvertToPx() * 2;
             badgeWidth = badgeCircleDiameter > badgeWidth ? badgeCircleDiameter : badgeWidth;
-            badgeCircleRadius = badgeCircleDiameter / 2;
         }
     }
     if (LessOrEqual(circleSize->ConvertToPx(), 0)) {
@@ -267,7 +259,7 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto textGeometryNode = textWrapper->GetGeometryNode();
     CHECK_NULL_VOID(textGeometryNode);
 
-    std::string textData;
+    std::u16string textData;
     if (textLayoutProperty->HasContent()) {
         textData = textLayoutProperty->GetContentValue();
     }
@@ -306,9 +298,9 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     textLayoutProperty->UpdateAlignment(Alignment::CENTER);
 
     OffsetF textOffset;
-    if (!layoutProperty->GetIsPositionXy().value()) {
+    if (layoutProperty->GetIsPositionXy().has_value() && !layoutProperty->GetIsPositionXy().value()) {
         textOffset = GetTextDataOffset(layoutProperty, badgeCircleDiameter, badgeCircleRadius,
-            geometryNode, textData == " ");
+            geometryNode, textData == u" ");
     } else {
         textOffset = GetTextOffsetByPosition(layoutProperty, geometryNode);
     }

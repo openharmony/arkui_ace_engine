@@ -49,6 +49,7 @@ ohos_shared_library("ace_xcomponent_controller") {
 
   deps = [
     "$ace_root/frameworks/core/components/theme:build_theme_code",
+    "$ace_root/interfaces/inner_api/ace:ace_forward_compatibility",
     "$ace_root/interfaces/inner_api/ace:ace_uicontent",
   ]
 

@@ -1,35 +1,63 @@
 /*
-* Copyright (c) 2024 Huawei Device Co., Ltd.
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 #include "bridge/cj_frontend/frontend/cj_page_router_ng.h"
 
-#include "base/i18n/localization.h"
-#include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
+#include "securec.h"
+
 #include "bridge/cj_frontend/frontend/cj_frontend_abstract.h"
 #include "bridge/cj_frontend/frontend/cj_page_loader.h"
-#include "bridge/declarative_frontend/ng/entry_page_info.h"
-#include "bridge/js_frontend/frontend_delegate.h"
-#include "core/common/container.h"
+#include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
+#include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/dialog/dialog_theme.h"
 
 using namespace OHOS::Ace::NG;
 
 namespace OHOS::Ace::Framework {
 constexpr int PAGE_SIZE_TWO = 2;
+
+void UpdateCjPageLifeCycleFuncs(
+    RefPtr<NG::PagePattern> pagePattern, OHOS::wptr<NativeView> weakView, RefPtr<NG::FrameNode> pageNode)
+{
+    CHECK_NULL_VOID(pagePattern);
+    pagePattern->SetOnPageShow([weakView]() {
+        auto view = weakView.promote();
+        CHECK_NULL_VOID(view);
+        view->FireOnShow();
+    });
+    pagePattern->SetOnPageHide([weakView]() {
+        auto view = weakView.promote();
+        CHECK_NULL_VOID(view);
+        view->FireOnHide();
+    });
+    pagePattern->SetOnBackPressed([weakView]() {
+        auto view = weakView.promote();
+        CHECK_NULL_RETURN(view, false);
+        return view->FireOnBackPress();
+    });
+    pagePattern->SetPageTransitionFunc([weakView, weakPage = WeakPtr<NG::FrameNode>(pageNode)]() {
+        auto view = weakView.promote();
+        CHECK_NULL_VOID(view);
+        NG::ScopedViewStackProcessor scopedViewStackProcessor;
+        NG::ViewStackProcessor::GetInstance()->SetPageNode(weakPage.Upgrade());
+        view->FireOnTransition();
+        NG::ViewStackProcessor::GetInstance()->SetPageNode(nullptr);
+    });
+}
 
 bool LoadNativeViewNG(NativeView* view)
 {
@@ -70,45 +98,10 @@ bool LoadNativeViewNG(NativeView* view)
     }
     pageRootNode->MountToParent(pageNode);
     auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
-    if (!pagePattern) {
-        LOGE("loadCJView fail, pageNode's pattern is null");
-        return false;
-    }
+    CHECK_NULL_RETURN(pagePattern, false);
     OHOS::wptr<NativeView> weak = view;
-    view->SetRenderDoneCallback([pagePattern] {
-        pagePattern->MarkRenderDone();
-    });
-    pagePattern->SetOnPageShow([weak]() {
-        auto view = weak.promote();
-        if (!view) {
-            return;
-        }
-        view->FireOnShow();
-    });
-    pagePattern->SetOnPageHide([weak]() {
-        auto view = weak.promote();
-        if (!view) {
-            return; // maybe released
-        }
-        view->FireOnHide();
-    });
-    pagePattern->SetOnBackPressed([weak]() {
-        auto view = weak.promote();
-        if (!view) {
-            return false;
-        }
-        return view->FireOnBackPress();
-    });
-    pagePattern->SetPageTransitionFunc([weak, weakPage = WeakPtr<NG::FrameNode>(pageNode)]() {
-        auto view = weak.promote();
-        if (!view) {
-            return;
-        }
-        NG::ScopedViewStackProcessor scopedViewStackProcessor;
-        NG::ViewStackProcessor::GetInstance()->SetPageNode(weakPage.Upgrade());
-        view->FireOnTransition();
-        NG::ViewStackProcessor::GetInstance()->SetPageNode(nullptr);
-    });
+    view->SetRenderDoneCallback([pagePattern] { pagePattern->MarkRenderDone(); });
+    UpdateCjPageLifeCycleFuncs(pagePattern, weak, pageNode);
     pageRouterManager->AddView(view->GetID());
     LOGI("OHOSAceFrameworkNGLoadCJView end.");
     return true;
@@ -128,6 +121,24 @@ void ExitToDesktop()
             pipeline->Finish(false);
         },
         TaskExecutor::TaskType::UI, "CJExitToDesktop");
+}
+
+struct DialogStrings {
+    std::string cancel;
+    std::string confirm;
+};
+
+DialogStrings GetDialogStrings()
+{
+    DialogStrings strs = {"", ""};
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, strs);
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, strs);
+
+    strs.cancel = dialogTheme->GetCancelText();
+    strs.confirm = dialogTheme->GetConfirmText();
+    return strs;
 }
 } // namespace
 
@@ -203,11 +214,13 @@ void CJPageRouterNG::EnableAlertBeforeBackPage(const std::string& message, std::
     CHECK_NULL_VOID(pageInfo);
     ClearAlertCallback(pageInfo);
 
+    auto strs = GetDialogStrings();
+
     DialogProperties dialogProperties = {
         .content = message,
         .autoCancel = false,
-        .buttons = { { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" },
-            { .text = Localization::GetInstance()->GetEntryLetters("common.ok"), .textColor = "" } },
+        .buttons = { { .text = strs.cancel, .textColor = "" },
+            { .text = strs.confirm, .textColor = "" } },
         .onSuccess =
             [weak = AceType::WeakClaim(this), callback](int32_t successType, int32_t successIndex) {
                 LOGI("showDialog successType: %{public}d, successIndex: %{public}d", successType, successIndex);
@@ -216,7 +229,11 @@ void CJPageRouterNG::EnableAlertBeforeBackPage(const std::string& message, std::
                     if (successIndex) {
                         auto router = weak.Upgrade();
                         CHECK_NULL_VOID(router);
-                        router->StartBack(router->ngBackUri_, router->backParam_);
+                        if (router->ngBackIndex_ > 0) {
+                            router->StartBackIndex(router->ngBackIndex_, router->backParam_);
+                        } else {
+                            router->StartBack(router->ngBackUri_, router->backParam_);
+                        }
                     }
                 }
             },
@@ -255,6 +272,7 @@ void CJPageRouterNG::StartClean()
         LOGW("current page stack can not clean, %{public}d", static_cast<int32_t>(pageRouterStack_.size()));
         return;
     }
+    UpdateSrcPage();
     std::list<WeakPtr<FrameNode>> temp;
     std::swap(temp, pageRouterStack_);
     pageRouterStack_.emplace_back(temp.back());
@@ -271,6 +289,7 @@ bool CJPageRouterNG::StartPop()
         // the last page.
         return false;
     }
+    UpdateSrcPage();
     auto topNode = pageRouterStack_.back();
     auto topView = viewStack_.back();
     pageRouterStack_.pop_back();
@@ -287,23 +306,6 @@ bool CJPageRouterNG::StartPop()
 int32_t CJPageRouterNG::GetStackSize() const
 {
     return static_cast<int32_t>(pageRouterStack_.size());
-}
-
-void CJPageRouterNG::GetState(int32_t& index, std::string& name, std::string& path)
-{
-    if (pageRouterStack_.empty()) {
-        LOGE("fail to get page state due to stack is null");
-        return;
-    }
-    index = static_cast<int32_t>(pageRouterStack_.size());
-    auto pageNode = pageRouterStack_.back().Upgrade();
-    CHECK_NULL_VOID(pageNode);
-    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
-    CHECK_NULL_VOID(pagePattern);
-    auto pageInfo = pagePattern->GetPageInfo();
-    CHECK_NULL_VOID(pageInfo);
-    name = pageInfo->GetPageUrl();
-    path = pageInfo->GetPagePath();
 }
 
 std::string CJPageRouterNG::GetParams() const
@@ -361,7 +363,7 @@ void CJPageRouterNG::StartPush(const RouterPageInfo& target, const std::string& 
         LOGE("router.Push uri is empty");
         return;
     }
-
+    UpdateSrcPage();
     if (mode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(target.url);
         if (pageInfo.second) {
@@ -381,6 +383,7 @@ void CJPageRouterNG::StartReplace(const RouterPageInfo& target, const std::strin
         LOGE("router.Push uri is empty");
         return;
     }
+    UpdateSrcPage();
     std::string url = target.url;
 
     PopPage("", false, false);
@@ -408,9 +411,11 @@ void CJPageRouterNG::StartBack(const RouterPageInfo& target, const std::string& 
             ExitToDesktop();
             return;
         }
+        UpdateSrcPage();
         PopPage(params, true, true);
         return;
     }
+    UpdateSrcPage();
     std::string url = target.url;
     auto pageInfo = FindPageInStack(url);
     if (pageInfo.second) {
@@ -432,10 +437,11 @@ void CJPageRouterNG::BackCheckAlert(const RouterPageInfo& target, const std::str
     CHECK_NULL_VOID(currentPage);
     auto pagePattern = currentPage->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
-    if (pagePattern->OnBackPressed()) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && pagePattern->GetPageInTransition()) {
+        LOGI("page is in transition");
         return;
     }
-    
+
     auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
     CHECK_NULL_VOID(pageInfo);
     if (pageInfo->GetAlertCallback()) {
@@ -466,25 +472,28 @@ void CJPageRouterNG::LoadPage(int32_t pageId, const RouterPageInfo& target, cons
         CHECK_NULL_VOID(frontend);
         auto taskExecutor = frontend->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask([weak = WeakClaim(this), pageId, target, params, isRestore,
-            needHideLast, needTransition] {
+        taskExecutor->PostTask(
+            [weak = WeakClaim(this), pageId, target, params, isRestore, needHideLast, needTransition] {
                 auto self = weak.Upgrade();
                 CHECK_NULL_VOID(self);
                 self->LoadPage(pageId, target, params, isRestore, needHideLast, needTransition);
-            }, TaskExecutor::TaskType::UI, "CJLoadPage");
+            },
+            TaskExecutor::TaskType::UI, "CJLoadPage");
         return;
     }
 
     auto entryPageInfo = AceType::MakeRefPtr<NG::EntryPageInfo>(pageId, target.url, target.path, params);
     auto pagePattern = AceType::MakeRefPtr<NG::PagePattern>(entryPageInfo);
-    auto pageNode =
-        NG::FrameNode::CreateFrameNode("page", ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
+    auto pageNode = NG::FrameNode::CreateFrameNode("page", ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
     pageNode->SetHostPageId(pageId);
 
     pageRouterStack_.emplace_back(pageNode);
 
-    if (!CJRuntimeDelegate::GetInstance()->LoadAppEntry(target.url)) {
+    if (!target.url.empty() && !CJRuntimeDelegate::GetInstance()->LoadAppEntry(target.url)) {
         LOGE("Run CJ Page fail: %{public}s", target.url.c_str());
+        if (target.callback != nullptr) {
+            target.callback(ERROR_CODE_URI_ERROR);
+        }
         pageRouterStack_.pop_back();
         return;
     }
@@ -668,7 +677,8 @@ bool CJPageRouterNG::OnPopPage(bool needShowNext, bool needTransition)
     auto context = DynamicCast<NG::PipelineContext>(pipeline);
     auto stageManager = context ? context->GetStageManager() : nullptr;
     if (stageManager) {
-        return stageManager->PopPage(needShowNext, needTransition);
+        auto inPageNode = GetCurrentPageNode();
+        return stageManager->PopPage(inPageNode, needShowNext, needTransition);
     }
     LOGE("fail to pop page due to stage manager is nullptr");
     return false;
@@ -714,4 +724,199 @@ void CJPageRouterNG::FlushReload()
         view->MarkNeedUpdate();
     }
 }
+
+void CJPageRouterNG::UpdateSrcPage()
+{
+    auto currentObj = Container::Current();
+    CHECK_NULL_VOID(currentObj);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(currentObj->GetPipelineContext());
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    stageManager->SetSrcPage(GetCurrentPageNode());
+}
+void CJPageRouterNG::GetState(int32_t& index, std::string& name, std::string& path, std::string& params)
+{
+    if (pageRouterStack_.empty()) {
+        LOGE("fail to get page state due to stack is null");
+        return;
+    }
+    index = static_cast<int32_t>(pageRouterStack_.size());
+    auto pageNode = pageRouterStack_.back().Upgrade();
+    CHECK_NULL_VOID(pageNode);
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    auto pageInfo = pagePattern->GetPageInfo();
+    CHECK_NULL_VOID(pageInfo);
+    name = pageInfo->GetPageUrl();
+    path = pageInfo->GetPagePath();
+    params = GetParams();
+}
+RefPtr<NG::FrameNode> CJPageRouterNG::FindPageByIndex(int32_t& index)
+{
+    auto it = pageRouterStack_.begin();
+    std::advance(it, index - 1);
+    return it->Upgrade();
+}
+void CJPageRouterNG::GetStateByIndex(int32_t& index, std::string& name, std::string& path, std::string& params)
+{
+    if (pageRouterStack_.empty() || static_cast<int32_t>(pageRouterStack_.size()) < index) {
+        LOGE("fail to get page state due to stack is null");
+        index = 0;
+        return;
+    }
+    auto pageNode = pageRouterStack_.back().Upgrade();
+    CHECK_NULL_VOID(pageNode);
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    auto pageInfo = pagePattern->GetPageInfo();
+    CHECK_NULL_VOID(pageInfo);
+    name = pageInfo->GetPageUrl();
+    path = pageInfo->GetPagePath();
+    params = GetParams();
+}
+static char* CopyStr(const std::string& str)
+{
+    char* newStr = new (std::nothrow) char[str.length() + 1];
+    if (newStr == nullptr) {
+        return nullptr;
+    }
+
+    int err = strcpy_s(newStr, str.length() + 1, str.c_str());
+    if (err != 0) {
+        delete[] newStr;
+        return nullptr;
+    }
+
+    return newStr;
+}
+std::vector<CJPageRouterAbstract::RouterState> CJPageRouterNG::GetStateByUrl(const std::string& url)
+{
+    std::vector<CJPageRouterAbstract::RouterState> ret;
+    if (pageRouterStack_.empty()) {
+        LOGE("fail to get page state due to stack is null");
+        return ret;
+    }
+    int64_t index = 0;
+    for (auto it = pageRouterStack_.begin(); it != pageRouterStack_.end(); ++it) {
+        std::string name = "";
+        std::string path = "";
+        std::string params = "";
+        auto pageNode = it->Upgrade();
+        if (!pageNode)
+            return ret;
+        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+        if (!pagePattern)
+            return ret;
+        auto pageInfo = pagePattern->GetPageInfo();
+        if (!pageInfo)
+            return ret;
+        name = pageInfo->GetPageUrl();
+        if (name == url) {
+            path = pageInfo->GetPagePath();
+            params = GetParams();
+            ret.push_back({ static_cast<int32_t>(index + 1), CopyStr(name), CopyStr(path), CopyStr(params) });
+        }
+        index++;
+    }
+    return ret;
+}
+void CJPageRouterNG::StartBackIndex(int32_t& index, const std::string& params)
+{
+    std::string pagePath;
+    int32_t pageRouterSize = static_cast<int32_t>(pageRouterStack_.size());
+    if (pageRouterSize < index) {
+        return;
+    }
+    if (pageRouterSize < PAGE_SIZE_TWO) {
+        LOGI("router stack is only one, back to desktop");
+        ExitToDesktop();
+        return;
+    }
+    UpdateSrcPage();
+    PopPageToIndex(index, params, true, true);
+}
+
+void CJPageRouterNG::StartPushPageWithCallback(const RouterPageInfo& target, const std::string& params)
+{
+    ProcessGuard guard(this);
+    if (target.url.empty()) {
+        LOGE("router.Push uri is empty");
+        return;
+    }
+    UpdateSrcPage();
+    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
+        if (target.callback != nullptr) {
+            target.callback(ERROR_CODE_PAGE_STACK_FULL);
+        }
+        return;
+    }
+    if (target.routerMode == RouterMode::SINGLE) {
+        auto pageInfo = FindPageInStack(target.url);
+        if (pageInfo.second) {
+            // find page in stack, move postion and update params.
+            MovePageToFront(pageInfo.first, pageInfo.second, params, false);
+            return;
+        }
+    }
+
+    LoadPage(GenerateNextPageId(), target, params);
+}
+void CJPageRouterNG::StartReplacePageWithCallback(const RouterPageInfo& target, const std::string& params)
+{
+    ProcessGuard guard(this);
+    if (target.url.empty()) {
+        LOGE("router.Push uri is empty");
+        return;
+    }
+    UpdateSrcPage();
+    std::string url = target.url;
+    PopPage("", false, false);
+
+    if (target.routerMode == RouterMode::SINGLE) {
+        auto pageInfo = FindPageInStack(url);
+        if (pageInfo.second) {
+            // find page in stack, move postion and update params.
+            MovePageToFront(pageInfo.first, pageInfo.second, params, false, true, true);
+            return;
+        }
+    }
+
+    LoadPage(GenerateNextPageId(), target, params, false, false, false);
+}
+void CJPageRouterNG::BackCheckAlertIndex(int32_t index, const std::string& params)
+{
+    ProcessGuard guard(this);
+    if (pageRouterStack_.empty()) {
+        LOGI("page route stack is empty");
+        return;
+    }
+    if (static_cast<int32_t>(pageRouterStack_.size()) < index) {
+        LOGI("index is invalid");
+        return;
+    }
+    auto currentPage = pageRouterStack_.back().Upgrade();
+    CHECK_NULL_VOID(currentPage);
+    auto pagePattern = currentPage->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    if (pagePattern->OnBackPressed()) {
+        return;
+    }
+
+    auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
+    CHECK_NULL_VOID(pageInfo);
+    if (pageInfo->GetAlertCallback()) {
+        ngBackIndex_ = index;
+        backParam_ = params;
+
+        auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+        auto overlayManager = pipelineContext ? pipelineContext->GetOverlayManager() : nullptr;
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->ShowDialog(
+            pageInfo->GetDialogProperties(), nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+        return;
+    }
+
+    StartBackIndex(index, params);
+}
+
 } // namespace OHOS::Ace::Framework

@@ -15,10 +15,32 @@
 
 #include "core/components_ng/pattern/navigation/navigation_content_layout_algorithm.h"
 
-#include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/navigation/title_bar_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+void UpdatePropertyIfNeedForceMeasure(const RefPtr<NavDestinationGroupNode>& navDestinationNode)
+{
+    CHECK_NULL_VOID(navDestinationNode);
+    if (!navDestinationNode->NeedForceMeasure()) {
+        return;
+    }
+    navDestinationNode->SetNeedForceMeasure(false);
+    auto property = navDestinationNode->GetLayoutProperty();
+    if (property) {
+        property->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    }
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleProperty = titleBarNode->GetLayoutProperty();
+    if (titleProperty) {
+        titleProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+}
 
 void NavigationContentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -30,10 +52,20 @@ void NavigationContentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         for (auto index = 0; index < childSize; index++) {
             auto child = layoutWrapper->GetOrCreateChildByIndex(index);
-            if (child->GetHostNode() && child->GetHostNode()->IsVisible()) {
-                child->Measure(layoutConstraint);
-                children.emplace_back(child);
+            if (!child) {
+                continue;
             }
+            auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(child->GetHostNode());
+            if (!navDestinationNode) {
+                continue;
+            }
+            if (!navDestinationNode->IsVisible()) {
+                continue;
+            }
+            UpdatePropertyIfNeedForceMeasure(navDestinationNode);
+            auto constraint = navDestinationNode->AdjustLayoutConstarintIfNeeded(layoutConstraint);
+            child->Measure(constraint);
+            children.emplace_back(child);
         }
     }
     PerformMeasureSelfWithChildList(layoutWrapper, { children });
@@ -54,13 +86,17 @@ void NavigationContentLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     // Update child position.
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild(false)) {
-        auto childNode = child->GetHostNode();
-        if (childNode && childNode->IsVisible()) {
-            SizeF childSize = child->GetGeometryNode()->GetMarginFrameSize();
-            auto translate = Alignment::GetAlignPosition(size, childSize, align) + paddingOffset;
-            child->GetGeometryNode()->SetMarginFrameOffset(translate);
-            child->Layout();
+        auto navDest = AceType::DynamicCast<NavDestinationGroupNode>(child->GetHostNode());
+        if (!navDest) {
+            continue;
         }
+        if (!navDest->IsVisible()) {
+            continue;
+        }
+        SizeF childSize = navDest->GetGeometryNode()->GetMarginFrameSize();
+        auto translate = Alignment::GetAlignPosition(size, childSize, align) + paddingOffset;
+        navDest->GetGeometryNode()->SetMarginFrameOffset(translate);
+        navDest->Layout();
     }
     // Update content position.
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();

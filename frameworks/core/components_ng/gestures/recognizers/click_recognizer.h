@@ -35,7 +35,8 @@ class ClickRecognizer : public MultiFingersRecognizer {
 
 public:
     ClickRecognizer() = default;
-    ClickRecognizer(int32_t fingers, int32_t count, double distanceThreshold = std::numeric_limits<double>::infinity());
+    ClickRecognizer(int32_t fingers, int32_t count, double distanceThreshold = std::numeric_limits<double>::infinity(),
+    bool isLimitFingerCount_ = false);
 
     ~ClickRecognizer() override = default;
 
@@ -65,7 +66,7 @@ public:
     void SetDistanceThreshold(double distanceThreshold)
     {
         distanceThreshold_ = distanceThreshold;
-        if (distanceThreshold_ < 0) {
+        if (distanceThreshold_ <= 0) {
             distanceThreshold_ = std::numeric_limits<double>::infinity();
         }
     }
@@ -73,6 +74,11 @@ public:
     int GetCount()
     {
         return count_;
+    }
+
+    double GetDistanceThreshold() const
+    {
+        return distanceThreshold_;
     }
 
     GestureEventFunc GetTapActionFunc()
@@ -102,6 +108,7 @@ private:
     void HandleTouchMoveEvent(const TouchEvent& event) override;
     void HandleTouchCancelEvent(const TouchEvent& event) override;
     bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer) override;
+    void UpdateInfoWithDownEvent(const TouchEvent& event);
 
     void OnResetStatus() override
     {
@@ -113,6 +120,7 @@ private:
         tapDeadlineTimer_.Cancel();
         currentTouchPointsNum_ = 0;
         responseRegionBuffer_.clear();
+        localMatrix_.clear();
     }
 
     void HandleOverdueDeadline();
@@ -125,6 +133,12 @@ private:
     void InitGlobalValue(SourceType deviceId);
 
     bool CheckNeedReceiveEvent();
+
+    bool IsFormRenderClickRejected(const TouchEvent& event);
+    void TriggerClickAccepted(const TouchEvent& event);
+    OnAccessibilityEventFunc GetOnAccessibilityEventFunc();
+    void RecordClickEventIfNeed(const GestureEvent& info) const;
+    void AboutToAddToPendingRecognizers(const TouchEvent& event);
 
     int32_t count_ = 1;
     double distanceThreshold_ = std::numeric_limits<double>::infinity();
@@ -145,6 +159,7 @@ private:
     CancelableCallback<void()> fingerDeadlineTimer_;
     CancelableCallback<void()> tapDeadlineTimer_;
     std::vector<RectF> responseRegionBuffer_;
+    RectF paintRect_;
 
     int32_t currentTouchPointsNum_ = 0;
 

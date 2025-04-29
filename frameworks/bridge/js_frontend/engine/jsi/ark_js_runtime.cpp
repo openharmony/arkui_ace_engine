@@ -51,6 +51,16 @@ void FunctionDeleter(void *env, void *nativePointer, void *data)
 
 thread_local EcmaVM* ArkJSRuntime::threadVm_ = nullptr;
 
+void ArkJSRuntime::SetUniqueId(const std::string& uniqueId)
+{
+    uniqueId_ = uniqueId;
+}
+
+const std::string& ArkJSRuntime::GetUniqueId() const
+{
+    return uniqueId_;
+}
+
 bool ArkJSRuntime::Initialize(const std::string& libraryPath, bool isDebugMode, int32_t instanceId)
 {
     RuntimeOption option;
@@ -158,8 +168,7 @@ bool ArkJSRuntime::StartDebugger()
     if (!libPath_.empty()) {
         bool isDebugApp = AceApplicationInfo::GetInstance().IsDebugVersion();
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
-        auto callback = [instanceId = instanceId_,
-                            weak = weak_from_this(), isDebugApp](int socketFd, std::string option) {
+        auto callback = [weak = weak_from_this(), isDebugApp](int socketFd, std::string option) {
             LOGI("HdcRegister callback socket %{public}d, option %{public}s.", socketFd, option.c_str());
             if (option.find(DEBUGGER) == std::string::npos) {
                 if (isDebugApp) {
@@ -179,7 +188,8 @@ bool ArkJSRuntime::StartDebugger()
         HdcRegister::Get().StartHdcRegister(instanceId_, callback);
         ConnectServerManager::Get().SetDebugMode();
 #endif
-        JSNApi::DebugOption debugOption = { libPath_.c_str(), isDebugApp ? isDebugMode_ : false };
+        //FA:true port:-1
+        JSNApi::DebugOption debugOption = { libPath_.c_str(), isDebugApp ? isDebugMode_ : false, -1, true };
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
         ConnectServerManager::Get().AddInstance(gettid(), language_);
         ret = JSNApi::NotifyDebugMode(gettid(), vm_, debugOption, gettid(), debuggerPostTask_, isDebugApp);
@@ -188,7 +198,7 @@ bool ArkJSRuntime::StartDebugger()
 #endif
     }
 #if defined(IOS_PLATFORM)
-    JSNApi::DebugOption debugOption = { nullptr, isDebugMode_ };
+    JSNApi::DebugOption debugOption = { nullptr, isDebugMode_, -1, true }; //FA:true port:-1
     ret = JSNApi::StartDebugger(vm_, debugOption, instanceId_, debuggerPostTask_);
 #endif
 #endif
@@ -263,14 +273,14 @@ void ArkJSRuntime::RunGC()
 {
     JSExecutionScope executionScope(vm_);
     LocalScope scope(vm_);
-    JSNApi::TriggerGC(vm_, panda::ecmascript::GCReason::TRIGGER_BY_ARKUI, JSNApi::TRIGGER_GC_TYPE::SEMI_GC);
+    JSNApi::HintGC(vm_, JSNApi::MemoryReduceDegree::LOW, panda::ecmascript::GCReason::TRIGGER_BY_ARKUI);
 }
 
 void ArkJSRuntime::RunFullGC()
 {
     JSExecutionScope executionScope(vm_);
     LocalScope scope(vm_);
-    JSNApi::TriggerGC(vm_, panda::ecmascript::GCReason::TRIGGER_BY_ARKUI, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
+    JSNApi::HintGC(vm_, JSNApi::MemoryReduceDegree::HIGH, panda::ecmascript::GCReason::TRIGGER_BY_ARKUI);
 }
 
 shared_ptr<JsValue> ArkJSRuntime::NewInt32(int32_t value)
@@ -355,8 +365,16 @@ void ArkJSRuntime::ThrowError(const std::string& msg, int32_t code)
 void ArkJSRuntime::RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback)
 {
     JSNApi::EnableUserUncaughtErrorHandler(vm_);
+    std::weak_ptr<ArkJSRuntime> weakThis = shared_from_this();
     JSNApi::RegisterUncatchableErrorHandler(vm_,
-        std::bind(&ArkJSRuntime::HandleUncaughtExceptionWithoutNativeEngine, this, std::placeholders::_1, nullptr));
+        [weakThis](auto& tryCatch) {
+            auto sharedThis = weakThis.lock();
+            if (sharedThis) {
+                sharedThis->HandleUncaughtExceptionWithoutNativeEngine(tryCatch, nullptr);
+            } else {
+                LOGE("ArkJSRuntime has been destructed.");
+            }
+        });
     uncaughtErrorHandler_ = callback;
 }
 
@@ -398,7 +416,7 @@ void ArkJSRuntime::HandleUncaughtExceptionWithoutNativeEngine(panda::TryCatch& t
     if (!exception.IsEmpty() && !exception->IsHole()) {
         shared_ptr<JsValue> errorPtr =
             std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(shared_from_this(), exception));
-        uncaughtErrorHandler_(errorPtr, shared_from_this());
+        uncaughtErrorHandler_(errorPtr, shared_from_this(), uniqueId_);
     }
 }
 

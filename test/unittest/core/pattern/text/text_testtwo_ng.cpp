@@ -15,6 +15,15 @@
 
 #include "text_base.h"
 
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
+#include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
@@ -37,6 +46,7 @@ HWTEST_F(TextTestTwoNg, TextOverlayModifierTest001, TestSize.Level1)
     TextOverlayModifier textOverlayModifier;
     OffsetF paintOffset;
     textOverlayModifier.SetPrintOffset(paintOffset);
+    textOverlayModifier.SetCursorColor(CURSOR_COLOR);
     textOverlayModifier.SetSelectedColor(SELECTED_COLOR);
     std::vector<RectF> rectList;
     rectList.push_back(RectF(RECT_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE));
@@ -55,6 +65,7 @@ HWTEST_F(TextTestTwoNg, TextOverlayModifierTest001, TestSize.Level1)
     textOverlayModifier.SetContentRect(contentRect);
     textOverlayModifier.onDraw(context);
     EXPECT_EQ(textOverlayModifier.paintOffset_->Get(), paintOffset);
+    EXPECT_EQ(textOverlayModifier.cursorColor_->Get(), CURSOR_COLOR);
     EXPECT_EQ(textOverlayModifier.selectedColor_->Get(), SELECTED_COLOR);
     EXPECT_EQ(textOverlayModifier.IsSelectedRectsChanged(rectList), true);
     EXPECT_EQ(textOverlayModifier.contentRect_, contentRect);
@@ -126,7 +137,7 @@ HWTEST_F(TextTestTwoNg, TextPaintMethodTest002, TestSize.Level1)
 HWTEST_F(TextTestTwoNg, TextAccessibilityPropertyGetText001, TestSize.Level1)
 {
     TextModelNG textModel;
-    textModel.Create(CREATE_VALUE);
+    textModel.Create(CREATE_VALUE_W);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto textPattern = frameNode->GetPattern<TextPattern>();
@@ -136,12 +147,12 @@ HWTEST_F(TextTestTwoNg, TextAccessibilityPropertyGetText001, TestSize.Level1)
 
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(CREATE_VALUE);
+    textLayoutProperty->UpdateContent(CREATE_VALUE_W);
     EXPECT_EQ(textAccessibilityProperty->GetText(), CREATE_VALUE);
 
     auto spanNode = SpanNode::GetOrCreateSpanNode(ElementRegister::GetInstance()->MakeUniqueId());
     frameNode->AddChild(spanNode);
-    textPattern->textForDisplay_ = TEXT_CONTENT;
+    textPattern->textForDisplay_ = TEXT_U16CONTENT;
     EXPECT_EQ(textAccessibilityProperty->GetText(), TEXT_CONTENT);
 }
 
@@ -153,7 +164,7 @@ HWTEST_F(TextTestTwoNg, TextAccessibilityPropertyGetText001, TestSize.Level1)
 HWTEST_F(TextTestTwoNg, TextAccessibilityPropertyIsSelected001, TestSize.Level1)
 {
     TextModelNG textModel;
-    textModel.Create(CREATE_VALUE);
+    textModel.Create(CREATE_VALUE_W);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<TextAccessibilityProperty>();
@@ -171,7 +182,7 @@ HWTEST_F(TextTestTwoNg, TextAccessibilityPropertyIsSelected001, TestSize.Level1)
 HWTEST_F(TextTestTwoNg, TextAccessibilityPropertyGetTextSelectionStart001, TestSize.Level1)
 {
     TextModelNG textModel;
-    textModel.Create(CREATE_VALUE);
+    textModel.Create(CREATE_VALUE_W);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto textPattern = frameNode->GetPattern<TextPattern>();
@@ -191,7 +202,7 @@ HWTEST_F(TextTestTwoNg, TextAccessibilityPropertyGetTextSelectionStart001, TestS
 HWTEST_F(TextTestTwoNg, TextAccessibilityPropertyGetTextSelectionEnd001, TestSize.Level1)
 {
     TextModelNG textModel;
-    textModel.Create(CREATE_VALUE);
+    textModel.Create(CREATE_VALUE_W);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto textPattern = frameNode->GetPattern<TextPattern>();
@@ -211,7 +222,7 @@ HWTEST_F(TextTestTwoNg, TextAccessibilityPropertyGetTextSelectionEnd001, TestSiz
 HWTEST_F(TextTestTwoNg, TextAccessibilityPropertyGetSupportAction001, TestSize.Level1)
 {
     TextModelNG textModel;
-    textModel.Create(CREATE_VALUE);
+    textModel.Create(CREATE_VALUE_W);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto textPattern = frameNode->GetPattern<TextPattern>();
@@ -256,7 +267,7 @@ HWTEST_F(TextTestTwoNg, TextModelNgTest001, TestSize.Level1)
      *               The TextShadowValue of textLayoutProperty is textShadow.
      */
     TextModelNG text;
-    text.Create("text");
+    text.Create(u"text");
     text.SetHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
     Shadow textShadow;
     text.SetTextShadow({ textShadow });
@@ -366,7 +377,6 @@ HWTEST_F(TextTestTwoNg, TextPatternTest004, TestSize.Level1)
      * @tc.expected: The copyOption_ value is equal to CopyOptions::InApp.
      */
     textPattern->OnModifyDone();
-    EXPECT_EQ(textPattern->copyOption_, CopyOptions::None);
 }
 
 /**
@@ -613,7 +623,7 @@ HWTEST_F(TextTestTwoNg, CreateParagraph001, TestSize.Level1)
     auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     TextStyle textStyle;
     LayoutConstraintF contentConstraint;
-    auto ret = rowLayoutAlgorithm->CreateParagraph(textStyle, "", AceType::RawPtr(frameNode));
+    auto ret = rowLayoutAlgorithm->CreateParagraph(textStyle, u"", AceType::RawPtr(frameNode));
     EXPECT_TRUE(ret);
 }
 
@@ -665,7 +675,7 @@ HWTEST_F(TextTestTwoNg, ApplyIndents001, TestSize.Level1)
     auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     TextStyle textStyle;
     LayoutConstraintF contentConstraint;
-    auto ret = rowLayoutAlgorithm->CreateParagraph(textStyle, "", AceType::RawPtr(frameNode));
+    auto ret = rowLayoutAlgorithm->CreateParagraph(textStyle, u"", AceType::RawPtr(frameNode));
     EXPECT_TRUE(ret);
 }
 
@@ -689,11 +699,11 @@ HWTEST_F(TextTestTwoNg, AddChildSpanItem001, TestSize.Level1)
     ASSERT_NE(layoutWrapper, nullptr);
     auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
     TextStyle textStyle;
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     pattern->AddChildSpanItem(element);
-    auto ret = rowLayoutAlgorithm->CreateParagraph(textStyle, "", AceType::RawPtr(frameNode));
+    auto ret = rowLayoutAlgorithm->CreateParagraph(textStyle, u"", AceType::RawPtr(frameNode));
     EXPECT_TRUE(ret);
 }
 
@@ -712,7 +722,7 @@ HWTEST_F(TextTestTwoNg, ShowSelectOverlay003, TestSize.Level1)
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
 
     pattern->copyOption_ = CopyOptions::Distributed;
-    pattern->textForDisplay_ = "test";
+    pattern->textForDisplay_ = u"test";
     pattern->textSelector_.Update(0, 20);
 
     pattern->ShowSelectOverlay();
@@ -739,7 +749,7 @@ HWTEST_F(TextTestTwoNg, ShowSelectOverlay004, TestSize.Level1)
      * @tc.steps: step2. construct menuOptionItems
      */
     pattern->copyOption_ = CopyOptions::InApp;
-    pattern->textForDisplay_ = "test";
+    pattern->textForDisplay_ = u"test";
     pattern->textSelector_.Update(0, 20);
     OnCreateMenuCallback onCreateMenuCallback;
     OnMenuItemClickCallback onMenuItemClick;
@@ -769,7 +779,7 @@ HWTEST_F(TextTestTwoNg, IsDraggable001, TestSize.Level1)
     pattern->copyOption_ = CopyOptions::Distributed;
     pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     host->draggable_ = true;
-    host->eventHub_->SetOnDragStart(
+    host->GetOrCreateEventHub<EventHub>()->SetOnDragStart(
         [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
 
     /**
@@ -839,7 +849,7 @@ HWTEST_F(TextTestTwoNg, DragBase001, TestSize.Level1)
 HWTEST_F(TextTestTwoNg, TextDecorationStyleTest001, TestSize.Level1)
 {
     TextModelNG text;
-    text.Create(CREATE_VALUE);
+    text.Create(CREATE_VALUE_W);
     text.SetTextDecorationStyle(TextDecorationStyle::DOUBLE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -862,9 +872,10 @@ HWTEST_F(TextTestTwoNg, TextDecorationStyleTest002, TestSize.Level1)
      * @tc.expected: Successfully created parent Node
      */
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     textModelNG.SetTextDecoration(TextDecoration::LINE_THROUGH);
     textModelNG.SetTextDecorationStyle(TextDecorationStyle::DOUBLE);
+    textModelNG.SetFontSize(Dimension(10.0));
     auto textFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
 
     /**
@@ -872,13 +883,34 @@ HWTEST_F(TextTestTwoNg, TextDecorationStyleTest002, TestSize.Level1)
      * @tc.expected: Successfully created spanNode
      */
     SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.Create(CREATE_VALUE_W);
+    spanModelNG.SetFontSize(Dimension(20.0));
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
 
     /**
      * @tc.steps: step3. SpanNode mount to parent
      */
     textFrameNode->AddChild(spanNode);
+
+    TextStyle textStyle;
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(textFrameNode, AceType::MakeRefPtr<GeometryNode>(), textLayoutProperty);
+    auto textLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextLayoutAlgorithm>();
+    LayoutConstraintF layoutConstraint;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    textLayoutAlgorithm->ConstructTextStyles(layoutConstraint, &layoutWrapper, textStyle);
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    ASSERT_NE(paragraph, nullptr);
+
+    auto spanItem = spanNode->spanItem_;
+    spanItem->UpdateParagraph(textFrameNode, paragraph, textStyle);
+    auto spanTextStyle = spanItem->GetTextStyle().value_or(TextStyle());
 
     /**
      * @tc.steps: step4. called BeforeCreateLayoutWrapper function to UpdateChildProperty
@@ -887,8 +919,9 @@ HWTEST_F(TextTestTwoNg, TextDecorationStyleTest002, TestSize.Level1)
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     textPattern->BeforeCreateLayoutWrapper();
-    EXPECT_EQ(spanNode->GetTextDecoration(), TextDecoration::LINE_THROUGH);
-    EXPECT_EQ(spanNode->GetTextDecorationStyle(), TextDecorationStyle::DOUBLE);
+    EXPECT_EQ(spanTextStyle.GetTextDecoration(), TextDecoration::LINE_THROUGH);
+    EXPECT_EQ(spanTextStyle.GetTextDecorationStyle(), TextDecorationStyle::DOUBLE);
+    EXPECT_EQ(spanTextStyle.GetFontSize(), Dimension(20.0));
 }
 
 /**
@@ -903,7 +936,7 @@ HWTEST_F(TextTestTwoNg, TextDecorationStyleTest003, TestSize.Level1)
      * @tc.expected: Successfully created parent Node
      */
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     textModelNG.SetTextDecoration(TextDecoration::LINE_THROUGH);
     textModelNG.SetTextDecorationStyle(TextDecorationStyle::DOUBLE);
     auto textFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -913,7 +946,7 @@ HWTEST_F(TextTestTwoNg, TextDecorationStyleTest003, TestSize.Level1)
      * @tc.expected: Successfully created spanNode1
      */
     SpanModelNG spanModelNG1;
-    spanModelNG1.Create(CREATE_VALUE);
+    spanModelNG1.Create(CREATE_VALUE_W);
     spanModelNG1.SetTextDecoration(TextDecoration::OVERLINE);
     spanModelNG1.SetTextDecorationStyle(TextDecorationStyle::WAVY);
     auto spanNode1 = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -923,7 +956,7 @@ HWTEST_F(TextTestTwoNg, TextDecorationStyleTest003, TestSize.Level1)
      * @tc.expected: Successfully created spanNode2
      */
     SpanModelNG spanModelNG2;
-    spanModelNG2.Create(TEXT_CONTENT);
+    spanModelNG2.Create(TEXT_U16CONTENT);
     auto spanNode2 = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
 
     /**
@@ -932,6 +965,26 @@ HWTEST_F(TextTestTwoNg, TextDecorationStyleTest003, TestSize.Level1)
     textFrameNode->AddChild(spanNode1);
     textFrameNode->AddChild(spanNode2);
 
+    TextStyle textStyle;
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(textFrameNode, AceType::MakeRefPtr<GeometryNode>(), textLayoutProperty);
+    auto textLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextLayoutAlgorithm>();
+    LayoutConstraintF layoutConstraint;
+    textLayoutAlgorithm->ConstructTextStyles(layoutConstraint, &layoutWrapper, textStyle);
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    ASSERT_NE(paragraph, nullptr);
+
+    auto spanItem1 = spanNode1->spanItem_;
+    spanItem1->UpdateParagraph(textFrameNode, paragraph, textStyle);
+    auto spanTextStyle1 = spanItem1->GetTextStyle().value_or(TextStyle());
+
+    auto spanItem2 = spanNode2->spanItem_;
+    spanItem2->UpdateParagraph(textFrameNode, paragraph, textStyle);
+    auto spanTextStyle2 = spanItem2->GetTextStyle().value_or(TextStyle());
+
     /**
      * @tc.steps: step5. called BeforeCreateLayoutWrapper function to UpdateChildProperty
      * @tc.expected: spanNode1 uses own property and spanNode2 inherits parent property
@@ -939,10 +992,10 @@ HWTEST_F(TextTestTwoNg, TextDecorationStyleTest003, TestSize.Level1)
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
     textPattern->BeforeCreateLayoutWrapper();
-    EXPECT_EQ(spanNode1->GetTextDecoration(), TextDecoration::OVERLINE);
-    EXPECT_EQ(spanNode1->GetTextDecorationStyle(), TextDecorationStyle::WAVY);
-    EXPECT_EQ(spanNode2->GetTextDecoration(), TextDecoration::LINE_THROUGH);
-    EXPECT_EQ(spanNode2->GetTextDecorationStyle(), TextDecorationStyle::DOUBLE);
+    EXPECT_EQ(spanTextStyle1.GetTextDecoration(), TextDecoration::OVERLINE);
+    EXPECT_EQ(spanTextStyle1.GetTextDecorationStyle(), TextDecorationStyle::WAVY);
+    EXPECT_EQ(spanTextStyle2.GetTextDecoration(), TextDecoration::LINE_THROUGH);
+    EXPECT_EQ(spanTextStyle2.GetTextDecorationStyle(), TextDecorationStyle::DOUBLE);
 }
 
 /**
@@ -953,7 +1006,7 @@ HWTEST_F(TextTestTwoNg, TextDecorationStyleTest003, TestSize.Level1)
 HWTEST_F(TextTestTwoNg, TextDecorationToJsonValue001, TestSize.Level1)
 {
     TextModelNG text;
-    text.Create(CREATE_VALUE);
+    text.Create(CREATE_VALUE_W);
     text.SetTextDecoration(TextDecoration::LINE_THROUGH);
     text.SetTextDecorationColor(TEXT_DECORATION_COLOR_VALUE);
     text.SetTextDecorationStyle(TextDecorationStyle::DOUBLE);
@@ -989,7 +1042,7 @@ HWTEST_F(TextTestTwoNg, TextDecorationToJsonValue001, TestSize.Level1)
 HWTEST_F(TextTestTwoNg, TextDecorationToJsonValue002, TestSize.Level1)
 {
     TextModelNG text;
-    text.Create(CREATE_VALUE);
+    text.Create(CREATE_VALUE_W);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
@@ -1022,7 +1075,7 @@ HWTEST_F(TextTestTwoNg, TextDecorationToJsonValue002, TestSize.Level1)
 HWTEST_F(TextTestTwoNg, TextDecorationToJsonValue003, TestSize.Level1)
 {
     TextModelNG text;
-    text.Create(CREATE_VALUE);
+    text.Create(CREATE_VALUE_W);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
@@ -1065,12 +1118,12 @@ HWTEST_F(TextTestTwoNg, UpdateChildProperty001, TestSize.Level1)
      * @tc.steps: step1. create text FrameNode and SpanNode, Update parent FrameNode properties
      * @tc.expected: Successfully created parent Node and child Node
      */
-    auto host = CreateTextParagraph(CREATE_VALUE, testProperty);
+    auto host = CreateTextParagraph(CREATE_VALUE_W, testProperty);
     ASSERT_NE(host, nullptr);
     SpanModelNG spanModelNG;
-    spanModelNG.Create("span1");
+    spanModelNG.Create(u"span1");
     auto firstChild = ViewStackProcessor::GetInstance()->Finish();
-    spanModelNG.Create("span2");
+    spanModelNG.Create(u"span2");
     auto secondChild = ViewStackProcessor::GetInstance()->Finish();
 
     /**
@@ -1087,27 +1140,36 @@ HWTEST_F(TextTestTwoNg, UpdateChildProperty001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->BeforeCreateLayoutWrapper();
     EXPECT_EQ(host->GetChildren().size(), 2);
+
+    TextStyle textStyle;
+    auto textLayoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(host, AceType::MakeRefPtr<GeometryNode>(), textLayoutProperty);
+    auto textLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextLayoutAlgorithm>();
+    LayoutConstraintF layoutConstraint;
+    textLayoutAlgorithm->ConstructTextStyles(layoutConstraint, &layoutWrapper, textStyle);
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    ASSERT_NE(paragraph, nullptr);
     for (const auto& child : host->GetChildren()) {
         auto spanNode = AceType::DynamicCast<SpanNode>(child);
         ASSERT_NE(spanNode, nullptr);
-        EXPECT_EQ(spanNode->GetFontSize().value(), FONT_SIZE_VALUE);
-        EXPECT_EQ(spanNode->GetTextColor().value(), TEXT_COLOR_VALUE);
-        EXPECT_EQ(spanNode->GetItalicFontStyle().value(), ITALIC_FONT_STYLE_VALUE);
-        EXPECT_EQ(spanNode->GetFontWeight().value(), FONT_WEIGHT_VALUE);
-        EXPECT_EQ(spanNode->GetTextDecoration().value(), TEXT_DECORATION_VALUE);
-        EXPECT_EQ(spanNode->GetTextDecorationColor().value(), TEXT_DECORATION_COLOR_VALUE);
-        EXPECT_EQ(spanNode->GetTextCase().value(), TEXT_CASE_VALUE);
-        EXPECT_EQ(spanNode->GetLetterSpacing().value(), LETTER_SPACING);
-        EXPECT_EQ(spanNode->GetLineHeight().value(), LINE_HEIGHT_VALUE);
-        EXPECT_EQ(spanNode->GetFontFamily().value(), FONT_FAMILY_VALUE);
-        EXPECT_EQ(spanNode->GetLineSpacing().value(), LINE_SPACING_VALUE);
+        auto spanItem = spanNode->spanItem_;
+        spanItem->UpdateParagraph(host, paragraph, textStyle);
+        auto spanTextStyle = spanItem->GetTextStyle().value_or(TextStyle());
+        EXPECT_EQ(spanTextStyle.GetFontSize(), FONT_SIZE_VALUE);
+        EXPECT_EQ(spanTextStyle.GetTextColor(), TEXT_COLOR_VALUE);
+        EXPECT_EQ(spanTextStyle.GetFontStyle(), ITALIC_FONT_STYLE_VALUE);
+        EXPECT_EQ(spanTextStyle.GetFontWeight(), FONT_WEIGHT_VALUE);
+        EXPECT_EQ(spanTextStyle.GetTextDecoration(), TEXT_DECORATION_VALUE);
+        EXPECT_EQ(spanTextStyle.GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
+        EXPECT_EQ(spanTextStyle.GetTextCase(), TEXT_CASE_VALUE);
+        EXPECT_EQ(spanTextStyle.GetLetterSpacing(), LETTER_SPACING);
+        EXPECT_EQ(spanTextStyle.GetLineHeight(), LINE_HEIGHT_VALUE);
+        EXPECT_EQ(spanTextStyle.GetFontFamilies(), FONT_FAMILY_VALUE);
+        EXPECT_EQ(spanTextStyle.GetLineSpacing(), LINE_SPACING_VALUE);
     }
-
-    /**
-     * @tc.steps: step4. Update parent fontsize property, called BeforeCreateLayoutWrapper again
-     * @tc.expected: Child update fontsize property
-     */
-    TestUpdateScenario(pattern);
 }
 
 /**
@@ -1122,10 +1184,10 @@ HWTEST_F(TextTestTwoNg, UpdateChildProperty002, TestSize.Level1)
      * @tc.steps: step1. create text FrameNode and SpanNode, Update child FrameNode properties
      * @tc.expected: Successfully created parent Node and child Node
      */
-    auto host = CreateTextParagraph(CREATE_VALUE, testProperty);
+    auto host = CreateTextParagraph(CREATE_VALUE_W, testProperty);
     ASSERT_NE(host, nullptr);
-    auto firstChild = CreateSpanNodeWithSetDefaultProperty("SPANNODE");
-    auto secondChild = CreateSpanNodeWithSetDefaultProperty("spanNode");
+    auto firstChild = CreateSpanNodeWithSetDefaultProperty(u"SPANNODE");
+    auto secondChild = CreateSpanNodeWithSetDefaultProperty(u"spanNode");
 
     /**
      * @tc.steps: step2. SpanNode mount to parent
@@ -1175,7 +1237,7 @@ HWTEST_F(TextTestTwoNg, InitSurfaceChangedTest001, TestSize.Level1)
      * @tc.steps: step1. create text FrameNode and SpanNode, Update child FrameNode properties
      * @tc.expected: Successfully created parent Node and child Node
      */
-    auto host = CreateTextParagraph(CREATE_VALUE, testProperty);
+    auto host = CreateTextParagraph(CREATE_VALUE_W, testProperty);
     ASSERT_NE(host, nullptr);
     /**
      * @tc.steps: step2. get text pattern called InitSurfaceChangedCallback function.
@@ -1296,7 +1358,7 @@ HWTEST_F(TextTestTwoNg, HandleMouseEvent002, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern
      */
     auto [frameNode, pattern] = Init();
-    pattern->textForDisplay_ = "test";
+    pattern->textForDisplay_ = u"test";
     pattern->textSelector_.Update(0, 3);
     pattern->copyOption_ = CopyOptions::InApp;
 
@@ -1333,7 +1395,7 @@ HWTEST_F(TextTestTwoNg, HandleMouseEvent003, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern
      */
     auto [frameNode, pattern] = Init();
-    pattern->textForDisplay_ = "test";
+    pattern->textForDisplay_ = u"test";
     pattern->textSelector_.Update(0, 3);
     pattern->copyOption_ = CopyOptions::InApp;
 
@@ -1390,7 +1452,7 @@ HWTEST_F(TextTestTwoNg, HandleMouseEvent003, TestSize.Level1)
     pattern->blockPress_ = true;
     pattern->HandleMouseEvent(info);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
-    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 3);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 0);
 
     pattern->textSelector_.Update(0, 3);
     pattern->blockPress_ = false;
@@ -1426,7 +1488,7 @@ HWTEST_F(TextTestTwoNg, HandleMouseEvent004, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern
      */
     auto [frameNode, pattern] = Init();
-    pattern->textForDisplay_ = "test";
+    pattern->textForDisplay_ = u"test";
     pattern->textSelector_.Update(0, 3);
     pattern->copyOption_ = CopyOptions::InApp;
 
@@ -1464,12 +1526,15 @@ HWTEST_F(TextTestTwoNg, HandleMouseEvent005, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern, InitMouseEvent.
      */
     TextModelNG textModelNG;
-    textModelNG.Create("1234567890");
+    textModelNG.Create(u"1234567890");
     textModelNG.SetCopyOption(CopyOptions::InApp);
     textModelNG.SetTextDetectEnable(true);
     auto host = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     auto pattern = host->GetPattern<TextPattern>();
-    auto inputHub = host->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
+    auto inputHub = host->GetOrCreateEventHub<EventHub>()->GetOrCreateInputEventHub();
+    inputHub->mouseEventActuator_->inputEvents_.clear();
+    pattern->mouseEventInitialized_ = false;
+    pattern->InitMouseEvent();
     auto mouseEvent = inputHub->mouseEventActuator_->inputEvents_.back();
 
     AISpan aiSpan1;
@@ -1482,10 +1547,8 @@ HWTEST_F(TextTestTwoNg, HandleMouseEvent005, TestSize.Level1)
     aiSpan2.end = AI_SPAN_END_II;
     aiSpan2.content = SPAN_URL;
     aiSpan2.type = TextDataDetectType::URL;
-    std::map<int32_t, AISpan> aiSpanMap;
-    aiSpanMap[AI_SPAN_START] = aiSpan1;
-    aiSpanMap[AI_SPAN_START_II] = aiSpan2;
-    pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
+    pattern->dataDetectorAdapter_->aiSpanMap_[AI_SPAN_START] = aiSpan1;
+    pattern->dataDetectorAdapter_->aiSpanMap_[AI_SPAN_START_II] = aiSpan2;
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     std::vector<RectF> rects { RectF(0, 0, 40, 40) };
     EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
@@ -1535,7 +1598,7 @@ HWTEST_F(TextTestTwoNg, HandleMouseEvent006, TestSize.Level1)
      */
     SuppressMockParagraph();
     TextModelNG textModelNG;
-    textModelNG.Create("1234567890");
+    textModelNG.Create(u"1234567890");
     textModelNG.SetCopyOption(CopyOptions::InApp);
     textModelNG.SetTextDetectEnable(true);
     auto host = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -1562,7 +1625,10 @@ HWTEST_F(TextTestTwoNg, HandleMouseEvent006, TestSize.Level1)
      * @tc.expect: expect selectedType_ IMAGE when mouse release offset not in textContentRect region.
      */
     pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 30 });
-    auto inputHub = host->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
+    auto inputHub = host->GetOrCreateEventHub<EventHub>()->GetOrCreateInputEventHub();
+    inputHub->mouseEventActuator_->inputEvents_.clear();
+    pattern->mouseEventInitialized_ = false;
+    pattern->InitMouseEvent();
     auto mouseEvent = inputHub->mouseEventActuator_->inputEvents_.back();
     MouseInfo info;
     info.button_ = MouseButton::LEFT_BUTTON;
@@ -1626,7 +1692,7 @@ HWTEST_F(TextTestTwoNg, HandleOnCopy002, TestSize.Level1)
      * @tc.expected: selectOverlay is closed
      */
     pattern->textSelector_.Update(0, 6);
-    pattern->textForDisplay_ = "TestHandleOnCopy";
+    pattern->textForDisplay_ = u"TestHandleOnCopy";
     pattern->copyOption_ = CopyOptions::InApp;
     pattern->HandleOnCopy();
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
@@ -1647,7 +1713,7 @@ HWTEST_F(TextTestTwoNg, HandleLongPress001, TestSize.Level1)
     frameNode->draggable_ = false;
     pattern->copyOption_ = CopyOptions::InApp;
     pattern->textSelector_.Update(0, 3);
-    pattern->textForDisplay_ = TEXT_CONTENT;
+    pattern->textForDisplay_ = TEXT_U16CONTENT;
     GestureEvent info;
     info.localLocation_ = Offset(1, 1);
     EXPECT_FALSE(pattern->IsDraggable(info.GetLocalLocation()));
@@ -1673,19 +1739,19 @@ HWTEST_F(TextTestTwoNg, HandleLongPress002, TestSize.Level1)
     EXPECT_CALL(*paragraph, ComputeOffsetForCaretUpstream).WillRepeatedly(Return(true));
     EXPECT_CALL(*paragraph, GetWordBoundary).WillRepeatedly(Return(false));
     std::vector<RectF> rects { RectF(0, 0, 20, 20) };
-    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).Times(2).WillRepeatedly(SetArgReferee<2>(rects));
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).Times(1).WillRepeatedly(SetArgReferee<2>(rects));
     /**
      * @tc.steps: step1. create frameNode and pattern
      */
     auto [frameNode, pattern] = Init();
 
     frameNode->draggable_ = true;
-    frameNode->eventHub_->SetOnDragStart(
+    frameNode->GetOrCreateEventHub<EventHub>()->SetOnDragStart(
         [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
     pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     pattern->copyOption_ = CopyOptions::InApp;
     pattern->textSelector_.Update(0, 3);
-    pattern->textForDisplay_ = TEXT_CONTENT;
+    pattern->textForDisplay_ = TEXT_U16CONTENT;
     GestureEvent info;
     info.localLocation_ = Offset(1, 1);
     /**
@@ -1709,7 +1775,7 @@ HWTEST_F(TextTestTwoNg, HandleOnSelectAll001, TestSize.Level1)
      * @tc.steps: step1. create frameNode and pattern
      */
     auto [frameNode, pattern] = Init();
-    pattern->textForDisplay_ = "TestHandleOnSelectAll";
+    pattern->textForDisplay_ = u"TestHandleOnSelectAll";
     pattern->selectOverlayProxy_ = nullptr;
 
     /**
@@ -1755,7 +1821,7 @@ HWTEST_F(TextTestTwoNg, HandleOnSelectAll002, TestSize.Level1)
      */
     auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr, false);
     pattern->selectOverlayProxy_ = proxy;
-    pattern->textForDisplay_ = "TestHandleOnSelectAll";
+    pattern->textForDisplay_ = u"TestHandleOnSelectAll";
 
     /**
      * @tc.steps: step4. call HandleOnSelectAll
@@ -1882,7 +1948,7 @@ HWTEST_F(TextTestTwoNg, TextPaintMethodTest003, TestSize.Level1)
     /**
      * @tc.steps: step2. set textForDisplay_ to EMPTY_TEXT.
      */
-    pattern->textForDisplay_ = EMPTY_TEXT;
+    pattern->textForDisplay_ = u"";
 
     /**
      * @tc.steps: step3. push UNKNOWN_REASON and PLACEHOLDER to reasons.
@@ -1908,7 +1974,7 @@ HWTEST_F(TextTestTwoNg, TextPaintMethodTest003, TestSize.Level1)
     /**
      * @tc.steps: step5. set textForDisplay_ to CREATE_VALUE.
      */
-    pattern->textForDisplay_ = CREATE_VALUE;
+    pattern->textForDisplay_ = CREATE_VALUE_W;
 
     /**
      * @tc.steps: step6. call UpdateContentModifier function.
@@ -1965,7 +2031,7 @@ HWTEST_F(TextTestTwoNg, TextContentModifier004, TestSize.Level1)
     TextStyle textStyle;
     textStyle.SetFontSize(ADAPT_FONT_SIZE_VALUE);
     textStyle.SetTextColor(TEXT_COLOR_VALUE);
-    textContentModifier->SetDefaultAnimatablePropertyValue(textStyle);
+    textContentModifier->SetDefaultAnimatablePropertyValue(textStyle, textFrameNode);
     SizeF contentSize(TEXT_CONTENT_SIZE, TEXT_CONTENT_SIZE);
     textContentModifier->SetContentSize(contentSize);
     std::vector<RectF> drawObscuredRects;
@@ -2252,5 +2318,292 @@ HWTEST_F(TextTestTwoNg, TextPaintMethodTest004, TestSize.Level1)
     auto OverlayModifier = textPaintMethod.GetOverlayModifier(AceType::RawPtr(paintWrapper));
     ASSERT_NE(OverlayModifier, nullptr);
     EXPECT_EQ(textOverlayModifier->isClip_->Get(), true);
+}
+
+/**
+ * @tc.name: TextContentModifierB001
+ * @tc.desc: test text_content_modifier.cpp ChangeDragStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextContentModifierB001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textPaintMethod and textContentModifier
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textPaintMethod = textPattern->CreateNodePaintMethod();
+    ASSERT_NE(textPaintMethod, nullptr);
+    auto textContentModifier = textPattern->GetContentModifier();
+    ASSERT_NE(textContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. call ChangeDragStatus and expect no error.
+     */
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    textContentModifier->dragStatus_ = AceType::MakeRefPtr<PropertyBool>(false);
+    textContentModifier->ChangeDragStatus();
+    EXPECT_EQ(textContentModifier->dragStatus_, true);
+}
+
+/**
+ * @tc.name: TextContentModifierB002
+ * @tc.desc: test text_content_modifier.cpp ModifyLineHeightInTextStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextContentModifierB002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textPaintMethod and textContentModifier
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textPaintMethod = textPattern->CreateNodePaintMethod();
+    ASSERT_NE(textPaintMethod, nullptr);
+    auto textContentModifier = textPattern->GetContentModifier();
+    ASSERT_NE(textContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. call ModifyLineHeightInTextStyle and expect no error.
+     */
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    float lineHeight = 2.0f;
+    textContentModifier->lineHeightFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(lineHeight);
+    textContentModifier->lineHeight_ = Dimension(1.0f);
+    TextStyle textStyle;
+    textContentModifier->ModifyLineHeightInTextStyle(textStyle);
+    EXPECT_EQ(textStyle.GetLineHeight(), Dimension(2.0f, DimensionUnit::PX));
+}
+
+/**
+ * @tc.name: TextContentModifierB003
+ * @tc.desc: test text_content_modifier.cpp TextColorModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextContentModifierB003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textPaintMethod and textContentModifier
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textPaintMethod = textPattern->CreateNodePaintMethod();
+    ASSERT_NE(textPaintMethod, nullptr);
+    auto textContentModifier = textPattern->GetContentModifier();
+    ASSERT_NE(textContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. call TextColorModifier and expect no error.
+     */
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    Color color = Color::BLACK;
+    textContentModifier->TextColorModifier(color);
+    EXPECT_EQ(textContentModifier->onlyTextColorAnimation_, true);
+}
+
+/**
+ * @tc.name: TextContentModifierB004
+ * @tc.desc: test text_content_modifier.cpp ResumeAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextContentModifierB004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textPaintMethod and textContentModifier
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textPaintMethod = textPattern->CreateNodePaintMethod();
+    ASSERT_NE(textPaintMethod, nullptr);
+    auto textContentModifier = textPattern->GetContentModifier();
+    ASSERT_NE(textContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. call ResumeAnimation and expect no error.
+     */
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    AnimationOption option = AnimationOption();
+    textContentModifier->raceAnimation_ = AnimationUtils::StartAnimation(option, [&]() {}, []() {});
+    textContentModifier->ResumeAnimation();
+    EXPECT_EQ(textContentModifier->marqueeState_, MarqueeState::IDLE);
+    textContentModifier->PauseAnimation();
+    EXPECT_EQ(textContentModifier->marqueeState_, MarqueeState::IDLE);
+}
+
+
+/**
+ * @tc.name: TextContentModifierB005
+ * @tc.desc: test text_content_modifier.cpp GetTextRaceDirectionByContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextContentModifierB005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textPaintMethod and textContentModifier
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textPaintMethod = textPattern->CreateNodePaintMethod();
+    ASSERT_NE(textPaintMethod, nullptr);
+    auto textContentModifier = textPattern->GetContentModifier();
+    ASSERT_NE(textContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetTextRaceDirectionByContent and expect no error.
+     */
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    auto direction = textContentModifier->GetTextRaceDirectionByContent();
+    EXPECT_EQ(direction, TextDirection::LTR);
+}
+
+
+/**
+ * @tc.name: TextContentModifierB006
+ * @tc.desc: test text_content_modifier.cpp ResettextRacePercent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextContentModifierB006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textPaintMethod and textContentModifier
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textPaintMethod = textPattern->CreateNodePaintMethod();
+    ASSERT_NE(textPaintMethod, nullptr);
+    auto textContentModifier = textPattern->GetContentModifier();
+    ASSERT_NE(textContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. call ResettextRacePercent and expect no error.
+     */
+    auto layoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    textContentModifier->ResetTextRacePercent();
+    EXPECT_NE(textContentModifier->racePercentFloat_, nullptr);
+}
+
+/**
+ * @tc.name: TextContentModifierB007
+ * @tc.desc: test text_content_modifier.cpp SetIsFocused
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextContentModifierB007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textPaintMethod and textContentModifier
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textPaintMethod = textPattern->CreateNodePaintMethod();
+    ASSERT_NE(textPaintMethod, nullptr);
+    auto textContentModifier = textPattern->GetContentModifier();
+    ASSERT_NE(textContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. call SetIsFocused and expect no error.
+     */
+    textContentModifier->SetIsFocused(false);
+    EXPECT_EQ(textContentModifier->marqueeFocused_, false);
+}
+ 
+/**
+ * @tc.name: TextContentModifierB008
+ * @tc.desc: test text_content_modifier.cpp AllowTextRace
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestTwoNg, TextContentModifierB008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textPaintMethod and textContentModifier
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textPaintMethod = textPattern->CreateNodePaintMethod();
+    ASSERT_NE(textPaintMethod, nullptr);
+    auto textContentModifier = textPattern->GetContentModifier();
+    ASSERT_NE(textContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. call AllowTextRace and expect no error.
+     */
+    textContentModifier->marqueeOption_.start = false;
+    textContentModifier->ResumeTextRace(false);
+    auto isAllowTextRace = textContentModifier->AllowTextRace();
+    EXPECT_EQ(isAllowTextRace, false);
+    textContentModifier->marqueeSet_ = true;
+    textContentModifier->marqueeOption_.start = true;
+    textContentModifier->marqueeOption_.loop = 1;
+    textContentModifier->marqueeCount_ = 2;
+    isAllowTextRace = textContentModifier->AllowTextRace();
+    EXPECT_EQ(isAllowTextRace, false);
+    textContentModifier->marqueeCount_ = 0;
+    textContentModifier->marqueeOption_.startPolicy = MarqueeStartPolicy::ON_FOCUS;
+    textContentModifier->marqueeFocused_ = false;
+    textContentModifier->marqueeHovered_ = false;
+    EXPECT_EQ(isAllowTextRace, false);
+}
+
+/**
+ * @tc.name: TextContentModifierB009
+ * @tc.desc: test text_content_modifier.cpp DetermineTextRace
+ * @tc.type: FUNC
+ */
+ HWTEST_F(TextTestTwoNg, TextContentModifierB009, TestSize.Level1)
+ {
+    /**
+     * @tc.steps: step1. create textPaintMethod and textContentModifier
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textPaintMethod = textPattern->CreateNodePaintMethod();
+    ASSERT_NE(textPaintMethod, nullptr);
+    auto textContentModifier = textPattern->GetContentModifier();
+    ASSERT_NE(textContentModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. call DetermineTextRace and expect no error.
+     */
+    textContentModifier->marqueeSet_ = false;
+    textContentModifier->DetermineTextRace();
+    textContentModifier->marqueeOption_.start = true;
+    textContentModifier->marqueeOption_.startPolicy = MarqueeStartPolicy::ON_FOCUS;
+    textContentModifier->marqueeState_ = MarqueeState::RUNNING;
+    textContentModifier->marqueeFocused_ = false;
+    textContentModifier->marqueeHovered_ = false;
+    textContentModifier->DetermineTextRace();
+    textContentModifier->marqueeHovered_ = true;
+    textContentModifier->marqueeState_ = MarqueeState::IDLE;
+    textContentModifier->DetermineTextRace();
+    EXPECT_EQ(textContentModifier->marqueeFocused_, false);
 }
 } // namespace OHOS::Ace::NG

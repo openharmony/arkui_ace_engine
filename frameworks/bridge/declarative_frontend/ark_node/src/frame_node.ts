@@ -19,10 +19,34 @@ interface LayoutConstraint {
   percentReference: Size;
 }
 
+interface CrossLanguageOptions {
+  attributeSetting?: boolean;
+}
+
+interface InteractionEventBindingInfo  {
+  baseEventRegistered?: boolean;
+  nodeEventRegistered?: boolean;
+  nativeEventRegistered?: boolean;
+  builtInEventRegistered?: boolean;
+}
+
+enum ExpandMode {
+  NOT_EXPAND = 0,
+  EXPAND = 1,
+  LAZY_EXPAND = 2,
+}
+
+enum EventQueryType {
+  ON_CLICK = 0,
+}
+
 class FrameNode {
   public _nodeId: number;
   protected _commonAttribute: ArkComponent;
   protected _commonEvent: UICommonEvent;
+  public _componentAttribute: ArkComponent;
+  public _scrollableEvent: UIScrollableCommonEvent;
+  protected _gestureEvent: UIGestureEvent;
   protected _childList: Map<number, FrameNode>;
   protected _nativeRef: NativeStrongRef | NativeWeakRef;
   protected renderNode_: RenderNode;
@@ -31,7 +55,7 @@ class FrameNode {
   protected nodePtr_: NodePtr;
   protected instanceId_?: number;
   private nodeAdapterRef_?: NodeAdapter;
-  constructor(uiContext: UIContext, type: string) {
+  constructor(uiContext: UIContext, type: string, options?: object) {
     if (uiContext === undefined) {
       throw Error('Node constructor error, param uiContext error');
     } else {
@@ -59,7 +83,7 @@ class FrameNode {
       this.renderNode_ = new RenderNode('CustomFrameNode');
       result = getUINativeModule().frameNode.createFrameNode(this);
     } else {
-      result = getUINativeModule().frameNode.createTypedFrameNode(this, type);
+      result = getUINativeModule().frameNode.createTypedFrameNode(this, type, options);
     }
     __JSScopeUtil__.restoreInstanceId();
     this._nativeRef = result?.nativeStrongRef;
@@ -100,7 +124,9 @@ class FrameNode {
     FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
     this._nativeRef = nativeRef;
     this.nodePtr_ = nodePtr ? nodePtr : this._nativeRef?.getNativeHandle();
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
     this._nodeId = getUINativeModule().frameNode.getIdByNodePtr(this.nodePtr_);
+    __JSScopeUtil__.restoreInstanceId();
     if (this._nodeId === -1) {
       return;
     }
@@ -123,6 +149,14 @@ class FrameNode {
   }
   getNodePtr(): NodePtr | null {
     return this.nodePtr_;
+  }
+  getValidNodePtr(): NodePtr {
+    const node = this.getNodePtr();
+    if (node === null) {
+      throw Error('The FrameNode has been disposed!');
+    } else {
+      return node;
+    }
   }
   dispose(): void {
     this.renderNode_?.dispose();
@@ -164,11 +198,15 @@ class FrameNode {
 
   convertToFrameNode(nodePtr: NodePtr, nodeId: number = -1): FrameNode | null {
     if (nodeId === -1) {
+      __JSScopeUtil__.syncInstanceId(this.instanceId_);
       nodeId = getUINativeModule().frameNode.getIdByNodePtr(nodePtr);
+      __JSScopeUtil__.restoreInstanceId();
     }
     if (nodeId !== -1 && !getUINativeModule().frameNode.isModifiable(nodePtr)) {
+      __JSScopeUtil__.syncInstanceId(this.instanceId_);
       let frameNode = new ProxyFrameNode(this.uiContext_);
       let node = getUINativeModule().nativeUtils.createNativeWeakRef(nodePtr);
+      __JSScopeUtil__.restoreInstanceId();
       frameNode.setNodePtr(node);
       frameNode._nodeId = nodeId;
       FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(frameNode._nodeId, new WeakRef(frameNode));
@@ -262,8 +300,8 @@ class FrameNode {
     __JSScopeUtil__.restoreInstanceId();
     this._childList.clear();
   }
-  getChild(index: number, isExpanded?: boolean): FrameNode | null {
-    const result = getUINativeModule().frameNode.getChild(this.getNodePtr(), index, isExpanded);
+  getChild(index: number, expandMode?: ExpandMode): FrameNode | null {
+    const result = getUINativeModule().frameNode.getChild(this.getNodePtr(), index, expandMode);
     const nodeId = result?.nodeId;
     if (nodeId === undefined || nodeId === -1) {
       return null;
@@ -273,6 +311,14 @@ class FrameNode {
       return frameNode === undefined ? null : frameNode;
     }
     return this.convertToFrameNode(result.nodePtr, result.nodeId);
+  }
+
+  getFirstChildIndexWithoutExpand(): number {
+    return getUINativeModule().frameNode.getFirstChildIndexWithoutExpand(this.getNodePtr());
+  }
+
+  getLastChildIndexWithoutExpand(): number {
+    return getUINativeModule().frameNode.getLastChildIndexWithoutExpand(this.getNodePtr());
   }
 
   getFirstChild(isExpanded?: boolean): FrameNode | null {
@@ -341,8 +387,10 @@ class FrameNode {
   }
 
   getParent(): FrameNode | null {
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
     const result = getUINativeModule().frameNode.getParent(this.getNodePtr());
     const nodeId = result?.nodeId;
+    __JSScopeUtil__.restoreInstanceId();
     if (nodeId === undefined || nodeId === -1) {
       return null;
     }
@@ -354,7 +402,30 @@ class FrameNode {
   }
 
   getChildrenCount(isExpanded?: boolean): number {
-    return getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    const childrenCount = getUINativeModule().frameNode.getChildrenCount(this.nodePtr_, isExpanded);
+    __JSScopeUtil__.restoreInstanceId();
+    return childrenCount;
+  }
+
+  moveTo(targetParent: FrameNode, index?: number): void {
+    if (targetParent === undefined || targetParent === null) {
+      return;
+    }
+    if (index === undefined || index === null) {
+      index = -1;
+    }
+    const oldParent = this.getParent();
+    if (oldParent && !oldParent.isModifiable() || !targetParent.isModifiable() || !targetParent.checkValid(this)) {
+      throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+    }
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    getUINativeModule().frameNode.moveTo(this.nodePtr_, targetParent.nodePtr_, index);
+    __JSScopeUtil__.restoreInstanceId();
+    if (oldParent) {
+      oldParent._childList.delete(this._nodeId);
+    }
+    targetParent._childList.set(this._nodeId, this);
   }
 
   getPositionToParent(): Position {
@@ -388,12 +459,12 @@ class FrameNode {
   }
 
   getMeasuredSize(): Size {
-    const size = getUINativeModule().frameNode.getMeasuredSize(this.getNodePtr());
+    const size = getUINativeModule().frameNode.getMeasuredSize(this.getValidNodePtr());
     return { width: size[0], height: size[1] };
   }
 
   getLayoutPosition(): Position {
-    const position = getUINativeModule().frameNode.getLayoutPosition(this.getNodePtr());
+    const position = getUINativeModule().frameNode.getLayoutPosition(this.getValidNodePtr());
     return { x: position[0], y: position[1] };
   }
 
@@ -464,13 +535,23 @@ class FrameNode {
   }
 
   getInspectorInfo(): Object {
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
     const inspectorInfoStr = getUINativeModule().frameNode.getInspectorInfo(this.getNodePtr());
+    __JSScopeUtil__.restoreInstanceId();
     const inspectorInfo = JSON.parse(inspectorInfoStr);
     return inspectorInfo;
   }
 
   getCustomProperty(key: string): Object | undefined {
-    return key === undefined ? undefined : __getCustomProperty__(this._nodeId, key);
+    if (key === undefined) {
+      return undefined;
+    }
+    let value = __getCustomProperty__(this._nodeId, key);
+    if (value === undefined) {
+      const valueStr = getUINativeModule().frameNode.getCustomPropertyCapiByKey(this.getNodePtr(), key);
+      value = valueStr === undefined ? undefined : valueStr;
+    }
+    return value;
   }
 
   setMeasuredSize(size: Size): void {
@@ -486,24 +567,70 @@ class FrameNode {
     const minSize: Size = constraint.minSize;
     const maxSize: Size = constraint.maxSize;
     const percentReference: Size = constraint.percentReference;
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
     getUINativeModule().frameNode.measureNode(this.getNodePtr(), minSize.width, minSize.height, maxSize.width,
       maxSize.height, percentReference.width, percentReference.height);
+    __JSScopeUtil__.restoreInstanceId();
   }
 
   layout(position: Position): void {
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
     getUINativeModule().frameNode.layoutNode(this.getNodePtr(), position.x, position.y);
+    __JSScopeUtil__.restoreInstanceId();
   }
 
   setNeedsLayout(): void {
     getUINativeModule().frameNode.setNeedsLayout(this.getNodePtr());
   }
 
+  setCrossLanguageOptions(options: CrossLanguageOptions): void {
+    if (!this.isModifiable()) {
+      throw { message: 'The FrameNode cannot be set whether to support cross-language common attribute setting.', code: 100022 };
+    }
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    const result = getUINativeModule().frameNode.setCrossLanguageOptions(this.getNodePtr(), options.attributeSetting ?? false);
+    __JSScopeUtil__.restoreInstanceId();
+    if (result !== 0) {
+      throw { message: 'The FrameNode cannot be set whether to support cross-language common attribute setting.', code: 100022 };
+    }
+  }
+
+  getCrossLanguageOptions(): CrossLanguageOptions {
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    const attributeSetting = getUINativeModule().frameNode.getCrossLanguageOptions(this.getNodePtr());
+    __JSScopeUtil__.restoreInstanceId();
+    return { attributeSetting: attributeSetting ?? false };
+  }
+
+  checkIfCanCrossLanguageAttributeSetting(): boolean {
+    return this.isModifiable() || getUINativeModule().frameNode.checkIfCanCrossLanguageAttributeSetting(this.getNodePtr());
+  }
+
+  getInteractionEventBindingInfo(eventType: EventQueryType): InteractionEventBindingInfo {
+    if (eventType === undefined || eventType === null) {
+      return undefined;
+    }
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    const eventBindingInfo = getUINativeModule().frameNode.getInteractionEventBindingInfo(this.getNodePtr(), eventType);
+    __JSScopeUtil__.restoreInstanceId();
+    if (!eventBindingInfo || (!eventBindingInfo.baseEventRegistered && !eventBindingInfo.nodeEventRegistered &&
+      !eventBindingInfo.nativeEventRegistered && !eventBindingInfo.builtInEventRegistered)) {
+      return undefined;
+    }
+    return {
+      baseEventRegistered: eventBindingInfo.baseEventRegistered,
+      nodeEventRegistered: eventBindingInfo.nodeEventRegistered,
+      nativeEventRegistered: eventBindingInfo.nativeEventRegistered,
+      builtInEventRegistered: eventBindingInfo.builtInEventRegistered,
+    };
+  }
+
   get commonAttribute(): ArkComponent {
     if (this._commonAttribute === undefined) {
       this._commonAttribute = new ArkComponent(this.nodePtr_, ModifierType.FRAME_NODE);
-      this._commonAttribute.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
     }
     this._commonAttribute.setNodePtr(this.nodePtr_);
+    this._commonAttribute.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
     return this._commonAttribute;
   }
 
@@ -516,9 +643,34 @@ class FrameNode {
     this._commonEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
     return this._commonEvent;
   }
+
+  get gestureEvent(): UIGestureEvent {
+    if (this._gestureEvent === undefined) {
+        this._gestureEvent = new UIGestureEvent();
+        this._gestureEvent.setNodePtr(this.nodePtr_);
+        let weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(this.nodePtr_);
+        this._gestureEvent.setWeakNodePtr(weakPtr);
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this._gestureEvent.registerFrameNodeDeletedCallback(this.nodePtr_);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+    return this._gestureEvent;
+  }
   updateInstance(uiContext: UIContext): void {
     this.uiContext_ = uiContext;
     this.instanceId_ = uiContext.instanceId_;
+  }
+  triggerOnReuse(): void {
+    getUINativeModule().frameNode.triggerOnReuse(this.getNodePtr());
+  }
+  triggerOnRecycle(): void {
+    getUINativeModule().frameNode.triggerOnRecycle(this.getNodePtr());
+  }
+  reuse(): void {
+    this.triggerOnReuse();
+  }
+  recycle(): void {
+    this.triggerOnRecycle();
   }
 }
 
@@ -589,6 +741,9 @@ class ProxyFrameNode extends ImmutableFrameNode {
     this._nativeRef = undefined;
     this.nodePtr_ = undefined;
   }
+  moveTo(targetParent: FrameNode, index?: number): void {
+    throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+  }
 }
 
 class FrameNodeUtils {
@@ -623,8 +778,8 @@ class TypedFrameNode<T extends ArkComponent> extends FrameNode {
   attribute_: T;
   attrCreator_: (node: NodePtr, type: ModifierType) => T
 
-  constructor(uiContext: UIContext, type: string, attrCreator: (node: NodePtr, type: ModifierType) => T) {
-    super(uiContext, type)
+  constructor(uiContext: UIContext, type: string, attrCreator: (node: NodePtr, type: ModifierType) => T, options?: object) {
+    super(uiContext, type, options);
     this.attrCreator_ = attrCreator;
   }
 
@@ -668,7 +823,7 @@ class TypedFrameNode<T extends ArkComponent> extends FrameNode {
   }
 }
 
-const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
+const __creatorMap__ = new Map<string, (context: UIContext, options?: object) => FrameNode>(
   [
     ['Text', (context: UIContext): FrameNode=> {
       return new TypedFrameNode(context, 'Text', (node: NodePtr, type: ModifierType): ArkTextComponent => {
@@ -774,10 +929,10 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
         return new ArkButtonComponent(node, type);
       })
     }],
-    ['XComponent', (context: UIContext): FrameNode=> {
+    ['XComponent', (context: UIContext, options?: object): FrameNode=> {
       return new TypedFrameNode(context, 'XComponent', (node: NodePtr, type: ModifierType): ArkXComponentComponent => {
         return new ArkXComponentComponent(node, type);
-      })
+      }, options);
     }],
     ['ListItemGroup', (context: UIContext): FrameNode=> {
       return new TypedFrameNode(context, 'ListItemGroup', (node: NodePtr, type: ModifierType): ArkListItemGroupComponent => {
@@ -789,25 +944,204 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
         return new ArkWaterFlowComponent(node, type);
       })
     }],
+    ['SymbolGlyph', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'SymbolGlyph', (node: NodePtr, type: ModifierType): ArkSymbolGlyphComponent => {
+        return new ArkSymbolGlyphComponent(node, type);
+      })
+    }],
     ['FlowItem', (context: UIContext): FrameNode=> {
       return new TypedFrameNode(context, 'FlowItem', (node: NodePtr, type: ModifierType): ArkFlowItemComponent => {
         return new ArkFlowItemComponent(node, type);
       })
     }],
-    ["QRCode", (context: UIContext) => {
-      return new TypedFrameNode(context, "QRCode", (node: NodePtr, type: ModifierType): ArkQRCodeComponent => {
+    ['QRCode', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'QRCode', (node: NodePtr, type: ModifierType): ArkQRCodeComponent => {
         return new ArkQRCodeComponent(node, type);
       })
+    }],
+    ['Badge', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Badge', (node: NodePtr, type: ModifierType): ArkBadgeComponent => {
+        return new ArkBadgeComponent(node, type);
+      })
+    }],
+    ['Grid', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Grid', (node: NodePtr, type: ModifierType): ArkGridComponent => {
+        return new ArkGridComponent(node, type);
+      })
+    }],
+    ['GridItem', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'GridItem', (node: NodePtr, type: ModifierType): ArkGridItemComponent => {
+        return new ArkGridItemComponent(node, type);
+      })
+    }],
+    ['TextClock', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'TextClock', (node: NodePtr, type: ModifierType): ArkTextClockComponent => {
+        return new ArkTextClockComponent(node, type);
+      })
+    }],
+    ['TextTimer', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'TextTimer', (node: NodePtr, type: ModifierType): ArkTextTimerComponent => {
+        return new ArkTextTimerComponent(node, type);
+      })
+    }],
+    ['Marquee', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Marquee', (node: NodePtr, type: ModifierType): ArkMarqueeComponent => {
+        return new ArkMarqueeComponent(node, type);
+      })
+    }],
+    ['TextArea', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'TextArea', (node: NodePtr, type: ModifierType): ArkTextAreaComponent => {
+        return new ArkTextAreaComponent(node, type);
+      })
+    }],
+    ['Checkbox', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Checkbox', (node: NodePtr, type: ModifierType): ArkCheckboxComponent => {
+        return new ArkCheckboxComponent(node, type);
+      });
+    }],
+    ['CheckboxGroup', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'CheckboxGroup', (node: NodePtr, type: ModifierType): ArkCheckboxGroupComponent => {
+        return new ArkCheckboxGroupComponent(node, type);
+      });
+    }],
+    ['Radio', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Radio', (node: NodePtr, type: ModifierType): ArkRadioComponent => {
+        return new ArkRadioComponent(node, type);
+      });
+    }],
+    ['Rating', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Rating', (node: NodePtr, type: ModifierType): ArkRatingComponent => {
+        return new ArkRatingComponent(node, type);
+      });
+    }],
+    ['Slider', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Slider', (node: NodePtr, type: ModifierType): ArkSliderComponent => {
+        return new ArkSliderComponent(node, type);
+      });
+    }],
+    ['Select', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Select', (node: NodePtr, type: ModifierType): ArkSelectComponent => {
+        return new ArkSelectComponent(node, type);
+      });
+    }],
+    ['Toggle', (context: UIContext, options?: object): FrameNode=> {
+      return new TypedFrameNode(context, 'Toggle', (node: NodePtr, type: ModifierType): ArkToggleComponent => {
+        return new ArkToggleComponent(node, type);
+      }, options);
     }],
   ]
 )
 
+const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
+  [
+    ['Scroll', (node: FrameNode): ArkScrollComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkScrollComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+  ]
+)
+
+const __eventMap__ = new Map<string, (node: FrameNode) => UICommonEvent>(
+  [
+    ['List', (node: FrameNode): UIListEvent => {
+      if (node._scrollableEvent) {
+        return node._scrollableEvent;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._scrollableEvent = new UIListEvent(node.getNodePtr());
+      node._scrollableEvent.setNodePtr(node);
+      node._scrollableEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
+      return node._scrollableEvent;
+    }],
+    ['Scroll', (node: FrameNode): UIScrollEvent => {
+      if (node._scrollableEvent) {
+        return node._scrollableEvent;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._scrollableEvent = new UIScrollEvent(node.getNodePtr());
+      node._scrollableEvent.setNodePtr(node);
+      node._scrollableEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
+      return node._scrollableEvent;
+    }],
+    ['Grid', (node: FrameNode): UIGridEvent => {
+      if (node._scrollableEvent) {
+        return node._scrollableEvent;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._scrollableEvent = new UIGridEvent(node.getNodePtr());
+      node._scrollableEvent.setNodePtr(node);
+      node._scrollableEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
+      return node._scrollableEvent;
+    }],
+    ['WaterFlow', (node: FrameNode): UIWaterFlowEvent => {
+      if (node._scrollableEvent) {
+        return node._scrollableEvent;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._scrollableEvent = new UIWaterFlowEvent(node.getNodePtr());
+      node._scrollableEvent.setNodePtr(node);
+      node._scrollableEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
+      return node._scrollableEvent;
+    }]
+  ]
+)
+
 class typeNode {
-  static createNode(context: UIContext, type: string): FrameNode {
+  static createNode(context: UIContext, type: string, options?: object): FrameNode {
     let creator = __creatorMap__.get(type)
     if (creator === undefined) {
       return undefined
     }
-    return creator(context);
+    return creator(context, options);
+  }
+  
+  static getAttribute(node: FrameNode, nodeType: string): ArkComponent {
+    if (node === undefined || node === null || node.getNodeType() !== nodeType) {
+      return undefined;
+    }
+    if (!node.checkIfCanCrossLanguageAttributeSetting()) {
+      return undefined;
+    }
+    let attribute = __attributeMap__.get(nodeType);
+    if (attribute === undefined || attribute === null) {
+      return undefined;
+    }
+    return attribute(node);
+  }
+
+  static getEvent(node: FrameNode, nodeType: string): UICommonEvent {
+    if (node === undefined || node === null || node.getNodeType() !== nodeType) {
+      return undefined;
+    }
+    let event = __eventMap__.get(nodeType);
+    if (event === undefined || event === null) {
+      return undefined;
+    }
+    return event(node);
+  } 
+
+  static bindController(node: FrameNode, controller: Scroller, nodeType: string): void {
+    if (node === undefined || node === null || controller === undefined || controller === null ||
+      node.getNodeType() !== nodeType || node.getNodePtr() === null || node.getNodePtr() === undefined) {
+      throw { message: 'Parameter error. Possible causes: 1. The type of the node is error; 2. The node is null or undefined.', code: 401 };
+    }
+    if (!node.checkIfCanCrossLanguageAttributeSetting()) {
+      throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+    }
+    getUINativeModule().scroll.setScrollInitialize(node.getNodePtr(), controller);
   }
 }

@@ -14,26 +14,23 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_radio.h"
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_radio_theme.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/models/radio_model_impl.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_radio_theme.h"
+#include "core/components_ng/pattern/radio/radio_pattern.h"
 
 namespace OHOS::Ace {
-
-std::unique_ptr<RadioModel> RadioModel::instance_ = nullptr;
-std::mutex RadioModel::mutex_;
 
 enum class RadioIndicatorType {
     TICK = 0,
@@ -43,21 +40,18 @@ enum class RadioIndicatorType {
 
 RadioModel* RadioModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::RadioModelNG());
+    static NG::RadioModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::RadioModelNG());
-            } else {
-                instance_.reset(new Framework::RadioModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::RadioModelNG instance;
+        return &instance;
+    } else {
+        static Framework::RadioModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 
 } // namespace OHOS::Ace
@@ -163,15 +157,25 @@ void JSRadio::Checked(const JSCallbackInfo& info)
     if (info.Length() < 1 || info.Length() > 2) {
         return;
     }
-
-    if (info.Length() > 0 && info[0]->IsBoolean()) {
-        RadioModel::GetInstance()->SetChecked(info[0]->ToBoolean());
-    } else {
-        RadioModel::GetInstance()->SetChecked(false);
+    bool checked = false;
+    JSRef<JSVal> changeEventVal;
+    auto checkedVal = info[0];
+    if (checkedVal->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(checkedVal);
+        checkedVal = obj->GetProperty("value");
+        changeEventVal = obj->GetProperty("$value");
+    } else if (info.Length() > 1) {
+        changeEventVal = info[1];
     }
 
-    if (info.Length() > 1 && info[1]->IsFunction()) {
-        ParseCheckedObject(info, info[1]);
+    if (checkedVal->IsBoolean()) {
+        checked = checkedVal->ToBoolean();
+    }
+
+    RadioModel::GetInstance()->SetChecked(checked);
+
+    if (changeEventVal->IsFunction()) {
+        ParseCheckedObject(info, changeEventVal);
     }
 }
 
@@ -246,35 +250,16 @@ NG::PaddingPropertyF JSRadio::GetOldPadding(const JSCallbackInfo& info)
 
 NG::PaddingProperty JSRadio::GetNewPadding(const JSCallbackInfo& info)
 {
-    NG::PaddingProperty padding({
-        NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp)
-    });
+    NG::PaddingProperty padding({ NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp),
+        NG::CalcLength(0.0_vp), std::nullopt, std::nullopt });
     if (info[0]->IsObject()) {
-        std::optional<CalcDimension> left;
-        std::optional<CalcDimension> right;
-        std::optional<CalcDimension> top;
-        std::optional<CalcDimension> bottom;
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
-
-        CalcDimension leftDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty(static_cast<int32_t>(ArkUIIndex::LEFT)), leftDimen)) {
-            left = leftDimen;
-        }
-        CalcDimension rightDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty(static_cast<int32_t>(ArkUIIndex::RIGHT)), rightDimen)) {
-            right = rightDimen;
-        }
-        CalcDimension topDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP)), topDimen)) {
-            top = topDimen;
-        }
-        CalcDimension bottomDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM)), bottomDimen)) {
-            bottom = bottomDimen;
-        }
-        if (left.has_value() || right.has_value() || top.has_value() || bottom.has_value()) {
-            padding = GetPadding(top, bottom, left, right);
-            return padding;
+        CommonCalcDimension commonCalcDimension;
+        JSViewAbstract::ParseCommonMarginOrPaddingCorner(paddingObj, commonCalcDimension);
+        if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
+            commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
+            return GetPadding(commonCalcDimension.top, commonCalcDimension.bottom, commonCalcDimension.left,
+                commonCalcDimension.right);
         }
     }
     CalcDimension length;
@@ -290,9 +275,8 @@ NG::PaddingProperty JSRadio::GetPadding(const std::optional<CalcDimension>& top,
     const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
     const std::optional<CalcDimension>& right)
 {
-    NG::PaddingProperty padding({
-        NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp)
-    });
+    NG::PaddingProperty padding({ NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp),
+        NG::CalcLength(0.0_vp), std::nullopt, std::nullopt });
     if (left.has_value() && left.value().IsNonNegative()) {
         padding.left = NG::CalcLength(left.value());
     }
@@ -333,6 +317,12 @@ void JSRadio::JsRadioStyle(const JSCallbackInfo& info)
         if (!JSRadioTheme::ObtainUncheckedBorderColor(uncheckedBorderColorVal)) {
             uncheckedBorderColorVal = theme->GetInactiveColor();
         }
+    } else {
+        auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<NG::RadioPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetIsUserSetUncheckBorderColor(true);
     }
     RadioModel::GetInstance()->SetUncheckedBorderColor(uncheckedBorderColorVal);
     Color indicatorColorVal;
@@ -371,9 +361,7 @@ void JSRadio::OnChange(const JSCallbackInfo& args)
         PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(check));
         func->ExecuteJS(1, &newJSVal);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Radio.onChange");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Radio.onChange");
     };
     RadioModel::GetInstance()->SetOnChange(std::move(onChange));
     args.ReturnSelf();

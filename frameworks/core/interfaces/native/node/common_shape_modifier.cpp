@@ -14,13 +14,9 @@
  */
 #include "core/interfaces/native/node/common_shape_modifier.h"
 
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace::NG {
 constexpr double DEFAULT_MITER_LIMIT = 4.0f;
@@ -248,23 +244,75 @@ void ResetShapeForegroundColor(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUICommonShapeModifier* GetCommonShapeModifier()
 {
-    static const ArkUICommonShapeModifier modifier = { SetStrokeDashArray, ResetStrokeDashArray, SetStrokeMiterLimit,
-        ResetStrokeMiterLimit, SetFillOpacity, ResetFillOpacity, SetStrokeOpacity, ResetStrokeOpacity, SetStrokeWidth,
-        ResetStrokeWidth, SetAntiAlias, ResetAntiAlias, SetStroke, ResetStroke, SetFill, ResetFill, SetStrokeDashOffset,
-        ResetStrokeDashOffset, SetStrokeLineCap, ResetStrokeLineCap, SetStrokeLineJoin, ResetStrokeLineJoin,
-        SetShapeWidth, ResetShapeWidth, SetShapeHeight, ResetShapeHeight, SetShapeForegroundColor,
-        ResetShapeForegroundColor };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUICommonShapeModifier modifier = {
+        .setStrokeDashArray = SetStrokeDashArray,
+        .resetStrokeDashArray = ResetStrokeDashArray,
+        .setStrokeMiterLimit = SetStrokeMiterLimit,
+        .resetStrokeMiterLimit = ResetStrokeMiterLimit,
+        .setFillOpacity = SetFillOpacity,
+        .resetFillOpacity = ResetFillOpacity,
+        .setStrokeOpacity = SetStrokeOpacity,
+        .resetStrokeOpacity = ResetStrokeOpacity,
+        .setStrokeWidth = SetStrokeWidth,
+        .resetStrokeWidth = ResetStrokeWidth,
+        .setAntiAlias = SetAntiAlias,
+        .resetAntiAlias = ResetAntiAlias,
+        .setStroke = SetStroke,
+        .resetStroke = ResetStroke,
+        .setFill = SetFill,
+        .resetFill = ResetFill,
+        .setStrokeDashOffset = SetStrokeDashOffset,
+        .resetStrokeDashOffset = ResetStrokeDashOffset,
+        .setStrokeLineCap = SetStrokeLineCap,
+        .resetStrokeLineCap = ResetStrokeLineCap,
+        .setStrokeLineJoin = SetStrokeLineJoin,
+        .resetStrokeLineJoin = ResetStrokeLineJoin,
+        .setShapeWidth = SetShapeWidth,
+        .resetShapeWidth = ResetShapeWidth,
+        .setShapeHeight = SetShapeHeight,
+        .resetShapeHeight = ResetShapeHeight,
+        .setShapeForegroundColor = SetShapeForegroundColor,
+        .resetShapeForegroundColor = ResetShapeForegroundColor,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUICommonShapeModifier* GetCJUICommonShapeModifier()
 {
-    static const CJUICommonShapeModifier modifier = { SetStrokeDashArray, ResetStrokeDashArray, SetStrokeMiterLimit,
-        ResetStrokeMiterLimit, SetFillOpacity, ResetFillOpacity, SetStrokeOpacity, ResetStrokeOpacity, SetStrokeWidth,
-        ResetStrokeWidth, SetAntiAlias, ResetAntiAlias, SetStroke, ResetStroke, SetFill, ResetFill, SetStrokeDashOffset,
-        ResetStrokeDashOffset, SetStrokeLineCap, ResetStrokeLineCap, SetStrokeLineJoin, ResetStrokeLineJoin,
-        SetShapeWidth, ResetShapeWidth, SetShapeHeight, ResetShapeHeight, SetShapeForegroundColor,
-        ResetShapeForegroundColor };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUICommonShapeModifier modifier = {
+        .setStrokeDashArray = SetStrokeDashArray,
+        .resetStrokeDashArray = ResetStrokeDashArray,
+        .setStrokeMiterLimit = SetStrokeMiterLimit,
+        .resetStrokeMiterLimit = ResetStrokeMiterLimit,
+        .setFillOpacity = SetFillOpacity,
+        .resetFillOpacity = ResetFillOpacity,
+        .setStrokeOpacity = SetStrokeOpacity,
+        .resetStrokeOpacity = ResetStrokeOpacity,
+        .setStrokeWidth = SetStrokeWidth,
+        .resetStrokeWidth = ResetStrokeWidth,
+        .setAntiAlias = SetAntiAlias,
+        .resetAntiAlias = ResetAntiAlias,
+        .setStroke = SetStroke,
+        .resetStroke = ResetStroke,
+        .setFill = SetFill,
+        .resetFill = ResetFill,
+        .setStrokeDashOffset = SetStrokeDashOffset,
+        .resetStrokeDashOffset = ResetStrokeDashOffset,
+        .setStrokeLineCap = SetStrokeLineCap,
+        .resetStrokeLineCap = ResetStrokeLineCap,
+        .setStrokeLineJoin = SetStrokeLineJoin,
+        .resetStrokeLineJoin = ResetStrokeLineJoin,
+        .setShapeWidth = SetShapeWidth,
+        .resetShapeWidth = ResetShapeWidth,
+        .setShapeHeight = SetShapeHeight,
+        .resetShapeHeight = ResetShapeHeight,
+        .setShapeForegroundColor = SetShapeForegroundColor,
+        .resetShapeForegroundColor = ResetShapeForegroundColor,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

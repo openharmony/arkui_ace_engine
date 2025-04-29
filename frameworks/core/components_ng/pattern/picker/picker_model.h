@@ -18,6 +18,7 @@
 
 #include <mutex>
 
+#include "core/components/dialog/dialog_properties.h"
 #include "core/components/picker/picker_data.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
@@ -29,18 +30,25 @@ struct PickerDialogInfo {
     PickerDate parseStartDate;
     PickerDate parseEndDate;
     PickerDate parseSelectedDate;
+    PickerTime parseStartTime;
+    PickerTime parseEndTime;
     PickerTime pickerTime;
     bool isUseMilitaryTime;
     bool isSelectedTime;
     bool isStartDate;
     bool isEndDate;
     bool isSelectedDate;
+    bool enableHoverMode = false;
+    bool isEnableCascade = false;
     std::optional<DialogAlignment> alignment;
     std::optional<DimensionOffset> offset;
     std::optional<DimensionRect> maskRect;
     std::optional<Color> backgroundColor;
     std::optional<int32_t> backgroundBlurStyle;
+    std::optional<BlurStyleOption> blurStyleOption;
+    std::optional<EffectOption> effectOption;
     std::optional<Shadow> shadow;
+    std::optional<HoverModeAreaType> hoverModeArea;
 };
 struct PickerDialogEvent {
     std::function<void()> onDidAppear;
@@ -58,6 +66,7 @@ public:
     virtual void SetStartDate(const PickerDate& value) = 0;
     virtual void SetEndDate(const PickerDate& value) = 0;
     virtual void SetSelectedDate(const PickerDate& value) = 0;
+    virtual void SetMode(const DatePickerMode& value) = 0;
     virtual void SetShowLunar(bool lunar) = 0;
     virtual void SetOnChange(DateChangeEvent&& onChange) = 0;
     virtual void SetOnDateChange(DateChangeEvent&& onChange) = 0;
@@ -71,13 +80,16 @@ public:
     virtual void HasUserDefinedSelectedFontFamily(bool isUserDefined) = 0;
     virtual void SetBackgroundColor(const Color& color) = 0;
     virtual void SetChangeEvent(DateChangeEvent&& onChange) = 0;
-
+    virtual void HasUserDefinedOpacity() = 0;
+    virtual void SetEnableHapticFeedback(bool isEnableHapticFeedback) {};
+    virtual void SetDigitalCrownSensitivity(int32_t value) = 0;
+    virtual void UpdateUserSetSelectColor() = 0;
 private:
     static std::unique_ptr<DatePickerModel> datePickerInstance_;
-    static std::mutex mutex_;
+    static std::once_flag onceFlag_;
 };
 
-class DatePickerDialogModel {
+class ACE_FORCE_EXPORT DatePickerDialogModel {
 public:
     static DatePickerDialogModel* GetInstance();
     virtual ~DatePickerDialogModel() = default;
@@ -90,7 +102,7 @@ public:
 
 private:
     static std::unique_ptr<DatePickerDialogModel> datePickerDialogInstance_;
-    static std::mutex mutex_;
+    static std::once_flag onceFlag_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PICKER_PICKER_MODEL_H

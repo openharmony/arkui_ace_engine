@@ -25,11 +25,12 @@
 namespace OHOS::Ace::NG {
 struct NavigationBackgroundOptions {
     std::optional<Color> color;
-    std::optional<BlurStyle> blurStyle;
+    std::optional<BlurStyleOption> blurStyleOption;
+    std::optional<EffectOption> effectOption;
 
     bool operator== (const NavigationBackgroundOptions& other) const
     {
-        return color == other.color && blurStyle == other.blurStyle;
+        return color == other.color && blurStyleOption == other.blurStyleOption && effectOption == other.effectOption;
     }
 
     bool operator!= (const NavigationBackgroundOptions& other) const
@@ -42,6 +43,7 @@ struct NavigationBarOptions {
     std::optional<BarStyle> barStyle;
     std::optional<CalcDimension> paddingStart;
     std::optional<CalcDimension> paddingEnd;
+    bool textHideOptions = false;
 
     bool operator== (const NavigationBarOptions& other) const
     {
@@ -50,6 +52,20 @@ struct NavigationBarOptions {
     }
 
     bool operator!= (const NavigationBarOptions& other) const
+    {
+        return !(*this == other);
+    }
+};
+
+struct MoreButtonOptions {
+    NavigationBackgroundOptions bgOptions;
+
+    bool operator== (const MoreButtonOptions& other) const
+    {
+        return bgOptions == other.bgOptions;
+    }
+
+    bool operator!= (const MoreButtonOptions& other) const
     {
         return !(*this == other);
     }
@@ -71,10 +87,12 @@ struct NavigationTitlebarOptions {
     NavigationBackgroundOptions bgOptions;
     NavigationBarOptions brOptions;
     NavigationTextOptions textOptions;
+    bool enableHoverMode = false;
 
     bool operator== (const NavigationTitlebarOptions& other) const
     {
-        return bgOptions == other.bgOptions &&  brOptions == other.brOptions;
+        return bgOptions == other.bgOptions && brOptions == other.brOptions
+            && enableHoverMode == other.enableHoverMode;
     }
 
     bool operator!= (const NavigationTitlebarOptions& other) const
@@ -85,10 +103,13 @@ struct NavigationTitlebarOptions {
 
 struct NavigationToolbarOptions {
     NavigationBackgroundOptions bgOptions;
+    // toolBar not support paddingStart and paddingEnd of NavigationBarOptions now
+    NavigationBarOptions brOptions;
+    MoreButtonOptions mbOptions;
 
     bool operator== (const NavigationToolbarOptions& other) const
     {
-        return bgOptions == other.bgOptions;
+        return bgOptions == other.bgOptions && brOptions == other.brOptions && mbOptions == other.mbOptions;
     }
 
     bool operator!= (const NavigationToolbarOptions& other) const
@@ -100,6 +121,20 @@ struct NavigationToolbarOptions {
 struct ImageOption {
     bool noPixMap;
     bool isValidImage;
+};
+
+struct NavigationMenuOptions {
+    MoreButtonOptions mbOptions;
+
+    bool operator== (const NavigationMenuOptions& other) const
+    {
+        return mbOptions == other.mbOptions;
+    }
+
+    bool operator!= (const NavigationMenuOptions& other) const
+    {
+        return !(*this == other);
+    }
 };
 
 } // namespace OHOS::Ace::NG

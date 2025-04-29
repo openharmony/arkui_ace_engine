@@ -15,12 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/models/side_bar_container_model_impl.h"
 
-#include "base/image/pixel_map.h"
-#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/side_bar/side_bar_container_component.h"
-#include "core/components_ng/base/view_abstract.h"
 
 namespace OHOS::Ace::Framework {
 void SideBarContainerModelImpl::SetSideBarContainerType(SideBarContainerType type)
@@ -53,7 +48,7 @@ void SideBarContainerModelImpl::SetShowControlButton(bool showControlButton)
     component->SetShowControlButton(showControlButton);
 }
 
-void SideBarContainerModelImpl::ParseAndSetWidth(WidthType widthType, Dimension& width)
+void SideBarContainerModelImpl::ParseAndSetWidth(WidthType widthType, Dimension& width, bool isDoubleBind)
 {
     if (LessNotEqual(width.Value(), 0.0)) {
         width.SetValue(0.0);
@@ -79,7 +74,7 @@ void SideBarContainerModelImpl::ParseAndSetWidth(WidthType widthType, Dimension&
     }
 }
 
-void SideBarContainerModelImpl::SetSideBarWidth(const Dimension& sideBarWidth) {}
+void SideBarContainerModelImpl::SetSideBarWidth(const Dimension& sideBarWidth, bool isDoubleBind) {}
 
 void SideBarContainerModelImpl::SetMinSideBarWidth(const Dimension& minSideBarWidth) {}
 
@@ -182,4 +177,6 @@ void SideBarContainerModelImpl::SetDividerEndMargin(const Dimension& endMargin) 
 void SideBarContainerModelImpl::SetMinContentWidth(const Dimension& minContentWidth) {};
 
 void SideBarContainerModelImpl::MarkNeedInitRealSideBarWidth() {}
+
+void SideBarContainerModelImpl::ResetControlButton() {}
 } // namespace OHOS::Ace::Framework

@@ -18,31 +18,27 @@
 
 #include <vector>
 
-#ifndef USE_ROSEN_DRAWING
-#include "include/core/SkCanvas.h"
-#include "include/core/SkPath.h"
-#endif
-
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/animation/svg_animate.h"
 #include "core/components_ng/image_provider/svg_dom_base.h"
 #include "core/components_ng/render/drawing_forward.h"
-#ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/render/drawing.h"
-#endif
 #include "core/components_ng/svg/svg_context.h"
+#include "core/components_ng/svg/base/svg_bounding_box_context.h"
 #include "core/components_ng/svg/parse/svg_attributes_parser.h"
 
 namespace OHOS::Ace::NG {
-enum class SvgLengthType {
-    HORIZONTAL,
-    VERTICAL,
-    OTHER,
-};
 
 class SvgContext;
 class SvgAnimation;
+
+struct SvgInitStyleProcessInfo {
+    SvgInitStyleProcessInfo() = default;
+    SvgInitStyleProcessInfo(RefPtr<SvgNode> svgNode) : svgNode(svgNode) {}
+    RefPtr<SvgNode> svgNode = nullptr; // The SVG node currently being processed
+    int32_t childIndex = 0; // Index of the next child node to traverse for the current node
+};
 
 // three level inherit class, for example:
 // 1. SvgMask::SvgQuote::SvgNode
@@ -55,12 +51,15 @@ public:
     ~SvgNode() override = default;
 
     void InitStyle(const SvgBaseAttribute& attr);
-
-    void PushAnimatorOnFinishCallback(const std::function<void()>& onFinishCallback);
+    void ProcessSvgStyle(RefPtr<SvgNode> svgNode, const SvgBaseAttribute& attr);
+    void ProcessChildAnimations(const RefPtr<SvgNode>& currentSvgNode);
+    bool ProcessChildStyle(SvgInitStyleProcessInfo& currentSvgNodeInfo,
+        std::stack<std::pair<SvgInitStyleProcessInfo, const SvgBaseAttribute*>>& initStyleTaskSt);
+    void InitStyleDfs(const WeakPtr<SvgNode>& root, const SvgBaseAttribute& attr);
 
     // draw entrance function, approve override by second level class.
     virtual void Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color);
-
+    virtual void Draw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule);
     virtual void SetAttr(const std::string& name, const std::string& value);
 
     virtual bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
@@ -74,7 +73,7 @@ public:
         OnAppendChild(child);
     }
 
-    virtual void InheritAttr(const SvgBaseAttribute& parent)
+    void InheritAttr(const SvgBaseAttribute& parent)
     {
         attributes_.Inherit(parent);
     }
@@ -84,11 +83,12 @@ public:
         attributes_.InheritFromUse(parent);
     }
 
-#ifndef USE_ROSEN_DRAWING
-    virtual SkPath AsPath(const Size& viewPort) const
-#else
     virtual RSRecordingPath AsPath(const Size& viewPort) const
-#endif
+    {
+        return {};
+    }
+
+    virtual RSRecordingPath AsPath(const SvgLengthScaleRule& lengthRule)
     {
         return {};
     }
@@ -97,18 +97,18 @@ public:
 
     Rect AsBounds(const Size& viewPort) const
     {
-#ifndef USE_ROSEN_DRAWING
-        auto bounds = AsPath(viewPort).getBounds();
-        return { bounds.left(), bounds.top(), bounds.width(), bounds.height() };
-#else
         auto bounds = AsPath(viewPort).GetBounds();
         return { bounds.GetLeft(), bounds.GetTop(), bounds.GetWidth(), bounds.GetHeight() };
-#endif
     }
 
     void SetContext(const WeakPtr<SvgContext>& svgContext)
     {
         svgContext_ = svgContext;
+    }
+
+    WeakPtr<SvgContext>& GetContext()
+    {
+        return svgContext_;
     }
 
     void SetNodeId(const std::string& value)
@@ -169,6 +169,15 @@ public:
     {
         isRootNode_ = isRoot;
     }
+    Offset CalcGlobalPivot(const std::pair<Dimension, Dimension>& transformOrigin,
+        const SvgLengthScaleRule& lengthRule);
+    float GetRegionLength(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType);
+    float GetRegionPosition(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType);
+    float GetMeasuredLength(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType);
+    float GetMeasuredPosition(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType);
+    Rect GetSvgContainerRect() const;
+    void ApplyTransform(RSRecordingPath& path, const SvgLengthScaleRule& contentRule);
+    bool drawTraversed_ = true; // enable OnDraw, TAGS mask/defs/pattern/filter = false
 protected:
     // override as need by derived class
     // called by function AppendChild
@@ -177,7 +186,8 @@ protected:
     virtual void OnInitStyle() {}
     // function override by graphic tag
     virtual void OnDraw(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color) {}
-
+    virtual void OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule) {}
+    virtual void OnDrawTraversed(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule);
     virtual void OnDrawTraversed(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color);
     virtual void AdjustContentAreaByViewBox(RSCanvas& canvas, const Size& viewPort) {}
     bool OnCanvas(RSCanvas& canvas);
@@ -185,7 +195,14 @@ protected:
     void OnFilter(RSCanvas& canvas, const Size& viewPort);
     void OnMask(RSCanvas& canvas, const Size& viewPort);
     void OnTransform(RSCanvas& canvas, const Size& viewPort);
-
+    virtual void OnClipEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext) {}
+    virtual void OnMaskEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext) {}
+    virtual void OnFilterEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext,
+        float useOffsetX, float useOffsetY) {}
+    void OnClipPath(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
+    void OnFilter(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
+    void OnMask(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
+    void OnTransform(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule);
     double ConvertDimensionToPx(const Dimension& value, const Size& viewPort, SvgLengthType type) const;
     double ConvertDimensionToPx(const Dimension& value, double baseValue) const;
 
@@ -204,6 +221,10 @@ protected:
     template<typename T>
     void UpdateAttr(const std::string& name, const T& val);
     void UpdateAttrHelper(const std::string& name, const std::string& val);
+    SvgLengthScaleRule BuildContentScaleRule(const SvgCoordinateSystemContext& parentContext,
+        SvgLengthScaleUnit contentUnits);
+    void TransformForCurrentOBB(RSCanvas& canvas, const SvgLengthScaleRule& contentRule,
+        const Size& ContainerSize, const Offset& offset);
 
     // defs gradient animation
     void InitNoneFlag()
@@ -238,14 +259,10 @@ protected:
     bool hrefRender_ = true; // get render attr (mask, filter, transform, opacity, clip path) from reference
     bool passStyle_ = true; // pass style attributes to child node, TAGS circle/path/line/... = false
     bool inheritStyle_ = true;  // inherit style attributes from parent node, TAGS mask/defs/pattern/filter = false
-    bool drawTraversed_ = true; // enable OnDraw, TAGS mask/defs/pattern/filter = false
     bool isRootNode_ = false;
-#ifndef USE_ROSEN_DRAWING
-    SkCanvas* skCanvas_ = nullptr;
-#else
     RSCanvas* rsCanvas_ = nullptr;
-#endif
-
+    bool isDrawing_ = false; // Indicates if the current node is being drawn in the SVG rendering process.
+    SvgLengthScaleRule lengthRule_;
     ACE_DISALLOW_COPY_AND_MOVE(SvgNode);
 };
 

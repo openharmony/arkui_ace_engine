@@ -21,6 +21,7 @@
 #include "base/thread/cancelable_callback.h"
 #include "core/accessibility/accessibility_utils.h"
 #include "core/components_ng/event/drag_event.h"
+#include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 
@@ -46,7 +47,7 @@ class ACE_FORCE_EXPORT LongPressRecognizer : public MultiFingersRecognizer {
 public:
     explicit LongPressRecognizer() = default;
     LongPressRecognizer(int32_t duration, int32_t fingers, bool repeat,
-        bool isForDrag = false, bool isDisableMouseLeft = false);
+        bool isForDrag = false, bool isDisableMouseLeft = false, bool isLimitFingerCount = false);
 
     LongPressRecognizer(bool isForDrag = false, bool isDisableMouseLeft = false)
         : isForDrag_(isForDrag), isDisableMouseLeft_(isDisableMouseLeft)
@@ -55,11 +56,6 @@ public:
 
     void OnAccepted() override;
     void OnRejected() override;
-
-    void SetOnLongPress(const OnLongPress& onLongPress)
-    {
-        onLongPress_ = onLongPress;
-    }
 
     bool HasAction() const
     {
@@ -87,6 +83,16 @@ public:
     int32_t GetDuration() const
     {
         return duration_;
+    }
+
+    void SetIsRepeat(bool repeat)
+    {
+        repeat_ = repeat;
+    }
+
+    bool GetIsRepeat() const
+    {
+        return repeat_;
     }
 
     void SetGestureHub(WeakPtr<GestureEventHub> gestureHub)
@@ -118,6 +124,12 @@ public:
 
     virtual RefPtr<GestureSnapshot> Dump() const override;
 
+    void PrintCurrentFingersInfo() const;
+
+    void RemoteRepeatTimer();
+
+    void ForceCleanRecognizer() override;
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;
@@ -128,7 +140,7 @@ private:
     void DeadlineTimer(int32_t time, bool isCatchMode);
     void DoRepeat();
     void StartRepeatTimer();
-    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, bool isOnAction = false);
+    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, GestureCallbackType type);
     GestureJudgeResult TriggerGestureJudgeCallback();
     void OnResetStatus() override;
     double ConvertPxToVp(double offset) const;
@@ -139,7 +151,6 @@ private:
     WeakPtr<GestureEventHub> gestureHub_;
     CancelableCallback<void()> thumbnailTimer_;
     int32_t thumbnailDeadline = 150;
-    OnLongPress onLongPress_;
     CancelableCallback<void()> deadlineTimer_;
     CancelableCallback<void()> timer_;
     std::function<void(Offset)> callback_;
@@ -153,6 +164,9 @@ private:
     DelayedTask task_;
     OnAccessibilityEventFunc onAccessibilityEventFunc_ = nullptr;
     std::unique_ptr<GestureEventFunc> longPressRecorder_;
+    bool hasRepeated_ = false;
+    int32_t longPressFingerCountForSequence_ = 0;
+    bool isOnActionTriggered_ = false;
 };
 
 } // namespace OHOS::Ace::NG

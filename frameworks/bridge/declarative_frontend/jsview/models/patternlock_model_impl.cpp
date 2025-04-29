@@ -19,7 +19,6 @@
 
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components_v2/pattern_lock/pattern_lock_component.h"
 #include "core/components_v2/pattern_lock/pattern_lock_theme.h"
@@ -136,4 +135,6 @@ void PatternLockModelImpl::SetStrokeWidth(const Dimension& lineWidth)
 void PatternLockModelImpl::SetActiveCircleColor(const Color& activeCircleColor) {};
 void PatternLockModelImpl::SetActiveCircleRadius(const Dimension& activeCircleRadius) {};
 void PatternLockModelImpl::SetEnableWaveEffect(bool enableWaveEffect) {};
+void PatternLockModelImpl::SetEnableForeground(bool enableForeground) {};
+void PatternLockModelImpl::SetSkipUnselectedPoint(bool isSkipUnselectedPoint) {};
 } // namespace OHOS::Ace::Framework

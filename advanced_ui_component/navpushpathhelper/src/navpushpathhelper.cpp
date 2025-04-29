@@ -34,6 +34,7 @@ namespace OHOS::NavPushPathHelper {
         napi_property_descriptor desc[] = {
             DECLARE_NAPI_FUNCTION("silentInstall", HspSilentInstallNapi::SilentInstall),
             DECLARE_NAPI_FUNCTION("isHspExist", HspSilentInstallNapi::IsHspExist),
+            DECLARE_NAPI_FUNCTION("initRouteMap", HspSilentInstallNapi::InitRouteMap),
         };
         NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
         return exports;

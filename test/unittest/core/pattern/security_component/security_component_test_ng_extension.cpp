@@ -15,6 +15,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdint>
 #include <optional>
 #include <utility>
 
@@ -23,16 +24,20 @@
 #define protected public
 #define private public
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_engine.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/blend_mode.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/grid/irregular/grid_layout_range_solver.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/security_component/location_button/location_button_common.h"
 #include "core/components_ng/pattern/security_component/location_button/location_button_model_ng.h"
@@ -44,6 +49,8 @@
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/property/border_property.h"
+#include "ui/base/utils/utils.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -63,6 +70,7 @@ const InspectorFilter filter;
 
 namespace {
     constexpr float MAX_ROTATE = 360.0f;
+    constexpr float TEST_FONT_SIZE = 2.0;
 class TestNode : public UINode {
     DECLARE_ACE_TYPE(TestNode, UINode);
 
@@ -100,12 +108,14 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateForegroundColor(Color::TRANSPARENT);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    std::string message;
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
     ASSERT_EQ(renderContext->GetForegroundColor().value(), Color::TRANSPARENT);
     renderContext->UpdateForegroundColor(Color::GRAY);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
 }
 
 /**
@@ -125,10 +135,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     RefPtr<BasicShape> basicShape;
     renderContext->UpdateClipMask(basicShape);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    std::string message;
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
 }
 
 /**
@@ -148,13 +160,15 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateClipEdge(true);
-    EXPECT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    std::string message;
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
 
     OffsetF invalidOffset(-100.0, -100.0);
     childFrameNode->geometryNode_->SetFrameOffset(invalidOffset);
-    EXPECT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    EXPECT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
 }
 
 /**
@@ -174,12 +188,14 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateFrontColorBlend(Color::TRANSPARENT);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    std::string message;
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
     ASSERT_EQ(renderContext->GetFrontColorBlend().value(), Color::TRANSPARENT);
     renderContext->UpdateFrontColorBlend(Color::GRAY);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
 }
 
 /**
@@ -199,15 +215,17 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateFrontHueRotate(0);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    std::string message;
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
     ASSERT_EQ(renderContext->GetFrontHueRotate().value(), 0.0f);
     renderContext->UpdateFrontHueRotate(MAX_ROTATE);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
     ASSERT_EQ(renderContext->GetFrontHueRotate().value(), MAX_ROTATE);
     renderContext->UpdateFrontHueRotate(1);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
 }
 
 /**
@@ -227,12 +245,14 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateFrontSepia(0.0_vp);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    std::string message;
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
     ASSERT_EQ(renderContext->GetFrontSepia().value().ConvertToVp(), 0.0f);
     renderContext->UpdateFrontSepia(1.0_vp);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
 }
 
 /**
@@ -252,14 +272,16 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     InvertVariant invert = 0.0f;
     renderContext->UpdateFrontInvert(invert);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    std::string message;
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
     ASSERT_EQ(renderContext->GetFrontInvert().value(), InvertVariant(0.0f));
     invert = 1.0f; // 1.0 means have frontinvert
     renderContext->UpdateFrontInvert(invert);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
 }
 
 /**
@@ -279,12 +301,14 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateFrontContrast(1.0_vp);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    std::string message;
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
     ASSERT_EQ(renderContext->GetFrontContrast().value().ConvertToVp(), 1.0f);
     renderContext->UpdateFrontContrast(2.0_vp);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
 }
 
 /**
@@ -304,12 +328,14 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateFrontSaturate(1.0_vp);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    std::string message;
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
     ASSERT_EQ(renderContext->GetFrontSaturate().value().ConvertToVp(), 1.0f);
     renderContext->UpdateFrontSaturate(2.0_vp);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
 }
 
 /**
@@ -329,12 +355,14 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateFrontGrayScale(0.0_vp);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    std::string message;
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
     ASSERT_EQ(renderContext->GetFrontGrayScale().value().ConvertToVp(), 0.0f);
     renderContext->UpdateFrontGrayScale(1.0_vp);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
 }
 
 /**
@@ -354,9 +382,11 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateFrontBlurRadius(0.0_px);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    std::string message;
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
 }
 
 /**
@@ -376,12 +406,14 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto property = parentFrameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(property, nullptr);
     property->UpdateVisibility(VisibleType::VISIBLE);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    std::string message;
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
     ASSERT_EQ(property->GetVisibility().value(), VisibleType::VISIBLE);
     property->UpdateVisibility(VisibleType::INVISIBLE);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
 }
 
 /**
@@ -401,12 +433,14 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateFrontBrightness(1.0_vp);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    std::string message;
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
     ASSERT_EQ(renderContext->GetFrontBrightness().value().ConvertToVp(), 1.0f);
     renderContext->UpdateFrontBrightness(2.0_vp);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
 }
 
 /**
@@ -426,34 +460,341 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateOpacity(1);
-    EXPECT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    std::string message;
+    EXPECT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
     EXPECT_EQ(renderContext->GetOpacity().value(), 1.0f);
     renderContext->UpdateOpacity(2);
-    EXPECT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    EXPECT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
 
     parentFrameNode->tag_ = V2::MENU_WRAPPER_ETS_TAG;
-    EXPECT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    EXPECT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
 
     // parent is not FrameNode
     RefPtr<TestNode> unFrameNode = AceType::MakeRefPtr<TestNode>(0);
     unFrameNode->AddChild(childFrameNode);
-    EXPECT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    EXPECT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
 }
 
 /**
- * @tc.name: SecurityComponentCalculateCurrentVisibleRatio001
- * @tc.desc: Test security component CalculateCurrentVisibleRatio
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest018
+ * @tc.desc: Test security component CheckParentNodesEffect
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCalculateCurrentVisibleRatio001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest018, TestSize.Level1)
 {
-    RectF invalidRect(-1.0, -1.0, -1.0, -1.0);
-    RectF validRect(1.0, 1.0, 1.0, 1.0);
-    EXPECT_EQ(SecurityComponentHandler::CalculateCurrentVisibleRatio(invalidRect, validRect), 0.0);
-    EXPECT_EQ(SecurityComponentHandler::CalculateCurrentVisibleRatio(validRect, invalidRect), 0.0);
+    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parentFrameNode, nullptr);
+    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(childFrameNode, nullptr);
+    parentFrameNode->AddChild(childFrameNode);
+
+    auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
+    ASSERT_NE(renderContext, nullptr);
+    BlurStyleOption blur;
+    blur.blurStyle = BlurStyle::NO_MATERIAL;
+    renderContext->UpdateFrontBlurStyle(blur);
+    std::string message;
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
+    auto blurStyleOption = renderContext->GetFrontBlurStyle();
+    ASSERT_EQ(blurStyleOption->blurStyle, BlurStyle::NO_MATERIAL);
+    blur.blurStyle = BlurStyle::THIN;
+    blur.scale = 0.0f;
+    renderContext->UpdateFrontBlurStyle(blur);
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest019
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest019, TestSize.Level1)
+{
+    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parentFrameNode, nullptr);
+    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(childFrameNode, nullptr);
+    parentFrameNode->AddChild(childFrameNode);
+
+    auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateFrontBlurRadius(Dimension(0.0f));
+    std::string message;
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest020
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest020, TestSize.Level1)
+{
+    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parentFrameNode, nullptr);
+    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(childFrameNode, nullptr);
+    parentFrameNode->AddChild(childFrameNode);
+
+    auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBackBlendMode(BlendMode::NONE);
+    std::string message;
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
+    renderContext->UpdateBackBlendMode(BlendMode::SRC_OVER);
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
+    renderContext->UpdateBackBlendMode(BlendMode::DST_OVER);
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest021
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest021, TestSize.Level1)
+{
+    RefPtr<FrameNode> node = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(node, nullptr);
+    std::vector<RectF> borderRects;
+
+    auto renderContext = node->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
+    ASSERT_NE(renderContext, nullptr);
+    ASSERT_FALSE(SecurityComponentHandler::GetBorderRect(node, borderRects));
+    BorderWidthProperty borderWidth;
+    borderWidth.leftDimen = Dimension(0.0f);
+    borderWidth.rightDimen = Dimension(0.0f);
+    borderWidth.topDimen = Dimension(0.0f);
+    borderWidth.bottomDimen = Dimension(0.0f);
+    renderContext->UpdateBorderWidth(borderWidth);
+    ASSERT_TRUE(SecurityComponentHandler::GetBorderRect(node, borderRects));
+    borderWidth.leftDimen = Dimension(2.0f);
+    borderWidth.rightDimen = Dimension(2.0f);
+    borderWidth.topDimen = Dimension(2.0f);
+    borderWidth.bottomDimen = Dimension(2.0f);
+    renderContext->UpdateBorderWidth(borderWidth);
+    ASSERT_TRUE(SecurityComponentHandler::GetBorderRect(node, borderRects));
+    BorderColorProperty borderColor;
+    borderColor.leftColor = Color::WHITE;
+    borderColor.rightColor = Color::WHITE;
+    borderColor.topColor = Color::WHITE;
+    borderColor.bottomColor = Color::WHITE;
+    renderContext->UpdateBorderColor(borderColor);
+    ASSERT_TRUE(SecurityComponentHandler::GetBorderRect(node, borderRects));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest022
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest022, TestSize.Level1)
+{
+    float radius = 0.0;
+    float deltaY = 1.0;
+    float distance = 2.0;
+    int32_t multiplier = 1;
+
+    ASSERT_TRUE(SecurityComponentHandler::CheckDistance(deltaY, radius, distance, multiplier));
+    distance = 0.0;
+    ASSERT_FALSE(SecurityComponentHandler::CheckDistance(deltaY, radius, distance, multiplier));
+    multiplier = 0;
+    ASSERT_FALSE(SecurityComponentHandler::CheckDistance(deltaY, radius, distance, multiplier));
+    radius = 3.0;
+    multiplier = 1;
+    ASSERT_TRUE(SecurityComponentHandler::CheckDistance(deltaY, radius, distance, multiplier));
+    multiplier = -1;
+    ASSERT_TRUE(SecurityComponentHandler::CheckDistance(deltaY, radius, distance, multiplier));
+    distance = 9.0;
+    ASSERT_FALSE(SecurityComponentHandler::CheckDistance(deltaY, radius, distance, multiplier));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest023
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest023, TestSize.Level1)
+{
+    RectF parentRect = RectF(0.0, 0.0, 0.0, 0.0);
+    RectF rect = RectF(0.0, 0.0, 0.0, 0.0);
+    GradientDirection direction = GradientDirection::LEFT_TOP;
+    float ratio = 0.5;
+    float radius = 0.0;
+
+    ASSERT_FALSE(SecurityComponentHandler::CheckDiagonalLinearGradientBlur(parentRect,
+        rect, direction, ratio, radius));
+    direction = GradientDirection::LEFT_BOTTOM;
+    ASSERT_FALSE(SecurityComponentHandler::CheckDiagonalLinearGradientBlur(parentRect,
+        rect, direction, ratio, radius));
+    direction = GradientDirection::RIGHT_TOP;
+    ASSERT_FALSE(SecurityComponentHandler::CheckDiagonalLinearGradientBlur(parentRect,
+        rect, direction, ratio, radius));
+    direction = GradientDirection::RIGHT_BOTTOM;
+    ASSERT_FALSE(SecurityComponentHandler::CheckDiagonalLinearGradientBlur(parentRect,
+        rect, direction, ratio, radius));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckGetBorderRadiusTest001
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckGetBorderRadiusTest001, TestSize.Level1)
+{
+    RefPtr<FrameNode> node = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(node, nullptr);
+
+    auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->SetLayoutRect(RectF(0.0, 0.0, 10.0, 10.0));
+    layoutProperty->UpdateBackgroundType(static_cast<int32_t>(ButtonType::CIRCLE));
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::LEFT_TOP), 0.0);
+    layoutProperty->UpdateBackgroundType(static_cast<int32_t>(ButtonType::CAPSULE));
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::LEFT_TOP), 0.0);
+    layoutProperty->UpdateBackgroundType(static_cast<int32_t>(ButtonType::NORMAL));
+    auto buttonNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    node->AddChild(buttonNode);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::LEFT_TOP), 0.0);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::LEFT_BOTTOM), 0.0);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::RIGHT_TOP), 0.0);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::RIGHT_BOTTOM), 0.0);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::RIGHT), 0.0);
+    auto bgProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    BorderRadiusProperty borderRadius;
+    bgProp->UpdateBorderRadius(borderRadius);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::LEFT_TOP), 0.0);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::LEFT_BOTTOM), 0.0);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::RIGHT_TOP), 0.0);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::RIGHT_BOTTOM), 0.0);
+    borderRadius.radiusTopLeft = Dimension(10.0);
+    borderRadius.radiusTopRight = Dimension(10.0);
+    borderRadius.radiusBottomLeft = Dimension(10.0);
+    borderRadius.radiusTopLeft = Dimension(10.0);
+    bgProp->UpdateBorderRadius(borderRadius);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::LEFT_TOP), 0.0);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::LEFT_BOTTOM), 0.0);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::RIGHT_TOP), 0.0);
+    ASSERT_EQ(SecurityComponentHandler::GetBorderRadius(node, GradientDirection::RIGHT_BOTTOM), 0.0);
+}
+
+/**
+ * @tc.name: SecurityComponentCheckRectIntersectTest001
+ * @tc.desc: Test security component CheckRectIntersect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckRectIntersectTest001, TestSize.Level1)
+{
+    RectF dest = RectF(0.0f, 0.0f, 5.0f, 5.0f);
+    int32_t secNodeId = 0;
+    std::unordered_map<int32_t, std::pair<std::string, NG::RectF>> nodeId2Rect;
+    std::unordered_map<int32_t, int32_t> nodeId2Zindex;
+    std::string message;
+    ASSERT_FALSE(SecurityComponentHandler::CheckRectIntersect(dest, secNodeId, nodeId2Rect, nodeId2Zindex, message));
+
+    nodeId2Rect[1] = std::pair<std::string, NG::RectF>("", RectF(10.0f, 10.0f, 2.0f, 2.0f));
+    ASSERT_FALSE(SecurityComponentHandler::CheckRectIntersect(dest, secNodeId, nodeId2Rect, nodeId2Zindex, message));
+
+    nodeId2Zindex[0] = 0;
+    nodeId2Zindex[1] = -1;
+    nodeId2Rect[1] = std::pair<std::string, NG::RectF>("", RectF(1.0f, 1.0f, 0.0f, 0.0f));
+    ASSERT_FALSE(SecurityComponentHandler::CheckRectIntersect(dest, secNodeId, nodeId2Rect, nodeId2Zindex, message));
+
+    nodeId2Zindex[1] = 1;
+    nodeId2Rect[1] = std::pair<std::string, NG::RectF>("", RectF(1.0f, 1.0f, 0.0f, 0.0f));
+    ASSERT_FALSE(SecurityComponentHandler::CheckRectIntersect(dest, secNodeId, nodeId2Rect, nodeId2Zindex, message));
+
+    nodeId2Rect[1] = std::pair<std::string, NG::RectF>("", RectF(1.0f, 1.0f, 1.0f, 0.0f));
+    ASSERT_FALSE(SecurityComponentHandler::CheckRectIntersect(dest, secNodeId, nodeId2Rect, nodeId2Zindex, message));
+
+    nodeId2Rect[1] = std::pair<std::string, NG::RectF>("", RectF(1.0f, 1.0f, 1.0f, 1.0f));
+    ASSERT_TRUE(SecurityComponentHandler::CheckRectIntersect(dest, secNodeId, nodeId2Rect, nodeId2Zindex, message));
+}
+
+/**
+ * @tc.name: SecurityComponentUpdateClipRectTest001
+ * @tc.desc: Test security component CheckRectIntersect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentUpdateClipRectTest001, TestSize.Level1)
+{
+    RectF clipRect = RectF(0.0f, 0.0f, 1.0f, 1.0f);
+    RectF paintRect = RectF(2.0f, 2.0f, 2.0f, 2.0f);
+
+    RectF result = SecurityComponentHandler::UpdateClipRect(clipRect, paintRect);
+    ASSERT_TRUE(NearEqual(result.GetX(), 0.0f));
+    ASSERT_TRUE(NearEqual(result.GetY(), 0.0f));
+    ASSERT_TRUE(NearEqual(result.Width(), 0.0f));
+    ASSERT_TRUE(NearEqual(result.Height(), 0.0f));
+
+    paintRect = RectF(0.0f, 0.0f, 2.0f, 2.0f);
+    result = SecurityComponentHandler::UpdateClipRect(clipRect, paintRect);
+    ASSERT_TRUE(NearEqual(result.GetX(), 0.0f));
+    ASSERT_TRUE(NearEqual(result.GetY(), 0.0f));
+    ASSERT_TRUE(NearEqual(result.Width(), 1.0f));
+    ASSERT_TRUE(NearEqual(result.Height(), 1.0f));
+
+    clipRect = RectF(0.0f, 0.0f, -1.0f, -1.0f);
+    result = SecurityComponentHandler::UpdatePaintRect(paintRect, clipRect);
+    ASSERT_TRUE(NearEqual(result.GetX(), 0.0f));
+    ASSERT_TRUE(NearEqual(result.GetY(), 0.0f));
+    ASSERT_TRUE(NearEqual(result.Width(), 2.0f));
+    ASSERT_TRUE(NearEqual(result.Height(), 2.0f));
+
+    clipRect = RectF(0.0f, 0.0f, -1.0f, 0.0f);
+    result = SecurityComponentHandler::UpdatePaintRect(paintRect, clipRect);
+    ASSERT_TRUE(NearEqual(result.GetX(), 0.0f));
+    ASSERT_TRUE(NearEqual(result.GetY(), 0.0f));
+    ASSERT_TRUE(NearEqual(result.Width(), 0.0f));
+    ASSERT_TRUE(NearEqual(result.Height(), 0.0f));
+
+    clipRect = RectF(0.0f, 0.0f, 1.0f, 1.0f);
+    result = SecurityComponentHandler::UpdatePaintRect(paintRect, clipRect);
+    ASSERT_TRUE(NearEqual(result.GetX(), 0.0f));
+    ASSERT_TRUE(NearEqual(result.GetY(), 0.0f));
+    ASSERT_TRUE(NearEqual(result.Width(), 1.0f));
+    ASSERT_TRUE(NearEqual(result.Height(), 1.0f));
+}
+
+/**
+ * @tc.name: SecurityComponentIsOutOfParentWithRound001
+ * @tc.desc: Test security component IsOutOfParentWithRound
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentIsOutOfParentWithRound001, TestSize.Level1)
+{
+    RectF smallRect(1.0, 1.0, 10.0, 10.0);
+    RectF largerRect(1.0, 1.0, 12.0, 12.0);
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
+    EXPECT_EQ(SecurityComponentHandler::IsOutOfParentWithRound(smallRect, largerRect, buttonInfo), true);
+    EXPECT_EQ(SecurityComponentHandler::IsOutOfParentWithRound(largerRect, smallRect, buttonInfo), false);
 }
 
 /**
@@ -484,7 +825,8 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentInitButtonInfo001, TestS
     RefPtr<FrameNode> node = AceType::MakeRefPtr<FrameNode>(V2::MENU_WRAPPER_ETS_TAG, 1, pattern, false);
     std::string compInfo;
     Security::SecurityComponent::SecCompType type;
-    EXPECT_FALSE(SecurityComponentHandler::InitButtonInfo(compInfo, node, type));
+    std::string message;
+    EXPECT_FALSE(SecurityComponentHandler::InitButtonInfo(compInfo, node, type, message));
 }
 
 /**
@@ -496,6 +838,18 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentInitButtonInfo001, TestS
 HWTEST_F(SecurityComponentModelTestNg, PasteButtonModelNGCreateNode001, TestSize.Level1)
 {
     auto frameNode = PasteButtonModelNG::GetInstance()->CreateNode(0, 0, 0, false);
+    ASSERT_NE(frameNode, nullptr);
+}
+
+/**
+ * @tc.name: PasteButtonModelNGCreateNode002
+ * @tc.desc: Test paste button create symbol Node
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, PasteButtonModelNGCreateNode002, TestSize.Level1)
+{
+    auto frameNode = PasteButtonModelNG::GetInstance()->CreateNode(0, 0, 0, false, 0);
     ASSERT_NE(frameNode, nullptr);
 }
 
@@ -636,6 +990,49 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutElementTextElement
 }
 
 /**
+ * @tc.name: SecurityComponentLayoutElementTextElement002
+ * @tc.desc: Test security component text element
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutElementTextElement002, TestSize.Level1)
+{
+    TextLayoutElement text;
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        BUTTON_TYPE_NULL, V2::LOCATION_BUTTON_ETS_TAG);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<SecurityComponentLayoutProperty> property =
+        AceType::MakeRefPtr<SecurityComponentLayoutProperty>();
+    RefPtr<TextLayoutProperty> textProp = AceType::MakeRefPtr<TextLayoutProperty>();
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapper> wrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geoNode, textProp);
+    property->UpdateSecurityComponentDescription(-1);
+    text.Init(property, wrapper);
+    ASSERT_FALSE(text.isExist_);
+    std::optional<SizeF> currentTextSize;
+    ASSERT_FALSE(text.DidExceedMaxLines(currentTextSize));
+    property->UpdateSecurityComponentDescription(0);
+    property->UpdateFontSize(Dimension(15.0));
+    property->UpdateAdaptMaxFontSize(Dimension(20.0));
+    property->UpdateAdaptMinFontSize(Dimension(10.0));
+    text.Init(property, wrapper);
+    ASSERT_TRUE(text.isExist_);
+    ASSERT_TRUE(text.isSetSize_);
+
+    text.UpdateFontSize();
+    ASSERT_EQ(property->GetFontSize()->ConvertToFp(), 15.0);
+    property->UpdateBackgroundTopPadding(Dimension(0.0));
+    property->UpdateBackgroundBottomPadding(Dimension(0.0));
+    ASSERT_EQ(text.GetHeightConstraint(property, 30.0), 30.0);
+    property->UpdateTextIconLayoutDirection(SecurityComponentLayoutDirection::VERTICAL);
+    property->UpdateIconSize(Dimension(5.0));
+    property->UpdateTextIconSpace(Dimension(5.0));
+    ASSERT_EQ(text.GetHeightConstraint(property, 30.0), 20.0);
+    ASSERT_FALSE(text.DidExceedMaxLines(currentTextSize));
+}
+
+/**
  * @tc.name: SecurityComponentPatternOnDirtyLayoutWrapperSwap001
  * @tc.desc: Test security component OnDirtyLayoutWrapperSwap
  * @tc.type: FUNC
@@ -721,9 +1118,9 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternInitOnKeyEvent001
 HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternIsParentMenu001, TestSize.Level1)
 {
     RefPtr<SecurityComponentPattern> pattern = AceType::MakeRefPtr<SecurityComponentPattern>();
-    auto menuNode = AceType::MakeRefPtr<FrameNode>(V2::MENU_WRAPPER_ETS_TAG, 1, pattern, false);
-    auto locationButton = AceType::MakeRefPtr<FrameNode>(V2::LOCATION_BUTTON_ETS_TAG, 1, pattern, false);
-    auto text = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1, pattern, false);
+    auto menuNode = AceType::MakeRefPtr<FrameNode>(V2::MENU_WRAPPER_ETS_TAG, 1, pattern);
+    auto locationButton = AceType::MakeRefPtr<FrameNode>(V2::LOCATION_BUTTON_ETS_TAG, 1, pattern);
+    auto text = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1, pattern);
 
     locationButton->SetParent(text);
     ASSERT_FALSE(pattern->IsParentMenu(locationButton));
@@ -820,12 +1217,13 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternInitOnTouchEvent0
     locationInfo.SetTouchType(TouchType::DOWN);
     Offset offset(1.0, 1.0);
     locationInfo.SetLocalLocation(offset);
-    TouchEventInfo touch("");
-    touch.AddTouchLocationInfo(std::move(locationInfo));
+    TouchEventInfo info("");
+    info.AddTouchLocationInfo(std::move(locationInfo));
+
     ASSERT_TRUE(gestureHub->touchEventActuator_ != nullptr);
     ASSERT_TRUE(gestureHub->touchEventActuator_->touchEvents_.size() > 0);
     auto impl = gestureHub->touchEventActuator_->touchEvents_.front()->callback_;
-    impl(touch);
+    impl(info);
     ASSERT_NE(pattern.onTouchListener_, nullptr);
 }
 
@@ -1303,18 +1701,19 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmUpdateVer
 
     OffsetF offsetIcon(0.0, 0.0);
     OffsetF offsetText(0.0, 0.0);
+    SizeF childSize(0.0, 0.0);
     buttonAlgorithm->icon_.height_ = 2.0;
     buttonAlgorithm->middle_.height_ = 2.0;
     buttonAlgorithm->icon_.width_ = 2.0;
     buttonAlgorithm->text_.width_ = 1.0;
-    buttonAlgorithm->UpdateVerticalOffset(offsetIcon, offsetText);
+    buttonAlgorithm->UpdateVerticalOffset(offsetIcon, offsetText, childSize);
     EXPECT_EQ(offsetText.GetX(), 0.5); // (icon_.width_ - text_.width_) / 2
     EXPECT_EQ(offsetText.GetY(), 4.0); // icon_.height_ + middle_.height_
 
     OffsetF offsetIcon1(0.0, 0.0);
     OffsetF offsetText1(0.0, 0.0);
     buttonAlgorithm->text_.width_ = 3.0;
-    buttonAlgorithm->UpdateVerticalOffset(offsetIcon1, offsetText1);
+    buttonAlgorithm->UpdateVerticalOffset(offsetIcon1, offsetText1, childSize);
     EXPECT_EQ(offsetText1.GetX(), 0);
     EXPECT_EQ(offsetText1.GetY(), 4.0); // icon_.height_ + middle_.height_
     EXPECT_EQ(offsetIcon1.GetX(), 0.5); // (text_.width_ - icon_.width_) / 2
@@ -1339,18 +1738,19 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmUpdateHor
 
     OffsetF offsetIcon(0.0, 0.0);
     OffsetF offsetText(0.0, 0.0);
+    SizeF childSize(0.0, 0.0);
     buttonAlgorithm->icon_.width_ = 2.0;
     buttonAlgorithm->middle_.width_ = 2.0;
     buttonAlgorithm->icon_.height_ = 2.0;
     buttonAlgorithm->text_.height_ = 1.0;
-    buttonAlgorithm->UpdateHorizontalOffset(layoutWrapper, offsetIcon, offsetText);
+    buttonAlgorithm->UpdateHorizontalOffset(layoutWrapper, offsetIcon, offsetText, childSize);
     EXPECT_EQ(offsetText.GetX(), 4.0); // icon_.width_ + middle_.width_
     EXPECT_EQ(offsetText.GetY(), 0.5); // (icon_.height_ - text_.height_) / 2
 
     OffsetF offsetIcon1(0.0, 0.0);
     OffsetF offsetText1(0.0, 0.0);
     buttonAlgorithm->text_.height_ = 3.0;
-    buttonAlgorithm->UpdateHorizontalOffset(layoutWrapper, offsetIcon1, offsetText1);
+    buttonAlgorithm->UpdateHorizontalOffset(layoutWrapper, offsetIcon1, offsetText1, childSize);
     EXPECT_EQ(offsetText1.GetX(), 4.0); // icon_.height_ + middle_.height_
     EXPECT_EQ(offsetText1.GetY(), 0);
     EXPECT_EQ(offsetIcon1.GetY(), 0.5); // (text_.width_ - icon_.width_) / 2
@@ -1377,13 +1777,13 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmGetTextDi
     auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
     ASSERT_NE(buttonAlgorithm, nullptr);
     
-    textLayoutProperty->UpdateContent("test");
+    textLayoutProperty->UpdateContent(u"test");
     EXPECT_EQ(buttonAlgorithm->GetTextDirection(layoutWrapper), TextDirection::LTR);
 
-    textLayoutProperty->UpdateContent("تۇرۇشلۇق ئورۇن"); // this text is read from RTL
+    textLayoutProperty->UpdateContent(u"تۇرۇشلۇق ئورۇن"); // this text is read from RTL
     EXPECT_EQ(buttonAlgorithm->GetTextDirection(layoutWrapper), TextDirection::RTL);
 
-    textLayoutProperty->UpdateContent(""); // this text empty, should ret default LTR
+    textLayoutProperty->UpdateContent(u""); // this text empty, should ret default LTR
     EXPECT_EQ(buttonAlgorithm->GetTextDirection(layoutWrapper), TextDirection::LTR);
 }
 
@@ -1468,5 +1868,249 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmFillBlank
     EXPECT_EQ(buttonAlgorithm2.right_.width_, 1.0);
     EXPECT_EQ(buttonAlgorithm2.top_.height_, 1.0);
     EXPECT_EQ(buttonAlgorithm2.bottom_.height_, 1.0);
+}
+
+void SecurityComponentModelTestNg::InitLayoutAlgorithm(RefPtr<SecurityComponentLayoutAlgorithm>& buttonAlgorithm)
+{
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto textGeometryNode = textNode->geometryNode_;
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    textLayoutProperty->UpdateContent(u"Security component");
+    textLayoutProperty->UpdateFontSize(Dimension(TEST_FONT_SIZE));
+    auto textWrapperNode = AceType::MakeRefPtr<LayoutWrapperNode>(
+        AceType::WeakClaim(AceType::RawPtr(textNode)), textGeometryNode, textLayoutProperty);
+    auto secCompProperty = AceType::MakeRefPtr<SecurityComponentLayoutProperty>();
+    secCompProperty->UpdateSecurityComponentDescription(1);
+
+    buttonAlgorithm->text_ = TextLayoutElement();
+    RefPtr<LayoutWrapper> textWrapper = textWrapperNode;
+    buttonAlgorithm->text_.Init(secCompProperty, textWrapper);
+    buttonAlgorithm->text_.width_ = 4.0; // set width 4.0
+    buttonAlgorithm->isVertical_ = true;
+}
+
+/**
+ * @tc.name: SecurityComponentLayoutAlgorithmIsTextOutOfRangeInCircle001
+ * @tc.desc: Test security component IsTextOutOfRangeInCircle
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsTextOutOfRangeInCircle001, TestSize.Level1)
+{
+    auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
+    ASSERT_NE(buttonAlgorithm, nullptr);
+    InitLayoutAlgorithm(buttonAlgorithm);
+
+    buttonAlgorithm->componentWidth_ = 10.0;
+    buttonAlgorithm->componentHeight_ = 10.0;
+    buttonAlgorithm->currentFontSize_ = Dimension(2.0);
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(4, 4);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(6, 4);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(4, 6);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(6, 6);
+    EXPECT_FALSE(buttonAlgorithm->IsTextOutOfRangeInCircle());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(0, 0);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(2, 0);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(0, 2);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(2, 2);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInCircle());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(0, 8);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(2, 8);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(0, 10);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(2, 10);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInCircle());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(8, 0);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(10, 0);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(8, 2);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(10, 2);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInCircle());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(8, 8);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(10, 8);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(8, 10);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(10, 10);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInCircle());
+}
+
+/**
+ * @tc.name: SecurityComponentLayoutAlgorithmIsTextOutOfRangeInCapsule001
+ * @tc.desc: Test security component IsTextOutOfRangeInCapsule
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsTextOutOfRangeInCapsule001, TestSize.Level1)
+{
+    auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
+    ASSERT_NE(buttonAlgorithm, nullptr);
+    InitLayoutAlgorithm(buttonAlgorithm);
+
+    buttonAlgorithm->componentWidth_ = 15.0;
+    buttonAlgorithm->componentHeight_ = 10.0;
+    buttonAlgorithm->currentFontSize_ = Dimension(2.0);
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(4, 4);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(6, 4);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(4, 6);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(6, 6);
+    EXPECT_FALSE(buttonAlgorithm->IsTextOutOfRangeInCapsule());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(0, 0);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(2, 0);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(0, 2);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(2, 2);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInCapsule());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(0, 8);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(2, 8);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(0, 10);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(2, 10);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInCapsule());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(13, 0);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(15, 0);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(13, 2);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(15, 2);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInCapsule());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(13, 8);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(15, 8);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(13, 10);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(15, 10);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInCapsule());
+}
+
+/**
+ * @tc.name: SecurityComponentLayoutAlgorithmIsTextOutOfRangeInCapsule002
+ * @tc.desc: Test security component IsTextOutOfRangeInCapsule
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsTextOutOfRangeInCapsule002, TestSize.Level1)
+{
+    auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
+    ASSERT_NE(buttonAlgorithm, nullptr);
+    InitLayoutAlgorithm(buttonAlgorithm);
+
+    buttonAlgorithm->componentWidth_ = 10.0;
+    buttonAlgorithm->componentHeight_ = 15.0;
+    buttonAlgorithm->currentFontSize_ = Dimension(2.0);
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(4, 4);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(6, 4);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(4, 6);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(6, 6);
+    EXPECT_FALSE(buttonAlgorithm->IsTextOutOfRangeInCapsule());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(0, 0);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(2, 0);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(0, 2);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(2, 2);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInCapsule());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(0, 13);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(2, 13);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(0, 15);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(2, 15);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInCapsule());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(8, 0);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(10, 0);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(8, 2);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(10, 2);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInCapsule());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(8, 13);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(10, 13);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(8, 15);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(10, 15);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInCapsule());
+}
+
+/**
+ * @tc.name: SecurityComponentLayoutAlgorithmIsTextOutOfRangeInNormal001
+ * @tc.desc: Test security component IsTextOutOfRangeInNormal
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsTextOutOfRangeInNormal001, TestSize.Level1)
+{
+    auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
+    ASSERT_NE(buttonAlgorithm, nullptr);
+    InitLayoutAlgorithm(buttonAlgorithm);
+    auto buttonNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    buttonNode->SetInternal();
+    buttonAlgorithm->buttonLayoutProperty_ = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonAlgorithm->buttonLayoutProperty_);
+    buttonAlgorithm->buttonLayoutProperty_->UpdateBorderRadius(BorderRadiusProperty(Dimension(5.0)));
+
+    buttonAlgorithm->componentWidth_ = 15.0;
+    buttonAlgorithm->componentHeight_ = 10.0;
+    buttonAlgorithm->currentFontSize_ = Dimension(2.0);
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(4, 4);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(6, 4);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(4, 6);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(6, 6);
+    EXPECT_FALSE(buttonAlgorithm->IsTextOutOfRangeInNormal());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(0, 0);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(2, 0);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(0, 2);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(2, 2);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInNormal());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(0, 8);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(2, 8);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(0, 10);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(2, 10);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInNormal());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(13, 0);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(15, 0);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(13, 2);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(15, 2);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInNormal());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(13, 8);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(15, 8);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(13, 10);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(15, 10);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInNormal());
+}
+
+/**
+ * @tc.name: SecurityComponentLayoutAlgorithmUpdateTextRectPointTest001
+ * @tc.desc: Test security component IsTextOutOfRangeInNormal
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmUpdateTextRectPointTest001, TestSize.Level1)
+{
+    auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
+    ASSERT_NE(buttonAlgorithm, nullptr);
+    InitLayoutAlgorithm(buttonAlgorithm);
+    auto buttonNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    buttonNode->SetInternal();
+    buttonAlgorithm->buttonLayoutProperty_ = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonAlgorithm->buttonLayoutProperty_);
+    buttonAlgorithm->buttonLayoutProperty_->UpdateBorderRadius(BorderRadiusProperty(Dimension(5.0)));
+    buttonAlgorithm->icon_.width_ = 6.0;
+    buttonAlgorithm->icon_.height_ = 6.0;
+    buttonAlgorithm->text_.width_ = 4.0;
+    buttonAlgorithm->text_.height_ = 4.0;
+    buttonAlgorithm->top_.height_ = 10.0;
+    buttonAlgorithm->left_.width_ = 10.0;
+    buttonAlgorithm->middle_.height_ = 5.0;
+    buttonAlgorithm->middle_.width_ = 5.0;
+
+    buttonAlgorithm->UpdateTextRectPoint();
+    ASSERT_TRUE(NearEqual(buttonAlgorithm->textLeftTopPoint_.Width(), 11.0f));
+    ASSERT_TRUE(NearEqual(buttonAlgorithm->textLeftTopPoint_.Height(), 21.0f));
+
+    buttonAlgorithm->icon_.width_ = 3.0;
+    buttonAlgorithm->icon_.height_ = 3.0;
+    buttonAlgorithm->UpdateTextRectPoint();
+    ASSERT_TRUE(NearEqual(buttonAlgorithm->textLeftTopPoint_.Width(), 10.0f));
+    ASSERT_TRUE(NearEqual(buttonAlgorithm->textLeftTopPoint_.Height(), 18.0f));
+
+    buttonAlgorithm->isVertical_ = false;
+    buttonAlgorithm->UpdateTextRectPoint();
+    ASSERT_TRUE(NearEqual(buttonAlgorithm->textLeftTopPoint_.Width(), 18.0f));
+    ASSERT_TRUE(NearEqual(buttonAlgorithm->textLeftTopPoint_.Height(), 10.0f));
+
+    buttonAlgorithm->icon_.width_ = 6.0;
+    buttonAlgorithm->icon_.height_ = 6.0;
+    buttonAlgorithm->UpdateTextRectPoint();
+    ASSERT_TRUE(NearEqual(buttonAlgorithm->textLeftTopPoint_.Width(), 21.0f));
+    ASSERT_TRUE(NearEqual(buttonAlgorithm->textLeftTopPoint_.Height(), 11.0f));
 }
 } // namespace OHOS::Ace::NG

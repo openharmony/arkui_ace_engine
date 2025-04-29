@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,30 +23,15 @@ class ArkThemeWhiteList {
         'AlphabetIndexer',
         'Badge',
         'Button',
-        'Checkbox',
-        'CheckboxGroup',
-        'Counter',
         'DataPanel',
-        'DatePicker',
-        'Divider',
-        'LoadingProgress',
         'Menu',
         'MenuItem',
         'PatternLock',
-        'Progress',
         'QRCode',
         'Radio',
         'Scroll',
-        'Search',
-        'Select',
-        'Slider',
         'Swiper',
         'Text',
-        'TextClock',
-        'TextInput',
-        'TextPicker',
-        'TimePicker',
-        'Toggle',
     ];
 
     /**

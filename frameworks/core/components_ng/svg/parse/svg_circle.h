@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_CIRCLE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_CIRCLE_H
 
+#include "frameworks/core/components_ng/svg/base/svg_length_scale_rule.h"
 #include "frameworks/core/components_ng/svg/parse/svg_attributes_parser.h"
 #include "frameworks/core/components_ng/svg/parse/svg_graphic.h"
 
@@ -30,12 +31,8 @@ public:
 
     static RefPtr<SvgNode> Create();
     void PrepareAnimation(const RefPtr<SvgAnimation>& animate) override;
-
-#ifndef USE_ROSEN_DRAWING
-    SkPath AsPath(const Size& viewPort) const override;
-#else
+    RSRecordingPath AsPath(const SvgLengthScaleRule& lengthRule) override;
     RSRecordingPath AsPath(const Size& viewPort) const override;
-#endif
     bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
 
 private:

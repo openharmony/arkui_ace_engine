@@ -16,7 +16,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_image_ffi.h"
 
 #ifndef __NON_OHOS__
-#include "foundation/multimedia/image_framework/frameworks/kits/cj/include/pixel_map_impl.h"
+#include "pixel_map_impl.h"
 #endif
 #include "cj_lambda.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
@@ -25,14 +25,6 @@ using namespace OHOS::Ace::Framework;
 using namespace OHOS::Ace;
 
 namespace {
-const std::vector<ImageFit> IMAGE_FITS = {
-    ImageFit::FILL,
-    ImageFit::CONTAIN,
-    ImageFit::COVER,
-    ImageFit::NONE,
-    ImageFit::SCALE_DOWN,
-    ImageFit::FITWIDTH
-};
 const std::vector<ImageRepeat> OBJECT_REPEATS = {
     ImageRepeat::NO_REPEAT,
     ImageRepeat::REPEAT_X,
@@ -49,6 +41,18 @@ const std::vector<ImageRenderMode> IMAGE_RENDER_MODES = {
     ImageRenderMode::ORIGINAL,
     ImageRenderMode::TEMPLATE
 };
+const std::vector<DynamicRangeMode> IMAGE_DYNAMICRANGE_MODES = {
+    DynamicRangeMode::HIGH,
+    DynamicRangeMode::CONSTRAINT,
+    DynamicRangeMode::STANDARD
+};
+const std::vector<CopyOptions> IMAGE_COPY_OPTIONS = {
+    CopyOptions::None,
+    CopyOptions::InApp,
+    CopyOptions::Local,
+    CopyOptions::Distributed
+};
+constexpr uint32_t FIT_MATRIX = 16;
 } // namespace
 
 extern "C" {
@@ -86,11 +90,36 @@ void FfiOHOSAceFrameworkImageCreateWithPixelMap(int64_t id)
 #endif
 }
 
+void FfiOHOSAceFrameworkImageCreateWithContent(int32_t imageContent)
+{
+    if (imageContent != 0) {
+        LOGE("invalid value for image content");
+        return;
+    }
+
+    ImageModel::GetInstance()->ResetImage();
+}
+
 void FfiOHOSAceFrameworkImageSetAlt(const char* url)
 {
     std::string bundleName;
     std::string moduleName;
     ImageModel::GetInstance()->SetAlt(ImageSourceInfo { url, bundleName, moduleName });
+}
+
+void FfiOHOSAceFrameworkImageSetAltWithPixelMap(int64_t pixelMapId)
+{
+#ifndef __NON_OHOS__
+    auto instance = OHOS::FFI::FFIData::GetData<OHOS::Media::PixelMapImpl>(pixelMapId);
+    if (!instance) {
+        LOGE("[PixelMap] instance not exist %{public}" PRId64, pixelMapId);
+        return;
+    }
+    std::shared_ptr<OHOS::Media::PixelMap> pixelMap = instance->GetRealPixelMap();
+    RefPtr<PixelMap> pixelMapRef = PixelMap::CreatePixelMap(&pixelMap);
+    auto srcInfo = ImageSourceInfo(pixelMapRef);
+    ImageModel::GetInstance()->SetAlt(srcInfo);
+#endif
 }
 
 CJ_EXPORT void FfiOHOSAceFrameworkImageSetBorderRadius()
@@ -100,11 +129,15 @@ CJ_EXPORT void FfiOHOSAceFrameworkImageSetBorderRadius()
 
 void FfiOHOSAceFrameworkImageSetObjectFit(int32_t objectFit)
 {
-    if (!OHOS::Ace::Framework::Utils::CheckParamsValid(objectFit, IMAGE_FITS.size())) {
-        LOGE("invalid value for image fit");
-        return;
+    int32_t parseRes = objectFit;
+    if (parseRes < static_cast<int32_t>(ImageFit::FILL) || parseRes > static_cast<int32_t>(ImageFit::MATRIX)) {
+        parseRes = static_cast<int32_t>(ImageFit::COVER);
     }
-    ImageModel::GetInstance()->SetImageFit(IMAGE_FITS[objectFit]);
+    auto fit = static_cast<ImageFit>(parseRes);
+    if (parseRes == FIT_MATRIX) {
+        fit = ImageFit::MATRIX;
+    }
+    ImageModel::GetInstance()->SetImageFit(fit);
 }
 
 void FfiOHOSAceFrameworkImageSetObjectRepeat(int32_t objectRepeat)
@@ -166,6 +199,47 @@ void FfiOHOSAceFrameworkImageSetFitOriginalSize(bool isFitOriginalSize)
     ImageModel::GetInstance()->SetFitOriginSize(isFitOriginalSize);
 }
 
+void FfiOHOSAceFrameworkImageSetColorFilter(void* vectorHandle)
+{
+    const auto& matrix = *reinterpret_cast<std::vector<float>*>(vectorHandle);
+    ImageModel::GetInstance()->SetColorFilterMatrix(matrix);
+}
+
+void FfiOHOSAceFrameworkImageDynamicRangeMode(int32_t value)
+{
+    if (!OHOS::Ace::Framework::Utils::CheckParamsValid(value, IMAGE_DYNAMICRANGE_MODES.size())) {
+        LOGE("invalid value for image dynamic rangeMode");
+        return;
+    }
+    ImageModel::GetInstance()->SetDynamicRangeMode(IMAGE_DYNAMICRANGE_MODES[value]);
+}
+
+void FfiOHOSAceFrameworkImageCopyOption(int32_t value)
+{
+    if (!OHOS::Ace::Framework::Utils::CheckParamsValid(value, IMAGE_COPY_OPTIONS.size())) {
+        LOGE("invalid value for image copy option");
+        return;
+    }
+    ImageModel::GetInstance()->SetCopyOption(IMAGE_COPY_OPTIONS[value]);
+}
+
+void FfiOHOSAceFrameworkImageDraggable(bool value)
+{
+    ImageModel::GetInstance()->SetDraggable(value);
+}
+
+void FfiOHOSAceFrameworkImageOnErrorV2(void (*callback)(CJImageErrorV2 errorInfo))
+{
+    auto onError = [ffiOnError = CJLambda::Create(callback)](const LoadImageFailEvent& newInfo) -> void {
+        CJImageErrorV2 ffiErrorInfo {};
+        ffiErrorInfo.componentWidth = newInfo.GetComponentWidth();
+        ffiErrorInfo.componentHeight = newInfo.GetComponentHeight();
+        ffiErrorInfo.message = newInfo.GetErrorMessage().c_str();
+        ffiOnError(ffiErrorInfo);
+    };
+    ImageModel::GetInstance()->SetOnError(onError);
+}
+
 void FfiOHOSAceFrameworkImageOnError(void (*callback)(CJImageError errorInfo))
 {
     auto onError = [ffiOnError = CJLambda::Create(callback)](const LoadImageFailEvent& newInfo) -> void {
@@ -183,6 +257,24 @@ void FfiOHOSAceFrameworkImageOnFinish(void (*callback)())
         ffiOnFinish();
     };
     ImageModel::GetInstance()->SetSvgAnimatorFinishEvent(onFinish);
+}
+
+void FfiOHOSAceFrameworkImageOnCompleteV2(void (*callback)(CJImageCompleteV2 completeInfo))
+{
+    auto onComplete = [ffiOnComplete = CJLambda::Create(callback)](const LoadImageSuccessEvent& newInfo) -> void {
+        CJImageCompleteV2 ffiCompleteInfo {};
+        ffiCompleteInfo.width = newInfo.GetWidth();
+        ffiCompleteInfo.height = newInfo.GetHeight();
+        ffiCompleteInfo.componentWidth = newInfo.GetComponentWidth();
+        ffiCompleteInfo.componentHeight = newInfo.GetComponentHeight();
+        ffiCompleteInfo.loadingStatus = newInfo.GetLoadingStatus();
+        ffiCompleteInfo.contentWidth = newInfo.GetContentWidth();
+        ffiCompleteInfo.contentHeight = newInfo.GetContentHeight();
+        ffiCompleteInfo.contentOffsetX = newInfo.GetContentOffsetX();
+        ffiCompleteInfo.contentOffsetY = newInfo.GetContentOffsetY();
+        ffiOnComplete(ffiCompleteInfo);
+    };
+    ImageModel::GetInstance()->SetOnComplete(onComplete);
 }
 
 void FfiOHOSAceFrameworkImageOnComplete(void (*callback)(CJImageComplete completeInfo))

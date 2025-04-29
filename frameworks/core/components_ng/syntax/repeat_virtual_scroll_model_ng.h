@@ -36,11 +36,13 @@ public:
         const std::function<void(const std::string& fromKey, uint32_t forIndex)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetKeys4Range,
         const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetTypes4Range,
-        const std::function<void(uint32_t from, uint32_t to)>& onSetActiveRange) override;
+        const std::function<void(int32_t from, int32_t to)>& onSetActiveRange,
+        bool reusable = true) override;
 
     void UpdateRenderState(uint32_t totalCount, bool visibleItemsChanged) override;
 
     void OnMove(std::function<void(int32_t, int32_t)>&& onMove) override;
+    void SetCreateByTemplate(bool isCreatedByTemplate) override;
 };
 
 } // namespace OHOS::Ace::NG

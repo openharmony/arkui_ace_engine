@@ -1,0 +1,66 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+// 测试代码路径
+import alphabetIndexerPopupUnselectedColorTest from '../MyTest/AlphabetIndexerPopupUnselectedColorTest';
+import { loadComponentTestEntry } from '@ohos.arkui.componentTest';
+
+@Entry
+@Component
+struct AlphabetIndexerPopupUnselectedColorSample {
+  private arrayA: string[] = ['甲', '乙', '丙']
+  private arrayB: string[] = ['a', 'b', 'c', 'd']
+  @State popupUnselectedColorType: ResourceColor = 0x808080
+
+  aboutToAppear(): void {
+    loadComponentTestEntry(alphabetIndexerPopupUnselectedColorTest);
+  }
+
+  build() {
+    Column() {
+      AlphabetIndexer({ arrayValue: this.arrayA, selected: 0 })
+        .onRequestPopupData((index: number) => {
+          if (this.arrayA[index] == '甲') {
+            return this.arrayB
+          } else {
+            return []
+          }
+        })
+        .usingPopup(true)
+        .margin({ left: 200 })
+        .popupUnselectedColor(Color.Gray)
+        .id('alphabetIndexerPopupUnselectedColor1')
+      AlphabetIndexer({ arrayValue: this.arrayA, selected: 0 })
+        .onRequestPopupData((index: number) => {
+          if (this.arrayA[index] == '甲') {
+            return this.arrayB
+          } else {
+            return []
+          }
+        })
+        .usingPopup(true)
+        .margin({ left: 200 })
+        .popupUnselectedColor(this.popupUnselectedColorType)
+        .id('alphabetIndexerPopupUnselectedColor2')
+      Button('AlphabetIndexerPopupUnselectedColor1')
+        .onClick(() => {
+          this.popupUnselectedColorType = '#ffa500'
+        })
+      Button('AlphabetIndexerPopupUnselectedColor2')
+        .onClick(() => {
+          this.popupUnselectedColorType = $r('sys.color.ohos_id_color_text_hyperlink')
+        })
+    }
+  }
+}

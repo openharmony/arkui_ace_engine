@@ -17,10 +17,19 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_ITEM_DRAG_MANAGER_H
 
 #include "base/memory/ace_type.h"
+#include "base/geometry/ng/vector.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/syntax/for_each_base_node.h"
 
 namespace OHOS::Ace::NG {
+
+class RenderContext;
+
+enum class ListItemDragState {
+    IDLE,
+    LONG_PRESS,
+    DRAGGING,
+};
 class ListItemDragManager : public AceType {
     DECLARE_ACE_TYPE(ListItemDragManager, AceType)
 
@@ -44,6 +53,8 @@ public:
 
     void InitDragDropEvent();
     void DeInitDragDropEvent();
+    void SetIsNeedDividerAnimation(bool isNeedDividerAnimation);
+
 private:
     void HandleOnItemLongPress(const GestureEvent& info);
     void HandleOnItemDragStart(const GestureEvent& info);
@@ -60,11 +71,14 @@ private:
     void SetPosition(const OffsetF& offset);
     void ResetPrevScaleNode();
     int32_t ScaleNearItem(int32_t index, const RectF& rect, const OffsetF& delta);
+    int32_t CalcMainNearIndex(const int32_t index, const OffsetF& delta);
+    int32_t CalcCrossNearIndex(const int32_t index, const OffsetF& delta);
     int32_t GetIndex() const;
     int32_t GetLanes() const;
     bool IsInHotZone(int32_t index, const RectF& frameRect) const;
     RefPtr<FrameNode> GetListFrameNode() const;
-
+    OffsetF GetParentPaddingOffset();
+    
     OffsetF dragOffset_;
     WeakPtr<FrameNode> frameNode_;
     WeakPtr<ForEachBaseNode> forEachNode_;
@@ -75,7 +89,9 @@ private:
     Axis axis_ = Axis::VERTICAL;
     int32_t totalCount_ = -1;
     int32_t lanes_ = 1;
+    bool isStackFromEnd_ = false;
     bool scrolling_ = false;
+    bool isSwapAnimationStopped_ = true;
     OffsetF realOffset_;
 
     int32_t fromIndex_ = -1;
@@ -83,6 +99,7 @@ private:
     VectorF prevScale_{ 1.f, 1.f };
     Shadow prevShadow_;
     int32_t prevZIndex_ = 0;
+    ListItemDragState dragState_ = ListItemDragState::IDLE;
 };
 } // namespace OHOS::Ace::NG
 

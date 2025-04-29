@@ -23,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
+#include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -37,6 +38,7 @@ inline constexpr UIState UI_STATE_FOCUSED = 1 << 1;
 inline constexpr UIState UI_STATE_DISABLED = 1 << 2;
 // used for radio, checkbox, switch.
 inline constexpr UIState UI_STATE_SELECTED = 1 << 3;
+inline constexpr UIState UI_STATE_UNKNOWN = 1 << 9;
 
 // StateStyleManager is mainly used to manage the setting and refresh of state styles.
 class StateStyleManager : public virtual AceType {
@@ -56,14 +58,62 @@ public:
         return currentState_;
     }
 
+    // this function should only be called by the frontend parsing layer to add a supported UI state.
     void AddSupportedState(UIState state)
     {
         supportedStates_ = supportedStates_ | state;
+        if (frontendSubscribers_ & UI_STATE_UNKNOWN) {
+            frontendSubscribers_ = frontendSubscribers_ | state;
+        }
     }
 
     void SetSupportedStates(UIState state)
     {
         supportedStates_ = state;
+    }
+
+    void AddSupportedUIStateWithCallback(UIState state, std::function<void(uint64_t)>& callback, bool isInner)
+    {
+        if (state == UI_STATE_NORMAL) {
+            return;
+        }
+        if (!HasStateStyle(state)) {
+            supportedStates_ = supportedStates_ | state;
+        }
+        if (isInner) {
+            innerStateStyleSubscribers_.first |= state;
+            innerStateStyleSubscribers_.second = callback;
+        } else {
+            userStateStyleSubscribers_.first |= state;
+            userStateStyleSubscribers_.second = callback;
+        }
+    }
+
+    bool GetUserSetStateStyle()
+    {
+        bool isSetState = true;
+
+        if (innerStateStyleSubscribers_.first == UI_STATE_UNKNOWN &&
+            userStateStyleSubscribers_.first == UI_STATE_UNKNOWN && frontendSubscribers_ == UI_STATE_UNKNOWN) {
+            isSetState = false;
+        }
+        return isSetState;
+    }
+
+    void RemoveSupportedUIState(UIState state, bool isInner)
+    {
+        if (state == UI_STATE_NORMAL) {
+            return;
+        }
+        if (isInner) {
+            innerStateStyleSubscribers_.first &= ~state;
+        } else {
+            userStateStyleSubscribers_.first &= ~state;
+        }
+        UIState temp = frontendSubscribers_ | innerStateStyleSubscribers_.first | userStateStyleSubscribers_.first;
+        if ((temp & state) != state) {
+            supportedStates_ = supportedStates_ & ~state;
+        }
     }
 
     bool IsCurrentStateOn(UIState state) const
@@ -83,6 +133,16 @@ public:
         }
     }
 
+    void SetScrollingFeatureForbidden(bool scrollingFeatureForbidden)
+    {
+        scrollingFeatureForbidden_ = scrollingFeatureForbidden;
+    }
+
+    bool GetScrollingFeatureForbidden()
+    {
+        return scrollingFeatureForbidden_;
+    }
+
     void UpdateCurrentUIState(UIState state)
     {
         if (!HasStateStyle(state)) {
@@ -91,7 +151,7 @@ public:
         auto temp = currentState_ | state;
         if (temp != currentState_) {
             currentState_ = temp;
-            FireStateFunc(false);
+            FireStateFunc(state, currentState_, false);
         }
     }
 
@@ -106,7 +166,7 @@ public:
         auto temp = currentState_ ^ state;
         if (temp != currentState_) {
             currentState_ = temp;
-            FireStateFunc(true);
+            FireStateFunc(state, currentState_, true);
         }
     }
 
@@ -123,11 +183,13 @@ public:
 
     void ClearStateStyleTask()
     {
-        ResetPressedState();
+        DeletePressStyleTask();
+        ResetPressedPendingState();
     }
 
 private:
-    void FireStateFunc(bool isReset);
+    void HandleStateChangeInternal(UIState handlingState, UIState currentState, bool isReset);
+    void FireStateFunc(UIState handlingState, UIState currentState, bool isReset);
 
     void PostListItemPressStyleTask(UIState state);
     void PostPressStyleTask(uint32_t delayTime);
@@ -198,20 +260,29 @@ private:
     void Transform(PointF& localPointF, const WeakPtr<FrameNode>& node) const;
     void CleanScrollingParentListener();
 
-    void GetCustomNode(RefPtr<CustomNodeBase>& customNode, RefPtr<FrameNode>& node);
+    void GetCustomNode(RefPtr<CustomNodeBase>& customNode, RefPtr<UINode> node);
+    bool GetCustomNodeFromSelf(RefPtr<UINode>& node, RefPtr<CustomNodeBase>& customNode, int32_t nodeId);
+    bool GetCustomNodeFromNavgation(RefPtr<UINode>& node, RefPtr<CustomNodeBase>& customNode, int32_t nodeId);
 
     WeakPtr<FrameNode> host_;
     RefPtr<TouchEventImpl> pressedFunc_;
 
     UIState supportedStates_ = UI_STATE_NORMAL;
     UIState currentState_ = UI_STATE_NORMAL;
-
+    // manages inner subscription UI state and callbacks.
+    std::pair<UIState, std::function<void(uint64_t)>> innerStateStyleSubscribers_ = { UI_STATE_UNKNOWN, nullptr };
+    // manages user subscription UI state and callbacks.
+    std::pair<UIState, std::function<void(uint64_t)>> userStateStyleSubscribers_ = { UI_STATE_UNKNOWN, nullptr };
+    // tracks frontend UI state.
+    UIState frontendSubscribers_ = UI_STATE_UNKNOWN;
+    
     std::set<int32_t> pointerId_;
     CancelableCallback<void()> pressStyleTask_;
     CancelableCallback<void()> pressCancelStyleTask_;
     bool pressedPendingState_ = false;
     bool pressedCancelPendingState_ = false;
     bool hasScrollingParent_ = false;
+    bool scrollingFeatureForbidden_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(StateStyleManager);
 };

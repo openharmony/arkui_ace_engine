@@ -15,16 +15,10 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_form.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/size_t.h"
 #include "base/log/ace_scoring_log.h"
-#include "base/log/log_wrapper.h"
-#include "base/utils/string_utils.h"
 #include "bridge/declarative_frontend/jsview/models/form_model_impl.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/form/form_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 #if !defined(WEARABLE_PRODUCT)
 #include "frameworks/core/components/form/form_component.h"
@@ -77,19 +71,19 @@ void JSForm::Create(const JSCallbackInfo& info)
     RequestFormInfo formInfo;
     if (id->IsString()) {
         if (!StringUtils::IsNumber(id->ToString())) {
-            LOGE("Invalid form id : %{public}s", id->ToString().c_str());
+            TAG_LOGE(AceLogTag::ACE_FORM, "Invalid form id : %{public}s", id->ToString().c_str());
             return;
         }
         int64_t inputFormId = StringUtils::StringToLongInt(id->ToString().c_str(), -1);
         if (inputFormId == -1) {
-            LOGE("StringToLongInt failed : %{public}s", id->ToString().c_str());
+            TAG_LOGE(AceLogTag::ACE_FORM, "StringToLongInt failed : %{public}s", id->ToString().c_str());
             return;
         }
         formInfo.id = inputFormId;
-    }
-    if (id->IsNumber()) {
+    } else if (id->IsNumber()) {
         formInfo.id = id->ToNumber<int64_t>();
     }
+    TAG_LOGI(AceLogTag::ACE_FORM, "JSForm Create, info.id: %{public}" PRId64, formInfo.id);
     formInfo.cardName = name->ToString();
     formInfo.bundleName = bundle->ToString();
     formInfo.abilityName = ability->ToString();
@@ -183,7 +177,7 @@ void JSForm::JsOnAcquired(const JSCallbackInfo& info)
         auto onAcquired = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Form.onAcquired");
-            std::vector<std::string> keys = { "id", "idString" };
+            std::vector<std::string> keys = { "id", "idString", "isLocked" };
             func->Execute(keys, param);
         };
         FormModel::GetInstance()->SetOnAcquired(std::move(onAcquired));
@@ -211,7 +205,7 @@ void JSForm::JsOnUninstall(const JSCallbackInfo& info)
         auto onUninstall = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Form.onUninstall");
-            std::vector<std::string> keys = { "id", "idString" };
+            std::vector<std::string> keys = { "id", "idString", "isLocked" };
             func->Execute(keys, param);
         };
         FormModel::GetInstance()->SetOnUninstall(std::move(onUninstall));
@@ -246,14 +240,28 @@ void JSForm::JsOnLoad(const JSCallbackInfo& info)
     }
 }
 
+void JSForm::JsOnUpdate(const JSCallbackInfo& info)
+{
+    if (info[0]->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+        auto onUpdate = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Form.onUpdate");
+            std::vector<std::string> keys = { "id", "idString" };
+            func->Execute(keys, param);
+        };
+        FormModel::GetInstance()->SetOnUpdate(std::move(onUpdate));
+    }
+}
+
 void JSForm::JsObscured(const JSCallbackInfo& info)
 {
     if (info[0]->IsUndefined()) {
-        LOGE("Obscured reasons undefined");
+        TAG_LOGE(AceLogTag::ACE_FORM, "Obscured reasons undefined");
         return;
     }
     if (!info[0]->IsArray()) {
-        LOGE("Obscured reasons not Array");
+        TAG_LOGE(AceLogTag::ACE_FORM, "Obscured reasons not Array");
         return;
     }
     auto obscuredArray = JSRef<JSArray>::Cast(info[0]);
@@ -287,6 +295,7 @@ void JSForm::JSBind(BindingTarget globalObj)
     JSClass<JSForm>::StaticMethod("onUninstall", &JSForm::JsOnUninstall);
     JSClass<JSForm>::StaticMethod("onRouter", &JSForm::JsOnRouter);
     JSClass<JSForm>::StaticMethod("onLoad", &JSForm::JsOnLoad);
+    JSClass<JSForm>::StaticMethod("onUpdate", &JSForm::JsOnUpdate);
     JSClass<JSForm>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSForm>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSForm>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);

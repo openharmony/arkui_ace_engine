@@ -74,7 +74,7 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
     FocusPattern GetFocusPattern() const override;
     void OnMountToParentDone() override;
-    void HandleDragEvent(const PointerEvent& info) override;
+    void HandleDragEvent(const DragPointerEvent& info) override;
 
     virtual void SetOnErrorCallback(const std::function<void(int32_t code,
         const std::string& name, const std::string& message)>&& callback);
@@ -83,6 +83,7 @@ public:
 
     int32_t GetInstanceId();
     int32_t GetNodeId();
+    bool HandleTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}

@@ -58,6 +58,7 @@ struct FilterProperty {
 class CustomPaintPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(CustomPaintPaintMethod, NodePaintMethod)
 public:
+    CustomPaintPaintMethod();
     ~CustomPaintPaintMethod() override = default;
 
     RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
@@ -252,6 +253,12 @@ public:
         state_.strokeState.SetFontSize(size);
     }
 
+    void SetLetterSpacing(const Dimension& letterSpacing)
+    {
+        state_.fillState.SetLetterSpacing(letterSpacing);
+        state_.strokeState.SetLetterSpacing(letterSpacing);
+    }
+
     void SetFontStyle(OHOS::Ace::FontStyle style)
     {
         state_.fillState.SetFontStyle(style);
@@ -270,9 +277,10 @@ public:
         state_.strokeState.SetFontFamilies(fontFamilies);
     }
 
-    void SaveMatrix();
-    void RestoreMatrix();
+    void SaveProperties();
+    void RestoreProperties();
     void ResetTransformMatrix();
+    void ResetLineDash();
     void RotateMatrix(double angle);
     void ScaleMatrix(double x, double y);
     void SetTransformMatrix(const TransformParam& param);
@@ -283,6 +291,7 @@ public:
     void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth);
     void StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
+    void SetTransform(std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform);
     void SetDensity(double density)
     {
         density_ = density;
@@ -295,12 +304,13 @@ protected:
     void UpdateLineDash(RSPen& pen);
     void UpdatePaintShader(RSPen* pen, RSBrush* brush, const Ace::Gradient& gradient);
     void UpdatePaintShader(const Ace::Pattern& pattern, RSPen* pen, RSBrush* brush);
-    bool UpdateParagraph(const std::string& text, bool isStroke, bool hasShadow = false);
-    void UpdateStrokeTextStyleForeground(RSTextStyle& txtStyle, bool hasShadow);
-    void UpdateFillTextStyleForeground(RSTextStyle& txtStyle, bool hasShadow);
+    bool UpdateFillParagraph(const std::string& text);
+    void UpdateFillTxtStyle(RSTextStyle& txtStyle);
+    bool UpdateStrokeParagraph(const std::string& text);
+    void UpdateStrokeShadowParagraph(const std::string& text, const RSPen* pen, const RSParagraphStyle& style);
     void InitPaintBlend(RSBrush& brush);
     void InitPaintBlend(RSPen& pen);
-    std::shared_ptr<RSShaderEffect> MakeConicGradient(RSBrush* brush, const Ace::Gradient& gradient);
+    std::shared_ptr<RSShaderEffect> MakeConicGradient(const Ace::Gradient& gradient);
 
     void Path2DFill();
     void Path2DStroke();
@@ -336,7 +346,7 @@ protected:
     bool CheckNumberAndPercentage(const std::string& param, bool isClamped, float& result);
     void InitImagePaint(RSPen* pen, RSBrush* brush, RSSamplingOptions& options);
     void GetStrokePaint(RSPen& pen, RSSamplingOptions& options);
-    void InitImageCallbacks();
+    void GetFillPaint(RSBrush& brush, RSSamplingOptions& options);
 
     void SetPaintImage(RSPen* pen, RSBrush* brush);
     void ClearPaintImage(RSPen* pen, RSBrush* brush);
@@ -344,17 +354,15 @@ protected:
     bool CheckFilterProperty(FilterType filterType, const std::string& filterParam);
     bool ParseFilter(std::string& filter, std::vector<FilterProperty>& filters);
     FilterType FilterStrToFilterType(const std::string& filterStr);
-    bool HasImageShadow() const;
 
-    virtual void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) = 0;
-    virtual void ImageObjFailed() = 0;
     std::shared_ptr<RSImage> GetImage(const std::string& src);
     void PaintShadow(const RSPath& path, const Shadow& shadow, const RSBrush* brush = nullptr,
         const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr);
     void PaintImageShadow(const RSPath& path, const Shadow& shadow, const RSBrush* brush = nullptr,
         const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr);
-    void PaintText(const float width, double x, double y,
-        std::optional<double> maxWidth, bool isStroke, bool hasShadow = false);
+    void PaintText(const float width, double x, double y, std::optional<double> maxWidth, bool isStroke);
+    void PaintStrokeTextShadow(
+        const float width, const double dx, const double dy, const std::optional<double> scale, RSSaveLayerOps* slo);
     double GetAlignOffset(TextAlign align, double width);
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<RSParagraph>& paragraph);
     RSTextAlign GetEffectiveAlign(RSTextAlign align, RSTextDirection direction) const;
@@ -364,6 +372,7 @@ protected:
     virtual void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle) = 0;
 #endif
     void ResetStates();
+    virtual TextDirection GetSystemDirection() = 0;
     void DrawImageInternal(const Ace::CanvasImage& canvasImage, const std::shared_ptr<RSImage>& image);
 
     // PaintHolder includes fillState, strokeState, globalState and shadow for save
@@ -372,14 +381,18 @@ protected:
     LineDashParam lineDash_;
     RSMatrix matrix_;
     std::vector<RSMatrix> matrixStates_;
+    std::vector<LineDashParam> lineDashStates_;
 
     bool smoothingEnabled_ = true;
     std::string smoothingQuality_ = "low";
     bool antiAlias_ = false;
     std::unique_ptr<RSParagraph> paragraph_;
+    std::unique_ptr<RSParagraph> shadowParagraph_;
 
     WeakPtr<PipelineBase> context_;
 
+    bool isPathChanged_ = true;
+    bool isPath2dChanged_ = true;
     RSPath rsPath_;
     RSPath rsPath2d_;
     RSBrush imageBrush_;
@@ -395,10 +408,6 @@ protected:
     sk_sp<SkSVGDOM> skiaDom_ = nullptr;
     ImageSourceInfo currentSource_;
     ImageSourceInfo loadingSource_;
-    ImageObjSuccessCallback imageObjSuccessCallback_;
-    UploadSuccessCallback uploadSuccessCallback_;
-    OnPostBackgroundTask onPostBackgroundTask_;
-    FailedCallback failedCallback_;
 #endif
 
     RefPtr<CanvasModifier> contentModifier_;
@@ -417,6 +426,7 @@ protected:
     std::shared_ptr<RSImageFilter> blurFilter_ = RSImageFilter::CreateBlurImageFilter(0, 0, RSTileMode::DECAL, nullptr);
     std::vector<std::shared_ptr<RSColorFilter>> saveColorFilter_;
     std::vector<std::shared_ptr<RSImageFilter>> saveBlurFilter_;
+    int32_t apiVersion_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

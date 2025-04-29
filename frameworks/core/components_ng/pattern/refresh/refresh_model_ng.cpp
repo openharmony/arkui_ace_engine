@@ -25,10 +25,6 @@
 #include "frameworks/core/components_ng/base/frame_node.h"
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
 #include "frameworks/core/components_ng/event/event_hub.h"
-#include "frameworks/core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
-#include "frameworks/core/components_ng/pattern/refresh/refresh_pattern.h"
-#include "frameworks/core/components_ng/pattern/text/text_pattern.h"
-#include "frameworks/core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -103,11 +99,6 @@ void RefreshModelNG::SetFriction(int32_t friction)
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, Friction, friction);
 }
 
-void RefreshModelNG::SetProgressColor(const Color& progressColor)
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, ProgressColor, progressColor);
-}
-
 void RefreshModelNG::SetLoadingText(const std::string& loadingText)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, loadingText);
@@ -122,7 +113,7 @@ void RefreshModelNG::SetOnStateChange(StateChangeEvent&& stateChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStateChange(std::move(stateChange));
 }
@@ -131,7 +122,7 @@ void RefreshModelNG::SetOnRefreshing(RefreshingEvent&& refreshing)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnRefreshing(std::move(refreshing));
 }
@@ -140,7 +131,7 @@ void RefreshModelNG::SetChangeEvent(RefreshChangeEvent&& changeEvent)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(changeEvent));
 }
@@ -149,7 +140,7 @@ void RefreshModelNG::SetOnOffsetChange(OffsetChangeEvent&& dragOffset)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnOffsetChange(std::move(dragOffset));
 }
@@ -158,9 +149,27 @@ void RefreshModelNG::ResetOnOffsetChange()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ResetOnOffsetChange();
+}
+
+void RefreshModelNG::SetMaxPullDownDistance(const std::optional<float>& maxDistance)
+{
+    if (maxDistance.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, MaxPullDownDistance, maxDistance.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY(RefreshLayoutProperty, MaxPullDownDistance);
+    }
+}
+
+void RefreshModelNG::SetMaxPullDownDistance(FrameNode* frameNode, const std::optional<float>& maxDistance)
+{
+    if (maxDistance.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, MaxPullDownDistance, maxDistance.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, MaxPullDownDistance, frameNode);
+    }
 }
 
 void RefreshModelNG::SetPullDownRatio(const std::optional<float>& pullDownRatio)
@@ -206,7 +215,7 @@ void RefreshModelNG::SetCustomBuilder(FrameNode* frameNode, FrameNode* customBui
 void RefreshModelNG::SetOnStateChange(FrameNode* frameNode, StateChangeEvent&& stateChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStateChange(std::move(stateChange));
 }
@@ -214,7 +223,7 @@ void RefreshModelNG::SetOnStateChange(FrameNode* frameNode, StateChangeEvent&& s
 void RefreshModelNG::SetOnRefreshing(FrameNode* frameNode, RefreshingEvent&& refreshing)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnRefreshing(std::move(refreshing));
 }
@@ -222,7 +231,7 @@ void RefreshModelNG::SetOnRefreshing(FrameNode* frameNode, RefreshingEvent&& ref
 void RefreshModelNG::SetOnOffsetChange(FrameNode* frameNode, OffsetChangeEvent&& dragOffset)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnOffsetChange(std::move(dragOffset));
 }
@@ -230,7 +239,7 @@ void RefreshModelNG::SetOnOffsetChange(FrameNode* frameNode, OffsetChangeEvent&&
 void RefreshModelNG::ResetOnOffsetChange(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->ResetOnOffsetChange();
 }
@@ -257,6 +266,14 @@ void RefreshModelNG::SetPullToRefresh(FrameNode* frameNode, bool pullToRefresh)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, PullToRefresh, pullToRefresh, frameNode);
 }
 
+float RefreshModelNG::GetMaxPullDownDistance(FrameNode* frameNode)
+{
+    float value = std::numeric_limits<float>::infinity();
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RefreshLayoutProperty, MaxPullDownDistance,
+        value, frameNode, value);
+    return value;
+}
+
 float RefreshModelNG::GetPullDownRatio(FrameNode* frameNode)
 {
     float value = 1.0;
@@ -281,7 +298,7 @@ bool RefreshModelNG::GetPullToRefresh(FrameNode* frameNode)
 void RefreshModelNG::SetChangeEvent(FrameNode* frameNode, RefreshChangeEvent&& changeEvent)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(changeEvent));
 }

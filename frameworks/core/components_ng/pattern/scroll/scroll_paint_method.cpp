@@ -15,11 +15,6 @@
 
 #include "core/components_ng/pattern/scroll/scroll_paint_method.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
-#include "core/components_ng/render/drawing.h"
-#include "core/pipeline/base/constants.h"
-
 namespace OHOS::Ace::NG {
 
 CanvasDrawFunction ScrollPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
@@ -38,6 +33,7 @@ void ScrollPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto renderContext = paintWrapper->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     UpdateFadingGradient(renderContext);
+    TryContentClip(paintWrapper);
 }
 
 void ScrollPaintMethod::PaintScrollEffect(RSCanvas& canvas, PaintWrapper* paintWrapper) const
@@ -58,11 +54,23 @@ void ScrollPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     if (scrollBar->GetPositionModeUpdate()) {
         scrollBarOverlayModifier->SetPositionMode(scrollBar->GetPositionMode());
     }
-    OffsetF fgOffset(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top());
-    scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
-        scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
+    auto shapeMode = scrollBar->GetShapeMode();
+    if (shapeMode == ShapeMode::ROUND) {
+        auto arcScrollBarOverlayModifier = AceType::DynamicCast<ArcScrollBarOverlayModifier>(scrollBarOverlayModifier);
+        CHECK_NULL_VOID(arcScrollBarOverlayModifier);
+        auto arcScrollBar = AceType::DynamicCast<ArcScrollBar>(scrollBar);
+        CHECK_NULL_VOID(arcScrollBar);
+        scrollBarOverlayModifier->SetBarColor(arcScrollBar->GetArcForegroundColor());
+        arcScrollBarOverlayModifier->SetBackgroundBarColor(arcScrollBar->GetArcBackgroundColor());
+        arcScrollBarOverlayModifier->StartArcBarAnimation(arcScrollBar->GetHoverAnimationType(),
+            arcScrollBar->GetOpacityAnimationType(), arcScrollBar->GetNeedAdaptAnimation(),
+            arcScrollBar->GetArcActiveRect(), arcScrollBar->GetArcBarRect());
+    } else {
+        scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
+        scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
+            scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
+    }
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
-    scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
 }
 } // namespace OHOS::Ace::NG

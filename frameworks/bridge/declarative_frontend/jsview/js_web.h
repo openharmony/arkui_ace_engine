@@ -90,6 +90,7 @@ public:
     static void OnSslSelectCertRequest(const JSCallbackInfo& args);
     static void OnPermissionRequest(const JSCallbackInfo& args);
     static void OnScreenCaptureRequest(const JSCallbackInfo& args);
+    static void BindSelectionMenu(const JSCallbackInfo& info);
     static void OnContextMenuHide(const JSCallbackInfo& args);
     static void OnContextMenuShow(const JSCallbackInfo& args);
     static void OnSearchResultReceive(const JSCallbackInfo& args);
@@ -140,12 +141,19 @@ public:
     static void SetNestedScroll(const JSCallbackInfo& info);
     static void SetMetaViewport(const JSCallbackInfo& args);
     static void OverScrollMode(int overScrollMode);
+    static void BlurOnKeyboardHideMode(int blurOnKeyboardHideMode);
     static void EnableNativeEmbedMode(bool isEmbedModeEnabled);
+    static void NativeEmbedOptions(const JSCallbackInfo& args);
     static void RegisterNativeEmbedRule(const std::string& tag, const std::string& type);
     static void OnNativeEmbedLifecycleChange(const JSCallbackInfo& args);
+    static void OnNativeEmbedVisibilityChange(const JSCallbackInfo& args);
     static void OnNativeEmbedGestureEvent(const JSCallbackInfo& args);
     static void JavaScriptOnDocumentStart(const JSCallbackInfo& args);
     static void JavaScriptOnDocumentEnd(const JSCallbackInfo& args);
+    static void OptimizeParserBudgetEnabled(bool enable);
+    static void RunJavaScriptOnDocumentStart(const JSCallbackInfo& args);
+    static void RunJavaScriptOnDocumentEnd(const JSCallbackInfo& args);
+    static void RunJavaScriptOnHeadEnd(const JSCallbackInfo& args);
     // Enable or disable debugging of web content
     static bool webDebuggingAccess_;
     static JSwebEventCallback OnControllerAttachedCallback_;
@@ -153,7 +161,6 @@ public:
     static void OnOverrideUrlLoading(const JSCallbackInfo& args);
     static void TextAutosizing(const JSCallbackInfo& args);
     static void EnableNativeVideoPlayer(const JSCallbackInfo& args);
-    static void EnableSmoothDragResize(bool isSmoothDragResizeEnabled);
     static void OnRenderProcessNotResponding(const JSCallbackInfo& args);
     static void OnRenderProcessResponding(const JSCallbackInfo& args);
     static void SelectionMenuOptions(const JSCallbackInfo& args);
@@ -163,6 +170,9 @@ public:
     static void ForceDisplayScrollBar(const JSCallbackInfo& args);
     static void KeyboardAvoidMode(int32_t mode);
     static void EditMenuOptions(const JSCallbackInfo& info);
+    static void EnableHapticFeedback(const JSCallbackInfo& args);
+    static void EnableWebAVSession(const JSCallbackInfo& args);
+    static void EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);
@@ -171,7 +181,8 @@ protected:
         const JSRef<JSVal>& keyboardOpt, WebKeyboardOption& keyboardOption);
 
 private:
-    static void ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItems);
+    static void ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItems,
+        ScriptItemsByOrder& scriptItemsByOrder);
     static bool CheckNestedScrollMode(const int32_t& modeValue);
 };
 } // namespace OHOS::Ace::Framework

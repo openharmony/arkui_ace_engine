@@ -16,7 +16,6 @@
 #include "bridge/declarative_frontend/jsview/models/image_animator_model_impl.h"
 
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/event/ace_event_handler.h"
 
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
 constexpr uint32_t DEFAULT_ITERATIONS = 1;

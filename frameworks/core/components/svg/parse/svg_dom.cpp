@@ -45,6 +45,7 @@ namespace {
 
 const char DOM_SVG_STYLE[] = "style";
 const char DOM_SVG_CLASS[] = "class";
+constexpr int32_t MAX_SVG_NODE_COUNT = 5000;
 
 } // namespace
 
@@ -161,6 +162,10 @@ bool SvgDom::ParseSvg(SkStream& svgStream)
 
 RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xmlNode, const RefPtr<SvgNode>& parent)
 {
+    if (GetSvgNodeCount() > MAX_SVG_NODE_COUNT) {
+        LOGE("Svg node count exceeds the limit");
+        return nullptr;
+    }
     const char* element = dom.getName(xmlNode);
     if (dom.getType(xmlNode) == SkDOM::kText_Type) {
         if (parent == nullptr) {
@@ -192,6 +197,7 @@ RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xm
     if (AceType::InstanceOf<SvgAnimation>(node)) {
         svgAnimate_ = true;
     }
+    InCreaseSvgNodeCount();
     return node;
 }
 

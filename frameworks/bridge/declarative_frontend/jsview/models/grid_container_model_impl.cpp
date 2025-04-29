@@ -17,8 +17,6 @@
 
 #include "bridge/declarative_frontend/jsview/models/column_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/flex/flex_component.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::Framework {
 

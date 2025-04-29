@@ -15,20 +15,12 @@
 
 #include "core/components_ng/pattern/qrcode/qrcode_layout_algorithm.h"
 
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/log/ace_trace.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/layout/layout_algorithm.h"
-#include "core/components_ng/pattern/qrcode/qrcode_paint_property.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
+#include "core/components/qrcode/qrcode_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr Dimension DEFAULT_SIZE = 240.0_vp;
 constexpr int32_t PLATFORM_VERSION_11 = 11;
 } // namespace
 
@@ -41,6 +33,9 @@ std::optional<SizeF> QRCodeLayoutAlgorithm::MeasureContent(
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
+    auto qrcodeTheme = pipeline->GetTheme<QrcodeTheme>();
+    CHECK_NULL_RETURN(qrcodeTheme, std::nullopt);
+    Dimension defaultSize = qrcodeTheme->GetQrcodeDefaultSize();
     if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_11) {
         auto topPadding = 0.0f;
         auto bottomPadding = 0.0f;
@@ -53,14 +48,14 @@ std::optional<SizeF> QRCodeLayoutAlgorithm::MeasureContent(
             leftPadding = padding->left.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
             rightPadding = padding->right.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
         }
-        auto width = DEFAULT_SIZE.ConvertToPx() - leftPadding - rightPadding;
+        auto width = defaultSize.ConvertToPx() - leftPadding - rightPadding;
         if (Negative(width)) {
             width = 0.0f;
         }
         if (contentConstraint.selfIdealSize.Width().has_value()) {
             width = contentConstraint.selfIdealSize.Width().value();
         }
-        auto height = DEFAULT_SIZE.ConvertToPx() - topPadding - bottomPadding;
+        auto height = defaultSize.ConvertToPx() - topPadding - bottomPadding;
         if (Negative(height)) {
             height = 0.0f;
         }

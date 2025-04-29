@@ -18,6 +18,7 @@
 
 #include <utility>
 
+#include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "base/i18n/localization.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -31,6 +32,10 @@
 #include "core/components_ng/pattern/picker/toss_animation_controller.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
+#include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -85,8 +90,12 @@ class DatePickerColumnPattern : public LinearLayoutPattern {
 
 public:
     DatePickerColumnPattern() : LinearLayoutPattern(true) {};
-
-    ~DatePickerColumnPattern() override = default;
+    ~DatePickerColumnPattern() override
+    {
+        if (circleUtils_) {
+            delete circleUtils_;
+        }
+    }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
@@ -272,6 +281,21 @@ public:
         clickBreak_ = value;
     }
 
+    void UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty);
+    void InitHapticController();
+    void StopHaptic();
+    void SetSelectedMarkListener(std::function<void(std::string& selectedColumnId)>& listener);
+    void SetSelectedMark(bool focus = true, bool notify = true, bool reRender = true);
+    void SetSelectedMarkId(const std::string &strColumnId);
+    void UpdateUserSetSelectColor();
+#ifdef SUPPORT_DIGITAL_CROWN
+    std::string& GetSelectedColumnId();
+    bool IsCrownEventEnded();
+    int32_t GetDigitalCrownSensitivity();
+    void SetDigitalCrownSensitivity(int32_t crownSensitivity);
+    bool OnCrownEvent(const CrownEvent& event);
+#endif
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -286,6 +310,11 @@ private:
     void SetButtonBackgroundColor(const Color& pressColor);
     void PlayPressAnimation(const Color& pressColor);
     void PlayHoverAnimation(const Color& color);
+    void InitSelectorButtonProperties(const RefPtr<PickerTheme>& pickerTheme);
+    void UpdateSelectorButtonProps(bool haveFocus, bool needMarkDirty);
+    const Color& GetButtonHoverColor() const;
+    void UpdateTextAreaPadding(const RefPtr<PickerTheme>& pickerTheme,
+        const RefPtr<TextLayoutProperty>& textLayoutProperty);
 
     std::vector<DatePickerOptionProperty> optionProperties_;
     RefPtr<ClickEvent> CreateItemClickEventListener(RefPtr<DatePickerEventParam> param);
@@ -304,6 +333,14 @@ private:
     void HandleDragStart(const GestureEvent& event);
     void HandleDragMove(const GestureEvent& event);
     void HandleDragEnd();
+    void SetSelectedMarkPaint(bool paint);
+    void UpdateSelectedTextColor(const RefPtr<PickerTheme>& pickerTheme);
+    void UpdateAnimationColor(const RefPtr<PickerTheme>& pickerTheme);
+#ifdef SUPPORT_DIGITAL_CROWN
+    void HandleCrownBeginEvent(const CrownEvent& event);
+    void HandleCrownMoveEvent(const CrownEvent& event);
+    void HandleCrownEndEvent(const CrownEvent& event);
+#endif
     void CreateAnimation();
     void CreateAnimation(double from, double to);
     void ScrollOption(double delta, bool isJump = false);
@@ -329,6 +366,11 @@ private:
     DimensionRect CalculateHotZone(int32_t index, int32_t midSize, float middleChildHeight, float otherChildHeight);
     void AddHotZoneRectToText();
     void InitTextFontFamily();
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void RegisterWindowStateChangedCallback();
+    void UnregisterWindowStateChangedCallback(FrameNode* frameNode);
+    void OnWindowHide() override;
+    void OnWindowShow() override;
 
     float localDownDistance_ = 0.0f;
     RefPtr<TouchEventImpl> touchListener_;
@@ -353,6 +395,17 @@ private:
     double distancePercent_ = 0.0;
     Color pressColor_;
     Color hoverColor_;
+    Color buttonBgColor_ = Color::TRANSPARENT;
+    Color buttonDefaultBgColor_ = Color::TRANSPARENT;
+    Color buttonFocusBgColor_ = Color::TRANSPARENT;
+    Color buttonDefaultBorderColor_ = Color::TRANSPARENT;
+    Color buttonFocusBorderColor_ = Color::TRANSPARENT;
+    Color selectorTextFocusColor_ = Color::WHITE;
+    Dimension buttonDefaultBorderWidth_ = 0.0_vp;
+    Dimension buttonFocusBorderWidth_ = 0.0_vp;
+    bool isFirstTimeUpdateButtonProps_ = true;
+    bool useButtonFocusArea_ = false;
+    bool isFocusColumn_ = false;
     bool isTossStatus_ = false;
     bool clickBreak_ = false;
     bool touchBreak_ = false;
@@ -376,8 +429,23 @@ private:
     bool hasUserDefinedDisappearFontFamily_ = false;
     bool hasUserDefinedNormalFontFamily_ = false;
     bool hasUserDefinedSelectedFontFamily_ = false;
+    bool isShow_ = true;
+    bool isEnableHaptic_ = true;
+    bool stopHaptic_ = false;
+    bool selectedMarkPaint_ = false;
+    std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerColumnPattern);
+
+    friend class PickerColumnPatternCircleUtils<DatePickerColumnPattern>;
+    PickerColumnPatternCircleUtils<DatePickerColumnPattern> *circleUtils_ = nullptr;
+    std::string selectedColumnId_ = "";
+    std::function<void(std::string& selectedColumnId)> focusedListerner_ = nullptr;
+    bool isUserSetSelectColor_ = false;
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool isCrownEventEnded_ = true;
+    int32_t crownSensitivity_ = INVALID_CROWNSENSITIVITY;
+#endif
 };
 } // namespace OHOS::Ace::NG
 

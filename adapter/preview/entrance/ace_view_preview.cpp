@@ -75,8 +75,7 @@ bool AceViewPreview::HandleTouchEvent(const TouchEvent& touchEvent)
         return false;
     }
     CHECK_NULL_RETURN(touchEventCallback_, true);
-    auto event = touchEvent.UpdatePointers();
-    touchEventCallback_(event, nullptr, nullptr);
+    touchEventCallback_(touchEvent, nullptr, nullptr);
     return true;
 }
 

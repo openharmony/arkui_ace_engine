@@ -19,6 +19,8 @@
 #include "core/components_ng/base/modifier.h"
 
 namespace OHOS::Ace::NG {
+
+class FrameNode;
 class MoonProgressModifier : public OverlayModifier {
 public:
     MoonProgressModifier(const WeakPtr<FrameNode>& maskNode);
@@ -39,6 +41,7 @@ public:
     void SetEnableBreathe(bool enableBreathe);
 
 private:
+    void CalculateSquareMoonPath(RSPath& path, const PointF& centerPt, const double& angle);
     void PaintSquareMoon(RSCanvas& canvas);
     void PaintSquareMoonShadow(RSCanvas& canvas, RSBrush& brush);
     void RegisterVisibleChange();

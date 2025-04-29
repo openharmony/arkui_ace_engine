@@ -1475,7 +1475,7 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsPutImageData(const shared_ptr<Js
                     auto blue = StringUtils::StringToInt(array[4 * flag + 2]);
                     auto alpha = StringUtils::StringToInt(array[4 * flag + 3]);
                     if (num < imageData.dirtyWidth * imageData.dirtyHeight) {
-                        imageData.data.emplace_back(Color::FromARGB(alpha, red, green, blue));
+                        imageData.data.emplace_back(Color::FromARGB(alpha, red, green, blue).GetValue());
                     }
                     num++;
                 }
@@ -1537,6 +1537,7 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsGetImageData(const shared_ptr<Js
 
     auto imageData = runtime->NewObject();
     auto colorArray = runtime->NewArray();
+    CHECK_NULL_RETURN(data, imageData);
     imageData->SetProperty(runtime, DOM_WIDTH, runtime->NewInt32(data->dirtyWidth));
     imageData->SetProperty(runtime, DOM_HEIGHT, runtime->NewInt32(data->dirtyHeight));
     uint32_t count = 0;
@@ -1545,7 +1546,7 @@ shared_ptr<JsValue> JsiOffscreenCanvasBridge::JsGetImageData(const shared_ptr<Js
         for (auto j = 0; j < data->dirtyWidth; j++) {
             // a pixel includes 4 data: red/green/blue/alpha
             int32_t idx = i * data->dirtyWidth + j;
-            auto pixel = data->data[idx];
+            Color pixel = Color(data->data[idx]);
             colorArray->SetProperty(runtime, runtime->NewInt32(count), runtime->NewInt32(pixel.GetRed()));
             colorArray->SetProperty(runtime, runtime->NewInt32(count + 1), runtime->NewInt32(pixel.GetGreen()));
             colorArray->SetProperty(runtime, runtime->NewInt32(count + 2), runtime->NewInt32(pixel.GetBlue()));

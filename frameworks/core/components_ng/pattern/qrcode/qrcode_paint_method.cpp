@@ -15,9 +15,6 @@
 
 #include "core/components_ng/pattern/qrcode/qrcode_paint_method.h"
 
-#include <cstdint>
-
-#include "base/utils/utils.h"
 #include "core/components_ng/pattern/qrcode/qrcode_paint_property.h"
 
 namespace OHOS::Ace::NG {

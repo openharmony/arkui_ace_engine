@@ -15,15 +15,9 @@
 
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/overlength_dot_indicator_paint_method.h"
 
-#include <valarray>
-
-#include "core/components_ng/render/paint_property.h"
-#include "core/pipeline/pipeline_base.h"
-
 namespace OHOS::Ace::NG {
 namespace {
 // for indicator
-constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
 constexpr Dimension INDICATOR_PADDING_DEFAULT = 12.0_vp;
 constexpr uint32_t ITEM_HALF_WIDTH = 0;
 constexpr uint32_t SELECTED_ITEM_HALF_WIDTH = 2;
@@ -50,7 +44,9 @@ void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* pain
     CHECK_NULL_VOID(geometryNode);
 
     auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
     IsCustomSizeValue_ = paintProperty->GetIsCustomSizeValue(false);
+    dotIndicatorModifier_->SetIsLoop(isLoop_);
     dotIndicatorModifier_->SetAxis(axis_);
     dotIndicatorModifier_->SetCurrentIndex(currentIndex_);
     dotIndicatorModifier_->SetMaxDisplayCount(maxDisplayCount_);
@@ -64,7 +60,11 @@ void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* pain
     dotIndicatorModifier_->SetAnimationEndIndex(animationEndIndex_);
     dotIndicatorModifier_->SetKeepStatus(keepStatus_);
     dotIndicatorModifier_->SetIsHorizontalAndRTL(isHorizontalAndRightToLeft_);
-
+    dotIndicatorModifier_->SetNeedUpdate(true);
+    dotIndicatorModifier_->SetForceStopPageRate(FLT_MAX);
+    dotIndicatorModifier_->SetIndicatorDotItemSpace(paintProperty->GetSpaceValue(
+        swiperTheme->GetIndicatorDotItemSpace()));
+    
     SizeF contentSize = geometryNode->GetFrameSize();
     centerY_ = (axis_ == Axis::HORIZONTAL ? contentSize.Height() : contentSize.Width()) * HALF_FLOAT;
     dotIndicatorModifier_->SetCenterY(centerY_);
@@ -83,6 +83,7 @@ void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* pain
 void OverlengthDotIndicatorPaintMethod::UpdateNormalIndicator(
     LinearVector<float>& itemHalfSizes, const PaintWrapper* paintWrapper)
 {
+    CHECK_NULL_VOID(dotIndicatorModifier_);
     dotIndicatorModifier_->SetTurnPageRate(turnPageRate_);
     dotIndicatorModifier_->SetGestureState(gestureState_);
     dotIndicatorModifier_->SetIsCustomSizeValue(IsCustomSizeValue_);
@@ -103,6 +104,7 @@ void OverlengthDotIndicatorPaintMethod::UpdateNormalIndicator(
 
 void OverlengthDotIndicatorPaintMethod::PaintNormalIndicator(const PaintWrapper* paintWrapper)
 {
+    CHECK_NULL_VOID(dotIndicatorModifier_);
     auto [longPointCenterX, itemHalfSizes] = CalculateLongPointCenterX(paintWrapper);
     longPointCenterX_ = longPointCenterX;
     if (dotIndicatorModifier_->GetIsHover()) {
@@ -130,7 +132,7 @@ std::pair<float, float> OverlengthDotIndicatorPaintMethod::CalculatePointCenterX
         if (IsCustomSizeValue_) {
             allPointDiameterSum = itemWidth * static_cast<float>(itemCount_ - NUM_1) + selectedItemWidth;
         }
-        auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx() * (itemCount_ - NUM_1));
+        auto allPointSpaceSum = static_cast<float>(space * (itemCount_ - NUM_1));
         float rectWidth = padding + allPointDiameterSum + allPointSpaceSum + padding;
         startCenterX = rectWidth - startCenterX;
         endCenterX = rectWidth - endCenterX;
@@ -161,7 +163,9 @@ std::tuple<std::pair<float, float>, LinearVector<float>> OverlengthDotIndicatorP
 
     int32_t displayCount = itemCount_;
     // use radius calculation
-    auto itemSpace = INDICATOR_ITEM_SPACE.ConvertToPx();
+    Dimension indicatorDotItemSpace =
+        paintProperty->GetSpaceValue(swiperTheme->GetIndicatorDotItemSpace());
+    auto itemSpace = indicatorDotItemSpace.ConvertToPx();
     if (maxDisplayCount_ > 0) {
         displayCount = maxDisplayCount_;
     }
@@ -170,7 +174,8 @@ std::tuple<std::pair<float, float>, LinearVector<float>> OverlengthDotIndicatorP
     itemHalfSizes.emplace_back(itemHeight * HALF_FLOAT);
     itemHalfSizes.emplace_back(selectedItemWidth * HALF_FLOAT);
     itemHalfSizes.emplace_back(selectedItemHeight * HALF_FLOAT);
-    CalculateNormalMargin(itemHalfSizes, frameSize, displayCount);
+    bool ignoreSize = paintProperty->GetIgnoreSizeValue(false);
+    CalculateNormalMargin(itemHalfSizes, frameSize, displayCount, indicatorDotItemSpace, ignoreSize);
 
     auto longPointCenterX = CalculatePointCenterX(itemHalfSizes, normalMargin_.GetX(),
         static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx()), static_cast<float>(itemSpace), currentIndex_);
@@ -281,5 +286,17 @@ void OverlengthDotIndicatorPaintMethod::AnalysisIndexRange(int32_t& nposStation)
     } else if (currentIndex_ >= realItemCount_ - NUM_2) {
         nposStation = NUM_3;
     }
+}
+
+void OverlengthDotIndicatorPaintMethod::CalculateNormalMargin(const LinearVector<float>& itemHalfSizes,
+    const SizeF& frameSize, const int32_t displayCount, const Dimension& indicatorDotItemSpace, bool ignoreSize)
+{
+    if (maxDisplayCount_ > 0) {
+        normalMargin_.Reset();
+        return;
+    }
+
+    DotIndicatorPaintMethod::CalculateNormalMargin(
+        itemHalfSizes, frameSize, displayCount, indicatorDotItemSpace, ignoreSize);
 }
 } // namespace OHOS::Ace::NG

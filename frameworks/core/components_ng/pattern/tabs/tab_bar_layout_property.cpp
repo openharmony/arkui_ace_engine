@@ -24,26 +24,36 @@ namespace OHOS::Ace::NG {
 
 RectF TabBarLayoutProperty::GetIndicatorRect(int32_t index)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto node = GetHost();
+    CHECK_NULL_RETURN(node, RectF());
+    auto pipelineContext = node->GetContext();
     CHECK_NULL_RETURN(pipelineContext, RectF());
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_RETURN(tabTheme, RectF());
-    auto node = GetHost();
-    CHECK_NULL_RETURN(node, RectF());
     auto childColumn = DynamicCast<FrameNode>(node->GetChildAtIndex(index));
-    CHECK_NULL_RETURN(childColumn, RectF());
+    CHECK_NULL_RETURN(childColumn && !childColumn->GetChildren().empty(), RectF());
     auto grandChildren = DynamicCast<FrameNode>(childColumn->GetChildren().back());
     CHECK_NULL_RETURN(grandChildren, RectF());
     auto geometryNode = grandChildren->GetGeometryNode();
-    RectF indicator = geometryNode->GetFrameRect();
+    RectF indicator = geometryNode->GetFrameRect(true);
 
     /* Set indicator at the bottom of columnNode's last child */
-    auto childColumnRect = childColumn->GetGeometryNode()->GetFrameRect();
+    auto childColumnRect = childColumn->GetGeometryNode()->GetFrameRect(true);
     auto tabBarPattern = node->GetPattern<TabBarPattern>();
     CHECK_NULL_RETURN(node, RectF());
     indicator.SetLeft(indicator.GetX() + childColumnRect.GetX());
     indicator.SetTop(indicator.Bottom() + childColumnRect.GetY());
     return indicator;
+}
+
+Dimension TabBarLayoutProperty::GetBarHeight() const
+{
+    auto node = GetHost();
+    CHECK_NULL_RETURN(node, 0.0_vp);
+    auto geometryNode = node->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0_vp);
+    auto frameSize = geometryNode->GetFrameSize();
+    return Dimension(PipelineBase::Px2VpWithCurrentDensity(frameSize.Height()), DimensionUnit::VP);
 }
 
 } // namespace OHOS::Ace::NG

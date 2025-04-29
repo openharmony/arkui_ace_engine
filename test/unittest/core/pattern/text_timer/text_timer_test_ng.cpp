@@ -45,7 +45,7 @@ constexpr double INPUT_COUNT_2 = 20000.0;
 constexpr bool IS_COUNT_DOWN = false;
 constexpr bool IS_COUNT_DOWN_2 = true;
 const std::string TEXT_TIMER_FORMAT = "HH:mm:ss.SSS";
-const std::string FORMAT_DATA = "08:00:00";
+const std::u16string FORMAT_DATA = u"08:00:00";
 const int64_t UTC_1 = 1000000000000;
 const int64_t UTC_2 = 2000000000000;
 const int64_t ELAPSED_TIME_1 = 100;
@@ -302,7 +302,7 @@ HWTEST_F(TextTimerTestNg, TextTimerTest003, TestSize.Level1)
      */
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_NE(frameNode, nullptr);
-    RefPtr<TextTimerEventHub> eventHub = frameNode->GetEventHub<NG::TextTimerEventHub>();
+    RefPtr<TextTimerEventHub> eventHub = frameNode->GetOrCreateEventHub<NG::TextTimerEventHub>();
     EXPECT_NE(eventHub, nullptr);
 
     /**
@@ -576,7 +576,6 @@ HWTEST_F(TextTimerTestNg, TextTimerTest008, TestSize.Level1)
 
     auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
     ASSERT_NE(childNode, nullptr);
-    childNode->pattern_ = AceType::MakeRefPtr<TextTimerPattern>();
 
     pattern->OnVisibleAreaChange(true);
     EXPECT_EQ(host->GetChildren().size(), length);
@@ -682,7 +681,6 @@ HWTEST_F(TextTimerTestNg, TextTimerTest009, TestSize.Level1)
     EXPECT_EQ(textLayoutProperty->GetFontStyle(), nullptr);
     EXPECT_EQ(textLayoutProperty->GetTextLineStyle(), nullptr);
     EXPECT_FALSE(textLayoutProperty->HasContent());
-    EXPECT_FALSE(textLayoutProperty->HasForegroundColor());
 
     pattern->textTimerController_ = nullptr;
     pattern->OnModifyDone();
@@ -882,5 +880,39 @@ HWTEST_F(TextTimerTestNg, TextTimerTest014, TestSize.Level1)
     pattern->Tick(1000);
     pattern->SetBuilderFunc(node);
     pattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: TextTimerTest015
+ * @tc.desc: Test TextTimer property.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create framenode and Init.
+     */
+    auto frameNode = TextTimerModelNG::CreateFrameNode(-1);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto controller = TextTimerModelNG::InitTextController(node);
+    ASSERT_NE(controller, nullptr);
+    /**
+     * @tc.steps: step2. SetIsCountDown.
+     */
+    TextTimerModelNG::SetIsCountDown(node, true);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetIsCountDownValue(), true);
+    TextTimerModelNG::SetInputCount(node, INPUT_COUNT);
+    EXPECT_EQ(layoutProperty->GetInputCountValue(), INPUT_COUNT);
+
+    /**
+     * @tc.steps: step3. SetJSTextTimerController.
+     */
+    TextTimerModelNG::SetJSTextTimerController(node, controller);
+    auto result = TextTimerModelNG::GetJSTextTimerController(node);
+    EXPECT_NE(result, nullptr);
 }
 } // namespace OHOS::Ace::NG

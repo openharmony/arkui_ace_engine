@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,7 +43,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifier001, TestSize.Level1)
     gradientColorStart.SetDimension(Dimension(1.0));
     gradient.AddColor(gradientColorStart);
 
-    ProgressModifier progressModifier;
+    ProgressModifier progressModifier(frameNode_);
     progressModifier.SetStrokeWidth(PROGRESS_STROKE_WIDTH);
     LinearColor linearColor;
     progressModifier.SetColor(linearColor);
@@ -128,7 +128,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifier002, TestSize.Level1)
     gradientColorStart.SetDimension(Dimension(1.0));
     gradient.AddColor(gradientColorStart);
 
-    ProgressModifier progressModifier;
+    ProgressModifier progressModifier(frameNode_);
     progressModifier.SetStrokeWidth(PROGRESS_STROKE_WIDTH);
     LinearColor linearColor;
     progressModifier.SetColor(linearColor);
@@ -200,7 +200,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifier003, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    ProgressModifier progressModifier;
+    ProgressModifier progressModifier(frameNode_);
     progressModifier.SetStrokeWidth(PROGRESS_STROKE_WIDTH);
     LinearColor linearColor;
     progressModifier.SetColor(linearColor);
@@ -276,7 +276,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifier004, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    ProgressModifier progressModifier;
+    ProgressModifier progressModifier(frameNode_);
     progressModifier.SetStrokeWidth(PROGRESS_STROKE_WIDTH);
     LinearColor linearColor;
     progressModifier.SetColor(linearColor);
@@ -379,8 +379,9 @@ HWTEST_F(ProgressModifierTestNg, ProgressPaintMethod002, TestSize.Level1)
      * @tc.steps: step3. Create ProgressPaintMethod. Call the function UpdateContentModifier and GetContentModifier.
      * @tc.expected: step3. Check the properties update before.
      */
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
-    ProgressPaintMethod progressPaintMethod(PROGRESS_TYPE_CAPSULE, PROGRESS_STROKE_WIDTH, progressModifier);
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
+    ProgressPaintMethod progressPaintMethod(
+        PROGRESS_TYPE_CAPSULE, PROGRESS_STROKE_WIDTH, progressModifier, ACTIVE_SETTING_FALSE);
     progressPaintMethod.progressType_ = PROGRESS_TYPE_CAPSULE;
     progressPaintMethod.UpdateContentModifier(paintWrapper);
 
@@ -390,10 +391,12 @@ HWTEST_F(ProgressModifierTestNg, ProgressPaintMethod002, TestSize.Level1)
     paintProperty_->UpdateBorderWidth(2.0_vp);
     SizeF progressContentSize(300.0f, 50.0f);
     progressModifier->SetContentSize(progressContentSize);
+    EXPECT_EQ(progressModifier->contentSize_->Get(), progressContentSize);
     progressPaintMethod.UpdateContentModifier(paintWrapper);
 
     SizeF progressContentSize1(50.0f, 300.0f);
     progressModifier->SetContentSize(progressContentSize1);
+    EXPECT_EQ(progressModifier->contentSize_->Get(), progressContentSize1);
     progressPaintMethod.UpdateContentModifier(paintWrapper);
 
     auto getModifier = progressPaintMethod.GetContentModifier(paintWrapper);
@@ -433,8 +436,9 @@ HWTEST_F(ProgressModifierTestNg, ProgressPaintMethod003, TestSize.Level1)
      */
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
-    ProgressPaintMethod progressPaintMethod(PROGRESS_TYPE_LINEAR, PROGRESS_STROKE_WIDTH, progressModifier);
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
+    ProgressPaintMethod progressPaintMethod(
+        PROGRESS_TYPE_LINEAR, PROGRESS_STROKE_WIDTH, progressModifier, ACTIVE_SETTING_FALSE);
     progressPaintMethod.progressType_ = PROGRESS_TYPE_RING;
     progressPaintMethod.UpdateContentModifier(paintWrapper);
     auto getModifier = progressPaintMethod.GetContentModifier(paintWrapper);
@@ -478,7 +482,7 @@ HWTEST_F(ProgressModifierTestNg, CapsuleProgressModifier001, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    ProgressModifier progressModifier;
+    ProgressModifier progressModifier(frameNode_);
     LinearColor linearColor;
     progressModifier.SetColor(linearColor);
     EXPECT_EQ(progressModifier.color_->Get(), linearColor);
@@ -550,7 +554,7 @@ HWTEST_F(ProgressModifierTestNg, CapsuleProgressModifier002, TestSize.Level1)
      */
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     LinearColor linearColor;
     progressModifier->SetColor(linearColor);
     EXPECT_EQ(progressModifier->color_->Get(), linearColor);
@@ -590,6 +594,59 @@ HWTEST_F(ProgressModifierTestNg, CapsuleProgressModifier002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CapsuleProgressModifier003
+ * @tc.desc: Test ProgressModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTestNg, CapsuleProgressModifier003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
+     * @tc.expected: step1. Check the ProgressModifier property value.
+     */
+    auto pipeline = PipelineBase::GetCurrentContext();
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
+    LinearColor linearColor;
+    progressModifier->SetColor(linearColor);
+    EXPECT_EQ(progressModifier->color_->Get(), linearColor);
+    progressModifier->SetBackgroundColor(linearColor);
+    EXPECT_EQ(progressModifier->bgColor_->Get(), linearColor);
+    progressModifier->SetBorderColor(linearColor);
+    EXPECT_EQ(progressModifier->borderColor_->Get(), linearColor);
+
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, 100, 100 };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawRect(_)).Times(AtLeast(1));
+
+    /**
+     * @tc.steps: step2. Set value, call function onDraw.
+     * @tc.expected: step2. Set the properties success.
+     */
+    progressModifier->SetProgressType(PROGRESS_TYPE_CAPSULE);
+    progressModifier->SetMaxValue(0.0001);
+    progressModifier->SetSweepEffect(true);
+    SizeF progressContentSize(200.0, 100.0);
+    progressModifier->SetContentSize(progressContentSize);
+    progressModifier->SetBorderWidth(2.0);
+    progressModifier->isSweeping_ = true;
+    progressModifier->sweepingDateBackup_ = 1000.0f;
+    progressModifier->SetValue(20.0);
+    progressModifier->SetVisible(false);
+    progressModifier->onDraw(context);
+    EXPECT_NE(progressModifier->sweepingDate_, 0.0f);
+}
+
+/**
  * @tc.name: RingProgressModifier001
  * @tc.desc: Test the loading and sweeping animation of the ring progress can be started and stoped.
  * @tc.type: FUNC
@@ -612,7 +669,7 @@ HWTEST_F(ProgressModifierTestNg, RingProgressModifier001, TestSize.Level1)
 
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     progressModifier->SetVisible(true);
     progressModifier->SetProgressType(PROGRESS_TYPE_RING);
     progressModifier->SetProgressStatus(ProgressStatus::PROGRESSING);
@@ -725,7 +782,7 @@ HWTEST_F(ProgressModifierTestNg, RingProgressModifier003, TestSize.Level1)
 
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     progressModifier->SetStrokeWidth(PROGRESS_STROKE_WIDTH);
     LinearColor linearColor;
     progressModifier->SetBackgroundColor(linearColor);
@@ -789,7 +846,7 @@ HWTEST_F(ProgressModifierTestNg, RingProgressModifier004, TestSize.Level1)
 
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     progressModifier->SetStrokeWidth(PROGRESS_STROKE_WIDTH);
     LinearColor linearColor;
     progressModifier->SetBackgroundColor(linearColor);
@@ -868,7 +925,7 @@ HWTEST_F(ProgressModifierTestNg, RingProgressModifier005, TestSize.Level1)
     Gradient gradient;
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     SizeF contentSize(CONTEXT_WIDTH, CONTEXT_HEIGHT);
     progressModifier->SetContentSize(contentSize);
     progressModifier->SetVisible(true);
@@ -965,6 +1022,316 @@ HWTEST_F(ProgressModifierTestNg, RingProgressModifier005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RingProgressModifier006
+ * @tc.desc: Test the modifier while stroke width smaller than the radius.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTestNg, RingProgressModifier006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
+     * @tc.expected: step1. Check the ProgressModifier property value.
+     */
+    Gradient gradient;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
+    SizeF contentSize(CONTEXT_WIDTH, CONTEXT_HEIGHT);
+    progressModifier->SetContentSize(contentSize);
+    progressModifier->SetVisible(true);
+    progressModifier->SetProgressType(PROGRESS_TYPE_RING);
+    progressModifier->SetProgressStatus(ProgressStatus::PROGRESSING);
+    EXPECT_EQ(progressModifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_RING));
+    LinearColor linearColor;
+    progressModifier->SetColor(linearColor);
+    EXPECT_EQ(progressModifier->color_->Get(), linearColor);
+    progressModifier->SetBackgroundColor(linearColor);
+    EXPECT_EQ(progressModifier->bgColor_->Get(), linearColor);
+    progressModifier->SetRingProgressColor(gradient);
+    progressModifier->SetMaxValue(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(progressModifier->maxValue_->Get(), PROGRESS_MODIFIER_VALUE);
+    progressModifier->SetValue(50.0f);
+    EXPECT_EQ(progressModifier->value_->Get(), 50.0f);
+    OffsetF offset(0, 0);
+    progressModifier->SetContentOffset(offset);
+    EXPECT_EQ(progressModifier->offset_->Get(), offset);
+
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawArc(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+
+    /**
+     * @tc.steps: step2. Make stroke width smaller than the radius, then call function onDraw.
+     * @tc.expected: step2. Draw ring progress with shadow.
+     */
+    progressModifier->SetPaintShadow(true);
+    contentSize.SetWidth(CONTEXT_WIDTH);
+    contentSize.SetHeight(CONTEXT_WIDTH);
+    progressModifier->SetContentSize(contentSize);
+    progressModifier->SetStrokeWidth(50.0f);
+    progressModifier->onDraw(context);
+    EXPECT_EQ(progressModifier->contentSize_->Get(), contentSize);
+}
+
+/**
+ * @tc.name: RingProgressModifier007
+ * @tc.desc: Test the modifier while stroke width equal to the radius.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTestNg, RingProgressModifier007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
+     * @tc.expected: step1. Check the ProgressModifier property value.
+     */
+    Gradient gradient;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
+    SizeF contentSize(CONTEXT_WIDTH, CONTEXT_HEIGHT);
+    progressModifier->SetContentSize(contentSize);
+    progressModifier->SetVisible(true);
+    progressModifier->SetProgressType(PROGRESS_TYPE_RING);
+    progressModifier->SetProgressStatus(ProgressStatus::PROGRESSING);
+    EXPECT_EQ(progressModifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_RING));
+    LinearColor linearColor;
+    progressModifier->SetColor(linearColor);
+    EXPECT_EQ(progressModifier->color_->Get(), linearColor);
+    progressModifier->SetBackgroundColor(linearColor);
+    EXPECT_EQ(progressModifier->bgColor_->Get(), linearColor);
+    progressModifier->SetRingProgressColor(gradient);
+    progressModifier->SetMaxValue(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(progressModifier->maxValue_->Get(), PROGRESS_MODIFIER_VALUE);
+    progressModifier->SetValue(50.0f);
+    EXPECT_EQ(progressModifier->value_->Get(), 50.0f);
+    OffsetF offset(0, 0);
+    progressModifier->SetContentOffset(offset);
+    EXPECT_EQ(progressModifier->offset_->Get(), offset);
+
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawArc(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+
+    /**
+     * @tc.steps: step2. Make stroke width equal to the radius, then call function onDraw.
+     * @tc.expected: step2. Draw ring progress without shadow.
+     */
+    progressModifier->SetPaintShadow(true);
+    contentSize.SetWidth(CONTEXT_WIDTH);
+    contentSize.SetHeight(CONTEXT_WIDTH);
+    progressModifier->SetContentSize(contentSize);
+    progressModifier->SetStrokeWidth(CONTEXT_WIDTH);
+    progressModifier->onDraw(context);
+    EXPECT_EQ(progressModifier->contentSize_->Get(), contentSize);
+}
+
+/**
+ * @tc.name: RingProgressModifier008
+ * @tc.desc: Test the modifier while stroke width larger than the radius.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTestNg, RingProgressModifier008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
+     * @tc.expected: step1. Check the ProgressModifier property value.
+     */
+    Gradient gradient;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
+    SizeF contentSize(CONTEXT_WIDTH, CONTEXT_HEIGHT);
+    progressModifier->SetContentSize(contentSize);
+    progressModifier->SetVisible(true);
+    progressModifier->SetProgressType(PROGRESS_TYPE_RING);
+    progressModifier->SetProgressStatus(ProgressStatus::PROGRESSING);
+    EXPECT_EQ(progressModifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_RING));
+    LinearColor linearColor;
+    progressModifier->SetColor(linearColor);
+    EXPECT_EQ(progressModifier->color_->Get(), linearColor);
+    progressModifier->SetBackgroundColor(linearColor);
+    EXPECT_EQ(progressModifier->bgColor_->Get(), linearColor);
+    progressModifier->SetRingProgressColor(gradient);
+    progressModifier->SetMaxValue(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(progressModifier->maxValue_->Get(), PROGRESS_MODIFIER_VALUE);
+    progressModifier->SetValue(50.0f);
+    EXPECT_EQ(progressModifier->value_->Get(), 50.0f);
+    OffsetF offset(0, 0);
+    progressModifier->SetContentOffset(offset);
+    EXPECT_EQ(progressModifier->offset_->Get(), offset);
+
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawArc(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+
+    /**
+     * @tc.steps: step2. Make stroke width larger than the radius, then call function onDraw.
+     * @tc.expected: step2. Draw ring progress with shadow.
+     */
+    progressModifier->SetPaintShadow(true);
+    contentSize.SetWidth(CONTEXT_WIDTH);
+    contentSize.SetHeight(CONTEXT_WIDTH);
+    progressModifier->SetContentSize(contentSize);
+    progressModifier->SetStrokeWidth(150.0f);
+    progressModifier->onDraw(context);
+    EXPECT_EQ(progressModifier->contentSize_->Get(), contentSize);
+}
+
+/**
+ * @tc.name: RingProgressModifier009
+ * @tc.desc: Test the modifier while stroke width close to the radius.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTestNg, RingProgressModifier009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
+     * @tc.expected: step1. Check the ProgressModifier property value.
+     */
+    Gradient gradient;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
+    SizeF contentSize(CONTEXT_WIDTH, CONTEXT_HEIGHT);
+    progressModifier->SetContentSize(contentSize);
+    progressModifier->SetVisible(true);
+    progressModifier->SetProgressType(PROGRESS_TYPE_RING);
+    progressModifier->SetProgressStatus(ProgressStatus::PROGRESSING);
+    EXPECT_EQ(progressModifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_RING));
+    LinearColor linearColor;
+    progressModifier->SetColor(linearColor);
+    EXPECT_EQ(progressModifier->color_->Get(), linearColor);
+    progressModifier->SetBackgroundColor(linearColor);
+    EXPECT_EQ(progressModifier->bgColor_->Get(), linearColor);
+    progressModifier->SetRingProgressColor(gradient);
+    progressModifier->SetMaxValue(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(progressModifier->maxValue_->Get(), PROGRESS_MODIFIER_VALUE);
+    progressModifier->SetValue(50.0f);
+    EXPECT_EQ(progressModifier->value_->Get(), 50.0f);
+    OffsetF offset(0, 0);
+    progressModifier->SetContentOffset(offset);
+    EXPECT_EQ(progressModifier->offset_->Get(), offset);
+
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawArc(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+
+    /**
+     * @tc.steps: step2. Disable shadow and make stroke width close to the radius, then call function onDraw.
+     * @tc.expected: step2. Draw ring progress with shadow.
+     */
+    progressModifier->SetPaintShadow(false);
+    contentSize.SetWidth(CONTEXT_WIDTH);
+    contentSize.SetHeight(CONTEXT_WIDTH);
+    progressModifier->SetContentSize(contentSize);
+    progressModifier->SetStrokeWidth(CONTEXT_WIDTH - 5.0f);
+    progressModifier->onDraw(context);
+    EXPECT_EQ(progressModifier->contentSize_->Get(), contentSize);
+}
+
+/**
+ * @tc.name: RingProgressModifier010
+ * @tc.desc: Test the modifier while radius equal to 10.0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTestNg, RingProgressModifier010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
+     * @tc.expected: step1. Check the ProgressModifier property value.
+     */
+    Gradient gradient;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
+    SizeF contentSize(CONTEXT_WIDTH, CONTEXT_HEIGHT);
+    progressModifier->SetContentSize(contentSize);
+    progressModifier->SetVisible(true);
+    progressModifier->SetProgressType(PROGRESS_TYPE_RING);
+    progressModifier->SetProgressStatus(ProgressStatus::PROGRESSING);
+    EXPECT_EQ(progressModifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_RING));
+    LinearColor linearColor;
+    progressModifier->SetColor(linearColor);
+    EXPECT_EQ(progressModifier->color_->Get(), linearColor);
+    progressModifier->SetBackgroundColor(linearColor);
+    EXPECT_EQ(progressModifier->bgColor_->Get(), linearColor);
+    progressModifier->SetRingProgressColor(gradient);
+    progressModifier->SetMaxValue(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(progressModifier->maxValue_->Get(), PROGRESS_MODIFIER_VALUE);
+    progressModifier->SetValue(50.0f);
+    EXPECT_EQ(progressModifier->value_->Get(), 50.0f);
+    OffsetF offset(0, 0);
+    progressModifier->SetContentOffset(offset);
+    EXPECT_EQ(progressModifier->offset_->Get(), offset);
+
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawArc(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+
+    /**
+     * @tc.steps: step2. Disable shadow and make radius equal to 10.0, then call function onDraw.
+     * @tc.expected: step2. Draw ring progress without shadow.
+     */
+    progressModifier->SetPaintShadow(false);
+    contentSize.SetWidth(20.0f);
+    contentSize.SetHeight(20.0f);
+    progressModifier->SetContentSize(contentSize);
+    progressModifier->SetStrokeWidth(1.0f);
+    progressModifier->onDraw(context);
+    EXPECT_EQ(progressModifier->contentSize_->Get(), contentSize);
+}
+
+/**
  * @tc.name: LinearProgressModifier001
  * @tc.desc: Test ProgressModifier.
  * @tc.type: FUNC
@@ -978,7 +1345,7 @@ HWTEST_F(ProgressModifierTestNg, LinearProgressModifier001, TestSize.Level1)
     float value = 50.0f;
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     progressModifier->SetStrokeWidth(PROGRESS_STROKE_WIDTH);
     LinearColor linearColor;
     progressModifier->SetLinearSweepEffect(true);
@@ -1065,6 +1432,123 @@ HWTEST_F(ProgressModifierTestNg, LinearProgressModifier001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LinearProgressModifier002
+ * @tc.desc: Test ProgressModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTestNg, LinearProgressModifier002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
+     * @tc.expected: step1. Check the ProgressModifier property value.
+     */
+    float value = 50.0f;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
+    progressModifier->SetStrokeWidth(PROGRESS_STROKE_WIDTH);
+    LinearColor linearColor;
+    progressModifier->SetLinearSweepEffect(true);
+    progressModifier->SetBackgroundColor(linearColor);
+    EXPECT_EQ(progressModifier->bgColor_->Get(), linearColor);
+    progressModifier->SetBorderColor(linearColor);
+    EXPECT_EQ(progressModifier->borderColor_->Get(), linearColor);
+    progressModifier->SetMaxValue(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(progressModifier->maxValue_->Get(), PROGRESS_MODIFIER_VALUE);
+    progressModifier->SetValue(value);
+    EXPECT_EQ(progressModifier->value_->Get(), value);
+    progressModifier->SetScaleWidth(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(progressModifier->scaleWidth_->Get(), PROGRESS_MODIFIER_VALUE);
+
+    /**
+     * @tc.steps: step2. Set different properties, call function onDraw.
+     * @tc.expected: step2. Set the properties success.
+     */
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
+
+    /**
+     * @tc.steps: step3. Set value for the linear progress.Set maxValue near zero.
+     * @tc.expected: step3. The sweeping animation is started.
+     */
+    SizeF ContentSize(100.0f, 200.0f);
+    progressModifier->SetContentSize(ContentSize);
+    progressModifier->SetVisible(true);
+    progressModifier->isSweeping_ = false;
+    progressModifier->SetProgressType(PROGRESS_TYPE_LINEAR);
+    progressModifier->SetValue(value);
+    progressModifier->SetMaxValue(0.0001f);
+    progressModifier->onDraw(context);
+    EXPECT_EQ(progressModifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_LINEAR));
+    EXPECT_EQ(progressModifier->isSweeping_, true);
+}
+
+/**
+ * @tc.name: LinearProgressModifier003
+ * @tc.desc: Test ProgressModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTestNg, LinearProgressModifier003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
+     * @tc.expected: step1. Check the ProgressModifier property value.
+     */
+    float value = 50.0f;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
+    progressModifier->SetStrokeWidth(PROGRESS_STROKE_WIDTH);
+    LinearColor linearColor;
+    progressModifier->SetLinearSweepEffect(true);
+    progressModifier->SetBackgroundColor(linearColor);
+    EXPECT_EQ(progressModifier->bgColor_->Get(), linearColor);
+    progressModifier->SetBorderColor(linearColor);
+    EXPECT_EQ(progressModifier->borderColor_->Get(), linearColor);
+    progressModifier->SetMaxValue(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(progressModifier->maxValue_->Get(), PROGRESS_MODIFIER_VALUE);
+    progressModifier->SetValue(value);
+    EXPECT_EQ(progressModifier->value_->Get(), value);
+    progressModifier->SetScaleWidth(PROGRESS_MODIFIER_VALUE);
+    EXPECT_EQ(progressModifier->scaleWidth_->Get(), PROGRESS_MODIFIER_VALUE);
+
+    /**
+     * @tc.steps: step2. Set different properties, call function onDraw.
+     * @tc.expected: step2. Set the properties success.
+     */
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
+
+    /**
+     * @tc.steps: step3. Set value for the linear progress.
+     * @tc.expected: step4. The dateUpdated_ is true.
+     */
+    SizeF ContentSize(50.0f, 100.0f);
+    progressModifier->SetContentSize(ContentSize);
+    progressModifier->sweepingDate_->Set(0.0f);
+    progressModifier->isSweeping_ = true;
+    progressModifier->sweepingDateBackup_ = 10000.0f;
+    progressModifier->SetProgressType(PROGRESS_TYPE_LINEAR);
+    progressModifier->SetValue(value);
+    progressModifier->SetMaxValue(0.0001f);
+    progressModifier->onDraw(context);
+    EXPECT_EQ(progressModifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_LINEAR));
+    EXPECT_TRUE(progressModifier->dateUpdated_);
+}
+
+/**
  * @tc.name: ProgressModifier005
  * @tc.desc: Test ProgressModifier.
  * @tc.type: FUNC
@@ -1077,7 +1561,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifier005, TestSize.Level1)
      */
     int32_t minPlatformVersion = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
     PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
-    auto modifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto modifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
 
     /**
      * @tc.steps: step2. Set different properties, call function onDraw.
@@ -1135,7 +1619,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifier006, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    auto modifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto modifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
 
     /**
      * @tc.steps: step2. Set different properties, call function onDraw.
@@ -1194,7 +1678,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifier007, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    auto modifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto modifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     modifier->SetProgressType(PROGRESS_TYPE_CAPSULE);
     auto contentSize = SizeF(100.0f, 100.0f);
     modifier->SetContentSize(contentSize);
@@ -1242,7 +1726,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifier008, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    auto modifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto modifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     modifier->SetProgressType(PROGRESS_TYPE_RING);
     auto contentSize = SizeF(100.0f, 100.0f);
     modifier->SetContentSize(contentSize);
@@ -1298,7 +1782,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifier009, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    auto modifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto modifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
     modifier->SetProgressType(PROGRESS_TYPE_LINEAR);
     auto contentSize = SizeF(100.0f, 100.0f);
     modifier->SetContentSize(contentSize);
@@ -1354,7 +1838,7 @@ HWTEST_F(ProgressModifierTestNg, GetContentDrawFunction, TestSize.Level1)
         model.SetStrokeWidth(LARG_STROKE_WIDTH);
         model.SetScaleWidth(SCALE_WIDTH);
         model.SetScaleCount(SCALE_COUNT);
-        CreateDone(frameNode_);
+        CreateDone();
 
         /**
          * @tc.steps: step3. create GeometryNode and PaintWrapper, ProgressPaintMethod.
@@ -1364,9 +1848,9 @@ HWTEST_F(ProgressModifierTestNg, GetContentDrawFunction, TestSize.Level1)
         geometryNode->SetContentOffset(OffsetF(0, 0));
         RefPtr<PaintWrapper> paintWrapper =
             AceType::MakeRefPtr<PaintWrapper>(RenderContext::Create(), geometryNode, paintProperty_);
-        auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+        auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
         auto progressPaintMethod = AceType::MakeRefPtr<ProgressPaintMethod>(
-            progressType[i], LARG_STROKE_WIDTH.ConvertToPx(), progressModifier);
+            progressType[i], LARG_STROKE_WIDTH.ConvertToPx(), progressModifier, ACTIVE_SETTING_FALSE);
         EXPECT_NE(progressPaintMethod, nullptr);
         EXPECT_NE(progressPaintMethod->progressModifier_, nullptr);
     }
@@ -1408,8 +1892,9 @@ HWTEST_F(ProgressModifierTestNg, ProgressPaintMethod001, TestSize.Level1)
      */
     auto pipeline = PipelineBase::GetCurrentContext();
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
-    ProgressPaintMethod progressPaintMethod(PROGRESS_TYPE_LINEAR, PROGRESS_STROKE_WIDTH, progressModifier);
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
+    ProgressPaintMethod progressPaintMethod(
+        PROGRESS_TYPE_LINEAR, PROGRESS_STROKE_WIDTH, progressModifier, ACTIVE_SETTING_FALSE);
     // progressType_ = PROGRESS_TYPE_LINEAR
     progressPaintMethod.progressType_ = PROGRESS_TYPE_LINEAR;
     progressPaintMethod.UpdateContentModifier(paintWrapper);
@@ -1444,7 +1929,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressPaintMethod004, TestSize.Level1)
     ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_MOON);
     model.SetStrokeWidth(LARG_STROKE_WIDTH);
     model.SetShowText(true);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step2. Create the GeometryNode and PaintWrapper.Set the paintProperty_.
@@ -1466,8 +1951,9 @@ HWTEST_F(ProgressModifierTestNg, ProgressPaintMethod004, TestSize.Level1)
      * @tc.steps: step3. Create ProgressPaintMethod. Call the function UpdateContentModifier and GetContentModifier.
      * @tc.expected: step3. Check the properties update before.
      */
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
-    ProgressPaintMethod progressPaintMethod(PROGRESS_TYPE_LINEAR, PROGRESS_STROKE_WIDTH, progressModifier);
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
+    ProgressPaintMethod progressPaintMethod(
+        PROGRESS_TYPE_LINEAR, PROGRESS_STROKE_WIDTH, progressModifier, ACTIVE_SETTING_FALSE);
     progressPaintMethod.UpdateContentModifier(paintWrapper);
     EXPECT_FLOAT_EQ(progressPaintMethod.strokeWidth_, PROGRESS_STROKE_WIDTH);
 
@@ -1496,7 +1982,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifierRTL001, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
 
     /**
      * @tc.steps: step2. Set different properties, call function onDraw.
@@ -1543,7 +2029,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifierRTL002, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
 
     /**
      * @tc.steps: step2. Set different properties, call function onDraw.
@@ -1596,7 +2082,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifierRTL003, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
 
     /**
      * @tc.steps: step2. Set different properties, call function onDraw.
@@ -1658,7 +2144,7 @@ HWTEST_F(ProgressModifierTestNg, ProgressModifierRTL004, TestSize.Level1)
      * @tc.steps: step1. Create ProgressModifier and set ProgressModifier property.
      * @tc.expected: step1. Check the ProgressModifier property value.
      */
-    auto modifier = AceType::MakeRefPtr<ProgressModifier>();
+    auto modifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
 
     /**
      * @tc.steps: step2. Set different properties, call function onDraw.

@@ -26,6 +26,12 @@ enum DatePickerType {
     DATE,
 };
 
+enum class DatePickerMode : uint32_t {
+    DATE = 0,
+    YEAR_AND_MONTH = 1,
+    MONTH_AND_DAY = 2,
+};
+
 class ACE_FORCE_EXPORT PickerDate final {
 public:
     PickerDate() = default;
@@ -38,6 +44,19 @@ public:
     static uint32_t GetMaxDay(uint32_t year, uint32_t month);
 
     static bool IsLeapYear(uint32_t year);
+
+    static PickerDate AdjustDateToRange(const PickerDate& date, const PickerDate& start, const PickerDate& end);
+
+    static bool IsDateInRange(const PickerDate& date, const PickerDate& start, const PickerDate& end);
+
+    static void SortAndMergeDisabledDateRange(std::vector<std::pair<PickerDate, PickerDate>>& disableDateRange);
+
+    static PickerDate GetAvailableNextDay(const PickerDate& date, const PickerDate& start, const PickerDate& end,
+        std::vector<std::pair<PickerDate, PickerDate>>& disableDateRange, bool isAdd);
+
+    static PickerDate PrevDay(const PickerDate& dateObj);
+
+    static PickerDate NextDay(const PickerDate& dateObj);
 
     uint32_t GetYear() const
     {
@@ -79,6 +98,33 @@ public:
 
     uint32_t ToDays() const;
     void FromDays(uint32_t days);
+
+    bool operator<(const PickerDate& other) const
+    {
+        if (year_ != other.year_) {
+            return year_ < other.year_;
+        }
+        if (month_ != other.month_) {
+            return month_ < other.month_;
+        }
+        return day_ < other.day_;
+    }
+
+    bool operator<=(const PickerDate& other) const
+    {
+        if (year_ != other.year_) {
+            return year_ < other.year_;
+        }
+        if (month_ != other.month_) {
+            return month_ < other.month_;
+        }
+        return day_ <= other.day_;
+    }
+
+    bool operator==(const PickerDate& other) const
+    {
+        return year_ < other.year_ && month_ < other.month_ && day_ == other.day_;
+    }
 
 private:
     uint32_t year_ = 0;
@@ -124,6 +170,7 @@ public:
     }
 
     std::string ToString(bool jsonFormat, bool hasSecond, int32_t status = -1) const;
+    uint32_t ToMinutes() const;
 
 private:
     uint32_t hour_ = 0;
@@ -211,7 +258,7 @@ public:
 private:
     static constexpr uint32_t YEAR_START = 1897; // start year reference with LUNAR_INFO
     static constexpr int32_t LUNAR_INFO_SIZE = 207;
-    static constexpr uint32_t MAX_MONTH = 12;
+    static constexpr uint32_t MAX_MONTH = 13;
     static const uint16_t LUNAR_INFO[];
 };
 

@@ -23,6 +23,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_v2/list/list_properties.h"
 
@@ -41,6 +42,22 @@ public:
     virtual RefPtr<NG::ListChildrenMainSize> GetOrCreateListChildrenMainSize()
     {
         return nullptr;
+    }
+    virtual void SetHeaderComponent(const RefPtr<NG::UINode>& headerComponent)
+    {
+        return;
+    }
+    virtual void SetFooterComponent(const RefPtr<NG::UINode>& footerComponent)
+    {
+        return;
+    }
+    virtual void RemoveHeader()
+    {
+        return;
+    }
+    virtual void RemoveFooter()
+    {
+        return;
     }
 
 private:

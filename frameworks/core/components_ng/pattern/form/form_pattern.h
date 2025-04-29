@@ -20,6 +20,7 @@
 
 #include "transaction/rs_interfaces.h"
 
+#include "core/common/container.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/form/resource/form_request_data.h"
 #include "core/components_ng/event/event_hub.h"
@@ -27,6 +28,8 @@
 #include "core/components_ng/pattern/form/form_event_hub.h"
 #include "core/components_ng/pattern/form/form_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/form/form_special_style.h"
+#include "core/components/common/properties/color.h"
 #include "form_skeleton_params.h"
 
 namespace OHOS {
@@ -37,6 +40,9 @@ class PointerEvent;
 namespace Ace {
 class SubContainer;
 class FormManagerDelegate;
+class DrawDelegate;
+struct SerializedGesture;
+struct AccessibilityParentRectInfo;
 
 namespace NG {
 enum class FormChildNodeType : int32_t {
@@ -61,9 +67,24 @@ enum class FormChildNodeType : int32_t {
     FORM_FORBIDDEN_ROOT_NODE,
 
     /**
-     * forbidden form text node
+     * time limit text node
     */
-    FORM_FORBIDDEN_TEXT_NODE,
+    TIME_LIMIT_TEXT_NODE,
+
+    /**
+     * time limit image node
+    */
+    TIME_LIMIT_IMAGE_NODE,
+
+    /**
+     * app locked text node
+    */
+    APP_LOCKED_TEXT_NODE,
+
+    /**
+     * app locked image node
+    */
+    APP_LOCKED_IMAGE_NODE,
 };
 
 class FormPattern : public Pattern {
@@ -116,7 +137,7 @@ public:
         formLinkInfos_ = infos;
     }
 
-    void GetRectRelativeToWindow(int32_t &top, int32_t &left);
+    void GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo);
 
     bool IsJsCard() const
     {
@@ -138,9 +159,12 @@ public:
 
     void OnLanguageConfigurationUpdate() override;
 
-    void GetTimeLimitResource(std::string &content);
+    void GetResourceContent(std::string resourceName, std::string &content);
 
     void UnregisterAccessibility();
+
+    void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -161,19 +185,24 @@ private:
     void FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want);
     void FireFormSurfaceChangeCallback(float width, float height, float borderWidth = 0.0);
     void FireFormSurfaceDetachCallback();
+    void FireOnUpdateFormDone(int64_t id) const;
     void UpdateBackgroundColorWhenUnTrustForm();
 
     bool ISAllowUpdate() const;
     void EnableDrag();
     void UpdateConfiguration();
-    void HandleFormComponent(const RequestFormInfo& info);
+    void HandleFormComponent(RequestFormInfo& info);
+    void SetParamForWantTask(const RequestFormInfo& info);
     void AddFormComponent(const RequestFormInfo& info);
+    void AddFormComponentTask(const RequestFormInfo& info, RefPtr<PipelineContext> pipeline);
     void AddFormComponentUI(bool isTransparencyEnabled, const RequestFormInfo& info);
     void UpdateFormComponent(const RequestFormInfo& info);
     void UpdateFormComponentSize(const RequestFormInfo& info);
-    void UpdateTimeLimitFontCfg();
+    void UpdateSpecialStyleCfg();
+    void UpdateForbiddenIcon(FormChildNodeType nodeType);
+    void UpdateForbiddenText(FormChildNodeType nodeType);
 
-    void HandleSnapshot(uint32_t delayTime);
+    void HandleSnapshot(uint32_t delayTime, const std::string& nodeIdStr);
     void TakeSurfaceCaptureForUI();
     void UpdateStaticCard();
     RefPtr<FrameNode> CreateImageNode();
@@ -181,6 +210,7 @@ private:
     void RemoveFrsNode();
     void ReleaseRenderer();
     void DelayDeleteImageNode(bool needHandleCachedClick);
+    void SetNonTransparentAfterRecover();
     void DeleteImageNodeAfterRecover(bool needHandleCachedClick);
     void HandleStaticFormEvent(const PointF& touchPoint);
     void ProcDeleteImageNode(const AAFwk::Want& want);
@@ -199,11 +229,21 @@ private:
     void RemoveFormChildNode(FormChildNodeType formChildNodeType);
     int32_t GetFormDimensionHeight(int32_t dimension);
     RefPtr<FrameNode> CreateColumnNode(FormChildNodeType formChildNodeType);
-    RefPtr<FrameNode> CreateTimeLimitNode();
+    RefPtr<FrameNode> CreateRowNode(FormChildNodeType formChildNodeType);
+    RefPtr<FrameNode> CreateTextNode(bool isRowStyle);
+    RefPtr<FrameNode> CreateIconNode();
+    RefPtr<FrameNode> CreateForbiddenImageNode(InternalResource::ResourceId resourceId);
+    RefPtr<FrameNode> CreateForbiddenTextNode(std::string resourceName, bool isRowStyle);
     RefPtr<FrameNode> CreateRectNode(const RefPtr<FrameNode>& parent, const CalcSize& idealSize,
         const MarginProperty& margin, uint32_t fillColor, double opacity);
     void CreateSkeletonView(const RefPtr<FrameNode>& parent, const std::shared_ptr<FormSkeletonParams>& params,
         int32_t dimensionHeight);
+    void SetTransparencyConfig(bool isTransparencyForm, const RequestFormInfo &info);
+    void SetSkeletonEnableConfig(const RequestFormInfo &info);
+    void SetExternalRenderOpacity(double opacity);
+    bool ShouldDoSkeletonAnimation();
+    void DoSkeletonAnimation();
+    void UpdateFormBaseConfig(bool isDynamic);
     void AddFormChildNode(FormChildNodeType formChildNodeType, const RefPtr<FrameNode> child);
     RefPtr<FrameNode> GetFormChildNode(FormChildNodeType formChildNodeType) const;
     double GetTimeLimitFontSize();
@@ -211,13 +251,31 @@ private:
     void UpdateChildNodeOpacity(FormChildNodeType formChildNodeType, double opacity);
     void SnapshotSurfaceNode();
     bool CheckFormBundleForbidden(const std::string &bundleName);
+    void DelayResetManuallyClickFlag();
+    void RemoveDelayResetManuallyClickFlagTask();
+
+    void InitAddFormUpdateAndErrorCallback(int32_t instanceId);
+    void InitAddUninstallAndSurfaceNodeCallback(int32_t instanceId);
+    void InitAddFormSurfaceChangeAndDetachCallback(int32_t instanceId);
+    void InitAddUnTrustAndSnapshotCallback(int32_t instanceId);
+    void InitOtherCallback(int32_t instanceId);
+    void InitUpdateFormDoneCallback(int32_t instanceID);
+    bool IsFormBundleExempt(int64_t formId) const;
+    bool IsFormBundleProtected(const std::string &bundleName, int64_t formId) const;
+    void HandleLockEvent(bool isLock);
+    void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle);
+    void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle, const RequestFormInfo& info);
+    void UpdateForbiddenRootNodeStyle(const RefPtr<RenderContext> &renderContext);
+    void ReAddStaticFormSnapshotTimer();
     // used by ArkTS Card, for RSSurfaceNode from FRS,
+    void enhancesSubContainer(bool hasContainer);
     RefPtr<RenderContext> externalRenderContext_;
 
     RefPtr<SubContainer> subContainer_;
     RefPtr<FormManagerDelegate> formManagerBridge_;
     RefPtr<AccessibilitySessionAdapterForm> accessibilitySessionAdapter_;
 
+    FormSpecialStyle formSpecialStyle_;
     RequestFormInfo cardInfo_;
     bool isLoaded_ = false;
     bool isVisible_ = true;
@@ -236,11 +294,18 @@ private:
     bool shouldResponseClick_ = false;
     Offset lastTouchLocation_;
     ColorMode colorMode = ColorMode::LIGHT;
+    int32_t instanceId_ = Container::CurrentId();
 
     bool isFormObscured_ = false;
     bool isJsCard_ = true;
+    bool isTransparencyEnable_ = false;
+    bool isSkeletonAnimEnable_ = false;
     std::unordered_map<FormChildNodeType, RefPtr<FrameNode>> formChildrenNodeMap_;
     bool isTibetanLanguage_ = false;
+    bool isManuallyClick_ = false;
+    bool ShouldAddChildAtReuildFrame();
+    bool isStaticFormSnaping_ = false;
+    int64_t updateFormComponentTimestamp_ = 0;
 };
 } // namespace NG
 } // namespace Ace

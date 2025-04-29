@@ -15,11 +15,8 @@
 
 #include "core/components_ng/syntax/repeat_virtual_scroll_model_ng.h"
 
-#include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
-#include "core/components_ng/syntax/syntax_item.h"
 
 namespace OHOS::Ace::NG {
 
@@ -30,7 +27,8 @@ void RepeatVirtualScrollModelNG::Create(
     const std::function<void(const std::string& fromKey, uint32_t forIndex)>& onUpdateNode,
     const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetKeys4Range,
     const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetTypes4Range,
-    const std::function<void(uint32_t from, uint32_t to)>& onSetActiveRange)
+    const std::function<void(int32_t from, int32_t to)>& onSetActiveRange,
+    bool reusable)
 {
     ACE_SCOPED_TRACE("RepeatVirtualScrollModelNG::Create");
     auto* stack = ViewStackProcessor::GetInstance();
@@ -43,7 +41,8 @@ void RepeatVirtualScrollModelNG::Create(
         onUpdateNode,
         onGetKeys4Range,
         onGetTypes4Range,
-        onSetActiveRange);
+        onSetActiveRange,
+        reusable);
     stack->Push(repeatNode);
     stack->PopContainer();
 }
@@ -66,5 +65,11 @@ void RepeatVirtualScrollModelNG::OnMove(std::function<void(int32_t, int32_t)>&& 
     node->SetOnMove(std::move(onMove));
 }
 
-
+void RepeatVirtualScrollModelNG::SetCreateByTemplate(bool isCreatedByTemplate)
+{
+    auto childOfRepeat = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    if (childOfRepeat) {
+        childOfRepeat->SetAllowReusableV2Descendant(!isCreatedByTemplate);
+    }
+}
 } // namespace OHOS::Ace::NG

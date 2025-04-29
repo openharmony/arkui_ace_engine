@@ -17,7 +17,7 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_UTILS_BRIDGE_H
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
-#include "core/common/task_runner_adapter_factory.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_ref_manager.h"
 
 namespace OHOS::Ace::NG {
 struct NativeWeakRef {
@@ -29,6 +29,11 @@ struct NativeWeakRef {
     bool Invalid() const
     {
         return weakRef.Invalid();
+    }
+
+    bool ReleaseImmediately() const
+    {
+        return true;
     }
 
     AceType* rawPtr = nullptr;
@@ -43,19 +48,24 @@ struct NativeStrongRef {
         return AceType::RawPtr(strongRef);
     }
 
+    bool ReleaseImmediately() const
+    {
+        return strongRef == nullptr;
+    }
+
     RefPtr<AceType> strongRef;
 };
 
+// Only used by NativeWeakRef or NativeStrongRef.
 template<typename T>
 void DestructorInterceptor(void* env, void* nativePtr, void* data)
 {
     auto* typePtr = reinterpret_cast<T*>(nativePtr);
-    auto taskExecutor = TaskRunnerAdapterFactory::Create(true, "");
-    if (!taskExecutor) {
+    if (typePtr && typePtr->ReleaseImmediately()) {
         delete typePtr;
         return;
     }
-    taskExecutor->PostTask([taskExecutor, typePtr]() { delete typePtr; }, "DestructorInterceptor");
+    NativeRefManager::GetInstance().PostDestructorInterceptorTask([typePtr]() { delete typePtr; });
 }
 
 template<typename T>
@@ -146,7 +156,6 @@ public:
 private:
     T value_;
 };
-
 
 template<typename T>
 class JSFuncObjRef {

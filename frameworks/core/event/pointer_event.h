@@ -20,6 +20,7 @@
 
 #include "base/geometry/point.h"
 #include "core/event/ace_events.h"
+#include "core/event/axis_event.h"
 
 namespace OHOS::MMI {
 class PointerEvent;
@@ -53,11 +54,13 @@ enum class PointerAction : int32_t {
     POINTER_ACTION_ROTATE_BEGIN = 20,
     POINTER_ACTION_ROTATE_UPDATE = 21,
     POINTER_ACTION_ROTATE_END = 22,
+    PULL_CANCEL = 37,
 };
 
-struct PointerEvent final {
+struct DragPointerEvent final : public PointerEvent {
     int32_t pointerEventId = 0;
     int32_t pointerId = 0;
+    int32_t pullId = -1;
     bool pressed = false;
     int32_t windowX = 0;
     int32_t windowY = 0;
@@ -67,21 +70,24 @@ struct PointerEvent final {
     float force = 0.0f;
     int32_t deviceId = 0;
     TimeStamp downTime;
-    TimeStamp time;
     SourceTool sourceTool = SourceTool::UNKNOWN;
     int32_t targetWindowId = -1;
-    int32_t x = 0;
-    int32_t y = 0;
     std::shared_ptr<MMI::PointerEvent> rawPointerEvent;
-    std::vector<KeyCode> pressedKeyCodes_;
+    std::vector<KeyCode> pressedKeyCodes;
     PointerAction action = PointerAction::UNKNOWN;
+    std::vector<DragPointerEvent> history;
+    int32_t displayId = 0;
+    int32_t sourceType = 0;
+    int32_t originId = 0;
 
-    PointerEvent() = default;
-    PointerEvent(int32_t x, int32_t y) : x(x), y(y) {}
-    PointerEvent(int32_t windowX, int32_t windowY, int32_t displayX, int32_t displayY)
+    DragPointerEvent() = default;
+    DragPointerEvent(float x, float y)
+        :PointerEvent(x, y)
+    {}
+    DragPointerEvent(int32_t windowX, int32_t windowY, int32_t displayX, int32_t displayY)
         : windowX(windowX), windowY(windowY), displayX(displayX), displayY(displayY)
     {}
-    PointerEvent(int32_t pointerEventId, int32_t windowX, int32_t windowY, int32_t displayX, int32_t displayY)
+    DragPointerEvent(int32_t pointerEventId, int32_t windowX, int32_t windowY, int32_t displayX, int32_t displayY)
         : pointerEventId(pointerEventId), windowX(windowX), windowY(windowY), displayX(displayX), displayY(displayY)
     {}
 
@@ -102,6 +108,16 @@ struct PointerEvent final {
     int32_t GetDisplayY() const
     {
         return displayY;
+    }
+
+    void UpdatePressedKeyCodes(std::vector<KeyCode> keyCodes)
+    {
+        pressedKeyCodes = keyCodes;
+    }
+
+    int32_t GetTargetDisplayId() const
+    {
+        return targetWindowId;
     }
 };
 } // namespace OHOS::Ace

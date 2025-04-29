@@ -61,4 +61,24 @@ HWTEST_F(GeometryNodeTestNg, GeometryNodeTestNg001, TestSize.Level1)
         }
     }
 }
+
+/**
+ * @tc.name: GeometryNodeTestNg002
+ * @tc.desc: Test SetAccumulatedSafeAreaEdges
+ * @tc.type: FUNC
+ */
+HWTEST_F(GeometryNodeTestNg, GeometryNodeTestNg002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>(); 
+    geometryNode->accumulatedSafeAreaExpand_ = nullptr;
+    ExpandEdges edge({ 0.0f, 0.0f, 0.0f, 0.0f });
+    geometryNode->SetAccumulatedSafeAreaEdges(edge);
+    EXPECT_NE(geometryNode->accumulatedSafeAreaExpand_, nullptr);
+    geometryNode->accumulatedSafeAreaExpand_ = std::make_unique<ExpandEdges>(edge);
+    geometryNode->SetAccumulatedSafeAreaEdges(edge);
+    EXPECT_EQ(geometryNode->accumulatedSafeAreaExpand_->left, edge.left);
+}
 } // namespace OHOS::Ace::NG

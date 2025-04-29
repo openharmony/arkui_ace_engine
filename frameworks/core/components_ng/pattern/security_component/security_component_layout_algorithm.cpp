@@ -15,20 +15,18 @@
 
 #include "core/components_ng/pattern/security_component/security_component_layout_algorithm.h"
 
-#include "base/log/ace_scoring_log.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
+#include "core/components/common/properties/alignment.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/image/image_render_property.h"
-#include "core/components_ng/pattern/security_component/security_component_layout_element.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/security_component/security_component_log.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "unicode/uchar.h"
 
 namespace {
 constexpr float HALF = 2.0f;
+constexpr float TEXT_OUT_OF_RANGE_PERCENT = 0.3f; // 30%
+constexpr float TEXT_OUT_OF_WIDTH_PERCENT = 0.1f; // 10%
+constexpr float RANGE_RATIO = 1.414f;
+constexpr float ICON_RANGE_RATIO = 0.7f;
 }
 
 namespace OHOS::Ace::NG {
@@ -55,7 +53,9 @@ void SecurityComponentLayoutAlgorithm::UpdateChildPosition(LayoutWrapper* layout
     CHECK_NULL_VOID(childWrapper);
     auto childNode = childWrapper->GetHostNode();
     CHECK_NULL_VOID(childNode);
-    childNode->GetGeometryNode()->SetMarginFrameOffset(
+    auto geometryNode = childNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetMarginFrameOffset(
         OffsetF(std::round(offset.GetX()), std::round(offset.GetY())));
 }
 
@@ -77,14 +77,14 @@ void SecurityComponentLayoutAlgorithm::MeasureButton(LayoutWrapper* layoutWrappe
     CHECK_NULL_VOID(buttonLayoutProperty);
     auto buttonConstraint = CreateDefaultChildConstraint(securityComponentProperty);
     if (securityComponentProperty->GetBackgroundType() == static_cast<int32_t>(ButtonType::CIRCLE)) {
-        buttonConstraint.selfIdealSize.SetSize(SizeF(std::max(componentWidth_, componentHeight_),
-            std::max(componentWidth_, componentHeight_)));
+        buttonConstraint.selfIdealSize.SetSize(SizeF(std::min(componentWidth_, componentHeight_),
+            std::min(componentWidth_, componentHeight_)));
         if (GreatNotEqual(componentWidth_, componentHeight_)) {
-            top_.EnlargeHeight((componentWidth_ / HALF) - (componentHeight_ / HALF));
+            left_.ShrinkWidth((componentWidth_ / HALF) - (componentHeight_ / HALF));
         } else if (GreatNotEqual(componentHeight_, componentWidth_)) {
-            left_.EnlargeWidth((componentHeight_ / HALF) - (componentWidth_ / HALF));
+            top_.ShrinkHeight((componentHeight_ / HALF) - (componentWidth_ / HALF));
         }
-        componentWidth_ = componentHeight_ = std::max(componentWidth_, componentHeight_);
+        componentWidth_ = componentHeight_ = std::min(componentWidth_, componentHeight_);
     } else {
         buttonConstraint.selfIdealSize.SetSize(SizeF(componentWidth_, componentHeight_));
     }
@@ -97,7 +97,9 @@ void SecurityComponentLayoutAlgorithm::MeasureButton(LayoutWrapper* layoutWrappe
 
 void SecurityComponentLayoutAlgorithm::InitPadding(RefPtr<SecurityComponentLayoutProperty>& property)
 {
-    auto theme = PipelineContext::GetCurrentContext()->GetTheme<SecurityComponentTheme>();
+    auto context = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<SecurityComponentTheme>();
     CHECK_NULL_VOID(theme);
 
     double borderWidth = property->GetBackgroundBorderWidth().value_or(Dimension(0.0)).ConvertToPx();
@@ -123,6 +125,21 @@ void SecurityComponentLayoutAlgorithm::InitPadding(RefPtr<SecurityComponentLayou
 
     size = property->GetTextIconSpace().value_or(theme->GetTextIconSpace()).ConvertToPx();
     middle_.Init(isVertical_, property->GetTextIconSpace().has_value(), size, 0.0);
+}
+
+void SecurityComponentLayoutAlgorithm::UpdateTextSize()
+{
+    auto minWidth = std::min(maxWidth_, componentWidth_);
+    if (!NearEqual(idealWidth_, 0.0)) {
+        minWidth = std::min(minWidth, idealWidth_);
+    }
+    float leftSpace;
+    if (isVertical_) {
+        leftSpace = left_.width_ + icon_.width_ + right_.width_;
+    } else {
+        leftSpace = left_.width_ + middle_.width_ + icon_.width_ + right_.width_;
+    }
+    text_.DoMeasure(isVertical_, minWidth, leftSpace);
 }
 
 double SecurityComponentLayoutAlgorithm::ShrinkWidth(double diff)
@@ -168,6 +185,7 @@ double SecurityComponentLayoutAlgorithm::ShrinkWidth(double diff)
             icon_.ShrinkWidth(resText);
         }
     }
+    UpdateTextSize();
     MeasureIntegralSize();
     return componentWidth_;
 }
@@ -294,18 +312,21 @@ void SecurityComponentLayoutAlgorithm::MeasureIntegralSize()
 }
 
 void SecurityComponentLayoutAlgorithm::UpdateVerticalOffset(OffsetF& offsetIcon,
-    OffsetF& offsetText)
+    OffsetF& offsetText, SizeF& childSize)
 {
     offsetText = offsetIcon + OffsetF(0.0, icon_.height_ + middle_.height_);
     if (icon_.width_ > text_.width_) {
         offsetText += OffsetF((icon_.width_ - text_.width_) / HALF, 0.0);
+        childSize += SizeF(icon_.width_, 0.0);
     } else {
         offsetIcon += OffsetF((text_.width_ - icon_.width_) / HALF, 0.0);
+        childSize += SizeF(text_.width_, 0.0);
     }
+    childSize += SizeF(0.0, icon_.height_ + middle_.height_ + text_.height_);
 }
 
 void SecurityComponentLayoutAlgorithm::UpdateHorizontalOffset(LayoutWrapper* layoutWrapper,
-    OffsetF& offsetIcon, OffsetF& offsetText)
+    OffsetF& offsetIcon, OffsetF& offsetText, SizeF& childSize)
 {
     if (GetTextDirection(layoutWrapper) == TextDirection::RTL) {
         offsetIcon = offsetText +
@@ -317,24 +338,76 @@ void SecurityComponentLayoutAlgorithm::UpdateHorizontalOffset(LayoutWrapper* lay
     if (icon_.height_ > text_.height_) {
         offsetText +=
             OffsetF(0.0, (icon_.height_ - text_.height_) / HALF);
+        childSize += SizeF(0.0, icon_.height_);
     } else {
         offsetIcon +=
             OffsetF(0.0, (text_.height_ - icon_.height_) / HALF);
+        childSize += SizeF(0.0, text_.height_);
     }
+    childSize += SizeF(icon_.width_ + middle_.width_ + text_.width_, 0.0);
+}
+
+Alignment SecurityComponentLayoutAlgorithm::ParseAlignmentRTL(LayoutWrapper* layoutWrapper, Alignment align)
+{
+    if (GetTextDirection(layoutWrapper) != TextDirection::RTL) {
+        return align;
+    }
+    if (align == Alignment::TOP_LEFT) {
+        return Alignment::TOP_RIGHT;
+    }
+    if (align == Alignment::CENTER_LEFT) {
+        return Alignment::CENTER_RIGHT;
+    }
+    if (align == Alignment::BOTTOM_LEFT) {
+        return Alignment::BOTTOM_RIGHT;
+    }
+    if (align == Alignment::TOP_RIGHT) {
+        return Alignment::TOP_LEFT;
+    }
+    if (align == Alignment::CENTER_RIGHT) {
+        return Alignment::CENTER_LEFT;
+    }
+    if (align == Alignment::BOTTOM_RIGHT) {
+        return Alignment::BOTTOM_LEFT;
+    }
+    return align;
 }
 
 void SecurityComponentLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    OffsetF offsetIcon = OffsetF(left_.width_, top_.height_);
-    OffsetF offsetText = OffsetF(left_.width_, top_.height_);
+    OffsetF offsetIcon = OffsetF(0.0, 0.0);
+    OffsetF offsetText = OffsetF(0.0, 0.0);
+    SizeF childSize = SizeF(0.0, 0.0);
     if (isVertical_) {
-        UpdateVerticalOffset(offsetIcon, offsetText);
+        UpdateVerticalOffset(offsetIcon, offsetText, childSize);
     } else {
-        UpdateHorizontalOffset(layoutWrapper, offsetIcon, offsetText);
+        UpdateHorizontalOffset(layoutWrapper, offsetIcon, offsetText, childSize);
+    }
+    auto property = AceType::DynamicCast<SecurityComponentLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(property);
+    if (property->GetAlignment().has_value()) {
+        auto left = LessNotEqual(left_.width_, left_.defaultWidth_) ? left_.width_ : left_.defaultWidth_;
+        auto right = LessNotEqual(right_.width_, right_.defaultWidth_) ? right_.width_ : right_.defaultWidth_;
+        auto top = LessNotEqual(top_.height_, top_.defaultHeight_) ? top_.height_ : top_.defaultHeight_;
+        auto bottom = LessNotEqual(bottom_.height_, bottom_.defaultHeight_) ? bottom_.height_ : bottom_.defaultHeight_;
+        offsetIcon += OffsetF(left, top);
+        offsetText += OffsetF(left, top);
+        auto geometryNode = layoutWrapper->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto frameSize = geometryNode->GetFrameSize();
+        frameSize -= SizeF(left + right, top + bottom);
+        auto alignment = ParseAlignmentRTL(layoutWrapper, property->GetAlignment().value());
+        auto translate = Alignment::GetAlignPosition(frameSize, childSize, alignment);
+        offsetIcon += translate;
+        offsetText += translate;
+    } else {
+        offsetIcon += OffsetF(left_.width_, top_.height_);
+        offsetText += OffsetF(left_.width_, top_.height_);
     }
 
     UpdateChildPosition(layoutWrapper, V2::IMAGE_ETS_TAG, offsetIcon);
+    UpdateChildPosition(layoutWrapper, V2::SYMBOL_ETS_TAG, offsetIcon);
     UpdateChildPosition(layoutWrapper, V2::TEXT_ETS_TAG, offsetText);
 
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
@@ -383,24 +456,475 @@ void SecurityComponentLayoutAlgorithm::FillBlank()
     MeasureIntegralSize();
 }
 
+RefPtr<FrameNode> SecurityComponentLayoutAlgorithm::GetSecCompChildNode(RefPtr<FrameNode>& parent,
+    const std::string& tag)
+{
+    for (const auto& child : parent->GetChildren()) {
+        auto node = AceType::DynamicCast<FrameNode, UINode>(child);
+        CHECK_NULL_RETURN(node, nullptr);
+        if (node->GetTag() == tag) {
+            return node;
+        }
+    }
+    return nullptr;
+}
+
+void SecurityComponentLayoutAlgorithm::UpdateTextRectPoint()
+{
+    if (isVertical_) {
+        if (icon_.width_ > text_.width_) {
+            textLeftTopPoint_ = SizeF(left_.width_ + icon_.width_ / HALF - text_.width_ / HALF,
+                top_.height_ + icon_.height_ + middle_.height_);
+            textRightTopPoint_ = SizeF(left_.width_ + icon_.width_ / HALF + text_.width_ / HALF,
+                top_.height_ + icon_.height_ + middle_.height_);
+            textLeftBottomPoint_ = SizeF(left_.width_ + icon_.width_ / HALF - text_.width_ / HALF,
+                top_.height_ + icon_.height_ + middle_.height_ + text_.height_);
+            textRightBottomPoint_ = SizeF(left_.width_ + icon_.width_ / HALF + text_.width_ / HALF,
+                top_.height_ + icon_.height_ + middle_.height_ + text_.height_);
+        } else {
+            textLeftTopPoint_ = SizeF(left_.width_, top_.height_ + icon_.height_ + middle_.height_);
+            textRightTopPoint_ = SizeF(left_.width_ + text_.width_, top_.height_ + icon_.height_ + middle_.height_);
+            textLeftBottomPoint_ = SizeF(left_.width_, top_.height_ + icon_.height_ + middle_.height_ + text_.height_);
+            textRightBottomPoint_ = SizeF(left_.width_ + text_.width_,
+                top_.height_ + icon_.height_ + middle_.height_ + text_.height_);
+        }
+    } else {
+        if (icon_.height_ > text_.height_) {
+            textLeftTopPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_,
+                top_.height_ + icon_.height_ / HALF - text_.height_ / HALF);
+            textRightTopPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_ + text_.width_,
+                top_.height_ + icon_.height_ / HALF - text_.height_ / HALF);
+            textLeftBottomPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_,
+                top_.height_ + icon_.height_ / HALF + text_.height_ / HALF);
+            textRightBottomPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_ + text_.width_,
+                top_.height_ + icon_.height_ / HALF + text_.height_ / HALF);
+        } else {
+            textLeftTopPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_, top_.height_);
+            textRightTopPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_ + text_.width_, top_.height_);
+            textLeftBottomPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_, top_.height_ + text_.height_);
+            textRightBottomPoint_ = SizeF(left_.width_ + icon_.width_ + middle_.width_ + text_.width_,
+                top_.height_ + text_.height_);
+        }
+    }
+}
+
+bool SecurityComponentLayoutAlgorithm::IsTextAdaptOutOfRange(SizeF& leftPoint, SizeF& rightPoint, SizeF& circlePoint,
+    float maxDistance)
+{
+    if (LessOrEqual(rightPoint.Width(), circlePoint.Width())) {
+        return true;
+    }
+
+    auto pointDistance = rightPoint.Width() - circlePoint.Width();
+    auto maxSpaceToShrink = rightPoint.Width() - leftPoint.Width();
+    maxSpaceToShrink = GreatNotEqual(maxSpaceToShrink, pointDistance) ? pointDistance : maxSpaceToShrink;
+    auto threshold = currentFontSize_.ConvertToPx() * (1.0 - TEXT_OUT_OF_WIDTH_PERCENT);
+    auto res = text_.TryShrinkTextWidth(rightPoint, circlePoint, maxSpaceToShrink, maxDistance, threshold);
+    if (res) {
+        UpdateTextRectPoint();
+        return false;
+    }
+    return true;
+}
+
+bool SecurityComponentLayoutAlgorithm::IsTextOutOfRangeInCircle()
+{
+    auto circlePoint = SizeF(componentWidth_ / HALF, componentHeight_ / HALF);
+    auto threshold = TEXT_OUT_OF_RANGE_PERCENT * RANGE_RATIO * currentFontSize_.ConvertToPx();
+    auto maxDistance = pow(circlePoint.Width() + threshold);
+    auto leftTopDistance = pow(textLeftTopPoint_.Width() - circlePoint.Width()) +
+        pow(textLeftTopPoint_.Height() - circlePoint.Height());
+    if (GreatNotEqual(leftTopDistance, maxDistance)) {
+        return true;
+    }
+    auto leftBottomDistance = pow(textLeftBottomPoint_.Width() - circlePoint.Width()) +
+        pow(textLeftBottomPoint_.Height() - circlePoint.Height());
+    if (GreatNotEqual(leftBottomDistance, maxDistance)) {
+        return true;
+    }
+    auto rightTopDistance = pow(textRightTopPoint_.Width() - circlePoint.Width()) +
+        pow(textRightTopPoint_.Height() - circlePoint.Height());
+    if (GreatNotEqual(rightTopDistance, maxDistance) && IsTextAdaptOutOfRange(textLeftTopPoint_,
+        textRightTopPoint_, circlePoint, maxDistance)) {
+        return true;
+    }
+    auto rightBottomDistance = pow(textRightBottomPoint_.Width() - circlePoint.Width()) +
+        pow(textRightBottomPoint_.Height() - circlePoint.Height());
+    if (GreatNotEqual(rightBottomDistance, maxDistance) && IsTextAdaptOutOfRange(textLeftBottomPoint_,
+        textRightBottomPoint_, circlePoint, maxDistance)) {
+        return true;
+    }
+    return false;
+}
+
+bool SecurityComponentLayoutAlgorithm::CompareDistance(SizeF& point, SizeF& circlePoint, float maxDistance)
+{
+    auto distance = pow(point.Width() - circlePoint.Width()) + pow(point.Height() - circlePoint.Height());
+    if (GreatNotEqual(distance, maxDistance)) {
+        return true;
+    }
+    return false;
+}
+
+bool SecurityComponentLayoutAlgorithm::IsOutOfRangeInHoriCapsule(SizeF& leftCirclePoint, SizeF& rightCirclePoint,
+    float maxDistance)
+{
+    if (GreatNotEqual(textRightTopPoint_.Width(), rightCirclePoint.Width()) &&
+        LessNotEqual(textRightTopPoint_.Height(), rightCirclePoint.Height())) {
+        if (CompareDistance(textRightTopPoint_, rightCirclePoint, maxDistance) &&
+            IsTextAdaptOutOfRange(textLeftTopPoint_, textRightTopPoint_, rightCirclePoint, maxDistance)) {
+            return true;
+        }
+    }
+    if (LessNotEqual(textLeftBottomPoint_.Width(), leftCirclePoint.Width()) &&
+        GreatNotEqual(textLeftBottomPoint_.Height(), leftCirclePoint.Height())) {
+        if (CompareDistance(textLeftBottomPoint_, leftCirclePoint, maxDistance)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool SecurityComponentLayoutAlgorithm::IsOutOfRangeInVertiCapsule(SizeF& topCirclePoint, SizeF& bottomCirclePoint,
+    float maxDistance)
+{
+    if (GreatNotEqual(textRightTopPoint_.Width(), topCirclePoint.Width()) &&
+        LessNotEqual(textRightTopPoint_.Height(), topCirclePoint.Height())) {
+        if (CompareDistance(textRightTopPoint_, topCirclePoint, maxDistance) &&
+            IsTextAdaptOutOfRange(textLeftTopPoint_, textRightTopPoint_, topCirclePoint, maxDistance)) {
+            return true;
+        }
+    }
+    if (LessNotEqual(textLeftBottomPoint_.Width(), bottomCirclePoint.Width()) &&
+        GreatNotEqual(textLeftBottomPoint_.Height(), bottomCirclePoint.Height())) {
+        if (CompareDistance(textLeftBottomPoint_, bottomCirclePoint, maxDistance)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool SecurityComponentLayoutAlgorithm::IsTextOutOfRangeInCapsule()
+{
+    SizeF rightBottomCirclePoint;
+    auto capsuleRadius = std::min(componentWidth_, componentHeight_) / HALF;
+    auto maxDistance = pow(capsuleRadius + TEXT_OUT_OF_RANGE_PERCENT * RANGE_RATIO * currentFontSize_.ConvertToPx());
+    auto leftTopCirclePoint = SizeF(capsuleRadius, capsuleRadius);
+    if (LessNotEqual(textLeftTopPoint_.Width(), leftTopCirclePoint.Width()) &&
+        LessNotEqual(textLeftTopPoint_.Height(), leftTopCirclePoint.Height())) {
+        if (CompareDistance(textLeftTopPoint_, leftTopCirclePoint, maxDistance)) {
+            return true;
+        }
+    }
+    if (GreatOrEqual(componentWidth_, componentHeight_)) {
+        rightBottomCirclePoint = SizeF(componentWidth_ - capsuleRadius, capsuleRadius);
+        auto res = IsOutOfRangeInHoriCapsule(leftTopCirclePoint, rightBottomCirclePoint, maxDistance);
+        if (res) {
+            return res;
+        }
+    } else {
+        rightBottomCirclePoint = SizeF(capsuleRadius, componentHeight_ - capsuleRadius);
+        auto res = IsOutOfRangeInVertiCapsule(leftTopCirclePoint, rightBottomCirclePoint, maxDistance);
+        if (res) {
+            return res;
+        }
+    }
+    if (GreatNotEqual(textRightBottomPoint_.Width(), rightBottomCirclePoint.Width()) &&
+        GreatNotEqual(textRightBottomPoint_.Height(), rightBottomCirclePoint.Height())) {
+        if (CompareDistance(textRightBottomPoint_, rightBottomCirclePoint, maxDistance) &&
+            IsTextAdaptOutOfRange(textLeftBottomPoint_, textRightBottomPoint_, rightBottomCirclePoint, maxDistance)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool SecurityComponentLayoutAlgorithm::TopLeftCompDistance(float obtainedRadius, float maxRadius, float threshold)
+{
+    auto radius = GreatNotEqual(obtainedRadius, maxRadius) ? maxRadius : obtainedRadius;
+    auto circlePoint = SizeF(radius, radius);
+    if (LessNotEqual(textLeftTopPoint_.Width(), circlePoint.Width()) &&
+        LessNotEqual(textLeftTopPoint_.Height(), circlePoint.Height())) {
+        auto distance = pow(textLeftTopPoint_.Width() - circlePoint.Width()) +
+            pow(textLeftTopPoint_.Height() - circlePoint.Height());
+        auto maxDistance = pow(radius + threshold);
+        if (GreatNotEqual(distance, maxDistance)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool SecurityComponentLayoutAlgorithm::BottomLeftCompDistance(float obtainedRadius, float maxRadius, float threshold)
+{
+    auto radius = GreatNotEqual(obtainedRadius, maxRadius) ? maxRadius : obtainedRadius;
+    auto circlePoint = SizeF(radius, componentHeight_ - radius);
+    if (LessNotEqual(textLeftBottomPoint_.Width(), circlePoint.Width()) &&
+        GreatNotEqual(textLeftBottomPoint_.Height(), circlePoint.Height())) {
+        auto distance = pow(textLeftBottomPoint_.Width() - circlePoint.Width()) +
+            pow(textLeftBottomPoint_.Height() - circlePoint.Height());
+        auto maxDistance = pow(radius + threshold);
+        if (GreatNotEqual(distance, maxDistance)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool SecurityComponentLayoutAlgorithm::TopRightCompDistance(float obtainedRadius, float maxRadius, float threshold)
+{
+    auto radius = GreatNotEqual(obtainedRadius, maxRadius) ? maxRadius : obtainedRadius;
+    auto circlePoint = SizeF(componentWidth_ - radius, radius);
+    if (GreatNotEqual(textRightTopPoint_.Width(), circlePoint.Width()) &&
+        LessNotEqual(textRightTopPoint_.Height(), circlePoint.Height())) {
+        auto distance = pow(textRightTopPoint_.Width() - circlePoint.Width()) +
+            pow(textRightTopPoint_.Height() - circlePoint.Height());
+        auto maxDistance = pow(radius + threshold);
+        if (GreatNotEqual(distance, maxDistance) && IsTextAdaptOutOfRange(textLeftTopPoint_,
+            textRightTopPoint_, circlePoint, maxDistance)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool SecurityComponentLayoutAlgorithm::BottomRightCompDistance(float obtainedRadius, float maxRadius, float threshold)
+{
+    auto radius = GreatNotEqual(obtainedRadius, maxRadius) ? maxRadius : obtainedRadius;
+    auto circlePoint = SizeF(componentWidth_ - radius, componentHeight_ - radius);
+    if (GreatNotEqual(textRightBottomPoint_.Width(), circlePoint.Width()) &&
+        GreatNotEqual(textRightBottomPoint_.Height(), circlePoint.Height())) {
+        auto distance = pow(textRightBottomPoint_.Width() - circlePoint.Width()) +
+            pow(textRightBottomPoint_.Height() - circlePoint.Height());
+        auto maxDistance = pow(radius + threshold);
+        if (GreatNotEqual(distance, maxDistance) && IsTextAdaptOutOfRange(textLeftBottomPoint_,
+            textRightBottomPoint_, circlePoint, maxDistance)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool SecurityComponentLayoutAlgorithm::IsTextOutOfRangeInNormal()
+{
+    auto borderRadius = buttonLayoutProperty_->GetBorderRadius();
+    if (!borderRadius.has_value()) {
+        return false;
+    }
+    auto maxRadius = std::min(componentWidth_, componentHeight_) / HALF;
+    auto threshold = TEXT_OUT_OF_RANGE_PERCENT * RANGE_RATIO * currentFontSize_.ConvertToPx();
+    if (borderRadius->radiusTopLeft.has_value() &&
+        GreatNotEqual(borderRadius->radiusTopLeft.value().ConvertToPx(), currentFontSize_.ConvertToPx())) {
+        if (TopLeftCompDistance(borderRadius->radiusTopLeft.value().ConvertToPx(), maxRadius, threshold)) {
+            return true;
+        }
+    }
+    if (borderRadius->radiusBottomLeft.has_value() &&
+        GreatNotEqual(borderRadius->radiusBottomLeft.value().ConvertToPx(), currentFontSize_.ConvertToPx())) {
+        if (BottomLeftCompDistance(borderRadius->radiusBottomLeft.value().ConvertToPx(), maxRadius, threshold)) {
+            return true;
+        }
+    }
+    if (borderRadius->radiusTopRight.has_value() &&
+        GreatNotEqual(borderRadius->radiusTopRight.value().ConvertToPx(), currentFontSize_.ConvertToPx())) {
+        if (TopRightCompDistance(borderRadius->radiusTopRight.value().ConvertToPx(), maxRadius, threshold)) {
+            return true;
+        }
+    }
+    if (borderRadius->radiusBottomRight.has_value() &&
+        GreatNotEqual(borderRadius->radiusBottomRight.value().ConvertToPx(), currentFontSize_.ConvertToPx())) {
+        if (BottomRightCompDistance(borderRadius->radiusBottomRight.value().ConvertToPx(), maxRadius, threshold)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool SecurityComponentLayoutAlgorithm::IsTextOutOfOneColumn(RefPtr<FrameNode>& frameNode, float threshold)
+{
+    auto textNode = GetSecCompChildNode(frameNode, V2::TEXT_ETS_TAG);
+    CHECK_NULL_RETURN(textNode, false);
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, false);
+    auto realWidth = textPattern->GetLineMetrics(0).width;
+    auto allowWidth = text_.width_ + threshold;
+    if (LessNotEqual(allowWidth, realWidth)) {
+        return true;
+    }
+
+    return false;
+}
+
+bool SecurityComponentLayoutAlgorithm::GetMaxLineLimitExceededFlag(std::optional<SizeF>& currentTextSize)
+{
+    auto res = text_.DidExceedMaxLines(currentTextSize);
+    if (res) {
+        SC_LOG_INFO("MaxLine limit exceeded.");
+        return true;
+    }
+    return false;
+}
+
+bool SecurityComponentLayoutAlgorithm::GetTextLimitExceededFlag(RefPtr<SecurityComponentLayoutProperty>& property,
+    RefPtr<FrameNode>& frameNode, std::optional<SizeF>& currentTextSize)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto buttonNode = GetSecCompChildNode(frameNode, V2::BUTTON_ETS_TAG);
+    CHECK_NULL_RETURN(buttonNode, false);
+    buttonLayoutProperty_ = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(buttonLayoutProperty_, false);
+
+    auto res = text_.GetCurrentTextSize(currentTextSize, currentFontSize_);
+    if (!res) {
+        return false;
+    }
+
+    UpdateTextRectPoint();
+
+    auto isCircle = (property->GetBackgroundType() == static_cast<int32_t>(ButtonType::CIRCLE));
+    auto isCapsule = (property->GetBackgroundType() == static_cast<int32_t>(ButtonType::CAPSULE));
+    if (isCircle) {
+        res = IsTextOutOfRangeInCircle();
+    } else if (isCapsule) {
+        res = IsTextOutOfRangeInCapsule();
+    } else {
+        res = IsTextOutOfRangeInNormal();
+    }
+
+    if (!res) {
+        auto threshold = currentFontSize_.ConvertToPx() * TEXT_OUT_OF_WIDTH_PERCENT;
+        res = IsTextOutOfOneColumn(frameNode, threshold);
+    }
+
+    return res;
+}
+
+bool SecurityComponentLayoutAlgorithm::IsIconOutOfRange(SizeF& iconPoint, SizeF& point, double maxDistance)
+{
+    auto iconRadius = icon_.width_ * ICON_RANGE_RATIO / HALF;
+    auto distance = sqrt(pow(iconPoint.Width() - point.Width()) + pow(iconPoint.Height() - point.Height())) +
+        iconRadius;
+    if (GreatNotEqual(distance, maxDistance + 1.0)) {
+        return true;
+    }
+    return false;
+}
+
+bool SecurityComponentLayoutAlgorithm::IsIconOutOfBackground(const NG::BorderRadiusProperty& radius)
+{
+    auto iconPoint = SizeF(left_.width_ + icon_.width_ / HALF, top_.height_ + icon_.width_ / HALF);
+    auto iconRadius = icon_.width_ * ICON_RANGE_RATIO / HALF;
+    if (GreatNotEqual(iconPoint.Width() + iconRadius, componentWidth_) ||
+        GreatNotEqual(iconPoint.Height() + iconRadius, componentHeight_)) {
+        return true;
+    }
+    if (radius.radiusTopLeft.has_value() &&
+        LessNotEqual(iconPoint.Width(), radius.radiusTopLeft.value().ConvertToPx()) &&
+        LessNotEqual(iconPoint.Height(), radius.radiusTopLeft.value().ConvertToPx())) {
+        auto topLeft = SizeF(radius.radiusTopLeft.value().ConvertToPx(), radius.radiusTopLeft.value().ConvertToPx());
+        return IsIconOutOfRange(iconPoint, topLeft, radius.radiusTopLeft.value().ConvertToPx());
+    }
+    if (radius.radiusTopRight.has_value() &&
+        GreatNotEqual(iconPoint.Width(), componentWidth_ - radius.radiusTopRight.value().ConvertToPx()) &&
+        LessNotEqual(iconPoint.Height(), radius.radiusTopRight.value().ConvertToPx())) {
+        auto topRight = SizeF(componentWidth_ - radius.radiusTopRight.value().ConvertToPx(),
+            radius.radiusTopRight.value().ConvertToPx());
+        return IsIconOutOfRange(iconPoint, topRight, radius.radiusTopRight.value().ConvertToPx());
+    }
+    if (radius.radiusBottomLeft.has_value() &&
+        LessNotEqual(iconPoint.Width(), radius.radiusBottomLeft.value().ConvertToPx()) &&
+        GreatNotEqual(iconPoint.Height(), componentHeight_ - radius.radiusBottomLeft.value().ConvertToPx())) {
+        auto bottomLeft = SizeF(radius.radiusBottomLeft.value().ConvertToPx(),
+            componentHeight_ - radius.radiusBottomLeft.value().ConvertToPx());
+        return IsIconOutOfRange(iconPoint, bottomLeft, radius.radiusBottomLeft.value().ConvertToPx());
+    }
+    if (radius.radiusBottomRight.has_value() &&
+        GreatNotEqual(iconPoint.Width(), componentWidth_ - radius.radiusBottomRight.value().ConvertToPx()) &&
+        GreatNotEqual(iconPoint.Height(), componentHeight_ - radius.radiusBottomRight.value().ConvertToPx())) {
+        auto bottomRight = SizeF(componentWidth_ - radius.radiusBottomRight.value().ConvertToPx(),
+            componentHeight_ - radius.radiusBottomRight.value().ConvertToPx());
+        return IsIconOutOfRange(iconPoint, bottomRight, radius.radiusBottomRight.value().ConvertToPx());
+    }
+
+    return false;
+}
+
+bool SecurityComponentLayoutAlgorithm::GetIconExceededFlag(RefPtr<SecurityComponentLayoutProperty>& property,
+    RefPtr<FrameNode>& frameNode)
+{
+    if (LessOrEqual(icon_.width_, 0.0)) {
+        return false;
+    }
+
+    NG::BorderRadiusProperty radius = BorderRadiusProperty(Dimension(0.0));
+    if (property->GetBackgroundType() == static_cast<int32_t>(ButtonType::CIRCLE) ||
+        property->GetBackgroundType() == static_cast<int32_t>(ButtonType::CAPSULE)) {
+        radius = BorderRadiusProperty(Dimension(std::min(componentWidth_, componentHeight_) / HALF));
+    } else if (property->GetBackgroundType() == static_cast<int32_t>(ButtonType::NORMAL) ||
+        property->GetBackgroundType() == static_cast<int32_t>(ButtonType::ROUNDED_RECTANGLE)) {
+        auto buttonNode = GetSecCompChildNode(frameNode, V2::BUTTON_ETS_TAG);
+        CHECK_NULL_RETURN(buttonNode, false);
+        auto bgProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+        CHECK_NULL_RETURN(bgProp, false);
+        const auto& borderRadius = bgProp->GetBorderRadius();
+        if (borderRadius.has_value()) {
+            radius = borderRadius.value();
+        }
+    } else {
+        return true;
+    }
+    return IsIconOutOfBackground(radius);
+}
+
+void SecurityComponentLayoutAlgorithm::UpdateTextFlags(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto securityComponentLayoutProperty =
+        AceType::DynamicCast<SecurityComponentLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(securityComponentLayoutProperty);
+    std::optional<SizeF> currentTextSize;
+    securityComponentLayoutProperty->UpdateIsTextLimitExceeded(GetTextLimitExceededFlag(securityComponentLayoutProperty,
+        frameNode, currentTextSize));
+    securityComponentLayoutProperty->UpdateIsMaxLineLimitExceeded(GetMaxLineLimitExceededFlag(currentTextSize));
+    securityComponentLayoutProperty->UpdateIsIconExceeded(GetIconExceededFlag(securityComponentLayoutProperty,
+        frameNode));
+}
+
+void SecurityComponentLayoutAlgorithm::InitLayoutWrapper(LayoutWrapper* layoutWrapper,
+    const RefPtr<SecurityComponentLayoutProperty>& securityComponentLayoutProperty)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto iconWrapper = GetChildWrapper(layoutWrapper, V2::IMAGE_ETS_TAG);
+    iconWrapper = iconWrapper ? iconWrapper : GetChildWrapper(layoutWrapper, V2::SYMBOL_ETS_TAG);
+    icon_.Init(securityComponentLayoutProperty, iconWrapper);
+
+    auto textWrapper = GetChildWrapper(layoutWrapper, V2::TEXT_ETS_TAG);
+    text_.Init(securityComponentLayoutProperty, textWrapper);
+}
+
 void SecurityComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto securityComponentLayoutProperty =
         AceType::DynamicCast<SecurityComponentLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(securityComponentLayoutProperty);
-
-    auto iconWrapper = GetChildWrapper(layoutWrapper, V2::IMAGE_ETS_TAG);
-    icon_.Init(securityComponentLayoutProperty, iconWrapper);
-
-    auto textWrapper = GetChildWrapper(layoutWrapper, V2::TEXT_ETS_TAG);
-    text_.Init(securityComponentLayoutProperty, textWrapper);
+    InitLayoutWrapper(layoutWrapper, securityComponentLayoutProperty);
 
     constraint_ = securityComponentLayoutProperty->GetContentLayoutConstraint();
     CHECK_NULL_VOID(constraint_);
-    isVertical_ = (securityComponentLayoutProperty->GetTextIconLayoutDirection().value() ==
-        SecurityComponentLayoutDirection::VERTICAL);
-    isNobg_ = (securityComponentLayoutProperty->GetBackgroundType().value() == BUTTON_TYPE_NULL);
+
+    // has value and less equal 0.0
+    if (LessOrEqual(constraint_->selfIdealSize.Width().value_or(1.0), 0.0) &&
+        LessOrEqual(constraint_->selfIdealSize.Height().value_or(1.0), 0.0)) {
+        return;
+    }
+
+    isVertical_ = (securityComponentLayoutProperty->GetTextIconLayoutDirection().value_or(
+        SecurityComponentLayoutDirection::HORIZONTAL) == SecurityComponentLayoutDirection::VERTICAL);
+    isNobg_ = (securityComponentLayoutProperty->GetBackgroundType().value_or(
+        static_cast<int32_t>(ButtonType::CAPSULE)) == BUTTON_TYPE_NULL);
     idealWidth_ = constraint_->selfIdealSize.Width().value_or(0.0);
     idealHeight_ = constraint_->selfIdealSize.Height().value_or(0.0);
     minWidth_ = constraint_->minSize.Width();
@@ -426,11 +950,12 @@ void SecurityComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     // fill blank when all paddings can not be enlarged because it has been set
     FillBlank();
-
     icon_.DoMeasure();
-    securityComponentLayoutProperty->UpdateIsTextLimitExceeded(text_.GetTextLimitExceededFlag(componentHeight_));
     MeasureButton(layoutWrapper, securityComponentLayoutProperty);
-    layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(componentWidth_, componentHeight_));
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetFrameSize(SizeF(componentWidth_, componentHeight_));
+    UpdateTextFlags(layoutWrapper);
 }
 
 TextDirection SecurityComponentLayoutAlgorithm::GetTextDirection(LayoutWrapper* layoutWrapper)
@@ -438,7 +963,7 @@ TextDirection SecurityComponentLayoutAlgorithm::GetTextDirection(LayoutWrapper* 
     auto frameNode = layoutWrapper->GetHostNode();
     // default return LTR
     CHECK_NULL_RETURN(frameNode, TextDirection::LTR);
-    std::string text = "";
+    std::u16string text = u"";
     // get button string
     for (const auto& child : frameNode->GetChildren()) {
         auto node = AceType::DynamicCast<FrameNode, UINode>(child);
@@ -457,8 +982,7 @@ TextDirection SecurityComponentLayoutAlgorithm::GetTextDirection(LayoutWrapper* 
     if (text.empty()) {
         return TextDirection::LTR;
     }
-    auto wString = StringUtils::ToWstring(text);
-    for (const auto& charInStr : wString) {
+    for (const auto& charInStr : text) {
         auto direction = u_charDirection(charInStr);
         if (direction == UCharDirection::U_LEFT_TO_RIGHT) {
             return TextDirection::LTR;

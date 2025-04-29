@@ -27,10 +27,6 @@ public:
     virtual ~CircleModel() = default;
 
     virtual void Create();
-
-private:
-    static std::unique_ptr<CircleModel> instance_;
-    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CIRCLE_CIRCLE_MODEL_H

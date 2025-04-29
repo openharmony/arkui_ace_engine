@@ -44,55 +44,51 @@ XComponentType ConvertToXComponentType(const std::string& type)
     if (type == "node") {
         return XComponentType::NODE;
     }
-#ifdef PLATFORM_VIEW_SUPPORTED
-    if (type == "platform_view") {
-        return XComponentType::PLATFORM_VIEW;
-    }
-#endif
     return XComponentType::SURFACE;
 }
 } // namespace
 
-std::unique_ptr<XComponentModel> XComponentModel::instance_ = nullptr;
-std::mutex XComponentModel::mutex_;
-
 XComponentModel* XComponentModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::XComponentModelNG());
+    static NG::XComponentModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::XComponentModelNG());
-            } else {
-                instance_.reset(new Framework::XComponentModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::XComponentModelNG instance;
+        return &instance;
+    } else {
+        static Framework::XComponentModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
-
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-void SetControllerCallback(const JSRef<JSObject>& object, const JsiExecutionContext& execCtx)
+void SetControllerOnCreated(
+    const WeakPtr<NG::FrameNode>& targetNode, const JSRef<JSObject>& object, const JsiExecutionContext& execCtx)
 {
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsCreatedFunc = object->GetProperty("onSurfaceCreated");
     if (jsCreatedFunc->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(jsCreatedFunc));
-        auto onSurfaceCreated = [execCtx, func = std::move(jsFunc), node = targetNode](const std::string& surfaceId) {
+        auto onSurfaceCreated = [execCtx, func = std::move(jsFunc), node = targetNode](
+                                    const std::string& surfaceId, const std::string& xcomponentId) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("XComponentController.onSurfaceCreated");
             PipelineContext::SetCallBackNode(node);
             auto jsVal = JSRef<JSVal>::Make(ToJSValue(surfaceId));
             func->ExecuteJS(1, &jsVal);
+            TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] ControllerOnCreated surfaceId:%{public}s",
+                xcomponentId.c_str(), surfaceId.c_str());
         };
         XComponentModel::GetInstance()->SetControllerOnCreated(std::move(onSurfaceCreated));
     }
+}
+
+void SetControllerOnChanged(
+    const WeakPtr<NG::FrameNode>& targetNode, const JSRef<JSObject>& object, const JsiExecutionContext& execCtx)
+{
     auto jsChangedFunc = object->GetProperty("onSurfaceChanged");
     if (jsChangedFunc->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(jsChangedFunc));
@@ -112,18 +108,34 @@ void SetControllerCallback(const JSRef<JSObject>& object, const JsiExecutionCont
         };
         XComponentModel::GetInstance()->SetControllerOnChanged(std::move(onSurfaceChanged));
     }
+}
+
+void SetControllerOnDestroyed(
+    const WeakPtr<NG::FrameNode>& targetNode, const JSRef<JSObject>& object, const JsiExecutionContext& execCtx)
+{
     auto jsDestroyedFunc = object->GetProperty("onSurfaceDestroyed");
     if (jsDestroyedFunc->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), JSRef<JSFunc>::Cast(jsDestroyedFunc));
-        auto onSurfaceDestroyed = [execCtx, func = std::move(jsFunc), node = targetNode](const std::string& surfaceId) {
+        auto onSurfaceDestroyed = [execCtx, func = std::move(jsFunc), node = targetNode](
+                                      const std::string& surfaceId, const std::string& xcomponentId) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("XComponentController.onSurfaceDestroyed");
             PipelineContext::SetCallBackNode(node);
             auto jsVal = JSRef<JSVal>::Make(ToJSValue(surfaceId));
             func->ExecuteJS(1, &jsVal);
+            TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] ControllerOnDestroyed surfaceId:%{public}s",
+                xcomponentId.c_str(), surfaceId.c_str());
         };
         XComponentModel::GetInstance()->SetControllerOnDestroyed(std::move(onSurfaceDestroyed));
     }
+}
+
+void SetControllerCallback(const JSRef<JSObject>& object, const JsiExecutionContext& execCtx)
+{
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    SetControllerOnCreated(targetNode, object, execCtx);
+    SetControllerOnChanged(targetNode, object, execCtx);
+    SetControllerOnDestroyed(targetNode, object, execCtx);
 }
 
 std::shared_ptr<InnerXComponentController> GetXComponentController(
@@ -181,6 +193,11 @@ void JSXComponent::JSBind(BindingTarget globalObj)
     JSClass<JSXComponent>::StaticMethod("pixelStretchEffect", &JSXComponent::JsPixelStretchEffect);
     JSClass<JSXComponent>::StaticMethod("linearGradientBlur", &JSXComponent::JsLinearGradientBlur);
     JSClass<JSXComponent>::StaticMethod("enableAnalyzer", &JSXComponent::JsEnableAnalyzer);
+    JSClass<JSXComponent>::StaticMethod("renderFit", &JSXComponent::JsRenderFit);
+    JSClass<JSXComponent>::StaticMethod("enableSecure", &JSXComponent::JsEnableSecure);
+    JSClass<JSXComponent>::StaticMethod("hdrBrightness", &JSXComponent::JsHdrBrightness);
+    JSClass<JSXComponent>::StaticMethod("blendMode", &JSXComponent::JsBlendMode);
+    JSClass<JSXComponent>::StaticMethod("enableTransparentLayer", &JSXComponent::JsEnableTransparentLayer);
 
     JSClass<JSXComponent>::InheritAndBind<JSContainerBase>(globalObj);
 }
@@ -190,35 +207,19 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     if (info.Length() < 1 || !info[0]->IsObject()) {
         return;
     }
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto id = paramObject->GetProperty("id");
-
-    auto type = paramObject->GetProperty("type");
-    auto libraryNameValue = paramObject->GetProperty("libraryname");
-    std::optional<std::string> idOpt = std::nullopt;
-    std::optional<std::string> libraryNameOpt = std::nullopt;
-    if (id->IsString()) {
-        idOpt = id->ToString();
-    }
-    if (libraryNameValue->IsString()) {
-        libraryNameOpt = libraryNameValue->ToString();
-    }
-    auto controller = paramObject->GetProperty("controller");
-    auto aiOptions = paramObject->GetProperty("imageAIOptions");
-    std::shared_ptr<InnerXComponentController> xcomponentController = nullptr;
+    XComponentOptions options;
     JSRef<JSObject> controllerObj;
-    if (controller->IsObject()) {
-        controllerObj = JSRef<JSObject>::Cast(controller);
-        xcomponentController = GetXComponentController(controllerObj, idOpt, info.GetExecutionContext());
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto aiOptions = paramObject->GetProperty("imageAIOptions");
+    ExtractInfoToXComponentOptions(options, controllerObj, paramObject, info);
+    if (options.id == std::nullopt && options.xcomponentController == nullptr &&
+        (options.xcomponentType == XComponentType::SURFACE || options.xcomponentType == XComponentType::TEXTURE)) {
+        XComponentModel::GetInstance()->Create(options.xcomponentType);
+    } else {
+        XComponentModel::GetInstance()->Create(
+            options.id, options.xcomponentType, options.libraryName, options.xcomponentController);
     }
-    XComponentType xcomponentType = XComponentType::SURFACE;
-    if (type->IsString()) {
-        xcomponentType = ConvertToXComponentType(type->ToString());
-    } else if (type->IsNumber()) {
-        xcomponentType = static_cast<XComponentType>(type->ToNumber<int32_t>());
-    }
-    XComponentModel::GetInstance()->Create(idOpt, xcomponentType, libraryNameOpt, xcomponentController);
-    if (!libraryNameOpt.has_value() && xcomponentController && !controllerObj->IsUndefined()) {
+    if (!options.libraryName.has_value() && options.xcomponentController && !controllerObj->IsUndefined()) {
         SetControllerCallback(controllerObj, info.GetExecutionContext());
     }
 
@@ -232,17 +233,40 @@ void JSXComponent::Create(const JSCallbackInfo& info)
         auto soPath = info[1]->ToString();
         XComponentModel::GetInstance()->SetSoPath(soPath);
     }
+    ParseImageAIOptions(aiOptions);
 
-    if (aiOptions->IsObject()) {
-        auto engine = EngineHelper::GetCurrentEngine();
-        CHECK_NULL_VOID(engine);
-        NativeEngine* nativeEngine = engine->GetNativeEngine();
-        CHECK_NULL_VOID(nativeEngine);
-        panda::Local<JsiValue> value = aiOptions.Get().GetLocalHandle();
-        JSValueWrapper valueWrapper = value;
-        ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
-        napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
-        XComponentModel::GetInstance()->SetImageAIOptions(optionsValue);
+    if (options.xcomponentType == XComponentType::SURFACE && options.screenId.has_value()) {
+        XComponentModel::GetInstance()->SetScreenId(options.screenId.value());
+    }
+}
+
+void JSXComponent::ExtractInfoToXComponentOptions(
+    XComponentOptions& options, JSRef<JSObject>& controllerObj,
+    const JSRef<JSObject>& paramObject, const JSCallbackInfo& info)
+{
+    auto id = paramObject->GetProperty("id");
+    auto type = paramObject->GetProperty("type");
+    auto libraryNameValue = paramObject->GetProperty("libraryname");
+    auto controller = paramObject->GetProperty("controller");
+    auto screenIdValue = paramObject->GetProperty("screenId");
+
+    if (id->IsString()) {
+        options.id = id->ToString();
+    }
+    if (libraryNameValue->IsString()) {
+        options.libraryName = libraryNameValue->ToString();
+    }
+    if (controller->IsObject()) {
+        controllerObj = JSRef<JSObject>::Cast(controller);
+        options.xcomponentController = GetXComponentController(controllerObj, options.id, info.GetExecutionContext());
+    }
+    if (type->IsString()) {
+        options.xcomponentType = ConvertToXComponentType(type->ToString());
+    } else if (type->IsNumber()) {
+        options.xcomponentType = static_cast<XComponentType>(type->ToNumber<int32_t>());
+    }
+    if (screenIdValue->IsNumber()) {
+        options.screenId = screenIdValue->ToNumber<uint64_t>();
     }
 }
 
@@ -255,6 +279,7 @@ void* JSXComponent::Create(const XComponentParams& params)
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(XComponentModel::GetInstance()->Create(params.elmtId,
         static_cast<float>(params.width), static_cast<float>(params.height), params.xcomponentId,
         static_cast<XComponentType>(params.xcomponentType), params.libraryName, xcomponentController));
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->SetIsArkTsFrameNode(true);
     auto pattern = frameNode->GetPattern<NG::XComponentPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
@@ -283,6 +308,22 @@ void* JSXComponent::Create(const XComponentParams& params)
     return jsXComponent;
 }
 
+void JSXComponent::ParseImageAIOptions(const JSRef<JSVal>& jsValue)
+{
+    if (!jsValue->IsObject()) {
+        return;
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_VOID(nativeEngine);
+    panda::Local<JsiValue> value = jsValue.Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    XComponentModel::GetInstance()->SetImageAIOptions(optionsValue);
+}
+
 bool JSXComponent::ChangeRenderType(int32_t renderType)
 {
     auto xcFrameNode = AceType::DynamicCast<NG::FrameNode>(frameNode_);
@@ -306,6 +347,7 @@ void JSXComponent::JsOnLoad(const JSCallbackInfo& args)
         PipelineContext::SetCallBackNode(node);
         std::vector<std::string> keys = { "load", xcomponentId };
         func->ExecuteNew(keys, "");
+        TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] onLoad triggers", xcomponentId.c_str());
     };
     XComponentModel::GetInstance()->SetOnLoad(std::move(onLoad));
 }
@@ -345,7 +387,8 @@ void JSXComponent::RegisterOnDestroy(const JsiExecutionContext& execCtx, const L
     }
 
     auto jsFunc = panda::Global<panda::FunctionRef>(execCtx.vm_, Local<panda::FunctionRef>(func));
-    auto onDestroy = [execCtx, funcRef = std::move(jsFunc), node = AceType::WeakClaim(AceType::RawPtr(frameNode))]() {
+    auto onDestroy = [execCtx, funcRef = std::move(jsFunc), node = AceType::WeakClaim(AceType::RawPtr(frameNode))](
+                         const std::string& xcomponentId) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("XComponentNode.onDestroy");
         PipelineContext::SetCallBackNode(node);
@@ -361,12 +404,14 @@ void JSXComponent::JsOnDestroy(const JSCallbackInfo& args)
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onDestroy = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
+    auto onDestroy = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                         const std::string& xcomponentId) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("XComponent.onDestroy");
         PipelineContext::SetCallBackNode(node);
         std::vector<std::string> keys = { "destroy" };
         func->Execute(keys, "");
+        TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] onDestroy", xcomponentId.c_str());
     };
     XComponentModel::GetInstance()->SetOnDestroy(std::move(onDestroy));
 }
@@ -670,4 +715,77 @@ void JSXComponent::JsEnableAnalyzer(bool enable)
     XComponentModel::GetInstance()->EnableAnalyzer(enable);
 }
 
+void JSXComponent::JsRenderFit(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE || args.Length() != 1) {
+        return;
+    }
+    if (type == XComponentType::TEXTURE) {
+        JSViewAbstract::JSRenderFit(args);
+        return;
+    }
+
+    // set RenderFit on SurfaceNode when type is SURFACE
+    RenderFit renderFit = RenderFit::RESIZE_FILL;
+    if (args[0]->IsNumber()) {
+        int32_t fitNumber = args[0]->ToNumber<int32_t>();
+        if (fitNumber >= static_cast<int32_t>(RenderFit::CENTER) &&
+            fitNumber <= static_cast<int32_t>(RenderFit::RESIZE_COVER_BOTTOM_RIGHT)) {
+            renderFit = static_cast<RenderFit>(fitNumber);
+        }
+    }
+    XComponentModel::GetInstance()->SetRenderFit(renderFit);
+}
+
+void JSXComponent::JsEnableSecure(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::SURFACE || args.Length() != 1) {
+        return;
+    }
+    // set isSecure on SurfaceNode when type is SURFACE
+    if (args[0]->IsBoolean()) {
+        bool isSecure = args[0]->ToBoolean();
+        XComponentModel::GetInstance()->EnableSecure(isSecure);
+    }
+}
+
+void JSXComponent::JsHdrBrightness(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::SURFACE || args.Length() != 1) {
+        return;
+    }
+    // set hdrBrightness on SurfaceNode when type is SURFACE
+    if (args[0]->IsNumber()) {
+        float hdrBrightness = args[0]->ToNumber<float>();
+        XComponentModel::GetInstance()->HdrBrightness(std::clamp(hdrBrightness, 0.0f, 1.0f));
+    } else {
+        XComponentModel::GetInstance()->HdrBrightness(1.0f);
+    }
+}
+
+void JSXComponent::JsBlendMode(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type == XComponentType::TEXTURE && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        return;
+    }
+
+    JSViewAbstract::JsBlendMode(args);
+}
+
+void JSXComponent::JsEnableTransparentLayer(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::SURFACE || args.Length() != 1) {
+        return;
+    }
+    // set isTransparentLayer on SurfaceNode when type is SURFACE
+    if (args[0]->IsBoolean()) {
+        bool isTransparentLayer = args[0]->ToBoolean();
+        XComponentModel::GetInstance()->EnableTransparentLayer(isTransparentLayer);
+    }
+}
 } // namespace OHOS::Ace::Framework

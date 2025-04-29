@@ -16,16 +16,25 @@
 #include "base/log/dump_log.h"
 
 #include <fstream>
+
+#if defined(OHOS_PLATFORM)
+#include "zlib.h"
+#endif
+
 #include "core/common/ace_application_info.h"
 
 namespace OHOS::Ace {
+
+#define CHUNK 16384
+
+#define COMPRESS_VERSION 9
 
 DumpLog::DumpLog() = default;
 DumpLog::~DumpLog() = default;
 
 void DumpLog::Print(int32_t depth, const std::string& className, int32_t childSize)
 {
-    if (!ostream_->good()) {
+    if (!ostream_ || !ostream_->good()) {
         return;
     }
     std::string space = "  ";
@@ -67,7 +76,7 @@ void DumpLog::Print(int32_t depth, const std::string& content)
     for (int32_t i = 0; i < depth; ++i) {
         ostream_->write(space.c_str(), space.length());
     }
-    std::string data = content + "\n";
+    std::string data = content + (isUIExt_ ? ";" : "\n");
     ostream_->write(data.c_str(), data.length());
 }
 
@@ -113,10 +122,12 @@ bool DumpLog::OutPutBySize()
 {
     if (!ostream_->good()) {
         result_.clear();
+        std::string tmp;
+        result_.swap(tmp);
         return false;
     }
     // if current result size > max size, dump will output as file
-    if (result_.size() + 1 > DumpLog::MAX_DUMP_LENGTH) {
+    if (result_.size() + 1 > DumpLog::MAX_DUMP_LENGTH || isUIExt_) {
         auto dumpFilePath = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/arkui.dump";
         std::unique_ptr<std::ostream> ostream = std::make_unique<std::ofstream>(dumpFilePath);
         if (!ostream) {
@@ -124,24 +135,32 @@ bool DumpLog::OutPutBySize()
             result_.append("Dump output failed,please try again");
             ostream_->write(result_.c_str(), result_.length());
             result_.clear();
+            std::string tmp;
+            result_.swap(tmp);
         }
         CHECK_NULL_RETURN(ostream, false);
         DumpLog::GetInstance().SetDumpFile(std::move(ostream));
     }
     ostream_->write(result_.c_str(), result_.length());
     result_.clear();
+    std::string tmp;
+    result_.swap(tmp);
     ostream_->flush();
     return true;
 }
 
 void DumpLog::OutPutDefault()
 {
-    if (!ostream_->good()) {
+    if (!ostream_ || !ostream_->good()) {
         result_.clear();
+        std::string tmp;
+        result_.swap(tmp);
         return;
     }
     ostream_->write(result_.c_str(), result_.length());
     result_.clear();
+    std::string tmp;
+    result_.swap(tmp);
     ostream_->flush();
 }
 
@@ -188,12 +207,86 @@ std::string DumpLog::GetPrefix(int32_t depth)
 
 std::string DumpLog::FormatDumpInfo(const std::string& str, int32_t depth)
 {
-    if (!str.empty() && str.length() > DumpLog::MIN_JSON_LENGTH) {
+    if (str.length() > DumpLog::MIN_JSON_LENGTH) {
         if (depth == 0) {
             return str.substr(0, str.length() - DumpLog::END_POS_TWO);
         }
         return str.substr(1, str.length() - DumpLog::END_POS_THREE);
     }
     return str;
+}
+
+#if defined(OHOS_PLATFORM)
+int DumpLog::CompressString(const char* in_str, size_t in_len, std::string& out_str, int level)
+{
+    if (!in_str)
+        return Z_DATA_ERROR;
+
+    int ret, flush;
+    unsigned have;
+    z_stream strm;
+
+    unsigned char out[CHUNK];
+
+    /* allocate deflate state */
+    strm.zalloc = Z_NULL;
+    strm.zfree = Z_NULL;
+    strm.opaque = Z_NULL;
+    ret = deflateInit(&strm, level);
+    if (ret != Z_OK)
+        return ret;
+
+    std::shared_ptr<z_stream> sp_strm(&strm, [](z_stream* strm) { (void)deflateEnd(strm); });
+    const char* end = in_str + in_len;
+
+    size_t distance = 0;
+    /* compress until end of file */
+    do {
+        distance = end - in_str;
+        strm.avail_in = (distance >= CHUNK) ? CHUNK : distance;
+        strm.next_in = (Bytef*)in_str;
+        in_str += strm.avail_in;
+        flush = (in_str == end) ? Z_FINISH : Z_NO_FLUSH;
+        do {
+            strm.avail_out = CHUNK;
+            strm.next_out = out;
+            ret = deflate(&strm, flush);
+            if (ret == Z_STREAM_ERROR)
+                break;
+            have = CHUNK - strm.avail_out;
+            out_str.append((const char*)out, have);
+        } while (strm.avail_out == 0);
+        if (strm.avail_in != 0) {
+            break;
+        }
+    } while (flush != Z_FINISH);
+    if (ret != Z_STREAM_END)
+        return Z_STREAM_ERROR;
+    return Z_OK;
+}
+#endif
+
+void DumpLog::OutPutByCompress()
+{
+    if (!ostream_ || !ostream_->good()) {
+        result_.clear();
+        std::string tmp;
+        result_.swap(tmp);
+        return;
+    }
+    std::string compressString;
+#if defined(OHOS_PLATFORM)
+    if (CompressString(result_.c_str(), result_.size(), compressString, COMPRESS_VERSION) == Z_OK) {
+        ostream_->write(compressString.c_str(), compressString.length());
+    } else {
+        ostream_->write(result_.c_str(), result_.length());
+    }
+#else
+    ostream_->write(result_.c_str(), result_.length());
+#endif
+    result_.clear();
+    std::string tmp;
+    result_.swap(tmp);
+    ostream_->flush();
 }
 } // namespace OHOS::Ace

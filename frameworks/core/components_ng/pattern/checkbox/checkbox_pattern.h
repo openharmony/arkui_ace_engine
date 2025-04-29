@@ -19,22 +19,22 @@
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-#include "core/components/checkable/checkable_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
+#include "core/components_ng/pattern/overlay/group_manager.h"
 #include "core/components_ng/pattern/checkbox/checkbox_accessibility_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_event_hub.h"
 #include "core/components_ng/pattern/checkbox/checkbox_layout_algorithm.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_method.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
-#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/picker/picker_type_define.h"
 
 namespace OHOS::Ace::NG {
+class CheckBoxGroupPaintProperty;
 class CheckBoxPattern : public Pattern {
     DECLARE_ACE_TYPE(CheckBoxPattern, Pattern);
 
@@ -57,47 +57,10 @@ public:
         return MakeRefPtr<CheckBoxLayoutAlgorithm>();
     }
 
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
-    {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, nullptr);
-        auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
-        paintProperty->SetHost(host);
-        if (!paintMethod_) {
-            paintMethod_ = MakeRefPtr<CheckBoxPaintMethod>();
-        }
-        CheckBoxStyle checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
-        } else {
-            checkboxStyle = CheckBoxStyle::SQUARE_STYLE;
-        }
-        if (paintProperty->HasCheckBoxSelectedStyle()) {
-            checkboxStyle = paintProperty->GetCheckBoxSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
-        }
-        paintMethod_->SetCheckboxStyle(checkboxStyle);
-        paintMethod_->SetUseContentModifier(UseContentModifier());
-        paintMethod_->SetHasBuilder(builder_.has_value());
-        host->SetCheckboxFlag(true);
-        auto eventHub = host->GetEventHub<EventHub>();
-        CHECK_NULL_RETURN(eventHub, nullptr);
-        auto enabled = eventHub->IsEnabled();
-        paintMethod_->SetEnabled(enabled);
-        paintMethod_->SetTouchHoverAnimationType(touchHoverType_);
-        return paintMethod_;
-    }
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     bool OnDirtyLayoutWrapperSwap(
-        const RefPtr<LayoutWrapper>& dirty, bool /*skipMeasure*/, bool /*skipLayout*/) override
-    {
-        auto geometryNode = dirty->GetGeometryNode();
-        offset_ = geometryNode->GetContentOffset();
-        size_ = geometryNode->GetContentSize();
-        if (!isUserSetResponseRegion_) {
-            AddHotZoneRect();
-        }
-        return true;
-    }
+        const RefPtr<LayoutWrapper>& dirty, bool /*skipMeasure*/, bool /*skipLayout*/) override;
 
     RefPtr<EventHub> CreateEventHub() override
     {
@@ -145,30 +108,14 @@ public:
         lastSelect_ = select;
     }
 
-    void SetBuilderFunc(CheckBoxMakeCallback&& makeFunc)
-    {
-        if (makeFunc == nullptr) {
-            makeFunc_ = std::nullopt;
-            OnModifyDone();
-            return;
-        }
-        makeFunc_ = std::move(makeFunc);
-    }
+    void SetBuilderFunc(CheckBoxMakeCallback&& makeFunc);
 
     RefPtr<FrameNode> GetContentModifierNode()
     {
         return contentModifierNode_;
     }
 
-    void SetToggleBuilderFunc(SwitchMakeCallback&& toggleMakeFunc)
-    {
-        if (toggleMakeFunc == nullptr) {
-            toggleMakeFunc_ = std::nullopt;
-            OnModifyDone();
-            return;
-        }
-        toggleMakeFunc_ = std::move(toggleMakeFunc);
-    }
+    void SetToggleBuilderFunc(SwitchMakeCallback&& toggleMakeFunc);
 
     bool UseContentModifier()
     {
@@ -187,25 +134,9 @@ public:
         builder_ = buildFunc;
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
-    {
-        Pattern::ToJsonValue(json, filter);
-        /* no fixed attr below, just return */
-        if (filter.IsFastFilter()) {
-            return;
-        }
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto checkBoxEventHub = host->GetEventHub<NG::CheckBoxEventHub>();
-        auto name = checkBoxEventHub ? checkBoxEventHub->GetName() : "";
-        auto group = checkBoxEventHub ? checkBoxEventHub->GetGroupName() : "";
-        json->PutExtAttr("name", name.c_str(), filter);
-        json->PutExtAttr("group", group.c_str(), filter);
-        json->PutExtAttr("type", "ToggleType.Checkbox", filter);
-        auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
-        auto select = paintProperty->GetCheckBoxSelectValue(false);
-        json->PutExtAttr("select", select ? "true" : "false", filter);
-    }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
 
     void SetOriginalCheckboxStyle(OriginalCheckBoxStyle style)
     {
@@ -227,6 +158,18 @@ public:
     void StartCustomNodeAnimation(bool select);
     RefPtr<GroupManager> GetGroupManager();
 
+    void SaveCheckboxSettingData(const CheckboxSettingData& checkboxSettingData)
+    {
+        checkboxSettingData_ = checkboxSettingData;
+    }
+
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+
+    void DumpInfo() override;
+    static int32_t ParseCommand(const std::string& command, bool& selectStatus);
+    void ReportChangeEvent(bool selectStatus);
+    int32_t OnInjectionEvent(const std::string& command) override;
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -235,10 +178,16 @@ private:
     void InitClickEvent();
     void InitTouchEvent();
     void InitMouseEvent();
+    void InitFocusEvent();
     void OnClick();
     void OnTouchDown();
     void OnTouchUp();
     void HandleMouseEvent(bool isHover);
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     void CheckPageNode();
     void LoadBuilder();
     void UpdateIndicator();
@@ -251,6 +200,8 @@ private:
     void SetPrePageIdToLastPageId();
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool IsSquareStyleBox();
+    bool OnKeyEvent(const KeyEvent& event);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void AddHotZoneRect();
     void RemoveLastHotZoneRect() const;
@@ -265,6 +216,9 @@ private:
     void InitCheckBoxStatusByGroup(RefPtr<FrameNode> checkBoxGroupNode,
         const RefPtr<CheckBoxGroupPaintProperty>& groupPaintProperty, const std::list<RefPtr<FrameNode>>& list);
     void UpdateCheckBoxGroupStatus(RefPtr<FrameNode> checkBoxGroupNode, const std::list<RefPtr<FrameNode>>& list);
+    void UpdatePaintPropertyBySettingData(RefPtr<CheckBoxPaintProperty> paintProp);
+
+    CheckboxSettingData checkboxSettingData_;
 
     std::optional<CheckBoxMakeCallback> makeFunc_;
     std::optional<SwitchMakeCallback> toggleMakeFunc_;
@@ -282,6 +236,7 @@ private:
     bool isHover_ = false;
     bool isFirstCreated_ = true;
     bool isUserSetResponseRegion_ = false;
+    bool focusEventInitialized_ = false;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;
@@ -293,10 +248,10 @@ private:
     OriginalCheckBoxStyle originalStyle_ = OriginalCheckBoxStyle::CIRCULAR_STYLE;
     RefPtr<FrameNode> builderNode_;
     std::optional<std::function<void()>> builder_;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 
     RefPtr<CheckBoxPaintMethod> paintMethod_;
     WeakPtr<GroupManager> groupManager_;
-    bool isTouchPreventDefault_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxPattern);
 };
 } // namespace OHOS::Ace::NG

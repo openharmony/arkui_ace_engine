@@ -56,7 +56,7 @@ public:
         return ExecuteJS(0, nullptr);
     }
     // Empty realization in JsFunctionBase
-    virtual JSRef<JSVal> ExecuteJS(int argc, JSRef<JSVal>* argv)
+    virtual JSRef<JSVal> ExecuteJS(int argc, JSRef<JSVal>* argv, bool isAnimation = false)
     {
         JSRef<JSObject> eventInfo = JSRef<JSObject>::New();
         return JSRef<JSVal>::Cast(eventInfo);
@@ -90,7 +90,7 @@ public:
     {
         return ExecuteJS(0, nullptr);
     }
-    JSRef<JSVal> ExecuteJS(int argc, JSRef<JSVal>* argv) override;
+    JSRef<JSVal> ExecuteJS(int argc, JSRef<JSVal>* argv, bool isAnimation = false) override;
 
 protected:
     JSRef<JSFunc> jsFunction_;
@@ -116,7 +116,7 @@ public:
     {
         return ExecuteJS(0, nullptr);
     }
-    JSRef<JSVal> ExecuteJS(int argc, JSRef<JSVal>* argv) override;
+    JSRef<JSVal> ExecuteJS(int argc, JSRef<JSVal>* argv, bool isAnimation = false) override;
 
 protected:
     JSWeak<JSFunc> jsWeakFunction_;
@@ -149,6 +149,17 @@ public:
     }
 
     void Execute(const std::string& val, T& eventInfo)
+    {
+        JSRef<JSVal> jsVal = JSRef<JSVal>::Make(ToJSValue(val));
+        JSRef<JSVal> itemInfo;
+        if (parser_) {
+            itemInfo = parser_(eventInfo);
+        }
+        JSRef<JSVal> params[] = { jsVal, itemInfo };
+        JsFunction::ExecuteJS(ARGC, params);
+    }
+
+    void Execute(const std::u16string& val, T& eventInfo)
     {
         JSRef<JSVal> jsVal = JSRef<JSVal>::Make(ToJSValue(val));
         JSRef<JSVal> itemInfo;

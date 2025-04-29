@@ -118,7 +118,7 @@ void WebPattern::InitEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<WebEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
@@ -227,7 +227,7 @@ void WebPattern::HandleMouseEvent(MouseInfo& info)
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<WebEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto mouseEventCallback = eventHub->GetOnMouseEvent();
     CHECK_NULL_VOID(mouseEventCallback);
@@ -300,7 +300,7 @@ bool WebPattern::IsImageDrag()
 
 void WebPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();
@@ -348,7 +348,7 @@ bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, ret);
-    auto eventHub = host->GetEventHub<WebEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_RETURN(eventHub, ret);
 
     KeyEventInfo info(keyEvent);
@@ -379,7 +379,7 @@ void WebPattern::WebRequestFocus()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<WebEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -747,7 +747,7 @@ void WebPattern::RegistVirtualKeyBoardListener()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->SetVirtualKeyBoardCallback(
-        [weak = AceType::WeakClaim(this)](int32_t width, int32_t height, double keyboard) {
+        [weak = AceType::WeakClaim(this)](int32_t width, int32_t height, double keyboard, bool isCustomKeyboard) {
             auto webPattern = weak.Upgrade();
             CHECK_NULL_RETURN(webPattern, false);
             return webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
@@ -1162,6 +1162,11 @@ void WebPattern::OnVisibleChange(bool isVisible)
     }
 }
 
+Color WebPattern::GetDefaultBackgroundColor()
+{
+    return Color::WHITE;
+}
+
 void WebPattern::UpdateBackgroundColorRightNow(int32_t color)
 {
     auto host = GetHost();
@@ -1171,17 +1176,22 @@ void WebPattern::UpdateBackgroundColorRightNow(int32_t color)
     renderContext->UpdateBackgroundColor(Color(static_cast<uint32_t>(color)));
 }
 
-void WebPattern::OnSmoothDragResizeEnabledUpdate(bool value)
-{
-    // cross platform is not support now;
-}
-
 void WebPattern::OnRootLayerChanged(int width, int height)
 {
     // cross platform is not support now;
 }
 
 void WebPattern::SetNestedScroll(const NestedScrollOptions& nestedOpt)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::SetNestedScrollExt(const NestedScrollOptionsExt& nestedOpt)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::OnScrollStart(const float x, const float y)
 {
     // cross platform is not support now;
 }
@@ -1201,7 +1211,30 @@ void WebPattern::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
     // cross platform is not support now;
 }
 
+void WebPattern::JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    // cross platform is not support now;
+}
+
 void WebPattern::OnOverScrollModeUpdate(int mode)
+{
+   // cross platform is not support now;
+}
+
+void WebPattern::OnBlurOnKeyboardHideModeUpdate(int mode)
 {
    // cross platform is not support now;
 }
@@ -1282,6 +1315,11 @@ void WebPattern::OnOverlayScrollbarEnabledUpdate(bool value)
     // cross platform is not support now;
 }
 
+void WebPattern::OnIntrinsicSizeEnabledUpdate(bool value)
+{
+    // cross platform is not support now;
+}
+
 void WebPattern::OnNativeEmbedRuleTagUpdate(const std::string& tag)
 {
     // cross platform is not support now;
@@ -1298,6 +1336,83 @@ void WebPattern::OnMetaViewportUpdate(bool value)
 }
 
 void WebPattern::OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode)
+{
+    // cross platform is not support now;
+}
+
+
+void WebPattern::UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+    const NG::OnMenuItemClickCallback&& onMenuItemClick)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::OnEnabledHapticFeedbackUpdate(bool enable)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::StartVibraFeedback(const std::string& vibratorType)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param)
+{
+    // cross platform is not support now;
+}
+
+std::shared_ptr<WebPreviewSelectionMenuParam> WebPattern::GetPreviewSelectionMenuParams(
+    const WebElementType& type, const ResponseType& responseType)
+{
+    // cross platform is not support now;
+    return nullptr;
+}
+
+bool WebPattern::IsPreviewMenuNotNeedShowPreview()
+{
+    // cross platform is not support now;
+    return false;
+}
+
+bool WebPattern::NotifyStartDragTask(bool isDelayed)
+{
+    // cross platform is not support now;
+    return false;
+}
+
+void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, bool isRichtext, bool result)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::RemovePreviewMenuNode()
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::UpdateImagePreviewParam()
+{
+    // cross platform is not support now;
+}
+
+bool WebPattern::RunJavascriptAsync(const std::string& jsCode, std::function<void(const std::string&)>&& callback)
+{
+    // cross platform is not support now;
+    return false;
+}
+
+void WebPattern::OnOptimizeParserBudgetEnabledUpdate(bool value)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::OnWebMediaAVSessionEnabledUpdate(bool value)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::OnEnableFollowSystemFontWeightUpdate(bool value)
 {
     // cross platform is not support now;
 }

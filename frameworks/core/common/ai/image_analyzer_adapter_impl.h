@@ -20,7 +20,7 @@
 #include "image_analyzer_adapter.h"
 
 namespace OHOS::Ace {
-class ImageAnalyzerAdapterImpl : public ImageAnalyzerAdapter {
+class ACE_FORCE_EXPORT ImageAnalyzerAdapterImpl : public ImageAnalyzerAdapter {
 public:
     ImageAnalyzerAdapterImpl();
     ~ImageAnalyzerAdapterImpl() override;

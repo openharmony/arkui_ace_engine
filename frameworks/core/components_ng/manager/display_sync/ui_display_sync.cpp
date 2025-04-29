@@ -71,15 +71,15 @@ void UIDisplaySync::JudgeWhetherSkip()
 
 void UIDisplaySync::OnFrame()
 {
-    ACE_SCOPED_TRACE("DisplaySyncId[%" PRIu64 "] Timestamp[%" PRIu64 "] TargetTimestamp[%" PRIu64 "]"
+    ACE_SCOPED_TRACE("DisplaySyncId[%" PRIu64 "] Type[%d] Timestamp[%" PRIu64 "] TargetTimestamp[%" PRIu64 "]"
                      "FrameRateRange[%d, %d, %d] DrawFPS[%d] VSyncRate[%d] Rate[%d] noSkip[%d]",
-                     GetId(), data_->timestamp_, data_->targetTimestamp_, data_->rateRange_->min_,
-                     data_->rateRange_->max_, data_->rateRange_->preferred_, drawFPS_, sourceVsyncRate_,
-                     data_->rate_, data_->noSkip_);
-    TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "FrameRateRange[%{public}d, %{public}d, %{public}d], "
-        "DrawFPS[%{public}d] VSyncRate[%{public}d] Rate[%{public}d] noSkip[%{public}d]",
-        data_->rateRange_->min_, data_->rateRange_->max_, data_->rateRange_->preferred_,
-        drawFPS_, sourceVsyncRate_, data_->rate_, data_->noSkip_);
+                     GetId(), static_cast<int32_t>(uiObjectType_), data_->timestamp_, data_->targetTimestamp_,
+                     data_->rateRange_->min_, data_->rateRange_->max_, data_->rateRange_->preferred_,
+                     drawFPS_, sourceVsyncRate_, data_->rate_, data_->noSkip_);
+    TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "Id[%{public}" PRIu64 "] Type[%{public}d] FrameRateRange[%{public}d, "
+        "%{public}d, %{public}d], DrawFPS[%{public}d] VSyncRate[%{public}d] Rate[%{public}d] noSkip[%{public}d]",
+        GetId(), static_cast<int32_t>(uiObjectType_), data_->rateRange_->min_, data_->rateRange_->max_,
+        data_->rateRange_->preferred_, drawFPS_, sourceVsyncRate_, data_->rate_, data_->noSkip_);
     if (data_->noSkip_ && data_->onFrame_) {
         data_->onFrame_();
     }
@@ -106,9 +106,9 @@ void UIDisplaySync::AddToPipeline(WeakPtr<PipelineBase>& pipelineContext)
 
     auto context = pipelineContext.Upgrade();
     if (!context) {
-        context = PipelineBase::GetCurrentContextSafely();
+        context = PipelineBase::GetCurrentContextSafelyWithCheck();
         if (!context) {
-            TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[DisplaySync] CurrentContext is nullptr.");
+            TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[DisplaySync] AddToPipeline CurrentContext is nullptr.");
             return;
         }
         TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "[DisplaySync] Add to current context safely.");
@@ -126,7 +126,7 @@ void UIDisplaySync::DelFromPipeline(WeakPtr<PipelineBase>& pipelineContext)
 {
     auto context = GetCurrentContext();
     if (!context) {
-        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[DisplaySync] CurrentContext is nullptr.");
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[DisplaySync] DelFromPipeline CurrentContext is nullptr.");
         return;
     }
 

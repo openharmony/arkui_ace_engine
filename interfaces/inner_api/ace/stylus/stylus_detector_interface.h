@@ -35,10 +35,42 @@ struct ResultData {
     std::string resultData;
 };
 
-enum CommandType { COMMAND_REQUEST_FOCUS, COMMAND_CLEAR_HIT, COMMAND_SET_TEXT, COMMAND_GET_TEXT, COMMAND_INVALID };
+enum CommandType {
+    COMMAND_REQUEST_FOCUS,
+    COMMAND_CLEAR_HIT,
+    COMMAND_SET_TEXT,
+    COMMAND_GET_TEXT,
+    COMMAND_UNDO,
+    COMMAND_REDO,
+    COMMAND_CANUNDO,
+    COMMAND_CANREDO,
+    COMMAND_DELETE_TEXT,
+    COMMAND_CHOICE_TEXT,
+    COMMAND_INSERT_SPACE,
+    COMMAND_MOVE_CURSOR,
+    COMMAND_INVALID
+};
 
 struct Command {
     CommandType commandType;
+};
+
+struct StylusGestureRect {
+    float Left;
+    float Top;
+    float Width;
+    float Height;
+};
+
+struct MoveCursorOption {
+    int32_t x;
+    int32_t y;
+    bool showHandle;
+};
+
+struct ChoiceTextOption {
+    StylusGestureRect rect;
+    bool showMenu;
 };
 
 class IAceStylusCallback {
@@ -50,8 +82,8 @@ public:
 class IStylusDetectorCallback {
 public:
     virtual ~IStylusDetectorCallback() = default;
-    virtual void OnDetector(
-        const CommandType& command, std::string args, std::shared_ptr<IAceStylusCallback> callback);
+    virtual int32_t OnDetector(const CommandType& command, void* data, std::shared_ptr<IAceStylusCallback> callback);
+    virtual bool OnDetectorSync(const CommandType& command);
 };
 
 class StylusDetectorInterface {

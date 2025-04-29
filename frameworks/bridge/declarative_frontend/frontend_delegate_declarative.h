@@ -210,12 +210,14 @@ public:
         std::function<void(bool)>&& onStatusChanged) override;
     void ShowDialogInner(DialogProperties& dialogProperties, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks);
-    void RemoveCustomDialog() override;
+    void RemoveCustomDialog(int32_t instanceId) override;
     void OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback) override;
     void CloseCustomDialog(const int32_t dialogId) override;
     void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback) override;
     void UpdateCustomDialog(const WeakPtr<NG::UINode>& node, const PromptDialogAttr &dialogAttr,
         std::function<void(int32_t)> &&callback) override;
+    std::optional<double> GetTopOrder() override;
+    std::optional<double> GetBottomOrder() override;
 
     RefPtr<NG::ChainedTransitionEffect> GetTransitionEffect(void* value) override;
 
@@ -285,16 +287,33 @@ public:
         std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
         bool enableInspector, const NG::SnapshotParam& param) override;
 
+    std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncSnapshot(
+        RefPtr<NG::FrameNode>& node, const NG::SnapshotOptions& options) override;
+
     std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncSnapshot(const std::string& componentId,
         const NG::SnapshotOptions& options) override;
 
+    void GetSnapshotByUniqueId(int32_t uniqueId,
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+        const NG::SnapshotOptions& options) override;
+
+    std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncSnapshotByUniqueId(int32_t uniqueId,
+        const NG::SnapshotOptions& options) override;
+        
+    void CreateSnapshotFromComponent(const RefPtr<NG::UINode>& nodeWk,
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+        bool enableInspector, const NG::SnapshotParam& param) override;
+
     void AddFrameNodeToOverlay(
         const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt) override;
+    void AddFrameNodeWithOrder(const RefPtr<NG::FrameNode>& node, std::optional<double> levelOrder) override;
     void RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node) override;
     void ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node) override;
     void HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node) override;
     void ShowAllNodesOnOverlay() override;
     void HideAllNodesOnOverlay() override;
+    bool SetOverlayManagerOptions(const NG::OverlayManagerInfo& overlayInfo) override;
+    std::optional<NG::OverlayManagerInfo> GetOverlayManagerOptions() override;
 
     void RequestAnimationFrame(const std::string& callbackId) override;
 
@@ -368,6 +387,8 @@ public:
         return manifestParser_;
     }
 
+    std::string GetPagePathByUrl(const std::string& url) const;
+
 protected:
     bool isCardDelegate_ = false;
 
@@ -413,8 +434,8 @@ private:
     uint64_t GetSystemRealTime();
 
     // Page lifecycle
-    void OnPageShow();
-    void OnPageHide();
+    void OnPageShow(bool isFromWindow = false);
+    void OnPageHide(bool isFromWindow = false);
     void OnPageDestroy(int32_t pageId);
 
     int32_t GetRunningPageId() const;
@@ -442,7 +463,10 @@ private:
     void ClearAlertCallback(PageInfo pageInfo);
     bool CheckIndexValid(int32_t index) const;
 
+    void ParsePartialPropertiesFromAttr(DialogProperties& dialogProperties, const PromptDialogAttr& dialogAttr);
     DialogProperties ParsePropertiesFromAttr(const PromptDialogAttr &dialogAttr);
+
+    std::unique_ptr<JsonValue> GetNavigationJsonInfo();
 
     std::atomic<uint64_t> pageIdPool_ = 0;
     int32_t callbackCnt_ = 0;

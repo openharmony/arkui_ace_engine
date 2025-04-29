@@ -68,6 +68,7 @@ struct ArkUI_KeyframeAnimateOption {
     void (*onFinish)(void* userData);
     void* userData;
     std::vector<ArkUI_KeyframeState> keyframes;
+    ArkUI_ExpectedFrameRateRange* expectedFrameRateRange;
 };
 
 struct ArkUI_Keyframe {

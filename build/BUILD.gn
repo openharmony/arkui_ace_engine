@@ -101,26 +101,53 @@ config("ace_engine_public_config") {
 }
 
 config("lto_link_config") {
-  ldflags = [ "-Wl,--lto-O2" ]
+  if (enable_lto_O0) {
+    ldflags = [ "-Wl,--lto-O0" ]
+  } else {
+    ldflags = [ "-Wl,--lto-O2" ]
+  }
   if (ace_engine_feature_enable_pgo && enable_enhanced_opt) {
-    ldflags +=
-        [ "-Wl,-mllvm,-force-sched-model=${ace_engine_feature_sched_model}" ]
+    ldflags += [
+      "-Wl,-mllvm,-force-sched-model=${ace_engine_feature_sched_model}",
+      "-Wl,-Bsymbolic",
+      "-Wl,--aarch64-inline-plt",
+      "-Wl,--symbol-ordering-file=" +
+          rebase_path("${ace_engine_feature_pgo_path}/libace_compatible.txt",
+                      root_build_dir),
+      "-Wl,--no-warn-symbol-ordering",
+    ]
+    if (ace_engine_feature_enable_mfs) {
+      ldflags += [
+        "-Wl,-plugin-opt=-split-machine-functions",
+        "-Wl,-mllvm",
+        "-Wl,-fixup-unconditional-branch-unsafely",
+        "-Wl,--no-create-thunks-introduced-by-mfs",
+        "-Wl,-mllvm",
+        "-Wl,-mfs-psi-cutoff=999500",
+        "-Wl,-z",
+        "-Wl,keep-text-section-prefix",
+      ]
+    }
   }
 }
 
 ohos_shared_library("libace_compatible") {
-  public_configs = [ ":ace_engine_public_config" ]
+  public_configs = [
+    ":ace_engine_public_config",
+    "$ace_root/interfaces/inner_api/ace_kit:ace_kit_config",
+  ]
   external_deps = []
   if (use_hilog) {
     external_deps += [ "hilog:libhilog" ]
   }
+  deps = [ "$ace_root/interfaces/inner_api/ace_kit:ace_kit" ]
   if (is_ohos) {
     sanitize = {
       integer_overflow = true
       boundary_sanitize = true
       debug = ace_sanitize_debug
     }
-    deps = [ "$ace_root/build:libace_static_ohos" ]
+    deps += [ "$ace_root/build:libace_static_ohos" ]
     version_script = "libace.map"
     innerapi_tags = [ "platformsdk" ]
     configs = [ "$ace_root:ace_coverage_config" ]
@@ -129,11 +156,11 @@ ohos_shared_library("libace_compatible") {
       configs += [ ":lto_link_config" ]
     }
   } else if (use_mingw_win) {
-    deps = [ "$ace_root/build:libace_static_windows" ]
+    deps += [ "$ace_root/build:libace_static_windows" ]
   } else if (use_mac) {
-    deps = [ "$ace_root/build:libace_static_mac" ]
+    deps += [ "$ace_root/build:libace_static_mac" ]
   } else if (use_linux) {
-    deps = [ "$ace_root/build:libace_static_linux" ]
+    deps += [ "$ace_root/build:libace_static_linux" ]
   }
   public_external_deps = external_deps
   part_name = ace_engine_part
@@ -146,22 +173,23 @@ if (!is_asan) {
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }
+    deps = [ "$ace_root/interfaces/inner_api/ace_kit:ace_kit" ]
     if (is_ohos) {
       sanitize = {
         integer_overflow = true
         boundary_sanitize = true
         debug = ace_sanitize_debug
       }
-      deps = [ "$ace_root/build:libace_static_ohos_ng" ]
+      deps += [ "$ace_root/build:libace_static_ohos_ng" ]
       version_script = "libace.map"
       innerapi_tags = [ "platformsdk" ]
       configs = [ "$ace_root:ace_coverage_config" ]
     } else if (use_mingw_win) {
-      deps = [ "$ace_root/build:libace_static_windows" ]
+      deps += [ "$ace_root/build:libace_static_windows" ]
     } else if (use_mac) {
-      deps = [ "$ace_root/build:libace_static_mac" ]
+      deps += [ "$ace_root/build:libace_static_mac" ]
     } else if (use_linux) {
-      deps = [ "$ace_root/build:libace_static_linux" ]
+      deps += [ "$ace_root/build:libace_static_linux" ]
     }
     public_external_deps = external_deps
     part_name = ace_engine_part

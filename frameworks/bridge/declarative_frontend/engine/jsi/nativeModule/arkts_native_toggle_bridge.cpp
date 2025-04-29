@@ -15,12 +15,14 @@
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.h"
 
+#include "base/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int PARAM_ARR_LENGTH_1 = 1;
 constexpr uint32_t INDEX_FRAME_NODE_0 = 0;
 constexpr uint32_t INDEX_ARGUMENT_1 = 1;
 constexpr uint32_t INDEX_ARGUMENT_2 = 2;
@@ -146,6 +148,45 @@ ArkUINativeModuleValue ToggleBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
         CHECK_NULL_RETURN(frameNode, nullptr);
         return AceType::Claim(frameNode);
     });
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ToggleBridge::SetOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    int32_t argsNumber = runtimeCallInfo->GetArgsNumber();
+    if (argsNumber != INDEX_ARGUMENT_2) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(INDEX_FRAME_NODE_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(INDEX_ARGUMENT_1);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getToggleModifier()->resetToggleOnChange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(bool)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](bool isOnchange) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { panda::BooleanRef::New(vm, isOnchange) };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+    };
+    GetArkUINodeModifiers()->getToggleModifier()->setToggleOnChange(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ToggleBridge::ResetOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(INDEX_FRAME_NODE_0);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getToggleModifier()->resetToggleOnChange(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -385,6 +426,54 @@ ArkUINativeModuleValue ToggleBridge::ResetHoverEffect(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(INDEX_FRAME_NODE_0);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getToggleModifier()->resetToggleHoverEffect(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ToggleBridge::SetToggleOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(INDEX_FRAME_NODE_0);
+    CHECK_EQUAL_RETURN(nodeArg.IsEmpty(), true, panda::JSValueRef::Undefined(vm));
+    auto pointer = nodeArg->ToNativePointer(vm);
+    CHECK_EQUAL_RETURN(pointer.IsEmpty(), true, panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(pointer->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> isOnArg = runtimeCallInfo->GetCallArgRef(INDEX_ARGUMENT_1);
+    CHECK_EQUAL_RETURN(isOnArg.IsEmpty(), true, panda::JSValueRef::Undefined(vm));
+    bool isOn = false;
+    if (!isOnArg->IsUndefined() && isOnArg->IsBoolean()) {
+        isOn = isOnArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getToggleModifier()->setToggleState(nativeNode, isOn);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ToggleBridge::ParseParams(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Params& params)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    CHECK_EQUAL_RETURN(params.nodeType != ARKUI_TOGGLE, true, panda::JSValueRef::Undefined(vm));
+    ArkUI_Toggle_Params* toggleParams = (ArkUI_Toggle_Params*)(&params);
+    toggleParams->toggleType = ToggleType::SWITCH;
+    toggleParams->isOn = false;
+    CHECK_EQUAL_RETURN(runtimeCallInfo->GetArgsNumber() != INDEX_ARGUMENT_3, true, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> paramsArg = runtimeCallInfo->GetCallArgRef(INDEX_ARGUMENT_2);
+    if (!paramsArg->IsNull() && paramsArg->IsObject(vm)) {
+        auto obj = Local<panda::ObjectRef>(paramsArg);
+        auto typeStr = panda::StringRef::NewFromUtf8(vm, "type");
+        auto isOnStr = panda::StringRef::NewFromUtf8(vm, "isOn");
+        auto typeArg = obj->Get(vm, typeStr);
+        auto isOnArg = obj->Get(vm, isOnStr);
+        CHECK_EQUAL_RETURN(typeArg.IsEmpty(), true, panda::JSValueRef::Undefined(vm));
+        CHECK_EQUAL_RETURN(isOnArg.IsEmpty(), true, panda::JSValueRef::Undefined(vm));
+        if (!typeArg->IsNull() && !typeArg->IsUndefined() && typeArg->IsNumber()) {
+            toggleParams->toggleType = static_cast<ToggleType>(typeArg->Int32Value(vm));
+        }
+        if (!isOnArg->IsNull() && !isOnArg->IsUndefined() && isOnArg->IsBoolean()) {
+            toggleParams->isOn = isOnArg->ToBoolean(vm)->Value();
+        }
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

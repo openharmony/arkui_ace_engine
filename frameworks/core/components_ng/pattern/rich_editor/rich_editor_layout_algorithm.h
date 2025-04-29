@@ -18,14 +18,101 @@
 
 #include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_paragraph_manager.h"
 
 namespace OHOS::Ace::NG {
+
+template<typename KeyType, typename ValueType>
+class LRUMap {
+public:
+    using Iterator = typename std::list<std::pair<KeyType, ValueType>>::iterator;
+ 
+    LRUMap() {}
+    LRUMap(size_t initialCapacity) : capacity(initialCapacity) {}
+ 
+    Iterator Get(const KeyType& key)
+    {
+        auto it = cacheMap.find(key);
+        if (it == cacheMap.end()) {
+            return cacheList.end(); // Return end iterator if not found
+        }
+
+        // Move the accessed item to the front of the list
+        cacheList.splice(cacheList.begin(), cacheList, it->second);
+ 
+        return it->second;
+    }
+
+    Iterator End()
+    {
+        return cacheList.end();
+    }
+
+    size_t Size()
+    {
+        return cacheMap.size();
+    }
+
+    void Erase(const KeyType& key)
+    {
+        auto it = cacheMap.find(key);
+        if (it != cacheMap.end()) {
+            cacheList.erase(it->second);
+            cacheMap.erase(it);
+        }
+    }
+ 
+    void Clear()
+    {
+        cacheList.clear();
+        cacheMap.clear();
+    }
+ 
+    void Put(const KeyType& key, const ValueType& value)
+    {
+        auto it = cacheMap.find(key);
+        if (it != cacheMap.end()) {
+            // Update existing item and move to front
+            cacheList.splice(cacheList.begin(), cacheList, it->second);
+            it->second->second = value;
+        } else {
+            // Insert new item
+            if (cacheList.size() >= capacity) {
+                // Remove least recently used item
+                auto last = cacheList.end();
+                last--;
+                cacheMap.erase(last->first);
+                cacheList.pop_back();
+            }
+            cacheList.emplace_front(key, value);
+            cacheMap[key] = cacheList.begin();
+        }
+    }
+ 
+    void SetCapacity(size_t newCapacity)
+    {
+        capacity = newCapacity;
+        while (cacheList.size() > capacity) {
+            auto last = cacheList.end();
+            last--;
+            cacheMap.erase(last->first);
+            cacheList.pop_back();
+        }
+    }
+
+private:
+    size_t capacity = SIZE_MAX;
+    std::list<std::pair<KeyType, ValueType>> cacheList;
+    std::unordered_map<KeyType, Iterator> cacheMap;
+};
+
 class ACE_EXPORT RichEditorLayoutAlgorithm : public MultipleParagraphLayoutAlgorithm {
     DECLARE_ACE_TYPE(RichEditorLayoutAlgorithm, MultipleParagraphLayoutAlgorithm);
 
 public:
     RichEditorLayoutAlgorithm() = delete;
-    RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, ParagraphManager* paragraphs);
+    RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, RichEditorParagraphManager* paragraphs,
+        std::optional<TextStyle> typingTextStyle, LRUMap<std::uintptr_t, RefPtr<Paragraph>>* paraMapPtr);
     ~RichEditorLayoutAlgorithm() override = default;
 
     const OffsetF& GetParentGlobalOffset() const
@@ -45,23 +132,48 @@ public:
 protected:
     void HandleEmptyParagraph(RefPtr<Paragraph> paragraph, const std::list<RefPtr<SpanItem>>& spanGroup) override;
     RefPtr<SpanItem> GetParagraphStyleSpanItem(const std::list<RefPtr<SpanItem>>& spanGroup) override;
+    void SetAdaptFontSizeStepToTextStyle(
+        TextStyle& textStyle, const std::optional<Dimension>& adaptFontSizeStep) override
+    {}
+    void AddImageToParagraph(RefPtr<ImageSpanItem>& imageSpanItem, const RefPtr<LayoutWrapper>& iterItem,
+        const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength) override;
+    void AddPlaceHolderToParagraph(RefPtr<PlaceholderSpanItem>& placeholderSpanItem,
+        const RefPtr<LayoutWrapper>& layoutWrapper, const RefPtr<Paragraph>& paragraph,
+        int32_t& spanTextLength) override;
+    void UpdateParagraphByCustomSpan(RefPtr<CustomSpanItem>& customSpanItem, const RefPtr<Paragraph>& paragraph,
+        int32_t& spanTextLength, CustomSpanPlaceholderInfo& customSpanPlaceholder) override;
+    void AddSymbolSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
+        const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph) override;
+    void AddTextSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
+        const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph) override;
 
 private:
     OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) override;
-    bool CreateParagraph(
-        const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper, double maxWidth = 0.0) override;
+    bool CreateParagraph(const TextStyle& textStyle, std::u16string content, LayoutWrapper* layoutWrapper,
+        double maxWidth = 0.0) override;
     bool BuildParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
-    ParagraphStyle GetParagraphStyle(
-        const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const override;
+    ParagraphStyle GetEditorParagraphStyle(
+        const TextStyle& textStyle, const std::u16string& content, LayoutWrapper* layoutWrapper) const;
     float GetShadowOffset(const std::list<RefPtr<SpanItem>>& group) override;
-    void UpdateRichTextRect(const SizeF& res, const float& textHeight, LayoutWrapper* layoutWrapper);
+    void UpdateRichTextRect(const SizeF& textSize, LayoutWrapper* layoutWrapper);
+    RefPtr<RichEditorPattern> GetRichEditorPattern(LayoutWrapper* layoutWrapper);
 
     bool SetPlaceholder(LayoutWrapper* layoutWrapper);
 
     void CopySpanStyle(RefPtr<SpanItem> source, RefPtr<SpanItem> target);
     void AppendNewLineSpan();
-    std::optional<SizeF> MeasureEmptyContent(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    std::optional<SizeF> MeasureContentSize(const LayoutConstraintF& constraint, LayoutWrapper* layoutWrapper);
+    std::optional<SizeF> MeasureEmptyContentSize(const LayoutConstraintF& constraint, LayoutWrapper* layoutWrapper);
+    LayoutConstraintF ReMeasureContent(
+        SizeF& textSize, const LayoutConstraintF& constraint, LayoutWrapper* layoutWrapper);
+    void HandleParagraphCache();
+    void ReLayoutParagraphBySpan(LayoutWrapper* layoutWrapper, std::vector<TextStyle>& textStyles,
+        std::list<RefPtr<SpanItem>>& group, bool& needReLayout, bool& needReLayoutParagraph);
+    std::uintptr_t Hash(const std::list<RefPtr<SpanItem>>& spanGroup);
+    RefPtr<Paragraph> GetOrCreateParagraph(const std::list<RefPtr<SpanItem>>& group,
+        const ParagraphStyle& paraStyle, const std::map<int32_t, AISpan>& aiSpanMap) override;
+    std::string SpansToString();
 
     const std::list<RefPtr<SpanItem>>& GetSpans() const
     {
@@ -69,9 +181,11 @@ private:
     }
 
     std::list<RefPtr<SpanItem>> allSpans_;
-    ParagraphManager* pManager_;
+    RichEditorParagraphManager* pManager_;
     OffsetF parentGlobalOffset_;
     RectF richTextRect_;
+    std::optional<TextStyle> typingTextStyle_;
+    LRUMap<std::uintptr_t, RefPtr<Paragraph>>* const paraMapPtr_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

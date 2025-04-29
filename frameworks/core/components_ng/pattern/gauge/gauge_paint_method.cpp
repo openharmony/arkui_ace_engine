@@ -15,21 +15,15 @@
 
 #include "core/components_ng/pattern/gauge/gauge_paint_method.h"
 
-#include <algorithm>
-#include <cmath>
-
-#include "core/common/container.h"
-#include "core/components/progress/progress_theme.h"
-#include "core/components_ng/pattern/gauge/gauge_paint_property.h"
 #include "core/components_ng/pattern/gauge/gauge_pattern.h"
-#include "core/components_ng/pattern/gauge/gauge_theme.h"
-#include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components_ng/render/image_painter.h"
-#include "core/components_ng/render/node_paint_method.h"
-#include "core/components_ng/render/paint_wrapper.h"
 
 namespace OHOS::Ace::NG {
 void GaugePaintMethod::UpdateForegroundModifier(PaintWrapper* paintWrapper)
+{
+    gaugeModifier_->UpdateValue();
+}
+
+void GaugePaintMethod::SetBoundsRect()
 {
     CHECK_NULL_VOID(gaugeModifier_);
     auto gaugePattern = DynamicCast<GaugePattern>(pattern_.Upgrade());
@@ -38,18 +32,26 @@ void GaugePaintMethod::UpdateForegroundModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(host);
     auto hostGeometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(hostGeometryNode);
-    CHECK_NULL_VOID(paintWrapper);
-    auto paintProperty = DynamicCast<GaugePaintProperty>(paintWrapper->GetPaintProperty());
+    auto paintProperty = host->GetPaintProperty<GaugePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     GaugeShadowOptions shadowOptions;
     if (paintProperty->HasShadowOptions()) {
         shadowOptions = paintProperty->GetShadowOptionsValue();
     }
-    RectF boundsRect(hostGeometryNode->GetFrameOffset().GetX() - std::abs(shadowOptions.offsetX) - shadowOptions.radius,
-        hostGeometryNode->GetFrameOffset().GetY() - std::abs(shadowOptions.offsetY) - shadowOptions.radius,
-        hostGeometryNode->GetFrameSize().Width() + std::abs(shadowOptions.offsetX) + shadowOptions.radius,
-        hostGeometryNode->GetFrameSize().Height() + std::abs(shadowOptions.offsetY) + shadowOptions.radius);
-    gaugeModifier_->SetBoundsRect(boundsRect);
-    gaugeModifier_->UpdateValue();
+    auto frameSize = hostGeometryNode->GetFrameSize();
+    float x = std::min<float>(shadowOptions.offsetX - shadowOptions.radius, boundsRect_.GetX());
+    float y = std::min<float>(shadowOptions.offsetY - shadowOptions.radius, boundsRect_.GetY());
+    float width = std::max<float>(
+        { boundsRect_.Width(), boundsRect_.GetX() + boundsRect_.Width() - x,
+        shadowOptions.offsetX - x + frameSize.Width() + shadowOptions.radius * 2.0f,
+        std::abs(shadowOptions.offsetX) + frameSize.Width() + shadowOptions.radius * 2.0f }
+    );
+    float height = std::max<float>(
+        { boundsRect_.Height(), boundsRect_.GetY() + boundsRect_.Height() - y,
+        shadowOptions.offsetY - y + frameSize.Height() + shadowOptions.radius * 2.0f,
+        std::abs(shadowOptions.offsetY) + frameSize.Height() + shadowOptions.radius * 2.0f }
+    );
+    boundsRect_.SetRect(x, y, width, height);
+    gaugeModifier_->SetBoundsRect(boundsRect_);
 }
 } // namespace OHOS::Ace::NG

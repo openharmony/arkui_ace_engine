@@ -14,9 +14,7 @@
  */
 #include "core/interfaces/native/node/node_container_modifier.h"
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 void Rebuild(int32_t nodeId)
@@ -41,13 +39,23 @@ void Clean(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUINodeContainerModifier* GetNodeContainerModifier()
 {
-    static const ArkUINodeContainerModifier modifier = { Rebuild, Clean };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUINodeContainerModifier modifier = {
+        .rebuild = Rebuild,
+        .clean = Clean,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUINodeContainerModifier* GetCJUINodeContainerModifier()
 {
-    static const CJUINodeContainerModifier modifier = { Rebuild, Clean };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUINodeContainerModifier modifier = {
+        .rebuild = Rebuild,
+        .clean = Clean,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

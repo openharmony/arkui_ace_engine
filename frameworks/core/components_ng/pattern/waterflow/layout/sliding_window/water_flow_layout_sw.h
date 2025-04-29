@@ -20,7 +20,6 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_segmented_layout.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -32,24 +31,31 @@ public:
     void Measure(LayoutWrapper* wrapper) override;
     void Layout(LayoutWrapper* wrapper) override;
 
-    void SetCanOverScroll(bool value) override
-    {
-        overScroll_ = value;
-    }
-
     void StartCacheLayout() override;
-    bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
+    bool PreloadItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
     void EndCacheLayout() override;
+
+    void EnableSkip(bool value)
+    {
+        canSkip_ = value;
+    }
 
 private:
     void Init(const SizeF& frameSize);
     /* init WaterFlow without Sections */
     void SingleInit(const SizeF& frameSize);
-    void CheckReset();
+    /**
+     * @brief check if any items have changed and require a re-layout
+     *
+     * @return item index to refill from. -1 if nothing changed
+     */
+    int32_t CheckReset();
 
     void MeasureOnOffset(float delta);
 
     void ApplyDelta(float delta);
+
+    void MeasureBeforeAnimation(int32_t targetIdx);
 
     void MeasureToTarget(int32_t targetIdx);
 
@@ -97,7 +103,8 @@ private:
      */
     void RecoverFront(float viewportBound, int32_t& idx, int32_t minChildIdx);
     /**
-     * @return new startPos of the filled lane.
+     * @brief Append Item in the front of a lane.
+     * @return endPos of next item in the filled lane.
      */
     float FillFrontHelper(float itemLen, int32_t idx, size_t laneIdx);
     /**
@@ -125,7 +132,8 @@ private:
      */
     void RecoverBack(float viewportBound, int32_t& idx, int32_t maxChildIdx);
     /**
-     * @return new endPos of the filled lane.
+     * @brief Append Item to a lane.
+     * @return startPos of next item in the filled lane.
      */
     float FillBackHelper(float itemLen, int32_t idx, size_t laneIdx);
     /**
@@ -142,7 +150,7 @@ private:
      */
     void PostMeasureSelf(float selfCrossLen);
 
-    float MeasureChild(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t lane);
+    float MeasureChild(int32_t idx, size_t lane, bool forward = true) const;
 
     /**
      * @brief Fill cache items back to lanes_ to prepare for Layout phase.
@@ -157,6 +165,16 @@ private:
     bool RecoverCachedHelper(int32_t itemIdx, bool front);
 
     /**
+     * @brief Measure all items in view to check if any item's height changed.
+     */
+    bool ItemHeightChanged() const;
+
+    /**
+     * @brief Data validity check
+     */
+    bool CheckData() const;
+
+    /**
      * @brief Layout a single section of items
      *
      * @param idx section index.
@@ -168,8 +186,18 @@ private:
     void LayoutSection(size_t idx, const OffsetF& paddingOffset, float selfCrossLen, bool reverse, bool rtl);
     void LayoutFooter(const OffsetF& paddingOffset, bool reverse);
 
+    void SyncPreloadItem(LayoutWrapper* host, int32_t itemIdx) override;
+    /**
+     * @brief shared implementation to preload a cache item.
+     * @return true if the item is successfully preloaded.
+     */
+    bool PreloadItemImpl(int32_t itemIdx);
+
     // convert FlowItem's index to children node index.
     inline int32_t nodeIdx(int32_t idx) const;
+
+    void MeasureRemainingLazyChild(int32_t startIdx, int32_t endIdx, bool forward = true) override;
+    void MeasureLazyChild(const RefPtr<LayoutWrapper>& child, int32_t idx, size_t lane, bool forward) const;
 
     RefPtr<WaterFlowLayoutInfoSW> info_;
     RefPtr<WaterFlowSections> sections_;
@@ -178,7 +206,7 @@ private:
     float mainLen_ = 0.0f;
     std::optional<int64_t> cacheDeadline_; // cache layout deadline
 
-    bool overScroll_ = true;
+    bool canSkip_ = false; // try converting large delta to jump if true.
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_SW_LAYOUT_H

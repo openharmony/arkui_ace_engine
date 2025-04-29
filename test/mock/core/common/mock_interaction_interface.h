@@ -29,7 +29,8 @@ class MockInteractionInterface : public InteractionInterface {
 public:
     MOCK_METHOD(int32_t, UpdateShadowPic, (const ShadowInfoCore& shadowInfo), (override));
 
-    MOCK_METHOD(int32_t, SetDragWindowVisible, (bool visible), (override));
+    MOCK_METHOD(int32_t, SetDragWindowVisible,
+        (bool visible, const std::shared_ptr<Rosen::RSTransaction>& rSTransaction), (override));
 
     MOCK_METHOD(int32_t, SetMouseDragMonitorState, (bool state), (override));
 
@@ -64,14 +65,22 @@ public:
 
     int32_t StartDrag(const DragDataCore& dragData, std::function<void(const OHOS::Ace::DragNotifyMsg&)> callback)
     {
+        gDragData_ = dragData;
         return gStartDrag;
     }
 
     MOCK_METHOD(int32_t, UnRegisterCoordinationListener, (), (override));
 
+    MOCK_METHOD(int32_t, SetDraggableState, (bool state), (override));
+
+    MOCK_METHOD(int32_t, GetAppDragSwitchState, (bool& state), (override));
+
+    MOCK_METHOD(void, SetDraggableStateAsync, (bool state, int64_t downTime), (override));
+
 private:
     std::function<void()> gDragOutCallback = nullptr;
     int gStartDrag = 0;
+    DragDataCore gDragData_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_CORE_COMMON_MOCK_INTERACTION_H

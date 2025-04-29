@@ -16,7 +16,6 @@
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/node_container/node_container_node.h"
-#include "core/components_ng/pattern/node_container/node_container_pattern.h"
 
 namespace OHOS::Ace::NG {
 void NodeContainerModelNG::Create()
@@ -66,6 +65,48 @@ void NodeContainerModelNG::SetOnTouchEvent(TouchEventFunc&& touchEventFunc)
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetOnTouchEvent(std::move(touchEventFunc));
+}
+
+void NodeContainerModelNG::SetOnAttach(std::function<void()>&& onAttachCallback)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<NodeContainerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetControllerOnAttach(std::move(onAttachCallback));
+}
+
+void NodeContainerModelNG::SetOnDetach(std::function<void()>&& onDetachCallback)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<NodeContainerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetControllerOnDetach(std::move(onDetachCallback));
+}
+
+void NodeContainerModelNG::SetOnWillBind(std::function<void(int32_t)>&& onWillBindCallback)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<NodeContainerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetControllerOnWillBind(std::move(onWillBindCallback));
+}
+
+void NodeContainerModelNG::SetOnWillUnbind(std::function<void(int32_t)>&& onWillUnbindCallback)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<NodeContainerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetControllerOnWillUnbind(std::move(onWillUnbindCallback));
+}
+
+void NodeContainerModelNG::SetOnBind(std::function<void(int32_t)>&& onBindCallback)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<NodeContainerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetControllerOnBind(std::move(onBindCallback));
+}
+
+void NodeContainerModelNG::SetOnUnbind(std::function<void(int32_t)>&& onUnbindCallback)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<NodeContainerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetControllerOnUnbind(std::move(onUnbindCallback));
 }
 
 void NodeContainerModelNG::BindController(std::function<void()>&& resetFunc)

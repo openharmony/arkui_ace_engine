@@ -15,6 +15,7 @@
 
 #include "core/components_ng/render/adapter/form_render_window.h"
 
+#include "base/log/frame_report.h"
 #include "core/common/container.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -34,6 +35,10 @@ float GetDisplayRefreshRate()
 
 namespace OHOS::Ace {
 
+#ifdef ENABLE_ROSEN_BACKEND
+std::recursive_mutex FormRenderWindow::globalMutex_;
+#endif
+
 FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id)
     : taskExecutor_(taskExecutor), id_(id)
 {
@@ -42,7 +47,8 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
     auto container = Container::Current();
     if (receiver_ == nullptr) {
         auto& rsClient = Rosen::RSInterfaces::GetInstance();
-        receiver_ = rsClient.CreateVSyncReceiver("Form");
+        frameRateLinker_ = Rosen::RSFrameRateLinker::Create();
+        receiver_ = rsClient.CreateVSyncReceiver("Form", frameRateLinker_ != nullptr ? frameRateLinker_->GetId() : 0);
         if (receiver_ == nullptr) {
             LOGE("Form Create VSync receiver failed.");
             return;
@@ -50,42 +56,15 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
         receiver_->Init();
     }
 
-    int64_t refreshPeriod = static_cast<int64_t>(ONE_SECOND_IN_NANO / GetDisplayRefreshRate());
-    onVsyncCallback_ = [weakTask = taskExecutor_, id = id_, refreshPeriod](
-                           int64_t timeStampNanos, int64_t frameCount, void* data) {
-        auto taskExecutor = weakTask.Upgrade();
-        CHECK_NULL_VOID(taskExecutor);
-        auto onVsync = [id, timeStampNanos, frameCount, refreshPeriod] {
-            int64_t ts = GetSysTimestamp();
-            ContainerScope scope(id);
-            // use container to get window can make sure the window is valid
-            auto container = Container::Current();
-            CHECK_NULL_VOID(container);
-            auto window = container->GetWindow();
-            CHECK_NULL_VOID(window);
-            window->OnVsync(static_cast<uint64_t>(timeStampNanos), static_cast<uint64_t>(frameCount));
-            auto pipeline = container->GetPipelineContext();
-            if (pipeline) {
-                pipeline->OnIdle(std::min(ts, timeStampNanos) + refreshPeriod);
-            }
-        };
-
-        auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::JS);
-        if (uiTaskRunner.IsRunOnCurrentThread()) {
-            onVsync();
-            return;
-        }
-
-        taskExecutor->PostTask(onVsync, TaskExecutor::TaskType::UI, "ArkUIFormRenderWindowVsync", PriorityType::VIP);
-    };
-
-    frameCallback_.userData_ = nullptr;
-    frameCallback_.callbackWithId_ = onVsyncCallback_;
+    InitOnVsyncCallback();
 
     receiver_->RequestNextVSync(frameCallback_);
 
     rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
-    rsUIDirector_->Init();
+    {
+        std::lock_guard<std::recursive_mutex> lock(globalMutex_);
+        rsUIDirector_->Init(); // Func Init Thread unsafe.
+    }
 
     std::string surfaceNodeName = "ArkTSCardNode";
     struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = surfaceNodeName, .isSync = true};
@@ -115,12 +94,14 @@ void FormRenderWindow::RequestFrame()
 
 void FormRenderWindow::Destroy()
 {
-    LOG_DESTROY();
+    TAG_LOGI(AceLogTag::ACE_FORM, "RenderWindow destroyed");
 #ifdef ENABLE_ROSEN_BACKEND
     frameCallback_.userData_ = nullptr;
     frameCallback_.callback_ = nullptr;
-    rsUIDirector_->Destroy();
-    rsUIDirector_.reset();
+    if (rsUIDirector_) {
+        rsUIDirector_->Destroy();
+        rsUIDirector_.reset();
+    }
     callbacks_.clear();
 #endif
 }
@@ -149,6 +130,7 @@ void FormRenderWindow::OnShow()
 {
 #ifdef ENABLE_ROSEN_BACKEND
     Window::OnShow();
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->GoForeground();
 #endif
 }
@@ -163,7 +145,82 @@ void FormRenderWindow::OnHide()
 void FormRenderWindow::FlushTasks()
 {
 #ifdef ENABLE_ROSEN_BACKEND
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->SendMessages();
 #endif
 }
+
+void FormRenderWindow::Lock()
+{
+}
+
+void FormRenderWindow::Unlock()
+{
+}
+
+void FormRenderWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (frameRateLinker_ == nullptr) {
+        return;
+    }
+    decltype(frameRateData_) frameRateData{rate, animatorExpectedFrameRate, rateType};
+    if (frameRateData_ != frameRateData) {
+        frameRateData_ = frameRateData;
+        frameRateLinker_->UpdateFrameRateRange({0, RANGE_MAX_REFRESHRATE, rate, rateType}, animatorExpectedFrameRate);
+    }
+#endif
+}
+
+void FormRenderWindow::InitOnVsyncCallback()
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    int64_t refreshPeriod = static_cast<int64_t>(ONE_SECOND_IN_NANO / GetDisplayRefreshRate());
+    onVsyncCallback_ = [weakTask = taskExecutor_, id = id_, refreshPeriod](
+                           int64_t timeStampNanos, int64_t frameCount, void* data) {
+        auto taskExecutor = weakTask.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        auto onVsync = [id, timeStampNanos, frameCount, refreshPeriod] {
+            int64_t ts = GetSysTimestamp();
+            ContainerScope scope(id);
+            // use container to get window can make sure the window is valid
+            auto container = Container::Current();
+            CHECK_NULL_VOID(container);
+            bool isReportFrameEvent = false;
+            auto containerHandler = container->GetContainerHandler();
+            if (containerHandler) {
+                isReportFrameEvent = containerHandler->GetHostConfig().isReportFrameEvent;
+            }
+            if (isReportFrameEvent) {
+                FrameReport::GetInstance().ReportSchedEvent(
+                    FrameSchedEvent::UI_SCB_WORKER_BEGIN, {});
+            }
+            auto window = container->GetWindow();
+            CHECK_NULL_VOID(window);
+            window->OnVsync(static_cast<uint64_t>(timeStampNanos), static_cast<uint64_t>(frameCount));
+            auto pipeline = container->GetPipelineContext();
+            if (pipeline) {
+                pipeline->OnIdle(std::min(ts, timeStampNanos) + refreshPeriod);
+            }
+            if (isReportFrameEvent) {
+                FrameReport::GetInstance().ReportSchedEvent(
+                    FrameSchedEvent::UI_SCB_WORKER_END, {});
+            }
+        };
+
+        ContainerScope scope(id);
+        auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::JS);
+        if (uiTaskRunner.IsRunOnCurrentThread()) {
+            onVsync();
+            return;
+        }
+
+        taskExecutor->PostTask(onVsync, TaskExecutor::TaskType::UI, "ArkUIFormRenderWindowVsync", PriorityType::VIP);
+    };
+
+    frameCallback_.userData_ = nullptr;
+    frameCallback_.callbackWithId_ = onVsyncCallback_;
+#endif
+}
+
 } // namespace OHOS::Ace

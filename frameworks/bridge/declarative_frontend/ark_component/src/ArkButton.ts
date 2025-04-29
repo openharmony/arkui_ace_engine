@@ -41,6 +41,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
   applyContent: WrappedBuilder<[ButtonConfiguration]>;
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
+    this._needDiff = false;
   }
   allowChildCount(): number {
     return 1;
@@ -157,6 +158,14 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
   }
   controlSize(value: ControlSize): this {
     modifierWithKey(this._modifiersWithKeys, ButtonControlSizeModifier.identity, ButtonControlSizeModifier, value);
+    return this;
+  }
+  minFontScale(value: number | Resource): this {
+    modifierWithKey(this._modifiersWithKeys, ButtonMinFontScaleModifier.identity, ButtonMinFontScaleModifier, value);
+    return this;
+  }
+  maxFontScale(value: number | Resource): this {
+    modifierWithKey(this._modifiersWithKeys, ButtonMaxFontScaleModifier.identity, ButtonMaxFontScaleModifier, value);
     return this;
   }
 }
@@ -613,6 +622,46 @@ class ButtonContentModifier extends ModifierWithKey<ContentModifier<ButtonConfig
   applyPeer(node: KNode, reset: boolean, component: ArkComponent) {
     let buttonComponent = component as ArkButtonComponent;
     buttonComponent.setContentModifier(this.value);
+  }
+}
+
+class ButtonMinFontScaleModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('buttonMinFontScale');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().button.resetMinFontScale(node);
+    } else if (!isNumber(this.value) && !isResource(this.value)) {
+      getUINativeModule().button.resetMinFontScale(node);
+    } else {
+      getUINativeModule().button.setMinFontScale(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class ButtonMaxFontScaleModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('buttonMaxFontScale');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().button.resetMaxFontScale(node);
+    } else if (!isNumber(this.value) && !isResource(this.value)) {
+      getUINativeModule().button.resetMaxFontScale(node);
+    } else {
+      getUINativeModule().button.setMaxFontScale(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 

@@ -15,22 +15,30 @@
 
 #include "text_drag_test_ng.h"
 
+#include "gmock/gmock.h"
+
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
+#define private public
 #include "core/components_ng/pattern/text_drag/text_drag_overlay_modifier.h"
-#include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
-#include "core/components_ng/render/canvas_image.h"
-
+#undef private
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+
+#include "base/memory/ace_type.h"
+#include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
+#include "core/components_ng/render/canvas_image.h"
+#include "core/components_ng/render/drawing_forward.h"
 
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
-const std::string TEXT_CONTENT1 = "hello";
-const std::string TEXT_CONTENT2 = "Winter is a beautiful season\n, especial when it snow.";
+const std::u16string TEXT_CONTENT1 = u"hello";
+const std::u16string TEXT_CONTENT2 = u"Winter is a beautiful season\n, especial when it snow.";
 constexpr float TEXT_NODE_WIDTH = 200.f;
 constexpr float TEXT_NODE_HEIGHT = 100.f;
 constexpr Color FRONT_COLOR = Color(0xff0000ff);
@@ -48,6 +56,12 @@ constexpr int32_t PARAGRAPHSIZE_END = 1000;
 const RectF DEFAULT_TEXT_CONTENT_RECTF(80.f, 80.f, 100.f, 200.f);
 } // namespace
 
+class MockCanvas : public RSCanvas {
+public:
+    MOCK_METHOD0(Restore, void());
+    MOCK_METHOD0(Save, void());
+};
+
 void TextDragTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
@@ -55,6 +69,7 @@ void TextDragTestNg::SetUpTestSuite()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto textTheme = AceType::MakeRefPtr<TextTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textTheme));
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
 }
 
 void TextDragTestNg::TearDownTestSuite()
@@ -77,7 +92,7 @@ void TextDragTestNg::TearDown()
     dragPattern_ = nullptr;
 }
 
-void TextDragTestNg::CreateTextWithDragNode(const std::string& textContent, const TextProperty& textProperty)
+void TextDragTestNg::CreateTextWithDragNode(const std::u16string& textContent, const TextProperty& textProperty)
 {
     ViewAbstract::SetWidth(CalcLength(TEXT_NODE_WIDTH));
     ViewAbstract::SetHeight(CalcLength(TEXT_NODE_HEIGHT));
@@ -144,7 +159,7 @@ void TextDragTestNg::GetInstance()
 {
     frameNode_ = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     pattern_ = frameNode_->GetPattern<TextPattern>();
-    std::list<ParagraphManager::ParagraphInfo> paragraphInfo;
+    std::vector<ParagraphManager::ParagraphInfo> paragraphInfo;
     ParagraphManager::ParagraphInfo pInfo = {
         .paragraph = paragraph_, .start = PARAGRAPHSIZE_START, .end = PARAGRAPHSIZE_END
     };
@@ -156,7 +171,7 @@ void TextDragTestNg::GetInstance()
     pattern_->dragNode_ = dragNode_;
     dragPattern_ = dragNode_->GetPattern<TextDragPattern>();
     dragContext_ = dragNode_->GetRenderContext();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 void TextDragTestNg::SetMockParagraphExpectCallParas(MockParagraphExpectCallParas params)
@@ -279,6 +294,7 @@ HWTEST_F(TextDragTestNg, TextDragCreateNodeTestNg003, TestSize.Level1)
         .lineCountValue = std::make_optional(EXPECT_MOCK_LINE_COUNT + 2), // 2: multi-lines
         .textWidthValue = std::make_optional(EXPECT_MOCK_TEXT_WIDTH),
     };
+    SystemProperties::SetDevicePhysicalHeight(2000);
     SetMockParagraphExpectCallParas(params);
     std::vector<RectF> rects { RectF(40, 40, 60, 60), RectF(100, 100, 60, 100)};
     EXPECT_CALL(*paragraph_, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
@@ -296,7 +312,7 @@ HWTEST_F(TextDragTestNg, TextDragCreateNodeTestNg003, TestSize.Level1)
      * @tc.expected: lastLineHeight/textRect/contentoffset as expected.
      */
     EXPECT_EQ(dragPattern_->GetContentOffset(),  OffsetF(-8.f, 32.f));
-    EXPECT_EQ(dragPattern_->GetTextRect(),  RectF(8.f, -32.f, 460.f, 160.f));
+    EXPECT_EQ(dragPattern_->GetTextRect(),  RectF(8.f, -32.f, 160.f, 160.f));
 }
 
 /**
@@ -335,5 +351,217 @@ HWTEST_F(TextDragTestNg, TextDragTestNg004, TestSize.Level1)
      */
     EXPECT_EQ(dragPattern_->GetFrameWidth(), 64.f);
     EXPECT_EQ(dragPattern_->GetFrameHeight(), 76.f);
+}
+
+/**
+ * @tc.name: TextDragOverlayModifierPaintShadow001
+ * @tc.desc: test PaintShadow
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextDragTestNg, TextDragOverlayModifierPaintShadow001, TestSize.Level1)
+{
+    std::shared_ptr<OHOS::Ace::NG::Pattern> pattern = std::make_shared<OHOS::Ace::NG::Pattern>();
+    RefPtr<OHOS::Ace::NG::Pattern> refPattern(pattern.get(), false);
+    WeakPtr<OHOS::Ace::NG::Pattern> weakPattern(refPattern);
+    TextDragOverlayModifier modifier(weakPattern);
+    RSPath path;
+    MockCanvas mockCanvas;
+    Shadow shadow;
+    modifier.type_ = DragAnimType::DEFAULT;
+    EXPECT_CALL(mockCanvas, Restore()).Times(0);
+    modifier.PaintShadow(path, shadow, mockCanvas);
+}
+
+/**
+ * @tc.name: TextDragOverlayModifierPaintShadow002
+ * @tc.desc: test PaintShadow
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextDragTestNg, TextDragOverlayModifierPaintShadow002, TestSize.Level1)
+{
+    std::shared_ptr<OHOS::Ace::NG::Pattern> pattern = std::make_shared<OHOS::Ace::NG::Pattern>();
+    RefPtr<OHOS::Ace::NG::Pattern> refPattern(pattern.get(), false);
+    WeakPtr<OHOS::Ace::NG::Pattern> weakPattern(refPattern);
+    TextDragOverlayModifier modifier(weakPattern);
+    RSPath path;
+    MockCanvas mockCanvas;
+    Shadow shadow;
+    modifier.type_ = DragAnimType::FLOATING;
+    EXPECT_CALL(mockCanvas, Restore()).Times(1);
+    modifier.PaintShadow(path, shadow, mockCanvas);
+}
+
+/**
+ * @tc.name: TextDragOverlayModifierPaintBackground001
+ * @tc.desc: test PaintBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextDragTestNg, TextDragOverlayModifierPaintBackground001, TestSize.Level1)
+{
+    auto textDragPattern = AceType::MakeRefPtr<TextDragPattern>();
+    WeakPtr<OHOS::Ace::NG::Pattern> pattern(textDragPattern);
+    TextDragOverlayModifier modifier(pattern);
+    RSPath path;
+    MockCanvas mockCanvas;
+    EXPECT_CALL(mockCanvas, Save()).Times(0);
+    modifier.PaintBackground(path, mockCanvas, textDragPattern);
+}
+
+/**
+ * @tc.name: TextDragOverlayModifierPaintBackground002
+ * @tc.desc: test PaintBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextDragTestNg, TextDragOverlayModifierPaintBackground002, TestSize.Level1)
+{
+    auto textDragPattern = AceType::MakeRefPtr<TextDragPattern>();
+    WeakPtr<OHOS::Ace::NG::Pattern> pattern(textDragPattern);
+    TextDragOverlayModifier modifier(pattern);
+    RSPath path;
+    MockCanvas mockCanvas;
+    modifier.type_ = DragAnimType::FLOATING_CANCEL;
+    EXPECT_CALL(mockCanvas, Restore()).Times(2);
+    EXPECT_CALL(mockCanvas, Save()).Times(1);
+    modifier.PaintBackground(path, mockCanvas, textDragPattern);
+}
+
+/**
+ * @tc.name: TextDragOverlayModifierPaintBackground003
+ * @tc.desc: test PaintBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextDragTestNg, TextDragOverlayModifierPaintBackground003, TestSize.Level1)
+{
+    auto textDragPattern = AceType::MakeRefPtr<TextDragPattern>();
+    WeakPtr<OHOS::Ace::NG::Pattern> pattern(textDragPattern);
+    TextDragOverlayModifier modifier(pattern);
+    RSPath path;
+    MockCanvas mockCanvas;
+    modifier.type_ = DragAnimType::FLOATING;
+    EXPECT_CALL(mockCanvas, Restore()).Times(2);
+    EXPECT_CALL(mockCanvas, Save()).Times(1);
+    modifier.PaintBackground(path, mockCanvas, textDragPattern);
+}
+
+/**
+ * @tc.name: TextDragPatternGenerateBackgroundPoints001
+ * @tc.desc: test GenerateBackgroundPoints
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextDragTestNg, TextDragPatternGenerateBackgroundPoints001, TestSize.Level1)
+{
+    TextDragPattern textDragPattern;
+    RectF textRect = RectF(0.0f, 0.0f, 300.0f, 200.0f);
+    TextDragData textDragData = TextDragData(textRect, 300.0f, 200.0f, 20.0f, 20.0f);
+    textDragPattern.textDragData_ = textDragData;
+    std::vector<TextPoint> points;
+    TextPoint textPoint = TextPoint(5.0f, 10.0f);
+    textDragPattern.textDragData_.textRect_ = textRect;
+    SelectPositionInfo selectPositionInfo = SelectPositionInfo(60.0f, 10.0f, 295.0f, 150.0f);
+    textDragPattern.textDragData_.selectPosition_ = selectPositionInfo;
+    points.emplace_back(textPoint);
+    textDragPattern.textDragData_.oneLineSelected_ = true;
+    textDragPattern.GenerateBackgroundPoints(points, 5.0f, true);
+    EXPECT_EQ(points[3].x, 300);
+    EXPECT_EQ(points[3].y, 175);
+    EXPECT_EQ(points[4].x, 55);
+    EXPECT_EQ(points[4].y, 175);
+}
+
+/**
+ * @tc.name: TextDragPatternGenerateBackgroundPoints002
+ * @tc.desc: test GenerateBackgroundPoints
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextDragTestNg, TextDragPatternGenerateBackgroundPoints002, TestSize.Level1)
+{
+    TextDragPattern textDragPattern;
+    RectF textRect = RectF(0.0f, 0.0f, 300.0f, 200.0f);
+    TextDragData textDragData = TextDragData(textRect, 300.0f, 200.0f, 20.0f, 20.0f);
+    textDragPattern.textDragData_ = textDragData;
+    std::vector<TextPoint> points;
+    TextPoint textPoint = TextPoint(5.0f, 10.0f);
+    textDragPattern.textDragData_.textRect_ = textRect;
+    SelectPositionInfo selectPositionInfo = SelectPositionInfo(60.0f, 10.0f, 105.0f, 50.0f);
+    textDragPattern.textDragData_.selectPosition_ = selectPositionInfo;
+    points.emplace_back(textPoint);
+    textDragPattern.textDragData_.oneLineSelected_ = true;
+    textDragPattern.GenerateBackgroundPoints(points, 5.0f, false);
+    EXPECT_EQ(points[3].x, 110);
+    EXPECT_EQ(points[3].y, 75);
+    EXPECT_EQ(points[4].x, 55);
+    EXPECT_EQ(points[4].y, 75);
+}
+
+/**
+ * @tc.name: TextDragPatternGenerateBackgroundPoints003
+ * @tc.desc: test GenerateBackgroundPoints
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextDragTestNg, TextDragPatternGenerateBackgroundPoints003, TestSize.Level1)
+{
+    TextDragPattern textDragPattern;
+    RectF textRect = RectF(0.0f, 0.0f, 300.0f, 200.0f);
+    TextDragData textDragData = TextDragData(textRect, 300.0f, 200.0f, 20.0f, 20.0f);
+    textDragPattern.textDragData_ = textDragData;
+    std::vector<TextPoint> points;
+    TextPoint textPoint = TextPoint(5.0f, 10.0f);
+    textDragPattern.textDragData_.textRect_ = textRect;
+    SelectPositionInfo selectPositionInfo = SelectPositionInfo(60.0f, 10.0f, 295.0f, 150.0f);
+    textDragPattern.textDragData_.selectPosition_ = selectPositionInfo;
+    points.emplace_back(textPoint);
+    textDragPattern.GenerateBackgroundPoints(points, 5.0f, true);
+    EXPECT_EQ(points[1].x, 55);
+    EXPECT_EQ(points[1].y, 5);
+    EXPECT_EQ(points[2].x, 305);
+    EXPECT_EQ(points[2].y, 5);
+}
+
+/**
+ * @tc.name: TextDragPatternGenerateBackgroundPoints004
+ * @tc.desc: test GenerateBackgroundPoints
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextDragTestNg, TextDragPatternGenerateBackgroundPoints004, TestSize.Level1)
+{
+    TextDragPattern textDragPattern;
+    RectF textRect = RectF(0.0f, 0.0f, 300.0f, 200.0f);
+    TextDragData textDragData = TextDragData(textRect, 400.0f, 600.0f, 30.0f, 30.0f);
+    textDragPattern.textDragData_ = textDragData;
+    std::vector<TextPoint> points;
+    TextPoint textPoint = TextPoint(5.0f, 10.0f);
+    textDragPattern.textDragData_.textRect_ = textRect;
+    SelectPositionInfo selectPositionInfo = SelectPositionInfo(50.0f, 50.0f, 150.0f, 110.0f);
+    textDragPattern.textDragData_.selectPosition_ = selectPositionInfo;
+    points.emplace_back(textPoint);
+    textDragPattern.GenerateBackgroundPoints(points, 5.0f, true);
+    EXPECT_EQ(points[1].x, 45);
+    EXPECT_EQ(points[1].y, 45);
+    EXPECT_EQ(points[4].x, 155);
+    EXPECT_EQ(points[4].y, 115);
+}
+
+/**
+ * @tc.name: TextDragPatternGenerateBackgroundPoints005
+ * @tc.desc: test GenerateBackgroundPoints
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextDragTestNg, TextDragPatternGenerateBackgroundPoints005, TestSize.Level1)
+{
+    TextDragPattern textDragPattern;
+    RectF textRect = RectF(0.0f, 0.0f, 300.0f, 200.0f);
+    TextDragData textDragData = TextDragData(textRect, 300.0f, 200.0f, 20.0f, 20.0f);
+    textDragPattern.textDragData_ = textDragData;
+    std::vector<TextPoint> points;
+    TextPoint textPoint = TextPoint(5.0f, 10.0f);
+    textDragPattern.textDragData_.textRect_ = textRect;
+    SelectPositionInfo selectPositionInfo = SelectPositionInfo(10.0f, 10.0f, 295.0f, 150.0f);
+    textDragPattern.textDragData_.selectPosition_ = selectPositionInfo;
+    points.emplace_back(textPoint);
+    textDragPattern.GenerateBackgroundPoints(points, 5.0f, true);
+    EXPECT_EQ(points[0].x, -5);
+    EXPECT_EQ(points[0].y, 5);
+    EXPECT_EQ(points[2].x, 305);
+    EXPECT_EQ(points[2].y, 5);
 }
 } // namespace OHOS::Ace::NG

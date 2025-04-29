@@ -54,11 +54,12 @@ public:
         return titleLabel_;
     }
 
-    void SetTitleButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
+    void SetTitleButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose)
     {
         hideSplit_ = hideSplit;
         hideMaximize_ = hideMaximize;
         hideMinimize_ = hideMinimize;
+        hideClose_ = hideClose;
     }
 
     bool GetSplitButtonHide() const
@@ -83,6 +84,7 @@ private:
     bool hideSplit_ = false;
     bool hideMaximize_ = false;
     bool hideMinimize_ = false;
+    bool hideClose_ = false;
 };
 
 } // namespace OHOS::Ace

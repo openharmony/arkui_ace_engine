@@ -20,6 +20,7 @@
 #include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
+class LayoutWrapper;
 struct ScrollableUtils {
     /**
      * @brief Checks if contentHeight needs to expand based on safeArea property.
@@ -40,6 +41,22 @@ struct ScrollableUtils {
      * @param wrapper layout wrapper
      */
     static void RecycleItemsOutOfBoundary(Axis axis, float offset, int32_t start, int32_t end, LayoutWrapper* wrapper);
+
+    /**
+     * @brief get moveoffset from parentFrameNode when curFrameNode focused.
+     *
+     * @param parentFrameNode parent framenode with scroll function
+     * @param curFrameNode current focused framenode
+     * @param isVertical vertical or not
+     * @param contentStartOffset content start offset from parentFrameNode
+     * @param contentEndOffset content end offset from parentFrameNode
+     */
+    static float GetMoveOffset(
+        const RefPtr<FrameNode>& parentFrameNode,
+        const RefPtr<FrameNode>& curFrameNode,
+        bool isVertical,
+        float contentStartOffset,
+        float contentEndOffset);
 };
 } // namespace OHOS::Ace::NG
 

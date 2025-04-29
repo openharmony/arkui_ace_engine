@@ -31,7 +31,6 @@ private:
     static std::string FontSizeToHtml(const std::optional<Dimension>& value);
     static std::string FontWeightToHtml(const std::optional<FontWeight>& value);
     static std::string ColorToHtml(const std::optional<Color>& value);
-    static std::string ColorToHtml(const std::optional<DynamicColor>& value);
     static std::string FontFamilyToHtml(const std::optional<std::vector<std::string>>& value);
     static std::string TextDecorationToHtml(TextDecoration decoration);
     static std::string TextDecorationStyleToHtml(TextDecorationStyle decorationStyle);
@@ -47,6 +46,7 @@ private:
     static std::string ToHtml(const std::string& key, const std::optional<OHOS::Ace::NG::MarginProperty>& prop);
     static std::string ToHtml(const std::optional<ImageFit>& objectFit);
     static std::string ToHtml(const std::optional<VerticalAlign>& verticalAlign);
+    static std::string ToHtml(const std::string& key, bool syncLoad);
     static std::string ParagraphStyleToHtml(const OHOS::Ace::NG::TextLineStyle& textLineStyle);
     static std::string LeadingMarginToHtml(const OHOS::Ace::NG::TextLineStyle& style);
     static int WriteLocalFile(RefPtr<PixelMap> pixelMap, std::string& filePath, std::string& fileUri);

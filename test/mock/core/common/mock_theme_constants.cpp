@@ -142,6 +142,11 @@ uint32_t ThemeConstants::GetSymbolByName(const char* name) const
     return -1;
 }
 
+uint32_t ThemeConstants::GetSymbolById(uint32_t resId) const
+{
+    return  -1;
+}
+
 std::vector<uint32_t> ThemeConstants::GetIntArray(uint32_t key) const
 {
     return {};
@@ -194,6 +199,23 @@ void ThemeConstants::LoadFile(const RefPtr<Asset>& asset)
 
 void ThemeConstants::SetColorScheme(ColorScheme colorScheme)
 {
+}
+
+RefPtr<ThemeStyle> ThemeConstants::GetPatternByName(const std::string& patternName)
+{
+    if (!currentThemeStyle_) {
+        TAG_LOGE(AceLogTag::ACE_THEME, "Get theme by name error: currentThemeStyle_ is null");
+        return nullptr;
+    }
+    currentThemeStyle_->CheckThemeStyleLoaded(patternName);
+    auto patternStyle = currentThemeStyle_->GetAttr<RefPtr<ThemeStyle>>(patternName, nullptr);
+    if (!patternStyle && resAdapter_) {
+        patternStyle = resAdapter_->GetPatternByName(patternName);
+        ResValueWrapper value = { .type = ThemeConstantsType::PATTERN,
+            .value = patternStyle };
+        currentThemeStyle_->SetAttr(patternName, value);
+    }
+    return patternStyle;
 }
 
 std::shared_ptr<Media::PixelMap> ThemeConstants::GetPixelMap(uint32_t key) const

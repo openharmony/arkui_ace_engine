@@ -14,10 +14,7 @@
  */
 #include "core/interfaces/native/node/nav_router_modifier.h"
 
-#include "core/pipeline/base/element_register.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/navrouter/navrouter_model_ng.h"
-#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
 void SetNavRouteMode(ArkUINodeHandle node, int32_t mode)
@@ -37,14 +34,24 @@ void ResetNavRouteMode(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUINavRouterModifier* GetNavRouterModifier()
 {
-    static const ArkUINavRouterModifier modifier = {SetNavRouteMode, ResetNavRouteMode};
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUINavRouterModifier modifier = {
+        .setNavRouteMode = SetNavRouteMode,
+        .resetNavRouteMode = ResetNavRouteMode,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUINavRouterModifier* GetCJUINavRouterModifier()
 {
-    static const CJUINavRouterModifier modifier = {SetNavRouteMode, ResetNavRouteMode};
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUINavRouterModifier modifier = {
+        .setNavRouteMode = SetNavRouteMode,
+        .resetNavRouteMode = ResetNavRouteMode,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

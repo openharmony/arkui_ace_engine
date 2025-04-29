@@ -1,0 +1,230 @@
+{
+  "routerMap": [
+    {
+      "name": "NavIndex",
+      "pageSourceFile": "src/main/ets/pages/navigationPage.ets",
+      "buildFunction": "NavIndexBuilder"
+    },
+    {
+      "name": "UIExtensionTest",
+      "pageSourceFile": "src/main/ets/pages/UIExtensionTestPage.ets",
+      "buildFunction": "NavIndexBuilder"
+    },
+    {
+      "name": "DialogIndex",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/Index.ets",
+      "buildFunction": "DialogIndexBuilder"
+    },
+    {
+      "name": "AlertDialog",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/alertDialog.ets",
+      "buildFunction": "AlertDialogBuilder"
+    },
+    {
+      "name": "ActionSheet",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/actionSheet.ets",
+      "buildFunction": "ActionSheetBuilder"
+    },
+    {
+      "name": "CustomDialog",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/customDialog.ets",
+      "buildFunction": "CustomDialogBuilder"
+    },
+    {
+      "name": "PromptAction",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/promptAction.ets",
+      "buildFunction": "PromptActionBuilder"
+    },
+    {
+      "name": "DialogController",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/dialogController.ets",
+      "buildFunction": "DialogControllerBuilder"
+    },
+    {
+      "name": "DialogLevelOrder",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/dialogLevelOrder.ets",
+      "buildFunction": "DialogLevelOrderBuilder"
+    },
+    {
+      "name": "DialogFocusable",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/dialogFocusable.ets",
+      "buildFunction": "DialogFocusableBuilder"
+    },
+    {
+      "name": "EmbeddedDialogPageOne",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/embeddedDialogPageOne.ets",
+      "buildFunction": "EmbeddedDialogPageOneBuilder"
+    },
+    {
+      "name": "MenuIndex",
+      "pageSourceFile": "src/main/ets/pages/components/menu/Index.ets",
+      "buildFunction": "MenuIndexBuilder"
+    },
+    {
+      "name": "MultiMenu",
+      "pageSourceFile": "src/main/ets/pages/components/menu/multiMenu.ets",
+      "buildFunction": "MultiMenuBuilder"
+    },
+    {
+      "name": "MultiMenuSymbol",
+      "pageSourceFile": "src/main/ets/pages/components/menu/multiMenuSymbol.ets",
+      "buildFunction": "MultiMenuSymbolBuilder"
+    },
+    {
+      "name": "BindMenu",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindMenu.ets",
+      "buildFunction": "BindMenuBuilder"
+    },
+    {
+      "name": "BindContextMenu",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenu.ets",
+      "buildFunction": "BindContextMenuBuilder"
+    },
+    {
+      "name": "BindContextMenuRightClick",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuRightClick.ets",
+      "buildFunction": "BindContextMenuRightClickBuilder"
+    },
+    {
+      "name": "BindMenuCustomBuilder",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindMenuCustomBuilder.ets",
+      "buildFunction": "BindMenuCustomBuilder"
+    },
+    {
+      "name": "BindContextMenuPreviewMode",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuPreviewMode.ets",
+      "buildFunction": "BindContextMenuPreviewModeBuilder"
+    },
+    {
+      "name": "BindContextMenuPreviewCustomBuilder",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuPreviewCustomBuilder.ets",
+      "buildFunction": "BindContextMenuPreviewCustomBuilder"
+    },
+    {
+      "name": "BindContextMenuIsShown",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuIsShown.ets",
+      "buildFunction": "BindContextMenuIsShownBuilder"
+    },
+    {
+      "name": "BindContextMenuTransition",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuTransition.ets",
+      "buildFunction": "BindContextMenuTransitionBuilder"
+    },
+    {
+      "name": "BindMenuSymbolIcon",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindMenuSymbolIcon.ets",
+      "buildFunction": "BindMenuSymbolIconBuilder"
+    },
+    {
+      "name": "BindContextMenuHoverScale",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuHoverScale.ets",
+      "buildFunction": "BindContextMenuHoverScaleBuilder"
+    },
+    {
+      "name": "BindMenuBackgroundBlurStyle",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindMenuBackgroundBlurStyle.ets",
+      "buildFunction": "BindMenuBackgroundBlurStyleBuilder"
+    },
+    {
+      "name": "BindMenuBackgroundEffect",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindMenuBackgroundEffect.ets",
+      "buildFunction": "BindMenuBackgroundEffectBuilder"
+    },
+    {
+      "name": "MenuDivider",
+      "pageSourceFile": "src/main/ets/pages/components/menu/menuDivider.ets",
+      "buildFunction": "MenuDividerBuilder"
+    },
+    {
+      "name": "MenuExpand",
+      "pageSourceFile": "src/main/ets/pages/components/menu/menuExpand.ets",
+      "buildFunction": "MenuExpandBuilder"
+    },
+    {
+      "name": "MenuPressStatus",
+      "pageSourceFile": "src/main/ets/pages/components/menu/menuPressStatus.ets",
+      "buildFunction": "MenuPressStatusBuilder"
+    },
+    {
+      "name": "OverlayIndex",
+      "pageSourceFile": "src/main/ets/pages/components/overlay/Index.ets",
+      "buildFunction": "OverlayIndexBuilder"
+    },
+    {
+      "name": "OverlayLevelOrder",
+      "pageSourceFile": "src/main/ets/pages/components/overlay/overlayLevelOrder.ets",
+      "buildFunction": "OverlayLevelOrderBuilder"
+    },
+    {
+      "name": "OverlayManagerHitTest",
+      "pageSourceFile": "src/main/ets/pages/components/overlay/overlayManagerHitTest.ets",
+      "buildFunction": "OverlayManagerHitBuilder"
+    },
+
+    {
+      "name": "PopupIndex",
+      "pageSourceFile": "src/main/ets/pages/components/popup/Index.ets",
+      "buildFunction": "PopupIndexBuilder"
+    },
+    {
+      "name": "Popup",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popup.ets",
+      "buildFunction": "PopupBuilder"
+    },
+    {
+      "name": "popupPositionTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupPositionTest.ets",
+      "buildFunction": "PopupPositionBuilder"
+    },
+    {
+      "name": "PopupStyleBuilder",
+      "pageSourceFile": "src/main/ets/pages/components/popup/PopupStyleTest.ets",
+      "buildFunction": "PopupStyleBuilder"
+    },
+    {
+      "name": "PopupDismissTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupDismissTets.ets",
+      "buildFunction": "PopupDismissBuilder"
+    },
+    {
+      "name": "PopupAdvancedTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupAdvancedTest.ets",
+      "buildFunction": "PopupAdvancedBuilder"
+    },
+    {
+      "name": "PopupAnimateTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupAnimateTest.ets",
+      "buildFunction": "PopupAnimateBuilder"
+    },
+    {
+      "name": "PopupTipTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupTipTest.ets",
+      "buildFunction": "PopupTipBuilder"
+    },
+    {
+      "name": "PopupDragTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupDragTest.ets",
+      "buildFunction": "PopupDragBuilder"
+    },
+    {
+      "name": "ToastIndex",
+      "pageSourceFile": "src/main/ets/pages/components/toast/Index.ets",
+      "buildFunction": "ToastIndexBuilder"
+    },
+    {
+      "name": "Toast",
+      "pageSourceFile": "src/main/ets/pages/components/toast/toast.ets",
+      "buildFunction": "ToastBuilder"
+    },
+    {
+      "name": "showToastTest",
+      "pageSourceFile": "src/main/ets/pages/components/toast/showToastTest.ets",
+      "buildFunction": "ShowToastBuilder"
+    },
+    {
+      "name": "toastPositionTest",
+      "pageSourceFile": "src/main/ets/pages/components/toast/toastPositionTest.ets",
+      "buildFunction": "ToastPositionBuilder"
+    }
+  ]
+}

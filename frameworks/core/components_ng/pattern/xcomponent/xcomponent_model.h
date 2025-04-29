@@ -26,21 +26,18 @@
 
 namespace OHOS::Ace {
 using LoadEvent = std::function<void(const std::string&)>;
-using DestroyEvent = std::function<void()>;
+using DestroyEvent = std::function<void(const std::string&)>;
 using DetachCallback = std::function<void(const std::string&)>;
-using SurfaceCreatedEvent = std::function<void(const std::string&)>;
+using SurfaceCreatedEvent = std::function<void(const std::string&, const std::string&)>;
 using SurfaceChangedEvent = std::function<void(const std::string&, const NG::RectF&)>;
-using SurfaceDestroyedEvent = std::function<void(const std::string&)>;
+using SurfaceDestroyedEvent = std::function<void(const std::string&, const std::string&)>;
 
-class XComponentModel {
+class ACE_FORCE_EXPORT XComponentModel {
 public:
     static XComponentModel* GetInstance();
     static bool IsBackGroundColorAvailable(const XComponentType& type)
     {
         return type == XComponentType::TEXTURE || type == XComponentType::NODE ||
-#ifdef PLATFORM_VIEW_SUPPORTED
-                type == XComponentType::PLATFORM_VIEW ||
-#endif
                (type == XComponentType::SURFACE && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN));
     }
     static bool IsCommonEventAvailable(const XComponentType& type, std::optional<std::string>& libraryName)
@@ -50,6 +47,7 @@ public:
     }
     virtual ~XComponentModel() = default;
 
+    virtual void Create(XComponentType type) {}
     virtual void Create(const std::optional<std::string>& id, XComponentType type,
         const std::optional<std::string>& libraryname,
         const std::shared_ptr<InnerXComponentController>& xcomponentController) = 0;
@@ -73,20 +71,20 @@ public:
     {
         return XComponentType::UNKNOWN;
     }
+    virtual void SetControllerOnCreated(SurfaceCreatedEvent&& onCreated) {}
+    virtual void SetControllerOnChanged(SurfaceChangedEvent&& onChanged) {}
+    virtual void SetControllerOnDestroyed(SurfaceDestroyedEvent&& onDestroyed) {}
     virtual std::optional<std::string> GetLibraryName()
     {
         return std::nullopt;
     }
     virtual void EnableAnalyzer(bool enable) {}
     virtual void SetImageAIOptions(void* options) {}
-    virtual void SetControllerOnCreated(SurfaceCreatedEvent&& onCreated) {}
-    virtual void SetControllerOnChanged(SurfaceChangedEvent&& onChanged) {}
-    virtual void SetControllerOnDestroyed(SurfaceDestroyedEvent&& onDestroyed) {}
-
-private:
-    static std::unique_ptr<XComponentModel> instance_;
-    static std::mutex mutex_;
+    virtual void SetRenderFit(RenderFit renderFit) {}
+    virtual void EnableSecure(bool isSecure) {}
+    virtual void HdrBrightness(float hdrBrightness) {}
+    virtual void EnableTransparentLayer(bool isTransparentLayer) {}
+    virtual void SetScreenId(uint64_t screenId) {}
 };
-
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_XCOMPONENT_XCOMPONENT_MODEL_H

@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <string>
+#include <optional>
 
 #include "interfaces/inner_api/xcomponent_controller/xcomponent_controller.h"
 
@@ -53,7 +54,7 @@ public:
         configSurfaceImpl_ = std::move(ConfigSurfaceImpl);
     }
 
-    virtual void GetLocalLocation(float& offsetX, float& offsetY) {}
+    virtual void GetSurfaceOffset(float& offsetX, float& offsetY) {}
     virtual void GetSurfaceSize(float& surfaceWidth, float& surfaceHeight) {}
 
     virtual void SetIdealSurfaceWidth(float surfaceWidth) {}

@@ -31,7 +31,18 @@ public:
     TextInputAction GetDefaultTextInputAction() const override;
     void InitDragEvent() override;
     void ApplyNormalTheme() override;
-    bool IsTextEditableForStylus() override;
+    bool IsTextEditableForStylus() const override;
+    void ProcessSelection() override;
+    void SearchRequestStartTwinkling();
+    void SearchRequestStopTwinkling();
+    void ResetSearchRequestStopTwinkling();
+    bool IsNeedProcessAutoFill() override;
+    int32_t GetRequestKeyboardId() override;
+    float FontSizeConvertToPx(const Dimension& fontSize) override;
+    std::string GetPlaceholderFont() const override;
+
+private:
+    bool searchRequestStopTwinkling_ = false;
 };
 } // namespace OHOS::Ace::NG
 

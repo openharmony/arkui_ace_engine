@@ -15,22 +15,12 @@
 
 #include "adapter/ohos/entrance/pa_container.h"
 
-#include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
 #include "adapter/ohos/entrance/pa_engine/engine/common/js_backend_engine_loader.h"
 #include "adapter/ohos/entrance/pa_engine/pa_backend.h"
-#include "base/log/ace_trace.h"
-#include "base/log/event_report.h"
-#include "base/log/log.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
-#include "core/common/asset_manager_impl.h"
-#include "core/common/platform_window.h"
-#include "core/common/text_field_manager.h"
-#include "core/common/window.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -80,6 +70,7 @@ void PaContainer::InitializeBackend(SrcLanguage language)
 RefPtr<PaContainer> PaContainer::GetContainer(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, nullptr);
     return AceType::DynamicCast<PaContainer>(container);
 }
 

@@ -15,10 +15,6 @@
 
 #include "core/components_ng/svg/parse/svg_fe_flood.h"
 
-#include "2d_graphics/include/effect/shader_effect.h"
-
-#include "base/utils/utils.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -32,7 +28,7 @@ SvgFeFlood::SvgFeFlood() : SvgFe() {}
 
 void SvgFeFlood::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
     const SvgColorInterpolationType& srcColor, SvgColorInterpolationType& currentColor,
-    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
+    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash, bool /*cropRect*/) const
 {
     imageFilter = MakeImageFilter(feAttr_.in, imageFilter, resultHash);
 

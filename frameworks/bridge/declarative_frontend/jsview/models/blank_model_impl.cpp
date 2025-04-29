@@ -15,8 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/models/blank_model_impl.h"
 
-#include "base/utils/utils.h"
-#include "core/components/box/box_component.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {

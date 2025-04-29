@@ -14,9 +14,9 @@
  */
 
 #include "core/components_ng/pattern/node_container/node_container_layout_algorithm.h"
-#include <optional>
 
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
 void NodeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)

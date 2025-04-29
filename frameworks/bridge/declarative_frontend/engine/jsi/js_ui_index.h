@@ -87,7 +87,10 @@ namespace OHOS::Ace::Framework {
     FUNCTION("width", WIDTH)       \
     FUNCTION("x", X)       \
     FUNCTION("y", Y)       \
-    FUNCTION("z", Z)
+    FUNCTION("z", Z)       \
+    FUNCTION("spaceValue", SPACE_VALUE)       \
+    FUNCTION("ignoreSizeValue", IGNORE_SIZE_VALUE)       \
+    FUNCTION("setIgnoreSizeValue", SET_IGNORE_SIZE_VALUE)
 
 #define PROPERTY_NAME_INDEX(propertyName, index) index,
 enum class ArkUIIndex : uint32_t {

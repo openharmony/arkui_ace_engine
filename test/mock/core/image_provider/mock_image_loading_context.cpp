@@ -15,6 +15,7 @@
 
 #include "test/mock/core/render/mock_canvas_image.h"
 
+#include "base/geometry/ng/size_t.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 
@@ -106,6 +107,11 @@ SizeF ImageLoadingContext::GetImageSize() const
     return SizeF(GetSourceInfo().GetSourceSize().Width(), GetSourceInfo().GetSourceSize().Height());
 }
 
+SizeF ImageLoadingContext::GetOriginImageSize() const
+{
+    return SizeF(GetSourceInfo().GetSourceSize().Width(), GetSourceInfo().GetSourceSize().Height());
+}
+
 ImageFit ImageLoadingContext::GetImageFit() const
 {
     return imageFit_;
@@ -150,7 +156,6 @@ bool ImageLoadingContext::NeedAlt() const
 
 void ImageLoadingContext::ResetLoading() {}
 void ImageLoadingContext::ResumeLoading() {}
-void ImageLoadingContext::DownloadImage() {}
 void ImageLoadingContext::ResizableCalcDstSize() {}
 
 const std::string ImageLoadingContext::GetCurrentLoadingState()
@@ -167,10 +172,4 @@ bool ImageLoadingContext::Downloadable()
 {
     return true;
 }
-
-void ImageLoadingContext::PerformDownload() {}
-
-void ImageLoadingContext::DownloadImageSuccess(const std::string& imageData) {}
-
-void ImageLoadingContext::DownloadImageFailed(const std::string& errorMessage) {}
 } // namespace OHOS::Ace::NG

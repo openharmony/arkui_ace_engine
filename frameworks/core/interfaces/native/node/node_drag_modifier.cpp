@@ -14,46 +14,10 @@
  */
 #include "core/interfaces/native/node/node_drag_modifier.h"
 
-#include <cstddef>
-#include <cstdint>
-#include <string>
-#include <vector>
-
-#include "interfaces/native/native_type.h"
 #include "interfaces/native/node/node_model.h"
-#include "securec.h"
 
-#include "base/geometry/ng/vector.h"
-#include "base/geometry/shape.h"
-#include "base/image/pixel_map.h"
-#include "base/log/log_wrapper.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
-#include "bridge/common/utils/utils.h"
-#include "core/animation/animation_pub.h"
-#include "core/animation/curves.h"
-#include "core/common/ime/text_input_type.h"
 #include "core/common/udmf/udmf_client.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/animation_option.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
-#include "core/components/common/properties/shadow.h"
-#include "core/components/theme/shadow_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
-#include "core/components_ng/property/transition_property.h"
-#include "core/event/axis_event.h"
-#include "core/gestures/drag_event.h"
-#include "core/image/image_source_info.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
-#include "core/interfaces/native/node/node_api.h"
-#include "core/interfaces/native/node/touch_event_convertor.h"
-#include "core/interfaces/native/node/view_model.h"
 
 namespace OHOS::Ace::NG {
 namespace NodeModifier {
@@ -116,6 +80,7 @@ void SetDragEventProperty(const RefPtr<OHOS::Ace::DragEvent>& info, ArkUINodeEve
     }
     event.dragEvent.dataTypes = strList.data();
     event.dragEvent.dataTypesMaxStrLength = maxLength + 1;
+    event.dragEvent.key = info->GetUdKey().c_str();
 }
 
 void SetOnDragDrop(ArkUINodeHandle node, void* extraParam)
@@ -142,10 +107,12 @@ void SetOnDragDrop(ArkUINodeHandle node, void* extraParam)
         event.dragEvent.unifiedData = unifiedData;
         event.dragEvent.dragBehavior = static_cast<ArkUI_Int32>(DragBehavior::UNKNOWN);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         info->UseCustomAnimation(event.dragEvent.useCustomDropAnimation);
         info->SetResult(static_cast<DragRet>(event.dragEvent.dragResult));
         info->SetDragBehavior(static_cast<DragBehavior>(event.dragEvent.dragBehavior));
+        info->SetIsDragEndPending(event.dragEvent.isDragEndPending);
+        info->SetRequestIdentify(event.dragEvent.requestId);
         info->SetCapi(true);
     };
     ViewAbstract::SetOnDrop(frameNode, onDragDrop);
@@ -171,7 +138,7 @@ void SetOnDragStart(ArkUINodeHandle node, void* extraParam)
         event.dragEvent.isSuitGetData = false;
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         RefPtr<UnifiedData> udData =
             UdmfClient::GetInstance()->TransformUnifiedDataForNative(event.dragEvent.unifiedData);
 
@@ -206,7 +173,7 @@ void SetOnDragEnter(ArkUINodeHandle node, void* extraParam)
         event.dragEvent.isSuitGetData = false;
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         info->SetResult(static_cast<DragRet>(event.dragEvent.dragResult));
         info->SetDragBehavior(static_cast<DragBehavior>(event.dragEvent.dragBehavior));
         info->SetCapi(true);
@@ -237,7 +204,7 @@ void SetOnDragMove(ArkUINodeHandle node, void* extraParam)
         event.dragEvent.isSuitGetData = false;
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         info->SetResult(static_cast<DragRet>(event.dragEvent.dragResult));
         info->SetDragBehavior(static_cast<DragBehavior>(event.dragEvent.dragBehavior));
         info->SetCapi(true);
@@ -269,7 +236,7 @@ void SetOnDragLeave(ArkUINodeHandle node, void* extraParam)
         event.dragEvent.isSuitGetData = false;
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         info->SetResult(static_cast<DragRet>(event.dragEvent.dragResult));
         info->SetDragBehavior(static_cast<DragBehavior>(event.dragEvent.dragBehavior));
         info->SetCapi(true);
@@ -315,7 +282,7 @@ void SetOnDragEnd(ArkUINodeHandle node, void* extraParam)
         event.dragEvent.dragBehavior = static_cast<ArkUI_Int32>(info->GetDragBehavior());
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnDragEnd(frameNode, onDragEnd);
 }
@@ -337,9 +304,58 @@ void SetOnPreDrag(ArkUINodeHandle node, void* extraParam)
         event.dragEvent.isSuitGetData = false;
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnPreDrag(frameNode, onPreDrag);
+}
+
+void ResetOnDragStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnDragStart(frameNode);
+}
+
+void ResetOnDragEnter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnDragEnter(frameNode);
+}
+
+void ResetOnDragDrop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnDrop(frameNode);
+}
+
+void ResetOnDragMove(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnDragMove(frameNode);
+}
+
+void ResetOnDragLeave(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnDragLeave(frameNode);
+}
+
+void ResetOnDragEnd(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnDragEnd(frameNode);
+}
+
+void ResetOnPreDrag(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnPreDrag(frameNode);
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

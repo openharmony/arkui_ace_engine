@@ -45,7 +45,7 @@
 #include "core/pipeline/base/render_node.h"
 
 #if defined(ENABLE_STANDARD_INPUT)
-#include "commonlibrary/c_utils/base/include/refbase.h"
+#include "refbase.h"
 
 namespace OHOS::MiscServices {
 class OnTextChangedListener;
@@ -172,6 +172,7 @@ public:
     void DeleteLeft();
     void DeleteRight();
     void InsertValueDone(const std::string& appendElement);
+    void SyncGeometryProperties() override;
 
     void SetInputFilter(const std::string& inputFilter)
     {
@@ -623,7 +624,7 @@ protected:
     CursorPositionType cursorPositionType_ = CursorPositionType::NORMAL;
     DirectionStatus directionStatus_ = DirectionStatus::LEFT_LEFT;
     double estimateHeight_ = 0.0;
-    CopyOptions copyOption_ = CopyOptions::Distributed;
+    CopyOptions copyOption_ = CopyOptions::Local;
     TextFieldOverflowX overflowX_ = TextFieldOverflowX::HIDDEN;
 
     bool showPasswordIcon_ = true; // Whether show password icon, effect only type is password.
@@ -728,7 +729,7 @@ private:
 
     // distribute
     void ApplyRestoreInfo();
-    void OnTapCallback();
+    void OnTapCallback(const TouchEventInfo& info);
     virtual double GetRealTextWidth() const
     {
         return 0;

@@ -158,9 +158,57 @@ class CheckboxGroupStyleModifier extends ModifierWithKey<CheckBoxShape> {
   }
 }
 
+class CheckBoxGroupOptionsModifier extends ModifierWithKey<CheckboxGroupOptions> {
+  constructor(value: CheckboxGroupOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('checkboxGroupOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().checkbox.setCheckboxGroupOptions(node, undefined);
+    } else {
+      getUINativeModule().checkbox.setCheckboxGroupOptions(node, this.value.group);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.group, this.value.group);
+  }
+}
+
+class CheckboxGroupOnChangeModifier extends ModifierWithKey<OnCheckboxGroupChangeCallback> {
+  constructor(value: OnCheckboxGroupChangeCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('checkboxOnChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().checkboxgroup.resetCheckboxGroupOnChange(node);
+    } else {
+      getUINativeModule().checkboxgroup.setCheckboxGroupOnChange(node, this.value);
+    }
+  }
+}
+
 class ArkCheckboxGroupComponent extends ArkComponent implements CheckboxGroupAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
+  }
+  allowChildCount(): number {
+    return 0;
+  }
+  initialize(value: Object[]): this {
+    if (!value.length) {
+      return this;
+    }
+    if (!isUndefined(value[0]) && !isNull(value[0]) && isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, CheckBoxGroupOptionsModifier.identity, CheckBoxGroupOptionsModifier,
+        value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, CheckBoxGroupOptionsModifier.identity, CheckBoxGroupOptionsModifier,
+        undefined);
+    }
+    return this;
   }
   selectAll(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, CheckboxGroupSelectAllModifier.identity, CheckboxGroupSelectAllModifier, value);
@@ -179,8 +227,9 @@ class ArkCheckboxGroupComponent extends ArkComponent implements CheckboxGroupAtt
       this._modifiersWithKeys, CheckboxGroupMarkModifier.identity, CheckboxGroupMarkModifier, value);
     return this;
   }
-  onChange(callback: (event: CheckboxGroupResult) => void): CheckboxGroupAttribute {
-    throw new Error('Method not implemented.');
+  onChange(callback: OnCheckboxGroupChangeCallback ): this {
+    modifierWithKey(this._modifiersWithKeys, CheckboxGroupOnChangeModifier.identity, CheckboxGroupOnChangeModifier, callback);
+    return this;
   }
   size(value: SizeOptions): this {
     modifierWithKey(

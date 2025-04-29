@@ -12,8 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include <utility>
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/base/mock_task_executor.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -25,16 +31,19 @@ enum class SpanType {
     BUILDER
 };
 namespace {
-const std::vector<string> INSERT_VALUE_LIST = {
-    "哈哈哈haha123",
-    "\n哈哈哈haha123",
-    "哈哈哈\nhaha123",
-    "哈哈哈haha123\n",
-    "\n哈哈哈\nhaha123",
-    "\n哈哈哈haha123\n",
-    "哈哈哈\nhaha123\n",
-    "\n哈哈哈\nhaha123\n",
+const std::vector<std::u16string> INSERT_VALUE_LIST = {
+    u"哈哈哈haha123",
+    u"\n哈哈哈haha123",
+    u"哈哈哈\nhaha123",
+    u"哈哈哈haha123\n",
+    u"\n哈哈哈\nhaha123",
+    u"\n哈哈哈haha123\n",
+    u"哈哈哈\nhaha123\n",
+    u"\n哈哈哈\nhaha123\n",
 };
+const auto BUILDER_NODE_1 = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG,
+    ElementRegister::GetInstance()->MakeUniqueId(),
+    []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
 const std::unordered_map<SpanType, std::function<void(RefPtr<RichEditorPattern>)>> SPAN_CONSTRUCTOR_MAP = {
     { SpanType::TEXT, [](RefPtr<RichEditorPattern> pattern) { pattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);} },
     { SpanType::IMAGE, [](RefPtr<RichEditorPattern> pattern) { pattern->AddImageSpan(IMAGE_SPAN_OPTIONS_1);} },
@@ -115,7 +124,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestTextText001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto insertFunc = [this, richEditorPattern](const std::string& insertValue) {
+    auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 6;
         InitSpans(SpanType::TEXT, SpanType::TEXT); // [hello1][hello1]
         ASSERT_EQ(richEditorPattern->spans_.back()->rangeStart, insertIndex);
@@ -176,7 +185,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestTextImage001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto insertFunc = [this, richEditorPattern](const std::string& insertValue) {
+    auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 6;
         InitSpans(SpanType::TEXT, SpanType::IMAGE); // hello1[image]
         ASSERT_EQ(richEditorPattern->spans_.back()->rangeStart, insertIndex);
@@ -237,7 +246,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestTextBuilder001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     
-    auto insertFunc = [this, richEditorPattern](const std::string& insertValue) {
+    auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 6;
         InitSpans(SpanType::TEXT, SpanType::BUILDER); // hello1[builder]
         ASSERT_EQ(richEditorPattern->spans_.back()->rangeStart, insertIndex);
@@ -298,7 +307,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestTextSymbol001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto insertFunc = [this, richEditorPattern](const std::string& insertValue) {
+    auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 6;
         InitSpans(SpanType::TEXT, SpanType::SYMBOL); // hello1[symbol]
         ASSERT_EQ(richEditorPattern->spans_.back()->rangeStart, insertIndex);
@@ -359,7 +368,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestImageText001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto insertFunc = [this, richEditorPattern](const std::string& insertValue) {
+    auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 1;
         InitSpans(SpanType::IMAGE, SpanType::TEXT); // [image]hello1
         ASSERT_EQ(richEditorPattern->spans_.back()->rangeStart, insertIndex);
@@ -420,7 +429,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestImageImage001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto insertFunc = [this, richEditorPattern](const std::string& insertValue) {
+    auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 1;
         InitSpans(SpanType::IMAGE, SpanType::IMAGE); // [image][image]
         ASSERT_EQ(richEditorPattern->spans_.back()->rangeStart, insertIndex);
@@ -481,7 +490,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestImageBuilder001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto insertFunc = [this, richEditorPattern](const std::string& insertValue) {
+    auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 1;
         InitSpans(SpanType::IMAGE, SpanType::BUILDER); // [image][builder]
         ASSERT_EQ(richEditorPattern->spans_.back()->rangeStart, insertIndex);
@@ -542,7 +551,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestImageSymbol001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto insertFunc = [this, richEditorPattern](const std::string& insertValue) {
+    auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 1;
         InitSpans(SpanType::IMAGE, SpanType::SYMBOL); // [image][symbol]
         ASSERT_EQ(richEditorPattern->spans_.back()->rangeStart, insertIndex);
@@ -603,7 +612,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestBuilderText001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto insertFunc = [this, richEditorPattern](const std::string& insertValue) {
+    auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 1;
         InitSpans(SpanType::BUILDER, SpanType::TEXT); // [builder]hello1
         ASSERT_EQ(richEditorPattern->spans_.back()->rangeStart, insertIndex);
@@ -664,7 +673,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestBuilderImage001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto insertFunc = [this, richEditorPattern](const std::string& insertValue) {
+    auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 1;
         InitSpans(SpanType::BUILDER, SpanType::IMAGE); // [builder][image]
         ASSERT_EQ(richEditorPattern->spans_.back()->rangeStart, insertIndex);
@@ -725,7 +734,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestBuilderBuilder001, TestSize.Level
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto insertFunc = [this, richEditorPattern](const std::string& insertValue) {
+    auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 1;
         InitSpans(SpanType::BUILDER, SpanType::BUILDER); // [builder][builder]
         ASSERT_EQ(richEditorPattern->spans_.back()->rangeStart, insertIndex);
@@ -786,7 +795,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestBuilderSymbol001, TestSize.Level1
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto insertFunc = [this, richEditorPattern](const std::string& insertValue) {
+    auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 1;
         InitSpans(SpanType::BUILDER, SpanType::SYMBOL); // [builder][symbol]
         ASSERT_EQ(richEditorPattern->spans_.back()->rangeStart, insertIndex);
@@ -847,7 +856,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestSymbolText001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto insertFunc = [this, richEditorPattern](const std::string& insertValue) {
+    auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 2;
         InitSpans(SpanType::SYMBOL, SpanType::TEXT); // [symbol]hello1
         ASSERT_EQ(richEditorPattern->spans_.back()->rangeStart, insertIndex);
@@ -908,7 +917,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestSymbolImage001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto insertFunc = [this, richEditorPattern](const std::string& insertValue) {
+    auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 2;
         InitSpans(SpanType::SYMBOL, SpanType::IMAGE); // [symbol][image]
         ASSERT_EQ(richEditorPattern->spans_.back()->rangeStart, insertIndex);
@@ -969,7 +978,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestSymbolBuilder001, TestSize.Level1
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto insertFunc = [this, richEditorPattern](const std::string& insertValue) {
+    auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 2;
         InitSpans(SpanType::SYMBOL, SpanType::BUILDER); // [symbol][builder]
         ASSERT_EQ(richEditorPattern->spans_.back()->rangeStart, insertIndex);
@@ -1030,7 +1039,7 @@ HWTEST_F(RichEditorSpanTest, RichEditorSpanTestSymbolSymbol001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto insertFunc = [this, richEditorPattern](const std::string& insertValue) {
+    auto insertFunc = [this, richEditorPattern](const std::u16string& insertValue) {
         const int32_t insertIndex = 2;
         InitSpans(SpanType::SYMBOL, SpanType::SYMBOL); // [symbol][symbol]
         ASSERT_EQ(richEditorPattern->spans_.back()->rangeStart, insertIndex);

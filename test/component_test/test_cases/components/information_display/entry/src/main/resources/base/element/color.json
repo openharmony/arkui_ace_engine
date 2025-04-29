@@ -1,0 +1,79 @@
+{
+  "color": [
+    {
+      "name": "start_window_background",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "data_panel_resource_color1",
+      "value": "#FFF89B9B"
+    },
+    {
+      "name": "data_panel_resource_color2",
+      "value": "#1AF15D07"
+    },
+    {
+      "name": "data_panel_resource_color3",
+      "value": "#FFEEEE4A"
+    },
+    {
+      "name": "data_panel_resource_color4",
+      "value": "#FF07F5F5"
+    },
+    {
+      "name": "data_panel_resource_color5",
+      "value": "#FF08F660"
+    },
+    {
+      "name": "data_panel_resource_color6",
+      "value": "#FF3C4747"
+    },    {
+      "name": "data_panel_resource_color7",
+      "value": "#FFE909E9"
+    },
+    {
+      "name": "data_panel_resource_color8",
+      "value": "#FFFF0164"
+    },
+    {
+      "name": "marquee_font_color",
+      "value": "#FFF89B9B"
+    },
+    {
+      "name": "text_timer_color1",
+      "value": "#FFEEEE4A"
+    },
+    {
+      "name": "text_timer_color2",
+      "value": "#FF07F5F5"
+    },
+    {
+      "name": "text_timer_color3",
+      "value": "#FF08F660"
+    },
+    {
+      "name": "progress_color",
+      "value": "#695333"
+    },
+    {
+      "name": "progress_background_color",
+      "value": "#226015"
+    },
+    {
+      "name": "borderColor",
+      "value": "#188888"
+    },
+    {
+      "name": "progress_linear_gradient_color1",
+      "value": "#65EEC9A3"
+    },
+    {
+      "name": "progress_linear_gradient_color2",
+      "value": "#FFEF629F"
+    },
+    {
+      "name": "loadingProgress_color",
+      "value": "#1AF15D07"
+    }
+  ]
+}

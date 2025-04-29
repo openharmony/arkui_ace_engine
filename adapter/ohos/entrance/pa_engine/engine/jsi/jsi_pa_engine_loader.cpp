@@ -16,7 +16,6 @@
 #include "adapter/ohos/entrance/pa_engine/engine/jsi/jsi_pa_engine_loader.h"
 
 #include "adapter/ohos/entrance/pa_engine/engine/jsi/jsi_pa_engine.h"
-#include "base/utils/macros.h"
 
 namespace OHOS::Ace {
 

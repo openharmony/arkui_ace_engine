@@ -32,7 +32,7 @@ public:
     ~PixelMapImageObject() override = default;
 
     void MakeCanvasImage(
-        const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize, bool syncLoad) override;
+        const WeakPtr<ImageLoadingContext>& ctxWp, const SizeF& resizeTarget, bool forceResize, bool syncLoad) override;
 
     static RefPtr<PixelMapImageObject> Create(const ImageSourceInfo& src, const RefPtr<ImageData>& data);
 

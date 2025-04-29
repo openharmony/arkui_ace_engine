@@ -37,6 +37,7 @@ using JSException = JsiException;
 using JSExecutionContext = JsiExecutionContext;
 using JSObjTemplate = JsiObjTemplate;
 using JSDate = JsiDate;
+using JSFastNativeScope = panda::JsiFastNativeScope;
 
 template<class T>
 inline auto ToJSValue(T&& val)
@@ -54,6 +55,7 @@ Local<JSValueRef> JsPreventDefault(panda::JsiRuntimeCallInfo *info);
 Local<JSValueRef> JsClickPreventDefault(panda::JsiRuntimeCallInfo *info);
 Local<JSValueRef> JsTouchPreventDefault(panda::JsiRuntimeCallInfo *info);
 Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info);
+Local<JSValueRef> JsPropagation(panda::JsiRuntimeCallInfo *info);
 
 #endif
 

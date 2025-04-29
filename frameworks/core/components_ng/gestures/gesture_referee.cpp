@@ -13,13 +13,8 @@
  * limitations under the License.
  */
 #include "core/components_ng/gestures/gesture_referee.h"
-#include "recognizers/gesture_recognizer.h"
 
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
-#include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
+#include "core/common/ace_application_info.h"
 #include "core/components_ng/gestures/recognizers/recognizer_group.h"
 
 namespace OHOS::Ace::NG {
@@ -189,7 +184,7 @@ static bool CheckRecognizer(const RefPtr<NGGestureRecognizer>& recognizer)
             return true;
         }
     }
-    return false;
+    return group->CheckGroupState();
 }
 
 bool GestureScope::CheckRecognizerState()
@@ -219,6 +214,18 @@ bool GestureScope::HasFailRecognizer()
     for (const auto& weak : recognizers_) {
         auto recognizer = weak.Upgrade();
         if (recognizer && recognizer->GetRefereeState() == RefereeState::FAIL) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool GestureScope::IsAnySucceedRecognizerExist()
+{
+    for (const auto& weak : recognizers_) {
+        auto recognizer = weak.Upgrade();
+        if (recognizer && (recognizer->GetRefereeState() == RefereeState::SUCCEED ||
+                              recognizer->GetRefereeState() == RefereeState::SUCCEED_BLOCKED)) {
             return true;
         }
     }
@@ -258,6 +265,16 @@ void GestureScope::CleanGestureScopeState()
     }
 }
 
+void GestureScope::CleanGestureScopeStateVoluntarily()
+{
+    for (const auto& weak : recognizers_) {
+        auto recognizer = weak.Upgrade();
+        if (recognizer) {
+            recognizer->CleanRecognizerStateVoluntarily();
+        }
+    }
+}
+
 void GestureReferee::AddGestureToScope(size_t touchId, const TouchTestResult& result)
 {
     RefPtr<GestureScope> scope;
@@ -290,6 +307,16 @@ void GestureReferee::CleanGestureScope(size_t touchId)
     }
 }
 
+void GestureReferee::CleanGestureStateVoluntarily(size_t touchId)
+{
+    const auto iter = gestureScopes_.find(touchId);
+    if (iter != gestureScopes_.end()) {
+        const auto& scope = iter->second;
+        CHECK_NULL_VOID(scope);
+        scope->CleanGestureScopeStateVoluntarily();
+    }
+}
+
 bool GestureReferee::QueryAllDone(size_t touchId)
 {
     bool ret = true;
@@ -313,11 +340,10 @@ bool GestureReferee::QueryAllDone()
 
 bool GestureReferee::CheckEventTypeChange(SourceType type, bool isAxis) const
 {
-    bool ret = false;
-    if (!isAxis && lastIsAxis_ && type == SourceType::TOUCH) {
-        ret = true;
+    if (!isAxis && lastIsAxis_) {
+        return (type == SourceType::TOUCH || type == SourceType::MOUSE);
     }
-    return ret;
+    return false;
 }
 
 bool GestureReferee::CheckSourceTypeChange(SourceType type, bool isAxis_)
@@ -373,6 +399,19 @@ bool GestureReferee::HasFailRecognizer(int32_t touchId)
     CHECK_NULL_RETURN(scope, false);
 
     return scope->HasFailRecognizer();
+}
+
+bool GestureReferee::IsAnySucceedRecognizerExist(int32_t touchId)
+{
+    const auto& iter = gestureScopes_.find(touchId);
+    if (iter == gestureScopes_.end()) {
+        return false;
+    }
+
+    const auto& scope = iter->second;
+    CHECK_NULL_RETURN(scope, false);
+
+    return scope->IsAnySucceedRecognizerExist();
 }
 
 void GestureReferee::ForceCleanGestureReferee()
@@ -511,6 +550,11 @@ bool GestureReferee::HasGestureAccepted(size_t touchId) const
     const auto& scope = iter->second;
     CHECK_NULL_RETURN(scope, false);
     return scope->HasGestureAccepted();
+}
+
+bool GestureReferee::IsScopesEmpty() const
+{
+    return gestureScopes_.empty();
 }
 
 } // namespace OHOS::Ace::NG

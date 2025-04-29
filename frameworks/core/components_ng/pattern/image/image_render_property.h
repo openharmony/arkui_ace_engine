@@ -20,10 +20,15 @@
 #include "base/image/drawing_lattice.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/inspector_filter.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
+
+namespace RenderConstants {
+    constexpr float DEFAULT_HDR_BRIGHTNESS = 1.0f;
+} // namespace
 
 struct ImagePaintStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ImageResizableSlice, ImageResizableSlice);
@@ -37,6 +42,7 @@ struct ImagePaintStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SvgFillColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SmoothEdge, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DynamicMode, DynamicRangeMode);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(HdrBrightness, float);
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
         /* no fixed attr below, just return */
@@ -62,6 +68,7 @@ struct ImagePaintStyle {
             colorFilter += std::to_string(num) + " ";
         }
         json->PutExtAttr("colorFilter", colorFilter.c_str(), filter);
+        json->PutExtAttr("hdrBrightness", propHdrBrightness.value_or(RenderConstants::DEFAULT_HDR_BRIGHTNESS), filter);
     }
 };
 
@@ -80,6 +87,7 @@ public:
         renderProperty->propImagePaintStyle_ = CloneImagePaintStyle();
         renderProperty->propNeedBorderRadius_ = CloneNeedBorderRadius();
         renderProperty->propImageFit_ = CloneImageFit();
+        renderProperty->propImageMatrix_ = CloneImageMatrix();
         return renderProperty;
     }
 
@@ -109,10 +117,13 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, SvgFillColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, SmoothEdge, float, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, DynamicMode, DynamicRangeMode, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImagePaintStyle, HdrBrightness, float, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         ImagePaintStyle, ImageResizableSlice, ImageResizableSlice, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NeedBorderRadius, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderRadius, BorderRadiusProperty, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageFit, ImageFit, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageMatrix, Matrix4, PROPERTY_UPDATE_RENDER);
 };
 
 } // namespace OHOS::Ace::NG

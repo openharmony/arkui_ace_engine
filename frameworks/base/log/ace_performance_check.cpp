@@ -20,7 +20,7 @@
 #include "base/log/event_report.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
-
+#include "base/websocket/websocket_manager.h"
 namespace OHOS::Ace {
 namespace {
 constexpr int32_t BASE_YEAR = 1900;
@@ -32,12 +32,14 @@ constexpr char DEBUG_PATH[] = "entry/build/default/cache/default/default@Compile
 constexpr char NEW_PATH[] = "entry|entry|1.0.0|src/main/ets/";
 constexpr char TS_SUFFIX[] = ".ts";
 constexpr char ETS_SUFFIX[] = ".ets";
+constexpr char CHECK_RESULT[] = "{\"message_type\": \"SendArkPerformanceCheckResult\", \"performance_check_result\": ";
 } // namespace
 
 // ============================== survival interval of JSON files ============================================
 
 std::unique_ptr<JsonValue> AcePerformanceCheck::performanceInfo_ = nullptr;
 std::string AceScopedPerformanceCheck::currentPath_;
+std::vector<std::pair<int64_t, std::string>> AceScopedPerformanceCheck::records_;
 void AcePerformanceCheck::Start()
 {
     if (AceChecker::IsPerformanceCheckEnabled()) {
@@ -51,14 +53,19 @@ void AcePerformanceCheck::Stop()
     if (performanceInfo_) {
         LOGI("performance check stop");
         auto info = performanceInfo_->ToString();
-        // output info to json file
-        auto filePath = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/arkui_bestpractice.json";
-        std::unique_ptr<std::ostream> ss = std::make_unique<std::ofstream>(filePath);
-        CHECK_NULL_VOID(ss);
-        DumpLog::GetInstance().SetDumpFile(std::move(ss));
-        DumpLog::GetInstance().Print(info);
-        DumpLog::GetInstance().Reset();
-        AceChecker::NotifyCaution("AcePerformanceCheck::Stop, json data generated, store in " + filePath);
+        if (AceChecker::IsWebSocketCheckEnabled()) {
+            info = CHECK_RESULT + info + "}";
+            WebSocketManager::SendMessage(info);
+        } else {
+            // output info to json file
+            auto filePath = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/arkui_bestpractice.json";
+            std::unique_ptr<std::ostream> ss = std::make_unique<std::ofstream>(filePath);
+            CHECK_NULL_VOID(ss);
+            DumpLog::GetInstance().SetDumpFile(std::move(ss));
+            DumpLog::GetInstance().Print(info);
+            DumpLog::GetInstance().Reset();
+            AceChecker::NotifyCaution("AcePerformanceCheck::Stop, json data generated, store in " + filePath);
+        }
         performanceInfo_.reset(nullptr);
     }
 }
@@ -80,7 +87,8 @@ AceScopedPerformanceCheck::~AceScopedPerformanceCheck()
     }
     if (AcePerformanceCheck::performanceInfo_) {
         // convert micro time to ms with 1000.
-        RecordFunctionTimeout(time, name_);
+        std::pair recordInfo { time, name_ };
+        records_.push_back(recordInfo);
     }
 }
 
@@ -88,6 +96,11 @@ bool AceScopedPerformanceCheck::CheckIsRuleContainsPage(const std::string& ruleT
 {
     // check for the presence of rule json
     CHECK_NULL_RETURN(AcePerformanceCheck::performanceInfo_, false);
+    if (AceChecker::IsWebSocketCheckEnabled()) {
+        if (!CheckIsRuleWebsocket(ruleType)) {
+            return true;
+        }
+    }
     if (!AcePerformanceCheck::performanceInfo_->Contains(ruleType)) {
         AcePerformanceCheck::performanceInfo_->Put(ruleType.c_str(), JsonUtil::CreateArray(true));
         return false;
@@ -172,6 +185,7 @@ void AceScopedPerformanceCheck::RecordPerformanceCheckData(
             }
         }
     }
+    RecordFunctionTimeout();
     RecordPageNodeCountAndDepth(nodeMap.size(), maxDepth, pageNodeList, codeInfo);
     RecordForEachItemsCount(itemCount, foreachNodeMap, codeInfo);
     RecordFlexLayoutsCount(flexNodeList, codeInfo);
@@ -212,24 +226,28 @@ void AceScopedPerformanceCheck::RecordPageNodeCountAndDepth(
     ruleJson->Put(pageJson);
 }
 
-void AceScopedPerformanceCheck::RecordFunctionTimeout(int64_t time, const std::string& functionName)
+void AceScopedPerformanceCheck::RecordFunctionTimeout()
 {
-    if (time < AceChecker::GetFunctionTimeout()) {
-        return;
+    for (auto record : records_) {
+        if (record.first < AceChecker::GetFunctionTimeout()) {
+            continue;
+        }
+        auto codeInfo = GetCodeInfo(1, 1);
+        if (!codeInfo.sources.empty()) {
+            continue;
+        }
+        CheckIsRuleContainsPage("9902", codeInfo.sources);
+        auto eventTime = GetCurrentTime();
+        CHECK_NULL_VOID(AcePerformanceCheck::performanceInfo_);
+        auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9902");
+        auto pageJson = JsonUtil::Create(true);
+        pageJson->Put("eventTime", eventTime.c_str());
+        pageJson->Put("pagePath", codeInfo.sources.c_str());
+        pageJson->Put("functionName", record.second.c_str());
+        pageJson->Put("costTime", record.first);
+        ruleJson->Put(pageJson);
     }
-    auto codeInfo = GetCodeInfo(1, 1);
-    if (!codeInfo.sources.empty() && CheckIsRuleContainsPage("9902", codeInfo.sources)) {
-        return;
-    }
-    auto eventTime = GetCurrentTime();
-    CHECK_NULL_VOID(AcePerformanceCheck::performanceInfo_);
-    auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9902");
-    auto pageJson = JsonUtil::Create(true);
-    pageJson->Put("eventTime", eventTime.c_str());
-    pageJson->Put("pagePath", codeInfo.sources.c_str());
-    pageJson->Put("functionName", functionName.c_str());
-    pageJson->Put("costTime", time);
-    ruleJson->Put(pageJson);
+    records_.clear();
 }
 
 void AceScopedPerformanceCheck::RecordVsyncTimeout(
@@ -369,5 +387,17 @@ RefPtr<Framework::RevSourceMap> AceScopedPerformanceCheck::GetCurrentSourceMap()
         }
     }
     return nullptr;
+}
+
+bool AceScopedPerformanceCheck::CheckIsRuleWebsocket(const std::string& ruleType)
+{
+    if (AceChecker::GetCheckMessge().empty()) {
+        return false;
+    }
+
+    if (AceChecker::GetCheckMessge().find(ruleType, 0) != std::string::npos) {
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace

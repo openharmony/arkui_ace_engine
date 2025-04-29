@@ -16,9 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_MOUSE_EVENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_MOUSE_EVENT_H
 
+#include <vector>
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/offset.h"
 #include "base/mousestyle/mouse_style.h"
+#include "base/memory/ace_type.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -48,7 +50,8 @@ enum class MouseAction : int32_t {
     HOVER_EXIT,
     PULL_DOWN,
     PULL_MOVE,
-    PULL_UP
+    PULL_UP,
+    CANCEL
 };
 
 enum class AccessibilityHoverAction : int32_t {
@@ -85,10 +88,8 @@ enum class HoverEffectType : int32_t {
     UNKNOWN,
 };
 
-struct MouseEvent final {
+struct MouseEvent final : public PointerEvent {
     int32_t id = 0;
-    float x = 0.0f;
-    float y = 0.0f;
     float z = 0.0f;
     float deltaX = 0.0f;
     float deltaY = 0.0f;
@@ -96,23 +97,27 @@ struct MouseEvent final {
     float scrollX = 0.0f;
     float scrollY = 0.0f;
     float scrollZ = 0.0f;
-    float screenX = 0.0f;
-    float screenY = 0.0f;
+    float rawDeltaX = 0.0f;
+    float rawDeltaY = 0.0f;
+    std::vector<MouseButton> pressedButtonsArray;
+    bool mockFlushEvent = false;
     MouseAction action = MouseAction::NONE;
     MouseAction pullAction = MouseAction::NONE;
     MouseButton button = MouseButton::NONE_BUTTON;
     int32_t pressedButtons = 0; // combined by MouseButtons
-    TimeStamp time;
     int64_t deviceId = 0;
     int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
     SourceTool sourceTool = SourceTool::UNKNOWN;
-    std::shared_ptr<MMI::PointerEvent> pointerEvent;
+    std::shared_ptr<const MMI::PointerEvent> pointerEvent;
     int32_t touchEventId = 0;
     int32_t originalId = 0;
     std::vector<KeyCode> pressedKeyCodes_;
+    std::vector<MouseEvent> history;
+    WeakPtr<NG::FrameNode> node;
     bool isInjected = false;
     bool isPrivacyMode = false;
+    bool isMockWindowTransFlag = false;
 
     Offset GetOffset() const
     {
@@ -141,34 +146,48 @@ struct MouseEvent final {
         return static_cast<int32_t>(button) + MOUSE_BASE_ID + pointerId;
     }
 
+    int32_t GetTargetDisplayId() const
+    {
+        return targetDisplayId;
+    }
+
     MouseEvent CloneWith(float scale) const
     {
-        return { .x = x / scale,
-            .y = y / scale,
-            .z = z / scale,
-            .deltaX = deltaX / scale,
-            .deltaY = deltaY / scale,
-            .deltaZ = deltaZ / scale,
-            .scrollX = scrollX / scale,
-            .scrollY = scrollY / scale,
-            .scrollZ = scrollZ / scale,
-            .screenX = screenX / scale,
-            .screenY = screenY / scale,
-            .action = action,
-            .pullAction = pullAction,
-            .button = button,
-            .pressedButtons = pressedButtons,
-            .time = time,
-            .deviceId = deviceId,
-            .targetDisplayId = targetDisplayId,
-            .sourceType = sourceType,
-            .sourceTool = sourceTool,
-            .pointerEvent = pointerEvent,
-            .originalId = originalId,
-            .pressedKeyCodes_ = pressedKeyCodes_,
-            .isInjected = isInjected,
-            .isPrivacyMode = isPrivacyMode
-        };
+        if (NearEqual(scale, 0.f)) {
+            return {};
+        }
+        MouseEvent mouseEvent;
+        mouseEvent.id = id;
+        mouseEvent.x = x / scale;
+        mouseEvent.y = y / scale;
+        mouseEvent.z = z / scale;
+        mouseEvent.deltaX = deltaX / scale;
+        mouseEvent.deltaY = deltaY /  scale;
+        mouseEvent.deltaZ = deltaZ / scale;
+        mouseEvent.scrollX = scrollX /  scale;
+        mouseEvent.scrollY = scrollY /  scale;
+        mouseEvent.scrollZ = scrollZ / scale;
+        mouseEvent.screenX = screenX / scale;
+        mouseEvent.screenY = screenY / scale;
+        mouseEvent.action = action;
+        mouseEvent.pullAction = pullAction;
+        mouseEvent.button = button;
+        mouseEvent.pressedButtons = pressedButtons;
+        mouseEvent.time = time;
+        mouseEvent.deviceId = deviceId;
+        mouseEvent.targetDisplayId = targetDisplayId;
+        mouseEvent.sourceType = sourceType;
+        mouseEvent.sourceTool = sourceTool;
+        mouseEvent.pointerEvent = pointerEvent;
+        mouseEvent.originalId = originalId;
+        mouseEvent.pressedKeyCodes_ = pressedKeyCodes_;
+        mouseEvent.isInjected = isInjected;
+        mouseEvent.isPrivacyMode = isPrivacyMode;
+        mouseEvent.mockFlushEvent = mockFlushEvent;
+        mouseEvent.rawDeltaX = rawDeltaX;
+        mouseEvent.rawDeltaY = rawDeltaY;
+        mouseEvent.pressedButtonsArray = pressedButtonsArray;
+        return mouseEvent;
     }
 
     MouseEvent CreateScaleEvent(float scale) const
@@ -188,6 +207,8 @@ struct MouseEvent final {
             type = TouchType::UP;
         } else if (action == MouseAction::MOVE) {
             type = TouchType::MOVE;
+        } else if (action == MouseAction::CANCEL) {
+            type = TouchType::CANCEL;
         } else {
             type = TouchType::UNKNOWN;
         }
@@ -195,10 +216,7 @@ struct MouseEvent final {
         if (sourceType == SourceType::MOUSE) {
             pointId = GetPointerId(pointId);
         }
-        auto pointOriginalId = originalId;
-        if (sourceType == SourceType::MOUSE) {
-            pointOriginalId = GetId();
-        }
+        auto pointOriginalId = sourceType == SourceType::MOUSE ? GetId() : originalId;
         TouchPoint point { .id = pointId,
             .x = x,
             .y = y,
@@ -231,34 +249,8 @@ struct MouseEvent final {
         return event;
     }
 
-    MouseEvent operator-(const Offset& offset) const
-    {
-        return { .x = x - offset.GetX(),
-            .y = y - offset.GetY(),
-            .z = z,
-            .deltaX = deltaX,
-            .deltaY = deltaY,
-            .deltaZ = deltaZ,
-            .scrollX = scrollX,
-            .scrollY = scrollY,
-            .scrollZ = scrollZ,
-            .screenX = screenX - offset.GetX(),
-            .screenY = screenY - offset.GetY(),
-            .action = action,
-            .button = button,
-            .pressedButtons = pressedButtons,
-            .time = time,
-            .deviceId = deviceId,
-            .targetDisplayId = targetDisplayId,
-            .sourceType = sourceType,
-            .sourceTool = sourceTool,
-            .pointerEvent = pointerEvent,
-            .originalId = originalId,
-            .pressedKeyCodes_ = pressedKeyCodes_,
-            .isInjected = isInjected,
-            .isPrivacyMode = isPrivacyMode
-        };
-    }
+    MouseEvent operator-(const Offset& offset) const;
+    std::shared_ptr<MMI::PointerEvent> GetMouseEventPointerEvent() const;
 };
 
 class MouseInfo : public BaseEventInfo {
@@ -338,6 +330,33 @@ public:
         return pointerEvent_;
     }
 
+    void SetRawDeltaX(float rawDeltaX)
+    {
+        rawDeltaX_ = rawDeltaX;
+    }
+    float GetRawDeltaX()
+    {
+        return rawDeltaX_;
+    }
+
+    void SetRawDeltaY(float rawDeltaY)
+    {
+        rawDeltaY_ = rawDeltaY;
+    }
+    float GetRawDeltaY()
+    {
+        return rawDeltaY_;
+    }
+    
+    void SetPressedButtons(const std::vector<MouseButton>& pressedButtonsArray)
+    {
+        pressedButtonsArray_ = pressedButtonsArray;
+    }
+    std::vector<MouseButton> GetPressedButtons()
+    {
+        return pressedButtonsArray_;
+    }
+
 private:
     std::shared_ptr<MMI::PointerEvent> pointerEvent_;
     MouseButton button_ = MouseButton::NONE_BUTTON;
@@ -349,6 +368,9 @@ private:
     // current node which has the recognizer.
     Offset localLocation_;
     Offset screenLocation_;
+    float rawDeltaX_ = 0.0f;
+    float rawDeltaY_ = 0.0f;
+    std::vector<MouseButton> pressedButtonsArray_;
 };
 
 using HoverEffectFunc = std::function<void(bool)>;
@@ -360,6 +382,59 @@ class HoverInfo : public BaseEventInfo {
 public:
     HoverInfo() : BaseEventInfo("onHover") {}
     ~HoverInfo() override = default;
+
+    HoverInfo& SetGlobalLocation(const Offset& globalLocation)
+    {
+        globalLocation_ = globalLocation;
+        return *this;
+    }
+    HoverInfo& SetLocalLocation(const Offset& localLocation)
+    {
+        localLocation_ = localLocation;
+        return *this;
+    }
+
+    HoverInfo& SetScreenLocation(const Offset& screenLocation)
+    {
+        screenLocation_ = screenLocation;
+        return *this;
+    }
+
+    HoverInfo& SetMouseAction(MouseAction mouseAction)
+    {
+        mouseAction_ = mouseAction;
+        return *this;
+    }
+
+    const Offset& GetScreenLocation() const
+    {
+        return screenLocation_;
+    }
+
+    const Offset& GetLocalLocation() const
+    {
+        return localLocation_;
+    }
+
+    const Offset& GetGlobalLocation() const
+    {
+        return globalLocation_;
+    }
+
+    MouseAction GetMouseAction() const
+    {
+        return mouseAction_;
+    }
+
+private:
+    // global position at which the touch point contacts the screen.
+    Offset globalLocation_;
+    // Different from global location, The local location refers to the location of the contact point relative to the
+    // current node which has the recognizer.
+    Offset localLocation_;
+
+    Offset screenLocation_;
+    MouseAction mouseAction_ = MouseAction::NONE;
 };
 
 class AccessibilityHoverInfo : public BaseEventInfo {
@@ -425,6 +500,7 @@ private:
 };
 
 using OnHoverFunc = std::function<void(bool, HoverInfo& info)>;
+using OnHoverMoveFunc = std::function<void(HoverInfo& info)>;
 using OnHoverEventFunc = std::function<void(bool)>;
 
 using OnAccessibilityHoverFunc = std::function<void(bool, AccessibilityHoverInfo& info)>;
@@ -441,31 +517,7 @@ public:
         onMouseCallback_ = onMouseCallback;
     }
 
-    bool HandleMouseEvent(const MouseEvent& event)
-    {
-        if (!onMouseCallback_) {
-            return false;
-        }
-        MouseInfo info;
-        info.SetPointerEvent(event.pointerEvent);
-        info.SetButton(event.button);
-        info.SetAction(event.action);
-        info.SetPullAction(event.pullAction);
-        info.SetGlobalLocation(event.GetOffset());
-        Offset localLocation = Offset(
-            event.GetOffset().GetX() - coordinateOffset_.GetX(), event.GetOffset().GetY() - coordinateOffset_.GetY());
-        info.SetLocalLocation(localLocation);
-        info.SetScreenLocation(event.GetScreenOffset());
-        info.SetTimeStamp(event.time);
-        info.SetDeviceId(event.deviceId);
-        info.SetTargetDisplayId(event.targetDisplayId);
-        info.SetSourceDevice(event.sourceType);
-        info.SetSourceTool(event.sourceTool);
-        info.SetTarget(GetEventTarget().value_or(EventTarget()));
-        info.SetPressedKeyCodes(event.pressedKeyCodes_);
-        onMouseCallback_(info);
-        return info.IsStopPropagation();
-    }
+    bool HandleMouseEvent(const MouseEvent& event);
 
     bool DispatchEvent(const TouchEvent& point) override
     {
@@ -502,13 +554,42 @@ public:
         onAccessibilityHoverCallback_ = onAccessibilityHoverCallback;
     }
 
+    void SetPenHoverCallback(const OnHoverFunc& onPenHoverEventCallback)
+    {
+        onPenHoverEventCallback_ = onPenHoverEventCallback;
+    }
+
+    void SetPenHoverMoveCallback(const OnHoverMoveFunc& onPenHoverMoveEventCallback)
+    {
+        onPenHoverMoveEventCallback_ = onPenHoverMoveEventCallback;
+    }
+
     bool HandleHoverEvent(bool isHovered, const MouseEvent& event);
 
     void HandleAccessibilityHoverEvent(bool isHovered, const TouchEvent& event);
 
+    bool HandlePenHoverEvent(bool isHovered, const TouchEvent& event);
+
+    bool HandlePenHoverMoveEvent(const TouchEvent& event);
+
+    bool IsHoverTarget() const
+    {
+        return onHoverCallback_ != nullptr || onHoverEventCallback_ != nullptr;
+    }
+
     bool IsAccessibilityHoverTarget()
     {
         return onAccessibilityHoverCallback_ != nullptr;
+    }
+
+    bool IsPenHoverTarget() const
+    {
+        return onPenHoverEventCallback_ != nullptr;
+    }
+
+    bool IsPenHoverMoveTarget() const
+    {
+        return onPenHoverMoveEventCallback_ != nullptr;
     }
 
     bool HandleHoverEvent(bool isHovered)
@@ -531,10 +612,18 @@ public:
 
     AccessibilityHoverAction ConvertAccessibilityHoverAction(TouchType type);
 
+    std::optional<bool> GetLastHoverState() const
+    {
+        return lastHoverState_;
+    }
+
 private:
+    std::optional<bool> lastHoverState_;
     OnHoverEventFunc onHoverCallback_;
     OnHoverFunc onHoverEventCallback_;
     OnAccessibilityHoverFunc onAccessibilityHoverCallback_;
+    OnHoverFunc onPenHoverEventCallback_;
+    OnHoverMoveFunc onPenHoverMoveEventCallback_;
 };
 
 class HoverEffectTarget : public virtual TouchEventTarget {

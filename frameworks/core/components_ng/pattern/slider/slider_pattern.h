@@ -55,23 +55,14 @@ public:
                     CHECK_NULL_VOID(pattern);
                     pattern->UpdateImagePositionY(y);
                 });
+            sliderContentModifier_->SetHost(GetHost());
         }
+        InitAccessibilityVirtualNodeTask();
         sliderContentModifier_->SetUseContentModifier(UseContentModifier());
         auto overlayGlobalOffset = CalculateGlobalSafeOffset();
         std::pair<OffsetF, float> BubbleVertex = GetBubbleVertexPosition(circleCenter_, trackThickness_, blockSize_);
         SliderPaintMethod::TipParameters tipParameters { bubbleFlag_, BubbleVertex.first, overlayGlobalOffset };
-        if (!sliderTipModifier_ && bubbleFlag_) {
-            sliderTipModifier_ = AceType::MakeRefPtr<SliderTipModifier>([weak = WeakClaim(this)]() {
-                auto pattern = weak.Upgrade();
-                if (!pattern) {
-                    return std::pair<OffsetF, float>();
-                }
-                auto blockCenter = pattern->GetBlockCenter();
-                auto trackThickness = pattern->sliderContentModifier_->GetTrackThickness();
-                auto blockSize = pattern->sliderContentModifier_->GetBlockSize();
-                return pattern->GetBubbleVertexPosition(blockCenter, trackThickness, blockSize);
-            });
-        }
+
         auto textDirection = TextDirection::AUTO;
         auto layoutProperty = GetLayoutProperty<SliderLayoutProperty>();
         if (layoutProperty) {
@@ -131,7 +122,6 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     OffsetF CalculateGlobalSafeOffset();
     void UpdateValue(float value);
-    void OnVisibleChange(bool isVisible) override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     void SetBuilderFunc(SliderMakeCallback&& makeFunc)
@@ -152,7 +142,71 @@ public:
         return contentModifierNode_ != nullptr;
     }
 
+    void SetEnableHapticFeedback(bool value)
+    {
+        isEnableHaptic_ = value;
+    }
+
+    bool GetEnableHapticFeedback() const
+    {
+        return isEnableHaptic_;
+    }
+
     void SetSliderValue(double value, int32_t mode);
+    void InitAccessibilityVirtualNodeTask();
+    void SetIsAccessibilityOn(bool value)
+    {
+        isAccessibilityOn_ = value;
+    }
+    void PlayHapticFeedback(bool isShowSteps, float step, float oldValue);
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    void DumpInfo() override;
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    void SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
+    {
+        crownSensitivity_ = sensitivity;
+    }
+
+    CrownSensitivity GetDigitalCrownSensitivity()
+    {
+        return crownSensitivity_;
+    }
+#endif
+    void SetBubbleFlag(bool flag)
+    {
+        bubbleFlag_ = flag;
+    }
+    
+    RefPtr<SliderContentModifier> GetSliderContentModifier() const
+    {
+        return sliderContentModifier_;
+    }
+
+    bool IsSliderVisible();
+    SliderContentModifier::Parameters UpdateContentParameters();
+    std::pair<OffsetF, float> GetBubbleVertexPosition(
+        const OffsetF& blockCenter, float trackThickness, const SizeF& blockSize);
+    const SizeF& GetBlockSize() const
+    {
+        return blockSize_;
+    }
+
+    float GetTrackThickness() const
+    {
+        return trackThickness_;
+    }
+
+    const bool& GetBubbleFlag() const
+    {
+        return bubbleFlag_;
+    }
+    void CreateTipToMountRoot();
+    void RemoveTipFromRoot();
+    void RefreshTipNode();
+    void OnFinishEventTipSize();
+    void CalculateOffset();
+    void MountToNavigation(RefPtr<FrameNode>& tipNode);
 
 private:
     void OnAttachToFrameNode() override;
@@ -171,6 +225,8 @@ private:
     void UpdateBubbleSizeAndLayout();
     void UpdateBubble();
     void InitializeBubble();
+    void UpdatePaintRect(RefPtr<SliderTheme> theme, SliderModel::SliderMode& sliderMode, RoundRect& paintRect,
+        const RectF& rect, float rectRadius);
 
     bool AtMousePanArea(const Offset& offsetInFrame);
     bool AtTouchPanArea(const Offset& offsetInFrame);
@@ -187,11 +243,11 @@ private:
     void InitMouseEvent(const RefPtr<InputEventHub>& inputEventHub);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);
+    void HandleEnabled();
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandlingGestureStart(const GestureEvent& info);
     void HandlingGestureEvent(const GestureEvent& info);
     void HandledGestureEvent();
-    void InitWindowSizeChanged(const RefPtr<FrameNode>& host);
 
     void UpdateValueByLocalLocation(const std::optional<Offset>& localLocation);
     void FireChangeEvent(int32_t mode);
@@ -203,8 +259,61 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState();
     bool MoveStep(int32_t stepCount);
+    void InitHapticController();
+#ifdef SUPPORT_DIGITAL_CROWN
+    void InitDigitalCrownEvent(const RefPtr<FocusHub>& focusHub)
+    {
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto sliderTheme = pipeline->GetTheme<SliderTheme>();
+        CHECK_NULL_VOID(sliderTheme);
+        crownDisplayControlRatio_ = sliderTheme->GetCrownDisplayControlRatio();
 
-    bool IsSliderVisible();
+        auto onCrownEvent = [weak = WeakClaim(this)](const CrownEvent& event) -> bool {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_RETURN(pattern, false);
+            pattern->HandleCrownEvent(event);
+            return true;
+        };
+        focusHub->SetOnCrownEventInternal(std::move(onCrownEvent));
+    }
+    void HandleCrownEvent(const CrownEvent& event)
+    {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT,
+            "slider HandleCrownEvent event.action %{public}d event.degree %{public}f",
+            event.action, event.degree);
+        double mainDelta = GetCrownRotatePx(event);
+        switch (event.action) {
+            case CrownAction::BEGIN:
+                crownMovingLength_ = valueRatio_ * sliderLength_;
+                crownEventNum_ = 0;
+                reachBoundary_ = false;
+                HandleCrownAction(mainDelta);
+                timeStampPre_ = GetCurrentTimestamp();
+                UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                FireChangeEvent(SliderChangeMode::Begin);
+                OpenTranslateAnimation(SliderStatus::MOVE);
+                break;
+            case CrownAction::UPDATE:
+                HandleCrownAction(mainDelta);
+                StartVibrateFeedback();
+                UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                FireChangeEvent(SliderChangeMode::Moving);
+                OpenTranslateAnimation(SliderStatus::MOVE);
+                break;
+            case CrownAction::END:
+            default:
+                bubbleFlag_ = false;
+                UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                FireChangeEvent(SliderChangeMode::End);
+                CloseTranslateAnimation();
+                break;
+        }
+    }
+    double GetCrownRotatePx(const CrownEvent& event) const;
+    void HandleCrownAction(double mainDelta);
+    void StartVibrateFeedback();
+#endif
     void RegisterVisibleAreaChange();
     void OnWindowHide() override;
     void OnWindowShow() override;
@@ -213,7 +322,7 @@ private:
 
     void OpenTranslateAnimation(SliderStatus status);
     void CloseTranslateAnimation();
-    SliderContentModifier::Parameters UpdateContentParameters();
+
     void GetSelectPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
     void GetBackgroundPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
     void GetCirclePosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
@@ -221,8 +330,7 @@ private:
     void LayoutImageNode();
     void UpdateImagePositionX(float centerX);
     void UpdateImagePositionY(float centerY);
-    std::pair<OffsetF, float> GetBubbleVertexPosition(
-        const OffsetF& blockCenter, float trackThickness, const SizeF& blockSize);
+
     void SetAccessibilityAction();
     void UpdateTipState();
     void OnIsFocusActiveUpdate(bool isFocusActive);
@@ -233,14 +341,15 @@ private:
     RefPtr<FrameNode> BuildContentModifierNode();
     float GetValueInValidRange(const RefPtr<SliderPaintProperty>& paintProperty, float value, float min, float max);
     void UpdateToValidValue();
+    void InitSliderAccessibilityEnabledRegister();
     void AccessibilityVirtualNodeRenderTask();
+    bool CheckCreateAccessibilityVirtualNode();
     void InitAccessibilityHoverEvent();
-    void HandleAccessibilityHoverEvent(bool state, const AccessibilityHoverInfo& info);
     bool InitAccessibilityVirtualNode();
     void ModifyAccessibilityVirtualNode();
     void AddStepPointsAccessibilityVirtualNode();
-    void HandleTextOnAccessibilityFocusCallback();
     void UpdateStepAccessibilityVirtualNode();
+    void UpdateParentNodeSize();
     std::string GetPointAccessibilityTxt(uint32_t pointIndex, float stepRatio, float min, float max);
     uint32_t GetCurrentStepIndex();
     SizeF GetStepPointAccessibilityVirtualNodeSize();
@@ -249,6 +358,10 @@ private:
         const RefPtr<FrameNode>& pointNode, uint32_t index, bool isClickAbled, bool reverse);
     void SetStepPointAccessibilityVirtualNode(
         const RefPtr<FrameNode>& pointNode, const SizeF& size, const PointF& point, const std::string& txt);
+    void SendAccessibilityValueEvent(int32_t mode);
+    void ClearSliderVirtualNode();
+    void InitOrRefreshSlipFactor();
+    RefPtr<PanEvent> CreatePanEvent();
 
     std::optional<SliderMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
@@ -264,6 +377,7 @@ private:
     {
         return skipGestureEvents_;
     }
+    void DumpSubInfo(RefPtr<SliderPaintProperty> paintProperty);
 
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };
@@ -284,7 +398,6 @@ private:
     bool panMoveFlag_ = false;
     bool hasVisibleChangeRegistered_ = false;
     bool isVisibleArea_ = true;
-    bool isVisible_ = true;
     bool isShow_ = true;
     SliderModelNG::SliderInteraction sliderInteractionMode_ = SliderModelNG::SliderInteraction::SLIDE_AND_CLICK;
     bool allowDragEvents_ = true;
@@ -301,6 +414,15 @@ private:
     float trackThickness_ = 0.0f;
     SizeF blockHotSize_;
     SizeF blockSize_;
+#ifdef SUPPORT_DIGITAL_CROWN
+    CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
+    double crownDisplayControlRatio_ = 1.0;
+    double crownMovingLength_ = 0.0;
+    int32_t crownEventNum_ = 0;
+    bool reachBoundary_ = false;
+    int64_t timeStampCur_ = 0;
+    int64_t timeStampPre_ = 0;
+#endif
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ClickEvent> clickListener_;
@@ -309,6 +431,7 @@ private:
     RefPtr<InputEvent> hoverEvent_;
 
     RefPtr<SliderContentModifier> sliderContentModifier_;
+    bool isTouchUpFlag_ = false;
 
     // tip Parameters
     bool bubbleFlag_ = false;
@@ -317,12 +440,23 @@ private:
     RefPtr<FrameNode> imageFrameNode_;
     std::function<void(bool)> isFocusActiveUpdateEvent_;
     bool isFocusActive_ = false;
+    SliderModel::SliderMode sliderMode_ = SliderModel::SliderMode::OUTSET;
+    bool isAccessibilityOn_ = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
 
+    std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
     RefPtr<FrameNode> parentAccessibilityNode_;
     std::vector<RefPtr<FrameNode>> pointAccessibilityNodeVec_;
     std::vector<GestureEventFunc> pointAccessibilityNodeEventVec_;
     bool isInitAccessibilityVirtualNode_ = false;
-
+    uint64_t lastSendPostValueTime_ = 0;
+    float accessibilityValue_ = 0.0f;
+    bool isEnableHaptic_ = true;
+    bool hapticApiEnabled = false;
+    double slipfactor_ = 0;
+    RefPtr<FrameNode> sliderTipNode_ = nullptr;
+    RefPtr<UINode> navigationNode_ = nullptr;
+    double xLastSlider_ = 0.0f;
+    double yLastSlider_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(SliderPattern);
 };
 } // namespace OHOS::Ace::NG

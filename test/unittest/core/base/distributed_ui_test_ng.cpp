@@ -24,6 +24,7 @@
 
 #include "base/json/node_object.h"
 #include "core/components_ng/base/distributed_ui.h"
+#include "core/components_ng/pattern/text_field/text_component_decorator.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -477,5 +478,21 @@ HWTEST_F(DistributedUiTestNg, DistributedUiTestNg011, TestSize.Level1)
     EXPECT_EQ(distributedUI.pendingUpdates_.size() == 1, true);
     distributedUI.ApplyOneUpdate();
     EXPECT_EQ(distributedUI.pendingUpdates_.size() == 0, true);
+}
+
+/**
+ * @tc.name: DistributedUiTestNg012
+ * @tc.desc: RestoreUITreeInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedUiTestNg, DistributedUiTestNg012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    SerializeableObjectArray array;
+    DistributedUI distributedUI;
+    distributedUI.RestoreUITreeInner(array);
+    EXPECT_EQ(distributedUI.sinkPageChildren_.empty(), true);
 }
 } // namespace OHOS::Ace::NG

@@ -22,29 +22,21 @@
 #include "core/components_ng/pattern/shape/rect_model_ng.h"
 
 namespace OHOS::Ace {
-
-std::unique_ptr<RectModel> RectModel::instance_ = nullptr;
-std::mutex RectModel::mutex_;
-
 RectModel* RectModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::RectModelNG());
+    static NG::RectModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::RectModelNG());
-            } else {
-                instance_.reset(new Framework::RectModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::RectModelNG instance;
+        return &instance;
+    } else {
+        static Framework::RectModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
-
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {

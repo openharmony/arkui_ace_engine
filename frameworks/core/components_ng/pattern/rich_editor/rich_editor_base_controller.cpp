@@ -38,11 +38,20 @@ int32_t RichEditorBaseController::GetCaretOffset()
     return position;
 }
 
+RectF RichEditorBaseController::GetCaretRect()
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(richEditorPattern, RectF(-1, -1, -1, -1));
+    return richEditorPattern->GetCaretRelativeRect();
+}
+
 bool RichEditorBaseController::SetCaretOffset(int32_t caretPosition)
 {
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(richEditorPattern, false);
-    return richEditorPattern->SetCaretOffset(caretPosition);
+    auto result = richEditorPattern->SetCaretOffset(caretPosition);
+    richEditorPattern->ForceTriggerAvoidOnCaretChange(true);
+    return result;
 }
 
 void RichEditorBaseController::SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle,
@@ -87,6 +96,7 @@ void RichEditorBaseController::SetSelection(
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_VOID(richEditorPattern);
     richEditorPattern->SetSelection(selectionStart, selectionEnd, options, isForward);
+    richEditorPattern->ForceTriggerAvoidOnCaretChange();
 }
 
 const PreviewTextInfo RichEditorBaseController::GetPreviewTextInfo() const
@@ -94,5 +104,20 @@ const PreviewTextInfo RichEditorBaseController::GetPreviewTextInfo() const
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(richEditorPattern, PreviewTextInfo());
     return richEditorPattern->GetPreviewTextInfo();
+}
+
+ColorMode RichEditorBaseController::GetColorMode()
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(richEditorPattern, ColorMode::COLOR_MODE_UNDEFINED);
+    return richEditorPattern->GetColorMode();
+}
+
+RefPtr<NG::RichEditorTheme> RichEditorBaseController::GetTheme()
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(richEditorPattern, {});
+    auto theme = richEditorPattern->GetTheme<NG::RichEditorTheme>();
+    return theme;
 }
 } // namespace OHOS::Ace::NG

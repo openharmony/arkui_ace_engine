@@ -25,10 +25,7 @@
 #include "base/geometry/shape.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -179,6 +176,7 @@ ArkUINativeModuleValue RenderNodeBridge::CreateRenderNode(ArkUIRuntimeCallInfo* 
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = NG::FrameNode::GetOrCreateFrameNode(
         V2::RENDER_NODE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NG::RenderNodePattern>(); });
+    frameNode->SetIsArkTsRenderNode(true);
     RenderNodeBridge::SetOnDraw(frameNode, runtimeCallInfo);
     return NativeUtilsBridge::CreateStrongRef(vm, frameNode);
 }
@@ -204,6 +202,14 @@ void RenderNodeBridge::FireDrawCallback(EcmaVM* vm, JsWeak<panda::CopyableGlobal
         panda::NumberRef::New(vm, static_cast<double>(PipelineBase::Px2VpWithCurrentDensity(context.width)))
     };
     auto sizeObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keysOfSize), keysOfSize, valuesOfSize);
+
+    Local<JSValueRef> valuesOfSizeInPixel[] = {
+        panda::NumberRef::New(vm, static_cast<double>(context.height)),
+        panda::NumberRef::New(vm, static_cast<double>(context.width))
+    };
+    auto sizeInPixelObj =
+        panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keysOfSize), keysOfSize, valuesOfSizeInPixel);
+
     auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, &context.canvas);
     OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
     napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
@@ -213,8 +219,8 @@ void RenderNodeBridge::FireDrawCallback(EcmaVM* vm, JsWeak<panda::CopyableGlobal
     }
 
     auto jsCanvasVal = NapiValueToLocalValue(jsCanvas);
-    Local<JSValueRef> values[] = { sizeObj, jsCanvasVal };
-    const char* keys[] = { "size", "canvas" };
+    Local<JSValueRef> values[] = { sizeObj, sizeInPixelObj, jsCanvasVal };
+    const char* keys[] = { "size", "sizeInPixel", "canvas" };
     auto contextObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     contextObj->SetNativePointerFieldCount(vm, 1);
     JSValueWrapper valueWrapper = contextObj;

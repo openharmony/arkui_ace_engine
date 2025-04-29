@@ -12,13 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 #include "base/subwindow/subwindow_manager.h"
+#include "core/common/ace_engine.h"
 #include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 
-#include "core/components_ng/event/click_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -26,12 +25,34 @@ void ActionSheetModelNG::ShowActionSheet(const DialogProperties& arg)
 {
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
+
+    auto isSubContainer = container->IsSubContainer();
+    auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
+    if (!expandDisplay && isSubContainer && arg.isShowInSubWindow) {
+        TAG_LOGW(AceLogTag::ACE_DIALOG, "subwindow can not show actionSheet in subwindow");
+        return;
+    }
+
+    auto currentId = Container::CurrentId();
+    if (expandDisplay && isSubContainer) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+        container = AceEngine::Get().GetContainer(currentId);
+        CHECK_NULL_VOID(container);
+    }
+    ContainerScope scope(currentId);
+
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
+    if (arg.dialogLevelMode == LevelMode::EMBEDDED) {
+        auto embeddedOverlay = NG::DialogManager::GetEmbeddedOverlay(arg.dialogLevelUniqueId, context);
+        if (embeddedOverlay) {
+            overlayManager = embeddedOverlay;
+        }
+    }
     RefPtr<NG::FrameNode> dialog;
     if (arg.isShowInSubWindow) {
         dialog = SubwindowManager::GetInstance()->ShowDialogNG(arg, nullptr);
@@ -50,9 +71,7 @@ void ActionSheetModelNG::ShowActionSheet(const DialogProperties& arg)
         dialog = overlayManager->ShowDialog(arg, nullptr, false);
         CHECK_NULL_VOID(dialog);
     }
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    UiSessionManager::GetInstance().ReportComponentChangeEvent("onVisibleChange", "show");
-#endif
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "show");
 }
 
 void ActionSheetModelNG::SetAction(GestureEventFunc&& eventFunc, ActionSheetInfo& sheetInfo)
@@ -65,8 +84,8 @@ void ActionSheetModelNG::SetCancel(std::function<void()>&& eventFunc, DialogProp
     arg.onCancel = eventFunc;
 }
 
-void ActionSheetModelNG::SetOnWillDismiss(std::function<void(const int32_t& info)>&& onWillDismissFunc,
-    DialogProperties& arg)
+void ActionSheetModelNG::SetOnWillDismiss(std::function<void(const int32_t& info,
+    const int32_t& instanceId)>&& onWillDismissFunc, DialogProperties& arg)
 {
     arg.onWillDismiss = std::move(onWillDismissFunc);
 }

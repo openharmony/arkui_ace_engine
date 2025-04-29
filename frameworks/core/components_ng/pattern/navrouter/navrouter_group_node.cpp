@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
 
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -40,9 +38,9 @@ void NavRouterGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t sl
         auto navDestinationNode = AceType::DynamicCast<FrameNode>(child);
         CHECK_NULL_VOID(navDestinationNode);
         auto navDestinationEventHub =
-            AceType::DynamicCast<NavDestinationEventHub>(navDestinationNode->GetEventHub<EventHub>());
+            AceType::DynamicCast<NavDestinationEventHub>(navDestinationNode->GetOrCreateEventHub<EventHub>());
         CHECK_NULL_VOID(navDestinationEventHub);
-        auto eventHub = GetEventHub<NavRouterEventHub>();
+        auto eventHub = GetOrCreateEventHub<NavRouterEventHub>();
         CHECK_NULL_VOID(eventHub);
         navDestinationEventHub->SetOnStateChange(eventHub->GetOnStateChange());
         return;
@@ -108,7 +106,7 @@ void NavRouterGroupNode::ProcessDestinationChangeEvent()
         CHECK_NULL_VOID(navRouter);
         navRouter->AddNavDestinationToNavigation();
     };
-    auto eventHub = GetEventHub<NavRouterEventHub>();
+    auto eventHub = GetOrCreateEventHub<NavRouterEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDestinationChange(std::move(onDestinationChange));
 }
@@ -151,7 +149,7 @@ void NavRouterGroupNode::AddNavDestinationToNavigation()
         }
 
         navigationPattern->AddNavDestinationNode(name, uiNode, navRouteMode, routeInfo);
-        auto navRouterEventHub = GetEventHub<NavRouterEventHub>();
+        auto navRouterEventHub = GetOrCreateEventHub<NavRouterEventHub>();
         CHECK_NULL_VOID(navRouterEventHub);
         if (uiNode) {
             navigationPattern->AddOnStateChangeItem(uiNode->GetId(), navRouterEventHub->GetOnStateChange());
@@ -161,6 +159,7 @@ void NavRouterGroupNode::AddNavDestinationToNavigation()
     } else if (navDestination) {
         auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(navDestinationPattern);
+        navDestination->SetFromNavrouterAndNoRouteInfo(true);
         auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
         if (shallowBuilder && navRouteMode != NavRouteMode::PUSH) {
             shallowBuilder->MarkIsExecuteDeepRenderDone(false);
@@ -175,6 +174,7 @@ void NavRouterGroupNode::AddNavDestinationToNavigation()
         navigationPattern->AddNavDestinationNode(name, navDestination, navRouteMode);
     }
     if (navDestination) {
+        navDestination->SetInCurrentStack(true);
         auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
         navDestinationPattern->SetNavigationId(navigationNode->GetInspectorId().value_or(""));
     }

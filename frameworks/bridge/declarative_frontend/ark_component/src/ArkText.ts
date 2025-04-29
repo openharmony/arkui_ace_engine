@@ -683,6 +683,40 @@ class TextSelectableModifier extends ModifierWithKey<TextSelectableMode> {
   }
 }
 
+class TextCaretColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textCaretColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetCaretColor(node);
+    } else {
+      getUINativeModule().text.setCaretColor(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextSelectedBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textSelectedBackgroundColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetSelectedBackgroundColor(node);
+    } else {
+      getUINativeModule().text.setSelectedBackgroundColor(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextDataDetectorConfigModifier extends ModifierWithKey<TextDataDetectorConfig> {
   constructor(value: TextDataDetectorConfig) {
     super(value);
@@ -773,6 +807,55 @@ class TextHalfLeadingModifier extends ModifierWithKey<boolean> {
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textEnableHapticFeedback');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetEnableHapticFeedback(node);
+    } else {
+      getUINativeModule().text.setEnableHapticFeedback(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextMarqueeOptionsModifier extends ModifierWithKey<MarqueeOptions> {
+  constructor(value: MarqueeOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textMarqueeOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetMarqueeOptions(node);
+    } else {
+      getUINativeModule().text.setMarqueeOptions(node, this.value.start, this.value.fromStart, this.value.step,
+        this.value.loop, this.value.delay, this.value.fadeout, this.value.marqueeStartPolicy);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextOnMarqueeStateChangeModifier extends ModifierWithKey<(state: MarqueeState) => void> {
+  constructor(value: (state: MarqueeState) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textOnMarqueeStateChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetOnMarqueeStateChange(node);
+    } else {
+      getUINativeModule().text.setOnMarqueeStateChange(node, this.value);
+    }
   }
 }
 
@@ -930,6 +1013,15 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextSelectableModifier.identity, TextSelectableModifier, value);
     return this;
   }
+  caretColor(value: ResourceColor): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextCaretColorModifier.identity, TextCaretColorModifier, value);
+    return this;
+  }
+  selectedBackgroundColor(value: ResourceColor): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextSelectedBackgroundColorModifier.identity,
+      TextSelectedBackgroundColorModifier, value);
+    return this;
+  }
   ellipsisMode(value: EllipsisMode): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextEllipsisModeModifier.identity, TextEllipsisModeModifier, value);
     return this;
@@ -960,6 +1052,20 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   halfLeading(value: boolean): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextHalfLeadingModifier.identity,
       TextHalfLeadingModifier, value);
+    return this;
+  }
+  enableHapticFeedback(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextEnableHapticFeedbackModifier.identity, TextEnableHapticFeedbackModifier, value);
+    return this;
+  }
+  marqueeOptions(value: MarqueeOptions): this {
+    modifierWithKey(
+      this._modifiersWithKeys, TextMarqueeOptionsModifier.identity, TextMarqueeOptionsModifier, value);
+    return this;
+  }
+  onMarqueeStateChange(callback: (state: MarqueeState) => void): this {
+    modifierWithKey(
+      this._modifiersWithKeys, TextOnMarqueeStateChangeModifier.identity, TextOnMarqueeStateChangeModifier, callback);
     return this;
   }
 }

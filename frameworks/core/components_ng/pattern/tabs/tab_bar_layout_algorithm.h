@@ -70,6 +70,11 @@ public:
         targetIndex_ = targetIndex;
     }
 
+    void SetFocusIndex(std::optional<int32_t> focusIndex)
+    {
+        focusIndex_ = focusIndex;
+    }
+
     void SetVisibleItemPosition(std::map<int32_t, ItemInfo> visibleItemPosition)
     {
         visibleItemPosition_ = visibleItemPosition;
@@ -85,22 +90,23 @@ public:
         canOverScroll_ = canOverScroll;
     }
 
-    void SetLastFontScale(float lastFontScale)
+    float GetBarGridMargin()
     {
-        lastFontScale_ = lastFontScale;
+        return barGridMargin_;
     }
 
 private:
     void MeasureFixedMode(LayoutWrapper* layoutWrapper, SizeF frameSize);
     void MeasureScrollableMode(LayoutWrapper* layoutWrapper, SizeF frameSize);
     LayoutConstraintF GetChildConstraint(LayoutWrapper* layoutWrapper, SizeF& frameSize);
-    void LayoutChildren(LayoutWrapper* layoutWrapper, const SizeF& frameSize, OffsetF& childOffset);
+    void LayoutChildren(LayoutWrapper* layoutWrapper, const SizeF& contentSize, OffsetF& childOffset);
     void LayoutMask(LayoutWrapper* layoutWrapper, const std::map<int32_t, OffsetF>& childOffsetDelta);
     void HandleSpaceBetweenOrCenterLayoutStyle(LayoutWrapper* layoutWrapper);
     void HandleAlwaysAverageSplitLayoutStyle(LayoutWrapper* layoutWrapper);
     void MeasureVisibleItems(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint);
     void MeasureTargetIndex(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint);
     void MeasureJumpIndex(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint);
+    void MeasureFocusIndex(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint);
     void MeasureWithOffset(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint);
     void AdjustPosition(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint,
         int32_t startIndex, int32_t endIndex, float startPos, float endPos);
@@ -113,23 +119,22 @@ private:
     void MeasureMaxHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint);
     GridSizeType GetGridSizeType(const SizeF& frameSize) const;
     float GetGridWidth(const BarGridColumnOptions& option, const SizeF& frameSize, int32_t columns) const;
-    float ApplyBarGridAlign(const RefPtr<TabBarLayoutProperty>& layoutProperty, const SizeF& frameSize) const;
+    float ApplyBarGridAlign(const RefPtr<TabBarLayoutProperty>& layoutProperty, const SizeF& contentSize) const;
     void ApplySymmetricExtensible(LayoutWrapper* layoutWrapper, float allocatedWidth);
     void ApplyLayoutMode(LayoutWrapper* layoutWrapper, float allocatedWidth);
-    float GetContentMainSize(LayoutWrapper* layoutWrapper, const SizeF& frameSize) const;
+    float GetContentMainSize(LayoutWrapper* layoutWrapper, const SizeF& contentSize);
     void CalculateItemWidthsForSymmetricExtensible(LayoutWrapper* layoutWrapper,
         const std::vector<float>& spaceRequests, const std::vector<float>& leftBuffer,
         const std::vector<float>& rightBuffer, float allocatedWidth);
-    void UpdateHorizontalPadding(LayoutWrapper* layoutWrapper, float horizontalPadding) const;
     void MeasureMask(LayoutWrapper* layoutWrapper) const;
     void UpdateChildMarginProperty(float rightMargin, float leftMargin, const RefPtr<LayoutWrapper>& childWrapper);
-    void SetTabBarMargin(RefPtr<LayoutWrapper> childWrapper, int index);
-    int32_t CalcTabBarContentLetterNums(LayoutWrapper* layoutWrapper);
-    bool IsSetMinMaxFontSize(
-        LayoutWrapper* layoutWrapper, RefPtr<PipelineContext> pipelineContext);
-    void tabBarFixAging(LayoutWrapper* layoutWrapper, SizeT<float>& frameSize);
-    double GetTabBarMaxFontSize(LayoutWrapper* layoutWrapper);
-    void SetFixAgingFrameSize(LayoutWrapper* layoutWrapper, SizeT<float>& frameSize);
+    bool GetBarAdaptiveHeight(LayoutWrapper* layoutWrapper);
+    bool NeedAdaptForAging(RefPtr<FrameNode> host);
+    void SetTabBarMargin(RefPtr<LayoutWrapper> layoutWrapper, int32_t index);
+    void UpdateMaxLines(LayoutWrapper* layoutWrapper, int32_t index);
+    float GetCurrentOffset(RefPtr<TabBarLayoutProperty>& layoutProperty, ScrollableBarModeOptions& layoutStyle);
+    void CheckBorderAndPadding(SizeF& frameSize, const PaddingPropertyF& padding);
+
     bool isRTL_ = false;
     Axis axis_ = Axis::NONE;
     TabBarStyle tabBarStyle_;
@@ -140,25 +145,20 @@ private:
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
     float currentDelta_ = 0.0f;
+    float barGridMargin_ = 0.0f;
+    float verticalPadding_ = 0.0f;
     std::map<int32_t, float> visibleItemLength_;
     std::map<int32_t, ItemInfo> visibleItemPosition_;
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;
+    std::optional<int32_t> focusIndex_;
     std::optional<float> maxHeight_;
     std::optional<float> defaultHeight_;
     bool isBarAdaptiveHeight_ = false;
     bool useItemWidth_ = true;
     bool canOverScroll_ = false;
-    float bigFontSizeScale_ = 0.0f;
-    float largeFontSizeScale_ = 0.0f;
-    float maxFontSizeScale_ = 0.0f;
-    float originFontSizeScale_ = 0.0f;
     Dimension leftAndRightMargin_ = 0.0_vp;
     Dimension indicatorStyleMarginTop_ = 0.0_vp;
-    float fontscale_ = 0.0f;
-    float lastFontScale_ = 0.0f;
-    std::optional<float> thirdLargeFontHeight_;
-    float thirdLargeFontSizeScale_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

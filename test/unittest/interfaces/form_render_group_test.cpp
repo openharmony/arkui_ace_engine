@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "interfaces/inner_api/form_render/include/form_renderer_group.h"
 #undef private
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "configuration.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -234,6 +235,23 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_011, TestSize.Level1)
     auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
     FormRendererGroup group(nullptr, nullptr, eventHandler);
     GTEST_LOG_(INFO) << "FormRenderGroupTest_011 end";
+}
+
+/**
+* @tc.name: FormRenderGroupTest_012
+* @tc.desc: Test SetVisibleChange() function.
+* @tc.type: FUNC
+*/
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_012, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_012 start";
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_012");
+    ASSERT_TRUE(eventRunner);
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto group = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
+    EXPECT_TRUE(group);
+    group->SetVisibleChange(true);
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_012 end";
 }
 
 /**
@@ -572,5 +590,34 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_023, TestSize.Level1)
     compIdPair = group->GetOrderedAndCurrentCompIds();
     EXPECT_EQ(compId2, compIdPair.second);
     GTEST_LOG_(INFO) << "FormRenderGroupTest_023 end";
+}
+
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_024, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_024 start";
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_024");
+    ASSERT_TRUE(eventRunner);
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto group = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
+    EXPECT_TRUE(group);
+    OHOS::AAFwk::Want want;
+    OHOS::AppExecFwk::FormJsInfo formJsInfo;
+    formJsInfo.formId = 1;
+    std::string compId = "comp1";
+    want.SetParam(FORM_RENDERER_COMP_ID, compId);
+    want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, 1.0);
+    want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, 1.0);
+    want.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, 1.0f);
+    group->AddForm(want, formJsInfo);
+    auto requestWant = group->GetAllRendererFormRequests().begin()->want;
+    EXPECT_EQ(1.0, requestWant.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, 0.0f));
+    EXPECT_EQ(1.0, requestWant.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, 0.0f));
+    EXPECT_EQ(1.0, requestWant.GetFloatParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, 0.0f));
+    group->UpdateFormSizeOfFormRequests(2.0, 2.0, 2.0f);
+    auto requestWant2 = group->GetAllRendererFormRequests().begin()->want;
+    EXPECT_EQ(2.0, requestWant2.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, 0.0f));
+    EXPECT_EQ(2.0, requestWant2.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, 0.0f));
+    EXPECT_EQ(2.0, requestWant2.GetFloatParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, 0.0f));
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_024 end";
 }
 }

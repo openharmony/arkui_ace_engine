@@ -14,13 +14,7 @@
  */
 #include "core/interfaces/native/node/navigation_modifier.h"
 
-#include "base/geometry/calc_dimension.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t NAV_BAR_POSITION_RANGE_MODIFIER = 1;
@@ -28,18 +22,32 @@ constexpr int32_t NAVIGATION_MODE_RANGE_MODIFIER = 2;
 constexpr int32_t DEFAULT_NAV_BAR_WIDTH_FOR_MODIFIER = 240;
 constexpr int32_t DEFAULT_SAFE_AREA_TYPE = 0b1;
 constexpr int32_t DEFAULT_SAFE_AREA_EDGE = 0b1111;
-void SetHideToolBar(ArkUINodeHandle node, ArkUI_Bool hide)
+void SetHideToolBar(ArkUINodeHandle node, ArkUI_Bool hide, ArkUI_Bool animated)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NavigationModelNG::SetHideToolBar(frameNode, hide);
+    NavigationModelNG::SetHideToolBar(frameNode, hide, animated);
 }
 
 void ResetHideToolBar(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NavigationModelNG::SetHideToolBar(frameNode, false);
+    NavigationModelNG::SetHideToolBar(frameNode, false, false);
+}
+
+void SetEnableModeChangeAnimation(ArkUINodeHandle node, ArkUI_Bool isEnable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetEnableModeChangeAnimation(frameNode, isEnable);
+}
+
+void ResetEnableModeChangeAnimation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetEnableModeChangeAnimation(frameNode, true);
 }
 
 void SetMinContentWidth(ArkUINodeHandle node, ArkUI_Float32 value, int unit)
@@ -206,18 +214,18 @@ void ResetUsrNavigationMode(ArkUINodeHandle node)
     NavigationModelNG::SetUsrNavigationMode(frameNode, NG::NavigationMode::AUTO);
 }
 
-void SetNavHideTitleBar(ArkUINodeHandle node, ArkUI_Bool hideBackButton)
+void SetNavHideTitleBar(ArkUINodeHandle node, ArkUI_Bool hide, ArkUI_Bool animated)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NavigationModelNG::SetHideTitleBar(frameNode, hideBackButton);
+    NavigationModelNG::SetHideTitleBar(frameNode, hide, animated);
 }
 
 void ResetNavHideTitleBar(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NavigationModelNG::SetHideTitleBar(frameNode, false);
+    NavigationModelNG::SetHideTitleBar(frameNode, false, false);
 }
 
 void SetNavIgnoreLayoutSafeArea(ArkUINodeHandle node, const char* typeStr, const char* edgesStr)
@@ -266,71 +274,333 @@ void ResetNavIgnoreLayoutSafeArea(ArkUINodeHandle node)
     NavigationModelNG::SetIgnoreLayoutSafeArea(frameNode, opts);
 }
 
+void SetNavTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUINavigationTitlebarOptions options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string mainTitleString = std::string(titleInfo.mainTitle);
+    std::string subTitleString = std::string(titleInfo.subTitle);
+    NG::NavigationTitleInfo ngTitleInfo = { titleInfo.hasSubTitle, titleInfo.hasMainTitle,
+        subTitleString, mainTitleString };
+    NavigationModelNG::ParseCommonTitle(frameNode, ngTitleInfo);
+    NG::NavigationTitlebarOptions finalOptions;
+    if (options.colorValue.isSet) {
+        finalOptions.bgOptions.color = Color(options.colorValue.value);
+    }
+    if (options.blurStyle.isSet) {
+        BlurStyleOption blurStyleOption;
+        blurStyleOption.blurStyle = static_cast<BlurStyle>(options.blurStyle.value);
+        finalOptions.bgOptions.blurStyleOption = blurStyleOption;
+    }
+    if (options.barStyle.isSet) {
+        finalOptions.brOptions.barStyle = static_cast<NG::BarStyle>(options.barStyle.value);
+    }
+    if (options.paddingStart.isSet) {
+        finalOptions.brOptions.paddingStart = CalcDimension(static_cast<double>(options.paddingStart.dimension.value),
+            static_cast<DimensionUnit>(options.paddingStart.dimension.units));
+    }
+    if (options.paddingEnd.isSet) {
+        finalOptions.brOptions.paddingEnd = CalcDimension(static_cast<double>(options.paddingEnd.dimension.value),
+            static_cast<DimensionUnit>(options.paddingEnd.dimension.units));
+    }
+    if (options.enableHoverMode.isSet) {
+        finalOptions.enableHoverMode = options.enableHoverMode.value;
+    }
+    NavigationModelNG::SetTitlebarOptions(frameNode, std::move(finalOptions));
+}
+
+void ResetNavTitle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::NavigationTitleInfo ngTitleInfo = { false, false, "", "" };
+    NavigationModelNG::ParseCommonTitle(frameNode, ngTitleInfo);
+    NavigationTitlebarOptions options;
+    NavigationModelNG::SetTitlebarOptions(frameNode, std::move(options));
+}
+
+void SetNavMenus(ArkUINodeHandle node, ArkUIBarItem* items, ArkUI_Uint32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(items);
+    std::vector<NG::BarItem> menuItems;
+    for (uint32_t i = 0; i < length; i++) {
+        NG::BarItem menuItem;
+        if (items[i].text.isSet) {
+            menuItem.text = items[i].text.value;
+        }
+        if (items[i].icon.isSet) {
+            menuItem.icon = items[i].icon.value;
+        }
+        if (items[i].isEnable.isSet) {
+            menuItem.isEnabled = items[i].isEnable.value;
+        }
+        menuItems.push_back(menuItem);
+        if (items[i].text.value) {
+            delete[] items[i].text.value;
+            items[i].text.value = nullptr;
+        }
+        if (items[i].icon.value) {
+            delete[] items[i].icon.value;
+            items[i].icon.value = nullptr;
+        }
+    }
+    NavigationModelNG::SetMenuItems(frameNode, std::move(menuItems));
+}
+
+void ResetNavMenus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<NG::BarItem> menuItems;
+    NavigationModelNG::SetMenuItems(frameNode, std::move(menuItems));
+}
+
+void SetNavMenuItemAction(ArkUINodeHandle node, void* action, ArkUI_Uint32 index)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto actionFunc = reinterpret_cast<std::function<void()>*>(action);
+    NavigationModelNG::SetMenuItemAction(frameNode, std::move(*actionFunc), index);
+}
+
+void SetNavMenuItemSymbol(ArkUINodeHandle node, void* symbol, ArkUI_Uint32 index)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto iconFunc = reinterpret_cast<std::function<void(WeakPtr<NG::FrameNode>)>*>(symbol);
+    NavigationModelNG::SetMenuItemSymbol(frameNode, std::move(*iconFunc), index);
+}
+
+void SetNavigationRecoverable(ArkUINodeHandle node, ArkUI_Bool recoverable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetRecoverable(frameNode, recoverable);
+}
+
+void ResetNavigationRecoverable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    // default value of navigation's recoverable is false
+    NavigationModelNG::SetRecoverable(frameNode, false);
+}
+
+void SetEnableDragBar(ArkUINodeHandle node, ArkUI_Bool enableDragBar)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetEnableDragBar(frameNode, enableDragBar);
+}
+
+void ResetEnableDragBar(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    // default value of navigation's enableDragBar is false
+    NavigationModelNG::SetEnableDragBar(frameNode, false);
+}
+
+void SetCustomTitle(ArkUINodeHandle node, ArkUINodeHandle titleNode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* customTitleFrameNode = reinterpret_cast<FrameNode*>(titleNode);
+    CHECK_NULL_VOID(customTitleFrameNode);
+    NavigationModelNG::SetCustomTitle(frameNode, AceType::Claim(customTitleFrameNode));
+}
+
+ArkUINodeHandle GetCustomTitle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto titleNode = NavigationModelNG::GetCustomTitle(frameNode);
+    CHECK_NULL_RETURN(titleNode, nullptr);
+    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(titleNode));
+}
+
+void SetTitleHeight(ArkUINodeHandle node, const struct ArkUIDimensionType height)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension titleHeight = Dimension(height.value, static_cast<OHOS::Ace::DimensionUnit>(height.units));
+    NavigationModelNG::SetTitleHeight(frameNode, titleHeight, true);
+}
+
+void SetTitlebarOptions(ArkUINodeHandle node, ArkUINavigationTitlebarOptions opts)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::NavigationTitlebarOptions finalOptions;
+    if (opts.colorValue.isSet) {
+        finalOptions.bgOptions.color = Color(opts.colorValue.value);
+    }
+    if (opts.barStyle.isSet) {
+        finalOptions.brOptions.barStyle = static_cast<NG::BarStyle>(opts.barStyle.value);
+    }
+    if (opts.enableHoverMode.isSet) {
+        finalOptions.enableHoverMode = opts.enableHoverMode.value;
+    }
+    NavigationModelNG::SetTitlebarOptions(frameNode, std::move(finalOptions));
+}
+
+void SetOnCoordScrollStartAction(ArkUINodeHandle node, void (*onCoordScrollStartAction)(ArkUINodeHandle node))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onCoordScrollStartActionCallBack = [node = AceType::WeakClaim(frameNode), onCoordScrollStartAction]() {
+        auto frameNode = node.Upgrade();
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        onCoordScrollStartAction(nodeHandle);
+    };
+    NavigationModelNG::SetOnCoordScrollStartAction(frameNode, std::move(onCoordScrollStartActionCallBack));
+}
+
+void SetOnCoordScrollUpdateAction(ArkUINodeHandle node,
+    void (*onCoordScrollUpdateAction)(ArkUINodeHandle node, ArkUI_Float32 currentOffset))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onCoordScrollUpdateActionCallBack =
+        [node = AceType::WeakClaim(frameNode), onCoordScrollUpdateAction](float currentOffset)->void {
+            auto frameNode = node.Upgrade();
+            auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+            onCoordScrollUpdateAction(nodeHandle, currentOffset);
+        };
+    NavigationModelNG::SetOnCoordScrollUpdateAction(frameNode, std::move(onCoordScrollUpdateActionCallBack));
+}
+
+void SetOnCoordScrollEndAction(ArkUINodeHandle node, void (*onCoordScrollEndAction)(ArkUINodeHandle node))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onCoordScrollEndActionCallBack = [node = AceType::WeakClaim(frameNode), onCoordScrollEndAction]() {
+        auto frameNode = node.Upgrade();
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        onCoordScrollEndAction(nodeHandle);
+    };
+    NavigationModelNG::SetOnCoordScrollEndAction(frameNode, std::move(onCoordScrollEndActionCallBack));
+}
+
+void SetSystemBarStyle(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto contentColor = Color(value);
+    NavigationModelNG::SetSystemBarStyle(frameNode, contentColor);
+}
+
+void SetEnableToolBarAdaptation(ArkUINodeHandle node, ArkUI_Bool enable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetEnableToolBarAdaptation(frameNode, enable);
+}
+
+void ResetEnableToolBarAdaptation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetEnableToolBarAdaptation(frameNode, false);
+}
+
 namespace NodeModifier {
 const ArkUINavigationModifier* GetNavigationModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUINavigationModifier modifier = {
-        SetHideToolBar,
-        ResetHideToolBar,
-        SetHideNavBar,
-        ResetHideNavBar,
-        SetTitleMode,
-        ResetTitleMode,
-        SetHideBackButton,
-        ResetHideBackButton,
-        SetSubtitle,
-        ResetSubtitle,
-        ResetUsrNavigationMode,
-        SetUsrNavigationMode,
-        SetNavHideTitleBar,
-        ResetNavHideTitleBar,
-        SetNavBarPosition,
-        ResetNavBarPosition,
-        SetMinContentWidth,
-        ResetMinContentWidth,
-        SetMaxNavBarWidth,
-        ResetMaxNavBarWidth,
-        SetMinNavBarWidth,
-        ResetMinNavBarWidth,
-        SetNavBarWidth,
-        ResetNavBarWidth,
-        SetNavIgnoreLayoutSafeArea,
-        ResetNavIgnoreLayoutSafeArea
+        .setHideToolBar = SetHideToolBar,
+        .resetHideToolBar = ResetHideToolBar,
+        .setEnableModeChangeAnimation = SetEnableModeChangeAnimation,
+        .resetEnableModeChangeAnimation = ResetEnableModeChangeAnimation,
+        .setHideNavBar = SetHideNavBar,
+        .resetHideNavBar = ResetHideNavBar,
+        .setTitleMode = SetTitleMode,
+        .resetTitleMode = ResetTitleMode,
+        .setHideBackButton = SetHideBackButton,
+        .resetHideBackButton = ResetHideBackButton,
+        .setSubtitle = SetSubtitle,
+        .resetSubtitle = ResetSubtitle,
+        .resetUsrNavigationMode = ResetUsrNavigationMode,
+        .setUsrNavigationMode = SetUsrNavigationMode,
+        .setNavHideTitleBar = SetNavHideTitleBar,
+        .resetNavHideTitleBar = ResetNavHideTitleBar,
+        .setNavBarPosition = SetNavBarPosition,
+        .resetNavBarPosition = ResetNavBarPosition,
+        .setMinContentWidth = SetMinContentWidth,
+        .resetMinContentWidth = ResetMinContentWidth,
+        .setMaxNavBarWidth = SetMaxNavBarWidth,
+        .resetMaxNavBarWidth = ResetMaxNavBarWidth,
+        .setMinNavBarWidth = SetMinNavBarWidth,
+        .resetMinNavBarWidth = ResetMinNavBarWidth,
+        .setNavBarWidth = SetNavBarWidth,
+        .resetNavBarWidth = ResetNavBarWidth,
+        .setNavIgnoreLayoutSafeArea = SetNavIgnoreLayoutSafeArea,
+        .resetNavIgnoreLayoutSafeArea = ResetNavIgnoreLayoutSafeArea,
+        .setNavTitle = SetNavTitle,
+        .resetNavTitle = ResetNavTitle,
+        .setNavMenus = SetNavMenus,
+        .resetNavMenus = ResetNavMenus,
+        .setNavMenuItemAction = SetNavMenuItemAction,
+        .setNavMenuItemSymbol = SetNavMenuItemSymbol,
+        .setRecoverable = SetNavigationRecoverable,
+        .resetRecoverable = ResetNavigationRecoverable,
+        .setEnableDragBar = SetEnableDragBar,
+        .resetEnableDragBar = ResetEnableDragBar,
+        .setCustomTitle = SetCustomTitle,
+        .getCustomTitle = GetCustomTitle,
+        .setTitleHeight = SetTitleHeight,
+        .setTitlebarOptions = SetTitlebarOptions,
+        .setOnCoordScrollStartAction = SetOnCoordScrollStartAction,
+        .setOnCoordScrollUpdateAction = SetOnCoordScrollUpdateAction,
+        .setOnCoordScrollEndAction = SetOnCoordScrollEndAction,
+        .setSystemBarStyle = SetSystemBarStyle,
+        .setEnableToolBarAdaptation = SetEnableToolBarAdaptation,
+        .resetEnableToolBarAdaptation = ResetEnableToolBarAdaptation,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUINavigationModifier* GetCJUINavigationModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUINavigationModifier modifier = {
-        SetHideToolBar,
-        ResetHideToolBar,
-        SetHideNavBar,
-        ResetHideNavBar,
-        SetTitleMode,
-        ResetTitleMode,
-        SetHideBackButton,
-        ResetHideBackButton,
-        SetSubtitle,
-        ResetSubtitle,
-        ResetUsrNavigationMode,
-        SetUsrNavigationMode,
-        SetNavHideTitleBar,
-        ResetNavHideTitleBar,
-        SetNavBarPosition,
-        ResetNavBarPosition,
-        SetMinContentWidth,
-        ResetMinContentWidth,
-        SetMaxNavBarWidth,
-        ResetMaxNavBarWidth,
-        SetMinNavBarWidth,
-        ResetMinNavBarWidth,
-        SetNavBarWidth,
-        ResetNavBarWidth,
-        SetNavIgnoreLayoutSafeArea,
-        ResetNavIgnoreLayoutSafeArea
+        .setHideToolBar = SetHideToolBar,
+        .resetHideToolBar = ResetHideToolBar,
+        .setEnableModeChangeAnimation = SetEnableModeChangeAnimation,
+        .resetEnableModeChangeAnimation = ResetEnableModeChangeAnimation,
+        .setHideNavBar = SetHideNavBar,
+        .resetHideNavBar = ResetHideNavBar,
+        .setTitleMode = SetTitleMode,
+        .resetTitleMode = ResetTitleMode,
+        .setHideBackButton = SetHideBackButton,
+        .resetHideBackButton = ResetHideBackButton,
+        .setSubtitle = SetSubtitle,
+        .resetSubtitle = ResetSubtitle,
+        .resetUsrNavigationMode = ResetUsrNavigationMode,
+        .setUsrNavigationMode = SetUsrNavigationMode,
+        .setNavHideTitleBar = SetNavHideTitleBar,
+        .resetNavHideTitleBar = ResetNavHideTitleBar,
+        .setNavBarPosition = SetNavBarPosition,
+        .resetNavBarPosition = ResetNavBarPosition,
+        .setMinContentWidth = SetMinContentWidth,
+        .resetMinContentWidth = ResetMinContentWidth,
+        .setMaxNavBarWidth = SetMaxNavBarWidth,
+        .resetMaxNavBarWidth = ResetMaxNavBarWidth,
+        .setMinNavBarWidth = SetMinNavBarWidth,
+        .resetMinNavBarWidth = ResetMinNavBarWidth,
+        .setNavBarWidth = SetNavBarWidth,
+        .resetNavBarWidth = ResetNavBarWidth,
+        .setNavIgnoreLayoutSafeArea = SetNavIgnoreLayoutSafeArea,
+        .resetNavIgnoreLayoutSafeArea = ResetNavIgnoreLayoutSafeArea,
+        .setEnableToolBarAdaptation = SetEnableToolBarAdaptation,
+        .resetEnableToolBarAdaptation = ResetEnableToolBarAdaptation,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

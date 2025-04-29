@@ -55,7 +55,7 @@ struct IndicatorStyle final {
     Dimension marginTop = 0.0_vp;
     IndicatorStyle()
     {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         if (!pipelineContext) {
             return;
         }
@@ -79,7 +79,7 @@ struct BoardStyle final {
     Dimension borderRadius = 0.0_vp;
     BoardStyle()
     {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         if (!pipelineContext) {
             return;
         }
@@ -129,6 +129,7 @@ public:
     virtual void Pop() = 0;
     virtual void SetTabBar(const std::optional<std::string>& text, const std::optional<std::string>& icon,
         const std::optional<TabBarSymbol>& tabBarSymbol, std::function<void()>&& builder, bool useContentOnly) = 0;
+    virtual void SetTabBarWithContent(const RefPtr<NG::UINode>& content) = 0;
     virtual void SetTabBarStyle(TabBarStyle tabBarStyle) = 0;
     virtual void SetIndicator(const IndicatorStyle& indicator) = 0;
     virtual void SetBoard(const BoardStyle& board) = 0;

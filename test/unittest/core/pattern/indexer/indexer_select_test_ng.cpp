@@ -673,7 +673,7 @@ HWTEST_F(IndexerSelectTestNg, PopupSelectByClick003, TestSize.Level1)
      * @tc.expected: The selected changed
      */
     listPattern->ScrollTo(100);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(listPattern->IsAtBottom());
 
     clickIndex = 6;

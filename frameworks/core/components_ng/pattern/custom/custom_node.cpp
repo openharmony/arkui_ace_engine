@@ -15,16 +15,9 @@
 
 #include "core/components_ng/pattern/custom/custom_node.h"
 
-#include "base/json/json_util.h"
 #include "base/log/ace_performance_monitor.h"
 #include "base/log/dump_log.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/custom/custom_node_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<CustomNode> CustomNode::CreateCustomNode(int32_t nodeId, const std::string& viewKey)
@@ -33,10 +26,6 @@ RefPtr<CustomNode> CustomNode::CreateCustomNode(int32_t nodeId, const std::strin
     ElementRegister::GetInstance()->AddUINode(node);
     return node;
 }
-
-CustomNode::CustomNode(int32_t nodeId, const std::string& viewKey)
-    : UINode(V2::JS_VIEW_ETS_TAG, nodeId, MakeRefPtr<CustomNodePattern>()), viewKey_(viewKey)
-{}
 
 void CustomNode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
 {
@@ -47,7 +36,7 @@ void CustomNode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
     UINode::Build(extraInfos);
 }
 
-void CustomNode::Render()
+bool CustomNode::Render(int64_t deadline)
 {
     // NOTE: this function will be re-enter, we need backup needMarkParent_ first and restore it later.
     bool needMarkParentBak = needMarkParent_;
@@ -55,20 +44,35 @@ void CustomNode::Render()
     if (renderFunction_) {
         RenderFunction renderFunction = nullptr;
         std::swap(renderFunction, renderFunction_);
-        {
+        if (!CheckFireOnAppear()) {
             ACE_SCOPED_TRACE("CustomNode:OnAppear");
             FireOnAppear();
+            if (deadline > 0 && GetSysTimestamp() > deadline) {
+                std::swap(renderFunction, renderFunction_);
+                return false;
+            }
         }
         {
-            COMPONENT_CREATION_DURATION();
-            ACE_SCOPED_TRACE("CustomNode:BuildItem [%s][self:%d][parent:%d]", GetJSViewName().c_str(), GetId(),
-                GetParent() ? GetParent()->GetId() : 0);
+            int32_t id = -1;
+            if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
+                id = Container::CurrentId();
+            }
+            COMPONENT_CREATION_DURATION(id);
+            ACE_SCOPED_TRACE("CustomNode:BuildItem [%s][self:%d][parent:%d][frameRound:%d]",
+                GetJSViewName().c_str(), GetId(), GetParent() ? GetParent()->GetId() : 0, prebuildFrameRounds_);
             // first create child node and wrapper.
-            ScopedViewStackProcessor scopedViewStackProcessor;
+            ScopedViewStackProcessor scopedViewStackProcessor(prebuildViewStackProcessor_);
             auto parent = GetParent();
             bool parentNeedExportTexture = parent ? parent->IsNeedExportTexture() : false;
             ViewStackProcessor::GetInstance()->SetIsExportTexture(parentNeedExportTexture || IsNeedExportTexture());
-            auto child = renderFunction();
+            bool isTimeout = false;
+            auto child = renderFunction(deadline, isTimeout);
+            if (isTimeout) {
+                prebuildFrameRounds_++;
+                std::swap(renderFunction, renderFunction_);
+                scopedViewStackProcessor.SwapViewStackProcessor(prebuildViewStackProcessor_);
+                return false;
+            }
             if (child) {
                 child->MountToParent(Claim(this));
             }
@@ -82,16 +86,18 @@ void CustomNode::Render()
         FireRecycleRenderFunc();
     }
     needMarkParent_ = needMarkParentBak;
+    return true;
 }
 
-void CustomNode::DetachFromMainTree(bool recursive)
+void CustomNode::FireCustomDisappear()
 {
-    auto context = GetContext();
-    if (context && context->IsDestroyed()) {
-        FireOnDisappear();
-        Reset();
+    if (!CheckFireOnAppear()) {
+        FireOnAppear();
+        FireDidBuild();
     }
-    UINode::DetachFromMainTree(recursive);
+    FireOnDisappear();
+    Reset();
+    UINode::FireCustomDisappear();
 }
 
 // used in HotReload to update root view @Component
@@ -100,6 +106,7 @@ void CustomNode::FlushReload()
     CHECK_NULL_VOID(completeReloadFunc_);
     Clean();
     renderFunction_ = completeReloadFunc_;
+    executeFireOnAppear_ = false;
     Build(nullptr);
 }
 
@@ -108,15 +115,17 @@ bool CustomNode::RenderCustomChild(int64_t deadline)
     if (GetSysTimestamp() > deadline) {
         return false;
     }
-    Render();
+    if (!Render(deadline)) {
+        return false;
+    }
     return UINode::RenderCustomChild(deadline);
 }
 
-void CustomNode::SetJSViewActive(bool active, bool isLazyForEachNode)
+void CustomNode::SetJSViewActive(bool active, bool isLazyForEachNode, bool isReuse)
 {
     if (GetJsActive() != active) {
         SetJsActive(active);
-        FireSetActiveFunc(active);
+        FireSetActiveFunc(active, isReuse);
     }
 }
 
@@ -182,8 +191,13 @@ RefPtr<UINode> CustomNode::GetFrameChildByIndex(uint32_t index, bool needBuild, 
     return UINode::GetFrameChildByIndex(index, needBuild, isCache, addToRenderTree);
 }
 
-void CustomNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
+void CustomNode::DoSetActiveChildRange(
+    int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache)
 {
+    if (showCache) {
+        start -= cacheStart;
+        end += cacheEnd;
+    }
     if (start <= end) {
         if (start > 0 || end < 0) {
             SetActive(false);
@@ -207,5 +221,66 @@ std::unique_ptr<JsonValue> CustomNode::GetStateInspectorInfo()
     TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI State Inspector dump info %{public}s", res.c_str());
     auto json = JsonUtil::ParseJsonString(res);
     return json;
+}
+
+void CustomNode::DumpComponentInfo(std::unique_ptr<JsonValue>& componentInfo)
+{
+    DumpLog::GetInstance().AddDesc("ComponentName: " + componentInfo->GetValue("ComponentName")->ToString());
+    DumpLog::GetInstance().AddDesc("isV2: " + componentInfo->GetValue("isV2")->ToString());
+    DumpLog::GetInstance().AddDesc("isFreezeAllowed: " + \
+                                    componentInfo->GetValue("isCompFreezeAllowed_")->ToString());
+    DumpLog::GetInstance().AddDesc("isViewActive: " + componentInfo->GetValue("isViewActive_")->ToString());
+}
+
+void CustomNode::DumpDecoratorInfo(std::unique_ptr<JsonValue>& decoratorInfo)
+{
+    int size = decoratorInfo->GetArraySize();
+
+    DumpLog::GetInstance().AddDesc("-----start print decoratorInfo");
+    for (int i = 0; i < size; i++) {
+        auto decoratorItem = decoratorInfo->GetArrayItem(i);
+        DumpLog::GetInstance().AddDesc("decorator:" + decoratorItem->GetValue("decorator")->ToString() + \
+                                       " propertyName:" + decoratorItem->GetValue("propertyName")->ToString() + \
+                                       " value:" + decoratorItem->GetValue("value")->ToString());
+        DumpLog::GetInstance().AddDesc("stateVariable id: " + decoratorItem->GetValue("id")->ToString());
+        DumpLog::GetInstance().AddDesc("inRenderingElementId: " + \
+                                        decoratorItem->GetValue("inRenderingElementId")->ToString());
+        DumpLog::GetInstance().AddDesc("dependentElementIds: " + \
+                                        decoratorItem->GetValue("dependentElementIds")->ToString());
+        if (i < size - 1) {
+            DumpLog::GetInstance().AddDesc("------------------------------");
+        }
+    }
+    DumpLog::GetInstance().AddDesc("-----end print decoratorInfo");
+}
+
+void CustomNode::DumpInfo()
+{
+    std::string ret = FireOnDumpInspectorFunc();
+    TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI DumpInfo %{public}s", ret.c_str());
+    if (ret != "") {
+        auto json = JsonUtil::ParseJsonString(ret);
+        if (json == nullptr || !json->IsValid()) {
+            TAG_LOGE(AceLogTag::ACE_STATE_MGMT, "ParseJsonString failed");
+            return;
+        }
+        auto componentInfo = json->GetValue("viewInfo");
+        if (componentInfo != nullptr) {
+            DumpComponentInfo(componentInfo);
+        }
+        auto decoratorInfo = json->GetValue("observedPropertiesInfo");
+        if (decoratorInfo != nullptr) {
+            DumpDecoratorInfo(decoratorInfo);
+        }
+    }
+}
+
+void CustomNode::OnDestroyingStateChange(bool isDestroying, bool cleanStatus)
+{
+    if (isDestroying && cleanStatus) {
+        auto context = GetContext();
+        CHECK_NULL_VOID(context);
+        context->AddPendingDeleteCustomNode(Claim(this));
+    }
 }
 } // namespace OHOS::Ace::NG

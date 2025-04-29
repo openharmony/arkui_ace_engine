@@ -89,12 +89,25 @@ public:
     {
         return fullPath_;
     }
+
+    std::optional<std::string> GetRouteName() const
+    {
+        return routeName_;
+    }
+
+    void SetRouteName(const std::optional<std::string>& name)
+    {
+        routeName_ = name;
+    }
+
 private:
     int32_t pageId_ = 0;
     int32_t pageIndex_ = -1;
     std::string url_;
     std::string path_;
     std::string fullPath_;
+
+    std::optional<std::string> routeName_;
 
     std::function<void(int32_t)> alertCallback_;
     DialogProperties dialogProperties_;

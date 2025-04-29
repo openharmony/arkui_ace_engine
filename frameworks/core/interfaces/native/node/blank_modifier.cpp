@@ -14,11 +14,7 @@
  */
 #include "core/interfaces/native/node/blank_modifier.h"
 
-#include "core/pipeline/base/element_register.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
 #include "core/components_ng/base/view_abstract.h"
 
 namespace OHOS::Ace::NG {
@@ -67,15 +63,31 @@ void ResetBlankMin(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIBlankModifier* GetBlankModifier()
 {
-    static const ArkUIBlankModifier modifier = { SetColor, ResetColor, SetBlankHeight, ResetBlankHeight,
-        SetBlankMin, ResetBlankMin };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIBlankModifier modifier = {
+        .setColor = SetColor,
+        .resetColor = ResetColor,
+        .setBlankHeight = SetBlankHeight,
+        .resetBlankHeight = ResetBlankHeight,
+        .setBlankMin = SetBlankMin,
+        .resetBlankMin = ResetBlankMin,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIBlankModifier* GetCJUIBlankModifier()
 {
-    static const CJUIBlankModifier modifier = { SetColor, ResetColor, SetBlankHeight, ResetBlankHeight,
-        SetBlankMin, ResetBlankMin };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIBlankModifier modifier = {
+        .setColor = SetColor,
+        .resetColor = ResetColor,
+        .setBlankHeight = SetBlankHeight,
+        .resetBlankHeight = ResetBlankHeight,
+        .setBlankMin = SetBlankMin,
+        .resetBlankMin = ResetBlankMin,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

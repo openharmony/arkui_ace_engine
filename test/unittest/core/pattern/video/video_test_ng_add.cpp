@@ -41,7 +41,6 @@
 #include "core/components/video/video_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -67,6 +66,7 @@ struct TestProperty {
     std::optional<std::string> src;
     std::optional<double> progressRate;
     std::optional<std::string> posterUrl;
+    std::optional<bool> showFirstFrame;
     std::optional<bool> muted;
     std::optional<bool> autoPlay;
     std::optional<bool> controls;
@@ -80,6 +80,7 @@ constexpr bool MUTED_VALUE = false;
 constexpr bool AUTO_PLAY = false;
 constexpr bool CONTROL_VALUE = true;
 constexpr bool LOOP_VALUE = false;
+constexpr bool SHOW_FIRST_FRAME = false;
 const ImageFit VIDEO_IMAGE_FIT = ImageFit::COVER;
 const std::string VIDEO_SRC = "common/video.mp4";
 const std::string VIDEO_POSTER_URL = "common/img2.png";
@@ -131,6 +132,7 @@ protected:
 void VideoTestAddNg::SetUpTestSuite()
 {
     g_testProperty.progressRate = VIDEO_PROGRESS_RATE;
+    g_testProperty.showFirstFrame = SHOW_FIRST_FRAME;
     g_testProperty.muted = MUTED_VALUE;
     g_testProperty.autoPlay = AUTO_PLAY;
     g_testProperty.controls = CONTROL_VALUE;
@@ -169,7 +171,7 @@ RefPtr<FrameNode> VideoTestAddNg::CreateVideoNode(TestProperty& g_testProperty)
         .WillRepeatedly(Return(true));
 
     if (g_testProperty.src.has_value()) {
-        VideoModelNG().SetSrc(g_testProperty.src.value());
+        VideoModelNG().SetSrc(g_testProperty.src.value(), "", "");
     }
     if (g_testProperty.progressRate.has_value()) {
         VideoModelNG().SetProgressRate(g_testProperty.progressRate.value());
@@ -191,6 +193,9 @@ RefPtr<FrameNode> VideoTestAddNg::CreateVideoNode(TestProperty& g_testProperty)
     }
     if (g_testProperty.objectFit.has_value()) {
         VideoModelNG().SetObjectFit(g_testProperty.objectFit.value());
+    }
+    if (g_testProperty.showFirstFrame.has_value()) {
+        VideoModelNG().SetShowFirstFrame(g_testProperty.showFirstFrame.value());
     }
 
     auto element = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -229,7 +234,7 @@ HWTEST_F(VideoTestAddNg, OnPlayerStatusTest001, TestSize.Level1)
     ASSERT_TRUE(playBtnGestureEventHub);
 
     // set videoEvent
-    auto videoEventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub);
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
@@ -309,7 +314,7 @@ HWTEST_F(VideoTestAddNg, OnPlayerStatusTest002, TestSize.Level1)
     auto playBtnGestureEventHub = playBtn->GetOrCreateGestureEventHub();
 
     // set videoEvent
-    auto videoEventHub2 = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub2 = frameNode->GetOrCreateEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub2);
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
@@ -390,7 +395,7 @@ HWTEST_F(VideoTestAddNg, OnPlayerStatusTest003, TestSize.Level1)
     auto playBtnGestureEventHub = playBtn->GetOrCreateGestureEventHub();
 
     // set videoEvent
-    auto videoEventHub3 = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub3 = frameNode->GetOrCreateEventHub<VideoEventHub>();
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
     std::string pauseCheck;
@@ -471,7 +476,7 @@ HWTEST_F(VideoTestAddNg, OnPlayerStatusTest004, TestSize.Level1)
     auto playBtnGestureEventHub = playBtn->GetOrCreateGestureEventHub();
 
     // set videoEvent
-    auto videoEventHub4 = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub4 = frameNode->GetOrCreateEventHub<VideoEventHub>();
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
     std::string pauseCheck;
@@ -553,7 +558,7 @@ HWTEST_F(VideoTestAddNg, OnPlayerStatusTest005, TestSize.Level1)
     auto playBtnGestureEventHub = playBtn->GetOrCreateGestureEventHub();
 
     // set videoEvent
-    auto videoEventHub5 = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub5 = frameNode->GetOrCreateEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub5);
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
@@ -636,7 +641,7 @@ HWTEST_F(VideoTestAddNg, OnPlayerStatusTest006, TestSize.Level1)
     auto playBtnGestureEventHub = playBtn->GetOrCreateGestureEventHub();
 
     // set videoEvent
-    auto videoEventHub6 = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub6 = frameNode->GetOrCreateEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub6);
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
@@ -721,7 +726,7 @@ HWTEST_F(VideoTestAddNg, OnPlayerStatusTest007, TestSize.Level1)
     ASSERT_TRUE(playBtnGestureEventHub);
 
     // set videoEvent
-    auto videoEventHub7 = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub7 = frameNode->GetOrCreateEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub7);
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
@@ -806,7 +811,7 @@ HWTEST_F(VideoTestAddNg, OnPlayerStatusTest008, TestSize.Level1)
     auto playBtnGestureEventHub = playBtn->GetOrCreateGestureEventHub();
 
     // set videoEvent
-    auto videoEventHub8 = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub8 = frameNode->GetOrCreateEventHub<VideoEventHub>();
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
     std::string pauseCheck;
@@ -895,7 +900,7 @@ HWTEST_F(VideoTestAddNg, OnPlayerStatusTest009, TestSize.Level1)
     auto playBtnGestureEventHub = playBtn->GetOrCreateGestureEventHub();
 
     // set videoEvent
-    auto videoEventHub9 = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub9 = frameNode->GetOrCreateEventHub<VideoEventHub>();
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
     std::string pauseCheck;
@@ -971,7 +976,7 @@ HWTEST_F(VideoTestAddNg, OnPlayerStatusTest010, TestSize.Level1)
     ASSERT_TRUE(playBtnGestureEventHub);
 
     // set videoEvent
-    auto videoEventHub10 = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub10 = frameNode->GetOrCreateEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub10);
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
@@ -1049,7 +1054,7 @@ HWTEST_F(VideoTestAddNg, OnPlayerStatusTest011, TestSize.Level1)
     ASSERT_TRUE(playBtnGestureEventHub);
 
     // set videoEvent
-    auto videoEventHub11 = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub11 = frameNode->GetOrCreateEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub11);
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
@@ -1133,7 +1138,7 @@ HWTEST_F(VideoTestAddNg, OnPlayerStatusTest012, TestSize.Level1)
     ASSERT_TRUE(playBtnGestureEventHub);
 
     // set videoEvent
-    auto videoEventHub12 = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub12 = frameNode->GetOrCreateEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub12);
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
@@ -1218,7 +1223,7 @@ HWTEST_F(VideoTestAddNg, OnPlayerStatusTest013, TestSize.Level1)
     ASSERT_TRUE(playBtnGestureEventHub);
 
     // set videoEvent
-    auto videoEventHub13 = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub13 = frameNode->GetOrCreateEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub13);
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
@@ -1295,7 +1300,7 @@ HWTEST_F(VideoTestAddNg, OnPlayerStatusTest014, TestSize.Level1)
     ASSERT_TRUE(playBtnGestureEventHub);
 
     // set videoEvent
-    auto videoEventHub14 = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub14 = frameNode->GetOrCreateEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub14);
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
@@ -1374,7 +1379,7 @@ HWTEST_F(VideoTestAddNg, OnPlayerStatusTest015, TestSize.Level1)
     ASSERT_TRUE(playBtnGestureEventHub);
 
     // set videoEvent
-    auto videoEventHub15 = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub15 = frameNode->GetOrCreateEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub15);
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
@@ -1452,7 +1457,7 @@ HWTEST_F(VideoTestAddNg, OnPlayerStatusTest016, TestSize.Level1)
     auto playBtnGestureEventHub = playBtn->GetOrCreateGestureEventHub();
 
     // set videoEvent
-    auto videoEventHub16 = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub16 = frameNode->GetOrCreateEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub16);
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
@@ -1536,7 +1541,7 @@ HWTEST_F(VideoTestAddNg, OnPlayerStatusTest017, TestSize.Level1)
     ASSERT_TRUE(playBtnGestureEventHub);
 
     // set videoEvent
-    auto videoEventHub17 = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub17 = frameNode->GetOrCreateEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub17);
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
@@ -1624,7 +1629,7 @@ HWTEST_F(VideoTestAddNg, OnPlayerStatusTest018, TestSize.Level1)
     ASSERT_TRUE(playBtnGestureEventHub);
 
     // set videoEvent
-    auto videoEventHub18 = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub18 = frameNode->GetOrCreateEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub18);
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
@@ -1710,7 +1715,7 @@ HWTEST_F(VideoTestAddNg, OnPlayerStatusTest019, TestSize.Level1)
     ASSERT_TRUE(playBtnGestureEventHub);
 
     // set videoEvent
-    auto videoEventHub19 = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub19 = frameNode->GetOrCreateEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub19);
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
@@ -1784,7 +1789,7 @@ auto themeManager20 = AceType::MakeRefPtr<MockThemeManager>();
     auto playBtnGestureEventHub = playBtn->GetOrCreateGestureEventHub();
 
     // set videoEvent
-    auto videoEventHub20 = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub20 = frameNode->GetOrCreateEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub20);
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
@@ -1865,7 +1870,7 @@ HWTEST_F(VideoTestAddNg, OnPlayerStatusTest021, TestSize.Level1)
     auto playBtnGestureEventHub = playBtn->GetOrCreateGestureEventHub();
 
     // set videoEvent
-    auto videoEventHub21 = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub21 = frameNode->GetOrCreateEventHub<VideoEventHub>();
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
     std::string pauseCheck;

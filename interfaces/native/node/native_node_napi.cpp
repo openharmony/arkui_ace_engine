@@ -28,7 +28,7 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
 {
     bool hasProperty = false;
     auto result = napi_has_named_property(env, value, "nodePtr_", &hasProperty);
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (result == napi_ok && hasProperty) {
         napi_value frameNodePtr = nullptr;
         auto result = napi_get_named_property(env, value, "nodePtr_", &frameNodePtr);
@@ -45,7 +45,17 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
         }
         auto* uiNodePtr = reinterpret_cast<OHOS::Ace::NG::UINode*>(nativePtr);
         uiNodePtr->IncRefCount();
-        *handle = new ArkUI_Node({ .type = -1, .uiNodeHandle = reinterpret_cast<ArkUINodeHandle>(nativePtr) });
+        // check whether it is bind to native XComponent.
+        bool isBindNativeXComponent = impl && impl->getNodeModifiers()->getXComponentModifier()
+            ->getXComponentIsBindNative(reinterpret_cast<ArkUINodeHandle>(nativePtr));
+        *handle = new ArkUI_Node({ .type = -1,
+            .uiNodeHandle = reinterpret_cast<ArkUINodeHandle>(nativePtr),
+            .cNode = false,
+            .buildNode = true });
+        if (isBindNativeXComponent) {
+            OHOS::Ace::NodeModel::RegisterBindNativeNode(*handle);
+            (*handle)->isBindNative = true;
+        }
         if (impl) {
             impl->getExtendedAPI()->setAttachNodePtr((*handle)->uiNodeHandle, reinterpret_cast<void*>(*handle));
         }
@@ -92,7 +102,10 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
             frameNode = reinterpret_cast<OHOS::Ace::NG::FrameNode*>(child);
         }
         frameNode->IncRefCount();
-        *handle = new ArkUI_Node({ .type = -1, .uiNodeHandle = reinterpret_cast<ArkUINodeHandle>(frameNode) });
+        *handle = new ArkUI_Node({ .type = -1,
+            .uiNodeHandle = reinterpret_cast<ArkUINodeHandle>(frameNode),
+            .cNode = false,
+            .buildNode = true });
         if (impl) {
             impl->getExtendedAPI()->setAttachNodePtr((*handle)->uiNodeHandle, reinterpret_cast<void*>(*handle));
         }
@@ -397,6 +410,24 @@ ArkUI_ErrorCode OH_ArkUI_GetRouterPageId(
     CHECK_NULL_RETURN(navigationAPI, ARKUI_ERROR_CODE_GET_INFO_FAILED);
     auto ret =
         navigationAPI->getRouterPageId(node->uiNodeHandle, buffer, bufferSize, writeLength);
+    return static_cast<ArkUI_ErrorCode>(ret);
+}
+
+int32_t OH_ArkUI_PostFrameCallback(ArkUI_ContextHandle uiContext, void* userData,
+    void (*callback)(uint64_t nanoTimestamp, uint32_t frameCount, void* userData))
+{
+    CHECK_NULL_RETURN(uiContext, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID);
+    CHECK_NULL_RETURN(callback, ARKUI_ERROR_CODE_CALLBACK_INVALID);
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(fullImpl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    auto basicAPI = fullImpl->getBasicAPI();
+    CHECK_NULL_RETURN(basicAPI, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    auto* context = reinterpret_cast<ArkUI_Context*>(uiContext);
+    auto id = context->id;
+    auto ret = basicAPI->postFrameCallback(id, userData, callback);
+    if (ret == OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD) {
+        LOGF_ABORT("OH_ArkUI_PostFrameCallback doesn't run on UI thread!");
+    }
     return static_cast<ArkUI_ErrorCode>(ret);
 }
 }

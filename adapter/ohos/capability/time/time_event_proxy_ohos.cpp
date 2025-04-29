@@ -18,7 +18,6 @@
 #include "common_event_support.h"
 
 #include "frameworks/core/common/container.h"
-#include "frameworks/core/common/container_scope.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<TimeEventProxy> TimeEventProxy::instance_;
@@ -60,7 +59,6 @@ TimeEventProxyOhos::TimeEventProxyOhos()
     subscribeInfo.SetThreadMode(CommonEventSubscribeInfo::ThreadMode::HANDLER);
 
     eventFwkSubscriber_ = std::make_shared<TimeEventSubscriber>(subscribeInfo);
-    CommonEventManager::SubscribeCommonEvent(eventFwkSubscriber_);
 }
 
 TimeEventProxyOhos::~TimeEventProxyOhos()
@@ -107,6 +105,9 @@ void TimeEventProxyOhos::OnTimeChange()
 
 void TimeEventProxyOhos::Register(const WeakPtr<TimeChangeListener>& listener)
 {
+    if (listeners_.empty()) {
+        CommonEventManager::SubscribeCommonEvent(eventFwkSubscriber_);
+    }
     listeners_.insert({ listener, Container::CurrentId() });
 }
 } // namespace OHOS::Ace

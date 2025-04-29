@@ -45,6 +45,11 @@ struct CustomSpanMetrics {
 struct UserGestureOptions {
     GestureEventFunc onClick;
     GestureEventFunc onLongPress;
+    GestureEventFunc onDoubleClick;
+};
+
+struct UserMouseOptions {
+    OnHoverFunc onHover;
 };
 
 struct ImageSpanSize {
@@ -85,6 +90,9 @@ struct ImageSpanAttribute {
     std::optional<OHOS::Ace::NG::MarginProperty> marginProp;
     std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius;
     std::optional<OHOS::Ace::NG::PaddingProperty> paddingProp;
+    bool syncLoad = false;
+    std::optional<std::vector<float>> colorFilterMatrix;
+    std::optional<RefPtr<DrawingColorFilter>> drawingColorFilter;
 
     bool operator==(const ImageSpanAttribute& attribute) const
     {
@@ -108,6 +116,9 @@ struct ImageSpanAttribute {
 struct SpanOptionBase {
     std::optional<int32_t> offset;
     UserGestureOptions userGestureOption;
+    UserMouseOptions userMouseOption;
+    std::optional<Color> dragBackgroundColor;
+    bool isDragShadowNeeded = true;
 
     std::string ToString() const
     {
@@ -124,15 +135,18 @@ struct ImageSpanOptions : SpanOptionBase {
     std::optional<std::string> moduleName;
     std::optional<RefPtr<PixelMap>> imagePixelMap;
     std::optional<ImageSpanAttribute> imageAttribute;
+    std::optional<bool> isUriPureNumber;
+
+    bool HasValue() const
+    {
+        return offset.has_value() || image.has_value() || bundleName.has_value() || moduleName.has_value() ||
+               imagePixelMap.has_value() || imageAttribute.has_value();
+    }
 
     std::string ToString() const
     {
         auto jsonValue = JsonUtil::Create(true);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, offset);
-        JSON_STRING_PUT_OPTIONAL_STRING(jsonValue, image);
-        JSON_STRING_PUT_OPTIONAL_STRING(jsonValue, bundleName);
-        JSON_STRING_PUT_OPTIONAL_STRING(jsonValue, moduleName);
-        JSON_STRING_PUT_OPTIONAL_STRING(jsonValue, image);
         if (imagePixelMap && *imagePixelMap) {
             std::string pixSize = "[";
             pixSize += std::to_string((*imagePixelMap)->GetWidth());
@@ -142,16 +156,22 @@ struct ImageSpanOptions : SpanOptionBase {
             jsonValue->Put("pixelMapSize", pixSize.c_str());
         }
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, imageAttribute);
+#ifndef IS_RELEASE_VERSION
+        JSON_STRING_PUT_OPTIONAL_STRING(jsonValue, image);
+        JSON_STRING_PUT_OPTIONAL_STRING(jsonValue, bundleName);
+        JSON_STRING_PUT_OPTIONAL_STRING(jsonValue, moduleName);
+#endif
         return jsonValue->ToString();
     }
 };
 } // namespace OHOS::Ace
 namespace OHOS::Ace::NG {
+class TextLayoutProperty;
 constexpr Dimension TEXT_DEFAULT_FONT_SIZE = 16.0_fp;
 using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSize, Dimension);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextColor, DynamicColor);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextShadow, std::vector<Shadow>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ItalicFontStyle, Ace::FontStyle);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontWeight, FontWeight);
@@ -160,29 +180,22 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFamily, std::vector<std::string>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFeature, FONT_FEATURES_LIST);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecoration, TextDecoration);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationColor, DynamicColor);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextDecorationStyle, TextDecorationStyle);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextCase, TextCase);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AdaptMinFontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AdaptMaxFontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LetterSpacing, Dimension);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundColor, DynamicColor);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolColorList, std::vector<Color>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolRenderingStrategy, uint32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolEffectStrategy, uint32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolEffectOptions, SymbolEffectOptions);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MinFontScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxFontScale, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolType, SymbolType);
 
-    void UpdateColorByResourceId()
-    {
-        if (propTextColor) {
-            propTextColor->UpdateColorByResourceId();
-        }
-        if (propTextDecorationColor) {
-            propTextDecorationColor->UpdateColorByResourceId();
-        }
-    }
+    void UpdateColorByResourceId();
 };
 
 struct TextLineStyle {
@@ -203,6 +216,7 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LineBreakStrategy, LineBreakStrategy);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(HalfLeading, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AllowScale, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ParagraphSpacing, Dimension);
 };
 
 struct HandleInfoNG {
@@ -221,7 +235,6 @@ struct HandleInfoNG {
 
     bool operator==(const HandleInfoNG& handleInfo) const
     {
-
         return rect == handleInfo.rect && index == handleInfo.index;
     }
 
@@ -232,17 +245,20 @@ struct HandleInfoNG {
 
     int32_t index = 0;
     RectF rect;
+    RectF originalRect;
 };
 
 TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
-    const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme);
+    const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme, bool isSymbol = false);
 
-TextStyle CreateTextStyleUsingThemeWithText(const RefPtr<FrameNode> frameNode,
-    const std::unique_ptr<FontStyle>& fontStyle, const std::unique_ptr<TextLineStyle>& textLineStyle,
-    const RefPtr<TextTheme>& textTheme);
+void CreateTextStyleUsingTheme(const RefPtr<TextLayoutProperty>& property, const RefPtr<TextTheme>& textTheme,
+    TextStyle& textStyle, bool isSymbol = false);
 
-void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle,
-    const std::unique_ptr<TextLineStyle>& textLineStyle, TextStyle& textStyle);
+void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique_ptr<TextLineStyle>& textLineStyle,
+    TextStyle& textStyle, bool isSymbol = false);
+
+void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle,
+    const RefPtr<TextTheme>& textTheme, bool isSymbol = false);
 
 std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& value);
 std::string GetFontStyleInJson(const std::optional<Ace::FontStyle>& value);

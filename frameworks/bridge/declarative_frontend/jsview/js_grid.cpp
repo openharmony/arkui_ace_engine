@@ -14,9 +14,8 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_grid.h"
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/log/ace_scoring_log.h"
 #include "base/utils/utils.h"
@@ -28,6 +27,7 @@
 #include "bridge/declarative_frontend/jsview/models/grid_model_impl.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 
@@ -119,6 +119,7 @@ void ParseGetGridItemSize(const JSCallbackInfo& info, JSRef<JSObject>& obj, Grid
         auto onGetIrregularSizeByIndex = [execCtx = info.GetExecutionContext(),
                                              func = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
                                                  JSRef<JSFunc>::Cast(getSizeByIndex))](int32_t index) {
+            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
             GridItemSize gridItemSize;
             JSRef<JSVal> itemIndex = JSRef<JSVal>::Make(ToJSValue(index));
             auto result = func->ExecuteJS(1, &itemIndex);
@@ -139,6 +140,7 @@ void ParseGetGridItemRect(const JSCallbackInfo& info, JSRef<JSObject>& obj, Grid
         auto onGetRectByIndex = [execCtx = info.GetExecutionContext(),
                                     func = AceType::MakeRefPtr<JsFunction>(
                                         JSRef<JSObject>(), JSRef<JSFunc>::Cast(getRectByIndex))](int32_t index) {
+            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
             GridItemRect gridItemRect;
             JSRef<JSVal> itemIndex = JSRef<JSVal>::Make(ToJSValue(index));
             auto result = func->ExecuteJS(1, &itemIndex);
@@ -232,8 +234,11 @@ void JSGrid::Create(const JSCallbackInfo& info)
     SetGridLayoutOptions(info);
 }
 
-void JSGrid::PopGrid(const JSCallbackInfo& /* info */)
+void JSGrid::PopGrid()
 {
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSGrid][pop]", &JSGrid::PopGrid);
+    }
     GridModel::GetInstance()->Pop();
 }
 
@@ -433,8 +438,11 @@ void JSGrid::SetCachedCount(const JSCallbackInfo& info)
             cachedCount = 1;
         }
     }
-
-    GridModel::GetInstance()->SetCachedCount(cachedCount);
+    bool show = false;
+    if (info.Length() > 1) {
+        show = info[1]->ToBoolean();
+    }
+    GridModel::GetInstance()->SetCachedCount(cachedCount, show);
 }
 
 void JSGrid::SetEditMode(const JSCallbackInfo& info)
@@ -489,14 +497,16 @@ void JSGrid::SetDragAnimation(bool value)
 void JSGrid::SetEdgeEffect(const JSCallbackInfo& info)
 {
     auto edgeEffect = EdgeEffect::NONE;
+    auto effectEdge = EffectEdge::ALL;
     if (info.Length() > 0) {
         edgeEffect = JSScrollable::ParseEdgeEffect(info[0], EdgeEffect::NONE);
     }
     auto alwaysEnabled = false;
     if (info.Length() > 1) {
         alwaysEnabled = JSScrollable::ParseAlwaysEnable(info[1], false);
+        effectEdge = JSScrollable::ParseEffectEdge(info[1]);
     }
-    GridModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled);
+    GridModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled, effectEdge);
 }
 
 void JSGrid::SetLayoutDirection(int32_t value)
@@ -610,9 +620,7 @@ void JSGrid::JsOnGridDrop(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Grid.onItemDrop");
         func->ItemDropExecute(dragInfo, itemIndex, insertIndex, isSuccess);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Grid.onItemDrop");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onItemDrop");
     };
     GridModel::GetInstance()->SetOnItemDrop(std::move(onItemDrop));
 }
@@ -709,9 +717,7 @@ void JSGrid::JsOnScrollStop(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onScrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Grid.onScrollStop");
-#endif
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onScrollStop");
             return;
         };
         GridModel::GetInstance()->SetOnScrollStop(std::move(onScrollStop));
@@ -772,9 +778,7 @@ void JSGrid::JsOnReachStart(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Grid.onReachStart");
-#endif
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onReachStart");
             return;
         };
         GridModel::GetInstance()->SetOnReachStart(std::move(onReachStart));
@@ -787,9 +791,7 @@ void JSGrid::JsOnReachEnd(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Grid.onReachEnd");
-#endif
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onReachEnd");
             return;
         };
         GridModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));

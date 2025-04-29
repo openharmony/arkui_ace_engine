@@ -16,6 +16,7 @@
 #include "core/components/common/properties/shadow.h"
 
 #include "core/animation/evaluator.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/shadow_config.h"
 
 namespace OHOS::Ace {
@@ -32,7 +33,7 @@ Shadow Shadow::Blend(const Shadow& to, const Shadow& from, float progress)
 
 Shadow Shadow::CreateShadow(ShadowStyle style)
 {
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = Container::CurrentColorMode();
     if (colorMode == ColorMode::DARK) {
         switch (style) {
             case ShadowStyle::OuterDefaultXS:

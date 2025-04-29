@@ -29,6 +29,7 @@ class ACE_EXPORT RichEditorBaseController : virtual public RichEditorBaseControl
 public:
     void SetPattern(const WeakPtr<RichEditorPattern>& pattern);
     int32_t GetCaretOffset() override;
+    RectF GetCaretRect() override;
     bool SetCaretOffset(int32_t caretPosition) override;
     void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle, std::optional<TextStyle> textStyle) override;
     std::optional<struct UpdateSpanStyle> GetTypingStyle() override;
@@ -39,6 +40,8 @@ public:
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) override;
     WeakPtr<LayoutInfoInterface> GetLayoutInfoInterface() override;
     const PreviewTextInfo GetPreviewTextInfo() const override;
+    ColorMode GetColorMode() override;
+    RefPtr<NG::RichEditorTheme> GetTheme() override;
 protected:
     WeakPtr<RichEditorPattern> pattern_;
 };

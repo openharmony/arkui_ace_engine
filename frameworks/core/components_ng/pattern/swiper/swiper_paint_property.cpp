@@ -14,17 +14,13 @@
  */
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 
-#include <unordered_map>
-
-#include "base/utils/string_utils.h"
-#include "core/components_ng/base/inspector_filter.h"
-
 namespace OHOS::Ace::NG {
 const int32_t SwiperAnimationStyle::DEFAULT_INTERVAL = 3000;
 const int32_t SwiperAnimationStyle::DEFAULT_DURATION = 400;
 
 void SwiperPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    CHECK_NULL_VOID(json);
     PaintProperty::ToJsonValue(json, filter);
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
@@ -44,6 +40,7 @@ void SwiperPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const In
 
 void SwiperPaintProperty::FromJson(const std::unique_ptr<JsonValue>& json)
 {
+    CHECK_NULL_VOID(json);
     UpdateAutoPlay(json->GetBool("autoPlay"));
     UpdateAutoPlayInterval(StringUtils::StringToInt(json->GetString("interval")));
     UpdateDuration(StringUtils::StringToInt(json->GetString("duration")));

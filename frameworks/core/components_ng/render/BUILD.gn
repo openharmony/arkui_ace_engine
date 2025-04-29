@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -26,10 +26,10 @@ build_component_ng("render_ng") {
     "adapter/path_painter.cpp",
     "adapter/pixelmap_image.cpp",
     "adapter/render_surface_impl.cpp",
+    "adapter/rich_editor_paragraph.cpp",
     "adapter/sk_painter.cpp",
     "adapter/skia_color_filter.cpp",
     "adapter/skia_decoration_painter.cpp",
-    "adapter/skia_image.cpp",
     "adapter/span_model_adapter.cpp",
     "adapter/svg_canvas_image.cpp",
     "adapter/txt_font_collection.cpp",
@@ -43,6 +43,7 @@ build_component_ng("render_ng") {
     "image_painter.cpp",
     "line_painter.cpp",
     "media_player_creator.cpp",
+    "paint_property.cpp",
     "paint_wrapper.cpp",
     "polygon_painter.cpp",
     "rect_painter.cpp",
@@ -54,6 +55,8 @@ build_component_ng("render_ng") {
 
   rosen_sources = [
     "adapter/component_snapshot.cpp",
+    "adapter/focus_animation_modifier.cpp",
+    "adapter/focus_state_modifier.cpp",
     "adapter/gradient_style_modifier.cpp",
     "adapter/moon_progress_modifier.cpp",
     "adapter/rosen_animation_utils.cpp",
@@ -86,13 +89,12 @@ build_component_ng("render_ng") {
     sources -= [
       "adapter/sk_painter.cpp",
       "adapter/skia_decoration_painter.cpp",
-      "adapter/skia_image.cpp",
     ]
 
     rosen_sources += [
-      "adapter/rosen/drawing_decoration_painter.cpp",
-      "adapter/rosen/drawing_image.cpp",
-      "adapter/rosen/drawing_painter.cpp",
+      "adapter/drawing_decoration_painter.cpp",
+      "adapter/drawing_image.cpp",
+      "adapter/drawing_painter.cpp",
     ]
   }
 
@@ -119,5 +121,6 @@ build_component_ng("render_ng") {
 
   if (is_arkui_x) {
     sources += [ "adapter/render_texture_impl.cpp" ]
+    deps = [ "$ace_graphic_surface/surface:arkuix_surface" ]
   }
 }

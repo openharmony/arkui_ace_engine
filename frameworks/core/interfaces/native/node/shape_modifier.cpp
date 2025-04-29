@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,11 +14,7 @@
  */
 #include "core/interfaces/native/node/shape_modifier.h"
 
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 void SetShapeViewPort(ArkUINodeHandle node, const ArkUI_Float32* dimValues, const ArkUI_Int32* dimUnits)
@@ -48,7 +44,7 @@ void SetShapeMesh(ArkUINodeHandle node, const ArkUI_Float32* mesh, ArkUI_Uint32 
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::vector<double> meshValues(mesh, mesh + arrayItemCount);
+    std::vector<float> meshValues(mesh, mesh + arrayItemCount);
     ShapeModelNG::SetBitmapMesh(frameNode, meshValues, column, row);
 }
 
@@ -56,7 +52,7 @@ void ResetShapeMesh(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::vector<double> meshValues;
+    std::vector<float> meshValues;
     int32_t column = 0;
     int32_t row = 0;
     ShapeModelNG::SetBitmapMesh(frameNode, meshValues, column, row);
@@ -65,13 +61,27 @@ void ResetShapeMesh(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIShapeModifier* GetShapeModifier()
 {
-    static const ArkUIShapeModifier modifier = { SetShapeViewPort, ResetShapeViewPort, SetShapeMesh, ResetShapeMesh };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIShapeModifier modifier = {
+        .setShapeViewPort = SetShapeViewPort,
+        .resetShapeViewPort = ResetShapeViewPort,
+        .setShapeMesh = SetShapeMesh,
+        .resetShapeMesh = ResetShapeMesh,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIShapeModifier* GetCJUIShapeModifier()
 {
-    static const CJUIShapeModifier modifier = { SetShapeViewPort, ResetShapeViewPort, SetShapeMesh, ResetShapeMesh };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIShapeModifier modifier = {
+        .setShapeViewPort = SetShapeViewPort,
+        .resetShapeViewPort = ResetShapeViewPort,
+        .setShapeMesh = SetShapeMesh,
+        .resetShapeMesh = ResetShapeMesh,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

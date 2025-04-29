@@ -50,11 +50,11 @@ public:
         value->propIsRefreshing_ = CloneIsRefreshing();
         value->propIndicatorOffset_ = CloneIndicatorOffset();
         value->propFriction_ = CloneFriction();
-        value->propProgressColor_ = CloneProgressColor();
         value->propLoadingText_ = CloneLoadingText();
         value->propPullToRefresh_ = ClonePullToRefresh();
         value->propRefreshOffset_ = CloneRefreshOffset();
         value->propPullDownRatio_ = ClonePullDownRatio();
+        value->propMaxPullDownDistance_ = CloneMaxPullDownDistance();
         value->propIsCustomBuilderExist_ = CloneIsCustomBuilderExist();
         return value;
     }
@@ -65,11 +65,11 @@ public:
         ResetIsRefreshing();
         ResetIndicatorOffset();
         ResetFriction();
-        ResetProgressColor();
         ResetLoadingText();
         ResetPullToRefresh();
         ResetRefreshOffset();
         ResetPullDownRatio();
+        ResetMaxPullDownDistance();
         ResetIsCustomBuilderExist();
     }
 
@@ -92,16 +92,21 @@ public:
         } else {
             json->PutExtAttr("pullDownRatio", "", filter);
         }
+        if (propMaxPullDownDistance_.has_value()) {
+            json->PutExtAttr("maxPullDownDistance", propMaxPullDownDistance_.value(), filter);
+        } else {
+            json->PutExtAttr("maxPullDownDistance", "", filter);
+        }
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsRefreshing, bool, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndicatorOffset, Dimension, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Friction, int32_t, PROPERTY_UPDATE_LAYOUT);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ProgressColor, Color, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LoadingText, std::string, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PullToRefresh, bool, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RefreshOffset, Dimension, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PullDownRatio, float, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaxPullDownDistance, float, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsCustomBuilderExist, bool, PROPERTY_UPDATE_LAYOUT);
 
 private:

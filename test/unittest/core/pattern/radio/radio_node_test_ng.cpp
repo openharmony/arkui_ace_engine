@@ -77,7 +77,7 @@ HWTEST_F(RadioNodeTestNg, RadioNodeTest001, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     eventHub->SetEnabled(CHECKED);
@@ -127,7 +127,7 @@ HWTEST_F(RadioNodeTestNg, RadioNodeTest002, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     eventHub->SetEnabled(CHECKED);
@@ -177,7 +177,7 @@ HWTEST_F(RadioNodeTestNg, RadioNodeTest003, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     eventHub->SetEnabled(CHECKED);
@@ -227,7 +227,7 @@ HWTEST_F(RadioNodeTestNg, RadioNodeTest004, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     eventHub->SetEnabled(CHECKED);
@@ -277,7 +277,7 @@ HWTEST_F(RadioNodeTestNg, RadioNodeTest005, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     eventHub->SetEnabled(CHECKED);
@@ -327,7 +327,7 @@ HWTEST_F(RadioNodeTestNg, RadioNodeTest006, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     eventHub->SetEnabled(CHECKED);
@@ -378,7 +378,7 @@ HWTEST_F(RadioNodeTestNg, RadioNodeTest007, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     eventHub->SetEnabled(CHECKED);
@@ -396,7 +396,7 @@ HWTEST_F(RadioNodeTestNg, RadioNodeTest007, TestSize.Level1)
     /**
      * @tc.steps: step4. Set parameters to radioModelNG builderFunc
      */
-    radioModelNG.SetBuilderFunc(frameNode.GetRawPtr(), node);
+    radioModelNG.SetBuilderFunc(Referenced::RawPtr(frameNode), node);
     pattern->FireBuilder();
     /**
      * @tc.steps: step5. Test customNode
@@ -428,14 +428,14 @@ HWTEST_F(RadioNodeTestNg, RadioNodeTest008, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     eventHub->SetEnabled(CHECKED);
     /**
      * @tc.steps: step3. Set parameters to radioModelNG builderFunc
      */
-    radioModelNG.SetBuilderFunc(frameNode.GetRawPtr(), nullptr);
+    radioModelNG.SetBuilderFunc(Referenced::RawPtr(frameNode), nullptr);
     pattern->FireBuilder();
     /**
      * @tc.steps: step4. Test customNode
@@ -498,7 +498,7 @@ HWTEST_F(RadioNodeTestNg, RadioNodeTest010, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     eventHub->SetEnabled(CHECKED);
@@ -516,7 +516,7 @@ HWTEST_F(RadioNodeTestNg, RadioNodeTest010, TestSize.Level1)
     /**
      * @tc.steps: step4. Set parameters to radioModelNG builderFunc
      */
-    radioModelNG.SetBuilderFunc(frameNode.GetRawPtr(), node);
+    radioModelNG.SetBuilderFunc(Referenced::RawPtr(frameNode), node);
     pattern->FireBuilder();
     /**
      * @tc.steps: step5. Test customNode
@@ -529,7 +529,7 @@ HWTEST_F(RadioNodeTestNg, RadioNodeTest010, TestSize.Level1)
     /**
      * @tc.steps: step6. change builder func nullptr
      */
-    radioModelNG.SetBuilderFunc(frameNode.GetRawPtr(), nullptr);
+    radioModelNG.SetBuilderFunc(Referenced::RawPtr(frameNode), nullptr);
     pattern->FireBuilder();
     /**
      * @tc.steps: step7. Test UseContentModifier
@@ -561,7 +561,7 @@ HWTEST_F(RadioNodeTestNg, RadioNodeTest011, TestSize.Level1)
      * @tc.steps: step2. Set radioConfiguration
      */
     pattern->SetRadioChecked(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(VALUE);
     eventHub->SetEnabled(CHECKED);
@@ -623,7 +623,7 @@ HWTEST_F(RadioNodeTestNg, RadioNodeTest012, TestSize.Level1)
     /**
      * @tc.steps: step2. Set radioConfiguration
      */
-    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(NAME);
     eventHub->SetEnabled(CHECKED);
@@ -690,7 +690,7 @@ HWTEST_F(RadioNodeTestNg, RadioNodeTest013, TestSize.Level1)
     /**
      * @tc.steps: step2. Set radioConfiguration
      */
-    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(NAME);
     eventHub->SetEnabled(CHECKED);
@@ -757,7 +757,7 @@ HWTEST_F(RadioNodeTestNg, RadioNodeTest014, TestSize.Level1)
     /**
      * @tc.steps: step2. Set radioConfiguration
      */
-    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(NAME);
     eventHub->SetEnabled(CHECKED);
@@ -824,7 +824,7 @@ HWTEST_F(RadioNodeTestNg, RadioNodeTest015, TestSize.Level1)
     /**
      * @tc.steps: step2. Set radioConfiguration
      */
-    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(NAME);
     eventHub->SetEnabled(CHECKED);
@@ -891,7 +891,7 @@ HWTEST_F(RadioNodeTestNg, RadioNodeTest016, TestSize.Level1)
     /**
      * @tc.steps: step2. Set radioConfiguration
      */
-    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(NAME);
     eventHub->SetEnabled(CHECKED);
@@ -958,7 +958,7 @@ HWTEST_F(RadioNodeTestNg, RadioNodeTest017, TestSize.Level1)
     /**
      * @tc.steps: step2. Set radioConfiguration
      */
-    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetValue(NAME);
     eventHub->SetEnabled(CHECKED);
@@ -1007,136 +1007,257 @@ HWTEST_F(RadioNodeTestNg, RadioNodeTest017, TestSize.Level1)
 }
 
 /**
- * @tc.name: PreventDefault001
- * @tc.desc: test InitTouchEvent and InitClickEvent
+ * @tc.name: RadioNodeTest018
+ * @tc.desc: Test SetChangeValue
  * @tc.type: FUNC
  */
-HWTEST_F(RadioNodeTestNg, PreventDefault001, TestSize.Level1)
+HWTEST_F(RadioNodeTestNg, RadioNodeTest018, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Init Radio node
+     * @tc.steps: step1. Init Radio node.
      */
-    RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = RadioModelNG::CreateFrameNode(0);
     ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<RadioPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    ASSERT_NE(gestureHub, nullptr);
+    /**
+     * @tc.steps: step2. SetRadioIndicatorType.
+     */
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    std::string testName = "testName";
+    std::string testGroup = "testGroup";
+    int32_t indicator = 2;
+    RadioModelNG::SetRadioOptions(node, testName, testGroup, indicator);
 
     /**
-     * @tc.steps: step2. Mock TouchEventInfo info and set preventDefault to true
-     * @tc.expected: Check the param value
+     * @tc.steps: step3. Get RadioEventHub and assert the name and group.
      */
-    pattern->InitTouchEvent();
-    TouchEventInfo touchInfo("onTouch");
-    TouchLocationInfo touchDownInfo(1);
-    touchDownInfo.SetTouchType(TouchType::DOWN);
-    touchInfo.SetPreventDefault(true);
-    touchInfo.SetSourceDevice(SourceType::TOUCH);
-    touchInfo.AddTouchLocationInfo(std::move(touchDownInfo));
-    pattern->touchListener_->callback_(touchInfo);
-    EXPECT_TRUE(pattern->isTouchPreventDefault_);
-    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::PRESS);
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    EXPECT_EQ(eventHub->GetValue(), testName);
+    EXPECT_EQ(eventHub->GetGroup(), testGroup);
+
     /**
-     * @tc.steps: step3.Mock GestureEvent info and set preventDefault to true
-     * @tc.expected: Check the param value
+     * @tc.steps: step4. Get paintProperty and assert the indicator.
      */
-    pattern->InitClickEvent();
-    GestureEvent clickInfo;
-    clickInfo.SetPreventDefault(true);
-    clickInfo.SetSourceDevice(SourceType::TOUCH);
-    pattern->clickListener_->operator()(clickInfo);
-    EXPECT_FALSE(pattern->isTouchPreventDefault_);
+    auto paintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetRadioIndicatorValue(), indicator);
 }
 
 /**
- * @tc.name: PreventDefault002
- * @tc.desc: test InitTouchEvent and InitClickEvent
+ * @tc.name: RadioNodeTest019
+ * @tc.desc: Test SetChangeValue
  * @tc.type: FUNC
  */
-HWTEST_F(RadioNodeTestNg, PreventDefault002, TestSize.Level1)
+HWTEST_F(RadioNodeTestNg, RadioNodeTest019, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init Radio node
      */
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    ASSERT_NE(gestureHub, nullptr);
-
     /**
-     * @tc.steps: step2. Mock TouchEvent info and set preventDefault to false
-     * @tc.expected: Check the param value
+     * @tc.steps: step2. Set radioConfiguration
      */
-    pattern->InitTouchEvent();
-    TouchEventInfo touchInfo("onTouch");
-    TouchLocationInfo touchDownInfo(1);
-    touchDownInfo.SetTouchType(TouchType::CANCEL);
-    touchInfo.SetPreventDefault(false);
-    touchInfo.SetSourceDevice(SourceType::TOUCH);
-    touchInfo.AddTouchLocationInfo(std::move(touchDownInfo));
-    pattern->touchListener_->callback_(touchInfo);
-    EXPECT_FALSE(pattern->isTouchPreventDefault_);
-    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::NONE);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetValue(NAME);
+    eventHub->SetEnabled(CHECKED);
     /**
-     * @tc.steps: step3. Mock GestureEvent info and set preventDefault to false
-     * @tc.expected: Check the param value
+     * @tc.steps: step3. Make builderFunc
      */
-    pattern->InitClickEvent();
-    GestureEvent clickInfo;
-    clickInfo.SetPreventDefault(false);
-    clickInfo.SetSourceDevice(SourceType::TOUCH);
-    pattern->clickListener_->operator()(clickInfo);
-    EXPECT_FALSE(pattern->isTouchPreventDefault_);
+    auto node = [](RadioConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(NAME, config.value_);
+                EXPECT_EQ(CHECKED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to radioModelNG builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->FireBuilder();
+    /**
+     * @tc.steps: step5. Test customNode
+     */
+    auto buildNode = pattern->customNode_;
+    /**
+     * @tc.expected: Check the Radio child id
+     */
+    EXPECT_EQ("child", buildNode->GetHostTag());
+    /**
+     * @tc.steps: step6. Test SetChangeValue
+     */
+    pattern->SetRadioChecked(-1);
+    /**
+     * @tc.steps: step7. Get isChecked
+     */
+    auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(radioPaintProperty, nullptr);
+    bool isChecked = false;
+    if (radioPaintProperty->HasRadioCheck()) {
+        isChecked = radioPaintProperty->GetRadioCheckValue();
+    } else {
+        isChecked = false;
+    }
+    /**
+     * @tc.expected: Check the Radio isChecked
+     */
+    EXPECT_EQ(isChecked, true);
 }
 
 /**
- * @tc.name: PreventDefault003
- * @tc.desc: test InitTouchEvent and InitClickEvent
+ * @tc.name: RadioNodeTest020
+ * @tc.desc: Test customNode
  * @tc.type: FUNC
  */
-HWTEST_F(RadioNodeTestNg, PreventDefault003, TestSize.Level1)
+HWTEST_F(RadioNodeTestNg, RadioNodeTest020, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init Radio node
      */
     RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    radioModelNG.Create(VALUE, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    ASSERT_NE(gestureHub, nullptr);
     /**
-     * @tc.steps: step2. Mock TouchEvent info and set preventDefault to false
-     * @tc.expected: Check the param value
+     * @tc.steps: step2. Set radioConfiguration
      */
-    pattern->InitTouchEvent();
-    TouchEventInfo touchInfo("onTouch");
-    TouchLocationInfo touchDownInfo(1);
-    touchDownInfo.SetTouchType(TouchType::UP);
-    touchInfo.SetPreventDefault(true);
-    touchInfo.SetSourceDevice(SourceType::MOUSE);
-    touchInfo.AddTouchLocationInfo(std::move(touchDownInfo));
-    pattern->touchListener_->callback_(touchInfo);
-    EXPECT_FALSE(pattern->isTouchPreventDefault_);
-    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::NONE);
+    pattern->SetRadioChecked(BIG_INT);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetValue(VALUE);
+    eventHub->SetEnabled(CHECKED);
     /**
-     * @tc.steps: step3. Mock GestureEvent info and set preventDefault to false
-     * @tc.expected: Check the param value
+     * @tc.steps: step3. Make builderFunc
      */
-    pattern->InitClickEvent();
-    GestureEvent clickInfo;
-    clickInfo.SetPreventDefault(false);
-    clickInfo.SetSourceDevice(SourceType::MOUSE);
-    pattern->clickListener_->operator()(clickInfo);
-    EXPECT_FALSE(pattern->isTouchPreventDefault_);
+    auto node = [](RadioConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(VALUE, config.value_);
+                EXPECT_EQ(CHECKED, config.checked_);
+                EXPECT_EQ(CHECKED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", 1, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->FireBuilder();
+    /**
+     * @tc.steps: step5. Test customNode
+     */
+    auto buildNode = pattern->customNode_;
+    /**
+     * @tc.expected: Check the Radio child id
+     */
+    EXPECT_EQ(1, buildNode->GetId());
+}
+
+/**
+ * @tc.name: RadioNodeTest021
+ * @tc.desc: Test customNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioNodeTestNg, RadioNodeTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(VALUE, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set radioConfiguration
+     */
+    pattern->SetRadioChecked(BIG_INT);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetValue(VALUE);
+    eventHub->SetEnabled(CHECKED);
+    /**
+     * @tc.steps: step3. Make builderFunc
+     */
+    auto node = [](RadioConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(VALUE, config.value_);
+                EXPECT_EQ(CHECKED, config.checked_);
+                EXPECT_EQ(CHECKED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", 0, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->FireBuilder();
+    /**
+     * @tc.steps: step5. Test customNode
+     */
+    auto buildNode = pattern->customNode_;
+    /**
+     * @tc.expected: Check the Radio child id
+     */
+    EXPECT_EQ(0, buildNode->GetId());
+}
+
+/**
+ * @tc.name: RadioNodeTest022
+ * @tc.desc: Test customNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioNodeTestNg, RadioNodeTest022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(VALUE, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set radioConfiguration
+     */
+    pattern->SetRadioChecked(BIG_INT);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetValue(VALUE);
+    eventHub->SetEnabled(CHECKED);
+    /**
+     * @tc.steps: step3. Make builderFunc
+     */
+    auto node = [](RadioConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(VALUE, config.value_);
+                EXPECT_EQ(CHECKED, config.checked_);
+                EXPECT_EQ(CHECKED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", BIG_INT, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to pattern builderFunc
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->FireBuilder();
+    /**
+     * @tc.steps: step5. Test customNode
+     */
+    auto buildNode = pattern->customNode_;
+    /**
+     * @tc.expected: Check the Radio child id
+     */
+    EXPECT_EQ(BIG_INT, buildNode->GetId());
 }
 }

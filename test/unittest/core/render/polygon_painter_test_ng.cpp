@@ -40,7 +40,6 @@ const std::pair<Dimension, Dimension> END_POINT = { 30.0_vp, 30.0_vp };
 
 std::vector<ShapePoint> shape_Point;
 
-Testing::MockCanvas canvas;
 } // namespace
 
 class PolygonPainterTestNg : public testing::Test {
@@ -63,6 +62,8 @@ void PolygonPainterTestNg::CallBack(Testing::MockCanvas& rSCanvas)
  */
 HWTEST_F(PolygonPainterTestNg, PolygonPainterTestNg001, TestSize.Level1)
 {
+    Testing::MockCanvas* canvasPtr = new Testing::MockCanvas();
+    Testing::MockCanvas& canvas = *canvasPtr;
     /**
      * @tc.steps1: create canvas and polygonPaintProperty object.
      */
@@ -85,6 +86,7 @@ HWTEST_F(PolygonPainterTestNg, PolygonPainterTestNg001, TestSize.Level1)
     NG::PolygonPainter::DrawPolygon(canvas, polygonPaintProperty, true);
     EXPECT_TRUE(polygonPaintProperty.HasPoints());
     EXPECT_TRUE(polygonPaintProperty.GetPointsValue().empty());
+    testing::Mock::AllowLeak(canvasPtr);
 }
 
 /**
@@ -94,6 +96,8 @@ HWTEST_F(PolygonPainterTestNg, PolygonPainterTestNg001, TestSize.Level1)
  */
 HWTEST_F(PolygonPainterTestNg, PolygonPainterTestNg002, TestSize.Level1)
 {
+    Testing::MockCanvas* canvasPtr = new Testing::MockCanvas();
+    Testing::MockCanvas& canvas = *canvasPtr;
     /**
      * @tc.steps1: create canvas and polygonPaintProperty object.
      */
@@ -116,5 +120,6 @@ HWTEST_F(PolygonPainterTestNg, PolygonPainterTestNg002, TestSize.Level1)
     NG::PolygonPainter::DrawPolygon(canvas, polygonPaintProperty, true);
     EXPECT_TRUE(polygonPaintProperty.HasStrokeWidth());
     EXPECT_FALSE(polygonPaintProperty.GetPointsValue().empty());
+    testing::Mock::AllowLeak(canvasPtr);
 }
 } // namespace OHOS::Ace

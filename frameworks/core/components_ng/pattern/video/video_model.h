@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 
 #include "base/image/pixel_map.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/video/video_controller_v2.h"
 
 namespace OHOS::Ace {
@@ -30,7 +31,8 @@ public:
     virtual ~VideoModel() = default;
 
     virtual void Create(const RefPtr<VideoControllerV2>& videoController) = 0;
-    virtual void SetSrc(const std::string& src) = 0;
+    virtual void SetSrc(const std::string& src, const std::string& bundleName, const std::string& moduleName) = 0;
+    virtual void SetShowFirstFrame(bool showFirstFrame) {}
     virtual void SetProgressRate(double progressRate) = 0;
     virtual void SetPosterSourceInfo(const std::string& posterUrl, const std::string &bundleName,
         const std::string &moduleName) = 0;
@@ -40,6 +42,8 @@ public:
     virtual void SetControls(bool controls) = 0;
     virtual void SetObjectFit(ImageFit objectFit) = 0;
     virtual void SetLoop(bool loop) = 0;
+    virtual void SetSurfaceBackgroundColor(Color color) {}
+    virtual void SetShortcutKeyEnabled(bool isEnableShortcutKey) {}
 
     virtual void SetOnStart(VideoEventFunc&& onStart) = 0;
     virtual void SetOnPause(VideoEventFunc&& onPause) = 0;
@@ -54,10 +58,6 @@ public:
     virtual void EnableAnalyzer(bool enable) {}
     virtual void SetImageAnalyzerConfig(void* config) {}
     virtual void SetImageAIOptions(void* options) {}
-private:
-    static std::unique_ptr<VideoModel> instance_;
-    static std::mutex mutex_;
 };
-
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_VIDEO_VIDEO_MODEL_H

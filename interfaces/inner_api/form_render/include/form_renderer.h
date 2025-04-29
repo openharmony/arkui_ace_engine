@@ -25,6 +25,7 @@
 #include "ui_content.h"
 #include "event_handler.h"
 #include "form_constants.h"
+#include "core/accessibility/accessibility_manager.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -63,7 +64,14 @@ public:
     void AttachForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void RecycleForm(std::string& statusData);
     void RecoverForm(const std::string& statusData);
-    void GetRectRelativeToWindow(int32_t &top, int32_t &left) const;
+    void GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo) const;
+    void SetVisibleChange(bool isVisible);
+    void UpdateFormSize(float width, float height, float borderWidth);
+    void HandleTimeStampAndSetBounds(std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode);
+    void CheckWhetherNeedResizeFormAgain(float borderWidth, float width, float height);
+    void ResizeFormAgain(float borderWidth, float width, float height);
+    int64_t GetRunFormPageInnerTimeStamp();
+    void SetRunFormPageInnerTimeStamp(int64_t timeStamp);
 
 private:
     void InitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
@@ -72,6 +80,7 @@ private:
     void AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void RemoveFormDeathRecipient();
 
     bool allowUpdate_ = true;
     bool obscurationMode_ = false;
@@ -82,6 +91,7 @@ private:
     bool fontScaleFollowSystem_ = true;
     std::string backgroundColor_;
     AppExecFwk::Constants::RenderingMode renderingMode_ = AppExecFwk::Constants::RenderingMode::FULL_COLOR;
+    bool enableBlurBackground_ = false;
     std::vector<std::string> cachedInfos_;
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
     std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;
@@ -91,6 +101,7 @@ private:
     std::shared_ptr<UIContent> uiContent_;
     sptr<IRemoteObject::DeathRecipient> renderDelegateDeathRecipient_;
     sptr<IRemoteObject> proxy_;
+    int64_t runFormPageInnerTimeStamp_ = -1;
 };
 
 /**

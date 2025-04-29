@@ -15,35 +15,40 @@
 
 #include "core/interfaces/native/node/view_model.h"
 
-#include <optional>
-
-#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/badge/badge_model_ng.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
+#include "core/components_ng/pattern/custom_node_ext/custom_node_ext_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
+#include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
+#ifdef QRCODEGEN_SUPPORT
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
+#endif
+#include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
+#include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
+#include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/symbol/symbol_model_ng.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
+#include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
@@ -53,6 +58,7 @@
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
@@ -67,15 +73,14 @@
 #include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
 #include "core/components_ng/pattern/grid_row/grid_row_model_ng.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
+#include "core/components_ng/pattern/custom_frame_node/custom_pattern.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
-#include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
-#include "core/interfaces/native/node/node_api.h"
-#include "core/pipeline/base/element_register.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_adapter.h"
 
 namespace OHOS::Ace::NG::ViewModel {
 
@@ -83,7 +88,15 @@ ArkUIAPICallbackMethod* callbacks = nullptr;
 
 void* createTextNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = TextModelNG::CreateFrameNode(nodeId, "");
+    auto frameNode = TextModelNG::CreateFrameNode(nodeId, u"");
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createSymbolNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = SymbolModelNG::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -91,7 +104,7 @@ void* createTextNode(ArkUI_Int32 nodeId)
 
 void* createSpanNode(ArkUI_Int32 nodeId)
 {
-    auto spanNode = SpanModelNG::CreateSpanNode(nodeId, "");
+    auto spanNode = SpanModelNG::CreateSpanNode(nodeId, u"");
     CHECK_NULL_RETURN(spanNode, nullptr);
     spanNode->IncRefCount();
     return AceType::RawPtr(spanNode);
@@ -122,6 +135,16 @@ void* createToggleNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createToggleNodeWithParams(ArkUI_Int32 nodeId, const ArkUI_Params& params)
+{
+    auto toggleParams = static_cast<const ArkUI_Toggle_Params*>(&params);
+    CHECK_NULL_RETURN(toggleParams, nullptr);
+    auto frameNode = ToggleModelNG::CreateFrameNode(nodeId, toggleParams->toggleType, toggleParams->isOn);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 void* createLoadingProgress(ArkUI_Int32 nodeId)
 {
     auto frameNode = LoadingProgressModelNG::CreateFrameNode(nodeId);
@@ -132,7 +155,7 @@ void* createLoadingProgress(ArkUI_Int32 nodeId)
 
 void* createTextInputNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = TextFieldModelNG::CreateFrameNode(nodeId, "", "", false);
+    auto frameNode = TextFieldModelNG::CreateFrameNode(nodeId, u"", u"", false);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -172,7 +195,7 @@ void* createSwiperNode(ArkUI_Int32 nodeId)
 
 void* createTextAreaNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = TextFieldModelNG::CreateFrameNode(nodeId, "", "", true);
+    auto frameNode = TextFieldModelNG::CreateFrameNode(nodeId, u"", u"", true);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -254,7 +277,6 @@ void* createRootNode(ArkUI_Int32 nodeId)
     auto stageManager = context->GetStageManager();
     CHECK_NULL_RETURN(stageManager, nullptr);
     auto stageNode = stageManager->GetStageNode();
-    TAG_LOGD(AceLogTag::ACE_NATIVE_NODE, "createRootNode: stageNode %{public}p", AceType::RawPtr(stageNode));
     return AceType::RawPtr(stageNode);
 }
 
@@ -264,7 +286,6 @@ void* createComponentRootNode(ArkUI_Int32 nodeId)
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
     frameNode->IncRefCount();
-    TAG_LOGD(AceLogTag::ACE_NATIVE_NODE, "createComponentRootNode: frameNode %{public}p", AceType::RawPtr(frameNode));
     return AceType::RawPtr(frameNode);
 }
 
@@ -273,6 +294,34 @@ void* createXComponentNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = XComponentModelNG::CreateFrameNode(nodeId, "", XComponentType::SURFACE, "");
     frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createXComponentTextureNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = XComponentModelNG::CreateFrameNode(nodeId, "", XComponentType::TEXTURE, "");
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createXComponentNodeWithParams(ArkUI_Int32 nodeId, const ArkUI_Params& params)
+{
+    ArkUI_XComponent_Params* xcParams = (ArkUI_XComponent_Params*)(&params);
+    CHECK_NULL_RETURN(xcParams, nullptr);
+    auto frameNode = XComponentModelNG::CreateTypeNode(nodeId, xcParams);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+#endif
+
+#ifdef WINDOW_SCENE_SUPPORTED
+void* createEmbeddedComponent(ArkUI_Int32 nodeId)
+{
+    RefPtr<OHOS::Ace::WantWrap> want = nullptr;
+    auto frameNode = UIExtensionAdapter::CreateEmbeddedComponent(nodeId, want);
+    if (frameNode) {
+        frameNode->IncRefCount();
+    }
     return AceType::RawPtr(frameNode);
 }
 #endif
@@ -335,7 +384,7 @@ void* createCalendarPickerNode(ArkUI_Int32 nodeId)
 
 void* createCustomNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = FrameNode::CreateFrameNode("Custom", nodeId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = FrameNode::CreateFrameNode("Custom", nodeId, AceType::MakeRefPtr<CustomPattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -344,6 +393,7 @@ void* createCustomNode(ArkUI_Int32 nodeId)
 void* createNavigationNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = NavigationModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -426,6 +476,14 @@ void* createAlphabetIndexerNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createArcAlphabetIndexerNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = IndexerModelNG::CreateFrameNode(nodeId, true);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 void* createSearchNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = SearchModelNG::CreateFrameNode(nodeId);
@@ -453,6 +511,7 @@ void* createGridColNode(ArkUI_Int32 nodeId)
 void* createImageAnimatorNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = ImageAnimatorModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -476,6 +535,7 @@ void* createSelectNode(ArkUI_Int32 nodeId)
 void* createTabContentNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = TabContentModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -488,6 +548,7 @@ void* createCustomSpanNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(customSpanNode);
 }
 
+#ifdef QRCODEGEN_SUPPORT
 void* createQRcodeNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = QRCodeModelNG::CreateFrameNode(nodeId);
@@ -495,78 +556,191 @@ void* createQRcodeNode(ArkUI_Int32 nodeId)
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
+#endif
+
+void* createBadgeNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = BadgeModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createTextClockNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = TextClockModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createTextTimerNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = TextTimerModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createMarqueeNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = MarqueeModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createCheckBoxGroupNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = CheckBoxGroupModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createRatingNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = RatingModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* CreateCustomNode(ArkUI_CharPtr tag)
+{
+    auto frameNode = CustomNodeExtModelNG::CreateFrameNode(std::string(tag));
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* GetOrCreateCustomNode(ArkUI_CharPtr tag)
+{
+    auto frameNode = CustomNodeExtModelNG::GetOrCreateFrameNode(std::string(tag));
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return AceType::RawPtr(frameNode);
+}
 
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
+
+static createArkUIFrameNode* createArkUIFrameNodes[] = {
+    nullptr,
+    createTextNode,
+    createSpanNode,
+    createImageSpanNode,
+    createImageNode,
+    createToggleNode,
+    createLoadingProgress,
+    createTextInputNode,
+    createStackNode,
+    createScrollNode,
+    createListNode,
+    createSwiperNode,
+    createTextAreaNode,
+    createButtonNode,
+    createProgressNode,
+    createCheckBoxNode,
+    createColumnNode,
+    createRowNode,
+    createFlexNode,
+    createListItemNode,
+    createTabsNode,
+    nullptr, // Navigator
+    nullptr, // Web
+    createSliderNode,
+    createCanvasNode,
+    createRadioNode, // Radio
+    createGridNode,
+#ifdef XCOMPONENT_SUPPORTED
+    createXComponentNode,
+#else
+    nullptr,
+#endif
+    nullptr, // SideBar
+    createRefreshNode,
+    createRootNode,
+    createComponentRootNode,
+    createListItemGroupNode,
+    createDatePickerNode,
+    createTimePickerNode,
+    createTextPickerNode,
+#ifndef ARKUI_WEARABLE
+    createCalendarPickerNode,
+#else
+    nullptr,
+#endif
+    createGridItemNode,
+    createCustomNode,
+    createWaterFlowNode,
+    createFlowItemNode,
+    createRelativeContainerNode,
+    createBlankNode,
+    createDividerNode,
+    createAlphabetIndexerNode,
+    createSearchNode,
+    createGridRowNode,
+    createGridColNode,
+    createSelectNode,
+    createImageAnimatorNode,
+    createCircleNode,
+    createTabContentNode,
+    createNavigationNode,
+    createCustomSpanNode,
+    createSymbolNode,
+#ifdef QRCODEGEN_SUPPORT
+    createQRcodeNode,
+#else
+    nullptr,
+#endif
+    createBadgeNode,
+    createTextClockNode,
+    createTextTimerNode,
+    createMarqueeNode,
+    createCheckBoxGroupNode,
+    createRatingNode,
+#ifdef XCOMPONENT_SUPPORTED
+    createXComponentTextureNode,
+#else
+    nullptr,
+#endif
+    createArcAlphabetIndexerNode,
+#ifdef WINDOW_SCENE_SUPPORTED
+    createEmbeddedComponent,
+#else
+    nullptr,
+#endif
+};
+
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 {
-    static createArkUIFrameNode* createArkUIFrameNodes[] = {
-        nullptr,
-        createTextNode,
-        createSpanNode,
-        createImageSpanNode,
-        createImageNode,
-        createToggleNode,
-        createLoadingProgress,
-        createTextInputNode,
-        createStackNode,
-        createScrollNode,
-        createListNode,
-        createSwiperNode,
-        createTextAreaNode,
-        createButtonNode,
-        createProgressNode,
-        createCheckBoxNode,
-        createColumnNode,
-        createRowNode,
-        createFlexNode,
-        createListItemNode,
-        createTabsNode,
-        nullptr, // Navigator
-        nullptr, // Web
-        createSliderNode,
-        createCanvasNode,
-        createRadioNode, // Radio
-        createGridNode,
-#ifdef XCOMPONENT_SUPPORTED
-        createXComponentNode,
-#else
-        nullptr,
-#endif
-        nullptr, // SideBar
-        createRefreshNode,
-        createRootNode,
-        createComponentRootNode,
-        createListItemGroupNode,
-        createDatePickerNode,
-        createTimePickerNode,
-        createTextPickerNode,
-        createCalendarPickerNode,
-        createGridItemNode,
-        createCustomNode,
-        createWaterFlowNode,
-        createFlowItemNode,
-        createRelativeContainerNode,
-        createBlankNode,
-        createDividerNode,
-        createAlphabetIndexerNode,
-        createSearchNode,
-        createGridRowNode,
-        createGridColNode,
-        createSelectNode,
-        createImageAnimatorNode,
-        createCircleNode,
-        createTabContentNode,
-        createNavigationNode,
-        createCustomSpanNode,
-        createQRcodeNode,
-    };
-    if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
+    if (tag >= static_cast<ArkUINodeType>(sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*))) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);
         return nullptr;
     }
     CHECK_NULL_RETURN(createArkUIFrameNodes[tag], nullptr);
     if (nodeId == ARKUI_AUTO_GENERATE_NODE_ID) {
         nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    }
+    return createArkUIFrameNodes[tag](nodeId);
+}
+
+void* CreateNodeWithParams(ArkUINodeType tag, ArkUI_Int32 nodeId, const ArkUI_Params& params)
+{
+    if (tag >= static_cast<ArkUINodeType>(sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*))) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);
+        return nullptr;
+    }
+    CHECK_NULL_RETURN(createArkUIFrameNodes[tag], nullptr);
+    if (nodeId == ARKUI_AUTO_GENERATE_NODE_ID) {
+        nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    }
+#ifdef XCOMPONENT_SUPPORTED
+    if (tag == ArkUINodeType::ARKUI_XCOMPONENT) {
+        return createXComponentNodeWithParams(nodeId, params);
+    }
+#endif
+    if (tag == ArkUINodeType::ARKUI_TOGGLE) {
+        return createToggleNodeWithParams(nodeId, params);
     }
     return createArkUIFrameNodes[tag](nodeId);
 }
@@ -677,7 +851,7 @@ void InsertChildBefore(void* parentNode, void* childNode, void* siblingNode)
 
 void RegisterCompanion(void* node, int peerId, ArkUI_Int32 flags)
 {
-    if (flags == ArkUIAPINodeFlags::NONE) {
+    if (flags == ArkUIAPINodeFlags::CUSTOM_NONE) {
         return;
     }
     auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));

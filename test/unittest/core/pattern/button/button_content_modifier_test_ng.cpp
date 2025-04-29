@@ -342,9 +342,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest001, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(false);
-    buttonPattern->OnTouchDown();
+    buttonPattern->HandlePressedStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -383,9 +383,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest002, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(1);
-    buttonPattern->OnTouchDown();
+    buttonPattern->HandlePressedStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -424,9 +424,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest003, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(0);
-    buttonPattern->OnTouchDown();
+    buttonPattern->HandlePressedStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -465,9 +465,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest004, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(-1);
-    buttonPattern->OnTouchDown();
+    buttonPattern->HandlePressedStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -506,9 +506,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest005, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(BIG_INT);
-    buttonPattern->OnTouchDown();
+    buttonPattern->HandlePressedStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -547,9 +547,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest006, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(NEGATIVE_BIG_INT);
-    buttonPattern->OnTouchDown();
+    buttonPattern->HandlePressedStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -588,9 +588,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest007, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(true);
-    buttonPattern->OnTouchUp();
+    buttonPattern->HandleNormalStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -629,9 +629,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest008, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(false);
-    buttonPattern->OnTouchUp();
+    buttonPattern->HandleNormalStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -670,9 +670,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest009, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(1);
-    buttonPattern->OnTouchUp();
+    buttonPattern->HandleNormalStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -711,9 +711,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest010, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(0);
-    buttonPattern->OnTouchUp();
+    buttonPattern->HandleNormalStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -752,9 +752,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest011, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(-1);
-    buttonPattern->OnTouchUp();
+    buttonPattern->HandleNormalStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -793,9 +793,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest012, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(BIG_INT);
-    buttonPattern->OnTouchUp();
+    buttonPattern->HandleNormalStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -834,9 +834,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest013, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(NEGATIVE_BIG_INT);
-    buttonPattern->OnTouchUp();
+    buttonPattern->HandleNormalStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -876,9 +876,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest014, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(false);
-    buttonPattern->OnTouchDown();
+    buttonPattern->HandlePressedStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -918,9 +918,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest015, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(1);
-    buttonPattern->OnTouchDown();
+    buttonPattern->HandlePressedStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -960,9 +960,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest016, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(0);
-    buttonPattern->OnTouchDown();
+    buttonPattern->HandlePressedStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -1002,9 +1002,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest017, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(-1);
-    buttonPattern->OnTouchDown();
+    buttonPattern->HandlePressedStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -1044,9 +1044,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest018, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(BIG_INT);
-    buttonPattern->OnTouchDown();
+    buttonPattern->HandlePressedStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -1086,9 +1086,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest019, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(NEGATIVE_BIG_INT);
-    buttonPattern->OnTouchDown();
+    buttonPattern->HandlePressedStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -1128,9 +1128,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest020, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(true);
-    buttonPattern->OnTouchUp();
+    buttonPattern->HandleNormalStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -1170,9 +1170,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest021, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(false);
-    buttonPattern->OnTouchUp();
+    buttonPattern->HandleNormalStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -1212,9 +1212,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest022, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(1);
-    buttonPattern->OnTouchUp();
+    buttonPattern->HandleNormalStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -1254,9 +1254,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest023, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(0);
-    buttonPattern->OnTouchUp();
+    buttonPattern->HandleNormalStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -1296,9 +1296,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest024, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(-1);
-    buttonPattern->OnTouchUp();
+    buttonPattern->HandleNormalStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -1338,9 +1338,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest025, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(BIG_INT);
-    buttonPattern->OnTouchUp();
+    buttonPattern->HandleNormalStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -1380,9 +1380,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest026, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(NEGATIVE_BIG_INT);
-    buttonPattern->OnTouchUp();
+    buttonPattern->HandleNormalStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -1422,9 +1422,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest027, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(false);
-    buttonPattern->OnTouchDown();
+    buttonPattern->HandlePressedStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -1464,9 +1464,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest028, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(1);
-    buttonPattern->OnTouchDown();
+    buttonPattern->HandlePressedStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -1506,9 +1506,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest029, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(0);
-    buttonPattern->OnTouchDown();
+    buttonPattern->HandlePressedStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -1548,9 +1548,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest030, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(-1);
-    buttonPattern->OnTouchDown();
+    buttonPattern->HandlePressedStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -1590,9 +1590,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest031, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(BIG_INT);
-    buttonPattern->OnTouchDown();
+    buttonPattern->HandlePressedStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -1632,9 +1632,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest032, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(NEGATIVE_BIG_INT);
-    buttonPattern->OnTouchDown();
+    buttonPattern->HandlePressedStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -1674,9 +1674,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest033, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(true);
-    buttonPattern->OnTouchUp();
+    buttonPattern->HandleNormalStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -1716,9 +1716,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest034, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(false);
-    buttonPattern->OnTouchUp();
+    buttonPattern->HandleNormalStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -1758,9 +1758,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest035, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(1);
-    buttonPattern->OnTouchUp();
+    buttonPattern->HandleNormalStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -1800,9 +1800,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest036, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(0);
-    buttonPattern->OnTouchUp();
+    buttonPattern->HandleNormalStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -1842,9 +1842,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest037, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(-1);
-    buttonPattern->OnTouchUp();
+    buttonPattern->HandleNormalStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -1884,9 +1884,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest038, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(BIG_INT);
-    buttonPattern->OnTouchUp();
+    buttonPattern->HandleNormalStyle();
 
     /**
      * @tc.steps: step3. make builderFunc
@@ -1926,9 +1926,9 @@ HWTEST_F(ButtonContentModifierTestNg, ButtonContentModifierTest039, TestSize.Lev
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(NEGATIVE_BIG_INT);
-    buttonPattern->OnTouchUp();
+    buttonPattern->HandleNormalStyle();
 
     /**
      * @tc.steps: step3. make builderFunc

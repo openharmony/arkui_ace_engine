@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -24,6 +22,24 @@ namespace OHOS::Ace::NG {
 TitleBarNode::TitleBarNode(const std::string& tag, int32_t nodeId)
     : FrameNode(tag, nodeId, MakeRefPtr<TitleBarPattern>())
 {}
+
+TitleBarNode::~TitleBarNode()
+{
+    auto pipeline = GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto titleBarPattern = GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    auto backButtonDialog = titleBarPattern->GetBackButtonDialogNode();
+    if (backButtonDialog) {
+        overlayManager->CloseDialog(backButtonDialog);
+    }
+    auto menuItemDialog = titleBarPattern->GetLargeFontPopUpDialogNode();
+    if (menuItemDialog) {
+        overlayManager->CloseDialog(menuItemDialog);
+    }
+}
 
 RefPtr<TitleBarNode> TitleBarNode::GetOrCreateTitleBarNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
@@ -54,5 +70,4 @@ void TitleBarNode::MarkIsInitialTitle(bool isInitialTitle)
     auto pattern = GetPattern<TitleBarPattern>();
     pattern->MarkIsInitialTitle(isInitialTitle);
 }
-
 } // namespace OHOS::Ace::NG

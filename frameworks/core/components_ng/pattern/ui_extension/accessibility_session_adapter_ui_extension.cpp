@@ -16,10 +16,7 @@
 #include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.h"
 
 #include <cinttypes>
-#include "base/log/log.h"
-#include "core/accessibility/accessibility_constants.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
-#include "core/event/ace_events.h"
 
 namespace OHOS::Ace::NG {
 void AccessibilitySessionAdapterUIExtension::TransferHoverEvent(const PointF &point, SourceType source,
@@ -33,5 +30,10 @@ void AccessibilitySessionAdapterUIExtension::TransferHoverEvent(const PointF &po
         point.ToString().c_str(), source, eventType, timeMs);
     sessionWrapper->TransferAccessibilityHoverEvent(point.GetX(), point.GetY(),
         static_cast<int32_t>(source), static_cast<int32_t>(eventType), timeMs);
+}
+
+bool AccessibilitySessionAdapterUIExtension::IgnoreHostNode() const
+{
+    return true;
 }
 } // namespace OHOS::Ace::NG

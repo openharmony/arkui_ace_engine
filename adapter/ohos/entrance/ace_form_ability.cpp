@@ -16,17 +16,8 @@
 #include "adapter/ohos/entrance/ace_form_ability.h"
 
 #include "form_provider_client.h"
-#include "res_config.h"
-#include "resource_manager.h"
-#include "session_info.h"
 
-#include "adapter/ohos/entrance/pa_container.h"
 #include "adapter/ohos/entrance/pa_engine/pa_backend.h"
-#include "adapter/ohos/entrance/platform_event_callback.h"
-#include "adapter/ohos/entrance/utils.h"
-#include "base/log/log.h"
-#include "base/utils/utils.h"
-#include "core/common/backend.h"
 
 namespace OHOS::Ace {
 using namespace OHOS::AAFwk;
@@ -206,8 +197,8 @@ sptr<IRemoteObject> AceFormAbility::GetFormRemoteObject()
     if (formProviderRemoteObject_ == nullptr) {
         sptr<FormProviderClient> providerClient = new (std::nothrow) FormProviderClient();
         std::shared_ptr<Ability> thisAbility = this->shared_from_this();
-        if (thisAbility == nullptr) {
-            TAG_LOGE(AceLogTag::ACE_FORM, "Get form remote object failed, ability is nullptr");
+        if (thisAbility == nullptr || providerClient == nullptr) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "Get form remote object failed, ability or providerClient is nullptr");
             return nullptr;
         }
         providerClient->SetOwner(thisAbility);

@@ -19,12 +19,26 @@
 #include <map>
 
 #include "core/event/ace_events.h"
+#include "core/event/focus_axis_event.h"
+#include "core/event/non_pointer_event.h"
 
 namespace OHOS::MMI {
 class KeyEvent;
 }
 
 namespace OHOS::Ace {
+enum class ModifierKeyName {
+    /** Ctrl. */
+    ModifierKeyCtrl = 1 << 0,
+    /** Shift. */
+    ModifierKeyShift = 1 << 1,
+    /** Alt. */
+    ModifierKeyAlt = 1 << 2,
+    /** Fn. */
+    ModifierKeyFn = 1 << 3,
+};
+
+uint64_t CalculateModifierKeyState(const std::vector<OHOS::Ace::KeyCode>& status);
 
 enum class KeyCode : int32_t {
     KEY_UNKNOWN = -1,
@@ -437,52 +451,26 @@ enum class KeyAction : int32_t {
     CLICK = 3,
 };
 
-enum class KeyIntention : int32_t {
-    INTENTION_UNKNOWN = -1,
-    INTENTION_UP = 1,
-    INTENTION_DOWN = 2,
-    INTENTION_LEFT = 3,
-    INTENTION_RIGHT = 4,
-    INTENTION_SELECT = 5,
-    INTENTION_ESCAPE = 6,
-    INTENTION_BACK = 7,
-    INTENTION_FORWARD = 8,
-    INTENTION_MENU = 9,
-    INTENTION_HOME = 10,
-    INTENTION_PAGE_UP = 11,
-    INTENTION_PAGE_DOWN = 12,
-    INTENTION_ZOOM_OUT = 13,
-    INTENTION_ZOOM_IN = 14,
-
-    INTENTION_MEDIA_PLAY_PAUSE = 100,
-    INTENTION_MEDIA_FAST_FORWARD = 101,
-    INTENTION_MEDIA_FAST_REWIND = 102,
-    INTENTION_MEDIA_FAST_PLAYBACK = 103,
-    INTENTION_MEDIA_NEXT = 104,
-    INTENTION_MEDIA_PREVIOUS = 105,
-    INTENTION_MEDIA_MUTE = 106,
-    INTENTION_VOLUTE_UP = 107,
-    INTENTION_VOLUTE_DOWN = 108,
-
-    INTENTION_CALL = 200,
-    INTENTION_ENDCALL = 201,
-    INTENTION_REJECTCALL = 202,
-
-    INTENTION_CAMERA = 300,
-};
-
 constexpr int32_t ASCII_START_UPPER_CASE_LETTER = 65;
 constexpr int32_t ASCII_START_LOWER_CASE_LETTER = 97;
 
 ACE_FORCE_EXPORT const char* KeyToString(int32_t code);
 
-struct KeyEvent final {
-    KeyEvent() = default;
-    KeyEvent(KeyCode code, KeyAction action, std::vector<KeyCode> pressedCodes, int32_t repeatTime, TimeStamp timeStamp,
-        int32_t metaKey, int64_t deviceId, SourceType sourceType, std::vector<uint8_t> enhanceData)
-        : code(code), action(action), pressedCodes(std::move(pressedCodes)), repeatTime(repeatTime),
-          timeStamp(timeStamp), metaKey(metaKey), deviceId(deviceId), sourceType(sourceType), enhanceData(enhanceData)
-    {}
+struct KeyEvent final : public NonPointerEvent {
+    KeyEvent()
+    {
+        eventType = UIInputEventType::KEY;
+    }
+    KeyEvent(KeyCode code, KeyAction action, std::vector<KeyCode> pressedCodes, int32_t repeatTimeStamp,
+        TimeStamp timeStamp, int32_t metaKey, int64_t deviceIdNum, SourceType source, std::vector<uint8_t> enhanceData)
+        : code(code), action(action), pressedCodes(std::move(pressedCodes)), timeStamp(timeStamp), metaKey(metaKey),
+          enhanceData(enhanceData)
+    {
+        repeatTime = repeatTimeStamp;
+        deviceId = deviceIdNum;
+        sourceType = source;
+        eventType = UIInputEventType::KEY;
+    }
     KeyEvent(KeyCode code, KeyAction action, int32_t repeatTime = 0, int64_t timeStamp = 0, int64_t deviceId = 0,
         SourceType sourceType = SourceType::KEYBOARD)
     {
@@ -512,7 +500,7 @@ struct KeyEvent final {
         }
         return false;
     }
- 
+
     bool IsExactlyKey(const std::vector<KeyCode>& expectCodes) const
     {
         auto pressedKeysCnt = pressedCodes.size();
@@ -547,6 +535,11 @@ struct KeyEvent final {
     {
         return IsKey({ KeyCode::KEY_SHIFT_LEFT, expectCodes }) || IsKey({ KeyCode::KEY_SHIFT_RIGHT, expectCodes });
     }
+    bool IsExactlyShiftWith(KeyCode expectCodes) const
+    {
+        return IsExactlyKey({ KeyCode::KEY_SHIFT_LEFT, expectCodes }) ||
+            IsExactlyKey({ KeyCode::KEY_SHIFT_RIGHT, expectCodes });
+    }
     bool IsNumberKey() const
     {
         return ((KeyCode::KEY_0 <= code && code <= KeyCode::KEY_9) ||
@@ -573,26 +566,30 @@ struct KeyEvent final {
     {
         return KeyCode::KEY_ESCAPE == code;
     }
+    bool IsPreIme() const
+    {
+        return isPreIme;
+    }
 
     std::string ConvertInputCodeToString() const;
     std::string ConvertCodeToString() const;
 
     KeyCode code { KeyCode::KEY_UNKNOWN };
-    const char* key = "";
+    std::string key;
     KeyAction action { KeyAction::UNKNOWN };
     std::vector<KeyCode> pressedCodes;
     // When the key is held down for a long period of time, it will be accumulated once in a while.
     // Note that In the long press scene, you will receive a DOWN and an extra LONG_PRESS event. If you only want to
     // identify the click event, you can use CLICK event.
-    int32_t repeatTime = 0;
     TimeStamp timeStamp;
     int32_t metaKey = 0;
-    int64_t deviceId = 0;
-    SourceType sourceType { SourceType::NONE };
     KeyIntention keyIntention { KeyIntention::INTENTION_UNKNOWN };
     bool enableCapsLock = false;
     bool isPreIme = false;
     bool isRedispatch = false;
+    bool numLock = false;
+    bool scrollLock = false;
+    uint32_t unicode = 0;
     std::vector<uint8_t> enhanceData;
     std::shared_ptr<MMI::KeyEvent> rawKeyEvent;
     std::string msg = "";
@@ -605,7 +602,8 @@ struct KeyEvent final {
         ss << "pressedCodes=[";
         std::for_each(pressedCodes.begin(), pressedCodes.end(),
             [&ss](const KeyCode& code) { ss << static_cast<int32_t>(code) << ", "; });
-        ss << "]";
+        ss << "]" << ", ";
+        ss << "isPreIme = " << isPreIme;
         return ss.str();
     }
 };
@@ -617,7 +615,7 @@ public:
     explicit KeyEventInfo(const KeyEvent& event) : BaseEventInfo("keyEvent")
     {
         keyCode_ = event.code;
-        keyText_ = event.key;
+        keyText_ = event.key.c_str();
         keyType_ = event.action;
         keySource_ = event.sourceType;
         keyIntention_ = event.keyIntention;
@@ -626,6 +624,10 @@ public:
         SetTimeStamp(event.timeStamp);
         keyMsg_ = event.msg;
         SetPressedKeyCodes(event.pressedCodes);
+        unicode_ = event.unicode;
+        numLock_ = event.numLock;
+        capsLock_ = event.enableCapsLock;
+        scrollLock_ = event.scrollLock;
     };
     ~KeyEventInfo() override = default;
 
@@ -658,6 +660,29 @@ public:
     {
         metaKey_ = metaKey;
     }
+
+    uint32_t GetUnicode() const
+    {
+        return unicode_;
+    }
+
+    bool GetNumLock() const
+    {
+        return numLock_;
+    }
+
+    bool GetCapsLock() const
+    {
+        return capsLock_;
+    }
+
+    bool GetScrollLock() const
+    {
+        return scrollLock_;
+    }
+
+    void ParseKeyEvent(KeyEvent& keyEvent);
+
 private:
     KeyCode keyCode_ = KeyCode::KEY_UNKNOWN;
     const char* keyText_ = "";
@@ -666,23 +691,39 @@ private:
     SourceType keySource_ = SourceType::NONE;
     KeyIntention keyIntention_ = KeyIntention::INTENTION_UNKNOWN;
     std::string keyMsg_ = "";
+    uint32_t unicode_ = 0;
+    bool numLock_= false;
+    bool capsLock_ = false;
+    bool scrollLock_ = false;
 };
 
 enum class BlurReason : int32_t {
     FOCUS_SWITCH = 0,
     WINDOW_BLUR = 1,
-    FRAME_DESTROY = 2,
+    FRAME_DESTROY = 2, // frame node detached from main tree
     VIEW_SWITCH = 3,
+    CLEAR_FOCUS = 4, // User api clearFocus triggered
+    BACK_TO_TABSTOP = 5,
+};
+
+enum class FocusReason : int32_t {
+    DEFAULT = 0,
+    FOCUS_TRAVEL = 1,
+    FOCUS_TOUCH = 2,
+    WINDOW_FOCUS = 3,
+    VIEW_SWITCH = 4,
 };
 
 using OnKeyEventFunc = std::function<bool(const KeyEvent&)>;
 using OnKeyCallbackFunc = std::function<void(KeyEventInfo&)>;
-using OnKeyPreImeFunc = std::function<bool(KeyEventInfo&)>;
+using OnKeyConsumeFunc = std::function<bool(KeyEventInfo&)>;
 using OnFocusFunc = std::function<void()>;
 using OnClearFocusStateFunc = std::function<void()>;
 using OnPaintFocusStateFunc = std::function<bool()>;
 using OnBlurFunc = std::function<void()>;
 using OnBlurReasonFunc = std::function<void(BlurReason reason)>;
 using OnPreFocusFunc = std::function<void()>;
+using OnKeyEventDispatchFunc = std::function<bool(KeyEventInfo&)>;
+using OnFocusAxisEventFunc = std::function<void(NG::FocusAxisEventInfo&)>;
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_KEY_EVENT_H

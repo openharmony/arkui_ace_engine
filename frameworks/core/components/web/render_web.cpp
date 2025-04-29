@@ -125,7 +125,7 @@ void RenderWeb::RegistVirtualKeyBoardListener()
         return;
     }
     pipelineContext->SetVirtualKeyBoardCallback(
-        [weak = AceType::WeakClaim(this)](int32_t width, int32_t height, double keyboard) {
+        [weak = AceType::WeakClaim(this)](int32_t width, int32_t height, double keyboard, bool isCustomKeyboard) {
             auto renderWeb = weak.Upgrade();
             if (renderWeb) {
                 return renderWeb->ProcessVirtualKeyBoard(width, height, keyboard);
@@ -152,27 +152,7 @@ void RenderWeb::Update(const RefPtr<Component>& component)
     web_ = web;
     if (delegate_) {
         delegate_->SetComponent(web);
-        delegate_->UpdateJavaScriptEnabled(web->GetJsEnabled());
-        delegate_->UpdateBlockNetworkImage(web->GetOnLineImageAccessEnabled());
-        delegate_->UpdateAllowFileAccess(web->GetFileAccessEnabled());
-        delegate_->UpdateLoadsImagesAutomatically(web->GetImageAccessEnabled());
-        delegate_->UpdateMixedContentMode(web->GetMixedMode());
-        delegate_->UpdateSupportZoom(web->GetZoomAccessEnabled());
-        delegate_->UpdateDomStorageEnabled(web->GetDomStorageAccessEnabled());
-        delegate_->UpdateGeolocationEnabled(web->GetGeolocationAccessEnabled());
-        delegate_->UpdateCacheMode(web->GetCacheMode());
-        delegate_->UpdateOverviewModeEnabled(web->GetOverviewModeAccessEnabled());
-        delegate_->UpdateFileFromUrlEnabled(web->GetFileFromUrlAccessEnabled());
-        delegate_->UpdateDatabaseEnabled(web->GetDatabaseAccessEnabled());
-        delegate_->UpdateTextZoomRatio(web->GetTextZoomRatio());
-        delegate_->UpdateWebDebuggingAccess(web->GetWebDebuggingAccessEnabled());
-        delegate_->UpdateMediaPlayGestureAccess(web->IsMediaPlayGestureAccess());
-        delegate_->UpdatePinchSmoothModeEnabled(web->GetPinchSmoothModeEnabled());
-        delegate_->UpdateMultiWindowAccess(web->GetMultiWindowAccessEnabled());
-        delegate_->UpdateAllowWindowOpenMethod(web->GetAllowWindowOpenMethod());
-        delegate_->UpdateNativeVideoPlayerConfig(
-            std::get<0>(web->GetNativeVideoPlayerConfig()),
-            std::get<1>(web->GetNativeVideoPlayerConfig()));
+        UpdateDelegate();
         auto userAgent = web->GetUserAgent();
         if (!userAgent.empty()) {
             delegate_->UpdateUserAgent(userAgent);
@@ -191,6 +171,32 @@ void RenderWeb::Update(const RefPtr<Component>& component)
         onDrop_ = web->GetOnDropId();
     }
     MarkNeedLayout();
+}
+
+void RenderWeb::UpdateDelegate()
+{
+    delegate_->UpdateJavaScriptEnabled(web_->GetJsEnabled());
+    delegate_->UpdateBlockNetworkImage(web_->GetOnLineImageAccessEnabled());
+    delegate_->UpdateAllowFileAccess(web_->GetFileAccessEnabled());
+    delegate_->UpdateLoadsImagesAutomatically(web_->GetImageAccessEnabled());
+    delegate_->UpdateMixedContentMode(web_->GetMixedMode());
+    delegate_->UpdateSupportZoom(web_->GetZoomAccessEnabled());
+    delegate_->UpdateDomStorageEnabled(web_->GetDomStorageAccessEnabled());
+    delegate_->UpdateGeolocationEnabled(web_->GetGeolocationAccessEnabled());
+    delegate_->UpdateCacheMode(web_->GetCacheMode());
+    delegate_->UpdateOverviewModeEnabled(web_->GetOverviewModeAccessEnabled());
+    delegate_->UpdateFileFromUrlEnabled(web_->GetFileFromUrlAccessEnabled());
+    delegate_->UpdateDatabaseEnabled(web_->GetDatabaseAccessEnabled());
+    delegate_->UpdateTextZoomRatio(web_->GetTextZoomRatio());
+    delegate_->UpdateWebDebuggingAccess(web_->GetWebDebuggingAccessEnabled());
+    delegate_->UpdateMediaPlayGestureAccess(web_->IsMediaPlayGestureAccess());
+    delegate_->UpdatePinchSmoothModeEnabled(web_->GetPinchSmoothModeEnabled());
+    delegate_->UpdateMultiWindowAccess(web_->GetMultiWindowAccessEnabled());
+    delegate_->UpdateAllowWindowOpenMethod(web_->GetAllowWindowOpenMethod());
+    delegate_->UpdateNativeVideoPlayerConfig(
+        std::get<0>(web_->GetNativeVideoPlayerConfig()),
+        std::get<1>(web_->GetNativeVideoPlayerConfig()));
+    delegate_->UpdateOptimizeParserBudgetEnabled(web_->GetOptimizeParserBudgetEnabled());
 }
 
 bool RenderWeb::ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard)
@@ -1207,7 +1213,7 @@ void RenderWeb::PanOnActionEnd(const GestureEvent& info)
     SetPreDragDropNode(nullptr);
 }
 
-void RenderWeb::PanOnActionCancel()
+void RenderWeb::PanOnActionCancel(const GestureEvent& info)
 {
     isDragging_ = false;
     auto pipelineContext = context_.Upgrade();

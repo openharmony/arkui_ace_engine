@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,32 +15,21 @@
 
 #include "core/common/layout_inspector.h"
 
-#include <string>
-
 #include "include/core/SkImage.h"
 #include "include/core/SkString.h"
-#include "include/core/SkColorSpace.h"
 #include "include/utils/SkBase64.h"
 
-#include "wm/window.h"
+#include "connect_server_manager.h"
 
 #include "adapter/ohos/osal/pixel_map_ohos.h"
-#include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/subwindow/subwindow_ohos.h"
+#include "base/log/ace_checker.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
-#include "base/utils/utils.h"
-#include "base/json/json_util.h"
-#include "base/utils/system_properties.h"
+#include "base/websocket/websocket_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/common/connect_server_manager.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
-#include "core/components_ng/base/inspector.h"
 #include "core/components_v2/inspector/inspector.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "dm/display_manager.h"
-#include "foundation/ability/ability_runtime/frameworks/native/runtime/connect_server_manager.h"
 
 namespace OHOS::Ace {
 
@@ -122,11 +111,27 @@ const OHOS::sptr<OHOS::Rosen::Window> GetWindow(int32_t containerId)
 }
 } // namespace
 
+constexpr static char RECNODE_SELFID[] = "selfId";
+constexpr static char RECNODE_NODEID[] = "nodeID";
+constexpr static char RECNODE_PARENTID[] = "parentID";
+constexpr static char RECNODE_NAME[] = "value";
+constexpr static char RECNODE_DEBUGLINE[] = "debugLine";
+constexpr static char RECNODE_CHILDREN[] = "RSNode";
+constexpr static char ARK_DEBUGGER_LIB_PATH[] = "libark_connect_inspector.z.so";
+static constexpr char START_PERFORMANCE_CHECK_MESSAGE[] = "StartArkPerformanceCheck";
+static constexpr char END_PERFORMANCE_CHECK_MESSAGE[] = "EndArkPerformanceCheck";
+
 bool LayoutInspector::stateProfilerStatus_ = false;
 bool LayoutInspector::layoutInspectorStatus_ = false;
+bool LayoutInspector::isUseStageModel_ = false;
+std::mutex LayoutInspector::recMutex_;
 ProfilerStatusCallback LayoutInspector::jsStateProfilerStatusCallback_ = nullptr;
 RsProfilerNodeMountCallback LayoutInspector::rsProfilerNodeMountCallback_ = nullptr;
 const char PNG_TAG[] = "png";
+NG::InspectorTreeMap LayoutInspector::recNodeInfos_;
+std::once_flag LayoutInspector::loadFlag;
+void* LayoutInspector::handlerConnectServerSo = nullptr;
+LayoutInspector::SetArkUICallback LayoutInspector::setArkUICallback = nullptr;
 
 void LayoutInspector::SupportInspector()
 {
@@ -146,7 +151,7 @@ void LayoutInspector::SupportInspector()
 
     auto sendTask = [treeJsonStr, jsonSnapshotStr = message->ToString(), container]() {
         if (container->IsUseStageModel()) {
-            OHOS::AbilityRuntime::ConnectServerManager::Get().SendInspector(treeJsonStr, jsonSnapshotStr);
+            WebSocketManager::SendInspector(treeJsonStr, jsonSnapshotStr);
         } else {
             OHOS::Ace::ConnectServerManager::Get().SendInspector(treeJsonStr, jsonSnapshotStr);
         }
@@ -187,9 +192,9 @@ void LayoutInspector::SetRsProfilerNodeMountCallback(RsProfilerNodeMountCallback
     rsProfilerNodeMountCallback_ = callback;
 }
 
-void LayoutInspector::SendStateProfilerMessage(const std::string& message)
+void LayoutInspector::SendMessage(const std::string& message)
 {
-    OHOS::AbilityRuntime::ConnectServerManager::Get().SendArkUIStateProfilerMessage(message);
+    WebSocketManager::SendMessage(message);
 }
 
 void LayoutInspector::SetStateProfilerStatus(bool status)
@@ -200,33 +205,50 @@ void LayoutInspector::SetStateProfilerStatus(bool status)
     taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUISetStateProfilerStatus");
 }
 
+void LayoutInspector::ConnectServerCallback()
+{
+    TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "connect server callback isStage:%{public}d", isUseStageModel_);
+    if (isUseStageModel_) {
+        TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "connect server, reset callback.");
+        WebSocketManager::SetRecordCallback(LayoutInspector::HandleStartRecord, LayoutInspector::HandleStopRecord);
+    }
+}
+
 void LayoutInspector::SetCallback(int32_t instanceId)
 {
+    TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "InstanceId:%{public}d", instanceId);
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_VOID(container);
     if (container->IsUseStageModel()) {
-        OHOS::AbilityRuntime::ConnectServerManager::Get().SetLayoutInspectorCallback(
-            [](int32_t containerId) { return CreateLayoutInfo(containerId); },
-            [](bool status) { return SetStatus(status); });
+        WebSocketManager::SetProfilerCallBack([](bool status) { return SetStateProfilerStatus(status); });
+        WebSocketManager::SetSwitchCallback(
+            [](int32_t containerId) { return CreateLayoutInfo(containerId); }, instanceId);
+        WebSocketManager::SetRecordCallback(LayoutInspector::HandleStartRecord, LayoutInspector::HandleStopRecord);
+        WebSocketManager::RegisterConnectServerCallback(LayoutInspector::ConnectServerCallback);
+        isUseStageModel_ = true;
+        RegisterConnectCallback();
     } else {
         OHOS::Ace::ConnectServerManager::Get().SetLayoutInspectorCallback(
-            [](int32_t containerId) { return CreateLayoutInfo(containerId); },
-            [](bool status) { return SetStatus(status); });
+            [](int32_t containerId) { return CreateLayoutInfo(containerId); });
+        isUseStageModel_ = false;
     }
 
-    OHOS::AbilityRuntime::ConnectServerManager::Get().SetStateProfilerCallback(
-        [](bool status) { return SetStateProfilerStatus(status); });
+    SendInstanceMessageCallBack sendInstanceMessageCallBack = [](int32_t id) {
+        WebSocketManager::SetProfilerCallBack(
+            [](bool status) { return SetStateProfilerStatus(status); });
+        WebSocketManager::SetSwitchCallback([](int32_t containerId) { return CreateLayoutInfo(containerId); }, id);
+    };
+    WebSocketManager::RegisterSendInstanceMessageCallback(sendInstanceMessageCallBack);
 }
 
-void LayoutInspector::CreateLayoutInfo(int32_t containerId)
+void LayoutInspector::CreateContainerLayoutInfo(RefPtr<Container>& container)
 {
-    auto container = Container::GetFoucsed();
     CHECK_NULL_VOID(container);
     if (container->IsDynamicRender()) {
         container = Container::CurrentSafely();
         CHECK_NULL_VOID(container);
     }
-    containerId = container->GetInstanceId();
+    int32_t containerId = container->GetInstanceId();
     ContainerScope socpe(containerId);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -238,7 +260,7 @@ void LayoutInspector::CreateLayoutInfo(int32_t containerId)
         CHECK_NULL_VOID(message);
         auto sendResultTask = [treeJsonStr = std::move(treeJson), jsonSnapshotStr = message->ToString(), container]() {
             if (container->IsUseStageModel()) {
-                OHOS::AbilityRuntime::ConnectServerManager::Get().SendInspector(treeJsonStr, jsonSnapshotStr);
+                WebSocketManager::SendInspector(treeJsonStr, jsonSnapshotStr);
             } else {
                 OHOS::Ace::ConnectServerManager::Get().SendInspector(treeJsonStr, jsonSnapshotStr);
             }
@@ -247,6 +269,21 @@ void LayoutInspector::CreateLayoutInfo(int32_t containerId)
     };
     context->GetTaskExecutor()->PostTask(
         std::move(getInspectorTask), TaskExecutor::TaskType::UI, "ArkUIGetInspectorTreeJson");
+}
+
+void LayoutInspector::CreateLayoutInfo(int32_t containerId)
+{
+    auto container = Container::GetFoucsed();
+    return CreateContainerLayoutInfo(container);
+}
+
+void LayoutInspector::CreateLayoutInfoByWinId(uint32_t windId)
+{
+    auto container = Container::GetByWindowId(windId);
+    if (container) {
+        TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "start get container %{public}d info", container->GetInstanceId());
+    }
+    return CreateContainerLayoutInfo(container);
 }
 
 void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t containerId)
@@ -309,4 +346,123 @@ void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonV
     message->Put("pixelMapBase64", info.c_str());
 }
 
+void LayoutInspector::RegisterConnectCallback()
+{
+    std::call_once(loadFlag, []() {
+        handlerConnectServerSo = dlopen(ARK_DEBUGGER_LIB_PATH, RTLD_NOLOAD | RTLD_NOW);
+        if (handlerConnectServerSo == nullptr) {
+            handlerConnectServerSo = dlopen(ARK_DEBUGGER_LIB_PATH, RTLD_NOW);
+            if (handlerConnectServerSo == nullptr) {
+                TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "null handlerConnectServerSo: %{public}s", dlerror());
+                return;
+            }
+        }
+
+        setArkUICallback = reinterpret_cast<SetArkUICallback>(dlsym(handlerConnectServerSo, "SetArkUICallback"));
+        if (setArkUICallback == nullptr) {
+            TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "null setArkUICallback: %{public}s", dlerror());
+            return;
+        }
+    });
+
+    if (setArkUICallback != nullptr) {
+        setArkUICallback([](const char* message) { ProcessMessages(message); });
+    }
+}
+
+void LayoutInspector::ProcessMessages(const std::string& message)
+{
+    if (message.find(START_PERFORMANCE_CHECK_MESSAGE, 0) != std::string::npos) {
+        TAG_LOGI(AceLogTag::ACE_LAYOUT_INSPECTOR, "performance check start");
+        AceChecker::SetPerformanceCheckStatus(true, message);
+    } else if (message.find(END_PERFORMANCE_CHECK_MESSAGE, 0) != std::string::npos) {
+        TAG_LOGI(AceLogTag::ACE_LAYOUT_INSPECTOR, "performance check end");
+        AceChecker::SetPerformanceCheckStatus(false, message);
+    }
+    uint32_t windowId = NG::Inspector::ParseWindowIdFromMsg(message);
+    if (windowId == OHOS::Ace::NG::INVALID_WINDOW_ID) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "input message: %{public}s", message.c_str());
+        return;
+    }
+    CreateLayoutInfoByWinId(windowId);
+}
+
+void LayoutInspector::HandleStopRecord()
+{
+    std::unique_lock<std::mutex> lock(recMutex_);
+    SetRsProfilerNodeMountCallback(nullptr);
+    auto jsonRoot = JsonUtil::Create(true);
+    auto jsonNodeArray = JsonUtil::CreateArray(true);
+    for (auto& uiNode : recNodeInfos_) {
+        if (uiNode.second != nullptr) {
+            auto jsonNode = JsonUtil::Create(true);
+            jsonNode->Put(RECNODE_NODEID, std::to_string(uiNode.second->GetSelfId()).c_str());
+            jsonNode->Put(RECNODE_PARENTID, uiNode.second->GetParentId());
+            jsonNode->Put(RECNODE_SELFID, uiNode.second->GetNodeId());
+            jsonNode->Put(RECNODE_NAME, uiNode.second->GetName().c_str());
+            jsonNode->Put(RECNODE_DEBUGLINE, uiNode.second->GetDebugLine().c_str());
+            jsonNodeArray->PutRef(std::move(jsonNode));
+        }
+    }
+    recNodeInfos_.clear();
+    lock.unlock();
+    if (jsonNodeArray->GetArraySize()) {
+        jsonRoot->PutRef(RECNODE_CHILDREN, std::move(jsonNodeArray));
+    }
+    std::string arrayJsonStr = jsonRoot->ToString();
+    auto sendResultTask = [arrayJsonStr]() {
+        WebSocketManager::SetRecordResults(arrayJsonStr);
+    };
+    BackgroundTaskExecutor::GetInstance().PostTask(std::move(sendResultTask));
+}
+
+void LayoutInspector::HandleStartRecord()
+{
+    // regist inner callback function
+    std::unique_lock<std::mutex> lock(recMutex_);
+    SetRsProfilerNodeMountCallback(LayoutInspector::HandleInnerCallback);
+    lock.unlock();
+    auto container = Container::GetFoucsed();
+    CHECK_NULL_VOID(container);
+    if (container->IsDynamicRender()) {
+        container = Container::CurrentSafely();
+        CHECK_NULL_VOID(container);
+    }
+    auto containerId = container->GetInstanceId();
+    ContainerScope socpe(containerId);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto startRecordTask = []() {
+        std::lock_guard<std::mutex> lock(LayoutInspector::recMutex_);
+        NG::InspectorTreeMap recTreeNodes;
+        NG::InspectorTreeMap offScreenTreeNodes;
+        NG::Inspector::GetRecordAllPagesNodes(recTreeNodes);
+        TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "Get nodes size:%{public}zu", recTreeNodes.size());
+        NG::Inspector::GetOffScreenTreeNodes(offScreenTreeNodes);
+        TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "Get offscreen nodes size:%{public}zu", offScreenTreeNodes.size());
+        LayoutInspector::recNodeInfos_.swap(recTreeNodes);
+        for (auto& item : offScreenTreeNodes) {
+            recNodeInfos_.emplace(item);
+        }
+    };
+    context->GetTaskExecutor()->PostTask(
+        std::move(startRecordTask), TaskExecutor::TaskType::UI, "ArkUIGetInspectorTree");
+}
+
+void LayoutInspector::HandleInnerCallback(FrameNodeInfo node)
+{
+    // convert FrameNodeInfo --> recNode
+    TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR,
+        "FrameNodeInfo:selfid:%{public}" PRIu64 ",nodid:%{public}d,type:%{public}s,debugline:%{public}s",
+        node.rsNodeId, node.frameNodeId, node.nodeType.c_str(), node.debugline.c_str());
+    auto recNode = AceType::MakeRefPtr<NG::RecNode>();
+    CHECK_NULL_VOID(recNode);
+    recNode->SetSelfId(node.rsNodeId);
+    recNode->SetNodeId(node.frameNodeId);
+    recNode->SetName(node.nodeType);
+    recNode->SetDebugLine(node.debugline);
+    recNode->SetParentId(node.parentNodeId);
+    std::lock_guard<std::mutex> lock(recMutex_);
+    recNodeInfos_.emplace(node.rsNodeId, recNode);
+}
 } // namespace OHOS::Ace

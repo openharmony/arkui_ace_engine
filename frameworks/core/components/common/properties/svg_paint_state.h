@@ -118,6 +118,9 @@ public:
         }
         if (!hasGradient_) {
             gradient_ = parent.GetGradient();
+            if (gradient_.has_value() && !parent.GetHref().empty()) {
+                gradient_->SetHref(parent.GetHref());
+            }
         }
     }
 
@@ -141,6 +144,16 @@ public:
         return href_;
     }
 
+    void SetIsFillNone(bool isFillNone)
+    {
+        isFillNone_ = isFillNone;
+    }
+
+    bool IsFillNone()
+    {
+        return isFillNone_;
+    }
+
 protected:
     AnimatableColor color_ = AnimatableColor(Color::BLACK);
     AnimatableDouble opacity_ = AnimatableDouble(1.0);
@@ -150,6 +163,7 @@ protected:
     bool hasOpacity_ = false;
     bool hasFillRule_ = false;
     bool hasGradient_ = false;
+    bool isFillNone_ = false;
     std::string href_;
 };
 

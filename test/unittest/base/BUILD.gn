@@ -26,6 +26,7 @@ ace_unittest("geometry_test") {
     "quaternion_test.cpp",
     "subwindow_manager_test.cpp",
     "transform_util_test.cpp",
+    "size_t_test.cpp",
   ]
 }
 
@@ -37,6 +38,8 @@ ace_unittest("util_test") {
     "json_util_test.cpp",
     "node_object_test.cpp",
     "uobject_test.cpp",
+    "utf_helper_test_ng.cpp",
+    "utf_helper_testone_ng.cpp",
   ]
 
   external_deps = [ "bounds_checking_function:libsec_shared" ]

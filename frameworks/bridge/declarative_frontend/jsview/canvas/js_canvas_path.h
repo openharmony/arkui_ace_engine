@@ -68,6 +68,7 @@ protected:
     panda::CopyableGlobal<panda::JSValueRef> pathCmdObj_;
     RefPtr<CanvasPath2D> path2d_;
     CanvasUnit unit_ = CanvasUnit::DEFAULT;
+    bool isJudgeSpecialValue_ = false;
 };
 
 } // namespace OHOS::Ace::Framework

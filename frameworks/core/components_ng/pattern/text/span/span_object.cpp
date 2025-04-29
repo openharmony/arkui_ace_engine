@@ -14,16 +14,12 @@
  */
 #include "core/components_ng/pattern/text/span/span_object.h"
 
-#include <optional>
-#include <utility>
-
-#include "base/memory/referenced.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/text_field/text_field_model.h"
-#include "core/components_ng/render/paragraph.h"
-
 namespace OHOS::Ace {
+namespace {
+static std::atomic<int32_t> gGestureSpanId = 0;
+constexpr int32_t GESTURES_SPAN_DIVIDE_SIZE = 10000000;
+}
+
 // SpanBase
 std::optional<std::pair<int32_t, int32_t>> SpanBase::GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const
 {
@@ -86,6 +82,9 @@ RefPtr<SpanBase> FontSpan::GetSubSpan(int32_t start, int32_t end)
 
 void FontSpan::AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const
 {
+    if (!spanItem || !spanItem->fontStyle) {
+        return;
+    }
     if (font_.fontColor.has_value()) {
         spanItem->fontStyle->UpdateTextColor(font_.fontColor.value());
     }
@@ -128,13 +127,31 @@ SpanType FontSpan::GetSpanType() const
 
 std::string FontSpan::ToString() const
 {
-    std::stringstream str;
-    str << "FontSpan ( start:";
-    str << GetStartIndex();
-    str << " end:";
-    str << GetEndIndex();
-    str << "]";
-    std::string output = str.str();
+    std::stringstream ss;
+    ss << "FontSpan [";
+    ss << GetStartIndex();
+    ss << ":";
+    ss << GetEndIndex();
+    ss << "]";
+    if (font_.fontColor.has_value()) {
+        ss << " FontColor:" << font_.fontColor.value().ColorToString();
+    }
+    if (font_.fontFamiliesNG.has_value()) {
+        ss << " FontFamily:";
+        for (auto& fontFam : font_.fontFamiliesNG.value()) {
+            ss << fontFam;
+        }
+    }
+    if (font_.fontSize.has_value()) {
+        ss << " FontSize:" << font_.fontSize.value().ToString();
+    }
+    if (font_.fontStyle.has_value()) {
+        ss << " FontStyle:" << static_cast<int32_t>(font_.fontStyle.value());
+    }
+    if (font_.fontWeight.has_value()) {
+        ss << " FontWeight:" << static_cast<int32_t>(font_.fontWeight.value());
+    }
+    std::string output = ss.str();
     return output;
 }
 
@@ -216,13 +233,16 @@ SpanType DecorationSpan::GetSpanType() const
 
 std::string DecorationSpan::ToString() const
 {
-    std::stringstream str;
-    str << "DecorationSpan ( start:";
-    str << GetStartIndex();
-    str << " end:";
-    str << GetEndIndex();
-    str << "]";
-    std::string output = str.str();
+    std::stringstream ss;
+    ss << "DecorationSpan [";
+    ss << GetStartIndex();
+    ss << ":";
+    ss << GetEndIndex();
+    ss << "]";
+    ss << " type:" << static_cast<int32_t>(type_) << " color:"
+        << (color_.has_value() ? color_.value().ColorToString(): "None")
+        << " style:" << (style_.has_value() ? static_cast<int32_t>(style_.value()): -1);
+    std::string output = ss.str();
     return output;
 }
 
@@ -269,11 +289,19 @@ RefPtr<SpanBase> BaselineOffsetSpan::GetSubSpan(int32_t start, int32_t end)
 
 void BaselineOffsetSpan::AddBaselineOffsetStyle(const RefPtr<NG::SpanItem>& spanItem) const
 {
+    CHECK_NULL_VOID(spanItem);
+    if (!spanItem->textLineStyle) {
+        spanItem->textLineStyle = std::make_unique<NG::TextLineStyle>();
+    }
     spanItem->textLineStyle->UpdateBaselineOffset(baselineOffset_);
 }
 
 void BaselineOffsetSpan::RemoveBaselineOffsetStyle(const RefPtr<NG::SpanItem>& spanItem)
 {
+    CHECK_NULL_VOID(spanItem);
+    if (!spanItem->textLineStyle) {
+        spanItem->textLineStyle = std::make_unique<NG::TextLineStyle>();
+    }
     spanItem->textLineStyle->ResetBaselineOffset();
 }
 
@@ -284,13 +312,14 @@ SpanType BaselineOffsetSpan::GetSpanType() const
 
 std::string BaselineOffsetSpan::ToString() const
 {
-    std::stringstream str;
-    str << "BaselineOffsetSpan ( start:";
-    str << GetStartIndex();
-    str << " end:";
-    str << GetEndIndex();
-    str << "]";
-    std::string output = str.str();
+    std::stringstream ss;
+    ss << "BaselineOffsetSpan [";
+    ss << GetStartIndex();
+    ss << ":";
+    ss << GetEndIndex();
+    ss << "]";
+    ss << " baselineOffset:" << baselineOffset_.ToString();
+    std::string output = ss.str();
     return output;
 }
 
@@ -350,13 +379,14 @@ SpanType LetterSpacingSpan::GetSpanType() const
 
 std::string LetterSpacingSpan::ToString() const
 {
-    std::stringstream str;
-    str << "LetterSpacingSpan ( start:";
-    str << GetStartIndex();
-    str << " end:";
-    str << GetEndIndex();
-    str << "]";
-    std::string output = str.str();
+    std::stringstream ss;
+    ss << "LetterSpacingSpan [";
+    ss << GetStartIndex();
+    ss << ":";
+    ss << GetEndIndex();
+    ss << "]";
+    ss << " letterSpacing:" << letterSpacing_.ToString();
+    std::string output = ss.str();
     return output;
 }
 
@@ -385,6 +415,12 @@ GestureStyle GestureSpan::GetGestureStyle() const
 RefPtr<SpanBase> GestureSpan::GetSubSpan(int32_t start, int32_t end)
 {
     RefPtr<SpanBase> spanBase = MakeRefPtr<GestureSpan>(gestureInfo_, start, end);
+    auto gestureSpan = DynamicCast<GestureSpan>(spanBase);
+    CHECK_NULL_RETURN(gestureSpan, spanBase);
+    if (gestureSpanId_ == -1) {
+        gestureSpanId_ = gGestureSpanId.fetch_add(1) % GESTURES_SPAN_DIVIDE_SIZE;
+    }
+    gestureSpan->SetGestureSpanId(gestureSpanId_);
     return spanBase;
 }
 
@@ -393,6 +429,9 @@ bool GestureSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
     auto gestureSpan = DynamicCast<GestureSpan>(other);
     if (!gestureSpan) {
         return false;
+    }
+    if (gestureSpanId_ != -1 && gestureSpanId_ == gestureSpan->GetGestureSpanId()) {
+        return true;
     }
     auto gestureInfo = gestureSpan->GetGestureStyle();
     return gestureInfo_.IsEqual(gestureInfo);
@@ -405,13 +444,13 @@ SpanType GestureSpan::GetSpanType() const
 
 std::string GestureSpan::ToString() const
 {
-    std::stringstream str;
-    str << "GestureSpan [ start:";
-    str << GetStartIndex();
-    str << " end:";
-    str << GetEndIndex();
-    str << "]";
-    std::string output = str.str();
+    std::stringstream ss;
+    ss << "GestureSpan [";
+    ss << GetStartIndex();
+    ss << ":";
+    ss << GetEndIndex();
+    ss << "]";
+    std::string output = ss.str();
     return output;
 }
 
@@ -494,13 +533,13 @@ SpanType TextShadowSpan::GetSpanType() const
 
 std::string TextShadowSpan::ToString() const
 {
-    std::stringstream str;
-    str << "TextShadowSpan ( start:";
-    str << GetStartIndex();
-    str << " end:";
-    str << GetEndIndex();
-    str << "]";
-    std::string output = str.str();
+    std::stringstream ss;
+    ss << "TextShadowSpan [";
+    ss << GetStartIndex();
+    ss << ":";
+    ss << GetEndIndex();
+    ss << "]";
+    std::string output = ss.str();
     return output;
 }
 
@@ -525,6 +564,10 @@ bool TextShadowSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
 
 // ImageSpan
 ImageSpan::ImageSpan(const ImageSpanOptions& options) : SpanBase(0, 1), imageOptions_(options) {}
+
+ImageSpan::ImageSpan(const ImageSpanOptions& options, int32_t position)
+    : SpanBase(position, position + 1), imageOptions_(options)
+{}
 
 bool ImageSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
 {
@@ -572,7 +615,14 @@ void ImageSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperat
 
 std::string ImageSpan::ToString() const
 {
-    return "";
+    std::stringstream ss;
+    ss << "ImageSpan [";
+    ss << GetStartIndex();
+    ss << ":";
+    ss << GetEndIndex();
+    ss << "]";
+    std::string output = ss.str();
+    return output;
 }
 
 const ImageSpanOptions& ImageSpan::GetImageSpanOptions()
@@ -652,13 +702,13 @@ void CustomSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOpera
 
 std::string CustomSpan::ToString() const
 {
-    std::stringstream str;
-    str << "CustomSpan ( start:";
-    str << GetStartIndex();
-    str << " end:";
-    str << GetEndIndex();
-    str << "]";
-    std::string output = str.str();
+    std::stringstream ss;
+    ss << "CustomSpan [";
+    ss << GetStartIndex();
+    ss << ":";
+    ss << GetEndIndex();
+    ss << "]";
+    std::string output = ss.str();
     return output;
 }
 
@@ -712,6 +762,10 @@ void ParagraphStyleSpan::AddParagraphStyle(const RefPtr<NG::SpanItem>& spanItem)
     if (paragraphStyle_.textIndent.has_value()) {
         spanItem->textLineStyle->UpdateTextIndent(paragraphStyle_.textIndent.value());
     }
+
+    if (paragraphStyle_.paragraphSpacing.has_value()) {
+        spanItem->textLineStyle->UpdateParagraphSpacing(paragraphStyle_.paragraphSpacing.value());
+    }
 }
 
 void ParagraphStyleSpan::RemoveParagraphStyle(const RefPtr<NG::SpanItem>& spanItem) const
@@ -722,6 +776,7 @@ void ParagraphStyleSpan::RemoveParagraphStyle(const RefPtr<NG::SpanItem>& spanIt
     spanItem->textLineStyle->ResetLeadingMargin();
     spanItem->textLineStyle->ResetWordBreak();
     spanItem->textLineStyle->ResetTextIndent();
+    spanItem->textLineStyle->ResetParagraphSpacing();
 }
 
 bool ParagraphStyleSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
@@ -746,7 +801,14 @@ SpanType ParagraphStyleSpan::GetSpanType() const
 
 std::string ParagraphStyleSpan::ToString() const
 {
-    return "";
+    std::stringstream ss;
+    ss << "ParagraphStyleSpan [";
+    ss << GetStartIndex();
+    ss << ":";
+    ss << GetEndIndex();
+    ss << "]";
+    std::string output = ss.str();
+    return output;
 }
 
 RefPtr<SpanBase> ParagraphStyleSpan::GetSubSpan(int32_t start, int32_t end)
@@ -801,13 +863,14 @@ SpanType LineHeightSpan::GetSpanType() const
 
 std::string LineHeightSpan::ToString() const
 {
-    std::stringstream str;
-    str << "LineHeightSpan ( start:";
-    str << GetStartIndex();
-    str << " end:";
-    str << GetEndIndex();
-    str << "]";
-    std::string output = str.str();
+    std::stringstream ss;
+    ss << "LineHeightSpan [";
+    ss << GetStartIndex();
+    ss << ":";
+    ss << GetEndIndex();
+    ss << "]";
+    ss << " baselineOffset:" << lineHeight_.ToString();
+    std::string output = ss.str();
     return output;
 }
 
@@ -819,6 +882,67 @@ bool LineHeightSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
     }
     auto lineHeight = lineHeightSpan->GetLineHeight();
     return lineHeight_ == lineHeight;
+}
+
+// HalfLeadingSpan
+HalfLeadingSpan::HalfLeadingSpan(bool halfLeading) : SpanBase(0, 0), halfLeading_(halfLeading) {}
+
+HalfLeadingSpan::HalfLeadingSpan(bool halfLeading, int32_t start, int32_t end)
+    : SpanBase(start, end), halfLeading_(halfLeading)
+{}
+
+void HalfLeadingSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const
+{
+    switch (operation) {
+        case SpanOperation::ADD:
+            AddHalfLeadingStyle(spanItem);
+            break;
+        case SpanOperation::REMOVE:
+            RemoveHalfLeadingStyle(spanItem);
+    }
+}
+
+RefPtr<SpanBase> HalfLeadingSpan::GetSubSpan(int32_t start, int32_t end)
+{
+    return MakeRefPtr<HalfLeadingSpan>(halfLeading_, start, end);
+}
+
+void HalfLeadingSpan::AddHalfLeadingStyle(const RefPtr<NG::SpanItem>& spanItem) const
+{
+    spanItem->textLineStyle->UpdateHalfLeading(halfLeading_);
+}
+
+void HalfLeadingSpan::RemoveHalfLeadingStyle(const RefPtr<NG::SpanItem>& spanItem) const
+{
+    spanItem->textLineStyle->ResetHalfLeading();
+}
+
+bool HalfLeadingSpan::GetHalfLeading() const
+{
+    return halfLeading_;
+}
+
+SpanType HalfLeadingSpan::GetSpanType() const
+{
+    return SpanType::HalfLeading;
+}
+
+std::string HalfLeadingSpan::ToString() const
+{
+    std::stringstream str;
+    str << "HalfLeadingSpan ( start:";
+    str << GetStartIndex();
+    str << " end:";
+    str << GetEndIndex();
+    str << "]";
+    return str.str();
+}
+
+bool HalfLeadingSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
+{
+    auto halfLeadingSpan = DynamicCast<HalfLeadingSpan>(other);
+    CHECK_NULL_RETURN(halfLeadingSpan, false);
+    return halfLeading_ == halfLeadingSpan->GetHalfLeading();
 }
 
 // ExtSpan
@@ -837,13 +961,13 @@ SpanType ExtSpan::GetSpanType() const
 
 std::string ExtSpan::ToString() const
 {
-    std::stringstream str;
-    str << "ExtSpan ( start:";
-    str << GetStartIndex();
-    str << " end:";
-    str << GetEndIndex();
-    str << "]";
-    std::string output = str.str();
+    std::stringstream ss;
+    ss << "ExtSpan [";
+    ss << GetStartIndex();
+    ss << ":";
+    ss << GetEndIndex();
+    ss << "]";
+    std::string output = ss.str();
     return output;
 }
 
@@ -894,7 +1018,7 @@ void BackgroundColorSpan::RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem)
 
 TextBackgroundStyle BackgroundColorSpan::GetBackgroundColor() const
 {
-    return textBackgroundStyle_.value();
+    return textBackgroundStyle_.value_or(TextBackgroundStyle());
 }
 
 void BackgroundColorSpan::SetBackgroundColorGroupId(int32_t groupId)
@@ -909,13 +1033,13 @@ SpanType BackgroundColorSpan::GetSpanType() const
 
 std::string BackgroundColorSpan::ToString() const
 {
-    std::stringstream str;
-    str << "BackgroundColorSpan ( start:";
-    str << GetStartIndex();
-    str << " end:";
-    str << GetEndIndex();
-    str << "]";
-    std::string output = str.str();
+    std::stringstream ss;
+    ss << "BackgroundColorSpan [";
+    ss << GetStartIndex();
+    ss << ":";
+    ss << GetEndIndex();
+    ss << "]";
+    std::string output = ss.str();
     return output;
 }
 
@@ -927,5 +1051,78 @@ bool BackgroundColorSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
         }
     auto backgroundColor = backgroundColorSpan->GetBackgroundColor();
     return backgroundColor == textBackgroundStyle_;
+}
+
+// UrlSpan
+UrlSpan::UrlSpan(const std::string& urlAddress) : SpanBase(0, 0), urlAddress_(urlAddress) {}
+
+UrlSpan::UrlSpan(const std::string& urlAddress, int32_t start, int32_t end)
+    : SpanBase(start, end), urlAddress_(urlAddress)
+{}
+
+std::string UrlSpan::GetUrlSpanAddress() const
+{
+    return urlAddress_;
+}
+
+void UrlSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const
+{
+    switch (operation) {
+        case SpanOperation::ADD:
+            AddUrlStyle(spanItem);
+            break;
+        case SpanOperation::REMOVE:
+            RemoveUrlStyle(spanItem);
+            break;
+    }
+}
+
+RefPtr<SpanBase> UrlSpan::GetSubSpan(int32_t start, int32_t end)
+{
+    RefPtr<SpanBase> spanBase = MakeRefPtr<UrlSpan>(urlAddress_, start, end);
+    return spanBase;
+}
+
+void UrlSpan::AddUrlStyle(const RefPtr<NG::SpanItem>& spanItem) const
+{
+    auto address = urlAddress_;
+    auto urlOnRelease = [address]() {
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->HyperlinkStartAbility(address);
+    };
+    spanItem->SetUrlOnReleaseEvent(std::move(urlOnRelease));
+}
+
+void UrlSpan::RemoveUrlStyle(const RefPtr<NG::SpanItem>& spanItem)
+{
+    spanItem->urlOnRelease = nullptr;
+}
+
+SpanType UrlSpan::GetSpanType() const
+{
+    return SpanType::Url;
+}
+
+std::string UrlSpan::ToString() const
+{
+    std::stringstream ss;
+    ss << "UrlSpan [";
+    ss << GetStartIndex();
+    ss << ":";
+    ss << GetEndIndex();
+    ss << "]";
+    std::string output = ss.str();
+    return output;
+}
+
+bool UrlSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
+{
+    auto urlSpan = DynamicCast<UrlSpan>(other);
+    if (!urlSpan) {
+        return false;
+    }
+    auto urlAddress = urlSpan->GetUrlSpanAddress();
+    return urlAddress == urlAddress_;
 }
 } // namespace OHOS::Ace

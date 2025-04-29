@@ -16,6 +16,9 @@
 #include "adapter/ohos/entrance/ace_container.h"
 
 namespace OHOS::Ace::Platform {
+namespace {
+constexpr uint32_t DEFAULT_WINDOW_TYPE = 1;
+}
 sptr<IRemoteObject> AceContainer::GetToken()
 {
     return token_;
@@ -37,7 +40,28 @@ sptr<OHOS::Rosen::Window> AceContainer::GetUIWindow(int32_t instanceId)
     return nullptr;
 }
 
-Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
+void AceContainer::SetAppRunningUniqueId(const std::string& uniqueId)
+{
+    return;
+}
+
+const std::string& AceContainer::GetAppRunningUniqueId() const
+{
+    static const std::string res;
+    return res;
+}
+
+uint32_t AceContainer::GetParentWindowType() const
+{
+    return DEFAULT_WINDOW_TYPE;
+}
+
+uint32_t AceContainer::GetWindowType() const
+{
+    return DEFAULT_WINDOW_TYPE;
+}
+
+Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type, int32_t apiVersion)
 {
     return {};
 }
@@ -47,5 +71,52 @@ RefPtr<AceContainer> AceContainer::GetContainer(int32_t instanceId)
     return nullptr;
 }
 
-void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration) {}
+void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent) {}
+
+void AceContainer::UpdateConfiguration(
+    const ParsedConfig& parsedConfig, const std::string& configuration, bool abilityLevel)
+{}
+
+Rect AceContainer::GetDisplayAvailableRect() const
+{
+    return Rect();
+}
+
+bool AceContainer::IsCrossAxisWindow()
+{
+    return false;
+}
+
+void AceContainer::GetExtensionConfig(AAFwk::WantParams& want) {}
+
+RefPtr<PageViewportConfig> AceContainer::GetCurrentViewportConfig() const
+{
+    return nullptr;
+}
+
+RefPtr<PageViewportConfig> AceContainer::GetTargetViewportConfig(Orientation orientation,
+    bool enableStatusBar, bool statusBarAnimated, bool enableNavigationIndicator)
+{
+    return nullptr;
+}
+
+void AceContainer::SetRequestedOrientation(
+    Orientation orientation, bool needAnimation)
+{
+}
+
+Orientation AceContainer::GetRequestedOrientation()
+{
+    return Orientation::UNSPECIFIED;
+}
+
+bool AceContainer::IsPcOrPadFreeMultiWindowMode() const
+{
+    return false;
+}
+
+bool AceContainer::SetSystemBarEnabled(SystemBarType type, bool enable, bool animation)
+{
+    return true;
+}
 } // namespace OHOS::Ace::Platform

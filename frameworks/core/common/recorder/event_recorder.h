@@ -22,49 +22,13 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/recorder/event_config.h"
+#include "core/common/recorder/event_definition.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::Recorder {
-enum EventType : int32_t {
-    INVALID = 0,
-    PAGE_SHOW,
-    PAGE_HIDE,
-    CLICK,
-    LONG_PRESS,
-    CHANGE,
-    EXPOSURE,
-    NAVIGATOR,
-    REFRESH,
-    STEPPER_FINISH,
-    STEPPER_SKIP,
-    STEPPER_NEXT,
-    STEPPER_PREVIOUS,
-    SEARCH_SUBMIT,
-    WEB_PAGE_BEGIN,
-    WEB_PAGE_END,
-    VIDEO_START,
-    VIDEO_PAUSE,
-    VIDEO_FINISH,
-    VIDEO_ERROR,
-    VIDEO_PREPARED,
-    VIDEO_SEEKED,
-    VIDEO_SCREEN_CHANGE,
-    VIDEO_STOP,
-    DIALOG_SHOW,
-    DIALOG_CANCEL,
-    DIALOG_ACTION,
-    DIALOG_SELECT,
-    DIALOG_ACCEPT,
-};
-
 enum PageEventType: int32_t {
     ROUTER_PAGE = 0,
     NAV_PAGE,
-};
-
-struct EventSwitch {
-    bool pageEnable = true;
-    bool exposureEnable = false;
-    bool componentEnable = false;
 };
 
 constexpr char KEY_ID[] = "id";
@@ -84,6 +48,8 @@ constexpr char KEY_NAV_PAGE[] = "navPage";
 constexpr char KEY_NAV_PAGE_TYPE[] = "navType";
 constexpr char KEY_NAV_PAGE_PARAM[] = "navPageParam";
 
+using WebJsItem = std::map<std::string, std::vector<std::string>>;
+
 ACE_FORCE_EXPORT bool IsCacheAvaliable();
 
 class ACE_FORCE_EXPORT EventParamsBuilder {
@@ -93,6 +59,8 @@ public:
     ~EventParamsBuilder() = default;
 
     EventParamsBuilder& SetEventType(EventType eventType);
+
+    EventParamsBuilder& SetEventCategory(EventCategory category);
 
     EventParamsBuilder& SetId(const std::string& id);
 
@@ -112,19 +80,24 @@ public:
 
     EventParamsBuilder& SetTextArray(const std::vector<std::string>& value);
 
+    EventParamsBuilder& SetHost(const RefPtr<NG::FrameNode>& node);
+
     EventParamsBuilder& SetExtra(const std::string& key, const std::string& value);
 
     std::shared_ptr<std::unordered_map<std::string, std::string>> build();
 
     EventType GetEventType() const;
 
-    std::string GetText() const;
+    EventCategory GetEventCategory() const;
+
+    std::string GetValue(const std::string& key) const;
 
     std::string ToString() const;
 
 private:
     std::shared_ptr<std::unordered_map<std::string, std::string>> params_;
     EventType eventType_ = EventType::INVALID;
+    EventCategory category_ = EventCategory::CATEGORY_COMPONENT;
 };
 
 std::string MapToString(const std::shared_ptr<std::unordered_map<std::string, std::string>>& input);
@@ -134,44 +107,48 @@ public:
     static EventRecorder& Get();
 
     bool IsPageRecordEnable() const;
+    bool IsPageParamRecordEnable() const;
     bool IsExposureRecordEnable() const;
     bool IsComponentRecordEnable() const;
-    void UpdateEventSwitch(const EventSwitch& eventSwitch);
-
-    void SetContainerChanged()
-    {
-        isFocusContainerChanged_ = true;
-    }
+    bool IsRecordEnable(EventCategory category) const;
+    void UpdateEventSwitch(const std::vector<bool>& eventSwitch);
+    void UpdateWebIdentifier(const std::unordered_map<std::string, std::string> identifierMap);
 
     void SetContainerInfo(const std::string& windowName, int32_t id, bool foreground);
     void SetFocusContainerInfo(const std::string& windowName, int32_t id);
-    int32_t GetContainerId();
+    int32_t GetContainerId(bool isFoucs = true);
     const std::string& GetPageUrl();
     const std::string& GetNavDstName() const;
+    void FillWebJsCode(std::optional<WebJsItem>& scriptItems) const;
+    bool IsMessageValid(const std::string& webCategory, const std::string& identifier);
+    void NotifyEventCacheEnd();
 
-    void OnPageShow(const std::string& pageUrl, const std::string& param);
-    void OnPageHide(const std::string& pageUrl, const int64_t duration);
+    void OnPageShow(const std::string& pageUrl, const std::string& param, const std::string& name = "");
+    void OnPageHide(const std::string& pageUrl, const int64_t duration, const std::string& name = "");
     void OnClick(EventParamsBuilder&& builder);
     void OnChange(EventParamsBuilder&& builder);
     void OnEvent(EventParamsBuilder&& builder);
     void OnNavDstShow(EventParamsBuilder&& builder);
     void OnNavDstHide(EventParamsBuilder&& builder);
     void OnExposure(EventParamsBuilder&& builder);
+    void OnWebEvent(const RefPtr<NG::FrameNode>& node, const std::vector<std::string>& params);
+    void OnAttachWeb(const RefPtr<NG::FrameNode>& node);
+    void OnDetachWeb(int32_t nodeId);
+    std::unordered_map<int32_t, WeakPtr<NG::FrameNode>>& GetWeakNodeMap()
+    {
+        return weakNodeCache_;
+    }
 
 private:
     EventRecorder();
     ~EventRecorder() = default;
     friend class EventConfig;
 
-    EventSwitch eventSwitch_;
-
-    bool pageEnable_ = true;
-    bool componentEnable_ = true;
-    bool exposureEnable_ = true;
+    std::vector<bool> eventSwitch_;
+    std::vector<bool> globalSwitch_;
 
     int32_t containerId_ = -1;
     int32_t focusContainerId_ = -1;
-    int32_t containerCount_ = 0;
 
     std::string pageUrl_;
     std::string navDstName_;
@@ -179,6 +156,10 @@ private:
     bool isFocusContainerChanged_ = false;
 
     RefPtr<TaskExecutor> taskExecutor_;
+
+    std::unordered_map<std::string, std::string> webIdentifierMap_;
+
+    std::unordered_map<int32_t, WeakPtr<NG::FrameNode>> weakNodeCache_;
 
     ACE_DISALLOW_COPY_AND_MOVE(EventRecorder);
 };

@@ -16,6 +16,7 @@
 #define NAPI_VERSION 8
 
 #include "core/common/ai/image_analyzer_mgr.h"
+
 namespace OHOS::Ace {
 ImageAnalyzerMgr& ImageAnalyzerMgr::GetInstance()
 {
@@ -33,8 +34,16 @@ void ImageAnalyzerMgr::BuildNodeFunc(
     void* pixelMap, void* config, ImageAnalyzerInnerConfig* uiConfig, void** overlayData)
 {
 }
+void ImageAnalyzerMgr::BuildNodeFunc(std::string uri, void* pixelMap, int frameTimestamp,
+    void* config, ImageAnalyzerInnerConfig* uiConfig, void** overlayData)
+{
+}
 void ImageAnalyzerMgr::UpdateImage(
     void** overlayData, void* pixelMap, void* config, ImageAnalyzerInnerConfig* uiConfig)
+{
+}
+void ImageAnalyzerMgr::UpdateImage(void** overlayData, std::string uri, void* pixelMap,
+    int frameTimestamp, void* config, ImageAnalyzerInnerConfig* uiConfig)
 {
 }
 void ImageAnalyzerMgr::UpdateConfig(void** overlayData, void* config)

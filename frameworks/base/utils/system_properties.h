@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_SYSTEM_PROPERTIES_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_SYSTEM_PROPERTIES_H
 
+#include <atomic>
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -38,8 +39,21 @@ enum class ResolutionType : int32_t {
     RESOLUTION_XXXHDPI = 640,
 };
 
+enum class FoldScreenType: int32_t {
+    UNKNOWN = 0,
+    BIG_FOLDER = 1,
+    SMALL_FOLDER = 2,
+    OUTER_FOLDER = 3,
+    SUPER_FOLDER = 5,
+};
+
 constexpr int32_t MCC_UNDEFINED = 0;
 constexpr int32_t MNC_UNDEFINED = 0;
+extern const char ENABLE_DEBUG_BOUNDARY_KEY[];
+extern const char ENABLE_TRACE_LAYOUT_KEY[];
+extern const char ENABLE_TRACE_INPUTEVENT_KEY[];
+extern const char ENABLE_SECURITY_DEVELOPERMODE_KEY[];
+extern const char ENABLE_DEBUG_STATEMGR_KEY[];
 
 enum class LongScreenType : int32_t {
     LONG = 0,
@@ -51,6 +65,20 @@ enum class ScreenShape : int32_t {
     ROUND = 0,
     NOT_ROUND,
     SCREEN_SHAPE_UNDEFINED,
+};
+
+union DebugFlags {
+    DebugFlags(int64_t flag = 0) : flag_(flag) {}
+    int64_t flag_;
+    struct {
+        bool containerMultiThread_ : 1;
+        bool getHostOnDetach_ : 1;
+        bool claimDeathObj_ : 1;
+        bool aceObjTypeCvt_ : 1;
+        bool jsObjTypeCvt_ : 1;
+        bool objDestroyInUse_ : 1;
+        bool useInvalidIter_ : 1;
+    } bits_;
 };
 
 class ACE_FORCE_EXPORT SystemProperties final {
@@ -70,6 +98,11 @@ public:
      * Init device type according to system property.
      */
     static void InitDeviceTypeBySystemProperty();
+
+    /**
+     * Init fold screen type according to system property.
+     */
+    static void InitFoldScreenTypeBySystemProperty();
 
     /*
      * Get type of current device.
@@ -156,10 +189,24 @@ public:
      */
     static float GetFontWeightScale();
 
+    static void SetFontWeightScale(const float fontWeightScale)
+    {
+        if (fontWeightScale_ != fontWeightScale) {
+            fontWeightScale_ = fontWeightScale;
+        }
+    }
+
     /*
      * Get size scale of device.
      */
     static float GetFontScale();
+
+    static void SetFontScale(const float fontScale)
+    {
+        if (fontScale != fontScale_) {
+            fontScale_ = fontScale;
+        }
+    }
 
     /*
      * Get density of default display.
@@ -219,6 +266,8 @@ public:
 
     static std::string GetLanguage();
 
+    static bool GetContainerDeleteFlag();
+
     static std::string GetRegion();
 
     static std::string GetNewPipePkg();
@@ -250,7 +299,7 @@ public:
 
     static bool GetDebugBoundaryEnabled()
     {
-        return debugBoundaryEnabled_;
+        return debugBoundaryEnabled_.load();
     }
 
     static bool GetDebugOffsetLogEnabled()
@@ -268,6 +317,11 @@ public:
         return downloadByNetworkEnabled_;
     }
 
+    static bool GetRecycleImageEnabled()
+    {
+        return recycleImageEnabled_;
+    }
+
     static bool GetSvgTraceEnabled()
     {
         return svgTraceEnable_;
@@ -275,7 +329,7 @@ public:
 
     static bool GetLayoutTraceEnabled()
     {
-        return layoutTraceEnable_;
+        return layoutTraceEnable_.load();
     }
 
     static bool GetSyncDebugTraceEnabled()
@@ -303,19 +357,24 @@ public:
         return accessTraceEnable_;
     }
 
+    static bool GetVsyncModeTraceEnabled()
+    {
+        return vsyncModeTraceEnable_;
+    }
+
     static bool GetTraceInputEventEnabled()
     {
-        return traceInputEventEnable_;
+        return traceInputEventEnable_.load();
     }
 
     static bool GetStateManagerEnabled()
     {
-        return stateManagerEnable_;
+        return stateManagerEnable_.load();
     }
 
     static void SetStateManagerEnabled(bool stateManagerEnable)
     {
-        stateManagerEnable_ = stateManagerEnable;
+        stateManagerEnable_.store(stateManagerEnable);
     }
 
     static void SetFaultInjectEnabled(bool faultInjectEnable)
@@ -333,6 +392,8 @@ public:
         return buildTraceEnable_;
     }
 
+    static bool GetCacheNavigationNodeEnable();
+
     static bool GetAccessibilityEnabled()
     {
         return accessibilityEnabled_;
@@ -344,6 +405,51 @@ public:
     }
 
     static bool GetDebugEnabled();
+
+    static bool DetectContainerMultiThread()
+    {
+        return debugEnabled_ && debugFlags_.bits_.containerMultiThread_;
+    }
+
+    static bool DetectGetHostOnDetach()
+    {
+        return debugEnabled_ && debugFlags_.bits_.getHostOnDetach_;
+    }
+
+    static bool DetectClaimDeathObj()
+    {
+        return debugEnabled_ && debugFlags_.bits_.claimDeathObj_;
+    }
+
+    static bool DetectAceObjTypeConvertion()
+    {
+        return debugEnabled_ && debugFlags_.bits_.aceObjTypeCvt_;
+    }
+
+    static bool DetectJsObjTypeConvertion()
+    {
+        return debugEnabled_ && debugFlags_.bits_.jsObjTypeCvt_;
+    }
+
+    static bool DetectObjDestroyInUse()
+    {
+        return debugEnabled_ && debugFlags_.bits_.objDestroyInUse_;
+    }
+
+    static bool DetectUseInvalidIterator()
+    {
+        return debugEnabled_ && debugFlags_.bits_.useInvalidIter_;
+    }
+
+    static bool GetMeasureDebugTraceEnabled()
+    {
+        return measureDebugTraceEnable_;
+    }
+
+    static bool GetSafeAreaDebugTraceEnabled()
+    {
+        return safeAreaDebugTraceEnable_;
+    }
 
     static bool GetLayoutDetectEnabled();
 
@@ -372,18 +478,6 @@ public:
     static int32_t GetMnc()
     {
         return mnc_;
-    }
-
-    static void SetColorMode(ColorMode colorMode)
-    {
-        if (colorMode_ != colorMode) {
-            colorMode_ = colorMode;
-        }
-    }
-
-    static ColorMode GetColorMode()
-    {
-        return colorMode_;
     }
 
     static void SetDeviceAccess(bool isDeviceAccess)
@@ -438,6 +532,8 @@ public:
     {
         return astcEnabled_;
     }
+
+    static bool GetWindowRectResizeEnabled();
 
     static int32_t GetAstcMaxError()
     {
@@ -514,7 +610,13 @@ public:
     static void AddWatchSystemParameter(const char* key, void* context, EnableSystemParameterCallback callback);
 
     static void RemoveWatchSystemParameter(const char* key, void* context, EnableSystemParameterCallback callback);
-
+    static void EnableSystemParameterTraceLayoutCallback(const char* key, const char* value, void* context);
+    static void EnableSystemParameterTraceInputEventCallback(const char* key, const char* value, void* context);
+    static void EnableSystemParameterSecurityDevelopermodeCallback(const char* key, const char* value, void* context);
+    static void EnableSystemParameterDebugStatemgrCallback(const char* key, const char* value, void* context);
+    static void EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context);
+    static void EnableSystemParameterPerformanceMonitorCallback(const char* key, const char* value, void* context);
+    static void OnFocusActiveChanged(const char* key, const char* value, void* context);
     static float GetDefaultResolution();
 
     static void SetLayoutTraceEnabled(bool layoutTraceEnable);
@@ -525,9 +627,18 @@ public:
 
     static void SetDebugBoundaryEnabled(bool debugBoundaryEnabled);
 
+    static void SetPerformanceMonitorEnabled(bool performanceMonitorEnable);
+
+    static void SetFocusCanBeActive(bool focusCanBeActive);
+
     static bool GetAcePerformanceMonitorEnabled()
     {
-        return acePerformanceMonitorEnable_;
+        return acePerformanceMonitorEnable_.load();
+    }
+
+    static bool GetFocusCanBeActive()
+    {
+        return focusCanBeActive_.load();
     }
 
     static bool GetAceCommercialLogEnabled()
@@ -542,24 +653,72 @@ public:
         return brightUpPercent_;
     }
 
+    static float GetPageCount()
+    {
+        return pageCount_;
+    }
+
     static bool IsOpIncEnable();
 
     static float GetDragStartDampingRatio();
 
     static float GetDragStartPanDistanceThreshold();
 
+    static bool IsSmallFoldProduct();
+
+    static bool IsBigFoldProduct();
+
+    static std::string GetWebDebugRenderMode();
+
+    static std::string GetDebugInspectorId();
+
+    static double GetSrollableVelocityScale();
+
+    static double GetSrollableFriction();
+
+    static double GetScrollableDistance();
+
+    static bool GetWebDebugMaximizeResizeOptimize();
+
+    static bool IsNeedResampleTouchPoints();
+
+    static bool GetAsyncInitializeEnabled()
+    {
+        return asyncInitializeEnabled_.load();
+    }
+
+    static bool IsNeedSymbol();
+
+    static bool GetTaskPriorityAdjustmentEnable()
+    {
+        return taskPriorityAdjustmentEnable_;
+    }
+
+    static int32_t GetDragDropFrameworkStatus();
+    static int32_t GetTouchAccelarate();
+
+    static bool IsSuperFoldDisplayDevice();
+
+    static bool IsPageTransitionFreeze();
+
+    static bool IsFormSkeletonBlurEnabled();
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
     static bool svgTraceEnable_;
-    static bool layoutTraceEnable_;
-    static bool traceInputEventEnable_;
+    static std::atomic<bool> layoutTraceEnable_;
+    static std::atomic<bool> traceInputEventEnable_;
     static bool buildTraceEnable_;
+    static bool cacheNavigationNodeEnable_;
     static bool syncDebugTraceEnable_;
+    static bool measureDebugTraceEnable_;
+    static bool safeAreaDebugTraceEnable_;
     static bool pixelRoundEnable_;
     static bool textTraceEnable_;
     static bool syntaxTraceEnable_;
     static bool accessTraceEnable_;
+    static bool vsyncModeTraceEnable_;
     static bool accessibilityEnabled_;
     static uint32_t canvasDebugMode_;
     static bool isRound_;
@@ -581,18 +740,20 @@ private:
     static std::string paramDeviceType_;
     static int32_t mcc_;
     static int32_t mnc_;
-    static ColorMode colorMode_;
     static ScreenShape screenShape_;
     static LongScreenType LongScreen_;
     static bool unZipHap_;
     static bool rosenBackendEnabled_;
     static bool windowAnimationEnabled_;
     static bool debugEnabled_;
+    static DebugFlags debugFlags_;
+    static bool containerDeleteFlag_;
     static bool layoutDetectEnabled_;
-    static bool debugBoundaryEnabled_;
+    static std::atomic<bool> debugBoundaryEnabled_;
     static bool debugAutoUIEnabled_; // for AutoUI Test
     static bool debugOffsetLogEnabled_;
     static bool downloadByNetworkEnabled_;
+    static bool recycleImageEnabled_;
     static bool gpuUploadEnabled_;
     static bool isHookModeEnabled_;
     static bool astcEnabled_;
@@ -607,14 +768,27 @@ private:
     static bool navigationBlurEnabled_;
     static bool gridCacheEnabled_;
     static bool sideBarContainerBlurEnable_;
-    static bool stateManagerEnable_;
-    static bool acePerformanceMonitorEnable_;
+    static std::atomic<bool> stateManagerEnable_;
+    static std::atomic<bool> acePerformanceMonitorEnable_;
+    static std::atomic<bool> asyncInitializeEnabled_;
+    static std::atomic<bool> focusCanBeActive_;
     static bool aceCommercialLogEnable_;
     static bool faultInjectEnabled_;
     static bool imageFrameworkEnable_;
+    static float pageCount_;
     static std::pair<float, float> brightUpPercent_;
     static float dragStartDampingRatio_;
     static float dragStartPanDisThreshold_;
+    static float fontScale_;
+    static float fontWeightScale_;
+    static bool windowRectResizeEnabled_;
+    static FoldScreenType foldScreenType_;
+    static double scrollableDistance_;
+    static bool taskPriorityAdjustmentEnable_;
+    static int32_t dragDropFrameworkStatus_;
+    static int32_t touchAccelarate_;
+    static bool pageTransitionFrzEnabled_;
+    static bool formSkeletonBlurEnabled_;
 };
 
 } // namespace OHOS::Ace

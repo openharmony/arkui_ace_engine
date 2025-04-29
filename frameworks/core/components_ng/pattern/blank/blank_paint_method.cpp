@@ -14,10 +14,6 @@
  */
 #include "core/components_ng/pattern/blank/blank_paint_method.h"
 
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/blank/blank_pattern.h"
-#include "core/components_ng/render/drawing.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/pattern/blank/blank_paint_property.h"
 
 namespace OHOS::Ace::NG {
@@ -28,8 +24,6 @@ void BlankPaintMethod::PaintRect(RSCanvas& canvas, PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(paintWrapper);
     auto paintProperty = DynamicCast<BlankPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
     auto color = paintProperty->GetColor().value_or(Color::TRANSPARENT);
     auto layoutSize = paintWrapper->GetContentSize();
     auto offset = paintWrapper->GetContentOffset();

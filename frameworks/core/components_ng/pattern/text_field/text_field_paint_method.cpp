@@ -14,36 +14,23 @@
  */
 #include "core/components_ng/pattern/text_field/text_field_paint_method.h"
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/rect.h"
 #include "base/geometry/rrect.h"
 #include "base/utils/utils.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/border.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
-#include "core/components/common/properties/placement.h"
-#include "core/components/popup/popup_theme.h"
-#include "core/components/theme/theme_manager.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/search/search_event_hub.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
-#include "core/components_ng/pattern/search/search_text_field.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/render/canvas_image.h"
-#include "core/components_ng/render/drawing.h"
-#include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components_ng/render/image_painter.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 TextFieldPaintMethod::TextFieldPaintMethod(const WeakPtr<Pattern>& pattern,
     const RefPtr<TextFieldOverlayModifier>& textFieldOverlayModifier,
-    const RefPtr<TextFieldContentModifier>& textFieldContentModifier)
+    const RefPtr<TextFieldContentModifier>& textFieldContentModifier,
+    const RefPtr<TextFieldForegroundModifier>& textFieldForegroundModifier)
     : pattern_(pattern), textFieldOverlayModifier_(textFieldOverlayModifier),
-      textFieldContentModifier_(textFieldContentModifier)
+      textFieldContentModifier_(textFieldContentModifier), textFieldForegroundModifier_(textFieldForegroundModifier)
 {}
 
 RefPtr<Modifier> TextFieldPaintMethod::GetContentModifier(PaintWrapper* paintWrapper)
@@ -68,9 +55,9 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     auto textFieldLayoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    auto textValue = textFieldPattern->GetTextValue();
+    auto textValue = textFieldPattern->GetTextUtf16Value();
     auto isPasswordType = textFieldPattern->IsInPasswordMode();
-    auto showPlaceHolder = textFieldLayoutProperty->GetValueValue("").empty();
+    auto showPlaceHolder = textFieldLayoutProperty->GetValueValue(u"").empty();
     auto needObscureText = isPasswordType && textFieldPattern->GetTextObscured() && !showPlaceHolder;
     auto frameNode = textFieldPattern->GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -78,10 +65,9 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
-    auto text =
-        TextFieldPattern::CreateDisplayText(textValue, textFieldPattern->GetNakedCharPosition(),
-            needObscureText, theme->IsShowPasswordDirectly());
-    auto displayText = StringUtils::Str16ToStr8(text);
+    auto text = TextFieldPattern::CreateDisplayText(
+        textValue, textFieldPattern->GetNakedCharPosition(), needObscureText, theme->IsShowPasswordDirectly());
+    auto displayText = text;
     textFieldContentModifier_->SetTextValue(displayText);
     textFieldContentModifier_->SetPlaceholderValue(textFieldPattern->GetPlaceHolder());
 
@@ -101,7 +87,7 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
             currentTextRectOffsetX += textFieldOffset.GetX();
             currentTextRectOffsetY += textFieldOffset.GetY();
         }
-        auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+        auto eventHub = frameNode->GetOrCreateEventHub<TextFieldEventHub>();
         eventHub->FireOnScrollChangeEvent(currentTextRectOffsetX, currentTextRectOffsetY);
     }
     textFieldContentModifier_->SetContentOffset(contentOffset);
@@ -113,10 +99,10 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(layoutProperty);
     textFieldContentModifier_->SetTextObscured(textFieldPattern->GetTextObscured());
     textFieldContentModifier_->SetShowErrorState(
-        layoutProperty->GetShowErrorTextValue(false) &&
-        !textFieldPattern->IsNormalInlineState());
-    textFieldContentModifier_->SetErrorTextValue(layoutProperty->GetErrorTextValue(""));
+        layoutProperty->GetShowErrorTextValue(false) && !textFieldPattern->IsNormalInlineState());
+    textFieldContentModifier_->SetErrorTextValue(layoutProperty->GetErrorTextValue(u""));
     textFieldContentModifier_->SetShowUnderlineState(layoutProperty->GetShowUnderlineValue(false));
+    DoTextFadeoutIfNeed(paintWrapper);
     PropertyChangeFlag flag = 0;
     if (textFieldContentModifier_->NeedMeasureUpdate(flag)) {
         frameNode->MarkDirtyNode(flag);
@@ -151,8 +137,9 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(textFieldPattern);
     auto paintProperty = DynamicCast<TextFieldPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
-
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto frameNode = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto themeManager = pipelineContext->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
@@ -175,6 +162,8 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     textFieldOverlayModifier_->SetCursorWidth(cursorRect.Width());
     auto cursorColor = paintProperty->GetCursorColorValue(theme->GetCursorColor());
     textFieldOverlayModifier_->SetCursorColor(cursorColor);
+
+    SetFloatingCursor();
 
     InputStyle inputStyle = paintProperty->GetInputStyleValue(InputStyle::DEFAULT);
     textFieldOverlayModifier_->SetInputStyle(inputStyle);
@@ -199,6 +188,42 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     UpdateScrollBar();
 }
 
+void TextFieldPaintMethod::SetFloatingCursor()
+{
+    CHECK_NULL_VOID(textFieldOverlayModifier_);
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    if (!textFieldOverlayModifier_->GetFloatCaretLanding()) {
+        auto floatingCursorRect = textFieldPattern->GetFloatingCaretRect();
+        textFieldOverlayModifier_->SetFloatingCursorOffset(floatingCursorRect.GetOffset());
+    }
+    auto floatingCursorVisible = textFieldPattern->GetFloatingCursorVisible();
+    textFieldOverlayModifier_->SetFloatingCursorVisible(floatingCursorVisible);
+    auto showOriginCursor = textFieldPattern->GetShowOriginCursor();
+    textFieldOverlayModifier_->SetShowOriginCursor(showOriginCursor);
+}
+
+void TextFieldPaintMethod::DoTextFadeoutIfNeed(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(paintWrapper);
+    CHECK_NULL_VOID(textFieldContentModifier_);
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto textFieldTheme = textFieldPattern->GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto frameNode = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    if ((textFieldTheme->TextFadeoutEnabled() && textFieldPattern->GetTextFadeoutCapacity())) {
+        auto paragraph = textFieldPattern->GetParagraph();
+        CHECK_NULL_VOID(paragraph);
+        auto paintContentWidth = paintWrapper->GetContentSize().Width();
+        auto textFadeoutEnabled =
+            GreatNotEqual(paintContentWidth, 0.0) &&
+            GreatNotEqual(paragraph->GetTextWidth() + textFieldPattern->GetTextParagraphIndent(), paintContentWidth);
+        textFieldContentModifier_->SetTextFadeoutEnabled(textFadeoutEnabled);
+    }
+}
+
 void TextFieldPaintMethod::UpdateScrollBar()
 {
     auto scrollBar = scrollBar_.Upgrade();
@@ -214,5 +239,21 @@ void TextFieldPaintMethod::UpdateScrollBar()
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     textFieldOverlayModifier_->SetBarColor(scrollBar->GetForegroundColor());
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
+}
+
+RefPtr<Modifier> TextFieldPaintMethod::GetForegroundModifier(PaintWrapper* paintWrapper)
+{
+    return textFieldForegroundModifier_;
+}
+
+void TextFieldPaintMethod::UpdateForegroundModifier(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(textFieldForegroundModifier_);
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto paintProperty = textFieldPattern->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    textFieldForegroundModifier_->SetInnerBorderWidth(
+        static_cast<float>(paintProperty->GetInnerBorderWidthValue(Dimension()).ConvertToPx()));
 }
 } // namespace OHOS::Ace::NG

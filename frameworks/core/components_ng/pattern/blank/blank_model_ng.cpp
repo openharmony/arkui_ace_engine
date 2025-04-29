@@ -15,18 +15,8 @@
 
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 
-#include "base/geometry/dimension.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "core/common/container.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/blank/blank_layout_property.h"
-#include "core/components_ng/pattern/blank/blank_paint_property.h"
 #include "core/components_ng/pattern/blank/blank_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 void BlankModelNG::Create()

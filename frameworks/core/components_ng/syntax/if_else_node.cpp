@@ -15,13 +15,7 @@
 
 #include "core/components_ng/syntax/if_else_node.h"
 
-#include <list>
-#include <type_traits>
-
-#include "base/log/ace_trace.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/property/property.h"
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
@@ -67,16 +61,17 @@ RefPtr<IfElseNode> IfElseNode::GetOrCreateIfElseNode(int32_t nodeId)
  *   an extra else clause in which to set the branchId (calls IfElseNode::SetBranchId)
  * - IfElseNode::FlushUpdateAndMarkDirty is called upon If.Pop()
  */
-void IfElseNode::SetBranchId(int32_t value, std::list<int32_t>& removedElmtId)
+void IfElseNode::SetBranchId(int32_t value, std::list<int32_t>& removedElmtId, std::list<int32_t>& reservedElmtId)
 {
     branchIdChanged_ = (branchId_ != value);
-    TAG_LOGD(AceLogTag::ACE_IF, "id: %{public}d, branchIdChanged_: %{public}d", GetId(), branchIdChanged_);
+    TAG_LOGD(AceLogTag::ACE_IF, "IfElse(%{public}d).SetBranchId branchIdChanged_: %{public}d",
+        GetId(), branchIdChanged_);
     if (branchIdChanged_) {
         // collect elmtIds of all children and their children up to CustomNode object
         // these will be removed, but possibly with a delay if their is an animation
         // list of elmtIds is sent back to calling TS ViewPU.ifElseBranchUpdateFunction()
         Clean(false, true, branchId_);
-        CollectRemovedChildren(GetChildren(), removedElmtId, true);
+        CollectCleanedChildren(GetChildren(), removedElmtId, reservedElmtId, true);
         branchId_ = value;
     }
 }
@@ -85,13 +80,9 @@ void IfElseNode::FlushUpdateAndMarkDirty()
 {
     if (branchIdChanged_) {
         auto parent = GetParent();
-        while (parent) {
-            auto frameNode = AceType::DynamicCast<FrameNode>(parent);
-            if (frameNode) {
-                frameNode->ChildrenUpdatedFrom(0);
-                break;
-            }
-            parent = parent->GetParent();
+        int64_t accessibilityId = GetAccessibilityId();
+        if (parent) {
+            parent->NotifyChange(0, 0, accessibilityId, NotificationType::START_CHANGE_POSITION);
         }
         // mark parent dirty to flush measure.
         MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);
@@ -104,12 +95,33 @@ bool IfElseNode::TryRetake(const std::string& id)
     auto node = GetDisappearingChildById(id, branchId_);
     if (node) {
         ACE_SCOPED_TRACE("IfElse TryRetake validate.");
+        node->SetJSViewActive(true);
         AddChild(node);
         // for geometryTransition, let all reused children call UpdateGeometryTransition.
         LayoutProperty::UpdateAllGeometryTransition(node);
+        CollectRetakenNodes(node);
         return true;
     }
     return false;
+}
+
+void IfElseNode::CollectRetakenNodes(const RefPtr<UINode>& node)
+{
+    retakenElmtIds_.emplace_back(node->GetId());
+    if (GetTag() != V2::JS_VIEW_ETS_TAG) {
+        for (auto const& child : node->GetChildren()) {
+            CollectRetakenNodes(child);
+        }
+    }
+}
+
+bool IfElseNode::GetRetakenElmtIds(std::list<int32_t>& retakenElmtIds)
+{
+    if (retakenElmtIds_.size() == 0) {
+        return false;
+    }
+    retakenElmtIds.splice(retakenElmtIds.end(), retakenElmtIds_);
+    return true;
 }
 
 } // namespace OHOS::Ace::NG

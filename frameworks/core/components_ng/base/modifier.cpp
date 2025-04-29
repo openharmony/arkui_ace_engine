@@ -26,65 +26,83 @@ Modifier::Modifier()
 
 void ContentModifier::Draw(DrawingContext& context)
 {
-    if (extensionHandler_) {
-        extensionHandler_->Draw(context);
+    auto extensionHandler = extensionHandler_.Upgrade();
+    if (extensionHandler) {
+        extensionHandler->Draw(context);
     } else {
         onDraw(context);
     }
 }
 
-void ContentModifier::SetExtensionHandler(ExtensionHandler* extensionHandler)
+void ContentModifier::SetExtensionHandler(const RefPtr<ExtensionHandler>& extensionHandler)
 {
-    extensionHandler_ = extensionHandler;
-    extensionHandler_->SetInvalidateRenderImpl([weak = WeakClaim(this)]() {
+    extensionHandler->SetInvalidateRenderImpl([weak = WeakClaim(this)]() {
         auto modifier = weak.Upgrade();
         if (modifier) {
             modifier->SetContentChange();
         }
     });
-    extensionHandler_->SetInnerDrawImpl([this](DrawingContext& context) { onDraw(context); });
+    extensionHandler->SetInnerDrawImpl([weak = WeakClaim(this)](DrawingContext& context) {
+        auto modifier = weak.Upgrade();
+        if (modifier) {
+            modifier->onDraw(context);
+        }
+    });
+    extensionHandler_ = AceType::WeakClaim(AceType::RawPtr(extensionHandler));
 }
 
 void OverlayModifier::Draw(DrawingContext& context)
 {
-    if (extensionHandler_) {
-        extensionHandler_->OverlayDraw(context);
+    auto extensionHandler = extensionHandler_.Upgrade();
+    if (extensionHandler) {
+        extensionHandler->OverlayDraw(context);
     } else {
         onDraw(context);
     }
 }
 
-void OverlayModifier::SetExtensionHandler(ExtensionHandler* extensionHandler)
+void OverlayModifier::SetExtensionHandler(const RefPtr<ExtensionHandler>& extensionHandler)
 {
-    extensionHandler_ = extensionHandler;
-    extensionHandler_->SetOverlayRenderImpl([weak = WeakClaim(this)]() {
+    extensionHandler->SetOverlayRenderImpl([weak = WeakClaim(this)]() {
         auto modifier = weak.Upgrade();
         if (modifier) {
             modifier->SetOverlayChange();
         }
     });
-    extensionHandler_->SetInnerOverlayDrawImpl([this](DrawingContext& context) { onDraw(context); });
+    extensionHandler->SetInnerOverlayDrawImpl([weak = WeakClaim(this)](DrawingContext& context) {
+        auto modifier = weak.Upgrade();
+        if (modifier) {
+            modifier->onDraw(context);
+        }
+    });
+    extensionHandler_ = AceType::WeakClaim(AceType::RawPtr(extensionHandler));
 }
 
 void ForegroundModifier::Draw(DrawingContext& context)
 {
-    if (extensionHandler_) {
-        extensionHandler_->ForegroundDraw(context);
+    auto extensionHandler = extensionHandler_.Upgrade();
+    if (extensionHandler) {
+        extensionHandler->ForegroundDraw(context);
     } else {
         onDraw(context);
     }
 }
 
-void ForegroundModifier::SetExtensionHandler(ExtensionHandler* extensionHandler)
+void ForegroundModifier::SetExtensionHandler(const RefPtr<ExtensionHandler>& extensionHandler)
 {
-    extensionHandler_ = extensionHandler;
-    extensionHandler_->SetForeGroundRenderImpl([weak = WeakClaim(this)]() {
+    extensionHandler->SetForeGroundRenderImpl([weak = WeakClaim(this)]() {
         auto modifier = weak.Upgrade();
         if (modifier) {
             modifier->SetForegroundChange();
         }
     });
-    extensionHandler_->SetInnerForegroundDrawImpl([this](DrawingContext& context) { onDraw(context); });
+    extensionHandler->SetInnerForegroundDrawImpl([weak = WeakClaim(this)](DrawingContext& context) {
+        auto modifier = weak.Upgrade();
+        if (modifier) {
+            modifier->onDraw(context);
+        }
+    });
+    extensionHandler_ = AceType::WeakClaim(AceType::RawPtr(extensionHandler));
 }
 
 } // namespace OHOS::Ace::NG

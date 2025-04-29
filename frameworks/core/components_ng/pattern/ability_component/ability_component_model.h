@@ -39,11 +39,6 @@ public:
     virtual void SetOnDisConnect(std::function<void()>&& onDisConnect) = 0;
     virtual void SetWidth(Dimension value) {};
     virtual void SetHeight(Dimension value) {};
-
-private:
-    static std::unique_ptr<AbilityComponentModel> instance_;
-    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ABILITY_COMPONENT_MODEL_H

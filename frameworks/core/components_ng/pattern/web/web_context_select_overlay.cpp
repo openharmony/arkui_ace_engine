@@ -20,7 +20,6 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -34,6 +33,7 @@ bool WebContextSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     auto host = pattern->GetHost();
     CHECK_NULL_RETURN(host, false);
     pipeline->AddOnAreaChangeNode(host->GetId());
+    SetEnableSubWindowMenu(true);
     return true;
 }
 
@@ -135,8 +135,6 @@ void WebContextSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
 {
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->UpdateTouchHandleForOverlay();
-    pattern->SetSelectOverlayDragging(false);
 }
 
 void WebContextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
@@ -147,7 +145,7 @@ void WebContextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     pattern->contextMenuResult_->Cancel();
 }
 
-void WebContextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
+void WebContextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside)
 {
     if (IsMouseClickDown(sourceType, touchType) || IsTouchUp(sourceType, touchType)) {
         CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);

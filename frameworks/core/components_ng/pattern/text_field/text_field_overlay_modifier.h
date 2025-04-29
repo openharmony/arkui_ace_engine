@@ -20,18 +20,12 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/shadow_config.h"
-#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 class TextFieldOverlayModifier : public ScrollBarOverlayModifier {
@@ -40,6 +34,8 @@ class TextFieldOverlayModifier : public ScrollBarOverlayModifier {
 public:
     TextFieldOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern, WeakPtr<ScrollEdgeEffect>&& edgeEffect);
     ~TextFieldOverlayModifier() override = default;
+
+    void ModifierAttachProperty();
 
     void onDraw(DrawingContext& context) override;
 
@@ -50,6 +46,9 @@ public:
     void SetContentSize(SizeF& value);
     void SetContentOffset(OffsetF& value);
     void SetCursorOffset(const OffsetF& value);
+    void SetFloatingCursorOffset(const OffsetF& value);
+    void SetFloatingCursorVisible(bool value);
+    void SetShowOriginCursor(bool value);
     void SetInputStyle(InputStyle& value);
     void SetFrameSize(const SizeF& value);
     void SetCurrentOffset(float value);
@@ -74,9 +73,25 @@ public:
     void SetPreviewTextStyle(PreviewTextStyle style);
     void ContentChange();
 
+    void StartFloatingCaretLand(const OffsetF& originCaretOffset);
+
+    bool GetFloatCaretLanding() const
+    {
+        return caretLanding_;
+    }
+
+    void SetFloatCaretLanding(bool caretLanding)
+    {
+        caretLanding_ = caretLanding;
+    }
+
+    void SetHoverColorAndRects(const std::vector<RoundRect>& hoverRects, uint32_t hoverColor);
+    void ClearHoverColorAndRects();
+
 private:
     void PaintSelection(DrawingContext& context) const;
     void PaintCursor(DrawingContext& context) const;
+    void PaintFloatingCursor(DrawingContext& context) const;
     void PaintEdgeEffect(const SizeF& frameSize, RSCanvas& canvas);
     void PaintScrollBar(DrawingContext& context);
     void PaintMagnifier(DrawingContext& context);
@@ -88,6 +103,7 @@ private:
     void GetFrameRectClip(RSRect& clipRect, std::vector<RSPoint>& clipRadius);
     void PaintPreviewTextDecoration(DrawingContext& context) const;
 
+    bool caretLanding_ = false;
     bool needPaintSelect_ = false;
     bool needPaintPreviewText = false;
     PreviewTextStyle previewTextStyle_ = PreviewTextStyle::NORMAL;
@@ -115,6 +131,12 @@ private:
     RefPtr<PropertyBool> contentChange_;
     RefPtr<PropertyColor> previewTextDecorationColor_;
     RectF textRect_;
+    RefPtr<AnimatablePropertyOffsetF> floatingCursorOffset_;
+    RefPtr<PropertyBool> floatingCursorVisible_;
+    RefPtr<PropertyBool> showOriginCursor_;
+    std::vector<RoundRect> hoverRects_;
+    RefPtr<PropertyInt> hoverColor_;
+
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldOverlayModifier);
 };
 } // namespace OHOS::Ace::NG

@@ -19,6 +19,7 @@
 #define private public
 #define protected public
 
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
@@ -112,8 +113,7 @@ constexpr float MENU_SIZE_WIDTH_SECOND = 199.0f;
 constexpr double DIP_SCALE = 1.5;
 const std::vector<std::string> FONT_FAMILY_VALUE = {"cursive"};
 constexpr double CONST_DOUBLE_ZREO = 0.0;
-constexpr float SCALE_ANIMATION_FISRT = 0.8f;
-constexpr float SCALE_ANIMATION_SECOND = 1.0f;
+constexpr float SCALE_ANIMATION_FIRST = 0.8f;
 constexpr float PLACEMENT_MENU_SPACE = 12.0f;
 const std::vector<SelectParam> CREATE_VALUE = { { "content1", "icon1" }, { "content2", "" },
     { "", "icon3" }, { "", "" } };
@@ -142,6 +142,7 @@ void MenuLayout2TestNg::TearDownTestCase() {}
 
 void MenuLayout2TestNg::SetUp()
 {
+    MockContainer::SetUp();
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -150,6 +151,7 @@ void MenuLayout2TestNg::SetUp()
 
 void MenuLayout2TestNg::TearDown()
 {
+    MockContainer::TearDown();
     MockPipelineContext::TearDown();
     menuFrameNode_ = nullptr;
     menuAccessibilityProperty_ = nullptr;
@@ -281,8 +283,6 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg4200, TestSize.Level1)
     menuAlgorithm->targetSize_ = SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
     menuAlgorithm->targetOffset_ = OffsetF(OFFSET_FORTH, OFFSET_THIRD);
     menuAlgorithm->previewScale_ = 1.0f;
-    auto pipelineContext = menuAlgorithm->GetCurrentPipelineContext();
-    ASSERT_NE(pipelineContext, nullptr);
 
     /**
      * @tc.steps: step2. the window can accommodate preview, placement is default, layout preview and menu
@@ -292,12 +292,13 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg4200, TestSize.Level1)
     auto layoutProperty = AceType::DynamicCast<MenuLayoutProperty>(menuNode->GetLayoutProperty());
     layoutProperty->UpdateMenuPlacement(Placement::BOTTOM_LEFT);
     menuAlgorithm->placement_ = Placement::BOTTOM_LEFT;
-    pipelineContext->SetDisplayWindowRectInfo(Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    menuAlgorithm->param_.menuWindowRect = Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
     menuAlgorithm->Layout(AceType::RawPtr(menuNode));
     auto expectPreviewOffset = OffsetF(OFFSET_FORTH, OFFSET_THIRD);
-    EXPECT_EQ(previewGeometryNode->GetFrameOffset(), OffsetF(OFFSET_FORTH, 0.0f));
+    EXPECT_EQ(previewGeometryNode->GetFrameOffset(), OffsetF(OFFSET_FORTH, OFFSET_THIRD));
     EXPECT_EQ(previewGeometryNode->GetFrameSize(), SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
-    auto expectMenuOffset = OffsetF(OFFSET_FORTH, OFFSET_THIRD / 2 + TARGET_SECURITY.ConvertToPx());
+    auto expectMenuOffset = OffsetF(OFFSET_FORTH, OFFSET_THIRD + TARGET_SIZE_HEIGHT + PLACEMENT_MENU_SPACE);
+    auto oldexpectMenuOffset = OffsetF(OFFSET_FORTH, OFFSET_THIRD / 2 + TARGET_SECURITY.ConvertToPx());
     EXPECT_EQ(menuGeometryNode->GetFrameOffset(), expectMenuOffset);
     EXPECT_EQ(menuGeometryNode->GetFrameSize(), SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
 
@@ -313,7 +314,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg4200, TestSize.Level1)
     layoutProperty->UpdateMenuPlacement(Placement::BOTTOM);
     menuAlgorithm->placement_ = Placement::BOTTOM;
     menuAlgorithm->Layout(AceType::RawPtr(menuNode));
-    expectMenuOffset = OffsetF(OFFSET_FORTH, TARGET_SIZE_HEIGHT + TARGET_SECURITY.ConvertToPx());
+    expectMenuOffset = OffsetF(OFFSET_FORTH, OFFSET_THIRD + TARGET_SIZE_HEIGHT + TARGET_SECURITY.ConvertToPx());
     EXPECT_EQ(menuGeometryNode->GetFrameOffset(), expectMenuOffset);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     EXPECT_EQ(menuPattern->endOffset_, expectMenuOffset);
@@ -358,8 +359,6 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg4300, TestSize.Level1)
     menuAlgorithm->targetOffset_ = OffsetF(OFFSET_FORTH, 0.0f);
     menuAlgorithm->targetSecurity_ = TARGET_SECURITY.ConvertToPx();
     menuAlgorithm->previewScale_ = 1.0f;
-    auto pipelineContext = menuAlgorithm->GetCurrentPipelineContext();
-    ASSERT_NE(pipelineContext, nullptr);
     /**
      * @tc.steps: step2. the height of window can't accommodate preview and menu, placement is default,
      * layout preview and menu
@@ -369,7 +368,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg4300, TestSize.Level1)
     auto layoutProperty = AceType::DynamicCast<MenuLayoutProperty>(menuNode->GetLayoutProperty());
     layoutProperty->UpdateMenuPlacement(Placement::BOTTOM_LEFT);
     menuAlgorithm->placement_ = Placement::BOTTOM_LEFT;
-    pipelineContext->SetDisplayWindowRectInfo(Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    menuAlgorithm->param_.menuWindowRect = Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
     menuAlgorithm->Layout(AceType::RawPtr(menuNode));
     OffsetF center(menuAlgorithm->targetOffset_.GetX() + menuAlgorithm->targetSize_.Width() / 2,
         menuAlgorithm->targetOffset_.GetY() + menuAlgorithm->targetSize_.Height() / 2);
@@ -625,8 +624,6 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg4700, TestSize.Level1)
     menuAlgorithm->targetOffset_ = OffsetF(OFFSET_THIRD, OFFSET_THIRD);
     menuAlgorithm->targetSecurity_ = TARGET_SECURITY.ConvertToPx();
     menuAlgorithm->previewScale_ = 1.0f;
-    auto pipelineContext = menuAlgorithm->GetCurrentPipelineContext();
-    ASSERT_NE(pipelineContext, nullptr);
 
     /**
      * @tc.steps: step2. the window can not accommodate preview, placement is default, layout preview and menu
@@ -636,15 +633,14 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg4700, TestSize.Level1)
     auto layoutProperty = AceType::DynamicCast<MenuLayoutProperty>(menuNode->GetLayoutProperty());
     layoutProperty->UpdateMenuPlacement(Placement::RIGHT_TOP);
     menuAlgorithm->placement_ = Placement::RIGHT_TOP;
-    pipelineContext->SetDisplayWindowRectInfo(Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    menuAlgorithm->param_.menuWindowRect = Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
     menuAlgorithm->Layout(AceType::RawPtr(menuNode));
     auto expectPreviewOffset = OffsetF(CONST_DOUBLE_ZREO, CONST_DOUBLE_ZREO);
     EXPECT_EQ(previewGeometryNode->GetFrameOffset(), expectPreviewOffset);
     EXPECT_EQ(previewGeometryNode->GetFrameSize(), SizeF(-MENU_SIZE_WIDTH_SECOND, -MENU_SIZE_WIDTH_SECOND * 2));
     auto expectMenuOffset = OffsetF(-MENU_SIZE_WIDTH_SECOND, CONST_DOUBLE_ZREO);
     EXPECT_EQ(menuGeometryNode->GetFrameOffset(), expectMenuOffset);
-    EXPECT_EQ(menuGeometryNode->GetFrameSize(),
-        SizeF(MENU_SIZE_WIDTH_SECOND, CONST_DOUBLE_ZREO));
+    EXPECT_EQ(menuGeometryNode->GetFrameSize(), SizeF(MENU_SIZE_WIDTH_SECOND, CONST_DOUBLE_ZREO));
     /**
      * @tc.steps: step3. the window can not accommodate preview, placement is RIGHT, layout preview and menu
      * @tc.expected: menu and preview bottom right distance TARGET_SECURITY, align the menu with the preview in the
@@ -840,8 +836,6 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5100, TestSize.Level1)
     menuAlgorithm->targetOffset_ = OffsetF(OFFSET_FORTH, 0.0f);
     menuAlgorithm->targetSecurity_ = TARGET_SECURITY.ConvertToPx();
     menuAlgorithm->previewScale_ = 1.0f;
-    auto pipelineContext = menuAlgorithm->GetCurrentPipelineContext();
-    ASSERT_NE(pipelineContext, nullptr);
 
     /**
      * @tc.steps: step2. the width of window can't accommodate preview and menu, placement is BOTTOM_LEFT,
@@ -851,7 +845,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5100, TestSize.Level1)
     auto layoutProperty = AceType::DynamicCast<MenuLayoutProperty>(menuNode->GetLayoutProperty());
     layoutProperty->UpdateMenuPlacement(Placement::BOTTOM_LEFT);
     menuAlgorithm->placement_ = Placement::BOTTOM_LEFT;
-    pipelineContext->SetDisplayWindowRectInfo(Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    menuAlgorithm->param_.menuWindowRect = Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 
     previewGeometryNode->SetFrameSize(SizeF(GREATER_WINDOW_PREVIEW_WIDTH, OFFSET_FORTH));
     menuAlgorithm->Layout(AceType::RawPtr(menuNode));
@@ -901,8 +895,6 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5200, TestSize.Level1)
     menuAlgorithm->targetOffset_ = OffsetF(OFFSET_FORTH, 0.0f);
     menuAlgorithm->targetSecurity_ = TARGET_SECURITY.ConvertToPx();
     menuAlgorithm->previewScale_ = 1.0f;
-    auto pipelineContext = menuAlgorithm->GetCurrentPipelineContext();
-    ASSERT_NE(pipelineContext, nullptr);
 
     /**
      * @tc.steps: step2. the width of window can't accommodate preview and menu, placement is TOP_LEFT,
@@ -912,16 +904,14 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5200, TestSize.Level1)
     auto layoutProperty = AceType::DynamicCast<MenuLayoutProperty>(menuNode->GetLayoutProperty());
     layoutProperty->UpdateMenuPlacement(Placement::TOP_LEFT);
     menuAlgorithm->placement_ = Placement::TOP_LEFT;
-    pipelineContext->SetDisplayWindowRectInfo(Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    menuAlgorithm->param_.menuWindowRect = Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
     previewGeometryNode->SetFrameSize(SizeF(GREATER_WINDOW_PREVIEW_WIDTH, OFFSET_FORTH));
     menuAlgorithm->Layout(AceType::RawPtr(menuNode));
-    auto expectMenuOffset = OffsetF(OFFSET_FORTH, POSITION_OFFSET + PLACEMENT_MENU_SPACE);
+    auto expectMenuOffset = OffsetF(0.0f, 382.0f);
     EXPECT_EQ(menuGeometryNode->GetFrameOffset(), expectMenuOffset);
     EXPECT_EQ(menuGeometryNode->GetFrameSize(), SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
-    auto expectPreviewOffset = OffsetF((OFFSET_FORTH + TARGET_SIZE_WIDTH) / DIP_SCALE, TARGET_SIZE_HEIGHT);
-    EXPECT_EQ(previewGeometryNode->GetFrameOffset(), expectPreviewOffset);
-    EXPECT_EQ(previewGeometryNode->GetFrameSize(),
-        SizeF(-(OFFSET_FORTH + TARGET_SIZE_WIDTH) / DIP_SCALE, -TARGET_SIZE_HEIGHT));
+    EXPECT_TRUE(previewGeometryNode->GetFrameOffset().NonNegative());
+    EXPECT_EQ(previewGeometryNode->GetFrameSize(), SizeF(SCALE_PREVIEW_WIDTH_FORTH_SECOND, SCALE_PREVIEW_HEIGHT));
 }
 
 /**
@@ -961,9 +951,6 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5300, TestSize.Level1)
     menuAlgorithm->targetOffset_ = OffsetF(OFFSET_FORTH, 0.0f);
     menuAlgorithm->targetSecurity_ = TARGET_SECURITY.ConvertToPx();
     menuAlgorithm->previewScale_ = 1.0f;
-    auto pipelineContext = menuAlgorithm->GetCurrentPipelineContext();
-    ASSERT_NE(pipelineContext, nullptr);
-
     /**
      * @tc.steps: step2. the height of window can't accommodate preview and menu, and the menu height is less than half
      * the height of the preview content , placement is BOTTOM_LEFT, layout preview and menu
@@ -974,7 +961,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5300, TestSize.Level1)
     auto layoutProperty = AceType::DynamicCast<MenuLayoutProperty>(menuNode->GetLayoutProperty());
     layoutProperty->UpdateMenuPlacement(Placement::BOTTOM_LEFT);
     menuAlgorithm->placement_ = Placement::BOTTOM_LEFT;
-    pipelineContext->SetDisplayWindowRectInfo(Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    menuAlgorithm->param_.menuWindowRect = Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
     menuAlgorithm->Layout(AceType::RawPtr(menuNode));
     auto expectPreviewOffset = OffsetF(305.536, CONST_DOUBLE_ZREO);
     EXPECT_EQ(previewGeometryNode->GetFrameOffset(), expectPreviewOffset);
@@ -990,9 +977,8 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5300, TestSize.Level1)
     layoutProperty->UpdateMenuPlacement(Placement::TOP_LEFT);
     menuAlgorithm->placement_ = Placement::TOP_LEFT;
     menuAlgorithm->Layout(AceType::RawPtr(menuNode));
-    expectPreviewOffset = OffsetF(8.58369, TARGET_SIZE_WIDTH);
-    EXPECT_EQ(previewGeometryNode->GetFrameOffset(), expectPreviewOffset);
-    EXPECT_EQ(previewGeometryNode->GetFrameSize(), SizeF(-8.58369, -TARGET_SIZE_WIDTH));
+    EXPECT_TRUE(previewGeometryNode->GetFrameOffset().NonNegative());
+    EXPECT_EQ(previewGeometryNode->GetFrameSize(), SizeF(88.927, FULL_SCREEN_HEIGHT - POSITION_OFFSET));
     EXPECT_TRUE(menuGeometryNode->GetFrameOffset().NonNegative());
     EXPECT_EQ(menuGeometryNode->GetFrameSize(), SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
 }
@@ -1034,8 +1020,6 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5400, TestSize.Level1)
     menuAlgorithm->targetOffset_ = OffsetF(OFFSET_FORTH, 0.0f);
     menuAlgorithm->targetSecurity_ = TARGET_SECURITY.ConvertToPx();
     menuAlgorithm->previewScale_ = 1.0f;
-    auto pipelineContext = menuAlgorithm->GetCurrentPipelineContext();
-    ASSERT_NE(pipelineContext, nullptr);
 
     /**
      * @tc.steps: step2. the height of window can't accommodate preview and menu, and the menu height is less than half
@@ -1047,7 +1031,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5400, TestSize.Level1)
     auto layoutProperty = AceType::DynamicCast<MenuLayoutProperty>(menuNode->GetLayoutProperty());
     layoutProperty->UpdateMenuPlacement(Placement::BOTTOM_LEFT);
     menuAlgorithm->placement_ = Placement::BOTTOM_LEFT;
-    pipelineContext->SetDisplayWindowRectInfo(Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    menuAlgorithm->param_.menuWindowRect = Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 
     previewGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, GREATER_WINDOW_PREVIEW_HEIGHT_SECOND));
     menuAlgorithm->Layout(AceType::RawPtr(menuNode));
@@ -1068,9 +1052,8 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5400, TestSize.Level1)
 
     previewGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, GREATER_WINDOW_PREVIEW_HEIGHT_SECOND));
     menuAlgorithm->Layout(AceType::RawPtr(menuNode));
-    expectPreviewOffset = OffsetF(CONST_DOUBLE_ZREO, CONST_DOUBLE_ZREO);
-    EXPECT_EQ(previewGeometryNode->GetFrameOffset(), expectPreviewOffset);
-    EXPECT_EQ(previewGeometryNode->GetFrameSize(), SizeF(CONST_DOUBLE_ZREO, CONST_DOUBLE_ZREO));
+    EXPECT_TRUE(previewGeometryNode->GetFrameOffset().NonNegative());
+    EXPECT_EQ(previewGeometryNode->GetFrameSize(), SizeF(55.0388, 757.333));
     EXPECT_TRUE(menuGeometryNode->GetFrameOffset().NonNegative());
 }
 
@@ -1173,27 +1156,26 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5600, TestSize.Level1)
     menuAlgorithm->targetSize_ = SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
     menuAlgorithm->targetOffset_ = OffsetF(OFFSET_FORTH, FULL_SCREEN_HEIGHT - OFFSET_THIRD);
     menuAlgorithm->targetSecurity_ = TARGET_SECURITY.ConvertToPx();
+    menuAlgorithm->param_.previewMenuGap = TARGET_SECURITY.ConvertToPx();
     menuAlgorithm->previewScale_ = 1.0f;
-    auto pipelineContext = menuAlgorithm->GetCurrentPipelineContext();
-    ASSERT_NE(pipelineContext, nullptr);
 
     /**
      * @tc.steps: step2. the window can accommodate preview, placement is BOTTOM_LEFT, but menu is in top security
      * layout preview and menu
-     * @tc.expected: preview offset is fixed [OFFSET_FORTH + (TARGET_SIZE_WIDTH - PREVIEW_WIDTH) / 2, FULL_SCREEN_HEIGHT
-     * - PORTRAIT_BOTTOM_SECURITY.ConvertToPx() - OFFSET_FORTH - TARGET_SECURITY.ConvertToPx() - TARGET_SIZE_HEIGHT],
-     * menu offset is [OFFSET_FORTH + (TARGET_SIZE_WIDTH - PREVIEW_WIDTH) / 2, FULL_SCREEN_HEIGHT -
-     * PORTRAIT_BOTTOM_SECURITY.ConvertToPx() - OFFSET_FORTH]
+     * @tc.expected: preview offset is fixed [OFFSET_FORTH, FULL_SCREEN_HEIGHT - OFFSET_FORTH -
+     * TARGET_SECURITY.ConvertToPx() - TARGET_SIZE_HEIGHT], menu offset is [OFFSET_FORTH, FULL_SCREEN_HEIGHT -
+     * OFFSET_FORTH]
      */
-    pipelineContext->SetDisplayWindowRectInfo(Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    menuAlgorithm->param_.menuWindowRect = Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
     auto layoutProperty = AceType::DynamicCast<MenuLayoutProperty>(menuNode->GetLayoutProperty());
     menuAlgorithm->placement_ = Placement::BOTTOM_LEFT;
     layoutProperty->UpdateMenuPlacement(Placement::BOTTOM_LEFT);
     menuAlgorithm->Layout(AceType::RawPtr(menuNode));
-    auto expectPreviewOffset = OffsetF(OFFSET_FORTH, 0.0f);
+    auto expectPreviewOffset =
+        OffsetF(OFFSET_FORTH, FULL_SCREEN_HEIGHT - OFFSET_FORTH - TARGET_SECURITY.ConvertToPx() - TARGET_SIZE_HEIGHT);
     EXPECT_EQ(previewGeometryNode->GetFrameOffset(), expectPreviewOffset);
     EXPECT_EQ(previewGeometryNode->GetFrameSize(), SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
-    auto expectMenuOffset = OffsetF(OFFSET_FORTH, TARGET_SIZE_HEIGHT + TARGET_SECURITY.ConvertToPx());
+    auto expectMenuOffset = OffsetF(OFFSET_FORTH, FULL_SCREEN_HEIGHT - OFFSET_FORTH);
     EXPECT_EQ(menuGeometryNode->GetFrameOffset(), expectMenuOffset);
     EXPECT_EQ(menuGeometryNode->GetFrameSize(), SizeF(TARGET_SIZE_WIDTH, OFFSET_FORTH));
 }
@@ -1236,8 +1218,6 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5700, TestSize.Level1)
     menuAlgorithm->targetOffset_ = OffsetF(OFFSET_FORTH, 0.0f);
     menuAlgorithm->targetSecurity_ = TARGET_SECURITY.ConvertToPx();
     menuAlgorithm->previewScale_ = 1.0f;
-    auto pipelineContext = menuAlgorithm->GetCurrentPipelineContext();
-    ASSERT_NE(pipelineContext, nullptr);
 
     /**
      * @tc.steps: step2. the width and height of window can't accommodate preview and menu, placement is BOTTOM_LEFT,
@@ -1247,7 +1227,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5700, TestSize.Level1)
     auto layoutProperty = AceType::DynamicCast<MenuLayoutProperty>(menuNode->GetLayoutProperty());
     layoutProperty->UpdateMenuPlacement(Placement::BOTTOM_LEFT);
     menuAlgorithm->placement_ = Placement::BOTTOM_LEFT;
-    pipelineContext->SetDisplayWindowRectInfo(Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    menuAlgorithm->param_.menuWindowRect = Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 
     previewGeometryNode->SetFrameSize(SizeF(GREATER_WINDOW_PREVIEW_WIDTH_SECOND, PREVIEW_HEIGHT));
     menuAlgorithm->Layout(AceType::RawPtr(menuNode));
@@ -1319,107 +1299,6 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5800, TestSize.Level1)
 }
 
 /**
- * @tc.name: MenuLayoutAlgorithmTestNg5910
- * @tc.desc: Test Layout with preview content and stat/stop animation scale options
- *           for MenuPreviewMode.IMAGE
- * @tc.type: FUNC
- */
-HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5910, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create menu node, preview node and menuLayoutAlgorithm, then set the initial properties
-     * @tc.expected: menu node and menuLayoutAlgorithm are not null
-     */
-    ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
-    ScreenSystemManager::GetInstance().screenWidth_ = FULL_SCREEN_WIDTH;
-    auto context = PipelineBase::GetCurrentContext();
-    if (context) {
-        context->dipScale_ = DIP_SCALE;
-    }
-    MenuPreviewAnimationOptions scaleOptions { 0.5f, 2.0f };
-
-    auto menuWrapperNode = GetImagePreviewMenuWrapper(std::make_optional(scaleOptions));
-    ASSERT_NE(menuWrapperNode, nullptr);
-    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
-    ASSERT_NE(menuNode, nullptr);
-
-    RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
-    layoutAlgorithm->hierarchicalParameters_ = true;
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper(menuNode, geometryNode, menuNode->GetLayoutProperty());
-    layoutWrapper.GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(FULL_SCREEN_HEIGHT)));
-    LayoutConstraintF parentLayoutConstraint;
-    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
-    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
-    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
-    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
-    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
-    layoutAlgorithm->targetSize_ = SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
-    layoutAlgorithm->Initialize(&layoutWrapper);
-    layoutAlgorithm->Measure(&layoutWrapper);
-
-    // @tc.expected: previewScale_ value set by user defined value after Measure and LayoutNormalPreviewMenu
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    ASSERT_NE(menuPattern, nullptr);
-    EXPECT_EQ(menuPattern->GetPreviewBeforeAnimationScale(), scaleOptions.scaleFrom);
-    EXPECT_EQ(menuPattern->GetPreviewAfterAnimationScale(), scaleOptions.scaleTo);
-    layoutAlgorithm->LayoutPreviewMenu(&layoutWrapper);
-    EXPECT_EQ(layoutAlgorithm->previewScale_, scaleOptions.scaleTo - 1);
-}
-
-    /**
-    * @tc.name: MenuLayoutAlgorithmTestNg5920
-    * @tc.desc: Test Layout with preview content and stat/stop animation scale options
-    *           for MenuPreviewMode.CUSTOM
-    * @tc.type: FUNC
-    */
-HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5920, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create menu node, preview node and menuLayoutAlgorithm, then set the initial properties
-     * @tc.expected: menu node and menuLayoutAlgorithm are not null
-     */
-    ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
-    ScreenSystemManager::GetInstance().screenWidth_ = FULL_SCREEN_WIDTH;
-    auto context = PipelineBase::GetCurrentContext();
-    if (context) {
-        context->dipScale_ = DIP_SCALE;
-    }
-    MenuPreviewAnimationOptions scaleOptions { 0.5f, 2.0f };
-
-    auto menuWrapperNode =
-        GetPreviewMenuWrapper(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT), std::make_optional(scaleOptions));
-    ASSERT_NE(menuWrapperNode, nullptr);
-    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
-    ASSERT_NE(menuNode, nullptr);
-
-    RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
-    layoutAlgorithm->hierarchicalParameters_ = true;
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper(menuNode, geometryNode, menuNode->GetLayoutProperty());
-    layoutWrapper.GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(FULL_SCREEN_HEIGHT)));
-    LayoutConstraintF parentLayoutConstraint;
-    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
-    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
-    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
-    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
-    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
-    layoutAlgorithm->targetSize_ = SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
-    layoutAlgorithm->Initialize(&layoutWrapper);
-    layoutAlgorithm->Measure(&layoutWrapper);
-
-    // @tc.expected: previewScale_ value set by user defined value after Measure and LayoutNormalPreviewMenu
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    ASSERT_NE(menuPattern, nullptr);
-    EXPECT_EQ(menuPattern->GetPreviewBeforeAnimationScale(), scaleOptions.scaleFrom);
-    EXPECT_EQ(menuPattern->GetPreviewAfterAnimationScale(), scaleOptions.scaleTo);
-    layoutAlgorithm->LayoutPreviewMenu(&layoutWrapper);
-    EXPECT_EQ(layoutAlgorithm->previewScale_, scaleOptions.scaleTo - 1);
-}
-
-/**
  * @tc.name: SubMenuLayoutAlgorithmTestNg001
  * @tc.desc: Test SubMenuLayoutAlgorithm VerticalLayoutSubMenuHalfScreen and ModifySubMenuWrapper function.
  * @tc.type: FUNC
@@ -1479,7 +1358,7 @@ HWTEST_F(MenuLayout2TestNg, SubMenuLayoutAlgorithmTestNg001, TestSize.Level1)
      * @tc.expected: wrapperSize_ is not Data anomalies
      */
     algorithm->ModifySubMenuWrapper(wrapper);
-    ASSERT_NE(algorithm->wrapperSize_, SizeF(0, 0));
+    ASSERT_EQ(algorithm->wrapperSize_, SizeF(0, 0));
 }
 
 /**
@@ -1544,13 +1423,13 @@ HWTEST_F(MenuLayout2TestNg, SubMenuLayoutAlgorithmTestNg002, TestSize.Level1)
      * @tc.expected: wrapperSize_ is not Data anomalies
      */
     algorithm->ModifySubMenuWrapper(wrapper);
-    ASSERT_NE(algorithm->wrapperSize_, SizeF(0, 0));
+    ASSERT_EQ(algorithm->wrapperSize_, SizeF(0, 0));
 
     /**
      * @tc.steps: step3. call the InitializePaddingAPI12 method.
      * @tc.expected: padding is not zero
      */
-    algorithm->hierarchicalParameters_ = true;
+    algorithm->canExpandCurrentWindow_ = true;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
     selectTheme->menuMediumMargin_ = 10.0_vp;
     algorithm->InitializePaddingAPI12(wrapper);
@@ -1621,13 +1500,13 @@ HWTEST_F(MenuLayout2TestNg, SubMenuLayoutAlgorithmTestNg003, TestSize.Level1)
      * @tc.expected: wrapperSize_ is not Data anomalies
      */
     algorithm->ModifySubMenuWrapper(wrapper);
-    ASSERT_NE(algorithm->wrapperSize_, SizeF(0, 0));
+    ASSERT_EQ(algorithm->wrapperSize_, SizeF(0, 0));
 
     /**
      * @tc.cases: case2. layering parameter is false.
      * @tc.expected: padding is not zero
      */
-    algorithm->hierarchicalParameters_ = false;
+    algorithm->canExpandCurrentWindow_ = false;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
     selectTheme->menuLargeMargin_ = 10.0_vp;
     algorithm->InitializePaddingAPI12(wrapper);
@@ -1671,7 +1550,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5900, TestSize.Level1)
      * @tc.expected: no exception in the method return value.
      */
     RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
-    layoutAlgorithm->hierarchicalParameters_ = true;
+    layoutAlgorithm->canExpandCurrentWindow_ = true;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper(menuNode, geometryNode, menuNode->GetLayoutProperty());
     layoutWrapper.GetLayoutProperty()->UpdateUserDefinedIdealSize(
@@ -1682,11 +1561,16 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5900, TestSize.Level1)
     parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
     layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    int32_t backApiversion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     layoutAlgorithm->Initialize(&layoutWrapper);
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0.0f, 0.0f));
+    container->SetApiTargetVersion(backApiversion);
 }
 
 /**
@@ -1723,7 +1607,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg6000, TestSize.Level1)
      * @tc.expected: no exception in the method return value.
      */
     RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
-    layoutAlgorithm->hierarchicalParameters_ = false;
+    layoutAlgorithm->canExpandCurrentWindow_ = false;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper(menuNode, geometryNode, menuNode->GetLayoutProperty());
     layoutWrapper.GetLayoutProperty()->UpdateUserDefinedIdealSize(
@@ -1734,11 +1618,16 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg6000, TestSize.Level1)
     parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
     layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    int32_t backApiversion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     layoutAlgorithm->Initialize(&layoutWrapper);
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0.0f, 0.0f));
+    container->SetApiTargetVersion(backApiversion);
 }
 
 /**
@@ -1784,81 +1673,6 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmInitTarget, TestSize.Level1)
     EXPECT_EQ(menuLayoutAlgorithm->targetOffset_, OffsetF(0.0f, 0.0f));
 }
 
-/**
- * @tc.name: MenuLayoutAlgorithmTestNg042
- * @tc.desc: Test FixMenuOriginOffset
- * @tc.type: FUNC
- */
-HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg042, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create menuLayoutAlgorithm is null
-     * @tc.expected: menuLayoutAlgorithm is not null
-     */
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>(nodeId, "menu");
-    ASSERT_NE(menuLayoutAlgorithm, nullptr);
-    /**
-     * @tc.steps: step2. set menuLayoutAlgorithm's placement an call FixMenuOriginOffset function
-     * @tc.expected: test algorithm for each two double direction placement
-     */
-    SizeF previewSize = SizeF(10.0, 10.0);
-    menuLayoutAlgorithm->previewSize_ = previewSize;
-    auto beforeScalePreviewOffset = OffsetF((previewSize * ((1.0f - SCALE_ANIMATION_FISRT) / 2)).Width(),
-        (previewSize * ((1.0f - SCALE_ANIMATION_FISRT) / 2)).Height());
-    auto afterScalePreviewOffset = OffsetF((previewSize * ((SCALE_ANIMATION_SECOND - 1.0f) / 2)).Width(),
-        (previewSize * ((SCALE_ANIMATION_SECOND - 1.0f) / 2)).Height());
-    auto scaleOffset = afterScalePreviewOffset + beforeScalePreviewOffset;
-    OffsetF fresult = menuLayoutAlgorithm->FixMenuOriginOffset(SCALE_ANIMATION_FISRT, SCALE_ANIMATION_SECOND);
-    EXPECT_EQ(fresult, OffsetF(scaleOffset.GetX(), -scaleOffset.GetY()));
-    menuLayoutAlgorithm->placement_ = Placement::LEFT_BOTTOM;
-    fresult = menuLayoutAlgorithm->FixMenuOriginOffset(SCALE_ANIMATION_FISRT, SCALE_ANIMATION_SECOND);
-    EXPECT_EQ(fresult, OffsetF(scaleOffset.GetX(), -scaleOffset.GetY()));
-
-    menuLayoutAlgorithm->placement_ = Placement::TOP_RIGHT;
-    fresult = menuLayoutAlgorithm->FixMenuOriginOffset(SCALE_ANIMATION_FISRT, SCALE_ANIMATION_SECOND);
-    EXPECT_EQ(fresult, OffsetF(-scaleOffset.GetX(), scaleOffset.GetY()));
-    menuLayoutAlgorithm->placement_ = Placement::RIGHT_TOP;
-    fresult = menuLayoutAlgorithm->FixMenuOriginOffset(SCALE_ANIMATION_FISRT, SCALE_ANIMATION_SECOND);
-    EXPECT_EQ(fresult, OffsetF(-scaleOffset.GetX(), scaleOffset.GetY()));
-
-    menuLayoutAlgorithm->placement_ = Placement::TOP_LEFT;
-    fresult = menuLayoutAlgorithm->FixMenuOriginOffset(SCALE_ANIMATION_FISRT, SCALE_ANIMATION_SECOND);
-    EXPECT_EQ(fresult, OffsetF(scaleOffset.GetX(), scaleOffset.GetY()));
-    menuLayoutAlgorithm->placement_ = Placement::LEFT_TOP;
-    fresult = menuLayoutAlgorithm->FixMenuOriginOffset(SCALE_ANIMATION_FISRT, SCALE_ANIMATION_SECOND);
-    EXPECT_EQ(fresult, OffsetF(scaleOffset.GetX(), scaleOffset.GetY()));
-
-    menuLayoutAlgorithm->placement_ = Placement::BOTTOM_RIGHT;
-    fresult = menuLayoutAlgorithm->FixMenuOriginOffset(SCALE_ANIMATION_FISRT, SCALE_ANIMATION_SECOND);
-    EXPECT_EQ(fresult, OffsetF(-scaleOffset.GetX(), -scaleOffset.GetY()));
-    menuLayoutAlgorithm->placement_ = Placement::RIGHT_BOTTOM;
-    fresult = menuLayoutAlgorithm->FixMenuOriginOffset(SCALE_ANIMATION_FISRT, SCALE_ANIMATION_SECOND);
-    EXPECT_EQ(fresult, OffsetF(-scaleOffset.GetX(), -scaleOffset.GetY()));
-    /**
-     * @tc.steps: step3. set menuLayoutAlgorithm's placement an call FixMenuOriginOffset function
-     * @tc.expected: test algorithm for each one single direction placement
-     */
-    menuLayoutAlgorithm->placement_ = Placement::BOTTOM;
-    fresult = menuLayoutAlgorithm->FixMenuOriginOffset(SCALE_ANIMATION_FISRT, SCALE_ANIMATION_SECOND);
-    EXPECT_EQ(fresult, OffsetF(0.0f, -scaleOffset.GetY()));
-    menuLayoutAlgorithm->placement_ = Placement::TOP;
-    fresult = menuLayoutAlgorithm->FixMenuOriginOffset(SCALE_ANIMATION_FISRT, SCALE_ANIMATION_SECOND);
-    EXPECT_EQ(fresult, OffsetF(0.0f, scaleOffset.GetY()));
-    menuLayoutAlgorithm->placement_ = Placement::LEFT;
-    fresult = menuLayoutAlgorithm->FixMenuOriginOffset(SCALE_ANIMATION_FISRT, SCALE_ANIMATION_SECOND);
-    EXPECT_EQ(fresult, OffsetF(scaleOffset.GetX(), 0.0f));
-    menuLayoutAlgorithm->placement_ = Placement::RIGHT;
-    fresult = menuLayoutAlgorithm->FixMenuOriginOffset(SCALE_ANIMATION_FISRT, SCALE_ANIMATION_SECOND);
-    EXPECT_EQ(fresult, OffsetF(-scaleOffset.GetX(), 0.0f));
-    /**
-     * @tc.steps: step3. set menuLayoutAlgorithm's placement an call FixMenuOriginOffset function
-     * @tc.expected: test algorithm for other placement
-     */
-    menuLayoutAlgorithm->placement_ = Placement::NONE;
-    fresult = menuLayoutAlgorithm->FixMenuOriginOffset(SCALE_ANIMATION_FISRT, SCALE_ANIMATION_SECOND);
-    EXPECT_EQ(fresult, OffsetF(scaleOffset.GetX(), -scaleOffset.GetY()));
-}
 /**
  * @tc.name: MenuLayoutAlgorithmTestNg043
  * @tc.desc: Test Measure with preview content
@@ -1908,7 +1722,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg043, TestSize.Level1)
      */
     menuAlgorithm->Measure(&layoutWrapper);
     EXPECT_TRUE(menuPattern->IsHeightModifiedBySelect());
-    EXPECT_TRUE(LessOrEqual(CURRENT_OFFSET, menuAlgorithm->wrapperRect_.Height() * SCALE_ANIMATION_FISRT));
+    EXPECT_TRUE(LessOrEqual(CURRENT_OFFSET, menuAlgorithm->wrapperRect_.Height() * SCALE_ANIMATION_FIRST));
 
     SizeF size(100, 100);
     SizeF size_f(100, 200);

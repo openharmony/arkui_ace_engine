@@ -32,12 +32,12 @@ public:
     void SetRefreshing(bool isRefreshing) override;
     void SetIndicatorOffset(const Dimension& indicatorOffset) override;
     void SetFriction(int32_t friction) override;
-    void SetProgressColor(const Color& progressColor) override;
     void SetOnStateChange(StateChangeEvent&& stateChange) override;
     void SetOnRefreshing(RefreshingEvent&& refreshing) override;
     void SetChangeEvent(RefreshChangeEvent&& changeEvent) override;
     void SetOnOffsetChange(OffsetChangeEvent&& dragOffset) override;
     void ResetOnOffsetChange() override;
+    void SetMaxPullDownDistance(const std::optional<float>& maxDistance) override;
     void SetPullDownRatio(const std::optional<float>& pullDownRatio) override;
     void SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder) override;
     void SetLoadingText(const std::string& loadingText) override;
@@ -58,6 +58,7 @@ public:
     void SetShowTimeDistance(const Dimension& showTimeDistance) override {}
     void SetTextStyle(const TextStyle& textStyle) override {}
     void SetProgressBackgroundColor(const Color& backgroundColor) override {}
+    void SetProgressColor(const Color& progressColor) override {}
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetRefreshing(FrameNode* frameNode, bool isRefreshing);
@@ -69,6 +70,8 @@ public:
     static void SetOnRefreshing(FrameNode* frameNode, RefreshingEvent&& refreshing);
     static void SetRefreshOffset(FrameNode* frameNode, const Dimension& offset);
     static void SetPullToRefresh(FrameNode* frameNode, bool isPullToRefresh);
+    static void SetMaxPullDownDistance(FrameNode* frameNode, const std::optional<float>& maxDistance);
+    static float GetMaxPullDownDistance(FrameNode* frameNode);
     static void SetPullDownRatio(FrameNode* frameNode, const std::optional<float>& pullDownRatio);
     static float GetPullDownRatio(FrameNode* frameNode);
     static Dimension GetRefreshOffset(FrameNode* frameNode);

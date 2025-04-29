@@ -15,31 +15,6 @@
 
 #include "html_to_span.h"
 
-#include <iterator>
-#include <ostream>
-#include <string>
-#include <utility>
-
-#include "base/geometry/dimension.h"
-#include "base/image/file_uri_helper.h"
-#include "base/image/image_source.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/common/properties/text_style_parser.h"
-#include "core/components/text/text_theme.h"
-#include "core/components_ng/image_provider/image_loading_context.h"
-#include "core/components_ng/image_provider/image_provider.h"
-#include "core/components_ng/pattern/text/span/mutable_span_string.h"
-#include "core/components_ng/pattern/text/span/span_object.h"
-#include "core/components_ng/pattern/text/span/span_string.h"
-#include "core/components_ng/pattern/text/span_node.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text/text_styles.h"
-#include "core/components_ng/property/calc_length.h"
 #include "core/text/html_utils.h"
 
 namespace OHOS::Ace {
@@ -55,7 +30,7 @@ constexpr int LEFT_PARAM = 3;
 constexpr int FIRST_PARAM = 0;
 constexpr int SECOND_PARAM = 1;
 constexpr int THIRD_PARAM = 2;
-constexpr int FOUTH_PARAM = 3;
+constexpr int FOURTH_PARAM = 3;
 
 constexpr int MAX_STYLE_FORMAT_NUMBER = 3;
 
@@ -104,19 +79,20 @@ FontStyle StringToFontStyle(const std::string& fontStyle)
 
 TextDecorationStyle StringToTextDecorationStyle(const std::string& textDecorationStyle)
 {
-    if (textDecorationStyle == "dashed") {
+    std::string value = StringUtils::TrimStr(textDecorationStyle);
+    if (value == "dashed") {
         return TextDecorationStyle::DASHED;
     }
-    if (textDecorationStyle == "dotted") {
+    if (value == "dotted") {
         return TextDecorationStyle::DOTTED;
     }
-    if (textDecorationStyle == "double") {
+    if (value == "double") {
         return TextDecorationStyle::DOUBLE;
     }
-    if (textDecorationStyle == "solid") {
+    if (value == "solid") {
         return TextDecorationStyle::SOLID;
     }
-    if (textDecorationStyle == "wavy") {
+    if (value == "wavy") {
         return TextDecorationStyle::WAVY;
     }
 
@@ -125,19 +101,20 @@ TextDecorationStyle StringToTextDecorationStyle(const std::string& textDecoratio
 
 TextDecoration StringToTextDecoration(const std::string& textDecoration)
 {
-    if (textDecoration == "inherit") {
+    std::string value = StringUtils::TrimStr(textDecoration);
+    if (value == "inherit") {
         return TextDecoration::INHERIT;
     }
-    if (textDecoration == "line-through") {
+    if (value == "line-through") {
         return TextDecoration::LINE_THROUGH;
     }
-    if (textDecoration == "none") {
+    if (value == "none") {
         return TextDecoration::NONE;
     }
-    if (textDecoration == "overline") {
+    if (value == "overline") {
         return TextDecoration::OVERLINE;
     }
-    if (textDecoration == "underline") {
+    if (value == "underline") {
         return TextDecoration::UNDERLINE;
     }
     return TextDecoration::NONE;
@@ -167,6 +144,9 @@ ImageFit ConvertStrToFit(const std::string& fit)
 HtmlToSpan::Styles HtmlToSpan::ParseStyleAttr(const std::string& style)
 {
     Styles styles;
+    if (style.find(':') == std::string::npos) {
+        return styles;
+    }
     std::regex pattern(R"(\s*([^:]+):([^;]+);?)");
     std::smatch match;
     std::string::const_iterator searchStart(style.begin());
@@ -176,7 +156,7 @@ HtmlToSpan::Styles HtmlToSpan::ParseStyleAttr(const std::string& style)
             continue;
         }
         std::string key = std::regex_replace(match[1].str(), std::regex(R"(\s+)"), "");
-        std::string value = std::regex_replace(match[2].str(), std::regex(R"(\s+)"), "");
+        std::string value = std::regex_replace(match[2].str(), std::regex(R"(\s+)"), " ");
         ToLowerCase(key);
         styles.emplace_back(key, value);
         searchStart = match[0].second;
@@ -219,8 +199,10 @@ Dimension HtmlToSpan::FromString(const std::string& str)
 
     for (int32_t i = static_cast<int32_t>(str.length()) - 1; i >= 0; --i) {
         if (str[i] >= '0' && str[i] <= '9') {
-            value = StringUtils::StringToDouble(str.substr(0, i + 1));
-            auto subStr = str.substr(i + 1);
+            auto startIndex = i + 1;
+            value = StringUtils::StringToDouble(str.substr(0, startIndex));
+            startIndex = std::clamp(startIndex, 0, static_cast<int32_t>(str.length()));
+            auto subStr = str.substr(startIndex);
             if (subStr == "pt") {
                 value = static_cast<int>(value * PT_TO_PX + ROUND_TO_INT);
                 break;
@@ -277,7 +259,7 @@ bool HtmlToSpan::IsFontAttr(const std::string& key)
     return false;
 }
 
-void HtmlToSpan::InitParagrap(
+void HtmlToSpan::InitParagraph(
     const std::string& key, const std::string& value, const std::string& index, StyleValues& values)
 {
     auto [ret, styleValue] = GetStyleValue<SpanParagraphStyle>(index, values);
@@ -399,7 +381,7 @@ void HtmlToSpan::InitLineHeight(const std::string& key, const std::string& value
         return;
     }
     Font* font = Get<Font>(&it->second);
-    if (font == nullptr) {
+    if (font != nullptr) {
         size = size * font->fontSize->Value();
         InitDimension<LineHeightSpanSparam>(key, std::to_string(size) + unit, "line-height", values);
     }
@@ -414,11 +396,15 @@ Color HtmlToSpan::ToSpanColor(const std::string& value)
 {
     std::smatch matches;
     std::string color = value;
-    if (std::regex_match(value, matches, std::regex("#[0-9A-Fa-f]{6,8}"))) {
-        auto rgb = value.substr(1);
+    std::string tmp = value;
+    tmp.erase(std::remove(tmp.begin(), tmp.end(), ' '), tmp.end());
+    auto regStr = "#[0-9A-Fa-f]{6,8}";
+    constexpr auto tmpLeastLength = 3;
+    if (std::regex_match(tmp, matches, std::regex(regStr)) && tmp.length() >= tmpLeastLength) {
+        auto rgb = tmp.substr(1);
         // remove last 2 character rgba -> argb
         rgb.erase(rgb.length() - 2, 2);
-        auto alpha = value.substr(value.length() - 2);
+        auto alpha = tmp.substr(tmp.length() - 2);
         color = "#" + alpha + rgb;
     }
 
@@ -436,31 +422,58 @@ void HtmlToSpan::InitTextShadow(
     if (shadow == nullptr) {
         return;
     }
-
     std::istringstream ss(value);
-    std::string word;
-    std::vector<std::string> words;
-    while (ss >> word) {
-        words.push_back(word);
+    std::string tmp;
+    std::vector<std::vector<std::string>> shadows;
+    while (std::getline(ss, tmp, ',')) {
+        std::istringstream iss(tmp);
+        std::string word;
+        std::vector<std::string> words;
+        while (iss >> word) {
+            words.emplace_back(word);
+        }
+        if (words.size() > FOUR_PARAM || words.size() < TWO_PARAM) {
+            return;
+        }
+        shadows.emplace_back(words);
     }
-    Shadow textShadow;
-    size_t size = words.size();
-    if (size == 0) {
-        return;
+    for (const auto &its : shadows) {
+        std::vector<std::string> attribute(FOUR_PARAM);
+        uint8_t num = 0;
+        for (const auto &it : its) {
+            if (IsLength(it)) {
+                attribute[num] = it;
+                num++;
+                continue;
+            }
+            attribute[FOURTH_PARAM] = it;
+        }
+        Shadow textShadow;
+        InitShadow(textShadow, attribute);
+        shadow->emplace_back(std::move(textShadow));
     }
-    if (size >= ONE_PARAM) {
-        textShadow.SetOffsetX(std::stod(words[FIRST_PARAM]));
+}
+
+void HtmlToSpan::InitShadow(Shadow &textShadow, std::vector<std::string> &attribute)
+{
+    if (!attribute[FIRST_PARAM].empty()) {
+        textShadow.SetOffsetX(FromString(attribute[FIRST_PARAM]).Value());
     }
-    if (size >= TWO_PARAM) {
-        textShadow.SetOffsetY(std::stod(words[SECOND_PARAM]));
+    if (!attribute[SECOND_PARAM].empty()) {
+        textShadow.SetOffsetY(FromString(attribute[SECOND_PARAM]).Value());
     }
-    if (size >= THREE_PARAM) {
-        textShadow.SetBlurRadius(std::stod(words[THIRD_PARAM]));
+    if (!attribute[THIRD_PARAM].empty()) {
+        textShadow.SetBlurRadius(FromString(attribute[THIRD_PARAM]).Value());
     }
-    if (size >= FOUR_PARAM) {
-        textShadow.SetColor(ToSpanColor(words[FOUTH_PARAM]));
+    if (!attribute[FOURTH_PARAM].empty()) {
+        textShadow.SetColor(ToSpanColor(attribute[FOURTH_PARAM]));
     }
-    shadow->push_back(std::move(textShadow));
+}
+
+bool HtmlToSpan::IsLength(const std::string& str)
+{
+    return !str.empty() &&
+        (std::all_of(str.begin(), str.end(), ::isdigit) || str.find("px") != std::string::npos);
 }
 
 bool HtmlToSpan::IsTextShadowAttr(const std::string& key)
@@ -521,34 +534,34 @@ void HtmlToSpan::SetPaddingOption(const std::string& key, const std::string& val
 
         size_t size = words.size();
         if (size == ONE_PARAM) {
-            paddings->top = NG::CalcLength::FromString(words[TOP_PARAM]);
-            paddings->right = NG::CalcLength::FromString(words[TOP_PARAM]);
-            paddings->bottom = NG::CalcLength::FromString(words[TOP_PARAM]);
-            paddings->left = NG::CalcLength::FromString(words[TOP_PARAM]);
+            paddings->top = NG::CalcLength(FromString(words[TOP_PARAM]));
+            paddings->right = NG::CalcLength(FromString(words[TOP_PARAM]));
+            paddings->bottom = NG::CalcLength(FromString(words[TOP_PARAM]));
+            paddings->left = NG::CalcLength(FromString(words[TOP_PARAM]));
         } else if (size == TWO_PARAM) {
-            paddings->top = NG::CalcLength::FromString(words[TOP_PARAM]);
-            paddings->right = NG::CalcLength::FromString(words[RIGHT_PARAM]);
-            paddings->bottom = NG::CalcLength::FromString(words[TOP_PARAM]);
-            paddings->left = NG::CalcLength::FromString(words[RIGHT_PARAM]);
+            paddings->top = NG::CalcLength(FromString(words[TOP_PARAM]));
+            paddings->right = NG::CalcLength(FromString(words[RIGHT_PARAM]));
+            paddings->bottom = NG::CalcLength(FromString(words[TOP_PARAM]));
+            paddings->left = NG::CalcLength(FromString(words[RIGHT_PARAM]));
         } else if (size == THREE_PARAM) {
-            paddings->top = NG::CalcLength::FromString(words[TOP_PARAM]);
-            paddings->right = NG::CalcLength::FromString(words[RIGHT_PARAM]);
-            paddings->bottom = NG::CalcLength::FromString(words[BOTTOM_PARAM]);
-            paddings->left = NG::CalcLength::FromString(words[RIGHT_PARAM]);
+            paddings->top = NG::CalcLength(FromString(words[TOP_PARAM]));
+            paddings->right = NG::CalcLength(FromString(words[RIGHT_PARAM]));
+            paddings->bottom = NG::CalcLength(FromString(words[BOTTOM_PARAM]));
+            paddings->left = NG::CalcLength(FromString(words[RIGHT_PARAM]));
         } else if (size == FOUR_PARAM) {
-            paddings->top = NG::CalcLength::FromString(words[TOP_PARAM]);
-            paddings->right = NG::CalcLength::FromString(words[RIGHT_PARAM]);
-            paddings->bottom = NG::CalcLength::FromString(words[BOTTOM_PARAM]);
-            paddings->left = NG::CalcLength::FromString(words[LEFT_PARAM]);
+            paddings->top = NG::CalcLength(FromString(words[TOP_PARAM]));
+            paddings->right = NG::CalcLength(FromString(words[RIGHT_PARAM]));
+            paddings->bottom = NG::CalcLength(FromString(words[BOTTOM_PARAM]));
+            paddings->left = NG::CalcLength(FromString(words[LEFT_PARAM]));
         }
     } else if (key == "padding-top") {
-        paddings->top = NG::CalcLength::FromString(value);
+        paddings->top = NG::CalcLength(FromString(value));
     } else if (key == "padding-right") {
-        paddings->right = NG::CalcLength::FromString(value);
+        paddings->right = NG::CalcLength(FromString(value));
     } else if (key == "padding-bottom") {
-        paddings->bottom = NG::CalcLength::FromString(value);
+        paddings->bottom = NG::CalcLength(FromString(value));
     } else if (key == "padding-left") {
-        paddings->left = NG::CalcLength::FromString(value);
+        paddings->left = NG::CalcLength(FromString(value));
     }
 }
 void HtmlToSpan::SetMarginOption(const std::string& key, const std::string& value, ImageSpanOptions& options)
@@ -567,40 +580,41 @@ void HtmlToSpan::SetMarginOption(const std::string& key, const std::string& valu
 
         size_t size = words.size();
         if (size == ONE_PARAM) {
-            marginProp->top = NG::CalcLength::FromString(words[TOP_PARAM]);
-            marginProp->right = NG::CalcLength::FromString(words[TOP_PARAM]);
-            marginProp->bottom = NG::CalcLength::FromString(words[TOP_PARAM]);
-            marginProp->left = NG::CalcLength::FromString(words[TOP_PARAM]);
+            marginProp->top = NG::CalcLength(FromString(words[TOP_PARAM]));
+            marginProp->right = NG::CalcLength(FromString(words[TOP_PARAM]));
+            marginProp->bottom = NG::CalcLength(FromString(words[TOP_PARAM]));
+            marginProp->left = NG::CalcLength(FromString(words[TOP_PARAM]));
         } else if (size == TWO_PARAM) {
-            marginProp->top = NG::CalcLength::FromString(words[TOP_PARAM]);
-            marginProp->right = NG::CalcLength::FromString(words[RIGHT_PARAM]);
-            marginProp->bottom = NG::CalcLength::FromString(words[TOP_PARAM]);
-            marginProp->left = NG::CalcLength::FromString(words[RIGHT_PARAM]);
+            marginProp->top = NG::CalcLength(FromString(words[TOP_PARAM]));
+            marginProp->right = NG::CalcLength(FromString(words[RIGHT_PARAM]));
+            marginProp->bottom = NG::CalcLength(FromString(words[TOP_PARAM]));
+            marginProp->left = NG::CalcLength(FromString(words[RIGHT_PARAM]));
         } else if (size == THREE_PARAM) {
-            marginProp->top = NG::CalcLength::FromString(words[TOP_PARAM]);
-            marginProp->right = NG::CalcLength::FromString(words[RIGHT_PARAM]);
-            marginProp->bottom = NG::CalcLength::FromString(words[BOTTOM_PARAM]);
-            marginProp->left = NG::CalcLength::FromString(words[RIGHT_PARAM]);
+            marginProp->top = NG::CalcLength(FromString(words[TOP_PARAM]));
+            marginProp->right = NG::CalcLength(FromString(words[RIGHT_PARAM]));
+            marginProp->bottom = NG::CalcLength(FromString(words[BOTTOM_PARAM]));
+            marginProp->left = NG::CalcLength(FromString(words[RIGHT_PARAM]));
         } else if (size == FOUR_PARAM) {
-            marginProp->top = NG::CalcLength::FromString(words[TOP_PARAM]);
-            marginProp->right = NG::CalcLength::FromString(words[RIGHT_PARAM]);
-            marginProp->bottom = NG::CalcLength::FromString(words[BOTTOM_PARAM]);
-            marginProp->left = NG::CalcLength::FromString(words[LEFT_PARAM]);
+            marginProp->top = NG::CalcLength(FromString(words[TOP_PARAM]));
+            marginProp->right = NG::CalcLength(FromString(words[RIGHT_PARAM]));
+            marginProp->bottom = NG::CalcLength(FromString(words[BOTTOM_PARAM]));
+            marginProp->left = NG::CalcLength(FromString(words[LEFT_PARAM]));
         }
     } else if (key == "margin-top") {
-        marginProp->top = NG::CalcLength::FromString(value);
+        marginProp->top = NG::CalcLength(FromString(value));
     } else if (key == "margin-right") {
-        marginProp->right = NG::CalcLength::FromString(value);
+        marginProp->right = NG::CalcLength(FromString(value));
     } else if (key == "margin-bottom") {
-        marginProp->bottom = NG::CalcLength::FromString(value);
+        marginProp->bottom = NG::CalcLength(FromString(value));
     } else if (key == "margin-left") {
-        marginProp->left = NG::CalcLength::FromString(value);
+        marginProp->left = NG::CalcLength(FromString(value));
     }
 }
 void HtmlToSpan::SetBorderOption(const std::string& key, const std::string& value, ImageSpanOptions& options)
 {
     if (!options.imageAttribute->borderRadius) {
         options.imageAttribute->borderRadius = std::make_optional<NG::BorderRadiusProperty>();
+        options.imageAttribute->borderRadius->multiValued = true;
     }
     auto& borderRadius = options.imageAttribute->borderRadius;
     if (key == "border-radius") {
@@ -612,51 +626,54 @@ void HtmlToSpan::SetBorderOption(const std::string& key, const std::string& valu
         }
         size_t size = words.size();
         if (size == ONE_PARAM) {
-            borderRadius->radiusTopLeft = NG::CalcLength::FromString(words[TOP_PARAM]).GetDimension();
-            borderRadius->radiusTopRight = NG::CalcLength::FromString(words[TOP_PARAM]).GetDimension();
-            borderRadius->radiusBottomRight = NG::CalcLength::FromString(words[TOP_PARAM]).GetDimension();
-            borderRadius->radiusBottomLeft = NG::CalcLength::FromString(words[TOP_PARAM]).GetDimension();
+            borderRadius->radiusTopLeft = FromString(words[TOP_PARAM]);
+            borderRadius->radiusTopRight = FromString(words[TOP_PARAM]);
+            borderRadius->radiusBottomRight = FromString(words[TOP_PARAM]);
+            borderRadius->radiusBottomLeft = FromString(words[TOP_PARAM]);
         } else if (size == TWO_PARAM) {
-            borderRadius->radiusTopLeft = NG::CalcLength::FromString(words[TOP_PARAM]).GetDimension();
-            borderRadius->radiusTopRight = NG::CalcLength::FromString(words[RIGHT_PARAM]).GetDimension();
-            borderRadius->radiusBottomRight = NG::CalcLength::FromString(words[TOP_PARAM]).GetDimension();
-            borderRadius->radiusBottomLeft = NG::CalcLength::FromString(words[RIGHT_PARAM]).GetDimension();
+            borderRadius->radiusTopLeft = FromString(words[TOP_PARAM]);
+            borderRadius->radiusTopRight = FromString(words[RIGHT_PARAM]);
+            borderRadius->radiusBottomRight = FromString(words[TOP_PARAM]);
+            borderRadius->radiusBottomLeft = FromString(words[RIGHT_PARAM]);
         } else if (size == THREE_PARAM) {
-            borderRadius->radiusTopLeft = NG::CalcLength::FromString(words[TOP_PARAM]).GetDimension();
-            borderRadius->radiusTopRight = NG::CalcLength::FromString(words[RIGHT_PARAM]).GetDimension();
-            borderRadius->radiusBottomRight = NG::CalcLength::FromString(words[BOTTOM_PARAM]).GetDimension();
-            borderRadius->radiusBottomLeft = NG::CalcLength::FromString(words[RIGHT_PARAM]).GetDimension();
+            borderRadius->radiusTopLeft = FromString(words[TOP_PARAM]);
+            borderRadius->radiusTopRight = FromString(words[RIGHT_PARAM]);
+            borderRadius->radiusBottomRight = FromString(words[BOTTOM_PARAM]);
+            borderRadius->radiusBottomLeft = FromString(words[RIGHT_PARAM]);
         } else if (size == FOUR_PARAM) {
-            borderRadius->radiusTopLeft = NG::CalcLength::FromString(words[TOP_PARAM]).GetDimension();
-            borderRadius->radiusTopRight = NG::CalcLength::FromString(words[RIGHT_PARAM]).GetDimension();
-            borderRadius->radiusBottomRight = NG::CalcLength::FromString(words[BOTTOM_PARAM]).GetDimension();
-            borderRadius->radiusBottomLeft = NG::CalcLength::FromString(words[LEFT_PARAM]).GetDimension();
+            borderRadius->radiusTopLeft = FromString(words[TOP_PARAM]);
+            borderRadius->radiusTopRight = FromString(words[RIGHT_PARAM]);
+            borderRadius->radiusBottomRight = FromString(words[BOTTOM_PARAM]);
+            borderRadius->radiusBottomLeft = FromString(words[LEFT_PARAM]);
         }
     } else if (key == "border-top-left-radius") {
-        borderRadius->radiusTopLeft = NG::CalcLength::FromString(value).GetDimension();
+        borderRadius->radiusTopLeft = FromString(value);
     } else if (key == "border-top-right-radius") {
-        borderRadius->radiusTopRight = NG::CalcLength::FromString(value).GetDimension();
+        borderRadius->radiusTopRight = FromString(value);
     } else if (key == "border-bottom-right-radius") {
-        borderRadius->radiusBottomRight = NG::CalcLength::FromString(value).GetDimension();
+        borderRadius->radiusBottomRight = FromString(value);
     } else if (key == "border-bottom-left-radius") {
-        borderRadius->radiusBottomLeft = NG::CalcLength::FromString(value).GetDimension();
+        borderRadius->radiusBottomLeft = FromString(value);
     }
 }
 void HtmlToSpan::HandleImgSpanOption(const Styles& styleMap, ImageSpanOptions& options)
 {
     for (const auto& [key, value] : styleMap) {
+        auto trimVal = StringUtils::TrimStr(value);
         if (IsPaddingAttr(key)) {
-            SetPaddingOption(key, value, options);
+            SetPaddingOption(key, trimVal, options);
         } else if (IsMarginAttr(key)) {
-            SetMarginOption(key, value, options);
+            SetMarginOption(key, trimVal, options);
         } else if (IsBorderAttr(key)) {
-            SetBorderOption(key, value, options);
+            SetBorderOption(key, trimVal, options);
         } else if (key == "object-fit") {
-            options.imageAttribute->objectFit = ConvertStrToFit(value);
+            options.imageAttribute->objectFit = ConvertStrToFit(trimVal);
         } else if (key == "vertical-align") {
-            options.imageAttribute->verticalAlign = StringToTextVerticalAlign(value);
+            options.imageAttribute->verticalAlign = StringToTextVerticalAlign(trimVal);
         } else if (key == "width" || key == "height") {
-            HandleImageSize(key, value, options);
+            HandleImageSize(key, trimVal, options);
+        } else if (key == "sync-load") {
+            options.imageAttribute->syncLoad = V2::ConvertStringToBool(trimVal);
         }
     }
 }
@@ -665,34 +682,25 @@ void HtmlToSpan::HandleImagePixelMap(const std::string& src, ImageSpanOptions& o
     if (src.empty()) {
         return;
     }
-    auto iter = src.find_first_of(':');
-    if (iter == std::string::npos) {
-        return;
-    }
-    std::string head = src.substr(0, iter);
-    std::transform(head.begin(), head.end(), head.begin(), [](unsigned char c) { return std::tolower(c); });
-    if (head == "http" || head == "https") {
-        NG::LoadNotifier loadNotifier(nullptr, nullptr, nullptr);
-        RefPtr<NG::ImageLoadingContext> ctx =
-            AceType::MakeRefPtr<NG::ImageLoadingContext>(ImageSourceInfo(src), std::move(loadNotifier), true);
-        CHECK_NULL_VOID(ctx);
-        ctx->LoadImageData();
-        ctx->MakeCanvasImageIfNeed(ctx->GetImageSize(), true, ImageFit::NONE);
-        auto image = ctx->MoveCanvasImage();
-        if (image != nullptr) {
-            option.imagePixelMap = image->GetPixelMap();
+    NG::LoadNotifier loadNotifier(nullptr, nullptr, nullptr);
+    RefPtr<NG::ImageLoadingContext> ctx =
+        AceType::MakeRefPtr<NG::ImageLoadingContext>(ImageSourceInfo(src), std::move(loadNotifier), true);
+    CHECK_NULL_VOID(ctx);
+    ctx->LoadImageData();
+    ctx->MakeCanvasImageIfNeed(ctx->GetImageSize(), true, ImageFit::NONE);
+    auto image = ctx->MoveCanvasImage();
+    if (image != nullptr) {
+        auto pixelMap = image->GetPixelMap();
+        if (pixelMap) {
+            option.imagePixelMap = pixelMap;
         }
-    } else if (head == "file") {
-        std::string filePath = FileUriHelper::GetRealPath(src);
-        auto imageSource = ImageSource::Create(filePath);
-        CHECK_NULL_VOID(imageSource);
-        option.imagePixelMap = imageSource->CreatePixelMap();
     }
-
     if (option.imagePixelMap.has_value() && option.imagePixelMap.value() != nullptr) {
         auto pixel = option.imagePixelMap.value();
-        LOGI("img head:%{public}s height: %{public}d, width: %{public}d, size:%{public}d", head.c_str(),
-            pixel->GetHeight(), pixel->GetWidth(), pixel->GetByteCount());
+        LOGI("img height: %{public}d, width: %{public}d, size:%{public}d", pixel->GetHeight(),
+            pixel->GetWidth(), pixel->GetByteCount());
+    } else {
+        option.image = src;
     }
 }
 
@@ -716,6 +724,8 @@ void HtmlToSpan::MakeImageSpanOptions(const std::string& key, const std::string&
     } else if (key == "style") {
         Styles styleMap = ParseStyleAttr(value);
         HandleImgSpanOption(styleMap, options);
+    } else if (key == "width" || key == "height") {
+        HandleImageSize(key, value, options);
     }
 }
 
@@ -833,21 +843,23 @@ std::map<std::string, HtmlToSpan::StyleValue> HtmlToSpan::ToTextSpanStyle(xmlAtt
         return {};
     }
     std::string strStyle(reinterpret_cast<const char*>(attrContent));
+    xmlFree(attrContent);
     Styles styleMap = ParseStyleAttr(strStyle);
     std::map<std::string, StyleValue> styleValues;
     for (auto& [key, value] : styleMap) {
+        auto trimVal = StringUtils::TrimStr(value);
         if (IsFontAttr(key)) {
-            InitFont(key, value, "font", styleValues);
+            InitFont(key, trimVal, "font", styleValues);
         } else if (IsDecorationAttr(key)) {
-            InitDecoration(key, value, "decoration", styleValues);
+            InitDecoration(key, trimVal, "decoration", styleValues);
         } else if (IsLetterSpacingAttr(key)) {
-            InitDimension<LetterSpacingSpanParam>(key, value, "letterSpacing", styleValues);
+            InitDimension<LetterSpacingSpanParam>(key, trimVal, "letterSpacing", styleValues);
         } else if (IsTextShadowAttr(key)) {
-            InitTextShadow(key, value, "shadow", styleValues);
+            InitTextShadow(key, trimVal, "shadow", styleValues);
         } else if (IsLineHeightAttr(key)) {
-            InitLineHeight(key, value, styleValues);
+            InitLineHeight(key, trimVal, styleValues);
         } else if (IsParagraphAttr(key)) {
-            InitParagrap(key, value, "paragrap", styleValues);
+            InitParagraph(key, trimVal, "paragrap", styleValues);
         }
     }
 
@@ -906,6 +918,7 @@ void HtmlToSpan::ToImage(xmlNodePtr node, size_t len, size_t& pos, std::vector<S
         auto attrContent = xmlGetProp(curNode->parent, curNode->name);
         if (attrContent != nullptr) {
             styleMap[reinterpret_cast<const char*>(curNode->name)] = reinterpret_cast<const char*>(attrContent);
+            xmlFree(attrContent);
         }
     }
 
@@ -935,12 +948,16 @@ void HtmlToSpan::ToSpan(
 
     std::string htmlTag = reinterpret_cast<const char*>(curNode->name);
     size_t childPos = pos + curNodeLen;
-    ParaseHtmlToSpanInfo(curNode->children, childPos, allContent, spanInfos);
+    ParseHtmlToSpanInfo(curNode->children, childPos, allContent, spanInfos);
     if (curNode->type == XML_ELEMENT_NODE) {
         if (htmlTag == "p") {
-            allContent += "\n";
-            childPos++;
-            ToParagraphSpan(curNode, childPos - pos, pos, spanInfos);
+            if (curNode->parent == nullptr || curNode->parent->type != XML_ELEMENT_NODE ||
+                xmlStrcmp(curNode->parent->name, (const xmlChar*)"span") != 0) {
+                // The <p> contained in <span> is discarded. It is not considered as a standard writing method.
+                allContent += "\n";
+                childPos++;
+                ToParagraphSpan(curNode, childPos - pos, pos, spanInfos);
+            }
         } else if (htmlTag == "img") {
             childPos++;
             ToImage(curNode, childPos - pos, pos, spanInfos, isNeedLoadPixelMap);
@@ -951,7 +968,7 @@ void HtmlToSpan::ToSpan(
     pos = childPos;
 }
 
-void HtmlToSpan::ParaseHtmlToSpanInfo(
+void HtmlToSpan::ParseHtmlToSpanInfo(
     xmlNodePtr node, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos, bool isNeedLoadPixelMap)
 {
     xmlNodePtr curNode = nullptr;
@@ -1084,7 +1101,7 @@ void HtmlToSpan::AddImageSpans(const SpanInfo& info, RefPtr<MutableSpanString> m
 RefPtr<MutableSpanString> HtmlToSpan::GenerateSpans(
     const std::string& allContent, const std::vector<SpanInfo>& spanInfos)
 {
-    auto mutableSpan = AceType::MakeRefPtr<MutableSpanString>(allContent);
+    auto mutableSpan = AceType::MakeRefPtr<MutableSpanString>(UtfUtils::Str8DebugToStr16(allContent));
     RefPtr<MutableSpanString> span;
     for (auto& info : spanInfos) {
         if (info.type == HtmlType::PARAGRAPH) {
@@ -1119,7 +1136,7 @@ RefPtr<MutableSpanString> HtmlToSpan::ToSpanString(const std::string& html, cons
     size_t pos = 0;
     std::string content;
     std::vector<SpanInfo> spanInfos;
-    ParaseHtmlToSpanInfo(root, pos, content, spanInfos, isNeedLoadPixelMap);
+    ParseHtmlToSpanInfo(root, pos, content, spanInfos, isNeedLoadPixelMap);
     AfterProcSpanInfos(spanInfos);
     PrintSpanInfos(spanInfos);
     return GenerateSpans(content, spanInfos);

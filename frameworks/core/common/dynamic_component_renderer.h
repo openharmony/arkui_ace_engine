@@ -37,7 +37,7 @@ struct RendererDumpInfo {
 
 struct IsolatedInfo {
     std::string abcPath;
-    std::string reourcePath;
+    std::string resourcePath;
     std::string entryPoint;
     std::vector<std::string> registerComponents;
 };
@@ -53,11 +53,14 @@ public:
         const RefPtr<FrameNode>& host, void* runtime, const IsolatedInfo& isolatedInfo);
 
     virtual void SetAdaptiveSize(bool adaptiveWidth, bool adaptiveHeight) = 0;
+    virtual void SetBackgroundTransparent(bool backgroundTransparent) = 0;
+    virtual bool GetBackgroundTransparent() const = 0;
     virtual void CreateContent() = 0;
     virtual void DestroyContent() = 0;
 
     virtual void UpdateViewportConfig(
-        const SizeF& size, float density, int32_t orientation, AnimationOption animationOpt) = 0;
+        const SizeF& size, float density, int32_t orientation, AnimationOption animationOpt,
+        const OffsetF& offset) = 0;
 
     virtual void TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
     virtual bool TransferKeyEvent(const KeyEvent& event) = 0;
@@ -76,8 +79,21 @@ public:
         int32_t action, int64_t offset) = 0;
     virtual void TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
         int64_t timeMs) = 0;
+    virtual void TransferAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId) = 0;
+    virtual void TransferAccessibilityChildTreeDeregister() = 0;
+    virtual void TransferAccessibilityDumpChildInfo(
+        const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
+    virtual void SetUIContentType(UIContentType uIContentType) {};
+    virtual bool IsRestrictedWorkerThread() { return false; }
+    virtual bool CheckDCMaxConstraintInWorker(void *worker) { return false; }
+    virtual bool CheckWorkerMaxConstraint(void *worker) { return true; }
+    virtual void UpdateParentOffsetToWindow(const OffsetF& offset) = 0;
 
     virtual void Dump(RendererDumpInfo &rendererDumpInfo) {}
+    virtual void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) {}
+
+    virtual void NotifyForeground() {};
+    virtual void NotifyBackground() {};
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(DynamicComponentRenderer);

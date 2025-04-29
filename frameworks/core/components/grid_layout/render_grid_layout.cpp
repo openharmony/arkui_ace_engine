@@ -1094,7 +1094,7 @@ void RenderGridLayout::CreateDragDropRecognizer()
     auto pan = AceType::MakeRefPtr<PanRecognizer>(GetContext(), DEFAULT_FINGERS, panDirection, DEFAULT_DISTANCE);
     pan->SetOnActionUpdate(std::bind(&RenderGridLayout::PanOnActionUpdate, this, std::placeholders::_1));
     pan->SetOnActionEnd(std::bind(&RenderGridLayout::PanOnActionEnd, this, std::placeholders::_1));
-    pan->SetOnActionCancel([weak = WeakClaim<RenderGridLayout>(this)]() {
+    pan->SetOnActionCancel([weak = WeakClaim<RenderGridLayout>(this)](const GestureEvent& info) {
         auto renderGrid = weak.Upgrade();
         if (renderGrid) {
             renderGrid->SetPreTargetRenderGrid(nullptr);
@@ -1840,7 +1840,7 @@ void RenderGridLayout::MoveWhenNoInsertCellButWithItemInDragCellAndDragEnter()
             if (supportAnimation_ || dragAnimation_) {
                 std::string key(__FUNCTION__);
                 RegisterAnimationFinishedFunc(
-                    key, [weak = WeakClaim(this), rowIndex = dragPosRowIndex_, colIndex = dragPosColumnIndex_]() {});
+                    key, [weak = WeakClaim(this)]() {});
                 UpdateCurInsertPos(dragPosRowIndex_, dragPosColumnIndex_);
                 PrepareAnimationController(key);
             } else {
@@ -1879,7 +1879,7 @@ void RenderGridLayout::MoveWhenWithInsertCellAndNoItemInDragCell()
             if (supportAnimation_ || dragAnimation_) {
                 std::string key(__FUNCTION__);
                 RegisterAnimationFinishedFunc(
-                    key, [weak = WeakClaim(this), rowIndex = endRow, colIndex = endColum]() {});
+                    key, [weak = WeakClaim(this)]() {});
                 UpdateCurInsertPos(endRow, endColum);
                 PrepareAnimationController(key);
             } else {
@@ -1910,7 +1910,7 @@ void RenderGridLayout::MoveWhenWithInsertCellButWithItemInDragCellDragBeforeInse
         if (supportAnimation_ || dragAnimation_) {
             std::string key(__FUNCTION__);
             RegisterAnimationFinishedFunc(
-                key, [weak = WeakClaim(this), rowIndex = dragPosRowIndex_, colIndex = dragPosColumnIndex_]() {});
+                key, [weak = WeakClaim(this)]() {});
             UpdateCurInsertPos(dragPosRowIndex_, dragPosColumnIndex_);
             PrepareAnimationController(key);
         } else {
@@ -1928,7 +1928,7 @@ void RenderGridLayout::MoveWhenWithInsertCellButWithItemInDragCellDragAfterInser
         if (supportAnimation_ || dragAnimation_) {
             std::string key(__FUNCTION__);
             RegisterAnimationFinishedFunc(
-                key, [weak = WeakClaim(this), rowIndex = dragPosRowIndex_, colIndex = dragPosColumnIndex_]() {});
+                key, [weak = WeakClaim(this)]() {});
             UpdateCurInsertPos(dragPosRowIndex_, dragPosColumnIndex_);
             PrepareAnimationController(key);
         } else {

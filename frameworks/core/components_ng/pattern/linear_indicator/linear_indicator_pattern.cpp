@@ -14,16 +14,29 @@
  */
 #include "core/components_ng/pattern/linear_indicator/linear_indicator_pattern.h"
 
-#include <algorithm>
-
 #include "base/log/dump_log.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/pattern/linear_indicator/linear_indicator_layout_property.h"
-#include "core/components_ng/pattern/linear_indicator/linear_indicator_theme.h"
+#include "core/components_ng/pattern/linear_indicator/linear_indicator_accessibility_property.h"
 #include "core/components_ng/pattern/progress/progress_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+LinearIndicatorPattern::LinearIndicatorPattern()
+    : LinearLayoutPattern(false), direction_(TextDirection::AUTO), hasVisibleChangeRegistered_(false),
+      isVisibleChangePause_(false)
+{
+    controller_ = AceType::MakeRefPtr<LinearIndicatorController>(AceType::WeakClaim(this));
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    theme_ = pipeline->GetThemeManager()->GetTheme<LinearIndicatorTheme>();
+    CHECK_NULL_VOID(theme_);
+    strokeWidth_ = theme_->GetDefaultStrokeWidth();
+    strokeRadius_ = theme_->GetDefaultStrokeRadius();
+    trackBackgroundColor_ = theme_->GetTrackBackgroundColor();
+    trackColor_ = theme_->GetTrackColor();
+};
+
+LinearIndicatorPattern::~LinearIndicatorPattern() = default;
 
 RefPtr<LayoutProperty> LinearIndicatorPattern::CreateLayoutProperty()
 {
@@ -84,10 +97,8 @@ bool LinearIndicatorPattern::IsChangeLayoutPropertyAndUpdate(RefPtr<LinearIndica
     TextDirection direction = layoutProperty->GetLayoutDirection();
 
     float progressWidth = .0f;
-    if (CalcProgressWidth(progressWidth)) {
-        if (strokeWidth.ConvertToPx() > progressWidth) {
-            strokeWidth = Dimension(progressWidth, DimensionUnit::PX);
-        }
+    if (CalcProgressWidth(progressWidth) && GreatNotEqual(strokeWidth.ConvertToPx(), progressWidth)) {
+        strokeWidth = Dimension(progressWidth, DimensionUnit::PX);
     }
     if (strokeWidth != strokeWidth_) {
         strokeWidth_ = strokeWidth;
@@ -250,4 +261,30 @@ void LinearIndicatorPattern::DumpInfo()
         std::string("count"), layoutProperty->GetProgressCountValue(theme->GetDefaultProgressCount()));
 }
 
+void LinearIndicatorPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto layoutProperty = GetLayoutProperty<LinearIndicatorLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetThemeManager()->GetTheme<NG::LinearIndicatorTheme>();
+    CHECK_NULL_VOID(theme);
+    json->Put("indicatorStyle.space", layoutProperty->GetSpaceValue(theme->GetDefaultSpace()).ToString().c_str());
+    json->Put("indicatorStyle.strokeWidth",
+        layoutProperty->GetStrokeWidthValue(theme->GetDefaultStrokeWidth()).ToString().c_str());
+    json->Put("indicatorStyle.strokeRadius",
+        layoutProperty->GetStrokeRadiusValue(theme->GetDefaultStrokeRadius()).ToString().c_str());
+    json->Put("indicatorStyle.trackBackgroundColor",
+        layoutProperty->GetTrackBackgroundColorValue(theme->GetTrackBackgroundColor()).ColorToString().c_str());
+    json->Put("indicatorStyle.trackColor",
+        layoutProperty->GetTrackColorValue(theme->GetTrackColor()).ColorToString().c_str());
+
+    json->Put("indicatorLoop", layoutProperty->GetLoopValue(theme->GetDefaultLoop()) ? "True" : "False");
+    json->Put("count", layoutProperty->GetProgressCountValue(theme->GetDefaultProgressCount()));
+}
+
+RefPtr<AccessibilityProperty> LinearIndicatorPattern::CreateAccessibilityProperty()
+{
+    return MakeRefPtr<LinearIndicatorAccessibilityProperty>();
+}
 } // namespace OHOS::Ace::NG

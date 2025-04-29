@@ -112,10 +112,13 @@ public:
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false,
         bool addToRenderTree = false) override;
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
-    void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
+    void DoSetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false) override;
 
     const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override;
     void LoadChildren(bool notDetach) const;
+
+    const std::list<RefPtr<UINode>>& GetChildrenForInspector() const override;
 
     void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override
     {
@@ -124,11 +127,17 @@ public:
             builder_->SetCacheCount(cacheCount);
         }
     }
-    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false) override
+    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false, bool isReuse = false) override
     {
         if (builder_) {
             builder_->SetJSViewActive(active);
             isActive_ = active;
+        }
+    }
+    void SetDestroying(bool isDestroying = true, bool cleanStatus = true) override
+    {
+        if (builder_) {
+            builder_->SetDestroying(isDestroying, cleanStatus);
         }
     }
     void PaintDebugBoundaryTreeAll(bool flag) override
@@ -158,6 +167,8 @@ public:
         }
     }
 
+    void SetItemDragHandler(std::function<void(int32_t)>&& onLongPress, std::function<void(int32_t)>&& onDragStart,
+        std::function<void(int32_t, int32_t)>&& onMoveThrough, std::function<void(int32_t)>&& onDrop);
     void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
     void MoveData(int32_t from, int32_t to) override;
     void FireOnMove(int32_t from, int32_t to) override;
@@ -167,12 +178,13 @@ public:
     void InitAllChilrenDragManager(bool init);
 
     /**
-     * @brief Notify the change of dataSource to component.
+     * @brief Notify the change of dataSource to parent.
      *
-     * @param index the last position of change.
+     * @param index the position of change.
      * @param count the count of change in [index].
+     * @param notificationType the type of notification.
      */
-    void NotifyCountChange(int32_t index, int32_t count);
+    void NotifyChangeWithCount(int32_t index, int32_t count, NotificationType notificationType) const;
 
     /**
      * @brief Parse OnDatasetChange for NotifyCountChange.
@@ -180,7 +192,8 @@ public:
      * @param dataOperations bulk change operations.
      */
     void ParseOperations(const std::list<V2::Operation>& dataOperations);
-
+protected:
+    void UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule = false) override;
 private:
     void OnAttachToMainTree(bool recursive) override
     {
@@ -199,10 +212,11 @@ private:
     {
         UINode::OnDetachFromMainTree(recursive, context);
         if (builder_) {
-            for (const auto& item : builder_->GetCachedUINodeMap()) {
-                if (item.second.second != nullptr) {
-                    item.second.second->DetachFromMainTree(recursive);
-                    builder_->ProcessOffscreenNode(item.second.second, true);
+            auto tempExpiringItem = builder_->GetCachedUINodeMap();
+            for (const auto& [key, child] : tempExpiringItem) {
+                if (child.second != nullptr) {
+                    child.second->DetachFromMainTree(recursive);
+                    builder_->ProcessOffscreenNode(child.second, true);
                 }
             }
         }
@@ -222,13 +236,11 @@ private:
         UINode::GenerateOneDepthVisibleFrameWithTransition(visibleList);
     }
 
-    void NotifyDataCountChanged(int32_t index);
-
     // The index values of the start and end of the current children nodes and the corresponding keys.
     std::list<std::optional<std::string>> ids_;
     std::list<int32_t> predictItems_;
     std::optional<LayoutConstraintF> itemConstraint_;
-    bool requestLongPredict_ = false;
+    bool requestLongPredict_ = true;
     bool isRegisterListener_ = false;
     bool isLoop_ = false;
 

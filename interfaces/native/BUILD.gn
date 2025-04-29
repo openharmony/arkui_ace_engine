@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -45,37 +45,52 @@ ohos_shared_library("ace_ndk") {
   include_dirs = [
     "//foundation/arkui/ace_engine",
     "//foundation/arkui/ace_engine/frameworks",
+    "//foundation/arkui/ace_engine/interfaces/inner_api/ace_kit/include",
     "//foundation/arkui/ace_engine/interfaces/native",
   ]
 
   public_configs = [ ":ace_ndk_public_configs" ]
 
   sources = [
+    "//foundation/arkui/ace_engine/frameworks/core/accessibility/native_interface_accessibility_impl.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/accessibility/native_interface_accessibility_provider.cpp",
     "//foundation/arkui/ace_engine/frameworks/core/components/common/properties/color.cpp",
     "//foundation/arkui/ace_engine/frameworks/core/components/xcomponent/native_interface_xcomponent_impl.cpp",
+    "//foundation/arkui/ace_engine/frameworks/core/components_v2/inspector/inspector_constants.cpp",
+    "build_check_for_c.c",
+    "build_check_for_cpp.cpp",
     "event/drag_and_drop_impl.cpp",
+    "event/key_event_impl.cpp",
     "event/ui_input_event.cpp",
+    "native_interface_accessibility.cpp",
     "native_interface_xcomponent.cpp",
+    "native_styled_string_descriptor.cpp",
     "node/animate_impl.cpp",
     "node/dialog_model.cpp",
+    "node/dialog_option.cpp",
     "node/drawable_descriptor.cpp",
+    "node/embeddedComponent_option.cpp",
     "node/event_converter.cpp",
     "node/frame_information.cpp",
     "node/gesture_impl.cpp",
     "node/list_option.cpp",
     "node/native_drawable_descriptor.cpp",
     "node/native_impl.cpp",
+    "node/native_interface_focus.cpp",
     "node/native_node_extented.cpp",
     "node/native_node_napi.cpp",
     "node/node_adapter_impl.cpp",
     "node/node_animate.cpp",
+    "node/node_component_snapshot.cpp",
     "node/node_extened.cpp",
     "node/node_model.cpp",
     "node/node_node_relative_container.cpp",
     "node/node_transition.cpp",
     "node/node_transition_imp.cpp",
     "node/node_utils.cpp",
+    "node/progress_option.cpp",
     "node/style_modifier.cpp",
+    "node/textpicker_option.cpp",
     "node/waterflow_section_option.cpp",
   ]
   external_deps = [ "bounds_checking_function:libsec_shared" ]
@@ -97,6 +112,8 @@ ohos_shared_library("ace_ndk") {
       "hilog:libhilog",
       "image_framework:pixelmap",
       "napi:ace_napi",
+      "resource_management:global_resmgr",
+      "udmf:libudmf",
       "udmf:udmf_client",
     ]
     version_script =
@@ -117,6 +134,7 @@ if (is_arkui_x) {
       "$ace_root",
       "$ace_root/frameworks",
       "$ace_root/interfaces/native",
+      "$ace_root/interfaces/inner_api/ace_kit/include",
     ]
 
     sources = [

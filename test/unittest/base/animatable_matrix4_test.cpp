@@ -158,11 +158,15 @@ HWTEST_F(AnimatableMatrix4Test, AnimatableMatrix4Test006, TestSize.Level1)
 {
     AnimatableMatrix4 animatableMatrix4Obj1;
     AnimatableMatrix4 animatableMatrix4Obj2;
+    ASSERT_EQ(animatableMatrix4Obj1.animationCallback_, nullptr);
+    ASSERT_EQ(animatableMatrix4Obj2.animationCallback_, nullptr);
     // true true, both animationCallback_ and pipelineContext nullptr
     animatableMatrix4Obj2 = animatableMatrix4Obj1;
+    ASSERT_EQ(animatableMatrix4Obj2.animationCallback_, nullptr);
     // false true, animationCallback_ not nullptr, pipelineContext  nullptr
     bool flagEventCbk = false;
     animatableMatrix4Obj2.SetContextAndCallback(nullptr, [&flagEventCbk]() { flagEventCbk = true; });
     animatableMatrix4Obj2 = animatableMatrix4Obj1;
+    ASSERT_NE(animatableMatrix4Obj2.animationCallback_, nullptr);
 }
 } // namespace OHOS::Ace

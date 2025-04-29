@@ -35,8 +35,6 @@
 #include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
-#include "core/components_ng/pattern/ui_extension/session_wrapper.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 #include "frameworks/core/components_ng/base/view_abstract_model.h"
 

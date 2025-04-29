@@ -15,9 +15,6 @@
 
 #include "core/components_ng/pattern/navigator/navigator_pattern.h"
 
-#include "base/utils/macros.h"
-#include "core/pipeline_ng/pipeline_context.h"
-
 namespace OHOS::Ace::NG {
 void NavigatorPattern::OnModifyDone()
 {
@@ -36,7 +33,7 @@ void NavigatorPattern::OnModifyDone()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         // pass to eventHub to perform navigation
-        auto eventHub = pattern->GetEventHub<NavigatorEventHub>();
+        auto eventHub = pattern->GetOrCreateEventHub<NavigatorEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->NavigatePage();
     };

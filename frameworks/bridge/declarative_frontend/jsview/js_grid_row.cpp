@@ -26,29 +26,21 @@
 #include "core/components_v2/grid_layout/grid_container_util_class.h"
 
 namespace OHOS::Ace {
-
-std::unique_ptr<GridRowModel> GridRowModel::instance_;
-std::mutex GridRowModel::mutex_;
-
 GridRowModel* GridRowModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::GridRowModelNG());
+    static NG::GridRowModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::GridRowModelNG());
-            } else {
-                instance_.reset(new Framework::GridRowModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::GridRowModelNG instance;
+        return &instance;
+    } else {
+        static Framework::GridRowModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
-
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {

@@ -45,6 +45,7 @@ public:
     static void JsHandlerOnActionCancel(const JSCallbackInfo& args);
     static void JsHandlerOnGestureEvent(Ace::GestureEventAction action, const JSCallbackInfo& args);
     static void SetTag(const JSCallbackInfo& args);
+    static void SetAllowedTypes(const JSCallbackInfo& args);
 }; // JSGesture
 
 class JSTapGesture : public JSGesture {
@@ -79,6 +80,7 @@ public:
     void SetDistance(const JSCallbackInfo& args);
     void SetFingers(const JSCallbackInfo& args);
     void GetDirection(const JSCallbackInfo& args);
+    void GetDistance(const JSCallbackInfo& args);
 
     void SetPanGestureOption(const RefPtr<PanGestureOption>& panGestureOption)
     {
@@ -102,6 +104,8 @@ public:
     ~JSPanGesture() override = default;
 
     static void Create(const JSCallbackInfo& args);
+    static napi_value ParsePanDistanceMap(JSRef<JSVal> jsDistanceMap, PanDistanceMap& distanceMap);
+    static void ParsePanDistance(const JSRef<JSObject>& obj, PanDistanceMap& distanceMap);
 };
 
 class JSSwipeGesture : public JSGesture {
@@ -159,4 +163,3 @@ public:
 };
 } // namespace OHOS::Ace::Framework
 #endif // FOUNDATION_ACE_ACE_ENGINE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JSVIEW_JS_GESTURE_H
-

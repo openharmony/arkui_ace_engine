@@ -49,13 +49,15 @@ public:
 
     double width_ = 0.0;
     double height_ = 0.0;
+    double defaultWidth_ = 0.0;
+    double defaultHeight_ = 0.0;
     bool isSetSize_ = false;
 };
 
 class IconLayoutElement : public SecurityComponentLayoutElement {
 public:
     IconLayoutElement() {};
-    void Init(RefPtr<SecurityComponentLayoutProperty>& property, RefPtr<LayoutWrapper>& textWrap);
+    void Init(const RefPtr<SecurityComponentLayoutProperty>& property, RefPtr<LayoutWrapper>& textWrap);
     ~IconLayoutElement() = default;
 
     double ShrinkWidth(double reduceSize) override;
@@ -79,8 +81,10 @@ public:
         minPadddingSize_ = minSize;
         if (isVertical) {
             height_ = size;
+            defaultHeight_ = size;
         } else {
             width_ = size;
+            defaultWidth_ = size;
         }
     };
 
@@ -140,7 +144,7 @@ private:
 class TextLayoutElement : public SecurityComponentLayoutElement {
 public:
     TextLayoutElement() {};
-    void Init(RefPtr<SecurityComponentLayoutProperty>& property,
+    void Init(const RefPtr<SecurityComponentLayoutProperty>& property,
         RefPtr<LayoutWrapper>& textWrap);
     ~TextLayoutElement() = default;
 
@@ -148,16 +152,32 @@ public:
 
     double ShrinkHeight(double reduceSize) override;
 
-    bool GetTextLimitExceededFlag(double maxHeight);
+    bool DidExceedMaxLines(std::optional<SizeF>& currentTextSize);
+
+    bool GetCurrentTextSize(std::optional<SizeF>& currentTextSize, Dimension& currentFontSize);
+
+    void DoMeasure(bool isVertical, float minWidth, float leftSpace);
+
+    bool TryShrinkTextWidth(SizeF& point, SizeF& circlePoint, bool maxSpaceToShrink, float maxDistance,
+        float threshold);
+
+    float pow(float value)
+    {
+        return value * value;
+    }
 
 private:
     void UpdateSize(bool isWidth);
     void MeasureMinTextSize();
     void ChooseExactFontSize(RefPtr<TextLayoutProperty>& property, bool isWidth);
     std::optional<SizeF> GetMeasureTextSize(const std::string& data,
-        const Dimension& fontSize, FontWeight fontWeight);
+        const Dimension& fontSize, FontWeight fontWeight, float constraintWidth);
+    void MeasureForWidth(float width);
+    float GetHeightConstraint(const RefPtr<SecurityComponentLayoutProperty>& property, float height);
+    void UpdateFontSize();
 
     bool isExist_ = false;
+    bool isAdaptive_ = false;
     Dimension minFontSize_;
     Dimension defaultFontSize_;
     RefPtr<SecurityComponentLayoutProperty> secCompProperty_;

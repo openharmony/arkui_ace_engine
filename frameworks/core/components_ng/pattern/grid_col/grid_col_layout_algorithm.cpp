@@ -16,9 +16,6 @@
 
 #include "grid_col_layout_algorithm.h"
 
-#include "core/components_ng/property/measure_utils.h"
-#include "core/components_v2/grid_layout/grid_container_utils.h"
-
 namespace OHOS::Ace::NG {
 
 void GridColLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

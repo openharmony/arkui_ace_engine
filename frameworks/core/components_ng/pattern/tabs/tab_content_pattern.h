@@ -70,23 +70,38 @@ public:
         CHECK_NULL_VOID(host);
         host->GetRenderContext()->UpdateClipEdge(true);
         FireWillShowEvent();
+        auto parentNode = host->GetAncestorNodeOfFrame(false);
+        CHECK_NULL_VOID(parentNode);
+        auto grandParentNode = parentNode->GetAncestorNodeOfFrame(false);
+        CHECK_NULL_VOID(grandParentNode);
+        if (grandParentNode->GetTag() == V2::TABS_ETS_TAG) {
+            auto tabLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(
+                grandParentNode->GetLayoutProperty());
+            CHECK_NULL_VOID(tabLayoutProperty);
+            if (tabLayoutProperty->GetSafeAreaPaddingProperty()) {
+                host->GetLayoutProperty()->UpdateSafeAreaExpandOpts({
+                    .type = SAFE_AREA_TYPE_SYSTEM,
+                    .edges = SAFE_AREA_EDGE_TOP + SAFE_AREA_EDGE_BOTTOM });
+            }
+        }
+
     }
 
     void CheckTabAnimateMode()
     {
-        if (!shallowBuilder_ || !firstTimeLayout_) {
+        if (!shallowBuilder_ || !(firstTimeLayout_ || secondTimeLayout_)) {
             return;
         }
 
         // Check whether current tabcontent belongs to tab component.
         auto tabContentNode = GetHost();
         CHECK_NULL_VOID(tabContentNode);
-        auto parentNode = tabContentNode->GetAncestorNodeOfFrame();
+        auto parentNode = tabContentNode->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(parentNode);
         if (parentNode->GetTag() != V2::SWIPER_ETS_TAG) {
             return;
         }
-        auto grandParentNode = parentNode->GetAncestorNodeOfFrame();
+        auto grandParentNode = parentNode->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(grandParentNode);
         if (grandParentNode->GetTag() != V2::TABS_ETS_TAG) {
             return;
@@ -97,7 +112,7 @@ public:
         auto tabsLayoutProperty = grandParentNode->GetLayoutProperty<TabsLayoutProperty>();
         CHECK_NULL_VOID(tabsLayoutProperty);
         TabAnimateMode mode = tabsPattern->GetAnimateMode();
-        if (mode == TabAnimateMode::ACTION_FIRST
+        if ((mode == TabAnimateMode::ACTION_FIRST || mode == TabAnimateMode::ACTION_FIRST_WITH_JUMP)
             && !tabsLayoutProperty->GetHeightAutoValue(false)
             && !tabsLayoutProperty->GetWidthAutoValue(false)) {
             ACE_SCOPED_TRACE("TabContentMarkRenderDone");
@@ -111,18 +126,35 @@ public:
         }
     }
 
+    void CleanChildren()
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        if (host->GetChildren().empty()) {
+            return;
+        }
+        host->Clean();
+        secondTimeLayout_ = true;
+        CHECK_NULL_VOID(shallowBuilder_);
+        shallowBuilder_->MarkIsExecuteDeepRenderDone(false);
+    }
+
     void BeforeCreateLayoutWrapper() override
     {
-        if (firstTimeLayout_) {
+        if (firstTimeLayout_ || secondTimeLayout_) {
             CheckTabAnimateMode();
-            firstTimeLayout_ = false;
         }
 
         if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
             shallowBuilder_->ExecuteDeepRender();
-            shallowBuilder_.Reset();
-        } else if (shallowBuilder_ && shallowBuilder_->IsExecuteDeepRenderDone()) {
-            auto pipeline = PipelineContext::GetCurrentContextSafely();
+            if (secondTimeLayout_) {
+                auto host = GetHost();
+                CHECK_NULL_VOID(host);
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            }
+        } else if ((firstTimeLayout_ || secondTimeLayout_) && shallowBuilder_ &&
+                   shallowBuilder_->IsExecuteDeepRenderDone()) {
+            auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
             if (!pipeline) {
                 shallowBuilder_->MarkIsExecuteDeepRenderDone(false);
                 return;
@@ -138,6 +170,8 @@ public:
                 host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             });
         }
+        firstTimeLayout_ = false;
+        secondTimeLayout_ = false;
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -155,6 +189,11 @@ public:
             symbol_ = tabBarSymbol.value();
         }
         tabBarParam_.SetBuilder(move(builder));
+    }
+
+    void SetTabBarWithContent(const RefPtr<NG::UINode>& content)
+    {
+        tabBarParam_.SetContent(content);
     }
 
     const TabBarSymbol& GetSymbol()
@@ -306,14 +345,14 @@ public:
 
     void FireWillShowEvent()
     {
-        auto tabContentEventHub = GetEventHub<TabContentEventHub>();
+        auto tabContentEventHub = GetOrCreateEventHub<TabContentEventHub>();
         CHECK_NULL_VOID(tabContentEventHub);
         tabContentEventHub->FireWillShowEvent();
     }
 
     void FireWillHideEvent()
     {
-        auto tabContentEventHub = GetEventHub<TabContentEventHub>();
+        auto tabContentEventHub = GetOrCreateEventHub<TabContentEventHub>();
         CHECK_NULL_VOID(tabContentEventHub);
         tabContentEventHub->FireWillHideEvent();
     }
@@ -333,6 +372,23 @@ public:
         return customStyleNode_;
     }
 
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override
+    {
+        switch (selectedMode_) {
+            case SelectedMode::INDICATOR: {
+                json->Put("SelectedMode", "INDICATOR");
+                break;
+            }
+            case SelectedMode::BOARD: {
+                json->Put("SelectedMode", "BOARD");
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
+
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     TabBarParam tabBarParam_;
@@ -348,6 +404,7 @@ private:
     TabBarSymbol symbol_;
 
     bool firstTimeLayout_ = true;
+    bool secondTimeLayout_ = false;
     bool useLocalizedPadding_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TabContentPattern);

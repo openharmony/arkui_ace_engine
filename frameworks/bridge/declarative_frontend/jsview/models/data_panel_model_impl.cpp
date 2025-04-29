@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/models/data_panel_model_impl.h"
 
-#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/data_panel/data_panel_component.h"
 

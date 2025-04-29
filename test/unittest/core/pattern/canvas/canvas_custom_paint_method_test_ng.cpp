@@ -23,6 +23,9 @@
 
 #define protected public
 #define private public
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
 #include "core/components_ng/pattern/canvas/canvas_event_hub.h"
 #include "core/components_ng/pattern/canvas/canvas_layout_algorithm.h"
 #include "core/components_ng/pattern/canvas/canvas_model.h"
@@ -30,13 +33,10 @@
 #include "core/components_ng/pattern/canvas/canvas_modifier.h"
 #include "core/components_ng/pattern/canvas/canvas_paint_mem.h"
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
-#include "core/components_ng/pattern/canvas/canvas_paint_op.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components_ng/pattern/canvas/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_paint_method.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/rosen/mock_canvas.h"
 #undef private
 #undef protected
 
@@ -53,7 +53,7 @@ const double END_ANGLE = 8.0;
 const double MAX_END_ANGLE = 1160.0;
 const double HALF = 0.5;
 const double HANGING_PERCENT = 0.8;
-}
+} // namespace
 
 class CanvasCustomPaintMethodTestNg : public testing::Test {
 public:
@@ -72,11 +72,11 @@ void CanvasCustomPaintMethodTestNg::TearDownTestCase()
 }
 
 /**
- * @tc.name: CanvasCustomPaintMethodTest001
+ * @tc.name: CanvasCustomPaintMethodTest0011
  * @tc.desc: Test the function 'CheckFilterProperty' of the class 'CustomPaintPaintMethod'.
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest001, TestSize.Level1)
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest0011, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -88,6 +88,8 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest001, TestSize
      * @tc.steps2: When FilterType is GRAYSCALE, call the function CheckFilterProperty.
      * @tc.expected: return value are as expected.
      */
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::GRAYSCALE, "0"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::GRAYSCALE, "-0"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::GRAYSCALE, "10"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::GRAYSCALE, "10.5"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::GRAYSCALE, "10%"));
@@ -98,6 +100,8 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest001, TestSize
      * @tc.steps3: When FilterType is SEPIA, call the function CheckFilterProperty.
      * @tc.expected: return value are as expected.
      */
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::SEPIA, "0"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::SEPIA, "-0"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::SEPIA, "10"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::SEPIA, "10.5"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::SEPIA, "10%"));
@@ -105,19 +109,50 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest001, TestSize
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::SEPIA, " "));
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::SEPIA, "10px"));
     /**
-     * @tc.steps4: When FilterType is INVERT, call the function CheckFilterProperty.
+     * @tc.steps4: When FilterType is SATURATE, call the function CheckFilterProperty.
      * @tc.expected: return value are as expected.
      */
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::SATURATE, "0"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::SATURATE, "-0"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::SATURATE, "10"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::SATURATE, "10.5"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::SATURATE, "10%"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::SATURATE, "10.5%"));
+    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::SATURATE, " "));
+    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::SATURATE, "10px"));
+    /**
+     * @tc.steps5: When FilterType is INVERT, call the function CheckFilterProperty.
+     * @tc.expected: return value are as expected.
+     */
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::INVERT, "0"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::INVERT, "-0"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::INVERT, "10"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::INVERT, "10.5"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::INVERT, "10%"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::INVERT, "10.5%"));
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::INVERT, " "));
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::INVERT, "10px"));
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest0012
+ * @tc.desc: Test the function 'CheckFilterProperty' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest0012, TestSize.Level1)
+{
     /**
-     * @tc.steps5: When FilterType is OPACITY, call the function CheckFilterProperty.
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    /**
+     * @tc.steps2: When FilterType is OPACITY, call the function CheckFilterProperty.
      * @tc.expected: return value are as expected.
      */
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::OPACITY, "0"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::OPACITY, "-0"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::OPACITY, "10"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::OPACITY, "10.5"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::OPACITY, "10%"));
@@ -125,9 +160,11 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest001, TestSize
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::OPACITY, " "));
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::OPACITY, "10px"));
     /**
-     * @tc.steps5: When FilterType is BRIGHTNESS, call the function CheckFilterProperty.
+     * @tc.steps3: When FilterType is BRIGHTNESS, call the function CheckFilterProperty.
      * @tc.expected: return value are as expected.
      */
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BRIGHTNESS, "0"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BRIGHTNESS, "-0"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BRIGHTNESS, "10"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BRIGHTNESS, "10.5"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BRIGHTNESS, "10%"));
@@ -135,9 +172,11 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest001, TestSize
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BRIGHTNESS, " "));
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BRIGHTNESS, "10px"));
     /**
-     * @tc.steps6: When FilterType is CONTRAST, call the function CheckFilterProperty.
+     * @tc.steps4: When FilterType is CONTRAST, call the function CheckFilterProperty.
      * @tc.expected: return value are as expected.
      */
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::CONTRAST, "0"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::CONTRAST, "-0"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::CONTRAST, "10"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::CONTRAST, "10.5"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::CONTRAST, "10%"));
@@ -163,25 +202,46 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest002, TestSize
      * @tc.steps2: When FilterType is BLUR, call the function CheckFilterProperty.
      * @tc.expected: return value are as expected.
      */
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "0"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "-0"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10px"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10.5px"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10vp"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10.5vp"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10rem"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10.5rem"));
+    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10"));
+    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10.5"));
+
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10%px"));
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10%rem"));
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10.5%px"));
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10.5%rem"));
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, " "));
-    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10"));
-    EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::BLUR, "10.5"));
     /**
      * @tc.steps3: When FilterType is HUE_ROTATE, call the function CheckFilterProperty.
      * @tc.expected: return value are as expected.
      */
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "0"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "-0"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10deg"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10.5deg"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10rad"));
     EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10.5rad"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10grad"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10.5grad"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "2turn"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "0.5turn"));
+
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "-10deg"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "-10.5deg"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "-10rad"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "-10.5rad"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "-10grad"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "-10.5grad"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "-2turn"));
+    EXPECT_TRUE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "-0.5turn"));
+
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10%deg"));
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10%rad"));
     EXPECT_FALSE(paintMethod->CheckFilterProperty(FilterType::HUE_ROTATE, "10.5%deg"));
@@ -263,16 +323,16 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest005, TestSize
      */
     Ace::Gradient gradient;
     gradient.SetType(Ace::GradientType::CONIC);
-    EXPECT_EQ(paintMethod->MakeConicGradient(nullptr, gradient), nullptr);
+    EXPECT_EQ(paintMethod->MakeConicGradient(gradient), nullptr);
     AnimatableDimension animatableDimension(1.0);
     gradient.GetConicGradient().centerX = animatableDimension;
     EXPECT_EQ(gradient.GetConicGradient().centerX.has_value(), true);
-    auto result = paintMethod->MakeConicGradient(nullptr, gradient);
+    auto result = paintMethod->MakeConicGradient(gradient);
     EXPECT_EQ(result, nullptr);
 
     gradient.GetConicGradient().centerY = animatableDimension;
     EXPECT_EQ(gradient.GetConicGradient().centerY.has_value(), true);
-    result = paintMethod->MakeConicGradient(nullptr, gradient);
+    result = paintMethod->MakeConicGradient(gradient);
     EXPECT_EQ(result, nullptr);
 
     gradient.GetConicGradient().startAngle = animatableDimension;
@@ -283,7 +343,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest005, TestSize
     gradient.AddColor(gradientColor1);
     gradient.AddColor(gradientColor2);
     gradient.AddColor(gradientColor3);
-    result = paintMethod->MakeConicGradient(nullptr, gradient);
+    result = paintMethod->MakeConicGradient(gradient);
     EXPECT_NE(result, nullptr);
 }
 
@@ -389,10 +449,12 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest009, TestSize
      * @tc.expected: return value are as expected.
      */
     std::string str1 = "10.0";
-    EXPECT_EQ(paintMethod->BlurStrToDouble(str1), 0.0);
+    EXPECT_EQ(paintMethod->BlurStrToDouble(str1), 10.0);
     str1 = "aaa";
     EXPECT_EQ(paintMethod->BlurStrToDouble(str1), 0.0);
     str1 = "10.0px";
+    EXPECT_EQ(paintMethod->BlurStrToDouble(str1), 10.0);
+    str1 = "10.0VP";
     EXPECT_EQ(paintMethod->BlurStrToDouble(str1), 10.0);
     str1 = "20.0rem";
     EXPECT_EQ(paintMethod->BlurStrToDouble(str1), 300.0);
@@ -474,7 +536,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest012, TestSize
     result = paintMethod->CalcTextScale(1.0, std::nullopt);
     EXPECT_FALSE(result.has_value());
 
-    result =paintMethod->CalcTextScale(0.0, std::nullopt);
+    result = paintMethod->CalcTextScale(0.0, std::nullopt);
     EXPECT_FALSE(result.has_value());
 
     result = paintMethod->CalcTextScale(1.0, -1.0);
@@ -932,7 +994,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest024, TestSize
     param.startAngle = 0.0;
     param.endAngle = 1.0;
     param.rotation = 1.0;
-    
+
     EXPECT_CALL(matrix, Rotate(_, _, _)).WillRepeatedly(Return());
     EXPECT_CALL(path, Transform(_)).WillRepeatedly(Return());
     paintMethod->Ellipse(param);
@@ -1098,7 +1160,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest028, TestSize
     EXPECT_CALL(canvas, Scale(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(typography, Paint(_, _, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
-    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true, true);
+    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 
     EXPECT_CALL(typography, Layout(_)).WillRepeatedly(Return());
@@ -1106,7 +1168,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest028, TestSize
     EXPECT_CALL(canvas, Scale(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(typography, Paint(_, _, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
-    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true, false);
+    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true);
 
     maxWidth = 10.0;
     EXPECT_CALL(typography, Layout(_)).WillRepeatedly(Return());
@@ -1114,7 +1176,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest028, TestSize
     EXPECT_CALL(canvas, Scale(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(typography, Paint(_, _, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
-    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true, true);
+    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true);
 }
 
 /**
@@ -1269,7 +1331,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest032, TestSize
 
 /**
  * @tc.name: CanvasCustomPaintMethodTest033
- * @tc.desc: Test the function 'RestoreMatrix' of the class 'CustomPaintPaintMethod'.
+ * @tc.desc: Test the function 'RestoreProperties' of the class 'CustomPaintPaintMethod'.
  * @tc.type: FUNC
  */
 
@@ -1281,9 +1343,9 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest033, TestSize
      */
     auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
     ASSERT_NE(paintMethod, nullptr);
-    paintMethod->SaveMatrix();
-    paintMethod->RestoreMatrix();
-    paintMethod->RestoreMatrix();
+    paintMethod->SaveProperties();
+    paintMethod->RestoreProperties();
+    paintMethod->RestoreProperties();
     EXPECT_TRUE(paintMethod->matrixStates_.empty());
 }
 
@@ -1455,32 +1517,6 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest038, TestSize
 }
 
 /**
- * @tc.name: CanvasCustomPaintMethodTest0138
- * @tc.desc: Test the function 'HasImageShadow' of the class 'CustomPaintPaintMethod'.
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest039, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
-    ASSERT_NE(paintMethod, nullptr);
-
-    Shadow shadow(1.0, Offset(1.0, 1.0), Color::WHITE, ShadowStyle::OuterDefaultXS);
-    paintMethod->imageShadow_ = std::make_unique<Shadow>(std::move(shadow));
-    Offset offset(0, 0);
-    paintMethod->imageShadow_->SetOffset(offset);
-    paintMethod->imageShadow_->blurRadius_ = 0;
-    EXPECT_FALSE(paintMethod->HasImageShadow());
-    paintMethod->imageShadow_->SetOffsetX(1.0);
-    paintMethod->imageShadow_->SetOffsetY(1.0);
-    paintMethod->imageShadow_->blurRadius_ = 1.0;
-    EXPECT_TRUE(paintMethod->HasImageShadow());
-}
-
-/**
  * @tc.name: CanvasCustomPaintMethodTest040
  * @tc.desc: Test the function 'InitImagePaint' of the class 'CustomPaintPaintMethod'.
  * @tc.type: FUNC
@@ -1542,5 +1578,113 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest041, TestSize
     RSPoint endPoint = RSPoint(
         static_cast<RSScalar>(gradient.GetEndOffset().GetX()), static_cast<RSScalar>(gradient.GetEndOffset().GetY()));
     EXPECT_FALSE(gradient.GetInnerRadius() <= 0.0 && beginPoint == endPoint);
+}
+
+/**
+ * @tc.name: GetSystemDirectionTest
+ * @tc.desc: Test the function 'GetSystemDirection' of the class 'CanvasPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, GetSystemDirectionTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto contentModifier = AceType::MakeRefPtr<CanvasModifier>();
+    ASSERT_TRUE(contentModifier);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    ASSERT_TRUE(frameNode);
+    frameNode->layoutProperty_ = AceType::MakeRefPtr<LayoutProperty>();
+    auto paintMethod = AceType::MakeRefPtr<CanvasPaintMethod>(contentModifier, frameNode);
+    ASSERT_TRUE(paintMethod);
+    paintMethod->frameNode_ = std::move(frameNode);
+
+    /**
+     * @tc.steps2: layoutDirection_ default is TextDirection::AUTO.
+     * @tc.expected: return TextDirection::LTR.
+     */
+    TextDirection ret = paintMethod->GetSystemDirection();
+    EXPECT_EQ(ret, TextDirection::LTR);
+
+    /**
+     * @tc.steps3: layoutDirection_ is not TextDirection::AUTO.
+     * @tc.expected: return TextDirection::INHERIT.
+     */
+    frameNode->layoutProperty_->layoutDirection_ = TextDirection::INHERIT;
+    ret = paintMethod->GetSystemDirection();
+    EXPECT_EQ(ret, TextDirection::INHERIT);
+}
+
+/**
+ * @tc.name: GetImageDataTest
+ * @tc.desc: Test the function 'GetImageData' of the class 'CanvasPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, GetImageDataTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto contentModifier = AceType::MakeRefPtr<CanvasModifier>();
+    ASSERT_TRUE(contentModifier);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    ASSERT_TRUE(frameNode);
+    auto paintMethod = AceType::MakeRefPtr<CanvasPaintMethod>(contentModifier, frameNode);
+    ASSERT_TRUE(paintMethod);
+    /**
+     * @tc.steps2: invoked by default.
+     * @tc.expected: DrawBitmap(renderContext, currentBitmap) return false.
+     */
+    auto imageData = paintMethod->GetImageData(10, 10, 10, 10);
+    EXPECT_FALSE(imageData);
+}
+
+/**
+* @tc.name: UpdateRecordingCanvasTest
+* @tc.desc: Test the function 'UpdateRecordingCanvas' of the class 'CanvasPaintMethod'.
+* @tc.type: FUNC
+*/
+HWTEST_F(CanvasCustomPaintMethodTestNg, UpdateRecordingCanvasTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto contentModifier = AceType::MakeRefPtr<CanvasModifier>();
+    ASSERT_TRUE(contentModifier);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    ASSERT_TRUE(frameNode);
+    auto paintMethod = AceType::MakeRefPtr<CanvasPaintMethod>(contentModifier, frameNode);
+    ASSERT_TRUE(paintMethod);
+
+    /**
+     * @tc.steps2: invoked by default.
+     * @tc.expected: set paintMethod->needMarkDirty_ is true.
+     */
+    paintMethod->UpdateRecordingCanvas(10, 10);
+    EXPECT_TRUE(paintMethod->needMarkDirty_);
+
+    /**
+     * @tc.steps3: set apiTargetVersion is VERSION_THIRTEEN.
+     * @tc.expected: set paintMethod->needMarkDirty_ is true.
+     */
+    auto container = Container::Current();
+    ASSERT_TRUE(container);
+    auto apiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    paintMethod->UpdateRecordingCanvas(10, 10);
+    EXPECT_TRUE(paintMethod->needMarkDirty_);
+    container->SetApiTargetVersion(apiVersion);
 }
 } // namespace OHOS::Ace::NG

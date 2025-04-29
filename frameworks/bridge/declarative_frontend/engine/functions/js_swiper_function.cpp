@@ -191,4 +191,15 @@ void JsSwiperFunction::Execute(int32_t selectedIndex, int32_t index, float posit
     JSRef<JSVal> params[] = { selectedIndexValue, indexValue, positionValue, mainAxisLengthValue };
     JsFunction::ExecuteJS(4, params);
 }
+
+JSRef<JSVal> JsSwiperFunction::Execute(const SwiperContentWillScrollResult& result)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty<int32_t>("currentIndex", result.currentIndex);
+    obj->SetProperty<int32_t>("comingIndex", result.comingIndex);
+    obj->SetProperty<float>("offset", result.offset);
+
+    JSRef<JSVal> params[] = { obj };
+    return JsFunction::ExecuteJS(1, params);
+}
 } // namespace OHOS::Ace::Framework

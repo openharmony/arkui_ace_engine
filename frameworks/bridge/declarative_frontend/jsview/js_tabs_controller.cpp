@@ -15,9 +15,11 @@
 
 #include "bridge/declarative_frontend/jsview/js_tabs_controller.h"
 
+#include "base/log/event_report.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
@@ -84,7 +86,6 @@ void ReturnPromise(const JSCallbackInfo& info, napi_value result)
 JSTabsController::JSTabsController()
 {
     controller_ = CreateController();
-    swiperController_ = MakeRefPtr<SwiperController>();
 }
 
 void JSTabsController::JSBind(BindingTarget globalObj)
@@ -92,6 +93,8 @@ void JSTabsController::JSBind(BindingTarget globalObj)
     JSClass<JSTabsController>::Declare("TabsController");
     JSClass<JSTabsController>::Method("changeIndex", &JSTabsController::ChangeIndex);
     JSClass<JSTabsController>::CustomMethod("preloadItems", &JSTabsController::PreloadItems);
+    JSClass<JSTabsController>::CustomMethod("setTabBarTranslate", &JSTabsController::SetTabBarTranslate);
+    JSClass<JSTabsController>::CustomMethod("setTabBarOpacity", &JSTabsController::SetTabBarOpacity);
     JSClass<JSTabsController>::Bind(globalObj, JSTabsController::Constructor, JSTabsController::Destructor);
 }
 
@@ -121,12 +124,17 @@ RefPtr<TabController> JSTabsController::CreateController()
 void JSTabsController::ChangeIndex(int32_t index)
 {
     ContainerScope scope(instanceId_);
-    if (swiperController_) {
-        const auto& updateCubicCurveCallback = swiperController_->GetUpdateCubicCurveCallback();
+    auto tabsController = tabsControllerWeak_.Upgrade();
+    if (tabsController) {
+        const auto& updateCubicCurveCallback = tabsController->GetUpdateCubicCurveCallback();
         if (updateCubicCurveCallback != nullptr) {
             updateCubicCurveCallback();
         }
-        swiperController_->SwipeTo(index);
+        TAG_LOGI(AceLogTag::ACE_TABS, "changeIndex %{public}d", index);
+        tabsController->SwipeTo(index);
+    } else {
+        EventReport::ReportScrollableErrorEvent(
+            "Tabs", ScrollableErrorType::CONTROLLER_NOT_BIND, "changeIndex: Tabs controller not bind.");
     }
 
 #ifndef NG_BUILD
@@ -147,7 +155,10 @@ void JSTabsController::PreloadItems(const JSCallbackInfo& args)
     asyncContext->env = env;
     napi_value promise = nullptr;
     napi_create_promise(env, &asyncContext->deferred, &promise);
-    if (!swiperController_) {
+    auto tabsController = tabsControllerWeak_.Upgrade();
+    if (!tabsController) {
+        EventReport::ReportScrollableErrorEvent(
+            "Tabs", ScrollableErrorType::CONTROLLER_NOT_BIND, "preloadItems: Tabs controller not bind.");
         ReturnPromise(args, promise);
         return;
     }
@@ -168,9 +179,71 @@ void JSTabsController::PreloadItems(const JSCallbackInfo& args)
         CHECK_NULL_VOID(asyncContext);
         HandleDeferred(asyncContext, errorCode, message);
     };
-    swiperController_->SetPreloadFinishCallback(onPreloadFinish);
-    swiperController_->PreloadItems(indexSet);
+    tabsController->SetPreloadFinishCallback(onPreloadFinish);
+    tabsController->PreloadItems(indexSet);
     ReturnPromise(args, promise);
+}
+
+void JSTabsController::SetTabBarTranslate(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_);
+    auto tabsController = tabsControllerWeak_.Upgrade();
+    if (!tabsController) {
+        EventReport::ReportScrollableErrorEvent(
+            "Tabs", ScrollableErrorType::CONTROLLER_NOT_BIND, "setTabBarTranslate: Tabs controller not bind.");
+        return;
+    }
+
+    if (args.Length() <= 0) {
+        return;
+    }
+    auto translate = args[0];
+    if (translate->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(translate);
+        if (jsObj->HasProperty(static_cast<int32_t>(ArkUIIndex::X)) ||
+            jsObj->HasProperty(static_cast<int32_t>(ArkUIIndex::Y)) ||
+            jsObj->HasProperty(static_cast<int32_t>(ArkUIIndex::Z))) {
+            CalcDimension translateX;
+            CalcDimension translateY;
+            CalcDimension translateZ;
+            JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::X)), translateX);
+            JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::Y)), translateY);
+            JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::Z)), translateZ);
+            auto options = NG::TranslateOptions(translateX, translateY, translateZ);
+            tabsController->SetTabBarTranslate(options);
+            return;
+        }
+    }
+    CalcDimension value;
+    if (JSViewAbstract::ParseJsDimensionVp(translate, value)) {
+        auto options = NG::TranslateOptions(value, value, value);
+        tabsController->SetTabBarTranslate(options);
+    } else {
+        auto options = NG::TranslateOptions(0.0f, 0.0f, 0.0f);
+        tabsController->SetTabBarTranslate(options);
+    }
+}
+
+void JSTabsController::SetTabBarOpacity(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_);
+    auto tabsController = tabsControllerWeak_.Upgrade();
+    if (!tabsController) {
+        EventReport::ReportScrollableErrorEvent(
+            "Tabs", ScrollableErrorType::CONTROLLER_NOT_BIND, "setTabBarOpacity: Tabs controller not bind.");
+        return;
+    }
+
+    if (args.Length() <= 0) {
+        return;
+    }
+    double opacity = 0.0;
+    if (JSViewAbstract::ParseJsDouble(args[0], opacity)) {
+        opacity = std::clamp(opacity, 0.0, 1.0);
+        tabsController->SetTabBarOpacity(opacity);
+    } else {
+        tabsController->SetTabBarOpacity(1.0f);
+    }
 }
 
 } // namespace OHOS::Ace::Framework

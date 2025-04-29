@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_INDICATOR_DOT_INDICATOR_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_INDICATOR_DOT_INDICATOR_PAINT_METHOD_H
 
+#include "core/common/container.h"
 #include "core/components/common/properties/swiper_indicator.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_modifier.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_property.h"
@@ -45,10 +46,12 @@ public:
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
     virtual void PaintNormalIndicator(const PaintWrapper* paintWrapper);
     void PaintHoverIndicator(const PaintWrapper* paintWrapper);
-    void PaintHoverIndicator(LinearVector<float>& itemHalfSizes, const Dimension paddingSide);
+    void PaintHoverIndicator(LinearVector<float>& itemHalfSizes, const Dimension paddingSide,
+        const Dimension& indicatorDotItemSpace);
     void PaintPressIndicator(const PaintWrapper* paintWrapper);
-    void CalculateNormalMargin(
-        const LinearVector<float>& itemHalfSizes, const SizeF& frameSize, const int32_t displayCount);
+    virtual void CalculateNormalMargin(
+        const LinearVector<float>& itemHalfSizes, const SizeF& frameSize, const int32_t displayCount,
+        const Dimension& indicatorDotItemSpace, bool ignoreSize);
     virtual std::pair<float, float> CalculatePointCenterX(
         const LinearVector<float>& itemHalfSizes, float margin, float padding, float space, int32_t index);
     void CalculateHoverIndex(const LinearVector<float>& itemHalfSizes);
@@ -64,6 +67,16 @@ public:
     void SetItemCount(int32_t itemCount)
     {
         itemCount_ = itemCount;
+    }
+
+    void SetIsAutoLinear(bool isAutoLinear)
+    {
+        isAutoLinear_ = isAutoLinear;
+    }
+
+    void SetTotalItemCount(int32_t totalItemCount)
+    {
+        totalItemCount_ = totalItemCount;
     }
 
     void SetDisplayCount(int32_t displayCount)
@@ -116,6 +129,11 @@ public:
         groupTurnPageRate_ = groupTurnPageRate;
     }
 
+    GestureState GetGestureState()
+    {
+        return gestureState_;
+    }
+
     void SetGestureState(GestureState gestureState)
     {
         gestureState_ = gestureState;
@@ -129,6 +147,11 @@ public:
     void SetTouchBottomRate(float touchBottomRate)
     {
         touchBottomRate_ = touchBottomRate;
+    }
+
+    void SetTouchBottomPageRate(float touchBottomPageRate)
+    {
+        touchBottomPageRate_ = touchBottomPageRate;
     }
 
     void SetMouseClickIndex(const std::optional<int32_t>& mouseClickIndex)
@@ -160,6 +183,12 @@ public:
     {
         isHorizontalAndRightToLeft_ = axis_ == Axis::HORIZONTAL && textDirection == TextDirection::RTL;
     }
+
+    void SetFirstIndex(int32_t index)
+    {
+        firstIndex_ = index;
+    }
+
 protected:
     struct StarAndEndPointCenter {
         float startLongPointLeftCenterX = 0.0f;
@@ -192,7 +221,13 @@ protected:
     void AdjustPointCenterXForTouchBottom(StarAndEndPointCenter& pointCenter,
         LinearVector<float>& endVectorBlackPointCenterX, int32_t startCurrentIndex, int32_t endCurrentIndex,
         float selectedItemWidth, int32_t index);
+    bool AdjustPointCenterXForTouchBottomNew(StarAndEndPointCenter& pointCenter,
+        LinearVector<float>& endVectorBlackPointCenterX, int32_t endCurrentIndex, float selectedItemWidth);
     std::pair<int32_t, int32_t> GetIndex(int32_t index);
+    std::pair<int32_t, int32_t> GetIndexOnRTL(int32_t index);
+    bool NeedBottomAnimation() const;
+    int32_t CalculateMouseClickIndexOnRTL();
+    std::pair<int32_t, int32_t> CalCurrentIndex();
 
     RefPtr<DotIndicatorModifier> dotIndicatorModifier_;
     PointF hoverPoint_;
@@ -201,15 +236,19 @@ protected:
     Axis axis_ = Axis::HORIZONTAL;
     int32_t currentIndex_ = 0;
     int32_t currentIndexActual_ = 0;
+    int32_t firstIndex_ = 0;
     int32_t nextValidIndex_ = 0;
     int32_t itemCount_ = 0;
+    int32_t totalItemCount_ = 0;
     int32_t displayCount_ = 1;
+    bool isAutoLinear_ = false;
     float turnPageRate_ = 0.0f;
     float groupTurnPageRate_ = 0.0f;
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     TouchBottomTypeLoop touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     PointAnimationStage pointAnimationStage_ = PointAnimationStage::STATE_SHRINKT_TO_BLACK_POINT;
     float touchBottomRate_ = 0.0f;
+    float touchBottomPageRate_ = 0.0f;
     bool isHorizontalAndRightToLeft_ = false;
     bool isLoop_ = true;
     bool isHover_ = false;

@@ -18,6 +18,11 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+#ifdef ACE_ENABLE_VK
+#include "render_service_base/include/platform/common/rs_system_properties.h"
+#include "2d_graphics/include/recording/draw_cmd_list.h"
+#endif
+
 namespace OHOS::Ace::NG {
 
 namespace {
@@ -150,6 +155,13 @@ void ImagePainter::DrawImage(RSCanvas& canvas, const OffsetF& offset, const Size
     if (drawObscuration) {
         DrawObscuration(canvas, offset, contentSize);
     } else if (config.isSvg_) {
+#ifdef ACE_ENABLE_VK
+    RSRecordingCanvas* recordingCanvas = static_cast<RSRecordingCanvas*>(&canvas);
+    if (recordingCanvas != nullptr && recordingCanvas->GetDrawCmdList() != nullptr &&
+            Rosen::RSSystemProperties::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::SVG) != 0) {
+            recordingCanvas->GetDrawCmdList()->SetHybridRenderType(RSHybridRenderType::SVG);
+        }
+#endif
         DrawSVGImage(canvas, offset, contentSize);
     } else {
         DrawStaticImage(canvas, offset, contentSize);
@@ -228,7 +240,7 @@ void ImagePainter::DrawImageWithRepeat(RSCanvas& canvas, const RectF& contentRec
     uint32_t down = 1;
     uint32_t left = 2;
     uint32_t right = 3;
-    auto drawRepeatYTask = [this, &canvas, &config, &dirRepeatNum, &singleImageHeight, &imageRepeatY, &contentRect](
+    auto drawRepeatYTask = [this, &canvas, &dirRepeatNum, &singleImageHeight, &imageRepeatY, &contentRect](
                                OffsetF offsetTempY, uint32_t dir) {
         float downNum = (dir == 0) ? -1 : 1;
         for (size_t j = 0; j < dirRepeatNum[dir] && imageRepeatY; j++) {
@@ -305,6 +317,9 @@ void ImagePainter::ApplyImageFit(
             } else {
                 ApplyContain(rawPicSize, dstSize, srcRect, dstRect);
             }
+            break;
+        case ImageFit::MATRIX:
+            ApplyNone(rawPicSize, dstSize, srcRect, dstRect);
             break;
         case ImageFit::CONTAIN:
         default:

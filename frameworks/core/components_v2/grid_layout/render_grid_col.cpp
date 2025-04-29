@@ -15,8 +15,6 @@
 
 #include "core/components_v2/grid_layout/render_grid_col.h"
 
-#include "base/memory/ace_type.h"
-#include "core/components/common/layout/layout_param.h"
 #include "core/components_v2/grid_layout/grid_col_component.h"
 
 namespace OHOS::Ace::V2 {
@@ -52,7 +50,7 @@ int32_t RenderGridCol::GetSpan(GridSizeType sizeType) const
         LOGI("child component error return span 1");
         return 1;
     }
-    return gridCol->GetSpan() < 1 ? 1 : gridCol->GetSpan(sizeType);
+    return gridCol->GetSpan(sizeType);
 }
 
 int32_t RenderGridCol::GetOffset(GridSizeType sizeType) const

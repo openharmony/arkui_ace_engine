@@ -33,6 +33,9 @@ void SvgStyle::ParseCssStyle(const std::string& styleValue, const PushAttr& call
     StringUtils::DeleteAllMark(newStyle, '\r');
     StringUtils::DeleteAllMark(newStyle, '\t');
     StringUtils::DeleteAllMark(newStyle, ' ');
+    if (newStyle.empty()) {
+        return;
+    }
     auto styles = SplitString(newStyle.substr(1), "}.");
     for (auto& style : styles) {
         auto nameEnd = style.find_first_of('{');

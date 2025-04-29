@@ -15,18 +15,7 @@
 
 #include "core/components_ng/pattern/panel/drag_bar_layout_algorithm.h"
 
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/log/ace_trace.h"
-#include "base/utils/utils.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components_ng/layout/layout_algorithm.h"
-#include "core/components_ng/pattern/panel/drag_bar_layout_property.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
-
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension DRAG_ICON_WIDTH = 64.0_vp;
@@ -57,7 +46,7 @@ std::optional<SizeF> DragBarLayoutAlgorithm::MeasureContent(
         idealSize.SetWidth(layoutConstraint->maxSize.Width());
         idealSize.SetHeight(static_cast<float>(hotRegionHeight));
     }
-    layoutProperty->UpdatePadding({ CalcLength(PADDING), CalcLength(PADDING), {}, {} });
+    layoutProperty->UpdatePadding({ CalcLength(PADDING), CalcLength(PADDING), CalcLength(0.0f), CalcLength(0.0f) });
     auto realSize = SizeF(DRAG_ICON_WIDTH.ConvertToPx(), DRAG_ICON_HEIGHT.ConvertToPx());
     iconOffset_ = Alignment::GetAlignPosition(idealSize, realSize, Alignment::CENTER);
     return idealSize;

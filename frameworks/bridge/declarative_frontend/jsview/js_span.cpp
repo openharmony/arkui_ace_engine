@@ -20,9 +20,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
@@ -52,21 +50,18 @@ std::mutex SpanModel::mutex_;
 
 SpanModel* SpanModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::SpanModelNG());
+    static NG::SpanModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::SpanModelNG());
-            } else {
-                instance_.reset(new Framework::SpanModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::SpanModelNG instance;
+        return &instance;
+    } else {
+        static Framework::SpanModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 
 } // namespace OHOS::Ace
@@ -82,6 +77,14 @@ constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyl
 
 void JSSpan::SetFont(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
+    auto infoZero = info[0];
+    if (infoZero->IsUndefined() || infoZero->IsNull()) {
+        SpanModel::GetInstance()->ResetFont();
+        return;
+    }
     Font font;
     JSText::GetFontInfo(info, font);
     SpanModel::GetInstance()->SetFont(font);
@@ -94,15 +97,9 @@ void JSSpan::SetFontSize(const JSCallbackInfo& info)
     }
     CalcDimension fontSize;
     if (!ParseJsDimensionFpNG(info[0], fontSize, false) || fontSize.IsNegative()) {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<TextTheme>();
-        CHECK_NULL_VOID(theme);
-        fontSize = theme->GetTextStyle().GetFontSize();
-        SpanModel::GetInstance()->SetFontSize(fontSize);
+        SpanModel::GetInstance()->ResetFontSize();
         return;
     }
-
     SpanModel::GetInstance()->SetFontSize(fontSize);
 }
 
@@ -114,12 +111,14 @@ void JSSpan::SetFontWeight(const std::string& value)
 void JSSpan::SetTextColor(const JSCallbackInfo& info)
 {
     Color textColor;
-    if (!ParseJsColor(info[0], textColor)) {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<TextTheme>();
-        CHECK_NULL_VOID(theme);
-        textColor = theme->GetTextStyle().GetTextColor();
+    auto infoZero = info[0];
+    if (infoZero->IsUndefined() || infoZero->IsNull()) {
+        SpanModel::GetInstance()->ResetTextColor();
+        return;
+    }
+    if (!ParseJsColor(infoZero, textColor)) {
+        SpanModel::GetInstance()->ResetTextColor();
+        return;
     }
     SpanModel::GetInstance()->SetTextColor(textColor);
 }
@@ -129,6 +128,8 @@ void JSSpan::SetFontStyle(int32_t value)
     if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
         auto style = FONT_STYLES[value];
         SpanModel::GetInstance()->SetItalicFontStyle(style);
+    } else {
+        SpanModel::GetInstance()->ResetItalicFontStyle();
     }
 }
 
@@ -139,6 +140,7 @@ void JSSpan::SetFontFamily(const JSCallbackInfo& info)
     }
     std::vector<std::string> fontFamilies;
     if (!ParseJsFontFamilies(info[0], fontFamilies)) {
+        SpanModel::GetInstance()->ResetFontFamily();
         return;
     }
     SpanModel::GetInstance()->SetFontFamily(fontFamilies);
@@ -216,14 +218,18 @@ void JSSpan::SetDecoration(const JSCallbackInfo& info)
     } else {
         auto theme = GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
-        if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+        if (Container::CurrentColorMode() == ColorMode::DARK) {
             colorVal = theme->GetTextStyle().GetTextColor();
         } else {
             colorVal = Color::BLACK;
         }
     }
-    SpanModel::GetInstance()->SetTextDecoration(textDecoration.value());
-    SpanModel::GetInstance()->SetTextDecorationColor(colorVal.value());
+    if (textDecoration) {
+        SpanModel::GetInstance()->SetTextDecoration(textDecoration.value());
+    }
+    if (colorVal) {
+        SpanModel::GetInstance()->SetTextDecorationColor(colorVal.value());
+    }
     if (textDecorationStyle) {
         SpanModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
     }
@@ -375,7 +381,7 @@ void JSSpan::JSBind(BindingTarget globalObj)
 
 void JSSpan::Create(const JSCallbackInfo& info)
 {
-    std::string label;
+    std::u16string label;
     if (info.Length() > 0) {
         ParseJsString(info[0], label);
     }

@@ -15,12 +15,9 @@
 
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 
-#include "base/geometry/dimension.h"
-#include "core/components/common/properties/color.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -36,6 +33,15 @@ void ShapeAbstractModelNG::SetStroke(FrameNode* frameNode, const Color& color)
 
 void ShapeAbstractModelNG::SetFill(const Color& color)
 {
+    ACE_UPDATE_PAINT_PROPERTY(ShapePaintProperty, Fill, color);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
+}
+void ShapeAbstractModelNG::SetForegroundColor(const Color& color)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
     ACE_UPDATE_PAINT_PROPERTY(ShapePaintProperty, Fill, color);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);

@@ -21,6 +21,7 @@
 
 namespace OHOS::Ace {
 napi_value JsCreate(napi_env env, napi_callback_info info);
+napi_value SetWaterMask(napi_env env, napi_value object);
 napi_value JsMuted(napi_env env, napi_callback_info info);
 napi_value JsObjectFit(napi_env env, napi_callback_info info);
 napi_value JsOnComplete(napi_env env, napi_callback_info info);
@@ -34,6 +35,7 @@ napi_value StopPlayback(napi_env env, napi_callback_info info);
 napi_value JsAutoPlayPeriod(napi_env env, napi_callback_info info);
 napi_value JsAutoPlay(napi_env env, napi_callback_info info);
 napi_value JsRepeatPlay(napi_env env, napi_callback_info info);
+napi_value JsEnableAnalyzer(napi_env env, napi_callback_info info);
 napi_value MovingPhotoControllerConstructor(napi_env env, napi_callback_info info);
 } // namespace OHOS::Ace
 #endif // COMPONENT_EXT_MOVING_PHOTO_MOVING_PHOTO_NAPI_H

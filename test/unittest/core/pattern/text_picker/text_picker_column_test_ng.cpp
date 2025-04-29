@@ -86,6 +86,27 @@ const SizeF TEST_TEXT_FRAME_SIZE { 100.0f, 10.0f };
 const SizeF COLUMN_SIZE { 100.0f, 200.0f };
 const std::vector<std::string> DEFAULT_VALUE = { "1", "2", "3" };
 const std::vector<std::string> CUSTOM_VALUE = { "appCustomFont" };
+#ifdef SUPPORT_DIGITAL_CROWN
+const int COLUMN_INDEX[] = {0, 1, 2, 3, 4};
+const int32_t CROWN_SENSITIVITY_ERR = -1;
+const int32_t CROWN_SENSITIVITY_ONE = 1;
+const int32_t CROWN_SENSITIVITY_THR = 3;
+const float OFFSET_FIVE = 5.0f;
+#endif
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return MockThemeDefault::GetPickerTheme();
+    } else if (type == ButtonTheme::TypeId()) {
+        return AceType::MakeRefPtr<ButtonTheme>();
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 
 class TextPickerColumnTestNg : public testing::Test {
@@ -193,16 +214,10 @@ void TextPickerColumnTestNg::SetUp()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     auto fontManager = AceType::MakeRefPtr<MockFontManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else if (type == PickerTheme::TypeId()) {
-            return MockThemeDefault::GetPickerTheme();
-        } else {
-            return nullptr;
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -265,8 +280,8 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternFlushCurrentOptions001, 
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
-    std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("2", content);
+    std::u16string content = textLayoutProperty->GetContent().value();
+    EXPECT_EQ(u"2", content);
 }
 
 /**
@@ -319,8 +334,8 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternInnerHandleScrollUp001, 
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
-    std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("2", content);
+    std::u16string content = textLayoutProperty->GetContent().value();
+    EXPECT_EQ(u"2", content);
 }
 
 /**
@@ -373,8 +388,8 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternInnerHandleScrollDown001
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
-    std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("4", content);
+    std::u16string content = textLayoutProperty->GetContent().value();
+    EXPECT_EQ(u"4", content);
 }
 
 /**
@@ -550,8 +565,8 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternFlushCurrentOptions003, 
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
-    std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("test2", content);
+    std::u16string content = textLayoutProperty->GetContent().value();
+    EXPECT_EQ(u"test2", content);
 }
 
 /**
@@ -727,8 +742,8 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternFlushCurrentOptions008, 
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
-    std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("", content);
+    std::u16string content = textLayoutProperty->GetContent().value();
+    EXPECT_EQ(u"", content);
 }
 
 /**
@@ -1085,8 +1100,8 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternInnerHandleScrollUp003, 
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
-    std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("test3", content);
+    std::u16string content = textLayoutProperty->GetContent().value();
+    EXPECT_EQ(u"test3", content);
 }
 
 /**
@@ -1198,8 +1213,8 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternInnerHandleScrollDown003
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    std::string content = textLayoutProperty->GetContent().value_or("");
-    EXPECT_EQ("test1", content);
+    std::u16string content = textLayoutProperty->GetContent().value_or(u"");
+    EXPECT_EQ(u"test1", content);
     ASSERT_TRUE(textLayoutProperty->HasFontSize());
 }
 
@@ -1402,7 +1417,7 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternInnerHandleScroll005, Te
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
-    EXPECT_EQ("1", textLayoutProperty->GetContent().value());
+    EXPECT_EQ(u"1", textLayoutProperty->GetContent().value());
 }
 
 /**
@@ -1449,8 +1464,8 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternFlushCurrentOptions016, 
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
-    std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("", content);
+    std::u16string content = textLayoutProperty->GetContent().value();
+    EXPECT_EQ(u"", content);
     count = columnPattern->GetOptionCount();
     EXPECT_EQ(ZERO, count);
 }
@@ -1525,7 +1540,7 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest002, TestSize.Level1
 
     std::vector<RangeContent> options { { "icon", "text" } };
     pickerColumnPattern->SetOptions(options);
-    pickerColumnPattern->columnkind_ = 0x00;
+    pickerColumnPattern->columnKind_ = TEXT;
     /**
      * @tc.cases: case3. cover branch KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN.
      */
@@ -1574,7 +1589,7 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest003, TestSize.Level1
     ASSERT_NE(pickerNodeLayout, nullptr);
     pickerNodeLayout->UpdateCanLoop(true);
 
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     columnPattern->InitPanEvent(gestureHub);
     auto panEvent = columnPattern->panEvent_;
@@ -1643,7 +1658,7 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest005, TestSize.Level1
     ASSERT_NE(pickerNodeLayout, nullptr);
     pickerNodeLayout->UpdateCanLoop(true);
 
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     columnPattern->InitPanEvent(gestureHub);
     auto panEvent = columnPattern->panEvent_;
@@ -1771,7 +1786,7 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest008, TestSize.Level1
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
-    textPickerColumnPattern->CalcAlgorithmOffset(DISTANCE);
+    textPickerColumnPattern->CalcAlgorithmOffset(ScrollDirection::UP, DISTANCE);
     EXPECT_EQ(textPickerColumnPattern->algorithmOffset_.size() - BUFFER_NODE_NUMBER, 5);
 }
 
@@ -1871,6 +1886,35 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest012, TestSize.Level1
     for (uint32_t i = 0; i < counts; i++) {
         EXPECT_EQ(textPickerColumnPattern->algorithmOffset_.emplace_back(i), i);
     }
+}
+
+/**
+ * @tc.name: TextPickerColumnPatternTest013
+ * @tc.desc: Test TextPickerColumnPattern ScrollOption and HandleEnterSelectedArea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest013, TestSize.Level1)
+{
+    InitTextPickerColumnTestNg();
+    auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->showOptionCount_ = 4;
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
+    textPickerColumnPattern->SetOptions(range);
+    textPickerColumnPattern->SetCurrentIndex(SELECTED_INDEX_2);
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->ScrollOption(10.0f);
+    EXPECT_EQ(textPickerColumnPattern->GetEnterIndex(), 1);
 }
 
 /**
@@ -1978,4 +2022,341 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternSetCanLoop001, TestSize.
     textPickerColumnPattern_->SetCanLoop(false);
     EXPECT_EQ(textPickerColumnPattern_->overscroller_.loopTossOffset_, 0.0);
 }
+
+#ifdef ARKUI_WEARABLE
+/**
+ * @tc.name: TextPickerColumnPatternTest014
+ * @tc.desc: Test TextPickerColumnPattern GetDigitalCrownSensitivity and SetDigitalCrownSensitivity.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest014, TestSize.Level1)
+{
+    InitTextPickerColumnTestNg();
+    auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    EXPECT_NE(textPickerColumnPattern->GetDigitalCrownSensitivity(), INVALID_CROWNSENSITIVITY);
+    EXPECT_EQ(textPickerColumnPattern->GetDigitalCrownSensitivity(), DEFAULT_CROWNSENSITIVITY);
+    textPickerColumnPattern->SetDigitalCrownSensitivity(2);
+    EXPECT_EQ(textPickerColumnPattern->GetDigitalCrownSensitivity(), 2);
+}
+
+/**
+ * @tc.name: TextPickerColumnPatternTest015
+ * @tc.desc: Test TextPickerColumnPattern UpdateSelectedTextColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest015, TestSize.Level1)
+{
+    InitTextPickerColumnTestNg();
+    auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    auto textPickerPattern = frameNode_->GetPattern<TextPickerPattern>();
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    RefPtr<TextLayoutProperty> textLayoutProperty = columnPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_FALSE(textLayoutProperty);
+    textPickerColumnPattern->UpdateSelectedTextColor(theme);
+    EXPECT_EQ(textPickerColumnPattern->GetEnterIndex(), 0);
+    EXPECT_EQ(textPickerColumnPattern->GetSelected(), 0);
+    EXPECT_EQ(textPickerColumnPattern->selectorTextFocusColor_, Color::WHITE);
+}
+#endif
+
+#ifdef SUPPORT_DIGITAL_CROWN
+/**
+ * @tc.name: TextPickerColumnPatternTest016
+ * @tc.desc: Test TextPickerColumnPattern SetSelectedMarkPaint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest016, TestSize.Level1)
+{
+    InitTextPickerColumnTestNg();
+    auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->showCircleDial_ = true;
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    textPickerColumnPattern->SetSelectedMarkPaint(true);
+    textPickerColumnPattern->SetSelectedMark(true, false);
+    EXPECT_TRUE(textPickerColumnPattern->selectedMarkPaint_);
+}
+
+/**
+ * @tc.name: TextPickerColumnPatternTest017
+ * @tc.desc: Test TextPickerColumnPattern SetSelectedMarkListener.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest017, TestSize.Level1)
+{
+    InitTextPickerColumnTestNg();
+    auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::function<void(int& selectedColumnId)> call =  [this](int& selectedColumnId) {
+        selectedColumnId = 1;
+    };
+
+    textPickerColumnPattern->SetSelectedMarkId(COLUMN_INDEX[0]);
+    textPickerColumnPattern->SetSelectedMarkListener(call);
+    textPickerColumnPattern->SetSelectedMark(true, false);
+    EXPECT_EQ(textPickerColumnPattern->selectedColumnId_, 0);
+
+    textPickerColumnPattern->SetSelectedMarkId(COLUMN_INDEX[1]);
+    textPickerColumnPattern->circleUtils_ = new PickerColumnPatternCircleUtils<TextPickerColumnPattern>();
+    textPickerColumnPattern->SetSelectedMarkListener(call);
+    EXPECT_EQ(textPickerColumnPattern->selectedColumnId_, 1);
+    textPickerColumnPattern->circleUtils_ = nullptr;
+}
+
+/**
+ * @tc.name: TextPickerColumnPatternTest018
+ * @tc.desc: Test TextPickerColumnPattern HandleCrownBeginEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest018, TestSize.Level1)
+{
+    InitTextPickerColumnTestNg();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    TextPickerModelNG::SetDigitalCrownSensitivity(frameNode, CROWN_SENSITIVITY_ONE);
+
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(columnNode)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    columnPattern->OnAttachToFrameNode();
+    CrownEvent crownEvent;
+    crownEvent.action = OHOS::Ace::CrownAction::BEGIN;
+    columnPattern->HandleCrownBeginEvent(crownEvent);
+    EXPECT_TRUE(columnPattern->pressed_);
+    EXPECT_FALSE(columnPattern->isCrownEventEnded_);
+    columnPattern->pressed_ = false;
+    crownEvent.action = OHOS::Ace::CrownAction::UPDATE;
+    columnPattern->HandleCrownMoveEvent(crownEvent);
+    EXPECT_FALSE(columnPattern->animationBreak_);
+    EXPECT_FALSE(columnPattern->isCrownEventEnded_);
+    crownEvent.action = OHOS::Ace::CrownAction::END;
+    columnPattern->HandleCrownEndEvent(crownEvent);
+    EXPECT_FALSE(columnPattern->pressed_);
+    EXPECT_TRUE(columnPattern->isCrownEventEnded_);
+}
+
+/**
+ * @tc.name: TextPickerColumnPatternTest019
+ * @tc.desc: Test TextPickerColumnPattern HandleCrownMoveEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest019, TestSize.Level1)
+{
+    InitTextPickerColumnTestNg();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->showCircleDial_ = true;
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    TextPickerModelNG::SetDigitalCrownSensitivity(frameNode, CROWN_SENSITIVITY_ONE);
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(columnNode)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    columnPattern->OnAttachToFrameNode();
+    auto layout = columnPattern->GetParentLayout();
+    ASSERT_NE(layout, nullptr);
+    layout->UpdateCanLoop(false);
+    AnimationOption option;
+    columnPattern->animation_ =
+        AnimationUtils::StartAnimation(option, []() { std::cout << "start animation now ." << std::endl; });
+    columnPattern->reboundAnimation_ = nullptr;
+
+    CrownEvent crownEvent;
+    crownEvent.action = OHOS::Ace::CrownAction::BEGIN;
+    columnPattern->HandleCrownBeginEvent(crownEvent);
+    EXPECT_TRUE(columnPattern->pressed_);
+    EXPECT_FALSE(columnPattern->isCrownEventEnded_);
+    columnPattern->circleUtils_ = nullptr;
+    crownEvent.action = OHOS::Ace::CrownAction::UPDATE;
+    columnPattern->HandleCrownMoveEvent(crownEvent);
+    EXPECT_FALSE(columnPattern->animationBreak_);
+    EXPECT_FALSE(columnPattern->isCrownEventEnded_);
+    columnPattern->animationCreated_ = true;
+    crownEvent.action = OHOS::Ace::CrownAction::END;
+    columnPattern->HandleCrownEndEvent(crownEvent);
+    EXPECT_FALSE(columnPattern->pressed_);
+    EXPECT_TRUE(columnPattern->isCrownEventEnded_);
+}
+
+/**
+ * @tc.name: TextPickerColumnPatternTest020
+ * @tc.desc: Test TextPickerColumnPattern GetDigitalCrownSensitivity and SetDigitalCrownSensitivity.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest020, TestSize.Level1)
+{
+    TextPickerModelNG::GetInstance()->SetDigitalCrownSensitivity(CROWN_SENSITIVITY_ERR);
+    TextPickerModelNG::SetDigitalCrownSensitivity(nullptr, CROWN_SENSITIVITY_ERR);
+    InitTextPickerColumnTestNg();
+    auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    EXPECT_NE(textPickerColumnPattern->GetDigitalCrownSensitivity(), INVALID_CROWNSENSITIVITY);
+    EXPECT_EQ(textPickerColumnPattern->GetDigitalCrownSensitivity(), DEFAULT_CROWNSENSITIVITY);
+
+    textPickerColumnPattern->SetDigitalCrownSensitivity(BUFFER_NODE_NUMBER);
+    TextPickerModelNG::SetDigitalCrownSensitivity(nullptr, CROWN_SENSITIVITY_ONE);
+    EXPECT_EQ(textPickerColumnPattern->GetDigitalCrownSensitivity(), BUFFER_NODE_NUMBER);
+}
+
+/**
+ * @tc.name: TextPickerColumnPatternTest021
+ * @tc.desc: Test TextPickerColumnPattern GetDigitalCrownSensitivity and SetDigitalCrownSensitivity.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest021, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create textpicker framenode and columnpattern.
+     */
+    TextPickerModelNG::GetInstance()->SetDigitalCrownSensitivity(CROWN_SENSITIVITY_THR);
+    TextPickerModelNG::SetDigitalCrownSensitivity(nullptr, CROWN_SENSITIVITY_THR);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    TextPickerModelNG::SetDigitalCrownSensitivity(frameNode, CROWN_SENSITIVITY_ONE);
+
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(columnNode)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    columnPattern->OnAttachToFrameNode();
+    EXPECT_EQ(columnPattern->GetDigitalCrownSensitivity(), DEFAULT_CROWNSENSITIVITY);
+    TextPickerModelNG::GetInstance()->SetDigitalCrownSensitivity(CROWN_SENSITIVITY_ONE);
+    TextPickerModelNG::SetDigitalCrownSensitivity(frameNode, CROWN_SENSITIVITY_ONE);
+    EXPECT_EQ(columnPattern->crownSensitivity_, CROWN_SENSITIVITY_ONE);
+}
+
+/**
+ * @tc.name: TextPickerColumnPatternTest022
+ * @tc.desc: Test TextPickerColumnPattern GetContentDrawFunction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest022, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create textpicker framenode and columnpattern.
+     */
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(pickerTheme, nullptr);
+    pickerTheme->showCircleDial_ = true;
+    TextPickerModelNG::GetInstance()->Create(pickerTheme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    ASSERT_NE(pickerPaintProperty, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto textPickerPaintMethod =
+        AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
+    ASSERT_NE(textPickerPaintMethod, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, pickerPaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    auto canvasDrawFunction = textPickerPaintMethod->GetContentDrawFunction(paintWrapper);
+    ASSERT_NE(canvasDrawFunction, nullptr);
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    canvasDrawFunction(rsCanvas);
+}
+
+/**
+ * @tc.name: TextPickerColumnPatternTest023
+ * @tc.desc: Test TextPickerColumnPattern SetSelectColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest023, TestSize.Level1)
+{
+    InitTextPickerColumnTestNg();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    TextPickerModelNG::SetDigitalCrownSensitivity(frameNode, CROWN_SENSITIVITY_ONE);
+
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(columnNode)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    columnPattern->OnAttachToFrameNode();
+    columnPattern->SetSelectedMarkPaint(true);
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    ASSERT_TRUE(textLayoutProperty);
+    columnPattern->SetSelectColor(textLayoutProperty, Color::RED, Color::BLUE, OFFSET_FIVE, true);
+    EXPECT_EQ(columnPattern->GetEnterIndex(), 0);
+    EXPECT_EQ(columnPattern->pressColor_, Color::RED);
+
+    auto newColumnPattern = AceType::MakeRefPtr<TextPickerColumnPattern>();
+    ASSERT_NE(newColumnPattern, nullptr);
+    newColumnPattern->UpdateSelectedTextColor(theme);
+    EXPECT_EQ(newColumnPattern->selectorTextFocusColor_, Color::WHITE);
+}
+
+/**
+ * @tc.name: TextPickerColumnPatternTest024
+ * @tc.desc: Test TextPickerColumnPattern SetSelectColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest024, TestSize.Level1)
+{
+    InitTextPickerColumnTestNg();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    TextPickerModelNG::SetDigitalCrownSensitivity(frameNode, CROWN_SENSITIVITY_ONE);
+
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(columnNode)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    columnPattern->OnAttachToFrameNode();
+    columnPattern->SetSelectedMarkPaint(true);
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    ASSERT_TRUE(textLayoutProperty);
+
+    MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
+    textPickerPattern_->SetDefaultFocus();
+    columnPattern->SetSelectedMark(true, true);
+    columnPattern->SetSelectColor(textLayoutProperty, Color::RED, Color::BLUE, OFFSET_FIVE, true);
+    EXPECT_EQ(columnPattern->GetEnterIndex(), 0);
+    EXPECT_EQ(columnPattern->selectorTextFocusColor_, Color::WHITE);
+}
+#endif
 } // namespace OHOS::Ace::NG

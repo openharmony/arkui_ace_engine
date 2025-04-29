@@ -22,23 +22,20 @@
 
 namespace OHOS::Ace {
 std::unique_ptr<ImageAnimatorModel> ImageAnimatorModel::instance_ = nullptr;
-std::mutex ImageAnimatorModel::mutex_;
 ImageAnimatorModel* ImageAnimatorModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, []() {
 #ifdef NG_BUILD
-            instance_.reset(new NG::ImageAnimatorModelNG());
+        instance_.reset(new NG::ImageAnimatorModelNG());
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::ImageAnimatorModelNG());
-            } else {
-                instance_.reset(new Framework::ImageAnimatorModelImpl());
-            }
-#endif
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::ImageAnimatorModelNG());
+        } else {
+            instance_.reset(new Framework::ImageAnimatorModelImpl());
         }
-    }
+#endif
+    });
     return instance_.get();
 }
 
@@ -68,6 +65,7 @@ void JSImageAnimator::JSBind(BindingTarget globalObj)
     JSClass<JSImageAnimator>::StaticMethod("fixedSize", &JSImageAnimator::SetFixedSize, opt);
     JSClass<JSImageAnimator>::StaticMethod("fillMode", &JSImageAnimator::SetFillMode, opt);
     JSClass<JSImageAnimator>::StaticMethod("preDecode", &JSImageAnimator::SetPreDecode, opt);
+    JSClass<JSImageAnimator>::StaticMethod("monitorInvisibleArea", &JSImageAnimator::SetAutoMonitorInvisibleArea, opt);
 
     JSClass<JSImageAnimator>::StaticMethod("onStart", &JSImageAnimator::OnStart, opt);
     JSClass<JSImageAnimator>::StaticMethod("onPause", &JSImageAnimator::OnPause, opt);
@@ -81,6 +79,15 @@ void JSImageAnimator::JSBind(BindingTarget globalObj)
     JSClass<JSImageAnimator>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
 
     JSClass<JSImageAnimator>::InheritAndBind<JSContainerBase>(globalObj);
+}
+
+void JSImageAnimator::SetAutoMonitorInvisibleArea(const JSCallbackInfo& info)
+{
+    bool autoMonitorInvisibleArea = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        autoMonitorInvisibleArea = info[0]->ToBoolean();
+    }
+    ImageAnimatorModel::GetInstance()->SetAutoMonitorInvisibleArea(autoMonitorInvisibleArea);
 }
 
 void JSImageAnimator::SetImages(const JSCallbackInfo& info)

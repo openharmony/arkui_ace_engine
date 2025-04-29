@@ -24,6 +24,7 @@
 #include "native_node.h"
 #include "node_extened.h"
 #include "node_model.h"
+#include "native_dialog.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -562,4 +563,152 @@ HWTEST_F(DialogModelTest, DialogModelTest037, TestSize.Level1)
     nEvent = nullptr;
     ret = OH_ArkUI_DialogDismissEvent_GetDismissReason(nEvent);
     ASSERT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: DialogModelTest038
+ * @tc.desc: Test SetLevelMode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest038, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = SetLevelMode(nativeDialogHandle, ARKUI_LEVEL_MODE_OVERLAY);
+    ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_NO_ERROR);
+    ret = SetLevelMode(nativeDialogHandle, static_cast<ArkUI_LevelMode>(-1));
+    ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest039
+ * @tc.desc: Test SetLevelUniqueId function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest039, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = SetLevelUniqueId(nativeDialogHandle, 0);
+    ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_NO_ERROR);
+    ret = SetLevelUniqueId(nativeDialogHandle, -1);
+    ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest040
+ * @tc.desc: Test SetImmersiveMode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest040, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = SetImmersiveMode(nativeDialogHandle, ARKUI_IMMERSIVE_MODE_DEFAULT);
+    ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_NO_ERROR);
+    ret = SetImmersiveMode(nativeDialogHandle, static_cast<ArkUI_ImmersiveMode>(-1));
+    ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest041
+ * @tc.desc: Test SetLevelOrder function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest041, TestSize.Level1)
+{
+    int32_t ret = SetLevelOrder(nullptr, 0.0f);
+    ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: DialogModelTest042
+ * @tc.desc: Test SetLevelOrder function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest042, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = SetLevelOrder(nativeDialogHandle, 0.0f);
+    ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_NO_ERROR);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest043
+ * @tc.desc: Test SetFocusable function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest043, TestSize.Level1)
+{
+    int32_t ret = SetFocusable(nullptr, false);
+    ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: DialogModelTest044
+ * @tc.desc: Test SetFocusable function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest044, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = SetFocusable(nativeDialogHandle, false);
+    ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_NO_ERROR);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest045
+ * @tc.desc: Test SetBackgroundBlurStyleOptions function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest045, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    ArkUI_NumberValue value[] = { { .i32 = ARKUI_COLOR_MODE_LIGHT }, { .i32 = ARKUI_ADAPTIVE_COLOR_AVERAGE },
+        { .f32 = 1.0f }, { .u32 = 20 }, { .u32 = 20 }, { .i32 = ARKUI_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE },
+        { .u32 = 0xFFFF0000 } };
+    ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+    int32_t ret = SetBackgroundBlurStyleOptions(nativeDialogHandle, &item);
+    ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_NO_ERROR);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest046
+ * @tc.desc: Test SetBackgroundEffect function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest046, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    ArkUI_NumberValue value[] = { { .f32 = 20.0f }, { .f32 = 1.0f }, { .f32 = 1.0f }, { .u32 = 0x66FFFFFF },
+        { .i32 = ARKUI_ADAPTIVE_COLOR_AVERAGE }, { .u32 = 20 }, { .u32 = 20 },
+        { .i32 = ARKUI_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE }, { .u32 = 0xFFFF0000 } };
+    ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
+    int32_t ret = SetBackgroundEffect(nativeDialogHandle, &item);
+    ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_NO_ERROR);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
 }

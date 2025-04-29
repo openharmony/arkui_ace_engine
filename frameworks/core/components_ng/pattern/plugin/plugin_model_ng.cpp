@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/plugin/plugin_model_ng.h"
 
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
 #include "core/components/plugin/plugin_sub_container.h"
 #include "core/components/plugin/resource/plugin_manager_delegate.h"
 #include "core/components_ng/base/frame_node.h"
@@ -25,13 +23,12 @@
 #include "core/components_ng/pattern/plugin/plugin_node.h"
 #include "core/components_ng/pattern/plugin/plugin_pattern.h"
 #include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 void PluginModelNG::Create(const RequestPluginInfo& pluginInfo)
 {
     auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
     int32_t nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::PLUGIN_ETS_TAG, nodeId);
     auto frameNode = PluginNode::GetOrCreatePluginNode(
@@ -44,7 +41,7 @@ void PluginModelNG::SetOnComplete(std::function<void(const std::string&)>&& OnCo
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<PluginEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<PluginEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnComplete(std::move(OnComplete));
 };
@@ -53,7 +50,7 @@ void PluginModelNG::SetOnError(std::function<void(const std::string&)>&& OnError
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<PluginEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<PluginEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnError(std::move(OnError));
 };

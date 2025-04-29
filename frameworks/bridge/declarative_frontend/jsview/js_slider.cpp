@@ -18,7 +18,6 @@
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/slider_model_impl.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_slider_theme.h"
 #include "core/components/slider/render_slider.h"
 #include "core/components/slider/slider_element.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
@@ -80,6 +79,7 @@ void JSSlider::JSBind(BindingTarget globalObj)
     JSClass<JSSlider>::StaticMethod("stepSize", &JSSlider::SetStepSize);
     JSClass<JSSlider>::StaticMethod("sliderInteractionMode", &JSSlider::SetSliderInteractionMode);
     JSClass<JSSlider>::StaticMethod("slideRange", &JSSlider::SetValidSlideRange);
+    JSClass<JSSlider>::StaticMethod("digitalCrownSensitivity", &JSSlider::SetDigitalCrownSensitivity);
     JSClass<JSSlider>::StaticMethod("onChange", &JSSlider::OnChange);
     JSClass<JSSlider>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSSlider>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
@@ -87,6 +87,7 @@ void JSSlider::JSBind(BindingTarget globalObj)
     JSClass<JSSlider>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSSlider>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSSlider>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSSlider>::StaticMethod("enableHapticFeedback", &JSSlider::SetEnableHapticFeedback);
     JSClass<JSSlider>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -130,7 +131,6 @@ void JSSlider::Create(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         SliderModel::GetInstance()->Create(
             static_cast<float>(value), static_cast<float>(step), static_cast<float>(min), static_cast<float>(max));
-        JSSliderTheme::ApplyTheme();
         return;
     }
 
@@ -144,13 +144,16 @@ void JSSlider::Create(const JSCallbackInfo& info)
     auto isReverse = paramObject->GetProperty("reverse");
     JSRef<JSVal> changeEventVal;
 
-    if (!getValue->IsNull() && getValue->IsNumber()) {
-        value = getValue->ToNumber<double>();
-    } else if (!getValue->IsNull() && getValue->IsObject()) {
+    if (!getValue->IsNull() && getValue->IsObject()) {
         JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(getValue);
         changeEventVal = valueObj->GetProperty("changeEvent");
         auto valueProperty = valueObj->GetProperty("value");
         value = valueProperty->ToNumber<double>();
+    } else if (paramObject->HasProperty("$value")) {
+        changeEventVal = paramObject->GetProperty("$value");
+        value = getValue->ToNumber<double>();
+    } else if (!getValue->IsNull() && getValue->IsNumber()) {
+        value = getValue->ToNumber<double>();
     }
 
     if (!getMin->IsNull() && getMin->IsNumber()) {
@@ -211,7 +214,6 @@ void JSSlider::Create(const JSCallbackInfo& info)
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseSliderValueObject(info, changeEventVal);
     }
-    JSSliderTheme::ApplyTheme();
 }
 
 void JSSlider::SetThickness(const JSCallbackInfo& info)
@@ -233,9 +235,8 @@ void JSSlider::SetBlockColor(const JSCallbackInfo& info)
     }
     Color colorVal;
     if (!ParseJsColor(info[0], colorVal)) {
-        auto theme = GetTheme<SliderTheme>();
-        CHECK_NULL_VOID(theme);
-        colorVal = theme->GetBlockColor();
+        SliderModel::GetInstance()->ResetBlockColor();
+        return;
     }
     SliderModel::GetInstance()->SetBlockColor(colorVal);
 }
@@ -250,9 +251,8 @@ void JSSlider::SetTrackColor(const JSCallbackInfo& info)
     if (!ConvertGradientColor(info[0], gradient)) {
         Color colorVal;
         if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal)) {
-            auto theme = GetTheme<SliderTheme>();
-            CHECK_NULL_VOID(theme);
-            colorVal = theme->GetTrackBgColor();
+            SliderModel::GetInstance()->ResetTrackColor();
+            return;
         }
         isResourceColor = true;
         gradient = NG::SliderModelNG::CreateSolidGradient(colorVal);
@@ -299,13 +299,19 @@ void JSSlider::SetSelectedColor(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    Color colorVal;
-    if (!ParseJsColor(info[0], colorVal)) {
-        auto theme = GetTheme<SliderTheme>();
-        CHECK_NULL_VOID(theme);
-        colorVal = theme->GetTrackSelectedColor();
+    NG::Gradient gradient;
+    bool isResourceColor = false;
+    if (!ConvertGradientColor(info[0], gradient)) {
+        Color colorVal;
+        if (!ParseJsColor(info[0], colorVal)) {
+            SliderModel::GetInstance()->ResetSelectColor();
+            return;
+        }
+        isResourceColor = true;
+        gradient = NG::SliderModelNG::CreateSolidGradient(colorVal);
+        SliderModel::GetInstance()->SetSelectColor(colorVal);
     }
-    SliderModel::GetInstance()->SetSelectColor(colorVal);
+    SliderModel::GetInstance()->SetSelectColor(gradient, isResourceColor);
 }
 
 void JSSlider::SetMinLabel(const JSCallbackInfo& info)
@@ -391,8 +397,15 @@ void JSSlider::SetSliderInteractionMode(const JSCallbackInfo& info)
     }
 
     if (!info[0]->IsNull() && info[0]->IsNumber()) {
-        auto mode = static_cast<SliderModel::SliderInteraction>(info[0]->ToNumber<int32_t>());
-        SliderModel::GetInstance()->SetSliderInteractionMode(mode);
+        int32_t num = info[0]->ToNumber<int32_t>();
+        int32_t lowRange = static_cast<int32_t>(SliderModel::SliderInteraction::SLIDE_AND_CLICK);
+        int32_t upRange = static_cast<int32_t>(SliderModel::SliderInteraction::SLIDE_AND_CLICK_UP);
+        if (lowRange <= num && num <= upRange) {
+            auto mode = static_cast<SliderModel::SliderInteraction>(num);
+            SliderModel::GetInstance()->SetSliderInteractionMode(mode);
+        } else {
+            SliderModel::GetInstance()->ResetSliderInteractionMode();
+        }
     } else {
         SliderModel::GetInstance()->ResetSliderInteractionMode();
     }
@@ -592,6 +605,23 @@ void JSSlider::SetStepSize(const JSCallbackInfo& info)
     SliderModel::GetInstance()->SetStepSize(stepSize);
 }
 
+void JSSlider::SetDigitalCrownSensitivity(const JSCallbackInfo& info)
+{
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (info.Length() < 1 || info[0]->IsNull() || !info[0]->IsNumber()) {
+        SliderModel::GetInstance()->ResetDigitalCrownSensitivity();
+        return;
+    }
+
+    auto sensitivity = info[0]->ToNumber<int32_t>();
+    if (sensitivity < 0 || sensitivity > static_cast<int32_t>(CrownSensitivity::HIGH)) {
+        SliderModel::GetInstance()->ResetDigitalCrownSensitivity();
+    } else {
+        SliderModel::GetInstance()->SetDigitalCrownSensitivity(static_cast<CrownSensitivity>(sensitivity));
+    }
+#endif
+}
+
 void JSSlider::OnChange(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
@@ -600,6 +630,15 @@ void JSSlider::OnChange(const JSCallbackInfo& info)
     SliderModel::GetInstance()->SetOnChange(
         JsEventCallback<void(float, int32_t)>(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0])));
     info.ReturnSelf();
+}
+
+void JSSlider::SetEnableHapticFeedback(const JSCallbackInfo& info)
+{
+    bool isEnableHapticFeedback = true;
+    if (info[0]->IsBoolean()) {
+        isEnableHapticFeedback = info[0]->ToBoolean();
+    }
+    SliderModel::GetInstance()->SetEnableHapticFeedback(isEnableHapticFeedback);
 }
 
 void JSSlider::ResetBlockStyle()

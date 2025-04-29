@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,7 +51,7 @@ public:
             return theme;
         }
 
-    private:
+    protected:
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SearchTheme>& theme) const
         {
             if (!theme) {
@@ -70,6 +70,8 @@ public:
             theme->textFieldWidthReserved_ = theme->closeIconHotZoneSize_;
             theme->leftPadding_ = pattern->GetAttr<Dimension>("search_text_field_padding_left", 0.0_vp);
             theme->rightPadding_ = pattern->GetAttr<Dimension>("search_text_field_padding_right", 0.0_vp);
+            theme->rightPaddingWithoutButton_ =
+                pattern->GetAttr<Dimension>("search_text_field_right_padding_without_button", 12.0_vp);
             theme->fontWeight_ = FontWeight(static_cast<int32_t>(pattern->GetAttr<double>("search_font_weight", 0.0)));
             theme->borderRadius_ = Radius(pattern->GetAttr<Dimension>("search_text_field_border_radius", 0.0_vp));
             theme->blockRightShade_ = static_cast<int32_t>(pattern->GetAttr<double>("search_block_right_shade", 0.0));
@@ -82,16 +84,38 @@ public:
             theme->hoverColor_ = pattern->GetAttr<Color>("search_hover_color", Color());
             theme->searchDividerColor_ = pattern->GetAttr<Color>("search_divider_color", Color());
             theme->searchButtonTextColor_ = pattern->GetAttr<Color>("search_button_text_color", Color());
-            theme->searchIconColor_ = pattern->GetAttr<Color>("search_icon_color", Color());
             theme->searchButtonTextPadding_ = pattern->GetAttr<Dimension>("search_button_text_padding", Dimension());
             theme->searchButtonSpace_ = pattern->GetAttr<Dimension>("search_button_space", Dimension());
             theme->dividerSideSpace_ = pattern->GetAttr<Dimension>("search_divider_side_space", Dimension());
+            theme->searchSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.magnifyingglass");
+            theme->cancelSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.xmark");
+            theme->borderColor_ = pattern->GetAttr<Color>("search_border_color", Color());
+            theme->borderWidth_ = pattern->GetAttr<Dimension>("search_border_width", 0.0_vp);
+            theme->focusBgColor_ = pattern->GetAttr<Color>("search_focus_bg_color", Color());
+            theme->needFocusBox_ = static_cast<bool>(pattern->GetAttr<double>("search_need_focus_box", 0.0));
+            theme->cancelButtonStyle_ = static_cast<CancelButtonStyle>(
+                static_cast<int32_t>(pattern->GetAttr<double>("search_cancel_button_style", 2.0f)));
+            theme->searchFocusPadding_ = pattern->GetAttr<Dimension>("search_focus_glow_padding", 0.0_vp);
+            ParsePatternIconTheme(pattern, theme);
+        }
+
+        void ParsePatternIconTheme(const RefPtr<ThemeStyle>& pattern, const RefPtr<SearchTheme>& theme) const
+        {
+            theme->searchIconColor_ = pattern->GetAttr<Color>("search_icon_color", Color());
             theme->iconHeight_ = pattern->GetAttr<Dimension>("search_icon_height", Dimension());
             theme->searchIconLeftSpace_ = pattern->GetAttr<Dimension>("search_icon_left_space", Dimension());
             theme->searchIconRightSpace_ = pattern->GetAttr<Dimension>("search_icon_right_space", Dimension());
             theme->symbolIconColor_ = pattern->GetAttr<Color>("search_symbol_icon_color", Color());
-            theme->searchSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.magnifyingglass");
-            theme->cancelSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.xmark");
+            theme->symbolIconHeight_ = pattern->GetAttr<Dimension>("search_symbol_icon_height", 16.0_fp);
+            theme->focusIconColor_ = pattern->GetAttr<Color>("search_focus_icon_color", Color());
+            theme->buttonFontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_fp);
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+                theme->searchButtonSpace_ = pattern->GetAttr<Dimension>("search_button_space_API16", 4.0_vp);
+                theme->dividerSideSpace_ = pattern->GetAttr<Dimension>("search_button_space_API16", 4.0_vp);
+                theme->searchButtonTextPadding_ = pattern->
+                    GetAttr<Dimension>("search_button_text_padding_API16", 12.0_vp);
+                theme->buttonFontSize_ = pattern->GetAttr<Dimension>("search_font_size_API16", 14.0_fp);
+            }
         }
     };
 
@@ -135,6 +159,11 @@ public:
     const Dimension& GetFontSize() const
     {
         return fontSize_;
+    }
+
+    const Dimension& GetButtonFontSize() const
+    {
+        return buttonFontSize_;
     }
 
     const Dimension& GetIconSize() const
@@ -202,6 +231,7 @@ public:
         return searchButtonSpace_;
     }
 
+
     const Dimension& GetIconHeight() const
     {
         return iconHeight_;
@@ -257,13 +287,58 @@ public:
         return symbolIconColor_;
     }
 
+    const Dimension& GetSymbolIconHeight() const
+    {
+        return symbolIconHeight_;
+    }
+
+    const Dimension& GetRightPaddingWithoutButton() const
+    {
+        return rightPaddingWithoutButton_;
+    }
+
+    const Color& GetBorderColor() const
+    {
+        return borderColor_;
+    }
+
+    const Dimension& GetBorderWidth() const
+    {
+        return borderWidth_;
+    }
+
+    const Color& GetFocusBgColor() const
+    {
+        return focusBgColor_;
+    }
+
+    const Color& GetFocusIconColor() const
+    {
+        return focusIconColor_;
+    }
+
+    bool NeedFocusBox() const
+    {
+        return needFocusBox_;
+    }
+
+    const Dimension& GetSearchFocusPadding() const
+    {
+        return searchFocusPadding_;
+    }
+
 protected:
     SearchTheme() = default;
+    TextStyle textStyle_;
+    Color textColor_;
+    Color placeholderColor_;
+    Color searchIconColor_;
+    Color searchButtonTextColor_;
+    Color symbolIconColor_;
+    Color focusIconColor_;
 
 private:
-    Color placeholderColor_;
     Color focusPlaceholderColor_;
-    Color textColor_;
     Color focusTextColor_;
     Color touchColor_;
     Color hoverColor_;
@@ -286,13 +361,17 @@ private:
     Dimension searchIconLeftSpace_;
     Dimension searchIconRightSpace_;
     Color searchDividerColor_;
-    Color searchButtonTextColor_;
-    Color searchIconColor_;
     CancelButtonStyle cancelButtonStyle_ = CancelButtonStyle::INPUT;
-    TextStyle textStyle_;
     uint32_t searchSymbolId_ = 0;
     uint32_t cancelSymbolId_ = 0;
-    Color symbolIconColor_;
+    Dimension symbolIconHeight_;
+    Dimension rightPaddingWithoutButton_;
+    Color borderColor_;
+    Dimension borderWidth_;
+    Color focusBgColor_;
+    bool needFocusBox_ = false;
+    Dimension searchFocusPadding_;
+    Dimension buttonFontSize_;
 };
 
 } // namespace OHOS::Ace

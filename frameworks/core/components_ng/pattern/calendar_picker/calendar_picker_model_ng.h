@@ -29,11 +29,23 @@ public:
     void SetOnChange(SelectedChangeEvent&& onChange) override;
     void SetChangeEvent(SelectedChangeEvent&& onChange) override;
     void SetPadding(const PaddingProperty& padding) override;
+    void ClearBorderColor() override;
+    void ClearBorderRadius() override;
+    void ClearHeight() override;
+    void ClearBorder() override;
+    void ClearBorderWidth() override;
+    void ClearPadding() override;
+    void SetMarkToday(bool isMarkToday) override;
     static RefPtr<FrameNode> CreateNode(int32_t nodeId, const CalendarSettingData& settingData);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetTextStyle(FrameNode* frameNode, const PickerTextStyle& textStyle);
     static void SetEdgeAlign(FrameNode* frameNode, const CalendarEdgeAlign& alignType, const DimensionOffset& offset);
     static void SetPadding(FrameNode* frameNode, const PaddingProperty& padding);
+    static void ClearPadding(FrameNode* frameNode);
+    static void ClearHeight(FrameNode* frameNode);
+    static void ClearBorderColor(FrameNode* frameNode);
+    static void ClearBorderRadius(FrameNode* frameNode);
+    static void ClearBorderWidth(FrameNode* frameNode);
     static void LayoutPicker(const RefPtr<CalendarPickerPattern>& pickerPattern, RefPtr<FrameNode>& pickerNode,
         const CalendarSettingData& settingData, const RefPtr<CalendarTheme>& theme);
     static RefPtr<FrameNode> CreateButtonChild(
@@ -46,6 +58,10 @@ public:
     static RefPtr<FrameNode> CreateDateTextNode(const std::string& textContent);
     static void SetHintRadiusWithNode(FrameNode* frameNode, Dimension& radius);
     static void SetSelectDateWithNode(FrameNode* frameNode, uint32_t year, uint32_t month, uint32_t day);
+    static PickerDate GetStartDateWithNode(FrameNode* frameNode);
+    static PickerDate GetEndDateWithNode(FrameNode* frameNode);
+    static void SetStartDateWithNode(FrameNode* frameNode, uint32_t year, uint32_t month, uint32_t day);
+    static void SetEndDateWithNode(FrameNode* frameNode, uint32_t year, uint32_t month, uint32_t day);
     static Dimension GetHintRadius(FrameNode* frameNode);
     static PickerDate GetSelectDateWithNode(FrameNode* frameNode);
     static RefPtr<FrameNode> GetYearNode(FrameNode* calendarPickerNode);
@@ -56,6 +72,15 @@ public:
     static DimensionOffset GetEdgeOffset(FrameNode* frameNode);
     static void SetOnChangeWithNode(FrameNode* frameNode, SelectedChangeEvent&& onChange);
     static std::map<std::size_t, std::string> GetDateNodeOrder(const CalendarSettingData& settingData);
+    static void SetMarkToday(FrameNode* frameNode, bool isMarkToday);
+    static bool GetMarkToday(FrameNode* frameNode);
+    static void SetDisabledDateRange(
+        FrameNode* frameNode, const std::vector<std::pair<PickerDate, PickerDate>>& disabledDateRange);
+    static std::string GetDisabledDateRange(FrameNode* frameNode);
+
+private:
+    static void UpdateSelectedDateContent(FrameNode* frameNode, const PickerDate& selectedDate);
+    static std::string AddLeadingZeroToYear(uint32_t year);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CALENDAR_PICKER_CALENDAR_PICKER_MODEL_NG_H

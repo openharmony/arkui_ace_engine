@@ -38,6 +38,7 @@ public:
     void Pop() override;
     void SetTabBar(const std::optional<std::string> &text, const std::optional<std::string> &icon,
         const std::optional<TabBarSymbol> &tabBarSymbol, TabBarBuilderFunc &&builder, bool useContentOnly) override;
+    void SetTabBarWithContent(const RefPtr<NG::UINode>& content) override;
     void SetTabBarStyle(TabBarStyle tabBarStyle) override;
     void SetIndicator(const IndicatorStyle& indicator) override;
     void SetBoard(const BoardStyle& board) override;
@@ -63,6 +64,8 @@ public:
     static void SetCustomTabBar(FrameNode* node, FrameNode* tabBar);
     static void UpdateDefaultSymbol(RefPtr<TabTheme>& tabTheme, RefPtr<TextLayoutProperty> symbolProperty);
     static void UpdateSymbolEffect(RefPtr<TextLayoutProperty> symbolProperty, bool isActive);
+    static void SetOnWillShow(FrameNode* node,  std::function<void()>&& onWillShow);
+    static void SetOnWillHide(FrameNode* node, std::function<void()>&& onWillHide);
 
 private:
     static void UpdateLabelStyle(const LabelStyle& labelStyle, RefPtr<TextLayoutProperty> textLayoutProperty);

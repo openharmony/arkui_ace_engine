@@ -25,31 +25,50 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 
 
+def build_target_name(xml_file_path):
+    last_backslash_index = xml_file_path.rfind('/')
+    last_dot_index = xml_file_path.rfind('.')
+    if last_backslash_index != -1 and last_dot_index != -1 and last_backslash_index < last_dot_index:
+        result = xml_file_path[last_backslash_index + 1:last_dot_index]
+        return result
+    else:
+        return "Build Target Not Find"
+
 def parse_xml(xml_file_path):
     """
     Parse the XML file of the execution output of the use case
     """
+    test_module_name = build_target_name(xml_file_path)
     tree = ET.parse(xml_file_path)
     root = tree.getroot()
     tests = root.attrib.get("tests")
     failures = root.attrib.get("failures")
     failed_info = {
-        "test_suite_name": [],
+        "test_module_name": test_module_name,
         "total_count": tests,
         "failed_count": failures,
         "failed_testcase_name": []
     }
+    passed_info = {
+        "test_module_name": test_module_name,
+        "total_count": tests,
+        "passed_count": 0,
+        "passed_testcase_name": []
+    }
+    passed_count = 0
     for testsuite in root.findall(".//testsuite"):
         testsuite_name = testsuite.attrib.get("name")
         testsuite_failures = testsuite.attrib.get("failures")
-        if int(testsuite_failures):
-            failed_info["test_suite_name"].append(testsuite_name)
         for testcase in testsuite.findall(".//testcase"):
             testcase_name = testcase.attrib.get("name")
             failure = testcase.find("failure")
             if failure is not None:
-                failed_info["failed_testcase_name"].append(testcase_name)
-    return failed_info
+                failed_info["failed_testcase_name"].append("{}#{}".format(testsuite_name, testcase_name))
+            else:
+                passed_info["passed_testcase_name"].append("{}#{}".format(testsuite_name, testcase_name))
+                passed_count = passed_count+1
+    passed_info["passed_count"] = str(passed_count)
+    return failed_info, passed_info
 
 
 def run_command(test_binary_path: str, alter_cmds: list = None):
@@ -81,7 +100,7 @@ def run_single_test(tests_path, test_suite_name):
         print("TestSuite {} did not compile successfully.".format(test_suite_name))
 
 
-def run_tests_parallel(test_directory):
+def run_tests_parallel(test_directory, process_number: int):
     """
     Run all gtest test binaries in parallel.
     """
@@ -93,7 +112,7 @@ def run_tests_parallel(test_directory):
             if ext == "":
                 test_binaries.append(test_suite_path)
     start = time.time()
-    with multiprocessing.Pool(processes=64) as pool:
+    with multiprocessing.Pool(processes=process_number) as pool:
         pool.map(run_command, iter(test_binaries))
     end = time.time()
     test_result = {
@@ -101,24 +120,30 @@ def run_tests_parallel(test_directory):
         "execute_time": 0,
         "total_execute_tests": 0,
         "failed_tests_count": 0,
+        "passed_tests_count": 0,
         "unavailable": [],
-        "failed": []
+        "failed": [],
+        "passed": []
     }
     total_tests_count = 0
     failed_tests_count = 0
+    passed_tests_count = 0
     for test_binary in test_binaries:
         xml_file_path = "{}.xml".format(test_binary)
         if os.path.exists(xml_file_path):
-            failed_info = parse_xml(xml_file_path)
+            failed_info, passed_info= parse_xml(xml_file_path)
             total_tests_count = total_tests_count + int(failed_info.get('total_count', '0'))
             failed_tests_count = failed_tests_count + int(failed_info.get('failed_count', '0'))
+            passed_tests_count = passed_tests_count + int(passed_info.get('passed_count', '0'))
             if int(failed_info.get('failed_count', '0')):
                 test_result['failed'].append(failed_info)
+            test_result['passed'].append(passed_info)
         else:
             test_result["unavailable"].append(test_binary.split('/')[-1])
     test_result["execute_time"] = "{} seconds".format(round(end - start, 2))
     test_result['total_execute_tests'] = total_tests_count
     test_result['failed_tests_count'] = failed_tests_count
+    test_result['passed_tests_count'] = passed_tests_count
     json_file_path = os.path.join(test_directory, "test_result.json")
     flags = os.O_CREAT | os.O_WRONLY | os.O_TRUNC
     mode = stat.S_IRUSR | stat.S_IWUSR
@@ -135,7 +160,14 @@ def get_tests_out_path():
     code_path = os.getcwd()
     for _ in range(6):
         code_path = os.path.dirname(code_path)
-    code_path = os.path.join(code_path, "out/rk3568/clang_x64/tests/unittest/ace_engine")
+    json_config_path =  os.path.join(code_path,"out/ohos_config.json")
+    if not os.path.exists(json_config_path):
+        print("{} not exist, please build linux_unittest first.".format(json_config_path))
+        code_path = os.path.join(code_path, "out/rk3568/clang_x64/tests/unittest/ace_engine")
+    else:
+        with open(json_config_path, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+            code_path = os.path.join(data["out_path"], "clang_x64/tests/unittest/ace_engine")
     return code_path
 
 
@@ -145,14 +177,16 @@ def main():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--target", nargs='+', type=str, default=None)
+    parser.add_argument("-p", "--process", nargs='+', type=int, default=64)
     tests_out_path = get_tests_out_path()
     args = parser.parse_args()
     targets = args.target
+    process = args.process
     if targets is not None:
         for target in targets:
             run_single_test(tests_out_path, target)
     else:
-        run_tests_parallel(tests_out_path)
+        run_tests_parallel(tests_out_path, process)
 
 
 if __name__ == "__main__":

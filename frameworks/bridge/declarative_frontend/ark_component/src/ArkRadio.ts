@@ -23,12 +23,27 @@ class ArkRadioComponent extends ArkComponent implements RadioAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  allowChildCount(): number {
+    return 0;
+  }
+  initialize(value: Object[]): this {
+    if (!value.length) {
+      return this;
+    }
+    if (!isUndefined(value[0]) && !isNull(value[0]) && isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, RadioOptionsModifier.identity, RadioOptionsModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, RadioOptionsModifier.identity, RadioOptionsModifier, undefined);
+    }
+    return this;
+  }
   checked(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, RadioCheckedModifier.identity, RadioCheckedModifier, value);
     return this;
   }
   onChange(callback: (isChecked: boolean) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, RadioOnChangeModifier.identity, RadioOnChangeModifier, callback);
+    return this;
   }
   radioStyle(value: RadioStyle): this {
     modifierWithKey(this._modifiersWithKeys, RadioStyleModifier.identity, RadioStyleModifier, value);
@@ -87,6 +102,26 @@ class ArkRadioComponent extends ArkComponent implements RadioAttribute {
       this.radioNode.update(radioConfiguration);
     }
     return this.radioNode.getFrameNode();
+  }
+}
+
+class RadioOptionsModifier extends ModifierWithKey<RadioOptions> {
+  constructor(value: RadioOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('radioOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().radio.setRadioOptions(node, undefined, undefined, undefined);
+    } else {
+      getUINativeModule().radio.setRadioOptions(node, this.value.value, this.value.group, this.value.indicatorType);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
+      !isBaseOrResourceEqual(this.stageValue.group, this.value.group) ||
+      !isBaseOrResourceEqual(this.stageValue.indicatorType, this.value.indicatorType);
   }
 }
 
@@ -316,6 +351,20 @@ class RadioContentModifier extends ModifierWithKey<ContentModifier<RadioConfigur
     radioComponent.setContentModifier(this.value); 
   }
 }
+class RadioOnChangeModifier extends ModifierWithKey<(isChecked: boolean) => void>{
+  constructor(value:(isChecked: boolean) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('radioOnChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().radio.resetRadioOnChange(node);
+    } else {
+      getUINativeModule().radio.setRadioOnChange(node, this.value);
+    }
+  }
+}
+
 // @ts-ignore
 globalThis.Radio.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {

@@ -14,24 +14,28 @@
  */
 
 #include "core/components_ng/pattern/web/web_paint_method.h"
-#include "surface_utils.h"
-#include "render_service_client/core/ui/rs_surface_node.h"
+#include "core/components_ng/pattern/web/web_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_surface.h"
 namespace OHOS::Ace::NG {
 CanvasDrawFunction WebPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
 {
-    const auto& geometryNode = paintWrapper->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, nullptr);
-    auto frameRect = geometryNode->GetFrameRect();
-    int32_t componentWidth = frameRect.Width();
-    int32_t componentHeight = frameRect.Height();
-    TAG_LOGD(AceLogTag::ACE_WEB, "web pattern geometryNode width: %{public}d, height: %{public}d.",
-             componentWidth, componentHeight);
+    CHECK_NULL_RETURN(paintWrapper, nullptr);
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    auto host = renderContext->GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto pattern = DynamicCast<WebPattern>(host->GetPattern());
+    CHECK_NULL_RETURN(pattern, nullptr);
+
+    int32_t componentWidth = pattern->GetDrawSize().Width();
+    int32_t componentHeight = pattern->GetDrawSize().Height();
     return [weak = WeakClaim(this), width = componentWidth, height = componentHeight](RSCanvas& canvas) {
         auto painter = weak.Upgrade();
         CHECK_NULL_VOID(painter);
         auto surface = DynamicCast<NG::RosenRenderSurface>(painter->renderSuface_);
         if (surface) {
+            ACE_SCOPED_TRACE("WebPaintMethod::GetForegroundDrawFunction Web DrawBuffer (width %d, height %d)",
+                width, height);
             surface->DrawBuffer(width, height);
         }
     };

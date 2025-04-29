@@ -47,20 +47,41 @@ void JsClickFunction::Execute(const ClickInfo& info)
     obj->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
     obj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
     obj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
+    obj->SetProperty<double>("deviceId", static_cast<int32_t>(info.GetDeviceId()));
     obj->SetPropertyObject("getModifierKeyState",
         JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
-    obj->SetProperty<double>("deviceId", static_cast<int32_t>(info.GetDeviceId()));
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
     obj->SetProperty<double>("pressure", info.GetForce());
     obj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
     obj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
+    obj->SetProperty<double>("rollAngle", info.GetRollAngle().value_or(0.0f));
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     obj->SetProperty<double>("axisVertical", 0.0f);
     obj->SetProperty<double>("axisHorizontal", 0.0f);
+    obj->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
 
     JSRef<JSVal> param = obj;
     JsFunction::ExecuteJS(1, &param);
+}
+
+static int32_t GetOperatingHand(GestureEvent& info)
+{
+    int32_t left = 0;
+    int32_t right = 0;
+    for (const FingerInfo& fingerInfo : info.GetFingerList()) {
+        if (fingerInfo.operatingHand_ == HAND_LEFT) {
+            ++left;
+        } else if (fingerInfo.operatingHand_ == HAND_RIGHT) {
+            ++right;
+        }
+    }
+    if (left > right) {
+        return HAND_LEFT;
+    } else if (right > left) {
+        return HAND_RIGHT;
+    }
+    return HAND_NONE;
 }
 
 void JsClickFunction::Execute(GestureEvent& info)
@@ -71,6 +92,7 @@ void JsClickFunction::Execute(GestureEvent& info)
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
+    obj->SetProperty<int32_t>("hand", GetOperatingHand(info));
     obj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
     obj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
     obj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
@@ -88,9 +110,11 @@ void JsClickFunction::Execute(GestureEvent& info)
     obj->SetProperty<double>("deviceId", static_cast<int32_t>(info.GetDeviceId()));
     obj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
     obj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
+    obj->SetProperty<double>("rollAngle", info.GetRollAngle().value_or(0.0f));
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     obj->SetProperty<double>("axisVertical", 0.0f);
     obj->SetProperty<double>("axisHorizontal", 0.0f);
+    obj->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
     obj->Wrap<GestureEvent>(&info);
@@ -126,11 +150,23 @@ void JsClickFunction::Execute(MouseInfo& info)
     obj->SetProperty<double>("pressure", info.GetForce());
     obj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
     obj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
+    obj->SetProperty<double>("rollAngle", info.GetRollAngle().value_or(0.0f));
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     obj->SetProperty<double>("axisVertical", 0.0f);
     obj->SetProperty<double>("axisHorizontal", 0.0f);
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
+    obj->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
+    obj->SetProperty<double>("rawDeltaX", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaX()));
+    obj->SetProperty<double>("rawDeltaY", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaY()));
+    JSRef<JSArray> pressedButtonArr = JSRef<JSArray>::New();
+    auto pressedButtons = info.GetPressedButtons();
+    uint32_t idx = 0;
+    for (const auto& button : pressedButtons) {
+        auto jsButton = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(button)));
+        pressedButtonArr->SetValueAt(idx++, jsButton);
+    }
+    obj->SetPropertyObject("pressedButtons", pressedButtonArr);
     obj->Wrap<MouseInfo>(&info);
 
     JSRef<JSVal> param = JSRef<JSObject>::Cast(obj);
@@ -172,6 +208,7 @@ void JsWeakClickFunction::Execute(const ClickInfo& info)
     obj->SetProperty<double>("pressure", info.GetForce());
     obj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
     obj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
+    obj->SetProperty<double>("rollAngle", info.GetRollAngle().value_or(0.0f));
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     obj->SetProperty<double>("axisVertical", 0.0f);
     obj->SetProperty<double>("axisHorizontal", 0.0f);
@@ -205,6 +242,7 @@ void JsWeakClickFunction::Execute(GestureEvent& info)
     obj->SetProperty<double>("deviceId", static_cast<int32_t>(info.GetDeviceId()));
     obj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
     obj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
+    obj->SetProperty<double>("rollAngle", info.GetRollAngle().value_or(0.0f));
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     obj->SetProperty<double>("axisVertical", 0.0f);
     obj->SetProperty<double>("axisHorizontal", 0.0f);
@@ -217,14 +255,14 @@ void JsWeakClickFunction::Execute(GestureEvent& info)
 
 void JsWeakClickFunction::Execute(MouseInfo& info)
 {
-    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
-    objectTemplate->SetInternalFieldCount(1);
-    JSRef<JSObject> obj = objectTemplate->NewInstance();
+    JSRef<JSObjTemplate> objTemp = JSRef<JSObjTemplate>::New();
+    objTemp->SetInternalFieldCount(1);
+    JSRef<JSObject> obj = objTemp->NewInstance();
+    Offset localOffset = info.GetLocalLocation();
+    Offset globalOffset = info.GetGlobalLocation();
+    Offset screenOffset = info.GetScreenLocation();
     obj->SetProperty<int32_t>("button", static_cast<int32_t>(info.GetButton()));
     obj->SetProperty<int32_t>("action", static_cast<int32_t>(info.GetAction()));
-    Offset globalOffset = info.GetGlobalLocation();
-    Offset localOffset = info.GetLocalLocation();
-    Offset screenOffset = info.GetScreenLocation();
     obj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
     obj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
     obj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
@@ -243,11 +281,23 @@ void JsWeakClickFunction::Execute(MouseInfo& info)
     obj->SetProperty<double>("pressure", info.GetForce());
     obj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
     obj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
+    obj->SetProperty<double>("rollAngle", info.GetRollAngle().value_or(0.0f));
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     obj->SetProperty<double>("axisVertical", 0.0f);
     obj->SetProperty<double>("axisHorizontal", 0.0f);
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
+    obj->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
+    obj->SetProperty<double>("rawDeltaX", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaX()));
+    obj->SetProperty<double>("rawDeltaY", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaY()));
+    JSRef<JSArray> pressedButtonArr = JSRef<JSArray>::New();
+    auto pressedButtons = info.GetPressedButtons();
+    uint32_t idx = 0;
+    for (const auto& button : pressedButtons) {
+        auto jsButton = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(button)));
+        pressedButtonArr->SetValueAt(idx++, jsButton);
+    }
+    obj->SetPropertyObject("pressedButtons", pressedButtonArr);
     obj->Wrap<MouseInfo>(&info);
 
     JSRef<JSVal> param = JSRef<JSObject>::Cast(obj);

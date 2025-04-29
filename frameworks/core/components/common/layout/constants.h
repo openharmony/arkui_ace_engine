@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,8 +17,13 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_CONSTANTS_H
 
 #include <cstdint>
+#include <string>
+
+#include "ui/properties/flex.h"
+
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
+#include "ui/view/components/tabs/tabs_constants.h"
 
 namespace OHOS::Ace {
 
@@ -40,6 +45,11 @@ enum class ButtonType {
     ROUNDED_RECTANGLE,
 };
 
+enum class ToolBarItemPlacement {
+    TOP_BAR_LEADING,
+    TOP_BAR_TRAILING
+};
+
 enum class RectWidthStyle {
     TIGHT,
     MAX,
@@ -54,6 +64,150 @@ enum class RectHeightStyle {
     STRUT,
 };
 
+// Type of hover mode area.
+enum class HoverModeAreaType {
+    TOP_SCREEN = 0,
+    BOTTOM_SCREEN = 1,
+};
+
+enum class AccessibilityRoleType {
+    ACTION_SHEET = 0,
+    ALERT_DIALOG = 1,
+    INDEXER_COMPONENT = 2,
+    BADGE_COMPONENT = 3,
+    BLANK = 4,
+    BUTTON = 5,
+    BACK_BUTTON = 6,
+    SHEET_DRAG_BAR = 7,
+    CALENDAR_PICKER = 8,
+    CALENDAR = 9,
+    CANVAS = 10,
+    CANVAS_GRADIENT = 11,
+    CANVAS_PATTERN = 12,
+    CHECKBOX = 13,
+    CHECKBOX_GROUP = 14,
+    CIRCLE = 15,
+    COLUMN_SPLIT = 16,
+    COLUMN = 17,
+    CANVAS_RENDERING_CONTEXT_2D = 18,
+    CHART = 19,
+    COUNTER = 20,
+    CONTAINER_MODAL = 21,
+    DATA_PANEL = 22,
+    DATE_PICKER = 23,
+    DIALOG = 24,
+    DIVIDER = 25,
+    DRAG_BAR = 26,
+    EFFECT_COMPONENT = 27,
+    ELLIPSE = 28,
+    FLEX = 29,
+    FLOW_ITEM = 30,
+    FORM_COMPONENT = 31,
+    FORM_LINK = 32,
+    GAUGE = 33,
+    GRID = 34,
+    GRID_COL = 35,
+    GRID_CONTAINER = 36,
+    GRID_ITEM = 37,
+    GRID_ROW = 38,
+    HYPERLINK = 39,
+    IMAGE = 40,
+    IMAGE_ANIMATOR = 41,
+    ROLE_IMAGE_BITMAP = 42,
+    IMAGE_DATA = 43,
+    IMAGE_SPAN = 44,
+    LABEL = 45,
+    LINE = 46,
+    LIST = 47,
+    LIST_ITEM = 48,
+    LIST_ITEM_GROUP = 49,
+    LOADING_PROGRESS = 50,
+    MARQUEE = 51,
+    MATRIX2D = 52,
+    MENU = 53,
+    MENU_ITEM = 54,
+    MENU_ITEM_GROUP = 55,
+    NAV_DESTINATION = 56,
+    NAV_ROUTER = 57,
+    NAVIGATION = 58,
+    NAVIGATION_BAR = 59,
+    NAVIGATION_MENU = 60,
+    NAVIGATOR = 61,
+    OFFSCREEN_CANVAS = 62,
+    OFFSCREEN_CANVAS_RENDERING_CONTEXT2D = 63,
+    OPTION = 64,
+    PANEL = 65,
+    PAPER_PAGE = 66,
+    PATH = 67,
+    PATH2D = 68,
+    PATTERN_LOCK = 69,
+    PICKER = 70,
+    PICKER_VIEW = 71,
+    PLUGIN_COMPONENT = 72,
+    POLYGON = 73,
+    POLYLINE = 74,
+    POPUP = 75,
+    PROGRESS = 76,
+    QRCODE = 77,
+    RADIO = 78,
+    RATING = 79,
+    RECT = 80,
+    REFRESH = 81,
+    RELATIVE_CONTAINER = 82,
+    REMOTE_WINDOW = 83,
+    RICH_EDITOR = 84,
+    RICH_TEXT = 85,
+    ROLE_PAGER = 86,
+    ROW = 87,
+    ROW_SPLIT = 88,
+    SCROLL = 89,
+    SCROLL_BAR = 90,
+    SEARCH = 91,
+    SEARCH_FIELD = 92,
+    SELECT = 93,
+    SHAPE = 94,
+    SIDEBAR_CONTAINER = 95,
+    SLIDER = 96,
+    SPAN = 97,
+    STACK = 98,
+    STEPPER = 99,
+    STEPPER_ITEM = 100,
+    SWIPER = 101,
+    SWIPER_INDICATOR = 102,
+    SWITCH = 103,
+    SYMBOL_GLYPH = 104,
+    TAB_CONTENT = 105,
+    TAB_BAR = 106,
+    TABS = 107,
+    TEXT = 108,
+    TEXT_CLOCK = 109,
+    TEXT_ENTRY = 110,
+    TEXT_INPUT = 111,
+    TEXT_PICKER = 112,
+    TEXT_TIMER = 113,
+    TEXT_AREA = 114,
+    TEXT_FIELD = 115,
+    TIME_PICKER = 116,
+    TITLE_BAR = 117,
+    TOGGLER = 118,
+    UI_EXTENSION_COMPONENT = 119,
+    VIDEO = 120,
+    WATER_FLOW = 121,
+    WEB = 122,
+    XCOMPONENT = 123,
+    ROLE_NONE = 124,
+};
+
+enum class AccessibilitySamePageMode {
+    SEMI_SILENT = 0,
+    FULL_SILENT = 1,
+};
+
+enum class FocusDrawLevel {
+    SELF = 0,
+    TOP = 1,
+};
+
 enum class ButtonStyleMode { NORMAL, EMPHASIZE, TEXT };
 
 enum class ControlSize { SMALL, NORMAL };
@@ -66,37 +220,6 @@ enum class FlexDirection {
     COLUMN,
     ROW_REVERSE,
     COLUMN_REVERSE,
-};
-
-enum class FlexAlign {
-    AUTO,
-
-    // align to the start of the axis, can be both used in MainAxisAlign and CrossAxisAlign.
-    FLEX_START,
-
-    // align to the center of the axis, can be both used in MainAxisAlign and CrossAxisAlign.
-    CENTER,
-
-    // align to the end of the axis, can be both used in MainAxisAlign and CrossAxisAlign.
-    FLEX_END,
-
-    // stretch the cross size, only used in CrossAxisAlign.
-    STRETCH,
-
-    // adjust the cross position according to the textBaseline, only used in CrossAxisAlign.
-    BASELINE,
-
-    // align the children on both ends, only used in MainAxisAlign.
-    SPACE_BETWEEN,
-
-    // align the child with equivalent space, only used in MainAxisAlign.
-    SPACE_AROUND,
-
-    // align the child with space evenly, only used in MainAxisAlign.
-    SPACE_EVENLY,
-
-    // User-defined space, only used in MainAxisAlign.
-    SPACE_CUSTOMIZATION,
 };
 
 enum class MainAxisSize {
@@ -227,6 +350,17 @@ inline std::string ToString(const TextAlign& textAlign)
 }
 } // namespace StringUtils
 
+enum class TextMarqueeState {
+    START = 0,
+    BOUNCE,
+    FINISH,
+};
+
+enum class MarqueeStartPolicy {
+    DEFAULT = 0,
+    ON_FOCUS,
+};
+
 enum class TextDataDetectType {
     PHONE_NUMBER = 0,
     URL,
@@ -303,6 +437,21 @@ enum class TextDecoration {
     INHERIT,
 };
 
+namespace StringUtils {
+inline std::string ToString(const TextDecoration& textDecoration)
+{
+    static const LinearEnumMapNode<TextDecoration, std::string> table[] = {
+        { TextDecoration::NONE, "NONE" },
+        { TextDecoration::UNDERLINE, "UNDERLINE" },
+        { TextDecoration::OVERLINE, "OVERLINE" },
+        { TextDecoration::LINE_THROUGH, "LINE_THROUGH" },
+        { TextDecoration::INHERIT, "INHERIT" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), textDecoration);
+    return iter != -1 ? table[iter].value : "";
+}
+} // namespace StringUtils
+
 enum class TextDecorationStyle {
     SOLID,
     DOUBLE,
@@ -322,6 +471,8 @@ enum class TextHeightAdaptivePolicy {
 enum class MarqueeDirection {
     LEFT,
     RIGHT,
+    DEFAULT,
+    DEFAULT_REVERSE,
 };
 
 enum class ImageRepeat {
@@ -349,7 +500,41 @@ enum class ImageFit {
     BOTTOM,
     BOTTOM_END,
     COVER_TOP_LEFT,
+    MATRIX,
 };
+
+enum class KeyboardAppearance {
+    NONE_IMMERSIVE = 0,
+    IMMERSIVE = 1,
+    LIGHT_IMMERSIVE = 2,
+    DARK_IMMERSIVE = 3
+};
+
+namespace StringUtils {
+inline std::string ToString(const ImageFit& imageFit)
+{
+    static const LinearEnumMapNode<ImageFit, std::string> table[] = {
+        { ImageFit::FILL, "FILL" },
+        { ImageFit::CONTAIN, "CONTAIN" },
+        { ImageFit::COVER, "COVER" },
+        { ImageFit::FITWIDTH, "FITWIDTH" },
+        { ImageFit::FITHEIGHT, "FITHEIGHT" },
+        { ImageFit::NONE, "NONE" },
+        { ImageFit::SCALE_DOWN, "SCALE_DOWN" },
+        { ImageFit::TOP_LEFT, "TOP_LEFT" },
+        { ImageFit::TOP, "TOP" },
+        { ImageFit::TOP_END, "TOP_END" },
+        { ImageFit::START, "START" },
+        { ImageFit::CENTER, "CENTER" },
+        { ImageFit::END, "END" },
+        { ImageFit::BOTTOM_START, "BOTTOM_START" },
+        { ImageFit::BOTTOM, "BOTTOM" },
+        { ImageFit::BOTTOM_END, "BOTTOM_END" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), imageFit);
+    return iter != -1 ? table[iter].value : "";
+}
+} // namespace StringUtils
 
 enum class DynamicRangeMode {
     HIGH = 0,
@@ -362,6 +547,14 @@ enum class AIImageQuality {
     LOW,
     NORMAL,
     HIGH,
+};
+
+enum class ImageRotateOrientation {
+    AUTO = 0,
+    UP = 1,
+    RIGHT = 2,
+    DOWN = 3,
+    LEFT = 4,
 };
 
 enum class ImageRenderMode {
@@ -380,6 +573,12 @@ enum class EdgeEffect {
     SPRING = 0,
     FADE,
     NONE,
+};
+
+enum class EffectEdge {
+    START = 1,
+    END = 2,
+    ALL = 3,
 };
 
 enum class BorderStyle {
@@ -405,10 +604,7 @@ enum class BorderImageDirection {
     END,
 };
 
-enum class TimePickerFormat {
-    HOUR_MINUTE,
-    HOUR_MINUTE_SECOND
-};
+enum class TimePickerFormat { HOUR_MINUTE, HOUR_MINUTE_SECOND };
 
 enum class SrcType {
     UNSUPPORTED = -1,
@@ -458,20 +654,35 @@ enum class KeyDirection {
 };
 
 enum class PixelRoundPolicy {
+    ALL_FORCE_ROUND = 0,
     FORCE_CEIL_START = 1,
     FORCE_FLOOR_START = 1 << 1,
-    FORCE_CEIL_TOP = 1 << 2,
-    FORCE_FLOOR_TOP = 1 << 3,
-    FORCE_CEIL_END = 1 << 4,
-    FORCE_FLOOR_END = 1 << 5,
-    FORCE_CEIL_BOTTOM = 1 << 6,
-    FORCE_FLOOR_BOTTOM = 1 << 7,
+    NO_FORCE_ROUND_START = 1 << 2,
+    FORCE_CEIL_TOP = 1 << 3,
+    FORCE_FLOOR_TOP = 1 << 4,
+    NO_FORCE_ROUND_TOP = 1 << 5,
+    FORCE_CEIL_END = 1 << 6,
+    FORCE_FLOOR_END = 1 << 7,
+    NO_FORCE_ROUND_END = 1 << 8,
+    FORCE_CEIL_BOTTOM = 1 << 9,
+    FORCE_FLOOR_BOTTOM = 1 << 10,
+    NO_FORCE_ROUND_BOTTOM = 1 << 11,
 };
 
 enum class PixelRoundCalcPolicy {
     NO_FORCE_ROUND = 0,
     FORCE_CEIL = 1,
     FORCE_FLOOR = 2,
+};
+
+enum class PixelRoundMode {
+    PIXEL_ROUND_ON_LAYOUT_FINISH = 0,
+    PIXEL_ROUND_AFTER_MEASURE = 1,
+};
+
+enum class LayoutCalPolicy {
+    NO_MATCH = 0,
+    MATCH_PARENT = 1,
 };
 
 const ImageRepeat IMAGE_REPEATS[] = {
@@ -580,16 +791,12 @@ enum class RefreshType {
     PULL_DOWN,
 };
 
-enum class TabBarMode {
-    FIXED,
-    SCROLLABLE,
-    FIXED_START,
-};
-
 enum class TabAnimateMode {
     CONTENT_FIRST = 0,
     ACTION_FIRST,
     NO_ANIMATION,
+    CONTENT_FIRST_WITH_JUMP,
+    ACTION_FIRST_WITH_JUMP,
     MAX_VALUE,
 };
 
@@ -617,6 +824,10 @@ enum class SwiperDynamicSyncSceneType {
     ANIMATE,
 };
 
+enum class MarqueeDynamicSyncSceneType {
+    ANIMATE = 1,
+};
+
 namespace StringUtils {
 inline std::string ToString(const VerticalAlign& verticalAlign)
 {
@@ -631,11 +842,6 @@ inline std::string ToString(const VerticalAlign& verticalAlign)
     return iter != -1 ? table[iter].value : "";
 }
 } // namespace StringUtils
-
-enum class BarPosition {
-    START,
-    END,
-};
 
 enum class CalendarType {
     NORMAL = 0,
@@ -743,9 +949,13 @@ enum class XComponentType {
     COMPONENT,
     TEXTURE,
     NODE,
-#ifdef PLATFORM_VIEW_SUPPORTED
-    PLATFORM_VIEW = 999,
-#endif
+};
+
+enum class XComponentNodeType {
+    UNKNOWN = -1,
+    TYPE_NODE = 0,
+    DECLARATIVE_NODE,
+    CNODE,
 };
 
 enum class RenderMode { ASYNC_RENDER = 0, SYNC_RENDER };
@@ -843,7 +1053,10 @@ enum class RenderFit : int32_t {
 
 enum class KeyBoardAvoidMode : int32_t {
     OFFSET = 0,
-    RESIZE,
+    RESIZE = 1,
+    OFFSET_WITH_CARET = 2,
+    RESIZE_WITH_CARET = 3,
+    NONE = 4,
 };
 
 enum class SwipeActionState : uint32_t {
@@ -868,7 +1081,20 @@ enum class Orientation : uint32_t {
     AUTO_ROTATION_PORTRAIT_RESTRICTED = 9,
     AUTO_ROTATION_LANDSCAPE_RESTRICTED = 10,
     LOCKED = 11,
-    END = LOCKED,
+    FOLLOW_RECENT = 12,
+    AUTO_ROTATION_UNSPECIFIED = 13,
+    USER_ROTATION_PORTRAIT = 14,
+    USER_ROTATION_LANDSCAPE = 15,
+    USER_ROTATION_PORTRAIT_INVERTED = 16,
+    USER_ROTATION_LANDSCAPE_INVERTED = 17,
+    FOLLOW_DESKTOP = 18,
+    END = FOLLOW_DESKTOP,
+};
+
+enum class SystemBarType : uint32_t {
+    STATUS = 1,
+    NAVIGATION = 2,
+    NAVIGATION_INDICATOR = 4,
 };
 
 enum class NodeRenderType : uint32_t {
@@ -892,6 +1118,18 @@ enum class SafeAreaSyncType : uint32_t {
     SYNC_TYPE_KEYBOARD,
     SYNC_TYPE_AVOID_AREA,
     SYNC_TYPE_WINDOW_IGNORE
+};
+
+enum class SwiperAnimationMode {
+    NO_ANIMATION = 0,
+    DEFAULT_ANIMATION,
+    FAST_ANIMATION,
+    MAX_VALUE,
+};
+
+enum class DividerMode {
+    FLOATING_ABOVE_MENU = 0,
+    EMBEDDED_IN_MENU = 1,
 };
 } // namespace OHOS::Ace
 

@@ -28,13 +28,17 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT TextModelNG : public TextModel {
 public:
+    void Create(const std::u16string& content) override;
     void Create(const std::string& content) override;
     void Create(const RefPtr<SpanStringBase>& spanString) override;
     void SetFont(const Font& value) override;
     void SetFontSize(const Dimension& value) override;
     void SetTextColor(const Color& value) override;
+    void ResetTextColor() override;
     void SetTextSelection(int32_t startIndex, int32_t endIndex) override;
     void SetTextShadow(const std::vector<Shadow>& value) override;
+    void SetTextCaretColor(const Color& value) override;
+    void SetSelectedBackgroundColor(const Color& value) override;
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
     void SetVariableFontWeight(int32_t value) override;
@@ -63,30 +67,28 @@ public:
     void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) override;
     void SetTextDetectEnable(bool value) override;
     void SetTextDetectConfig(const TextDetectConfig& textDetectConfig) override;
-    void SetOnClick(std::function<void(BaseEventInfo* info)>&& click) override;
+    void SetOnClick(std::function<void(BaseEventInfo* info)>&& click, double distanceThreshold) override;
     void ClearOnClick() override;
     void SetRemoteMessage(std::function<void()>&& event) override;
     void SetCopyOption(CopyOptions copyOption) override;
-    void SetOnCopy(std::function<void(const std::string&)>&& func) override;
+    void SetOnCopy(std::function<void(const std::u16string&)>&& func) override;
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
-    void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
-    void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
-    void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
-    void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
-    void SetDraggable(bool draggable) override;
     void BindSelectionMenu(TextSpanType& spanType, TextResponseType& responseType, std::function<void()>& buildFunc,
         SelectMenuParam& menuParam) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     RefPtr<TextControllerBase> GetTextController() override;
     void SetClipEdge(bool clip) override;
     void SetFontFeature(const FONT_FEATURES_LIST& value) override;
+    void SetMarqueeOptions(const TextMarqueeOptions& options) override;
+    void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) override;
     void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
     void SetResponseRegion(bool isUserSetResponseRegion) override;
     void SetHalfLeading(bool halfLeading) override;
+    void SetEnableHapticFeedback(bool state) override;
 
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& content);
-    static void InitText(FrameNode* frameNode, std::string& value);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::u16string& content);
+    static void InitText(FrameNode* frameNode, std::u16string& value);
     static void InitSpanStringController(FrameNode* frameNode, const RefPtr<SpanStringBase>& spanBase);
     static RefPtr<TextControllerBase> InitTextController(FrameNode* frameNode);
     static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);
@@ -97,6 +99,7 @@ public:
     static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);
     static void SetTextAlign(FrameNode* frameNode, Ace::TextAlign value);
     static void SetTextColor(FrameNode* frameNode, const Color& value);
+    static void ResetTextColor(FrameNode* frameNode);
     static void SetFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
     static void SetLineSpacing(FrameNode* frameNode, const Dimension& value);
@@ -107,7 +110,6 @@ public:
     static void SetTextCase(FrameNode* frameNode, TextCase value);
     static void SetMaxLines(FrameNode* frameNode, uint32_t value);
     static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);
-    static void SetDraggable(FrameNode* frameNode, bool draggable);
     static void SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions copyOption);
@@ -122,21 +124,25 @@ public:
     static void SetEllipsisMode(FrameNode* frameNode, EllipsisMode value);
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
+    static void SetMarqueeOptions(FrameNode* frameNode, const TextMarqueeOptions& options);
+    static void SetOnMarqueeStateChange(FrameNode* frameNode, std::function<void(int32_t)>&& func);
     static void SetTextDetectConfig(FrameNode* frameNode, const std::string& value);
     static void SetOnClick(FrameNode* frameNode, GestureEventFunc&& click);
     static void ClearOnClick(FrameNode* frameNode);
     static void SetResponseRegion(FrameNode* frameNode, std::vector<DimensionRect> regions);
     static void ClearResponseRegion(FrameNode* frameNode);
     static void SetOnDetectResultUpdate(FrameNode* frameNode, std::function<void(const std::string&)>&& onResult);
+    static void SetCaretColor(FrameNode* frameNode, const Color& value);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
     static void SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_StyledString* value);
     static std::vector<std::string> GetFontFamily(FrameNode* frameNode);
     static CopyOptions GetCopyOption(FrameNode* frameNode);
+    static TextMarqueeOptions GetMarqueeOptions(FrameNode* frameNode);
     static TextHeightAdaptivePolicy GetHeightAdaptivePolicy(FrameNode* frameNode);
     static Dimension GetAdaptMinFontSize(FrameNode* frameNode);
     static Dimension GetAdaptMaxFontSize(FrameNode* frameNode);
     static Font GetFont(FrameNode* frameNode);
-    static std::string GetContent(FrameNode* frameNode);
+    static std::u16string GetContent(FrameNode* frameNode);
     static float GetLineHeight(FrameNode* frameNode);
     static float GetLineSpacing(FrameNode* frameNode);
     static TextDecoration GetDecoration(FrameNode* frameNode);
@@ -152,7 +158,7 @@ public:
     static Dimension GetFontSize(FrameNode* frameNode);
     static Ace::FontWeight GetFontWeight(FrameNode* frameNode);
     static Ace::FontStyle GetItalicFontStyle(FrameNode* frameNode);
-    static Color GetDefaultColor();
+    static Color GetDefaultColor(int32_t themeScopeId);
     static Color GetFontColor(FrameNode* frameNode);
     static Dimension GetTextBaselineOffset(FrameNode* frameNode);
     static std::vector<Shadow> GetTextShadow(FrameNode* frameNode);
@@ -162,18 +168,22 @@ public:
     static std::string GetTextDetectConfig(FrameNode* frameNode);
     static FONT_FEATURES_LIST GetFontFeature(FrameNode* frameNode);
     static TextSelectableMode GetTextSelectableMode(FrameNode* frameNode);
+    static Color GetCaretColor(FrameNode* frameNode);
+    static void ResetCaretColor(FrameNode* frameNode);
     static Color GetSelectedBackgroundColor(FrameNode* frameNode);
     static void ResetSelectedBackgroundColor(FrameNode* frameNode);
     static LineBreakStrategy GetLineBreakStrategy(FrameNode* frameNode);
     static void SetTextSelection(FrameNode* frameNode, int32_t startIndex, int32_t endIndex);
     static void SetTextSelectableMode(FrameNode* frameNode, TextSelectableMode value);
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
-    static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
+    static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
     static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);
-    static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-        const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    static void OnCreateMenuCallbackUpdate(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback);
+    static void OnMenuItemClickCallbackUpdate(
+        FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void SetHalfLeading(FrameNode* frameNode, bool halfLeading);
     static bool GetHalfLeading(FrameNode* frameNode);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
 };
 } // namespace OHOS::Ace::NG
 

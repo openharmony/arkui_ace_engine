@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@ void SearchBases::SetUpTestSuite()
     searchTheme->height_ = 60.0_px;
     searchTheme->searchButtonTextColor_ = Color::RED;
     searchTheme->placeholderColor_ = Color::RED;
+    searchTheme->symbolIconHeight_ = 16.0_fp;
     textFieldTheme->bgColor_ = Color::RED;
     auto iconTheme = AceType::MakeRefPtr<IconTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([=](ThemeType type) -> RefPtr<Theme> {
@@ -38,10 +39,19 @@ void SearchBases::SetUpTestSuite()
         }
         return textFieldTheme;
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([=](ThemeType type, int id) -> RefPtr<Theme> {
+        if (type == SearchTheme::TypeId()) {
+            return searchTheme;
+        }
+        if (type == IconTheme::TypeId()) {
+            return iconTheme;
+        }
+        return textFieldTheme;
+    });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     SearchModelNG searchModelInstance;
-    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
 }
 
 void SearchBases::TearDownTestSuite()

@@ -30,11 +30,6 @@ public:
     virtual void SetBlankMin(const Dimension& blankMin) = 0;
     virtual void SetHeight(const Dimension& height) = 0;
     virtual void SetColor(const Color& color) = 0;
-
-private:
-    static std::unique_ptr<BlankModel> instance_;
-    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BLANK_BLANK_MODEL_H

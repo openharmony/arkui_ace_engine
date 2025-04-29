@@ -31,6 +31,11 @@ public:
     MOCK_CONST_METHOD0(GetWidth, int32_t());
     MOCK_CONST_METHOD0(GetHeight, int32_t());
 
+    bool IsHdrPixelMap() override
+    {
+        return true;
+    }
+
     void SetRedrawCallback(std::function<void()>&& callback)  override
     {
         redrawCallback_ = callback;
@@ -41,8 +46,20 @@ public:
         onFinishCallback_ = callback;
     }
 
+    RefPtr<PixelMap> GetPixelMap() const override
+    {
+        void* voidPtr = static_cast<void*>(new char[0]);
+        RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+        if (!needPixelMap) {
+            return nullptr;
+        }
+        return pixelMap;
+    }
+
     std::function<void()> redrawCallback_ = nullptr;
     std::function<void()> onFinishCallback_ = nullptr;
+
+    bool needPixelMap = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_MOCK_CANVAS_IMAGE__H

@@ -15,9 +15,11 @@
 #include "core/interfaces/native/node/node_text_modifier.h"
 
 #include "base/utils/utils.h"
+#include "base/utils/utf_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/font/constants_converter.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
@@ -46,6 +48,7 @@ constexpr CopyOptions DEFAULT_COPY_OPTION = CopyOptions::None;
 constexpr Dimension DEFAULT_BASELINE_OFFSET = 0.0_fp;
 constexpr Dimension DEFAULT_FONT_SIZE = 16.0_fp;
 constexpr FontWeight DEFAULT_FONT_WEIGHT = FontWeight::NORMAL;
+constexpr int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const std::string DEFAULT_FAMILY = "HarmonyOS Sans";
 const std::string EMPTY_STRING = "";
@@ -57,6 +60,7 @@ const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeigh
 const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
 const std::vector<TextSelectableMode> TEXT_SELECTABLE_MODE = { TextSelectableMode::SELECTABLE_UNFOCUSABLE,
     TextSelectableMode::SELECTABLE_FOCUSABLE, TextSelectableMode::UNSELECTABLE };
+constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE = true;
 constexpr bool DEFAULT_ENABLE_TEXT_DETECTOR = false;
 const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
 constexpr int NUM_0 = 0;
@@ -81,12 +85,11 @@ FontWeight ConvertStrToFontWeight(const char* weight, FontWeight defaultFontWeig
 namespace {
 
 std::string g_strValue;
-
 void SetTextContent(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::string content(value);
+    std::u16string content = UtfUtils::Str8DebugToStr16(std::string(value));
     TextModelNG::InitText(frameNode, content);
 }
 
@@ -94,7 +97,7 @@ const char* GetTextContent(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    g_strValue = TextModelNG::GetContent(frameNode);
+    g_strValue = UtfUtils::Str16DebugToStr8(TextModelNG::GetContent(frameNode));
     return g_strValue.c_str();
 }
 
@@ -105,11 +108,31 @@ void SetFontWeightStr(ArkUINodeHandle node, ArkUI_CharPtr weight)
     TextModelNG::SetFontWeight(frameNode, ConvertStrToFontWeight(weight));
 }
 
+void SetFontWeightWithOption(ArkUINodeHandle node, const struct ArkUIFontWeightWithOptionsStruct* weightInfo)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetFontWeight(frameNode, ConvertStrToFontWeight(weightInfo->weight));
+    TextModelNG::SetVariableFontWeight(frameNode, weightInfo->variableFontWeight);
+    TextModelNG::SetEnableVariableFontWeight(frameNode, weightInfo->enableVariableFontWeight);
+}
+
 void SetFontWeight(ArkUINodeHandle node, ArkUI_Int32 weight)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetFontWeight(frameNode, static_cast<FontWeight>(weight));
+    TextModelNG::SetVariableFontWeight(frameNode, DEFAULT_VARIABLE_FONT_WEIGHT);
+    TextModelNG::SetEnableVariableFontWeight(frameNode, false);
+}
+
+void SetImmutableFontWeight(ArkUINodeHandle node, ArkUI_Int32 weight)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetFontWeight(frameNode, static_cast<FontWeight>(weight));
+    TextModelNG::SetVariableFontWeight(frameNode, Constants::GetVariableFontWeight(static_cast<FontWeight>(weight)));
+    TextModelNG::SetEnableVariableFontWeight(frameNode, true);
 }
 
 void SetOnClick(ArkUINodeHandle node, void* callback)
@@ -119,8 +142,10 @@ void SetOnClick(ArkUINodeHandle node, void* callback)
     GestureEventFunc* click = nullptr;
     if (callback) {
         click = reinterpret_cast<GestureEventFunc*>(callback);
+        TextModelNG::SetOnClick(frameNode, std::move(*click));
+    } else {
+        TextModelNG::SetOnClick(frameNode, nullptr);
     }
-    TextModelNG::SetOnClick(frameNode, std::move(*click));
 }
 
 void ResetOnClick(ArkUINodeHandle node)
@@ -162,6 +187,8 @@ void ResetFontWeight(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetFontWeight(frameNode, Ace::FontWeight::NORMAL);
+    TextModelNG::SetVariableFontWeight(frameNode, DEFAULT_VARIABLE_FONT_WEIGHT);
+    TextModelNG::SetEnableVariableFontWeight(frameNode, false);
 }
 
 void SetFontStyle(ArkUINodeHandle node, ArkUI_Uint32 fontStyle)
@@ -217,11 +244,7 @@ void ResetFontColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Color textColor;
-    auto theme = GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    textColor = theme->GetTextStyle().GetTextColor();
-    TextModelNG::SetTextColor(frameNode, textColor);
+    TextModelNG::ResetTextColor(frameNode);
 }
 
 uint32_t GetFontColor(ArkUINodeHandle node)
@@ -409,14 +432,14 @@ void SetTextDraggable(ArkUINodeHandle node, ArkUI_Uint32 draggable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetDraggable(frameNode, static_cast<bool>(draggable));
+    ViewAbstract::SetDraggable(frameNode, static_cast<bool>(draggable));
 }
 
 void ResetTextDraggable(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetDraggable(frameNode, DEFAULT_TEXT_DRAGGABLE);
+    ViewAbstract::SetDraggable(frameNode, DEFAULT_TEXT_DRAGGABLE);
 }
 
 void SetTextPrivacySensitve(ArkUINodeHandle node, ArkUI_Uint32 sensitive)
@@ -578,6 +601,7 @@ void SetTextHeightAdaptivePolicy(ArkUINodeHandle node, ArkUI_Int32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    value = std::clamp(value, 0, static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size()));
     TextModelNG::SetHeightAdaptivePolicy(frameNode, HEIGHT_ADAPTIVE_POLICY[value]);
 }
 
@@ -652,7 +676,7 @@ void ResetTextLetterSpacing(ArkUINodeHandle node)
     TextModelNG::SetLetterSpacing(frameNode, letterSpacing);
 }
 
-void SetTextFont(ArkUINodeHandle node, const struct ArkUIFontStruct* fontInfo)
+void SetTextFont(ArkUINodeHandle node, const struct ArkUIFontWithOptionsStruct* fontInfo)
 {
     CHECK_NULL_VOID(fontInfo);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -663,6 +687,9 @@ void SetTextFont(ArkUINodeHandle node, const struct ArkUIFontStruct* fontInfo)
     font.fontWeight = static_cast<FontWeight>(fontInfo->fontWeight);
     std::vector<std::string> families;
     if (fontInfo->fontFamilies && fontInfo->familyLength > 0) {
+        if (fontInfo->familyLength > DEFAULT_MAX_FONT_FAMILY_LENGTH) {
+            return;
+        }
         families.resize(fontInfo->familyLength);
         for (uint32_t i = 0; i < fontInfo->familyLength; i++) {
             families.at(i) = std::string(*(fontInfo->fontFamilies + i));
@@ -670,6 +697,8 @@ void SetTextFont(ArkUINodeHandle node, const struct ArkUIFontStruct* fontInfo)
     }
     font.fontFamilies = families;
     TextModelNG::SetFont(frameNode, font);
+    TextModelNG::SetVariableFontWeight(frameNode, fontInfo->variableFontWeight);
+    TextModelNG::SetEnableVariableFontWeight(frameNode, fontInfo->enableVariableFontWeight);
 }
 
 void ResetTextFont(ArkUINodeHandle node)
@@ -684,6 +713,8 @@ void ResetTextFont(ArkUINodeHandle node)
     families.emplace_back(DEFAULT_FAMILY);
     font.fontFamilies = families;
     TextModelNG::SetFont(frameNode, font);
+    TextModelNG::SetVariableFontWeight(frameNode, DEFAULT_VARIABLE_FONT_WEIGHT);
+    TextModelNG::SetEnableVariableFontWeight(frameNode, false);
 }
 
 void SetWordBreak(ArkUINodeHandle node, ArkUI_Uint32 wordBreak)
@@ -940,6 +971,32 @@ void ResetTextLineSpacing(ArkUINodeHandle node)
     TextModelNG::SetLineSpacing(frameNode, DEFAULT_LINE_SPACING);
 }
 
+void SetTextCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetCaretColor(frameNode, Color(color));
+}
+
+ArkUI_Uint32 GetTextCaretColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, Color::BLACK.GetValue());
+    return TextModelNG::GetCaretColor(frameNode).GetValue();
+}
+
+void ResetTextCaretColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetThemeManager()->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    auto caretColor = static_cast<int32_t>(theme->GetCaretColor().GetValue());
+    TextModelNG::SetCaretColor(frameNode, Color(caretColor));
+}
+
 void SetTextSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1063,7 +1120,7 @@ void SetTextOnCopy(ArkUINodeHandle node, void* callback)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (callback) {
-        auto onCopy = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        auto onCopy = reinterpret_cast<std::function<void(const std::u16string&)>*>(callback);
         TextModelNG::SetOnCopy(frameNode, std::move(*onCopy));
     } else {
         TextModelNG::SetOnCopy(frameNode, nullptr);
@@ -1100,15 +1157,19 @@ void SetTextSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallbac
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NG::OnCreateMenuCallback* onCreateMenu = nullptr;
-    NG::OnMenuItemClickCallback* onMenuItemClick = nullptr;
     if (onCreateMenuCallback) {
-        onCreateMenu = reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback);
+        NG::OnCreateMenuCallback onCreateMenu = *(reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback));
+        TextModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(onCreateMenu));
+    } else {
+        TextModelNG::OnCreateMenuCallbackUpdate(frameNode, nullptr);
     }
     if (onMenuItemClickCallback) {
-        onMenuItemClick = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
+        NG::OnMenuItemClickCallback onMenuItemClick =
+            *(reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback));
+        TextModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
+    } else {
+        TextModelNG::OnMenuItemClickCallbackUpdate(frameNode, nullptr);
     }
-    TextModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
 }
 
 void ResetTextSelectionMenuOptions(ArkUINodeHandle node)
@@ -1117,7 +1178,8 @@ void ResetTextSelectionMenuOptions(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
-    TextModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    TextModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(onCreateMenuCallback));
+    TextModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
 }
 
 void SetTextHalfLeading(ArkUINodeHandle node, ArkUI_Bool value)
@@ -1140,65 +1202,333 @@ ArkUI_Int32 GetTextHalfLeading(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, false);
     return static_cast<ArkUI_Int32>(TextModelNG::GetHalfLeading(frameNode));
 }
+
+void SetTextEnableHapticFeedback(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetEnableHapticFeedback(frameNode, static_cast<bool>(value));
+}
+
+void ResetTextEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetEnableHapticFeedback(frameNode, DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE);
+}
+
+void SetMarqueeOptions(ArkUINodeHandle node, struct ArkUITextMarqueeOptions* value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    TextMarqueeOptions marqueeOptions;
+    marqueeOptions.UpdateTextMarqueeStart(value->start);
+    marqueeOptions.UpdateTextMarqueeStep(value->step);
+    marqueeOptions.UpdateTextMarqueeLoop(value->loop);
+    marqueeOptions.UpdateTextMarqueeDirection(value->fromStart ? MarqueeDirection::LEFT : MarqueeDirection::RIGHT);
+    marqueeOptions.UpdateTextMarqueeDelay(value->delay);
+    marqueeOptions.UpdateTextMarqueeFadeout(value->fadeout);
+    marqueeOptions.UpdateTextMarqueeStartPolicy(static_cast<MarqueeStartPolicy>(value->marqueeStartPolicy));
+
+    TextModelNG::SetMarqueeOptions(frameNode, marqueeOptions);
+}
+
+void ResetMarqueeOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextMarqueeOptions marqueeOptions;
+    TextModelNG::SetMarqueeOptions(frameNode, marqueeOptions);
+}
+
+void SetOnMarqueeStateChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(int32_t)>*>(callback);
+        TextModelNG::SetOnMarqueeStateChange(frameNode, std::move(*onChange));
+    } else {
+        TextModelNG::SetOnMarqueeStateChange(frameNode, nullptr);
+    }
+}
+
+void ResetOnMarqueeStateChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetOnMarqueeStateChange(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
 const ArkUITextModifier* GetTextModifier()
 {
-    static const ArkUITextModifier modifier = { SetTextContent, SetFontWeight, ResetFontWeight, SetFontStyle,
-        ResetFontStyle, SetTextAlign, ResetTextAlign, SetFontColor, ResetFontColor, SetTextForegroundColor,
-        ResetTextForegroundColor, SetFontSize, ResetFontSize, SetTextLineHeight, ResetTextLineHeight,
-        SetTextTextOverflow, ResetTextTextOverflow, SetTextDecoration, ResetTextDecoration, SetTextTextCase,
-        ResetTextTextCase, SetTextMaxLines, ResetTextMaxLines, SetTextMinFontSize, ResetTextMinFontSize,
-        SetTextDraggable, ResetTextDraggable, SetTextPrivacySensitve, ResetTextPrivacySensitve, SetTextMaxFontSize,
-        ResetTextMaxFontSize, SetTextFontFamily, ResetTextFontFamily, SetTextCopyOption, ResetTextCopyOption,
-        SetTextTextShadow, ResetTextTextShadow, SetTextHeightAdaptivePolicy, ResetTextHeightAdaptivePolicy,
-        SetTextTextIndent, ResetTextTextIndent, SetTextBaselineOffset, ResetTextBaselineOffset, SetTextLetterSpacing,
-        ResetTextLetterSpacing, SetTextFont, ResetTextFont, SetFontWeightStr, SetWordBreak, ResetWordBreak,
-        GetFontFamily, GetCopyOption, GetHeightAdaptivePolicy, GetTextMinFontSize, GetTextMaxFontSize, GetFont,
-        GetFontSize, GetFontWeight, GetItalicFontStyle, SetEllipsisMode, ResetEllipsisMode, SetTextDetectEnable,
-        ResetTextDetectEnable, GetTextContent, GetTextLineHeight, GetTextDecoration, GetTextTextCase,
-        GetTextLetterSpacing, GetTextMaxLines, GetTextAlign, GetTextTextOverflow, GetTextTextIndent, GetFontColor,
-        GetTextBaselineOffset, GetTextShadowCount, GetTextShadow, GetTextWordBreak, GetTextEllipsisMode,
-        SetTextFontFeature, ResetTextFontFeature, SetTextLineSpacing, GetTextLineSpacing, ResetTextLineSpacing,
-        GetTextFontFeature, GetTextDetectEnable, SetTextDataDetectorConfig, GetTextDataDetectorConfig,
-        ResetTextDataDetectorConfig, SetLineBreakStrategy, ResetLineBreakStrategy, GetTextLineBreakStrategy,
-        SetTextSelectedBackgroundColor, GetTextSelectedBackgroundColor, ResetTextSelectedBackgroundColor,
-        SetTextContentWithStyledString, ResetTextContentWithStyledString, SetTextSelection, ResetTextSelection,
-        SetTextSelectableMode, ResetTextSelectableMode, SetTextDataDetectorConfigWithEvent,
-        ResetTextDataDetectorConfigWithEvent, SetTextOnCopy, ResetTextOnCopy, SetTextOnTextSelectionChange,
-        ResetTextOnTextSelectionChange, SetTextMinFontScale, ResetTextMinFontScale, SetTextMaxFontScale,
-        ResetTextMaxFontScale, SetTextSelectionMenuOptions, ResetTextSelectionMenuOptions, SetTextHalfLeading,
-        ResetTextHalfLeading, GetTextHalfLeading, SetOnClick, ResetOnClick, SetResponseRegion, ResetResponseRegion };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUITextModifier modifier = {
+        .setContent = SetTextContent,
+        .setFontWeight = SetFontWeight,
+        .resetFontWeight = ResetFontWeight,
+        .setFontStyle = SetFontStyle,
+        .resetFontStyle = ResetFontStyle,
+        .setTextAlign = SetTextAlign,
+        .resetTextAlign = ResetTextAlign,
+        .setFontColor = SetFontColor,
+        .resetFontColor = ResetFontColor,
+        .setTextForegroundColor = SetTextForegroundColor,
+        .resetTextForegroundColor = ResetTextForegroundColor,
+        .setFontSize = SetFontSize,
+        .resetFontSize = ResetFontSize,
+        .setTextLineHeight = SetTextLineHeight,
+        .resetTextLineHeight = ResetTextLineHeight,
+        .setTextOverflow = SetTextTextOverflow,
+        .resetTextOverflow = ResetTextTextOverflow,
+        .setTextDecoration = SetTextDecoration,
+        .resetTextDecoration = ResetTextDecoration,
+        .setTextCase = SetTextTextCase,
+        .resetTextCase = ResetTextTextCase,
+        .setTextMaxLines = SetTextMaxLines,
+        .resetTextMaxLines = ResetTextMaxLines,
+        .setTextMinFontSize = SetTextMinFontSize,
+        .resetTextMinFontSize = ResetTextMinFontSize,
+        .setTextDraggable = SetTextDraggable,
+        .resetTextDraggable = ResetTextDraggable,
+        .setTextPrivacySensitive = SetTextPrivacySensitve,
+        .resetTextPrivacySensitive = ResetTextPrivacySensitve,
+        .setTextMaxFontSize = SetTextMaxFontSize,
+        .resetTextMaxFontSize = ResetTextMaxFontSize,
+        .setTextFontFamily = SetTextFontFamily,
+        .resetTextFontFamily = ResetTextFontFamily,
+        .setTextCopyOption = SetTextCopyOption,
+        .resetTextCopyOption = ResetTextCopyOption,
+        .setTextShadow = SetTextTextShadow,
+        .resetTextShadow = ResetTextTextShadow,
+        .setTextHeightAdaptivePolicy = SetTextHeightAdaptivePolicy,
+        .resetTextHeightAdaptivePolicy = ResetTextHeightAdaptivePolicy,
+        .setTextIndent = SetTextTextIndent,
+        .resetTextIndent = ResetTextTextIndent,
+        .setTextBaselineOffset = SetTextBaselineOffset,
+        .resetTextBaselineOffset = ResetTextBaselineOffset,
+        .setTextLetterSpacing = SetTextLetterSpacing,
+        .resetTextLetterSpacing = ResetTextLetterSpacing,
+        .setTextFont = SetTextFont,
+        .resetTextFont = ResetTextFont,
+        .setFontWeightStr = SetFontWeightStr,
+        .setFontWeightWithOption = SetFontWeightWithOption,
+        .setWordBreak = SetWordBreak,
+        .resetWordBreak = ResetWordBreak,
+        .getFontFamily = GetFontFamily,
+        .getCopyOption = GetCopyOption,
+        .getHeightAdaptivePolicy = GetHeightAdaptivePolicy,
+        .getTextMinFontSize = GetTextMinFontSize,
+        .getTextMaxFontSize = GetTextMaxFontSize,
+        .getFont = GetFont,
+        .getFontSize = GetFontSize,
+        .getFontWeight = GetFontWeight,
+        .getItalicFontStyle = GetItalicFontStyle,
+        .setEllipsisMode = SetEllipsisMode,
+        .resetEllipsisMode = ResetEllipsisMode,
+        .setEnableDataDetector = SetTextDetectEnable,
+        .resetEnableDataDetector = ResetTextDetectEnable,
+        .getTextContent = GetTextContent,
+        .getTextLineHeight = GetTextLineHeight,
+        .getTextDecoration = GetTextDecoration,
+        .getTextTextCase = GetTextTextCase,
+        .getTextLetterSpacing = GetTextLetterSpacing,
+        .getTextMaxLines = GetTextMaxLines,
+        .getTextAlign = GetTextAlign,
+        .getTextTextOverflow = GetTextTextOverflow,
+        .getTextTextIndent = GetTextTextIndent,
+        .getFontColor = GetFontColor,
+        .getTextBaselineOffset = GetTextBaselineOffset,
+        .getTextShadowsCount = GetTextShadowCount,
+        .getTextShadows = GetTextShadow,
+        .getTextWordBreak = GetTextWordBreak,
+        .getTextEllipsisMode = GetTextEllipsisMode,
+        .setTextFontFeature = SetTextFontFeature,
+        .resetTextFontFeature = ResetTextFontFeature,
+        .setTextLineSpacing = SetTextLineSpacing,
+        .getTextLineSpacing = GetTextLineSpacing,
+        .resetTextLineSpacing = ResetTextLineSpacing,
+        .getTextFontFeature = GetTextFontFeature,
+        .getEnableDataDetector = GetTextDetectEnable,
+        .setTextDataDetectorConfig = SetTextDataDetectorConfig,
+        .getTextDataDetectorConfig = GetTextDataDetectorConfig,
+        .resetTextDataDetectorConfig = ResetTextDataDetectorConfig,
+        .setLineBreakStrategy = SetLineBreakStrategy,
+        .resetLineBreakStrategy = ResetLineBreakStrategy,
+        .getTextLineBreakStrategy = GetTextLineBreakStrategy,
+        .setTextCaretColor = SetTextCaretColor,
+        .getTextCaretColor = GetTextCaretColor,
+        .resetTextCaretColor = ResetTextCaretColor,
+        .setTextSelectedBackgroundColor = SetTextSelectedBackgroundColor,
+        .getTextSelectedBackgroundColor = GetTextSelectedBackgroundColor,
+        .resetTextSelectedBackgroundColor = ResetTextSelectedBackgroundColor,
+        .setTextContentWithStyledString = SetTextContentWithStyledString,
+        .resetTextContentWithStyledString = ResetTextContentWithStyledString,
+        .setTextSelection = SetTextSelection,
+        .resetTextSelection = ResetTextSelection,
+        .setTextSelectableMode = SetTextSelectableMode,
+        .resetTextSelectableMode = ResetTextSelectableMode,
+        .setTextDataDetectorConfigWithEvent = SetTextDataDetectorConfigWithEvent,
+        .resetTextDataDetectorConfigWithEvent = ResetTextDataDetectorConfigWithEvent,
+        .setTextOnCopy = SetTextOnCopy,
+        .resetTextOnCopy = ResetTextOnCopy,
+        .setTextOnTextSelectionChange = SetTextOnTextSelectionChange,
+        .resetTextOnTextSelectionChange = ResetTextOnTextSelectionChange,
+        .setTextMinFontScale = SetTextMinFontScale,
+        .resetTextMinFontScale = ResetTextMinFontScale,
+        .setTextMaxFontScale = SetTextMaxFontScale,
+        .resetTextMaxFontScale = ResetTextMaxFontScale,
+        .setTextSelectionMenuOptions = SetTextSelectionMenuOptions,
+        .resetTextSelectionMenuOptions = ResetTextSelectionMenuOptions,
+        .setTextHalfLeading = SetTextHalfLeading,
+        .resetTextHalfLeading = ResetTextHalfLeading,
+        .getTextHalfLeading = GetTextHalfLeading,
+        .setTextOnClick = SetOnClick,
+        .resetTextOnClick = ResetOnClick,
+        .setTextResponseRegion = SetResponseRegion,
+        .resetTextResponseRegion = ResetResponseRegion,
+        .setTextEnableHapticFeedback = SetTextEnableHapticFeedback,
+        .resetTextEnableHapticFeedback = ResetTextEnableHapticFeedback,
+        .setTextMarqueeOptions = SetMarqueeOptions,
+        .resetTextMarqueeOptions = ResetMarqueeOptions,
+        .setOnMarqueeStateChange = SetOnMarqueeStateChange,
+        .resetOnMarqueeStateChange = ResetOnMarqueeStateChange,
+        .setImmutableFontWeight = SetImmutableFontWeight,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUITextModifier* GetCJUITextModifier()
 {
-    static const CJUITextModifier modifier = { SetTextContent, SetFontWeight, ResetFontWeight, SetFontStyle,
-        ResetFontStyle, SetTextAlign, ResetTextAlign, SetFontColor, ResetFontColor, SetTextForegroundColor,
-        ResetTextForegroundColor, SetFontSize, ResetFontSize, SetTextLineHeight, ResetTextLineHeight,
-        SetTextTextOverflow, ResetTextTextOverflow, SetTextDecoration, ResetTextDecoration, SetTextTextCase,
-        ResetTextTextCase, SetTextMaxLines, ResetTextMaxLines, SetTextMinFontSize, ResetTextMinFontSize,
-        SetTextDraggable, ResetTextDraggable, SetTextPrivacySensitve, ResetTextPrivacySensitve, SetTextMaxFontSize,
-        ResetTextMaxFontSize, SetTextFontFamily, ResetTextFontFamily, SetTextCopyOption, ResetTextCopyOption,
-        SetTextTextShadow, ResetTextTextShadow, SetTextHeightAdaptivePolicy, ResetTextHeightAdaptivePolicy,
-        SetTextTextIndent, ResetTextTextIndent, SetTextBaselineOffset, ResetTextBaselineOffset, SetTextLetterSpacing,
-        ResetTextLetterSpacing, SetTextFont, ResetTextFont, SetFontWeightStr, SetWordBreak, ResetWordBreak,
-        GetFontFamily, GetCopyOption, GetHeightAdaptivePolicy, GetTextMinFontSize, GetTextMaxFontSize, GetFont,
-        GetFontSize, GetFontWeight, GetItalicFontStyle, SetEllipsisMode, ResetEllipsisMode, SetTextDetectEnable,
-        ResetTextDetectEnable, GetTextContent, GetTextLineHeight, GetTextDecoration, GetTextTextCase,
-        GetTextLetterSpacing, GetTextMaxLines, GetTextAlign, GetTextTextOverflow, GetTextTextIndent, GetFontColor,
-        GetTextBaselineOffset, GetTextShadowCount, GetTextShadow, GetTextWordBreak, GetTextEllipsisMode,
-        SetTextFontFeature, ResetTextFontFeature, GetTextFontFeature, GetTextDetectEnable, SetTextDataDetectorConfig,
-        GetTextDataDetectorConfig, ResetTextDataDetectorConfig, SetTextLineSpacing, GetTextLineSpacing,
-        ResetTextLineSpacing, SetTextSelectedBackgroundColor, GetTextSelectedBackgroundColor,
-        ResetTextSelectedBackgroundColor, SetLineBreakStrategy, ResetLineBreakStrategy, GetTextLineBreakStrategy,
-        SetTextContentWithStyledString, ResetTextContentWithStyledString, SetTextSelection, ResetTextSelection,
-        SetTextSelectableMode, ResetTextSelectableMode, SetTextDataDetectorConfigWithEvent,
-        ResetTextDataDetectorConfigWithEvent, SetTextOnCopy, ResetTextOnCopy, SetTextOnTextSelectionChange,
-        ResetTextOnTextSelectionChange };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUITextModifier modifier = {
+        .setContent = SetTextContent,
+        .setFontWeight = SetFontWeight,
+        .resetFontWeight = ResetFontWeight,
+        .setFontStyle = SetFontStyle,
+        .resetFontStyle = ResetFontStyle,
+        .setTextAlign = SetTextAlign,
+        .resetTextAlign = ResetTextAlign,
+        .setFontColor = SetFontColor,
+        .resetFontColor = ResetFontColor,
+        .setTextForegroundColor = SetTextForegroundColor,
+        .resetTextForegroundColor = ResetTextForegroundColor,
+        .setFontSize = SetFontSize,
+        .resetFontSize = ResetFontSize,
+        .setTextLineHeight = SetTextLineHeight,
+        .resetTextLineHeight = ResetTextLineHeight,
+        .setTextOverflow = SetTextTextOverflow,
+        .resetTextOverflow = ResetTextTextOverflow,
+        .setTextDecoration = SetTextDecoration,
+        .resetTextDecoration = ResetTextDecoration,
+        .setTextCase = SetTextTextCase,
+        .resetTextCase = ResetTextTextCase,
+        .setTextMaxLines = SetTextMaxLines,
+        .resetTextMaxLines = ResetTextMaxLines,
+        .setTextMinFontSize = SetTextMinFontSize,
+        .resetTextMinFontSize = ResetTextMinFontSize,
+        .setTextDraggable = SetTextDraggable,
+        .resetTextDraggable = ResetTextDraggable,
+        .setTextPrivacySensitive = SetTextPrivacySensitve,
+        .resetTextPrivacySensitive = ResetTextPrivacySensitve,
+        .setTextMaxFontSize = SetTextMaxFontSize,
+        .resetTextMaxFontSize = ResetTextMaxFontSize,
+        .setTextFontFamily = SetTextFontFamily,
+        .resetTextFontFamily = ResetTextFontFamily,
+        .setTextCopyOption = SetTextCopyOption,
+        .resetTextCopyOption = ResetTextCopyOption,
+        .setTextShadow = SetTextTextShadow,
+        .resetTextShadow = ResetTextTextShadow,
+        .setTextHeightAdaptivePolicy = SetTextHeightAdaptivePolicy,
+        .resetTextHeightAdaptivePolicy = ResetTextHeightAdaptivePolicy,
+        .setTextIndent = SetTextTextIndent,
+        .resetTextIndent = ResetTextTextIndent,
+        .setTextBaselineOffset = SetTextBaselineOffset,
+        .resetTextBaselineOffset = ResetTextBaselineOffset,
+        .setTextLetterSpacing = SetTextLetterSpacing,
+        .resetTextLetterSpacing = ResetTextLetterSpacing,
+        .setTextFont = SetTextFont,
+        .resetTextFont = ResetTextFont,
+        .setFontWeightStr = SetFontWeightStr,
+        .setWordBreak = SetWordBreak,
+        .resetWordBreak = ResetWordBreak,
+        .getFontFamily = GetFontFamily,
+        .getCopyOption = GetCopyOption,
+        .getHeightAdaptivePolicy = GetHeightAdaptivePolicy,
+        .getTextMinFontSize = GetTextMinFontSize,
+        .getTextMaxFontSize = GetTextMaxFontSize,
+        .getFont = GetFont,
+        .getFontSize = GetFontSize,
+        .getFontWeight = GetFontWeight,
+        .getItalicFontStyle = GetItalicFontStyle,
+        .setEllipsisMode = SetEllipsisMode,
+        .resetEllipsisMode = ResetEllipsisMode,
+        .setEnableDataDetector = SetTextDetectEnable,
+        .resetEnableDataDetector = ResetTextDetectEnable,
+        .getTextContent = GetTextContent,
+        .getTextLineHeight = GetTextLineHeight,
+        .getTextDecoration = GetTextDecoration,
+        .getTextTextCase = GetTextTextCase,
+        .getTextLetterSpacing = GetTextLetterSpacing,
+        .getTextMaxLines = GetTextMaxLines,
+        .getTextAlign = GetTextAlign,
+        .getTextTextOverflow = GetTextTextOverflow,
+        .getTextTextIndent = GetTextTextIndent,
+        .getFontColor = GetFontColor,
+        .getTextBaselineOffset = GetTextBaselineOffset,
+        .getTextShadowsCount = GetTextShadowCount,
+        .getTextShadows = GetTextShadow,
+        .getTextWordBreak = GetTextWordBreak,
+        .getTextEllipsisMode = GetTextEllipsisMode,
+        .setTextFontFeature = SetTextFontFeature,
+        .resetTextFontFeature = ResetTextFontFeature,
+        .getTextFontFeature = GetTextFontFeature,
+        .getEnableDataDetector = GetTextDetectEnable,
+        .setTextDataDetectorConfig = SetTextDataDetectorConfig,
+        .getTextDataDetectorConfig = GetTextDataDetectorConfig,
+        .resetTextDataDetectorConfig = ResetTextDataDetectorConfig,
+        .setTextLineSpacing = SetTextLineSpacing,
+        .getTextLineSpacing = GetTextLineSpacing,
+        .resetTextLineSpacing = ResetTextLineSpacing,
+        .setTextSelectedBackgroundColor = SetTextSelectedBackgroundColor,
+        .getTextSelectedBackgroundColor = GetTextSelectedBackgroundColor,
+        .resetTextSelectedBackgroundColor = ResetTextSelectedBackgroundColor,
+        .setLineBreakStrategy = SetLineBreakStrategy,
+        .resetLineBreakStrategy = ResetLineBreakStrategy,
+        .getTextLineBreakStrategy = GetTextLineBreakStrategy,
+        .setTextContentWithStyledString = SetTextContentWithStyledString,
+        .resetTextContentWithStyledString = ResetTextContentWithStyledString,
+        .setTextSelection = SetTextSelection,
+        .resetTextSelection = ResetTextSelection,
+        .setTextSelectableMode = SetTextSelectableMode,
+        .resetTextSelectableMode = ResetTextSelectableMode,
+        .setTextDataDetectorConfigWithEvent = SetTextDataDetectorConfigWithEvent,
+        .resetTextDataDetectorConfigWithEvent = ResetTextDataDetectorConfigWithEvent,
+        .setTextOnCopy = SetTextOnCopy,
+        .resetTextOnCopy = ResetTextOnCopy,
+        .setTextOnTextSelectionChange = SetTextOnTextSelectionChange,
+        .resetTextOnTextSelectionChange = ResetTextOnTextSelectionChange,
+        .setFontWeightWithOption = SetFontWeightWithOption,
+        .setTextMinFontScale = SetTextMinFontScale,
+        .resetTextMinFontScale = ResetTextMinFontScale,
+        .setTextMaxFontScale = SetTextMaxFontScale,
+        .resetTextMaxFontScale = ResetTextMaxFontScale,
+        .setTextSelectionMenuOptions = SetTextSelectionMenuOptions,
+        .resetTextSelectionMenuOptions = ResetTextSelectionMenuOptions,
+        .setTextHalfLeading = SetTextHalfLeading,
+        .resetTextHalfLeading = ResetTextHalfLeading,
+        .getTextHalfLeading = GetTextHalfLeading,
+        .setTextOnClick = SetOnClick,
+        .resetTextOnClick = ResetOnClick,
+        .setTextResponseRegion = SetResponseRegion,
+        .resetTextResponseRegion = ResetResponseRegion,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
@@ -1213,7 +1543,7 @@ void SetOnDetectResultUpdate(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_DETECT_RESULT_UPDATE;
         event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(str.c_str());
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     TextModelNG::SetOnDetectResultUpdate(frameNode, std::move(onDetectResultUpdate));
 }

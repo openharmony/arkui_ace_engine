@@ -156,4 +156,36 @@ std::vector<uint8_t> UdmfClientImpl::GetSpanStringRecord(const RefPtr<UnifiedDat
     return {};
 }
 
+int32_t UdmfClientImpl::StartAsyncDataRetrieval(napi_env env, napi_value napiValue, const std::string& key)
+{
+    return -1;
+}
+
+int32_t UdmfClientImpl::Cancel(const std::string& key)
+{
+    return -1;
+}
+
+void UdmfClientImpl::SetTagProperty(const RefPtr<UnifiedData>& unifiedData, const std::string& tag) {}
+
+std::string UdmfClientImpl::GetPlainTextEntry(const RefPtr<UnifiedData>& unifiedData)
+{
+    return "";
+}
+
+void UdmfClientImpl::GetHtmlEntry(
+    const RefPtr<UnifiedData>& unifiedData, std::string& htmlContent, std::string& plainContent)
+{}
+
+void UdmfClientImpl::GetLinkEntry(const RefPtr<UnifiedData>& unifiedData, std::string& url, std::string& description) {}
+
+bool UdmfClientImpl::GetFileUriEntry(const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri)
+{
+    return false;
+}
+
+std::vector<uint8_t> UdmfClientImpl::GetSpanStringEntry(const RefPtr<UnifiedData>& unifiedData)
+{
+    return {};
+}
 } // namespace OHOS::Ace

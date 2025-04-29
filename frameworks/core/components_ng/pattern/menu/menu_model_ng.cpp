@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/menu/menu_model_ng.h"
 
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::NG {
 
@@ -96,8 +95,8 @@ void MenuModelNG::SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
 
 void MenuModelNG::SetWidth(const Dimension& width)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, MenuWidth, width);
-    ViewAbstract::SetWidth(NG::CalcLength(width));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    MenuModelNG::SetWidth(frameNode, width);
 }
 
 void MenuModelNG::SetFontFamily(const std::vector<std::string>& families)
@@ -115,24 +114,33 @@ void MenuModelNG::SetExpandingMode(const SubMenuExpandingMode& expandingMode)
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ExpandingMode, expandingMode);
 }
 
-void MenuModelNG::SetItemDivider(const V2::ItemDivider& divider)
+void MenuModelNG::SetExpandingMode(FrameNode* frameNode, const SubMenuExpandingMode& expandingMode)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ExpandingMode, expandingMode, frameNode);
+}
+
+void MenuModelNG::SetItemDivider(const V2::ItemDivider& divider, const DividerMode& mode)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDivider, divider);
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDividerMode, mode);
 }
 
-void MenuModelNG::SetItemDivider(FrameNode* frameNode, const V2::ItemDivider& divider)
+void MenuModelNG::SetItemDivider(FrameNode* frameNode, const V2::ItemDivider& divider, const DividerMode& mode)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDivider, divider, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDividerMode, mode, frameNode);
 }
 
-void MenuModelNG::SetItemGroupDivider(const V2::ItemDivider& divider)
+void MenuModelNG::SetItemGroupDivider(const V2::ItemDivider& divider, const DividerMode& mode)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDivider, divider);
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDividerMode, mode);
 }
 
-void MenuModelNG::SetItemGroupDivider(FrameNode* frameNode, const V2::ItemDivider& divider)
+void MenuModelNG::SetItemGroupDivider(FrameNode* frameNode, const V2::ItemDivider& divider, const DividerMode& mode)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDivider, divider, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDividerMode, mode, frameNode);
 }
 
 void MenuModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Color>& color)
@@ -199,6 +207,7 @@ void MenuModelNG::SetBorderRadius(FrameNode* frameNode, const std::optional<Dime
 
 void MenuModelNG::SetWidth(FrameNode* frameNode, const Dimension& width)
 {
+    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, MenuWidth, width, frameNode);
     ViewAbstract::SetWidth(frameNode, NG::CalcLength(width));
 }

@@ -14,15 +14,6 @@
  */
 #include "core/interfaces/native/node/node_symbol_glyph_modifier.h"
 
-#include "bridge/common/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/common/properties/text_style_parser.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/pipeline/base/element_register.h"
-#include "frameworks/core/components/common/layout/constants.h"
-#include "frameworks/core/components/common/properties/text_style.h"
 #include "frameworks/core/components_ng/pattern/symbol/symbol_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -151,51 +142,131 @@ void ResetEffectStrategy(ArkUINodeHandle node)
     SymbolModelNG::SetSymbolEffect(frameNode, 0);
 }
 
-void SetSymbolId(ArkUINodeHandle node, ArkUI_Uint32 symbolId)
+void SetSymbolGlyphInitialize(ArkUINodeHandle node, ArkUI_Uint32 symbolId)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SymbolModelNG::InitialSymbol(frameNode, symbolId);
+    SymbolModelNG::SetSymbolGlyphInitialize(frameNode, symbolId);
+}
+
+void SetCustomSymbolGlyphInitialize(ArkUINodeHandle node, ArkUI_Uint32 symbolId, ArkUI_CharPtr fontFamily)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string fontFamilyStr(fontFamily);
+    SymbolModelNG::SetCustomSymbolGlyphInitialize(frameNode, symbolId, fontFamilyStr.c_str());
+}
+
+void ResetSymbolGlyphInitialize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolModelNG::SetSymbolGlyphInitialize(frameNode, 0);
+}
+
+void UpdateSymbolEffect(ArkUINodeHandle node, ArkUI_Uint32 symbolEffectType, ArkUI_Bool isActive,
+    ArkUI_Int16 isTxtActiveSource)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolModelNG::UpdateSymbolEffect(frameNode, symbolEffectType, isActive, isTxtActiveSource);
+}
+
+void SetMinFontScale(ArkUINodeHandle node, ArkUI_Float32 minFontScale)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (LessOrEqual(minFontScale, 0.0f)) {
+        SymbolModelNG::SetMinFontScale(frameNode, 0.0f);
+        return;
+    }
+    if (GreatOrEqual(minFontScale, 1.0f)) {
+        SymbolModelNG::SetMinFontScale(frameNode, 1.0f);
+        return;
+    }
+    SymbolModelNG::SetMinFontScale(frameNode, minFontScale);
+}
+
+void ResetMinFontScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolModelNG::SetMinFontScale(frameNode, 1.0f);
+}
+
+void SetMaxFontScale(ArkUINodeHandle node, ArkUI_Float32 maxFontScale)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (LessOrEqual(maxFontScale, 1.0f)) {
+        SymbolModelNG::SetMaxFontScale(frameNode, 1.0f);
+        return;
+    }
+    SymbolModelNG::SetMaxFontScale(frameNode, maxFontScale);
+}
+
+void ResetMaxFontScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolModelNG::SetMaxFontScale(frameNode, 1.0f);
 }
 }
 
 namespace NodeModifier {
 const ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUISymbolGlyphModifier modifier = {
-        SetFontColor,
-        ResetFontColor,
-        SetFontSize,
-        ResetFontSize,
-        SetFontWeightStr,
-        SetFontWeight,
-        ResetFontWeight,
-        SetRenderingStrategy,
-        ResetRenderingStrategy,
-        SetEffectStrategy,
-        ResetEffectStrategy,
-        SetSymbolId,
+        .setFontColor = SetFontColor,
+        .resetFontColor = ResetFontColor,
+        .setFontSize = SetFontSize,
+        .resetFontSize = ResetFontSize,
+        .setFontWeightStr = SetFontWeightStr,
+        .setFontWeight = SetFontWeight,
+        .resetFontWeight = ResetFontWeight,
+        .setRenderingStrategy = SetRenderingStrategy,
+        .resetRenderingStrategy = ResetRenderingStrategy,
+        .setEffectStrategy = SetEffectStrategy,
+        .resetEffectStrategy = ResetEffectStrategy,
+        .setSymbolGlyphInitialize = SetSymbolGlyphInitialize,
+        .resetSymbolGlyphInitialize = ResetSymbolGlyphInitialize,
+        .updateSymbolEffect = UpdateSymbolEffect,
+        .setMinFontScale = SetMinFontScale,
+        .resetMinFontScale = ResetMinFontScale,
+        .setMaxFontScale = SetMaxFontScale,
+        .resetMaxFontScale = ResetMaxFontScale,
+        .setCustomSymbolGlyphInitialize = SetCustomSymbolGlyphInitialize,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUISymbolGlyphModifier* GetCJUISymbolGlyphModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUISymbolGlyphModifier modifier = {
-        SetFontColor,
-        ResetFontColor,
-        SetFontSize,
-        ResetFontSize,
-        SetFontWeightStr,
-        SetFontWeight,
-        ResetFontWeight,
-        SetRenderingStrategy,
-        ResetRenderingStrategy,
-        SetEffectStrategy,
-        ResetEffectStrategy,
-        SetSymbolId,
+        .setFontColor = SetFontColor,
+        .resetFontColor = ResetFontColor,
+        .setFontSize = SetFontSize,
+        .resetFontSize = ResetFontSize,
+        .setFontWeightStr = SetFontWeightStr,
+        .setFontWeight = SetFontWeight,
+        .resetFontWeight = ResetFontWeight,
+        .setRenderingStrategy = SetRenderingStrategy,
+        .resetRenderingStrategy = ResetRenderingStrategy,
+        .setEffectStrategy = SetEffectStrategy,
+        .resetEffectStrategy = ResetEffectStrategy,
+        .setSymbolGlyphInitialize = SetSymbolGlyphInitialize,
+        .resetSymbolGlyphInitialize = ResetSymbolGlyphInitialize,
+        .setMinFontScale = SetMinFontScale,
+        .resetMinFontScale = ResetMinFontScale,
+        .setMaxFontScale = SetMaxFontScale,
+        .resetMaxFontScale = ResetMaxFontScale,
+        .setCustomSymbolGlyphInitialize = SetCustomSymbolGlyphInitialize,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

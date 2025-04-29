@@ -17,9 +17,11 @@
 
 #include <optional>
 #include <string>
+#include <unordered_set>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/geometry/rect.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/placement.h"
@@ -35,8 +37,10 @@ enum class ArrowOfTargetOffset {
 struct BubbleDumpInfo {
     bool enableArrow = false;
     bool mask = true;
+    bool avoidKeyboard = false;
+    bool enableHoverMode = false;
     std::string targetNode;
-    int32_t targetID;
+    int32_t targetID = -1;
     OffsetF targetOffset;
     SizeF targetSize;
     RectF touchRegion;
@@ -97,6 +101,11 @@ public:
         return touchRegion_;
     }
 
+    Rect GetHostWindowRect() const
+    {
+        return hostWindowRect_;
+    }
+
     const Border& GetBorder() const
     {
         return border_;
@@ -141,9 +150,16 @@ public:
         return dumpInfo_;
     }
 
+    const Placement& GetArrowBuildPlacement() const
+    {
+        return arrowBuildPlacement_;
+    }
+
 protected:
     OffsetF positionOffset_;
     SizeF wrapperSize_;
+    // rect is relative to popupWrapper
+    Rect wrapperRect_;
 
 private:
     enum class ErrorPositionType {
@@ -168,11 +184,17 @@ private:
     OffsetF AddOffset(const OffsetF& position);
     bool CheckPositionInPlacementRect(const Rect& rect, const OffsetF& position, const SizeF& childSize);
     OffsetF AdjustPosition(const OffsetF& position, float width, float height, float space);
+    OffsetF AdjustPositionNew(const OffsetF& position, float width, float height);
+    OffsetF GetBubblePosition(const OffsetF& position, float xMin, float xMax, float yMin, float yMax);
+    bool CheckIfNeedRemoveArrow(float& xMin, float& xMax, float& yMin, float& yMax);
+    void CheckArrowPosition(OffsetF& position, float width, float height);
+    bool IsUIExtensionWindow();
+    void HandleUIExtensionKeyboard(LayoutWrapper* layoutWrapper, bool showInSubWindow);
     OffsetF GetAdjustPosition(std::vector<Placement>& currentPlacementStates, size_t step, const SizeF& childSize,
         const OffsetF& topPosition, const OffsetF& bottomPosition, OffsetF& arrowPosition);
-    void InitTargetSizeAndPosition(bool showInSubWindow);
+    void InitTargetSizeAndPosition(bool showInSubWindow, LayoutWrapper* layoutWrapper);
     void InitCaretTargetSizeAndPosition();
-    void InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp, bool showInSubWindow);
+    void InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp, bool showInSubWindow, LayoutWrapper* layoutWrapper);
     void InitArrowState(const RefPtr<BubbleLayoutProperty>& layoutProp);
     OffsetF GetPositionWithPlacementNew(
         const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition, OffsetF& arrowPosition);
@@ -182,7 +204,8 @@ private:
     bool GetIfNeedArrow(const RefPtr<BubbleLayoutProperty>& bubbleProp, const SizeF& childSize);
     void UpdateChildPosition(OffsetF& childOffset);
     void UpdateTouchRegion();
-
+    void InitWrapperRect(LayoutWrapper* layoutWrapper);
+    void UpdateScrollHeight(LayoutWrapper* layoutWrapper, bool showInSubWindow);
     std::string MoveTo(double x, double y);
     std::string LineTo(double x, double y);
     std::string ArcTo(double rx, double ry, double rotation, int32_t arc_flag, double x, double y);
@@ -208,10 +231,12 @@ private:
     std::string BuildCornerPath(const Placement& placement, float radius);
     void UpdateArrowOffset(const std::optional<Dimension>& offset, const Placement& placement);
     void BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, RefPtr<BubbleLayoutProperty> bubbleProp,
-        RefPtr<FrameNode> bubbleNode, bool showInSubWindow);
+        RefPtr<FrameNode> bubbleNode, bool showInSubWindow, LayoutWrapper* layoutWrapper);
     void SetArrowOffsetsFromClip(const int16_t index, const float offsetX, const float offsetY);
     void SetHotAreas(bool showInSubWindow, bool isBlock, RefPtr<FrameNode> frameNode, int32_t containerId);
     void SetBubbleRadius();
+    void UpdateHostWindowRect();
+    void HandleKeyboard(LayoutWrapper* layoutWrapper, bool showInSubWindow);
 
     OffsetF GetChildPosition(
         const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp, bool UseArrowOffset);
@@ -221,7 +246,7 @@ private:
         OffsetF& childPosition, OffsetF& arrowPosition, const SizeF& childSize, Placement placement);
     ErrorPositionType GetErrorPositionType(const OffsetF& childOffset, const SizeF& childSize);
     OffsetF FitToScreen(const OffsetF& fitPosition, const SizeF& childSize);
-    SizeF GetPopupMaxWidthAndHeight(bool showInSubWindow, const float& width);
+    SizeF GetPopupMaxWidthAndHeight(bool showInSubWindow, const RefPtr<FrameNode>& frameNode);
     void UpdateDumpInfo();
     ArrowOfTargetOffset arrowOfTargetOffset_ = ArrowOfTargetOffset::NONE;
     Dimension arrowOffset_;
@@ -230,6 +255,7 @@ private:
     std::string targetTag_;
     bool bCaretMode_ = false;
     bool useCustom_ = false;
+    bool isTips_ = false;
 
     BubbleDumpInfo dumpInfo_;
     SizeF targetSize_;
@@ -243,6 +269,7 @@ private:
     OffsetF arrowPositionForPaint_;
     SizeF selfSize_;
     RectF touchRegion_;
+    Rect hostWindowRect_;
     SizeF buttonRowSize_;
     OffsetF buttonRowOffset_;
     // top right bottom left
@@ -252,12 +279,17 @@ private:
     Border border_;
     Placement arrowPlacement_ = Placement::BOTTOM;
     Placement placement_ = Placement::BOTTOM;
+    Placement arrowBuildPlacement_ = Placement::BOTTOM;
     Dimension targetSpace_;
     Dimension borderRadius_;
     Dimension userSetTargetSpace_;
+    Dimension minHeight_;
+    uint32_t maxColumns_ = 0;
     bool showArrow_ = false;
     bool enableArrow_ = false;
     bool isCaretMode_ = true;
+    bool followTransformOfTarget_ = false;
+    bool enableFoldedArea_ = false;
     float scaledBubbleSpacing_ = 0.0f;
     float arrowHeight_ = 0.0f;
     float realArrowWidth_ = 20.0f;
@@ -269,6 +301,7 @@ private:
     float marginBottom_ = 0.0f;
     float top_ = 0.0f;
     float bottom_ = 0.0f;
+    bool avoidKeyboard_ = false;
     bool bHorizontal_ = false;
     bool bVertical_ = false;
     std::unordered_set<Placement> setHorizontal_;
@@ -286,6 +319,9 @@ private:
     std::vector<std::vector<float>> arrowOffsetsFromClip_
         = { {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f} };
     bool isGreatWrapperWidth_ = false;
+    float foldCreaseTop_ = 0.0f;
+    float foldCreaseBottom_ = 0.0f;
+    bool isHalfFoldHover_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUBBLE_BUBBLE_LAYOUT_ALGORITHM_H

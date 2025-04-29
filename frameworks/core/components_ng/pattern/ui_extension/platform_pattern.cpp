@@ -23,10 +23,10 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
-#include "base/geometry/offset.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/ui_extension/platform_utils.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_layout_algorithm.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -64,7 +64,7 @@ void PlatformPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -80,7 +80,8 @@ void PlatformPattern::OnModifyDone()
 
 void PlatformPattern::InitKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
-    focusHub->SetOnFocusInternal([weak = WeakClaim(this)]() {
+    focusHub->SetIsNodeNeedKey(true);
+    focusHub->SetOnFocusInternal([weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleFocusEvent();
@@ -193,24 +194,32 @@ void PlatformPattern::HandleTouchEvent(const TouchEventInfo& info)
     CHECK_NULL_VOID(pointerEvent);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto selfGlobalOffset = host->GetTransformRelativeOffset();
-    auto scale = host->GetTransformScale();
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto window = static_cast<RosenWindow*>(pipeline->GetWindow());
-    CHECK_NULL_VOID(window);
-    auto rsWindow = window->GetRSWindow();
-    auto udegree = WindowPattern::CalculateTranslateDegree(host->GetId());
-    if (rsWindow->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD) {
-        Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale, udegree);
-    } else {
-        Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale, udegree);
+    const auto& changedTouches = info.GetChangedTouches();
+    if (!changedTouches.empty() && changedTouches.back().GetTouchType() == TouchType::DOWN) {
+        auto focusHub = host->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->RequestFocusImmediately();
     }
-    AceExtraInputData::InsertInterpolatePoints(info);
-    auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->RequestFocusImmediately();
-    DispatchPointerEvent(pointerEvent);
+
+    if (tag_ != AceLogTag::ACE_DYNAMIC_COMPONENT) {
+        bool ret = HandleTouchEvent(pointerEvent);
+        if (ret) {
+            AceExtraInputData::InsertInterpolatePoints(info);
+        }
+    }
+}
+
+bool PlatformPattern::HandleTouchEvent(
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    CHECK_NULL_RETURN(pointerEvent, false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto newPointerEvent = PlatformUtils::CopyPointerEventWithExtraProperty(pointerEvent, tag_);
+    CHECK_NULL_RETURN(newPointerEvent, false);
+    Platform::CalculatePointerEvent(newPointerEvent, host);
+    DispatchPointerEvent(newPointerEvent);
+    return true;
 }
 
 void PlatformPattern::HandleMouseEvent(const MouseInfo& info)
@@ -220,12 +229,10 @@ void PlatformPattern::HandleMouseEvent(const MouseInfo& info)
     }
     const auto pointerEvent = info.GetPointerEvent();
     CHECK_NULL_VOID(pointerEvent);
-    lastPointerEvent_ = pointerEvent;
+    lastPointerEvent_ = PlatformUtils::CopyPointerEventWithExtraProperty(pointerEvent, tag_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto selfGlobalOffset = host->GetTransformRelativeOffset();
-    auto scale = host->GetTransformScale();
-    Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale);
+    Platform::CalculatePointerEvent(pointerEvent, host);
     if (info.GetAction() == MouseAction::PRESS) {
         auto hub = host->GetFocusHub();
         CHECK_NULL_VOID(hub);
@@ -244,25 +251,15 @@ void PlatformPattern::HandleHoverEvent(bool isHover)
     DispatchPointerEvent(lastPointerEvent_);
 }
 
-void PlatformPattern::HandleDragEvent(const PointerEvent& info)
+void PlatformPattern::HandleDragEvent(const DragPointerEvent& info)
 {
     const auto pointerEvent = info.rawPointerEvent;
     CHECK_NULL_VOID(pointerEvent);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto selfGlobalOffset = host->GetTransformRelativeOffset();
-    auto scale = host->GetTransformScale();
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto window = static_cast<RosenWindow*>(pipeline->GetWindow());
-    CHECK_NULL_VOID(window);
-    auto rsWindow = window->GetRSWindow();
-    auto udegree = WindowPattern::CalculateTranslateDegree(host->GetId());
-    if (rsWindow->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD) {
-        Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale, udegree);
-    } else {
-        Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale, udegree);
-    }
+    Platform::CalculatePointerEvent(pointerEvent, host, true);
     DispatchPointerEvent(pointerEvent);
 }
 

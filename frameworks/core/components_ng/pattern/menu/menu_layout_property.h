@@ -22,7 +22,6 @@
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/utils.h"
@@ -67,6 +66,7 @@ public:
         value->propTitle_ = CloneTitle();
         value->propMenuPlacement_ = CloneMenuPlacement();
         value->propSelectMenuAlignOption_ = CloneSelectMenuAlignOption();
+        value->propSelectAvoidanceMode_ = CloneSelectAvoidanceMode();
         value->propBorderRadius_ = CloneBorderRadius();
         value->propMenuWidth_ = CloneMenuWidth();
         value->propShowInSubWindow_ = CloneShowInSubWindow();
@@ -87,6 +87,7 @@ public:
         ResetTitle();
         ResetMenuPlacement();
         ResetSelectMenuAlignOption();
+        ResetSelectAvoidanceMode();
         ResetBorderRadius();
         ResetMenuWidth();
         ResetShowInSubWindow();
@@ -104,7 +105,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderRadius, NG::BorderRadiusProperty, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MenuWidth, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItemDivider, V2::ItemDivider, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItemDividerMode, DividerMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItemGroupDivider, V2::ItemDivider, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItemGroupDividerMode, DividerMode, PROPERTY_UPDATE_MEASURE);
 
     // offset to cursor
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PositionOffset, NG::OffsetF, PROPERTY_UPDATE_LAYOUT);
@@ -128,6 +131,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SelectMenuAlignOption, AlignType, MenuAlignType, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SelectMenuAlignOption, Offset, DimensionOffset, PROPERTY_UPDATE_MEASURE);
 
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectAvoidanceMode, AvoidanceMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowInSubWindow, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ExpandingMode, SubMenuExpandingMode, PROPERTY_UPDATE_MEASURE)
 

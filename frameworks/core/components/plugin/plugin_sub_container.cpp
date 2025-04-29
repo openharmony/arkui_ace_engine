@@ -16,11 +16,12 @@
 #include "core/components/plugin/plugin_sub_container.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
-#include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
 #include "core/common/plugin_manager.h"
+#include "core/common/resource/resource_manager.h"
+#include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "core/components/plugin/hap_asset_provider_impl.h"
 #include "core/components/plugin/plugin_element.h"
 #include "core/components/plugin/plugin_window.h"
@@ -39,6 +40,7 @@ const char* GetDeclarativeSharedLibrary()
 
 void PluginSubContainer::Initialize()
 {
+    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "PluginSubContainer initialize start.");
     ContainerScope scope(instanceId_);
 
     auto outSidePipelineContext = outSidePipelineContext_.Upgrade();
@@ -89,11 +91,14 @@ void PluginSubContainer::Initialize()
     EngineHelper::AddEngine(instanceId_, jsEngine);
     frontend_->SetJsEngine(jsEngine);
     frontend_->Initialize(FrontendType::JS_PLUGIN, taskExecutor_);
+    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "PluginSubContainer initialize end.");
 }
 
 void PluginSubContainer::Destroy()
 {
+    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "PluginSubContainer Destroy.");
     ContainerScope scope(instanceId_);
+    ResourceManager::GetInstance().RemoveResourceAdapter("", "", instanceId_);
     if (frontend_) {
         frontend_->Destroy();
         frontend_.Reset();
@@ -170,6 +175,7 @@ void PluginSubContainer::UpdateSurfaceSize()
 void PluginSubContainer::RunDecompressedPlugin(const std::string& hapPath, const std::string& module,
     const std::string& source, const std::string& moduleResPath, const std::string& data)
 {
+    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "RunDecompressedPlugin hapPath: %{public}s.", hapPath.c_str());
     ContainerScope scope(instanceId_);
     CHECK_NULL_VOID(frontend_);
     frontend_->ResetPageLoadState();
@@ -190,10 +196,9 @@ void PluginSubContainer::RunDecompressedPlugin(const std::string& hapPath, const
     SetActionEventHandler();
 
     auto weakContext = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
-    auto& instance = instanceId_;
     taskExecutor_->PostTask(
-        [weakContext, &instance]() {
-            ContainerScope scope(instance);
+        [weakContext, instanceId = instanceId_]() {
+            ContainerScope scope(instanceId);
             auto context = weakContext.Upgrade();
             if (context == nullptr) {
                 return;
@@ -234,6 +239,7 @@ void PluginSubContainer::RunDecompressedPlugin(const std::string& hapPath, const
 void PluginSubContainer::RunPlugin(const std::string& path, const std::string& module, const std::string& source,
     const std::string& moduleResPath, const std::string& data)
 {
+    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "RunPlugin hapPath: %{public}s.", path.c_str());
     ContainerScope scope(instanceId_);
     CHECK_NULL_VOID(frontend_);
     frontend_->ResetPageLoadState();
@@ -254,8 +260,8 @@ void PluginSubContainer::RunPlugin(const std::string& path, const std::string& m
 
     auto weakContext = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
     taskExecutor_->PostTask(
-        [weakContext, this]() {
-            ContainerScope scope(instanceId_);
+        [weakContext, instanceId = instanceId_]() {
+            ContainerScope scope(instanceId);
             auto context = weakContext.Upgrade();
             if (context == nullptr) {
                 return;
@@ -299,7 +305,8 @@ void PluginSubContainer::RunPlugin(const std::string& path, const std::string& m
     frontend_->RunPage(source, data);
 }
 
-void PluginSubContainer::SetPluginComponentTheme(const std::string& path, const RefPtr<AssetManager>& assetManager)
+void PluginSubContainer::SetPluginComponentTheme(
+    const std::string& path, const RefPtr<AssetManager>& assetManager)
 {
     ResourceInfo pluginResourceInfo;
     ResourceConfiguration resConfig;
@@ -315,6 +322,7 @@ void PluginSubContainer::SetPluginComponentTheme(const std::string& path, const 
     RefPtr<ThemeManagerImpl> pluginThemeManager;
     if (SystemProperties::GetResourceDecoupling()) {
         auto resourceAdapter = ResourceAdapter::CreateV2();
+        ResourceManager::GetInstance().RegisterMainResourceAdapter("", "", instanceId_, resourceAdapter);
         pluginThemeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
     } else {
         pluginThemeManager = AceType::MakeRefPtr<ThemeManagerImpl>();

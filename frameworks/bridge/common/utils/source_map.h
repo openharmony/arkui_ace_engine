@@ -59,8 +59,8 @@ private:
     std::vector<std::string> mappings_;
     std::vector<std::string> nameMap_;
     std::vector<SourceMapInfo> afterPos_;
-
-    static std::vector<std::string> HandleMappings(const std::string& mapping);
+    void HandleKeyInfo(const std::string& keyInfo, std::string& mark);
+    static std::vector<std::string> HandleMappings(const std::string& mappings);
     static uint32_t Base64CharToInt(char charCode);
     static bool VlqRevCode(const std::string& vStr, std::vector<int32_t>& ans);
 };

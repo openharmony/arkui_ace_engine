@@ -15,12 +15,10 @@
 
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 
-#include "core/components_ng/base/frame_node.h"
+#include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 constexpr float CHECK_BOX_MARK_SIZE_INVALID_VALUE = -1.0f;
@@ -29,13 +27,14 @@ void CheckBoxModelNG::Create(
     const std::optional<std::string>& name, const std::optional<std::string>& groupName, const std::string& tagName)
 {
     auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
     int32_t nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tagName.c_str(), nodeId);
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(tagName, nodeId, []() { return AceType::MakeRefPtr<CheckBoxPattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
-
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (name.has_value()) {
         eventHub->SetName(name.value());
@@ -54,9 +53,11 @@ RefPtr<FrameNode> CheckBoxModelNG::CreateFrameNode(int32_t nodeId)
 
 void CheckBoxModelNG::SetSelect(bool isSelected)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    const auto& frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
 
@@ -66,16 +67,20 @@ void CheckBoxModelNG::SetSelect(bool isSelected)
 void CheckBoxModelNG::SetSelectedColor(const Color& color)
 {
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedColor, color);
+    ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedColorFlagByUser, true);
 }
 
 void CheckBoxModelNG::SetUnSelectedColor(const Color& color)
 {
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxUnSelectedColor, color);
+    ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxUnSelectedColorFlagByUser, true);
 }
 
 void CheckBoxModelNG::SetBuilder(std::optional<std::function<void(void)>>& buildFunc)
 {
-    const auto& frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    const auto& frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto checkBoxPattern = frameNode->GetPattern<CheckBoxPattern>();
     CHECK_NULL_VOID(checkBoxPattern);
@@ -91,6 +96,7 @@ void CheckBoxModelNG::SetCheckboxStyle(CheckBoxStyle checkboxStyle)
 void CheckBoxModelNG::SetCheckMarkColor(const Color& color)
 {
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkColor, color);
+    ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkColorFlagByUser, true);
 }
 
 void CheckBoxModelNG::SetCheckMarkSize(const Dimension& size)
@@ -105,9 +111,11 @@ void CheckBoxModelNG::SetCheckMarkWidth(const Dimension& width)
 
 void CheckBoxModelNG::SetOnChange(ChangeEvent&& onChange)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    auto frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
@@ -129,9 +137,11 @@ void CheckBoxModelNG::SetPadding(const NG::PaddingPropertyF& args, const NG::Pad
 
 void CheckBoxModelNG::SetChangeEvent(ChangeEvent&& changeEvent)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    auto frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(changeEvent));
 }
@@ -139,7 +149,9 @@ void CheckBoxModelNG::SetChangeEvent(ChangeEvent&& changeEvent)
 void CheckBoxModelNG::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
 {
     NG::ViewAbstract::SetResponseRegion(responseRegion);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    auto frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     CHECK_NULL_VOID(pattern);
@@ -154,16 +166,19 @@ void CheckBoxModelNG::SetSelect(FrameNode* frameNode, bool isSelected)
 void CheckBoxModelNG::SetSelectedColor(FrameNode* frameNode, const Color& color)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedColor, color, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedColorFlagByUser, true, frameNode);
 }
 
 void CheckBoxModelNG::SetUnSelectedColor(FrameNode* frameNode, const Color& color)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxUnSelectedColor, color, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxUnSelectedColorFlagByUser, true, frameNode);
 }
 
 void CheckBoxModelNG::SetCheckMarkColor(FrameNode* frameNode, const Color& color)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkColor, color, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkColorFlagByUser, true, frameNode);
 }
 
 void CheckBoxModelNG::SetCheckMarkSize(FrameNode* frameNode, const Dimension& size)
@@ -188,7 +203,7 @@ void CheckBoxModelNG::SetWidth(FrameNode* frameNode, const Dimension& width)
 
 void CheckBoxModelNG::SetPadding(FrameNode* frameNode, const NG::PaddingProperty& padding)
 {
-    NG::ViewAbstract::SetPadding(padding);
+    NG::ViewAbstract::SetPadding(frameNode, padding);
 }
 
 void CheckBoxModelNG::SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion)
@@ -205,9 +220,30 @@ void CheckBoxModelNG::SetCheckboxStyle(FrameNode* frameNode, CheckBoxStyle check
     ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedStyle, checkboxStyle, frameNode);
 }
 
+void CheckBoxModelNG::SetCheckboxName(FrameNode* frameNode, const std::optional<std::string>& name)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (name.has_value()) {
+        eventHub->SetName(name.value());
+    }
+}
+
+void CheckBoxModelNG::SetCheckboxGroup(FrameNode* frameNode, const std::optional<std::string>& groupName)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (groupName.has_value()) {
+        eventHub->SetGroupName(groupName.value());
+    }
+}
+
 bool CheckBoxModelNG::GetSelect(FrameNode* frameNode)
 {
     bool value = false;
+    CHECK_NULL_RETURN(frameNode, value);
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(CheckBoxPaintProperty, CheckBoxSelect, value, frameNode, value);
     return value;
 }
@@ -218,7 +254,7 @@ Color CheckBoxModelNG::GetSelectedColor(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, value);
     auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, value);
-    auto theme = pipelineContext->GetTheme<CheckboxTheme>();
+    auto theme = pipelineContext->GetTheme<CheckboxTheme>(frameNode->GetThemeScopeId());
     CHECK_NULL_RETURN(theme, value);
     value = theme->GetActiveColor();
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -232,7 +268,7 @@ Color CheckBoxModelNG::GetUnSelectedColor(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, value);
     auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, value);
-    auto theme = pipelineContext->GetTheme<CheckboxTheme>();
+    auto theme = pipelineContext->GetTheme<CheckboxTheme>(frameNode->GetThemeScopeId());
     CHECK_NULL_RETURN(theme, value);
     value = theme->GetInactiveColor();
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -246,7 +282,7 @@ Color CheckBoxModelNG::GetCheckMarkColor(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, value);
     auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, value);
-    auto theme = pipelineContext->GetTheme<CheckboxTheme>();
+    auto theme = pipelineContext->GetTheme<CheckboxTheme>(frameNode->GetThemeScopeId());
     CHECK_NULL_RETURN(theme, value);
     value = theme->GetPointColor();
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -257,6 +293,7 @@ Color CheckBoxModelNG::GetCheckMarkColor(FrameNode* frameNode)
 Dimension CheckBoxModelNG::GetCheckMarkSize(FrameNode* frameNode)
 {
     Dimension value = Dimension(CHECK_BOX_MARK_SIZE_INVALID_VALUE);
+    CHECK_NULL_RETURN(frameNode, value);
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
         CheckBoxPaintProperty, CheckBoxCheckMarkSize, value, frameNode, value);
     return value;
@@ -279,6 +316,7 @@ Dimension CheckBoxModelNG::GetCheckMarkWidth(FrameNode* frameNode)
 CheckBoxStyle CheckBoxModelNG::GetCheckboxStyle(FrameNode* frameNode)
 {
     CheckBoxStyle value = CheckBoxStyle::CIRCULAR_STYLE;
+    CHECK_NULL_RETURN(frameNode, value);
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
         CheckBoxPaintProperty, CheckBoxSelectedStyle, value, frameNode, value);
     return value;
@@ -294,6 +332,7 @@ void CheckBoxModelNG::SetBuilderFunc(FrameNode* frameNode, NG::CheckBoxMakeCallb
 
 void CheckBoxModelNG::SetChangeValue(FrameNode* frameNode, bool value)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCheckBoxSelect(value);
@@ -301,9 +340,68 @@ void CheckBoxModelNG::SetChangeValue(FrameNode* frameNode, bool value)
 
 void CheckBoxModelNG::SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange)
 {
-    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
 
+std::string CheckBoxModelNG::GetCheckboxName(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, "");
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    CHECK_NULL_RETURN(eventHub, "");
+    return eventHub->GetName();
+}
+
+std::string CheckBoxModelNG::GetCheckboxGroup(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, "");
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
+    CHECK_NULL_RETURN(eventHub, "");
+    return eventHub->GetGroupName();
+}
+
+void CheckBoxModelNG::ResetSelectedColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxSelectedColor, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxSelectedColorFlagByUser, PROPERTY_UPDATE_RENDER);
+}
+
+void CheckBoxModelNG::ResetSelectedColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxSelectedColor,
+        PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxSelectedColorFlagByUser,
+        PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void CheckBoxModelNG::ResetUnSelectedColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxUnSelectedColor, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxUnSelectedColorFlagByUser,
+        PROPERTY_UPDATE_RENDER);
+}
+
+void CheckBoxModelNG::ResetUnSelectedColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxUnSelectedColor,
+        PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxUnSelectedColorFlagByUser,
+        PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void CheckBoxModelNG::ResetCheckMarkColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxCheckMarkColor, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxCheckMarkColorFlagByUser, PROPERTY_UPDATE_RENDER);
+}
+
+void CheckBoxModelNG::ResetCheckMarkColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxCheckMarkColor,
+        PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxCheckMarkColorFlagByUser,
+        PROPERTY_UPDATE_RENDER, frameNode);
+}
 } // namespace OHOS::Ace::NG

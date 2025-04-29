@@ -48,6 +48,14 @@ private:
     std::string plainText_;
 };
 
+enum class DragDropInitiatingStatus : int32_t {
+    IDLE = 0,
+    READY,
+    PRESS,
+    LIFTING,
+    MOVING,
+};
+
 enum class DragRet {
     DRAG_DEFAULT = -1,
     DRAG_SUCCESS = 0,
@@ -65,6 +73,12 @@ enum class PreDragStatus {
     PREVIEW_LANDING_STARTED,
     PREVIEW_LANDING_FINISHED,
     ACTION_CANCELED_BEFORE_DRAG,
+    PREPARING_FOR_DRAG_DETECTION,
+};
+
+enum class DragStartRequestStatus : int32_t {
+    WAITING = 0,
+    READY
 };
 
 enum class DragBehavior {
@@ -235,7 +249,7 @@ public:
         udKey_ = udKey;
     }
 
-    std::string GetUdKey()
+    const std::string& GetUdKey()
     {
         return udKey_;
     }
@@ -297,6 +311,44 @@ public:
         return isCapi_;
     }
 
+    void SetDropAnimation(std::function<void()>&& executeDropAnimation)
+    {
+        executeDropAnimation_ = std::move(executeDropAnimation);
+    }
+
+    bool HasDropAnimation() const
+    {
+        return (executeDropAnimation_ != nullptr);
+    }
+
+    void ExecuteDropAnimation()
+    {
+        if (executeDropAnimation_) {
+            auto executeDropAnimation = executeDropAnimation_;
+            executeDropAnimation();
+        }
+    }
+
+    void SetIsDragEndPending(bool isDragEndPending)
+    {
+        isDragEndPending_ = isDragEndPending;
+    }
+
+    bool IsDragEndPending() const
+    {
+        return isDragEndPending_;
+    }
+
+    void SetRequestIdentify(int32_t requestId)
+    {
+        requestId_ = requestId;
+    }
+
+    int32_t GetRequestIdentify() const
+    {
+        return requestId_;
+    }
+
 private:
     RefPtr<PasteData> pasteData_;
     double screenX_ = 0.0;
@@ -321,6 +373,9 @@ private:
     Velocity velocity_;
     std::vector<KeyCode> pressedKeyCodes_;
     bool isCapi_ = false;
+    std::function<void()> executeDropAnimation_;
+    int32_t requestId_ = -1;
+    bool isDragEndPending_ = false;
 };
 
 class NotifyDragEvent : public DragEvent {

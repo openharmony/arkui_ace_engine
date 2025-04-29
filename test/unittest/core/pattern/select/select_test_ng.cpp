@@ -36,10 +36,9 @@
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
-#include "core/components_ng/pattern/option/option_paint_property.h"
-#include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
@@ -84,6 +83,16 @@ const Color BG_COLOR_VALUE = Color::FromRGB(100, 255, 100);
 const std::vector<SelectParam> CREATE_VALUE = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
     { OPTION_TEXT_3, INTERNAL_SOURCE } };
 constexpr int32_t PLATFORM_VERSION_ELEVEN = 11;
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == SelectTheme::TypeId()) {
+        return AceType::MakeRefPtr<SelectTheme>();
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 struct TestProperty {
     std::optional<Dimension> FontSize = std::nullopt;
@@ -112,7 +121,11 @@ void SelectTestNg::SetUpTestCase()
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        return GetTheme(type);
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
 }
 
 void SelectTestNg::TearDownTestCase()
@@ -186,7 +199,8 @@ HWTEST_F(SelectTestNg, SelectLayoutPropertyTest001, TestSize.Level1)
     auto options = pattern->GetOptions();
     EXPECT_EQ(options.size(), params.size());
     for (size_t i = 0; i < options.size(); ++i) {
-        auto optionPattern = options[i]->GetPattern<OptionPattern>();
+        auto optionPattern = options[i]->GetPattern<MenuItemPattern>();
+        ASSERT_NE(optionPattern, nullptr);
         EXPECT_EQ(optionPattern->GetText(), params[i].text);
     }
 }
@@ -264,7 +278,7 @@ HWTEST_F(SelectTestNg, SelectSetMenuAlign001, TestSize.Level1)
     menuAlign.alignType = MenuAlignType::END;
     menuAlign.offset = DimensionOffset(Dimension(OFFSETX, DimensionUnit::VP), Dimension(OFFSETY, DimensionUnit::VP));
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_TRUE(select->GetChildren().empty());
+    ASSERT_FALSE(select->GetChildren().empty());
     EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
     auto selectPattern = select->GetPattern<SelectPattern>();
     ASSERT_NE(selectPattern, nullptr);
@@ -345,7 +359,7 @@ HWTEST_F(SelectTestNg, OnModifyDone001, TestSize.Level1)
      */
     selectPattern->OnModifyDone();
     auto host = selectPattern->GetHost();
-    EXPECT_NE(host->GetEventHub<SelectEventHub>(), nullptr);
+    EXPECT_NE(host->GetOrCreateEventHub<SelectEventHub>(), nullptr);
 }
 /**
  * @tc.name: UpdateSelectedProps001
@@ -459,17 +473,20 @@ HWTEST_F(SelectTestNg, SelectLayoutPropertyTest004, TestSize.Level1)
     EXPECT_EQ(options.size(), CREATE_VALUE.size());
     for (size_t i = 0; i < options.size(); ++i) {
         pattern->SetSelected(i);
-        auto optionPattern = options[i]->GetPattern<OptionPattern>();
+        auto optionPattern = options[i]->GetPattern<MenuItemPattern>();
+        ASSERT_NE(optionPattern, nullptr);
         optionPattern->selectTheme_ = AceType::MakeRefPtr<SelectTheme>();
         optionPattern->textTheme_ = AceType::MakeRefPtr<TextTheme>();
         EXPECT_EQ(optionPattern->GetText(), CREATE_VALUE[i].text);
         pattern->SetOptionBgColor(BG_COLOR_VALUE);
+        optionPattern->HandleOptionBackgroundColor();
         EXPECT_EQ(optionPattern->bgColor_, BG_COLOR_VALUE);
         pattern->SetOptionFontFamily(FONT_FAMILY_VALUE);
         pattern->SetOptionFontSize(FONT_SIZE_VALUE);
         pattern->SetOptionItalicFontStyle(ITALIC_FONT_STYLE_VALUE);
         pattern->SetOptionFontColor(TEXT_COLOR_VALUE);
         pattern->SetOptionFontWeight(FONT_WEIGHT_VALUE);
+        optionPattern->HandleOptionFontColor();
         EXPECT_EQ(optionPattern->GetFontColor(), TEXT_COLOR_VALUE);
         EXPECT_EQ(optionPattern->GetFontSize(), FONT_SIZE_VALUE);
         EXPECT_EQ(optionPattern->GetFontFamily(), FONT_FAMILY_VALUE);
@@ -595,7 +612,7 @@ HWTEST_F(SelectTestNg, SelectAccessibilityPropertyGetBeginIndex001, TestSize.Lev
     EXPECT_EQ(selectAccessibilityProperty_->GetBeginIndex(), SELECT_ERROR);
 
     auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+        []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
     ASSERT_NE(option, nullptr);
 
     selectPattern_->options_.push_back(option);
@@ -618,7 +635,7 @@ HWTEST_F(SelectTestNg, SelectAccessibilityPropertyGetEndIndex001, TestSize.Level
     EXPECT_EQ(selectAccessibilityProperty_->GetEndIndex(), SELECT_ERROR);
 
     auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+        []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
     ASSERT_NE(option, nullptr);
     /**
      * @tc.steps: step1. Add two option and verify end index of select.
@@ -667,7 +684,7 @@ HWTEST_F(SelectTestNg, SelectAccessibilityPropertyGetCollectionItemCounts001, Te
     EXPECT_EQ(selectAccessibilityProperty_->GetCollectionItemCounts(), SELECT_ERROR);
 
     auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+        []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
     ASSERT_NE(option, nullptr);
 
     for (int i = 0; i < CURRENT_INDEX; i++) {
@@ -795,7 +812,7 @@ HWTEST_F(SelectTestNg, SelectSetArrowPositionTest002, TestSize.Level1)
     selectModelInstance.SetArrowPosition(ArrowPosition::END);
     selectModelInstance.SetSpace(Dimension(20.00, DimensionUnit::VP));
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_TRUE(select->GetChildren().empty());
+    ASSERT_FALSE(select->GetChildren().empty());
 }
 
 /**
@@ -857,14 +874,13 @@ HWTEST_F(SelectTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
      * is the same as the original input.
      * @tc.expected: Property is setted successfully and obejects should not be null.
      */
-    selectTheme->backgroundColor_ = Color::BLACK;
     selectPattern->OnColorConfigurationUpdate();
     auto menuNode = selectPattern->GetMenuNode();
     ASSERT_NE(menuNode, nullptr);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
     auto renderContext = menuNode->GetRenderContext();
-    EXPECT_EQ(renderContext->GetBackgroundColor(), Color::BLACK);
+    EXPECT_EQ(renderContext->GetBackgroundColor(), Color::WHITE);
 }
 
 /**
@@ -1089,7 +1105,7 @@ HWTEST_F(SelectTestNg, SelectPattern001, TestSize.Level1)
      * @tc.expected: Objects are gotten successfully and option pattern should not be null.
      */
     auto options = pattern->GetOptions();
-    auto optionPattern = options.front()->GetPattern<OptionPattern>();
+    auto optionPattern = options.front()->GetPattern<MenuItemPattern>();
     ASSERT_NE(optionPattern, nullptr);
     /**
      * @tc.steps: step4. Set and update background color of option.
@@ -1144,21 +1160,9 @@ HWTEST_F(SelectTestNg, SelectOption001, TestSize.Level1)
      */
     auto options = selectPattern->GetOptions();
     if (options.size() > 0) {
-        auto optionPaintProperty = options[0]->GetPaintProperty<OptionPaintProperty>();
+        auto optionPaintProperty = options[0]->GetPaintProperty<MenuItemPaintProperty>();
         EXPECT_EQ(optionPaintProperty->GetSelectModifiedWidth().value(), OPTION_WIDTH.ConvertToPx());
     }
-}
-
-/**
- * @tc.name: SelectFont001
- * @tc.desc: Test SelectPattern GetFontSize.
- * @tc.type: FUNC
- */
-HWTEST_F(SelectTestNg, SelectFont001, TestSize.Level1)
-{
-    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto selectPattern = select->GetPattern<SelectPattern>();
-    auto props = selectPattern->text_->GetLayoutProperty<TextLayoutProperty>();
 }
 
 /**
@@ -1207,7 +1211,6 @@ HWTEST_F(SelectTestNg, SetSelectDefaultThemeTest001, TestSize.Level1)
     ASSERT_NE(select, nullptr);
     auto selectPattern = select->GetPattern<SelectPattern>();
     ASSERT_NE(selectPattern, nullptr);
-    selectPattern->SetSelectDefaultTheme();
     /**
      * @tc.steps: step2. build render context, pipeline and select theme.
      * @tc.expected: Objects are created successfully.
@@ -1388,12 +1391,12 @@ HWTEST_F(SelectTestNg, SetSelectedOptionFontSize002, TestSize.Level1)
     pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
     pattern->selected_ = 1;
     auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+        []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
     ASSERT_NE(option, nullptr);
     pattern->options_.push_back(option);
     pattern->options_.push_back(option);
     pattern->SetSelectedOptionFontSize(Dimension(20.00, DimensionUnit::VP));
-    EXPECT_NE(pattern->options_[pattern->selected_]->GetPattern<OptionPattern>(), nullptr);
+    EXPECT_NE(pattern->options_[pattern->selected_]->GetPattern<MenuItemPattern>(), nullptr);
 }
 
 /**
@@ -1432,11 +1435,11 @@ HWTEST_F(SelectTestNg, SetSelectedOptionFontWeight002, TestSize.Level1)
     pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
     pattern->selected_ = 0;
     auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+        []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
     ASSERT_NE(option, nullptr);
     pattern->options_.push_back(option);
     pattern->SetSelectedOptionFontWeight(FontWeight::NORMAL);
-    EXPECT_NE(pattern->options_[pattern->selected_]->GetPattern<OptionPattern>(), nullptr);
+    EXPECT_NE(pattern->options_[pattern->selected_]->GetPattern<MenuItemPattern>(), nullptr);
 }
 
 /**
@@ -1509,11 +1512,11 @@ HWTEST_F(SelectTestNg, SetSelectedOptionFontFamily003, TestSize.Level1)
     std::vector<std::string> value = { "select", "font", "family" };
     pattern->selected_ = 0;
     auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+        []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
     ASSERT_NE(option, nullptr);
     pattern->options_.push_back(option);
     pattern->SetSelectedOptionFontFamily(value);
-    EXPECT_NE(pattern->options_[pattern->selected_]->GetPattern<OptionPattern>(), nullptr);
+    EXPECT_NE(pattern->options_[pattern->selected_]->GetPattern<MenuItemPattern>(), nullptr);
 }
 
 /**
@@ -1571,11 +1574,11 @@ HWTEST_F(SelectTestNg, SetSelectedOptionItalicFontStyle003, TestSize.Level1)
     pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
     pattern->selected_ = 0;
     auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+        []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
     ASSERT_NE(option, nullptr);
     pattern->options_.push_back(option);
     pattern->SetSelectedOptionItalicFontStyle(Ace::FontStyle::NORMAL);
-    EXPECT_NE(pattern->options_[pattern->selected_]->GetPattern<OptionPattern>(), nullptr);
+    EXPECT_NE(pattern->options_[pattern->selected_]->GetPattern<MenuItemPattern>(), nullptr);
 }
 
 /**
@@ -1624,7 +1627,7 @@ HWTEST_F(SelectTestNg, OnAfterModifyDone001, TestSize.Level1)
      */
     selectPattern->OnAfterModifyDone();
     auto host = selectPattern->GetHost();
-    EXPECT_NE(host->GetEventHub<SelectEventHub>(), nullptr);
+    EXPECT_NE(host->GetOrCreateEventHub<SelectEventHub>(), nullptr);
 }
 
 /**
@@ -1696,11 +1699,11 @@ HWTEST_F(SelectTestNg, UpdateLastSelectedProps001, TestSize.Level1)
     EXPECT_TRUE(pattern);
     pattern->selected_ = 1;
     auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+        []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
     ASSERT_NE(option, nullptr);
     pattern->options_.push_back(option);
     pattern->UpdateLastSelectedProps(0);
-    EXPECT_NE(pattern->options_[0]->GetPattern<OptionPattern>(), nullptr);
+    EXPECT_NE(pattern->options_[0]->GetPattern<MenuItemPattern>(), nullptr);
 }
 
 /**
@@ -1720,12 +1723,12 @@ HWTEST_F(SelectTestNg, UpdateLastSelectedProps002, TestSize.Level1)
     EXPECT_TRUE(pattern);
     pattern->selected_ = 1;
     auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+        []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
     ASSERT_NE(option, nullptr);
     pattern->options_.push_back(option);
     EXPECT_NE(pattern->options_.size(), 0);
     pattern->UpdateLastSelectedProps(3);
-    EXPECT_EQ(pattern->options_[pattern->selected_]->GetPattern<OptionPattern>(), 1);
+    EXPECT_EQ(pattern->options_[pattern->selected_]->GetPattern<MenuItemPattern>(), 1);
 }
 
 /**
@@ -1767,7 +1770,7 @@ HWTEST_F(SelectTestNg, UpdateText002, TestSize.Level1)
     EXPECT_TRUE(pattern);
     const int32_t index = 1;
     auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+        []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
     ASSERT_NE(option, nullptr);
     pattern->options_.push_back(option);
     EXPECT_EQ(pattern->options_.size(), 1);
@@ -1818,7 +1821,7 @@ HWTEST_F(SelectTestNg, ToJsonValue002, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue = std::make_unique<JsonValue>();
     ASSERT_NE(jsonValue, nullptr);
     auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+        []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
     ASSERT_NE(option, nullptr);
     pattern->options_.push_back(option);
     pattern->menuWrapper_ = FrameNode::CreateFrameNode(

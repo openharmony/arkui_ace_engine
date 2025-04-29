@@ -13,11 +13,9 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+#include "base/utils/utf_helper.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -31,22 +29,22 @@ int32_t RichEditorInsertValue::GetInsertOffset() const
     return insertOffset_;
 }
 
-void RichEditorInsertValue::SetInsertValue(const std::string& insertValue)
+void RichEditorInsertValue::SetInsertValue(const std::u16string& insertValue)
 {
     insertValue_ = insertValue;
 }
 
-void RichEditorInsertValue::SetPreviewText(const std::string& previewText)
+void RichEditorInsertValue::SetPreviewText(const std::u16string& previewText)
 {
     previewText_ = previewText;
 }
 
-const std::string& RichEditorInsertValue::GetInsertValue() const
+const std::u16string& RichEditorInsertValue::GetInsertValue() const
 {
     return insertValue_;
 }
 
-const std::string& RichEditorInsertValue::GetPreviewText() const
+const std::u16string& RichEditorInsertValue::GetPreviewText() const
 {
     return previewText_;
 }
@@ -111,22 +109,22 @@ int32_t RichEditorAbstractSpanResult::GetEraseLength() const
     return eraseLength_;
 }
 
-void RichEditorAbstractSpanResult::SetValue(const std::string& value)
+void RichEditorAbstractSpanResult::SetValue(const std::u16string& value)
 {
     value_ = value;
 }
 
-const std::string& RichEditorAbstractSpanResult::GetValue() const
+const std::u16string& RichEditorAbstractSpanResult::GetValue() const
 {
     return value_;
 }
 
-void RichEditorAbstractSpanResult::SetPreviewText(const std::string& previewText)
+void RichEditorAbstractSpanResult::SetPreviewText(const std::u16string& previewText)
 {
     previewText_ = previewText;
 }
 
-const std::string& RichEditorAbstractSpanResult::GetPreviewText() const
+const std::u16string& RichEditorAbstractSpanResult::GetPreviewText() const
 {
     return previewText_;
 }
@@ -164,6 +162,16 @@ void RichEditorAbstractSpanResult::SetLineHeight(double lineHeight)
 double RichEditorAbstractSpanResult::GetLineHeight() const
 {
     return lineHeight_;
+}
+
+void RichEditorAbstractSpanResult::SetHalfLeading(bool halfLeading)
+{
+    halfLeading_ = halfLeading;
+}
+
+bool RichEditorAbstractSpanResult::GetHalfLeading() const
+{
+    return halfLeading_;
 }
 
 void RichEditorAbstractSpanResult::SetLetterspacing(double letterSpacing)
@@ -331,6 +339,16 @@ ImageFit RichEditorAbstractSpanResult::GetObjectFit() const
     return objectFit_;
 }
 
+void RichEditorAbstractSpanResult::SetUrlAddress(const std::u16string& urlAddress)
+{
+    urlAddress_ = urlAddress;
+}
+
+const std::u16string& RichEditorAbstractSpanResult::GetUrlAddress() const
+{
+    return urlAddress_;
+}
+
 void RichEditorDeleteValue::SetOffset(int32_t offset)
 {
     offset_ = offset;
@@ -466,6 +484,16 @@ const RefPtr<SpanStringBase> StyledStringChangeValue::GetReplacementString() con
     return replacementString_;
 }
 
+void StyledStringChangeValue::SetPreviewText(const RefPtr<SpanStringBase>& previewText)
+{
+    previewText_ = previewText;
+}
+
+const RefPtr<SpanStringBase> StyledStringChangeValue::GetPreviewText() const
+{
+    return previewText_;
+}
+
 void RichEditorEventHub::SetOnReady(std::function<void()>&& func)
 {
     onReady_ = std::move(func);
@@ -533,9 +561,7 @@ void RichEditorEventHub::FireOnDeleteComplete()
 {
     if (onDeleteComplete_) {
         onDeleteComplete_();
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Radio.onChange");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Radio.onChange");
     }
 }
 
@@ -627,6 +653,18 @@ void RichEditorEventHub::FireOnCopy(NG::TextCommonEvent& value)
 {
     if (onCopy_) {
         onCopy_(value);
+    }
+}
+
+void RichEditorEventHub::SetOnShare(std::function<void(NG::TextCommonEvent&)>&& func)
+{
+    onShare_ = std::move(func);
+}
+
+void RichEditorEventHub::FireOnShare(NG::TextCommonEvent& value)
+{
+    if (onShare_) {
+        onShare_(value);
     }
 }
 

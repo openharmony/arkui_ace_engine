@@ -13,11 +13,9 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/side_bar_container_modifier.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components_ng/base/frame_node.h"
+
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
@@ -238,23 +236,59 @@ void ResetSideBarContainerDivider(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUISideBarContainerModifier* GetSideBarContainerModifier()
 {
-    static const ArkUISideBarContainerModifier modifier = { SetSideBarWidth, ResetSideBarWidth, SetMinSideBarWidth,
-        ResetMinSideBarWidth, SetControlButton, ResetControlButton, SetShowControlButton, ResetShowControlButton,
-        SetAutoHide, ResetAutoHide, SetSideBarContainerMaxSideBarWidth, ResetSideBarContainerMaxSideBarWidth,
-        SetSideBarContainerMinContentWidth, ResetSideBarContainerMinContentWidth, SetSideBarPosition,
-        ResetSideBarPosition, SetShowSideBar, ResetShowSideBar, SetSideBarContainerDivider,
-        ResetSideBarContainerDivider };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUISideBarContainerModifier modifier = {
+        .setSideBarWidth = SetSideBarWidth,
+        .resetSideBarWidth = ResetSideBarWidth,
+        .setMinSideBarWidth = SetMinSideBarWidth,
+        .resetMinSideBarWidth = ResetMinSideBarWidth,
+        .setControlButton = SetControlButton,
+        .resetControlButton = ResetControlButton,
+        .setShowControlButton = SetShowControlButton,
+        .resetShowControlButton = ResetShowControlButton,
+        .setAutoHide = SetAutoHide,
+        .resetAutoHide = ResetAutoHide,
+        .setSideBarContainerMaxSideBarWidth = SetSideBarContainerMaxSideBarWidth,
+        .resetSideBarContainerMaxSideBarWidth = ResetSideBarContainerMaxSideBarWidth,
+        .setSideBarContainerMinContentWidth = SetSideBarContainerMinContentWidth,
+        .resetSideBarContainerMinContentWidth = ResetSideBarContainerMinContentWidth,
+        .setSideBarPosition = SetSideBarPosition,
+        .resetSideBarPosition = ResetSideBarPosition,
+        .setShowSideBar = SetShowSideBar,
+        .resetShowSideBar = ResetShowSideBar,
+        .setSideBarContainerDivider = SetSideBarContainerDivider,
+        .resetSideBarContainerDivider = ResetSideBarContainerDivider,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUISideBarContainerModifier* GetCJUISideBarContainerModifier()
 {
-    static const CJUISideBarContainerModifier modifier = { SetSideBarWidth, ResetSideBarWidth, SetMinSideBarWidth,
-        ResetMinSideBarWidth, SetControlButton, ResetControlButton, SetShowControlButton, ResetShowControlButton,
-        SetAutoHide, ResetAutoHide, SetSideBarContainerMaxSideBarWidth, ResetSideBarContainerMaxSideBarWidth,
-        SetSideBarContainerMinContentWidth, ResetSideBarContainerMinContentWidth, SetSideBarPosition,
-        ResetSideBarPosition, SetShowSideBar, ResetShowSideBar, SetSideBarContainerDivider,
-        ResetSideBarContainerDivider };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUISideBarContainerModifier modifier = {
+        .setSideBarWidth = SetSideBarWidth,
+        .resetSideBarWidth = ResetSideBarWidth,
+        .setMinSideBarWidth = SetMinSideBarWidth,
+        .resetMinSideBarWidth = ResetMinSideBarWidth,
+        .setControlButton = SetControlButton,
+        .resetControlButton = ResetControlButton,
+        .setShowControlButton = SetShowControlButton,
+        .resetShowControlButton = ResetShowControlButton,
+        .setAutoHide = SetAutoHide,
+        .resetAutoHide = ResetAutoHide,
+        .setSideBarContainerMaxSideBarWidth = SetSideBarContainerMaxSideBarWidth,
+        .resetSideBarContainerMaxSideBarWidth = ResetSideBarContainerMaxSideBarWidth,
+        .setSideBarContainerMinContentWidth = SetSideBarContainerMinContentWidth,
+        .resetSideBarContainerMinContentWidth = ResetSideBarContainerMinContentWidth,
+        .setSideBarPosition = SetSideBarPosition,
+        .resetSideBarPosition = ResetSideBarPosition,
+        .setShowSideBar = SetShowSideBar,
+        .resetShowSideBar = ResetShowSideBar,
+        .setSideBarContainerDivider = SetSideBarContainerDivider,
+        .resetSideBarContainerDivider = ResetSideBarContainerDivider,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

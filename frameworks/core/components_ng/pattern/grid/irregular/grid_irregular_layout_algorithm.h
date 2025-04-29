@@ -20,6 +20,7 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 /**
  * @brief GridIrregularLayout class supports irregular grid items that take multiple rows and multiple columns.
@@ -33,8 +34,10 @@ class GridIrregularLayoutAlgorithm : public GridLayoutBaseAlgorithm {
     DECLARE_ACE_TYPE(GridIrregularLayoutAlgorithm, GridLayoutBaseAlgorithm);
 
 public:
-    explicit GridIrregularLayoutAlgorithm(GridLayoutInfo info, bool overScroll = false)
-        : GridLayoutBaseAlgorithm(std::move(info)), info_(gridLayoutInfo_), overScroll_(overScroll) {};
+    explicit GridIrregularLayoutAlgorithm(
+        GridLayoutInfo info, bool canOverScrollStart = false, bool canOverScrollEnd = false)
+        : GridLayoutBaseAlgorithm(std::move(info)), canOverScrollStart_(canOverScrollStart),
+          canOverScrollEnd_(canOverScrollEnd) {};
 
     ~GridIrregularLayoutAlgorithm() override = default;
 
@@ -45,6 +48,11 @@ public:
     void SetEnableSkip(bool value)
     {
         enableSkip_ = value;
+    }
+
+    void SetScrollSource(bool source)
+    {
+        scrollSource_ = source;
     }
 
 private:
@@ -63,7 +71,7 @@ private:
 
     void MeasureOnOffset(float mainSize);
     void MeasureForward(float mainSize);
-    void MeasureBackward(float mainSize);
+    void MeasureBackward(float mainSize, bool toAdjust = false);
 
     /**
      * @brief Check if offset is larger than the entire viewport. If so, skip measuring intermediate items and jump
@@ -89,8 +97,9 @@ private:
      * @brief Performs the layout of the children based on the main offset.
      * @param mainOffset The main offset of the layout.
      * @param cacheLine number of lines of cache items to layout
+     * @return number of cached items laid out in front and back
      */
-    void LayoutChildren(float mainOffset, int32_t cacheLine);
+    std::pair<int32_t, int32_t> LayoutChildren(float mainOffset, int32_t cacheLine);
 
     /**
      * @brief Update variables in GridLayoutInfo at the end of Layout.
@@ -145,9 +154,17 @@ private:
 
     bool IsIrregularLine(int32_t lineIndex) const override;
 
+    /**
+     * @brief post delayed task to preload GridItems in cache range.
+     */
     void PreloadItems(int32_t cacheCnt);
+    /**
+     * @brief immediately create & measure GridItems in cache range.
+     */
+    void SyncPreloadItems(int32_t cacheCnt);
 
-    GridLayoutInfo& info_;
+    void AdaptToChildMainSize(RefPtr<GridLayoutProperty>& gridLayoutProperty, float mainSize, SizeF idealSize);
+
     LayoutWrapper* wrapper_ = nullptr;
 
     std::vector<float> crossLens_; /**< The column widths of the GridItems. */
@@ -157,7 +174,11 @@ private:
     float postJumpOffset_ = 0.0f; /**< The offset to be applied after performing a jump. */
 
     bool enableSkip_ = true;
-    bool overScroll_ = false;
+    bool canOverScrollStart_ = false;
+    bool canOverScrollEnd_ = false;
+    int32_t scrollSource_ = SCROLL_FROM_NONE;
+
+    SizeF frameSize_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridIrregularLayoutAlgorithm);
 };

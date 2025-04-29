@@ -96,6 +96,11 @@ public:
         return userCallback_ != nullptr;
     }
 
+    bool IsComponentClickable() const
+    {
+        return !(clickEvents_.empty() && !clickAfterEvents_ && !userCallback_ && !jsFrameNodeCallback_);
+    }
+
     void AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
     {
         if (clickEvents_.empty()) {
@@ -104,6 +109,14 @@ public:
         }
         if (std::find(clickEvents_.begin(), clickEvents_.end(), clickEvent) == clickEvents_.end()) {
             clickEvents_.emplace_back(clickEvent);
+        }
+    }
+
+    void AddDistanceThreshold(double distanceThreshold)
+    {
+        distanceThreshold_ = distanceThreshold;
+        if (distanceThreshold_ <= 0) {
+            distanceThreshold_ = std::numeric_limits<double>::infinity();
         }
     }
 
@@ -181,6 +194,7 @@ private:
     RefPtr<ClickEvent> userCallback_;
     RefPtr<ClickEvent> jsFrameNodeCallback_;
     RefPtr<ClickRecognizer> clickRecognizer_;
+    double distanceThreshold_ = std::numeric_limits<double>::infinity();
 
     ACE_DISALLOW_COPY_AND_MOVE(ClickEventActuator);
 };

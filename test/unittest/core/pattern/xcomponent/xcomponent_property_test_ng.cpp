@@ -19,8 +19,10 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "base/geometry/ng/size_t.h"
 
 #define private public
+#define protected public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/render/mock_render_surface.h"
@@ -34,6 +36,8 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_layout_algorithm.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_surface_holder.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
@@ -87,6 +91,7 @@ const float SURFACE_OFFSETX = 10.0f;
 const float SURFACE_OFFSETY = 20.0f;
 const uint32_t TRANSFORM_HINT = 90;
 const uint64_t SURFACE_ID_UINT = 2430951489577;
+const RenderFit RENDER_FIT = RenderFit::BOTTOM_RIGHT;
 TestProperty testProperty;
 } // namespace
 
@@ -1594,68 +1599,6 @@ HWTEST_F(XComponentPropertyTestNg, XComponentModelNGTest041, TestSize.Level1)
 }
 
 /**
- * @tc.name: XComponentModelNGLifeCycleCallbackTest042
- * @tc.desc: Test XComponentModelNG controller lifecycle callback, type = XComponentType::SURFACE
- * @tc.type: FUNC
- */
-HWTEST_F(XComponentPropertyTestNg, XComponentModelNGLifeCycleCallbackTest042, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. set surface life cycle callback
-     */
-    std::string onSurfaceCreatedSurfaceId = "";
-    std::string onSurfaceChangedSurfaceId = "";
-    std::string onSurfaceDestroyedSurfaceId = "";
-    auto onSurfaceCreated = [&onSurfaceCreatedSurfaceId](
-                                const std::string& surfaceId) { onSurfaceCreatedSurfaceId = surfaceId; };
-    auto onSurfaceChanged = [&onSurfaceChangedSurfaceId](const std::string& surfaceId, const RectF& /* rect */) {
-        onSurfaceChangedSurfaceId = surfaceId;
-    };
-    auto onSurfaceDestroyed = [&onSurfaceDestroyedSurfaceId](
-                                  const std::string& surfaceId) { onSurfaceDestroyedSurfaceId = surfaceId; };
-
-    /**
-     * @tc.steps: step2. call CreateFrameNode
-     *            case: type = XComponentType::SURFACE
-     * @tc.expected: xcomponent frameNode create successfully
-     */
-    const std::shared_ptr<InnerXComponentController> xComponentController;
-    XComponentModelNG xComponent;
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        xComponent.CreateFrameNode(nodeId, XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME);
-    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
-
-    /**
-     * @tc.steps: step3. call SetControllerOnCreated, SetControllerOnChanged and SetControllerOnDestroyed
-     * @tc.expected: onSurfaceCreated & onSurfaceChanged has called
-     */
-    auto pattern = frameNode->GetPattern<XComponentPattern>();
-    ASSERT_TRUE(pattern);
-    pattern->surfaceId_ = SURFACE_ID;
-    XComponentModelNG::SetControllerOnCreated(Referenced::RawPtr(frameNode), std::move(onSurfaceCreated));
-    XComponentModelNG::SetControllerOnChanged(Referenced::RawPtr(frameNode), std::move(onSurfaceChanged));
-    XComponentModelNG::SetControllerOnDestroyed(Referenced::RawPtr(frameNode), std::move(onSurfaceDestroyed));
-    DirtySwapConfig config;
-    auto xComponentLayoutAlgorithm = AceType::MakeRefPtr<XComponentLayoutAlgorithm>();
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetFrameSize(MAX_SIZE);
-    geometryNode->SetContentSize(MAX_SIZE);
-    frameNode->geometryNode_ = geometryNode;
-    pattern->BeforeSyncGeometryProperties(config);
-    EXPECT_STREQ(SURFACE_ID.c_str(), onSurfaceCreatedSurfaceId.c_str());
-    EXPECT_STREQ(SURFACE_ID.c_str(), onSurfaceChangedSurfaceId.c_str());
-
-    /**
-     * @tc.steps: step4. call OnDetachFromFrameNode
-     * @tc.expected: onSurfaceDestroyed has called
-     */
-    pattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
-    EXPECT_STREQ(SURFACE_ID.c_str(), onSurfaceDestroyedSurfaceId.c_str());
-}
-
-/**
  * @tc.name: XComponentModelNGLifeCycleCallbackTest043
  * @tc.desc: Test XComponentModelNG controller lifecycle callback, type = XComponentType::COMPONENT
  * @tc.type: FUNC
@@ -1668,13 +1611,15 @@ HWTEST_F(XComponentPropertyTestNg, XComponentModelNGLifeCycleCallbackTest043, Te
     std::string onSurfaceCreatedSurfaceId = "";
     std::string onSurfaceChangedSurfaceId = "";
     std::string onSurfaceDestroyedSurfaceId = "";
-    auto onSurfaceCreated = [&onSurfaceCreatedSurfaceId](
-                                const std::string& surfaceId) { onSurfaceCreatedSurfaceId = surfaceId; };
+    auto onSurfaceCreated = [&onSurfaceCreatedSurfaceId](const std::string& surfaceId, const std::string& xcId) {
+        onSurfaceCreatedSurfaceId = surfaceId;
+    };
     auto onSurfaceChanged = [&onSurfaceChangedSurfaceId](const std::string& surfaceId, const RectF& /* rect */) {
         onSurfaceChangedSurfaceId = surfaceId;
     };
-    auto onSurfaceDestroyed = [&onSurfaceDestroyedSurfaceId](
-                                  const std::string& surfaceId) { onSurfaceDestroyedSurfaceId = surfaceId; };
+    auto onSurfaceDestroyed = [&onSurfaceDestroyedSurfaceId](const std::string& surfaceId, const std::string& xcId) {
+        onSurfaceDestroyedSurfaceId = surfaceId;
+    };
 
     /**
      * @tc.steps: step2. call CreateFrameNode
@@ -1730,13 +1675,15 @@ HWTEST_F(XComponentPropertyTestNg, XComponentModelNGLifeCycleCallbackTest044, Te
     std::string onSurfaceCreatedSurfaceId = "";
     std::string onSurfaceChangedSurfaceId = "";
     std::string onSurfaceDestroyedSurfaceId = "";
-    auto onSurfaceCreated = [&onSurfaceCreatedSurfaceId](
-                                const std::string& surfaceId) { onSurfaceCreatedSurfaceId = surfaceId; };
+    auto onSurfaceCreated = [&onSurfaceCreatedSurfaceId](const std::string& surfaceId, const std::string& xcId) {
+        onSurfaceCreatedSurfaceId = surfaceId;
+    };
     auto onSurfaceChanged = [&onSurfaceChangedSurfaceId](const std::string& surfaceId, const RectF& /* rect */) {
         onSurfaceChangedSurfaceId = surfaceId;
     };
-    auto onSurfaceDestroyed = [&onSurfaceDestroyedSurfaceId](
-                                  const std::string& surfaceId) { onSurfaceDestroyedSurfaceId = surfaceId; };
+    auto onSurfaceDestroyed = [&onSurfaceDestroyedSurfaceId](const std::string& surfaceId, const std::string& xcId) {
+        onSurfaceDestroyedSurfaceId = surfaceId;
+    };
 
     /**
      * @tc.steps: step2. call CreateFrameNode
@@ -1813,7 +1760,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentModelNGDetachCallbackTest045, TestS
      * @tc.steps: step4. call FireDetachEvent
      * @tc.expected: onDetachKey != CHECK_KEY
      */
-    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     xComponentEventHub->FireDetachEvent(XCOMPONENT_ID);
     EXPECT_FALSE(onDetachKey == CHECK_KEY);
@@ -1929,5 +1876,134 @@ HWTEST_F(XComponentPropertyTestNg, XComponentModelNGTest048, TestSize.Level1)
     ASSERT_TRUE(pattern);
     XComponentModelNG::SetImageAIOptions(Referenced::RawPtr(frameNode), nullptr);
     EXPECT_EQ(pattern->imageAnalyzerManager_, nullptr);
+}
+
+/**
+ * @tc.name: XComponentModelNGTest049
+ * @tc.desc: Test XComponentModelNG SetRenderFit, type = XComponentType::SURFACE
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentPropertyTestNg, XComponentModelNGTest049, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ComponentController.
+     *            case: type = XComponentType::SURFACE
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto xComponentController = std::make_shared<XComponentControllerNG>();
+    XComponentModelNG xComponent;
+    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
+    xComponent.SetSoPath(XCOMPONENT_SO_PATH);
+
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. call SetRenderFit
+     *            case: renderFit == RenderFit::BOTTOM_RIGHT
+     * @tc.expected: handlingSurfaceRenderContext_->SetRenderFit(renderFit) is called
+     */
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->handlingSurfaceRenderContext_),
+        SetRenderFit(RENDER_FIT)).Times(1).WillOnce(Return()).RetiresOnSaturation();
+    xComponent.SetRenderFit(RENDER_FIT);
+
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->handlingSurfaceRenderContext_),
+        SetRenderFit(RENDER_FIT)).Times(1).WillOnce(Return()).RetiresOnSaturation();
+    XComponentModelNG::SetRenderFit(Referenced::RawPtr(frameNode), RENDER_FIT);
+}
+
+/**
+ * @tc.name: XComponentModelNGTest050
+ * @tc.desc: Test XComponentModelNG SetRenderFit, type != XComponentType::SURFACE
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentPropertyTestNg, XComponentModelNGTest050, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ComponentController.
+     *            case: type = XComponentType::TEXTURE
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto xComponentController = std::make_shared<XComponentControllerNG>();
+    XComponentModelNG xComponent;
+    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_TEXTURE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
+    xComponent.SetSoPath(XCOMPONENT_SO_PATH);
+
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. call SetRenderFit
+     *            case: renderFit == RenderFit::BOTTOM_RIGHT
+     * @tc.expected: handlingSurfaceRenderContext_->SetRenderFit(renderFit) is not called
+     */
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    xComponent.SetRenderFit(RENDER_FIT);
+    EXPECT_EQ(pattern->handlingSurfaceRenderContext_, nullptr);
+}
+
+/**
+ * @tc.name: XComponentNodeTypeToStringTest
+ * @tc.desc: Test XComponentNodeTypeToString Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentPropertyTestNg, XComponentNodeTypeToStringTest, TestSize.Level1)
+{
+    auto xComponentController = std::make_shared<XComponentControllerNG>();
+    XComponentModelNG xComponent;
+    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_TEXTURE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
+    xComponent.SetSoPath(XCOMPONENT_SO_PATH);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_TRUE(frameNode);
+    auto xComponentPattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(xComponentPattern);
+    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    EXPECT_EQ(xComponentPattern->XComponentNodeTypeToString(XComponentNodeType::TYPE_NODE), "type_node");
+    EXPECT_EQ(xComponentPattern->XComponentNodeTypeToString(XComponentNodeType::UNKNOWN), "unknown");
+    EXPECT_EQ(xComponentPattern->XComponentNodeTypeToString(XComponentNodeType::CNODE), "cnode");
+    EXPECT_EQ(xComponentPattern->XComponentNodeTypeToString(XComponentNodeType::DECLARATIVE_NODE), "declarative_node");
+    EXPECT_EQ(xComponentPattern->XComponentNodeTypeToString(static_cast<XComponentNodeType>(5)), "unknown");
+}
+
+/**
+ * @tc.name: OnAccessibilityChildTreeRegisterTest001
+ * @tc.desc: Test OnAccessibilityChildTreeRegister Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentPropertyTestNg, OnAccessibilityChildTreeRegisterTest001, TestSize.Level1)
+{
+    auto xComponentController = std::make_shared<XComponentControllerNG>();
+    XComponentModelNG xComponent;
+    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_TEXTURE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
+    xComponent.SetSoPath(XCOMPONENT_SO_PATH);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_TRUE(frameNode);
+    auto xComponentPattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(xComponentPattern);
+    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    EXPECT_FALSE(xComponentPattern->OnAccessibilityChildTreeRegister(1, 0));
+}
+    
+/**
+ * @tc.name: OnAccessibilityChildTreeRegisterTest002
+ * @tc.desc: Test OnAccessibilityChildTreeRegister Func set accessibilityProvider_ != nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentPropertyTestNg, OnAccessibilityChildTreeRegisterTest002, TestSize.Level1)
+{
+    auto xComponentController = std::make_shared<XComponentControllerNG>();
+    XComponentModelNG xComponent;
+    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_TEXTURE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
+    xComponent.SetSoPath(XCOMPONENT_SO_PATH);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_TRUE(frameNode);
+    auto xComponentPattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(xComponentPattern);
+    EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
+    xComponentPattern->accessibilityProvider_ = AceType::MakeRefPtr<XComponentAccessibilityProvider>(xComponentPattern);
+    EXPECT_FALSE(xComponentPattern->OnAccessibilityChildTreeRegister(1, 0));
 }
 } // namespace OHOS::Ace::NG

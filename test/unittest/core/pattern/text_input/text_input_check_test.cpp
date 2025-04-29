@@ -16,7 +16,6 @@
 #include "text_input_base.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {} // namespace
 
 class TextInputCheckTest : public TextInputBases {
@@ -110,7 +109,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave004, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return false
      */
-    EXPECT_FALSE(pattern_->CheckAutoSave());
+    EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
 
@@ -1056,6 +1055,402 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave0032, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckAutoSave0033
+ * @tc.desc: Test the result after check autosave.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCheckTest, CheckAutoSave0033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and set TextContentType PASSPORT_NUMBER.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetEnableAutoFill(true);
+        model.SetContentType(TextContentType::PASSPORT_NUMBER);
+    });
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CheckAutoSave.
+     * @tc.expected: return true
+     */
+    pattern_->lastAutoFillTextValue_ = "a";
+    EXPECT_TRUE(pattern_->CheckAutoSave());
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
+     * @tc.expected: return false
+     */
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    EXPECT_FALSE(pattern_->CheckAutoSave());
+}
+
+/**
+ * @tc.name: CheckAutoSave0034
+ * @tc.desc: Test the result after check autosave.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCheckTest, CheckAutoSave0034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and set TextContentType VALIDITY.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetEnableAutoFill(true);
+        model.SetContentType(TextContentType::VALIDITY);
+    });
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CheckAutoSave.
+     * @tc.expected: return true
+     */
+    pattern_->lastAutoFillTextValue_ = "a";
+    EXPECT_TRUE(pattern_->CheckAutoSave());
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
+     * @tc.expected: return false
+     */
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    EXPECT_FALSE(pattern_->CheckAutoSave());
+}
+
+/**
+ * @tc.name: CheckAutoSave0035
+ * @tc.desc: Test the result after check autosave.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCheckTest, CheckAutoSave0035, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and set TextContentType ISSUE_AT.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetEnableAutoFill(true);
+        model.SetContentType(TextContentType::ISSUE_AT);
+    });
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CheckAutoSave.
+     * @tc.expected: return true
+     */
+    pattern_->lastAutoFillTextValue_ = "a";
+    EXPECT_TRUE(pattern_->CheckAutoSave());
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
+     * @tc.expected: return false
+     */
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    EXPECT_FALSE(pattern_->CheckAutoSave());
+}
+
+/**
+ * @tc.name: CheckAutoSave0036
+ * @tc.desc: Test the result after check autosave.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCheckTest, CheckAutoSave0036, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and set TextContentType ORGANIZATION.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetEnableAutoFill(true);
+        model.SetContentType(TextContentType::ORGANIZATION);
+    });
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CheckAutoSave.
+     * @tc.expected: return true
+     */
+    pattern_->lastAutoFillTextValue_ = "a";
+    EXPECT_TRUE(pattern_->CheckAutoSave());
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
+     * @tc.expected: return false
+     */
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    EXPECT_FALSE(pattern_->CheckAutoSave());
+}
+
+/**
+ * @tc.name: CheckAutoSave0037
+ * @tc.desc: Test the result after check autosave.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCheckTest, CheckAutoSave0037, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and set TextContentType TAX_ID.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetEnableAutoFill(true);
+        model.SetContentType(TextContentType::TAX_ID);
+    });
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CheckAutoSave.
+     * @tc.expected: return true
+     */
+    pattern_->lastAutoFillTextValue_ = "a";
+    EXPECT_TRUE(pattern_->CheckAutoSave());
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
+     * @tc.expected: return false
+     */
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    EXPECT_FALSE(pattern_->CheckAutoSave());
+}
+
+/**
+ * @tc.name: CheckAutoSave0038
+ * @tc.desc: Test the result after check autosave.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCheckTest, CheckAutoSave0038, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and set TextContentType ADDRESS_CITY_AND_STATE.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetEnableAutoFill(true);
+        model.SetContentType(TextContentType::ADDRESS_CITY_AND_STATE);
+    });
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CheckAutoSave.
+     * @tc.expected: return true
+     */
+    pattern_->lastAutoFillTextValue_ = "a";
+    EXPECT_TRUE(pattern_->CheckAutoSave());
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
+     * @tc.expected: return false
+     */
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    EXPECT_FALSE(pattern_->CheckAutoSave());
+}
+
+/**
+ * @tc.name: CheckAutoSave0039
+ * @tc.desc: Test the result after check autosave.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCheckTest, CheckAutoSave0039, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and set TextContentType FLIGHT_NUMBER.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetEnableAutoFill(true);
+        model.SetContentType(TextContentType::FLIGHT_NUMBER);
+    });
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CheckAutoSave.
+     * @tc.expected: return true
+     */
+    pattern_->lastAutoFillTextValue_ = "a";
+    EXPECT_TRUE(pattern_->CheckAutoSave());
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
+     * @tc.expected: return false
+     */
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    EXPECT_FALSE(pattern_->CheckAutoSave());
+}
+
+/**
+ * @tc.name: CheckAutoSave0040
+ * @tc.desc: Test the result after check autosave.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCheckTest, CheckAutoSave0040, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and set TextContentType LICENSE_NUMBER.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetEnableAutoFill(true);
+        model.SetContentType(TextContentType::LICENSE_NUMBER);
+    });
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CheckAutoSave.
+     * @tc.expected: return true
+     */
+    pattern_->lastAutoFillTextValue_ = "a";
+    EXPECT_TRUE(pattern_->CheckAutoSave());
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
+     * @tc.expected: return false
+     */
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    EXPECT_FALSE(pattern_->CheckAutoSave());
+}
+
+/**
+ * @tc.name: CheckAutoSave0041
+ * @tc.desc: Test the result after check autosave.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCheckTest, CheckAutoSave0041, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and set TextContentType LICENSE_FILE_NUMBER.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetEnableAutoFill(true);
+        model.SetContentType(TextContentType::LICENSE_FILE_NUMBER);
+    });
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CheckAutoSave.
+     * @tc.expected: return true
+     */
+    pattern_->lastAutoFillTextValue_ = "a";
+    EXPECT_TRUE(pattern_->CheckAutoSave());
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
+     * @tc.expected: return false
+     */
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    EXPECT_FALSE(pattern_->CheckAutoSave());
+}
+
+/**
+ * @tc.name: CheckAutoSave0042
+ * @tc.desc: Test the result after check autosave.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCheckTest, CheckAutoSave0042, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and set TextContentType LICENSE_PLATE.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetEnableAutoFill(true);
+        model.SetContentType(TextContentType::LICENSE_PLATE);
+    });
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CheckAutoSave.
+     * @tc.expected: return true
+     */
+    pattern_->lastAutoFillTextValue_ = "a";
+    EXPECT_TRUE(pattern_->CheckAutoSave());
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
+     * @tc.expected: return false
+     */
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    EXPECT_FALSE(pattern_->CheckAutoSave());
+}
+
+/**
+ * @tc.name: CheckAutoSave0043
+ * @tc.desc: Test the result after check autosave.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCheckTest, CheckAutoSave0043, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and set TextContentType ENGINE_NUMBER.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetEnableAutoFill(true);
+        model.SetContentType(TextContentType::ENGINE_NUMBER);
+    });
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CheckAutoSave.
+     * @tc.expected: return true
+     */
+    pattern_->lastAutoFillTextValue_ = "a";
+    EXPECT_TRUE(pattern_->CheckAutoSave());
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
+     * @tc.expected: return false
+     */
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    EXPECT_FALSE(pattern_->CheckAutoSave());
+}
+
+/**
+ * @tc.name: CheckAutoSave0044
+ * @tc.desc: Test the result after check autosave.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCheckTest, CheckAutoSave0044, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and set TextContentType LICENSE_CHASSIS_NUMBER.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetEnableAutoFill(true);
+        model.SetContentType(TextContentType::LICENSE_CHASSIS_NUMBER);
+    });
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CheckAutoSave.
+     * @tc.expected: return true
+     */
+    pattern_->lastAutoFillTextValue_ = "a";
+    EXPECT_TRUE(pattern_->CheckAutoSave());
+    FlushLayoutTask(frameNode_);
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. set PasswordTextValue eq textValue and call CheckAutoSave.
+     * @tc.expected: return false
+     */
+    pattern_->lastAutoFillTextValue_ = "abcdefghijklmnopqrstuvwxyz";
+    EXPECT_FALSE(pattern_->CheckAutoSave());
+}
+
+/**
  * @tc.name: GetDragUpperLeftCoordinates001
  * @tc.desc: Test dragUpper left coordinates.
  * @tc.type: FUNC
@@ -1074,53 +1469,6 @@ HWTEST_F(TextInputCheckTest, GetDragUpperLeftCoordinates001, TestSize.Level1)
      */
     OffsetF localOffset(0.0f, 0.0f);
     EXPECT_EQ(pattern_->GetDragUpperLeftCoordinates(), localOffset);
-}
-
-/**
- * @tc.name: HandleOnDragStatusCallback
- * @tc.desc: Test cursor drag status.
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputCheckTest, HandleOnDragStatusCallback, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize text input.
-     */
-    CreateTextField(DEFAULT_TEXT);
-    GetFocus();
-
-    const RefPtr<NotifyDragEvent> notifyDragEvent = AceType::MakeRefPtr<NotifyDragEvent>();
-    std::vector<DragEventType> dragEventType = {
-        DragEventType::MOVE,
-        DragEventType::LEAVE,
-        DragEventType::DROP
-    };
-
-    /**
-     * @tc.steps: step2. set handle cursor on drag moved
-     */
-    auto focushHub = pattern_->GetFocusHub();
-    focushHub->currentFocus_ = false;
-    pattern_->HandleOnDragStatusCallback(dragEventType[0], notifyDragEvent);
-    EXPECT_TRUE(pattern_->isCursorAlwaysDisplayed_);
-    pattern_->HandleOnDragStatusCallback(dragEventType[0], notifyDragEvent);
-
-    /**
-     * @tc.steps: step3. set handle cursor on drag leaved
-     */
-    FlushLayoutTask(frameNode_);
-    GetFocus();
-    pattern_->HandleOnDragStatusCallback(dragEventType[1], notifyDragEvent);
-    EXPECT_FALSE(pattern_->isCursorAlwaysDisplayed_);
-
-    /**
-     * @tc.steps: step3. set handle cursor on drag ended
-     */
-    FlushLayoutTask(frameNode_);
-    GetFocus();
-    pattern_->isCursorAlwaysDisplayed_ = true;
-    pattern_->HandleOnDragStatusCallback(dragEventType[2], notifyDragEvent);
-    EXPECT_FALSE(pattern_->isCursorAlwaysDisplayed_);
 }
 
 /**

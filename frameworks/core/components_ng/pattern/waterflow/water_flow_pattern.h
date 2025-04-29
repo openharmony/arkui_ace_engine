@@ -33,8 +33,11 @@ public:
     bool UpdateCurrentOffset(float delta, int32_t source) override;
     bool IsScrollable() const override;
     bool IsAtTop() const override;
-    bool IsAtBottom() const override;
+    bool IsAtBottom(bool considerRepeat = false) const override;
+    bool IsAtTopWithDelta() const override;
+    bool IsAtBottomWithDelta() const override;
     bool IsReverse() const override;
+    bool IsVerticalReverse() const;
     bool hasFooter()
     {
         return footer_.Upgrade() != nullptr;
@@ -151,6 +154,8 @@ public:
     void OnSectionChanged(int32_t start);
 
     void DumpAdvanceInfo() override;
+    void GetEventDumpInfo() override;
+    void GetEventDumpInfo(std::unique_ptr<JsonValue>& json) override;
 
     void SetPreloadList(std::list<int32_t>&& preload)
     {
@@ -191,6 +196,18 @@ public:
         MarkDirtyNodeSelf();
     }
 
+    float GetPrevOffset() const
+    {
+        return prevOffset_;
+    }
+
+    int32_t GetDefaultCachedCount() const
+    {
+        return layoutInfo_->defCachedCount_;
+    }
+
+    SizeF GetChildrenExpandedSize() override;
+
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override
     {
@@ -209,6 +226,10 @@ private:
     void OnScrollEndCallback() override;
     bool ScrollToTargetIndex(int32_t index);
     bool NeedRender();
+    void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override;
+    void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override;
+    void FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex);
+    void DumpInfoAddSections();
 
     /**
      * @param step FocusStep

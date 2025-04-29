@@ -92,7 +92,9 @@ void PickerTheme::Builder::Parse(const RefPtr<ThemeStyle>& style, const RefPtr<P
     theme->focusColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_FOCUSED, theme->focusColor_);
     theme->selectedOptionStyle_.SetTextColor(
         pattern->GetAttr<Color>("selected_text_color", theme->selectedOptionStyle_.GetTextColor()));
-    theme->focusOptionStyle_.SetTextColor(theme->selectedOptionStyle_.GetTextColor());
+    if (!theme->IsCircleDial()) {
+        theme->focusOptionStyle_.SetTextColor(theme->selectedOptionStyle_.GetTextColor());
+    }
     theme->normalOptionStyle_.SetTextColor(
         pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->normalOptionStyle_.GetTextColor()));
     theme->disappearOptionStyle_.SetTextColor(theme->normalOptionStyle_.GetTextColor());
@@ -112,13 +114,16 @@ void PickerTheme::Builder::Parse(const RefPtr<ThemeStyle>& style, const RefPtr<P
     theme->gradientHeightLimit_ = pattern->GetAttr<Dimension>("picker_gradient_limit", 54.0_vp);
     theme->dividerSpacingHeightLimit_ = pattern->GetAttr<Dimension>("picker_divider_spacing_limit", 64.0_vp);
     theme->pickerDialogFontPadding_ = pattern->GetAttr<Dimension>("picker_divider_spacing_padding", 8.0_vp);
-    theme->selectedTextStyle_ = pattern->GetAttr<Dimension>("picker_select_Font_limit", 40.0_vp);
-    theme->normalTextStyle_ = pattern->GetAttr<Dimension>("picker_normal_Font_limit", 32.0_vp);
-    theme->disappearTextStyle_ = pattern->GetAttr<Dimension>("picker_disappear_Font_limit", 28.0_vp);
+    theme->selectedTextStyle_ = pattern->GetAttr<Dimension>("picker_select_Font_limit", 40.0_fp);
+    theme->normalTextStyle_ = pattern->GetAttr<Dimension>("picker_normal_Font_limit", 32.0_fp);
+    theme->disappearTextStyle_ = pattern->GetAttr<Dimension>("picker_disappear_Font_limit", 28.0_fp);
     theme->pickerDialogNormalFontScale_ = pattern->GetAttr<double>("picker_dialog_normal", 1.0f);
     theme->pickerDialogMaxOneFontScale_ = pattern->GetAttr<double>("picker_dialog_maxone", 1.75f);
     theme->pickerDialogMaxTwoFontScale_ = pattern->GetAttr<double>("picker_dialog_maxtwo", 2.0f);
     theme->pickerDialogMaxThirdFontScale_ = pattern->GetAttr<double>("picker_dialog_maxthird", 3.2f);
     theme->titleFontScaleLimit_ = pattern->GetAttr<double>("picker_dialog_max", 1.45f);
+    theme->lunarSwitch_ = pattern->GetAttr<std::string>("picker_dialog_lunar_switch", "");
+    theme->prevText_ = pattern->GetAttr<std::string>("picker_dialog_previous_button", "");
+    theme->nextText_ = pattern->GetAttr<std::string>("picker_dialog_next_button", "");
 }
 } // namespace OHOS::Ace

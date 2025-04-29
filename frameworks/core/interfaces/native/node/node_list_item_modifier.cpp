@@ -16,10 +16,7 @@
 
 #include "interfaces/native/node/list_option.h"
 
-#include "base/geometry/calc_dimension.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NG {
 
@@ -120,18 +117,71 @@ void ResetSelectable(ArkUINodeHandle node)
     ListItemModelNG::SetSelectable(frameNode, true);
 }
 
+void SetListItemOnSelectCallback(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onSelectEvent = reinterpret_cast<std::function<void(bool)>*>(callback);
+        ListItemModelNG::SetSelectCallback(frameNode, std::move(*onSelectEvent));
+    } else {
+        ListItemModelNG::SetSelectCallback(frameNode, nullptr);
+    }
+}
+
+void ResetListItemOnSelectCallback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemModelNG::SetSelectCallback(frameNode, nullptr);
+}
+
+void SetListItemStyle(ArkUINodeHandle node, ArkUI_Uint32 style)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemModelNG::SetStyle(frameNode, static_cast<V2::ListItemStyle>(style));
+}
+
+void ResetListItemStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemModelNG::SetStyle(frameNode, V2::ListItemStyle::NONE);
+}
+
 namespace NodeModifier {
 const ArkUIListItemModifier* GetListItemModifier()
 {
-    static const ArkUIListItemModifier modifier = { SetListItemSelected, ResetListItemSelected, SetSelectable,
-        ResetSelectable, SetListItemSwiperAction, ResetListItemSwiperAction };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIListItemModifier modifier = {
+        .setListItemSelected = SetListItemSelected,
+        .resetListItemSelected = ResetListItemSelected,
+        .setSelectable = SetSelectable,
+        .resetSelectable = ResetSelectable,
+        .setListItemSwipeAction = SetListItemSwiperAction,
+        .resetListItemSwipeAction = ResetListItemSwiperAction,
+        .setListItemOnSelectCallback = SetListItemOnSelectCallback,
+        .resetListItemOnSelectCallback = ResetListItemOnSelectCallback,
+        .setListItemStyle = SetListItemStyle,
+        .resetListItemStyle = ResetListItemStyle,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIListItemModifier* GetCJUIListItemModifier()
 {
-    static const CJUIListItemModifier modifier = { SetListItemSelected, ResetListItemSelected, SetSelectable,
-        ResetSelectable, SetListItemSwiperAction, ResetListItemSwiperAction };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIListItemModifier modifier = {
+        .setListItemSelected = SetListItemSelected,
+        .resetListItemSelected = ResetListItemSelected,
+        .setSelectable = SetSelectable,
+        .resetSelectable = ResetSelectable,
+        .setListItemSwipeAction = SetListItemSwiperAction,
+        .resetListItemSwipeAction = ResetListItemSwiperAction,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
@@ -145,7 +195,7 @@ void SetListItemOnSelect(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_LIST_ITEM_SELECTED;
         event.componentAsyncEvent.data[0].i32 = static_cast<int32_t>(isSelected);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ListItemModelNG::SetSelectCallback(frameNode, std::move(onEvent));
 }

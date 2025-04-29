@@ -46,16 +46,17 @@ Flow B:
 
 type RemovedElementInfo = { elmtId : number, tag : string };
 // defined a globle function to clean up the removeItems when idle
-function uiNodeCleanUpIdleTask(): void {
-    stateMgmtConsole.debug(`UINodeRegisterProxy. static uiNodeCleanUpIdleTask:`);
+function uiNodeCleanUpIdleTask(maxTimeInMs: number): void {
+    stateMgmtConsole.debug(`UINodeRegisterProxy. static uiNodeCleanUpIdleTask(${maxTimeInMs}):`);
+    const deadline = Date.now() + maxTimeInMs;
     UINodeRegisterProxy.obtainDeletedElmtIds();
     UINodeRegisterProxy.unregisterElmtIdsFromIViews();
-    UINodeRegisterProxy.cleanUpDeadReferences();
+    ObserveV2.getObserve().runIdleTasks(deadline);
 }
 
 class UINodeRegisterProxy {
     public static readonly notRecordingDependencies : number = -1;
-    public static readonly monitorIllegalV2V3StateAccess : number = -2;
+    public static readonly monitorIllegalV1V2StateAccess : number = -2;
 
     public static obtainDeletedElmtIds(): void {
         stateMgmtConsole.debug(`UINodeRegisterProxy. static obtainDeletedElmtIds:`);
@@ -77,13 +78,6 @@ class UINodeRegisterProxy {
         stateMgmtConsole.debug(`UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs elmtIds ${removedElements}`);
         UINodeRegisterProxy.instance_.populateRemoveElementInfo(removedElements);
         UINodeRegisterProxy.instance_.unregisterElmtIdsFromIViews();
-    }
-
-    public static registerModifierElmtDeleteCallback(callback): void {
-        if (UINodeRegisterProxy.modifierElmtDeleteCallback_) {
-            return;
-        }
-        UINodeRegisterProxy.modifierElmtDeleteCallback_ = callback;
     }
 
     private populateRemoveElementInfo(removedElements: Array<number>) {
@@ -109,9 +103,9 @@ class UINodeRegisterProxy {
             stateMgmtConsole.debug(`${this.removeElementsInfo_.length} elmtIds needs to purgeDelete. } .`);
             return;
         }
-        let owningView : IView | undefined;
+        let owningView : ViewBuildNodeBase | undefined;
         this.removeElementsInfo_.forEach((elmtId: number) => {
-            const owningViewPUWeak : WeakRef<IView> | undefined = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(elmtId);
+            const owningViewPUWeak : WeakRef<ViewBuildNodeBase> | undefined = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(elmtId);
             if (owningViewPUWeak !== undefined) {
                 owningView = owningViewPUWeak.deref();
                 if (owningView) {
@@ -119,27 +113,18 @@ class UINodeRegisterProxy {
                 } else {
                     stateMgmtConsole.debug(`elmtIds ${elmtId} has not been removed because of failure of updating the weakptr of viewpu. Internal error!.`);
                 }
-                if (UINodeRegisterProxy.modifierElmtDeleteCallback_) {
-                    UINodeRegisterProxy.modifierElmtDeleteCallback_(elmtId);
-                }
             } else {
                 stateMgmtConsole.debug(`elmtIds ${elmtId} cannot find its owning ViewPU, maybe this ViewPu has already been aboutToBeDeleted. Internal error!`);
             }
 
-            // FIXME: only do this if app uses V3
             ObserveV2.getObserve().clearBinding(elmtId);
+            delete ObserveV2.getObserve().id2cmp_[elmtId];
         })
 
         this.removeElementsInfo_.length = 0;
     }
 
-    public static cleanUpDeadReferences(): void {
-        stateMgmtConsole.debug('UINodeRegisterProxy.cleanUpDeadReferences');
-        ObserveV2.getObserve().cleanUpDeadReferences();
-    }
-
     public static instance_: UINodeRegisterProxy = new UINodeRegisterProxy();
     public removeElementsInfo_: Array<number> = new Array<number>();
-    public static ElementIdToOwningViewPU_: Map<number, WeakRef<IView>> = new Map<number, WeakRef<IView>>();
-    public static modifierElmtDeleteCallback_;
+    public static ElementIdToOwningViewPU_: Map<number, WeakRef<ViewBuildNodeBase>> = new Map<number, WeakRef<ViewBuildNodeBase>>();
 }

@@ -15,14 +15,11 @@
 
 #include "span_to_html.h"
 
-#include <cstdint>
-#include <string>
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "base/image/file_uri_helper.h"
 #include "base/image/image_packer.h"
-#include "base/utils/macros.h"
+#include "core/text/html_utils.h"
 
 namespace OHOS::Ace {
 const constexpr char* CONVERT_PNG_FORMAT = "image/png";
@@ -90,13 +87,6 @@ void SpanToHtml::ToHtmlColor(std::string& color)
 std::string SpanToHtml::ColorToHtml(const std::optional<Color>& value)
 {
     auto color = value.value_or(Color::BLACK).ColorToString();
-    ToHtmlColor(color);
-    return ToHtmlStyleFormat("color", color);
-}
-
-std::string SpanToHtml::ColorToHtml(const std::optional<DynamicColor>& value)
-{
-    auto color = value.value_or(DynamicColor(Color::BLACK)).ToColor().ColorToString();
     ToHtmlColor(color);
     return ToHtmlStyleFormat("color", color);
 }
@@ -221,6 +211,11 @@ std::string SpanToHtml::ToHtml(const std::string& key, const std::optional<CalcD
     }
 
     return ToHtmlStyleFormat(key, DimensionToString(*dimesion));
+}
+
+std::string SpanToHtml::ToHtml(const std::string& key, bool syncLoad)
+{
+    return ToHtmlStyleFormat(key, V2::ConvertBoolToString(syncLoad));
 }
 
 std::string SpanToHtml::ToHtmlImgSizeAttribute(const std::string& key, const std::optional<CalcDimension>& dimesion)
@@ -409,19 +404,19 @@ std::string SpanToHtml::ImageToHtml(RefPtr<NG::SpanItem> item)
     }
 
     auto options = image->options;
-    if (!options.image || !options.imagePixelMap) {
-        return "";
-    }
-
-    auto pixelMap = options.imagePixelMap.value();
-    if (pixelMap == nullptr) {
+    if (!options.image && !options.imagePixelMap) {
         return "";
     }
 
     std::string urlName;
-    int ret = WriteLocalFile(pixelMap, *options.image, urlName);
-    LOGI("img write ret: %{public}d height: %{public}d, width: %{public}d, size:%{public}d", ret, pixelMap->GetHeight(),
-        pixelMap->GetWidth(), pixelMap->GetByteCount());
+    auto pixelMap = options.imagePixelMap.value_or(nullptr);
+    if (pixelMap) {
+        int ret = WriteLocalFile(pixelMap, *options.image, urlName);
+        LOGI("img write ret: %{public}d height: %{public}d, width: %{public}d, size:%{public}d", ret,
+            pixelMap->GetHeight(), pixelMap->GetWidth(), pixelMap->GetByteCount());
+    } else if (options.image.has_value()) {
+        urlName = options.image.value();
+    }
     std::string imgHtml = "<img src=\"" + urlName + "\" ";
     imgHtml += ToHtml(options.imageAttribute->size);
     if (options.imageAttribute) {
@@ -431,6 +426,9 @@ std::string SpanToHtml::ImageToHtml(RefPtr<NG::SpanItem> item)
         imgHtml += ToHtml("margin", options.imageAttribute->marginProp);
         imgHtml += ToHtml(options.imageAttribute->borderRadius);
         imgHtml += ToHtml("padding", options.imageAttribute->paddingProp);
+        if (!pixelMap) {
+            imgHtml += ToHtml("sync-load", options.imageAttribute->syncLoad);
+        }
         imgHtml += "\"";
     }
 
@@ -559,7 +557,7 @@ std::string SpanToHtml::ToHtml(const SpanString& spanString)
                 paragrapStart = out.length();
             }
             out += "<span " + NormalStyleToHtml(*item->fontStyle, *item->textLineStyle) + ">";
-            auto content = item->GetSpanContent();
+            auto content = UtfUtils::Str16DebugToStr8(item->GetSpanContent());
             auto wContent = StringUtils::ToWstring(content);
             if (wContent.back() == L'\n') {
                 if (newLine) {
@@ -590,5 +588,12 @@ std::string SpanToHtml::ToHtml(std::vector<uint8_t>& values)
 {
     auto spanString = SpanString::DecodeTlv(values);
     return ToHtml(*spanString);
+}
+
+std::string HtmlUtils::ToHtml(const SpanString* str)
+{
+    SpanToHtml sth;
+    const std::string html = sth.ToHtml(*str);
+    return html;
 }
 } // namespace OHOS::Ace

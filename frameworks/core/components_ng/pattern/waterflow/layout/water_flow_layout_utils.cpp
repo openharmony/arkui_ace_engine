@@ -14,9 +14,8 @@
  */
 #include "frameworks/core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 
-#include "base/utils/string_utils.h"
-#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_layout_property.h"
+#include "core/components_ng/property/measure_utils.h"
 namespace OHOS::Ace::NG {
 namespace {
 const std::string UNIT_AUTO = "auto";
@@ -125,6 +124,14 @@ LayoutConstraintF WaterFlowLayoutUtils::CreateChildConstraint(
     return itemConstraint;
 }
 
+LayoutConstraintF WaterFlowLayoutUtils::CreateChildConstraint(const ConstraintParams& params,
+    const ViewPosReference& posRef, const RefPtr<WaterFlowLayoutProperty>& props, const RefPtr<LayoutWrapper>& child)
+{
+    auto itemConstraint = CreateChildConstraint(params, props, child);
+    itemConstraint.viewPosRef = posRef;
+    return itemConstraint;
+}
+
 std::pair<SizeF, bool> WaterFlowLayoutUtils::PreMeasureSelf(LayoutWrapper* wrapper, Axis axis)
 {
     const auto& props = wrapper->GetLayoutProperty();
@@ -176,5 +183,28 @@ void WaterFlowLayoutUtils::UpdateItemIdealSize(const RefPtr<LayoutWrapper>& item
     }
     props->UpdateUserDefinedIdealSize(axis == Axis::VERTICAL ? CalcSize(crossSize, CalcLength(userHeight))
                                                              : CalcSize(CalcLength(userHeight), crossSize));
+}
+
+AdjustOffset WaterFlowLayoutUtils::GetAdjustOffset(const RefPtr<LayoutWrapper>& item)
+{
+    AdjustOffset pos {};
+    RefPtr<UINode> child = AceType::DynamicCast<FrameNode>(item);
+    do {
+        CHECK_NULL_RETURN(child, pos);
+        auto frameNode = AceType::DynamicCast<FrameNode>(child);
+        if (!frameNode) {
+            child = child->GetFirstChild();
+            continue;
+        }
+        if (!frameNode->GetLayoutProperty()->GetNeedLazyLayout()) {
+            return pos;
+        }
+        auto pattern = frameNode->GetPattern<LazyLayoutPattern>();
+        if (pattern) {
+            return pattern->GetAndResetAdjustOffset();
+        }
+        child = child->GetFirstChild();
+    } while (child);
+    return pos;
 }
 } // namespace OHOS::Ace::NG

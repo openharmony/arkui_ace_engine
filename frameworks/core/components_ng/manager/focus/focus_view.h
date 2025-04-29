@@ -50,7 +50,7 @@ public:
 
     void FocusViewShow(bool isTriggerByStep = false);
     void FocusViewHide();
-    void FocusViewClose();
+    void FocusViewClose(bool isDetachFromTree = false);
 
     virtual void LostViewFocus();
 
@@ -59,6 +59,7 @@ public:
     static RefPtr<FocusView> GetCurrentFocusView();
     RefPtr<FocusView> GetEntryFocusView();
     RefPtr<FocusHub> GetViewRootScope();
+    bool IsViewRootScopeHasLastFocus();
     bool IsRootScopeCurrentFocus();
     bool IsChildFocusViewOf(const RefPtr<FocusView>& parent);
     bool HasParentFocusHub();
@@ -100,7 +101,9 @@ public:
         return isViewHasShow_;
     }
 
-    bool GetFocusViewFocusable();
+    std::pair<bool, bool> HandleDefaultFocusNode(
+        const RefPtr<FocusHub>& defaultFocusNode, bool isViewRootScopeHasChildFocused);
+
     void FocusViewDidShow(const RefPtr<FocusHub>& focusHub);
 
 private:
@@ -110,6 +113,7 @@ private:
     bool isViewHasShow_ = false;
 
     WeakPtr<FocusHub> rootScopeSpecified_;
+    bool GetFocusViewFocusable();
 
     ACE_DISALLOW_COPY_AND_MOVE(FocusView);
 };

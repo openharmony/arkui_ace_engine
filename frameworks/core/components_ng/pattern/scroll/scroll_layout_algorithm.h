@@ -21,6 +21,7 @@
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/grid_system_manager.h"
+#include "core/components/common/properties/alignment.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 
@@ -75,8 +76,12 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
+    void UpdateOverlay(LayoutWrapper* layoutWrapper);
 
 private:
+    void UseInitialOffset(Axis axis, SizeF selfSize, LayoutWrapper* layoutWrapper);
+    bool UnableOverScroll(LayoutWrapper* layoutWrapper) const;
+
     float currentOffset_ = 0.0f;
     float scrollableDistance_ = 0.0f;
     float viewPortLength_ = 0.0f;

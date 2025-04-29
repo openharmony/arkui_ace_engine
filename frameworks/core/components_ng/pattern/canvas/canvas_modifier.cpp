@@ -15,10 +15,13 @@
 
 #include "core/components_ng/pattern/canvas/canvas_modifier.h"
 
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
+#include "base/utils/time_util.h"
 #include "core/components_ng/pattern/canvas/custom_paint_util.h"
 #include "core/components_ng/render/render_context.h"
+#ifdef ACE_ENABLE_HYBRID_RENDER
+#include "render_service_base/include/platform/common/rs_system_properties.h"
+#include "2d_graphics/include/recording/draw_cmd_list.h"
+#endif
 
 namespace OHOS::Ace::NG {
 constexpr size_t MAX_SIZE = 10;
@@ -30,13 +33,18 @@ CanvasModifier::CanvasModifier()
 
 void CanvasModifier::onDraw(DrawingContext& drawingContext)
 {
-    ACE_SCOPED_TRACE("CanvasModifier::onDraw");
     CHECK_NULL_VOID(rsRecordingCanvas_);
     auto& recordingCanvas = drawingContext.canvas;
     auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
     CHECK_NULL_VOID(drawCmdList);
     auto rsDrawCmdList = static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList();
     CHECK_NULL_VOID(rsDrawCmdList);
+#ifdef ACE_ENABLE_HYBRID_RENDER
+    if (OHOS::Rosen::RSSystemProperties::GetHybridRenderSwitch(OHOS::Rosen::ComponentEnableSwitch::CANVAS)) {
+        rsDrawCmdList->SetHybridRenderType(RSHybridRenderType::CANVAS);
+    }
+#endif
+    ACE_SCOPED_TRACE("CanvasModifier::onDraw Op count: %zu.", drawCmdList->GetOpItemSize());
     if (SystemProperties::GetCanvasDebugMode() > 0) {
         TAG_LOGI(AceLogTag::ACE_CANVAS,
             "Canvas Size: [%{public}d, %{public}d]->[%{public}d, %{public}d]; Command Size: %{public}zu.",
@@ -84,5 +92,22 @@ std::string CanvasModifier::GetDumpInfo()
     }
     dumpInfos_.clear();
     return ret;
+}
+
+void CanvasModifier::GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& array)
+{
+    for (CanvasModifierDump& dumpInfo : dumpInfos_) {
+        auto info = JsonUtil::Create();
+        info->Put("Timestamp", ConvertTimestampToStr(dumpInfo.timestamp).c_str());
+        info->Put(
+            "CanvasSize", ("[" + std::to_string(dumpInfo.width) + "," + std::to_string(dumpInfo.height) + "]").c_str());
+        info->Put("CommandSize", std::to_string(dumpInfo.opItemSize).c_str());
+        array->PutRef(std::move(info));
+    }
+}
+
+void CanvasModifier::SetRenderContext(const WeakPtr<RenderContext>& renderContext)
+{
+    renderContext_ = renderContext;
 }
 } // namespace OHOS::Ace::NG

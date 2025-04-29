@@ -29,20 +29,23 @@ namespace OHOS::Ace::Framework {
 class TextFieldModelImpl : public TextFieldModel {
 public:
     RefPtr<TextFieldControllerBase> CreateTextInput(
-        const std::optional<std::string>& placeholder, const std::optional<std::string>& value) override;
+        const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value) override;
 
     RefPtr<TextFieldControllerBase> CreateTextArea(
-        const std::optional<std::string>& placeholder, const std::optional<std::string>& value) override;
+        const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value) override;
     void RequestKeyboardOnFocus(bool needToRequest) override {};
     void SetWidthAuto(bool isAuto) override {};
     void SetType(TextInputType value) override;
     void SetContentType(const NG::TextContentType& value) override {};
     void SetPlaceholderColor(const Color& value) override;
+    void ResetPlaceholderColor() override {};
     void SetPlaceholderFont(const Font& value) override;
     void SetEnterKeyType(TextInputAction value) override;
+    void SetCapitalizationMode(AutoCapitalizationMode value) override {};
     void SetTextAlign(TextAlign value) override;
     void SetLineBreakStrategy(LineBreakStrategy value) override {};
     void SetCaretColor(const Color& value) override;
+    void ResetCaretColor() override {};
     void SetCaretStyle(const CaretStyle& value) override;
     void SetCaretPosition(const int32_t& value) override;
     void SetSelectedBackgroundColor(const Color& value) override;
@@ -50,30 +53,35 @@ public:
     void SetMaxLines(uint32_t value) override;
     void SetFontSize(const Dimension& value) override;
     void SetFontWeight(FontWeight value) override;
+    void SetMinFontScale(const float value) override;
+    void SetMaxFontScale(const float value) override;
     void SetTextColor(const Color& value) override;
+    void ResetTextColor() override {};
     void SetFontStyle(FontStyle value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
-    void SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError) override;
+    void SetInputFilter(const std::string& value, const std::function<void(const std::u16string&)>&& func) override;
     void SetInputStyle(InputStyle value) override;
     void SetShowPasswordIcon(bool value) override;
     void SetOnEditChanged(std::function<void(bool)>&& func) override;
     void SetOnSubmit(std::function<void(int32_t)>&& func) override;
     void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override {};
-    void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& func) override;
+    void SetOnChange(std::function<void(const ChangeValueInfo&)>&& func) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override {};
     void SetOnSecurityStateChange(std::function<void(bool)>&& func) override {};
     void SetOnContentScroll(std::function<void(float, float)>&& func) override {};
-    void SetOnCopy(std::function<void(const std::string&)>&& func) override;
-    void SetOnCut(std::function<void(const std::string&)>&& func) override;
-    void SetOnPaste(std::function<void(const std::string&)>&& func) override;
-    void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func) override {};
+    void SetOnCopy(std::function<void(const std::u16string&)>&& func) override;
+    void SetOnCut(std::function<void(const std::u16string&)>&& func) override;
+    void SetOnPaste(std::function<void(const std::u16string&)>&& func) override;
+    void SetOnPasteWithEvent(std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func) override {};
     void SetCopyOption(CopyOptions copyOption) override;
     void ResetMaxLength() override {};
     static void InitTextInputDefaultStyle();
     void SetForegroundColor(const Color& value) override {};
     void SetShowUnit(std::function<void()>&& unitAction) override {};
-    void SetOnChangeEvent(std::function<void(const std::string&)>&& func) override {};
+    void SetOnWillChangeEvent(std::function<bool(const ChangeValueInfo&)>&& func) override {};
+    void SetOnChangeEvent(std::function<void(const std::u16string&)>&& func) override {};
     void SetBackgroundColor(const Color& color, bool tmp) override;
+    void ResetBackgroundColor() override {};
     void SetHeight(const Dimension& value) override;
     void SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) override;
     void SetBackBorder() override;
@@ -89,6 +97,8 @@ public:
     void SetCanacelIconSrc(
         const std::string& iconSrc, const std::string& bundleName, const std::string& moduleName) override {};
     void SetCancelIconColor(const Color& iconColor) override {};
+    void SetCancelButtonSymbol(bool isShowSymbol) override {};
+    void SetCancelSymbolIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol) override{};
     void SetIsShowCancelButton(bool isShowCancelButton) override {};
     void SetShowPasswordText(bool value) override {}
     void SetSelectAllValue(bool isSetSelectAllValue) override {};
@@ -98,6 +108,8 @@ public:
     void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) override {};
     void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) override {};
     void SetEnablePreviewText(bool enablePreviewText) override {};
+    void SetEnableHapticFeedback(bool state) override {};
+    void SetKeyboardAppearance(KeyboardAppearance value) override {};
 
 private:
     static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

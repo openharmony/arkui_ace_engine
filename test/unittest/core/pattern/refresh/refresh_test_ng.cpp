@@ -15,29 +15,34 @@
 
 #include "refresh_test_ng.h"
 
+#include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 
 #include "core/components/refresh/refresh_theme.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
+#include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float WIDTH = 480.f;
 constexpr float TEXT_HEIGHT = 200.f;
 } // namespace
 
 void RefreshTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_REFRESH);
     auto refreshTheme = RefreshTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(refreshTheme));
-    EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(AnyNumber());
+    auto scrollableThemeConstants = CreateThemeConstants(THEME_PATTERN_SCROLLABLE);
+    auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(ScrollableTheme::TypeId())).WillRepeatedly(Return(scrollableTheme));
+    MockAnimationManager::Enable(true);
 }
 
 void RefreshTestNg::TearDownTestSuite()
@@ -49,18 +54,20 @@ void RefreshTestNg::SetUp() {}
 
 void RefreshTestNg::TearDown()
 {
+    RemoveFromStageNode();
     frameNode_ = nullptr;
     pattern_ = nullptr;
     eventHub_ = nullptr;
     layoutProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
+    MockAnimationManager::GetInstance().Reset();
 }
 
 void RefreshTestNg::GetRefresh()
 {
     frameNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     pattern_ = frameNode_->GetPattern<RefreshPattern>();
-    eventHub_ = frameNode_->GetEventHub<RefreshEventHub>();
+    eventHub_ = frameNode_->GetOrCreateEventHub<RefreshEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<RefreshLayoutProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<RefreshAccessibilityProperty>();
 }
@@ -69,7 +76,6 @@ RefreshModelNG RefreshTestNg::CreateRefresh()
 {
     RefreshModelNG model;
     model.Create();
-    ViewAbstract::SetHeight(CalcLength(REFRESH_HEIGHT));
     GetRefresh();
     return model;
 }
@@ -77,7 +83,7 @@ RefreshModelNG RefreshTestNg::CreateRefresh()
 void RefreshTestNg::CreateText()
 {
     TextModelNG model;
-    model.Create("text");
+    model.Create(u"text");
     ViewAbstract::SetWidth(CalcLength(WIDTH));
     ViewAbstract::SetHeight(CalcLength(TEXT_HEIGHT));
     ViewStackProcessor::GetInstance()->Pop();

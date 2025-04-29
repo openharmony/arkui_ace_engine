@@ -31,17 +31,6 @@ public:
     }
     ~SvgQuote() override = default;
 
-#ifndef USE_ROSEN_DRAWING
-    SkPath AsPath(const Size& viewPort) const override
-    {
-        SkPath path;
-        for (const auto& child : children_) {
-            const SkPath childPath = child->AsPath(viewPort);
-            Op(path, childPath, kUnion_SkPathOp, &path);
-        }
-        return path;
-    }
-#else
     RSRecordingPath AsPath(const Size& viewPort) const override
     {
         RSRecordingPath path;
@@ -51,7 +40,17 @@ public:
         }
         return path;
     }
-#endif
+
+    RSRecordingPath AsPath(const SvgLengthScaleRule& lengthRule) override
+    {
+        RSRecordingPath path;
+
+        for (const auto& child : children_) {
+            auto childPath = child->AsPath(lengthRule);
+            path.Op(path, childPath, RSPathOp::UNION);
+        }
+        return path;
+    }
 
     void Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color) override
     {
@@ -64,10 +63,19 @@ public:
         OnDrawTraversedAfter(canvas, viewPort, color);
     }
 
+    void Draw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule) override
+    {
+        // render composition on other svg tags
+        OnDrawTraversedBefore(canvas, lengthRule);
+        OnDrawTraversed(canvas, lengthRule);
+        OnDrawTraversedAfter(canvas, lengthRule);
+    }
+
 protected:
     virtual void OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color) {}
     virtual void OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color) {}
-
+    virtual void OnDrawTraversedBefore(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule) {}
+    virtual void OnDrawTraversedAfter(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule) {}
     // mask/pattern/filter/clipPath
     void InitHrefFlag()
     {

@@ -75,6 +75,7 @@
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "interfaces/napi/kits/promptaction/prompt_controller.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -156,8 +157,8 @@ RefPtr<FrameNode> OverlayManagerDialogTestNg::CreateTargetNode()
 
 void OverlayManagerDialogTestNg::CreateSheetStyle(SheetStyle& sheetStyle)
 {
-    if (!sheetStyle.sheetMode.has_value()) {
-        sheetStyle.sheetMode = SheetMode::MEDIUM;
+    if (!sheetStyle.sheetHeight.sheetMode.has_value()) {
+        sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
     }
     if (!sheetStyle.showDragBar.has_value()) {
         sheetStyle.showDragBar = true;
@@ -878,7 +879,7 @@ HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest001, TestSize.Level1)
      * @tc.steps3: Set the onWillDismiss property.
      * @tc.expected:  return value are as expected.
      */
-    std::function<void(int32_t)> onWillDismiss1 = [](int32_t reason) {};
+    std::function<void(int32_t, int32_t)> onWillDismiss1 = [](int32_t reason, int32_t instanceId) {};
     auto pattern = overlay->GetPattern();
     auto dialogPattern = dialog->GetPattern<DialogPattern>();
     dialogPattern->SetOnWillDismiss(onWillDismiss1);
@@ -971,7 +972,7 @@ HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest003, TestSize.Level1)
      * @tc.steps: step3. create focusHub and call DialogInMapHoldingFocus when dialogMap_ is not empty.
      * @tc.expected: return true
      */
-    auto eventHub = dialogNode->GetEventHub<DialogEventHub>();
+    auto eventHub = dialogNode->GetOrCreateEventHub<DialogEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -1199,280 +1200,10 @@ HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest007, TestSize.Level1)
 
 /**
  * @tc.name: DismissDialogTest008
- * @tc.desc: Test DismissDialog.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest008, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create root node and prepare dialogProperties.
-     */
-    auto context = PipelineContext::GetCurrentContext();
-    ASSERT_NE(context, nullptr);
-    auto overlayManager = context->GetOverlayManager();
-    ASSERT_NE(overlayManager, nullptr);
-    auto rootNode = overlayManager->GetRootNode().Upgrade();
-    ASSERT_NE(rootNode, nullptr);
-    DialogProperties dialogProperties;
-    dialogProperties.isShowInSubWindow = true;
-
-    auto datePickerSettingData = GenDatePickerSettingData();
-
-    std::map<std::string, NG::DialogEvent> dialogEvent;
-    auto eventFunc = [](const std::string& info) { (void)info; };
-    dialogEvent["changeId"] = eventFunc;
-    dialogEvent["acceptId"] = eventFunc;
-    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
-    dialogCancelEvent["cancelId"] = cancelFunc;
-    auto lifeCycleFunc = []() {};
-    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent;
-    dialogLifeCycleEvent["didAppearId"] = lifeCycleFunc;
-    dialogLifeCycleEvent["didDisappearId"] = lifeCycleFunc;
-    dialogLifeCycleEvent["willAppearId"] = lifeCycleFunc;
-    dialogLifeCycleEvent["willDisappearId"] = lifeCycleFunc;
-    /**
-     * @tc.steps: step2. create timePickerSettingData and call ShowTimeDialog.
-     * @tc.expected: timeDialogNode is created successfully
-     */
-    TimePickerSettingData timePickerSettingData;
-    timePickerSettingData.properties = datePickerSettingData.properties;
-    timePickerSettingData.isUseMilitaryTime = false;
-
-    std::map<std::string, PickerTime> timePickerProperty;
-    timePickerProperty["selected"] = PickerTime(1, 1, 1);
-
-    overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
-        dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
-    /**
-     * @tc.steps: step3. create overlayManager and call ShowDateDialog.
-     * @tc.expected: dateDialogNode is created successfully
-     */
-    overlayManager->ShowDateDialog(
-        dialogProperties, datePickerSettingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
-    /**
-     * @tc.steps: step4. call DismissDialog
-     * @tc.expected: remove lastChild successfully.
-     */
-    ViewAbstract::DismissDialog();
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
-}
-
-/**
- * @tc.name: DismissDialogTest009
- * @tc.desc: Test DismissDialog.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest009, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create root node and prepare dialogProperties.
-     */
-    auto context = PipelineContext::GetCurrentContext();
-    ASSERT_NE(context, nullptr);
-    auto overlayManager = context->GetOverlayManager();
-    ASSERT_NE(overlayManager, nullptr);
-    auto rootNode = overlayManager->GetRootNode().Upgrade();
-    ASSERT_NE(rootNode, nullptr);
-    DialogProperties dialogProperties;
-    dialogProperties.isShowInSubWindow = false;
-
-    auto datePickerSettingData = GenDatePickerSettingData();
-
-    std::map<std::string, NG::DialogEvent> dialogEvent;
-    auto eventFunc = [](const std::string& info) { (void)info; };
-    dialogEvent["changeId"] = eventFunc;
-    dialogEvent["acceptId"] = eventFunc;
-    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
-    dialogCancelEvent["cancelId"] = cancelFunc;
-    auto lifeCycleFunc = []() {};
-    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent;
-    dialogLifeCycleEvent["didAppearId"] = lifeCycleFunc;
-    dialogLifeCycleEvent["didDisappearId"] = lifeCycleFunc;
-    dialogLifeCycleEvent["willAppearId"] = lifeCycleFunc;
-    dialogLifeCycleEvent["willDisappearId"] = lifeCycleFunc;
-    /**
-     * @tc.steps: step2. create timePickerSettingData and call ShowTimeDialog.
-     * @tc.expected: timeDialogNode is created successfully
-     */
-    TimePickerSettingData timePickerSettingData;
-    timePickerSettingData.properties = datePickerSettingData.properties;
-    timePickerSettingData.isUseMilitaryTime = false;
-
-    std::map<std::string, PickerTime> timePickerProperty;
-    timePickerProperty["selected"] = PickerTime(1, 1, 1);
-
-    overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
-        dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
-    /**
-     * @tc.steps: step3. create overlayManager and call ShowDateDialog.
-     * @tc.expected: dateDialogNode is created successfully
-     */
-    overlayManager->ShowDateDialog(
-        dialogProperties, datePickerSettingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 3);
-    /**
-     * @tc.steps: step4. call DismissDialog
-     * @tc.expected: remove lastChild successfully.
-     */
-    ViewAbstract::DismissDialog();
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
-}
-
-/**
- * @tc.name: DismissDialogTest010
- * @tc.desc: Test DismissDialog.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest010, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create root node and prepare dialogProperties.
-     */
-    auto context = PipelineContext::GetCurrentContext();
-    ASSERT_NE(context, nullptr);
-    auto overlayManager = context->GetOverlayManager();
-    ASSERT_NE(overlayManager, nullptr);
-    auto rootNode = overlayManager->GetRootNode().Upgrade();
-    ASSERT_NE(rootNode, nullptr);
-    DialogProperties dialogProperties;
-    dialogProperties.isShowInSubWindow = true;
-
-    auto datePickerSettingData = GenDatePickerSettingData();
-
-    std::map<std::string, NG::DialogEvent> dialogEvent;
-    auto eventFunc = [](const std::string& info) { (void)info; };
-    dialogEvent["changeId"] = eventFunc;
-    dialogEvent["acceptId"] = eventFunc;
-    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
-    dialogCancelEvent["cancelId"] = cancelFunc;
-    auto lifeCycleFunc = []() {};
-    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent;
-    dialogLifeCycleEvent["didAppearId"] = lifeCycleFunc;
-    dialogLifeCycleEvent["didDisappearId"] = lifeCycleFunc;
-    dialogLifeCycleEvent["willAppearId"] = lifeCycleFunc;
-    dialogLifeCycleEvent["willDisappearId"] = lifeCycleFunc;
-    /**
-     * @tc.steps: step2. create timePickerSettingData and call ShowTimeDialog.
-     * @tc.expected: timeDialogNode is created successfully
-     */
-    TimePickerSettingData timePickerSettingData;
-    timePickerSettingData.properties = datePickerSettingData.properties;
-    timePickerSettingData.isUseMilitaryTime = false;
-
-    std::map<std::string, PickerTime> timePickerProperty;
-    timePickerProperty["selected"] = PickerTime(1, 1, 1);
-
-    overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
-        dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 3);
-    /**
-     * @tc.steps: step3. create overlayManager and call ShowDateDialog.
-     * @tc.expected: dateDialogNode is created successfully
-     */
-    overlayManager->ShowDateDialog(
-        dialogProperties, datePickerSettingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 4);
-    /**
-     * @tc.steps: step4. call DismissDialog
-     * @tc.expected: remove lastChild successfully.
-     */
-    ViewAbstract::DismissDialog();
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 3);
-    /**
-     * @tc.steps: step5. ShowTimeDialog again and call DismissDialog
-     * @tc.expected: remove  successfully
-     */
-    overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
-        dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 4);
-    ViewAbstract::DismissDialog();
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 3);
-}
-
-/**
- * @tc.name: DismissDialogTest011
- * @tc.desc: Test DismissDialog.
- * @tc.type: FUNC
- */
-HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest011, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create root node and prepare dialogProperties.
-     */
-    auto context = PipelineContext::GetCurrentContext();
-    ASSERT_NE(context, nullptr);
-    auto overlayManager = context->GetOverlayManager();
-    ASSERT_NE(overlayManager, nullptr);
-    auto rootNode = overlayManager->GetRootNode().Upgrade();
-    ASSERT_NE(rootNode, nullptr);
-    DialogProperties dialogProperties;
-    dialogProperties.isShowInSubWindow = false;
-
-    auto datePickerSettingData = GenDatePickerSettingData();
-
-    std::map<std::string, NG::DialogEvent> dialogEvent;
-    auto eventFunc = [](const std::string& info) { (void)info; };
-    dialogEvent["changeId"] = eventFunc;
-    dialogEvent["acceptId"] = eventFunc;
-    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
-    dialogCancelEvent["cancelId"] = cancelFunc;
-    auto lifeCycleFunc = []() {};
-    std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent;
-    dialogLifeCycleEvent["didAppearId"] = lifeCycleFunc;
-    dialogLifeCycleEvent["didDisappearId"] = lifeCycleFunc;
-    dialogLifeCycleEvent["willAppearId"] = lifeCycleFunc;
-    dialogLifeCycleEvent["willDisappearId"] = lifeCycleFunc;
-    /**
-     * @tc.steps: step2. create timePickerSettingData and call ShowTimeDialog.
-     * @tc.expected: timeDialogNode is created successfully
-     */
-    TimePickerSettingData timePickerSettingData;
-    timePickerSettingData.properties = datePickerSettingData.properties;
-    timePickerSettingData.isUseMilitaryTime = false;
-
-    std::map<std::string, PickerTime> timePickerProperty;
-    timePickerProperty["selected"] = PickerTime(1, 1, 1);
-
-    overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
-        dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 4);
-    /**
-     * @tc.steps: step3. create overlayManager and call ShowDateDialog.
-     * @tc.expected: dateDialogNode is created successfully
-     */
-    overlayManager->ShowDateDialog(
-        dialogProperties, datePickerSettingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 5);
-    /**
-     * @tc.steps: step4. call DismissDialog
-     * @tc.expected: remove lastChild successfully.
-     */
-    ViewAbstract::DismissDialog();
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 4);
-    /**
-     * @tc.steps: step5. ShowTimeDialog again and call DismissDialog
-     * @tc.expected: remove  successfully
-     */
-    overlayManager->ShowTimeDialog(dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent,
-        dialogCancelEvent, dialogLifeCycleEvent);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 5);
-    ViewAbstract::DismissDialog();
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 4);
-}
-
-/**
- * @tc.name: DismissDialogTest012
  * @tc.desc: Test OverlayManager::OpenCustomDialog->CloseCustomDialog.
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest012, TestSize.Level1)
+HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create root node and overlayManager.
@@ -1503,29 +1234,29 @@ HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest012, TestSize.Level1)
         EXPECT_EQ(errorCode, ERROR_CODE_NO_ERROR);
     };
     overlayManager->OpenCustomDialog(dialogParam, openCallbackFst);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 5);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
     auto dialogNode = overlayManager->GetDialogNodeWithExistContent(contentNode);
     EXPECT_NE(dialogNode, nullptr);
     auto openCallbackSnd = [](int32_t errorCode) {
         EXPECT_EQ(errorCode, ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST);
     };
     overlayManager->OpenCustomDialog(dialogParam, openCallbackSnd);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 5);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
 
     /**
      * @tc.steps: step4. call DismissDialog for contentNodeNew.
      * @tc.expected: remove  successfully.
      */
     ViewAbstract::DismissDialog();
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 4);
+    EXPECT_TRUE(overlayManager->dialogMap_.empty());
 }
 
 /**
- * @tc.name: DismissDialogTest013
+ * @tc.name: DismissDialogTest009
  * @tc.desc: Test DismissDialog.
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest013, TestSize.Level1)
+HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create root node and prepare dialogProperties.
@@ -1544,13 +1275,13 @@ HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest013, TestSize.Level1)
      */
     auto dialogNode = overlayManager->ShowDialog(dialogParam, nullptr, true);
     EXPECT_NE(dialogNode, nullptr);
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 5);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
 
     /**
      * @tc.steps: step3. create focusHub and call DialogInMapHoldingFocus when dialogMap_ is not empty.
      * @tc.expected: return true
      */
-    auto eventHub = dialogNode->GetEventHub<DialogEventHub>();
+    auto eventHub = dialogNode->GetOrCreateEventHub<DialogEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -1562,7 +1293,62 @@ HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest013, TestSize.Level1)
      * @tc.expected: remove successfully.
      */
     ViewAbstract::DismissDialog();
-    EXPECT_EQ(overlayManager->dialogMap_.size(), 4);
+    EXPECT_TRUE(overlayManager->dialogMap_.empty());
     EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
+}
+
+/**
+ * @tc.name: DismissDialogTest010
+ * @tc.desc: Test OverlayManager::OpenCustomDialog->Dialog Controller::CloseDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and overlayManager.
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    auto rootNode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootNode, nullptr);
+    /**
+     * @tc.steps: step2. create dialog content node.
+     */
+    auto contentNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    DialogProperties dialogParam;
+    dialogParam.contentNode = contentNode;
+    auto contentNodeNew = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, 3, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    DialogProperties dialogParamNew;
+    dialogParamNew.contentNode = contentNodeNew;
+
+    /**
+     * @tc.steps: step3. call OpenCustomDialog for contentNode.
+     * @tc.expected: OpenCustomDialog succeed and dialog of contentNode is in the dialogMap_.
+     */
+    auto openCallbackFst = [](int32_t errorCode) {
+        EXPECT_EQ(errorCode, ERROR_CODE_NO_ERROR);
+    };
+    overlayManager->OpenCustomDialog(dialogParam, openCallbackFst);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    auto dialogNode = overlayManager->GetDialogNodeWithExistContent(contentNode);
+    EXPECT_NE(dialogNode, nullptr);
+    auto openCallbackSnd = [](int32_t errorCode) {
+        EXPECT_EQ(errorCode, ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST);
+    };
+    overlayManager->OpenCustomDialog(dialogParam, openCallbackSnd);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+
+    /**
+     * @tc.steps: step4. call CloseDialog for contentNodeNew.
+     * @tc.expected: remove  successfully.
+     */
+    Napi::PromptDialogController* controller = new Napi::PromptDialogController();
+    controller->SetNode(dialogNode);
+    controller->Close();
+    EXPECT_TRUE(overlayManager->dialogMap_.empty());
 }
 } // namespace OHOS::Ace::NG

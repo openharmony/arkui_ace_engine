@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,23 +15,12 @@
 
 #include "core/components_ng/pattern/progress/progress_paint_method.h"
 
-#include <algorithm>
-#include <optional>
-
-#include "base/geometry/ng/point_t.h"
-#include "base/geometry/ng/rect_t.h"
-#include "base/utils/utils.h"
-#include "core/components/picker/picker_option_component.h"
-#include "core/components/progress/progress_theme.h"
-#include "core/components/theme/theme_manager.h"
-#include "core/components_ng/pattern/progress/progress_pattern.h"
-
 namespace OHOS::Ace::NG {
-void ProgressPaintMethod::GetThemeData()
+void ProgressPaintMethod::GetThemeData(int32_t themeScopeId)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+    auto progressTheme = pipeline->GetTheme<ProgressTheme>(themeScopeId);
     CHECK_NULL_VOID(progressTheme);
     color_ = progressTheme->GetTrackSelectedColor();
     if (progressType_ == ProgressType::CAPSULE) {
@@ -39,6 +28,9 @@ void ProgressPaintMethod::GetThemeData()
         bgColor_ = progressTheme->GetCapsuleBgColor();
     } else if (progressType_ == ProgressType::RING) {
         bgColor_ = progressTheme->GetRingProgressBgColor();
+    } else if (progressType_ == ProgressType::SCALE) {
+        color_ = progressTheme->GetScaleTrackSelectedColor();
+        bgColor_ = progressTheme->GetTrackBgColor();
     } else {
         bgColor_ = progressTheme->GetTrackBgColor();
     }
@@ -48,6 +40,13 @@ void ProgressPaintMethod::GetThemeData()
     capsuleBorderWidth_ = progressTheme->GetBorderWidth();
     ringProgressEndSideColor_ = progressTheme->GetRingProgressEndSideColor();
     ringProgressBeginSideColor_ = progressTheme->GetRingProgressBeginSideColor();
+    capsuleBgFocusedColor_ = progressTheme->GetCapsuleBgFocusedColor();
+    capsuleSelectFocusedColor_ = progressTheme->GetCapsuleSelectFocusedColor();
+    capsuleInprogressBorderColor_ = progressTheme->GetCapsuleInprogressBorderColor();
+    capsuleInprogressBorderWidth_ = progressTheme->GetCapsuleInprogressBorderWidth();
+    capsuleInprogressBgColor_ = progressTheme->GetCapsuleInprogressBgColor();
+    defaultBorderColor_ = progressTheme->GetBorderColor();
+    defaultBorderWidth_ = progressTheme->GetBorderWidth();
 }
 
 void ProgressPaintMethod::CalculateStrokeWidth(const SizeF& contentSize)
@@ -96,4 +95,66 @@ Gradient ProgressPaintMethod::GenerateRingProgressColor(PaintWrapper* paintWrapp
     return gradient;
 }
 
+void ProgressPaintMethod::UpdateCapsuleProgress(PaintWrapper* paintWrapper)
+{
+    if (progressType_ != ProgressType::CAPSULE) {
+        return;
+    }
+    CHECK_NULL_VOID(paintWrapper);
+    auto paintProperty = DynamicCast<ProgressPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
+
+    bool isFocused = progressModifier_->IsFocused();
+    bool isInprogress = LessNotEqual(0.0f, value_) && LessNotEqual(value_, maxValue_);
+
+    if (!paintProperty->HasBackgroundColor()) {
+        bgColor_ = capsuleInprogressBgColor_;
+        bgColor_ = isFocused ? capsuleBgFocusedColor_ : bgColor_;
+    }
+    bgColor_ = progressModifier_->CalculateHoverPressColor(bgColor_);
+    progressModifier_->SetBackgroundColor(LinearColor(bgColor_));
+
+    if (!paintProperty->HasColor() && isFocused) {
+        color_ = capsuleSelectFocusedColor_;
+    }
+    color_ = progressModifier_->CalculateHoverPressColor(color_);
+    progressModifier_->SetColor(LinearColor(color_));
+
+    if (paintProperty->GetBorderColorValue(defaultBorderColor_) == defaultBorderColor_) {
+        borderColor_ = capsuleInprogressBorderColor_;
+    }
+    borderColor_ = progressModifier_->CalculateHoverPressColor(borderColor_);
+    progressModifier_->SetBorderColor(LinearColor(borderColor_));
+
+    if (paintProperty->GetBorderWidthValue(defaultBorderWidth_) == defaultBorderWidth_ && isInprogress) {
+        progressModifier_->SetBorderWidth(capsuleInprogressBorderWidth_.ConvertToPx());
+    }
+}
+
+void ProgressPaintMethod::SetCapsuleBorderRadius(PaintWrapper* paintWrapper)
+{
+    if (progressType_ != ProgressType::CAPSULE) {
+        return;
+    }
+    CHECK_NULL_VOID(progressModifier_);
+    auto paintProperty = DynamicCast<ProgressPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
+    const SizeF& contentSize = paintWrapper->GetContentSize();
+    constexpr float HALF = 2.0f;
+    float contentMinHalf = std::min(contentSize.Height(), contentSize.Width()) / HALF;
+    auto borderRadius = static_cast<float>(
+        paintProperty->GetBorderRadiusValue(Dimension(contentMinHalf, DimensionUnit::PX)).ConvertToPx());
+    progressModifier_->SetCapsuleBorderRadius(std::min(contentMinHalf, borderRadius));
+}
+
+int32_t ProgressPaintMethod::GetThemeScopeId(PaintWrapper* paintWrapper) const
+{
+    const int32_t defaultValue = 0;
+    CHECK_NULL_RETURN(paintWrapper, defaultValue);
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, defaultValue);
+    auto host = renderContext->GetHost();
+    CHECK_NULL_RETURN(host, defaultValue);
+    return host->GetThemeScopeId();
+}
 } // namespace OHOS::Ace::NG

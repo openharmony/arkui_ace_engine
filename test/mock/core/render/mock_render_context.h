@@ -37,6 +37,11 @@ public:
     MOCK_METHOD1(GetPointTransform, void(PointF&));
     MOCK_METHOD1(GetPointWithRevert, void(PointF&));
     MOCK_METHOD1(SetSurfaceRotation, void(bool));
+    MOCK_METHOD1(SetRenderFit, void(RenderFit));
+    MOCK_METHOD1(SetSecurityLayer, void(bool));
+    MOCK_METHOD1(SetHDRBrightness, void(float));
+    MOCK_METHOD1(SetContentClip, void(const std::variant<RectF, RefPtr<ShapeRect>>&));
+    MOCK_METHOD1(SetTransparentLayer, void(bool));
 
     void SetVisible(bool visible) override
     {
@@ -53,17 +58,12 @@ public:
         blendColor_ = color;
     }
 
-    std::vector<double> GetTrans() override
-    {
-        return transInfo_;
-    }
-
     void UpdatePaintRect(const RectF& rect) override
     {
         paintRect_ = rect;
     }
 
-    void SavePaintRect(bool isRound = true, uint8_t flag = 0) override
+    void SavePaintRect(bool isRound = true, uint16_t flag = 0) override
     {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -87,19 +87,27 @@ public:
         return paintRect_;
     }
 
-    void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> modifier) override
 #ifdef ENHANCED_ANIMATION
-        ;
-#else
-    {}
-#endif
-
+    void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> modifier) override;
     void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) override {}
 
-    void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle)
+    void CancelTranslateXYAnimation() override;
+    OffsetF GetTranslateXYProperty() override;
+    void UpdateTranslateInXY(const OffsetF& offset) override;
+#endif
+
+    void UpdateBackBlurStyle(
+        const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions = SysOptions())
     {
         const auto& groupProperty = GetOrCreateBackground();
         groupProperty->propBlurStyleOption = bgBlurStyle;
+    }
+
+    void UpdateBackgroundEffect(
+        const std::optional<EffectOption>& effectOption, const SysOptions& sysOptions = SysOptions())
+    {
+        const auto& groupProperty = GetOrCreateBackground();
+        groupProperty->propEffectOption = effectOption;
     }
 
     void UpdateMotionBlur(const MotionBlurOption& motionBlurOption)
@@ -118,12 +126,43 @@ public:
         opacityMultiplier_ = opacity;
     }
 
+    bool HasDisappearTransition() const
+    {
+        return hasDisappearTransition_;
+    }
+
+    void SetTransitionOutCallback(std::function<void()>&& callback)
+    {
+        transitionOutCallback_ = std::move(callback);
+    }
+
+    void SetActualForegroundColor(const Color& value) override
+    {
+        actualForegroundColor_ = value;
+    }
+
+    size_t GetAnimationsCount() const override
+    {
+        return animationsCount_;
+    }
+
+    void SetAnimationsCount(size_t count)
+    {
+        animationsCount_ = count;
+    }
+
     bool isVisible_ = true;
+    bool hasDisappearTransition_ = false;
     RectF rect_;
     RectF paintRect_;
     Color blendColor_ = Color::TRANSPARENT;
-    std::vector<double> transInfo_ = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    RefPtr<AnimatablePropertyOffsetF> translateXY_;
     float opacityMultiplier_ = 1.0f;
+    std::function<void()> transitionOutCallback_;
+    Color actualForegroundColor_;
+
+private:
+    size_t animationsCount_ = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H

@@ -24,6 +24,7 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "core/common/window_animation_config.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 
 namespace OHOS {
 template<typename T>
@@ -60,6 +61,9 @@ enum class SessionType : int32_t {
     UI_EXTENSION_ABILITY = 1,
     CLOUD_CARD = 2,
     SECURITY_UI_EXTENSION_ABILITY = 3,
+    DYNAMIC_COMPONENT = 4,
+    ISOLATED_COMPONENT = 5,
+    INVALID_TYPE = 100,
 };
 
 enum class UIExtensionUsage : uint32_t {
@@ -107,14 +111,16 @@ public:
     // The lifecycle interface
     virtual void NotifyCreate() = 0;
     virtual void NotifyForeground() = 0;
-    virtual void NotifyBackground() = 0;
-    virtual void NotifyDestroy() = 0;
+    virtual void NotifyBackground(bool isHandleError = true) = 0;
+    virtual void NotifyDestroy(bool isHandleError = true) = 0;
     virtual void NotifyConfigurationUpdate() = 0;
 
     // The interface for responsing provider
     virtual void OnConnect() = 0;
     virtual void OnDisconnect(bool isAbnormal) = 0;
+    virtual void OnReleaseDone() {}
     virtual void OnExtensionTimeout(int32_t errorCode) = 0;
+    virtual void OnExtensionDetachToDisplay() {};
     virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t offset) = 0;
 
     // The interface about the accessibility
@@ -131,12 +137,27 @@ public:
     virtual void NotifySizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) = 0;
     virtual void NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const = 0;
-    virtual bool NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaChangeInfo> info) const = 0;
-    virtual void SetDensityDpiImpl(bool densityDpi) = 0;
+    virtual bool NotifyOccupiedAreaChangeInfo(
+        sptr<Rosen::OccupiedAreaChangeInfo> info, bool needWaitLayout = false) = 0;
+    virtual void SetDensityDpiImpl(bool densityDpi) {}
 
     // The interface to send the data for ArkTS
     virtual void SendDataAsync(const AAFwk::WantParams& params) const = 0;
     virtual int32_t SendDataSync(const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) const = 0;
+
+    // The interface to update viewport config
+    virtual void UpdateSessionViewportConfig() {}
+
+    // The interface for UEC dump
+    virtual uint32_t GetReasonDump() const = 0;
+    virtual void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
+    virtual bool SendBusinessDataSyncReply(UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply,
+        RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT) = 0;
+    virtual bool SendBusinessData(UIContentBusinessCode code, const AAFwk::Want& data, BusinessDataSendType type,
+        RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT) = 0;
+
+    virtual void NotifyHostWindowMode(int32_t mode) {}
+    virtual void ReDispatchWantParams() {}
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_SESSION_WRAPPER_H

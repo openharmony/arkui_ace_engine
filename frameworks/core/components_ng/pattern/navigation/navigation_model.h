@@ -32,6 +32,7 @@
 namespace OHOS::Ace {
 using NavigationTransitionEvent = std::function<NG::NavigationTransition(
      RefPtr<NG::NavDestinationContext> from, RefPtr<NG::NavDestinationContext> to, NG::NavigationOperation operation)>;
+using OnNavBarWidthChangeEvent = std::function<void(const Dimension)>;
 class ACE_FORCE_EXPORT NavigationModel {
 public:
     static NavigationModel* GetInstance();
@@ -55,32 +56,39 @@ public:
     virtual void SetTitleHeight(const Dimension& height, bool isValid = true) = 0;
     virtual void SetTitleMode(NG::NavigationTitleMode mode) = 0;
     virtual void SetSubtitle(const std::string& subtitle) = 0;
-    virtual void SetHideTitleBar(bool hideTitleBar) = 0;
+    virtual void SetEnableModeChangeAnimation(bool isEnable) = 0;
+    virtual void SetHideTitleBar(bool hideTitleBar, bool animated = false) = 0;
     virtual void SetHideNavBar(bool hideNavBar) = 0;
     virtual void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
         const std::string& src, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
-        const std::vector<std::string>& nameList);
+        const std::vector<std::string>& nameList, bool userDefinedAccessibilityText = false,
+        const std::string& backButtonAccessibilityText = "");
     virtual void SetHideBackButton(bool hideBackButton) = 0;
-    virtual void SetHideToolBar(bool hideToolBar) = 0;
+    virtual void SetHideToolBar(bool hideToolBar, bool animated = false) = 0;
     virtual void SetCustomToolBar(const RefPtr<AceType>& customNode) = 0;
     virtual bool NeedSetItems() = 0;
     virtual void SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems) = 0;
+    virtual void SetHideItemText(bool isHideItemText) {};
+    virtual void SetEnableToolBarAdaptation(bool disable) {};
     virtual void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) = 0;
     virtual void GetToolBarItems(std::list<RefPtr<AceType>>& items) {};
     virtual void SetToolbarOptions(NG::NavigationToolbarOptions&& opt) {}
+    virtual void SetToolbarMorebuttonOptions(NG::MoreButtonOptions&& opt) {}
     virtual void SetMenuItems(std::vector<NG::BarItem>&& menuItems) = 0;
     virtual void GetMenuItems(std::list<RefPtr<AceType>>& items) {};
+    virtual void SetMenuOptions(NG::NavigationMenuOptions&& opt) {}
     virtual void SetCustomMenu(const RefPtr<AceType>& customNode) = 0;
     virtual void SetOnTitleModeChange(std::function<void(NG::NavigationTitleMode)>&& onTitleModeChange,
         std::function<void(const BaseEventInfo* baseInfo)>&& eventInfo) = 0;
     virtual void SetUsrNavigationMode(NG::NavigationMode mode) = 0;
     virtual void SetNavBarPosition(NG::NavBarPosition mode) = 0;
-    virtual void SetNavBarWidth(const Dimension& value) = 0;
+    virtual void SetNavBarWidth(const Dimension& value, bool isDoubleBind = false) = 0;
     virtual void SetMinNavBarWidth(const Dimension& value) = 0;
     virtual void SetMaxNavBarWidth(const Dimension& value) = 0;
     virtual void SetMinContentWidth(const Dimension& value) = 0;
     virtual void SetOnNavBarStateChange(std::function<void(bool)>&& onNavBarStateChange) = 0;
     virtual void SetOnNavigationModeChange(std::function<void(NG::NavigationMode)>&& onNavigationModeChange);
+    virtual void SetOnNavBarWidthChangeEvent(OnNavBarWidthChangeEvent event) {};
     virtual void SetNavigationMode(NG::NavigationMode mode) = 0;
     virtual void SetNavDestination(std::function<void(std::string)>&& builder) = 0;
     virtual RefPtr<NG::NavigationStack> GetNavigationStack() = 0;
@@ -89,6 +97,8 @@ public:
     virtual void SetIsCustomAnimation(bool isCustom);
     virtual void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) {};
     virtual void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) {};
+    virtual void SetRecoverable(bool recoverable) {}
+    virtual void SetEnableDragBar(bool recoverable) {}
 
 private:
     static std::unique_ptr<NavigationModel> instance_;

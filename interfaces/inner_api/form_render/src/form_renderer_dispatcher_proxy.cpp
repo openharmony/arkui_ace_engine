@@ -15,7 +15,7 @@
 #include "form_renderer_dispatcher_proxy.h"
 
 #include "form_renderer_hilog.h"
-
+#include "core/accessibility/accessibility_manager.h"
 
 namespace OHOS {
 namespace Ace {
@@ -44,7 +44,7 @@ void FormRendererDispatcherProxy::DispatchPointerEvent(
 
     MessageParcel reply;
     MessageOption option;
-    int error = Remote()->SendRequest(
+    int32_t error = SendRequest(
         static_cast<uint32_t>(IFormRendererDispatcher::Message::DISPATCH_POINTER_EVENT),
         data, reply, option);
 
@@ -80,7 +80,7 @@ void FormRendererDispatcherProxy::SetAllowUpdate(bool allowUpdate)
 
     MessageParcel reply;
     MessageOption option;
-    int error = Remote()->SendRequest(
+    int32_t error = SendRequest(
         static_cast<uint32_t>(IFormRendererDispatcher::Message::SET_ALLOW_UPDATE),
         data, reply, option);
     if (error != ERR_OK) {
@@ -88,7 +88,8 @@ void FormRendererDispatcherProxy::SetAllowUpdate(bool allowUpdate)
     }
 }
 
-void FormRendererDispatcherProxy::DispatchSurfaceChangeEvent(float width, float height, float borderWidth)
+void FormRendererDispatcherProxy::DispatchSurfaceChangeEvent(float width, float height, uint32_t reason,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, float borderWidth)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -106,6 +107,26 @@ void FormRendererDispatcherProxy::DispatchSurfaceChangeEvent(float width, float 
         return;
     }
 
+    if (!data.WriteUint32(static_cast<uint32_t>(reason))) {
+        HILOG_ERROR("Write SessionSizeChangeReason failed");
+        return;
+    }
+
+    bool hasRSTransaction = rsTransaction != nullptr;
+    if (!data.WriteBool(hasRSTransaction)) {
+        HILOG_ERROR("Write has transaction failed");
+        return;
+    }
+    if (hasRSTransaction) {
+        auto pid = rsTransaction->GetParentPid();
+        rsTransaction->SetParentPid(getprocpid());
+        if (!data.WriteParcelable(rsTransaction.get())) {
+            HILOG_ERROR("Write transaction sync Id failed");
+            return;
+        }
+        rsTransaction->SetParentPid(pid);
+    }
+
     if (!data.WriteFloat(borderWidth)) {
         HILOG_ERROR("write borderWidth fail, action error");
         return;
@@ -113,7 +134,7 @@ void FormRendererDispatcherProxy::DispatchSurfaceChangeEvent(float width, float 
 
     MessageParcel reply;
     MessageOption option;
-    int error = Remote()->SendRequest(
+    int32_t error = SendRequest(
         static_cast<uint32_t>(IFormRendererDispatcher::Message::DISPATCH_SURFACE_CHANGE_EVENT), data, reply, option);
     if (error != ERR_OK) {
         HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
@@ -144,7 +165,7 @@ void FormRendererDispatcherProxy::SetObscured(bool isObscured)
 
     MessageParcel reply;
     MessageOption option;
-    int error = Remote()->SendRequest(
+    int32_t error = SendRequest(
         static_cast<uint32_t>(IFormRendererDispatcher::Message::SET_OBSCURED),
         data, reply, option);
     if (error != ERR_OK) {
@@ -175,7 +196,7 @@ void FormRendererDispatcherProxy::OnAccessibilityChildTreeRegister(
 
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
-    int error = Remote()->SendRequest(
+    int32_t error = SendRequest(
         static_cast<uint32_t>(IFormRendererDispatcher::Message::ACCESSIBILITY_CHILD_TREE_REGISTER),
         data, reply, option);
     if (error != ERR_OK) {
@@ -193,7 +214,7 @@ void FormRendererDispatcherProxy::OnAccessibilityChildTreeDeregister()
 
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
-    int error = Remote()->SendRequest(
+    int32_t error = SendRequest(
         static_cast<uint32_t>(IFormRendererDispatcher::Message::ACCESSIBILITY_CHILD_TREE_DEREGISTER),
         data, reply, option);
     if (error != ERR_OK) {
@@ -216,7 +237,7 @@ void FormRendererDispatcherProxy::OnAccessibilityDumpChildInfo(
 
     MessageParcel reply;
     MessageOption option;
-    int error = Remote()->SendRequest(
+    int32_t error = SendRequest(
         static_cast<uint32_t>(IFormRendererDispatcher::Message::ACCESSIBILITY_DUMP_CHILD_INFO),
         data, reply, option);
     if (error != ERR_OK) {
@@ -247,12 +268,50 @@ void FormRendererDispatcherProxy::OnAccessibilityTransferHoverEvent(float pointX
 
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
-    int error = Remote()->SendRequest(
+    int32_t error = SendRequest(
         static_cast<uint32_t>(IFormRendererDispatcher::Message::ACCESSIBILITY_TRANSFER_HOVER_EVENT),
         data, reply, option);
     if (error != ERR_OK) {
         HILOG_ERROR("failed to SendRequest: %{public}d", error);
     }
+}
+
+void FormRendererDispatcherProxy::OnNotifyDumpInfo(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("failed to write interface token");
+        return;
+    }
+    if (!data.WriteStringVector(params)) {
+        HILOG_ERROR("failed to write params");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error = SendRequest(
+        static_cast<uint32_t>(IFormRendererDispatcher::Message::NOTIFY_DUMP_INFO),
+        data, reply, option);
+    if (error != ERR_OK) {
+        HILOG_ERROR("failed to SendRequest: %{public}d", error);
+        return;
+    }
+    if (!reply.ReadStringVector(&info)) {
+        HILOG_ERROR("%{public}s, Read reply info failed.", __func__);
+    }
+}
+
+int32_t FormRendererDispatcherProxy::SendRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
+    MessageOption &option)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("remote is null");
+        return IPC_PROXY_ERR;
+    }
+    return remote->SendRequest(code, data, reply, option);
 }
 } // namespace Ace
 } // namespace OHOS

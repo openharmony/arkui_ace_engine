@@ -51,19 +51,27 @@ public:
      */
     void SetAllowUpdate(bool allowUpdate) override;
     bool IsAllowUpdate();
+    void SetVisible(bool isVisible);
+    bool IsVisible();
 
-    void DispatchSurfaceChangeEvent(float width, float height, float borderWidth = 0.0) override;
+    void DispatchSurfaceChangeEvent(float width, float height, uint32_t reason = 0,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, float borderWidth = 0.0) override;
     void SetObscured(bool isObscured) override;
     void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId) override;
     void OnAccessibilityChildTreeDeregister() override;
     void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
     void OnAccessibilityTransferHoverEvent(float pointX, float pointY, int32_t sourceType,
         int32_t eventType, int64_t timeMs) override;
+    void OnNotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 private:
     std::weak_ptr<UIContent> uiContent_;
     std::weak_ptr<FormRenderer> formRenderer_;
     std::weak_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
     bool allowUpdate_ = true;
+    bool isVisible_ = true;
+    static std::recursive_mutex globalLock_;
+    void HandleSurfaceChangeEvent(const std::shared_ptr<UIContent>& uiContent, float width, float height,
+        uint32_t reason, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, float borderWidth);
 };
 } // namespace Ace
 } // namespace OHOS

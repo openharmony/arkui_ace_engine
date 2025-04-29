@@ -14,14 +14,7 @@
  */
 #include "frameworks/core/interfaces/native/node/node_symbol_span_modifier.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/core/components/common/layout/constants.h"
-#include "frameworks/core/components/common/properties/text_style.h"
-#include "frameworks/core/components/common/properties/text_style_parser.h"
-#include "frameworks/core/components_ng/base/frame_node.h"
-#include "frameworks/core/components_ng/base/view_abstract.h"
 #include "frameworks/core/components_ng/pattern/text/symbol_span_model_ng.h"
-#include "frameworks/core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -129,6 +122,13 @@ void ResetSymbolSpanEffectStrategy(ArkUINodeHandle node)
     SymbolSpanModelNG::SetSymbolEffect(frameNode, 0);
 }
 
+void SetCustomSymbolSpanId(ArkUINodeHandle node, ArkUI_Uint32 symbolId, ArkUI_CharPtr fontFamily)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolSpanModelNG::InitialCustomSymbol(frameNode, symbolId, fontFamily);
+}
+
 void SetSymbolSpanId(ArkUINodeHandle node, ArkUI_Uint32 symbolId)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -140,40 +140,46 @@ void SetSymbolSpanId(ArkUINodeHandle node, ArkUI_Uint32 symbolId)
 namespace NodeModifier {
 const ArkUISymbolSpanModifier* GetSymbolSpanModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUISymbolSpanModifier modifier = {
-        SetSymbolSpanFontColor,
-        ResetSymbolSpanFontColor,
-        SetSymbolSpanFontSize,
-        ResetSymbolSpanFontSize,
-        SetSymbolSpanFontWeightStr,
-        SetSymbolSpanFontWeight,
-        ResetSymbolSpanFontWeight,
-        SetSymbolSpanRenderingStrategy,
-        ResetSymbolSpanRenderingStrategy,
-        SetSymbolSpanEffectStrategy,
-        ResetSymbolSpanEffectStrategy,
-        SetSymbolSpanId
+        .setSymbolSpanFontColor = SetSymbolSpanFontColor,
+        .resetSymbolSpanFontColor = ResetSymbolSpanFontColor,
+        .setSymbolSpanFontSize = SetSymbolSpanFontSize,
+        .resetSymbolSpanFontSize = ResetSymbolSpanFontSize,
+        .setSymbolSpanFontWeightStr = SetSymbolSpanFontWeightStr,
+        .setSymbolSpanFontWeight = SetSymbolSpanFontWeight,
+        .resetSymbolSpanFontWeight = ResetSymbolSpanFontWeight,
+        .setSymbolSpanRenderingStrategy = SetSymbolSpanRenderingStrategy,
+        .resetSymbolSpanRenderingStrategy = ResetSymbolSpanRenderingStrategy,
+        .setSymbolSpanEffectStrategy = SetSymbolSpanEffectStrategy,
+        .resetSymbolSpanEffectStrategy = ResetSymbolSpanEffectStrategy,
+        .setSymbolSpanId = SetSymbolSpanId,
+        .setCustomSymbolSpanId = SetCustomSymbolSpanId,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUISymbolSpanModifier* GetCJUISymbolSpanModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUISymbolSpanModifier modifier = {
-        SetSymbolSpanFontColor,
-        ResetSymbolSpanFontColor,
-        SetSymbolSpanFontSize,
-        ResetSymbolSpanFontSize,
-        SetSymbolSpanFontWeightStr,
-        SetSymbolSpanFontWeight,
-        ResetSymbolSpanFontWeight,
-        SetSymbolSpanRenderingStrategy,
-        ResetSymbolSpanRenderingStrategy,
-        SetSymbolSpanEffectStrategy,
-        ResetSymbolSpanEffectStrategy,
-        SetSymbolSpanId
+        .setSymbolSpanFontColor = SetSymbolSpanFontColor,
+        .resetSymbolSpanFontColor = ResetSymbolSpanFontColor,
+        .setSymbolSpanFontSize = SetSymbolSpanFontSize,
+        .resetSymbolSpanFontSize = ResetSymbolSpanFontSize,
+        .setSymbolSpanFontWeightStr = SetSymbolSpanFontWeightStr,
+        .setSymbolSpanFontWeight = SetSymbolSpanFontWeight,
+        .resetSymbolSpanFontWeight = ResetSymbolSpanFontWeight,
+        .setSymbolSpanRenderingStrategy = SetSymbolSpanRenderingStrategy,
+        .resetSymbolSpanRenderingStrategy = ResetSymbolSpanRenderingStrategy,
+        .setSymbolSpanEffectStrategy = SetSymbolSpanEffectStrategy,
+        .resetSymbolSpanEffectStrategy = ResetSymbolSpanEffectStrategy,
+        .setSymbolSpanId = SetSymbolSpanId,
+        .setCustomSymbolSpanId = SetCustomSymbolSpanId,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

@@ -18,6 +18,8 @@
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #define private public
 #define protected public
 #include "test/mock/core/common/mock_container.h"
@@ -31,7 +33,12 @@ void TestNG::SetUpTestSuite()
 {
     MockContainer::SetUp();
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockContainer::Current()->SetUseNewPipeline();
     MockPipelineContext::SetUp();
+    testing::FLAGS_gmock_verbose = "error";
+    auto rootNode = MockPipelineContext::GetCurrent()->GetRootElement();
+    auto stageNode = AceType::DynamicCast<FrameNode>(rootNode->GetChildAtIndex(0));
+    stageNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
 }
 
 void TestNG::TearDownTestSuite()
@@ -41,22 +48,18 @@ void TestNG::TearDownTestSuite()
     MockAnimationManager::Enable(false);
 }
 
-RefPtr<PaintWrapper> TestNG::FlushLayoutTask(const RefPtr<FrameNode>& frameNode, bool markDirty)
+void TestNG::FlushUITasks()
 {
-    if (markDirty) {
-        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    }
+    auto currentNode = GetStageNode()->GetChildAtIndex(0);
+    currentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    MockPipelineContext::GetCurrent()->FlushUITasks();
+}
+
+void TestNG::FlushUITasks(const RefPtr<FrameNode>& frameNode)
+{
     frameNode->SetActive();
-    frameNode->isLayoutDirtyMarked_ = true;
-    frameNode->CreateLayoutTask();
-    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
-    auto wrapper = frameNode->CreatePaintWrapper();
-    if (wrapper != nullptr) {
-        wrapper->FlushRender();
-    }
-    paintProperty->CleanDirty();
-    frameNode->SetActive(false);
-    return wrapper;
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    MockPipelineContext::GetCurrent()->FlushUITasks();
 }
 
 void TestNG::FlushExpandSafeAreaTask()
@@ -68,7 +71,7 @@ void TestNG::FlushExpandSafeAreaTask()
     safeAreaManager->ExpandSafeArea();
 }
 
-RefPtr<PaintWrapper> TestNG::CreateDone(const RefPtr<FrameNode>& frameNode)
+void TestNG::CreateDone()
 {
     auto& elementsStack = ViewStackProcessor::GetInstance()->elementsStack_;
     while (elementsStack.size() > 1) {
@@ -76,11 +79,11 @@ RefPtr<PaintWrapper> TestNG::CreateDone(const RefPtr<FrameNode>& frameNode)
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
-    auto rootNode = AceType::DynamicCast<FrameNode>(element);
+    auto currentNode = AceType::DynamicCast<FrameNode>(element);
     ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    auto layoutNode = frameNode ? frameNode : rootNode;
-    layoutNode->MarkModifyDone();
-    return FlushLayoutTask(layoutNode);
+    // rootNode > stageNode > currentNode
+    MountToStageNode(currentNode);
+    FlushUITasks();
 }
 
 void TestNG::CreateLayoutTask(const RefPtr<FrameNode>& frameNode)
@@ -88,6 +91,25 @@ void TestNG::CreateLayoutTask(const RefPtr<FrameNode>& frameNode)
     frameNode->SetActive();
     frameNode->SetLayoutDirtyMarked(true);
     frameNode->CreateLayoutTask();
+}
+
+RefPtr<FrameNode> TestNG::GetStageNode()
+{
+    auto rootNode = MockPipelineContext::GetCurrent()->GetRootElement();
+    auto stageNode = rootNode->GetChildAtIndex(0);
+    return AceType::DynamicCast<FrameNode>(stageNode);
+}
+
+void TestNG::MountToStageNode(const RefPtr<FrameNode>& currentNode)
+{
+    auto stageNode = GetStageNode();
+    auto oldNode = stageNode->GetChildAtIndex(0);
+    stageNode->ReplaceChild(oldNode, currentNode);
+}
+
+void TestNG::RemoveFromStageNode()
+{
+    GetStageNode()->RemoveChildAtIndex(0);
 }
 
 uint64_t TestNG::GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty)
@@ -124,7 +146,7 @@ RefPtr<ThemeConstants> TestNG::CreateThemeConstants(const std::string& patternNa
     return themeConstants;
 }
 
-RefPtr<FrameNode> TestNG::CreateText(const std::string& content, const std::function<void(TextModelNG)>& callback)
+RefPtr<FrameNode> TestNG::CreateText(const std::u16string& content, const std::function<void(TextModelNG)>& callback)
 {
     TextModelNG model;
     model.Create(content);
@@ -160,14 +182,47 @@ RefPtr<FrameNode> TestNG::CreateColumn(const std::function<void(ColumnModelNG)>&
     return AceType::DynamicCast<FrameNode>(element);
 }
 
-void TestNG::SetSize(Axis axis, const CalcLength& crossSize, const CalcLength& mainSize)
+void TestNG::SetSize(std::optional<Axis> axis, const CalcLength& crossSize, const CalcLength& mainSize)
 {
-    if (axis == Axis::VERTICAL) {
-        ViewAbstract::SetWidth(crossSize);
-        ViewAbstract::SetHeight(mainSize);
-    } else {
+    if (axis.has_value() && axis.value() == Axis::HORIZONTAL) {
         ViewAbstract::SetWidth(mainSize);
         ViewAbstract::SetHeight(crossSize);
+    } else {
+        ViewAbstract::SetWidth(crossSize);
+        ViewAbstract::SetHeight(mainSize);
     }
+}
+
+AssertionResult TestNG::IsExist(const RefPtr<FrameNode>& frameNode, int32_t index)
+{
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildByIndex(index, true));
+    if (childNode) {
+        return AssertionSuccess();
+    }
+    return AssertionFailure();
+}
+
+AssertionResult TestNG::IsExistAndActive(const RefPtr<FrameNode>& frameNode, int32_t index)
+{
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildByIndex(index, true));
+    if (!childNode) {
+        return AssertionFailure();
+    }
+    if (childNode->IsActive()) {
+        return AssertionSuccess();
+    }
+    return AssertionFailure();
+}
+
+AssertionResult TestNG::IsExistAndInActive(const RefPtr<FrameNode>& frameNode, int32_t index)
+{
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildByIndex(index, true));
+    if (!childNode) {
+        return AssertionFailure();
+    }
+    if (childNode->IsActive()) {
+        return AssertionFailure();
+    }
+    return AssertionSuccess();
 }
 } // namespace OHOS::Ace::NG

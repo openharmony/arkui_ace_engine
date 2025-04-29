@@ -47,22 +47,6 @@ private:
     WeakPtr<WebDelegate> webDelegate_;
 };
 
-class AccessibilityEventListenerImpl : public OHOS::NWeb::NWebAccessibilityEventCallback {
-public:
-    AccessibilityEventListenerImpl() = default;
-    ~AccessibilityEventListenerImpl() = default;
-
-    void OnAccessibilityEvent(int64_t accessibilityId, uint32_t eventType) override;
-
-    void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
-    {
-        webDelegate_ = delegate;
-    }
-
-private:
-    WeakPtr<WebDelegate> webDelegate_;
-};
-
 class ReleaseSurfaceImpl : public OHOS::NWeb::NWebReleaseSurfaceCallback {
 public:
     ReleaseSurfaceImpl() = default;
@@ -259,6 +243,9 @@ public:
                        std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback) override;
     void OnShowAutofillPopup(
         const float offsetX, const float offsetY, const std::vector<std::string>& menu_items) override;
+    void OnShowAutofillPopupV2(
+        const float offsetX, const float offsetY, const float height, const float width,
+        const std::vector<std::string>& menu_items) override;
     void OnHideAutofillPopup() override;
     void OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked) override;
 
@@ -298,6 +285,22 @@ public:
 
     void StartVibraFeedback(const std::string& vibratorType) override;
 
+    void OnNativeEmbedVisibilityChange(const std::string& embedId, bool visibility) override;
+
+    bool CloseImageOverlaySelection() override;
+    
+    bool OnSslErrorRequestByJSV2(std::shared_ptr<NWeb::NWebJSSslErrorResult> result,
+        OHOS::NWeb::SslError error, const std::vector<std::string>& certChainData) override;
+
+    void OnAccessibilityEventV2(int64_t accessibilityId, int32_t eventType, const std::string& argument) override;
+
+    bool IsCurrentFocus() override;
+
+    void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight) override;
+
+    void OnScrollStart(const float x, const float y) override;
+
+    void RestoreRenderFit() override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

@@ -17,7 +17,6 @@
 #include "core/components/calendar/calendar_theme.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
-
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
@@ -25,17 +24,12 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int SIZE_OF_TWO = 2;
 constexpr Dimension DEFAULT_TEXTSTYLE_FONTSIZE = 16.0_fp;
+constexpr int PARAM_ARR_LENGTH_1 = 1;
 
 void ParseCalendarPickerPadding(
     const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dim, ArkUISizeType& result)
 {
-    if (value->IsNull() || value->IsUndefined()) {
-        dim.SetValue(-1);
-        dim.SetUnit(DimensionUnit::VP);
-        result.unit = static_cast<int8_t>(dim.Unit());
-        result.value = dim.Value();
-    }
-    if (ArkTSUtils::ParseJsDimensionVp(vm, value, dim)) {
+    if (ArkTSUtils::ParseJsDimensionVpNG(vm, value, dim)) {
         if (LessOrEqual(dim.Value(), 0.0)) {
             dim.SetValue(-1);
             dim.SetUnit(DimensionUnit::VP);
@@ -46,7 +40,41 @@ void ParseCalendarPickerPadding(
         } else {
             result.value = dim.Value();
         }
+    } else {
+        dim.SetValue(-1);
+        dim.SetUnit(DimensionUnit::VP);
+        result.unit = static_cast<int8_t>(dim.Unit());
+        result.value = dim.Value();
     }
+}
+
+double GetMSByDate(const std::string& date)
+{
+    auto json = JsonUtil::ParseJsonString(date);
+    if (!json || json->IsNull()) {
+        return 0.0f;
+    }
+
+    std::tm dateTime {};
+    auto year = json->GetValue("year");
+    if (year && year->IsNumber()) {
+        dateTime.tm_year = year->GetInt() - 1900; // local date start from 1900
+    }
+    auto month = json->GetValue("month");
+    if (month && month->IsNumber()) {
+        dateTime.tm_mon = month->GetInt() - 1;
+    }
+    auto day = json->GetValue("day");
+    if (day && day->IsNumber()) {
+        dateTime.tm_mday = day->GetInt();
+    }
+    auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    auto local = std::localtime(&now);
+    CHECK_NULL_RETURN(local, 0.0f);
+    dateTime.tm_hour = local->tm_hour;
+    dateTime.tm_min = local->tm_min;
+    dateTime.tm_sec = local->tm_sec;
+    return Date::GetMilliSecondsByDateTime(dateTime);
 }
 
 ArkUINativeModuleValue CalendarPickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -100,30 +128,26 @@ ArkUINativeModuleValue CalendarPickerBridge::SetEdgeAlign(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> dxArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> dyArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    int alignType = NUM_2;
     if (!alignTypeArg->IsNull() && !alignTypeArg->IsUndefined() && alignTypeArg->IsNumber()) {
-        int alignType = alignTypeArg->ToNumber(vm)->Value();
-        CalcDimension dx;
-        CalcDimension dy;
-        if (!dxArg->IsNull() && !dxArg->IsUndefined()) {
-            ArkTSUtils::ParseJsDimensionVp(vm, dxArg, dx);
-        }
-        if (!dyArg->IsNull() && !dyArg->IsUndefined()) {
-            ArkTSUtils::ParseJsDimensionVp(vm, dyArg, dy);
-        }
-
-        ArkUI_Float32 values[SIZE_OF_TWO];
-        int units[SIZE_OF_TWO];
-
-        values[NUM_0] = dx.Value();
-        units[NUM_0] = static_cast<int>(dx.Unit());
-        values[NUM_1] = dy.Value();
-        units[NUM_1] = static_cast<int>(dy.Unit());
-
-        GetArkUINodeModifiers()->getCalendarPickerModifier()->setEdgeAlign(
-            nativeNode, values, units, SIZE_OF_TWO, alignType);
-    } else {
-        GetArkUINodeModifiers()->getCalendarPickerModifier()->resetEdgeAlign(nativeNode);
+        alignType = alignTypeArg->ToNumber(vm)->Value();
     }
+    CalcDimension dx;
+    CalcDimension dy;
+    if (!dxArg->IsNull() && !dxArg->IsUndefined()) {
+        ArkTSUtils::ParseJsDimensionVp(vm, dxArg, dx);
+    }
+    if (!dyArg->IsNull() && !dyArg->IsUndefined()) {
+        ArkTSUtils::ParseJsDimensionVp(vm, dyArg, dy);
+    }
+    ArkUI_Float32 values[SIZE_OF_TWO];
+    int units[SIZE_OF_TWO];
+    values[NUM_0] = dx.Value();
+    units[NUM_0] = static_cast<int>(dx.Unit());
+    values[NUM_1] = dy.Value();
+    units[NUM_1] = static_cast<int>(dy.Unit());
+    GetArkUINodeModifiers()->getCalendarPickerModifier()->setEdgeAlign(
+        nativeNode, values, units, SIZE_OF_TWO, alignType);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -152,10 +176,10 @@ ArkUINativeModuleValue CalendarPickerBridge::SetCalendarPickerPadding(ArkUIRunti
         return panda::JSValueRef::Undefined(vm);
     }
 
-    struct ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
-    struct ArkUISizeType right = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
-    struct ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
-    struct ArkUISizeType left = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
+    struct ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    struct ArkUISizeType right = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    struct ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    struct ArkUISizeType left = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
 
     CalcDimension topDim(0, DimensionUnit::VP);
     CalcDimension rightDim(0, DimensionUnit::VP);
@@ -195,6 +219,13 @@ ArkUINativeModuleValue CalendarPickerBridge::SetCalendarPickerBorder(ArkUIRuntim
 
     CommonBridge::SetBorder(runtimeCallInfo);
 
+    CalcDimension borderWidth;
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, borderWidth) || !borderWidth.IsValid()) {
+        GetArkUINodeModifiers()->getCalendarPickerModifier()->resetCalendarPickerBorderWidth(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
     if (leftArg->IsUndefined() && rightArg->IsUndefined() && topArg->IsUndefined() && bottomArg->IsUndefined()) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, panda::NativePointerRef::New(vm, nullptr));
@@ -213,6 +244,177 @@ ArkUINativeModuleValue CalendarPickerBridge::ResetCalendarPickerBorder(ArkUIRunt
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getCalendarPickerModifier()->resetCalendarPickerBorder(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CalendarPickerBridge::SetCalendarPickerHeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CalcDimension height;
+    std::string calcStr;
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height)) {
+        GetArkUINodeModifiers()->getCalendarPickerModifier()->resetCalendarPickerHeight(nativeNode);
+    } else {
+        if (LessNotEqual(height.Value(), 0.0)) {
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                GetArkUINodeModifiers()->getCalendarPickerModifier()->resetCalendarPickerHeight(nativeNode);
+                return panda::JSValueRef::Undefined(vm);
+            }
+            height.SetValue(0.0);
+        }
+        if (height.Unit() == DimensionUnit::CALC) {
+            GetArkUINodeModifiers()->getCalendarPickerModifier()->setCalendarPickerHeight(
+                nativeNode, height.Value(), static_cast<int32_t>(height.Unit()));
+        } else {
+            GetArkUINodeModifiers()->getCalendarPickerModifier()->setCalendarPickerHeight(
+                nativeNode, height.Value(), static_cast<int32_t>(height.Unit()));
+        }
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CalendarPickerBridge::ResetCalendarPickerHeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCalendarPickerModifier()->resetCalendarPickerHeight(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CalendarPickerBridge::SetCalendarPickerBorderColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Color color;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+        GetArkUINodeModifiers()->getCalendarPickerModifier()->resetCalendarPickerBorderColor(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getCalendarPickerModifier()->setCalendarPickerBorderColor(
+            nativeNode, color.GetValue());
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CalendarPickerBridge::ResetCalendarPickerBorderColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCalendarPickerModifier()->resetCalendarPickerBorderColor(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CalendarPickerBridge::SetCalendarPickerBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    CalcDimension borderRadius;
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, secondArg, borderRadius, true)) {
+        GetArkUINodeModifiers()->getCalendarPickerModifier()->resetCalendarPickerBorderRadius(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    if (LessNotEqual(borderRadius.Value(), 0.0)) {
+        GetArkUINodeModifiers()->getCalendarPickerModifier()->resetCalendarPickerBorderRadius(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    GetArkUINodeModifiers()->getCalendarPickerModifier()->setCalendarPickerBorderRadius(nativeNode,
+        borderRadius.Value(), static_cast<int>(borderRadius.Unit()));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CalendarPickerBridge::ResetCalendarPickerBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCalendarPickerModifier()->resetCalendarPickerBorderRadius(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CalendarPickerBridge::SetCalendarPickerMarkToday(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> markTodayArg = runtimeCallInfo->GetCallArgRef(1); // markToday value
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    if (!markTodayArg->IsUndefined() && !markTodayArg.IsNull() && markTodayArg->IsBoolean()) {
+        bool isMarkToday = markTodayArg->ToBoolean(vm)->Value();
+        nodeModifiers->getCalendarPickerModifier()->setCalendarPickerMarkToday(nativeNode, isMarkToday);
+    } else {
+        nodeModifiers->getCalendarPickerModifier()->resetCalendarPickerMarkToday(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CalendarPickerBridge::ResetCalendarPickerMarkToday(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getCalendarPickerModifier()->resetCalendarPickerMarkToday(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue CalendarPickerBridge::SetCalendarPickerOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    int32_t argsNumber = runtimeCallInfo->GetArgsNumber();
+    if (argsNumber != NUM_2) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getCalendarPickerModifier()->resetCalendarPickerOnChange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(const std::string&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+                                                           const std::string& dateStr) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        panda::Local<panda::DateRef> dateObj = panda::DateRef::New(vm, GetMSByDate(dateStr));
+        panda::Local<panda::JSValueRef> params[] = { dateObj };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+    };
+    GetArkUINodeModifiers()->getCalendarPickerModifier()->setCalendarPickerOnChange(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue CalendarPickerBridge::ResetCalendarPickerOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCalendarPickerModifier()->resetCalendarPickerOnChange(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

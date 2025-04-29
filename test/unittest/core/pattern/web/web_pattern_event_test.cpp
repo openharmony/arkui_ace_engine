@@ -99,12 +99,12 @@ HWTEST_F(WebPatternEventTest, WebPatternTestNg_001, TestSize.Level1)
     TimeStamp time(millisec);
     info.SetLocalLocation(localLocation);
     info.SetTimeStamp(time);
-    EXPECT_TRUE(g_webPattern->doubleClickQueue_.empty());
+    EXPECT_TRUE(g_webPattern->mouseClickQueue_.empty());
     g_webPattern->HandleDoubleClickEvent(info);
-    EXPECT_FALSE(g_webPattern->doubleClickQueue_.empty());
-    EXPECT_EQ(g_webPattern->doubleClickQueue_.size(), 1);
+    EXPECT_FALSE(g_webPattern->mouseClickQueue_.empty());
+    EXPECT_EQ(g_webPattern->mouseClickQueue_.size(), 1);
     g_webPattern->HandleDoubleClickEvent(info);
-    EXPECT_NE(g_webPattern->doubleClickQueue_.size(), 1);
+    EXPECT_NE(g_webPattern->mouseClickQueue_.size(), 1);
     g_webPattern->HandleDoubleClickEvent(info);
 #endif
 }
@@ -125,6 +125,7 @@ HWTEST_F(WebPatternEventTest, WebPatternTestNg_002, TestSize.Level1)
     g_webPattern->HandleBlurEvent(blurReason);
     KeyEvent keyEvent;
     g_webPattern->WebOnKeyEvent(keyEvent);
+    EXPECT_FALSE(g_webPattern->isTouchUpEvent_);
 #endif
 }
 
@@ -139,7 +140,7 @@ HWTEST_F(WebPatternEventTest, WebPatternTestNg_003, TestSize.Level1)
     g_webPattern->OnModifyDone();
     auto host = g_webPattern->GetHost();
     EXPECT_NE(host, nullptr);
-    auto eventHub = host->GetEventHub<WebEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<WebEventHub>();
     EXPECT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     EXPECT_NE(focusHub, nullptr);

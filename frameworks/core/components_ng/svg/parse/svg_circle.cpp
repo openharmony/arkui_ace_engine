@@ -15,7 +15,6 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_circle.h"
 
-#include "base/utils/utils.h"
 #include "core/components_ng/svg/parse/svg_animation.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
@@ -28,16 +27,6 @@ RefPtr<SvgNode> SvgCircle::Create()
     return AceType::MakeRefPtr<SvgCircle>();
 }
 
-#ifndef USE_ROSEN_DRAWING
-SkPath SvgCircle::AsPath(const Size& viewPort) const
-{
-    SkPath path;
-    path.addCircle(ConvertDimensionToPx(circleAttr_.cx, viewPort, SvgLengthType::HORIZONTAL),
-        ConvertDimensionToPx(circleAttr_.cy, viewPort, SvgLengthType::VERTICAL),
-        ConvertDimensionToPx(circleAttr_.r, viewPort, SvgLengthType::OTHER));
-    return path;
-}
-#else
 RSRecordingPath SvgCircle::AsPath(const Size& viewPort) const
 {
     RSRecordingPath path;
@@ -46,7 +35,25 @@ RSRecordingPath SvgCircle::AsPath(const Size& viewPort) const
         ConvertDimensionToPx(circleAttr_.r, viewPort, SvgLengthType::OTHER));
     return path;
 }
-#endif
+
+RSRecordingPath SvgCircle::AsPath(const SvgLengthScaleRule& lengthRule)
+{
+    /* re-generate the Path for pathTransform(true). AsPath come from clip-path */
+    if (path_.has_value() && lengthRule_ == lengthRule && !lengthRule.GetPathTransform()) {
+        return path_.value();
+    }
+    RSRecordingPath path;
+    auto cx = GetMeasuredPosition(circleAttr_.cx, lengthRule, SvgLengthType::HORIZONTAL);
+    auto cy = GetMeasuredPosition(circleAttr_.cy, lengthRule, SvgLengthType::VERTICAL);
+    path.AddCircle(cx, cy, GetMeasuredLength(circleAttr_.r, lengthRule, SvgLengthType::OTHER));
+    lengthRule_ = lengthRule;
+    path_ = path;
+    /* Apply path transform for clip-path only */
+    if (lengthRule.GetPathTransform()) {
+        ApplyTransform(path);
+    }
+    return path;
+}
 
 void SvgCircle::PrepareAnimation(const RefPtr<SvgAnimation>& animate)
 {

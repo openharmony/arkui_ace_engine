@@ -32,14 +32,17 @@ struct TimePickerDialogEvent {
     std::function<void()> onWillAppear;
     std::function<void()> onWillDisappear;
 };
-class TimePickerModel {
+class ACE_FORCE_EXPORT TimePickerModel {
 public:
     static TimePickerModel* GetInstance();
     virtual ~TimePickerModel() = default;
 
     virtual void CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool hasSecond = false) = 0;
+    virtual void SetStartTime(const PickerTime& value) = 0;
+    virtual void SetEndTime(const PickerTime& value) = 0;
     virtual void SetSelectedTime(const PickerTime& value) = 0;
     virtual void SetOnChange(ChangeEvent&& onChange) = 0;
+    virtual void SetOnEnterSelectedArea(ChangeEvent&& onEnterSelectedArea) = 0;
     virtual void SetHour24(bool isUseMilitaryTime) = 0;
     virtual void SetIsEnableHapticFeedback(bool isEnableHapticFeedback) {};
     virtual void SetDateTimeOptions(ZeroPrefixType& hourType,
@@ -53,10 +56,14 @@ public:
     virtual void HasUserDefinedSelectedFontFamily(bool isUserDefined) = 0;
     virtual void SetBackgroundColor(const Color& color) = 0;
     virtual void SetChangeEvent(ChangeEvent&& onChange) = 0;
+    virtual void HasUserDefinedOpacity() = 0;
+    virtual void SetEnableCascade(bool isEnableCascade) = 0;
 
+    virtual void SetDigitalCrownSensitivity(int32_t value) = 0;
+    virtual void UpdateUserSetSelectColor() = 0;
 private:
     static std::unique_ptr<TimePickerModel> timePickerInstance_;
-    static std::mutex mutex_;
+    static std::once_flag onceFlag_;
 };
 
 class TimePickerDialogModel {
@@ -66,12 +73,13 @@ public:
 
     virtual void SetTimePickerDialogShow(PickerDialogInfo& pickerDialog, NG::TimePickerSettingData& settingData,
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
-        std::function<void(const std::string&)>&& onChange, TimePickerDialogEvent& timePickerDialogEvent,
+        std::function<void(const std::string&)>&& onChange,
+        std::function<void(const std::string&)>&& onEnterSelectedArea, TimePickerDialogEvent& timePickerDialogEvent,
         const std::vector<ButtonInfo>& buttonInfos) = 0;
 
 private:
     static std::unique_ptr<TimePickerDialogModel> timePickerDialogInstance_;
-    static std::mutex mutex_;
+    static std::once_flag onceFlag_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TIME_PICKER_TIME_PICKER_MODEL_H

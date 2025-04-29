@@ -14,13 +14,6 @@
  */
 #include "core/interfaces/native/node/node_component3d_modifier.h"
 
-#include "bridge/common/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/interfaces/native/node/node_api.h"
-#include "core/pipeline/base/element_register.h"
-#include "frameworks/core/components/common/layout/constants.h"
 #include "frameworks/core/components_ng/pattern/model/model_view_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -58,20 +51,24 @@ void ResetShaderInputBuffer(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIComponent3DModifier* GetComponent3DModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIComponent3DModifier modifier = {
-        SetShaderInputBuffer,
-        ResetShaderInputBuffer,
+        .setShaderInputBuffer = SetShaderInputBuffer,
+        .resetShaderInputBuffer = ResetShaderInputBuffer,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIComponent3DModifier* GetCJUIComponent3DModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIComponent3DModifier modifier = {
-        SetShaderInputBuffer,
-        ResetShaderInputBuffer,
+        .setShaderInputBuffer = SetShaderInputBuffer,
+        .resetShaderInputBuffer = ResetShaderInputBuffer,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

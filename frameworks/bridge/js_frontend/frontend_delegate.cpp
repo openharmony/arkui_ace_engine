@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/js_frontend/frontend_delegate.h"
 
+#include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/core/components_ng/base/inspector.h"
@@ -120,7 +121,7 @@ void FrontendDelegate::GetRectangleById(const std::string& key, NG::Rectangle& r
 
 void FrontendDelegate::ResetFocus()
 {
-    TAG_LOGI(AceLogTag::ACE_FOCUS, "Lost focus to view root scope by user");
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "user lost focus to view root scope");
     NG::FocusHub::LostFocusToViewRoot();
 }
 
@@ -148,6 +149,38 @@ void FrontendDelegate::ResetRequestFocusCallback()
     auto focusManager = pipeline->GetOrCreateFocusManager();
     CHECK_NULL_VOID(focusManager);
     focusManager->ResetRequestFocusCallback();
+}
+
+bool FrontendDelegate::Activate(bool isActive, bool autoInactive)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    return pipeline->SetIsFocusActive(isActive, NG::FocusActiveReason::USE_API, autoInactive);
+}
+
+void FrontendDelegate::SetAutoFocusTransfer(bool isAutoFocusTransfer)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    CHECK_NULL_VOID(focusManager);
+    focusManager->SetIsAutoFocusTransfer(isAutoFocusTransfer);
+}
+
+void FrontendDelegate::SetKeyProcessingMode(int32_t keyProcessingMode)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    CHECK_NULL_VOID(focusManager);
+    focusManager->SetKeyProcessingMode(static_cast<NG::KeyProcessingMode>(keyProcessingMode));
+}
+
+bool FrontendDelegate::ConfigWindowMask(bool enable)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    return NG::ContainerModalView::ConfigCustomWindowMask(pipeline, enable);
 }
 
 template<typename T>

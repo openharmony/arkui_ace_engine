@@ -42,11 +42,14 @@ public:
     MOCK_METHOD0(GetMaxWidth, float());
     MOCK_METHOD0(GetAlphabeticBaseline, float());
     MOCK_METHOD0(GetParagraphText, std::u16string());
+    MOCK_METHOD0(GetEllipsisTextRange, std::pair<size_t, size_t>());
     MOCK_CONST_METHOD0(GetParagraphStyle, const ParagraphStyle&());
     MOCK_METHOD1(PushStyle, void(const TextStyle& style));
     MOCK_METHOD1(AddText, void(const std::u16string& text));
     MOCK_METHOD1(AddSymbol, void(const uint32_t& symbolId));
     MOCK_METHOD1(Layout, void(float width));
+    MOCK_METHOD3(ReLayout, void(float width, const ParagraphStyle& paraStyle,
+        const std::vector<TextStyle>& textStyles));
     MOCK_METHOD1(AddPlaceholder, int32_t(const PlaceholderRun& span));
     MOCK_METHOD1(GetRectsForPlaceholders, void(std::vector<RectF>& selectedRects));
     MOCK_METHOD1(SetIndents, void(const std::vector<float>& indents));
@@ -67,10 +70,9 @@ public:
     MOCK_METHOD3(Paint, void(SkCanvas* skCanvas, float x, float y));
 #endif
     MOCK_METHOD3(GetWordBoundary, bool(int32_t offset, int32_t& start, int32_t& end));
-
-    void TxtGetRectsForRange(int32_t start, int32_t end, RectHeightStyle heightStyle, RectWidthStyle widthStyle,
-        std::vector<RectF>& selectedRects, std::vector<TextDirection>& textDirections) override {}
-
+    MOCK_METHOD6(TxtGetRectsForRange, void(int32_t start, int32_t end,
+        RectHeightStyle heightStyle, RectWidthStyle widthStyle,
+        std::vector<RectF>& selectedRects, std::vector<TextDirection>& textDirections));
     bool CalcCaretMetricsByPosition(
         int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity, bool needLineHighest) override
     {
@@ -88,7 +90,13 @@ public:
         LineMetrics lineMetrics;
         return lineMetrics;
     }
-    
+
+    RectF GetPaintRegion(float x, float y) override
+    {
+        RectF rect;
+        return rect;
+    }
+
     bool GetLineMetricsByCoordinate(const Offset& offset, LineMetrics& lineMetrics) override
     {
         return true;

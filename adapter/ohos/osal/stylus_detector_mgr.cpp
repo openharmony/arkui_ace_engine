@@ -15,26 +15,9 @@
 
 #include "core/common/stylus/stylus_detector_mgr.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/rect_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/geometry/point.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/common/stylus/stylus_detector_default.h"
-#include "core/common/stylus/stylus_detector_loader.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
-#include "core/components_ng/pattern/search/search_text_field.h"
-#include "core/components_ng/pattern/text/text_base.h"
+#include "core/common/stylus/stylus_detector_callback.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/base/log/log_wrapper.h"
 
 namespace OHOS::Ace {
 const static std::unordered_set<std::string> TEXT_FIELD_COMPONENT_TAGS = {
@@ -43,109 +26,6 @@ const static std::unordered_set<std::string> TEXT_FIELD_COMPONENT_TAGS = {
     V2::RICH_EDITOR_ETS_TAG,
     V2::SEARCH_Field_ETS_TAG,
 };
-
-void StylusDetectorMgr::StylusDetectorCallBack::RequestFocus(int32_t nodeId)
-{
-    auto UiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
-    auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
-    CHECK_NULL_VOID(frameNode);
-    auto focusHub = frameNode->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    if (frameNode->GetTag() == V2::SEARCH_Field_ETS_TAG) {
-        auto searchTextFieldPattern = frameNode->GetPattern<NG::SearchTextFieldPattern>();
-        CHECK_NULL_VOID(searchTextFieldPattern);
-        focusHub = searchTextFieldPattern->GetFocusHub();
-        CHECK_NULL_VOID(focusHub);
-    }
-    if (!focusHub->IsCurrentFocus()) {
-        focusHub->RequestFocusImmediately();
-    }
-    if (frameNode->GetTag() == V2::RICH_EDITOR_ETS_TAG) {
-        return;
-    }
-    auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    bool needToRequestKeyBoardOnFocus = pattern->NeedToRequestKeyboardOnFocus();
-    if (!needToRequestKeyBoardOnFocus) {
-        pattern->RequestKeyboardNotByFocusSwitch(NG::RequestKeyboardReason::STYLUS_DETECTOR);
-    }
-}
-
-void StylusDetectorMgr::StylusDetectorCallBack::SetText(int32_t nodeId, std::string args)
-{
-    auto UiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
-    auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
-    CHECK_NULL_VOID(frameNode);
-    if (frameNode->GetTag() == V2::RICH_EDITOR_ETS_TAG) {
-        return;
-    }
-    auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    if (!args.empty()) {
-        pattern->UpdateEditingValue(args, args.size());
-        frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
-    }
-}
-
-std::string StylusDetectorMgr::StylusDetectorCallBack::GetText(int32_t nodeId)
-{
-    auto UiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
-    auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
-    CHECK_NULL_RETURN(frameNode, "");
-    if (frameNode->GetTag() == V2::RICH_EDITOR_ETS_TAG) {
-        return "";
-    }
-    auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
-    CHECK_NULL_RETURN(pattern, "");
-    return pattern->GetTextValue();
-}
-
-void StylusDetectorMgr::StylusDetectorCallBack::OnDetector(
-    const CommandType& command, std::string args, std::shared_ptr<IAceStylusCallback> callback)
-{
-    ResultData res;
-    auto nodeId = StylusDetectorMgr::GetInstance()->GetDefaultNodeId();
-    if (nodeId == 0) {
-        return;
-    }
-    auto container = Container::CurrentSafely();
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto taskScheduler = pipelineContext->GetTaskExecutor();
-    CHECK_NULL_VOID(taskScheduler);
-
-    LOGI("Stylus received commandType:%{public}d", static_cast<int32_t>(command));
-    taskScheduler->PostTask(
-        [command, callback, nodeId, args]() {
-            ResultData res;
-            std::string inputText = "";
-            switch (command) {
-                case COMMAND_REQUEST_FOCUS:
-                    StylusDetectorMgr::StylusDetectorCallBack::RequestFocus(nodeId);
-                    break;
-                case COMMAND_CLEAR_HIT:
-                    break;
-                case COMMAND_SET_TEXT:
-                    StylusDetectorMgr::StylusDetectorCallBack::SetText(nodeId, args);
-                    break;
-                case COMMAND_GET_TEXT:
-                    res.resultData = StylusDetectorMgr::StylusDetectorCallBack::GetText(nodeId);
-                    break;
-                case COMMAND_INVALID:
-                    LOGE("StylusDetector received error command.");
-                    res.errorMessage = "StylusDetector received error command.";
-                    res.errorCode = 1;
-                    break;
-                default:
-                    break;
-            }
-            if (callback.get() != nullptr) {
-                callback->Callback(res);
-            }
-        },
-        TaskExecutor::TaskType::UI, "ArkUIDetectorStylusAction");
-}
 
 StylusDetectorMgr* StylusDetectorMgr::GetInstance()
 {
@@ -198,7 +78,7 @@ RefPtr<NG::FrameNode> StylusDetectorMgr::FindHitFrameNode(
 
     auto pipeline = frameNode->GetContextRefPtr();
     if (!pipeline) {
-        LOGI("Can't find pipeline for find hit node.");
+        TAG_LOGI(AceLogTag::ACE_STYLUS, "Can't find pipeline for find hit node.");
         return nullptr;
     }
     auto nanoTimestamp = pipeline->GetVsyncTime();
@@ -220,21 +100,26 @@ bool StylusDetectorMgr::IsNeedInterceptedTouchEvent(
 
     const auto iter = touchTestResults.find(touchEvent.id);
     if (iter == touchTestResults.end() || iter->second.empty()) {
-        LOGI("TouchTestResult is empty");
+        TAG_LOGI(AceLogTag::ACE_STYLUS, "TouchTestResult is empty");
         return false;
     }
 
     auto frameNode = FindHitFrameNode(touchEvent, iter->second);
     if (!frameNode) {
-        LOGI("Stylus hit position is (%{public}f, %{public}f). TargetNode is None", touchEvent.x, touchEvent.y);
+        TAG_LOGI(AceLogTag::ACE_STYLUS,
+            "Stylus hit position is (" SEC_PLD(%{public}f) "," SEC_PLD(%{public}f) "). TargetNode is None",
+            SEC_PARAM(touchEvent.x), SEC_PARAM(touchEvent.y));
         return false;
     }
 
-    LOGI("Stylus hit position is (%{public}f, %{public}f). TargetNode is %{public}s, id is %{public}s", touchEvent.x,
-        touchEvent.y, frameNode->GetTag().c_str(), frameNode->GetInspectorId()->c_str());
+    TAG_LOGI(AceLogTag::ACE_STYLUS,
+        "Stylus hit position is (" SEC_PLD(%{public}f) "," SEC_PLD(%{public}f) ")."
+        "TargetNode is %{public}s, id is " SEC_PLD(%{public}s) ".",
+        SEC_PARAM(touchEvent.x), SEC_PARAM(touchEvent.y), frameNode->GetTag().c_str(),
+        SEC_PARAM(frameNode->GetInspectorId()->c_str()));
 
     if (!IsEnable()) {
-        LOGI("Stylus service is not enable");
+        TAG_LOGI(AceLogTag::ACE_STYLUS, "Stylus service is not enable");
         return false;
     }
 
@@ -244,17 +129,23 @@ bool StylusDetectorMgr::IsNeedInterceptedTouchEvent(
     NotifyInfo info;
     info.componentId = frameNode->GetId();
     nodeId_ = info.componentId;
+    const auto layoutIter = textFieldLayoutInfos_.find(nodeId_);
+    if (layoutIter != textFieldLayoutInfos_.end()) {
+        layoutInfo_ = layoutIter->second;
+    }
     info.x = touchEvent.screenX;
     info.y = touchEvent.screenY;
     info.bundleName = bundleName;
-    if (!isRegistered_) {
-        auto stylusDetectorCallback = std::make_shared<StylusDetectorCallBack>();
-        isRegistered_ = RegisterStylusInteractionListener(bundleName, stylusDetectorCallback);
-    }
+    auto stylusDetectorCallback = std::make_shared<StylusDetectorCallBack>();
+    isRegistered_ = RegisterStylusInteractionListener(bundleName, stylusDetectorCallback);
+    sInd_ = -1;
+    eInd_ = -1;
+    showMenu_ = false;
     return Notify(info);
 }
 
-void StylusDetectorMgr::AddTextFieldFrameNode(const RefPtr<NG::FrameNode>& frameNode)
+void StylusDetectorMgr::AddTextFieldFrameNode(const RefPtr<NG::FrameNode>& frameNode,
+    const WeakPtr<NG::LayoutInfoInterface>& layoutInfo)
 {
     CHECK_NULL_VOID(frameNode);
     auto tag = frameNode->GetTag();
@@ -264,13 +155,15 @@ void StylusDetectorMgr::AddTextFieldFrameNode(const RefPtr<NG::FrameNode>& frame
     }
     auto id = frameNode->GetId();
     auto destructor = [id]() { StylusDetectorMgr::GetInstance()->RemoveTextFieldFrameNode(id); };
-    frameNode->PushDestroyCallback(std::move(destructor));
+    frameNode->PushDestroyCallbackWithTag(std::move(destructor), "DestroyCallbackForStylus");
     textFieldNodes_[id] = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    textFieldLayoutInfos_[id] = layoutInfo;
 }
 
 void StylusDetectorMgr::RemoveTextFieldFrameNode(const int32_t id)
 {
     textFieldNodes_.erase(id);
+    textFieldLayoutInfos_.erase(id);
     if (textFieldNodes_.empty()) {
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
@@ -317,5 +210,29 @@ bool StylusDetectorMgr::IsHitCleanNodeResponseArea(
     auto globalFrameRect = cleanNodeGeometryNode->GetFrameRect();
     globalFrameRect.SetOffset(cleanNodeFrameNode->CalculateCachedTransformRelativeOffset(nanoTimestamp));
     return globalFrameRect.IsInRegion(point);
+}
+
+bool StylusDetectorMgr::IsNeedInterceptedTouchEventForWeb(float x, float y)
+{
+    if (!IsEnable()) {
+        TAG_LOGI(AceLogTag::ACE_STYLUS, "IsNeedInterceptedTouchEventForWeb Stylus service is not enable");
+        return false;
+    }
+
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto bundleName = container->GetBundleName();
+    NotifyInfo info;
+    info.componentId = -1;
+    info.x = x;
+    info.y = y;
+    info.bundleName = bundleName;
+    auto stylusDetectorCallback = std::make_shared<StylusDetectorCallBack>();
+    nodeId_ = 0;
+    sInd_ = -1;
+    eInd_ = -1;
+    showMenu_ = false;
+    isRegistered_ = RegisterStylusInteractionListener(bundleName, stylusDetectorCallback);
+    return Notify(info);
 }
 } // namespace OHOS::Ace

@@ -44,9 +44,14 @@ public:
     // keep compatible, need remove after
     static void UseMilitaryTime(bool isUseMilitaryTime);
     static void IsUserDefinedFontFamily(const std::string& pos);
+    static void JsOpacity(const JSCallbackInfo& info);
+    static void SetEnableHapticFeedback(const JSCallbackInfo& info);
+    static void SetDigitalCrownSensitivity(const JSCallbackInfo& info);
 
 private:
     static void CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
+    static void ParseStartEndDate(JSRef<JSVal> startDate, JSRef<JSVal> endDate);
+    static void ParseDatePickerMode(JSRef<JSVal> mode);
     // keep compatible, need remove after
     static void CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
     static PickerDate ParseDate(const JSRef<JSVal>& dateVal);
@@ -63,7 +68,7 @@ public:
         const std::map<std::string, NG::DialogEvent>& dialogEvent,
         const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent);
     static void ParseDateTimeOptions(const JSRef<JSObject>& paramObj, DateTimeType& dateTimeOptions);
-    static JsiRef<JsiValue> GetDateObj(const std::unique_ptr<JsonValue>& selectedJson);
+    static JsiRef<JsiValue> GetDateObj(const std::unique_ptr<JsonValue>& selectedJson, bool isDatePicker = true);
 
 private:
     static std::function<void(const std::string&)> GetDateChangeEvent(const JSRef<JSObject>& paramObject,
@@ -77,6 +82,8 @@ private:
     static std::function<void()> GetCancelEvent(
         const JSRef<JSObject>& paramObject, const JSCallbackInfo& info, const WeakPtr<NG::FrameNode>& frameNode);
     static void UpdateDatePickerSettingData(const JSRef<JSObject>& paramObject, NG::DatePickerSettingData& settingData);
+    static void UpdateLunarSwitchSettingData(
+        const JSRef<JSObject>& paramObject, NG::DatePickerSettingData& settingData);
     static void UpdatePickerDialogTimeInfo(const JSRef<JSObject>& paramObject, PickerDialogInfo& pickerDialog);
     static void UpdatePickerDialogPositionInfo(const JSRef<JSObject>& paramObject, PickerDialogInfo& pickerDialog);
     static void UpdatePickerDialogInfo(const JSRef<JSObject>& paramObject, PickerDialogInfo& pickerDialog);
@@ -95,6 +102,7 @@ public:
 
     static void JSBind(BindingTarget globalObj);
     static void OnChange(const JSCallbackInfo& info);
+    static void OnEnterSelectedArea(const JSCallbackInfo& info);
     static void Loop(const JSCallbackInfo& info);
     static void UseMilitaryTime(bool isUseMilitaryTime);
     static void EnableHapticFeedback(const JSCallbackInfo& info);
@@ -104,14 +112,18 @@ public:
     static void SetTextStyle(const JSCallbackInfo& info);
     static void SetSelectedTextStyle(const JSCallbackInfo& info);
     static void DateTimeOptions(const JSCallbackInfo& info);
+    static void JsOpacity(const JSCallbackInfo& info);
+    static void EnableCascade(const JSCallbackInfo& info);
 
+    static void SetDigitalCrownSensitivity(const JSCallbackInfo& info);
 private:
     static void CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
     static void SetDefaultAttributes();
-    static PickerTime ParseTime(const JSRef<JSVal>& timeVal);
+    static PickerTime ParseTime(
+        const JSRef<JSVal>& timeVal, PickerTime defaultTime = PickerTime(), bool useDefaultTime = false);
 };
 
-class JSTimePickerDialog {
+class JSTimePickerDialog : public JSViewAbstract {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Show(const JSCallbackInfo& info);
@@ -121,7 +133,8 @@ public:
 
 private:
     static void CreateTimePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj);
-    static PickerTime ParseTime(const JSRef<JSVal>& timeVal);
+    static PickerTime ParseTime(
+        const JSRef<JSVal>& timeVal, PickerTime defaultTime = PickerTime(), bool useDefaultTime = false);
     static PickerDate ParseDate(const JSRef<JSVal>& dateVal);
 };
 } // namespace OHOS::Ace::Framework

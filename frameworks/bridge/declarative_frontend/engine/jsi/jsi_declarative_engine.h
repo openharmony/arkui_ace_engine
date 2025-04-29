@@ -27,7 +27,6 @@
 #include "native_engine/impl/ark/ark_native_engine.h"
 
 #include "base/memory/ace_type.h"
-#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_page.h"
@@ -83,6 +82,10 @@ public:
     static RefPtr<PipelineBase> GetPipelineContext(const shared_ptr<JsRuntime>& runtime);
     static void PreloadAceModule(void* runtime);
     static void PreloadAceModuleWorker(void* runtime);
+    // crossPlatform Resets the module pre-load flag
+    static void ResetModulePreLoadFlag();
+    // crossPlatform Prepares for resetting the module pre-load flag
+    static void PrepareForResetModulePreLoadFlag();
 
     WeakPtr<JsMessageDispatcher> GetJsMessageDispatcher() const
     {
@@ -294,7 +297,8 @@ public:
     bool LoadPageSource(const std::string& url,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
     bool LoadPageSource(const std::shared_ptr<std::vector<uint8_t>>& content,
-        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr,
+        const std::string& contentName = "") override;
     int32_t LoadNavDestinationSource(const std::string& pageUrl, const std::string& bundleName,
         const std::string& moduleName, bool isSingleton) override;
 
@@ -370,9 +374,16 @@ public:
 
     static std::string GetFullPathInfo(const std::string& url);
 
+    static std::optional<std::string> GetRouteNameByUrl(
+        const std::string& url, const std::string& bundleName, const std::string& moduleName);
+
     void SetLocalStorage(int32_t instanceId, NativeReference* storage) override;
 
     void SetContext(int32_t instanceId, NativeReference* context) override;
+
+    std::shared_ptr<Framework::JsValue> GetJsContext() override;
+
+    void SetJsContext(const std::shared_ptr<Framework::JsValue>& jsContext) override;
 
     void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
 
@@ -426,6 +437,8 @@ public:
 
     void JsStateProfilerResgiter();
 
+    void JsSetAceDebugMode();
+
 #if defined(PREVIEW)
     void ReplaceJSContent(const std::string& url, const std::string componentName) override;
     RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID) override;
@@ -468,6 +481,8 @@ public:
 
     panda::Global<panda::ObjectRef> GetNavigationBuilder(std::string name);
 
+    // crossPlatform Clears the 'namedRouterRegisterMap_'
+    static void ResetNamedRouterRegisterMap();
 private:
     bool CallAppFunc(const std::string& appFuncName);
 
@@ -486,6 +501,8 @@ private:
     bool ExecuteAbc(const std::string& fileName);
     bool ExecuteCardAbc(const std::string& fileName, int64_t cardId);
     bool ExecuteDynamicAbc(const std::string& fileName, const std::string& entryPoint);
+    bool InnerExecuteIsolatedAbc(const std::string& fileName, const std::string& entryPoint);
+    bool InnerExecuteDynamicAbc(const std::string& fileName, const std::string& entryPoint);
 
     RefPtr<JsiDeclarativeEngineInstance> engineInstance_;
 

@@ -16,11 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_MASK_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_MASK_H
 
-#ifndef USE_ROSEN_DRAWING
-#include "include/core/SkRect.h"
-#else
 #include "core/components_ng/render/drawing.h"
-#endif
 
 #include "frameworks/core/components_ng/svg/parse/svg_attributes_parser.h"
 #include "frameworks/core/components_ng/svg/parse/svg_quote.h"
@@ -36,12 +32,14 @@ public:
     static RefPtr<SvgNode> Create();
 
 protected:
+    void OnMaskEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext) override;
     void OnInitStyle() override;
     void OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color) override;
     void OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color) override;
 
     double ParseUnitsAttr(const Dimension& attr, double value);
     bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
+    void DrawChildren(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule);
 
 private:
     Dimension x_ = Dimension(-0.1, DimensionUnit::PERCENT); // x-axis default value
@@ -53,11 +51,7 @@ private:
 
     SvgMaskAttribute maskAttr_;
 
-#ifndef USE_ROSEN_DRAWING
-    SkRect maskBounds_;
-#else
     RSRect maskBounds_;
-#endif
     int canvasLayerCount_ = -1;
 };
 

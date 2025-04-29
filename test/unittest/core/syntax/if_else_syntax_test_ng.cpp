@@ -37,6 +37,7 @@ constexpr int32_t IF_ELSE_CHILDREN_COUNT = 1;
 constexpr int32_t IF_ELSE_CHILDREN_COUNT_2 = 0;
 constexpr int32_t IF_ELSE_NODE_ID = 1;
 std::list<int32_t> removedElmtIds;
+std::list<int32_t> reservedElmtIds;
 constexpr bool IS_ATOMIC_NODE = false;
 } // namespace
 
@@ -104,7 +105,7 @@ HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxBranchIDTest003, TestSize.Level1)
 {
     IfElseModelNG ifElse;
     ifElse.Create();
-    ifElse.SetBranchId(IF_ELSE_BRANCH_ID, removedElmtIds);
+    ifElse.SetBranchId(IF_ELSE_BRANCH_ID, removedElmtIds, reservedElmtIds);
 
     EXPECT_EQ(ifElse.GetBranchId(), IF_ELSE_BRANCH_ID);
     auto ifElseNodeNode = AceType::DynamicCast<IfElseNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -121,7 +122,7 @@ HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxBranchIDTest003, TestSize.Level1)
     ifElseNodeNode->AddChild(childFrameNode);
     EXPECT_EQ(ifElseNodeNode->GetChildren().size(), IF_ELSE_CHILDREN_COUNT);
     // ifElse node will clean its children when its branch id has changed.
-    ifElseNodeNode->SetBranchId(IF_ELSE_BRANCH_ID_2, removedElmtIds);
+    ifElseNodeNode->SetBranchId(IF_ELSE_BRANCH_ID_2, removedElmtIds, reservedElmtIds);
     ifElseNodeNode->FlushUpdateAndMarkDirty();
     EXPECT_EQ(ifElseNodeNode->GetChildren().size(), IF_ELSE_CHILDREN_COUNT_2);
 
@@ -129,7 +130,7 @@ HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxBranchIDTest003, TestSize.Level1)
      * @tc.steps: step1. Set branch id which is same as before.
      * @tc.expected: OnDirtyLayoutWrapperSwap return the true only when the canvas images all have been initialized.
      */
-    ifElseNodeNode->SetBranchId(IF_ELSE_BRANCH_ID, removedElmtIds);
+    ifElseNodeNode->SetBranchId(IF_ELSE_BRANCH_ID, removedElmtIds, reservedElmtIds);
     ifElseNodeNode->FlushUpdateAndMarkDirty();
     EXPECT_FALSE(ifElseNodeNode->branchIdChanged_);
 }
@@ -143,7 +144,7 @@ HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxTest004, TestSize.Level1)
 {
     IfElseModelNG ifElse;
     ifElse.Create();
-    ifElse.SetBranchId(IF_ELSE_BRANCH_ID, removedElmtIds);
+    ifElse.SetBranchId(IF_ELSE_BRANCH_ID, removedElmtIds, reservedElmtIds);
 
     auto ifElseNodeNode = AceType::DynamicCast<IfElseNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_TRUE(ifElseNodeNode != nullptr && ifElseNodeNode->GetTag() == V2::JS_IF_ELSE_ETS_TAG);
@@ -159,7 +160,7 @@ HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxBranchIDTest005, TestSize.Level1)
 {
     IfElseModelNG ifElse;
     ifElse.Create();
-    ifElse.SetBranchId(IF_ELSE_BRANCH_ID, removedElmtIds);
+    ifElse.SetBranchId(IF_ELSE_BRANCH_ID, removedElmtIds, reservedElmtIds);
 
     EXPECT_EQ(ifElse.GetBranchId(), IF_ELSE_BRANCH_ID);
     auto ifElseNodeNode = AceType::DynamicCast<IfElseNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -176,7 +177,7 @@ HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxBranchIDTest005, TestSize.Level1)
     ifElseNodeNode->AddChild(childFrameNode);
     EXPECT_EQ(ifElseNodeNode->GetChildren().size(), IF_ELSE_CHILDREN_COUNT);
     // ifElse node will clean its children when its branch id has changed.
-    ifElseNodeNode->SetBranchId(IF_ELSE_BRANCH_ID_2, removedElmtIds);
+    ifElseNodeNode->SetBranchId(IF_ELSE_BRANCH_ID_2, removedElmtIds, reservedElmtIds);
     ifElseNodeNode->FlushUpdateAndMarkDirty();
     EXPECT_EQ(ifElseNodeNode->GetChildren().size(), IF_ELSE_CHILDREN_COUNT_2);
 
@@ -184,7 +185,7 @@ HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxBranchIDTest005, TestSize.Level1)
      * @tc.steps: step1. Set branch id which is same as before.
      * @tc.expected: OnDirtyLayoutWrapperSwap return the true only when the canvas images all have been initialized.
      */
-    ifElseNodeNode->SetBranchId(IF_ELSE_BRANCH_ID_2, removedElmtIds);
+    ifElseNodeNode->SetBranchId(IF_ELSE_BRANCH_ID_2, removedElmtIds, reservedElmtIds);
     ifElseNodeNode->FlushUpdateAndMarkDirty();
     EXPECT_FALSE(ifElseNodeNode->branchIdChanged_);
 }
@@ -248,5 +249,29 @@ HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxTest007, TestSize.Level1)
      */
     bool result3 = ifElseNode->TryRetake("node2");
     EXPECT_FALSE(result3);
+}
+
+/**
+ * @tc.name: FlushUpdateAndMarkDirty001
+ * @tc.desc: Test for FlushUpdateAndMarkDirty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IfElseSyntaxTestNg, FlushUpdateAndMarkDirty001, TestSize.Level1)
+{
+    IfElseModelNG ifElse;
+    ifElse.Create();
+
+    auto ifElseNode = AceType::DynamicCast<IfElseNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(ifElseNode, nullptr);
+    EXPECT_EQ(ifElseNode->GetTag(), V2::JS_IF_ELSE_ETS_TAG);
+    ifElseNode->branchIdChanged_ = true;
+    
+    auto node = AceType::MakeRefPtr<FrameNode>("node", -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(node, nullptr);
+    ifElseNode->SetParent(node);
+    ASSERT_NE(ifElseNode->GetParent(), nullptr);
+    ASSERT_EQ(ifElseNode->GetParent()->GetTag(), "node");
+    ifElseNode->FlushUpdateAndMarkDirty();
+    EXPECT_FALSE(ifElseNode->branchIdChanged_);
 }
 } // namespace OHOS::Ace::NG

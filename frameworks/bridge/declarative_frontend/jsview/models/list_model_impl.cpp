@@ -19,14 +19,11 @@
 
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "core/components_v2/list/list_position_controller.h"
-#include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::Framework {
 
-void ListModelImpl::Create()
+void ListModelImpl::Create(bool isCreateArc)
 {
     auto listComponent = AceType::MakeRefPtr<V2::ListComponent>();
     ViewStackProcessor::GetInstance()->ClaimElementId(listComponent);
@@ -68,7 +65,7 @@ void ListModelImpl::SetScrollBar(DisplayMode scrollBar)
     JSViewSetProperty(&V2::ListComponent::SetScrollBar, scrollBar);
 }
 
-void ListModelImpl::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
+void ListModelImpl::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge)
 {
     JSViewSetProperty(&V2::ListComponent::SetEdgeEffect, edgeEffect);
 }
@@ -109,7 +106,7 @@ void ListModelImpl::SetLaneConstrain(const Dimension& laneMinLength, const Dimen
     component->SetLaneConstrain(laneMinLength, laneMaxLength);
 }
 
-void ListModelImpl::SetCachedCount(int32_t cachedCount)
+void ListModelImpl::SetCachedCount(int32_t cachedCount, bool show)
 {
     JSViewSetProperty(&V2::ListComponent::SetCachedCount, cachedCount);
 }

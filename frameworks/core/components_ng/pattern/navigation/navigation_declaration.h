@@ -30,8 +30,15 @@ inline RefPtr<NavigationBarTheme> NavigationGetTheme()
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<NavigationBarTheme>();
-    return theme;
+    return pipeline->GetTheme<NavigationBarTheme>();
+}
+
+
+inline RefPtr<NavigationBarTheme> NavigationGetTheme(int32_t themeScopeId)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return pipeline->GetTheme<NavigationBarTheme>(themeScopeId);
 }
 
 // TODO：move some items to theme
@@ -124,6 +131,13 @@ constexpr const char* DES_FIELD = "__NavdestinationField__";
 // font scale
 constexpr float STANDARD_FONT_SCALE = 1.0f;
 
+constexpr int32_t ROTATION_0 = 0;
+constexpr int32_t ROTATION_90 = 90;
+constexpr int32_t ROTATION_180 = 180;
+constexpr int32_t ROTATION_270 = 270;
+
+constexpr uint32_t BAR_ITEM_MARGIN_NUM = 2;
+
 enum class NavToolbarItemStatus {
     NORMAL = 0,
     DISABLED,
@@ -149,6 +163,13 @@ struct BarItem {
         result.append(icon.value_or("na"));
         return result;
     }
+};
+
+struct NavigationTitleInfo {
+    bool hasSubTitle;
+    bool hasMainTitle;
+    std::string subtitle;
+    std::string title;
 };
 
 enum class ToolbarIconStatus {
@@ -195,6 +216,7 @@ enum class ChildNodeOperation {
 enum class BarStyle {
     STANDARD = 0,
     STACK,
+    SAFE_AREA_PADDING,
 };
 
 enum class TitleBarParentType { NAVBAR, NAV_DESTINATION };
@@ -212,20 +234,58 @@ enum class NavigationOperation {
 };
 
 enum NavDestinationLifecycle {
-    ON_WILL_APPEAR,
+    ON_WILL_APPEAR = 0,
     ON_APPEAR,
     ON_WILL_SHOW,
     ON_SHOW,
+    ON_ACTIVE,
     ON_WILL_HIDE,
+    ON_INACTIVE,
     ON_HIDE,
     ON_WILL_DISAPPEAR,
     ON_DISAPPEAR
 };
 
+enum class NavDestinationActiveReason {
+    TRANSITION = 0,
+    CONTENT_COVER,
+    SHEET,
+    DIALOG,
+    OVERLAY,
+    APP_STATE_CHANGE
+};
+
+enum class NavigationSystemTransitionType {
+    NONE = 0,
+    TITLE = 1,
+    CONTENT = 1 << 1,
+    DEFAULT = 1 | (1 << 1),
+    FADE = 1 << 2,
+    EXPLODE = 1 << 3,
+    SLIDE_RIGHT = 1 << 4,
+    SLIDE_BOTTOM = 1 << 5,
+};
+
+inline NavigationSystemTransitionType operator& (NavigationSystemTransitionType lv, NavigationSystemTransitionType rv)
+{
+    return static_cast<NavigationSystemTransitionType>(static_cast<uint32_t>(lv) & static_cast<uint32_t>(rv));
+}
 struct NavSafeArea {
     float top = 0.0f;
     float bottom = 0.0f;
 };
+
+struct NavDestinationTransition {
+    int32_t delay;
+    int32_t duration;
+    RefPtr<Curve> curve;
+    std::function<void()> event;
+    std::function<void()> onTransitionEnd;
+};
+
+using NavDestinationTransitionDelegate = std::function<std::optional<std::vector<NavDestinationTransition>>(
+    NavigationOperation operation, bool isEnter)>;
+using NavDestinationOnNewParamCallback = std::function<void(napi_value param)>;
 
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_NAVIGATION_NAVIGATION_DECLARATION_H

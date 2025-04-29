@@ -28,19 +28,16 @@
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
-#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper_builder.h"
 #include "core/components_ng/property/constraint_flags.h"
-#include "core/components_ng/property/geometry_property.h"
 #include "core/components_ng/property/layout_constraint.h"
-#include "core/components_ng/property/magic_layout_property.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/position_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 class FrameNode;
+class UINode;
+class LayoutProperty;
+struct SafeAreaInsets;
+struct SafeAreaExpandOpts;
 
 class RecursiveLock {
 public:
@@ -145,6 +142,9 @@ public:
 
     virtual RefPtr<LayoutWrapper> GetOrCreateChildByIndex(
         uint32_t index, bool addToRenderTree = true, bool isCache = false) = 0;
+    /**
+     * @param isCache if false, child is added to render tree and AttachToMainTree is called.
+     */
     virtual RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index, bool isCache = false) = 0;
     virtual ChildrenListWithGuard GetAllChildrenWithBuild(bool addToRenderTree = true) = 0;
     virtual void RemoveChildInRenderTree(uint32_t index) = 0;
@@ -152,9 +152,11 @@ public:
     /**
      * @param cacheStart number of items to cache before @c start
      * @param cacheEnd number of items to cache after @c end
+     * @param showCached whether to set cached items as active
      * @note To deactivate all children, set @c start and @c end to -1
      */
-    virtual void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0) = 0;
+    virtual void SetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0, bool showCached = false) = 0;
     virtual void SetActiveChildRange(const std::optional<ActiveChildSets>& activeChildSets,
         const std::optional<ActiveChildRange>& activeChildRange = std::nullopt)
     {}
@@ -183,7 +185,7 @@ public:
         return false;
     }
 
-    OffsetF GetParentGlobalOffsetWithSafeArea(bool checkBoundary = false, bool checkPosition = false) const;
+    virtual OffsetF GetParentGlobalOffsetWithSafeArea(bool checkBoundary = false, bool checkPosition = false) const;
 
     virtual bool SkipMeasureContent() const;
 
@@ -210,9 +212,9 @@ public:
 
     virtual void BuildLazyItem() {}
 
-    bool IsConstraintNoChanged() const
+    bool ConstraintChanged() const
     {
-        return isConstraintNotChanged_;
+        return !isConstraintNotChanged_;
     }
     const ConstraintFlags& GetConstraintChanges() const
     {
@@ -261,8 +263,10 @@ protected:
     OffsetF ExpandIntoKeyboard();
     bool CheckValidSafeArea();
     float GetPageCurrentOffset();
-    bool AccumulateExpandCacheHit(ExpandEdges& totalExpand);
-    void GetAccumulatedSafeAreaExpandHelper(RectF& adjustingRect, ExpandEdges& totalExpand);
+    bool AccumulateExpandCacheHit(ExpandEdges& totalExpand, const PaddingPropertyF& innerSpace);
+    void GetAccumulatedSafeAreaExpandHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false);
+    void ParseSafeAreaPaddingSides(const PaddingPropertyF& parentSafeAreaPadding,
+        const PaddingPropertyF& parentInnerSpace, const RectF& adjustingRect, ExpandEdges& rollingExpand);
 
     WeakPtr<FrameNode> hostNode_;
 

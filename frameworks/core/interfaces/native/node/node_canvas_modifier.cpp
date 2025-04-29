@@ -14,8 +14,6 @@
  */
 #include "core/interfaces/native/node/node_canvas_modifier.h"
 
-#include "base/log/log_wrapper.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
@@ -28,7 +26,7 @@ void SetCanvasOnReady(ArkUINodeHandle node, void* extraParam)
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.componentAsyncEvent.subKind = ON_CANVAS_READY;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     CanvasModelNG::SetOnReady(frameNode, std::move(onChange));
 }

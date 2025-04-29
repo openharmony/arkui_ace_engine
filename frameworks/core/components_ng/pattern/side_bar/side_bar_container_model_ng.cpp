@@ -15,15 +15,6 @@
 
 #include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
 
-#include "base/geometry/dimension.h"
-#include "base/image/pixel_map.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/side_bar/side_bar_container_layout_property.h"
-#include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/image/image_source_info.h"
-#include "core/pipeline_ng/pipeline_context.h"
-
 namespace OHOS::Ace::NG {
 namespace {
 static Dimension DEFAULT_SIDE_BAR_WIDTH = 200.0_vp;
@@ -31,6 +22,9 @@ static Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
 static Dimension DEFAULT_MIN_CONTENT_WIDTH = 0.0_vp;
 constexpr static int32_t PLATFORM_VERSION_TEN = 10;
+constexpr Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
+constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
+constexpr Dimension DEFAULT_CONTROL_BUTTON_TOP = 48.0_vp;
 
 ImageSourceInfo CreateSourceInfo(const std::string& src, bool isPixelMap, RefPtr<PixelMap>& pixMap)
 {
@@ -42,6 +36,7 @@ ImageSourceInfo CreateSourceInfo(const std::string& src, bool isPixelMap, RefPtr
     return ImageSourceInfo(src);
 }
 } // namespace
+bool SideBarContainerModelNG::sideBarWidthDoubleBind_ = false;
 
 void SideBarContainerModelNG::Create()
 {
@@ -81,11 +76,11 @@ void SideBarContainerModelNG::SetShowControlButton(bool showControlButton)
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ShowControlButton, showControlButton);
 }
 
-void SideBarContainerModelNG::ParseAndSetWidth(WidthType widthType, Dimension& width)
+void SideBarContainerModelNG::ParseAndSetWidth(WidthType widthType, Dimension& width, bool isDoubleBind)
 {
     switch (widthType) {
         case WidthType::SIDEBAR_WIDTH:
-            SetSideBarWidth(width.IsNonNegative() ? width : DEFAULT_SIDE_BAR_WIDTH);
+            SetSideBarWidth(width.IsNonNegative() ? width : DEFAULT_SIDE_BAR_WIDTH, isDoubleBind);
             break;
         case WidthType::MIN_SIDEBAR_WIDTH:
             SetMinSideBarWidth(width.IsNonNegative() ? width : DEFAULT_MIN_SIDE_BAR_WIDTH);
@@ -98,20 +93,42 @@ void SideBarContainerModelNG::ParseAndSetWidth(WidthType widthType, Dimension& w
     }
 }
 
-void SideBarContainerModelNG::SetSideBarWidth(const Dimension& sideBarWidth)
+void SideBarContainerModelNG::SetSideBarWidth(const Dimension& sideBarWidth, bool isDoubleBind)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
+    CHECK_NULL_VOID(pattern);
+    sideBarWidthDoubleBind_ = isDoubleBind;
+    if (IsDoubleBindBlock(pattern)) {
+        return;
+    }
     MarkNeedInitRealSideBarWidth();
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, SideBarWidth, sideBarWidth);
 }
 
 void SideBarContainerModelNG::SetMinSideBarWidth(const Dimension& minSideBarWidth)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (IsDoubleBindBlock(pattern)) {
+        return;
+    }
     MarkNeedInitRealSideBarWidth();
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinSideBarWidth, minSideBarWidth);
 }
 
 void SideBarContainerModelNG::SetMaxSideBarWidth(const Dimension& maxSideBarWidth)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (IsDoubleBindBlock(pattern)) {
+        return;
+    }
     MarkNeedInitRealSideBarWidth();
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MaxSideBarWidth, maxSideBarWidth);
 }
@@ -224,7 +241,7 @@ void SideBarContainerModelNG::SetOnChange(std::function<void(const bool)>&& onCh
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<SideBarContainerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SideBarContainerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
@@ -242,19 +259,40 @@ void SideBarContainerModelNG::SetOnChangeEvent(std::function<void(const bool)>&&
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<SideBarContainerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SideBarContainerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(onChangeEvent));
 }
 
+void SideBarContainerModelNG::SetOnSideBarWidthChangeEvent(OnSideBarWidthChangeEvent&& event)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<SideBarContainerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSideBarWidthChangeEvent(std::move(event));
+}
+
 void SideBarContainerModelNG::SetSideBarWidth(FrameNode* frameNode, const Dimension& sideBarWidth)
 {
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (IsDoubleBindBlock(pattern)) {
+        return;
+    }
     MarkNeedInitRealSideBarWidth(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, SideBarWidth, sideBarWidth, frameNode);
 }
 
 void SideBarContainerModelNG::SetMinSideBarWidth(FrameNode* frameNode, const Dimension& minSideBarWidth)
 {
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (IsDoubleBindBlock(pattern)) {
+        return;
+    }
     MarkNeedInitRealSideBarWidth(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinSideBarWidth, minSideBarWidth, frameNode);
 }
@@ -329,6 +367,12 @@ void SideBarContainerModelNG::SetAutoHide(FrameNode* frameNode, bool autoHide)
 
 void SideBarContainerModelNG::SetMaxSideBarWidth(FrameNode* frameNode, const Dimension& maxSideBarWidth)
 {
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (IsDoubleBindBlock(pattern)) {
+        return;
+    }
     MarkNeedInitRealSideBarWidth(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MaxSideBarWidth, maxSideBarWidth, frameNode);
 }
@@ -387,5 +431,24 @@ void SideBarContainerModelNG::ResetControlButtonIconInfo(FrameNode* frameNode)
         SideBarContainerLayoutProperty, ControlButtonHiddenIconInfo, PROPERTY_UPDATE_LAYOUT, frameNode);
     ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
         SideBarContainerLayoutProperty, ControlButtonSwitchingIconInfo, PROPERTY_UPDATE_LAYOUT, frameNode);
+}
+
+void SideBarContainerModelNG::ResetControlButton()
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonWidth, DEFAULT_CONTROL_BUTTON_WIDTH);
+    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonHeight, DEFAULT_CONTROL_BUTTON_HEIGHT);
+    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonTop, DEFAULT_CONTROL_BUTTON_TOP);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(SideBarContainerLayoutProperty, ControlButtonLeft, PROPERTY_UPDATE_LAYOUT);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(
+        SideBarContainerLayoutProperty, ControlButtonShowIconInfo, PROPERTY_UPDATE_LAYOUT);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(
+        SideBarContainerLayoutProperty, ControlButtonHiddenIconInfo, PROPERTY_UPDATE_LAYOUT);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(
+        SideBarContainerLayoutProperty, ControlButtonSwitchingIconInfo, PROPERTY_UPDATE_LAYOUT);
+}
+
+bool SideBarContainerModelNG::IsDoubleBindBlock(const RefPtr<SideBarContainerPattern>& sideBarContainerPattern)
+{
+    return sideBarWidthDoubleBind_ && sideBarContainerPattern->GetIsInDividerDrag();
 }
 } // namespace OHOS::Ace::NG

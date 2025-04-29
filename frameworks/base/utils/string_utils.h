@@ -85,6 +85,11 @@ inline bool IsLetterOrNumberForWchar(wchar_t chr)
     return (chr >= L'0' && chr <= L'9') || (chr >= L'a' && chr <= L'z') || (chr >= L'A' && chr <= L'Z');
 }
 
+inline bool IsLetterOrNumberForChar16(char16_t chr)
+{
+    return (chr >= u'0' && chr <= u'9') || (chr >= u'a' && chr <= u'z') || (chr >= u'A' && chr <= u'Z');
+}
+
 inline std::string ToString(const std::wstring& str)
 {
     if (str == DEFAULT_WSTRING) {
@@ -203,13 +208,13 @@ inline std::string RestoreBackslash(const std::string& src)
     return res;
 }
 
-inline int32_t StringToInt(const std::string& value)
+inline int32_t StringToInt(const std::string& value, int64_t defaultErr = 0)
 {
     errno = 0;
     char* pEnd = nullptr;
     int64_t result = std::strtol(value.c_str(), &pEnd, 10);
     if (pEnd == value.c_str() || (result < INT_MIN || result > INT_MAX) || errno == ERANGE) {
-        return 0;
+        return defaultErr;
     } else {
         return result;
     }
@@ -682,6 +687,17 @@ inline void SplitStr(const std::string& str, const std::string& sep, std::vector
     }
 }
 
+inline bool CStringEqual(const char* first, const char* second)
+{
+    if (first == nullptr && second == nullptr) {
+        return true;
+    }
+    if (first && second) {
+        return std::strcmp(first, second) == 0;
+    }
+    return false;
+}
+
 const std::string ACE_FORCE_EXPORT FormatString(const char* fmt, ...);
 
 inline bool StartWith(const std::string& dst, const std::string& prefix)
@@ -705,7 +721,8 @@ inline bool EndWith(const std::string& str, const char* suffix, size_t suffixLen
     return ((len >= suffixLen) && (str.compare(len - suffixLen, suffixLen, suffix) == 0));
 }
 
-inline void TransformStrCase(std::string& str, int32_t textCase)
+template<typename T>
+inline void TransformStrCase(T& str, int32_t textCase)
 {
     if (str.empty()) {
         return;

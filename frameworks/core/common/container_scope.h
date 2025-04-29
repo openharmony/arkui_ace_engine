@@ -38,11 +38,21 @@ enum class InstanceIdGenReason : uint32_t {
     UNDEFINED,
 };
 
-class ACE_EXPORT ContainerScope {
+class ACE_EXPORT ContainerScope final {
 public:
+    template<typename T>
+    explicit ContainerScope(T) = delete;
+
     explicit ContainerScope(int32_t id)
     {
         UpdateCurrent(id);
+    }
+
+    ContainerScope(int32_t id, bool enable)
+    {
+        if (enable) {
+            UpdateCurrent(id);
+        }
     }
 
     ~ContainerScope()
@@ -51,6 +61,7 @@ public:
     }
 
     static int32_t CurrentId();
+    static int32_t CurrentLocalId();
     static int32_t DefaultId();
     static int32_t SingletonId();
     static int32_t RecentActiveId();
@@ -64,6 +75,7 @@ public:
     static uint32_t ContainerCount();
 
     static void UpdateCurrent(int32_t id);
+    static void UpdateLocalCurrent(int32_t id);
     static void UpdateSingleton(int32_t id);
     static void UpdateRecentActive(int32_t id);
     static void UpdateRecentForeground(int32_t id);

@@ -39,14 +39,14 @@ public:
         }
     }
 
-    std::string GetArrayValueTexts()
+    std::u16string GetArrayValueTexts()
     {
-        std::string arrayValueTexts;
+        std::u16string arrayValueTexts;
         int32_t totalChildCount = frameNode_->GetTotalChildCount();
         for (int32_t index = 0; index < totalChildCount; index++) {
             auto textLayoutProperty = GetChildLayoutProperty<TextLayoutProperty>(frameNode_, index);
-            std::string text = textLayoutProperty->GetContent().value_or("");
-            arrayValueTexts += text == "•" ? "." : text; // avoid EXPECT error
+            std::u16string text = textLayoutProperty->GetContent().value_or(u"");
+            arrayValueTexts += text == u"•" ? u"." : text; // avoid EXPECT error
         }
         return arrayValueTexts;
     }
@@ -591,7 +591,7 @@ HWTEST_F(IndexerLayoutTestNg, AdaptiveWidth001, TestSize.Level1)
     float itemSize = INDEXER_ITEM_SIZE + 10.f;
     model.SetItemSize(AceType::RawPtr(frameNode_), Dimension(itemSize));
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameRect().Width(), itemSize + padding);
 
     /**
@@ -600,7 +600,7 @@ HWTEST_F(IndexerLayoutTestNg, AdaptiveWidth001, TestSize.Level1)
     itemSize = INDEXER_ITEM_SIZE - 10.f;
     model.SetItemSize(AceType::RawPtr(frameNode_), Dimension(itemSize));
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameRect().Width(), itemSize + padding);
 
     /**
@@ -609,9 +609,9 @@ HWTEST_F(IndexerLayoutTestNg, AdaptiveWidth001, TestSize.Level1)
     model.SetUsingPopup(AceType::RawPtr(frameNode_), true);
     model.SetOnRequestPopupData(AceType::RawPtr(frameNode_), GetPopupData());
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     pattern_->MoveIndexByStep(1);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_NE(pattern_->popupNode_, nullptr);
     EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameRect().Width(), itemSize + padding);
 }
@@ -653,7 +653,7 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse001, TestSize.Level1)
     model.SetAutoCollapse(false);
     CreateDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::INVALID);
-    EXPECT_EQ(GetArrayValueTexts(), "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    EXPECT_EQ(GetArrayValueTexts(), u"ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 
     /**
      * @tc.steps: step2. AutoCollapse is true, Set Height enough to contain short fold mode items
@@ -662,10 +662,10 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse001, TestSize.Level1)
     ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(SHORT_INDEXER_HEIGHT));
     model.SetAutoCollapse(AceType::RawPtr(frameNode_), true);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::FIVE);
-    EXPECT_EQ(GetArrayValueTexts(), "A.G.M.S.Z");
+    EXPECT_EQ(GetArrayValueTexts(), u"A.G.M.S.Z");
 
     /**
      * @tc.steps: step3. Set Height enough to contain long fold mode items
@@ -673,10 +673,10 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse001, TestSize.Level1)
      */
     ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(LONG_INDEXER_HEIGHT));
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::SEVEN);
-    EXPECT_EQ(GetArrayValueTexts(), "A.E.I.M.Q.U.Z");
+    EXPECT_EQ(GetArrayValueTexts(), u"A.E.I.M.Q.U.Z");
 
     /**
      * @tc.steps: step4. Set Height enough to contain all items
@@ -685,10 +685,10 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse001, TestSize.Level1)
     ViewAbstract::SetHeight(
         AceType::RawPtr(frameNode_), CalcLength(INDEXER_ITEM_SIZE * arrayValue.size() + INDEXER_PADDING_TOP * 2));
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::NONE);
-    EXPECT_EQ(GetArrayValueTexts(), "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    EXPECT_EQ(GetArrayValueTexts(), u"ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 }
 
 /**
@@ -708,7 +708,7 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse002, TestSize.Level1)
     model.SetAutoCollapse(false);
     CreateDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::INVALID);
-    EXPECT_EQ(GetArrayValueTexts(), "#ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    EXPECT_EQ(GetArrayValueTexts(), u"#ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 
     /**
      * @tc.steps: step2. AutoCollapse is true
@@ -717,10 +717,10 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse002, TestSize.Level1)
     ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(SHORT_INDEXER_HEIGHT + INDEXER_ITEM_SIZE));
     model.SetAutoCollapse(AceType::RawPtr(frameNode_), true);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::FIVE);
-    EXPECT_EQ(GetArrayValueTexts(), "#A.G.M.S.Z");
+    EXPECT_EQ(GetArrayValueTexts(), u"#A.G.M.S.Z");
 
     /**
      * @tc.steps: step3. Set Height enough to contain long fold mode items
@@ -728,10 +728,10 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse002, TestSize.Level1)
      */
     ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(LONG_INDEXER_HEIGHT + INDEXER_ITEM_SIZE));
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::SEVEN);
-    EXPECT_EQ(GetArrayValueTexts(), "#A.E.I.M.Q.U.Z");
+    EXPECT_EQ(GetArrayValueTexts(), u"#A.E.I.M.Q.U.Z");
 
     /**
      * @tc.steps: step4. Set Height enough to contain all items
@@ -740,10 +740,10 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse002, TestSize.Level1)
     ViewAbstract::SetHeight(
         AceType::RawPtr(frameNode_), CalcLength(INDEXER_ITEM_SIZE * arrayValue.size() + INDEXER_PADDING_TOP * 2));
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::NONE);
-    EXPECT_EQ(GetArrayValueTexts(), "#ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    EXPECT_EQ(GetArrayValueTexts(), u"#ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 }
 
 /**
@@ -762,7 +762,7 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse003, TestSize.Level1)
     model.SetAutoCollapse(true);
     CreateDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::NONE);
-    EXPECT_EQ(GetArrayValueTexts(), "ABCDEFGHIJKLM");
+    EXPECT_EQ(GetArrayValueTexts(), u"ABCDEFGHIJKLM");
 
     /**
      * @tc.steps: step2. Set Height enough to contain short fold mode items
@@ -770,10 +770,10 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse003, TestSize.Level1)
      */
     ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(SHORT_INDEXER_HEIGHT));
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::FIVE);
-    EXPECT_EQ(GetArrayValueTexts(), "A.D.G.J.M");
+    EXPECT_EQ(GetArrayValueTexts(), u"A.D.G.J.M");
 }
 
 /**
@@ -792,7 +792,73 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse004, TestSize.Level1)
     model.SetAutoCollapse(true);
     CreateDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::NONE);
-    EXPECT_EQ(GetArrayValueTexts(), "ABCDEFGHI");
+    EXPECT_EQ(GetArrayValueTexts(), u"ABCDEFGHI");
+}
+
+/**
+ * @tc.name: AutoCollapse005
+ * @tc.desc: Test autoCollapse with enough and insufficient height
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerLayoutTestNg, AutoCollapse005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. AutoCollapse is true
+     * @tc.expected: Not fold
+     */
+    std::vector arrayValue = GetMidArrayValue();
+    IndexerModelNG model = CreateIndexer(arrayValue, 0);
+    model.SetAutoCollapse(true);
+    CreateDone();
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::NONE);
+    EXPECT_EQ(GetArrayValueTexts(), u"ABCDEFGHIJKLM");
+
+    /**
+     * @tc.steps: step2. Set Height more than the height of all item
+     * @tc.expected: item height is equal with item size
+     */
+    ViewAbstract::SetHeight(
+        AceType::RawPtr(frameNode_), CalcLength(LONG_INDEXER_HEIGHT + INDEXER_THIRTEEN_CHARACTERS_CHECK));
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::NONE);
+    EXPECT_EQ(GetArrayValueTexts(), u"ABCDEFGHIJKLM");
+    EXPECT_EQ(pattern_->maxContentHeight_, (INDEXER_ITEM_SIZE + 1) * INDEXER_THIRTEEN_CHARACTERS_CHECK);
+    EXPECT_EQ(pattern_->itemHeight_, INDEXER_ITEM_SIZE);
+
+    /**
+     * @tc.steps: step3. Set Height less than the height of all item but more than the height of five mode
+     * @tc.expected: item height is equal with item size
+     */
+    ViewAbstract::SetHeight(
+        AceType::RawPtr(frameNode_), CalcLength(LONG_INDEXER_HEIGHT - INDEXER_THIRTEEN_CHARACTERS_CHECK));
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->maxContentHeight_, (INDEXER_ITEM_SIZE - 1) * INDEXER_THIRTEEN_CHARACTERS_CHECK);
+    EXPECT_EQ(pattern_->itemHeight_, INDEXER_ITEM_SIZE - 1);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::FIVE);
+    EXPECT_EQ(GetArrayValueTexts(), u"A.D.G.J.M");
+    EXPECT_EQ(pattern_->maxContentHeight_, (INDEXER_ITEM_SIZE - 1) * INDEXER_THIRTEEN_CHARACTERS_CHECK);
+    EXPECT_EQ(pattern_->itemHeight_, INDEXER_ITEM_SIZE);
+
+    /**
+     * @tc.steps: step4. Set Height less than the height of five mode
+     * @tc.expected: item height is the average of the height without padding
+     */
+    ViewAbstract::SetHeight(
+        AceType::RawPtr(frameNode_), CalcLength(SHORT_INDEXER_HEIGHT - INDEXER_NINE_CHARACTERS_CHECK));
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::FIVE);
+    EXPECT_EQ(GetArrayValueTexts(), u"A.D.G.J.M");
+    EXPECT_EQ(pattern_->maxContentHeight_, (INDEXER_ITEM_SIZE - 1) * INDEXER_NINE_CHARACTERS_CHECK);
+    EXPECT_EQ(pattern_->itemHeight_, INDEXER_ITEM_SIZE - 1);
 }
 
 /**
@@ -816,7 +882,7 @@ HWTEST_F(IndexerLayoutTestNg, InitializingSelected001, TestSize.Level1)
 
     model.SetSelected(AceType::RawPtr(frameNode_), 1);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetSelected(), 1);
     EXPECT_EQ(accessibilityProperty_->GetText(), "B");
 
@@ -828,7 +894,7 @@ HWTEST_F(IndexerLayoutTestNg, InitializingSelected001, TestSize.Level1)
     ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(SHORT_INDEXER_HEIGHT));
     model.SetAutoCollapse(AceType::RawPtr(frameNode_), true);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::FIVE);
     EXPECT_EQ(pattern_->GetSelected(), 1);
@@ -836,19 +902,19 @@ HWTEST_F(IndexerLayoutTestNg, InitializingSelected001, TestSize.Level1)
     // select A
     model.SetSelected(AceType::RawPtr(frameNode_), 0);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetSelected(), 0);
     EXPECT_EQ(accessibilityProperty_->GetText(), "A");
     // select •
     model.SetSelected(AceType::RawPtr(frameNode_), 2);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetSelected(), 1);
     EXPECT_EQ(accessibilityProperty_->GetText(), "B");
     // select •
     model.SetSelected(AceType::RawPtr(frameNode_), 5);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetSelected(), 1);
     EXPECT_EQ(accessibilityProperty_->GetText(), "B");
 
@@ -859,7 +925,7 @@ HWTEST_F(IndexerLayoutTestNg, InitializingSelected001, TestSize.Level1)
     // "A.E.I.M.Q.U.Z"
     ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(LONG_INDEXER_HEIGHT));
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::SEVEN);
     EXPECT_EQ(pattern_->GetSelected(), 3);
@@ -867,13 +933,13 @@ HWTEST_F(IndexerLayoutTestNg, InitializingSelected001, TestSize.Level1)
 
     model.SetSelected(AceType::RawPtr(frameNode_), 0);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetSelected(), 0);
     EXPECT_EQ(accessibilityProperty_->GetText(), "A");
 
     model.SetSelected(AceType::RawPtr(frameNode_), 1);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetSelected(), 1);
     EXPECT_EQ(accessibilityProperty_->GetText(), "B");
 }
@@ -900,7 +966,7 @@ HWTEST_F(IndexerLayoutTestNg, InitializingSelected002, TestSize.Level1)
 
     model.SetSelected(AceType::RawPtr(frameNode_), 1);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetSelected(), 1);
     EXPECT_EQ(accessibilityProperty_->GetText(), "A");
 
@@ -911,7 +977,7 @@ HWTEST_F(IndexerLayoutTestNg, InitializingSelected002, TestSize.Level1)
     ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(SHORT_INDEXER_HEIGHT));
     model.SetAutoCollapse(AceType::RawPtr(frameNode_), true);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::FIVE);
     EXPECT_EQ(pattern_->GetSelected(), 1);
@@ -919,13 +985,13 @@ HWTEST_F(IndexerLayoutTestNg, InitializingSelected002, TestSize.Level1)
 
     model.SetSelected(AceType::RawPtr(frameNode_), 0);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetSelected(), 0);
     EXPECT_EQ(accessibilityProperty_->GetText(), "#");
 
     model.SetSelected(AceType::RawPtr(frameNode_), 2);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetSelected(), 2);
     EXPECT_EQ(accessibilityProperty_->GetText(), "B");
 
@@ -935,7 +1001,7 @@ HWTEST_F(IndexerLayoutTestNg, InitializingSelected002, TestSize.Level1)
      */
     ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(LONG_INDEXER_HEIGHT + INDEXER_ITEM_SIZE));
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::SEVEN);
     EXPECT_EQ(pattern_->GetSelected(), 2);
@@ -943,13 +1009,13 @@ HWTEST_F(IndexerLayoutTestNg, InitializingSelected002, TestSize.Level1)
 
     model.SetSelected(AceType::RawPtr(frameNode_), 0);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetSelected(), 0);
     EXPECT_EQ(accessibilityProperty_->GetText(), "#");
 
     model.SetSelected(AceType::RawPtr(frameNode_), 1);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetSelected(), 1);
     EXPECT_EQ(accessibilityProperty_->GetText(), "A");
 }
@@ -973,7 +1039,7 @@ HWTEST_F(IndexerLayoutTestNg, ArrayValue001, TestSize.Level1)
 
     model.SetArrayValue(AceType::RawPtr(frameNode_), GetShortArrayValue());
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 9);
 
     /**
@@ -986,7 +1052,7 @@ HWTEST_F(IndexerLayoutTestNg, ArrayValue001, TestSize.Level1)
     EXPECT_TRUE(layoutProperty_->GetIsPopupValue(false));
     model.SetArrayValue(AceType::RawPtr(frameNode_), GetMidArrayValue());
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->GetSelected(), 0);
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 14); // items + popup
@@ -1170,7 +1236,7 @@ HWTEST_F(IndexerLayoutTestNg, BubbleSize001, TestSize.Level1)
     const int32_t popupSize = popupDataSize + 1;
     pattern_->MoveIndexByStep(1);
     OnPopupTouchDown(TouchType::DOWN); // trigger UpdateBubbleSize
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(
         pattern_->popupNode_->GetGeometryNode()->GetFrameSize(), SizeF(BUBBLE_BOX_SIZE, BUBBLE_BOX_SIZE * popupSize)));
 
@@ -1181,7 +1247,7 @@ HWTEST_F(IndexerLayoutTestNg, BubbleSize001, TestSize.Level1)
     Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     pattern_->MoveIndexByStep(1);
     OnPopupTouchDown(TouchType::DOWN); // trigger UpdateBubbleSize
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(pattern_->popupNode_->GetGeometryNode()->GetFrameSize(),
         SizeF(BUBBLE_BOX_SIZE, (BUBBLE_ITEM_SIZE + BUBBLE_DIVIDER_SIZE) * popupSize + BUBBLE_DIVIDER_SIZE)));
     Container::Current()->SetApiTargetVersion(apiTargetVersion);
@@ -1206,7 +1272,7 @@ HWTEST_F(IndexerLayoutTestNg, BubbleSize002, TestSize.Level1)
      */
     pattern_->MoveIndexByStep(1);
     OnPopupTouchDown(TouchType::DOWN); // trigger UpdateBubbleSize
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(pattern_->popupNode_->GetGeometryNode()->GetFrameSize(),
         SizeF(BUBBLE_BOX_SIZE, BUBBLE_BOX_SIZE * (INDEXER_BUBBLE_MAXSIZE + 1))));
 
@@ -1217,7 +1283,7 @@ HWTEST_F(IndexerLayoutTestNg, BubbleSize002, TestSize.Level1)
     Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     pattern_->MoveIndexByStep(1);
     OnPopupTouchDown(TouchType::DOWN); // trigger UpdateBubbleSize
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(
         pattern_->popupNode_->GetGeometryNode()->GetFrameSize(), SizeF(BUBBLE_BOX_SIZE, BUBBLE_COLUMN_MAX_SIZE)));
     Container::Current()->SetApiTargetVersion(apiTargetVersion);
@@ -1244,7 +1310,7 @@ HWTEST_F(IndexerLayoutTestNg, BubbleSize003, TestSize.Level1)
      */
     pattern_->MoveIndexByStep(1);
     OnPopupTouchDown(TouchType::DOWN); // trigger UpdateBubbleSize
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(pattern_->popupNode_->GetGeometryNode()->GetFrameSize(),
         SizeF(BUBBLE_BOX_SIZE, BUBBLE_BOX_SIZE * INDEXER_BUBBLE_MAXSIZE_COLLAPSED)));
 
@@ -1255,7 +1321,7 @@ HWTEST_F(IndexerLayoutTestNg, BubbleSize003, TestSize.Level1)
     Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     pattern_->MoveIndexByStep(1);
     OnPopupTouchDown(TouchType::DOWN); // trigger UpdateBubbleSize
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(pattern_->popupNode_->GetGeometryNode()->GetFrameSize(),
         SizeF(BUBBLE_BOX_SIZE, BUBBLE_COLLAPSE_COLUMN_MAX_SIZE)));
     Container::Current()->SetApiTargetVersion(apiTargetVersion);
@@ -1281,7 +1347,7 @@ HWTEST_F(IndexerLayoutTestNg, DrawPopupListGradient001, TestSize.Level1)
      * @tc.expected: Colors.size is 3
      */
     pattern_->MoveIndexByOffset(Offset(0, 10));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto stackNode = AceType::DynamicCast<FrameNode>(pattern_->popupNode_->GetLastChild());
     auto stackRenderContext = stackNode->GetRenderContext();
     auto listNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
@@ -1294,7 +1360,7 @@ HWTEST_F(IndexerLayoutTestNg, DrawPopupListGradient001, TestSize.Level1)
      * @tc.expected: Colors.size is 4
      */
     listPattern->ScrollTo(20);
-    FlushLayoutTask(listNode);
+    FlushUITasks();
     EXPECT_FALSE(listPattern->IsAtTop());
     EXPECT_FALSE(listPattern->IsAtBottom());
     EXPECT_EQ(stackRenderContext->GetLinearGradientValue(Gradient()).GetColors().size(), 4);
@@ -1304,7 +1370,7 @@ HWTEST_F(IndexerLayoutTestNg, DrawPopupListGradient001, TestSize.Level1)
      * @tc.expected: Colors.size is 3
      */
     listPattern->ScrollTo(100);
-    FlushLayoutTask(listNode);
+    FlushUITasks();
     EXPECT_TRUE(listPattern->IsAtBottom());
     EXPECT_EQ(stackRenderContext->GetLinearGradientValue(Gradient()).GetColors().size(), 3);
 
@@ -1313,7 +1379,7 @@ HWTEST_F(IndexerLayoutTestNg, DrawPopupListGradient001, TestSize.Level1)
      * @tc.expected: Colors.size is 3
      */
     listPattern->ScrollTo(0);
-    FlushLayoutTask(listNode);
+    FlushUITasks();
     EXPECT_TRUE(listPattern->IsAtTop());
     EXPECT_EQ(stackRenderContext->GetLinearGradientValue(Gradient()).GetColors().size(), 3);
     Container::Current()->SetApiTargetVersion(apiTargetVersion);

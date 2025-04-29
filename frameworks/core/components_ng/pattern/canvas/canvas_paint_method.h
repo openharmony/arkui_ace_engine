@@ -20,7 +20,6 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/pattern/canvas/canvas_paint_op.h"
 #include "core/components_ng/pattern/canvas/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
 
@@ -39,22 +38,7 @@ public:
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
     void UpdateRecordingCanvas(float width, float height);
 
-#ifndef USE_FAST_TASKPOOL
     void PushTask(const TaskFunc& task);
-#else
-    template <typename T, typename... Args>
-    void PushTask(Args&&... args)
-    {
-        CHECK_NULL_VOID(fastTaskPool_);
-        fastTaskPool_->Push<T>(0, std::forward<Args>(args)...);
-        if (needMarkDirty_) {
-            needMarkDirty_ = false;
-            auto host = frameNode_.Upgrade();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        }
-    }
-#endif
     bool HasTask() const;
     void FlushTask();
 
@@ -100,6 +84,7 @@ public:
 
     void CloseImageBitmap(const std::string& src);
     void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
+    void DrawPixelMapInternal(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
     std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
     void GetImageData(const std::shared_ptr<Ace::ImageData>& imageData);
 #ifdef PIXEL_MAP_SUPPORTED
@@ -110,19 +95,16 @@ public:
     std::string GetJsonData(const std::string& path);
 
     void Reset();
+    TextDirection GetSystemDirection() override;
     std::string GetDumpInfo();
+    void SetHostCustomNodeName();
+    void GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& json);
 private:
-    void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
-    void ImageObjFailed() override;
+    int32_t GetId() const;
 #ifndef ACE_UNITTEST
     void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle) override;
 #endif
-#ifndef USE_FAST_TASKPOOL
     std::list<TaskFunc> tasks_;
-#else
-    friend class CanvasPattern;
-    std::unique_ptr<CanvasPaintOp> fastTaskPool_ = std::make_unique<CanvasPaintOp>();
-#endif
 
 #ifndef ACE_UNITTEST
     RefPtr<Ace::ImageObject> imageObj_ = nullptr;
@@ -131,6 +113,8 @@ private:
     std::function<void(RSCanvas*, double, double)> canvasCallback_ = nullptr;
     WeakPtr<FrameNode> frameNode_;
     bool needMarkDirty_ = true;
+    // To record the host custom component name of the current canvas.
+    std::string customNodeName_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasPaintMethod);
 };

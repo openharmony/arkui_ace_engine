@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,23 +17,21 @@
 
 #include "base/i18n/localization.h"
 #include "base/utils/date_util.h"
-#include "core/components/calendar/calendar_data_adapter.h"
-#include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/calendar/calendar_model_ng.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t TITLE_NODE_INDEX = 0;
-constexpr int32_t CALENDAR_NODE_INDEX = 1;
-constexpr int32_t OPTIONS_NODE_INDEX = 2;
+constexpr int32_t CALENDAR_NODE_INDEX = 2;
+constexpr int32_t OPTIONS_NODE_INDEX = 3;
 constexpr int32_t TITLE_LAST_YEAR_BUTTON_NODE_INDEX = 0;
 constexpr int32_t TITLE_LAST_MONTH_BUTTON_NODE_INDEX = 1;
 constexpr int32_t TITLE_TEXT_NODE_INDEX = 2;
@@ -52,6 +50,23 @@ constexpr size_t ACCEPT_BUTTON_BACKGROUND_COLOR_INDEX = 3;
 constexpr size_t OPTION_CANCEL_BUTTON_INDEX = 0;
 constexpr size_t OPTION_ACCEPT_BUTTON_INDEX = 1;
 } // namespace
+
+FocusPattern CalendarDialogPattern::GetFocusPattern() const
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, FocusPattern());
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
+    CHECK_NULL_RETURN(pickerTheme, FocusPattern());
+    CHECK_NULL_RETURN(calendarTheme, FocusPattern());
+    auto focusColor = pickerTheme->GetFocusColor();
+    FocusPaintParam focusPaintParams;
+    focusPaintParams.SetPaintColor(focusColor);
+    auto focusPaintWidth = calendarTheme->GetCalendarDayKeyFocusedPenWidth();
+    focusPaintParams.SetPaintWidth(focusPaintWidth);
+    return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
+}
+
 void CalendarDialogPattern::OnModifyDone()
 {
     LinearLayoutPattern::OnModifyDone();
@@ -100,7 +115,7 @@ void CalendarDialogPattern::UpdateDialogBackgroundColor()
     CHECK_NULL_VOID(host);
     auto wrapperNode = AceType::DynamicCast<FrameNode>(host->GetParent());
     CHECK_NULL_VOID(wrapperNode);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     auto contentRenderContext = wrapperNode->GetRenderContext();
@@ -116,7 +131,7 @@ void CalendarDialogPattern::UpdateTitleArrowsColor()
     CHECK_NULL_VOID(host);
     auto title = host->GetChildAtIndex(TITLE_NODE_INDEX);
     CHECK_NULL_VOID(title);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
@@ -135,6 +150,7 @@ void CalendarDialogPattern::UpdateTitleArrowsColor()
             auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
             CHECK_NULL_VOID(imageLayoutProperty);
             auto imageInfo = imageLayoutProperty->GetImageSourceInfo();
+            CHECK_NULL_VOID(imageInfo);
             imageInfo->SetFillColor(theme->GetEntryArrowColor());
             imageLayoutProperty->UpdateImageSourceInfo(imageInfo.value());
             imageNode->MarkModifyDone();
@@ -197,6 +213,10 @@ void CalendarDialogPattern::UpdateOptionsButton()
     CHECK_NULL_VOID(host);
     auto options = host->GetChildAtIndex(OPTIONS_NODE_INDEX);
     CHECK_NULL_VOID(options);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
 
     size_t buttonIndex = OPTION_CANCEL_BUTTON_INDEX;
     for (const auto& child : options->GetChildren()) {
@@ -207,9 +227,9 @@ void CalendarDialogPattern::UpdateOptionsButton()
             auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
             CHECK_NULL_VOID(buttonLayoutProperty);
             if (buttonIndex == OPTION_ACCEPT_BUTTON_INDEX) {
-                buttonLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.ok"));
+                buttonLayoutProperty->UpdateLabel(dialogTheme->GetConfirmText());
             } else {
-                buttonLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+                buttonLayoutProperty->UpdateLabel(dialogTheme->GetCancelText());
             }
             button->MarkDirtyNode();
             buttonIndex++;
@@ -223,7 +243,7 @@ void CalendarDialogPattern::UpdateOptionsButtonColor()
     CHECK_NULL_VOID(host);
     auto options = host->GetChildAtIndex(OPTIONS_NODE_INDEX);
     CHECK_NULL_VOID(options);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto calendarTheme = pipeline->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(calendarTheme);
@@ -372,6 +392,9 @@ void CalendarDialogPattern::InitOnTouchEvent()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (info.GetTouches().empty()) {
+            return;
+        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             pattern->HandleEntryNodeTouchEvent(true, info.GetTouches().front().GetGlobalLocation());
             if (!pattern->isFocused_) {
@@ -444,7 +467,7 @@ void CalendarDialogPattern::InitEntryChangeEvent()
 {
     auto entryNode = entryNode_.Upgrade();
     CHECK_NULL_VOID(entryNode);
-    auto eventHub = entryNode->GetEventHub<CalendarPickerEventHub>();
+    auto eventHub = entryNode->GetOrCreateEventHub<CalendarPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto callback = [weak = WeakClaim(this)](const std::string& info) {
         auto pattern = weak.Upgrade();
@@ -676,11 +699,17 @@ bool CalendarDialogPattern::HandleTabKeyEvent(const KeyEvent& event)
     hasTabKeyDown_ = true;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto childSize = static_cast<int32_t>(host->GetChildren().size());
+    auto childSize = static_cast<int32_t>(host->GetChildren().size()) - 1;
     if (event.IsShiftWith(KeyCode::KEY_TAB)) {
-        focusAreaID_ = (focusAreaID_ + childSize - 1) % childSize;
+        focusAreaIDWithoutWeek_ = (focusAreaIDWithoutWeek_ + childSize - 1) % childSize;
     } else {
-        focusAreaID_ = (focusAreaID_ + 1) % childSize;
+        focusAreaIDWithoutWeek_ = (focusAreaIDWithoutWeek_ + 1) % childSize;
+    }
+
+    if (focusAreaIDWithoutWeek_ == TITLE_NODE_INDEX) {
+        focusAreaID_ = focusAreaIDWithoutWeek_;
+    } else {
+        focusAreaID_ = focusAreaIDWithoutWeek_ + 1;
     }
 
     if (focusAreaID_ == CALENDAR_NODE_INDEX) {
@@ -1120,7 +1149,7 @@ void CalendarDialogPattern::FireChangeByKeyEvent(PickerDate& selectedDay)
     CHECK_NULL_VOID(swiperPattern);
     auto monthNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperPattern->GetCurrentIndex()));
     CHECK_NULL_VOID(monthNode);
-    auto eventHub = monthNode->GetEventHub<CalendarEventHub>();
+    auto eventHub = monthNode->GetOrCreateEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateSelectedChangeEvent(selectedDay.ToString(true));
 }
@@ -1173,13 +1202,20 @@ void CalendarDialogPattern::HandleEntryLayoutChange()
     CHECK_NULL_VOID(wrapperNode);
     auto dialogNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetParent());
     CHECK_NULL_VOID(dialogNode);
-    auto dialogLayoutProp = dialogNode->GetLayoutProperty<DialogLayoutProperty>();
-    CHECK_NULL_VOID(dialogLayoutProp);
-    auto pattern = entryNode->GetPattern<CalendarPickerPattern>();
-    CHECK_NULL_VOID(pattern);
-    dialogLayoutProp->UpdateDialogOffset(DimensionOffset(pattern->CalculateDialogOffset()));
-    dialogOffset_ = pattern->CalculateDialogOffset();
-    dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto pipeline = GetContext();
+    if (pipeline) {
+        pipeline->AddAfterRenderTask([weak = WeakClaim(this), entryNode, dialogNode]() {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto pattern = entryNode->GetPattern<CalendarPickerPattern>();
+            CHECK_NULL_VOID(pattern);
+            node->dialogOffset_ = pattern->CalculateDialogOffset();
+            auto dialogLayoutProp = dialogNode->GetLayoutProperty<DialogLayoutProperty>();
+            CHECK_NULL_VOID(dialogLayoutProp);
+            dialogLayoutProp->UpdateDialogOffset(DimensionOffset(node->dialogOffset_));
+            dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        });
+    }
     isFirstAddhotZoneRect_ = false;
 }
 
@@ -1220,7 +1256,9 @@ RefPtr<FrameNode> CalendarDialogPattern::GetCalendarFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto calendarNode = host->GetChildAtIndex(CALENDAR_NODE_INDEX);
+    auto scrollNode = host->GetChildAtIndex(CALENDAR_NODE_INDEX);
+    CHECK_NULL_RETURN(scrollNode, nullptr);
+    auto calendarNode = scrollNode->GetChildren().front();
     return AceType::DynamicCast<FrameNode>(calendarNode);
 }
 
@@ -1282,7 +1320,9 @@ void CalendarDialogPattern::OnLanguageConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto calendarNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(CALENDAR_NODE_INDEX));
+    auto scrollNode = host->GetChildAtIndex(CALENDAR_NODE_INDEX);
+    CHECK_NULL_VOID(scrollNode);
+    auto calendarNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildren().front());
     CHECK_NULL_VOID(calendarNode);
     auto swiperNode = AceType::DynamicCast<FrameNode>(calendarNode->GetFirstChild());
     CHECK_NULL_VOID(swiperNode);
@@ -1357,11 +1397,13 @@ void CalendarDialogPattern::UpdateCaretInfoToController()
     CHECK_NULL_VOID(pipelineContext);
     auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(calendarTheme);
-    auto calendarNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(CALENDAR_NODE_INDEX));
+    auto scrollNode = host->GetChildAtIndex(CALENDAR_NODE_INDEX);
+    CHECK_NULL_VOID(calendarTheme);
+    auto calendarNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildren().front());
     CHECK_NULL_VOID(calendarNode);
     auto calendarLayoutProperty = calendarNode->GetLayoutProperty();
     CHECK_NULL_VOID(calendarLayoutProperty);
-    CalendarDialogView::UpdateIdealSize(calendarTheme, layoutProps, calendarLayoutProperty);
+    CalendarDialogView::UpdateIdealSize(calendarTheme, layoutProps, calendarLayoutProperty, calendarNode);
 
     auto swiperNode = AceType::DynamicCast<FrameNode>(calendarNode->GetFirstChild());
     CHECK_NULL_VOID(swiperNode);
@@ -1397,5 +1439,48 @@ void CalendarDialogPattern::UpdateCaretInfoToController()
     CHECK_NULL_VOID(dialogNode);
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     CalendarDialogView::SetPreviousOrientation();
+}
+
+bool CalendarDialogPattern::CanReportChangeEvent(const PickerDate& pickerDate)
+{
+    return CalendarDialogView::CanReportChangeEvent(reportedPickerDate_, pickerDate);
+}
+
+void CalendarDialogPattern::OnColorConfigurationUpdate()
+{
+    auto titleNode = titleNode_.Upgrade();
+    CHECK_NULL_VOID(titleNode);
+    auto pipelineContext = titleNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    auto textLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    
+    textLayoutProperty->UpdateTextColor(theme->GetCalendarTitleFontColor());
+}
+
+void CalendarDialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+
+    json->PutExtAttr("markToday", currentSettingData_.markToday ? "true" : "false", filter);
+    std::string disabledDateRangeStr = "";
+    for (const auto& range : currentSettingData_.disabledDateRange) {
+        disabledDateRangeStr += range.first.ToString(false) + "," + range.second.ToString(false) + ",";
+    }
+    if (!disabledDateRangeStr.empty() && disabledDateRangeStr.back() == ',') {
+        disabledDateRangeStr.pop_back();
+    }
+    json->PutExtAttr("disabledDateRange", disabledDateRangeStr.c_str(), filter);
+    if (currentSettingData_.startDate.ToDays() != PickerDate().ToDays()) {
+        json->PutExtAttr("start", currentSettingData_.startDate.ToString(false).c_str(), filter);
+    }
+    if (currentSettingData_.endDate.ToDays() != PickerDate().ToDays()) {
+        json->PutExtAttr("end", currentSettingData_.endDate.ToString(false).c_str(), filter);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -14,12 +14,10 @@
  */
 
 #include "interaction_impl.h"
-#include "drag_data.h"
-#include "core/common/interaction/interaction_data.h"
-#include "core/gestures/gesture_info.h"
 
 #include "interaction_manager.h"
 #include "start_drag_listener_impl.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 
 using namespace OHOS::Msdp::DeviceStatus;
 
@@ -49,9 +47,9 @@ int32_t InteractionImpl::UpdateShadowPic(const OHOS::Ace::ShadowInfoCore& shadow
     return InteractionManager::GetInstance()->UpdateShadowPic(msdpShadowInfo);
 }
 
-int32_t InteractionImpl::SetDragWindowVisible(bool visible)
+int32_t InteractionImpl::SetDragWindowVisible(bool visible, const std::shared_ptr<Rosen::RSTransaction>& rSTransaction)
 {
-    return InteractionManager::GetInstance()->SetDragWindowVisible(visible);
+    return InteractionManager::GetInstance()->SetDragWindowVisible(visible, false, rSTransaction);
 }
 
 int32_t InteractionImpl::SetMouseDragMonitorState(bool state)
@@ -71,9 +69,9 @@ int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
         }
     };
     Msdp::DeviceStatus::DragData msdpDragData { {}, dragData.buffer, dragData.udKey, dragData.extraInfo,
-    dragData.filterInfo, dragData.sourceType, dragData.dragNum, dragData.pointerId, dragData.displayX,
-    dragData.displayY, dragData.displayId, dragData.mainWindow, dragData.hasCanceledAnimation,
-    dragData.hasCoordinateCorrected, dragData.summarys };
+    dragData.filterInfo, dragData.sourceType, dragData.dragNum, dragData.pointerId, dragData.toolType,
+    dragData.displayX, dragData.displayY, dragData.displayId, dragData.mainWindow,
+    dragData.hasCanceledAnimation, dragData.hasCoordinateCorrected, dragData.summarys };
     for (auto& shadowInfo: dragData.shadowInfos) {
         if (shadowInfo.pixelMap) {
             msdpDragData.shadowInfos.push_back({ shadowInfo.pixelMap->GetPixelMapSharedPtr(),
@@ -109,7 +107,11 @@ int32_t InteractionImpl::StopDrag(DragDropRet result)
 {
     Msdp::DeviceStatus::DragDropResult dragDropResult { TranslateDragResult(result.result), result.hasCustomAnimation,
     result.mainWindow, TranslateDragBehavior(result.dragBehavior) };
-    return InteractionManager::GetInstance()->StopDrag(dragDropResult);
+    auto ret = InteractionManager::GetInstance()->StopDrag(dragDropResult);
+    NG::DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(
+        ret ? NG::DragStopResult::DRAGFWK_STOP_FAIL : NG::DragStopResult::DRAG_SOTP_SUCCESS);
+    NG::DragDropBehaviorReporter::GetInstance().Submit(NG::DragReporterPharse::DRAG_STOP, -1);
+    return ret;
 }
 
 int32_t InteractionImpl::GetUdKey(std::string& udKey)
@@ -164,6 +166,21 @@ int32_t InteractionImpl::UnRegisterCoordinationListener()
     auto ret = InteractionManager::GetInstance()->UnregisterCoordinationListener(consumer_);
     consumer_ = nullptr;
     return ret;
+}
+
+int32_t InteractionImpl::SetDraggableState(bool state)
+{
+    return InteractionManager::GetInstance()->SetDraggableState(state);
+}
+
+int32_t InteractionImpl::GetAppDragSwitchState(bool& state)
+{
+    return InteractionManager::GetInstance()->GetAppDragSwitchState(state);
+}
+
+void InteractionImpl::SetDraggableStateAsync(bool state, int64_t downTime)
+{
+    InteractionManager::GetInstance()->SetDraggableStateAsync(state, downTime);
 }
 
 Msdp::DeviceStatus::DragCursorStyle TranslateDragCursorStyle(OHOS::Ace::DragCursorStyleCore style)
@@ -235,7 +252,7 @@ DragRet TranslateDragResult(Msdp::DeviceStatus::DragResult dragResult)
         case Msdp::DeviceStatus::DragResult::DRAG_CANCEL:
             return DragRet::DRAG_CANCEL;
         default:
-            return DragRet::DRAG_SUCCESS;
+            return DragRet::DRAG_FAIL;
     }
 }
 

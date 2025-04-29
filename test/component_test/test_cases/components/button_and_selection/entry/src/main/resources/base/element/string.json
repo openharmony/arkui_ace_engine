@@ -1,0 +1,97 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "BenchMark"
+    },
+    {
+      "name": "font_size",
+      "value": "10.00fp"
+    },
+    {
+      "name": "minFont_size",
+      "value": "10.00fp"
+    },
+    {
+      "name": "maxFont_size",
+      "value": "20.00fp"
+    },
+    {
+      "name": "size",
+      "value": "10.00fp"
+    },
+    {
+      "name": "picker_edgeOffset",
+      "value": "10.00fp"
+    },
+    {
+      "name": "mark_strok",
+      "value": "10.00fp"
+    },
+    {
+      "name": "option_height",
+      "value": "10"
+    },
+    {
+      "name": "option_num",
+      "value": "10"
+    },
+    {
+      "name": "selected_index",
+      "value": "2"
+    },
+    {
+      "name": "select_space",
+      "value": "10.00vp"
+    },
+    {
+      "name": "select_value",
+      "value": "10"
+    },
+    {
+      "name": "border_width",
+      "value": "10.00vp"
+    },
+    {
+      "name": "width",
+      "value": "10"
+    },
+    {
+      "name": "height",
+      "value": "10"
+    },
+    {
+      "name": "step_size",
+      "value": "10"
+    },
+    {
+      "name": "radius_number",
+      "value": "2.00vp"
+    },
+    {
+      "name": "track_thickness",
+      "value": "10.00vp"
+    },
+    {
+      "name": "slider_blockSize",
+      "value": "10.00vp"
+    },
+    {
+      "name": "slider_stepSize",
+      "value": "15.00vp"
+    },
+    {
+      "name": "slider_image",
+      "value": "/common/5.png"
+    }
+
+  ]
+}

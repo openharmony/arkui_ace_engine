@@ -100,6 +100,8 @@ public:
 void ProgressConModTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
+    testing::FLAGS_gmock_verbose = "error";
     auto pipeline = PipelineContext::GetCurrentContext();
     pipeline->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
     themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -128,6 +130,7 @@ void ProgressConModTestNg::SetUp()
 
 void ProgressConModTestNg::TearDown()
 {
+    RemoveFromStageNode();
     frameNode_ = nullptr;
     pattern_ = nullptr;
     eventHub_ = nullptr;
@@ -142,7 +145,7 @@ void ProgressConModTestNg::GetProgress()
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     pattern_ = frameNode_->GetPattern<ProgressPattern>();
-    eventHub_ = frameNode_->GetEventHub<EventHub>();
+    eventHub_ = frameNode_->GetOrCreateEventHub<EventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<ProgressLayoutProperty>();
     paintProperty_ = frameNode_->GetPaintProperty<ProgressPaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<ProgressAccessibilityProperty>();
@@ -172,7 +175,7 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest001, TestSize.Level1)
      * @tc.expected: step3. Check the pattern not nullptr.
      */
     CreateProgress(MAX_VALUE, MAX_VALUE, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
+    CreateDone();
 
     auto node = [](ProgressConfiguration config) -> RefPtr<FrameNode> {
         EXPECT_EQ(config.value_, MAX_VALUE);
@@ -204,8 +207,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest002, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(MAX_VALUE, MAX_VALUE, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
    
@@ -245,8 +248,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest003, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(MIN_VALUE, MAX_VALUE, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
    
@@ -286,8 +289,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest004, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(NEG_VALUE, MAX_VALUE, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
    
@@ -327,8 +330,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest005, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE, PROGRESS_TYPE_MOON);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
    
@@ -368,8 +371,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest006, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(NEG_VALUE_OF_PROGRESS, MAX_VALUE, PROGRESS_TYPE_RING);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
    
@@ -409,8 +412,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest007, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(MAX_VALUE_OF_PROGRESS, MAX_VALUE, PROGRESS_TYPE_SCALE);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
    
@@ -450,8 +453,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest008, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(MAX_NEG_VALUE_OF_PROGRESS, MAX_VALUE, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
    
@@ -491,8 +494,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest009, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(MAX_VALUE, MIN_VALUE, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
    
@@ -532,8 +535,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest010, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(MIN_VALUE, MIN_VALUE, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
    
@@ -573,8 +576,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest011, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(NEG_VALUE, MIN_VALUE, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
    
@@ -614,8 +617,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest012, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(VALUE_OF_PROGRESS, MIN_VALUE, PROGRESS_TYPE_RING);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
    
@@ -655,8 +658,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest013, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(NEG_VALUE_OF_PROGRESS, MIN_VALUE, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
    
@@ -696,8 +699,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest014, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(MAX_VALUE_OF_PROGRESS, MIN_VALUE, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
    
@@ -737,8 +740,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest015, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(MAX_NEG_VALUE_OF_PROGRESS, MIN_VALUE, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
    
@@ -778,8 +781,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest016, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(MAX_VALUE, NEG_VALUE, PROGRESS_TYPE_MOON);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
    
@@ -819,8 +822,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest017, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(MIN_VALUE, NEG_VALUE, PROGRESS_TYPE_SCALE);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
    
@@ -860,8 +863,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest018, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(NEG_VALUE, NEG_VALUE, PROGRESS_TYPE_SCALE);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
    
@@ -901,8 +904,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest019, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(VALUE_OF_PROGRESS, NEG_VALUE, PROGRESS_TYPE_SCALE);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
    
@@ -942,8 +945,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest020, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(NEG_VALUE_OF_PROGRESS, NEG_VALUE, PROGRESS_TYPE_SCALE);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
    
@@ -983,8 +986,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest021, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(MAX_VALUE_OF_PROGRESS, NEG_VALUE, PROGRESS_TYPE_SCALE);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
    
@@ -1024,8 +1027,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest022, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(MAX_NEG_VALUE_OF_PROGRESS, NEG_VALUE, PROGRESS_TYPE_SCALE);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
    
@@ -1065,8 +1068,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest023, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(MAX_VALUE, VALUE_OF_PROGRESS, PROGRESS_TYPE_SCALE);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
    
@@ -1106,8 +1109,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest024, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(MIN_VALUE, VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
    
@@ -1147,8 +1150,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest025, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(NEG_VALUE, VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
    
@@ -1188,8 +1191,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest026, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(VALUE_OF_PROGRESS, VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
    
@@ -1229,8 +1232,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest027, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(NEG_VALUE_OF_PROGRESS, VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
    
@@ -1270,8 +1273,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest028, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(MAX_VALUE_OF_PROGRESS, VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
    
@@ -1311,8 +1314,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest029, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(MAX_NEG_VALUE_OF_PROGRESS, VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
    
@@ -1352,8 +1355,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest030, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(MAX_VALUE, NEG_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
    
@@ -1393,8 +1396,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest031, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(MIN_VALUE, NEG_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
    
@@ -1434,8 +1437,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest032, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(NEG_VALUE, NEG_VALUE_OF_PROGRESS, PROGRESS_TYPE_RING);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
    
@@ -1475,8 +1478,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest033, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(VALUE_OF_PROGRESS, NEG_VALUE_OF_PROGRESS, PROGRESS_TYPE_RING);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
    
@@ -1516,8 +1519,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest034, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(NEG_VALUE_OF_PROGRESS, NEG_VALUE_OF_PROGRESS, PROGRESS_TYPE_RING);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
    
@@ -1557,8 +1560,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest035, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(MAX_VALUE_OF_PROGRESS, NEG_VALUE_OF_PROGRESS, PROGRESS_TYPE_RING);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
    
@@ -1598,8 +1601,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest036, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(MAX_NEG_VALUE_OF_PROGRESS, NEG_VALUE_OF_PROGRESS, PROGRESS_TYPE_RING);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
    
@@ -1639,8 +1642,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest037, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(MAX_VALUE, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
    
@@ -1680,8 +1683,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest038, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(MIN_VALUE, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
    
@@ -1721,8 +1724,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest039, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(NEG_VALUE, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
    
@@ -1762,8 +1765,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest040, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
    
@@ -1803,8 +1806,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest041, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(NEG_VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
    
@@ -1844,8 +1847,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest042, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(MAX_VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
    
@@ -1885,8 +1888,8 @@ HWTEST_F(ProgressConModTestNg, ProgressConPatternTest043, TestSize.Level1)
      * @tc.expected: step2. get frameNode_ success and progress properties equals expected value.
      */
     CreateProgress(MAX_VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_SCALE);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 

@@ -18,7 +18,7 @@ overrideMap.set(
   'ArkCheckboxComponent',
   new Map([
     ['Symbol(width)', CheckboxWidthModifier],
-    ['Symbol(height)', CheckboxHeightModifier]
+    ['Symbol(height)', CheckboxHeightModifier],
   ])
 );
 overrideMap.set(
@@ -64,8 +64,8 @@ class ModifierUtils {
   static mergeMapsEmplace(stageMap, newMap, componentOverrideMap) {
     newMap.forEach((value, key) => {
       if (!key) {
-        ArkLogConsole.info("key of modifier map is undefined, ModifierWithKey is " +
-          (value ? value.constructor.name.toString() : "undefined"));
+        ArkLogConsole.info('key of modifier map is undefined, ModifierWithKey is ' +
+          (value ? value.constructor.name.toString() : 'undefined'));
       } else {
         if (componentOverrideMap.has(key.toString())) {
           const newValue = new (componentOverrideMap.get(key.toString()))(value.stageValue);
@@ -103,13 +103,15 @@ class ModifierUtils {
   }
   static putDirtyModifier(arkModifier, attributeModifierWithKey) {
     attributeModifierWithKey.value = attributeModifierWithKey.stageValue;
-    if (!arkModifier._weakPtr.invalid()) {  
+    if (!arkModifier._weakPtr.invalid()) {
       attributeModifierWithKey.applyPeer(arkModifier.nativePtr,
         (attributeModifierWithKey.value === undefined ||
           attributeModifierWithKey.value === null)
       );
     } else {
-      ArkLogConsole.warn("pointer is invalid when putDirtyModifier");
+      ArkLogConsole.info('pointer is invalid when putDirtyModifier in ' + (arkModifier ?
+        arkModifier.constructor.name.toString() : 'undefined') + ' of ' + (attributeModifierWithKey ?
+        attributeModifierWithKey.constructor.name.toString() : 'undefined'));
     }
     this.dirtyComponentSet.add(arkModifier);
     if (!this.dirtyFlag) {
@@ -223,7 +225,7 @@ class AttributeUpdater {
   onComponentChanged(instance) {}
   updateConstructorParams(...args) {
     if (!this.attribute) {
-      ArkLogConsole.info("AttributeUpdater has not been initialized before updateConstructorParams.");
+      ArkLogConsole.info('AttributeUpdater has not been initialized before updateConstructorParams.');
       return;
     }
     this.attribute.initialize(args);
@@ -1088,6 +1090,28 @@ class LinearIndicatorModifier extends ArkLinearIndicatorComponent {
   }
 }
 
+class IndicatorComponentModifier extends ArkIndicatorComponentComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier(instance, this);
+  }
+}
+
+class LazyVGridLayoutModifier extends ArkLazyVGridLayoutComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier(instance, this);
+  }
+}
+
 export default {
   CommonModifier, AlphabetIndexerModifier, BlankModifier, ButtonModifier, CalendarPickerModifier, CheckboxModifier, CheckboxGroupModifier, CircleModifier,
   ColumnModifier, ColumnSplitModifier, CounterModifier, DataPanelModifier, DatePickerModifier, DividerModifier, FormComponentModifier, GaugeModifier,
@@ -1098,5 +1122,6 @@ export default {
   ScrollModifier, SearchModifier, SelectModifier, ShapeModifier, SideBarContainerModifier, SliderModifier, SpanModifier, StackModifier, StepperItemModifier,
   SwiperModifier, TabsModifier, TextAreaModifier, TextModifier, TextClockModifier, TextInputModifier, TextPickerModifier, TextTimerModifier, TimePickerModifier,
   ToggleModifier, VideoModifier, WaterFlowModifier, FlexModifier, PluginComponentModifier, RefreshModifier, TabContentModifier, ModifierUtils, AttributeUpdater,
-  ParticleModifier, MediaCachedImageModifier, SymbolGlyphModifier, SymbolSpanModifier, Component3DModifier, ContainerSpanModifier, LinearIndicatorModifier
+  ParticleModifier, MediaCachedImageModifier, SymbolGlyphModifier, SymbolSpanModifier, Component3DModifier, ContainerSpanModifier, LinearIndicatorModifier,
+  IndicatorComponentModifier, LazyVGridLayoutModifier, ModifierMap
 };

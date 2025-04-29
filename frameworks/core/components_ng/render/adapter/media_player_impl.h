@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,7 @@ public:
     void ResetMediaPlayer() override;
     bool IsMediaPlayerValid() override;
     void SetVolume(float leftVolume, float rightVolume) override;
-    bool SetSource(const std::string& src) override;
+    bool SetSource(const std::string& src, const std::string& bundleName, const std::string& moduleName) override;
     void SetRenderSurface(const RefPtr<RenderSurface>& renderSurface) override;
     void RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUpdatedEvent, StateChangedEvent&& stateChangedEvent,
         CommonEvent&& errorEvent, CommonEvent&& resolutionChangeEvent, CommonEvent&& startRenderFrameEvent) override;
@@ -56,6 +56,7 @@ public:
     void ProcessSurfaceChange(int32_t width, int32_t height) override;
     void ProcessSurfaceDestroy() override {}
     void ProcessTextureRefresh(int32_t instanceId, int64_t textureId) override;
+    void RegisterMediaPlayerSeekDoneEvent(SeekDoneEvent&& seekDoneEvent) override;
 
 private:
     void InitListener();
@@ -63,6 +64,7 @@ private:
     RefPtr<Player> player_;
     WeakPtr<RenderSurface> renderSurface_;
     PositionUpdatedEvent positionUpdateCallback_;
+    SeekDoneEvent seekDoneCallback_;
     StateChangedEvent stateChangeCallback_;
     CommonEvent errorCallback_;
     CommonEvent resolutionChangeCallback_;

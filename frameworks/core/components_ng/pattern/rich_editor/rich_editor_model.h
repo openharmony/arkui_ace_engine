@@ -23,12 +23,14 @@
 
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/device_config.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
 #include "core/components_ng/pattern/text/text_model.h"
@@ -79,12 +81,12 @@ struct UpdateSpanStyle {
         updateTextDecorationStyle.reset();
         updateTextShadows.reset();
         updateFontFeature.reset();
+        updateTextBackgroundStyle.reset();
+        updateUrlAddress.reset();
 
         updateLineHeight.reset();
+        updateHalfLeading.reset();
         updateLetterSpacing.reset();
-        updateSymbolColor.reset();
-        updateSymbolRenderingStrategy.reset();
-        updateSymbolEffectStrategy.reset();
 
         updateImageWidth.reset();
         updateImageHeight.reset();
@@ -92,25 +94,31 @@ struct UpdateSpanStyle {
         updateImageFit.reset();
         marginProp.reset();
         borderRadius.reset();
-        isSymbolStyle = false;
+        isInitDecoration = false;
+
+        updateSymbolColor.reset();
+        updateSymbolFontSize.reset();
+        updateSymbolFontWeight.reset();
+        updateSymbolRenderingStrategy.reset();
+        updateSymbolEffectStrategy.reset();
     }
 
-    std::optional<DynamicColor> updateTextColor = std::nullopt;
+    std::optional<Color> updateTextColor = std::nullopt;
     std::optional<CalcDimension> updateFontSize = std::nullopt;
     std::optional<FontStyle> updateItalicFontStyle = std::nullopt;
     std::optional<FontWeight> updateFontWeight = std::nullopt;
     std::optional<std::vector<std::string>> updateFontFamily = std::nullopt;
     std::optional<TextDecoration> updateTextDecoration = std::nullopt;
-    std::optional<DynamicColor> updateTextDecorationColor = std::nullopt;
+    std::optional<Color> updateTextDecorationColor = std::nullopt;
     std::optional<TextDecorationStyle> updateTextDecorationStyle = std::nullopt;
     std::optional<std::vector<Shadow>> updateTextShadows = std::nullopt;
     std::optional<NG::FONT_FEATURES_LIST> updateFontFeature = std::nullopt;
+    std::optional<TextBackgroundStyle> updateTextBackgroundStyle = std::nullopt;
+    std::optional<std::u16string> updateUrlAddress = std::nullopt;
 
     std::optional<CalcDimension> updateLineHeight = std::nullopt;
+    std::optional<bool> updateHalfLeading = std::nullopt;
     std::optional<CalcDimension> updateLetterSpacing = std::nullopt;
-    std::optional<std::vector<Color>> updateSymbolColor = std::nullopt;
-    std::optional<uint32_t> updateSymbolRenderingStrategy = std::nullopt;
-    std::optional<uint32_t> updateSymbolEffectStrategy = std::nullopt;
 
     std::optional<CalcDimension> updateImageWidth = std::nullopt;
     std::optional<CalcDimension> updateImageHeight = std::nullopt;
@@ -120,7 +128,13 @@ struct UpdateSpanStyle {
     std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
     bool useThemeFontColor = true;
     bool useThemeDecorationColor = true;
-    bool isSymbolStyle = false;
+    bool isInitDecoration = false;
+    
+    std::optional<std::vector<Color>> updateSymbolColor = std::nullopt;
+    std::optional<CalcDimension> updateSymbolFontSize = std::nullopt;
+    std::optional<FontWeight> updateSymbolFontWeight = std::nullopt;
+    std::optional<uint32_t> updateSymbolRenderingStrategy = std::nullopt;
+    std::optional<uint32_t> updateSymbolEffectStrategy = std::nullopt;
 
     void UpdateColorByResourceId()
     {
@@ -129,6 +143,17 @@ struct UpdateSpanStyle {
         }
         if (updateTextDecorationColor) {
             updateTextDecorationColor->UpdateColorByResourceId();
+        }
+        if (updateTextShadows) {
+            auto& shadows = updateTextShadows.value();
+            std::for_each(shadows.begin(), shadows.end(), [](Shadow& sd) { sd.UpdateColorByResourceId(); });
+        }
+        if (updateSymbolColor) {
+            auto& colors = updateSymbolColor.value();
+            std::for_each(colors.begin(), colors.end(), [](Color& cl) { cl.UpdateColorByResourceId(); });
+        }
+        if (updateTextBackgroundStyle) {
+            updateTextBackgroundStyle->UpdateColorByResourceId();
         }
     }
 
@@ -152,7 +177,6 @@ struct UpdateSpanStyle {
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, borderRadius);
         JSON_STRING_PUT_BOOL(jsonValue, useThemeFontColor);
         JSON_STRING_PUT_BOOL(jsonValue, useThemeDecorationColor);
-        JSON_STRING_PUT_BOOL(jsonValue, isSymbolStyle);
         return jsonValue->ToString();
     }
 };
@@ -164,11 +188,13 @@ struct UpdateParagraphStyle {
         leadingMargin.reset();
         wordBreak.reset();
         lineBreakStrategy.reset();
+        paragraphSpacing.reset();
     }
     std::optional<TextAlign> textAlign;
     std::optional<NG::LeadingMargin> leadingMargin;
     std::optional<WordBreak> wordBreak;
     std::optional<LineBreakStrategy> lineBreakStrategy;
+    std::optional<Dimension> paragraphSpacing;
 
     std::string ToString() const
     {
@@ -177,6 +203,7 @@ struct UpdateParagraphStyle {
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, leadingMargin);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, wordBreak);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, lineBreakStrategy);
+        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, paragraphSpacing);
         return jsonValue->ToString();
     }
 };
@@ -197,9 +224,10 @@ struct RangeOptions {
 
 struct TextSpanOptions : SpanOptionBase {
     std::optional<int32_t> offset;
-    std::string value;
+    std::u16string value;
     std::optional<TextStyle> style;
     std::optional<UpdateParagraphStyle> paraStyle;
+    std::optional<std::u16string> urlAddress;
     UserGestureOptions userGestureOption;
     bool useThemeFontColor = true;
     bool useThemeDecorationColor = true;
@@ -234,10 +262,10 @@ struct SymbolSpanOptions : SpanOptionBase {
 };
 
 struct PlaceholderOptions {
-    std::optional<std::string> value;
+    std::optional<std::u16string> value;
     std::optional<FontWeight> fontWeight;
     std::optional<Dimension> fontSize;
-    std::optional<DynamicColor> fontColor;
+    std::optional<Color> fontColor;
     std::optional<FontStyle> fontStyle;
     std::vector<std::string> fontFamilies;
 
@@ -254,7 +282,7 @@ struct PlaceholderOptions {
 };
 
 struct PreviewTextInfo {
-    std::optional<std::string> value;
+    std::optional<std::u16string> value;
     std::optional<int32_t> offset;
 
     std::string ToString() const
@@ -266,11 +294,14 @@ struct PreviewTextInfo {
     }
 };
 
+enum class UndoStyle { CLEAR_STYLE = 0, KEEP_STYLE = 1 };
+
 class ACE_EXPORT RichEditorBaseControllerBase : public AceType {
     DECLARE_ACE_TYPE(RichEditorBaseControllerBase, AceType);
 
 public:
     virtual int32_t GetCaretOffset() = 0;
+    virtual NG::RectF GetCaretRect() = 0;
     virtual bool SetCaretOffset(int32_t caretPosition) = 0;
     virtual void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle,
         std::optional<TextStyle> textStyle) = 0;
@@ -282,6 +313,8 @@ public:
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) = 0;
     virtual WeakPtr<NG::LayoutInfoInterface> GetLayoutInfoInterface() = 0;
     virtual const PreviewTextInfo GetPreviewTextInfo() const = 0;
+    virtual ColorMode GetColorMode() = 0;
+    virtual RefPtr<NG::RichEditorTheme> GetTheme() = 0;
 };
 
 class ACE_EXPORT RichEditorControllerBase : virtual public RichEditorBaseControllerBase {
@@ -338,8 +371,8 @@ public:
     virtual void SetTextDetectEnable(bool value) = 0;
     virtual void SetSupportPreviewText(bool value) = 0;
     virtual void SetTextDetectConfig(const TextDetectConfig& textDetectConfig) = 0;
-    virtual void SetSelectedBackgroundColor(const DynamicColor& selectedColor) = 0;
-    virtual void SetCaretColor(const DynamicColor& color) = 0;
+    virtual void SetSelectedBackgroundColor(const Color& selectedColor) = 0;
+    virtual void SetCaretColor(const Color& color) = 0;
     virtual void SetOnEditingChange(std::function<void(const bool&)>&& func) = 0;
     virtual void SetEnterKeyType(TextInputAction value) = 0;
     virtual void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) = 0;
@@ -347,10 +380,21 @@ public:
     virtual void SetOnDidChange(std::function<void(const NG::RichEditorChangeValue&)>&& func) = 0;
     virtual void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
+    virtual void SetOnShare(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetSelectionMenuOptions(
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {}
     virtual void SetRequestKeyboardOnFocus(bool needToRequest) {}
     virtual void SetEnableHapticFeedback(bool isEnabled) {}
+    virtual void SetBarState(DisplayMode mode) {}
+    virtual void SetPreviewMenuParam(NG::TextSpanType spanType, std::function<void()>& buildFunc,
+        const NG::SelectMenuParam& menuParam) {}
+    virtual void SetMaxLength(std::optional<int32_t> value) {}
+    virtual void ResetMaxLength() {}
+    virtual void SetMaxLines(uint32_t value) {};
+    virtual void SetStopBackPress(bool isStopBackPress) {};
+    virtual void SetKeyboardAppearance(KeyboardAppearance value) {};
+    virtual void SetSupportStyledUndo(bool enabled) {};
+
 private:
     static std::unique_ptr<RichEditorModel> instance_;
     static std::mutex mutex_;

@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/navigation/inner_navigation_controller.h"
 
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS {
 namespace Ace {

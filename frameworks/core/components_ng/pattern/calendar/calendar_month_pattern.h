@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,10 +21,10 @@
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
 #include "core/components/calendar/calendar_data_adapter.h"
+#include "core/components/picker/picker_data.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/calendar/calendar_event_hub.h"
 #include "core/components_ng/pattern/calendar/calendar_layout_algorithm.h"
-#include "core/components_ng/pattern/calendar/calendar_paint_method.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/paint_property.h"
@@ -53,13 +53,7 @@ public:
         return MakeRefPtr<CalendarLayoutAlgorithm>();
     }
 
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
-    {
-        if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
-            InitCurrentVirtualNode();
-        }
-        return MakeRefPtr<CalendarPaintMethod>(obtainedMonth_, calendarDay_, isCalendarDialog_);
-    }
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     const ObtainedMonth& GetMonthData() const
     {
@@ -77,17 +71,26 @@ public:
         return calendarDay_;
     }
 
-    void SetCalendarDay(const CalendarDay& calendarDay)
+    void SetCalendarDay(const CalendarDay& calendarDay);
+
+    void SetStartDate(const PickerDate& startDate)
     {
-        calendarDay_ = calendarDay;
-        if (monthState_ == MonthState::CUR_MONTH && !obtainedMonth_.days.empty()) {
-            for (auto& day : obtainedMonth_.days) {
-                if (day.month.year == calendarDay.month.year && day.month.month == calendarDay.month.month &&
-                    day.day == calendarDay.day) {
-                    day.focused = true;
-                }
-            }
-        }
+        startDate_ = startDate;
+    }
+
+    void SetEndDate(const PickerDate& endDate)
+    {
+        endDate_ = endDate;
+    }
+
+    void SetMarkToday(bool markToday)
+    {
+        markToday_ = markToday;
+    }
+
+    void SetDisabledDateRange(const std::vector<std::pair<PickerDate, PickerDate>>& disabledDateRange)
+    {
+        disabledDateRange_ = disabledDateRange;
     }
 
     bool IsCalendarDialog() const
@@ -124,8 +127,22 @@ public:
 
     void ClearCalendarVirtualNode();
 
+    void ClearFocusCalendarDay();
+
+    void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
+
+    Dimension GetDaySize(const RefPtr<CalendarTheme>& theme);
+
+    bool IsLargeSize(const RefPtr<CalendarTheme>& theme);
+
+    void InitFoldState();
+
+    void FireIsFoldStatusChanged();
+
 private:
     void OnAttachToFrameNode() override;
+    void OnColorConfigurationUpdate() override;
+    void OnLanguageConfigurationUpdate() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnModifyDone() override;
     void OnClick(Offset& localLocation, const ObtainedMonth& obtainedMonth);
@@ -136,7 +153,6 @@ private:
     void InitHoverEvent();
     void SetColRowSpace();
     int32_t JudgeArea(const Offset& offset);
-    Dimension GetDaySize(const RefPtr<CalendarTheme>& theme);
     RefPtr<FrameNode> AddButtonNodeIntoVirtual(const CalendarDay& calendarDay);
     void UpdateAccessibilityButtonNode(RefPtr<FrameNode> frameNode, int32_t index);
     void UpdateButtonNodeWithoutTheme(RefPtr<FrameNode> frameNode, int32_t index);
@@ -152,22 +168,35 @@ private:
     void InitializeCalendarAccessibility();
     void ChangeVirtualNodeState(const CalendarDay& calendarDay);
     void SetLineNodeSize(RefPtr<FrameNode> lineNode);
+    void SetFocusNode(int32_t index, bool isDeviceOrientation = false);
+    float GetWidth(const RefPtr<FrameNode>& host);
+    bool IsDateInRange(const CalendarDay& day);
+    std::string GetDayStr(int32_t index);
+    std::string GetTodayStr();
     bool isCalendarDialog_ = false;
     bool hoverState_ = false;
     bool isOnHover_ = false;
     bool isFirstEnter_ = false;
     int32_t selectedIndex_ = 0;
     double margin_ = 0;
+    RefPtr<FrameNode> lineNode_;
     double dayHeight_ = 0;
     double dayWidth_ = 0;
+    double colSpace_ = 0;
     DeviceOrientation deviceOrientation_ = DeviceOrientation::ORIENTATION_UNDEFINED;
     std::string selectedTxt_;
     std::string disabledDesc_;
+    FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;
     std::vector<RefPtr<AccessibilityProperty>> accessibilityPropertyVec_;
     std::vector<RefPtr<FrameNode>> buttonAccessibilityNodeVec_;
     std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
     bool isInitVirtualNode_ = false;
     CalendarDay calendarDay_;
+    PickerDate startDate_;
+    PickerDate endDate_;
+    bool markToday_ = false;
+    std::vector<std::pair<PickerDate, PickerDate>> disabledDateRange_;
+    CalendarDay focusedCalendarDay_;
     ObtainedMonth obtainedMonth_;
     MonthState monthState_ = MonthState::CUR_MONTH;
     RefPtr<ClickEvent> clickListener_;

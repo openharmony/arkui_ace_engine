@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
+#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/texttimer/text_timer_accessibility_property.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -26,6 +25,6 @@ std::string TextTimerAccessibilityProperty::GetText() const
     CHECK_NULL_RETURN(frameNode, "");
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, "");
-    return textLayoutProperty->GetContentValue("");
+    return UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue(u""));
 }
 } // namespace OHOS::Ace::NG

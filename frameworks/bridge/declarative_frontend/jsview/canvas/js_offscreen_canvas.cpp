@@ -48,7 +48,7 @@ void* DetachOffscreenCanvas(napi_env env, void* value, void* hint)
     }
     workCanvas->SetDetachStatus(true);
 
-    auto result = new (std::nothrow) JSOffscreenCanvas();
+    auto result = new JSOffscreenCanvas();
     result->SetWidth(workCanvas->GetWidth());
     result->SetHeight(workCanvas->GetHeight());
     result->SetUnit(workCanvas->GetUnit());
@@ -73,6 +73,7 @@ napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
 
     napi_value offscreenCanvas = nullptr;
     napi_create_object(env, &offscreenCanvas);
+
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_GETTER_SETTER("width", JSOffscreenCanvas::JsGetWidth, JSOffscreenCanvas::JsSetWidth),
         DECLARE_NAPI_GETTER_SETTER("height", JSOffscreenCanvas::JsGetHeight, JSOffscreenCanvas::JsSetHeight),
@@ -80,6 +81,7 @@ napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
         DECLARE_NAPI_FUNCTION("getContext", JSOffscreenCanvas::JsGetContext),
     };
     napi_define_properties(env, offscreenCanvas, sizeof(desc) / sizeof(*desc), desc);
+
     napi_coerce_to_native_binding_object(
         env, offscreenCanvas, DetachOffscreenCanvas, AttachOffscreenCanvas, value, nullptr);
     napi_wrap_with_size(
@@ -141,7 +143,7 @@ napi_value JSOffscreenCanvas::Constructor(napi_env env, napi_callback_info info)
     }
     double fWidth = 0.0;
     double fHeight = 0.0;
-    auto workCanvas = new (std::nothrow) JSOffscreenCanvas();
+    auto workCanvas = new JSOffscreenCanvas();
     if (argv[2] != nullptr) {
         int32_t unit = 0;
         napi_get_value_int32(env, argv[2], &unit);
@@ -195,22 +197,19 @@ napi_value JSOffscreenCanvas::JsGetHeight(napi_env env, napi_callback_info info)
 
 napi_value JSOffscreenCanvas::JsSetWidth(napi_env env, napi_callback_info info)
 {
-    ContainerScope scope(Container::CurrentIdSafely());
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
     return (me != nullptr && !me->isDetached_) ? me->OnSetWidth(env, info) : nullptr;
 }
 
 napi_value JSOffscreenCanvas::JsSetHeight(napi_env env, napi_callback_info info)
 {
-    ContainerScope scope(Container::CurrentIdSafely());
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
     return (me != nullptr && !me->isDetached_) ? me->OnSetHeight(env, info) : nullptr;
 }
 napi_value JSOffscreenCanvas::JsTransferToImageBitmap(napi_env env, napi_callback_info info)
 {
-    ContainerScope scope(Container::CurrentIdSafely());
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
-    if (me->isDetached_) {
+    if (me != nullptr && me->isDetached_) {
         JSException::Throw("%s", "Failed to execute 'transferToImageBitmap' on 'OffscreenCanvas': Cannot transfer an "
                                  "ImageBitmap from a detached OffscreenCanvas");
         return nullptr;
@@ -222,9 +221,8 @@ napi_value JSOffscreenCanvas::JsTransferToImageBitmap(napi_env env, napi_callbac
 
 napi_value JSOffscreenCanvas::JsGetContext(napi_env env, napi_callback_info info)
 {
-    ContainerScope scope(Container::CurrentIdSafely());
     JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
-    if (me->isDetached_) {
+    if (me != nullptr && me->isDetached_) {
         JSException::Throw(
             "%s", "Failed to execute 'getContext' on 'OffscreenCanvas': OffscreenCanvas object is detached");
         return nullptr;
@@ -257,24 +255,17 @@ napi_value JSOffscreenCanvas::OnGetHeight(napi_env env)
 napi_value JSOffscreenCanvas::OnSetWidth(napi_env env, napi_callback_info info)
 {
     CHECK_NULL_RETURN(offscreenCanvasPattern_, nullptr);
-    size_t argc = 0;
-    napi_value argv = nullptr;
-    napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
+    size_t argc = 1;
+    napi_value argv[1] = { nullptr };
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     if (argc != ARGS_COUNT_ONE) {
         LOGD("Invalid args.");
         return nullptr;
     }
-    napi_get_cb_info(env, info, &argc, &argv, nullptr, nullptr);
-    if (argv == nullptr) {
-        return nullptr;
-    }
     double width = 0.0;
-    if (napi_get_value_double(env, argv, &width) == napi_ok) {
-        double density = GetDensity();
-        width *= density;
-    } else {
-        return nullptr;
-    }
+    NAPI_CALL(env, napi_get_value_double(env, argv[0], &width));
+    double density = GetDensity();
+    width *= density;
 
     if (width_ != width) {
         width_ = width;
@@ -289,24 +280,17 @@ napi_value JSOffscreenCanvas::OnSetWidth(napi_env env, napi_callback_info info)
 napi_value JSOffscreenCanvas::OnSetHeight(napi_env env, napi_callback_info info)
 {
     CHECK_NULL_RETURN(offscreenCanvasPattern_, nullptr);
-    size_t argc = 0;
-    napi_value argv = nullptr;
-    napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
+    size_t argc = 1;
+    napi_value argv[1] = { nullptr };
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     if (argc != ARGS_COUNT_ONE) {
         LOGD("Invalid args.");
         return nullptr;
     }
-    napi_get_cb_info(env, info, &argc, &argv, nullptr, nullptr);
-    if (argv == nullptr) {
-        return nullptr;
-    }
     double height = 0.0;
-    if (napi_get_value_double(env, argv, &height) == napi_ok) {
-        double density = GetDensity();
-        height *= density;
-    } else {
-        return nullptr;
-    }
+    NAPI_CALL(env, napi_get_value_double(env, argv[0], &height));
+    double density = GetDensity();
+    height *= density;
 
     if (height_ != height) {
         height_ = height;
@@ -323,36 +307,17 @@ napi_value JSOffscreenCanvas::onTransferToImageBitmap(napi_env env)
     if (offscreenCanvasPattern_ == nullptr || offscreenCanvasContext_ == nullptr) {
         return nullptr;
     }
-    napi_value global = nullptr;
-    napi_status status = napi_get_global(env, &global);
-    if (status != napi_ok) {
-        return nullptr;
-    }
-    napi_value constructor = nullptr;
-    status = napi_get_named_property(env, global, "ImageBitmap", &constructor);
-    if (status != napi_ok) {
-        return nullptr;
-    }
     napi_value renderImage = nullptr;
     napi_create_object(env, &renderImage);
-    status = napi_new_instance(env, constructor, 0, nullptr, &renderImage);
-    if (status != napi_ok) {
+    auto pixelMap = offscreenCanvasPattern_->TransferToImageBitmap();
+    if (!JSRenderImage::CreateJSRenderImage(env, pixelMap, renderImage)) {
         return nullptr;
     }
     void* nativeObj = nullptr;
-    status = napi_unwrap(env, renderImage, &nativeObj);
-    if (status != napi_ok) {
-        return nullptr;
-    }
+    NAPI_CALL(env, napi_unwrap(env, renderImage, &nativeObj));
     auto jsImage = (JSRenderImage*)nativeObj;
     CHECK_NULL_RETURN(jsImage, nullptr);
-#ifdef PIXEL_MAP_SUPPORTED
-    auto pixelMap = offscreenCanvasPattern_->TransferToImageBitmap();
-    if (pixelMap == nullptr) {
-        return nullptr;
-    }
-    jsImage->SetPixelMap(pixelMap);
-#else
+#ifndef PIXEL_MAP_SUPPORTED
     auto imageData = offscreenCanvasPattern_->GetImageData(0, 0, width_, height_);
     if (imageData == nullptr) {
         return nullptr;
@@ -398,16 +363,6 @@ napi_value JSOffscreenCanvas::onGetContext(napi_env env, napi_callback_info info
         if (contextObj == nullptr) {
             return nullptr;
         }
-        napi_value isSucceed = nullptr;
-        if (napi_get_named_property(env, contextObj, "__isSucceed", &isSucceed) == napi_ok) {
-            bool value = true;
-            napi_get_value_bool(env, isSucceed, &value);
-            if (!value) {
-                return nullptr;
-            }
-        } else {
-            return nullptr;
-        }
         SetAntiAlias(argv[1]);
         offscreenCanvasContext_->SetUnit(GetUnit());
         offscreenCanvasContext_->SetDensity();
@@ -433,39 +388,18 @@ void JSOffscreenCanvas::SetAntiAlias(napi_value argv)
 napi_value JSOffscreenCanvas::CreateContext2d(napi_env env, double width, double height, const EcmaVM* vm)
 {
     napi_value global = nullptr;
-    napi_status status = napi_get_global(env, &global);
-    if (status != napi_ok) {
-        return nullptr;
-    }
+    NAPI_CALL(env, napi_get_global(env, &global));
     napi_value constructor = nullptr;
-    status = napi_get_named_property(env, global, "OffscreenCanvasRenderingContext2D", &constructor);
-    if (status != napi_ok) {
-        return nullptr;
-    }
+    NAPI_CALL(env, napi_get_named_property(env, global, "OffscreenCanvasRenderingContext2D", &constructor));
 
     napi_value thisVal = nullptr;
     napi_create_object(env, &thisVal);
-    status = napi_new_instance(env, constructor, 0, nullptr, &thisVal);
-    if (status != napi_ok) {
-        return nullptr;
-    }
+    NAPI_CALL(env, napi_new_instance(env, constructor, 0, nullptr, &thisVal));
     if (offscreenCanvasPattern_ == nullptr) {
         return thisVal;
     }
-    bool isSucceed = true;
-    napi_value value = nullptr;
-    if (!offscreenCanvasPattern_->IsSucceed()) {
-        isSucceed = false;
-        napi_create_int32(env, isSucceed, &value);
-        napi_set_named_property(env, thisVal, "__isSucceed", value);
-        return thisVal;
-    }
-    napi_create_int32(env, isSucceed, &value);
-    napi_set_named_property(env, thisVal, "__isSucceed", value);
-
     JSObject jsObject(vm, NapiValueToLocalValue(thisVal)->ToEcmaObject(vm));
     offscreenCanvasContext_ = Referenced::Claim(jsObject.Unwrap<JSOffscreenRenderingContext>());
-    offscreenCanvasContext_->SetInstanceId(Container::CurrentId());
     offscreenCanvasContext_->SetOffscreenPattern(offscreenCanvasPattern_);
     offscreenCanvasContext_->AddOffscreenCanvasPattern(offscreenCanvasPattern_);
     offscreenCanvasContext_->SetWidth(width_);

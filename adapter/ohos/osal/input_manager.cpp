@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "frameworks/base/input_manager/input_manager.h"
+#include "base/input_manager/input_manager.h"
 
 #include "input_manager.h"
 
@@ -27,6 +27,15 @@ bool InputManager::GetDeviceIds(std::vector<int32_t>& resDeviceIds)
     CHECK_NULL_RETURN(inputManager, false);
     inputManager->GetDeviceIds([&resDeviceIds](std::vector<int32_t>& deviceIds) { resDeviceIds = deviceIds; });
     return true;
+}
+
+std::shared_ptr<MMI::PointerEvent> InputManager::CreatePointerEvent(
+    const std::shared_ptr<const MMI::PointerEvent>& pointerEvent)
+{
+    if (!pointerEvent) {
+        return nullptr;
+    }
+    return std::make_shared<MMI::PointerEvent>(*pointerEvent);
 }
 
 KeyboardType ConvertKeyboardType(int32_t type)
@@ -59,6 +68,24 @@ KeyboardType InputManager::GetKeyboardType(int32_t deviceId)
     inputManager->GetKeyboardType(
         deviceId, [&mmiKeyboardType](int32_t keyboardType) { mmiKeyboardType = keyboardType; });
     return ConvertKeyboardType(mmiKeyboardType);
+}
+
+bool InputManager::GetSystemHotkeys(std::vector<HotKey>& hotkeys)
+{
+    auto* inputManager = MMI::InputManager::GetInstance();
+    CHECK_NULL_RETURN(inputManager, false);
+
+    std::vector<std::unique_ptr<OHOS::MMI::KeyOption>> keyOptions;
+    int32_t count = 0;
+    inputManager->GetAllSystemHotkeys(keyOptions, count);
+
+    if (keyOptions.empty()) {
+        return false;
+    }
+    for (const auto& key : keyOptions) {
+        hotkeys.push_back({ key->GetPreKeys(), key->GetFinalKey() });
+    }
+    return true;
 }
 
 bool InputManager::IsKeyboardConnected()

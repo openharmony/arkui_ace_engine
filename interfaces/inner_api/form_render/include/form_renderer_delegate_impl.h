@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_DELEGATE_IMPL_H
 
 #include "form_renderer_delegate_stub.h"
+#include "core/accessibility/accessibility_manager.h"
 
 namespace OHOS {
 namespace Ace {
@@ -61,7 +62,11 @@ public:
 
     int32_t OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos) override;
 
-    int32_t OnGetRectRelativeToWindow(int32_t &top, int32_t &left) override;
+    int32_t OnGetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo) override;
+
+    int32_t OnCheckManagerDelegate(bool &checkFlag) override;
+
+    int32_t OnUpdateFormDone(const int64_t formId) override;
 
     void SetSurfaceCreateEventHandler(std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&,
             const OHOS::AppExecFwk::FormJsInfo&, const AAFwk::Want&)>&& listener);
@@ -70,7 +75,9 @@ public:
     void SetSurfaceChangeEventHandler(std::function<void(float width, float height, float borderWidth)>&& listener);
     void SetSurfaceDetachEventHandler(std::function<void()>&& listener);
     void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& listener);
-    void SetGetRectRelativeToWindowHandler(std::function<void(int32_t&, int32_t&)>&& listener);
+    void SetGetRectRelativeToWindowHandler(std::function<void(AccessibilityParentRectInfo& parentRectInfo)>&& listener);
+    void SetCheckManagerDelegate(std::function<void(bool&)>&& listener);
+    void SetUpdateFormEventHandler(std::function<void(const int64_t)>&& listener);
 private:
     std::function<void(
         const std::shared_ptr<Rosen::RSSurfaceNode>&, const OHOS::AppExecFwk::FormJsInfo&, const AAFwk::Want&)>
@@ -80,7 +87,9 @@ private:
     std::function<void(float width, float height, float borderWidth)> surfaceChangeEventHandler_;
     std::function<void()> surfaceDetachEventHandler_;
     std::function<void(const std::vector<std::string>&)> formLinkInfoUpdateHandler_;
-    std::function<void(int32_t&, int32_t&)> getRectRelativeToWindowHandler_;
+    std::function<void(AccessibilityParentRectInfo& parentRectInfo)> getRectRelativeToWindowHandler_;
+    std::function<void(bool&)> checkManagerDelegate_;
+    std::function<void(const int64_t)> updateFormEventHandler_;
 };
 } // namespace Ace
 } // namespace OHOS

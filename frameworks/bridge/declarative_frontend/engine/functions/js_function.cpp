@@ -114,9 +114,13 @@ void JsFunctionBase::ExecuteNew(const std::vector<std::string>& keys, const std:
     ExecuteJS(1, &jsVal);
 }
 
-JSRef<JSVal> JsWeakFunction::ExecuteJS(int argc, JSRef<JSVal> argv[])
+JSRef<JSVal> JsWeakFunction::ExecuteJS(int argc, JSRef<JSVal> argv[], bool isAnimation)
 {
-    JS_CALLBACK_DURATION();
+    int32_t id = -1;
+    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
+        id = Container::CurrentId();
+    }
+    JS_CALLBACK_DURATION(id);
     JAVASCRIPT_EXECUTION_SCOPE_STATIC
     ACE_FUNCTION_TRACE();
     JSRef<JSVal> jsObject = jsThis_.Lock();
@@ -129,14 +133,18 @@ JSRef<JSVal> JsWeakFunction::ExecuteJS(int argc, JSRef<JSVal> argv[])
     return result;
 }
 
-JSRef<JSVal> JsFunction::ExecuteJS(int argc, JSRef<JSVal> argv[])
+JSRef<JSVal> JsFunction::ExecuteJS(int argc, JSRef<JSVal> argv[], bool isAnimation)
 {
-    JS_CALLBACK_DURATION();
+    int32_t id = -1;
+    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
+        id = Container::CurrentId();
+    }
+    JS_CALLBACK_DURATION(id);
     JAVASCRIPT_EXECUTION_SCOPE_STATIC
     ACE_FUNCTION_TRACE();
 
     JSRef<JSVal> jsObject = jsThis_.Lock();
-    JSRef<JSVal> result = jsFunction_->Call(jsObject, argc, argv);
+    JSRef<JSVal> result = jsFunction_->Call(jsObject, argc, argv, isAnimation);
     return result;
 }
 
@@ -158,6 +166,11 @@ JSRef<JSObject> CreateEventTargetObject(const BaseEventInfo& info)
     area->SetProperty<double>("width", info.GetTarget().area.GetWidth().ConvertToVp());
     area->SetProperty<double>("height", info.GetTarget().area.GetHeight().ConvertToVp());
     target->SetPropertyObject("area", area);
+    if (info.GetTarget().id.empty()) {
+        target->SetPropertyObject("id", JsiValue::Undefined());
+    } else {
+        target->SetProperty<const char*>("id", info.GetTarget().id.c_str());
+    }
     return target;
 }
 

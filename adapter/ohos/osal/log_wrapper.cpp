@@ -19,11 +19,6 @@
 #include <dlfcn.h>
 #endif
 #include <mutex>
-#include <cstring>
-#include <map>
-#include <unordered_map>
-
-#include "hilog/log.h"
 
 #ifdef ACE_INSTANCE_LOG
 #include "core/common/container_scope.h"
@@ -107,6 +102,7 @@ const std::unordered_map<AceLogTag, const char*> g_DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_NODE_CONTAINER, "AceNodeContainer" },
     { AceLogTag::ACE_NATIVE_NODE, "AceNativeNode" },
     { AceLogTag::ACE_ISOLATED_COMPONENT, "AceIsolatedComponent" },
+    { AceLogTag::ACE_DYNAMIC_COMPONENT, "AceDynamicComponent" },
     { AceLogTag::ACE_SECURITYUIEXTENSION, "AceSecurityUiExtensionComponent" },
     { AceLogTag::ACE_MARQUEE, "AceMarquee" },
     { AceLogTag::ACE_OBSERVER, "AceObserver" },
@@ -130,6 +126,15 @@ const std::unordered_map<AceLogTag, const char*> g_DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_SELECT_OVERLAY, "AceSelectOverlay"},
     { AceLogTag::ACE_CLIPBOARD, "AceClipBoard"},
     { AceLogTag::ACE_SECURITY_COMPONENT, "AceSecurityComponent"},
+    { AceLogTag::ACE_LAYOUT_INSPECTOR, "AceLayoutInspector" },
+    { AceLogTag::ACE_MEDIA_QUERY, "AceMediaQuery" },
+    { AceLogTag::ACE_LAYOUT, "AceLayout" },
+    { AceLogTag::ACE_STYLUS, "AceStylus"},
+    { AceLogTag::ACE_BADGE, "AceBadge"},
+    { AceLogTag::ACE_QRCODE, "AceQRCode"},
+    { AceLogTag::ACE_PROGRESS, "ACE_PROGRESS"},
+    { AceLogTag::ACE_DRAWABLE_DESCRIPTOR, "AceDrawableDescriptor"},
+    { AceLogTag::ACE_LAZY_GRID, "AceLazyGrid"},
 };
 // initial static member object
 LogLevel LogWrapper::level_ = LogLevel::DEBUG;
@@ -154,8 +159,18 @@ const std::string LogWrapper::GetIdWithReason()
 }
 #endif
 
+static std::atomic<bool> skipBacktrace = false;
+
+void SetSkipBacktrace(bool inputFlag)
+{
+    skipBacktrace.store(inputFlag);
+}
+
 bool LogBacktrace(size_t maxFrameNums)
 {
+    if (skipBacktrace.load()) {
+        return true;
+    }
     static const char* (*pfnGetTrace)(size_t, size_t);
 #ifdef _GNU_SOURCE
     if (!pfnGetTrace) {

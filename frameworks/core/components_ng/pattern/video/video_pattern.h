@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,11 +66,6 @@ public:
         return MakeRefPtr<VideoAccessibilityProperty>();
     }
 
-    bool DefaultSupportDrag() override
-    {
-        return true;
-    }
-
     bool IsSupportDrawModifier() const override
     {
         return false;
@@ -106,9 +101,17 @@ public:
         return loop_;
     }
 
+    void SetSurfaceBackgroundColor(Color color);
+
     virtual bool IsFullScreen() const;
 
     void OnColorConfigurationUpdate() override;
+
+    void UpdateShowFirstFrame(bool showFirstFrame)
+    {
+        showFirstFrame_ = showFirstFrame;
+    }
+
     void UpdateProgressRate(double progressRate)
     {
         progressRate_ = progressRate;
@@ -159,8 +162,8 @@ public:
     // It is used to init mediaplayer on background.
     void UpdateMediaPlayerOnBg();
     void ResetMediaPlayer();
+    void ResetMediaPlayerOnBg();
 
-    void EnableDrag();
     void SetIsStop(bool isStop)
     {
         isStop_ = isStop;
@@ -171,24 +174,14 @@ public:
         return isStop_;
     }
 
-    void SetIsDrag(bool isDrag)
-    {
-        isDrag_ = isDrag;
-    }
-
     bool IsInitialState() const
     {
         return isInitialState_;
     }
 
-    void SetIsDragEndAutoPlay(bool isDragEndAutoPlay)
-    {
-        dragEndAutoPlay_ = isDragEndAutoPlay;
-    }
-
     const std::string& GetSrc() const
     {
-        return src_;
+        return videoSrcInfo_.src_;
     }
 
     void UpdateMediaParam(const RefPtr<MediaPlayer>& mediaPlayer, const RefPtr<RenderSurface>& renderSurface,
@@ -203,8 +196,11 @@ public:
     {
         mediaPlayer_.Reset();
         renderSurface_.Reset();
+        RemoveMediaPlayerSurfaceNode();
         renderContextForMediaPlayer_.Reset();
     }
+
+    void RemoveMediaPlayerSurfaceNode();
 
     void OnFullScreenChange(bool isFullScreen);
 
@@ -238,6 +234,7 @@ public:
     RefPtr<VideoPattern> GetTargetVideoPattern();
     void EnableAnalyzer(bool enable);
     void SetImageAnalyzerConfig(void* config);
+    void StartUpdateImageAnalyzer();
     void SetImageAIOptions(void* options);
     bool GetAnalyzerState();
     void UpdateAnalyzerState(bool isCreated)
@@ -248,6 +245,29 @@ public:
     {
         isSeeking_ = isSeeking;
     }
+    bool GetIsSeeking() const
+    {
+        return isSeeking_;
+    }
+
+    void SetIsPrepared(bool isPrepared)
+    {
+        isPrepared_ = isPrepared;
+    }
+    bool GetIsPrepared() const
+    {
+        return isPrepared_;
+    }
+    static void RegisterMediaPlayerEvent(const WeakPtr<VideoPattern>& weak, const RefPtr<MediaPlayer>& mediaPlayer,
+        const std::string& videoSrc, int32_t instanceId);
+
+    void SetShortcutKeyEnabled(bool isEnableShortcutKey);
+    bool GetShortcutKeyEnabled() const;
+
+    void SetCurrentVolume(float currentVolume);
+    float GetCurrentVolume() const;
+    static bool ParseCommand(const std::string& command);
+    int32_t OnInjectionEvent(const std::string& command) override;
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
@@ -255,7 +275,6 @@ public:
 
 protected:
     void OnUpdateTime(uint32_t time, int pos) const;
-    void RegisterMediaPlayerEvent();
 
     RefPtr<MediaPlayer> mediaPlayer_ = MediaPlayer::Create();
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
@@ -276,9 +295,28 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
     void OnWindowHide() override;
+    void InitKeyEvent();
+    bool OnKeyEvent(const KeyEvent& event);
+    bool HandleSliderKeyEvent(const KeyEventInfo& event);
+    void AddChild();
 
     // Set properties for media player.
     void PrepareMediaPlayer();
+    void SetStartImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+    void SetPausetImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+    void SetStopImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+    void SetSeekToImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+    void SetRequestFullscreenImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+    void SetExitFullscreenImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+    void SetResetImpl(
+        const RefPtr<VideoController>& videoController, const SingleTaskExecutor& uiTaskExecutor);
+
     void SetMethodCall();
 
     bool SetSourceForMediaPlayer();
@@ -298,7 +336,7 @@ private:
     void SetCurrentTime(float currentPos, SeekMode seekMode = SeekMode::SEEK_PREVIOUS_SYNC);
     void SetFullScreenButtonCallBack(RefPtr<FrameNode>& fullScreenBtn);
 
-    void OnPrepared(double width, double height, uint32_t duration, uint32_t currentPos, bool needFireEvent);
+    void OnPrepared(uint32_t duration, uint32_t currentPos, bool needFireEvent);
     void OnCompletion();
     void OnSliderChange(float posTime, int32_t mode);
 
@@ -315,7 +353,6 @@ private:
     void ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode>& fullScreenBtn);
     void ResetStatus();
     void HiddenChange(bool hidden);
-    void PrintPlayerStatus(PlaybackStatus status);
 
     void UpdateFsState();
     void checkNeedAutoPlay();
@@ -338,17 +375,22 @@ private:
 #endif
 
     void RegisterRenderContextCallBack();
-    void ChangePlayerStatus(bool isPlaying, const PlaybackStatus& status);
+    void ChangePlayerStatus(const PlaybackStatus& status);
 
     bool IsSupportImageAnalyzer();
     bool ShouldUpdateImageAnalyzer();
     void StartImageAnalyzer();
-    void StartUpdateImageAnalyzer();
     void CreateAnalyzerOverlay();
     void DestroyAnalyzerOverlay();
     void UpdateAnalyzerOverlay();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void UpdateOverlayVisibility(VisibleType type);
+
+    void OnKeySpaceEvent();
+    void MoveByStep(int32_t step);
+    void AdjustVolume(int32_t step);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     RefPtr<VideoControllerV2> videoControllerV2_;
     RefPtr<FrameNode> controlBar_;
@@ -358,12 +400,13 @@ private:
     HiddenChangeEvent hiddenChangeEvent_;
 
     // Video src.
-    std::string src_;
+    VideoSourceInfo videoSrcInfo_;
+    bool showFirstFrame_ = false;
     bool isInitialState_ = true; // Initial state is true. Play or seek will set it to false.
     bool isPlaying_ = false;
+    bool isPrepared_ = false;
 
     bool isStop_ = false;
-    bool isDrag_ = false;
 
     bool muted_ = false;
     bool autoPlay_ = false;
@@ -371,18 +414,20 @@ private:
 
     bool pastPlayingStatus_ = false;
 
-    bool dragEndAutoPlay_ = false;
     bool isEnableAnalyzer_ = false;
     bool isAnalyzerCreated_ = false;
     bool isPaused_ = false;
     bool isContentSizeChanged_ = false;
     bool isSeeking_ = false;
+    bool isEnableShortcutKey_ = false;
 
     uint32_t currentPos_ = 0;
     uint32_t duration_ = 0;
+    float currentVolume_ = 1.0f;
 
     // full screen node id
     std::optional<int32_t> fullScreenNodeId_;
+    int32_t hostId_ = 0;
 
     // Video playback speed.
     double progressRate_ = 1.0;

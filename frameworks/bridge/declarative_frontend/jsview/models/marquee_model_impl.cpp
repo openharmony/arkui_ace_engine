@@ -20,7 +20,6 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
 
 namespace OHOS::Ace::Framework {

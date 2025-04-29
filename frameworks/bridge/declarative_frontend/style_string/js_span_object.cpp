@@ -34,10 +34,11 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/render/paragraph.h"
 #include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
@@ -46,7 +47,11 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
 const int32_t WORD_BREAK_TYPES_DEFAULT = 2;
-} //namespace
+const std::vector<float> DEFAULT_COLORFILTER_MATRIX = {
+    1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f
+};
+} // namespace
 
 CalcDimension ParseLengthMetrics(const JSRef<JSObject>& obj, bool withoutPercent = true)
 {
@@ -515,7 +520,7 @@ void JSGestureSpan::Destructor(JSGestureSpan* gestureSpan)
 
 void JSGestureSpan::JSBind(BindingTarget globalObj)
 {
-    JSClass<JSGestureSpan>::Declare("GestureStyle");
+    JSClass<JSGestureSpan>::Declare("NativeGestureStyle");
     JSClass<JSGestureSpan>::Bind(globalObj, JSGestureSpan::Constructor, JSGestureSpan::Destructor);
 }
 
@@ -680,6 +685,8 @@ void JSImageAttachment::JSBind(BindingTarget globalObj)
         "objectFit", &JSImageAttachment::GetImageObjectFit, &JSImageAttachment::SetImageObjectFit);
     JSClass<JSImageAttachment>::CustomProperty(
         "layoutStyle", &JSImageAttachment::GetImageLayoutStyle, &JSImageAttachment::SetImageLayoutStyle);
+    JSClass<JSImageAttachment>::CustomProperty(
+        "colorFilter", &JSImageAttachment::GetImageColorFilter, &JSImageAttachment::SetImageColorFilter);
     JSClass<JSImageAttachment>::Bind(globalObj, JSImageAttachment::Constructor, JSImageAttachment::Destructor);
 }
 
@@ -696,16 +703,17 @@ ImageSpanOptions JSImageAttachment::CreateImageOptions(const JSRef<JSObject>& ob
 {
     ImageSpanOptions options;
     auto container = Container::CurrentSafely();
-    CHECK_NULL_RETURN(container, options);
-    auto context = PipelineBase::GetCurrentContextSafely();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, options);
-    bool isCard = context->IsFormRender() && !container->IsDynamicRender();
+    bool isCard = context->IsFormRender() && container && !container->IsDynamicRender();
 
     std::string imageSrc;
     std::string bundleName;
     std::string moduleName;
-    auto imageValue = obj->GetProperty("value");
-    bool srcValid = JSContainerBase::ParseJsMedia(imageValue, imageSrc);
+    int32_t resId = 0;
+    auto srcValid = obj->HasProperty("resourceValue");
+    auto imageValue = srcValid ? obj->GetProperty("resourceValue") : obj->GetProperty("value");
+    JSViewAbstract::ParseJsMediaWithBundleName(imageValue, imageSrc, bundleName, moduleName, resId);
     if (isCard && imageValue->IsString()) {
         SrcType srcType = ImageSourceInfo::ResolveURIType(imageSrc);
         bool notSupport = (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
@@ -713,10 +721,10 @@ ImageSpanOptions JSImageAttachment::CreateImageOptions(const JSRef<JSObject>& ob
             imageSrc.clear();
         }
     }
-    JSImage::GetJsMediaBundleInfo(imageValue, bundleName, moduleName);
     options.image = imageSrc;
     options.bundleName = bundleName;
     options.moduleName = moduleName;
+    options.isUriPureNumber = (resId == -1);
     if (!srcValid) {
 #if defined(PIXEL_MAP_SUPPORTED)
         if (!isCard) {
@@ -765,7 +773,69 @@ ImageSpanAttribute JSImageAttachment::ParseJsImageSpanAttribute(const JSRef<JSOb
             imageStyle.borderRadius = JSRichEditor::ParseBorderRadiusAttr(borderRadiusAttr);
         }
     }
+
+    auto syncLoadObj = obj->GetProperty("syncLoad");
+    if (!syncLoadObj->IsNull() && syncLoadObj->IsBoolean()) {
+        imageStyle.syncLoad = syncLoadObj->ToBoolean();
+    }
+
+    ParseJsImageSpanColorFilterAttribute(obj, imageStyle);
     return imageStyle;
+}
+
+void JSImageAttachment::ParseJsImageSpanColorFilterAttribute(const JSRef<JSObject>& obj, ImageSpanAttribute& imageStyle)
+{
+    auto colorFilterObj = obj->GetProperty("colorFilter");
+    if (colorFilterObj->IsNull()) {
+        return;
+    }
+    if (!colorFilterObj->IsArray() && !colorFilterObj->IsObject()) {
+        SetImageSpanColorFilterAttribute(imageStyle, DEFAULT_COLORFILTER_MATRIX);
+        return;
+    }
+    if (colorFilterObj->IsObject() && !colorFilterObj->IsArray()) {
+        auto drawingColorFilter = CreateDrawingColorFilter(colorFilterObj);
+        if (drawingColorFilter) {
+            imageStyle.colorFilterMatrix = std::nullopt;
+            imageStyle.drawingColorFilter = drawingColorFilter;
+            return;
+        }
+        JSColorFilter* colorFilter;
+        if (!colorFilterObj->IsUndefined() && !colorFilterObj->IsNull()) {
+            colorFilter = JSRef<JSObject>::Cast(colorFilterObj)->Unwrap<JSColorFilter>();
+        } else {
+            SetImageSpanColorFilterAttribute(imageStyle, DEFAULT_COLORFILTER_MATRIX);
+            return;
+        }
+        if (colorFilter && colorFilter->GetColorFilterMatrix().size() == COLOR_FILTER_MATRIX_SIZE) {
+            SetImageSpanColorFilterAttribute(imageStyle, colorFilter->GetColorFilterMatrix());
+            return;
+        }
+        SetImageSpanColorFilterAttribute(imageStyle, DEFAULT_COLORFILTER_MATRIX);
+        return;
+    }
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(colorFilterObj);
+    if (array->Length() != COLOR_FILTER_MATRIX_SIZE) {
+        SetImageSpanColorFilterAttribute(imageStyle, DEFAULT_COLORFILTER_MATRIX);
+        return;
+    }
+    std::vector<float> colorfilter;
+    for (size_t i = 0; i < array->Length(); i++) {
+        JSRef<JSVal> value = array->GetValueAt(i);
+        if (!value->IsNumber()) {
+            SetImageSpanColorFilterAttribute(imageStyle, DEFAULT_COLORFILTER_MATRIX);
+            return;
+        }
+        colorfilter.emplace_back(value->ToNumber<float>());
+    }
+    SetImageSpanColorFilterAttribute(imageStyle, colorfilter);
+}
+
+void JSImageAttachment::SetImageSpanColorFilterAttribute(ImageSpanAttribute& imageStyle,
+    const std::vector<float>& matrix)
+{
+    imageStyle.colorFilterMatrix = matrix;
+    imageStyle.drawingColorFilter = std::nullopt;
 }
 
 void JSImageAttachment::ParseJsImageSpanSizeAttribute(const JSRef<JSObject>& obj, ImageSpanAttribute& imageStyle)
@@ -905,6 +975,35 @@ void JSImageAttachment::GetImageLayoutStyle(const JSCallbackInfo& info)
     info.SetReturnValue(layoutStyle);
 }
 
+void JSImageAttachment::GetImageColorFilter(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(imageSpan_);
+    auto imageAttr = imageSpan_->GetImageAttribute();
+    if (!imageAttr.has_value()) {
+        return;
+    }
+    if (imageAttr->colorFilterMatrix.has_value()) {
+        JSRef<JSArray> colorFilterArr = JSRef<JSArray>::New();
+        uint32_t othersIdx = 0;
+        for (auto filterFloat : imageAttr->colorFilterMatrix.value()) {
+            colorFilterArr->SetValueAt(othersIdx++, JSRef<JSVal>::Make(ToJSValue(filterFloat)));
+        }
+        info.SetReturnValue(colorFilterArr);
+        return;
+    }
+    if (imageAttr->drawingColorFilter.has_value()) {
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_VOID(engine);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        CHECK_NULL_VOID(nativeEngine);
+        auto jsColorFilter = imageAttr->drawingColorFilter.value()->GetDrawingColorFilterNapiValue(nativeEngine);
+        CHECK_NULL_VOID(jsColorFilter);
+        auto colorFilterJsVal = JsConverter::ConvertNapiValueToJsVal(jsColorFilter);
+        CHECK_NULL_VOID(colorFilterJsVal->IsObject());
+        info.SetReturnValue(JSRef<JSObject>::Cast(colorFilterJsVal));
+    }
+}
+
 const RefPtr<ImageSpan>& JSImageAttachment::GetImageSpan()
 {
     return imageSpan_;
@@ -918,6 +1017,62 @@ void JSImageAttachment::SetImageSpan(const RefPtr<ImageSpan>& imageSpan)
 const ImageSpanOptions& JSImageAttachment::GetImageOptions() const
 {
     return imageSpan_->GetImageSpanOptions();
+}
+
+// JSNativeCustomSpan
+void JSNativeCustomSpan::Constructor(const JSCallbackInfo& args)
+{
+    auto customSpan = Referenced::MakeRefPtr<JSNativeCustomSpan>();
+    customSpan->IncRefCount();
+    args.SetReturnValue(Referenced::RawPtr(customSpan));
+}
+
+void JSNativeCustomSpan::Destructor(JSNativeCustomSpan* customSpan)
+{
+    if (customSpan != nullptr) {
+        customSpan->DecRefCount();
+    }
+}
+
+void JSNativeCustomSpan::Invalidate(const JSCallbackInfo& info)
+{
+    for (const auto& styledStringWeakPtr : spanStringBaseSet_) {
+        auto styledString = AceType::DynamicCast<SpanString>(styledStringWeakPtr.Upgrade());
+        if (!styledString) {
+            continue;
+        }
+        styledString->MarkDirtyFrameNode();
+    }
+}
+
+void JSNativeCustomSpan::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSNativeCustomSpan>::Declare("NativeCustomSpan");
+    JSClass<JSNativeCustomSpan>::CustomMethod("invalidate", &JSNativeCustomSpan::Invalidate);
+    JSClass<JSNativeCustomSpan>::Bind(globalObj, JSNativeCustomSpan::Constructor, JSNativeCustomSpan::Destructor);
+}
+
+void JSNativeCustomSpan::AddStyledString(const WeakPtr<SpanStringBase>& spanString)
+{
+    spanStringBaseSet_.insert(spanString);
+}
+
+void JSNativeCustomSpan::RemoveStyledString(const WeakPtr<SpanStringBase>& spanString)
+{
+    spanStringBaseSet_.erase(spanString);
+}
+
+// JSCustomSpan
+void JSCustomSpan::AddStyledString(const WeakPtr<SpanStringBase>& spanString)
+{
+    CHECK_NULL_VOID(customSpan_);
+    customSpan_->AddStyledString(spanString);
+}
+
+void JSCustomSpan::RemoveStyledString(const WeakPtr<SpanStringBase>& spanString)
+{
+    CHECK_NULL_VOID(customSpan_);
+    customSpan_->RemoveStyledString(spanString);
 }
 
 JSCustomSpan::JSCustomSpan(JSRef<JSObject> customSpanObj, const JSCallbackInfo& args) : customSpanObj_(customSpanObj)
@@ -938,13 +1093,23 @@ JSCustomSpan::JSCustomSpan(JSRef<JSObject> customSpanObj, const JSCallbackInfo& 
         auto onDrawFunc = JSCustomSpan::ParseOnDrawFunc(jsDrawFunc, args.GetExecutionContext());
         CustomSpan::SetOnDraw(onDrawFunc);
     }
+    auto type = customSpanObj->Unwrap<AceType>();
+    CHECK_NULL_VOID(type);
+    auto* nativeCustomSpan = AceType::DynamicCast<JSNativeCustomSpan>(type);
+    customSpan_ = nativeCustomSpan;
 }
 
 JSCustomSpan::JSCustomSpan(JSRef<JSObject> customSpanObj,
     std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure,
     std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw, int32_t start, int32_t end)
     : CustomSpan(onMeasure, onDraw, start, end), customSpanObj_(customSpanObj)
-{}
+{
+    auto type = customSpanObj->Unwrap<AceType>();
+    CHECK_NULL_VOID(type);
+    auto* nativeCustomSpan = AceType::DynamicCast<JSNativeCustomSpan>(type);
+    customSpan_ = nativeCustomSpan;
+}
+
 void JSCustomSpan::SetJsCustomSpanObject(const JSRef<JSObject>& customSpanObj)
 {
     customSpanObj_ = customSpanObj;
@@ -1025,6 +1190,12 @@ std::function<void(NG::DrawingContext&, CustomSpanOptions)> JSCustomSpan::ParseO
         sizeObj->SetProperty<float>("height", PipelineBase::Px2VpWithCurrentDensity(context.height));
         sizeObj->SetProperty<float>("width", PipelineBase::Px2VpWithCurrentDensity(context.width));
         contextObj->SetPropertyObject("size", sizeObj);
+
+        JSRef<JSObject> sizeInPxObj = objectTemplate->NewInstance();
+        sizeInPxObj->SetProperty<float>("height", context.height);
+        sizeInPxObj->SetProperty<float>("width", context.width);
+        contextObj->SetPropertyObject("sizeInPixel", sizeInPxObj);
+
         auto engine = EngineHelper::GetCurrentEngine();
         CHECK_NULL_VOID(engine);
         NativeEngine* nativeEngine = engine->GetNativeEngine();
@@ -1045,8 +1216,7 @@ std::function<void(NG::DrawingContext&, CustomSpanOptions)> JSCustomSpan::ParseO
         JSValueWrapper valueWrapper = value;
         napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
 
-        napi_wrap(
-            env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
+        napi_wrap(env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
         JSRef<JSObject> customSpanOptionsObj = objectTemplate->NewInstance();
         customSpanOptionsObj->SetProperty<float>("x", customSpanOptions.x);
         customSpanOptionsObj->SetProperty<float>("lineTop", customSpanOptions.lineTop);
@@ -1135,6 +1305,8 @@ void JSParagraphStyleSpan::JSBind(BindingTarget globalObj)
         "wordBreak", &JSParagraphStyleSpan::GetWordBreak, &JSParagraphStyleSpan::SetWordBreak);
     JSClass<JSParagraphStyleSpan>::CustomProperty(
         "leadingMargin", &JSParagraphStyleSpan::GetLeadingMargin, &JSParagraphStyleSpan::SetLeadingMargin);
+    JSClass<JSParagraphStyleSpan>::CustomProperty(
+        "paragraphSpacing", &JSParagraphStyleSpan::GetParagraphSpacing, &JSParagraphStyleSpan::SetParagraphSpacing);
     JSClass<JSParagraphStyleSpan>::Bind(globalObj, JSParagraphStyleSpan::Constructor, JSParagraphStyleSpan::Destructor);
 }
 
@@ -1170,6 +1342,7 @@ RefPtr<ParagraphStyleSpan> JSParagraphStyleSpan::ParseJsParagraphStyleSpan(const
     ParseJsTextOverflow(obj, paragraphStyle);
     ParseJsWordBreak(obj, paragraphStyle);
     ParseJsLeadingMargin(obj, paragraphStyle);
+    ParseParagraphSpacing(obj, paragraphStyle);
     return AceType::MakeRefPtr<ParagraphStyleSpan>(paragraphStyle);
 }
 
@@ -1274,8 +1447,7 @@ bool JSParagraphStyleSpan::IsPixelMap(const JSRef<JSVal>& jsValue)
     return (!func->IsNull() && func->IsFunction());
 }
 
-void JSParagraphStyleSpan::ParseJsLeadingMargin(const JSRef<JSObject>& obj,
-    SpanParagraphStyle& paragraphStyle)
+void JSParagraphStyleSpan::ParseJsLeadingMargin(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle)
 {
     if (!obj->HasProperty("leadingMargin")) {
         return;
@@ -1306,6 +1478,32 @@ void JSParagraphStyleSpan::ParseJsLeadingMargin(const JSRef<JSObject>& obj,
         }
     }
     paragraphStyle.leadingMargin = margin;
+}
+
+void JSParagraphStyleSpan::ParseParagraphSpacing(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle)
+{
+    if (!obj->HasProperty("paragraphSpacing")) {
+        return;
+    }
+    auto paragraphSpacing = obj->GetProperty("paragraphSpacing");
+    CalcDimension size;
+    if (!paragraphSpacing->IsNull() && paragraphSpacing->IsObject()) {
+        auto paragraphSpacingObj = JSRef<JSObject>::Cast(paragraphSpacing);
+        auto value = 0.0;
+        auto paragraphSpacingVal = paragraphSpacingObj->GetProperty("value");
+        if (!paragraphSpacingVal->IsNull() && paragraphSpacingVal->IsNumber()) {
+            value = paragraphSpacingVal->ToNumber<float>();
+        }
+        auto unit = DimensionUnit::VP;
+        auto paragraphSpacingUnit = paragraphSpacingObj->GetProperty("unit");
+        if (!paragraphSpacingUnit->IsNull() && paragraphSpacingUnit->IsNumber()) {
+            unit = static_cast<DimensionUnit>(paragraphSpacingUnit->ToNumber<int32_t>());
+        }
+        if (value >= 0 && unit != DimensionUnit::PERCENT) {
+            size = CalcDimension(value, unit);
+        }
+    }
+    paragraphStyle.paragraphSpacing = size;
 }
 
 void JSParagraphStyleSpan::ParseLeadingMarginPixelMap(const JSRef<JSObject>& leadingMarginObject,
@@ -1350,8 +1548,8 @@ void JSParagraphStyleSpan::GetTextAlign(const JSCallbackInfo& info)
     if (!paragraphStyleSpan_->GetParagraphStyle().align.has_value()) {
         return;
     }
-    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(
-        static_cast<int32_t>(paragraphStyleSpan_->GetParagraphStyle().align.value()))));
+    auto ret = JSRef<JSVal>::Make(
+        JSVal(ToJSValue(static_cast<int32_t>(paragraphStyleSpan_->GetParagraphStyle().align.value()))));
     info.SetReturnValue(ret);
 }
 
@@ -1387,8 +1585,8 @@ void JSParagraphStyleSpan::GetOverflow(const JSCallbackInfo& info)
     if (!paragraphStyleSpan_->GetParagraphStyle().textOverflow.has_value()) {
         return;
     }
-    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(
-        static_cast<int32_t>(paragraphStyleSpan_->GetParagraphStyle().textOverflow.value()))));
+    auto ret = JSRef<JSVal>::Make(
+        JSVal(ToJSValue(static_cast<int32_t>(paragraphStyleSpan_->GetParagraphStyle().textOverflow.value()))));
     info.SetReturnValue(ret);
 }
 void JSParagraphStyleSpan::SetOverflow(const JSCallbackInfo& info) {}
@@ -1399,8 +1597,8 @@ void JSParagraphStyleSpan::GetWordBreak(const JSCallbackInfo& info)
     if (!paragraphStyleSpan_->GetParagraphStyle().wordBreak.has_value()) {
         return;
     }
-    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(
-        static_cast<int32_t>(paragraphStyleSpan_->GetParagraphStyle().wordBreak.value()))));
+    auto ret = JSRef<JSVal>::Make(
+        JSVal(ToJSValue(static_cast<int32_t>(paragraphStyleSpan_->GetParagraphStyle().wordBreak.value()))));
     info.SetReturnValue(ret);
 }
 void JSParagraphStyleSpan::SetWordBreak(const JSCallbackInfo& info) {}
@@ -1432,6 +1630,17 @@ void JSParagraphStyleSpan::GetLeadingMargin(const JSCallbackInfo& info)
 }
 
 void JSParagraphStyleSpan::SetLeadingMargin(const JSCallbackInfo& info) {}
+
+void JSParagraphStyleSpan::GetParagraphSpacing(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(paragraphStyleSpan_);
+    auto paragraphSpacing = paragraphStyleSpan_->GetParagraphStyle().paragraphSpacing;
+    CHECK_EQUAL_VOID(paragraphSpacing.has_value(), false);
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(paragraphSpacing.value().ConvertToVp())));
+    info.SetReturnValue(ret);
+}
+
+void JSParagraphStyleSpan::SetParagraphSpacing(const JSCallbackInfo& info) {}
 
 RefPtr<ParagraphStyleSpan>& JSParagraphStyleSpan::GetParagraphStyleSpan()
 {
@@ -1538,5 +1747,56 @@ RefPtr<BackgroundColorSpan>& JSBackgroundColorSpan::GetBackgroundColorSpan()
 void JSBackgroundColorSpan::SetBackgroundColorSpan(const RefPtr<BackgroundColorSpan>& backgroundColorSpan)
 {
     backgroundColorSpan_ = backgroundColorSpan;
+}
+
+// JSUrlSpan
+void JSUrlSpan::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSUrlSpan>::Declare("UrlStyle");
+    JSClass<JSUrlSpan>::CustomProperty(
+        "url", &JSUrlSpan::GetUrlContext, &JSUrlSpan::SetUrlContext);
+    JSClass<JSUrlSpan>::Bind(globalObj, JSUrlSpan::Constructor, JSUrlSpan::Destructor);
+}
+
+void JSUrlSpan::Constructor(const JSCallbackInfo& args)
+{
+    auto urlSpan = Referenced::MakeRefPtr<JSUrlSpan>();
+    urlSpan->IncRefCount();
+    RefPtr<UrlSpan> span;
+    if (args.Length() > 0 && args[0]->IsString()) {
+        auto address = args[0]->ToString();
+        span = AceType::MakeRefPtr<UrlSpan>(address);
+    } else {
+        span = AceType::MakeRefPtr<UrlSpan>();
+    }
+    CHECK_NULL_VOID(span);
+    urlSpan->urlContextSpan_ = span;
+    args.SetReturnValue(Referenced::RawPtr(urlSpan));
+}
+
+void JSUrlSpan::Destructor(JSUrlSpan* urlSpan)
+{
+    if (urlSpan != nullptr) {
+        urlSpan->DecRefCount();
+    }
+}
+
+void JSUrlSpan::GetUrlContext(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(urlContextSpan_);
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(urlContextSpan_->GetUrlSpanAddress())));
+    info.SetReturnValue(ret);
+}
+
+void JSUrlSpan::SetUrlContext(const JSCallbackInfo& info) {}
+
+const RefPtr<UrlSpan>& JSUrlSpan::GetUrlSpan()
+{
+    return urlContextSpan_;
+}
+
+void JSUrlSpan::SetUrlSpan(const RefPtr<UrlSpan>& urlSpan)
+{
+    urlContextSpan_ = urlSpan;
 }
 } // namespace OHOS::Ace::Framework

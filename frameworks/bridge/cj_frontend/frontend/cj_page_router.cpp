@@ -1,16 +1,16 @@
 /*
-* Copyright (c) 2024 Huawei Device Co., Ltd.
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 #include "bridge/cj_frontend/frontend/cj_page_router.h"
@@ -22,6 +22,44 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
+void SetCjPageCallbackClassic(RefPtr<Framework::JsAcePage> page, NativeView* view)
+{
+    CHECK_NULL_VOID(view);
+    wptr<NativeView> weak = view;
+    CHECK_NULL_VOID(page);
+    page->SetDeclarativeOnPageAppearCallback([weak]() {
+        auto view = weak.promote();
+        if (view) {
+            view->FireOnShow();
+        }
+    });
+    page->SetDeclarativeOnPageDisAppearCallback([weak]() {
+        auto view = weak.promote();
+        if (view) {
+            view->FireOnHide();
+        }
+    });
+    page->SetDeclarativeOnBackPressCallback([weak]() {
+        auto view = weak.promote();
+        if (view) {
+            return view->FireOnBackPress();
+        }
+        return false;
+    });
+    page->SetDeclarativeOnPageRefreshCallback([weak]() {
+        auto view = weak.promote();
+        if (view) {
+            view->MarkNeedUpdate();
+        }
+    });
+    page->SetDeclarativeOnUpdateWithValueParamsCallback([weak](const std::string& params) {
+        auto view = weak.promote();
+        if (view && !params.empty()) {
+            view->ExecuteUpdateWithValueParams(params);
+        }
+    });
+}
+
 bool LoadNativeViewClassic(NativeView* view)
 {
     auto currentObj = Container::Current();
@@ -56,38 +94,7 @@ bool LoadNativeViewClassic(NativeView* view)
 
     // We are done, tell to the JSAgePage
     page->SetPageCreated();
-    wptr<NativeView> weak = view;
-    page->SetDeclarativeOnPageAppearCallback([weak]() {
-        auto view = weak.promote();
-        if (view) {
-            view->FireOnShow();
-        }
-    });
-    page->SetDeclarativeOnPageDisAppearCallback([weak]() {
-        auto view = weak.promote();
-        if (view) {
-            view->FireOnHide();
-        }
-    });
-    page->SetDeclarativeOnBackPressCallback([weak]() {
-        auto view = weak.promote();
-        if (view) {
-            return view->FireOnBackPress();
-        }
-        return false;
-    });
-    page->SetDeclarativeOnPageRefreshCallback([weak]() {
-        auto view = weak.promote();
-        if (view) {
-            view->MarkNeedUpdate();
-        }
-    });
-    page->SetDeclarativeOnUpdateWithValueParamsCallback([weak](const std::string& params) {
-        auto view = weak.promote();
-        if (view && !params.empty()) {
-            view->ExecuteUpdateWithValueParams(params);
-        }
-    });
+    SetCjPageCallbackClassic(page, view);
     return true;
 }
 
@@ -154,20 +161,6 @@ void CJPageRouter::EnableAlertBeforeBackPage(const std::string& message, std::fu
 int32_t CJPageRouter::GetStackSize() const
 {
     return pageRouterStack_.size();
-}
-
-void CJPageRouter::GetState(int32_t& index, std::string& name, std::string& path)
-{
-    if (pageRouterStack_.empty()) {
-        LOGE("fail to get page state due to stack is null");
-        return;
-    }
-    index = static_cast<int32_t>(pageRouterStack_.size());
-    auto topPage = GetTopPage();
-    CHECK_NULL_VOID(topPage);
-
-    name = topPage->GetUrl();
-    // path is invalid for cj
 }
 
 std::string CJPageRouter::GetParams() const
@@ -505,4 +498,14 @@ void CJPageRouter::OnPrePageChange(const RefPtr<OHOS::Ace::Framework::JsAcePage>
     CHECK_NULL_VOID(accessManager);
     accessManager->SetRootNodeId(document->GetRootNodeId());
 }
+void CJPageRouter::GetState(int32_t& index, std::string& name, std::string& path, std::string& params) {}
+void CJPageRouter::GetStateByIndex(int32_t& index, std::string& name, std::string& path, std::string& params) {}
+std::vector<CJPageRouterAbstract::RouterState> CJPageRouter::GetStateByUrl(const std::string& url)
+{
+    return {};
+}
+void CJPageRouter::StartPushPageWithCallback(const RouterPageInfo& target, const std::string& params) {}
+void CJPageRouter::StartReplacePageWithCallback(const RouterPageInfo& target, const std::string& params) {}
+void CJPageRouter::BackCheckAlertIndex(int32_t index, const std::string& params) {}
+void CJPageRouter::DisableAlertBeforeBackPage() {}
 } // namespace OHOS::Ace::Framework

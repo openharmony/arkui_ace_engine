@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,9 +18,14 @@
 
 #include <optional>
 
+#include "base/log/dump_log.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/counter/counter_layout_algorithm.h"
+#include "core/components_ng/pattern/counter/counter_layout_property.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components/counter/counter_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -72,12 +77,95 @@ public:
         return MakeRefPtr<CounterLayoutAlgorithm>();
     }
 
+    RefPtr<LayoutProperty> CreateLayoutProperty() override
+    {
+        return MakeRefPtr<CounterLayoutProperty>();
+    }
+
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
+        auto frameNode = GetHost();
+        CHECK_NULL_RETURN(frameNode, FocusPattern());
+        if (frameNode->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+            return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
+        }
+        return { FocusType::SCOPE, true, FocusStyleType::OUTER_BORDER };
+    }
+
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto counterRenderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(counterRenderContext, false);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return !counterRenderContext->GetForegroundColor().has_value();
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
+    {
+        if (filter.IsFastFilter()) {
+            return;
+        }
+        ToJsonValueAttribute(json);
+    }
+
+    void ToJsonValueAttribute(std::unique_ptr<JsonValue>& json) const
+    {
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto addNode = AceType::DynamicCast<FrameNode>(
+            frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId_.value())));
+        if (addNode) {
+            auto eventHub = addNode->GetOrCreateEventHub<ButtonEventHub>();
+            if (eventHub) {
+                auto enableInc = eventHub->GetStateEffect();
+                json->Put("enableInc", enableInc ? "true" : "false");
+            }
+        }
+
+        auto subNode = AceType::DynamicCast<FrameNode>(
+            frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId_.value())));
+        if (subNode) {
+            auto eventHub = subNode->GetOrCreateEventHub<ButtonEventHub>();
+            if (eventHub) {
+                auto enableDec = eventHub->GetStateEffect();
+                json->Put("enableDec", enableDec ? "true" : "false");
+            }
+        }
     }
 
 private:
+    void DumpInfo() override
+    {
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto addNode = AceType::DynamicCast<FrameNode>(
+            frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId_.value())));
+        if (addNode) {
+            auto eventHub = addNode->GetOrCreateEventHub<ButtonEventHub>();
+            if (eventHub) {
+                auto enableInc = eventHub->GetStateEffect();
+                DumpLog::GetInstance().AddDesc(std::string("enableInc: ").append(enableInc ? "true" : "false"));
+            }
+        }
+
+        auto subNode = AceType::DynamicCast<FrameNode>(
+            frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId_.value())));
+        if (subNode) {
+            auto eventHub = subNode->GetOrCreateEventHub<ButtonEventHub>();
+            if (eventHub) {
+                auto enableDec = eventHub->GetStateEffect();
+                DumpLog::GetInstance().AddDesc(std::string("enableDec: ").append(enableDec ? "true" : "false"));
+            }
+        }
+    }
+
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override
+    {
+        ToJsonValueAttribute(json);
+    }
+
     std::optional<int32_t> subId_;
     std::optional<int32_t> contentId_;
     std::optional<int32_t> addId_;

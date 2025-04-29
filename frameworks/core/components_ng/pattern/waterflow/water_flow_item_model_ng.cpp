@@ -18,7 +18,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_node.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 void WaterFlowItemModelNG::Create()
@@ -33,8 +32,7 @@ void WaterFlowItemModelNG::Create()
 
 RefPtr<FrameNode> WaterFlowItemModelNG::CreateFrameNode(int32_t nodeId)
 {
-    auto frameNode =
-        FrameNode::CreateFrameNode(V2::FLOW_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<WaterFlowItemPattern>());
-    return frameNode;
+    return WaterFlowItemNode::CreateFlowItem(
+        V2::FLOW_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<WaterFlowItemPattern>());
 }
 } // namespace OHOS::Ace::NG

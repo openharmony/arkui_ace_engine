@@ -29,6 +29,10 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/common/vibrator/vibrator_utils.h"
+#endif
+
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
@@ -61,23 +65,9 @@ public:
         return layoutAlgorithm;
     }
 
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
-    {
-        auto paint = MakeRefPtr<ScrollPaintMethod>(GetAxis() == Axis::HORIZONTAL);
-        paint->SetScrollBar(GetScrollBar());
-        CreateScrollBarOverlayModifier();
-        paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
-        auto scrollEffect = GetScrollEdgeEffect();
-        if (scrollEffect && scrollEffect->IsFadeEffect()) {
-            paint->SetEdgeEffect(scrollEffect);
-        }
-        if (!scrollContentModifier_) {
-            scrollContentModifier_ = AceType::MakeRefPtr<ScrollContentModifier>();
-        }
-        paint->SetContentModifier(scrollContentModifier_);
-        UpdateFadingEdge(paint);
-        return paint;
-    }
+    RefPtr<PaintProperty> CreatePaintProperty() override;
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     OPINC_TYPE_E OpIncType() override
     {
@@ -154,10 +144,10 @@ public:
     }
 
     bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode) override;
-    std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility() override;
+    ScrollOffsetAbility GetScrollOffsetAbility() override;
 
     bool IsAtTop() const override;
-    bool IsAtBottom() const override;
+    bool IsAtBottom(bool considerRepeat = false) const override;
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
 
@@ -195,7 +185,9 @@ public:
     Rect GetItemRect(int32_t index) const override;
 
     // scrollSnap
-    std::optional<float> CalePredictSnapOffset(float delta, float dragDistance = 0.f, float velocity = 0.f) override;
+    std::optional<float> CalcPredictSnapOffset(float delta, float dragDistance = 0.f, float velocity = 0.f,
+        SnapDirection snapDirection = SnapDirection::NONE) override;
+    std::optional<float> CalcPredictNextSnapOffset(float delta, SnapDirection snapDirection);
     bool NeedScrollSnapToSide(float delta) override;
     void CaleSnapOffsets();
     void CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign);
@@ -222,9 +214,19 @@ public:
     {
         if (intervalSize_ != intervalSize) {
             intervalSize_ = intervalSize;
+            TAG_LOGI(AceLogTag::ACE_SCROLL, "scroll setIntervalSize:%{public}f", intervalSize.Value());
             scrollSnapUpdate_ = true;
         }
     }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    void StartVibrateFeedback();
+
+    void SetReachBoundary(bool flag)
+    {
+        reachBoundary_ = flag;
+    }
+#endif
 
     Dimension GetIntervalSize() const
     {
@@ -322,6 +324,14 @@ public:
                (GetScrollSnapAlign() != ScrollSnapAlign::NONE || enablePagingStatus_ == ScrollPagingStatus::VALID);
     }
 
+    SnapType GetSnapType() override
+    {
+        return (!snapOffsets_.empty() &&
+                   (GetScrollSnapAlign() != ScrollSnapAlign::NONE || enablePagingStatus_ == ScrollPagingStatus::VALID))
+                   ? SnapType::SCROLL_SNAP
+                   : SnapType::NONE_SNAP;
+    }
+
     void TriggerModifyDone();
 
     void SetInitialOffset(const OffsetT<CalcDimension>& offset)
@@ -345,10 +355,12 @@ public:
     void AddScrollLayoutInfo();
 
     void GetScrollSnapAlignDumpInfo();
+    void GetScrollSnapAlignDumpInfo(std::unique_ptr<JsonValue>& json);
 
     void GetScrollPagingStatusDumpInfo();
-
+    void GetScrollPagingStatusDumpInfo(std::unique_ptr<JsonValue>& json);
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
 
     SizeF GetViewSize() const
     {
@@ -362,7 +374,18 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
-    bool OnScrollSnapCallback(double targetOffset, double velocity) override;
+    bool StartSnapAnimation(SnapAnimationOptions snapAnimationOptions) override;
+
+    void StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity, bool fromScrollBar);
+
+    SizeF GetChildrenExpandedSize() override;
+
+    void TriggerScrollBarDisplay();
+
+    bool IsEnablePagingValid() override
+    {
+        return enablePagingStatus_ == ScrollPagingStatus::VALID && GetScrollSnapAlign() == ScrollSnapAlign::NONE;
+    }
 
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
@@ -373,15 +396,11 @@ private:
 
     bool IsCrashTop() const;
     bool IsCrashBottom() const;
-    bool ReachStart() const;
-    bool ReachEnd() const;
+    bool ReachStart(bool firstLayout) const;
+    bool ReachEnd(bool firstLayout) const;
     bool IsScrollOutOnEdge(float delta) const;
     void HandleCrashTop();
     void HandleCrashBottom();
-    bool IsEnablePagingValid() const
-    {
-        return enablePagingStatus_ == ScrollPagingStatus::VALID && GetScrollSnapAlign() == ScrollSnapAlign::NONE;
-    }
 
     void RegisterScrollBarEventTask();
     void HandleScrollEffect();
@@ -390,6 +409,8 @@ private:
     void HandleScrollPosition(float scroll);
     float FireTwoDimensionOnWillScroll(float scroll);
     void FireOnDidScroll(float scroll);
+    void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override;
+    void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override;
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void UpdateScrollBarOffset() override;
     void SetAccessibilityAction() override;
@@ -438,6 +459,12 @@ private:
     // dump info
     std::list<ScrollLayoutInfo> scrollLayoutInfos_;
     std::list<ScrollMeasureInfo> scrollMeasureInfos_;
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    int32_t crownEventNum_ = 0;
+    bool reachBoundary_ = false;
+    int64_t lastTime_ = 0;
+#endif
 };
 
 } // namespace OHOS::Ace::NG

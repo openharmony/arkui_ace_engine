@@ -28,10 +28,6 @@ public:
 
     virtual void Create();
     virtual void SetCommands(const std::string& pathCmd);
-
-private:
-    static std::unique_ptr<PathModel> instance_;
-    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PATH_PATH_MODEL_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,9 @@
 
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/properties/text_style_parser.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/text_clock/text_clock_event_hub.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
-#include "core/pipeline/base/element_register.h"
+#include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
 
 namespace OHOS::Ace::NG {
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
@@ -56,9 +55,9 @@ void ResetFontColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextTheme>();
+    auto theme = pipelineContext->GetTheme<TextClockTheme>();
     CHECK_NULL_VOID(theme);
-    TextClockModelNG::SetFontColor(frameNode, theme->GetTextStyle().GetTextColor());
+    TextClockModelNG::SetFontColor(frameNode, theme->GetTextParseFailedColor());
 }
 
 void SetFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSizeValue, ArkUI_Int32 fontSizeUnit)
@@ -183,55 +182,88 @@ void ResetDateTimeOptions(ArkUINodeHandle node)
     ZeroPrefixType hourType = ZeroPrefixType::AUTO;
     TextClockModelNG::SetDateTimeOptions(frameNode, hourType);
 }
+
+void SetTextClockTimeZoneOffset(ArkUINodeHandle node, ArkUI_Float32 timeZoneOffset)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextClockModelNG::SetHoursWest(frameNode, timeZoneOffset);
+}
+
+void SetTextClockOnDateChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onDateChange = reinterpret_cast<ChangeEvent*>(callback);
+        TextClockModelNG::SetOnDateChange(frameNode, std::move(*onDateChange));
+    } else {
+        TextClockModelNG::SetOnDateChange(frameNode, nullptr);
+    }
+}
+
+void ResetTextClockOnDateChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextClockModelNG::SetOnDateChange(frameNode, nullptr);
+}
 } // namespace TextClockModifier
 
 namespace NodeModifier {
 const ArkUITextClockModifier* GetTextClockModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUITextClockModifier modifier = {
-        TextClockModifier::SetFormat,
-        TextClockModifier::ResetFormat,
-        TextClockModifier::SetFontColor,
-        TextClockModifier::ResetFontColor,
-        TextClockModifier::SetFontSize,
-        TextClockModifier::ResetFontSize,
-        TextClockModifier::SetFontStyle,
-        TextClockModifier::ResetFontStyle,
-        TextClockModifier::SetFontWeight,
-        TextClockModifier::ResetFontWeight,
-        TextClockModifier::SetFontFamily,
-        TextClockModifier::ResetFontFamily,
-        TextClockModifier::SetTextShadow,
-        TextClockModifier::ResetTextShadow,
-        TextClockModifier::SetFontFeature,
-        TextClockModifier::ResetFontFeature,
-        TextClockModifier::SetDateTimeOptions,
-        TextClockModifier::ResetDateTimeOptions
+        .setFormat = TextClockModifier::SetFormat,
+        .resetFormat = TextClockModifier::ResetFormat,
+        .setFontColor = TextClockModifier::SetFontColor,
+        .resetFontColor = TextClockModifier::ResetFontColor,
+        .setFontSize = TextClockModifier::SetFontSize,
+        .resetFontSize = TextClockModifier::ResetFontSize,
+        .setFontStyle = TextClockModifier::SetFontStyle,
+        .resetFontStyle = TextClockModifier::ResetFontStyle,
+        .setFontWeight = TextClockModifier::SetFontWeight,
+        .resetFontWeight = TextClockModifier::ResetFontWeight,
+        .setFontFamily = TextClockModifier::SetFontFamily,
+        .resetFontFamily = TextClockModifier::ResetFontFamily,
+        .setTextShadow = TextClockModifier::SetTextShadow,
+        .resetTextShadow = TextClockModifier::ResetTextShadow,
+        .setFontFeature = TextClockModifier::SetFontFeature,
+        .resetFontFeature = TextClockModifier::ResetFontFeature,
+        .setDateTimeOptions = TextClockModifier::SetDateTimeOptions,
+        .resetDateTimeOptions = TextClockModifier::ResetDateTimeOptions,
+        .setTextClockTimeZoneOffset = TextClockModifier::SetTextClockTimeZoneOffset,
+        .setTextClockOnDateChange = TextClockModifier::SetTextClockOnDateChange,
+        .resetTextClockOnDateChange = TextClockModifier::ResetTextClockOnDateChange,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUITextClockModifier* GetCJUITextClockModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUITextClockModifier modifier = {
-        TextClockModifier::SetFormat,
-        TextClockModifier::ResetFormat,
-        TextClockModifier::SetFontColor,
-        TextClockModifier::ResetFontColor,
-        TextClockModifier::SetFontSize,
-        TextClockModifier::ResetFontSize,
-        TextClockModifier::SetFontStyle,
-        TextClockModifier::ResetFontStyle,
-        TextClockModifier::SetFontWeight,
-        TextClockModifier::ResetFontWeight,
-        TextClockModifier::SetFontFamily,
-        TextClockModifier::ResetFontFamily,
-        TextClockModifier::SetTextShadow,
-        TextClockModifier::ResetTextShadow,
-        TextClockModifier::SetFontFeature,
-        TextClockModifier::ResetFontFeature
+        .setFormat = TextClockModifier::SetFormat,
+        .resetFormat = TextClockModifier::ResetFormat,
+        .setFontColor = TextClockModifier::SetFontColor,
+        .resetFontColor = TextClockModifier::ResetFontColor,
+        .setFontSize = TextClockModifier::SetFontSize,
+        .resetFontSize = TextClockModifier::ResetFontSize,
+        .setFontStyle = TextClockModifier::SetFontStyle,
+        .resetFontStyle = TextClockModifier::ResetFontStyle,
+        .setFontWeight = TextClockModifier::SetFontWeight,
+        .resetFontWeight = TextClockModifier::ResetFontWeight,
+        .setFontFamily = TextClockModifier::SetFontFamily,
+        .resetFontFamily = TextClockModifier::ResetFontFamily,
+        .setTextShadow = TextClockModifier::SetTextShadow,
+        .resetTextShadow = TextClockModifier::ResetTextShadow,
+        .setFontFeature = TextClockModifier::SetFontFeature,
+        .resetFontFeature = TextClockModifier::ResetFontFeature,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

@@ -55,6 +55,10 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::RATE_STAR_BIG_ON_SVG, "rate_star_big_on" },
     { InternalResource::ResourceId::RATE_STAR_SMALL_OFF_SVG, "rate_star_small_off" },
     { InternalResource::ResourceId::RATE_STAR_SMALL_ON_SVG, "rate_star_small_on" },
+    { InternalResource::ResourceId::TV_RATE_STAR_BIG_OFF_SVG, "rate_star_big_off" },
+    { InternalResource::ResourceId::TV_RATE_STAR_BIG_ON_SVG, "rate_star_big_on" },
+    { InternalResource::ResourceId::TV_RATE_STAR_SMALL_OFF_SVG, "rate_star_small_off" },
+    { InternalResource::ResourceId::TV_RATE_STAR_SMALL_ON_SVG, "rate_star_small_on" },
     { InternalResource::ResourceId::RIGHT_ARROW_SVG, "right_arrow" },
     { InternalResource::ResourceId::SEARCH_SVG, "search" },
     { InternalResource::ResourceId::SELECT_ARROW_DISABLED_PNG, "select_arrow_disabled" },
@@ -100,21 +104,18 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::IC_SEARCH_SVG, "ic_public_search_filled" },
     { InternalResource::ResourceId::IC_AI_WRITE_SVG, "ic_public_ai_write" },
     { InternalResource::ResourceId::MENU_OK_SVG, "ic_public_ok" },
-    { InternalResource::ResourceId::IC_WINDOW_CLOSE, "ic_window_close" },
-    { InternalResource::ResourceId::IC_WINDOW_MAX, "ic_window_max" },
     { InternalResource::ResourceId::IC_WINDOW_MENU_FULLSCREEN, "ic_window_menu_fullscreen" },
     { InternalResource::ResourceId::IC_WINDOW_MENU_MAXIMIZE, "ic_window_menu_maximize" },
     { InternalResource::ResourceId::IC_WINDOW_MENU_OK, "ic_window_menu_ok" },
     { InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_L, "ic_window_menu_screen_l" },
     { InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_N, "ic_window_menu_screen_n" },
-    { InternalResource::ResourceId::IC_WINDOW_MIN, "ic_window_min" },
-    { InternalResource::ResourceId::IC_WINDOW_RESTORES, "ic_window_restores" },
     { InternalResource::ResourceId::IC_BOTTOMSHEET_CLOSE_SVG, "ic_bottomsheet_close" },
     { InternalResource::ResourceId::IC_CANCEL_SVG, "ic_public_cancel" },
     { InternalResource::ResourceId::RADIO_TICK_SVG, "radio_tick_svg" },
     { InternalResource::ResourceId::RADIO_DOT_SVG, "radio_dot_svg" },
-    { InternalResource::ResourceId::IC_TAKEPHOTO_SVG, "ic_public_camera" }
-};
+    { InternalResource::ResourceId::IC_TAKEPHOTO_SVG, "ic_public_camera" },
+    { InternalResource::ResourceId::APP_LOCK_SVG, "app_lock_picture"},
+    { InternalResource::ResourceId::IC_TIME_LIMIT_SVG, "ic_time_limit_picture"}};
 }
 
 RefPtr<IconTheme> IconTheme::Builder::Build(const RefPtr<ThemeConstants>& themeConstants) const

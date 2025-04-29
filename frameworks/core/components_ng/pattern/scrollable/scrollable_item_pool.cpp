@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,16 +15,15 @@
 
 #include "core/components_ng/pattern/scrollable/scrollable_item_pool.h"
 
-#include "base/log/ace_trace.h"
-#include "base/utils/utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 constexpr size_t MAX_SIZE = 10;
 
 ScrollableItemPool& ScrollableItemPool::GetInstance()
 {
-    static ScrollableItemPool pool(MAX_SIZE);
+    static thread_local ScrollableItemPool pool(MAX_SIZE);
     return pool;
 }
 

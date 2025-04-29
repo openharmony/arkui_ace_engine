@@ -24,6 +24,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/syntax/for_each_base_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_caches.h"
 
@@ -43,7 +44,8 @@ public:
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range,
-        const std::function<void(uint32_t, uint32_t)>& onSetActiveRange);
+        const std::function<void(int32_t, int32_t)>& onSetActiveRange,
+        bool reusable = true);
 
     RepeatVirtualScrollNode(int32_t nodeId, int32_t totalCount,
         const std::map<std::string, std::pair<bool, uint32_t>>& templateCacheCountMap,
@@ -51,7 +53,8 @@ public:
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range,
-        const std::function<void(uint32_t, uint32_t)>& onSetActiveRange);
+        const std::function<void(int32_t, int32_t)>& onSetActiveRange,
+        bool reusable = true);
 
     ~RepeatVirtualScrollNode() override = default;
 
@@ -73,6 +76,11 @@ public:
      */
     const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override;
 
+    const std::list<RefPtr<UINode>>& GetChildrenForInspector() const override;
+
+    void OnRecycle() override;
+    void OnReuse() override;
+
     /**
      * scenario: called by layout informs:
      *   - start: the first visible index
@@ -89,7 +97,8 @@ public:
      * those items out of cached range are removed from L1
      * requests idle task
      */
-    void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
+    void DoSetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false) override;
 
     /**
      * those items with index in cachedItems are marked active
@@ -138,7 +147,7 @@ public:
 
     void OnConfigurationUpdate(const ConfigurationChange& configurationChange) override;
 
-    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false) override
+    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false, bool isReuse = false) override
     {
         const auto& children = caches_.GetAllNodes();
         for (const auto& [key, child] : children) {
@@ -146,6 +155,18 @@ public:
         }
         isActive_ = active;
     }
+
+    void SetDestroying(bool isDestroying = true, bool cleanStatus = true) override
+    {
+        for (const auto& [key, child] : caches_.GetAllNodes()) {
+            if (child.item->IsReusableNode()) {
+                child.item->SetDestroying(isDestroying, false);
+            } else {
+                child.item->SetDestroying(isDestroying, cleanStatus);
+            }
+        }
+    }
+
     void PaintDebugBoundaryTreeAll(bool flag) override
     {
         const auto& children = caches_.GetAllNodes();
@@ -153,7 +174,16 @@ public:
             child.item->PaintDebugBoundaryTreeAll(flag);
         }
     }
-
+    void SetIsLoop(bool isLoop)
+    {
+        isLoop_ = isLoop;
+    }
+    void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override
+    {
+        containerCacheCount_ = cacheCount;
+    }
+protected:
+    void UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule = false) override;
 private:
     void PostIdleTask();
 
@@ -163,17 +193,19 @@ private:
         return caches_.GetCachedNode4Index(forIndex);
     }
 
-    // index is not in L1 or L2 cache, need to make it
-    // either by TS rendering new children or by TS updating
-    // a L2 cache item from old to new index
-    RefPtr<UINode> CreateOrUpdateFrameChild4Index(uint32_t index, const std::string& forKey);
-
     // get farthest (from L1 indexes) index in L2 cache or -1
     int32_t GetFarthestL2CacheIndex();
 
     // drop UINode with given key from L1 but keep in L2
     // detach from tree and request tree sync
     void DropFromL1(const std::string& key);
+
+    // check whether UINode (index) is in the L1 cache range
+    bool CheckNode4IndexInL1(int32_t index, int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd,
+        RefPtr<FrameNode>& frameNode);
+
+    // process params sent by parent
+    void CheckActiveRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd);
 
     // RepeatVirtualScrollNode is not instance of FrameNode
     // needs to propagate active state to all items inside
@@ -182,11 +214,14 @@ private:
     // size of data source when all data items loaded
     uint32_t totalCount_ = 0;
 
+    // loop property of the parent container
+    bool isLoop_ = false;
+
     // caches:
     mutable RepeatVirtualScrollCaches caches_;
 
     // get active child range
-    std::function<void(uint32_t, uint32_t)> onSetActiveRange_;
+    std::function<void(int32_t, int32_t)> onSetActiveRange_;
 
     // used by one of the unknown functions
     std::list<std::string> ids_;
@@ -200,6 +235,10 @@ private:
     // STATE_MGMT_NOTE: What are these?
     OffscreenItems offscreenItems_;
     int32_t startIndex_ = 0;
+
+    // reuse node in L2 cache or not
+    bool reusable_ = true;
+    int32_t containerCacheCount_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(RepeatVirtualScrollNode);
 };

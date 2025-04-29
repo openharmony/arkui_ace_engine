@@ -18,6 +18,7 @@
 
 #include <optional>
 
+#include "core/components/theme/app_theme.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -28,6 +29,9 @@
 #include "core/components_ng/pattern/text_picker/textpicker_paint_method.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
 
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 using EventCallback = std::function<void(bool)>;
@@ -81,6 +85,14 @@ public:
 
     void FireChangeEvent(bool refresh);
 
+    void SetScrollStopEventCallback(EventCallback&& value);
+
+    void FireScrollStopEvent(bool refresh);
+
+    void SetEnterSelectedAreaEventCallback(EventCallback&& value);
+
+    void FireEnterSelectedAreaEvent(bool refresh);
+
     void OnColumnsBuilding();
 
     void FlushOptions();
@@ -108,18 +120,25 @@ public:
         if (value.empty()) {
             return;
         }
-        range_.clear();
-        for (size_t i = 0; i < value.size(); i++) {
-            RangeContent content;
-            content.icon_ = value[i].icon_;
-            content.text_ = value[i].text_;
-            range_.emplace_back(content);
-        }
+        range_ = value;
     }
 
     std::vector<NG::RangeContent> GetRange() const
     {
         return range_;
+    }
+
+    void SetColumnWidths(const std::vector<Dimension>& widths)
+    {
+        columnWidths_.clear();
+        for (size_t i = 0; i < widths.size(); i++) {
+            columnWidths_.emplace_back(widths[i]);
+        }
+    }
+
+    std::vector<Dimension> GetColumnWidths() const
+    {
+        return columnWidths_;
     }
 
     std::vector<NG::TextCascadePickerOptions> GetMultiOptions() const
@@ -147,7 +166,7 @@ public:
         return options_.size();
     }
 
-    std::string GetSelectedObject(bool isColumnChange, int32_t status = 0) const;
+    std::string GetSelectedObject(bool isColumnChange, int32_t status = 0, bool isEnterSelectedAreaEvent = false) const;
 
     std::string GetOption(uint32_t index) const
     {
@@ -183,7 +202,6 @@ public:
 
         FocusPaintParam focusPaintParams;
         focusPaintParams.SetPaintColor(focusColor);
-        focusPaintParams.SetPaintWidth(TEXT_FOCUS_PAINT_WIDTH);
 
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
@@ -250,6 +268,7 @@ public:
 
     void OnLanguageConfigurationUpdate() override;
     void OnFontConfigurationUpdate() override;
+    void OnFontScaleConfigurationUpdate() override;
 
     void SetValues(const std::vector<std::string>& values)
     {
@@ -322,6 +341,8 @@ public:
 
     void OnColorConfigurationUpdate() override;
 
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+
     void OnDirectionConfigurationUpdate() override;
 
     void SetContentRowNode(RefPtr<FrameNode>& contentRowNode)
@@ -334,7 +355,8 @@ public:
         isPicker_ = isPicker;
     }
 
-    void CheckAndUpdateColumnSize(SizeF& size);
+    void CheckAndUpdateColumnSize(SizeF& size, RefPtr<FrameNode>& frameNode, bool isNeedAdaptForAging = false);
+    bool NeedAdaptForAging();
 
     void SetDivider(const ItemDivider& divider)
     {
@@ -366,6 +388,7 @@ public:
     }
 
     void SetCanLoop(bool isLoop);
+    void SetDigitalCrownSensitivity(int32_t crownSensitivity);
 
     bool GetCanLoop()
     {
@@ -471,8 +494,43 @@ public:
         return paintDividerSpacing_;
     }
 
+    void SetUserDefinedOpacity(double opacity)
+    {
+        curOpacity_ = opacity;
+    }
+
+    void SetDisableTextStyleAnimation(bool isDisableTextStyleAnimation);
+
+    bool GetDisableTextStyleAnimation() const
+    {
+        return isDisableTextStyleAnimation_;
+    }
+
+    void SetIsEnableHaptic(bool isEnableHapticFeedback)
+    {
+        if (isEnableHaptic_ != isEnableHapticFeedback) {
+            isHapticChanged_ = true;
+        }
+        isEnableHaptic_ = isEnableHapticFeedback;
+    }
+
+    bool GetIsEnableHaptic() const
+    {
+        return isEnableHaptic_;
+    }
+
+    void ColumnPatternInitHapticController();
+    void UpdateUserSetSelectColor();
+    std::string GetTextPickerRange() const;
+    inline void SetSingleRange(bool isSingleRange)
+    {
+        isSingleRange_ = isSingleRange;
+    }
+
 private:
     void OnModifyDone() override;
+    void InitCrownAndKeyEvent();
+    void SetCallBack();
     void SetLayoutDirection(TextDirection textDirection);
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -480,8 +538,27 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
+    void InitFocusEvent();
+    void InitSelectorProps();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void GetInnerFocusButtonPaintRect(RoundRect& paintRect, float focusButtonXOffset);
+    void CalcLeftTotalColumnWidth(const RefPtr<FrameNode>& host, float& leftTotalColumnWidth, float childSize);
+    void UpdateFocusButtonState();
+    void SetHaveFocus(bool haveFocus);
+    void UpdateColumnButtonStyles(const RefPtr<FrameNode>& columnNode, bool haveFocus, bool needMarkDirty);
+    const RefPtr<FrameNode> GetFocusButtonNode() const;
     double CalculateHeight();
 
+    void ClearFocus();
+    void SetDefaultFocus();
+    bool IsCircle();
+#ifdef SUPPORT_DIGITAL_CROWN
+    void InitOnCrownEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnCrownEvent(const CrownEvent& event);
+#endif
     void InitDisabled();
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintFocusState();
@@ -489,6 +566,7 @@ private:
     std::string GetRangeStr() const;
     std::string GetOptionsMultiStr() const;
     std::string GetOptionsMultiStrInternal() const;
+    std::string GetColumnWidthsStr() const;
     std::string GetOptionsCascadeStr(
         const std::vector<NG::TextCascadePickerOptions>& options) const;
     bool ChangeCurrentOptionValue(NG::TextCascadePickerOptions& option,
@@ -501,19 +579,27 @@ private:
         std::vector<NG::RangeContent>& rangeContents, uint32_t patterIndex);
     void ProcessCascadeOptionsValues(const std::vector<std::string>& rangeResultValue, uint32_t index);
     void SetFocusCornerRadius(RoundRect& paintRect);
-    void UpdateConfirmButtonMargin(
-        const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
-    void UpdateCancelButtonMargin(
-        const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
+    void UpdateButtonMargin(
+        const RefPtr<FrameNode>& buttonNode, const RefPtr<DialogTheme>& dialogTheme, const bool isConfirmOrNextNode);
     void CheckFocusID(int32_t childSize);
-    bool ParseDirectionKey(RefPtr<TextPickerColumnPattern>& textPickerColumnPattern, KeyCode& code, int32_t childSize);
+    bool ParseDirectionKey(RefPtr<TextPickerColumnPattern>& textPickerColumnPattern, KeyCode& code,
+        uint32_t totalOptionCount, int32_t childSize);
     RectF CalculatePaintRect(int32_t currentFocusIndex,
-        float centerX, float centerY, float piantRectWidth, float piantRectHeight, float columnWidth);
+        float centerX, float centerY, float paintRectWidth, float paintRectHeight, float columnWidth);
+    void AdjustFocusBoxOffset(float& centerX, float& centerY);
+    float CalculateColumnSize(int32_t index, float childCount, const SizeF& pickerContentSize);
+    int32_t CalculateIndex(RefPtr<FrameNode>& frameNode);
+    void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext);
 
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
     double defaultPickerItemHeight_ = 0.0;
     double resizePickerItemHeight_ = 0.0;
+    bool focusEventInitialized_ = false;
+    bool haveFocus_ = false;
+    bool useButtonFocusArea_ = false;
+    Dimension selectorItemRadius_ = 8.0_vp;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
     uint32_t selectedIndex_ = 0;
     std::vector<NG::RangeContent> range_;
     std::vector<NG::RangeContent> options_;
@@ -534,12 +620,11 @@ private:
     bool isShowInDialog_ = false;
     bool canloop_ = true;
 
-    // inner focus switch
-    bool operationOn_ = false;
-
     bool hasUserDefinedDisappearFontFamily_ = false;
     bool hasUserDefinedNormalFontFamily_ = false;
     bool hasUserDefinedSelectedFontFamily_ = false;
+
+    double curOpacity_ = 1.0;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerPattern);
 
@@ -547,7 +632,7 @@ private:
     bool isPicker_ = true;
     bool isFiredSelectsChange_ = false;
     std::optional<std::string> firedSelectsStr_;
-    
+
     ItemDivider divider_;
     bool customDividerFlag_ = false;
     Dimension value_;
@@ -560,6 +645,13 @@ private:
     float paintDividerSpacing_ = 1.0f;
     bool isNeedUpdateSelectedIndex_ = true;
     PickerTextProperties textProperties_;
+    std::vector<Dimension> columnWidths_;
+
+    bool isDisableTextStyleAnimation_ = false;
+    bool isEnableHaptic_ = true;
+    bool isHapticChanged_ = false;
+    int32_t selectedColumnId_ = INVALID_SELECTED_COLUMN_INDEX;
+    bool isSingleRange_ = true;
 };
 } // namespace OHOS::Ace::NG
 

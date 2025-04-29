@@ -17,6 +17,7 @@
 
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/declaration/common/declaration_constants.h"
+#include "core/components/text/text_theme.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace {

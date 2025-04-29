@@ -13,15 +13,13 @@
  * limitations under the License.
  */
 
-#include "core/common/container.h"
 #include "core/common/ime/input_method_manager.h"
-#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
-#if not defined(ACE_UNITTEST)
-#if defined(ENABLE_STANDARD_INPUT)
+#ifndef ACE_UNITTEST
+#ifdef ENABLE_STANDARD_INPUT
 #include "input_method_controller.h"
 #endif
 #endif
@@ -41,7 +39,7 @@ InputMethodManager* InputMethodManager::GetInstance()
     return instance_.get();
 }
 
-void InputMethodManager::OnFocusNodeChange(const RefPtr<NG::FrameNode>& curFocusNode)
+void InputMethodManager::OnFocusNodeChange(const RefPtr<NG::FrameNode>& curFocusNode, FocusReason focusReason)
 {
     auto container = Container::Current();
     if (container && container->IsKeyboard()) {
@@ -57,12 +55,22 @@ void InputMethodManager::OnFocusNodeChange(const RefPtr<NG::FrameNode>& curFocus
         curFocusNode_ = curFocusNode;
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "UIExtension switch focus");
         auto pattern = curFocusNode->GetPattern();
-        if (!pattern->NeedSoftKeyboard()) {
+#ifdef WINDOW_SCENE_SUPPORTED
+        auto needCloseKeyboard = !NG::WindowSceneHelper::IsWindowScene(curFocusNode) ||
+            !NG::WindowSceneHelper::IsFocusWindowSceneCloseKeyboard(curFocusNode);
+#else
+        auto needCloseKeyboard = true;
+#endif
+        if (!pattern->NeedSoftKeyboard() && needCloseKeyboard) {
             HideKeyboardAcrossProcesses();
         }
     }
 
     curFocusNode_ = curFocusNode;
+    auto pattern = curFocusNode->GetPattern();
+    if (pattern) {
+        pattern->OnFocusNodeChange(focusReason);
+    }
 #ifdef WINDOW_SCENE_SUPPORTED
     auto isWindowScene = NG::WindowSceneHelper::IsWindowScene(curFocusNode);
     if (isWindowScene) {
@@ -89,6 +97,14 @@ void InputMethodManager::ProcessKeyboardInWindowScene(const RefPtr<NG::FrameNode
         NG::WindowSceneHelper::IsWindowSceneCloseKeyboard(curFocusNode);
         return;
     }
+
+    if (curFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||
+        curFocusNode->GetTag() == V2::EMBEDDED_COMPONENT_ETS_TAG) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "UIExtension(%{public}s/%{public}d) not need to process.",
+            curFocusNode->GetTag().c_str(), curFocusNode->GetId());
+        return;
+    }
+
     // In window scene, focus change, need close keyboard.
     auto pattern = curFocusNode->GetPattern();
     if (!pattern->NeedSoftKeyboard()) {
@@ -106,6 +122,7 @@ void InputMethodManager::ProcessKeyboard(const RefPtr<NG::FrameNode>& curFocusNo
     }
     auto pipeline = curFocusNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
+    ACE_LAYOUT_SCOPED_TRACE("ProcessKeyboard [node:%s]", curFocusNode->GetTag().c_str());
     if (windowFocus_.has_value() && windowFocus_.value()) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Normal Window focus first, set focus flag to window.");
         windowFocus_.reset();
@@ -133,7 +150,7 @@ void InputMethodManager::ProcessKeyboard(const RefPtr<NG::FrameNode>& curFocusNo
     auto isUIExtension = container && container->IsUIExtensionWindow();
     auto pattern = curFocusNode->GetPattern();
     CHECK_NULL_VOID(pattern);
-    if (isUIExtension && !pattern->NeedSoftKeyboard()) {
+    if (isUIExtension && !pattern->NeedSoftKeyboard() && pipeline->IsWindowFocused()) {
         HideKeyboardAcrossProcesses();
     } else {
         CloseKeyboard(curFocusNode);
@@ -165,7 +182,7 @@ bool InputMethodManager::NeedSoftKeyboard() const
     return pattern->NeedSoftKeyboard() && pattern->NeedToRequestKeyboardOnFocus();
 }
 
-void InputMethodManager::CloseKeyboard()
+void InputMethodManager::CloseKeyboard(bool disableNeedToRequestKeyboard)
 {
     ACE_LAYOUT_SCOPED_TRACE("CloseKeyboard");
     auto currentFocusNode = curFocusNode_.Upgrade();
@@ -174,11 +191,13 @@ void InputMethodManager::CloseKeyboard()
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = pipeline->GetTextFieldManager();
     CHECK_NULL_VOID(textFieldManager);
-    if (!textFieldManager->GetImeShow()) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Ime Not Shown, No need to close keyboard");
+    if (!textFieldManager->GetImeShow() && !textFieldManager->GetIsImeAttached()) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Ime Not Shown, Ime Not Attached, No need to close keyboard");
         return;
     }
-    textFieldManager->SetNeedToRequestKeyboard(false);
+    if (disableNeedToRequestKeyboard) {
+        textFieldManager->SetNeedToRequestKeyboard(false);
+    }
 #if defined(ENABLE_STANDARD_INPUT)
     // If pushpage, close it
     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "PageChange CloseKeyboard FrameNode notNeedSoftKeyboard.");
@@ -219,15 +238,24 @@ void InputMethodManager::CloseKeyboard(const RefPtr<NG::FrameNode>& focusNode)
 void InputMethodManager::HideKeyboardAcrossProcesses()
 {
 #if defined(ENABLE_STANDARD_INPUT)
-    // If Nav, close it
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nav CloseKeyboard FrameNode notNeedSoftKeyboard.");
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "across processes CloseKeyboard FrameNode notNeedSoftKeyboard.");
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (inputMethod) {
         inputMethod->RequestHideInput();
         inputMethod->Close();
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nav CloseKeyboard SoftKeyboard Closes Successfully.");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "across processes CloseKeyboard SoftKeyboard Closes Successfully.");
     }
 #endif
+}
+
+void InputMethodManager::CloseKeyboardInProcess()
+{
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "CloseKeyboardInProcess Ready to close SoftKeyboard.");
+    auto inputMethod = MiscServices::InputMethodController::GetInstance();
+    if (inputMethod) {
+        inputMethod->Close();
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "CloseKeyboardInProcess Close SoftKeyboard Successfully.");
+    }
 }
 
 void InputMethodManager::ProcessModalPageScene()
@@ -237,7 +265,7 @@ void InputMethodManager::ProcessModalPageScene()
     if (currentFocusNode && currentFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
         HideKeyboardAcrossProcesses();
     } else {
-        CloseKeyboard();
+        CloseKeyboardInProcess();
     }
 }
 } // namespace OHOS::Ace

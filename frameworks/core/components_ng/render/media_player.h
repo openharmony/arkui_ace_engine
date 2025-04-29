@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,7 +50,10 @@ public:
 
     virtual void SetVolume(float leftVolume, float rightVolume) {}
 
-    virtual bool SetSource(const std::string& /*src*/)
+    virtual void SetMediaMuted(int32_t type, bool isMuted) {}
+
+    virtual bool SetSource(const std::string& /*src*/, const std::string& bundleName = "",
+        const std::string& moduleName = "")
     {
         return false;
     }
@@ -101,6 +104,11 @@ public:
         return -1;
     }
 
+    virtual int32_t SetRenderFirstFrame(bool /*display*/)
+    {
+        return -1;
+    }
+
     virtual int32_t PrepareAsync()
     {
         return -1;
@@ -135,6 +143,14 @@ public:
         return -1;
     }
     virtual int32_t SetPlayRange(int64_t /*startTime*/, int64_t /*endTime*/)
+    {
+        return -1;
+    }
+    virtual int32_t SetPlayRangeWithMode(int64_t /*startTime*/, int64_t /*endTime*/, SeekMode /*mode */)
+    {
+        return -1;
+    }
+    virtual int32_t SetParameter(const std::string& key, int64_t value)
     {
         return -1;
     }

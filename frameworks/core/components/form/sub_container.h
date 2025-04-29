@@ -160,6 +160,15 @@ public:
     }
 
 private:
+    void InitFrontend(const std::string &path, const std::string &module,
+        const std::map<std::string, sptr<AppExecFwk::FormAshmem>> &imageDataMap,
+        const std::string& formSrc,
+        const FrontendType &cardType);
+    void InitCardThemeManager(const std::string &path, int32_t instanceId, const std::string &module,
+        const std::map<std::string, sptr<AppExecFwk::FormAshmem>> &imageDataMap, RefPtr<AssetManager> assetManager);
+    RefPtr<AssetManager> GetAssetManager(const std::string& path, const std::string& module);
+    void InitPipelineContext();
+    void RunJSCard(const std::string& data);
     RefPtr<CardFrontend> frontend_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<PipelineBase> pipelineContext_;

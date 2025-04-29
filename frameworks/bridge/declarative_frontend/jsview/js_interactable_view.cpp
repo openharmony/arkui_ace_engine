@@ -20,6 +20,7 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "base/log/log_wrapper.h"
+#include "base/utils/utf_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_hover_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_key_function.h"
@@ -85,11 +86,12 @@ void JSInteractableView::JsOnKey(const JSCallbackInfo& args)
     RefPtr<JsKeyFunction> JsOnKeyEvent = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onKeyEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnKeyEvent), node = frameNode](
-                          KeyEventInfo& info) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                          KeyEventInfo& info) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
         ACE_SCORING_EVENT("onKey");
         PipelineContext::SetCallBackNode(node);
-        func->Execute(info);
+        auto ret = func->ExecuteWithValue(info);
+        return ret->IsBoolean() ? ret->ToBoolean() : false;
     };
     ViewAbstractModel::GetInstance()->SetOnKeyEvent(std::move(onKeyEvent));
 }
@@ -116,6 +118,25 @@ void JSInteractableView::JsOnKeyPreIme(const JSCallbackInfo& args)
     ViewAbstractModel::GetInstance()->SetOnKeyPreIme(std::move(onPreImeEvent));
 }
 
+void JSInteractableView::JsOnKeyEventDispatch(const JSCallbackInfo& args)
+{
+    if (args[0]->IsUndefined() || !args[0]->IsFunction()) {
+        ViewAbstractModel::GetInstance()->DisableOnKeyEventDispatch();
+        return;
+    }
+    RefPtr<JsKeyFunction> JsOnKeyEventDispatch = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onKeyEventDispatch = [execCtx = args.GetExecutionContext(), func = std::move(JsOnKeyEventDispatch),
+                             node = frameNode](KeyEventInfo& keyEvent) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        ACE_SCORING_EVENT("onKeyEventDispatch");
+        PipelineContext::SetCallBackNode(node);
+        auto ret = func->ExecuteWithValue(keyEvent);
+        return ret->IsBoolean() ? ret->ToBoolean() : false;
+    };
+    ViewAbstractModel::GetInstance()->SetOnKeyEventDispatch(std::move(onKeyEventDispatch));
+}
+
 void JSInteractableView::JsOnHover(const JSCallbackInfo& info)
 {
     if (info[0]->IsUndefined() && IsDisableEventVersion()) {
@@ -135,6 +156,27 @@ void JSInteractableView::JsOnHover(const JSCallbackInfo& info)
         func->HoverExecute(isHover, hoverInfo);
     };
     ViewAbstractModel::GetInstance()->SetOnHover(std::move(onHover));
+}
+
+void JSInteractableView::JsOnHoverMove(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+        ViewAbstractModel::GetInstance()->DisableOnHoverMove();
+        return;
+    }
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    RefPtr<JsHoverFunction> jsOnHoverMoveFunc = AceType::MakeRefPtr<JsHoverFunction>(JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onHover = [execCtx = info.GetExecutionContext(), func = std::move(jsOnHoverMoveFunc), node = frameNode](
+                       HoverInfo& hoverInfo) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onHoverMove");
+        PipelineContext::SetCallBackNode(node);
+        func->HoverMoveExecute(hoverInfo);
+    };
+    ViewAbstractModel::GetInstance()->SetOnHoverMove(std::move(onHover));
 }
 
 void JSInteractableView::JsOnPan(const JSCallbackInfo& args)
@@ -218,8 +260,8 @@ void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
     double distanceThreshold = std::numeric_limits<double>::infinity();
     if (info.Length() > 1 && info[1]->IsNumber()) {
         distanceThreshold = info[1]->ToNumber<double>();
+        distanceThreshold = Dimension(distanceThreshold, DimensionUnit::VP).ConvertToPx();
     }
-    distanceThreshold = Dimension(distanceThreshold, DimensionUnit::VP).ConvertToPx();
 
     ViewAbstractModel::GetInstance()->SetOnClick(std::move(onTap), std::move(onClick), distanceThreshold);
     CHECK_NULL_VOID(frameNode);
@@ -408,22 +450,23 @@ std::function<void()> JSInteractableView::GetRemoteMessageEventCallback(const JS
 }
 
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-void JSInteractableView::ReportClickEvent(const WeakPtr<NG::FrameNode>& node, const std::string text)
+void JSInteractableView::ReportClickEvent(const WeakPtr<NG::FrameNode>& weakNode, const std::u16string text)
 {
-    if (UiSessionManager::GetInstance().GetClickEventRegistered()) {
+    if (UiSessionManager::GetInstance()->GetClickEventRegistered()) {
         auto data = JsonUtil::Create();
         data->Put("event", "onClick");
-        std::string content = text;
-        if (!node.Invalid()) {
-            data->Put("id", node.GetRawPtr()->GetId());
-            auto children = node.GetRawPtr()->GetChildren();
+        std::u16string content = text;
+        auto node = weakNode.Upgrade();
+        if (node) {
+            data->Put("id", node->GetId());
+            auto children = node->GetChildren();
             if (!children.empty()) {
-                node.GetRawPtr()->GetContainerComponentText(content);
+                node->GetContainerComponentText(content);
             }
-            data->Put("text", content.data());
-            data->Put("position", node.GetRawPtr()->GetGeometryNode()->GetFrameRect().ToString().data());
+            data->Put("text", UtfUtils::Str16DebugToStr8(content).data());
+            data->Put("position", node->GetGeometryNode()->GetFrameRect().ToString().data());
         }
-        UiSessionManager::GetInstance().ReportClickEvent(data->ToString());
+        UiSessionManager::GetInstance()->ReportClickEvent(data->ToString());
     }
 }
 #endif

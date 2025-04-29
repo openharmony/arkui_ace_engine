@@ -15,20 +15,15 @@
 
 #include "page_url_checker_ohos.h"
 
-#include <string>
-
 #include "ability_runtime/context/context.h"
 #include "app_mgr_client.h"
-#include "atomic_service_status_callback.h"
-#include "errors.h"
-#include "iremote_broker.h"
-#include "iremote_object.h"
 #include "iremote_stub.h"
 #include "iservice_registry.h"
-#include "nocopyable.h"
 #include "singleton.h"
 #include "system_ability_definition.h"
-#include "want.h"
+#include "transaction/rs_interfaces.h"
+
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 const char BUNDLE_TAG[] = "@bundle:";
@@ -284,6 +279,7 @@ void PageUrlCheckerOhos::NotifyPageShow(const std::string& pageName)
     pageStateData.pageName = pageName;
     pageStateData.targetBundleName = targetBundleName;
     pageStateData.targetModuleName = targetModuleName;
+    OHOS::Rosen::RSInterfaces::GetInstance().NotifyPageName(targetBundleName, pageName, true);
     DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->
         NotifyPageShow(context_->GetToken(), pageStateData);
 }
@@ -300,6 +296,7 @@ void PageUrlCheckerOhos::NotifyPageHide(const std::string& pageName)
     pageStateData.pageName = pageName;
     pageStateData.targetBundleName = targetBundleName;
     pageStateData.targetModuleName = targetModuleName;
+    OHOS::Rosen::RSInterfaces::GetInstance().NotifyPageName(targetBundleName, pageName, false);
     DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->
         NotifyPageHide(context_->GetToken(), pageStateData);
 }

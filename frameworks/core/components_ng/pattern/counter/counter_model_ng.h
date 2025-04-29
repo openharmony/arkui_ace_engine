@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,10 +39,13 @@ public:
     static void SetHeight(FrameNode* frameNode, const Dimension& value);
     static void SetWidth(FrameNode* frameNode, const Dimension& value);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& value);
+    static void ResetBackgroundColor(FrameNode* frameNode);
+    static void SetOnInc(FrameNode* frameNode, CounterEventFunc&& onInc);
+    static void SetOnDec(FrameNode* frameNode, CounterEventFunc&& onDec);
 
 private:
     RefPtr<FrameNode> CreateButtonChild(
-        int32_t id, const std::string& symbol, const RefPtr<CounterTheme>& counterTheme);
+        int32_t id, const std::u16string& symbol, const RefPtr<CounterTheme>& counterTheme);
     static RefPtr<FrameNode> CreateContentNodeChild(int32_t contentId, const RefPtr<CounterTheme>& counterTheme);
 };
 

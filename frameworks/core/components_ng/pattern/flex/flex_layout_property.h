@@ -22,6 +22,22 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+struct FlexMeasureResult {
+    float allocatedSize = 0.0f;
+    int32_t validSizeCount = 0;
+};
+
+struct FlexLayoutResult {
+    float frontSpace = 0.0f;
+    float betweenSpace = 0.0f;
+};
+
+enum class FlexOperatorType {
+    RESTORE_MEASURE_RESULT,
+    UPDATE_MEASURE_RESULT,
+    UPDATE_LAYOUT_RESULT,
+};
+
 class ACE_EXPORT FlexLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(FlexLayoutProperty, LayoutProperty);
 
@@ -50,6 +66,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FlexLayoutAttribute, CrossAxisAlign, FlexAlign, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FlexLayoutAttribute, Space, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FlexLayoutAttribute, IsReverse, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FlexLayoutAttribute, WidthLayoutPolicy, uint8_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        FlexLayoutAttribute, HeightLayoutPolicy, uint8_t, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_GROUP(WrapLayoutAttribute, WrapLayoutAttribute);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(WrapLayoutAttribute, WrapDirection, WrapDirection, PROPERTY_UPDATE_MEASURE);

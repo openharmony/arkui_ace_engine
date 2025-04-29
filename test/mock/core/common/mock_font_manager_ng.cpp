@@ -68,4 +68,8 @@ const std::string& FontManager::GetAppCustomFont() const
 void FontManager::AddFontObserver(WeakPtr<FontChangeObserver> node) {}
 
 void FontManager::RemoveFontChangeObserver(WeakPtr<FontChangeObserver> node) {}
+
+void FontManager::AddHybridRenderNode(const WeakPtr<NG::UINode>& node) {}
+void FontManager::RemoveHybridRenderNode(const WeakPtr<NG::UINode>& node) {}
+void FontManager::UpdateHybridRenderNodes() {}
 } // namespace OHOS::Ace

@@ -14,10 +14,6 @@
  */
 #include "core/interfaces/native/node/rating_modifier.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t STARS_DEFAULT = 5;
@@ -64,6 +60,18 @@ void SetStarStyle(ArkUINodeHandle node,
     }
 }
 
+void SetOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        RatingModelNG::SetOnChange(frameNode, std::move(*onChange));
+    } else {
+        RatingModelNG::SetOnChange(frameNode, nullptr);
+    }
+}
+
 void ResetStars(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -87,18 +95,50 @@ void ResetStarStyle(ArkUINodeHandle node)
     RatingModelNG::SetSecondarySrc(frameNode, "", true);
 }
 
+void SetRatingOptions(ArkUINodeHandle node, ArkUI_Float64 rating, ArkUI_Bool indicator)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RatingModelNG::SetRatingOptions(frameNode, rating, static_cast<bool>(indicator));
+}
+void ResetOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RatingModelNG::SetOnChange(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUIRatingModifier* GetRatingModifier()
 {
-    static const ArkUIRatingModifier modifier = {SetStars, SetRatingStepSize, SetStarStyle,
-        ResetStars, ResetRatingStepSize, ResetStarStyle};
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIRatingModifier modifier = {
+        .setStars = SetStars,
+        .setRatingStepSize = SetRatingStepSize,
+        .setStarStyle = SetStarStyle,
+        .setOnChange = SetOnChange,
+        .resetStars = ResetStars,
+        .resetRatingStepSize = ResetRatingStepSize,
+        .resetStarStyle = ResetStarStyle,
+        .setRatingOptions = SetRatingOptions,
+        .resetOnChange = ResetOnChange,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIRatingModifier* GetCJUIRatingModifier()
 {
-    static const CJUIRatingModifier modifier = {SetStars, SetRatingStepSize, SetStarStyle,
-        ResetStars, ResetRatingStepSize, ResetStarStyle};
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIRatingModifier modifier = {
+        .setStars = SetStars,
+        .setRatingStepSize = SetRatingStepSize,
+        .setStarStyle = SetStarStyle,
+        .resetStars = ResetStars,
+        .resetRatingStepSize = ResetRatingStepSize,
+        .resetStarStyle = ResetStarStyle,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

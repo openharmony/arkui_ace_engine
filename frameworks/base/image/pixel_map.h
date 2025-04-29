@@ -20,15 +20,15 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/rect.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 
 namespace OHOS {
 
-namespace Ace {
-class Rect;
-}
 namespace Media {
 class PixelMap;
 }
@@ -47,6 +47,9 @@ enum class PixelFormat : int32_t {
     NV21 = 8, // Each pixel is stored on 3/2 bytes.
     NV12 = 9,
     CMYK = 10,
+    YCBCR_P010 = 11,
+    YCRCB_P010 = 12,
+    RGBA_1010102 = 14,
 };
 
 enum class AlphaType : int32_t {
@@ -54,6 +57,15 @@ enum class AlphaType : int32_t {
     IMAGE_ALPHA_TYPE_OPAQUE = 1,   // image pixels are stored as opaque.
     IMAGE_ALPHA_TYPE_PREMUL = 2,   // image have alpha component, and all pixels have premultiplied by alpha value.
     IMAGE_ALPHA_TYPE_UNPREMUL = 3, // image have alpha component, and all pixels stored without premultiply alpha value.
+};
+
+enum class AllocatorType : int32_t {
+    // keep same with java AllocatorType
+    DEFAULT = 0,
+    HEAP_ALLOC = 1,
+    SHARE_MEM_ALLOC = 2,
+    CUSTOM_ALLOC = 3,  // external
+    DMA_ALLOC = 4, // SurfaceBuffer
 };
 
 enum class ResizableOption {
@@ -135,11 +147,38 @@ enum class AceAntiAliasingOption : int32_t {
     HIGH = 3,
 };
 
+enum class ScaleMode : int32_t {
+    FIT_TARGET_SIZE = 0,
+    CENTER_CROP = 1,
+};
+
+struct InitializationOptions {
+    NG::SizeT<int32_t> size;
+    PixelFormat srcPixelFormat = PixelFormat::BGRA_8888;
+    PixelFormat pixelFormat = PixelFormat::UNKNOWN;
+    AlphaType alphaType = AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
+    ScaleMode scaleMode = ScaleMode::FIT_TARGET_SIZE;
+    int32_t srcRowStride = 0;
+    bool editable = false;
+    bool useSourceIfMatch = false;
+    bool useDMA = false;
+};
+
+struct WritePixelsOptions {
+    const uint8_t* source = nullptr;
+    uint64_t bufferSize = 0;
+    uint32_t offset = 0;
+    uint32_t stride = 0;
+    Rect region;
+    PixelFormat srcPixelFormat = PixelFormat::BGRA_8888;
+};
+
 class ACE_FORCE_EXPORT PixelMap : public AceType {
     DECLARE_ACE_TYPE(PixelMap, AceType)
 
 public:
     static RefPtr<PixelMap> Create(std::unique_ptr<Media::PixelMap>&& pixmap);
+    static RefPtr<PixelMap> Create(const InitializationOptions& opts);
     static RefPtr<PixelMap> CreatePixelMap(void* sptrAddr);
     static RefPtr<PixelMap> CopyPixelMap(const RefPtr<PixelMap>& pixelMap);
     static RefPtr<PixelMap> DecodeTlv(std::vector<uint8_t>& buff);
@@ -162,6 +201,8 @@ public:
     virtual int32_t GetRowStride() const = 0;
     virtual int32_t GetRowBytes() const = 0;
     virtual int32_t GetByteCount() const = 0;
+    virtual AllocatorType GetAllocatorType() const = 0;
+    virtual bool IsHdr() const = 0;
     virtual void* GetPixelManager() const = 0;
     virtual void* GetRawPixelMapPtr() const = 0;
     virtual std::string GetId() = 0;
@@ -177,6 +218,8 @@ public:
     virtual void SavePixelMapToFile(const std::string& dst) const = 0;
     virtual RefPtr<PixelMap> GetCropPixelMap(const Rect& srcRect) = 0;
     virtual bool EncodeTlv(std::vector<uint8_t>& buff) = 0;
+    virtual uint32_t WritePixels(const WritePixelsOptions& opts) = 0;
+    virtual bool GetIsWideColorGamut() const = 0;
 };
 
 } // namespace Ace

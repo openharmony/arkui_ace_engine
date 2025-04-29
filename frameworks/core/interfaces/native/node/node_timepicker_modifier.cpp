@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,18 +14,10 @@
  */
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
 
-#include "base/utils/utils.h"
-#include "base/i18n/localization.h"
 #include "bridge/common/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
-#include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
-#include "core/interfaces/native/node/node_api.h"
 #include "core/interfaces/native/node/node_textpicker_modifier.h"
-#include "core/pipeline/base/element_register.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -56,6 +48,38 @@ void ResetTimepickerSelected(ArkUINodeHandle node)
     PickerTime pickerTime(currentTm->tm_hour, currentTm->tm_min, 0);
 
     TimePickerModelNG::SetSelectedTime(frameNode, pickerTime);
+}
+
+void SetTimepickerStart(ArkUINodeHandle node, ArkUI_Uint32 hour, ArkUI_Uint32 minute)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetStartTime(frameNode, PickerTime(hour, minute, 0));
+}
+
+void ResetTimepickerStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PickerTime pickerTime(0, 0, 0);
+
+    TimePickerModelNG::SetStartTime(frameNode, pickerTime);
+}
+
+void SetTimepickerEnd(ArkUINodeHandle node, ArkUI_Uint32 hour, ArkUI_Uint32 minute)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetEndTime(frameNode, PickerTime(hour, minute, 0));
+}
+
+void ResetTimepickerEnd(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PickerTime defaultEndTime = PickerTime(23, 59, 59);
+
+    TimePickerModelNG::SetEndTime(frameNode, defaultEndTime);
 }
 
 void SetTimepickerBackgroundColor(ArkUINodeHandle node, uint32_t color)
@@ -253,6 +277,20 @@ void ResetTimepickerDateTimeOptions(ArkUINodeHandle node)
     TimePickerModelNG::SetDateTimeOptions(frameNode, hourType, minuteType, secondType);
 }
 
+void SetTimepickerEnableHapticFeedback(ArkUINodeHandle node, int enableHapticFeedback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetIsEnableHapticFeedback(frameNode, enableHapticFeedback);
+}
+
+void ResetTimepickerEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetIsEnableHapticFeedback(frameNode, true);
+}
+
 ArkUI_CharPtr GetTimepickerSelectedTextStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -348,6 +386,28 @@ ArkUI_CharPtr GetTimepickerSelected(ArkUINodeHandle node)
     return g_strValue.c_str();
 }
 
+ArkUI_CharPtr GetTimepickerStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    PickerTime pickerTime = TimePickerModelNG::getTimepickerStart(frameNode);
+    g_strValue = std::to_string(static_cast<uint32_t>(pickerTime.GetHour())) + ":";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(pickerTime.GetMinute())) + ":";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(pickerTime.GetSecond()));
+    return g_strValue.c_str();
+}
+
+ArkUI_CharPtr GetTimepickerEnd(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    PickerTime pickerTime = TimePickerModelNG::getTimepickerEnd(frameNode);
+    g_strValue = std::to_string(static_cast<uint32_t>(pickerTime.GetHour())) + ":";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(pickerTime.GetMinute())) + ":";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(pickerTime.GetSecond()));
+    return g_strValue.c_str();
+}
+
 ArkUI_Uint32 GetTimepickerBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -362,33 +422,139 @@ ArkUI_Int32 GetTimepickerUseMilitaryTime(ArkUINodeHandle node)
     return TimePickerModelNG::getTimepickerUseMilitaryTime(frameNode);
 }
 
+void SetTimepickerEnableCascade(ArkUINodeHandle node, int isEnableCascade)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetEnableCascade(frameNode, isEnableCascade);
+}
+
+void ResetTimepickerEnableCascade(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetEnableCascade(frameNode, false);
+}
+
+ArkUI_Int32 GetTimepickerEnableCascade(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return TimePickerModelNG::getTimepickerEnableCascade(frameNode);
+}
+
+void SetTimePickerDigitalCrownSensitivity(ArkUINodeHandle node, int32_t CrownSensitivity)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetDigitalCrownSensitivity(frameNode, CrownSensitivity);
+}
+
+void ResetTimePickerDigitalCrownSensitivity(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetDigitalCrownSensitivity(frameNode, DEFAULT_CROWNSENSITIVITY);
+}
+
+void SetTimepickerOnChangeExt(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChange = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+    TimePickerModelNG::SetOnChange(frameNode, std::move(*onChange));
+}
+
+void ResetTimepickerOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetOnChange(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
 const ArkUITimepickerModifier* GetTimepickerModifier()
 {
-    static const ArkUITimepickerModifier modifier = { GetTimepickerSelected, SetTimepickerSelected,
-        ResetTimepickerSelected, GetTimepickerBackgroundColor, SetTimepickerBackgroundColor,
-        GetTimepickerDisappearTextStyle, SetTimepickerDisappearTextStyle, GetTimepickerTextStyle,
-        SetTimepickerTextStyle, GetTimepickerSelectedTextStyle, SetTimepickerSelectedTextStyle,
-        ResetTimepickerDisappearTextStyle, ResetTimepickerTextStyle, ResetTimepickerSelectedTextStyle,
-        ResetTimepickerBackgroundColor, GetTimepickerUseMilitaryTime, SetTimepickerUseMilitaryTime,
-        ResetTimepickerUseMilitaryTime, SetTimepickerLoop, ResetTimepickerLoop, SetTimepickerDateTimeOptions,
-        ResetTimepickerDateTimeOptions };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUITimepickerModifier modifier = {
+        .getTimepickerSelected = GetTimepickerSelected,
+        .setTimepickerSelected = SetTimepickerSelected,
+        .resetTimepickerSelected = ResetTimepickerSelected,
+        .getTimepickerStart = GetTimepickerStart,
+        .setTimepickerStart = SetTimepickerStart,
+        .resetTimepickerStart = ResetTimepickerStart,
+        .getTimepickerEnd = GetTimepickerEnd,
+        .setTimepickerEnd = SetTimepickerEnd,
+        .resetTimepickerEnd = ResetTimepickerEnd,
+        .getTimepickerBackgroundColor = GetTimepickerBackgroundColor,
+        .setTimepickerBackgroundColor = SetTimepickerBackgroundColor,
+        .getTimepickerDisappearTextStyle = GetTimepickerDisappearTextStyle,
+        .setTimepickerDisappearTextStyle = SetTimepickerDisappearTextStyle,
+        .getTimepickerTextStyle = GetTimepickerTextStyle,
+        .setTimepickerTextStyle = SetTimepickerTextStyle,
+        .getTimepickerSelectedTextStyle = GetTimepickerSelectedTextStyle,
+        .setTimepickerSelectedTextStyle = SetTimepickerSelectedTextStyle,
+        .resetTimepickerDisappearTextStyle = ResetTimepickerDisappearTextStyle,
+        .resetTimepickerTextStyle = ResetTimepickerTextStyle,
+        .resetTimepickerSelectedTextStyle = ResetTimepickerSelectedTextStyle,
+        .resetTimepickerBackgroundColor = ResetTimepickerBackgroundColor,
+        .getTimepickerUseMilitaryTime = GetTimepickerUseMilitaryTime,
+        .setTimepickerUseMilitaryTime = SetTimepickerUseMilitaryTime,
+        .resetTimepickerUseMilitaryTime = ResetTimepickerUseMilitaryTime,
+        .setTimepickerLoop = SetTimepickerLoop,
+        .resetTimepickerLoop = ResetTimepickerLoop,
+        .setTimepickerDateTimeOptions = SetTimepickerDateTimeOptions,
+        .resetTimepickerDateTimeOptions = ResetTimepickerDateTimeOptions,
+        .setTimepickerEnableHapticFeedback = SetTimepickerEnableHapticFeedback,
+        .resetTimepickerEnableHapticFeedback = ResetTimepickerEnableHapticFeedback,
+        .getTimepickerEnableCascade = GetTimepickerEnableCascade,
+        .setTimepickerEnableCascade = SetTimepickerEnableCascade,
+        .resetTimepickerEnableCascade = ResetTimepickerEnableCascade,
+        .setTimePickerDigitalCrownSensitivity = SetTimePickerDigitalCrownSensitivity,
+        .resetTimePickerDigitalCrownSensitivity = ResetTimePickerDigitalCrownSensitivity,
+        .setTimepickerOnChange = SetTimepickerOnChangeExt,
+        .resetTimepickerOnChange = ResetTimepickerOnChange,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUITimepickerModifier* GetCJUITimepickerModifier()
 {
-    static const CJUITimepickerModifier modifier = { GetTimepickerSelected, SetTimepickerSelected,
-        ResetTimepickerSelected, GetTimepickerBackgroundColor, SetTimepickerBackgroundColor,
-        GetTimepickerDisappearTextStyle, SetTimepickerDisappearTextStyle, GetTimepickerTextStyle,
-        SetTimepickerTextStyle, GetTimepickerSelectedTextStyle, SetTimepickerSelectedTextStyle,
-        ResetTimepickerDisappearTextStyle, ResetTimepickerTextStyle, ResetTimepickerSelectedTextStyle,
-        ResetTimepickerBackgroundColor, GetTimepickerUseMilitaryTime, SetTimepickerUseMilitaryTime,
-        ResetTimepickerUseMilitaryTime, SetTimepickerLoop, ResetTimepickerLoop, SetTimepickerDateTimeOptions,
-        ResetTimepickerDateTimeOptions };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUITimepickerModifier modifier = {
+        .getTimepickerSelected = GetTimepickerSelected,
+        .setTimepickerSelected = SetTimepickerSelected,
+        .resetTimepickerSelected = ResetTimepickerSelected,
+        .getTimepickerStart = GetTimepickerStart,
+        .setTimepickerStart = SetTimepickerStart,
+        .resetTimepickerStart = ResetTimepickerStart,
+        .getTimepickerEnd = GetTimepickerEnd,
+        .setTimepickerEnd = SetTimepickerEnd,
+        .resetTimepickerEnd = ResetTimepickerEnd,
+        .getTimepickerBackgroundColor = GetTimepickerBackgroundColor,
+        .setTimepickerBackgroundColor = SetTimepickerBackgroundColor,
+        .getTimepickerDisappearTextStyle = GetTimepickerDisappearTextStyle,
+        .setTimepickerDisappearTextStyle = SetTimepickerDisappearTextStyle,
+        .getTimepickerTextStyle = GetTimepickerTextStyle,
+        .setTimepickerTextStyle = SetTimepickerTextStyle,
+        .getTimepickerSelectedTextStyle = GetTimepickerSelectedTextStyle,
+        .setTimepickerSelectedTextStyle = SetTimepickerSelectedTextStyle,
+        .resetTimepickerDisappearTextStyle = ResetTimepickerDisappearTextStyle,
+        .resetTimepickerTextStyle = ResetTimepickerTextStyle,
+        .resetTimepickerSelectedTextStyle = ResetTimepickerSelectedTextStyle,
+        .resetTimepickerBackgroundColor = ResetTimepickerBackgroundColor,
+        .getTimepickerUseMilitaryTime = GetTimepickerUseMilitaryTime,
+        .setTimepickerUseMilitaryTime = SetTimepickerUseMilitaryTime,
+        .resetTimepickerUseMilitaryTime = ResetTimepickerUseMilitaryTime,
+        .setTimepickerLoop = SetTimepickerLoop,
+        .resetTimepickerLoop = ResetTimepickerLoop,
+        .setTimepickerDateTimeOptions = SetTimepickerDateTimeOptions,
+        .resetTimepickerDateTimeOptions = ResetTimepickerDateTimeOptions,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
@@ -417,7 +583,7 @@ void SetTimePickerOnChange(ArkUINodeHandle node, void* extraParam)
                 event.componentAsyncEvent.data[1].i32 = minute->GetInt();
             }
         }
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     TimePickerModelNG::SetOnChange(frameNode, std::move(onChange));
 }

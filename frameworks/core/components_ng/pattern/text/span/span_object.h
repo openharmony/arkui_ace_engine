@@ -23,9 +23,10 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/text/span_node.h"
-#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text/span/tlv_util.h"
+#include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/pattern/text/text_model.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/render/paragraph.h"
 
@@ -39,6 +40,8 @@ enum class SpanType {
     TextShadow = 4,
     LineHeight = 5,
     BackgroundColor = 6,
+    Url = 7,
+    HalfLeading,
     Gesture = 100,
     ParagraphStyle = 200,
     Image = 300,
@@ -53,11 +56,13 @@ struct SpanParagraphStyle {
     std::optional<TextOverflow> textOverflow;
     std::optional<NG::LeadingMargin> leadingMargin;
     std::optional<Dimension> textIndent;
+    std::optional<Dimension> paragraphSpacing;
 
     bool Equal(const SpanParagraphStyle& other) const
     {
         auto flag = align == other.align && maxLines == other.maxLines && wordBreak == other.wordBreak &&
-                    textOverflow == other.textOverflow && textIndent == other.textIndent;
+                    textOverflow == other.textOverflow && textIndent == other.textIndent &&
+                    paragraphSpacing == other.paragraphSpacing;
         if (leadingMargin.has_value() && other.leadingMargin.has_value()) {
             flag &= leadingMargin.value().CheckLeadingMargin(other.leadingMargin.value());
         } else if (!leadingMargin.has_value() && !other.textOverflow.has_value()) {
@@ -219,11 +224,22 @@ public:
     std::string ToString() const override;
     void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
 
+    int32_t GetGestureSpanId()
+    {
+        return gestureSpanId_;
+    }
+
+    void SetGestureSpanId(int32_t gestureSpanId)
+    {
+        gestureSpanId_ = gestureSpanId;
+    }
+
 private:
     void AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const;
     static void RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem);
 
     GestureStyle gestureInfo_;
+    int32_t gestureSpanId_ = -1;
 };
 
 class TextShadowSpan : public SpanBase {
@@ -248,6 +264,7 @@ private:
 };
 class BackgroundColorSpan : public SpanBase {
     DECLARE_ACE_TYPE(BackgroundColorSpan, SpanBase);
+
 public:
     BackgroundColorSpan() = default;
     explicit BackgroundColorSpan(std::optional<TextBackgroundStyle> textBackgroundStyle_);
@@ -259,6 +276,7 @@ public:
     SpanType GetSpanType() const override;
     std::string ToString() const override;
     void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+
 private:
     std::optional<TextBackgroundStyle> textBackgroundStyle_;
     void AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const;
@@ -270,6 +288,7 @@ class ImageSpan : public SpanBase {
 
 public:
     explicit ImageSpan(const ImageSpanOptions& options);
+    ImageSpan(const ImageSpanOptions& options, int32_t position);
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
     RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
     SpanType GetSpanType() const override;
@@ -303,6 +322,8 @@ public:
     std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> GetOnDraw();
     std::string ToString() const override;
     void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+    virtual void AddStyledString(const WeakPtr<SpanStringBase>& spanString) {}
+    virtual void RemoveStyledString(const WeakPtr<SpanStringBase>& spanString) {}
 
 private:
     std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure_;
@@ -351,6 +372,27 @@ private:
     Dimension lineHeight_;
 };
 
+class HalfLeadingSpan : public SpanBase {
+    DECLARE_ACE_TYPE(HalfLeadingSpan, SpanBase);
+
+public:
+    HalfLeadingSpan() = default;
+    explicit HalfLeadingSpan(bool halfLeading);
+    HalfLeadingSpan(bool halfLeading, int32_t start, int32_t end);
+    bool GetHalfLeading() const;
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
+    SpanType GetSpanType() const override;
+    std::string ToString() const override;
+    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+
+private:
+    void AddHalfLeadingStyle(const RefPtr<NG::SpanItem>& spanItem) const;
+    void RemoveHalfLeadingStyle(const RefPtr<NG::SpanItem>& spanItem) const;
+
+    bool halfLeading_;
+};
+
 class ExtSpan : public SpanBase {
     DECLARE_ACE_TYPE(ExtSpan, SpanBase);
 
@@ -362,6 +404,25 @@ public:
     SpanType GetSpanType() const override;
     std::string ToString() const override;
     void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override {}
+};
+
+class UrlSpan : public SpanBase {
+    DECLARE_ACE_TYPE(UrlSpan, SpanBase);
+
+public:
+    UrlSpan() = default;
+    explicit UrlSpan(const std::string& urlAddress);
+    UrlSpan(const std::string& urlAddress, int32_t start, int32_t end);
+    std::string GetUrlSpanAddress() const;
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
+    SpanType GetSpanType() const override;
+    std::string ToString() const override;
+    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+private:
+    void AddUrlStyle(const RefPtr<NG::SpanItem>& spanItem) const;
+    static void RemoveUrlStyle(const RefPtr<NG::SpanItem>& spanItem);
+    std::string urlAddress_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_SPAN_SPAN_OBJECT_H

@@ -31,9 +31,9 @@ namespace OHOS::Ace::NG {
 struct SwiperItemInfo {
     float startPos = 0.0f;
     float endPos = 0.0f;
-    RefPtr<FrameNode> node;
-    OffsetF finalOffset;
-    CancelableCallback<void()> task;
+    RefPtr<FrameNode> node = nullptr;
+    OffsetF finalOffset = OffsetF();
+    CancelableCallback<void()> task = CancelableCallback<void()>();
     bool isFinishAnimation = false;
 };
 
@@ -44,22 +44,14 @@ public:
     using PositionMap = std::map<int32_t, SwiperItemInfo>;
 
     SwiperLayoutAlgorithm() = default;
-    ~SwiperLayoutAlgorithm() override = default;
+    ~SwiperLayoutAlgorithm() override
+    {
+        std::lock_guard<std::mutex> lock(swiperMutex_);
+    }
 
     void OnReset() override {}
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
-
-    void LayoutForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
-        int32_t startIndex, float startPos);
-    void LayoutBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
-        int32_t endIndex, float endPos);
-    bool LayoutForwardItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
-        int32_t& currentIndex, float startPos, float& endPos);
-    bool LayoutBackwardItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
-        int32_t& currentIndex, float endPos, float& startPos);
-    float GetChildMaxSize(LayoutWrapper* layoutWrapper, Axis axis, bool isMainAxis) const;
-    int32_t GetLoopIndex(int32_t originalIndex) const;
 
     void SetItemsPosition(const PositionMap& itemPosition)
     {
@@ -105,16 +97,12 @@ public:
     void SetContentMainSize(float contentMainSize)
     {
         contentMainSize_ = contentMainSize;
+        oldContentMainSize_ = contentMainSize;
     }
 
     float GetContentCrossSize() const
     {
         return contentCrossSize_;
-    }
-
-    void SetContentCrossSize(float contentCrossSize)
-    {
-        contentCrossSize_ = contentCrossSize;
     }
 
     void SetCurrentOffset(float offset)
@@ -299,9 +287,9 @@ public:
         return childLayoutConstraint_;
     }
 
-    void SetNextMarginIgnoreBlank(bool nextMarginIgnoreBlank)
+    float GetIgnoreBlankOffset() const
     {
-        nextMarginIgnoreBlank_ = nextMarginIgnoreBlank;
+        return ignoreBlankOffset_;
     }
 
     void SetIgnoreBlankOffset(float ignoreBlankOffset)
@@ -309,15 +297,41 @@ public:
         ignoreBlankOffset_ = ignoreBlankOffset;
     }
 
+    void SetDuringInteraction(bool duringInteraction)
+    {
+        duringInteraction_ = duringInteraction;
+    }
+
+    std::optional<int32_t> GetJumpIndex() const
+    {
+        return jumpIndex_;
+    }
+
+    void SetCachedShow(bool cachedShow)
+    {
+        cachedShow_ = cachedShow;
+    }
+
 private:
+    void LayoutForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex,
+        float startPos, bool cachedLayout = false);
+    void LayoutBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t endIndex,
+        float endPos, bool cachedLayout = false);
+    bool LayoutForwardItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+        int32_t& currentIndex, float startPos, float& endPos);
+    bool LayoutBackwardItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+        int32_t& currentIndex, float endPos, float& startPos);
+    float GetChildMaxSize(LayoutWrapper* layoutWrapper, bool isMainAxis) const;
+    int32_t GetLoopIndex(int32_t originalIndex) const;
+
     void LayoutSwiperIndicator(
         LayoutWrapper* layoutWrapper, const RefPtr<SwiperLayoutProperty>& swiperLayoutProperty,
         const PaddingPropertyF& padding);
-    void MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
+    void MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
     void MeasureTabsCustomAnimation(LayoutWrapper* layoutWrapper);
     void MeasureSwiperCustomAnimation(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
     void LayoutCustomAnimation(LayoutWrapper* layoutWrapper) const;
-    void LayoutItem(LayoutWrapper* layoutWrapper, Axis axis, OffsetF offset, std::pair<int32_t, SwiperItemInfo> pos);
+    void LayoutItem(LayoutWrapper* layoutWrapper, OffsetF offset, std::pair<int32_t, SwiperItemInfo> pos);
     void SetInactive(
         LayoutWrapper* layoutWrapper, float startMainPos, float endMainPos, std::optional<int32_t> targetIndex);
 
@@ -326,10 +340,10 @@ private:
     void MeasureArrow(const RefPtr<LayoutWrapper>& arrowWrapper, const RefPtr<LayoutProperty>& layoutProperty) const;
     void ArrowLayout(
         LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& arrowWrapper, const PaddingPropertyF padding) const;
-    void ResetOffscreenItemPosition(LayoutWrapper* layoutWrapper, int32_t index, bool isForward, Axis axis) const;
+    void ResetOffscreenItemPosition(LayoutWrapper* layoutWrapper, int32_t index, bool isForward) const;
     int32_t GetDisplayCount(LayoutWrapper* layoutWrapper) const;
-    void SetInactiveOnForward(LayoutWrapper* layoutWrapper, Axis axis);
-    void SetInactiveOnBackward(LayoutWrapper* layoutWrapper, Axis axis);
+    void SetInactiveOnForward(LayoutWrapper* layoutWrapper);
+    void SetInactiveOnBackward(LayoutWrapper* layoutWrapper);
     void AdjustStartInfoOnSwipeByGroup(
         int32_t startIndex, const PositionMap& itemPosition, int32_t& startIndexInVisibleWindow, float& startPos);
     bool HasCustomIndicatorOffset(const RefPtr<LayoutWrapper>& indicatorWrapper);
@@ -338,13 +352,26 @@ private:
     void CaptureMeasure(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint);
     void CaptureLayout(LayoutWrapper* layoutWrapper);
     bool IsNormalItem(const RefPtr<LayoutWrapper>& wrapper) const;
-    bool CheckIsSingleCase(const RefPtr<SwiperLayoutProperty>& property);
-    void UpdateLayoutInfoBeforeMeasureSwiper(const RefPtr<SwiperLayoutProperty>& property);
+    void UpdateLayoutInfoBeforeMeasureSwiper(
+        const RefPtr<SwiperLayoutProperty>& property, const LayoutConstraintF& layoutConstraint);
     void IndicatorAndArrowMeasure(LayoutWrapper* layoutWrapper, const OptionalSizeF& parentIdealSize);
     float GetChildMainAxisSize(
-        const RefPtr<LayoutWrapper>& childWrapper, const RefPtr<SwiperLayoutProperty>& swiperProperty, Axis axis);
+        const RefPtr<LayoutWrapper>& childWrapper, const RefPtr<SwiperLayoutProperty>& swiperProperty);
 
     void CheckCachedItem(int32_t startIndex, int32_t endIndex, LayoutWrapper* layoutWrapper);
+    void MeasureSwiperOnJump(LayoutWrapper* layoutWrapper, const LayoutConstraintF& constraint, int32_t jumpIndex);
+    bool NeedMeasureForward(int32_t currentIndex, float currentEndPos, float forwardEndPos, bool cachedLayout) const;
+    bool NeedMeasureBackward(
+        int32_t currentIndex, float currentStartPos, float backwardStartPos, bool isStretch, bool cachedLayout) const;
+    void CalcCachedItemIndex(LayoutWrapper* layoutWrapper);
+    int32_t GetCurrentFirstIndexInWindow(LayoutWrapper* layoutWrapper) const;
+    int32_t GetCurrentLastIndexInWindow(LayoutWrapper* layoutWrapper) const;
+    void LayoutCachedItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& constraint);
+    int32_t GetUserSetCachedCount(LayoutWrapper* layoutWrapper) const;
+    void AdjustItemPositionOnCachedShow();
+    void AdjustOffsetOnForward(float currentEndPos);
+    void AdjustOffsetOnBackward(float currentStartPos);
+    float GetHeightForDigit(LayoutWrapper* layoutWrapper, float height) const;
 
     bool isLoop_ = true;
     float prevMargin_ = 0.0f;
@@ -361,6 +388,7 @@ private:
     float paddingBeforeContent_ = 0.0f;
     float paddingAfterContent_ = 0.0f;
     float contentMainSize_ = 0.0f;
+    float oldContentMainSize_ = 0.0f;
     float contentCrossSize_ = 0.0f;
     int32_t totalItemCount_ = 0;
     bool mainSizeIsDefined_ = false;
@@ -372,12 +400,16 @@ private:
     bool mainSizeIsMeasured_ = false;
     bool crossMatchChild_ = false;
     bool measured_ = false; // to distinguish first and second measure in flex layout
+    bool duringInteraction_ = false; // user interacting, include touching and translating animation.
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;
+    std::optional<int32_t> currentJumpIndex_;
     std::optional<int32_t> currentTargetIndex_;
     std::optional<int32_t> customAnimationToIndex_;
     std::optional<int32_t> removeFromRSTreeIndex_;
+    std::optional<SizeF> leftCaptureSize_ = std::nullopt;
+    std::optional<SizeF> rightCaptureSize_ = std::nullopt;
     int32_t currentIndex_ = 0;
     bool targetIsSameWithStartFlag_ = false;
     bool useCustomAnimation_ = false;
@@ -392,15 +424,22 @@ private:
     bool isNeedUpdateCapture_ = false;
     bool isMeasureOneMoreItem_ = false;
     bool isFrameAnimation_ = false;
-    bool nextMarginIgnoreBlank_ = false;
     float ignoreBlankOffset_ = 0.0f;
+    float currentIgnoreBlankOffset_ = 0.0f;
+    bool prevMarginIgnoreBlank_ = false;
     std::set<int32_t> measuredItems_;
     std::set<int32_t> activeItems_;
     std::set<int32_t> cachedItems_;
     // only be used in AutoLinear mode
     float targetStartPos_ = 0.0f;
     int32_t cachedCount_ = 0;
+    bool cachedShow_ = false;
+    int32_t cachedStartIndex_ = 0;
+    int32_t cachedEndIndex_ = 0;
     LayoutConstraintF childLayoutConstraint_;
+    Axis axis_ = Axis::HORIZONTAL;
+
+    std::mutex swiperMutex_;
 };
 
 } // namespace OHOS::Ace::NG

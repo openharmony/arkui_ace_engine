@@ -15,9 +15,10 @@
 
 #include "cj_page_transition_ffi.h"
 
+#include "cj_lambda.h"
+
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/stage/page_transition_model_ng.h"
-#include "cj_lambda.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
@@ -25,14 +26,14 @@ using namespace OHOS::Ace::Framework;
 extern "C" {
 void FfiPageTransitionEnterCreate(int type, int duration, char* curve, int delay)
 {
-    PageTransitionOption option = {(RouteType)type, duration, delay, Framework::CreateCurve(std::string(curve))};
+    PageTransitionOption option = { (RouteType)type, duration, delay, Framework::CreateCurve(std::string(curve)) };
     PageTransitionModel::GetInstance()->CreateTransition(PageTransitionType::ENTER, option);
 }
 
 void FfiPageTransitionExitCreate(int type, int duration, char* curve, int delay)
 {
-    PageTransitionOption option = {
-        static_cast<RouteType>(type), duration, delay, Framework::CreateCurve(std::string(curve))};
+    PageTransitionOption option = { static_cast<RouteType>(type), duration, delay,
+        Framework::CreateCurve(std::string(curve)) };
     PageTransitionModel::GetInstance()->CreateTransition(PageTransitionType::EXIT, option);
 }
 
@@ -65,6 +66,9 @@ void FfiPageTransitionScalePointer(double x, double y, double z, double centerX,
 void FfiPageTransitionSetOpacity(double value)
 {
     LOGI("FfiPageTransitionSetOpacity called.");
+    if (LessNotEqual(value, 0.0)) {
+        value = 1.0;
+    }
     PageTransitionModel::GetInstance()->SetOpacityEffect(static_cast<float>(value));
 }
 

@@ -15,10 +15,8 @@
 
 #include <dlfcn.h>
 
-#include "frameworks/base/log/log_wrapper.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "core/common/ai/image_analyzer_loader.h"
-#include "napi/native_api.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -65,6 +63,10 @@ ImageAnalyzerInstance ImageAnalyzerLoader::CreateImageAnalyzer()
         return {};
     }
     auto engine = OHOS::Ace::EngineHelper::GetCurrentEngine();
+    if (!engine) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "ImageAnalyzer Create engine null.");
+        return {};
+    }
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     auto env = reinterpret_cast<napi_env>(nativeEngine);
     return { createImageAnalyzerInstance_(env), [lib = shared_from_this(),

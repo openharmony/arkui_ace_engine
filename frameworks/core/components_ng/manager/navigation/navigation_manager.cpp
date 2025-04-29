@@ -15,16 +15,15 @@
 
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 
-#include <string>
-
 #include "base/log/dump_log.h"
-#include "base/thread/task_executor.h"
-#include "core/common/thread_checker.h"
+#include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
-#include "core/components_ng/pattern/navigation/navigation_stack.h"
-
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t INDENT_SIZE = 2;
+
 void NavigationManager::AddNavigationDumpCallback(int32_t nodeId, int32_t depth, const DumpCallback& callback)
 {
     CHECK_RUN_ON(UI);
@@ -42,17 +41,40 @@ void NavigationManager::RemoveNavigationDumpCallback(int32_t nodeId, int32_t dep
 
 void NavigationManager::OnDumpInfo()
 {
-    constexpr int NAVIGATION_DUMP_DEPTH = 2;
     CHECK_RUN_ON(UI);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto rootNode = pipeline->GetRootElement();
+    if (!rootNode) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "navigation dump failed, invalid root node");
+        return;
+    }
     DumpLog::GetInstance().Print("Navigation number: " + std::to_string(dumpMap_.size()));
-    int navIdx = 0;
-    for (auto it = dumpMap_.begin(); it != dumpMap_.end(); ++it) {
-        DumpLog::GetInstance().Print(1, "Navigation[" + std::to_string(navIdx) + "] ID: " +
-            std::to_string(it->first.nodeId) + ", Depth: " + std::to_string(it->first.depth) + ", NavPathStack:");
-        if (it->second) {
-            it->second(NAVIGATION_DUMP_DEPTH);
+    std::stack<std::pair<RefPtr<UINode>, int32_t>> stack;
+    stack.push({ rootNode, 0 });
+    while (!stack.empty()) {
+        auto [curNode, curDepth] = stack.top();
+        stack.pop();
+        std::string space(INDENT_SIZE * curDepth, ' ');
+        int32_t depth = 0;
+        if (curNode->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
+            auto navigation = AceType::DynamicCast<NavigationGroupNode>(curNode);
+            CHECK_NULL_VOID(navigation);
+            DumpLog::GetInstance().Print(space + navigation->ToDumpString());
+            depth++;
+        } else if (curNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
+            CHECK_NULL_VOID(navDestination);
+            DumpLog::GetInstance().Print(space + navDestination->ToDumpString());
+            depth++;
         }
-        navIdx++;
+        const auto& children = curNode->GetChildren();
+        for (auto it = children.rbegin(); it != children.rend(); it++) {
+            if (!(*it)) {
+                continue;
+            }
+            stack.push({ *it, curDepth + depth });
+        }
     }
 }
 
@@ -94,5 +116,449 @@ std::shared_ptr<NavigationInfo> NavigationManager::GetNavigationInfo(const RefPt
     auto stack = pattern->GetNavigationStack();
     CHECK_NULL_RETURN(stack, nullptr);
     return std::make_shared<NavigationInfo>(navigation->GetInspectorId().value_or(""), stack);
+}
+
+bool NavigationManager::AddInteractiveAnimation(const std::function<void()>& addCallback)
+{
+    if (!isInteractive_) {
+        return false;
+    }
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(
+        FrameNode::GetFrameNode(V2::NAVIGATION_VIEW_ETS_TAG, interactiveAnimationId_));
+    CHECK_NULL_RETURN(navigationGroupNode, false);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    auto proxy = pattern->GetTopNavigationProxy();
+    CHECK_NULL_RETURN(proxy, false);
+    proxy->AddInteractiveAnimation(addCallback);
+    return true;
+}
+
+bool NavigationManager::CheckNodeNeedCache(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+
+    auto context = node->GetRenderContext();
+    if ((context && context->GetAnimationsCount() != 0) || node->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
+        return false;
+    }
+    std::stack<RefPtr<FrameNode>> nodeStack;
+    nodeStack.push(node);
+    while (!nodeStack.empty()) {
+        auto curNode = nodeStack.top();
+        nodeStack.pop();
+        std::list<RefPtr<FrameNode>> children;
+        curNode->GenerateOneDepthVisibleFrameWithTransition(children);
+        for (auto& child : children) {
+            if (!child) {
+                continue;
+            }
+            auto childContext = child->GetRenderContext();
+            if ((childContext && childContext->GetAnimationsCount() != 0) ||
+                child->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
+                return false;
+            }
+            nodeStack.push(child);
+        }
+        auto overlayNode = curNode->GetOverlayNode();
+        if (overlayNode) {
+            auto overlayNodeContext = overlayNode->GetRenderContext();
+            if ((overlayNodeContext && overlayNodeContext->GetAnimationsCount() != 0) ||
+                overlayNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
+                return false;
+            }
+            nodeStack.push(overlayNode);
+        }
+    }
+    return true;
+}
+
+RefPtr<FrameNode> NavigationManager::GetNavDestContentFrameNode(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto navDestinationNodeBase = AceType::DynamicCast<NavDestinationNodeBase>(node);
+    CHECK_NULL_RETURN(navDestinationNodeBase, nullptr);
+    auto navDestContentFrameNode = AceType::DynamicCast<FrameNode>(navDestinationNodeBase->GetContentNode());
+    CHECK_NULL_RETURN(navDestContentFrameNode, nullptr);
+    return navDestContentFrameNode;
+}
+
+void NavigationManager::UpdatePreNavNodeRenderGroupProperty()
+{
+    auto preNavNode = preNavNode_.Upgrade();
+    CHECK_NULL_VOID(preNavNode);
+    auto preNavDestContentNode = GetNavDestContentFrameNode(preNavNode);
+    CHECK_NULL_VOID(preNavDestContentNode);
+    auto state = CheckNodeNeedCache(preNavDestContentNode);
+    UpdateAnimationCachedRenderGroup(preNavDestContentNode, state);
+    preNodeAnimationCached_ = state;
+    preNodeNeverSet_ = false;
+    auto preNavPattern = preNavNode->GetPattern<NavDestinationPattern>();
+    auto name = preNavPattern == nullptr ? "NavBar" : preNavPattern->GetName();
+    TAG_LOGD(AceLogTag::ACE_NAVIGATION, "Cache PreNavNode, name=%{public}s, will cache? %{public}s", name.c_str(),
+        state ? "yes" : "no");
+}
+
+void NavigationManager::UpdateCurNavNodeRenderGroupProperty()
+{
+    auto curNavNode = curNavNode_.Upgrade();
+    CHECK_NULL_VOID(curNavNode);
+    auto curNavDestContentNode = GetNavDestContentFrameNode(curNavNode);
+    CHECK_NULL_VOID(curNavDestContentNode);
+    auto state = CheckNodeNeedCache(curNavDestContentNode);
+    UpdateAnimationCachedRenderGroup(curNavDestContentNode, state);
+    curNodeAnimationCached_ = state;
+    currentNodeNeverSet_ = false;
+    auto curNavPattern = curNavNode->GetPattern<NavDestinationPattern>();
+    auto name = curNavPattern == nullptr ? "NavBar" : curNavPattern->GetName();
+    TAG_LOGD(AceLogTag::ACE_NAVIGATION, "Cache CurNavNode, name=%{public}s, will cache? %{public}s", name.c_str(),
+        state ? "yes" : "no");
+}
+
+void NavigationManager::ResetCurNavNodeRenderGroupProperty()
+{
+    auto curNavNode = curNavNode_.Upgrade();
+    CHECK_NULL_VOID(curNavNode);
+    auto curNavDestContentNode = GetNavDestContentFrameNode(curNavNode);
+    CHECK_NULL_VOID(curNavDestContentNode);
+    UpdateAnimationCachedRenderGroup(curNavDestContentNode, false);
+    curNodeAnimationCached_ = false;
+    TAG_LOGD(AceLogTag::ACE_NAVIGATION, "Cancel Cache CurNavNode node(id=%{public}d name=%{public}s)",
+        curNavDestContentNode->GetId(), curNavDestContentNode->GetTag().c_str());
+}
+
+void NavigationManager::CacheNavigationNodeAnimation()
+{
+    if (!hasCacheNavigationNodeEnable_) {
+        return;
+    }
+    if (!IsNavigationInAnimation()) {
+        return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    /**
+     * If the exit page has not been cached before, or if the already cached exit page changes again,
+     * cache the exit page for future use.
+     */
+    if (preNodeNeverSet_ || (isNodeAddAnimation_ && preNodeAnimationCached_)) {
+        UpdatePreNavNodeRenderGroupProperty();
+        isNodeAddAnimation_ = false;
+    }
+    //  Cache the entry page for future use
+    if (currentNodeNeverSet_ && !curNodeAnimationCached_ && !pipeline->GetIsRequestVsync()) {
+        UpdateCurNavNodeRenderGroupProperty();
+    }
+    // If the cached entry page changes again, cancel the previously marked entry page.
+    if (!currentNodeNeverSet_) {
+        ResetCurNavNodeRenderGroupProperty();
+    }
+}
+
+void NavigationManager::UpdateAnimationCachedRenderGroup(const RefPtr<FrameNode>& node, bool isSet)
+{
+    auto context = node->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    TAG_LOGD(AceLogTag::ACE_NAVIGATION,
+        "UpdateAnimationCachedRenderGroup node(id=%{public}d name=%{public}s), isSet=%{public}d", node->GetId(),
+        node->GetTag().c_str(), isSet);
+    context->UpdateRenderGroup(isSet, false, false);
+}
+
+bool NavigationManager::AddRecoverableNavigation(std::string id, RefPtr<AceType> navigationNode)
+{
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(navigationNode);
+    CHECK_NULL_RETURN(navigation, false);
+    if (!navigation->CanRecovery() || id != navigation->GetCurId()) {
+        return false;
+    }
+    recoverableNavigationMap_[id] = navigationNode;
+    return true;
+}
+
+std::unique_ptr<JsonValue> NavigationManager::GetNavigationJsonInfo()
+{
+    auto allNavigationInfo = JsonUtil::CreateArray(true);
+    for (auto iter : recoverableNavigationMap_) {
+        auto node = iter.second.Upgrade();
+        if (!node) {
+            continue;
+        }
+        auto navigation = AceType::DynamicCast<NavigationGroupNode>(node);
+        if (!navigation->CanRecovery()) {
+            continue;
+        }
+        auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+        if (!navigationPattern) {
+            continue;
+        }
+        auto navigationInfo = JsonUtil::Create(true);
+        navigationInfo->Put("id", iter.first.c_str());
+        navigationInfo->Put("stack", navigationPattern->GetNavdestinationJsonArray());
+        allNavigationInfo->Put(navigationInfo);
+    }
+    return allNavigationInfo;
+}
+
+void NavigationManager::StorageNavigationRecoveryInfo(std::unique_ptr<JsonValue> navigationRecoveryInfo)
+{
+    auto allNavigationInfo = std::move(navigationRecoveryInfo);
+    if (!allNavigationInfo || !allNavigationInfo->IsArray()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Navigation recovery info invalid, can not restore!");
+        return;
+    }
+    auto arraySize = allNavigationInfo->GetArraySize();
+    for (int32_t i = 0; i < arraySize; ++ i) {
+        auto navigationInfo = allNavigationInfo->GetArrayItem(i);
+        auto navigationId = navigationInfo->GetString("id");
+        auto stackInfo = navigationInfo->GetValue("stack");
+        if (!stackInfo->IsArray()) {
+            continue;
+        }
+        std::vector<NavdestinationRecoveryInfo> navdestinationsInfo;
+        auto stackSize = stackInfo->GetArraySize();
+        for (int32_t j = 0; j < stackSize; ++ j) {
+            auto navdestinationInfo = stackInfo->GetArrayItem(j);
+            auto name = navdestinationInfo->GetString("name");
+            auto param = navdestinationInfo->GetString("param");
+            auto mode = navdestinationInfo->GetInt("mode");
+            navdestinationsInfo.emplace_back(NavdestinationRecoveryInfo(name, param, mode));
+        }
+        navigationRecoveryInfo_[navigationId] = navdestinationsInfo;
+    }
+}
+
+const std::vector<NavdestinationRecoveryInfo> NavigationManager::GetNavigationRecoveryInfo(std::string navigationId)
+{
+    if (navigationRecoveryInfo_.find(navigationId) == navigationRecoveryInfo_.end()) {
+        return {};
+    }
+    auto ret = navigationRecoveryInfo_[navigationId];
+    navigationRecoveryInfo_.erase(navigationId);
+    return ret;
+}
+
+void NavigationManager::AddNavigation(int32_t parentId, int32_t navigationId)
+{
+    auto iter = navigationMaps_.find(parentId);
+    if (iter == navigationMaps_.end()) {
+        // insert into navigation maps
+        std::vector<int32_t> navigationIds;
+        navigationIds.push_back(navigationId);
+        navigationMaps_[parentId] = navigationIds;
+        return;
+    }
+    auto navigations = iter->second;
+    navigations.push_back(navigationId);
+    iter->second = navigations;
+}
+
+void NavigationManager::RemoveNavigation(int32_t navigationId)
+{
+    for (auto navigationIter = navigationMaps_.begin(); navigationIter != navigationMaps_.end();) {
+        auto navigationIds = navigationIter->second;
+        auto it = std::find(navigationIds.begin(), navigationIds.end(), navigationId);
+        if (it == navigationIds.end()) {
+            navigationIter++;
+            continue;
+        }
+        navigationIds.erase(it);
+        if (navigationIds.empty()) {
+            navigationIter = navigationMaps_.erase(navigationIter);
+        } else {
+            navigationIter++;
+        }
+    }
+}
+
+std::vector<int32_t> NavigationManager::FindNavigationInTargetParent(int32_t targetId)
+{
+    auto it = navigationMaps_.find(targetId);
+    if (it == navigationMaps_.end()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't find inner navigation");
+        return {};
+    }
+    return it->second;
+}
+
+void NavigationManager::FireNavigationLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason)
+{
+    NavDestinationActiveReason activeReason = static_cast<NavDestinationActiveReason>(reason);
+    if (activeReason == NavDestinationActiveReason::TRANSITION) {
+        NavigationPattern::FireNavigationLifecycle(node, static_cast<NavDestinationLifecycle>(lifecycle),
+            activeReason);
+        return;
+    }
+    // fire navdestination lifecycle in outer layer
+    FireLowerLayerLifecycle(nullptr, lifecycle, reason);
+}
+
+void NavigationManager::FireOverlayLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason)
+{
+    CHECK_NULL_VOID(node);
+    NavDestinationActiveReason activeReason = static_cast<NavDestinationActiveReason>(reason);
+    auto currentLifecycle = static_cast<NavDestinationLifecycle>(lifecycle);
+    NavigationPattern::FireNavigationLifecycle(node, currentLifecycle, activeReason);
+    NavDestinationLifecycle lowerLifecycle = NavDestinationLifecycle::ON_ACTIVE;
+    if (lifecycle == NavDestinationLifecycle::ON_ACTIVE) {
+        lowerLifecycle = NavDestinationLifecycle::ON_INACTIVE;
+    }
+    if (lifecycle == NavDestinationLifecycle::ON_INACTIVE) {
+        lowerLifecycle = NavDestinationLifecycle::ON_ACTIVE;
+    }
+    FireLowerLayerLifecycle(node, static_cast<int32_t>(lowerLifecycle), reason);
+}
+
+void NavigationManager::FireLowerLayerLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason)
+{
+    NavDestinationLifecycle lowerLifecycle = static_cast<NavDestinationLifecycle>(lifecycle);
+    NavDestinationActiveReason activeReason = static_cast<NavDestinationActiveReason>(reason);
+    auto pipelineContext = pipeline_.Upgrade();
+    CHECK_NULL_VOID(pipelineContext);
+    auto rootNode = pipelineContext->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    RefPtr<UINode> curNode = node;
+    // sheet page node is not attach on root, get parent node sheetWrapper
+    if (node && node->GetTag() == V2::SHEET_PAGE_TAG) {
+        curNode = node->GetParent();
+    }
+    int32_t curNodeIndex = curNode ? rootNode->GetChildIndex(curNode)
+        : static_cast<int32_t>(rootNode->GetChildren().size());
+    // find lower layer node below node
+    for (auto index = curNodeIndex - 1; index >= 0; index--) {
+        auto child = AceType::DynamicCast<FrameNode>(rootNode->GetChildAtIndex(index));
+        if (!child) {
+            continue;
+        }
+        auto tag = child->GetTag();
+        if (tag == V2::SHEET_WRAPPER_TAG) {
+            NavigationPattern::FireNavigationLifecycle(child->GetChildAtIndex(0), lowerLifecycle, activeReason);
+            return;
+        }
+        if (tag == V2::MODAL_PAGE_TAG) {
+            NavigationPattern::FireNavigationLifecycle(child, lowerLifecycle, activeReason);
+            return;
+        }
+        if (IsOverlayValid(child)) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "overlay has onShow");
+            return;
+        }
+        if (IsCustomDialogValid(child)) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "custom dialog onShow");
+            return;
+        }
+    }
+    // fire last page lifecycle
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto lastPage = stageManager->GetLastPage();
+    CHECK_NULL_VOID(lastPage);
+    NavigationPattern::FireNavigationLifecycle(lastPage, lowerLifecycle, activeReason);
+}
+
+void NavigationManager::FireSubWindowLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason)
+{
+    auto context = AceType::DynamicCast<NG::PipelineContext>(PipelineContext::GetMainPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto navigationManager = context->GetNavigationManager();
+    CHECK_NULL_VOID(navigationManager);
+    navigationManager->FireLowerLayerLifecycle(node, lifecycle, reason);
+}
+
+bool NavigationManager::IsOverlayValid(const RefPtr<UINode>& node)
+{
+    if (node->GetTag() != V2::OVERLAY_ETS_TAG) {
+        return false;
+    }
+    auto overlays = node->GetChildren();
+    // check overlay is visible, if overlay is visible, don't need fire active lifecycle
+    for (auto index = 0; index < static_cast<int32_t>(overlays.size()); index++) {
+        auto overlay = AceType::DynamicCast<FrameNode>(node->GetChildAtIndex(index));
+        if (!overlay) {
+            continue;
+        }
+        auto layoutProperty = overlay->GetLayoutProperty();
+        if (layoutProperty && layoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool NavigationManager::IsCustomDialogValid(const RefPtr<UINode>& node)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    // if lower layer is dialog, don't need to trigger lifecycle
+    auto pattern = frameNode->GetPattern();
+    if (!InstanceOf<DialogPattern>(pattern)) {
+        return false;
+    }
+    auto dialogPattern = AceType::DynamicCast<DialogPattern>(pattern);
+    if (!dialogPattern) {
+        return false;
+    }
+    auto dialogProperty = dialogPattern->GetDialogProperties();
+    // if dialog is custom dialog, don't need to trigger active lifecycle, it triggers when dialog closed
+    return dialogProperty.isUserCreatedDialog;
+}
+
+void NavigationManager::AddBeforeOrientationChangeTask(const std::function<void()>&& task)
+{
+    beforeOrientationChangeTasks_.emplace_back(std::move(task));
+}
+
+void NavigationManager::ClearBeforeOrientationChangeTask()
+{
+    beforeOrientationChangeTasks_.clear();
+}
+
+void NavigationManager::OnOrientationChanged()
+{
+    auto tasks = std::move(beforeOrientationChangeTasks_);
+    for (auto& task : tasks) {
+        if (task) {
+            task();
+        }
+    }
+}
+
+void NavigationManager::SetStatusBarConfig(const std::optional<std::pair<bool, bool>>& config)
+{
+    auto pipeline = pipeline_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    auto container = Container::GetContainer(pipeline->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    bool enable = false;
+    bool animated = false;
+    if (config.has_value()) {
+        // developer set statusBar config to NavDestination
+        enable = config.value().first;
+        animated = config.value().second;
+    } else {
+        // developer didn't use interface of NavDestination, fallback to setting in window.d.ts
+        enable = statusBarConfigByWindowApi_.first;
+        animated = statusBarConfigByWindowApi_.second;
+    }
+
+    container->SetSystemBarEnabled(SystemBarType::STATUS, enable, animated);
+}
+
+void NavigationManager::SetNavigationIndicatorConfig(std::optional<bool> config)
+{
+    auto pipeline = pipeline_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    auto container = Container::GetContainer(pipeline->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    bool enable = false;
+    if (config.has_value()) {
+        // developer set navigationIndicator config to NavDestination
+        enable = config.value();
+    } else {
+        // developer didn't use interface of NavDestination, fallback to setting in window.d.ts
+        enable = navigationIndicatorConfigByWindowApi_;
+    }
+
+    container->SetSystemBarEnabled(SystemBarType::NAVIGATION_INDICATOR, enable, false);
 }
 } // namespace OHOS::Ace::NG

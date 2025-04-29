@@ -14,12 +14,9 @@
  */
 #include "core/interfaces/native/node/column_modifier.h"
 
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
-#include "core/pipeline/base/element_register.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 constexpr FlexAlign DEFAULT_JUSTIFY_CONTENT = FlexAlign::FLEX_START;
@@ -108,33 +105,37 @@ void ResetColumnReverse(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIColumnModifier* GetColumnModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIColumnModifier modifier = {
-        SetColumnJustifyContent,
-        ResetColumnJustifyContent,
-        SetColumnAlignItems,
-        ResetColumnAlignItems,
-        GetColumnJustifyContent,
-        GetColumnAlignItems,
-        SetColumnSpace,
-        ResetColumnSpace,
-        SetColumnReverse,
-        ResetColumnReverse,
+        .setColumnJustifyContent = SetColumnJustifyContent,
+        .resetColumnJustifyContent = ResetColumnJustifyContent,
+        .setColumnAlignItems = SetColumnAlignItems,
+        .resetColumnAlignItems = ResetColumnAlignItems,
+        .getColumnJustifyContent = GetColumnJustifyContent,
+        .getColumnAlignItems = GetColumnAlignItems,
+        .setColumnSpace = SetColumnSpace,
+        .resetColumnSpace = ResetColumnSpace,
+        .setColumnReverse = SetColumnReverse,
+        .resetColumnReverse = ResetColumnReverse,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIColumnModifier* GetCJUIColumnModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIColumnModifier modifier = {
-        SetColumnJustifyContent,
-        ResetColumnJustifyContent,
-        SetColumnAlignItems,
-        ResetColumnAlignItems,
-        GetColumnJustifyContent,
-        GetColumnAlignItems,
-        SetColumnSpace,
-        ResetColumnSpace,
+        .setColumnJustifyContent = SetColumnJustifyContent,
+        .resetColumnJustifyContent = ResetColumnJustifyContent,
+        .setColumnAlignItems = SetColumnAlignItems,
+        .resetColumnAlignItems = ResetColumnAlignItems,
+        .getColumnJustifyContent = GetColumnJustifyContent,
+        .getColumnAlignItems = GetColumnAlignItems,
+        .setColumnSpace = SetColumnSpace,
+        .resetColumnSpace = ResetColumnSpace,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

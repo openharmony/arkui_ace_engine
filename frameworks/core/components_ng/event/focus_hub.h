@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_FOCUS_HUB_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_FOCUS_HUB_H
 
-#include "base/memory/ace_type.h"
+#include "focus_event_handler.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/event/touch_event.h"
@@ -25,23 +25,17 @@
 
 namespace OHOS::Ace::NG {
 
-class FrameNode;
-class FocusHub;
-class EventHub;
 class FocusView;
 class FocusManager;
 
 using TabIndexNodeList = std::list<std::pair<int32_t, WeakPtr<FocusHub>>>;
+using OnGetNextFocusNodeFunc = std::function<RefPtr<FocusHub>(FocusReason, FocusIntension)>;
 constexpr int32_t DEFAULT_TAB_FOCUSED_INDEX = -2;
 constexpr int32_t NONE_TAB_FOCUSED_INDEX = -1;
+constexpr int32_t MASK_FOCUS_STEP_VERTICAL = 0x01;
 constexpr int32_t MASK_FOCUS_STEP_FORWARD = 0x10;
 constexpr int32_t MASK_FOCUS_STEP_TAB = 0x5;
 
-enum class FocusType : int32_t {
-    DISABLE = 0,
-    NODE = 1,
-    SCOPE = 2,
-};
 enum class FocusNodeType : int32_t {
     DEFAULT = 0,
     GROUP_DEFAULT = 1,
@@ -78,6 +72,7 @@ enum class SwitchingStartReason : int32_t {
     LOST_FOCUS_TO_VIEW_ROOT = 3,
     REMOVE_SELF = 4,
     REMOVE_CHILD = 5,
+    LOST_FOCUS_TO_TABSTOP = 6,
 };
 enum class SwitchingEndReason : int32_t {
     DEFAULT = 0,
@@ -85,6 +80,7 @@ enum class SwitchingEndReason : int32_t {
     DEPENDENCE_SELF = 2,
     NO_FOCUSABLE_CHILD = 3,
     NODE_FOCUS = 4,
+    TAB_STOP = 5,
 };
 enum class SwitchingUpdateReason : int32_t {
     DEFAULT = 0,
@@ -92,7 +88,7 @@ enum class SwitchingUpdateReason : int32_t {
     ON_FOCUS_NODE = 2,
 };
 
-using GetNextFocusNodeFunc = std::function<void(FocusStep, const WeakPtr<FocusHub>&, WeakPtr<FocusHub>&)>;
+using GetNextFocusNodeFunc = std::function<bool(FocusStep, const WeakPtr<FocusHub>&, WeakPtr<FocusHub>&)>;
 
 enum class FocusStyleType : int32_t {
     NONE = -1,
@@ -102,11 +98,6 @@ enum class FocusStyleType : int32_t {
     CUSTOM_REGION = 3,
     FORCE_BORDER = 4,
     FORCE_NONE = 5,
-};
-
-enum class OnKeyEventType : int32_t {
-    DEFAULT = 0,
-    CONTEXT_MENU = 1,
 };
 
 enum class FocusDependence : int32_t {
@@ -327,41 +318,29 @@ struct ScopeFocusAlgorithm final {
     GetNextFocusNodeFunc getNextFocusNode;
 };
 
-class ACE_EXPORT FocusCallbackEvents : public virtual AceType {
-    DECLARE_ACE_TYPE(FocusCallbackEvents, AceType)
-public:
-    FocusCallbackEvents() = default;
-    ~FocusCallbackEvents() override = default;
-
-    OnFocusFunc onFocusCallback_;
-    OnFocusFunc onJSFrameNodeFocusCallback_;
-    OnBlurFunc onBlurCallback_;
-    OnBlurFunc onJSFrameNodeBlurCallback_;
-    OnKeyCallbackFunc onKeyEventCallback_;
-    OnKeyCallbackFunc onJSFrameNodeKeyEventCallback_;
-    OnKeyPreImeFunc onKeyPreImeCallback_;
-    GestureEventFunc onClickEventCallback_;
-
-    WeakPtr<FocusHub> defaultFocusNode_;
-
-    std::optional<bool> isFocusOnTouch_;
-    bool isDefaultFocus_ = { false };
-    bool isDefaultHasFocused_ = { false };
-    bool isDefaultGroupFocus_ = { false };
-    bool isDefaultGroupHasFocused_ { false };
-
-    int32_t tabIndex_ = 0;
-};
-
-class ACE_EXPORT FocusHub : public virtual AceType {
-    DECLARE_ACE_TYPE(FocusHub, AceType)
+class ACE_EXPORT FocusHub : public virtual FocusEventHandler, public virtual FocusState {
+    DECLARE_ACE_TYPE(FocusHub, FocusEventHandler, FocusState)
 public:
     explicit FocusHub(const WeakPtr<EventHub>& eventHub, FocusType type = FocusType::DISABLE, bool focusable = false)
-        : eventHub_(eventHub), focusable_(focusable), focusType_(type)
+        : FocusState(eventHub, type), FocusEventHandler(), focusable_(focusable)
+    {}
+    explicit FocusHub(const WeakPtr<FrameNode>& frameNode, FocusType type = FocusType::DISABLE, bool focusable = false)
+        : FocusState(frameNode, type), FocusEventHandler(), focusable_(focusable)
     {}
     explicit FocusHub(const WeakPtr<EventHub>& eventHub, const FocusPattern& focusPattern)
+        : FocusState(eventHub), FocusEventHandler()
     {
-        eventHub_ = eventHub;
+        focusable_ = focusPattern.GetFocusable();
+        focusType_ = focusPattern.GetFocusType();
+        focusStyleType_ = focusPattern.GetStyleType();
+        if (focusPattern.GetFocusPaintParams()) {
+            SetFocusPaintParamsPtr(focusPattern.GetFocusPaintParams());
+        }
+        isFocusActiveWhenFocused_ = focusPattern.GetIsFocusActiveWhenFocused();
+    }
+    explicit FocusHub(const WeakPtr<FrameNode>& frameNode, const FocusPattern& focusPattern)
+        : FocusState(frameNode), FocusEventHandler()
+    {
         focusable_ = focusPattern.GetFocusable();
         focusType_ = focusPattern.GetFocusType();
         focusStyleType_ = focusPattern.GetStyleType();
@@ -472,7 +451,7 @@ public:
     void SetPaintRect(const RoundRect& rect)
     {
         if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
         }
         CHECK_NULL_VOID(focusPaintParamsPtr_);
         focusPaintParamsPtr_->SetPaintRect(rect);
@@ -480,7 +459,7 @@ public:
     void SetPaintColor(const Color& color)
     {
         if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
         }
         CHECK_NULL_VOID(focusPaintParamsPtr_);
         focusPaintParamsPtr_->SetPaintColor(color);
@@ -488,7 +467,7 @@ public:
     void SetPaintWidth(const Dimension& width)
     {
         if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
         }
         CHECK_NULL_VOID(focusPaintParamsPtr_);
         focusPaintParamsPtr_->SetPaintWidth(width);
@@ -496,26 +475,28 @@ public:
     void SetFocusPadding(const Dimension& padding)
     {
         if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
         }
         CHECK_NULL_VOID(focusPaintParamsPtr_);
         focusPaintParamsPtr_->SetFocusPadding(padding);
     }
 
     RefPtr<FocusManager> GetFocusManager() const;
-    RefPtr<FrameNode> GetFrameNode() const;
-    RefPtr<GeometryNode> GetGeometryNode() const;
     RefPtr<FocusHub> GetParentFocusHub() const;
+    RefPtr<FocusHub> GetParentFocusHubWithBoundary() const;
     RefPtr<FocusHub> GetRootFocusHub();
-    std::string GetFrameName() const;
-    int32_t GetFrameId() const;
+    RefPtr<FocusHub> GetFocusLeaf();
 
-    bool HandleKeyEvent(const KeyEvent& keyEvent);
-    bool RequestFocusImmediately(bool isJudgeRootTree = false);
+    bool HandleEvent(const NonPointerEvent& event);
+    bool HandleFocusTravel(const FocusEvent& event) override;
+    bool HandleFocusNavigation(const FocusEvent& event);
+    bool RequestFocusImmediately(FocusReason reason = FocusReason::DEFAULT);
     void RequestFocus() const;
-    void SwitchFocus(const RefPtr<FocusHub>& focusNode);
+    void SwitchFocus(const RefPtr<FocusHub>& focusNode, FocusReason focusReason = FocusReason::DEFAULT);
+    void HandleLastFocusNodeInFocusWindow();
 
     static void LostFocusToViewRoot();
+    void LostFocusToTabStop(const RefPtr<FocusHub>& focusNode);
 
     bool IsViewRootScope();
     void LostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH);
@@ -545,7 +526,6 @@ public:
 
     bool IsFocusableWholePath();
     bool IsSelfFocusableWholePath();
-    bool IsOnRootTree() const;
 
     bool IsFocusable();
     bool IsFocusableNode();
@@ -562,6 +542,12 @@ public:
     void SetParentFocusable(bool parentFocusable);
 
     void SetFocusable(bool focusable, bool isExplicit = true);
+
+    bool GetFocusable() const
+    {
+        return focusable_;
+    }
+
     void SetShow(bool show);
     void SetEnabled(bool enabled);
 
@@ -569,162 +555,11 @@ public:
 
     bool IsEnabled() const;
 
-    bool IsCurrentFocus() const
-    {
-        return currentFocus_;
-    }
     bool IsCurrentFocusWholePath();
 
     bool HasFocusedChild();
 
-    void ClearUserOnFocus()
-    {
-        if (focusCallbackEvents_ && focusCallbackEvents_->onFocusCallback_) {
-            focusCallbackEvents_->onFocusCallback_ = nullptr;
-        }
-    }
-
-    void SetOnFocusCallback(OnFocusFunc&& onFocusCallback)
-    {
-        if (!focusCallbackEvents_) {
-            focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
-        }
-        focusCallbackEvents_->onFocusCallback_ = std::move(onFocusCallback);
-    }
-    OnFocusFunc GetOnFocusCallback()
-    {
-        return focusCallbackEvents_ ? focusCallbackEvents_->onFocusCallback_ : nullptr;
-    }
-
-    void ClearJSFrameNodeOnFocusCallback()
-    {
-        if (focusCallbackEvents_) {
-            focusCallbackEvents_->onJSFrameNodeFocusCallback_ = nullptr;
-        }
-    }
-    void SetJSFrameNodeOnFocusCallback(OnFocusFunc&& onFocusCallback)
-    {
-        if (!focusCallbackEvents_) {
-            focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
-        }
-        focusCallbackEvents_->onJSFrameNodeFocusCallback_ = std::move(onFocusCallback);
-    }
-    OnFocusFunc GetOnJSFrameNodeFocusCallback()
-    {
-        return focusCallbackEvents_ ? focusCallbackEvents_->onJSFrameNodeFocusCallback_ : nullptr;
-    }
-
-    void ClearUserOnBlur()
-    {
-        if (focusCallbackEvents_ && focusCallbackEvents_->onBlurCallback_) {
-            focusCallbackEvents_->onBlurCallback_ = nullptr;
-        }
-    }
-
-    void SetOnBlurCallback(OnBlurFunc&& onBlurCallback)
-    {
-        if (!focusCallbackEvents_) {
-            focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
-        }
-        focusCallbackEvents_->onBlurCallback_ = std::move(onBlurCallback);
-    }
-
-    OnBlurFunc GetOnBlurCallback()
-    {
-        return focusCallbackEvents_ ? focusCallbackEvents_->onBlurCallback_ : nullptr;
-    }
-
-    void ClearJSFrameNodeOnBlurCallback()
-    {
-        if (focusCallbackEvents_) {
-            focusCallbackEvents_->onJSFrameNodeBlurCallback_ = nullptr;
-        }
-    }
-    void SetJSFrameNodeOnBlurCallback(OnBlurFunc&& onBlurCallback)
-    {
-        if (!focusCallbackEvents_) {
-            focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
-        }
-        focusCallbackEvents_->onJSFrameNodeBlurCallback_ = std::move(onBlurCallback);
-    }
-    OnBlurFunc GetOnJSFrameNodeBlurCallback()
-    {
-        return focusCallbackEvents_ ? focusCallbackEvents_->onJSFrameNodeBlurCallback_ : nullptr;
-    }
-
-    void SetOnKeyCallback(OnKeyCallbackFunc&& onKeyCallback)
-    {
-        if (!focusCallbackEvents_) {
-            focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
-        }
-        focusCallbackEvents_->onKeyEventCallback_ = std::move(onKeyCallback);
-    }
-
-    void ClearUserOnKey()
-    {
-        if (focusCallbackEvents_ && focusCallbackEvents_->onKeyEventCallback_) {
-            focusCallbackEvents_->onKeyEventCallback_ = nullptr;
-        }
-    }
-
-    OnKeyCallbackFunc GetOnKeyCallback()
-    {
-        return focusCallbackEvents_ ? focusCallbackEvents_->onKeyEventCallback_ : nullptr;
-    }
-
-    void SetOnKeyPreImeCallback(OnKeyPreImeFunc&& onKeyCallback)
-    {
-        if (!focusCallbackEvents_) {
-            focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
-        }
-        focusCallbackEvents_->onKeyPreImeCallback_ = std::move(onKeyCallback);
-    }
-
-    void ClearOnKeyPreIme()
-    {
-        if (focusCallbackEvents_ && focusCallbackEvents_->onKeyPreImeCallback_) {
-            focusCallbackEvents_->onKeyPreImeCallback_ = nullptr;
-        }
-    }
-
-    OnKeyPreImeFunc GetOnKeyPreIme()
-    {
-        return focusCallbackEvents_ ? focusCallbackEvents_->onKeyPreImeCallback_ : nullptr;
-    }
-
-    void ClearJSFrameNodeOnKeyCallback()
-    {
-        if (focusCallbackEvents_) {
-            focusCallbackEvents_->onJSFrameNodeKeyEventCallback_ = nullptr;
-        }
-    }
-
-    void SetJSFrameNodeOnKeyCallback(OnKeyCallbackFunc&& onKeyCallback)
-    {
-        if (!focusCallbackEvents_) {
-            focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
-        }
-        focusCallbackEvents_->onJSFrameNodeKeyEventCallback_ = std::move(onKeyCallback);
-    }
-    
-    OnKeyCallbackFunc GetOnJSFrameNodeKeyCallback()
-    {
-        return focusCallbackEvents_ ? focusCallbackEvents_->onJSFrameNodeKeyEventCallback_ : nullptr;
-    }
-
-    void SetOnClickCallback(GestureEventFunc&& onClickCallback)
-    {
-        if (!focusCallbackEvents_) {
-            focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
-        }
-        focusCallbackEvents_->onClickEventCallback_ = std::move(onClickCallback);
-    }
-    GestureEventFunc GetOnClickCallback()
-    {
-        return focusCallbackEvents_ ? focusCallbackEvents_->onClickEventCallback_ : nullptr;
-    }
-
-    void SetOnFocusInternal(OnFocusFunc&& onFocusInternal)
+    void SetOnFocusInternal(std::function<void(FocusReason reason)>&& onFocusInternal)
     {
         onFocusInternal_ = std::move(onFocusInternal);
     }
@@ -741,6 +576,20 @@ public:
         onPreFocusCallback_ = std::move(onPreFocusCallback);
     }
 
+    void SetOnGetNextFocusNodeFunc(OnGetNextFocusNodeFunc&& onGetNextFocusNodeFunc)
+    {
+        onGetNextFocusNodeFunc_ = std::move(onGetNextFocusNodeFunc);
+    }
+
+    bool IsAllowedLoop()
+    {
+        return allowedLoop_;
+    }
+    void SetAllowedLoop(bool allowedLoop)
+    {
+        allowedLoop_ = allowedLoop;
+    }
+
     void SetOnClearFocusStateInternal(OnClearFocusStateFunc&& onClearFocusCallback)
     {
         onClearFocusStateCallback_ = std::move(onClearFocusCallback);
@@ -751,38 +600,12 @@ public:
         onPaintFocusStateCallback_ = std::move(onPaintFocusCallback);
     }
 
-    void SetOnKeyEventInternal(OnKeyEventFunc&& onKeyEvent, OnKeyEventType type = OnKeyEventType::DEFAULT)
-    {
-        onKeyEventsInternal_[type] = std::move(onKeyEvent);
-    }
-
-    bool FindContextMenuOnKeyEvent(OnKeyEventType type)
-    {
-        return (onKeyEventsInternal_.find(type) != onKeyEventsInternal_.end());
-    }
-
-    bool ProcessOnKeyEventInternal(const KeyEvent& event)
-    {
-        bool result = false;
-        for (const auto& onKeyEvent : onKeyEventsInternal_) {
-            auto callback = onKeyEvent.second;
-            if (callback && callback(event)) {
-                result = true;
-            }
-        }
-        return result;
-    }
-
-    void GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
-
     std::list<RefPtr<FocusHub>>::iterator FlushChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
-
-    std::list<RefPtr<FocusHub>> GetChildren()
-    {
-        std::list<RefPtr<FocusHub>> focusNodes;
-        GetChildrenFocusHub(focusNodes);
-        return focusNodes;
-    }
+    /* Manipulation on node-tree is forbidden in operation. */
+    bool AnyChildFocusHub(const std::function<bool(const RefPtr<FocusHub>&)>& operation, bool isReverse = false);
+    bool AllChildFocusHub(const std::function<void(const RefPtr<FocusHub>&)>& operation, bool isReverse = false);
+    bool AllChildFocusHubInMainTree(const std::function<void(const RefPtr<FocusHub>&)>& operation,
+        RefPtr<FocusHub>& lastFocusNode, bool isReverse = false);
 
     bool IsChild() const
     {
@@ -801,8 +624,8 @@ public:
     void DumpFocusTree(int32_t depth, bool hasJson = false);
     void DumpFocusNodeTree(int32_t depth);
     void DumpFocusScopeTree(int32_t depth);
-
-    bool OnClick(const KeyEvent& event);
+    void DumpFocusUie();
+    void DumpFocusUieInJson(std::unique_ptr<JsonValue>& json);
 
     void SetFocusType(FocusType type)
     {
@@ -912,23 +735,18 @@ public:
     std::optional<std::string> GetInspectorKey() const;
 
     bool PaintFocusState(bool isNeedStateStyles = true);
+    bool PaintFocusStateToRenderContext();
+    void GetPaintColorFromBox(Color& paintColor);
+    void GetPaintWidthFromBox(Dimension& paintWidth);
+    void GetPaintPaddingVp(Dimension& focusPaddingVp);
     bool PaintAllFocusState();
     bool PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate = false);
-    void ClearFocusState(bool isNeedStateStyles = true);
+    void ClearFocusState(bool isNeedStateStyles = true, bool isNeedClearCallBack = true);
     void ClearAllFocusState();
 
     void SetInnerFocusPaintRectCallback(const std::function<void(RoundRect&)>& callback)
     {
         getInnerFocusRectFunc_ = callback;
-    }
-
-    void SetLastWeakFocusNode(const WeakPtr<FocusHub>& focusHub)
-    {
-        lastWeakFocusNode_ = focusHub;
-    }
-    WeakPtr<FocusHub> GetLastWeakFocusNode() const
-    {
-        return lastWeakFocusNode_;
     }
 
     void SetIsFocusUnit(bool isFocusUnit)
@@ -948,12 +766,11 @@ public:
     size_t GetFocusableCount()
     {
         size_t count = 0;
-        auto children = GetChildren();
-        for (const auto& child : children) {
+        AllChildFocusHub([&count](const RefPtr<FocusHub>& child) {
             if (child->IsFocusable()) {
                 count++;
             }
-        }
+        });
         return count;
     }
 
@@ -968,7 +785,7 @@ public:
 
     static inline bool IsFocusStepVertical(FocusStep step)
     {
-        return (static_cast<uint32_t>(step) & 0x1) == 0;
+        return (static_cast<uint32_t>(step) & MASK_FOCUS_STEP_VERTICAL) == 0;
     }
 
     static inline bool IsFocusStepForward(FocusStep step, bool isRtl = false)
@@ -993,10 +810,10 @@ public:
             return moveStep == FocusStep::TAB ? FocusStep::RIGHT : FocusStep::LEFT;
         }
     }
-    
+
     static double GetProjectAreaOnRect(const RectF& rect, const RectF& projectRect, FocusStep step);
 
-    void SetFocusScopeId(const std::string& focusScopeId, bool isGroup);
+    void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut = true);
     void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority);
     void RemoveFocusScopeIdAndPriority();
     bool AcceptFocusOfPriorityChild();
@@ -1031,12 +848,45 @@ public:
         const RefPtr<FocusHub>& hub, std::unique_ptr<JsonValue>& json, const InspectorFilter& filter);
 
     bool FocusToHeadOrTailChild(bool isHead);
+
+    WeakPtr<FocusHub> GetUnfocusableParentFocusNode();
+
+    bool IsNeedPaintFocusStateSelf();
+
+    void LostChildFocusToSelf();
+
+    static bool IsFocusStepKey(KeyCode keyCode);
+
+    bool GetNextFocusByStep(const KeyEvent& keyEvent);
+
+    void SetDirectionalKeyFocus(bool directionalKeyFocus)
+    {
+        enableDirectionalKeyFocus_ = directionalKeyFocus;
+    }
+
+    bool GetDirectionalKeyFocus() const
+    {
+        return enableDirectionalKeyFocus_;
+    }
+
+    void SetIsNodeNeedKey(bool isNodeNeedKey)
+    {
+        isNodeNeedKey_ = isNodeNeedKey;
+    }
+
+    OnGetNextFocusNodeFunc GetOnGetNextFocusNodeFunc()
+    {
+        return onGetNextFocusNodeFunc_;
+    }
+
+    void SetNextFocus(FocusIntension key, const std::variant<WeakPtr<AceType>, std::string>& nextFocus)
+    {
+        FocusState::SetNextFocus(static_cast<int32_t>(key), nextFocus);
+    }
 protected:
-    bool OnKeyEvent(const KeyEvent& keyEvent);
-    bool OnKeyEventNode(const KeyEvent& keyEvent);
-    bool OnKeyEventScope(const KeyEvent& keyEvent);
-    bool RequestNextFocusOfKeyTab(const KeyEvent& keyEvent);
-    bool OnKeyPreIme(KeyEventInfo& info, const KeyEvent& keyEvent);
+    bool RequestNextFocusOfKeyTab(const FocusEvent& event);
+    bool RequestNextFocusOfKeyEnter();
+    bool RequestNextFocusOfKeyEsc();
 
     bool AcceptFocusOfSpecifyChild(FocusStep step);
     bool AcceptFocusOfLastFocus();
@@ -1045,10 +895,12 @@ protected:
     bool AcceptFocusByRectOfLastFocusFlex(const RectF& rect);
 
     bool CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) const;
-    bool RequestNextFocus(FocusStep moveStep, const RectF& rect);
+    bool RequestNextFocus(FocusStep moveStep);
+    bool RequestNextFocusByDefaultAlgorithm(FocusStep moveStep, const RectF& rect);
+    bool RequestNextFocusByCustomAlgorithm(FocusStep moveStep, const RectF& rect);
 
     void OnFocus();
-    void OnFocusNode();
+    void OnFocusNode(bool currentHasFocused = false);
     void OnFocusScope(bool currentHasFocused = false);
     void OnBlur();
     void OnBlurNode();
@@ -1061,7 +913,15 @@ protected:
     }
 
 private:
+    friend class FocusView;
+
+    friend class FocusManager;
+
     bool CalculatePosition();
+
+    bool IsLeafFocusScope();
+
+    void ClearLastFocusNode();
 
     void SetScopeFocusAlgorithm();
 
@@ -1082,33 +942,41 @@ private:
     bool UpdateFocusView();
 
     bool IsFocusAbleChildOf(const RefPtr<FocusHub>& parentFocusHub);
+    bool IsChildOf(const RefPtr<FocusHub>& parentFocusHub);
+    void CloseChildFocusView();
     WeakPtr<FocusHub> GetChildPriorfocusNode(const std::string& focusScopeId);
     bool RequestFocusByPriorityInScope();
     bool IsInFocusGroup();
     bool IsNestingFocusGroup();
-    void SetLastWeakFocusNodeWholeScope(const std::string &focusScopeId);
+    void SetLastWeakFocusNodeWholeScope(const std::string& focusScopeId);
 
     void RaiseZIndex(); // Recover z-index in ClearFocusState
 
-    bool RequestFocusImmediatelyInner(bool isJudgeRootTree = false);
+    bool RequestFocusImmediatelyInner(FocusReason reason = FocusReason::DEFAULT);
+    bool RequestUserNextFocus(const FocusEvent& event);
+    bool RequestNextFocusByKey(const FocusEvent& event);
+
+    bool IsComponentDirectionRtl();
 
     void DumpFocusNodeTreeInJson(int32_t depth);
     void DumpFocusScopeTreeInJson(int32_t depth);
-    OnFocusFunc onFocusInternal_;
+
+    bool SkipFocusMoveBeforeRemove();
+
+    bool IsArrowKeyStepOut(FocusStep moveStep);
+
+    bool IsLastWeakNodeFocused() const;
+
+    std::function<void(FocusReason reason)> onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;
-    std::unordered_map<OnKeyEventType, OnKeyEventFunc> onKeyEventsInternal_;
     OnPreFocusFunc onPreFocusCallback_;
     OnClearFocusStateFunc onClearFocusStateCallback_;
     OnPaintFocusStateFunc onPaintFocusStateCallback_;
-
-    RefPtr<FocusCallbackEvents> focusCallbackEvents_;
+    OnGetNextFocusNodeFunc onGetNextFocusNodeFunc_;
 
     RefPtr<TouchEventImpl> focusOnTouchListener_;
 
-    WeakPtr<EventHub> eventHub_;
-
-    WeakPtr<FocusHub> lastWeakFocusNode_ { nullptr };
     int32_t lastFocusNodeIndex_ { -1 };
     int32_t lastTabIndexNodeId_ { DEFAULT_TAB_FOCUSED_INDEX };
 
@@ -1116,14 +984,13 @@ private:
     bool isFocusableExplicit_ { false };
     bool implicitFocusable_ { false };
     bool parentFocusable_ { true };
-    bool currentFocus_ { false };
     bool isFocusUnit_ { false };
     bool hasForwardMovement_ { false };
     bool hasBackwardMovement_ { false };
     bool isFocusActiveWhenFocused_ { false };
     bool isRaisedZIndex_ { false };
+    bool allowedLoop_ { true };
 
-    FocusType focusType_ = FocusType::DISABLE;
     FocusStyleType focusStyleType_ = FocusStyleType::NONE;
     std::unique_ptr<FocusPaintParam> focusPaintParamsPtr_;
     std::function<void(RoundRect&)> getInnerFocusRectFunc_;
@@ -1132,12 +999,18 @@ private:
     RectF rectFromOrigin_;
     ScopeFocusAlgorithm focusAlgorithm_;
     BlurReason blurReason_ = BlurReason::FOCUS_SWITCH;
+    FocusReason focusReason_ = FocusReason::DEFAULT;
     FocusDependence focusDepend_ = FocusDependence::CHILD;
 
     std::string focusScopeId_;
     bool isFocusScope_ { false };
     bool isGroup_ { false };
     FocusPriority focusPriority_ = FocusPriority::AUTO;
+    bool arrowKeyStepOut_ { true };
+    bool isSwitchByEnter_ { false };
+    bool enableDirectionalKeyFocus_ { false };
+    bool isCustomFocusTravel_ = false;
+    WeakPtr<FocusHub> nextFocusTravelNode_;
 };
 } // namespace OHOS::Ace::NG
 

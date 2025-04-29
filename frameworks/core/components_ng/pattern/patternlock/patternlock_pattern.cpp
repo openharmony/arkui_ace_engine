@@ -16,7 +16,6 @@
 #include "base/i18n/localization.h"
 #include "core/components_ng/pattern/patternlock/patternlock_pattern.h"
 
-#include "core/components_ng/pattern/patternlock/patternlock_paint_property.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/calc_length.h"
@@ -53,8 +52,9 @@ void PatternLockPattern::OnModifyDone()
     InitFocusEvent();
     InitMouseEvent();
     InitAccessibilityHoverEvent();
+    InitSkipUnselectedPoint();
     if (isInitVirtualNode_) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterRenderTask([weak = WeakClaim(this)]() {
             auto patternLock = weak.Upgrade();
@@ -228,6 +228,21 @@ void PatternLockPattern::ModifyAccessibilityVirtualNode()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
+std::string PatternLockPattern::ReplacePlaceHolder(const std::string& str, int32_t number)
+{
+    std::string result = str;
+    std::string numberStr = std::to_string(number);
+
+    size_t pos = result.find("%d");
+    if (pos != std::string::npos) {
+        result.replace(pos, 2, numberStr); // 2: "%d" length
+    } else {
+        result = str + numberStr;
+    }
+
+    return result;
+}
+
 void PatternLockPattern::UpdateAccessibilityTextNode(
     RefPtr<FrameNode> frameNode, float handleCircleRadius, int32_t x, int32_t y)
 {
@@ -239,8 +254,12 @@ void PatternLockPattern::UpdateAccessibilityTextNode(
     float offsetX = sideLength / PATTERN_LOCK_COL_COUNT / scale * (scale * (x + 1) - 1);
     float offsetY = sideLength / PATTERN_LOCK_COL_COUNT / scale * (scale * (y + 1) - 1);
     int32_t index = y * PATTERN_LOCK_COL_COUNT + x + 1;
-    std::string message = Localization::GetInstance()->GetEntryLetters("patternlock.accessibilitypasspoint");
-    std::string text = message + std::to_string(index);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto patternLockTheme = pipeline->GetTheme<V2::PatternLockTheme>();
+    CHECK_NULL_VOID(patternLockTheme);
+    auto message = patternLockTheme->GetPassPointTxt();
+    std::string text = ReplacePlaceHolder(message, index);
     CHECK_NULL_VOID(frameNode);
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
@@ -272,6 +291,9 @@ void PatternLockPattern::HandleTouchEvent(const TouchEventInfo& info)
             } else if (touchType == TouchType::MOVE) {
                 OnTouchMove(touchInfo);
             } else if (touchType == TouchType::UP) {
+                OnTouchUp();
+            } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) &&
+                       touchType == TouchType::CANCEL) {
                 OnTouchUp();
             }
             break;
@@ -360,7 +382,7 @@ void PatternLockPattern::UpdateDotConnectEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<PatternLockEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<PatternLockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateDotConnectEvent(choosePoint_.back().GetCode());
 }
@@ -392,7 +414,7 @@ void PatternLockPattern::AddPassPointToChoosePoint(
 
 void PatternLockPattern::AddPassPoint(int32_t x, int32_t y)
 {
-    if (choosePoint_.empty()) {
+    if (choosePoint_.empty() || skipUnselectedPoint_) {
         return;
     }
     passPointCount_ = 0;
@@ -453,13 +475,8 @@ bool PatternLockPattern::CheckAutoReset() const
 
 void PatternLockPattern::OnTouchDown(const TouchLocationInfo& info)
 {
-#ifdef PREVIEW
-    auto locationX = static_cast<float>(info.GetGlobalLocation().GetX());
-    auto locationY = static_cast<float>(info.GetGlobalLocation().GetY());
-#else
-    auto locationX = static_cast<float>(info.GetScreenLocation().GetX());
-    auto locationY = static_cast<float>(info.GetScreenLocation().GetY());
-#endif
+    auto locationX = static_cast<float>(info.GetLocalLocation().GetX());
+    auto locationY = static_cast<float>(info.GetLocalLocation().GetY());
     screenTouchPoint_.SetX(locationX);
     screenTouchPoint_.SetY(locationY);
 
@@ -486,13 +503,8 @@ void PatternLockPattern::OnTouchDown(const TouchLocationInfo& info)
 
 void PatternLockPattern::OnTouchMove(const TouchLocationInfo& info)
 {
-#ifdef PREVIEW
-    auto locationX = static_cast<float>(info.GetGlobalLocation().GetX());
-    auto locationY = static_cast<float>(info.GetGlobalLocation().GetY());
-#else
-    auto locationX = static_cast<float>(info.GetScreenLocation().GetX());
-    auto locationY = static_cast<float>(info.GetScreenLocation().GetY());
-#endif
+    auto locationX = static_cast<float>(info.GetLocalLocation().GetX());
+    auto locationY = static_cast<float>(info.GetLocalLocation().GetY());
     screenTouchPoint_.SetX(locationX);
     screenTouchPoint_.SetY(locationY);
     if (!isMoveEventValid_) {
@@ -523,7 +535,7 @@ void PatternLockPattern::AddPointEnd()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<PatternLockEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<PatternLockEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto patternCompleteEvent = V2::PatternCompleteEvent(chooseCellVec);
@@ -551,7 +563,7 @@ void PatternLockPattern::InitFocusEvent()
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
 
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();
@@ -751,7 +763,7 @@ void PatternLockPattern::InitMouseEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputEventHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputEventHub);
@@ -848,9 +860,37 @@ void PatternLockPattern::CalculateCellCenter()
         }
         cellCenter_ = GetLastChoosePointOffset();
     } else {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        cellCenter_ = screenTouchPoint_ - host->GetPositionToScreenWithTransform();
+        cellCenter_ = screenTouchPoint_;
+    }
+}
+
+OffsetF PatternLockPattern::GetTouchOffsetToNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, OffsetF());
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, OffsetF());
+    auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
+    OffsetF nodeOffset = host->GetPositionToWindowWithTransform();
+    auto container = Container::CurrentSafely();
+    auto windowScale = container->GetWindowScale();
+    nodeOffset = nodeOffset * windowScale;
+    OffsetF offset(windowOffset.GetX() + nodeOffset.GetX(), windowOffset.GetY() + nodeOffset.GetY());
+    offset = screenTouchPoint_ - offset;
+    if (windowScale != 0) {
+        offset = offset / windowScale;
+    }
+    return offset;
+}
+
+void PatternLockPattern::InitSkipUnselectedPoint()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto patternLockPaintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
+    CHECK_NULL_VOID(patternLockPaintProperty);
+    if (patternLockPaintProperty->HasSkipUnselectedPoint()) {
+        skipUnselectedPoint_ = patternLockPaintProperty->GetSkipUnselectedPointValue();
     }
 }
 } // namespace OHOS::Ace::NG

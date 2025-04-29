@@ -31,7 +31,7 @@ void RichEditorStyledStringController::SetStyledString(const RefPtr<SpanStringBa
 RefPtr<SpanStringBase> RichEditorStyledStringController::GetStyledString()
 {
     auto richEditorPattern = pattern_.Upgrade();
-    auto mutableSpanString = AceType::MakeRefPtr<MutableSpanString>("");
+    auto mutableSpanString = AceType::MakeRefPtr<MutableSpanString>(u"");
     CHECK_NULL_RETURN(richEditorPattern, mutableSpanString);
     auto styledString = richEditorPattern->GetStyledString();
     CHECK_NULL_RETURN(styledString, mutableSpanString);
@@ -61,7 +61,7 @@ void RichEditorStyledStringController::SetOnWillChange(std::function<bool(const 
 {
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_VOID(richEditorPattern);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStyledStringWillChange(std::move(func));
 }
@@ -70,7 +70,7 @@ void RichEditorStyledStringController::SetOnDidChange(std::function<void(const S
 {
     auto richEditorPattern = pattern_.Upgrade();
     CHECK_NULL_VOID(richEditorPattern);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStyledStringDidChange(std::move(func));
 }

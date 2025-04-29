@@ -24,14 +24,20 @@
 #include <utility>
 #include <vector>
 
+#include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/lru/count_limit_lru.h"
+#include "core/components_ng/render/drawing_forward.h"
 
 namespace OHOS::Ace {
 
-struct CachedImage;
+struct CachedImage {
+    explicit CachedImage(const std::shared_ptr<RSImage>& image) : imagePtr(image) {}
+    std::shared_ptr<RSImage> imagePtr;
+    uint32_t uniqueId = 0;
+};
 class ImageObject;
 
 namespace NG {
@@ -39,13 +45,13 @@ class ImageObject;
 class ImageData;
 } // namespace NG
 
-class ACE_EXPORT ImageCache : public AceType {
+class ACE_FORCE_EXPORT ImageCache : public AceType {
     DECLARE_ACE_TYPE(ImageCache, AceType);
 
 public:
     static RefPtr<ImageCache> Create();
-    ImageCache() = default;
-    ~ImageCache() override = default;
+    ImageCache();
+    ~ImageCache() override;
 
     void CacheImage(const std::string& key, const std::shared_ptr<CachedImage>& image);
     std::shared_ptr<CachedImage> GetCacheImage(const std::string& key);
@@ -58,6 +64,12 @@ public:
 
     void CacheImgObj(const std::string& key, const RefPtr<ImageObject>& imgObj);
     RefPtr<ImageObject> GetCacheImgObj(const std::string& key);
+    /**
+    @brief Clears the cached image object associated with the specified key.
+    This interface is for internal use only. Exercise caution when calling it.
+    @param key The unique identifier for the cached image object.
+    */
+    void ClearCacheImgObj(const std::string& key);
 
     void SetCapacity(size_t capacity)
     {
@@ -89,14 +101,14 @@ public:
     void DumpCacheInfo();
 
 private:
-    bool ProcessImageDataCacheInner(size_t dataSize);
+    bool ProcessImageDataCacheInner(size_t dataSize, std::vector<CacheNode<RefPtr<NG::ImageData>>>& needErase);
 
     std::atomic<size_t> capacity_ = 0; // by default memory cache can store 0 images.
     mutable std::mutex imageCacheMutex_;
     std::list<CacheNode<std::shared_ptr<CachedImage>>> cacheList_;
     std::unordered_map<std::string, std::list<CacheNode<std::shared_ptr<CachedImage>>>::iterator> imageCache_;
 
-    std::mutex dataCacheMutex_;
+    std::timed_mutex dataCacheMutex_;
     std::list<CacheNode<RefPtr<NG::ImageData>>> dataCacheList_;
     std::unordered_map<std::string, std::list<CacheNode<RefPtr<NG::ImageData>>>::iterator> imageDataCache_;
 

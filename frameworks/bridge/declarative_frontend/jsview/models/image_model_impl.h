@@ -28,9 +28,15 @@ class ImageModelImpl : public OHOS::Ace::ImageModel {
 public:
     void SetAlt(const ImageSourceInfo& src) override;
     void SetBorder(const Border& border) override;
+    void SetBorderRadius(const Dimension& value) override {};
+    void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft, const std::optional<Dimension>& radiusTopRight,
+        const std::optional<Dimension>& radiusBottomLeft, const std::optional<Dimension>& radiusBottomRight) override
+    {}
+    void SetBorderRadius(const NG::BorderRadiusProperty& borderRadius) override {}
     void SetBackBorder() override;
     void SetBlur(double blur) override;
     void SetImageFit(ImageFit value) override;
+    void SetImageMatrix(const Matrix4 &value) override {};
     void SetMatchTextDirection(bool value) override;
     void SetFitOriginSize(bool value) override;
     void SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback) override;
@@ -39,6 +45,7 @@ public:
     void Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixMap) override;
     void SetImageSourceSize(const std::pair<Dimension, Dimension>& size) override;
     void SetImageFill(const Color& color) override;
+    void ResetImageFill() override {};
     void SetImageInterpolation(ImageInterpolation iterpolation) override;
     void SetImageRepeat(ImageRepeat imageRepeat) override;
     void SetImageRenderMode(ImageRenderMode imageRenderMode) override;
@@ -65,7 +72,9 @@ public:
     void SetSmoothEdge(float value)  override {}
     void ResetImage() override {}
     void SetDynamicRangeMode(DynamicRangeMode dynamicRangeMode) override {}
+    void SetHdrBrightness(float hdrBrightness) override {}
     void SetEnhancedImageQuality(AIImageQuality imageQuality) override {}
+    void SetOrientation(ImageRotateOrientation orientation) override {}
     void CreateAnimation(const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration) override {}
     bool GetIsAnimation() override;
 };

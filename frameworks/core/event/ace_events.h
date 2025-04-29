@@ -35,7 +35,9 @@ enum class SourceType : int32_t {
     MOUSE = 1,
     TOUCH = 2,
     TOUCH_PAD = 3,
-    KEYBOARD = 4
+    KEYBOARD = 4,
+    JOYSTICK = 5,
+    CROWN = 6,
 };
 
 enum class SourceTool : int32_t {
@@ -154,6 +156,15 @@ public:
         return tiltY_;
     }
 
+    void SetRollAngle(float rollAngle)
+    {
+        rollAngle_ = rollAngle;
+    }
+    std::optional<float> GetRollAngle() const
+    {
+        return rollAngle_;
+    }
+
     void SetSourceTool(SourceTool tool)
     {
         sourceTool_ = tool;
@@ -200,6 +211,36 @@ public:
         pressedKeyCodes_ = pressedKeyCodes;
     }
 
+    int32_t GetPostEventNodeId() const
+    {
+        return postEventNodeId_;
+    }
+
+    void SetPostEventNodeId(int32_t postEventNodeId)
+    {
+        postEventNodeId_ = postEventNodeId;
+    }
+
+    bool GetIsPostEventResult() const
+    {
+        return isPostEventResult_;
+    }
+
+    void SetIsPostEventResult(bool isPostEventResult)
+    {
+        isPostEventResult_ = isPostEventResult;
+    }
+
+    int32_t GetOperatingHand() const
+    {
+        return operatingHand_;
+    }
+
+    void SetOperatingHand(int32_t operatingHand)
+    {
+        operatingHand_ = operatingHand;
+    }
+
 protected:
     // Event type like onTouchDown, onClick and so on.
     std::string type_;
@@ -211,6 +252,7 @@ protected:
     float force_ = 0.0f;
     std::optional<float> tiltX_;
     std::optional<float> tiltY_;
+    std::optional<float> rollAngle_;
     SourceTool sourceTool_ = SourceTool::UNKNOWN;
     int64_t deviceId_ = 0;
     // Will be used in drag.
@@ -219,6 +261,9 @@ protected:
     bool preventDefault_ = false;
     std::string patternName_;
     std::vector<KeyCode> pressedKeyCodes_;
+    bool isPostEventResult_ = false;
+    int32_t postEventNodeId_ = -1;
+    int32_t operatingHand_ = 0;
 };
 
 class PropagationEventInfo : public virtual TypeInfoBase {

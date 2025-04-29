@@ -20,6 +20,7 @@
 
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/render/canvas_image.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 
@@ -39,14 +40,18 @@ public:
         return pixelMap_;
     }
 
+    bool IsHdrPixelMap() override
+    {
+        return pixelMap_ && pixelMap_->IsHdr();
+    }
+
     void Cache(const std::string& key) override;
 
     RefPtr<CanvasImage> Clone() override;
 
+    void NotifyDrawCompletion(const std::string& srcInfo, const RefPtr<PixelMap>& pixmap);
     void DrawToRSCanvas(
         RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) override;
-    void DrawToRSCanvasWithBrush(
-        RSCanvas& canvas, RSBrush& brush, const RSRect& srcRect, const RSRect& dstRect);
     void DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) override;
     void DrawRect(RSCanvas& canvas, const RSRect& dstRect);
 
@@ -63,6 +68,7 @@ public:
     {
         return GetPixelMap();
     }
+    static RSMatrix ToDrawingMatrix(const Matrix4& matrix4);
 
 private:
     RefPtr<PixelMap> pixelMap_;

@@ -16,28 +16,26 @@
 #ifndef FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_REFRESH_REFRESH_TEST_NG_H
 #define FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_REFRESH_REFRESH_TEST_NG_H
 
-#include "test/unittest/core/pattern/test_ng.h"
+#include "test/unittest/core/pattern/scrollable/scrollable_utils_test_ng.h"
 #define private public
 #define protected public
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
-#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
-constexpr float REFRESH_HEIGHT = 400.f;
-constexpr Dimension TRIGGER_LOADING_DISTANCE = 16.0_vp;
-constexpr Dimension TRIGGER_REFRESH_DISTANCE = 64.0_vp;
-constexpr Dimension TRIGGER_REFRESH_WITH_TEXT_DISTANCE = 96.0_vp;
+constexpr float TRIGGER_LOADING_DISTANCE = 16.0;
+constexpr float TRIGGER_REFRESH_DISTANCE = 64.0;
+constexpr float TRIGGER_REFRESH_WITH_TEXT_DISTANCE = 96.0;
 constexpr int32_t DEFAULT_FRICTION_RATIO = 62;
 constexpr float PERCENT = 0.01;
 constexpr float RATIO = DEFAULT_FRICTION_RATIO * PERCENT;
 constexpr float CUSTOM_NODE_WIDTH = 100.f;
 constexpr float CUSTOM_NODE_HEIGHT = 10.f;
 
-class RefreshTestNg : public TestNG {
+class RefreshTestNg : public ScrollableUtilsTestNG {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
@@ -49,12 +47,10 @@ public:
     void CreateText();
     RefPtr<FrameNode> CreateCustomNode();
 
-    RefPtr<FrameNode> frameNode_;
     RefPtr<RefreshPattern> pattern_;
     RefPtr<RefreshEventHub> eventHub_;
     RefPtr<RefreshLayoutProperty> layoutProperty_;
     RefPtr<RefreshAccessibilityProperty> accessibilityProperty_;
 };
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_REFRESH_REFRESH_TEST_NG_H

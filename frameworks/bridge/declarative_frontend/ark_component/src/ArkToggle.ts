@@ -19,11 +19,31 @@ class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
   toggleNode: BuilderNode<[ToggleConfiguration]> | null = null;
   modifier: ContentModifier<ToggleConfiguration>;
   needRebuild: boolean = false;
+  toggleType: ToggleType = ToggleType.Switch;
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  allowChildCount(): number {
+    if (this.toggleType === ToggleType.Button) {
+      return 1;
+    }
+    return 0;
+  }
+  initialize(value: Object[]): this {
+    if (!value.length) {
+      return this;
+    }
+    if (!isUndefined(value[0]) && !isNull(value[0]) && isObject(value[0])) {
+      this.toggleType = (value[0] as ToggleOptions).type;
+      modifierWithKey(this._modifiersWithKeys, ToggleOptionsModifier.identity, ToggleOptionsModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, ToggleOptionsModifier.identity, ToggleOptionsModifier, undefined);
+    }
+    return this;
+  }
   onChange(callback: (isOn: boolean) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ToggleOnChangeModifier.identity, ToggleOnChangeModifier, callback);
+    return this;
   }
   selectedColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, ToggleSelectedColorModifier.identity, ToggleSelectedColorModifier, value);
@@ -87,6 +107,21 @@ class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
     return this.toggleNode.getFrameNode();
   }
 }
+
+class ToggleOnChangeModifier extends ModifierWithKey<(isOn:boolean) => void> {
+  constructor(value: (isOn:boolean) => void) {
+    super(value);
+  }
+  static identity = Symbol('toggleOnChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().toggle.resetOnChange(node);
+    } else {
+      getUINativeModule().toggle.setOnChange(node, this.value);
+    }
+  }
+}
+
 class ToggleSelectedColorModifier extends ModifierWithKey<ResourceColor> {
   constructor(value: ResourceColor) {
     super(value);
@@ -302,6 +337,23 @@ class ToggleContentModifier extends ModifierWithKey<ContentModifier<ToggleConfig
     let toggleComponent = component as ArkToggleComponent;
     toggleComponent.setNodePtr(node);
     toggleComponent.setContentModifier(this.value);
+  }
+}
+class ToggleOptionsModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('toggleOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().toggle.setToggleOptions(node, undefined);
+    } else {
+      getUINativeModule().toggle.setToggleOptions(node, this.value?.isOn);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.isOn, this.value.isOn);
   }
 }
 // @ts-ignore

@@ -17,9 +17,8 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
-#include "core/components_ng/pattern/list/list_pattern.h"
-#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -44,20 +43,26 @@ float GetScrollableNodeOffset(RefPtr<Pattern> pattern)
     return scrollablePattern->GetBarOffset();
 }
 
-double GetScrollBarOutBoundaryExtent(RefPtr<Pattern> pattern)
+float GetScrollBarOutBoundaryExtent(RefPtr<Pattern> pattern)
 {
     auto scrollablePattern = AceType::DynamicCast<ScrollablePattern>(pattern);
-    CHECK_NULL_RETURN(scrollablePattern, 0.0f);
+    CHECK_NULL_RETURN(scrollablePattern, 0.f);
     return scrollablePattern->GetScrollBarOutBoundaryExtent();
 }
 } // namespace
 
 void ScrollBarProxy::RegisterScrollableNode(const ScrollableNodeInfo& scrollableNode)
 {
-    if (std::find(scrollableNodes_.begin(), scrollableNodes_.end(), scrollableNode) != scrollableNodes_.end()) {
+    scorllableNode_ = scrollableNode;
+}
+
+void ScrollBarProxy::RegisterNestScrollableNode(const ScrollableNodeInfo& scrollableNode)
+{
+    if (std::find(nestScrollableNodes_.begin(), nestScrollableNodes_.end(), scrollableNode) !=
+        nestScrollableNodes_.end()) {
         return;
     }
-    scrollableNodes_.emplace_back(scrollableNode);
+    nestScrollableNodes_.emplace_back(scrollableNode);
 }
 
 void ScrollBarProxy::RegisterScrollBar(const WeakPtr<ScrollBarPattern>& scrollBar)
@@ -68,12 +73,12 @@ void ScrollBarProxy::RegisterScrollBar(const WeakPtr<ScrollBarPattern>& scrollBa
     scrollBars_.emplace_back(scrollBar);
 }
 
-void ScrollBarProxy::UnRegisterScrollableNode(const WeakPtr<ScrollablePattern>& scrollableNode)
+void ScrollBarProxy::UnRegisterNestScrollableNode(const WeakPtr<ScrollablePattern>& scrollableNode)
 {
-    auto iter = std::find_if(scrollableNodes_.begin(), scrollableNodes_.end(),
+    auto iter = std::find_if(nestScrollableNodes_.begin(), nestScrollableNodes_.end(),
         [&scrollableNode](const ScrollableNodeInfo& info) { return scrollableNode == info.scrollableNode; });
-    if (iter != scrollableNodes_.end()) {
-        scrollableNodes_.erase(iter);
+    if (iter != nestScrollableNodes_.end()) {
+        nestScrollableNodes_.erase(iter);
     }
 }
 
@@ -86,81 +91,87 @@ void ScrollBarProxy::UnRegisterScrollBar(const WeakPtr<ScrollBarPattern>& scroll
 }
 
 void ScrollBarProxy::NotifyScrollableNode(
-    float distance, int32_t source, const WeakPtr<ScrollBarPattern>& weakScrollBar) const
+    float distance, int32_t source, const WeakPtr<ScrollBarPattern>& weakScrollBar, bool isMouseWheelScroll) const
 {
     auto scrollBar = weakScrollBar.Upgrade();
     CHECK_NULL_VOID(scrollBar);
-    float barScrollableDistance  = scrollBar->GetScrollableDistance();
-
-    for (const auto& node : scrollableNodes_) {
-        if (node.onPositionChanged == nullptr) {
-            continue;
-        }
-        auto scrollable = node.scrollableNode.Upgrade();
-        if (!scrollable || !CheckScrollable(scrollable)) {
-            continue;
-        }
-        float value = CalcPatternOffset(GetScrollableNodeDistance(scrollable), barScrollableDistance, distance);
-        node.onPositionChanged(value, source);
-        if (node.scrollbarFRcallback) {
-            node.scrollbarFRcallback(0, SceneStatus::RUNNING);
-        }
+    float barScrollableDistance = scrollBar->GetScrollableDistance();
+    auto node = scorllableNode_;
+    CHECK_NULL_VOID(node.onPositionChanged);
+    auto scrollable = node.scrollableNode.Upgrade();
+    if (!scrollable || !CheckScrollable(scrollable)) {
+        return;
+    }
+    float controlDistance = scrollBar->GetControlDistance();
+    float value = CalcPatternOffset(controlDistance, barScrollableDistance, distance);
+    node.onPositionChanged(value, source, IsNestScroller(), isMouseWheelScroll);
+    if (node.scrollbarFRcallback) {
+        node.scrollbarFRcallback(0, SceneStatus::RUNNING);
     }
 }
 
-void ScrollBarProxy::NotifyScrollBarNode(float distance, int32_t source) const
+void ScrollBarProxy::NotifyScrollBarNode(float distance, int32_t source, bool isMouseWheelScroll) const
 {
-    for (const auto& node : scrollableNodes_) {
-        if (node.onPositionChanged == nullptr) {
-            continue;
-        }
-        auto scrollable = node.scrollableNode.Upgrade();
-        if (!scrollable || !CheckScrollable(scrollable)) {
-            continue;
-        }
-        node.onPositionChanged(distance, source);
-        if (node.scrollbarFRcallback) {
-            node.scrollbarFRcallback(0, SceneStatus::RUNNING);
-        }
+    auto node = scorllableNode_;
+    CHECK_NULL_VOID(node.onPositionChanged);
+    auto scrollable = node.scrollableNode.Upgrade();
+    if (!scrollable || !CheckScrollable(scrollable)) {
+        return;
+    }
+    node.onPositionChanged(distance, source, IsNestScroller(), isMouseWheelScroll);
+    if (node.scrollbarFRcallback) {
+        node.scrollbarFRcallback(0, SceneStatus::RUNNING);
     }
 }
 
 void ScrollBarProxy::NotifyScrollStart() const
 {
-    for (const auto& node : scrollableNodes_) {
-        if (node.scrollStartCallback == nullptr) {
-            continue;
-        }
-        node.scrollStartCallback(0, SCROLL_FROM_BAR);
-        if (node.scrollbarFRcallback) {
-            node.scrollbarFRcallback(0, SceneStatus::RUNNING);
-        }
+    auto node = scorllableNode_;
+    CHECK_NULL_VOID(node.scrollStartCallback);
+    node.scrollStartCallback(0, SCROLL_FROM_BAR, IsNestScroller());
+    if (node.scrollbarFRcallback) {
+        node.scrollbarFRcallback(0, SceneStatus::RUNNING);
     }
 }
 
 void ScrollBarProxy::NotifyScrollStop() const
 {
-    for (const auto& node : scrollableNodes_) {
-        if (node.scrollEndCallback == nullptr) {
-            continue;
-        }
-        node.scrollEndCallback();
-        if (node.scrollbarFRcallback) {
-            node.scrollbarFRcallback(0, SceneStatus::RUNNING);
-        }
+    auto node = scorllableNode_;
+    CHECK_NULL_VOID(node.scrollEndCallback);
+    node.scrollEndCallback(IsNestScroller());
+    if (node.scrollbarFRcallback) {
+        node.scrollbarFRcallback(0, SceneStatus::RUNNING);
     }
 }
 
-void ScrollBarProxy::NotifyScrollBar(const WeakPtr<ScrollablePattern>& weakScrollableNode) const
+void ScrollBarProxy::NotifyScrollBar(int32_t scrollSource)
 {
-    auto scrollable = weakScrollableNode.Upgrade();
-    if (!scrollable || !CheckScrollable(scrollable)) {
-        return;
-    }
+    auto scrollable = scorllableNode_.scrollableNode.Upgrade();
+    CHECK_NULL_VOID(scrollable && CheckScrollable(scrollable));
 
     float controlDistance = GetScrollableNodeDistance(scrollable);
-    float scrollableNodeOffset = -GetScrollableNodeOffset(scrollable); // scroll bar direction is reverse
-    double scrollBarOutBoundaryDistance = GetScrollBarOutBoundaryExtent(scrollable);
+    float scrollableNodeOffset = -GetScrollableNodeOffset(scrollable);
+    for (auto info : nestScrollableNodes_) {
+        auto pattern = info.scrollableNode.Upgrade();
+        if (!pattern || !CheckScrollable(pattern)) {
+            continue;
+        }
+        controlDistance += GetScrollableNodeDistance(pattern);
+        scrollableNodeOffset += -GetScrollableNodeOffset(pattern);
+    }
+    if (scrollSource == SCROLL_FROM_JUMP || scrollSource == SCROLL_FROM_FOCUS_JUMP) {
+        auto atTop = NearZero(scrollableNodeOffset) && NearZero(lastScrollableNodeOffset_);
+        auto atBottom = NearEqual(lastScrollableNodeOffset_, lastControlDistance_) &&
+                        NearEqual(scrollableNodeOffset, controlDistance);
+        if (!atTop && !atBottom) {
+            StopScrollBarAnimator();
+            StartScrollBarAnimator();
+        }
+    }
+    lastControlDistance_ = controlDistance;
+    lastScrollableNodeOffset_ = scrollableNodeOffset;
+
+    float scrollBarOutBoundaryDistance = GetScrollBarOutBoundaryExtent(scrollable);
     for (const auto& weakScrollBar : scrollBars_) {
         auto scrollBar = weakScrollBar.Upgrade();
         if (!scrollBar) {
@@ -174,13 +185,16 @@ void ScrollBarProxy::NotifyScrollBar(const WeakPtr<ScrollablePattern>& weakScrol
         if (!host) {
             continue;
         }
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && !scrollBar->HasChild()) {
+        if (scrollBar->UseInnerScrollBar()) {
             scrollBar->SetScrollableNodeOffset(scrollableNodeOffset);
-            scrollBar->UpdateScrollBarOffset();
+            scrollBar->UpdateScrollBarOffset(scrollSource);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        } else {
-            scrollBar->SetScrollableNodeOffset(
-                !scrollable->IsReverse() ? scrollableNodeOffset : controlDistance - scrollableNodeOffset);
+            continue;
+        }
+
+        scrollBar->SetScrollableNodeOffset(
+            !scrollable->IsReverse() ? scrollableNodeOffset : controlDistance - scrollableNodeOffset);
+        if (!host->CheckNeedForceMeasureAndLayout()) {
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         }
     }
@@ -216,24 +230,28 @@ void ScrollBarProxy::StopScrollBarAnimator() const
 bool ScrollBarProxy::NotifySnapScroll(
     float delta, float velocity, float barScrollableDistance, float dragDistance) const
 {
-    for (const auto& node : scrollableNodes_) {
-        auto scrollable = node.scrollableNode.Upgrade();
-        if (!scrollable || !CheckScrollable(scrollable) || !node.calePredictSnapOffsetCallback ||
-            !node.startScrollSnapMotionCallback) {
-            continue;
-        }
+    auto scrollable = scorllableNode_.scrollableNode.Upgrade();
+    CHECK_NULL_RETURN(scrollable, false);
+    if (scorllableNode_.startSnapAnimationCallback) {
         auto controlDistance = GetScrollableNodeDistance(scrollable);
-        auto patternOffset = CalcPatternOffset(controlDistance, barScrollableDistance, delta);
-        dragDistance = CalcPatternOffset(controlDistance, barScrollableDistance, dragDistance);
-        auto predictSnapOffset = node.calePredictSnapOffsetCallback(patternOffset, dragDistance, -velocity);
-        // If snap scrolling, predictSnapOffset will has a value.
-        if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
-            node.startScrollSnapMotionCallback(predictSnapOffset.value(), velocity);
-            // Outer scrollBar can only control one snap scrollable component.
-            return true;
-        }
+        SnapAnimationOptions snapAnimationOptions = {
+            .snapDelta = CalcPatternOffset(controlDistance, barScrollableDistance, delta),
+            .animationVelocity = -velocity,
+            .dragDistance = CalcPatternOffset(controlDistance, barScrollableDistance, dragDistance),
+            .fromScrollBar = true,
+        };
+        return scorllableNode_.startSnapAnimationCallback(snapAnimationOptions);
     }
     return false;
+}
+
+bool ScrollBarProxy::NotifySnapScrollWithoutChild(SnapAnimationOptions snapAnimationOptions) const
+{
+    auto scrollable = scorllableNode_.scrollableNode.Upgrade();
+    if (!scrollable || !CheckScrollable(scrollable) || !scorllableNode_.startSnapAnimationCallback) {
+        return false;
+    }
+    return scorllableNode_.startSnapAnimationCallback(snapAnimationOptions);
 }
 
 float ScrollBarProxy::CalcPatternOffset(float controlDistance, float barScrollableDistance, float delta) const
@@ -247,11 +265,29 @@ float ScrollBarProxy::CalcPatternOffset(float controlDistance, float barScrollab
 
 void ScrollBarProxy::ScrollPage(bool reverse, bool smooth)
 {
-    for (const auto& node : scrollableNodes_) {
-        if (node.scrollPageCallback == nullptr) {
-            continue;
-        }
+    auto node = scorllableNode_;
+    if (!IsNestScroller() || nestScrollableNodes_.empty()) {
+        CHECK_NULL_VOID(node.scrollPageCallback);
         node.scrollPageCallback(reverse, smooth);
+    } else {
+        auto nodePattern = scorllableNode_.scrollableNode.Upgrade();
+        CHECK_NULL_VOID(nodePattern);
+        auto nodeInfo = nestScrollableNodes_.back();
+        auto pattern = nodeInfo.scrollableNode.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto patternNode = pattern->GetHost();
+        CHECK_NULL_VOID(patternNode);
+        auto geometryNode = patternNode->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto size = geometryNode->GetFrameSize();
+        auto axis = nodePattern->GetAxis();
+        auto distance = GetMainAxisSize(size, axis);
+        int32_t source = SCROLL_FROM_BAR;
+        float offset = reverse ? distance : -distance;
+        CHECK_NULL_VOID(scorllableNode_.onPositionChanged);
+        NotifyScrollStart();
+        scorllableNode_.onPositionChanged(offset, source, true, false);
+        NotifyScrollStop();
     }
 }
 
@@ -269,6 +305,58 @@ void ScrollBarProxy::SetScrollEnabled(bool scrollEnabled, const WeakPtr<Scrollab
         }
 
         scrollBar->SetScrollEnabled(scrollEnabled);
+    }
+}
+
+bool ScrollBarProxy::IsNestScroller() const
+{
+    for (auto bar : scrollBars_) {
+        auto scrollBarPattern = bar.Upgrade();
+        if (!scrollBarPattern) {
+            continue;
+        }
+        auto enableNestedSorll = scrollBarPattern->GetEnableNestedSorll();
+        if (enableNestedSorll) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ScrollBarProxy::IsScrollSnapTrigger() const
+{
+    if (scrollSnapTrigger_) {
+        return true;
+    }
+    for (auto bar : scrollBars_) {
+        auto scrollBar = bar.Upgrade();
+        if (!scrollBar) {
+            continue;
+        }
+        if (scrollBar->UseInnerScrollBar()) {
+            auto innerScrollBar = scrollBar->GetScrollBar();
+            if (!innerScrollBar) {
+                continue;
+            }
+            if (innerScrollBar->IsDriving()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void ScrollBarProxy::MarkScrollBarDirty() const
+{
+    for (auto bar : scrollBars_) {
+        auto scrollBarPattern = bar.Upgrade();
+        if (!scrollBarPattern || scrollBarPattern->UseInnerScrollBar()) {
+            continue;
+        }
+        auto host = scrollBarPattern->GetHost();
+        if (host && !host->CheckNeedForceMeasureAndLayout()) {
+            host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        }
     }
 }
 } // namespace OHOS::Ace::NG

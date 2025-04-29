@@ -19,6 +19,7 @@
 #include <cmath>
 
 #include "base/geometry/ng/size_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components_ng/property/gradient_property.h"
@@ -38,6 +39,7 @@ public:
         const SizeF& paintSize, const RSImage& image, const DisplayScaleInfo& dipscaleInfoe);
     ~BorderImagePainter() override = default;
     void PaintBorderImage(const OffsetF& offset, RSCanvas& canvas) const;
+    RectF GetDrawRect(const OffsetF& offset);
 
 private:
     void InitPainter();

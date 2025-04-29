@@ -78,6 +78,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     owningChildView: IPropertySubscriber,
     thisPropertyName: PropertyInfo) {
     super(owningChildView, thisPropertyName);
+    this.setDecoratorInfo("@Prop");
 
     if (source && (typeof (source) === 'object') && ('subscribeMe' in source)) {
       // code path for @(Local)StorageProp, the source is a ObservedPropertyObject<C> in a LocalStorage)
@@ -102,7 +103,6 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     if (this.source_ !== undefined) {
       this.resetLocalValue(this.source_.get(), /* needCopyObject */ true);
     }
-    this.setDecoratorInfo("@Prop");
     stateMgmtConsole.debug(`${this.debugInfo()}: constructor: done!`);
   }
 

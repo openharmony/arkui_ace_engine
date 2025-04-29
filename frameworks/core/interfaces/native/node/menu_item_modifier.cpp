@@ -14,12 +14,7 @@
  */
 #include "core/interfaces/native/node/menu_item_modifier.h"
 
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
@@ -224,23 +219,77 @@ void ResetSelectIconSymbol(ArkUINodeHandle node)
     MenuItemModelNG::SetSelectIconSymbol(frameNode, nullptr);
 }
 
+void SetMenuItemOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(bool)>*>(callback);
+        MenuItemModelNG::SetOnChange(frameNode, std::move(*onChange));
+    } else {
+        MenuItemModelNG::SetOnChange(frameNode, nullptr);
+    }
+}
+
+void ResetMenuItemOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string iconPathStr;
+    MenuItemModelNG::SetOnChange(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUIMenuItemModifier* GetMenuItemModifier()
 {
-    static const ArkUIMenuItemModifier modifier = { SetMenuItemSelected, ResetMenuItemSelected, SetLabelFontColor,
-        ResetLabelFontColor, SetContentFontColor, ResetContentFontColor, SetLabelFont, ResetLabelFont, SetContentFont,
-        ResetContentFont, SetSelectIcon, ResetSelectIcon, SetSelectIconSrc, ResetSelectIconSrc, SetSelectIconSymbol,
-        ResetSelectIconSymbol };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIMenuItemModifier modifier = {
+        .setMenuItemSelected = SetMenuItemSelected,
+        .resetMenuItemSelected = ResetMenuItemSelected,
+        .setLabelFontColor = SetLabelFontColor,
+        .resetLabelFontColor = ResetLabelFontColor,
+        .setContentFontColor = SetContentFontColor,
+        .resetContentFontColor = ResetContentFontColor,
+        .setLabelFont = SetLabelFont,
+        .resetLabelFont = ResetLabelFont,
+        .setContentFont = SetContentFont,
+        .resetContentFont = ResetContentFont,
+        .setSelectIcon = SetSelectIcon,
+        .resetSelectIcon = ResetSelectIcon,
+        .setSelectIconSrc = SetSelectIconSrc,
+        .resetSelectIconSrc = ResetSelectIconSrc,
+        .setSelectIconSymbol = SetSelectIconSymbol,
+        .resetSelectIconSymbol = ResetSelectIconSymbol,
+        .setOnChange = SetMenuItemOnChange,
+        .resetOnChange = ResetMenuItemOnChange,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIMenuItemModifier* GetCJUIMenuItemModifier()
 {
-    static const CJUIMenuItemModifier modifier = { SetMenuItemSelected, ResetMenuItemSelected, SetLabelFontColor,
-        ResetLabelFontColor, SetContentFontColor, ResetContentFontColor, SetLabelFont, ResetLabelFont, SetContentFont,
-        ResetContentFont, SetSelectIcon, ResetSelectIcon, SetSelectIconSrc, ResetSelectIconSrc, SetSelectIconSymbol,
-        ResetSelectIconSymbol };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIMenuItemModifier modifier = {
+        .setMenuItemSelected = SetMenuItemSelected,
+        .resetMenuItemSelected = ResetMenuItemSelected,
+        .setLabelFontColor = SetLabelFontColor,
+        .resetLabelFontColor = ResetLabelFontColor,
+        .setContentFontColor = SetContentFontColor,
+        .resetContentFontColor = ResetContentFontColor,
+        .setLabelFont = SetLabelFont,
+        .resetLabelFont = ResetLabelFont,
+        .setContentFont = SetContentFont,
+        .resetContentFont = ResetContentFont,
+        .setSelectIcon = SetSelectIcon,
+        .resetSelectIcon = ResetSelectIcon,
+        .setSelectIconSrc = SetSelectIconSrc,
+        .resetSelectIconSrc = ResetSelectIconSrc,
+        .setSelectIconSymbol = SetSelectIconSymbol,
+        .resetSelectIconSymbol = ResetSelectIconSymbol,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

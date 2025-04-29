@@ -33,7 +33,9 @@
 #include "frameworks/bridge/common/dom/dom_panel.h"
 #include "frameworks/bridge/common/dom/dom_picker_view.h"
 #include "frameworks/bridge/common/dom/dom_progress.h"
+#ifdef QRCODEGEN_SUPPORT
 #include "frameworks/bridge/common/dom/dom_qrcode.h"
+#endif
 #include "frameworks/bridge/common/dom/dom_refresh.h"
 #ifdef WEB_SUPPORTED
 #include "frameworks/bridge/common/dom/dom_rich_text.h"
@@ -124,7 +126,6 @@ RefPtr<DOMNode> DOMListItemCreator(NodeId nodeId, const std::string& tag, int32_
 DOMDocument::~DOMDocument()
 {
     CHECK_RUN_ON(UI);
-    LOG_DESTROY();
 }
 
 RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nodeId, int32_t itemIndex)
@@ -190,7 +191,9 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_POPUP, &DOMNodeCreator<DOMPopup> },
 #endif
         { DOM_NODE_TAG_PROGRESS, &DOMNodeCreator<DOMProgress> },
+#ifdef QRCODEGEN_SUPPORT
         { DOM_NODE_TAG_QRCODE, &DOMNodeCreator<DOMQrcode> },
+#endif
 #ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_RATING, &DOMNodeCreator<DOMRating> },
 #endif

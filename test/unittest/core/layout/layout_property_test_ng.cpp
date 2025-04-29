@@ -28,6 +28,7 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/safe_area_insets.h"
+#include "core/components_ng/property/grid_property.h"
 #include "core/pipeline/base/element_register.h"
 
 
@@ -423,7 +424,7 @@ HWTEST_F(LayoutPropertyTestNg, BuildGridProperty001, TestSize.Level1)
      */
     layoutProperty->Reset();
     layoutProperty->BuildGridProperty(FRAME_NODE_ROOT);
-    auto parent = FRAME_NODE_ROOT->GetAncestorNodeOfFrame();
+    auto parent = FRAME_NODE_ROOT->GetAncestorNodeOfFrame(false);
     EXPECT_EQ(parent, nullptr);
 
     /**
@@ -432,9 +433,9 @@ HWTEST_F(LayoutPropertyTestNg, BuildGridProperty001, TestSize.Level1)
      */
     layoutProperty->gridProperty_ = std::make_unique<GridProperty>();
     FRAME_NODE_ROOT->SetParent(FRAME_NODE_TEST);
-    FRAME_NODE_ROOT->NotifyVisibleChange(true);
+    FRAME_NODE_ROOT->NotifyVisibleChange(VisibleType::INVISIBLE, VisibleType::VISIBLE);
     layoutProperty->BuildGridProperty(FRAME_NODE_ROOT);
-    auto result = FRAME_NODE_ROOT->GetAncestorNodeOfFrame();
+    auto result = FRAME_NODE_ROOT->GetAncestorNodeOfFrame(false);
     ASSERT_NE(result, nullptr);
     EXPECT_EQ(result->GetTag(), VALUE_TEST);
 
@@ -490,8 +491,7 @@ HWTEST_F(LayoutPropertyTestNg, UpdateGridProperty001, TestSize.Level1)
      */
     layoutProperty->gridProperty_ = std::make_unique<GridProperty>();
     layoutProperty->UpdateGridProperty(DEFAULT_GRID_SPAN, DEFAULT_GRID_OFFSET, GridSizeType::UNDEFINED);
-    EXPECT_EQ(layoutProperty->layoutConstraint_->minSize.Width(), 0);
-    EXPECT_EQ(layoutProperty->layoutConstraint_->minSize.Height(), 0);
+    EXPECT_FALSE(layoutProperty->layoutConstraint_.has_value());
     EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_MEASURE);
 
     /**
@@ -534,7 +534,7 @@ HWTEST_F(LayoutPropertyTestNg, UpdateGridProperty002, TestSize.Level1)
     auto framenodeTemp = FrameNode::CreateFrameNode("root", 2, AceType::MakeRefPtr<Pattern>(), true);
     bool result1 = layoutProperty->UpdateGridOffset(framenodeTemp);
     EXPECT_NE(layoutProperty->gridProperty_->GetOffset(), UNDEFINED_DIMENSION);
-    EXPECT_EQ(framenodeTemp->GetAncestorNodeOfFrame(), nullptr);
+    EXPECT_EQ(framenodeTemp->GetAncestorNodeOfFrame(false), nullptr);
     EXPECT_FALSE(result1);
 }
 
@@ -557,14 +557,6 @@ HWTEST_F(LayoutPropertyTestNg, CreatePaddingAndBorderWithDefault001, TestSize.Le
     PaddingPropertyF paddingPropertyF = layoutProperty->CreatePaddingAndBorderWithDefault(1.0, 2.0, 3.0, 4.0);
     EXPECT_EQ(paddingPropertyF.left, 1.0 + 3.0);
     EXPECT_EQ(paddingPropertyF.right, 1.0 + 3.0);
-
-    /**
-     * @tc.steps3: call CreatePaddingWithoutBorder, push layoutConstraint_is null.
-     * @tc.expected: After CombinePaddingsAndBorder, Return paddingOne is [0, 0, 0, 0].
-     */
-    PaddingPropertyF paddingOne = layoutProperty->CreatePaddingWithoutBorder();
-    EXPECT_EQ(paddingOne.left, 0);
-    EXPECT_EQ(paddingOne.right, 0);
 
     /**
      * @tc.steps4: call CreateMargin, push layoutConstraint_ null.
@@ -624,7 +616,7 @@ HWTEST_F(LayoutPropertyTestNg, OnVisibilityUpdate001, TestSize.Level1)
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
     layoutProperty->SetHost(frameNodeHost);
     layoutProperty->OnVisibilityUpdate(VisibleType::INVISIBLE, true);
-    auto parent = layoutProperty->GetHost()->GetAncestorNodeOfFrame();
+    auto parent = layoutProperty->GetHost()->GetAncestorNodeOfFrame(false);
     EXPECT_EQ(parent, nullptr);
 
     /**
@@ -642,7 +634,7 @@ HWTEST_F(LayoutPropertyTestNg, OnVisibilityUpdate001, TestSize.Level1)
      * @tc.expected: expected parent_test is not null.
      */
     layoutProperty->OnVisibilityUpdate(VisibleType::GONE);
-    auto parent_test = layoutProperty->GetHost()->GetAncestorNodeOfFrame();
+    auto parent_test = layoutProperty->GetHost()->GetAncestorNodeOfFrame(false);
     ASSERT_NE(parent_test, nullptr);
 }
 
@@ -1077,7 +1069,7 @@ HWTEST_F(LayoutPropertyTestNg, UpdateDisplayIndex001, TestSize.Level1)
      */
     EXPECT_FALSE(layoutProperty->flexItemProperty_);
     layoutProperty->UpdateDisplayIndex(0);
-    EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL | PROPERTY_UPDATE_MEASURE);
+    EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 
     /**
      * @tc.steps3 Call UpdateFlexBasis with flexItemProperty_ again.

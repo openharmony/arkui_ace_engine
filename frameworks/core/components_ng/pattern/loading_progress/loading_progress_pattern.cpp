@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,9 +14,8 @@
  */
 
 #include "base/log/dump_log.h"
+#include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
-
-#include "core/components_ng/pattern/loading_progress/loading_progress_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 
@@ -61,6 +60,7 @@ void LoadingProgressPattern::OnModifyDone()
     CHECK_NULL_VOID(paintProperty);
     enableLoading_ = paintProperty->GetEnableLoadingValue(true);
     enableLoading_ ? StartAnimation() : StopAnimation();
+    InitFocusEvent();
 }
 
 void LoadingProgressPattern::OnVisibleChange(bool isVisible)
@@ -100,7 +100,9 @@ void LoadingProgressPattern::RegisterVisibleAreaChange()
     if (hasVisibleChangeRegistered_) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto pattern = weak.Upgrade();
@@ -113,10 +115,8 @@ void LoadingProgressPattern::RegisterVisibleAreaChange()
             pattern->StopAnimation();
         }
     };
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     std::vector<double> ratioList = {0.0};
-    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
     pipeline->AddWindowStateChangedCallback(host->GetId());
     hasVisibleChangeRegistered_ = true;
 }
@@ -169,7 +169,7 @@ RefPtr<FrameNode> LoadingProgressPattern::BuildContentModifierNode()
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     auto paintProperty = host->GetPaintProperty<LoadingProgressPaintProperty>();
@@ -177,5 +177,139 @@ RefPtr<FrameNode> LoadingProgressPattern::BuildContentModifierNode()
     auto enableLoading = paintProperty->GetEnableLoadingValue(true);
     LoadingProgressConfiguration loadingProgressConfiguration(enableLoading, enabled);
     return (makeFunc_.value())(loadingProgressConfiguration);
+}
+
+void LoadingProgressPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_VOID(json);
+    json->Put("IsInVisibleArea", isVisibleArea_ ? "true" : "false");
+}
+
+void LoadingProgressPattern::InitThemeValues()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto progressTheme = pipeline->GetTheme<ProgressTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(progressTheme);
+
+    defaultColor_ = progressTheme->GetLoadingColor();
+    focusedColor_ = progressTheme->GetLoadingFocusedColor();
+}
+
+void LoadingProgressPattern::InitFocusEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleFocusEvent();
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+}
+
+void LoadingProgressPattern::HandleFocusEvent()
+{
+    SetFocusStyle();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetIsFocusActive()) {
+        SetFocusStyle();
+    }
+    AddIsFocusActiveUpdateEvent();
+}
+
+void LoadingProgressPattern::HandleBlurEvent()
+{
+    ClearFocusStyle();
+    RemoveIsFocusActiveUpdateEvent();
+}
+
+void LoadingProgressPattern::SetFocusStyle()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    if (paintProperty->GetColorValue(defaultColor_) == defaultColor_) {
+        paintProperty->UpdateColor(focusedColor_);
+        isFocusColorSet_ = true;
+    }
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void LoadingProgressPattern::ClearFocusStyle()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    if (isFocusColorSet_) {
+        paintProperty->UpdateColor(defaultColor_);
+        isFocusColorSet_ = false;
+    }
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void LoadingProgressPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            isFocusAcitve ? pattern->SetFocusStyle() : pattern->ClearFocusStyle();
+        };
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipline = host->GetContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void LoadingProgressPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipline = host->GetContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
+}
+
+bool LoadingProgressPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    bool result = false;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, result);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, result);
+    auto progressTheme = pipeline->GetTheme<ProgressTheme>(host->GetThemeScopeId());
+    CHECK_NULL_RETURN(progressTheme, result);
+    auto paintProperty = host->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, result);
+
+    result = !paintProperty->HasColor();
+
+    if (themeScopeId && !colorLock_) {
+        paintProperty->UpdateColor(progressTheme->GetLoadingColor());
+        result = true;
+    }
+    return result;
 }
 } // namespace OHOS::Ace::NG

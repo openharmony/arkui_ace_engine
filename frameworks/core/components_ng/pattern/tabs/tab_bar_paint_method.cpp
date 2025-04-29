@@ -18,6 +18,7 @@
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -38,14 +39,13 @@ CanvasDrawFunction TabBarPaintMethod::GetForegroundDrawFunction(PaintWrapper* pa
     
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);
-    auto frameRect = geometryNode->GetFrameRect();
     MarginPropertyF padding;
     if (geometryNode->GetPadding()) {
         padding.left = geometryNode->GetPadding()->left;
         padding.right = geometryNode->GetPadding()->right;
     }
 
-    auto paintFunc = [gradientRegions = gradientRegions_, barRect = frameRect, backgroundColor = backgroundColor_,
+    auto paintFunc = [gradientRegions = gradientRegions_, barRect = frameRect_, backgroundColor = backgroundColor_,
                          padding](RSCanvas& canvas) {
         PaintGradient(canvas, barRect, backgroundColor, gradientRegions, padding);
     };
@@ -55,7 +55,7 @@ CanvasDrawFunction TabBarPaintMethod::GetForegroundDrawFunction(PaintWrapper* pa
 void TabBarPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& barRect, const Color& backgroundColor,
     const std::vector<bool>& gradientRegions, const MarginPropertyF& padding)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
@@ -169,7 +169,7 @@ RefPtr<Modifier> TabBarPaintMethod::GetContentModifier(PaintWrapper* paintWrappe
 void TabBarPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(tabBarModifier_);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
 
     tabBarModifier_->SetIndicatorOffset(indicatorOffset_);

@@ -17,15 +17,18 @@
 #define _NATIVE_INTERFACE_XCOMPONENT_IMPL_
 
 #include <functional>
+#include <memory>
 #include <string>
 #include <unistd.h>
 #include <vector>
 
+#include "interfaces/native/native_interface_accessibility.h"
 #include "interfaces/native/native_interface_xcomponent.h"
 #include "interfaces/native/ui_input_event.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/accessibility/native_interface_accessibility_provider.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 
 using NativeXComponent_Surface_Callback = void (*)(OH_NativeXComponent*, void*);
@@ -56,6 +59,7 @@ namespace OHOS::Ace {
 class NativeXComponentImpl : public virtual AceType {
     DECLARE_ACE_TYPE(NativeXComponentImpl, AceType);
     using NativeXComponent_Callback = void (*)(OH_NativeXComponent*, void*);
+    using NativeXComponent_CallbackWithResult = bool (*)(OH_NativeXComponent*, void*);
     using NativeXComponent_UIEventCallback = void (*)(
         OH_NativeXComponent*, ArkUI_UIInputEvent*, ArkUI_UIInputEvent_Type);
     using SetExpectedRateRangeEvent_Callback = std::function<void()>;
@@ -65,7 +69,10 @@ class NativeXComponentImpl : public virtual AceType {
     using NativeNode_Callback = void (*)(void*, void*);
 
 public:
-    NativeXComponentImpl() {}
+    NativeXComponentImpl()
+    {
+        accessbilityProvider_ = std::make_shared<ArkUI_AccessibilityProvider>();
+    }
 
     ~NativeXComponentImpl() {}
 
@@ -285,6 +292,11 @@ public:
         return &keyEvent_;
     }
 
+    std::shared_ptr<ArkUI_AccessibilityProvider> GetAccessbilityProvider()
+    {
+        return accessbilityProvider_;
+    }
+
     NativeXComponent_Callback GetFocusEventCallback() const
     {
         return focusEventCallback_;
@@ -293,6 +305,11 @@ public:
     NativeXComponent_Callback GetKeyEventCallback() const
     {
         return keyEventCallback_;
+    }
+
+    NativeXComponent_CallbackWithResult GetKeyEventCallbackWithResult() const
+    {
+        return keyEventCallbackWithResult_;
     }
 
     NativeXComponent_Callback GetBlurEventCallback() const
@@ -318,6 +335,11 @@ public:
     void SetKeyEventCallback(NativeXComponent_Callback callback)
     {
         keyEventCallback_ = callback;
+    }
+
+    void SetKeyEventCallbackWithResult(NativeXComponent_CallbackWithResult callback)
+    {
+        keyEventCallbackWithResult_ = callback;
     }
 
     void SetBlurEventCallback(NativeXComponent_Callback callback)
@@ -433,12 +455,14 @@ private:
     OH_NativeXComponent_TouchEvent touchEvent_ {};
     OH_NativeXComponent_MouseEvent mouseEvent_ { .x = 0, .y = 0 };
     OH_NativeXComponent_KeyEvent keyEvent_;
+    std::shared_ptr<ArkUI_AccessibilityProvider> accessbilityProvider_;
     OH_NativeXComponent_Callback* callback_ = nullptr;
     OH_NativeXComponent_MouseEvent_Callback* mouseEventCallback_ = nullptr;
     NativeXComponent_Surface_Callback surfaceShowCallback_ = nullptr;
     NativeXComponent_Surface_Callback surfaceHideCallback_ = nullptr;
     NativeXComponent_Callback focusEventCallback_ = nullptr;
     NativeXComponent_Callback keyEventCallback_ = nullptr;
+    NativeXComponent_CallbackWithResult keyEventCallbackWithResult_ = nullptr;
     NativeXComponent_Callback blurEventCallback_ = nullptr;
     NativeXComponent_UIEventCallback uiAxisEventCallback_ = nullptr;
     std::vector<XComponentTouchPoint> touchPoints_;
@@ -478,6 +502,7 @@ struct OH_NativeXComponent {
     int32_t GetDisplayY(size_t pointIndex, float* displayY);
     int32_t RegisterFocusEventCallback(void (*callback)(OH_NativeXComponent* component, void* window));
     int32_t RegisterKeyEventCallback(void (*callback)(OH_NativeXComponent* component, void* window));
+    int32_t RegisterKeyEventCallbackWithResult(bool (*callback)(OH_NativeXComponent* component, void* window));
     int32_t RegisterBlurEventCallback(void (*callback)(OH_NativeXComponent* component, void* window));
     int32_t GetKeyEvent(OH_NativeXComponent_KeyEvent** keyEvent);
     int32_t SetExpectedFrameRateRange(OH_NativeXComponent_ExpectedRateRange* range);
@@ -492,6 +517,7 @@ struct OH_NativeXComponent {
     int32_t RegisterOnTouchInterceptCallback(
         HitTestMode (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event));
     int32_t GetSourceType(int32_t pointId, OH_NativeXComponent_EventSourceType* sourceType);
+    int32_t GetAccessibilityProvider(ArkUI_AccessibilityProvider** handle);
 
 private:
     OHOS::Ace::NativeXComponentImpl* xcomponentImpl_ = nullptr;

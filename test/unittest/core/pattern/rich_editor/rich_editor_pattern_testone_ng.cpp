@@ -12,9 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
-#define private public
-#define protected public
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -100,186 +106,6 @@ HWTEST_F(RichEditorPatternTestOneNg, GetParagraphLength001, TestSize.Level1)
 }
 
 /**
- * @tc.name: CalculateEmptyValueCaretRect001
- * @tc.desc: test RichEditorPattern CalculateEmptyValueCaretRect
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, CalculateEmptyValueCaretRect001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    ASSERT_NE(paragraph, nullptr);
-    EXPECT_CALL(*paragraph, PushStyle(_)).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, AddText(_)).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, PopStyle()).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, Build()).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, Layout(_)).Times(AnyNumber());
-    TestParagraphItem testParagraphItem = {
-        .start = 0, .end = 6, .indexOffsetMap = { { 0, Offset(0, 5) }, { 6, Offset(50, 0) } }
-    };
-    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 6 });
-    CaretMetricsF metricsDown;
-    CaretMetricsF metricsUp;
-    for (const auto& [index, offset] : testParagraphItem.indexOffsetMap) {
-        metricsDown.offset.SetX(offset.GetX());
-        metricsDown.offset.SetY(offset.GetY());
-        metricsUp.offset.SetX(offset.GetX());
-        metricsUp.offset.SetY(offset.GetY());
-        EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(6));
-        EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(150));
-        EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
-        EXPECT_CALL(*paragraph, ComputeOffsetForCaretDownstream(index, _, _))
-            .WillRepeatedly(DoAll(SetArgReferee<1>(metricsDown), Return(true)));
-        EXPECT_CALL(*paragraph, ComputeOffsetForCaretUpstream(index, _, _))
-            .WillRepeatedly(DoAll(SetArgReferee<1>(metricsUp), Return(true)));
-    }
-
-    TextStyle style;
-    style.SetLineHeight(LINE_HEIGHT_VALUE);
-    style.SetLetterSpacing(LETTER_SPACING);
-    style.SetFontFeatures(TEXT_FONTFEATURE);
-    auto layoutProperty = richEditorPattern->GetLayoutProperty<TextLayoutProperty>();
-    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
-    richEditorPattern->presetParagraph_ = paragraph;
-    richEditorPattern->CalculateEmptyValueCaretRect();
-    richEditorPattern->typingTextStyle_ = style;
-    richEditorPattern->PreferredParagraph();
-    EXPECT_NE(richEditorPattern->presetParagraph_, nullptr);
-}
-
-/**
- * @tc.name: HandleMenuCallbackOnSelectAll001
- * @tc.desc: test RichEditorPattern HandleMenuCallbackOnSelectAll
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, HandleMenuCallbackOnSelectAll001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    /**
-     * @tc.steps: step1. get richeditor pattern and add add text span
-     */
-    AddSpan("hello1");
-    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 6);
-
-    /**
-     * @tc.steps: step2. request focus
-     */
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    focusHub->RequestFocusImmediately();
-
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-
-    bool enabledCache = eventHub->IsEnabled();
-    EXPECT_EQ(enabledCache, true);
-
-    /**
-     * @tc.step: step3. create a scene where the text menu has popped up
-     */
-    richEditorPattern->textDetectEnable_ = true;
-    richEditorPattern->enabled_ = true;
-    richEditorPattern->OnModifyDone();
-
-    richEditorPattern->textDetectEnable_ = true;
-    richEditorPattern->enabled_ = false;
-    richEditorPattern->OnModifyDone();
-
-    richEditorPattern->textDetectEnable_ = false;
-    richEditorPattern->enabled_ = true;
-    richEditorPattern->OnModifyDone();
-
-    richEditorPattern->textDetectEnable_ = false;
-    richEditorPattern->enabled_ = false;
-    richEditorPattern->OnModifyDone();
-
-    richEditorPattern->textSelector_.Update(1, 2);
-    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
-    richEditorPattern->ShowSelectOverlay(
-        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
-    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
-
-    /**
-     * @tc.step: step4. test OnMenuItemAction
-     */
-    richEditorPattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::COPY, OptionMenuType::TOUCH_MENU);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 1);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 2);
-
-    richEditorPattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::PASTE, OptionMenuType::NO_MENU);
-    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 6);
-
-    richEditorPattern->selectOverlay_->isUsingMouse_ = true;
-    richEditorPattern->HandleMenuCallbackOnSelectAll();
-    ASSERT_EQ(richEditorPattern->IsUsingMouse(), false);
-}
-
-/**
- * @tc.name: InsertStyledStringByPaste001
- * @tc.desc: test RichEditorPattern InsertStyledStringByPaste
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, InsertStyledStringByPaste001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richEditor pattern and controller
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-
-    /**
-     * @tc.steps: step2. add span and select text
-     */
-    AddSpan("test");
-    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 4);
-    richEditorPattern->textSelector_.Update(3, 4);
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>("abc");
-    std::string data = "abc";
-    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(data);
-    richEditorPattern->InsertStyledStringByPaste(spanString);
-
-    ASSERT_EQ(richEditorPattern->textSelector_.IsValid(), false);
-}
-
-/**
- * @tc.name: AddSpansByPaste001
- * @tc.desc: test RichEditorPattern AddSpansByPaste
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, AddSpansByPaste001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richEditor pattern and controller
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-
-    /**
-     * @tc.steps: step2. add span and select text
-     */
-    AddSpan("test");
-    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 4);
-    richEditorPattern->textSelector_.Update(3, 4);
-    std::list<RefPtr<NG::SpanItem>> spans;
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem1 = AceType::MakeRefPtr<ImageSpanItem>();
-    spans.push_back(spanItem1);
-    richEditorPattern->AddSpansByPaste(spans);
-    ASSERT_EQ(richEditorPattern->textSelector_.IsValid(), false);
-}
-
-/**
  * @tc.name: UnableStandardInput001
  * @tc.desc: test RichEditorPattern UnableStandardInput
  * @tc.type: FUNC
@@ -292,20 +118,6 @@ HWTEST_F(RichEditorPatternTestOneNg, UnableStandardInput001, TestSize.Level1)
     richEditorPattern->UnableStandardInput(true);
     bool res = richEditorPattern->UnableStandardInput(false);
     ASSERT_EQ(res, false);
-}
-
-/**
- * @tc.name: HandleOnDelete001
- * @tc.desc: test RichEditorPattern HandleOnDelete
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, HandleOnDelete001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->HandleOnDelete(true);
-    richEditorPattern->HandleOnDelete(false);
 }
 
 /**
@@ -346,29 +158,6 @@ HWTEST_F(RichEditorPatternTestOneNg, CursorMoveHome001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ClearOperationRecords001
- * @tc.desc: test RichEditorPattern ClearOperationRecords
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, ClearOperationRecords001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RichEditorPattern::OperationRecord record;
-    richEditorPattern->redoOperationRecords_.push_back(record);
-    richEditorPattern->ClearRedoOperationRecords();
-    richEditorPattern->redoOperationRecords_.clear();
-    richEditorPattern->HandleOnRedoAction();
-    ASSERT_EQ(richEditorPattern->redoOperationRecords_.empty(), true);
-    richEditorPattern->operationRecords_.push_back(record);
-    richEditorPattern->ClearOperationRecords();
-    richEditorPattern->operationRecords_.clear();
-    richEditorPattern->HandleOnUndoAction();
-    ASSERT_EQ(richEditorPattern->operationRecords_.empty(), true);
-}
-
-/**
  * @tc.name: ResetAfterPaste001
  * @tc.desc: test RichEditorPattern ResetAfterPaste
  * @tc.type: FUNC
@@ -379,6 +168,10 @@ HWTEST_F(RichEditorPatternTestOneNg, ResetAfterPaste001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->previewLongPress_ = true;
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
+    richEditorPattern->isEditing_ = false;
     richEditorPattern->ResetAfterPaste();
     ASSERT_NE(richEditorPattern->previewLongPress_, true);
 }
@@ -414,6 +207,115 @@ HWTEST_F(RichEditorPatternTestOneNg, ShowHandles001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateDecoration001
+ * @tc.desc: test UpdateDecoration
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, UpdateDecoration001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    RefPtr<SpanNode> spanNode = OHOS::Ace::NG::SpanNode::CreateSpanNode(1);
+    UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.updateTextDecorationStyle = TextDecorationStyle::DASHED;
+    TextStyle textStyle;
+    richEditorPattern->UpdateDecoration(spanNode, updateSpanStyle, textStyle);
+    ASSERT_EQ(updateSpanStyle.updateTextDecoration.has_value(), false);
+}
+
+/**
+ * @tc.name: CreateAndShowSingleHandle001
+ * @tc.desc: test CreateAndShowSingleHandle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, CreateAndShowSingleHandle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create richEditorPattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->caretPosition_ = -1;
+
+    /**
+     * @tc.steps: step2. Construct GestureEvent data and call CreatAndShowSingleHandle
+     */
+    ASSERT_NE(richEditorPattern->selectOverlay_, nullptr);
+    richEditorPattern->previewTextRecord_.previewContent = u"abc";
+    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
+    richEditorPattern->previewTextRecord_.startOffset = 0;
+    richEditorPattern->previewTextRecord_.endOffset = 0;
+    richEditorPattern->CreateAndShowSingleHandle();
+    EXPECT_FALSE(richEditorPattern->selectOverlay_->IsSingleHandle());
+}
+
+/**
+ * @tc.name: CloseKeyboard001
+ * @tc.desc: test CloseKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, CloseKeyboard001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->CloseKeyboard(false);
+    EXPECT_EQ(richEditorPattern->HasConnection(), false);
+}
+
+/**
+ * @tc.name: InsertSpanByBackData001
+ * @tc.desc: test InsertSpanByBackData
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, InsertSpanByBackData001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"");
+    richEditorPattern->textSelector_ = TextSelector(0, 6);
+    EXPECT_TRUE(richEditorPattern->textSelector_.IsValid());
+    richEditorPattern->InsertSpanByBackData(spanString);
+    EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
+    richEditorPattern->ClearOperationRecords();
+
+    richEditorPattern->placeholderSpansMap_[u"![id1]"] = AceType::MakeRefPtr<SpanItem>();
+    spanString = AceType::MakeRefPtr<SpanString>(u"test![id1]");
+    auto start = richEditorPattern->operationRecords_.size();
+    richEditorPattern->InsertSpanByBackData(spanString);
+    EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + 2);
+    richEditorPattern->ClearOperationRecords();
+}
+
+/**
+ * @tc.name: HandleOnShare001
+ * @tc.desc: test rich_editor_select_overlay.cpp HandleOnShare function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, HandleOnShare001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    richEditorPattern->HandleOnShare();
+    auto value = richEditorPattern->selectOverlay_->GetSelectedText();
+    int32_t ret = value.length();
+    EXPECT_EQ(ret, 0);
+}
+
+/**
  * @tc.name: UpdateTextFieldManager001
  * @tc.desc: test RichEditorPattern UpdateTextFieldManager
  * @tc.type: FUNC
@@ -425,6 +327,9 @@ HWTEST_F(RichEditorPatternTestOneNg, UpdateTextFieldManager001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdatePreviewTextStyle("underline");
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
@@ -469,65 +374,6 @@ HWTEST_F(RichEditorPatternTestOneNg, UpdateTextFieldManager001, TestSize.Level1)
 }
 
 /**
- * @tc.name: JudgeSelectType001
- * @tc.desc: test RichEditorPattern JudgeSelectType
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, JudgeSelectType001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    ASSERT_NE(paragraph, nullptr);
-
-    richEditorPattern->previewLongPress_ = true;
-    auto offset = Offset(50.0, -80.0);
-    AddSpan("hello1");
-    PositionWithAffinity position = richEditorPattern->paragraphs_.GetGlyphPositionAtCoordinate(offset);
-    SelectType type = richEditorPattern->JudgeSelectType(position);
-    EXPECT_NE(type, SelectType::SELECT_FORWARD);
-    richEditorPattern->previewLongPress_ = false;
-    richEditorPattern->editingLongPress_ = true;
-    type = richEditorPattern->JudgeSelectType(position);
-    EXPECT_NE(type, SelectType::SELECT_FORWARD);
-}
-
-/**
- * @tc.name: HandleSelectOverlayWithOptions001
- * @tc.desc: test RichEditorPattern HandleSelectOverlayWithOptions
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, HandleSelectOverlayWithOptions001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    SelectionOptions options;
-    options.menuPolicy = MenuPolicy::SHOW;
-    richEditorPattern->isMousePressed_ = true;
-    richEditorPattern->sourceType_ = SourceType::MOUSE;
-    richEditorPattern->HandleSelectOverlayWithOptions(options);
-    richEditorPattern->isMousePressed_ = false;
-    richEditorPattern->sourceType_ = SourceType::MOUSE;
-    richEditorPattern->HandleSelectOverlayWithOptions(options);
-    richEditorPattern->isMousePressed_ = true;
-    richEditorPattern->sourceType_ = SourceType::TOUCH;
-    richEditorPattern->HandleSelectOverlayWithOptions(options);
-    richEditorPattern->isMousePressed_ = false;
-    richEditorPattern->sourceType_ = SourceType::TOUCH;
-    richEditorPattern->HandleSelectOverlayWithOptions(options);
-    options.menuPolicy = MenuPolicy::DEFAULT;
-    richEditorPattern->HandleSelectOverlayWithOptions(options);
-    options.menuPolicy = MenuPolicy::HIDE;
-    richEditorPattern->HandleSelectOverlayWithOptions(options);
-    ClearSpan();
-    richEditorPattern->HandleSelectOverlayWithOptions(options);
-    ASSERT_EQ(richEditorPattern->SelectOverlayIsOn(), false);
-}
-
-/**
  * @tc.name: InsertValueInStyledString002
  * @tc.desc: test RichEditorPattern InsertValueInStyledString
  * @tc.type: FUNC
@@ -542,7 +388,7 @@ HWTEST_F(RichEditorPatternTestOneNg, InsertValueInStyledString002, TestSize.Leve
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
     auto host = richEditorPattern->GetHost();
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     TextSpanOptions options2;
     options2.value = INIT_VALUE_1;
@@ -552,55 +398,6 @@ HWTEST_F(RichEditorPatternTestOneNg, InsertValueInStyledString002, TestSize.Leve
     richEditorPattern->FireOnSelectionChange(0, -1);
     richEditorPattern->FireOnSelectionChange(-1, -1);
     ASSERT_EQ(richEditorPattern->HasFocus(), true);
-}
-
-/**
- * @tc.name: CreateDecorationSpanByTextStyle001
- * @tc.desc: test RichEditorPattern CreateDecorationSpanByTextStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, CreateDecorationSpanByTextStyle001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    UpdateSpanStyle updateSpanStyle;
-    updateSpanStyle.updateTextDecorationStyle = TextDecorationStyle::DASHED;
-    TextStyle style;
-    style.SetLineHeight(LINE_HEIGHT_VALUE);
-    style.SetLetterSpacing(LETTER_SPACING);
-    style.SetFontFeatures(TEXT_FONTFEATURE);
-    RefPtr<DecorationSpan> span = richEditorPattern->CreateDecorationSpanByTextStyle(updateSpanStyle, style, 0);
-    ASSERT_NE(span, nullptr);
-}
-
-/**
- * @tc.name: MouseDoubleClickParagraphEnd001
- * @tc.desc: test RichEditorPattern MouseDoubleClickParagraphEnd
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, MouseDoubleClickParagraphEnd001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    AddSpan("TEST123");
-    std::string content = "TEST123";
-    richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(content);
-
-    richEditorPattern->typingStyle_ = std::nullopt;
-    richEditorPattern->typingTextStyle_ = std::nullopt;
-    richEditorPattern->InsertValueInStyledString("TEST123");
-
-    richEditorPattern->caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
-    richEditorPattern->sourceType_ = SourceType::MOUSE;
-    int32_t index = 7;
-    int32_t index2 = 2;
-    richEditorPattern->MouseDoubleClickParagraphEnd(index2);
-    richEditorPattern->MouseDoubleClickParagraphEnd(index);
-    EXPECT_EQ(richEditorPattern->GetParagraphEndPosition(index), 7);
 }
 
 /**
@@ -641,11 +438,11 @@ HWTEST_F(RichEditorPatternTestOneNg, GetTextContentLength001, TestSize.Level1)
     richEditorPattern->isSpanStringMode_ = false;
     richEditorPattern->GetTextContentLength();
 
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>("abc");
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"abc");
     richEditorPattern->isSpanStringMode_ = true;
     richEditorPattern->GetTextContentLength();
 
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>("abc");
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"abc");
     richEditorPattern->isSpanStringMode_ = false;
     int32_t res = richEditorPattern->GetTextContentLength();
     EXPECT_EQ(res, 0);
@@ -682,53 +479,13 @@ HWTEST_F(RichEditorPatternTestOneNg, AddTextSpan001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     TextSpanOptions options;
-    richEditorPattern->previewTextRecord_.previewContent = "123";
-    richEditorPattern->previewTextRecord_.isPreviewTextInputting = true;
+    richEditorPattern->previewTextRecord_.previewContent = u"123";
+    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
     richEditorPattern->previewTextRecord_.startOffset = 0;
     richEditorPattern->previewTextRecord_.endOffset = 0;
     EXPECT_EQ(richEditorPattern->previewTextRecord_.IsValid(), true);
     int32_t res = richEditorPattern->AddTextSpan(options, true, 0);
     EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: DeleteSpansOperation001
- * @tc.desc: test DeleteSpansOperation
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, DeleteSpansOperation001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richEditor pattern and controller
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-
-    AddSpan("test");
-    richEditorPattern->textSelector_.Update(3, 4);
-    richEditorPattern->DeleteSpansOperation(0, 0);
-    EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
-}
-
-/**
- * @tc.name: DeleteSpansByRange001
- * @tc.desc: test DeleteSpansByRange
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, DeleteSpansByRange001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    SpanPositionInfo startInfo;
-    SpanPositionInfo endInfo;
-    startInfo.spanIndex_ = -1;
-    richEditorPattern->DeleteSpansByRange(0, 0, startInfo, endInfo);
-    EXPECT_EQ(richEditorPattern->GetHost()->GetChildren().size(), 0);
 }
 
 /**
@@ -753,26 +510,6 @@ HWTEST_F(RichEditorPatternTestOneNg, CopyGestureOption001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetCaretOffset001
- * @tc.desc: test SetCaretOffset
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, SetCaretOffset001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->previewTextRecord_.previewContent = "abc";
-    richEditorPattern->previewTextRecord_.isPreviewTextInputting = true;
-    richEditorPattern->previewTextRecord_.startOffset = 0;
-    richEditorPattern->previewTextRecord_.endOffset = 0;
-
-    bool res = richEditorPattern->SetCaretOffset(0);
-    ASSERT_EQ(res, false);
-}
-
-/**
  * @tc.name: CalcCursorOffsetByPosition001
  * @tc.desc: test CalcCursorOffsetByPosition
  * @tc.type: FUNC
@@ -791,486 +528,4 @@ HWTEST_F(RichEditorPatternTestOneNg, CalcCursorOffsetByPosition001, TestSize.Lev
     ASSERT_EQ(richEditorPattern->GetHost()->GetChildren().empty(), false);
 }
 
-/**
- * @tc.name: UpdateDecoration001
- * @tc.desc: test UpdateDecoration
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, UpdateDecoration001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<SpanNode> spanNode = OHOS::Ace::NG::SpanNode::CreateSpanNode(1);
-    UpdateSpanStyle updateSpanStyle;
-    updateSpanStyle.updateTextDecorationStyle = TextDecorationStyle::DASHED;
-    TextStyle textStyle;
-    richEditorPattern->UpdateDecoration(spanNode, updateSpanStyle, textStyle);
-    ASSERT_EQ(updateSpanStyle.updateTextDecoration.has_value(), false);
-}
-
-/**
- * @tc.name: UpdateImageStyle001
- * @tc.desc: test UpdateImageStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, UpdateImageStyle001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    Dimension width = 50.0_vp;
-    Dimension height = 50.0_vp;
-    RefPtr<FrameNode> imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 0, AceType::MakeRefPtr<ImagePattern>());
-    ImageSpanAttribute imageStyle;
-    richEditorPattern->updateSpanStyle_.updateImageWidth = std::nullopt;
-    richEditorPattern->updateSpanStyle_.updateImageHeight = std::nullopt;
-    richEditorPattern->UpdateImageStyle(imageNode, imageStyle);
-
-    richEditorPattern->updateSpanStyle_.updateImageWidth = width;
-    richEditorPattern->updateSpanStyle_.updateImageHeight = height;
-    richEditorPattern->UpdateImageStyle(imageNode, imageStyle);
-
-    richEditorPattern->updateSpanStyle_.updateImageWidth = width;
-    richEditorPattern->updateSpanStyle_.updateImageHeight = std::nullopt;
-    richEditorPattern->UpdateImageStyle(imageNode, imageStyle);
-
-    richEditorPattern->updateSpanStyle_.updateImageWidth = std::nullopt;
-    richEditorPattern->updateSpanStyle_.updateImageHeight = height;
-    richEditorPattern->UpdateImageStyle(imageNode, imageStyle);
-    ASSERT_EQ(richEditorPattern->updateSpanStyle_.updateImageHeight.has_value(), true);
-}
-
-/**
- * @tc.name: SymbolSpanUpdateStyle001
- * @tc.desc: test SymbolSpanUpdateStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, SymbolSpanUpdateStyle001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto spanNode = SpanNode::GetOrCreateSpanNode(V2::SYMBOL_SPAN_ETS_TAG, 0);
-    UpdateSpanStyle updateSpanStyle;
-    updateSpanStyle.updateTextDecorationStyle = TextDecorationStyle::DASHED;
-    TextStyle textStyle;
-
-    bool res = richEditorPattern->SymbolSpanUpdateStyle(spanNode, updateSpanStyle, textStyle);
-    ASSERT_EQ(res, true);
-}
-
-/**
- * @tc.name: CloseSystemMenu001
- * @tc.desc: test CloseSystemMenu
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, CloseSystemMenu001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    /**
-     * @tc.steps: step1. get richeditor pattern and add add text span
-     */
-    AddSpan("hello1");
-    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 6);
-
-    /**
-     * @tc.steps: step2. request focus
-     */
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    focusHub->RequestFocusImmediately();
-
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-
-    bool enabledCache = eventHub->IsEnabled();
-    EXPECT_EQ(enabledCache, true);
-
-    /**
-     * @tc.step: step3. create a scene where the text menu has popped up
-     */
-    richEditorPattern->textDetectEnable_ = true;
-    richEditorPattern->enabled_ = true;
-    richEditorPattern->OnModifyDone();
-
-    richEditorPattern->textDetectEnable_ = true;
-    richEditorPattern->enabled_ = false;
-    richEditorPattern->OnModifyDone();
-
-    richEditorPattern->textDetectEnable_ = false;
-    richEditorPattern->enabled_ = true;
-    richEditorPattern->OnModifyDone();
-
-    richEditorPattern->textDetectEnable_ = false;
-    richEditorPattern->enabled_ = false;
-    richEditorPattern->OnModifyDone();
-
-    richEditorPattern->textSelector_.Update(1, 2);
-    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
-    richEditorPattern->ShowSelectOverlay(
-        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
-
-    richEditorPattern->CloseSystemMenu();
-
-    EXPECT_EQ(richEditorPattern->SelectOverlayIsOn(), false);
-}
-
-/**
- * @tc.name: CreateAndShowSingleHandle001
- * @tc.desc: test CreateAndShowSingleHandle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, CreateAndShowSingleHandle001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create richEditorPattern
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->caretPosition_ = -1;
-
-    /**
-     * @tc.steps: step2. Construct GestureEvent data and call CreatAndShowSingleHandle
-     */
-    ASSERT_NE(richEditorPattern->selectOverlay_, nullptr);
-    richEditorPattern->previewTextRecord_.previewContent = "abc";
-    richEditorPattern->previewTextRecord_.isPreviewTextInputting = true;
-    richEditorPattern->previewTextRecord_.startOffset = 0;
-    richEditorPattern->previewTextRecord_.endOffset = 0;
-    richEditorPattern->CreateAndShowSingleHandle();
-    EXPECT_FALSE(richEditorPattern->selectOverlay_->IsSingleHandle());
-}
-
-/**
- * @tc.name: MoveCaretAndStartFocus001
- * @tc.desc: test MoveCaretAndStartFocus
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, MoveCaretAndStartFocus001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-
-    Offset textOffset;
-    richEditorPattern->overlayMod_ = nullptr;
-    richEditorPattern->MoveCaretAndStartFocus(textOffset);
-    EXPECT_TRUE(focusHub->RequestFocusImmediately());
-}
-
-/**
- * @tc.name: HandleOnlyImageSelected001
- * @tc.desc: test HandleOnlyImageSelected
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, HandleOnlyImageSelected001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richeditor pattern and add add text span
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(INIT_VALUE_1);
-    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 6);
-
-    /**
-     * @tc.steps: step2. request focus
-     */
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    focusHub->RequestFocusImmediately();
-
-    /**
-     * @tc.step: step3. create a scene where the text menu has popped up
-     */
-    richEditorPattern->OnModifyDone();
-    richEditorPattern->textSelector_.Update(1, 2);
-    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
-    richEditorPattern->ShowSelectOverlay(
-        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
-    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
-
-    /**
-     * @tc.step: step4. test OnMenuItemAction
-     */
-    richEditorPattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::COPY, OptionMenuType::TOUCH_MENU);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 1);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 2);
-
-    richEditorPattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::PASTE, OptionMenuType::NO_MENU);
-    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 6);
-
-    Offset globalOffset;
-    auto selectOverlayInfo = richEditorPattern->selectOverlay_->GetSelectOverlayInfo();
-    auto selectInfoFirstHandle = selectOverlayInfo->firstHandle;
-    auto selectInfoSecHandle = selectOverlayInfo->secondHandle;
-    selectInfoFirstHandle.isShow = true;
-    selectInfoSecHandle.isShow = true;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, true);
-
-    selectInfoFirstHandle.isShow = false;
-    selectInfoSecHandle.isShow = true;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, true);
-
-    selectInfoFirstHandle.isShow = true;
-    selectInfoSecHandle.isShow = true;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, false);
-
-    selectInfoFirstHandle.isShow = false;
-    selectInfoSecHandle.isShow = true;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, false);
-
-    EXPECT_EQ(richEditorPattern->selectOverlay_->IsBothHandlesShow(), false);
-}
-
-/**
- * @tc.name: HandleBlurEvent001
- * @tc.desc: test HandleBlurEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, HandleBlurEvent001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-
-    auto func = []() {};
-
-    richEditorPattern->customKeyboardBuilder_ = func;
-    richEditorPattern->isCustomKeyboardAttached_ = true;
-    focusHub->blurReason_ = BlurReason::FRAME_DESTROY;
-    richEditorPattern->HandleBlurEvent();
-
-    richEditorPattern->customKeyboardBuilder_ = nullptr;
-    richEditorPattern->isCustomKeyboardAttached_ = true;
-    focusHub->blurReason_ = BlurReason::FRAME_DESTROY;
-    richEditorPattern->HandleBlurEvent();
-
-    richEditorPattern->customKeyboardBuilder_ = func;
-    richEditorPattern->isCustomKeyboardAttached_ = true;
-    focusHub->blurReason_ = BlurReason::WINDOW_BLUR;
-    richEditorPattern->HandleBlurEvent();
-
-    richEditorPattern->customKeyboardBuilder_ = nullptr;
-    richEditorPattern->isCustomKeyboardAttached_ = true;
-    focusHub->blurReason_ = BlurReason::WINDOW_BLUR;
-    richEditorPattern->HandleBlurEvent();
-    EXPECT_EQ(richEditorPattern->isMoveCaretAnywhere_, false);
-}
-
-/**
- * @tc.name: HandleFocusEvent001
- * @tc.desc: test HandleFocusEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, HandleFocusEvent001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->previewLongPress_ = true;
-    richEditorPattern->HandleFocusEvent();
-
-    richEditorPattern->previewLongPress_ = false;
-    richEditorPattern->isCaretInContentArea_ = true;
-
-    richEditorPattern->usingMouseRightButton_ = true;
-    richEditorPattern->isLongPress_ = true;
-    richEditorPattern->isDragging_ = true;
-    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
-    richEditorPattern->HandleFocusEvent();
-
-    richEditorPattern->usingMouseRightButton_ = false;
-    richEditorPattern->isLongPress_ = true;
-    richEditorPattern->isDragging_ = true;
-    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
-    richEditorPattern->HandleFocusEvent();
-
-    richEditorPattern->usingMouseRightButton_ = true;
-    richEditorPattern->isLongPress_ = false;
-    richEditorPattern->isDragging_ = true;
-    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
-    richEditorPattern->HandleFocusEvent();
-
-    richEditorPattern->usingMouseRightButton_ = true;
-    richEditorPattern->isLongPress_ = true;
-    richEditorPattern->isDragging_ = false;
-    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
-    richEditorPattern->HandleFocusEvent();
-
-    richEditorPattern->usingMouseRightButton_ = true;
-    richEditorPattern->isLongPress_ = true;
-    richEditorPattern->isDragging_ = true;
-    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = false;
-    richEditorPattern->HandleFocusEvent();
-
-    richEditorPattern->usingMouseRightButton_ = false;
-    richEditorPattern->isLongPress_ = false;
-    richEditorPattern->isDragging_ = true;
-    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
-    richEditorPattern->HandleFocusEvent();
-
-    richEditorPattern->usingMouseRightButton_ = false;
-    richEditorPattern->isLongPress_ = false;
-    richEditorPattern->isDragging_ = false;
-    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
-    richEditorPattern->HandleFocusEvent();
-
-    richEditorPattern->usingMouseRightButton_ = false;
-    richEditorPattern->isLongPress_ = false;
-    richEditorPattern->isDragging_ = false;
-    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = false;
-    richEditorPattern->HandleFocusEvent();
-
-    EXPECT_EQ(richEditorPattern->textSelector_.SelectNothing(), true);
-}
-
-/**
- * @tc.name: CloseKeyboard001
- * @tc.desc: test CloseKeyboard
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, CloseKeyboard001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->CloseKeyboard(false);
-    EXPECT_EQ(richEditorPattern->HasConnection(), false);
-}
-
-/**
- * @tc.name: CalculateEmptyValueCaretRect002
- * @tc.desc: test CalculateEmptyValueCaretRect
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, CalculateEmptyValueCaretRect002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto layoutProperty = richEditorPattern->GetLayoutProperty<TextLayoutProperty>();
-
-    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
-    layoutProperty->UpdateTextAlign(TextAlign::LEFT);
-    richEditorPattern->CalculateEmptyValueCaretRect();
-
-    layoutProperty->UpdateLayoutDirection(TextDirection::INHERIT);
-    layoutProperty->UpdateTextAlign(TextAlign::CENTER);
-    richEditorPattern->CalculateEmptyValueCaretRect();
-
-    layoutProperty->UpdateLayoutDirection(TextDirection::INHERIT);
-    layoutProperty->UpdateTextAlign(TextAlign::LEFT);
-    richEditorPattern->CalculateEmptyValueCaretRect();
-
-    EXPECT_EQ(richEditorPattern->presetParagraph_, false);
-}
-
-/**
- * @tc.name: HandleDoubleClickOrLongPress001
- * @tc.desc: test HandleDoubleClickOrLongPress
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, HandleDoubleClickOrLongPress001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    GestureEvent info;
-    info.SetSourceTool(SourceTool::FINGER);
-    richEditorPattern->caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
-
-    richEditorPattern->previewTextRecord_.previewContent = "123";
-    richEditorPattern->previewTextRecord_.isPreviewTextInputting = true;
-    richEditorPattern->previewTextRecord_.startOffset = 0;
-    richEditorPattern->previewTextRecord_.endOffset = 0;
-    richEditorPattern->HandleDoubleClickOrLongPress(info);
-
-    richEditorPattern->previewTextRecord_.previewContent = "123";
-    richEditorPattern->previewTextRecord_.isPreviewTextInputting = false;
-    richEditorPattern->previewTextRecord_.startOffset = 0;
-    richEditorPattern->previewTextRecord_.endOffset = 0;
-    richEditorPattern->status_ = Status::DRAGGING;
-    richEditorPattern->HandleDoubleClickOrLongPress(info);
-
-    richEditorPattern->status_ = Status::NONE;
-    richEditorPattern->HandleDoubleClickOrLongPress(info);
-
-    AddSpan("test");
-    richEditorPattern->textSelector_.Update(3, 4);
-    EXPECT_EQ(richEditorPattern->IsSelected(), true);
-    richEditorPattern->HandleDoubleClickOrLongPress(info);
-    EXPECT_EQ(richEditorPattern->IsSelected(), false);
-}
-
-/**
- * @tc.name: AdjustPlaceholderSelection001
- * @tc.desc: test AdjustPlaceholderSelection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, AdjustPlaceholderSelection001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    AddSpan(INIT_VALUE_1);
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem1 = AceType::MakeRefPtr<ImageSpanItem>();
-    richEditorPattern->spans_.emplace_back(spanItem1);
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem2 = AceType::MakeRefPtr<PlaceholderSpanItem>();
-    richEditorPattern->spans_.emplace_back(spanItem2);
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem3 = AceType::MakeRefPtr<PlaceholderSpanItem>();
-    richEditorPattern->spans_.emplace_back(spanItem3);
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    ASSERT_NE(paragraph, nullptr);
-    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(300.0f));
-    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(6));
-    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 10.0, 20.0, 30.0, 40.0 } } };
-    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
-    AddParagraph(paragraphItem);
-    CaretMetricsF metrics = { { 10.0f, 50.0f }, 20.0f };
-    EXPECT_CALL(*paragraph, ComputeOffsetForCaretUpstream(_, _, _))
-        .WillRepeatedly(DoAll(SetArgReferee<1>(metrics), Return(true)));
-    EXPECT_CALL(*paragraph, ComputeOffsetForCaretDownstream(_, _, _))
-        .WillRepeatedly(DoAll(SetArgReferee<1>(metrics), Return(true)));
-    TestParagraphRect paragraphRectSec = { .start = 7, .end = 12, .rects = { { 40.0, 50.0, 60.0, 70.0 } } };
-    TestParagraphItem paragraphItemSec = { .start = 7, .end = 12, .testParagraphRects = { paragraphRectSec } };
-    AddParagraph(paragraphItemSec);
-    TestParagraphRect paragraphRectThi = { .start = 13, .end = 18, .rects = { { 80.0, 90.0, 100.0, 110.0 } } };
-    TestParagraphItem paragraphItemThi = { .start = 13, .end = 18, .testParagraphRects = { paragraphRectThi } };
-    AddParagraph(paragraphItemThi);
-    /**
-     * @tc.steps: step2. change parameter and call function.
-     */
-    int32_t start = 8;
-    int32_t end = 10;
-    Offset touchPos(8.0f, 350.0f);
-    richEditorPattern->AdjustPlaceholderSelection(start, end, touchPos);
-
-    for (auto iter : richEditorPattern->spans_) {
-        iter->position = start;
-    }
-    richEditorPattern->AdjustPlaceholderSelection(start, end, touchPos);
-    EXPECT_NE(start, end);
-}
 } // namespace OHOS::Ace::NG

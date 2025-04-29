@@ -14,7 +14,6 @@
  */
 
 #include "base/log/exception_handler.h"
-#include "base/utils/utils.h"
 
 #include "app_mgr_client.h"
 #include "application_data_manager.h"
@@ -42,7 +41,7 @@ static void KillApplicationByUid()
 }
 
 void ExceptionHandler::HandleJsException(
-    const std::string& exceptionMsg, const JsErrorObject& errorInfo)
+    const std::string& exceptionMsg, const JsErrorObject& errorInfo, bool isStageModel)
 {
     AppExecFwk::ErrorObject errorObject = {
         .name = errorInfo.name,
@@ -52,7 +51,11 @@ void ExceptionHandler::HandleJsException(
     auto hasErrorObserver = AppExecFwk::ApplicationDataManager::GetInstance().NotifyUnhandledException(exceptionMsg);
     auto isNotifySuccess = AppExecFwk::ApplicationDataManager::GetInstance().NotifyExceptionObject(errorObject);
     if (!hasErrorObserver && !isNotifySuccess) {
-        KillApplicationByUid();
+        if (isStageModel) {
+            _exit(0);
+        } else {
+            KillApplicationByUid();
+        }
     }
 }
 } // namespace OHOS::Ace

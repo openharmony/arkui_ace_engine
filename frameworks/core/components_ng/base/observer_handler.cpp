@@ -15,7 +15,8 @@
 
 #include "core/components_ng/base/observer_handler.h"
 
-#include "base/utils/utils.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
@@ -45,6 +46,10 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
     CHECK_NULL_VOID(context);
     auto pathInfo = pattern->GetNavPathInfo();
     CHECK_NULL_VOID(pathInfo);
+    auto host = AceType::DynamicCast<NavDestinationGroupNode>(pattern->GetHost());
+    CHECK_NULL_VOID(host);
+    NavDestinationMode mode = host->GetNavDestinationMode();
+    auto uniqueId = host->GetId();
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         if (state == NavDestinationState::ON_SHOWN || state == NavDestinationState::ON_HIDDEN) {
             NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state);
@@ -52,9 +57,16 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
         }
         return;
     }
+    // api 16 trigger onActive and onInactive observer
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SEVENTEEN) && (
+        state == NavDestinationState::ON_ACTIVE || state == NavDestinationState::ON_INACTIVE)) {
+        return;
+    }
+    pathInfo->OpenScope();
     NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
-        pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()));
+        pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()), mode, uniqueId);
     navigationHandleFunc_(info);
+    pathInfo->CloseScope();
 }
 
 void UIObserverHandler::NotifyScrollEventStateChange(const WeakPtr<AceType>& weakPattern, ScrollEventType eventType)
@@ -81,11 +93,16 @@ void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& page
 {
     CHECK_NULL_VOID(pageInfo);
     CHECK_NULL_VOID(routerPageHandleFunc_);
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("notify router event failed, current UI instance invalid");
+        return;
+    }
     napi_value context = GetUIContextValue();
     AbilityContextInfo info = {
         AceApplicationInfo::GetInstance().GetAbilityName(),
         AceApplicationInfo::GetInstance().GetProcessName(),
-        Container::Current()->GetModuleName()
+        container->GetModuleName()
     };
     int32_t index = pageInfo->GetPageIndex();
     std::string name = pageInfo->GetPageUrl();
@@ -98,10 +115,15 @@ void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& page
 void UIObserverHandler::NotifyDensityChange(double density)
 {
     CHECK_NULL_VOID(densityHandleFunc_);
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("notify density event failed, current UI instance invalid");
+        return;
+    }
     AbilityContextInfo info = {
         AceApplicationInfo::GetInstance().GetAbilityName(),
         AceApplicationInfo::GetInstance().GetProcessName(),
-        Container::Current()->GetModuleName()
+        container->GetModuleName()
     };
     densityHandleFunc_(info, density);
 }
@@ -111,10 +133,12 @@ void UIObserverHandler::NotifyWillClick(
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(willClickHandleFunc_);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
     AbilityContextInfo info = {
         AceApplicationInfo::GetInstance().GetAbilityName(),
         AceApplicationInfo::GetInstance().GetProcessName(),
-        Container::Current()->GetModuleName()
+        container->GetModuleName()
     };
     willClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
 }
@@ -124,12 +148,27 @@ void UIObserverHandler::NotifyDidClick(
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(didClickHandleFunc_);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
     AbilityContextInfo info = {
         AceApplicationInfo::GetInstance().GetAbilityName(),
         AceApplicationInfo::GetInstance().GetProcessName(),
-        Container::Current()->GetModuleName()
+        container->GetModuleName()
     };
     didClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
+}
+
+void UIObserverHandler::NotifyPanGestureStateChange(const GestureEvent& gestureEventInfo,
+    const RefPtr<PanRecognizer>& current, const RefPtr<FrameNode>& frameNode, const PanGestureInfo& panGestureInfo)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(panGestureHandleFunc_);
+    auto getCurrent = Container::Current();
+    CHECK_NULL_VOID(getCurrent);
+    AbilityContextInfo info = { AceApplicationInfo::GetInstance().GetAbilityName(),
+        AceApplicationInfo::GetInstance().GetProcessName(), getCurrent->GetModuleName() };
+
+    panGestureHandleFunc_(info, gestureEventInfo, current, frameNode, panGestureInfo);
 }
 
 void UIObserverHandler::NotifyTabContentStateUpdate(const TabContentInfo& info)
@@ -143,6 +182,33 @@ UIObserverHandler::NavDestinationSwitchHandleFunc UIObserverHandler::GetHandleNa
     return navDestinationSwitchHandleFunc_;
 }
 
+std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavDestinationInfo(const RefPtr<UINode>& current)
+{
+    auto nav = AceType::DynamicCast<FrameNode>(current);
+    CHECK_NULL_RETURN(nav, nullptr);
+    auto pattern = nav->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto host = AceType::DynamicCast<NavDestinationGroupNode>(pattern->GetHost());
+    CHECK_NULL_RETURN(host, nullptr);
+    auto pathInfo = pattern->GetNavPathInfo();
+    CHECK_NULL_RETURN(pathInfo, nullptr);
+    NavDestinationState state = NavDestinationState::NONE;
+    NavDestinationMode mode = host->GetNavDestinationMode();
+    auto uniqueId = host->GetId();
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        state = pattern->GetNavDestinationState();
+        if (state == NavDestinationState::NONE) {
+            return nullptr;
+        }
+    } else {
+        state = pattern->GetIsOnShow() ? NavDestinationState::ON_SHOWN : NavDestinationState::ON_HIDDEN;
+    }
+    return std::make_shared<NavDestinationInfo>(
+        GetNavigationId(pattern), pattern->GetName(),
+        state, host->GetIndex(), pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()),
+        mode, uniqueId);
+}
+
 std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const RefPtr<AceType>& node)
 {
     CHECK_NULL_RETURN(node, nullptr);
@@ -154,26 +220,38 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const 
         current = current->GetParent();
     }
     CHECK_NULL_RETURN(current, nullptr);
-    auto nav = AceType::DynamicCast<FrameNode>(current);
-    CHECK_NULL_RETURN(nav, nullptr);
-    auto pattern = nav->GetPattern<NavDestinationPattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
-    auto host = AceType::DynamicCast<NavDestinationGroupNode>(pattern->GetHost());
-    CHECK_NULL_RETURN(host, nullptr);
-    auto pathInfo = pattern->GetNavPathInfo();
-    CHECK_NULL_RETURN(pathInfo, nullptr);
-    NavDestinationState state = NavDestinationState::NONE;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        state = pattern->GetNavDestinationState();
-        if (state == NavDestinationState::NONE) {
-            return nullptr;
+    return GetNavDestinationInfo(current);
+}
+
+std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationInnerState(const RefPtr<AceType>& node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto current = AceType::DynamicCast<UINode>(node);
+    while (current) {
+        if (current->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG &&
+            current->GetParent()->GetTag() == V2::NAVIGATION_CONTENT_ETS_TAG) {
+            break;
         }
-    } else {
-        state = pattern->GetIsOnShow() ? NavDestinationState::ON_SHOWN : NavDestinationState::ON_HIDDEN;
+        current = current->GetFirstChild();
     }
-    return std::make_shared<NavDestinationInfo>(
-        GetNavigationId(pattern), pattern->GetName(),
-        state, host->GetIndex(), pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()));
+    CHECK_NULL_RETURN(current, nullptr);
+    return GetNavDestinationInfo(current);
+}
+
+std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationOuterState(const RefPtr<AceType>& node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto current = AceType::DynamicCast<UINode>(node);
+    while (current) {
+        CHECK_NULL_RETURN(current->GetParent(), nullptr);
+        if (current->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG &&
+            current->GetParent()->GetTag() == V2::NAVIGATION_CONTENT_ETS_TAG) {
+            break;
+        }
+        current = current->GetParent();
+    }
+    CHECK_NULL_RETURN(current, nullptr);
+    return GetNavDestinationInfo(current);
 }
 
 std::shared_ptr<ScrollEventInfo> UIObserverHandler::GetScrollEventState(const RefPtr<AceType>& node)
@@ -253,10 +331,15 @@ void UIObserverHandler::NotifyNavDestinationSwitch(std::optional<NavDestinationI
     std::optional<NavDestinationInfo>&& to, NavigationOperation operation)
 {
     CHECK_NULL_VOID(navDestinationSwitchHandleFunc_);
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("notify destination event failed, current UI instance invalid");
+        return;
+    }
     AbilityContextInfo info = {
         AceApplicationInfo::GetInstance().GetAbilityName(),
         AceApplicationInfo::GetInstance().GetProcessName(),
-        Container::Current()->GetModuleName()
+        container->GetModuleName()
     };
     NavDestinationSwitchInfo switchInfo(GetUIContextValue(), std::forward<std::optional<NavDestinationInfo>>(from),
         std::forward<std::optional<NavDestinationInfo>>(to), operation);
@@ -278,7 +361,7 @@ void UIObserverHandler::SetHandleRouterPageChangeFunc(RouterPageHandleFunc func)
     routerPageHandleFunc_ = func;
 }
 
-void UIObserverHandler::SetHandleDensityChangeFunc(const DensityHandleFunc& func)
+void UIObserverHandler::SetHandleDensityChangeFunc(DensityHandleFunc func)
 {
     densityHandleFunc_ = func;
 }
@@ -306,6 +389,11 @@ void UIObserverHandler::SetWillClickFunc(WillClickHandleFunc func)
 void UIObserverHandler::SetDidClickFunc(DidClickHandleFunc func)
 {
     didClickHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetPanGestureHandleFunc(PanGestureHandleFunc func)
+{
+    panGestureHandleFunc_ = func;
 }
 
 void UIObserverHandler::SetHandleTabContentStateUpdateFunc(TabContentStateHandleFunc func)

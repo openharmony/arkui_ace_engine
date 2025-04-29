@@ -36,6 +36,7 @@
 
 namespace OHOS::Ace::Framework {
 const std::string EMPTY_STATUS_DATA = "empty_status_data";
+const std::string JS_STRINGIFIED_UNDEFINED = "undefined";
 
 #ifdef USE_ARK_ENGINE
 
@@ -85,6 +86,11 @@ void ViewFunctions::ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper)
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     ACE_SCOPED_TRACE("ViewFunctions::ExecuteMeasureSize");
     auto jsParam = JSMeasureLayoutParamNG::GetInstance(layoutWrapper);
+    if (!jsParam) {
+        layoutWrapper->GetGeometryNode()->SetFrameSize({ -1.0f, -1.0f });
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "GetInstance return val in onMeasureSize API is null");
+        return;
+    }
 
     auto selfLayoutInfo = jsParam->GetSelfLayoutInfo();
     auto childArray = jsParam->GetChildArray();
@@ -92,6 +98,11 @@ void ViewFunctions::ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper)
 
     JSRef<JSVal> params[3] = { selfLayoutInfo, childArray, constraint };
     JSRef<JSObject> result = jsMeasureSizeFunc_.Lock()->Call(jsObject_.Lock(), 3, params); /* 3:params number */
+    if (result->IsUndefined()) {
+        layoutWrapper->GetGeometryNode()->SetFrameSize({ -1.0f, -1.0f });
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "app return val of onMeasureSize API is empty or undefined");
+        return;
+    }
 
     CalcDimension measureWidth;
     CalcDimension measureHeight;
@@ -101,7 +112,8 @@ void ViewFunctions::ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper)
     if (!JSViewAbstract::ParseJsDimensionVp(result->GetProperty("height"), measureHeight)) {
         measureWidth = { -1.0f };
     }
-    NG::SizeF frameSize = { measureWidth.ConvertToPx(), measureHeight.ConvertToPx() };
+    NG::SizeF frameSize = { static_cast<float>(measureWidth.ConvertToPx()),
+        static_cast<float>(measureHeight.ConvertToPx()) };
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
 }
 
@@ -161,16 +173,59 @@ void ViewFunctions::ExecuteRecycle(const std::string& viewName)
     }
 }
 
-void ViewFunctions::ExecuteSetActive(bool active)
+void ViewFunctions::ExecuteSetActive(bool active, bool isReuse)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     auto func = jsSetActive_.Lock();
     if (!func->IsEmpty()) {
-        auto isActive = JSRef<JSVal>::Make(ToJSValue(active));
-        func->Call(jsObject_.Lock(), 1, &isActive);
+        JSFastNativeScope scope(func->GetEcmaVM());
+        JSRef<JSVal> params[2]; // 2: the count of parameter
+        params[0] = JSRef<JSVal>(JSVal(JsiValueConvertor::toJsiValue(active)));
+        params[1] = JSRef<JSVal>(JSVal(JsiValueConvertor::toJsiValue(isReuse)));
+        func->Call(jsObject_.Lock(), 2, params); // 2: the count of parameter
     } else {
         LOGE("the set active func is null");
     }
+}
+
+void ViewFunctions::ExecutePrebuildComponent()
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    auto func = jsPrebuildComponent_.Lock();
+    if (!func->IsEmpty()) {
+        func->Call(jsObject_.Lock());
+    } else {
+        LOGE("the prebuild component func is null");
+    }
+}
+
+bool ViewFunctions::ExecuteSetPrebuildPhase(PrebuildPhase prebuildPhase)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_, false)
+    auto func = jsSetPrebuildPhase_.Lock();
+    if (!func->IsEmpty()) {
+        auto jsPrebuildPhase = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(prebuildPhase)));
+        func->Call(jsObject_.Lock(), 1, &jsPrebuildPhase);
+        return true;
+    } else {
+        LOGE("the set prebuild phase func is null");
+    }
+    return false;
+}
+
+bool ViewFunctions::ExecuteIsEnablePrebuildInMultiFrame()
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_, false)
+    auto func = jsIsEnablePrebuildInMultiFrame_.Lock();
+    if (!func->IsEmpty()) {
+        auto result = func->Call(jsObject_.Lock());
+        if (result->IsBoolean()) {
+            return result->ToBoolean();
+        }
+    } else {
+        LOGE("the is enable prebuild in multi frame func is null");
+    }
+    return false;
 }
 
 void ViewFunctions::ExecuteOnDumpInfo(const std::vector<std::string>& params)
@@ -274,6 +329,11 @@ void ViewFunctions::InitViewFunctions(
             jsAboutToRecycleFunc_ = JSRef<JSFunc>::Cast(jsAboutToRecycleFunc);
         }
 
+        JSRef<JSVal> jsAboutToReuseFunc = jsObject->GetProperty("aboutToReuseInternal");
+        if (jsAboutToReuseFunc->IsFunction()) {
+            jsAboutToReuseFunc_ = JSRef<JSFunc>::Cast(jsAboutToReuseFunc);
+        }
+
         JSRef<JSVal> jsSetActive = jsObject->GetProperty("setActiveInternal");
         if (jsSetActive->IsFunction()) {
             jsSetActive_ = JSRef<JSFunc>::Cast(jsSetActive);
@@ -287,6 +347,21 @@ void ViewFunctions::InitViewFunctions(
         JSRef<JSVal> jsOnDumpInspector = jsObject->GetProperty("onDumpInspector");
         if (jsOnDumpInspector->IsFunction()) {
             jsOnDumpInspector_ = JSRef<JSFunc>::Cast(jsOnDumpInspector);
+        }
+
+        JSRef<JSVal> jsPrebuildComponent = jsObject->GetProperty("prebuildComponent");
+        if (jsPrebuildComponent->IsFunction()) {
+            jsPrebuildComponent_ = JSRef<JSFunc>::Cast(jsPrebuildComponent);
+        }
+
+        JSRef<JSVal> jsIsEnablePrebuildInMultiFrame = jsObject->GetProperty("isEnablePrebuildInMultiFrame");
+        if (jsIsEnablePrebuildInMultiFrame->IsFunction()) {
+            jsIsEnablePrebuildInMultiFrame_ = JSRef<JSFunc>::Cast(jsIsEnablePrebuildInMultiFrame);
+        }
+
+        JSRef<JSVal> jsSetPrebuildPhase = jsObject->GetProperty("setPrebuildPhase");
+        if (jsSetPrebuildPhase->IsFunction()) {
+            jsSetPrebuildPhase_ = JSRef<JSFunc>::Cast(jsSetPrebuildPhase);
         }
     }
 
@@ -397,6 +472,11 @@ void ViewFunctions::InitViewFunctions(
     if (jsOnFormRecoverFunc->IsFunction()) {
         jsOnFormRecoverFunc_ = JSRef<JSFunc>::Cast(jsOnFormRecoverFunc);
     }
+
+    JSRef<JSVal> jsOnNewParam = jsObject->GetProperty("onNewParam");
+    if (jsOnNewParam->IsFunction()) {
+        jsOnNewParam_ = JSRef<JSFunc>::Cast(jsOnNewParam);
+    }
 }
 
 ViewFunctions::ViewFunctions(const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsRenderFunction)
@@ -452,6 +532,29 @@ void ViewFunctions::ExecuteDidBuild()
 void ViewFunctions::ExecuteAboutToRecycle()
 {
     ExecuteFunction(jsAboutToRecycleFunc_, "aboutToRecycleInternal");
+}
+
+void ViewFunctions::ExecuteAboutToReuse(void* params)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    if (jsAboutToReuseFunc_.IsEmpty()) {
+        return;
+    }
+    ACE_SCOPED_TRACE("ExecuteAboutToReuse");
+    JSRef<JSVal> jsObject = jsObject_.Lock();
+    if (!jsObject->IsUndefined()) {
+        std::string functionName("ExecuteAboutToReuse");
+        AceScopedPerformanceCheck scoped(functionName);
+        auto reuseParams = JsiCallbackInfo(reinterpret_cast<panda::JsiRuntimeCallInfo*>(params));
+        JsiRef<JsiValue> params[1] = { reuseParams[0] };
+        if (reuseParams.Length() > 0) {
+            jsAboutToReuseFunc_.Lock()->Call(jsObject, 1, params);
+        } else {
+            jsAboutToReuseFunc_.Lock()->Call(jsObject);
+        }
+    } else {
+        LOGE("jsObject is undefined. Internal error while trying to exec ExecuteAboutToReuse");
+    }
 }
 
 bool ViewFunctions::HasLayout() const
@@ -614,7 +717,7 @@ void ViewFunctions::Destroy(JSView* parentCustomView)
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(renderRes);
     if (!obj.IsEmpty()) {
         // jsRenderResult_ maybe an js exception, not a JSView
-        JSView* view = obj->Unwrap<JSView>();
+        JSView* view = JSView::GetNativeView(obj);
         if (view != nullptr) {
             view->Destroy(parentCustomView);
         }
@@ -639,7 +742,7 @@ void ViewFunctions::Destroy()
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(renderRes);
     if (!obj.IsEmpty()) {
         // jsRenderResult_ maybe an js exception, not a JSView
-        JSView* view = obj->Unwrap<JSView>();
+        JSView* view = JSView::GetNativeView(obj);
         if (view != nullptr) {
             LOGE("NOTE NOTE NOTE render returned a JSView object that's dangling!");
         }
@@ -651,7 +754,11 @@ void ViewFunctions::Destroy()
 // Partial update method
 void ViewFunctions::ExecuteRerender()
 {
-    COMPONENT_UPDATE_DURATION();
+    int32_t id = -1;
+    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
+        id = Container::CurrentId();
+    }
+    COMPONENT_UPDATE_DURATION(id);
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     if (jsRerenderFunc_.IsEmpty()) {
         LOGE("no rerender function in View!");
@@ -699,5 +806,19 @@ void ViewFunctions::ExecuteOnFormRecover(const std::string& statusData)
     auto jsData = JSRef<JSVal>::Make(ToJSValue(data));
     auto func = jsOnFormRecoverFunc_.Lock();
     func->Call(jsObject_.Lock(), 1, &jsData);
+}
+
+void ViewFunctions::ExecuteOnNewParam(const std::string& newParam)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    if (jsOnNewParam_.IsEmpty()) {
+        return;
+    }
+    auto argv = JSRef<JSVal>::Make();
+    if (!newParam.empty() && newParam != JS_STRINGIFIED_UNDEFINED) {
+        argv = JSRef<JSObject>::New()->ToJsonObject(newParam.c_str());
+    }
+    auto func = jsOnNewParam_.Lock();
+    func->Call(jsObject_.Lock(), 1, &argv);
 }
 } // namespace OHOS::Ace::Framework

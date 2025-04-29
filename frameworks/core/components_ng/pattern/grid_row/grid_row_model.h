@@ -35,11 +35,6 @@ public:
     virtual void SetOnBreakPointChange(std::function<void(const std::string)>&& onChange) = 0;
     virtual void SetHeight() {}
     virtual void SetAlignItems(FlexAlign alignItem) = 0;
-
-private:
-    static std::unique_ptr<GridRowModel> instance_;
-    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
-
 #endif

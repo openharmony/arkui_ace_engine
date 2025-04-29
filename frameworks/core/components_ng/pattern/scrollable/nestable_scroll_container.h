@@ -54,10 +54,12 @@ public:
     /**
      * @brief Called when the scroll starts, recursively pass upwards.
      *
+     * @param child components that call OnScrollStartRecursive.
      * @param position The global position of the first touch point.
      * @param velocity current velocity on the main axis.
      */
-    virtual void OnScrollStartRecursive(float position, float velocity = 0.f) = 0;
+    virtual void OnScrollStartRecursive(
+        WeakPtr<NestableScrollContainer> child, float position, float velocity = 0.f) = 0;
 
     /**
      * @brief This function is called when the scrolling ends, recursively pass upwards.
@@ -99,6 +101,8 @@ public:
     virtual void RemainVelocityToChild(float remainVelocity) {}
 
     virtual void OnScrollDragEndRecursive();
+
+    virtual void StopScrollAnimation() {};
 
 protected:
     /**

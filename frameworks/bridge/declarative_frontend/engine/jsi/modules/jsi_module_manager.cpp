@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_module_manager.h"
 
-#include "base/log/log.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_app_module.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_curves_module.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_matrix4_module.h"

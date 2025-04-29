@@ -29,7 +29,7 @@ class MonitorValueV2<T> {
   public now?: T;
   public path: string;
   // properties on the path
-  public props : string[];
+  public props: string[];
 
   private dirty : boolean;
 
@@ -61,7 +61,7 @@ class MonitorValueV2<T> {
 
 /**
  * MonitorV2
- * one MonitorV2 object per @monitor function
+ * one MonitorV2 object per @Monitor function
  * watchId - similar to elmtId, identify one MonitorV2 in Observe.idToCmp Map
  * observeObjectAccess = get each object on the 'path' to create dependency and add them with Observe.addRef
  * fireChange - exec @Monitor function and re-new dependencies with observeObjectAccess
@@ -78,7 +78,7 @@ class MonitorV2 {
 
 
   private values_: Array<MonitorValueV2<unknown>> = new Array<MonitorValueV2<unknown>>();
-  private target_: object; // @monitor function 'this': data object or ViewV2
+  private target_: object; // @Monitor function 'this': data object or ViewV2
   private monitorFunction: (m: IMonitor) => void;
   private watchId_: number; // unique id, similar to elmtId but identifies this object
 
@@ -93,7 +93,7 @@ class MonitorV2 {
 
     // add watchId to owning ViewV2 or view model data object
     // ViewV2 uses to call clearBinding(id)
-    // FIXME data object leave data inside ObservedV3, because they can not 
+    // FIXME data object leave data inside ObservedV2, because they can not 
     // call clearBinding(id) before they get deleted.
     const meta = target[MonitorV2.WATCH_INSTANCE_PREFIX] ??= {};
     meta[pathsString] = this.watchId_;
@@ -101,6 +101,10 @@ class MonitorV2 {
 
   public getTarget() : Object {
     return this.target_;
+  }
+
+  public getMonitorFuncName(): string {
+    return this.monitorFunction.name;
   }
 
   /**
@@ -139,16 +143,24 @@ class MonitorV2 {
     if (this.bindRun(/* is init / first run */ false)) {
       stateMgmtConsole.debug(`@Monitor function '${this.monitorFunction.name}' exec ...`);
 
-      // exec @Monitor function
-      this.monitorFunction.call(this.target_, this);
-
-      // now -> before value
-      this.reset();
+      try {
+        // exec @Monitor function
+        this.monitorFunction.call(this.target_, this);
+      } catch(e) {
+        stateMgmtConsole.applicationError(`@Monitor exception caught for ${this.monitorFunction.name}`, e.toString());
+        throw e;
+      } finally {
+        this.resetMonitor();
+      }
     }
   }
 
+  public notifyChangeOnReuse(): void {
+    this.bindRun(true);
+  }
+
   // called after @Monitor function call
-  private reset(): void {
+  private resetMonitor(): void {
     this.values_.forEach(item => item.reset());
   }
 
@@ -157,7 +169,7 @@ class MonitorV2 {
     ObserveV2.getObserve().startRecordDependencies(this, this.watchId_);
     let ret = false;
     this.values_.forEach((item) => {
-      const [ success, value ] = this.analysisProp(isInit, item)
+      const [success, value] = this.analysisProp(isInit, item);
       if (!success ) {
         stateMgmtConsole.debug(`@Monitor path no longer valid.`);
         return;
@@ -172,17 +184,17 @@ class MonitorV2 {
 
   // record / update object dependencies by reading each object along the path
   // return the value, i.e. the value of the last path item
-  private analysisProp<T>(isInit: boolean, monitoredValue: MonitorValueV2<T>): [ success: boolean, value : T ]  {
+  private analysisProp<T>(isInit: boolean, monitoredValue: MonitorValueV2<T>): [ success: boolean, value : T ] {
     let obj = this.target_;
     for (let prop of monitoredValue.props) {
-      if (typeof obj === 'object' && Reflect.has(obj, prop)) {
+      if (obj && typeof obj === 'object' && Reflect.has(obj, prop)) {
         obj = obj[prop];
       } else {
         isInit && stateMgmtConsole.warn(`watch prop ${monitoredValue.path} initialize not found, make sure it exists!`);
-        return [ false, undefined ];
+        return [false, undefined];
       }
     }
-    return [true, obj as unknown as T ];
+    return [true, obj as unknown as T];
   }
 
   public static clearWatchesFromTarget(target: Object): void {
@@ -204,7 +216,12 @@ class AsyncAddMonitorV2 {
   
   static addMonitor(target: any, name: string): void {
     if (AsyncAddMonitorV2.watches.length === 0) {
-      Promise.resolve(true).then(AsyncAddMonitorV2.run);
+      Promise.resolve(true)
+      .then(AsyncAddMonitorV2.run)
+      .catch(error => {
+        stateMgmtConsole.applicationError(`Exception caught in @Monitor function ${name}`, error);
+        _arkUIUncaughtPromiseError(error);
+      });
     }
     AsyncAddMonitorV2.watches.push([target, name]);
   }

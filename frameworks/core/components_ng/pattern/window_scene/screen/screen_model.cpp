@@ -20,7 +20,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/window_scene/screen/screen_node.h"
 #include "core/components_ng/pattern/window_scene/screen/screen_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 void ScreenModel::Create(uint64_t screenId)

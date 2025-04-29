@@ -185,7 +185,7 @@ HWTEST_F(StepperTestNg, StepperFrameNodeCreator001, TestSize.Level1)
     StepperModelNG().SetOnSkip([&eventName]() { eventName = SKIP_EVENT_NAME; });
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<StepperEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<StepperEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->FireFinishEvent(1);
     EXPECT_EQ(eventName, FINISH_EVENT_NAME);
@@ -283,7 +283,7 @@ HWTEST_F(StepperTestNg, StepperPatternInitSwiperChangeEvent001, TestSize.Level1)
     auto swiperNode = FrameNode::GetOrCreateFrameNode(
         SWIPER_NODE_TAG, frameNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     ASSERT_NE(swiperNode, nullptr);
-    auto swiperEventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    auto swiperEventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
     EXPECT_NE(swiperEventHub, nullptr);
     EXPECT_FALSE(stepperPattern->swiperChangeEvent_);
     stepperPattern->InitSwiperChangeEvent(swiperEventHub);
@@ -470,8 +470,8 @@ HWTEST_F(StepperTestNg, StepperPatternCreateArrowlessRightButtonNode001, TestSiz
     ASSERT_NE(stepperItemNode, nullptr);
     frameNode->AddChild(swiperNode);
     swiperNode->AddChild(stepperItemNode);
-    stepperPattern->CreateArrowlessRightButtonNode(
-        INDEX, false, Localization::GetInstance()->GetEntryLetters("stepper.start"));
+    auto theme = AceType::MakeRefPtr<StepperTheme>();
+    stepperPattern->CreateArrowlessRightButtonNode(INDEX, false, theme->GetStepperStart());
     auto hostNode = AceType::DynamicCast<StepperNode>(stepperPattern->GetHost());
     ASSERT_NE(hostNode, nullptr);
     auto buttonId = hostNode->GetRightButtonId();
@@ -694,7 +694,7 @@ HWTEST_F(StepperTestNg, StepperEventHubChangeEvent001, TestSize.Level1)
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<StepperEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<StepperEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->FireChangeEvent(1, 1);
 }

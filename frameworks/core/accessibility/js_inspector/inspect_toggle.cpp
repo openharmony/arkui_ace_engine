@@ -33,7 +33,7 @@ void InspectToggle::PackAttrAndStyle()
     } else if (deviceType == DeviceType::TV) {
         styles_.insert(std::make_pair("color", "#e5ffffff"));
         styles_.insert(std::make_pair("font-size", "18px"));
-    } else if (deviceType == DeviceType::WATCH) {
+    } else if (deviceType == DeviceType::WEARABLE || deviceType == DeviceType::WATCH) {
         styles_.insert(std::make_pair("color", "#ff45a5ff"));
         styles_.insert(std::make_pair("font-size", "16px"));
     }

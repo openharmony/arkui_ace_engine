@@ -26,7 +26,8 @@ class MockTaskExecutor : public TaskExecutor {
 public:
     MockTaskExecutor() = default;
     MockTaskExecutor(bool delayRun): delayRun_(delayRun) {}
-    
+    MOCK_CONST_METHOD4(PostTask, bool(Task&&, TaskType, const std::string&, PriorityType));
+
     bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
         PriorityType priorityType = PriorityType::LOW) const override
     {
@@ -63,6 +64,23 @@ public:
         }
         task();
         return true;
+    }
+
+    bool PostTask(Task&& task, Task type, const std::string& name,
+        PriorityType priorityType = PriorityType::LOW) const
+    {
+        CHECK_NULL_RETURN(task, false);
+        task();
+        return true;
+    }
+
+    bool PostDelayedTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
+        PriorityType priorityType = PriorityType::LOW) const
+    {
+        if (delayTime > 0 && type == TaskType::BACKGROUND) {
+            return false;
+        }
+        return OnPostTask(std::move(task), type, delayTime, name, priorityType);
     }
 
 private:

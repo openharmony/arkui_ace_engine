@@ -40,6 +40,8 @@
     "src/lib/common/observed_property_abstract.ts",
     "src/lib/common/utils.ts",
     "src/lib/common/state_mgmt_dfx.ts",
+    "src/lib/common/finalization_registry.d.ts",
+    "src/lib/common/weakref_pool.ts",
 
     // full_update specific
     "src/lib/full_update/fu_observed_property.ts",
@@ -66,6 +68,7 @@
     "src/lib/partial_update/pu_builder_proxy.ts",
 
     // 'new' stateMgmt vers 2
+    "src/lib/v2/v2_observed_proxy.ts",
     "src/lib/v2/v2_change_observation.ts",
     "src/lib/v2/v2_decorated_variables.ts",
     "src/lib/v2/v2_monitor.ts",
@@ -74,6 +77,7 @@
     "src/lib/v2/v2_decorators.ts",
     "src/lib/v2/v2_json_coder.ts",
     "src/lib/v2/v2_make_observed.ts",
+    "src/lib/v2/v2_recycle_pool.ts",
     "src/lib/common/sendable_type.ts",
 
     
@@ -81,6 +85,7 @@
     "src/lib/partial_update/pu_repeat.ts",
     "src/lib/partial_update/pu_repeat_impl.ts",
     "src/lib/partial_update/pu_repeat_virtual_scroll_impl.ts",
+    "src/lib/partial_update/pu_repeat_virtual_scroll_2_impl.ts",
 
     // sdk
     "src/lib/sdk/v2_persistence.ts",

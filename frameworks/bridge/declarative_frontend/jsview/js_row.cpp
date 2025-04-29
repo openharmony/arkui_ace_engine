@@ -21,27 +21,20 @@
 #include "frameworks/bridge/declarative_frontend/jsview/models/row_model_impl.h"
 
 namespace OHOS::Ace {
-
-std::unique_ptr<RowModel> RowModel::instance_ = nullptr;
-std::mutex RowModel::mutex_;
-
 RowModel* RowModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::RowModelNG());
+    static NG::RowModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::RowModelNG());
-            } else {
-                instance_.reset(new Framework::RowModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::RowModelNG instance;
+        return &instance;
+    } else {
+        static Framework::RowModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 } // namespace OHOS::Ace
 

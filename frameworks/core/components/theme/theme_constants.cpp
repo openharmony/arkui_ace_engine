@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "core/components/theme/theme_constants.h"
 
 #include "base/resource/ace_res_config.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -308,6 +309,22 @@ bool ThemeConstants::GetRawFileDescription(const std::string& rawfileName, Rawfi
     return resAdapter_->GetRawFileDescription(rawfileName, rawfileDescription);
 }
 
+bool ThemeConstants::CloseRawFileDescription(const std::string& rawfileName) const
+{
+    if (!resAdapter_) {
+        return false;
+    }
+    return resAdapter_->CloseRawFileDescription(rawfileName);
+}
+
+bool ThemeConstants::GetRawFD(const std::string& rawfileName, RawfileDescription& rawfileDescription) const
+{
+    if (!resAdapter_) {
+        return false;
+    }
+    return resAdapter_->GetRawFD(rawfileName, rawfileDescription);
+}
+
 bool ThemeConstants::GetMediaById(const int32_t& resId, std::string& mediaPath) const
 {
     if (!resAdapter_) {
@@ -341,6 +358,14 @@ uint32_t ThemeConstants::GetSymbolByName(const char* name) const
         return ERROR_VALUE_UINT;
     }
     return resAdapter_->GetSymbolByName(name);
+}
+
+uint32_t ThemeConstants::GetSymbolById(uint32_t resId) const
+{
+    if (!resAdapter_) {
+        return ERROR_VALUE_UINT;
+    }
+    return resAdapter_->GetSymbolById(resId);
 }
 
 std::vector<uint32_t> ThemeConstants::GetIntArray(uint32_t key) const
@@ -551,6 +576,36 @@ void ThemeConstants::SetColorScheme(ColorScheme colorScheme)
         currentThemeStyle_->SetAttr(
             THEME_ATTR_BG_COLOR, { .type = ThemeConstantsType::COLOR, .value = TRANSPARENT_BG_COLOR });
     }
+}
+
+RefPtr<ThemeStyle> ThemeConstants::GetPatternByName(const std::string& patternName)
+{
+    // if LocalColorMode is different from SystemColorMode, GetPattern from SysResMgr directly by LocolColorMode
+    if (auto pipelineContext = NG::PipelineContext::GetCurrentContext(); pipelineContext) {
+        ColorMode systemMode = pipelineContext->GetColorMode();
+        ColorMode localMode = pipelineContext->GetLocalColorMode();
+        if (localMode != ColorMode::COLOR_MODE_UNDEFINED && localMode != systemMode) {
+            // currentThemeStyle_ contains patterns for different color scheme, so need to get pattern from resAdapter_
+            auto patternStyle = resAdapter_ ? resAdapter_->GetPatternByName(patternName) : nullptr;
+            if (patternStyle != nullptr) {
+                return patternStyle;
+            }
+        }
+    }
+
+    if (!currentThemeStyle_) {
+        TAG_LOGE(AceLogTag::ACE_THEME, "Get theme by name error: currentThemeStyle_ is null");
+        return nullptr;
+    }
+    currentThemeStyle_->CheckThemeStyleLoaded(patternName);
+    auto patternStyle = currentThemeStyle_->GetAttr<RefPtr<ThemeStyle>>(patternName, nullptr);
+    if (!patternStyle && resAdapter_) {
+        patternStyle = resAdapter_->GetPatternByName(patternName);
+        ResValueWrapper value = { .type = ThemeConstantsType::PATTERN,
+            .value = patternStyle };
+        currentThemeStyle_->SetAttr(patternName, value);
+    }
+    return patternStyle;
 }
 
 } // namespace OHOS::Ace

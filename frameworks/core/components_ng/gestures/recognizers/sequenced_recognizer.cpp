@@ -15,17 +15,6 @@
 
 #include "core/components_ng/gestures/recognizers/sequenced_recognizer.h"
 
-#include <iterator>
-#include <vector>
-
-#include "base/memory/referenced.h"
-#include "base/thread/task_executor.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/gestures/gesture_referee.h"
-#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
-#include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
-#include "core/components_ng/gestures/recognizers/recognizer_group.h"
-#include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -49,6 +38,17 @@ void SequencedRecognizer::OnAccepted()
     }
 }
 
+void SequencedRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
+{
+    if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
+        return;
+    }
+    if (callback && *callback) {
+        GestureEvent info;
+        (*callback)(info);
+    }
+}
+
 void SequencedRecognizer::OnRejected()
 {
     refereeState_ = RefereeState::FAIL;
@@ -69,7 +69,7 @@ void SequencedRecognizer::OnRejected()
     }
 
     if (currentIndex_ != -1) {
-        SendCancelMsg();
+        SendCallbackMsg(onActionCancel_);
     }
 }
 
@@ -114,16 +114,90 @@ void SequencedRecognizer::OnBlocked()
     }
 }
 
+RefPtr<NGGestureRecognizer> SequencedRecognizer::GetCurrentRecognizer()
+{
+    auto iter = recognizers_.begin();
+    std::advance(iter, currentIndex_);
+    RefPtr<NGGestureRecognizer> curRecognizer = *iter;
+    return curRecognizer;
+}
+
+bool SequencedRecognizer::CheckGroupState()
+{
+    if (currentIndex_ < 0 || refereeState_ != RefereeState::PENDING) {
+        return false;
+    }
+    auto curRecognizer = GetCurrentRecognizer();
+    if (!AceType::InstanceOf<RecognizerGroup>(curRecognizer)) {
+        return curRecognizer->GetRefereeState() != RefereeState::SUCCEED_BLOCKED &&
+               curRecognizer->GetRefereeState() != RefereeState::SUCCEED &&
+               curRecognizer->GetRefereeState() != RefereeState::FAIL;
+    }
+    auto group = AceType::DynamicCast<RecognizerGroup>(curRecognizer);
+    return group && group->CheckGroupState();
+}
+
+RefereeState SequencedRecognizer::CheckStates(size_t touchId)
+{
+    int count = 0;
+    if (currentIndex_ < 0 || refereeState_ != RefereeState::PENDING) {
+        return RefereeState::READY;
+    }
+    auto curRecognizer = GetCurrentRecognizer();
+    if (!AceType::InstanceOf<RecognizerGroup>(curRecognizer)) {
+        if (curRecognizer->GetRefereeState() != RefereeState::SUCCEED_BLOCKED &&
+            curRecognizer->GetRefereeState() != RefereeState::SUCCEED &&
+            curRecognizer->GetRefereeState() != RefereeState::FAIL) {
+            count++;
+        }
+    } else {
+        auto group = AceType::DynamicCast<RecognizerGroup>(curRecognizer);
+        if (group) {
+            auto state = group->CheckStates(touchId);
+            if (state == RefereeState::PENDING) {
+                count++;
+            }
+        }
+    }
+    if (count > 0) {
+        return RefereeState::PENDING;
+    } else {
+        return RefereeState::READY;
+    }
+}
+
+bool SequencedRecognizer::NeedStartDeadlineTimerInner(
+    const RefPtr<NGGestureRecognizer> curRecognizer, SourceTool sourceTool)
+{
+    if (currentIndex_ <= 0) {
+        return curRecognizer->IsAllowedType(sourceTool);
+    }
+    auto iter = recognizers_.begin();
+    std::advance(iter, currentIndex_ - 1);
+    RefPtr<NGGestureRecognizer> lastRecognizer = *iter;
+    return (lastRecognizer->GetRefereeState() == RefereeState::SUCCEED && lastRecognizer->IsAllowedType(sourceTool)) ||
+           curRecognizer->IsAllowedType(sourceTool);
+}
+
+void SequencedRecognizer::StopLongPressRepeatTimer(int32_t pointerId)
+{
+    int32_t idx = 0;
+    for (const auto& recognizer : recognizers_) {
+        if (idx < currentIndex_ && recognizer && recognizer->CheckTouchId(pointerId)) {
+            RefPtr<LongPressRecognizer> longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(recognizer);
+            if (longPressRecognizer && longPressRecognizer->GetIsRepeat()) {
+                longPressRecognizer->RemoteRepeatTimer();
+            }
+        }
+        idx++;
+    }
+}
+
 bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
 {
     if (point.type == TouchType::DOWN || point.type == TouchType::UP) {
-        if (point.sourceType == SourceType::TOUCH) {
-            inputEventType_ = InputEventType::TOUCH_SCREEN;
-        } else {
-            inputEventType_ = InputEventType::MOUSE_BUTTON;
-        }
-        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, sequenced %{public}d type: %{public}d",
-            point.touchEventId, point.id, static_cast<int32_t>(point.type));
+        inputEventType_ = point.sourceType == SourceType::TOUCH ? InputEventType::TOUCH_SCREEN :
+            InputEventType::MOUSE_BUTTON;
     }
     auto iter = recognizers_.begin();
     std::advance(iter, currentIndex_);
@@ -140,14 +214,14 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
     }
     touchPoints_[point.id] = point;
     // the prevState is ready, need to pase down event to the new coming recognizer.
-    if (curRecognizer && curRecognizer->GetRefereeState() == RefereeState::READY) {
+    if (currentIndex_ > 0 && curRecognizer->GetRefereeState() == RefereeState::READY) {
         if (inputEventType_ != InputEventType::MOUSE_BUTTON || !CheckBetweenTwoLongPressRecognizer(currentIndex_)) {
             SendTouchEventToNextRecognizer(curRecognizer);
         }
     }
     switch (point.type) {
         case TouchType::DOWN:
-            if (touchPoints_.size() == 1) {
+            if (touchPoints_.size() == 1 && curRecognizer->IsAllowedType(point.sourceTool)) {
                 deadlineTimer_.Cancel();
             }
             [[fallthrough]];
@@ -161,9 +235,13 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
             break;
     }
 
-    if ((point.type == TouchType::UP) && (refereeState_ == RefereeState::PENDING)) {
-        DeadlineTimer();
+    if (point.type == TouchType::UP) {
+        StopLongPressRepeatTimer(point.id);
+        if ((refereeState_ == RefereeState::PENDING) && NeedStartDeadlineTimerInner(curRecognizer, point.sourceTool)) {
+            DeadlineTimer();
+        }
     }
+
     return true;
 }
 
@@ -191,7 +269,8 @@ bool SequencedRecognizer::HandleEvent(const AxisEvent& point)
         curRecognizer->HandleEvent(point);
     }
 
-    if ((point.action == AxisAction::END) && (refereeState_ == RefereeState::PENDING)) {
+    if ((point.action == AxisAction::END) && (refereeState_ == RefereeState::PENDING) &&
+        NeedStartDeadlineTimerInner(curRecognizer, point.sourceTool)) {
         DeadlineTimer();
     }
     return true;
@@ -246,7 +325,8 @@ void SequencedRecognizer::UpdateCurrentIndex()
     }
     currentIndex_++;
     // if the sequence recognizer between long press recognizer, auto send to next event.
-    if (inputEventType_ == InputEventType::MOUSE_BUTTON && CheckBetweenTwoLongPressRecognizer(currentIndex_)) {
+    if (isEventHandoverNeeded_ ||
+        (inputEventType_ == InputEventType::MOUSE_BUTTON && CheckBetweenTwoLongPressRecognizer(currentIndex_))) {
         auto duration = 0;
         auto iter = recognizers_.begin();
         std::advance(iter, currentIndex_ - 1);
@@ -309,7 +389,7 @@ void SequencedRecognizer::OnResetStatus()
 
 void SequencedRecognizer::DeadlineTimer()
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
 
     auto callback = [weakPtr = AceType::WeakClaim(this)]() {
@@ -365,8 +445,9 @@ bool SequencedRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recog
 void SequencedRecognizer::CleanRecognizerState()
 {
     for (const auto& child : recognizers_) {
-        if (child) {
-            child->CleanRecognizerState();
+        auto childRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(child);
+        if (childRecognizer && childRecognizer->GetTouchPointsSize() <= 1) {
+            childRecognizer->CleanRecognizerState();
         }
     }
     if ((refereeState_ == RefereeState::SUCCEED ||
@@ -391,4 +472,26 @@ void SequencedRecognizer::ForceCleanRecognizer()
     currentIndex_ = 0;
     childTouchTestList_.clear();
 }
+
+void SequencedRecognizer::CheckAndSetRecognizerCleanFlag(const RefPtr<NGGestureRecognizer>& recognizer)
+{
+    if (currentIndex_ == static_cast<int32_t>(recognizers_.size() - 1)) {
+        SetIsNeedResetRecognizer(true);
+    }
+}
+
+void SequencedRecognizer::CleanRecognizerStateVoluntarily()
+{
+    for (const auto& child : recognizers_) {
+        if (child && AceType::InstanceOf<RecognizerGroup>(child)) {
+            child->CleanRecognizerStateVoluntarily();
+        }
+    }
+    if (IsNeedResetRecognizerState()) {
+        currentIndex_ = 0;
+        refereeState_ = RefereeState::READY;
+        SetIsNeedResetRecognizer(false);
+    }
+}
+
 } // namespace OHOS::Ace::NG

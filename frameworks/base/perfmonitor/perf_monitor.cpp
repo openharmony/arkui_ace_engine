@@ -18,18 +18,78 @@
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/perfmonitor/perf_constants.h"
+#include "base/perfmonitor/perf_interfaces.h"
+#include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
 #include "render_service_client/core/transaction/rs_interfaces.h"
+#ifdef OHOS_STANDARD_SYSTEM
+#include "event_handler.h"
+#endif
 
 namespace OHOS::Ace {
 using namespace std;
 PerfMonitor* PerfMonitor::pMonitor = nullptr;
+std::once_flag PerfMonitor::initFlag;
 constexpr int64_t SCENE_TIMEOUT = 10000000000;
-constexpr int64_t RESPONSE_TIMEOUT = 60000000;
-constexpr int64_t STARTAPP_FRAME_TIMEOUT = 100000000;
+constexpr int64_t RESPONSE_TIMEOUT = 600000000;
+constexpr int64_t STARTAPP_FRAME_TIMEOUT = 1000000000;
 constexpr float SINGLE_FRAME_TIME = 16600000;
 const int32_t JANK_SKIPPED_THRESHOLD = SystemProperties::GetJankFrameThreshold();
 const int32_t DEFAULT_JANK_REPORT_THRESHOLD = 3;
+constexpr uint32_t DEFAULT_VSYNC = 16;
+// Obtain the last three digits of the full path
+constexpr uint32_t PATH_DEPTH = 3;
+
+constexpr uint32_t JANK_FRAME_6_LIMIT = 0;
+constexpr uint32_t JANK_FRAME_15_LIMIT = 1;
+constexpr uint32_t JANK_FRAME_20_LIMIT = 2;
+constexpr uint32_t JANK_FRAME_36_LIMIT = 3;
+constexpr uint32_t JANK_FRAME_48_LIMIT = 4;
+constexpr uint32_t JANK_FRAME_60_LIMIT = 5;
+constexpr uint32_t JANK_FRAME_120_LIMIT = 6;
+constexpr uint32_t JANK_FRAME_180_LIMIT = 7;
+constexpr uint32_t JANK_STATS_SIZE = 8;
+
+uint32_t GetJankLimit(double jank)
+{
+    if (jank < 6.0f) {
+        return JANK_FRAME_6_LIMIT;
+    }
+    if (jank < 15.0f) {
+        return JANK_FRAME_15_LIMIT;
+    }
+    if (jank < 20.0f) {
+        return JANK_FRAME_20_LIMIT;
+    }
+    if (jank < 36.0f) {
+        return JANK_FRAME_36_LIMIT;
+    }
+    if (jank < 48.0f) {
+        return JANK_FRAME_48_LIMIT;
+    }
+    if (jank < 60.0f) {
+        return JANK_FRAME_60_LIMIT;
+    }
+    if (jank < 120.0f) {
+        return JANK_FRAME_120_LIMIT;
+    }
+    return JANK_FRAME_180_LIMIT;
+}
+
+std::string ParsePageUrl(const std::string& pagePath)
+{
+    std::string res;
+    std::vector<std::string> paths;
+    StringUtils::StringSplitter(pagePath, '/', paths);
+    uint32_t pathSize = paths.size();
+    if (pathSize < PATH_DEPTH) {
+        return pagePath;
+    }
+    for (uint32_t i = pathSize - PATH_DEPTH; i < pathSize; i++) {
+        res = res + "/" + paths[i];
+    }
+    return res;
+}
 
 static int64_t GetCurrentRealTimeNs()
 {
@@ -119,7 +179,7 @@ void ReportPerfEventToRS(DataBase& data)
             }
         case EVENT_COMPLETE:
             {
-                if (data.isDisplayAnimator) {
+                if (data.needReportRs) {
                     ACE_SCOPED_TRACE("EVENT_REPORT_COMPLETE_RS sceneId = %s, uniqueId = %lld",
                         dataRs.sceneId.c_str(), static_cast<long long> (dataRs.uniqueId));
                     Rosen::RSInterfaces::GetInstance().ReportEventComplete(dataRs);
@@ -229,6 +289,8 @@ bool SceneRecord::IsDisplayAnimator(const std::string& sceneId)
         || sceneId == PerfConstants::SNAP_RECENT_ANI
         || sceneId == PerfConstants::WINDOW_RECT_RESIZE
         || sceneId == PerfConstants::WINDOW_RECT_MOVE
+        || sceneId == PerfConstants::META_BALLS_TURBO_CHARGING_ANIMATION
+        || sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH_INTERACTIVE
         || sceneId == PerfConstants::LAUNCHER_SPRINGBACK_SCROLL) {
         return true;
     }
@@ -257,22 +319,35 @@ void SceneRecord::Reset()
 
 PerfMonitor* PerfMonitor::GetPerfMonitor()
 {
-    if (pMonitor == nullptr) {
-        pMonitor = new PerfMonitor();
-    }
+    std::call_once(initFlag, &PerfMonitor::InitInstance);
     return pMonitor;
+}
+
+void PerfMonitor::InitInstance()
+{
+    pMonitor = new PerfMonitor();
 }
 
 void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const std::string& note)
 {
     std::lock_guard<std::mutex> Lock(mMutex);
+    if (IsScrollJank(sceneId)) {
+        PerfInterfaces::SetScrollState(true);
+    }
+    NotifySdbJankStatsEnd(sceneId);
+    if (apsMonitor_ != nullptr) {
+        apsMonitor_->SetApsScene(sceneId, true);
+    }
+
     int64_t inputTime = GetInputTime(sceneId, type, note);
     SceneRecord* record = GetRecord(sceneId);
     if (IsSceneIdInSceneWhiteList(sceneId)) {
         isExceptAnimator = true;
+        SetVsyncLazyMode();
     }
     ACE_SCOPED_TRACE("Animation start and current sceneId=%s", sceneId.c_str());
     if (record == nullptr) {
+        currentSceneId = sceneId;
         record = new SceneRecord();
         record->InitRecord(sceneId, type, mSourceType, note, inputTime);
         mRecords.insert(std::pair<std::string, SceneRecord*> (sceneId, record));
@@ -281,14 +356,49 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
     }
 }
 
+void PerfMonitor::StartCommercial(const std::string& sceneId, PerfActionType type, const std::string& note)
+{
+    std::lock_guard<std::mutex> Lock(mMutex);
+    if (IsScrollJank(sceneId)) {
+        PerfInterfaces::SetScrollState(true);
+    }
+    if (apsMonitor_ != nullptr) {
+        apsMonitor_->SetApsScene(sceneId, true);
+    }
+
+    int64_t inputTime = GetInputTime(sceneId, type, note);
+    SceneRecord* record = GetRecord(sceneId);
+    if (IsSceneIdInSceneWhiteList(sceneId)) {
+        isExceptAnimator = true;
+    }
+    ACE_SCOPED_TRACE_COMMERCIAL("Animation start and current sceneId=%s", sceneId.c_str());
+    if (record == nullptr) {
+        currentSceneId = sceneId;
+        record = new SceneRecord();
+        record->InitRecord(sceneId, type, mSourceType, note, inputTime);
+        mRecords.insert(std::pair<std::string, SceneRecord*> (sceneId, record));
+        RecordBaseInfo(record);
+        AceAsyncTraceBeginCommercial(0, sceneId.c_str());
+    }
+}
+
 void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
 {
     std::lock_guard<std::mutex> Lock(mMutex);
+    if (IsScrollJank(sceneId)) {
+        PerfInterfaces::SetScrollState(false);
+    }
+    NotifySbdJankStatsBegin(sceneId);
+    if (apsMonitor_ != nullptr) {
+        apsMonitor_->SetApsScene(sceneId, false);
+    }
+
     SceneRecord* record = GetRecord(sceneId);
     ACE_SCOPED_TRACE("Animation end and current sceneId=%s", sceneId.c_str());
     if (record != nullptr) {
         if (IsSceneIdInSceneWhiteList(sceneId)) {
             isExceptAnimator = false;
+            SetVsyncLazyMode();
         }
         RecordBaseInfo(record);
         record->Report(sceneId, mVsyncTime, isRsRender);
@@ -298,8 +408,33 @@ void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
     }
 }
 
+void PerfMonitor::EndCommercial(const std::string& sceneId, bool isRsRender)
+{
+    std::lock_guard<std::mutex> Lock(mMutex);
+    if (IsScrollJank(sceneId)) {
+        PerfInterfaces::SetScrollState(false);
+    }
+    if (apsMonitor_ != nullptr) {
+        apsMonitor_->SetApsScene(sceneId, false);
+    }
+
+    SceneRecord* record = GetRecord(sceneId);
+    ACE_SCOPED_TRACE_COMMERCIAL("Animation end and current sceneId=%s", sceneId.c_str());
+    if (record != nullptr) {
+        if (IsSceneIdInSceneWhiteList(sceneId)) {
+            isExceptAnimator = false;
+        }
+        RecordBaseInfo(record);
+        record->Report(sceneId, mVsyncTime, isRsRender);
+        ReportAnimateEnd(sceneId, record);
+        RemoveRecord(sceneId);
+        AceAsyncTraceEndCommercial(0, sceneId.c_str());
+    }
+}
+
 void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time)
 {
+    std::lock_guard<std::mutex> Lock(mMutex);
     mSourceType = sourceType;
     if (time <= 0) {
         time = GetCurrentRealTimeNs();
@@ -316,6 +451,7 @@ void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceTyp
                 ACE_SCOPED_TRACE("RecordInputEvent: last_up=%lld(ns)", static_cast<long long>(time));
                 mInputTime[LAST_UP] = time;
                 isResponseExclusion = true;
+                SetVsyncLazyMode();
                 break;
             }
         case FIRST_MOVE:
@@ -350,6 +486,7 @@ void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t duration, double jank,
         it++;
     }
     ProcessJank(jank, windowName);
+    JankFrameStatsRecord(jank);
 }
 
 void PerfMonitor::ReportJankFrameApp(double jank)
@@ -365,7 +502,7 @@ void PerfMonitor::ReportJankFrameApp(double jank)
 
 void PerfMonitor::SetPageUrl(const std::string& pageUrl)
 {
-    baseInfo.pageUrl = pageUrl;
+    baseInfo.pageUrl = ParsePageUrl(pageUrl);
 }
 
 std::string PerfMonitor::GetPageUrl()
@@ -386,7 +523,8 @@ std::string PerfMonitor::GetPageName()
 void PerfMonitor::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
                                     const std::string& pageName)
 {
-    EventReport::ReportPageShowMsg(pageUrl, bundleName, pageName);
+    std::string parsePageUrl = ParsePageUrl(pageUrl);
+    EventReport::ReportPageShowMsg(parsePageUrl, bundleName, pageName);
 }
 
 void PerfMonitor::RecordBaseInfo(SceneRecord* record)
@@ -550,10 +688,29 @@ bool PerfMonitor::IsExclusionFrame()
     return isResponseExclusion || isStartAppFrame || isBackgroundApp || isExclusionWindow || isExceptAnimator;
 }
 
+void PerfMonitor::SetVsyncLazyMode()
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    static bool lastExcusion = false;
+    bool needExcusion = isResponseExclusion || isStartAppFrame || isBackgroundApp ||
+                        isExclusionWindow || isExceptAnimator;
+    if (lastExcusion == needExcusion) {
+        return;
+    }
+
+    lastExcusion = needExcusion;
+    ACE_VSYNC_MODE_SCOPED_TRACE("SetVsyncLazyMode: isResponse(%d) isStartApp(%d) isBg(%d) isExcluWindow(%d) "
+        "isExcAni(%d)",
+        isResponseExclusion, isStartAppFrame, isBackgroundApp, isExclusionWindow, isExceptAnimator);
+    OHOS::AppExecFwk::EventHandler::SetVsyncLazyMode(needExcusion);
+#endif
+}
+
 void PerfMonitor::SetAppStartStatus()
 {
     ACE_FUNCTION_TRACE();
     isStartAppFrame = true;
+    SetVsyncLazyMode();
     startAppTime = GetCurrentRealTimeNs();
 }
 
@@ -564,6 +721,7 @@ void PerfMonitor::CheckInStartAppStatus()
         if (curTime - startAppTime >= STARTAPP_FRAME_TIMEOUT) {
             isStartAppFrame = false;
             startAppTime = curTime;
+            SetVsyncLazyMode();
         }
     }
 }
@@ -571,6 +729,7 @@ void PerfMonitor::CheckInStartAppStatus()
 void PerfMonitor::SetAppForeground(bool isShow)
 {
     isBackgroundApp = !isShow;
+    SetVsyncLazyMode();
 }
 
 void PerfMonitor::CheckExclusionWindow(const std::string& windowName)
@@ -581,12 +740,14 @@ void PerfMonitor::CheckExclusionWindow(const std::string& windowName)
         windowName == "SCBStatusBar15") {
         isExclusionWindow = true;
     }
+    SetVsyncLazyMode();
 }
 
 void PerfMonitor::CheckResponseStatus()
 {
     if (isResponseExclusion) {
         isResponseExclusion = false;
+        SetVsyncLazyMode();
     }
 }
 
@@ -601,13 +762,23 @@ void PerfMonitor::ProcessJank(double jank, const std::string& windowName)
 
 void PerfMonitor::ReportJankFrame(double jank, const std::string& windowName)
 {
-    if (jank >= static_cast<double>(DEFAULT_JANK_REPORT_THRESHOLD) && !IsExclusionFrame()) {
+    if (jank >= static_cast<double>(DEFAULT_JANK_REPORT_THRESHOLD)) {
         JankInfo jankInfo;
         jankInfo.skippedFrameTime = static_cast<int64_t>(jank * SINGLE_FRAME_TIME);
         jankInfo.windowName = windowName;
         RecordBaseInfo(nullptr);
         jankInfo.baseInfo = baseInfo;
-        EventReport::ReportJankFrameFiltered(jankInfo);
+        jankInfo.filterType = GetFilterType();
+        if (!mRecords.empty()) {
+            jankInfo.sceneId = currentSceneId;
+        } else {
+            jankInfo.sceneId = DEFAULT_SCENE_ID;
+        }
+        jankInfo.realSkippedFrameTime = jankInfo.filterType == 0 ? jankInfo.skippedFrameTime : 0;
+        EventReport::ReportJankFrameUnFiltered(jankInfo);
+        if (!IsExclusionFrame()) {
+            EventReport::ReportJankFrameFiltered(jankInfo);
+        }
     }
 }
 
@@ -620,9 +791,20 @@ bool PerfMonitor::IsSceneIdInSceneWhiteList(const std::string& sceneId)
         sceneId == PerfConstants::LAUNCHER_APP_BACK_TO_HOME ||
         sceneId == PerfConstants::EXIT_RECENT_2_HOME_ANI ||
         sceneId == PerfConstants::APP_SWIPER_FLING ||
-        sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH) {
+        sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH ||
+        sceneId == PerfConstants::SCREENLOCK_SCREEN_OFF_ANIM) {
             return true;
         }
+    return false;
+}
+
+bool PerfMonitor::IsScrollJank(const std::string& sceneId)
+{
+    if (sceneId == PerfConstants::APP_LIST_FLING ||
+        sceneId == PerfConstants::APP_SWIPER_SCROLL ||
+        sceneId == PerfConstants::APP_SWIPER_FLING) {
+        return true;
+    }
     return false;
 }
 
@@ -630,6 +812,156 @@ void PerfMonitor::CheckTimeOutOfExceptAnimatorStatus(const std::string& sceneId)
 {
     if (IsSceneIdInSceneWhiteList(sceneId)) {
         isExceptAnimator = false;
+        SetVsyncLazyMode();
     }
 }
+
+int32_t PerfMonitor::GetFilterType() const
+{
+    int32_t filterType = (isBackgroundApp << 4) | (isResponseExclusion << 3) | (isStartAppFrame << 2)
+        | (isExclusionWindow << 1) | isExceptAnimator;
+    return filterType;
+}
+
+void PerfMonitor::RecordWindowRectResize(OHOS::Ace::WindowSizeChangeReason reason, const std::string& bundleName)
+{
+    switch (reason) {
+        case OHOS::Ace::WindowSizeChangeReason::DRAG_START:
+            Start(PerfConstants::WINDOW_RECT_RESIZE, PerfActionType::LAST_DOWN, bundleName.c_str());
+            break;
+        case OHOS::Ace::WindowSizeChangeReason::DRAG_END:
+            End(PerfConstants::WINDOW_RECT_RESIZE, true);
+            break;
+        default:
+            break;
+    }
+}
+
+void PerfMonitor::ClearJankFrameRecord()
+{
+    std::fill(jankFrameRecord.begin(), jankFrameRecord.end(), 0);
+    jankFrameTotalCount = 0;
+    jankFrameRecordBeginTime = 0;
+}
+
+void SetJankFrameRecord(OHOS::Rosen::AppInfo &appInfo, int64_t startTime, int64_t endTime)
+{
+    appInfo.pid = AceApplicationInfo::GetInstance().GetPid();
+    appInfo.bundleName = AceApplicationInfo::GetInstance().GetPackageName();
+    appInfo.versionCode = static_cast<int32_t>(AceApplicationInfo::GetInstance().GetAppVersionCode());
+    appInfo.versionName = AceApplicationInfo::GetInstance().GetAppVersionName();
+    appInfo.processName = AceApplicationInfo::GetInstance().GetProcessName();
+    appInfo.startTime = startTime;
+    appInfo.endTime = endTime;
+}
+
+void PerfMonitor::JankFrameStatsRecord(double jank)
+{
+    if (isStats == true && jank > 1.0f && !jankFrameRecord.empty()) {
+        jankFrameRecord[GetJankLimit(jank)]++;
+        jankFrameTotalCount++;
+    }
+}
+
+void PerfMonitor::NotifySbdJankStatsBegin(const std::string& sceneId)
+{
+    static set<std::string> backToHomeScene = {
+        PerfConstants::LAUNCHER_APP_BACK_TO_HOME,
+        PerfConstants::LAUNCHER_APP_SWIPE_TO_HOME,
+        PerfConstants::INTO_HOME_ANI,
+        PerfConstants::PASSWORD_UNLOCK_ANI,
+        PerfConstants::FACIAL_FLING_UNLOCK_ANI,
+        PerfConstants::FACIAL_UNLOCK_ANI,
+        PerfConstants::FINGERPRINT_UNLOCK_ANI
+    };
+    if (backToHomeScene.find(sceneId) != backToHomeScene.end()) {
+        ACE_SCOPED_TRACE("NotifySbdJankStatsBegin");
+        NotifyAppJankStatsBegin();
+    }
+}
+
+void PerfMonitor::NotifySdbJankStatsEnd(const std::string& sceneId)
+{
+    static set<std::string> appLaunch = {
+        PerfConstants::LAUNCHER_APP_LAUNCH_FROM_DOCK,
+        PerfConstants::LAUNCHER_APP_LAUNCH_FROM_ICON,
+        PerfConstants::LAUNCHER_APP_LAUNCH_FROM_NOTIFICATIONBAR,
+        PerfConstants::LAUNCHER_APP_LAUNCH_FROM_NOTIFICATIONBAR_IN_LOCKSCREEN,
+        PerfConstants::LAUNCHER_APP_LAUNCH_FROM_RECENT,
+        PerfConstants::START_APP_ANI_FORM,
+        PerfConstants::SCREENLOCK_SCREEN_OFF_ANIM
+    };
+    if (appLaunch.find(sceneId) != appLaunch.end()) {
+        ACE_SCOPED_TRACE("NotifySdbJankStatsEnd");
+        NotifyAppJankStatsEnd();
+    }
+}
+
+
+void PerfMonitor::NotifyAppJankStatsBegin()
+{
+    ACE_SCOPED_TRACE("NotifyAppJankStatsBegin");
+    int64_t duration = GetCurrentSystimeMs() - jankFrameRecordBeginTime;
+    if (!isStats) {
+        if (jankFrameRecord.empty()) {
+            jankFrameRecord = std::vector<uint16_t>(JANK_STATS_SIZE, 0);
+        }
+        isStats = true;
+        NotifyRsJankStatsBegin();
+        return;
+    }
+    if (duration >= DEFAULT_VSYNC) {
+        ReportJankStatsApp(duration);
+        NotifyRsJankStatsEnd(GetCurrentSystimeMs());
+        ClearJankFrameRecord();
+        NotifyRsJankStatsBegin();
+    }
+}
+
+void PerfMonitor::NotifyAppJankStatsEnd()
+{
+    if (!isStats) {
+        return;
+    }
+    ACE_SCOPED_TRACE("NotifyAppJankStatsEnd");
+    int64_t endTime = GetCurrentSystimeMs();
+    NotifyRsJankStatsEnd(endTime);
+    isStats = false;
+    int64_t duration = endTime - jankFrameRecordBeginTime;
+    ReportJankStatsApp(duration);
+}
+
+void PerfMonitor::ReportJankStatsApp(int64_t duration)
+{
+    ACE_SCOPED_TRACE("ReportJankStatsApp count=%" PRId32 ";duration=%" PRId64 ";beginTime=%" PRId64 ";",
+        jankFrameTotalCount, duration, jankFrameRecordBeginTime);
+    if (duration > DEFAULT_VSYNC && jankFrameTotalCount > 0 && jankFrameRecordBeginTime > 0) {
+        EventReport::JankFrameReport(jankFrameRecordBeginTime, duration, jankFrameRecord,
+            baseInfo.pageUrl, JANK_STATS_VERSION);
+    }
+    ClearJankFrameRecord();
+}
+
+void PerfMonitor::NotifyRsJankStatsBegin()
+{
+    ACE_SCOPED_TRACE("NotifyRsJankStatsBegin");
+    OHOS::Rosen::AppInfo appInfo;
+    jankFrameRecordBeginTime = GetCurrentSystimeMs();
+    SetJankFrameRecord(appInfo, jankFrameRecordBeginTime, 0);
+    Rosen::RSInterfaces::GetInstance().ReportRsSceneJankStart(appInfo);
+}
+
+void PerfMonitor::NotifyRsJankStatsEnd(int64_t endTime)
+{
+    ACE_SCOPED_TRACE("NotifyRsJankStatsEnd");
+    OHOS::Rosen::AppInfo appInfo;
+    SetJankFrameRecord(appInfo, jankFrameRecordBeginTime, endTime);
+    Rosen::RSInterfaces::GetInstance().ReportRsSceneJankEnd(appInfo);
+}
+
+void PerfMonitor::SetApsMonitor(const std::shared_ptr<ApsMonitor>& apsMonitor)
+{
+    apsMonitor_ = apsMonitor;
+}
+
 } // namespace OHOS::Ace

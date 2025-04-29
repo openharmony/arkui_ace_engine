@@ -44,6 +44,7 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    void MockPipelineContextGetTheme();
 };
 
 void NavrouterGroupTestNg::SetUpTestCase()
@@ -57,6 +58,14 @@ void NavrouterGroupTestNg::TearDownTestCase()
 
 void NavrouterGroupTestNg::SetUp() {}
 void NavrouterGroupTestNg::TearDown() {}
+
+void NavrouterGroupTestNg::MockPipelineContextGetTheme()
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
+}
 
 /**
  * @tc.name: NavrouterTestNg001
@@ -382,6 +391,7 @@ HWTEST_F(NavrouterGroupTestNg, NavrouterTestNg009, TestSize.Level1)
  */
 HWTEST_F(NavrouterGroupTestNg, NavrouterTestNg0010, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     /**
      * @tc.steps: step1. create navDestinationPattern then prepare properties.
      */
@@ -581,7 +591,7 @@ HWTEST_F(NavrouterGroupTestNg, NavrouterTestNg0016, TestSize.Level1)
     parent->GetPattern<NavigationPattern>()->navigationStack_ = stack;
 
     navRouterGroupNode->OnAttachToMainTree(false);
-    navRouterGroupNode->GetEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
+    navRouterGroupNode->GetOrCreateEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
     EXPECT_EQ(layoutProperty->GetNavigationModeValue(NavigationMode::AUTO), NavigationMode::AUTO);
     layoutProperty->propNavigationMode_ = NavigationMode::STACK;
     navRouterGroupNode->OnAttachToMainTree(false);
@@ -591,7 +601,7 @@ HWTEST_F(NavrouterGroupTestNg, NavrouterTestNg0016, TestSize.Level1)
         "titleBarNode", 33, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     std::pair<std::string, RefPtr<UINode>> p("test", preNavDestination);
     stack->navPathList_.push_back(p);
-    navRouterGroupNode->GetEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
+    navRouterGroupNode->GetOrCreateEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
 
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         "navDestinationNode", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
@@ -604,11 +614,11 @@ HWTEST_F(NavrouterGroupTestNg, NavrouterTestNg0016, TestSize.Level1)
     navDestinationNode->titleBarNode_ = titleBarNode;
 
     navRouterGroupNode->OnAttachToMainTree(false);
-    navRouterGroupNode->GetEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
+    navRouterGroupNode->GetOrCreateEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
     ASSERT_NE(navRouterGroupNode->navDestinationNode_, nullptr);
 
     navRouterGroupNode->OnAttachToMainTree(false);
-    navRouterGroupNode->GetEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
+    navRouterGroupNode->GetOrCreateEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
     ASSERT_NE(navRouterGroupNode->navDestinationNode_, nullptr);
 
     parent->isOnAnimation_ = false;
@@ -636,7 +646,7 @@ HWTEST_F(NavrouterGroupTestNg, NavrouterTestNg0016, TestSize.Level1)
     parent->parent_ = AceType::WeakClaim(AceType::RawPtr(navBar));
 
     navRouterGroupNode->OnAttachToMainTree(false);
-    navRouterGroupNode->GetEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
+    navRouterGroupNode->GetOrCreateEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
     ASSERT_NE(navRouterGroupNode->navDestinationNode_, nullptr);
 
     parent->isOnAnimation_ = false;
@@ -654,7 +664,7 @@ HWTEST_F(NavrouterGroupTestNg, NavrouterTestNg0016, TestSize.Level1)
     auto backButton = FrameNode::CreateFrameNode("BackButton", 123, AceType::MakeRefPtr<ButtonPattern>());
     AceType::DynamicCast<TitleBarNode>(navDestinationNode->titleBarNode_)->backButton_ = backButton;
     navRouterGroupNode->OnAttachToMainTree(false);
-    navRouterGroupNode->GetEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
+    navRouterGroupNode->GetOrCreateEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
     ASSERT_NE(navRouterGroupNode->navDestinationNode_, nullptr);
 }
 
@@ -716,11 +726,11 @@ HWTEST_F(NavrouterGroupTestNg, UpdateBackgroundColorIfNeeded001, TestSize.Level1
 }
 
 /**
- * @tc.name: UpdateTitlebarVisibility001
+ * @tc.name: MountTitleBar001
  * @tc.desc: Test UpdateBackgroundColorIfNeeded and make opts return false.
  * @tc.type: FUNC
  */
-HWTEST_F(NavrouterGroupTestNg, UpdateTitlebarVisibility001, TestSize.Level1)
+HWTEST_F(NavrouterGroupTestNg, MountTitleBar001, TestSize.Level1)
 {
     // Create NavDestinationGroupNode to make GetHost return not NULL.
     auto pattern = AceType::MakeRefPtr<NavDestinationPattern>();
@@ -746,17 +756,18 @@ HWTEST_F(NavrouterGroupTestNg, UpdateTitlebarVisibility001, TestSize.Level1)
     ASSERT_NE(hostTitleBarNode, nullptr);
     EXPECT_NE(hostTitleBarNode->GetLayoutProperty<TitleBarLayoutProperty>(), nullptr);
     EXPECT_EQ(hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts(), nullptr);
-    // There is a second branch in UpdateTitlebarVisibility
+    // There is a second branch in MountTitleBar
     EXPECT_FALSE(navDestinationLayoutProperty->GetHideTitleBar().value_or(false));
-    navDestinationPattern->UpdateTitlebarVisibility(hostNode);
+    bool needRunTitleBarAnimation = false;
+    navDestinationPattern->MountTitleBar(hostNode, needRunTitleBarAnimation);
 }
 
 /**
- * @tc.name: UpdateTitlebarVisibility002
+ * @tc.name: MountTitleBar002
  * @tc.desc: Test UpdateBackgroundColorIfNeeded and make opts return true and Expansive return false.
  * @tc.type: FUNC
  */
-HWTEST_F(NavrouterGroupTestNg, UpdateTitlebarVisibility002, TestSize.Level1)
+HWTEST_F(NavrouterGroupTestNg, MountTitleBar002, TestSize.Level1)
 {
     // Create NavDestinationGroupNode to make GetHost return not NULL.
     auto pattern = AceType::MakeRefPtr<NavDestinationPattern>();
@@ -785,18 +796,19 @@ HWTEST_F(NavrouterGroupTestNg, UpdateTitlebarVisibility002, TestSize.Level1)
     auto&& hostOpts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
     ASSERT_NE(hostOpts, nullptr);
     EXPECT_FALSE(hostOpts->Expansive());
-    // There is a second branch in UpdateTitlebarVisibility
+    // There is a second branch in MountTitleBar
     EXPECT_FALSE(navDestinationLayoutProperty->GetHideTitleBar().value_or(false));
-    navDestinationPattern->UpdateTitlebarVisibility(hostNode);
+    bool needRunTitleBarAnimation = false;
+    navDestinationPattern->MountTitleBar(hostNode, needRunTitleBarAnimation);
 }
 
 /**
- * @tc.name: UpdateTitlebarVisibility003
+ * @tc.name: MountTitleBar003
  * @tc.desc: Test UpdateBackgroundColorIfNeeded and make opts and Expansive return true
  *           and navDestinationContentNode return false.
  * @tc.type: FUNC
  */
-HWTEST_F(NavrouterGroupTestNg, UpdateTitlebarVisibility003, TestSize.Level1)
+HWTEST_F(NavrouterGroupTestNg, MountTitleBar003, TestSize.Level1)
 {
     // Create NavDestinationGroupNode to make GetHost return not NULL.
     auto pattern = AceType::MakeRefPtr<NavDestinationPattern>();
@@ -830,18 +842,19 @@ HWTEST_F(NavrouterGroupTestNg, UpdateTitlebarVisibility003, TestSize.Level1)
     ASSERT_NE(hostOpts, nullptr);
     EXPECT_TRUE(hostOpts->Expansive());
     EXPECT_EQ(AceType::DynamicCast<FrameNode>(hostNode->GetContentNode()), nullptr);
-    // There is a second branch in UpdateTitlebarVisibility
+    // There is a second branch in MountTitleBar
     EXPECT_FALSE(navDestinationLayoutProperty->GetHideTitleBar().value_or(false));
-    navDestinationPattern->UpdateTitlebarVisibility(hostNode);
+    bool needRunTitleBarAnimation = false;
+    navDestinationPattern->MountTitleBar(hostNode, needRunTitleBarAnimation);
 }
 
 /**
- * @tc.name: UpdateTitlebarVisibility004
+ * @tc.name: MountTitleBar004
  * @tc.desc: Test UpdateBackgroundColorIfNeeded and make opts and Expansive return true
  *           and navDestinationContentNode return true.
  * @tc.type: FUNC
  */
-HWTEST_F(NavrouterGroupTestNg, UpdateTitlebarVisibility004, TestSize.Level1)
+HWTEST_F(NavrouterGroupTestNg, MountTitleBar004, TestSize.Level1)
 {
     // Create NavDestinationGroupNode to make GetHost return not NULL.
     auto pattern = AceType::MakeRefPtr<NavDestinationPattern>();
@@ -876,15 +889,16 @@ HWTEST_F(NavrouterGroupTestNg, UpdateTitlebarVisibility004, TestSize.Level1)
     ASSERT_NE(hostOpts, nullptr);
     EXPECT_TRUE(hostOpts->Expansive());
     EXPECT_NE(AceType::DynamicCast<FrameNode>(hostNode->GetContentNode()), nullptr);
-    navDestinationPattern->UpdateTitlebarVisibility(hostNode);
+    bool needRunTitleBarAnimation = false;
+    navDestinationPattern->MountTitleBar(hostNode, needRunTitleBarAnimation);
 }
 
 /**
- * @tc.name: UpdateTitlebarVisibility005
+ * @tc.name: MountTitleBar005
  * @tc.desc: Test UpdateBackgroundColorIfNeeded and make GetIndex return 0.
  * @tc.type: FUNC
  */
-HWTEST_F(NavrouterGroupTestNg, UpdateTitlebarVisibility005, TestSize.Level1)
+HWTEST_F(NavrouterGroupTestNg, MountTitleBar005, TestSize.Level1)
 {
     // Create NavDestinationGroupNode to make GetHost return not NULL.
     auto pattern = AceType::MakeRefPtr<NavDestinationPattern>();
@@ -899,7 +913,8 @@ HWTEST_F(NavrouterGroupTestNg, UpdateTitlebarVisibility005, TestSize.Level1)
     auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationPattern->GetHost());
     hostNode->index_ = 0;
     EXPECT_EQ(hostNode->GetIndex(), 0);
-    navDestinationPattern->UpdateTitlebarVisibility(hostNode);
+    bool needRunTitleBarAnimation = false;
+    navDestinationPattern->MountTitleBar(hostNode, needRunTitleBarAnimation);
 }
 
 /**

@@ -41,6 +41,7 @@ protected:
     static void SetLocationUserDefinedPropty();
     static void SetPasteUserDefinedPropty();
     static void SetSaveUserDefinedPropty();
+    static void InitLayoutAlgorithm(RefPtr<SecurityComponentLayoutAlgorithm>& buttonAlgorithm);
 };
 
 class MockSecurityComponentButtonLayoutAlgorithm : public BoxLayoutAlgorithm {

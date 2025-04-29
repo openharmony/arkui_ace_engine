@@ -99,6 +99,8 @@ public:
 void ProgressBuilderTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
+    testing::FLAGS_gmock_verbose = "error";
     auto pipeline = PipelineContext::GetCurrentContext();
     pipeline->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
     themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -127,6 +129,7 @@ void ProgressBuilderTestNg::SetUp()
 
 void ProgressBuilderTestNg::TearDown()
 {
+    RemoveFromStageNode();
     frameNode_ = nullptr;
     pattern_ = nullptr;
     eventHub_ = nullptr;
@@ -141,7 +144,7 @@ void ProgressBuilderTestNg::GetProgress()
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     pattern_ = frameNode_->GetPattern<ProgressPattern>();
-    eventHub_ = frameNode_->GetEventHub<EventHub>();
+    eventHub_ = frameNode_->GetOrCreateEventHub<EventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<ProgressLayoutProperty>();
     paintProperty_ = frameNode_->GetPaintProperty<ProgressPaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<ProgressAccessibilityProperty>();
@@ -173,8 +176,8 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest001, TestSize.Level1)
     model.SetStrokeWidth(500.0_vp);
     model.SetShowText(true);
     model.SetBackgroundColor(Color::GRAY);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -216,9 +219,9 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest002, TestSize.Level1)
     model.SetStrokeWidth(500.0_vp);
     model.SetShowText(true);
     model.SetBackgroundColor(Color::GRAY);
-    CreateDone(frameNode_);
+    CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -260,9 +263,9 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest003, TestSize.Level1)
     model.SetStrokeWidth(500.0_vp);
     model.SetShowText(true);
     model.SetBackgroundColor(Color::GRAY);
-    CreateDone(frameNode_);
+    CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -301,9 +304,9 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest004, TestSize.Level1)
      * @tc.steps: step1. create progress.
      */
     CreateProgress(MIN_VALUE, MAX_NEG_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
-    CreateDone(frameNode_);
+    CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -345,9 +348,9 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest005, TestSize.Level1)
     model.SetStrokeWidth(500.0_vp);
     model.SetColor(FRONT_COLOR);
     model.SetBackgroundColor(BG_COLOR);
-    CreateDone(frameNode_);
+    CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -389,9 +392,9 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest006, TestSize.Level1)
     model.SetStrokeWidth(500.0_vp);
     model.SetColor(FRONT_COLOR);
     model.SetBackgroundColor(BG_COLOR);
-    CreateDone(frameNode_);
+    CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -433,9 +436,9 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest007, TestSize.Level1)
     model.SetStrokeWidth(500.0_vp);
     model.SetColor(FRONT_COLOR);
     model.SetBackgroundColor(BG_COLOR);
-    CreateDone(frameNode_);
+    CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -477,9 +480,9 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest008, TestSize.Level1)
     model.SetStrokeWidth(500.0_vp);
     model.SetColor(FRONT_COLOR);
     model.SetBackgroundColor(BG_COLOR);
-    CreateDone(frameNode_);
+    CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -521,9 +524,9 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest009, TestSize.Level1)
     model.SetStrokeWidth(500.0_vp);
     model.SetColor(FRONT_COLOR);
     model.SetBackgroundColor(BG_COLOR);
-    CreateDone(frameNode_);
+    CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -565,8 +568,8 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest010, TestSize.Level1)
     model.SetStrokeWidth(500.0_vp);
     model.SetShowText(true);
     model.SetBackgroundColor(Color::GRAY);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -608,9 +611,9 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest011, TestSize.Level1)
     model.SetStrokeWidth(500.0_vp);
     model.SetShowText(true);
     model.SetBackgroundColor(Color::GRAY);
-    CreateDone(frameNode_);
+    CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -652,9 +655,9 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest012, TestSize.Level1)
     model.SetStrokeWidth(500.0_vp);
     model.SetShowText(true);
     model.SetBackgroundColor(Color::GRAY);
-    CreateDone(frameNode_);
+    CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -693,9 +696,9 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest013, TestSize.Level1)
      * @tc.steps: step1. create progress.
      */
     CreateProgress(MIN_VALUE, MAX_NEG_VALUE_OF_PROGRESS, PROGRESS_TYPE_SCALE);
-    CreateDone(frameNode_);
+    CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -737,9 +740,9 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest014, TestSize.Level1)
     model.SetStrokeWidth(500.0_vp);
     model.SetColor(FRONT_COLOR);
     model.SetBackgroundColor(BG_COLOR);
-    CreateDone(frameNode_);
+    CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -781,9 +784,9 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest015, TestSize.Level1)
     model.SetStrokeWidth(500.0_vp);
     model.SetColor(FRONT_COLOR);
     model.SetBackgroundColor(BG_COLOR);
-    CreateDone(frameNode_);
+    CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -825,9 +828,9 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest016, TestSize.Level1)
     model.SetStrokeWidth(500.0_vp);
     model.SetColor(FRONT_COLOR);
     model.SetBackgroundColor(BG_COLOR);
-    CreateDone(frameNode_);
+    CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -869,9 +872,9 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest017, TestSize.Level1)
     model.SetStrokeWidth(500.0_vp);
     model.SetColor(FRONT_COLOR);
     model.SetBackgroundColor(BG_COLOR);
-    CreateDone(frameNode_);
+    CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -913,9 +916,9 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest018, TestSize.Level1)
     model.SetStrokeWidth(500.0_vp);
     model.SetColor(FRONT_COLOR);
     model.SetBackgroundColor(BG_COLOR);
-    CreateDone(frameNode_);
+    CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -954,8 +957,8 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest019, TestSize.Level1)
      * @tc.steps: step1. create progress.
      */
     CreateProgress(MAX_VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_MOON);
-    CreateDone(frameNode_);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -981,5 +984,173 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest019, TestSize.Level1)
      */
     pattern_->SetBuilderFunc(node);
     pattern_->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: ProgressHandleFocusEventTest001
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressBuilderTestNg, ProgressHandleFocusEventTest001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create progress.
+    */
+    CreateProgress(MAX_VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_MOON);
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetEnabled(true);
+
+    auto progressPaintProperty = frameNode_->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(progressPaintProperty, nullptr);
+    progressPaintProperty->UpdateMaxValue(MAX_VALUE_OF_PROGRESS);
+    auto pattern = frameNode_->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: step2. handle focus event.
+    * @tc.expected: step2. isFocusTextColorSet_ false
+    */
+    pattern->HandleFocusEvent();
+    EXPECT_FALSE(pattern->isFocusTextColorSet_);
+}
+
+/**
+* @tc.name: ProgressHandleFocusEventTest002
+* @tc.desc: SetBuilderFunc and get value
+* @tc.type: FUNC
+*/
+HWTEST_F(ProgressBuilderTestNg, ProgressHandleFocusEventTest002, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create progress.
+    */
+    CreateProgress(MAX_VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_MOON);
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetEnabled(true);
+
+    auto progressPaintProperty = frameNode_->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(progressPaintProperty, nullptr);
+    progressPaintProperty->UpdateMaxValue(MAX_VALUE_OF_PROGRESS);
+    auto pattern = frameNode_->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: step2. set isFocusActive_ true and handle focus event.
+    * @tc.expected: step2. isFocusTextColorSet_ true
+    */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
+    pattern->HandleFocusEvent();
+    EXPECT_TRUE(pattern->isFocusTextColorSet_);
+}
+
+/**
+* @tc.name: ProgressHandleFocusEventTest003
+* @tc.desc: SetBuilderFunc and get value
+* @tc.type: FUNC
+*/
+HWTEST_F(ProgressBuilderTestNg, ProgressHandleFocusEventTest003, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create progress.
+    */
+    CreateProgress(MAX_VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_MOON);
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetEnabled(true);
+
+    auto progressPaintProperty = frameNode_->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(progressPaintProperty, nullptr);
+    progressPaintProperty->UpdateMaxValue(MAX_VALUE_OF_PROGRESS);
+    auto pattern = frameNode_->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: step2. set isFocusActive_ true and handle focus event.
+    * @tc.expected: step2. isFocusTextColorSet_ true
+    */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
+    pattern->focusShadowStyle_ = ShadowStyle::OuterDefaultSM;
+    pattern->HandleFocusEvent();
+    EXPECT_TRUE(pattern->isFocusTextColorSet_);
+}
+
+/**
+* @tc.name: ProgressHandleBlurEventTest001
+* @tc.desc: SetBuilderFunc and get value
+* @tc.type: FUNC
+*/
+HWTEST_F(ProgressBuilderTestNg, ProgressHandleBlurEventTest001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create progress.
+    */
+    CreateProgress(MAX_VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_MOON);
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetEnabled(true);
+
+    auto progressPaintProperty = frameNode_->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(progressPaintProperty, nullptr);
+    progressPaintProperty->UpdateMaxValue(MAX_VALUE_OF_PROGRESS);
+    auto pattern = frameNode_->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: step2. set true and call HandleBlurEvent.
+    * @tc.expected: step2. isFocusScaleSet_, isFocusShadowSet_, isFocusShadowSet_ is false.
+    */
+    pattern->isFocusScaleSet_ = true;
+    pattern->isFocusTextColorSet_ = true;
+    pattern->isFocusShadowSet_ = true;
+    pattern->HandleBlurEvent();
+    EXPECT_FALSE(pattern->isFocusScaleSet_);
+    EXPECT_FALSE(pattern->isFocusTextColorSet_);
+    EXPECT_FALSE(pattern->isFocusShadowSet_);
+}
+
+/**
+* @tc.name: ProgressHandleBlurEventTest002
+* @tc.desc: SetBuilderFunc and get value
+* @tc.type: FUNC
+*/
+HWTEST_F(ProgressBuilderTestNg, ProgressHandleBlurEventTest002, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create progress.
+    */
+    CreateProgress(MAX_VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_MOON);
+    CreateDone();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetEnabled(true);
+
+    auto progressPaintProperty = frameNode_->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(progressPaintProperty, nullptr);
+    progressPaintProperty->UpdateMaxValue(MAX_VALUE_OF_PROGRESS);
+    auto pattern = frameNode_->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: step2. call HandleBlurEvent.
+    * @tc.expected: step2. isFocusScaleSet_, isFocusShadowSet_, isFocusShadowSet_ is false.
+    */
+    pattern->HandleBlurEvent();
+    EXPECT_FALSE(pattern->isFocusScaleSet_);
+    EXPECT_FALSE(pattern->isFocusTextColorSet_);
+    EXPECT_FALSE(pattern->isFocusShadowSet_);
 }
 } // namespace OHOS::Ace::NG

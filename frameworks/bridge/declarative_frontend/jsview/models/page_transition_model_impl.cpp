@@ -16,7 +16,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/models/page_transition_model_impl.h"
 
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-#include "frameworks/core/components/page_transition/page_transition_info.h"
 
 namespace OHOS::Ace::Framework {
 void PageTransitionModelImpl::SetSlideEffect(SlideEffect effect)

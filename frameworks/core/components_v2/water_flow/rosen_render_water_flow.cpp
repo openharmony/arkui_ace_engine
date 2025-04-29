@@ -17,7 +17,6 @@
 #include "render_service_client/core/ui/rs_node.h"
 
 #include "core/components/common/painter/rosen_scroll_bar_painter.h"
-#include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace::V2 {
 void RosenRenderWaterFlow::Update(const RefPtr<Component>& component)
@@ -57,6 +56,7 @@ void RosenRenderWaterFlow::Paint(RenderContext& context, const Offset& offset)
         return;
     }
     const auto& renderContext = AceType::DynamicCast<RosenRenderContext>(&context);
+    CHECK_NULL_VOID(renderContext);
     auto *canvas = renderContext->GetCanvas();
     auto rsNode = renderContext->GetRSNode();
     if (!canvas || !rsNode) {

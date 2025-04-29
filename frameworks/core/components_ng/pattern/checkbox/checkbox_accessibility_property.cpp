@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/checkbox/checkbox_accessibility_property.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -39,7 +37,7 @@ std::string CheckBoxAccessibilityProperty::GetText() const
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, "");
 
-    auto checkBoxEventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto checkBoxEventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     return checkBoxEventHub ? checkBoxEventHub->GetName() : "";
 }
 } // namespace OHOS::Ace::NG

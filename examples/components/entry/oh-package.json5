@@ -21,7 +21,8 @@
   "author": "",
   "license": "",
   "dependencies": {
-    "common": "file:../common"
+    "common": "file:../common",
+    "feature": "file:../feature"
   }
 }
 

@@ -15,11 +15,7 @@
 
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 
-#include "core/components/divider/divider_theme.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -79,5 +75,10 @@ void DividerModelNG::SetDividerColor(FrameNode* frameNode, const Color& color)
 void DividerModelNG::SetVertical(FrameNode* frameNode, const bool& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(DividerLayoutProperty, Vertical, value, frameNode);
+}
+
+void DividerModelNG::ResetDividerColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(DividerRenderProperty, DividerColor, PROPERTY_UPDATE_RENDER);
 }
 } // namespace OHOS::Ace::NG

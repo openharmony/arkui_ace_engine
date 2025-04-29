@@ -19,36 +19,14 @@
 #include <cstdint>
 #include <optional>
 
+#include "ui/properties/dirty_flag.h"
+
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
-using PropertyChangeFlag = uint32_t;
-
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_NORMAL = 0;
-// Mark self, parent, children to remeasure.
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_MEASURE = 1;
-// Mark self to reLayout.
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_LAYOUT = 1 << 1;
-
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_DIFF = 1 << 2;
-
-// Mark self to remeasure.
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_MEASURE_SELF = 1 << 3;
-
-// Mark self and parent to remeasure.
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT = 1 << 4;
-
-// Mark self remeasure due to child size may change, which may mark parent, self and children to remeasure.
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_BY_CHILD_REQUEST = 1 << 5;
-
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_RENDER = 1 << 6;
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST = 1 << 7;
-
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_EVENT = 1 << 8;
-
-inline constexpr PropertyChangeFlag PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD = 1 << 9;
 
 using FrameNodeChangeInfoFlag = uint32_t;
 inline constexpr FrameNodeChangeInfoFlag FRAME_NODE_CHANGE_INFO_NONE = 0;
@@ -58,6 +36,7 @@ inline constexpr FrameNodeChangeInfoFlag FRAME_NODE_CHANGE_START_ANIMATION = 1 <
 inline constexpr FrameNodeChangeInfoFlag FRAME_NODE_CHANGE_GEOMETRY_CHANGE = 1 << 4;
 inline constexpr FrameNodeChangeInfoFlag FRAME_NODE_CHANGE_TRANSFORM_CHANGE = 1 << 5;
 inline constexpr FrameNodeChangeInfoFlag FRAME_NODE_CHANGE_TRANSITION_START = 1 << 6;
+inline constexpr FrameNodeChangeInfoFlag FRAME_NODE_CONTENT_CLIP_CHANGE = 1 << 7;
 
 inline bool CheckNeedMakePropertyDiff(PropertyChangeFlag flag)
 {
@@ -223,16 +202,16 @@ public:                                                                         
         On##name##Update(value);                                                        \
     }
 
-#define ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(group, name, type)  \
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_GET(group, name, type)  \
-    void Update##name(const type& value)                        \
-    {                                                           \
-        auto& groupProperty = GetOrCreate##group();             \
-        if (groupProperty->Check##name(value)) {                \
-            return;                                             \
-        }                                                       \
-        groupProperty->Update##name(value);                     \
-        On##name##Update(value);                                \
+#define ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(group, name, type) \
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_GET(group, name, type) \
+    void Update##name(const type& value)                       \
+    {                                                          \
+        auto& groupProperty = GetOrCreate##group();            \
+        if (groupProperty->Check##name(value)) {               \
+            return;                                            \
+        }                                                      \
+        groupProperty->Update##name(value);                    \
+        On##name##Update(value);                               \
     }
 
 #define ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(name, type)   \
@@ -297,18 +276,18 @@ public:                                                                         
         On##name##Update(value);                                                          \
     }
 
-#define ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(name, type)     \
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(name, type)          \
-public:                                                             \
-    void Update##name(const type& value)                            \
-    {                                                               \
-        if (prop##name##_.has_value()) {                            \
-            if (NearEqual(prop##name##_.value(), value)) {          \
-                return;                                             \
-            }                                                       \
-        }                                                           \
-        prop##name##_ = value;                                      \
-        On##name##Update(value);                                    \
+#define ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(name, type) \
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(name, type)      \
+public:                                                         \
+    void Update##name(const type& value)                        \
+    {                                                           \
+        if (prop##name##_.has_value()) {                        \
+            if (NearEqual(prop##name##_.value(), value)) {      \
+                return;                                         \
+            }                                                   \
+        }                                                       \
+        prop##name##_ = value;                                  \
+        On##name##Update(value);                                \
     }
 
 #define ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP_FOR_VIRTUAL_NODE(name, type)                 \
@@ -361,6 +340,21 @@ public:                                                                         
     void Reset##name()                                  \
     {                                                   \
         prop##name.reset();                             \
+    }
+
+#define ACE_DEFINE_PROPERTY_GROUP_ITEM_WITH_CALLBACK(name, type) \
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(name, type)       \
+public:                                                          \
+    bool Update##name(const type& value)                         \
+    {                                                            \
+        if (prop##name##_.has_value()) {                         \
+            if (NearEqual(prop##name##_.value(), value)) {       \
+                return false;                                    \
+            }                                                    \
+        }                                                        \
+        On##name##Update(value);                                 \
+        prop##name##_ = value;                                   \
+        return true;                                             \
     }
 
 #define ACE_PROPERTY_TO_JSON_VALUE(target, type) \

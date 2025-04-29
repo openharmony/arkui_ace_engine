@@ -15,6 +15,7 @@
 #include "bridge/declarative_frontend/jsview/js_base_node.h"
 
 #include <memory>
+#include <queue>
 #include <string>
 
 #include "canvas_napi/js_canvas.h"
@@ -51,6 +52,8 @@ const std::unordered_set<std::string> EXPORT_TEXTURE_SUPPORT_TYPES = { V2::JS_VI
 constexpr int32_t INFO_LENGTH_LIMIT = 2;
 constexpr int32_t BUILD_PARAM_INDEX_TWO = 2;
 constexpr int32_t BUILD_PARAM_INDEX_THREE = 3;
+constexpr int32_t BUILD_PARAM_INDEX_FOUR = 4;
+constexpr int32_t BUILD_PARAM_INDEX_THIS_OBJ = 5;
 } // namespace
 
 void JSBaseNode::BuildNode(const JSCallbackInfo& info)
@@ -80,6 +83,7 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
     lazyBuilderFunc();
     auto parent = viewNode_ ? viewNode_->GetParent() : nullptr;
     auto newNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    realNode_ = newNode;
     if (newNode) {
         newNode->SetBuilderFunc(std::move(lazyBuilderFunc));
     }
@@ -107,6 +111,14 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         newNode->SetUpdateNodeConfig(std::move(updateNodeConfig));
     }
 
+    bool isSupportLazyBuild = false;
+    if (infoLen >= BUILD_PARAM_INDEX_FOUR + 1) {
+        auto jsLazyBuildSupported = info[BUILD_PARAM_INDEX_FOUR];
+        if (jsLazyBuildSupported->IsBoolean()) {
+            isSupportLazyBuild = jsLazyBuildSupported->ToBoolean();
+        }
+    }
+
     // If the node is a UINode, amount it to a BuilderProxyNode if needProxy.
     auto flag = AceType::InstanceOf<NG::FrameNode>(newNode);
     auto isSupportExportTexture = newNode ? EXPORT_TEXTURE_SUPPORT_TYPES.count(newNode->GetTag()) > 0 : false;
@@ -120,29 +132,37 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         newNode = proxyNode;
     }
     if (parent) {
-        parent->ReplaceChild(viewNode_, newNode);
-        newNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
+        if (newNode) {
+            parent->ReplaceChild(viewNode_, newNode);
+            newNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
+        } else {
+            parent->RemoveChild(viewNode_);
+            parent->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
+        }
     }
     viewNode_ = newNode ? AceType::DynamicCast<NG::FrameNode>(newNode) : nullptr;
     CHECK_NULL_VOID(viewNode_);
-    ProccessNode(isSupportExportTexture);
+    ProccessNode(isSupportExportTexture, isSupportLazyBuild);
     UpdateEnd(info);
     CHECK_NULL_VOID(viewNode_);
-    JSRef<JSObject> thisObj = info.This();
-    JSWeak<JSObject> jsObject(thisObj);
-    viewNode_->RegisterUpdateJSInstanceCallback([jsObject, vm = info.GetVm()](int32_t id) {
-        JSRef<JSObject> jsThis = jsObject.Lock();
-        JSRef<JSVal> jsUpdateFunc = jsThis->GetProperty("updateInstance");
-        if (jsUpdateFunc->IsFunction()) {
-            auto jsFunc = JSRef<JSFunc>::Cast(jsUpdateFunc);
-            auto uiContext = NG::UIContextHelper::GetUIContext(vm, id);
-            auto jsVal = JSRef<JSVal>::Make(uiContext);
-            jsFunc->Call(jsThis, 1, &jsVal);
-        }
-    });
+
+    JSRef<JSObject> thisObj = info[BUILD_PARAM_INDEX_THIS_OBJ];
+    auto updateInstance = thisObj->GetProperty("updateInstance");
+    if (!updateInstance->IsFunction()) {
+        return;
+    }
+    EcmaVM* vm = info.GetVm();
+    auto updateInstanceFunc = AceType::MakeRefPtr<JsFunction>(thisObj, JSRef<JSFunc>::Cast(updateInstance));
+    CHECK_NULL_VOID(updateInstanceFunc);
+    auto updateJSInstanceCallback = [updateInstanceFunc, vm](int32_t instanceId) {
+        auto uiContext = NG::UIContextHelper::GetUIContext(vm, instanceId);
+        auto jsVal = JSRef<JSVal>::Make(uiContext);
+        updateInstanceFunc->ExecuteJS(1, &jsVal);
+    };
+    viewNode_->RegisterUpdateJSInstanceCallback(updateJSInstanceCallback);
 }
 
-void JSBaseNode::ProccessNode(bool isSupportExportTexture)
+void JSBaseNode::ProccessNode(bool isSupportExportTexture, bool isSupportLazyBuild)
 {
     CHECK_NULL_VOID(viewNode_);
     viewNode_->SetIsRootBuilderNode(true);
@@ -153,7 +173,9 @@ void JSBaseNode::ProccessNode(bool isSupportExportTexture)
         exportTextureInfo->SetSurfaceId(surfaceId_);
         exportTextureInfo->SetCurrentRenderType(renderType_);
     }
-    viewNode_->Build(nullptr);
+    if (!isSupportLazyBuild) {
+        viewNode_->Build(nullptr);
+    }
 }
 
 void JSBaseNode::Create(const JSCallbackInfo& info)
@@ -218,9 +240,29 @@ void JSBaseNode::FinishUpdateFunc(const JSCallbackInfo& info)
 void JSBaseNode::PostTouchEvent(const JSCallbackInfo& info)
 {
     if (!viewNode_ || info.Length() < 1 || !info[0]->IsObject()) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostTouchEvent params invalid");
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
         return;
     }
+    TouchEvent touchEvent = InitTouchEvent(info);
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    if (!pipelineContext) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostTouchEvent pipelineContext is invalid");
+        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+        return;
+    }
+    auto postEventManager = pipelineContext->GetPostEventManager();
+    if (!postEventManager) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostTouchEvent postEventManager is invalid");
+        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+        return;
+    }
+    auto result = postEventManager->PostEvent(viewNode_, touchEvent);
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+}
+
+TouchEvent JSBaseNode::InitTouchEvent(const JSCallbackInfo& info)
+{   
     TouchEvent touchEvent;
     auto obj = JSRef<JSObject>::Cast(info[0]);
     auto typeJsVal = obj->GetProperty("type");
@@ -284,13 +326,15 @@ void JSBaseNode::PostTouchEvent(const JSCallbackInfo& info)
     if (changedTouchesJsVal->IsArray()) {
         JSRef<JSArray> changedTouchesArray = JSRef<JSArray>::Cast(changedTouchesJsVal);
         if (static_cast<int32_t>(changedTouchesArray->Length()) <= 0) {
+            TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostTouchEvent event changedTouchesArray is invalid");
             info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
-            return;
+            return touchEvent;
         }
         JSRef<JSVal> item = changedTouchesArray->GetValueAt(0);
         if (!item->IsObject()) {
+            TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostTouchEvent event changedTouchesArray item is not an object");
             info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
-            return;
+            return touchEvent;
         }
         JSRef<JSObject> itemObj = JSRef<JSObject>::Cast(item);
         touchEvent.id = itemObj->GetPropertyValue<int32_t>("id", 0);
@@ -300,18 +344,7 @@ void JSBaseNode::PostTouchEvent(const JSCallbackInfo& info)
         touchEvent.screenY = itemObj->GetPropertyValue<float>("screenY", 0.0f);
         touchEvent.originalId = itemObj->GetPropertyValue<int32_t>("id", 0);
     }
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-    if (!pipelineContext) {
-        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
-        return;
-    }
-    auto postEventManager = pipelineContext->GetPostEventManager();
-    if (!postEventManager) {
-        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
-        return;
-    }
-    auto result = postEventManager->PostEvent(viewNode_, touchEvent);
-    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+    return touchEvent;
 }
 
 void JSBaseNode::UpdateStart(const JSCallbackInfo& info)
@@ -328,6 +361,51 @@ void JSBaseNode::UpdateEnd(const JSCallbackInfo& info)
     }
 }
 
+void JSBaseNode::OnReuseWithBindThis(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(realNode_);
+    std::queue<RefPtr<NG::UINode>> elements;
+    elements.push(realNode_);
+    void* data = static_cast<void*>(info.GetJsiRuntimeCallInfo());
+    while (!elements.empty()) {
+        auto currentNode = elements.front();
+        elements.pop();
+        if (!currentNode) {
+            continue;
+        }
+        if (AceType::InstanceOf<NG::CustomNodeBase>(currentNode)) {
+            auto customNode = AceType::DynamicCast<NG::CustomNodeBase>(currentNode);
+            customNode->FireOnReuseFunc(data);
+        } else {
+            for (const auto& child : currentNode->GetChildren()) {
+                elements.push(child);
+            }
+        }
+    }
+}
+
+void JSBaseNode::OnRecycleWithBindThis(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(realNode_);
+    std::queue<RefPtr<NG::UINode>> elements;
+    elements.push(realNode_);
+    while (!elements.empty()) {
+        auto currentNode = elements.front();
+        elements.pop();
+        if (!currentNode) {
+            continue;
+        }
+        if (AceType::InstanceOf<NG::CustomNodeBase>(currentNode)) {
+            auto customNode = AceType::DynamicCast<NG::CustomNodeBase>(currentNode);
+            customNode->FireOnRecycleFunc();
+        } else {
+            for (const auto& child : currentNode->GetChildren()) {
+                elements.push(child);
+            }
+        }
+    }
+}
+
 void JSBaseNode::JSBind(BindingTarget globalObj)
 {
     JSClass<JSBaseNode>::Declare("__JSBaseNode__");
@@ -338,6 +416,8 @@ void JSBaseNode::JSBind(BindingTarget globalObj)
     JSClass<JSBaseNode>::CustomMethod("disposeNode", &JSBaseNode::Dispose);
     JSClass<JSBaseNode>::CustomMethod("updateStart", &JSBaseNode::UpdateStart);
     JSClass<JSBaseNode>::CustomMethod("updateEnd", &JSBaseNode::UpdateEnd);
+    JSClass<JSBaseNode>::CustomMethod("onReuseWithBindObject", &JSBaseNode::OnReuseWithBindThis);
+    JSClass<JSBaseNode>::CustomMethod("onRecycleWithBindObject", &JSBaseNode::OnRecycleWithBindThis);
 
     JSClass<JSBaseNode>::Bind(globalObj, JSBaseNode::ConstructorCallback, JSBaseNode::DestructorCallback);
 }

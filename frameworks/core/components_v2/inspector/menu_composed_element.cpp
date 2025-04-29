@@ -15,14 +15,6 @@
 
 #include "core/components_v2/inspector/menu_composed_element.h"
 
-#include <unordered_map>
-
-#include "base/log/dump_log.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/select_popup/render_select_popup.h"
-#include "core/components/select_popup/select_popup_element.h"
-#include "core/components_v2/inspector/utils.h"
-
 namespace OHOS::Ace::V2 {
 namespace {
 

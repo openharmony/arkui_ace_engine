@@ -15,21 +15,13 @@
 
 #include "core/interfaces/native/node/node_api.h"
 
-#include <deque>
 #include <securec.h>
+#include <vector>
 
-#include "base/error/error_code.h"
-#include "base/log/ace_trace.h"
-#include "base/log/log_wrapper.h"
-#include "base/utils/macros.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/observer_handler.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/canvas_rendering_context_2d_modifier.h"
@@ -42,9 +34,11 @@
 #include "core/interfaces/native/node/node_canvas_modifier.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_common_modifier.h"
+#include "core/interfaces/native/node/node_custom_node_ext_modifier.h"
 #include "core/interfaces/native/node/node_drag_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
 #include "core/interfaces/native/node/node_image_modifier.h"
+#include "core/interfaces/native/node/node_image_span_modifier.h"
 #include "core/interfaces/native/node/node_list_item_modifier.h"
 #include "core/interfaces/native/node/node_list_modifier.h"
 #include "core/interfaces/native/node/node_refresh_modifier.h"
@@ -65,6 +59,10 @@
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/text/html_utils.h"
+#include "interfaces/native/native_type.h"
+#include "core/interfaces/native/node/checkboxgroup_modifier.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -120,7 +118,7 @@ ArkUI_Int64 GetUIState(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, 0);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, 0);
     return eventHub->GetCurrentUIState();
 }
@@ -129,71 +127,76 @@ void SetSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->AddSupportedState(static_cast<uint64_t>(state));
+}
+
+void AddSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    std::function<void(uint64_t)>* func = reinterpret_cast<std::function<void(uint64_t)>*>(callback);
+    eventHub->AddSupportedUIStateWithCallback(static_cast<uint64_t>(state), *func, false);
+    func = nullptr;
+}
+
+void RemoveSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->RemoveSupportedUIState(static_cast<uint64_t>(state), false);
 }
 
 namespace NodeModifier {
 const ArkUIStateModifier* GetUIStateModifier()
 {
-    static const ArkUIStateModifier modifier = { GetUIState, SetSupportedUIState };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIStateModifier modifier = {
+        .getUIState = GetUIState,
+        .setSupportedUIState = SetSupportedUIState,
+        .addSupportedUIState = AddSupportedUIState,
+        .removeSupportedUIState = RemoveSupportedUIState
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIStateModifier* GetCJUIStateModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIStateModifier modifier = {
-        GetUIState,
-        SetSupportedUIState
+        .getUIState = GetUIState,
+        .setSupportedUIState = SetSupportedUIState,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 } // namespace NodeModifier
 
 namespace NodeEvent {
-std::deque<ArkUINodeEvent> g_eventQueue;
-int CheckEvent(ArkUINodeEvent* event)
-{
-    if (!g_eventQueue.empty()) {
-        *event = g_eventQueue.front();
-        g_eventQueue.pop_front();
-        return 1;
-    }
-    return 0;
-}
 
 static EventReceiver globalEventReceiver = nullptr;
 
-void SendArkUIAsyncEvent(ArkUINodeEvent* event)
+void SendArkUISyncEvent(ArkUINodeEvent* event)
 {
     if (globalEventReceiver) {
         globalEventReceiver(event);
-    } else {
-        g_eventQueue.push_back(*event);
     }
 }
 } // namespace NodeEvent
 
 namespace CustomNodeEvent {
-std::deque<ArkUICustomNodeEvent> g_eventQueue;
-int CheckEvent(ArkUICustomNodeEvent* event)
-{
-    if (!g_eventQueue.empty()) {
-        *event = g_eventQueue.front();
-        g_eventQueue.pop_front();
-        return 1;
-    }
-    return 0;
-}
 
 void (*g_fliter)(ArkUICustomNodeEvent* event) = nullptr;
-void SendArkUIAsyncEvent(ArkUICustomNodeEvent* event)
+void SendArkUISyncEvent(ArkUICustomNodeEvent* event)
 {
     if (g_fliter) {
         g_fliter(event);
-    } else {
-        g_eventQueue.push_back(*event);
     }
 }
 } // namespace CustomNodeEvent
@@ -211,9 +214,19 @@ ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 flags)
     if (flags == ARKUI_NODE_FLAG_C) {
         ContainerScope Scope(Container::CurrentIdSafelyWithCheck());
         node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
+        auto* uiNode = reinterpret_cast<UINode*>(node);
+        if (uiNode) {
+            uiNode->setIsCNode(true);
+        }
     } else {
         node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
     }
+    return node;
+}
+
+ArkUINodeHandle CreateNodeWithParams(ArkUINodeType type, int peerId, ArkUI_Int32 flags, const ArkUI_Params& params)
+{
+    auto* node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNodeWithParams(type, peerId, params));
     return node;
 }
 
@@ -222,6 +235,58 @@ ArkUINodeHandle GetNodeByViewStack()
     auto node = ViewStackProcessor::GetInstance()->Finish();
     node->IncRefCount();
     return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(node));
+}
+
+ArkUINodeHandle GetTopNodeByViewStack()
+{
+    auto node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(node, nullptr);
+    return reinterpret_cast<ArkUINodeHandle>(node);
+}
+
+ArkUINodeHandle CreateCustomNode(ArkUI_CharPtr tag)
+{
+    return reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateCustomNode(tag));
+}
+
+ArkUINodeHandle GetOrCreateCustomNode(ArkUI_CharPtr tag)
+{
+    return reinterpret_cast<ArkUINodeHandle>(ViewModel::GetOrCreateCustomNode(tag));
+}
+
+ArkUI_Bool IsRightToLeft()
+{
+    return AceApplicationInfo::GetInstance().IsRightToLeft();
+}
+
+void CreateNewScope()
+{
+    ViewStackModel::GetInstance()->NewScope();
+}
+
+ArkUIRSNodeHandle GetRSNodeByNode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto rsNode = frameNode->GetExtraCustomProperty("RS_NODE");
+    CHECK_NULL_RETURN(rsNode, nullptr);
+    return reinterpret_cast<ArkUIRSNodeHandle>(rsNode);
+}
+
+void RegisterOEMVisualEffect(ArkUIOEMVisualEffectFuncHandle func)
+{
+    OEMVisualEffectFunc oemFunc = reinterpret_cast<OEMVisualEffectFunc>(func);
+    ViewAbstract::RegisterOEMVisualEffect(oemFunc);
+}
+
+void SetOnNodeDestroyCallback(ArkUINodeHandle node, void (*onDestroy)(ArkUINodeHandle node))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onDestroyCallback = [node, onDestroy](int32_t nodeId) {
+        onDestroy(node);
+    };
+    uiNode->SetOnNodeDestroyCallback(std::move(onDestroyCallback));
 }
 
 void DisposeNode(ArkUINodeHandle node)
@@ -234,10 +299,7 @@ ArkUI_CharPtr GetName(ArkUINodeHandle node)
     return ViewModel::GetName(node);
 }
 
-static void DumpTree(ArkUINodeHandle node, int indent)
-{
-    TAG_LOGI(AceLogTag::ACE_NATIVE_NODE, "dumpTree %{public}p", node);
-}
+static void DumpTree(ArkUINodeHandle node, int indent) {}
 
 void DumpTreeNode(ArkUINodeHandle node)
 {
@@ -300,14 +362,10 @@ ArkUI_Int32 InsertChildBefore(ArkUINodeHandle parent, ArkUINodeHandle child, Ark
     return ERROR_CODE_NO_ERROR;
 }
 
-void SetAttribute(ArkUINodeHandle node, ArkUI_CharPtr attribute, ArkUI_CharPtr value)
-{
-    TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "%{public}p SetAttribute %{public}s, %{public}s", node, attribute, value);
-}
+void SetAttribute(ArkUINodeHandle node, ArkUI_CharPtr attribute, ArkUI_CharPtr value) {}
 
 ArkUI_CharPtr GetAttribute(ArkUINodeHandle node, ArkUI_CharPtr attribute)
 {
-    TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "%{public}p GetAttribute %{public}s", node, attribute);
     return "";
 }
 
@@ -332,7 +390,7 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnClick,
     NodeModifier::SetOnHover,
     NodeModifier::SetOnBlur,
-    nullptr,
+    NodeModifier::SetOnKeyEvent,
     NodeModifier::SetOnMouse,
     NodeModifier::SetOnAreaChange,
     nullptr,
@@ -349,6 +407,14 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnDragLeave,
     NodeModifier::SetOnDragEnd,
     NodeModifier::SetOnPreDrag,
+    NodeModifier::SetOnKeyPreIme,
+    NodeModifier::SetOnFocusAxisEvent,
+    NodeModifier::SetOnKeyEventDispatch,
+    nullptr,
+    NodeModifier::SetOnAxisEvent,
+    NodeModifier::SetOnClick,
+    NodeModifier::SetOnHover,
+    NodeModifier::SetOnHoverMove,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -381,6 +447,7 @@ const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
     NodeModifier::SetTextInputOnDidInsert,
     NodeModifier::SetTextInputOnWillDelete,
     NodeModifier::SetTextInputOnDidDelete,
+    NodeModifier::SetOnTextInputChangeWithPreviewText,
 };
 
 const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
@@ -397,6 +464,7 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     NodeModifier::SetTextAreaOnDidInsertValue,
     NodeModifier::SetTextAreaOnWillDeleteValue,
     NodeModifier::SetTextAreaOnDidDeleteValue,
+    NodeModifier::SetOnTextAreaChangeWithPreviewText,
 };
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
@@ -417,6 +485,11 @@ const ComponentAsyncEventHandler imageNodeAsyncEventHandlers[] = {
     NodeModifier::SetImageOnDownloadProgress,
 };
 
+const ComponentAsyncEventHandler IMAGE_SPAN_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetImageSpanOnCompleteEvent,
+    NodeModifier::SetImageSpanOnErrorEvent,
+};
+
 const ComponentAsyncEventHandler DATE_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetDatePickerOnDateChange,
 };
@@ -427,14 +500,21 @@ const ComponentAsyncEventHandler TIME_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
 
 const ComponentAsyncEventHandler TEXT_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetTextPickerOnChange,
+    NodeModifier::SetTextPickerOnScrollStop,
 };
 
+#ifndef ARKUI_WEARABLE
 const ComponentAsyncEventHandler CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetCalendarPickerOnChange,
 };
+#endif
 
 const ComponentAsyncEventHandler CHECKBOX_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetCheckboxChange,
+};
+
+const ComponentAsyncEventHandler CHECKBOX_GROUP_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetCheckboxGroupChange,
 };
 
 const ComponentAsyncEventHandler SLIDER_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -447,6 +527,9 @@ const ComponentAsyncEventHandler SWIPER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetSwiperAnimationEnd,
     NodeModifier::SetSwiperGestureSwipe,
     NodeModifier::SetSwiperOnContentDidScroll,
+    NodeModifier::SetSwiperSelected,
+    NodeModifier::SetSwiperUnselected,
+    NodeModifier::SetSwiperContentWillScroll,
 };
 
 const ComponentAsyncEventHandler CANVAS_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -463,6 +546,7 @@ const ComponentAsyncEventHandler listNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnListDidScroll,
     NodeModifier::SetOnListReachStart,
     NodeModifier::SetOnListReachEnd,
+    NodeModifier::SetOnListScrollVisibleContentChange,
 };
 
 const ComponentAsyncEventHandler LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -526,7 +610,7 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnClick,
     NodeModifier::ResetOnHover,
     NodeModifier::ResetOnBlur,
-    nullptr,
+    NodeModifier::ResetOnKeyEvent,
     NodeModifier::ResetOnMouse,
     NodeModifier::ResetOnAreaChange,
     NodeModifier::ResetOnVisibleAreaChange,
@@ -536,6 +620,21 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnAttach,
     NodeModifier::ResetOnDetach,
     nullptr,
+    NodeModifier::ResetOnDragStart,
+    NodeModifier::ResetOnDragEnter,
+    NodeModifier::ResetOnDragDrop,
+    NodeModifier::ResetOnDragMove,
+    NodeModifier::ResetOnDragLeave,
+    NodeModifier::ResetOnDragEnd,
+    NodeModifier::ResetOnPreDrag,
+    NodeModifier::ResetOnKeyPreIme,
+    NodeModifier::ResetOnFocusAxisEvent,
+    nullptr,
+    nullptr,
+    NodeModifier::ResetOnAxisEvent,
+    nullptr,
+    nullptr,
+    NodeModifier::ResetOnHoverMove,
 };
 
 const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -564,6 +663,11 @@ const ResetComponentAsyncEventHandler TEXT_INPUT_NODE_RESET_ASYNC_EVENT_HANDLERS
     NodeModifier::ResetOnTextInputContentSizeChange,
     NodeModifier::ResetOnTextInputInputFilterError,
     NodeModifier::ResetTextInputOnTextContentScroll,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    NodeModifier::ResetOnTextInputChangeWithPreviewText,
 };
 
 const ResetComponentAsyncEventHandler TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -576,6 +680,11 @@ const ResetComponentAsyncEventHandler TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[
     NodeModifier::ResetOnTextAreaContentSizeChange,
     NodeModifier::ResetOnTextAreaInputFilterError,
     NodeModifier::ResetTextAreaOnTextContentScroll,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    NodeModifier::ResetOnTextAreaChangeWithPreviewText,
 };
 
 const ResetComponentAsyncEventHandler REFRESH_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -616,11 +725,18 @@ const ResetComponentAsyncEventHandler CHECKBOX_NODE_RESET_ASYNC_EVENT_HANDLERS[]
     nullptr,
 };
 
+const ResetComponentAsyncEventHandler CHECKBOX_GROUP_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetCheckboxGroupChange,
+};
+
 const ResetComponentAsyncEventHandler SLIDER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     nullptr,
 };
 
 const ResetComponentAsyncEventHandler SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+    nullptr,
+    nullptr,
     nullptr,
     nullptr,
     nullptr,
@@ -642,6 +758,7 @@ const ResetComponentAsyncEventHandler LIST_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetOnListDidScroll,
     NodeModifier::ResetOnListReachStart,
     NodeModifier::ResetOnListReachEnd,
+    NodeModifier::ResetOnScrollVisibleContentChange,
 };
 
 const ResetComponentAsyncEventHandler LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -720,6 +837,14 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = imageNodeAsyncEventHandlers[subKind];
+            break;
+        }
+        case ARKUI_IMAGE_SPAN: {
+            if (subKind >= sizeof(IMAGE_SPAN_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = IMAGE_SPAN_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_SCROLL: {
@@ -804,11 +929,13 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
         }
         case ARKUI_CALENDAR_PICKER: {
             // calendar picker event type.
+#ifndef ARKUI_WEARABLE
             if (subKind >= sizeof(CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
                 TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
                 return;
             }
             eventHandle = CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS[subKind];
+#endif
             break;
         }
         case ARKUI_CHECKBOX: {
@@ -925,6 +1052,14 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_CHECK_BOX_GROUP: {
+            if (subKind >= sizeof(CHECKBOX_GROUP_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = CHECKBOX_GROUP_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         default: {
@@ -1202,6 +1337,16 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
             eventHandle = IMAGE_ANIMATOR_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+        case ARKUI_CHECK_BOX_GROUP: {
+            if (subKind >=
+                sizeof(CHECKBOX_GROUP_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = CHECKBOX_GROUP_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
         default: {
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
         }
@@ -1303,8 +1448,13 @@ void* GetAttachNodePtr(ArkUINodeHandle node)
 ArkUI_Int32 MeasureLayoutAndDraw(ArkUIVMContext vmContext, ArkUINodeHandle rootPtr)
 {
     auto* root = reinterpret_cast<FrameNode*>(rootPtr);
-    float width = root->GetGeometryNode()->GetFrameSize().Width();
-    float height = root->GetGeometryNode()->GetFrameSize().Height();
+    auto geometryNode = root->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return 0;
+    }
+    float width = geometryNode->GetFrameSize().Width();
+    float height = geometryNode->GetFrameSize().Height();
     // measure
     ArkUI_Float32 measureData[] = { width, height, width, height, width, height };
     MeasureNode(vmContext, rootPtr, &measureData[0]);
@@ -1373,7 +1523,12 @@ void SetMeasureWidth(ArkUINodeHandle node, ArkUI_Int32 value)
     if (!frameNode) {
         return;
     }
-    frameNode->GetGeometryNode()->SetFrameWidth(value);
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return;
+    }
+    geometryNode->SetFrameWidth(value);
 }
 
 ArkUI_Int32 GetMeasureWidth(ArkUINodeHandle node)
@@ -1382,7 +1537,12 @@ ArkUI_Int32 GetMeasureWidth(ArkUINodeHandle node)
     if (!frameNode) {
         return 0;
     }
-    return frameNode->GetGeometryNode()->GetFrameSize().Width();
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return 0;
+    }
+    return geometryNode->GetFrameSize().Width();
 }
 
 void SetMeasureHeight(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -1392,7 +1552,12 @@ void SetMeasureHeight(ArkUINodeHandle node, ArkUI_Int32 value)
     if (!frameNode) {
         return;
     }
-    frameNode->GetGeometryNode()->SetFrameHeight(value);
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return;
+    }
+    geometryNode->SetFrameHeight(value);
 }
 
 ArkUI_Int32 GetMeasureHeight(ArkUINodeHandle node)
@@ -1401,7 +1566,12 @@ ArkUI_Int32 GetMeasureHeight(ArkUINodeHandle node)
     if (!frameNode) {
         return 0;
     }
-    return frameNode->GetGeometryNode()->GetFrameSize().Height();
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return 0;
+    }
+    return geometryNode->GetFrameSize().Height();
 }
 
 void SetX(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -1411,7 +1581,12 @@ void SetX(ArkUINodeHandle node, ArkUI_Int32 value)
     if (!frameNode) {
         return;
     }
-    frameNode->GetGeometryNode()->SetMarginFrameOffsetX(value);
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return;
+    }
+    geometryNode->SetMarginFrameOffsetX(value);
 }
 
 void SetY(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -1421,7 +1596,12 @@ void SetY(ArkUINodeHandle node, ArkUI_Int32 value)
     if (!frameNode) {
         return;
     }
-    frameNode->GetGeometryNode()->SetMarginFrameOffsetY(value);
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return;
+    }
+    geometryNode->SetMarginFrameOffsetY(value);
 }
 
 ArkUI_Int32 GetX(ArkUINodeHandle node)
@@ -1430,7 +1610,12 @@ ArkUI_Int32 GetX(ArkUINodeHandle node)
     if (!frameNode) {
         return 0;
     }
-    return frameNode->GetGeometryNode()->GetMarginFrameOffset().GetX();
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return 0;
+    }
+    return geometryNode->GetMarginFrameOffset().GetX();
 }
 
 ArkUI_Int32 GetY(ArkUINodeHandle node)
@@ -1439,7 +1624,12 @@ ArkUI_Int32 GetY(ArkUINodeHandle node)
     if (!frameNode) {
         return 0;
     }
-    return frameNode->GetGeometryNode()->GetMarginFrameOffset().GetY();
+    auto geometryNode = frameNode->GetGeometryNode();
+    if (!geometryNode) {
+        LOGW("WARNING geometryNode is nullptr");
+        return 0;
+    }
+    return geometryNode->GetMarginFrameOffset().GetY();
 }
 
 void SetCustomMethodFlag(ArkUINodeHandle node, ArkUI_Int32 flag)
@@ -1613,78 +1803,87 @@ int32_t GetContextByNode(ArkUINodeHandle node)
     return instanceId;
 }
 
+ArkUI_Int32 PostFrameCallback(ArkUI_Int32 instanceId, void* userData,
+    void (*callback)(uint64_t nanoTimestamp, uint32_t frameCount, void* userData))
+{
+    auto pipeline = PipelineContext::GetContextByContainerId(instanceId);
+    if (pipeline == nullptr) {
+        LOGW("Cannot find pipeline context by contextHandle ID");
+        return ARKUI_ERROR_CODE_UI_CONTEXT_INVALID;
+    }
+    if (!pipeline->CheckThreadSafe()) {
+        return ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD;
+    }
+    auto onframeCallbackFuncFromCAPI = [userData, callback](uint64_t nanoTimestamp, uint32_t frameCount) -> void {
+        callback(nanoTimestamp, frameCount, userData);
+    };
+
+    pipeline->AddCAPIFrameCallback(std::move(onframeCallbackFuncFromCAPI));
+    return ERROR_CODE_NO_ERROR;
+}
+
 const ArkUIBasicAPI* GetBasicAPI()
 {
-    /* clang-format off */
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIBasicAPI basicImpl = {
-        CreateNode,
-        GetNodeByViewStack,
-        DisposeNode,
-        GetName,
-        DumpTreeNode,
-
-        AddChild,
-        RemoveChild,
-        InsertChildAfter,
-        InsertChildBefore,
-        InsertChildAt,
-        GetAttribute,
-        SetAttribute,
-        ResetAttribute,
-
-        NotifyComponentAsyncEvent,
-        NotifyResetComponentAsyncEvent,
-        RegisterNodeAsyncEventReceiver,
-        UnregisterNodeAsyncEventReceiver,
-
-        nullptr,
-
-        ApplyModifierFinish,
-        MarkDirty,
-        IsBuilderNode,
-        ConvertLengthMetricsUnit,
-
-        GetContextByNode,
+        .createNode = CreateNode,
+        .createNodeWithParams = CreateNodeWithParams,
+        .getNodeByViewStack = GetNodeByViewStack,
+        .disposeNode = DisposeNode,
+        .getName = GetName,
+        .dump = DumpTreeNode,
+        .addChild = AddChild,
+        .removeChild = RemoveChild,
+        .insertChildAfter = InsertChildAfter,
+        .insertChildBefore = InsertChildBefore,
+        .insertChildAt = InsertChildAt,
+        .getAttribute = GetAttribute,
+        .setAttribute = SetAttribute,
+        .resetAttribute = ResetAttribute,
+        .registerNodeAsyncEvent = NotifyComponentAsyncEvent,
+        .unRegisterNodeAsyncEvent = NotifyResetComponentAsyncEvent,
+        .registerNodeAsyncEventReceiver = RegisterNodeAsyncEventReceiver,
+        .unRegisterNodeAsyncEventReceiver = UnregisterNodeAsyncEventReceiver,
+        .checkAsyncEvent = nullptr,
+        .applyModifierFinish = ApplyModifierFinish,
+        .markDirty = MarkDirty,
+        .isBuilderNode = IsBuilderNode,
+        .convertLengthMetricsUnit = ConvertLengthMetricsUnit,
+        .getContextByNode = GetContextByNode,
+        .postFrameCallback = PostFrameCallback,
     };
-    /* clang-format on */
-
+    CHECK_INITIALIZED_FIELDS_END(basicImpl, 0, 0, 0); // don't move this line
     return &basicImpl;
 }
 
 const CJUIBasicAPI* GetCJUIBasicAPI()
 {
-    /* clang-format off */
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIBasicAPI basicImpl = {
-        CreateNode,
-        DisposeNode,
-        GetName,
-        DumpTreeNode,
-
-        AddChild,
-        RemoveChild,
-        InsertChildAfter,
-        InsertChildBefore,
-        InsertChildAt,
-        GetAttribute,
-        SetAttribute,
-        ResetAttribute,
-
-        NotifyComponentAsyncEvent,
-        NotifyResetComponentAsyncEvent,
-        RegisterNodeAsyncEventReceiver,
-        UnregisterNodeAsyncEventReceiver,
-
-        nullptr,
-
-        ApplyModifierFinish,
-        MarkDirty,
-        IsBuilderNode,
-        ConvertLengthMetricsUnit,
-
-        GetContextByNode,
+        .createNode = CreateNode,
+        .disposeNode = DisposeNode,
+        .getName = GetName,
+        .dump = DumpTreeNode,
+        .addChild = AddChild,
+        .removeChild = RemoveChild,
+        .insertChildAfter = InsertChildAfter,
+        .insertChildBefore = InsertChildBefore,
+        .insertChildAt = InsertChildAt,
+        .getAttribute = GetAttribute,
+        .setAttribute = SetAttribute,
+        .resetAttribute = ResetAttribute,
+        .registerNodeAsyncEvent = NotifyComponentAsyncEvent,
+        .unRegisterNodeAsyncEvent = NotifyResetComponentAsyncEvent,
+        .registerNodeAsyncEventReceiver = RegisterNodeAsyncEventReceiver,
+        .unRegisterNodeAsyncEventReceiver = UnregisterNodeAsyncEventReceiver,
+        .checkAsyncEvent = nullptr,
+        .applyModifierFinish = ApplyModifierFinish,
+        .markDirty = MarkDirty,
+        .isBuilderNode = IsBuilderNode,
+        .convertLengthMetricsUnit = ConvertLengthMetricsUnit,
+        .getContextByNode = GetContextByNode,
     };
-    /* clang-format on */
-
+    CHECK_INITIALIZED_FIELDS_END(basicImpl, 0, 0, 0); // don't move this line
     return &basicImpl;
 }
 
@@ -1783,28 +1982,195 @@ ArkUI_Int32 RegisterOnWillDismissWithUserData(
     return CustomDialog::RegisterOnWillDialogDismissWithUserData(handler, userData, callback);
 }
 
+ArkUI_Int32 SetKeyboardAvoidDistance(ArkUIDialogHandle handle, float distance, ArkUI_Int32 unit)
+{
+    return CustomDialog::SetKeyboardAvoidDistance(handle, distance, unit);
+}
+
+ArkUI_Int32 SetDialogLevelMode(ArkUIDialogHandle handle, ArkUI_Int32 mode)
+{
+    return CustomDialog::SetLevelMode(handle, mode);
+}
+
+ArkUI_Int32 SetDialogLevelUniqueId(ArkUIDialogHandle handle, ArkUI_Int32 uniqueId)
+{
+    return CustomDialog::SetLevelUniqueId(handle, uniqueId);
+}
+
+ArkUI_Int32 SetDialogImmersiveMode(ArkUIDialogHandle handle, ArkUI_Int32 mode)
+{
+    return CustomDialog::SetImmersiveMode(handle, mode);
+}
+
+ArkUI_Int32 SetLevelOrder(ArkUIDialogHandle handle, ArkUI_Float64 levelOrder)
+{
+    return CustomDialog::SetLevelOrder(handle, levelOrder);
+}
+
+ArkUI_Int32 RegisterOnWillAppear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
+{
+    return CustomDialog::RegisterOnWillAppearDialog(handle, userData, callback);
+}
+
+ArkUI_Int32 RegisterOnDidAppear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
+{
+    return CustomDialog::RegisterOnDidAppearDialog(handle, userData, callback);
+}
+
+ArkUI_Int32 RegisterOnWillDisappear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
+{
+    return CustomDialog::RegisterOnWillDisappearDialog(handle, userData, callback);
+}
+
+ArkUI_Int32 RegisterOnDidDisappear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
+{
+    return CustomDialog::RegisterOnDidDisappearDialog(handle, userData, callback);
+}
+
+ArkUI_Int32 SetDialogBorderWidth(ArkUIDialogHandle handle, ArkUI_Float32 top, ArkUI_Float32 right, ArkUI_Float32 bottom,
+    ArkUI_Float32 left, ArkUI_Int32 unit)
+{
+    return CustomDialog::SetDialogBorderWidth(handle, top, right, bottom, left, unit);
+}
+
+ArkUI_Int32 SetDialogBorderColor(ArkUIDialogHandle handle, uint32_t top, uint32_t right, uint32_t bottom, uint32_t left)
+{
+    return CustomDialog::SetDialogBorderColor(handle, top, right, bottom, left);
+}
+
+ArkUI_Int32 SetDialogBorderStyle(ArkUIDialogHandle handle, int32_t top, int32_t right, int32_t bottom, int32_t left)
+{
+    return CustomDialog::SetDialogBorderStyle(handle, top, right, bottom, left);
+}
+
+ArkUI_Int32 SetDialogWidth(ArkUIDialogHandle handle, float width, ArkUI_Int32 unit)
+{
+    return CustomDialog::SetWidth(handle, width, unit);
+}
+
+ArkUI_Int32 SetDialogHeight(ArkUIDialogHandle handle, float height, ArkUI_Int32 unit)
+{
+    return CustomDialog::SetHeight(handle, height, unit);
+}
+
+ArkUI_Int32 SetDialogShadow(ArkUIDialogHandle handle, ArkUI_Int32 shadow)
+{
+    return CustomDialog::SetShadow(handle, shadow);
+}
+
+ArkUI_Int32 SetDialogCustomShadow(ArkUIDialogHandle handle, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length)
+{
+    return CustomDialog::SetDialogCustomShadow(handle, shadows, length);
+}
+
+ArkUI_Int32 SetDialogBackgroundBlurStyle(ArkUIDialogHandle handle, ArkUI_Int32 blurStyle)
+{
+    return CustomDialog::SetBackgroundBlurStyle(handle, blurStyle);
+}
+
+ArkUI_Int32 SetDialogKeyboardAvoidMode(ArkUIDialogHandle handle, ArkUI_Int32 keyboardAvoidMode)
+{
+    return CustomDialog::SetKeyboardAvoidMode(handle, keyboardAvoidMode);
+}
+
+ArkUI_Int32 EnableDialogHoverMode(ArkUIDialogHandle handle, ArkUI_Bool enableHoverMode)
+{
+    return CustomDialog::EnableHoverMode(handle, enableHoverMode);
+}
+
+ArkUI_Int32 SetDialogHoverModeArea(ArkUIDialogHandle handle, ArkUI_Int32 hoverModeAreaType)
+{
+    return CustomDialog::SetHoverModeArea(handle, hoverModeAreaType);
+}
+
+ArkUI_Int32 SetDialogFocusable(ArkUIDialogHandle handle, ArkUI_Bool focusable)
+{
+    return CustomDialog::SetFocusable(handle, focusable);
+}
+
+ArkUI_Int32 OpenCustomDialog(ArkUIDialogHandle handle, void(*callback)(ArkUI_Int32 dialogId))
+{
+    return CustomDialog::OpenCustomDialog(handle, callback);
+}
+
+ArkUI_Int32 UpdateCustomDialog(ArkUIDialogHandle handle, void(*callback)(int32_t dialogId))
+{
+    return CustomDialog::UpdateCustomDialog(handle, callback);
+}
+
+ArkUI_Int32 CloseCustomDialog(ArkUI_Int32 dialogId)
+{
+    return CustomDialog::CloseCustomDialog(dialogId);
+}
+
+ArkUI_Int32 SetDialogSubwindowMode(ArkUIDialogHandle handle, ArkUI_Bool showInSubWindow)
+{
+    return CustomDialog::SetDialogSubwindowMode(handle, showInSubWindow);
+}
+
+ArkUI_Int32 SetBackgroundBlurStyleOptions(ArkUIDialogHandle handle, ArkUI_Int32 (*intArray)[3], ArkUI_Float32 scale,
+    ArkUI_Uint32 (*uintArray)[3], ArkUI_Bool isValidColor)
+{
+    return CustomDialog::SetBackgroundBlurStyleOptions(handle, intArray, scale, uintArray, isValidColor);
+}
+
+ArkUI_Int32 SetBackgroundEffect(ArkUIDialogHandle handle, ArkUI_Float32 (*floatArray)[3], ArkUI_Int32 (*intArray)[2],
+    ArkUI_Uint32 (*uintArray)[4], ArkUI_Bool isValidColor)
+{
+    return CustomDialog::SetBackgroundEffect(handle, floatArray, intArray, uintArray, isValidColor);
+}
+
 const ArkUIDialogAPI* GetDialogAPI()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIDialogAPI dialogImpl = {
-        CreateDialog,
-        DisposeDialog,
-        SetDialogContent,
-        RemoveDialogContent,
-        SetDialogContentAlignment,
-        ResetDialogContentAlignment,
-        SetDialogModalMode,
-        SetDialogAutoCancel,
-        SetDialogMask,
-        SetDialogBackgroundColor,
-        SetDialogCornerRadius,
-        SetDialogGridColumnCount,
-        EnableDialogCustomStyle,
-        EnableDialogCustomAnimation,
-        ShowDialog,
-        CloseDialog,
-        RegisterOnWillDialogDismiss,
-        RegisterOnWillDismissWithUserData
+        .create = CreateDialog,
+        .dispose = DisposeDialog,
+        .setContent = SetDialogContent,
+        .removeContent = RemoveDialogContent,
+        .setContentAlignment = SetDialogContentAlignment,
+        .resetContentAlignment = ResetDialogContentAlignment,
+        .setModalMode = SetDialogModalMode,
+        .setAutoCancel = SetDialogAutoCancel,
+        .setMask = SetDialogMask,
+        .setBackgroundColor = SetDialogBackgroundColor,
+        .setCornerRadius = SetDialogCornerRadius,
+        .setGridColumnCount = SetDialogGridColumnCount,
+        .enableCustomStyle = EnableDialogCustomStyle,
+        .enableCustomAnimation = EnableDialogCustomAnimation,
+        .show = ShowDialog,
+        .close = CloseDialog,
+        .registerOnWillDismiss = RegisterOnWillDialogDismiss,
+        .registerOnWillDismissWithUserData = RegisterOnWillDismissWithUserData,
+        .setKeyboardAvoidDistance = SetKeyboardAvoidDistance,
+        .setLevelMode = SetDialogLevelMode,
+        .setLevelUniqueId = SetDialogLevelUniqueId,
+        .setImmersiveMode = SetDialogImmersiveMode,
+        .setLevelOrder = SetLevelOrder,
+        .registerOnWillAppear = RegisterOnWillAppear,
+        .registerOnDidAppear = RegisterOnDidAppear,
+        .registerOnWillDisappear = RegisterOnWillDisappear,
+        .registerOnDidDisappear = RegisterOnDidDisappear,
+        .setBorderWidth = SetDialogBorderWidth,
+        .setBorderColor = SetDialogBorderColor,
+        .setBorderStyle = SetDialogBorderStyle,
+        .setWidth = SetDialogWidth,
+        .setHeight = SetDialogHeight,
+        .setShadow = SetDialogShadow,
+        .setCustomShadow = SetDialogCustomShadow,
+        .setBackgroundBlurStyle = SetDialogBackgroundBlurStyle,
+        .setKeyboardAvoidMode = SetDialogKeyboardAvoidMode,
+        .enableHoverMode = EnableDialogHoverMode,
+        .setHoverModeArea = SetDialogHoverModeArea,
+        .setFocusable = SetDialogFocusable,
+        .openCustomDialog = OpenCustomDialog,
+        .updateCustomDialog = UpdateCustomDialog,
+        .closeCustomDialog = CloseCustomDialog,
+        .setSubwindowMode = SetDialogSubwindowMode,
+        .setBackgroundBlurStyleOptions = SetBackgroundBlurStyleOptions,
+        .setBackgroundEffect = SetBackgroundEffect
     };
+    CHECK_INITIALIZED_FIELDS_END(dialogImpl, 0, 0, 0); // don't move this line
     return &dialogImpl;
 }
 
@@ -1815,62 +2181,75 @@ void ShowCrash(ArkUI_CharPtr message)
 
 /* clang-format off */
 ArkUIExtendedNodeAPI impl_extended = {
-    ARKUI_EXTENDED_API_VERSION,
-
-    NodeModifier::GetUtilsModifier, // getUtilsModifier
-    NodeModifier::GetCanvasRenderingContext2DModifier,
-
-    SetCallbackMethod,
-    SetCustomMethodFlag,
-    GetCustomMethodFlag,
-    RegisterCustomNodeAsyncEvent,
-    RegisterCustomSpanAsyncEvent,
-    UnregisterCustomNodeEvent,
-    RegisterCustomNodeEventReceiver,
-    SetCustomCallback, // setCustomCallback
-    MeasureLayoutAndDraw,
-    MeasureNode,
-    LayoutNode,
-    DrawNode,
-    SetAttachNodePtr,
-    GetAttachNodePtr,
-    SetMeasureWidth, // setMeasureWidth
-    GetMeasureWidth, // getMeasureWidth
-    SetMeasureHeight, // setMeasureHeight
-    GetMeasureHeight, // getMeasureHeight
-    SetX, // setX
-    SetY, // setY
-    GetX, // getX
-    GetY, // getY
-    GetLayoutConstraint,
-    SetAlignment,
-    GetAlignment,
-    nullptr, // indexerChecker
-    nullptr, // setRangeUpdater
-    nullptr, // setLazyItemIndexer
-    GetPipelineContext,
-    SetVsyncCallback,
-    UnblockVsyncWait,
-    NodeEvent::CheckEvent,
-    NodeEvent::SendArkUIAsyncEvent, // sendEvent
-    nullptr, // callContinuation
-    nullptr, // setChildTotalCount
-    ShowCrash,
+    .version = ARKUI_EXTENDED_API_VERSION,
+    .getUtilsModifier = NodeModifier::GetUtilsModifier, // getUtilsModifier
+    .getCanvasRenderingContext2DModifier = NodeModifier::GetCanvasRenderingContext2DModifier,
+    .setCallbackMethod = SetCallbackMethod,
+    .setCustomMethodFlag = SetCustomMethodFlag,
+    .getCustomMethodFlag = GetCustomMethodFlag,
+    .registerCustomNodeAsyncEvent = RegisterCustomNodeAsyncEvent,
+    .registerCustomSpanAsyncEvent = RegisterCustomSpanAsyncEvent,
+    .unregisterCustomNodeAsyncEvent = UnregisterCustomNodeEvent,
+    .registerCustomNodeAsyncEventReceiver = RegisterCustomNodeEventReceiver,
+    .setCustomCallback = SetCustomCallback, // setCustomCallback
+    .measureLayoutAndDraw = MeasureLayoutAndDraw,
+    .measureNode = MeasureNode,
+    .layoutNode = LayoutNode,
+    .drawNode = DrawNode,
+    .setAttachNodePtr = SetAttachNodePtr,
+    .getAttachNodePtr = GetAttachNodePtr,
+    .setMeasureWidth = SetMeasureWidth, // setMeasureWidth
+    .getMeasureWidth = GetMeasureWidth, // getMeasureWidth
+    .setMeasureHeight = SetMeasureHeight, // setMeasureHeight
+    .getMeasureHeight = GetMeasureHeight, // getMeasureHeight
+    .setX = SetX, // setX
+    .setY = SetY, // setY
+    .getX = GetX, // getX
+    .getY = GetY, // getY
+    .getLayoutConstraint = GetLayoutConstraint,
+    .setAlignment = SetAlignment,
+    .getAlignment = GetAlignment,
+    .indexerChecker = nullptr, // indexerChecker
+    .setRangeUpdater = nullptr, // setRangeUpdater
+    .setLazyItemIndexer = nullptr, // setLazyItemIndexer
+    .getPipelineContext = GetPipelineContext,
+    .setVsyncCallback = SetVsyncCallback,
+    .unblockVsyncWait = UnblockVsyncWait,
+    .sendEvent = NodeEvent::SendArkUISyncEvent, // sendEvent
+    .callContinuation = nullptr, // callContinuation
+    .setChildTotalCount = nullptr, // setChildTotalCount
+    .showCrash = ShowCrash,
+    .getTopNodeFromViewStack = GetTopNodeByViewStack,
+    .createCustomNode = CreateCustomNode,
+    .getOrCreateCustomNode = GetOrCreateCustomNode,
+    .getRSNodeByNode = GetRSNodeByNode,
+    .isRightToLeft = IsRightToLeft,
+    .createNewScope = CreateNewScope,
+    .registerOEMVisualEffect = RegisterOEMVisualEffect,
+    .setOnNodeDestroyCallback = SetOnNodeDestroyCallback,
 };
 /* clang-format on */
 
 void CanvasDrawRect(ArkUICanvasHandle canvas, ArkUI_Float32 left, ArkUI_Float32 top, ArkUI_Float32 right,
-    ArkUI_Float32 bottom, ArkUIPaintHandle paint)
-{
-    TAG_LOGI(AceLogTag::ACE_NATIVE_NODE,
-        "DrawRect canvas=%{public}p [%{public}f, %{public}f, %{public}f, %{public}f]\n", canvas, left, top, right,
-        bottom);
-}
+    ArkUI_Float32 bottom, ArkUIPaintHandle paint) {}
 
 const ArkUIGraphicsCanvas* GetCanvasAPI()
 {
-    static const ArkUIGraphicsCanvas modifier = { nullptr, nullptr, nullptr, nullptr, nullptr, CanvasDrawRect,
-        nullptr };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIGraphicsCanvas modifier = {
+        .finalize = nullptr,
+        .drawPoint = nullptr,
+        .drawPoints = nullptr,
+        .drawLine = nullptr,
+        .drawArc = nullptr,
+        .drawRect = CanvasDrawRect,
+        .drawOval = nullptr,
+        .drawCircle = nullptr,
+        .drawRRect = nullptr,
+        .drawDRRect = nullptr,
+        .drawString = nullptr,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
@@ -1891,22 +2270,41 @@ void PaintFinalize(ArkUIPaintHandle paintPtr)
 
 const ArkUIGraphicsPaint* GetPaintAPI()
 {
-    static const ArkUIGraphicsPaint modifier = { PaintMake, PaintFinalize, nullptr, nullptr, nullptr, nullptr };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIGraphicsPaint modifier = {
+        .make = PaintMake,
+        .finalize = PaintFinalize,
+        .setColor = nullptr,
+        .getColor = nullptr,
+        .setAlpha = nullptr,
+        .getAlpha = nullptr
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const ArkUIGraphicsFont* GetFontAPI()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIGraphicsFont modifier = {
-        nullptr,
+        .makeDefault = nullptr,
+        .finalize = nullptr,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const ArkUIGraphicsAPI* GetGraphicsAPI()
 {
-    static const ArkUIGraphicsAPI api = { ARKUI_NODE_GRAPHICS_API_VERSION, SetCallbackMethod, GetCanvasAPI, GetPaintAPI,
-        GetFontAPI };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIGraphicsAPI api = {
+        .version = ARKUI_NODE_GRAPHICS_API_VERSION,
+        .setCallbackMethod = SetCallbackMethod,
+        .getCanvasAPI = GetCanvasAPI,
+        .getPaintAPI = GetPaintAPI,
+        .getFontAPI = GetFontAPI
+    };
+    CHECK_INITIALIZED_FIELDS_END(api, 0, 0, 0); // don't move this line
     return &api;
 }
 
@@ -2011,52 +2409,56 @@ void DisposeCurve(ArkUICurveHandle curve)
 
 const ArkUIAnimation* GetAnimationAPI()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIAnimation modifier = {
-        nullptr,
-        nullptr,
-        nullptr,
-        AnimateTo,
-        KeyframeAnimateTo,
-        CreateAnimator,
-        DisposeAnimator,
-        AnimatorReset,
-        AnimatorPlay,
-        AnimatorFinish,
-        AnimatorPause,
-        AnimatorCancel,
-        AnimatorReverse,
-        CreateCurve,
-        CreateStepsCurve,
-        CreateCubicBezierCurve,
-        CreateSpringCurve,
-        CreateSpringMotion,
-        CreateResponsiveSpringMotion,
-        CreateInterpolatingSpring,
-        CreateCustomCurve,
-        DisposeCurve,
+        .startAnimation = nullptr,
+        .openImplicitAnimation = nullptr,
+        .closeImplicitAnimation = nullptr,
+        .animateTo = AnimateTo,
+        .keyframeAnimateTo = KeyframeAnimateTo,
+        .createAnimator = CreateAnimator,
+        .disposeAnimator = DisposeAnimator,
+        .animatorReset = AnimatorReset,
+        .animatorPlay = AnimatorPlay,
+        .animatorFinish = AnimatorFinish,
+        .animatorPause = AnimatorPause,
+        .animatorCancel = AnimatorCancel,
+        .animatorReverse = AnimatorReverse,
+        .initCurve = CreateCurve,
+        .stepsCurve = CreateStepsCurve,
+        .cubicBezierCurve = CreateCubicBezierCurve,
+        .springCurve = CreateSpringCurve,
+        .springMotion = CreateSpringMotion,
+        .responsiveSpringMotion = CreateResponsiveSpringMotion,
+        .interpolatingSpring = CreateInterpolatingSpring,
+        .customCurve = CreateCustomCurve,
+        .disposeCurve = DisposeCurve,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const ArkUINavigation* GetNavigationAPI()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUINavigation modifier = {
-        nullptr,
-        nullptr,
-        GetNavigationId,
-        GetNavDestinationName,
-        GetStackLength,
-        GetNavDesNameByIndex,
-        GetNavDestinationId,
-        GetNavDestinationState,
-        GetNavDestinationIndex,
-        GetNavDestinationParam,
-        GetRouterPageIndex,
-        GetRouterPageName,
-        GetRouterPagePath,
-        GetRouterPageState,
-        GetRouterPageId,
+        .popPageToIndex = nullptr,
+        .setNavDestinationBackPressed = nullptr,
+        .getNavigationId = GetNavigationId,
+        .getNavDestinationName = GetNavDestinationName,
+        .getStackLength = GetStackLength,
+        .getNavDesNameByIndex = GetNavDesNameByIndex,
+        .getNavDestinationId = GetNavDestinationId,
+        .getNavDestinationState = GetNavDestinationState,
+        .getNavDestinationIndex = GetNavDestinationIndex,
+        .getNavDestinationParam = GetNavDestinationParam,
+        .getRouterPageIndex = GetRouterPageIndex,
+        .getRouterPageName = GetRouterPageName,
+        .getRouterPagePath = GetRouterPagePath,
+        .getRouterPageState = GetRouterPageState,
+        .getRouterPageId = GetRouterPageId,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
@@ -2065,162 +2467,307 @@ const ArkUIExtendedNodeAPI* GetExtendedAPI()
     return &impl_extended;
 }
 
+ArkUI_StyledString_Descriptor* CreateArkUIStyledStringDescriptor()
+{
+    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "ArkUI_StyledString_Descriptor create");
+    return new ArkUI_StyledString_Descriptor;
+}
+
+void DestroyArkUIStyledStringDescriptor(ArkUI_StyledString_Descriptor* descriptor)
+{
+    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "ArkUI_StyledString_Descriptor destroy");
+    CHECK_NULL_VOID(descriptor);
+    if (descriptor->html) {
+        delete descriptor->html;
+        descriptor->html = nullptr;
+    }
+    if (descriptor->spanString) {
+        auto* spanString = reinterpret_cast<SpanString*>(descriptor->spanString);
+        delete spanString;
+        descriptor->spanString = nullptr;
+    }
+    delete descriptor;
+    descriptor = nullptr;
+}
+
+ArkUI_Int32 UnmarshallStyledStringDescriptor(
+    uint8_t* buffer, size_t bufferSize, ArkUI_StyledString_Descriptor* descriptor)
+{
+    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "UnmarshallStyledStringDescriptor");
+    CHECK_NULL_RETURN(buffer && descriptor && bufferSize > 0, ARKUI_ERROR_CODE_PARAM_INVALID);
+    std::vector<uint8_t> vec(buffer, buffer + bufferSize);
+    SpanString* spanString = new SpanString(u"");
+    std::function<RefPtr<ExtSpan>(const std::vector<uint8_t>&, int32_t, int32_t)> unmarshallCallback;
+    spanString->DecodeTlvExt(vec, spanString, std::move(unmarshallCallback));
+    descriptor->spanString = reinterpret_cast<void*>(spanString);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 MarshallStyledStringDescriptor(
+    uint8_t* buffer, size_t bufferSize, ArkUI_StyledString_Descriptor* descriptor, size_t* resultSize)
+{
+    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "MarshallStyledStringDescriptor");
+    CHECK_NULL_RETURN(buffer && resultSize && descriptor, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(descriptor->spanString, ARKUI_ERROR_CODE_INVALID_STYLED_STRING);
+    auto spanStringRawPtr = reinterpret_cast<SpanString*>(descriptor->spanString);
+    std::vector<uint8_t> tlvData;
+    spanStringRawPtr->EncodeTlv(tlvData);
+    *resultSize = tlvData.size();
+    if (bufferSize < *resultSize) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto data = tlvData.data();
+    std::copy(data, data + *resultSize, buffer);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+const char* ConvertToHtml(ArkUI_StyledString_Descriptor* descriptor)
+{
+    TAG_LOGI(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "ConvertToHtml");
+    CHECK_NULL_RETURN(descriptor && descriptor->spanString, "");
+    auto spanStringRawPtr = reinterpret_cast<SpanString*>(descriptor->spanString);
+    auto htmlStr = HtmlUtils::ToHtml(spanStringRawPtr);
+    char* html = new char[htmlStr.length() + 1];
+    CHECK_NULL_RETURN(html, "");
+    std::copy(htmlStr.begin(), htmlStr.end(), html);
+    html[htmlStr.length()] = '\0';
+    descriptor->html = html;
+    return descriptor->html;
+}
+
+const ArkUIStyledStringAPI* GetStyledStringAPI()
+{
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIStyledStringAPI impl {
+        .createArkUIStyledStringDescriptor = CreateArkUIStyledStringDescriptor,
+        .destroyArkUIStyledStringDescriptor = DestroyArkUIStyledStringDescriptor,
+        .unmarshallStyledStringDescriptor = UnmarshallStyledStringDescriptor,
+        .marshallStyledStringDescriptor = MarshallStyledStringDescriptor,
+        .convertToHtml = ConvertToHtml
+    };
+    CHECK_INITIALIZED_FIELDS_END(impl, 0, 0, 0); // don't move this line
+    return &impl;
+}
+
+ArkUISnapshotOptions* CreateSnapshotOptions()
+{
+    ArkUISnapshotOptions* snapshotOptions = new ArkUISnapshotOptions();
+    snapshotOptions->scale = 1.0f;
+    return snapshotOptions;
+}
+
+void DestroySnapshotOptions(ArkUISnapshotOptions* snapshotOptions)
+{
+    if (snapshotOptions != nullptr) {
+        delete snapshotOptions;
+        snapshotOptions = nullptr;
+    }
+}
+
+ArkUI_Int32 SnapshotOptionsSetScale(ArkUISnapshotOptions* snapshotOptions, ArkUI_Float32 scale)
+{
+    if (snapshotOptions == nullptr || !OHOS::Ace::GreatNotEqual(scale, 0.0)) {
+        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    snapshotOptions->scale = scale;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 GetNodeSnapshot(ArkUINodeHandle node, ArkUISnapshotOptions* snapshotOptions, void* mediaPixel)
+{
+    auto frameNode =
+        OHOS::Ace::AceType::Claim<OHOS::Ace::NG::FrameNode>(reinterpret_cast<OHOS::Ace::NG::FrameNode*>(node));
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    NG::SnapshotOptions options;
+    options.scale = snapshotOptions != nullptr ? snapshotOptions->scale : 1.0f;
+    options.waitUntilRenderFinished = true;
+    auto result = delegate->GetSyncSnapshot(frameNode, options);
+    *reinterpret_cast<std::shared_ptr<Media::PixelMap>*>(mediaPixel) = result.second;
+    return result.first;
+}
+
+const ArkUISnapshotAPI* GetComponentSnapshotAPI()
+{
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUISnapshotAPI impl {
+        .createSnapshotOptions = CreateSnapshotOptions,
+        .destroySnapshotOptions = DestroySnapshotOptions,
+        .snapshotOptionsSetScale = SnapshotOptionsSetScale,
+        .getSyncSnapshot = GetNodeSnapshot
+    };
+    CHECK_INITIALIZED_FIELDS_END(impl, 0, 0, 0); // don't move this line
+    return &impl;
+}
+
 /* clang-format off */
 ArkUIFullNodeAPI impl_full = {
-    ARKUI_NODE_API_VERSION,
-    SetCallbackMethod,      // CallbackMethod
-    GetBasicAPI,            // BasicAPI
-    GetArkUINodeModifiers,  // NodeModifiers
-    GetAnimationAPI,        // Animation
-    GetNavigationAPI,       // Navigation
-    GetGraphicsAPI,         // Graphics
-    GetDialogAPI,
-    GetExtendedAPI,         // Extended
-    NodeAdapter::GetNodeAdapterAPI,         // adapter.
-    DragAdapter::GetDragAdapterAPI,        // drag adapter.
+    .version = ARKUI_NODE_API_VERSION,
+    .setCallbackMethod = SetCallbackMethod,      // CallbackMethod
+    .getBasicAPI = GetBasicAPI,            // BasicAPI
+    .getNodeModifiers = GetArkUINodeModifiers,  // NodeModifiers
+    .getAnimation = GetAnimationAPI,        // Animation
+    .getNavigation = GetNavigationAPI,       // Navigation
+    .getGraphicsAPI = GetGraphicsAPI,         // Graphics
+    .getDialogAPI = GetDialogAPI,
+    .getExtendedAPI = GetExtendedAPI,         // Extended
+    .getNodeAdapterAPI = NodeAdapter::GetNodeAdapterAPI,         // adapter.
+    .getDragAdapterAPI = DragAdapter::GetDragAdapterAPI,        // drag adapter.
+    .getStyledStringAPI = GetStyledStringAPI,     // StyledStringAPI
+    .getSnapshotAPI = GetComponentSnapshotAPI,     // SyncSnapshot
 };
 /* clang-format on */
 
 const CJUIAnimation* GetCJUIAnimationAPI()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIAnimation modifier = {
-        nullptr,
-        nullptr,
-        nullptr,
-        AnimateTo,
-        KeyframeAnimateTo,
-        CreateAnimator,
-        DisposeAnimator,
-        AnimatorReset,
-        AnimatorPlay,
-        AnimatorFinish,
-        AnimatorPause,
-        AnimatorCancel,
-        AnimatorReverse,
-        CreateCurve,
-        CreateStepsCurve,
-        CreateCubicBezierCurve,
-        CreateSpringCurve,
-        CreateSpringMotion,
-        CreateResponsiveSpringMotion,
-        CreateInterpolatingSpring,
-        CreateCustomCurve,
-        DisposeCurve,
+        .startAnimation = nullptr,
+        .openImplicitAnimation = nullptr,
+        .closeImplicitAnimation = nullptr,
+        .animateTo = AnimateTo,
+        .keyframeAnimateTo = KeyframeAnimateTo,
+        .createAnimator = CreateAnimator,
+        .disposeAnimator = DisposeAnimator,
+        .animatorReset = AnimatorReset,
+        .animatorPlay = AnimatorPlay,
+        .animatorFinish = AnimatorFinish,
+        .animatorPause = AnimatorPause,
+        .animatorCancel = AnimatorCancel,
+        .animatorReverse = AnimatorReverse,
+        .initCurve = CreateCurve,
+        .stepsCurve = CreateStepsCurve,
+        .cubicBezierCurve = CreateCubicBezierCurve,
+        .springCurve = CreateSpringCurve,
+        .springMotion = CreateSpringMotion,
+        .responsiveSpringMotion = CreateResponsiveSpringMotion,
+        .interpolatingSpring = CreateInterpolatingSpring,
+        .customCurve = CreateCustomCurve,
+        .disposeCurve = DisposeCurve,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUINavigation* GetCJUINavigationAPI()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUINavigation modifier = {
-        nullptr,
-        nullptr,
-        GetNavigationId,
-        GetNavDestinationName,
-        GetStackLength,
-        GetNavDesNameByIndex,
-        GetNavDestinationId,
-        GetNavDestinationState,
-        GetNavDestinationIndex,
-        GetNavDestinationParam,
-        GetRouterPageIndex,
-        GetRouterPageName,
-        GetRouterPagePath,
-        GetRouterPageState,
-        GetRouterPageId,
+        .popPageToIndex = nullptr,
+        .setNavDestinationBackPressed = nullptr,
+        .getNavigationId = GetNavigationId,
+        .getNavDestinationName = GetNavDestinationName,
+        .getStackLength = GetStackLength,
+        .getNavDesNameByIndex = GetNavDesNameByIndex,
+        .getNavDestinationId = GetNavDestinationId,
+        .getNavDestinationState = GetNavDestinationState,
+        .getNavDestinationIndex =GetNavDestinationIndex,
+        .getNavDestinationParam = GetNavDestinationParam,
+        .getRouterPageIndex = GetRouterPageIndex,
+        .getRouterPageName = GetRouterPageName,
+        .getRouterPagePath = GetRouterPagePath,
+        .getRouterPageState = GetRouterPageState,
+        .getRouterPageId = GetRouterPageId,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIGraphicsAPI* GetCJUIGraphicsAPI()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIGraphicsAPI api = {
-        ARKUI_NODE_GRAPHICS_API_VERSION, SetCallbackMethod, GetCanvasAPI, GetPaintAPI, GetFontAPI
+        .version = ARKUI_NODE_GRAPHICS_API_VERSION,
+        .setCallbackMethod = SetCallbackMethod,
+        .getCanvasAPI = GetCanvasAPI,
+        .getPaintAPI = GetPaintAPI,
+        .getFontAPI = GetFontAPI
     };
+    CHECK_INITIALIZED_FIELDS_END(api, 0, 0, 0); // don't move this line
     return &api;
 }
 
 const CJUIDialogAPI* GetCJUIDialogAPI()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIDialogAPI dialogImpl = {
-        CreateDialog,
-        DisposeDialog,
-        SetDialogContent,
-        RemoveDialogContent,
-        SetDialogContentAlignment,
-        ResetDialogContentAlignment,
-        SetDialogModalMode,
-        SetDialogAutoCancel,
-        SetDialogMask,
-        SetDialogBackgroundColor,
-        SetDialogCornerRadius,
-        SetDialogGridColumnCount,
-        EnableDialogCustomStyle,
-        EnableDialogCustomAnimation,
-        ShowDialog,
-        CloseDialog,
-        RegisterOnWillDialogDismiss,
+        .create = CreateDialog,
+        .dispose = DisposeDialog,
+        .setContent = SetDialogContent,
+        .removeContent = RemoveDialogContent,
+        .setContentAlignment = SetDialogContentAlignment,
+        .resetContentAlignment = ResetDialogContentAlignment,
+        .setModalMode = SetDialogModalMode,
+        .setAutoCancel = SetDialogAutoCancel,
+        .setMask = SetDialogMask,
+        .setBackgroundColor = SetDialogBackgroundColor,
+        .setCornerRadius = SetDialogCornerRadius,
+        .setGridColumnCount = SetDialogGridColumnCount,
+        .enableCustomStyle = EnableDialogCustomStyle,
+        .enableCustomAnimation = EnableDialogCustomAnimation,
+        .show = ShowDialog,
+        .close = CloseDialog,
+        .registerOnWillDismiss = RegisterOnWillDialogDismiss,
     };
+    CHECK_INITIALIZED_FIELDS_END(dialogImpl, 0, 0, 0); // don't move this line
     return &dialogImpl;
 }
 
 const CJUIExtendedNodeAPI* GetCJUIExtendedAPI()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static CJUIExtendedNodeAPI impl_extended = {
-        ARKUI_EXTENDED_API_VERSION,
-
-        NodeModifier::GetUtilsModifier,
-        NodeModifier::GetCanvasRenderingContext2DModifier,
-
-        SetCallbackMethod,
-        SetCustomMethodFlag,
-        GetCustomMethodFlag,
-        RegisterCustomNodeAsyncEvent,
-        UnregisterCustomNodeEvent,
-        RegisterCustomNodeEventReceiver,
-        SetCustomCallback, // setCustomCallback
-        MeasureLayoutAndDraw,
-        MeasureNode,
-        LayoutNode,
-        DrawNode,
-        SetAttachNodePtr,
-        GetAttachNodePtr,
-        SetMeasureWidth, // setMeasureWidth
-        GetMeasureWidth, // getMeasureWidth
-        SetMeasureHeight, // setMeasureHeight
-        GetMeasureHeight, // getMeasureHeight
-        SetX, // setX
-        SetY, // setY
-        GetX, // getX
-        GetY, // getY
-        GetLayoutConstraint,
-        SetAlignment,
-        GetAlignment,
-        nullptr, // indexerChecker
-        nullptr, // setRangeUpdater
-        nullptr, // setLazyItemIndexer
-        GetPipelineContext,
-        SetVsyncCallback,
-        UnblockVsyncWait,
-        NodeEvent::CheckEvent,
-        NodeEvent::SendArkUIAsyncEvent,
-        nullptr, // callContinuation
-        nullptr, // setChildTotalCount
-        ShowCrash,
+        .version = ARKUI_EXTENDED_API_VERSION,
+        .getUtilsModifier = NodeModifier::GetUtilsModifier,
+        .getCanvasRenderingContext2DModifier = NodeModifier::GetCanvasRenderingContext2DModifier,
+        .setCallbackMethod = SetCallbackMethod,
+        .setCustomMethodFlag = SetCustomMethodFlag,
+        .getCustomMethodFlag = GetCustomMethodFlag,
+        .registerCustomNodeAsyncEvent = RegisterCustomNodeAsyncEvent,
+        .unregisterCustomNodeAsyncEvent = UnregisterCustomNodeEvent,
+        .registerCustomNodeAsyncEventReceiver = RegisterCustomNodeEventReceiver,
+        .setCustomCallback = SetCustomCallback, // setCustomCallback
+        .measureLayoutAndDraw = MeasureLayoutAndDraw,
+        .measureNode = MeasureNode,
+        .layoutNode = LayoutNode,
+        .drawNode = DrawNode,
+        .setAttachNodePtr = SetAttachNodePtr,
+        .getAttachNodePtr = GetAttachNodePtr,
+        .setMeasureWidth = SetMeasureWidth, // setMeasureWidth
+        .getMeasureWidth = GetMeasureWidth, // getMeasureWidth
+        .setMeasureHeight = SetMeasureHeight, // setMeasureHeight
+        .getMeasureHeight = GetMeasureHeight, // getMeasureHeight
+        .setX = SetX, // setX
+        .setY = SetY, // setY
+        .getX = GetX, // getX
+        .getY = GetY, // getY
+        .getLayoutConstraint = GetLayoutConstraint,
+        .setAlignment = SetAlignment,
+        .getAlignment = GetAlignment,
+        .indexerChecker = nullptr, // indexerChecker
+        .setRangeUpdater = nullptr, // setRangeUpdater
+        .setLazyItemIndexer = nullptr, // setLazyItemIndexer
+        .getPipelineContext = GetPipelineContext,
+        .setVsyncCallback = SetVsyncCallback,
+        .unblockVsyncWait = UnblockVsyncWait,
+        .sendEvent = NodeEvent::SendArkUISyncEvent,
+        .callContinuation = nullptr, // callContinuation
+        .setChildTotalCount = nullptr, // setChildTotalCount
+        .showCrash = ShowCrash,
     };
+    CHECK_INITIALIZED_FIELDS_END(impl_extended, 0, 0, 0); // don't move this line
     return &impl_extended;
 }
 
 CJUIFullNodeAPI fullCJUIApi {
-    SetCallbackMethod,
-    GetCJUIBasicAPI,            // BasicAPI
-    GetCJUINodeModifiers,       // NodeModifiers
-    GetCJUIAnimationAPI,        // Animation
-    GetCJUINavigationAPI,       // Navigation
-    GetCJUIGraphicsAPI,         // Graphics
-    GetCJUIDialogAPI,
-    GetCJUIExtendedAPI,         // Extended
-    NodeAdapter::GetCJUINodeAdapterAPI,         // adapter.
+    .setCallbackMethod = SetCallbackMethod,
+    .getBasicAPI = GetCJUIBasicAPI,            // BasicAPI
+    .getNodeModifiers = GetCJUINodeModifiers,       // NodeModifiers
+    .getAnimation = GetCJUIAnimationAPI,        // Animation
+    .getNavigation = GetCJUINavigationAPI,       // Navigation
+    .getGraphicsAPI = GetCJUIGraphicsAPI,         // Graphics
+    .getDialogAPI = GetCJUIDialogAPI,
+    .getExtendedAPI = GetCJUIExtendedAPI,         // Extended
+    .getNodeAdapterAPI = NodeAdapter::GetCJUINodeAdapterAPI,         // adapter.
 };
 } // namespace
 
@@ -2252,14 +2799,14 @@ const ArkUIFullNodeAPI* GetArkUIFullNodeAPI()
     return &OHOS::Ace::NG::impl_full;
 }
 
-void SendArkUIAsyncEvent(ArkUINodeEvent* event)
+void SendArkUISyncEvent(ArkUINodeEvent* event)
 {
-    OHOS::Ace::NG::NodeEvent::SendArkUIAsyncEvent(event);
+    OHOS::Ace::NG::NodeEvent::SendArkUISyncEvent(event);
 }
 
 void SendArkUIAsyncCustomEvent(ArkUICustomNodeEvent* event)
 {
-    OHOS::Ace::NG::CustomNodeEvent::SendArkUIAsyncEvent(event);
+    OHOS::Ace::NG::CustomNodeEvent::SendArkUISyncEvent(event);
 }
 
 ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_Int32 version)

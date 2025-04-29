@@ -15,16 +15,7 @@
 
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 
-#include <utility>
-
-#include "base/log/ace_trace.h"
-#include "base/log/dump_log.h"
-#include "base/memory/referenced.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
-#include "core/components_ng/property/property.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
@@ -79,6 +70,7 @@ void LazyForEachNode::BuildAllChildren()
     auto items = builder_->GetAllChildren();
     for (auto& [index, item] : items) {
         if (item.second) {
+            RemoveDisappearingChild(item.second);
             children_.push_back(item.second);
         }
     }
@@ -104,7 +96,7 @@ void LazyForEachNode::PostIdleTask()
             if (!preBuildResult) {
                 node->PostIdleTask();
             } else {
-                node->requestLongPredict_ = false;
+                node->requestLongPredict_ = true;
                 node->itemConstraint_.reset();
             }
         }
@@ -123,7 +115,11 @@ void LazyForEachNode::OnDataReloaded()
             PostIdleTask();
         }
     }
-    NotifyDataCountChanged(0);
+    NotifyChangeWithCount(0, 0, NotificationType::START_CHANGE_POSITION);
+    if (builder_) {
+        int32_t endChangePos = std::max(builder_->GetHistoryTotalCount(), FrameCount());
+        NotifyChangeWithCount(endChangePos, 0, NotificationType::END_CHANGE_POSITION);
+    }
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -138,8 +134,7 @@ void LazyForEachNode::OnDataAdded(size_t index)
     }
     tempChildren_.clear();
     tempChildren_.swap(children_);
-    NotifyDataCountChanged(insertIndex);
-    NotifyCountChange(insertIndex, 1);
+    NotifyChangeWithCount(insertIndex, 1, NotificationType::START_AND_END_CHANGE_POSITION);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -154,8 +149,7 @@ void LazyForEachNode::OnDataBulkAdded(size_t index, size_t count)
     }
     tempChildren_.clear();
     tempChildren_.swap(children_);
-    NotifyDataCountChanged(insertIndex);
-    NotifyCountChange(insertIndex, static_cast<int32_t>(count));
+    NotifyChangeWithCount(insertIndex, static_cast<int32_t>(count), NotificationType::START_AND_END_CHANGE_POSITION);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -170,7 +164,7 @@ void LazyForEachNode::OnDataDeleted(size_t index)
 
         if (node) {
             if (!node->OnRemoveFromParent(true)) {
-                const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node);
+                AddDisappearingChild(node);
             } else {
                 node->DetachFromMainTree();
             }
@@ -179,8 +173,7 @@ void LazyForEachNode::OnDataDeleted(size_t index)
     }
     tempChildren_.clear();
     tempChildren_.swap(children_);
-    NotifyDataCountChanged(deletedIndex);
-    NotifyCountChange(deletedIndex, -1);
+    NotifyChangeWithCount(deletedIndex, -1, NotificationType::START_AND_END_CHANGE_POSITION);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -197,7 +190,7 @@ void LazyForEachNode::OnDataBulkDeleted(size_t index, size_t count)
                 continue;
             }
             if (!node.second->OnRemoveFromParent(true)) {
-                const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node.second);
+                AddDisappearingChild(node.second);
             } else {
                 node.second->DetachFromMainTree();
             }
@@ -208,8 +201,7 @@ void LazyForEachNode::OnDataBulkDeleted(size_t index, size_t count)
     }
     tempChildren_.clear();
     tempChildren_.swap(children_);
-    NotifyDataCountChanged(deletedIndex);
-    NotifyCountChange(deletedIndex, -static_cast<int32_t>(count));
+    NotifyChangeWithCount(deletedIndex, -static_cast<int32_t>(count), NotificationType::START_AND_END_CHANGE_POSITION);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -223,8 +215,7 @@ void LazyForEachNode::OnDataChanged(size_t index)
     }
     tempChildren_.clear();
     tempChildren_.swap(children_);
-    NotifyDataCountChanged(changedIndex);
-    NotifyCountChange(changedIndex, 0);
+    NotifyChangeWithCount(changedIndex, 0, NotificationType::START_AND_END_CHANGE_POSITION);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -241,7 +232,7 @@ void LazyForEachNode::OnDataBulkChanged(size_t index, size_t count)
                 continue;
             }
             if (!node.second->OnRemoveFromParent(true)) {
-                const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node.second);
+                AddDisappearingChild(node.second);
             } else {
                 node.second->DetachFromMainTree();
             }
@@ -252,8 +243,8 @@ void LazyForEachNode::OnDataBulkChanged(size_t index, size_t count)
     }
     tempChildren_.clear();
     tempChildren_.swap(children_);
-    NotifyDataCountChanged(changedIndex);
-    NotifyCountChange(changedIndex + static_cast<int32_t>(count) - 1, 0);
+    NotifyChangeWithCount(changedIndex, 0, NotificationType::START_CHANGE_POSITION);
+    NotifyChangeWithCount(changedIndex + static_cast<int32_t>(count) - 1, 0, NotificationType::END_CHANGE_POSITION);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -266,8 +257,8 @@ void LazyForEachNode::OnDataMoveToNewPlace(size_t from, size_t to)
     }
     tempChildren_.clear();
     tempChildren_.swap(children_);
-    NotifyDataCountChanged(static_cast<int32_t>(std::min(from, to)));
-    NotifyCountChange(static_cast<int32_t>(std::max(from, to)), 0);
+    NotifyChangeWithCount(static_cast<int32_t>(std::min(from, to)), 0, NotificationType::START_CHANGE_POSITION);
+    NotifyChangeWithCount(static_cast<int32_t>(std::max(from, to)), 0, NotificationType::END_CHANGE_POSITION);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -280,8 +271,8 @@ void LazyForEachNode::OnDataMoved(size_t from, size_t to)
     }
     tempChildren_.clear();
     tempChildren_.swap(children_);
-    NotifyDataCountChanged(static_cast<int32_t>(std::min(from, to)));
-    NotifyCountChange(static_cast<int32_t>(std::max(from, to)), 0);
+    NotifyChangeWithCount(static_cast<int32_t>(std::min(from, to)), 0, NotificationType::START_CHANGE_POSITION);
+    NotifyChangeWithCount(static_cast<int32_t>(std::max(from, to)), 0, NotificationType::END_CHANGE_POSITION);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -292,36 +283,29 @@ void LazyForEachNode::OnDatasetChange(const std::list<V2::Operation>& DataOperat
     int32_t initialChangedIndex = 0;
     if (builder_) {
         builder_->SetUseNewInterface(true);
-        std::pair<int32_t, std::list<RefPtr<UINode>>> pair = builder_->OnDatasetChange(DataOperations);
+        std::pair<int32_t, std::list<std::pair<std::string, RefPtr<UINode>>>> pair =
+            builder_->OnDatasetChange(DataOperations);
         initialChangedIndex = pair.first;
-        std::list<RefPtr<UINode>> nodeList_ = pair.second;
-        for (auto& node : nodeList_) {
-            if (node == nullptr) {
+        std::list<std::pair<std::string, RefPtr<UINode>>> nodeList = pair.second;
+        for (const auto& node : nodeList) {
+            if (node.second == nullptr) {
                 continue;
             }
-            if (!node->OnRemoveFromParent(true)) {
-                const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node);
+            if (!node.second->OnRemoveFromParent(true)) {
+                AddDisappearingChild(node.second);
             } else {
-                node->DetachFromMainTree();
+                node.second->DetachFromMainTree();
             }
-            builder_->ProcessOffscreenNode(node, true);
+            builder_->ProcessOffscreenNode(node.second, true);
         }
         builder_->clearDeletedNodes();
     }
     tempChildren_.clear();
     tempChildren_.swap(children_);
-    NotifyDataCountChanged(initialChangedIndex);
+    NotifyChangeWithCount(initialChangedIndex, 0, NotificationType::START_CHANGE_POSITION);
     ParseOperations(DataOperations);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
-}
-
-void LazyForEachNode::NotifyDataCountChanged(int32_t index)
-{
-    auto parent = GetParent();
-    if (parent) {
-        parent->ChildrenUpdatedFrom(index);
-    }
 }
 
 void LazyForEachNode::MarkNeedSyncRenderTree(bool needRebuild)
@@ -333,6 +317,9 @@ void LazyForEachNode::MarkNeedSyncRenderTree(bool needRebuild)
 
 RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
 {
+    ACE_SYNTAX_SCOPED_TRACE("LazyForEach.GetFrameChildByIndex index[%d] needBuild[%d] isCache[%d] addToRenderTree[%d]",
+        static_cast<int32_t>(index), static_cast<int32_t>(needBuild),
+        static_cast<int32_t>(isCache), static_cast<int32_t>(addToRenderTree));
     if (index >= static_cast<uint32_t>(FrameCount())) {
         return nullptr;
     }
@@ -340,6 +327,7 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
     if (!child.second) {
         return nullptr;
     }
+    child.second->UpdateThemeScopeId(GetThemeScopeId());
     if (isCache) {
         child.second->SetParent(WeakClaim(this));
         child.second->SetJSViewActive(false, true);
@@ -412,10 +400,16 @@ void LazyForEachNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
     }
 }
 
-void LazyForEachNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
+void LazyForEachNode::DoSetActiveChildRange(
+    int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache)
 {
     if (!builder_) {
         return;
+    }
+    if (showCache) {
+        start -= cacheStart;
+        end += cacheEnd;
+        builder_->SetShowCached(cacheStart, cacheEnd);
     }
     if (builder_->SetActiveChildRange(start, end)) {
         tempChildren_.clear();
@@ -440,8 +434,23 @@ const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren(bool notDetach) co
     return children_;
 }
 
+void LazyForEachNode::UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule)
+{
+    if (!builder_) {
+        return;
+    }
+    std::vector<UINode*> children;
+    builder_->GetAllItems(children);
+    for (const auto& child : children) {
+        if (child) {
+            child->SetFreeze(isFreeze);
+        }
+    }
+}
+
 void LazyForEachNode::LoadChildren(bool notDetach) const
 {
+    ACE_SYNTAX_SCOPED_TRACE("LazyForEach.LoadChildren notDetach[%d]", static_cast<int32_t>(notDetach));
     std::list<std::pair<std::string, RefPtr<UINode>>> childList;
     const auto& items = builder_->GetItems(childList);
 
@@ -461,6 +470,11 @@ void LazyForEachNode::LoadChildren(bool notDetach) const
             children_.push_back(item.second);
         }
     }
+}
+
+const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildrenForInspector() const
+{
+    return children_;
 }
 
 void LazyForEachNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
@@ -484,6 +498,18 @@ void LazyForEachNode::SetOnMove(std::function<void(int32_t, int32_t)>&& onMove)
         InitAllChilrenDragManager(false);
     }
     onMoveEvent_ = onMove;
+}
+
+void LazyForEachNode::SetItemDragHandler(std::function<void(int32_t)>&& onLongPress,
+    std::function<void(int32_t)>&& onDragStart, std::function<void(int32_t, int32_t)>&& onMoveThrough,
+    std::function<void(int32_t)>&& onDrop)
+{
+    if (onMoveEvent_) {
+        onLongPressEvent_ = onLongPress;
+        onDragStartEvent_ = onDragStart;
+        onMoveThroughEvent_ = onMoveThrough;
+        onDropEvent_ = onDrop;
+    }
 }
 
 void LazyForEachNode::MoveData(int32_t from, int32_t to)
@@ -566,12 +592,12 @@ void LazyForEachNode::InitAllChilrenDragManager(bool init)
     }
 }
 
-void LazyForEachNode::NotifyCountChange(int32_t index, int32_t count)
+void LazyForEachNode::NotifyChangeWithCount(int32_t index, int32_t count, NotificationType notificationType) const
 {
     auto parent = GetParent();
     int64_t accessibilityId = GetAccessibilityId();
     if (parent) {
-        parent->NotifyDataChange(index, count, accessibilityId);
+        parent->NotifyChange(index, count, accessibilityId, notificationType);
     }
 }
 
@@ -588,22 +614,26 @@ void LazyForEachNode::ParseOperations(const std::list<V2::Operation>& dataOperat
     for (const auto& operation : dataOperations) {
         switch (operationTypeMap[operation.type]) {
             case ADDOP:
-                NotifyCountChange(operation.index, operation.count);
+                NotifyChangeWithCount(operation.index, operation.count, NotificationType::END_CHANGE_POSITION);
                 break;
             case DELETEOP:
-                NotifyCountChange(operation.index, -operation.count);
+                NotifyChangeWithCount(operation.index, -operation.count, NotificationType::END_CHANGE_POSITION);
                 break;
             case CHANGEOP:
-                NotifyCountChange(operation.index + operation.count - 1, 0);
+                NotifyChangeWithCount(operation.index + operation.count - 1, 0, NotificationType::END_CHANGE_POSITION);
                 break;
             case MOVEOP:
-                NotifyCountChange(std::max(operation.coupleIndex.first, operation.coupleIndex.second), 0);
+                NotifyChangeWithCount(std::max(operation.coupleIndex.first, operation.coupleIndex.second), 0,
+                    NotificationType::END_CHANGE_POSITION);
                 break;
             case EXCHANGEOP:
-                NotifyCountChange(operation.coupleIndex.second, 0);
+                NotifyChangeWithCount(operation.coupleIndex.second, 0, NotificationType::END_CHANGE_POSITION);
                 break;
             case RELOADOP:
-                NotifyCountChange(static_cast<int32_t>(FrameCount()), 0);
+                if (builder_) {
+                    int32_t endChangePos = std::max(builder_->GetHistoryTotalCount(), FrameCount());
+                    NotifyChangeWithCount(endChangePos, 0, NotificationType::END_CHANGE_POSITION);
+                }
                 break;
         }
     }

@@ -52,10 +52,12 @@ const std::uint32_t CREATE_VALUE = 983041;
 const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
 std::uint32_t RENDER_STRATEGY = 1;
 std::uint32_t EFFECT_STRATEGY = 1;
+constexpr float MIN_FONT_SCALE = 0.5f;
+constexpr float MAX_FONT_SCALE = 2.5f;
 SymbolEffectOptions SYMBOL_EFFECT_OPTIONS =
     SymbolEffectOptions(OHOS::Ace::SymbolEffectType::BOUNCE, OHOS::Ace::ScopeType::WHOLE, OHOS::Ace::CommonSubType::UP);
 std::vector<Color> SYMBOL_COLOR_LIST = { Color::FromRGB(255, 100, 100), Color::FromRGB(255, 255, 100) };
-
+const char* SYMBOL_FONT_FAMILY = "Symbol_Test_CustomSymbol";
 struct TestProperty {
     std::optional<Dimension> fontSizeValue = std::nullopt;
     std::optional<Ace::FontWeight> fontWeightValue = std::nullopt;
@@ -259,7 +261,7 @@ HWTEST_F(SymbolTestNg, SymbolPropertyTest003, TestSize.Level1)
      */
     const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
     ASSERT_NE(symbolStyle, nullptr);
-    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr);
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr, true);
     EXPECT_EQ(textStyle.GetRenderStrategy(), RENDER_STRATEGY);
 }
 
@@ -292,7 +294,7 @@ HWTEST_F(SymbolTestNg, SymbolPropertyTest004, TestSize.Level1)
      */
     const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
     ASSERT_NE(symbolStyle, nullptr);
-    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr);
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr, true);
     EXPECT_EQ(textStyle.GetRenderColors(), SYMBOL_COLOR_LIST);
 }
 
@@ -326,7 +328,7 @@ HWTEST_F(SymbolTestNg, SymbolPropertyTest005, TestSize.Level1)
      */
     const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
     ASSERT_NE(symbolStyle, nullptr);
-    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr);
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr, true);
     EXPECT_EQ(textStyle.GetEffectStrategy(), EFFECT_STRATEGY);
 }
 
@@ -349,7 +351,6 @@ HWTEST_F(SymbolTestNg, SymbolPropertyTest006, TestSize.Level1)
      */
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
     RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
@@ -360,10 +361,450 @@ HWTEST_F(SymbolTestNg, SymbolPropertyTest006, TestSize.Level1)
      */
     const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
     ASSERT_NE(symbolStyle, nullptr);
-    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr);
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr, true);
     auto symbolOptions = textStyle.GetSymbolEffectOptions().value_or(SymbolEffectOptions());
     EXPECT_EQ(symbolOptions.GetEffectType(), OHOS::Ace::SymbolEffectType::BOUNCE);
     EXPECT_EQ(symbolOptions.GetScopeType(), OHOS::Ace::ScopeType::WHOLE);
     EXPECT_EQ(symbolOptions.GetCommonSubType(), OHOS::Ace::CommonSubType::UP);
+}
+
+/**
+ * @tc.name: SymbolPropertyTest007
+ * @tc.desc: test static method of symbol model
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SymbolPropertyTest007, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    auto frameNode = SymbolModelNG::CreateFrameNode(CREATE_VALUE);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+
+    SymbolModelNG::SetFontColor(node, SYMBOL_COLOR_LIST);
+    SymbolModelNG::SetFontSize(node, FONT_SIZE_VALUE);
+    SymbolModelNG::SetFontWeight(node, FontWeight::W100);
+    SymbolModelNG::SetRenderingStrategy(node, RENDER_STRATEGY);
+    SymbolModelNG::SetSymbolEffect(node, EFFECT_STRATEGY);
+    SymbolModelNG::SetSymbolEffectOptions(node, SYMBOL_EFFECT_OPTIONS);
+
+    RefPtr<LayoutProperty> property = frameNode->GetLayoutProperty();
+    ASSERT_NE(property, nullptr);
+
+    RefPtr<TextLayoutProperty> textProperty = AceType::DynamicCast<TextLayoutProperty>(property);
+    ASSERT_NE(textProperty, nullptr);
+    const std::unique_ptr<FontStyle>& symbolStyle = textProperty->GetFontStyle();
+    ASSERT_NE(symbolStyle, nullptr);
+
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr, true);
+    auto effectOptions = textStyle.GetSymbolEffectOptions().value_or(SymbolEffectOptions());
+    EXPECT_EQ(textStyle.GetRenderColors(), SYMBOL_COLOR_LIST);
+    EXPECT_EQ(textStyle.GetFontSize(), FONT_SIZE_VALUE);
+    EXPECT_EQ(symbolStyle->GetFontWeight(), FontWeight::W100);
+    EXPECT_EQ(textStyle.GetEffectStrategy(), EFFECT_STRATEGY);
+    EXPECT_EQ(effectOptions.GetEffectType(), OHOS::Ace::SymbolEffectType::BOUNCE);
+    EXPECT_EQ(effectOptions.GetScopeType(), OHOS::Ace::ScopeType::WHOLE);
+    EXPECT_EQ(effectOptions.GetCommonSubType(), OHOS::Ace::CommonSubType::UP);
+}
+
+/**
+ * @tc.name: SymbolPropertyTest008
+ * @tc.desc: test symbol minFontScale property of symbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SymbolPropertyTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+    symbolModelNG.SetMinFontScale(MIN_FONT_SCALE);
+
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get minFontScale property
+     */
+    const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
+    ASSERT_NE(symbolStyle, nullptr);
+
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr);
+    EXPECT_EQ(textStyle.GetMinFontScale(), MIN_FONT_SCALE);
+}
+
+/**
+ * @tc.name: SymbolPropertyTest009
+ * @tc.desc: test symbol maxFontScale property of symbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SymbolPropertyTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+    symbolModelNG.SetMaxFontScale(MAX_FONT_SCALE);
+
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get minFontScale property
+     */
+    const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
+    ASSERT_NE(symbolStyle, nullptr);
+
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr);
+    EXPECT_EQ(textStyle.GetMaxFontScale(), MAX_FONT_SCALE);
+}
+
+/**
+ * @tc.name: SymbolPropertyTest010
+ * @tc.desc: test symbol fontFamilies property of symbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SymbolPropertyTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+    std::vector<std::string> testFontFamilies;
+    testFontFamilies.push_back(SYMBOL_FONT_FAMILY);
+    symbolModelNG.SetFontFamilies(testFontFamilies);
+
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get fontFamily property
+     */
+    const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
+    ASSERT_NE(symbolStyle, nullptr);
+
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr);
+    auto fontFamilies = textStyle.GetFontFamilies();
+    ASSERT_NE(fontFamilies.size(), 0);
+    auto familyNameValue = fontFamilies.front();
+    EXPECT_EQ(familyNameValue, SYMBOL_FONT_FAMILY);
+}
+
+/**
+ * @tc.name: SymbolPropertyTest011
+ * @tc.desc: test symbol set symbolType property of symbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SymbolPropertyTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+    symbolModelNG.SetSymbolType(SymbolType::CUSTOM);
+
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get symbolType property
+     */
+    const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
+    ASSERT_NE(symbolStyle, nullptr);
+
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr, true);
+    
+    auto symbolType = textStyle.GetSymbolType();
+    EXPECT_EQ(symbolType, SymbolType::CUSTOM);
+}
+
+/**
+ * @tc.name: SymbolPropertyTest012
+ * @tc.desc: test symbol SetCustomSymbolGlyphInitialize property of symbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SymbolPropertyTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    SymbolModelNG::SetCustomSymbolGlyphInitialize(AceType::RawPtr(frameNode), CREATE_VALUE, SYMBOL_FONT_FAMILY);
+
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get symbolType property
+     */
+    const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
+    ASSERT_NE(symbolStyle, nullptr);
+
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr, true);
+    
+    auto fontFamilies = textStyle.GetFontFamilies();
+    ASSERT_NE(fontFamilies.size(), 0);
+    auto familyNameValue = fontFamilies.front();
+    EXPECT_EQ(familyNameValue, SYMBOL_FONT_FAMILY);
+
+    auto symbolType = textStyle.GetSymbolType();
+    EXPECT_EQ(symbolType, SymbolType::CUSTOM);
+}
+
+/*
+* @tc.name: SymbolPropertyTest013
+* @tc.desc: test symbol set font properties of symbol
+* @tc.type: FUNC
+*/
+HWTEST_F(SymbolTestNg, SymbolPropertyTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+    std::vector<std::string> testFontFamilies;
+    testFontFamilies.push_back(SYMBOL_FONT_FAMILY);
+    symbolModelNG.SetFontFamilies(testFontFamilies);
+    symbolModelNG.SetMaxFontScale(MAX_FONT_SCALE);
+    symbolModelNG.SetMinFontScale(MIN_FONT_SCALE);
+    symbolModelNG.SetFontSize(FONT_SIZE_VALUE);
+    symbolModelNG.SetFontWeight(FontWeight::W100);
+
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get fontFamily property
+     */
+    const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
+    ASSERT_NE(symbolStyle, nullptr);
+
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr);
+    auto fontFamilies = textStyle.GetFontFamilies();
+    ASSERT_NE(fontFamilies.size(), 0);
+    auto familyNameValue = fontFamilies.front();
+    EXPECT_EQ(familyNameValue, SYMBOL_FONT_FAMILY);
+    EXPECT_EQ(textStyle.GetMinFontScale(), MIN_FONT_SCALE);
+    EXPECT_EQ(textStyle.GetMaxFontScale(), MAX_FONT_SCALE);
+    EXPECT_EQ(symbolStyle->GetFontSize(), FONT_SIZE_VALUE);
+    EXPECT_EQ(symbolStyle->GetFontWeight(), FontWeight::W100);
+}
+
+/**
+ * @tc.name: SymbolPropertyTest014
+ * @tc.desc: test symbol render property of symbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SymbolPropertyTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+    symbolModelNG.SetSymbolRenderingStrategy(RENDER_STRATEGY);
+    symbolModelNG.SetFontColor(SYMBOL_COLOR_LIST);
+    symbolModelNG.SetSymbolEffect(EFFECT_STRATEGY);
+    symbolModelNG.SetSymbolEffectOptions(SYMBOL_EFFECT_OPTIONS);
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get renderStrategy property
+     */
+    const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
+    ASSERT_NE(symbolStyle, nullptr);
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr, true);
+    EXPECT_EQ(textStyle.GetRenderStrategy(), RENDER_STRATEGY);
+    EXPECT_EQ(textStyle.GetRenderColors(), SYMBOL_COLOR_LIST);
+    auto symbolOptions = textStyle.GetSymbolEffectOptions().value_or(SymbolEffectOptions());
+    EXPECT_EQ(symbolOptions.GetEffectType(), OHOS::Ace::SymbolEffectType::BOUNCE);
+    EXPECT_EQ(symbolOptions.GetScopeType(), OHOS::Ace::ScopeType::WHOLE);
+    EXPECT_EQ(symbolOptions.GetCommonSubType(), OHOS::Ace::CommonSubType::UP);
+    EXPECT_EQ(textStyle.GetEffectStrategy(), EFFECT_STRATEGY);
+}
+
+
+/**
+ * @tc.name: SymbolPropertyTest015
+ * @tc.desc: test symbol render property of symbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SymbolPropertyTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+    std::vector<std::string> testFontFamilies;
+    testFontFamilies.push_back(SYMBOL_FONT_FAMILY);
+    symbolModelNG.SetFontFamilies(testFontFamilies);
+    symbolModelNG.SetMaxFontScale(MAX_FONT_SCALE);
+    symbolModelNG.SetMinFontScale(MIN_FONT_SCALE);
+    symbolModelNG.SetFontSize(FONT_SIZE_VALUE);
+    symbolModelNG.SetFontWeight(FontWeight::W100);
+    symbolModelNG.SetSymbolEffect(EFFECT_STRATEGY);
+    symbolModelNG.SetSymbolRenderingStrategy(RENDER_STRATEGY);
+    symbolModelNG.SetFontColor(SYMBOL_COLOR_LIST);
+    symbolModelNG.SetSymbolEffectOptions(SYMBOL_EFFECT_OPTIONS);
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    SymbolModelNG::SetCustomSymbolGlyphInitialize(AceType::RawPtr(frameNode), CREATE_VALUE, SYMBOL_FONT_FAMILY);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get renderStrategy property
+     */
+    const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
+    ASSERT_NE(symbolStyle, nullptr);
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr, true);
+    auto symbolOptions = textStyle.GetSymbolEffectOptions().value_or(SymbolEffectOptions());
+    EXPECT_EQ(textStyle.GetRenderStrategy(), RENDER_STRATEGY);
+    EXPECT_EQ(textStyle.GetRenderColors(), SYMBOL_COLOR_LIST);
+    EXPECT_EQ(symbolOptions.GetEffectType(), OHOS::Ace::SymbolEffectType::BOUNCE);
+    EXPECT_EQ(symbolOptions.GetScopeType(), OHOS::Ace::ScopeType::WHOLE);
+    EXPECT_EQ(symbolOptions.GetCommonSubType(), OHOS::Ace::CommonSubType::UP);
+    EXPECT_EQ(textStyle.GetSymbolType(), SymbolType::CUSTOM);
+    EXPECT_EQ(textStyle.GetEffectStrategy(), EFFECT_STRATEGY);
+}
+
+/**
+ * @tc.name: SymbolPropertyTest016
+ * @tc.desc: test symbol set FontScale property of symbol
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SymbolPropertyTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+    symbolModelNG.SetMinFontScale(MIN_FONT_SCALE);
+    symbolModelNG.SetMaxFontScale(MAX_FONT_SCALE);
+
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get symbolType property
+     */
+    const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
+    ASSERT_NE(symbolStyle, nullptr);
+
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr, true);
+    
+    EXPECT_EQ(textStyle.GetMinFontScale(), MIN_FONT_SCALE);
+    EXPECT_EQ(textStyle.GetMaxFontScale(), MAX_FONT_SCALE);
+}
+
+/**
+ * @tc.name: SymbolPropertyTest017
+ * @tc.desc: test symbol property
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolTestNg, SymbolPropertyTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol node
+     */
+    SymbolModelNG symbolModelNG;
+    symbolModelNG.Create(CREATE_VALUE);
+    symbolModelNG.SetSymbolType(SymbolType::SYSTEM);
+    std::vector<std::string> testFontFamilies;
+    testFontFamilies.push_back(SYMBOL_FONT_FAMILY);
+    symbolModelNG.SetFontFamilies(testFontFamilies);
+
+    /**
+     * @tc.steps: step2. get symbol node and layoutProperty
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test get symbolType property
+     */
+    const std::unique_ptr<FontStyle>& symbolStyle = textLayoutProperty->GetFontStyle();
+    ASSERT_NE(symbolStyle, nullptr);
+
+    auto textStyle = CreateTextStyleUsingTheme(symbolStyle, nullptr, nullptr, true);
+    
+    auto symbolType = textStyle.GetSymbolType();
+    auto fontFamilies = textStyle.GetFontFamilies();
+    ASSERT_NE(fontFamilies.size(), 0);
+    auto familyNameValue = fontFamilies.front();
+    EXPECT_EQ(familyNameValue, SYMBOL_FONT_FAMILY);
+    EXPECT_EQ(symbolType, SymbolType::SYSTEM);
 }
 } // namespace OHOS::Ace::NG

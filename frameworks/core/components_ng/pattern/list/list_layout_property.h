@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,12 +50,14 @@ public:
         value->propLaneGutter_ = CloneLaneGutter();
         value->propListItemAlign_ = CloneListItemAlign();
         value->propCachedCount_ = CloneCachedCount();
+        value->propShowCachedItems_ = CloneShowCachedItems();
         value->propStickyStyle_ = CloneStickyStyle();
         value->propContentStartOffset_ = CloneContentStartOffset();
         value->propContentEndOffset_ = CloneContentEndOffset();
         value->propScrollSnapAlign_ = CloneScrollSnapAlign();
         value->propEditMode_ = CloneEditMode();
         value->propScrollEnabled_ = CloneScrollEnabled();
+        value->propStackFromEnd_ = CloneStackFromEnd();
         return value;
     }
 
@@ -72,12 +74,24 @@ public:
         ResetLaneGutter();
         ResetListItemAlign();
         ResetCachedCount();
+        ResetShowCachedItems();
         ResetStickyStyle();
         ResetContentStartOffset();
         ResetContentEndOffset();
         ResetScrollSnapAlign();
         ResetEditMode();
         ResetScrollEnabled();
+        ResetStackFromEnd();
+    }
+
+    void SetDefaultCachedCount(const int32_t cachedCount)
+    {
+        defCachedCount_ = cachedCount;
+    }
+
+    int32_t GetCachedCountWithDefault() const
+    {
+        return GetCachedCountValue(defCachedCount_);
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -96,13 +110,19 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LaneGutter, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ListItemAlign, V2::ListItemAlign, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CachedCount, int32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowCachedItems, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StickyStyle, V2::StickyStyle, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollSnapAlign, V2::ScrollSnapAlign, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollSnapAlign, ScrollSnapAlign, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ChainAnimation, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ContentStartOffset, float, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ContentEndOffset, float, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EditMode, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollEnabled, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StackFromEnd, bool, PROPERTY_UPDATE_MEASURE);
+
+    int defCachedCount_ = 1;
+protected:
+    void UpdateLayoutProperty(const ListLayoutProperty* layoutProperty);
 };
 } // namespace OHOS::Ace::NG
 

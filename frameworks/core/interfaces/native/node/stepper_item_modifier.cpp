@@ -14,10 +14,7 @@
  */
 #include "core/interfaces/native/node/stepper_item_modifier.h"
 
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/stepper/stepper_item_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 void SetNextLabel(ArkUINodeHandle node, ArkUI_CharPtr value)
@@ -67,28 +64,32 @@ void ResetStatus(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIStepperItemModifier* GetStepperItemModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIStepperItemModifier modifier = {
-        SetNextLabel,
-        ResetNextLabel,
-        SetPrevLabel,
-        ResetPrevLabel,
-        SetStatus,
-        ResetStatus,
+        .setNextLabel = SetNextLabel,
+        .resetNextLabel = ResetNextLabel,
+        .setPrevLabel = SetPrevLabel,
+        .resetPrevLabel = ResetPrevLabel,
+        .setStatus = SetStatus,
+        .resetStatus = ResetStatus,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIStepperItemModifier* GetCJUIStepperItemModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIStepperItemModifier modifier = {
-        SetNextLabel,
-        ResetNextLabel,
-        SetPrevLabel,
-        ResetPrevLabel,
-        SetStatus,
-        ResetStatus,
+        .setNextLabel = SetNextLabel,
+        .resetNextLabel = ResetNextLabel,
+        .setPrevLabel = SetPrevLabel,
+        .resetPrevLabel = ResetPrevLabel,
+        .setStatus = SetStatus,
+        .resetStatus = ResetStatus,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

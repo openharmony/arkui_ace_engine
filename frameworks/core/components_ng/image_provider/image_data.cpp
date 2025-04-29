@@ -15,8 +15,6 @@
 
 #include "core/components_ng/image_provider/image_data.h"
 
-#include "base/utils/utils.h"
-
 namespace OHOS::Ace::NG {
 
 size_t PixmapData::GetSize() const
@@ -30,8 +28,11 @@ const void* PixmapData::GetData() const
 
 std::string PixmapData::ToString() const
 {
-    return "PixmapData-> pixelMapId: " + pixmap_->GetId() + ",[width*height]:" + "[" +
-           std::to_string(pixmap_->GetWidth()) + "*" + std::to_string(pixmap_->GetHeight()) + "]" +
-           ", ByteCount: " + std::to_string(pixmap_->GetByteCount()) + "(B)";
+    if (pixmap_) {
+        return "PixmapData-> pixelMapId: " + pixmap_->GetId() + ",[width*height]:" + "[" +
+               std::to_string(pixmap_->GetWidth()) + "*" + std::to_string(pixmap_->GetHeight()) + "]" +
+               ", ByteCount: " + std::to_string(pixmap_->GetByteCount()) + "(B)";
+    }
+    return "";
 }
 } // namespace OHOS::Ace::NG

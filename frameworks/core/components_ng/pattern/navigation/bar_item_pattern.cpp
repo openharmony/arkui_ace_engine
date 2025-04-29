@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
+#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -31,7 +30,7 @@ void BarItemPattern::OnModifyDone()
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& /* info */) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto eventHub = pattern->GetEventHub<BarItemEventHub>();
+        auto eventHub = pattern->GetOrCreateEventHub<BarItemEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireItemAction();
         pattern->UpdateBarItemActiveStatusResource();
@@ -134,32 +133,19 @@ void UpdateSymbolEffect(const RefPtr<FrameNode>& iconNode)
     iconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void BarItemPattern::UpdateBarItemActiveStatusResource()
+void BarItemPattern::UpdateBarItemTextAndIconStatusResource(const RefPtr<BarItemNode>& barItemNode,
+    const RefPtr<FrameNode>& iconNode)
 {
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-
-    auto barItemNode = AceType::DynamicCast<BarItemNode>(GetHost());
     CHECK_NULL_VOID(barItemNode);
-    auto status = GetToolbarItemStatus();
-    auto iconStatus = GetCurrentIconStatus();
-
-    auto iconNode = DynamicCast<FrameNode>(barItemNode->GetIconNode());
     CHECK_NULL_VOID(iconNode);
-
-    if (iconNode->GetTag() == V2::SYMBOL_ETS_TAG) {
-        UpdateSymbolEffect(iconNode);
-    }
-
-    auto textNode = DynamicCast<FrameNode>(barItemNode->GetTextNode());
-    CHECK_NULL_VOID(textNode);
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-
+    auto theme = GetNavigationBarTheme();
+    CHECK_NULL_VOID(theme);
     ImageSourceInfo info;
     ToolbarIconStatus barIconStatus;
     Color textColor;
     Color iconColor;
+    auto status = GetToolbarItemStatus();
+    auto iconStatus = GetCurrentIconStatus();
     std::function<void(WeakPtr<NG::FrameNode>)> symbol;
     if (iconStatus == ToolbarIconStatus::INITIAL) {
         info = GetActiveIconImageSourceInfo();
@@ -184,11 +170,34 @@ void BarItemPattern::UpdateBarItemActiveStatusResource()
         }
         barItemNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         barItemNode->MarkDirtyNode();
-        textLayoutProperty->UpdateTextColor(textColor);
-        textNode->MarkModifyDone();
-        textNode->MarkDirtyNode();
+        if (!barItemNode->IsHideText()) {
+            auto textNode = DynamicCast<FrameNode>(barItemNode->GetTextNode());
+            CHECK_NULL_VOID(textNode);
+            auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(textLayoutProperty);
+            textLayoutProperty->UpdateTextColor(textColor);
+            textNode->MarkModifyDone();
+            textNode->MarkDirtyNode();
+        } else {
+            if (barItemNode->GetTextNode()) {
+                barItemNode->RemoveChild(barItemNode->GetTextNode());
+            }
+        }
         SetCurrentIconStatus(barIconStatus);
     }
+}
+
+void BarItemPattern::UpdateBarItemActiveStatusResource()
+{
+    auto barItemNode = AceType::DynamicCast<BarItemNode>(GetHost());
+    CHECK_NULL_VOID(barItemNode);
+    auto iconNode = DynamicCast<FrameNode>(barItemNode->GetIconNode());
+    CHECK_NULL_VOID(iconNode);
+
+    if (iconNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        UpdateSymbolEffect(iconNode);
+    }
+    UpdateBarItemTextAndIconStatusResource(barItemNode, iconNode);
 }
 
 void BarItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -206,6 +215,52 @@ void BarItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    json->PutExtAttr("label", textLayoutProperty->GetContentValue("").c_str(), filter);
+    json->PutExtAttr("label", (UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue(u""))).c_str(), filter);
 }
+
+bool BarItemPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto theme = NavigationGetTheme(themeScopeId);
+    CHECK_NULL_RETURN(theme, false);
+    auto barItemNode = AceType::DynamicCast<BarItemNode>(GetHost());
+    CHECK_NULL_RETURN(barItemNode, false);
+    auto textNode = DynamicCast<FrameNode>(barItemNode->GetTextNode());
+    CHECK_NULL_RETURN(textNode, false);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, false);
+    auto iconNode = DynamicCast<FrameNode>(barItemNode->GetIconNode());
+    CHECK_NULL_RETURN(iconNode, false);
+
+    Color textColor;
+    Color iconColor;
+    auto iconStatus = GetCurrentIconStatus();
+    if (iconStatus == ToolbarIconStatus::ACTIVE) {
+        textColor = theme->GetToolBarItemActiveFontColor();
+        iconColor = theme->GetToolbarActiveIconColor();
+    }
+    if (iconStatus == ToolbarIconStatus::INITIAL) {
+        textColor = theme->GetToolBarItemFontColor();
+        iconColor = theme->GetToolbarIconColor();
+    }
+
+    if (iconNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        auto symbolProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_RETURN(symbolProperty, false);
+        symbolProperty->UpdateSymbolColorList({ iconColor });
+        iconNode->MarkDirtyNode();
+    }
+
+    textLayoutProperty->UpdateTextColor(textColor);
+    textNode->MarkDirtyNode();
+
+    return false;
+}
+
+RefPtr<NavigationBarTheme> BarItemPattern::GetNavigationBarTheme()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    return NavigationGetTheme(host->GetThemeScopeId());
+}
+
 } // namespace OHOS::Ace::NG

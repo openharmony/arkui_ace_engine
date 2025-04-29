@@ -15,11 +15,7 @@
 
 #include "core/interfaces/native/node/form_component_modifier.h"
 
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/form/form_model_ng.h"
-#include "core/pipeline/base/element_register.h"
-#include "base/geometry/dimension.h"
 
 namespace OHOS::Ace::NG {
 const int32_t DEFAULT_VISIBILITY = 0;
@@ -101,18 +97,40 @@ void ResetFormSize(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIFormComponentModifier* GetFormComponentModifier()
 {
-    static const ArkUIFormComponentModifier modifier = { SetFormVisibility, AllowUpdate, SetDimension,
-        SetModuleName, SetFormSize, ResetFormVisibility, DisallowUpdate, ResetDimension, ResetModuleName,
-        ResetFormSize };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIFormComponentModifier modifier = {
+        .setFormVisibility = SetFormVisibility,
+        .allowUpdate = AllowUpdate,
+        .setDimension = SetDimension,
+        .setModuleName = SetModuleName,
+        .setFormSize = SetFormSize,
+        .resetFormVisibility = ResetFormVisibility,
+        .disallowUpdate = DisallowUpdate,
+        .resetDimension = ResetDimension,
+        .resetModuleName = ResetModuleName,
+        .resetFormSize = ResetFormSize,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIFormComponentModifier* GetCJUIFormComponentModifier()
 {
-    static const CJUIFormComponentModifier modifier = { SetFormVisibility, AllowUpdate, SetDimension,
-        SetModuleName, SetFormSize, ResetFormVisibility, DisallowUpdate, ResetDimension, ResetModuleName,
-        ResetFormSize };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIFormComponentModifier modifier = {
+        .setFormVisibility = SetFormVisibility,
+        .allowUpdate = AllowUpdate,
+        .setDimension = SetDimension,
+        .setModuleName = SetModuleName,
+        .setFormSize = SetFormSize,
+        .resetFormVisibility = ResetFormVisibility,
+        .disallowUpdate = DisallowUpdate,
+        .resetDimension = ResetDimension,
+        .resetModuleName = ResetModuleName,
+        .resetFormSize = ResetFormSize,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

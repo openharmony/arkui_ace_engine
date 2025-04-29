@@ -12,14 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/render/mock_canvas_image.h"
 #include "test/unittest/core/base/frame_node_test_ng.h"
 
-#include "frameworks/core/common/recorder/event_recorder.h"
-#include "frameworks/core/common/recorder/node_data_cache.h"
-#include "frameworks/core/components_ng/pattern/image/image_pattern.h"
-#include "frameworks/core/components_ng/pattern/stage/page_pattern.h"
+#include "core/common/recorder/event_definition.h"
+#include "core/components_ng/property/grid_property.h"
+#include "core/common/recorder/event_recorder.h"
+#include "core/common/recorder/node_data_cache.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/render/mock_canvas_image.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -117,6 +119,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetOneDepthVisibleFrame01, TestSize.Level1)
      */
     node->SetOverlayNode(overlayNode);
     node->GetOneDepthVisibleFrame(children);
+    EXPECT_NE(node->overlayNode_, nullptr);
 }
 
 /**
@@ -146,6 +149,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetOneDepthVisibleFrame02, TestSize.Level1)
      */
     node->SetOverlayNode(overlayNode);
     node->GetOneDepthVisibleFrame(children);
+    EXPECT_EQ(node->overlayNode_, nullptr);
 }
 
 /**
@@ -177,6 +181,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetOneDepthVisibleFrameWithOffset01, TestSize
     OffsetF Offset = { 0, 0 };
     node->SetOverlayNode(overlayNode);
     node->GetOneDepthVisibleFrameWithOffset(children, Offset);
+    EXPECT_NE(node->overlayNode_, nullptr);
 }
 
 /**
@@ -207,6 +212,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetOneDepthVisibleFrameWithOffset02, TestSize
     OffsetF Offset = { 0, 0 };
     node->SetOverlayNode(overlayNode);
     node->GetOneDepthVisibleFrameWithOffset(children, Offset);
+    EXPECT_EQ(node->overlayNode_, nullptr);
 }
 
 /**
@@ -257,6 +263,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeProcessOffscreenNode01, TestSize.Level1)
      * @tc.steps: step3. call the function ProcessOffscreenNode.
      */
     frameNode->ProcessOffscreenNode(node);
+    EXPECT_NE(frameNode, nullptr);
 }
 
 /**
@@ -290,6 +297,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeDumpAlignRulesInfo01, TestSize.Level1)
      */
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->DumpAlignRulesInfo();
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_NE(frameNode->layoutProperty_, nullptr);
 }
 
 /**
@@ -402,6 +411,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeDumpOnSizeChangeInfo01, TestSize.Level1)
      * @tc.steps: step3. call the function DumpOnSizeChangeInfo.
      */
     frameNode->DumpOnSizeChangeInfo();
+    EXPECT_NE(frameNode, nullptr);
 }
 
 /**
@@ -493,7 +503,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchToJsonValue02, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     EXPECT_NE(frameNode->pattern_, nullptr);
     frameNode->isActive_ = true;
-    frameNode->eventHub_->SetEnabled(true);
+    frameNode->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
 
     /**
      * @tc.steps: step2. update the mouseResponseRegion.
@@ -501,7 +511,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchToJsonValue02, TestSize.Level1)
     DimensionRect responseRect(Dimension(0), Dimension(0), DimensionOffset(OFFSETF));
     std::vector<DimensionRect> mouseResponseRegion;
     mouseResponseRegion.emplace_back(responseRect);
-    auto gestureEventHub = frameNode->eventHub_->GetOrCreateGestureEventHub();
+    auto gestureEventHub = frameNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub();
     gestureEventHub->SetMouseResponseRegion(mouseResponseRegion);
 
     /**
@@ -534,6 +544,87 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGeometryNodeToJsonValue01, TestSize.Level1)
     testFilter.AddFilterAttr("focusable");
     frameNode->GeometryNodeToJsonValue(jsonValue, testFilter);
     EXPECT_FALSE(jsonValue->GetBool("enabled", false));
+}
+
+/**
+ * @tc.name: FrameNodeToTreeJson01
+ * @tc.desc: Test the function ToTreeJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeToTreeJson01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. call the function ToTreeJson.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    frameNode->SetLayoutProperty(layoutProperty);
+
+    InspectorConfig testConfig;
+    auto jsonValue = std::make_unique<JsonValue>();
+    testConfig.contentOnly = true;
+    frameNode->ToTreeJson(jsonValue, testConfig);
+}
+
+/**
+ * @tc.name: FrameNodeToTreeJson02
+ * @tc.desc: Test the function ToTreeJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeToTreeJson02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. call the function ToTreeJson.
+     */
+    frameNode->paintProperty_ = nullptr;
+    frameNode->propInspectorId_ = "123";
+    frameNode->accessibilityProperty_ = nullptr;
+    frameNode->GetOrCreateEventHub<EventHub>()->GetOrCreateFocusHub();
+
+    InspectorConfig testConfig;
+    auto jsonValue = std::make_unique<JsonValue>();
+    testConfig.contentOnly = false;
+    frameNode->ToTreeJson(jsonValue, testConfig);
+}
+
+/**
+ * @tc.name: FrameNodeToTreeJson03
+ * @tc.desc: Test the function ToTreeJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeToTreeJson03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. call the function ToTreeJson.
+     */
+    auto pattern = frameNode->pattern_;
+    frameNode->pattern_ = nullptr;
+    frameNode->paintProperty_ = nullptr;
+    frameNode->accessibilityProperty_->accessibilityText_ = "test";
+    frameNode->layoutProperty_ = nullptr;
+
+    InspectorConfig testConfig;
+    auto jsonValue = std::make_unique<JsonValue>();
+    testConfig.contentOnly = false;
+    frameNode->ToTreeJson(jsonValue, testConfig);
+    frameNode->pattern_ = pattern;
 }
 
 /**
@@ -658,6 +749,12 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnAttachToMainTree02, TestSize.Level1)
      * @tc.steps: step3. call the function OnAttachToMainTree.
      */
     frameNode->OnAttachToMainTree(true);
+    EXPECT_TRUE(childNode->isLayoutDirtyMarked_);
+    EXPECT_FALSE(frameNode->useOffscreenProcess_);
+    EXPECT_TRUE(frameNode->isPropertyDiffMarked_);
+    auto context = frameNode->GetContext();
+    bool hasDirtyPropertyNodes = context->dirtyPropertyNodes_.find(frameNode) != context->dirtyPropertyNodes_.end();
+    EXPECT_TRUE(hasDirtyPropertyNodes);
 }
 
 /**
@@ -676,6 +773,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnAttachToBuilderNode01, TestSize.Level1)
      * @tc.steps: step2. call the function OnAttachToBuilderNode.
      */
     frameNode->OnAttachToBuilderNode(NodeStatus::BUILDER_NODE_ON_MAINTREE);
+    EXPECT_NE(frameNode->pattern_, nullptr);
 }
 
 /**
@@ -701,6 +799,10 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnConfigurationUpdate01, TestSize.Level1)
     configurationChange.iconUpdate = false;
     configurationChange.skinUpdate = false;
     frameNode->OnConfigurationUpdate(configurationChange);
+    EXPECT_TRUE(configurationChange.colorModeUpdate);
+    EXPECT_FALSE(configurationChange.fontUpdate);
+    EXPECT_FALSE(configurationChange.iconUpdate);
+    EXPECT_FALSE(configurationChange.skinUpdate);
 }
 
 /**
@@ -738,6 +840,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeSwapDirtyLayoutWrapperOnMainThread01, TestSiz
     frameNode->SetBackgroundFunction(builderFunc);
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->SwapDirtyLayoutWrapperOnMainThread(layoutWrapper);
+    EXPECT_TRUE(frameNode->isActive_);
 }
 
 /**
@@ -795,6 +898,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeSwapDirtyLayoutWrapperOnMainThread02, TestSiz
     frameNode->SetBackgroundFunction(builderFunc);
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->SwapDirtyLayoutWrapperOnMainThread(layoutWrapper);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+    EXPECT_NE(frameNode->layoutProperty_, nullptr);
 }
 
 /**
@@ -819,7 +924,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAdjustGridOffset01, TestSize.Level1)
 
     layoutProperty->gridProperty_ = std::make_unique<GridProperty>();
     frameNode->SetParent(FRAME_NODE);
-    frameNode->NotifyVisibleChange(true);
+    frameNode->NotifyVisibleChange(VisibleType::INVISIBLE, VisibleType::VISIBLE);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     geometryNode->SetFrameOffset(OffsetF(1.0f, 0.0f));
     frameNode->geometryNode_ = geometryNode;
@@ -830,6 +935,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAdjustGridOffset01, TestSize.Level1)
      */
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->AdjustGridOffset();
+    EXPECT_NE(frameNode->pattern_, nullptr);
+    EXPECT_NE(frameNode->layoutProperty_, nullptr);
 }
 
 /**
@@ -870,8 +977,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback01, TestSize.Level
     bool flag = false;
     OnAreaChangedFunc onAreaChanged = [&flag](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect,
                                           const OffsetF& origin) { flag = !flag; };
-    frameNode->eventHub_->SetOnAreaChanged(std::move(onAreaChanged));
-    frameNode->eventHub_->AddInnerOnAreaChangedCallback(1, std::move(onAreaChanged));
+    frameNode->GetOrCreateEventHub<EventHub>()->SetOnAreaChanged(std::move(onAreaChanged));
+    frameNode->GetOrCreateEventHub<EventHub>()->AddInnerOnAreaChangedCallback(1, std::move(onAreaChanged));
     frameNode->lastParentOffsetToWindow_ = std::make_unique<OffsetF>(OffsetF(50.0f, 50.0f)); // 50.0f is the offset
     frameNode->lastFrameRect_ =
         std::make_unique<RectF>(RectF(OffsetF(50.0f, 50.0f), SizeF(50.0f, 50.0f))); // 50.0f is ths offset and size
@@ -900,7 +1007,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback02, TestSize.Level
     bool flag = false;
     OnAreaChangedFunc onAreaChanged = [&flag](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect,
                                           const OffsetF& origin) { flag = !flag; };
-    frameNode->eventHub_->SetOnAreaChanged(std::move(onAreaChanged));
+    frameNode->GetOrCreateEventHub<EventHub>()->SetOnAreaChanged(std::move(onAreaChanged));
     frameNode->lastParentOffsetToWindow_ = std::make_unique<OffsetF>(OffsetF(50.0f, 50.0f)); // 50.0f is the offset
     frameNode->lastFrameRect_ =
         std::make_unique<RectF>(RectF(OffsetF(50.0f, 50.0f), SizeF(50.0f, 50.0f))); // 50.0f is ths offset and size
@@ -929,7 +1036,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback03, TestSize.Level
     bool flag = false;
     OnAreaChangedFunc onAreaChanged = [&flag](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect,
                                           const OffsetF& origin) { flag = !flag; };
-    frameNode->eventHub_->AddInnerOnAreaChangedCallback(1, std::move(onAreaChanged));
+    frameNode->GetOrCreateEventHub<EventHub>()->AddInnerOnAreaChangedCallback(1, std::move(onAreaChanged));
     frameNode->lastParentOffsetToWindow_ = std::make_unique<OffsetF>(OffsetF(50.0f, 50.0f)); // 50.0f is the offset
     frameNode->lastFrameRect_ =
         std::make_unique<RectF>(RectF(OffsetF(50.0f, 50.0f), SizeF(50.0f, 50.0f))); // 50.0f is ths offset and size
@@ -1093,8 +1200,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnSizeChangeCallback01, TestSize.Level
     pattern->isOnShow_ = true;
     bool flag = false;
     OnSizeChangedFunc onSizeChanged = [&flag](const RectF& oldRect, const RectF& rect) { flag = !flag; };
-    frameNode->eventHub_->SetOnSizeChanged(std::move(onSizeChanged));
-    frameNode->eventHub_->AddInnerOnSizeChanged(1, std::move(onSizeChanged));
+    frameNode->GetOrCreateEventHub<EventHub>()->SetOnSizeChanged(std::move(onSizeChanged));
+    frameNode->GetOrCreateEventHub<EventHub>()->AddInnerOnSizeChanged(1, std::move(onSizeChanged));
     frameNode->lastFrameNodeRect_ =
         std::make_unique<RectF>(RectF(OffsetF(50.0f, 50.0f), SizeF(50.0f, 50.0f))); // 50.0f is ths offset and size
     frameNode->onSizeChangeDumpInfos.push_back(dumpInfoOne);
@@ -1128,7 +1235,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnSizeChangeCallback02, TestSize.Level
     pattern->isOnShow_ = true;
     bool flag = false;
     OnSizeChangedFunc onSizeChanged = [&flag](const RectF& oldRect, const RectF& rect) { flag = !flag; };
-    frameNode->eventHub_->SetOnSizeChanged(std::move(onSizeChanged));
+    frameNode->GetOrCreateEventHub<EventHub>()->SetOnSizeChanged(std::move(onSizeChanged));
     frameNode->lastFrameNodeRect_ =
         std::make_unique<RectF>(RectF(OffsetF(50.0f, 50.0f), SizeF(50.0f, 50.0f))); // 50.0f is ths offset and size
     frameNode->onSizeChangeDumpInfos.push_back(dumpInfoOne);
@@ -1158,7 +1265,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnSizeChangeCallback03, TestSize.Level
     pattern->isOnShow_ = true;
     bool flag = false;
     OnSizeChangedFunc onSizeChanged = [&flag](const RectF& oldRect, const RectF& rect) { flag = !flag; };
-    frameNode->eventHub_->AddInnerOnSizeChanged(1, std::move(onSizeChanged));
+    frameNode->GetOrCreateEventHub<EventHub>()->AddInnerOnSizeChanged(1, std::move(onSizeChanged));
     frameNode->lastFrameNodeRect_ =
         std::make_unique<RectF>(RectF(OffsetF(50.0f, 50.0f), SizeF(50.0f, 50.0f))); // 50.0f is ths offset and size
     frameNode->onSizeChangeDumpInfos.push_back(dumpInfoOne);
@@ -1200,6 +1307,10 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsFrameDisappear01, TestSize.Level1)
     parentNode->SetLayoutProperty(parentLayoutProperty);
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->IsFrameDisappear();
+    EXPECT_FALSE(parentNode->isActive_);
+    EXPECT_TRUE(frameNode->onMainTree_);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+    EXPECT_NE(frameNode->layoutProperty_, nullptr);
 }
 
 /**
@@ -1234,6 +1345,49 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsFrameDisappear02, TestSize.Level1)
     parentNode->SetLayoutProperty(parentLayoutProperty);
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->IsFrameDisappear();
+    EXPECT_TRUE(parentNode->isActive_);
+    EXPECT_TRUE(frameNode->onMainTree_);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+    EXPECT_NE(frameNode->layoutProperty_, nullptr);
+}
+
+/**
+ * @tc.name: FrameNodIsFrameDisappear03
+ * @tc.desc: Test the function IsFrameDisappear
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeIsFrameDisappear03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto parentNode = FrameNode::CreateFrameNode("parentNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    parentNode->isActive_ = true;
+    frameNode->isActive_ = false;
+    frameNode->onMainTree_ = true;
+    auto context = frameNode->GetContext();
+    context->onShow_ = true;
+    frameNode->SetParent(AceType::WeakClaim(AceType::RawPtr(parentNode)));
+
+    /**
+     * @tc.steps: step2. create layoutProperty.
+     */
+    auto parentLayoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    parentLayoutProperty->propVisibility_ = VisibleType::INVISIBLE;
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->propVisibility_ = VisibleType::VISIBLE;
+
+    /**
+     * @tc.steps: step3. call the function IsFrameDisappear.
+     */
+    parentNode->SetLayoutProperty(parentLayoutProperty);
+    frameNode->SetLayoutProperty(layoutProperty);
+    frameNode->IsFrameDisappear(TIMESTAMP_1);
+    EXPECT_TRUE(parentNode->isActive_);
+    EXPECT_TRUE(frameNode->onMainTree_);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+    EXPECT_NE(frameNode->layoutProperty_, nullptr);
 }
 
 /**
@@ -1257,17 +1411,17 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback01, TestSize.
     const std::function<void(bool, double)>&& jsCallback = [&flag](bool isVisible, double radio) { flag++; };
     callbackInfo.callback = jsCallback;
     callbackInfo.period = 1;
-    frameNode->eventHub_->visibleAreaUserCallback_ = callbackInfo;
+    frameNode->GetOrCreateEventHub<EventHub>()->visibleAreaUserCallback_ = callbackInfo;
     frameNode->TriggerVisibleAreaChangeCallback(0, false);
-    frameNode->eventHub_->visibleAreaUserCallback_.callback = nullptr;
-    frameNode->eventHub_->visibleAreaInnerCallback_ = callbackInfo;
+    frameNode->GetOrCreateEventHub<EventHub>()->visibleAreaUserCallback_.callback = nullptr;
+    frameNode->GetOrCreateEventHub<EventHub>()->visibleAreaInnerCallback_ = callbackInfo;
     frameNode->TriggerVisibleAreaChangeCallback(0, false);
-    EXPECT_NE(frameNode->eventHub_, nullptr);
+    EXPECT_NE(frameNode->GetOrCreateEventHub<EventHub>(), nullptr);
     frameNode->isCalculateInnerVisibleRectClip_ = true;
     frameNode->lastInnerVisibleRatio_ = 10.0;
     frameNode->lastVisibleRatio_ = 10.0;
     frameNode->TriggerVisibleAreaChangeCallback(0, true);
-    frameNode->eventHub_->visibleAreaUserCallback_ = callbackInfo;
+    frameNode->GetOrCreateEventHub<EventHub>()->visibleAreaUserCallback_ = callbackInfo;
     /**
      * @tc.steps: step2. create layoutProperty.
      */
@@ -1281,7 +1435,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback01, TestSize.
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->TriggerVisibleAreaChangeCallback(false);
     frameNode->ProcessAllVisibleCallback(ratios, callbackInfo, 1.0, 0.0, true);
-    EXPECT_NE(frameNode->eventHub_, nullptr);
+    EXPECT_NE(frameNode->GetOrCreateEventHub<EventHub>(), nullptr);
 }
 
 /**
@@ -1305,7 +1459,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeThrottledVisibleTask01, TestSize.Level1)
     const std::function<void(bool, double)>&& jsCallback = [&flag](bool isVisible, double radio) { flag++; };
     callbackInfo.callback = jsCallback;
     callbackInfo.period = 1;
-    frameNode->eventHub_->throttledVisibleAreaCallback_ = callbackInfo;
+    frameNode->GetOrCreateEventHub<EventHub>()->throttledVisibleAreaCallback_ = callbackInfo;
 
     /**
      * @tc.steps: step2. create layoutProperty.
@@ -1318,6 +1472,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeThrottledVisibleTask01, TestSize.Level1)
      */
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->ThrottledVisibleTask();
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_FALSE(frameNode->throttledCallbackOnTheWay_);
 }
 
 /**
@@ -1341,7 +1497,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeThrottledVisibleTask02, TestSize.Level1)
     const std::function<void(bool, double)>&& jsCallback = [&flag](bool isVisible, double radio) { flag++; };
     callbackInfo.callback = jsCallback;
     callbackInfo.period = 1;
-    frameNode->eventHub_->throttledVisibleAreaCallback_ = callbackInfo;
+    frameNode->GetOrCreateEventHub<EventHub>()->throttledVisibleAreaCallback_ = callbackInfo;
 
     /**
      * @tc.steps: step2. create layoutProperty.
@@ -1354,6 +1510,10 @@ HWTEST_F(FrameNodeTestNg, FrameNodeThrottledVisibleTask02, TestSize.Level1)
      */
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->ThrottledVisibleTask();
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_FALSE(frameNode->throttledCallbackOnTheWay_);
+    EXPECT_TRUE(frameNode->isActive_);
+    EXPECT_EQ(frameNode->GetOrCreateEventHub<EventHub>()->throttledVisibleAreaCallback_.period, 1);
 }
 
 /**
@@ -1373,12 +1533,14 @@ HWTEST_F(FrameNodeTestNg, FrameNodeThrottledVisibleTask03, TestSize.Level1)
     const std::function<void(bool, double)>&& jsCallback = [&flag](bool isVisible, double radio) { flag++; };
     callbackInfo.callback = jsCallback;
     callbackInfo.period = 1;
-    frameNode->eventHub_->throttledVisibleAreaCallback_ = callbackInfo;
+    frameNode->GetOrCreateEventHub<EventHub>()->throttledVisibleAreaCallback_ = callbackInfo;
 
     /**
      * @tc.steps: step2. call the function ThrottledVisibleTask.
      */
     frameNode->ThrottledVisibleTask();
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetOrCreateEventHub<EventHub>()->throttledVisibleAreaCallback_.period, 1);
 }
 
 /**
@@ -1407,6 +1569,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeCreateLayoutTask01, TestSize.Level1)
      */
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->CreateLayoutTask(true);
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->layoutProperty_->propVisibility_, VisibleType::VISIBLE);
 }
 
 /**
@@ -1436,6 +1600,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeCreateRenderTask01, TestSize.Level1)
      */
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->CreateRenderTask(true).value()();
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_NE(frameNode->layoutProperty_, nullptr);
+    EXPECT_EQ(frameNode->layoutProperty_->propVisibility_, VisibleType::VISIBLE);
 }
 
 /**
@@ -1464,25 +1631,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeCreateRenderTask02, TestSize.Level1)
      */
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->CreateRenderTask(false).value()();
-}
-
-/**
- * @tc.name: FrameNodeGetParentGlobalOffset01
- * @tc.desc: Test the function GetParentGlobalOffset
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeGetParentGlobalOffset01, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode.
-     */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
-
-    /**
-     * @tc.steps: step3. call the function GetParentGlobalOffset.
-     */
-    EXPECT_EQ(frameNode->GetParentGlobalOffset().GetX(), 0.0f);
-    EXPECT_EQ(frameNode->GetParentGlobalOffset().GetY(), 0.0f);
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_NE(frameNode->layoutProperty_, nullptr);
+    EXPECT_EQ(frameNode->layoutProperty_->propVisibility_, VisibleType::VISIBLE);
 }
 
 /**
@@ -1513,6 +1664,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeUpdateLayoutWrapper01, TestSize.Level1)
      */
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->UpdateLayoutWrapper(layoutWrapper, false, true);
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_NE(frameNode->layoutProperty_, nullptr);
+    EXPECT_EQ(frameNode->layoutProperty_->propVisibility_, VisibleType::GONE);
 }
 
 /**
@@ -1539,6 +1693,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeUpdateLayoutWrapper02, TestSize.Level1)
      */
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->UpdateLayoutWrapper(nullptr, false, true);
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_NE(frameNode->layoutProperty_, nullptr);
+    EXPECT_EQ(frameNode->layoutProperty_->propVisibility_, VisibleType::VISIBLE);
 }
 
 /**
@@ -1561,6 +1718,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetContentModifier01, TestSize.Level1)
     frameNode->GetContentModifier();
     frameNode->renderContext_->UpdateAccessibilityFocus(false);
     frameNode->GetContentModifier();
+    EXPECT_NE(frameNode, nullptr);
 }
 
 /**
@@ -1582,6 +1740,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetContentModifier02, TestSize.Level1)
      * @tc.steps: step2. call the function GetContentModifier.
      */
     frameNode->GetContentModifier();
+    EXPECT_NE(frameNode->extensionHandler_, nullptr);
 }
 
 /**
@@ -1600,6 +1759,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetContentModifier03, TestSize.Level1)
      * @tc.steps: step2. call the function GetContentModifier.
      */
     frameNode->GetContentModifier();
+    EXPECT_NE(frameNode, nullptr);
 }
 
 /**
@@ -1619,6 +1779,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodePostIdleTask01, TestSize.Level1)
     int32_t flag = 0;
     std::function<void(int64_t, bool)>&& callback = [&flag](int64_t radio, bool isVisible) { flag++; };
     frameNode->PostIdleTask(std::move(callback));
+    EXPECT_NE(frameNode, nullptr);
 }
 
 /**
@@ -1646,6 +1807,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeRebuildRenderContextTree01, TestSize.Level1)
      */
     frameNode->overlayNode_->SetLayoutProperty(layoutProperty);
     frameNode->RebuildRenderContextTree();
+    EXPECT_NE(frameNode->overlayNode_, nullptr);
 
     /**
      * @tc.steps: step4. update layoutProperty and call the function RebuildRenderContextTree.
@@ -1659,6 +1821,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeRebuildRenderContextTree01, TestSize.Level1)
      */
     frameNode->overlayNode_ = nullptr;
     frameNode->RebuildRenderContextTree();
+    EXPECT_EQ(frameNode->overlayNode_, nullptr);
 }
 
 /**
@@ -1686,6 +1849,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeRebuildRenderContextTree02, TestSize.Level1)
      */
     frameNode->overlayNode_->SetLayoutProperty(layoutProperty);
     frameNode->RebuildRenderContextTree();
+    EXPECT_NE(frameNode->overlayNode_->layoutProperty_, nullptr);
 }
 
 /**
@@ -1707,6 +1871,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeRebuildRenderContextTree03, TestSize.Level1)
      * @tc.steps: step2. call the function RebuildRenderContextTree.
      */
     frameNode->RebuildRenderContextTree();
+    EXPECT_EQ(frameNode->overlayNode_->layoutProperty_, nullptr);
 }
 
 /**
@@ -1723,8 +1888,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeMarkModifyDone01, TestSize.Level1)
     frameNode->isPrivacySensitive_ = true;
     frameNode->isRestoreInfoUsed_ = false;
     frameNode->restoreId_ = 1;
-    Recorder::EventRecorder::Get().componentEnable_ = true;
-    Recorder::EventRecorder::Get().eventSwitch_.componentEnable = true;
+    auto index = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_COMPONENT);
+    Recorder::EventRecorder::Get().eventSwitch_[index] = true;
+    Recorder::EventRecorder::Get().globalSwitch_[index] = true;
     std::unordered_set<std::string> nodeSet;
     nodeSet.emplace("abc");
     Recorder::NodeDataCache::Get().mergedConfig_->shareNodes.emplace("test", nodeSet);
@@ -1733,6 +1899,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeMarkModifyDone01, TestSize.Level1)
      * @tc.steps: step2. call the function MarkModifyDone.
      */
     frameNode->MarkModifyDone();
+    EXPECT_TRUE(frameNode->isPrivacySensitive_);
+    EXPECT_TRUE(frameNode->isRestoreInfoUsed_);
 }
 
 /**
@@ -1756,6 +1924,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeMarkModifyDone02, TestSize.Level1)
      * @tc.steps: step2. call the function MarkModifyDone.
      */
     frameNode->MarkModifyDone();
+    EXPECT_TRUE(frameNode->isPrivacySensitive_);
+    EXPECT_TRUE(frameNode->isRestoreInfoUsed_);
+    EXPECT_EQ(pipeline->privacySensitiveManager_, nullptr);
 }
 
 /**
@@ -1778,6 +1949,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeMarkDirtyNode01, TestSize.Level1)
      */
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
     testNode->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
+    EXPECT_FALSE(frameNode->isPrivacySensitive_);
+    EXPECT_FALSE(frameNode->isRestoreInfoUsed_);
 }
 
 /**
@@ -1797,6 +1970,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetAncestorNodeOfFrame01, TestSize.Level1)
      * @tc.steps: step2. call the function GetAncestorNodeOfFrame.
      */
     frameNode->GetAncestorNodeOfFrame(true);
+    EXPECT_TRUE(frameNode->isWindowBoundary_);
 }
 
 /**
@@ -1815,6 +1989,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetFirstAutoFillContainerNode01, TestSize.Lev
      * @tc.steps: step2. call the function GetFirstAutoFillContainerNode.
      */
     frameNode->GetFirstAutoFillContainerNode();
+    EXPECT_NE(frameNode, nullptr);
 }
 
 /**
@@ -1835,6 +2010,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetFirstAutoFillContainerNode02, TestSize.Lev
      * @tc.steps: step2. call the function GetFirstAutoFillContainerNode.
      */
     frameNode->GetFirstAutoFillContainerNode();
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_NE(parentNode, nullptr);
 }
 
 /**
@@ -1855,6 +2032,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetFirstAutoFillContainerNode03, TestSize.Lev
      * @tc.steps: step2. call the function GetFirstAutoFillContainerNode.
      */
     frameNode->GetFirstAutoFillContainerNode();
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_NE(parentNode, nullptr);
 }
 
 /**
@@ -1922,6 +2101,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeMarkNeedRender01, TestSize.Level1)
      * @tc.steps: step2. call the function MarkNeedRender.
      */
     frameNode->MarkNeedRender(false);
+    EXPECT_FALSE(frameNode->isLayoutDirtyMarked_);
+    EXPECT_TRUE(frameNode->isRenderDirtyMarked_);
 }
 
 /**
@@ -1945,6 +2126,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnGenerateOneDepthVisibleFrame01, TestSize.Le
     std::list<RefPtr<FrameNode>> children;
     children.push_back(childNode);
     frameNode->OnGenerateOneDepthVisibleFrame(children);
+    EXPECT_TRUE(frameNode->isLayoutNode_);
 }
 
 /**
@@ -1968,6 +2150,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnGenerateOneDepthVisibleFrame02, TestSize.Le
     std::list<RefPtr<FrameNode>> children;
     children.push_back(childNode);
     frameNode->OnGenerateOneDepthVisibleFrame(children);
+    EXPECT_TRUE(frameNode->isLayoutNode_);
+    EXPECT_EQ(frameNode->overlayNode_, nullptr);
 }
 
 /**
@@ -1994,5 +2178,309 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnGenerateOneDepthVisibleFrameWithTransition0
     frameNode->OnGenerateOneDepthVisibleFrameWithTransition(children);
     frameNode->overlayNode_ = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
     frameNode->OnGenerateOneDepthVisibleFrameWithTransition(children);
+    EXPECT_TRUE(frameNode->isActive_);
+    EXPECT_TRUE(frameNode->isLayoutNode_);
+    EXPECT_EQ(frameNode->overlayNode_, 1);
+}
+
+/**
+ * @tc.name: FrameNodeProcessThrottledVisibleCallback01
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeProcessThrottledVisibleCallback01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    
+    /**
+     * @tc.steps: step2. set VisibleAreaUserCallback.
+     */
+    VisibleCallbackInfo callbackInfo;
+    constexpr uint32_t minInterval = 100; // 100ms
+    int flag = 0;
+    callbackInfo.callback = [&flag](bool input1, double input2) { flag += 1; };
+    callbackInfo.period = minInterval;
+    frameNode->SetVisibleAreaUserCallback({ 0.2, 0.8, 0.21, 0.79, 0.5 }, callbackInfo);
+
+    /**
+     * @tc.steps: step3. call the function ProcessThrottledVisibleCallback.
+     */
+    frameNode->ProcessThrottledVisibleCallback(true);
+    EXPECT_TRUE(frameNode->eventHub_->GetThrottledVisibleAreaCallback().callback);
+}
+
+/**
+ * @tc.name: FrameNodeProcessThrottledVisibleCallback02
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeProcessThrottledVisibleCallback02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. set VisibleAreaUserCallback.
+     */
+    VisibleCallbackInfo callbackInfo;
+    constexpr uint32_t minInterval = 100; // 100ms
+    int flag = 0;
+    callbackInfo.callback = [&flag](bool input1, double input2) { flag += 1; };
+    callbackInfo.period = minInterval;
+    frameNode->SetVisibleAreaUserCallback({ 0.2, 0.8, 0.21, 0.79, 0.5 }, callbackInfo);
+    auto context = MockPipelineContext::GetCurrentContext();
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    /**
+     * @tc.steps: step3. call the function ProcessThrottledVisibleCallback.
+     */
+    frameNode->throttledCallbackOnTheWay_ = true;
+    frameNode->ProcessThrottledVisibleCallback(false);
+    EXPECT_EQ(frameNode->throttledCallbackOnTheWay_, true);
+}
+
+/**
+ * @tc.name: FrameNodeProcessThrottledVisibleCallback03
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeProcessThrottledVisibleCallback03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. set VisibleAreaUserCallback.
+     */
+    VisibleCallbackInfo callbackInfo;
+    constexpr uint32_t minInterval = 100; // 100ms
+    int flag = 0;
+    callbackInfo.callback = [&flag](bool input1, double input2) { flag += 1; };
+    callbackInfo.period = minInterval;
+    frameNode->SetVisibleAreaUserCallback({ 0.2, 0.8, 0.21, 0.79, 0.5 }, callbackInfo);
+    auto context = MockPipelineContext::GetCurrentContext();
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    
+    /**
+     * @tc.steps: step2. call the function ProcessThrottledVisibleCallback.
+     */
+    frameNode->GetOrCreateEventHub<EventHub>()->GetOrCreateFocusHub();
+    frameNode->throttledCallbackOnTheWay_ = false;
+    frameNode->ProcessThrottledVisibleCallback(false);
+    EXPECT_EQ(frameNode->throttledCallbackOnTheWay_, false);
+}
+
+/**
+ * @tc.name: FrameNodeProcessThrottledVisibleCallback04
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeProcessThrottledVisibleCallback04, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. set VisibleAreaUserCallback.
+     */
+    VisibleCallbackInfo callbackInfo;
+    constexpr uint32_t minInterval = 100; // 100ms
+    int flag = 0;
+    callbackInfo.callback = [&flag](bool input1, double input2) { flag += 1; };
+    callbackInfo.period = minInterval;
+    frameNode->lastThrottledTriggerTime_ = GetCurrentTimestamp();
+    frameNode->SetVisibleAreaUserCallback({ 0.2, 0.8, 0.21, 0.79, 0.5 }, callbackInfo);
+    auto context = MockPipelineContext::GetCurrentContext();
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+
+    /**
+     * @tc.steps: step2. call the function ProcessThrottledVisibleCallback.
+     */
+    frameNode->GetOrCreateEventHub<EventHub>()->GetOrCreateFocusHub();
+    frameNode->throttledCallbackOnTheWay_ = false;
+    frameNode->ProcessThrottledVisibleCallback(false);
+}
+
+/**
+ * @tc.name: FrameNodeGetResponseRegionListForTouch01
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetResponseRegionListForTouch01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    /**
+     * @tc.steps: step2. construct parameters.
+     */
+    frameNode->isActive_ = true;
+    frameNode->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
+
+    DimensionRect responseRect(Dimension(0), Dimension(0), DimensionOffset(OFFSETF));
+    std::vector<DimensionRect> responseRegion;
+    responseRegion.emplace_back(responseRect);
+
+    /**
+     * @tc.steps: step3. call GetResponseRegionList.
+     * @tc.expected: expect ResponseRegion is not empty.
+     */
+    auto gestureEventHub = frameNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    gestureEventHub->SetResponseRegion(responseRegion);
+
+    auto paintRect = frameNode->renderContext_->GetPaintRectWithoutTransform();
+    frameNode->GetResponseRegionListForTouch(paintRect);
+    EXPECT_FALSE(gestureEventHub->GetResponseRegion().empty());
+}
+
+/**
+ * @tc.name: FrameNodeGetResponseRegionListForTouch02
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetResponseRegionListForTouch02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    /**
+     * @tc.steps: step2. construct parameters.
+     */
+    frameNode->isActive_ = true;
+    frameNode->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
+
+    DimensionRect responseRect(Dimension(0), Dimension(0), DimensionOffset(OFFSETF));
+    std::vector<DimensionRect> responseRegion;
+    responseRegion.emplace_back(responseRect);
+
+    /**
+     * @tc.steps: step3. call GetResponseRegionList.
+     * @tc.expected: expect ResponseRegion is not empty.
+     */
+    auto gestureEventHub = frameNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    gestureEventHub->SetResponseRegion(responseRegion);
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(1, 1);
+    gestureEventHub->gestureHierarchy_.emplace_back(clickRecognizer);
+
+    auto paintRect = frameNode->renderContext_->GetPaintRectWithoutTransform();
+    frameNode->GetResponseRegionListForTouch(paintRect);
+    EXPECT_FALSE(gestureEventHub->GetResponseRegion().empty());
+}
+
+/**
+ * @tc.name: FrameNodeGetResponseRegionListForTouch03
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetResponseRegionListForTouch03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    /**
+     * @tc.steps: step2. construct parameters.
+     */
+    frameNode->isActive_ = true;
+    frameNode->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
+
+    /**
+     * @tc.steps: step3. call GetResponseRegionList.
+     * @tc.expected: expect ResponseRegion is not empty.
+     */
+    auto gestureEventHub = frameNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(1, 1);
+    gestureEventHub->gestureHierarchy_.emplace_back(clickRecognizer);
+
+    auto paintRect = frameNode->renderContext_->GetPaintRectWithoutTransform();
+    auto responseRegionList = frameNode->GetResponseRegionListForTouch(paintRect);
+    EXPECT_FALSE(responseRegionList.empty());
+}
+
+/**
+ * @tc.name: FrameNodeProcessMouseTestHit01
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeProcessMouseTestHit01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    /**
+     * @tc.steps: step2. construct parameters.
+     */
+    PointF globalPoint;
+    PointF parentLocalPoint;
+    TouchRestrict touchRestrict;
+    TouchTestResult result;
+    ResponseLinkResult responseLinkResult;
+
+    /**
+     * @tc.steps: step3. eventHub_ is nullptr, call ProcessMouseTestHit.
+     * @tc.expected: expect ProcessMouseTestHit is false.
+     */
+    frameNode->eventHub_ = nullptr;
+    EXPECT_FALSE(frameNode->ProcessMouseTestHit(globalPoint, parentLocalPoint, touchRestrict, result));
+
+    /**
+     * @tc.steps: step4. eventHub_ is gestureEventHub, call ProcessMouseTestHit.
+     * @tc.expected: expect ProcessMouseTestHit is false.
+     */
+    auto gestureEventHub = frameNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    EXPECT_FALSE(frameNode->ProcessMouseTestHit(globalPoint, parentLocalPoint, touchRestrict, result));
+
+    /**
+     * @tc.steps: step3. call ProcessMouseTestHit.
+     * @tc.expected: expect ProcessMouseTestHit is false.
+     */
+    auto inputEventHub = frameNode->GetOrCreateEventHub<EventHub>()->GetOrCreateInputEventHub();
+    EXPECT_FALSE(frameNode->ProcessMouseTestHit(globalPoint, parentLocalPoint, touchRestrict, result));
+
+    /**
+     * @tc.steps: step4. call ProcessMouseTestHit.
+     * @tc.expected: expect ProcessMouseTestHit is false.
+     */
+    touchRestrict.touchEvent.SetSourceTool(SourceTool::PEN);
+    touchRestrict.touchEvent.SetType(TouchType::PROXIMITY_IN);
+    EXPECT_FALSE(frameNode->ProcessMouseTestHit(globalPoint, parentLocalPoint, touchRestrict, result));
+}
+
+/**
+ * @tc.name: FrameNodeGetResponseRegionListByTraversal01
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetResponseRegionListByTraversal01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetResponseRegionListByTraversal.
+     * @tc.expected: expect ResponseRegion is not empty.
+     */
+    NG::RectF responseRect = { 10.0f, 10.0f, 10.0f, 10.0f }; // 10.0f is the x, y, width and height of rect
+    std::vector<RectF> responseRegionList;
+    responseRegionList.emplace_back(responseRect);
+    auto context = MockPipelineContext::GetCurrentContext();
+    frameNode->GetResponseRegionListByTraversal(responseRegionList);
 }
 } // namespace OHOS::Ace::NG

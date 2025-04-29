@@ -15,6 +15,9 @@
 
 #include "test/unittest/core/base/view_abstract_test_ng.h"
 
+#include "base/subwindow/subwindow_manager.h"
+#include "core/components_ng/event/focus_hub.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -270,8 +273,6 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest036, TestSize.Level1)
     ViewAbstract::SetForegroundColor(BLUE);
     ViewAbstract::SetForegroundColor(AceType::RawPtr(FRAME_NODE_REGISTER), BLUE);
     ViewAbstract::ClearWidthOrHeight(true);
-    ViewAbstract::SetUseEffect(false);
-    ViewAbstract::SetUseEffect(nullptr, false);
     ViewAbstract::SetRenderGroup(false);
     ViewAbstract::SetRenderGroup(nullptr, false);
     ViewAbstract::SetRenderFit(RenderFit::BOTTOM);
@@ -850,6 +851,49 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableMouseTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ViewAbstractDisableAxis
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableAxisTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and check callback;
+     * @tc.expected: callback is not null.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
+    OnAxisEventFunc onAxisEventFunc;
+    ViewAbstract::SetOnAxisEvent(std::move(onAxisEventFunc));
+
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto eventHub = node->GetOrCreateInputEventHub();
+    auto& callback = eventHub->axisEventActuator_->userCallback_;
+    EXPECT_NE(callback, nullptr);
+
+    /**
+     * @tc.steps: step2. Disable callback.
+     * @tc.expected: callback is null.
+     */
+    ViewAbstract::DisableOnAxisEvent();
+    EXPECT_EQ(callback, nullptr);
+
+    /**
+     * @tc.steps: step3. Add callback again.
+     * @tc.expected: callback is not null.
+     */
+    OnAxisEventFunc onAxisEventFunc2;
+    ViewAbstract::SetOnAxisEvent(std::move(onAxisEventFunc2));
+    EXPECT_NE(callback, nullptr);
+    ViewStackProcessor::GetInstance()->instance = nullptr;
+}
+
+/**
  * @tc.name: ViewAbstractDisableHoverTest
  * @tc.desc: Test the operation of View_Abstract.
  * @tc.type: FUNC
@@ -905,7 +949,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableKeyTest, TestSize.Level1)
      */
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
-    OnKeyCallbackFunc onKeyCallback = [](KeyEventInfo& info) {};
+    OnKeyConsumeFunc onKeyCallback = [](KeyEventInfo& info) -> bool { return false; };
     ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback));
 
     auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
@@ -929,7 +973,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableKeyTest, TestSize.Level1)
      * @tc.steps: step3. Add callback again.
      * @tc.expected: callback is not null.
      */
-    OnKeyCallbackFunc onKeyCallback2 = [](KeyEventInfo& info) {};
+    OnKeyConsumeFunc onKeyCallback2 = [](KeyEventInfo& info) -> bool { return false; };
     ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback2));
     EXPECT_TRUE(callback);
     ViewStackProcessor::GetInstance()->instance = nullptr;
@@ -1400,6 +1444,40 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableMouseByFrameNodeTest, TestSize.L
 }
 
 /**
+ * @tc.name: ViewAbstractDisableAxisByFrameNodeTest
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableAxisByFrameNodeTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and check callback;
+     * @tc.expected: callback is not null.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
+
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    OnAxisEventFunc onAxisEventFunc;
+    ViewAbstract::SetOnAxisEvent(AceType::RawPtr(node), std::move(onAxisEventFunc));
+    auto eventHub = node->GetOrCreateInputEventHub();
+    auto& callback = eventHub->axisEventActuator_->userCallback_;
+    EXPECT_NE(callback, nullptr);
+
+    /**
+     * @tc.steps: step2. Disable callback.
+     * @tc.expected: callback is null.
+     */
+    ViewAbstract::DisableOnAxisEvent(AceType::RawPtr(node));
+    EXPECT_EQ(callback, nullptr);
+}
+
+/**
  * @tc.name: ViewAbstractDisableHoverByFrameNodeTest
  * @tc.desc: Test the operation of View_Abstract.
  * @tc.type: FUNC
@@ -1453,7 +1531,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableKeyByFrameNodeTest, TestSize.Lev
     ASSERT_NE(frameNode, nullptr);
     auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
     ASSERT_NE(node, nullptr);
-    OnKeyCallbackFunc onKeyCallback = [](KeyEventInfo& info) {};
+    OnKeyConsumeFunc onKeyCallback = [](KeyEventInfo& info) -> bool { return false; };
     ViewAbstract::SetOnKeyEvent(AceType::RawPtr(node), std::move(onKeyCallback));
     auto focusHub = node->GetOrCreateFocusHub();
     auto& callback = focusHub->focusCallbackEvents_->onKeyEventCallback_;
@@ -1557,7 +1635,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableOnAppearByFrameNodeTest, TestSiz
     ASSERT_NE(node, nullptr);
     std::function<void()> onAppearCallback = []() {};
     ViewAbstract::SetOnAppear(AceType::RawPtr(node), std::move(onAppearCallback));
-    auto eventHub = node->GetEventHub<EventHub>();
+    auto eventHub = node->GetOrCreateEventHub<EventHub>();
     auto& callback = eventHub->onAppear_;
     EXPECT_NE(callback, nullptr);
 
@@ -1591,7 +1669,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableOnDisAppearByFrameNodeTest, Test
     ASSERT_NE(node, nullptr);
     std::function<void()> onDiaAppearCallback = []() {};
     ViewAbstract::SetOnDisappear(AceType::RawPtr(node), std::move(onDiaAppearCallback));
-    auto eventHub = node->GetEventHub<EventHub>();
+    auto eventHub = node->GetOrCreateEventHub<EventHub>();
     auto& callback = eventHub->onDisappear_;
     EXPECT_NE(callback, nullptr);
 
@@ -1627,7 +1705,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableOnAreaChangeByFrameNodeTest, Tes
         onAreaChangeCallback =
             [](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {};
     ViewAbstract::SetOnAreaChanged(AceType::RawPtr(node), std::move(onAreaChangeCallback));
-    auto eventHub = node->GetEventHub<EventHub>();
+    auto eventHub = node->GetOrCreateEventHub<EventHub>();
     auto& callback = eventHub->onAreaChanged_;
     EXPECT_NE(callback, nullptr);
 
@@ -1692,7 +1770,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractSetOnSizeChangeByFrameNodeTest, TestSiz
     std::function<void(const RectF& oldRect, const RectF& rect)> onSizeChangeCallback = [](const RectF& oldRect,
                                                                                             const RectF& rect) {};
     ViewAbstract::SetOnSizeChanged(AceType::RawPtr(node), std::move(onSizeChangeCallback));
-    auto eventHub = node->GetEventHub<EventHub>();
+    auto eventHub = node->GetOrCreateEventHub<EventHub>();
     auto& callback = eventHub->onSizeChanged_;
     EXPECT_NE(callback, nullptr);
 }
@@ -1778,4 +1856,143 @@ HWTEST_F(ViewAbstractTestNg, SetForegroundEffectTest, TestSize.Level1)
     ViewAbstract::SetForegroundEffect(1.1f);
     ASSERT_EQ(frameNode->GetRenderContext()->GetForegroundEffect(), 1.1f);
 }
+
+/**
+ * @tc.name: ViewAbstractTest045
+ * @tc.desc: Test SetNeedFocus of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest045, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    frameNode->GetOrCreateFocusHub();
+
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    focusHub->currentFocus_ = true;
+
+    /**
+    * @tc.steps: Set frameNode attached context null
+    * @tc.expected: do not set scop instanceId and excute lost focus to view root.
+    */
+    frameNode->DetachContext(true);
+    ViewAbstract::SetNeedFocus(AceType::RawPtr(frameNode), false);
+    EXPECT_EQ(ContainerScope::CurrentId(), -1);
+}
+
+/**
+ * @tc.name: ViewAbstractDisableOnKeyEventDispatchTest
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableOnKeyEventDispatchTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and check callback;
+     * @tc.expected: callback is not null.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
+    OnKeyConsumeFunc onKeyCallback = [](KeyEventInfo& info) -> bool { return false; };
+    ViewAbstract::SetOnKeyEventDispatch(std::move(onKeyCallback));
+
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto focusHub = node->GetOrCreateFocusHub();
+    auto& callback = focusHub->focusCallbackEvents_->onKeyEventDispatchCallback_;
+    EXPECT_TRUE(callback);
+
+    /**
+     * @tc.steps: step2. Disable callback.
+     * @tc.expected: callback is null.
+     */
+    ViewAbstract::DisableOnKeyEventDispatch();
+    EXPECT_FALSE(callback);
+
+    /**
+     * @tc.steps: step3. Add callback again.
+     * @tc.expected: callback is not null.
+     */
+    OnKeyConsumeFunc onKeyCallback2 = [](KeyEventInfo& info) -> bool { return false; };
+    ViewAbstract::SetOnKeyEventDispatch(std::move(onKeyCallback2));
+    EXPECT_TRUE(callback);
+    ViewStackProcessor::GetInstance()->instance = nullptr;
+}
+
+#ifdef SUPPORT_DIGITAL_CROWN
+/**
+ * @tc.name: ViewAbstract
+ * @tc.desc: Test DisableOnCrownEvent001 of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, DisableOnCrownEvent001, TestSize.Level1)
+{
+    /**
+    * @tc.steps1: create and put frameNode
+    * @tc.expected: frameNode is't nullptr.
+    */
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+
+    /**
+     * @tc.steps2: Call the function SetOnCrownEvent and DisableOnCrownEvent
+     */
+    OnCrownCallbackFunc onCrownCallback = [](CrownEventInfo& info) {};
+    ViewAbstract::SetOnCrownEvent(AceType::RawPtr(node), std::move(onCrownCallback));
+    ViewAbstract::DisableOnCrownEvent(AceType::RawPtr(node));
+    EXPECT_NE(onCrownCallback, nullptr);
+}
+
+/**
+ * @tc.name: ViewAbstract
+ * @tc.desc: Test DisableOnCrownEvent002 of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, DisableOnCrownEvent002, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    frameNode->GetOrCreateFocusHub();
+
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    focusHub->currentFocus_ = true;
+
+    /**
+     * @tc.steps: Call the function SetOnCrownEvent and DisableOnCrownEvent
+     */
+    OnCrownCallbackFunc onCrownCallback = [](CrownEventInfo& info) {};
+    ViewAbstract::SetOnCrownEvent(std::move(onCrownCallback));
+    ViewAbstract::DisableOnCrownEvent();
+    EXPECT_EQ(ContainerScope::CurrentId(), -1);
+}
+
+/**
+ * @tc.name: ViewAbstract
+ * @tc.desc: Test DisableOnCrownEvent003 of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, DisableOnCrownEvent003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Call the function SetOnCrownEvent, node is nullptr
+     */
+    auto node = AceType::DynamicCast<NG::FrameNode>((AceType*)nullptr);
+    OnCrownCallbackFunc onCrownCallback = [](CrownEventInfo& info) {};
+
+    ViewAbstract::SetOnCrownEvent(node, std::move(onCrownCallback));
+    EXPECT_NE(onCrownCallback, nullptr);
+}
+#endif
+
 } // namespace OHOS::Ace::NG

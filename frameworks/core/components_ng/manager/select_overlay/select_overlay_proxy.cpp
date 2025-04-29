@@ -15,11 +15,6 @@
 
 #include "core/components_ng/manager/select_overlay/select_overlay_proxy.h"
 
-#include <cstdint>
-
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -71,6 +66,13 @@ void SelectOverlayProxy::UpdateSelectMenuInfo(std::function<void(SelectMenuInfo&
     auto pattern = GetSelectOverlayPattern(selectOverlayId_);
     CHECK_NULL_VOID(pattern);
     pattern->UpdateSelectMenuInfo(updateAction);
+}
+
+void SelectOverlayProxy::UpdateAncestorViewPort(const std::optional<RectF>& ancestorViewPort) const
+{
+    auto pattern = GetSelectOverlayPattern(selectOverlayId_);
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateAncestorViewPort(ancestorViewPort);
 }
 
 void SelectOverlayProxy::UpdateShowArea(const RectF& area) const

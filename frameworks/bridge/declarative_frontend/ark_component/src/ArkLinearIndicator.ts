@@ -23,19 +23,11 @@ class LinearIndicatorIndicatorStyleModifier extends ModifierWithKey<LinearIndica
     if (reset) {
       getUINativeModule().linearIndicator.resetIndicatorStyle(node);
     } else {
-      getUINativeModule().linearIndicator.setIndicatorStyle(node,
-        this.value.space, this.value.strokeWidth, this.value.strokeRadius
-        , this.value.trackBackgroundColor, this.value.trackColor);
+      getUINativeModule().linearIndicator.setIndicatorStyle(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
-    return
-    this.stageValue.space !== this.value.space
-      || this.stageValue.strokeWidth !== this.value.strokeWidth
-      || this.stageValue.strokeRadius !== this.value.strokeRadius
-      || this.stageValue.trackBackgroundColor !== this.value.trackBackgroundColor
-      || this.stageValue.trackColor !== this.value.trackColor
-      ;
+    return this.stageValue !== this.value;
   }
 }
 
@@ -75,17 +67,17 @@ class ArkLinearIndicatorComponent extends ArkComponent implements CommonMethod<L
     super(nativePtr, classType);
   }
 
-  indicatorStyle(value: LinearIndicatorStyle) {
+  indicatorStyle(value: LinearIndicatorStyle): LinearIndicatorAttribute {
     modifierWithKey(this._modifiersWithKeys, LinearIndicatorIndicatorStyleModifier.identity, LinearIndicatorIndicatorStyleModifier, value);
     return this;
   }
 
-  indicatorLoop(value: boolean) {
+  indicatorLoop(value: boolean): LinearIndicatorAttribute {
     modifierWithKey(this._modifiersWithKeys, LinearIndicatorIndicatorLoopModifier.identity, LinearIndicatorIndicatorLoopModifier, value);
     return this;
   }
 
-  onChange(value: OnLinearIndicatorChangeCallback) {
+  onChange(value: OnLinearIndicatorChangeCallback): LinearIndicatorAttribute {
     modifierWithKey(this._modifiersWithKeys, LinearIndicatorOnChangeModifier.identity, LinearIndicatorOnChangeModifier, value);
     return this;
   }

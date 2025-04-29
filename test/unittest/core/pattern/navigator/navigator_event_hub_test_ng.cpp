@@ -177,10 +177,9 @@ HWTEST_F(NavigatorEventHubTestNg, NavigatePage005, TestSize.Level1)
     NavigatorEventHub navigatorEventHub;
     navigatorEventHub.SetType(NavigatorType::PUSH);
     // Make IsComponentRecordEnable return false.
-    Recorder::EventRecorder::Get().componentEnable_ = false;
-    Recorder::EventSwitch eventSwitch;
-    eventSwitch.componentEnable = false;
-    Recorder::EventRecorder::Get().UpdateEventSwitch(eventSwitch);
+    auto index = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_COMPONENT);
+    Recorder::EventRecorder::Get().globalSwitch_[index] = true;
+    Recorder::EventRecorder::Get().eventSwitch_[index] = false;
     navigatorEventHub.NavigatePage();
 
     EXPECT_FALSE(Recorder::EventRecorder::Get().IsComponentRecordEnable());
@@ -196,10 +195,9 @@ HWTEST_F(NavigatorEventHubTestNg, NavigatePage006, TestSize.Level1)
     NavigatorEventHub navigatorEventHub;
     navigatorEventHub.SetType(NavigatorType::PUSH);
     // Make IsComponentRecordEnable return true.
-    Recorder::EventRecorder::Get().componentEnable_ = true;
-    Recorder::EventSwitch eventSwitch;
-    eventSwitch.componentEnable = true;
-    Recorder::EventRecorder::Get().UpdateEventSwitch(eventSwitch);
+    auto index = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_COMPONENT);
+    Recorder::EventRecorder::Get().globalSwitch_[index] = true;
+    Recorder::EventRecorder::Get().eventSwitch_[index] = true;
     // Make host NULL.
     navigatorEventHub.AttachHost(nullptr);
     navigatorEventHub.NavigatePage();
@@ -218,10 +216,9 @@ HWTEST_F(NavigatorEventHubTestNg, NavigatePage007, TestSize.Level1)
     NavigatorEventHub navigatorEventHub;
     navigatorEventHub.SetType(NavigatorType::PUSH);
     // Make IsComponentRecordEnable return true.
-    Recorder::EventRecorder::Get().componentEnable_ = true;
-    Recorder::EventSwitch eventSwitch;
-    eventSwitch.componentEnable = true;
-    Recorder::EventRecorder::Get().UpdateEventSwitch(eventSwitch);
+    auto index = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_COMPONENT);
+    Recorder::EventRecorder::Get().globalSwitch_[index] = true;
+    Recorder::EventRecorder::Get().eventSwitch_[index] = true;
     // Make host not NULL.
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     navigatorEventHub.AttachHost(frameNode);

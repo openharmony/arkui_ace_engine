@@ -16,11 +16,15 @@
 #ifndef FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_TOUCH_EVENT_CONVERTOR_H
 #define FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_TOUCH_EVENT_CONVERTOR_H
 
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "frameworks/core/event/touch_event.h"
 #include "frameworks/core/event/mouse_event.h"
 
 namespace OHOS::Ace::NG {
     TouchEvent ConvertToTouchEvent(const std::shared_ptr<MMI::PointerEvent>& srcPointerEvent);
     void ConvertToMouseEvent(MouseEvent& event, const std::shared_ptr<MMI::PointerEvent>& srcPointerEvent);
+    void ConvertToAxisEvent(AxisEvent& event, const std::shared_ptr<MMI::PointerEvent>& srcPointerEvent);
+    void SetClonedPointerEvent(const MMI::PointerEvent* pointerEvent, ArkUITouchEvent* arkUITouchEventCloned);
+    void SetPostPointerEvent(const MMI::PointerEvent* pointerEvent, TouchEvent& touchEvent);
 }
 #endif

@@ -15,13 +15,9 @@
 
 #include "base/log/frame_report.h"
 
-#include <cstdio>
 #include <dlfcn.h>
-#include <unistd.h>
-
 #include <frame_collector.h>
 
-#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {
@@ -86,6 +82,7 @@ bool FrameReport::LoadLibrary()
         CHECK_NULL_RETURN(enableSelfRenderFunc_, false);
         disableSelfRenderFunc_ = (DisableSelfRenderFunc)LoadSymbol("DisableSelfRender");
         CHECK_NULL_RETURN(disableSelfRenderFunc_, false);
+        reportSchedEventFunc_ = (ReportSchedEventFunc)LoadSymbol("ReportSchedEvent");
         frameSchedSoLoaded_ = true;
     }
     return true;
@@ -278,5 +275,14 @@ void FrameReport::DisableSelfRender()
         return;
     }
     disableSelfRenderFunc_();
+}
+
+void FrameReport::ReportSchedEvent(
+    FrameSchedEvent event, const std::unordered_map<std::string, std::string>& payLoad)
+{
+    if (!enable_ || !reportSchedEventFunc_) {
+        return;
+    }
+    reportSchedEventFunc_(event, payLoad);
 }
 } // namespace OHOS::Ace

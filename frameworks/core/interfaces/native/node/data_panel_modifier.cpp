@@ -14,10 +14,7 @@
  */
 #include "core/interfaces/native/node/data_panel_modifier.h"
 
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 #include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
@@ -190,20 +187,42 @@ void ResetTrackShadow(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIDataPanelModifier* GetDataPanelModifier()
 {
-    static const ArkUIDataPanelModifier modifier = { SetCloseEffect, ResetCloseEffect,
-        SetDataPanelTrackBackgroundColor, ResetDataPanelTrackBackgroundColor, SetDataPanelStrokeWidth,
-        ResetDataPanelStrokeWidth, SetValueColors, ResetValueColors, SetTrackShadow, SetNullTrackShadow,
-        ResetTrackShadow };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIDataPanelModifier modifier = {
+        .setCloseEffect = SetCloseEffect,
+        .resetCloseEffect = ResetCloseEffect,
+        .setDataPanelTrackBackgroundColor = SetDataPanelTrackBackgroundColor,
+        .resetDataPanelTrackBackgroundColor = ResetDataPanelTrackBackgroundColor,
+        .setDataPanelStrokeWidth = SetDataPanelStrokeWidth,
+        .resetDataPanelStrokeWidth = ResetDataPanelStrokeWidth,
+        .setValueColors = SetValueColors,
+        .resetValueColors = ResetValueColors,
+        .setTrackShadow = SetTrackShadow,
+        .setNullTrackShadow = SetNullTrackShadow,
+        .resetTrackShadow = ResetTrackShadow,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIDataPanelModifier* GetCJUIDataPanelModifier()
 {
-    static const CJUIDataPanelModifier modifier = { SetCloseEffect, ResetCloseEffect,
-        SetDataPanelTrackBackgroundColor, ResetDataPanelTrackBackgroundColor, SetDataPanelStrokeWidth,
-        ResetDataPanelStrokeWidth, SetValueColors, ResetValueColors, SetTrackShadow, SetNullTrackShadow,
-        ResetTrackShadow };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIDataPanelModifier modifier = {
+        .setCloseEffect = SetCloseEffect,
+        .resetCloseEffect = ResetCloseEffect,
+        .setDataPanelTrackBackgroundColor = SetDataPanelTrackBackgroundColor,
+        .resetDataPanelTrackBackgroundColor = ResetDataPanelTrackBackgroundColor,
+        .setDataPanelStrokeWidth = SetDataPanelStrokeWidth,
+        .resetDataPanelStrokeWidth = ResetDataPanelStrokeWidth,
+        .setValueColors = SetValueColors,
+        .resetValueColors = ResetValueColors,
+        .setTrackShadow = SetTrackShadow,
+        .setNullTrackShadow = SetNullTrackShadow,
+        .resetTrackShadow = ResetTrackShadow,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

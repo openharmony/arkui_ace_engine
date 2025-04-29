@@ -16,6 +16,8 @@ import("//build/templates/abc/ohos_abc.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
+import(
+    "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/files_to_watch.gni")
 
 # declarative frontend source
 template("declarative_frontend") {
@@ -29,8 +31,10 @@ template("declarative_frontend") {
     defines += [ "USE_ARK_ENGINE" ]
     configs = [ "$ace_root:ace_config" ]
 
-    include_dirs =
-        [ "$ace_napi_frameworks/bridge/declarative_frontend/engine/jsi" ]
+    include_dirs = [
+      "$ace_napi_frameworks/bridge/declarative_frontend/engine/jsi",
+      "$ace_root",
+    ]
     if (platform == "ohos_ng" || is_arkui_x) {
       sources = [
         "ng/declarative_frontend_ng.cpp",
@@ -100,13 +104,27 @@ ark_theme_obj_path = base_output_path + "/arkTheme.o"
 jsuicontext_obj_path = base_output_path + "/jsUIContext.o"
 arkcomponent_obj_path = base_output_path + "/arkComponent.o"
 
+action("run_state_mgmt_build") {
+  script = "state_mgmt/build.py"
+  inputs = state_mgmt_release_files_to_watch
+  outputs = [ "$target_out_dir/stateMgmt.js" ]
+  args = [
+    # Paths: 1 StateMgmt root folder. 2. Folder to check need of npm install. 3. stateMgmt.js output path.
+    rebase_path("$ace_root/frameworks/bridge/declarative_frontend/state_mgmt"),
+    rebase_path(
+        "$ace_root/frameworks/bridge/declarative_frontend/state_mgmt/node_modules"),
+    rebase_path("$target_out_dir"),
+    "--release",
+  ]
+}
+
 gen_obj("js_proxyclass") {
-  input = "engine/stateMgmt.js"
+  input = "$target_out_dir/stateMgmt.js"
   if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
     jsproxyclass_obj_path = base_output_path + "/js_proxy_class.c"
   }
   output = jsproxyclass_obj_path
-  snapshot_dep = []
+  snapshot_dep = [ ":run_state_mgmt_build" ]
 }
 
 gen_obj("js_enum_style") {
@@ -181,7 +199,6 @@ template("declarative_js_engine") {
       ":gen_obj_src_ark_theme",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
-      ":gen_obj_src_js_uicontext",
       ":mock",
       ":prefetcher",
       ":shape",
@@ -189,6 +206,12 @@ template("declarative_js_engine") {
       ":x_node",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
     ]
+
+    if (!is_arkui_x) {
+      deps += [ ":uicontext" ]
+    } else {
+      deps += [ ":gen_obj_src_js_uicontext" ]
+    }
 
     configs = [ "$ace_root:ace_config" ]
     if (ace_engine_feature_enable_point_light) {
@@ -198,6 +221,7 @@ template("declarative_js_engine") {
     sources = [
       "engine/bindings_implementation.cpp",
       "engine/declarative_engine_loader.cpp",
+      "engine/functions/js_accessibility_function.cpp",
       "engine/functions/js_animator_function.cpp",
       "engine/functions/js_click_function.cpp",
       "engine/functions/js_clipboard_function.cpp",
@@ -207,6 +231,7 @@ template("declarative_js_engine") {
       "engine/functions/js_function.cpp",
       "engine/functions/js_gesture_function.cpp",
       "engine/functions/js_gesture_judge_function.cpp",
+      "engine/functions/js_gesture_recognizer.cpp",
       "engine/functions/js_hover_function.cpp",
       "engine/functions/js_key_function.cpp",
       "engine/functions/js_mouse_function.cpp",
@@ -241,7 +266,9 @@ template("declarative_js_engine") {
       "jsview/canvas/js_rendering_context_settings.cpp",
       "jsview/dialog/js_alert_dialog.cpp",
       "jsview/dialog/js_custom_dialog_controller.cpp",
+      "jsview/js_accessibility.cpp",
       "jsview/js_animator.cpp",
+      "jsview/js_app_bar_view.cpp",
       "jsview/js_badge.cpp",
       "jsview/js_base_node.cpp",
       "jsview/js_blank.cpp",
@@ -258,6 +285,7 @@ template("declarative_js_engine") {
       "jsview/js_column_split.cpp",
       "jsview/js_common_view.cpp",
       "jsview/js_container_base.cpp",
+      "jsview/js_container_modal_view.cpp",
       "jsview/js_container_span.cpp",
       "jsview/js_content_slot.cpp",
       "jsview/js_counter.cpp",
@@ -270,7 +298,6 @@ template("declarative_js_engine") {
       "jsview/js_environment.cpp",
       "jsview/js_flex.cpp",
       "jsview/js_flex_impl.cpp",
-      "jsview/js_folder_stack.cpp",
       "jsview/js_foreach.cpp",
       "jsview/js_form_link.cpp",
       "jsview/js_gauge.cpp",
@@ -286,10 +313,13 @@ template("declarative_js_engine") {
       "jsview/js_image_animator.cpp",
       "jsview/js_image_span.cpp",
       "jsview/js_indexer.cpp",
+      "jsview/js_indicator.cpp",
       "jsview/js_interactable_view.cpp",
       "jsview/js_keyboard_avoid.cpp",
       "jsview/js_layout_manager.cpp",
+      "jsview/js_layoutable_view.cpp",
       "jsview/js_lazy_foreach.cpp",
+      "jsview/js_lazy_grid.cpp",
       "jsview/js_line.cpp",
       "jsview/js_linear_gradient.cpp",
       "jsview/js_linear_indicator.cpp",
@@ -308,8 +338,10 @@ template("declarative_js_engine") {
       "jsview/js_nav_path_stack.cpp",
       "jsview/js_navdestination.cpp",
       "jsview/js_navdestination_context.cpp",
+      "jsview/js_navdestination_scrollable_processor.cpp",
       "jsview/js_navigation.cpp",
       "jsview/js_navigation_stack.cpp",
+      "jsview/js_navigation_utils.cpp",
       "jsview/js_navigator.cpp",
       "jsview/js_navrouter.cpp",
       "jsview/js_node_container.cpp",
@@ -323,8 +355,8 @@ template("declarative_js_engine") {
       "jsview/js_persistent.cpp",
       "jsview/js_polygon.cpp",
       "jsview/js_polyline.cpp",
+      "jsview/js_popups.cpp",
       "jsview/js_progress.cpp",
-      "jsview/js_qrcode.cpp",
       "jsview/js_radio.cpp",
       "jsview/js_rect.cpp",
       "jsview/js_rect_shape.cpp",
@@ -333,6 +365,7 @@ template("declarative_js_engine") {
       "jsview/js_relative_container.cpp",
       "jsview/js_repeat.cpp",
       "jsview/js_repeat_virtual_scroll.cpp",
+      "jsview/js_repeat_virtual_scroll_2.cpp",
       "jsview/js_richeditor.cpp",
       "jsview/js_row.cpp",
       "jsview/js_row_split.cpp",
@@ -362,6 +395,7 @@ template("declarative_js_engine") {
       "jsview/js_tab_content.cpp",
       "jsview/js_tabs.cpp",
       "jsview/js_tabs_controller.cpp",
+      "jsview/js_tabs_feature.cpp",
       "jsview/js_text.cpp",
       "jsview/js_text_clock.cpp",
       "jsview/js_text_editable_controller.cpp",
@@ -371,10 +405,12 @@ template("declarative_js_engine") {
       "jsview/js_textpicker.cpp",
       "jsview/js_texttimer.cpp",
       "jsview/js_toggle.cpp",
+      "jsview/js_toolbaritem.cpp",
       "jsview/js_touch_handler.cpp",
       "jsview/js_utils.cpp",
       "jsview/js_view.cpp",
       "jsview/js_view_abstract.cpp",
+      "jsview/js_view_abstract_bridge.cpp",
       "jsview/js_view_context.cpp",
       "jsview/js_view_functions.cpp",
       "jsview/js_view_measure_layout.cpp",
@@ -384,6 +420,7 @@ template("declarative_js_engine") {
       "jsview/js_water_flow_sections.cpp",
       "jsview/menu/js_context_menu.cpp",
       "jsview/scroll_bar/js_scroll_bar.cpp",
+      "jsview/text_menu/js_text_menu.cpp",
       "sharedata/js_share_data.cpp",
       "style_string/js_span_object.cpp",
       "style_string/js_span_string.cpp",
@@ -446,7 +483,6 @@ template("declarative_js_engine") {
       "jsview/models/picker_model_impl.cpp",
       "jsview/models/polygon_model_impl.cpp",
       "jsview/models/progress_model_impl.cpp",
-      "jsview/models/qrcode_model_impl.cpp",
       "jsview/models/radio_model_impl.cpp",
       "jsview/models/rect_model_impl.cpp",
       "jsview/models/refresh_model_impl.cpp",
@@ -484,6 +520,21 @@ template("declarative_js_engine") {
       "jsview/models/water_flow_model_impl.cpp",
     ]
 
+    if (!ace_engine_feature_wearable) {
+      sources += [ "jsview/js_folder_stack.cpp" ]
+    }
+
+    if (ace_engine_feature_enable_digital_crown) {
+      sources += [ "engine/functions/js_crown_function.cpp" ]
+    }
+
+    if (qrcodegen_support) {
+      sources += [
+        "jsview/js_qrcode.cpp",
+        "jsview/models/qrcode_model_impl.cpp",
+      ]
+    }
+
     external_deps = [ "graphic_2d:drawing_napi_impl" ]
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
@@ -494,6 +545,9 @@ template("declarative_js_engine") {
         "udmf:udmf_client",
         "udmf:udmf_data_napi",
       ]
+    }
+    if (is_ohos_standard_system && !build_ohos_sdk) {
+      sources += [ "jsview/js_form_button.cpp" ]
     }
 
     # rich components needed by phone and TV. wearable like watch do not need them
@@ -607,7 +661,7 @@ template("declarative_js_engine") {
     if (defined(config.model_component_support) &&
         config.model_component_support) {
       sources += [ "jsview/js_sceneview.cpp" ]
-      external_deps += [ "graphic_3d:3dWidgetAdapterInterface" ]
+      external_deps += [ "graphic_3d:lib3dWidgetAdapter" ]
     }
 
     if (defined(config.use_build_in_js_engine) &&
@@ -632,13 +686,17 @@ template("declarative_js_engine") {
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
     if (is_arkui_x) {
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
-      deps += [ "$ark_ets_path:libark_jsruntime_static" ]
+      deps += [
+        "$ace_graphic/rosen/modules/render_service_base:librender_service_base_static",
+        "$ark_ets_path:libark_jsruntime_static",
+      ]
       if (defined(config.pixel_map_support) && config.pixel_map_support) {
         configs += [ "//foundation/multimedia/image_framework/interfaces/innerkits:image_external_config" ]
       }
     } else {
       external_deps += [
         "ets_runtime:libark_jsruntime",
+        "graphic_2d:librender_service_client",
         "napi:ace_napi",
       ]
     }
@@ -708,7 +766,6 @@ template("declarative_js_engine_ng") {
       ":gen_obj_src_ark_theme",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
-      ":gen_obj_src_js_uicontext",
       ":mock",
       ":prefetcher",
       ":shape",
@@ -717,11 +774,18 @@ template("declarative_js_engine_ng") {
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
     ]
 
+    if (!is_arkui_x) {
+      deps += [ ":uicontext" ]
+    } else {
+      deps += [ ":gen_obj_src_js_uicontext" ]
+    }
+
     configs = [ "$ace_root:ace_config" ]
 
     sources = [
       "engine/bindings_implementation.cpp",
       "engine/declarative_engine_loader.cpp",
+      "engine/functions/js_accessibility_function.cpp",
       "engine/functions/js_animator_function.cpp",
       "engine/functions/js_click_function.cpp",
       "engine/functions/js_clipboard_function.cpp",
@@ -731,6 +795,7 @@ template("declarative_js_engine_ng") {
       "engine/functions/js_function.cpp",
       "engine/functions/js_gesture_function.cpp",
       "engine/functions/js_gesture_judge_function.cpp",
+      "engine/functions/js_gesture_recognizer.cpp",
       "engine/functions/js_hover_function.cpp",
       "engine/functions/js_key_function.cpp",
       "engine/functions/js_mouse_function.cpp",
@@ -776,7 +841,9 @@ template("declarative_js_engine_ng") {
       "jsview/canvas/js_rendering_context_settings.cpp",
       "jsview/dialog/js_alert_dialog.cpp",
       "jsview/dialog/js_custom_dialog_controller.cpp",
+      "jsview/js_accessibility.cpp",
       "jsview/js_animator.cpp",
+      "jsview/js_app_bar_view.cpp",
       "jsview/js_badge.cpp",
       "jsview/js_base_node.cpp",
       "jsview/js_blank.cpp",
@@ -793,6 +860,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_column_split.cpp",
       "jsview/js_common_view.cpp",
       "jsview/js_container_base.cpp",
+      "jsview/js_container_modal_view.cpp",
       "jsview/js_container_span.cpp",
       "jsview/js_content_slot.cpp",
       "jsview/js_counter.cpp",
@@ -803,7 +871,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_ellipse_shape.cpp",
       "jsview/js_flex.cpp",
       "jsview/js_flex_impl.cpp",
-      "jsview/js_folder_stack.cpp",
       "jsview/js_foreach.cpp",
       "jsview/js_form_link.cpp",
       "jsview/js_gauge.cpp",
@@ -819,12 +886,17 @@ template("declarative_js_engine_ng") {
       "jsview/js_image_animator.cpp",
       "jsview/js_image_span.cpp",
       "jsview/js_indexer.cpp",
+      "jsview/js_indicator.cpp",
       "jsview/js_interactable_view.cpp",
       "jsview/js_keyboard_avoid.cpp",
       "jsview/js_layout_manager.cpp",
+      "jsview/js_layoutable_view.cpp",
       "jsview/js_lazy_foreach.cpp",
+      "jsview/js_lazy_grid.cpp",
       "jsview/js_line.cpp",
       "jsview/js_linear_gradient.cpp",
+      "jsview/js_linear_indicator.cpp",
+      "jsview/js_linear_indicator_controller.cpp",
       "jsview/js_list.cpp",
       "jsview/js_list_item.cpp",
       "jsview/js_list_item_group.cpp",
@@ -838,8 +910,10 @@ template("declarative_js_engine_ng") {
       "jsview/js_nav_path_stack.cpp",
       "jsview/js_navdestination.cpp",
       "jsview/js_navdestination_context.cpp",
+      "jsview/js_navdestination_scrollable_processor.cpp",
       "jsview/js_navigation.cpp",
       "jsview/js_navigation_stack.cpp",
+      "jsview/js_navigation_utils.cpp",
       "jsview/js_navigator.cpp",
       "jsview/js_navrouter.cpp",
       "jsview/js_node_container.cpp",
@@ -849,6 +923,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_path_shape.cpp",
       "jsview/js_polygon.cpp",
       "jsview/js_polyline.cpp",
+      "jsview/js_popups.cpp",
       "jsview/js_progress.cpp",
       "jsview/js_radio.cpp",
       "jsview/js_rating.cpp",
@@ -858,6 +933,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_refresh.cpp",
       "jsview/js_repeat.cpp",
       "jsview/js_repeat_virtual_scroll.cpp",
+      "jsview/js_repeat_virtual_scroll_2.cpp",
       "jsview/js_richeditor.cpp",
       "jsview/js_row.cpp",
       "jsview/js_row_split.cpp",
@@ -885,6 +961,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_tab_content.cpp",
       "jsview/js_tabs.cpp",
       "jsview/js_tabs_controller.cpp",
+      "jsview/js_tabs_feature.cpp",
       "jsview/js_text.cpp",
       "jsview/js_text_clock.cpp",
       "jsview/js_text_editable_controller.cpp",
@@ -894,21 +971,32 @@ template("declarative_js_engine_ng") {
       "jsview/js_textpicker.cpp",
       "jsview/js_texttimer.cpp",
       "jsview/js_toggle.cpp",
+      "jsview/js_toolbaritem.cpp",
       "jsview/js_utils.cpp",
       "jsview/js_view.cpp",
       "jsview/js_view_abstract.cpp",
+      "jsview/js_view_abstract_bridge.cpp",
       "jsview/js_view_context.cpp",
       "jsview/js_water_flow.cpp",
       "jsview/js_water_flow_item.cpp",
       "jsview/js_water_flow_sections.cpp",
       "jsview/menu/js_context_menu.cpp",
       "jsview/scroll_bar/js_scroll_bar.cpp",
+      "jsview/text_menu/js_text_menu.cpp",
       "style_string/js_span_object.cpp",
       "style_string/js_span_string.cpp",
 
       # ark_theme
       "ark_theme/theme_apply/js_with_theme.cpp",
     ]
+
+    if (!ace_engine_feature_wearable) {
+      sources += [ "jsview/js_folder_stack.cpp" ]
+    }
+
+    if (ace_engine_feature_enable_digital_crown) {
+      sources += [ "engine/functions/js_crown_function.cpp" ]
+    }
 
     sources += [
       "$ace_root/frameworks/bridge/js_frontend/engine/common/js_engine.cpp",
@@ -922,9 +1010,11 @@ template("declarative_js_engine_ng") {
     if (!defined(config.use_components_lib) || !config.use_components_lib) {
       sources += [
         "jsview/js_pattern_lock.cpp",
-        "jsview/js_qrcode.cpp",
         "jsview/js_relative_container.cpp",
       ]
+      if (qrcodegen_support) {
+        sources += [ "jsview/js_qrcode.cpp" ]
+      }
     }
 
     if (defined(config.video_components_support) &&
@@ -959,7 +1049,9 @@ template("declarative_js_engine_ng") {
         ]
       }
     }
-
+    if (is_ohos_standard_system && !build_ohos_sdk) {
+      sources += [ "jsview/js_form_button.cpp" ]
+    }
     if (defined(config.enable_ability_component) &&
         config.enable_ability_component) {
       sources += [
@@ -1019,7 +1111,7 @@ template("declarative_js_engine_ng") {
     if (defined(config.model_component_support) &&
         config.model_component_support) {
       sources += [ "jsview/js_sceneview.cpp" ]
-      external_deps += [ "graphic_3d:3dWidgetAdapterInterface" ]
+      external_deps += [ "graphic_3d:lib3dWidgetAdapter" ]
     }
 
     if (defined(config.use_build_in_js_engine) &&
@@ -1046,10 +1138,11 @@ template("declarative_js_engine_ng") {
         "jsview/js_paste_button.cpp",
         "jsview/js_save_button.cpp",
         "jsview/js_sec_button_base.cpp",
-        "jsview/menu/js_context_menu.cpp",
+        "jsview/text_menu/js_text_menu.cpp",
       ]
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
       deps += [
+        "$ace_graphic/rosen/modules/render_service_base:librender_service_base_static",
         "$ark_ets_path:libark_jsruntime_static",
         "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/drawing:drawing_napi_impl",
       ]
@@ -1059,6 +1152,7 @@ template("declarative_js_engine_ng") {
     } else {
       external_deps += [
         "ets_runtime:libark_jsruntime",
+        "graphic_2d:librender_service_client",
         "napi:ace_napi",
       ]
     }
@@ -1155,6 +1249,28 @@ ohos_abc("x_node") {
 ohos_abc("prefetcher") {
   sources = [ "engine/jsPrefetcher.js" ]
   output_name = "prefetcher"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+action("gen_uicontext_ohos") {
+  script = "$ace_root/build/tools/gen_uicontext_ohos.py"
+  inputs = [
+    "$ace_root/frameworks/bridge/declarative_frontend/engine/jsUIContext.js",
+  ]
+  outputs = [ "$base_output_path/jsUIContext_ohos.js" ]
+  args = [
+    rebase_path(inputs[0]),
+    rebase_path(outputs[0]),
+  ]
+}
+
+ohos_abc("uicontext") {
+  sources = [ "$base_output_path/jsUIContext_ohos.js" ]
+  output_name = "uicontext"
+  deps = [ ":gen_uicontext_ohos" ]
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui"
   subsystem_name = ace_engine_subsystem

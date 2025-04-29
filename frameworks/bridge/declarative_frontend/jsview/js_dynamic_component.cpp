@@ -19,7 +19,7 @@
 #include <functional>
 #include <string>
 
-#include "commonlibrary/ets_utils/js_concurrent_module/worker/worker.h"
+#include "worker.h"
 #include "jsnapi.h"
 #include "native_engine.h"
 
@@ -36,15 +36,24 @@
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
 #include "core/components_ng/base/view_abstract_model.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_model.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 
 using namespace Commonlibrary::Concurrent::WorkerModule;
-
+namespace OHOS::Ace {
+NG::DynamicModelNG* NG::DynamicModelNG::GetInstance()
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        LOGE("Get DynamicModelNG in non NewPipeline.");
+    }
+    static NG::DynamicModelNG instance;
+    return &instance;
+}
+} // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
+const CalcDimension DYNAMIC_COMPONENT_MIN_WIDTH(10.0f, DimensionUnit::VP);
+const CalcDimension DYNAMIC_COMPONENT_MIN_HEIGHT(10.0f, DimensionUnit::VP);
 
 void JSDynamicComponent::JSBind(BindingTarget globalObj)
 {
@@ -58,24 +67,47 @@ void JSDynamicComponent::JSBind(BindingTarget globalObj)
     JSClass<JSDynamicComponent>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSDynamicComponent>::StaticMethod("width", &JSDynamicComponent::Width, opt);
     JSClass<JSDynamicComponent>::StaticMethod("height", &JSDynamicComponent::Height, opt);
+    JSClass<JSDynamicComponent>::StaticMethod("onError", &JSDynamicComponent::JsOnError, opt);
+    JSClass<JSDynamicComponent>::StaticMethod("isReportFrameEvent",
+        &JSDynamicComponent::SetIsReportFrameEvent, opt);
     JSClass<JSDynamicComponent>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSDynamicComponent::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        TAG_LOGW(AceLogTag::ACE_ISOLATED_COMPONENT, "DynamicComponent argument is invalid");
+        TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "DynamicComponent argument is invalid");
         return;
     }
     auto dynamicComponentArg = JSRef<JSObject>::Cast(info[0]);
     auto hapPathValue = dynamicComponentArg->GetProperty("hapPath");
     auto abcPathValue = dynamicComponentArg->GetProperty("abcPath");
     auto entryPointValue = dynamicComponentArg->GetProperty("entryPoint");
-    if (!hapPathValue->IsString() || !abcPathValue->IsString() || !entryPointValue->IsString()) {
-        TAG_LOGW(AceLogTag::ACE_ISOLATED_COMPONENT, "DynamicComponent argument type is invalid");
+    auto backgroundTransparentValue = dynamicComponentArg->GetProperty("backgroundTransparent");
+    if (!entryPointValue->IsString()) {
+        TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "DynamicComponent argument type is invalid");
         return;
     }
-
+    auto entryPoint = entryPointValue->ToString();
+    bool backgroundTransparent = true;
+    if (backgroundTransparentValue->IsBoolean()) {
+        backgroundTransparent = backgroundTransparentValue->ToBoolean();
+    }
+    NG::UIExtensionConfig config;
+    config.sessionType = NG::SessionType::DYNAMIC_COMPONENT;
+    config.backgroundTransparent = backgroundTransparent;
+    NG::DynamicModelNG::GetInstance()->Create(config);
+    ViewAbstractModel::GetInstance()->SetWidth(DYNAMIC_COMPONENT_MIN_WIDTH);
+    ViewAbstractModel::GetInstance()->SetHeight(DYNAMIC_COMPONENT_MIN_HEIGHT);
+    ViewAbstractModel::GetInstance()->SetMinWidth(DYNAMIC_COMPONENT_MIN_WIDTH);
+    ViewAbstractModel::GetInstance()->SetMinHeight(DYNAMIC_COMPONENT_MIN_HEIGHT);
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<NG::DynamicPattern>();
+    if (pattern && pattern->HasDynamicRenderer()) {
+        TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "dynamic renderer already exists");
+        return;
+    }
     auto hostEngine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_VOID(hostEngine);
     NativeEngine* hostNativeEngine = hostEngine->GetNativeEngine();
@@ -85,30 +117,69 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     napi_value nativeValue = hostNativeEngine->ValueToNapiValue(valueWrapper);
     Worker* worker = nullptr;
     napi_unwrap(reinterpret_cast<napi_env>(hostNativeEngine), nativeValue, reinterpret_cast<void**>(&worker));
-    TAG_LOGD(AceLogTag::ACE_ISOLATED_COMPONENT, "worker running=%{public}d,  worker name=%{public}s",
+    if (worker == nullptr || entryPoint.empty()) {
+        TAG_LOGE(AceLogTag::ACE_DYNAMIC_COMPONENT, "worker is nullptr or entryPoint is empty");
+        NG::DynamicModelNG::GetInstance()->InitializeDynamicComponent(
+            AceType::Claim(frameNode), "", "", entryPoint, nullptr);
+        return;
+    }
+
+    TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "worker running=%{public}d, worker name=%{public}s",
         worker->IsRunning(), worker->GetName().c_str());
-    auto hapPath = hapPathValue->ToString();
-    auto abcPath = abcPathValue->ToString();
-    auto entryPoint = entryPointValue->ToString();
-
-    UIExtensionModel::GetInstance()->Create();
-    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     auto instanceId = Container::CurrentId();
-
-    worker->RegisterCallbackForWorkerEnv([instanceId, weak = AceType::WeakClaim(frameNode), hapPath,
-                                             abcPath, entryPoint](napi_env env) {
+    worker->RegisterCallbackForWorkerEnv([instanceId,
+        weak = AceType::WeakClaim(frameNode), entryPoint](napi_env env) {
         ContainerScope scope(instanceId);
         auto container = Container::Current();
         container->GetTaskExecutor()->PostTask(
-            [weak, hapPath, abcPath, entryPoint, env]() {
+            [weak, entryPoint, env]() {
                 auto frameNode = weak.Upgrade();
                 CHECK_NULL_VOID(frameNode);
-                UIExtensionModel::GetInstance()->InitializeDynamicComponent(
-                    frameNode, hapPath, abcPath, entryPoint, env);
+                NG::DynamicModelNG::GetInstance()->InitializeDynamicComponent(
+                    frameNode, "", "", entryPoint, env);
             },
             TaskExecutor::TaskType::UI, "ArkUIDynamicComponentInitialize");
     });
+}
+
+void JSDynamicComponent::SetIsReportFrameEvent(const JSCallbackInfo& info)
+{
+    bool isReportFrameEvent = false;
+    if (info[0]->IsBoolean()) {
+        isReportFrameEvent = info[0]->ToBoolean();
+    }
+
+    NG::DynamicModelNG::GetInstance()->SetIsReportFrameEvent(isReportFrameEvent);
+}
+
+void JSDynamicComponent::JsOnError(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        TAG_LOGW(AceLogTag::ACE_ISOLATED_COMPONENT, "onError argument is invalid");
+        return;
+    }
+
+    WeakPtr<NG::FrameNode> frameNode =
+        AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto execCtx = info.GetExecutionContext();
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto instanceId = Container::CurrentId();
+    auto onError = [execCtx, func = std::move(jsFunc), instanceId, node = frameNode]
+        (int32_t code, const std::string& name, const std::string& message) {
+            ContainerScope scope(instanceId);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("DynamicComponent.onError");
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateCurrentActiveNode(node);
+            JSRef<JSObject> obj = JSRef<JSObject>::New();
+            obj->SetProperty<int32_t>("code", code);
+            obj->SetProperty<std::string>("name", name);
+            obj->SetProperty<std::string>("message", message);
+            auto returnValue = JSRef<JSVal>::Cast(obj);
+            func->ExecuteJS(1, &returnValue);
+        };
+    NG::DynamicModelNG::GetInstance()->SetPlatformOnError(std::move(onError));
 }
 
 void JSDynamicComponent::SetOnSizeChanged(const JSCallbackInfo& info)
@@ -117,29 +188,25 @@ void JSDynamicComponent::SetOnSizeChanged(const JSCallbackInfo& info)
 
 void JSDynamicComponent::Width(const JSCallbackInfo& info)
 {
-    JSViewAbstract::JsWidth(info);
-
-    CalcDimension value;
-    bool parseResult = ParseJsDimensionVpNG(info[0], value);
-    if (NearEqual(value.Value(), 0)) {
-        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
-        UIExtensionModel::GetInstance()->SetAdaptiveWidth(true);
+    if (info[0]->IsUndefined()) {
         return;
     }
-    UIExtensionModel::GetInstance()->SetAdaptiveWidth(!parseResult || value.Unit() == DimensionUnit::AUTO);
+
+    CalcDimension value;
+    if (JSViewAbstract::ParseJsDimensionVpNG(info[0], value)) {
+        ViewAbstractModel::GetInstance()->SetWidth(value);
+    }
 }
 
 void JSDynamicComponent::Height(const JSCallbackInfo& info)
 {
-    JSViewAbstract::JsHeight(info);
-
-    CalcDimension value;
-    bool parseResult = ParseJsDimensionVpNG(info[0], value);
-    if (NearEqual(value.Value(), 0)) {
-        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
-        UIExtensionModel::GetInstance()->SetAdaptiveHeight(true);
+    if (info[0]->IsUndefined()) {
         return;
     }
-    UIExtensionModel::GetInstance()->SetAdaptiveHeight(!parseResult || value.Unit() == DimensionUnit::AUTO);
+
+    CalcDimension value;
+    if (JSViewAbstract::ParseJsDimensionVpNG(info[0], value)) {
+        ViewAbstractModel::GetInstance()->SetHeight(value);
+    }
 }
 } // namespace OHOS::Ace::Framework

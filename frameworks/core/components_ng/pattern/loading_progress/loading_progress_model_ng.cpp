@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +15,7 @@
 
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 void LoadingProgressModelNG::Create()
@@ -30,6 +26,13 @@ void LoadingProgressModelNG::Create()
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::LOADING_PROGRESS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LoadingProgressPattern>(); });
     stack->Push(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    RefPtr<ProgressTheme> theme = pipeline->GetTheme<ProgressTheme>(frameNode->GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
+    if (frameNode->GetThemeScopeId()) {
+        ACE_UPDATE_PAINT_PROPERTY(LoadingProgressPaintProperty, Color, theme->GetLoadingColor());
+    }
 }
 RefPtr<FrameNode> LoadingProgressModelNG::CreateFrameNode(int32_t nodeId)
 {
@@ -39,6 +42,11 @@ RefPtr<FrameNode> LoadingProgressModelNG::CreateFrameNode(int32_t nodeId)
 }
 void LoadingProgressModelNG::SetColor(const Color& value)
 {
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetColorLock(true);
     ACE_UPDATE_PAINT_PROPERTY(LoadingProgressPaintProperty, Color, value);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
@@ -48,6 +56,28 @@ void LoadingProgressModelNG::SetColor(const Color& value)
 void LoadingProgressModelNG::SetEnableLoading(bool enable)
 {
     ACE_UPDATE_PAINT_PROPERTY(LoadingProgressPaintProperty, EnableLoading, enable);
+}
+
+void LoadingProgressModelNG::ResetColor()
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetColorLock(false);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(LoadingProgressPaintProperty, Color, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorFlag);
+}
+
+void LoadingProgressModelNG::SetForegroundColorParseFailed(bool isParseFailed)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetForegroundColorParseFailed(isParseFailed);
 }
 
 uint32_t LoadingProgressModelNG::GetColor(FrameNode* frameNode)
@@ -88,8 +118,39 @@ void LoadingProgressModelNG::SetForegroundColor(FrameNode* frameNode, const Colo
 
 void LoadingProgressModelNG::SetBuilderFunc(FrameNode* frameNode, NG::LoadingProgressMakeCallback&& makeFunc)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetBuilderFunc(std::move(makeFunc));
+}
+
+void LoadingProgressModelNG::ResetColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(LoadingProgressPaintProperty, Color, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorFlag, frameNode);
+}
+
+void LoadingProgressModelNG::ResetForegroundColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(LoadingProgressPaintProperty, Color, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorFlag, frameNode);
+}
+
+void LoadingProgressModelNG::SetForegroundColorParseFailed(FrameNode* frameNode, bool isParseFailed)
+{
+    auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetForegroundColorParseFailed(isParseFailed);
+}
+
+void LoadingProgressModelNG::SetColorParseFailed(FrameNode* frameNode, bool isParseFailed)
+{
+    auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetColorLock(isParseFailed);
 }
 } // namespace OHOS::Ace::NG

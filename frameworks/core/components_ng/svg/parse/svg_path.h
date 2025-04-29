@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_PATH_H
 
 #include "frameworks/core/components_ng/svg/parse/svg_graphic.h"
-
+#include "core/components_ng/render/drawing.h"
 namespace OHOS::Ace::NG {
 
 class SvgPath : public SvgGraphic {
@@ -30,11 +30,9 @@ public:
 
     bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
 
-#ifndef USE_ROSEN_DRAWING
-    SkPath AsPath(const Size& viewPort) const override;
-#else
     RSRecordingPath AsPath(const Size& viewPort) const override;
-#endif
+    RSRecordingPath AsPath(const SvgLengthScaleRule& /* lengthRule */) override;
+    Rect GetobjectBoundingBox(const SvgLengthScaleRule& lengthRule);
 private:
     std::string d_;
 };

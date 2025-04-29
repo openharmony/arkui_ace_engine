@@ -14,7 +14,7 @@
  */
 #define private public
 #define protected public
-#include "core/components_ng/pattern/ui_extension/session_wrapper_impl.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.h"
 
 #include <cmath>
 #include <memory>
@@ -85,8 +85,13 @@ int32_t SessionWrapperImpl::GetSessionId() const
 
 const std::shared_ptr<AAFwk::Want> SessionWrapperImpl::GetWant()
 {
-    return nullptr;
+    RefPtr<WantWrap> wantWrap = AceType::MakeRefPtr<WantWrapOhos>("123", "123");
+    auto wantWrapOhos = AceType::DynamicCast<WantWrapOhos>(wantWrap);
+    auto want = wantWrapOhos->GetWant();
+    return std::make_shared<AAFwk::Want>(want);
 }
+
+void SessionWrapperImpl::UpdateInstanceId(int32_t instanceId) {}
 
 bool SessionWrapperImpl::NotifyFocusEventSync(bool isFocus)
 {
@@ -153,19 +158,30 @@ void SessionWrapperImpl::NotifyCreate()
 {
 }
 
+RefPtr<SystemWindowScene> SessionWrapperImpl::GetWindowScene()
+{
+    return nullptr;
+}
+
 int32_t SessionWrapperImpl::GetWindowSceneId()
 {
     return 1;
+}
+
+Rosen::WSRect SessionWrapperImpl::GetWindowSceneRect()
+{
+    Rosen::WSRect rect = {0, 0, 0, 0};
+    return rect;
 }
 
 void SessionWrapperImpl::NotifyForeground()
 {
 }
 
-void SessionWrapperImpl::NotifyBackground()
+void SessionWrapperImpl::NotifyBackground(bool isHandleError)
 {
 }
-void SessionWrapperImpl::NotifyDestroy()
+void SessionWrapperImpl::NotifyDestroy(bool isHandleError)
 {
 }
 
@@ -231,14 +247,17 @@ void SessionWrapperImpl::NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea
 {
 }
 
-bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaChangeInfo> info) const
+bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
+    sptr<Rosen::OccupiedAreaChangeInfo> info, bool needWaitLayout)
 {
     return true;
 }
 
-void SessionWrapperImpl::SetDensityDpiImpl(bool isDensityDpi)
-{
-}
+void SessionWrapperImpl::OnReleaseDone()
+{}
+
+void SessionWrapperImpl::OnExtensionDetachToDisplay()
+{}
 
 void SessionWrapperImpl::SendDataAsync(const AAFwk::WantParams& params) const
 {
@@ -248,4 +267,33 @@ int32_t SessionWrapperImpl::SendDataSync(const AAFwk::WantParams& wantParams, AA
 {
     return 1;
 }
+
+void SessionWrapperImpl::UpdateSessionViewportConfig()
+{
+}
+
+uint32_t SessionWrapperImpl::GetReasonDump() const
+{
+    return 1;
+}
+
+void SessionWrapperImpl::NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+}
+
+bool SessionWrapperImpl::SendBusinessDataSyncReply(
+    UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply, RSSubsystemId subSystemId)
+{
+    return false;
+}
+
+bool SessionWrapperImpl::SendBusinessData(
+    UIContentBusinessCode code, const AAFwk::Want& data, BusinessDataSendType type, RSSubsystemId subSystemId)
+{
+    return false;
+}
+
+void SessionWrapperImpl::NotifyHostWindowMode(int32_t mode) {}
+
+void SessionWrapperImpl::ReDispatchWantParams() {}
 } // namespace OHOS::Ace::NG

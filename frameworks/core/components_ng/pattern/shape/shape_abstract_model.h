@@ -29,6 +29,7 @@ public:
     virtual ~ShapeAbstractModel() = default;
     virtual void SetStroke(const Color& color);
     virtual void SetFill(const Color& color);
+    virtual void SetForegroundColor(const Color& color);
     virtual void SetStrokeDashOffset(const Ace::Dimension& dashOffset);
     virtual void SetStrokeLineCap(int lineCapStyle);
     virtual void SetStrokeLineJoin(int lineJoinStyle);
@@ -40,10 +41,6 @@ public:
     virtual void SetAntiAlias(bool antiAlias);
     virtual void SetWidth(Dimension& width);
     virtual void SetHeight(Dimension& height);
-
-private:
-    static std::unique_ptr<ShapeAbstractModel> instance_;
-    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_ABSTRACT_MODEL_H

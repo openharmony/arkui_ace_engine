@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,6 +39,7 @@ public:
     void SetOnDateChange(std::function<void(const std::string)>&& onChange) override;
     void SetFontSize(const Dimension& value) override;
     void SetTextColor(const Color& value) override;
+    void ResetTextColor() override;
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
@@ -47,8 +48,12 @@ public:
     void InitFontDefault(const TextStyle& textStyle) override;
     void SetDateTimeOptions(const ZeroPrefixType& hourType) override;
 
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static RefPtr<TextClockController> InitTextController(FrameNode* frameNode);
     static void SetFormat(FrameNode* frameNode, const std::string& format);
+    static void SetHoursWest(FrameNode* frameNode, float hoursWest);
     static void SetFontColor(FrameNode* frameNode, const Color& value);
+    static void ResetFontColor(FrameNode* frameNode);
     static void SetFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetFontStyle(FrameNode* frameNode, Ace::FontStyle value);
     static void SetFontWeight(FrameNode* frameNode, FontWeight value);
@@ -56,7 +61,11 @@ public:
     static void SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetBuilderFunc(FrameNode* frameNode, TextClockMakeCallback&& jsMake);
+    static void InitFontDefault(FrameNode* frameNode, const TextStyle& textStyle);
     static void SetDateTimeOptions(FrameNode* frameNode, const ZeroPrefixType& hourType);
+    static void SetJSTextClockController(FrameNode* frameNode, const RefPtr<Referenced>& controller);
+    static RefPtr<Referenced> GetJSTextClockController(FrameNode* frameNode);
+    static void SetOnDateChange(FrameNode* frameNode, std::function<void(const std::string)>&& onChange);
 };
 } // namespace OHOS::Ace::NG
 

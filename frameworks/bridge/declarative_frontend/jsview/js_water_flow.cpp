@@ -17,9 +17,8 @@
 
 #include <cstdint>
 #include <vector>
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
@@ -166,6 +165,36 @@ void JSWaterFlow::UpdateWaterFlowSectionsByFrameNode(
     UpdateSections(args, sections, waterFlowSections);
 }
 
+RefPtr<NG::UINode> SetWaterFlowBuilderNode(const JSRef<JSObject>& footerJsObject)
+{
+    JSRef<JSVal> builderNodeParam = footerJsObject->GetProperty("builderNode_");
+    if (builderNodeParam->IsObject()) {
+        auto builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
+        JSRef<JSVal> nodePtr = builderNodeObject->GetProperty("nodePtr_");
+        if (!nodePtr.IsEmpty()) {
+            const auto* vm = nodePtr->GetEcmaVM();
+            auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
+            auto* myUINode = reinterpret_cast<NG::UINode*>(node);
+            if (!myUINode) {
+                return nullptr;
+            }
+            auto refPtrUINode = AceType::Claim(myUINode);
+            return refPtrUINode;
+        }
+    }
+    return nullptr;
+}
+
+void JSWaterFlow::UpdateWaterFlowFooter(NG::FrameNode* frameNode, const JSRef<JSVal>& args)
+{
+    CHECK_NULL_VOID(args->IsObject());
+    JSRef<JSObject> footerJsObject = JSRef<JSObject>::Cast(args); // 4 is the index of footerContent
+    if (footerJsObject->HasProperty("builderNode_")) {
+        RefPtr<NG::UINode> refPtrUINode = SetWaterFlowBuilderNode(footerJsObject);
+        NG::WaterFlowModelNG::SetWaterflowFooterWithFrameNode(frameNode, refPtrUINode);
+    }
+}
+
 void JSWaterFlow::Create(const JSCallbackInfo& args)
 {
     if (args.Length() > 1) {
@@ -206,6 +235,16 @@ void JSWaterFlow::Create(const JSCallbackInfo& args)
     } else {
         WaterFlowModel::GetInstance()->ResetSections();
 
+        if (obj->HasProperty("footerContent")) {
+            RefPtr<NG::UINode> refPtrUINode = nullptr;
+            auto footerContentObject = obj->GetProperty("footerContent");
+            if (footerContentObject->IsObject()) {
+                auto footerJsObject = JSRef<JSObject>::Cast(footerContentObject);
+                refPtrUINode = SetWaterFlowBuilderNode(footerJsObject);
+            }
+            WaterFlowModel::GetInstance()->SetFooterWithFrameNode(refPtrUINode);
+            return;
+        }
         if (footerObject->IsFunction()) {
             // ignore footer if sections are present
             auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(footerObject));
@@ -395,9 +434,7 @@ void JSWaterFlow::ReachStartCallback(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onReachStart");
-#endif
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onReachStart");
             return;
         };
         WaterFlowModel::GetInstance()->SetOnReachStart(std::move(onReachStart));
@@ -410,9 +447,7 @@ void JSWaterFlow::ReachEndCallback(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onReachEnd");
-#endif
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onReachEnd");
             return;
         };
         WaterFlowModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));
@@ -461,22 +496,26 @@ void JSWaterFlow::SetCachedCount(const JSCallbackInfo& info)
             cachedCount = 1;
         }
     }
-
-    WaterFlowModel::GetInstance()->SetCachedCount(cachedCount);
+    bool show = false;
+    if (info.Length() > 1) {
+        show = info[1]->ToBoolean();
+    }
+    WaterFlowModel::GetInstance()->SetCachedCount(cachedCount, show);
 }
 
 void JSWaterFlow::SetEdgeEffect(const JSCallbackInfo& info)
 {
     auto edgeEffect = WaterFlowModel::GetInstance()->GetEdgeEffect();
+    auto effectEdge = EffectEdge::ALL;
     if (info.Length() > 0) {
         edgeEffect = JSScrollable::ParseEdgeEffect(info[0], edgeEffect);
     }
     auto alwaysEnabled = WaterFlowModel::GetInstance()->GetAlwaysEnableEdgeEffect();
     if (info.Length() > 1) {
-        alwaysEnabled =
-            JSScrollable::ParseAlwaysEnable(info[1], alwaysEnabled);
+        alwaysEnabled = JSScrollable::ParseAlwaysEnable(info[1], alwaysEnabled);
+        effectEdge = JSScrollable::ParseEffectEdge(info[1]);
     }
-    WaterFlowModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled);
+    WaterFlowModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled, effectEdge);
 }
 
 void JSWaterFlow::JsOnScroll(const JSCallbackInfo& args)
@@ -525,9 +564,7 @@ void JSWaterFlow::JsOnScrollIndex(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto params = ConvertToJSValues(first, last);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onScrollIndex");
-#endif
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onScrollIndex");
             return;
         };
         WaterFlowModel::GetInstance()->SetOnScrollIndex(std::move(onScrollIndex));

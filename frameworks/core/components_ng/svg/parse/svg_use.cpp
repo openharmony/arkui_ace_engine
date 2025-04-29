@@ -15,7 +15,6 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_use.h"
 
-#include "base/utils/utils.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -52,6 +51,29 @@ RSRecordingPath SvgUse::AsPath(const Size& viewPort) const
     return refSvgNode->AsPath(viewPort);
 }
 
+RSRecordingPath SvgUse::AsPath(const SvgLengthScaleRule& lengthRule)
+{
+    auto svgContext = svgContext_.Upgrade();
+    CHECK_NULL_RETURN(svgContext, RSRecordingPath());
+    if (attributes_.href.empty()) {
+        LOGE("href is empty");
+        return {};
+    }
+    if (isDrawingPath_) {
+        LOGW("SvgUse::AsPath draw path is still in processing");
+        return RSRecordingPath();
+    }
+    isDrawingPath_ = true;
+    auto refSvgNode = svgContext->GetSvgNodeById(attributes_.href);
+    CHECK_NULL_RETURN(refSvgNode, RSRecordingPath());
+
+    AttributeScope scope(refSvgNode);
+    refSvgNode->InheritAttr(attributes_);
+    auto path = refSvgNode->AsPath(lengthRule);
+    isDrawingPath_ = false;
+    return path;
+}
+
 void SvgUse::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color)
 {
     auto svgContext = svgContext_.Upgrade();
@@ -61,14 +83,58 @@ void SvgUse::OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Co
     }
     auto refSvgNode = svgContext->GetSvgNodeById(attributes_.href);
     CHECK_NULL_VOID(refSvgNode);
-
-    if (useAttr_.x.Value() != 0 || useAttr_.y.Value() != 0) {
-        canvas.Translate(useAttr_.x.Value(), useAttr_.y.Value());
+    auto useX = useAttr_.x.Value();
+    if (useAttr_.x.Unit() == DimensionUnit::PERCENT) {
+        useX = useX * layout.Width();
+    }
+    auto useY = useAttr_.y.Value();
+    if (useAttr_.y.Unit() == DimensionUnit::PERCENT) {
+        useY = useY * layout.Height();
+    }
+    if (!NearEqual(useX, 0.0) || !NearEqual(useY, 0.0)) {
+        canvas.Translate(useX, useY);
     }
     AttributeScope scope(refSvgNode);
     refSvgNode->InheritUseAttr(attributes_);
 
     refSvgNode->Draw(canvas, layout, color);
+}
+
+void SvgUse::ApplyOpacity(RSCanvas& canvas)
+{
+    if (!attributes_.hasOpacity) {
+        LOGD("SvgUse::ApplyOpacity has no opacity");
+        return;
+    }
+    RSBrush brush;
+    brush.SetAlphaF(attributes_.opacity);
+    RSSaveLayerOps slo(nullptr, &brush);
+    canvas.SaveLayer(slo);
+}
+
+void SvgUse::OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
+{
+    auto svgContext = svgContext_.Upgrade();
+    CHECK_NULL_VOID(svgContext);
+    if (attributes_.href.empty()) {
+        return;
+    }
+    // Create New coordinate system
+    SvgCoordinateSystemContext useContext(lengthRule.GetContainerRect(), lengthRule.GetViewPort());
+    auto useRule = useContext.BuildScaleRule(SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    useRule.SetUseFillColor(lengthRule.UseFillColor());
+    auto refSvgNode = svgContext->GetSvgNodeById(attributes_.href);
+    CHECK_NULL_VOID(refSvgNode);
+    auto useX = GetRegionPosition(useAttr_.x, useRule, SvgLengthType::HORIZONTAL);
+    auto useY = GetRegionPosition(useAttr_.y, useRule, SvgLengthType::VERTICAL);
+    if (!NearEqual(useX, 0.0) || !NearEqual(useY, 0.0)) {
+        canvas.Translate(useX, useY);
+    }
+    AttributeScope scope(refSvgNode);
+    refSvgNode->InheritAttr(attributes_);
+    ApplyOpacity(canvas);
+
+    refSvgNode->Draw(canvas, useRule);
 }
 
 bool SvgUse::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)

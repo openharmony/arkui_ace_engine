@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 
-#include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/slider/slider_layout_property.h"
@@ -31,8 +29,6 @@ const float DEFAULT_STEP = 1.0f;
 const float DEFAULT_MIN_VALUE = 0.0f;
 const float DEFAULT_MAX_VALUE = 100.0f;
 constexpr uint32_t BLOCK_COLOR = 0xffffffff;
-constexpr uint32_t TRACK_COLOR = 0x19182431;
-constexpr uint32_t SELECTED_COLOR = 0xff007dff;
 
 void SliderModelNG::Create(float value, float step, float min, float max)
 {
@@ -54,7 +50,7 @@ void SliderModelNG::SetSliderValue(float value)
     auto pattern = frameNode->GetPattern<SliderPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->UpdateValue(value);
-    auto sliderEventHub = frameNode->GetEventHub<SliderEventHub>();
+    auto sliderEventHub = frameNode->GetOrCreateEventHub<SliderEventHub>();
     CHECK_NULL_VOID(sliderEventHub);
     sliderEventHub->SetValue(value);
 }
@@ -85,6 +81,11 @@ void SliderModelNG::SetTrackBackgroundColor(const Gradient& value, bool isResour
 void SliderModelNG::SetSelectColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, SelectColor, value);
+}
+void SliderModelNG::SetSelectColor(const Gradient& value, bool isResourceColor)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, SelectGradientColor, value);
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, SelectIsResourceColor, isResourceColor);
 }
 void SliderModelNG::SetMinLabel(float value)
 {
@@ -140,7 +141,7 @@ void SliderModelNG::SetThickness(const Dimension& value)
         CHECK_NULL_VOID(frameNode);
         auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = frameNode->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_VOID(theme);
@@ -221,11 +222,17 @@ void SliderModelNG::SetStepSize(const Dimension& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, StepSize, value);
 }
+#ifdef SUPPORT_DIGITAL_CROWN
+void SliderModelNG::SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, DigitalCrownSensitivity, sensitivity);
+}
+#endif
 void SliderModelNG::SetOnChange(SliderOnChangeEvent&& eventOnChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(eventOnChange));
 }
@@ -234,7 +241,7 @@ void SliderModelNG::SetOnChangeEvent(SliderOnValueChangeEvent&& onChangeEvent)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(onChangeEvent));
 }
@@ -305,6 +312,19 @@ void SliderModelNG::ResetValidSlideRange()
 {
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, ValidSlideRange, PROPERTY_UPDATE_RENDER);
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void SliderModelNG::ResetDigitalCrownSensitivity()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, DigitalCrownSensitivity, PROPERTY_UPDATE_RENDER);
+}
+
+void SliderModelNG::ResetDigitalCrownSensitivity(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        SliderPaintProperty, DigitalCrownSensitivity, PROPERTY_UPDATE_RENDER, frameNode);
+}
+#endif
 
 void SliderModelNG::SetShowTips(FrameNode* frameNode, bool value, const std::optional<std::string>& content)
 {
@@ -400,9 +420,10 @@ void SliderModelNG::SetTrackBackgroundColor(FrameNode* frameNode, const Gradient
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundColor, value, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundIsResourceColor, isResourceColor, frameNode);
 }
-void SliderModelNG::SetSelectColor(FrameNode* frameNode, const Color& value)
+void SliderModelNG::SetSelectColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SelectColor, value, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SelectGradientColor, value, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SelectIsResourceColor, isResourceColor, frameNode);
 }
 void SliderModelNG::SetShowSteps(FrameNode* frameNode, bool value)
 {
@@ -424,8 +445,15 @@ void SliderModelNG::SetMinResponsiveDistance(FrameNode* frameNode, float value)
     if (LessOrEqual(value, diff) && GreatOrEqual(value, minResponse)) {
         minResponse = value;
     }
-    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, MinResponsiveDistance, minResponse);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, MinResponsiveDistance, minResponse, frameNode);
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void SliderModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, CrownSensitivity sensitivity)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, DigitalCrownSensitivity, sensitivity, frameNode);
+}
+#endif
 
 void SliderModelNG::SetBlockImage(
     FrameNode* frameNode, const std::string& value, const std::string& bundleName, const std::string& moduleName)
@@ -511,7 +539,7 @@ RefPtr<FrameNode> SliderModelNG::CreateFrameNode(int32_t nodeId)
 void SliderModelNG::SetOnChange(FrameNode* frameNode, SliderOnChangeEvent&& eventOnChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(eventOnChange));
 }
@@ -599,17 +627,28 @@ Color SliderModelNG::GetBlockColor(FrameNode* frameNode)
 Gradient SliderModelNG::GetTrackBackgroundColor(FrameNode* frameNode)
 {
     Gradient value;
+    CHECK_NULL_RETURN(frameNode, value);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, value);
+    auto theme = pipelineContext->GetTheme<SliderTheme>();
+    CHECK_NULL_RETURN(theme, value);
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
         SliderPaintProperty, TrackBackgroundColor, value, frameNode,
-        SliderModelNG::CreateSolidGradient(Color(TRACK_COLOR)));
+        SliderModelNG::CreateSolidGradient(Color(theme->GetTrackBgColor())));
     return value;
 }
 
-Color SliderModelNG::GetSelectColor(FrameNode* frameNode)
+Gradient SliderModelNG::GetSelectColor(FrameNode* frameNode)
 {
-    Color value;
+    Gradient value;
+    CHECK_NULL_RETURN(frameNode, value);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, value);
+    auto theme = pipelineContext->GetTheme<SliderTheme>();
+    CHECK_NULL_RETURN(theme, value);
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
-        SliderPaintProperty, SelectColor, value, frameNode, Color(SELECTED_COLOR));
+        SliderPaintProperty, SelectGradientColor, value, frameNode,
+        SliderModelNG::CreateSolidGradient(Color(theme->GetTrackSelectedColor())));
     return value;
 }
 
@@ -703,6 +742,16 @@ RefPtr<SliderModel::SliderValidRange> SliderModelNG::GetValidSlideRange(FrameNod
     return value;
 }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+CrownSensitivity SliderModelNG::GetDigitalCrownSensitivity(FrameNode* frameNode)
+{
+    CrownSensitivity sensitivity = CrownSensitivity::MEDIUM;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        SliderPaintProperty, DigitalCrownSensitivity, sensitivity, frameNode, sensitivity);
+    return sensitivity;
+}
+#endif
+
 Gradient SliderModelNG::CreateSolidGradient(Color value)
 {
     Gradient gradient;
@@ -730,6 +779,30 @@ void SliderModelNG::SetChangeValue(FrameNode* frameNode, double value, int32_t m
     auto pattern = frameNode->GetPattern<SliderPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSliderValue(value, mode);
+}
+
+bool SliderModelNG::GetEnableHapticFeedback(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, true);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_RETURN(sliderPattern, true);
+    return sliderPattern->GetEnableHapticFeedback();
+}
+
+void SliderModelNG::SetEnableHapticFeedback(bool isEnableHapticFeedback)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetEnableHapticFeedback(frameNode, isEnableHapticFeedback);
+}
+
+void SliderModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(sliderPattern);
+    sliderPattern->SetEnableHapticFeedback(isEnableHapticFeedback);
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, EnableHapticFeedback, isEnableHapticFeedback);
 }
 
 Dimension SliderModelNG::GetThickness(FrameNode* frameNode)
@@ -778,5 +851,42 @@ void SliderModelNG::ResetMinResponsiveDistance(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
         SliderPaintProperty, MinResponsiveDistance, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void SliderModelNG::ResetBlockColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, BlockColor, PROPERTY_UPDATE_RENDER);
+}
+
+void SliderModelNG::ResetSelectColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, SelectColor, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, SelectIsResourceColor, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, SelectGradientColor, PROPERTY_UPDATE_RENDER);
+}
+
+void SliderModelNG::ResetSelectColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, SelectColor,
+        PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
+        SelectIsResourceColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
+        SelectGradientColor, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void SliderModelNG::ResetTrackColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty, TrackBackgroundColor, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
+        TrackBackgroundIsResourceColor, PROPERTY_UPDATE_RENDER);
+}
+
+void SliderModelNG::ResetTrackColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
+        TrackBackgroundColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(SliderPaintProperty,
+        TrackBackgroundIsResourceColor, PROPERTY_UPDATE_RENDER, frameNode);
 }
 } // namespace OHOS::Ace::NG

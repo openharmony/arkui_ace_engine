@@ -19,7 +19,6 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/render/node_paint_method.h"
@@ -33,21 +32,7 @@ public:
     MenuPaintMethod() = default;
     ~MenuPaintMethod() override = default;
 
-    CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override;
-
-private:
-    void UpdateArrowPath(Placement placement, float arrowX, float arrowY, RSPath& path);
-    void GetTopPath(float arrowX, float arrowY, RSPath& path);
-    void GetBottomPath(float arrowX, float arrowY, RSPath& path);
-    void GetRightPath(float arrowX, float arrowY, RSPath& path);
-    void GetLeftPath(float arrowX, float arrowY, RSPath& path);
-    float horizonOffsetFirst_ = 0.0f;
-    float horizonOffsetSecond_ = 0.0f;
-    float horizonOffsetThird_ = 0.0f;
-    float horizonOffsetForth_ = 0.0f;
-    float verticalOffsetFirst_ = 0.0f;
-    float verticalOffsetSecond_ = 0.0f;
-    float verticalOffsetThird_ = 0.0f;
+    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
     ACE_DISALLOW_COPY_AND_MOVE(MenuPaintMethod);
 };
 } // namespace OHOS::Ace::NG

@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
+constexpr uint8_t TOTAL_COUNT = 3;
 void CalendarPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -69,7 +70,7 @@ void CalendarPattern::OnModifyDone()
     auto swiperLayoutProperty = swiperFrameNode->GetLayoutProperty();
     CHECK_NULL_VOID(swiperLayoutProperty);
     swiperLayoutProperty->UpdateLayoutDirection(textDirection);
-    auto calendarEventHub = host->GetEventHub<CalendarEventHub>();
+    auto calendarEventHub = host->GetOrCreateEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(calendarEventHub);
     if (swiperFrameNode->GetChildren().size() < 3) {
         return;
@@ -92,6 +93,22 @@ void CalendarPattern::OnModifyDone()
     prePattern->SetCalendarDay(calendarDay_);
     currentPattern->SetCalendarDay(calendarDay_);
     nextPattern->SetCalendarDay(calendarDay_);
+
+    // Set the startDate and endDate.
+    prePattern->SetStartDate(startDate_);
+    currentPattern->SetStartDate(startDate_);
+    nextPattern->SetStartDate(startDate_);
+    prePattern->SetEndDate(endDate_);
+    currentPattern->SetEndDate(endDate_);
+    nextPattern->SetEndDate(endDate_);
+
+    prePattern->SetMarkToday(markToday_);
+    currentPattern->SetMarkToday(markToday_);
+    nextPattern->SetMarkToday(markToday_);
+
+    prePattern->SetDisabledDateRange(disabledDateRange_);
+    currentPattern->SetDisabledDateRange(disabledDateRange_);
+    nextPattern->SetDisabledDateRange(disabledDateRange_);
 
     // Flush the focus.
     FlushFocus(preMonth_);
@@ -184,33 +201,32 @@ void CalendarPattern::InitSwiperChangeDoneEvent()
     CHECK_NULL_VOID(swiperNode);
     auto swiperFrameNode = DynamicCast<FrameNode>(swiperNode);
     CHECK_NULL_VOID(swiperFrameNode);
-    auto swiperEventHub = swiperFrameNode->GetEventHub<SwiperEventHub>();
+    auto swiperEventHub = swiperFrameNode->GetOrCreateEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
-    auto requestDataCallBack = [weak = WeakClaim(this), textDirection,
-                                    swiperEventHubWeak = WeakPtr<SwiperEventHub>(swiperEventHub)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto swiperEventHub = swiperEventHubWeak.Upgrade();
-        CHECK_NULL_VOID(swiperEventHub);
-        auto direction = swiperEventHub->GetDirection();
-        if (textDirection == TextDirection::RTL && !pattern->isClickEvent_) {
-            if (direction == NG::Direction::NEXT) {
-                direction = NG::Direction::PRE;
+    auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
+    uint8_t totalCount = swiperPattern ? static_cast<uint8_t>(swiperPattern->TotalCount()) : TOTAL_COUNT;
+    CHECK_EQUAL_VOID(totalCount, 0);
+
+    auto changeEventWithPreIndex = std::make_shared<ChangeEventWithPreIndex>(
+        [weak = WeakClaim(this), &curMonthIndex = curMonthIndex_, totalCount](int32_t preIndex, int32_t currentIndex) {
+            CHECK_EQUAL_VOID(curMonthIndex, currentIndex);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+
+            if ((currentIndex == (curMonthIndex + 1) % totalCount) ||
+                (currentIndex == 0 && curMonthIndex == (totalCount - 1))) {
+                    pattern->FireRequestData(MonthState::NEXT_MONTH);
+                    pattern->SetMoveDirection(NG::Direction::NEXT);
             } else {
-                direction = NG::Direction::NEXT;
+                pattern->FireRequestData(MonthState::PRE_MONTH);
+                pattern->SetMoveDirection(NG::Direction::PRE);
             }
-        }
-        pattern->isClickEvent_ = false;
-        if (direction == NG::Direction::NEXT) {
-            pattern->FireRequestData(MonthState::NEXT_MONTH);
-            pattern->SetMoveDirection(NG::Direction::NEXT);
-        } else {
-            pattern->FireRequestData(MonthState::PRE_MONTH);
-            pattern->SetMoveDirection(NG::Direction::PRE);
-        }
-        pattern->ReadTitleNode();
-    };
-    swiperEventHub->SetChangeDoneEvent(requestDataCallBack);
+            curMonthIndex = static_cast<uint8_t>(currentIndex);
+            pattern->ReadTitleNode();
+            pattern->ClearChildrenFocus();
+    });
+    swiperEventHub->AddOnChangeEventWithPreIndex(changeEventWithPreIndex);
+
     for (const auto& calendarMonthNode : swiperNode->GetChildren()) {
         auto calenderMonthFrameNode = AceType::DynamicCast<FrameNode>(calendarMonthNode);
         CHECK_NULL_VOID(calenderMonthFrameNode);
@@ -226,7 +242,7 @@ void CalendarPattern::FireFirstRequestData()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = GetEventHub<CalendarEventHub>();
+    auto eventHub = GetOrCreateEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto json = JsonUtil::Create(true);
     auto currentMonth = calendarDay_.month;
@@ -242,7 +258,7 @@ void CalendarPattern::FireRequestData(MonthState monthState)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = GetEventHub<CalendarEventHub>();
+    auto eventHub = GetOrCreateEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto json = JsonUtil::Create(true);
     if (monthState == MonthState::PRE_MONTH) {
@@ -263,7 +279,7 @@ void CalendarPattern::FireGoToRequestData(int32_t year, int32_t month, int32_t d
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = GetEventHub<CalendarEventHub>();
+    auto eventHub = GetOrCreateEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto json = JsonUtil::Create(true);
     auto currentMonth = calendarDay_.month;
@@ -397,6 +413,32 @@ void CalendarPattern::FlushDialogMonthData(ObtainedMonth& obtainedMonth)
     }
 }
 
+void CalendarPattern::ClearChildrenFocus()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto swiperNode = host->GetChildren().front();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperFrameNode = DynamicCast<FrameNode>(swiperNode);
+    CHECK_NULL_VOID(swiperFrameNode);
+    auto preFrameNode = AceType::DynamicCast<FrameNode>(swiperFrameNode->GetChildren().front());
+    CHECK_NULL_VOID(preFrameNode);
+    auto prePattern = preFrameNode->GetPattern<CalendarMonthPattern>();
+    CHECK_NULL_VOID(prePattern);
+    auto iterator = swiperFrameNode->GetChildren().begin();
+    auto currentFrameNode = AceType::DynamicCast<FrameNode>(*(++iterator));
+    CHECK_NULL_VOID(currentFrameNode);
+    auto currentPattern = currentFrameNode->GetPattern<CalendarMonthPattern>();
+    CHECK_NULL_VOID(currentPattern);
+    auto nextFrameNode = AceType::DynamicCast<FrameNode>(swiperFrameNode->GetChildren().back());
+    CHECK_NULL_VOID(nextFrameNode);
+    auto nextPattern = nextFrameNode->GetPattern<CalendarMonthPattern>();
+    CHECK_NULL_VOID(nextPattern);
+    prePattern->ClearFocusCalendarDay();
+    currentPattern->ClearFocusCalendarDay();
+    nextPattern->ClearFocusCalendarDay();
+}
+
 void CalendarPattern::ReadTitleNode()
 {
     auto host = GetHost();
@@ -429,7 +471,11 @@ void CalendarPattern::UpdateTitleNode()
     CHECK_NULL_VOID(theme);
     auto fontSizeScale = pipelineContext->GetFontScale();
     auto fontSize = theme->GetCalendarTitleFontSize();
+#ifndef ARKUI_WEARABLE
     if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarDialogView::CheckOrientationChange()) {
+#else
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale()) {
+#endif
         textLayoutProperty->UpdateFontSize(fontSize);
     } else {
         textLayoutProperty->UpdateMaxLines(2);

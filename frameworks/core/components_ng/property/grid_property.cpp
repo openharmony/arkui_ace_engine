@@ -15,10 +15,6 @@
 
 #include "grid_property.h"
 
-#include <cstddef>
-
-#include "core/components/common/layout/grid_container_info.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/grid_container/grid_container_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -75,7 +71,7 @@ bool GridProperty::UpdateSpan(int32_t span, GridSizeType type)
     GridSizeType currentType = container->GetContainerInfo()->GetSizeType(); // working type, not UNDEFINED
     auto currentProp = GetTypedProperty(type);                               // working property
 
-    return (currentProp->type_ == type || currentType == type) && SetSpan(type, span);
+    return ((currentProp.has_value() && currentProp->type_ == type) || currentType == type) && SetSpan(type, span);
 }
 
 bool GridProperty::UpdateOffset(int32_t offset, GridSizeType type)
@@ -88,7 +84,7 @@ bool GridProperty::UpdateOffset(int32_t offset, GridSizeType type)
     GridSizeType currentType = container->GetContainerInfo()->GetSizeType(); // working type, not UNDEFINED
     auto currentProp = GetTypedProperty(type);                               // working property
 
-    return (currentProp->type_ == type || currentType == type) && SetOffset(type, offset);
+    return ((currentProp.has_value() && currentProp->type_ == type) || currentType == type) && SetOffset(type, offset);
 }
 
 bool GridProperty::SetSpan(GridSizeType type, int32_t span)

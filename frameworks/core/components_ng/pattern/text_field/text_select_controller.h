@@ -28,12 +28,17 @@
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 using OnAccessibilityCallback = std::function<void()>;
 } // namespace
+
+enum class TouchPosition {
+    LEFT = 0,
+    MID = 1,
+    RIGHT
+};
 
 class TextSelectController : public Property {
     DECLARE_ACE_TYPE(TextSelectController, AceType);
@@ -111,6 +116,16 @@ public:
         return caretInfo_.rect;
     }
 
+    RectF GetFloatingCaretRect() const
+    {
+        return floatingCaretInfo_.rect;
+    }
+
+    void UpdateFloatingCaretInfo(const OffsetF& offset)
+    {
+        floatingCaretInfo_.UpdateOffset(offset);
+    }
+
     double GetSelectHeight() const
     {
         return std::max(firstHandleInfo_.rect.Height(), secondHandleInfo_.rect.Height());
@@ -131,10 +146,10 @@ public:
     {
         return firstHandleInfo_.index == 0 && secondHandleInfo_.index >= 0 &&
                abs(firstHandleInfo_.index - secondHandleInfo_.index) ==
-                   static_cast<int32_t>(contentController_->GetWideText().length());
+                   static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
     }
 
-    bool IsHandleSamePosition()
+    bool IsHandleSamePosition() const
     {
         bool sameX = NearEqual(firstHandleInfo_.rect.GetX(), secondHandleInfo_.rect.GetX());
         bool sameY = NearEqual(firstHandleInfo_.rect.GetY(), secondHandleInfo_.rect.GetY());
@@ -154,6 +169,7 @@ public:
     void UpdateCaretWidth(float width)
     {
         caretInfo_.rect.SetWidth(width);
+        caretInfo_.originalRect.SetWidth(SelectHandleInfo::GetDefaultLineWidth().ConvertToPx());
     }
 
     HandleInfoNG GetFirstHandleInfo() const
@@ -171,24 +187,24 @@ public:
         return caretInfo_;
     }
 
-    bool HasReverse()
+    bool HasReverse() const
     {
         return firstHandleInfo_.index > secondHandleInfo_.index;
     }
 
     bool CaretAtLast() const
     {
-        return caretInfo_.index == static_cast<int32_t>(contentController_->GetWideText().length());
+        return caretInfo_.index == static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
     }
     
-    int32_t ConvertTouchOffsetToPosition(const Offset& localOffset, bool isSelectionPos = false);
+    int32_t ConvertTouchOffsetToPosition(const Offset& localOffset, bool isSelectionPos = false) const;
     void ResetHandles();
     void UpdateHandleIndex(int32_t firstHandleIndex, int32_t secondHandleIndex);
     void UpdateCaretIndex(int32_t index);
-    void UpdateCaretInfoByOffset(const Offset& localOffset);
+    void UpdateCaretInfoByOffset(const Offset& localOffset, bool moveContent = true, bool floatCaret = false);
     OffsetF CalcCaretOffsetByOffset(const Offset& localOffset);
     void UpdateSecondHandleInfoByMouseOffset(const Offset& localOffset);
-    void MoveSecondHandleByKeyBoard(int32_t index);
+    void MoveSecondHandleByKeyBoard(int32_t index, std::optional<TextAffinity> textAffinity = std::nullopt);
     void UpdateSelectByOffset(const Offset& localOffset);
     void UpdateSelectPragraphByOffset(const Offset& localOffset);
     std::pair<int32_t, int32_t> GetSelectRangeByOffset(const Offset& localOffset);
@@ -197,21 +213,26 @@ public:
     void UpdateCaretOffset(const OffsetF& offset);
     void UpdateFirstHandleOffset();
     void UpdateSecondHandleOffset();
-    void MoveFirstHandleToContentRect(int32_t index, bool moveHandle = true);
-    void MoveSecondHandleToContentRect(int32_t index, bool moveHandle = true);
-    void MoveCaretToContentRect(
-        int32_t index, TextAffinity textAffinity = TextAffinity::UPSTREAM, bool isEditorValueChanged = true);
+    void MoveFirstHandleToContentRect(int32_t index, bool moveHandle = true, bool moveContent = true);
+    void MoveSecondHandleToContentRect(int32_t index, bool moveHandle = true, bool moveContent = true);
+    void MoveCaretToContentRect(int32_t index, TextAffinity textAffinity = TextAffinity::UPSTREAM,
+        bool isEditorValueChanged = true, bool moveContent = true);
     void MoveCaretAnywhere(const Offset& touchOffset);
     void MoveHandleToContentRect(RectF& handleRect, float boundaryAdjustment = 0.0f) const;
     void AdjustHandleAtEdge(RectF& handleRect) const;
     void AdjustHandleOffset(RectF& handleRect) const;
-    static int32_t GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev = false);
+    static int32_t GetGraphemeClusterLength(const std::u16string& text, int32_t extend, bool checkPrev = false);
     void CalculateHandleOffset();
     std::vector<RectF> GetSelectedRects() const;
-    RectF CalculateEmptyValueCaretRect();
+    RectF CalculateEmptyValueCaretRect(float width = 0.0f);
     std::string ToString() const;
-    bool IsTouchAtLineEnd(const Offset& localOffset);
+    bool IsTouchAtLineEnd(const Offset& localOffset) const;
+    TouchPosition GetTouchLinePos(const Offset& localOffset);
     void GetSubParagraphByOffset(int32_t pos, int32_t &start, int32_t &end);
+    void UpdateSelectWithBlank(const Offset& localOffset);
+    void AdjustHandleInBoundary(RectF& handleRect) const;
+    void AdjustHandleOffsetWithBoundary(RectF& handleRect);
+    void AdjustAllHandlesWithBoundary();
 
 private:
     constexpr static uint32_t SECONDS_TO_MILLISECONDS = 1000;
@@ -227,11 +248,12 @@ private:
     // ai text analysis or detect
     bool NeedAIAnalysis(int32_t& index, const CaretUpdateType targetType, const Offset& touchOffset,
         std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout);
-    bool IsLineBreakOrEndOfParagraph(int32_t pos) const;
     void AdjustCursorPosition(int32_t& index, const Offset& touchOffset);
     bool AdjustWordSelection(int32_t& index, int32_t& start, int32_t& end, const Offset& touchOffset);
     bool IsClickAtBoundary(int32_t index, const Offset& touchOffset);
-    const TimeStamp& GetLastClickTime();
+    const TimeStamp& GetLastClickTime() const;
+    void UpdateCaretOriginalRect(const OffsetF& offset);
+    void SetCaretRectAtEmptyValue();
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FirstIndex, int32_t, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SecondIndex, int32_t, PROPERTY_UPDATE_RENDER);
@@ -240,6 +262,7 @@ private:
     HandleInfoNG firstHandleInfo_;
     HandleInfoNG secondHandleInfo_;
     HandleInfoNG caretInfo_;
+    HandleInfoNG floatingCaretInfo_;
     RefPtr<Paragraph> paragraph_;
     RefPtr<ContentController> contentController_;
     OnAccessibilityCallback onAccessibilityCallback_;

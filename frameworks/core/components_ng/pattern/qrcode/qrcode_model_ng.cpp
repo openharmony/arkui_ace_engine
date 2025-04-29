@@ -15,9 +15,6 @@
 
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 
-#include "core/common/container.h"
-#include "core/components/qrcode/qrcode_theme.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/qrcode/qrcode_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"

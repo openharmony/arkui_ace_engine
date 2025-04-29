@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 
 #include "scope_manager/native_scope_manager.h"
+
 #include "base/image/drawing_lattice.h"
 
 #if !defined(PREVIEW)
@@ -47,49 +48,6 @@ namespace {
 #if defined(WINDOWS_PLATFORM)
 constexpr char CHECK_REGEX_VALID[] = "__checkRegexValid__";
 #endif
-// navigation title bar options
-constexpr char BACKGROUND_COLOR_PROPERTY[] = "backgroundColor";
-constexpr char BACKGROUND_BLUR_STYLE_PROPERTY[] = "backgroundBlurStyle";
-constexpr char BAR_STYLE_PROPERTY[] = "barStyle";
-constexpr char PADDING_START_PROPERTY[] = "paddingStart";
-constexpr char PADDING_END_PROPERTY[] = "paddingEnd";
-constexpr char MAIN_TITLE_MODIFIER[] = "mainTitleModifier";
-constexpr char SUB_TITLE_MODIFIER[] = "subTitleModifier";
-} // namespace
-
-namespace {
-void* UnwrapNapiValue(const JSRef<JSVal>& obj)
-{
-#ifdef ENABLE_ROSEN_BACKEND
-    if (!obj->IsObject()) {
-        LOGE("info[0] is not an object when try CreateFromNapiValue");
-        return nullptr;
-    }
-    auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_RETURN(engine, nullptr);
-    auto nativeEngine = engine->GetNativeEngine();
-    CHECK_NULL_RETURN(nativeEngine, nullptr);
-#ifdef USE_ARK_ENGINE
-    panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
-#endif
-    JSValueWrapper valueWrapper = value;
-
-    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
-    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
-    auto env = reinterpret_cast<napi_env>(nativeEngine);
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, napiValue, &valueType);
-    if (valueType != napi_object) {
-        LOGE("napiValue is not napi_object");
-        return nullptr;
-    }
-    void* objectNapi = nullptr;
-    napi_unwrap(env, napiValue, &objectNapi);
-    return objectNapi;
-#else
-    return nullptr;
-#endif
-}
 } // namespace
 
 #if !defined(PREVIEW)
@@ -131,8 +89,8 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(const JSRef<JSVal>& obj, NativeEngi
     return PixelMap::CreatePixelMap(pixmapPtrAddr);
 }
 
-bool GetPixelMapListFromAnimatedDrawable(JSRef<JSVal> obj, std::vector<RefPtr<PixelMap>>& pixelMaps,
-    int32_t& duration, int32_t& iterations)
+bool GetPixelMapListFromAnimatedDrawable(
+    JSRef<JSVal> obj, std::vector<RefPtr<PixelMap>>& pixelMaps, int32_t& duration, int32_t& iterations)
 {
     return PixelMap::GetPxielMapListFromAnimatedDrawable(UnwrapNapiValue(obj), pixelMaps, duration, iterations);
 }
@@ -183,6 +141,12 @@ const Rosen::Filter* CreateRSFilterFromNapiValue(JSRef<JSVal> obj)
 {
     auto filterPtr = static_cast<Rosen::Filter*>(UnwrapNapiValue(obj));
     return filterPtr;
+}
+
+const Rosen::BrightnessBlender* CreateRSBrightnessBlenderFromNapiValue(JSRef<JSVal> obj)
+{
+    auto blenderPtr = static_cast<Rosen::BrightnessBlender*>(UnwrapNapiValue(obj));
+    return blenderPtr;
 }
 
 RefPtr<DrawingColorFilter> CreateDrawingColorFilter(JSRef<JSVal> obj)
@@ -298,6 +262,7 @@ void ParseTextShadowFromShadowObject(const JSRef<JSVal>& shadowObject, std::vect
 #ifdef PIXEL_MAP_SUPPORTED
 JSRef<JSVal> ConvertPixmap(const RefPtr<PixelMap>& pixelMap)
 {
+    ContainerScope scope(Container::CurrentIdSafely());
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_RETURN(engine, {});
     NativeEngine* nativeEngine = engine->GetNativeEngine();
@@ -374,58 +339,6 @@ bool CheckRegexValid(const std::string& pattern)
 #endif
 }
 
-void ParseBackgroundOptions(const JSRef<JSVal>& obj, NG::NavigationBackgroundOptions& options)
-{
-    options.color.reset();
-    options.blurStyle.reset();
-    if (!obj->IsObject()) {
-        return;
-    }
-    auto optObj = JSRef<JSObject>::Cast(obj);
-    auto colorProperty = optObj->GetProperty(BACKGROUND_COLOR_PROPERTY);
-    Color color;
-    if (JSViewAbstract::ParseJsColor(colorProperty, color)) {
-        options.color = color;
-    }
-    auto blurProperty = optObj->GetProperty(BACKGROUND_BLUR_STYLE_PROPERTY);
-    if (blurProperty->IsNumber()) {
-        auto blurStyle = blurProperty->ToNumber<int32_t>();
-        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
-            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
-            options.blurStyle = static_cast<BlurStyle>(blurStyle);
-        }
-    }
-}
-
-void ParseBarOptions(const JSRef<JSVal>& obj, NG::NavigationBarOptions& options)
-{
-    options.paddingStart.reset();
-    options.paddingEnd.reset();
-    options.barStyle.reset();
-    if (!obj->IsObject()) {
-        return;
-    }
-    auto optObj = JSRef<JSObject>::Cast(obj);
-    auto barStyleProperty = optObj->GetProperty(BAR_STYLE_PROPERTY);
-    if (barStyleProperty->IsNumber()) {
-        auto barStyle = barStyleProperty->ToNumber<int32_t>();
-        if (barStyle >= static_cast<int32_t>(NG::BarStyle::STANDARD) &&
-            barStyle <= static_cast<int32_t>(NG::BarStyle::STACK)) {
-            options.barStyle = static_cast<NG::BarStyle>(barStyle);
-        } else {
-            options.barStyle = NG::BarStyle::STANDARD;
-        }
-    }
-    CalcDimension paddingStart;
-    if (JSViewAbstract::ParseLengthMetricsToDimension(optObj->GetProperty(PADDING_START_PROPERTY), paddingStart)) {
-        options.paddingStart = paddingStart;
-    }
-    CalcDimension paddingEnd;
-    if (JSViewAbstract::ParseLengthMetricsToDimension(optObj->GetProperty(PADDING_END_PROPERTY), paddingEnd)) {
-        options.paddingEnd = paddingEnd;
-    }
-}
-
 napi_env GetCurrentEnv()
 {
     auto engine = EngineHelper::GetCurrentEngine();
@@ -439,16 +352,36 @@ napi_env GetCurrentEnv()
     return reinterpret_cast<napi_env>(nativeEngine);
 }
 
-void ParseTextOptions(const JSCallbackInfo& info, const JSRef<JSVal>& obj, NG::NavigationTextOptions& options)
+void* UnwrapNapiValue(const JSRef<JSVal>& obj)
 {
-    options.Reset();
+#ifdef ENABLE_ROSEN_BACKEND
     if (!obj->IsObject()) {
-        return;
+        LOGE("info[0] is not an object when try CreateFromNapiValue");
+        return nullptr;
     }
-    auto optObj = JSRef<JSObject>::Cast(obj);
-    auto mainTitleModifierProperty = optObj->GetProperty(MAIN_TITLE_MODIFIER);
-    auto subTitleModifierProperty = optObj->GetProperty(SUB_TITLE_MODIFIER);
-    JSViewAbstract::SetTextStyleApply(info, options.mainTitleApplyFunc, mainTitleModifierProperty);
-    JSViewAbstract::SetTextStyleApply(info, options.subTitleApplyFunc, subTitleModifierProperty);
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, nullptr);
+    auto nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, nullptr);
+#ifdef USE_ARK_ENGINE
+    panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
+#endif
+    JSValueWrapper valueWrapper = value;
+
+    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, napiValue, &valueType);
+    if (valueType != napi_object) {
+        LOGE("napiValue is not napi_object");
+        return nullptr;
+    }
+    void* objectNapi = nullptr;
+    napi_unwrap(env, napiValue, &objectNapi);
+    return objectNapi;
+#else
+    return nullptr;
+#endif
 }
 } // namespace OHOS::Ace::Framework

@@ -13,14 +13,28 @@
  * limitations under the License.
  */
 
-#include "frameworks/core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
+#include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_session_wrapper_impl.h"
+#include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<SessionWrapper> SessionWrapperFactory::CreateSessionWrapper(SessionType sessionType,
     const WeakPtr<UIExtensionPattern>& hostPattern, int32_t instanceId, bool isTransferringCaller)
 {
     if (sessionType == SessionType::UI_EXTENSION_ABILITY || sessionType == SessionType::EMBEDDED_UI_EXTENSION) {
-        return RefPtr<SessionWrapper>();
+        auto ret = RefPtr<SessionWrapper>();
+        return ret;
+    }
+    return nullptr;
+}
+
+RefPtr<SessionWrapper> SessionWrapperFactory::CreateSessionWrapper(
+    SessionType sessionType, const SessionCreateParam& sessionCreateParam)
+{
+    if (sessionType == SessionType::SECURITY_UI_EXTENSION_ABILITY) {
+        auto ret = AceType::MakeRefPtr<SecuritySessionWrapperImpl>(
+            sessionCreateParam.hostPattern, sessionCreateParam.instanceId,
+            sessionCreateParam.isTransferringCaller, sessionType);
+        return ret;
     }
     return nullptr;
 }

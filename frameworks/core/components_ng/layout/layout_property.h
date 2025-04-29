@@ -21,6 +21,7 @@
 #include <optional>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -28,39 +29,44 @@
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/event/focus_hub.h"
+#include "core/components/common/layout/grid_layout_info.h"
+#include "core/components/common/layout/position_param.h"
+#include "core/components/common/properties/alignment.h"
 #include "core/components_ng/property/border_property.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/flex_property.h"
-#include "core/components_ng/property/geometry_property.h"
-#include "core/components_ng/property/grid_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/magic_layout_property.h"
 #include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/position_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/property/safe_area_insets.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 
 class FrameNode;
+class UINode;
 class InspectorFilter;
+class GridProperty;
+class FlexItemProperty;
+struct PositionProperty;
+struct SafeAreaExpandOpts;
+class GeometryTransition;
+struct SafeAreaInsets;
+using BiasPair = std::pair<float, float>;
+using ChainWeightPair = std::pair<std::optional<float>, std::optional<float>>; // <horizontal,vertical>
 
 class ACE_FORCE_EXPORT LayoutProperty : public Property {
     DECLARE_ACE_TYPE(LayoutProperty, Property);
 
 public:
-    LayoutProperty() = default;
+    LayoutProperty();
 
-    ~LayoutProperty() override = default;
+    ~LayoutProperty() override;
 
     virtual RefPtr<LayoutProperty> Clone() const;
 
     virtual void Reset();
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+
+    virtual void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const {}
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json);
 
@@ -131,10 +137,7 @@ public:
 
     TextDirection GetNonAutoLayoutDirection() const;
 
-    RefPtr<GeometryTransition> GetGeometryTransition() const
-    {
-        return geometryTransition_.Upgrade();
-    }
+    RefPtr<GeometryTransition> GetGeometryTransition() const;
 
     MeasureType GetMeasureType(MeasureType defaultType = MeasureType::MATCH_CONTENT) const
     {
@@ -156,12 +159,14 @@ public:
 
     void UpdateLayoutWeight(float value);
 
-    void UpdatePixelRound(uint8_t value)
+    void UpdateChainWeight(const ChainWeightPair& value);
+
+    void UpdatePixelRound(uint16_t value)
     {
         pixelRoundFlag_ = value;
     }
 
-    uint8_t GetPixelRound() const {
+    uint16_t GetPixelRound() const {
         return pixelRoundFlag_;
     }
 
@@ -200,6 +205,8 @@ public:
     virtual void UpdateCalcMinSize(const CalcSize& value);
 
     virtual void UpdateCalcMaxSize(const CalcSize& value);
+
+    std::pair<std::vector<std::string>, std::vector<std::string>> CalcToString(const CalcSize& calcSize);
 
     void UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint);
 
@@ -290,8 +297,12 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(Visibility, VisibleType);
 
 public:
-    void UpdateVisibility(const VisibleType& value, bool allowTransition = false);
-    void OnVisibilityUpdate(VisibleType visible, bool allowTransition = false);
+    void UpdateVisibility(const VisibleType& value, bool allowTransition = false, bool isUserSet = false);
+    void OnVisibilityUpdate(VisibleType visible, bool allowTransition = false, bool isUserSet = false);
+    bool IsUserSetVisibility()
+    {
+        return isUserSetVisibility_;
+    }
 
     void UpdateLayoutConstraint(const RefPtr<LayoutProperty>& layoutProperty);
 
@@ -336,7 +347,9 @@ public:
 
     static void UpdateAllGeometryTransition(const RefPtr<UINode>& parent);
 
-    std::pair<bool, bool> GetPercentSensitive();
+    // the returned value represents whether to compare percent reference when comparing old and new layout constrains.
+    // the first of returned value represents width, and the second of returned value represents height.
+    virtual std::pair<bool, bool> GetPercentSensitive();
     std::pair<bool, bool> UpdatePercentSensitive(bool width, bool height);
     bool ConstraintEqual(const std::optional<LayoutConstraintF>& preLayoutConstraint,
         const std::optional<LayoutConstraintF>& preContentConstraint);
@@ -353,16 +366,6 @@ public:
         return needPositionLocalizedEdges_;
     }
 
-    void UpdatNeedMarkAnchorPosition(bool needMarkAnchorPosition)
-    {
-        needMarkAnchorPosition_ = needMarkAnchorPosition;
-    }
-
-    bool IsMarkAnchorPosition() const
-    {
-        return needMarkAnchorPosition_;
-    }
-
     void UpdateNeedOffsetLocalizedEdges(bool needOffsetLocalizedEdges)
     {
         needOffsetLocalizedEdges_ = needOffsetLocalizedEdges;
@@ -372,6 +375,28 @@ public:
     {
         return needOffsetLocalizedEdges_;
     }
+
+    void ResetMarkAnchorStart()
+    {
+        markAnchorStart_.reset();
+    }
+
+    void UpdateMarkAnchorStart(const Dimension& markAnchorStart)
+    {
+        markAnchorStart_ = markAnchorStart;
+    }
+
+    void SetNeedLazyLayout(bool value)
+    {
+        needLazyLayout_ = true;
+    }
+
+    bool GetNeedLazyLayout() const
+    {
+        return needLazyLayout_;
+    }
+
+    void ConstraintViewPosRef(ViewPosReference& viewPosRef);
 
     void CheckPositionLocalizedEdges(TextDirection layoutDirection);
     void CheckMarkAnchorPosition(TextDirection layoutDirection);
@@ -385,6 +410,11 @@ public:
     void CheckLocalizedBorderImageSlice(const TextDirection& direction);
     void CheckLocalizedBorderImageWidth(const TextDirection& direction);
     void CheckLocalizedBorderImageOutset(const TextDirection& direction);
+    void CheckLocalizedSafeAreaPadding(const TextDirection& direction);
+
+    virtual void OnPropertyChangeMeasure() {}
+
+    std::string LayoutInfoToString();
 
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);
@@ -393,7 +423,8 @@ protected:
 
 private:
     // This will call after ModifyLayoutConstraint.
-    void CheckSelfIdealSize(const LayoutConstraintF& parentConstraint, const SizeF& originMax);
+    void CheckSelfIdealSize(const SizeF& originMax);
+    void CheckCalcLayoutConstraint(const LayoutConstraintF& parentConstraint);
 
     void CheckAspectRatio();
     void CheckBorderAndPadding();
@@ -401,11 +432,13 @@ private:
     void ConstraintContentByBorder();
     void ConstraintContentBySafeAreaPadding();
     PaddingPropertyF CreateSafeAreaPadding();
+    bool DecideMirror();
 
     const std::string PixelRoundToJsonValue() const;
 
     void PaddingToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void MarginToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void SafeAreaPaddingToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     // available in measure process.
     std::optional<LayoutConstraintF> layoutConstraint_;
@@ -415,6 +448,9 @@ private:
     std::optional<LayoutConstraintF> parentLayoutConstraint_;
 
     std::unique_ptr<MeasureProperty> calcLayoutConstraint_;
+    std::pair<std::vector<std::string>, std::vector<std::string>> calcSelfIdealSizeRpn_;
+    std::pair<std::vector<std::string>, std::vector<std::string>> calcMinSizeRpn_;
+    std::pair<std::vector<std::string>, std::vector<std::string>> calcMaxSizeRpn_;
     std::unique_ptr<PaddingProperty> safeAreaPadding_;
     std::unique_ptr<PaddingProperty> padding_;
     std::unique_ptr<MarginProperty> margin_;
@@ -432,6 +468,7 @@ private:
     std::optional<MeasureType> measureType_;
     std::optional<TextDirection> layoutDirection_;
     std::optional<RectF> layoutRect_;
+    std::optional<Dimension> markAnchorStart_;
 
     WeakPtr<GeometryTransition> geometryTransition_;
 
@@ -439,7 +476,7 @@ private:
 
     bool usingPosition_ = true;
 
-    uint8_t pixelRoundFlag_  = 0;
+    uint16_t pixelRoundFlag_ = 0;
 
     bool isOverlayNode_ = false;
     Dimension overlayOffsetX_;
@@ -448,8 +485,9 @@ private:
     bool heightPercentSensitive_ = false;
     bool widthPercentSensitive_ = false;
     bool needPositionLocalizedEdges_ = false;
-    bool needMarkAnchorPosition_ = false;
     bool needOffsetLocalizedEdges_ = false;
+    bool needLazyLayout_ = false;
+    bool isUserSetVisibility_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);
 };

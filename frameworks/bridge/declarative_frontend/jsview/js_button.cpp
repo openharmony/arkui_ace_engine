@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
+#include <limits>
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
@@ -28,35 +29,87 @@
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_button_theme.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/button_model_impl.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace {
-std::unique_ptr<ButtonModel> ButtonModel::instance_ = nullptr;
-std::mutex ButtonModel::mutex_;
-
 ButtonModel* ButtonModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::ButtonModelNG());
+    static NG::ButtonModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::ButtonModelNG());
-            } else {
-                instance_.reset(new Framework::ButtonModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::ButtonModelNG instance;
+        return &instance;
+    } else {
+        static Framework::ButtonModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+namespace {
+
+constexpr int32_t UNKNOWN_RESOURCE_TYPE = -1;
+
+bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, std::optional<CalcDimension>& result)
+{
+    auto value = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE));
+    if (!value->IsNumber()) {
+        return false;
+    }
+    auto unit = DimensionUnit::VP;
+    auto jsUnit = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::UNIT));
+    if (jsUnit->IsNumber()) {
+        unit = static_cast<DimensionUnit>(jsUnit->ToNumber<int32_t>());
+    }
+    CalcDimension dimension(value->ToNumber<double>(), unit);
+    result = dimension;
+    return true;
+}
+
+void GetBorderRadiusByLengthMetrics(
+    const char* key, const JSRef<JSObject>& object, std::optional<CalcDimension>& radius)
+{
+    if (object->HasProperty(key) && object->GetProperty(key)->IsObject()) {
+        JSRef<JSObject> startObj = JSRef<JSObject>::Cast(object->GetProperty(key));
+        ParseJsLengthMetrics(startObj, radius);
+    }
+}
+
+void GetNormalBorderRadius(const char* key, const JSRef<JSObject>& object, std::optional<CalcDimension>& radius)
+{
+    CalcDimension calcDimension;
+    auto jsVal = object->GetProperty(key);
+    if (!jsVal->IsUndefined() && JSViewAbstract::ParseJsDimensionVp(jsVal, calcDimension)) {
+        radius = calcDimension;
+    }
+}
+
+bool ParseAllBorderRadius(const JSRef<JSObject>& object, std::optional<CalcDimension>& topLeft,
+    std::optional<CalcDimension>& topRight, std::optional<CalcDimension>& bottomLeft,
+    std::optional<CalcDimension>& bottomRight)
+{
+    if (object->HasProperty("topStart") || object->HasProperty("topEnd") || object->HasProperty("bottomStart") ||
+        object->HasProperty("bottomEnd")) {
+        GetBorderRadiusByLengthMetrics("topStart", object, topLeft);
+        GetBorderRadiusByLengthMetrics("topEnd", object, topRight);
+        GetBorderRadiusByLengthMetrics("bottomStart", object, bottomLeft);
+        GetBorderRadiusByLengthMetrics("bottomEnd", object, bottomRight);
+        return true;
+    }
+    GetNormalBorderRadius("topLeft", object, topLeft);
+    GetNormalBorderRadius("topRight", object, topRight);
+    GetNormalBorderRadius("bottomLeft", object, bottomLeft);
+    GetNormalBorderRadius("bottomRight", object, bottomRight);
+    return false;
+}
+} // namespace
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
@@ -121,7 +174,10 @@ void JSButton::SetTextColor(const JSCallbackInfo& info)
 
 void JSButton::SetType(const JSCallbackInfo& info)
 {
-    int32_t value = 1;
+    int32_t value = static_cast<int32_t>(ButtonType::CAPSULE);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        value = static_cast<int32_t>(ButtonType::ROUNDED_RECTANGLE);
+    }
     if (info[0]->IsNumber()) {
         value = info[0]->ToNumber<int32_t>();
     }
@@ -175,42 +231,40 @@ void JSButton::SetRole(const JSCallbackInfo& info)
     }
 }
 
+void JSButton::SetMinFontScale(const JSCallbackInfo& info)
+{
+    double minFontScale;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], minFontScale)) {
+        return;
+    }
+    if (LessOrEqual(minFontScale, 0.0f)) {
+        ButtonModel::GetInstance()->SetMinFontScale(0.0f);
+        return;
+    }
+    if (GreatOrEqual(minFontScale, 1.0f)) {
+        ButtonModel::GetInstance()->SetMinFontScale(1.0f);
+        return;
+    }
+    ButtonModel::GetInstance()->SetMinFontScale(static_cast<float>(minFontScale));
+}
+
+void JSButton::SetMaxFontScale(const JSCallbackInfo& info)
+{
+    double maxFontScale;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], maxFontScale)) {
+        return;
+    }
+    if (LessOrEqual(maxFontScale, 1.0f)) {
+        ButtonModel::GetInstance()->SetMaxFontScale(1.0f);
+        return;
+    }
+    ButtonModel::GetInstance()->SetMaxFontScale(static_cast<float>(maxFontScale));
+}
+
 void JSButton::SetStateEffect(const JSCallbackInfo& info)
 {
     bool value = info[0]->IsBoolean() ? info[0]->ToBoolean() : true;
     ButtonModel::GetInstance()->SetStateEffect(value);
-}
-
-void JSButton::HandleDifferentRadius(const JSRef<JSVal>& args)
-{
-    std::optional<CalcDimension> radiusTopLeft;
-    std::optional<CalcDimension> radiusTopRight;
-    std::optional<CalcDimension> radiusBottomLeft;
-    std::optional<CalcDimension> radiusBottomRight;
-    if (args->IsObject()) {
-        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        CalcDimension topLeft;
-        if (ParseJsDimensionVp(object->GetProperty("topLeft"), topLeft)) {
-            radiusTopLeft = topLeft;
-        }
-        CalcDimension topRight;
-        if (ParseJsDimensionVp(object->GetProperty("topRight"), topRight)) {
-            radiusTopRight = topRight;
-        }
-        CalcDimension bottomLeft;
-        if (ParseJsDimensionVp(object->GetProperty("bottomLeft"), bottomLeft)) {
-            radiusBottomLeft = bottomLeft;
-        }
-        CalcDimension bottomRight;
-        if (ParseJsDimensionVp(object->GetProperty("bottomRight"), bottomRight)) {
-            radiusBottomRight = bottomRight;
-        }
-        if (!radiusTopLeft.has_value() && !radiusTopRight.has_value() && !radiusBottomLeft.has_value() &&
-            !radiusBottomRight.has_value()) {
-            return;
-        }
-        ButtonModel::GetInstance()->SetBorderRadius(radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
-    }
 }
 
 void JSButton::GetFontContent(JSRef<JSVal>& font, ButtonParameters& buttonParameters)
@@ -362,6 +416,8 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("role", &JSButton::SetRole);
     JSClass<JSButton>::StaticMethod("createWithLabel", &JSButton::CreateWithLabel, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("createWithChild", &JSButton::CreateWithChild, MethodOptions::NONE);
+    JSClass<JSButton>::StaticMethod("minFontScale", &JSButton::SetMinFontScale);
+    JSClass<JSButton>::StaticMethod("maxFontScale", &JSButton::SetMaxFontScale);
     JSClass<JSButton>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -426,13 +482,14 @@ Edge JSButton::GetOldPadding(const JSCallbackInfo& info)
 
 NG::PaddingProperty JSButton::GetNewPadding(const JSCallbackInfo& info)
 {
-    NG::PaddingProperty padding = { NG::CalcLength(0.0), NG::CalcLength(0.0), NG::CalcLength(0.0),
-        NG::CalcLength(0.0) };
+    NG::PaddingProperty padding = { NG::CalcLength(0.0), NG::CalcLength(0.0), NG::CalcLength(0.0), NG::CalcLength(0.0),
+        std::nullopt, std::nullopt };
     if (isLabelButton_) {
         auto buttonTheme = GetTheme<ButtonTheme>();
+        CHECK_NULL_RETURN(buttonTheme, padding);
         auto defaultPadding = buttonTheme->GetPadding();
         padding = { NG::CalcLength(defaultPadding.Left()), NG::CalcLength(defaultPadding.Right()),
-            NG::CalcLength(defaultPadding.Top()), NG::CalcLength(defaultPadding.Bottom()) };
+            NG::CalcLength(defaultPadding.Top()), NG::CalcLength(defaultPadding.Bottom()), std::nullopt, std::nullopt };
     }
     if (info[0]->IsObject()) {
         CommonCalcDimension commonCalcDimension;
@@ -525,7 +582,12 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
 #endif
     };
 
-    ButtonModel::GetInstance()->OnClick(std::move(onTap), std::move(onClick));
+    double distanceThreshold = std::numeric_limits<double>::infinity();
+    if (info.Length() > 1 && info[1]->IsNumber()) {
+        distanceThreshold = info[1]->ToNumber<double>();
+        distanceThreshold = Dimension(distanceThreshold, DimensionUnit::VP).ConvertToPx();
+    }
+    ButtonModel::GetInstance()->OnClick(std::move(onTap), std::move(onClick), distanceThreshold);
 }
 
 void JSButton::JsBackgroundColor(const JSCallbackInfo& info)
@@ -590,17 +652,28 @@ void JSButton::JsSize(const JSCallbackInfo& info)
 
 void JSButton::JsRadius(const JSCallbackInfo& info)
 {
+    JsRadius(info[0]);
+}
+
+void JSButton::JsRadius(const JSRef<JSVal>& jsValue)
+{
     CalcDimension radius;
-    if (ParseJsDimensionVpNG(info[0], radius)) {
+    if (ParseJsDimensionVpNG(jsValue, radius)) {
         ButtonModel::GetInstance()->SetBorderRadius(radius);
-    } else if (info[0]->IsObject()) {
-        JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
-        CalcDimension topLeft;
-        CalcDimension topRight;
-        CalcDimension bottomLeft;
-        CalcDimension bottomRight;
-        JSViewAbstract::ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
-        ButtonModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+    } else if (jsValue->IsObject() && ((JSRef<JSObject>::Cast(jsValue)->GetPropertyValue<int32_t>(
+                                           "type", UNKNOWN_RESOURCE_TYPE)) == UNKNOWN_RESOURCE_TYPE)) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
+        std::optional<CalcDimension> radiusTopLeft;
+        std::optional<CalcDimension> radiusTopRight;
+        std::optional<CalcDimension> radiusBottomLeft;
+        std::optional<CalcDimension> radiusBottomRight;
+        if (ParseAllBorderRadius(object, radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight)) {
+            ButtonModel::GetInstance()->SetLocalizedBorderRadius(
+                radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
+        } else {
+            ButtonModel::GetInstance()->SetBorderRadius(
+                radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
+        }
     } else {
         ButtonModel::GetInstance()->ResetBorderRadius();
     }
@@ -615,9 +688,7 @@ void JSButton::JsBorder(const JSCallbackInfo& info)
     JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
     CalcDimension borderRadius;
     auto valueRadius = object->GetProperty("radius");
-    ParseJsDimensionVp(valueRadius, borderRadius);
-    ButtonModel::GetInstance()->SetBorderRadius(borderRadius);
-    HandleDifferentRadius(valueRadius);
+    JsRadius(valueRadius);
 }
 
 CalcDimension JSButton::GetSizeValue(const JSCallbackInfo& info)
@@ -639,7 +710,7 @@ CreateWithPara JSButton::ParseCreatePara(const JSCallbackInfo& info, bool hasLab
         para.label = label;
         return para;
     }
-    int32_t optionIndex = 0;
+    uint32_t optionIndex = 0;
     if (hasLabel) {
         para.parseSuccess = ParseJsString(info[0], label);
         if (para.parseSuccess) {

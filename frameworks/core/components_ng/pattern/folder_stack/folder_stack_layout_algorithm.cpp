@@ -15,24 +15,10 @@
 
 #include "core/components_ng/pattern/folder_stack/folder_stack_layout_algorithm.h"
 
-#include "base/memory/ace_type.h"
 #include "base/log/event_report.h"
-#include "base/subwindow/subwindow_manager.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/common/display_info.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/folder_stack/control_parts_stack_node.h"
-#include "core/components_ng/pattern/folder_stack/folder_stack_group_node.h"
-#include "core/components_ng/pattern/folder_stack/folder_stack_layout_property.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_pattern.h"
-#include "core/components_ng/pattern/folder_stack/hover_stack_node.h"
-#include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
-#include "core/components_ng/pattern/stack/stack_layout_property.h"
-#include "core/components_ng/syntax/if_else_model.h"
-#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -152,7 +138,7 @@ void FolderStackLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto displayInfo = pattern->GetDisplayInfo();
         if (displayInfo) {
             FolderEventInfo event(displayInfo->GetFoldStatus());
-            auto eventHub = layoutWrapper->GetHostNode()->GetEventHub<FolderStackEventHub>();
+            auto eventHub = layoutWrapper->GetHostNode()->GetOrCreateEventHub<FolderStackEventHub>();
             if (eventHub) {
                 eventHub->OnFolderStateChange(event);
             }
@@ -205,7 +191,7 @@ void FolderStackLayoutAlgorithm::RangeCalculation(const RefPtr<FolderStackGroupN
     int32_t creaseHeight = 0;
     const auto& constraint = folderStackLayoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(constraint);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto safeArea = pipeline->GetSafeArea();
     int32_t length = static_cast<int32_t>(safeArea.top_.Length());
@@ -232,7 +218,7 @@ bool FolderStackLayoutAlgorithm::IsFullWindow(
     auto parent = AceType::DynamicCast<FrameNode>(host->GetParent());
     CHECK_NULL_RETURN(parent, false);
     auto padding = parent->GetLayoutProperty()->CreatePaddingAndBorder();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto windowManager = pipeline->GetWindowManager();
     auto safeArea = pipeline->GetSafeArea();
@@ -300,7 +286,7 @@ bool FolderStackLayoutAlgorithm::IsIntoFolderStack(
     }
     CHECK_NULL_RETURN(displayInfo, false);
     bool isFullWindow = IsFullWindow(frameSize, foldStackLayoutProperty, layoutWrapper);
-    bool isFoldable = displayInfo->GetIsFoldable();
+    bool isFoldable = OHOS::Ace::SystemProperties::IsBigFoldProduct();
     auto foldStatus = displayInfo->GetFoldStatus();
     auto rotation = displayInfo->GetRotation();
     auto isLandscape = rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270;
@@ -315,11 +301,13 @@ void FolderStackLayoutAlgorithm::OnHoverStatusChange(LayoutWrapper* layoutWrappe
 {
     auto pattern = layoutWrapper->GetHostNode()->GetPattern<FolderStackPattern>();
     CHECK_NULL_VOID(pattern);
-    if (isIntoFolderStack_ == pattern->IsInHoverMode()) {
+    if (isIntoFolderStack_ == pattern->IsInHoverMode() || !OHOS::Ace::SystemProperties::IsBigFoldProduct()) {
         return;
     }
-    auto eventHub = layoutWrapper->GetHostNode()->GetEventHub<FolderStackEventHub>();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto eventHub = layoutWrapper->GetHostNode()->GetOrCreateEventHub<FolderStackEventHub>();
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_VOID(windowManager);
@@ -345,7 +333,12 @@ void FolderStackLayoutAlgorithm::OnHoverStatusChange(LayoutWrapper* layoutWrappe
 void FolderStackLayoutAlgorithm::MeasureByStack(
     const RefPtr<FolderStackGroupNode>& hostNode, LayoutWrapper* layoutWrapper)
 {
-    PaddingProperty padding { CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f) };
+    PaddingProperty padding { .left = CalcLength(0.0f),
+        .right = CalcLength(0.0f),
+        .top = CalcLength(0.0f),
+        .bottom = CalcLength(0.0f),
+        .start = std::nullopt,
+        .end = std::nullopt };
     auto controlPartsStackNode = hostNode->GetControlPartsStackNode();
     CHECK_NULL_VOID(controlPartsStackNode);
     auto index = hostNode->GetChildIndexById(controlPartsStackNode->GetId());

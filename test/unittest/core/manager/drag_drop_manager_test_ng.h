@@ -20,7 +20,7 @@
 #include "gtest/gtest.h"
 
 #define private public
-#include "test/mock/base/mock_drag_window.h"
+#define protected public
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_interaction_interface.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -48,6 +48,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/render_node.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -75,7 +76,6 @@ const SizeF FRAME_SIZE(GLOBAL_X * 10.0f, GLOBAL_Y * 10.0f);
 constexpr int32_t DRAGGED_INDEX = 0;
 const DragType DRAG_TYPE_GRID = DragType::GRID;
 const DragType DRAG_TYPE_LIST = DragType::LIST;
-RefPtr<DragWindow> MOCK_DRAG_WINDOW;
 } // namespace
 
 class DragDropManagerTestNg : public testing::Test {

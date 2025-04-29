@@ -193,6 +193,7 @@ class ColorMetrics {
   private green_: number;
   private blue_: number;
   private alpha_: number;
+  private resourceId_: number;
   private static clamp(value: number): number {
     return Math.min(Math.max(value, 0), MAX_CHANNEL_VALUE);
   }
@@ -257,7 +258,10 @@ class ColorMetrics {
       const green = chanels[1];
       const blue = chanels[2];
       const alpha = chanels[3];
-      return new ColorMetrics(red, green, blue, alpha);
+      const resourceId = chanels[4];
+      const colorMetrics = new ColorMetrics(red, green, blue, alpha);
+      colorMetrics.setResourceId(resourceId);
+      return colorMetrics;
     } else if (typeof color === 'number') {
       return ColorMetrics.numeric(color);
     } else if (typeof color === 'string') {
@@ -335,6 +339,12 @@ class ColorMetrics {
   get alpha(): number {
     return this.alpha_;
   }
+  setResourceId(resourceId: number): void {
+    this.resourceId_ = resourceId;
+  }
+  getResourceId(): number {
+    return this.resourceId_;
+  }
 }
 
 class BaseShape {
@@ -407,7 +417,7 @@ class RenderNode {
   private shadowRadiusValue: number;
   private transformValue: Transform;
   private translationValue: Vector2;
-  private baseNode_: __JSBaseNode__;
+  private baseNode_: BaseNode;
   private borderStyleValue: EdgeStyles;
   private borderWidthValue: EdgeWidths;
   private borderColorValue: EdgeColors;
@@ -587,9 +597,9 @@ class RenderNode {
   }
   set lengthMetricsUnit(unit: LengthMetricsUnit) {
     if (unit === undefined || unit == null) {
-      this.lengthMetricsUnit = LengthMetricsUnit.DEFAULT;
+      this.lengthMetricsUnitValue = LengthMetricsUnit.DEFAULT;
     } else {
-      this.lengthMetricsUnit = unit;
+      this.lengthMetricsUnitValue = unit;
     }
   }
   set markNodeGroup(isNodeGroup) {

@@ -53,6 +53,7 @@ const char ROOT_ETS_TAG[] = "root";
 const char STAGE_ETS_TAG[] = "stage";
 // overlay view
 const char OVERLAY_ETS_TAG[] = "overlay";
+const char ORDER_OVERLAY_ETS_TAG[] = "OrderOverlay";
 // page view
 const char PAGE_ETS_TAG[] = "page";
 // container modal view (title bar)
@@ -74,6 +75,8 @@ const char JS_SYNTAX_ITEM_ETS_TAG[] = "SyntaxItem";
 const char JS_REPEAT_ETS_TAG[] = "Repeat";
 // js if else node
 const char JS_IF_ELSE_ETS_TAG[] = "IfElse";
+// js with theme node
+const char JS_WITH_THEME_ETS_TAG[] = "WithTheme";
 // js node slot
 const char JS_NODE_SLOT_ETS_TAG[] = "NodeSlot";
 
@@ -111,6 +114,10 @@ const char SWIPER_LEFT_ARROW_ETS_TAG[] = "LeftArrow";
 const char SWIPER_RIGHT_ARROW_ETS_TAG[] = "RightArrow";
 const char SWIPER_LEFT_CAPTURE_ETS_TAG[] = "SwiperLeftCapture";
 const char SWIPER_RIGHT_CAPTURE_ETS_TAG[] = "SwiperRightCapture";
+
+// indicator
+const char INDICATOR_COMPONENT_TAG[] = "IndicatorComponentComponent";
+const char INDICATOR_ETS_TAG[] = "IndicatorComponent";
 
 // tabs
 const char TABS_COMPONENT_TAG[] = "TabsComponent";
@@ -269,6 +276,10 @@ const char SPAN_ETS_TAG[] = "Span";
 const char SYMBOL_SPAN_COMPONENT_TAG[] = "SymbolSpanComponent";
 const char SYMBOL_SPAN_ETS_TAG[] = "SymbolSpan";
 
+// image span
+const char IMAGE_SPAN_COMPONENT_TAG[] = "ImageSpanComponent";
+const char IMAGE_SPAN_ETS_TAG[] = "ImageSpan";
+
 // placeholder span
 const char PLACEHOLDER_SPAN_COMPONENT_TAG[] = "PlaceholderSpanComponent";
 const char PLACEHOLDER_SPAN_ETS_TAG[] = "PlaceholderSpan";
@@ -337,6 +348,12 @@ const char FORM_ETS_TAG[] = "FormComponent";
 const char FORM_LINK_TAG[] = "FormLink";
 const char FORM_LINK_ETS_TAG[] = "FormLink";
 
+// formButton
+#ifdef FORM_BUTTON_COMPONENT_SUPPORT
+const char FORM_BUTTON_TAG[] = "FormButton";
+const char FORM_BUTTON_ETS_TAG[] = "FormButton";
+#endif
+
 // PluginComponent
 const char PLUGIN_COMPONENT_TAG[] = "PluginComponent";
 const char PLUGIN_ETS_TAG[] = "PluginComponent";
@@ -352,6 +369,10 @@ const char INDEXER_ETS_TAG[] = "AlphabetIndexer";
 // slider
 const char SLIDER_COMPONENT_TAG[] = "SliderComponent";
 const char SLIDER_ETS_TAG[] = "Slider";
+
+// sliderTip
+const char SLIDER_TIP_NODE_COMPONENT_TAG[] = "sliderTipFrameNodeComponent";
+const char SLIDER_TIP_NODE_ETS_TAG[] = "sliderTipFrameNode";
 
 // rating
 const char RATING_COMPONENT_TAG[] = "RatingComponent";
@@ -386,6 +407,12 @@ const char STEPPER_ETS_TAG[] = "Stepper";
 // stepperItem
 const char STEPPER_ITEM_COMPONENT_TAG[] = "StepperItemComponentV2";
 const char STEPPER_ITEM_ETS_TAG[] = "StepperItem";
+
+// toolbar
+const char TOOLBAR_ETS_TAG[] = "Tool_Bar";
+
+// toolbaritem
+const char TOOLBARITEM_ETS_TAG[] = "ToolBarItem";
 
 // scrollbar
 const char SCROLL_BAR_COMPONENT_TAG[] = "ScrollBarComponent";
@@ -435,6 +462,7 @@ const char MENU_ITEM_ETS_TAG[] = "MenuItem";
 const char MENU_ITEM_GROUP_ETS_TAG[] = "MenuItemGroup";
 const char MENU_WRAPPER_ETS_TAG[] = "MenuWrapper";
 const char MENU_PREVIEW_ETS_TAG[] = "MenuPreview";
+const char MENU_DIVIDER_TAG[] = "MenuDivider";
 
 // textarea
 const char TEXTAREA_COMPONENT_TAG[] = "TextFieldComponent";
@@ -586,6 +614,10 @@ const char SYMBOL_ETS_TAG[] = "SymbolGlyph";
 const char ISOLATED_COMPONENT_TAG[] = "IsolatedComponent";
 const char ISOLATED_COMPONENT_ETS_TAG[] = "IsolatedComponent";
 
+// DynamicComponent
+const char DYNAMIC_COMPONENT_TAG[] = "DynamicComponent";
+const char DYNAMIC_COMPONENT_ETS_TAG[] = "DynamicComponent";
+
 // ContainerSpan
 const char CONTAINER_SPAN_COMPONENT_TAG[] = "ContainerSpanComponent";
 const char CONTAINER_SPAN_ETS_TAG[] = "ContainerSpan";
@@ -603,10 +635,35 @@ const char NODE_CONTAINER_ETS_TAG[] = "NodeContainer";
 const char MOVING_PHOTO_COMPONENT_TAG[] = "MovingPhotoComponent";
 const char MOVING_PHOTO_ETS_TAG[] = "MovingPhoto";
 
+// CustomSpanNode
+const char CUSTOM_SPAN_NODE_ETS_TAG[] = "CustomSpanNode";
+
 // LinearIndicator
 const char LINEARINDICATOR_COMPONENT_TAG[] = "LinearIndicatorComponent";
 const char LINEARINDICATOR_ETS_TAG[] = "LinearIndicator";
 
-// CustomSpanNode
-const char CUSTOM_SPAN_NODE_ETS_TAG[] = "CustomSpanNode";
+// ArcList
+const char ARC_LIST_COMPONENT_TAG[] = "ArcListComponent";
+const char ARC_LIST_ETS_TAG[] = "ArcList";
+
+// ArcListItem
+const char ARC_LIST_ITEM_COMPONENT_TAG[] = "ArcListItemComponent";
+const char ARC_LIST_ITEM_ETS_TAG[] = "ArcListItem";
+
+// ArcScrollBar
+const char ARC_SCROLL_BAR_COMPONENT_TAG[] = "ArcScrollBarComponent";
+const char ARC_SCROLL_BAR_ETS_TAG[] = "ArcScrollBar";
+
+// ArcAlphabetIndexer
+const char ARC_INDEXER_COMPONENT_TAG[] = "ArcIndexerComponent";
+const char ARC_INDEXER_ETS_TAG[] = "ArcAlphabetIndexer";
+
+// Magnifier
+const char MAGNIFIER_TAG[] = "Magnifier";
+
+// AccessibilityFocusPaintNode
+const char ACCESSIBILITY_FOCUS_PAINT_NODE_TAG[] = "Accessibility_focus_paint_node";
+
+// LazyVGridLayout
+const char LAZY_V_GRID_LAYOUT_ETS_TAG[] = "LazyVGridLayout";
 } // namespace OHOS::Ace::V2

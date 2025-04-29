@@ -15,12 +15,6 @@
 
 #include "frameworks/bridge/card_frontend/form_frontend_declarative.h"
 
-#include "base/log/event_report.h"
-#include "base/utils/utils.h"
-#include "core/common/thread_checker.h"
-#include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/core/pipeline_ng/pipeline_context.h"
-
 namespace OHOS::Ace {
 namespace {
 const char FILE_TYPE_BIN[] = ".abc";
@@ -55,6 +49,23 @@ UIContentErrorCode FormFrontendDeclarative::RunDynamicPage(
 {
     TAG_LOGI(AceLogTag::ACE_FORM, "FormFrontendDeclarative run page url = %{public}s, entryPoint = %{public}s",
         url.c_str(), entryPoint.c_str());
+    auto container = Container::Current();
+    if (!container) {
+        return UIContentErrorCode::NULL_POINTER;
+    }
+
+    auto uiContentType = container->GetUIContentType();
+    if (uiContentType == UIContentType::DYNAMIC_COMPONENT) {
+        return InnerRunDynamicPage(url, params, entryPoint);
+    }
+
+    return InnerRunCardPage(url, params, entryPoint);
+}
+
+UIContentErrorCode FormFrontendDeclarative::InnerRunCardPage(
+    const std::string& url, const std::string& params, const std::string& entryPoint)
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "InnerRunCardPage");
     std::string urlPath = GetFormSrcPath(url, FILE_TYPE_BIN);
     if (urlPath.empty()) {
         return UIContentErrorCode::NULL_URL;
@@ -74,10 +85,30 @@ UIContentErrorCode FormFrontendDeclarative::RunDynamicPage(
     return UIContentErrorCode::NULL_POINTER;
 }
 
+UIContentErrorCode FormFrontendDeclarative::InnerRunDynamicPage(
+    const std::string& url, const std::string& params, const std::string& entryPoint)
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "InnerRunDynamicPage");
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
+    container->SetCardFrontend(AceType::WeakClaim(this), cardId_);
+    CHECK_NULL_RETURN(delegate_, UIContentErrorCode::NULL_POINTER);
+    auto delegate = AceType::DynamicCast<Framework::FormFrontendDelegateDeclarative>(delegate_);
+    CHECK_NULL_RETURN(delegate, UIContentErrorCode::NULL_POINTER);
+    auto errorCode = delegate->RunCard(url, params, "", cardId_, entryPoint);
+    if (errorCode == NO_ERRORS) {
+        auto jsAccessibility = delegate_->GetJSAccessibilityManager();
+        CHECK_NULL_RETURN(jsAccessibility, errorCode);
+        jsAccessibility->InitializeCallback();
+    }
+    return errorCode;
+}
+
 void FormFrontendDeclarative::UpdateData(const std::string& dataList)
 {
     CHECK_NULL_VOID(taskExecutor_);
     // eTSCard UI == Main JS/UI/PLATFORM
+    TAG_LOGI(AceLogTag::ACE_FORM, "UpdateData, dataList length:%{public}zu", dataList.length());
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), dataList] {
             auto frontend = weak.Upgrade();
@@ -91,8 +122,10 @@ void FormFrontendDeclarative::UpdateData(const std::string& dataList)
 void FormFrontendDeclarative::UpdatePageData(const std::string& dataList)
 {
     CHECK_RUN_ON(UI); // eTSCard UI == Main JS/UI/PLATFORM
+    TAG_LOGI(AceLogTag::ACE_FORM, "UpdatePageData, dataList length:%{public}zu", dataList.length());
     auto delegate = GetDelegate();
     if (!delegate) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "UpdatePageData delegate is null");
         return;
     }
     delegate->UpdatePageData(dataList);

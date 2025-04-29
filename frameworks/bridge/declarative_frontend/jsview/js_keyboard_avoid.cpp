@@ -14,14 +14,15 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
-
+#include "core/common/container.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Framework {
-const std::vector<KeyBoardAvoidMode> KEYBOARD_AVOID_MODES = { KeyBoardAvoidMode::OFFSET, KeyBoardAvoidMode::RESIZE };
+const std::vector<KeyBoardAvoidMode> KEYBOARD_AVOID_MODES = { KeyBoardAvoidMode::OFFSET, KeyBoardAvoidMode::RESIZE,
+    KeyBoardAvoidMode::OFFSET_WITH_CARET, KeyBoardAvoidMode::RESIZE_WITH_CARET, KeyBoardAvoidMode::NONE };
 
 void JSKeyboardAvoid::SetKeyboardAvoidMode(const JSCallbackInfo& info)
 {
@@ -31,29 +32,43 @@ void JSKeyboardAvoid::SetKeyboardAvoidMode(const JSCallbackInfo& info)
         return;
     }
     if (!info[0]->IsNumber()) {
-        pipeline->SetEnableKeyBoardAvoidMode(false);
+        pipeline->SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode::OFFSET);
         return;
     }
     auto index = info[0]->ToNumber<int32_t>();
     if (index < 0 || index >= static_cast<int32_t>(KEYBOARD_AVOID_MODES.size())) {
         return;
     }
-    if (KEYBOARD_AVOID_MODES[index] == KeyBoardAvoidMode::RESIZE) {
-        pipeline->SetEnableKeyBoardAvoidMode(true);
-    } else {
-        pipeline->SetEnableKeyBoardAvoidMode(false);
-    }
+    pipeline->SetEnableKeyBoardAvoidMode(KEYBOARD_AVOID_MODES[index]);
 }
 
 void JSKeyboardAvoid::GetKeyboardAvoidMode(const JSCallbackInfo& info)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    auto mode = pipeline->GetEnableKeyBoardAvoidMode();
     auto obj = "KeyBoardAvoidMode.OFFSET";
-    if (pipeline->IsEnableKeyBoardAvoidMode()) {
-        obj =  "KeyBoardAvoidMode.RESIZE";
+    switch (mode) {
+        case KeyBoardAvoidMode::OFFSET_WITH_CARET:
+            obj = "KeyBoardAvoidMode.OFFSET_WITH_CARET";
+            break;
+        case KeyBoardAvoidMode::RESIZE:
+            obj = "KeyBoardAvoidMode.RESIZE";
+            break;
+        case KeyBoardAvoidMode::RESIZE_WITH_CARET:
+            obj = "KeyBoardAvoidMode.RESIZE_WITH_CARET";
+            break;
+        case KeyBoardAvoidMode::NONE:
+            obj = "KeyBoardAvoidMode.NONE";
+            break;
+        case KeyBoardAvoidMode::OFFSET:
+        default:
+            break;
     }
     auto returnValue = JSVal(ToJSValue(obj));
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        returnValue = JSVal(ToJSValue(static_cast<int32_t>(mode)));
+    }
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     info.SetReturnValue(returnPtr);
 }

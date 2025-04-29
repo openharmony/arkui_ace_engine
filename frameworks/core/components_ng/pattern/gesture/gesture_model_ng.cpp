@@ -16,14 +16,10 @@
 #include "core/components_ng/pattern/gesture/gesture_model_ng.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/gestures/gesture_group.h"
 #include "core/components_ng/gestures/long_press_gesture.h"
 #include "core/components_ng/gestures/rotation_gesture.h"
-#include "core/components_ng/gestures/pan_gesture.h"
 #include "core/components_ng/gestures/pinch_gesture.h"
 #include "core/components_ng/gestures/swipe_gesture.h"
-#include "core/components_ng/gestures/tap_gesture.h"
-#include "core/gestures/gesture_processor.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -31,6 +27,28 @@ bool IsTapClick(const RefPtr<NG::Gesture>& gesture)
 {
     auto tap = AceType::DynamicCast<NG::TapGesture>(gesture);
     return tap && (tap->GetTapCount() == 1) && (tap->GetFingers() == 1);
+}
+
+GestureEventFunc GetTapGestureEventFunc(const RefPtr<NG::Gesture>& gesture)
+{
+    if (IsTapClick(gesture)) {
+        auto tapGesture = AceType::DynamicCast<NG::TapGesture>(gesture);
+        auto onActionId = tapGesture->GetOnActionId();
+        return onActionId ? *onActionId : nullptr;
+    }
+    auto group = AceType::DynamicCast<NG::GestureGroup>(gesture);
+    if (!group) {
+        return nullptr;
+    }
+    auto list = group->GetGestures();
+    for (const auto& tap : list) {
+        if (IsTapClick(tap)) {
+            auto tapGesture = AceType::DynamicCast<NG::TapGesture>(tap);
+            auto onActionId = tapGesture->GetOnActionId();
+            return onActionId ? *onActionId : nullptr;
+        }
+    }
+    return nullptr;
 }
 } // namespace
 
@@ -70,10 +88,12 @@ void GestureModelNG::Finish()
     CHECK_NULL_VOID(gestureEventHub);
     gestureEventHub->AddGesture(gesture);
 
-    if (IsTapClick(gesture)) {
+    GestureEventFunc clickEvent = GetTapGestureEventFunc(gesture);
+    if (clickEvent) {
         auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->SetFocusable(true, false);
+        focusHub->SetOnClickCallback(std::move(clickEvent));
     }
 }
 
@@ -93,27 +113,52 @@ void GestureModelNG::SetTag(const std::string& tag)
     gesture->SetTag(tag);
 }
 
-void TapGestureModelNG::Create(int32_t countNum, int32_t fingersNum, double distanceThreshold)
+void GestureModelNG::SetAllowedTypes(const std::set<SourceTool>& allowedTypes)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
-    auto gesture = AceType::MakeRefPtr<NG::TapGesture>(countNum, fingersNum, distanceThreshold);
+    auto gesture = gestureProcessor->TopGestureNG();
+    CHECK_NULL_VOID(gesture);
+    gesture->SetAllowedTypes(allowedTypes);
+}
+
+void TapGestureModelNG::Create(
+    int32_t countNum, int32_t fingersNum, double distanceThreshold, bool isLimitFingerCount)
+{
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto gesture = AceType::MakeRefPtr<NG::TapGesture>(
+        countNum, fingersNum, distanceThreshold, isLimitFingerCount);
     gestureProcessor->PushGestureNG(gesture);
 }
 
-void LongPressGestureModelNG::Create(int32_t fingersNum, bool repeatResult, int32_t durationNum)
+void LongPressGestureModelNG::Create(
+    int32_t fingersNum, bool repeatResult, int32_t durationNum, bool isLimitFingerCount)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
-    auto gesture = AceType::MakeRefPtr<NG::LongPressGesture>(fingersNum, repeatResult, durationNum);
+    auto gesture = AceType::MakeRefPtr<NG::LongPressGesture>(
+        fingersNum, repeatResult, durationNum, false, false, isLimitFingerCount);
     gestureProcessor->PushGestureNG(gesture);
 }
 
-void PanGestureModelNG::Create(int32_t fingersNum, const PanDirection& panDirection, double distanceNum)
+void PanGestureModelNG::Create(
+    int32_t fingersNum, const PanDirection& panDirection, double distanceNum, bool isLimitFingerCount)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
-    auto gesture = AceType::MakeRefPtr<NG::PanGesture>(fingersNum, panDirection, distanceNum);
+    auto gesture = AceType::MakeRefPtr<NG::PanGesture>(
+        fingersNum, panDirection, distanceNum, isLimitFingerCount);
+    gestureProcessor->PushGestureNG(gesture);
+}
+
+void PanGestureModelNG::Create(
+    int32_t fingersNum, const PanDirection& panDirection, const PanDistanceMap& distanceMap, bool isLimitFingerCount)
+{
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto gesture = AceType::MakeRefPtr<NG::PanGesture>(
+        fingersNum, panDirection, distanceMap, isLimitFingerCount);
     gestureProcessor->PushGestureNG(gesture);
 }
 
@@ -125,27 +170,29 @@ void PanGestureModelNG::SetPanGestureOption(const RefPtr<PanGestureOption>& panG
     gestureProcessor->PushGestureNG(gesture);
 }
 
-void SwipeGestureModelNG::Create(int32_t fingersNum, const SwipeDirection& slideDirection, double speedNum)
+void SwipeGestureModelNG::Create(
+    int32_t fingersNum, const SwipeDirection& slideDirection, double speedNum, bool isLimitFingerCount)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
-    auto gesture = AceType::MakeRefPtr<NG::SwipeGesture>(fingersNum, slideDirection, speedNum);
+    auto gesture = AceType::MakeRefPtr<NG::SwipeGesture>(
+        fingersNum, slideDirection, speedNum, isLimitFingerCount);
     gestureProcessor->PushGestureNG(gesture);
 }
 
-void PinchGestureModelNG::Create(int32_t fingersNum, double distanceNum)
+void PinchGestureModelNG::Create(int32_t fingersNum, double distanceNum, bool isLimitFingerCount)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
-    auto gesture = AceType::MakeRefPtr<NG::PinchGesture>(fingersNum, distanceNum);
+    auto gesture = AceType::MakeRefPtr<NG::PinchGesture>(fingersNum, distanceNum, isLimitFingerCount);
     gestureProcessor->PushGestureNG(gesture);
 }
 
-void RotationGestureModelNG::Create(int32_t fingersNum, double angleNum)
+void RotationGestureModelNG::Create(int32_t fingersNum, double angleNum, bool isLimitFingerCount)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
-    auto gesture = AceType::MakeRefPtr<NG::RotationGesture>(fingersNum, angleNum);
+    auto gesture = AceType::MakeRefPtr<NG::RotationGesture>(fingersNum, angleNum, isLimitFingerCount);
     gestureProcessor->PushGestureNG(gesture);
 }
 
@@ -164,13 +211,13 @@ RefPtr<GestureProcessor> TimeoutGestureModelNG::GetGestureProcessor()
     return gestureProcessor;
 }
 
-void GestureModelNG::SetOnGestureEvent(const GestureEventNoParameter& gestureEventNoParameter)
+void GestureModelNG::SetOnGestureEvent(const GestureEventFunc& gestureEventFunc)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
     auto gesture = gestureProcessor->TopGestureNG();
     CHECK_NULL_VOID(gesture);
-    gesture->SetOnActionCancelId(gestureEventNoParameter);
+    gesture->SetOnActionCancelId(gestureEventFunc);
 }
 
 void GestureModelNG::SetOnActionFunc(const GestureEventFunc& gestureEventFunc, const Ace::GestureEventAction& action)

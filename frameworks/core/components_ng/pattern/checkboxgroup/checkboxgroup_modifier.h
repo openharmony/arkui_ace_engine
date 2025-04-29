@@ -50,6 +50,8 @@ public:
         Dimension shadowWidth;
         UIStatus uiStatus;
         Dimension defaultPaddingSize;
+        Dimension hoverPaddingSize;
+        bool showCircleDial;
         CheckBoxGroupPaintProperty::SelectStatus status;
     };
 
@@ -157,7 +159,9 @@ public:
 
     void SetInactivePointColor(Color inactivePointColor)
     {
-        inactivePointColor_ = inactivePointColor;
+        if (inactivePointColor_) {
+            inactivePointColor_->Set(inactivePointColor);
+        }
     }
 
     void SetHoverRadius(Dimension hoverRadius)
@@ -256,7 +260,7 @@ private:
     Color shadowColor_;
     Color clickEffectColor_;
     Color hoverColor_;
-    Color inactivePointColor_;
+    RefPtr<PropertyColor> inactivePointColor_;
     Dimension hoverRadius_;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;
@@ -264,6 +268,8 @@ private:
     float hoverDuration_ = 0.0f;
     float hoverToTouchDuration_ = 0.0f;
     Dimension defaultPaddingSize_;
+    Dimension hoverPaddingSize_;
+    bool showCircleDial_;
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxGroupModifier);
 };
 } // namespace OHOS::Ace::NG

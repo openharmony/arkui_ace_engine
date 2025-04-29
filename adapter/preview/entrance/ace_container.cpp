@@ -75,17 +75,18 @@ const char LOCALE_DIR_LTR[] = "ltr";
 const char LOCALE_DIR_RTL[] = "rtl";
 const char LOCALE_KEY[] = "locale";
 
-void SaveResourceAdapter(
-    const std::string& bundleName, const std::string& moduleName, RefPtr<ResourceAdapter>& resourceAdapter)
+void SaveResourceAdapter(const std::string& bundleName, const std::string& moduleName, int32_t instanceId,
+    RefPtr<ResourceAdapter>& resourceAdapter)
 {
     auto defaultBundleName = "";
     auto defaultModuleName = "";
-    ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter);
+    ResourceManager::GetInstance().AddResourceAdapter(
+        defaultBundleName, defaultModuleName, instanceId, resourceAdapter);
     LOGI("Save default adapter");
 
     if (!bundleName.empty() && !moduleName.empty()) {
         LOGI("Save resource adapter bundle: %{public}s, module: %{public}s", bundleName.c_str(), moduleName.c_str());
-        ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+        ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, instanceId, resourceAdapter);
     }
 }
 } // namespace
@@ -334,7 +335,7 @@ void AceContainer::InitializeCallback()
         }
         bool result = false;
         context->GetTaskExecutor()->PostSyncTask(
-            [context, event, &result]() { result = context->OnKeyEvent(event); },
+            [context, event, &result]() { result = context->OnNonPointerEvent(event); },
             TaskExecutor::TaskType::UI, "ArkUIAceContainerKeyEvent");
         return result;
     };
@@ -367,6 +368,23 @@ void AceContainer::InitializeCallback()
             TaskExecutor::TaskType::UI, "ArkUIAceContainerAxisEvent");
     };
     aceView_->RegisterAxisEventCallback(axisEventCallback);
+
+    auto&& crownEventCallback = [weak, id = instanceId_](
+        const CrownEvent& event, const std::function<void()>& ignoreMark) {
+        ContainerScope scope(id);
+        auto context = weak.Upgrade();
+        if (context == nullptr) {
+            return false;
+        }
+        context->GetTaskExecutor()->PostTask(
+            [context, event, id]() {
+                ContainerScope scope(id);
+                context->OnNonPointerEvent(event);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIAceContainerCrownEvent");
+        return true;
+    };
+    aceView_->RegisterCrownEventCallback(crownEventCallback);
 
     auto&& rotationEventCallback = [weak, id = instanceId_](const RotationEvent& event) {
         ContainerScope scope(id);
@@ -507,7 +525,8 @@ void AceContainer::DestroyContainer(int32_t instanceId)
     AceEngine::Get().RemoveContainer(instanceId);
 }
 
-UIContentErrorCode AceContainer::RunPage(int32_t instanceId, const std::string& url, const std::string& params)
+UIContentErrorCode AceContainer::RunPage(
+    int32_t instanceId, const std::string& url, const std::string& params, bool isNamedRouter)
 {
     ACE_FUNCTION_TRACE();
     auto container = AceEngine::Get().GetContainer(instanceId);
@@ -517,12 +536,16 @@ UIContentErrorCode AceContainer::RunPage(int32_t instanceId, const std::string& 
 
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
-    if (front) {
-        auto type = front->GetType();
-        if ((type == FrontendType::JS) || (type == FrontendType::DECLARATIVE_JS) || (type == FrontendType::JS_CARD) ||
-            (type == FrontendType::ETS_CARD)) {
-            return front->RunPage(url, params);
+    CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
+    auto type = front->GetType();
+    if ((type == FrontendType::JS) || (type == FrontendType::DECLARATIVE_JS) || (type == FrontendType::JS_CARD) ||
+        (type == FrontendType::ETS_CARD)) {
+        if (isNamedRouter) {
+            return front->RunPageByNamedRouter(url, params);
         }
+        return front->RunPage(url, params);
+    } else {
+        LOGE("Frontend type not supported when runpage");
     }
     return UIContentErrorCode::NULL_POINTER;
 }
@@ -537,7 +560,7 @@ void AceContainer::UpdateResourceConfiguration(const std::string& jsonStr)
     }
     resourceInfo_.SetResourceConfiguration(resConfig);
     if (ResourceConfiguration::TestFlag(updateFlags, ResourceConfiguration::COLOR_MODE_UPDATED_FLAG)) {
-        SystemProperties::SetColorMode(resConfig.GetColorMode());
+        SetColorMode(resConfig.GetColorMode());
         if (frontend_) {
             frontend_->SetColorMode(resConfig.GetColorMode());
         }
@@ -588,7 +611,7 @@ void AceContainer::NativeOnConfigurationUpdated(int32_t instanceId)
 
     std::unique_ptr<JsonValue> value = JsonUtil::Create(true);
     value->Put("fontScale", container->GetResourceConfiguration().GetFontRatio());
-    value->Put("colorMode", SystemProperties::GetColorMode() == ColorMode::LIGHT ? "light" : "dark");
+    value->Put("colorMode", container->GetColorMode() == ColorMode::LIGHT ? "light" : "dark");
     auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(front);
     if (declarativeFrontend) {
         container->UpdateResourceConfiguration(value->ToString());
@@ -748,7 +771,7 @@ void AceContainer::UpdateDeviceConfig(const DeviceConfig& deviceConfig)
     SystemProperties::InitDeviceType(deviceConfig.deviceType);
     SystemProperties::SetDeviceOrientation(deviceConfig.orientation == DeviceOrientation::PORTRAIT ? 0 : 1);
     SystemProperties::SetResolution(deviceConfig.density);
-    SystemProperties::SetColorMode(deviceConfig.colorMode);
+    SetColorMode(deviceConfig.colorMode);
     auto resConfig = resourceInfo_.GetResourceConfiguration();
     if (resConfig.GetDeviceType() == deviceConfig.deviceType &&
         resConfig.GetOrientation() == deviceConfig.orientation && resConfig.GetDensity() == deviceConfig.density &&
@@ -822,6 +845,7 @@ void AceContainer::SetView(AceViewPreview* view, sptr<Rosen::Window> rsWindow, d
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+    window->Init();
     auto rsUIDirector = window->GetRSUIDirector();
     CHECK_NULL_VOID(rsUIDirector);
     rsUIDirector->SetFlushEmptyCallback(AcePreviewHelper::GetInstance()->GetCallbackFlushEmpty());
@@ -873,7 +897,7 @@ void AceContainer::AttachView(
     if (SystemProperties::GetResourceDecoupling()) {
         auto resourceAdapter = ResourceAdapter::Create();
         resourceAdapter->Init(resourceInfo);
-        SaveResourceAdapter(bundleName_, moduleName_, resourceAdapter);
+        SaveResourceAdapter(bundleName_, moduleName_, instanceId_, resourceAdapter);
         themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
     }
     if (themeManager) {
@@ -884,12 +908,13 @@ void AceContainer::AttachView(
         }
         themeManager->LoadSystemTheme(resourceInfo_.GetThemeId());
         taskExecutor_->PostTask(
-            [themeManager, assetManager = assetManager_, colorScheme = colorScheme_, aceView = aceView_]() {
+            [themeManager, assetManager = assetManager_, colorScheme = colorScheme_,
+                pipelineContext = pipelineContext_]() {
                 themeManager->ParseSystemTheme();
                 themeManager->SetColorScheme(colorScheme);
                 themeManager->LoadCustomTheme(assetManager);
                 // get background color from theme
-                aceView->SetBackgroundColor(themeManager->GetBackgroundColor());
+                pipelineContext->SetAppBgColor(themeManager->GetBackgroundColor());
             },
             TaskExecutor::TaskType::UI, "ArkUISetBackgroundColor");
     }
@@ -997,7 +1022,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceViewPreview* vi
     if (SystemProperties::GetResourceDecoupling()) {
         auto resourceAdapter = ResourceAdapter::Create();
         resourceAdapter->Init(resourceInfo_);
-        SaveResourceAdapter(bundleName_, moduleName_, resourceAdapter);
+        SaveResourceAdapter(bundleName_, moduleName_, instanceId_, resourceAdapter);
         themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
     }
 
@@ -1009,12 +1034,13 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceViewPreview* vi
         }
         themeManager->LoadSystemTheme(resourceInfo_.GetThemeId());
         taskExecutor_->PostTask(
-            [themeManager, assetManager = assetManager_, colorScheme = colorScheme_, aceView = aceView_]() {
+            [themeManager, assetManager = assetManager_, colorScheme = colorScheme_,
+                pipelineContext = pipelineContext_]() {
                 themeManager->ParseSystemTheme();
                 themeManager->SetColorScheme(colorScheme);
                 themeManager->LoadCustomTheme(assetManager);
                 // get background color from theme
-                aceView->SetBackgroundColor(themeManager->GetBackgroundColor());
+                pipelineContext->SetAppBgColor(themeManager->GetBackgroundColor());
             },
             TaskExecutor::TaskType::UI, "ArkUISetBackgroundColor");
     }

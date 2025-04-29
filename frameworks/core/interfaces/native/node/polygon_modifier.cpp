@@ -14,11 +14,7 @@
  */
 #include "core/interfaces/native/node/polygon_modifier.h"
 
-#include "core/pipeline/base/element_register.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/shape/polygon_model_ng.h"
-#include "base/geometry/shape.h"
 
 namespace OHOS::Ace::NG {
 void SetPolygonPoints(ArkUINodeHandle node, const ArkUI_Float32* pointX, const ArkUI_Float32* pointY, int32_t length)
@@ -49,14 +45,24 @@ void ResetPolygonPoints(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIPolygonModifier* GetPolygonModifier()
 {
-    static const ArkUIPolygonModifier modifier = {SetPolygonPoints, ResetPolygonPoints};
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIPolygonModifier modifier = {
+        .setPolygonPoints = SetPolygonPoints,
+        .resetPolygonPoints = ResetPolygonPoints,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIPolygonModifier* GetCJUIPolygonModifier()
 {
-    static const CJUIPolygonModifier modifier = {SetPolygonPoints, ResetPolygonPoints};
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIPolygonModifier modifier = {
+        .setPolygonPoints = SetPolygonPoints,
+        .resetPolygonPoints = ResetPolygonPoints,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

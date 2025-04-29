@@ -22,7 +22,9 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "core/components_ng/base/frame_scene_status.h"
-#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
+#include "core/components_ng/event/touch_event.h"
+#include "core/components_ng/property/layout_constraint.h"
+#include "ui/properties/scrollable_properties.h"
 
 namespace OHOS::Ace {
 constexpr float DEFAULT_SCROLL_TO_MASS = 1.0f;
@@ -52,13 +54,30 @@ enum class ScrollSnapAlign {
     END,
 };
 
+enum class ScrollBarShape {
+    RECT = 0,
+    ARC,
+};
+
 enum class ScrollPagingStatus {
-    // no enablePaging and scrollSnap setting
+    // no enablePaging set
     NONE = 0,
-    // scrollSnap has set, enablePaging is not effective
+    // enablePaging is false
     INVALID,
-    // enablePaging is effective
+    // enablePaging is true
     VALID,
+};
+
+enum class SnapType {
+    SCROLL_SNAP = 0,
+    LIST_SNAP,
+    NONE_SNAP
+};
+
+enum class SnapDirection {
+    FORWARD = 0,
+    BACKWARD,
+    NONE
 };
 
 // use in dumpInfo, excluding events truggered per frame,
@@ -189,6 +208,8 @@ constexpr int32_t SCROLL_FROM_START = 10; // from drag start
 constexpr int32_t SCROLL_FROM_AXIS = 11;
 constexpr int32_t SCROLL_FROM_ANIMATION_CONTROLLER = 12;
 constexpr int32_t SCROLL_FROM_BAR_FLING = 13;
+constexpr int32_t SCROLL_FROM_CROWN = 14;
+constexpr int32_t SCROLL_FROM_STATUSBAR = 15;
 
 inline std::string GetSourceStr(int32_t scrollSource)
 {
@@ -258,6 +279,13 @@ struct ScrollableEventsFiredInfo {
                 return "";
         }
     }
+
+    void ToJson(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("event type", GetEventStr().c_str());
+        json->Put("fired in", std::to_string(eventFiredTime_).c_str());
+        json->Put("source is", GetSourceStr(scrollSource_).c_str());
+    }
 };
 
 struct ScrollableFrameInfo {
@@ -285,6 +313,19 @@ struct ScrollableFrameInfo {
             .append(" fired in ")
             .append(std::to_string(scrollStateTime_));
     }
+
+    void ToJson(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("scroll from", GetSourceStr(scrollState_).c_str());
+        json->Put("canOverScroll", std::to_string(canOverScroll_).c_str());
+        json->Put("isScrollableSpringEffect",
+            (canOverScrollInfo_ >> 4) & 1 ? "true" : "false");                         // 4: isScrollableSpringEffect
+        json->Put("isScrollable", (canOverScrollInfo_ >> 3) & 1 ? "true" : "false");   // 3: isScrollable
+        json->Put("scrollableIdle", (canOverScrollInfo_ >> 2) & 1 ? "true" : "false"); // 2: scrollableIdle
+        json->Put("animateOverScroll", (canOverScrollInfo_ >> 1) & 1 ? "true" : "false");
+        json->Put("animateCanOverScroll", canOverScrollInfo_ & 1 ? "true" : "false");
+        json->Put("scroll from", std::to_string(scrollStateTime_).c_str());
+    }
 };
 
 struct ScrollLayoutInfo {
@@ -307,6 +348,15 @@ struct ScrollLayoutInfo {
             .append(" fired in ")
             .append(std::to_string(changedTime_));
     }
+
+    void ToJson(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("scrollableDistance changed, scrollableDistance", std::to_string(scrollableDistance_).c_str());
+        json->Put("scrollSize", scrollSize_.ToString().c_str());
+        json->Put("viewPort", viewPort_.ToString().c_str());
+        json->Put("childSize", childSize_.ToString().c_str());
+        json->Put("fired in", std::to_string(changedTime_).c_str());
+    }
 };
 
 struct ScrollMeasureInfo {
@@ -328,6 +378,15 @@ struct ScrollMeasureInfo {
             .append(childSize_.ToString())
             .append(" fired in ")
             .append(std::to_string(changedTime_));
+    }
+
+    void ToJson(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("Scroll Measure changed, parentConstraint", parentConstraint_->ToString().c_str());
+        json->Put("childConstraint", childConstraint_->ToString().c_str());
+        json->Put("selfSize", selfSize_.ToString().c_str());
+        json->Put("childSize", childSize_.ToString().c_str());
+        json->Put("fired in", std::to_string(changedTime_).c_str());
     }
 };
 
@@ -354,6 +413,16 @@ struct InnerScrollBarLayoutInfo {
             .append(" fired in ")
             .append(std::to_string(layoutTime_));
     }
+
+    void ToJson(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("inner scrollBar layout, viewPortSize", viewPortSize_.ToString().c_str());
+        json->Put("lastOffset", lastOffset_.ToString().c_str());
+        json->Put("estimatedHeight", estimatedHeight_);
+        json->Put("outBoundary", std::to_string(outBoundary_).c_str());
+        json->Put("activeRect", activeRect_.ToString().c_str());
+        json->Put("fired in", std::to_string(layoutTime_).c_str());
+    }
 };
 
 struct OuterScrollBarLayoutInfo {
@@ -370,17 +439,21 @@ struct OuterScrollBarLayoutInfo {
             .append(" fired in ")
             .append(std::to_string(layoutTime_));
     }
+
+    void ToJson(std::unique_ptr<JsonValue>& json) const
+    {
+        json->Put("outer scrollBar layout, currentOffset", std::to_string(currentOffset_).c_str());
+        json->Put("scrollableNodeOffset", std::to_string(scrollableNodeOffset_).c_str());
+        json->Put("fired in", std::to_string(layoutTime_).c_str());
+    }
 };
 
-enum class ScrollSource {
-    DRAG = 0,           // constexpr int32_t SCROLL_FROM_UPDATE = 1;
-    FLING,              // constexpr int32_t SCROLL_FROM_ANIMATION = 2;
-    EDGE_EFFECT,        // constexpr int32_t SCROLL_FROM_ANIMATION_SPRING = 4;
-    OTHER_USER_INPUT,   // constexpr int32_t SCROLL_FROM_AXIS = 11;
-    SCROLL_BAR,         // constexpr int32_t SCROLL_FROM_BAR = 6;
-    SCROLL_BAR_FLING,   // constexpr int32_t SCROLL_FROM_BAR_FLING = 13;
-    SCROLLER,           // constexpr int32_t SCROLL_FROM_JUMP = 3;
-    SCROLLER_ANIMATION, // constexpr int32_t SCROLL_FROM_ANIMATION_CONTROLLER = 12;
+struct SnapAnimationOptions {
+    float snapDelta = 0.f;
+    float animationVelocity = 0.f;
+    float dragDistance = 0.f;
+    SnapDirection snapDirection = SnapDirection::NONE;
+    bool fromScrollBar = false;
 };
 
 // app tail animation
@@ -393,6 +466,7 @@ constexpr char SCROLLER_ANIMATION[] = "CUSTOM_ANIMATOR_SCROLLER_ANIMATION ";
 constexpr char SCROLLER_FIX_VELOCITY_ANIMATION[] = "SCROLLER_FIX_VELOCITY_ANIMATION ";
 
 using OnScrollEvent = std::function<void(Dimension, ScrollState)>;
+using OnDidScrollEvent = std::function<void(Dimension, ScrollSource, bool, bool)>;
 using OnWillScrollEvent = std::function<ScrollFrameResult(Dimension, ScrollState, ScrollSource)>;
 using OnScrollBeginEvent = std::function<ScrollInfo(Dimension, Dimension)>;
 using OnScrollFrameBeginEvent = std::function<ScrollFrameResult(Dimension, ScrollState)>;
@@ -400,15 +474,23 @@ using OnScrollStartEvent = std::function<void()>;
 using OnScrollStopEvent = std::function<void()>;
 using OnReachEvent = std::function<void()>;
 using OnScrollIndexEvent = std::function<void(int32_t, int32_t, int32_t)>;
+using ScrollIndexFunc = std::function<void(int32_t, int32_t)>;
 using OnScrollVisibleContentChangeEvent = std::function<void(ListItemIndex, ListItemIndex)>;
 
 using ScrollPositionCallback = std::function<bool(double, int32_t source)>;
 using ScrollEndCallback = std::function<void()>;
-using CalePredictSnapOffsetCallback =
-                std::function<std::optional<float>(float delta, float dragDistance, float velocity)>;
-using StartScrollSnapMotionCallback = std::function<void(float scrollSnapDelta, float scrollSnapVelocity)>;
+using StartSnapAnimationCallback = std::function<bool(SnapAnimationOptions)>;
 using ScrollBarFRCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 using ScrollPageCallback = std::function<void(bool, bool smooth)>;
+
+struct ScrollerObserver {
+    RefPtr<NG::TouchEventImpl> onTouchEvent;
+    OnReachEvent onReachStartEvent;
+    OnReachEvent onReachEndEvent;
+    OnScrollStartEvent onScrollStartEvent;
+    OnScrollStopEvent onScrollStopEvent;
+    OnDidScrollEvent onDidScrollEvent;
+};
 } // namespace OHOS::Ace
 
 #endif

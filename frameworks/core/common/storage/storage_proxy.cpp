@@ -18,14 +18,10 @@
 
 namespace OHOS::Ace {
 
-StorageProxy* StorageProxy::inst_ = nullptr;
-
 StorageProxy* StorageProxy::GetInstance()
 {
-    if (inst_ == nullptr) {
-        inst_ = new StorageProxy();
-    }
-    return (inst_);
+    static StorageProxy instance;
+    return &instance;
 }
 
 void StorageProxy::SetDelegate(std::unique_ptr<StorageInterface>&& delegate)
@@ -38,10 +34,10 @@ void StorageProxy::SetDistributedDelegate(std::unique_ptr<StorageInterface>&& de
     distributedDelegate_ = std::move(delegate);
 }
 
-RefPtr<Storage> StorageProxy::GetStorage() const
+RefPtr<Storage> StorageProxy::GetStorage(int areaMode) const
 {
     CHECK_NULL_RETURN(delegate_, nullptr);
-    return delegate_->GetStorage();
+    return delegate_->GetStorage(areaMode);
 }
 
 RefPtr<Storage> StorageProxy::GetStorage(const std::string& sessionId,

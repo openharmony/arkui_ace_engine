@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/base/common_configuration.h"
 
@@ -87,6 +88,7 @@ struct ProgressDate {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableLinearScanEffect, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableShowText, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeRadius, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderRadius, Dimension);
 };
 
 struct ProgressStyle {
@@ -99,8 +101,10 @@ struct ProgressAnimatableProperty {
     Color color;
     Color bgColor;
     Color borderColor;
+    Gradient ringProgressColor;
     float strokeWidth = 0.0f;
     float strokeRadius = 0.0f;
+    float value = 0.0f;
 };
 
 class ProgressConfiguration : public CommonConfiguration {

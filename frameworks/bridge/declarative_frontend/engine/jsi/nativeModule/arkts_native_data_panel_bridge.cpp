@@ -106,14 +106,17 @@ void SetTrackShadowObject(ArkUINodeHandle nativeNode, std::vector<OHOS::Ace::NG:
         linearLength[i] = shadowColors[i].GetColors().size();
         for (uint32_t j = 0; j < linearLength[i]; j++) {
             allColor.emplace_back(shadowColors[i].GetColors()[j].GetLinearColor().GetValue());
-            allOffset.emplace_back(ArkUILengthType { .number = shadowColors[i].GetColors()[j].GetDimension().Value(),
+            allOffset.emplace_back(ArkUILengthType {
+                .number = static_cast<ArkUI_Float32>(shadowColors[i].GetColors()[j].GetDimension().Value()),
                 .unit = static_cast<int8_t>(shadowColors[i].GetColors()[j].GetDimension().Unit()) });
         }
     }
     gradient.color = &(*allColor.begin());
     gradient.offset = &(*allOffset.begin());
     gradient.gradientLength = linearLength.get();
-    GetArkUINodeModifiers()->getDataPanelModifier()->setTrackShadow(nativeNode, &gradient, radius, offsetX, offsetY);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_VOID(nodeModifiers);
+    nodeModifiers->getDataPanelModifier()->setTrackShadow(nativeNode, &gradient, radius, offsetX, offsetY);
 }
 } // namespace
 
@@ -123,11 +126,15 @@ ArkUINativeModuleValue DataPanelBridge::SetValueColors(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> colors = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     std::vector<OHOS::Ace::NG::Gradient> shadowColors;
     if (!colors.IsEmpty() && colors->IsArray(vm)) {
         auto colorsArray = panda::CopyableGlobal<panda::ArrayRef>(vm, colors);
+        if (colorsArray.IsEmpty() || colorsArray->IsUndefined() || colorsArray->IsNull()) {
+            return panda::JSValueRef::Undefined(vm);
+        }
         for (size_t i = 0; i < colorsArray->Length(vm); ++i) {
             auto item = colorsArray->GetValueAt(vm, colors, i);
             OHOS::Ace::NG::Gradient gradient;
@@ -148,14 +155,17 @@ ArkUINativeModuleValue DataPanelBridge::SetValueColors(ArkUIRuntimeCallInfo* run
         linearLength[i] = shadowColors[i].GetColors().size();
         for (uint32_t j = 0; j < linearLength[i]; j++) {
             allColor.emplace_back(shadowColors[i].GetColors()[j].GetLinearColor().GetValue());
-            allOffset.emplace_back(ArkUILengthType { .number = shadowColors[i].GetColors()[j].GetDimension().Value(),
+            allOffset.emplace_back(ArkUILengthType {
+                .number = static_cast<ArkUI_Float32>(shadowColors[i].GetColors()[j].GetDimension().Value()),
                 .unit = static_cast<int8_t>(shadowColors[i].GetColors()[j].GetDimension().Unit()) });
         }
     }
     gradient.color = &(*allColor.begin());
     gradient.offset = &(*allOffset.begin());
     gradient.gradientLength = linearLength.get();
-    GetArkUINodeModifiers()->getDataPanelModifier()->setValueColors(nativeNode, &gradient);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getDataPanelModifier()->setValueColors(nativeNode, &gradient);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -164,8 +174,11 @@ ArkUINativeModuleValue DataPanelBridge::ResetValueColors(ArkUIRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getDataPanelModifier()->resetValueColors(nativeNode);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getDataPanelModifier()->resetValueColors(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -175,13 +188,16 @@ ArkUINativeModuleValue DataPanelBridge::SetTrackShadow(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     if (secondArg->IsNull()) {
-        GetArkUINodeModifiers()->getDataPanelModifier()->setNullTrackShadow(nativeNode);
+        nodeModifiers->getDataPanelModifier()->setNullTrackShadow(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     if (!secondArg->IsObject(vm)) {
-        GetArkUINodeModifiers()->getDataPanelModifier()->resetTrackShadow(nativeNode);
+        nodeModifiers->getDataPanelModifier()->resetTrackShadow(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     auto obj = secondArg->ToObject(vm);
@@ -210,6 +226,10 @@ ArkUINativeModuleValue DataPanelBridge::SetTrackShadow(ArkUIRuntimeCallInfo* run
     if (!colors.IsEmpty() && colors->IsArray(vm)) {
         shadowColors.clear();
         auto colorsArray = panda::CopyableGlobal<panda::ArrayRef>(vm, colors);
+        if (colorsArray.IsEmpty() || colorsArray->IsUndefined() || colorsArray->IsNull()) {
+            SetTrackShadowObject(nativeNode, shadowColors, radius, offsetX, offsetY);
+            return panda::JSValueRef::Undefined(vm);
+        }
         for (size_t i = 0; i < colorsArray->Length(vm); ++i) {
             auto item = colorsArray->GetValueAt(vm, colors, i);
             OHOS::Ace::NG::Gradient gradient;
@@ -230,8 +250,11 @@ ArkUINativeModuleValue DataPanelBridge::ResetTrackShadow(ArkUIRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getDataPanelModifier()->resetTrackShadow(nativeNode);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getDataPanelModifier()->resetTrackShadow(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue DataPanelBridge::SetCloseEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -240,9 +263,12 @@ ArkUINativeModuleValue DataPanelBridge::SetCloseEffect(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     bool boolValue = secondArg->ToBoolean(vm)->Value();
-    GetArkUINodeModifiers()->getDataPanelModifier()->setCloseEffect(nativeNode, boolValue);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getDataPanelModifier()->setCloseEffect(nativeNode, boolValue);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -251,8 +277,11 @@ ArkUINativeModuleValue DataPanelBridge::ResetCloseEffect(ArkUIRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(nativeNodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getDataPanelModifier()->resetCloseEffect(nativeNode);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getDataPanelModifier()->resetCloseEffect(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -262,6 +291,7 @@ ArkUINativeModuleValue DataPanelBridge::SetDataPanelTrackBackgroundColor(ArkUIRu
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     Color color;
@@ -269,7 +299,9 @@ ArkUINativeModuleValue DataPanelBridge::SetDataPanelTrackBackgroundColor(ArkUIRu
         RefPtr<DataPanelTheme> theme = ArkTSUtils::GetTheme<DataPanelTheme>();
         color = theme->GetBackgroundColor();
     }
-    GetArkUINodeModifiers()->getDataPanelModifier()->setDataPanelTrackBackgroundColor(nativeNode, color.GetValue());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getDataPanelModifier()->setDataPanelTrackBackgroundColor(nativeNode, color.GetValue());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -278,8 +310,11 @@ ArkUINativeModuleValue DataPanelBridge::ResetDataPanelTrackBackgroundColor(ArkUI
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(nativeNodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getDataPanelModifier()->resetDataPanelTrackBackgroundColor(nativeNode);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getDataPanelModifier()->resetDataPanelTrackBackgroundColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -288,6 +323,7 @@ ArkUINativeModuleValue DataPanelBridge::SetDataPanelStrokeWidth(ArkUIRuntimeCall
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
 
@@ -308,7 +344,9 @@ ArkUINativeModuleValue DataPanelBridge::SetDataPanelStrokeWidth(ArkUIRuntimeCall
         strokeWidth = theme->GetThickness();
     }
 
-    GetArkUINodeModifiers()->getDataPanelModifier()->setDataPanelStrokeWidth(
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getDataPanelModifier()->setDataPanelStrokeWidth(
         nativeNode, strokeWidth.Value(), static_cast<int32_t>(strokeWidth.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -318,8 +356,11 @@ ArkUINativeModuleValue DataPanelBridge::ResetDataPanelStrokeWidth(ArkUIRuntimeCa
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getDataPanelModifier()->resetDataPanelStrokeWidth(nativeNode);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getDataPanelModifier()->resetDataPanelStrokeWidth(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -329,6 +370,7 @@ ArkUINativeModuleValue DataPanelBridge::SetContentModifierBuilder(ArkUIRuntimeCa
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     if (!secondArg->IsObject(vm)) {

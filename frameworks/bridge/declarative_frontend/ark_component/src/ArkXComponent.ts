@@ -24,14 +24,22 @@ interface XComponentParam {
 class ArkXComponentComponent extends ArkComponent implements XComponentAttribute {
   _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
   nativePtr: KNode;
+  xComponentType: XComponentType = XComponentType.SURFACE;
+  libraryname?: string = undefined;
 
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  allowChildCount(): number {
+    if (this.xComponentType === XComponentType.COMPONENT) {
+      return undefined;
+    }
+    return 0;
+  }
   applyModifierPatch(): void {
     let expiringItemsWithKeys = [];
     this._modifiersWithKeys.forEach((value, key) => {
-      if (value.applyStage(this.nativePtr)) {
+      if (value.applyStage(this.nativePtr, this)) {
         expiringItemsWithKeys.push(key);
       }
     });
@@ -40,62 +48,13 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
     });
   }
   initialize(value: Object[]): this {
-    if (value[0]) {
+    if (!isUndefined(value[0]) && !isNull(value[0]) && isObject(value[0])) {
+      this.xComponentType = (value[0] as XComponentParam).type;
+      this.libraryname = (value[0] as XComponentParam).libraryname;
       modifierWithKey(this._modifiersWithKeys, XComponentInitializeModifier.identity,
         XComponentInitializeModifier, value[0] as XComponentParam);
     }
     return this;
-  }
-  outline(value: OutlineOptions): this {
-    throw new Error('Method not implemented.');
-  }
-  outlineColor(value: ResourceColor | EdgeColors): this {
-    throw new Error('Method not implemented.');
-  }
-  outlineRadius(value: Dimension | OutlineRadiuses): this {
-    throw new Error('Method not implemented.');
-  }
-  outlineStyle(value: OutlineStyle | EdgeOutlineStyles): this {
-    throw new Error('Method not implemented.');
-  }
-  outlineWidth(value: Dimension | EdgeOutlineWidths): this {
-    throw new Error('Method not implemented.');
-  }
-  width(value: Length): this {
-    throw new Error('Method not implemented.');
-  }
-  height(value: Length): this {
-    throw new Error('Method not implemented.');
-  }
-  expandSafeArea(types?: SafeAreaType[], edges?: SafeAreaEdge[]): this {
-    throw new Error('Method not implemented.');
-  }
-  responseRegion(value: Rectangle | Rectangle[]): this {
-    throw new Error('Method not implemented.');
-  }
-  mouseResponseRegion(value: Rectangle | Rectangle[]): this {
-    throw new Error('Method not implemented.');
-  }
-  size(value: SizeOptions): this {
-    throw new Error('Method not implemented.');
-  }
-  constraintSize(value: ConstraintSizeOptions): this {
-    throw new Error('Method not implemented.');
-  }
-  touchable(value: boolean): this {
-    throw new Error('Method not implemented.');
-  }
-  hitTestBehavior(value: HitTestMode): this {
-    throw new Error('Method not implemented.');
-  }
-  layoutWeight(value: string | number): this {
-    throw new Error('Method not implemented.');
-  }
-  padding(value: Length | Padding): this {
-    throw new Error('Method not implemented.');
-  }
-  margin(value: Length | Padding): this {
-    throw new Error('Method not implemented.');
   }
   background(builder: CustomBuilder, options?: { align?: Alignment; }): this {
     throw new Error('Method not implemented.');
@@ -106,94 +65,79 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
     return this;
   }
   backgroundImage(src: ResourceStr, repeat?: ImageRepeat): this {
+    if (this.xComponentType !== XComponentType.NODE) {
+      return this;
+    }
     let arkBackgroundImage = new ArkBackgroundImage();
     arkBackgroundImage.src = src;
     arkBackgroundImage.repeat = repeat;
-    modifierWithKey(this._modifiersWithKeys, XComponentBackgroundImageModifier.identity, XComponentBackgroundImageModifier, arkBackgroundImage);
+    modifierWithKey(this._modifiersWithKeys, BackgroundImageModifier.identity, BackgroundImageModifier, arkBackgroundImage);
     return this;
   }
   backgroundImageSize(value: SizeOptions | ImageSize): this {
-    modifierWithKey(this._modifiersWithKeys, XComponentBackgroundImageSizeModifier.identity, XComponentBackgroundImageSizeModifier, value);
+    if (this.xComponentType !== XComponentType.NODE) {
+      return this;
+    }
+    modifierWithKey(this._modifiersWithKeys, BackgroundImageSizeModifier.identity, BackgroundImageSizeModifier, value);
     return this;
   }
   backgroundImagePosition(value: Alignment | Position): this {
-    modifierWithKey(this._modifiersWithKeys, XComponentBackgroundImagePositionModifier.identity, XComponentBackgroundImagePositionModifier, value);
+    if (this.xComponentType !== XComponentType.NODE) {
+      return this;
+    }
+    modifierWithKey(this._modifiersWithKeys, BackgroundImagePositionModifier.identity, BackgroundImagePositionModifier, value);
     return this;
-  }
-  backgroundBlurStyle(value: BlurStyle, options?: BackgroundBlurStyleOptions): this {
-    throw new Error('Method not implemented.');
-  }
-  foregroundBlurStyle(value: BlurStyle, options?: ForegroundBlurStyleOptions): this {
-    throw new Error('Method not implemented.');
   }
   opacity(value: number | Resource): this {
     modifierWithKey(this._modifiersWithKeys, XComponentOpacityModifier.identity, XComponentOpacityModifier, value);
     return this;
   }
-  border(value: BorderOptions): this {
-    throw new Error('Method not implemented.');
-  }
-  borderStyle(value: BorderStyle | EdgeStyles): this {
-    throw new Error('Method not implemented.');
-  }
-  borderWidth(value: Length | EdgeWidths): this {
-    throw new Error('Method not implemented.');
-  }
-  borderColor(value: ResourceColor | EdgeColors): this {
-    throw new Error('Method not implemented.');
-  }
-  borderRadius(value: Length | BorderRadiuses): this {
-    throw new Error('Method not implemented.');
-  }
-  borderImage(value: BorderImageOption): this {
-    throw new Error('Method not implemented.');
-  }
   foregroundColor(value: string | number | Resource | Color): this {
     throw new Error('Method not implemented.');
   }
   onClick(event: (event: ClickEvent) => void): this {
-    throw new Error('Method not implemented.');
+    if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
+      modifierWithKey(this._modifiersWithKeys, OnClickModifier.identity, OnClickModifier, event);
+    }
+    return this;
   }
   onHover(event: (isHover: boolean, event: HoverEvent) => void): this {
-    throw new Error('Method not implemented.');
-  }
-  hoverEffect(value: HoverEffect): this {
-    throw new Error('Method not implemented.');
+    if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
+      modifierWithKey(this._modifiersWithKeys, OnHoverModifier.identity, OnHoverModifier, event);
+    }
+    return this;
   }
   onMouse(event: (event: MouseEvent) => void): this {
-    throw new Error('Method not implemented.');
+    if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
+      modifierWithKey(this._modifiersWithKeys, OnMouseModifier.identity, OnMouseModifier, event);
+    }
+    return this;
   }
   onTouch(event: (event: TouchEvent) => void): this {
-    throw new Error('Method not implemented.');
+    if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
+      modifierWithKey(this._modifiersWithKeys, OnTouchModifier.identity, OnTouchModifier, event);
+    }
+    return this;
   }
   onKeyEvent(event: (event: KeyEvent) => void): this {
-    throw new Error('Method not implemented.');
-  }
-  focusable(value: boolean): this {
-    throw new Error('Method not implemented.');
+    if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
+      modifierWithKey(this._modifiersWithKeys, OnKeyEventModifier.identity, OnKeyEventModifier, event);
+    }
+    return this;
   }
   onFocus(event: () => void): this {
-    throw new Error('Method not implemented.');
+    if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
+      modifierWithKey(this._modifiersWithKeys, OnFocusModifier.identity, OnFocusModifier, event);
+    }
+    return this;
   }
   onBlur(event: () => void): this {
-    throw new Error('Method not implemented.');
-  }
-  tabIndex(index: number): this {
-    throw new Error('Method not implemented.');
-  }
-  defaultFocus(value: boolean): this {
-    throw new Error('Method not implemented.');
-  }
-  groupDefaultFocus(value: boolean): this {
-    throw new Error('Method not implemented.');
-  }
-  focusOnTouch(value: boolean): this {
-    throw new Error('Method not implemented.');
+    if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
+      modifierWithKey(this._modifiersWithKeys, OnBlurModifier.identity, OnBlurModifier, event);
+    }
+    return this;
   }
   animation(value: AnimateParam): this {
-    throw new Error('Method not implemented.');
-  }
-  transition(value: TransitionOptions | TransitionEffect): this {
     throw new Error('Method not implemented.');
   }
   gesture(gesture: GestureType, mask?: GestureMask): this {
@@ -205,13 +149,22 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
   parallelGesture(gesture: GestureType, mask?: GestureMask): this {
     throw new Error('Method not implemented.');
   }
-  blur(value: number): this {
-    modifierWithKey(this._modifiersWithKeys, XComponentBlurModifier.identity, XComponentBlurModifier, value);
+  blur(value: number, options?: BlurOptions): this {
+    if (this.xComponentType !== XComponentType.NODE) {
+      return this;
+    }
+    let blur = new ArkBlurOptions();
+    blur.value = value;
+    blur.options = options;
+    modifierWithKey(this._modifiersWithKeys, BlurModifier.identity, BlurModifier, blur);
     return this;
   }
   linearGradientBlur(value: number, options: LinearGradientBlurOptions): this {
+    if (this.xComponentType !== XComponentType.NODE) {
+      return this;
+    }
     if (isUndefined(value) || isNull(value) || isUndefined(options) || isNull(options)) {
-      modifierWithKey(this._modifiersWithKeys, XComponentLinearGradientBlurModifier.identity, XComponentLinearGradientBlurModifier,
+      modifierWithKey(this._modifiersWithKeys, LinearGradientBlurModifier.identity, LinearGradientBlurModifier,
         undefined);
       return this;
     }
@@ -219,16 +172,32 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
     arkLinearGradientBlur.blurRadius = value;
     arkLinearGradientBlur.fractionStops = options.fractionStops;
     arkLinearGradientBlur.direction = options.direction;
-    modifierWithKey(this._modifiersWithKeys, XComponentLinearGradientBlurModifier.identity, XComponentLinearGradientBlurModifier,
+    modifierWithKey(this._modifiersWithKeys, LinearGradientBlurModifier.identity, LinearGradientBlurModifier,
       arkLinearGradientBlur);
     return this;
   }
   brightness(value: number): this {
-    modifierWithKey(this._modifiersWithKeys, XComponentBrightnessModifier.identity, XComponentBrightnessModifier, value);
+    if (this.xComponentType !== XComponentType.NODE) {
+      return this;
+    }
+    if (!isNumber(value)) {
+      modifierWithKey(this._modifiersWithKeys, BrightnessModifier.identity, BrightnessModifier, undefined);
+    }
+    else {
+      modifierWithKey(this._modifiersWithKeys, BrightnessModifier.identity, BrightnessModifier, value);
+    }
     return this;
   }
   contrast(value: number): this {
-    modifierWithKey(this._modifiersWithKeys, XComponentContrastModifier.identity, XComponentContrastModifier, value);
+    if (this.xComponentType !== XComponentType.NODE) {
+      return this;
+    }
+    if (!isNumber(value)) {
+      modifierWithKey(this._modifiersWithKeys, ContrastModifier.identity, ContrastModifier, undefined);
+    }
+    else {
+      modifierWithKey(this._modifiersWithKeys, ContrastModifier.identity, ContrastModifier, value);
+    }
     return this;
   }
   grayscale(value: number): this {
@@ -236,108 +205,107 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
     return this;
   }
   colorBlend(value: string | Resource | Color): this {
-    modifierWithKey(this._modifiersWithKeys, XComponentColorBlendModifier.identity, XComponentColorBlendModifier, value);
+    if (this.xComponentType !== XComponentType.NODE) {
+      return this;
+    }
+    modifierWithKey(this._modifiersWithKeys, ColorBlendModifier.identity, ColorBlendModifier, value);
     return this;
   }
   saturate(value: number): this {
-    modifierWithKey(this._modifiersWithKeys, XComponentSaturateModifier.identity, XComponentSaturateModifier, value);
+    if (this.xComponentType !== XComponentType.NODE) {
+      return this;
+    }
+    if (!isNumber(value)) {
+      modifierWithKey(this._modifiersWithKeys, SaturateModifier.identity, SaturateModifier, undefined);
+    }
+    else {
+      modifierWithKey(this._modifiersWithKeys, SaturateModifier.identity, SaturateModifier, value);
+    }
     return this;
   }
   sepia(value: number): this {
-    modifierWithKey(this._modifiersWithKeys, XComponentSepiaModifier.identity, XComponentSepiaModifier, value);
+    if (this.xComponentType !== XComponentType.NODE) {
+      return this;
+    }
+    if (!isNumber(value)) {
+      modifierWithKey(this._modifiersWithKeys, SepiaModifier.identity, SepiaModifier, undefined);
+    }
+    else {
+      modifierWithKey(this._modifiersWithKeys, SepiaModifier.identity, SepiaModifier, value);
+    }
     return this;
   }
-  invert(value: number): this {
-    modifierWithKey(this._modifiersWithKeys, XComponentInvertModifier.identity, XComponentInvertModifier, value);
+  invert(value: number | InvertOptions): this {
+    if (this.xComponentType !== XComponentType.NODE) {
+      return this;
+    }
+    if (!isUndefined(value)) {
+      modifierWithKey(this._modifiersWithKeys, InvertModifier.identity, InvertModifier, value);
+    }
+    else {
+      modifierWithKey(this._modifiersWithKeys, InvertModifier.identity, InvertModifier, undefined);
+    }
     return this;
   }
   hueRotate(value: string | number): this {
-    modifierWithKey(this._modifiersWithKeys, XComponentHueRotateModifier.identity, XComponentHueRotateModifier, value);
+    if (this.xComponentType !== XComponentType.NODE) {
+      return this;
+    }
+    if (!isNumber(value) && !isString(value)) {
+      modifierWithKey(this._modifiersWithKeys, HueRotateModifier.identity, HueRotateModifier, undefined);
+    }
+    else {
+      modifierWithKey(this._modifiersWithKeys, HueRotateModifier.identity, HueRotateModifier, value);
+    }
     return this;
   }
   useEffect(value: boolean): this {
     throw new Error('Method not implemented.');
   }
-  backdropBlur(value: number): this {
-    modifierWithKey(this._modifiersWithKeys, XComponentBackdropBlurModifier.identity, XComponentBackdropBlurModifier, value);
+  backdropBlur(value: number, options?: BlurOptions): this {
+    if (this.xComponentType !== XComponentType.NODE) {
+      return this;
+    }
+    let blur = new ArkBlurOptions();
+    blur.value = value;
+    blur.options = options;
+    modifierWithKey(this._modifiersWithKeys, BackdropBlurModifier.identity, BackdropBlurModifier, blur);
     return this;
   }
   renderGroup(value: boolean): this {
     throw new Error('Method not implemented.');
   }
-  translate(value: TranslateOptions): this {
-    throw new Error('Method not implemented.');
-  }
-  scale(value: ScaleOptions): this {
-    throw new Error('Method not implemented.');
-  }
-  gridSpan(value: number): this {
-    throw new Error('Method not implemented.');
-  }
-  gridOffset(value: number): this {
-    throw new Error('Method not implemented.');
-  }
-  rotate(value: RotateOptions): this {
-    throw new Error('Method not implemented.');
-  }
-  transform(value: object): this {
-    throw new Error('Method not implemented.');
-  }
   onAppear(event: () => void): this {
-    throw new Error('Method not implemented.');
+    if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
+      modifierWithKey(this._modifiersWithKeys, OnAppearModifier.identity, OnAppearModifier, event);
+    }
+    return this;
   }
   onDisAppear(event: () => void): this {
-    throw new Error('Method not implemented.');
+    if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
+      modifierWithKey(this._modifiersWithKeys, OnDisappearModifier.identity, OnDisappearModifier, event);
+    }
+    return this;
   }
-  onAttach(event: () => void): this {
-    throw new Error('Method not implemented.');
+  onAttach(callback: Callback<void>): this {
+    if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
+      modifierWithKey(this._modifiersWithKeys, OnAttachModifier.identity, OnAttachModifier, callback);
+    }
+    return this;
   }
-  onDetach(event: () => void): this {
-    throw new Error('Method not implemented.');
-  }
-  onAreaChange(event: (oldValue: Area, newValue: Area) => void): this {
-    throw new Error('Method not implemented.');
-  }
-  visibility(value: Visibility): this {
-    throw new Error('Method not implemented.');
+  onDetach(callback: Callback<void>): this {
+    if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
+      modifierWithKey(this._modifiersWithKeys, OnDetachModifier.identity, OnDetachModifier, callback);
+    }
+    return this;
   }
   flexGrow(value: number): this {
-    throw new Error('Method not implemented.');
-  }
-  flexShrink(value: number): this {
-    throw new Error('Method not implemented.');
-  }
-  flexBasis(value: string | number): this {
-    throw new Error('Method not implemented.');
-  }
-  alignSelf(value: ItemAlign): this {
-    throw new Error('Method not implemented.');
-  }
-  displayPriority(value: number): this {
-    throw new Error('Method not implemented.');
-  }
-  zIndex(value: number): this {
-    throw new Error('Method not implemented.');
-  }
-  sharedTransition(id: string, options?: sharedTransitionOptions): this {
     throw new Error('Method not implemented.');
   }
   direction(value: Direction): this {
     throw new Error('Method not implemented.');
   }
   align(value: Alignment): this {
-    throw new Error('Method not implemented.');
-  }
-  position(value: Position): this {
-    throw new Error('Method not implemented.');
-  }
-  markAnchor(value: Position): this {
-    throw new Error('Method not implemented.');
-  }
-  offset(value: Position): this {
-    throw new Error('Method not implemented.');
-  }
-  enabled(value: boolean): this {
     throw new Error('Method not implemented.');
   }
   useSizeType(value: {
@@ -348,83 +316,7 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
   }): this {
     throw new Error('Method not implemented.');
   }
-  alignRules(value: AlignRuleOption): this {
-    throw new Error('Method not implemented.');
-  }
-  aspectRatio(value: number): this {
-    throw new Error('Method not implemented.');
-  }
-  clickEffect(value: ClickEffect): this {
-    throw new Error('Method not implemented.');
-  }
-  onDragStart(event: (event: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this {
-    throw new Error('Method not implemented.');
-  }
-  onDragEnter(event: (event: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
-  }
-  onDragMove(event: (event: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
-  }
-  onDragLeave(event: (event: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
-  }
-  onDrop(event: (event: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
-  }
-  onDragEnd(event: (event: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
-  }
-  allowDrop(value: Array<UniformDataType>): this {
-    throw new Error('Method not implemented.');
-  }
-  draggable(value: boolean): this {
-    throw new Error('Method not implemented.');
-  }
-  overlay(value: string | CustomBuilder, options?: { align?: Alignment; offset?: { x?: number; y?: number; }; }): this {
-    throw new Error('Method not implemented.');
-  }
-  linearGradient(value: {
-    angle?: number | string;
-    direction?: GradientDirection;
-    colors: Array<any>;
-    repeating?: boolean;
-  }): this {
-    throw new Error('Method not implemented.');
-  }
-  sweepGradient(value: {
-    center: Array<any>;
-    start?: number | string;
-    end?: number | string;
-    rotation?: number | string;
-    colors: Array<any>;
-    repeating?: boolean;
-  }): this {
-    throw new Error('Method not implemented.');
-  }
-  radialGradient(value: { center: Array<any>; radius: number | string; colors: Array<any>; repeating?: boolean }): this {
-    throw new Error('Method not implemented.');
-  }
-  motionPath(value: MotionPathOptions): this {
-    throw new Error('Method not implemented.');
-  }
-  shadow(value: ShadowOptions | ShadowStyle): this {
-    modifierWithKey(this._modifiersWithKeys, ShadowModifier.identity, ShadowModifier, value);
-    return this;
-  }
-  blendMode(value: BlendMode): this {
-    throw new Error('Method not implemented.');
-  }
   clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
-    throw new Error('Method not implemented.');
-  }
-  mask(value: CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute | ProgressMask): this {
-    throw new Error('Method not implemented.');
-  }
-  key(value: string): this {
-    throw new Error('Method not implemented.');
-  }
-  id(value: string): this {
     throw new Error('Method not implemented.');
   }
   geometryTransition(id: string): this {
@@ -455,30 +347,27 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
     throw new Error('Method not implemented.');
   }
   sphericalEffect(value: number): this {
-    modifierWithKey(this._modifiersWithKeys, XComponentSphericalEffectModifier.identity, XComponentSphericalEffectModifier, value);
+    if (this.xComponentType !== XComponentType.NODE) {
+      return this;
+    }
+    modifierWithKey(this._modifiersWithKeys, SphericalEffectModifier.identity, SphericalEffectModifier, value);
     return this;
   }
   lightUpEffect(value: number): this {
-    modifierWithKey(this._modifiersWithKeys, XComponentLightUpEffectModifier.identity, XComponentLightUpEffectModifier, value);
+    if (this.xComponentType !== XComponentType.NODE) {
+      return this;
+    }
+    modifierWithKey(this._modifiersWithKeys, LightUpEffectModifier.identity, LightUpEffectModifier, value);
     return this;
   }
   pixelStretchEffect(options: PixelStretchEffectOptions): this {
-    modifierWithKey(this._modifiersWithKeys, XComponentPixelStretchEffectModifier.identity, XComponentPixelStretchEffectModifier, options);
+    if (this.xComponentType !== XComponentType.NODE) {
+      return this;
+    }
+    modifierWithKey(this._modifiersWithKeys, PixelStretchEffectModifier.identity, PixelStretchEffectModifier, options);
     return this;
   }
-  keyboardShortcut(value: string | FunctionKey, keys: ModifierKey[], action?: () => void): this {
-    throw new Error('Method not implemented.');
-  }
   accessibilityGroup(value: boolean): this {
-    throw new Error('Method not implemented.');
-  }
-  accessibilityText(value: string): this {
-    throw new Error('Method not implemented.');
-  }
-  accessibilityDescription(value: string): this {
-    throw new Error('Method not implemented.');
-  }
-  accessibilityLevel(value: string): this {
     throw new Error('Method not implemented.');
   }
   obscured(reasons: ObscuredReasons[]): this {
@@ -488,21 +377,36 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
     throw new Error('Method not implemented.');
   }
   renderFit(fitMode: RenderFit): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentRenderFitModifier.identity, XComponentRenderFitModifier, fitMode);
+    return this;
   }
   attributeModifier(modifier: AttributeModifier<CommonAttribute>): this {
     return this;
   }
-  onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error('Method not implemented.');
-  }
   onLoad(callback: (event?: object) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentOnLoadModifier.identity, XComponentOnLoadModifier, callback);
+    return this;
   }
   onDestroy(event: () => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentOnDestroyModifier.identity, XComponentOnDestroyModifier, event);
+    return this;
   }
-
+  enableAnalyzer(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, XComponentEnableAnalyzerModifier.identity, XComponentEnableAnalyzerModifier, value);
+    return this;
+  }
+  enableSecure(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, XComponentEnableSecureModifier.identity, XComponentEnableSecureModifier, value);
+    return this;
+  }
+  hdrBrightness(value: number): this {
+    modifierWithKey(this._modifiersWithKeys, XComponentHdrBrightnessModifier.identity, XComponentHdrBrightnessModifier, value);
+    return this;
+  }
+  enableTransparentLayer(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, XComponentEnableTransparentLayerModifier.identity, XComponentEnableTransparentLayerModifier, value);
+    return this;
+  }
 }
 
 // @ts-ignore
@@ -567,97 +471,6 @@ class XComponentBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
-class XComponentBackgroundImageModifier extends ModifierWithKey<ArkBackgroundImage> {
-  constructor(value: ArkBackgroundImage) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('xComponentBackgroundImage');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().xComponent.resetBackgroundImage(node);
-    } else {
-      getUINativeModule().xComponent.setBackgroundImage(node, this.value.src, this.value.repeat);
-    }
-  }
-
-  checkObjectDiff(): boolean {
-    return !((this.stageValue as ArkBackgroundImage).src === (this.value as ArkBackgroundImage).src &&
-      (this.stageValue as ArkBackgroundImage).repeat === (this.value as ArkBackgroundImage).repeat);
-  }
-}
-
-class XComponentBackgroundImageSizeModifier extends ModifierWithKey<SizeOptions | ImageSize> {
-  constructor(value: SizeOptions | ImageSize) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('xComponentBackgroundImageSize');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().xComponent.resetBackgroundImageSize(node);
-    } else {
-      if (isNumber(this.value)) {
-        getUINativeModule().xComponent.setBackgroundImageSize(node, this.value, undefined, undefined);
-      } else {
-        getUINativeModule().xComponent.setBackgroundImageSize(node, undefined, (this.value as SizeOptions)?.width, (this.value as SizeOptions)?.height);
-      }
-    }
-  }
-  checkObjectDiff(): boolean {
-    return !((this.value as SizeOptions).width === (this.stageValue as SizeOptions).width &&
-      (this.value as SizeOptions).height === (this.stageValue as SizeOptions).height);
-  }
-}
-
-class XComponentBackgroundImagePositionModifier extends ModifierWithKey<Position | Alignment> {
-  constructor(value: Position | Alignment) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('xComponentBackgroundImagePosition');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().xComponent.resetBackgroundImagePosition(node);
-    } else {
-      if (isNumber(this.value)) {
-        getUINativeModule().xComponent.setBackgroundImagePosition(node, this.value, undefined, undefined);
-      } else {
-        getUINativeModule().xComponent.setBackgroundImagePosition(node, undefined, (this.value as Position)?.x, (this.value as Position)?.y);
-      }
-    }
-  }
-  checkObjectDiff(): boolean {
-    return !((this.value as Position)?.x === (this.stageValue as Position)?.x &&
-      (this.value as Position)?.y === (this.stageValue as Position)?.y);
-  }
-}
-
-class XComponentBlurModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('xComponentBlur');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().xComponent.resetBlur(node);
-    } else {
-      getUINativeModule().xComponent.setBlur(node, this.value);
-    }
-  }
-}
-
-class XComponentBackdropBlurModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('xComponentBackdropBlur');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().xComponent.resetBackdropBlur(node);
-    } else {
-      getUINativeModule().xComponent.setBackdropBlur(node, this.value);
-    }
-  }
-}
-
 class XComponentGrayscaleModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
@@ -672,100 +485,62 @@ class XComponentGrayscaleModifier extends ModifierWithKey<number> {
   }
 }
 
-class XComponentBrightnessModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
+class XComponentOnLoadModifier extends ModifierWithKey<(event?: object) => void> {
+  constructor(value: (event?: object) => void) {
     super(value);
   }
-  static identity: Symbol = Symbol('xComponentBrightness');
+  static identity: Symbol = Symbol('xComponentOnLoad');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().xComponent.resetBrightness(node);
+      getUINativeModule().xComponent.resetOnLoad(node);
     } else {
-      getUINativeModule().xComponent.setBrightness(node, this.value);
+      getUINativeModule().xComponent.setOnLoad(node, this.value);
     }
   }
 }
 
-class XComponentSaturateModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
+class XComponentOnDestroyModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
     super(value);
   }
-  static identity: Symbol = Symbol('xComponentSaturate');
+  static identity: Symbol = Symbol('xComponentOnDestroy');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().xComponent.resetSaturate(node);
+      getUINativeModule().xComponent.resetOnDestroy(node);
     } else {
-      getUINativeModule().xComponent.setSaturate(node, this.value);
+      getUINativeModule().xComponent.setOnDestroy(node, this.value);
     }
   }
 }
 
-class XComponentContrastModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
+class XComponentEnableAnalyzerModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
     super(value);
   }
-  static identity: Symbol = Symbol('xComponentContrast');
+  static identity: Symbol = Symbol('xComponentEnableAnalyzer');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().xComponent.resetContrast(node);
+      getUINativeModule().xComponent.resetEnableAnalyzer(node);
     } else {
-      getUINativeModule().xComponent.setContrast(node, this.value);
+      getUINativeModule().xComponent.setEnableAnalyzer(node, this.value);
     }
+  }
+  
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
-class XComponentInvertModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
+class XComponentEnableSecureModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
     super(value);
   }
-  static identity: Symbol = Symbol('xComponentInvert');
+  static identity: Symbol = Symbol('xComponentEnableSecure');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().xComponent.resetInvert(node);
+      getUINativeModule().xComponent.resetEnableSecure(node);
     } else {
-      getUINativeModule().xComponent.setInvert(node, this.value);
-    }
-  }
-}
-
-class XComponentSepiaModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('xComponentSepia');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().xComponent.resetSepia(node);
-    } else {
-      getUINativeModule().xComponent.setSepia(node, this.value);
-    }
-  }
-}
-
-class XComponentHueRotateModifier extends ModifierWithKey<number | string> {
-  constructor(value: number | string) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('xComponentHueRotate');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().xComponent.resetHueRotate(node);
-    } else {
-      getUINativeModule().xComponent.setHueRotate(node, this.value);
-    }
-  }
-}
-
-class XComponentColorBlendModifier extends ModifierWithKey<Color | string | Resource> {
-  constructor(value: Color | string | Resource) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('xComponentColorBlend');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().xComponent.resetColorBlend(node);
-    } else {
-      getUINativeModule().xComponent.setColorBlend(node, this.value);
+      getUINativeModule().xComponent.setEnableSecure(node, this.value);
     }
   }
 
@@ -774,70 +549,52 @@ class XComponentColorBlendModifier extends ModifierWithKey<Color | string | Reso
   }
 }
 
-class XComponentSphericalEffectModifier extends ModifierWithKey<number> {
+class XComponentHdrBrightnessModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
-  static identity: Symbol = Symbol('xComponentSphericalEffect');
+  static identity: Symbol = Symbol('xComponentHdrBrightness');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().xComponent.resetSphericalEffect(node);
+      getUINativeModule().xComponent.resetHdrBrightness(node);
     } else {
-      getUINativeModule().xComponent.setSphericalEffect(node, this.value);
-    }
-  }
-}
-
-class XComponentLightUpEffectModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('xComponentLightUpEffect');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().xComponent.resetLightUpEffect(node);
-    } else {
-      getUINativeModule().xComponent.setLightUpEffect(node, this.value);
-    }
-  }
-}
-
-class XComponentPixelStretchEffectModifier extends ModifierWithKey<PixelStretchEffectOptions> {
-  constructor(value: PixelStretchEffectOptions) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('xComponentPixelStretchEffect');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().xComponent.resetPixelStretchEffect(node);
-    } else {
-      getUINativeModule().xComponent.setPixelStretchEffect(node,
-        this.value.top, this.value.right, this.value.bottom, this.value.left);
+      getUINativeModule().xComponent.setHdrBrightness(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    return !((this.stageValue as PixelStretchEffectOptions).left === (this.value as PixelStretchEffectOptions).left &&
-      (this.stageValue as PixelStretchEffectOptions).right === (this.value as PixelStretchEffectOptions).right &&
-      (this.stageValue as PixelStretchEffectOptions).top === (this.value as PixelStretchEffectOptions).top &&
-      (this.stageValue as PixelStretchEffectOptions).bottom === (this.value as PixelStretchEffectOptions).bottom);
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
-class XComponentLinearGradientBlurModifier extends ModifierWithKey<ArkLinearGradientBlur> {
-  constructor(value: ArkLinearGradientBlur) {
+class XComponentEnableTransparentLayerModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
     super(value);
   }
-  static identity: Symbol = Symbol('xComponentlinearGradientBlur');
+  static identity: Symbol = Symbol('xComponentEnableTransparentLayer');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().xComponent.resetLinearGradientBlur(node);
+      getUINativeModule().xComponent.resetEnableTransparentLayer(node);
     } else {
-      getUINativeModule().xComponent.setLinearGradientBlur(node,
-        this.value.blurRadius, this.value.fractionStops, this.value.direction);
+      getUINativeModule().xComponent.setEnableTransparentLayer(node, this.value);
     }
   }
+
   checkObjectDiff(): boolean {
-    return !this.value.isEqual(this.stageValue);
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class XComponentRenderFitModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentRenderFit');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetRenderFit(node);
+    } else {
+      getUINativeModule().xComponent.setRenderFit(node, this.value);
+    }
   }
 }

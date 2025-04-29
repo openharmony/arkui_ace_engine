@@ -50,13 +50,19 @@ private:
     void TextFieldMeasure(LayoutWrapper* layoutWrapper);
     void ImageMeasure(LayoutWrapper* layoutWrapper);
     void SearchButtonMeasure(LayoutWrapper* layoutWrapper);
+    void DividerMeasure(LayoutWrapper* layoutWrapper);
     void SelfMeasure(LayoutWrapper* layoutWrapper);
     bool IsFixedHeightMode(LayoutWrapper* layoutWrapper);
     double CalcSearchAdaptHeight(LayoutWrapper* layoutWrapper);
     void CalcChildrenHotZone(LayoutWrapper* layoutWrapper);
     double CalcSearchWidth(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     double CalcSearchHeight(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    float CalculateMaxFontScale(LayoutWrapper* layoutWrapper);
+    float CalculateMinFontScale(LayoutWrapper* layoutWrapper);
+    CalcSize searchButtonCalcSize(const RefPtr<SearchTheme>& searchTheme, RefPtr<SearchLayoutProperty> layoutProperty,
+        LayoutWrapper* layoutWrapper, float maxFontScale, float minFontScale);
     void UpdateFontFeature(LayoutWrapper* layoutWrapper);
+    void UpdateTextFieldSize(LayoutWrapper* layoutWrapper);
     void SetTextFieldLayoutConstraintHeight(LayoutConstraintF& contentConstraint, double textFieldHeight,
         LayoutWrapper* layoutWrapper);
 
@@ -66,13 +72,22 @@ private:
     SizeF searchButtonSizeMeasure_;
     SizeF cancelBtnSizeMeasure_;
     SizeF textFieldSizeMeasure_;
+    SizeF dividerSizeMeasure_;
     void LayoutSearchIcon(const LayoutSearchParams& params);
     void LayoutSearchButton(const LayoutSearchParams& params);
+    void LayoutDivider(const LayoutSearchParams& params);
     void LayoutCancelButton(const LayoutSearchParams& params);
     void LayoutCancelImage(const LayoutSearchParams& params);
     void LayoutTextField(const LayoutSearchParams& params);
     void UpdateClipBounds(LayoutWrapper* layoutWrapper, float height);
     double CalcSymbolIconHeight(LayoutWrapper* layoutWrapper, int32_t index, double defaultImageHeight);
+    float CalculateTextFieldWidth(
+        LayoutWrapper* layoutWrapper, float searchWidthMax, const RefPtr<SearchTheme>& searchTheme);
+
+    // cached data
+    float maxFontScale_;
+    float minFontScale_;
+    double searchHeight_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SearchLayoutAlgorithm);
 };

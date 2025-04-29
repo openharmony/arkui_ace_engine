@@ -51,11 +51,25 @@ void ImageAnalyzerMgr::BuildNodeFunc(
         return engine_->BuildNodeFunc(pixelMap, config, uiConfig, overlayData);
     }
 }
+void ImageAnalyzerMgr::BuildNodeFunc(std::string uri, void* pixelMap, int frameTimestamp,
+    void* config, ImageAnalyzerInnerConfig* uiConfig, void** overlayData)
+{
+    if (engine_) {
+        return engine_->BuildNodeFunc(uri, pixelMap, frameTimestamp, config, uiConfig, overlayData);
+    }
+}
 void ImageAnalyzerMgr::UpdateImage(
     void** overlayData, void* pixelMap, void* config, ImageAnalyzerInnerConfig* uiConfig)
 {
     if (engine_) {
         return engine_->UpdateImage(overlayData, pixelMap, config, uiConfig);
+    }
+}
+void ImageAnalyzerMgr::UpdateImage(void** overlayData, std::string uri, void* pixelMap,
+    int frameTimestamp, void* config, ImageAnalyzerInnerConfig* uiConfig)
+{
+    if (engine_) {
+        return engine_->UpdateImage(overlayData, uri, pixelMap, frameTimestamp, config, uiConfig);
     }
 }
 void ImageAnalyzerMgr::UpdateConfig(void** overlayData, void* config)

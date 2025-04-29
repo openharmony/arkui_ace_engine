@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,8 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT VideoModelNG : public OHOS::Ace::VideoModel {
 public:
     void Create(const RefPtr<VideoControllerV2>& videoController) override;
-    void SetSrc(const std::string& src) override;
+    void SetSrc(const std::string& src, const std::string& bundleName, const std::string& moduleName) override;
+    void SetShowFirstFrame(bool showFirstFrame) override;
     void SetProgressRate(double progressRate) override;
     void SetPosterSourceInfo(const std::string& posterUrl, const std::string &bundleName,
         const std::string &moduleName) override;
@@ -34,6 +35,8 @@ public:
     void SetControls(bool controls) override;
     void SetObjectFit(ImageFit objectFit) override;
     void SetLoop(bool loop) override;
+    void SetSurfaceBackgroundColor(Color color) override;
+    void SetShortcutKeyEnabled(bool isEnableShortcutKey) override;
 
     void SetOnStart(VideoEventFunc&& onStart) override;
     void SetOnPause(VideoEventFunc&& onPause) override;
@@ -53,9 +56,8 @@ public:
     static void SetObjectFit(FrameNode* frameNode, ImageFit objectFit);
     static void SetLoop(FrameNode* frameNode, bool loop);
     static void SetMuted(FrameNode* frameNode, bool muted);
-private:
-    void AddDragFrameNodeToManager() const;
+    static void SetSurfaceBackgroundColor(FrameNode* frameNode, Color color);
+    static void SetShortcutKeyEnabled(FrameNode* frameNode, bool isEnableShortcutKey);
 };
-
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_VIDEO_VIDEO_MODEL_NG_H

@@ -13,4 +13,5 @@
  * limitations under the License.
  */
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type ScrollDirection = 'UP' | 'DOWN' | 'UNKNOWN';

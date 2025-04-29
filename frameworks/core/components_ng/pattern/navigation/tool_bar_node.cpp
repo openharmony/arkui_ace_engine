@@ -15,14 +15,26 @@
 
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
 NavToolbarNode::NavToolbarNode(const std::string& tag, int32_t nodeId)
     : FrameNode(tag, nodeId, MakeRefPtr<NavToolbarPattern>())
 {}
+
+NavToolbarNode::~NavToolbarNode()
+{
+    auto pipeline = GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto toolBarPattern = GetPattern<NavToolbarPattern>();
+    CHECK_NULL_VOID(toolBarPattern);
+    auto toolBarDialog = toolBarPattern->GetDialogNode();
+    if (toolBarDialog) {
+        overlayManager->CloseDialog(toolBarDialog);
+    }
+}
 
 RefPtr<NavToolbarNode> NavToolbarNode::GetOrCreateToolbarNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)

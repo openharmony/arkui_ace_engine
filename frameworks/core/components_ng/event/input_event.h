@@ -31,6 +31,8 @@ public:
     explicit InputEvent(OnHoverEventFunc&& callback) : onHoverCallback_(std::move(callback)) {}
 
     explicit InputEvent(OnHoverFunc&& callback) : onHoverEventCallback_(std::move(callback)) {}
+
+    explicit InputEvent(OnHoverMoveFunc&& callback) : onHoverMoveCallback_(std::move(callback)) {}
     
     explicit InputEvent(OnAxisEventFunc&& callback) : onAxisCallback_(std::move(callback)) {}
 
@@ -46,6 +48,11 @@ public:
     const OnHoverEventFunc& GetOnHoverEventFunc() const
     {
         return onHoverCallback_;
+    }
+
+    const OnHoverMoveFunc& GetOnHoverMoveEventFunc() const
+    {
+        return onHoverMoveCallback_;
     }
 
     const OnHoverFunc& GetOnHoverFunc() const
@@ -90,19 +97,37 @@ public:
         }
     }
 
+    void operator()(HoverInfo& info) const
+    {
+        if (onHoverMoveCallback_) {
+            onHoverMoveCallback_(info);
+        }
+    }
+
     void operator()(bool state, AccessibilityHoverInfo& info) const
     {
         if (onAccessibilityHoverFunc_) {
             onAccessibilityHoverFunc_(state, info);
         }
     }
+    bool GetIstips() const
+    {
+        return istips_;
+    }
+
+    void SetIstips(bool istips)
+    {
+        istips_ = istips;
+    }
 
 private:
     OnMouseEventFunc onMouseCallback_;
     OnHoverEventFunc onHoverCallback_;
     OnHoverFunc onHoverEventCallback_;
+    OnHoverMoveFunc onHoverMoveCallback_;
     OnAxisEventFunc onAxisCallback_;
     OnAccessibilityHoverFunc onAccessibilityHoverFunc_;
+    bool istips_ = false;
 };
 
 class ACE_EXPORT InputEventActuator : public virtual AceType {
@@ -116,6 +141,11 @@ public:
         if (userCallback_) {
             userCallback_.Reset();
         }
+    }
+
+    bool HasUserCallback()
+    {
+        return userCallback_ != nullptr;
     }
 
     void ClearJSFrameNodeCallback()
@@ -140,6 +170,14 @@ public:
         userJSFrameNodeCallback_ = MakeRefPtr<InputEvent>(std::move(callback));
     }
 
+    void ReplaceJSFrameNodeInputEvent(OnHoverMoveFunc&& callback)
+    {
+        if (userJSFrameNodeCallback_) {
+            userJSFrameNodeCallback_.Reset();
+        }
+        userJSFrameNodeCallback_ = MakeRefPtr<InputEvent>(std::move(callback));
+    }
+
     void ReplaceInputEvent(OnMouseEventFunc&& callback)
     {
         if (userCallback_) {
@@ -148,6 +186,14 @@ public:
         userCallback_ = MakeRefPtr<InputEvent>(std::move(callback));
     }
     void ReplaceInputEvent(OnHoverFunc&& callback)
+    {
+        if (userCallback_) {
+            userCallback_.Reset();
+        }
+        userCallback_ = MakeRefPtr<InputEvent>(std::move(callback));
+    }
+
+    void ReplaceInputEvent(OnHoverMoveFunc&& callback)
     {
         if (userCallback_) {
             userCallback_.Reset();
@@ -193,10 +239,19 @@ public:
     void OnCollectHoverEvent(
         const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result);
 
+    void OnCollectHoverEventForTips(
+        const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result);
+
     void OnCollectHoverEffect(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result);
     
     void OnCollectAccessibilityHoverEvent(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result, const RefPtr<FrameNode>& host);
+
+    void OnCollectPenHoverEvent(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result, const RefPtr<FrameNode>& host);
+
+    void OnCollectPenHoverMoveEvent(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& host);
 
     void OnCollectAxisEvent(
@@ -208,6 +263,8 @@ private:
     RefPtr<HoverEventTarget> hoverEventTarget_;
     RefPtr<HoverEffectTarget> hoverEffectTarget_;
     RefPtr<HoverEventTarget> accessibilityHoverEventTarget_;
+    RefPtr<HoverEventTarget> penHoverEventTarget_;
+    RefPtr<HoverEventTarget> penHoverMoveEventTarget_;
     RefPtr<AxisEventTarget> axisEventTarget_;
     std::list<RefPtr<InputEvent>> inputEvents_;
     RefPtr<InputEvent> userCallback_;

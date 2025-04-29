@@ -38,101 +38,25 @@ void EventManagerTestNg::TearDownTestSuite()
 HWTEST_F(EventManagerTestNg, EventManagerTest001, TestSize.Level1)
 {
     auto eventManager = AceType::MakeRefPtr<EventManager>();
-
-    bool isCtrlC = eventManager->IsSystemKeyboardShortcut(CHARACTER_C, NUM_CTRL_VALUE);
-    bool isCtrlA = eventManager->IsSystemKeyboardShortcut(CHARACTER_A, NUM_CTRL_VALUE);
-    bool isCtrlV = eventManager->IsSystemKeyboardShortcut(CHARACTER_V, NUM_CTRL_VALUE);
-    bool isCtrl8 = eventManager->IsSystemKeyboardShortcut(CHARACTER_EIGHT, NUM_CTRL_VALUE);
-    bool isCtrlX = eventManager->IsSystemKeyboardShortcut(CHARACTER_X, NUM_CTRL_VALUE);
-    bool isShiftC = eventManager->IsSystemKeyboardShortcut(CHARACTER_C, NUM_SHIFT_VALUE);
-    bool isShiftA = eventManager->IsSystemKeyboardShortcut(CHARACTER_A, NUM_SHIFT_VALUE);
-    bool isShiftV = eventManager->IsSystemKeyboardShortcut(CHARACTER_V, NUM_SHIFT_VALUE);
-    bool isShift8 = eventManager->IsSystemKeyboardShortcut(CHARACTER_EIGHT, NUM_SHIFT_VALUE);
-    bool isShiftX = eventManager->IsSystemKeyboardShortcut(CHARACTER_X, NUM_SHIFT_VALUE);
-    bool isAltC = eventManager->IsSystemKeyboardShortcut(CHARACTER_C, NUM_ALT_VALUE);
-    bool isAltA = eventManager->IsSystemKeyboardShortcut(CHARACTER_A, NUM_ALT_VALUE);
-    bool isAltV = eventManager->IsSystemKeyboardShortcut(CHARACTER_V, NUM_ALT_VALUE);
-    bool isAlt8 = eventManager->IsSystemKeyboardShortcut(CHARACTER_EIGHT, NUM_ALT_VALUE);
-    bool isAltX = eventManager->IsSystemKeyboardShortcut(CHARACTER_X, NUM_ALT_VALUE);
-    bool isCtrlShiftC = eventManager->IsSystemKeyboardShortcut(CHARACTER_C, (NUM_CTRL_VALUE + NUM_SHIFT_VALUE));
-    bool isCtrlShiftA = eventManager->IsSystemKeyboardShortcut(CHARACTER_A, (NUM_CTRL_VALUE + NUM_SHIFT_VALUE));
-    bool isCtrlShiftV = eventManager->IsSystemKeyboardShortcut(CHARACTER_V, (NUM_CTRL_VALUE + NUM_SHIFT_VALUE));
-    bool isCtrlShift8 = eventManager->IsSystemKeyboardShortcut(CHARACTER_EIGHT, (NUM_CTRL_VALUE + NUM_SHIFT_VALUE));
-    bool isCtrlShiftX = eventManager->IsSystemKeyboardShortcut(CHARACTER_X, (NUM_CTRL_VALUE + NUM_SHIFT_VALUE));
-
-    EXPECT_TRUE(isCtrlC);
-    EXPECT_TRUE(isCtrlA);
-    EXPECT_TRUE(isCtrlV);
-    EXPECT_FALSE(isCtrl8);
-    EXPECT_TRUE(isCtrlX);
-    EXPECT_FALSE(isShiftC);
-    EXPECT_FALSE(isShiftA);
-    EXPECT_FALSE(isShiftV);
-    EXPECT_FALSE(isShift8);
-    EXPECT_FALSE(isShiftX);
-    EXPECT_FALSE(isAltC);
-    EXPECT_FALSE(isAltA);
-    EXPECT_FALSE(isAltV);
-    EXPECT_FALSE(isAlt8);
-    EXPECT_FALSE(isAltX);
-    EXPECT_FALSE(isCtrlShiftC);
-    EXPECT_FALSE(isCtrlShiftA);
-    EXPECT_FALSE(isCtrlShiftV);
-    EXPECT_FALSE(isCtrlShift8);
-    EXPECT_FALSE(isCtrlShiftX);
-}
-
-/**
- * @tc.name: EventManagerTest002
- * @tc.desc: Test OnDragStart
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, EventManagerTest002, TestSize.Level1)
-{
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
     KeyEvent event;
-    auto frameNodeCtrl = FrameNode::GetOrCreateFrameNode(CTRL, NODEID, nullptr);
-    auto frameNodeShift = FrameNode::GetOrCreateFrameNode(SHIFT, NODEID, nullptr);
-    auto frameNodeAlt = FrameNode::GetOrCreateFrameNode(ALT, NODEID, nullptr);
-    auto frameNodeCtrlShift = FrameNode::GetOrCreateFrameNode(CTRLSHIFT, NODEID, nullptr);
-    frameNodeCtrl->SetActive(true);
-    frameNodeShift->SetActive(true);
-    frameNodeAlt->SetActive(true);
-    frameNodeCtrlShift->SetActive(true);
 
-    auto eventHubCtrl = frameNodeCtrl->GetEventHub<NG::EventHub>();
-    auto eventHubShift = frameNodeShift->GetEventHub<NG::EventHub>();
-    auto eventHubAlt = frameNodeAlt->GetEventHub<NG::EventHub>();
-    auto eventHubCtrlShift = frameNodeCtrlShift->GetEventHub<NG::EventHub>();
+    /* LAlt + F4 */
+    event.code = KeyCode::KEY_F4;
+    event.pressedCodes = {KeyCode::KEY_ALT_LEFT};
+    bool isSystemKey = eventManager->IsSystemKeyboardShortcut(event);
+    EXPECT_FALSE(isSystemKey);
 
-    eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeCtrl));
-    eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeShift));
-    eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeAlt));
-    eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeCtrlShift));
-    eventHubCtrl->SetKeyboardShortcut(CHARACTER_C, (NUM_CTRL_VALUE + NUM_SHIFT_VALUE + NUM_ALT_VALUE), []() {});
-    event.code = KeyCode::KEY_C;
-    event.action = KeyAction::DOWN;
-    event.pressedCodes.emplace_back(KeyCode::KEY_CTRL_LEFT);
-    event.pressedCodes.emplace_back(KeyCode::KEY_SHIFT_LEFT);
-    event.pressedCodes.emplace_back(KeyCode::KEY_ALT_LEFT);
-    event.pressedCodes.emplace_back(KeyCode::KEY_C);
-    eventManager->DispatchKeyboardShortcut(event);
-    EXPECT_EQ(event.action, KeyAction::DOWN);
-    eventHubShift->SetKeyboardShortcut(CHARACTER_A, (NUM_CTRL_VALUE + NUM_SHIFT_VALUE), []() {});
+    /* RAlt + F4 */
+    event.code = KeyCode::KEY_F4;
+    event.pressedCodes = {KeyCode::KEY_ALT_RIGHT};
+    isSystemKey = eventManager->IsSystemKeyboardShortcut(event);
+    EXPECT_FALSE(isSystemKey);
+
+    /* Ctrl + A */
     event.code = KeyCode::KEY_A;
-    event.action = KeyAction::DOWN;
-    event.pressedCodes.emplace_back(KeyCode::KEY_CTRL_LEFT);
-    event.pressedCodes.emplace_back(KeyCode::KEY_SHIFT_LEFT);
-    event.pressedCodes.emplace_back(KeyCode::KEY_A);
-    eventManager->DispatchKeyboardShortcut(event);
-    EXPECT_EQ(event.action, KeyAction::DOWN);
-    eventHubAlt->SetKeyboardShortcut(CHARACTER_A, (NUM_CTRL_VALUE + NUM_ALT_VALUE), []() {});
-    event.code = KeyCode::KEY_V;
-    event.action = KeyAction::DOWN;
-    event.pressedCodes.emplace_back(KeyCode::KEY_CTRL_LEFT);
-    event.pressedCodes.emplace_back(KeyCode::KEY_V);
-    eventManager->DispatchKeyboardShortcut(event);
-    EXPECT_EQ(event.action, KeyAction::DOWN);
+    event.pressedCodes = {KeyCode::KEY_CTRL_LEFT};
+    isSystemKey = eventManager->IsSystemKeyboardShortcut(event);
+    EXPECT_FALSE(isSystemKey);
 }
 
 /**
@@ -155,10 +79,10 @@ HWTEST_F(EventManagerTestNg, EventManagerTest003, TestSize.Level1)
     auto frameNodeCtrlShift = FrameNode::GetOrCreateFrameNode(CTRLSHIFT, (NUM_CTRL_VALUE + NUM_SHIFT_VALUE), nullptr);
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeCtrlShift));
 
-    auto eventHubCtrl = frameNodeCtrl->GetEventHub<NG::EventHub>();
-    auto eventHubShift = frameNodeShift->GetEventHub<NG::EventHub>();
-    auto eventHubAlt = frameNodeAlt->GetEventHub<NG::EventHub>();
-    auto eventHubCtrlShift = frameNodeCtrlShift->GetEventHub<NG::EventHub>();
+    auto eventHubCtrl = frameNodeCtrl->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHubShift = frameNodeShift->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHubAlt = frameNodeAlt->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHubCtrlShift = frameNodeCtrlShift->GetOrCreateEventHub<NG::EventHub>();
 
     eventHubCtrl->SetKeyboardShortcut(CHARACTER_C, NUM_CTRL_VALUE, []() {});
     eventHubShift->SetKeyboardShortcut(CHARACTER_A, NUM_SHIFT_VALUE, []() {});
@@ -246,7 +170,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest006, TestSize.Level1)
      */
     std::vector<ModifierKey> keys { ModifierKey::ALT, ModifierKey::CTRL, ModifierKey::SHIFT, ModifierKey::SHIFT };
     auto ret = eventManager->GetKeyboardShortcutKeys(keys);
-    ASSERT_EQ(ret, 0);
+    EXPECT_EQ(ret, 0);
 
     /**
      * @tc.steps: step3. Call GetKeyboardShortcutKeys with keys CTRL SHIFT ALT.
@@ -256,7 +180,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest006, TestSize.Level1)
     ret = eventManager->GetKeyboardShortcutKeys(keys);
     uint8_t target = static_cast<uint8_t>(CtrlKeysBit::CTRL) | static_cast<uint8_t>(CtrlKeysBit::SHIFT) |
                      static_cast<uint8_t>(CtrlKeysBit::ALT);
-    ASSERT_EQ(ret, target);
+    EXPECT_EQ(ret, target);
 
     /**
      * @tc.steps: step4. Call GetKeyboardShortcutKeys with keys CTRL CTRL.
@@ -264,7 +188,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest006, TestSize.Level1)
      */
     keys = std::vector<ModifierKey>({ ModifierKey::CTRL, ModifierKey::CTRL });
     ret = eventManager->GetKeyboardShortcutKeys(keys);
-    ASSERT_EQ(ret, 0);
+    EXPECT_EQ(ret, 0);
 
     /**
      * @tc.steps: step5. Call GetKeyboardShortcutKeys with keys SHIFT SHIFT.
@@ -272,7 +196,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest006, TestSize.Level1)
      */
     keys = std::vector<ModifierKey>({ ModifierKey::SHIFT, ModifierKey::SHIFT });
     ret = eventManager->GetKeyboardShortcutKeys(keys);
-    ASSERT_EQ(ret, 0);
+    EXPECT_EQ(ret, 0);
 
     /**
      * @tc.steps: step6. Call GetKeyboardShortcutKeys with keys SHIFT SHIFT.
@@ -280,89 +204,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest006, TestSize.Level1)
      */
     keys = std::vector<ModifierKey>({ ModifierKey::ALT, ModifierKey::ALT });
     ret = eventManager->GetKeyboardShortcutKeys(keys);
-    ASSERT_EQ(ret, 0);
-}
-
-/**
- * @tc.name: EventManagerTest007
- * @tc.desc: Test IsSystemKeyboardShortcut
- * @tc.type: FUNC
- */
-HWTEST_F(EventManagerTestNg, EventManagerTest007, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create EventManager.
-     * @tc.expected: eventManager is not null.
-     */
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    ASSERT_NE(eventManager, nullptr);
-
-    /**
-     * @tc.steps: step2. Call IsSystemKeyboardShortcut with CTRL C.
-     * @tc.expected: retFlag is true.
-     */
-    std::string value = SHORT_CUT_VALUE_C;
-    uint8_t keys = static_cast<uint8_t>(CtrlKeysBit::CTRL);
-    auto retFlag = eventManager->IsSystemKeyboardShortcut(value, keys);
-    ASSERT_TRUE(retFlag);
-
-    /**
-     * @tc.steps: step2. Call IsSystemKeyboardShortcut with CTRL A.
-     * @tc.expected: retFlag is true.
-     */
-    value = SHORT_CUT_VALUE_A;
-    retFlag = eventManager->IsSystemKeyboardShortcut(value, keys);
-    ASSERT_TRUE(retFlag);
-
-    /**
-     * @tc.steps: step3. Call IsSystemKeyboardShortcut with CTRL V.
-     * @tc.expected: retFlag is true.
-     */
-    value = SHORT_CUT_VALUE_V;
-    retFlag = eventManager->IsSystemKeyboardShortcut(value, keys);
-    ASSERT_TRUE(retFlag);
-
-    /**
-     * @tc.steps: step4. Call IsSystemKeyboardShortcut with CTRL X.
-     * @tc.expected: retFlag is true.
-     */
-    value = SHORT_CUT_VALUE_X;
-    retFlag = eventManager->IsSystemKeyboardShortcut(value, keys);
-    ASSERT_TRUE(retFlag);
-
-    /**
-     * @tc.steps: step5. Call IsSystemKeyboardShortcut with CTRL Y.
-     * @tc.expected: retFlag is true.
-     */
-    value = SHORT_CUT_VALUE_Y;
-    retFlag = eventManager->IsSystemKeyboardShortcut(value, keys);
-    ASSERT_TRUE(retFlag);
-
-    /**
-     * @tc.steps: step6. Call IsSystemKeyboardShortcut with CTRL Z.
-     * @tc.expected: retFlag is true.
-     */
-    value = SHORT_CUT_VALUE_Z;
-    retFlag = eventManager->IsSystemKeyboardShortcut(value, keys);
-    ASSERT_TRUE(retFlag);
-
-    /**
-     * @tc.steps: step6. Call IsSystemKeyboardShortcut with CTRL SHIFT Z.
-     * @tc.expected: retFlag is true.
-     */
-    value = SHORT_CUT_VALUE_Z;
-    keys = static_cast<uint8_t>(CtrlKeysBit::CTRL) + static_cast<uint8_t>(CtrlKeysBit::SHIFT);
-    retFlag = eventManager->IsSystemKeyboardShortcut(value, keys);
-    ASSERT_TRUE(retFlag);
-
-    /**
-     * @tc.steps: step6. Call IsSystemKeyboardShortcut with CTRL SHIFT A.
-     * @tc.expected: retFlag is false.
-     */
-    value = SHORT_CUT_VALUE_A;
-    keys = static_cast<uint8_t>(CtrlKeysBit::CTRL) + static_cast<uint8_t>(CtrlKeysBit::SHIFT);
-    retFlag = eventManager->IsSystemKeyboardShortcut(value, keys);
-    ASSERT_FALSE(retFlag);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -384,16 +226,10 @@ HWTEST_F(EventManagerTestNg, EventManagerTest009, TestSize.Level1)
      * @tc.expected: keyboardShortcutNode_.size() > 0.
      */
     auto frameNodeShift = FrameNode::GetOrCreateFrameNode(SHIFT, NUM_SHIFT_VALUE, nullptr);
-    frameNodeShift->eventHub_->SetKeyboardShortcut(SHORT_CUT_VALUE_A, static_cast<int>(CtrlKeysBit::SHIFT), []() {});
+    frameNodeShift->GetOrCreateEventHub<EventHub>()->SetKeyboardShortcut(
+        SHORT_CUT_VALUE_A, static_cast<int>(CtrlKeysBit::SHIFT), []() {});
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeShift));
-    ASSERT_GT(eventManager->keyboardShortcutNode_.size(), 0);
-
-    /**
-     * @tc.steps: step3. Call ClearResults
-     * @tc.expected: keyboardShortcutNode_.size() = 0.
-     */
-    eventManager->ClearResults();
-    ASSERT_EQ(eventManager->keyboardShortcutNode_.size(), 0);
+    EXPECT_GT(eventManager->keyboardShortcutNode_.size(), 0);
 }
 
 /**
@@ -443,7 +279,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest010, TestSize.Level1)
     RefPtr<GestureScope> scope = AceType::MakeRefPtr<GestureScope>(touchId);
     ASSERT_NE(scope, nullptr);
     eventManager->refereeNG_->gestureScopes_.insert(std::make_pair(touchId, scope));
-    ASSERT_TRUE(eventManager->refereeNG_->QueryAllDone(touchId));
+    EXPECT_TRUE(eventManager->refereeNG_->QueryAllDone(touchId));
 }
 
 /**
@@ -647,7 +483,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest015, TestSize.Level1)
      */
     KeyEvent event;
     auto retFlag = eventManager->DispatchTabIndexEventNG(event, mainNode);
-    ASSERT_FALSE(retFlag);
+    EXPECT_FALSE(retFlag);
 }
 
 /**
@@ -670,7 +506,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest016, TestSize.Level1)
      */
     const int focusNodeId = 10007;
     auto focusNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, focusNodeId, nullptr);
-    focusNode->eventHub_ = AceType::MakeRefPtr<ButtonEventHub>();
+    focusNode->GetOrCreateEventHub<ButtonEventHub>();
     focusNode->eventHub_->GetOrCreateFocusHub(FocusType::NODE);
     ASSERT_NE(focusNode->GetFocusHub(), nullptr);
 
@@ -680,7 +516,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest016, TestSize.Level1)
      */
     KeyEvent event;
     auto retFlag = eventManager->DispatchKeyEventNG(event, focusNode);
-    ASSERT_FALSE(retFlag);
+    EXPECT_FALSE(retFlag);
 }
 
 /**
@@ -709,9 +545,9 @@ HWTEST_F(EventManagerTestNg, EventManagerTest017, TestSize.Level1)
     event.action = MouseAction::WINDOW_LEAVE;
     auto hoverEventTarget = AceType::MakeRefPtr<HoverEventTarget>(V2::LOCATION_BUTTON_ETS_TAG, nodeId);
     eventManager->currHoverTestResults_.push_back(hoverEventTarget);
-    ASSERT_FALSE(eventManager->currHoverTestResults_.empty());
+    EXPECT_FALSE(eventManager->currHoverTestResults_.empty());
     eventManager->MouseTest(event, frameNode, touchRestrict);
-    ASSERT_TRUE(eventManager->currHoverTestResults_.empty());
+    EXPECT_TRUE(eventManager->currHoverTestResults_.empty());
 
     /**
      * @tc.steps: step3. Call MouseTest with MouseAction::WINDOW_ENTER
@@ -719,9 +555,9 @@ HWTEST_F(EventManagerTestNg, EventManagerTest017, TestSize.Level1)
      */
     event.action = MouseAction::WINDOW_ENTER;
     eventManager->lastHoverTestResults_.push_back(hoverEventTarget);
-    ASSERT_FALSE(eventManager->lastHoverTestResults_.empty());
+    EXPECT_FALSE(eventManager->lastHoverTestResults_.empty());
     eventManager->MouseTest(event, frameNode, touchRestrict);
-    ASSERT_TRUE(eventManager->lastHoverTestResults_.empty());
+    EXPECT_TRUE(eventManager->lastHoverTestResults_.empty());
 
     /**
      * @tc.steps: step4. Call MouseTest with MouseAction::HOVER
@@ -730,8 +566,8 @@ HWTEST_F(EventManagerTestNg, EventManagerTest017, TestSize.Level1)
     event.action = MouseAction::HOVER;
     eventManager->lastHoverTestResults_.push_back(hoverEventTarget);
     eventManager->MouseTest(event, frameNode, touchRestrict);
-    ASSERT_TRUE(eventManager->lastHoverTestResults_.empty());
-    ASSERT_TRUE(eventManager->currHoverTestResults_.empty());
+    EXPECT_TRUE(eventManager->lastHoverTestResults_.empty());
+    EXPECT_TRUE(eventManager->currHoverTestResults_.empty());
 }
 
 /**
@@ -762,7 +598,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest018, TestSize.Level1)
     eventManager->currMouseTestResults_.push_back(mouseEventTarget);
 
     auto retFlag = eventManager->DispatchMouseEventNG(event);
-    ASSERT_FALSE(retFlag);
+    EXPECT_FALSE(retFlag);
 
     /**
      * @tc.steps: step2. Call DispatchMouseEventNG
@@ -772,7 +608,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest018, TestSize.Level1)
     event.button = MouseButton::LEFT_BUTTON;
     event.pullAction = MouseAction::MOVE;
     retFlag = eventManager->DispatchMouseEventNG(event);
-    ASSERT_FALSE(retFlag);
+    EXPECT_FALSE(retFlag);
 
     /**
      * @tc.steps: step3. Call DispatchMouseEventNG
@@ -782,7 +618,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest018, TestSize.Level1)
     event.button = MouseButton::LEFT_BUTTON;
     event.pullAction = MouseAction::PULL_UP;
     retFlag = eventManager->DispatchMouseEventNG(event);
-    ASSERT_FALSE(retFlag);
+    EXPECT_FALSE(retFlag);
 
     /**
      * @tc.steps: step4. Call DispatchMouseEventNG
@@ -796,7 +632,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest018, TestSize.Level1)
     eventManager->currMouseTestResults_.push_back(mouseTestResult);
 
     retFlag = eventManager->DispatchMouseEventNG(event);
-    ASSERT_FALSE(retFlag);
+    EXPECT_FALSE(retFlag);
 }
 
 /**
@@ -828,7 +664,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest019, TestSize.Level1)
     eventManager->lastHoverDispatchLength_++;
 
     auto retFlag = eventManager->DispatchMouseHoverEventNG(event);
-    ASSERT_TRUE(retFlag);
+    EXPECT_TRUE(retFlag);
 
     /**
      * @tc.steps: step2. Call DispatchMouseHoverEventNG with lastHoverTestResults == currHoverTestResults
@@ -840,7 +676,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest019, TestSize.Level1)
     eventManager->currHoverTestResults_.push_back(hoverEventTarget);
 
     retFlag = eventManager->DispatchMouseHoverEventNG(event);
-    ASSERT_TRUE(retFlag);
+    EXPECT_TRUE(retFlag);
 }
 
 /**
@@ -866,7 +702,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest020, TestSize.Level1)
     event.verticalAxis = 0;
     event.pinchAxisScale = 0;
     auto retFlag = eventManager->DispatchAxisEventNG(event);
-    ASSERT_FALSE(retFlag);
+    EXPECT_FALSE(retFlag);
 
     /**
      * @tc.steps: step3. Call DispatchAxisEventNG with axisTestResults_ empty
@@ -874,7 +710,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest020, TestSize.Level1)
      */
     event.horizontalAxis = 1;
     retFlag = eventManager->DispatchAxisEventNG(event);
-    ASSERT_TRUE(retFlag);
+    EXPECT_TRUE(retFlag);
 
     /**
      * @tc.steps: step4. Call DispatchAxisEventNG with axisTestResults_ not empty
@@ -886,7 +722,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest020, TestSize.Level1)
 
     eventManager->axisTestResults_.push_back(axisEventTarget);
     retFlag = eventManager->DispatchAxisEventNG(event);
-    ASSERT_TRUE(retFlag);
+    EXPECT_TRUE(retFlag);
 }
 
 /**
@@ -909,25 +745,25 @@ HWTEST_F(EventManagerTestNg, EventManagerTest021, TestSize.Level1)
     const int nodeIdCtrlShift = 10010;
     auto frameNodeCtrlShift = FrameNode::GetOrCreateFrameNode(CTRL, nodeIdCtrlShift, nullptr);
     frameNodeCtrlShift->SetActive(true);
-    frameNodeCtrlShift->eventHub_->SetEnabled(true);
+    frameNodeCtrlShift->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     const uint8_t ctrlShift = static_cast<uint8_t>(CtrlKeysBit::CTRL) + static_cast<uint8_t>(CtrlKeysBit::SHIFT);
-    frameNodeCtrlShift->eventHub_->SetKeyboardShortcut(CHARACTER_A, ctrlShift, []() {});
+    frameNodeCtrlShift->GetOrCreateEventHub<EventHub>()->SetKeyboardShortcut(CHARACTER_A, ctrlShift, []() {});
     eventManager->AddKeyboardShortcutNode(frameNodeCtrlShift);
 
     const int nodeIdCtrlAlt = 10011;
     auto frameNodeCtrlAlt = FrameNode::GetOrCreateFrameNode(CTRL, nodeIdCtrlAlt, nullptr);
     frameNodeCtrlAlt->SetActive(true);
-    frameNodeCtrlAlt->eventHub_->SetEnabled(true);
+    frameNodeCtrlAlt->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     const uint8_t ctrlAlt = static_cast<uint8_t>(CtrlKeysBit::CTRL) + static_cast<uint8_t>(CtrlKeysBit::ALT);
-    frameNodeCtrlAlt->eventHub_->SetKeyboardShortcut(CHARACTER_A, ctrlAlt, []() {});
+    frameNodeCtrlAlt->GetOrCreateEventHub<EventHub>()->SetKeyboardShortcut(CHARACTER_A, ctrlAlt, []() {});
     eventManager->AddKeyboardShortcutNode(frameNodeCtrlAlt);
 
     const int nodeIdAltShift = 10012;
     auto frameNodeAltShift = FrameNode::GetOrCreateFrameNode(ALT, nodeIdAltShift, nullptr);
     frameNodeAltShift->SetActive(true);
-    frameNodeAltShift->eventHub_->SetEnabled(true);
+    frameNodeAltShift->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     const uint8_t altShift = static_cast<uint8_t>(CtrlKeysBit::SHIFT) + static_cast<uint8_t>(CtrlKeysBit::ALT);
-    frameNodeAltShift->eventHub_->SetKeyboardShortcut(CHARACTER_A, altShift, []() {});
+    frameNodeAltShift->GetOrCreateEventHub<EventHub>()->SetKeyboardShortcut(CHARACTER_A, altShift, []() {});
     eventManager->AddKeyboardShortcutNode(frameNodeAltShift);
 
     /**
@@ -937,9 +773,9 @@ HWTEST_F(EventManagerTestNg, EventManagerTest021, TestSize.Level1)
     KeyEvent event;
     event.action = KeyAction::DOWN;
     eventManager->DispatchKeyboardShortcut(event);
-    ASSERT_EQ(frameNodeCtrlShift->GetEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, ctrlShift);
-    ASSERT_EQ(frameNodeCtrlAlt->GetEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, ctrlAlt);
-    ASSERT_EQ(frameNodeAltShift->GetEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, altShift);
+    EXPECT_EQ(frameNodeCtrlShift->GetOrCreateEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, ctrlShift);
+    EXPECT_EQ(frameNodeCtrlAlt->GetOrCreateEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, ctrlAlt);
+    EXPECT_EQ(frameNodeAltShift->GetOrCreateEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, altShift);
 }
 
 /**
@@ -962,25 +798,25 @@ HWTEST_F(EventManagerTestNg, EventManagerTest022, TestSize.Level1)
     const int nodeIdCtrl = 10013;
     auto frameNodeCtrl = FrameNode::GetOrCreateFrameNode(CTRL, nodeIdCtrl, nullptr);
     frameNodeCtrl->SetActive(true);
-    frameNodeCtrl->eventHub_->SetEnabled(true);
+    frameNodeCtrl->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     const uint8_t ctrl = static_cast<uint8_t>(CtrlKeysBit::CTRL);
-    frameNodeCtrl->eventHub_->SetKeyboardShortcut(CHARACTER_A, ctrl, []() {});
+    frameNodeCtrl->GetOrCreateEventHub<EventHub>()->SetKeyboardShortcut(CHARACTER_A, ctrl, []() {});
     eventManager->AddKeyboardShortcutNode(frameNodeCtrl);
 
     const int nodeIdAlt = 10014;
     auto frameNodeAlt = FrameNode::GetOrCreateFrameNode(ALT, nodeIdAlt, nullptr);
     frameNodeAlt->SetActive(true);
-    frameNodeAlt->eventHub_->SetEnabled(true);
+    frameNodeAlt->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     const uint8_t alt = static_cast<uint8_t>(CtrlKeysBit::ALT);
-    frameNodeAlt->eventHub_->SetKeyboardShortcut(CHARACTER_A, alt, []() {});
+    frameNodeAlt->GetOrCreateEventHub<EventHub>()->SetKeyboardShortcut(CHARACTER_A, alt, []() {});
     eventManager->AddKeyboardShortcutNode(frameNodeAlt);
 
     const int nodeIdShift = 10015;
     auto frameNodeShift = FrameNode::GetOrCreateFrameNode(SHIFT, nodeIdShift, nullptr);
     frameNodeShift->SetActive(true);
-    frameNodeShift->eventHub_->SetEnabled(true);
+    frameNodeShift->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     const uint8_t shift = static_cast<uint8_t>(CtrlKeysBit::SHIFT);
-    frameNodeShift->eventHub_->SetKeyboardShortcut(CHARACTER_A, shift, []() {});
+    frameNodeShift->GetOrCreateEventHub<EventHub>()->SetKeyboardShortcut(CHARACTER_A, shift, []() {});
     eventManager->AddKeyboardShortcutNode(frameNodeShift);
 
     /**
@@ -990,9 +826,9 @@ HWTEST_F(EventManagerTestNg, EventManagerTest022, TestSize.Level1)
     KeyEvent event;
     event.action = KeyAction::DOWN;
     eventManager->DispatchKeyboardShortcut(event);
-    ASSERT_EQ(frameNodeCtrl->GetEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, ctrl);
-    ASSERT_EQ(frameNodeAlt->GetEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, alt);
-    ASSERT_EQ(frameNodeShift->GetEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, shift);
+    EXPECT_EQ(frameNodeCtrl->GetOrCreateEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, ctrl);
+    EXPECT_EQ(frameNodeAlt->GetOrCreateEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, alt);
+    EXPECT_EQ(frameNodeShift->GetOrCreateEventHub<NG::EventHub>()->GetKeyboardShortcut().back().keys, shift);
 }
 
 /**
@@ -1311,7 +1147,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest032, TestSize.Level1)
      * @tc.expected: eventManager->axisNode_.Upgrade() is not null.
      */
     bool retFlag = eventManager->DispatchAxisEvent(axisEvent);
-    ASSERT_TRUE(retFlag);
+    EXPECT_TRUE(retFlag);
 }
 
 /**
@@ -1332,10 +1168,10 @@ HWTEST_F(EventManagerTestNg, EventManagerTest033, TestSize.Level1)
      * @tc.steps: step2. Call DumpEvent.
      * @tc.expected: eventManager->axisNode_.Upgrade() is not null.
      */
-    eventManager->DumpEvent();
+    eventManager->DumpEvent(EventTreeType::TOUCH);
     std::list<std::pair<int32_t, std::string>> dumpList;
     eventManager->eventTree_.Dump(dumpList, 0);
-    ASSERT_TRUE(dumpList.empty());
+    EXPECT_TRUE(dumpList.empty());
 }
 
 /**
@@ -1359,7 +1195,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest034, TestSize.Level1)
     MouseEvent event;
     event.action = MouseAction::PRESS;
     bool retFlag = eventManager->DispatchMouseEvent(event);
-    ASSERT_TRUE(retFlag);
+    EXPECT_TRUE(retFlag);
 }
 
 /**
@@ -1558,7 +1394,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest036, TestSize.Level1)
      */
     MouseEvent event;
     bool retFlag = eventManager->DispatchMouseHoverEvent(event);
-    ASSERT_TRUE(retFlag);
+    EXPECT_TRUE(retFlag);
 }
 
 /**
@@ -1790,5 +1626,125 @@ HWTEST_F(EventManagerTestNg, ParallelRecognizerAxisDirection001, TestSize.Level1
     auto parallelVerticalFree = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
     ASSERT_NE(parallelVerticalFree, nullptr);
     EXPECT_EQ(parallelVerticalFree->GetAxisDirection(), Axis::FREE);
+}
+
+/**
+ * @tc.name: EventManagerTest090
+ * @tc.desc: Test DispatchMouseEventNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest090, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    MouseEvent event;
+    event.mockFlushEvent = true;
+    bool result = eventManager->DispatchMouseEventNG(event);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: EventManagerTest091
+ * @tc.desc: Test DispatchMouseEventNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest091, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    MouseEvent event;
+    event.mockFlushEvent = false;
+    bool result = eventManager->DispatchMouseEventNG(event);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: EventManagerTest092
+ * @tc.desc: Test CheckAndLogLastReceivedTouchEventInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest092, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    int32_t eventId = 1;
+    auto type = TouchType::MOVE;
+    eventManager->CheckAndLogLastReceivedTouchEventInfo(eventId, type);
+    EXPECT_EQ(eventManager->lastReceivedEvent_.eventId, eventId);
+}
+
+/**
+ * @tc.name: EventManagerTest093
+ * @tc.desc: Test CheckAndLogLastConsumedTouchEventInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest093, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    int32_t eventId = 1;
+    auto type = TouchType::MOVE;
+    eventManager->CheckAndLogLastConsumedTouchEventInfo(eventId, type);
+    EXPECT_EQ(eventManager->lastConsumedEvent_.eventId, eventId);
+}
+
+/**
+ * @tc.name: EventManagerTest094
+ * @tc.desc: Test CheckAndLogLastReceivedMouseEventInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest094, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    int32_t eventId = 1;
+    auto action = MouseAction::MOVE;
+    eventManager->CheckAndLogLastReceivedMouseEventInfo(eventId, action);
+    EXPECT_EQ(eventManager->lastReceivedEvent_.eventId, eventId);
+}
+
+/**
+ * @tc.name: EventManagerTest095
+ * @tc.desc: Test CheckAndLogLastConsumedMouseEventInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest095, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    int32_t eventId = 1;
+    auto action = MouseAction::MOVE;
+    eventManager->CheckAndLogLastConsumedMouseEventInfo(eventId, action);
+    EXPECT_EQ(eventManager->lastConsumedEvent_.eventId, eventId);
+}
+
+/**
+ * @tc.name: EventManagerTest096
+ * @tc.desc: Test CheckAndLogLastReceivedAxisEventInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest096, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    int32_t eventId = 1;
+    auto action = AxisAction::NONE;
+    eventManager->CheckAndLogLastReceivedAxisEventInfo(eventId, action);
+    EXPECT_EQ(eventManager->lastReceivedEvent_.eventId, eventId);
+}
+
+/**
+ * @tc.name: EventManagerTest097
+ * @tc.desc: Test CheckAndLogLastConsumedAxisEventInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest097, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    int32_t eventId = 1;
+    auto action = AxisAction::NONE;
+    eventManager->CheckAndLogLastConsumedAxisEventInfo(eventId, action);
+    EXPECT_EQ(eventManager->lastConsumedEvent_.eventId, eventId);
 }
 } // namespace OHOS::Ace::NG

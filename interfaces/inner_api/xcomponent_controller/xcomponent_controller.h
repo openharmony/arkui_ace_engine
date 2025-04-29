@@ -34,6 +34,11 @@ enum XComponentControllerErrorCode {
     XCOMPONENT_CONTROLLER_RESET_ERROR,
 };
 
+enum class SurfaceCallbackMode : char {
+    DEFAULT = 0,
+    PIP,
+};
+
 /**
  * @class XComponentController
  * XComponentController interface is used to control xcomponent.
@@ -45,8 +50,16 @@ public:
      * @brief Get xcomponentController from napiValue converted by jsXComponentController
      *
      */
-    static std::shared_ptr<XComponentController> GetXComponentControllerFromNapiValue(napi_env env,
-        napi_value napiValue);
+    static std::shared_ptr<XComponentController> GetXComponentControllerFromNapiValue(
+        napi_env env, napi_value napiValue);
+
+    /**
+     * @brief set typedNode.XComponent's SurfaceCallbackMode
+     *
+     */
+    static XComponentControllerErrorCode SetSurfaceCallbackMode(
+        napi_env env, napi_value node, SurfaceCallbackMode mode);
+
     XComponentController() = default;
     virtual ~XComponentController() = default;
 

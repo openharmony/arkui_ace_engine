@@ -21,10 +21,12 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_attributes.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_style.h"
+#include "core/components_ng/pattern/security_component/security_component_log.h"
 
 namespace OHOS::Ace::NG {
 class SecurityComponentTheme : public virtual Theme {
@@ -41,7 +43,7 @@ public:
         {
             RefPtr<SecurityComponentTheme> theme = AceType::Claim(new SecurityComponentTheme());
             if (!themeConstants) {
-                LOGE("Build SecurityComponentTheme error, themeConstants is null!");
+                SC_LOG_ERROR("Build SecurityComponentTheme error, themeConstants is null!");
                 return theme;
             }
             ParsePattern(themeConstants, theme);
@@ -99,6 +101,11 @@ public:
         return paddingWithoutBg_;
     }
 
+    const Dimension& GetDefaultBorderRadius() const
+    {
+        return defaultBorderRadius_;
+    }
+
     const Dimension& GetBorderRadius() const
     {
         return borderRadius_;
@@ -139,6 +146,11 @@ public:
         return borderColor_;
     }
 
+    const Color& GetDefaultSymbolIconColor() const
+    {
+        return defaultSymbolIconColor_;
+    }
+
     const std::string& GetLocationDescriptions(int32_t index)
     {
         if (index < 0 || index >= static_cast<int32_t>(locationDescriptions_.size())) {
@@ -166,6 +178,16 @@ public:
     uint32_t GetDefaultTextMaxLines() const
     {
         return defaultTextMaxLines_;
+    }
+
+    const TextStyle& GetTextStyle() const
+    {
+        return textStyle_;
+    }
+
+    float GetBgDisabledAlpha() const
+    {
+        return bgDisabledAlpha_;
     }
 
 private:
@@ -225,6 +247,14 @@ private:
             securityComponentPattern->GetAttr<std::string>("description_continue_to_receive", ""));
         theme->saveDescriptions_.emplace_back(
             securityComponentPattern->GetAttr<std::string>("description_save_to_gallery", ""));
+        theme->saveDescriptions_.emplace_back(
+            securityComponentPattern->GetAttr<std::string>("description_export_to_gallery", ""));
+        theme->saveDescriptions_.emplace_back(
+            securityComponentPattern->GetAttr<std::string>("description_quick_save_to_gallery", ""));
+        theme->saveDescriptions_.emplace_back(
+            securityComponentPattern->GetAttr<std::string>("description_quick_resave_to_gallery", ""));
+        theme->saveDescriptions_.emplace_back(
+            securityComponentPattern->GetAttr<std::string>("description_save_all", ""));
     }
 
     static void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SecurityComponentTheme>& theme)
@@ -249,6 +279,7 @@ private:
         theme->textIconSpace_ = securityComponentPattern->GetAttr<Dimension>("text_icon_padding", 0.0_vp);
         theme->paddingWithoutBg_ = securityComponentPattern->GetAttr<Dimension>("padding_without_background", 0.0_vp);
         theme->borderRadius_ = securityComponentPattern->GetAttr<Dimension>("border_radius", 0.0_vp);
+        theme->defaultBorderRadius_ = securityComponentPattern->GetAttr<Dimension>("default_border_radius", 0.0_vp);
         theme->borderWidth_ = securityComponentPattern->GetAttr<Dimension>("border_width", 0.0_vp);
         theme->iconColor_ = securityComponentPattern->GetAttr<Color>("icon_color", Color());
         theme->fontColor_ = securityComponentPattern->GetAttr<Color>("font_color", Color());
@@ -256,6 +287,7 @@ private:
         theme->fontColorNoBg_ = securityComponentPattern->GetAttr<Color>("font_color_no_bg", Color());
         theme->backgroundColor_ = securityComponentPattern->GetAttr<Color>("background_color", Color());
         theme->borderColor_ = securityComponentPattern->GetAttr<Color>("border_color", Color());
+        theme->defaultSymbolIconColor_ = securityComponentPattern->GetAttr<Color>("menu_icon_color", Color());
         ParseLocationDescriptions(securityComponentPattern, theme);
         ParsePasteDescriptions(securityComponentPattern, theme);
         ParseSaveDescriptions(securityComponentPattern, theme);
@@ -271,6 +303,7 @@ private:
     Dimension backgroundLeftPadding_;
     Dimension textIconSpace_;
     Dimension borderRadius_;
+    Dimension defaultBorderRadius_;
     Dimension borderWidth_;
     Dimension paddingWithoutBg_;
 
@@ -280,8 +313,11 @@ private:
     Color fontColorNoBg_;
     Color backgroundColor_;
     Color borderColor_;
+    Color defaultSymbolIconColor_;
 
     uint32_t defaultTextMaxLines_ = 1000000; // Infinity
+    TextStyle textStyle_;
+    float bgDisabledAlpha_ = 0.4f;
 
     std::vector<std::string> locationDescriptions_;
     std::vector<std::string> pasteDescriptions_;

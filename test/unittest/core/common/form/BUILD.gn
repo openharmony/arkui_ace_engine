@@ -16,23 +16,24 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("form_manager_test") {
-  module_out_path = "$basic_test_output_path/common"
+  module_out_path = "$basic_test_output_path"
 
   sources = [
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/form_manager.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
+    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
     "$ace_root/test/unittest/core/pattern/form/mock/mock_sub_container.cpp",
     "form_manager_test.cpp",
   ]
   deps = [
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/test/unittest:ace_unittest_log",
-    "//third_party/googletest:gmock_main",
   ]
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
+    "googletest:gmock_main",
     "hilog:libhilog",
   ]
   if (is_ohos_standard_system) {

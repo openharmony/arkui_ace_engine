@@ -21,6 +21,8 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
+#include "core/common/autofill/auto_fill_trigger_state_holder.h"
+#include "core/components/common/properties/popup_param.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
@@ -48,8 +50,8 @@ enum class DismissReason {
     CLOSE_BUTTON,
 };
 
-class BubblePattern : public PopupBasePattern, public FocusView {
-    DECLARE_ACE_TYPE(BubblePattern, PopupBasePattern, FocusView);
+class BubblePattern : public PopupBasePattern, public FocusView, public AutoFillTriggerStateHolder {
+    DECLARE_ACE_TYPE(BubblePattern, PopupBasePattern, FocusView, AutoFillTriggerStateHolder);
 
 public:
     BubblePattern() = default;
@@ -74,12 +76,21 @@ public:
         bubbleMethod->SetArrowWidth(arrowWidth_);
         bubbleMethod->SetArrowHeight(arrowHeight_);
         bubbleMethod->SetBorder(border_);
+        bubbleMethod->SetArrowBuildPlacement(arrowBuildPlacement_);
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, bubbleMethod);
         auto theme = pipeline->GetTheme<PopupTheme>();
         CHECK_NULL_RETURN(theme, bubbleMethod);
         bubbleMethod->SetOuterBorderWidth(theme->GetPopupOuterBorderWidth());
         bubbleMethod->SetInnerBorderWidth(theme->GetPopupInnerBorderWidth());
+        if (outlineWidth_.has_value()) {
+            bubbleMethod->SetOuterBorderWidthByUser(outlineWidth_.value());
+        }
+        if (innerBorderWidth_.has_value()) {
+            bubbleMethod->SetInnerBorderWidthByUser(innerBorderWidth_.value());
+        }
+        bubbleMethod->SetOutlineLinearGradient(outlineLinearGradient_);
+        bubbleMethod->SetInnerBorderLinearGradient(innerBorderLinearGradient_);
         return bubbleMethod;
     }
 
@@ -155,9 +166,19 @@ public:
         messageNode_ = messageNode;
     }
 
+    RefPtr<FrameNode> GetMessageNode()
+    {
+        return messageNode_;
+    }
+
     void SetCustomPopupTag(bool isCustomPopup)
     {
         isCustomPopup_ = isCustomPopup;
+    }
+
+    void SetTipsTag(bool isTips)
+    {
+        isTips_ = isTips;
     }
 
     void SetTransitionStatus(TransitionStatus transitionStatus)
@@ -199,13 +220,35 @@ public:
     void CallOnWillDismiss(int32_t reason)
     {
         if (onWillDismiss_) {
+            TAG_LOGD(AceLogTag::ACE_OVERLAY,
+                "Popup CallOnWillDismiss, reason: %{public}d", reason);
             onWillDismiss_(reason);
         }
+    }
+
+    void SetEnableHoverMode(bool enableHoverMode)
+    {
+        enableHoverMode_ = enableHoverMode;
+    }
+
+    bool GetEnableHoverMode() const
+    {
+        return enableHoverMode_;
     }
     
     void SetHasTransition(bool hasTransition)
     {
         hasTransition_ = hasTransition;
+    }
+
+    void SetAvoidKeyboard(bool avoidKeyboard)
+    {
+        avoidKeyboard_ = avoidKeyboard;
+    }
+
+    bool GetAvoidKeyboard()
+    {
+        return avoidKeyboard_;
     }
 
     bool GetHasTransition() const
@@ -218,6 +261,82 @@ public:
         FocusViewDidShow(nullptr);
         SetIsViewRootScopeFocused(true);
         SetIsViewHasFocused(false);
+    }
+
+    Rect GetHostWindowRect() const
+    {
+        return hostWindowRect_;
+    }
+
+    void RegisterDoubleBindCallback(const std::function<void(const std::string&)>& callback)
+    {
+        doubleBindCallback_ = callback;
+    }
+
+    void CallDoubleBindCallback(const std::string& value)
+    {
+        if (doubleBindCallback_) {
+            doubleBindCallback_(value);
+        }
+    }
+
+    void SetPopupParam(const RefPtr<PopupParam>& popupParam)
+    {
+        popupParam_ = popupParam;
+    }
+
+    const RefPtr<PopupParam>& GetPopupParam() const
+    {
+        return popupParam_;
+    }
+
+    void SetCustomNode(const WeakPtr<UINode>& customNode)
+    {
+        customNode_ = customNode;
+    }
+
+    const RefPtr<UINode> GetCustomNode() const
+    {
+        return customNode_.Upgrade();
+    }
+    void SetOutlineLinearGradient(const PopupLinearGradientProperties& outlineLinearGradient)
+    {
+        outlineLinearGradient_ = outlineLinearGradient;
+    }
+
+    const PopupLinearGradientProperties& GetOutlineLinearGradient() const
+    {
+        return outlineLinearGradient_;
+    }
+
+    void SetOutlineWidth(const std::optional<Dimension>& outlineWidth)
+    {
+        outlineWidth_ = outlineWidth;
+    }
+
+    const std::optional<Dimension>& GetOutlineWidth() const
+    {
+        return outlineWidth_;
+    }
+
+    void SetInnerBorderLinearGradient(const PopupLinearGradientProperties& innerBorderLinearGradient)
+    {
+        innerBorderLinearGradient_ = innerBorderLinearGradient;
+    }
+
+    const PopupLinearGradientProperties& GetInnerBorderLinearGradient() const
+    {
+        return innerBorderLinearGradient_;
+    }
+
+    void SetInnerBorderWidth(const std::optional<Dimension>& innerBorderWidth)
+    {
+        innerBorderWidth_ = innerBorderWidth;
+    }
+
+    const std::optional<Dimension>& GetInnerBorderWidth() const
+    {
+        return innerBorderWidth_;
     }
 
 protected:
@@ -248,6 +367,7 @@ private:
     void ButtonOnHover(bool isHover, const RefPtr<NG::FrameNode>& buttonNode);
     void ButtonOnPress(const TouchEventInfo& info, const RefPtr<NG::FrameNode>& buttonNode);
     void PopBubble();
+    void PopTipsBubble();
     void Animation(
         RefPtr<RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve);
 
@@ -273,6 +393,7 @@ private:
     OffsetF arrowPosition_;
     SizeF childSize_;
     RectF touchRegion_;
+    Rect hostWindowRect_;
     BubbleDumpInfo dumpInfo_;
     // top right bottom left
     std::vector<float> arrowOffsetByClips_ = { 0.0f, 0.0f, 0.0f, 0.0f };
@@ -281,11 +402,13 @@ private:
         = { {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f} };
     float arrowWidth_ = Dimension(16.0_vp).ConvertToPx();
     float arrowHeight_ = Dimension(8.0_vp).ConvertToPx();
+    Placement arrowBuildPlacement_ = Placement::BOTTOM;
 
     bool showArrow_ = false;
     ColorMode colorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
     bool isSetMessageColor_ = false;
     Border border_;
+    bool avoidKeyboard_ = false;
 
     TransitionStatus transitionStatus_ = TransitionStatus::INVISIABLE;
 
@@ -296,6 +419,7 @@ private:
     std::optional<SizeF> targetSize_;
 
     bool isCustomPopup_ = false;
+    bool isTips_ = false;
     RefPtr<FrameNode> messageNode_;
 
     std::string clipPath_;
@@ -304,6 +428,16 @@ private:
 
     bool hasTransition_ = false;
     bool hasOnAreaChange_ = false;
+    bool enableHoverMode_ = false;
+    int32_t halfFoldHoverCallbackId_ = -1;
+    std::function<void(const std::string&)> onStateChangeCallback_ = nullptr;
+    std::function<void(const std::string&)> doubleBindCallback_ = nullptr;
+    RefPtr<PopupParam> popupParam_ = nullptr;
+    WeakPtr<UINode> customNode_ = nullptr;
+    std::optional<Dimension> outlineWidth_;
+    std::optional<Dimension> innerBorderWidth_;
+    PopupLinearGradientProperties outlineLinearGradient_;
+    PopupLinearGradientProperties innerBorderLinearGradient_;
 };
 } // namespace OHOS::Ace::NG
 

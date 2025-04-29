@@ -119,13 +119,14 @@ class SearchSearchButtonModifier extends ModifierWithKey<ArkSearchButton> {
       getUINativeModule().search.resetSearchButton(node);
     } else {
       getUINativeModule().search.setSearchButton(node, this.value.value,
-        this.value.fontSize, this.value.fontColor);
+        this.value.fontSize, this.value.fontColor, this.value.autoDisable);
     }
   }
   checkObjectDiff(): boolean {
     return this.stageValue.value !== this.value.value ||
       !isBaseOrResourceEqual(this.stageValue.fontSize, this.value.fontSize) ||
-      !isBaseOrResourceEqual(this.stageValue.fontColor, this.value.fontColor);
+      !isBaseOrResourceEqual(this.stageValue.fontColor, this.value.fontColor) ||
+      !isBaseOrResourceEqual(this.stageValue.autoDisable, this.value.autoDisable);
   }
 }
 
@@ -371,6 +372,25 @@ class SearchLineHeightModifier extends ModifierWithKey<number | string | Resourc
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+
+class SearchHalfLeadingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchHalfLeading');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetHalfLeading(node);
+    } else {
+      getUINativeModule().search.setHalfLeading(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class SearchMaxFontSizeModifier extends ModifierWithKey<number | string | Resource> {
   constructor(value: number | string | Resource) {
     super(value);
@@ -381,6 +401,42 @@ class SearchMaxFontSizeModifier extends ModifierWithKey<number | string | Resour
       getUINativeModule().search.resetSearchMaxFontSize(node);
     } else {
       getUINativeModule().search.setSearchMaxFontSize(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SearchMinFontScaleModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchMinFontScale');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetMinFontScale(node);
+    } else {
+      getUINativeModule().textArea.setMinFontScale(node, this.value!);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SearchMaxFontScaleModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchMaxFontScale');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetMaxFontScale(node);
+    } else {
+      getUINativeModule().textArea.setMaxFontScale(node, this.value!);
     }
   }
 
@@ -500,8 +556,8 @@ class SearchOnEditChangeModifier extends ModifierWithKey<(isEditing: boolean) =>
   }
 }
 
-class SearchOnSubmitModifier extends ModifierWithKey<(enterKey: EnterKeyType, event: SubmitEvent) => void> {
-  constructor(value: (enterKey: EnterKeyType, event: SubmitEvent) => void) {
+class SearchOnSubmitModifier extends ModifierWithKey<(info: string, event?: SubmitEvent) => void> {
+  constructor(value: (info: string, event?: SubmitEvent) => void) {
     super(value);
   }
   static identity = Symbol('searchOnSubmit');
@@ -556,8 +612,8 @@ class SearchOnPasteModifier extends ModifierWithKey<(value: string, event: Paste
   }
 }
 
-class SearchOnChangeModifier extends ModifierWithKey<(value: string) => void> {
-  constructor(value: (value: string) => void) {
+class SearchOnChangeModifier extends ModifierWithKey<(value: ChangeValueInfo) => void> {
+  constructor(value: (value: ChangeValueInfo) => void) {
     super(value);
   }
   static identity = Symbol('searchOnChange');
@@ -633,6 +689,19 @@ class SearchInitializeModifier extends ModifierWithKey<SearchParam> {
   }
 }
 
+class SearchOnWillChangeModifier extends ModifierWithKey<Callback<ChangeValueInfo, boolean>> {
+  constructor(value: Callback<ChangeValueInfo, boolean>) {
+    super(value);
+  }
+  static identity = Symbol('searchOnWillChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetOnWillChange(node);
+    } else {
+      getUINativeModule().search.setOnWillChange(node, this.value);
+    }
+  }
+}
 
 class SearchOnWillInsertModifier extends ModifierWithKey<Callback<InsertValue, boolean>> {
   constructor(value: Callback<InsertValue, boolean>) {
@@ -721,6 +790,23 @@ class SearchEditMenuOptionsModifier extends ModifierWithKey<EditMenuOptions> {
   }
 }
 
+class SearchEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchEnableHapticFeedback');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetEnableHapticFeedback(node);
+    } else {
+      getUINativeModule().search.setEnableHapticFeedback(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 interface SearchParam {
   value?: string;
   placeholder?: ResourceStr;
@@ -773,7 +859,7 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
       SearchOnContentScrollModifier, callback);
     return this;
   }
-  onChange(callback: (value: string) => void): SearchAttribute {
+  onChange(callback: (value: ChangeValueInfo) => void): SearchAttribute {
     modifierWithKey(this._modifiersWithKeys, SearchOnChangeModifier.identity,
       SearchOnChangeModifier, callback);
     return this;
@@ -793,7 +879,7 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
       SearchOnCutModifier, callback);
     return this;
   }
-  onSubmit(callback: (value: string) => void): SearchAttribute {
+  onSubmit(callback: (value: string, event?: SubmitEvent) => void): SearchAttribute {
     modifierWithKey(this._modifiersWithKeys, SearchOnSubmitModifier.identity,
       SearchOnSubmitModifier, callback);
     return this;
@@ -817,6 +903,7 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
     searchButton.value = value;
     searchButton.fontColor = option?.fontColor;
     searchButton.fontSize = option?.fontSize;
+    searchButton.autoDisable = option?.autoDisable;
     modifierWithKey(this._modifiersWithKeys, SearchSearchButtonModifier.identity, SearchSearchButtonModifier, searchButton);
     return this;
   }
@@ -897,12 +984,24 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
     modifierWithKey(this._modifiersWithKeys, SearchLineHeightModifier.identity, SearchLineHeightModifier, value);
     return this;
   }
+  halfLeading(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, SearchHalfLeadingModifier.identity, SearchHalfLeadingModifier, value);
+    return this;
+  }
   minFontSize(value: number | string | Resource): this {
     modifierWithKey(this._modifiersWithKeys, SearchMinFontSizeModifier.identity, SearchMinFontSizeModifier, value);
     return this;
   }
   maxFontSize(value: number | string | Resource): this {
     modifierWithKey(this._modifiersWithKeys, SearchMaxFontSizeModifier.identity, SearchMaxFontSizeModifier, value);
+    return this;
+  }
+  minFontScale(value: number | Resource): this {
+    modifierWithKey(this._modifiersWithKeys, SearchMinFontScaleModifier.identity, SearchMinFontScaleModifier, value);
+    return this;
+  }
+  maxFontScale(value: number | Resource): this {
+    modifierWithKey(this._modifiersWithKeys, SearchMaxFontScaleModifier.identity, SearchMaxFontScaleModifier, value);
     return this;
   }
   selectedBackgroundColor(value: ResourceColor): this {
@@ -918,6 +1017,10 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
     searchInputFilter.value = value;
     searchInputFilter.error = error;
     modifierWithKey(this._modifiersWithKeys, SearchInputFilterModifier.identity, SearchInputFilterModifier, searchInputFilter);
+    return this;
+  }
+  onWillChange(callback: Callback<ChangeValueInfo, boolean>): this {
+    modifierWithKey(this._modifiersWithKeys, SearchOnWillChangeModifier.identity, SearchOnWillChangeModifier, callback);
     return this;
   }
   onWillInsert(callback: Callback<InsertValue, boolean>): this {
@@ -943,6 +1046,10 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
   editMenuOptions(value: EditMenuOptions): this {
     modifierWithKey(this._modifiersWithKeys, SearchEditMenuOptionsModifier.identity,
       SearchEditMenuOptionsModifier, value);
+    return this;
+  }
+  enableHapticFeedback(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, SearchEnableHapticFeedbackModifier.identity, SearchEnableHapticFeedbackModifier, value);
     return this;
   }
 }

@@ -15,25 +15,9 @@
 
 #include "frameworks/bridge/plugin_frontend/plugin_frontend_delegate.h"
 
-#include <atomic>
-#include <regex>
-#include <string>
-
-#include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/resource/ace_res_config.h"
-#include "base/thread/background_task_executor.h"
-#include "base/utils/measure_util.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
-#include "core/common/container.h"
-#include "core/common/platform_bridge.h"
-#include "core/common/thread_checker.h"
-#include "core/components/dialog/dialog_component.h"
 #include "core/components/toast/toast_component.h"
-#include "frameworks/bridge/common/manifest/manifest_parser.h"
-#include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/bridge/js_frontend/js_ace_page.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -118,7 +102,7 @@ PluginFrontendDelegate::PluginFrontendDelegate(const RefPtr<TaskExecutor>& taskE
 PluginFrontendDelegate::~PluginFrontendDelegate()
 {
     CHECK_RUN_ON(JS);
-    LOG_DESTROY();
+    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "Plugin delegate destroyed");
 }
 
 int32_t PluginFrontendDelegate::GetMinPlatformVersion()
@@ -1278,7 +1262,7 @@ void PluginFrontendDelegate::OnPushPageSuccess(
 {
     std::lock_guard<std::mutex> lock(mutex_);
     AddPageLocked(page);
-    pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url });
+    pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url, false, {}, {} });
     if (Container::IsCurrentUseNewPipeline()) {
         FireDeclarativeOnUpdateWithValueParamsCallback(page->GetPluginComponentJsonData());
     } else {
@@ -1461,7 +1445,7 @@ void PluginFrontendDelegate::OnReplacePageSuccess(
         pageParamMap_.erase(pageRouteStack_.back().pageId);
         pageRouteStack_.pop_back();
     }
-    pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url});
+    pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url, false, {}, {} });
 }
 
 void PluginFrontendDelegate::ReplacePage(

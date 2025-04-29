@@ -22,6 +22,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_group_model.h"
 #include "core/components_v2/list/list_properties.h"
 
@@ -35,6 +36,10 @@ public:
     void SetHeader(std::function<void()>&& header) override;
     void SetFooter(std::function<void()>&& footer) override;
     RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize() override;
+    void SetHeaderComponent(const RefPtr<NG::UINode>& headerComponent) override;
+    void SetFooterComponent(const RefPtr<NG::UINode>& footerComponent) override;
+    void RemoveHeader() override;
+    void RemoveFooter() override;
 
     static void SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
@@ -46,6 +51,10 @@ public:
     static V2::ItemDivider GetDivider(FrameNode* frameNode);
     static void SetSpace(FrameNode* frameNode, const Dimension& space);
     static void SetStyle(FrameNode* frameNode, V2::ListItemGroupStyle style);
+    static void RemoveHeader(FrameNode* frameNode);
+    static void RemoveFooter(FrameNode* frameNode);
+    static bool HasFooter(FrameNode* frameNode);
+    static bool HasHeader(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

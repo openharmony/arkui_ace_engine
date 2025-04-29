@@ -15,11 +15,7 @@
 
 #include "core/components_ng/pattern/security_component/save_button/save_button_model_ng.h"
 
-#include "base/log/ace_scoring_log.h"
-#include "base/resource/internal_resource.h"
-#include "core/components_ng/pattern/security_component/save_button/save_button_common.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 std::unique_ptr<SaveButtonModelNG> SaveButtonModelNG::instance_ = nullptr;

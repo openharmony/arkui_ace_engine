@@ -16,7 +16,6 @@
 #include "bridge/declarative_frontend/jsview/models/navigation_model_impl.h"
 
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/navigation_bar/navigation_container_component.h"
 
 namespace OHOS::Ace::Framework {
 void NavigationModelImpl::Create()
@@ -79,7 +78,12 @@ void NavigationModelImpl::SetSubtitle(const std::string& subtitle)
     navigationContainer->GetDeclaration()->subTitle = subtitle;
 }
 
-void NavigationModelImpl::SetHideTitleBar(bool hideTitleBar)
+void NavigationModelImpl::SetEnableModeChangeAnimation(bool isEnable)
+{
+    return;
+}
+
+void NavigationModelImpl::SetHideTitleBar(bool hideTitleBar, bool animated)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
@@ -99,7 +103,8 @@ void NavigationModelImpl::SetHideNavBar(bool hideNavBar)
 
 void NavigationModelImpl::SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
     const std::string& src, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
-    const std::vector<std::string>& nameList)
+    const std::vector<std::string>& nameList, bool userDefinedAccessibilityText,
+    const std::string& backButtonAccessibilityText)
 {
     return;
 }
@@ -115,7 +120,7 @@ void NavigationModelImpl::SetHideBackButton(bool hideBackButton)
     navigationContainer->GetDeclaration()->hideBarBackButton = hideBackButton;
 }
 
-void NavigationModelImpl::SetHideToolBar(bool hideToolBar)
+void NavigationModelImpl::SetHideToolBar(bool hideToolBar, bool animated)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto navigationContainer = AceType::DynamicCast<OHOS::Ace::NavigationContainerComponent>(component);
@@ -220,7 +225,7 @@ void NavigationModelImpl::SetNavBarPosition(NG::NavBarPosition mode)
     return;
 }
 
-void NavigationModelImpl::SetNavBarWidth(const Dimension& value)
+void NavigationModelImpl::SetNavBarWidth(const Dimension& value, bool isDoubleBind)
 {
     return;
 }

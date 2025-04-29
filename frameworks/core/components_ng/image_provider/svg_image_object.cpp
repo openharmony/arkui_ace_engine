@@ -15,11 +15,9 @@
 
 #include "core/components_ng/image_provider/svg_image_object.h"
 
-#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
-#include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
-#include "core/components_ng/render/canvas_image.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<SvgImageObject> SvgImageObject::Create(const ImageSourceInfo& src, const RefPtr<ImageData>& data)
@@ -36,10 +34,18 @@ RefPtr<SvgDomBase> SvgImageObject::GetSVGDom() const
     return svgDomBase_;
 }
 
+std::string SvgImageObject::GetDumpInfo()
+{
+    CHECK_NULL_RETURN(svgDomBase_, "");
+    return svgDomBase_->GetDumpInfo();
+}
+
 void SvgImageObject::MakeCanvasImage(
-    const RefPtr<ImageLoadingContext>& ctx, const SizeF& /*resizeTarget*/, bool /*forceResize*/, bool /*syncLoad*/)
+    const WeakPtr<ImageLoadingContext>& ctxWp, const SizeF& /*resizeTarget*/, bool /*forceResize*/, bool /*syncLoad*/)
 {
     CHECK_NULL_VOID(GetSVGDom());
+    auto ctx = ctxWp.Upgrade();
+    CHECK_NULL_VOID(ctx);
     // just set svgDom to canvasImage
     auto canvasImage = MakeRefPtr<SvgCanvasImage>(GetSVGDom());
     ctx->SuccessCallback(canvasImage);

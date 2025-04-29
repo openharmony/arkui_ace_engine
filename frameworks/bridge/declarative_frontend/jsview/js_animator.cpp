@@ -14,9 +14,7 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_animator.h"
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 
 #include "base/log/ace_scoring_log.h"
@@ -141,9 +139,7 @@ std::function<void()> GetEventCallback(const JSCallbackInfo& info, const std::st
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT(name);
         func->Execute();
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", name);
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", name);
     };
 }
 
@@ -409,54 +405,69 @@ void JSSpringProp::DestructorCallback(JSSpringProp* obj)
 void JSMotion::ConstructorCallback(const JSCallbackInfo& info)
 {
     ContainerScope scope(Container::CurrentIdSafely());
-    int32_t len = info.Length();
+    int32_t len = static_cast<int32_t>(info.Length());
     if (len != FRICTION_MOTION_LENGTH && len != SPRING_MOTION_LENGTH && len != SCROLL_MOTION_LENGTH) {
         return;
     }
     auto obj = AceType::MakeRefPtr<JSMotion>();
     if (len == FRICTION_MOTION_LENGTH) {
-        if (!info[0]->IsNumber() || !info[1]->IsNumber() || !info[2]->IsNumber()) {
-            return;
-        }
-        double friction = info[0]->ToNumber<double>();
-        double position = info[1]->ToNumber<double>();
-        double velocity = info[2]->ToNumber<double>();
-        RefPtr<FrictionMotion> frictionMotion = AceType::MakeRefPtr<FrictionMotion>(friction, position, velocity);
-        obj->SetMotion(frictionMotion);
+        HandleFrictionMotion(info, obj);
     } else if (len == SPRING_MOTION_LENGTH) {
-        if (!info[0]->IsNumber() || !info[1]->IsNumber() || !info[2]->IsNumber() || !info[3]->IsObject()) {
-            return;
-        }
-        double start = info[0]->ToNumber<double>();
-        double end = info[1]->ToNumber<double>();
-        double velocity = info[2]->ToNumber<double>();
-        JSSpringProp* prop = JSRef<JSObject>::Cast(info[3])->Unwrap<JSSpringProp>();
-        if (!prop) {
-            return;
-        }
-        RefPtr<SpringProperty> springProperty = prop->GetSpringProp();
-        auto springMotion = AceType::MakeRefPtr<SpringMotion>(start, end, velocity, springProperty);
-        obj->SetMotion(springMotion);
+        HandleSpringMotion(info, obj);
     } else {
-        if (!info[0]->IsNumber() || !info[1]->IsNumber() || !info[2]->IsNumber() || !info[3]->IsNumber() ||
-            !info[4]->IsObject()) {
-            return;
-        }
-        double position = info[0]->ToNumber<double>();
-        double velocity = info[1]->ToNumber<double>();
-        double min = info[2]->ToNumber<double>();
-        double max = info[3]->ToNumber<double>();
-        JSSpringProp* prop = JSRef<JSObject>::Cast(info[4])->Unwrap<JSSpringProp>();
-        if (!prop) {
-            return;
-        }
-        RefPtr<SpringProperty> springProperty = prop->GetSpringProp();
-        RefPtr<ScrollMotion> scrollMotion = AceType::MakeRefPtr<ScrollMotion>(
-            position, velocity, ExtentPair(min, min), ExtentPair(max, max), springProperty);
-        obj->SetMotion(scrollMotion);
+        HandleScrollMotion(info, obj);
     }
     obj->IncRefCount();
     info.SetReturnValue(AceType::RawPtr(obj));
+}
+
+void JSMotion::HandleFrictionMotion(const JSCallbackInfo& info, RefPtr<JSMotion>& obj)
+{
+    if (!info[0]->IsNumber() || !info[1]->IsNumber() || !info[2]->IsNumber()) {
+        return;
+    }
+    double friction = info[0]->ToNumber<double>();
+    double position = info[1]->ToNumber<double>();
+    double velocity = info[2]->ToNumber<double>();
+    RefPtr<FrictionMotion> frictionMotion = AceType::MakeRefPtr<FrictionMotion>(friction, position, velocity);
+    obj->SetMotion(frictionMotion);
+}
+
+void JSMotion::HandleSpringMotion(const JSCallbackInfo& info, RefPtr<JSMotion>& obj)
+{
+    if (!info[0]->IsNumber() || !info[1]->IsNumber() || !info[2]->IsNumber() || !info[3]->IsObject()) {
+        return;
+    }
+    double start = info[0]->ToNumber<double>();
+    double end = info[1]->ToNumber<double>();
+    double velocity = info[2]->ToNumber<double>();
+    JSSpringProp* prop = JSRef<JSObject>::Cast(info[3])->Unwrap<JSSpringProp>();
+    if (!prop) {
+        return;
+    }
+    RefPtr<SpringProperty> springProperty = prop->GetSpringProp();
+    auto springMotion = AceType::MakeRefPtr<SpringMotion>(start, end, velocity, springProperty);
+    obj->SetMotion(springMotion);
+}
+
+void JSMotion::HandleScrollMotion(const JSCallbackInfo& info, RefPtr<JSMotion>& obj)
+{
+    if (!info[0]->IsNumber() || !info[1]->IsNumber() || !info[2]->IsNumber() || !info[3]->IsNumber() ||
+        !info[4]->IsObject()) {
+        return;
+    }
+    double position = info[0]->ToNumber<double>();
+    double velocity = info[1]->ToNumber<double>();
+    double min = info[2]->ToNumber<double>();
+    double max = info[3]->ToNumber<double>();
+    JSSpringProp* prop = JSRef<JSObject>::Cast(info[4])->Unwrap<JSSpringProp>();
+    if (!prop) {
+        return;
+    }
+    RefPtr<SpringProperty> springProperty = prop->GetSpringProp();
+    RefPtr<ScrollMotion> scrollMotion = AceType::MakeRefPtr<ScrollMotion>(
+        position, velocity, ExtentPair(min, min), ExtentPair(max, max), springProperty);
+    obj->SetMotion(scrollMotion);
 }
 
 void JSMotion::DestructorCallback(JSMotion* obj)

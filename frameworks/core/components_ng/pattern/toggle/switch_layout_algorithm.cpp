@@ -15,12 +15,6 @@
 
 #include "core/components_ng/pattern/toggle/switch_layout_algorithm.h"
 
-#include "base/geometry/ng/size_t.h"
-#include "core/common/container.h"
-#include "core/components/checkable/checkable_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/pipeline/base/constants.h"
-#include "core/pipeline/pipeline_base.h"
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -29,12 +23,16 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, std::nullopt);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto pattern = frameNode->GetPattern<SwitchPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        frameNode->GetGeometryNode()->Reset();
+        if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+            frameNode->GetGeometryNode()->ResetContent();
+        } else {
+            frameNode->GetGeometryNode()->Reset();
+        }
         return std::nullopt;
     }
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
@@ -64,7 +62,7 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
     }
     float width = 0.0f;
     float height = 0.0f;
-    CalcHeightAndWidth(height, width, frameHeight, frameWidth);
+    CalcHeightAndWidth(frameNode, height, width, frameHeight, frameWidth);
 
     width_ = width;
     height_ = height;
@@ -104,13 +102,15 @@ void SwitchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 }
 
-void SwitchLayoutAlgorithm::CalcHeightAndWidth(float& height, float& width, float frameHeight, float frameWidth)
+void SwitchLayoutAlgorithm::CalcHeightAndWidth(
+    const RefPtr<FrameNode>& host, float& height, float& width, float frameHeight, float frameWidth)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto switchTheme = pipeline->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         width = frameWidth;
         height = frameHeight;
     } else {

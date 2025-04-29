@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,25 +13,39 @@
  * limitations under the License.
  */
 
+#include "mock_task_executor.h"
 #include "scroll_test_ng.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
+#include "test/unittest/core/pattern/scrollable/scrollable_test_utils.h"
 
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {} // namespace
 
-class ScrolleEffectTestNg : public ScrollTestNg {
+class ScrollEffectTestNg : public ScrollTestNg {
 public:
+    RefPtr<ScrollPaintMethod> UpdateContentModifier();
 };
+
+RefPtr<ScrollPaintMethod> ScrollEffectTestNg::UpdateContentModifier()
+{
+    auto paintWrapper = frameNode_->CreatePaintWrapper();
+    RefPtr<ScrollPaintMethod> paintMethod = AceType::DynamicCast<ScrollPaintMethod>(paintWrapper->nodePaintImpl_);
+    paintMethod->UpdateContentModifier(AceType::RawPtr(paintWrapper));
+    return paintMethod;
+}
 
 /**
  * @tc.name: SpringEffect001
  * @tc.desc: Test SpringEffect
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, SpringEffect001, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, SpringEffect001, TestSize.Level1)
 {
     auto springEffect = AceType::MakeRefPtr<ScrollSpringEffect>();
     springEffect->ProcessScrollOver(0.0);
@@ -39,8 +53,8 @@ HWTEST_F(ScrolleEffectTestNg, SpringEffect001, TestSize.Level1)
 
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateScrollDone();
     springEffect = AceType::DynamicCast<ScrollSpringEffect>(pattern_->GetScrollEdgeEffect());
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
     springEffect->SetScrollable(scrollable);
@@ -78,7 +92,7 @@ HWTEST_F(ScrolleEffectTestNg, SpringEffect001, TestSize.Level1)
  * @tc.desc: Test SpringEffect
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, SpringEffect002, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, SpringEffect002, TestSize.Level1)
 {
     auto springEffect = AceType::MakeRefPtr<ScrollSpringEffect>();
     springEffect->ProcessSpringUpdate();
@@ -86,22 +100,22 @@ HWTEST_F(ScrolleEffectTestNg, SpringEffect002, TestSize.Level1)
 
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateScrollDone();
     springEffect = AceType::DynamicCast<ScrollSpringEffect>(pattern_->GetScrollEdgeEffect());
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
     springEffect->SetScrollable(scrollable);
     springEffect->ProcessSpringUpdate();
-    EXPECT_TRUE(springEffect->scrollable_->isSpringAnimationStop_);
+    EXPECT_EQ(springEffect->scrollable_->state_, Scrollable::AnimationState::IDLE);
 
     scrollable->MarkAvailable(false);
     springEffect->ProcessSpringUpdate();
-    EXPECT_TRUE(springEffect->scrollable_->isSpringAnimationStop_);
+    EXPECT_EQ(springEffect->scrollable_->state_, Scrollable::AnimationState::IDLE);
 
     pattern_->SetDirection(FlexDirection::ROW_REVERSE);
     pattern_->SetEdgeEffect(EdgeEffect::SPRING);
     springEffect->ProcessSpringUpdate();
-    EXPECT_TRUE(springEffect->scrollable_->isSpringAnimationStop_);
+    EXPECT_EQ(springEffect->scrollable_->state_, Scrollable::AnimationState::IDLE);
 
     springEffect->SetScrollable(nullptr);
     springEffect->ProcessSpringUpdate();
@@ -123,12 +137,12 @@ HWTEST_F(ScrolleEffectTestNg, SpringEffect002, TestSize.Level1)
  * @tc.desc: Test the correlation function in ScrollFadeEffect under different conditions.
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect001, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, ScrollFadeEffect001, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::FADE, true);
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent(600.f);
+    CreateScrollDone();
     RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
     scrollEdgeEffect->SetScrollable(scrollable);
@@ -145,7 +159,7 @@ HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect001, TestSize.Level1)
      * @tc.steps: step2. call HandleOverScroll(), overScroll is 0
      * @tc.expected: do nothing
      */
-    const SizeF viewPort(SCROLL_WIDTH, SCROLL_HEIGHT);
+    const SizeF viewPort(WIDTH, HEIGHT);
     scrollFadeEffect->HandleOverScroll(Axis::VERTICAL, 0.f, viewPort);
 
     /**
@@ -179,42 +193,42 @@ HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect001, TestSize.Level1)
      * @tc.steps: step5. Call CalculateOverScroll()
      */
     // minExtent:  0
-    // maxExtent: ITEM_HEIGHT * 2
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_HEIGHT, true), 0.0));
+    // maxExtent: ITEM_MAIN_SIZE * 2
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_MAIN_SIZE, true), 0.0));
     EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(0.0, true), 0.0));
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(-ITEM_HEIGHT, true), 0.0));
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(-ITEM_MAIN_SIZE, true), 0.0));
 
-    ScrollTo(ITEM_HEIGHT * 1);
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_HEIGHT * 2, true), 0.0));
+    ScrollTo(ITEM_MAIN_SIZE * 1);
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_MAIN_SIZE * 2, true), 0.0));
     EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(0.0, true), 0.0));
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(-ITEM_HEIGHT * 2, true), 0.0));
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(-ITEM_MAIN_SIZE * 2, true), 0.0));
 
-    ScrollTo(ITEM_HEIGHT * 2);
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_HEIGHT, true), 0.0));
+    ScrollTo(ITEM_MAIN_SIZE * 2);
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_MAIN_SIZE, true), 0.0));
     EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(0.0, true), 0.0));
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(-ITEM_HEIGHT, true), 0.0));
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(-ITEM_MAIN_SIZE, true), 0.0));
 
-    pattern_->currentOffset_ = ITEM_HEIGHT;
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_HEIGHT, true), -ITEM_HEIGHT));
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(0.0, true), -ITEM_HEIGHT));
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(-ITEM_HEIGHT * 2, true), 0.0));
+    pattern_->currentOffset_ = ITEM_MAIN_SIZE;
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_MAIN_SIZE, true), -ITEM_MAIN_SIZE));
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(0.0, true), -ITEM_MAIN_SIZE));
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(-ITEM_MAIN_SIZE * 2, true), 0.0));
 
-    pattern_->currentOffset_ = -ITEM_HEIGHT;
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_HEIGHT * 2, true), 0.0));
+    pattern_->currentOffset_ = -ITEM_MAIN_SIZE;
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_MAIN_SIZE * 2, true), 0.0));
     EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(0.0, true), 0.0));
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(-ITEM_HEIGHT, true), 0.0));
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(-ITEM_MAIN_SIZE, true), 0.0));
 
     // over scroll
-    pattern_->currentOffset_ = -ITEM_HEIGHT * 3;
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_HEIGHT * 2, true), ITEM_HEIGHT));
+    pattern_->currentOffset_ = -ITEM_MAIN_SIZE * 3;
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_MAIN_SIZE * 2, true), ITEM_MAIN_SIZE));
 
     // crash the bottom
-    pattern_->currentOffset_ = -ITEM_HEIGHT * 3;
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_HEIGHT, true), ITEM_HEIGHT));
-    pattern_->currentOffset_ = -ITEM_HEIGHT * 3;
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_HEIGHT, false), 0.0));
-    pattern_->currentOffset_ = -ITEM_HEIGHT * 3;
-    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_HEIGHT * 3, false), 0.0));
+    pattern_->currentOffset_ = -ITEM_MAIN_SIZE * 3;
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_MAIN_SIZE, true), ITEM_MAIN_SIZE));
+    pattern_->currentOffset_ = -ITEM_MAIN_SIZE * 3;
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_MAIN_SIZE, false), 0.0));
+    pattern_->currentOffset_ = -ITEM_MAIN_SIZE * 3;
+    EXPECT_TRUE(NearEqual(scrollFadeEffect->CalculateOverScroll(ITEM_MAIN_SIZE * 3, false), 0.0));
 }
 
 /**
@@ -222,12 +236,12 @@ HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect001, TestSize.Level1)
  * @tc.desc: Test Paint
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect002, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, ScrollFadeEffect002, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::FADE, true);
-    CreateContent(1);
-    CreateDone(frameNode_);
+    CreateContent(100.f);
+    CreateScrollDone();
     RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     auto scrollFadeEffect = AceType::DynamicCast<ScrollFadeEffect>(scrollEdgeEffect);
     scrollFadeEffect->InitialEdgeEffect();
@@ -261,12 +275,12 @@ HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect002, TestSize.Level1)
  * @tc.desc: Test SetPaintDirection in different situations.
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect003, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, ScrollFadeEffect003, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::FADE, true);
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateScrollDone();
     RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
     scrollEdgeEffect->SetScrollable(scrollable);
@@ -312,12 +326,12 @@ HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect003, TestSize.Level1)
  * @tc.desc: Test SetPaintDirection in different situations.
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect004, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, ScrollFadeEffect004, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::FADE, true);
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateScrollDone();
     RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
     scrollEdgeEffect->SetScrollable(scrollable);
@@ -357,12 +371,12 @@ HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect004, TestSize.Level1)
  * @tc.desc: Test HandleOverScroll in different situations.
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect005, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, ScrollFadeEffect005, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::FADE, true);
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent();
+    CreateScrollDone();
     RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
     scrollEdgeEffect->SetScrollable(scrollable);
@@ -379,7 +393,7 @@ HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect005, TestSize.Level1)
      * @tc.steps: step2. call HandleOverScroll(), axis is vertical and isScrollFromUpdate is false.
      * @tc.expected: do nothing
      */
-    const SizeF viewPort(SCROLL_WIDTH, SCROLL_HEIGHT);
+    const SizeF viewPort(WIDTH, HEIGHT);
     scrollFadeEffect->HandleOverScroll(Axis::VERTICAL, 0.f, viewPort);
 
     /**
@@ -403,13 +417,14 @@ HWTEST_F(ScrolleEffectTestNg, ScrollFadeEffect005, TestSize.Level1)
  * @tc.desc: Test scroll_fade_controller
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, FadeController001, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, FadeController001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create ScrollFadeController and set callback function.
      */
+    auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockPipelineContext::GetCurrentContext()->taskExecutor_ = mockTaskExecutor;
     auto fadeController = AceType::MakeRefPtr<ScrollFadeController>();
-    ASSERT_NE(fadeController, nullptr);
     double param1 = 10.f;
     double param2 = -10.0;
     auto callback = [&param1, &param2](double parameter1, double parameter2) {
@@ -461,6 +476,7 @@ HWTEST_F(ScrolleEffectTestNg, FadeController001, TestSize.Level1)
      * @tc.expected: step4. Check whether relevant parameters are correct.
      */
     fadeController->ProcessPull(1.0, 1.0, 1.0);
+    mockTaskExecutor->RunDelayTask();
     EXPECT_EQ(fadeController->opacityFloor_, 0.3);
     EXPECT_EQ(fadeController->opacityCeil_, 0.0);
     EXPECT_EQ(fadeController->scaleSizeFloor_, 3.25);
@@ -480,6 +496,7 @@ HWTEST_F(ScrolleEffectTestNg, FadeController001, TestSize.Level1)
     EXPECT_EQ(fadeController->state_, OverScrollState::IDLE);
     fadeController->ProcessAbsorb(100.0);
     fadeController->ProcessPull(1.0, 1.0, 1.0);
+    mockTaskExecutor->RunDelayTask();
     fadeController->decele_->NotifyListener(100.0);
     EXPECT_EQ(param1, 2940.3);
     EXPECT_EQ(param2, 31853.25);
@@ -490,13 +507,14 @@ HWTEST_F(ScrolleEffectTestNg, FadeController001, TestSize.Level1)
  * @tc.desc: Test scroll_fade_controller
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, FadeController002, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, FadeController002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create ScrollFadeController and set callback function.
      */
+    auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockPipelineContext::GetCurrentContext()->taskExecutor_ = mockTaskExecutor;
     auto fadeController = AceType::MakeRefPtr<ScrollFadeController>();
-    ASSERT_NE(fadeController, nullptr);
     double param1 = 10.f;
     double param2 = -10.0;
     auto callback = [&param1, &param2](double parameter1, double parameter2) {
@@ -524,6 +542,7 @@ HWTEST_F(ScrolleEffectTestNg, FadeController002, TestSize.Level1)
     fadeController->controller_->NotifyStopListener();
     fadeController->state_ = OverScrollState::PULL;
     fadeController->ProcessPull(1.0, 1.0, 1.0);
+    mockTaskExecutor->RunDelayTask();
     EXPECT_EQ(fadeController->state_, OverScrollState::RECEDE);
 
     /**
@@ -551,13 +570,12 @@ HWTEST_F(ScrolleEffectTestNg, FadeController002, TestSize.Level1)
  * @tc.desc: Test scroll_fade_controller
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, FadeController003, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, FadeController003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create ScrollFadeController and set callback function.
      */
     auto fadeController = AceType::MakeRefPtr<ScrollFadeController>();
-    ASSERT_NE(fadeController, nullptr);
     double param1 = 10.f;
     double param2 = -10.0;
     auto callback = [&param1, &param2](double parameter1, double parameter2) {
@@ -595,12 +613,12 @@ HWTEST_F(ScrolleEffectTestNg, FadeController003, TestSize.Level1)
  * @tc.desc: Test EdgeEffectOption
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, EdgeEffectOption001, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, EdgeEffectOption001, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, false);
-    CreateContent(VIEW_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent(HEIGHT);
+    CreateScrollDone();
     EXPECT_FALSE(pattern_->GetAlwaysEnabled());
     EXPECT_FALSE(pattern_->GetScrollableEvent()->GetEnabled());
 }
@@ -610,12 +628,12 @@ HWTEST_F(ScrolleEffectTestNg, EdgeEffectOption001, TestSize.Level1)
  * @tc.desc: Test EdgeEffectOption
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, EdgeEffectOption002, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, EdgeEffectOption002, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
-    CreateContent(VIEW_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateContent(HEIGHT);
+    CreateScrollDone();
     EXPECT_TRUE(pattern_->GetAlwaysEnabled());
     EXPECT_TRUE(pattern_->GetScrollableEvent()->GetEnabled());
 }
@@ -625,13 +643,13 @@ HWTEST_F(ScrolleEffectTestNg, EdgeEffectOption002, TestSize.Level1)
  * @tc.desc: Test EdgeEffectOption
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, EdgeEffectOption003, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, EdgeEffectOption003, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, false);
     // 20 is childNumber.
-    CreateContent(20);
-    CreateDone(frameNode_);
+    CreateContent(2000.f);
+    CreateScrollDone();
     EXPECT_FALSE(pattern_->GetAlwaysEnabled());
     EXPECT_TRUE(pattern_->GetScrollableEvent()->GetEnabled());
 }
@@ -641,50 +659,112 @@ HWTEST_F(ScrolleEffectTestNg, EdgeEffectOption003, TestSize.Level1)
  * @tc.desc: Test EdgeEffectOption
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, EdgeEffectOption004, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, EdgeEffectOption004, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     // 20 is childNumber.
-    CreateContent(20);
-    CreateDone(frameNode_);
+    CreateContent(2000.f);
+    CreateScrollDone();
     EXPECT_TRUE(pattern_->GetAlwaysEnabled());
     EXPECT_TRUE(pattern_->GetScrollableEvent()->GetEnabled());
 }
 
 /**
- * @tc.name: AttrEdgeEffect001
- * @tc.desc: Test attribute about edgeEffect,
+ * @tc.name: ContentClip001
+ * @tc.desc: Test ContentClip
  * @tc.type: FUNC
  */
-HWTEST_F(ScrolleEffectTestNg, AttrEdgeEffect001, TestSize.Level1)
+HWTEST_F(ScrollEffectTestNg, ContentClip001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    CreateContent(2000.f);
+    CreateScrollDone();
+
+    paintProperty_->UpdateContentClip({ ContentClipMode::DEFAULT, nullptr });
+    auto ctx = AceType::DynamicCast<MockRenderContext>(frameNode_->GetRenderContext());
+    ASSERT_TRUE(ctx);
+    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(frameNode_->GetGeometryNode()->GetPaddingRect()))).Times(1);
+    FlushUITasks();
+
+    paintProperty_->UpdateContentClip({ ContentClipMode::BOUNDARY, nullptr });
+    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(frameNode_->GetGeometryNode()->GetFrameRect()))).Times(1);
+    FlushUITasks();
+}
+
+/**
+ * @tc.name: FadingEdge001
+ * @tc.desc: Test FadingEdge property
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, FadingEdge001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Text default value: NONE
+     * @tc.steps: step1. Set FadingEdge
+     * @tc.expected: Would create a overlayNode attach to scroll
      */
-    CreateScroll();
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    EXPECT_EQ(pattern_->GetEdgeEffect(), EdgeEffect::NONE);
-
-    /**
-     * @tc.steps: step2. Text set value: SPRING
-     */
-    ClearOldNodes();
+    const Dimension fadingEdgeLength = Dimension(10.0f);
     ScrollModelNG model = CreateScroll();
-    model.SetEdgeEffect(EdgeEffect::SPRING, true);
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    EXPECT_EQ(pattern_->GetEdgeEffect(), EdgeEffect::SPRING);
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    CreateContent(2000.f);
+    CreateScrollDone();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+    EXPECT_TRUE(paintProperty_->GetFadingEdge().value_or(false));
+    EXPECT_EQ(paintProperty_->GetFadingEdgeLength().value(), fadingEdgeLength);
 
     /**
-     * @tc.steps: step3. Text set width value: FADE
+     * @tc.steps: step2. Change FadingEdge to false
+     * @tc.expected: There is no fading edge
      */
-    ClearOldNodes();
-    model = CreateScroll();
-    model.SetEdgeEffect(EdgeEffect::FADE, true);
-    CreateContent(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    EXPECT_EQ(pattern_->GetEdgeEffect(), EdgeEffect::FADE);
+    ScrollableModelNG::SetFadingEdge(AceType::RawPtr(frameNode_), false, fadingEdgeLength);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+    EXPECT_FALSE(paintProperty_->GetFadingEdge().value_or(false));
+}
+
+/**
+ * @tc.name: FadingEdge002
+ * @tc.desc: Test FadingEdge property
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, FadingEdge002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set FadingEdge
+     * @tc.expected: Would create a overlayNode attach to scroll
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    ScrollModelNG model = CreateScroll();
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    CreateContent(2000.f);
+    CreateScrollDone();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+
+    /**
+     * @tc.steps: step2. The scroll at top
+     * @tc.expected: Fading bottom
+     */
+    auto paintMethod = UpdateContentModifier();
+    EXPECT_FALSE(paintMethod->isFadingTop_);
+    EXPECT_TRUE(paintMethod->isFadingBottom_);
+
+    /**
+     * @tc.steps: step3. The scroll at middle
+     * @tc.expected: Fading both
+     */
+    ScrollTo(100.0f);
+    paintMethod = UpdateContentModifier();
+    EXPECT_TRUE(paintMethod->isFadingTop_);
+    EXPECT_TRUE(paintMethod->isFadingBottom_);
+
+    /**
+     * @tc.steps: step4. The scroll at bottom
+     * @tc.expected: Fading top
+     */
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    paintMethod = UpdateContentModifier();
+    EXPECT_TRUE(paintMethod->isFadingTop_);
+    EXPECT_FALSE(paintMethod->isFadingBottom_);
 }
 } // namespace OHOS::Ace::NG

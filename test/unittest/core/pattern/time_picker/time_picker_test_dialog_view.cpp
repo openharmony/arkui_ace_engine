@@ -76,6 +76,20 @@ const Dimension FONT_VALUE_NOMARL = Dimension(10);
 const Dimension FONT_SIZE_LIMIT = Dimension(10);
 const Dimension FONT_SIZE_VP = Dimension(10.0_vp);
 const Dimension FONT_SIZE_LIMIT_MORE = Dimension(40);
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return MockThemeDefault::GetPickerTheme();
+    } else if (type == ButtonTheme::TypeId()) {
+        return AceType::MakeRefPtr<ButtonTheme>();
+    } else {
+        return nullptr;
+    }
+}
 } // namespace
 class TimePickerDialogViewTestNg : public testing::Test {
 public:
@@ -123,20 +137,11 @@ void TimePickerDialogViewTestNg::TearDownTestSuite()
 void TimePickerDialogViewTestNg::SetUp()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-            if (type == IconTheme::TypeId()) {
-                return AceType::MakeRefPtr<IconTheme>();
-            } else if (type == DialogTheme::TypeId()) {
-                return AceType::MakeRefPtr<DialogTheme>();
-            } else if (type == PickerTheme::TypeId()) {
-                return MockThemeDefault::GetPickerTheme();
-            } else if (type == ButtonTheme::TypeId()) {
-                return AceType::MakeRefPtr<ButtonTheme>();
-            } else {
-                return nullptr;
-            }
-        });
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        return GetTheme(type);
+    });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -169,6 +174,31 @@ void TimePickerDialogViewTestNg::CreateTimePickerColumnNode()
     EXPECT_NE(host, nullptr);
 }
 
+static RefPtr<FrameNode> CreateDialogNode()
+{
+    DialogProperties dialogProperties;
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    std::vector<ButtonInfo> buttonInfos;
+    std::map<std::string, PickerTime> timePickerProperty;
+    uint32_t hour = 3;
+    uint32_t minute = 4;
+    uint32_t second = 1;
+    timePickerProperty["selected"] = PickerTime(hour, minute, second);
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    return dialogNode;
+}
+
 /**
  * @tc.name: TimePickerDialogViewTest001
  * @tc.desc: Test TimePickerDialogView::ConvertFontScaleValue.
@@ -184,13 +214,15 @@ HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewTest001, TestSize.Level
     ASSERT_TRUE(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     ASSERT_TRUE(pickerTheme);
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(3.2f);
     pipeline->SetFontScale(0);
     /**
      * @tc.steps: step2. fontSizeValue's unit is VP,isUserSetFont is true,and
-     * @tc.expected: call GetIsUserSetTextProperties and result expect FONT_SIZE_VP.
+     * @tc.expected: call GetIsUserSetTextProperties and result expect equal FONT_SIZE_LIMIT.
      */
     auto ret = TimePickerDialogView::ConvertFontScaleValue(FONT_SIZE_VP, FONT_SIZE_LIMIT, true);
-    EXPECT_EQ(ret, FONT_SIZE_LIMIT / 2);
+    EXPECT_EQ(ret.Value(), FONT_SIZE_LIMIT.Value());
     /**
      * @tc.steps: step2+. fontSizeValue's unit is not VP,isUserSetFont is false,and
      * @tc.expected: call GetIsUserSetTextProperties and result expect FONT_VALUE_NOMARL / FontScale.
@@ -199,7 +231,7 @@ HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewTest001, TestSize.Level
     pipeline->rootHeight_ = 0;
     pickerTheme->pickerDialogMaxOneFontScale_ = 5;
     ret = TimePickerDialogView::ConvertFontScaleValue(FONT_VALUE_NOMARL, FONT_SIZE_LIMIT, false);
-    EXPECT_EQ(ret, Dimension(FONT_VALUE_NOMARL / pipeline->GetFontScale()));
+    EXPECT_EQ(ret, Dimension(FONT_VALUE_NOMARL / pipeline->GetMaxAppFontScale()));
     /**
      * @tc.steps: step3. set fontscale,fontSizeValue's unit is VP,isUserSetFont is true/false.
      * @tc.expected: call GetIsUserSetTextProperties and NeedAdaptForAging is true.
@@ -208,20 +240,19 @@ HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewTest001, TestSize.Level
     pickerTheme->pickerDialogNormalFontScale_ = 10;
     pickerTheme->pickerDialogMaxOneFontScale_ = 5;
     pipeline->rootHeight_ = 1000;
-    TimePickerDialogView::ConvertFontScaleValue(FONT_VALUE_NOMARL, FONT_SIZE_LIMIT, true);
     ret = TimePickerDialogView::ConvertFontScaleValue(FONT_VALUE_NOMARL, FONT_SIZE_LIMIT, false);
     auto scale = pickerTheme->GetMaxTwoFontScale() / pickerTheme->GetMaxThirdFontScale();
     EXPECT_EQ(ret, FONT_VALUE_NOMARL * scale);
     /**
      * @tc.steps: step3+. fontSizeValue's unit is VP,isUserSetFont is true/false.
-     * @tc.expected: call GetIsUserSetTextProperties and result expect FONT_SIZE_VP * TwoFontScale/ThirdFontScale.
+     * @tc.expected: call GetIsUserSetTextProperties and result expect FONT_SIZE_LIMIT/FONT_SIZE_VP.
      */
     pickerTheme->pickerDialogMaxTwoFontScale_ = 10;
     pickerTheme->pickerDialogMaxThirdFontScale_ = 5;
     ret = TimePickerDialogView::ConvertFontScaleValue(FONT_SIZE_VP, FONT_SIZE_LIMIT, true);
-    EXPECT_EQ(ret, FONT_SIZE_LIMIT);
+    EXPECT_EQ(ret.Value(), FONT_SIZE_LIMIT.Value());
     ret = TimePickerDialogView::ConvertFontScaleValue(FONT_SIZE_VP, FONT_SIZE_LIMIT, false);
-    EXPECT_EQ(ret, FONT_SIZE_VP * (pickerTheme->GetMaxTwoFontScale() / pickerTheme->GetMaxThirdFontScale()));
+    EXPECT_EQ(ret.Value(), FONT_SIZE_VP.Value());
 }
 
 /**
@@ -237,27 +268,32 @@ HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewTest002, TestSize.Level
      */
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_TRUE(pipeline);
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(3.2f);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     ASSERT_TRUE(pickerTheme);
     pipeline->SetFontScale(0);
     auto ret = TimePickerDialogView::ConvertFontSizeLimit(FONT_SIZE_VP, FONT_SIZE_LIMIT, false);
-    EXPECT_EQ(ret, FONT_SIZE_VP);
+    EXPECT_EQ(ret.Value(), FONT_SIZE_VP.Value());
     /**
      * @tc.steps: step2. fontSizeValue's unit is VP,isUserSetFont is true
      * @tc.expected: call ConvertFontSizeLimit and result expect FONT_SIZE_LIMIT_MORE/FONT_SIZE_VP.
      */
+    auto nFontScale = 5;
+    pipeline->SetFontScale(nFontScale);
     ret = TimePickerDialogView::ConvertFontSizeLimit(FONT_SIZE_VP, FONT_SIZE_LIMIT, true);
-    EXPECT_EQ(ret, FONT_SIZE_LIMIT / 2);
+    EXPECT_EQ(ret.Value(), FONT_SIZE_LIMIT.Value() / pipeline->GetMaxAppFontScale());
+    pipeline->SetFontScale(0);
     ret = TimePickerDialogView::ConvertFontSizeLimit(FONT_SIZE_VP, FONT_SIZE_LIMIT_MORE, true);
-    EXPECT_EQ(ret, FONT_SIZE_VP);
+    EXPECT_EQ(ret.Value(), FONT_SIZE_VP.Value());
     /**
      * @tc.steps: step2+. fontSizeValue's unit is not VP,isUserSetFont is true
      * @tc.expected: call ConvertFontSizeLimit and result expect FONT_SIZE_LIMIT_MORE/FONT_VALUE_NOMARL.
      */
     ret = TimePickerDialogView::ConvertFontSizeLimit(FONT_VALUE_NOMARL, FONT_SIZE_LIMIT, true);
-    EXPECT_EQ(ret, FONT_SIZE_LIMIT);
+    EXPECT_EQ(ret.Value(), FONT_SIZE_LIMIT.Value());
     ret = TimePickerDialogView::ConvertFontSizeLimit(FONT_VALUE_NOMARL, FONT_SIZE_LIMIT_MORE, true);
-    EXPECT_EQ(ret, FONT_VALUE_NOMARL);
+    EXPECT_EQ(ret.Value(), FONT_VALUE_NOMARL.Value());
 }
 
 /**
@@ -274,6 +310,8 @@ HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewTest003, TestSize.Level
     ASSERT_TRUE(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     ASSERT_TRUE(pickerTheme);
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(10.0f);
     pipeline->SetFontScale(0);
     /**
      * @tc.steps: step2. set NeedAdaptForAging is false,
@@ -290,7 +328,7 @@ HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewTest003, TestSize.Level
     pipeline->rootHeight_ = 0;
     pickerTheme->pickerDialogMaxOneFontScale_ = 5;
     ret = TimePickerDialogView::ConvertTitleFontScaleValue(FONT_VALUE_NOMARL);
-    EXPECT_EQ(ret, Dimension(FONT_VALUE_NOMARL / pipeline->GetFontScale()));
+    EXPECT_EQ(ret, Dimension(FONT_VALUE_NOMARL.Value() / pipeline->GetFontScale()));
     /**
      * @tc.steps: step3. set NeedAdaptForAging is true.
      * fontSizeValue's unit is VP
@@ -305,8 +343,213 @@ HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewTest003, TestSize.Level
      * @tc.expected: call GetIsUserSetTextProperties and result expect FONT_SIZE_LIMIT.
      */
     ret = TimePickerDialogView::ConvertTitleFontScaleValue(FONT_VALUE_NOMARL);
-    auto scale = pickerTheme->GetTitleFontScaleLimit() / pipeline->GetFontScale();
+    auto scale = pickerTheme->GetTitleFontScaleLimit() / pipeline->GetMaxAppFontScale();
     EXPECT_EQ(ret, FONT_VALUE_NOMARL * scale);
 }
 
+/**
+ * @tc.name: TimePickerDialogViewTest004
+ * @tc.desc: Test TimePickerDialogViewShow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewTest004, TestSize.Level1)
+{
+    int32_t setApiVersion = 12;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = false;
+    settingData.dateTimeOptions.hourType = ZeroPrefixType::SHOW;
+    settingData.dateTimeOptions.minuteType = ZeroPrefixType::SHOW;
+    std::map<std::string, PickerTime> timePickerProperty;
+    uint32_t hour = 3;
+    uint32_t minute = 4;
+    uint32_t second = 1;
+    timePickerProperty["selected"] = PickerTime(hour, minute, second);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    /**
+     * @tc.steps2: call TimePickerDialogViewShow.
+     * @tc.expected: set NeedAdaptForAging is true.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    EXPECT_TRUE(pickerTheme);
+    pipeline->SetFollowSystem(true);
+    pipeline->SetMaxAppFontScale(10.0f);
+    pipeline->SetFontScale(0);
+    pickerTheme->pickerDialogMaxOneFontScale_ = 5;
+    pipeline->SetFontScale(10);
+    pipeline->rootHeight_ = 1000;
+    auto ret = TimePickerDialogView::ConvertTitleFontScaleValue(FONT_SIZE_VP);
+    EXPECT_EQ(ret, FONT_SIZE_VP * pickerTheme->GetTitleFontScaleLimit());
+    EXPECT_TRUE(TimePickerDialogView::NeedAdaptForAging());
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewTest005
+ * @tc.desc: Test TimePickerDialogView::CreateNextPrevButtonNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    EXPECT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(pickerFrameNode, nullptr);
+    pickerFrameNode->MarkModifyDone();
+    auto timePickerRowPattern = pickerFrameNode->GetPattern<TimePickerRowPattern>();
+    EXPECT_NE(timePickerRowPattern, nullptr);
+    auto dialogNode = CreateDialogNode();
+    EXPECT_NE(dialogNode, nullptr);
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    EXPECT_NE(timePickerNode, nullptr);
+    /**
+     * @tc.steps2: call CreateNextPrevButtonNode.
+     * @tc.expected: set switch event and api version is 16.
+     */
+    std::vector<ButtonInfo> buttonInfos;
+    std::function<void()> switchEvent = [weak = WeakPtr<FrameNode>(dialogNode), timePickerRowPattern]() {
+        auto dialogNode = weak.Upgrade();
+        auto pipeline = dialogNode->GetContext();
+        auto overlayManager = pipeline->GetOverlayManager();
+        overlayManager->CloseDialog(dialogNode);
+        timePickerRowPattern->SetIsShowInDialog(false);
+    };
+    auto setApiVersion = 16;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    auto currApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    TimePickerDialogView::CreateNextPrevButtonNode(switchEvent, timePickerNode, buttonInfos);
+    EXPECT_EQ(currApiVersion, setApiVersion);
+    /**
+     * @tc.steps3: call CreateNextPrevButtonNode.
+     * @tc.expected: set api version is 13.
+     */
+    setApiVersion = 13;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    currApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    TimePickerDialogView::CreateNextPrevButtonNode(switchEvent, timePickerNode, buttonInfos);
+    EXPECT_EQ(currApiVersion, setApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewTest006
+ * @tc.desc: Test TimePickerDialogView::UpdateTimePickerSwitchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. creat timePickerDialog with dateTimeOptions
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    EXPECT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(pickerFrameNode, nullptr);
+    pickerFrameNode->MarkModifyDone();
+    auto timePickerRowPattern = pickerFrameNode->GetPattern<TimePickerRowPattern>();
+    EXPECT_NE(timePickerRowPattern, nullptr);
+    auto dialogNode = CreateDialogNode();
+    EXPECT_NE(dialogNode, nullptr);
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    EXPECT_NE(timePickerNode, nullptr);
+    std::function<void()> switchEvent = [weak = WeakPtr<FrameNode>(dialogNode), timePickerRowPattern]() {
+        auto dialogNode = weak.Upgrade();
+        auto pipeline = dialogNode->GetContext();
+        auto overlayManager = pipeline->GetOverlayManager();
+        overlayManager->CloseDialog(dialogNode);
+        timePickerRowPattern->SetIsShowInDialog(false);
+    };
+    /**
+     * @tc.steps3: call UpdateTimePickerSwitchEvent.
+     * @tc.expected: set switch event.
+     */
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumn = allChildNode["minute"].Upgrade();
+    EXPECT_TRUE(minuteColumn);
+    auto child = minuteColumn->GetChildren();
+    auto iter = child.begin();
+    auto textNode = AceType::DynamicCast<FrameNode>(*iter);
+    EXPECT_TRUE(textNode);
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    TimePickerDialogView::UpdateTimePickerSwitchEvent(timePickerNode, textNode, dialogTheme, buttonNode, switchEvent);
+    EXPECT_NE(buttonNode, nullptr);
+}
+
+/**
+ * @tc.name: TimePickerDialogViewShow044
+ * @tc.desc: Test TimePickerDialogViewShow Show for API 16.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerDialogViewTestNg, TimePickerDialogViewShow044, TestSize.Level1)
+{
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    TimePickerSettingData settingData;
+    settingData.properties.disappearTextStyle_.textColor = Color::RED;
+    settingData.properties.disappearTextStyle_.fontSize = Dimension(0);
+    settingData.properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+
+    settingData.properties.normalTextStyle_.textColor = Color::RED;
+    settingData.properties.normalTextStyle_.fontSize = Dimension(0);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+
+    settingData.properties.selectedTextStyle_.textColor = Color::RED;
+    settingData.properties.selectedTextStyle_.fontSize = Dimension(0);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    settingData.isUseMilitaryTime = false;
+    settingData.isEnableHapticFeedback = true;
+
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(1, 1, 1);
+
+    DialogProperties dialogProperties;
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    auto customNode = dialogPattern->GetCustomNode();
+    ASSERT_NE(customNode, nullptr);
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    ASSERT_NE(timePickerNode, nullptr);
+    auto timePickerRowPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    EXPECT_TRUE(timePickerRowPattern->isEnableHaptic_);
+}
 } // namespace OHOS::Ace::NG

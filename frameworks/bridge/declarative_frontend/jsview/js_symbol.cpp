@@ -23,19 +23,16 @@
 #include "frameworks/core/components_ng/pattern/symbol/symbol_model_ng.h"
 
 namespace OHOS::Ace {
+constexpr int32_t SYSTEM_SYMBOL_BOUNDARY = 0XFFFFF;
+const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 
 std::unique_ptr<SymbolModel> SymbolModel::instance_ = nullptr;
 std::mutex SymbolModel::mutex_;
 
 SymbolModel* SymbolModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
-            instance_.reset(new NG::SymbolModelNG());
-        }
-    }
-    return instance_.get();
+    static NG::SymbolModelNG instance;
+    return &instance;
 }
 
 } // namespace OHOS::Ace
@@ -70,6 +67,8 @@ void JSSymbol::JSBind(BindingTarget globalObj)
     JSClass<JSSymbol>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSymbol>::StaticMethod("clip", &JSSymbol::JsClip);
     JSClass<JSSymbol>::StaticMethod("symbolEffect", &JSSymbol::SetSymbolEffectOptions, opt);
+    JSClass<JSSymbol>::StaticMethod("minFontScale", &JSSymbol::SetMinFontScale);
+    JSClass<JSSymbol>::StaticMethod("maxFontScale", &JSSymbol::SetMaxFontScale);
     JSClass<JSSymbol>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -83,6 +82,16 @@ void JSSymbol::Create(const JSCallbackInfo& info)
     RefPtr<ResourceObject> resourceObject;
     ParseJsSymbolId(info[0], symbolId, resourceObject);
     SymbolModel::GetInstance()->Create(symbolId);
+    std::vector<std::string> familyNames;
+    if (symbolId > SYSTEM_SYMBOL_BOUNDARY) {
+        ParseJsSymbolCustomFamilyNames(familyNames, info[0]);
+        SymbolModel::GetInstance()->SetFontFamilies(familyNames);
+        SymbolModel::GetInstance()->SetSymbolType(SymbolType::CUSTOM);
+    } else {
+        familyNames.push_back(DEFAULT_SYMBOL_FONTFAMILY);
+        SymbolModel::GetInstance()->SetFontFamilies(familyNames);
+        SymbolModel::GetInstance()->SetSymbolType(SymbolType::SYSTEM);
+    }
 }
 
 void JSSymbol::SetFontSize(const JSCallbackInfo& info)
@@ -156,6 +165,36 @@ void JSSymbol::SetSymbolEffectOptions(const JSCallbackInfo& info)
     }
 
     SymbolModel::GetInstance()->SetSymbolEffectOptions(symbolEffectOptions);
+}
+
+void JSSymbol::SetMinFontScale(const JSCallbackInfo& info)
+{
+    double minFontScale;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], minFontScale)) {
+        return;
+    }
+    if (LessOrEqual(minFontScale, 0.0f)) {
+        SymbolModel::GetInstance()->SetMinFontScale(0.0f);
+        return;
+    }
+    if (GreatOrEqual(minFontScale, 1.0f)) {
+        SymbolModel::GetInstance()->SetMinFontScale(1.0f);
+        return;
+    }
+    SymbolModel::GetInstance()->SetMinFontScale(static_cast<float>(minFontScale));
+}
+
+void JSSymbol::SetMaxFontScale(const JSCallbackInfo& info)
+{
+    double maxFontScale;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], maxFontScale)) {
+        return;
+    }
+    if (LessOrEqual(maxFontScale, 1.0f)) {
+        SymbolModel::GetInstance()->SetMaxFontScale(1.0f);
+        return;
+    }
+    SymbolModel::GetInstance()->SetMaxFontScale(static_cast<float>(maxFontScale));
 }
 
 void JSSymbol::parseSymbolEffect(const JSRef<JSObject> symbolEffectObj, NG::SymbolEffectOptions& symbolEffectOptions)

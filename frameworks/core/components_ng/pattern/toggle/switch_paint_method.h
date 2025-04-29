@@ -23,6 +23,7 @@
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/render/render_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -40,19 +41,27 @@ public:
     {
         if (!switchModifier_) {
             auto paintProperty = DynamicCast<SwitchPaintProperty>(paintWrapper->GetPaintProperty());
+            CHECK_NULL_RETURN(paintProperty, nullptr);
             auto size = paintWrapper->GetContentSize();
             auto offset = paintWrapper->GetContentOffset();
             bool isRtl = direction_ == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft()
                                                            : direction_ == TextDirection::RTL;
             auto pointOffset = isSelect_ ^ isRtl ? size.Width() - size.Height() : 0.0f;
-            auto pipeline = PipelineBase::GetCurrentContext();
+            auto renderContext = paintWrapper->GetRenderContext();
+            CHECK_NULL_RETURN(renderContext, nullptr);
+            auto host = renderContext->GetHost();
+            CHECK_NULL_RETURN(host, nullptr);
+            auto pipeline = host->GetContext();
             CHECK_NULL_RETURN(pipeline, nullptr);
-            auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+            auto themeScopeId = GetThemeScopeId(paintWrapper);
+            auto switchTheme = pipeline->GetTheme<SwitchTheme>(themeScopeId);
+            CHECK_NULL_RETURN(switchTheme, nullptr);
             auto boardColor = isSelect_ ? paintProperty->GetSelectedColorValue(switchTheme->GetActiveColor())
                                         : switchTheme->GetInactivePointColor();
-            switchModifier_ =
-                AceType::MakeRefPtr<SwitchModifier>(size, offset, pointOffset, isSelect_, boardColor, dragOffsetX_);
-            switchModifier_->InitializeParam();
+            auto pointColor = paintProperty->GetSwitchPointColorValue(switchTheme->GetPointColor());
+            switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(
+                size, offset, pointOffset, isSelect_, boardColor, pointColor, dragOffsetX_);
+            switchModifier_->InitializeParam(themeScopeId);
         }
         return switchModifier_;
     }
@@ -93,20 +102,40 @@ public:
         switchModifier_->SetBoundsRect(boundsRect);
     }
 
-    void UpdateContentModifier(PaintWrapper* paintWrapper) override
+    void UpdateModifierColor(PaintWrapper* paintWrapper)
     {
-        CHECK_NULL_VOID(switchModifier_);
         auto paintProperty = DynamicCast<SwitchPaintProperty>(paintWrapper->GetPaintProperty());
-        switchModifier_->SetUseContentModifier(useContentModifier_);
+        CHECK_NULL_VOID(paintProperty);
+        auto renderContext = paintWrapper->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto host = renderContext->GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto switchTheme = pipeline->GetTheme<SwitchTheme>(GetThemeScopeId(paintWrapper));
+        CHECK_NULL_VOID(switchTheme);
         if (paintProperty->HasUnselectedColor()) {
             switchModifier_->SetInactiveColor(paintProperty->GetUnselectedColor().value());
         }
         if (paintProperty->HasSelectedColor()) {
             switchModifier_->SetUserActiveColor(paintProperty->GetSelectedColor().value());
+        } else {
+            switchModifier_->SetUserActiveColor(switchTheme->GetActiveColor());
         }
         if (paintProperty->HasSwitchPointColor()) {
             switchModifier_->SetPointColor(paintProperty->GetSwitchPointColor().value());
+        } else {
+            switchModifier_->SetPointColor(switchTheme->GetPointColor());
         }
+    }
+
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override
+    {
+        CHECK_NULL_VOID(switchModifier_);
+        switchModifier_->SetUseContentModifier(useContentModifier_);
+        UpdateModifierColor(paintWrapper);
+        auto paintProperty = DynamicCast<SwitchPaintProperty>(paintWrapper->GetPaintProperty());
+        CHECK_NULL_VOID(paintProperty);
         auto pointRadius = SWITCH_ERROR_RADIUS;
         if (paintProperty->HasPointRadius()) {
             pointRadius = paintProperty->GetPointRadius().value().ConvertToPx();
@@ -121,7 +150,6 @@ public:
         auto offset = paintWrapper->GetContentOffset();
         switchModifier_->SetSize(size);
         switchModifier_->SetOffset(offset);
-        switchModifier_->SetEnabled(enabled_);
         switchModifier_->SetIsSelect(isSelect_);
         switchModifier_->SetDirection(direction_);
         switchModifier_->SetTouchHoverAnimationType(touchHoverType_);
@@ -154,11 +182,6 @@ public:
     void SetHoverPercent(float hoverPercent)
     {
         hoverPercent_ = hoverPercent;
-    }
-
-    void SetEnabled(bool enabled)
-    {
-        enabled_ = enabled;
     }
 
     void SetDragOffsetX(float dragOffsetX)
@@ -210,10 +233,10 @@ private:
     float dragOffsetX_ = 0.0f;
     float hoverPercent_ = 0.0f;
     const Dimension radiusGap_ = 2.0_vp;
-    bool enabled_ = true;
     bool isSelect_ = true;
     Color clickEffectColor_ = Color::WHITE;
     Color hoverColor_ = Color::WHITE;
+    Color focusColor_ = Color::WHITE;
     Dimension hoverRadius_ = 8.0_vp;
     bool showHoverEffect_ = true;
     bool useContentModifier_ = false;
@@ -228,6 +251,8 @@ private:
     RefPtr<SwitchModifier> switchModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPaintMethod);
+
+    int32_t GetThemeScopeId(PaintWrapper* paintWrapper) const;
 };
 } // namespace OHOS::Ace::NG
 

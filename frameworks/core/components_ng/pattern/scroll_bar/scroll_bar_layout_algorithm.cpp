@@ -15,18 +15,7 @@
 
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_layout_algorithm.h"
 
-#include <algorithm>
-
-#include "base/geometry/axis.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/log/ace_trace.h"
-#include "base/utils/utils.h"
-#include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components_ng/pattern/scroll_bar/scroll_bar_layout_property.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -42,9 +31,12 @@ void UpdateChildConstraint(Axis axis, const OptionalSizeF& selfIdealSize, Layout
     }
 }
 
-void UpdateIdealSize(Axis axis, const SizeF& childSize, const OptionalSizeF& parentSize, OptionalSizeF& idealSize)
+void UpdateIdealSize(Axis axis, const SizeF& childSize, const OptionalSizeF& parentSize, OptionalSizeF& idealSize,
+    LayoutWrapper* layoutWrapper)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(theme);
@@ -95,17 +87,19 @@ void ScrollBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // Measure child.
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     auto scrollBarPattern = AceType::DynamicCast<ScrollBarPattern>(layoutWrapper->GetHostNode()->GetPattern());
-    if (!childWrapper && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto size = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();
-        UpdateIdealSize(axis, size, parentSize, idealSize);
-        scrollBarPattern->SetChild(false);
-    } else {
-        CHECK_NULL_VOID(childWrapper);
-        childWrapper->Measure(childLayoutConstraint);
-        // Use child size when self idea size of scroll is not setted.
-        auto childSize = childWrapper->GetGeometryNode()->GetMarginFrameSize();
-        UpdateIdealSize(axis, childSize, parentSize, idealSize);
-        scrollBarPattern->SetChild(true);
+    if (scrollBarPattern) {
+        if (!childWrapper && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            auto size = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();
+            UpdateIdealSize(axis, size, parentSize, idealSize, layoutWrapper);
+            scrollBarPattern->SetChild(false);
+        } else {
+            CHECK_NULL_VOID(childWrapper);
+            childWrapper->Measure(childLayoutConstraint);
+            // Use child size when self idea size of scroll is not setted.
+            auto childSize = childWrapper->GetGeometryNode()->GetMarginFrameSize();
+            UpdateIdealSize(axis, childSize, parentSize, idealSize, layoutWrapper);
+            scrollBarPattern->SetChild(true);
+        }
     }
     AddPaddingToSize(padding, idealSize);
     auto selfSize = idealSize.ConvertToSizeT();
@@ -130,19 +124,17 @@ void ScrollBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto childSize = childGeometryNode->GetMarginFrameSize();
-    scrollableDistance_ = std::abs(GetMainAxisSize(size, axis) - GetMainAxisSize(childSize, axis));
+    scrollableDistance_ = GetMainAxisSize(size, axis) - GetMainAxisSize(childSize, axis);
     auto scrollBarPattern = AceType::DynamicCast<ScrollBarPattern>(layoutWrapper->GetHostNode()->GetPattern());
     auto controlDistance = scrollBarPattern->GetControlDistance();
     auto scrollableNodeOffset = scrollBarPattern->GetScrollableNodeOffset();
     scrollBarPattern->SetChildOffset(GetMainAxisSize(childSize, axis));
     float currentOffset = 0.0f;
-    if (!NearZero(controlDistance)) {
+    if (!NearZero(controlDistance) && GreatNotEqual(scrollableDistance_, 0.0f)) {
         currentOffset = scrollableNodeOffset * scrollableDistance_ / controlDistance;
+        currentOffset = std::clamp(currentOffset, 0.0f, scrollableDistance_);
     }
-    currentOffset = std::clamp(currentOffset, 0.0f, scrollableDistance_);
-    if (scrollableDistance_ > 0.0f) {
-        currentOffset_ = currentOffset;
-    }
+    currentOffset_ = currentOffset;
     scrollBarPattern->SetCurrentPosition(currentOffset_);
     auto scrollBarAlignment = Alignment::TOP_LEFT;
     if (layoutProperty->GetPositionProperty()) {

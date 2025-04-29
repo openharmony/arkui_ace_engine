@@ -32,6 +32,7 @@ public:
 private:
     static void SetIndicatorStyleSize(EcmaVM* vm, ArkUINodeHandle nativeNode, const Local<panda::ObjectRef>& obj);
     static void SetIndicatorStyleColor(EcmaVM* vm, ArkUINodeHandle nativeNode, const Local<panda::ObjectRef>& obj);
+    static bool ParseColorMetricsToColor(const EcmaVM* vm, const Local<JSValueRef>& jsValue, Color& result);
 };
 } // namespace OHOS::Ace::NG
 

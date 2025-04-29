@@ -13,24 +13,12 @@
  * limitations under the License.
  */
 
+#include "base/utils/string_expression.h"
 #include "core/components_ng/layout/layout_property.h"
 
-#include <optional>
-
-#include "base/geometry/ng/size_t.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
-#include "core/common/container.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/property/safe_area_insets.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/property/grid_property.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -116,7 +104,41 @@ TextDirection StringToTextDirection(const std::string& str)
     }
     return TextDirection::LTR;
 }
+
+void ConstrainContentByBorderAndPadding(std::optional<LayoutConstraintF>& contentConstraint,
+    std::optional<LayoutConstraintF>& layoutConstraint, std::unique_ptr<BorderWidthProperty>& borderWidth,
+    std::unique_ptr<PaddingProperty>& padding)
+{
+    if (padding) {
+        auto paddingF = ConvertToPaddingPropertyF(
+            *padding, contentConstraint->scaleProperty, contentConstraint->percentReference.Width());
+        contentConstraint->MinusPaddingToNonNegativeSize(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
+    }
+    CHECK_NULL_VOID(borderWidth);
+    auto borderWidthF = ConvertToBorderWidthPropertyF(
+        *borderWidth, contentConstraint->scaleProperty, layoutConstraint->percentReference.Width());
+    contentConstraint->MinusPaddingToNonNegativeSize(
+        borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
+}
+
+void TruncateSafeAreaPadding(const std::optional<float>& range, std::optional<float>& start, std::optional<float>& end)
+{
+    if (range && start && GreatNotEqual(start.value(), range.value())) {
+        start = range;
+    }
+    if (range && end) {
+        if (start) {
+            end = std::min(range.value() - start.value(), end.value());
+        } else {
+            end = std::min(range, end);
+        }
+    }
+}
 } // namespace
+
+LayoutProperty::LayoutProperty() = default;
+
+LayoutProperty::~LayoutProperty() = default;
 
 void LayoutProperty::Reset()
 {
@@ -150,6 +172,7 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
 
     PaddingToJsonValue(json, filter);
     MarginToJsonValue(json, filter);
+    SafeAreaPaddingToJsonValue(json, filter);
 
     json->PutExtAttr("visibility",
         VisibleTypeToString(propVisibility_.value_or(VisibleType::VISIBLE)).c_str(), filter);
@@ -205,6 +228,30 @@ void LayoutProperty::MarginToJsonValue(std::unique_ptr<JsonValue>& json,
     }
 }
 
+void LayoutProperty::SafeAreaPaddingToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    if (!safeAreaPadding_) {
+        json->PutExtAttr("safeAreaPadding", "0.00vp", filter);
+        return;
+    }
+    auto hasAllValue = safeAreaPadding_->top.has_value() && safeAreaPadding_->right.has_value() &&
+                       safeAreaPadding_->left.has_value() && safeAreaPadding_->bottom.has_value();
+    if (hasAllValue) {
+        json->PutExtAttr("safeAreaPadding", safeAreaPadding_->ToJsonString().c_str(), filter);
+        return;
+    }
+    auto safeAreaPaddingJsonValue = JsonUtil::Create(true);
+    safeAreaPaddingJsonValue->Put(
+        "top", safeAreaPadding_->top.has_value() ? safeAreaPadding_->top.value().ToString().c_str() : "0.00vp");
+    safeAreaPaddingJsonValue->Put(
+        "right", safeAreaPadding_->right.has_value() ? safeAreaPadding_->right.value().ToString().c_str() : "0.00vp");
+    safeAreaPaddingJsonValue->Put("bottom",
+        safeAreaPadding_->bottom.has_value() ? safeAreaPadding_->bottom.value().ToString().c_str() : "0.00vp");
+    safeAreaPaddingJsonValue->Put(
+        "left", safeAreaPadding_->left.has_value() ? safeAreaPadding_->left.value().ToString().c_str() : "0.00vp");
+    json->PutExtAttr("safeAreaPadding", safeAreaPaddingJsonValue->ToString().c_str(), filter);
+}
+
 void LayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
 {
     UpdateCalcLayoutProperty(MeasureProperty::FromJson(json));
@@ -218,6 +265,10 @@ void LayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
     if (margin != "0.0") {
         UpdateMargin(MarginProperty::FromJsonString(margin));
     }
+    auto safeAreaPadding = json->GetString("safeAreaPadding");
+    if (safeAreaPadding != "0.0") {
+        UpdateSafeAreaPadding(PaddingProperty::FromJsonString(safeAreaPadding));
+    }
     UpdateVisibility(StringToVisibleType(json->GetString("visibility")));
     UpdateLayoutDirection(StringToTextDirection(json->GetString("direction")));
 }
@@ -225,30 +276,30 @@ void LayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
 const std::string LayoutProperty::PixelRoundToJsonValue() const
 {
     auto res = JsonUtil::Create(true);
-    if (pixelRoundFlag_ & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_START)) {
+    if (pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_START)) {
         res->Put("start", "PixelRoundCalcPolicy.FORCE_CEIL");
-    } else if (pixelRoundFlag_ & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START)) {
+    } else if (pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START)) {
         res->Put("start", "PixelRoundCalcPolicy.FORCE_FLOOR");
     } else {
         res->Put("start", "PixelRoundCalcPolicy.NO_FORCE_ROUND");
     }
-    if (pixelRoundFlag_ & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_TOP)) {
+    if (pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_TOP)) {
         res->Put("top", "PixelRoundCalcPolicy.FORCE_CEIL");
-    } else if (pixelRoundFlag_ & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP)) {
+    } else if (pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP)) {
         res->Put("top", "PixelRoundCalcPolicy.FORCE_FLOOR");
     } else {
         res->Put("top", "PixelRoundCalcPolicy.NO_FORCE_ROUND");
     }
-    if (pixelRoundFlag_ & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END)) {
+    if (pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END)) {
         res->Put("end", "PixelRoundCalcPolicy.FORCE_CEIL");
-    } else if (pixelRoundFlag_ & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_END)) {
+    } else if (pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_END)) {
         res->Put("end", "PixelRoundCalcPolicy.FORCE_FLOOR");
     } else {
         res->Put("end", "PixelRoundCalcPolicy.NO_FORCE_ROUND");
     }
-    if (pixelRoundFlag_ & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM)) {
+    if (pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM)) {
         res->Put("bottom", "PixelRoundCalcPolicy.FORCE_CEIL");
-    } else if (pixelRoundFlag_ & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM)) {
+    } else if (pixelRoundFlag_ & static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM)) {
         res->Put("bottom", "PixelRoundCalcPolicy.FORCE_FLOOR");
     } else {
         res->Put("bottom", "PixelRoundCalcPolicy.NO_FORCE_ROUND");
@@ -268,8 +319,18 @@ void LayoutProperty::Clone(RefPtr<LayoutProperty> layoutProperty) const
     layoutProperty->UpdateLayoutProperty(this);
 }
 
+bool LayoutProperty::DecideMirror()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+}
+
 void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
 {
+    CHECK_NULL_VOID(layoutProperty);
     layoutConstraint_ = layoutProperty->layoutConstraint_;
     if (layoutProperty->gridProperty_) {
         gridProperty_ = std::make_unique<GridProperty>(*layoutProperty->gridProperty_);
@@ -326,9 +387,25 @@ void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
     propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
 }
 
+std::pair<std::vector<std::string>, std::vector<std::string>> LayoutProperty::CalcToString(const CalcSize& calcSize)
+{
+    std::vector<std::string> widthString;
+    std::vector<std::string> heightString;
+    if (calcSize.Width().has_value() && !calcSize.Width()->CalcValue().empty()) {
+        widthString = StringExpression::ConvertDal2Rpn(calcSize.Width()->CalcValue());
+    }
+    if (calcSize.Height().has_value() && !calcSize.Height()->CalcValue().empty()) {
+        heightString = StringExpression::ConvertDal2Rpn(calcSize.Height()->CalcValue());
+    }
+    return std::pair<std::vector<std::string>, std::vector<std::string>>(widthString, heightString);
+}
+
 void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint)
 {
     layoutConstraint_ = parentConstraint;
+    if (!needLazyLayout_) {
+        layoutConstraint_->viewPosRef.reset();
+    }
     if (margin_) {
         marginResult_.reset();
         auto margin = CreateMargin();
@@ -346,25 +423,45 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
         MinusPaddingToSize(margin, layoutConstraint_->parentIdealSize);
     }
     auto originMax = layoutConstraint_->maxSize;
-    if (calcLayoutConstraint_) {
-        if (calcLayoutConstraint_->maxSize.has_value()) {
-            layoutConstraint_->UpdateMaxSizeWithCheck(ConvertToSize(calcLayoutConstraint_->maxSize.value(),
-                parentConstraint.scaleProperty, parentConstraint.percentReference));
-        }
-        if (calcLayoutConstraint_->minSize.has_value()) {
-            layoutConstraint_->UpdateMinSizeWithCheck(ConvertToSize(calcLayoutConstraint_->minSize.value(),
-                parentConstraint.scaleProperty, parentConstraint.percentReference));
-        }
-        if (calcLayoutConstraint_->selfIdealSize.has_value()) {
-            layoutConstraint_->UpdateIllegalSelfIdealSizeWithCheck(
-                ConvertToOptionalSize(calcLayoutConstraint_->selfIdealSize.value(), parentConstraint.scaleProperty,
-                    parentConstraint.percentReference));
-        }
-    }
-
-    CheckSelfIdealSize(parentConstraint, originMax);
+    
+    CheckCalcLayoutConstraint(parentConstraint);
+    CheckSelfIdealSize(originMax);
     CheckBorderAndPadding();
     CheckAspectRatio();
+}
+
+void LayoutProperty::CheckCalcLayoutConstraint(const LayoutConstraintF& parentConstraint)
+{
+    if (calcLayoutConstraint_) {
+        if (calcLayoutConstraint_->maxSize.has_value()) {
+            if (!calcLayoutConstraint_->preMaxSize.has_value() ||
+                calcLayoutConstraint_->preMaxSize.value() != calcLayoutConstraint_->maxSize.value()) {
+                calcMaxSizeRpn_ = CalcToString(calcLayoutConstraint_->maxSize.value());
+                calcLayoutConstraint_->preMaxSize = calcLayoutConstraint_->maxSize;
+            }
+            layoutConstraint_->UpdateMaxSizeWithCheck(ConvertToSize(calcLayoutConstraint_->maxSize.value(),
+                parentConstraint.scaleProperty, parentConstraint.percentReference, calcMaxSizeRpn_));
+        }
+        if (calcLayoutConstraint_->minSize.has_value()) {
+            if (!calcLayoutConstraint_->preMinSize.has_value() ||
+                calcLayoutConstraint_->preMinSize.value() != calcLayoutConstraint_->minSize.value()) {
+                calcMinSizeRpn_ = CalcToString(calcLayoutConstraint_->minSize.value());
+                calcLayoutConstraint_->preMinSize = calcLayoutConstraint_->minSize;
+            }
+            layoutConstraint_->UpdateMinSizeWithCheck(ConvertToSize(calcLayoutConstraint_->minSize.value(),
+                parentConstraint.scaleProperty, parentConstraint.percentReference, calcMinSizeRpn_));
+        }
+        if (calcLayoutConstraint_->selfIdealSize.has_value()) {
+            if (!calcLayoutConstraint_->preSelfIdealSize.has_value() ||
+                calcLayoutConstraint_->preSelfIdealSize.value() != calcLayoutConstraint_->selfIdealSize.value()) {
+                calcSelfIdealSizeRpn_ = CalcToString(calcLayoutConstraint_->selfIdealSize.value());
+                calcLayoutConstraint_->preSelfIdealSize = calcLayoutConstraint_->selfIdealSize;
+            }
+            layoutConstraint_->UpdateIllegalSelfIdealSizeWithCheck(
+                ConvertToOptionalSize(calcLayoutConstraint_->selfIdealSize.value(), parentConstraint.scaleProperty,
+                    parentConstraint.percentReference, calcSelfIdealSizeRpn_));
+        }
+    }
 }
 
 void LayoutProperty::UpdateLayoutConstraintWithLayoutRect()
@@ -447,7 +544,7 @@ void LayoutProperty::CheckAspectRatio()
 void LayoutProperty::BuildGridProperty(const RefPtr<FrameNode>& host)
 {
     CHECK_NULL_VOID(gridProperty_);
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(false);
     while (parent) {
         if (parent->GetTag() == V2::GRIDCONTAINER_ETS_TAG) {
             auto containerLayout = parent->GetLayoutProperty();
@@ -455,7 +552,7 @@ void LayoutProperty::BuildGridProperty(const RefPtr<FrameNode>& host)
             UpdateUserDefinedIdealSize(CalcSize(CalcLength(gridProperty_->GetWidth()), std::nullopt));
             break;
         }
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(false);
     }
 }
 
@@ -480,7 +577,7 @@ bool LayoutProperty::UpdateGridOffset(const RefPtr<FrameNode>& host)
         return false;
     }
 
-    RefPtr<FrameNode> parent = host->GetAncestorNodeOfFrame();
+    RefPtr<FrameNode> parent = host->GetAncestorNodeOfFrame(false);
     if (!parent) {
         return false;
     }
@@ -498,7 +595,7 @@ bool LayoutProperty::UpdateGridOffset(const RefPtr<FrameNode>& host)
     return true;
 }
 
-void LayoutProperty::CheckSelfIdealSize(const LayoutConstraintF& parentConstraint, const SizeF& originMax)
+void LayoutProperty::CheckSelfIdealSize(const SizeF& originMax)
 {
     if (measureType_ == MeasureType::MATCH_PARENT) {
         layoutConstraint_->UpdateIllegalSelfIdealSizeWithCheck(layoutConstraint_->parentIdealSize);
@@ -510,11 +607,11 @@ void LayoutProperty::CheckSelfIdealSize(const LayoutConstraintF& parentConstrain
     SizeF maxSize(-1.0f, -1.0f);
     if (calcLayoutConstraint_->maxSize.has_value()) {
         maxSize = ConvertToSize(calcLayoutConstraint_->maxSize.value(), layoutConstraint_->scaleProperty,
-            layoutConstraint_->percentReference);
+            layoutConstraint_->percentReference, calcMaxSizeRpn_);
     }
     if (calcLayoutConstraint_->minSize.has_value()) {
         minSize = ConvertToSize(calcLayoutConstraint_->minSize.value(), layoutConstraint_->scaleProperty,
-            layoutConstraint_->percentReference);
+            layoutConstraint_->percentReference, calcMinSizeRpn_);
     }
     if (calcLayoutConstraint_->maxSize.has_value()) {
         layoutConstraint_->selfIdealSize.UpdateWidthWhenSmaller(maxSize);
@@ -569,9 +666,41 @@ void LayoutProperty::UpdateContentConstraint()
     if (contentConstraint_->parentIdealSize.Height()) {
         contentConstraint_->percentReference.SetHeight(contentConstraint_->parentIdealSize.Height().value());
     }
-    ConstraintContentBySafeAreaPadding();
     ConstraintContentByPadding();
     ConstraintContentByBorder();
+    ConstraintContentBySafeAreaPadding();
+    if (needLazyLayout_ && contentConstraint_->viewPosRef.has_value()) {
+        ConstraintViewPosRef(contentConstraint_->viewPosRef.value());
+    }
+}
+
+void LayoutProperty::ConstraintViewPosRef(ViewPosReference& posRef)
+{
+    auto axis = posRef.axis;
+    float adjStart = 0.0f;
+    float adjEnd = 0.0f;
+    if (padding_) {
+        auto paddingF = ConvertToPaddingPropertyF(
+            *padding_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
+        adjStart = axis == Axis::HORIZONTAL ? paddingF.left.value_or(0) : paddingF.top.value_or(0);
+        adjEnd = axis == Axis::HORIZONTAL ? paddingF.right.value_or(0) : paddingF.bottom.value_or(0);
+    }
+    if (borderWidth_) {
+        auto border = ConvertToBorderWidthPropertyF(
+            *borderWidth_, contentConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
+        adjStart += axis == Axis::HORIZONTAL ? border.leftDimen.value_or(0) : border.topDimen.value_or(0);
+        adjEnd += axis == Axis::HORIZONTAL ? border.rightDimen.value_or(0) : border.bottomDimen.value_or(0);
+    }
+    if (margin_) {
+        auto margin = CreateMargin();
+        adjStart += axis == Axis::HORIZONTAL ? margin.left.value_or(0) : margin.top.value_or(0);
+        adjEnd += axis == Axis::HORIZONTAL ? margin.right.value_or(0) : margin.bottom.value_or(0);
+    }
+    if (posRef.referenceEdge == ReferenceEdge::START) {
+        posRef.referencePos = posRef.referencePos + adjStart;
+    } else {
+        posRef.referencePos = posRef.referencePos - adjEnd;
+    }
 }
 
 void LayoutProperty::ConstraintContentByPadding()
@@ -589,6 +718,14 @@ void LayoutProperty::ConstraintContentByPadding()
 void LayoutProperty::ConstraintContentByBorder()
 {
     CHECK_NULL_VOID(borderWidth_);
+    auto host = GetHost();
+    if (host) {
+        auto pattern = host->GetPattern();
+        if (pattern && pattern->BorderUnoccupied()) {
+            return;
+        }
+    }
+
     auto borderWidthF = ConvertToBorderWidthPropertyF(
         *borderWidth_, contentConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -628,8 +765,19 @@ PaddingPropertyF LayoutProperty::GetOrCreateSafeAreaPadding(bool forceReCreate)
 PaddingPropertyF LayoutProperty::CreateSafeAreaPadding()
 {
     if (layoutConstraint_.has_value()) {
-        return ConvertToPaddingPropertyF(safeAreaPadding_, ScaleProperty::CreateScaleProperty(),
-            layoutConstraint_->percentReference.Width(), true, true);
+        std::optional<LayoutConstraintF> contentWithSafeArea = layoutConstraint_.value();
+        ConstrainContentByBorderAndPadding(contentWithSafeArea, layoutConstraint_, borderWidth_, padding_);
+        PaddingPropertyF truncatedSafeAreaPadding = ConvertToPaddingPropertyF(safeAreaPadding_,
+            ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width(), true, true);
+        TruncateSafeAreaPadding(
+            contentWithSafeArea->selfIdealSize.Height(), truncatedSafeAreaPadding.top, truncatedSafeAreaPadding.bottom);
+
+        bool isRtl = DecideMirror() && safeAreaPadding_ &&
+                     (safeAreaPadding_->start.has_value() || safeAreaPadding_->end.has_value());
+        TruncateSafeAreaPadding(contentWithSafeArea->selfIdealSize.Width(),
+            isRtl ? truncatedSafeAreaPadding.right : truncatedSafeAreaPadding.left,
+            isRtl ? truncatedSafeAreaPadding.left : truncatedSafeAreaPadding.right);
+        return truncatedSafeAreaPadding;
     }
     return ConvertToPaddingPropertyF(
         safeAreaPadding_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth(), true, true);
@@ -646,6 +794,13 @@ PaddingPropertyF LayoutProperty::CreatePaddingAndBorder(bool includeSafeAreaPadd
             padding_, ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width());
         auto borderWidth = ConvertToBorderWidthPropertyF(
             borderWidth_, ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width());
+        auto host = GetHost();
+        if (host) {
+            auto pattern = host->GetPattern();
+            if (pattern && pattern->BorderUnoccupied()) {
+                borderWidth = BorderWidthPropertyF();
+            }
+        }
         return CombinePaddingsAndBorder(safeAreaPadding, padding, borderWidth, {});
     }
     auto padding = ConvertToPaddingPropertyF(
@@ -746,7 +901,7 @@ RefPtr<FrameNode> LayoutProperty::GetHost() const
     return host_.Upgrade();
 }
 
-void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransition)
+void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransition, bool isUserSet)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -755,16 +910,27 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
 
     // update visibility value.
     propVisibility_ = visible;
-    host->NotifyVisibleChange(visible == VisibleType::VISIBLE);
+    auto pipeline = host->GetContext();
+    uint64_t vsyncTime = 0;
+    if (pipeline) {
+        vsyncTime = pipeline->GetVsyncTime();
+    }
+    host->AddVisibilityDumpInfo({ vsyncTime, { visible, isUserSet } });
+
+    host->NotifyVisibleChange(preVisibility.value_or(VisibleType::VISIBLE), visible);
     if (allowTransition && preVisibility) {
         if (preVisibility.value() == VisibleType::VISIBLE && visible != VisibleType::VISIBLE) {
-            host->GetRenderContext()->OnNodeDisappear(false);
+            auto renderContext = host->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->OnNodeDisappear(false);
         } else if (preVisibility.value() != VisibleType::VISIBLE && visible == VisibleType::VISIBLE) {
-            host->GetRenderContext()->OnNodeAppear(false);
+            auto renderContext = host->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->OnNodeAppear(false);
         }
     }
 
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parent);
     // if visible is not changed to/from VisibleType::Gone, only need to update render tree.
     if (preVisibility.value_or(VisibleType::VISIBLE) != VisibleType::GONE && visible != VisibleType::GONE) {
@@ -893,6 +1059,7 @@ void LayoutProperty::UpdateLayoutDirection(TextDirection value)
     }
     layoutDirection_ = value;
     propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    OnPropertyChangeMeasure();
 }
 
 TextDirection LayoutProperty::GetNonAutoLayoutDirection() const
@@ -906,6 +1073,13 @@ TextDirection LayoutProperty::GetNonAutoLayoutDirection() const
 void LayoutProperty::UpdateLayoutWeight(float value)
 {
     if (magicItemProperty_.UpdateLayoutWeight(value)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void LayoutProperty::UpdateChainWeight(const ChainWeightPair& value)
+{
+    if (flexItemProperty_->UpdateChainWeight(value)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     }
 }
@@ -962,7 +1136,6 @@ void LayoutProperty::UpdatePadding(const PaddingProperty& value)
 
 void LayoutProperty::UpdateSafeAreaPadding(const PaddingProperty& value)
 {
-    auto host = GetHost();
     if (!safeAreaPadding_) {
         safeAreaPadding_ = std::make_unique<PaddingProperty>();
     }
@@ -1039,6 +1212,7 @@ void LayoutProperty::ResetCalcMinSize()
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     }
     calcLayoutConstraint_->minSize.reset();
+    calcLayoutConstraint_->preMinSize.reset();
 }
 
 void LayoutProperty::ResetCalcMaxSize()
@@ -1050,6 +1224,7 @@ void LayoutProperty::ResetCalcMaxSize()
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
     }
     calcLayoutConstraint_->maxSize.reset();
+    calcLayoutConstraint_->preMaxSize.reset();
 }
 
 void LayoutProperty::ResetCalcMinSize(bool resetWidth)
@@ -1210,7 +1385,7 @@ void LayoutProperty::UpdateDisplayIndex(int32_t displayIndex)
         flexItemProperty_ = std::make_unique<FlexItemProperty>();
     }
     if (flexItemProperty_->UpdateDisplayIndex(displayIndex)) {
-        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT;
     }
 }
 
@@ -1229,14 +1404,15 @@ void LayoutProperty::UpdateLayoutConstraint(const RefPtr<LayoutProperty>& layout
         (layoutProperty->gridProperty_) ? std::make_unique<GridProperty>(*layoutProperty->gridProperty_) : nullptr;
 }
 
-void LayoutProperty::UpdateVisibility(const VisibleType& value, bool allowTransition)
+void LayoutProperty::UpdateVisibility(const VisibleType& value, bool allowTransition, bool isUserSet)
 {
+    isUserSetVisibility_ = isUserSet;
     if (propVisibility_.has_value()) {
         if (NearEqual(propVisibility_.value(), value)) {
             return;
         }
     }
-    OnVisibilityUpdate(value, allowTransition);
+    OnVisibilityUpdate(value, allowTransition, isUserSet);
 }
 
 void LayoutProperty::SetOverlayOffset(
@@ -1373,24 +1549,29 @@ void LayoutProperty::CheckPositionLocalizedEdges(TextDirection layoutDirection)
     CHECK_NULL_VOID(target);
     EdgesParam edges;
     auto positionEdges = target->GetPositionEdgesValue(EdgesParam {});
+    if (!positionEdges.start.has_value() && !positionEdges.end.has_value()) {
+        return;
+    }
     if (positionEdges.top.has_value()) {
         edges.SetTop(positionEdges.top.value_or(Dimension(0.0)));
     }
     if (positionEdges.bottom.has_value()) {
         edges.SetBottom(positionEdges.bottom.value_or(Dimension(0.0)));
     }
-    if (positionEdges.left.has_value()) {
+    if (positionEdges.start.has_value()) {
+        edges.start = positionEdges.start.value();
         if (layoutDirection == TextDirection::RTL) {
-            edges.SetRight(positionEdges.left.value_or(Dimension(0.0)));
+            edges.SetRight(positionEdges.start.value_or(Dimension(0.0)));
         } else {
-            edges.SetLeft(positionEdges.left.value_or(Dimension(0.0)));
+            edges.SetLeft(positionEdges.start.value_or(Dimension(0.0)));
         }
     }
-    if (positionEdges.right.has_value()) {
+    if (positionEdges.end.has_value()) {
+        edges.end = positionEdges.end.value();
         if (layoutDirection == TextDirection::RTL) {
-            edges.SetLeft(positionEdges.right.value_or(Dimension(0.0)));
+            edges.SetLeft(positionEdges.end.value_or(Dimension(0.0)));
         } else {
-            edges.SetRight(positionEdges.right.value_or(Dimension(0.0)));
+            edges.SetRight(positionEdges.end.value_or(Dimension(0.0)));
         }
     }
     target->UpdatePositionEdges(edges);
@@ -1405,9 +1586,16 @@ void LayoutProperty::CheckMarkAnchorPosition(TextDirection layoutDirection)
     CalcDimension x;
     CalcDimension y;
     auto anchor = target->GetAnchorValue({});
-    x = layoutDirection == TextDirection::RTL ? -anchor.GetX() : anchor.GetX();
-    y = anchor.GetY();
-    target->UpdateAnchor({ x, y });
+    if (!markAnchorStart_.has_value()) {
+        return;
+    }
+    OffsetT<Dimension> offset(Dimension(0.0), Dimension(0.0));
+    if (markAnchorStart_.has_value()) {
+        x = layoutDirection == TextDirection::RTL ? -markAnchorStart_.value() : markAnchorStart_.value();
+        offset.SetX(x);
+    }
+    offset.SetY(anchor.GetY());
+    target->UpdateAnchor(offset);
 }
 
 void LayoutProperty::CheckOffsetLocalizedEdges(TextDirection layoutDirection)
@@ -1418,24 +1606,29 @@ void LayoutProperty::CheckOffsetLocalizedEdges(TextDirection layoutDirection)
     CHECK_NULL_VOID(target);
     EdgesParam edges;
     auto offsetEdges = target->GetOffsetEdgesValue(EdgesParam {});
+    if (!offsetEdges.start.has_value() && !offsetEdges.end.has_value()) {
+        return;
+    }
     if (offsetEdges.top.has_value()) {
         edges.SetTop(offsetEdges.top.value_or(Dimension(0.0)));
     }
     if (offsetEdges.bottom.has_value()) {
         edges.SetBottom(offsetEdges.bottom.value_or(Dimension(0.0)));
     }
-    if (offsetEdges.left.has_value()) {
+    if (offsetEdges.start.has_value()) {
+        edges.start = offsetEdges.start.value();
         if (layoutDirection == TextDirection::RTL) {
-            edges.SetRight(offsetEdges.left.value_or(Dimension(0.0)));
+            edges.SetRight(offsetEdges.start.value_or(Dimension(0.0)));
         } else {
-            edges.SetLeft(offsetEdges.left.value_or(Dimension(0.0)));
+            edges.SetLeft(offsetEdges.start.value_or(Dimension(0.0)));
         }
     }
-    if (offsetEdges.right.has_value()) {
+    if (offsetEdges.end.has_value()) {
+        edges.end = offsetEdges.end.value();
         if (layoutDirection == TextDirection::RTL) {
-            edges.SetLeft(offsetEdges.right.value_or(Dimension(0.0)));
+            edges.SetLeft(offsetEdges.end.value_or(Dimension(0.0)));
         } else {
-            edges.SetRight(offsetEdges.right.value_or(Dimension(0.0)));
+            edges.SetRight(offsetEdges.end.value_or(Dimension(0.0)));
         }
     }
     target->UpdateOffsetEdges(edges);
@@ -1605,6 +1798,45 @@ void LayoutProperty::CheckLocalizedMargin(const RefPtr<LayoutProperty>& layoutPr
     LocalizedPaddingOrMarginChange(margin, margin_);
 }
 
+void LayoutProperty::CheckLocalizedSafeAreaPadding(const TextDirection& direction)
+{
+    const auto& safeAreaPaddingProperty = GetSafeAreaPaddingProperty();
+    CHECK_NULL_VOID(safeAreaPaddingProperty);
+    if (!safeAreaPaddingProperty->start.has_value() && !safeAreaPaddingProperty->end.has_value()) {
+        return;
+    }
+    PaddingProperty safeAreaPadding;
+    if (safeAreaPaddingProperty->start.has_value()) {
+        safeAreaPadding.start = safeAreaPaddingProperty->start;
+        if (direction == TextDirection::RTL) {
+            safeAreaPadding.right = safeAreaPaddingProperty->start;
+        } else {
+            safeAreaPadding.left = safeAreaPaddingProperty->start;
+        }
+    }
+    if (safeAreaPaddingProperty->end.has_value()) {
+        safeAreaPadding.end = safeAreaPaddingProperty->end;
+        if (direction == TextDirection::RTL) {
+            safeAreaPadding.left = safeAreaPaddingProperty->end;
+        } else {
+            safeAreaPadding.right = safeAreaPaddingProperty->end;
+        }
+    }
+    if (safeAreaPaddingProperty->top.has_value()) {
+        safeAreaPadding.top = safeAreaPaddingProperty->top;
+    }
+    if (safeAreaPaddingProperty->bottom.has_value()) {
+        safeAreaPadding.bottom = safeAreaPaddingProperty->bottom;
+    }
+    if (safeAreaPadding.left.has_value() && !safeAreaPadding.right.has_value()) {
+        safeAreaPadding.right = std::optional<CalcLength>(CalcLength(0));
+    }
+    if (!safeAreaPadding.left.has_value() && safeAreaPadding.right.has_value()) {
+        safeAreaPadding.left = std::optional<CalcLength>(CalcLength(0));
+    }
+    LocalizedPaddingOrMarginChange(safeAreaPadding, safeAreaPadding_);
+}
+
 void LayoutProperty::LocalizedPaddingOrMarginChange(
     const PaddingProperty& value, std::unique_ptr<PaddingProperty>& padding)
 {
@@ -1697,7 +1929,7 @@ void LayoutProperty::CheckLocalizedEdgeColors(const TextDirection& direction)
         borderColors.topColor = colorProperty.topColor;
     }
     if (colorProperty.bottomColor.has_value()) {
-        borderColors.topColor = colorProperty.bottomColor;
+        borderColors.bottomColor = colorProperty.bottomColor;
     }
     borderColors.multiValued = true;
     target->UpdateBorderColor(borderColors);
@@ -1713,14 +1945,24 @@ void LayoutProperty::CheckLocalizedBorderImageSlice(const TextDirection& directi
     CHECK_NULL_VOID(borderImage);
     auto borderImageProperty = borderImage.value();
     CHECK_NULL_VOID(borderImageProperty);
-    if (!borderImageProperty->borderImageStart_.has_value() && !borderImageProperty->borderImageEnd_.has_value()) {
-        return;
+    auto isGreaterThanFourteen =
+        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN);
+    if (isGreaterThanFourteen) {
+        if (!borderImageProperty->borderImageStart_->GetBorderImageSlice().IsValid() &&
+            !borderImageProperty->borderImageEnd_->GetBorderImageSlice().IsValid()) {
+            return;
+        }
+    } else {
+        if (!borderImageProperty->borderImageStart_.has_value() && !borderImageProperty->borderImageEnd_.has_value()) {
+            return;
+        }
     }
     Dimension leftSlice;
     Dimension rightSlice;
     Dimension startSlice;
     Dimension endSlice;
-    if (borderImageProperty->borderImageStart_.has_value()) {
+    if (isGreaterThanFourteen ? borderImageProperty->borderImageStart_->GetBorderImageSlice().IsValid()
+                            : borderImageProperty->borderImageStart_.has_value()) {
         startSlice = borderImageProperty->borderImageStart_->GetBorderImageSlice();
         borderImageProperty->SetEdgeSlice(BorderImageDirection::START, startSlice);
         if (direction == TextDirection::RTL) {
@@ -1729,7 +1971,8 @@ void LayoutProperty::CheckLocalizedBorderImageSlice(const TextDirection& directi
             leftSlice = borderImageProperty->borderImageStart_->GetBorderImageSlice();
         }
     }
-    if (borderImageProperty->borderImageEnd_.has_value()) {
+    if (isGreaterThanFourteen ? borderImageProperty->borderImageEnd_->GetBorderImageSlice().IsValid()
+                            : borderImageProperty->borderImageEnd_.has_value()) {
         endSlice = borderImageProperty->borderImageEnd_->GetBorderImageSlice();
         borderImageProperty->SetEdgeSlice(BorderImageDirection::END, endSlice);
         if (direction == TextDirection::RTL) {
@@ -1753,14 +1996,24 @@ void LayoutProperty::CheckLocalizedBorderImageWidth(const TextDirection& directi
     CHECK_NULL_VOID(borderImage);
     auto borderImageProperty = borderImage.value();
     CHECK_NULL_VOID(borderImageProperty);
-    if (!borderImageProperty->borderImageStart_.has_value() && !borderImageProperty->borderImageEnd_.has_value()) {
-        return;
+    auto isGreaterThanFourteen =
+        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN);
+    if (isGreaterThanFourteen) {
+        if (!borderImageProperty->borderImageStart_->GetBorderImageWidth().IsValid() &&
+            !borderImageProperty->borderImageEnd_->GetBorderImageWidth().IsValid()) {
+            return;
+        }
+    } else {
+        if (!borderImageProperty->borderImageStart_.has_value() && !borderImageProperty->borderImageEnd_.has_value()) {
+            return;
+        }
     }
     Dimension leftWidth;
     Dimension rightWidth;
     Dimension startWidth;
     Dimension endWidth;
-    if (borderImageProperty->borderImageStart_.has_value()) {
+    if (isGreaterThanFourteen ? borderImageProperty->borderImageStart_->GetBorderImageWidth().IsValid()
+                              : borderImageProperty->borderImageStart_.has_value()) {
         startWidth = borderImageProperty->borderImageStart_->GetBorderImageWidth();
         borderImageProperty->SetEdgeWidth(BorderImageDirection::START, startWidth);
         if (direction == TextDirection::RTL) {
@@ -1769,7 +2022,8 @@ void LayoutProperty::CheckLocalizedBorderImageWidth(const TextDirection& directi
             leftWidth = borderImageProperty->borderImageStart_->GetBorderImageWidth();
         }
     }
-    if (borderImageProperty->borderImageEnd_.has_value()) {
+    if (isGreaterThanFourteen ? borderImageProperty->borderImageEnd_->GetBorderImageWidth().IsValid()
+                              : borderImageProperty->borderImageEnd_.has_value()) {
         endWidth = borderImageProperty->borderImageEnd_->GetBorderImageWidth();
         borderImageProperty->SetEdgeWidth(BorderImageDirection::END, endWidth);
         if (direction == TextDirection::RTL) {
@@ -1793,14 +2047,25 @@ void LayoutProperty::CheckLocalizedBorderImageOutset(const TextDirection& direct
     CHECK_NULL_VOID(borderImage);
     auto borderImageProperty = borderImage.value();
     CHECK_NULL_VOID(borderImageProperty);
-    if (!borderImageProperty->borderImageStart_.has_value() && !borderImageProperty->borderImageEnd_.has_value()) {
-        return;
+    auto isGreaterThanFourteen =
+        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN);
+    if (isGreaterThanFourteen) {
+        if (!borderImageProperty->borderImageStart_->GetBorderImageOutset().IsValid() &&
+            !borderImageProperty->borderImageEnd_->GetBorderImageOutset().IsValid()) {
+            return;
+        }
+    } else {
+        if (!borderImageProperty->borderImageStart_.has_value() && !borderImageProperty->borderImageEnd_.has_value()) {
+            return;
+        }
     }
+
     Dimension leftOutset;
     Dimension rightOutset;
     Dimension startOutset;
     Dimension endOutset;
-    if (borderImageProperty->borderImageStart_.has_value()) {
+    if (isGreaterThanFourteen ? borderImageProperty->borderImageStart_->GetBorderImageOutset().IsValid()
+                              : borderImageProperty->borderImageStart_.has_value()) {
         startOutset = borderImageProperty->borderImageStart_->GetBorderImageOutset();
         borderImageProperty->SetEdgeOutset(BorderImageDirection::START, startOutset);
         if (direction == TextDirection::RTL) {
@@ -1809,7 +2074,8 @@ void LayoutProperty::CheckLocalizedBorderImageOutset(const TextDirection& direct
             leftOutset = borderImageProperty->borderImageStart_->GetBorderImageOutset();
         }
     }
-    if (borderImageProperty->borderImageEnd_.has_value()) {
+    if (isGreaterThanFourteen ? borderImageProperty->borderImageEnd_->GetBorderImageOutset().IsValid()
+                              : borderImageProperty->borderImageEnd_.has_value()) {
         endOutset = borderImageProperty->borderImageEnd_->GetBorderImageOutset();
         borderImageProperty->SetEdgeOutset(BorderImageDirection::END, endOutset);
         if (direction == TextDirection::RTL) {
@@ -1821,5 +2087,27 @@ void LayoutProperty::CheckLocalizedBorderImageOutset(const TextDirection& direct
     borderImageProperty->SetEdgeOutset(BorderImageDirection::LEFT, leftOutset);
     borderImageProperty->SetEdgeOutset(BorderImageDirection::RIGHT, rightOutset);
     target->UpdateBorderImage(borderImageProperty);
+}
+
+std::string LayoutProperty::LayoutInfoToString()
+{
+    std::stringstream ss;
+    if (HasAspectRatio()) {
+        ss << "aspectRatio: " << magicItemProperty_.GetAspectRatioValue() << ",";
+    }
+    if (magicItemProperty_.GetLayoutWeight().has_value()) {
+        ss << "layoutWeight: " << magicItemProperty_.GetLayoutWeight().value() << ",";
+    }
+    if (GetPositionProperty() && GetPositionProperty()->GetAlignment().has_value()) {
+        ss << GetPositionProperty()->GetAlignment().value().ToString() << ",";
+    }
+    if (GetLayoutDirection() != TextDirection::AUTO) {
+        ss << "layoutDirection: " << static_cast<int32_t>(GetLayoutDirection());
+    }
+    return ss.str();
+}
+RefPtr<GeometryTransition> LayoutProperty::GetGeometryTransition() const
+{
+    return geometryTransition_.Upgrade();
 }
 } // namespace OHOS::Ace::NG

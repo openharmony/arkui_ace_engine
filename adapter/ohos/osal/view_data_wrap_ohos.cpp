@@ -16,8 +16,6 @@
 #include <dlfcn.h>
 #include "view_data_wrap_ohos.h"
 
-#include "base/utils/utils.h"
-
 namespace OHOS::Ace {
 #ifdef APP_USE_ARM
 constexpr char LIB_HINT2_TYPE_Z_SO_NAME[] = "/system/lib/module/core/atomicservicecomponent/libhint2type.z.so";
@@ -57,7 +55,7 @@ AbilityBase::AutoFillType ViewDataWrap::ViewDataToType(const AbilityBase::ViewDa
     for (auto it = viewData.nodes.begin(); it != viewData.nodes.end(); ++it) {
         if (!it->value.empty()) {
             if (AbilityBase::AutoFillType::FULL_STREET_ADDRESS <= it->autoFillType &&
-                it->autoFillType <= AbilityBase::AutoFillType::FORMAT_ADDRESS) {
+                it->autoFillType <= AbilityBase::AutoFillType::LICENSE_CHASSIS_NUMBER) {
                 return it->autoFillType;
             }
         }
@@ -139,7 +137,19 @@ AbilityBase::AutoFillType ViewDataWrap::HintToAutoFillType(const int& intType)
         AbilityBase::AutoFillType::FULL_STREET_ADDRESS,
         AbilityBase::AutoFillType::DETAIL_INFO_WITHOUT_STREET,
         AbilityBase::AutoFillType::HOUSE_NUMBER,
-        AbilityBase::AutoFillType::BANK_CARD_NUMBER };
+        AbilityBase::AutoFillType::BANK_CARD_NUMBER,
+        AbilityBase::AutoFillType::PASSPORT_NUMBER,
+        AbilityBase::AutoFillType::VALIDITY,
+        AbilityBase::AutoFillType::ISSUE_AT,
+        AbilityBase::AutoFillType::ORGANIZATION,
+        AbilityBase::AutoFillType::TAX_ID,
+        AbilityBase::AutoFillType::ADDRESS_CITY_AND_STATE,
+        AbilityBase::AutoFillType::FLIGHT_NUMBER,
+        AbilityBase::AutoFillType::LICENSE_NUMBER,
+        AbilityBase::AutoFillType::LICENSE_FILE_NUMBER,
+        AbilityBase::AutoFillType::LICENSE_PLATE,
+        AbilityBase::AutoFillType::ENGINE_NUMBER,
+        AbilityBase::AutoFillType::LICENSE_CHASSIS_NUMBER };
 
     if (intType < 0 || (size_t)intType >= hintVector.size()) {
         return hintVector[0];

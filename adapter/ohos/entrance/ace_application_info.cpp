@@ -15,21 +15,8 @@
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 
-#include <dirent.h>
-#include <iostream>
-#include <sys/stat.h>
-
-#include "contrib/minizip/unzip.h"
-#include "ohos/init_data.h"
-#include "unicode/locid.h"
-
 #include "base/i18n/localization.h"
-#include "base/log/ace_trace.h"
-#include "base/log/log.h"
 #include "base/resource/ace_res_config.h"
-#include "base/resource/ace_res_data_struct.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_engine.h"
 
 namespace OHOS::Ace::Platform {
 AceApplicationInfoImpl::AceApplicationInfoImpl() {}
@@ -73,6 +60,7 @@ void AceApplicationInfoImpl::ChangeLocale(const std::string& language, const std
 void AceApplicationInfoImpl::SetLocale(const std::string& language, const std::string& countryOrRegion,
     const std::string& script, const std::string& keywordsAndValues)
 {
+    std::unique_lock<std::shared_mutex> lock(localeTagMutex_);
     language_ = language;
     countryOrRegion_ = countryOrRegion;
     script_ = script;

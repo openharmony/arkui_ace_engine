@@ -34,10 +34,6 @@ public:
     virtual void SetWidth(const Dimension& width) = 0;
     virtual void SetHeight(const Dimension& height) = 0;
     virtual void SetData(const std::string& data) = 0;
-
-private:
-    static std::unique_ptr<PluginModel> instance_;
-    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PLUGIN_PLUGIN_MODEL_H

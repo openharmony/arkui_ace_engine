@@ -18,6 +18,7 @@
 #include "swiper_pattern.h"
 
 #include "core/components/swiper/swiper_controller.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_layout_property.h"
 namespace OHOS::Ace::NG {
 /* implements helper functions for SwiperPattern */
 class SwiperHelper {
@@ -32,6 +33,18 @@ public:
 
     static std::string GetDotIndicatorStyle(const std::shared_ptr<SwiperParameters>& params);
     static std::string GetDigitIndicatorStyle(const std::shared_ptr<SwiperDigitalParameters>& params);
+
+    static float CalculateFriction(float gamma);
+
+private:
+    static void DumpInfoAddPositionDesc(SwiperPattern& swiper);
+    static void DumpInfoAddGestureDesc(SwiperPattern& swiper);
+    static void DumpInfoAddAnimationDesc(SwiperPattern& swiper);
+    static void SetChangeIndexWithModeImpl(const RefPtr<SwiperController>& controller,
+        const WeakPtr<SwiperPattern>& weak);
+    static void SaveDigitIndicatorIgnoreSize(const SwiperPattern& swiper,
+        const std::shared_ptr<SwiperDigitalParameters>& digitalParams,
+        RefPtr<SwiperIndicatorLayoutProperty>& indicatorProps, bool isSidebarMiddle, bool isShowArrow);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_SWIPER_HELPER_H

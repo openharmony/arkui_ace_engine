@@ -17,15 +17,10 @@
 #include "water_flow_test_ng.h"
 
 #include "core/components/common/layout/constants.h"
-#include "core/gestures/gesture_event.h"
+#include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
-class WaterFlowScrollerTestNg : public WaterFlowTestNg {
-public:
-};
+class WaterFlowScrollerTestNg : public WaterFlowTestNg {};
 
 /**
  * @tc.name: UpdateCurrentOffset001
@@ -44,36 +39,36 @@ HWTEST_F(WaterFlowScrollerTestNg, UpdateCurrentOffset001, TestSize.Level1)
      * @tc.expected: can not scroll.
      */
     UpdateCurrentOffset(ITEM_MAIN_SIZE);
-    EXPECT_TRUE(IsEqualTotalOffset(0));
+    EXPECT_TRUE(Position(0));
 
     /**
      * @tc.steps: step2. Scroll down
      * @tc.expected: can scroll.
      */
     UpdateCurrentOffset(-ITEM_MAIN_SIZE);
-    EXPECT_TRUE(IsEqualTotalOffset(ITEM_MAIN_SIZE));
+    EXPECT_TRUE(Position(-ITEM_MAIN_SIZE));
 
     /**
      * @tc.steps: step3. Continue scroll down
      * @tc.expected: can scroll and IsAtEnd.
      */
     UpdateCurrentOffset(-WATER_FLOW_HEIGHT);
-    EXPECT_TRUE(IsEqualTotalOffset(WATER_FLOW_HEIGHT));
-    EXPECT_TRUE(pattern_->positionController_->IsAtEnd());
+    EXPECT_TRUE(Position(-WATER_FLOW_HEIGHT));
+    EXPECT_TRUE(IsAtEnd());
 
     /**
      * @tc.steps: step4. Continue scroll down
      * @tc.expected: can not scroll.
      */
     UpdateCurrentOffset(-ITEM_MAIN_SIZE);
-    EXPECT_TRUE(IsEqualTotalOffset(WATER_FLOW_HEIGHT));
+    EXPECT_TRUE(Position(-WATER_FLOW_HEIGHT));
 
     /**
      * @tc.steps: step5. When offsetEnd_ and scroll up
      * @tc.expected: can scroll.
      */
     UpdateCurrentOffset(ITEM_MAIN_SIZE);
-    EXPECT_TRUE(IsEqualTotalOffset(WATER_FLOW_HEIGHT - ITEM_MAIN_SIZE));
+    EXPECT_TRUE(Position(-WATER_FLOW_HEIGHT + ITEM_MAIN_SIZE));
 }
 
 /**
@@ -149,11 +144,13 @@ HWTEST_F(WaterFlowScrollerTestNg, PositionController001, TestSize.Level1)
      */
     auto controller = pattern_->positionController_;
     controller->ScrollPage(false, false);
-    EXPECT_TRUE(IsEqualTotalOffset(WATER_FLOW_HEIGHT));
+    FlushUITasks();
+    EXPECT_TRUE(Position(-WATER_FLOW_HEIGHT));
     EXPECT_EQ(controller->GetCurrentOffset().GetY(), WATER_FLOW_HEIGHT);
     EXPECT_TRUE(controller->IsAtEnd());
     controller->ScrollPage(true, false);
-    EXPECT_TRUE(IsEqualTotalOffset(0));
+    FlushUITasks();
+    EXPECT_TRUE(Position(0));
     EXPECT_EQ(controller->GetCurrentOffset().GetY(), 0);
     EXPECT_FALSE(controller->IsAtEnd());
 
@@ -182,8 +179,8 @@ HWTEST_F(WaterFlowScrollerTestNg, PositionController002, TestSize.Level1)
     /**
      * @tc.steps: step1. Test ScrollBy
      */
-    controller->ScrollBy(0, ITEM_MAIN_SIZE, true);
-    EXPECT_TRUE(IsEqualTotalOffset(ITEM_MAIN_SIZE));
+    ScrollBy(0, ITEM_MAIN_SIZE);
+    EXPECT_TRUE(Position(-ITEM_MAIN_SIZE));
     EXPECT_EQ(controller->GetCurrentOffset().GetY(), ITEM_MAIN_SIZE);
 }
 
@@ -198,17 +195,16 @@ HWTEST_F(WaterFlowScrollerTestNg, PositionController003, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr");
     CreateWaterFlowItems(TOTAL_LINE_NUMBER * 2);
     CreateDone();
-    auto controller = pattern_->positionController_;
 
     /**
      * @tc.steps: step1. Test ScrollToEdge
      */
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
-    EXPECT_TRUE(IsEqualTotalOffset(WATER_FLOW_HEIGHT));
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
-    EXPECT_TRUE(IsEqualTotalOffset(0));
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_NONE, true);
-    EXPECT_TRUE(IsEqualTotalOffset(0));
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    EXPECT_TRUE(Position(-WATER_FLOW_HEIGHT));
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
+    EXPECT_TRUE(Position(0));
+    ScrollToEdge(ScrollEdgeType::SCROLL_NONE, true);
+    EXPECT_TRUE(Position(0));
 }
 
 namespace {
@@ -239,7 +235,7 @@ HWTEST_F(WaterFlowScrollerTestNg, PositionController004, TestSize.Level1)
     for (int i = 0; i < TIME_CHANGED_COUNTS; i++) {
         pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
         offsetTime = offsetTime + OFFSET_TIME;
-        FlushLayoutTask(frameNode_);
+        FlushUITasks();
     }
     EXPECT_TRUE(pattern_->IsAtBottom());
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, SCROLL_FIXED_VELOCITY);
@@ -249,7 +245,7 @@ HWTEST_F(WaterFlowScrollerTestNg, PositionController004, TestSize.Level1)
     for (int i = 0; i < TIME_CHANGED_COUNTS; i++) {
         pattern_->fixedVelocityMotion_->OnTimestampChanged(offsetTime, 0.0f, false);
         offsetTime = offsetTime + OFFSET_TIME;
-        FlushLayoutTask(frameNode_);
+        FlushUITasks();
     }
     EXPECT_TRUE(pattern_->IsAtTop());
 }
@@ -293,7 +289,7 @@ HWTEST_F(WaterFlowScrollerTestNg, OnScroll001, TestSize.Level1)
      * @tc.expected: Trigger onScroll with IDLE state
      */
     pattern_->OnAnimateStop();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(scrollOffset.Value(), 0);
     EXPECT_EQ(scrollState, ScrollState::IDLE);
 }
@@ -397,7 +393,7 @@ HWTEST_F(WaterFlowScrollerTestNg, OnScrollStart001, TestSize.Level1)
      * @tc.expected: trigger onScrollStop
      */
     pattern_->OnScrollEndCallback();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isScrollStopCalled);
 }
 
@@ -420,14 +416,16 @@ HWTEST_F(WaterFlowScrollerTestNg, WaterFlowPositionController_ScrollPage001, Tes
      */
     pattern_->SetAxis(Axis::VERTICAL);
     controller->ScrollPage(false, false);
-    EXPECT_TRUE(IsEqualTotalOffset(WATER_FLOW_HEIGHT));
+    FlushUITasks();
+    EXPECT_TRUE(Position(-WATER_FLOW_HEIGHT));
     EXPECT_EQ(controller->GetCurrentOffset().GetY(), WATER_FLOW_HEIGHT);
     EXPECT_EQ(accessibilityProperty_->GetScrollOffSet(), pattern_->GetTotalOffset());
     EXPECT_TRUE(controller->IsAtEnd());
 
     pattern_->SetAxis(Axis::NONE);
     controller->ScrollPage(false, false);
-    EXPECT_TRUE(IsEqualTotalOffset(WATER_FLOW_HEIGHT));
+    FlushUITasks();
+    EXPECT_TRUE(Position(-WATER_FLOW_HEIGHT));
     EXPECT_EQ(controller->GetCurrentOffset().GetY(), 0);
     EXPECT_TRUE(controller->IsAtEnd());
 }
@@ -480,36 +478,81 @@ HWTEST_F(WaterFlowScrollerTestNg, SpringAnimation001, TestSize.Level1)
 
     // scroll up
     scrollable->HandleDragUpdate(gesture);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 9.77164745);
 
     MockAnimationManager::GetInstance().SetTicks(2);
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(gesture);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 19.325195);
 
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 9.6625977);
 
     // interrupt animation
     scrollable->HandleTouchDown();
     scrollable->HandleDragStart(gesture);
     scrollable->HandleDragUpdate(gesture);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 19.218552);
 
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(gesture);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 28.565876);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 14.282938);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0.0f);
+}
+
+/**
+ * @tc.name: Refresh001
+ * @tc.desc: Test WaterFlow nested in refresh.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, Refresh001, TestSize.Level1)
+{
+    RefreshModelNG refreshModel;
+    refreshModel.Create();
+    auto refreshNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+
+    auto model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateWaterFlowItems(3);
+    CreateDone();
+
+    GestureEvent info;
+    info.SetMainVelocity(1200.f);
+    info.SetMainDelta(100.f);
+    auto scrollable = pattern_->GetScrollableEvent()->scrollable_;
+    ASSERT_TRUE(scrollable);
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+    EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 100);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+    EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "179.37px"); // friction
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+
+    EXPECT_FALSE(pattern_->OutBoundaryCallback());
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "245.45px");
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
 }
 
 /**
@@ -524,50 +567,42 @@ HWTEST_F(WaterFlowScrollerTestNg, ScrollToIndex002, TestSize.Level1)
     CreateWaterFlowItems(30);
     CreateDone();
 
-    pattern_->ScrollToIndex(3, false, ScrollAlign::AUTO);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(3, false, ScrollAlign::AUTO);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
     EXPECT_EQ(pattern_->layoutInfo_->storedOffset_, 0);
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), 0);
 
-    pattern_->ScrollToIndex(15, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(15, false, ScrollAlign::START);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 15);
     EXPECT_EQ(pattern_->layoutInfo_->storedOffset_, 0);
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), -1100);
 
-    pattern_->ScrollToIndex(LAST_ITEM);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(LAST_ITEM, false, ScrollAlign::START);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 19);
     EXPECT_EQ(pattern_->layoutInfo_->storedOffset_, -100);
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), -1500);
 
-    pattern_->ScrollToIndex(0, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(0, false, ScrollAlign::START);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
     EXPECT_EQ(pattern_->layoutInfo_->storedOffset_, 0);
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), 0);
 
-    pattern_->ScrollToIndex(15, false, ScrollAlign::AUTO);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(15, false, ScrollAlign::AUTO);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 7);
     EXPECT_EQ(pattern_->layoutInfo_->storedOffset_, 0);
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), -500);
 
-    pattern_->ScrollToIndex(7, false, ScrollAlign::CENTER);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(7, false, ScrollAlign::CENTER);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 3);
     EXPECT_EQ(pattern_->layoutInfo_->storedOffset_, 0);
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), -200);
 
-    pattern_->ScrollToIndex(14, false, ScrollAlign::END);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(14, false, ScrollAlign::END);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 3);
     EXPECT_EQ(pattern_->layoutInfo_->storedOffset_, -100);
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), -300);
 
-    pattern_->ScrollToIndex(2, false, ScrollAlign::AUTO);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(2, false, ScrollAlign::AUTO);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 1);
     EXPECT_EQ(pattern_->layoutInfo_->storedOffset_, -100);
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), -100);
@@ -587,41 +622,52 @@ HWTEST_F(WaterFlowScrollerTestNg, ScrollToIndex003, TestSize.Level1)
 
     pattern_->ScrollToIndex(3, true, ScrollAlign::START);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, 200.f);
 
     pattern_->ScrollToIndex(3, true, ScrollAlign::END);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, -400.f);
 
     pattern_->ScrollToIndex(15, true, ScrollAlign::AUTO);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, 500.f);
 
     pattern_->ScrollToIndex(15, true, ScrollAlign::CENTER);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, 800.f);
 
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 11);
-    pattern_->ScrollToIndex(3, true, ScrollAlign::AUTO);
-    MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(3, true, ScrollAlign::AUTO);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 4)->IsActive());
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, 200.f);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 4)->IsActive());
 
-    pattern_->ScrollPage(false);
-    FlushLayoutTask(frameNode_);
+    ScrollPage(false, false);
     EXPECT_LT(pattern_->layoutInfo_->Offset(), 0.f);
 
-    pattern_->ScrollToIndex(3, true, ScrollAlign::AUTO);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(3, true, ScrollAlign::AUTO);
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, 200.f);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 3);
 
-    pattern_->ScrollToIndex(29, true);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(29, true, ScrollAlign::START);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 29)->IsActive());
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, 2100.f);
+    EXPECT_FALSE(pattern_->AnimateStoped());
+    MockAnimationManager::GetInstance().Tick();
+    // because animation finishes in 1 tick, AnimateStoped status becomes true again
+    pattern_->isAnimationStop_ = false; // manually set to prevent jumping
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 29);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 29)->IsActive());
+    EXPECT_EQ(GetChildY(frameNode_, 29), 600.0f);
 }
 
 /**
@@ -658,8 +704,7 @@ HWTEST_F(WaterFlowScrollerTestNg, Focus001, TestSize.Level1)
     cmp = GetChildFocusHub(frameNode_, 11);
     EXPECT_EQ(AceType::RawPtr(next), AceType::RawPtr(cmp));
 
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     next = pattern_->GetNextFocusNode(FocusStep::LEFT, GetChildFocusHub(frameNode_, 29)).Upgrade();
     cmp = GetChildFocusHub(frameNode_, 28);
     EXPECT_EQ(AceType::RawPtr(next), AceType::RawPtr(cmp));
@@ -684,7 +729,7 @@ HWTEST_F(WaterFlowScrollerTestNg, Focus002, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr");
     CreateFocusableWaterFlowItems(30);
     CreateDone();
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     auto focusHub = eventHub->GetOrCreateFocusHub();
     focusHub->SetFocusDependence(FocusDependence::AUTO);
 
@@ -693,7 +738,7 @@ HWTEST_F(WaterFlowScrollerTestNg, Focus002, TestSize.Level1)
      * @tc.expected: scroll to bottom
      */
     focusHub->FocusToHeadOrTailChild(false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetBeginIndex(), 19);
     EXPECT_EQ(pattern_->GetEndIndex(), 29);
     EXPECT_EQ(pattern_->layoutInfo_->itemStart_, false);
@@ -706,7 +751,7 @@ HWTEST_F(WaterFlowScrollerTestNg, Focus002, TestSize.Level1)
      * @tc.expected: scroll to top
      */
     focusHub->FocusToHeadOrTailChild(true);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetBeginIndex(), 0);
     EXPECT_EQ(pattern_->GetEndIndex(), 10);
     EXPECT_EQ(pattern_->layoutInfo_->itemStart_, true);
@@ -720,7 +765,7 @@ HWTEST_F(WaterFlowScrollerTestNg, Focus002, TestSize.Level1)
      */
     auto scrollIndexAbility = pattern_->GetScrollIndexAbility();
     EXPECT_TRUE(scrollIndexAbility(29));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetBeginIndex(), 19);
     EXPECT_EQ(pattern_->GetEndIndex(), 29);
     EXPECT_EQ(pattern_->layoutInfo_->itemStart_, false);
@@ -733,12 +778,375 @@ HWTEST_F(WaterFlowScrollerTestNg, Focus002, TestSize.Level1)
      * @tc.expected: scroll to top
      */
     EXPECT_TRUE(scrollIndexAbility(0));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetBeginIndex(), 0);
     EXPECT_EQ(pattern_->GetEndIndex(), 10);
     EXPECT_EQ(pattern_->layoutInfo_->itemStart_, true);
     EXPECT_EQ(pattern_->layoutInfo_->itemEnd_, false);
     EXPECT_EQ(pattern_->layoutInfo_->offsetEnd_, false);
     EXPECT_EQ(pattern_->layoutInfo_->storedOffset_, 0);
+}
+
+/**
+ * @tc.name: ReachStart001
+ * @tc.desc: Test ReachStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, ReachStart001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::NONE, false);
+    bool reached = false;
+    model.SetOnReachStart([&reached]() { reached = true; });
+    CreateWaterFlowItems(30);
+    CreateDone();
+
+    ScrollToIndex(29, false, ScrollAlign::START);
+
+    reached = false;
+    UpdateCurrentOffset(Infinity<float>());
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_TRUE(reached);
+    FlushUITasks();
+
+    reached = false;
+    UpdateCurrentOffset(-5.0f);
+    EXPECT_FALSE(reached);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -5.0f);
+    reached = false;
+    UpdateCurrentOffset(6.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_TRUE(reached);
+}
+
+/**
+ * @tc.name: ScrollPage002
+ * @tc.desc: Test ScrollPage
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, ScrollPage002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr");
+    model.SetEdgeEffect(EdgeEffect::NONE, false);
+    CreateWaterFlowItems(30);
+    CreateDone();
+
+    MockAnimationManager::GetInstance().SetTicks(1);
+    pattern_->ScrollPage(false, true);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    const auto& info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->Offset(), -800.0f);
+
+    ScrollToIndex(29, false, ScrollAlign::START);
+    EXPECT_EQ(info->startIndex_, 25);
+    EXPECT_EQ(GetChildY(frameNode_, 25), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 29), 600.0f);
+
+    pattern_->ScrollPage(true, true, AccessibilityScrollType::SCROLL_HALF);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 25), 400.0f);
+
+    ScrollableController controller;
+    controller.SetScrollPattern(pattern_);
+    controller.ScrollPage(true, true);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(info->startIndex_, 17);
+    EXPECT_EQ(info->endIndex_, 21);
+}
+
+/**
+ * @tc.name: ReachStart002
+ * @tc.desc: Test WaterFlow reach start in spring animation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, ReachStart002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Calling the ScrollToIndex interface to set values to 20 and true.
+     * @tc.expected: pattern_->targetIndex_ is 20
+     */
+    MockAnimationManager::GetInstance().SetTicks(1);
+    auto model = CreateWaterFlow();
+    CreateWaterFlowItems(50);
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    int32_t reached = 0;
+    model.SetOnReachStart([&reached]() { ++reached; });
+    CreateDone();
+    EXPECT_EQ(reached, 1);
+    UpdateCurrentOffset(-100.0f);
+
+    auto scrollable = pattern_->GetScrollableEvent()->scrollable_;
+    ASSERT_TRUE(scrollable);
+    GestureEvent info;
+    info.SetMainVelocity(1000.f);
+    info.SetMainDelta(10.f);
+    scrollable->isDragging_ = true;
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+    scrollable->HandleDragEnd(info);
+    scrollable->isDragging_ = false;
+    FlushUITasks();
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::FRICTION);
+    // friction animation
+    MockAnimationManager::GetInstance().TickByVelocity(200.0f);
+    FlushUITasks();
+    EXPECT_EQ(reached, 2);
+
+    // transitioned to spring animation
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::SPRING);
+    MockAnimationManager::GetInstance().TickByVelocity(50.0f);
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(reached, 3);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0.0f);
+}
+
+/**
+ * @tc.name: ReachEnd001
+ * @tc.desc: Test WaterFlow reach emd in spring animation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, ReachEnd001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Calling the ScrollToIndex interface to set values to 20 and true.
+     * @tc.expected: pattern_->targetIndex_ is 20
+     */
+    MockAnimationManager::GetInstance().SetTicks(1);
+    auto model = CreateWaterFlow();
+    CreateWaterFlowItems(20);
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    int32_t reached = 0;
+    model.SetOnReachEnd([&reached]() { ++reached; });
+    CreateDone();
+
+    auto scrollable = pattern_->GetScrollableEvent()->scrollable_;
+    ASSERT_TRUE(scrollable);
+    GestureEvent info;
+    info.SetMainVelocity(-1000.f);
+    info.SetMainDelta(-10.f);
+    scrollable->isDragging_ = true;
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+    scrollable->HandleDragEnd(info);
+    scrollable->isDragging_ = false;
+    FlushUITasks();
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::FRICTION);
+    // friction animation
+    MockAnimationManager::GetInstance().TickByVelocity(-2500.0f);
+    FlushUITasks();
+    EXPECT_EQ(reached, 1);
+
+    // transitioned to spring animation
+    MockAnimationManager::GetInstance().TickByVelocity(-50.0f);
+    FlushUITasks();
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::SPRING);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(reached, 2);
+    EXPECT_NEAR(GetChildRect(frameNode_, 19).Bottom(), WATER_FLOW_HEIGHT, 0.01f);
+}
+
+/**
+ * @tc.name: ReachEnd002
+ * @tc.desc: Test the OnReachEnd event when the repeatDifference is different.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, ReachEnd002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the OnReachEnd event.
+     */
+    bool isTrigger = false;
+    auto event = [&isTrigger]() { isTrigger = true; };
+    auto model = CreateWaterFlow();
+    model.SetOnReachEnd(event);
+    CreateWaterFlowItems(20);
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateDone();
+    EXPECT_NE(pattern_, nullptr);
+    EXPECT_EQ(pattern_->layoutInfo_->repeatDifference_, 0);
+
+    /**
+     * @tc.steps: step2. Scroll down to end
+     * @tc.expected: the OnReachEnd event can be triggered.
+     */
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_TRUE(isTrigger);
+
+    isTrigger = false;
+
+    /**
+     * @tc.steps: step3. Modify the repeatDifference_ of WaterFlow.
+     * @tc.expected: the OnReachEnd event can not be triggered.
+     */
+    pattern_->layoutInfo_->repeatDifference_ = 1;
+    pattern_->FireOnReachEnd(event, nullptr);
+    EXPECT_FALSE(pattern_->layoutInfo_->repeatDifference_ == 0);
+    EXPECT_FALSE(isTrigger);
+}
+
+/**
+ * @tc.name: ScrollAnimation001
+ * @tc.desc: Test ScrollToIndex with animation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, ScrollAnimation001, TestSize.Level1)
+{
+    MockAnimationManager::GetInstance().SetTicks(1);
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(2, true);
+    CreateItemsInRepeat(50, [](int32_t i) { return 100.0f; });
+    CreateDone();
+
+    ScrollToIndex(48, true, ScrollAlign::START);
+    MockAnimationManager::GetInstance().Tick();
+    pattern_->isAnimationStop_ = false; // animation ended in 1 tick, need to set manually
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 49);
+    for (int i = pattern_->layoutInfo_->startIndex_; i <= 49; i++) {
+        ASSERT_TRUE(GetChildFrameNode(frameNode_, i));
+    }
+
+    ScrollToIndex(0, true, ScrollAlign::START);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 15);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    for (int i = pattern_->layoutInfo_->startIndex_; i <= 15; i++) {
+        ASSERT_TRUE(GetChildFrameNode(frameNode_, i));
+    }
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 1)->IsActive());
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0.0f);
+}
+
+/**
+ * @tc.name: SetEffectEdge001
+ * @tc.desc: Test SetEffectEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, SetEffectEdge001, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::START);
+    CreateWaterFlowItems(3);
+    CreateDone();
+    EXPECT_EQ(pattern_->GetEffectEdge(), EffectEdge::START);
+
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+
+    scrollable->HandleTouchDown();
+    UpdateCurrentOffset(-100);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
+    UpdateCurrentOffset(200);
+    ASSERT_TRUE(Positive(GetChildY(frameNode_, 0)));
+}
+
+/**
+ * @tc.name: SetEffectEdge002
+ * @tc.desc: Test SetEffectEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, SetEffectEdge002, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::END);
+    CreateWaterFlowItems(3);
+    CreateDone();
+    EXPECT_EQ(pattern_->GetEffectEdge(), EffectEdge::END);
+
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    UpdateCurrentOffset(100);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
+
+    UpdateCurrentOffset(-200);
+    ASSERT_TRUE(Negative(GetChildY(frameNode_, 0)));
+}
+
+/**
+ * @tc.name: SetEffectEdge003
+ * @tc.desc: Test SetEffectEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, SetEffectEdge003, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    CreateWaterFlowItems(20);
+    model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::START);
+    CreateDone();
+    EXPECT_EQ(pattern_->GetEffectEdge(), EffectEdge::START);
+
+    GestureEvent gesture;
+    gesture.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    gesture.SetMainVelocity(-1000.0f);
+    gesture.SetMainDelta(-100.0f);
+
+    auto scrollable = pattern_->GetScrollableEvent()->scrollable_;
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(gesture);
+
+    scrollable->HandleDragUpdate(gesture);
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -79.373947);
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(gesture);
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -179.37395);
+
+    const auto& info = pattern_->layoutInfo_;
+    MockAnimationManager::GetInstance().TickByVelocity(-8000);
+    FlushUITasks();
+    EXPECT_EQ(info->endIndex_, 19);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 19), 600);
+}
+
+/**
+ * @tc.name: SetEffectEdge004
+ * @tc.desc: Test SetEffectEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, SetEffectEdge004, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    CreateWaterFlowItems(20);
+    model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::END);
+    CreateDone();
+    EXPECT_EQ(pattern_->GetEffectEdge(), EffectEdge::END);
+    UpdateCurrentOffset(-200);
+
+    GestureEvent gesture;
+    gesture.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    gesture.SetMainVelocity(1000.0f);
+    gesture.SetMainDelta(20.0f);
+
+    auto scrollable = pattern_->GetScrollableEvent()->scrollable_;
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(gesture);
+    scrollable->HandleDragUpdate(gesture);
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -106.00447);
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(gesture);
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -86.004471);
+
+    MockAnimationManager::GetInstance().TickByVelocity(1000);
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
 }
 } // namespace OHOS::Ace::NG

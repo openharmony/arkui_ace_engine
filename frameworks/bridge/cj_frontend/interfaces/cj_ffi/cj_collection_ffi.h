@@ -17,27 +17,34 @@
 #define OHOS_ACE_FRAMEWORK_FFI_CJ_COLLECTION_H
 
 #include <cstdint>
-#include <string>
 #include <functional>
+#include <string>
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 
 extern "C" struct NavigationItemFFI {
-    const char *value;
-    const char *icon;
-    int64_t builder;
+    const char* value;
+    const char* icon;
+    bool isEnable;
+    int64_t action;
+    int32_t status;
+    const char* activeIcon;
 };
 
 struct NavigationItem {
     std::string value;
     std::string icon;
-    int64_t builderFFI;
-    std::function<void()> builder;
+    bool isEnable;
+    int64_t actionFFI;
+    std::function<void()> action;
+    int32_t status;
+    std::string activeIcon;
     NavigationItem() = default;
     explicit NavigationItem(const NavigationItemFFI& source);
     NavigationItemFFI ToFFI()
     {
-        return NavigationItemFFI {.value = value.c_str(), .icon = icon.c_str(), .builder = builderFFI};
+        return NavigationItemFFI { .value = value.c_str(), .icon = icon.c_str(), .isEnable = isEnable,
+            .action = actionFFI, .status = status, .activeIcon = activeIcon.c_str() };
     }
 };
 
@@ -86,10 +93,9 @@ CJ_EXPORT double FFICJCommonVectorFloat64GetElement(VectorFloat64Handle vec, int
 CJ_EXPORT void FFICJCommonVectorBoolSetElement(VectorBoolHandle vec, int64_t index, bool value);
 CJ_EXPORT bool FFICJCommonVectorBoolGetElement(VectorBoolHandle vec, int64_t index);
 
-CJ_EXPORT void FFICJCommonVectorNavigationItemSetElement(VectorNavigationItemHandle vec, int64_t index,
-                                                         NavigationItemFFI value);
-CJ_EXPORT NavigationItemFFI
-FFICJCommonVectorNavigationItemGetElement(VectorNavigationItemHandle vec, int64_t index);
+CJ_EXPORT void FFICJCommonVectorNavigationItemSetElement(
+    VectorNavigationItemHandle vec, int64_t index, NavigationItemFFI value);
+CJ_EXPORT NavigationItemFFI FFICJCommonVectorNavigationItemGetElement(VectorNavigationItemHandle vec, int64_t index);
 };
 
 #endif // OHOS_ACE_FRAMEWORK_FFI_CJ_COLLECTION_H

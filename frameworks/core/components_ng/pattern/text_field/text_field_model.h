@@ -32,6 +32,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text_field/text_content_type.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
@@ -138,6 +139,7 @@ enum class CleanNodeStyle {
 };
 
 enum class MenuPolicy { DEFAULT = 0, HIDE, SHOW };
+enum class HandlePolicy { DEFAULT = 0, HIDE, SHOW };
 
 enum class CancelButtonStyle {
     CONSTANT,
@@ -147,6 +149,7 @@ enum class CancelButtonStyle {
 
 struct SelectionOptions {
     MenuPolicy menuPolicy = MenuPolicy::DEFAULT;
+    HandlePolicy handlePolicy = HandlePolicy::DEFAULT;
 };
 
 enum class PreviewTextStyle {
@@ -186,6 +189,12 @@ public:
         return {};
     }
     virtual void StopEditing() {}
+
+    virtual int32_t AddText(std::u16string text, int32_t offset) { return 0; }
+    virtual void DeleteText(int32_t start, int32_t end) {}
+    virtual SelectionInfo GetSelection() { return {}; }
+    virtual void ClearPreviewText() {}
+    virtual std::u16string GetText() { return u""; }
 
     void SetGetCaretIndex(std::function<int32_t()>&& setGetCaretIndex)
     {
@@ -234,7 +243,7 @@ public:
                 auto nextChar = value.substr(i, 1);
                 auto mapTuple = escapeMap.find(nextChar);
                 if (mapTuple == escapeMap.end()) {
-                    LOGE("Find escape \\%{public}s failed", nextChar.c_str());
+                    TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Find escape \\ failed");
                     return false;
                 }
                 ch = mapTuple->second;
@@ -260,21 +269,22 @@ public:
     virtual ~TextFieldModel() = default;
 
     virtual RefPtr<TextFieldControllerBase> CreateTextInput(
-        const std::optional<std::string>& placeholder, const std::optional<std::string>& value) = 0;
-
+        const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value) = 0;
     virtual RefPtr<TextFieldControllerBase> CreateTextArea(
-        const std::optional<std::string>& placeholder, const std::optional<std::string>& value) = 0;
-
+        const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value) = 0;
     virtual void RequestKeyboardOnFocus(bool needToRequest) = 0;
     virtual void SetWidthAuto(bool isAuto) {}
     virtual void SetType(TextInputType value) = 0;
     virtual void SetContentType(const NG::TextContentType& value) = 0;
     virtual void SetPlaceholderColor(const Color& value) = 0;
+    virtual void ResetPlaceholderColor() = 0;
     virtual void SetPlaceholderFont(const Font& value) = 0;
     virtual void SetEnterKeyType(TextInputAction value) = 0;
+    virtual void SetCapitalizationMode(AutoCapitalizationMode value) = 0;
     virtual void SetTextAlign(TextAlign value) = 0;
     virtual void SetLineBreakStrategy(LineBreakStrategy lineBreakStrategy) = 0;
     virtual void SetCaretColor(const Color& value) = 0;
+    virtual void ResetCaretColor() = 0;
     virtual void SetCaretPosition(const int32_t& value) = 0;
     virtual void SetSelectedBackgroundColor(const Color& value) = 0;
     virtual void SetCaretStyle(const CaretStyle& value) = 0;
@@ -283,37 +293,44 @@ public:
     virtual void SetFontSize(const Dimension& value) = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
     virtual void SetTextColor(const Color& value) = 0;
+    virtual void ResetTextColor() = 0;
     virtual void SetWordBreak(Ace::WordBreak value) {};
     virtual void SetFontStyle(FontStyle value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
-    virtual void SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError) = 0;
+    virtual void SetMinFontScale(const float value) = 0;
+    virtual void SetMaxFontScale(const float value) = 0;
+
+    virtual void SetInputFilter(const std::string& value,
+        const std::function<void(const std::u16string&)>&& func) = 0;
     virtual void SetInputStyle(InputStyle value) = 0;
     virtual void SetShowPasswordIcon(bool value) = 0;
     virtual void SetOnEditChanged(std::function<void(bool)>&& func) = 0;
     virtual void SetOnSubmit(std::function<void(int32_t)>&& func) = 0;
     virtual void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) = 0;
-    virtual void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& func) = 0;
+    virtual void SetOnChange(std::function<void(const ChangeValueInfo&)>&& func) = 0;
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) = 0;
     virtual void SetOnSecurityStateChange(std::function<void(bool)>&& func) = 0;
     virtual void SetOnContentScroll(std::function<void(float, float)>&& func) = 0;
-    virtual void SetOnCopy(std::function<void(const std::string&)>&& func) = 0;
-    virtual void SetOnCut(std::function<void(const std::string&)>&& func) = 0;
-    virtual void SetOnPaste(std::function<void(const std::string&)>&& func) = 0;
-    virtual void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func) = 0;
+    virtual void SetOnCopy(std::function<void(const std::u16string&)>&& func) = 0;
+    virtual void SetOnCut(std::function<void(const std::u16string&)>&& func) = 0;
+    virtual void SetOnPaste(std::function<void(const std::u16string&)>&& func) = 0;
+    virtual void SetOnPasteWithEvent(std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetCopyOption(CopyOptions copyOption) = 0;
     virtual void ResetMaxLength() = 0;
     virtual void SetForegroundColor(const Color& value) = 0;
     virtual void SetBackgroundColor(const Color& color, bool tmp) = 0;
+    virtual void ResetBackgroundColor() = 0;
     virtual void SetHeight(const Dimension& value) = 0;
     virtual void SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) = 0;
     virtual void SetMargin() {};
     virtual void SetBackBorder() {};
+    virtual void SetEllipsisMode(EllipsisMode modal) {};
     virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;
     virtual void SetShowPasswordText(bool value) = 0;
     virtual void SetOnClick(std::function<void(const ClickInfo&)>&& func) {};
     virtual void SetPasswordIcon(const PasswordIcon& passwordIcon) {};
     virtual void SetShowUnit(std::function<void()>&& unitAction) {};
-    virtual void SetShowError(const std::string& errorText, bool visible) {};
+    virtual void SetShowError(const std::u16string& errorText, bool visible) {};
     virtual void SetBarState(DisplayMode value) {};
     virtual void SetMaxViewLines(uint32_t value) {};
     virtual void SetNormalMaxViewLines(uint32_t value) {};
@@ -322,7 +339,8 @@ public:
     virtual void SetNormalUnderlineColor(const Color& normalColor) {};
     virtual void SetUserUnderlineColor(UserUnderlineColor userColor) {};
     virtual void SetShowCounter(bool value) {};
-    virtual void SetOnChangeEvent(std::function<void(const std::string&)>&& func) = 0;
+    virtual void SetOnWillChangeEvent(std::function<bool(const ChangeValueInfo&)>&& func) = 0;
+    virtual void SetOnChangeEvent(std::function<void(const std::u16string&)>&& func) = 0;
     virtual void SetFocusableAndFocusNode() {};
     virtual void SetSelectionMenuHidden(bool contextMenuHidden) = 0;
     virtual void SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance = false) = 0;
@@ -335,12 +353,15 @@ public:
     virtual void SetCanacelIconSrc(
         const std::string& iconSrc, const std::string& bundleName, const std::string& moduleName) = 0;
     virtual void SetCancelIconColor(const Color& iconColor) = 0;
+    virtual void SetCancelButtonSymbol(bool isShowSymbol) = 0;
+    virtual void SetCancelSymbolIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol) = 0;
     virtual void SetIsShowCancelButton(bool isShowCancelButton) = 0;
 
     virtual void SetSelectAllValue(bool isSetSelectAllValue) = 0;
     virtual void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) = 0;
     virtual void SetLetterSpacing(const Dimension& value) {};
     virtual void SetLineHeight(const Dimension& value) {};
+    virtual void SetHalfLeading(bool value) {};
     virtual void SetLineSpacing(const Dimension& value) {};
     virtual void SetAdaptMinFontSize(const Dimension& value) {};
     virtual void SetAdaptMaxFontSize(const Dimension& value) {};
@@ -348,7 +369,6 @@ public:
     virtual void SetTextDecoration(Ace::TextDecoration value) {};
     virtual void SetTextDecorationColor(const Color& value) {};
     virtual void SetTextDecorationStyle(Ace::TextDecorationStyle value) {};
-
     virtual void SetTextOverflow(Ace::TextOverflow value) {};
     virtual void SetTextIndent(const Dimension& value) {};
     virtual void SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func) = 0;
@@ -358,6 +378,9 @@ public:
     virtual void SetSelectionMenuOptions(
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
     virtual void SetEnablePreviewText(bool enablePreviewText) = 0;
+    virtual void SetEnableHapticFeedback(bool state) = 0;
+    virtual void SetStopBackPress(bool isStopBackPress) {};
+    virtual void SetKeyboardAppearance(KeyboardAppearance value) = 0;
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

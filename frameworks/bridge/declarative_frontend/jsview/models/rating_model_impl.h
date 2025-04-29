@@ -33,8 +33,8 @@ public:
     void SetForegroundSrc(const std::string& value, bool flag = false) override;
     void SetSecondarySrc(const std::string& value, bool flag = false) override;
     void SetBackgroundSrc(const std::string& value, bool flag = false) override;
-    void SetOnChange(ChangeEvent&& onChange) override;
-    void SetOnChangeEvent(ChangeEvent&& onChangeEvent) override {};
+    void SetOnChange(RatingChangeEvent&& onChange) override;
+    void SetOnChangeEvent(RatingChangeEvent&& onChangeEvent) override {};
 };
 } // namespace OHOS::Ace::Framework
 

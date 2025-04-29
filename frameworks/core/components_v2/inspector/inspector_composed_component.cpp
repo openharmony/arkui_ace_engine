@@ -15,10 +15,6 @@
 
 #include "core/components_v2/inspector/inspector_composed_component.h"
 
-#include <unordered_map>
-
-#include "base/utils/string_utils.h"
-#include "core/common/container.h"
 #include "core/components_v2/inspector/actionsheetdialog_composed_element.h"
 #include "core/components_v2/inspector/alertdialog_composed_element.h"
 #include "core/components_v2/inspector/badge_composed_element.h"
@@ -46,7 +42,6 @@
 #include "core/components_v2/inspector/image_animator_composed_element.h"
 #include "core/components_v2/inspector/image_composed_element.h"
 #include "core/components_v2/inspector/indexer_composed_element.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/list_composed_element.h"
 #include "core/components_v2/inspector/list_item_composed_element.h"
 #include "core/components_v2/inspector/list_item_group_composed_element.h"
@@ -97,7 +92,6 @@
 #include "core/components_v2/inspector/water_flow_composed_element.h"
 #include "core/components_v2/inspector/water_flow_item_composed_element.h"
 #include "core/components_v2/inspector/wrap_composed_element.h"
-#include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace::V2 {
 
@@ -263,6 +257,7 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { ROW_SPLIT_COMPONENT_TAG, ROW_SPLIT_ETS_TAG },
     { STACK_COMPONENT_TAG, STACK_ETS_TAG },
     { SWIPER_COMPONENT_TAG, SWIPER_ETS_TAG },
+    { INDICATOR_COMPONENT_TAG, INDICATOR_ETS_TAG },
     { TAB_CONTENT_ITEM_COMPONENT_TAG, TAB_CONTENT_ITEM_ETS_TAG },
     { TABS_COMPONENT_TAG, TABS_ETS_TAG },
     { FLEX_COMPONENT_TAG, FLEX_ETS_TAG },
@@ -317,7 +312,6 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { GRIDCONTAINER_COMPONENT_TAG, GRIDCONTAINER_ETS_TAG },
     { GRID_COL_COMPONENT_TAG, GRID_COL_ETS_TAG },
     { GRID_ROW_COMPONENT_TAG, GRID_ROW_ETS_TAG },
-    { INDEXER_COMPONENT_TAG, INDEXER_ETS_TAG },
     { MENU_COMPONENT_TAG, MENU_ETS_TAG },
     { MENU_TAG, MENU_ETS_TAG },
     { TEXTAREA_COMPONENT_TAG, TEXTAREA_ETS_TAG },
@@ -354,6 +348,10 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { EMBEDDED_COMPONENT_TAG, EMBEDDED_COMPONENT_ETS_TAG },
     { MOVING_PHOTO_COMPONENT_TAG, MOVING_PHOTO_ETS_TAG },
     { LINEARINDICATOR_COMPONENT_TAG, LINEARINDICATOR_ETS_TAG },
+    { ARC_LIST_COMPONENT_TAG, ARC_LIST_ETS_TAG },
+    { ARC_LIST_ITEM_COMPONENT_TAG, ARC_LIST_ITEM_ETS_TAG },
+    { ARC_SCROLL_BAR_COMPONENT_TAG, ARC_SCROLL_BAR_ETS_TAG },
+	{ ARC_INDEXER_COMPONENT_TAG, ARC_INDEXER_ETS_TAG },
 };
 
 thread_local int32_t InspectorComposedComponent::composedElementId_ = 1;

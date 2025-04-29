@@ -18,7 +18,6 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
@@ -28,6 +27,8 @@
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_method.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_paint_property.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -67,6 +68,16 @@ public:
         return MakeRefPtr<MenuWrapperLayoutAlgorithm>();
     }
 
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        return MakeRefPtr<MenuWrapperPaintProperty>();
+    }
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        return AceType::MakeRefPtr<MenuWrapperPaintMethod>();
+    }
+
     void HandleMouseEvent(const MouseInfo& info, RefPtr<MenuItemPattern>& menuItem);
 
     int32_t GetTargetId() const override
@@ -74,7 +85,7 @@ public:
         return targetId_;
     }
 
-    void HideMenu();
+    void HideMenu(const HideMenuType& reason = HideMenuType::NORMAL);
 
     bool IsHide() const
     {
@@ -109,9 +120,8 @@ public:
     }
 
     void HideSubMenu();
-    RefPtr<FrameNode> MenuFocusViewShow();
     void HideStackExpandMenu(const RefPtr<UINode>& subMenu);
-
+    void GetExpandingMode(const RefPtr<UINode>& subMenu, SubMenuExpandingMode& expandingMode, bool& hasAnimation);
     RefPtr<FrameNode> GetMenu() const
     {
         auto host = GetHost();
@@ -210,6 +220,11 @@ public:
         isFirstShow_ = true;
     }
 
+    bool GetIsFirstShow() const
+    {
+        return isFirstShow_;
+    }
+
     void SetIsShowHoverImage(bool isShow)
     {
         isShowHoverImage_ = isShow;
@@ -238,6 +253,26 @@ public:
     bool GetIsShowHoverImagePreviewStartDrag() const
     {
         return isShowHoverImagePreviewStartDrag_;
+    }
+
+    void SetOnMenuDisappear(bool isDisappear)
+    {
+        onMenuDisappear_ = isDisappear;
+    }
+
+    bool GetOnMenuDisappear() const
+    {
+        return onMenuDisappear_;
+    }
+
+    void SetOnPreviewDisappear(bool isDisappear)
+    {
+        onPreviewDisappear_ = isDisappear;
+    }
+
+    bool GetOnPreviewDisappear() const
+    {
+        return onPreviewDisappear_;
     }
 
     void RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam);
@@ -315,6 +350,7 @@ public:
     void SetMenuStatus(MenuStatus value)
     {
         menuStatus_ = value;
+        RequestPathRender();
     }
 
     MenuStatus GetMenuStatus() const
@@ -344,6 +380,16 @@ public:
         hasPreviewTransitionEffect_ = hasPreviewTransitionEffect;
     }
 
+    bool HasFoldModeChangedTransition() const
+    {
+        return hasFoldModeChangeTransition_;
+    }
+
+    void SetHasFoldModeChangedTransition(bool hasTransition)
+    {
+        hasFoldModeChangeTransition_ = hasTransition;
+    }
+
     void SetFilterColumnNode(const RefPtr<FrameNode>& columnNode)
     {
         filterColumnNode_ = columnNode;
@@ -355,6 +401,8 @@ public:
     }
 
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
 
     MenuDumpInfo GetDumpInfo() const
     {
@@ -366,16 +414,21 @@ public:
         dumpInfo_.menuPreviewMode = dumpInfo.menuPreviewMode;
         dumpInfo_.menuType = dumpInfo.menuType;
         dumpInfo_.enableArrow = dumpInfo.enableArrow;
+        dumpInfo_.offset = dumpInfo.offset;
         dumpInfo_.targetNode = dumpInfo.targetNode;
         dumpInfo_.targetOffset = dumpInfo.targetOffset;
         dumpInfo_.targetSize = dumpInfo.targetSize;
+        dumpInfo_.menuWindowRect = dumpInfo.menuWindowRect;
         dumpInfo_.wrapperRect = dumpInfo.wrapperRect;
         dumpInfo_.previewBeginScale = dumpInfo.previewBeginScale;
         dumpInfo_.previewEndScale = dumpInfo.previewEndScale;
         dumpInfo_.top = dumpInfo.top;
         dumpInfo_.bottom = dumpInfo.bottom;
+        dumpInfo_.left = dumpInfo.left;
+        dumpInfo_.right = dumpInfo.right;
         dumpInfo_.globalLocation = dumpInfo.globalLocation;
         dumpInfo_.originPlacement = dumpInfo.originPlacement;
+        dumpInfo_.defaultPlacement = dumpInfo.defaultPlacement;
         dumpInfo_.finalPosition = dumpInfo.finalPosition;
         dumpInfo_.finalPlacement = dumpInfo.finalPlacement;
     }
@@ -402,21 +455,146 @@ public:
 
     int IncreaseEmbeddedSubMenuCount()
     {
+        ++embeddedSubMenuExpandTotalCount_;
         return ++embeddedSubMenuCount_;
     }
-    
+
     int DecreaseEmbeddedSubMenuCount()
     {
         return --embeddedSubMenuCount_;
     }
 
+    int GetEmbeddedSubMenuExpandTotalCount() const
+    {
+        return embeddedSubMenuExpandTotalCount_;
+    }
+
+    void SetForceUpdateEmbeddedMenu(bool forceUpdate)
+    {
+        forceUpdateEmbeddedMenu_ = forceUpdate;
+    }
+
+    bool GetForceUpdateEmbeddedMenu() const
+    {
+        return forceUpdateEmbeddedMenu_;
+    }
+
     RefPtr<FrameNode> GetMenuChild(const RefPtr<UINode>& node);
     RefPtr<FrameNode> GetShowedSubMenu();
     bool IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const;
+    bool IsSelectOverlayRightClickMenu(const RefPtr<FrameNode>& menu) const;
     bool HasEmbeddedSubMenu();
     void UpdateMenuAnimation(const RefPtr<FrameNode>& host);
     bool HasStackSubMenu();
+    void ClearAllSubMenu();
     int embeddedSubMenuCount_ = 0;
+
+    void SetAnimationClipRate(float rate)
+    {
+        animationInfo_.clipRate = rate;
+    }
+
+    void SetAnimationBorderRadius(double rate, const BorderRadiusProperty& radius)
+    {
+        animationInfo_.borderRadius.radiusTopLeft = Dimension(radius.radiusTopLeft->ConvertToPx() * rate);
+        animationInfo_.borderRadius.radiusTopRight = Dimension(radius.radiusTopRight->ConvertToPx() * rate);
+        animationInfo_.borderRadius.radiusBottomLeft = Dimension(radius.radiusBottomLeft->ConvertToPx() * rate);
+        animationInfo_.borderRadius.radiusBottomRight = Dimension(radius.radiusBottomRight->ConvertToPx() * rate);
+    }
+
+    PreviewMenuAnimationInfo GetPreviewMenuAnimationInfo()
+    {
+        return animationInfo_;
+    }
+
+    void SetMenuParam(const MenuParam& param)
+    {
+        menuParam_ = param;
+    }
+
+    const MenuParam& GetMenuParam() const
+    {
+        return menuParam_;
+    }
+
+    void SetIsShowFromUser(bool isShow)
+    {
+        isShowFromUser_ = isShow;
+    }
+
+    bool GetIsShowFromUser() const
+    {
+        return isShowFromUser_;
+    }
+
+    void RequestPathRender();
+
+    void SetChildLayoutConstraint(LayoutConstraintF constraint)
+    {
+        childLayoutConstraint_ = constraint;
+    }
+
+    LayoutConstraintF GetChildLayoutConstraint() const
+    {
+        return childLayoutConstraint_;
+    }
+
+    void SetPreviewDisappearStartOffset(OffsetF offset)
+    {
+        previewDisappearStartOffset_ = offset;
+    }
+
+    bool IsMenuPreviewNode(const RefPtr<FrameNode>& frameNode) const;
+
+    void SetIsOpenMenu(bool isOpenMenu)
+    {
+        isOpenMenu_ = isOpenMenu;
+    }
+
+    bool GetIsOpenMenu() const
+    {
+        return isOpenMenu_;
+    }
+
+    void SetHoverMode(bool enableFold)
+    {
+        enableFold_ = enableFold;
+    }
+
+    bool GetHoverMode() const
+    {
+        return enableFold_.value_or(false);
+    }
+
+    bool GetIsSelectOverlaySubWindowWrapper() const
+    {
+        return isSelectOverlaySubWindowWrapper_;
+    }
+
+    void SetIsSelectOverlaySubWindowWrapper(bool isSelectOverlaySubWindowWrapper)
+    {
+        isSelectOverlaySubWindowWrapper_ = isSelectOverlaySubWindowWrapper;
+    }
+
+    bool GetHasCustomOutlineWidth() const
+    {
+        return hasCustomOutlineWidth_;
+    }
+
+    void SetHasCustomOutlineWidth(bool hasCustomOutlineWidth)
+    {
+        hasCustomOutlineWidth_ = hasCustomOutlineWidth;
+    }
+
+    bool GetHasCustomOutlineColor() const
+    {
+        return hasCustomOutlineColor_;
+    }
+
+    void SetHasCustomOutlineColor(bool hasCustomOutlineColor)
+    {
+        hasCustomOutlineColor_ = hasCustomOutlineColor;
+    }
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -435,18 +613,27 @@ private:
     void OnAttachToFrameNode() override;
     void RegisterOnTouch();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    // mark self and all children no-draggable
+    void MarkWholeSubTreeNoDraggable(const RefPtr<FrameNode>& frameNode);
+    void MarkAllMenuNoDraggable();
     void SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
     void StartShowAnimation();
     void HandleInteraction(const TouchEventInfo& info);
+    void ChangeTouchItem(const TouchEventInfo& info, TouchType touchType);
     void ChangeCurMenuItemBgColor();
     void ClearLastMenuItem();
-    RectF GetMenuZone(RefPtr<UINode>& innerMenuNode);
-    RefPtr<FrameNode> FindTouchedMenuItem(const RefPtr<UINode>& menuNode, const OffsetF& position);
+    bool GetInnerMenu(RefPtr<UINode>& innerMenuNode, const PointF& position);
+    RefPtr<FrameNode> FindTouchedMenuItem(const RefPtr<UINode>& menuNode, const PointF& position);
+    bool IsNeedSetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
 
-    void HideMenu(const RefPtr<FrameNode>& menu);
-    void HideMenu(const RefPtr<MenuPattern>& menuPattern, const RefPtr<FrameNode>& menu, const OffsetF& position);
+    void HideMenu(const RefPtr<FrameNode>& menu, const HideMenuType& reason = HideMenuType::NORMAL);
+    void HideMenu(const RefPtr<MenuPattern>& menuPattern, const RefPtr<FrameNode>& menu, const PointF& position,
+        const HideMenuType& reason = HideMenuType::NORMAL);
     void SetExitAnimation(const RefPtr<FrameNode>& host);
     void SendToAccessibility(const RefPtr<UINode>& subMenu, bool isShow);
+    bool CheckPointInMenuZone(const RefPtr<FrameNode>& node, const PointF& point);
+    RefPtr<FrameNode> GetParentMenu(const RefPtr<UINode>& subMenu);
+    void MenuFocusViewShow(const RefPtr<FrameNode>& menuNode);
     std::function<void()> onAppearCallback_ = nullptr;
     std::function<void()> onDisappearCallback_ = nullptr;
     std::function<void()> aboutToAppearCallback_ = nullptr;
@@ -457,6 +644,9 @@ private:
     RefPtr<FrameNode> currentTouchItem_ = nullptr;
     // menuId in OverlayManager's map
     int32_t targetId_ = -1;
+    int embeddedSubMenuExpandTotalCount_ = 0;
+    bool forceUpdateEmbeddedMenu_ = false;
+    LayoutConstraintF childLayoutConstraint_;
 
     AnimationOption animationOption_;
     Placement menuPlacement_ = Placement::NONE;
@@ -465,12 +655,26 @@ private:
     bool isShowHoverImage_ = false;
     bool isStopHoverImageAnimation_ = false;
     bool isShowHoverImagePreviewStartDrag_ = false;
+    bool onMenuDisappear_ = false;
+    bool onPreviewDisappear_ = false;
     MenuStatus menuStatus_ = MenuStatus::INIT;
     bool hasTransitionEffect_ = false;
     bool hasPreviewTransitionEffect_ = false;
+    bool hasFoldModeChangeTransition_ = false;
+    OffsetF previewDisappearStartOffset_;
     RefPtr<FrameNode> filterColumnNode_;
     MenuDumpInfo dumpInfo_;
     bool hasCustomRadius_ = false;
+    PreviewMenuAnimationInfo animationInfo_;
+    MenuParam menuParam_;
+    bool isShowFromUser_ = false;
+    int32_t fingerId_ = -1;
+    bool isOpenMenu_ = false;
+    std::optional<bool> enableFold_;
+    // Identify whether the menuWrapper is used by selectOverlay in the subwindow.
+    bool isSelectOverlaySubWindowWrapper_ = false;
+    bool hasCustomOutlineWidth_ = false;
+    bool hasCustomOutlineColor_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
 } // namespace OHOS::Ace::NG

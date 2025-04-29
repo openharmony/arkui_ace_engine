@@ -21,7 +21,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/window_scene/scene/input_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/panel_scene.h"
-#include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/transform_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/window_node.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene.h"
@@ -47,6 +46,24 @@ std::function<RefPtr<Pattern>(void)> PatternCreator(const sptr<Rosen::SceneSessi
     return patternCreator;
 }
 
+void CheckParentNodeDfx(RefPtr<FrameNode>& node, sptr<Rosen::SceneSession>& sceneSession, int persistentId)
+{
+    if (node == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "node is nullptr, sessionId:%{public}d", persistentId);
+        return;
+    }
+    if (sceneSession == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "session is nullptr, nodeId:%{public}d, sessionId:%{public}d",
+            node->GetId(), persistentId);
+        return;
+    }
+    auto parent = node->GetParentFrameNode();
+    if (parent) {
+        TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "parentId:%{public}d, nodeId:%{public}d, sessionId:%{public}d",
+            parent->GetId(), node->GetId(), sceneSession->GetPersistentId());
+    }
+}
+
 void WindowSceneModel::Create(int32_t persistentId)
 {
     if (persistentId == -1) { // -1: transform window scene type
@@ -63,7 +80,7 @@ void WindowSceneModel::Create(int32_t persistentId)
     auto sceneSession = Rosen::SceneSessionManager::GetInstance().GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE,
-            "[WMSMain][WMSSystem] session is nullptr, persistentId:%{public}d", persistentId);
+            "session is nullptr, persistentId: %{public}d", persistentId);
         return;
     }
 
@@ -75,6 +92,7 @@ void WindowSceneModel::Create(int32_t persistentId)
         auto node = FrameNode::GetOrCreateFrameNode(V2::WINDOW_SCENE_ETS_TAG, nodeId, PatternCreator(sceneSession));
         stack->Push(node);
         ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT);
+        CheckParentNodeDfx(node, sceneSession, persistentId);
         return;
     }
 
@@ -84,12 +102,18 @@ void WindowSceneModel::Create(int32_t persistentId)
         V2::WINDOW_SCENE_ETS_TAG, nodeId, sceneSession->GetSessionInfo().bundleName_.c_str());
     auto windowNode = WindowNode::GetOrCreateWindowNode(V2::WINDOW_SCENE_ETS_TAG, nodeId, persistentId,
         [sceneSession]() { return AceType::MakeRefPtr<WindowScene>(sceneSession); });
+    if (windowNode == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE, "windowNode is nullptr, persistentId: %{public}d", persistentId);
+        return;
+    }
     stack->Push(windowNode);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT);
 
     if (windowNode->GetHitTestMode() == HitTestMode::HTMDEFAULT) {
         windowNode->SetHitTestMode(HitTestMode::HTMBLOCK);
     }
+    auto node = AceType::DynamicCast<FrameNode>(windowNode);
+    CheckParentNodeDfx(node, sceneSession, persistentId);
 }
 
 void WindowSceneModel::SetAttractionEffect(const AttractionEffect& effect)

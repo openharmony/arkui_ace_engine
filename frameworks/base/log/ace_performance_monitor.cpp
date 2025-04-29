@@ -15,8 +15,12 @@
 
 #include "base/log/ace_performance_monitor.h"
 
+#include <sstream>
+
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
+#include "core/common/container.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 using namespace std;
@@ -30,22 +34,36 @@ void GetTimePoint(TimePoint& now)
 }
 } // namespace
 
-ScopedMonitor::ScopedMonitor(MonitorTag tag) : tag_(tag)
+ScopedMonitor::ScopedMonitor(MonitorTag tag, int32_t instanceId) : tag_(tag), instanceId_(instanceId)
 {
+    if (instanceId == -1) {
+        return;
+    }
     GetTimePoint(begin_);
-    ArkUIPerfMonitor::GetInstance().SetRecordingStatus(tag_, MonitorStatus::RUNNING);
+    ArkUIPerfMonitor::GetPerfMonitor(instanceId)->SetRecordingStatus(tag_, MonitorStatus::RUNNING);
 }
 
 ScopedMonitor::~ScopedMonitor()
 {
+    if (instanceId_ == -1) {
+        return;
+    }
     GetTimePoint(end_);
-    ArkUIPerfMonitor::GetInstance().RecordTimeSlice(tag_, duration_cast<nanoseconds>(end_ - begin_).count());
+    ArkUIPerfMonitor::GetPerfMonitor(instanceId_)->RecordTimeSlice(
+        tag_, duration_cast<nanoseconds>(end_ - begin_).count());
 }
 
-ArkUIPerfMonitor& ArkUIPerfMonitor::GetInstance()
+std::shared_ptr<ArkUIPerfMonitor> ArkUIPerfMonitor::GetPerfMonitor(int32_t instanceId)
 {
-    static ArkUIPerfMonitor instance;
-    return instance;
+    auto container = Container::GetContainer(instanceId);
+    if (!container) {
+        return std::make_shared<ArkUIPerfMonitor>();
+    }
+    auto pipeline = container->GetPipelineContext();
+    if (!pipeline) {
+        return std::make_shared<ArkUIPerfMonitor>();
+    }
+    return pipeline->GetPerfMonitor();
 }
 
 ArkUIPerfMonitor::ArkUIPerfMonitor()
@@ -144,6 +162,7 @@ void ArkUIPerfMonitor::FlushPerfMonitor()
     auto frameWork = total - timeSlice_[MonitorTag::COMPONENT_CREATION] - timeSlice_[MonitorTag::COMPONENT_LIFECYCLE] -
                      timeSlice_[MonitorTag::COMPONENT_UPDATE] - timeSlice_[MonitorTag::JS_CALLBACK] +
                      timeSlice_[MonitorTag::STATIC_API] - timeSlice_[MonitorTag::OTHER];
+#if ORIGIN_PERF_MONITOR
     auto json = JsonUtil::Create(true);
     json->Put("state_mgmt", stateMgmtNodeNum_);
     json->Put("layout", layoutNodeNum_);
@@ -153,5 +172,17 @@ void ArkUIPerfMonitor::FlushPerfMonitor()
     json->Put("framework", frameWork);
     json->Put("display_sync_rate", displaySyncRate_);
     ACE_SCOPED_TRACE("ArkUIPerfMonitor %s", json->ToString().c_str());
+#else
+    std::ostringstream oss;
+    oss << "{\'state_mgmt\':" << stateMgmtNodeNum_;
+    oss << ",\'layout\':" << layoutNodeNum_;
+    oss << ",\'render\':" << renderNodeNum_;
+    oss << ",\'property\':" << propertyNum_;
+    oss << ",\'total\':" << total;
+    oss << ",\'framework\':" << frameWork;
+    oss << ",\'display_sync_rate\':" << displaySyncRate_;
+    oss << "}";
+    ACE_SCOPED_TRACE("ArkUIPerfMonitor %s", oss.str().c_str());
+#endif
 }
 } // namespace OHOS::Ace

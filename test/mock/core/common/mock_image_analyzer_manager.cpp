@@ -47,7 +47,17 @@ void ImageAnalyzerManager::CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
 {
 }
 
+void ImageAnalyzerManager::CreateMovingPhotoAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
+    MovingPhotoAnalyzerInfo info)
+{
+}
+
 void ImageAnalyzerManager::UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, const NG::OffsetF& offset)
+{
+}
+
+void ImageAnalyzerManager::UpdateMovingPhotoAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
+    MovingPhotoAnalyzerInfo info)
 {
 }
 
@@ -88,5 +98,29 @@ void ImageAnalyzerManager::SetImageAnalyzerCallback(OnAnalyzedCallback& callback
 
 void ImageAnalyzerManager::ReleaseImageAnalyzer()
 {
+}
+
+void ImageAnalyzerManager::UpdateOverlayTouchInfo(int touchPointX, int touchPointY, TouchType touchType)
+{
+}
+
+void ImageAnalyzerManager::UpdatePressOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int offsetX, int offsetY,
+    int rectWidth, int rectHeight, int pointX, int pointY, OnTextSelectedCallback callback)
+{
+}
+
+void ImageAnalyzerManager::UpdateOverlayStatus(bool status, int offsetX, int offsetY, int rectWidth, int rectHeight)
+{
+}
+
+void ImageAnalyzerManager::SetNotifySelectedCallback(OnNotifySelectedStatusCallback&& callback)
+{
+    analyzerUIConfig_.onNotifySelectedStatus = std::move(callback);
+}
+
+void ImageAnalyzerManager::SetOnCanPlayCallback(
+    OnCanPlayCallback&& onCanPlay)
+{
+    analyzerUIConfig_.onCanPlay = std::move(onCanPlay);
 }
 } // namespace OHOS::Ace

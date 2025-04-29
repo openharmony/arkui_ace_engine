@@ -1,0 +1,28 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "BenchMark"
+    },
+    {
+      "name": "stroke_width",
+      "value": "3.00vp"
+    },
+    {
+      "name": "fill_opacity",
+      "value": "0.800000"
+    },
+    {
+      "name": "stroke_opacity",
+      "value": "0.800000"
+    }
+  ]
+}

@@ -31,30 +31,22 @@
 #include "interfaces/include/ws_common.h"
 
 namespace OHOS::Ace {
-std::unique_ptr<UIExtensionModel> UIExtensionModel::instance_ = nullptr;
-std::mutex UIExtensionModel::mutex_;
-
 UIExtensionModel* UIExtensionModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
-#ifdef NG_BUILD
-            instance_.reset(new NG::UIExtensionModelNG());
-#else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::UIExtensionModelNG());
-            } else {
-                return nullptr;
-            }
-#endif
-        }
+    if (!Container::IsCurrentUseNewPipeline()) {
+        LOGE("Get UIExtensionModel in non NewPipeline.");
     }
-    return instance_.get();
+    static NG::UIExtensionModelNG instance;
+    return &instance;
 }
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+
+const char UI_EXTENSION_PLACEHOLDER_TYPE_UNDEFINED[] = "UNDEFINED";
+const char UI_EXTENSION_PLACEHOLDER_TYPE_ROTATION[] = "ROTATION";
+const char UI_EXTENSION_PLACEHOLDER_TYPE_FOLD_TO_EXPAND[] = "FOLD_TO_EXPAND";
+
 void JSUIExtensionProxy::JSBind(BindingTarget globalObj)
 {
     JSClass<JSUIExtensionProxy>::Declare("UIExtensionProxy ");
@@ -92,7 +84,7 @@ void JSUIExtensionProxy::Send(const JSCallbackInfo& info)
     JSValueWrapper valueWrapper = value;
     ScopeRAII scopeNapi(reinterpret_cast<napi_env>(nativeEngine));
     napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
-    
+
     auto wantParams = WantParamsWrap::CreateWantWrap(reinterpret_cast<napi_env>(nativeEngine), nativeValue);
     if (proxy_) {
         proxy_->SendData(wantParams);
@@ -173,7 +165,7 @@ void JSUIExtensionProxy::AddCallbackToList(napi_env env, napi_value cb,
     napi_close_handle_scope(env, scope);
 }
 
-void JSUIExtensionProxy::DeleteCallbackFromList(int argc, napi_env env, napi_value cb, RegisterType type)
+void JSUIExtensionProxy::DeleteCallbackFromList(uint32_t argc, napi_env env, napi_value cb, RegisterType type)
 {
     if (argc == 1) {
         if (type == RegisterType::SYNC) {
@@ -345,8 +337,88 @@ void JSUIExtension::JSBind(BindingTarget globalObj)
     JSClass<JSUIExtension>::StaticMethod("onResult", &JSUIExtension::OnResult);
     JSClass<JSUIExtension>::StaticMethod("onError", &JSUIExtension::OnError);
     JSClass<JSUIExtension>::StaticMethod("onTerminated", &JSUIExtension::OnTerminated);
+    JSClass<JSUIExtension>::StaticMethod("onDrawReady", &JSUIExtension::OnDrawReady);
     JSClass<JSUIExtension>::InheritAndBind<JSViewAbstract>(globalObj);
 }
+
+void JSUIExtension::ResolveAreaPlaceholderParams(const JSRef<JSObject>& obj,
+    std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap)
+{
+    static const std::map<std::string, NG::PlaceholderType> placeholderTypeTable = {
+        { UI_EXTENSION_PLACEHOLDER_TYPE_UNDEFINED, NG::PlaceholderType::UNDEFINED },
+        { UI_EXTENSION_PLACEHOLDER_TYPE_ROTATION, NG::PlaceholderType::ROTATION },
+        { UI_EXTENSION_PLACEHOLDER_TYPE_FOLD_TO_EXPAND, NG::PlaceholderType::FOLD_TO_EXPAND }
+    };
+    do {
+        JSRef<JSVal> componentContentMap = obj->GetProperty("areaChangePlaceholder");
+        if (!componentContentMap->IsObject()) {
+            break;
+        }
+        auto contentMapObj = JSRef<JSObject>::Cast(componentContentMap);
+        for (auto [strName, type] : placeholderTypeTable) {
+            JSRef<JSVal> typeContent = contentMapObj->GetProperty(strName.c_str());
+            if (!typeContent->IsObject()) {
+                continue;
+            }
+            auto componentContentObj = JSRef<JSObject>::Cast(typeContent);
+            JSRef<JSVal> builderNode = componentContentObj->GetProperty("builderNode_");
+            if (!builderNode->IsObject()) {
+                continue;
+            }
+            auto builderNodeObj = JSRef<JSObject>::Cast(builderNode);
+            JSRef<JSVal> nodePtr = builderNodeObj->GetProperty("nodePtr_");
+            if (nodePtr.IsEmpty()) {
+                continue;
+            }
+            const auto* vm = nodePtr->GetEcmaVM();
+            if (!(nodePtr->GetLocalHandle()->IsNativePointer(vm))) {
+                continue;
+            }
+            auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
+            auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+            if (!frameNode) {
+                continue;
+            }
+            RefPtr<NG::FrameNode> placeholderNode = AceType::Claim(frameNode);
+            placeholderMap.insert({type, placeholderNode});
+        }
+    } while (false);
+}
+
+namespace {
+void InsertPlaceholderObj(JsiRef<JsiObject>& obj,
+    std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap)
+{
+    do {
+        RefPtr<NG::FrameNode> placeholderNode = nullptr;
+        JSRef<JSVal> componentContent = obj->GetProperty("placeholder");
+        if (!componentContent->IsObject()) {
+            break;
+        }
+        auto componentContentObj = JSRef<JSObject>::Cast(componentContent);
+        JSRef<JSVal> builderNode = componentContentObj->GetProperty("builderNode_");
+        if (!builderNode->IsObject()) {
+            break;
+        }
+        auto builderNodeObj = JSRef<JSObject>::Cast(builderNode);
+        JSRef<JSVal> nodePtr = builderNodeObj->GetProperty("nodePtr_");
+        if (nodePtr.IsEmpty()) {
+            break;
+        }
+        const auto* vm = nodePtr->GetEcmaVM();
+        if (!(nodePtr->GetLocalHandle()->IsNativePointer(vm))) {
+            break;
+        }
+        auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
+        auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+        if (!frameNode) {
+            break;
+        }
+        placeholderNode = AceType::Claim(frameNode);
+        placeholderMap.insert({NG::PlaceholderType::INITIAL, placeholderNode});
+    } while (false);
+}
+} // namespace
 
 void JSUIExtension::Create(const JSCallbackInfo& info)
 {
@@ -358,7 +430,8 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
 
     bool transferringCaller = false;
     bool densityDpi = false;
-    RefPtr<NG::FrameNode> placeholderNode = nullptr;
+    bool windowModeStrategy = false;
+    std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>> placeholderMap;
     if (info.Length() > 1 && info[1]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(info[1]);
         JSRef<JSVal> transferringCallerValue = obj->GetProperty("isTransferringCaller");
@@ -369,31 +442,14 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
         if (enableDensityDPI->IsNumber()) {
             densityDpi = (enableDensityDPI->ToNumber<int32_t>())==0 ? true : false;
         }
-        do {
-            JSRef<JSVal> componentContent = obj->GetProperty("placeholder");
-            if (!componentContent->IsObject()) {
-                break;
-            }
-            auto componentContentObj = JSRef<JSObject>::Cast(componentContent);
-            JSRef<JSVal> builderNode = componentContentObj->GetProperty("builderNode_");
-            if (!builderNode->IsObject()) {
-                break;
-            }
-            auto builderNodeObj = JSRef<JSObject>::Cast(builderNode);
-            JSRef<JSVal> nodePtr = builderNodeObj->GetProperty("nodePtr_");
-            if (nodePtr.IsEmpty()) {
-                break;
-            }
-            const auto* vm = nodePtr->GetEcmaVM();
-            auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
-            auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
-            if (!frameNode) {
-                break;
-            }
-            placeholderNode = AceType::Claim(frameNode);
-        } while (false);
+        JSRef<JSVal> windowModeStrategyValue = obj->GetProperty("windowModeFollowStrategy");
+        if (windowModeStrategyValue->IsNumber()) {
+            windowModeStrategy = (windowModeStrategyValue->ToNumber<int32_t>()) == 0 ? true : false;
+        }
+        InsertPlaceholderObj(obj, placeholderMap);
+        ResolveAreaPlaceholderParams(obj, placeholderMap);
     }
-    UIExtensionModel::GetInstance()->Create(want, placeholderNode, transferringCaller, densityDpi);
+    UIExtensionModel::GetInstance()->Create(want, placeholderMap, transferringCaller, densityDpi, windowModeStrategy);
 }
 
 void JSUIExtension::OnRemoteReady(const JSCallbackInfo& info)
@@ -561,5 +617,27 @@ void JSUIExtension::OnTerminated(const JSCallbackInfo& info)
         func->ExecuteJS(1, &returnValue);
     };
     UIExtensionModel::GetInstance()->SetOnTerminated(std::move(onTerminated));
+}
+
+void JSUIExtension::OnDrawReady(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto instanceId = ContainerScope::CurrentId();
+    auto onDrawReady = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode]
+        () {
+            ContainerScope scope(instanceId);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("UIExtensionComponent.onDrawReady");
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateCurrentActiveNode(node);
+            auto newJSVal = JSRef<JSVal>::Make();
+            func->ExecuteJS(1, &newJSVal);
+    };
+    UIExtensionModel::GetInstance()->SetOnDrawReady(std::move(onDrawReady));
 }
 } // namespace OHOS::Ace::Framework

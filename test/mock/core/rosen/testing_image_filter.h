@@ -50,26 +50,28 @@ public:
     }
 
     static std::shared_ptr<TestingImageFilter> CreateColorFilterImageFilter(
-        const TestingColorFilter& cf, std::shared_ptr<TestingImageFilter> input)
+        const TestingColorFilter& cf, std::shared_ptr<TestingImageFilter> input,
+        const TestingRect& filterRect = noCropRect)
     {
         return std::make_shared<TestingImageFilter>();
     }
 
     static std::shared_ptr<TestingImageFilter> CreateArithmeticImageFilter(const std::vector<scalar>& coefficients,
         bool enforcePMColor, std::shared_ptr<TestingImageFilter> background,
-        std::shared_ptr<TestingImageFilter> foreground)
+        std::shared_ptr<TestingImageFilter> foreground, const TestingRect& filterRect = noCropRect)
     {
         return std::make_shared<TestingImageFilter>();
     }
 
     static std::shared_ptr<TestingImageFilter> CreateOffsetImageFilter(
-        scalar dx, scalar dy, std::shared_ptr<TestingImageFilter> input)
+        scalar dx, scalar dy, std::shared_ptr<TestingImageFilter> input, const TestingRect& filterRect = noCropRect)
     {
         return std::make_shared<TestingImageFilter>();
     }
 
     static std::shared_ptr<TestingImageFilter> CreateBlendImageFilter(BlendMode mode,
-        std::shared_ptr<TestingImageFilter> background, std::shared_ptr<TestingImageFilter> foreground = nullptr)
+        std::shared_ptr<TestingImageFilter> background, std::shared_ptr<TestingImageFilter> foreground = nullptr,
+        const TestingRect& filterRect = noCropRect)
     {
         return std::make_shared<TestingImageFilter>();
     }

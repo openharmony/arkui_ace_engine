@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "base/image/pixel_map.h"
 #include "base/utils/resource_configuration.h"
+#include "core/common/resource/resource_configuration.h"
 #include "core/components/theme/theme_style.h"
 namespace OHOS::Ace {
 
@@ -191,7 +192,23 @@ public:
 
     virtual void UpdateResourceManager(const std::string& bundleName, const std::string& moduleName) {}
 
+    virtual bool CloseRawFileDescription(const std::string& rawfileName) const
+    {
+        return false;
+    }
+
     virtual bool GetRawFileDescription(const std::string& rawfileName, RawfileDescription& rawfileDescription) const
+    {
+        return false;
+    }
+
+    /*
+     * Get rawfile file description which will not be cached.
+     * NOTE: false value will be returned if not found.
+     * @param[in] rawfileName Target rawfile.
+     * @return success or not to close file info.
+     */
+    virtual bool GetRawFD(const std::string& /* rawfileName */, RawfileDescription& /* rawfileDescription */) const
     {
         return false;
     }
@@ -229,6 +246,12 @@ public:
     virtual ColorMode GetResourceColorMode() const
     {
         return ColorMode::LIGHT;
+    }
+
+    virtual RefPtr<ResourceAdapter> GetOverrideResourceAdapter(
+        const ResourceConfiguration& config, const ConfigurationChange& configurationChange)
+    {
+        return nullptr;
     }
 };
 

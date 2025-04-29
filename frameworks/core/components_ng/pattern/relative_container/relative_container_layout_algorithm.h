@@ -20,8 +20,10 @@
 #include <map>
 #include <optional>
 
+#include "core/components/common/layout/position_param.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -37,8 +39,10 @@ class ACE_EXPORT RelativeContainerLayoutAlgorithm : public LayoutAlgorithm {
 
 public:
     RelativeContainerLayoutAlgorithm() = default;
-    ~RelativeContainerLayoutAlgorithm() override = default;
-
+    ~RelativeContainerLayoutAlgorithm()
+    {
+        std::lock_guard<std::mutex> lock(relativeContainerMutex_);
+    }
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
@@ -65,10 +69,15 @@ public:
         AlignRule anchorTail;
         ChainStyle chainStyle;
         BiasPair bias;
+        float totalChainWeight = 0.0f; // default
+        float remainingSpace = 0.0f; // default
         bool isCalculated = false;
+        bool isWeightCalculated = false;
     };
 
 private:
+    void Initialize(LayoutWrapper* layoutWrapper);
+    bool TopologicalResultHit(LayoutWrapper* layoutWrapper);
     void DetermineTopologicalOrder(LayoutWrapper* layoutWrapper);
     void MeasureSelf(LayoutWrapper* layoutWrapper);
     void CollectNodesById(LayoutWrapper* layoutWrapper);
@@ -86,20 +95,21 @@ private:
     bool IsGuideline(const std::string& id);
     bool IsBarrier(const std::string& id);
     bool IsGuidelineOrBarrier(const std::string& id);
-    std::optional<float> GetOriginMarginLeft(
-        TextDirection textDirection, const std::unique_ptr<MarginPropertyF>& marginProp);
+    float GetOriginMarginLeft(TextDirection textDirection, const std::unique_ptr<MarginPropertyF>& marginProp);
     BarrierRect GetBarrierRectByReferencedIds(const std::vector<std::string>& referencedIds);
     void MeasureBarrier(const std::string& barrierName);
-    void CheckNodeInHorizontalChain(std::string& currentNode, std::string& nextNode,
-        AlignRulesItem& currentAlignRules, std::vector<std::string>& chainNodes, AlignRule& rightAnchor);
+    void CheckNodeInHorizontalChain(std::string& currentNode,
+        AlignRulesItem& currentAlignRules, std::vector<std::string>& chainNodes,
+        AlignRule& rightAnchor, float& totalChainWeight);
     void CheckHorizontalChain(const ChildMeasureWrapper& measureParam);
-    void CheckNodeInVerticalChain(std::string& currentNode, std::string& nextNode, AlignRulesItem& currentAlignRules,
-        std::vector<std::string>& chainNodes, AlignRule& bottomAnchor);
+    void CheckNodeInVerticalChain(std::string& currentNode, AlignRulesItem& currentAlignRules,
+        std::vector<std::string>& chainNodes, AlignRule& bottomAnchor, float& totalChainWeight);
     void CheckVerticalChain(const ChildMeasureWrapper& measureParam);
     void CheckChain(LayoutWrapper* layoutWrapper);
     void RecordSizeInChain(const std::string& nodeName);
     bool IsNodeInHorizontalChain(const std::string& nodeName, std::string& chainName);
     bool IsNodeInVerticalChain(const std::string& nodeName, std::string& chainName);
+    bool IsNodeInChain(const std::string& nodeName, std::string& chainName, LineDirection direction);
     float GetHorizontalAnchorValueByAlignRule(AlignRule& alignRule);
     float GetVerticalAnchorValueByAlignRule(AlignRule& alignRule);
     std::pair<float, float> CalcOffsetInChainGetStart(const float& anchorDistance, const float& contentSize,
@@ -108,7 +118,7 @@ private:
     bool CalcOffsetInChain(const std::string& chainName, LineDirection direction);
     void PreTopologicalLoopDetectionGetAnchorSet(
         const std::string& nodeName, const AlignRulesItem& alignRulesItem, std::set<std::string>& anchorSet);
-    bool PreTopologicalLoopDetection();
+    bool PreTopologicalLoopDetection(LayoutWrapper* layoutWrapper);
     void TopologicalSort(std::list<std::string>& renderList);
     void CalcSizeParam(LayoutWrapper* layoutWrapper, const std::string& nodeName);
     void CalcOffsetParam(LayoutWrapper* layoutWrapper, const std::string& nodeName);
@@ -121,7 +131,7 @@ private:
     float CalcHorizontalOffsetAlignRight(const HorizontalAlign& alignRule, float& anchorWidth, float& flexItemWidth);
     float CalcHorizontalOffset(
         AlignDirection alignDirection, const AlignRule& alignRule, float containerWidth, const std::string& nodeName);
-    float CalcAnchorWidth(bool anchorIsContainer, float& containerWidth, const std::string& anchor);
+    float CalcAnchorWidth(bool anchorIsContainer, float containerWidth, const std::string& anchor);
     float CalcVerticalOffsetAlignTop(const VerticalAlign& alignRule, float& anchorHeight);
     float CalcVerticalOffsetAlignCenter(const VerticalAlign& alignRule, float& anchorHeight, float& flexItemHeight);
     float CalcVerticalOffsetAlignBottom(const VerticalAlign& alignRule, float& anchorHeight, float& flexItemHeight);
@@ -137,11 +147,18 @@ private:
     void UpdateSizeWhenChildrenEmpty(LayoutWrapper* layoutWrapper);
     bool IsAnchorLegal(const std::string& anchorName);
     void MeasureChild(LayoutWrapper* layoutWrapper);
+    void MeasureChainWeight(LayoutWrapper* layoutWrapper);
+    void InitRemainingSpace(ChainParam& chainParam, LineDirection direction);
     BarrierDirection BarrierDirectionRtl(BarrierDirection barrierDirection);
+    void CalcChainWeightSize(const std::unique_ptr<FlexItemProperty>& flexItem,
+        LayoutConstraintF& childConstraint, const std::string & nodeName, LineDirection direction);
+    bool HasWeight(const std::unique_ptr<FlexItemProperty>& flexItem, LineDirection direction);
     void AdjustOffsetRtl(LayoutWrapper* layoutWrapper);
+    void UpdateDegreeMapWithBarrier(std::queue<std::string>& layoutQueue);
     bool versionGreatorOrEqualToEleven_ = false;
     bool isHorizontalRelyOnContainer_ = false;
     bool isVerticalRelyOnContainer_ = false;
+    bool isChainWeightMode_ = false;
     std::list<std::string> renderList_;
     std::unordered_map<std::string, ChildMeasureWrapper> idNodeMap_;
     std::unordered_map<std::string, uint32_t> incomingDegreeMap_;
@@ -153,6 +170,7 @@ private:
     std::unordered_map<std::string, ChainParam> verticalChains_;
     std::unordered_map<std::string, std::string> horizontalChainNodeMap_;
     std::unordered_map<std::string, std::string> verticalChainNodeMap_;
+    std::mutex relativeContainerMutex_;
     PaddingPropertyF padding_;
     SizeF containerSizeWithoutPaddingBorder_;
 };

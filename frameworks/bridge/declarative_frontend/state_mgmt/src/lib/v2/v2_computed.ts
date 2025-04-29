@@ -62,6 +62,11 @@ class ComputedV2 {
         ObserveV2.getObserve().addRef(this, propertyKey);
         return ObserveV2.autoProxyObject(this, cachedProp);
       },
+      set(_) {
+        const error = `@Computed ${propertyKey} is readonly, cannot set value for it`;
+        stateMgmtConsole.applicationError(error);
+        throw new Error(error);
+      },
       enumerable: true
     });
 
@@ -86,13 +91,57 @@ class ComputedV2 {
     return this.prop_;
   }
 
+  public getComputedFuncName(): string {
+    return this.propertyComputeFunc_.name;
+  }
+
   // register current watchId while executing compute function
   private observeObjectAccess(): Object | undefined {
     ObserveV2.getObserve().startRecordDependencies(this, this.computedId_);
-    let ret = this.propertyComputeFunc_.call(this.target_);
-    ObserveV2.getObserve().stopRecordDependencies();
+    let ret;
+
+    try {
+        ret = this.propertyComputeFunc_.call(this.target_);
+    } catch (e) {
+        stateMgmtConsole.applicationError(`@Computed Exception caught for ${this.propertyComputeFunc_.name}`, e.toString());
+        ret = undefined;
+        throw e;
+    } finally {
+        ObserveV2.getObserve().stopRecordDependencies();
+    }
+
     return ret;
   }
+
+  public static clearComputedFromTarget(target: Object): void {
+    let meta: Object;
+    if (!target || typeof target !== 'object' ||
+        !(meta = target[ObserveV2.COMPUTED_REFS]) || typeof meta !== 'object') {
+      return;
+    }
+
+    stateMgmtConsole.debug(`ComputedV2: clearComputedFromTarget: from target ${target.constructor?.name} computedIds to clear ${JSON.stringify(Array.from(Object.values(meta)))}`);
+    Array.from(Object.values(meta)).forEach((computed: ComputedV2) => ObserveV2.getObserve().clearWatch(computed.computedId_));
+  }
+
+   /**
+   * @function resetComputed
+   * @description
+   * Recalculates the value of the specified computed property based on the current values
+   * of the input variables
+   *
+   * @param {string} computedName - The name of the computed property to be reset.
+  */
+   public resetComputed(computedName: string) : void {
+    let newVal = this.observeObjectAccess();
+
+    let cachedProp = ComputedV2.COMPUTED_CACHED_PREFIX + computedName;
+    if (this.target_[cachedProp] !== newVal) {
+      this.target_[cachedProp] = newVal;
+      ObserveV2.getObserve().fireChange(this.target_, computedName);
+    }
+  }
+
 }
 
 interface AsyncAddComputedJobEntryV2 {
@@ -104,7 +153,12 @@ class AsyncAddComputedV2 {
 
   static addComputed(target: Object, name: string): void {
     if (AsyncAddComputedV2.computedVars.length === 0) {
-      Promise.resolve(true).then(AsyncAddComputedV2.run);
+      Promise.resolve(true)
+      .then(AsyncAddComputedV2.run)
+      .catch(error => {
+        stateMgmtConsole.applicationError(`Exception caught in @Computed ${name}`, error);
+        _arkUIUncaughtPromiseError(error);
+      });
     }
     AsyncAddComputedV2.computedVars.push({target: target, name: name});
   }

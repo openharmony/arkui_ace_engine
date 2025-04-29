@@ -14,7 +14,6 @@
  */
 
 #include "core/components/text_field/textfield_theme.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 
 namespace OHOS::Ace::NG {
@@ -22,15 +21,17 @@ void TextFieldPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const
 {
     PaintProperty::ToJsonValue(json, filter);
     /* no fixed attr below, just return */
-    if (filter.IsFastFilter()) {
+    if (!json || filter.IsFastFilter()) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+    auto host = GetHost();
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>(host ? host->GetThemeScopeId() : 0);
     CHECK_NULL_VOID(textFieldTheme);
 
-    json->PutExtAttr("placeholderColor", propCursorColor_.value_or(Color()).ColorToString().c_str(), filter);
+    json->PutExtAttr("placeholderColor", propPlaceholderColor_.value_or(
+        textFieldTheme->GetPlaceholderColor()).ColorToString().c_str(), filter);
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("color", propCursorColor_.value_or(textFieldTheme->GetCursorColor()).ColorToString().c_str());
     jsonValue->Put("width", propCursorWidth_.value_or(textFieldTheme->GetCursorWidth()).ToString().c_str());

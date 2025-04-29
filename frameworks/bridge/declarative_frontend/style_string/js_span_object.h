@@ -25,8 +25,9 @@
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
-namespace OHOS::Ace::Framework {
+#include "core/components_ng/pattern/text/text_model.h"
 
+namespace OHOS::Ace::Framework {
 class JSFontSpan : public virtual AceType {
     DECLARE_ACE_TYPE(JSFontSpan, AceType)
 
@@ -77,6 +78,7 @@ public:
     static void ParseJsTextOverflow(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
     static void ParseJsWordBreak(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
     static void ParseJsLeadingMargin(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
+    static void ParseParagraphSpacing(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
     static void ParseLeadingMarginPixelMap(const JSRef<JSObject>& leadingMarginObject,
         std::optional<NG::LeadingMargin>& margin, const JsiRef<JsiValue>& leadingMargin);
     void GetTextAlign(const JSCallbackInfo& info);
@@ -91,6 +93,8 @@ public:
     void GetWordBreak(const JSCallbackInfo& info);
     void SetLeadingMargin(const JSCallbackInfo& info);
     void GetLeadingMargin(const JSCallbackInfo& info);
+    void GetParagraphSpacing(const JSCallbackInfo& info);
+    void SetParagraphSpacing(const JSCallbackInfo& info);
 
     static bool IsPixelMap(const JSRef<JSVal>& jsValue);
 
@@ -269,6 +273,8 @@ public:
     void SetImageObjectFit(const JSCallbackInfo& info) {}
     void GetImageLayoutStyle(const JSCallbackInfo& info);
     void SetImageLayoutStyle(const JSCallbackInfo& info) {}
+    void GetImageColorFilter(const JSCallbackInfo& info);
+    void SetImageColorFilter(const JSCallbackInfo& info) {}
 
     const RefPtr<ImageSpan>& GetImageSpan();
     void SetImageSpan(const RefPtr<ImageSpan>& imageSpan);
@@ -280,9 +286,28 @@ private:
     static JSRef<JSObject> CreateEdge(const NG::PaddingPropertyT<NG::CalcLength>& edge);
     static JSRef<JSObject> CreateBorderRadius(const NG::BorderRadiusProperty& borderRadius);
     static void ParseJsImageSpanSizeAttribute(const JSRef<JSObject>& obj, ImageSpanAttribute& imageStyle);
+    static void ParseJsImageSpanColorFilterAttribute(const JSRef<JSObject>& obj, ImageSpanAttribute& imageStyle);
+    static void SetImageSpanColorFilterAttribute(ImageSpanAttribute& imageStyle, const std::vector<float>& matrix);
 
     ACE_DISALLOW_COPY_AND_MOVE(JSImageAttachment);
     RefPtr<ImageSpan> imageSpan_;
+};
+
+class JSNativeCustomSpan : public virtual AceType {
+    DECLARE_ACE_TYPE(JSNativeCustomSpan, AceType)
+
+public:
+    JSNativeCustomSpan() = default;
+    ~JSNativeCustomSpan() override = default;
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JSNativeCustomSpan* imageSpan);
+    static void JSBind(BindingTarget globalObj);
+    void Invalidate(const JSCallbackInfo& info);
+    void AddStyledString(const WeakPtr<SpanStringBase>& spanString);
+    void RemoveStyledString(const WeakPtr<SpanStringBase>& spanString);
+
+private:
+    std::set<WeakPtr<SpanStringBase>> spanStringBaseSet_;
 };
 
 class JSCustomSpan : public CustomSpan {
@@ -299,14 +324,16 @@ public:
         const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);
     static std::function<void(NG::DrawingContext&, CustomSpanOptions)> ParseOnDrawFunc(
         const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);
-
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
     RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
     void SetJsCustomSpanObject(const JSRef<JSObject>& customSpanObj);
     JSRef<JSObject>& GetJsCustomSpanObject();
+    void AddStyledString(const WeakPtr<SpanStringBase>& spanString) override;
+    void RemoveStyledString(const WeakPtr<SpanStringBase>& spanString) override;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(JSCustomSpan);
+    RefPtr<JSNativeCustomSpan> customSpan_;
     JSRef<JSObject> customSpanObj_;
 };
 
@@ -327,6 +354,26 @@ public:
 private:
     ACE_DISALLOW_COPY_AND_MOVE(JSExtSpan);
     JSRef<JSObject> extSpanObj_;
+};
+
+class JSUrlSpan : public virtual AceType {
+    DECLARE_ACE_TYPE(JSUrlSpan, AceType)
+
+public:
+    JSUrlSpan() = default;
+    ~JSUrlSpan() override = default;
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JSUrlSpan* urlSpan);
+    static void JSBind(BindingTarget globalObj);
+    void GetUrlContext(const JSCallbackInfo& info);
+    void SetUrlContext(const JSCallbackInfo& info);
+
+    const RefPtr<UrlSpan>& GetUrlSpan();
+    void SetUrlSpan(const RefPtr<UrlSpan>& urlSpan);
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(JSUrlSpan);
+    RefPtr<UrlSpan> urlContextSpan_;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_STYLE_STRING_JS_SPAN_OBJECT_H

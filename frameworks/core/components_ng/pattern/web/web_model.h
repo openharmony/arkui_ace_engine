@@ -20,9 +20,11 @@
 
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/web/web_property.h"
+#include "core/components_ng/property/menu_property.h"
 
 namespace OHOS::Ace {
 using ScriptItems = std::map<std::string, std::vector<std::string>>;
+using ScriptItemsByOrder = std::vector<std::string>;
 class ACE_FORCE_EXPORT WebModel {
 public:
     static WebModel* GetInstance();
@@ -35,6 +37,7 @@ public:
         std::function<void(const std::string&)>&& setHapPathCallback, int32_t parentWebId, bool popup,
         RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
         const std::string& sharedRenderProcessToken = "") = 0;
+    virtual Color GetDefaultBackgroundColor() { return Color::WHITE; }
     virtual void SetCustomScheme(const std::string& cmdLine) = 0;
     virtual void SetFocusable(bool focusable) {};
     virtual void SetFocusNode(bool isFocusNode) {};
@@ -65,6 +68,8 @@ public:
     virtual void SetOnFileSelectorShow(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnContextMenuShow(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnContextMenuHide(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
+    virtual void SetNewDragStyle(bool isNewDragStyle) {}
+    virtual void SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param) {}
     virtual void SetJsEnabled(bool isJsEnabled) = 0;
     virtual void SetFileAccessEnabled(bool isFileAccessEnabled) = 0;
     virtual void SetOnLineImageAccessEnabled(bool isOnLineImageAccessEnabled) = 0;
@@ -154,17 +159,25 @@ public:
     virtual void SetAudioExclusive(bool audioExclusive) {};
     virtual void SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetNativeEmbedModeEnabled(bool isEmbedModeEnabled) = 0;
+    virtual void SetIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled) = 0;
     virtual void RegisterNativeEmbedRule(const std::string&, const std::string&) = 0;
     virtual void SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
-
+    virtual void SetNativeEmbedVisibilityChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetScreenCaptureRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) {};
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) {}
     virtual void SetNestedScrollExt(const NestedScrollOptionsExt& nestedOpt) {}
     virtual void SetMetaViewport(bool enabled) {}
     virtual void SetLayoutMode(WebLayoutMode mode) {}
     virtual void SetOverScrollMode(OverScrollMode mode) {}
+    virtual void SetBlurOnKeyboardHideMode(BlurOnKeyboardHideMode mode) {}
     virtual void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) {};
+    virtual void JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
+        const ScriptItemsByOrder& scriptItemsByOrder) {};
+    virtual void JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
+        const ScriptItemsByOrder& scriptItemsByOrder) {};
+    virtual void JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
+        const ScriptItemsByOrder& scriptItemsByOrder) {};
     virtual void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems) {};
 
     virtual void SetCopyOptionMode(CopyOptions mode) {};
@@ -177,7 +190,6 @@ public:
     virtual void SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetTextAutosizing(bool isTextAutosizing) {};
     virtual void SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay) = 0;
-    virtual void SetSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled) = 0;
     virtual void SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
     virtual void SetRenderProcessRespondingId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
     virtual void SetSelectionMenuOptions(const WebMenuOptionsParam& webMenuOption) {};
@@ -191,6 +203,10 @@ public:
     virtual void SetKeyboardAvoidMode(const WebKeyboardAvoidMode& mode) {}
     virtual void SetEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
+    virtual void SetEnabledHapticFeedback(bool isEnabled) {}
+    virtual void SetOptimizeParserBudgetEnabled(bool enable) = 0;
+    virtual void SetWebMediaAVSessionEnabled(bool isEnabled) {};
+    virtual void SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) {};
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

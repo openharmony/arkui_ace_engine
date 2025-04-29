@@ -15,31 +15,27 @@
 
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_layout_algorithm.h"
 
-#include "base/log/log_wrapper.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/components/select/select_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_paint_property.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void RecordItemsAndGroups(const RefPtr<FrameNode>& host)
 {
-    auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<MenuItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto menu = pattern->GetMenu();
+    CHECK_NULL_VOID(menu);
+    auto menuPattern = menu->GetPattern<InnerMenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->RecordItemsAndGroups();
+}
 
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-
+void MenuItemGroupLayoutAlgorithm::MeasureChildren(
+    LayoutWrapper* layoutWrapper, float& maxChildrenWidth, SizeF& menuItemGroupSize)
+{
     const auto& props = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(props);
     auto layoutConstraint = props->GetLayoutConstraint();
@@ -54,13 +50,14 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     UpdateHeaderAndFooterMargin(layoutWrapper);
 
     // measure children (header, footer, menuItem)
-    float maxChildrenWidth = GetChildrenMaxWidth(layoutWrapper->GetAllChildrenWithBuild(), childConstraint);
-    SizeF menuItemGroupSize;
+    maxChildrenWidth = GetChildrenMaxWidth(layoutWrapper->GetAllChildrenWithBuild(), childConstraint);
     menuItemGroupSize.SetWidth(maxChildrenWidth);
-    float totalHeight = 0.0f;
-    auto minItemHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
+}
 
-    // measure header
+void MenuItemGroupLayoutAlgorithm::MeasureHeader(
+    LayoutWrapper* layoutWrapper, const RefPtr<FrameNode>& host, float& totalHeight)
+{
+    CHECK_NULL_VOID(host);
     needHeaderPadding_ = NeedHeaderPadding(host);
     auto paintProperty = host->GetPaintProperty<MenuItemGroupPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
@@ -70,13 +67,23 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (headerIndex_ >= 0) {
         auto headerWrapper = layoutWrapper->GetOrCreateChildByIndex(headerIndex_);
         auto headerHeight = headerWrapper->GetGeometryNode()->GetMarginFrameSize().Height();
-        totalHeight += (minItemHeight > headerHeight) ? minItemHeight : headerHeight;
+        totalHeight += (minItemHeight_ > headerHeight) ? minItemHeight_ : headerHeight;
     }
-    // measure menu item
+}
+
+void MenuItemGroupLayoutAlgorithm::MeasureMenuItems(
+    LayoutWrapper* layoutWrapper, float maxChildrenWidth, float& totalHeight)
+{
+    CHECK_NULL_VOID(layoutWrapper);
     auto totalItemCount = layoutWrapper->GetTotalChildCount();
     int32_t currentIndex = itemStartIndex_;
     while (currentIndex < totalItemCount) {
         auto item = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
+        if (!item) {
+            TAG_LOGW(AceLogTag::ACE_MENU, "currentIndex:%{public}d item is null in MenuItemGroup", currentIndex);
+            ++currentIndex;
+            continue;
+        }
         auto childSize = item->GetGeometryNode()->GetMarginFrameSize();
         // set minimum size
         childSize.SetWidth(maxChildrenWidth);
@@ -102,10 +109,32 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (footerIndex_ >= 0) {
         auto footerWrapper = layoutWrapper->GetOrCreateChildByIndex(footerIndex_);
         auto footerHeight = footerWrapper->GetGeometryNode()->GetMarginFrameSize().Height();
-        totalHeight += (minItemHeight > footerHeight) ? minItemHeight : footerHeight;
+        totalHeight += (minItemHeight_ > footerHeight) ? minItemHeight_ : footerHeight;
     }
+}
+
+void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    RecordItemsAndGroups(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    SizeF menuItemGroupSize;
+    float maxChildrenWidth = 0.0f;
+    MeasureChildren(layoutWrapper, maxChildrenWidth, menuItemGroupSize);
+    minItemHeight_ = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
+    float totalHeight = 0.0f;
+    MeasureHeader(layoutWrapper, host, totalHeight);
+    MeasureMenuItems(layoutWrapper, maxChildrenWidth, totalHeight);
+
     // set menu size
     needFooterPadding_ = NeedFooterPadding(host);
+    auto paintProperty = host->GetPaintProperty<MenuItemGroupPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
     paintProperty->UpdateNeedFooterPadding(needFooterPadding_);
     float footerPadding = needFooterPadding_ ? groupDividerPadding_ : 0.0f;
     totalHeight += footerPadding;
@@ -254,6 +283,7 @@ void MenuItemGroupLayoutAlgorithm::UpdateHeaderAndFooterMargin(LayoutWrapper* la
         return;
     }
     auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<MenuItemGroupPattern>();
     pattern->UpdateMenuItemIconInfo();
 

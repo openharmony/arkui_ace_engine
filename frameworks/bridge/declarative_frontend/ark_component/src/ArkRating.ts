@@ -62,7 +62,19 @@ class RatingStarStyleModifier extends ModifierWithKey<ArkStarStyle> {
       this.stageValue?.foregroundUri !== this.value?.foregroundUri || this.stageValue?.secondaryUri !== this.value?.secondaryUri;
   }
 }
-
+class RatingOnChangeModifier extends ModifierWithKey<(value: number) => void> {
+  constructor(value: (value: number) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('ratingOnChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().rating.resetOnChange(node);
+    } else {
+      getUINativeModule().rating.setOnChange(node, this.value);
+    }
+  }
+}
 class RatingContentModifier extends ModifierWithKey<ContentModifier<RatingConfiguration>> {
   constructor(value: ContentModifier<RatingConfiguration>) {
     super(value);
@@ -81,6 +93,20 @@ class ArkRatingComponent extends ArkComponent implements RatingAttribute {
   needRebuild: boolean = false;
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
+  }
+  allowChildCount(): number {
+    return 0;
+  }
+  initialize(value: Object[]): this {
+    if (!value.length) {
+      return this;
+    }
+    if (!isUndefined(value[0]) && !isNull(value[0]) && isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, RatingOptionsModifier.identity, RatingOptionsModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, RatingOptionsModifier.identity, RatingOptionsModifier, undefined);
+    }
+    return this;
   }
   stars(value: number): this {
     modifierWithKey(this._modifiersWithKeys, RatingStarsModifier.identity, RatingStarsModifier, value);
@@ -104,7 +130,8 @@ class ArkRatingComponent extends ArkComponent implements RatingAttribute {
     return this;
   }
   onChange(callback: (value: number) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, RatingOnChangeModifier.identity, RatingOnChangeModifier, callback);
+    return this;
   }
   contentModifier(value: ContentModifier<RatingConfiguration>): this {
     modifierWithKey(this._modifiersWithKeys, RatingContentModifier.identity, RatingContentModifier, value);
@@ -136,6 +163,26 @@ class ArkRatingComponent extends ArkComponent implements RatingAttribute {
     return this.ratingNode.getFrameNode();
   }
 }
+
+class RatingOptionsModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('ratingOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().radio.setRatingOptions(node, undefined, undefined);
+    } else {
+      getUINativeModule().radio.setRatingOptions(node, this.value?.rating, this.value?.indicator);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue?.rating, this.value?.rating) ||
+      !isBaseOrResourceEqual(this.stageValue?.indicator, this.value?.indicator);
+  }
+}
+
 // @ts-ignore
 globalThis.Rating.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {

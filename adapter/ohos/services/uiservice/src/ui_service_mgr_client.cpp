@@ -15,12 +15,7 @@
 
 #include "ui_service_mgr_client.h"
 
-#include "dialog_callback.h"
-#include "if_system_ability_manager.h"
-#include "ipc_skeleton.h"
 #include "iservice_registry.h"
-#include "string_ex.h"
-#include "system_ability_definition.h"
 #include "ui_service_hilog.h"
 
 namespace OHOS {

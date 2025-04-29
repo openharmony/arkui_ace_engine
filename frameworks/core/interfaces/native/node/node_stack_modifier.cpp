@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,7 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/node_stack_modifier.h"
-#include <cstdint>
 
-#include "core/pipeline/base/element_register.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components/common/properties/alignment.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -111,14 +106,26 @@ int32_t GetAlignContent(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIStackModifier* GetStackModifier()
 {
-    static const ArkUIStackModifier modifier = { SetAlignContent, ResetAlignContent, GetAlignContent };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIStackModifier modifier = {
+        .setAlignContent = SetAlignContent,
+        .resetAlignContent = ResetAlignContent,
+        .getAlignContent = GetAlignContent,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIStackModifier* GetCJUIStackModifier()
 {
-    static const CJUIStackModifier modifier = { SetAlignContent, ResetAlignContent, GetAlignContent };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIStackModifier modifier = {
+        .setAlignContent = SetAlignContent,
+        .resetAlignContent = ResetAlignContent,
+        .getAlignContent = GetAlignContent,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

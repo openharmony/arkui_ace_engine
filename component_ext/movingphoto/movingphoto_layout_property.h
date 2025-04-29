@@ -18,7 +18,6 @@
 
 #include "movingphoto_styles.h"
 #include "base/geometry/ng/size_t.h"
-#include "base/geometry/size.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
@@ -53,6 +52,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MovingPhotoStyle, ImageSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MovingPhotoStyle, VideoSize, SizeF, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MovingPhotoStyle, MovingPhotoUri, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MovingPhotoStyle, XmageHeight, float, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MovingPhotoStyle, ImageSize, SizeF, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(MovingPhotoLayoutProperty);

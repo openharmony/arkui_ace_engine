@@ -79,5 +79,36 @@ public:
     void Close(const JSCallbackInfo& info) {}
 };
 
+class JSMockNativeCustomSpan {
+public:
+    JSMockNativeCustomSpan() = default;
+    ~JSMockNativeCustomSpan() = default;
+
+    static void JSBind(BindingTarget globalObj);
+    void Invalidate(const JSCallbackInfo& info) {}
+};
+
+class JSMockViewBuildNodeBase {
+public:
+    JSMockViewBuildNodeBase() = default;
+    ~JSMockViewBuildNodeBase() = default;
+
+    static void JSBind(BindingTarget globalObj);
+    static void ConstructorCallback(const JSCallbackInfo& info) {}
+    static void DestructorCallback(JSMockViewBuildNodeBase* node) {}
+    static void SetArkThemeScopeManager(const JSCallbackInfo& info) {}
+    void Id(const JSCallbackInfo& info) {}
+    void DebugInfo(const JSCallbackInfo& info) {}
+    void DebugInfoElmtId(const JSCallbackInfo& info) {}
+    void GetChildById(const JSCallbackInfo& info) {}
+    void AddChild(const JSCallbackInfo& info) {}
+    void PurgeDeletedElmtIds(const JSCallbackInfo& info) {}
+    void UpdateStateVarsOfChildByElmtId(const JSCallbackInfo& info) {}
+    void CreateOrGetNode(const JSCallbackInfo& info) {}
+    void IfElseBranchUpdateFunction(const JSCallbackInfo& info) {}
+    void OnWillApplyThemeInternally(const JSCallbackInfo& info) {}
+    void OnWillApplyTheme(const JSCallbackInfo& info) {}
+    void OnGlobalThemeChanged(const JSCallbackInfo& info) {}
+};
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_MOCK_H

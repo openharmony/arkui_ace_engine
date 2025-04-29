@@ -39,6 +39,8 @@ enum class NavDestinationState {
     ON_WILL_HIDE = 5,
     ON_WILL_APPEAR = 6,
     ON_WILL_DISAPPEAR = 7,
+    ON_ACTIVE = 8,
+    ON_INACTIVE = 9,
     ON_BACKPRESS = 100,
 };
 
@@ -49,6 +51,8 @@ struct NavDestinationInfo {
     int32_t index;
     napi_value param;
     std::string navDestinationId;
+    NavDestinationMode mode;
+    int32_t uniqueId;
 
     NavDestinationInfo() = default;
 
@@ -60,6 +64,12 @@ struct NavDestinationInfo {
         int32_t index, napi_value param, std::string navDesId)
         : navigationId(std::move(id)), name(std::move(name)), state(state),
           index(index), param(param), navDestinationId(std::move(navDesId))
+    {}
+
+    NavDestinationInfo(std::string id, std::string name, NavDestinationState state,
+        int32_t index, napi_value param, std::string navDesId, NavDestinationMode mode, int32_t uniqueId)
+        : navigationId(std::move(id)), name(std::move(name)), state(state),
+        index(index), param(param), navDestinationId(std::move(navDesId)), mode(mode), uniqueId(std::move(uniqueId))
     {}
 };
 
@@ -139,6 +149,16 @@ struct TabContentInfo {
     {}
 };
 
+enum class PanGestureState {
+    BEFORE = 0,
+    AFTER = 1,
+};
+
+struct PanGestureInfo {
+    PanGestureState gestureState;
+    CurrentCallbackState callbackState;
+};
+
 class ACE_FORCE_EXPORT UIObserverHandler {
 public:
     UIObserverHandler() = default;
@@ -152,8 +172,14 @@ public:
         const ClickInfo& clickInfo, const RefPtr<FrameNode>& frameNode);
     void NotifyDidClick(const GestureEvent& gestureEventInfo,
         const ClickInfo& clickInfo, const RefPtr<FrameNode>& frameNode);
+    void NotifyPanGestureStateChange(const GestureEvent& gestureEventInfo,
+        const RefPtr<PanRecognizer>& current, const RefPtr<FrameNode>& frameNode,
+        const PanGestureInfo& panGestureInfo);
     void NotifyTabContentStateUpdate(const TabContentInfo& info);
     std::shared_ptr<NavDestinationInfo> GetNavigationState(const RefPtr<AceType>& node);
+    std::shared_ptr<NavDestinationInfo> GetNavDestinationInfo(const RefPtr<UINode>& current);
+    std::shared_ptr<NavDestinationInfo> GetNavigationInnerState(const RefPtr<AceType>& node);
+    std::shared_ptr<NavDestinationInfo> GetNavigationOuterState(const RefPtr<AceType>& node);
     std::shared_ptr<ScrollEventInfo> GetScrollEventState(const RefPtr<AceType>& node);
     std::shared_ptr<RouterPageInfoNG> GetRouterPageState(const RefPtr<AceType>& node);
     void NotifyNavDestinationSwitch(std::optional<NavDestinationInfo>&& from,
@@ -163,18 +189,20 @@ public:
     using RouterPageHandleFunc = void (*)(AbilityContextInfo&, const RouterPageInfoNG&);
     using DrawCommandSendHandleFunc = void (*)();
     using LayoutDoneHandleFunc = void (*)();
-    using NavDestinationSwitchHandleFunc = std::function<void(const AbilityContextInfo&, NavDestinationSwitchInfo&)>;
+    using NavDestinationSwitchHandleFunc = void (*)(const AbilityContextInfo&, NavDestinationSwitchInfo&);
     using WillClickHandleFunc = void (*)(
         AbilityContextInfo&, const GestureEvent&, const ClickInfo&, const RefPtr<FrameNode>&);
     using DidClickHandleFunc = void (*)(
         AbilityContextInfo&, const GestureEvent&, const ClickInfo&, const RefPtr<FrameNode>&);
+    using PanGestureHandleFunc = void (*)(AbilityContextInfo&, const GestureEvent&,
+        const RefPtr<PanRecognizer>& current, const RefPtr<FrameNode>&, const NG::PanGestureInfo& panGestureInfo);
     using TabContentStateHandleFunc = void (*)(const TabContentInfo&);
     NavDestinationSwitchHandleFunc GetHandleNavDestinationSwitchFunc();
     void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
     void SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func);
     void SetHandleRouterPageChangeFunc(RouterPageHandleFunc func);
-    using DensityHandleFunc = std::function<void(AbilityContextInfo&, double)>;
-    void SetHandleDensityChangeFunc(const DensityHandleFunc& func);
+    using DensityHandleFunc = void (*)(AbilityContextInfo&, double);
+    void SetHandleDensityChangeFunc(DensityHandleFunc func);
     void SetLayoutDoneHandleFunc(DrawCommandSendHandleFunc func);
     void HandleLayoutDoneCallBack();
     void SetDrawCommandSendHandleFunc(LayoutDoneHandleFunc func);
@@ -182,6 +210,7 @@ public:
     void SetHandleNavDestinationSwitchFunc(NavDestinationSwitchHandleFunc func);
     void SetWillClickFunc(WillClickHandleFunc func);
     void SetDidClickFunc(DidClickHandleFunc func);
+    void SetPanGestureHandleFunc(PanGestureHandleFunc func);
     void SetHandleTabContentStateUpdateFunc(TabContentStateHandleFunc func);
 private:
     NavigationHandleFunc navigationHandleFunc_ = nullptr;
@@ -189,10 +218,11 @@ private:
     RouterPageHandleFunc routerPageHandleFunc_ = nullptr;
     LayoutDoneHandleFunc layoutDoneHandleFunc_ = nullptr;
     DrawCommandSendHandleFunc drawCommandSendHandleFunc_ = nullptr;
-    DensityHandleFunc densityHandleFunc_;
-    NavDestinationSwitchHandleFunc navDestinationSwitchHandleFunc_;
+    DensityHandleFunc densityHandleFunc_ = nullptr;
+    NavDestinationSwitchHandleFunc navDestinationSwitchHandleFunc_ = nullptr;
     WillClickHandleFunc willClickHandleFunc_ = nullptr;
     DidClickHandleFunc didClickHandleFunc_ = nullptr;
+    PanGestureHandleFunc panGestureHandleFunc_ = nullptr;
     TabContentStateHandleFunc tabContentStateHandleFunc_ = nullptr;
 
     napi_value GetUIContextValue();

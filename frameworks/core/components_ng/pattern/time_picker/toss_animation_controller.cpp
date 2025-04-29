@@ -17,9 +17,6 @@
 
 #include <sys/time.h>
 
-#include "base/log/log.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -118,6 +115,9 @@ void TimePickerTossAnimationController::StartSpringMotion()
         if (isTouchBreak == false) {
             column->SetTossStatus(false);
             column->SetYOffset(0.0);
+            if (!NearZero(column->GetOffset()) && column->IsStartEndTimeDefined()) {
+                column->TossStoped();
+            }
         }
     };
     AnimationUtils::Animate(
@@ -163,7 +163,7 @@ RefPtr<Curve> TimePickerTossAnimationController::UpdatePlayAnimationValue()
 
 double TimePickerTossAnimationController::GetCurrentTime() const
 {
-    struct timeval tv = { 0 };
+    struct timeval tv {};
     int result = gettimeofday(&tv, nullptr);
     if (result != 0) {
         return 0.0;

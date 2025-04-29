@@ -35,16 +35,31 @@ class CanvasPaintMethod;
 class OffscreenCanvasPattern;
 class CanvasModifier;
 // CanvasPattern is the base class for custom paint render node to perform paint canvas.
-class ACE_EXPORT CanvasPattern : public Pattern {
+class ACE_FORCE_EXPORT CanvasPattern : public Pattern {
     DECLARE_ACE_TYPE(CanvasPattern, Pattern);
 
 public:
     CanvasPattern() = default;
     ~CanvasPattern() override;
 
+    void SetOnContext2DAttach(std::function<void()>&& callback);
+    void SetOnContext2DDetach(std::function<void()>&& callback);
+
+    int32_t GetId() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, -1);
+        return host->GetId();
+    }
+
+    void AttachRenderContext();
+    void DetachRenderContext();
+    void OnAttachToMainTree() override;
+
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        return RenderContext::ContextParam { RenderContext::ContextType::INCREMENTAL_CANVAS };
+        return RenderContext::ContextParam { .type = RenderContext::ContextType::INCREMENTAL_CANVAS,
+            .surfaceName = std::nullopt };
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
@@ -67,6 +82,11 @@ public:
     bool IsSupportDrawModifier() const override
     {
         return false;
+    }
+
+    bool IsAttached() const
+    {
+        return isAttached_;
     }
 
     void SetAntiAlias(bool isEnabled);
@@ -149,6 +169,7 @@ public:
     void UpdateFontStyle(FontStyle style);
     void UpdateFontFamilies(const std::vector<std::string>& families);
     void UpdateFontSize(const Dimension& size);
+    void UpdateLetterSpacing(const Dimension& letterSpacing);
     void UpdateLineJoin(LineJoinStyle join);
     void SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient);
     void UpdateFillPattern(const std::weak_ptr<Ace::Pattern>& pattern);
@@ -158,6 +179,8 @@ public:
     void SetFilterParam(const std::string& filterStr);
     TransformParam GetTransform() const;
     void SetDensity(double density);
+    void SetTransform(std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform);
+    int32_t GetId();
 
     void SaveLayer();
     void RestoreLayer();
@@ -167,9 +190,15 @@ public:
     void StopImageAnalyzer();
     void Reset();
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
 
 private:
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromMainTree() override;
+    void FireOnContext2DAttach();
+    void FireOnContext2DDetach();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnSizeChanged(const DirtySwapConfig& config, bool needReset);
     void CreateAnalyzerOverlay();
@@ -181,6 +210,8 @@ private:
     void OnModifyDone() override;
     void UpdateTextDefaultDirection();
 
+    std::function<void()> onContext2DAttach_;
+    std::function<void()> onContext2DDetach_;
     RefPtr<CanvasPaintMethod> paintMethod_;
     std::optional<SizeF> canvasSize_;
     SizeF dirtyPixelGridRoundSize_ = { -1, -1 };
@@ -190,6 +221,7 @@ private:
     bool isEnableAnalyzer_ = false;
     TextDirection currentSetTextDirection_ = TextDirection::INHERIT;
     RefPtr<CanvasModifier> contentModifier_;
+    bool isAttached_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(CanvasPattern);
 };
 } // namespace OHOS::Ace::NG

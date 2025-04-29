@@ -16,15 +16,13 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("event_manager_test_ng") {
   type = "new"
   module_output = "events"
-  flutter_skia = true
-  render = true
   sources = [
-    "$ace_root/frameworks/core/event/mouse_event.cpp",
-    "$ace_root/frameworks/core/gestures/gesture_referee.cpp",
     "$ace_root/test/mock/core/common/mock_watch_dog.cpp",
     "$ace_root/test/mock/core/common/mock_window.cpp",
     "event_dump_test_ng.cpp",
+    "event_manager_dispatch_mouse_hover_event_ng.cpp",
     "event_manager_test_ng.cpp",
+    "event_manager_test_ng_issuse.cpp",
     "event_manager_test_ng_new.cpp",
   ]
 }
@@ -45,6 +43,21 @@ ace_unittest("drag_event_test_ng") {
   ]
 }
 
+ace_unittest("drag_drop_event_test_ng") {
+  type = "new"
+  module_output = "events"
+  sources = [ "./drag_event/drag_drop_event_test_ng.cpp" ]
+}
+
+ace_unittest("drag_event_test_ng_base") {
+  type = "new"
+  module_output = "events"
+  sources = [
+    "./drag_event/drag_event_test_ng_base.cpp",
+    "./drag_event/drag_event_test_ng_issue.cpp",
+  ]
+}
+
 ace_unittest("event_hub_test_ng") {
   type = "new"
   module_output = "events"
@@ -55,7 +68,19 @@ ace_unittest("focus_hub_test_ng") {
   type = "new"
   module_output = "events"
   sources = [
+    "focus_core/focus_api_test.cpp",
+    "focus_core/focus_area_test.cpp",
+    "focus_core/focus_creatbox_test.cpp",
+    "focus_core/focus_request_test.cpp",
+    "focus_core/focus_test_base.cpp",
+    "focus_core/focus_window_test.cpp",
+    "focus_core/linear_focus_test.cpp",
+    "focus_core/lost_focus_to_view_root_test.cpp",
+    "focus_core/page_focus_switch_test.cpp",
+    "focus_core/passive_last_focus_test.cpp",
     "focus_hub_test_ng.cpp",
+    "focus_hub_test_ng_branch_coverage.cpp",
+    "focus_hub_test_ng_for_paint_focus_state.cpp",
     "focus_hub_test_ng_for_property_config.cpp",
     "focus_hub_test_ng_new.cpp",
   ]
@@ -68,6 +93,7 @@ ace_unittest("gesture_event_hub_test_ng") {
     "gesture_event_hub_test_ng.cpp",
     "gesture_event_hub_test_ng_coverage.cpp",
     "gesture_event_hub_test_ng_property_config.cpp",
+    "gesture_event_hub_test_three_ng.cpp",
     "gesture_event_hub_test_two_ng.cpp",
   ]
 }
@@ -75,16 +101,22 @@ ace_unittest("gesture_event_hub_test_ng") {
 ace_unittest("input_event_hub_test_ng") {
   type = "new"
   module_output = "events"
-  sources = [
-    "$ace_root/frameworks/core/event/mouse_event.cpp",
-    "input_event_hub_test_ng.cpp",
-  ]
+  sources = [ "input_event_hub_test_ng.cpp" ]
 }
 
 ace_unittest("long_press_event_test_ng") {
   module_output = "events"
   type = "new"
   sources = [ "long_press_event_test_ng.cpp" ]
+}
+
+ace_unittest("mouse_style_manager_test_ng") {
+  module_output = "events"
+  type = "new"
+  sources = [
+    "$ace_root/frameworks/base/mousestyle/mouse_style.cpp",
+    "mouse_style_manager_test_ng.cpp",
+  ]
 }
 
 ace_unittest("pan_event_test_ng") {
@@ -121,6 +153,10 @@ ace_unittest("input_event_test_ng") {
   type = "new"
   module_output = "events"
   sources = [ "input_event_test_ng.cpp" ]
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
 }
 
 ace_unittest("focus_box_test_ng") {
@@ -129,10 +165,18 @@ ace_unittest("focus_box_test_ng") {
   sources = [ "focus_box_test_ng.cpp" ]
 }
 
+ace_unittest("axis_event_test_ng") {
+  type = "new"
+  module_output = "events"
+  sources = [ "axis_event_test_ng.cpp" ]
+}
+
 group("core_event_unittest") {
   testonly = true
   deps = [
+    ":axis_event_test_ng",
     ":click_event_test_ng",
+    ":drag_drop_event_test_ng",
     ":drag_event_test_ng",
     ":event_hub_test_ng",
     ":event_manager_test_ng",
@@ -142,6 +186,7 @@ group("core_event_unittest") {
     ":input_event_hub_test_ng",
     ":input_event_test_ng",
     ":long_press_event_test_ng",
+    ":mouse_style_manager_test_ng",
     ":pan_event_test_ng",
     ":response_ctrl_test_ng",
     ":scrollable_event_test_ng",

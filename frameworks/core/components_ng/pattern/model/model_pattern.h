@@ -57,6 +57,16 @@ public:
         return MakeRefPtr<ModelLayoutAlgorithm>(WeakClaim(RawPtr(modelAdapter_)));
     }
 
+    void UpdateTransformHintChangedCallbackId(std::optional<int32_t> id)
+    {
+        transformHintChangedCallbackId_ = id;
+    }
+
+    bool HasTransformHintChangedCallbackId() const
+    {
+        return transformHintChangedCallbackId_.has_value();
+    }
+
     void OnModifyDone() override;
     void OnRebuildFrame() override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -74,6 +84,9 @@ private:
 
     RefPtr<ModelAdapterWrapper> modelAdapter_;
     RefPtr<TouchEventImpl> touchListener_;
+
+    std::optional<int32_t> transformHintChangedCallbackId_;
+    uint32_t rotation_ = 0; // Transform
 
     ACE_DISALLOW_COPY_AND_MOVE(ModelPattern);
 };

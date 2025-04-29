@@ -49,6 +49,7 @@ struct WebEvent : Event {
     EventMarker windowExitId;
     EventMarker overScrollId;
     EventMarker nativeEmbedLifecycleChangeId;
+    EventMarker nativeEmbedVisibilityChangeId;
     EventMarker nativeEmbedGestureEventId;
     EventMarker renderProcessNotRespondingId;
     EventMarker renderProcessRespondingId;
@@ -346,6 +347,19 @@ public:
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.nativeEmbedLifecycleChangeId;
     }
+
+    void SetNativeEmbedVisibilityChangeId(const EventMarker& embedVisibilityChangeId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.nativeEmbedVisibilityChangeId = embedVisibilityChangeId;
+    }
+
+    const EventMarker& GetNativeEmbedVisibilityChangeId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.nativeEmbedVisibilityChangeId;
+    }
+    
     void SetNativeEmbedGestureEventId(const EventMarker& embedGestureEventId)
     {
         auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);

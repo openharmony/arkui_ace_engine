@@ -14,17 +14,11 @@
  */
 
 #include "core/components_ng/pattern/text/image_span_view.h"
+#include <cstdint>
 
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
-#include "core/image/image_source_info.h"
+#include "core/components_ng/base/view_abstract.h"
 
 namespace OHOS::Ace::NG {
 void ImageSpanView::SetObjectFit(ImageFit value)
@@ -52,6 +46,14 @@ void ImageSpanView::SetBaselineOffset(FrameNode* frameNode, const Dimension& val
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, BaselineOffset, value, frameNode);
 }
 
+float ImageSpanView::GetBaselineOffset(FrameNode* frameNode, int32_t unit)
+{
+    Dimension value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ImageLayoutProperty, BaselineOffset,
+        value, frameNode, value);
+    return value.GetNativeValue(static_cast<DimensionUnit>(unit));
+}
+
 void ImageSpanView::SetAlt(FrameNode* frameNode, RefPtr<PixelMap>& pixMap)
 {
     auto srcInfo = ImageSourceInfo(pixMap);
@@ -67,17 +69,17 @@ void ImageSpanView::SetPlaceHolderStyle(TextBackgroundStyle& style)
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, HasPlaceHolderStyle,
         style.backgroundColor.has_value() || style.backgroundRadius.has_value());
     auto frameNodeRef = AceType::Claim<FrameNode>(frameNode);
-    SpanNode::RequestTextFlushDirty(AceType::Claim<FrameNode>(frameNode));
+    SpanNode::RequestTextFlushDirty(AceType::Claim<FrameNode>(frameNode), true);
 }
 
 void ImageSpanView::SetPlaceHolderStyle(FrameNode* frameNode, TextBackgroundStyle& style)
 {
     style.groupId = frameNode->GetId();
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, PlaceHolderStyle, style);
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, HasPlaceHolderStyle,
-        style.backgroundColor.has_value() || style.backgroundRadius.has_value());
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, PlaceHolderStyle, style, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, HasPlaceHolderStyle,
+        style.backgroundColor.has_value() || style.backgroundRadius.has_value(), frameNode);
     auto frameNodeRef = AceType::Claim<FrameNode>(frameNode);
-    SpanNode::RequestTextFlushDirty(AceType::Claim<FrameNode>(frameNode));
+    SpanNode::RequestTextFlushDirty(AceType::Claim<FrameNode>(frameNode), true);
 }
 
 void ImageSpanView::Create()
@@ -143,7 +145,7 @@ void ImageSpanView::SetOnComplete(
     FrameNode* frameNode, std::function<void(const LoadImageSuccessEvent& info)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ImageEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnComplete(std::move(callback));
 }
@@ -151,8 +153,22 @@ void ImageSpanView::SetOnComplete(
 void ImageSpanView::SetOnError(FrameNode* frameNode, std::function<void(const LoadImageFailEvent& info)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ImageEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnError(std::move(callback));
+}
+
+void ImageSpanView::SetBorderRadius(FrameNode* frameNode, NG::BorderRadiusProperty borderRadius)
+{
+    ViewAbstract::SetBorderRadius(frameNode, borderRadius);
+    ImageModelNG::SetBackBorder(frameNode);
+}
+
+void ImageSpanView::ResetBorderRadius(FrameNode* frameNode)
+{
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(Dimension(0));
+    ViewAbstract::SetBorderRadius(frameNode, borderRadius);
+    ImageModelNG::ResetBackBorder(frameNode);
 }
 } // namespace OHOS::Ace::NG

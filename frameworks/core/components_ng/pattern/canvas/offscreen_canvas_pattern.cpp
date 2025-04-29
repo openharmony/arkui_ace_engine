@@ -28,13 +28,7 @@ OffscreenCanvasPattern::OffscreenCanvasPattern(int32_t width, int32_t height)
 void OffscreenCanvasPattern::UpdateSize(int32_t width, int32_t height)
 {
     CHECK_NULL_VOID(offscreenPaintMethod_);
-    return offscreenPaintMethod_->UpdateSize(width, height);
-}
-
-bool OffscreenCanvasPattern::IsSucceed()
-{
-    CHECK_NULL_RETURN(offscreenPaintMethod_, false);
-    return offscreenPaintMethod_->IsSucceed();
+    return offscreenPaintMethod_->UpdateSize(std::max(width, 0), std::max(height, 0));
 }
 
 void OffscreenCanvasPattern::FillRect(const Rect& rect)
@@ -396,6 +390,11 @@ void OffscreenCanvasPattern::SetFontSize(const Dimension& size)
     offscreenPaintMethod_->SetFontSize(size);
 }
 
+void OffscreenCanvasPattern::SetLetterSpacing(const Dimension& letterSpacing)
+{
+    offscreenPaintMethod_->SetLetterSpacing(letterSpacing);
+}
+
 std::string OffscreenCanvasPattern::ToDataURL(const std::string& type, const double quality)
 {
     return offscreenPaintMethod_->ToDataURL(type, quality);
@@ -404,6 +403,11 @@ std::string OffscreenCanvasPattern::ToDataURL(const std::string& type, const dou
 TransformParam OffscreenCanvasPattern::GetTransform() const
 {
     return offscreenPaintMethod_->GetTransform();
+}
+
+void OffscreenCanvasPattern::SetTransform(std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform)
+{
+    offscreenPaintMethod_->SetTransform(pattern, transform);
 }
 
 void OffscreenCanvasPattern::SaveLayer()

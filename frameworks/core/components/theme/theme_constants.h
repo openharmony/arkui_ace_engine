@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -181,6 +181,14 @@ public:
      */
     uint32_t GetSymbolByName(const char *name) const;
 
+     /*
+     * Get int value from platform constants.
+     * NOTE: false will be returned if not found or value is not uint32_t.
+     * @param[in] key Target key.
+     * @return uint32_t value corresponding to the name.
+     */
+    uint32_t GetSymbolById(uint32_t resId) const;
+
     /*
      * Get int array value from platform constants.
      * NOTE: empty array will be returned if not found or value is not boolean.
@@ -256,6 +264,22 @@ public:
      * @return success or not to get file info.
      */
     bool GetRawFileDescription(const std::string& rawfileName, RawfileDescription& rawfileDescription) const;
+
+    /*
+     * Close rawfile file description.
+     * NOTE: false value will be returned if not found.
+     * @param[in] rawfileName Target rawfile.
+     * @return success or not to close file info.
+     */
+    bool CloseRawFileDescription(const std::string& rawfileName) const;
+
+    /*
+     * Get rawfile file description which will not be cached.
+     * NOTE: false value will be returned if not found.
+     * @param[in] rawfileName Target rawfile.
+     * @return success or not to close file info.
+     */
+    bool GetRawFD(const std::string& rawfileName, RawfileDescription& rawfileDescription) const;
 
     /*
      * Get resource media file path.
@@ -338,6 +362,11 @@ public:
         }
     }
 
+    void UpdateResourceAdapter(const RefPtr<ResourceAdapter>& adapter)
+    {
+        resAdapter_ = adapter;
+    }
+
     uint32_t GetResourceLimitKeys() const
     {
         CHECK_NULL_RETURN(resAdapter_, 0);
@@ -349,19 +378,7 @@ public:
         return resAdapter_;
     }
 
-    RefPtr<ThemeStyle> GetPatternByName(const std::string& patternName)
-    {
-        currentThemeStyle_->CheckThemeStyleLoaded(patternName);
-        auto patternStyle = currentThemeStyle_->GetAttr<RefPtr<ThemeStyle>>(patternName, nullptr);
-        if (!patternStyle && resAdapter_) {
-            patternStyle = resAdapter_->GetPatternByName(patternName);
-            ResValueWrapper value = { .type = ThemeConstantsType::PATTERN,
-                .value = patternStyle };
-            currentThemeStyle_->SetAttr(patternName, value);
-        }
-        return patternStyle;
-    }
-
+    RefPtr<ThemeStyle> GetPatternByName(const std::string& patternName);
 private:
     static const ResValueWrapper* GetPlatformConstants(uint32_t key);
     static const ResValueWrapper* styleMapDefault[];

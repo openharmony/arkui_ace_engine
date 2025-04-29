@@ -20,10 +20,8 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/base_text_select_overlay.h"
-#include "core/components_ng/pattern/text/text_base.h"
-#include "core/event/ace_events.h"
+
 namespace OHOS::Ace::NG {
 
 class TextFieldSelectOverlay : public BaseTextSelectOverlay {
@@ -44,17 +42,19 @@ public:
 
     void OnResetTextSelection() override;
     void AfterCloseOverlay() override;
-    RectF GetFirstHandleLocalPaintRect() override;
-    RectF GetSecondHandleLocalPaintRect() override;
+    RectF GetHandleLocalPaintRect(DragHandleIndex dragHandleIndex) override;
     void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag) override;
+    void UpdateAllHandlesOffset() override;
+    void UpdateFirstHandleOffset() override;
+    void UpdateSecondHandleOffset() override;
 
     // override SelectOverlayHolder
     std::optional<SelectHandleInfo> GetFirstHandleInfo() override;
     std::optional<SelectHandleInfo> GetSecondHandleInfo() override;
     void OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlayDirtyFlag dirtyFlag) override;
     void OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode) override;
-    RectF GetSelectArea() override;
     std::string GetSelectedText() override;
+    bool IsStopBackPress() const override;
 
     // override SelectOverlayCallback
     void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type) override;
@@ -62,9 +62,9 @@ public:
     void OnHandleMoveDone(const RectF& rect, bool isFirst) override;
     void OnAfterSelectOverlayShow(bool isCreate) override;
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info = nullptr) override;
-    void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) override;
+    void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside = true) override;
     void OnHandleIsHidden() override;
-    void OnHandleMoveStart(bool isFirst) override;
+    void OnHandleMoveStart(const GestureEvent& event, bool isFirst) override;
 
     void HandleOnShowMenu();
 
@@ -88,14 +88,25 @@ public:
     }
 
     int32_t GetCaretPositionOnHandleMove(const OffsetF& localOffset, bool isFirst);
+    bool IsClipHandleWithViewPort() override
+    {
+        return !HasRenderTransform();
+    }
+    std::optional<Color> GetHandleColor() override;
+
+protected:
+    bool AllowTranslate() override;
+    bool AllowSearch() override;
+    bool AllowShare() override;
+    RectF GetSelectAreaFromRects(SelectRectsType pos) override;
 
 private:
     std::optional<SelectHandleInfo> GetHandleInfo(const RectF& handlePaintRect);
     void UpdatePattern(const OverlayRequest& request);
     int32_t GetTextAreaCaretPosition(const OffsetF& localOffset);
     int32_t GetTextInputCaretPosition(const OffsetF& localOffset, bool isFirst);
-    void StartVibratorByCaretIndexChange(const int32_t currentIndex, const int32_t preIndex);
     void CloseMagnifier();
+    void TriggerContentToScroll(const OffsetF& localOffset, bool isEnd);
     SourceType lastSourceType_ = SourceType::NONE;
     std::vector<std::string> pasteMimeTypes_ = { "text/plain", "text/html" };
 };

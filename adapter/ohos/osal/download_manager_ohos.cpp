@@ -15,14 +15,12 @@
 
 #include <dlfcn.h>
 
-#include "base/log/log.h"
 #include "base/log/log_wrapper.h"
 #include "base/network/download_manager.h"
 
 namespace OHOS::Ace {
 using CreateDownloadManagerFunc = DownloadManager* (*)();
 std::unique_ptr<DownloadManager> DownloadManager::instance_ = nullptr;
-std::mutex DownloadManager::mutex_;
 constexpr char CREATE_DOWNLOAD_MANAGER_FUNC[] = "OHOS_ACE_CreateDownloadManager";
 constexpr char ACE_NET_WORK_NAME[] = "libace_network.z.so";
 
@@ -47,13 +45,14 @@ DownloadManager* CreateDownloadManager()
 DownloadManager* DownloadManager::GetInstance()
 {
     TAG_LOGI(AceLogTag::ACE_DOWNLOAD_MANAGER, "DownloadManager GetInstance");
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
-            auto* manager = CreateDownloadManager();
-            instance_.reset(manager);
+    struct DownloadManagerHolder {
+        DownloadManager* mgr_;
+        DownloadManagerHolder()
+        {
+            mgr_ = CreateDownloadManager();
         }
-    }
-    return instance_.get();
+    };
+    static DownloadManagerHolder mgrHolder;
+    return mgrHolder.mgr_;
 }
 } // namespace OHOS::Ace

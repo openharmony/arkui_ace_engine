@@ -15,16 +15,10 @@
 
 #include "core/components_ng/pattern/overlay/group_manager.h"
 
-#include "base/utils/utils.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
-#include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
-#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
-#include "core/components_ng/pattern/radio/radio_paint_property.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -87,12 +81,13 @@ void GroupManager::AddCheckBoxGroup(const std::string& group, const WeakPtr<Fram
 void GroupManager::RemoveCheckBoxFromGroup(const std::string& group, int32_t checkBoxId)
 {
     auto& checkboxList = checkBoxListMap_[group];
-    for (auto && item : checkboxList) {
-        auto frameNode = item.Upgrade();
-        if (frameNode && frameNode->GetId() == checkBoxId) {
-            checkboxList.remove(item);
+    for (std::list<WeakPtr<FrameNode>>::iterator iter = checkboxList.begin(); iter != checkboxList.end();) {
+        auto frameNode = (*iter).Upgrade();
+        if (!frameNode || frameNode->GetId() == checkBoxId) {
+            iter = checkboxList.erase(iter);
             checkboxChangedMap_[group] = true;
-            return;
+        } else {
+            ++iter;
         }
     }
 }
@@ -107,7 +102,7 @@ void GroupManager::RemoveCheckBoxGroup(const std::string& group, int32_t checkBo
 
 std::list<RefPtr<FrameNode>> GroupManager::GetCheckboxList(const std::string& group)
 {
-    auto checkboxList = checkBoxListMap_[group];
+    auto& checkboxList = checkBoxListMap_[group];
     std::list<RefPtr<FrameNode>> result;
     for (std::list<WeakPtr<FrameNode>>::iterator iter = checkboxList.begin(); iter != checkboxList.end();) {
         auto frameNode = (*iter).Upgrade();
@@ -140,7 +135,7 @@ WeakPtr<GroupManager> GroupManager::GetGroupManager()
         CHECK_NULL_RETURN(stageManager, nullptr);
         auto pageNode = stageManager->GetLastPage();
         CHECK_NULL_RETURN(pageNode, nullptr);
-        auto pageEventHub = pageNode->GetEventHub<NG::PageEventHub>();
+        auto pageEventHub = pageNode->GetOrCreateEventHub<NG::PageEventHub>();
         CHECK_NULL_RETURN(pageEventHub, nullptr);
         groupManager = pageEventHub->GetGroupManager();
     }

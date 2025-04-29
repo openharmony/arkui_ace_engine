@@ -75,7 +75,7 @@ void JSEnvironment::GetAccessibilityEnabled(const JSCallbackInfo& args)
 void JSEnvironment::GetColorMode(const JSCallbackInfo& args)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(args.GetExecutionContext());
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = Container::CurrentColorMode();
     auto returnValue = JSVal(ToJSValue(static_cast<int32_t>(colorMode)));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     args.SetReturnValue(returnPtr);
@@ -95,6 +95,7 @@ void JSEnvironment::GetFontScale(const JSCallbackInfo& args)
         return;
     }
     auto context = container->GetPipelineContext();
+    CHECK_NULL_VOID(context);
     auto returnValue = JSVal(ToJSValue(context->GetFontScale()));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     args.SetReturnValue(returnPtr);

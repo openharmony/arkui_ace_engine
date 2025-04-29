@@ -18,6 +18,8 @@
 
 #include <optional>
 
+#include "ui/properties/dirty_flag.h"
+
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -32,6 +34,7 @@
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/event/pointer_event.h"
+#include "core/common/container_consts.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -41,15 +44,6 @@ class AccessibilityEventInfo;
 namespace OHOS::Ace::NG {
 class AccessibilitySessionAdapter;
 class InspectorFilter;
-
-struct DirtySwapConfig {
-    bool frameSizeChange = false;
-    bool frameOffsetChange = false;
-    bool contentSizeChange = false;
-    bool contentOffsetChange = false;
-    bool skipMeasure = false;
-    bool skipLayout = false;
-};
 
 class ScrollingListener : public AceType {
     DECLARE_ACE_TYPE(ScrollingListener, AceType);
@@ -130,7 +124,9 @@ public:
 
     void DetachFromFrameNode(FrameNode* frameNode)
     {
+        onDetach_ = true;
         OnDetachFromFrameNode(frameNode);
+        onDetach_ = false;
         frameNode_.Reset();
     }
 
@@ -141,6 +137,11 @@ public:
         }
         frameNode_ = frameNode;
         OnAttachToFrameNode();
+    }
+
+    virtual bool CustomizeExpandSafeArea()
+    {
+        return false;
     }
 
     virtual RefPtr<AccessibilityProperty> CreateAccessibilityProperty()
@@ -192,13 +193,8 @@ public:
 
     virtual void OnModifyDone()
     {
-#if (defined(__aarch64__) || defined(__x86_64__))
-        if (IsNeedInitClickEventRecorder()) {
-            InitClickEventRecorder();
-        }
-#endif
         CheckLocalized();
-        auto* frameNode = GetUnsafeHostPtr();
+        auto frameNode = GetHost();
         const auto& children = frameNode->GetChildren();
         if (children.empty()) {
             return;
@@ -209,7 +205,7 @@ public:
         }
         std::list<RefPtr<FrameNode>> childrenList {};
         std::queue<RefPtr<FrameNode>> queue {};
-        queue.emplace(Claim(frameNode));
+        queue.emplace(frameNode);
         RefPtr<FrameNode> parentNode;
         while (!queue.empty()) {
             parentNode = queue.front();
@@ -363,29 +359,31 @@ public:
 
     RefPtr<FrameNode> GetHost() const
     {
+        if (onDetach_ && SystemProperties::DetectGetHostOnDetach()) {
+            LOGF_ABORT("fatal: can't GetHost at detaching period");
+        }
         return frameNode_.Upgrade();
     }
 
     int32_t GetHostInstanceId() const
     {
         auto host = GetHost();
-        CHECK_NULL_RETURN(host, -1); // -1 means no valid id exists
+        CHECK_NULL_RETURN(host, INSTANCE_ID_UNDEFINED);
         return host->GetInstanceId();
     }
 
-    FrameNode* GetUnsafeHostPtr() const
+    PipelineContext* GetContext() const
     {
-        return UnsafeRawPtr(frameNode_);
-    }
-
-    PipelineContext* GetContext() {
-        auto frameNode = GetUnsafeHostPtr();
+        auto frameNode = GetHost();
         CHECK_NULL_RETURN(frameNode, nullptr);
         return frameNode->GetContext();
     }
 
     virtual void DumpInfo() {}
+    virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
+    virtual void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
+    virtual void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}
     virtual void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) {}
@@ -412,11 +410,11 @@ public:
     }
 
     template<typename T>
-    RefPtr<T> GetEventHub() const
+    RefPtr<T> GetOrCreateEventHub() const
     {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
-        return DynamicCast<T>(host->GetEventHub<T>());
+        return DynamicCast<T>(host->GetOrCreateEventHub<T>());
     }
 
     // Called after frameNode RebuildRenderContextTree.
@@ -457,12 +455,16 @@ public:
     virtual void OnWindowHide() {}
     virtual void OnWindowFocused() {}
     virtual void OnWindowUnfocused() {}
+    virtual void OnWindowActivated() {}
+    virtual void OnWindowDeactivated() {}
     virtual void OnPixelRoundFinish(const SizeF& pixelGridRoundSize) {}
     virtual void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
     virtual void OnNotifyMemoryLevel(int32_t level) {}
 
     // get XTS inspector value
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const {}
+
+    virtual void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const {}
 
     // call by recycle framework.
     virtual void OnRecycle() {}
@@ -503,7 +505,7 @@ public:
     virtual void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
 
-    virtual void HandleDragEvent(const PointerEvent& info) {};
+    virtual void HandleDragEvent(const DragPointerEvent& info) {};
     virtual void OnLanguageConfigurationUpdate() {}
     virtual void OnColorConfigurationUpdate() {}
     virtual void OnDirectionConfigurationUpdate() {}
@@ -511,6 +513,7 @@ public:
     virtual void OnIconConfigurationUpdate() {}
     virtual void OnFontConfigurationUpdate() {}
     virtual void OnFontScaleConfigurationUpdate() {}
+    virtual void OnForegroundColorUpdate(const Color& value) {}
 
     virtual bool ShouldDelayChildPressedState() const
     {
@@ -564,16 +567,18 @@ public:
             auto inspectorId = host->GetInspectorId().value_or("");
             auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetGroupText(true);
             auto desc = host->GetAutoEventParamValue("");
-            if (inspectorId.empty() && text.empty() && desc.empty()) {
-                return;
-            }
 
             Recorder::EventParamsBuilder builder;
             builder.SetId(inspectorId)
                 .SetType(host->GetTag())
                 .SetEventType(Recorder::LONG_PRESS)
                 .SetText(text)
+                .SetHost(host)
                 .SetDescription(desc);
+            if (Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_RECT)) {
+                auto rect = host->GetTransformRectRelativeToWindow().ToBounds();
+                builder.SetExtra(Recorder::KEY_NODE_RECT, std::move(rect));
+            }
             Recorder::EventRecorder::Get().OnEvent(std::move(builder));
         };
         return longPressCallback;
@@ -582,7 +587,6 @@ public:
     virtual void OnAttachContext(PipelineContext *context) {}
     virtual void OnDetachContext(PipelineContext *context) {}
     virtual void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) {}
-
     void CheckLocalized()
     {
         auto host = GetHost();
@@ -593,9 +597,7 @@ public:
         if (layoutProperty->IsPositionLocalizedEdges()) {
             layoutProperty->CheckPositionLocalizedEdges(layoutDirection);
         }
-        if (layoutProperty->IsMarkAnchorPosition()) {
-            layoutProperty->CheckMarkAnchorPosition(layoutDirection);
-        }
+        layoutProperty->CheckMarkAnchorPosition(layoutDirection);
         if (layoutProperty->IsOffsetLocalizedEdges()) {
             layoutProperty->CheckOffsetLocalizedEdges(layoutDirection);
         }
@@ -608,20 +610,17 @@ public:
         layoutProperty->CheckLocalizedBorderImageSlice(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageWidth(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageOutset(layoutDirection);
+        host->ResetSafeAreaPadding();
+        layoutProperty->CheckLocalizedSafeAreaPadding(layoutDirection);
     }
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
-
-    virtual bool OnAccessibilityHoverEvent(const PointF& point)
-    {
-        return false;
-    }
 
     virtual uint32_t GetWindowPatternType() const
     {
         return 0;
     }
-    
+
     virtual bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const
     {
         return false;
@@ -634,60 +633,79 @@ public:
 
     virtual void NotifyDataChange(int32_t index, int32_t count) {};
 
-protected:
-    virtual void OnAttachToFrameNode() {}
-    virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
+    virtual bool RenderCustomChild(int64_t deadline)
+    {
+        return true;
+    }
 
-    virtual bool IsNeedInitClickEventRecorder() const
+    virtual bool TriggerAutoSaveWhenInvisible()
     {
         return false;
     }
 
-    void InitClickEventRecorder()
+    virtual void AddInnerOnGestureRecognizerJudgeBegin(
+        GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) {};
+
+    virtual void RecoverInnerOnGestureRecognizerJudgeBegin() {};
+
+    virtual bool OnThemeScopeUpdate(int32_t themeScopeId)
     {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto gesture = host->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(gesture);
-        if (!gesture->IsUserClickable()) {
-            if (clickCallback_) {
-                gesture->RemoveClickEvent(clickCallback_);
-                clickCallback_ = nullptr;
-            }
-            return;
-        }
-
-        if (clickCallback_) {
-            return;
-        }
-
-        auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-            if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
-                return;
-            }
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            auto host = pattern->GetHost();
-            CHECK_NULL_VOID(host);
-            auto inspectorId = host->GetInspectorId().value_or("");
-            auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetGroupText(true);
-            auto desc = host->GetAutoEventParamValue("");
-            if (inspectorId.empty() && text.empty() && desc.empty()) {
-                return;
-            }
-
-            Recorder::EventParamsBuilder builder;
-            builder.SetId(inspectorId).SetType(host->GetTag()).SetText(text).SetDescription(desc);
-            Recorder::EventRecorder::Get().OnClick(std::move(builder));
-        };
-        clickCallback_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-        gesture->AddClickEvent(clickCallback_);
+        return false;
     }
 
+    int32_t GetThemeScopeId() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, 0);
+        return host->GetThemeScopeId();
+    }
+
+    virtual bool ReusedNodeSkipMeasure()
+    {
+        return false;
+    }
+
+    virtual void OnFocusNodeChange(FocusReason focusReason) {}
+    virtual void OnCollectRemoved() {}
+    virtual std::string GetCurrentLanguage()
+    {
+        return nullptr;
+    };
+    virtual void GetTranslateText(
+        std::string extraData, std::function<void(std::string)> callback, bool isContinued) {};
+    virtual void SendTranslateResult(std::vector<std::string> results, std::vector<int32_t> ids) {};
+    virtual void EndTranslate() {};
+    virtual void SendTranslateResult(std::string results) {};
+    virtual int32_t OnInjectionEvent(const std::string& command)
+    {
+        return RET_SUCCESS;
+    };
+
+    int32_t OnRecvCommand(const std::string& command)
+    {
+        auto json = JsonUtil::ParseJsonString(command);
+        if (!json || !json->IsValid() || !json->IsObject()) {
+            return RET_FAILED;
+        }
+        auto event = json->GetString("cmd");
+        if (event != "click") {
+            return OnInjectionEvent(command);
+        }
+        return RET_FAILED;
+    }
+
+    virtual bool BorderUnoccupied() const
+    {
+        return false;
+    }
+protected:
+    virtual void OnAttachToFrameNode() {}
+    virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
+
     WeakPtr<FrameNode> frameNode_;
-    RefPtr<ClickEvent> clickCallback_;
 
 private:
+    bool onDetach_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(Pattern);
 };
 } // namespace OHOS::Ace::NG

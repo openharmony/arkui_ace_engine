@@ -151,7 +151,8 @@ void OH_ArkUI_AnimateOption_SetExpectedFrameRateRange(ArkUI_AnimateOption* optio
 {
     CHECK_NULL_VOID(option);
     CHECK_NULL_VOID(value);
-    option->expectedFrameRateRange = new ArkUI_ExpectedFrameRateRange { value->min, value->max, value->expected };
+    option->expectedFrameRateRange =
+        new ArkUI_ExpectedFrameRateRange { value->min, value->max, value->expected };
 }
 
 void OH_ArkUI_AnimateOption_SetICurve(ArkUI_AnimateOption* option, ArkUI_CurveHandle value)
@@ -179,6 +180,7 @@ ArkUI_KeyframeAnimateOption* OH_ArkUI_KeyframeAnimateOption_Create(int32_t size)
     animateOption->iterations = 1;
     animateOption->onFinish = nullptr;
     animateOption->userData = nullptr;
+    animateOption->expectedFrameRateRange = nullptr;
 
     for (int32_t i = 0; i < size; ++i) {
         //duration default 1000
@@ -193,6 +195,10 @@ ArkUI_KeyframeAnimateOption* OH_ArkUI_KeyframeAnimateOption_Create(int32_t size)
 void OH_ArkUI_KeyframeAnimateOption_Dispose(ArkUI_KeyframeAnimateOption* option)
 {
     CHECK_NULL_VOID(option);
+    if (option->expectedFrameRateRange) {
+        delete option->expectedFrameRateRange;
+        option->expectedFrameRateRange = nullptr;
+    }
     delete option;
 }
 
@@ -572,10 +578,29 @@ float OH_ArkUI_AnimatorOnFrameEvent_GetValue(ArkUI_AnimatorOnFrameEvent* event)
     return event->progress;
 }
 
+int32_t OH_ArkUI_KeyframeAnimateOption_SetExpectedFrameRate(
+    ArkUI_KeyframeAnimateOption* option, ArkUI_ExpectedFrameRateRange* frameRate)
+{
+    CHECK_NULL_RETURN(option, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(frameRate, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    option->expectedFrameRateRange =
+        new ArkUI_ExpectedFrameRateRange { frameRate->min, frameRate->max, frameRate->expected };
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ExpectedFrameRateRange* OH_ArkUI_KeyframeAnimateOption_GetExpectedFrameRate(
+    ArkUI_KeyframeAnimateOption* option)
+{
+    if (option != nullptr) {
+        return option->expectedFrameRateRange;
+    }
+    return nullptr;
+}
+
 int32_t OH_ArkUI_AnimatorOption_RegisterOnFrameCallback(
     ArkUI_AnimatorOption* option, void* userData, void (*callback)(ArkUI_AnimatorOnFrameEvent* event))
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !option || !callback) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
@@ -587,7 +612,7 @@ int32_t OH_ArkUI_AnimatorOption_RegisterOnFrameCallback(
 int32_t OH_ArkUI_AnimatorOption_RegisterOnFinishCallback(
     ArkUI_AnimatorOption* option, void* userData, void (*callback)(ArkUI_AnimatorEvent* event))
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !option || !callback) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
@@ -600,7 +625,7 @@ int32_t OH_ArkUI_AnimatorOption_RegisterOnFinishCallback(
 int32_t OH_ArkUI_AnimatorOption_RegisterOnCancelCallback(
     ArkUI_AnimatorOption* option, void* userData, void (*callback)(ArkUI_AnimatorEvent* event))
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !option || !callback) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
@@ -613,7 +638,7 @@ int32_t OH_ArkUI_AnimatorOption_RegisterOnCancelCallback(
 int32_t OH_ArkUI_AnimatorOption_RegisterOnRepeatCallback(
     ArkUI_AnimatorOption* option, void* userData, void (*callback)(ArkUI_AnimatorEvent* event))
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !option || !callback) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }

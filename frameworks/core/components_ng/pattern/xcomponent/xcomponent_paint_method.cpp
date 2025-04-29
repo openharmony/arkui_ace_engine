@@ -24,18 +24,17 @@ CanvasDrawFunction XComponentPaintMethod::GetContentDrawFunction(PaintWrapper* p
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, nullptr);
     auto surfaceSize = pattern->GetSurfaceSize();
-    auto localPostion = pattern->GetLocalPosition();
+    auto surfaceOffset = pattern->GetSurfaceOffset();
     auto width = surfaceSize.Width();
     auto height = surfaceSize.Height();
-    auto offsetX = localPostion.GetX();
-    auto offsetY = localPostion.GetY();
+    auto offsetX = surfaceOffset.GetX();
+    auto offsetY = surfaceOffset.GetY();
     return [weak = WeakClaim(this), width, height, offsetX, offsetY](RSCanvas& canvas) {
         auto painter = weak.Upgrade();
         CHECK_NULL_VOID(painter);
         auto surface = painter->renderSuface_;
-        if (surface) {
-            surface->DrawBufferForXComponent(canvas, width, height, offsetX, offsetY);
-        }
+        CHECK_NULL_VOID(surface);
+        surface->DrawBufferForXComponent(canvas, width, height, offsetX, offsetY);
     };
 }
 } // namespace OHOS::Ace::NG

@@ -16,8 +16,6 @@
 #include "bridge/declarative_frontend/jsview/models/calendar_model_impl.h"
 
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/event/ace_event_handler.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Framework {
 void CalendarModelImpl::Create(const CalendarModelData& calendarModelData)

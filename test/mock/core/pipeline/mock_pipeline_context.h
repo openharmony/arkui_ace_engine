@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,9 +33,11 @@ public:
     static void SetCurrentWindowRect(Rect rect);
     static RefPtr<MockPipelineContext> GetCurrent();
     void SetRootSize(double rootWidth, double rootHeight);
+    void SetInstanceId(int32_t instanceId);
+    void SetContainerModalButtonsRect(bool hasModalButtonsRect);
 
     MOCK_CONST_METHOD0(GetSafeAreaWithoutProcess, SafeAreaInsets());
-    MOCK_METHOD(void, FlushUITasks, (bool triggeredByImplicitAnimation), (override));
+    MOCK_CONST_METHOD0(GetSelectOverlayManager, SafeAreaInsets());
     MOCK_METHOD(float, GetFontScale, ());
     MOCK_METHOD(SafeAreaInsets, GetSafeArea, (), (const));
 
@@ -45,12 +47,49 @@ public:
     }
 
     static RefPtr<MockPipelineContext> pipeline_;
+    bool IsWindowFocused() const
+    {
+        return onFocus_;
+    }
+
+    void SetUseFlushUITasks(bool enable)
+    {
+        useFlushUITasks_ = enable;
+    }
+
+    bool UseFlushUITasks()
+    {
+        return useFlushUITasks_;
+    }
+
+    void SetBackCallback(std::function<void()> callback)
+    {
+        backCallback_ = callback;
+    }
+
+    bool CallRouterBackToPopPage() override
+    {
+        if (backCallback_) {
+            backCallback_();
+            return true;
+        }
+        return false;
+    }
+    void SetEnableSwipeBack(bool isEnable) {}
+
+    void UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode);
 
 protected:
     float fontScale_ = 1.0f;
     bool isDeclarative_ = false;
     double dipScale_ = 1.0;
+    std::function<void()> backCallback_;
     RefPtr<TaskExecutor> taskExecutor_;
+    bool useFlushUITasks_ = false;
 };
 } // namespace OHOS::Ace::NG
+
+namespace OHOS::Ace {
+void SetBoolStatus(bool value);
+} // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_PIPELINE_CONTEXT_H

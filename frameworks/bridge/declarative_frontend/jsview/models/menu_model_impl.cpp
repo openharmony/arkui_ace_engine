@@ -27,6 +27,6 @@ void MenuModelImpl::SetBorderRadius(const Dimension& radius) {}
 void MenuModelImpl::SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
     const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
     const std::optional<Dimension>& radiusBottomRight) {}
-void MenuModelImpl::SetItemDivider(const V2::ItemDivider& divider) {}
-void MenuModelImpl::SetItemGroupDivider(const V2::ItemDivider& divider) {}
+void MenuModelImpl::SetItemDivider(const V2::ItemDivider& divider, const DividerMode& mode) {}
+void MenuModelImpl::SetItemGroupDivider(const V2::ItemDivider& divider, const DividerMode& mode) {}
 } // namespace OHOS::Ace::Framework

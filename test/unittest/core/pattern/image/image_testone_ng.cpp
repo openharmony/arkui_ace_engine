@@ -15,6 +15,8 @@
 
 #include "image_base.h"
 
+#include "base/image/image_defines.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
@@ -985,32 +987,6 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest017, TestSize.Level1)
     PaintWrapper paintWrapper(nullptr, geometryNode, imageRenderProperty);
     auto pipeLine = PipelineBase::GetCurrentContext();
     pipeLine->SetIsRightToLeft(true);
-    auto paintMethod = imagePaintMethod.GetContentDrawFunction(&paintWrapper);
-    ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
-    ASSERT_NE(paintMethod, nullptr);
-    auto& config = imagePaintMethod.canvasImage_->paintConfig_;
-    /**
-     * Check if the colorfilter is set correctly
-    */
-    EXPECT_EQ(*config->colorFilter_.colorFilterMatrix_, COLOR_FILTER_DEFAULT);
-    /**
-     * Creating a colorfilter through a graphical interface
-     * @tc.steps: step3. set drawingcolorFilter.
-     */
-    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
-    imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-
-    ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
-
-    auto& paintConfig = imagePaintMethod.canvasImage_->paintConfig_;
-
-    auto drawingColorFilter = paintConfig->colorFilter_.colorFilterDrawing_;
-    image.SetAlt(ImageSourceInfo { RESOURCE_URL });
-    image.SetDrawingColorFilter(drawingColorFilter);
-    /**
-     * Check if the colorfilter is set correctly
-    */
-    EXPECT_EQ(config->colorFilter_.colorFilterDrawing_, drawingColorFilter);
 }
 
 /**
@@ -1623,7 +1599,6 @@ void ImageModelNGTest001_MixedProperties01(ImageModelNG &image)
 
     ImageModelNG::SetImageInterpolation(frameNode, ImageInterpolation::HIGH);
     EXPECT_EQ(imageRenderProperty->GetImageInterpolation().value(), ImageInterpolation::HIGH);
-    EXPECT_EQ(imagePattern->GetImageInterpolation(), string("HIGH"));
 
     auto imageInterpolation = ImageModelNG::GetInterpolation(frameNode);
     EXPECT_EQ(imageInterpolation, ImageInterpolation::HIGH);
@@ -1642,7 +1617,7 @@ void ImageModelNGTest001_MixedProperties01(ImageModelNG &image)
         IMAGE_WIDTH_DEFAULT, IMAGE_HEIGHT_DEFAULT, IMAGE_COMPONENTWIDTH_DEFAULT, IMAGE_COMPONENTHEIGHT_DEFAULT, -1);
     auto onComplete = [&successEvent](const LoadImageSuccessEvent& info) { successEvent = info; };
     ImageModelNG::SetOnComplete(frameNode, std::move(onComplete));
-    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
     LoadImageSuccessEvent loadImageSuccessEvent(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT, WIDTH, HEIGHT, 1);
     eventHub->FireCompleteEvent(loadImageSuccessEvent);
@@ -1665,7 +1640,7 @@ void ImageModelNGTest001_MixedProperties01(ImageModelNG &image)
 void ImageModelNGTest001_MixedProperties02(ImageModelNG &image)
 {
     auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
-    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     auto finishEventData = RADIUS_DEFAULT;
@@ -1715,7 +1690,7 @@ void ImageModelNGTest001_MixedProperties03(ImageModelNG &image)
 
     image.EnableAnalyzer(false);
     ImageModelNG::EnableAnalyzer(frameNode, true);
-    imagePattern->SetImageType(ImagePattern::ImageType::ANIMATION);
+    imagePattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
     ImageModelNG::ResetImageSrc(frameNode);
     auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo();
     ASSERT_EQ(imageSourceInfo->GetSrc(), "");
@@ -1863,7 +1838,7 @@ void ImageModelNGFailedTest001_Properties02(ImageModelNG &image)
     EXPECT_EQ(imageLayoutProperty->GetFitOriginalSize().has_value(), false);
 
     int testData = 0;
-    auto eventHub = frameNode->GetEventHub<NG::ImageEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::ImageEventHub>();
     auto onError = [&testData](const LoadImageFailEvent& info) { testData = 1; };
     image.SetOnError(std::move(onError));
     eventHub->FireErrorEvent(LoadImageFailEvent(WIDTH, HEIGHT, "image load error!"));
@@ -1980,5 +1955,99 @@ HWTEST_F(ImageTestOneNg, ImageModelNGFailedTest001, TestSize.Level1)
     ImageModelNGFailedTest001_Properties02(image);
     ImageModelNGFailedTest001_Properties03(image);
     frameNode->MarkModifyDone();
+}
+
+/**
+ * @tc.name: ImageImageInterpolation001
+ * @tc.desc: Test ImageGetImageInterpolation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, ImageImageInterpolation001, TestSize.Level1)
+{
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    image.SetAlt(ImageSourceInfo { ALT_SRC_URL });
+    image.SetSyncMode(true);
+    image.SetImageFill(SVG_FILL_COLOR_DEFAULT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    image.SetBorderRadius(frameNode, IMAGE_SOURCEINFO_HEIGHT);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    /**
+     * @tc.cases: case1. ImageInterpolation LOW.
+     */
+    image.SetImageInterpolation(ImageInterpolation::LOW);
+
+    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    imagePattern->DumpRenderInfo();
+    EXPECT_EQ(imageRenderProperty->GetImageInterpolation().value(), ImageInterpolation::LOW);
+
+    /**
+     * @tc.cases: case2. ImageInterpolation MEDIUM.
+     */
+    image.SetImageInterpolation(ImageInterpolation::MEDIUM);
+    imagePattern->DumpRenderInfo();
+    EXPECT_EQ(imageRenderProperty->GetImageInterpolation().value(), ImageInterpolation::MEDIUM);
+
+    /**
+     * @tc.cases: case3. ImageInterpolation HIGH.
+     */
+    image.SetImageInterpolation(ImageInterpolation::HIGH);
+    imagePattern->DumpRenderInfo();
+    EXPECT_EQ(imageRenderProperty->GetImageInterpolation().value(), ImageInterpolation::HIGH);
+}
+
+/**
+ * @tc.name: ImageDynamicRangeMode 001
+ * @tc.desc: Test ImageDynamicRangeMode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, ImageDynamicRangeMode001, TestSize.Level1)
+{
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    image.SetAlt(ImageSourceInfo { ALT_SRC_URL });
+    image.SetSyncMode(true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    /**
+     * @tc.cases: case1. DynamicRangeMode HIGH.
+     */
+    image.SetDynamicRangeMode(DynamicRangeMode::HIGH);
+
+    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+    imagePattern->DumpRenderInfo();
+    EXPECT_EQ(imageRenderProperty->GetDynamicMode().value(), DynamicRangeMode::HIGH);
+
+    /**
+     * @tc.cases: case2. DynamicRangeMode CONSTRAINT.
+     */
+    image.SetDynamicRangeMode(DynamicRangeMode::CONSTRAINT);
+    imagePattern->DumpRenderInfo();
+    EXPECT_EQ(imageRenderProperty->GetDynamicMode().value(), DynamicRangeMode::CONSTRAINT);
+
+    /**
+     * @tc.cases: case2. DynamicRangeMode STANDARD.
+     */
+    image.SetDynamicRangeMode(DynamicRangeMode::STANDARD);
+    imagePattern->DumpRenderInfo();
+    EXPECT_EQ(imageRenderProperty->GetDynamicMode().value(), DynamicRangeMode::STANDARD);
 }
 } // namespace OHOS::Ace::NG

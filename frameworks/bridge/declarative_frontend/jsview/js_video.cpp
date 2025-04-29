@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,29 +27,21 @@
 #endif
 
 namespace OHOS::Ace {
-
-std::unique_ptr<VideoModel> VideoModel::instance_ = nullptr;
-std::mutex VideoModel::mutex_;
-
 VideoModel* VideoModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::VideoModelNG());
+    static NG::VideoModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::VideoModelNG());
-            } else {
-                instance_.reset(new Framework::VideoModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::VideoModelNG instance;
+        return &instance;
+    } else {
+        static Framework::VideoModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
-
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
@@ -61,6 +53,7 @@ void JSVideo::Create(const JSCallbackInfo& info)
     }
     JSRef<JSObject> videoObj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> srcValue = videoObj->GetProperty("src");
+    JSRef<JSVal> posterOptionsValue = videoObj->GetProperty("posterOptions");
     JSRef<JSVal> previewUriValue = videoObj->GetProperty("previewUri");
     JSRef<JSVal> currentProgressRateValue = videoObj->GetProperty("currentProgressRate");
 
@@ -76,9 +69,16 @@ void JSVideo::Create(const JSCallbackInfo& info)
     VideoModel::GetInstance()->Create(videoController);
 
     // Parse the src, if it is invalid, use the empty string.
-    std::string videoSrc;
-    ParseJsMedia(srcValue, videoSrc);
-    VideoModel::GetInstance()->SetSrc(videoSrc);
+    std::string bundleNameSrc;
+    std::string moduleNameSrc;
+    std::string src;
+    int32_t resId = 0;
+    ParseJsMediaWithBundleName(srcValue, src, bundleNameSrc, moduleNameSrc, resId);
+    VideoModel::GetInstance()->SetSrc(src, bundleNameSrc, moduleNameSrc);
+
+    bool showFirstFrame = false;
+    ParseJsPosterOptions(posterOptionsValue, showFirstFrame);
+    VideoModel::GetInstance()->SetShowFirstFrame(showFirstFrame);
 
     // Parse the rate, if it is invalid, set it as 1.0.
     double currentProgressRate = 1.0;
@@ -87,15 +87,7 @@ void JSVideo::Create(const JSCallbackInfo& info)
 
     auto aiOptions = videoObj->GetProperty("imageAIOptions");
     if (aiOptions->IsObject()) {
-        auto engine = EngineHelper::GetCurrentEngine();
-        CHECK_NULL_VOID(engine);
-        NativeEngine* nativeEngine = engine->GetNativeEngine();
-        CHECK_NULL_VOID(nativeEngine);
-        panda::Local<JsiValue> value = aiOptions.Get().GetLocalHandle();
-        JSValueWrapper valueWrapper = value;
-        ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
-        napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
-        VideoModel::GetInstance()->SetImageAIOptions(optionsValue);
+        ParseImageAIOptions(aiOptions);
     }
 
     std::string previewUri;
@@ -118,6 +110,29 @@ void JSVideo::Create(const JSCallbackInfo& info)
         VideoModel::GetInstance()->SetPosterSourceByPixelMap(pixMap);
 #endif
     }
+}
+
+void JSVideo::ParseImageAIOptions(const JSRef<JSVal>& jsValue)
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_VOID(nativeEngine);
+    panda::Local<JsiValue> value = jsValue.Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    VideoModel::GetInstance()->SetImageAIOptions(optionsValue);
+}
+
+bool JSVideo::ParseJsPosterOptions(const JSRef<JSVal>& jsValue, bool& result)
+{
+    if (!jsValue->IsObject()) {
+        return false;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    JSRef<JSVal> showFirstFrame = jsObj->GetProperty("showFirstFrame");
+    return ParseJsBool(showFirstFrame, result);
 }
 
 void JSVideo::JsMuted(const JSCallbackInfo& info)
@@ -175,6 +190,21 @@ void JSVideo::JsObjectFit(const JSCallbackInfo& info)
         imageFit = static_cast<ImageFit>(info[0]->ToNumber<int>());
     }
     VideoModel::GetInstance()->SetObjectFit(imageFit);
+}
+
+void JSVideo::JsSurfaceBackgroundColor(const JSCallbackInfo& info)
+{
+    Color backgroundColor = Color::BLACK;
+    if (ParseColorMetricsToColor(info[0], backgroundColor) && backgroundColor != Color::TRANSPARENT) {
+        backgroundColor = Color::BLACK;
+    }
+
+    VideoModel::GetInstance()->SetSurfaceBackgroundColor(backgroundColor);
+}
+
+void JSVideo::JsSetShortcutKeyEnabled(const JSCallbackInfo& info)
+{
+    VideoModel::GetInstance()->SetShortcutKeyEnabled(info[0]->IsBoolean() ? info[0]->ToBoolean() : false);
 }
 
 void JSVideo::JsOnStart(const JSCallbackInfo& info)
@@ -237,7 +267,7 @@ void JSVideo::JsOnStop(const JSCallbackInfo& info)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onStop = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                         const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -405,6 +435,8 @@ void JSVideo::JSBind(BindingTarget globalObj)
     JSClass<JSVideo>::StaticMethod("controls", &JSVideo::JsControls, opt);
     JSClass<JSVideo>::StaticMethod("loop", &JSVideo::JsLoop, opt);
     JSClass<JSVideo>::StaticMethod("objectFit", &JSVideo::JsObjectFit, opt);
+    JSClass<JSVideo>::StaticMethod("surfaceBackgroundColor", &JSVideo::JsSurfaceBackgroundColor, opt);
+    JSClass<JSVideo>::StaticMethod("enableShortcutKey", &JSVideo::JsSetShortcutKeyEnabled, opt);
 
     JSClass<JSVideo>::StaticMethod("onStart", &JSVideo::JsOnStart);
     JSClass<JSVideo>::StaticMethod("onPause", &JSVideo::JsOnPause);

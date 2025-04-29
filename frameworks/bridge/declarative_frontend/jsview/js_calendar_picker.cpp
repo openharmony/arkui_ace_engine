@@ -32,23 +32,22 @@
 
 namespace OHOS::Ace {
 std::unique_ptr<CalendarPickerModel> CalendarPickerModel::instance_ = nullptr;
-std::mutex CalendarPickerModel::mutex_;
+std::once_flag CalendarPickerModel::onceFlag_;
+
 CalendarPickerModel* CalendarPickerModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
+    std::call_once(onceFlag_, []() {
 #ifdef NG_BUILD
-            instance_.reset(new NG::CalendarPickerModelNG());
+        instance_.reset(new NG::CalendarPickerModelNG());
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::CalendarPickerModelNG());
-            } else {
-                instance_.reset(new Framework::CalendarPickerModelImpl());
-            }
-#endif
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::CalendarPickerModelNG());
+        } else {
+            instance_.reset(new Framework::CalendarPickerModelImpl());
         }
-    }
+#endif
+    });
+
     return instance_.get();
 }
 } // namespace OHOS::Ace
@@ -91,8 +90,14 @@ ButtonInfo ParseButtonStyle(const JSRef<JSObject>& pickerButtonParamObject)
 {
     ButtonInfo buttonInfo;
     if (pickerButtonParamObject->GetProperty("type")->IsNumber()) {
-        buttonInfo.type =
-            static_cast<ButtonType>(pickerButtonParamObject->GetProperty("type")->ToNumber<int32_t>());
+        auto buttonTypeIntValue = pickerButtonParamObject->GetProperty("type")->ToNumber<int32_t>();
+        if (buttonTypeIntValue == static_cast<int32_t>(ButtonType::CAPSULE) ||
+            buttonTypeIntValue == static_cast<int32_t>(ButtonType::CIRCLE) ||
+            buttonTypeIntValue == static_cast<int32_t>(ButtonType::ARC) ||
+            buttonTypeIntValue == static_cast<int32_t>(ButtonType::NORMAL) ||
+            buttonTypeIntValue == static_cast<int32_t>(ButtonType::ROUNDED_RECTANGLE)) {
+            buttonInfo.type = static_cast<ButtonType>(buttonTypeIntValue);
+        }
     }
     if (pickerButtonParamObject->GetProperty("style")->IsNumber()) {
         auto styleModeIntValue = pickerButtonParamObject->GetProperty("style")->ToNumber<int32_t>();
@@ -155,7 +160,7 @@ double GetMSByDate(const std::string& date)
         return 0.0f;
     }
 
-    std::tm dateTime = { 0 };
+    std::tm dateTime {};
     auto year = json->GetValue("year");
     if (year && year->IsNumber()) {
         dateTime.tm_year = year->GetInt() - 1900; // local date start from 1900
@@ -186,18 +191,34 @@ void JSCalendarPicker::JSBind(BindingTarget globalObj)
     JSClass<JSCalendarPicker>::StaticMethod("onChange", &JSCalendarPicker::SetOnChange);
     JSClass<JSCalendarPicker>::StaticMethod("border", &JSCalendarPicker::SetBorder);
     JSClass<JSCalendarPicker>::StaticMethod("padding", &JSCalendarPicker::JsPadding);
+    JSClass<JSCalendarPicker>::StaticMethod("height", &JSCalendarPicker::JsHeight);
+    JSClass<JSCalendarPicker>::StaticMethod("borderColor", &JSCalendarPicker::JsBorderColor);
+    JSClass<JSCalendarPicker>::StaticMethod("borderRadius", &JSCalendarPicker::JsBorderRadius);
+    JSClass<JSCalendarPicker>::StaticMethod("markToday", &JSCalendarPicker::JsMarkToday);
+    JSClass<JSCalendarPicker>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSCalendarPicker>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSCalendarPicker>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSCalendarPicker>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSCalendarPicker>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
+    JSClass<JSCalendarPicker>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSCalendarPicker>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
+    JSClass<JSCalendarPicker>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSCalendarPicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSCalendarPicker::SetBorder(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
+        CalendarPickerModel::GetInstance()->ClearBorder();
         return;
     }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
     auto valueWidth = object->GetProperty("width");
-    if (!valueWidth->IsUndefined()) {
+    CalcDimension value;
+    if (ParseJsDimensionVpNG(valueWidth, value) || valueWidth->IsObject()) {
         ParseBorderWidth(valueWidth);
+    } else {
+        CalendarPickerModel::GetInstance()->ClearBorderWidth();
     }
 
     // use default value when undefined.
@@ -291,41 +312,58 @@ void JSCalendarPicker::JsPadding(const JSCallbackInfo& info)
 {
     NG::PaddingProperty padding;
     if (info[0]->IsObject()) {
-        std::optional<CalcDimension> left;
-        std::optional<CalcDimension> right;
-        std::optional<CalcDimension> top;
-        std::optional<CalcDimension> bottom;
+        CommonCalcDimension commonCalcDimension;
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
-
-        CalcDimension leftDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("left"), leftDimen)) {
-            left = leftDimen;
-        }
-        CalcDimension rightDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("right"), rightDimen)) {
-            right = rightDimen;
-        }
-        CalcDimension topDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("top"), topDimen)) {
-            top = topDimen;
-        }
-        CalcDimension bottomDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
-            bottom = bottomDimen;
-        }
-        if (left.has_value() || right.has_value() || top.has_value() || bottom.has_value()) {
-            padding = SetPaddings(top, bottom, left, right);
+        JSViewAbstract::ParseCommonMarginOrPaddingCorner(paddingObj, commonCalcDimension);
+        if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
+            commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
+            padding = SetPaddings(commonCalcDimension.top, commonCalcDimension.bottom, commonCalcDimension.left,
+                commonCalcDimension.right);
             CalendarPickerModel::GetInstance()->SetPadding(padding);
             return;
         }
     }
 
     CalcDimension length(-1);
-    ParseJsDimensionVp(info[0], length);
-    if (length.IsNonNegative()) {
+    if (ParseJsDimensionVpNG(info[0], length) && length.IsNonNegative()) {
         padding.SetEdges(NG::CalcLength(length));
+        CalendarPickerModel::GetInstance()->SetPadding(padding);
+    } else {
+        CalendarPickerModel::GetInstance()->ClearPadding();
     }
-    CalendarPickerModel::GetInstance()->SetPadding(padding);
+}
+
+void JSCalendarPicker::JsHeight(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CalcDimension value;
+    if (ParseJsDimensionVpNG(jsValue, value) && value.IsValid()) {
+        JSViewAbstract::JsHeight(info);
+    } else {
+        CalendarPickerModel::GetInstance()->ClearHeight();
+    }
+}
+
+void JSCalendarPicker::JsBorderColor(const JSCallbackInfo& info)
+{
+    Color borderColor;
+    auto jsValue = info[0];
+    if (ParseJsColor(jsValue, borderColor) || jsValue->IsObject()) {
+        JSViewAbstract::JsBorderColor(info);
+    } else {
+        CalendarPickerModel::GetInstance()->ClearBorderColor();
+    }
+}
+
+void JSCalendarPicker::JsBorderRadius(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CalcDimension value;
+    if (ParseJsDimensionVpNG(jsValue, value) || jsValue->IsObject()) {
+        JSViewAbstract::JsBorderRadius(info);
+    } else {
+        CalendarPickerModel::GetInstance()->ClearBorderRadius();
+    }
 }
 
 NG::PaddingProperty JSCalendarPicker::SetPaddings(const std::optional<CalcDimension>& top,
@@ -388,6 +426,36 @@ void JSCalendarPicker::ParseSelectedDateObject(const JSCallbackInfo& info, const
     CalendarPickerModel::GetInstance()->SetChangeEvent(std::move(changeEvent));
 }
 
+void JSCalendarPicker::ParseDisabledDateRange(
+    const JSRef<JSVal>& disabledDateRangeVal, NG::CalendarSettingData& settingData)
+{
+    if (disabledDateRangeVal->IsUndefined() || disabledDateRangeVal->IsNull() || !disabledDateRangeVal->IsArray()) {
+        return;
+    }
+
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(disabledDateRangeVal);
+    for (size_t i = 0; i < array->Length(); i++) {
+        JSRef<JSVal> dateRangeValue = array->GetValueAt(i);
+        if (!dateRangeValue->IsObject()) {
+            continue;
+        }
+        auto dateRangeObj = JSRef<JSObject>::Cast(dateRangeValue);
+        auto startValue = dateRangeObj->GetProperty("start");
+        auto endValue = dateRangeObj->GetProperty("end");
+        if (startValue->IsObject() && endValue->IsObject()) {
+            auto startDate = ParseDate(startValue, false);
+            auto endDate = ParseDate(endValue, false);
+            if (startDate.GetYear() == 0 || endDate.GetYear() == 0 || endDate < startDate) {
+                continue;
+            }
+            std::pair<PickerDate, PickerDate> pickerDateRange;
+            pickerDateRange.first = startDate;
+            pickerDateRange.second = endDate;
+            settingData.disabledDateRange.emplace_back(pickerDateRange);
+        }
+    }
+}
+
 void JSCalendarPicker::Create(const JSCallbackInfo& info)
 {
     NG::CalendarSettingData settingData;
@@ -411,6 +479,19 @@ void JSCalendarPicker::Create(const JSCallbackInfo& info)
                 settingData.selectedDate = parseSelectedDate;
             }
         }
+        auto disabledDateRange = obj->GetProperty("disabledDateRange");
+        ParseDisabledDateRange(disabledDateRange, settingData);
+        PickerDate::SortAndMergeDisabledDateRange(settingData.disabledDateRange);
+        auto startDate = obj->GetProperty("start");
+        auto endDate = obj->GetProperty("end");
+        auto parseStartDate = ParseDate(startDate, false);
+        auto parseEndDate = ParseDate(endDate, false);
+        if (parseEndDate.GetYear() > 0 && parseStartDate.ToDays() > parseEndDate.ToDays()) {
+            parseStartDate = PickerDate();
+            parseEndDate = PickerDate();
+        }
+        settingData.startDate = parseStartDate;
+        settingData.endDate = parseEndDate;
     } else {
         dayRadius = calendarTheme->GetCalendarDayRadius();
     }
@@ -456,9 +537,9 @@ void JSCalendarPicker::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::Picke
     }
 }
 
-PickerDate JSCalendarPicker::ParseDate(const JSRef<JSVal>& dateVal)
+PickerDate JSCalendarPicker::ParseDate(const JSRef<JSVal>& dateVal, bool useCurrentDate)
 {
-    auto pickerDate = PickerDate::Current();
+    auto pickerDate = useCurrentDate ? PickerDate::Current() : PickerDate();
     if (!dateVal->IsObject()) {
         return pickerDate;
     }
@@ -482,6 +563,15 @@ PickerDate JSCalendarPicker::ParseDate(const JSRef<JSVal>& dateVal)
         pickerDate.SetDay(date->ToNumber<int32_t>());
     }
     return pickerDate;
+}
+
+void JSCalendarPicker::JsMarkToday(const JSCallbackInfo& info)
+{
+    bool isMarkToday = false;
+    if (info[0]->IsBoolean()) {
+        isMarkToday = info[0]->ToBoolean();
+    }
+    CalendarPickerModel::GetInstance()->SetMarkToday(isMarkToday);
 }
 
 void JSCalendarPickerDialog::JSBind(BindingTarget globalObj)
@@ -645,9 +735,9 @@ std::map<std::string, NG::DialogCancelEvent> JSCalendarPickerDialog::LifeCycleDi
     return dialogLifeCycleEvent;
 }
 
-PickerDate JSCalendarPickerDialog::ParseDate(const JSRef<JSVal>& dateVal)
+PickerDate JSCalendarPickerDialog::ParseDate(const JSRef<JSVal>& dateVal, bool useCurrentDate)
 {
-    auto pickerDate = PickerDate();
+    auto pickerDate = useCurrentDate ? PickerDate::Current() : PickerDate();
     if (!dateVal->IsObject()) {
         return pickerDate;
     }
@@ -674,6 +764,32 @@ PickerDate JSCalendarPickerDialog::ParseDate(const JSRef<JSVal>& dateVal)
     return pickerDate;
 }
 
+void JSCalendarPickerDialog::ParseDisabledDateRange(
+    const JSRef<JSVal>& disabledDateRangeVal, NG::CalendarSettingData& settingData)
+{
+    if (disabledDateRangeVal->IsUndefined() || disabledDateRangeVal->IsNull() || !disabledDateRangeVal->IsArray()) {
+        return;
+    }
+
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(disabledDateRangeVal);
+    for (size_t i = 0; i < array->Length(); i++) {
+        JSRef<JSVal> dateRangeValue = array->GetValueAt(i);
+        auto dateRangeObj = JSRef<JSObject>::Cast(dateRangeValue);
+        auto startValue = dateRangeObj->GetProperty("start");
+        auto endValue = dateRangeObj->GetProperty("end");
+        if (startValue->IsObject() && endValue->IsObject()) {
+            auto startDate = ParseDate(startValue);
+            auto endDate = ParseDate(endValue);
+            if (startDate.GetYear() == 0 || endDate.GetYear() == 0 || endDate < startDate)
+                continue;
+            std::pair<PickerDate, PickerDate> pickerDateRange;
+            pickerDateRange.first = startDate;
+            pickerDateRange.second = endDate;
+            settingData.disabledDateRange.emplace_back(pickerDateRange);
+        }
+    }
+}
+
 void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& paramObj,
     const std::map<std::string, NG::DialogEvent>& dialogEvent,
     const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent,
@@ -691,9 +807,33 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
     CHECK_NULL_VOID(theme);
     auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>();
     NG::CalendarSettingData settingData;
+    auto markToday = paramObj->GetProperty("markToday");
+    bool isMarkToday = false;
+    if (markToday->IsBoolean()) {
+        isMarkToday = markToday->ToBoolean();
+    }
+    settingData.markToday = isMarkToday;
+    auto disabledDateRange = paramObj->GetProperty("disabledDateRange");
+    ParseDisabledDateRange(disabledDateRange, settingData);
+    PickerDate::SortAndMergeDisabledDateRange(settingData.disabledDateRange);
     auto selectedDate = paramObj->GetProperty("selected");
-    auto parseSelectedDate = ParseDate(selectedDate);
-    if (selectedDate->IsObject() && parseSelectedDate.GetYear() != 0) {
+    auto parseSelectedDate = ParseDate(selectedDate, true);
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        auto startDate = paramObj->GetProperty("start");
+        auto endDate = paramObj->GetProperty("end");
+        auto parseStartDate = ParseDate(startDate);
+        auto parseEndDate = ParseDate(endDate);
+        if (parseEndDate.GetYear() > 0 && parseStartDate.ToDays() > parseEndDate.ToDays()) {
+            parseStartDate = PickerDate();
+            parseEndDate = PickerDate();
+        }
+        settingData.startDate = parseStartDate;
+        settingData.endDate = parseEndDate;
+        parseSelectedDate = PickerDate::AdjustDateToRange(parseSelectedDate, parseStartDate, parseEndDate);
+    }
+
+    if (parseSelectedDate.GetYear() != 0) {
         settingData.selectedDate = parseSelectedDate;
     }
 
@@ -728,6 +868,7 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
     if ((shadowValue->IsObject() || shadowValue->IsNumber()) && JSViewAbstract::ParseShadowProps(shadowValue, shadow)) {
         properties.shadow = shadow;
     }
+
     properties.customStyle = false;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
@@ -735,6 +876,9 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
         dialogRadius.SetRadius(calendarTheme->GetDialogBorderRadius());
         properties.borderRadius = dialogRadius;
     }
+    JSViewAbstract::SetDialogHoverModeProperties(paramObj, properties);
+    JSViewAbstract::SetDialogBlurStyleOption(paramObj, properties);
+    JSViewAbstract::SetDialogEffectOption(paramObj, properties);
 
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
@@ -746,6 +890,7 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
             overlayManager->ShowCalendarDialog(
                 properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDialogShowCalendarPicker");
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowCalendarPicker",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 } // namespace OHOS::Ace::Framework

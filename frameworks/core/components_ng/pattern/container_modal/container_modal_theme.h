@@ -19,6 +19,7 @@
 #include <cstdint>
 #include "base/utils/device_config.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
@@ -43,6 +44,18 @@ constexpr uint32_t UNFOCUS_CLOSE_BTN_COLOR_DARK = 0xff191312;
 constexpr uint32_t UNFOCUS_CLOSE_BTN_COLOR_LIGHT = 0xfffef7f6;
 constexpr uint32_t UNFOCUS_BTN_COLOR_DARK = 0xff121212;
 constexpr uint32_t UNFOCUS_BTN_COLOR_LIGHT = 0xfff5f5f5;
+
+constexpr uint32_t ICON_PRIMARY_LIGHT = 0xE5000000;
+constexpr uint32_t ICON_PRIMARY_DARK = 0xDBFFFFFF;
+constexpr uint32_t ICON_ON_PRIMARY_LIGHT = 0xFFFFFF;
+constexpr uint32_t ICON_ON_PRIMARY_DARK = 0xE5E5E5;
+constexpr uint32_t INTERACTIVE_HOVER_LIGHT = 0x0C000000;
+constexpr uint32_t INTERACTIVE_HOVER_DARK = 0x19FFFFFF;
+constexpr uint32_t INTERACTIVE_CLICK_LIGHT = 0x19000000;
+constexpr uint32_t INTERACTIVE_CLICK_DARK = 0x26FFFFFF;
+constexpr uint32_t WARNING_LIGHT = 0xE84026;
+constexpr uint32_t WARNING_DARK = 0xD94838;
+constexpr uint32_t CLOSE_BTN_DARK = 0xE6A5A5;
 
 enum ControlBtnColorType {
     NORMAL,
@@ -71,13 +84,15 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            theme->themeConstants_ = themeConstants;
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
     private:
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<ContainerModalTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<ContainerModalTheme>& theme) const
         {
+            auto themeStyle = themeConstants->GetThemeStyle();
             if (!themeStyle) {
                 return;
             }
@@ -88,9 +103,34 @@ public:
             theme->backgroundColor_ = pattern->GetAttr<Color>("container_modal_background", Color());
             theme->backgroundUnfocusColor_ = pattern->GetAttr<Color>("container_modal_unfocus_background", Color());
             theme->titleTextColor_ = pattern->GetAttr<Color>("ohos_id_color_primary", Color());
-            theme->colorPrimary_ = pattern->GetAttr<Color>("ohos_id_color_primary", Color());
-            theme->colorWarning_ = pattern->GetAttr<Color>("ohos_id_color_warning", Color());
-            theme->colorPrimaryContrary_ = pattern->GetAttr<Color>("ohos_id_color_primary_contary", Color());
+
+            auto resAdapter = themeConstants->GetResourceAdapter();
+            CHECK_NULL_VOID(resAdapter);
+            auto isLightMode = resAdapter->GetResourceColorMode() == ColorMode::LIGHT;
+
+            theme->iconPrimaryColor_ = pattern->GetAttr<Color>(
+                "icon_primary",
+                isLightMode ? Color(ICON_PRIMARY_LIGHT) : Color(ICON_PRIMARY_DARK)
+            );
+            theme->iconOnPrimaryColor_ = pattern->GetAttr<Color>(
+                "icon_on_primary",
+                isLightMode ? Color(ICON_ON_PRIMARY_LIGHT) : Color(ICON_ON_PRIMARY_DARK)
+            );
+            theme->interactiveHoverColor_ = pattern->GetAttr<Color>(
+                "interactive_hover",
+                isLightMode ? Color(INTERACTIVE_HOVER_LIGHT) : Color(INTERACTIVE_HOVER_DARK)
+            );
+            theme->interactiveClickColor_ = pattern->GetAttr<Color>(
+                "interactive_click",
+                isLightMode ? Color(INTERACTIVE_CLICK_LIGHT) : Color(INTERACTIVE_CLICK_DARK)
+            );
+            theme->warningColor_ = pattern->GetAttr<Color>(
+                "warning",
+                isLightMode ? Color(WARNING_LIGHT) : Color(WARNING_DARK)
+            );
+
+            theme->windowScreenLeft_ = pattern->GetAttr<std::string>("window_left_screen", "");
+            theme->windowScreenRight_ = pattern->GetAttr<std::string>("window_right_screen", "");
         }
     };
     ContainerModalTheme() = default;
@@ -104,48 +144,48 @@ public:
 
     Color GetControlBtnColor(bool isCloseBtn, ControlBtnColorType type)
     {
-        auto isDarkMode = SystemProperties::GetColorMode() == ColorMode::DARK;
-
+        auto isLightMode = IsLightMode();
+        auto normalBtnOpacity = isLightMode ? 0.1f : 0.2f;
+        auto normalBtnColor = iconPrimaryColor_;
+        auto closeBtnOpacity = isLightMode ? 0.1f : 0.3f;
+        auto closeBtnColor = isLightMode ? warningColor_ : Color(CLOSE_BTN_DARK);
         Color btnColor;
         switch (type) {
             case ControlBtnColorType::NORMAL:
-                if (isDarkMode) {
-                    btnColor = isCloseBtn ? Color(DARK_MODE_NORMAL_CLOSE_BTN_COLOR) : colorPrimary_.ChangeOpacity(0.2f);
-                } else {
-                    btnColor = isCloseBtn ? colorWarning_.ChangeOpacity(0.1f) : colorPrimary_.ChangeOpacity(0.1f);
-                }
+                btnColor = !isCloseBtn
+                    ? normalBtnColor.ChangeOpacity(normalBtnOpacity)
+                    : closeBtnColor.ChangeOpacity(closeBtnOpacity);
                 break;
             case ControlBtnColorType::NORMAL_FILL:
-                btnColor = isCloseBtn ? colorWarning_.ChangeOpacity(1.0f)
-                                      : colorPrimary_.ChangeOpacity(isDarkMode ? 1.0f : 0.9f);
+                btnColor = !isCloseBtn
+                    ? iconPrimaryColor_.ChangeOpacity(1.0f) : warningColor_.ChangeOpacity(1.0f);
                 break;
             case ControlBtnColorType::HOVER:
-                btnColor = isCloseBtn
-                               ? colorWarning_.ChangeOpacity(1.0f)
-                               : (isDarkMode ? Color(HOVER_CLOSE_BTN_COLOR_DARK) : Color(HOVER_CLOSE_BTN_COLOR_LIGHT));
+                btnColor = !isCloseBtn
+                    ? normalBtnColor.ChangeOpacity(normalBtnOpacity).BlendColor(interactiveHoverColor_)
+                    : warningColor_.ChangeOpacity(1.0f);
                 break;
             case ControlBtnColorType::HOVER_FILL:
-                btnColor = isCloseBtn ? (isDarkMode ? Color(HOVER_FILL_CLOSE_BTN_COLOR_DARK)
-                                                    : Color(HOVER_FILL_CLOSE_BTN_COLOR_LIGHT))
-                                      : (isDarkMode ? Color(HOVER_FILL_CLOSE_BTN_COLOR_LIGHT).ChangeOpacity(0.86f)
-                                                    : Color(HOVER_FILL_CLOSE_BTN_COLOR_LIGHT).ChangeOpacity(0.9f));
+                btnColor = !isCloseBtn
+                    ? iconPrimaryColor_.ChangeOpacity(1.0f) : iconOnPrimaryColor_.ChangeOpacity(1.0f);
                 break;
             case ControlBtnColorType::PRESS:
-                btnColor =
-                    isCloseBtn
-                        ? (isDarkMode ? Color(PRESS_CLOSE_BTN_COLOR_DARK) : Color(PRESS_CLOSE_BTN_COLOR_LIGHT))
-                        : (isDarkMode ? Color(PRESS_NORMAL_BTN_COLOR_DARK) : Color(PRESS_NORMAL_BTN_COLOR_LIGHT));
+                btnColor = !isCloseBtn
+                    ? normalBtnColor.ChangeOpacity(normalBtnOpacity).BlendColor(interactiveClickColor_)
+                    : warningColor_.ChangeOpacity(1.0f).BlendColor(interactiveClickColor_);
                 break;
             case ControlBtnColorType::PRESS_FILL:
-                btnColor = isCloseBtn ? colorPrimaryContrary_.ChangeOpacity(1.0f) : colorPrimary_.ChangeOpacity(1.0f);
+                btnColor = !isCloseBtn
+                    ? iconPrimaryColor_.ChangeOpacity(1.0f) : iconOnPrimaryColor_.ChangeOpacity(1.0f);
                 break;
             case ControlBtnColorType::UNFOCUS:
-                btnColor = isCloseBtn ? (isDarkMode ? Color(UNFOCUS_CLOSE_BTN_COLOR_DARK)
-                                                    : Color(UNFOCUS_CLOSE_BTN_COLOR_LIGHT))
-                                      : (isDarkMode ? Color(UNFOCUS_BTN_COLOR_DARK) : Color(UNFOCUS_BTN_COLOR_LIGHT));
+                btnColor = !isCloseBtn
+                    ? normalBtnColor.ChangeOpacity(normalBtnOpacity * 0.4f)
+                    : closeBtnColor.ChangeOpacity(closeBtnOpacity * 0.4f);
                 break;
             case ControlBtnColorType::UNFOCUS_FILL:
-                btnColor = GetControlBtnColor(isCloseBtn, ControlBtnColorType::NORMAL_FILL).ChangeOpacity(0.4f);
+                btnColor = !isCloseBtn
+                    ? iconPrimaryColor_.ChangeOpacity(0.4f) : warningColor_.ChangeOpacity(0.4f);
                 break;
             default:
                 break;
@@ -153,14 +193,33 @@ public:
         return btnColor;
     }
 
+    bool IsLightMode()
+    {
+        CHECK_NULL_RETURN(themeConstants_, true);
+        auto resAdapter = themeConstants_->GetResourceAdapter();
+        CHECK_NULL_RETURN(resAdapter, true);
+        return resAdapter->GetResourceColorMode() == ColorMode::LIGHT;
+    }
+
+    std::string GetWindowScreen(bool isLeftSplit)
+    {
+        return isLeftSplit ? windowScreenLeft_ : windowScreenRight_;
+    }
+
 private:
     Color backgroundColor_;
     Color backgroundUnfocusColor_;
     Color titleTextColor_;
 
-    Color colorPrimary_;
-    Color colorWarning_;
-    Color colorPrimaryContrary_;
+    Color iconPrimaryColor_;
+    Color iconOnPrimaryColor_;
+    Color interactiveHoverColor_;
+    Color interactiveClickColor_;
+    Color warningColor_;
+    RefPtr<ThemeConstants> themeConstants_ = nullptr;
+
+    std::string windowScreenLeft_;
+    std::string windowScreenRight_;
 };
 
 } // namespace OHOS::Ace

@@ -18,6 +18,7 @@
 
 #include <mutex>
 
+#include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/pattern/dialog/dialog_event_hub.h"
 
 namespace OHOS::Ace {
@@ -29,8 +30,8 @@ public:
         const std::string& property) = 0;
     virtual void SetOnCancel(std::function<void()>&& eventFunc, DialogProperties& arg) = 0;
     virtual void SetShowDialog(const DialogProperties& arg) = 0;
-    virtual void SetOnWillDismiss(std::function<void(const int32_t& info)>&& onWillDismissFunc,
-        DialogProperties& arg) {};
+    virtual void SetOnWillDismiss(std::function<void(const int32_t& info,
+        const int32_t& instanceId)>&& onWillDismissFunc, DialogProperties& arg) {};
 
 private:
     static std::unique_ptr<AlertDialogModel> instance_;

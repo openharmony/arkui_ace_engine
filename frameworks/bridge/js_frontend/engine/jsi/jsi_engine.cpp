@@ -59,9 +59,9 @@ const int SYSTEM_BASE = 10;
 #if defined(ANDROID_PLATFORM)
 const std::string ARK_DEBUGGER_LIB_PATH = "libark_inspector.so";
 #elif defined(APP_USE_ARM)
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_inspector.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "libark_inspector.z.so";
 #else
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_inspector.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "libark_inspector.z.so";
 #endif
 const int32_t MAX_READ_TEXT_LENGTH = 4096;
 const std::regex URI_PATTERN("^\\/([a-z0-9A-Z_]+\\/)*[a-z0-9A-Z_]+\\.?[a-z0-9A-Z_]*$");
@@ -3136,7 +3136,7 @@ void JsiEngine::RegisterInitWorkerFunc()
     if (debugVersion) {
         libraryPath = ARK_DEBUGGER_LIB_PATH;
     }
-    auto&& initWorkerFunc = [weakInstance, libraryPath, debugVersion, instanceId = instanceId_](
+    auto&& initWorkerFunc = [weakInstance, libraryPath, debugVersion](
                                 NativeEngine* nativeEngine) {
         LOGI("WorkerCore RegisterInitWorkerFunc called");
         if (nativeEngine == nullptr) {
@@ -3161,7 +3161,7 @@ void JsiEngine::RegisterInitWorkerFunc()
             nativeEngine->CallDebuggerPostTaskFunc(std::move(callback));
         };
         bool debugMode = AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint();
-        panda::JSNApi::DebugOption debugOption = { libraryPath.c_str(), debugMode };
+        panda::JSNApi::DebugOption debugOption = { libraryPath.c_str(), debugMode, -1, true }; //FA:true port:-1
         JSNApi::NotifyDebugMode(tid, vm, debugOption, tid, workerPostTask, debugVersion);
 #endif
         instance->RegisterConsoleModule(arkNativeEngine);
@@ -3204,7 +3204,7 @@ void JsiEngine::RegisterAssetFunc()
 {
     auto weakDelegate = WeakPtr(engineInstance_->GetDelegate());
     auto&& assetFunc = [weakDelegate](const std::string& uri, uint8_t** buff, size_t* buffSize,
-        std::vector<uint8_t>& content, std::string& ami, bool& useSecureMem, bool isRestricted) {
+        std::vector<uint8_t>& content, std::string& ami, bool& useSecureMem, void** mapper, bool isRestricted) {
         LOGI("WorkerCore RegisterAssetFunc called");
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
@@ -3233,7 +3233,7 @@ void JsiEngine::RegisterWorker()
 
 JsiEngine::~JsiEngine()
 {
-    LOG_DESTROY();
+    LOGI("Engine destroyed");
     if (nativeEngine_ != nullptr) {
 #if !defined(PREVIEW)
         nativeEngine_->CancelCheckUVLoop();

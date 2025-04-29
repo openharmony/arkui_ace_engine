@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navigation/bar_item_event_hub.h"
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
+#include "core/components_ng/pattern/navigation/navdestination_node_base.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
@@ -44,31 +45,33 @@ namespace OHOS::Ace::NG {
 
 class NavigationTitleUtil {
 public:
-    static RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG::BarItem>& menuItems,
-        RefPtr<TitleBarNode> titleBarNode, bool isButtonEnabled);
+    static RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId,
+        const std::vector<NG::BarItem>& menuItems, const RefPtr<NavDestinationNodeBase>& navDestinationNodeBase,
+        bool isButtonEnabled, const std::string& field, const std::string& parentId,
+        bool isCreateLandscapeMenu = false);
     static void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<BarItemNode>& barItemNode,
-        const RefPtr<FrameNode>& barMenuNode, const RefPtr<TitleBarNode>& titleBarNode);
+        const RefPtr<FrameNode>& barMenuNode);
 
-    static bool BuildMoreButton(bool isButtonEnabled, RefPtr<NavigationBarTheme> theme,
-        RefPtr<TitleBarNode> titleBarNode, RefPtr<FrameNode> menuNode, std::vector<OptionParam>&& params);
+    static bool BuildMoreButton(bool isButtonEnabled, const RefPtr<NavigationBarTheme>& theme,
+        const RefPtr<NavDestinationNodeBase>& nodeBase, const RefPtr<FrameNode>& menuNode,
+        std::vector<OptionParam>&& params, const std::string& field, const std::string& parentId,
+        bool isCreateLandscapeMenu);
     static RefPtr<FrameNode> CreateMenuItemNode(
-        RefPtr<NavigationBarTheme> theme, const BarItem& menuItem, bool isButtonEnabled);
-    static RefPtr<FrameNode> CreateMenuItemButton(RefPtr<NavigationBarTheme> theme);
-    static RefPtr<BarItemNode> CreateBarItemNode(const bool isButtonEnabled);
+        const RefPtr<NavigationBarTheme>& theme, const BarItem& menuItem, bool isButtonEnabled);
+    static RefPtr<FrameNode> CreateMenuItemButton(const RefPtr<NavigationBarTheme>& theme);
+    static RefPtr<BarItemNode> CreateBarItemNode(const bool isButtonEnabled, const RefPtr<NavigationBarTheme>& theme);
     static RefPtr<FrameNode> CreateBarItemTextNode(const std::string& text);
-    static RefPtr<FrameNode> CreateBarItemIconNode(const BarItem& barItem, bool isButtonEnabled);
+    static RefPtr<FrameNode> CreateBarItemIconNode(
+        const BarItem& barItem, bool isButtonEnabled, const RefPtr<NavigationBarTheme>& theme);
     static void InitTitleBarButtonEvent(const RefPtr<FrameNode>& buttonNode, const RefPtr<FrameNode>& iconNode,
-        bool isMoreButton,  BarItem menuItem = BarItem(), bool isButtonEnabled = true);
+        bool isMoreButton, const BarItem& menuItem = BarItem(), bool isButtonEnabled = true);
     static void SetAccessibility(const RefPtr<FrameNode>& node, const std::string& message);
-    static void UpdateBarItemNodeWithItem(
-        const RefPtr<BarItemNode>& barItemNode, const BarItem& barItem, bool isButtonEnabled);
-    static void BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNode, bool isButtonEnabled);
-    static uint32_t GetOrInitMaxMenuNums(RefPtr<NavigationBarTheme>& theme, RefPtr<TitleBarNode> titleBarNode);
-    static void HandleLongPress(
-        const GestureEvent& info, const RefPtr<FrameNode>& menuNode, const std::vector<NG::BarItem>& menuItems);
-    static void HandleLongPressActionEnd(const RefPtr<FrameNode>& buttonNode);
-    static void InitDragAndLongPressEvent(const RefPtr<FrameNode>& menuNode, const std::vector<NG::BarItem>& menuItems);
-
+    static void UpdateBarItemNodeWithItem(const RefPtr<BarItemNode>& barItemNode, const BarItem& barItem,
+        bool isButtonEnabled, const RefPtr<NavigationBarTheme>& theme);
+    static void BuildMoreIemNode(
+        const RefPtr<BarItemNode>& barItemNode, bool isButtonEnabled, const RefPtr<NavigationBarTheme>& theme);
+    static uint32_t GetOrInitMaxMenuNums(
+        const RefPtr<NavigationBarTheme>& theme, const RefPtr<NavDestinationNodeBase>& navDestinationNodeBase);
     static std::string GetTitleString(const RefPtr<TitleBarNode>& titleBarNode, bool isCustom);
     static std::string GetSubtitleString(const RefPtr<TitleBarNode>& titleBarNode);
 
@@ -86,16 +89,30 @@ public:
         CHECK_NULL_VOID(node);
         node->UpdateInspectorId(id);
     }
-    
-private:
-    static RefPtr<FrameNode> CreatePopupDialogNode(
-        const RefPtr<FrameNode> targetNode, const std::vector<NG::BarItem>& menuItems, int32_t index);
-    static RefPtr<FrameNode> CreateSymbolDialog(const std::string& message, const RefPtr<FrameNode>& targetNode);
 
-    static void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameNode>& menuNode,
-        const std::vector<NG::BarItem>& menuItems);
-    static void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameNode>& menuNode,
-        const std::vector<NG::BarItem>& menuItems);
+    static float ParseCalcDimensionToPx(const std::optional<CalcDimension>& value, const float titleBarWidth);
+
+    static void CreateOrUpdateMainTitle(const RefPtr<TitleBarNode>& titleBarNode,
+        const NG::NavigationTitleInfo& titleInfo, bool ignoreMainTitle);
+    static void CreateOrUpdateSubtitle(const RefPtr<TitleBarNode>& titleBarNode,
+        const NG::NavigationTitleInfo& titleInfo);
+    static void CreateOrUpdateDestinationMainTitle(const RefPtr<TitleBarNode>& titleBarNode,
+        const NG::NavigationTitleInfo& titleInfo);
+    static void CreateOrUpdateDestinationSubtitle(const RefPtr<TitleBarNode>& titleBarNode,
+        const NG::NavigationTitleInfo& titleInfo);
+
+    static float CalculateTitlebarOffset(const RefPtr<UINode>& titleBarNode);
+    static void FoldStatusChangedAnimation(const RefPtr<FrameNode>& host);
+
+    static bool IsNeedHoverModeAction(const RefPtr<TitleBarNode>& titleBarNode);
+
+    static RefPtr<FrameNode> CreatePopupDialogNode(const RefPtr<FrameNode> targetNode,
+        const std::vector<NG::BarItem>& menuItems, int32_t index, int32_t themeScopeId);
+    static RefPtr<FrameNode> CreateSymbolDialog(
+        const std::string& message, const RefPtr<FrameNode>& targetNode, int32_t themeScopeId);
+    static void UpdateTitleOrToolBarTranslateYAndOpacity(const RefPtr<NavDestinationNodeBase>& nodeBase,
+        const RefPtr<FrameNode>& barNode, float translate, bool isTitle);
+    static bool IsTitleBarHasOffsetY(const RefPtr<FrameNode>& titleBarNode);
 };
 
 } // namespace OHOS::Ace::NG

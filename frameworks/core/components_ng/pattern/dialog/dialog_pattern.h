@@ -62,14 +62,14 @@ public:
         return false;
     }
 
-    void SetOnWillDismiss(const std::function<void(const int32_t& info)>& onWillDismiss)
+    void SetOnWillDismiss(const std::function<void(const int32_t& info, const int32_t& instanceId)>& onWillDismiss)
     {
         onWillDismiss_ = onWillDismiss;
     }
 
     bool ShouldDismiss() const
     {
-        if (onWillDismiss_) {
+        if (onWillDismiss_ && !isDialogDisposed_) {
             return true;
         }
         return false;
@@ -88,10 +88,10 @@ public:
         return false;
     }
 
-    void CallOnWillDismiss(const int32_t reason)
+    void CallOnWillDismiss(const int32_t reason, const int32_t instanceId)
     {
-        if (onWillDismiss_) {
-            onWillDismiss_(reason);
+        if (onWillDismiss_ && !isDialogDisposed_) {
+            onWillDismiss_(reason, instanceId);
         }
     }
 
@@ -186,7 +186,8 @@ public:
     void OnLanguageConfigurationUpdate() override;
 
     void DumpInfo() override;
-
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
     bool AvoidBottom() const override
     {
         return false;
@@ -260,6 +261,16 @@ public:
         return foldDisplayModeChangedCallbackId_.has_value();
     }
 
+    void UpdateHoverModeChangedCallbackId(std::optional<int32_t> id)
+    {
+        hoverModeChangedCallbackId_ = id;
+    }
+
+    bool HasHoverModeChangedCallbackId()
+    {
+        return hoverModeChangedCallbackId_.has_value();
+    }
+
     bool GetIsSuitableForAging()
     {
         return isSuitableForElderly_;
@@ -270,18 +281,19 @@ public:
         return fontScaleForElderly_;
     }
 
-    void SetIsPickerDiaglog(bool value)
+    void SetIsPickerDialog(bool value)
     {
-        isPickerDiaglog_ = value;
+        isPickerDialog_ = value;
     }
 
-    bool GetIsPickerDiaglog()
+    bool GetIsPickerDialog()
     {
-        return isPickerDiaglog_;
+        return isPickerDialog_;
     }
 
     void UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation);
     void InitHostWindowRect();
+    void UpdateHostWindowRect();
     void UpdateFontScale();
 
     bool GetIsSuitOldMeasure()
@@ -294,6 +306,36 @@ public:
         isScrollHeightNegative_ = isScrollHeightNegative;
     }
 
+    bool TriggerAutoSaveWhenInvisible() override
+    {
+        return true;
+    }
+
+    void SetIsDialogDisposed(bool isDialogDisposed)
+    {
+        isDialogDisposed_ = isDialogDisposed;
+    }
+
+    bool IsShowInFreeMultiWindow();
+    bool IsWaterfallWindowMode();
+    bool IsShowInFloatingWindow();
+    void AddExtraMaskNode(const DialogProperties& props);
+
+    void OverlayDismissDialog(const RefPtr<FrameNode>& dialogNode);
+    RefPtr<OverlayManager> GetEmbeddedOverlay(const RefPtr<OverlayManager>& context);
+    void MountMaskToUECHost();
+    void CloseDialog();
+    void CloseDialogByEvent(DialogDismissReason reason = DialogDismissReason::DIALOG_TOUCH_OUTSIDE);
+    void SetUECHostMaskInfo(UECHostMaskInfo maskInfo)
+    {
+        hostMaskInfo_ = maskInfo;
+    }
+
+    UECHostMaskInfo GetUECHostMaskInfo()
+    {
+        return hostMaskInfo_;
+    }
+
 private:
     bool AvoidKeyboard() const override
     {
@@ -303,8 +345,10 @@ private:
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void RegisterHoverModeChangeCallback();
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    RectF GetContentRect(const RefPtr<FrameNode>& contentNode);
     void HandleClick(const GestureEvent& info);
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
@@ -313,6 +357,7 @@ private:
     void HandleFocusEvent();
 
     void PopDialog(int32_t buttonIdx);
+    bool NeedUpdateHostWindowRect();
 
     // set render context properties of content frame
     void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props);
@@ -349,17 +394,29 @@ private:
     void RecordEvent(int32_t btnIndex) const;
     void ParseBorderRadius(BorderRadiusProperty& raidus);
     void UpdateSheetIconAndText();
+    void UpdateButtonsPropertyForEachButton(RefPtr<FrameNode> buttonFrameNode, int32_t btnindex);
     void UpdateButtonsProperty();
     void UpdateNodeContent(const RefPtr<FrameNode>& node, std::string& text);
+    void UpdateTitleAndContentColor();
+    void UpdateDialogTextColor(const RefPtr<FrameNode>& textNode, const TextStyle& textStyle);
     void UpdateAlignmentAndOffset();
     void DumpBoolProperty();
+    void DumpBoolProperty(std::unique_ptr<JsonValue>& json);
     void DumpObjectProperty();
+    void DumpObjectProperty(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyBoolProperty(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyObjectProperty(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyBorderProperty(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifySizeProperty(std::unique_ptr<JsonValue>& json);
     void UpdatePropertyForElderly(const std::vector<ButtonInfo>& buttons);
     bool NeedsButtonDirectionChange(const std::vector<ButtonInfo>& buttons);
     void OnFontConfigurationUpdate() override;
     void UpdateTextFontScale();
     void UpdateTitleTextFontScale();
     void CheckScrollHeightIsNegative(const RefPtr<UINode>& contentColumn, const DialogProperties& props);
+    RefPtr<OverlayManager> GetOverlayManager(const RefPtr<FrameNode>& host);
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;
@@ -367,13 +424,14 @@ private:
     std::optional<AnimationOption> openAnimation_;
     std::optional<AnimationOption> closeAnimation_;
     std::optional<int32_t> foldDisplayModeChangedCallbackId_;
+    std::optional<int32_t> hoverModeChangedCallbackId_;
     bool isFoldStatusChanged_ = false;
 
     // XTS inspector values
     std::string message_;
     std::string title_;
     std::string subtitle_;
-    std::function<void(const int32_t& info)> onWillDismiss_;
+    std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismiss_;
     std::function<bool(const int32_t& info)> onWillDismissByNDK_;
 
     DialogProperties dialogProperties_;
@@ -383,7 +441,7 @@ private:
     RefPtr<FrameNode> contentColumn_;
     RefPtr<RenderContext> contentRenderContext_;
     bool isSuitableForElderly_ = false;
-    bool isPickerDiaglog_ = false;
+    bool isPickerDialog_ = false;
     bool notAdapationAging_ = false;
     bool isSuitOldMeasure_ = false;
     bool isScrollHeightNegative_ = false;
@@ -399,7 +457,9 @@ private:
     std::function<void()> onWillDisappearCallback_ = nullptr;
     std::unordered_map<DialogContentNode, RefPtr<FrameNode>> contentNodeMap_;
     bool isUIExtensionSubWindow_ = false;
+    bool isDialogDisposed_ = false;
     RectF hostWindowRect_;
+    UECHostMaskInfo hostMaskInfo_;
 };
 } // namespace OHOS::Ace::NG
 

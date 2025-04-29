@@ -21,15 +21,10 @@
 #define protected public
 #undef SECURITY_COMPONENT_ENABLE
 
-#include "test/mock/base/mock_drag_window.h"
 #include "test/mock/base/mock_pixel_map.h"
-#include "test/mock/base/mock_subwindow.h"
 #include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_interaction_interface.h"
 #include "test/mock/core/common/mock_udmf.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
@@ -47,9 +42,6 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/core/common/event_manager.h"
-#include "frameworks/core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/grid/grid_item_pattern.h"
-#include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "frameworks/core/components_ng/pattern/text_drag/text_drag_base.h"
 
 namespace OHOS::Ace::NG {

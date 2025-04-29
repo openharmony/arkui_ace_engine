@@ -27,7 +27,7 @@ public:
     NavToolbarNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : FrameNode(tag, nodeId, pattern)
     {}
-    ~NavToolbarNode() override = default;
+    ~NavToolbarNode() override;
     static RefPtr<NavToolbarNode> GetOrCreateToolbarNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
@@ -66,10 +66,21 @@ public:
         return hasValidContent_;
     }
 
+    void SetIsHideItemText(bool hideItemText)
+    {
+        isHideItemText_ = hideItemText;
+    }
+
+    bool IsHideItemText() const
+    {
+        return isHideItemText_;
+    }
+
 private:
     RefPtr<UINode> toolbarContainerNode_;
     bool isNewToolbar_ = false;
     bool hasValidContent_ = false;
+    bool isHideItemText_ = false;
 };
 } // namespace OHOS::Ace::NG
 

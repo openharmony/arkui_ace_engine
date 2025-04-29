@@ -15,16 +15,13 @@
 
 #include "inspector.h"
 
-#include "inspector_composed_element.h"
 #include "shape_composed_element.h"
 
-#include "core/common/ace_application_info.h"
 #include "core/components/page/page_element.h"
 #include "core/components/root/root_element.h"
 
 namespace OHOS::Ace::V2 {
 namespace {
-const char IFELSE_ELEMENT_TAG[] = "IfElseElement";
 const char INSPECTOR_TYPE[] = "$type";
 const char INSPECTOR_ROOT[] = "root";
 const char INSPECTOR_WIDTH[] = "width";
@@ -99,10 +96,9 @@ void ToJsonValue(const RefPtr<Element>& element,
     json->Put(INSPECTOR_TYPE, inspectorElement->GetTag().c_str());
     auto shapeComposedElement = AceType::DynamicCast<V2::ShapeComposedElement>(element);
     if (shapeComposedElement != nullptr) {
-        int type = StringUtils::StringToInt(shapeComposedElement->GetShapeType());
-        json->Replace(INSPECTOR_TYPE, SHAPE_TYPE_STRINGS[type]);
+        json->Replace(INSPECTOR_TYPE, shapeComposedElement->GetShapeType().c_str());
     }
-    json->Put(INSPECTOR_ID, std::stoi(inspectorElement->GetId()));
+    json->Put(INSPECTOR_ID, StringUtils::StringToInt(inspectorElement->GetId()));
     json->Put(INSPECTOR_Z_INDEX, inspectorElement->GetZIndex());
     json->Put(INSPECTOR_RECT, inspectorElement->GetRenderRect().ToBounds().c_str());
     auto jsonObject = inspectorElement->ToJsonObject();
@@ -121,23 +117,6 @@ void ToJsonValue(const RefPtr<Element>& element,
     }
     json->Put(INSPECTOR_CHILDREN, jsonNodeArray);
 }
-
-void DumpElementTree(
-    int32_t depth, const RefPtr<Element>& element, std::map<int32_t, std::list<RefPtr<Element>>>& depthElementMap)
-{
-    if (element->GetChildren().empty()) {
-        return;
-    }
-    const auto& children = element->GetChildren();
-    for (auto& depthElement : children) {
-        if (strcmp(AceType::TypeName(depthElement), IFELSE_ELEMENT_TAG) == 0) {
-            DumpElementTree(depth, depthElement, depthElementMap);
-            continue;
-        }
-        depthElementMap[depth].insert(depthElementMap[depth].end(), depthElement);
-        DumpElementTree(depth + 1, depthElement, depthElementMap);
-    }
-}
 } // namespace
 
 std::string Inspector::GetInspectorNodeByKey(const RefPtr<PipelineContext>& context, const std::string& key)
@@ -149,7 +128,7 @@ std::string Inspector::GetInspectorNodeByKey(const RefPtr<PipelineContext>& cont
 
     auto jsonNode = JsonUtil::Create(true);
     jsonNode->Put(INSPECTOR_TYPE, inspectorElement->GetTag().c_str());
-    jsonNode->Put(INSPECTOR_ID, std::stoi(inspectorElement->GetId()));
+    jsonNode->Put(INSPECTOR_ID, StringUtils::StringToInt(inspectorElement->GetId()));
     jsonNode->Put(INSPECTOR_Z_INDEX, inspectorElement->GetZIndex());
     jsonNode->Put(INSPECTOR_RECT, inspectorElement->GetRenderRect().ToBounds().c_str());
     std::string debugLine = inspectorElement->GetDebugLine();
@@ -273,7 +252,7 @@ bool Inspector::SendKeyEvent(const RefPtr<PipelineContext>& context, const JsKey
     keyEvent.SetTimeStamp(event.timeStamp);
     keyEvent.sourceType = static_cast<SourceType>(event.sourceDevice);
     return context->GetTaskExecutor()->PostTask(
-        [context, keyEvent]() { context->OnKeyEvent(keyEvent); },
+        [context, keyEvent]() { context->OnNonPointerEvent(keyEvent); },
         TaskExecutor::TaskType::UI, "ArkUIInspectorSendKeyEvent");
 }
 } // namespace OHOS::Ace::V2

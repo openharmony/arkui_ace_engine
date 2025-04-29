@@ -20,6 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/pipeline/base/element_register.h"
 
 #define private public
 #define protected public
@@ -1390,7 +1391,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxNotifyDataCountChangedTest001, Te
      * @tc.steps: step3. Invoke NotifyDataCountChanged.
      * @tc.expected: LazyForEachNode ids_ will be cleared.
      */
-    lazyForEachNode->NotifyDataCountChanged(INDEX_0);
+    lazyForEachNode->NotifyChangeWithCount(INDEX_0, 0, UINode::NotificationType::START_CHANGE_POSITION);
     EXPECT_TRUE(lazyForEachNode->ids_.empty());
 }
 
@@ -1612,9 +1613,9 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxOnDataReloadedTest001, TestSi
     for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
     }
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 7);
     lazyForEachBuilder->OnDataReloaded();
-    lazyForEachBuilder->OnDataChanged(INDEX_1);
-    lazyForEachBuilder->OnDataReloaded();
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 0);
 }
 
 /**
@@ -1684,9 +1685,9 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxOnDataAddedTest001, TestSize.
     for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true, true);
     }
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 7);
     lazyForEachBuilder->OnDataAdded(INDEX_0);
-    lazyForEachBuilder->OnDataChanged(INDEX_1);
-    lazyForEachBuilder->OnDataAdded(INDEX_0);
+    EXPECT_NE(lazyForEachBuilder->GetChildByIndex(7, false, false).second, nullptr);
 }
 
 /**
@@ -1759,9 +1760,9 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxOnDataBulkAddedTest001, TestS
     for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
     }
-    lazyForEachBuilder->OnDataBulkAdded(INDEX_0, INDEX_0);
-    lazyForEachBuilder->OnDataChanged(INDEX_1);
-    lazyForEachBuilder->OnDataBulkAdded(INDEX_0, INDEX_0);
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 7);
+    lazyForEachBuilder->OnDataBulkAdded(INDEX_0, 2);
+    EXPECT_NE(lazyForEachBuilder->GetChildByIndex(8, false, false).second, nullptr);
 }
 
 /**
@@ -1791,10 +1792,11 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxOnDataDeletedTest001, TestSiz
     for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
     }
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 7);
     lazyForEachBuilder->OnDataDeleted(INDEX_0);
-    lazyForEachBuilder->OnDataChanged(INDEX_1);
-    lazyForEachBuilder->OnDataDeleted(INDEX_1);
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 6);
     lazyForEachBuilder->OnDataDeleted(BUILDER_INDEX_ONDATADELETED_END);
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 6);
 }
 
 /**
@@ -1823,12 +1825,16 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxOnDataDeletedTest002, TestSiz
     for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
     }
+    // init historicalTotalCount_
+    lazyForEachBuilder->UpdateHistoricalTotalCount(lazyForEachBuilder->GetTotalCount());
     std::list<V2::Operation> DataOperations;
     V2::Operation operation1 = {.type = "delete", .index = INDEX_0, .count = 1};
     DataOperations.push_back(operation1);
     lazyForEachBuilder->OnDatasetChange(DataOperations);
     EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 6);
     DataOperations.clear();
+    // update historicalTotalCount_
+    lazyForEachBuilder->UpdateHistoricalTotalCount(lazyForEachBuilder->GetTotalCount());
     V2::Operation operation2 = {.type = "delete", .index = INDEX_0, .count = 2};
     DataOperations.push_back(operation2);
     lazyForEachBuilder->OnDatasetChange(DataOperations);
@@ -1863,8 +1869,9 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxOnDataBulkDeletedTest001, Tes
     for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
     }
-    lazyForEachBuilder->OnDataChanged(INDEX_1);
-    lazyForEachBuilder->OnDataBulkDeleted(INDEX_0, INDEX_1);
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 7);
+    lazyForEachBuilder->OnDataBulkDeleted(INDEX_0, 2);
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 5);
 }
 
 /**
@@ -1894,8 +1901,11 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxOnDataChangedTest001, TestSiz
     for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
     }
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 7);
     lazyForEachBuilder->OnDataChanged(INDEX_1);
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 6);
     lazyForEachBuilder->OnDataChanged(INDEX_7);
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 6);
 }
 
 /**
@@ -1957,10 +1967,15 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxOnDataMovedTest001, TestSize.
     for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
     }
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 7);
     lazyForEachBuilder->OnDataMoved(INDEX_0, INDEX_1);
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 7);
     lazyForEachBuilder->OnDataMoved(INDEX_0, INDEX_7);
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 6);
     lazyForEachBuilder->OnDataMoved(INDEX_7, INDEX_1);
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 5);
     lazyForEachBuilder->OnDataMoved(INDEX_7, INDEX_EQUAL_WITH_START_INDEX_DELETED);
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 5);
 }
 
 /**
@@ -2049,6 +2064,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxRecycleChildByIndexTest001, T
     for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
     }
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 7);
     lazyForEachBuilder->RecycleChildByIndex(INDEX_1);
 }
 
@@ -2153,7 +2169,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxNotifyCountChangeTest001, TestSiz
      * @tc.steps: step3. Invoke NotifyCountChange.
      * @tc.expected: LazyForEachNode ids_ will be cleared.
      */
-    lazyForEachNode->NotifyCountChange(0, 0);
+    lazyForEachNode->NotifyChangeWithCount(0, 0, UINode::NotificationType::END_CHANGE_POSITION);
     EXPECT_TRUE(lazyForEachNode->ids_.empty());
 }
 

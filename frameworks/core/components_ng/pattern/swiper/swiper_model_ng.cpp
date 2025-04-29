@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,11 +26,10 @@
 #include "core/components/swiper/swiper_component.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/swiper/arc_swiper_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_node.h"
-#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 typedef enum {
@@ -39,14 +38,20 @@ typedef enum {
     ARKUI_SWIPER_ARROW_SHOW_ON_HOVER,
 } SwiperArrow;
 
-RefPtr<SwiperController> SwiperModelNG::Create()
+RefPtr<SwiperController> SwiperModelNG::Create(bool isCreateArc)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     CHECK_NULL_RETURN(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SWIPER_ETS_TAG, nodeId);
-    auto swiperNode = FrameNode::GetOrCreateFrameNode(
-        V2::SWIPER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    RefPtr<FrameNode> swiperNode = nullptr;
+    if (isCreateArc) {
+        swiperNode = FrameNode::GetOrCreateFrameNode(
+            V2::SWIPER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ArcSwiperPattern>(); });
+    } else {
+        swiperNode = FrameNode::GetOrCreateFrameNode(
+            V2::SWIPER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    }
 
     stack->Push(swiperNode);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
@@ -115,7 +120,6 @@ void SwiperModelNG::SetShowIndicator(bool showIndicator)
 
 void SwiperModelNG::SetIndicatorType(SwiperIndicatorType indicatorType)
 {
-    SwiperIndicatorUtils::SetSwiperIndicatorType(indicatorType);
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, IndicatorType, indicatorType);
 }
 
@@ -133,6 +137,16 @@ void SwiperModelNG::SetCachedCount(int32_t cachedCount)
     pattern->SetCachedCount(cachedCount);
 
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, CachedCount, cachedCount);
+}
+
+void SwiperModelNG::SetCachedIsShown(bool isShown)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, CachedIsShown, isShown);
+}
+
+void SwiperModelNG::SetCachedIsShown(FrameNode* frameNode, bool isShown)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, CachedIsShown, isShown, frameNode);
 }
 
 void SwiperModelNG::SetIsIndicatorCustomSize(bool isCustomSize)
@@ -201,6 +215,20 @@ void SwiperModelNG::SetOnChange(std::function<void(const BaseEventInfo* info)>&&
     CHECK_NULL_VOID(pattern);
 
     pattern->UpdateChangeEvent([event = std::move(onChange)](int32_t index) {
+        CHECK_NULL_VOID(event);
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
+void SwiperModelNG::SetOnUnselected(std::function<void(const BaseEventInfo* info)>&& onUnselected)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateOnUnselectedEvent([event = std::move(onUnselected)](int32_t index) {
+        CHECK_NULL_VOID(event);
         SwiperChangeEvent eventInfo(index);
         event(&eventInfo);
     });
@@ -213,8 +241,12 @@ void SwiperModelNG::SetOnAnimationStart(AnimationStartEvent&& onAnimationStart)
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
 
-    pattern->UpdateAnimationStartEvent([event = std::move(onAnimationStart)](int32_t index, int32_t targetIndex,
-                                           const AnimationCallbackInfo& info) { event(index, targetIndex, info); });
+    pattern->UpdateAnimationStartEvent(
+        [event = std::move(onAnimationStart)](int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {
+            CHECK_NULL_VOID(event);
+            event(index, targetIndex, info);
+        }
+    );
 }
 
 void SwiperModelNG::SetOnAnimationEnd(AnimationEndEvent&& onAnimationEnd)
@@ -225,18 +257,26 @@ void SwiperModelNG::SetOnAnimationEnd(AnimationEndEvent&& onAnimationEnd)
     CHECK_NULL_VOID(pattern);
 
     pattern->UpdateAnimationEndEvent(
-        [event = std::move(onAnimationEnd)](int32_t index, const AnimationCallbackInfo& info) { event(index, info); });
+        [event = std::move(onAnimationEnd)](int32_t index, const AnimationCallbackInfo& info) {
+            CHECK_NULL_VOID(event);
+            event(index, info);
+        }
+    );
 }
 
 void SwiperModelNG::SetOnGestureSwipe(GestureSwipeEvent&& onGestureSwipe)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(swiperNode);
-    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->SetGestureSwipeEvent(
-        [event = std::move(onGestureSwipe)](int32_t index, const AnimationCallbackInfo& info) { event(index, info); });
+        [event = std::move(onGestureSwipe)](int32_t index, const AnimationCallbackInfo& info) {
+            CHECK_NULL_VOID(event);
+            event(index, info);
+        }
+    );
 }
 
 void SwiperModelNG::SetNestedScroll(FrameNode* frameNode, const int32_t nestedOpt)
@@ -266,6 +306,15 @@ void SwiperModelNG::SetIndicatorStyle(const SwiperParameters& swiperParameters)
     pattern->SetSwiperParameters(swiperParameters);
 };
 
+void SwiperModelNG::SetArcDotIndicatorStyle(const SwiperArcDotParameters& swiperArcDotParameters)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSwiperArcDotParameters(swiperArcDotParameters);
+}
+
 void SwiperModelNG::SetDotIndicatorStyle(const SwiperParameters& swiperParameters)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -274,6 +323,32 @@ void SwiperModelNG::SetDotIndicatorStyle(const SwiperParameters& swiperParameter
     CHECK_NULL_VOID(pattern);
     pattern->SetSwiperParameters(swiperParameters);
 };
+
+void SwiperModelNG::SetArcDotIndicatorStyle(FrameNode* frameNode, const SwiperArcDotParameters& swiperArcDotParameters)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSwiperArcDotParameters(swiperArcDotParameters);
+}
+
+void SwiperModelNG::SetBindIndicator(bool bind)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBindIndicator(bind);
+}
+
+void SwiperModelNG::SetJSIndicatorController(std::function<void()> resetFunc)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetJSIndicatorController(resetFunc);
+}
 
 void SwiperModelNG::SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters)
 {
@@ -330,6 +405,7 @@ void SwiperModelNG::SetOnChangeEvent(std::function<void(const BaseEventInfo* inf
     CHECK_NULL_VOID(pattern);
 
     pattern->UpdateOnChangeEvent([event = std::move(onChangeEvent)](int32_t index) {
+        CHECK_NULL_VOID(event);
         SwiperChangeEvent eventInfo(index);
         event(&eventInfo);
     });
@@ -342,6 +418,25 @@ void SwiperModelNG::SetIndicatorIsBoolean(bool isBoolean)
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetIndicatorIsBoolean(isBoolean);
+}
+
+void SwiperModelNG::SetAutoPlayOptions(const SwiperAutoPlayOptions& swiperAutoPlayOptions)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetStopWhenTouched(swiperAutoPlayOptions.stopWhenTouched);
+}
+
+SwiperAutoPlayOptions SwiperModelNG::GetAutoPlayOptions(FrameNode* frameNode)
+{
+    SwiperAutoPlayOptions swiperAutoPlayOptions;
+    CHECK_NULL_RETURN(frameNode, swiperAutoPlayOptions);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, swiperAutoPlayOptions);
+    swiperAutoPlayOptions.stopWhenTouched = pattern->IsStopWhenTouched();
+    return swiperAutoPlayOptions;
 }
 
 void SwiperModelNG::SetArrowStyle(const SwiperArrowParameters& swiperArrowParameters)
@@ -426,6 +521,68 @@ void SwiperModelNG::SetOnContentDidScroll(FrameNode* frameNode, ContentDidScroll
     pattern->SetOnContentDidScroll(std::move(onContentDidScroll));
 }
 
+void SwiperModelNG::SetOnContentWillScroll(ContentWillScrollEvent&& onContentWillScroll)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnContentWillScroll(std::move(onContentWillScroll));
+}
+
+void SwiperModelNG::SetOnContentWillScroll(FrameNode* frameNode, ContentWillScrollEvent&& onContentWillScroll)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnContentWillScroll(std::move(onContentWillScroll));
+}
+
+void SwiperModelNG::SetPageFlipMode(int32_t pageFlipMode)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetPageFlipMode(pageFlipMode);
+}
+
+void SwiperModelNG::SetPageFlipMode(FrameNode* frameNode, int32_t options)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetPageFlipMode(options);
+}
+
+int32_t SwiperModelNG::GetPageFlipMode(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, 0);
+    return pattern->GetPageFlipMode();
+}
+
+void SwiperModelNG::SetDisableTransitionAnimation(bool isDisable)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDisableTransitionAnimation(isDisable);
+}
+
+void SwiperModelNG::SetDigitalCrownSensitivity(int32_t sensitivity)
+{
+#ifdef SUPPORT_DIGITAL_CROWN
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDigitalCrownSensitivity(static_cast<CrownSensitivity>(sensitivity));
+#endif
+}
+
 void SwiperModelNG::SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin, bool ignoreBlank)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin, frameNode);
@@ -476,6 +633,13 @@ int32_t SwiperModelNG::GetCachedCount(FrameNode* frameNode)
     int32_t cachedCount = 1;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperLayoutProperty, CachedCount, cachedCount, frameNode, 1);
     return cachedCount;
+}
+
+bool SwiperModelNG::GetCachedIsShown(FrameNode* frameNode)
+{
+    bool isShown = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperLayoutProperty, CachedIsShown, isShown, frameNode, false);
+    return isShown;
 }
 
 void SwiperModelNG::SetAutoPlay(FrameNode* frameNode, bool autoPlay)
@@ -535,6 +699,14 @@ void SwiperModelNG::ResetDisplayCount(FrameNode* frameNode)
 void SwiperModelNG::SetCurve(FrameNode* frameNode, const RefPtr<Curve>& curve)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(SwiperPaintProperty, Curve, curve, frameNode);
+}
+
+void SwiperModelNG::SetAutoPlayOptions(FrameNode* frameNode, const SwiperAutoPlayOptions& swiperAutoPlayOptions)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetStopWhenTouched(swiperAutoPlayOptions.stopWhenTouched);
 }
 
 void SwiperModelNG::SetArrowStyle(FrameNode* frameNode, const SwiperArrowParameters& swiperArrowParameters)
@@ -598,7 +770,6 @@ void SwiperModelNG::SetDigitIndicatorStyle(FrameNode* frameNode, const SwiperDig
 
 void SwiperModelNG::SetIndicatorType(FrameNode* frameNode, SwiperIndicatorType indicatorType)
 {
-    SwiperIndicatorUtils::SetSwiperIndicatorType(indicatorType);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, IndicatorType, indicatorType, frameNode);
 }
 
@@ -618,6 +789,14 @@ void SwiperModelNG::SetDotIndicatorStyle(FrameNode* frameNode, const SwiperParam
     pattern->SetSwiperParameters(swiperParameters);
 }
 
+void SwiperModelNG::SetBindIndicator(FrameNode* frameNode, bool bind)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBindIndicator(bind);
+}
+
 void SwiperModelNG::SetEnabled(FrameNode* frameNode, bool enabled)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(SwiperPaintProperty, Enabled, enabled, frameNode);
@@ -629,6 +808,19 @@ void SwiperModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const B
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->UpdateChangeEvent([event = std::move(onChange)](int32_t index) {
+        CHECK_NULL_VOID(event);
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
+void SwiperModelNG::SetOnUnselected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onUnselected)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateOnUnselectedEvent([event = std::move(onUnselected)](int32_t index) {
+        CHECK_NULL_VOID(event);
         SwiperChangeEvent eventInfo(index);
         event(&eventInfo);
     });
@@ -639,8 +831,12 @@ void SwiperModelNG::SetOnAnimationStart(FrameNode* frameNode, AnimationStartEven
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->UpdateAnimationStartEvent([event = std::move(onAnimationStart)](int32_t index, int32_t targetIndex,
-        const AnimationCallbackInfo& info) { event(index, targetIndex, info); });
+    pattern->UpdateAnimationStartEvent(
+        [event = std::move(onAnimationStart)](int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {
+            CHECK_NULL_VOID(event);
+            event(index, targetIndex, info);
+        }
+    );
 }
 
 void SwiperModelNG::SetOnAnimationEnd(FrameNode* frameNode, AnimationEndEvent&& onAnimationEnd)
@@ -649,16 +845,24 @@ void SwiperModelNG::SetOnAnimationEnd(FrameNode* frameNode, AnimationEndEvent&& 
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->UpdateAnimationEndEvent(
-        [event = std::move(onAnimationEnd)](int32_t index, const AnimationCallbackInfo& info) { event(index, info); });
+        [event = std::move(onAnimationEnd)](int32_t index, const AnimationCallbackInfo& info) {
+            CHECK_NULL_VOID(event);
+            event(index, info);
+        }
+    );
 }
 
 void SwiperModelNG::SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& onGestureSwipe)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<SwiperEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetGestureSwipeEvent(
-        [event = std::move(onGestureSwipe)](int32_t index, const AnimationCallbackInfo& info) { event(index, info); });
+        [event = std::move(onGestureSwipe)](int32_t index, const AnimationCallbackInfo& info) {
+            CHECK_NULL_VOID(event);
+            event(index, info);
+        }
+    );
 }
 
 bool SwiperModelNG::GetLoop(FrameNode* frameNode)
@@ -787,8 +991,18 @@ void SwiperModelNG::SetSwiperToIndex(FrameNode* frameNode, int32_t index, bool u
     pattern->ChangeIndex(index, useAnimation);
 }
 
+void SwiperModelNG::SetSwiperToIndex(FrameNode* frameNode, int32_t index, SwiperAnimationMode animationMode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ChangeIndex(index, animationMode);
+}
+
 void SwiperModelNG::GetPreviousMargin(FrameNode* frameNode, int32_t unit, SwiperMarginOptions* options)
 {
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
     Dimension prevMargin(0.0f, static_cast<DimensionUnit>(unit));
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         SwiperLayoutProperty, PrevMargin, prevMargin, frameNode, prevMargin);
@@ -800,6 +1014,8 @@ void SwiperModelNG::GetPreviousMargin(FrameNode* frameNode, int32_t unit, Swiper
 
 void SwiperModelNG::GetNextMargin(FrameNode* frameNode, int32_t unit, SwiperMarginOptions* options)
 {
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
     Dimension nextMargin(0.0f, static_cast<DimensionUnit>(unit));
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         SwiperLayoutProperty, NextMargin, nextMargin, frameNode, nextMargin);
@@ -840,6 +1056,7 @@ RefPtr<SwiperController> SwiperModelNG::GetOrCreateSwiperController(FrameNode* f
 
 RefPtr<SwiperController> SwiperModelNG::GetSwiperController(FrameNode* frameNode)
 {
+    CHECK_NULL_RETURN(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     return pattern->GetSwiperController();
@@ -851,5 +1068,95 @@ bool SwiperModelNG::GetIndicatorInteractive(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_RETURN(pattern, false);
     return pattern->IsIndicatorInteractive();
+}
+
+void SwiperModelNG::SetOnSelected(std::function<void(const BaseEventInfo* info)>&& onSelected)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    pattern->UpdateOnSelectedEvent([event = std::move(onSelected)](int32_t index) {
+        CHECK_NULL_VOID(event);
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
+void SwiperModelNG::SetOnSelected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onSelected)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateOnSelectedEvent([event = std::move(onSelected)](int32_t index) {
+        CHECK_NULL_VOID(event);
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
+SwiperArrowParameters SwiperModelNG::GetArrowStyle(FrameNode* frameNode)
+{
+    SwiperArrowParameters swiperArrowParameters;
+    CHECK_NULL_RETURN(frameNode, swiperArrowParameters);
+    auto castSwiperLayoutProperty = frameNode->GetLayoutPropertyPtr<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(castSwiperLayoutProperty, swiperArrowParameters);
+    swiperArrowParameters.isShowBackground = castSwiperLayoutProperty->GetIsShowBackground();
+    swiperArrowParameters.isSidebarMiddle = castSwiperLayoutProperty->GetIsSidebarMiddle();
+    swiperArrowParameters.backgroundSize = castSwiperLayoutProperty->GetBackgroundSize();
+    swiperArrowParameters.backgroundColor = castSwiperLayoutProperty->GetBackgroundColor();
+    swiperArrowParameters.arrowSize = castSwiperLayoutProperty->GetArrowSize();
+    swiperArrowParameters.arrowColor = castSwiperLayoutProperty->GetArrowColor();
+    return swiperArrowParameters;
+}
+
+void SwiperModelNG::ResetArrowStyle(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, IsShowBackground, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, BackgroundSize, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, BackgroundColor, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, ArrowSize, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, ArrowColor, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, IsSidebarMiddle, frameNode);
+}
+
+void SwiperModelNG::ResetIndicatorStyle(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetIndicatorParameters();
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+int SwiperModelNG::GetSwipeByGroup(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperLayoutProperty, SwipeByGroup, value, frameNode, value);
+    return value;
+}
+
+SwiperDisplayMode SwiperModelNG::GetDisplayMode(FrameNode* frameNode)
+{
+    SwiperDisplayMode displayMode = SwiperDisplayMode::STRETCH;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        SwiperLayoutProperty, DisplayMode, displayMode, frameNode, displayMode);
+    return displayMode;
+}
+
+float SwiperModelNG::GetMinSize(FrameNode* frameNode)
+{
+    Dimension value(0, DimensionUnit::VP);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperLayoutProperty, MinSize, value, frameNode, value);
+    return value.Value();
+}
+
+std::shared_ptr<SwiperDigitalParameters> SwiperModelNG::GetDigitIndicator(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetSwiperDigitalParameters();
 }
 } // namespace OHOS::Ace::NG

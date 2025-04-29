@@ -28,7 +28,10 @@ class ACE_FORCE_EXPORT CanvasRenderingContext2DModelNG : public OHOS::Ace::Canva
 public:
     CanvasRenderingContext2DModelNG() = default;
     ~CanvasRenderingContext2DModelNG() override = default;
-
+    int32_t GetId() override;
+    void Release() override;
+    void SetOnAttach(std::function<void()>&& callback) override;
+    void SetOnDetach(std::function<void()>&& callback) override;
     void SetPattern(RefPtr<AceType> pattern) override;
     void SetFillText(const PaintState& state, const FillTextInfo& fillTextInfo) override;
     void SetStrokeText(const PaintState& state, const FillTextInfo& fillTextInfo) override;
@@ -37,6 +40,7 @@ public:
     void SetFontStyle(const Ace::FontStyle& fontStyle) override;
     void SetFontFamilies(const std::vector<std::string>& families) override;
     void SetFontSize(const Dimension& size) override;
+    void SetLetterSpacing(const Dimension& letterSpacing) override;
     std::vector<double> GetLineDash() override;
     void SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient) override;
     void SetFillPattern(const std::shared_ptr<Ace::Pattern>& pattern) override;
@@ -105,24 +109,25 @@ public:
     void Reset() override;
     TextMetrics GetMeasureTextMetrics(const PaintState& state, const std::string& text) override;
     void SetDensity(double density) override;
+    void SetTransform(std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform) override;
 
     // All interfaces that only the 'CanvasRenderingContext2D' has.
-    void GetWidth(RefPtr<AceType>& canvasPattern, double& width) override;
-    void GetHeight(RefPtr<AceType>& canvasPattern, double& height) override;
-    void StartImageAnalyzer(RefPtr<AceType>& canvasPattern, void* config, OnAnalyzedCallback& onAnalyzed) override;
-    void StopImageAnalyzer(RefPtr<AceType>& canvasPattern) override;
+    void GetWidth(double& width) override;
+    void GetHeight(double& height) override;
+    void StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed) override;
+    void StopImageAnalyzer() override;
 #ifdef PIXEL_MAP_SUPPORTED
-    void TransferFromImageBitmap(RefPtr<AceType>& canvasPattern, const RefPtr<AceType>& pixelMap) override;
+    void TransferFromImageBitmap(const RefPtr<AceType>& pixelMap) override;
 #else
-    void TransferFromImageBitmap(
-        RefPtr<AceType>& canvasPattern, const std::shared_ptr<Ace::ImageData>& imageData) override;
+    void TransferFromImageBitmap(const std::shared_ptr<Ace::ImageData>& imageData) override;
 #endif
 
 private:
     void GetImageData(const std::shared_ptr<Ace::ImageData>& imageData);
-
-    RefPtr<CanvasPattern> pattern_;
-
+    void OnAttachToCanvas();
+    void OnDetachFromCanvas();
+    WeakPtr<CanvasPattern> weakPattern_;
+    bool isAttached_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(CanvasRenderingContext2DModelNG);
 };
 } // namespace OHOS::Ace::NG

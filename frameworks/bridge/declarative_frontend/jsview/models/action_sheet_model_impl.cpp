@@ -14,12 +14,9 @@
  */
 #include "bridge/declarative_frontend/jsview/models/action_sheet_model_impl.h"
 
-#include "base/thread/task_executor.h"
 #include "core/components/dialog/dialog_component.h"
 #include "core/components/stack/stack_element.h"
-#include "core/event/ace_event_handler.h"
 #include "core/gestures/tap_gesture.h"
-#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace::Framework {
 void ActionSheetModelImpl::ShowActionSheet(const DialogProperties& arg)

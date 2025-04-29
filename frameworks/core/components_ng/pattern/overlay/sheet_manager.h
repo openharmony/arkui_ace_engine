@@ -36,7 +36,7 @@ public:
         std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
         int32_t currentInstanceId, int32_t targetId);
     int32_t UpdateBindSheetByUIContext(
-        const RefPtr<NG::FrameNode>& sheetContentNode, NG::SheetStyle& sheetStyle, bool isPartialUpdate,
+        const RefPtr<NG::FrameNode>& sheetContentNode, const NG::SheetStyle& sheetStyle, bool isPartialUpdate,
         int32_t currentInstanceId);
     int32_t CloseBindSheetByUIContext(const RefPtr<NG::FrameNode>& sheetContentNode, int32_t currentInstanceId);
     void CleanBindSheetMap(int32_t instanceId, int32_t sheetContentNodeId)
@@ -55,6 +55,25 @@ public:
         return sheetDismissId_;
     }
 
+    void SetFocusSheetId(const std::optional<int32_t>& id)
+    {
+        sheetFocusId_ = id;
+    }
+
+    std::optional<int32_t> GetFocusSheetId() const
+    {
+        return sheetFocusId_;
+    }
+
+    bool RemoveSheetByESC();
+
+    void DeleteOverlayForWindowScene(int32_t rootNodeId, RootNodeType rootNodeType);
+
+    void CloseSheetInSubWindow(const SheetKey& sheetKey);
+    static void SetMaskInteractive(const RefPtr<FrameNode>& maskNode, bool isInteractive);
+    void RegisterDestroyCallback(const RefPtr<FrameNode>& targetNode, NG::SheetStyle& sheetStyle,
+        const int32_t containerId);
+
 private:
     struct SheetContentKey {
         SheetContentKey() {}
@@ -71,6 +90,7 @@ private:
     };
 
     int32_t sheetDismissId_ = 0;
+    std::optional<int32_t> sheetFocusId_;
     std::map<SheetContentKey, RefPtr<OverlayManager>> overlayManagerMap_;
     // Value:  The uniqueId of the FrameNode to which BindSheet is attached
     std::map<SheetContentKey, int32_t> targetIdMap_;

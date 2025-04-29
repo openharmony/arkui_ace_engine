@@ -17,8 +17,6 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/gauge/gauge_layout_algorithm.h"
 #include "core/components_ng/pattern/gauge/gauge_theme.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -111,7 +109,7 @@ RefPtr<FrameNode> GaugePattern::BuildContentModifierNode()
     auto min = gaugePaintProperty->GetMin().value_or(0.0f);
     auto max = gaugePaintProperty->GetMax().value_or(100.0f);
     auto value = gaugePaintProperty->GetValue().value_or(min);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     GaugeConfiguration gaugeConfiguration(value, min, max, enabled);

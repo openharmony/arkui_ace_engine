@@ -27,6 +27,11 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT DialogView {
 public:
     static RefPtr<FrameNode> CreateDialogNode(const DialogProperties& param, const RefPtr<UINode>& customNode);
+    static RefPtr<FrameNode> CreateDialogNode(
+        const int32_t nodeId, const DialogProperties& param, const RefPtr<UINode>& customNode);
+private:
+    static void SetDialogAccessibilityHoverConsume(const RefPtr<FrameNode>& dialog);
+    static std::string GetDialogTag(const DialogProperties& param);
 };
 } // namespace OHOS::Ace::NG
 

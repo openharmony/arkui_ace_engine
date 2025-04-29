@@ -25,7 +25,7 @@ public:
     ListModelImpl() = default;
     ~ListModelImpl() override = default;
 
-    void Create() override;
+    void Create(bool isCreateArc = false) override;
     void SetSpace(const Dimension& space) override;
     void SetInitialIndex(int32_t initialIndex) override;
     RefPtr<ScrollControllerBase> CreateScrollController() override;
@@ -34,7 +34,7 @@ public:
     void SetScrollBar(DisplayMode scrollBar) override;
     void SetScrollBarColor(const std::string& /* value */) override {};
     void SetScrollBarWidth(const std::string& /* value */) override {};
-    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) override;
+    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge) override;
     void SetEditMode(bool editMode) override;
     void SetDivider(const V2::ItemDivider& divider) override;
     void SetChainAnimation(bool enableChainAnimation) override;
@@ -45,7 +45,7 @@ public:
     void SetLaneMaxLength(const Dimension& laneMaxLength) override {}
     void SetLaneGutter(const Dimension& laneGutter) override {}
     void SetListItemAlign(V2::ListItemAlign listItemAlign) override;
-    void SetCachedCount(int32_t cachedCount) override;
+    void SetCachedCount(int32_t cachedCount, bool show = false) override;
     void SetMultiSelectable(bool selectable) override;
     void SetHasWidth(bool hasWidth) override;
     void SetHasHeight(bool hasHeight) override;
@@ -56,6 +56,7 @@ public:
     void SetScrollEnabled(bool scrollEnabled) override {};
     void SetFriction(double friction) override {};
     void SetMaintainVisibleContentPosition(bool enabled) override {};
+    void SetStackFromEnd(bool enabled) override {};
     void SetOnScroll(OnScrollEvent&& onScroll) override;
     void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin) override;
     void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin) override;

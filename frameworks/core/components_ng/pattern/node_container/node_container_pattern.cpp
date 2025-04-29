@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
 
-#include "base/utils/utils.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -73,7 +71,10 @@ bool NodeContainerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
-    auto context = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
     if (config.frameSizeChange) {
         auto geometryNode = dirty->GetGeometryNode();
         auto size = geometryNode->GetFrameSize();
@@ -83,11 +84,12 @@ bool NodeContainerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
             pattern->FireOnResize(size);
         });
     }
-    if (context && surfaceId_ != 0U && !exportTextureNode_.Invalid()) {
+    if (surfaceId_ != 0U && !exportTextureNode_.Invalid()) {
         context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            auto ret = pattern->HandleTextureExport(false);
+            auto host = pattern->GetHost();
+            auto ret = pattern->HandleTextureExport(false, Referenced::RawPtr(host));
             if (!ret) {
                 TAG_LOGW(AceLogTag::ACE_NODE_CONTAINER, "DoTextureExport fail");
             }
@@ -96,15 +98,14 @@ bool NodeContainerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     return false;
 }
 
-bool NodeContainerPattern::HandleTextureExport(bool isStop)
+bool NodeContainerPattern::HandleTextureExport(bool isStop, FrameNode* frameNode)
 {
     auto exportTextureNode = GetExportTextureNode();
     CHECK_NULL_RETURN(exportTextureNode, false);
     auto exportTextureRenderContext = exportTextureNode->GetRenderContext();
     CHECK_NULL_RETURN(exportTextureRenderContext, false);
-    auto host = GetHost();
-    if (host) {
-        auto renderContext = host->GetRenderContext();
+    if (frameNode) {
+        auto renderContext = frameNode->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         renderContext->SetIsNeedRebuildRSTree(isStop);
     }
@@ -114,9 +115,9 @@ bool NodeContainerPattern::HandleTextureExport(bool isStop)
     return exportTextureRenderContext->DoTextureExport(surfaceId_);
 }
 
-void NodeContainerPattern::OnDetachFromFrameNode(FrameNode* /* frameNode */)
+void NodeContainerPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    HandleTextureExport(true);
+    HandleTextureExport(true, frameNode);
 }
 
 RefPtr<FrameNode> NodeContainerPattern::GetExportTextureNode() const
@@ -147,7 +148,7 @@ void NodeContainerPattern::SetExportTextureInfoIfNeeded()
     if (!viewNode->IsNeedExportTexture()) {
         return;
     }
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(false);
     if (parent) {
         auto nodeContainer = parent->GetNodeContainer();
         if (nodeContainer) {
@@ -167,12 +168,54 @@ void NodeContainerPattern::SetExportTextureInfoIfNeeded()
 
 void NodeContainerPattern::OnAddBaseNode()
 {
-    HandleTextureExport(true);
+    auto host = GetHost();
+    HandleTextureExport(true, Referenced::RawPtr(host));
     SetExportTextureInfoIfNeeded();
 }
 
 void NodeContainerPattern::OnMountToParentDone()
 {
     SetExportTextureInfoIfNeeded();
+}
+
+RefPtr<NodeContainerEventHub> NodeContainerPattern::GetNodeContainerEventHub()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (frameNode) {
+        return frameNode->GetOrCreateEventHub<NodeContainerEventHub>();
+    }
+    return nullptr;
+}
+
+void NodeContainerPattern::FireOnWillBind(int32_t containerId)
+{
+    auto nodeContainerEventHub = GetNodeContainerEventHub();
+    if (nodeContainerEventHub) {
+        nodeContainerEventHub->FireOnWillBind(containerId);
+    }
+}
+
+void NodeContainerPattern::FireOnWillUnbind(int32_t containerId)
+{
+    auto nodeContainerEventHub = GetNodeContainerEventHub();
+    if (nodeContainerEventHub) {
+        nodeContainerEventHub->FireOnWillUnbind(containerId);
+    }
+}
+
+void NodeContainerPattern::FireOnBind(int32_t containerId)
+{
+    auto nodeContainerEventHub = GetNodeContainerEventHub();
+    if (nodeContainerEventHub) {
+        nodeContainerEventHub->FireOnBind(containerId);
+    }
+}
+
+void NodeContainerPattern::FireOnUnbind(int32_t containerId)
+{
+    auto nodeContainerEventHub = GetNodeContainerEventHub();
+    if (nodeContainerEventHub) {
+        nodeContainerEventHub->FireOnUnbind(containerId);
+    }
 }
 } // namespace OHOS::Ace::NG

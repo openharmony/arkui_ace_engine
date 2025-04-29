@@ -16,7 +16,6 @@
 #include "core/components_v2/inspector/refresh_composed_element.h"
 
 #include "base/log/dump_log.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/refresh/render_refresh.h"
 #include "core/components_v2/inspector/utils.h"
 

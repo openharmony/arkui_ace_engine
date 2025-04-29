@@ -15,9 +15,6 @@
 
 #include "bridge/declarative_frontend/jsview/models/web_model_impl.h"
 
-#include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/event/ace_event_handler.h"
-
 namespace OHOS::Ace::Framework {
 void WebModelImpl::Create(const std::string& src, const RefPtr<WebController>& webController,
     RenderMode /* renderMode */, bool incognitoMode, const std::string& sharedRenderProcessToken)
@@ -590,6 +587,13 @@ void WebModelImpl::SetNativeEmbedModeEnabled(bool isEmbedModeEnabled)
     webComponent->SetNativeEmbedModeEnabled(isEmbedModeEnabled);
 }
 
+void WebModelImpl::SetIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetIntrinsicSizeEnabled(isIntrinsicSizeEnabled);
+}
+
 void WebModelImpl::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
 {
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -604,6 +608,15 @@ void WebModelImpl::SetNativeEmbedLifecycleChangeId(std::function<void(const Base
     auto eventMarker = EventMarker(std::move(jsCallback));
 
     webComponent->SetNativeEmbedLifecycleChangeId(eventMarker);
+}
+
+void WebModelImpl::SetNativeEmbedVisibilityChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    auto eventMarker = EventMarker(std::move(jsCallback));
+
+    webComponent->SetNativeEmbedVisibilityChangeId(eventMarker);
 }
 
 void WebModelImpl::SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
@@ -627,13 +640,6 @@ void WebModelImpl::SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay)
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     CHECK_NULL_VOID(webComponent);
     webComponent->SetNativeVideoPlayerConfig(enable, shouldOverlay);
-}
-
-void WebModelImpl::SetSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled)
-{
-    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    CHECK_NULL_VOID(webComponent);
-    webComponent->SetSmoothDragResizeEnabled(isSmoothDragResizeEnabled);
 }
 
 void WebModelImpl::SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
@@ -674,5 +680,12 @@ void WebModelImpl::SetAdsBlockedEventId(std::function<void(const BaseEventInfo* 
 
 void WebModelImpl::SetUpdateInstanceIdCallback(std::function<void(int32_t)>&& callback)
 {
+}
+
+void WebModelImpl::SetOptimizeParserBudgetEnabled(bool enable)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetOptimizeParserBudgetEnabled(enable);
 }
 } // namespace OHOS::Ace::Framework

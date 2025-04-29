@@ -15,14 +15,10 @@
 
 #include "core/components_ng/pattern/calendar/calendar_layout_algorithm.h"
 
-#include <algorithm>
 #include <optional>
 
 #include "base/geometry/ng/size_t.h"
-#include "core/components/checkable/checkable_theme.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
-#include "core/pipeline/base/constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

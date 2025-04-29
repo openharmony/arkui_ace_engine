@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,8 @@
 
 #include "base/geometry/arc.h"
 #include "base/memory/ace_type.h"
+#include "base/thread/task_executor.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
@@ -37,6 +39,7 @@ class ProgressModifier : public ContentModifier {
 
 public:
     explicit ProgressModifier(
+        const WeakPtr<FrameNode>& host,
         const ProgressAnimatableProperty& progressAnimatableProperty = ProgressAnimatableProperty {});
     ~ProgressModifier() override = default;
     void onDraw(DrawingContext& context) override;
@@ -65,6 +68,15 @@ public:
     void SetStrokeRadius(float strokeRaidus);
     void SetUseContentModifier(bool useContentModifier);
     void SetIsRightToLeft(bool value);
+    void UpdateProgress();
+    void SetCapsuleBorderRadius(float borderRadius);
+    void SetIsHovered(bool value);
+    void SetIsPressed(bool value);
+    void SetIsFocused(bool value);
+    bool IsFocused() const;
+    void SetRingProgressLeftPadding(const Dimension& ringProgressLeftPadding);
+
+    Color CalculateHoverPressColor(const Color& color);
 
 private:
     void PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
@@ -88,8 +100,18 @@ private:
     void PaintTrailing(RSCanvas& canvas, const RingProgressData& ringProgressData) const;
     void PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintMoon(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
-    void PaintCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
-    void PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
+    void PaintCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize,
+        const float borderRadius) const;
+    void PaintCapsuleLeftBorder(RSPath& path, const OffsetF& offset, const SizeF& contentSize,
+        const float borderRadius) const;
+    void PaintCapsuleRightBorder(RSPath& path, const OffsetF& offset, const SizeF& contentSize,
+        const float borderRadius) const;
+    void PaintCapsuleProgressLessRadiusScene(RSPath& path, const OffsetF& offset, const SizeF& contentSize,
+        const float borderRadius) const;
+    void PaintCapsuleProgressGreaterRadiusScene(RSPath& path, const OffsetF& offset, const SizeF& contentSize,
+        const float borderRadius) const;
+    void PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize,
+        const float borderRadius) const;
     void PaintCapsuleLightSweep(
         RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset, const RSPath& path, bool isVertical) const;
 
@@ -117,6 +139,12 @@ private:
     bool PostTask(const TaskExecutor::Task& task, const std::string& name);
     Gradient SortGradientColorsByOffset(const Gradient& gradient) const;
     bool IsSweepEffectOn();
+    inline bool IsDynamicComponent()
+    {
+        auto container = Container::Current();
+        return container && container->IsDynamicRender();
+    }
+    uint32_t GetThemeScopeId() const;
 
     // Animatable
     RefPtr<AnimatablePropertyFloat> strokeWidth_; // After adjusting to the content width and height
@@ -147,13 +175,22 @@ private:
     RefPtr<PropertyBool> smoothEffect_;
     RefPtr<PropertyBool> useContentModifier_;
     RefPtr<PropertyBool> isRightToLeft_;
+    RefPtr<PropertyBool> progressUpdate_;
+    RefPtr<PropertyFloat> capsuleBorderRadius_;
 
+    Color hoverBlendColor_;
+    Color pressBlendColor_;
+    bool isHover_ = false;
+    bool isPress_ = false;
+    bool isFocus_ = false;
     bool isVisible_ = true;
     float valueBackup_ = 0.0f;
     bool isLoading_ = false;
     bool isSweeping_ = false;
     float sweepingDateBackup_ = 0.0f;
     bool dateUpdated_ = false;
+    Dimension ringProgressLeftPadding_ = 0.0_vp;
+    WeakPtr<FrameNode> host_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressModifier);
 };

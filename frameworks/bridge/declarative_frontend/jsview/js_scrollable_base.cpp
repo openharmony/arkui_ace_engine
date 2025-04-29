@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_scrollable_base.h"
 
+#include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
@@ -64,7 +65,10 @@ void JSScrollableBase::JsOnWillScroll(const JSCallbackInfo& args)
 
 void JSScrollableBase::JsOnDidScroll(const JSCallbackInfo& args)
 {
-    if (args.Length() > 0 && args[0]->IsFunction()) {
+    if (args.Length() <= 0) {
+        return;
+    }
+    if (args[0]->IsFunction()) {
         auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
                             const CalcDimension& scrollOffset, const ScrollState& scrollState) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -72,6 +76,8 @@ void JSScrollableBase::JsOnDidScroll(const JSCallbackInfo& args)
             func->Call(JSRef<JSObject>(), params.size(), params.data());
         };
         NG::ScrollableModelNG::SetOnDidScroll(std::move(onScroll));
+    } else {
+        NG::ScrollableModelNG::SetOnDidScroll(nullptr);
     }
 }
 
@@ -92,6 +98,24 @@ void JSScrollableBase::SetFadingEdge(const JSCallbackInfo& info)
     NG::ScrollableModelNG::SetFadingEdge(fadingEdge, fadingEdgeLength);
 }
 
+void JSScrollableBase::SetDigitalCrownSensitivity(const JSCallbackInfo& info)
+{
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (info.Length() < 1 || info[0]->IsNull() || !info[0]->IsNumber()) {
+        NG::ScrollableModelNG::SetDigitalCrownSensitivity(
+            static_cast<CrownSensitivity>(static_cast<int32_t>(CrownSensitivity::MEDIUM)));
+        return;
+    }
+    auto sensitivity = info[0]->ToNumber<int32_t>();
+    if (sensitivity < 0 || sensitivity > static_cast<int32_t>(CrownSensitivity::HIGH)) {
+        NG::ScrollableModelNG::SetDigitalCrownSensitivity(
+            static_cast<CrownSensitivity>(static_cast<int32_t>(CrownSensitivity::MEDIUM)));
+        return;
+    }
+    NG::ScrollableModelNG::SetDigitalCrownSensitivity(static_cast<CrownSensitivity>(sensitivity));
+#endif
+}
+
 void JSScrollableBase::JSBind(BindingTarget globalObj)
 {
     MethodOptions opt = MethodOptions::NONE;
@@ -100,6 +124,44 @@ void JSScrollableBase::JSBind(BindingTarget globalObj)
     JSClass<JSScrollableBase>::StaticMethod("onWillScroll", &JSScrollableBase::JsOnWillScroll);
     JSClass<JSScrollableBase>::StaticMethod("onDidScroll", &JSScrollableBase::JsOnDidScroll);
     JSClass<JSScrollableBase>::StaticMethod("fadingEdge", &JSScrollableBase::SetFadingEdge);
+    JSClass<JSScrollableBase>::StaticMethod("clipContent", &JSScrollableBase::JSClipContent);
+    JSClass<JSScrollableBase>::StaticMethod("digitalCrownSensitivity", &JSScrollableBase::SetDigitalCrownSensitivity);
+    JSClass<JSScrollableBase>::StaticMethod("backToTop", &JSScrollableBase::JSBackToTop);
     JSClass<JSScrollableBase>::InheritAndBind<JSContainerBase>(globalObj);
+}
+
+void JSScrollableBase::JSClipContent(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        return;
+    }
+    if (info[0]->IsNumber()) {
+        auto mode = static_cast<NG::ContentClipMode>(info[0]->ToNumber<int32_t>());
+        if (mode >= NG::ContentClipMode::CONTENT_ONLY && mode <= NG::ContentClipMode::SAFE_AREA) {
+            NG::ScrollableModelNG::SetContentClip(mode, nullptr);
+            return;
+        }
+    } else if (info[0]->IsObject()) {
+        auto* clipShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
+        if (clipShape) {
+            NG::ScrollableModelNG::SetContentClip(
+                NG::ContentClipMode::CUSTOM, AceType::DynamicCast<ShapeRect>(clipShape->GetBasicShape()));
+            return;
+        }
+    }
+    // default
+    NG::ScrollableModelNG::SetContentClip(NG::ContentClipMode::DEFAULT, nullptr);
+}
+
+void JSScrollableBase::JSBackToTop(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (info[0]->IsBoolean()) {
+        NG::ScrollableModelNG::SetBackToTop(info[0]->ToBoolean());
+    } else {
+        NG::ScrollableModelNG::ResetBackToTop();
+    }
 }
 } // namespace OHOS::Ace::Framework

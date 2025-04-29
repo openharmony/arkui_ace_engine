@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,7 @@ public:
     static ListModel* GetInstance();
     virtual ~ListModel() = default;
 
-    virtual void Create() = 0;
+    virtual void Create(bool isCreateArc = false) = 0;
     virtual void SetSpace(const Dimension& space) = 0;
     virtual void SetInitialIndex(int32_t initialIndex) = 0;
     virtual RefPtr<ScrollControllerBase> CreateScrollController() = 0;
@@ -42,7 +42,7 @@ public:
     virtual void SetScrollBar(DisplayMode scrollBar) = 0;
     virtual void SetScrollBarColor(const std::string& value) = 0;
     virtual void SetScrollBarWidth(const std::string& value) = 0;
-    virtual void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) = 0;
+    virtual void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge = EffectEdge::ALL) = 0;
     virtual void SetEditMode(bool editMode) = 0;
     virtual void SetDivider(const V2::ItemDivider& divider) = 0;
     virtual void SetChainAnimation(bool enableChainAnimation) = 0;
@@ -54,7 +54,7 @@ public:
     virtual void SetLaneGutter(const Dimension& laneGutter) = 0;
     virtual void SetListItemAlign(V2::ListItemAlign listItemAlign) = 0;
     virtual void SetMultiSelectable(bool selectable) = 0;
-    virtual void SetCachedCount(int32_t cachedCount) = 0;
+    virtual void SetCachedCount(int32_t cachedCount, bool show = false) = 0;
     virtual void SetHasWidth(bool hasWidth) = 0;
     virtual void SetHasHeight(bool hasHeight) = 0;
     virtual void SetSticky(V2::StickyStyle stickyStyle) = 0;
@@ -64,6 +64,7 @@ public:
     virtual void SetScrollEnabled(bool scrollEnabled) = 0;
     virtual void SetFriction(double friction) = 0;
     virtual void SetMaintainVisibleContentPosition(bool enabled) = 0;
+    virtual void SetStackFromEnd(bool enabled) = 0;
     virtual void SetOnScroll(OnScrollEvent&& onScroll) = 0;
     virtual void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin) = 0;
     virtual void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin) = 0;
@@ -80,14 +81,18 @@ public:
     virtual void SetOnItemDragLeave(OnItemDragLeaveFunc&& onItemDragLeave) = 0;
     virtual void SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove) = 0;
     virtual void SetOnItemDrop(OnItemDropFunc&& onItemDrop) = 0;
-    virtual void SetScrollSnapAlign(V2::ScrollSnapAlign scrollSnapAlign) {};
+    virtual void SetScrollSnapAlign(ScrollSnapAlign scrollSnapAlign) {};
     virtual RefPtr<NG::ListChildrenMainSize> GetOrCreateListChildrenMainSize()
     {
         return nullptr;
     }
 
     virtual DisplayMode GetDisplayMode() const = 0;
-
+    virtual void SetHeader(const RefPtr<NG::FrameNode>& headerNode) {}
+#ifdef SUPPORT_DIGITAL_CROWN
+    virtual void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) {}
+#endif
+    virtual void ResetListChildrenMainSize() {}
 private:
     static std::unique_ptr<ListModel> instance_;
     static std::mutex mutex_;

@@ -40,7 +40,8 @@ void InspectSwiper::PackAttrAndStyle()
     DeviceType deviceType = SystemProperties::GetDeviceType();
     if (deviceType == DeviceType::PHONE) {
         styles_.insert(std::make_pair("indicator-selected-color", "#ff007dff"));
-    } else if (deviceType == DeviceType::TV || deviceType == DeviceType::WATCH) {
+    } else if (deviceType == DeviceType::TV || deviceType == DeviceType::WEARABLE ||
+        deviceType == DeviceType::WATCH) {
         styles_.insert(std::make_pair("indicator-selected-color", "#ffffffff"));
     }
     styles_.insert(std::make_pair("indicator-size", "4px"));

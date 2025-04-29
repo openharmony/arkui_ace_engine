@@ -1,0 +1,96 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "BenchMark"
+    },
+    {
+      "name": "alert_string",
+      "value": "alertDialog"
+    },
+    {
+      "name": "alert_dialog_buttons_value",
+      "value": "按钮2"
+    },
+    {
+      "name": "dialog_show_mask_rect_width",
+      "value": "80%"
+    },
+    {
+      "name": "dialog_show_mask_rect_height",
+      "value": "80%"
+    },
+    {
+      "name": "dialog_show_title",
+      "value": "hello"
+    },
+    {
+      "name": "dialog_show_subtitle",
+      "value": "world"
+    },
+    {
+      "name": "dialog_show_message",
+      "value": "my name is ddd"
+    },
+    {
+      "name": "timePickerDialog_value_one",
+      "value": "10"
+    },
+    {
+      "name": "custom_dialog_length",
+      "value": "10"
+    },
+    {
+      "name": "custom_dialog_mask_rect_length",
+      "value": "100"
+    },
+    {
+      "name": "actionSheet_confirm_value",
+      "value": "Confirm_Resource"
+    },
+    {
+      "name": "actionSheet_title",
+      "value": "title2"
+    },
+    {
+      "name": "actionSheet_subtitle",
+      "value": "subtitle"
+    },
+    {
+      "name": "actionSheet_message",
+      "value": "message"
+    },
+    {
+      "name": "text_style_size",
+      "value": "10"
+    },
+    {
+      "name": "step_size",
+      "value": "10"
+    },
+    {
+      "name": "offset_num",
+      "value": "10"
+    },
+    {
+      "name": "mask_rect",
+      "value": "50"
+    },
+    {
+      "name": "actionSheet_offset_dx",
+      "value": "2"
+    },
+    {
+      "name": "actionSheet_offset_dy",
+      "value": "-10"
+    }
+  ]
+}

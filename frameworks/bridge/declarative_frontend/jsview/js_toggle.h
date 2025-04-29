@@ -49,6 +49,8 @@ public:
     static NG::PaddingProperty GetPadding(const std::optional<CalcDimension>& top,
         const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
         const std::optional<CalcDimension>& right);
+    static void JsRadius(const JSCallbackInfo& info);
+    static void JsBorder(const JSCallbackInfo& info);
 
 private:
     static int32_t toggleType_;

@@ -97,8 +97,8 @@ public:
 
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
 
-    void OnScrollStartRecursive(float position, float velocity = 0.f) override;
-    
+    void OnScrollStartRecursive(WeakPtr<NestableScrollContainer> child, float position, float velocity = 0.f) override;
+
     bool NestedScrollOutOfBoundary() override
     {
         return !NearZero(scrollOffset_);
@@ -112,6 +112,7 @@ private:
     void HandleDragEnd(float speed);
     void HandleDragCancel();
     float CalculatePullDownRatio();
+    float GetMaxPullDownDistance();
     void TriggerStatusChange(RefreshStatus newStatus);
     void OnAttachToFrameNode() override;
     float GetFollowRatio();
@@ -144,11 +145,16 @@ private:
     void FireRefreshing();
     void FireChangeEvent(const std::string& value);
     void FireOnOffsetChange(float value);
+    void UpdateCustomBuilderVisibility();
     void UpdateDragFRCSceneInfo(const std::string& scene, float speed, SceneStatus sceneStatus);
     void InitProgressColumn();
     void UpdateLoadingTextOpacity(float opacity);
+    float GetLoadingProgressOpacity();
+    float GetLoadingTextOpacity();
+    Color GetLoadingProgressColor();
     void DumpInfo() override;
-
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
     float scrollOffset_;
@@ -169,6 +175,7 @@ private:
     bool pullToRefresh_ = true;
     RefPtr<NodeAnimatablePropertyFloat> offsetProperty_;
     std::shared_ptr<AnimationUtils::Animation> animation_;
+    std::optional<float> ratio_;
     // API version 10
     void InitLowVersionOffset();
     void UpdateChild();
@@ -190,6 +197,8 @@ private:
     float customBuilderOffset_ = 0.0f;
     RefPtr<NodeAnimatablePropertyFloat> lowVersionOffset_;
     ACE_DISALLOW_COPY_AND_MOVE(RefreshPattern);
+    Dimension loadingProgressSizeTheme_ = 32.0_vp;
+    Dimension triggerLoadingDistanceTheme_ = 16.0_vp;
 };
 } // namespace OHOS::Ace::NG
 

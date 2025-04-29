@@ -40,6 +40,11 @@ JSRef<JSObject> JsTouchFunction::CreateTouchInfo(const TouchLocationInfo& touchI
     touchInfoObj->SetProperty<double>("screenY", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY()));
     touchInfoObj->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX()));
     touchInfoObj->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY()));
+    touchInfoObj->SetProperty<double>(
+        "pressedTime", static_cast<double>(touchInfo.GetPressedTime().time_since_epoch().count()));
+    touchInfoObj->SetProperty<double>("pressure", PipelineBase::Px2VpWithCurrentDensity(touchInfo.GetForce()));
+    touchInfoObj->SetProperty<double>("width", PipelineBase::Px2VpWithCurrentDensity(touchInfo.GetWidth()));
+    touchInfoObj->SetProperty<double>("height", PipelineBase::Px2VpWithCurrentDensity(touchInfo.GetHeight()));
     touchInfoObj->Wrap<TouchEventInfo>(&info);
     return touchInfoObj;
 }
@@ -60,7 +65,9 @@ JSRef<JSObject> JsTouchFunction::CreateJSEventInfo(TouchEventInfo& info)
     eventObj->SetPropertyObject("preventDefault", JSRef<JSFunc>::New<FunctionCallback>(JsTouchPreventDefault));
     eventObj->SetProperty<double>("tiltX", info.GetTiltX().value_or(0.0f));
     eventObj->SetProperty<double>("tiltY", info.GetTiltY().value_or(0.0f));
+    eventObj->SetProperty<double>("rollAngle", info.GetRollAngle().value_or(0.0f));
     eventObj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
+    eventObj->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
 
     const std::list<TouchLocationInfo>& touchList = info.GetTouches();
     uint32_t idx = 0;

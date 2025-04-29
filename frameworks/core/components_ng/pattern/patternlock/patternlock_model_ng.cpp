@@ -15,11 +15,7 @@
 
 #include "core/components_ng/pattern/patternlock/patternlock_model_ng.h"
 
-#include "base/memory/referenced.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/patternlock/patternlock_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -41,7 +37,7 @@ void PatternLockModelNG::SetPatternComplete(NG::PatternLockCompleteEvent&& onCom
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<PatternLockEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<PatternLockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnComplete(std::move(onComplete));
 }
@@ -50,7 +46,7 @@ void PatternLockModelNG::SetDotConnect(std::function<void(int32_t)>&& onDotConne
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<PatternLockEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<PatternLockEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDotConnect(std::move(onDotConnect));
 }
@@ -110,6 +106,16 @@ void PatternLockModelNG::SetEnableWaveEffect(bool enableWaveEffect)
     ACE_UPDATE_PAINT_PROPERTY(PatternLockPaintProperty, EnableWaveEffect, enableWaveEffect);
 }
 
+void PatternLockModelNG::SetEnableForeground(bool enableForeground)
+{
+    ACE_UPDATE_PAINT_PROPERTY(PatternLockPaintProperty, EnableForeground, enableForeground);
+}
+
+void PatternLockModelNG::SetSkipUnselectedPoint(bool isSkipUnselectedPoint)
+{
+    ACE_UPDATE_PAINT_PROPERTY(PatternLockPaintProperty, SkipUnselectedPoint, isSkipUnselectedPoint);
+}
+
 void PatternLockModelNG::SetActiveColor(FrameNode* frameNode, const Color& activeColor)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, ActiveColor, activeColor, frameNode);
@@ -165,4 +171,28 @@ void PatternLockModelNG::SetEnableWaveEffect(FrameNode* frameNode, bool enableWa
     ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, EnableWaveEffect, enableWaveEffect, frameNode);
 }
 
+void PatternLockModelNG::SetEnableForeground(FrameNode* frameNode, bool enableForeground)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, EnableForeground, enableForeground, frameNode);
+}
+
+void PatternLockModelNG::SetSkipUnselectedPoint(FrameNode* frameNode, bool isSkipUnselectedPoint)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, SkipUnselectedPoint, isSkipUnselectedPoint, frameNode);
+}
+
+void PatternLockModelNG::SetPatternComplete(FrameNode* frameNode, NG::PatternLockCompleteEvent&& onComplete)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<PatternLockEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnComplete(std::move(onComplete));
+}
+void PatternLockModelNG::SetDotConnect(FrameNode* frameNode, std::function<void(int32_t)>&& onDotConnect)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<PatternLockEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDotConnect(std::move(onDotConnect));
+}
 } // namespace OHOS::Ace::NG

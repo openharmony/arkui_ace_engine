@@ -42,7 +42,7 @@ void Scrollable::StartSpringMotion(
 
 void Scrollable::UpdateScrollSnapStartOffset(double offset) {}
 
-void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnapVelocity)
+void Scrollable::StartListSnapAnimation(float predictSnapOffset, float scrollSnapVelocity)
 {
     scrollSnapMotion_ = AceType::MakeRefPtr<SpringMotion>(0, predictSnapOffset, scrollSnapVelocity, nullptr);
 }
@@ -56,6 +56,6 @@ bool Scrollable::IsSpringStopped() const
     return true;
 }
 
-void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scrollSnapVelocity) {}
+void Scrollable::StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity) {}
 void Scrollable::StartScrollAnimation(float, float) {}
 } // namespace OHOS::Ace

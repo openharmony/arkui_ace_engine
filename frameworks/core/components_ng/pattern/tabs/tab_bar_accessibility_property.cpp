@@ -45,7 +45,7 @@ bool TabBarAccessibilityProperty::IsScrollable() const
     auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_RETURN(tabBarLayoutProperty, false);
     if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
-        GetCollectionItemCounts() > 1) {
+        GetCollectionItemCounts() > 1 && tabBarPattern->CanScroll()) {
         return true;
     }
     return false;

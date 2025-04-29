@@ -15,14 +15,6 @@
 
 #include "core/components_ng/pattern/patternlock/patternlock_paint_method.h"
 
-#include "core/components/theme/theme_manager.h"
-#include "core/components_ng/pattern/patternlock/patternlock_paint_property.h"
-#include "core/components_ng/pattern/patternlock/patternlock_pattern.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/render/drawing.h"
-#include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components_v2/pattern_lock/pattern_lock_theme.h"
-
 namespace OHOS::Ace::NG {
 void PatternLockPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
@@ -44,6 +36,7 @@ void PatternLockPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     pathStrokeWidth_ = paintProperty->GetPathStrokeWidth().value_or(pathStrokeWidth_);
     backgroundCircleRadius_ = paintProperty->GetActiveCircleRadius().value_or(Dimension(0.0f, DimensionUnit::VP));
     enableWaveEffect_ = paintProperty->GetEnableWaveEffect().value_or(true);
+    enableForeground_ = paintProperty->GetEnableForeground().value_or(false);
 
     patternlockModifier_->SetRegularColor(regularColor_);
     patternlockModifier_->SetSelectColor(selectedColor_);
@@ -67,6 +60,7 @@ void PatternLockPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     patternlockModifier_->SetActiveCircleColor(LinearColor(activeCircleColor_));
     patternlockModifier_->SetActiveBackgroundRadius(backgroundCircleRadius_.ConvertToPxWithSize(sideLength_));
     patternlockModifier_->SetEnableWaveEffect(enableWaveEffect_);
+    patternlockModifier_->SetEnableForeground(enableForeground_);
     patternlockModifier_->UpdateBoundsRect();
 }
 

@@ -18,13 +18,39 @@
 #include "core/accessibility/accessibility_constants.h"
 #include "core/accessibility/accessibility_session_adapter.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+void CheckAndSendHoverEnterByAncestor(const RefPtr<NG::FrameNode>& ancestor)
+{
+    CHECK_NULL_VOID(ancestor);
+    auto pipeline = ancestor->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    // Inter Process is showed as a component with rect like form process,
+    // need send hover enter when no component hovered to focus outside
+    if (pipeline->IsFormRender() || pipeline->IsJsCard() || pipeline->IsJsPlugin()) {
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "SendHoverEnterByAncestor");
+        ancestor->OnAccessibilityEvent(AccessibilityEventType::HOVER_ENTER_EVENT);
+    }
+}
+}
+
+bool IsTouchExplorationEnabled(const RefPtr<FrameNode>& root)
+{
+    CHECK_NULL_RETURN(root, true);
+    auto pipeline = root->GetContext();
+    CHECK_NULL_RETURN(pipeline, true);
+    auto jsAccessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_RETURN(jsAccessibilityManager, true);
+    auto accessibilityWorkMode = jsAccessibilityManager->GenerateAccessibilityWorkMode();
+    return accessibilityWorkMode.isTouchExplorationEnabled;
+}
+
 void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNode>& root, const MouseEvent& event)
 {
-    if (root == nullptr ||
-        !AceApplicationInfo::GetInstance().IsAccessibilityEnabled() ||
-        event.sourceType != SourceType::MOUSE) {
+    if (root == nullptr || !AceApplicationInfo::GetInstance().IsAccessibilityEnabled() ||
+        !IsTouchExplorationEnabled(root) || event.sourceType != SourceType::MOUSE) {
         return;
     }
     AccessibilityHoverEventType type = AccessibilityHoverEventType::MOVE;
@@ -49,7 +75,11 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNod
 {
     if (root == nullptr ||
         !AceApplicationInfo::GetInstance().IsAccessibilityEnabled() ||
+        !IsTouchExplorationEnabled(root) ||
         event.sourceType == SourceType::MOUSE) {
+        return;
+    }
+    if (IsHandlePipelineAccessibilityHoverEnter(root)) {
         return;
     }
     AccessibilityHoverEventType type = AccessibilityHoverEventType::MOVE;
@@ -81,11 +111,21 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNod
 {
     if (root == nullptr ||
         !AceApplicationInfo::GetInstance().IsAccessibilityEnabled() ||
+        !IsTouchExplorationEnabled(root) ||
         eventType < 0 || eventType >= static_cast<int32_t>(AccessibilityHoverEventType::Count)) {
         return;
     }
     PointF point(pointX, pointY);
     TimeStamp time((std::chrono::milliseconds(timeMs)));
+
+    if (IsHandlePipelineAccessibilityHoverEnter(root)) {
+        TouchEvent event;
+        event.x = pointX;
+        event.y = pointY;
+        event.sourceType = static_cast<SourceType>(sourceType);
+        event.time = time;
+        HandlePipelineAccessibilityHoverEnter(root, event, eventType);
+    }
     HandleAccessibilityHoverEventInner(root, point, static_cast<SourceType>(sourceType),
         static_cast<AccessibilityHoverEventType>(eventType), time);
 }
@@ -97,12 +137,15 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
     AccessibilityHoverEventType eventType,
     TimeStamp time)
 {
-    static constexpr size_t THROTTLE_INTERVAL_HOVER_EVENT = 100;
+    static constexpr size_t THROTTLE_INTERVAL_HOVER_EVENT = 10;
     uint64_t duration =
         static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(time - hoverState_.time).count());
-    if (!hoverState_.idle && duration < THROTTLE_INTERVAL_HOVER_EVENT) {
-        return;
+    if (!hoverState_.idle) {
+        if ((!IsEventTypeChangeDirectHandleHover(eventType)) && (duration < THROTTLE_INTERVAL_HOVER_EVENT)) {
+            return;
+        }
     }
+
     static constexpr size_t MIN_SOURCE_CHANGE_GAP_MS = 1000;
     if (sourceType != hoverState_.source && !hoverState_.idle) {
         if (duration < MIN_SOURCE_CHANGE_GAP_MS) {
@@ -136,7 +179,7 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
             }
         }
     }
-
+    auto sendHoverEnter = false;
     static constexpr int32_t INVALID_NODE_ID = -1;
     int32_t lastHoveringId = INVALID_NODE_ID;
     RefPtr<FrameNode> lastHovering = nullptr;
@@ -150,33 +193,30 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
         currentHovering = currentNodesHovering.back().Upgrade();
         currentHoveringId = currentHovering->GetId();
     }
-    if (!DeliverAccessibilityHoverEvent(currentHovering, point)) {
-        if (lastHoveringId != INVALID_NODE_ID && lastHoveringId != currentHoveringId) {
-            lastHovering->OnAccessibilityEvent(AccessibilityEventType::HOVER_EXIT_EVENT);
-            NotifyHoverEventToNodeSession(lastHovering, root, point,
-                sourceType, AccessibilityHoverEventType::EXIT, time);
+    if (lastHoveringId != INVALID_NODE_ID && lastHoveringId != currentHoveringId) {
+        lastHovering->OnAccessibilityEvent(AccessibilityEventType::HOVER_EXIT_EVENT);
+        NotifyHoverEventToNodeSession(lastHovering, root, point,
+            sourceType, AccessibilityHoverEventType::EXIT, time);
+    }
+    if (currentHoveringId != INVALID_NODE_ID) {
+        if (currentHoveringId != lastHoveringId && (!IgnoreCurrentHoveringNode(currentHovering))) {
+            currentHovering->OnAccessibilityEvent(AccessibilityEventType::HOVER_ENTER_EVENT);
+            sendHoverEnter = true;
         }
-        if (currentHoveringId != INVALID_NODE_ID) {
-            if (currentHoveringId != lastHoveringId && (!IgnoreCurrentHoveringNode(currentHovering))) {
-                currentHovering->OnAccessibilityEvent(AccessibilityEventType::HOVER_ENTER_EVENT);
-            }
-            NotifyHoverEventToNodeSession(currentHovering, root, point,
-                sourceType, eventType, time);
-        }
+        NotifyHoverEventToNodeSession(currentHovering, root, point,
+            sourceType, eventType, time);
+    }
+
+    if (!sendHoverEnter && (eventType == AccessibilityHoverEventType::ENTER)) {
+        // check need send hover enter when no component hovered to focus outside
+        CheckAndSendHoverEnterByAncestor(root);
     }
 
     hoverState_.nodesHovering = std::move(currentNodesHovering);
     hoverState_.time = time;
     hoverState_.source = sourceType;
     hoverState_.idle = eventType == AccessibilityHoverEventType::EXIT;
-}
-
-bool AccessibilityManagerNG::DeliverAccessibilityHoverEvent(const RefPtr<FrameNode>& hoverNode, const PointF& point)
-{
-    CHECK_NULL_RETURN(hoverNode, false);
-    auto hoverNodePattern = hoverNode->GetPattern();
-    CHECK_NULL_RETURN(hoverNodePattern, false);
-    return hoverNodePattern->OnAccessibilityHoverEvent(point);
+    hoverState_.eventType = eventType;
 }
 
 bool AccessibilityManagerNG::IgnoreCurrentHoveringNode(const RefPtr<FrameNode> &node)
@@ -190,13 +230,17 @@ void AccessibilityManagerNG::NotifyHoverEventToNodeSession(const RefPtr<FrameNod
     const RefPtr<FrameNode>& rootNode, const PointF& pointRoot,
     SourceType sourceType, AccessibilityHoverEventType eventType, TimeStamp time)
 {
-    auto eventHub = node->GetEventHub<EventHub>();
+    auto eventHub = node->GetOrCreateEventHub<EventHub>();
     if (!eventHub->IsEnabled()) {
         // If the host component is disabled, do not transfer hover event.
         return;
     }
     auto sessionAdapter = AccessibilitySessionAdapter::GetSessionAdapter(node);
     CHECK_NULL_VOID(sessionAdapter);
+    // mouse event will not be hover and may be transformed by component self through touch event transform
+    if ((sourceType == SourceType::MOUSE) && (sessionAdapter->IgnoreTransformMouseEvent())) {
+        return;
+    }
     PointF pointNode(pointRoot);
     if (AccessibilityManagerNG::ConvertPointFromAncestorToNode(rootNode, node, pointRoot, pointNode)) {
         sessionAdapter->TransferHoverEvent(pointNode, sourceType, eventType, time);
@@ -251,20 +295,71 @@ bool AccessibilityManagerNG::ConvertPointFromAncestorToNode(
 {
     CHECK_NULL_RETURN(ancestor, false);
     CHECK_NULL_RETURN(endNode, false);
+    // revert scale from endNode to ancestor
     std::vector<RefPtr<NG::FrameNode>> path;
     RefPtr<NG::FrameNode> curr = endNode;
     while (curr != nullptr && curr->GetId() != ancestor->GetId()) {
         path.push_back(curr);
-        curr = curr->GetAncestorNodeOfFrame();
+        curr = curr->GetAncestorNodeOfFrame(true);
     }
     CHECK_NULL_RETURN(curr, false);
     pointNode = pointAncestor;
-    for (const auto& node : path) {
-        auto renderContext = node->GetRenderContext();
+    for (auto nodePtr = path.rbegin(); nodePtr != path.rend(); ++nodePtr) {
+        auto renderContext = (*nodePtr)->GetRenderContext();
         renderContext->GetPointWithRevert(pointNode);
         auto rect = renderContext->GetPaintRectWithoutTransform();
         pointNode = pointNode - rect.GetOffset();
     }
     return true;
+}
+
+bool AccessibilityManagerNG::IsEventTypeChangeDirectHandleHover(AccessibilityHoverEventType eventType)
+{
+    if ((hoverState_.eventType == AccessibilityHoverEventType::MOVE)
+        && (eventType == AccessibilityHoverEventType::EXIT)) {
+        return true;
+    }
+    return false;
+}
+
+bool AccessibilityManagerNG::IsHandlePipelineAccessibilityHoverEnter(const RefPtr<NG::FrameNode>& root)
+{
+    auto pipeline = root->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_RETURN(ngPipeline, false);
+
+    auto container = Container::GetContainer(ngPipeline->GetInstanceId());
+    if (container && (container->IsUIExtensionWindow())) {
+        return true;
+    }
+    return false;
+}
+
+void AccessibilityManagerNG::HandlePipelineAccessibilityHoverEnter(
+    const RefPtr<NG::FrameNode>& root,
+    TouchEvent& event,
+    int32_t eventType)
+{
+    CHECK_NULL_VOID(root);
+    AccessibilityHoverEventType eventHoverType = static_cast<AccessibilityHoverEventType>(eventType);
+    event.type = TouchType::HOVER_MOVE;
+    switch (eventHoverType) {
+        case AccessibilityHoverEventType::ENTER:
+            event.type = TouchType::HOVER_ENTER;
+            break;
+        case AccessibilityHoverEventType::MOVE:
+            event.type = TouchType::HOVER_MOVE;
+            break;
+        case AccessibilityHoverEventType::EXIT:
+            event.type = TouchType::HOVER_EXIT;
+            break;
+        default:
+            break;
+    }
+
+    auto pipeline = root->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->OnAccessibilityHoverEvent(event, root);
 }
 } // namespace OHOS::Ace::NG

@@ -15,7 +15,10 @@
 
 import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node';
-import common from '@ohos.app.ability.common';
+import { common, EnvironmentCallback } from '@kit.AbilityKit';
+import { BusinessError } from '@kit.BasicServicesKit';
+import { hilog } from '@kit.PerformanceAnalysisKit';
+import measure from '@ohos.measure';
 
 export enum IconType {
   BADGE = 1,
@@ -50,6 +53,7 @@ export declare class OperateItem {
   public checkbox?: OperateCheck;
   public radio?: OperateCheck;
   public image?: ResourceStr;
+  public symbolStyle?: SymbolGlyphModifier;
   public text?: ResourceStr;
   public arrow?: OperateIcon;
 }
@@ -57,6 +61,7 @@ export declare class OperateItem {
 export declare class ContentItem {
   public iconStyle?: IconType;
   public icon?: ResourceStr;
+  public symbolStyle?: SymbolGlyphModifier;
   public primaryText?: ResourceStr;
   public secondaryText?: ResourceStr;
   public description?: ResourceStr;
@@ -64,16 +69,26 @@ export declare class ContentItem {
 
 export declare class OperateIcon {
   public value: ResourceStr;
+  public symbolStyle?: SymbolGlyphModifier;
   public action?: () => void;
+  public accessibilityText?: ResourceStr;
+  public accessibilityDescription?: ResourceStr;
+  public accessibilityLevel?: string;
 }
 
 export declare class OperateButton {
   public text?: ResourceStr;
+  public accessibilityText?: ResourceStr;
+  public accessibilityDescription?: ResourceStr;
+  public accessibilityLevel?: string;
 }
 
 export declare class OperateCheck {
   public isCheck?: boolean;
   public onChange?: (value: boolean) => void;
+  public accessibilityText?: ResourceStr;
+  public accessibilityDescription?: ResourceStr;
+  public accessibilityLevel?: string;
 }
 
 const TEXT_MAX_LINE = 1;
@@ -100,15 +115,25 @@ const SPECIAL_ICON_SIZE = 0;
 const DEFAULT_ROW_SPACE = 0;
 const SPECICAL_ROW_SPACE = 4;
 const OPERATEITEM_ICONLIKE_SIZE = 24;
+const OPERATEITEM_SELECTIONBOX_PADDING_SIZE = 2;
 const OPERATEITEM_ARROW_WIDTH = 12
 const OPERATEITEM_ICON_CLICKABLE_SIZE = 40;
 const OPERATEITEM_IMAGE_SIZE = 48;
-const RIGHT_CONTENT_NULL_LEFTWIDTH = '100%';
 const RIGHT_CONTENT_NULL_RIGHTWIDTH = '0vp';
 const LEFT_PART_WIDTH = 'calc(66% - 16vp)';
 const RIGHT_PART_WIDTH = '34%';
-const LEFT_ONLY_ARROW_WIDTH = 'calc(100% - 40vp)';
 const RIGHT_ONLY_ARROW_WIDTH = '24vp';
+const RIGHT_ONLY_IMAGE_WIDTH = '54vp';
+const RIGHT_ONLY_ICON_WIDTH = '40vp';
+const RIGHT_ICON_SUB_ICON_WIDTH = '80vp';
+const RIGHT_ONLY_RADIO_WIDTH = '30vp';
+const RIGHT_ONLY_CHECKBOX_WIDTH = '30vp';
+const RIGHT_ONLY_SWITCH_WIDTH = '44vp';
+const ACCESSIBILITY_LEVEL_AUTO = 'auto';
+const ACCESSIBILITY_LEVEL_YES = 'yes';
+const ACCESSIBILITY_LEVEL_NO = 'no';
+const RESOURCE_TYPE_SYMBOL: number = 40000;
+
 const ICON_SIZE_MAP: Map<number, number> = new Map([
   [IconType.BADGE, BADGE_SIZE],
   [IconType.NORMAL_ICON, SMALL_ICON_SIZE],
@@ -119,22 +144,78 @@ const ICON_SIZE_MAP: Map<number, number> = new Map([
   [IconType.LONGITUDINAL, LONGITUDINAL_SIZE],
   [IconType.VERTICAL, VERTICAL_SIZE]
 ])
+// Does it support events such as focus, hover, press, etc. for the sub components of list
+const IS_SUPPORT_SUBCOMPONENT_EVENT: boolean =
+  LengthMetrics.resource($r('sys.float.composeListItem_focus_dynamic_effect')).value !== 1;
+const RECOVER_ITEM_SCALE: number = 1;
+const CLEAR_SHADOW: ShadowStyle = -1;
+const OPERATE_ITEM_RADIUS: number = 50;
+const DEFUALT_RADIO_CHECKBOX_BORDER_COLOR: ResourceColor = $r('sys.color.ohos_id_color_switch_outline_off');
+const TEXT_SUPPORT_MARQUEE: number = 1;
+const IS_MARQUEE_OR_ELLIPSIS: number = LengthMetrics.resource($r('sys.float.composeListItem_right_textOverflow')).value;
+const UNUSUAL: number = -1;
+const FOCUSED_BG_COLOR: ResourceColor = $r('sys.color.composeListItem_container_focus_color');
+const NORMAL_BG_COLOR: ResourceColor = $r('sys.color.composeListItem_container_normal_color');
+const FOCUSED_ITEM_SCALE: number = LengthMetrics.resource($r('sys.float.composeListItem_focus_magnification')).value;
+const FOCUSED_SHADOW: ShadowStyle = LengthMetrics.resource($r('sys.float.composeListItem_focus_shadow_attribute'))
+  .value as ShadowStyle;
+const NORMAL_SHADOW: ShadowStyle = LengthMetrics.resource($r('sys.float.composeListItem_normal_shadow_attribute'))
+  .value as ShadowStyle;
+const ITEM_PADDING: Resource = $r('sys.float.composeListItem_padding');
+const OPERATEITEM_ARROW_MARGIN_WIDTH: number = LengthMetrics.resource(
+  $r('sys.float.composeListItem_arrow_margin')).value;
+const APPICON_ITEMLENGTH: number = LengthMetrics.resource(
+  $r('sys.float.composeListItem_AppIcon_ItemLength')).value;
+
+class Util {
+  public static isSymbolResource(resourceStr: ResourceStr | undefined | null): boolean {
+    if (!Util.isResourceType(resourceStr)) {
+      return false;
+    }
+    let resource: Resource = resourceStr as Resource;
+    return resource.type === RESOURCE_TYPE_SYMBOL;
+  }
+
+  public static isResourceType(resource: ResourceStr | Resource | undefined | null): boolean {
+    if (!resource) {
+      return false;
+    }
+    if (typeof resource === 'string' || typeof resource === 'undefined') {
+      return false;
+    }
+    return true;
+  }
+}
 
 @Component
 struct ContentItemStruct {
   @Prop @Watch('onPropChange') iconStyle: IconType | null = null;
   @Prop @Watch('onPropChange') icon: ResourceStr | null = null;
+  @Prop @Watch('onPropChange') symbolStyle: SymbolGlyphModifier | null = null;
   @Prop @Watch('onPropChange') primaryText: ResourceStr | null = null;
   @Prop @Watch('onPropChange') secondaryText: ResourceStr | null = null;
   @Prop @Watch('onPropChange') description: ResourceStr | null = null;
   @State itemRowSpace: number = NORMAL_ITEM_ROW_SPACE;
   @Prop leftWidth: string = LEFT_PART_WIDTH;
-  @State primaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_primary');
-  @State secondaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
-  @State descriptionColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
+  @State @Watch('onPropChange') primaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_primary');
+  @State @Watch('onPropChange') secondaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
+  @State @Watch('onPropChange') descriptionColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
   @Prop fontSizeScale: number;
   @Prop parentDirection: FlexDirection;
   @Prop itemDirection: FlexDirection;
+  @Prop @Watch('onPropChange') isFocus: boolean = false;
+  @State primaryTextSize: string | number | Resource = $r('sys.float.ohos_id_text_size_body1');
+  @State primaryTextColors: ResourceColor = $r('sys.color.font_primary');
+  @Prop itemHeight: number | null = null;
+  @State iconColor: ResourceColor | null = null;
+  @State secondaryTextColors: ResourceColor = $r('sys.color.font_secondary');
+  @State secondaryThirdTextSize: string | number | Resource =
+    $r('sys.float.composeListItem_left_secondary_tertiary_text_size');
+  @State descriptionColors: ResourceColor = $r('sys.color.font_tertiary');
+  @Link isWrapText: Boolean;
+  @State @Watch('onWrapChange') isWrapFirstText: Boolean = false;
+  @State @Watch('onWrapChange') isWrapSecondText: Boolean = false;
+  @State @Watch('onWrapChange') isWrapThirdText: Boolean = false;
 
   onWillApplyTheme(theme: Theme): void {
     this.primaryTextColor = theme.colors.fontPrimary;
@@ -142,45 +223,109 @@ struct ContentItemStruct {
     this.descriptionColor = theme.colors.fontTertiary;
   }
 
-  onPropChange() {
-    if (this.icon == null && this.iconStyle == null) {
+  onPropChange(): void {
+    if (this.icon == null && this.symbolStyle == null && this.iconStyle == null) {
       this.itemRowSpace = SPECIAL_ITEM_ROW_SPACE;
     } else {
       this.itemRowSpace = NORMAL_ITEM_ROW_SPACE;
     }
+    if (!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus) {
+      this.primaryTextColors = $r('sys.color.composeListItem_left_text_focus_color');
+      this.secondaryTextColors = $r('sys.color.composeListItem_left_secondary_text_focus_color');
+      this.descriptionColors = $r('sys.color.composeListItem_left_secondary_text_focus_color');
+    } else {
+      this.primaryTextColors = this.primaryTextColor;
+      this.secondaryTextColors = this.secondaryTextColor;
+      this.descriptionColors = this.descriptionColor;
+    }
   }
 
-  aboutToAppear() {
+  onWrapChange(): void {
+    this.isWrapText = this.isWrapFirstText || this.isWrapSecondText || this.isWrapThirdText;
+  }
+
+  getContentItemIconFillColor(): ResourceColor {
+    switch (this.iconStyle) {
+      case IconType.BADGE:
+        return $r('sys.color.composeListItem_badge_color');
+      case IconType.SYSTEM_ICON:
+        return $r('sys.color.composeListItem_icon_normal_color');
+      default:
+        return $r('sys.color.ohos_id_color_secondary');
+    }
+  }
+
+  judgeIsWrap(text: ResourceStr | null, sizeResource: Length, newHeight: number): boolean {
+    let singleRowHeight = this.getSingleRowTextHeight(text, sizeResource);
+    return newHeight > singleRowHeight;
+  }
+
+  getSingleRowTextHeight(text: ResourceStr | null, sizeResource: Length): number {
+    if (text && sizeResource) {
+      let singleRowHeight = px2vp(measure.measureTextSize({
+        textContent: text,
+        fontSize: sizeResource,
+        maxLines: TEXT_MAX_LINE
+      }).height as number);
+      return singleRowHeight;
+    }
+    return 0;
+  }
+
+  aboutToAppear(): void {
     this.onPropChange();
   }
 
   @Builder
   createIcon() {
-    if (this.icon != null && this.iconStyle != null && ICON_SIZE_MAP.has(this.iconStyle)) {
-      if (this.iconStyle <= IconType.PREVIEW) {
-        Image(this.icon)
-          .objectFit(ImageFit.Contain)
-          .width(ICON_SIZE_MAP.get(this.iconStyle))
-          .height(ICON_SIZE_MAP.get(this.iconStyle))
-          .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
+    if (this.iconStyle != null && ICON_SIZE_MAP.has(this.iconStyle)) {
+      if (this.symbolStyle != null) {
+        SymbolGlyph()
+          .fontColor([this.getContentItemIconFillColor()])
+          .attributeModifier(this.symbolStyle)
+          .fontSize(`${ICON_SIZE_MAP.get(this.iconStyle)}vp`)
+          .effectStrategy(SymbolEffectStrategy.NONE)
+          .symbolEffect(new SymbolEffect(), false)
+          .borderRadius($r('sys.float.composeListItem_Image_Radius'))
           .focusable(false)
           .draggable(false)
-          .fillColor($r('sys.color.ohos_id_color_secondary'))
           .flexShrink(0)
-      } else {
-        Image(this.icon)
-          .objectFit(ImageFit.Contain)
-          .constraintSize({
-            minWidth: SPECIAL_ICON_SIZE,
-            maxWidth: ICON_SIZE_MAP.get(this.iconStyle),
-            minHeight: SPECIAL_ICON_SIZE,
-            maxHeight: ICON_SIZE_MAP.get(this.iconStyle)
-          })
-          .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
-          .focusable(false)
-          .draggable(false)
-          .fillColor($r('sys.color.ohos_id_color_secondary'))
-          .flexShrink(0)
+      } else if (this.icon != null) {
+        if (Util.isSymbolResource(this.icon)) {
+          SymbolGlyph(this.icon as Resource)
+            .fontSize(`${ICON_SIZE_MAP.get(this.iconStyle)}vp`)
+            .fontColor([this.getContentItemIconFillColor()])
+            .borderRadius($r('sys.float.composeListItem_Image_Radius'))
+            .focusable(false)
+            .draggable(false)
+            .flexShrink(0)
+        } else {
+          if (this.iconStyle <= IconType.PREVIEW) {
+            Image(this.icon)
+              .objectFit(ImageFit.Contain)
+              .width(ICON_SIZE_MAP.get(this.iconStyle))
+              .height(ICON_SIZE_MAP.get(this.iconStyle))
+              .borderRadius($r('sys.float.composeListItem_Image_Radius'))
+              .focusable(false)
+              .draggable(false)
+              .fillColor(this.getContentItemIconFillColor())
+              .flexShrink(0)
+          } else {
+            Image(this.icon)
+              .objectFit(ImageFit.Contain)
+              .constraintSize({
+                minWidth: SPECIAL_ICON_SIZE,
+                maxWidth: ICON_SIZE_MAP.get(this.iconStyle),
+                minHeight: SPECIAL_ICON_SIZE,
+                maxHeight: ICON_SIZE_MAP.get(this.iconStyle)
+              })
+              .borderRadius($r('sys.float.composeListItem_Image_Radius'))
+              .focusable(false)
+              .draggable(false)
+              .fillColor(this.getContentItemIconFillColor())
+              .flexShrink(0)
+          }
+        }
       }
     }
   }
@@ -189,45 +334,67 @@ struct ContentItemStruct {
   createText() {
     Column({ space: TEXT_COLUMN_SPACE }) {
       Text(this.primaryText)
-        .fontSize($r('sys.float.ohos_id_text_size_body1'))
-        .fontColor(this.primaryTextColor)
-        .maxLines(TEXT_MAX_LINE)
-        .textOverflow({ overflow: TextOverflow.Ellipsis })
+        .fontSize(this.primaryTextSize)
+        .fontColor(this.primaryTextColors)
+        .textOverflow({
+          overflow: IS_MARQUEE_OR_ELLIPSIS === TEXT_SUPPORT_MARQUEE ? TextOverflow.None :
+          TextOverflow.Ellipsis
+        })
         .fontWeight(FontWeight.Medium)
         .focusable(true)
         .draggable(false)
+        .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+          if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+            this.isWrapFirstText = this.judgeIsWrap(this.primaryText, this.primaryTextSize,
+              newValue.height as number);
+          }
+        })
       if (this.secondaryText != null) {
         Text(this.secondaryText)
-          .fontSize($r('sys.float.ohos_id_text_size_body2'))
-          .fontColor(this.secondaryTextColor)
-          .maxLines(TEXT_MAX_LINE)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .focusable(true)
+          .fontSize(this.secondaryThirdTextSize)
+          .fontColor(this.secondaryTextColors)
+          .textOverflow({
+            overflow: IS_MARQUEE_OR_ELLIPSIS === TEXT_SUPPORT_MARQUEE ? TextOverflow.None :
+            TextOverflow.Ellipsis
+          })
           .draggable(false)
+          .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+            if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+              this.isWrapSecondText = this.judgeIsWrap(this.secondaryText, this.secondaryThirdTextSize,
+                newValue.height as number);
+            }
+          })
       }
       if (this.description != null) {
         Text(this.description)
-          .fontSize($r('sys.float.ohos_id_text_size_body2'))
-          .fontColor(this.descriptionColor)
-          .maxLines(TEXT_MAX_LINE)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .focusable(true)
+          .fontSize(this.secondaryThirdTextSize)
+          .fontColor(this.descriptionColors)
+          .textOverflow({
+            overflow: IS_MARQUEE_OR_ELLIPSIS === TEXT_SUPPORT_MARQUEE ? TextOverflow.None :
+            TextOverflow.Ellipsis
+          })
           .draggable(false)
+          .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+            if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+              this.isWrapThirdText = this.judgeIsWrap(this.description, this.secondaryThirdTextSize,
+                newValue.height as number);
+            }
+          })
       }
     }
     .flexShrink(1)
-    .margin(this.fontSizeScale >= FontSizeScaleLevel.LEVEL1 ? undefined :{
+    .margin(this.fontSizeScale >= FontSizeScaleLevel.LEVEL1 ? undefined : {
       top: TEXT_SAFE_MARGIN,
       bottom: TEXT_SAFE_MARGIN
     })
     .alignItems(HorizontalAlign.Start)
   }
 
-  isColumnDirection() {
+  isColumnDirection(): boolean {
     return this.itemDirection === FlexDirection.Column;
   }
 
-  isParentColumnDirection() {
+  isParentColumnDirection(): boolean {
     return this.parentDirection === FlexDirection.Column;
   }
 
@@ -245,22 +412,31 @@ struct ContentItemStruct {
       justifyContent: FlexAlign.Start,
       alignItems: this.isColumnDirection() ? ItemAlign.Start : ItemAlign.Center,
     }) {
-      this.createIcon()
-      this.createText()
+      this.createIcon();
+      this.createText();
     }
+    .height(this.itemDirection === FlexDirection.Column ? 'auto' : undefined)
     .margin({
       end: this.isParentColumnDirection() ?
       LengthMetrics.vp(0) :
       LengthMetrics.vp(16)
     })
     .padding({ start: LengthMetrics.vp(LISTITEM_PADDING) })
-    .width(this.isParentColumnDirection() ? undefined : this.leftWidth)
     .flexShrink(this.isParentColumnDirection() ? 0 : 1)
   }
 }
 
 class CreateIconParam {
   public icon?: OperateIcon;
+}
+
+class OperateItemStructController {
+  public changeRadioState = () => {
+  };
+  public changeCheckboxState = () => {
+  };
+  public changeSwitchState = () => {
+  };
 }
 
 @Component
@@ -273,22 +449,28 @@ struct OperateItemStruct {
   @Prop @Watch('onPropChange') checkBox: OperateCheck | null = null;
   @Prop @Watch('onPropChange') radio: OperateCheck | null = null;
   @Prop @Watch('onPropChange') image: ResourceStr | null = null;
+  @Prop @Watch('onPropChange') symbolStyle: SymbolGlyphModifier | null = null;
   @Prop @Watch('onPropChange') text: ResourceStr | null = null;
-  @State switchState: boolean = false
-  @State radioState: boolean = false
-  @State checkBoxState: boolean = false
+  @State switchState: boolean = false;
+  @State radioState: boolean = false;
+  @State checkBoxState: boolean = false;
   @Prop rightWidth: string = RIGHT_PART_WIDTH;
-  @State secondaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
+  @State @Watch('onFocusChange') secondaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
   @State hoveringColor: ResourceColor = '#0d000000';
   @State activedColor: ResourceColor = '#1a0a59f7';
-  @Link parentCanFocus: boolean
-  @Link parentCanTouch: boolean
-  @Link parentIsHover: boolean
-  @Link parentCanHover: boolean
-  @Link parentIsActive: boolean
+  @Link parentCanFocus: boolean;
+  @Link parentCanTouch: boolean;
+  @Link parentIsHover: boolean;
+  @Link parentCanHover: boolean;
+  @Link parentIsActive: boolean;
   @Link parentFrontColor: ResourceColor;
   @Link parentDirection: FlexDirection;
   @State rowSpace: number = DEFAULT_ROW_SPACE;
+  @Link @Watch('onFocusChange') isFocus: boolean;
+  @State secondaryTextSize: Length = $r('sys.float.ohos_id_text_size_body2');
+  @State secondaryTextColors: ResourceColor = $r('sys.color.font_secondary');
+  @State iconColor: ResourceColor = $r('sys.color.composeListItem_right_icon_normal_color');
+  private controller: OperateItemStructController = new OperateItemStructController();
 
   onWillApplyTheme(theme: Theme): void {
     this.secondaryTextColor = theme.colors.fontSecondary;
@@ -296,7 +478,17 @@ struct OperateItemStruct {
     this.activedColor = theme.colors.interactiveActive;
   }
 
-  onPropChange() {
+  onFocusChange() {
+    if (!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus) {
+      this.secondaryTextColors = $r('sys.color.composeListItem_right_text_focus_color');
+    } else {
+      this.secondaryTextColors = this.secondaryTextColor;
+    }
+    this.iconColor = this.isFocus ? $r('sys.color.composeListItem_right_icon_focus_color') :
+    $r('sys.color.composeListItem_right_icon_normal_color');
+  }
+
+  onPropChange(): void {
     if (this.switch != null) {
       this.switchState = this.switch.isCheck as boolean;
     }
@@ -307,17 +499,33 @@ struct OperateItemStruct {
       this.checkBoxState = this.checkBox.isCheck as boolean;
     }
 
-    if ((this.button == null && this.image == null && this.icon != null && this.text != null) ||
-      (this.button == null && this.image == null && this.icon == null && this.arrow != null && this.text != null)) {
+    if ((this.button == null && this.image == null && this.symbolStyle == null && this.text != null) &&
+      ((this.icon != null) || (this.icon == null && this.arrow != null))) {
       this.rowSpace = SPECICAL_ROW_SPACE;
     } else {
       this.rowSpace = DEFAULT_ROW_SPACE;
     }
   }
 
-  aboutToAppear() {
+  aboutToAppear(): void {
     this.onPropChange();
+    this.onFocusChange();
+    if (this.controller) {
+      this.controller.changeRadioState = this.changeRadioState;
+      this.controller.changeCheckboxState = this.changeCheckboxState;
+      this.controller.changeSwitchState = this.changeSwitchState;
+    }
   }
+
+  changeRadioState = () => {
+    this.radioState = !this.radioState;
+  };
+  changeCheckboxState = () => {
+    this.checkBoxState = !this.checkBoxState;
+  };
+  changeSwitchState = () => {
+    this.switchState = !this.switchState;
+  };
 
   @Builder
   createButton() {
@@ -333,7 +541,7 @@ struct OperateItemStruct {
     }
     .padding({ top: 0, bottom: 0 })
     .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
-    .hitTestBehavior(HitTestMode.Block)
+    .hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None)
     .fontSize($r('sys.float.ohos_id_text_size_button3'))
     .fontColor($r('sys.color.ohos_id_color_text_primary_activated_transparent'))
     .constraintSize({
@@ -346,40 +554,55 @@ struct OperateItemStruct {
     .onFocus(() => {
       this.parentCanFocus = false;
     })
-    .onTouch((event: TouchEvent) => {
-      if (event.type === TouchType.Down) {
-        this.parentCanTouch = false;
-      }
-      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.parentCanTouch = true;
-      }
-    })
     .onHover((isHover: boolean) => {
-      this.parentCanHover = false
-      if (isHover && this.parentFrontColor === this.hoveringColor) {
+      this.parentCanHover = false;
+      if (isHover && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
         this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
       }
       if (!isHover) {
-        this.parentCanHover = true
+        this.parentCanHover = true;
         if (this.parentIsHover) {
           this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
             (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
         }
       }
     })
+    .accessibilityLevel(this.button?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+    .accessibilityText(getAccessibilityText(this.button?.accessibilityText ?? ''))
+    .accessibilityDescription(getAccessibilityText(this.button?.accessibilityDescription ?? ''))
   }
 
   @Builder
   createIcon(param: CreateIconParam) {
     Button({ type: ButtonType.Normal }) {
-      Image(param.icon?.value)
-        .height(OPERATEITEM_ICONLIKE_SIZE)
-        .width(OPERATEITEM_ICONLIKE_SIZE)
-        .focusable(true)
-        .fillColor($r('sys.color.ohos_id_color_primary'))
-        .draggable(false)
+      if (param.icon?.symbolStyle) {
+        SymbolGlyph()
+          .fontColor([this.iconColor])
+          .attributeModifier(param.icon?.symbolStyle)
+          .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
+          .effectStrategy(SymbolEffectStrategy.NONE)
+          .symbolEffect(new SymbolEffect(), false)
+          .focusable(true)
+          .draggable(false)
+      } else {
+        if (Util.isSymbolResource(param.icon?.value)) {
+          SymbolGlyph(param.icon?.value as Resource)
+            .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
+            .fontColor([this.iconColor])
+            .focusable(true)
+            .draggable(false)
+        } else {
+          Image(param.icon?.value)
+            .height(OPERATEITEM_ICONLIKE_SIZE)
+            .width(OPERATEITEM_ICONLIKE_SIZE)
+            .focusable(true)
+            .fillColor(this.iconColor)
+            .draggable(false)
+        }
+      }
     }
-    .hitTestBehavior(HitTestMode.Block)
+    .shadow(CLEAR_SHADOW)
+    .hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None)
     .backgroundColor(Color.Transparent)
     .height(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .width(OPERATEITEM_ICON_CLICKABLE_SIZE)
@@ -387,21 +610,13 @@ struct OperateItemStruct {
     .onFocus(() => {
       this.parentCanFocus = false;
     })
-    .onTouch((event: TouchEvent) => {
-      if (event.type === TouchType.Down) {
-        this.parentCanTouch = false;
-      }
-      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.parentCanTouch = true;
-      }
-    })
     .onHover((isHover: boolean) => {
-      this.parentCanHover = false
-      if (isHover && this.parentFrontColor === this.hoveringColor) {
+      this.parentCanHover = false;
+      if (isHover && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
         this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
       }
       if (!isHover) {
-        this.parentCanHover = true
+        this.parentCanHover = true;
         if (this.parentIsHover) {
           this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
             (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
@@ -409,14 +624,35 @@ struct OperateItemStruct {
       }
     })
     .onClick(param.icon?.action)
+    .accessibilityLevel(getAccessibilityLevelOnAction(param.icon?.accessibilityLevel, param.icon?.action))
+    .accessibilityText(getAccessibilityText(param.icon?.accessibilityText ?? ''))
+    .accessibilityDescription(getAccessibilityText(param.icon?.accessibilityDescription ?? ''))
     .flexShrink(0)
   }
 
   @Builder
   createImage() {
-    Image(this.image)
-      .height(OPERATEITEM_IMAGE_SIZE)
-      .width(OPERATEITEM_IMAGE_SIZE)
+    if (Util.isSymbolResource(this.image)) {
+      SymbolGlyph(this.image as Resource)
+        .fontSize(`${OPERATEITEM_IMAGE_SIZE}vp`)
+        .draggable(false)
+        .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
+    } else {
+      Image(this.image)
+        .height(OPERATEITEM_IMAGE_SIZE)
+        .width(OPERATEITEM_IMAGE_SIZE)
+        .draggable(false)
+        .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
+    }
+  }
+
+  @Builder
+  createSymbol() {
+    SymbolGlyph()
+      .attributeModifier(this.symbolStyle)
+      .fontSize(`${OPERATEITEM_IMAGE_SIZE}vp`)
+      .effectStrategy(SymbolEffectStrategy.NONE)
+      .symbolEffect(new SymbolEffect(), false)
       .draggable(false)
       .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
   }
@@ -425,9 +661,18 @@ struct OperateItemStruct {
   createText() {
     Text(this.text)
       .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
-      .fontSize($r('sys.float.ohos_id_text_size_body2'))
-      .fontColor(this.secondaryTextColor)
-      .focusable(true)
+      .fontSize(this.secondaryTextSize)
+      .fontColor(this.secondaryTextColors)
+      .textOverflow({
+        overflow: IS_MARQUEE_OR_ELLIPSIS === TEXT_SUPPORT_MARQUEE ? TextOverflow.MARQUEE :
+        TextOverflow.None
+      })
+      .marqueeOptions({
+        start: this.isFocus || this.parentIsHover,
+        fadeout: true,
+        marqueeStartPolicy: MarqueeStartPolicy.DEFAULT
+      })
+      .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value)
       .draggable(false)
       .flexShrink(1)
   }
@@ -435,16 +680,37 @@ struct OperateItemStruct {
   @Builder
   createArrow() {
     Button({ type: ButtonType.Normal }) {
-      Image(this.arrow?.value)
-        .height(OPERATEITEM_ICONLIKE_SIZE)
-        .width(OPERATEITEM_ARROW_WIDTH)
-        .focusable(true)
-        .fillColor($r('sys.color.ohos_id_color_fourth'))
-        .draggable(false)
-        .matchTextDirection(true)
+      if (this.arrow?.symbolStyle) {
+        SymbolGlyph()
+          .fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? $r('sys.color.ohos_id_color_fourth') : this.iconColor])
+          .attributeModifier(this.arrow?.symbolStyle)
+          .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
+          .effectStrategy(SymbolEffectStrategy.NONE)
+          .symbolEffect(new SymbolEffect(), false)
+          .focusable(true)
+          .draggable(false)
+      } else {
+        if (Util.isSymbolResource(this.arrow?.value)) {
+          SymbolGlyph(this.arrow?.value as Resource)
+            .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
+            .fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? $r('sys.color.ohos_id_color_fourth') : this.iconColor])
+            .focusable(true)
+            .draggable(false)
+        } else {
+          Image(this.arrow?.value)
+            .height(OPERATEITEM_ICONLIKE_SIZE)
+            .width(OPERATEITEM_ARROW_WIDTH)
+            .focusable(true)
+            .fillColor(IS_SUPPORT_SUBCOMPONENT_EVENT ? $r('sys.color.ohos_id_color_fourth') : this.iconColor)
+            .draggable(false)
+            .matchTextDirection(true)
+        }
+      }
     }
+    .shadow(CLEAR_SHADOW)
     .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
-    .hitTestBehavior(HitTestMode.Transparent)
+    .hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ?
+      (this.arrow?.action !== undefined ? HitTestMode.Block : HitTestMode.Transparent) : HitTestMode.None)
     .backgroundColor(Color.Transparent)
     .height(OPERATEITEM_ICONLIKE_SIZE)
     .width(OPERATEITEM_ARROW_WIDTH)
@@ -452,28 +718,16 @@ struct OperateItemStruct {
       this.parentCanFocus = false;
     })
     .stateEffect(this.arrow?.action !== undefined)
-    .onTouch((event: TouchEvent) => {
-      if (this.arrow?.action === undefined) {
-        return;
-      }
-      if (event.type === TouchType.Down) {
-        this.parentCanTouch = false;
-      }
-      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.parentCanTouch = true;
-      }
-    })
     .hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None)
     .onHover((isHover: boolean) => {
       if (this.arrow?.action === undefined) {
         return;
       }
-      this.parentCanHover = false
-      if (isHover) {
+      if (isHover && IS_SUPPORT_SUBCOMPONENT_EVENT) {
+        this.parentCanHover = false;
         this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
-      }
-      if (!isHover) {
-        this.parentCanHover = true
+      } else {
+        this.parentCanHover = true;
         if (this.parentIsHover) {
           this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
             (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
@@ -481,6 +735,9 @@ struct OperateItemStruct {
       }
     })
     .onClick(this.arrow?.action)
+    .accessibilityLevel(getAccessibilityLevelOnAction(this.arrow?.accessibilityLevel, this.arrow?.action))
+    .accessibilityText(getAccessibilityText(this.arrow?.accessibilityText ?? ''))
+    .accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''))
   }
 
   @Builder
@@ -488,80 +745,106 @@ struct OperateItemStruct {
     Radio({ value: '', group: '' })
       .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
       .checked(this.radioState)
-      .onChange(this.radio?.onChange)
+      .radioStyle({
+        uncheckedBorderColor: DEFUALT_RADIO_CHECKBOX_BORDER_COLOR
+      })
+      .backgroundColor(Color.Transparent)
+      .borderRadius(OPERATE_ITEM_RADIUS)
+      .onChange((isCheck: boolean) => {
+        if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+          this.radioState = isCheck;
+        }
+        if (this.radio?.onChange) {
+          this.radio?.onChange(isCheck);
+        }
+      })
       .height(OPERATEITEM_ICONLIKE_SIZE)
       .width(OPERATEITEM_ICONLIKE_SIZE)
+      .padding(OPERATEITEM_SELECTIONBOX_PADDING_SIZE)
       .onFocus(() => {
         this.parentCanFocus = false;
       })
-      .hitTestBehavior(HitTestMode.Block)
-      .onTouch((event: TouchEvent) => {
-        if (event.type === TouchType.Down) {
-          this.parentCanTouch = false;
-        }
-        if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-          this.parentCanTouch = true;
-        }
-      })
+      .hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None)
+      .flexShrink(0)
       .onHover((isHover: boolean) => {
-        this.parentCanHover = false
-        if (isHover && this.parentFrontColor === this.hoveringColor) {
+        this.parentCanHover = false;
+        if (isHover && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
           this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
         }
         if (!isHover) {
-          this.parentCanHover = true
+          this.parentCanHover = true;
           if (this.parentIsHover) {
             this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
               (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
           }
         }
       })
+      .accessibilityLevel(getAccessibilityLevelOnChange(this.radio?.accessibilityLevel, this.radio?.onChange))
+      .accessibilityText(getAccessibilityText(this.radio?.accessibilityText ?? ''))
+      .accessibilityDescription(getAccessibilityText(this.radio?.accessibilityDescription ?? ''))
   }
 
   @Builder
   createCheckBox() {
     Checkbox()
+      .borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? UNUSUAL : OPERATE_ITEM_RADIUS)
+      .unselectedColor(DEFUALT_RADIO_CHECKBOX_BORDER_COLOR)
+      .backgroundColor(Color.Transparent)
       .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
       .select(this.checkBoxState)
-      .onChange(this.checkBox?.onChange)
+      .onChange((isCheck: boolean) => {
+        if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+          this.checkBoxState = isCheck;
+        }
+        if (this.checkBox?.onChange) {
+          this.checkBox?.onChange(isCheck);
+        }
+      })
       .height(OPERATEITEM_ICONLIKE_SIZE)
       .width(OPERATEITEM_ICONLIKE_SIZE)
+      .padding(OPERATEITEM_SELECTIONBOX_PADDING_SIZE)
       .onFocus(() => {
         this.parentCanFocus = false;
       })
-      .hitTestBehavior(HitTestMode.Block)
-      .onTouch((event: TouchEvent) => {
-        if (event.type === TouchType.Down) {
-          this.parentCanTouch = false;
-        }
-        if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-          this.parentCanTouch = true;
-        }
-      })
+      .hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None)
+      .flexShrink(0)
       .onHover((isHover: boolean) => {
-        this.parentCanHover = false
-        if (isHover && this.parentFrontColor === this.hoveringColor) {
+        this.parentCanHover = false;
+        if (isHover && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
           this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
         }
         if (!isHover) {
-          this.parentCanHover = true
+          this.parentCanHover = true;
           if (this.parentIsHover) {
             this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
               (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
           }
         }
       })
+      .accessibilityLevel(getAccessibilityLevelOnChange(this.checkBox?.accessibilityLevel, this.checkBox?.onChange))
+      .accessibilityText(getAccessibilityText(this.checkBox?.accessibilityText ?? ''))
+      .accessibilityDescription(getAccessibilityText(this.checkBox?.accessibilityDescription ?? ''))
   }
 
   @Builder
   createSwitch() {
     Row() {
       Toggle({ type: ToggleType.Switch, isOn: this.switchState })
-        .onChange(this.switch?.onChange)
-        .onClick(() => {
-          this.switchState = !this.switchState
+        .borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? UNUSUAL : OPERATE_ITEM_RADIUS)
+        .backgroundColor(Color.Transparent)
+        .onChange((isCheck: boolean) => {
+          this.switchState = isCheck;
+          if (this.switch?.onChange) {
+            this.switch?.onChange(isCheck);
+          }
         })
-        .hitTestBehavior(HitTestMode.Block)
+        .onClick(() => {
+          this.switchState = !this.switchState;
+        })
+        .hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None)
+        .accessibilityLevel(getAccessibilityLevelOnChange(this.switch?.accessibilityLevel, this.switch?.onChange))
+        .accessibilityText(getAccessibilityText(this.switch?.accessibilityText ?? ''))
+        .accessibilityDescription(getAccessibilityText(this.switch?.accessibilityDescription ?? ''))
     }
     .margin({ end: LengthMetrics.vp(SWITCH_PADDING) })
     .height(OPERATEITEM_ICON_CLICKABLE_SIZE)
@@ -570,21 +853,13 @@ struct OperateItemStruct {
     .onFocus(() => {
       this.parentCanFocus = false;
     })
-    .onTouch((event: TouchEvent) => {
-      if (event.type === TouchType.Down) {
-        this.parentCanTouch = false;
-      }
-      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.parentCanTouch = true;
-      }
-    })
     .onHover((isHover: boolean) => {
-      this.parentCanHover = false
-      if (isHover && this.parentFrontColor === this.hoveringColor) {
+      this.parentCanHover = false;
+      if (isHover && this.parentFrontColor === this.hoveringColor && IS_SUPPORT_SUBCOMPONENT_EVENT) {
         this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
       }
       if (!isHover) {
-        this.parentCanHover = true
+        this.parentCanHover = true;
         if (this.parentIsHover) {
           this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
             (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
@@ -596,43 +871,94 @@ struct OperateItemStruct {
   @Builder
   createTextArrow() {
     Button({ type: ButtonType.Normal }) {
-      if(this.parentDirection === FlexDirection.Column) {
+      if (this.parentDirection === FlexDirection.Column) {
         Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
           Text(this.text)
             .fontSize($r('sys.float.ohos_id_text_size_body2'))
-            .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+            .fontColor(this.secondaryTextColor)
             .focusable(true)
             .draggable(false)
             .constraintSize({
               maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
             })
-          Image(this.arrow?.value)
-            .height(OPERATEITEM_ICONLIKE_SIZE)
-            .width(OPERATEITEM_ARROW_WIDTH)
-            .fillColor($r('sys.color.ohos_id_color_fourth'))
-            .focusable(false)
-            .draggable(false)
+          if (this.arrow?.symbolStyle) {
+            SymbolGlyph()
+              .fontColor([$r('sys.color.ohos_id_color_fourth')])
+              .attributeModifier(this.arrow?.symbolStyle)
+              .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
+              .effectStrategy(SymbolEffectStrategy.NONE)
+              .symbolEffect(new SymbolEffect(), false)
+              .focusable(false)
+              .draggable(false)
+          } else {
+            if (Util.isSymbolResource(this.arrow?.value)) {
+              SymbolGlyph(this.arrow?.value as Resource)
+                .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
+                .fontColor([$r('sys.color.ohos_id_color_fourth')])
+                .focusable(false)
+                .draggable(false)
+            } else {
+              Image(this.arrow?.value)
+                .height(OPERATEITEM_ICONLIKE_SIZE)
+                .width(OPERATEITEM_ARROW_WIDTH)
+                .fillColor($r('sys.color.ohos_id_color_fourth'))
+                .focusable(false)
+                .draggable(false)
+                .matchTextDirection(true)
+            }
+          }
         }
         .padding({
           start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
           end: LengthMetrics.vp(LISTITEM_PADDING)
         })
-      }else {
+      } else {
         Row({ space: SPECICAL_ROW_SPACE }) {
           Text(this.text)
-            .fontSize($r('sys.float.ohos_id_text_size_body2'))
-            .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+            .fontSize(this.secondaryTextSize)
+            .fontColor(this.secondaryTextColors)
+            .textOverflow({
+              overflow: IS_MARQUEE_OR_ELLIPSIS === TEXT_SUPPORT_MARQUEE ? TextOverflow.MARQUEE :
+              TextOverflow.None
+            })
+            .marqueeOptions({
+              start: this.isFocus || this.parentIsHover,
+              fadeout: true,
+              marqueeStartPolicy: MarqueeStartPolicy.DEFAULT
+            })
+            .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value)
             .focusable(true)
             .draggable(false)
             .constraintSize({
-              maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
+              maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH + OPERATEITEM_ARROW_MARGIN_WIDTH}vp)`
             })
-          Image(this.arrow?.value)
-            .height(OPERATEITEM_ICONLIKE_SIZE)
-            .width(OPERATEITEM_ARROW_WIDTH)
-            .fillColor($r('sys.color.ohos_id_color_fourth'))
-            .focusable(false)
-            .draggable(false)
+            .margin({ right: OPERATEITEM_ARROW_MARGIN_WIDTH })
+          if (this.arrow?.symbolStyle) {
+            SymbolGlyph()
+              .fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? $r('sys.color.icon_fourth') : this.iconColor])
+              .attributeModifier(this.arrow?.symbolStyle)
+              .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
+              .effectStrategy(SymbolEffectStrategy.NONE)
+              .symbolEffect(new SymbolEffect(), false)
+              .focusable(false)
+              .draggable(false)
+          } else {
+            if (Util.isSymbolResource(this.arrow?.value)) {
+              SymbolGlyph(this.arrow?.value as Resource)
+                .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
+                .fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? $r('sys.color.icon_fourth') : this.iconColor])
+                .focusable(false)
+                .draggable(false)
+            } else {
+              Image(this.arrow?.value)
+                .height(OPERATEITEM_ICONLIKE_SIZE)
+                .width(OPERATEITEM_ARROW_WIDTH)
+                .fillColor(IS_SUPPORT_SUBCOMPONENT_EVENT ? $r('sys.color.icon_fourth') : this.iconColor)
+                .focusable(false)
+                .draggable(false)
+                .matchTextDirection(true)
+            }
+          }
         }
         .padding({
           start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
@@ -640,7 +966,9 @@ struct OperateItemStruct {
         })
       }
     }
-    .hitTestBehavior(HitTestMode.Transparent)
+    .shadow(CLEAR_SHADOW)
+    .hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ?
+      (this.arrow?.action !== undefined ? HitTestMode.Block : HitTestMode.Transparent) : HitTestMode.None)
     .labelStyle({
       maxLines: TEXT_MAX_LINE
     })
@@ -657,28 +985,16 @@ struct OperateItemStruct {
       right: 0
     })
     .stateEffect(this.arrow?.action !== undefined)
-    .onTouch((event: TouchEvent) => {
-      if (this.arrow?.action === undefined) {
-        return;
-      }
-      if (event.type === TouchType.Down) {
-        this.parentCanTouch = false;
-      }
-      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.parentCanTouch = true;
-      }
-    })
     .hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None)
     .onHover((isHover: boolean) => {
       if (this.arrow?.action === undefined) {
         return;
       }
-      this.parentCanHover = false
-      if (isHover) {
+      if (isHover && IS_SUPPORT_SUBCOMPONENT_EVENT) {
+        this.parentCanHover = false;
         this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
-      }
-      if (!isHover) {
-        this.parentCanHover = true
+      } else {
+        this.parentCanHover = true;
         if (this.parentIsHover) {
           this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
             (this.parentIsActive ? this.activedColor : Color.Transparent.toString());
@@ -686,6 +1002,9 @@ struct OperateItemStruct {
       }
     })
     .onClick(this.arrow?.action)
+    .accessibilityLevel(getAccessibilityLevelOnAction(this.arrow?.accessibilityLevel, this.arrow?.action))
+    .accessibilityText(`${this.text} ${getAccessibilityText(this.arrow?.accessibilityText ?? '')}`)
+    .accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''))
   }
 
   getFlexOptions(): FlexOptions {
@@ -703,25 +1022,27 @@ struct OperateItemStruct {
     Flex(this.getFlexOptions()) {
       if (this.button != null) {
         this.createButton();
+      } else if (this.symbolStyle != null) {
+        this.createSymbol();
       } else if (this.image != null) {
-        this.createImage()
+        this.createImage();
       } else if (this.icon != null && this.text != null) {
-        this.createText()
+        this.createText();
         this.createIcon({ icon: this.icon })
       } else if (this.arrow != null && this.text == null) {
-        this.createArrow()
+        this.createArrow();
       } else if (this.arrow != null && this.text != null) {
         this.createTextArrow();
       } else if (this.text != null) {
-        this.createText()
+        this.createText();
       } else if (this.radio != null) {
-        this.createRadio()
+        this.createRadio();
       } else if (this.checkBox != null) {
-        this.createCheckBox()
+        this.createCheckBox();
       } else if (this.switch != null) {
-        this.createSwitch()
+        this.createSwitch();
       } else if (this.icon != null) {
-        this.createIcon({ icon: this.icon })
+        this.createIcon({ icon: this.icon });
         if (this.subIcon != null) {
           this.createIcon({ icon: this.subIcon });
         }
@@ -731,18 +1052,76 @@ struct OperateItemStruct {
   }
 }
 
+/**
+ * Obtain accessible text
+ *
+ * @param resource initial resource
+ * @param selected select state
+ * @returns string
+ */
+function getAccessibilityText(resource: ResourceStr): string {
+  try {
+    let resourceString: string = '';
+    if (typeof resource === 'string') {
+      resourceString = resource;
+    } else {
+      resourceString = getContext().resourceManager.getStringSync(resource);
+    }
+    return resourceString;
+  } catch (error) {
+    let code: number = (error as BusinessError).code;
+    let message: string = (error as BusinessError).message;
+    hilog.error(0x3900, 'Ace', `getAccessibilityText error, code: ${code}, message: ${message}`);
+    return '';
+  }
+}
+
+/**
+ * Obtain accessible level
+ *
+ * @param resource
+ * @param selected select state
+ * @returns string
+ */
+function getAccessibilityLevelOnChange(accessibilityLevel?: string, onChange?: (value: boolean) => void): string {
+  if (accessibilityLevel) {
+    return accessibilityLevel;
+  }
+  if (onChange) {
+    return ACCESSIBILITY_LEVEL_YES;
+  }
+  return ACCESSIBILITY_LEVEL_NO;
+}
+
+/**
+ * Obtain accessible level
+ *
+ * @param resource
+ * @param selected select state
+ * @returns string
+ */
+function getAccessibilityLevelOnAction(accessibilityLevel?: string, onAction?: () => void): string {
+  if (accessibilityLevel) {
+    return accessibilityLevel;
+  }
+  if (onAction) {
+    return ACCESSIBILITY_LEVEL_YES;
+  }
+  return ACCESSIBILITY_LEVEL_NO;
+}
+
 @Component
 export struct ComposeListItem {
   @Prop @Watch('onPropChange') contentItem: ContentItem | null = null;
   @Prop @Watch('onPropChange') operateItem: OperateItem | null = null;
-  @State frontColor: ResourceColor = Color.Transparent.toString();
+  @State frontColor: ResourceColor = NORMAL_BG_COLOR;
   @State borderSize: number = 0;
-  @State canFocus: boolean = false
-  @State canTouch: boolean = true
-  @State canHover: boolean = true
-  @State isHover: boolean = true
+  @State canFocus: boolean = false;
+  @State canTouch: boolean = true;
+  @State canHover: boolean = true;
+  @State isHover: boolean = false;
   @State itemHeight: number = ItemHeight.FIRST_HEIGHT;
-  @State isActive: boolean = false
+  @State isActive: boolean = false;
   @State hoveringColor: ResourceColor = '#0d000000';
   @State touchDownColor: ResourceColor = '#1a000000';
   @State activedColor: ResourceColor = '#1a0a59f7';
@@ -750,10 +1129,16 @@ export struct ComposeListItem {
   @State @Watch('onFontSizeScaleChange') fontSizeScale: number = 1;
   @State containerDirection: FlexDirection = FlexDirection.Row;
   @State contentItemDirection: FlexDirection = FlexDirection.Row;
-  @State containerPadding?: Padding = undefined;
+  @State containerPadding?: Padding | LocalizedPadding | Length = undefined;
   @State textArrowLeftSafeOffset: number = 0;
   private isFollowingSystemFontScale = this.getUIContext().isFollowingSystemFontScale();
   private maxFontScale = this.getUIContext().getMaxFontScale();
+  private callbackId: number | undefined = undefined;
+  @State accessibilityTextBuilder: string = '';
+  @State isFocus: boolean = false;
+  @State @Watch('onWrapChange') isWrapText: boolean = false;
+  @State listScale: ScaleOptions = { x: 1, y: 1 };
+  private operateItemStructRef = new OperateItemStructController();
 
   onWillApplyTheme(theme: Theme): void {
     this.hoveringColor = theme.colors.interactiveHover;
@@ -762,61 +1147,130 @@ export struct ComposeListItem {
     this.focusOutlineColor = theme.colors.interactiveFocus;
   }
 
-  onPropChange() {
+  onWrapChange(): void {
+    this.containerPadding = this.getPadding();
+  }
+
+  onPropChange(): void {
+    this.containerDirection = this.decideContainerDirection();
+    this.contentItemDirection = this.decideContentItemDirection();
     if (this.contentItem === undefined) {
       if (this.operateItem?.image !== undefined ||
+        this.operateItem?.symbolStyle !== undefined ||
         this.operateItem?.icon !== undefined ||
         this.operateItem?.subIcon !== undefined) {
-        this.itemHeight = OPERATEITEM_IMAGE_SIZE + SAFE_LIST_PADDING
+        this.itemHeight = OPERATEITEM_IMAGE_SIZE + SAFE_LIST_PADDING;
       }
-      return
+      return;
     }
-
     if (this.contentItem?.secondaryText === undefined && this.contentItem?.description === undefined) {
       if (this.contentItem?.icon === undefined) {
-        this.itemHeight = ItemHeight.FIRST_HEIGHT
+        this.itemHeight = ItemHeight.FIRST_HEIGHT;
       } else {
         this.itemHeight = this.contentItem.iconStyle as number <= IconType.HEAD_SCULPTURE ?
-        ItemHeight.SECOND_HEIGHT : ItemHeight.THIRD_HEIGHT;
+        ItemHeight.SECOND_HEIGHT :
+          (LengthMetrics.resource($r('sys.float.composeListItem_system_icon_line_height')).value);
       }
     } else if (this.contentItem.description === undefined) {
+      let iconStyle = this.contentItem.iconStyle as number;
       if (this.contentItem.icon === undefined ||
-        (this.contentItem.icon !== undefined && this.contentItem.iconStyle as number <= IconType.SYSTEM_ICON)) {
-        this.itemHeight = ItemHeight.THIRD_HEIGHT
+        (this.contentItem.icon !== undefined && iconStyle <= IconType.SYSTEM_ICON)) {
+        this.itemHeight = ItemHeight.THIRD_HEIGHT;
       } else {
-        this.itemHeight = ItemHeight.FOURTH_HEIGHT
+        this.itemHeight = iconStyle === IconType.HEAD_SCULPTURE ? ItemHeight.FOURTH_HEIGHT : APPICON_ITEMLENGTH;
       }
     } else {
-      this.itemHeight = ItemHeight.FIFTH_HEIGHT
+      this.itemHeight = ItemHeight.FIFTH_HEIGHT;
     }
-
     if (ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number) as number >= this.itemHeight) {
       this.itemHeight = ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number) as number + SAFE_LIST_PADDING;
     }
-  }
 
-  aboutToAppear() {
-    this.onPropChange();
-  }
-
-  calculatedLeftWidth(): string {
-    if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
-      return RIGHT_CONTENT_NULL_LEFTWIDTH
-    } else if (this.operateItem?.arrow != null && this.operateItem?.text == null) {
-      return LEFT_ONLY_ARROW_WIDTH
+    if (this.operateItem?.arrow && this.operateItem?.text && this.operateItem?.arrow?.action) {
+      this.accessibilityTextBuilder = `
+        ${getAccessibilityText(this.contentItem?.primaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.secondaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.description ?? '')}
+      `;
     } else {
-      return LEFT_PART_WIDTH
+      this.accessibilityTextBuilder = `
+        ${getAccessibilityText(this.contentItem?.primaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.secondaryText ?? '')}
+        ${getAccessibilityText(this.contentItem?.description ?? '')}
+        ${getAccessibilityText(this.operateItem?.text ?? '')}
+      `;
+    }
+  }
+
+  aboutToAppear(): void {
+    this.fontSizeScale = this.decideFontSizeScale();
+    this.onPropChange();
+    try {
+      this.callbackId = getContext()?.getApplicationContext()?.on('environment', this.envCallback);
+    } catch (paramError) {
+      let code = (paramError as BusinessError).code;
+      let message = (paramError as BusinessError).message;
+      hilog.error(0x3900, 'Ace',
+        `ComposeListItem Faild to get environment param error: ${code}, ${message}`);
+    }
+    if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+      this.onFontSizeScaleChange();
+    }
+  }
+
+  private envCallback: EnvironmentCallback = {
+    onConfigurationUpdated: (config) => {
+      if (config === undefined || !this.isFollowingSystemFontScale) {
+        this.fontSizeScale = 1;
+        return;
+      }
+      try {
+        this.fontSizeScale = Math.min(
+          this.maxFontScale, config.fontSizeScale ?? 1);
+      } catch (paramError) {
+        let code = (paramError as BusinessError).code;
+        let message = (paramError as BusinessError).message;
+        hilog.error(0x3900, 'Ace',
+          `ComposeListItem environmentCallback error: ${code}, ${message}`);
+      }
+    },
+    onMemoryLevel: (level) => {
+    }
+  }
+
+  aboutToDisappear(): void {
+    if (this.callbackId) {
+      this.getUIContext()
+      ?.getHostContext()
+      ?.getApplicationContext()
+      ?.off('environment', this.callbackId);
+      this.callbackId = void (0);
     }
   }
 
   calculatedRightWidth(): string {
-    if (this.operateItem === null || JSON.stringify(this.operateItem) === '{}') {
-      return RIGHT_CONTENT_NULL_RIGHTWIDTH
-    } else if (this.operateItem?.arrow != null && this.operateItem?.text == null) {
-      return RIGHT_ONLY_ARROW_WIDTH
-    } else {
-      return RIGHT_PART_WIDTH
+    if (this.operateItem?.text || this.operateItem?.button) {
+      return RIGHT_PART_WIDTH;
     }
+    if (this.operateItem?.switch) {
+      return RIGHT_ONLY_SWITCH_WIDTH;
+    } else if (this.operateItem?.checkbox) {
+      return RIGHT_ONLY_CHECKBOX_WIDTH;
+    } else if (this.operateItem?.radio) {
+      return RIGHT_ONLY_RADIO_WIDTH;
+    } else if (this.operateItem?.icon) {
+      if (this.operateItem?.subIcon) {
+        return RIGHT_ICON_SUB_ICON_WIDTH;
+      }
+      return RIGHT_ONLY_ICON_WIDTH;
+    } else if (this.operateItem?.symbolStyle) {
+      return RIGHT_ONLY_IMAGE_WIDTH;
+    } else if (this.operateItem?.image) {
+      return RIGHT_ONLY_IMAGE_WIDTH;
+    } else if (this.operateItem?.arrow) {
+      return RIGHT_ONLY_ARROW_WIDTH;
+    }
+    return RIGHT_CONTENT_NULL_RIGHTWIDTH;
   }
 
   decideContentItemDirection(): FlexDirection {
@@ -833,6 +1287,8 @@ export struct ComposeListItem {
     }
     if (this.operateItem?.button) {
       return FlexDirection.Column;
+    } else if (this.operateItem?.symbolStyle) {
+      return FlexDirection.Row;
     } else if (this.operateItem?.image) {
       return FlexDirection.Row;
     } else if (this.operateItem?.icon && this.operateItem?.text) {
@@ -850,7 +1306,7 @@ export struct ComposeListItem {
     }
   }
 
-  onFontSizeScaleChange() {
+  onFontSizeScaleChange(): void {
     this.containerDirection = this.decideContainerDirection();
     this.contentItemDirection = this.decideContentItemDirection();
     if (this.fontSizeScale >= FontSizeScaleLevel.LEVEL3) {
@@ -869,7 +1325,7 @@ export struct ComposeListItem {
         bottom: $r('sys.float.padding_level8'),
       };
     } else {
-      this.containerPadding = undefined;
+      this.containerPadding = this.getPadding();
     }
   }
 
@@ -890,7 +1346,8 @@ export struct ComposeListItem {
 
   getMainSpace(): LengthMetrics {
     if (this.containerDirection === FlexDirection.Column) {
-      return LengthMetrics.resource(this.isSingleLine() ? $r('sys.float.padding_level1') : $r('sys.float.padding_level8'));
+      return LengthMetrics.resource(this.isSingleLine() ? $r('sys.float.padding_level1') :
+      $r('sys.float.padding_level8'));
     }
     return LengthMetrics.vp(0);
   }
@@ -921,35 +1378,45 @@ export struct ComposeListItem {
     )
   }
 
-  onMeasureSize(selfLayoutInfo: GeometryInfo, children: Measurable[], constraint: ConstraintSizeOptions): SizeResult {
-    this.fontSizeScale = this.decideFontSizeScale();
-    let sizeResult: SizeResult = { height: 0, width: 0 };
-    children.forEach((child) => {
-      let childMeasureResult: MeasureResult = child.measure(constraint);
-      sizeResult.width = childMeasureResult.width;
-      sizeResult.height = childMeasureResult.height;
-    });
-    return sizeResult;
+  getPadding(): Padding | undefined {
+    if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+      let paddingNum = LengthMetrics.resource(ITEM_PADDING).value;
+      let compareSize = paddingNum > LISTITEM_PADDING;
+      let horizontalPadding = compareSize ? paddingNum - LISTITEM_PADDING : 0;
+      return {
+        top: this.isWrapText ? paddingNum : 0,
+        bottom: this.isWrapText ? paddingNum : 0,
+        left: horizontalPadding,
+        right: horizontalPadding
+      };
+    } else {
+      return undefined;
+    }
   }
 
   build() {
     Stack() {
       Flex(this.getFlexOptions()) {
         if (this.contentItem === null) {
-          ContentItemStruct({})
+          ContentItemStruct({
+            isWrapText: this.isWrapText
+          })
         }
         if (this.contentItem !== null) {
           ContentItemStruct({
             icon: this.contentItem?.icon,
+            symbolStyle: this.contentItem?.symbolStyle,
             iconStyle: this.contentItem?.iconStyle,
             primaryText: this.contentItem?.primaryText,
             secondaryText: this.contentItem?.secondaryText,
             description: this.contentItem?.description,
-            leftWidth: this.calculatedLeftWidth(),
             fontSizeScale: this.fontSizeScale,
             parentDirection: this.containerDirection,
             itemDirection: this.contentItemDirection,
-          })
+            isFocus: this.isFocus,
+            itemHeight: this.itemHeight,
+            isWrapText: this.isWrapText
+          });
         }
         if (this.operateItem !== null) {
           OperateItemStruct({
@@ -960,6 +1427,7 @@ export struct ComposeListItem {
             checkBox: this.operateItem?.checkbox,
             radio: this.operateItem?.radio,
             image: this.operateItem?.image,
+            symbolStyle: this.operateItem?.symbolStyle,
             text: this.operateItem?.text,
             arrow: this.operateItem?.arrow,
             parentCanFocus: this.canFocus,
@@ -970,47 +1438,50 @@ export struct ComposeListItem {
             parentCanHover: this.canHover,
             rightWidth: this.calculatedRightWidth(),
             parentDirection: this.containerDirection,
+            isFocus: this.isFocus,
+            controller: this.operateItemStructRef
           })
             .flexShrink(0)
             .onFocus(() => {
-              this.canFocus = false
+              this.canFocus = false;
             })
             .onBlur(() => {
-              this.canFocus = true
-            }).padding({start: this.getOperateOffset()});
+              this.canFocus = true;
+            }).padding({ start: this.getOperateOffset() });
         }
       }
+      .height(this.containerDirection === FlexDirection.Column ? 'auto' : undefined)
       .constraintSize({
         minHeight: this.itemHeight
       })
-      .focusable(true)
-      .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
+      .focusable(IS_SUPPORT_SUBCOMPONENT_EVENT)
+      .borderRadius($r('sys.float.composeListItem_radius'))
       .backgroundColor(this.frontColor)
       .onFocus(() => {
-        this.canFocus = true
+        this.canFocus = true;
       })
       .onBlur(() => {
-        this.canFocus = false
+        this.canFocus = false;
       })
       .onHover((isHover: boolean) => {
-        this.isHover = isHover
+        if (this.isFocus && !IS_SUPPORT_SUBCOMPONENT_EVENT) {
+          this.isHover = false;
+          return;
+        }
+        this.isHover = isHover;
         if (this.canHover) {
           this.frontColor = isHover ? this.hoveringColor :
             (this.isActive ? this.activedColor : Color.Transparent.toString());
         }
-      })
-      .onTouch((event: TouchEvent) => {
-        if (event.type === TouchType.Down && this.canTouch) {
-          this.frontColor = this.touchDownColor;
-        }
-        if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-          this.frontColor = this.isActive ? this.activedColor : Color.Transparent.toString();
+        if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+          this.frontColor = isHover ? FOCUSED_BG_COLOR : NORMAL_BG_COLOR;
+          isHover ? this.zoomIn() : this.zoomOut();
         }
       })
       .stateStyles({
         focused: {
           .border({
-            radius: $r('sys.float.ohos_id_corner_radius_default_m'),
+            radius: $r('sys.float.composeListItem_radius'),
             width: ITEM_BORDER_SHOWN,
             color: this.focusOutlineColor,
             style: BorderStyle.Solid
@@ -1018,16 +1489,74 @@ export struct ComposeListItem {
         },
         normal: {
           .border({
-            radius: $r('sys.float.ohos_id_corner_radius_default_m'),
-            width: ITEM_BORDER_SHOWN,
-            color: Color.Transparent
+            radius: $r('sys.float.composeListItem_radius'),
+            color: $r('sys.color.composeListItem_stroke_normal_color'),
+            width: $r('sys.float.composeListItem_stroke_normal_thickness'),
           })
+        },
+        pressed: {
+          .backgroundColor(this.touchDownColor)
         }
-      }).padding(this.containerPadding)
+      })
+      .padding(this.containerPadding)
     }
-    .padding({
-      left: STACK_PADDING,
-      right: STACK_PADDING
+    .width('100%')
+    .accessibilityGroup(true)
+    .accessibilityText(this.accessibilityTextBuilder)
+    .onFocus(() => {
+      this.isFocus = true;
+      this.frontColor = FOCUSED_BG_COLOR;
+      this.zoomIn();
     })
+    .onBlur(() => {
+      this.isFocus = false;
+      this.frontColor = NORMAL_BG_COLOR;
+      this.zoomOut();
+    })
+    .borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : $r('sys.float.composeListItem_radius'))
+    .onClick(IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : () => {
+      if (this.operateItem?.icon && this.operateItem.icon?.action) {
+        this.operateItem.icon.action();
+      }
+      if (this.operateItem?.subIcon && this.operateItem.subIcon?.action) {
+        this.operateItem.subIcon.action();
+      }
+      if (this.operateItem?.arrow && this.operateItem.arrow?.action) {
+        this.operateItem.arrow.action();
+      }
+      if (this.operateItem?.radio) {
+        this.operateItemStructRef.changeRadioState();
+      }
+      if (this.operateItem?.checkbox) {
+        this.operateItemStructRef.changeCheckboxState();
+      }
+      if (this.operateItem?.switch) {
+        this.operateItemStructRef.changeSwitchState();
+      }
+    })
+    .scale(this.listScale)
+    .shadow(IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : (this.isFocus ? FOCUSED_SHADOW : NORMAL_SHADOW))
+    .margin({
+      left: !IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : undefined,
+      right: !IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : undefined
+    })
+    .padding({
+      left: IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : 0,
+      right: IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : 0
+    })
+  }
+
+  private zoomIn(): void {
+    this.listScale = {
+      x: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : FOCUSED_ITEM_SCALE,
+      y: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : FOCUSED_ITEM_SCALE
+    };
+  }
+
+  private zoomOut(): void {
+    this.listScale = {
+      x: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : RECOVER_ITEM_SCALE,
+      y: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : RECOVER_ITEM_SCALE
+    };
   }
 }

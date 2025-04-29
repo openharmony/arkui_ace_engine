@@ -15,7 +15,6 @@
 
 #include "core/components_ng/svg/parse/svg_fe_blend.h"
 
-#include "base/utils/utils.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -47,7 +46,7 @@ RSBlendMode SvgFeBlend::GetBlendMode(SvgFeBlendMode mode) const
 
 void SvgFeBlend::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
     const SvgColorInterpolationType& srcColor, SvgColorInterpolationType& currentColor,
-    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
+    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash, bool cropRect) const
 {
     auto blendMode = feBlendAttr_.blendMode;
 
@@ -55,9 +54,15 @@ void SvgFeBlend::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
     auto foreImageFilter = MakeImageFilter(feAttr_.in, imageFilter, resultHash);
     ConverImageFilterColor(foreImageFilter, srcColor, currentColor);
     ConverImageFilterColor(backImageFilter, srcColor, currentColor);
-
-    imageFilter =
-        RSRecordingImageFilter::CreateBlendImageFilter(GetBlendMode(blendMode), backImageFilter, foreImageFilter);
+    RSRect filterRect(effectFilterArea_.Left(), effectFilterArea_.Top(),
+        effectFilterArea_.Right(), effectFilterArea_.Bottom());
+    if (cropRect) {
+        imageFilter = RSRecordingImageFilter::CreateBlendImageFilter(GetBlendMode(blendMode),
+            backImageFilter, foreImageFilter, filterRect);
+    } else {
+        imageFilter = RSRecordingImageFilter::CreateBlendImageFilter(GetBlendMode(blendMode),
+            backImageFilter, foreImageFilter);
+    }
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
     RegisterResult(feAttr_.result, imageFilter, resultHash);
 }

@@ -15,10 +15,7 @@
 
 #include "core/components_ng/pattern/list/list_content_modifier.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/divider_painter.h"
-#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 ListContentModifier::ListContentModifier(const OffsetF& clipOffset, const SizeF& clipSize)
@@ -55,7 +52,7 @@ void ListContentModifier::onDraw(DrawingContext& context)
     CHECK_NULL_VOID(dividerlist);
     auto lda = AceType::DynamicCast<ListDividerArithmetic>(dividerlist);
     CHECK_NULL_VOID(lda);
-    const auto& dividerMap = lda->GetDividerMap();
+    const auto& dividerMap = isNeedDividerAnimation_ ? lda->GetDividerMap() : refDivider_->GetMap();
     if (!dividerMap.empty()) {
         DividerPainter dividerPainter(
             width_, 0, isVertical_, color_->Get().ToColor(), LineCap::SQUARE);

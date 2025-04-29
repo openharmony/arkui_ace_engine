@@ -41,9 +41,21 @@ void AddOrChangeScaleModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
     }
 }
 
+void AddOrChangeScaleZModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
+    std::shared_ptr<Rosen::RSScaleZModifier>& modifier,
+    std::shared_ptr<Rosen::RSAnimatableProperty<float>>& property, const float value)
+{
+    bool isCreate = CreateOrSetModifierValue(property, value);
+    if (isCreate) {
+        CHECK_NULL_VOID(rsNode);
+        modifier = std::make_shared<Rosen::RSScaleZModifier>(property);
+        rsNode->AddModifier(modifier);
+    }
+}
+
 void AddOrChangeSkewModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
     std::shared_ptr<Rosen::RSSkewModifier>& modifier,
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>>& property, const Rosen::Vector2f& value)
+    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector3f>>& property, const Rosen::Vector3f& value)
 {
     bool isCreate = CreateOrSetModifierValue(property, value);
     if (isCreate) {
@@ -79,7 +91,7 @@ void AddOrChangeTranslateZModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
 
 void AddOrChangePerspectiveModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
     std::shared_ptr<Rosen::RSPerspModifier>& modifier,
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector2f>>& property, const Rosen::Vector2f& value)
+    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::Vector4f>>& property, const Rosen::Vector4f& value)
 {
     bool isCreate = CreateOrSetModifierValue(property, value);
     if (isCreate) {
@@ -109,6 +121,51 @@ void AddOrChangeQuaternionModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
     if (isCreate) {
         CHECK_NULL_VOID(rsNode);
         modifier = std::make_shared<Rosen::RSQuaternionModifier>(property);
+        rsNode->AddModifier(modifier);
+    }
+}
+
+void WindowBlurModifier::AddOrChangeRadiusModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
+    std::shared_ptr<Rosen::RSBehindWindowFilterRadiusModifier>& modifier,
+    std::shared_ptr<Rosen::RSAnimatableProperty<float>>& property, const float& value)
+{
+    bool isCreate = CreateOrSetModifierValue(property, value);
+    if (isCreate) {
+        CHECK_NULL_VOID(rsNode);
+        modifier = std::make_shared<Rosen::RSBehindWindowFilterRadiusModifier>(property);
+        rsNode->AddModifier(modifier);
+    }
+}
+void WindowBlurModifier::AddOrChangeSaturationModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
+    std::shared_ptr<Rosen::RSBehindWindowFilterSaturationModifier>& modifier,
+    std::shared_ptr<Rosen::RSAnimatableProperty<float>>& property, const float& value)
+{
+    bool isCreate = CreateOrSetModifierValue(property, value);
+    if (isCreate) {
+        CHECK_NULL_VOID(rsNode);
+        modifier = std::make_shared<Rosen::RSBehindWindowFilterSaturationModifier>(property);
+        rsNode->AddModifier(modifier);
+    }
+}
+void WindowBlurModifier::AddOrChangeBrightnessModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
+    std::shared_ptr<Rosen::RSBehindWindowFilterBrightnessModifier>& modifier,
+    std::shared_ptr<Rosen::RSAnimatableProperty<float>>& property, const float& value)
+{
+    bool isCreate = CreateOrSetModifierValue(property, value);
+    if (isCreate) {
+        CHECK_NULL_VOID(rsNode);
+        modifier = std::make_shared<Rosen::RSBehindWindowFilterBrightnessModifier>(property);
+        rsNode->AddModifier(modifier);
+    }
+}
+void WindowBlurModifier::AddOrChangeMaskColorModifier(std::shared_ptr<Rosen::RSNode>& rsNode,
+    std::shared_ptr<Rosen::RSBehindWindowFilterMaskColorModifier>& modifier,
+    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::RSColor>>& property, const Rosen::RSColor& value)
+{
+    bool isCreate = CreateOrSetModifierValue(property, value);
+    if (isCreate) {
+        CHECK_NULL_VOID(rsNode);
+        modifier = std::make_shared<Rosen::RSBehindWindowFilterMaskColorModifier>(property);
         rsNode->AddModifier(modifier);
     }
 }

@@ -50,6 +50,7 @@ struct DragDataCore {
     int32_t sourceType = -1;
     int32_t dragNum = -1;
     int32_t pointerId = -1;
+    int32_t toolType = -1;
     int32_t displayX = -1;
     int32_t displayY = -1;
     int32_t displayId = -1;
@@ -65,6 +66,7 @@ struct DragNotifyMsg {
     int32_t targetPid = -1;
     DragRet result { DragRet::DRAG_FAIL };
     DragBehavior dragBehavior { DragBehavior::UNKNOWN };
+    bool isInnerAndOuterTriggerBothNeeded = true;
 };
 
 struct DragDropRet {

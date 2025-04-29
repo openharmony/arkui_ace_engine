@@ -15,8 +15,6 @@
 
 #include "bridge/declarative_frontend/jsview/models/effect_component_model_impl.h"
 
-#include "bridge/declarative_frontend/view_stack_processor.h"
-
 namespace OHOS::Ace::Framework {
 void EffectComponentModelImpl::Create()
 {

@@ -33,9 +33,10 @@
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_box.h"
+#include "core/components_ng/event/focus_event_handler.h"
 #include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/overlay/content_cover_param.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
@@ -45,7 +46,6 @@
 #include "core/event/ace_events.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
-#include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
 #include "core/image/image_source_info.h"
 
@@ -59,7 +59,7 @@ enum class ResponseType : int32_t {
     RIGHT_CLICK = 0,
     LONG_PRESS,
 };
-
+class SpanString;
 class ACE_FORCE_EXPORT ViewAbstractModel {
 public:
     static ViewAbstractModel* GetInstance();
@@ -82,10 +82,13 @@ public:
     virtual void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) = 0;
     virtual void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) = 0;
     virtual void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) = 0;
-    virtual void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) = 0;
-    virtual void SetBackgroundEffect(const EffectOption& effectOption) {}
+    virtual void SetBackgroundBlurStyle(
+        const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions = SysOptions()) = 0;
+    virtual void SetBackgroundEffect(const EffectOption& effectOption, const SysOptions& sysOptions = SysOptions()) {}
+    virtual void SetBackgroundImageSyncMode(bool syncMode) {}
     virtual void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice) = 0;
-    virtual void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) {}
+    virtual void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle, const SysOptions& sysOptions = SysOptions())
+    {}
     virtual void SetForegroundEffect(float radius) {}
     virtual void SetSphericalEffect(double radio) {}
     virtual void SetPixelStretchEffect(PixStretchEffectOption& option) {}
@@ -101,6 +104,7 @@ public:
     virtual void SetMargins(const NG::MarginProperty& margins) = 0;
     virtual void ResetSafeAreaPadding() = 0;
     virtual void SetSafeAreaPadding(const CalcDimension& value) = 0;
+    virtual void SetSafeAreaPaddings(const NG::PaddingProperty& paddings) = 0;
     virtual void SetSafeAreaPaddings(const std::optional<CalcDimension>& top,
         const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
         const std::optional<CalcDimension>& right) = 0;
@@ -136,6 +140,7 @@ public:
     virtual void SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) {};
     virtual void SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) {};
     virtual void SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) {};
+    virtual void SetBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender) {};
 
     // outerBorder
     virtual void SetOuterBorderRadius(const Dimension& value) = 0;
@@ -158,7 +163,8 @@ public:
     // layout
     virtual void SetLayoutPriority(int32_t priority) = 0;
     virtual void SetLayoutWeight(float value) = 0;
-    virtual void SetPixelRound(uint8_t value) = 0;
+    virtual void SetChainWeight(const NG::ChainWeightPair& value) = 0;
+    virtual void SetPixelRound(uint16_t value) = 0;
     virtual void SetLayoutDirection(TextDirection value) = 0;
     virtual void SetAspectRatio(float ratio) = 0;
     virtual void ResetAspectRatio() = 0;
@@ -224,7 +230,8 @@ public:
 
     // effects
     virtual void SetMask(const RefPtr<BasicShape>& shape) = 0;
-    virtual void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption) = 0;
+    virtual void SetBackdropBlur(
+        const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions = SysOptions()) = 0;
     virtual void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) = 0;
 
     virtual void SetDynamicDim(float DimDegree) = 0;
@@ -232,7 +239,8 @@ public:
     virtual void SetBgDynamicBrightness(const BrightnessOption& brightnessOption) = 0;
     virtual void SetFgDynamicBrightness(const BrightnessOption& brightnessOption) = 0;
 
-    virtual void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) = 0;
+    virtual void SetFrontBlur(
+        const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions = SysOptions()) = 0;
     virtual void SetMotionBlur(const MotionBlurOption& motionBlurOption) {}
     virtual void SetBackShadow(const std::vector<Shadow>& shadows) = 0;
     virtual void SetBlendMode(BlendMode blendMode) = 0;
@@ -248,7 +256,7 @@ public:
     virtual void SetSystemBarEffect(bool systemBarEffect) = 0;
     virtual void SetHueRotate(float value) = 0;
     virtual void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) = 0;
-    virtual void SetUseEffect(bool useEffect) = 0;
+    virtual void SetUseEffect(bool useEffect, EffectType effectType) = 0;
     virtual void SetUseShadowBatching(bool useShadowBatching) = 0;
     virtual void SetFreeze(bool freeze) = 0;
 
@@ -259,12 +267,19 @@ public:
     virtual void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) = 0;
     virtual void SetShouldBuiltInRecognizerParallelWith(
         NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc) = 0;
-    virtual void SetOnGestureRecognizerJudgeBegin(NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) = 0;
+    virtual void SetOnGestureRecognizerJudgeBegin(
+        NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) = 0;
     virtual void SetOnTouch(TouchEventFunc&& touchEventFunc) = 0;
-    virtual void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) = 0;
-    virtual void SetOnKeyPreIme(OnKeyPreImeFunc&& onKeyCallback) {}
+    virtual void SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback) = 0;
+#ifdef SUPPORT_DIGITAL_CROWN
+    virtual void SetOnCrownEvent(OnCrownCallbackFunc&& onCrownCallback) = 0;
+#endif
+    virtual void SetOnKeyPreIme(OnKeyConsumeFunc&& onKeyCallback) {}
+    virtual void SetOnKeyEventDispatch(OnKeyEventDispatchFunc&& onKeyCallback) {}
     virtual void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) = 0;
+    virtual void SetOnAxisEvent(OnAxisEventFunc&& onAxisEventFunc) = 0;
     virtual void SetOnHover(OnHoverFunc&& onHoverEventFunc) = 0;
+    virtual void SetOnHoverMove(OnHoverMoveFunc&& onHoverMoveEventFunc) = 0;
     virtual void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) = 0;
     virtual void SetOnDelete(std::function<void()>&& onDeleteCallback) = 0;
     virtual void SetOnAppear(std::function<void()>&& onAppearCallback) = 0;
@@ -276,6 +291,7 @@ public:
     virtual void SetOnFocusMove(std::function<void(int32_t)>&& onFocusMoveCallback) = 0;
     virtual void SetOnFocus(OnFocusFunc&& onFocusCallback) = 0;
     virtual void SetOnBlur(OnBlurFunc&& onBlurCallback) = 0;
+    virtual void SetOnFocusAxisEvent(OnFocusAxisEventFunc&& onFocusAxisCallback) = 0;
     virtual void SetDraggable(bool draggable) = 0;
     virtual void SetDragPreviewOptions(const NG::DragPreviewOption& previewOption) = 0;
     virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
@@ -290,6 +306,8 @@ public:
     virtual void SetDragPreview(const NG::DragDropInfo& info) = 0;
     virtual void SetOnVisibleChange(
         std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios) = 0;
+    virtual void SetOnVisibleAreaApproximateChange(const std::function<void(bool, double)>&& onVisibleChange,
+        const std::vector<double>& ratioList, int32_t expectedUpdateInterval) = 0;
     virtual void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
             onAreaChanged) = 0;
@@ -302,7 +320,9 @@ public:
     virtual void DisableOnTouch() = 0;
     virtual void DisableOnKeyEvent() = 0;
     virtual void DisableOnKeyPreIme() {}
+    virtual void DisableOnKeyEventDispatch() {}
     virtual void DisableOnHover() = 0;
+    virtual void DisableOnHoverMove() = 0;
     virtual void DisableOnAccessibilityHover() = 0;
     virtual void DisableOnMouse() = 0;
     virtual void DisableOnAppear() = 0;
@@ -312,6 +332,11 @@ public:
     virtual void DisableOnAreaChange() = 0;
     virtual void DisableOnFocus() = 0;
     virtual void DisableOnBlur() = 0;
+    virtual void DisableOnFocusAxisEvent() = 0;
+    virtual void DisableOnAxisEvent() = 0;
+#ifdef SUPPORT_DIGITAL_CROWN
+    virtual void DisableOnCrownEvent() = 0;
+#endif
 
     // interact
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) = 0;
@@ -319,13 +344,16 @@ public:
     virtual void SetEnabled(bool enabled) = 0;
     virtual void SetTouchable(bool touchable) = 0;
     virtual void SetFocusable(bool focusable) = 0;
+    virtual void SetTabStop(bool tabStop) {}
     virtual void SetFocusNode(bool focus) = 0;
     virtual void SetTabIndex(int32_t index) = 0;
     virtual void SetFocusOnTouch(bool isSet) = 0;
     virtual void SetDefaultFocus(bool isSet) = 0;
     virtual void SetGroupDefaultFocus(bool isSet) = 0;
+    virtual void SetNextFocus(NG::FocusIntension key, std::string& nextFocus) {}
+    virtual void ResetNextFocus() {}
     virtual void SetFocusBoxStyle(const NG::FocusBoxStyle& style) {}
-    virtual void SetFocusScopeId(const std::string& focusScopeId, bool isGroup) {}
+    virtual void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut) {}
     virtual void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority) {}
     virtual void SetInspectorId(const std::string& inspectorId) = 0;
     virtual void SetAutoEventParam(const std::string& param) {}
@@ -337,18 +365,33 @@ public:
     virtual void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) = 0;
     virtual void SetMonopolizeEvents(bool monopolizeEvents) = 0;
+    virtual void NotifyDragStartRequest(DragStartRequestStatus dragStatus) {}
     virtual void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) = 0;
+    virtual int32_t CancelDataLoading(const std::string& key) = 0;
+    virtual void SetDisableDataPrefetch(bool disableDataPrefetch);
     virtual void SetDisallowDropForcedly(bool isDisallowDropForcedly) {}
     // obscured
     virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;
     virtual void SetPrivacySensitive(bool flag) = 0;
 
+    // toolbar
+    virtual void SetToolbarBuilder(std::function<void()>&& buildFunc) = 0;
+    
     // background
     virtual void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) = 0;
 
     // popup and menu
     virtual void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) = 0;
+    virtual void BindTips(const RefPtr<PopupParam>& param, const RefPtr<SpanString>& spanString) = 0;
+    virtual int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) = 0;
+    virtual int32_t UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) = 0;
+    virtual int32_t ClosePopup(const RefPtr<NG::UINode>& customNode) = 0;
+    virtual int32_t GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) = 0;
     virtual void DismissPopup() = 0;
+    virtual int32_t OpenMenu(
+        NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId) = 0;
+    virtual int32_t UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode) = 0;
+    virtual int32_t CloseMenu(const RefPtr<NG::UINode>& customNode) = 0;
     virtual void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
     virtual void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam& menuParam,
@@ -356,6 +399,7 @@ public:
     virtual void BindContextMenu(const RefPtr<NG::FrameNode>& targetNode, ResponseType type,
         std::function<void()>& buildFunc, const NG::MenuParam& menuParam, std::function<void()>& previewBuildFunc) {};
     virtual void BindDragWithContextMenuParams(const NG::MenuParam& menuParam) = 0;
+    virtual void BindDragWithContextMenuParams(NG::FrameNode* targetNode, const NG::MenuParam& menuParam) {};
     virtual void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,
@@ -380,6 +424,19 @@ public:
     virtual void SetAccessibilityDescription(const std::string& description) = 0;
     virtual void SetAccessibilityImportance(const std::string& importance) = 0;
     virtual void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) = 0;
+    virtual void SetAccessibilitySelected(bool selected, bool resetValue) = 0;
+    virtual void SetAccessibilityChecked(bool checked, bool resetValue) = 0;
+    virtual void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) = 0;
+    virtual void SetAccessibilityNextFocusId(const std::string& nextFocusId) = 0;
+    virtual void SetAccessibilityRole(const std::string& role, bool resetValue) = 0;
+    virtual void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) = 0;
+    virtual void SetOnAccessibilityActionIntercept(
+        NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept) = 0;
+    virtual void ResetOnAccessibilityFocus() = 0;
+    virtual void SetAccessibilityDefaultFocus(bool isFocus) = 0;
+    virtual void SetAccessibilityUseSamePage(const std::string& pageMode) = 0;
+    virtual void SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue) = 0;
+    virtual void SetAccessibilityFocusDrawLevel(int32_t drawLevel) = 0;
 
     // progress mask
     virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;
@@ -408,13 +465,9 @@ public:
     virtual void SetIlluminatedBorderWidth(const Dimension& value) = 0;
     virtual void SetBloom(const float value) = 0;
     virtual void SetPositionLocalizedEdges(bool needLocalized) = 0;
-    virtual void SetLocalizedMarkAnchor(bool needLocalized) = 0;
+    virtual void SetMarkAnchorStart(Dimension& markAnchorStart) = 0;
+    virtual void ResetMarkAnchorStart() = 0;
     virtual void SetOffsetLocalizedEdges(bool needLocalized) = 0;
-
-private:
-    static std::unique_ptr<ViewAbstractModel> instance_;
-    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_H

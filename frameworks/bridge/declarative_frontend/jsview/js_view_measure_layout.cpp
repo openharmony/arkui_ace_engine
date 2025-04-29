@@ -27,6 +27,9 @@ namespace OHOS::Ace::Framework {
 #ifdef USE_ARK_ENGINE
 
 namespace {
+using OHOS::Ace::NG::LayoutConstraintF;
+using OHOS::Ace::NG::LayoutProperty;
+using OHOS::Ace::NG::SizeF;
 JSRef<JSObject> GenConstraint(const std::optional<NG::LayoutConstraintF>& parentConstraint)
 {
     auto minSize = parentConstraint->minSize;
@@ -44,7 +47,14 @@ JSRef<JSObject> GenConstraintNG(const NG::LayoutConstraintF& parentConstraint)
     auto minSize = parentConstraint.minSize;
     auto maxSize = parentConstraint.maxSize;
     JSRef<JSObject> constraint = JSRef<JSObject>::New();
+    constraint->SetProperty<double>("minWidth", 0.0f);
+    constraint->SetProperty<double>("minHeight", 0.0f);
+    constraint->SetProperty<double>("maxWidth", 0.0f);
+    constraint->SetProperty<double>("maxHeight", 0.0f);
     auto pipeline = PipelineBase::GetCurrentContext();
+    if (!pipeline) {
+        return constraint;
+    }
     constraint->SetProperty<double>("minWidth", minSize.Width() / pipeline->GetDipScale());
     constraint->SetProperty<double>("minHeight", minSize.Height() / pipeline->GetDipScale());
     constraint->SetProperty<double>("maxWidth", maxSize.Width() / pipeline->GetDipScale());
@@ -56,8 +66,7 @@ JSRef<JSObject> GenPlaceChildrenConstraintNG(const NG::SizeF& size, RefPtr<NG::L
 {
     JSRef<JSObject> constraint = JSRef<JSObject>::New();
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, JSRef<JSObject>::New());
-    if (!layoutProperty) {
+    if (!layoutProperty || !pipeline) {
         constraint->SetProperty<double>("minWidth", 0.0f);
         constraint->SetProperty<double>("minHeight", 0.0f);
         constraint->SetProperty<double>("maxWidth", 0.0f);
@@ -193,7 +202,8 @@ JSRef<JSObject> GenSelfLayoutInfo(RefPtr<NG::LayoutProperty> layoutProperty)
     const std::unique_ptr<NG::PaddingProperty> defaultPadding = std::make_unique<NG::PaddingProperty>();
     const std::unique_ptr<NG::PaddingProperty> defaultMargin = std::make_unique<NG::MarginProperty>();
     const std::unique_ptr<NG::BorderWidthProperty>& defaultEdgeWidth = std::make_unique<NG::BorderWidthProperty>();
-    if (!layoutProperty) {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (!layoutProperty || !pipeline) {
         selfLayoutInfo->SetPropertyObject("borderWidth", GenEdgeWidths(defaultEdgeWidth));
         selfLayoutInfo->SetPropertyObject("margin", GenMargin(defaultPadding));
         selfLayoutInfo->SetPropertyObject("padding", GenPadding(defaultPadding));
@@ -202,7 +212,6 @@ JSRef<JSObject> GenSelfLayoutInfo(RefPtr<NG::LayoutProperty> layoutProperty)
         return selfLayoutInfo;
     }
     auto parentNode = AceType::DynamicCast<NG::FrameNode>(layoutProperty->GetHost()->GetParent());
-    auto pipeline = PipelineBase::GetCurrentContext();
     if (parentNode && parentNode->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
         layoutProperty = parentNode->GetLayoutProperty();
     }
@@ -291,8 +300,12 @@ void JSMeasureLayoutParam::GenChildArray(int32_t start, int32_t end)
 JSRef<JSObject> JSMeasureLayoutParam::GetConstraint()
 {
     auto layoutWrapper = GetLayoutWrapper();
-    auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
-    return GenConstraint(parentConstraint);
+    if (layoutWrapper && layoutWrapper->GetGeometryNode() &&
+        layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint()) {
+        auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
+        return GenConstraint(parentConstraint);
+    }
+    return GenConstraint(LayoutConstraintF());
 }
 
 void JSMeasureLayoutParam::Update(NG::LayoutWrapper* layoutWrapper)
@@ -358,6 +371,11 @@ void JSMeasureLayoutParamNG::GenChildArray(int32_t start, int32_t end)
     for (int32_t index = start; index < end; index++) {
         JSRef<JSObjTemplate> info = JSRef<JSObjTemplate>::New();
         info->SetInternalFieldCount(1);
+        auto child = GetChildByIndex(index);
+        if (child && child->GetHostNode()) {
+            auto uniqueId = child->GetHostNode()->GetId();
+            info->SetProperty("uniqueId", uniqueId);
+        }
         info->SetPropertyObject("measureResult", size);
         info->Wrap<NG::MeasureLayoutChild>(&Get(index));
         info->SetPropertyObject("measure", measureFunc);
@@ -372,21 +390,29 @@ void JSMeasureLayoutParamNG::GenChildArray(int32_t start, int32_t end)
 JSRef<JSObject> JSMeasureLayoutParamNG::GetConstraint()
 {
     auto layoutWrapper = GetLayoutWrapper();
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint().value();
-    return GenConstraintNG(layoutConstraint);
+    if (layoutWrapper && layoutWrapper->GetLayoutProperty() &&
+        layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()) {
+        auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint().value();
+        return GenConstraintNG(layoutConstraint);
+    }
+    return GenConstraintNG(LayoutConstraintF());
 }
 
 JSRef<JSObject> JSMeasureLayoutParamNG::GetPlaceChildrenConstraint()
 {
     auto layoutWrapper = GetLayoutWrapper();
-    auto layoutFrameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    return GenPlaceChildrenConstraintNG(layoutFrameSize, layoutWrapper->GetLayoutProperty());
+    if (layoutWrapper && layoutWrapper->GetLayoutProperty() && layoutWrapper->GetGeometryNode()) {
+        auto layoutFrameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+        return GenPlaceChildrenConstraintNG(layoutFrameSize, layoutWrapper->GetLayoutProperty());
+    }
+    return GenPlaceChildrenConstraintNG(SizeF(), MakeRefPtr<LayoutProperty>());
 }
 
 JSRef<JSObject> JSMeasureLayoutParamNG::GetSelfLayoutInfo()
 {
     auto layoutWrapper = GetLayoutWrapper();
-    return GenSelfLayoutInfo(layoutWrapper->GetLayoutProperty());
+    return GenSelfLayoutInfo(layoutWrapper && layoutWrapper->GetLayoutProperty() ? layoutWrapper->GetLayoutProperty()
+                                                                                 : MakeRefPtr<LayoutProperty>());
 }
 
 void JSMeasureLayoutParamNG::UpdateSize(int32_t index, const NG::SizeF& size)
@@ -441,6 +467,7 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSMeasure(panda::JsiRuntimeCa
     Local<JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
         vm, 0));
+    CHECK_NULL_RETURN(ptr, panda::JSValueRef::Undefined(vm));
     auto child = ptr->GetOrCreateChild();
     if (!child) {
         return panda::JSValueRef::Undefined(vm);
@@ -523,6 +550,7 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSLayout(panda::JsiRuntimeCal
     Local<JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
         vm, 0));
+    CHECK_NULL_RETURN(ptr, panda::JSValueRef::Undefined(vm));
     auto child = ptr->GetChild();
     if (!child) {
         return panda::JSValueRef::Undefined(vm);
@@ -547,7 +575,8 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSLayout(panda::JsiRuntimeCal
     if (!(xResult || yResult)) {
         LOGE("the position prop is illegal");
     } else {
-        child->GetGeometryNode()->SetMarginFrameOffset({ dimenX.ConvertToPx(), dimenY.ConvertToPx() });
+        child->GetGeometryNode()->SetMarginFrameOffset({ static_cast<float>(dimenX.ConvertToPx()),
+            static_cast<float>(dimenY.ConvertToPx()) });
     }
     child->Layout();
 
@@ -561,6 +590,7 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSPlaceChildren(panda::JsiRun
     Local<JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
         vm, 0));
+    CHECK_NULL_RETURN(ptr, panda::JSValueRef::Undefined(vm));
     auto child = ptr->GetChild();
     if (!child) {
         return panda::JSValueRef::Undefined(vm);
@@ -584,7 +614,8 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSPlaceChildren(panda::JsiRun
     if (!(xResult || yResult)) {
         LOGE("the position prop is illegal");
     } else {
-        child->GetGeometryNode()->SetMarginFrameOffset({ dimenX.ConvertToPx(), dimenY.ConvertToPx() });
+        child->GetGeometryNode()->SetMarginFrameOffset({ static_cast<float>(dimenX.ConvertToPx()),
+            static_cast<float>(dimenY.ConvertToPx()) });
     }
     child->Layout();
     return panda::JSValueRef::Undefined(vm);
@@ -596,6 +627,7 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSGetMargin(panda::JsiRuntime
     Local<JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
         vm, 0));
+    CHECK_NULL_RETURN(ptr, panda::JSValueRef::Undefined(vm));
     auto child = ptr->GetOrCreateChild();
     if (!(child && child->GetLayoutProperty())) {
         return GenEdgesGlobalized({}, TextDirection::LTR).Get().GetLocalHandle();
@@ -611,6 +643,7 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSGetPadding(panda::JsiRuntim
     Local<JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
         vm, 0));
+    CHECK_NULL_RETURN(ptr, panda::JSValueRef::Undefined(vm));
     auto child = ptr->GetOrCreateChild();
     if (!(child && child->GetLayoutProperty())) {
         return GenEdgesGlobalized({}, TextDirection::LTR).Get().GetLocalHandle();
@@ -628,6 +661,7 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSGetBorderWidth(panda::JsiRu
     Local<JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
     auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
         vm, 0));
+    CHECK_NULL_RETURN(ptr, panda::JSValueRef::Undefined(vm));
     auto child = ptr->GetOrCreateChild();
     if (!(child && child->GetLayoutProperty())) {
         return GenBorderWidthGlobalized({}, TextDirection::LTR).Get().GetLocalHandle();

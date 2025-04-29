@@ -20,6 +20,7 @@
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include <mutex>
+#include "render_service_client/core/feature/hyper_graphic_manager/rs_frame_rate_linker.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #include "vsync_receiver.h"
 #endif
@@ -42,6 +43,7 @@ public:
     void Destroy() override;
     void SetRootRenderNode(const RefPtr<RenderNode>& root) override {}
     void SetRootFrameNode(const RefPtr<NG::FrameNode>& root) override;
+    void FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType) override;
 
 #ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<OHOS::Rosen::RSUIDirector> GetRsUIDirector() const
@@ -56,22 +58,44 @@ public:
 
     bool FlushAnimation(uint64_t timeStamp) override
     {
+        CHECK_NULL_RETURN(rsUIDirector_, false);
         return rsUIDirector_->FlushAnimation(timeStamp);
+    }
+
+    bool HasFirstFrameAnimation() override
+    {
+        CHECK_NULL_RETURN(rsUIDirector_, false);
+        return rsUIDirector_->HasFirstFrameAnimation();
     }
 
     void FlushAnimationStartTime(uint64_t timeStamp) override
     {
+        CHECK_NULL_VOID(rsUIDirector_);
         rsUIDirector_->FlushAnimationStartTime(timeStamp);
     }
 
     void FlushModifier() override
     {
+        CHECK_NULL_VOID(rsUIDirector_);
         rsUIDirector_->FlushModifier();
     }
 
     bool HasUIRunningAnimation() override
     {
+        CHECK_NULL_RETURN(rsUIDirector_, false);
         return rsUIDirector_->HasUIRunningAnimation();
+    }
+
+    int32_t GetCurrentRefreshRateMode() const override
+    {
+        CHECK_NULL_RETURN(rsUIDirector_, -1);
+        return rsUIDirector_->GetCurrentRefreshRateMode();
+    }
+
+    int32_t GetAnimateExpectedRate() const override
+    {
+        CHECK_NULL_RETURN(rsUIDirector_, 0);
+        return rsUIDirector_->GetAnimateExpectedRate();
     }
 #endif
 
@@ -79,15 +103,22 @@ public:
     void OnHide() override;
     void FlushTasks() override;
 
+    void Lock() override;
+    void Unlock() override;
+
 private:
     WeakPtr<TaskExecutor> taskExecutor_ = nullptr;
     int32_t id_ = 0;
 #ifdef ENABLE_ROSEN_BACKEND
+    void InitOnVsyncCallback();
+    static std::recursive_mutex globalMutex_;
     std::shared_ptr<Rosen::VSyncReceiver> receiver_ = nullptr;
     Rosen::VSyncReceiver::FrameCallback frameCallback_;
     OnVsyncCallback onVsyncCallback_;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
     std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode_;
+    std::shared_ptr<Rosen::RSFrameRateLinker> frameRateLinker_ = nullptr;
+    std::tuple<int32_t, int32_t, int32_t> frameRateData_{0, 0, 0};
 #endif
     ACE_DISALLOW_COPY_AND_MOVE(FormRenderWindow);
 };

@@ -20,39 +20,28 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
+#include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
+#include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ContainerModalViewEnhance : public ContainerModalView {
 public:
+    static void OnContainerModalEvent(
+        RefPtr<PipelineContext> pipelineContext, const std::string& name, const std::string& value);
     static RefPtr<FrameNode> Create(RefPtr<FrameNode>& content);
-    static void SetEnableSplit(bool enableSplit)
-    {
-        enableSplit_ = enableSplit;
-    }
+    static RefPtr<FrameNode> BuildMenuItemIcon(InternalResource::ResourceId resourceId);
+    static RefPtr<FrameNode> BuildGestureRow(RefPtr<FrameNode>& containerNode);
+    static bool GetContainerModalComponentRect(PipelineContext *pipelineContext,
+        RectF& floatContainerModal, RectF& floatButtons);
+    static void SetContainerButtonStyle(RefPtr<PipelineContext> pipeline,
+        const Ace::DecorButtonStyle& buttonStyle);
+    static int32_t AddButtonsRectChangeListener(PipelineContext* context, ButtonsRectChangeListener&& listener);
+    static void RemoveButtonsRectChangeListener(PipelineContext* context, int32_t id);
+    static bool GetContainerModalTitleVisible(RefPtr<PipelineContext> pipeline, bool isImmersive);
 
 protected:
     static RefPtr<FrameNode> BuildTitle(RefPtr<FrameNode>& containerNode, bool isFloatingTitle = false);
-    static void SetTapGestureEvent(RefPtr<FrameNode>& containerNode, RefPtr<FrameNode>& containerTitleRow);
     static RefPtr<FrameNode> AddControlButtons(RefPtr<FrameNode>& containerNode, RefPtr<FrameNode>& containerTitleRow);
-    static void BondingMaxBtnGestureEvent(RefPtr<FrameNode>& maximizeBtn, RefPtr<FrameNode>& containerNode);
-    static void BondingMaxBtnInputEvent(RefPtr<FrameNode>& maximizeBtn, RefPtr<FrameNode>& containerNode);
-    static RefPtr<FrameNode> ShowMaxMenu(const RefPtr<FrameNode>& targetNode, OffsetF menuPosition);
-    static void BondingMenuItemEvent(RefPtr<FrameNode> item);
-    static RefPtr<FrameNode> BuildMenuItem(
-        std::string title, InternalResource::ResourceId resourceId, RefPtr<ClickEvent> event, bool chooseCurrent);
-    static RefPtr<FrameNode> BuildLeftSplitMenuItem();
-    static RefPtr<FrameNode> BuildRightSplitMenuItem();
-    static RefPtr<FrameNode> BuildMenuItemIcon(InternalResource::ResourceId resourceId);
-    static RefPtr<FrameNode> BuildMenuItemPadding(PaddingProperty padding, RefPtr<FrameNode> node);
-    static RefPtr<FrameNode> BuildGestureRow(RefPtr<FrameNode>& containerNode);
-    static void ResetHoverTimer();
-    static bool sIsMenuPending_;
-    static bool sIsForbidMenuEvent_;
-    static bool enableSplit_;
-    static OffsetF menuOffset_;
-    static CancelableCallback<void()> sContextTimer_;
-
-private:
-    static void CalculateMenuOffset(OffsetF menuPosition);
+    static RefPtr<FrameNode> BuildCustomButtonRow(RefPtr<FrameNode>& containerRow);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_VIEW_ENHANCE_H

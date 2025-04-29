@@ -15,11 +15,7 @@
 
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 
-#include <utility>
-
-#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -120,8 +116,8 @@ void NavigationStack::Add(
     // for the old page: keep the UINode, and keep in the stack
     auto index = FindIndex(name, navDestinationNode, true);
     if (index != NOT_EXIST) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "This navigation destination node already exists");
         RemoveIndex(index);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "This navigation destination node already exists");
     }
     navPathList_.emplace_back(std::make_pair(name, navDestinationNode));
     if (index != NOT_EXIST) {
@@ -323,9 +319,9 @@ void NavigationStack::Clear()
     cacheNodes_.clear();
 }
 
-RefPtr<UINode> NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<UINode>& node)
+bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<UINode>& customNode, RefPtr<UINode>& node)
 {
-    return nullptr;
+    return false;
 }
 
 RefPtr<UINode> NavigationStack::CreateNodeByRouteInfo(const RefPtr<RouteInfo>& routeInfo, const WeakPtr<UINode>& node)
@@ -443,7 +439,7 @@ RefPtr<UINode> NavigationStack::GetFromCacheNode(const std::string& name)
 std::optional<std::pair<std::string, RefPtr<UINode>>> NavigationStack::GetFromCacheNode(int32_t handle)
 {
     for (auto it = cacheNodes_.begin(); it != cacheNodes_.end(); ++it) {
-        if ((*it).second || (*it).second->GetId() == handle) {
+        if ((*it).second && (*it).second->GetId() == handle) {
             return std::make_pair((*it).first, (*it).second);
         }
     }

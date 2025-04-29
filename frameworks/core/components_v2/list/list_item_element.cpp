@@ -14,9 +14,7 @@
  */
 
 #include "core/components_v2/list/list_item_element.h"
-#include "core/components_v2/list/list_item_component.h"
 #include "core/components_v2/list/render_list_item.h"
-#include "core/pipeline/base/render_element.h"
 
 namespace OHOS::Ace::V2 {
 

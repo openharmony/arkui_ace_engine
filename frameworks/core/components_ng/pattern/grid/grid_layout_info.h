@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +30,20 @@ namespace OHOS::Ace::NG {
 struct GridPredictLayoutParam {
     LayoutConstraintF layoutConstraint;
     std::map<int32_t, float> itemsCrossSizes;
-    float crossGap;
+    float crossGap = 0.0f;
+};
+
+struct GridPreloadItem {
+    explicit GridPreloadItem(int32_t idx) : idx(idx) {}
+    GridPreloadItem(int32_t idx, bool buildOnly) : idx(idx), buildOnly(buildOnly) {}
+
+    bool operator==(const GridPreloadItem& other) const
+    {
+        return idx == other.idx && buildOnly == other.buildOnly;
+    }
+
+    int32_t idx = -1;
+    bool buildOnly = false; // true if item only needs to be created, not measure / layout
 };
 
 /**
@@ -47,18 +60,20 @@ constexpr float HALF = 0.5f;
 // harder it is to maintain
 struct GridLayoutInfo {
     /**
-     * @param regular running regular/irregular layout. For compatibility.
-     * Because in regular we used to add starting lines that are above viewport.
+     * @param prune
+     * @if true, try eliminate lines that are above viewport.
+     * @else trust startMainLineIndex_ to determine the viewport.
      *
-     * @return height of all lines in viewport.
+     * @return height in view range.
      */
-    float GetTotalHeightOfItemsInView(float mainGap, bool regular = true) const;
+    float GetTotalHeightOfItemsInView(float mainGap, bool prune = false) const;
+
+    using HeightMapIt = std::map<int32_t, float>::const_iterator;
     /**
      * @brief skip starting lines that are outside viewport in LayoutIrregular
      *
      * @return [iterator to the first line in view, offset of that first line]
      */
-    using HeightMapIt = std::map<int32_t, float>::const_iterator;
     std::pair<HeightMapIt, float> SkipLinesAboveView(float mainGap) const;
 
     void UpdateStartIndexByStartLine()
@@ -219,25 +234,11 @@ struct GridLayoutInfo {
     void ClearMapsToEnd(int32_t idx);
 
     /**
-     * @brief clears lineHeightMap_ and gridMatrix_ starting from line [idx]
-     *
-     * @param idx starting line index
-     */
-    void ClearMapsToEndContainsMultiLineItem(int32_t idx);
-
-    /**
      * @brief clears lineHeightMap_ and gridMatrix_ in range [0, idx)
      *
      * @param idx ending line index, exclusive.
      */
     void ClearMapsFromStart(int32_t idx);
-
-    /**
-     * @brief clears lineHeightMap_ and gridMatrix_ in range [0, idx)
-     *
-     * @param idx ending line index, exclusive.
-     */
-    void ClearMapsFromStartContainsMultiLineItem(int32_t idx);
 
     /**
      * @brief clears lineHeightMap_ starting from line [idx]
@@ -349,6 +350,21 @@ struct GridLayoutInfo {
     MatIter FindStartLineInMatrix(MatIter iter, int32_t index) const;
     void ClearHeightsFromMatrix(int32_t lineIdx);
 
+    void UpdateDefaultCachedCount();
+
+    int32_t FindInMatrixByMainIndexAndCrossIndex(int32_t mainIndex, int32_t crossIndex) const;
+
+    // Only used for debugging.
+    void PrintMatrix();
+    void PrintLineHeight();
+
+    bool CheckGridMatrix(int32_t cachedCount);
+
+    int32_t GetChildrenCount() const
+    {
+        return firstRepeatCount_ > 0 ? firstRepeatCount_ : childrenCount_;
+    }
+
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f; // offset on the current top GridItem on [startMainLineIndex_]
@@ -376,6 +392,8 @@ struct GridLayoutInfo {
     std::optional<float> extraOffset_;
     int32_t crossCount_ = 0;
     int32_t childrenCount_ = 0;
+    int32_t firstRepeatCount_ = 0;
+    int32_t repeatDifference_ = 0;
     ScrollAlign scrollAlign_ = ScrollAlign::AUTO;
 
     // Map structure: [mainIndex, [crossIndex, index]],
@@ -408,6 +426,13 @@ struct GridLayoutInfo {
     std::map<int32_t, bool> irregularLines_;
 
     bool clearStretch_ = false;
+
+    // default cached count
+    int32_t defCachedCount_ = 1;
+
+    int32_t times_ = 0;
+
+    float endHeight_ = 0.0f;
 
 private:
     float GetCurrentOffsetOfRegularGrid(float mainGap) const;

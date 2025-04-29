@@ -14,12 +14,6 @@
  */
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/data_panel/data_panel_layout_algorithm.h"
-#include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
-#include "core/components_ng/render/animation_utils.h"
-
 namespace OHOS::Ace::NG {
 
 void DataPanelPattern::OnAttachToFrameNode() {}
@@ -124,7 +118,7 @@ RefPtr<FrameNode> DataPanelPattern::BuildContentModifierNode()
         tmpArry.push_back(0.0f);
     }
 
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     double max = paintProperty->GetMax().value_or(DEFAULT_MAX_VALUE);

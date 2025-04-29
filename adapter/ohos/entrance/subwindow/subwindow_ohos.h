@@ -23,10 +23,10 @@
 #include "resource_manager.h"
 #include "wm/window.h"
 
+#include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/platform_event_callback.h"
 #include "base/resource/asset_manager.h"
 #include "base/subwindow/subwindow.h"
-#include "base/subwindow/subwindow_manager.h"
 #include "base/thread/task_executor.h"
 #include "core/common/ace_view.h"
 #include "core/common/js_message_dispatcher.h"
@@ -54,15 +54,22 @@ public:
     explicit SubwindowOhos(int32_t instanceId);
     ~SubwindowOhos() = default;
 
-    bool InitContainer() override;
+    void InitContainer() override;
     void ResizeWindow() override;
+    void ResizeWindowForMenu() override;
     NG::RectF GetRect() override;
+    void SetRect(const NG::RectF& rect) override;
     void ShowMenu(const RefPtr<Component>& newComponent) override;
     void ShowMenuNG(const RefPtr<NG::FrameNode> customNode, const NG::MenuParam& menuParam,
         const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) override;
     void ShowMenuNG(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
         const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) override;
-    bool ShowPreviewNG() override;
+    bool ShowPreviewNG(bool isStartDraggingFromSubWindow = false) override;
+    void SetWindowTouchable(bool touchable) override
+    {
+        CHECK_NULL_VOID(window_);
+        window_->SetTouchable(touchable);
+    }
     void HidePreviewNG() override;
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) override;
     void HideMenuNG(bool showPreviewAnimation, bool startDrag) override;
@@ -75,6 +82,9 @@ public:
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) override;
     void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true) override;
+    void ShowTipsNG(int32_t targetId, const NG::PopupInfo& popupInfo, int32_t appearingTime,
+        int32_t appearingTimeWithContinuousOperation, bool isSubwindow) override;
+    void HideTipsNG(int32_t targetId, int32_t disappearingTime) override;
     void HidePopupNG(int32_t targetId) override;
     void GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo) override;
     bool CancelPopup(const std::string& id) override;
@@ -82,6 +92,7 @@ public:
     void ClearMenu() override;
     void ClearMenuNG(int32_t targetId, bool inWindow, bool showAnimation = false) override;
     void ClearPopupNG() override;
+    void ClearPopupNG(bool isForceClear) override;
     RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, std::function<void()>&& buildFunc) override;
     RefPtr<NG::FrameNode> ShowDialogNGWithNode(const DialogProperties& dialogProps,
         const RefPtr<NG::UINode>& customNode) override;
@@ -137,6 +148,18 @@ public:
     // Gets parent window's size and offset
     Rect GetParentWindowRect() const override;
     Rect GetUIExtensionHostWindowRect() const override;
+    Rect GetFoldExpandAvailableRect() const override;
+    NG::RectF GetWindowRect() const override;
+    bool CheckHostWindowStatus() const override;
+    bool IsFreeMultiWindow() const override;
+    void OnFreeMultiWindowSwitch(bool enable) override;
+    int32_t RegisterFreeMultiWindowSwitchCallback(std::function<void(bool)>&& callback) override;
+    void UnRegisterFreeMultiWindowSwitchCallback(int32_t callbackId) override;
+
+    bool NeedAvoidKeyboard() override
+    {
+        return needAvoidKeyboard_;
+    }
 
     bool IsFocused() override;
     void RequestFocus() override;
@@ -149,6 +172,51 @@ public:
     void MarkDirtyDialogSafeArea() override;
 
     bool Close() override;
+    bool IsToastSubWindow() override;
+    void DestroyWindow() override;
+
+    void ResizeDialogSubwindow() override;
+    uint64_t GetDisplayId() override;
+    bool IsSameDisplayWithParentWindow(bool useInitializedId = false) override;
+
+    void InitializeSafeArea();
+    void SetFollowParentWindowLayoutEnabled(bool enable) override
+    {
+        window_->SetFollowParentWindowLayoutEnabled(enable);
+    }
+    bool ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode) override;
+
+    void ShowBindSheetNG(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<RefPtr<NG::UINode>()>&& buildNodeFunc, std::function<RefPtr<NG::UINode>()>&& buildtitleNodeFunc,
+        NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+        std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
+        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+        std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange,
+        std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange,
+        std::function<void()>&& sheetSpringBack, const RefPtr<NG::FrameNode>& targetNode) override;
+
+    MenuWindowState GetAttachState() override
+    {
+        return attachState_;
+    }
+
+    MenuWindowState GetDetachState() override
+    {
+        return detachState_;
+    }
+
+    void SetAttachState(MenuWindowState t)
+    {
+        attachState_ = t;
+    }
+
+    void SetDetachState(MenuWindowState t)
+    {
+        detachState_ = t;
+    }
+
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);
@@ -161,8 +229,9 @@ private:
     bool CreateEventRunner();
     void GetToastDialogWindowProperty(
         int32_t& width, int32_t& height, int32_t& posX, int32_t& posY, float& density) const;
-    bool InitToastDialogWindow(int32_t width, int32_t height, int32_t posX, int32_t posY, bool isToast = false);
+    bool InitToastDialogWindow(int32_t& width, int32_t& height, int32_t posX, int32_t posY, bool isToast = false);
     bool InitToastDialogView(int32_t width, int32_t height, float density);
+    bool InitToastServiceConfig();
     void ShowToastForAbility(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
     void ShowToastForService(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
     void ShowDialogForAbility(const std::string& title, const std::string& message,
@@ -181,18 +250,25 @@ private:
         std::function<void(int32_t, int32_t)>&& callback);
     void ShowActionMenuForService(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
-    
     RefPtr<PipelineBase> GetChildPipelineContext() const;
+    std::function<void()> GetInitToastDelayTask(const NG::ToastInfo& toastInfo,
+        std::function<void(int32_t)>&& callback);
     void ContainerModalUnFocus();
 
     void HideFilter(bool isInSubWindow);
     void HidePixelMap(bool startDrag = false, double x = 0, double y = 0, bool showAnimation = true);
     void HideEventColumn();
+    Rosen::WindowType GetToastRosenType(bool IsSceneBoardEnabled);
+
+    void SetToastWindowOption(RefPtr<Platform::AceContainer>& parentContainer,
+        OHOS::sptr<OHOS::Rosen::WindowOption>& windowOption,
+        const Rosen::WindowType& toastWindowType, uint32_t mainWindowId);
 
     static int32_t id_;
     int32_t windowId_ = 0;
     int32_t parentContainerId_ = -1;
     int32_t childContainerId_ = -1;
+    uint64_t defaultDisplayId_ = 0;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     sptr<OHOS::Rosen::Window> window_ = nullptr;
     RefPtr<SelectPopupComponent> popup_;
@@ -201,12 +277,43 @@ private:
     sptr<OHOS::Rosen::Window> dialogWindow_;
     std::shared_ptr<AppExecFwk::EventRunner> eventLoop_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
-    int32_t targetId_ = -1;
     bool isToastWindow_ = false;
     int32_t popupTargetId_ = -1;
     bool haveDialog_ = false;
     bool isShowed_ = false;
+    bool isClosing_ = false;
+    bool needAvoidKeyboard_ = false;
     sptr<OHOS::Rosen::Window> parentWindow_ = nullptr;
+    int32_t callbackId_ = 0;
+    sptr<OHOS::Rosen::ISwitchFreeMultiWindowListener> freeMultiWindowListener_ = nullptr;
+    std::unordered_map<int32_t, std::function<void(bool)>> freeMultiWindowSwitchCallbackMap_;
+    NG::RectF windowRect_;
+    std::mutex eventRunnerMutex_;
+    MenuWindowState attachState_ = MenuWindowState::DEFAULT;
+    MenuWindowState detachState_ = MenuWindowState::DEFAULT;
+};
+
+class MenuWindowSceneListener : public OHOS::Rosen::IWindowAttachStateChangeListner {
+public:
+    explicit MenuWindowSceneListener(WeakPtr<SubwindowOhos> sub) : sub_(sub) {}
+    ~MenuWindowSceneListener() = default;
+    void AfterAttached()
+    {
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "receive callback: AfterAttachToFrameNode");
+        auto sub = sub_.Upgrade();
+        CHECK_NULL_VOID(sub);
+        sub->SetAttachState(MenuWindowState::ATTACHED);
+    }
+
+    void AfterDetached()
+    {
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "receive callback: AfterDetachToFrameNode");
+        auto sub = sub_.Upgrade();
+        CHECK_NULL_VOID(sub);
+        sub->SetDetachState(MenuWindowState::DETACHED);
+    }
+private:
+    WeakPtr<SubwindowOhos> sub_;
 };
 
 } // namespace OHOS::Ace

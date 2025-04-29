@@ -13,11 +13,35 @@
  * limitations under the License.
  */
 
+#include <unicode/putil.h>
+#include <unicode/uclean.h>
+
 #include "text_input_base.h"
+
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_data_detector_mgr.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/render/mock_render_context.h"
+
+#include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+const std::string NEWLINE = "\n";
+const std::u16string WIDE_NEWLINE = UtfUtils::Str8ToStr16(NEWLINE);
+const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
+const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
+} // namespace
+
+class MockDataDetectorInterface : public DataDetectorInterface {
+public:
+    MOCK_METHOD(bool, IsDataDetectorSupported, (), (override));
+    MOCK_METHOD(void, GetAIEntityMenu, (TextDataDetectResult & textDataDetectResult), (override));
+    MOCK_METHOD(void, DataDetect, (const TextDataDetectInfo& info, const TextDetectResultFunc& resultFunc), (override));
+    MOCK_METHOD(int8_t, GetCursorPosition, (const std::string& text, int8_t offset), (override));
+    MOCK_METHOD(std::vector<int8_t>, GetWordSelection, (const std::string& text, int8_t offset), (override));
+};
 
 class TextAdjustObject : public TextInputBases {
 protected:
@@ -89,7 +113,7 @@ HWTEST_F(TextAdjustObject, AdjustWordCursorAndSelect01, TestSize.Level1)
      * @tc.steps: step2. assign text as default text
      */
     pos = 1;
-    pattern_->contentController_->SetTextValue(DEFAULT_TEXT);
+    pattern_->contentController_->SetTextValue(DEFAULT_TEXT_U16);
     content = pattern_->contentController_->GetTextValue();
     mockDataDetectorMgr.AdjustCursorPosition(
         pos, content, pattern_->selectController_->lastAiPosTimeStamp_, pattern_->lastClickTimeStamp_);
@@ -139,6 +163,7 @@ HWTEST_F(TextFieldResponseAreaTest, TextFieldResponseArea001, TestSize.Level1)
         model.SetPasswordIcon(myIcon);
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
+        model.SetCancelButtonSymbol(false);
     });
     auto passwordArea = AceType::MakeRefPtr<PasswordResponseArea>(pattern_, false);
     passwordArea->InitResponseArea();
@@ -168,6 +193,7 @@ HWTEST_F(TextFieldResponseAreaTest, TextFieldResponseArea002, TestSize.Level1)
         model.SetPasswordIcon(myIcon);
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
+        model.SetCancelButtonSymbol(false);
     });
     RefPtr<TextInputResponseArea> responseArea = AceType::MakeRefPtr<CleanNodeResponseArea>(pattern_);
     auto convertedArea = AceType::DynamicCast<CleanNodeResponseArea>(responseArea);
@@ -260,7 +286,7 @@ HWTEST_F(TextFieldControllerTest, TextFieldFilter001, TestSize.Level1)
      * @tc.steps: step2. assign filter as lowercase filter
      */
     layoutProperty_->UpdateInputFilter(LOWERCASE_FILTER);
-    pattern_->InsertValue("X");
+    pattern_->InsertValue(u"X");
     EXPECT_EQ(pattern_->GetInputFilter(), LOWERCASE_FILTER);
 }
 
@@ -280,7 +306,7 @@ HWTEST_F(TextFieldControllerTest, TextFieldFilter002, TestSize.Level1)
      * @tc.steps: step2. assign filter as number filter
      */
     layoutProperty_->UpdateInputFilter(NUMBER_FILTER);
-    auto numStr = "1";
+    auto numStr = u"1";
     pattern_->InsertValue(numStr);
     EXPECT_EQ(pattern_->GetInputFilter(), NUMBER_FILTER);
 }
@@ -426,22 +452,51 @@ HWTEST_F(TextFieldControllerTest, CreateDisplayText001, TestSize.Level1)
      * tc.expected: step2. Check the CreateDisplayText return.
      */
     GetFocus();
-    PipelineBase::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_TWELVE);
-    std::string inputPartOne = "tes";
-    std::string inputPartTwo = "t";
-    std::string input = inputPartOne + inputPartTwo;
-    auto outputOne = pattern_->CreateObscuredText(static_cast<int32_t>(StringUtils::ToWstring(input).length()));
-    auto res = pattern_->CreateDisplayText(input, 3, true, true);
+    int32_t setApiVersion = 12;
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    std::u16string inputPartOne = u"tes";
+    std::u16string inputPartTwo = u"t";
+    std::u16string input = inputPartOne + inputPartTwo;
+    auto outputOne = StringUtils::Str16ToStr8(pattern_->CreateObscuredText(static_cast<int32_t>(input.length())));
+    auto res = StringUtils::Str16ToStr8(pattern_->CreateDisplayText(input, 3, true, true));
     EXPECT_EQ(outputOne, res);
 
     /**
      * @tc.steps: step3. call CreateDisplayText with showPasswordDirectly is false
      * tc.expected: step3. Check the CreateDisplayText return.
      */
-    auto outputTwo = pattern_->CreateObscuredText(static_cast<int32_t>(StringUtils::ToWstring(inputPartOne).length()));
-    outputTwo += StringUtils::Str8ToStr16(inputPartTwo);
-    res = pattern_->CreateDisplayText(input, 3, true, false);
-    EXPECT_EQ(outputTwo, res);
+    auto outputTwo = pattern_->CreateObscuredText(static_cast<int32_t>(inputPartOne.length()));
+    outputTwo += inputPartTwo;
+    res = StringUtils::Str16ToStr8(pattern_->CreateDisplayText(input, 3, true, false));
+    EXPECT_EQ(StringUtils::Str16ToStr8(outputTwo), res);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: CreateDisplayText002
+ * @tc.desc: Test textInput display of context.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, CreateDisplayText002, TestSize.Level1)
+{
+    SystemProperties::debugEnabled_ = true;
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    std::u16string inputPart2 = u"t";
+    int32_t setApiVersion = 13;
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    std::u16string inputPart1 = u"tes";
+    std::u16string input = inputPart1 + inputPart2;
+    auto output1 = StringUtils::Str16ToStr8(pattern_->CreateObscuredText(static_cast<int32_t>(input.length())));
+    auto res = StringUtils::Str16ToStr8(pattern_->CreateDisplayText(input, 3, true, true));
+    EXPECT_EQ(output1, res);
+    auto output2 = pattern_->CreateObscuredText(static_cast<int32_t>(inputPart1.length()));
+    output2 += inputPart2;
+    res = StringUtils::Str16ToStr8(pattern_->CreateDisplayText(input, 3, true, false));
+    EXPECT_EQ(StringUtils::Str16ToStr8(output2), res);
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
 /**
@@ -503,14 +558,14 @@ HWTEST_F(TextFieldControllerTest, ContentController001, TestSize.Level1)
     /**
      * @tc.steps: Initialize insert text and expected values
      */
-    std::vector<std::string> insertValues = {
-        "openharmony123_ *+%$",
-        "openharmony123456*+&@huawei.com",
-        "openharmony (new)#15612932075*.com",
-        "open_harmony@@harmony.com*+$helloworld",
-        "open_harmony123 password*+#",
-        "openharmony123456*+&@huawei.com",
-        "o达瓦大屋顶pen_harmony456顶顶顶 password*+#得到",
+    std::vector<std::u16string> insertValues = {
+        u"openharmony123_ *+%$",
+        u"openharmony123456*+&@huawei.com",
+        u"openharmony (new)#15612932075*.com",
+        u"open_harmony@@harmony.com*+$helloworld",
+        u"open_harmony123 password*+#",
+        u"openharmony123456*+&@huawei.com",
+        u"o达瓦大屋顶pen_harmony456顶顶顶 password*+#得到",
     };
     std::vector<TestItem<TextInputType, std::string>> testItems;
     testItems.emplace_back(TextInputType::TEXT, "openharmony123_ *+%$", "TextInputType::TEXT");
@@ -548,7 +603,7 @@ HWTEST_F(TextFieldControllerTest, ContentController002, TestSize.Level1)
     /**
      * @tc.steps: Initialize text and filter patterns
      */
-    std::string text = "CabcdefgABhCDEFG0123a456A789";
+    std::u16string text = u"CabcdefgABhCDEFG0123a456A789";
     std::vector<TestItem<std::string, std::string>> testItems;
     testItems.emplace_back("", "CabcdefgABhCDEFG0123a456A789", "None");
     testItems.emplace_back("[0-9]", "0123456789", "Input filter [0-9]");
@@ -582,19 +637,19 @@ HWTEST_F(TextFieldControllerTest, ContentController003, TestSize.Level1)
     /**
      * @tc.expected: Check if text is selected based on corresponding left and right coordinates
      */
-    auto selectedValue = pattern_->contentController_->GetSelectedValue(1, 4);
+    auto selectedValue = StringUtils::Str16ToStr8(pattern_->contentController_->GetSelectedValue(1, 4));
     EXPECT_EQ(selectedValue.compare("bcd"), 0) << "Text is " + selectedValue;
 
     /**
      * @tc.expected: Check if text is selected based on preceding coordinates
      */
-    auto beforeSelectedValue = pattern_->contentController_->GetValueBeforeIndex(3);
+    auto beforeSelectedValue = StringUtils::Str16ToStr8(pattern_->contentController_->GetValueBeforeIndex(3));
     EXPECT_EQ(beforeSelectedValue.compare("abc"), 0) << "Text is " + beforeSelectedValue;
 
     /**
      * @tc.expected: Check if text is selected based on trailing coordinates
      */
-    auto afterSelectedValue = pattern_->contentController_->GetValueAfterIndex(3);
+    auto afterSelectedValue = StringUtils::Str16ToStr8(pattern_->contentController_->GetValueAfterIndex(3));
     EXPECT_EQ(afterSelectedValue.compare("defghijklmnopqrstuvwxyz"), 0) << "Text is " + afterSelectedValue;
 }
 
@@ -620,7 +675,7 @@ HWTEST_F(TextFieldControllerTest, ContentController004, TestSize.Level1)
      * @tc.expected: when the text point more then one, FilterWithDecimal return true,
      * @tc.expected: and the value update only one point
      */
-    std::string text = "3.1.4.";
+    std::u16string text = u"3.1.4.";
     pattern_->contentController_->InsertValue(0, text);
     EXPECT_TRUE(pattern_->contentController_->FilterWithDecimal(text));
     EXPECT_EQ(pattern_->GetTextValue(), "3.14");
@@ -647,7 +702,7 @@ HWTEST_F(TextFieldControllerTest, ContentController005, TestSize.Level1)
     /**
      * @tc.expected: when the text have one point, FilterWithDecimal return false
      */
-    std::string text = "3.14";
+    std::u16string text = u"3.14";
     pattern_->contentController_->InsertValue(0, text);
     EXPECT_FALSE(pattern_->contentController_->FilterWithDecimal(text));
     EXPECT_EQ(pattern_->GetTextValue(), "3.14");
@@ -694,6 +749,29 @@ HWTEST_F(TextFieldControllerTest, TextFieldControllerTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextFieldControllerTest003
+ * @tc.desc: Test TextFieldModelNG controller.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, TextFieldControllerTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Initialize textarea node.
+     */
+    auto frameNode = TextFieldModelNG::CreateFrameNode(-1, u"", u"", true);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+
+    /**
+     * @tc.expected: Check jsController value.
+     */
+    auto jsController = AceType::MakeRefPtr<Referenced>();
+    TextFieldModelNG::SetJSTextEditableController(node, jsController);
+    auto getController = TextFieldModelNG::GetJSTextEditableController(node);
+    EXPECT_NE(getController, nullptr);
+}
+
+/**
  * @tc.name: TextFieldFontFeatureTest
  * @tc.desc: Test the caret move right
  * @tc.type: FUNC
@@ -704,7 +782,7 @@ HWTEST_F(TextFieldControllerTest, FontFeature003, TestSize.Level1)
      * @tc.steps: step1. Initialize text input.
      */
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextInput(DEFAULT_TEXT, "");
+    textFieldModelNG.CreateTextInput(DEFAULT_TEXT_U16, u"");
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -728,7 +806,7 @@ HWTEST_F(TextFieldControllerTest, FontFeature004, TestSize.Level1)
      * @tc.steps: step1. Initialize text input.
      */
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextInput(DEFAULT_TEXT, "");
+    textFieldModelNG.CreateTextInput(DEFAULT_TEXT_U16, u"");
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -831,25 +909,25 @@ HWTEST_F(TextFieldControllerTest, HandleOnDeleteAction002, TestSize.Level1)
     // change line to aviod the line length exceed 120
     std::string result = std::string("👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦")
         .append("👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦");
-    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 1) << "Text is: " + pattern_->GetTextValue();
 
     pattern_->SetCaretPosition(88);
     pattern_->DeleteBackward(2);
     FlushLayoutTask(frameNode_);
     result = "👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦";
-    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 14) << "Text is: " + pattern_->GetTextValue();
 
     pattern_->SetCaretPosition(0);
     pattern_->DeleteForward(2);
     FlushLayoutTask(frameNode_);
     result = "👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦";
-    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 1) << "Text is: " + pattern_->GetTextValue();
 
     pattern_->SetCaretPosition(44);
     pattern_->DeleteForward(2);
     FlushLayoutTask(frameNode_);
     result = "👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦";
-    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 1) << "Text is: " + pattern_->GetTextValue();
 }
 
 /**
@@ -1007,19 +1085,19 @@ HWTEST_F(TextFieldControllerTest, HandleOnDeleteAction006, TestSize.Level1)
     pattern_->DeleteBackward(2);
     FlushLayoutTask(frameNode_);
     std::string result = "👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️";
-    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 1) << "Text is: " + pattern_->GetTextValue();
 
     pattern_->SetCaretPosition(77);
     pattern_->DeleteBackward(2);
     FlushLayoutTask(frameNode_);
     result = "👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️";
-    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 1) << "Text is: " + pattern_->GetTextValue();
 
     pattern_->SetCaretPosition(0);
     pattern_->DeleteForward(2);
     FlushLayoutTask(frameNode_);
     result = "👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️";
-    EXPECT_EQ(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 1) << "Text is: " + pattern_->GetTextValue();
 }
 
 /**
@@ -1131,14 +1209,16 @@ HWTEST_F(TextFieldControllerTest, GetGlobalPointsWithTransform, TestSize.Level1)
     pattern_->selectOverlay_->hasTransform_ = true;
     auto renderContext = frameNode_->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
     EXPECT_CALL(*mockRenderContext, GetPointTransform(_)).WillRepeatedly([](PointF& point) {
         point.SetX(-5.0f);
         point.SetY(5.0f);
     });
+    pattern_->frameNode_.Upgrade()->renderContext_ = mockRenderContext;
     pattern_->selectOverlay_->GetGlobalPointsWithTransform(localPoints);
     EXPECT_EQ(localPoints[0].GetX(), -5.0f);
     EXPECT_EQ(localPoints[0].GetY(), 5.0f);
+    pattern_->frameNode_.Upgrade()->renderContext_ = renderContext;
 }
 
 /**
@@ -1161,7 +1241,7 @@ HWTEST_F(TextFieldControllerTest, GetGlobalRectWithTransform, TestSize.Level1)
     pattern_->selectOverlay_->hasTransform_ = true;
     auto renderContext = frameNode_->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
     EXPECT_CALL(*mockRenderContext, GetPointTransform(_)).WillRepeatedly([](PointF& point) {
         point.SetX(point.GetX());
         point.SetY(point.GetY());
@@ -1192,15 +1272,17 @@ HWTEST_F(TextFieldControllerTest, RevertLocalPointWithTransform, TestSize.Level1
     pattern_->selectOverlay_->hasTransform_ = true;
     auto renderContext = frameNode_->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
     EXPECT_CALL(*mockRenderContext, GetPointWithRevert(_)).WillRepeatedly([](PointF& point) {
         point.SetX(5.0f);
         point.SetY(5.0f);
     });
     OffsetF offset(-5.0f, 5.0f);
+    pattern_->frameNode_.Upgrade()->renderContext_ = mockRenderContext;
     pattern_->selectOverlay_->RevertLocalPointWithTransform(offset);
     EXPECT_EQ(offset.GetX(), 5.0f);
     EXPECT_EQ(offset.GetY(), 5.0f);
+    pattern_->frameNode_.Upgrade()->renderContext_ = renderContext;
 }
 
 /**
@@ -1223,7 +1305,7 @@ HWTEST_F(TextFieldControllerTest, GetGlobalRectVertexWithTransform, TestSize.Lev
     pattern_->selectOverlay_->hasTransform_ = true;
     auto renderContext = frameNode_->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
     EXPECT_CALL(*mockRenderContext, GetPointWithRevert(_)).WillRepeatedly([](PointF& point) {
         point.SetX(point.GetX());
         point.SetY(point.GetY());
@@ -1256,7 +1338,7 @@ HWTEST_F(TextFieldControllerTest, GetLocalPointsWithTransform, TestSize.Level1)
     pattern_->selectOverlay_->hasTransform_ = true;
     auto renderContext = frameNode_->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
     EXPECT_CALL(*mockRenderContext, GetPointWithRevert(_)).WillRepeatedly([](PointF& point) {
         point.SetX(point.GetX());
         point.SetY(point.GetY());
@@ -1287,7 +1369,7 @@ HWTEST_F(TextFieldControllerTest, GetLocalRectWithTransform, TestSize.Level1)
     pattern_->selectOverlay_->hasTransform_ = true;
     auto renderContext = frameNode_->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
     EXPECT_CALL(*mockRenderContext, GetPointWithRevert(_)).WillRepeatedly([](PointF& point) {
         point.SetX(point.GetX());
         point.SetY(point.GetY());
@@ -1327,5 +1409,359 @@ HWTEST_F(TextFieldControllerTest, IsPointInRect, TestSize.Level1)
     point = OffsetF(-1.0f, -1.0f);
     ret = pattern_->selectOverlay_->IsPointInRect(point, leftBottom, rightBottom, rightTop, leftTop);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: GetSubParagraphByOffset
+ * @tc.desc: test GetSubParagraphByOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, GetSubParagraphByOffset, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    int32_t pos = 2;
+    int32_t start = 2;
+    int32_t end = 2;
+    auto controller = pattern_->GetTextSelectController();
+
+    controller->contentController_->content_[2] = WIDE_NEWLINE[0];
+    controller->contentController_->content_[3] = WIDE_NEWLINE[0];
+    controller->GetSubParagraphByOffset(pos, start, end);
+    EXPECT_EQ(start, 3);
+    EXPECT_EQ(end, 2);
+
+    pos = 2;
+    start = 2;
+    end = 2;
+    controller->contentController_->content_[2] = WIDE_NEWLINE[1];
+    controller->GetSubParagraphByOffset(pos, start, end);
+    EXPECT_EQ(start, 0);
+    EXPECT_EQ(end, 3);
+
+    pos = 0;
+    start = 2;
+    end = 2;
+    controller->contentController_->content_.resize(7, WIDE_NEWLINE[1]);
+    controller->GetSubParagraphByOffset(pos, start, end);
+    EXPECT_EQ(start, 0);
+    EXPECT_EQ(end, 3);
+}
+
+/**
+ * @tc.name: MoveHandleToContentRect001
+ * @tc.desc: test MoveHandleToContentRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, MoveHandleToContentRect001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto controller = pattern_->GetTextSelectController();
+    ASSERT_NE(controller, nullptr);
+    RectF handleRect = RectF(OffsetF(5.0f, 5.0f), SizeF(5.0f, 5.0f));
+    float boundaryAdjustment = 1.0f;
+    auto textFiled = AceType::DynamicCast<TextFieldPattern>(pattern_);
+    ASSERT_NE(textFiled, nullptr);
+    textFiled->textRect_.SetRect(0.0f, 0.0f, 0.0f, 10.0f);
+    controller->contentRect_.SetRect(0.0f, 6.0f, 0.0f, 6.0f);
+    controller->MoveHandleToContentRect(handleRect, boundaryAdjustment);
+    EXPECT_EQ(textFiled->textRect_.GetY(), 1.0f);
+    EXPECT_EQ(textFiled->textRect_.GetX(), 0.0f);
+}
+
+/**
+ * @tc.name: MoveHandleToContentRect002
+ * @tc.desc: test MoveHandleToContentRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, MoveHandleToContentRect002, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto controller = pattern_->GetTextSelectController();
+    ASSERT_NE(controller, nullptr);
+    RectF handleRect = RectF(OffsetF(5.0f, 5.0f), SizeF(5.0f, 5.0f));
+    float boundaryAdjustment = 1.0f;
+    auto textFiled = AceType::DynamicCast<TextFieldPattern>(pattern_);
+    ASSERT_NE(textFiled, nullptr);
+    textFiled->textRect_.SetRect(0.0f, 0.0f, 0.0f, 10.0f);
+    controller->contentRect_.SetRect(0.0f, 6.0f, 0.0f, 4.0f);
+    controller->MoveHandleToContentRect(handleRect, boundaryAdjustment);
+    EXPECT_EQ(textFiled->textRect_.GetY(), 0.0f);
+    EXPECT_EQ(textFiled->textRect_.GetX(), 0.0f);
+}
+
+/**
+ * @tc.name: MoveHandleToContentRect003
+ * @tc.desc: test MoveHandleToContentRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, MoveHandleToContentRect003, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto controller = pattern_->GetTextSelectController();
+    ASSERT_NE(controller, nullptr);
+    RectF handleRect = RectF(OffsetF(5.0f, 5.0f), SizeF(5.0f, 5.0f));
+    float boundaryAdjustment = 1.0f;
+    auto textFiled = AceType::DynamicCast<TextFieldPattern>(pattern_);
+    ASSERT_NE(textFiled, nullptr);
+    textFiled->textRect_.SetRect(0.0f, 0.0f, 4.0f, 10.0f);
+    controller->contentRect_.SetRect(6.0f, 6.0f, 0.0f, 4.0f);
+    controller->MoveHandleToContentRect(handleRect, boundaryAdjustment);
+    EXPECT_EQ(textFiled->textRect_.GetY(), 0.0f);
+    EXPECT_EQ(textFiled->textRect_.GetX(), 1.0f);
+}
+
+/**
+ * @tc.name: MoveHandleToContentRect004
+ * @tc.desc: test MoveHandleToContentRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, MoveHandleToContentRect004, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto controller = pattern_->GetTextSelectController();
+    ASSERT_NE(controller, nullptr);
+    RectF handleRect = RectF(OffsetF(5.0f, 5.0f), SizeF(5.0f, 5.0f));
+    float boundaryAdjustment = 1.0f;
+    auto textFiled = AceType::DynamicCast<TextFieldPattern>(pattern_);
+    ASSERT_NE(textFiled, nullptr);
+    textFiled->textRect_.SetRect(0.0f, 0.0f, 4.0f, 10.0f);
+    controller->contentRect_.SetRect(4.0f, 6.0f, 0.0f, 4.0f);
+    controller->MoveHandleToContentRect(handleRect, boundaryAdjustment);
+    EXPECT_EQ(textFiled->textRect_.GetY(), 0.0f);
+    EXPECT_EQ(textFiled->textRect_.GetX(), -2.0f);
+}
+
+/**
+ * @tc.name: MoveHandleToContentRect005
+ * @tc.desc: test MoveHandleToContentRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, MoveHandleToContentRect005, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto controller = pattern_->GetTextSelectController();
+    ASSERT_NE(controller, nullptr);
+    RectF handleRect = RectF(OffsetF(-5.0f, 5.0f), SizeF(5.0f, 5.0f));
+    float boundaryAdjustment = -10.0f;
+    auto textFiled = AceType::DynamicCast<TextFieldPattern>(pattern_);
+    ASSERT_NE(textFiled, nullptr);
+    textFiled->textRect_.SetRect(0.0f, 0.0f, 4.0f, 10.0f);
+    controller->contentRect_.SetRect(-6.0f, 6.0f, 0.0f, 4.0f);
+    controller->MoveHandleToContentRect(handleRect, boundaryAdjustment);
+    EXPECT_EQ(textFiled->textRect_.GetY(), 0.0f);
+    EXPECT_EQ(textFiled->textRect_.GetX(), 0.0f);
+}
+
+/**
+ * @tc.name: MoveCaretToContentRect001
+ * @tc.desc: test MoveCaretToContentRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, MoveCaretToContentRect001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto controller = pattern_->GetTextSelectController();
+    ASSERT_NE(controller, nullptr);
+    auto textFiled = AceType::DynamicCast<TextFieldPattern>(pattern_);
+    ASSERT_NE(textFiled, nullptr);
+    int32_t index = 0;
+    SystemProperties::debugEnabled_ = true;
+    textFiled->textRect_.SetRect(0.0f, 0.0f, 4.0f, 0.0f);
+    controller->contentRect_.SetRect(2.0f, 2.0f, 1.0f, 4.0f);
+    controller->MoveCaretToContentRect(index, TextAffinity::DOWNSTREAM, true, false);
+    EXPECT_EQ(controller->caretInfo_.rect.GetX(), 2.0f);
+    EXPECT_EQ(controller->caretInfo_.rect.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: MoveCaretToContentRect002
+ * @tc.desc: test MoveCaretToContentRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, MoveCaretToContentRect002, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto controller = pattern_->GetTextSelectController();
+    ASSERT_NE(controller, nullptr);
+    auto textFiled = AceType::DynamicCast<TextFieldPattern>(pattern_);
+    ASSERT_NE(textFiled, nullptr);
+    int32_t index = 30;
+    SystemProperties::debugEnabled_ = false;
+    textFiled->textRect_.SetRect(2.0f, 2.0f, 2.0f, 2.0f);
+    controller->contentRect_.SetRect(0.0f, 0.0f, 1.0f, 4.0f);
+    controller->MoveCaretToContentRect(index, TextAffinity::DOWNSTREAM, true, true);
+    EXPECT_EQ(controller->caretInfo_.rect.GetX(), 1.0f);
+    EXPECT_EQ(controller->caretInfo_.rect.GetY(), 2.0f);
+}
+
+/**
+ * @tc.name: MoveCaretToContentRect003
+ * @tc.desc: test MoveCaretToContentRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, MoveCaretToContentRect003, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto controller = pattern_->GetTextSelectController();
+    ASSERT_NE(controller, nullptr);
+    auto textFiled = AceType::DynamicCast<TextFieldPattern>(pattern_);
+    ASSERT_NE(textFiled, nullptr);
+    int32_t index = 30;
+    SystemProperties::debugEnabled_ = false;
+    textFiled->textRect_.SetRect(0.0f, 0.0f, 0.0f, 0.0f);
+    controller->contentRect_.SetRect(2.0f, 2.0f, 5.0f, 4.0f);
+    controller->MoveCaretToContentRect(index, TextAffinity::DOWNSTREAM, true, false);
+    EXPECT_EQ(controller->caretInfo_.rect.GetX(), 2.0f);
+    EXPECT_EQ(controller->caretInfo_.rect.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: MoveCaretToContentRect004
+ * @tc.desc: test MoveCaretToContentRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, MoveCaretToContentRect004, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto controller = pattern_->GetTextSelectController();
+    ASSERT_NE(controller, nullptr);
+    auto textFiled = AceType::DynamicCast<TextFieldPattern>(pattern_);
+    ASSERT_NE(textFiled, nullptr);
+    int32_t index = 0;
+    SystemProperties::debugEnabled_ = false;
+    textFiled->textRect_.SetRect(2.0f, 2.0f, 4.0f, 2.0f);
+    controller->contentRect_.SetRect(0.0f, 0.0f, 1.0f, 4.0f);
+    controller->MoveCaretToContentRect(index, TextAffinity::DOWNSTREAM, true, false);
+    EXPECT_EQ(controller->caretInfo_.rect.GetX(), 1.0f);
+    EXPECT_EQ(controller->caretInfo_.rect.GetY(), 2.0f);
+}
+
+/**
+ * @tc.name: GetSelectParagraphByOffset001
+ * @tc.desc: test GetSelectParagraphByOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, GetSelectParagraphByOffset001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto controller = pattern_->GetTextSelectController();
+    ASSERT_NE(controller, nullptr);
+    auto textFiled = AceType::DynamicCast<TextFieldPattern>(pattern_);
+    ASSERT_NE(textFiled, nullptr);
+    textFiled->selectOverlay_->isUsingMouse_ = true;
+    SystemProperties::debugEnabled_ = false;
+    Offset offset(50.0f, 50.0f);
+    auto result = controller->GetSelectParagraphByOffset(offset);
+    EXPECT_EQ(result.first, 0);
+}
+
+/**
+ * @tc.name: GetSelectParagraphByOffset002
+ * @tc.desc: test GetSelectParagraphByOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, GetSelectParagraphByOffset002, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto controller = pattern_->GetTextSelectController();
+    ASSERT_NE(controller, nullptr);
+    auto textFiled = AceType::DynamicCast<TextFieldPattern>(pattern_);
+    ASSERT_NE(textFiled, nullptr);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(testing::_, testing::_)).WillRepeatedly(Return(-5));
+    controller->paragraph_ = paragraph;
+    textFiled->selectOverlay_->isUsingMouse_ = false;
+    SystemProperties::debugEnabled_ = true;
+    Offset offset(50.0f, 50.0f);
+    auto mockEngine = std::make_unique<MockDataDetectorInterface>();
+    ASSERT_NE(mockEngine, nullptr);
+    EXPECT_CALL(*mockEngine, GetWordSelection(testing::_, testing::_))
+        .WillRepeatedly(Return(std::vector<int8_t> { 100, 100 }));
+    DataDetectorMgr::GetInstance().engine_ = std::unique_ptr<OHOS::Ace::DataDetectorInterface>(
+        static_cast<OHOS::Ace::DataDetectorInterface*>(mockEngine.release()));
+    ASSERT_NE(DataDetectorMgr::GetInstance().engine_, nullptr);
+    auto result = controller->GetSelectParagraphByOffset(offset);
+    EXPECT_EQ(result.second, 26);
+}
+
+/**
+ * @tc.name: GetGraphemeClusterLength001
+ * @tc.desc: test GetGraphemeClusterLength.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, GetGraphemeClusterLength001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto controller = pattern_->GetTextSelectController();
+    ASSERT_NE(controller, nullptr);
+    std::u16string text = u"ab\U0001F600";
+    int32_t extend = 3;
+    bool checkPrev = true;
+    auto result = controller->GetGraphemeClusterLength(text, extend, checkPrev);
+    EXPECT_EQ(result, 2);
+}
+
+/**
+ * @tc.name: GetGraphemeClusterLength002
+ * @tc.desc: test GetGraphemeClusterLength.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, GetGraphemeClusterLength002, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto controller = pattern_->GetTextSelectController();
+    ASSERT_NE(controller, nullptr);
+    std::u16string text = u"ab\U0001F600";
+    int32_t extend = 10;
+    bool checkPrev = false;
+    auto result = controller->GetGraphemeClusterLength(text, extend, checkPrev);
+    EXPECT_EQ(result, 1);
+}
+
+/**
+ * @tc.name: GetGraphemeClusterLength003
+ * @tc.desc: test GetGraphemeClusterLength.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, GetGraphemeClusterLength003, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto controller = pattern_->GetTextSelectController();
+    ASSERT_NE(controller, nullptr);
+    std::u16string text = u"ab\U0001F600";
+    int32_t extend = 2;
+    bool checkPrev = false;
+    auto result = controller->GetGraphemeClusterLength(text, extend, checkPrev);
+    EXPECT_EQ(result, 2);
 }
 }

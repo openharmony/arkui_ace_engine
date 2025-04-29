@@ -31,10 +31,13 @@ constexpr int32_t MONTH_NODE_INDEX = 2;
 constexpr int32_t DAY_NODE_INDEX = 4;
 constexpr int32_t DATE_NODE_COUNT = 3;
 constexpr int32_t ONE_DIGIT_BOUNDARY = 10;
+constexpr uint32_t MAX_MONTH = 12;
 constexpr float DEFAULT_HINT_RADIUS = 16.0f;
+constexpr uint32_t YEAR_LENGTH = 4;
 static int32_t yearNodeIndex_ = 0;
 static int32_t monthNodeIndex_ = 2;
 static int32_t dayNodeIndex_ = 4;
+const bool DEFAULT_MARK_TODAY = false;
 void CalendarPickerModelNG::Create(const CalendarSettingData& settingData)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -60,7 +63,10 @@ void CalendarPickerModelNG::LayoutPicker(const RefPtr<CalendarPickerPattern>& pi
         CHECK_NULL_VOID(contentNode);
         contentNode->MountToParent(pickerNode);
     } else {
-        pickerPattern->SetDate(settingData.selectedDate.ToString(true));
+        auto setDate =
+            PickerDate::AdjustDateToRange(settingData.selectedDate, settingData.startDate, settingData.endDate);
+        CHECK_NULL_VOID(pickerPattern);
+        pickerPattern->SetDate(setDate.ToString(true));
     }
     auto flexNode = CalendarPickerModelNG::CreateButtonFlexChild(pickerPattern->GetButtonFlexId(), theme);
     CHECK_NULL_VOID(flexNode);
@@ -83,7 +89,7 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateButtonChild(
     auto buttonNode =
         FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, id, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_RETURN(buttonNode, nullptr);
-    auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
+    auto buttonEventHub = buttonNode->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonEventHub, nullptr);
     buttonEventHub->SetStateEffect(true);
 
@@ -245,7 +251,7 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateNode(int32_t nodeId, const Calend
         V2::CALENDAR_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CalendarPickerPattern>(); });
     auto pickerPattern = pickerNode->GetPattern<CalendarPickerPattern>();
     CHECK_NULL_RETURN(pickerPattern, pickerNode);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = pickerNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, pickerNode);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, pickerNode);
@@ -308,7 +314,7 @@ void CalendarPickerModelNG::SetOnChange(SelectedChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<CalendarPickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<CalendarPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(onChange));
 }
@@ -317,7 +323,7 @@ void CalendarPickerModelNG::SetChangeEvent(SelectedChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<CalendarPickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<CalendarPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(onChange));
 }
@@ -354,6 +360,89 @@ void CalendarPickerModelNG::SetTextStyle(FrameNode* frameNode, const PickerTextS
         textStyle.textColor.value_or(calendarTheme->GetEntryFontColor()), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         CalendarPickerLayoutProperty, Weight, textStyle.fontWeight.value_or(FontWeight::NORMAL), frameNode);
+}
+
+void CalendarPickerModelNG::ClearBorderColor()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    BorderColorProperty borderColor;
+    borderColor.SetColor(theme->GetEntryBorderColor());
+    frameNode->GetRenderContext()->UpdateBorderColor(borderColor);
+}
+
+void CalendarPickerModelNG::ClearBorderRadius()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(theme->GetEntryBorderRadius());
+    frameNode->GetRenderContext()->UpdateBorderRadius(borderRadius);
+}
+
+void CalendarPickerModelNG::ClearHeight()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    frameNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(std::nullopt, CalcLength(theme->GetEntryHeight())));
+}
+
+void CalendarPickerModelNG::ClearBorder()
+{
+    ClearBorderWidth();
+    ClearBorderRadius();
+    ClearBorderColor();
+}
+
+void CalendarPickerModelNG::ClearBorderWidth()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(theme->GetEntryBorderWidth());
+    frameNode->GetLayoutProperty()->UpdateBorderWidth(borderWidth);
+}
+
+void CalendarPickerModelNG::ClearPadding()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    if (!pickerPattern->HasContentNode()) {
+        return;
+    }
+    auto contentNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    CHECK_NULL_VOID(contentNode);
+    auto linearLayoutProperty = contentNode->GetLayoutProperty();
+    CHECK_NULL_VOID(linearLayoutProperty);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    PaddingProperty padding;
+    padding.top = CalcLength(theme->GetEntryDateTopBottomMargin());
+    padding.left = CalcLength(theme->GetEntryDateLeftRightMargin());
+    padding.right = CalcLength(theme->GetEntryDateLeftRightMargin());
+    padding.bottom = CalcLength(theme->GetEntryDateTopBottomMargin());
+    linearLayoutProperty->UpdatePadding(padding);
 }
 
 RefPtr<CalendarTheme> GetCalendarTheme()
@@ -426,6 +515,76 @@ void CalendarPickerModelNG::SetPadding(FrameNode* frameNode, const PaddingProper
     linearLayoutProperty->UpdatePadding(padding);
 }
 
+void CalendarPickerModelNG::ClearPadding(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    if (!pickerPattern->HasContentNode()) {
+        return;
+    }
+    auto contentNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    CHECK_NULL_VOID(contentNode);
+    auto linearLayoutProperty = contentNode->GetLayoutProperty();
+    CHECK_NULL_VOID(linearLayoutProperty);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    PaddingProperty padding;
+    padding.top = CalcLength(theme->GetEntryDateTopBottomMargin());
+    padding.left = CalcLength(theme->GetEntryDateLeftRightMargin());
+    padding.right = CalcLength(theme->GetEntryDateLeftRightMargin());
+    padding.bottom = CalcLength(theme->GetEntryDateTopBottomMargin());
+    linearLayoutProperty->UpdatePadding(padding);
+}
+
+void CalendarPickerModelNG::ClearHeight(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    ViewAbstract::SetHeight(frameNode, CalcLength(theme->GetEntryHeight()));
+}
+
+void CalendarPickerModelNG::ClearBorderColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    BorderColorProperty borderColor;
+    borderColor.SetColor(theme->GetEntryBorderColor());
+    frameNode->GetRenderContext()->UpdateBorderColor(borderColor);
+}
+
+void CalendarPickerModelNG::ClearBorderRadius(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(theme->GetEntryBorderRadius());
+    frameNode->GetRenderContext()->UpdateBorderRadius(borderRadius);
+}
+
+void CalendarPickerModelNG::ClearBorderWidth(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(theme->GetEntryBorderWidth());
+    frameNode->GetLayoutProperty()->UpdateBorderWidth(borderWidth);
+}
+
 void CalendarPickerModelNG::SetHintRadiusWithNode(FrameNode* frameNode, Dimension& radius)
 {
     CHECK_NULL_VOID(frameNode);
@@ -436,31 +595,98 @@ void CalendarPickerModelNG::SetHintRadiusWithNode(FrameNode* frameNode, Dimensio
     pickerPattern->SetCalendarData(calendarDate);
 }
 
-void CalendarPickerModelNG::SetSelectDateWithNode(FrameNode* frameNode, uint32_t year, uint32_t month, uint32_t day)
+PickerDate CalendarPickerModelNG::GetStartDateWithNode(FrameNode* frameNode)
+{
+    PickerDate startDate;
+    CHECK_NULL_RETURN(frameNode, startDate);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_RETURN(pickerPattern, startDate);
+    return pickerPattern->GetCalendarData().startDate;
+}
+
+PickerDate CalendarPickerModelNG::GetEndDateWithNode(FrameNode* frameNode)
+{
+    PickerDate endDate;
+    CHECK_NULL_RETURN(frameNode, endDate);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_RETURN(pickerPattern, endDate);
+    return pickerPattern->GetCalendarData().endDate;
+}
+
+void CalendarPickerModelNG::SetStartDateWithNode(FrameNode* frameNode, uint32_t year, uint32_t month, uint32_t day)
 {
     CHECK_NULL_VOID(frameNode);
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
     auto calendarDate = pickerPattern->GetCalendarData();
+    PickerDate defaultDate;
+    if (year > 0 && month > 0 && month <= MAX_MONTH && day > 0 && day <= PickerDate::GetMaxDay(year, month)) {
+        calendarDate.startDate.SetYear(year);
+        calendarDate.startDate.SetMonth(month);
+        calendarDate.startDate.SetDay(day);
+    } else {
+        calendarDate.startDate = defaultDate;
+    }
+    if (calendarDate.endDate.ToDays() > 0 && calendarDate.startDate.ToDays() > calendarDate.endDate.ToDays()) {
+        calendarDate.startDate = defaultDate;
+        calendarDate.endDate = defaultDate;
+        calendarDate.selectedDate = PickerDate::Current();
+    }
+    calendarDate.selectedDate =
+        PickerDate::AdjustDateToRange(calendarDate.selectedDate, calendarDate.startDate, calendarDate.endDate);
+    UpdateSelectedDateContent(frameNode, calendarDate.selectedDate);
+    pickerPattern->SetCalendarData(calendarDate);
+}
+
+void CalendarPickerModelNG::SetEndDateWithNode(FrameNode* frameNode, uint32_t year, uint32_t month, uint32_t day)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    auto calendarDate = pickerPattern->GetCalendarData();
+    PickerDate defaultDate;
+    if (year > 0 && month > 0 && month <= MAX_MONTH && day > 0 && day <= PickerDate::GetMaxDay(year, month)) {
+        calendarDate.endDate.SetYear(year);
+        calendarDate.endDate.SetMonth(month);
+        calendarDate.endDate.SetDay(day);
+    } else {
+        calendarDate.endDate = defaultDate;
+    }
+    if (calendarDate.endDate.ToDays() > 0 && calendarDate.startDate.ToDays() > calendarDate.endDate.ToDays()) {
+        calendarDate.startDate = defaultDate;
+        calendarDate.endDate = defaultDate;
+        calendarDate.selectedDate = PickerDate::Current();
+    }
+    calendarDate.selectedDate =
+        PickerDate::AdjustDateToRange(calendarDate.selectedDate, calendarDate.startDate, calendarDate.endDate);
+    UpdateSelectedDateContent(frameNode, calendarDate.selectedDate);
+    pickerPattern->SetCalendarData(calendarDate);
+}
+
+void CalendarPickerModelNG::UpdateSelectedDateContent(FrameNode* frameNode, const PickerDate& selectedDate)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto year = selectedDate.GetYear();
+    auto month = selectedDate.GetMonth();
+    auto day = selectedDate.GetDay();
     if (year > 0) {
-        calendarDate.selectedDate.SetYear(year);
         auto yearNode = CalendarPickerModelNG::GetYearNode(frameNode);
         if (yearNode) {
             auto textLayoutProperty = yearNode->GetLayoutProperty<TextLayoutProperty>();
             if (textLayoutProperty) {
-                textLayoutProperty->UpdateContent(std::to_string(year));
+                auto selectedYearStr = AddLeadingZeroToYear(year);
+                textLayoutProperty->UpdateContent(selectedYearStr);
                 yearNode->MarkModifyDone();
                 yearNode->MarkDirtyNode();
             }
         }
     }
     if (month > 0) {
-        calendarDate.selectedDate.SetMonth(month);
         auto monthNode = CalendarPickerModelNG::GetMonthNode(frameNode);
         if (monthNode) {
             auto textLayoutProperty = monthNode->GetLayoutProperty<TextLayoutProperty>();
             if (textLayoutProperty) {
-                auto selectedMonthStr = (month < ONE_DIGIT_BOUNDARY  ? "0" : "") + std::to_string(month);
+                auto selectedMonthStr = (month < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(month);
                 textLayoutProperty->UpdateContent(selectedMonthStr);
                 monthNode->MarkModifyDone();
                 monthNode->MarkDirtyNode();
@@ -468,18 +694,33 @@ void CalendarPickerModelNG::SetSelectDateWithNode(FrameNode* frameNode, uint32_t
         }
     }
     if (day > 0) {
-        calendarDate.selectedDate.SetDay(day);
         auto dayNode = CalendarPickerModelNG::GetDayNode(frameNode);
         if (dayNode) {
             auto textLayoutProperty = dayNode->GetLayoutProperty<TextLayoutProperty>();
             if (textLayoutProperty) {
-                auto selectedDayStr = (day < ONE_DIGIT_BOUNDARY  ? "0" : "") + std::to_string(day);
+                auto selectedDayStr = (day < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(day);
                 textLayoutProperty->UpdateContent(selectedDayStr);
                 dayNode->MarkModifyDone();
                 dayNode->MarkDirtyNode();
             }
         }
     }
+}
+
+void CalendarPickerModelNG::SetSelectDateWithNode(FrameNode* frameNode, uint32_t year, uint32_t month, uint32_t day)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    auto calendarDate = pickerPattern->GetCalendarData();
+    if (year > 0 && month > 0 && month <= MAX_MONTH && day > 0 && day <= PickerDate::GetMaxDay(year, month)) {
+        calendarDate.selectedDate.SetYear(year);
+        calendarDate.selectedDate.SetMonth(month);
+        calendarDate.selectedDate.SetDay(day);
+    }
+    calendarDate.selectedDate =
+        PickerDate::AdjustDateToRange(calendarDate.selectedDate, calendarDate.startDate, calendarDate.endDate);
+    UpdateSelectedDateContent(frameNode, calendarDate.selectedDate);
     pickerPattern->SetCalendarData(calendarDate);
 }
 
@@ -529,14 +770,15 @@ PickerDate CalendarPickerModelNG::GetSelectDateWithNode(FrameNode* frameNode)
 void CalendarPickerModelNG::SetOnChangeWithNode(FrameNode* frameNode, SelectedChangeEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<CalendarPickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<CalendarPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(onChange));
 }
 
 std::map<std::size_t, std::string> CalendarPickerModelNG::GetDateNodeOrder(const CalendarSettingData& settingData)
 {
-    PickerDate date = settingData.selectedDate;
+    PickerDate date =
+        PickerDate::AdjustDateToRange(settingData.selectedDate, settingData.startDate, settingData.endDate);
     std::vector<std::string> outOrder;
     bool result = Localization::GetInstance()->GetDateOrder(outOrder);
     std::map<std::size_t, std::string> order;
@@ -545,7 +787,7 @@ std::map<std::size_t, std::string> CalendarPickerModelNG::GetDateNodeOrder(const
         monthNodeIndex_ = MONTH_NODE_INDEX;
         dayNodeIndex_ = DAY_NODE_INDEX;
         auto num = 0;
-        order[num++] = std::to_string(date.GetYear());
+        order[num++] = AddLeadingZeroToYear(date.GetYear());
         order[num++] = (date.GetMonth() < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(date.GetMonth());
         order[num] = (date.GetDay() < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(date.GetDay());
     } else {
@@ -553,7 +795,7 @@ std::map<std::size_t, std::string> CalendarPickerModelNG::GetDateNodeOrder(const
         for (size_t i = 0; i < outOrder.size(); ++i) {
             if (outOrder[i] == "year") {
                 yearNodeIndex_ = static_cast<int32_t>(i + index);
-                order[i] = std::to_string(date.GetYear());
+                order[i] = AddLeadingZeroToYear(date.GetYear());
             }
             if (outOrder[i] == "month") {
                 monthNodeIndex_ = static_cast<int32_t>(i + index);
@@ -568,5 +810,54 @@ std::map<std::size_t, std::string> CalendarPickerModelNG::GetDateNodeOrder(const
     }
 
     return order;
+}
+
+std::string CalendarPickerModelNG::AddLeadingZeroToYear(uint32_t year)
+{
+    std::string yearStr = std::string(YEAR_LENGTH - std::to_string(year).length(), '0');
+    yearStr += std::to_string(year);
+    return yearStr;
+}
+
+void CalendarPickerModelNG::SetMarkToday(bool isMarkToday)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    pickerPattern->SetMarkToday(isMarkToday);
+}
+
+void CalendarPickerModelNG::SetMarkToday(FrameNode* frameNode, bool isMarkToday)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    pickerPattern->SetMarkToday(isMarkToday);
+}
+
+bool CalendarPickerModelNG::GetMarkToday(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, DEFAULT_MARK_TODAY);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_RETURN(pickerPattern, DEFAULT_MARK_TODAY);
+    return pickerPattern->GetMarkToday();
+}
+
+void CalendarPickerModelNG::SetDisabledDateRange(
+    FrameNode* frameNode, const std::vector<std::pair<PickerDate, PickerDate>>& disabledDateRange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    pickerPattern->SetDisabledDateRange(disabledDateRange);
+}
+
+std::string CalendarPickerModelNG::GetDisabledDateRange(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, "");
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_RETURN(pickerPattern, "");
+    return pickerPattern->GetDisabledDateRange();
 }
 } // namespace OHOS::Ace::NG

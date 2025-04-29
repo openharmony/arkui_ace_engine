@@ -15,8 +15,6 @@
 
 #include "bridge/declarative_frontend/jsview/models/richeditor_model_impl.h"
 
-#include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
-
 namespace OHOS::Ace::Framework {
 RefPtr<RichEditorBaseControllerBase> RichEditorModelImpl::GetRichEditorController()
 {

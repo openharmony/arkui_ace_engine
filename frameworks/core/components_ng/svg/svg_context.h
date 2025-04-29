@@ -27,12 +27,27 @@
 #include "base/utils/noncopyable.h"
 #include "core/animation/animator.h"
 #include "core/components_ng/render/canvas_image.h"
+#include "core/components_ng/svg/base/svg_length_scale_rule.h"
 
 namespace OHOS::Ace::NG {
 using AttrMap = std::unordered_map<std::string, std::string>;
 using ClassStyleMap = std::unordered_map<std::string, AttrMap>;
 using FuncNormalizeToPx = std::function<double(const Dimension&)>;
 using FuncAnimateFlush = std::function<void()>;
+
+class SvgDumpInfo {
+public:
+    SvgDumpInfo(Size contentSize, std::string drawTime) : contentSize_(contentSize), drawTime_(drawTime) {}
+    SvgDumpInfo() = default;
+    ~SvgDumpInfo() = default;
+    std::string ToString()
+    {
+        return std::string("contentSize: ").append(contentSize_.ToString()).append(", drawTime: ").append(drawTime_);
+    }
+private:
+   Size contentSize_;
+   std::string drawTime_;
+};
 
 class SvgNode;
 
@@ -63,8 +78,6 @@ public:
 
     void ControlAnimators(bool play);
 
-    size_t GetAnimatorCount();
-
     void SetFuncNormalizeToPx(const FuncNormalizeToPx& funcNormalizeToPx);
 
     double NormalizeToPx(const Dimension& value);
@@ -92,21 +105,30 @@ public:
     {
         return viewPort_;
     }
-
-    uint32_t ReleaseAndGetAnimatorNeedFinishCnt()
+    void SetOnAnimationFinished(const std::function<void()>& onFinishCallback);
+    void OnAnimationFinished();
+    void CreateDumpInfo(SvgDumpInfo dumpInfo);
+    void SetContentSize(Size& contentSize)
     {
-        return --animatorNeedFinishCnt_;
+        contentSize_ = contentSize;
     }
-
-    void InitAnimatorNeedFinishCnt()
+    const Size& GetContentSize()
     {
-        animatorNeedFinishCnt_ = animatorSumCnt_;
+        return contentSize_;
     }
-
+    SvgDumpInfo& GetDumpInfo();
+    std::string GetCurrentTimeString();
+    void SetFillColor(std::optional<Color>& fillColor)
+    {
+        fillColor_ = fillColor;
+    }
+    std::optional<Color>& GetFillColor()
+    {
+        return fillColor_;
+    }
+    Rect GetBoundingRect(RefPtr<SvgNode>& boxNode, SvgLengthScaleRule& boxMeasureRule);
 private:
     std::unordered_map<std::string, WeakPtr<SvgNode>> idMapper_;
-    uint32_t animatorNeedFinishCnt_ = 0;
-    uint32_t animatorSumCnt_ = 0;
     // weak references to animators in svgDom
     std::unordered_map<int32_t, WeakPtr<Animator>> animators_;
     ClassStyleMap styleMap_;
@@ -115,7 +137,10 @@ private:
     std::map<WeakPtr<CanvasImage>, FuncAnimateFlush> animateCallbacks_;
     Rect rootViewBox_;
     Size viewPort_;
-
+    std::list<std::function<void()>> onFinishCallbacks_;
+    Size contentSize_;
+    SvgDumpInfo dumpInfo_;
+    std::optional<Color> fillColor_;
     ACE_DISALLOW_COPY_AND_MOVE(SvgContext);
 };
 } // namespace OHOS::Ace::NG

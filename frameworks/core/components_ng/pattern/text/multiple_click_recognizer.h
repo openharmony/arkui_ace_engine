@@ -30,6 +30,7 @@ public:
     MultipleClickRecognizer() = default;
     ~MultipleClickRecognizer() = default;
     void Start(const GestureEvent& event);
+    void StartCounting(const GestureEvent& event);
     bool IsSingleClick() const;
     bool IsDoubleClick() const;
     bool IsTripleClick() const;
@@ -75,7 +76,7 @@ private:
     CancelableCallback<void()> clickCountTask_;
     int32_t clickTimes_ = 1;
     TimeStamp lastClickTimeStamp_;
-    Offset lastClickPosition_;
+    Offset lastClickPosition_ = Offset(Infinity<double>(), Infinity<double>());
     float minIntervalTime_ = 0.0f;
     float maxIntervalTime_ = 300.0f;
     Dimension maxDeltaDistance_ = 15.0_vp;

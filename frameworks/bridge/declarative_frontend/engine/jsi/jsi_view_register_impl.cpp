@@ -13,20 +13,9 @@
  * limitations under the License.
  */
 
-#include <array>
-#include <utility>
-
-#include "base/geometry/ng/size_t.h"
-#include "base/i18n/localization.h"
-#include "base/log/log.h"
-#include "base/log/log_wrapper.h"
-#include "base/memory/ace_type.h"
 #include "bridge/card_frontend/card_frontend_declarative.h"
-#include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
-#include "bridge/declarative_frontend/engine/js_object_template.h"
-#include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_extra_view_register.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
 #ifdef NG_BUILD
@@ -38,25 +27,15 @@
 #include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
 #include "bridge/declarative_frontend/jsview/action_sheet/js_action_sheet.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas.h"
-#include "bridge/declarative_frontend/jsview/canvas/js_canvas_gradient.h"
-#include "bridge/declarative_frontend/jsview/canvas/js_canvas_path.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas_pattern.h"
-#include "bridge/declarative_frontend/jsview/canvas/js_drawing_rendering_context.h"
-#include "bridge/declarative_frontend/jsview/canvas/js_matrix2d.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_offscreen_canvas.h"
-#include "bridge/declarative_frontend/jsview/canvas/js_offscreen_rendering_context.h"
-#include "bridge/declarative_frontend/jsview/canvas/js_path2d.h"
-#include "bridge/declarative_frontend/jsview/canvas/js_render_image.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_rendering_context.h"
-#include "bridge/declarative_frontend/jsview/canvas/js_rendering_context_settings.h"
-#include "bridge/declarative_frontend/jsview/dialog/js_alert_dialog.h"
 #include "bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 #include "bridge/declarative_frontend/jsview/js_animator.h"
 #include "bridge/declarative_frontend/jsview/js_badge.h"
 #include "bridge/declarative_frontend/jsview/js_base_node.h"
 #include "bridge/declarative_frontend/jsview/js_blank.h"
 #include "bridge/declarative_frontend/jsview/js_button.h"
-#include "bridge/declarative_frontend/jsview/js_cached_image.h"
 #include "bridge/declarative_frontend/jsview/js_calendar.h"
 #include "bridge/declarative_frontend/jsview/js_calendar_controller.h"
 #include "bridge/declarative_frontend/jsview/js_calendar_picker.h"
@@ -65,10 +44,8 @@
 #include "bridge/declarative_frontend/jsview/js_circle.h"
 #include "bridge/declarative_frontend/jsview/js_circle_shape.h"
 #include "bridge/declarative_frontend/jsview/js_clipboard.h"
-#include "bridge/declarative_frontend/jsview/js_column.h"
 #include "bridge/declarative_frontend/jsview/js_column_split.h"
 #include "bridge/declarative_frontend/jsview/js_common_view.h"
-#include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_container_span.h"
 #include "bridge/declarative_frontend/jsview/js_content_slot.h"
 #include "bridge/declarative_frontend/jsview/js_counter.h"
@@ -82,9 +59,11 @@
 #include "bridge/declarative_frontend/jsview/js_flex_impl.h"
 #include "bridge/declarative_frontend/jsview/js_folder_stack.h"
 #include "bridge/declarative_frontend/jsview/js_foreach.h"
+#ifdef FORM_BUTTON_COMPONENT_SUPPORT
+#include "bridge/declarative_frontend/jsview/js_form_button.h"
+#endif
 #include "bridge/declarative_frontend/jsview/js_form_link.h"
 #include "bridge/declarative_frontend/jsview/js_gauge.h"
-#include "bridge/declarative_frontend/jsview/js_gesture.h"
 #include "bridge/declarative_frontend/jsview/js_grid.h"
 #include "bridge/declarative_frontend/jsview/js_grid_col.h"
 #include "bridge/declarative_frontend/jsview/js_grid_container.h"
@@ -96,10 +75,14 @@
 #include "bridge/declarative_frontend/jsview/js_image_animator.h"
 #include "bridge/declarative_frontend/jsview/js_image_span.h"
 #include "bridge/declarative_frontend/jsview/js_indexer.h"
+#include "bridge/declarative_frontend/jsview/js_indicator.h"
+#if defined(DYNAMIC_COMPONENT_SUPPORT)
 #include "bridge/declarative_frontend/jsview/js_isolated_component.h"
+#endif
 #include "bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
 #include "bridge/declarative_frontend/jsview/js_layout_manager.h"
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach.h"
+#include "bridge/declarative_frontend/jsview/js_lazy_grid.h"
 #include "bridge/declarative_frontend/jsview/js_line.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/js_linear_indicator.h"
@@ -122,7 +105,6 @@
 #include "bridge/declarative_frontend/jsview/js_navrouter.h"
 #include "bridge/declarative_frontend/jsview/js_node_container.h"
 #include "bridge/declarative_frontend/jsview/js_page_transition.h"
-#include "bridge/declarative_frontend/jsview/js_pan_handler.h"
 #include "bridge/declarative_frontend/jsview/js_particle.h"
 #include "bridge/declarative_frontend/jsview/js_paste_button.h"
 #include "bridge/declarative_frontend/jsview/js_path.h"
@@ -132,7 +114,9 @@
 #include "bridge/declarative_frontend/jsview/js_polygon.h"
 #include "bridge/declarative_frontend/jsview/js_polyline.h"
 #include "bridge/declarative_frontend/jsview/js_progress.h"
+#ifdef QRCODEGEN_SUPPORT
 #include "bridge/declarative_frontend/jsview/js_qrcode.h"
+#endif
 #include "bridge/declarative_frontend/jsview/js_radio.h"
 #include "bridge/declarative_frontend/jsview/js_rect.h"
 #include "bridge/declarative_frontend/jsview/js_rect_shape.h"
@@ -141,23 +125,21 @@
 #include "bridge/declarative_frontend/jsview/js_relative_container.h"
 #include "bridge/declarative_frontend/jsview/js_repeat.h"
 #include "bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.h"
+#include "bridge/declarative_frontend/jsview/js_repeat_virtual_scroll_2.h"
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
 #include "bridge/declarative_frontend/jsview/js_row.h"
 #include "bridge/declarative_frontend/jsview/js_row_split.h"
 #include "bridge/declarative_frontend/jsview/js_save_button.h"
 #include "bridge/declarative_frontend/jsview/js_scope_util.h"
 #include "bridge/declarative_frontend/jsview/js_scroll.h"
-#include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_search.h"
 #include "bridge/declarative_frontend/jsview/js_select.h"
 #include "bridge/declarative_frontend/jsview/js_shape.h"
-#include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_sheet.h"
 #include "bridge/declarative_frontend/jsview/js_side_bar.h"
 #include "bridge/declarative_frontend/jsview/js_slider.h"
 #include "bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "bridge/declarative_frontend/jsview/js_span.h"
-#include "bridge/declarative_frontend/jsview/js_stack.h"
 #include "bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h"
 #include "bridge/declarative_frontend/jsview/js_stepper.h"
 #include "bridge/declarative_frontend/jsview/js_stepper_item.h"
@@ -174,26 +156,21 @@
 #include "bridge/declarative_frontend/jsview/js_textpicker.h"
 #include "bridge/declarative_frontend/jsview/js_texttimer.h"
 #include "bridge/declarative_frontend/jsview/js_toggle.h"
-#include "bridge/declarative_frontend/jsview/js_touch_handler.h"
-#include "bridge/declarative_frontend/jsview/js_view.h"
+#include "bridge/declarative_frontend/jsview/js_toolbaritem.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
-#include "bridge/declarative_frontend/jsview/js_view_measure_layout.h"
 #include "bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "bridge/declarative_frontend/jsview/js_water_flow.h"
 #include "bridge/declarative_frontend/jsview/js_water_flow_item.h"
 #include "bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "bridge/declarative_frontend/sharedata/js_share_data.h"
-#include "bridge/declarative_frontend/style_string/js_span_object.h"
 #include "bridge/declarative_frontend/style_string/js_span_string.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_object_template.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_app_bar_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_scrollable_base.h"
-#include "frameworks/bridge/js_frontend/engine/jsi/js_value.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_container_modal_view.h"
+#include "bridge/declarative_frontend/jsview/text_menu/js_text_menu.h"
 
 #ifdef REMOTE_WINDOW_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_remote_window.h"
@@ -265,64 +242,6 @@
 
 namespace OHOS::Ace::Framework {
 
-void AddCustomTitleBarComponent(const panda::Local<panda::ObjectRef>& obj)
-{
-    const auto object = JSRef<JSObject>::Make(obj);
-    const EcmaVM* vm = object->GetEcmaVM();
-    auto* view = static_cast<JSView*>(obj->GetNativePointerField(vm, 0));
-    if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
-        return;
-    }
-    auto uiNode = AceType::DynamicCast<NG::UINode>(view->CreateViewNode(true));
-    CHECK_NULL_VOID(uiNode);
-    auto customNode = AceType::DynamicCast<NG::CustomTitleNode>(uiNode);
-    CHECK_NULL_VOID(customNode);
-
-    auto id = ContainerScope::CurrentId();
-    const JSRef<JSVal> setAppTitle = object->GetProperty("setAppTitle");
-    if (setAppTitle->IsFunction()) {
-        JSRef<JSFunc> jsSetAppTitleFunc = JSRef<JSFunc>::Cast(setAppTitle);
-        auto callback = [obj = object, jsFunc = jsSetAppTitleFunc, id, vm](const std::string& title) {
-            ContainerScope scope(id);
-            CHECK_NULL_VOID(vm);
-            JSRef<JSVal> param = JSRef<JSVal>::Make(JsiValueConvertor::toJsiValueWithVM(vm, title));
-            jsFunc->Call(obj, 1, &param);
-        };
-        customNode->SetAppTitleCallback(callback);
-    }
-#ifdef PIXEL_MAP_SUPPORTED
-    const JSRef<JSVal> setAppIcon = object->GetProperty("setAppIcon");
-    if (setAppIcon->IsFunction()) {
-        JSRef<JSFunc> jsSetAppIconFunc = JSRef<JSFunc>::Cast(setAppIcon);
-        auto callback = [obj = object, jsFunc = jsSetAppIconFunc, id](const RefPtr<PixelMap>& icon) {
-            ContainerScope scope(id);
-            JSRef<JSVal> param = ConvertPixmap(icon);
-            jsFunc->Call(obj, 1, &param);
-        };
-        customNode->SetAppIconCallback(callback);
-    }
-#endif
-    const JSRef<JSVal> onWindowFocused = object->GetProperty("onWindowFocused");
-    if (onWindowFocused->IsFunction()) {
-        JSRef<JSFunc> jsOnWindowFocusedFunc = JSRef<JSFunc>::Cast(onWindowFocused);
-        auto callback = [obj = object, jsFunc = jsOnWindowFocusedFunc, id]() {
-            ContainerScope scope(id);
-            jsFunc->Call(obj);
-        };
-        customNode->SetOnWindowFocusedCallback(callback);
-    }
-
-    const JSRef<JSVal> onWindowUnfocused = object->GetProperty("onWindowUnfocused");
-    if (onWindowUnfocused->IsFunction()) {
-        JSRef<JSFunc> jsOnWindowUnfocusedFunc = JSRef<JSFunc>::Cast(onWindowUnfocused);
-        auto callback = [obj = object, jsFunc = jsOnWindowUnfocusedFunc, id]() {
-            ContainerScope scope(id);
-            jsFunc->Call(obj);
-        };
-        customNode->SetOnWindowUnfocusedCallback(callback);
-    }
-    NG::ViewStackProcessor::GetInstance()->SetCustomTitleNode(customNode);
-}
 
 void CleanPageNode(const RefPtr<NG::FrameNode>& pageNode)
 {
@@ -344,7 +263,7 @@ void CleanPageNode(const RefPtr<NG::FrameNode>& pageNode)
 
 void UpdateRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectRef>& obj)
 {
-    auto* view = static_cast<JSView*>(obj->GetNativePointerField(vm, 0));
+    auto* view = JsiObjectTemplate::GetNativeView(obj, vm);
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return;
     }
@@ -426,6 +345,12 @@ void UpdateRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectRef>&
             }
             return false;
         });
+        pagePattern->SetOnNewParam([weak = Referenced::WeakClaim(view)](const std::string& newParam) {
+            auto view = weak.Upgrade();
+            if (view) {
+                view->FireOnNewParam(newParam);
+            }
+        });
         auto customNode = AceType::DynamicCast<NG::CustomNodeBase>(pageRootNode);
 
         pagePattern->SetPageTransitionFunc(
@@ -439,9 +364,7 @@ void UpdateRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectRef>&
                     NG::ViewStackProcessor::GetInstance()->SetPageNode(nullptr);
                 }
             });
-        auto context = AceType::DynamicCast<NG::PipelineContext>(PipelineContext::GetCurrentContext());
-        CHECK_NULL_VOID(context);
-        context->RegisterDumpInfoListener(
+        pagePattern->RegisterDumpInfoListener(
             [weakView = Referenced::WeakClaim(view)](const std::vector<std::string>& params) {
                 auto view = weakView.Upgrade();
                 if (view) {
@@ -518,13 +441,15 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ScrollMotion", JSAnimator::JSBind },
     { "Animator", JSAnimator::JSBind },
     { "Span", JSSpan::JSBind },
+    { "NativeCustomSpan", JSNativeCustomSpan::JSBind },
     { "SpanString", JSSpanString::JSBind },
     { "MutableSpanString", JSMutableSpanString::JSBind },
     { "TextStyle", JSFontSpan::JSBind },
     { "DecorationStyle", JSDecorationSpan::JSBind },
     { "BaselineOffsetStyle", JSBaselineOffsetSpan::JSBind },
     { "LetterSpacingStyle", JSLetterSpacingSpan::JSBind },
-    { "GestureSpan", JSGestureSpan::JSBind },
+    { "UrlStyle", JSUrlSpan::JSBind },
+    { "NativeGestureStyle", JSGestureSpan::JSBind },
     { "TextShadowSpan", JSTextShadowSpan::JSBind },
     { "BackgroundColorStyle", JSBackgroundColorSpan::JSBind },
     { "ImageAttachment", JSImageAttachment::JSBind },
@@ -539,13 +464,17 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LoadingProgress", JSLoadingProgress::JSBind },
     { "Image", JSImage::JSBind },
     { "Counter", JSCounter::JSBind },
+#ifndef ARKUI_WEARABLE
     { "CalendarPicker", JSCalendarPicker::JSBind },
+#endif
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
     { "Slider", JSSlider::JSBind },
     { "Stack", JSStack::JSBind },
+#ifndef ARKUI_WEARABLE
     { "FolderStack", JSFolderStack::JSBind},
+#endif
     { "ForEach", JSForEach::JSBind },
     { "Divider", JSDivider::JSBind },
     { "If", JSIfElse::JSBind },
@@ -564,7 +493,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Polyline", JSPolyline::JSBind },
     { "Ellipse", JSEllipse::JSBind },
     { "Radio", JSRadio::JSBind },
+#ifdef QRCODEGEN_SUPPORT
     { "QRCode", JSQRCode::JSBind },
+#endif
     { "Piece", JSPiece::JSBind },
     { "Rating", JSRating::JSBind },
     { "DataPanel", JSDataPanel::JSBind },
@@ -572,6 +503,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Gauge", JSGauge::JSBind },
     { "Marquee", JSMarquee::JSBind },
     { "Swiper", JSSwiper::JSBind },
+    { "Indicator", JSIndicator::JSBind },
     { "SwiperController", JSSwiperController::JSBind },
     { "CalendarController", JSCalendarController::JSBind },
     { "CanvasRenderingContext2D", JSRenderingContext::JSBind },
@@ -590,6 +522,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "__Common__", JSCommonView::JSBind },
     { "LinearGradient", JSLinearGradient::JSBind },
     { "FormLink", JSFormLink::JSBind },
+#ifdef FORM_BUTTON_COMPONENT_SUPPORT
+    { "FormButton", JSFormButton::JSBind },
+#endif
     { "SymbolSpan", JSSymbolSpan::JSBind },
     { "DrawingRenderingContext", JSDrawingRenderingContext::JSBind },
 };
@@ -604,13 +539,15 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ScrollMotion", JSAnimator::JSBind },
     { "Animator", JSAnimator::JSBind },
     { "Span", JSSpan::JSBind },
+    { "NativeCustomSpan", JSNativeCustomSpan::JSBind },
     { "SpanString", JSSpanString::JSBind },
     { "MutableSpanString", JSMutableSpanString::JSBind },
     { "TextStyle", JSFontSpan::JSBind },
     { "DecorationStyle", JSDecorationSpan::JSBind },
     { "BaselineOffsetStyle", JSBaselineOffsetSpan::JSBind },
     { "LetterSpacingStyle", JSLetterSpacingSpan::JSBind },
-    { "GestureSpan", JSGestureSpan::JSBind },
+    { "UrlStyle", JSUrlSpan::JSBind },
+    { "NativeGestureStyle", JSGestureSpan::JSBind },
     { "TextShadowSpan", JSTextShadowSpan::JSBind },
     { "BackgroundColorStyle", JSBackgroundColorSpan::JSBind },
     { "ImageAttachment", JSImageAttachment::JSBind },
@@ -619,6 +556,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Button", JSButton::JSBind },
     { "Canvas", JSCanvas::JSBind },
     { "LazyForEach", JSLazyForEach::JSBind },
+    { "LazyVGridLayout", JSLazyVGridLayout::JSBind },
     { "List", JSList::JSBind },
     { "ListItem", JSListItem::JSBind },
     { "ListItemGroup", JSListItemGroup::JSBind },
@@ -626,7 +564,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Image", JSImage::JSBind },
     { "ImageAnimator", JSImageAnimator::JSBind },
     { "Counter", JSCounter::JSBind },
+#ifndef ARKUI_WEARABLE
     { "CalendarPicker", JSCalendarPicker::JSBind },
+#endif
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
@@ -635,19 +575,22 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "GridContainer", JSGridContainer::JSBind },
     { "Slider", JSSlider::JSBind },
     { "Stack", JSStack::JSBind },
+#ifndef ARKUI_WEARABLE
     { "FolderStack", JSFolderStack::JSBind},
+#endif
     { "ForEach", JSForEach::JSBind },
     { "Divider", JSDivider::JSBind },
     { "Swiper", JSSwiper::JSBind },
+    { "Indicator", JSIndicator::JSBind },
     { "Panel", JSSlidingPanel::JSBind },
     { "RepeatNative", JSRepeat::JSBind },
     { "RepeatVirtualScrollNative", JSRepeatVirtualScroll::JSBind },
+    { "RepeatVirtualScroll2Native", JSRepeatVirtualScroll2::JSBind },
     { "NavDestination", JSNavDestination::JSBind },
     { "Navigation", JSNavigation::JSBind },
     { "NativeNavPathStack", JSNavPathStack::JSBind },
     { "Navigator", JSNavigator::JSBind },
     { "NavRouter", JSNavRouter::JSBind },
-    { "ColumnSplit", JSColumnSplit::JSBind },
     { "If", JSIfElse::JSBind },
     { "Scroll", JSScroll::JSBind },
     { "ScrollBar", JSScrollBar::JSBind },
@@ -656,9 +599,12 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Stepper", JSStepper::JSBind },
     { "StepperItem", JSStepperItem::JSBind },
     { "Toggle", JSToggle::JSBind },
+    { "ToolBarItem", JSToolBarItem::JSBind },
     { "Blank", JSBlank::JSBind },
     { "Calendar", JSCalendar::JSBind },
+#ifndef ARKUI_WEARABLE
     { "CalendarPickerDialog", JSCalendarPickerDialog::JSBind },
+#endif
     { "Rect", JSRect::JSBind },
     { "Shape", JSShape::JSBind },
     { "Path", JSPath::JSBind },
@@ -671,10 +617,14 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TabContent", JSTabContent::JSBind },
     { "TextPicker", JSTextPicker::JSBind },
     { "TimePicker", JSTimePicker::JSBind },
+#ifndef ARKUI_WEARABLE
     { "TextPickerDialog", JSTextPickerDialog::JSBind },
     { "TimePickerDialog", JSTimePickerDialog::JSBind },
+#endif
     { "DatePicker", JSDatePicker::JSBind },
+#ifndef ARKUI_WEARABLE
     { "DatePickerDialog", JSDatePickerDialog::JSBind },
+#endif
     { "PageTransitionEnter", JSPageTransition::JSBind },
     { "PageTransitionExit", JSPageTransition::JSBind },
     { "RowSplit", JSRowSplit::JSBind },
@@ -686,12 +636,16 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "AlertDialog", JSAlertDialog::JSBind },
     { "ContextMenu", JSContextMenu::JSBind },
     { "FormLink", JSFormLink::JSBind },
+#ifdef FORM_BUTTON_COMPONENT_SUPPORT
+    { "FormButton", JSFormButton::JSBind },
+#endif
     { "LocationButton", JSLocationButton::JSBind },
     { "PasteButton", JSPasteButton::JSBind },
     { "Particle", JSParticle::JSBind },
     { "SaveButton", JSSaveButton::JSBind },
     { "WithTheme", JSWithTheme::JSBind },
     { "__KeyboardAvoid__", JSKeyboardAvoid::JSBind },
+    { "TextMenu", JSTextMenu::JSBind },
 #ifdef ABILITY_COMPONENT_SUPPORTED
     { "AbilityComponent", JSAbilityComponent::JSBind },
 #endif
@@ -699,7 +653,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextInput", JSTextInput::JSBind },
     { "TextClock", JSTextClock::JSBind },
     { "SideBarContainer", JSSideBar::JSBind },
+#ifdef QRCODEGEN_SUPPORT
     { "QRCode", JSQRCode::JSBind },
+#endif
 #ifdef FORM_SUPPORTED
     { "FormComponent", JSForm::JSBind },
     { "FormMenuItem", JSFormMenuItem::JSBind },
@@ -757,6 +713,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Scroller", JSScroller::JSBind },
     { "ListScroller", JSListScroller::JSBind },
     { "SwiperController", JSSwiperController::JSBind },
+    { "IndicatorController", JSIndicatorController::JSBind },
     { "TabsController", JSTabsController::JSBind },
     { "CalendarController", JSCalendarController::JSBind },
 #ifdef ABILITY_COMPONENT_SUPPORTED
@@ -799,9 +756,14 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LinearGradient", JSLinearGradient::JSBind },
     { "ImageSpan", JSImageSpan::JSBind },
 #ifdef PREVIEW
+    { "AbilityComponent", JSAbilityComponent::JSBind },
+    { "Component3D", JSSceneView::JSBind },
+    { "EmbeddedComponent", JSEmbeddedComponent::JSBind },
     { "FormComponent", JSForm::JSBind },
+    { "IsolatedComponent", JSIsolatedComponent::JSBind },
     { "XComponent", JSXComponent::JSBind },
     { "XComponentController", JSXComponentController::JSBind },
+    { "RemoteWindow", JSRemoteWindow::JSBind },
     { "RichText", JSRichText::JSBind },
     { "Web", JSWeb::JSBind },
     { "WebController", JSWebController::JSBind },
@@ -850,7 +812,12 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ScrollableTargetInfo", JSScrollableTargetInfo::JSBind },
     { "PanRecognizer", JSPanRecognizer::JSBind },
     { "LinearIndicator", JSLinearIndicator::JSBind },
-    { "LinearIndicatorController", JSLinearIndicatorController::JSBind }
+    { "LinearIndicatorController", JSLinearIndicatorController::JSBind },
+    { "TapRecognizer", JSTapRecognizer::JSBind },
+    { "LongPressRecognizer", JSLongPressRecognizer::JSBind },
+    { "SwipeRecognizer", JSSwipeRecognizer::JSBind },
+    { "PinchRecognizer", JSPinchRecognizer::JSBind },
+    { "RotationRecognizer", JSRotationRecognizer::JSBind }
 };
 
 void RegisterBindFuncs(BindingTarget globalObj)
@@ -880,6 +847,7 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)
     JSColumn::JSBind(globalObj);
     JSCommonView::JSBind(globalObj);
     JSSwiperController::JSBind(globalObj);
+    JSIndicatorController::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
@@ -931,6 +899,7 @@ void RegisterAllFormModule(BindingTarget globalObj, void* nativeEngine)
     JSColumn::JSBind(globalObj);
     JSCommonView::JSBind(globalObj);
     JSSwiperController::JSBind(globalObj);
+    JSIndicatorController::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
@@ -960,6 +929,10 @@ void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module
         JSOffscreenCanvas::JSBind(globalObj, nativeEngine);
         return;
     }
+    if (module == "Repeat") {
+        JSRepeat::JSBind(globalObj);
+        return;
+    }
     auto func = bindFuncs.find(module);
     if (func == bindFuncs.end()) {
         RegisterExtraViewByName(globalObj, module);
@@ -971,6 +944,8 @@ void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module
         JSCalendarController::JSBind(globalObj);
     } else if ((*func).first == "TextTimer") {
         JSTextTimerController::JSBind(globalObj);
+    } else if ((*func).first == "TextClock") {
+        JSTextClockController::JSBind(globalObj);
     } else if ((*func).first == "Canvas") {
         JSCanvasPattern::JSBind(globalObj);
         JSCanvasGradient::JSBind(globalObj);
@@ -1041,8 +1016,9 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
     if (cleanUpIdleTask->IsFunction()) {
         LOGI("CleanUpIdleTask is a valid function");
         const auto globalFunc = JSRef<JSFunc>::Cast(cleanUpIdleTask);
-        const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
-            jsFunc->Call(globalObject);
+        const auto callback = [jsFunc = globalFunc, globalObject = globalObject](int64_t maxTimeInNs) {
+            auto params = ConvertToJSValues(maxTimeInNs / 1e6);
+            jsFunc->Call(globalObject, params.size(), params.data());
         };
         ElementRegister::GetInstance()->RegisterJSCleanUpIdleTaskFunc(callback);
     }
@@ -1097,6 +1073,11 @@ void JsBindFormViews(
         JSOffscreenRenderingContext::JSBind(globalObj);
         JSRenderingContextSettings::JSBind(globalObj);
         JSRenderingContext::JSBind(globalObj);
+
+        JSRectShape::JSBind(globalObj);
+        JSCircleShape::JSBind(globalObj);
+        JSEllipseShape::JSBind(globalObj);
+        JSPathShape::JSBind(globalObj);
     }
 
     if (!formModuleList.empty()) {
@@ -1137,7 +1118,8 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
 
     JSProfiler::JSBind(globalObj);
     JSScopeUtil::JSBind(globalObj);
-
+    JSContainerModal::JSBind(globalObj);
+    JSAppBar::JSBind(globalObj);
     auto delegate = JsGetFrontendDelegate();
     std::string jsModules;
     if (delegate && delegate->GetAssetContent("component_collection.txt", jsModules)) {
@@ -1157,6 +1139,7 @@ void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
     JSRenderingContextSettings::JSBind(globalObj);
     JSRenderImage::JSBind(globalObj, nativeEngine);
     JSPath2D::JSBind(globalObj);
+    JSCanvasImageData::JSBind(globalObj);
     JSMock::JSBind(globalObj);
 }
 

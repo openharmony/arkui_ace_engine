@@ -46,11 +46,8 @@ public:
         return UIContentErrorCode::NO_ERRORS;
     }
     UIContentErrorCode InitializeByName(OHOS::Rosen::Window *window, const std::string &name,
-        napi_value storage) override {
-        return UIContentErrorCode::NO_ERRORS;
-    }
-    void InitializeDynamic(const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint,
-        const std::vector<std::string>& registerComponents) override {}
+        napi_value storage) override;
+    void InitializeDynamic(const DynamicInitialConfig& config) override {}
     void Initialize(
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override {}
     void Foreground() override {}
@@ -78,17 +75,21 @@ public:
     bool ProcessVsyncEvent(uint64_t timeStampNanos) override;
     void SetIsFocusActive(bool isFocusActive) override {}
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
+    void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) override;
     void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
-        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) override;
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
+        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {}) override;
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override {}
     void UpdateDecorVisible(bool visible, bool hasDeco = true) override {};
-    void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override {}
+    void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override {}
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override {}
     void UpdateTitleInTargetPos(bool isShow, int32_t height) override {}
 
     // Window color
     uint32_t GetBackgroundColor() override;
     void SetBackgroundColor(uint32_t color) override;
+    void SetWindowContainerColor(uint32_t activeColor, uint32_t inactiveColor) override;
 
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
@@ -107,7 +108,9 @@ public:
     // ArkTS Form
     void PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override {}
     void RunFormPage() override {}
-    void OnFormSurfaceChange(float width, float height) override {}
+    void OnFormSurfaceChange(float width, float height,
+        OHOS::Rosen::WindowSizeChangeReason type = static_cast<OHOS::Rosen::WindowSizeChangeReason>(0),
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override {}
     void UpdateFormData(const std::string& data) override {}
     void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap) override
     {}
@@ -146,12 +149,32 @@ public:
     void SetContentNodeGrayScale(float grayscale) override {};
 
     void PreLayout() override {};
-    
+
     void SetStatusBarItemColor(uint32_t color) override;
 
     void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) override {};
 
+    void EnableContainerModalGesture(bool isEnable) override {};
+
+    bool GetContainerFloatingTitleVisible() override
+    {
+        return false;
+    }
+
+    bool GetContainerCustomTitleVisible() override
+    {
+        return false;
+    }
+
+    bool GetContainerControlButtonVisible() override
+    {
+        return false;
+    }
+
+    void UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform) override {};
 private:
+    UIContentErrorCode InitializeInner(
+        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
     UIContentErrorCode CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo,
         napi_value storage);
     void DestroyCallback() const;
@@ -160,6 +183,7 @@ private:
     int32_t instanceId_ = -1;
     void* runtime_ = nullptr;
     // All parameters that need to be passed.
+    std::string startUrl_;
     std::string assetPath_;
     std::string systemResourcesPath_;
     std::string appResourcesPath_;

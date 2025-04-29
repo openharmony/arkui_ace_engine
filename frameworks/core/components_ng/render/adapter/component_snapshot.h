@@ -21,22 +21,36 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/snapshot_param.h"
 
+namespace OHOS::Rosen {
+class RSNode;
+}
+
 namespace OHOS::Ace::NG {
 
-class ComponentSnapshot {
+class ACE_FORCE_EXPORT ComponentSnapshot {
 public:
     using JsCallback = std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>;
     using NormalCallback = std::function<void(std::shared_ptr<Media::PixelMap>)>;
 
     static void Get(const std::string& componentId, JsCallback&& callback, const SnapshotOptions& options);
+    static void GetByUniqueId(int32_t uniqueId, JsCallback&& callback, const SnapshotOptions& options);
     // add delay to ensure Rosen has finished rendering
     static void Create(
         const RefPtr<AceType>& customNode, JsCallback&& callback, bool enableInspector, const SnapshotParam& param,
         bool flag = true);
     static void GetNormalCapture(const RefPtr<FrameNode>& frameNode, NormalCallback&& callback);
 
+    static std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSync(
+        RefPtr<FrameNode>& node, const SnapshotOptions& options);
+
     static std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSync(const std::string& componentId,
         const SnapshotOptions& options);
+    static std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncByUniqueId(int32_t uniqueId,
+        const SnapshotOptions& options);
+
+    // create pixelMap in sync, this method only for drag.
+    static std::shared_ptr<Media::PixelMap> CreateSync(
+        const RefPtr<AceType>& customNode, const SnapshotParam& param);
 
 private:
     static std::shared_ptr<Rosen::RSNode> GetRsNode(const RefPtr<FrameNode>& node);

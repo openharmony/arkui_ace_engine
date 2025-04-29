@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,8 +78,11 @@ constexpr char WEB_EVENT_RUNJSCODE_RECVVALUE[] = "onRunJSRecvValue";
 constexpr char WEB_EVENT_SCROLL[] = "onScroll";
 constexpr char WEB_EVENT_SCALECHANGE[] = "onScaleChange";
 constexpr char WEB_EVENT_JS_INVOKE_METHOD[] = "onJSInvokeMethod";
+constexpr char WEB_EVENT_ON_BEFORE_UNLOAD[] = "onBeforeUnload";
 constexpr char WEB_EVENT_REFRESH_HISTORY[] = "onRefreshAccessedHistory";
 constexpr char WEB_EVENT_RENDER_EXITED[] = "onRenderExited";
+constexpr char WEB_EVENT_FULLSCREEN_ENTER[] = "onFullScreenEnter";
+constexpr char WEB_EVENT_FULLSCREEN_EXIT[] = "onFullScreenExit";
 constexpr char WEB_EVENT_URL_LOAD_INTERCEPT[] = "onUrlLoadIntercept";
 constexpr char WEB_EVENT_PAGECHANGED[] = "onProgressChanged";
 constexpr char WEB_EVENT_RECVTITLE[] = "onReceivedTitle";
@@ -122,6 +125,7 @@ constexpr char NTC_PARAM_Y[] = "y";
 
 constexpr char WEB_ATTRIBUTE_ZOOM_ACCESS[] = "zoomAccess";
 constexpr char NTC_ZOOM_ACCESS[] = "zoomAccess";
+constexpr char NTC_INCOGNITO_MODE[] = "incognitoMode";
 constexpr char WEB_ATTRIBUTE_JAVASCRIPT_ACCESS[] = "javascriptAccess";
 constexpr char NTC_JAVASCRIPT_ACCESS[] = "javascriptAccess";
 constexpr char WEB_ATTRIBUTE_MIN_FONT_SIZE[] = "minFontSize";
@@ -134,6 +138,20 @@ constexpr char WEB_ATTRIBUTE_BACKGROUND_COLOR[] = "backgroundColor";
 constexpr char NTC_BACKGROUND_COLOR[] = "backgroundColor";
 constexpr char WEB_ATTRIBUTE_MEDIA_PLAY_GESTURE_ACCESS[] = "mediaPlayGestureAccess";
 constexpr char NTC_MEDIA_PLAY_GESTURE_ACCESS[] = "mediaPlayGestureAccess";
+constexpr char WEB_ATTRIBUTE_BLOCK_NETWORK[] = "blockNetwork";
+constexpr char NTC_BLOCK_NETWORK[] = "blockNetwork";
+constexpr char WEB_ATTRIBUTE_MIXED_MODE[] = "mixedMode";
+constexpr char NTC_MIXED_MODE[] = "mixedMode";
+constexpr char WEB_ATTRIBUTE_ONLINE_IMAGE_ACCESS[] = "onlineImageAccess";
+constexpr char NTC_ONLINE_IMAGE_ACCESS[] = "onlineImageAccess";
+constexpr char WEB_ATTRIBUTE_GEOLOCATION_ACCESS[] = "geolocationAccess";
+constexpr char NTC_GEOLOCATION_ACCESS[] = "geolocationAccess";
+constexpr char WEB_ATTRIBUTE_DOM_STORAGE_ACCESS[] = "domStorageAccess";
+constexpr char NTC_DOM_STORAGE_ACCESS[] = "domStorageAccess";
+constexpr char WEB_CACHE_MODE[] = "cacheMode";
+constexpr char NTC_CACHE_MODE[] = "cacheMode";
+constexpr char WEB_IMAGE_ACCESS[] = "imageAccess";
+constexpr char NTC_IMAGE_ACCESS[] = "imageAccess";
 
 const char WEB_PARAM_NONE[] = "";
 const char WEB_PARAM_AND[] = "#HWJS-&-#";
@@ -158,7 +176,12 @@ const std::string RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
 
 std::map<std::string, std::string> WebResourceRequsetImpl::GetRequestHeader() const
 {
-    return std::map<std::string, std::string>();
+    auto obj = WebObjectEventManager::GetInstance().GetResourceRequestObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebResourceRequsetImpl GetRequestHeader failed");
+        return std::map<std::string, std::string>();
+    }
+    return obj->GetRequestHeader(object_);
 }
 
 std::string WebResourceRequsetImpl::GetRequestUrl() const
@@ -172,32 +195,62 @@ std::string WebResourceRequsetImpl::GetRequestUrl() const
 
 std::string WebResourceRequsetImpl::GetMethod() const
 {
-    return "GET";
+    auto obj = WebObjectEventManager::GetInstance().GetResourceRequestObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebResourceRequsetImpl GetMethod failed");
+        return std::string();
+    }
+    return obj->GetMethod(object_);
 }
 
 bool WebResourceRequsetImpl::IsRequestGesture() const
 {
-    return true;
+    auto obj = WebObjectEventManager::GetInstance().GetResourceRequestObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebResourceRequsetImpl IsRequestGesture failed");
+        return false;
+    }
+    return obj->IsRequestGesture(object_);
 }
 
 bool WebResourceRequsetImpl::IsMainFrame() const
 {
-    return true;
+    auto obj = WebObjectEventManager::GetInstance().GetResourceRequestObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebResourceRequsetImpl IsMainFrame failed");
+        return true;
+    }
+    return obj->IsMainFrame(object_);
 }
 
 bool WebResourceRequsetImpl::IsRedirect() const
 {
-    return false;
+    auto obj = WebObjectEventManager::GetInstance().GetResourceRequestObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebResourceRequsetImpl IsRedirect failed");
+        return false;
+    }
+    return obj->IsRedirect(object_);
 }
 
 std::map<std::string, std::string> WebResourceResponseImpl::GetResponseHeader() const
 {
-    return std::map<std::string, std::string>();
+    auto obj = WebObjectEventManager::GetInstance().GetResourceResponseObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebResourceResponseImpl ResponseHeader failed");
+        return std::map<std::string, std::string>();
+    }
+    return obj->GetResponseHeader(object_);
 }
 
 std::string WebResourceResponseImpl::GetResponseData() const
 {
-    return "ResponseData";
+    auto obj = WebObjectEventManager::GetInstance().GetResourceResponseObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebResourceResponseImpl ResponseData failed");
+        return std::string();
+    }
+    return obj->GetResponseData(object_);
 }
 
 std::string WebResourceResponseImpl::GetEncoding() const
@@ -222,7 +275,12 @@ std::string WebResourceResponseImpl::GetMimeType() const
 
 std::string WebResourceResponseImpl::GetReason() const
 {
-    return "ResponseReason";
+    auto obj = WebObjectEventManager::GetInstance().GetResourceResponseObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebResourceResponseImpl Reason failed");
+        return std::string();
+    }
+    return obj->GetReason(object_);
 }
 
 int WebResourceResponseImpl::GetStatusCode() const
@@ -295,12 +353,22 @@ int WebConsoleMessage::GetMessageLevel() const
 
 std::string WebConsoleMessage::GetSourceId() const
 {
-    return "SourceId";
+    auto obj = WebObjectEventManager::GetInstance().GetConsoleMessageObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebConsoleMessage GetSourceId failed");
+        return std::string();
+    }
+    return obj->GetSourceId(object_);
 }
 
 int WebConsoleMessage::GetLineNumber() const
 {
-    return 0;
+    auto obj = WebObjectEventManager::GetInstance().GetConsoleMessageObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebConsoleMessage GetLineNumber failed");
+        return 0;
+    }
+    return obj->GetLineNumber(object_);
 }
 
 float WebScaleChangeImpl::GetNewScale() const
@@ -443,6 +511,55 @@ std::string WebAuthRequestImpl::GetRealm() const
     return obj->GetRealm(object_);
 }
 
+std::string WebRefreshAccessedHistoryImpl::GetUrl() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetRefreshAccessedHistoryObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get RefreshAccessedHistory Url failed");
+        return std::string();
+    }
+    return obj->GetUrl(object_);
+}
+
+bool WebRefreshAccessedHistoryImpl::GetIsRefreshed() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetRefreshAccessedHistoryObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebRefreshAccessedHistoryImpl GetIsRefreshed failed");
+        return false;
+    }
+    return obj->GetIsRefreshed(object_);
+}
+
+int WebFullScreenEnterImpl::GetHeights() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetFullScreenEnterObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager WebFullScreenEnterImpl GetHeights failed");
+        return 0;
+    }
+    return obj->GetHeights(object_);
+}
+int WebFullScreenEnterImpl::GetWidths() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetFullScreenEnterObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager WebFullScreenEnterImpl GetWidths failed");
+        return 0;
+    }
+    return obj->GetWidths(object_);
+}
+
+void FullScreenExitHandlerImpl::ExitFullScreen()
+{
+    auto obj = WebObjectEventManager::GetInstance().GetFullScreenEnterObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager FullScreenExitHandlerImpl ExitFullScreen failed");
+        return;
+    }
+    obj->ExitFullScreen(object_, index_);
+}
+
 std::string WebDownloadResponseImpl::GetUrl() const
 {
     auto obj = WebObjectEventManager::GetInstance().GetDownloadResponseObject();
@@ -485,7 +602,12 @@ std::string WebDownloadResponseImpl::GetUserAgent() const
 
 std::string WebDownloadResponseImpl::GetContentDisposition() const
 {
-    return "ContentDisposition";
+    auto obj = WebObjectEventManager::GetInstance().GetDownloadResponseObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebDownloadResponseImpl GetContentDisposition failed");
+        return std::string();
+    }
+    return obj->GetContentDisposition(object_);
 }
 
 void DialogResult::Confirm(const std::string& promptResult)
@@ -599,7 +721,8 @@ void WebFileSelectorResult::HandleFileList(std::vector<std::string>& fileList)
 {
     auto obj = WebObjectEventManager::GetInstance().GetFileChooserObject();
     if (!obj) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebFileChooserImpl FileSelectorResultCallback failed");
+        TAG_LOGE(
+            AceLogTag::ACE_WEB, "WebObjectEventManager get WebFileSelectorResult FileSelectorResultCallback failed");
         return;
     }
     obj->HandleFileList(object_, fileList, index_);
@@ -609,7 +732,7 @@ std::string WebGeolocationImpl::GetOrigin() const
 {
     auto obj = WebObjectEventManager::GetInstance().GetGeolocationObject();
     if (!obj) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebFileChooserImpl FileSelectorResultCallback failed");
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebGeolocationImpl FileSelectorResultCallback failed");
         return nullptr;
     }
     return obj->GetOrigin(object_);
@@ -619,7 +742,7 @@ void Geolocation::Invoke(const std::string& origin, const bool& allow, const boo
 {
     auto obj = WebObjectEventManager::GetInstance().GetGeolocationObject();
     if (!obj) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebFileChooserImpl FileSelectorResultCallback failed");
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get Geolocation FileSelectorResultCallback failed");
         return;
     }
     obj->Invoke(index_, origin, allow, retain);
@@ -688,8 +811,9 @@ void WebDelegateCross::CreatePluginResource(
                     << WEB_PARAM_EQUALS << position.GetX() * context->GetViewScale() << WEB_PARAM_AND << NTC_PARAM_TOP
                     << WEB_PARAM_EQUALS << position.GetY() * context->GetViewScale() << WEB_PARAM_AND << NTC_PARAM_SRC
                     << WEB_PARAM_EQUALS << webPattern->GetWebSrc().value_or("") << WEB_PARAM_AND << NTC_PARAM_PAGE_URL
-                    << WEB_PARAM_EQUALS << pageUrl << WEB_PARAM_AND << NTC_PARAM_RICH_TEXT_INIT << WEB_PARAM_EQUALS
-                    << webPattern->GetRichTextInit();
+                    << WEB_PARAM_EQUALS << pageUrl << WEB_PARAM_AND << NTC_PARAM_RICH_TEXT_INIT
+                    << WEB_PARAM_EQUALS << webPattern->GetRichTextInit() << WEB_PARAM_AND << NTC_INCOGNITO_MODE
+                    << WEB_PARAM_EQUALS << webPattern->GetIncognitoMode();
 
         std::string param = paramStream.str();
         webDelegate->id_ = resRegister->CreateResource(WEB_CREATE, param);
@@ -722,6 +846,7 @@ void WebDelegateCross::RegisterWebEvent()
         auto delegate = weak.Upgrade();
         if (delegate) {
             delegate->OnPageStarted(param);
+            delegate->RunJsProxyCallback();
         }
     });
     resRegister->RegisterEvent(MakeEventHash(WEB_EVENT_PAGEFINISH), [weak = WeakClaim(this)](const std::string& param) {
@@ -806,6 +931,29 @@ void WebDelegateCross::RegisterWebObjectEvent()
             return false;
         });
     WebObjectEventManager::GetInstance().RegisterObjectEvent(
+        MakeEventHash(WEB_EVENT_REFRESH_HISTORY),
+        [weak = WeakClaim(this)](const std::string& param, void* object) {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->OnRefreshAccessedHistory(object);
+            }
+        });
+    WebObjectEventManager::GetInstance().RegisterObjectEvent(
+        MakeEventHash(WEB_EVENT_FULLSCREEN_ENTER), [weak = WeakClaim(this)](const std::string& param, void* object) {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->OnFullScreenEnter(object);
+            }
+        });
+    WebObjectEventManager::GetInstance().RegisterObjectEvent(
+        MakeEventHash(WEB_EVENT_FULLSCREEN_EXIT),
+        [weak = WeakClaim(this)](const std::string& param, void* object) {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->OnFullScreenExit(object);
+            }
+        });
+    WebObjectEventManager::GetInstance().RegisterObjectEvent(
         MakeEventHash(WEB_EVENT_DOWNLOADSTART), [weak = WeakClaim(this)](const std::string& param, void* object) {
             auto delegate = weak.Upgrade();
             if (delegate) {
@@ -856,6 +1004,14 @@ void WebDelegateCross::RegisterWebObjectEvent()
             auto delegate = weak.Upgrade();
             if (delegate) {
                 return delegate->OnPermissionRequest(object);
+            }
+            return false;
+        });
+    WebObjectEventManager::GetInstance().RegisterObjectEventWithBoolReturn(MakeEventHash(WEB_EVENT_ON_BEFORE_UNLOAD),
+        [weak = WeakClaim(this)](const std::string& param, void* object) -> bool {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->OnCommonDialog(object, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD);
             }
             return false;
         });
@@ -949,6 +1105,7 @@ void WebDelegateCross::RecordWebEvent(Recorder::EventType eventType, const std::
         .SetType(host->GetHostTag())
         .SetEventType(eventType)
         .SetText(param)
+        .SetHost(host)
         .SetDescription(host->GetAutoEventParamValue(""));
     Recorder::EventRecorder::Get().OnEvent(std::move(builder));
 }
@@ -1325,6 +1482,93 @@ void WebDelegateCross::OnDownloadStart(void* object)
         TaskExecutor::TaskType::JS, "ArkUIWebDownloadStartEvent");
 }
 
+void WebDelegateCross::OnRefreshAccessedHistory(void* object)
+{
+    ContainerScope scope(instanceId_);
+    CHECK_NULL_VOID(object);
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto WebRefreshAccessedHistory = AceType::MakeRefPtr<WebRefreshAccessedHistoryImpl>(object);
+    CHECK_NULL_VOID(WebRefreshAccessedHistory);
+    auto url = WebRefreshAccessedHistory->GetUrl();
+    auto isRefreshed = WebRefreshAccessedHistory->GetIsRefreshed();
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), url, isRefreshed]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnRefreshAccessedHistory = webEventHub->GetOnRefreshAccessedHistoryEvent();
+                CHECK_NULL_VOID(propOnRefreshAccessedHistory);
+                auto eventParam = std::make_shared<RefreshAccessedHistoryEvent>(url, isRefreshed);
+                propOnRefreshAccessedHistory(eventParam);
+                return;
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebRefreshAccessedHistoryEvent");
+}
+
+void WebDelegateCross::OnFullScreenEnter(void* object)
+{
+    ContainerScope scope(instanceId_);
+    CHECK_NULL_VOID(object);
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto webFullScreenEnter = AceType::MakeRefPtr<WebFullScreenEnterImpl>(object);
+    CHECK_NULL_VOID(webFullScreenEnter);
+    int heights = webFullScreenEnter->GetHeights();
+    int widths = webFullScreenEnter->GetWidths();
+    auto fullScreenExitHandlerResponse = AceType::MakeRefPtr<FullScreenExitHandlerImpl>(object);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), widths, heights, fullScreenExitHandlerResponse]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnFullScreenEnter = webEventHub->GetOnFullScreenEnterEvent();
+                CHECK_NULL_VOID(propOnFullScreenEnter);
+                auto eventParam = std::make_shared<FullScreenEnterEvent>(fullScreenExitHandlerResponse,
+                    widths, heights);
+                propOnFullScreenEnter(eventParam);
+                return;
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebFullScreenEnterEvent");
+}
+
+void WebDelegateCross::OnFullScreenExit(void* object)
+{
+    ContainerScope scope(instanceId_);
+    CHECK_NULL_VOID(object);
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto webFullScreenExit = AceType::MakeRefPtr<WebFullScreenExitImpl>(object);
+    CHECK_NULL_VOID(webFullScreenExit);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnFullScreenExit = webEventHub->GetOnFullScreenExitEvent();
+                CHECK_NULL_VOID(propOnFullScreenExit);
+                auto eventParam = std::make_shared<FullScreenExitEvent>();
+                propOnFullScreenExit(eventParam);
+                return;
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebFullScreenExitEvent");
+}
+
 bool WebDelegateCross::OnCommonDialog(void* object, DialogEventType dialogEventType)
 {
     ContainerScope scope(instanceId_);
@@ -1534,9 +1778,36 @@ void WebDelegateCross::UpdateJavaScriptEnabled(const bool& isJsEnabled)
 }
 
 void WebDelegateCross::UpdateAllowFileAccess(const bool& isFileAccessEnabled) {}
-void WebDelegateCross::UpdateBlockNetworkImage(const bool& onLineImageAccessEnabled) {}
-void WebDelegateCross::UpdateLoadsImagesAutomatically(const bool& isImageAccessEnabled) {}
-void WebDelegateCross::UpdateMixedContentMode(const MixedModeContent& mixedMode) {}
+
+void WebDelegateCross::UpdateBlockNetworkImage(const bool& onLineImageAccessEnabled)
+{
+    hash_ = MakeResourceHash();
+    updateBlockNetworkImageMethod_ = MakeMethodHash(WEB_ATTRIBUTE_ONLINE_IMAGE_ACCESS);
+    std::stringstream paramStream;
+    paramStream << NTC_ONLINE_IMAGE_ACCESS << WEB_PARAM_EQUALS << onLineImageAccessEnabled;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(updateBlockNetworkImageMethod_, param, nullptr);
+}
+
+void WebDelegateCross::UpdateLoadsImagesAutomatically(const bool& isImageAccessEnabled)
+{
+    hash_ = MakeResourceHash();
+    updateLoadsImagesAutomaticallyMethod_ = MakeMethodHash(WEB_IMAGE_ACCESS);
+    std::stringstream paramStream;
+    paramStream << NTC_IMAGE_ACCESS << WEB_PARAM_EQUALS << isImageAccessEnabled;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(updateLoadsImagesAutomaticallyMethod_, param, nullptr);
+}
+
+void WebDelegateCross::UpdateMixedContentMode(const MixedModeContent& mixedMode)
+{
+    hash_ = MakeResourceHash();
+    onUpdateMixedContentModeMethod_ = MakeMethodHash(WEB_ATTRIBUTE_MIXED_MODE);
+    std::stringstream paramStream;
+    paramStream << NTC_MIXED_MODE << WEB_PARAM_EQUALS << mixedMode;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(onUpdateMixedContentModeMethod_, param, nullptr);
+}
 
 void WebDelegateCross::UpdateSupportZoom(const bool& isZoomAccessEnabled)
 {
@@ -1549,13 +1820,34 @@ void WebDelegateCross::UpdateSupportZoom(const bool& isZoomAccessEnabled)
 }
 
 void WebDelegateCross::UpdateDomStorageEnabled(const bool& isDomStorageAccessEnabled)
-{}
+{
+    hash_ = MakeResourceHash();
+    updateDomStorageEnabledMethod_ = MakeMethodHash(WEB_ATTRIBUTE_DOM_STORAGE_ACCESS);
+    std::stringstream paramStream;
+    paramStream << NTC_DOM_STORAGE_ACCESS << WEB_PARAM_EQUALS << isDomStorageAccessEnabled;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(updateDomStorageEnabledMethod_, param, nullptr);
+}
 
 void WebDelegateCross::UpdateGeolocationEnabled(const bool& isGeolocationAccessEnabled)
-{}
+{
+    hash_ = MakeResourceHash();
+    UpdateGeolocationEnabledMethod_ = MakeMethodHash(WEB_ATTRIBUTE_GEOLOCATION_ACCESS);
+    std::stringstream paramStream;
+    paramStream << NTC_GEOLOCATION_ACCESS << WEB_PARAM_EQUALS << isGeolocationAccessEnabled;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(UpdateGeolocationEnabledMethod_, param, nullptr);
+}
 
 void WebDelegateCross::UpdateCacheMode(const WebCacheMode& mode)
-{}
+{
+    hash_ = MakeResourceHash();
+    updateCacheModeMethod_ = MakeMethodHash(WEB_CACHE_MODE);
+    std::stringstream paramStream;
+    paramStream << NTC_CACHE_MODE << WEB_PARAM_EQUALS << mode;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(updateCacheModeMethod_, param, nullptr);
+}
 
 void WebDelegateCross::UpdateDarkMode(const WebDarkMode& mode)
 {}
@@ -1641,7 +1933,14 @@ void WebDelegateCross::UpdateMinLogicalFontSize(int32_t minLogicalFontSize)
 {}
 
 void WebDelegateCross::UpdateBlockNetwork(bool isNetworkBlocked)
-{}
+{
+    hash_ = MakeResourceHash();
+    onBlockNetworkUpdateMethod_ = MakeMethodHash(WEB_ATTRIBUTE_BLOCK_NETWORK);
+    std::stringstream paramStream;
+    paramStream << NTC_BLOCK_NETWORK << WEB_PARAM_EQUALS << isNetworkBlocked;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(onBlockNetworkUpdateMethod_, param, nullptr);
+}
 
 void WebDelegateCross::UpdateHorizontalScrollBarAccess(bool isHorizontalScrollBarAccessEnabled)
 {
@@ -1723,9 +2022,20 @@ void WebDelegateCross::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t 
     // cross platform is not support now;
 }
 
-void WebDelegateCross::DragResize(
-    const double& width, const double& height, const double& preHeight, const double& preWidth)
+void WebDelegateCross::UpdateOptimizeParserBudgetEnabled(const bool enable)
 {
     // cross platform is not support now;
+}
+
+void WebDelegateCross::MaximizeResize()
+{
+    // cross platform is not support now;
+}
+
+void WebDelegateCross::RunJsProxyCallback()
+{
+    auto pattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->CallJsProxyCallback();
 }
 }

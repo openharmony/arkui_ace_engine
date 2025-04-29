@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#define private public
-#define protected public
-#include "core/common/asset_manager_impl.h"
-#undef private
-#undef protected
 #include "mock_asset.h"
 #include "test/mock/core/common/mock_container.h"
+
+#define private public
+#define protected public
+
+#include "core/common/asset_manager_impl.h"
 
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 

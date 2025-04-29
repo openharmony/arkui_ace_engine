@@ -15,10 +15,6 @@
 
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 
-#include "base/error/error_code.h"
-#include "core/common/ace_engine.h"
-#include "core/common/container.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -46,6 +42,14 @@ void ViewContextModelNG::openAnimation(const AnimationOption& option)
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->OpenFrontendAnimation(option, option.GetCurve(), option.GetOnFinishEvent());
+    bool isDirtyLayoutNodesEmpty = pipelineContext->IsDirtyLayoutNodesEmpty();
+    bool isDirtyPropertyNodesEmpty = pipelineContext->IsDirtyPropertyNodesEmpty();
+    if (option.GetIteration() == ANIMATION_REPEAT_INFINITE && !pipelineContext->IsLayouting()
+        && (!isDirtyLayoutNodesEmpty || !isDirtyPropertyNodesEmpty)) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "openAnimation: option:%{public}s,"
+            "dirtyLayoutNodes is empty:%{public}d, dirtyPropertyNodes is empty:%{public}d",
+            option.ToString().c_str(), isDirtyLayoutNodesEmpty, isDirtyPropertyNodesEmpty);
+    }
 }
 
 int32_t ViewContextModelNG::OpenBindSheet(
@@ -65,7 +69,7 @@ int32_t ViewContextModelNG::OpenBindSheet(
 }
 
 int32_t ViewContextModelNG::UpdateBindSheet(const RefPtr<NG::FrameNode>& sheetContentNode,
-    NG::SheetStyle& sheetStyle, bool isPartialUpdate, int32_t currentInstanceId)
+    const NG::SheetStyle& sheetStyle, bool isPartialUpdate, int32_t currentInstanceId)
 {
     return SheetManager::GetInstance().UpdateBindSheetByUIContext(
         sheetContentNode, sheetStyle, isPartialUpdate, currentInstanceId);

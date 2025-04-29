@@ -15,9 +15,7 @@
 
 #include "core/components_ng/pattern/divider/divider_layout_algorithm.h"
 
-#include "base/utils/utils.h"
 #include "core/components/divider/divider_theme.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 
 namespace OHOS::Ace::NG {

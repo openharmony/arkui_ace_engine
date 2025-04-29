@@ -18,6 +18,8 @@
 
 #include <string>
 
+#include "base/utils/utf_helper.h"
+#include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -52,13 +54,35 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         LayoutProperty::ToJsonValue(json, filter);
-        json->PutFixedAttr("content", propContent_.value_or("").c_str(), filter, FIXED_ATTR_CONTENT);
+        json->PutFixedAttr("content", UtfUtils::Str16DebugToStr8(propContent_.value_or(u"")).c_str(), filter,
+            FIXED_ATTR_CONTENT);
         /* no fixed attr below, just return */
         if (filter.IsFastFilter()) {
             return;
         }
-        json->PutExtAttr("color", propColor_.value_or(Color::BLUE).ColorToString().c_str(), filter);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+            if (propColor_.has_value()) {
+                json->PutExtAttr("color", propColor_.value().ColorToString().c_str(), filter);
+            } else {
+                auto pipeline = host->GetContext();
+                CHECK_NULL_VOID(pipeline);
+                auto themeManager = pipeline->GetThemeManager();
+                CHECK_NULL_VOID(themeManager);
+                auto theme = themeManager->GetTheme<HyperlinkTheme>();
+                json->PutExtAttr("color", theme->GetTextColor().ColorToString().c_str(), filter);
+            }
+        } else {
+            json->PutExtAttr("color", propColor_.value_or(Color::BLUE).ColorToString().c_str(), filter);
+        }
         json->PutExtAttr("address", propAddress_.value_or("").c_str(), filter);
+    }
+
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override
+    {
+        LayoutProperty::ToTreeJson(json, config);
+        json->Put(TreeKey::CONTENT, UtfUtils::Str16DebugToStr8(propContent_.value_or(u"")).c_str());
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Color, Color, PROPERTY_UPDATE_MEASURE);

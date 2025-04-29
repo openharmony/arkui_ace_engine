@@ -1,0 +1,1889 @@
+/*
+ * Copyright (c) 2025 Hunan OpenValley Digital Industry Development Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { describe, beforeAll, beforeEach, afterEach, afterAll, it, expect } from '@ohos/hypium'
+import { abilityDelegatorRegistry, Component, Driver, ON } from '@kit.TestKit';
+
+import {
+  buttonClick,
+  JsonType,
+  KeyStruct,
+  radioClick,
+  Slide,
+  sliderDrag,
+  ToggleClick,
+  Search,
+  searchParentBlock,
+  titleSearch,
+} from '../../../utils/index';
+import { StackStart } from './Stack';
+
+
+/*获取AbilityDelegator实例,管理Ability的生命周期和事件*/
+const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
+
+/*初始化与UI元素交互的驱动对象*/
+const driver = Driver.create();
+
+
+export default function Stack2Test() {
+  describe('Stack2Test', () => {
+    // Defines a test suite. Two parameters are supported: test suite name and test suite function.
+    beforeAll(async (done: Function) => {
+      await StackStart(done)
+      // Presets an action, which is performed only once before all test cases of the test suite start.
+      // This API supports only one parameter: preset action function.
+    })
+    beforeEach(() => {
+      // Presets an action, which is performed before each unit test case starts.
+      // The number of execution times is the same as the number of test cases defined by **it**.
+      // This API supports only one parameter: preset action function.
+    })
+    afterEach(() => {
+      // Presets a clear action, which is performed after each unit test case ends.
+      // The number of execution times is the same as the number of test cases defined by **it**.
+      // This API supports only one parameter: clear action function.
+    })
+    afterAll(() => {
+      // Presets a clear action, which is performed after all test cases of the test suite end.
+      // This API supports only one parameter: clear action function.
+    })
+    it('ArkUI_Stack_Comp_0083', 0, async (done: Function) => {
+      // 获取不到
+      await titleSearch('基础属性', 'backgroundBlurStyleParams.options.params');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundBlurStyleParams.options.params')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backgroundBlurStyleParams.options.params.blurOptions.right');
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0084', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundBlurStyleParams.options.params');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundBlurStyleParams.options.params')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backgroundBlurStyleParams.options.params.scale');
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundBlurStyle', JsonType.obj),
+          new KeyStruct('options', JsonType.obj),
+          new KeyStruct('scale', JsonType.value)
+        ],
+        assertEqual: 1
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundBlurStyle', JsonType.obj),
+          new KeyStruct('options', JsonType.obj),
+          new KeyStruct('scale', JsonType.value)
+        ],
+        assertEqual: 1
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0085', 0, async (done: Function) => {
+      // 无断言
+      await titleSearch('基础属性', 'backgroundBlurStyleParams.options.params');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundBlurStyleParams.options.params')))
+      if (await toggle.isChecked() === true) {
+        await toggle.click();
+      }
+      done();
+
+    })
+    /**
+     * 测试组件backdropBlur
+     */
+    it('ArkUI_Stack_Comp_0086', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backdropBlur');
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backdropBlur', JsonType.value),
+        ],
+        assertEqual: 0
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backdropBlur', JsonType.value),
+        ],
+        assertEqual: 0
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0087', 0, async (done: Function) => {
+      // 无断言
+      await titleSearch('基础属性', 'backdropBlur.options.grayscale');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backdropBlur.options.grayscale')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0088', 0, async (done: Function) => {
+      // 获取不到
+      await titleSearch('基础属性', 'backdropBlur.options.grayscale');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backdropBlur.options.grayscale')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backdropBlur.options.grayscale.left');
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        }
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        }
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0089', 0, async (done: Function) => {
+      // 获取不到
+      await titleSearch('基础属性', 'backdropBlur.options.grayscale');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backdropBlur.options.grayscale')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backdropBlur.options.grayscale.right');
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        }
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        }
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0090', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backdropBlur.options.grayscale');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backdropBlur.options.grayscale')))
+      if (await toggle.isChecked() === true) {
+        await toggle.click();
+      }
+      done();
+
+    })
+    /**
+     * 测试组件backgroundEffect
+     */
+    it('ArkUI_Stack_Comp_0091', 0, async (done: Function) => {
+      // 无断言
+      await titleSearch('基础属性', 'backgroundEffect');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundEffect')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0092', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundEffect');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundEffect')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backgroundEffect.radius');
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundEffect', JsonType.obj),
+          new KeyStruct('options', JsonType.obj),
+          new KeyStruct('radius', JsonType.value)
+        ],
+        assertEqual: 100
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundEffect', JsonType.obj),
+          new KeyStruct('options', JsonType.obj),
+          new KeyStruct('radius', JsonType.value)
+        ],
+        assertEqual: 0
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0093', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundEffect');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundEffect')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backgroundEffect.saturation');
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundEffect', JsonType.obj),
+          new KeyStruct('options', JsonType.obj),
+          new KeyStruct('saturation', JsonType.value)
+        ],
+        assertEqual: 50
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundEffect', JsonType.obj),
+          new KeyStruct('options', JsonType.obj),
+          new KeyStruct('saturation', JsonType.value)
+        ],
+        assertEqual: 0
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0094', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundEffect');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundEffect')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backgroundEffect.brightness');
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundEffect', JsonType.obj),
+          new KeyStruct('options', JsonType.obj),
+          new KeyStruct('brightness', JsonType.value)
+        ],
+        assertEqual: 2
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundEffect', JsonType.obj),
+          new KeyStruct('options', JsonType.obj),
+          new KeyStruct('brightness', JsonType.value)
+        ],
+        assertEqual: 0
+      })
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0095', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundEffect');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundEffect')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backgroundEffect.color');
+      await buttonClick({
+        buttonClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundEffect', JsonType.obj),
+          new KeyStruct('options', JsonType.obj),
+          new KeyStruct('color', JsonType.value)
+        ],
+        assertEqual: '#FF0A59F7'
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0096', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundEffect');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundEffect')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backgroundEffect.color');
+      toggle = await driver.findComponent(ON.type('Toggle')
+        .within(ON.type('Scroll'))
+        .isAfter(ON.text('backgroundEffect.color')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await buttonClick({
+        buttonClickObj: 1,
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundEffect', JsonType.obj),
+          new KeyStruct('options', JsonType.obj),
+          new KeyStruct('color', JsonType.value)
+        ],
+        assertEqual: '#FF646AFD'
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0097', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundEffect');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundEffect')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backgroundEffect.color');
+      toggle = await driver.findComponent(ON.type('Toggle')
+        .within(ON.type('Scroll'))
+        .isAfter(ON.text('backgroundEffect.color')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await buttonClick({
+        buttonClickObj: 2,
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundEffect', JsonType.obj),
+          new KeyStruct('options', JsonType.obj),
+          new KeyStruct('color', JsonType.value)
+        ],
+        assertEqual: '#FFFE7062'
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0098', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundEffect');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundEffect')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backgroundEffect.color');
+      toggle = await driver.findComponent(ON.type('Toggle')
+        .within(ON.type('Scroll'))
+        .isAfter(ON.text('backgroundEffect.color')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await buttonClick({
+        buttonClickObj: 3,
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundEffect', JsonType.obj),
+          new KeyStruct('options', JsonType.obj),
+          new KeyStruct('color', JsonType.value)
+        ],
+        assertEqual: '#FFE9E8ED'
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0099', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundEffect');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundEffect')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backgroundEffect.color');
+      toggle = await driver.findComponent(ON.type('Toggle')
+        .within(ON.type('Scroll'))
+        .isAfter(ON.text('backgroundEffect.color')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await buttonClick({
+        buttonClickObj: 4,
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundEffect', JsonType.obj),
+          new KeyStruct('options', JsonType.obj),
+          new KeyStruct('color', JsonType.value)
+        ],
+        assertEqual: '#FF1C1C1C'
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0100', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundEffect');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundEffect')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backgroundEffect.color');
+      toggle = await driver.findComponent(ON.type('Toggle')
+        .within(ON.type('Scroll'))
+        .isAfter(ON.text('backgroundEffect.color')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await buttonClick({
+        buttonClickObj: 5,
+        id: 'Stack',
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundEffect', JsonType.obj),
+          new KeyStruct('options', JsonType.obj),
+          new KeyStruct('color', JsonType.value)
+        ],
+        assertEqual: '#FFFFFFFF'
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0101', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundEffect');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundEffect')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backgroundEffect.adaptiveColor');
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundEffect', JsonType.obj),
+          new KeyStruct('options', JsonType.obj),
+          new KeyStruct('adaptiveColor', JsonType.value)
+        ],
+        assertEqual: 'AdaptiveColor.Default'
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0102', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundEffect');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundEffect')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backgroundEffect.adaptiveColor');
+      toggle = await driver.findComponent(ON.type('Toggle')
+        .within(ON.type('Scroll'))
+        .isAfter(ON.text('backgroundEffect.adaptiveColor')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundEffect', JsonType.obj),
+          new KeyStruct('options', JsonType.obj),
+          new KeyStruct('adaptiveColor', JsonType.value)
+        ],
+        assertEqual: 'AdaptiveColor.Average'
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0103', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundEffect');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundEffect')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backgroundEffect.blurOptions.grayscale.left');
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundEffect', JsonType.obj),
+          new KeyStruct('options', JsonType.obj),
+          new KeyStruct('blurOption', JsonType.value)
+        ],
+        assertEqual: '[127.000000,0.000000]'
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundEffect', JsonType.obj),
+          new KeyStruct('options', JsonType.obj),
+          new KeyStruct('blurOption', JsonType.value)
+        ],
+        assertEqual: '[0.000000,0.000000]'
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0104', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundEffect');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundEffect')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backgroundEffect.blurOptions.grayscale.right');
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundEffect', JsonType.obj),
+          new KeyStruct('options', JsonType.obj),
+          new KeyStruct('blurOption', JsonType.value)
+        ],
+        assertEqual: '[0.000000,127.000000]'
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundEffect', JsonType.obj),
+          new KeyStruct('options', JsonType.obj),
+          new KeyStruct('blurOption', JsonType.value)
+        ],
+        assertEqual: '[0.000000,0.000000]'
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0105', 0, async (done: Function) => {
+      // 无断言
+      await titleSearch('基础属性', 'backgroundEffect');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundEffect')))
+      if (await toggle.isChecked() === true) {
+        await toggle.click();
+      }
+      done();
+
+      done();
+
+    })
+    /**
+     * 测试组件backgroundImageResizable
+     */
+    it('ArkUI_Stack_Comp_0106', 0, async (done: Function) => {
+      // 无断言
+      await titleSearch('基础属性', 'backgroundImageResizable');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundImageResizable')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0107', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundImageResizable');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundImageResizable')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backgroundImageResizable.slice.top');
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundImageResizable', JsonType.value)
+        ],
+        assertEqual: 'ImageResizableSlice: {left: 0.00px, right: 0.00px, top: 300.00vp, bottom: 0.00px}'
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundImageResizable', JsonType.value)
+        ],
+        assertEqual: 'ImageResizableSlice: {left: 0.00px, right: 0.00px, top: 0.00px, bottom: 0.00px}'
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0108', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundImageResizable');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundImageResizable')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backgroundImageResizable.slice.bottom');
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundImageResizable', JsonType.value)
+        ],
+        assertEqual: 'ImageResizableSlice: {left: 0.00px, right: 0.00px, top: 0.00px, bottom: 300.00vp}'
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundImageResizable', JsonType.value)
+        ],
+        assertEqual: 'ImageResizableSlice: {left: 0.00px, right: 0.00px, top: 0.00px, bottom: 0.00px}'
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0109', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundImageResizable');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundImageResizable')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backgroundImageResizable.slice.left');
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundImageResizable', JsonType.value)
+        ],
+        assertEqual: 'ImageResizableSlice: {left: 300.00vp, right: 0.00px, top: 0.00px, bottom: 0.00px}'
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundImageResizable', JsonType.value)
+        ],
+        assertEqual: 'ImageResizableSlice: {left: 0.00px, right: 0.00px, top: 0.00px, bottom: 0.00px}'
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0110', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundImageResizable');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundImageResizable')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backgroundImageResizable.slice.right');
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundImageResizable', JsonType.value)
+        ],
+        assertEqual: 'ImageResizableSlice: {left: 0.00px, right: 300.00vp, top: 0.00px, bottom: 0.00px}'
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundImageResizable', JsonType.value)
+        ],
+        assertEqual: 'ImageResizableSlice: {left: 0.00px, right: 0.00px, top: 0.00px, bottom: 0.00px}'
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0111', 0, async (done: Function) => {
+      // 无断言
+      await titleSearch('基础属性', 'backgroundImageResizable');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundImageResizable')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backgroundImageResizable.lattice');
+      toggle = await driver.findComponent(ON.type('Toggle')
+        .within(ON.type('Scroll'))
+        .isAfter(ON.text('backgroundImageResizable.lattice')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0112', 0, async (done: Function) => {
+      // 获取不到
+      await searchParentBlock('backgroundImageResizable', true)
+      await searchParentBlock('backgroundImageResizable.lattice', true)
+      await Search('基础属性', 'backgroundImageResizable.lattice.xDivs');
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        }
+      })
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0113', 0, async (done: Function) => {
+      // 获取不到
+      await searchParentBlock('backgroundImageResizable', true)
+      await searchParentBlock('backgroundImageResizable.lattice', true)
+      await searchParentBlock('backgroundImageResizable.lattice.xDivs', true)
+      await radioClick({
+        radioClickObj: 1,
+      })
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0114', 0, async (done: Function) => {
+      // 获取不到
+      await searchParentBlock('backgroundImageResizable', true)
+      await searchParentBlock('backgroundImageResizable.lattice', true)
+      await searchParentBlock('backgroundImageResizable.lattice.xDivs', true)
+      await radioClick({
+        radioClickObj: 2,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        }
+      })
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0115', 0, async (done: Function) => {
+      // 获取不到
+      await searchParentBlock('backgroundImageResizable', true)
+      await searchParentBlock('backgroundImageResizable.lattice', true)
+      await searchParentBlock('backgroundImageResizable.lattice.yDivs', false)
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        }
+      })
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0116', 0, async (done: Function) => {
+      // 获取不到
+      await searchParentBlock('backgroundImageResizable', true)
+      await searchParentBlock('backgroundImageResizable.lattice', true)
+      await searchParentBlock('backgroundImageResizable.lattice.yDivs', true)
+      await radioClick({
+        radioClickObj: 1,
+      })
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0117', 0, async (done: Function) => {
+      // 获取不到
+      await searchParentBlock('backgroundImageResizable', true)
+      await searchParentBlock('backgroundImageResizable.lattice', true)
+      await searchParentBlock('backgroundImageResizable.lattice.yDivs', true)
+      await radioClick({
+        radioClickObj: 2,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        }
+      })
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0118', 0, async (done: Function) => {
+      // 获取不到
+      await searchParentBlock('backgroundImageResizable', true)
+      await searchParentBlock('backgroundImageResizable.lattice', true)
+      await searchParentBlock('backgroundImageResizable.lattice.fXCount', false)
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        }
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        }
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0119', 0, async (done: Function) => {
+      // 获取不到
+      await searchParentBlock('backgroundImageResizable', true)
+      await searchParentBlock('backgroundImageResizable.lattice', true)
+      await searchParentBlock('backgroundImageResizable.lattice.fYCount', false)
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        }
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        }
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0120', 0, async (done: Function) => {
+      // 获取不到
+      await searchParentBlock('backgroundImageResizable', true)
+      await searchParentBlock('backgroundImageResizable.lattice', true)
+      await searchParentBlock('backgroundImageResizable.lattice.fBounds', true)
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0121', 0, async (done: Function) => {
+      // 获取不到
+      await searchParentBlock('backgroundImageResizable', true)
+      await searchParentBlock('backgroundImageResizable.lattice', true)
+      await searchParentBlock('backgroundImageResizable.lattice.fBounds', true)
+      await searchParentBlock('backgroundImageResizable.lattice.fBounds.left', false)
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        }
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        }
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0122', 0, async (done: Function) => {
+      // 获取不到
+      await searchParentBlock('backgroundImageResizable', true)
+      await searchParentBlock('backgroundImageResizable.lattice', true)
+      await searchParentBlock('backgroundImageResizable.lattice.fBounds', true)
+      await searchParentBlock('backgroundImageResizable.lattice.fBounds.top', false)
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        }
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        }
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0123', 0, async (done: Function) => {
+      // 获取不到
+      await searchParentBlock('backgroundImageResizable', true)
+      await searchParentBlock('backgroundImageResizable.lattice', true)
+      await searchParentBlock('backgroundImageResizable.lattice.fBounds', true)
+      await searchParentBlock('backgroundImageResizable.lattice.fBounds.right', false)
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        }
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        }
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0124', 0, async (done: Function) => {
+      // 获取不到
+      await searchParentBlock('backgroundImageResizable', true)
+      await searchParentBlock('backgroundImageResizable.lattice', true)
+      await searchParentBlock('backgroundImageResizable.lattice.fBounds', true)
+      await searchParentBlock('backgroundImageResizable.lattice.fBounds.bottom', false)
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        }
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        }
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0125', 0, async (done: Function) => {
+      // 获取不到
+      await searchParentBlock('backgroundImageResizable', true)
+      await searchParentBlock('backgroundImageResizable.lattice', true)
+      await searchParentBlock('backgroundImageResizable.lattice.fBounds', false)
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0126', 0, async (done: Function) => {
+      // 获取不到
+      await searchParentBlock('backgroundImageResizable', true)
+      await searchParentBlock('backgroundImageResizable.lattice', true)
+      await searchParentBlock('backgroundImageResizable.lattice.fColors', false)
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        }
+      })
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0127', 0, async (done: Function) => {
+      // 获取不到
+      await searchParentBlock('backgroundImageResizable', true)
+      await searchParentBlock('backgroundImageResizable.lattice', true)
+      await searchParentBlock('backgroundImageResizable.lattice.fColors', true)
+      await radioClick({
+        radioClickObj: 1
+      })
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0128', 0, async (done: Function) => {
+      // 获取不到
+      await searchParentBlock('backgroundImageResizable', true)
+      await searchParentBlock('backgroundImageResizable.lattice', true)
+      await searchParentBlock('backgroundImageResizable.lattice.fColors', true)
+      await radioClick({
+        radioClickObj: 2,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        }
+      })
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0129', 0, async (done: Function) => {
+      // 无断言
+      await searchParentBlock('backgroundImageResizable', true)
+      await searchParentBlock('backgroundImageResizable.lattice', false)
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0130', 0, async (done: Function) => {
+      // 无断言
+      await searchParentBlock('backgroundImageResizable', false)
+      done();
+
+    })
+    /**
+     * 测试组件backgroundBrightness
+     */
+    it('ArkUI_Stack_Comp_0131', 0, async (done: Function) => {
+      await Search('基础属性', 'backgroundBrightness.rate');
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('BackgroundBrightness', JsonType.obj),
+          new KeyStruct('dynamicLightUpRate', JsonType.value)
+        ],
+        assertEqual: 5
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('BackgroundBrightness', JsonType.obj),
+          new KeyStruct('dynamicLightUpRate', JsonType.value)
+        ],
+        assertEqual: 0
+      })
+
+      done();
+
+    })
+    it('ArkUI_Stack_Comp_0132', 0, async (done: Function) => {
+      await Search('基础属性', 'backgroundBrightness.lightUpDegree');
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('BackgroundBrightness', JsonType.obj),
+          new KeyStruct('dynamicLightUpDegree', JsonType.value)
+        ],
+        assertEqual: 1
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('BackgroundBrightness', JsonType.obj),
+          new KeyStruct('dynamicLightUpDegree', JsonType.value)
+        ],
+        assertEqual: -1
+      })
+
+      done();
+
+    })
+    /**
+     * 测试组件opacity
+     */
+    it('ArkUI_Stack_Comp_0133', 0, async (done: Function) => {
+      await Search('基础属性', 'opacity');
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('opacity', JsonType.value),
+        ],
+        assertEqual: 1
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('opacity', JsonType.value),
+        ],
+        assertEqual: 0
+      })
+
+      done();
+
+    })
+    /**
+     * 测试组件aspectRatio且获取属性正确
+     */
+    it('ArkUI_Stack_Comp_0134', 0, async (done: Function) => {
+      await Search('基础属性', 'aspectRatio', '通用属性1');
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('aspectRatio', JsonType.value)
+        ],
+        assertEqual: 5
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('aspectRatio', JsonType.value)
+        ],
+        assertEqual: ''
+      })
+      done();
+    })
+    /**
+     * 测试开启pixelRound
+     */
+    it('ArkUI_Stack_Comp_0135', 0, async (done: Function) => {
+      await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
+      done();
+    })
+    /**
+     * 测试组件pixelRound.start
+     */
+    it('ArkUI_Stack_Comp_0136', 0, async (done: Function) => {
+      await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
+      await searchParentBlock('pixelRound.start', false);
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('pixelRound', JsonType.value)
+        ],
+        assertEqual: '{"start":"PixelRoundCalcPolicy.NO_FORCE_ROUND","top":"PixelRoundCalcPolicy.NO_FORCE_ROUND","end":"PixelRoundCalcPolicy.NO_FORCE_ROUND","bottom":"PixelRoundCalcPolicy.NO_FORCE_ROUND"}'
+      })
+      done();
+    })
+    it('ArkUI_Stack_Comp_0137', 0, async (done: Function) => {
+      await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
+      await searchParentBlock('pixelRound.start', true);
+      await radioClick({
+        radioClickObj: 1,
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('pixelRound', JsonType.value)
+        ],
+        assertEqual: '{"start":"PixelRoundCalcPolicy.FORCE_CEIL","top":"PixelRoundCalcPolicy.NO_FORCE_ROUND","end":"PixelRoundCalcPolicy.NO_FORCE_ROUND","bottom":"PixelRoundCalcPolicy.NO_FORCE_ROUND"}'
+      })
+      done();
+    })
+    it('ArkUI_Stack_Comp_0138', 0, async (done: Function) => {
+      await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
+      await searchParentBlock('pixelRound.start', true);
+      await radioClick({
+        radioClickObj: 2,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('pixelRound', JsonType.value)
+        ],
+        assertEqual: '{"start":"PixelRoundCalcPolicy.FORCE_FLOOR","top":"PixelRoundCalcPolicy.NO_FORCE_ROUND","end":"PixelRoundCalcPolicy.NO_FORCE_ROUND","bottom":"PixelRoundCalcPolicy.NO_FORCE_ROUND"}'
+      })
+      done();
+    })
+    /**
+     * 测试组件pixelRound.bottom
+     */
+    it('ArkUI_Stack_Comp_0139', 0, async (done: Function) => {
+      await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
+      await searchParentBlock('pixelRound.bottom', false);
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('pixelRound', JsonType.value)
+        ],
+        assertEqual: '{"start":"PixelRoundCalcPolicy.NO_FORCE_ROUND","top":"PixelRoundCalcPolicy.NO_FORCE_ROUND","end":"PixelRoundCalcPolicy.NO_FORCE_ROUND","bottom":"PixelRoundCalcPolicy.NO_FORCE_ROUND"}'
+      })
+      done();
+    })
+    it('ArkUI_Stack_Comp_0140', 0, async (done: Function) => {
+      await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
+      await searchParentBlock('pixelRound.bottom', true);
+      await radioClick({
+        radioClickObj: 1,
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('pixelRound', JsonType.value)
+        ],
+        assertEqual: '{"start":"PixelRoundCalcPolicy.NO_FORCE_ROUND","top":"PixelRoundCalcPolicy.NO_FORCE_ROUND","end":"PixelRoundCalcPolicy.NO_FORCE_ROUND","bottom":"PixelRoundCalcPolicy.FORCE_CEIL"}'
+      })
+      done();
+    })
+    it('ArkUI_Stack_Comp_0141', 0, async (done: Function) => {
+      await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
+      await searchParentBlock('pixelRound.bottom', true);
+      await radioClick({
+        radioClickObj: 2,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('pixelRound', JsonType.value)
+        ],
+        assertEqual: '{"start":"PixelRoundCalcPolicy.NO_FORCE_ROUND","top":"PixelRoundCalcPolicy.NO_FORCE_ROUND","end":"PixelRoundCalcPolicy.NO_FORCE_ROUND","bottom":"PixelRoundCalcPolicy.FORCE_FLOOR"}'
+      })
+      done();
+    })
+
+    /**
+     * 测试组件pixelRound.top
+     */
+    it('ArkUI_Stack_Comp_0142', 0, async (done: Function) => {
+      await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
+      await searchParentBlock('pixelRound.top', false);
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('pixelRound', JsonType.value)
+        ],
+        assertEqual: '{"start":"PixelRoundCalcPolicy.NO_FORCE_ROUND","top":"PixelRoundCalcPolicy.NO_FORCE_ROUND","end":"PixelRoundCalcPolicy.NO_FORCE_ROUND","bottom":"PixelRoundCalcPolicy.NO_FORCE_ROUND"}'
+      })
+      done();
+    })
+    it('ArkUI_Stack_Comp_0143', 0, async (done: Function) => {
+      await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
+      await searchParentBlock('pixelRound.top', true);
+      await radioClick({
+        radioClickObj: 1,
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('pixelRound', JsonType.value)
+        ],
+        assertEqual: '{"start":"PixelRoundCalcPolicy.NO_FORCE_ROUND","top":"PixelRoundCalcPolicy.FORCE_CEIL","end":"PixelRoundCalcPolicy.NO_FORCE_ROUND","bottom":"PixelRoundCalcPolicy.NO_FORCE_ROUND"}'
+      })
+      done();
+    })
+    it('ArkUI_Stack_Comp_0144', 0, async (done: Function) => {
+      await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
+      await searchParentBlock('pixelRound.top', true);
+      await radioClick({
+        radioClickObj: 2,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('pixelRound', JsonType.value)
+        ],
+        assertEqual: '{"start":"PixelRoundCalcPolicy.NO_FORCE_ROUND","top":"PixelRoundCalcPolicy.FORCE_FLOOR","end":"PixelRoundCalcPolicy.NO_FORCE_ROUND","bottom":"PixelRoundCalcPolicy.NO_FORCE_ROUND"}'
+      })
+      await driver.delayMs(1000);
+      done();
+    })
+    /**
+     * 测试组件pixelRound.end
+     */
+    it('ArkUI_Stack_Comp_0145', 0, async (done: Function) => {
+      await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
+      await searchParentBlock('pixelRound.end', false);
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('pixelRound', JsonType.value)
+        ],
+        assertEqual: '{"start":"PixelRoundCalcPolicy.NO_FORCE_ROUND","top":"PixelRoundCalcPolicy.NO_FORCE_ROUND","end":"PixelRoundCalcPolicy.NO_FORCE_ROUND","bottom":"PixelRoundCalcPolicy.NO_FORCE_ROUND"}'
+      })
+      done();
+    })
+    it('ArkUI_Stack_Comp_0146', 0, async (done: Function) => {
+      await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
+      await searchParentBlock('pixelRound.end', true);
+      await radioClick({
+        radioClickObj: 1,
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('pixelRound', JsonType.value)
+        ],
+        assertEqual: '{"start":"PixelRoundCalcPolicy.NO_FORCE_ROUND","top":"PixelRoundCalcPolicy.NO_FORCE_ROUND","end":"PixelRoundCalcPolicy.FORCE_CEIL","bottom":"PixelRoundCalcPolicy.NO_FORCE_ROUND"}'
+      })
+      done();
+    })
+    it('ArkUI_Stack_Comp_0147', 0, async (done: Function) => {
+      await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
+      await searchParentBlock('pixelRound.end', true);
+      await radioClick({
+        radioClickObj: 2,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('pixelRound', JsonType.value)
+        ],
+        assertEqual: '{"start":"PixelRoundCalcPolicy.NO_FORCE_ROUND","top":"PixelRoundCalcPolicy.NO_FORCE_ROUND","end":"PixelRoundCalcPolicy.FORCE_FLOOR","bottom":"PixelRoundCalcPolicy.NO_FORCE_ROUND"}'
+      })
+      done();
+    })
+    /**
+     * 测试关闭pixelRound
+     */
+    it('ArkUI_Stack_Comp_0148', 0, async (done: Function) => {
+      // 无断言
+      await searchParentBlock('pixelRound', false, '基础属性', '通用属性1')
+      done();
+
+      done();
+    })
+    /**
+     * 测试开启borderImage
+     */
+    it('ArkUI_Stack_Comp_0149', 0, async (done: Function) => {
+      // 无断言
+      await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
+      done();
+    })
+    /**
+     * 测试开启关闭borderImage.source
+     */
+    it('ArkUI_Stack_Comp_0150', 0, async (done: Function) => {
+      // 无断言
+      await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
+      await searchParentBlock('borderImage.source', true, '基础属性', '通用属性1')
+      done();
+    })
+    it('ArkUI_Stack_Comp_0151', 0, async (done: Function) => {
+      // 无断言
+      await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
+      await searchParentBlock('borderImage.source', false, '基础属性', '通用属性1')
+      done();
+    })
+    /**
+     * 测试开启borderImage.slice
+     */
+    it('ArkUI_Stack_Comp_0152', 0, async (done: Function) => {
+      // 无断言
+      await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
+      await searchParentBlock('borderImage.slice', true, '基础属性', '通用属性1')
+      done();
+    })
+    /**
+     * 测试组件borderImage.slice.top
+     */
+    it('ArkUI_Stack_Comp_0153', 0, async (done: Function) => {
+      await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
+      await searchParentBlock('borderImage.slice', true, '基础属性', '通用属性1')
+      await searchParentBlock('borderImage.slice.top', false, '基础属性', '通用属性1')
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('borderImage', JsonType.value),
+        ],
+        assertEqual: '{"source":"","slice":"left: [0.00px] right: [0.00px] top: [300.00vp] bottom: [0.00px]","width":"0.00vp","outset":"0.00vp","repeat":"RepeatMode.Stretch","fill":"false"}'
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('borderWidth', JsonType.value),
+        ],
+        assertEqual: '0.00px'
+      })
+
+      done();
+
+    })
+    /**
+     * 测试组件borderImage.slice.bottom
+     */
+    it('ArkUI_Stack_Comp_0154', 0, async (done: Function) => {
+      await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
+      await searchParentBlock('borderImage.slice', true, '基础属性', '通用属性1')
+      await searchParentBlock('borderImage.slice.bottom', false, '基础属性', '通用属性1')
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('borderImage', JsonType.value),
+        ],
+        assertEqual: '{"source":"","slice":"left: [0.00px] right: [0.00px] top: [0.00px] bottom: [300.00vp]","width":"0.00vp","outset":"0.00vp","repeat":"RepeatMode.Stretch","fill":"false"}'
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('borderWidth', JsonType.value),
+        ],
+        assertEqual: '0.00px'
+      })
+
+      done();
+
+    })
+    /**
+     * 测试组件borderImage.slice.left
+     */
+    it('ArkUI_Stack_Comp_0155', 0, async (done: Function) => {
+      await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
+      await searchParentBlock('borderImage.slice', true, '基础属性', '通用属性1')
+      await searchParentBlock('borderImage.slice.left', false, '基础属性', '通用属性1')
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('borderImage', JsonType.value),
+        ],
+        assertEqual: '{"source":"","slice":"left: [300.00vp] right: [0.00px] top: [0.00px] bottom: [0.00px]","width":"0.00vp","outset":"0.00vp","repeat":"RepeatMode.Stretch","fill":"false"}'
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('borderWidth', JsonType.value),
+        ],
+        assertEqual: '0.00px'
+      })
+
+      done();
+
+    })
+    /**
+     * 测试组件borderImage.slice.right
+     */
+    it('ArkUI_Stack_Comp_0156', 0, async (done: Function) => {
+      await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
+      await searchParentBlock('borderImage.slice', true, '基础属性', '通用属性1')
+      await searchParentBlock('borderImage.slice.right', false, '基础属性', '通用属性1')
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('borderImage', JsonType.value),
+        ],
+        assertEqual: '{"source":"","slice":"left: [0.00px] right: [300.00vp] top: [0.00px] bottom: [0.00px]","width":"0.00vp","outset":"0.00vp","repeat":"RepeatMode.Stretch","fill":"false"}'
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('borderWidth', JsonType.value),
+        ],
+        assertEqual: '0.00px'
+      })
+
+      done();
+
+    })
+    /**
+     * 测试关闭borderImage.slice
+     */
+    it('ArkUI_Stack_Comp_0157', 0, async (done: Function) => {
+      // 无断言
+      await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
+      await searchParentBlock('borderImage.slice', false, '基础属性', '通用属性1')
+      done();
+    })
+    /**
+     * 测试开启borderImage.width
+     */
+    it('ArkUI_Stack_Comp_0158', 0, async (done: Function) => {
+      // 无断言
+      await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
+      await searchParentBlock('borderImage.width', true, '基础属性', '通用属性1')
+      done();
+    })
+    /**
+     * 测试组件borderImage.width.top
+     */
+    it('ArkUI_Stack_Comp_0159', 0, async (done: Function) => {
+      await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
+      await searchParentBlock('borderImage.width', true, '基础属性', '通用属性1')
+      await searchParentBlock('borderImage.width.top', false, '基础属性', '通用属性1')
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('borderImage', JsonType.value),
+        ],
+        assertEqual: '{"source":"","slice":"0.00vp","width":"left: [0.00px] right: [0.00px] top: [300.00vp] bottom: [0.00px]","outset":"0.00vp","repeat":"RepeatMode.Stretch","fill":"false"}'
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('borderWidth', JsonType.value),
+        ],
+        assertEqual: '0.00px'
+      })
+
+      done();
+
+    })
+    /**
+     * 测试组件borderImage.width.bottom
+     */
+    it('ArkUI_Stack_Comp_0160', 0, async (done: Function) => {
+      await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
+      await searchParentBlock('borderImage.width', true, '基础属性', '通用属性1')
+      await searchParentBlock('borderImage.width.bottom', false, '基础属性', '通用属性1')
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('borderImage', JsonType.value),
+        ],
+        assertEqual: '{"source":"","slice":"0.00vp","width":"left: [0.00px] right: [0.00px] top: [0.00px] bottom: [300.00vp]","outset":"0.00vp","repeat":"RepeatMode.Stretch","fill":"false"}'
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('borderWidth', JsonType.value),
+        ],
+        assertEqual: '0.00px'
+      })
+
+      done();
+
+    })
+    /**
+     * 测试组件borderImage.width.left
+     */
+    it('ArkUI_Stack_Comp_0161', 0, async (done: Function) => {
+      await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
+      await searchParentBlock('borderImage.width', true, '基础属性', '通用属性1')
+      await searchParentBlock('borderImage.width.left', false, '基础属性', '通用属性1')
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('borderImage', JsonType.value),
+        ],
+        assertEqual: '{"source":"","slice":"0.00vp","width":"left: [300.00vp] right: [0.00px] top: [0.00px] bottom: [0.00px]","outset":"0.00vp","repeat":"RepeatMode.Stretch","fill":"false"}'
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+        id: 'Stack',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('borderWidth', JsonType.value),
+        ],
+        assertEqual: '0.00px'
+      })
+
+      done();
+
+    })
+  })
+}

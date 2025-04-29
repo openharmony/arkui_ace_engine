@@ -15,15 +15,8 @@
 
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 
-#include "core/animation/spring_curve.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
-#include "core/components_ng/pattern/grid/grid_layout_property.h"
-#include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 #if defined(PIXEL_MAP_SUPPORTED)
@@ -84,7 +77,7 @@ int32_t GridEventHub::GetInsertPosition(float x, float y)
     CHECK_NULL_RETURN(host, -1);
     auto pattern = AceType::DynamicCast<GridPattern>(host->GetPattern());
     CHECK_NULL_RETURN(pattern, -1);
-    auto itemFrameNode = host->FindChildByPosition(x, y);
+    auto itemFrameNode = host->FindChildByPositionWithoutChildTransform(x, y);
     if (itemFrameNode) {
         RefPtr<GridItemLayoutProperty> itemLayoutProperty = itemFrameNode->GetLayoutProperty<GridItemLayoutProperty>();
         CHECK_NULL_RETURN(itemLayoutProperty, 0);
@@ -154,21 +147,21 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
         return;
     }
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
 
     auto globalX = static_cast<float>(info.GetGlobalPoint().GetX());
     auto globalY = static_cast<float>(info.GetGlobalPoint().GetY());
 
-    auto host = GetFrameNode();
-    CHECK_NULL_VOID(host);
-    auto gridItem = host->FindChildByPosition(globalX, globalY);
+    auto gridItem = host->FindChildByPositionWithoutChildTransform(globalX, globalY);
     CHECK_NULL_VOID(gridItem);
     draggedIndex_ = GetGridItemIndex(gridItem);
 
     OHOS::Ace::ItemDragInfo itemDragInfo;
-    itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(globalX, DimensionUnit::PX)));
-    itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
+    itemDragInfo.SetX(globalX);
+    itemDragInfo.SetY(globalY);
     auto customNode = FireOnItemDragStart(itemDragInfo, draggedIndex_);
     CHECK_NULL_VOID(customNode);
     auto dragDropManager = pipeline->GetDragDropManager();
@@ -178,23 +171,31 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
 #if defined(PIXEL_MAP_SUPPORTED)
     auto callback = [id = Container::CurrentId(), pipeline, info, host, gridItem, weak = WeakClaim(this)](
                         std::shared_ptr<Media::PixelMap> mediaPixelMap, int32_t /*arg*/,
-                        const std::function<void()>& /*unused*/) {
+                        const std::function<void()>& finishCallback) {
         ContainerScope scope(id);
         if (!mediaPixelMap) {
             TAG_LOGE(AceLogTag::ACE_DRAG, "gridItem drag start failed, custom component screenshot is empty.");
             return;
         }
-        auto pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&mediaPixelMap));
-        CHECK_NULL_VOID(pixelMap);
+        CHECK_NULL_VOID(pipeline);
         auto taskScheduler = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
+        taskScheduler->PostTask(
+            [finishCallback]() {
+                if (finishCallback) {
+                    finishCallback();
+                }
+            },
+            TaskExecutor::TaskType::UI, "ArkUIGridItemDragRemoveCustomNode");
+        auto pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&mediaPixelMap));
+        CHECK_NULL_VOID(pixelMap);
         taskScheduler->PostTask(
             [weak, pipeline, info, pixelMap, host, gridItem]() {
                 auto eventHub = weak.Upgrade();
                 CHECK_NULL_VOID(eventHub);
                 auto manager = pipeline->GetDragDropManager();
                 CHECK_NULL_VOID(manager);
-                eventHub->dragDropProxy_ = manager->CreateAndShowDragWindow(pixelMap, info);
+                eventHub->dragDropProxy_ = manager->CreateAndShowItemDragOverlay(pixelMap, info, eventHub);
                 CHECK_NULL_VOID(eventHub->dragDropProxy_);
                 eventHub->dragDropProxy_->OnItemDragStart(info, host);
                 gridItem->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
@@ -206,12 +207,16 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
             TaskExecutor::TaskType::UI, "ArkUIGridItemDragStart");
     };
     SnapshotParam param;
+    if (auto pixmap = ComponentSnapshot::CreateSync(customNode, param); pixmap) {
+        callback(pixmap, 0, nullptr);
+        return;
+    }
     param.delay = CREATE_PIXELMAP_TIME;
     NG::ComponentSnapshot::Create(customNode, std::move(callback), true, param);
 #else
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
-    dragDropProxy_ = manager->CreateAndShowDragWindow(customNode, info);
+    dragDropProxy_ = manager->CreateAndShowItemDragOverlay(customNode, info, AceType::Claim(this));
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->OnItemDragStart(info, host);
     gridItem->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
@@ -290,6 +295,7 @@ void GridEventHub::FireOnItemDragLeave(const ItemDragInfo& dragInfo, int32_t ite
         CHECK_NULL_VOID(pattern);
         auto insertIndex = pattern->GetChildrenCount();
         MoveItems(itemIndex, insertIndex);
+        pattern->ClearDragState();
     }
 
     if (onItemDragLeave_) {

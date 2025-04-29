@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/data_panel/data_panel_layout_algorithm.h"
 
-#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
 
@@ -32,7 +31,11 @@ std::optional<SizeF> DataPanelLayoutAlgorithm::MeasureContent(
     auto pattern = host->GetPattern<DataPanelPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        host->GetGeometryNode()->Reset();
+        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+            host->GetGeometryNode()->ResetContent();
+        } else {
+            host->GetGeometryNode()->Reset();
+        }
         return std::nullopt;
     }
     // 1.If user set the width and height, use the selfIdealSize.

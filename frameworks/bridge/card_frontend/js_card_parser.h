@@ -195,12 +195,16 @@ private:
         const std::unique_ptr<JsonValue>& propsJson, const std::string& key, bool& value, bool& hasAttr);
     void ParseVersionAndUpdateData();
     void ReplaceParam(const std::unique_ptr<JsonValue>& node);
-
+    void UpdateChildRen(const std::unique_ptr<JsonValue>& childList, const RefPtr<Framework::JsAcePage>& page,
+        int32_t selfId, const std::vector<int>& idArray, const std::unique_ptr<JsonValue>& dataJson,
+        const std::unique_ptr<JsonValue>& styleJson, const std::unique_ptr<JsonValue>& propsJson);
     double density_ = 1.0;
     int32_t nodeId_ = 0;
     int32_t maxNodeId_ = 0;
     int32_t numberOfForNode_ = 0;
     int32_t listNodeIndex_ = 0;
+    int32_t baseDepth_ = 0;
+    const int32_t maxDepth_ = 5;
     ColorMode colorMode_ = ColorMode::LIGHT;
     ParsingStatus parsingStatus_ = ParsingStatus::CREATE;
     std::vector<int32_t> idArray_;

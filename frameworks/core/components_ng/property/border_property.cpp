@@ -15,8 +15,6 @@
 
 #include "border_property.h"
 
-#include "core/components_ng/base/inspector_filter.h"
-
 namespace OHOS::Ace::NG {
 void BorderStyleProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson,
     const InspectorFilter& filter, bool isOutline) const
@@ -206,6 +204,22 @@ bool BorderRadiusPropertyT<Dimension>::UpdateWithCheck(const BorderRadiusPropert
     }
     if (value.radiusBottomRight.has_value() && (radiusBottomRight != value.radiusBottomRight)) {
         radiusBottomRight = value.radiusBottomRight;
+        isModified = true;
+    }
+    if (value.radiusTopStart.has_value() && (radiusTopStart != value.radiusTopStart)) {
+        radiusTopStart = value.radiusTopStart;
+        isModified = true;
+    }
+    if (value.radiusTopEnd.has_value() && (radiusTopEnd != value.radiusTopEnd)) {
+        radiusTopEnd = value.radiusTopEnd;
+        isModified = true;
+    }
+    if (value.radiusBottomEnd.has_value() && (radiusBottomEnd != value.radiusBottomEnd)) {
+        radiusBottomEnd = value.radiusBottomEnd;
+        isModified = true;
+    }
+    if (value.radiusBottomStart.has_value() && (radiusBottomStart != value.radiusBottomStart)) {
+        radiusBottomStart = value.radiusBottomStart;
         isModified = true;
     }
     return isModified;

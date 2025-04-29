@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
-#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
 void RenderNodePattern::OnModifyDone()

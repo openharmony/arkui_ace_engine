@@ -62,3 +62,16 @@ globalThis.__RemoveFromNodeControllerMap__ = function __RemoveFromNodeController
   nodeController._nodeContainerId.__rootNodeOfNodeController__ = undefined;
   NodeControllerRegisterProxy.__NodeControllerMap__.delete(containerId);
 }
+
+globalThis.__viewPuStack__ = new Array<ViewPU>();
+
+globalThis.__CheckIsInBuilderNode__ = function __CheckIsInBuilderNode__(parent: ViewPU): boolean {
+  if (globalThis.__viewPuStack__ === undefined || globalThis.__viewPuStack__.length === 0) {
+    return false;
+  }
+  const _BuilderNodeView = globalThis.__viewPuStack__?.pop();
+  if (_BuilderNodeView) {
+    globalThis.__viewPuStack__?.push(_BuilderNodeView);
+  }
+  return (_BuilderNodeView !== undefined && _BuilderNodeView === parent) ? true : false;
+}

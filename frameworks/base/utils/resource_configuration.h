@@ -147,24 +147,14 @@ public:
         return preferredLanguage_;
     }
 
-    void SetPreferredCountry(const std::string& preferredCountry)
+    void SetLanguage(const std::string& language)
     {
-        preferredCountry_ = preferredCountry;
+        language_ = language;
     }
 
-    const std::string& GetPreferredCountry() const
+    const std::string& GetLanguage() const
     {
-        return preferredCountry_;
-    }
-
-    void SetPreferredScript(const std::string& preferredScript)
-    {
-        preferredScript_ = preferredScript;
-    }
-
-    const std::string& GetPreferredScript() const
-    {
-        return preferredScript_;
+        return language_;
     }
 
 private:
@@ -183,8 +173,7 @@ private:
     uint32_t mcc_ = 0;
     uint32_t mnc_ = 0;
     std::string preferredLanguage_;
-    std::string preferredCountry_;
-    std::string preferredScript_;
+    std::string language_;
 };
 
 class ResourceInfo {

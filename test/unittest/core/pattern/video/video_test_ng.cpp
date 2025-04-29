@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,6 @@
 #include "core/components/video/video_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -68,6 +67,7 @@ struct TestProperty {
     std::optional<std::string> src;
     std::optional<double> progressRate;
     std::optional<std::string> posterUrl;
+    std::optional<bool> showFirstFrame;
     std::optional<bool> muted;
     std::optional<bool> autoPlay;
     std::optional<bool> controls;
@@ -81,6 +81,7 @@ constexpr bool MUTED_VALUE = false;
 constexpr bool AUTO_PLAY = false;
 constexpr bool CONTROL_VALUE = true;
 constexpr bool LOOP_VALUE = false;
+constexpr bool SHOW_FIRST_FRAME = false;
 const ImageFit VIDEO_IMAGE_FIT = ImageFit::COVER;
 const std::string VIDEO_SRC = "common/video.mp4";
 const std::string VIDEO_POSTER_URL = "common/img2.png";
@@ -97,6 +98,7 @@ const std::string EXTRA_INFO_KEY = "extraInfo";
 const std::string VIDEO_ERROR_ID = "";
 const std::string VIDEO_CALLBACK_RESULT = "result_ok";
 const std::string VIDEO_STOP_EVENT = "stop";
+const std::string JSON_VALUE_FALSE = "false";
 constexpr float MAX_WIDTH = 400.0f;
 constexpr float MAX_HEIGHT = 400.0f;
 constexpr float VIDEO_WIDTH = 300.0f;
@@ -138,6 +140,7 @@ protected:
 void VideoTestNg::SetUpTestSuite()
 {
     testProperty.progressRate = VIDEO_PROGRESS_RATE;
+    testProperty.showFirstFrame = SHOW_FIRST_FRAME;
     testProperty.muted = MUTED_VALUE;
     testProperty.autoPlay = AUTO_PLAY;
     testProperty.controls = CONTROL_VALUE;
@@ -176,7 +179,7 @@ RefPtr<FrameNode> VideoTestNg::CreateVideoNode(TestProperty& testProperty)
         .WillRepeatedly(Return(true));
 
     if (testProperty.src.has_value()) {
-        VideoModelNG().SetSrc(testProperty.src.value());
+        VideoModelNG().SetSrc(testProperty.src.value(), "", "");
     }
     if (testProperty.progressRate.has_value()) {
         VideoModelNG().SetProgressRate(testProperty.progressRate.value());
@@ -198,6 +201,9 @@ RefPtr<FrameNode> VideoTestNg::CreateVideoNode(TestProperty& testProperty)
     }
     if (testProperty.objectFit.has_value()) {
         VideoModelNG().SetObjectFit(testProperty.objectFit.value());
+    }
+    if (testProperty.showFirstFrame.has_value()) {
+        VideoModelNG().SetShowFirstFrame(testProperty.showFirstFrame.value());
     }
 
     auto element = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -321,7 +327,9 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
      * @tc.expected: step4. IsMediaPlayerValid will be called 5 times
      */
     auto videoLayoutProperty = pattern->GetLayoutProperty<VideoLayoutProperty>();
-    videoLayoutProperty->UpdateVideoSource(VIDEO_SRC);
+    auto videoSrcInfo = videoLayoutProperty->GetVideoSourceValue(VideoSourceInfo());
+    videoSrcInfo.src_ = VIDEO_SRC;
+    videoLayoutProperty->UpdateVideoSource(videoSrcInfo);
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
         .Times(5)
         .WillRepeatedly(Return(true));
@@ -330,7 +338,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
 
     /**
      * @tc.steps: step5. Call UpdateMediaPlayerOnBg
-     *            case: IsMediaPlayerValid is always true & has set VideoSource & has set src_
+     *            case: IsMediaPlayerValid is always true & has set VideoSource & has set videoSrcInfo_.src_
      * @tc.expected: step5. IsMediaPlayerValid will be called 3 times.
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
@@ -345,7 +353,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
      *                      other function will be called once and return right value when preparing MediaPlayer
      *                      firstly
      */
-    pattern->src_.clear();
+    pattern->videoSrcInfo_.src_.clear();
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
         .Times(5)
         .WillOnce(Return(false))
@@ -383,11 +391,11 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
         .WillOnce(Return(true))
         .WillOnce(Return(true))
         .WillOnce(Return(true));
-    pattern->src_.clear();
+    pattern->videoSrcInfo_.src_.clear();
     pattern->UpdateMediaPlayerOnBg();
-    pattern->src_.clear();
+    pattern->videoSrcInfo_.src_.clear();
     pattern->UpdateMediaPlayerOnBg();
-    pattern->src_.clear();
+    pattern->videoSrcInfo_.src_.clear();
     pattern->UpdateMediaPlayerOnBg();
 
     // CreateMediaPlayer success but PrepareMediaPlayer fail for mediaPlayer is invalid
@@ -398,7 +406,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
         .WillOnce(Return(false))
         .WillOnce(Return(false))
         .WillOnce(Return(false));
-    pattern->src_.clear();
+    pattern->videoSrcInfo_.src_.clear();
     pattern->UpdateMediaPlayerOnBg();
 }
 
@@ -489,7 +497,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest010, TestSize.Level1)
     ASSERT_TRUE(playBtnGestureEventHub);
 
     // set videoEvent
-    auto videoEventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub);
     std::string startCheck;
     VideoEventCallback onStart = [&startCheck](const std::string& /* param */) { startCheck = VIDEO_START_EVENT; };
@@ -574,7 +582,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest011, TestSize.Level1)
     ASSERT_TRUE(pattern);
 
     // set videoEvent
-    auto videoEventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub);
     std::string preparedCheck;
     VideoEventCallback onPrepared = [&preparedCheck](
@@ -591,7 +599,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest011, TestSize.Level1)
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
         .Times(3)
         .WillRepeatedly(Return(true));
-    pattern->OnPrepared(VIDEO_WIDTH, VIDEO_HEIGHT, DURATION, 0, true);
+    pattern->OnPrepared(DURATION, 0, true);
     EXPECT_EQ(pattern->duration_, DURATION);
     EXPECT_EQ(preparedCheck, VIDEO_PREPARED_EVENT);
 
@@ -605,17 +613,15 @@ HWTEST_F(VideoTestNg, VideoPatternTest011, TestSize.Level1)
     pattern->isStop_ = true;
     pattern->autoPlay_ = true;
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(9)
+        .Times(8)
         .WillRepeatedly(Return(true));
-    pattern->OnPrepared(VIDEO_WIDTH, VIDEO_HEIGHT, DURATION, 0, false);
+    pattern->OnPrepared(DURATION, 0, false);
     EXPECT_EQ(pattern->duration_, DURATION);
     EXPECT_TRUE(preparedCheck.empty());
     pattern->isStop_ = false;
-    pattern->dragEndAutoPlay_ = true;
-    pattern->OnPrepared(VIDEO_WIDTH, VIDEO_HEIGHT, DURATION, 0, false);
+    pattern->OnPrepared(DURATION, 0, false);
     EXPECT_EQ(pattern->duration_, DURATION);
     EXPECT_TRUE(preparedCheck.empty());
-    EXPECT_FALSE(pattern->dragEndAutoPlay_);
 }
 
 /**
@@ -639,7 +645,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest012, TestSize.Level1)
     auto rawChildNum = static_cast<int32_t>(frameNode->GetChildren().size());
 
     // set video event
-    auto videoEventHub = pattern->GetEventHub<VideoEventHub>();
+    auto videoEventHub = pattern->GetOrCreateEventHub<VideoEventHub>();
     std::string pauseCheck;
     VideoEventCallback onPause = [&pauseCheck](const std::string& /* param */) { pauseCheck = VIDEO_PAUSE_EVENT; };
     videoEventHub->SetOnPause(std::move(onPause));
@@ -694,12 +700,12 @@ HWTEST_F(VideoTestNg, VideoPatternTest012, TestSize.Level1)
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Stop()).WillOnce(Return(0));
     pattern->Stop();
     EXPECT_EQ(static_cast<int32_t>(pattern->currentPos_), 0);
-    EXPECT_EQ(pattern->isStop_, true);
+    EXPECT_TRUE(pattern->isStop_);
 
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Stop()).WillOnce(Return(0));
     EXPECT_EQ(static_cast<int32_t>(pattern->currentPos_), 0);
     pattern->Stop(); // case2: media player is valid & currentPos = currentPos_ = 0
-    EXPECT_EQ(pattern->isStop_, true);
+    EXPECT_TRUE(pattern->isStop_);
 
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Stop())
         .Times(2)
@@ -712,14 +718,14 @@ HWTEST_F(VideoTestNg, VideoPatternTest012, TestSize.Level1)
                      // this will call OnUpdateTime(pos=DURATION_POS)
     EXPECT_EQ(static_cast<int32_t>(pattern->currentPos_), 1);
     EXPECT_EQ(updateCheck, "");
-    EXPECT_EQ(pattern->isStop_, true);
+    EXPECT_TRUE(pattern->isStop_);
     updateCheck.clear();
     pattern->currentPos_ = 1;
     pattern->Stop(); // case4: media player is valid & currentPos != currentPos_ & duration_ = 0 &
                      // mediaPlayer_->GetDuration return err
     EXPECT_EQ(static_cast<int32_t>(pattern->currentPos_), 1);
     EXPECT_EQ(updateCheck, "");
-    EXPECT_EQ(pattern->isStop_, true);
+    EXPECT_TRUE(pattern->isStop_);
 }
 
 /**
@@ -746,7 +752,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest013, TestSize.Level1)
     frameNode->AddChild(tempFrameNode, 0);
 
     // set video event
-    auto videoEventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub);
     std::string seekingCheck;
     VideoEventCallback onSeeking = [&seekingCheck](
@@ -764,9 +770,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest013, TestSize.Level1)
     for (int i = 0; i < 3; i++) {
         auto sliderChangeMode = sliderChangeModes[i];
         if (i == 1) {
-            EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Seek(_, _))
-                .Times(2)
-                .WillOnce(Return(0)); // 0 <= currentPos(0) <= duration_(0) will call mediaPlayer's Seek()
+            EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Seek(_, _)).Times(0);
         }
         if (i < 2) {
             seekingCheck.clear();
@@ -917,7 +921,7 @@ HWTEST_F(VideoTestNg, VideoAccessibilityPropertyTest001, TestSize.Level1)
     ASSERT_NE(videoAccessibilitProperty, nullptr);
     EXPECT_EQ(videoAccessibilitProperty->GetText(), "");
 
-    video.SetSrc(VIDEO_SRC);
+    video.SetSrc(VIDEO_SRC, "", "");
     EXPECT_EQ(videoAccessibilitProperty->GetText(), VIDEO_SRC);
 }
 
@@ -941,7 +945,7 @@ HWTEST_F(VideoTestNg, VideoAccessibilityPropertyTest002, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
         .WillRepeatedly(Return(true));
-    pattern->OnPrepared(VIDEO_WIDTH, VIDEO_HEIGHT, DURATION, 0, true);
+    pattern->OnPrepared(DURATION, 0, true);
     EXPECT_EQ(pattern->duration_, DURATION);
     pattern->currentPos_ = CURRENT_TIME;
     accessibilityValue = videoAccessibilitProperty->GetAccessibilityValue();
@@ -987,7 +991,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest016, TestSize.Level1)
     frameNode->AddChild(tempFrameNode, 0);
 
     // set video event
-    auto videoEventHub = frameNode->GetEventHub<VideoEventHub>();
+    auto videoEventHub = frameNode->GetOrCreateEventHub<VideoEventHub>();
     ASSERT_TRUE(videoEventHub);
 
     std::string fullScreenCheck;
@@ -1114,6 +1118,16 @@ HWTEST_F(VideoTestNg, VideoNodeTest001, TestSize.Level1)
     EXPECT_TRUE(secondVideoNode);
     EXPECT_EQ(videoNode->GetTag(), thirdVideoNode->GetTag());
     EXPECT_NE(videoNode->GetId(), thirdVideoNode->GetId());
+
+    /**
+     * @tc.steps: step3. Create Video again
+     * @tc.expected: step3. Get tag is different
+     */
+    auto fourthVideoNode = VideoNode::GetOrCreateVideoNode("test", VIDEO_NODE_ID_2,
+        [videoController]() { return AceType::MakeRefPtr<VideoPattern>(videoController); });
+    ASSERT_TRUE(fourthVideoNode);
+    EXPECT_NE(fourthVideoNode->GetTag(), thirdVideoNode->GetTag());
+    EXPECT_EQ(fourthVideoNode->GetId(), thirdVideoNode->GetId());
 }
 
 /**
@@ -1145,7 +1159,7 @@ HWTEST_F(VideoTestNg, VideoPatternEventTest001, TestSize.Level1)
      */
     std::string result;
     auto errorCallback = [&result](const std::string& error) { result = VIDEO_CALLBACK_RESULT; };
-    auto eventHub = pattern->GetEventHub<VideoEventHub>();
+    auto eventHub = pattern->GetOrCreateEventHub<VideoEventHub>();
     eventHub->SetOnError(std::move(errorCallback));
     pattern->OnError(VIDEO_ERROR_ID);
     EXPECT_EQ(result, VIDEO_CALLBACK_RESULT);
@@ -1191,6 +1205,14 @@ HWTEST_F(VideoTestNg, VideoPatternEventTest002, TestSize.Level1)
      */
     pattern->OnVisibleChange(false);
     EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step4. Make hiddenChangeEvent_ nullptr
+     * @tc.expected: step4. hiddenChangeEvent_ is nullptr.
+     */
+    pattern->SetHiddenChangeEvent(nullptr);
+    pattern->OnVisibleChange(false);
+    EXPECT_FALSE(pattern->hiddenChangeEvent_);
 }
 
 /**
@@ -1222,5 +1244,152 @@ HWTEST_F(VideoTestNg, VideoPatternPlayerTest001, TestSize.Level1)
      */
     bool result = pattern->HasPlayer();
     EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CallVideoPatternOnWindowHide
+ * @tc.desc: Test VideoPattern OnWindowHide() func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestNg, CallVideoPatternOnWindowHide, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video
+     * @tc.expected: step1. Create Video successfully
+     */
+    auto frameNode = CreateVideoNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. call OnWindowHide
+     * @tc.expected: step2. video will pause, isPaused_ is true.
+     */
+    pattern->OnWindowHide();
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
+        .WillRepeatedly(Return(true));
+    EXPECT_TRUE(pattern->isPaused_);
+}
+
+/**
+ * @tc.name: CallVideoPatternToJsonValue
+ * @tc.desc: Test VideoPattern ToJsonValue() func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestNg, CallVideoPatternToJsonValue, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video
+     * @tc.expected: step1. Create Video successfully
+     */
+    auto frameNode = CreateVideoNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. call ToJsonValue
+     * @tc.expected: step2. filter.IsFastFilter() is false.
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    pattern->ToJsonValue(json, filter);
+    EXPECT_FALSE(filter.IsFastFilter());
+    EXPECT_EQ(json->GetValue("enableAnalyzer")->GetString().c_str(), JSON_VALUE_FALSE);
+
+    /**
+     * @tc.steps: step3. call ToJsonValue
+     * @tc.expected: step3. filter.IsFastFilter() is true.
+     */
+    auto jsonSecond = JsonUtil::Create(true);
+    filter.AddFilterAttr("id");
+    pattern->ToJsonValue(jsonSecond, filter);
+    EXPECT_TRUE(filter.IsFastFilter());
+    EXPECT_FALSE(jsonSecond->Contains("enableAnalyzer"));
+}
+
+/**
+ * @tc.name: CallVideoPatternOnStartRenderFrameCb
+ * @tc.desc: Test VideoPattern OnStartRenderFrameCb() func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestNg, CallVideoPatternOnStartRenderFrameCb, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video
+     * @tc.expected: step1. Create Video successfully
+     */
+    auto frameNode = CreateVideoNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. call OnStartRenderFrameCb
+     * @tc.expected: step2. call IsMediaPlayerValid() once.
+     */
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
+        .WillRepeatedly(Return(true));
+    pattern->OnStartRenderFrameCb();
+}
+
+/**
+ * @tc.name: CallVideoPatternMoveByStepFunc
+ * @tc.desc: Test VideoPattern MoveByStep() func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestNg, CallVideoPatternMoveByStepFunc, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video
+     * @tc.expected: Create Video successfully
+     */
+    auto frameNode = CreateVideoNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. call MoveByStep, parameter is abnormal
+     * @tc.expected: currentPos_ will not change.
+     */
+    int32_t step = -1;
+    pattern->currentPos_ = 0;
+    pattern->MoveByStep(step);
+    EXPECT_EQ(pattern->currentPos_, 0);
+    step = pattern->duration_ + 1;
+    pattern->MoveByStep(step);
+    EXPECT_EQ(pattern->currentPos_, 0);
+}
+
+/**
+ * @tc.name: CallVideoPatternAdjustVolumeFunc
+ * @tc.desc: Test VideoPattern AdjustVolume() func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestNg, CallVideoPatternAdjustVolumeFunc, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video
+     * @tc.expected: Create Video successfully
+     */
+    auto frameNode = CreateVideoNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. call AdjustVolume, parameter is abnormal
+     * @tc.expected: currentVolume_ will not change.
+     */
+    int32_t step = 0;
+    pattern->currentVolume_ = 0.0f;
+    pattern->AdjustVolume(step);
+    EXPECT_EQ(pattern->currentVolume_, 0);
+    step = 1;
+    pattern->currentVolume_ = 1.0f;
+    pattern->AdjustVolume(step);
+    EXPECT_EQ(pattern->currentVolume_, 1);
 }
 } // namespace OHOS::Ace::NG

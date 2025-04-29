@@ -15,10 +15,9 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_mask.h"
 
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
 #include "frameworks/core/components/common/painter/rosen_svg_painter.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
+#include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace::NG {
 
@@ -29,21 +28,44 @@ RefPtr<SvgNode> SvgMask::Create()
     return AceType::MakeRefPtr<SvgMask>();
 }
 
+void SvgMask::OnMaskEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext)
+{
+    auto maskRule = svgCoordinateSystemContext.BuildScaleRule(maskAttr_.maskUnits);
+    auto measuredX = GetRegionPosition(maskAttr_.x, maskRule, SvgLengthType::HORIZONTAL);
+    auto measuredY = GetRegionPosition(maskAttr_.y, maskRule, SvgLengthType::VERTICAL);
+    auto measuredWidth = GetRegionLength(maskAttr_.width, maskRule, SvgLengthType::HORIZONTAL);
+    auto measuredHeight = GetRegionLength(maskAttr_.height, maskRule, SvgLengthType::VERTICAL);
+    Rect maskRect = {
+        measuredX,
+        measuredY,
+        measuredWidth,
+        measuredHeight
+    };
+    RSRect maskBounds(maskRect.Left(), maskRect.Top(), maskRect.Right(), maskRect.Bottom());
+    // create mask layer
+    RSSaveLayerOps slo(&maskBounds, nullptr);
+    canvas.SaveLayer(slo);
+    // ready to render mask content
+    auto canvasLayerCount = static_cast<int32_t>(canvas.GetSaveCount());
+    RosenSvgPainter::SetMask(&canvas);
+    auto maskContentRule = BuildContentScaleRule(svgCoordinateSystemContext, maskAttr_.maskContentUnits);
+    TransformForCurrentOBB(canvas, maskContentRule,  svgCoordinateSystemContext.GetContainerRect().GetSize(),
+        svgCoordinateSystemContext.GetContainerRect().GetOffset());
+    // subgraph does not use image components parameter fillColor
+    maskContentRule.SetUseFillColor(false);
+    DrawChildren(canvas, maskContentRule);
+    canvas.RestoreToCount(canvasLayerCount);
+    // create content layer and render content
+    RSBrush maskBrush;
+    maskBrush.SetBlendMode(RSBlendMode::SRC_IN);
+    RSSaveLayerOps slo2(&maskBounds, &maskBrush);
+    canvas.SaveLayer(slo2);
+    canvas.ClipRect(maskBounds, RSClipOp::INTERSECT, true);
+}
+
 void SvgMask::OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
     auto nodeBounds = isDefaultMaskUnits_ ? AsBounds(viewPort) : GetRootViewBox();
-#ifndef USE_ROSEN_DRAWING
-    maskBounds_ = SkRect::MakeXYWH(SkDoubleToScalar(nodeBounds.Left() + ParseUnitsAttr(x_, nodeBounds.Width())),
-        SkDoubleToScalar(nodeBounds.Top() + ParseUnitsAttr(y_, nodeBounds.Height())),
-        SkDoubleToScalar(ParseUnitsAttr(width_, nodeBounds.Width())),
-        SkDoubleToScalar(ParseUnitsAttr(height_, nodeBounds.Height())));
-    // create mask layer
-    skCanvas_->saveLayer(maskBounds_, nullptr);
-    // ready to render mask content
-    canvasLayerCount_ = skCanvas_->getSaveCount();
-
-    RosenSvgPainter::SetMask(skCanvas_);
-#else
     RSScalar left = static_cast<RSScalar>(nodeBounds.Left() + ParseUnitsAttr(x_, nodeBounds.Width()));
     RSScalar top = static_cast<RSScalar>(nodeBounds.Top() + ParseUnitsAttr(y_, nodeBounds.Height()));
     RSScalar width = static_cast<RSScalar>(ParseUnitsAttr(width_, nodeBounds.Width()));
@@ -55,19 +77,10 @@ void SvgMask::OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, cons
     // ready to render mask content
     canvasLayerCount_ = static_cast<int32_t>(rsCanvas_->GetSaveCount());
     RosenSvgPainter::SetMask(rsCanvas_);
-#endif
 }
 
 void SvgMask::OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
-#ifndef USE_ROSEN_DRAWING
-    skCanvas_->restoreToCount(canvasLayerCount_);
-    // create content layer and render content
-    SkPaint maskPaint;
-    maskPaint.setBlendMode(SkBlendMode::kSrcIn);
-    skCanvas_->saveLayer(maskBounds_, &maskPaint);
-    skCanvas_->clipRect(maskBounds_, true);
-#else
     rsCanvas_->RestoreToCount(canvasLayerCount_);
     // create content layer and render content
     RSBrush maskBrush;
@@ -75,13 +88,26 @@ void SvgMask::OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, const
     RSSaveLayerOps slo(&maskBounds_, &maskBrush);
     rsCanvas_->SaveLayer(slo);
     rsCanvas_->ClipRect(maskBounds_, RSClipOp::INTERSECT, true);
-#endif
 }
 
+void SvgMask::DrawChildren(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
+{
+    auto smoothEdge = GetSmoothEdge();
+    auto colorFilter = GetColorFilter();
+    for (auto& node : children_) {
+        if (node && node->drawTraversed_) {
+            if (GreatNotEqual(smoothEdge, 0.0f)) {
+                node->SetSmoothEdge(smoothEdge);
+            }
+            node->SetColorFilter(colorFilter);
+            node->Draw(canvas, lengthRule);
+        }
+    }
+}
 void SvgMask::OnInitStyle()
 {
-    isDefaultMaskUnits_ = (maskAttr_.maskUnits == "objectBoundingBox");
-    isDefaultMaskContentUnits_ = (maskAttr_.maskContentUnits == "userSpaceOnUse");
+    isDefaultMaskUnits_ = (maskAttr_.maskUnits == SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
+    isDefaultMaskContentUnits_ = (maskAttr_.maskContentUnits == SvgLengthScaleUnit::USER_SPACE_ON_USE);
     x_ = maskAttr_.x;
     y_ = maskAttr_.y;
     height_ = maskAttr_.height;
@@ -109,27 +135,34 @@ bool SvgMask::ParseAndSetSpecializedAttr(const std::string& name, const std::str
     static const LinearMapNode<void (*)(const std::string&, SvgMaskAttribute&)> attrs[] = {
         { SVG_HEIGHT,
             [](const std::string& val, SvgMaskAttribute& attr) {
-                attr.height = SvgAttributesParser::ParseDimension(val);
+                SvgAttributesParser::ParseDimension(val, attr.height);
             } },
         { SVG_MASK_CONTENT_UNITS,
             [](const std::string& val, SvgMaskAttribute& attr) {
-                attr.maskContentUnits = val;
+                attr.maskContentUnits = (val == "objectBoundingBox") ? SvgLengthScaleUnit::OBJECT_BOUNDING_BOX :
+                    SvgLengthScaleUnit::USER_SPACE_ON_USE;
             } },
         { SVG_MASK_UNITS,
             [](const std::string& val, SvgMaskAttribute& attr) {
-                attr.maskUnits = val;
+                if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+                    attr.maskUnits = (val == "objectBoundingBox") ? SvgLengthScaleUnit::OBJECT_BOUNDING_BOX :
+                        SvgLengthScaleUnit::USER_SPACE_ON_USE;
+                    return;
+                }
+                attr.maskUnits = (val == "userSpaceOnUse") ? SvgLengthScaleUnit::USER_SPACE_ON_USE :
+                    SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
             } },
         { SVG_WIDTH,
             [](const std::string& val, SvgMaskAttribute& attr) {
-                attr.width = SvgAttributesParser::ParseDimension(val);
+                SvgAttributesParser::ParseDimension(val, attr.width);
             } },
         { SVG_X,
             [](const std::string& val, SvgMaskAttribute& attr) {
-                attr.x = SvgAttributesParser::ParseDimension(val);
+                SvgAttributesParser::ParseDimension(val, attr.x);
             } },
         { SVG_Y,
             [](const std::string& val, SvgMaskAttribute& attr) {
-                attr.y = SvgAttributesParser::ParseDimension(val);
+                SvgAttributesParser::ParseDimension(val, attr.y);
             } },
     };
     std::string key = name;

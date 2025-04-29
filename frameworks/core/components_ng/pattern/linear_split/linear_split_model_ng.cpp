@@ -15,14 +15,8 @@
 
 #include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
 
-#include <string>
-
-#include "base/memory/referenced.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/linear_split/linear_split_pattern.h"
-#include "core/components_ng/pattern/linear_split/linear_split_layout_property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 void LinearSplitModelNG::Create(SplitType splitType)

@@ -15,16 +15,10 @@
 
 #include "core/components_ng/pattern/select/select_layout_algorithm.h"
 
-#include "base/geometry/dimension.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/select/select_theme.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
-#include "core/components_ng/pattern/option/option_pattern.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -49,7 +43,9 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         space = minSpace.ConvertToPx();
         rowProps->UpdateSpace(minSpace);
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = layoutProps->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -58,25 +54,12 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     childConstraint.maxSize.MinusWidth(spinnerSize.Width() + space);
     auto textWrapper = rowWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(textWrapper);
-    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(textLayoutProperty);
-    auto textLayoutConstraint = textLayoutProperty->CreateContentConstraint();
-    auto textSize = MeasureAndGetSize(textWrapper, childConstraint);
+    std::optional<float> maxWidth = std::nullopt;
     if (childConstraint.parentIdealSize.Width().has_value()) {
         // Make the spinner icon layout at the right end
-        textSize.SetWidth(childConstraint.parentIdealSize.Width().value() - spinnerSize.Width() - space);
+        maxWidth = childConstraint.parentIdealSize.Width().value() - spinnerSize.Width() - space;
     }
-
-    auto fontSize = textLayoutProperty->GetFontSize().value().ConvertToPx();
-    bool isTextMin = false;
-    MeasureAndGetTextSize(fontSize, textSize, isTextMin);
-
-    if (isTextMin || childConstraint.parentIdealSize.Width().has_value()) {
-        textLayoutProperty->UpdateMarginSelfIdealSize(textSize);
-        textLayoutConstraint.selfIdealSize = OptionalSize<float>(textSize.Width(), textSize.Height());
-        textLayoutConstraint.maxSize.SetSizeT(textSize);
-        textWrapper->Measure(textLayoutConstraint);
-    }
+    auto textSize = MeasureSelectText(textWrapper, childConstraint, maxWidth);
 
     auto rowGeometry = rowWrapper->GetGeometryNode();
     CHECK_NULL_VOID(rowGeometry);
@@ -85,13 +68,45 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto rowHeight = std::max(textSize.Height(), spinnerSize.Height());
     rowGeometry->SetFrameSize(SizeF(rowWidth, rowHeight));
     rowWrapper->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
-
     float defaultHeight = MeasureAndGetDefaultHeight(layoutProps, theme);
     layoutWrapper->GetGeometryNode()->SetContentSize(
         SizeF(rowWidth, rowHeight > defaultHeight ? rowHeight : defaultHeight));
 
     // Measure same as box, base on the child row.
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
+}
+
+SizeF SelectLayoutAlgorithm::MeasureSelectText(
+    RefPtr<LayoutWrapper> textWrapper, const LayoutConstraintF& childConstraint, std::optional<float> maxWidth)
+{
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(textLayoutProperty, SizeF());
+    auto textLayoutConstraint = textLayoutProperty->CreateContentConstraint();
+    auto contentValue = textLayoutProperty->GetContentValue(u"");
+
+    SizeF textSize;
+    if (!contentValue.empty()) {
+        textSize = MeasureAndGetSize(textWrapper, childConstraint);
+    }
+    if (maxWidth.has_value()) {
+        // Make the spinner icon layout at the right end
+        textSize.SetWidth(maxWidth.value());
+    }
+    auto fontSize = textLayoutProperty->GetFontSizeValue(Dimension()).ConvertToPx();
+    bool isTextMin = false;
+    MeasureAndGetTextSize(fontSize, textSize, isTextMin);
+    if (contentValue.empty()) {
+        auto textGeometry = textWrapper->GetGeometryNode();
+        CHECK_NULL_RETURN(textGeometry, SizeF());
+        auto textMargin = textGeometry->GetMarginFrameSize() - textGeometry->GetFrameSize();
+        textGeometry->SetFrameSize(textSize - textMargin);
+    } else if (isTextMin || childConstraint.parentIdealSize.Width().has_value()) {
+        textLayoutProperty->UpdateMarginSelfIdealSize(textSize);
+        textLayoutConstraint.selfIdealSize = OptionalSize<float>(textSize.Width(), textSize.Height());
+        textLayoutConstraint.maxSize.SetSizeT(textSize);
+        textWrapper->Measure(textLayoutConstraint);
+    }
+    return textSize;
 }
 
 void SelectLayoutAlgorithm::MeasureAndGetTextSize(double fontSize, SizeF& textSize, bool& isTextMin)
@@ -106,14 +121,13 @@ void SelectLayoutAlgorithm::MeasureAndGetTextSize(double fontSize, SizeF& textSi
 
 float SelectLayoutAlgorithm::MeasureAndGetDefaultHeight(RefPtr<LayoutProperty> layoutProps, RefPtr<SelectTheme> theme)
 {
-    float defaultHeight = 0.0f;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto host = layoutProps->GetHost();
+    float defaultHeight = static_cast<float>(theme->GetSelectDefaultHeight().ConvertToPx());
+    auto host = layoutProps->GetHost();
+    CHECK_NULL_RETURN(host, defaultHeight);
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto selectPattern = host->GetPattern<SelectPattern>();
         defaultHeight =
             static_cast<float>(theme->GetSelectDefaultHeight(selectPattern->GetControlSize()).ConvertToPx());
-    } else {
-        defaultHeight = static_cast<float>(theme->GetSelectDefaultHeight().ConvertToPx());
     }
     return defaultHeight;
 }
@@ -143,25 +157,24 @@ void SelectLayoutAlgorithm::NeedAgingUpdateParams(LayoutWrapper* layoutWrapper)
     auto pattern = host->GetPattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
     auto options = pattern->GetOptions();
-    if (NearEqual(fontScale_, menuTheme->GetBigFontSizeScale()) ||
-        NearEqual(fontScale_, menuTheme->GetLargeFontSizeScale()) ||
-        NearEqual(fontScale_, menuTheme->GetMaxFontSizeScale())) {
-        UpdateOptionsMaxLines(options, menuTheme->GetTextMaxLines());
-    } else {
-        UpdateOptionsMaxLines(options, 1);
-    }
-}
-
-void SelectLayoutAlgorithm::UpdateOptionsMaxLines(const std::vector<RefPtr<FrameNode>>& options, int32_t maxLines)
-{
-    for (auto child :options) {
-        auto optionPattern = child->GetPattern<OptionPattern>();
+    for (const auto& option : options) {
+        auto optionPattern = option->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(optionPattern);
         auto textNode = AceType::DynamicCast<FrameNode>(optionPattern->GetTextNode());
         CHECK_NULL_VOID(textNode);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateMaxLines(maxLines);
+        if (optionPattern->GetOptionTextModifier() || optionPattern->GetSelectedOptionTextModifier()) {
+            continue;
+        } else {
+            if (NearEqual(fontScale_, menuTheme->GetBigFontSizeScale()) ||
+                NearEqual(fontScale_, menuTheme->GetLargeFontSizeScale()) ||
+                NearEqual(fontScale_, menuTheme->GetMaxFontSizeScale())) {
+                textLayoutProperty->UpdateMaxLines(menuTheme->GetTextMaxLines());
+            } else {
+                textLayoutProperty->UpdateMaxLines(1);
+            }
+        }
     }
 }
 
@@ -176,6 +189,8 @@ void SelectLayoutAlgorithm::UpdateMargin(LayoutWrapper* layoutWrapper, RefPtr<Se
     CHECK_NULL_VOID(rowProps);
     auto arrowStart = rowProps->GetFlexDirection() == FlexDirection::ROW_REVERSE;
     CHECK_NULL_VOID(layoutProps);
+    auto host = layoutProps->GetHost();
+    auto selectPattern = host->GetPattern<SelectPattern>();
     auto isRtl = layoutProps->GetNonAutoLayoutDirection() == TextDirection::RTL;
     MarginProperty spinnerMargin;
     MarginProperty TextMargin;
@@ -190,11 +205,15 @@ void SelectLayoutAlgorithm::UpdateMargin(LayoutWrapper* layoutWrapper, RefPtr<Se
         TextMargin.left = CalcLength(theme->GetContentMargin());
         TextMargin.right = CalcLength();
     }
-    spinnerLayoutProperty->UpdateMargin(spinnerMargin);
+    if (!selectPattern->GetArrowModifier()) {
+        spinnerLayoutProperty->UpdateMargin(spinnerMargin);
+    }
+    if (!selectPattern->GetTextModifier()) {
         auto textWrapper = rowWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID(textWrapper);
+        CHECK_NULL_VOID(textWrapper);
         auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateMargin(TextMargin);
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateMargin(TextMargin);
+    }
 }
 } // namespace OHOS::Ace::NG

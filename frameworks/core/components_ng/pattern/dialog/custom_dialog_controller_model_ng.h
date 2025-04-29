@@ -19,7 +19,7 @@
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/memory/ace_type.h"
-#include "base/subwindow/subwindow_manager.h"
+
 namespace OHOS::Ace::NG {
 class ACE_EXPORT CustomDialogControllerModelNG : public OHOS::Ace::CustomDialogControllerModel {
 public:
@@ -34,6 +34,13 @@ public:
         RefPtr<AceType>& dialogComponent, RefPtr<AceType>& customDialog,
         std::list<DialogOperation>& dialogOperation) override;
     static void SetCloseDialogForNDK(FrameNode* dialogNode);
+
+private:
+    TaskExecutor::Task ParseOpenDialogTask(int32_t currentId, const WeakPtr<AceType>& controller,
+        DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs, std::function<void()>&& buildFunc,
+        const RefPtr<OverlayManager>& overlayManager);
+    TaskExecutor::Task ParseCloseDialogTask(const WeakPtr<AceType>& controller, DialogProperties& dialogProperties,
+        std::vector<WeakPtr<AceType>>& dialogs, const RefPtr<OverlayManager>& overlayManager);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_DIALOG_JS_CUSTOM_DIALOG_CONTROLLER_H

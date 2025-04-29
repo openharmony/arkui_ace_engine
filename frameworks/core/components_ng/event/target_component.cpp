@@ -14,7 +14,6 @@
  */
 #include "core/components_ng/event/target_component.h"
 
-#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 
 namespace OHOS::Ace::NG {

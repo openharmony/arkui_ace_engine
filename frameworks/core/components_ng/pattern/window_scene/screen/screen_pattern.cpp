@@ -19,11 +19,10 @@
 
 #include "ipc_skeleton.h"
 #include "root_scene.h"
+#include "screen_scene.h"
 #include "screen_manager.h"
 #include "transaction/rs_transaction_proxy.h"
-#include "ui/rs_display_node.h"
 
-#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene_layout_manager.h"
@@ -223,16 +222,29 @@ bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(container, false);
     auto window = static_cast<RosenWindow*>(container->GetWindow());
     CHECK_NULL_RETURN(window, false);
-    auto rootScene = static_cast<Rosen::RootScene*>(window->GetRSWindow().GetRefPtr());
-    CHECK_NULL_RETURN(rootScene, false);
+    auto rsWindow = window->GetRSWindow();
+    CHECK_NULL_RETURN(rsWindow, false);
     auto screenBounds = screenSession_->GetScreenProperty().GetBounds();
     Rosen::Rect rect = { screenBounds.rect_.left_, screenBounds.rect_.top_,
         screenBounds.rect_.width_, screenBounds.rect_.height_ };
     float density = GetDensityInCurrentResolution();
-    rootScene->SetDisplayDensity(density);
-    int32_t orientation = static_cast<int32_t>(screenSession_->GetScreenProperty().GetDisplayOrientation());
-    rootScene->SetDisplayOrientation(orientation);
-    rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
+    if (rsWindow->GetClassType() == "RootScene") {
+        auto rootScene = static_cast<Rosen::RootScene*>(rsWindow.GetRefPtr());
+        CHECK_NULL_RETURN(rootScene, false);
+        rootScene->SetDisplayDensity(density);
+        int32_t orientation = static_cast<int32_t>(screenSession_->GetScreenProperty().GetDisplayOrientation());
+        rootScene->SetDisplayOrientation(orientation);
+        rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
+    } else if (rsWindow->GetClassType() == "ScreenScene") {
+        auto screenScene = static_cast<Rosen::ScreenScene*>(rsWindow.GetRefPtr());
+        CHECK_NULL_RETURN(screenScene, false);
+        screenScene->SetDisplayDensity(density);
+        int32_t orientation = static_cast<int32_t>(screenSession_->GetScreenProperty().GetDisplayOrientation());
+        screenScene->SetDisplayOrientation(orientation);
+        screenScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
+    } else {
+        LOGE("others type");
+    }
     return true;
 }
 

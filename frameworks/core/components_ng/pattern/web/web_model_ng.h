@@ -15,9 +15,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H
 
-#if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
-#include "base/web/webview/ohos_nweb/include/nweb_helper.h"
-#endif
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/web/web_model.h"
@@ -30,6 +27,33 @@ using SetHapPathCallback = std::function<void(const std::string&)>;
 using JsProxyCallback = std::function<void()>;
 using setPermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
 
+// enum type used for decoupe NWeb dependency, same as NWeb::ImageColorType
+enum class TransImageColorType {
+    // Unknown color type
+    COLOR_TYPE_UNKNOWN = -1,
+
+    // RGBA with 8 bits per pixel (32 bits total).
+    COLOR_TYPE_RGBA_8888 = 0,
+
+    // RGRA with 8 bits per pixel (32 bits total).
+    COLOR_TYPE_BGRA_8888 = 1,
+};
+
+// enum type used for decoupe NWeb dependency, same as NWeb::ImageAlphaType
+enum class TransImageAlphaType {
+    // Unknown alpha type
+    ALPHA_TYPE_UNKNOWN = -1,
+
+    // No transparency. The alpha component is ignored.
+    ALPHA_TYPE_OPAQUE = 0,
+
+    // Transparency with pre-multiplied alpha component.
+    ALPHA_TYPE_PREMULTIPLIED = 1,
+
+    // Transparency with post-multiplied alpha component.
+    ALPHA_TYPE_POSTMULTIPLIED = 2,
+};
+
 class ACE_EXPORT WebModelNG : public OHOS::Ace::WebModel {
 public:
     void Create(const std::string& src, const RefPtr<WebController>& webController,
@@ -39,6 +63,7 @@ public:
         std::function<void(const std::string&)>&& setHapPathCallback, int32_t parentWebId, bool popup,
         RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
         const std::string& sharedRenderProcessToken = "") override;
+    Color GetDefaultBackgroundColor() override;
     void SetCustomScheme(const std::string& cmdLine) override;
     void SetOnCommonDialog(std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType) override;
     void SetOnConsoleLog(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
@@ -67,6 +92,8 @@ public:
     void SetOnFileSelectorShow(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnContextMenuShow(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnContextMenuHide(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetNewDragStyle(bool isNewDragStyle) override;
+    void SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param) override;
     void SetJsEnabled(bool isJsEnabled) override;
     void SetFileAccessEnabled(bool isFileAccessEnabled) override;
     void SetOnLineImageAccessEnabled(bool isOnLineImageAccessEnabled) override;
@@ -81,6 +108,7 @@ public:
     void SetRefreshAccessedHistoryId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetCacheMode(WebCacheMode cacheMode) override;
     void SetOverScrollMode(OverScrollMode mode) override;
+    void SetBlurOnKeyboardHideMode(BlurOnKeyboardHideMode mode) override;
     void SetCopyOptionMode(CopyOptions mode) override;
     void SetOverviewModeAccessEnabled(bool isOverviewModeAccessEnabled) override;
     void SetFileFromUrlAccessEnabled(bool isFileFromUrlAccessEnabled) override;
@@ -161,14 +189,22 @@ public:
     void SetAudioExclusive(bool audioExclusive) override;
     void SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetNativeEmbedModeEnabled(bool isEmbedModeEnabled) override;
+    void SetIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled) override;
     void RegisterNativeEmbedRule(const std::string& tag, const std::string& type) override;
     void SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetNativeEmbedVisibilityChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetLayoutMode(WebLayoutMode mode) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
     void SetNestedScrollExt(const NestedScrollOptionsExt& nestedOpt) override;
     void SetMetaViewport(bool enabled) override;
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) override;
+    void JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
+        const ScriptItemsByOrder& scriptItemsByOrder) override;
+    void JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
+        const ScriptItemsByOrder& scriptItemsByOrder) override;
+    void JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
+        const ScriptItemsByOrder& scriptItemsByOrder) override;
     void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems) override;
 
     void SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) override;
@@ -179,7 +215,6 @@ public:
             intelligentTrackingPreventionResultId) override;
     void SetTextAutosizing(bool isTextAutosizing) override;
     void SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay) override;
-    void SetSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled) override;
     void SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetRenderProcessRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetSelectionMenuOptions(const WebMenuOptionsParam& webMenuOption) override;
@@ -192,6 +227,20 @@ public:
     void SetKeyboardAvoidMode(const WebKeyboardAvoidMode& mode) override;
     void SetEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
+    void SetEnabledHapticFeedback(bool isEnabled) override;
+    void SetOptimizeParserBudgetEnabled(bool enable) override;
+    void SetWebMediaAVSessionEnabled(bool isEnabled) override;
+    void SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) override;
+
+    static void SetJsEnabled(FrameNode* frameNode, bool isJsEnabled);
+    static void SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEnabled);
+    static void SetDomStorageAccessEnabled(FrameNode* frameNode, bool isDomStorageAccessEnabled);
+    static void SetMixedMode(FrameNode* frameNode, MixedModeContent mixedMode);
+    static void SetZoomAccessEnabled(FrameNode* frameNode, bool isZoomAccessEnabled);
+    static void SetCacheMode(FrameNode* frameNode, WebCacheMode cacheMode);
+    static void SetDarkMode(FrameNode* frameNode, WebDarkMode mode);
+    static void SetMultiWindowAccessEnabled(FrameNode* frameNode, bool isMultiWindowAccessEnable);
+    static void SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllowWindowOpenMethod);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

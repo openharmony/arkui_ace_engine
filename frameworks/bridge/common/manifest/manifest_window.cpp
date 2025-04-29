@@ -16,6 +16,7 @@
 #include "frameworks/bridge/common/manifest/manifest_window.h"
 
 #include <regex>
+#include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
 
 namespace OHOS::Ace::Framework {
@@ -39,7 +40,7 @@ void ManifestWindow::WindowParse(const std::unique_ptr<JsonValue>& root)
         std::regex reg("\\$(\\S+):(\\S+)");
         std::smatch results;
 
-        auto resourceObject = AceType::MakeRefPtr<Ace::ResourceObject>("", "");
+        auto resourceObject = AceType::MakeRefPtr<Ace::ResourceObject>("", "", Container::CurrentIdSafely());
         auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
         if (std::regex_match(designString, results, reg) && resourceAdapter) {
             designWidth = resourceAdapter->GetInt(StringUtils::StringToInt(results[2].str()));

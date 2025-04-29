@@ -137,6 +137,7 @@ void SliderModelImpl::SetOnChange(std::function<void(float, int32_t)>&& eventOnC
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto slider = AceType::DynamicCast<SliderComponent>(component);
+    CHECK_NULL_VOID(slider);
     slider->SetOnChange(std::move(eventOnChange));
 }
 

@@ -318,7 +318,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest001,
     EXPECT_EQ(textProp->GetFontWeight().value_or(FontWeight::NORMAL), FontWeight::MEDIUM);
     std::vector<std::string> emptyVec;
     auto fontFamily = textProp->GetFontFamily().value_or(emptyVec);
-    EXPECT_FALSE(fontFamily.empty());
+    EXPECT_TRUE(fontFamily.empty());
     EXPECT_EQ(textProp->GetTextColor().value_or(Color()), Color::WHITE);
 
     // icon node property
@@ -649,7 +649,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPatternTest002, 
     GestureEvent info;
     clickListener->callback_(info);
 
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_NE(eventHub->onAppear_, nullptr);
     ASSERT_NE(eventHub->onDisappear_, nullptr);
@@ -691,6 +691,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationLayoutAlgoTest00
 
     property->UpdateBackgroundType(static_cast<int32_t>(ButtonType::CAPSULE));
     property->UpdateTextIconLayoutDirection(SecurityComponentLayoutDirection::VERTICAL);
+    property->UpdateAlignment(Alignment::CENTER_LEFT);
     pattern->OnModifyDone();
 
     layoutAlgo->Measure(layoutWrapper.rawPtr_);
@@ -766,7 +767,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest001, Tes
     EXPECT_EQ(textProp->GetFontWeight().value_or(FontWeight::NORMAL), FontWeight::MEDIUM);
     std::vector<std::string> emptyVec;
     auto fontFamily = textProp->GetFontFamily().value_or(emptyVec);
-    EXPECT_FALSE(fontFamily.empty());
+    EXPECT_TRUE(fontFamily.empty());
     EXPECT_EQ(textProp->GetTextColor().value_or(Color()), Color::WHITE);
 
     // icon node property
@@ -1097,7 +1098,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePatternTest002, Test
     GestureEvent info;
     clickListener->callback_(info);
 
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_NE(eventHub->onAppear_, nullptr);
     ASSERT_NE(eventHub->onDisappear_, nullptr);
@@ -1194,7 +1195,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest001, Te
     EXPECT_EQ(textProp->GetFontWeight().value_or(FontWeight::NORMAL), FontWeight::MEDIUM);
     std::vector<std::string> emptyVec;
     auto fontFamily = textProp->GetFontFamily().value_or(emptyVec);
-    EXPECT_FALSE(fontFamily.empty());
+    EXPECT_TRUE(fontFamily.empty());
     EXPECT_EQ(textProp->GetTextColor().value_or(Color()), Color::WHITE);
 
     // icon node property
@@ -1523,7 +1524,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePatternTest002, Tes
     GestureEvent info;
     clickListener->callback_(info);
 
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     ASSERT_NE(eventHub->onAppear_, nullptr);
     ASSERT_NE(eventHub->onDisappear_, nullptr);
@@ -1626,13 +1627,14 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest001, TestSize
 
     int32_t invalidId = -1;
     int32_t noExistId = 0;
+    std::string message;
     EXPECT_EQ(SecurityComponentHandler::RegisterSecurityComponent(invalidFrameNode, scId), -1);
     EXPECT_EQ(SecurityComponentHandler::UpdateSecurityComponent(invalidFrameNode, noExistId), -1);
     EXPECT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(invalidId), -1);
-    EXPECT_EQ(
-        SecurityComponentHandler::ReportSecurityComponentClickEvent(invalidId, frameNode, info, [] (int32_t){}), -1);
     EXPECT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
-        noExistId, invalidFrameNode, info, [] (int32_t) {}), -1);
+        invalidId, frameNode, info, [](int32_t) {}, message), -1);
+    EXPECT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
+        noExistId, invalidFrameNode, info, [] (int32_t) {}, message), -1);
 
     KeyEvent key;
     EXPECT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
@@ -1656,11 +1658,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest002, TestSize
     GestureEvent info;
 
     int32_t noExistId = 0;
+    std::string message;
     ASSERT_EQ(SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId), -1);
     ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(frameNode, noExistId), -1);
     ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(noExistId), 0);
     ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
-        noExistId, frameNode, info, [] (int32_t) {}), -1);
+        noExistId, frameNode, info, [] (int32_t) {}, message), -1);
 }
 
 /**
@@ -1677,11 +1680,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest003, TestSize
     GestureEvent info;
 
     int32_t noExistId = 0;
+    std::string message;
     ASSERT_EQ(SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId), -1);
     ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(frameNode, noExistId), -1);
     ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(noExistId), 0);
     ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
-        noExistId, frameNode, info, [] (int32_t) {}), -1);
+        noExistId, frameNode, info, [] (int32_t) {}, message), -1);
 }
 
 /**
@@ -1698,11 +1702,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest004, TestSize
     GestureEvent info;
 
     int32_t noExistId = 0;
+    std::string message;
     ASSERT_EQ(SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId), -1);
     ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(frameNode, noExistId), -1);
     ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(noExistId), 0);
     ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
-        noExistId, frameNode, info, [] (int32_t) {}), -1);
+        noExistId, frameNode, info, [] (int32_t) {}, message), -1);
 }
 
 /**
@@ -1715,8 +1720,8 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest005, TestSize
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
-
-    ASSERT_EQ(SecurityComponentHandler::CheckComponentCoveredStatus(frameNode->GetId()), false);
+    std::string message;
+    ASSERT_EQ(SecurityComponentHandler::CheckComponentCoveredStatus(frameNode->GetId(), message), false);
 }
 
 /**
@@ -1736,7 +1741,9 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     // security component is not completely displayed
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
+    std::string message;
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
     RefPtr<RenderContext> parentRenderContext = parentFrameNode->GetRenderContext();
     auto parentFrameRect = parentRenderContext->GetPaintRectWithTransform();
     RefPtr<RenderContext> childRenderContext = childFrameNode->GetRenderContext();
@@ -1748,7 +1755,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     auto renderContext = parentFrameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdatePixelStretchEffect(pixelStretchEffectOption);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
 }
 
 /**
@@ -1768,9 +1775,11 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateLightUpEffect(1);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    std::string message;
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
 }
 
 /**
@@ -1790,11 +1799,13 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateSphericalEffect(0);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    std::string message;
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
     ASSERT_EQ(renderContext->GetSphericalEffect().value(), 0.0f);
     renderContext->UpdateSphericalEffect(1);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
 }
 } // namespace OHOS::Ace::NG

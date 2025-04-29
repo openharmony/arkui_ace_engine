@@ -21,6 +21,7 @@
 #include "gtest/gtest.h"
 
 #define private public
+#define protected public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/render/mock_render_surface.h"
@@ -34,6 +35,8 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_layout_algorithm.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_surface_holder.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
@@ -141,6 +144,14 @@ class XComponentTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    void TearDown() override
+    {
+        testProperty.loadEvent = std::nullopt;
+        testProperty.destroyEvent = std::nullopt;
+        testProperty.surfaceCreatedEvent = std::nullopt;
+        testProperty.surfaceChangedEvent = std::nullopt;
+        testProperty.surfaceDestroyedEvent = std::nullopt;
+    }
 
 protected:
     static RefPtr<FrameNode> CreateXComponentNode(TestProperty& testProperty);
@@ -204,7 +215,7 @@ HWTEST_F(XComponentTestNg, XComponentEventTest002, TestSize.Level1)
     std::string onLoadKey;
     std::string onDestroyKey;
     auto onLoad = [&onLoadKey](const std::string& /* xComponentId */) { onLoadKey = CHECK_KEY; };
-    auto onDestroy = [&onDestroyKey]() { onDestroyKey = CHECK_KEY; };
+    auto onDestroy = [&onDestroyKey](const std::string& /* xComponentId */) { onDestroyKey = CHECK_KEY; };
 
     testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
     testProperty.loadEvent = std::move(onLoad);
@@ -217,10 +228,10 @@ HWTEST_F(XComponentTestNg, XComponentEventTest002, TestSize.Level1)
      * @tc.steps: step2. call FireLoadEvent, FireDestroyEvent
      * @tc.expected: three checkKeys has changed
      */
-    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     xComponentEventHub->FireLoadEvent(XCOMPONENT_ID);
-    xComponentEventHub->FireDestroyEvent();
+    xComponentEventHub->FireDestroyEvent(XCOMPONENT_ID);
     EXPECT_EQ(onLoadKey, CHECK_KEY);
     EXPECT_EQ(onDestroyKey, CHECK_KEY);
 
@@ -231,17 +242,17 @@ HWTEST_F(XComponentTestNg, XComponentEventTest002, TestSize.Level1)
      */
 
     auto onLoad2 = [&onLoadKey](const std::string& /* xComponentId */) { onLoadKey = ""; };
-    auto onDestroy2 = [&onDestroyKey]() { onDestroyKey = ""; };
+    auto onDestroy2 = [&onDestroyKey](const std::string& /* xComponentId */) { onDestroyKey = ""; };
     testProperty.xcType = XCOMPONENT_COMPONENT_TYPE_VALUE;
     testProperty.loadEvent = std::move(onLoad2);
     testProperty.destroyEvent = std::move(onDestroy2);
 
     auto frameNode2 = CreateXComponentNode(testProperty);
     EXPECT_TRUE(frameNode2);
-    xComponentEventHub = frameNode2->GetEventHub<XComponentEventHub>();
+    xComponentEventHub = frameNode2->GetOrCreateEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     xComponentEventHub->FireLoadEvent(XCOMPONENT_ID);
-    xComponentEventHub->FireDestroyEvent();
+    xComponentEventHub->FireDestroyEvent(XCOMPONENT_ID);
     EXPECT_EQ(onLoadKey, CHECK_KEY);
     EXPECT_EQ(onDestroyKey, CHECK_KEY);
 }
@@ -532,7 +543,7 @@ HWTEST_F(XComponentTestNg, XComponentKeyEventTest010, TestSize.Level1)
      * @tc.steps: step4. call focusHub's focus & blur event
      * @tc.expected: the callbacks registered in step3 are called
      */
-    focusHub->onFocusInternal_();
+    focusHub->onFocusInternal_(focusHub->focusReason_);
     EXPECT_TRUE(isFocus);
     focusHub->onBlurInternal_();
     EXPECT_FALSE(isFocus);
@@ -603,7 +614,7 @@ HWTEST_F(XComponentTestNg, XComponentOnAreaChangedInnerTest019, TestSize.Level1)
     std::string onLoadKey;
     std::string onDestroyKey;
     auto onLoad = [&onLoadKey](const std::string& /* xComponentId */) { onLoadKey = CHECK_KEY; };
-    auto onDestroy = [&onDestroyKey]() { onDestroyKey = CHECK_KEY; };
+    auto onDestroy = [&onDestroyKey](const std::string& /* xComponentId */) { onDestroyKey = CHECK_KEY; };
 
     testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
     testProperty.loadEvent = std::move(onLoad);
@@ -719,7 +730,7 @@ HWTEST_F(XComponentTestNg, XComponentSetDetachEventTest021, TestSize.Level1)
      * @tc.steps: step2. call FireDetachEvent
      * @tc.expected: three checkKeys has changed
      */
-    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
 
     bool detachFlage = false;
@@ -786,7 +797,7 @@ HWTEST_F(XComponentTestNg, XComponentEventTest023, TestSize.Level1)
     std::string onLoadKey;
     std::string onDestroyKey;
     auto onLoad = [&onLoadKey](const std::string& /* xComponentId */) { onLoadKey = CHECK_KEY; };
-    auto onDestroy = [&onDestroyKey]() { onDestroyKey = CHECK_KEY; };
+    auto onDestroy = [&onDestroyKey](const std::string& /* xComponentId */) { onDestroyKey = CHECK_KEY; };
 
     /**
      * @tc.steps: step1. set the testProperty and CreateXComponentNode
@@ -811,10 +822,10 @@ HWTEST_F(XComponentTestNg, XComponentEventTest023, TestSize.Level1)
      * @tc.steps: step3. call FireLoadEvent, FireDestroyEvent
      * @tc.expected: three checkKeys not changed
      */
-    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     xComponentEventHub->FireLoadEvent(XCOMPONENT_ID);
-    xComponentEventHub->FireDestroyEvent();
+    xComponentEventHub->FireDestroyEvent(XCOMPONENT_ID);
     EXPECT_FALSE(onLoadKey == CHECK_KEY);
     EXPECT_FALSE(onDestroyKey == CHECK_KEY);
 
@@ -833,7 +844,7 @@ HWTEST_F(XComponentTestNg, XComponentEventTest023, TestSize.Level1)
      */
     ASSERT_TRUE(xComponentEventHub);
     xComponentEventHub->FireLoadEvent(XCOMPONENT_ID);
-    xComponentEventHub->FireDestroyEvent();
+    xComponentEventHub->FireDestroyEvent(XCOMPONENT_ID);
     EXPECT_EQ(onLoadKey, CHECK_KEY);
     EXPECT_EQ(onDestroyKey, CHECK_KEY);
 }
@@ -866,7 +877,7 @@ HWTEST_F(XComponentTestNg, XComponentDetachCallbackTest024, TestSize.Level1)
      * @tc.steps: step2. call FireDetachEvent
      * @tc.expected: three checkKeys has changed
      */
-    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     xComponentEventHub->FireDetachEvent(XCOMPONENT_ID);
     EXPECT_FALSE(onDetachKey == CHECK_KEY);
@@ -975,7 +986,7 @@ HWTEST_F(XComponentTestNg, XComponentExtSurfaceCallbackClient026, TestSize.Level
      * @tc.steps: step2. call FireDetachEvent
      * @tc.expected: three checkKeys has changed
      */
-    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
 
     std::string surfaceInitFlage;
@@ -1144,7 +1155,7 @@ HWTEST_F(XComponentTestNg, XComponentControllerTest, TestSize.Level1)
     auto surfaceOffsetX = 0.0f;
     auto surfaceOffsetY = 0.0f;
     xcomponentController->GetSurfaceSize(surfaceWidth, surfaceHeight);
-    xcomponentController->GetLocalLocation(surfaceOffsetX, surfaceOffsetY);
+    xcomponentController->GetSurfaceOffset(surfaceOffsetX, surfaceOffsetY);
     EXPECT_EQ(surfaceOffsetX, SURFACE_OFFSETX);
     EXPECT_EQ(surfaceOffsetY, SURFACE_OFFSETY);
     EXPECT_EQ(surfaceWidth, SURFACE_WIDTH);
@@ -1312,19 +1323,21 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceLifeCycleCallback, TestSize.Level1)
     std::string onSurfaceCreatedSurfaceId = "";
     std::string onSurfaceChangedSurfaceId = "";
     std::string onSurfaceDestroyedSurfaceId = "";
-    auto onSurfaceCreated = [&onSurfaceCreatedSurfaceId](
-                                const std::string& surfaceId) { onSurfaceCreatedSurfaceId = surfaceId; };
+    auto onSurfaceCreated = [&onSurfaceCreatedSurfaceId](const std::string& surfaceId, const std::string& xcId) {
+        onSurfaceCreatedSurfaceId = surfaceId;
+    };
     auto onSurfaceChanged = [&onSurfaceChangedSurfaceId](const std::string& surfaceId, const RectF& /* rect */) {
         onSurfaceChangedSurfaceId = surfaceId;
     };
-    auto onSurfaceDestroyed = [&onSurfaceDestroyedSurfaceId](
-                                  const std::string& surfaceId) { onSurfaceDestroyedSurfaceId = surfaceId; };
+    auto onSurfaceDestroyed = [&onSurfaceDestroyedSurfaceId](const std::string& surfaceId, const std::string& xcId) {
+        onSurfaceDestroyedSurfaceId = surfaceId;
+    };
     testProperty.surfaceCreatedEvent = std::move(onSurfaceCreated);
     testProperty.surfaceChangedEvent = std::move(onSurfaceChanged);
     testProperty.surfaceDestroyedEvent = std::move(onSurfaceDestroyed);
     auto frameNode = CreateXComponentNode(testProperty);
     ASSERT_TRUE(frameNode);
-    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto xComponentEventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     EXPECT_FALSE(xComponentEventHub->surfaceInitEvent_);
     auto pattern = frameNode->GetPattern<XComponentPattern>();

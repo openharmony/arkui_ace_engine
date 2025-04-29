@@ -61,6 +61,16 @@ constexpr Dimension TOOL_BAR_HEIGHT = 56.0_vp;
 constexpr Dimension TOOL_BAR_ITEM_SAFE_INTERVAL = 8.0_vp;
 constexpr Dimension TOOL_BAR_ITEM_VERTICAL_PADDING = 12.0_vp;
 constexpr Dimension ICON_SIZE = 24.0_vp;
+
+RefPtr<NavigationBarTheme> CreateAndBindNavigationBarTheme()
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto navigationTheme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(navigationTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(navigationTheme));
+    return navigationTheme;
+}
 } // namespace
 
 class NavigationPatternTestNg : public testing::Test {
@@ -99,9 +109,7 @@ void NavigationPatternTestNg::RunMeasureAndLayout(RefPtr<LayoutWrapperNode>& lay
 
 void NavigationPatternTestNg::MockPipelineContextGetTheme()
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
+    CreateAndBindNavigationBarTheme();
 }
 
 /**
@@ -551,7 +559,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_015, TestSize.Level1)
      * @tc.steps: step2. get inputHub.
      * @tc.expected: hoverEvent_ is not nullptr.
      */
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(hub, nullptr);
     auto inputHub = hub->GetOrCreateInputEventHub();
     ASSERT_NE(inputHub, nullptr);
@@ -592,11 +600,11 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_016, TestSize.Level1)
      * @tc.steps: step2. get gestureHub.
      * @tc.expected: pattern is not nullptr.
      */
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(hub, nullptr);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
-    pattern->InitPanEvent(gestureHub);
+    pattern->InitDividerPanEvent(gestureHub);
     ASSERT_NE(pattern->panEvent_, nullptr);
     GestureEvent event;
     pattern->panEvent_->GetActionStartEventFunc()(event);
@@ -806,7 +814,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationModelNGTest003, TestSize.Level1)
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
+    auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetOrCreateEventHub<EventHub>());
     ASSERT_NE(navigationEventHub, nullptr);
     navigationEventHub->SetOnNavBarStateChange(std::move(onChange));
     EXPECT_TRUE(isSelected);
@@ -1055,7 +1063,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationModelNG001, TestSize.Level1)
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
 
     navBarNode->titleBarNode_ = titleBarNode;
-    navBarNode->navBarContentNode_ = navBarContentNode;
+    navBarNode->contentNode_ = navBarContentNode;
     navBarNode->toolBarNode_ = toolBarNode;
 
     stack->reservedNodeId_ = navigationUniqueId;
@@ -1200,7 +1208,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationModelNG006, TestSize.Level1)
     auto newNavDestinationPattern = newTopNavDestination->GetPattern<NavDestinationPattern>();
     ASSERT_NE(newNavDestinationPattern, nullptr);
     preNavDestinationPattern->isOnShow_ = true;
-    ASSERT_NE(preTopNavDestination->GetEventHub<NavDestinationEventHub>(), nullptr);
+    ASSERT_NE(preTopNavDestination->GetOrCreateEventHub<NavDestinationEventHub>(), nullptr);
 
     navigationPattern->CheckTopNavPathChange(preTopNavPath, newTopNavPath);
     ASSERT_FALSE(preNavDestinationPattern->isOnShow_);
@@ -1216,10 +1224,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationToolbarTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. create navigation theme to set toolbar specifications.
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto navigationTheme = AceType::MakeRefPtr<NavigationBarTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(navigationTheme));
+    auto navigationTheme = CreateAndBindNavigationBarTheme();
     navigationTheme->toolbarIconSize_ = ICON_SIZE;
     navigationTheme->menuIconSize_ = ICON_SIZE;
 
@@ -1390,7 +1395,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationToolbarConfigurationTest002, TestSiz
      * @tc.steps: step5. barItem is disable.
      * @tc.expected: IsEnabled function return false.
      */
-    auto itemEventHub = barItemNode->GetEventHub<BarItemEventHub>();
+    auto itemEventHub = barItemNode->GetOrCreateEventHub<BarItemEventHub>();
     EXPECT_NE(itemEventHub, nullptr);
     EXPECT_FALSE(itemEventHub->IsEnabled());
 }
@@ -1537,10 +1542,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationToolbarConfigurationTest005, TestSiz
     /**
      * @tc.steps: step1. create navigation theme to set toolbar specifications.
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto navigationTheme = AceType::MakeRefPtr<NavigationBarTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(navigationTheme));
+    auto navigationTheme = CreateAndBindNavigationBarTheme();
     navigationTheme->height_ = TOOL_BAR_HEIGHT;
     navigationTheme->toolbarItemSafeInterval_ = TOOL_BAR_ITEM_SAFE_INTERVAL;
     navigationTheme->toolbarItemHorizontalPadding_ = TOOL_BAR_ITEM_SAFE_INTERVAL;
@@ -1874,7 +1876,7 @@ HWTEST_F(NavigationPatternTestNg, NavDestinationDialogTest002, TestSize.Level1)
     config.skipMeasure = true;
     config.skipLayout = true;
     navigationPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    navigationPattern->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, true, true);
+    navigationPattern->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, true);
     auto navDestinationPatternA = AceType::DynamicCast<NavDestinationPattern>(navDestinationA->GetPattern());
     EXPECT_NE(navDestinationPatternA, nullptr);
     auto navDestinationPatternB = AceType::DynamicCast<NavDestinationPattern>(navDestinationB->GetPattern());

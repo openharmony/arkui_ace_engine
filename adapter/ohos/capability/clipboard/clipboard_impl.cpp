@@ -14,13 +14,10 @@
  */
 
 #include "adapter/ohos/capability/clipboard/clipboard_impl.h"
-#include <vector>
 
 #include "adapter/ohos/osal/pixel_map_ohos.h"
 #include "adapter/ohos/capability/html/html_to_span.h"
-#include "base/log/log_wrapper.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/pattern/text/span/span_string.h"
+#include "base/log/event_report.h"
 
 namespace OHOS::Ace {
 #ifndef SYSTEM_CLIPBOARD_SUPPORTED
@@ -75,6 +72,8 @@ void ClipboardImpl::HasDataType(
         [&hasData, mimeTypes]() {
             for (auto mimeType = mimeTypes.begin(); mimeType != mimeTypes.end(); ++mimeType) {
                 hasData = OHOS::MiscServices::PasteboardClient::GetInstance()->HasDataType(*mimeType);
+                TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "Clipboard data mimeType %{public}s available ? %{public}d",
+                    mimeType->c_str(), hasData);
                 if (hasData) {
                     break;
                 }
@@ -98,10 +97,11 @@ void ClipboardImpl::SetData(const std::string& data, CopyOptions copyOption, boo
             pasteData->SetDraggedDataFlag(isDragData);
             OHOS::MiscServices::PasteboardClient::GetInstance()->SetPasteData(*pasteData);
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardSetDataWithCopyOption");
+        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardSetDataWithCopyOption", PriorityType::IMMEDIATE);
 #else
     taskExecutor_->PostTask(
-        [data]() { g_clipboard = data; }, TaskExecutor::TaskType::UI, "ArkUIClipboardSetTextPasteData");
+        [data]() { g_clipboard = data; }, TaskExecutor::TaskType::UI, "ArkUIClipboardSetTextPasteData",
+        PriorityType::IMMEDIATE);
 #endif
 }
 
@@ -122,20 +122,19 @@ void ClipboardImpl::SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions 
             TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "Set pixmap to system clipboard");
             OHOS::MiscServices::PasteboardClient::GetInstance()->SetPasteData(*pasteData);
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardSetPixelMapWithCopyOption");
+        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardSetPixelMapWithCopyOption", PriorityType::IMMEDIATE);
 #else
     taskExecutor_->PostTask(
-        [pixmap]() { g_pixmap = pixmap; }, TaskExecutor::TaskType::UI, "ArkUIClipboardSetImagePasteData");
+        [pixmap]() { g_pixmap = pixmap; }, TaskExecutor::TaskType::UI, "ArkUIClipboardSetImagePasteData",
+        PriorityType::IMMEDIATE);
 #endif
 }
 
 void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callback, bool syncMode)
 {
+    CHECK_NULL_VOID(callback);
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
-    if (!taskExecutor_ || !callback) {
-        return;
-    }
-
+    CHECK_NULL_VOID(taskExecutor_);
     if (syncMode) {
         GetDataSync(callback);
     } else {
@@ -151,7 +150,7 @@ void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callb
         [callback, taskExecutor = WeakClaim(RawPtr(taskExecutor_)), textData = g_clipboard]() {
             callback(textData);
         },
-        TaskExecutor::TaskType::UI, "ArkUIClipboardTextDataCallback");
+        TaskExecutor::TaskType::UI, "ArkUIClipboardTextDataCallback", PriorityType::IMMEDIATE);
 #endif
 }
 
@@ -172,7 +171,7 @@ void ClipboardImpl::GetPixelMapData(const std::function<void(const RefPtr<PixelM
     } else {
         taskExecutor_->PostTask([callback, taskExecutor = WeakClaim(RawPtr(taskExecutor_)),
                                     imageData = g_pixmap]() { callback(imageData); },
-            TaskExecutor::TaskType::UI, "ArkUIClipboardImageDataCallback");
+            TaskExecutor::TaskType::UI, "ArkUIClipboardImageDataCallback", PriorityType::IMMEDIATE);
     }
 #endif
 }
@@ -180,6 +179,91 @@ void ClipboardImpl::GetPixelMapData(const std::function<void(const RefPtr<PixelM
 RefPtr<PasteDataMix> ClipboardImpl::CreatePasteDataMix()
 {
     return AceType::MakeRefPtr<PasteDataImpl>();
+}
+
+void ClipboardImpl::AddMultiTypeRecord(
+    const RefPtr<PasteDataMix>& pasteData, const RefPtr<MultiTypeRecordMix>& multiTypeRecord)
+{
+#ifdef SYSTEM_CLIPBOARD_SUPPORTED
+    CHECK_NULL_VOID(taskExecutor_);
+    auto peData = AceType::DynamicCast<PasteDataImpl>(pasteData);
+    CHECK_NULL_VOID(peData);
+    auto multiTypeRecordImpl = AceType::DynamicCast<MultiTypeRecordImpl>(multiTypeRecord);
+    CHECK_NULL_VOID(multiTypeRecordImpl);
+
+    std::map<std::string, std::shared_ptr<OHOS::MiscServices::EntryValue>> multiTypeDataMap;
+    if (!multiTypeRecordImpl->GetPlainText().empty()) {
+        multiTypeDataMap[OHOS::MiscServices::MIMETYPE_TEXT_PLAIN] =
+            std::make_shared<OHOS::MiscServices::EntryValue>(multiTypeRecordImpl->GetPlainText());
+    }
+    if (!multiTypeRecordImpl->GetUri().empty()) {
+        multiTypeDataMap[OHOS::MiscServices::MIMETYPE_TEXT_URI] =
+            std::make_shared<OHOS::MiscServices::EntryValue>(multiTypeRecordImpl->GetUri());
+    }
+    if (multiTypeRecordImpl->GetPixelMap()) {
+        multiTypeDataMap[OHOS::MiscServices::MIMETYPE_PIXELMAP] =
+            std::make_shared<OHOS::MiscServices::EntryValue>(multiTypeRecordImpl->GetPixelMap());
+    }
+    if (!multiTypeRecordImpl->GetSpanStringBuffer().empty()) {
+        multiTypeDataMap[SPAN_STRING_TAG] =
+            std::make_shared<OHOS::MiscServices::EntryValue>(multiTypeRecordImpl->GetSpanStringBuffer());
+    }
+
+    auto entry =
+        std::make_shared<std::map<std::string, std::shared_ptr<OHOS::MiscServices::EntryValue>>>(multiTypeDataMap);
+    peData->GetPasteDataData()->AddRecord(
+        MiscServices::PasteDataRecord::NewMultiTypeRecord(entry, GetMimeType(multiTypeDataMap)));
+#endif
+}
+
+#ifdef SYSTEM_CLIPBOARD_SUPPORTED
+const std::string ClipboardImpl::GetMimeType(
+    std::map<std::string, std::shared_ptr<OHOS::MiscServices::EntryValue>> multiTypeDataMap)
+{
+    std::string mimeType;
+    if (multiTypeDataMap.find(SPAN_STRING_TAG) != multiTypeDataMap.end()) {
+        mimeType = SPAN_STRING_TAG;
+    }
+    if (multiTypeDataMap.find(OHOS::MiscServices::MIMETYPE_PIXELMAP) != multiTypeDataMap.end()) {
+        mimeType = OHOS::MiscServices::MIMETYPE_PIXELMAP;
+    }
+    if (multiTypeDataMap.find(OHOS::MiscServices::MIMETYPE_TEXT_URI) != multiTypeDataMap.end()) {
+        mimeType = OHOS::MiscServices::MIMETYPE_TEXT_URI;
+    }
+    if (multiTypeDataMap.find(OHOS::MiscServices::MIMETYPE_TEXT_PLAIN) != multiTypeDataMap.end()) {
+        mimeType = OHOS::MiscServices::MIMETYPE_TEXT_PLAIN;
+    }
+    return mimeType;
+}
+#endif
+
+void MultiTypeRecordImpl::SetPlainText(const std::string plainText)
+{
+    plainText_ = plainText;
+}
+void MultiTypeRecordImpl::SetUri(const std::string uri)
+{
+    uri_ = uri;
+}
+void MultiTypeRecordImpl::SetPixelMap(RefPtr<PixelMap> pixelMap)
+{
+    pixelMap_ = pixelMap;
+}
+const RefPtr<PixelMap> MultiTypeRecordImpl::GetPixelMap()
+{
+    return pixelMap_;
+}
+const std::string MultiTypeRecordImpl::GetPlainText()
+{
+    return plainText_;
+}
+const std::string MultiTypeRecordImpl::GetUri()
+{
+    return uri_;
+}
+std::vector<uint8_t>& MultiTypeRecordImpl::GetSpanStringBuffer()
+{
+    return spanStringBuffer_;
 }
 
 void ClipboardImpl::AddPixelMapRecord(const RefPtr<PasteDataMix>& pasteData, const RefPtr<PixelMap>& pixmap)
@@ -243,7 +327,7 @@ void ClipboardImpl::SetData(const RefPtr<PasteDataMix>& pasteData, CopyOptions c
             TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "add pasteData to clipboard, shareOption:  %{public}d", shareOption);
             OHOS::MiscServices::PasteboardClient::GetInstance()->SetPasteData(*pasteData);
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardSetMixDataWithCopyOption");
+        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardSetMixDataWithCopyOption", PriorityType::IMMEDIATE);
 #endif
 }
 
@@ -328,49 +412,67 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&)>& 
     taskExecutor_->PostTask(
         [callback, weakExecutor = WeakClaim(RawPtr(taskExecutor_)), weak = WeakClaim(this)]() {
             auto clip = weak.Upgrade();
+            CHECK_NULL_VOID(clip);
             auto taskExecutor = weakExecutor.Upgrade();
             CHECK_NULL_VOID(taskExecutor);
             if (!OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData()) {
+                EventReport::ReportClipboardFailEvent("SystemKeyboardData is not exist from MiscServices");
                 TAG_LOGW(AceLogTag::ACE_CLIPBOARD, "SystemKeyboardData is not exist from MiscServices");
                 taskExecutor->PostTask(
-                    [callback]() { callback(""); }, TaskExecutor::TaskType::UI, "ArkUIClipboardHasDataFailed");
+                    [callback]() { callback(""); }, TaskExecutor::TaskType::UI, "ArkUIClipboardHasDataFailed",
+                    PriorityType::IMMEDIATE);
                 return;
             }
             OHOS::MiscServices::PasteData pasteData;
             if (!OHOS::MiscServices::PasteboardClient::GetInstance()->GetPasteData(pasteData)) {
                 TAG_LOGW(AceLogTag::ACE_CLIPBOARD, "Get SystemKeyboardData fail from MiscServices");
                 taskExecutor->PostTask(
-                    [callback]() { callback(""); }, TaskExecutor::TaskType::UI, "ArkUIClipboardGetDataFailed");
+                    [callback]() { callback(""); }, TaskExecutor::TaskType::UI, "ArkUIClipboardGetDataFailed",
+                    PriorityType::IMMEDIATE);
                 return;
             }
             std::string resText;
+            bool hasPlainRecord = false;
             for (const auto& pasteDataRecord : pasteData.AllRecords()) {
-                clip->ProcessPasteDataRecord(pasteDataRecord, resText);
+                clip->ProcessPasteDataRecord(pasteDataRecord, resText, hasPlainRecord);
             }
             if (resText.empty()) {
-                TAG_LOGW(AceLogTag::ACE_CLIPBOARD, "Get SystemKeyboardTextData fail from MiscServices");
                 taskExecutor->PostTask(
-                    [callback]() { callback(""); }, TaskExecutor::TaskType::UI, "ArkUIClipboardGetTextDataFailed");
+                    [callback]() { callback(""); }, TaskExecutor::TaskType::UI, "ArkUIClipboardGetTextDataFailed",
+                    PriorityType::IMMEDIATE);
                 return;
             }
             TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "resText len:%{public}d", static_cast<int32_t>(resText.length()));
             auto result = resText;
             taskExecutor->PostTask(
                 [callback, result]() { callback(result); },
-                TaskExecutor::TaskType::UI, "ArkUIClipboardGetTextDataCallback");
+                TaskExecutor::TaskType::UI, "ArkUIClipboardGetTextDataCallback", PriorityType::IMMEDIATE);
         },
-        TaskExecutor::TaskType::BACKGROUND, "ArkUIClipboardGetTextDataAsync");
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIClipboardGetTextDataAsync", PriorityType::IMMEDIATE);
 }
 
 void ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::PasteDataRecord>& pasteDataRecord,
-    std::string& resText)
+    std::string& resText, bool& hasPlainRecord)
 {
     if (pasteDataRecord == nullptr) {
         return;
     }
     TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "mimeType:%{public}s", pasteDataRecord->GetMimeType().c_str());
+    if (pasteDataRecord->GetPlainText() != nullptr) {
+        auto textData = pasteDataRecord->GetPlainText();
+        if (!hasPlainRecord) {
+            resText = "";
+        }
+        TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "ProcessPlainText, length:%{public}zu", textData->length());
+        resText.append(*textData);
+        hasPlainRecord = true;
+    }
+    if (hasPlainRecord) {
+        return;
+    }
     if (pasteDataRecord->GetHtmlText() != nullptr) {
         auto htmlText = pasteDataRecord->GetHtmlText();
+        TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "ProcessHtmlText, length=%{public}zu", htmlText->length());
         HtmlToSpan toSpan;
         auto spanStr = toSpan.ToSpanString(*htmlText);
         if (spanStr) {
@@ -387,10 +489,6 @@ void ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::P
                 return;
             }
         }
-    }
-    if (pasteDataRecord->GetPlainText() != nullptr) {
-        auto textData = pasteDataRecord->GetPlainText();
-        resText.append(*textData);
     }
 }
 
@@ -441,6 +539,7 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&, bo
     taskExecutor_->PostTask(
         [textCallback, pixelMapCallback, urlCallback, weakExecutor = WeakClaim(RawPtr(taskExecutor_))]() {
             auto taskExecutor = weakExecutor.Upgrade();
+            CHECK_NULL_VOID(taskExecutor);
             auto has = OHOS::MiscServices::PasteboardClient::GetInstance()->HasPasteData();
             CHECK_NULL_VOID(has);
             OHOS::MiscServices::PasteData pasteData;
@@ -459,26 +558,26 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&, bo
                     auto result = *textData;
                     taskExecutor->PostTask(
                         [textCallback, result, isLastRecord]() { textCallback(result, isLastRecord); },
-                        TaskExecutor::TaskType::UI, "ArkUIClipboardGetTextCallback");
+                        TaskExecutor::TaskType::UI, "ArkUIClipboardGetTextCallback", PriorityType::IMMEDIATE);
                 } else if (pasteDataRecord->GetPixelMap() != nullptr) {
                     auto imageData = pasteDataRecord->GetPixelMap();
                     auto result = AceType::MakeRefPtr<PixelMapOhos>(imageData);
                     taskExecutor->PostTask(
                         [pixelMapCallback, result, isLastRecord]() { pixelMapCallback(result, isLastRecord); },
-                        TaskExecutor::TaskType::UI, "ArkUIClipboardGetImageCallback");
+                        TaskExecutor::TaskType::UI, "ArkUIClipboardGetImageCallback", PriorityType::IMMEDIATE);
                 } else if (pasteDataRecord->GetUri() != nullptr) {
                     auto textData = pasteDataRecord->GetUri();
                     auto result = (*textData).ToString();
                     taskExecutor->PostTask([urlCallback, result, isLastRecord]() { urlCallback(result, isLastRecord); },
-                        TaskExecutor::TaskType::UI, "ArkUIClipboardGetUrlCallback");
+                        TaskExecutor::TaskType::UI, "ArkUIClipboardGetUrlCallback", PriorityType::IMMEDIATE);
                 }
             }
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardGetDataAsync");
+        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardGetDataAsync", PriorityType::IMMEDIATE);
 }
 
 void ClipboardImpl::GetSpanStringData(
-    const std::function<void(std::vector<uint8_t>&, const std::string&)>& callback, bool syncMode)
+    const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback, bool syncMode)
 {
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
     if (!taskExecutor_ || !callback) {
@@ -490,7 +589,7 @@ void ClipboardImpl::GetSpanStringData(
 }
 
 void ClipboardImpl::GetSpanStringDataHelper(
-    const std::function<void(std::vector<uint8_t>&, const std::string&)>& callback, bool syncMode)
+    const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback, bool syncMode)
 {
     auto task = [callback, weakExecutor = WeakClaim(RawPtr(taskExecutor_)), weak = WeakClaim(this)]() {
         auto clip = weak.Upgrade();
@@ -502,46 +601,60 @@ void ClipboardImpl::GetSpanStringDataHelper(
         OHOS::MiscServices::PasteData pasteData;
         auto getDataRes = OHOS::MiscServices::PasteboardClient::GetInstance()->GetPasteData(pasteData);
         CHECK_NULL_VOID(getDataRes);
-        std::vector<uint8_t> arr;
+        std::vector<std::vector<uint8_t>> arrays;
         std::string text;
-        clip->ProcessSpanStringData(arr, pasteData, text);
+        bool isMultiTypeRecord = false;
+        clip->ProcessSpanStringData(arrays, pasteData, text, isMultiTypeRecord);
         auto textData = pasteData.GetPrimaryText();
         if (textData && text.empty()) {
             text.append(*textData);
         }
         auto result = text;
         taskExecutor->PostTask(
-            [callback, arr, result]() mutable { callback(arr, result); },
-            TaskExecutor::TaskType::UI, "ArkUIClipboardGetSpanStringDataCallback");
+            [callback, arrays, result, isMultiTypeRecord]() mutable { callback(arrays, result, isMultiTypeRecord); },
+            TaskExecutor::TaskType::UI, "ArkUIClipboardGetSpanStringDataCallback", PriorityType::IMMEDIATE);
     };
     if (syncMode) {
         taskExecutor_->PostSyncTask(task, TaskExecutor::TaskType::BACKGROUND, "ArkUIClipboardGetSpanStringDataSync");
     } else {
-        taskExecutor_->PostTask(task, TaskExecutor::TaskType::BACKGROUND, "ArkUIClipboardGetSpanStringDataAsync");
+        taskExecutor_->PostTask(task, TaskExecutor::TaskType::BACKGROUND, "ArkUIClipboardGetSpanStringDataAsync",
+        PriorityType::IMMEDIATE);
     }
 }
 
-void ClipboardImpl::ProcessSpanStringData(
-    std::vector<uint8_t>& arr, const OHOS::MiscServices::PasteData& pasteData, std::string& text)
+void ClipboardImpl::ProcessSpanStringData(std::vector<std::vector<uint8_t>>& arrays,
+    const OHOS::MiscServices::PasteData& pasteData, std::string& text, bool& isMultiTypeRecord)
 {
     for (const auto& pasteDataRecord : pasteData.AllRecords()) {
         if (pasteDataRecord == nullptr) {
             continue;
         }
-        if (pasteDataRecord->GetCustomData() != nullptr) {
-            auto itemData = pasteDataRecord->GetCustomData()->GetItemData();
-            if (itemData.find(SPAN_STRING_TAG) != itemData.end()) {
-                arr = itemData[SPAN_STRING_TAG];
-                return;
-            }
+#ifdef SYSTEM_CLIPBOARD_SUPPORTED
+        std::vector<std::string> types = { SPAN_STRING_TAG, OHOS::MiscServices::MIMETYPE_TEXT_URI,
+            OHOS::MiscServices::MIMETYPE_PIXELMAP, OHOS::MiscServices::MIMETYPE_TEXT_PLAIN,
+            OHOS::MiscServices::MIMETYPE_TEXT_HTML };
+        auto validTypes = pasteDataRecord->GetValidMimeTypes(types);
+        if (validTypes.size() > 1) {
+            isMultiTypeRecord = true;
         }
-        if (pasteDataRecord->GetHtmlText() != nullptr) {
+#endif
+        auto hasSpanString = false;
+        auto entryPtr = pasteDataRecord->GetEntryByMimeType(SPAN_STRING_TAG);
+        if (entryPtr) {
+            // entryValue InstanceOf OHOS::MiscServices::EntryValue.
+            auto entryValue = entryPtr->GetValue();
+            auto spanStringBuffer = std::get_if<std::vector<uint8_t>>(&entryValue);
+            arrays.emplace_back(*spanStringBuffer);
+            hasSpanString = true;
+        }
+        if (pasteDataRecord->GetHtmlText() != nullptr && !hasSpanString) {
             auto htmlText = pasteDataRecord->GetHtmlText();
             HtmlToSpan toSpan;
             auto spanStr = toSpan.ToSpanString(*htmlText);
             if (spanStr) {
+                std::vector<uint8_t> arr;
                 spanStr->EncodeTlv(arr);
-                return;
+                arrays.emplace_back(arr);
             }
         }
         if (pasteDataRecord->GetPlainText() != nullptr) {
@@ -579,7 +692,8 @@ void ClipboardImpl::GetPixelMapDataAsync(const std::function<void(const RefPtr<P
             if (!has) {
                 TAG_LOGW(AceLogTag::ACE_CLIPBOARD, "SystemKeyboardData is not exist from MiscServices");
                 taskExecutor->PostTask(
-                    [callback]() { callback(nullptr); }, TaskExecutor::TaskType::UI, "ArkUIClipboardHasDataFailed");
+                    [callback]() { callback(nullptr); }, TaskExecutor::TaskType::UI, "ArkUIClipboardHasDataFailed",
+                    PriorityType::IMMEDIATE);
                 return;
             }
             OHOS::MiscServices::PasteData pasteData;
@@ -587,7 +701,8 @@ void ClipboardImpl::GetPixelMapDataAsync(const std::function<void(const RefPtr<P
             if (!ok) {
                 TAG_LOGW(AceLogTag::ACE_CLIPBOARD, "Get SystemKeyboardData fail from MiscServices");
                 taskExecutor->PostTask(
-                    [callback]() { callback(nullptr); }, TaskExecutor::TaskType::UI, "ArkUIClipboardGetDataFailed");
+                    [callback]() { callback(nullptr); }, TaskExecutor::TaskType::UI, "ArkUIClipboardGetDataFailed",
+                    PriorityType::IMMEDIATE);
                 return;
             }
             auto imageData = pasteData.GetPrimaryPixelMap();
@@ -595,15 +710,15 @@ void ClipboardImpl::GetPixelMapDataAsync(const std::function<void(const RefPtr<P
                 TAG_LOGW(AceLogTag::ACE_CLIPBOARD, "Get SystemKeyboardImageData fail from MiscServices");
                 taskExecutor->PostTask(
                     [callback]() { callback(nullptr); },
-                    TaskExecutor::TaskType::UI, "ArkUIClipboardGetImageDataFailed");
+                    TaskExecutor::TaskType::UI, "ArkUIClipboardGetImageDataFailed", PriorityType::IMMEDIATE);
                 return;
             }
             auto result = AceType::MakeRefPtr<PixelMapOhos>(imageData);
             taskExecutor->PostTask(
                 [callback, result]() { callback(result); },
-                TaskExecutor::TaskType::UI, "ArkUIClipboardGetImageDataCallback");
+                TaskExecutor::TaskType::UI, "ArkUIClipboardGetImageDataCallback", PriorityType::IMMEDIATE);
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardGetImageDataAsync");
+        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardGetImageDataAsync", PriorityType::IMMEDIATE);
 }
 #endif
 

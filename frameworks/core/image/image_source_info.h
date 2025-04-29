@@ -29,6 +29,10 @@
 #include "core/components_ng/pattern/image/image_dfx.h"
 
 namespace OHOS::Ace {
+namespace NG {
+class FrameNode;
+}
+
 class ACE_FORCE_EXPORT ImageSourceInfo {
 public:
     // add constructor method for decompressed hap
@@ -55,11 +59,12 @@ public:
     ~ImageSourceInfo() = default;
 
     // static functions
-    static bool IsSVGSource(const std::string& imageSrc, InternalResource::ResourceId resourceId);
+    static bool IsSVGSource(const std::string& imageSrc, SrcType srcType, InternalResource::ResourceId resourceId);
     static bool IsPngSource(const std::string& src, InternalResource::ResourceId resourceId);
     static SrcType ResolveURIType(const std::string& uri);
     static bool IsValidBase64Head(const std::string& uri, const std::string& pattern);
     static bool IsUriOfDataAbilityEncoded(const std::string& uri, const std::string& pattern);
+    static ImageSourceInfo CreateImageSourceInfoWithHost(const RefPtr<NG::FrameNode>& host);
 
     // operators
     bool operator==(const ImageSourceInfo& info) const;
@@ -91,7 +96,7 @@ public:
     bool IsSourceDimensionValid() const;
     const std::string& GetBundleName() const;
     const std::string& GetModuleName() const;
-    std::string ToString() const;
+    std::string ToString(bool isNeedTruncated = true) const;
     InternalResource::ResourceId GetResourceId() const;
     SrcType GetSrcType() const;
     Size GetSourceSize() const;
@@ -99,6 +104,10 @@ public:
     const std::optional<Color>& GetFillColor() const;
     const RefPtr<PixelMap>& GetPixmap() const;
     std::string GetKey() const;
+    // Generates a task key that includes the current running container ID.
+    std::string GetTaskKey() const;
+    void SetContainerId(int32_t containerId);
+    int32_t GetContainerId() const;
     bool GetIsUriPureNumber() const
     {
         return isUriPureNumber_;
@@ -121,7 +130,6 @@ public:
     {
         isFromReset_ = isFromReset;
     }
-    const std::string GetColorModeToString();
 
     void SetImageDfxConfig(const NG::ImageDfxConfig& imageDfxConfig)
     {
@@ -139,6 +147,7 @@ private:
     std::string src_;
     std::shared_ptr<std::string> srcRef_ = nullptr;
     std::string cacheKey_;
+    int32_t containerId_ = 0;
     // Interim programme
     std::string bundleName_;
     std::string moduleName_;

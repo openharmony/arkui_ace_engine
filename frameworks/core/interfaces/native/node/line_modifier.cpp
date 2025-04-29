@@ -14,11 +14,7 @@
  */
 #include "core/interfaces/native/node/line_modifier.h"
 
-#include "core/pipeline/base/element_register.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/shape/line_model_ng.h"
-#include "core/components/common/layout/constants.h"
-#include "base/geometry/shape.h"
 
 namespace OHOS::Ace::NG {
 void SetStartPoint(ArkUINodeHandle node, const ArkUI_Float32* pointValues, const ArkUI_Int32* pointUnits,
@@ -66,13 +62,27 @@ void ResetEndPoint(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUILineModifier* GetLineModifier()
 {
-    static const ArkUILineModifier modifier = {SetStartPoint, ResetStartPoint, SetEndPoint, ResetEndPoint};
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUILineModifier modifier = {
+        .setStartPoint = SetStartPoint,
+        .resetStartPoint = ResetStartPoint,
+        .setEndPoint = SetEndPoint,
+        .resetEndPoint = ResetEndPoint,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUILineModifier* GetCJUILineModifier()
 {
-    static const CJUILineModifier modifier = {SetStartPoint, ResetStartPoint, SetEndPoint, ResetEndPoint};
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUILineModifier modifier = {
+        .setStartPoint = SetStartPoint,
+        .resetStartPoint = ResetStartPoint,
+        .setEndPoint = SetEndPoint,
+        .resetEndPoint = ResetEndPoint,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

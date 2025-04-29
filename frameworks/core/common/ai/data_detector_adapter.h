@@ -19,6 +19,7 @@
 #include <set>
 
 #include "interfaces/inner_api/ace/ai/data_detector_interface.h"
+#include "interfaces/inner_api/ace/ai/data_url_analyzer.h"
 
 #include "base/memory/ace_type.h"
 #include "base/thread/cancelable_callback.h"
@@ -43,6 +44,10 @@ struct AISpan {
     int32_t end = 0;
     std::string content = "";
     TextDataDetectType type = TextDataDetectType::PHONE_NUMBER;
+    bool operator==(const AISpan& span) const
+    {
+        return start == span.start && end == span.end && content == span.content && type == span.type;
+    }
 };
 class DataDetectorAdapter : public AceType {
     DECLARE_ACE_TYPE(DataDetectorAdapter, AceType);
@@ -59,15 +64,18 @@ public:
     {
         textDetectResult_ = result;
     }
+    void FireFinalResult();
     void FireOnResult(const std::string& result)
     {
         if (onResult_) {
-            TAG_LOGD(AceLogTag::ACE_TEXT, "Data detect result: %{public}s.", result.c_str());
             onResult_(result);
         }
     }
-    bool ParseOriText(const std::unique_ptr<JsonValue>& entityJson, std::string& text);
+    bool ParseOriText(const std::unique_ptr<JsonValue>& entityJson, std::u16string& text);
+    void PreprocessTextDetect();
     void InitTextDetect(int32_t startPos, std::string detectText);
+    void HandleTextUrlDetect();
+    void HandleUrlResult(std::vector<UrlEntity> urlEntities);
     void SetTextDetectTypes(const std::string& types);
     void ParseAIResult(const TextDataDetectResult& result, int32_t startPos);
     void ParseAIJson(const std::unique_ptr<JsonValue>& jsonValue, TextDataDetectType type, int32_t startPos);
@@ -83,6 +91,7 @@ public:
         bool isShowCopy = true, bool isShowSelectText = true);
     void ResponseBestMatchItem(const AISpan& aiSpan);
     void GetAIEntityMenu();
+    void MarkDirtyNode() const;
 
 private:
     friend class NG::TextPattern;
@@ -98,10 +107,13 @@ private:
     bool pressedByLeftMouse_ = false;
     bool typeChanged_ = false;
     bool hasClickedMenuOption_ = false;
+    bool hasUrlType_ = false;
+    uint8_t aiDetectFlag_ = 0;
+    std::vector<NG::RectF> aiSpanRects_;
     AISpan clickedAISpan_;
     std::string textDetectTypes_;
-    std::string textForAI_;
-    std::string lastTextForAI_;
+    std::u16string textForAI_;
+    std::u16string lastTextForAI_;
     std::set<std::string> textDetectTypesSet_;
     TextDataDetectResult textDetectResult_;
     std::function<void(const std::string&)> onResult_;

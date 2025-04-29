@@ -16,19 +16,14 @@
 #include "adapter/ohos/entrance/ui_event_impl.h"
 
 #include <dlfcn.h>
-#include <mutex>
-#include <string>
-#include <unordered_map>
 
-#include "interfaces/inner_api/ace/ui_event_observer.h"
-
-#include "base/log/log.h"
-#include "base/thread/background_task_executor.h"
 #include "core/common/container.h"
 #include "core/common/recorder/event_controller.h"
 #include "core/common/recorder/event_recorder.h"
+#include "core/common/recorder/inspector_tree_collector.h"
 #include "core/common/recorder/node_data_cache.h"
-#include "core/components_ng/base/inspector.h"
+#include "core/components_ng/base/simplified_inspector.h"
+#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace {
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_RegisterUIEventObserver(
@@ -51,16 +46,58 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetNodeProperty(
     Recorder::NodeDataCache::Get().GetNodeData(pageUrl, nodeProperties);
 }
 
-extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTree(std::string& tree)
+std::string GetWebLanguageByNodeId(int32_t nodeId)
 {
-    TAG_LOGD(AceLogTag::ACE_UIEVENT, "GetSimplifiedInspectorTree.");
-    auto containerId = Recorder::EventRecorder::Get().GetContainerId();
+    auto& weakNodeCache = Recorder::EventRecorder::Get().GetWeakNodeMap();
+    auto iter = weakNodeCache.find(nodeId);
+    if (iter == weakNodeCache.end()) {
+        return "";
+    }
+    auto node = iter->second.Upgrade();
+    CHECK_NULL_RETURN(node, "");
+    auto pattern = node->GetPattern();
+    CHECK_NULL_RETURN(pattern, "");
+    return pattern->GetCurrentLanguage();
+}
+
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTree(const TreeParams& params, std::string& tree)
+{
+    auto containerId = Recorder::EventRecorder::Get().GetContainerId(params.inspectorType == InspectorPageType::FOCUS);
+    auto container = Container::GetContainer(containerId);
+    if (!container) {
+        return;
+    }
+    if (params.isWindowIdOnly || params.infoType == InspectorInfoType::WINDOW_ID) {
+        tree = std::to_string(container->GetWindowId());
+        return;
+    }
+    if (params.infoType == InspectorInfoType::WEB_LANG) {
+        tree = GetWebLanguageByNodeId(params.webId);
+        return;
+    }
+    if (container->IsUseNewPipeline()) {
+        auto inspector = std::make_shared<NG::SimplifiedInspector>(containerId, params);
+        tree = inspector->GetInspector();
+    }
+}
+
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTreeAsync(
+    const TreeParams& params, OnInspectorTreeResult&& callback)
+{
+    auto containerId = Recorder::EventRecorder::Get().GetContainerId(params.inspectorType == InspectorPageType::FOCUS);
     auto container = Container::GetContainer(containerId);
     if (!container) {
         return;
     }
     if (container->IsUseNewPipeline()) {
-        tree = NG::Inspector::GetSimplifiedInspector(containerId);
+        auto inspector = std::make_shared<NG::SimplifiedInspector>(containerId, params);
+        if (params.enableBackground) {
+            auto collector = std::make_shared<Recorder::InspectorTreeCollector>(std::move(callback), true);
+            inspector->GetInspectorBackgroundAsync(collector);
+        } else {
+            auto collector = std::make_shared<Recorder::InspectorTreeCollector>(std::move(callback), false);
+            inspector->GetInspectorAsync(collector);
+        }
     }
 }
 

@@ -16,15 +16,8 @@
 #include "adapter/ohos/entrance/form_utils_impl.h"
 
 #include "form_mgr.h"
-#include "want.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
-#include "adapter/ohos/osal/want_wrap_ohos.h"
-#include "base/utils/utils.h"
-#include "core/common/container_scope.h"
-#include "core/common/form_manager.h"
-#include "frameworks/base/json/json_util.h"
-
 
 namespace OHOS::Ace {
 namespace {
@@ -63,6 +56,11 @@ int32_t FormUtilsImpl::RouterEvent(
     if (uri->IsValid() && !abilityName->IsValid()) {
         auto uriStr = uri->GetString();
         want.SetUri(uriStr);
+        auto bundleName = eventAction->GetValue("bundleName");
+        auto bundle = bundleName->GetString();
+        if (!bundle.empty()) {
+            want.SetElementName(bundle, std::string());
+        }
     } else {
         auto bundleName = eventAction->GetValue("bundleName");
         auto bundle = bundleName->GetString();
@@ -92,11 +90,12 @@ int32_t FormUtilsImpl::RequestPublishFormEvent(const AAFwk::Want& want,
     std::vector<AppExecFwk::FormDataProxy> formDataProxies;
     int32_t ret = AppExecFwk::FormMgr::GetInstance().RequestPublishFormWithSnapshot(const_cast<Want&>(want),
         withFormBindingData, formBindingData, formId, formDataProxies);
+    int32_t externalErrorCode = ret;
     if (ret != ERR_OK) {
-        errMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
+        OHOS::AppExecFwk::FormMgr::GetInstance().GetExternalError(ret, externalErrorCode, errMsg);
     }
     
-    return ret;
+    return externalErrorCode;
 }
 
 int32_t FormUtilsImpl::BackgroundEvent(

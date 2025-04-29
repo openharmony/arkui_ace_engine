@@ -15,8 +15,6 @@
 
 #include "core/components_ng/syntax/repeat_model_ng.h"
 
-#include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/syntax/repeat_node.h"
 #include "core/components_ng/syntax/syntax_item.h"
@@ -73,11 +71,30 @@ void RepeatModelNG::CreateNewChildFinish(const std::string& key)
     stack->PopContainer();
 }
 
+void RepeatModelNG::AfterAddChild()
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto node = AceType::DynamicCast<RepeatNode>(stack->GetMainElementNode());
+    CHECK_NULL_VOID(node);
+    node->AfterAddChild();
+}
+
 void RepeatModelNG::OnMove(std::function<void(int32_t, int32_t)>&& onMove)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto node = AceType::DynamicCast<RepeatNode>(stack->GetMainElementNode());
     CHECK_NULL_VOID(node);
     node->SetOnMove(std::move(onMove));
+}
+
+void RepeatModelNG::SetItemDragHandler(std::function<void(int32_t)>&& onLongPress,
+    std::function<void(int32_t)>&& onDragStart, std::function<void(int32_t, int32_t)>&& onMoveThrough,
+    std::function<void(int32_t)>&& onDrop)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto node = AceType::DynamicCast<RepeatNode>(stack->GetMainElementNode());
+    CHECK_NULL_VOID(node);
+    node->SetItemDragHandler(
+        std::move(onLongPress), std::move(onDragStart), std::move(onMoveThrough), std::move(onDrop));
 }
 } // namespace OHOS::Ace::NG

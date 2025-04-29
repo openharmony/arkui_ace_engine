@@ -29,6 +29,19 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 
 namespace OHOS::Ace::Framework {
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetXComponentController(void* jsController, void* controller)
+{
+    auto* jsXComponentController = static_cast<Framework::JSXComponentController*>(jsController);
+    if (!jsXComponentController) {
+        return;
+    }
+    auto xComponentController = reinterpret_cast<std::shared_ptr<InnerXComponentController>*>(controller);
+    if (!xComponentController) {
+        return;
+    }
+    *xComponentController = jsXComponentController->GetController();
+}
+
 struct XComponentAsyncCxt {
     napi_env env = nullptr;
     napi_deferred deferred = nullptr;
@@ -155,6 +168,7 @@ void JSXComponentController::GetSurfaceId(const JSCallbackInfo& args)
         auto surfaceId = xcomponentController_->GetSurfaceId();
         auto returnValue = JSVal(ToJSValue(surfaceId));
         auto returnPtr = JSRef<JSVal>::Make(returnValue);
+        TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Controller GetSurfaceId:%{public}s", surfaceId.c_str());
         args.SetReturnValue(returnPtr);
     }
 }
@@ -190,7 +204,7 @@ void JSXComponentController::GetXComponentSurfaceRect(const JSCallbackInfo& args
     float offsetY = 0.0f;
     float width = 0.0f;
     float height = 0.0f;
-    xcomponentController_->GetLocalLocation(offsetX, offsetY);
+    xcomponentController_->GetSurfaceOffset(offsetX, offsetY);
     xcomponentController_->GetSurfaceSize(width, height);
     retObj->SetProperty("offsetX", offsetX);
     retObj->SetProperty("offsetY", offsetY);

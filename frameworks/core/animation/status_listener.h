@@ -248,7 +248,8 @@ public:
 
     void NotifyStopListener() const
     {
-        for (auto&& [id, callback] : stopCallbacks_) {
+        auto stopCallbacks = stopCallbacks_;
+        for (auto&& [id, callback] : stopCallbacks) {
             if (callback) {
                 callback();
             }
@@ -257,7 +258,8 @@ public:
 
     void NotifyRepeatListener() const
     {
-        for (auto&& [id, callback] : repeatCallbacks_) {
+        auto repeatCallbacks = repeatCallbacks_;
+        for (auto&& [id, callback] : repeatCallbacks) {
             if (callback) {
                 callback();
             }
@@ -284,7 +286,8 @@ public:
 
     void NotifyIdleListener() const
     {
-        for (auto&& [id, callback] : idleCallbacks_) {
+        auto idleCallbacks = idleCallbacks_;
+        for (auto&& [id, callback] : idleCallbacks) {
             if (callback) {
                 callback();
             }

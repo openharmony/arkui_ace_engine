@@ -30,11 +30,7 @@ void PolygonPainter::DrawPolygon(RSCanvas& canvas, const PolygonPaintProperty& p
     }
     ShapePainter::SetBrush(brush, polygonPaintProperty);
     canvas.AttachBrush(brush);
-#ifndef USE_ROSEN_DRAWING
-    RSPath path;
-#else
     RSRecordingPath path;
-#endif
     std::vector<RSPoint> points;
     for (auto point : polygonPaintProperty.GetPointsValue()) {
         points.emplace_back(RSPoint(

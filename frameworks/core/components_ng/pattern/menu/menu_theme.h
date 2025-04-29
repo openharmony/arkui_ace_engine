@@ -37,6 +37,8 @@ constexpr float MENU_BIG_FONT_SIZE_SCALE = 1.75f;
 constexpr float MENU_LARGE_FONT_SIZE_SCALE_ = 2.0f;
 constexpr float MENU_MAX_FONT_SIZE_SCALE = 3.2f;
 constexpr int32_t MENU_TEXT_MAX_LINES = std::numeric_limits<int32_t>::max();
+constexpr int32_t SUB_MENU_SHOW_DELAY_DURATION = 300;
+constexpr int32_t SUB_MENU_HIDE_DELAY_DURATION = 500;
 
 /**
  * MenuTheme defines styles of menu item. MenuTheme should be built
@@ -116,6 +118,27 @@ public:
             theme->normalLayout_ = pattern->GetAttr<int>("menu_normal_layout", 1);
             theme->normalPlacement_ = pattern->GetAttr<int>("menu_normal_placement", 1);
             theme->hasBackBlur_ = pattern->GetAttr<int>("menu_back_blur", 1);
+            theme->enableDirectionalKeyFocus_ = pattern->GetAttr<int>("menu_focus_directional_key_enable", 0);
+            theme->menuShadowStyle_ = static_cast<ShadowStyle>(
+                pattern->GetAttr<int>("menu_default_shadow_style", static_cast<int>(ShadowStyle::OuterDefaultMD)));
+            theme->menuBackGroundBlurStyle_ =
+                pattern->GetAttr<int>("menu_background_blur_style", static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
+            theme->subMenuShowDelayDuration_ =
+                pattern->GetAttr<int>("sub_menu_show_delay_duration", SUB_MENU_SHOW_DELAY_DURATION);
+            theme->subMenuHideDelayDuration_ =
+                pattern->GetAttr<int>("sub_menu_hide_delay_duration", SUB_MENU_HIDE_DELAY_DURATION);
+            theme->menuHapticFeedback_ =
+                pattern->GetAttr<std::string>("menu_haptic_feedback", "haptic.long_press_medium");
+            ParseWideScreenAttrs(theme, pattern);
+        }
+
+        void ParseWideScreenAttrs(const RefPtr<MenuTheme>& theme, const RefPtr<ThemeStyle>& pattern) const
+        {
+            theme->hasBackBlurColor_ = static_cast<bool>(pattern->GetAttr<double>("menu_back_blur_with_color", 0.0f));
+            theme->backBlurColor_ = pattern->GetAttr<Color>("menu_back_blur_color", Color::TRANSPARENT);
+            theme->borderWidth_ = pattern->GetAttr<Dimension>("menu_border_width", 0.0_vp);
+            theme->borderColor_ = pattern->GetAttr<Color>("menu_border_color", Color::BLACK);
+            theme->focusStyleType_ = pattern->GetAttr<double>("menu_focus_style_type", 0.0);
         }
     };
 
@@ -326,6 +349,61 @@ public:
         return hasBackBlur_;
     }
 
+    bool GetEnableDirectionalKeyFocus() const
+    {
+        return enableDirectionalKeyFocus_;
+    }
+
+    Color GetBorderColor() const
+    {
+        return borderColor_;
+    }
+
+    bool HasBackBlurColor() const
+    {
+        return hasBackBlurColor_;
+    }
+
+    Color GetBackBlurColor() const
+    {
+        return backBlurColor_;
+    }
+
+    Dimension GetBorderWidth() const
+    {
+        return borderWidth_;
+    }
+
+    double GetFocusStyleType() const
+    {
+        return focusStyleType_;
+    }
+
+    ShadowStyle GetMenuShadowStyle() const
+    {
+        return menuShadowStyle_;
+    }
+    
+    int GetMenuBackgroundBlurStyle() const
+    {
+        return menuBackGroundBlurStyle_;
+    }
+
+    int32_t GetSubMenuShowDelayDuration()
+    {
+        return subMenuShowDelayDuration_;
+    }
+
+    int32_t GetSubMenuHideDelayDuration()
+    {
+        return subMenuHideDelayDuration_;
+    }
+
+    const std::string& GetMenuHapticFeedback() const
+    {
+        return menuHapticFeedback_;
+    }
+
 protected:
     MenuTheme() = default;
 
@@ -336,6 +414,8 @@ private:
     int32_t hoverImageDelayDuration_ = 0;
     int32_t hoverImageCustomPreviewScaleDuration_ = 0;
     int32_t hoverImagePreviewDisappearDuration_ = 0;
+    int32_t subMenuShowDelayDuration_ = SUB_MENU_SHOW_DELAY_DURATION;
+    int32_t subMenuHideDelayDuration_ = SUB_MENU_HIDE_DELAY_DURATION;
     float previewBeforeAnimationScale_ = 1.0f;
     float previewAfterAnimationScale_ = 1.0f;
     float menuAnimationScale_ = 1.0f;
@@ -371,6 +451,15 @@ private:
     bool normalLayout_ = true;
     bool normalPlacement_ = true;
     bool hasBackBlur_ = true;
+    bool enableDirectionalKeyFocus_ = false;
+    bool hasBackBlurColor_ = false;
+    Dimension borderWidth_;
+    Color backBlurColor_ = Color::TRANSPARENT;
+    Color borderColor_ = Color::TRANSPARENT;
+    double focusStyleType_ = 0.0;
+    ShadowStyle menuShadowStyle_ = ShadowStyle::OuterDefaultMD;
+    int menuBackGroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
+    std::string menuHapticFeedback_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -217,6 +217,8 @@ HWTEST_F(RenderContextTestNg, RenderContextTest004, TestSize.Level1)
     EXPECT_EQ(json->GetString("backgroundColor"), "#00000000");
     EXPECT_EQ(json->GetString("foregroundColor"), "#00000001");
     EXPECT_EQ(json->GetString("transform"), "");
+    EXPECT_EQ(json->GetString("useEffect"), "false");
+    EXPECT_EQ(json->GetString("useEffectType"), "EffectType.DEFAULT");
 }
 
 /**
@@ -367,7 +369,7 @@ HWTEST_F(RenderContextTestNg, RenderContextTest009, TestSize.Level1)
      */
     renderContext->RequestNextFrame();
     EXPECT_EQ(renderContext->GetBorderColor()->leftColor.value(), Color::BLACK);
-    EXPECT_NE(renderContext->GetUnsafeHost(), nullptr);
+    EXPECT_NE(renderContext->GetHost(), nullptr);
     EXPECT_FALSE(renderContext->HasSharedTransition());
 }
 

@@ -15,6 +15,17 @@
 
 #include "text_base.h"
 
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_paragraph.h"
+
+#include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
+
 namespace OHOS::Ace::NG {
 
 void TextBases::onClickFunc(const BaseEventInfo* info) {};
@@ -53,7 +64,7 @@ std::pair<RefPtr<FrameNode>, RefPtr<TextPattern>> TextBases::Init()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
+    textModelNG.Create(CREATE_VALUE_W);
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
@@ -76,15 +87,6 @@ void TextBases::TestUpdateScenario(const RefPtr<TextPattern>& pattern)
     pattern->BeforeCreateLayoutWrapper();
     auto host = pattern->GetHost();
     ASSERT_NE(host, nullptr);
-    for (const auto& child : host->GetChildren()) {
-        auto spanNode = AceType::DynamicCast<SpanNode>(child);
-        ASSERT_NE(spanNode, nullptr);
-        auto inheritPropertyInfo = spanNode->CalculateInheritPropertyInfo();
-        auto iter = inheritPropertyInfo.find(PropertyInfo::FONTSIZE);
-        if (iter != inheritPropertyInfo.end()) {
-            EXPECT_EQ(spanNode->GetFontSize().value(), ADAPT_UPDATE_FONTSIZE_VALUE);
-        }
-    }
 }
 
 void TextBases::ConstructSpanItemList1(std::list<RefPtr<SpanItem>>& spans)
@@ -93,22 +95,22 @@ void TextBases::ConstructSpanItemList1(std::list<RefPtr<SpanItem>>& spans)
     RefPtr<SpanItem> span2 = AceType::MakeRefPtr<SpanItem>();
     RefPtr<SpanItem> span3 = AceType::MakeRefPtr<SpanItem>();
     RefPtr<SpanItem> span4 = AceType::MakeRefPtr<SpanItem>();
-    span1->content = MULTIPLE_SPAN1;
+    span1->content = MULTIPLE_SPAN1_U16;
     spans.emplace_back(span1);
 
-    span2->content = MULTIPLE_SPAN2;
+    span2->content = MULTIPLE_SPAN2_U16;
     span2->textLineStyle->UpdateTextAlign(TextAlign::CENTER);
     span2->textLineStyle->UpdateMaxLines(1);
     spans.emplace_back(span2);
 
-    span3->content = MULTIPLE_SPAN3;
+    span3->content = MULTIPLE_SPAN3_U16;
     span3->textLineStyle->UpdateTextAlign(TextAlign::END);
     span3->textLineStyle->UpdateTextIndent(Dimension(20.0f));
     span3->textLineStyle->UpdateWordBreak(WordBreak::BREAK_ALL);
     span3->textLineStyle->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     spans.emplace_back(span3);
 
-    span4->content = MULTIPLE_SPAN4;
+    span4->content = MULTIPLE_SPAN4_U16;
     spans.emplace_back(span4);
 }
 
@@ -135,7 +137,7 @@ void TextBases::TearDown()
     MockParagraph::TearDown();
 }
 
-RefPtr<SpanNode> TextBases::CreateSpanNodeWithSetDefaultProperty(const std::string& content)
+RefPtr<SpanNode> TextBases::CreateSpanNodeWithSetDefaultProperty(const std::u16string& content)
 {
     SpanModelNG spanModelNG;
     spanModelNG.Create(content);
@@ -176,7 +178,7 @@ RefPtr<ImageSpanNode> TextBases::CreateImageSpanNode(const ImageSpanNodeProperty
     return imageSpanNode;
 }
 
-RefPtr<FrameNode> TextBases::CreateTextParagraph(const std::string& createValue, const TestProperty& testProperty)
+RefPtr<FrameNode> TextBases::CreateTextParagraph(const std::u16string& createValue, const TestProperty& testProperty)
 {
     TextModelNG textModel;
     textModel.Create(createValue);
@@ -273,7 +275,7 @@ void TextBases::SetContentModifier(TextContentModifier& textContentModifier)
     textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
     textContentModifier.SetTextShadow({ textShadow });
     textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE, textStyle);
-    textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE);
+    textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE, textStyle);
     OffsetF paintOffset;
     textContentModifier.SetPrintOffset(paintOffset);
 }

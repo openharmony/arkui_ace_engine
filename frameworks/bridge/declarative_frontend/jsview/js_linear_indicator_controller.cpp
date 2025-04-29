@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_linear_indicator_controller.h"
 
-#include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components_ng/pattern/linear_indicator/linear_indicator_theme.h"
@@ -54,14 +53,14 @@ void JSLinearIndicatorController::SetProgress(const JSCallbackInfo& args)
     }
     auto arg0 = args[0];
     auto arg1 = args[1];
-    if (arg0->IsUndefined() || arg1->IsUndefined() || arg0->IsNull() || arg1->IsNull()) {
-        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "invalid param index or progress");
-        return;
-    }
     int32_t index = 0;
     float value = .0f;
-    ConvertFromJSValue(arg0, index);
-    ConvertFromJSValue(arg1, value);
+    if (arg0->IsUndefined() || arg0->IsNull() || (!ConvertFromJSValue(arg0, index))) {
+        index = 0;
+    }
+    if (arg1->IsUndefined() || arg1->IsNull() ||(!ConvertFromJSValue(arg1, value))) {
+        value = .0f;
+    }
     if (linearIndicatorController_) {
         linearIndicatorController_->SetProgress(index, value);
     }

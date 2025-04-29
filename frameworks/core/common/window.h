@@ -56,6 +56,8 @@ public:
 
     virtual void Init() {}
 
+    virtual void InitArkUI_X() {}
+
     virtual void Destroy()
     {
         platformWindow_->Destroy();
@@ -75,7 +77,14 @@ public:
         return nullptr;
     }
 
+    virtual void FlushLayoutSize(int32_t width, int32_t height) {}
+
     virtual bool FlushAnimation(uint64_t timeStamp)
+    {
+        return false;
+    }
+
+    virtual bool HasFirstFrameAnimation()
     {
         return false;
     }
@@ -107,6 +116,13 @@ public:
     {
         return !onShow_;
     }
+
+    bool GetUiDvsyncSwitch() const
+    {
+        return dvsyncOn_;
+    }
+
+    int64_t GetDeadlineByFrameCount(int64_t deadline, int64_t ts, int64_t frameBufferCount);
 
     void SetDensity(double density)
     {
@@ -150,6 +166,7 @@ public:
     }
 
     virtual void SetKeepScreenOn(bool keepScreenOn) {};
+    virtual void SetViewKeepScreenOn(bool keepScreenOn) {};
 
     virtual int64_t GetVSyncPeriod() const
     {
@@ -197,9 +214,23 @@ public:
     virtual void Unlock() {}
 
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch);
+    
+    virtual uint32_t GetStatusBarHeight() const
+    {
+        return 0;
+    }
+
+    virtual bool GetIsRequestVsync()
+    {
+        return false;
+    }
 
     virtual void NotifyExtensionTimeout(int32_t errorCode) {}
 
+    virtual bool GetIsRequestFrame()
+    {
+        return false;
+    }
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;
@@ -216,6 +247,8 @@ protected:
     uint64_t lastRequestVsyncTime_ = 0;
     int64_t lastVsyncEndTimestamp_ = 0;
     uint32_t windowId_ = 0;
+    bool dvsyncOn_ = false;
+    int64_t lastDVsyncInbihitPredictTs_ = 0;
 
 private:
     std::function<Rect()> windowRectImpl_;

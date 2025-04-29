@@ -32,12 +32,17 @@ struct ModalStyle {
     std::optional<Color> backgroundColor;
     bool isUIExtension = false;
     bool prohibitedRemoveByRouter = false;
+    bool isAllowAddChildBelowModalUec = true;
+    bool prohibitedRemoveByNavigation = true;
 
     bool operator==(const ModalStyle& modelStyle) const
     {
-        return !(modalTransition != modelStyle.modalTransition || backgroundColor != modelStyle.backgroundColor ||
+        return !(modalTransition != modelStyle.modalTransition ||
+            backgroundColor != modelStyle.backgroundColor ||
             isUIExtension != modelStyle.isUIExtension ||
-            prohibitedRemoveByRouter != modelStyle.prohibitedRemoveByRouter);
+            prohibitedRemoveByRouter != modelStyle.prohibitedRemoveByRouter ||
+            isAllowAddChildBelowModalUec != modelStyle.isAllowAddChildBelowModalUec ||
+            prohibitedRemoveByNavigation != modelStyle.prohibitedRemoveByNavigation);
     }
 };
 } // namespace OHOS::Ace::NG

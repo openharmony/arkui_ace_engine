@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_IRREGULAR_FILLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_IRREGULAR_FILLER_H
 
+#include <unordered_set>
+
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
@@ -218,12 +220,12 @@ private:
     /**
      * @brief Update item info to the newly filled GridItem.
      *
-     * @param idx item index
+     * @param idx index of item in Grid
      * @param row row index of item's top-left corner
      * @param col column index of item's top-left corner
      * @param size size of the item.
      */
-    void SetItemInfo(int32_t idx, int32_t row, int32_t col, GridItemSize size);
+    void SetItemInfo(const RefPtr<LayoutWrapper>& item, int32_t idx, int32_t row, int32_t col, GridItemSize size);
 
     int32_t posY_ = 0;  /**< The current row index in the grid. */
     int32_t posX_ = -1; /**< The current column index in the grid. */

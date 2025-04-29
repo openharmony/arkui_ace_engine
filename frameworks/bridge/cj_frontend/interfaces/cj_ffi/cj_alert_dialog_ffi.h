@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #ifndef OHOS_ACE_FRAMEWORK_CJ_ALERT_DIALOG_FFI_H
 #define OHOS_ACE_FRAMEWORK_CJ_ALERT_DIALOG_FFI_H
 

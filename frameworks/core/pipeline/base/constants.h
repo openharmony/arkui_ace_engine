@@ -584,6 +584,8 @@ extern const char STOP[];
 extern const char RESUME[];
 extern const char CANCEL[];
 
+extern const char DEFAULT_HAR_BUNDLE_NAME[];
+extern const char DEFAULT_HAR_MODULE_NAME[];
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_CONSTANTS_H

@@ -128,6 +128,8 @@ void JsDragEvent::JSBind(BindingTarget globalObj)
     JSClass<JsDragEvent>::CustomMethod("getVelocityY", &JsDragEvent::GetVelocityY);
     JSClass<JsDragEvent>::CustomMethod("getVelocity", &JsDragEvent::GetVelocity);
     JSClass<JsDragEvent>::CustomMethod("getModifierKeyState", &JsDragEvent::GetModifierKeyState);
+    JSClass<JsDragEvent>::CustomMethod("executeDropAnimation", &JsDragEvent::ExecuteDropAnimation);
+    JSClass<JsDragEvent>::CustomMethod("startDataLoading", &JsDragEvent::StartDataLoading);
     JSClass<JsDragEvent>::Bind(globalObj, &JsDragEvent::Constructor, &JsDragEvent::Destructor);
 }
 
@@ -198,6 +200,38 @@ void JsDragEvent::SetData(const JSCallbackInfo& args)
     RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedData(nativeValue);
     CHECK_NULL_VOID(udData);
     dragEvent_->SetData(udData);
+}
+
+void JsDragEvent::StartDataLoading(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsObject()) {
+        return;
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    std::string udKey = dragEvent_->GetUdKey();
+    if (udKey.empty()) {
+        args.SetReturnValue(JSVal::Undefined());
+        NapiThrow(engine, ERROR_CODE_DRAG_DATA_NOT_ONDROP, "Operation no allowed for current pharse.");
+        return;
+    }
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    panda::Local<JsiValue> value = args[0].Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    ScopeRAII scope(env);
+    napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    auto status = UdmfClient::GetInstance()->StartAsyncDataRetrieval(env, nativeValue, udKey);
+    if (status != 0) {
+        args.SetReturnValue(JSVal::Undefined());
+        napi_value result;
+        napi_get_and_clear_last_exception(env, &result);
+        NapiThrow(engine, ERROR_CODE_PARAM_INVALID, "Invalid input parameter.");
+        return;
+    }
+    auto jsUdKey = JSVal(ToJSValue(udKey));
+    auto jsUdKeyRef = JSRef<JSVal>::Make(jsUdKey);
+    args.SetReturnValue(jsUdKeyRef);
 }
 
 void JsDragEvent::GetData(const JSCallbackInfo& args)
@@ -370,6 +404,23 @@ void JsDragEvent::GetModifierKeyState(const JSCallbackInfo& args)
 
     auto jsValueRef = JSRef<JSVal>::Make(ToJSValue(ret));
     args.SetReturnValue(jsValueRef);
+}
+
+void JsDragEvent::ExecuteDropAnimation(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    RefPtr<JsFunction> jsExecuteDropAnimation =
+        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto executeDropAnimation = [execCtx = args.GetExecutionContext(), func = std::move(jsExecuteDropAnimation),
+                                    node = frameNode]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        PipelineContext::SetCallBackNode(node);
+        func->Execute();
+    };
+    dragEvent_->SetDropAnimation(std::move(executeDropAnimation));
 }
 
 void JsDragEvent::Constructor(const JSCallbackInfo& args)

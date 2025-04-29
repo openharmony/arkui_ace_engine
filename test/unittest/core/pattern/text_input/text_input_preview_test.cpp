@@ -85,7 +85,11 @@ HWTEST_F(TextInputPreviewText, CheckPasswordAreaState, TestSize.Level1)
     });
     GetFocus();
 
+    pattern_->responseArea_ = AceType::MakeRefPtr<PasswordResponseArea>(pattern_, pattern_->GetTextObscured());
     pattern_->CheckPasswordAreaState();
+    auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(pattern_->responseArea_);
+    EXPECT_NE(passwordArea, nullptr);
+    EXPECT_FALSE(passwordArea->IsObscured());
 }
 
 /**
@@ -122,6 +126,7 @@ HWTEST_F(TextInputPreviewText, UpdateFocusForward001, TestSize.Level1)
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
         model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(false);
     });
     GetFocus();
 
@@ -132,6 +137,7 @@ HWTEST_F(TextInputPreviewText, UpdateFocusForward001, TestSize.Level1)
     auto stackNode = cleanNodeResponseArea->cleanNode_;
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
 
     /**
      * @tc.steps: step3. test Update clear node false
@@ -156,6 +162,7 @@ HWTEST_F(TextInputPreviewText, UpdateFocusForward002, TestSize.Level1)
         model.SetIsShowCancelButton(true);
         model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
         model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetCancelButtonSymbol(false);
     });
     GetFocus();
 
@@ -166,6 +173,7 @@ HWTEST_F(TextInputPreviewText, UpdateFocusForward002, TestSize.Level1)
     auto stackNode = cleanNodeResponseArea->cleanNode_;
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
 
     /**
      * @tc.steps: step3. test Update clear node false
@@ -190,6 +198,7 @@ HWTEST_F(TextInputPreviewText, UpdateCancelNode001, TestSize.Level1)
         model.SetIsShowCancelButton(true);
         model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
         model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -199,6 +208,7 @@ HWTEST_F(TextInputPreviewText, UpdateCancelNode001, TestSize.Level1)
     auto stackNode = cleanNodeResponseArea->cleanNode_;
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
 
     /**
      * @tc.steps: step3. test Update clear node true
@@ -223,6 +233,7 @@ HWTEST_F(TextInputPreviewText, UpdateCancelNode002, TestSize.Level1)
         model.SetIsShowCancelButton(true);
         model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
         model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -232,6 +243,7 @@ HWTEST_F(TextInputPreviewText, UpdateCancelNode002, TestSize.Level1)
     auto stackNode = cleanNodeResponseArea->cleanNode_;
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
 
     /**
      * @tc.steps: step3. test Update clear node true
@@ -256,6 +268,7 @@ HWTEST_F(TextInputPreviewText, UpdateCancelNode003, TestSize.Level1)
         model.SetIsShowCancelButton(true);
         model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
         model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -265,6 +278,7 @@ HWTEST_F(TextInputPreviewText, UpdateCancelNode003, TestSize.Level1)
     auto stackNode = cleanNodeResponseArea->cleanNode_;
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
 
     /**
      * @tc.steps: step3. test Update clear node true
@@ -290,7 +304,8 @@ HWTEST_F(TextInputPreviewText, OnObscuredChanged, TestSize.Level1)
     /**
      * @tc.steps: step2. Set textObscured_  true;
      */
-    pattern_->textObscured_  = true;
+    pattern_->textObscured_ = true;
     pattern_->OnObscuredChanged(false);
+    EXPECT_FALSE(pattern_->textObscured_);
 }
 } // namespace OHOS::Ace::NG

@@ -17,8 +17,6 @@
 
 #include <sys/time.h>
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text_picker/textpicker_column_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -91,14 +89,15 @@ void TextPickerTossAnimationController::StartSpringMotion()
     auto columnNode = column->GetHost();
     CHECK_NULL_VOID(columnNode);
     auto offset = column->GetOffset();
+    auto speed = column->GetMainVelocity() / VELOCTY_TRANS;
     auto renderContext = columnNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto springCurve = UpdatePlayAnimationValue();
     CHECK_NULL_VOID(springCurve);
     double midIndex = column->GetShowOptionCount() / 2;
     auto optionProperties = column->GetMidShiftDistance();
-    auto midShiftDistance =
-        column->IsDownScroll() ? optionProperties[midIndex].nextDistance : optionProperties[midIndex].prevDistance;
+    auto midShiftDistance = LessNotEqual(speed, 0.0) ? optionProperties[midIndex].prevDistance
+                                                     : optionProperties[midIndex].nextDistance;
     column->SetYLast(0);
     end_ = midShiftDistance * showCount_ - offset;
     AnimationOption option = AnimationOption();
@@ -161,7 +160,7 @@ RefPtr<Curve> TextPickerTossAnimationController::UpdatePlayAnimationValue()
 
 double TextPickerTossAnimationController::GetCurrentTime() const
 {
-    struct timeval tv = { 0 };
+    struct timeval tv {};
     int result = gettimeofday(&tv, nullptr);
     if (result != 0) {
         return 0.0;
@@ -186,8 +185,8 @@ void TextPickerTossAnimationController::CreatePropertyCallback()
         if ((isTouchBreak) || (static_cast<int32_t>(position) == DISMIN)) {
             return;
         }
-        column->UpdateToss(position);
         column->SetTossStatus(true);
+        column->UpdateToss(position);
     };
     property_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0f, std::move(propertyCallback));
 }

@@ -55,6 +55,8 @@ public:
     void CleanRecognizerState() override;
     void ForceCleanRecognizer() override;
 
+    void CleanRecognizerStateVoluntarily() override;
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override {};
     void HandleTouchUpEvent(const TouchEvent& event) override {};
@@ -69,9 +71,19 @@ private:
     {
         RecognizerGroup::OnResetStatus();
         currentBatchRecognizer_.Reset();
+        succeedBlockRecognizers_.clear();
+    }
+
+    void AddSucceedBlockRecognizer(const RefPtr<NGGestureRecognizer>& recognizer)
+    {
+        if (std::find(succeedBlockRecognizers_.begin(), succeedBlockRecognizers_.end(),
+            recognizer) == succeedBlockRecognizers_.end()) {
+            succeedBlockRecognizers_.push_back(recognizer);
+        }
     }
 
     RefPtr<NGGestureRecognizer> currentBatchRecognizer_;
+    std::vector<RefPtr<NGGestureRecognizer>> succeedBlockRecognizers_;
 };
 
 } // namespace OHOS::Ace::NG

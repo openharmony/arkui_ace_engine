@@ -41,6 +41,7 @@ private:
     void CheckMenuPadding(LayoutWrapper* layoutWrapper);
     void InitializePadding(LayoutWrapper* layoutWrapper);
     void InitializePaddingAPI12(LayoutWrapper* layoutWrapper);
+    void UpdateHoverRegion(RefPtr<FrameNode>& parentMenuItem, const OffsetF& postion, const SizeF& size);
     float margin_ = 0.0f;
     float paddingStart_ = 0.0f;
     float paddingEnd_ = 0.0f;

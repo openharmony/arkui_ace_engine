@@ -24,16 +24,21 @@ class InputMethodManager final {
 
 public:
     static InputMethodManager* GetInstance();
-    void OnFocusNodeChange(const RefPtr<NG::FrameNode>& focusNode);
+    void OnFocusNodeChange(const RefPtr<NG::FrameNode>& focusNode, FocusReason focusReason);
     void SetWindowFocus(bool windowFocus);
     bool NeedSoftKeyboard() const;
     // Close the keyboard in-process
-    void CloseKeyboard();
+    void CloseKeyboard(bool disableNeedToRequestKeyboard = true);
+    void CloseKeyboardInProcess();
     void CloseKeyboardInPipelineDestroy();
     void CloseKeyboard(const RefPtr<NG::FrameNode>& focusNode);
     // Hide the keyboard across processes
     void HideKeyboardAcrossProcesses();
     void ProcessModalPageScene();
+    WeakPtr<NG::FrameNode> GetCurFocusNode() const
+    {
+        return curFocusNode_;
+    }
 
 private:
     InputMethodManager() = default;

@@ -37,6 +37,7 @@ void TossAnimationController::SetStart(double y)
 {
     auto weak = AceType::WeakClaim(this);
     auto ref = weak.Upgrade();
+    CHECK_NULL_VOID(ref);
     auto column = AceType::DynamicCast<DatePickerColumnPattern>(ref->column_.Upgrade());
     CHECK_NULL_VOID(column);
     auto isTouchBreak = column->GetTouchBreakStatus();
@@ -64,6 +65,7 @@ bool TossAnimationController::Play()
 {
     auto weak = AceType::WeakClaim(this);
     auto ref = weak.Upgrade();
+    CHECK_NULL_RETURN(ref, false);
     auto column = AceType::DynamicCast<DatePickerColumnPattern>(ref->column_.Upgrade());
     CHECK_NULL_RETURN(column, false);
     auto timeDiff = timeEnd_ - timeStart_;
@@ -82,6 +84,7 @@ void TossAnimationController::StartSpringMotion()
 {
     auto weak = AceType::WeakClaim(this);
     auto ref = weak.Upgrade();
+    CHECK_NULL_VOID(ref);
     auto column = AceType::DynamicCast<DatePickerColumnPattern>(ref->column_.Upgrade());
     CHECK_NULL_VOID(column);
     auto columnNode = column->GetHost();
@@ -139,6 +142,7 @@ void TossAnimationController::StopTossAnimation()
     option.SetDelay(0);
     AnimationUtils::Animate(option, [weak]() {
         auto ref = weak.Upgrade();
+        CHECK_NULL_VOID(ref);
         ref->property_->Set(0.0);
     });
 }
@@ -155,7 +159,7 @@ RefPtr<Curve> TossAnimationController::UpdatePlayAnimationValue()
 }
 double TossAnimationController::GetCurrentTime() const
 {
-    struct timeval tv = { 0 };
+    struct timeval tv {};
     int result = gettimeofday(&tv, nullptr);
     if (result != 0) {
         return 0.0;
@@ -173,6 +177,7 @@ void TossAnimationController::CreatePropertyCallback()
     }
     auto weak = AceType::WeakClaim(this);
     auto ref = weak.Upgrade();
+    CHECK_NULL_VOID(ref);
     auto column = AceType::DynamicCast<DatePickerColumnPattern>(ref->column_.Upgrade());
     CHECK_NULL_VOID(column);
     auto propertyCallback = [weak, column](float position) {
@@ -181,25 +186,6 @@ void TossAnimationController::CreatePropertyCallback()
             return;
         }
         column->UpdateToss(static_cast<int>(position));
-        auto ref = weak.Upgrade();
-        CHECK_NULL_VOID(ref);
-        if (position > 0.0f) {
-            if (static_cast<int>(ref->end_) == std::ceil(position)) {
-                column->UpdateFinishToss(std::ceil(position));
-            } else if (static_cast<int>(ref->end_) < std::ceil(position)) {
-                return;
-            } else {
-                column->UpdateToss(std::ceil(position));
-            }
-        } else {
-            if (static_cast<int>(ref->end_) == std::floor(position)) {
-                column->UpdateFinishToss(std::floor(position));
-            } else if (static_cast<int>(ref->end_) > std::floor(position)) {
-                return;
-            } else {
-                column->UpdateToss(std::floor(position));
-            }
-        }
         column->SetTossStatus(true);
     };
     property_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));

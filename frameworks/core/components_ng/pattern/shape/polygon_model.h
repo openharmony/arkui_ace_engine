@@ -29,10 +29,6 @@ public:
 
     virtual void Create(bool isPolygon);
     virtual void SetPoints(const ShapePoints& points);
-
-private:
-    static std::unique_ptr<PolygonModel> instance_;
-    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_POLYGON_POLYGON_MODEL_H

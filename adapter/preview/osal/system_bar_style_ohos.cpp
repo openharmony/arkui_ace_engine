@@ -15,8 +15,16 @@
 
 #include "adapter/preview/osal/system_bar_style_ohos.h"
 
+#include "base/log/log.h"
+
 namespace OHOS::Ace {
 RefPtr<SystemBarStyle> SystemBarStyle::CreateStyleFromJsObj(void* env, void* value)
+{
+    LOGI("Not supported in previewer");
+    return nullptr;
+}
+
+RefPtr<SystemBarStyle> SystemBarStyle::CreateStyleFromColor(const uint32_t colorValue)
 {
     LOGI("Not supported in previewer");
     return nullptr;

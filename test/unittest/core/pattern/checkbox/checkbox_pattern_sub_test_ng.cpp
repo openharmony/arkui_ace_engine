@@ -61,6 +61,7 @@ void CheckBoxPatternSubTestNG::SetUpTestSuite()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CheckboxTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<CheckboxTheme>()));
 
     RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<Pattern>());
     auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
@@ -411,7 +412,7 @@ HWTEST_F(CheckBoxPatternSubTestNG, CheckBoxPatternTest056, TestSize.Level1)
     EXPECT_NE(layoutProperty, nullptr);
     EXPECT_EQ(layoutProperty->GetVisibility(), VisibleType::VISIBLE);
     EXPECT_NEAR(opacity, 1.0f, DBL_EPSILON);
-    auto eventHub = pattern->builderNode_->GetEventHub<EventHub>();
+    auto eventHub = pattern->builderNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_EQ(eventHub->IsEnabled(), true);
 }
@@ -477,7 +478,7 @@ HWTEST_F(CheckBoxPatternSubTestNG, CheckBoxPatternTest058, TestSize.Level1)
     auto opacity = renderContext->GetOpacityValue();
     EXPECT_NE(layoutProperty, nullptr);
     EXPECT_NEAR(opacity, 0.0f, DBL_EPSILON);
-    auto eventHub = pattern->builderNode_->GetEventHub<EventHub>();
+    auto eventHub = pattern->builderNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_NE(eventHub->IsEnabled(), true);
 }
@@ -512,7 +513,7 @@ HWTEST_F(CheckBoxPatternSubTestNG, CheckBoxPatternTest059, TestSize.Level1)
     EXPECT_NE(layoutProperty, nullptr);
     EXPECT_NE(layoutProperty->GetVisibility(), VisibleType::VISIBLE);
     EXPECT_NEAR(opacity, 0.0f, DBL_EPSILON);
-    auto eventHub = pattern->builderNode_->GetEventHub<EventHub>();
+    auto eventHub = pattern->builderNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_NE(eventHub->IsEnabled(), true);
 }
@@ -548,7 +549,7 @@ HWTEST_F(CheckBoxPatternSubTestNG, CheckBoxPatternTest060, TestSize.Level1)
     EXPECT_NE(layoutProperty, nullptr);
     EXPECT_NE(layoutProperty->GetVisibility(), VisibleType::VISIBLE);
     EXPECT_NEAR(opacity, 0.0f, DBL_EPSILON);
-    auto eventHub = pattern->builderNode_->GetEventHub<EventHub>();
+    auto eventHub = pattern->builderNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_NE(eventHub->IsEnabled(), true);
 }
@@ -596,6 +597,7 @@ HWTEST_F(CheckBoxPatternSubTestNG, CheckBoxPatternTest061, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(checkBoxTheme));
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     checkBoxTheme->focusPaintPadding_ = 10.0_px; //10.0_px is value of focusPaintPadding_
     pattern->size_ = SizeF(200, 200); //200 is width of checkbox, 200 is height of checkbox
@@ -649,6 +651,7 @@ HWTEST_F(CheckBoxPatternSubTestNG, CheckBoxPatternTest062, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(checkBoxTheme));
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     checkBoxTheme->focusPaintPadding_ = 10.0_px; //10.0_px is value of focusPaintPadding_
     pattern->size_ = SizeF(200, 200); //200 is width of checkbox, 200 is height of checkbox
@@ -702,6 +705,7 @@ HWTEST_F(CheckBoxPatternSubTestNG, CheckBoxPatternTest063, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(checkBoxTheme));
     EXPECT_NE(pattern->paintMethod_->GetContentModifier(paintWrapper), nullptr);
     checkBoxTheme->focusPaintPadding_ = 100.0_px; //10.0_px is value of focusPaintPadding_
     pattern->size_ = SizeF(200, 200); //200 is width of checkbox, 200 is height of checkbox
@@ -714,11 +718,11 @@ HWTEST_F(CheckBoxPatternSubTestNG, CheckBoxPatternTest063, TestSize.Level1)
 }
 
 /**
- * @tc.name: PreventDefault001
- * @tc.desc: test InitTouchEvent and InitClickEvent
+ * @tc.name: OnInjectionEvent001
+ * @tc.desc: test OnInjectionEvent
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPatternSubTestNG, PreventDefault001, TestSize.Level1)
+HWTEST_F(CheckBoxPatternSubTestNG, OnInjectionEvent001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init CheckBox node
@@ -732,73 +736,36 @@ HWTEST_F(CheckBoxPatternSubTestNG, PreventDefault001, TestSize.Level1)
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
 
-    /**
-     * @tc.steps: step2. Mock TouchEventInfo info and set preventDefault to true
-     * @tc.expected: Check the param value
-     */
-    pattern->InitTouchEvent();
-    TouchEventInfo touchInfo("onTouch");
-    TouchLocationInfo touchDownInfo(1);
-    touchDownInfo.SetTouchType(TouchType::DOWN);
-    touchInfo.SetPreventDefault(true);
-    touchInfo.SetSourceDevice(SourceType::TOUCH);
-    touchInfo.AddTouchLocationInfo(std::move(touchDownInfo));
-    pattern->touchListener_->callback_(touchInfo);
-    EXPECT_TRUE(pattern->isTouchPreventDefault_);
-    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::PRESS);
-    /**
-     * @tc.steps: step3.Mock GestureEvent info and set preventDefault to true
-     * @tc.expected: Check the param value
-     */
-    pattern->InitClickEvent();
-    GestureEvent clickInfo;
-    clickInfo.SetPreventDefault(true);
-    clickInfo.SetSourceDevice(SourceType::TOUCH);
-    pattern->clickListener_->operator()(clickInfo);
-    EXPECT_FALSE(pattern->isTouchPreventDefault_);
-}
+    std::string jsonCommandFalse = R"({"cmd":"selectCheckBox","selectStatus": false})";
+    int32_t resultfalse = pattern->OnInjectionEvent(jsonCommandFalse);
+    EXPECT_EQ(resultfalse, RET_SUCCESS);
+    auto checkBoxPaintPropertyfalse = pattern->GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_VOID(checkBoxPaintPropertyfalse);
+    bool status = checkBoxPaintPropertyfalse->GetCheckBoxSelect().value_or(false);
+    EXPECT_EQ(status, false);
 
-/**
- * @tc.name: PreventDefault002
- * @tc.desc: test InitTouchEvent and InitClickEvent
- * @tc.type: FUNC
- */
-HWTEST_F(CheckBoxPatternSubTestNG, PreventDefault002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init CheckBox node
-     */
-    CheckBoxModelNG checkBoxModelNG;
-    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    ASSERT_NE(gestureHub, nullptr);
+    std::string jsonCommandtrue = R"({"cmd":"selectCheckBox","selectStatus": true})";
+    int32_t result = pattern->OnInjectionEvent(jsonCommandtrue);
+    EXPECT_EQ(result, RET_SUCCESS);
+    auto checkBoxPaintPropertytrue = pattern->GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_VOID(checkBoxPaintPropertytrue);
+    status = checkBoxPaintPropertytrue->GetCheckBoxSelect().value_or(false);
+    EXPECT_EQ(status, true);
 
-    /**
-     * @tc.steps: step2. Mock TouchEvent info and set preventDefault to false
-     * @tc.expected: Check the param value
-     */
-    pattern->InitTouchEvent();
-    TouchEventInfo touchInfo("onTouch");
-    TouchLocationInfo touchDownInfo(1);
-    touchDownInfo.SetTouchType(TouchType::DOWN);
-    touchInfo.SetPreventDefault(false);
-    touchInfo.SetSourceDevice(SourceType::TOUCH);
-    touchInfo.AddTouchLocationInfo(std::move(touchDownInfo));
-    pattern->touchListener_->callback_(touchInfo);
-    EXPECT_FALSE(pattern->isTouchPreventDefault_);
-    /**
-     * @tc.steps: step3. Mock GestureEvent info and set preventDefault to false
-     * @tc.expected: Check the param value
-     */
-    pattern->InitClickEvent();
-    GestureEvent clickInfo;
-    clickInfo.SetPreventDefault(false);
-    clickInfo.SetSourceDevice(SourceType::TOUCH);
-    pattern->clickListener_->operator()(clickInfo);
-    EXPECT_FALSE(pattern->isTouchPreventDefault_);
+    std::string jsonCommandUndifine = R"({"cmd":"selectCheckBox","selectStatus": undifine})";
+    int32_t resultUndifine = pattern->OnInjectionEvent(jsonCommandUndifine);
+    EXPECT_EQ(resultUndifine, RET_FAILED);
+    auto checkBoxPaintPropertyUndifine = pattern->GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_VOID(checkBoxPaintPropertyUndifine);
+    status = checkBoxPaintPropertyUndifine->GetCheckBoxSelect().value_or(false);
+    EXPECT_EQ(status, true);
+
+    std::string jsonCommandGroup = R"({"cmd":"selectCheckBoxGroup","selectStatus": "undifine"})";
+    result = pattern->OnInjectionEvent(jsonCommandGroup);
+    EXPECT_EQ(result, RET_FAILED);
+    auto checkBoxPaintProperty = pattern->GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_VOID(checkBoxPaintProperty);
+    status = checkBoxPaintProperty->GetCheckBoxSelect().value_or(false);
+    EXPECT_EQ(status, true);
 }
 } // namespace OHOS::Ace::NG

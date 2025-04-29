@@ -16,7 +16,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_gesture.h"
 
 #include "base/log/log_wrapper.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/jsview/models/gesture_model_impl.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/gesture/gesture_model_ng.h"
 #include "frameworks/base/log/ace_scoring_log.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_gesture_function.h"
@@ -241,6 +243,8 @@ constexpr char LONG_PRESS_DURATION[] = "duration";
 constexpr char PAN_DIRECTION[] = "direction";
 constexpr char SWIPE_DIRECTION[] = "direction";
 constexpr char ROTATION_ANGLE[] = "angle";
+constexpr char LIMIT_FINGER_COUNT[] = "isFingerCountLimited";
+constexpr char GESTURE_DISTANCE_MAP[] = "distanceMap";
 } // namespace
 
 void JSGesture::Create(const JSCallbackInfo& info)
@@ -266,11 +270,17 @@ void JSGesture::Create(const JSCallbackInfo& info)
 
 void JSGesture::Finish()
 {
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSGesture][pop]", &JSGesture::Finish);
+    }
     GestureModel::GetInstance()->Finish();
 }
 
 void JSGesture::Pop()
 {
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSGesture][pop]", &JSGesture::Pop);
+    }
     GestureModel::GetInstance()->Pop();
 }
 
@@ -279,11 +289,13 @@ void JSTapGesture::Create(const JSCallbackInfo& args)
     int32_t countNum = DEFAULT_TAP_COUNT;
     int32_t fingersNum = DEFAULT_TAP_FINGER;
     double distanceThresholdNum = DEFAULT_TAP_DISTANCE;
+    bool isLimitFingerCount = false;
     if (args.Length() > 0 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
         JSRef<JSVal> count = obj->GetProperty(TAP_COUNT);
         JSRef<JSVal> fingers = obj->GetProperty(GESTURE_FINGERS);
         JSRef<JSVal> distanceThreshold = obj->GetProperty(TAP_GESTURE_DISTANCE);
+        JSRef<JSVal> limitFingerCount = obj->GetProperty(LIMIT_FINGER_COUNT);
 
         if (count->IsNumber()) {
             int32_t countNumber = count->ToNumber<int32_t>();
@@ -298,9 +310,12 @@ void JSTapGesture::Create(const JSCallbackInfo& args)
             distanceThresholdNum = distanceThresholdNumber < 0? DEFAULT_TAP_DISTANCE : distanceThresholdNumber;
             distanceThresholdNum = Dimension(distanceThresholdNum, DimensionUnit::VP).ConvertToPx();
         }
+        if (limitFingerCount->IsBoolean()) {
+            isLimitFingerCount = limitFingerCount->ToBoolean();
+        }
     }
 
-    TapGestureModel::GetInstance()->Create(countNum, fingersNum, distanceThresholdNum);
+    TapGestureModel::GetInstance()->Create(countNum, fingersNum, distanceThresholdNum, isLimitFingerCount);
 }
 
 void JSLongPressGesture::Create(const JSCallbackInfo& args)
@@ -308,11 +323,13 @@ void JSLongPressGesture::Create(const JSCallbackInfo& args)
     int32_t fingersNum = DEFAULT_LONG_PRESS_FINGER;
     bool repeatResult = false;
     int32_t durationNum = DEFAULT_LONG_PRESS_DURATION;
+    bool isLimitFingerCount = false;
     if (args.Length() > 0 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
         JSRef<JSVal> fingers = obj->GetProperty(GESTURE_FINGERS);
         JSRef<JSVal> repeat = obj->GetProperty(LONG_PRESS_REPEAT);
         JSRef<JSVal> duration = obj->GetProperty(LONG_PRESS_DURATION);
+        JSRef<JSVal> limitFingerCount = obj->GetProperty(LIMIT_FINGER_COUNT);
 
         if (fingers->IsNumber()) {
             int32_t fingersNumber = fingers->ToNumber<int32_t>();
@@ -325,18 +342,96 @@ void JSLongPressGesture::Create(const JSCallbackInfo& args)
             int32_t durationNumber = duration->ToNumber<int32_t>();
             durationNum = durationNumber <= 0 ? DEFAULT_LONG_PRESS_DURATION : durationNumber;
         }
+        if (limitFingerCount->IsBoolean()) {
+            isLimitFingerCount = limitFingerCount->ToBoolean();
+        }
     }
+    LongPressGestureModel::GetInstance()->Create(fingersNum, repeatResult, durationNum, isLimitFingerCount);
+}
 
-    LongPressGestureModel::GetInstance()->Create(fingersNum, repeatResult, durationNum);
+napi_value GetIteratorNext(const napi_env env, napi_value iterator, napi_value func, bool *done)
+{
+    napi_value next = nullptr;
+    NAPI_CALL(env, napi_call_function(env, iterator, func, 0, nullptr, &next));
+    napi_value doneValue = nullptr;
+    NAPI_CALL(env, napi_get_named_property(env, next, "done", &doneValue));
+    NAPI_CALL(env, napi_get_value_bool(env, doneValue, done));
+    return next;
+}
+
+napi_value JSPanGesture::ParsePanDistanceMap(JSRef<JSVal> jsDistanceMap, PanDistanceMap& distanceMap)
+{
+    napi_value emptyValue = nullptr;
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, emptyValue);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, emptyValue);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+
+    auto jsVal = JSRef<JSVal>::Cast(jsDistanceMap);
+    panda::Local<JsiValue> value = jsVal.Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+
+    // parse map object
+    napi_value entriesFunc = nullptr;
+    napi_value iterator = nullptr;
+    napi_value nextFunc = nullptr;
+    NAPI_CALL(env, napi_get_named_property(env, nativeValue, "entries", &entriesFunc));
+    NAPI_CALL(env, napi_call_function(env, nativeValue, entriesFunc, 0, nullptr, &iterator));
+    NAPI_CALL(env, napi_get_named_property(env, iterator, "next", &nextFunc));
+
+    bool done = false;
+    napi_value next = nullptr;
+    while ((next = GetIteratorNext(env, iterator, nextFunc, &done)) != nullptr && !done) {
+        napi_value entry = nullptr;
+        napi_value key = nullptr;
+        napi_value value = nullptr;
+        NAPI_CALL(env, napi_get_named_property(env, next, "value", &entry));
+        NAPI_CALL(env, napi_get_element(env, entry, 0, &key));
+        NAPI_CALL(env, napi_get_element(env, entry, 1, &value));
+        int32_t sourceTool = 0;
+        NAPI_CALL(env, napi_get_value_int32(env, key, &sourceTool));
+        double distance = 0.0;
+        NAPI_CALL(env, napi_get_value_double(env, value, &distance));
+        SourceTool st = static_cast<SourceTool>(sourceTool);
+        if (st >= SourceTool::UNKNOWN && st <= SourceTool::JOYSTICK && GreatOrEqual(distance, 0.0)) {
+            Dimension dimension = Dimension(distance, DimensionUnit::VP);
+            distanceMap[st] = dimension.ConvertToPx();
+        }
+    }
+    return next;
+}
+
+void JSPanGesture::ParsePanDistance(const JSRef<JSObject>& obj, PanDistanceMap& distanceMap)
+{
+    JSRef<JSVal> distance = obj->GetProperty(GESTURE_DISTANCE);
+    JSRef<JSVal> jsDistanceMap = obj->GetProperty(GESTURE_DISTANCE_MAP);
+    if (distance->IsNumber()) {
+        double distanceNumber = distance->ToNumber<double>();
+        if (!LessNotEqual(distanceNumber, 0.0)) {
+            Dimension dimension = Dimension(distanceNumber, DimensionUnit::VP);
+            distanceMap[SourceTool::UNKNOWN] = dimension.ConvertToPx();
+        } else {
+            distanceMap[SourceTool::PEN] = DEFAULT_PEN_PAN_DISTANCE.ConvertToPx();
+        }
+    } else {
+        distanceMap[SourceTool::PEN] = DEFAULT_PEN_PAN_DISTANCE.ConvertToPx();
+    }
+    if (jsDistanceMap->IsObject()) {
+        ParsePanDistanceMap(jsDistanceMap, distanceMap);
+    }
 }
 
 void JSPanGesture::Create(const JSCallbackInfo& args)
 {
     int32_t fingersNum = DEFAULT_PAN_FINGER;
-    double distanceNum = DEFAULT_PAN_DISTANCE.ConvertToPx();
+    bool isLimitFingerCount = false;
     PanDirection panDirection;
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() } };
     if (args.Length() <= 0 || !args[0]->IsObject()) {
-        PanGestureModel::GetInstance()->Create(fingersNum, panDirection, distanceNum);
+        distanceMap[SourceTool::PEN] = DEFAULT_PEN_PAN_DISTANCE.ConvertToPx();
+        PanGestureModel::GetInstance()->Create(fingersNum, panDirection, distanceMap, isLimitFingerCount);
         return;
     }
 
@@ -350,18 +445,12 @@ void JSPanGesture::Create(const JSCallbackInfo& args)
     }
 
     JSRef<JSVal> fingers = obj->GetProperty(GESTURE_FINGERS);
-    JSRef<JSVal> distance = obj->GetProperty(GESTURE_DISTANCE);
     JSRef<JSVal> directionNum = obj->GetProperty(PAN_DIRECTION);
+    JSRef<JSVal> limitFingerCount = obj->GetProperty(LIMIT_FINGER_COUNT);
 
     if (fingers->IsNumber()) {
         int32_t fingersNumber = fingers->ToNumber<int32_t>();
         fingersNum = fingersNumber <= DEFAULT_PAN_FINGER ? DEFAULT_PAN_FINGER : fingersNumber;
-    }
-    if (distance->IsNumber()) {
-        double distanceNumber = distance->ToNumber<double>();
-        Dimension dimension =
-            LessNotEqual(distanceNumber, 0.0) ? DEFAULT_PAN_DISTANCE : Dimension(distanceNumber, DimensionUnit::VP);
-        distanceNum = dimension.ConvertToPx();
     }
     if (directionNum->IsNumber()) {
         uint32_t directNum = directionNum->ToNumber<uint32_t>();
@@ -370,8 +459,11 @@ void JSPanGesture::Create(const JSCallbackInfo& args)
             panDirection.type = directNum;
         }
     }
-
-    PanGestureModel::GetInstance()->Create(fingersNum, panDirection, distanceNum);
+    if (limitFingerCount->IsBoolean()) {
+        isLimitFingerCount = limitFingerCount->ToBoolean();
+    }
+    ParsePanDistance(obj, distanceMap);
+    PanGestureModel::GetInstance()->Create(fingersNum, panDirection, distanceMap, isLimitFingerCount);
 }
 
 void JSSwipeGesture::Create(const JSCallbackInfo& args)
@@ -379,9 +471,10 @@ void JSSwipeGesture::Create(const JSCallbackInfo& args)
     int32_t fingersNum = DEFAULT_SLIDE_FINGER;
     double speedNum = DEFAULT_SLIDE_SPEED;
     SwipeDirection slideDirection;
+    bool isLimitFingerCount = false;
 
     if (args.Length() <= 0 || !args[0]->IsObject()) {
-        SwipeGestureModel::GetInstance()->Create(fingersNum, slideDirection, speedNum);
+        SwipeGestureModel::GetInstance()->Create(fingersNum, slideDirection, speedNum, isLimitFingerCount);
         return;
     }
 
@@ -389,6 +482,7 @@ void JSSwipeGesture::Create(const JSCallbackInfo& args)
     JSRef<JSVal> fingers = obj->GetProperty(GESTURE_FINGERS);
     JSRef<JSVal> speed = obj->GetProperty(GESTURE_SPEED);
     JSRef<JSVal> directionNum = obj->GetProperty(SWIPE_DIRECTION);
+    JSRef<JSVal> limitFingerCount = obj->GetProperty(LIMIT_FINGER_COUNT);
 
     if (fingers->IsNumber()) {
         int32_t fingersNumber = fingers->ToNumber<int32_t>();
@@ -405,18 +499,23 @@ void JSSwipeGesture::Create(const JSCallbackInfo& args)
             slideDirection.type = directNum;
         }
     }
+    if (limitFingerCount->IsBoolean()) {
+            isLimitFingerCount = limitFingerCount->ToBoolean();
+    }
 
-    SwipeGestureModel::GetInstance()->Create(fingersNum, slideDirection, speedNum);
+    SwipeGestureModel::GetInstance()->Create(fingersNum, slideDirection, speedNum, isLimitFingerCount);
 }
 
 void JSPinchGesture::Create(const JSCallbackInfo& args)
 {
     int32_t fingersNum = DEFAULT_PINCH_FINGER;
     double distanceNum = DEFAULT_PINCH_DISTANCE;
+    bool isLimitFingerCount = false;
     if (args.Length() > 0 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
         JSRef<JSVal> fingers = obj->GetProperty(GESTURE_FINGERS);
         JSRef<JSVal> distance = obj->GetProperty(GESTURE_DISTANCE);
+        JSRef<JSVal> limitFingerCount = obj->GetProperty(LIMIT_FINGER_COUNT);
 
         if (fingers->IsNumber()) {
             int32_t fingersNumber = fingers->ToNumber<int32_t>();
@@ -427,19 +526,24 @@ void JSPinchGesture::Create(const JSCallbackInfo& args)
             double distanceNumber = distance->ToNumber<double>();
             distanceNum = LessNotEqual(distanceNumber, 0.0) ? DEFAULT_PINCH_DISTANCE : distanceNumber;
         }
+        if (limitFingerCount->IsBoolean()) {
+            isLimitFingerCount = limitFingerCount->ToBoolean();
+        }
     }
 
-    PinchGestureModel::GetInstance()->Create(fingersNum, distanceNum);
+    PinchGestureModel::GetInstance()->Create(fingersNum, distanceNum, isLimitFingerCount);
 }
 
 void JSRotationGesture::Create(const JSCallbackInfo& args)
 {
     double angleNum = DEFAULT_ROTATION_ANGLE;
     int32_t fingersNum = DEFAULT_ROTATION_FINGER;
+    bool isLimitFingerCount = false;
     if (args.Length() > 0 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
         JSRef<JSVal> fingers = obj->GetProperty(GESTURE_FINGERS);
         JSRef<JSVal> angle = obj->GetProperty(ROTATION_ANGLE);
+        JSRef<JSVal> limitFingerCount = obj->GetProperty(LIMIT_FINGER_COUNT);
 
         if (fingers->IsNumber()) {
             int32_t fingersNumber = fingers->ToNumber<int32_t>();
@@ -449,9 +553,12 @@ void JSRotationGesture::Create(const JSCallbackInfo& args)
             double angleNumber = angle->ToNumber<double>();
             angleNum = LessNotEqual(angleNumber, 0.0) ? DEFAULT_ROTATION_ANGLE : angleNumber;
         }
+        if (limitFingerCount->IsBoolean()) {
+            isLimitFingerCount = limitFingerCount->ToBoolean();
+        }
     }
 
-    RotationGestureModel::GetInstance()->Create(fingersNum, angleNum);
+    RotationGestureModel::GetInstance()->Create(fingersNum, angleNum, isLimitFingerCount);
 }
 
 void JSGestureGroup::Create(const JSCallbackInfo& args)
@@ -476,9 +583,9 @@ void JSGesture::JsHandlerOnGestureEvent(Ace::GestureEventAction action, const JS
     RefPtr<JsGestureFunction> handlerFunc = AceType::MakeRefPtr<JsGestureFunction>(JSRef<JSFunc>::Cast(args[0]));
 
     if (action == Ace::GestureEventAction::CANCEL) {
-        auto onActionCancelFunc = [execCtx = args.GetExecutionContext(), func = std::move(handlerFunc)]() {
+        auto onActionCancelFunc = [execCtx = args.GetExecutionContext(), func = std::move(handlerFunc)](
+                                      GestureEvent& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto info = GestureEvent();
             ACE_SCORING_EVENT("Gesture.onCancel");
             func->Execute(info);
         };
@@ -505,6 +612,31 @@ void JSGesture::SetTag(const JSCallbackInfo& args)
         }
     }
     GestureModel::GetInstance()->SetTag(tag);
+}
+
+void JSGesture::SetAllowedTypes(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1) {
+        return;
+    }
+
+    JSRef<JSVal> jsTypes = args[0];
+    if (!jsTypes->IsArray()) {
+        return;
+    }
+    JSRef<JSArray> jsTypesArr = JSRef<JSArray>::Cast(jsTypes);
+    std::set<SourceTool> allowedTypes{};
+    auto typesArrLength = jsTypesArr->Length();
+    for (size_t i = 0; i < typesArrLength; ++i) {
+        auto type = jsTypesArr->GetValueAt(i);
+        if (type->IsNumber()) {
+            allowedTypes.insert(static_cast<SourceTool>(type->ToNumber<int32_t>()));
+        }
+    }
+    if (allowedTypes.empty()) {
+        return;
+    }
+    GestureModel::GetInstance()->SetAllowedTypes(allowedTypes);
 }
 
 void JSGesture::JsHandlerOnAction(const JSCallbackInfo& args)
@@ -542,13 +674,14 @@ void JSPanGestureOption::JSBind(BindingTarget globalObj)
     JSClass<JSPanGestureOption>::CustomMethod("setDistance", &JSPanGestureOption::SetDistance);
     JSClass<JSPanGestureOption>::CustomMethod("setFingers", &JSPanGestureOption::SetFingers);
     JSClass<JSPanGestureOption>::CustomMethod("getDirection", &JSPanGestureOption::GetDirection);
+    JSClass<JSPanGestureOption>::CustomMethod("getDistance", &JSPanGestureOption::GetDistance);
     JSClass<JSPanGestureOption>::Bind(globalObj, &JSPanGestureOption::Constructor, &JSPanGestureOption::Destructor);
 }
 
 void JSPanGestureOption::SetDirection(const JSCallbackInfo& args)
 {
     if (args.Length() > 0 && args[0]->IsNumber()) {
-        PanDirection direction = { args[0]->ToNumber<int32_t>() };
+        PanDirection direction = { static_cast<uint32_t>(args[0]->ToNumber<int32_t>()) };
         panGestureOption_->SetDirection(direction);
     } else {
         PanDirection directionAll = { PanDirection::ALL };
@@ -589,6 +722,19 @@ void JSPanGestureOption::GetDirection(const JSCallbackInfo& args)
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(direction.type))));
 }
 
+void JSPanGestureOption::GetDistance(const JSCallbackInfo& args)
+{
+    double distance = 5;
+    double distance_new = distance;
+    if (panGestureOption_) {
+        distance = panGestureOption_->GetDistance();
+        auto context = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(context);
+        distance_new = context->ConvertPxToVp(Dimension(distance, DimensionUnit::PX));
+    }
+    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(RoundToMaxPrecision(distance_new))));
+}
+
 void JSPanGestureOption::Constructor(const JSCallbackInfo& args)
 {
     auto panGestureOption = Referenced::MakeRefPtr<JSPanGestureOption>();
@@ -596,14 +742,17 @@ void JSPanGestureOption::Constructor(const JSCallbackInfo& args)
     RefPtr<PanGestureOption> option = AceType::MakeRefPtr<PanGestureOption>();
 
     int32_t fingersNum = DEFAULT_PAN_FINGER;
-    double distanceNum = DEFAULT_PAN_DISTANCE.ConvertToPx();
+    bool isLimitFingerCount = false;
     PanDirection panDirection;
+    PanDistanceMap distanceMap;
+    distanceMap[SourceTool::UNKNOWN] = DEFAULT_PAN_DISTANCE.ConvertToPx();
 
     if (args.Length() > 0 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
         JSRef<JSVal> fingers = obj->GetProperty(GESTURE_FINGERS);
         JSRef<JSVal> distance = obj->GetProperty(GESTURE_DISTANCE);
         JSRef<JSVal> directionNum = obj->GetProperty(PAN_DIRECTION);
+        JSRef<JSVal> limitFingerCount = obj->GetProperty(LIMIT_FINGER_COUNT);
 
         if (fingers->IsNumber()) {
             int32_t fingersNumber = fingers->ToNumber<int32_t>();
@@ -611,9 +760,14 @@ void JSPanGestureOption::Constructor(const JSCallbackInfo& args)
         }
         if (distance->IsNumber()) {
             double distanceNumber = distance->ToNumber<double>();
-            Dimension dimension =
-                LessNotEqual(distanceNumber, 0.0) ? DEFAULT_PAN_DISTANCE : Dimension(distanceNumber, DimensionUnit::VP);
-            distanceNum = dimension.ConvertToPx();
+            if (!LessNotEqual(distanceNumber, 0.0)) {
+                Dimension dimension = Dimension(distanceNumber, DimensionUnit::VP);
+                distanceMap[SourceTool::UNKNOWN] = dimension.ConvertToPx();
+            } else {
+                distanceMap[SourceTool::PEN] = DEFAULT_PEN_PAN_DISTANCE.ConvertToPx();
+            }
+        } else {
+            distanceMap[SourceTool::PEN] = DEFAULT_PEN_PAN_DISTANCE.ConvertToPx();
         }
         if (directionNum->IsNumber()) {
             uint32_t directNum = directionNum->ToNumber<uint32_t>();
@@ -622,10 +776,15 @@ void JSPanGestureOption::Constructor(const JSCallbackInfo& args)
                 panDirection.type = directNum;
             }
         }
+        if (limitFingerCount->IsBoolean()) {
+            isLimitFingerCount = limitFingerCount->ToBoolean();
+        }
     }
     option->SetDirection(panDirection);
-    option->SetDistance(distanceNum);
+    option->SetDistanceMap(distanceMap);
+    option->SetDistance(distanceMap[SourceTool::UNKNOWN]);
     option->SetFingers(fingersNum);
+    option->SetIsLimitFingerCount(isLimitFingerCount);
 
     panGestureOption->SetPanGestureOption(option);
     args.SetReturnValue(Referenced::RawPtr(panGestureOption));
@@ -649,6 +808,7 @@ void JSGesture::JSBind(BindingTarget globalObj)
     JSClass<JSTapGesture>::Declare("TapGesture");
     JSClass<JSTapGesture>::StaticMethod("create", &JSTapGesture::Create, opt);
     JSClass<JSTapGesture>::StaticMethod("tag", &JSGesture::SetTag, opt);
+    JSClass<JSTapGesture>::StaticMethod("allowedTypes", &JSGesture::SetAllowedTypes);
     JSClass<JSTapGesture>::StaticMethod("pop", &JSGesture::Pop);
     JSClass<JSTapGesture>::StaticMethod("onAction", &JSGesture::JsHandlerOnAction);
     JSClass<JSTapGesture>::StaticMethod("onActionUpdate", &JSGesture::JsHandlerOnActionUpdate);
@@ -657,6 +817,7 @@ void JSGesture::JSBind(BindingTarget globalObj)
     JSClass<JSLongPressGesture>::Declare("LongPressGesture");
     JSClass<JSLongPressGesture>::StaticMethod("create", &JSLongPressGesture::Create, opt);
     JSClass<JSLongPressGesture>::StaticMethod("tag", &JSGesture::SetTag, opt);
+    JSClass<JSLongPressGesture>::StaticMethod("allowedTypes", &JSGesture::SetAllowedTypes);
     JSClass<JSLongPressGesture>::StaticMethod("pop", &JSGesture::Pop);
     JSClass<JSLongPressGesture>::StaticMethod("onAction", &JSGesture::JsHandlerOnAction);
     JSClass<JSLongPressGesture>::StaticMethod("onActionEnd", &JSGesture::JsHandlerOnActionEnd);
@@ -667,6 +828,7 @@ void JSGesture::JSBind(BindingTarget globalObj)
     JSClass<JSPanGesture>::Declare("PanGesture");
     JSClass<JSPanGesture>::StaticMethod("create", &JSPanGesture::Create, opt);
     JSClass<JSPanGesture>::StaticMethod("tag", &JSGesture::SetTag, opt);
+    JSClass<JSPanGesture>::StaticMethod("allowedTypes", &JSGesture::SetAllowedTypes);
     JSClass<JSPanGesture>::StaticMethod("pop", &JSGesture::Pop);
     JSClass<JSPanGesture>::StaticMethod("onActionStart", &JSGesture::JsHandlerOnActionStart);
     JSClass<JSPanGesture>::StaticMethod("onActionUpdate", &JSGesture::JsHandlerOnActionUpdate);
@@ -677,6 +839,7 @@ void JSGesture::JSBind(BindingTarget globalObj)
     JSClass<JSSwipeGesture>::Declare("SwipeGesture");
     JSClass<JSSwipeGesture>::StaticMethod("create", &JSSwipeGesture::Create, opt);
     JSClass<JSSwipeGesture>::StaticMethod("tag", &JSGesture::SetTag, opt);
+    JSClass<JSSwipeGesture>::StaticMethod("allowedTypes", &JSGesture::SetAllowedTypes);
     JSClass<JSSwipeGesture>::StaticMethod("pop", &JSGesture::Pop);
     JSClass<JSSwipeGesture>::StaticMethod("onAction", &JSGesture::JsHandlerOnAction);
     JSClass<JSSwipeGesture>::Bind(globalObj);
@@ -684,6 +847,7 @@ void JSGesture::JSBind(BindingTarget globalObj)
     JSClass<JSPinchGesture>::Declare("PinchGesture");
     JSClass<JSPinchGesture>::StaticMethod("create", &JSPinchGesture::Create, opt);
     JSClass<JSPinchGesture>::StaticMethod("tag", &JSGesture::SetTag, opt);
+    JSClass<JSPinchGesture>::StaticMethod("allowedTypes", &JSGesture::SetAllowedTypes);
     JSClass<JSPinchGesture>::StaticMethod("pop", &JSGesture::Pop);
     JSClass<JSPinchGesture>::StaticMethod("onActionStart", &JSGesture::JsHandlerOnActionStart);
     JSClass<JSPinchGesture>::StaticMethod("onActionUpdate", &JSGesture::JsHandlerOnActionUpdate);
@@ -694,6 +858,7 @@ void JSGesture::JSBind(BindingTarget globalObj)
     JSClass<JSRotationGesture>::Declare("RotationGesture");
     JSClass<JSRotationGesture>::StaticMethod("create", &JSRotationGesture::Create, opt);
     JSClass<JSRotationGesture>::StaticMethod("tag", &JSGesture::SetTag, opt);
+    JSClass<JSRotationGesture>::StaticMethod("allowedTypes", &JSGesture::SetAllowedTypes);
     JSClass<JSRotationGesture>::StaticMethod("pop", &JSGesture::Pop);
     JSClass<JSRotationGesture>::StaticMethod("onActionStart", &JSGesture::JsHandlerOnActionStart);
     JSClass<JSRotationGesture>::StaticMethod("onActionUpdate", &JSGesture::JsHandlerOnActionUpdate);

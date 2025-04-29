@@ -19,7 +19,7 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_ui_extension.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "core/components_ng/pattern/ui_extension/security_ui_extension_proxy.h"
+#include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_proxy.h"
 
 namespace OHOS::Ace::Framework {
 class JSSecurityUIExtension {
@@ -30,6 +30,10 @@ public:
     static void OnReceive(const JSCallbackInfo& info);
     static void OnError(const JSCallbackInfo& info);
     static void OnTerminated(const JSCallbackInfo& info);
+    static void JsWidth(const JSCallbackInfo& info);
+    static void JsHeight(const JSCallbackInfo& info);
+private:
+    static CalcDimension GetSizeValue(const JSCallbackInfo& info);
 };
 
 using SecurityCallbackFuncPairList =
@@ -50,11 +54,12 @@ private:
     static void Constructor(const JSCallbackInfo& info);
     static void Destructor(JSSecurityUIExtensionProxy* uiExtensionProxy);
 
+    bool CanTurnOn(const JSCallbackInfo& info);
     SecurityCallbackFuncPairList::const_iterator FindCbList(napi_env env, napi_value cb,
         SecurityCallbackFuncPairList& callbackFuncPairList);
     void AddCallbackToList(napi_env env, napi_value cb, napi_handle_scope scope, RegisterType type,
         const std::function<void(const RefPtr<NG::SecurityUIExtensionProxy>&)>&& onFunc);
-    void DeleteCallbackFromList(int argc, napi_env env, napi_value cb, RegisterType type);
+    void DeleteCallbackFromList(uint32_t argc, napi_env env, napi_value cb, RegisterType type);
     std::list<std::function<void(const RefPtr<NG::SecurityUIExtensionProxy>&)>> GetOnFuncList(RegisterType type);
     RegisterType GetRegisterType(const std::string& strType);
 

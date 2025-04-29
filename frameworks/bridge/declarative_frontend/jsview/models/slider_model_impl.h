@@ -30,6 +30,7 @@ public:
     void SetTrackBackgroundColor(const Color& value) override;
     void SetTrackBackgroundColor(const NG::Gradient& value, bool isResourceColor = false) override {};
     void SetSelectColor(const Color& value) override;
+    void SetSelectColor(const NG::Gradient& value, bool isResourceColor = false) override {};
     void SetMinLabel(float value) override;
     void SetMaxLabel(float value) override;
     void SetShowSteps(bool value) override;
@@ -61,6 +62,13 @@ public:
     void ResetSliderInteractionMode() override {};
     void ResetMinResponsiveDistance() override {};
     void ResetValidSlideRange() override {};
+    void SetEnableHapticFeedback(bool isEnableHapticFeedback) override {};
+    void ResetBlockColor() override {};
+    void ResetTrackColor() override {};
+    void ResetSelectColor() override {};
+#ifdef SUPPORT_DIGITAL_CROWN
+    void ResetDigitalCrownSensitivity() override {};
+#endif
 };
 
 } // namespace OHOS::Ace::Framework

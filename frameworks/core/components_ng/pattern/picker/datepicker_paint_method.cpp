@@ -28,9 +28,31 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr float DIVIDER_LINE_WIDTH = 1.0f;
-constexpr uint8_t ENABLED_ALPHA = 255;
-constexpr uint8_t DISABLED_ALPHA = 102;
 } // namespace
+
+CanvasDrawFunction DatePickerPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+    if (theme->IsCircleDial()) {
+        if (!circleUtils_) {
+            circleUtils_ = new PickerPaintMethodCircleUtils();
+            CHECK_NULL_RETURN(circleUtils_, nullptr);
+        }
+        CanvasDrawFunction drawFunction =
+            circleUtils_->GetContentDrawFunctionL<DataPickerRowLayoutProperty>(paintWrapper, pipeline);
+        CHECK_NULL_RETURN(drawFunction, nullptr);
+        return [weak = WeakClaim(this), drawFunction](RSCanvas& canvas) {
+            auto picker = weak.Upgrade();
+            CHECK_NULL_VOID(picker);
+            drawFunction(canvas);
+        };
+    }
+
+    return nullptr;
+}
 
 CanvasDrawFunction DatePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
 {
@@ -38,8 +60,8 @@ CanvasDrawFunction DatePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
+    CHECK_EQUAL_RETURN(theme->IsCircleDial(), true, nullptr);
     auto dividerColor = theme->GetDividerColor();
-
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);
     auto frameRect = geometryNode->GetFrameRect();
@@ -56,7 +78,7 @@ CanvasDrawFunction DatePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     auto fontScale = datePickerPattern->GetPaintDividerSpacing();
     dividerSpacing = dividerSpacing * fontScale;
     return [weak = WeakClaim(this), dividerLineWidth = DIVIDER_LINE_WIDTH, layoutProperty, frameRect, dividerSpacing,
-               dividerColor, enabled = enabled_, pattern = pattern_](RSCanvas& canvas) {
+               dividerColor, pattern = pattern_](RSCanvas& canvas) {
         PaddingPropertyF padding = layoutProperty->CreatePaddingAndBorder();
         RectF contentRect = { padding.left.value_or(0), padding.top.value_or(0),
             frameRect.Width() - padding.Width(), frameRect.Height() - padding.Height() };
@@ -70,30 +92,6 @@ CanvasDrawFunction DatePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
             OffsetF offsetY = OffsetF(contentRect.GetX(), downLine);
             dividerPainter.DrawLine(canvas, offsetY);
         }
-
-        auto picker = weak.Upgrade();
-        CHECK_NULL_VOID(picker);
-        if (!enabled) {
-            picker->PaintDisable(canvas, frameRect.Width(), frameRect.Height());
-        }
     };
-}
-
-void DatePickerPaintMethod::PaintDisable(RSCanvas& canvas, double X, double Y)
-{
-    double centerY = Y;
-    double centerX = X;
-    RSRect rRect(0, 0, centerX, centerY);
-    RSPath path;
-    path.AddRoundRect(rRect, 0, 0, RSPathDirection::CW_DIRECTION);
-    RSPen pen;
-    RSBrush brush;
-    brush.SetColor(float(DISABLED_ALPHA) / ENABLED_ALPHA);
-    pen.SetColor(float(DISABLED_ALPHA) / ENABLED_ALPHA);
-    canvas.AttachBrush(brush);
-    canvas.AttachPen(pen);
-    canvas.DrawPath(path);
-    canvas.DetachPen();
-    canvas.DetachBrush();
 }
 } // namespace OHOS::Ace::NG

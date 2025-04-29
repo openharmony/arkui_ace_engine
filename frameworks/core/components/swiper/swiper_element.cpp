@@ -89,7 +89,7 @@ bool SwiperElement::IsFocusable() const
             LOGE("target focus node is null");
             return false;
         }
-        return (*currentFocusNode)->IsFocusable();
+        return (*currentFocusNode) && (*currentFocusNode)->IsFocusable();
     }
 }
 
@@ -105,7 +105,7 @@ void SwiperElement::OnFocus()
 
     if (showIndicator_) {
         auto currentFocusNode = focusNodes_.begin();
-        if ((*currentFocusNode)->RequestFocusImmediately()) {
+        if ((*currentFocusNode) && (*currentFocusNode)->RequestFocusImmediately()) {
             itLastFocusNode_ = currentFocusNode;
             indicatorFocusNode_ = *itLastFocusNode_;
         }
@@ -114,7 +114,7 @@ void SwiperElement::OnFocus()
         auto currentFocusNode = focusNodes_.begin();
         std::advance(currentFocusNode, currentIndex);
         if (currentFocusNode != focusNodes_.end()) {
-            if ((*currentFocusNode)->RequestFocusImmediately()) {
+            if ((*currentFocusNode) && (*currentFocusNode)->RequestFocusImmediately()) {
                 itLastFocusNode_ = currentFocusNode;
                 swiper->OnFocus();
             } else {
@@ -140,7 +140,7 @@ void SwiperElement::RequestChildFocus(int32_t index)
         std::advance(currentFocusNode, index);
     }
     if (currentFocusNode != focusNodes_.end()) {
-        if ((*currentFocusNode)->RequestFocusImmediately()) {
+        if ((*currentFocusNode) && (*currentFocusNode)->RequestFocusImmediately()) {
             itLastFocusNode_ = currentFocusNode;
         }
     }
@@ -203,7 +203,7 @@ bool SwiperElement::RequestIndicatorFocus()
         return false;
     }
     auto currentFocusNode = focusNodes_.begin();
-    if ((*currentFocusNode)->RequestFocusImmediately()) {
+    if ((*currentFocusNode) && (*currentFocusNode)->RequestFocusImmediately()) {
         itLastFocusNode_ = currentFocusNode;
         indicatorFocusNode_ = *itLastFocusNode_;
         swiper->IndicatorShowFocus(true);
@@ -227,7 +227,7 @@ bool SwiperElement::RequestCurrentItemFocus()
         std::advance(currentFocusNode, currentIndex);
     }
     if (currentFocusNode != focusNodes_.end()) {
-        if ((*currentFocusNode)->RequestFocusImmediately()) {
+        if ((*currentFocusNode) && (*currentFocusNode)->RequestFocusImmediately()) {
             itLastFocusNode_ = currentFocusNode;
             swiper->IndicatorShowFocus(false);
             return true;
@@ -242,7 +242,8 @@ bool SwiperElement::OnKeyEvent(const KeyEvent& keyEvent)
         return false;
     }
 
-    if (itLastFocusNode_ != focusNodes_.end() && (*itLastFocusNode_)->HandleKeyEvent(keyEvent)) {
+    if (itLastFocusNode_ != focusNodes_.end() && (*itLastFocusNode_)
+        && (*itLastFocusNode_)->HandleKeyEvent(keyEvent)) {
         return true;
     }
 

@@ -16,7 +16,17 @@
 #include "core/common/ai/ai_write_adapter.h"
 
 namespace OHOS::Ace {
-bool AIWriteAdapter::IsSentenceBoundary(const wchar_t value) { return false; }
+bool AIWriteAdapter::IsSentenceBoundary(const char16_t value) { return false; }
+uint32_t AIWriteAdapter::GetSelectLengthOnlyText(const std::u16string& content)
+{
+    uint32_t length = 0;
+    for (uint32_t i = 0; i < content.length(); i++) {
+        if (content[i] != u' ' && content[i] != u'\n') {
+            length++;
+        }
+    }
+    return length;
+}
 void AIWriteAdapter::CloseModalUIExtension() {}
 void AIWriteAdapter::ShowModalUIExtension(const AIWriteInfo& info,
     std::function<void(std::vector<uint8_t>&)> resultCallback) {}

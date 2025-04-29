@@ -159,10 +159,10 @@ class ImageResizableModifier extends ModifierWithKey<ResizableOptions> {
     if (reset) {
       getUINativeModule().image.resetResizable(node);
     } else {
-      if (!isUndefined(this.value.lattice)) {
+      if (!isUndefined(this.value.lattice) && !isNull(this.value.lattice)) {
         getUINativeModule().image.setResizableLattice(node, this.value.lattice);
       }
-      if (!isUndefined(this.value.slice)) {
+      if (!isUndefined(this.value.slice) && !isNull(this.value.slice)) {
         let sliceTop: Length | undefined;
         let sliceRight: Length | undefined;
         let sliceBottom: Length | undefined;
@@ -188,6 +188,23 @@ class ImageDynamicRangeModeModifier extends ModifierWithKey<DynamicRangeMode> {
       getUINativeModule().image.resetDynamicRangeMode(node);
     } else {
       getUINativeModule().image.setDynamicRangeMode(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+
+class ImageHdrBrightnessModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('hdrBrightness');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetHdrBrightness(node);
+    } else {
+      getUINativeModule().image.setHdrBrightness(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -329,6 +346,22 @@ class ImageObjectFitModifier extends ModifierWithKey<ImageFit> {
   }
   checkObjectDiff(): boolean {
     return this.stageValue !== this.value;
+  }
+}
+class ImageMatrixModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('imageMatrix');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetImageMatrix(node);
+    } else {
+      getUINativeModule().image.setImageMatrix(node, (this.value as Matrix).matrix4x4);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !deepCompareArrays((this.stageValue as Matrix).matrix4x4, (this.value as Matrix).matrix4x4);
   }
 }
 class ImageBorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses> {
@@ -602,6 +635,17 @@ class ImageOnFinishModifier extends ModifierWithKey<VoidCallback> {
   }
 }
 
+class ImageRotateOrientationModifier extends ModifierWithKey<ImageRotateOrientation> {
+  static identity: Symbol = Symbol('imageOrientation');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetOrientation(node);
+    } else {
+      getUINativeModule().image.setOrientation(node);
+    }
+  }
+}
+
 class ImagePointLightModifier extends ModifierWithKey<PointLightStyle> {
   constructor(value: PointLightStyle) {
     super(value);
@@ -719,6 +763,10 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
       ImageObjectFitModifier, value);
     return this;
   }
+  imageMatrix(value: object): this {
+    modifierWithKey(this._modifiersWithKeys, ImageMatrixModifier.identity, ImageMatrixModifier, value);
+    return this;
+  }
   objectRepeat(value: ImageRepeat): this {
     modifierWithKey(this._modifiersWithKeys, ImageObjectRepeatModifier.identity,
       ImageObjectRepeatModifier, value);
@@ -809,6 +857,15 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
       this._modifiersWithKeys, ImageDynamicRangeModeModifier.identity, ImageDynamicRangeModeModifier, value);
     return this;
   }
+  hdrBrightness(value: number): this {
+    modifierWithKey(this._modifiersWithKeys, ImageHdrBrightnessModifier.identity, ImageHdrBrightnessModifier, value);
+    return this;
+  }
+  orientation(value: ImageRotateOrientaion): this {
+    modifierWithKey(
+    this._modifiersWithKeys, ImageRotateOrientationModifier.identity, ImageRotateOrientationModifier, value);
+    return this;
+  }
   enhancedImageQuality(value: ResolutionQuality): this {
     modifierWithKey(
       this._modifiersWithKeys, ImageDynamicRangeModeModifier.identity, ImageDynamicRangeModeModifier, value);
@@ -824,6 +881,10 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
   }
   analyzerConfig(value: object): this {
     modifierWithKey(this._modifiersWithKeys, ImageAnalyzerConfigModifier.identity, ImageAnalyzerConfigModifier, value);
+    return this;
+  }
+  resizable(value: ResizableOptions): this {
+    modifierWithKey(this._modifiersWithKeys, ImageResizableModifier.identity, ImageResizableModifier, value);
     return this;
   }
 }

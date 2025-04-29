@@ -17,9 +17,8 @@
 
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
-#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"
-#include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
+
 namespace OHOS::Ace::NG {
 RefPtr<WaterFlowLayoutInfoBase> WaterFlowLayoutInfoBase::Create(WaterFlowLayoutMode mode)
 {
@@ -62,6 +61,26 @@ void WaterFlowLayoutInfoBase::InitMargins(
         if (sections[i].margin) {
             margins_[i] = ConvertToMarginPropertyF(*sections[i].margin, scale, percentWidth);
         }
+    }
+}
+
+void WaterFlowLayoutInfoBase::UpdateDefaultCachedCount()
+{
+    thread_local float pageCount = SystemProperties::GetPageCount();
+    if (pageCount <= 0.0f) {
+        return;
+    }
+    int32_t itemCount = endIndex_ - startIndex_ + 1;
+    if (itemCount <= 0) {
+        return;
+    }
+    constexpr int32_t MAX_DEFAULT_CACHED_COUNT = 16;
+    int32_t newCachedCount = static_cast<int32_t>(ceil(pageCount * itemCount));
+    if (newCachedCount > MAX_DEFAULT_CACHED_COUNT) {
+        TAG_LOGI(AceLogTag::ACE_WATERFLOW, "Default cachedCount exceed 16");
+        defCachedCount_ = MAX_DEFAULT_CACHED_COUNT;
+    } else {
+        defCachedCount_ = std::max(newCachedCount, defCachedCount_);
     }
 }
 } // namespace OHOS::Ace::NG

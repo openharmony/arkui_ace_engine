@@ -27,11 +27,10 @@ namespace OHOS::Ace::NG {
 class ScrollablePattern;
 struct ScrollableNodeInfo {
     WeakPtr<ScrollablePattern> scrollableNode;
-    std::function<bool(double, int32_t source)> onPositionChanged;
-    std::function<bool(double, int32_t source)> scrollStartCallback;
-    std::function<void()> scrollEndCallback;
-    CalePredictSnapOffsetCallback calePredictSnapOffsetCallback;
-    StartScrollSnapMotionCallback startScrollSnapMotionCallback;
+    std::function<bool(double, int32_t source, bool, bool)> onPositionChanged;
+    std::function<bool(double, int32_t source, bool)> scrollStartCallback;
+    std::function<void(bool)> scrollEndCallback;
+    StartSnapAnimationCallback startSnapAnimationCallback;
     ScrollBarFRCallback scrollbarFRcallback;
     std::function<void(bool, bool smooth)> scrollPageCallback;
 
@@ -54,14 +53,14 @@ public:
     void RegisterScrollBar(const WeakPtr<ScrollBarPattern>& scrollBar);
 
     // UnRegister scrollable node and scroll bar.
-    void UnRegisterScrollableNode(const WeakPtr<ScrollablePattern>& scrollableNode);
     void UnRegisterScrollBar(const WeakPtr<ScrollBarPattern>& scrollBar);
 
     /*
      * Notify scrollable node to update state, called by scroll bar.
      * @param distance absolute distance that scroll bar has scrolled.
      */
-    void NotifyScrollableNode(float distance, int32_t source, const WeakPtr<ScrollBarPattern>& weakScrollBar) const;
+    void NotifyScrollableNode(float distance, int32_t source, const WeakPtr<ScrollBarPattern>& weakScrollBar,
+        bool isMouseWheelScroll = false) const;
 
     /*
      * Notify scrollable node to callback scrollStart, called by scroll bar.
@@ -74,9 +73,8 @@ public:
     void NotifyScrollStop() const;
     /*
      * Notify scroll bar to update state, called by scrollable node.
-     * @param distance absolute distance that scrollable node has scrolled.
      */
-    void NotifyScrollBar(const WeakPtr<ScrollablePattern>& weakScrollableNode) const;
+    void NotifyScrollBar(int32_t scrollSource);
 
     /*
      * Start animation of ScrollBar.
@@ -93,32 +91,46 @@ public:
      */
     bool NotifySnapScroll(float delta, float velocity, float barScrollableDistance, float dragDistance) const;
 
+    bool NotifySnapScrollWithoutChild(SnapAnimationOptions snapAnimationOptions) const;
+
     float CalcPatternOffset(float controlDistance, float barScrollableDistance, float delta) const;
 
-    void NotifyScrollBarNode(float distance, int32_t source) const;
+    void NotifyScrollBarNode(float distance, int32_t source, bool isMouseWheelScroll = false) const;
 
     void SetScrollSnapTrigger_(bool scrollSnapTrigger)
     {
         scrollSnapTrigger_ = scrollSnapTrigger;
     }
 
-    bool IsScrollSnapTrigger() const
-    {
-        return scrollSnapTrigger_;
-    }
+    bool IsScrollSnapTrigger() const;
 
     void ScrollPage(bool reverse, bool smooth);
 
     void SetScrollEnabled(bool scrollEnabled, const WeakPtr<ScrollablePattern>& weakScrollableNode) const;
 
+    void RegisterNestScrollableNode(const ScrollableNodeInfo& scrollableNode);
+
+    void UnRegisterNestScrollableNode(const WeakPtr<ScrollablePattern>& scrollableNode);
+
+    ScrollableNodeInfo& GetScrollableNodeInfo()
+    {
+        return scorllableNode_;
+    }
+
+    bool IsNestScroller() const;
+
+    void MarkScrollBarDirty() const;
 private:
     /*
      * Drag the built-in or external scroll bar to slide the Scroll.
      * When the sliding stops and the fingers are not raised, prevent scrolling to the limit point
      */
     bool scrollSnapTrigger_ = false;
-    std::list<ScrollableNodeInfo> scrollableNodes_;  // Scrollable nodes, like list, grid, scroll, etc.
+    ScrollableNodeInfo scorllableNode_; // Scrollable node, like list, grid, scroll, etc.
+    std::list<ScrollableNodeInfo> nestScrollableNodes_; // Scrollable nodes, like scroll.
     std::list<WeakPtr<ScrollBarPattern>> scrollBars_; // ScrollBar should effect with scrollable node.
+    float lastControlDistance_ = 0.f;
+    float lastScrollableNodeOffset_ = 0.f;
 };
 
 } // namespace OHOS::Ace::NG

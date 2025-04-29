@@ -31,6 +31,8 @@ public:
     ~SvgFilter() override = default;
     static RefPtr<SvgNode> Create();
     bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
+    void OnFilterEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext,
+        float useOffsetX, float useOffsetY) override;
 
 protected:
     void OnInitStyle() override;
@@ -41,11 +43,7 @@ protected:
     void OnAsPaint();
 
 private:
-#ifndef USE_ROSEN_DRAWING
-    SkPaint filterPaint_;
-#else
     RSBrush filterBrush_;
-#endif
     SvgFilterAttribute filterAttr_;
 };
 

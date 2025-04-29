@@ -15,9 +15,6 @@
 
 #include "ui_service_proxy.h"
 
-#include "message_parcel.h"
-#include "want.h"
-
 #include "ui_service_hilog.h"
 
 namespace OHOS {

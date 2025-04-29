@@ -21,7 +21,7 @@
 #include "base/utils/macros.h"
 
 namespace OHOS::Ace {
-class ACE_EXPORT RecycleViewModel {
+class ACE_FORCE_EXPORT RecycleViewModel {
 public:
     static RecycleViewModel* GetInstance();
     virtual ~RecycleViewModel() = default;
@@ -29,6 +29,7 @@ public:
     virtual void Create() = 0;
 private:
     static std::unique_ptr<RecycleViewModel> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 

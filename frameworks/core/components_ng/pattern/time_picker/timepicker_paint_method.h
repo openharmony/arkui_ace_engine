@@ -23,17 +23,23 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
+#include "core/components_ng/pattern/picker_utils/picker_paint_method_utils.h"
 
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT TimePickerPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(TimePickerPaintMethod, NodePaintMethod)
+    DECLARE_ACE_TYPE(TimePickerPaintMethod, NodePaintMethod);
+
 public:
     TimePickerPaintMethod() = default;
-    ~TimePickerPaintMethod() override = default;
-
+    ~TimePickerPaintMethod() override
+    {
+        if (circleUtils_) {
+            delete circleUtils_;
+        }
+    }
+    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
-    void PaintDisable(RSCanvas& canvas, double X, double Y);
 
     void SetEnabled(bool enabled)
     {
@@ -48,6 +54,7 @@ public:
 private:
     bool enabled_ = true;
     Color backgroundColor_ = Color::WHITE;
+    PickerPaintMethodCircleUtils *circleUtils_ = NULL;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TIME_PICKER_TIME_PICKER_PAINT_METHOD_H

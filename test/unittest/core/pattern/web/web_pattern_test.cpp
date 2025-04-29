@@ -29,6 +29,7 @@ using namespace testing;
 using namespace testing::ext;
 using namespace OHOS::NWeb;
 using namespace OHOS::Ace;
+using namespace OHOS::Rosen;
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -40,10 +41,6 @@ float g_height = 0;
 
 int32_t g_editStateFlags = 0;
 
-int32_t EF_CAN_CUT = 2;
-int32_t EF_CAN_COPY = 4;
-int32_t EF_CAN_PASTE = 8;
-int32_t EF_CAN_SELECT_ALL = 16;
 int32_t CONTRNT_WIDTH_SIZE = 1024;
 int32_t CONTRNT_HEIGHT_SIZE = 99999;
 
@@ -80,44 +77,60 @@ void WebPatternTest::SetUpTestCase()
     g_webPattern->SetWebController(controller);
 #endif
 }
-void WebPatternTest::TearDownTestCase() {}
+void WebPatternTest::TearDownTestCase()
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    g_webPattern = nullptr;
+#endif
+}
+
 void WebPatternTest::SetUp() {}
 void WebPatternTest::TearDown() {}
 
 #ifdef OHOS_STANDARD_SYSTEM
 class NWebTouchHandleStateMock : public NWebTouchHandleState {
 public:
-    int32_t GetTouchHandleId() const override
+    int32_t GetTouchHandleId() override
     {
         return 0;
     }
 
-    int32_t GetX() const override
+    int32_t GetX() override
     {
         return 0;
     }
 
-    int32_t GetY() const override
+    int32_t GetY() override
     {
         return g_Y;
     }
 
-    TouchHandleType GetTouchHandleType() const override
+    int32_t GetViewPortX() override
+    {
+        return 0;
+    }
+
+    int32_t GetViewPortY() override
+    {
+        return 0;
+    }
+
+    TouchHandleType GetTouchHandleType() override
     {
         return TouchHandleType::INSERT_HANDLE;
     }
 
-    bool IsEnable() const override
+    bool IsEnable() override
     {
         return g_isEnable;
     }
 
-    float GetAlpha() const override
+    float GetAlpha() override
     {
         return g_alpha;
     }
 
-    float GetEdgeHeight() const override
+    float GetEdgeHeight() override
     {
         return g_height;
     }
@@ -150,6 +163,25 @@ public:
         return g_editStateFlags;
     }
 
+    int32_t GetSelectX() override
+    {
+        return 0;
+    }
+    int32_t GetSelectY() override
+    {
+        return 0;
+    }
+
+    int32_t GetSelectWidth() override
+    {
+        return 0;
+    }
+
+    int32_t GetSelectXHeight() override
+    {
+        return 0;
+    }
+
     std::shared_ptr<NWebTouchHandleState> GetTouchHandleState(NWebTouchHandleState::TouchHandleType type) override
     {
         if (type == NWebTouchHandleState::TouchHandleType::INSERT_HANDLE) {
@@ -158,6 +190,11 @@ public:
             return g_startSelectionHandle;
         }
         return g_endSelectionHandle;
+    }
+
+    bool GetIsLongPressActived() override
+    {
+        return false;
     }
 };
 
@@ -192,37 +229,10 @@ HWTEST_F(WebPatternTest, OnModifyDoneTest001, TestSize.Level1)
     EXPECT_FALSE(result);
     keyboard = 1;
     result = g_webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
     g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_HIDE;
     result = g_webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
-    EXPECT_TRUE(result);
-    g_webPattern->UpdateWebLayoutSize(width, height, false);
-    TouchEventInfo info("test");
-    info.changedTouches_.clear();
-    g_webPattern->touchEvent_->callback_(info);
-    TouchLocationInfo touch(1);
-    info.changedTouches_.emplace_back(touch);
-    g_webPattern->touchEvent_->callback_(info);
-    info.SetSourceDevice(SourceType::NONE);
-    g_webPattern->touchEvent_->callback_(info);
-    info.SetSourceDevice(SourceType::TOUCH);
-    g_webPattern->touchEvent_->callback_(info);
-    touch.SetTouchType(TouchType::DOWN);
-    info.changedTouches_.clear();
-    info.changedTouches_.emplace_back(touch);
-    g_webPattern->touchEvent_->callback_(info);
-    touch.SetTouchType(TouchType::MOVE);
-    info.changedTouches_.clear();
-    info.changedTouches_.emplace_back(touch);
-    g_webPattern->touchEvent_->callback_(info);
-    touch.SetTouchType(TouchType::UP);
-    info.changedTouches_.clear();
-    info.changedTouches_.emplace_back(touch);
-    g_webPattern->touchEvent_->callback_(info);
-    touch.SetTouchType(TouchType::CANCEL);
-    info.changedTouches_.clear();
-    info.changedTouches_.emplace_back(touch);
-    g_webPattern->touchEvent_->callback_(info);
+    EXPECT_FALSE(result);
 #endif
 }
 
@@ -244,7 +254,7 @@ HWTEST_F(WebPatternTest, HandleTouchDownTest002, TestSize.Level1)
     auto drawSize = Size(CONTRNT_WIDTH_SIZE, CONTRNT_HEIGHT_SIZE);
     g_webPattern->drawSizeCache_ = drawSize;
     bool result = g_webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
     TouchLocationInfo info("webtest", fingerId);
     TouchEventInfo event("webtest");
     g_webPattern->HandleTouchUp(event, true);
@@ -262,167 +272,6 @@ HWTEST_F(WebPatternTest, HandleTouchDownTest002, TestSize.Level1)
     g_webPattern->ExitFullScreen();
     g_webPattern->isFullScreen_ = true;
     g_webPattern->ExitFullScreen();
-#endif
-}
-
-/**
- * @tc.name: IsTouchHandleValid003
- * @tc.desc: Test IsTouchHandleValid.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTest, IsTouchHandleValid003, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle = nullptr;
-    bool result = g_webPattern->IsTouchHandleValid(handle);
-    EXPECT_FALSE(result);
-    result = g_webPattern->IsTouchHandleShow(handle);
-    EXPECT_FALSE(result);
-    handle = std::make_shared<NWebTouchHandleStateMock>();
-    result = g_webPattern->IsTouchHandleValid(handle);
-    EXPECT_FALSE(result);
-    g_isEnable = true;
-    result = g_webPattern->IsTouchHandleValid(handle);
-    EXPECT_TRUE(result);
-
-    result = g_webPattern->IsTouchHandleShow(handle);
-    EXPECT_FALSE(result);
-    g_alpha = 1;
-    result = g_webPattern->IsTouchHandleShow(handle);
-    EXPECT_FALSE(result);
-    g_Y = 0;
-    g_height = 1;
-    result = g_webPattern->IsTouchHandleShow(handle);
-    EXPECT_FALSE(result);
-#endif
-}
-
-/**
- * @tc.name: GetTouchHandleOverlayTypeTest004
- * @tc.desc: Test GetTouchHandleOverlayType.
- * @tc.type: FUNC
- */
-
-HWTEST_F(WebPatternTest, GetTouchHandleOverlayTypeTest004, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    std::shared_ptr<NWebQuickMenuParams> params = std::make_shared<NWebQuickMenuParamsMock>();
-    std::shared_ptr<NWebQuickMenuCallback> callback = std::make_shared<NWebQuickMenuCallbackMock>();
-    bool result = g_webPattern->RunQuickMenu(params, callback);
-    EXPECT_FALSE(result);
-
-    g_insertHandle = std::make_shared<NWebTouchHandleStateMock>();
-    result = g_webPattern->RunQuickMenu(params, callback);
-    EXPECT_FALSE(result);
-
-    g_endSelectionHandle = std::make_shared<NWebTouchHandleStateMock>();
-    result = g_webPattern->RunQuickMenu(params, callback);
-    EXPECT_FALSE(result);
-
-    g_startSelectionHandle = std::make_shared<NWebTouchHandleStateMock>();
-    result = g_webPattern->RunQuickMenu(params, callback);
-    EXPECT_FALSE(result);
-
-    int32_t selectOverlayId = 1;
-    g_webPattern->selectOverlayProxy_ = new SelectOverlayProxy(selectOverlayId);
-    result = g_webPattern->RunQuickMenu(params, callback);
-    EXPECT_FALSE(result);
-    g_webPattern->selectOverlayProxy_->Close();
-    g_webPattern->selectOverlayProxy_ = nullptr;
-
-    g_insertHandle.reset();
-    g_insertHandle = nullptr;
-    result = g_webPattern->RunQuickMenu(params, callback);
-    EXPECT_FALSE(result);
-
-    g_endSelectionHandle.reset();
-    g_endSelectionHandle = nullptr;
-    result = g_webPattern->RunQuickMenu(params, callback);
-    EXPECT_FALSE(result);
-#endif
-}
-
-/**
- * @tc.name: RegisterSelectOverlayCallbackTest005
- * @tc.desc: Test RegisterSelectOverlayCallback.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTest, RegisterSelectOverlayCallbackTest005, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    g_webPattern->GetCoordinatePoint();
-    std::shared_ptr<NWebTouchHandleState> touchHandle = std::make_shared<NWebTouchHandleStateMock>();
-    g_webPattern->ComputeTouchHandleRect(touchHandle);
-    g_Y = -1;
-    g_webPattern->ComputeTouchHandleRect(touchHandle);
-
-    std::shared_ptr<NWebQuickMenuParams> params = std::make_shared<NWebQuickMenuParamsMock>();
-    std::shared_ptr<NWebQuickMenuCallback> callback = std::make_shared<NWebQuickMenuCallbackMock>();
-    SelectOverlayInfo selectInfo;
-    g_webPattern->RegisterSelectOverlayCallback(selectInfo, params, callback);
-    g_editStateFlags = EF_CAN_CUT;
-    g_webPattern->RegisterSelectOverlayCallback(selectInfo, params, callback);
-    g_editStateFlags = EF_CAN_COPY;
-    g_webPattern->RegisterSelectOverlayCallback(selectInfo, params, callback);
-    g_editStateFlags = EF_CAN_PASTE;
-    g_webPattern->RegisterSelectOverlayCallback(selectInfo, params, callback);
-    g_editStateFlags = EF_CAN_SELECT_ALL;
-    g_webPattern->RegisterSelectOverlayCallback(selectInfo, params, callback);
-#endif
-}
-
-/**
- * @tc.name: OnTouchSelectionChangedTest006
- * @tc.desc: Test OnTouchSelectionChanged.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTest, OnTouchSelectionChangedTest006, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    g_webPattern->OnTouchSelectionChanged(g_insertHandle, g_startSelectionHandle, g_endSelectionHandle);
-    g_endSelectionHandle = std::make_shared<NWebTouchHandleStateMock>();
-    g_webPattern->OnTouchSelectionChanged(g_insertHandle, g_startSelectionHandle, g_endSelectionHandle);
-
-    g_insertHandle = std::make_shared<NWebTouchHandleStateMock>();
-    g_startSelectionHandle.reset();
-    g_startSelectionHandle = nullptr;
-    g_endSelectionHandle.reset();
-    g_endSelectionHandle = nullptr;
-    g_webPattern->OnTouchSelectionChanged(g_insertHandle, g_startSelectionHandle, g_endSelectionHandle);
-    g_webPattern->OnTouchSelectionChanged(g_insertHandle, g_startSelectionHandle, g_endSelectionHandle);
-    g_insertHandle.reset();
-    g_insertHandle = nullptr;
-    g_endSelectionHandle = std::make_shared<NWebTouchHandleStateMock>();
-    g_startSelectionHandle = std::make_shared<NWebTouchHandleStateMock>();
-    g_webPattern->OnTouchSelectionChanged(g_insertHandle, g_startSelectionHandle, g_endSelectionHandle);
-#endif
-}
-
-/**
- * @tc.name: UpdateTouchHandleForOverlayTest007
- * @tc.desc: Test UpdateTouchHandleForOverlay.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTest, UpdateTouchHandleForOverlayTest007, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    g_webPattern->insertHandle_ = std::make_shared<NWebTouchHandleStateMock>();
-    g_webPattern->startSelectionHandle_.reset();
-    g_webPattern->endSelectionHandle_.reset();
-    g_webPattern->UpdateTouchHandleForOverlay();
-
-    int32_t selectOverlayId = 1;
-    g_webPattern->selectOverlayProxy_ = new SelectOverlayProxy(selectOverlayId);
-    g_webPattern->UpdateTouchHandleForOverlay();
-    g_webPattern->insertHandle_.reset();
-    g_webPattern->startSelectionHandle_ = std::make_shared<NWebTouchHandleStateMock>();
-    g_webPattern->endSelectionHandle_ = std::make_shared<NWebTouchHandleStateMock>();
-    g_webPattern->UpdateTouchHandleForOverlay();
-
-    g_webPattern->startSelectionHandle_.reset();
-    g_webPattern->endSelectionHandle_.reset();
-    g_webPattern->UpdateTouchHandleForOverlay();
-    g_webPattern->UpdateLocale();
 #endif
 }
 
@@ -472,10 +321,6 @@ HWTEST_F(WebPatternTest, OnOverviewUpdateTest008, TestSize.Level1)
     webPattern->isW3cDragEvent_ = false;
     result = webPattern->GenerateDragDropInfo(dragDropInfo);
     EXPECT_FALSE(result);
-    g_webPattern->RegistVirtualKeyBoardListener();
-    g_webPattern->needUpdateWeb_ = false;
-    g_webPattern->RegistVirtualKeyBoardListener();
-    g_webPattern->OnQuickMenuDismissed();
 #endif
 }
 
@@ -491,9 +336,9 @@ HWTEST_F(WebPatternTest, HandleDoubleClickEventTest009, TestSize.Level1)
     info.SetButton(MouseButton::LEFT_BUTTON);
     info.SetAction(MouseAction::NONE);
     std::queue<MouseClickInfo> empty;
-    swap(empty, g_webPattern->doubleClickQueue_);
+    swap(empty, g_webPattern->mouseClickQueue_);
     g_webPattern->HandleDoubleClickEvent(info);
-    g_webPattern->HandleDoubleClickEvent(info);
+    EXPECT_FALSE(g_webPattern->HandleDoubleClickEvent(info));
 #endif
 }
 
@@ -516,7 +361,8 @@ HWTEST_F(WebPatternTest, HandleDragUpdateTest010, TestSize.Level1)
     g_webPattern->HandleDragCancel();
     g_webPattern->HandleDragEnd(x, y);
     g_webPattern->needUpdateWeb_ = false;
-    g_webPattern->RegistVirtualKeyBoardListener();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    g_webPattern->RegistVirtualKeyBoardListener(pipelineContext);
 
     RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
     RefPtr<WebPattern> webPattern = AceType::MakeRefPtr<WebPattern>("test", controller);
@@ -545,6 +391,7 @@ HWTEST_F(WebPatternTest, OnWindowShowTest011, TestSize.Level1)
     g_webPattern->isWindowShow_ = false;
     g_webPattern->OnWindowHide();
     g_webPattern->OnWindowShow();
+    EXPECT_TRUE(g_webPattern->isWindowShow_);
 
     g_webPattern->isActive_ = true;
     g_webPattern->OnActive();
@@ -552,6 +399,7 @@ HWTEST_F(WebPatternTest, OnWindowShowTest011, TestSize.Level1)
     g_webPattern->isActive_ = false;
     g_webPattern->OnInActive();
     g_webPattern->OnActive();
+    EXPECT_TRUE(g_webPattern->isActive_);
 
     g_webPattern->OnVisibleChange(false);
     g_webPattern->OnVisibleChange(true);

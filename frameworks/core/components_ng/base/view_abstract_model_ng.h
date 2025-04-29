@@ -34,17 +34,20 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+namespace OHOS::Ace {
+class SpanString;
+}
 namespace OHOS::Ace::NG {
-class ACE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
+class ACE_FORCE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
 public:
     ~ViewAbstractModelNG() override = default;
 
@@ -130,6 +133,11 @@ public:
         ViewAbstract::SetBackgroundImageRepeat(imageRepeat);
     }
 
+    void SetBackgroundImageSyncMode(bool syncMode) override
+    {
+        ViewAbstract::SetBackgroundImageSyncMode(syncMode);
+    }
+
     void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) override
     {
         ViewAbstract::SetBackgroundImageSize(bgImgSize);
@@ -140,14 +148,14 @@ public:
         ViewAbstract::SetBackgroundImagePosition(bgImgPosition);
     }
 
-    void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) override
+    void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions) override
     {
-        ViewAbstract::SetBackgroundBlurStyle(bgBlurStyle);
+        ViewAbstract::SetBackgroundBlurStyle(bgBlurStyle, sysOptions);
     }
 
-    void SetBackgroundEffect(const EffectOption& effectOption) override
+    void SetBackgroundEffect(const EffectOption& effectOption, const SysOptions& sysOptions) override
     {
-        ViewAbstract::SetBackgroundEffect(effectOption);
+        ViewAbstract::SetBackgroundEffect(effectOption, sysOptions);
     }
 
     void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice) override
@@ -155,9 +163,9 @@ public:
         ViewAbstract::SetBackgroundImageResizableSlice(slice);
     }
 
-    void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) override
+    void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle, const SysOptions& sysOptions) override
     {
-        ViewAbstract::SetForegroundBlurStyle(fgBlurStyle);
+        ViewAbstract::SetForegroundBlurStyle(fgBlurStyle, sysOptions);
     }
 
     void SetSphericalEffect(double radio) override
@@ -235,6 +243,11 @@ public:
             // padding must great or equal zero.
             ViewAbstract::SetSafeAreaPadding(NG::CalcLength(value.IsNonNegative() ? value : CalcDimension()));
         }
+    }
+
+    void SetSafeAreaPaddings(const NG::PaddingProperty& paddings) override
+    {
+        ViewAbstract::SetSafeAreaPadding(paddings);
     }
 
     void SetSafeAreaPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
@@ -498,7 +511,8 @@ public:
     {
         CHECK_NULL_VOID(borderImage);
         if (bitset & BorderImage::SOURCE_BIT) {
-            ViewAbstract::SetBorderImageSource(borderImage->GetSrc());
+            ViewAbstract::SetBorderImageSource(
+                borderImage->GetSrc(), borderImage->GetBundleName(), borderImage->GetModuleName());
         }
         if (bitset & BorderImage::OUTSET_BIT) {
             ViewAbstract::SetHasBorderImageOutset(true);
@@ -527,7 +541,12 @@ public:
         ViewAbstract::SetLayoutWeight(value);
     }
 
-    void SetPixelRound(uint8_t value) override
+    void SetChainWeight(const ChainWeightPair& value) override
+    {
+        ViewAbstract::SetChainWeight(value);
+    }
+
+    void SetPixelRound(uint16_t value) override
     {
         ViewAbstract::SetPixelRound(value);
     }
@@ -775,9 +794,9 @@ public:
         ViewAbstract::SetProgressMask(progress);
     }
 
-    void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption) override
+    void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override
     {
-        ViewAbstract::SetBackdropBlur(radius, blurOption);
+        ViewAbstract::SetBackdropBlur(radius, blurOption, sysOptions);
     }
 
     void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) override
@@ -804,9 +823,14 @@ public:
         ViewAbstract::SetFgDynamicBrightness(brightnessOption);
     }
 
-    void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) override
+    void SetBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender) override
     {
-        ViewAbstract::SetFrontBlur(radius, blurOption);
+        ViewAbstract::SetBrightnessBlender(brightnessBlender);
+    }
+
+    void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override
+    {
+        ViewAbstract::SetFrontBlur(radius, blurOption, sysOptions);
     }
 
     void SetMotionBlur(const MotionBlurOption& motionBlurOption) override
@@ -878,9 +902,9 @@ public:
         ViewAbstract::SetHueRotate(value);
     }
 
-    void SetUseEffect(bool useEffect) override
+    void SetUseEffect(bool useEffect, EffectType effectType) override
     {
-        ViewAbstract::SetUseEffect(useEffect);
+        ViewAbstract::SetUseEffect(useEffect, effectType);
     }
 
     void SetUseShadowBatching(bool useShadowBatching) override
@@ -919,9 +943,10 @@ public:
         ViewAbstract::SetShouldBuiltInRecognizerParallelWith(std::move(shouldBuiltInRecognizerParallelWithFunc));
     }
 
-    void SetOnGestureRecognizerJudgeBegin(NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) override
+    void SetOnGestureRecognizerJudgeBegin(
+        NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) override
     {
-        ViewAbstract::SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
+        ViewAbstract::SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc), exposeInnerGestureFlag);
     }
 
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override
@@ -929,23 +954,34 @@ public:
         ViewAbstract::SetOnTouch(std::move(touchEventFunc));
     }
 
-    void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) override
+    void SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback) override
     {
         ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback));
     }
 
-    void SetOnKeyPreIme(OnKeyPreImeFunc&& onKeyCallback) override
+#ifdef SUPPORT_DIGITAL_CROWN
+    void SetOnCrownEvent(OnCrownCallbackFunc&& onCrownCallback) override
+    {
+        ViewAbstract::SetOnCrownEvent(std::move(onCrownCallback));
+    }
+#endif
+    void SetOnKeyPreIme(OnKeyConsumeFunc&& onKeyCallback) override
     {
         auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
         CHECK_NULL_VOID(focusHub);
-        focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
+        focusHub->SetOnKeyPreIme(std::move(onKeyCallback));
     }
 
-    static void SetOnKeyPreIme(FrameNode* frameNode, OnKeyPreImeFunc&& onKeyCallback)
+    void SetOnKeyEventDispatch(OnKeyEventDispatchFunc&& onKeyCallback) override
+    {
+        ViewAbstract::SetOnKeyEventDispatch(std::move(onKeyCallback));
+    }
+
+    static void SetOnKeyPreIme(FrameNode* frameNode, OnKeyConsumeFunc&& onKeyCallback)
     {
         auto focusHub = frameNode->GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
-        focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
+        focusHub->SetOnKeyPreIme(std::move(onKeyCallback));
     }
 
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override
@@ -953,9 +989,19 @@ public:
         ViewAbstract::SetOnMouse(std::move(onMouseEventFunc));
     }
 
+    void SetOnAxisEvent(OnAxisEventFunc&& onAxisEventFunc) override
+    {
+        ViewAbstract::SetOnAxisEvent(std::move(onAxisEventFunc));
+    }
+
     void SetOnHover(OnHoverFunc&& onHoverEventFunc) override
     {
         ViewAbstract::SetOnHover(std::move(onHoverEventFunc));
+    }
+
+    void SetOnHoverMove(OnHoverMoveFunc&& onHoverMoveEventFunc) override
+    {
+        ViewAbstract::SetOnHoverMove(std::move(onHoverMoveEventFunc));
     }
 
     void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) override
@@ -999,6 +1045,11 @@ public:
     void SetOnBlur(OnBlurFunc&& onBlurCallback) override
     {
         ViewAbstract::SetOnBlur(std::move(onBlurCallback));
+    }
+
+    void SetOnFocusAxisEvent(OnFocusAxisEventFunc&& onFocusAxisCallback) override
+    {
+        ViewAbstract::SetOnFocusAxisEvent(std::move(onFocusAxisCallback));
     }
 
     void SetDraggable(bool draggable) override
@@ -1085,6 +1136,12 @@ public:
         ViewAbstract::SetOnVisibleChange(std::move(onVisibleChange), ratios);
     }
 
+    void SetOnVisibleAreaApproximateChange(const std::function<void(bool, double)>&& onVisibleChange,
+        const std::vector<double>& ratioList, int32_t expectedUpdateInterval) override
+    {
+        ViewAbstract::SetOnVisibleAreaApproximateChange(std::move(onVisibleChange), ratioList, expectedUpdateInterval);
+    }
+
     void SetOnAreaChanged(
         std::function<void(const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)>&&
             onAreaChanged) override
@@ -1144,11 +1201,26 @@ public:
         ViewAbstract::SetFocusable(focusable);
     }
 
+    void SetTabStop(bool tabStop) override
+    {
+        ViewAbstract::SetTabStop(tabStop);
+    }
+
     void SetFocusNode(bool focus) override {}
 
     void SetTabIndex(int32_t index) override
     {
         ViewAbstract::SetTabIndex(index);
+    }
+
+    void SetNextFocus(NG::FocusIntension key, std::string& nextFocus) override
+    {
+        ViewAbstract::SetNextFocus(key, nextFocus);
+    }
+
+    void ResetNextFocus() override
+    {
+        ViewAbstract::ResetNextFocus();
     }
 
     void SetFocusOnTouch(bool isSet) override
@@ -1227,6 +1299,30 @@ public:
         ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
     }
 
+    void BindTips(const RefPtr<PopupParam>& param, const RefPtr<OHOS::Ace::SpanString>& spanString) override
+    {
+        auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        ViewAbstract::BindTips(param, AceType::Claim(targetNode), spanString);
+    }
+
+    int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) override
+    {
+        return ViewAbstract::OpenPopup(param, customNode);
+    }
+    int32_t UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode) override
+    {
+        return ViewAbstract::UpdatePopup(param, customNode);
+    }
+    int32_t ClosePopup(const RefPtr<UINode>& customNode) override
+    {
+        return ViewAbstract::ClosePopup(customNode);
+    }
+
+    int32_t GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) override
+    {
+        return ViewAbstract::GetPopupParam(param, customNode);
+    }
+
     void DismissDialog() override
     {
         ViewAbstract::DismissDialog();
@@ -1237,10 +1333,27 @@ public:
         ViewAbstract::DismissPopup();
     }
 
+    void SetToolbarBuilder(std::function<void()>&& buildFunc) override;
+
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
+
+    int32_t OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId) override
+    {
+        return ViewAbstract::OpenMenu(menuParam, customNode, targetId);
+    }
+    int32_t UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode) override
+    {
+        return ViewAbstract::UpdateMenu(menuParam, customNode);
+    }
+    int32_t CloseMenu(const RefPtr<UINode>& customNode) override
+    {
+        return ViewAbstract::CloseMenu(customNode);
+    }
 
     void BindMenuGesture(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam);
+
+    void BindMenuTouch(FrameNode* targetNode, const RefPtr<GestureEventHub>& gestrueHub);
 
     void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam) override;
@@ -1252,6 +1365,8 @@ public:
         const NG::MenuParam& menuParam, std::function<void()>& previewBuildFunc) override;
 
     void BindDragWithContextMenuParams(const NG::MenuParam& menuParam) override;
+
+    void BindDragWithContextMenuParams(FrameNode* targetNode, const NG::MenuParam& menuParam) override;
 
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
@@ -1272,12 +1387,30 @@ public:
     void DismissContentCover() override;
     void SheetSpringBack() override;
 
+    void NotifyDragStartRequest(DragStartRequestStatus dragStatus) override
+    {
+        ViewAbstract::NotifyDragStartRequest(dragStatus);
+    }
+
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;
     void SetAccessibilityTextHint(const std::string& text) override;
     void SetAccessibilityDescription(const std::string& description) override;
     void SetAccessibilityImportance(const std::string& importance) override;
     void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) override;
+    void SetAccessibilitySelected(bool selected, bool resetValue) override;
+    void SetAccessibilityChecked(bool checked, bool resetValue) override;
+    void SetAccessibilityRole(const std::string& role, bool resetValue) override;
+    void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) override;
+    void SetOnAccessibilityActionIntercept(
+        NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept) override;
+    void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) override;
+    void SetAccessibilityNextFocusId(const std::string& nextFocusId) override;
+    void ResetOnAccessibilityFocus() override;
+    void SetAccessibilityDefaultFocus(bool isFocus) override;
+    void SetAccessibilityUseSamePage(const std::string& pageMode) override;
+    void SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue) override;
+    void SetAccessibilityFocusDrawLevel(int32_t drawLevel) override;
 
     void SetForegroundColor(const Color& color) override
     {
@@ -1309,11 +1442,23 @@ public:
         ViewAbstract::DisableOnKeyEvent();
     }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    void DisableOnCrownEvent() override
+    {
+        ViewAbstract::DisableOnCrownEvent();
+    }
+#endif
+
     void DisableOnKeyPreIme() override
     {
         auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->ClearOnKeyPreIme();
+    }
+
+    void DisableOnKeyEventDispatch() override
+    {
+        ViewAbstract::DisableOnKeyEventDispatch();
     }
 
     static void DisableOnKeyPreIme(FrameNode* frameNode)
@@ -1328,6 +1473,11 @@ public:
         ViewAbstract::DisableOnHover();
     }
 
+    void DisableOnHoverMove() override
+    {
+        ViewAbstract::DisableOnHoverMove();
+    }
+
     void DisableOnAccessibilityHover() override
     {
         ViewAbstract::DisableOnAccessibilityHover();
@@ -1338,6 +1488,11 @@ public:
         ViewAbstract::DisableOnMouse();
     }
 
+    void DisableOnAxisEvent() override
+    {
+        ViewAbstract::DisableOnAxisEvent();
+    }
+    
     void DisableOnAppear() override
     {
         ViewAbstract::DisableOnAppear();
@@ -1371,6 +1526,18 @@ public:
     void DisableOnBlur() override
     {
         ViewAbstract::DisableOnBlur();
+    }
+
+    void DisableOnFocusAxisEvent() override
+    {
+        ViewAbstract::DisableOnFocusAxisEvent();
+    }
+
+    static void DisableOnFocusAxisEvent(FrameNode* frameNode)
+    {
+        auto focusHub = frameNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->ClearOnFocusAxisCallback();
     }
 
     static void SetAccessibilityText(FrameNode* frameNode, const std::string& text);
@@ -1411,9 +1578,19 @@ public:
         ViewAbstract::SetDragEventStrictReportingEnabled(dragEventStrictReportingEnabled);
     }
 
-    void SetFocusScopeId(const std::string& focusScopeId, bool isGroup) override
+    int32_t CancelDataLoading(const std::string& key) override
     {
-        ViewAbstract::SetFocusScopeId(focusScopeId, isGroup);
+        return ViewAbstract::CancelDataLoading(key);
+    }
+
+    void SetDisableDataPrefetch(bool disableDataPrefetch) override
+    {
+        return ViewAbstract::SetDisableDataPrefetch(disableDataPrefetch);
+    }
+
+    void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut) override
+    {
+        ViewAbstract::SetFocusScopeId(focusScopeId, isGroup, arrowKeyStepOut);
     }
 
     void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority) override
@@ -1434,6 +1611,10 @@ public:
     {
         ViewAbstract::SetBlendApplyType(frameNode, blendApplyType);
     }
+    static void SetBrightnessBlender(FrameNode* frameNode, const OHOS::Rosen::BrightnessBlender* brightnessBlender)
+    {
+        ViewAbstract::SetBrightnessBlender(brightnessBlender);
+    }
     static void SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents)
     {
         ViewAbstract::SetMonopolizeEvents(frameNode, monopolizeEvents);
@@ -1441,6 +1622,20 @@ public:
 
     static void SetAccessibilityImportance(FrameNode* frameNode, const std::string& importance);
     static void SetAccessibilityDescription(FrameNode* frameNode, const std::string& description);
+    static void SetAccessibilitySelected(FrameNode* frameNode, bool selected, bool resetValue);
+    static void SetAccessibilityChecked(FrameNode* frameNode, bool checked, bool resetValue);
+    static void SetAccessibilityTextPreferred(FrameNode* frameNode, bool accessibilityTextPreferred);
+    static void SetAccessibilityRole(FrameNode* frameNode, const std::string& role, bool resetValue);
+    static void SetOnAccessibilityFocus(
+        FrameNode* frameNode, NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl);
+    static void SetOnAccessibilityActionIntercept(
+        FrameNode* frameNode, NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept);
+    static void ResetOnAccessibilityFocus(FrameNode* frameNode);
+    static void SetAccessibilityNextFocusId(FrameNode* frameNode, const std::string& nextFocusId);
+    static void SetAccessibilityDefaultFocus(FrameNode* frameNode, bool isFocus);
+    static void SetAccessibilityUseSamePage(FrameNode* frameNode, const std::string& pageMode);
+    static void SetAccessibilityScrollTriggerable(FrameNode* frameNode, bool triggerable, bool resetValue);
+    static void SetAccessibilityFocusDrawLevel(FrameNode* frameNode, int32_t drawLevel);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
     {
@@ -1456,8 +1651,10 @@ public:
     static std::string GetAccessibilityText(FrameNode* frameNode);
     static std::string GetAccessibilityDescription(FrameNode* frameNode);
     static std::string GetAccessibilityImportance(FrameNode* frameNode);
+    static bool CheckSkipMenuShow(const RefPtr<FrameNode>& targetNode);
 
 private:
+    bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);
     void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
 
@@ -1494,9 +1691,14 @@ private:
         ViewAbstract::SetPositionLocalizedEdges(needLocalized);
     }
 
-    void SetLocalizedMarkAnchor(bool needLocalized) override
+    void SetMarkAnchorStart(Dimension& markAnchorStart) override
     {
-        ViewAbstract::SetLocalizedMarkAnchor(needLocalized);
+        ViewAbstract::SetMarkAnchorStart(markAnchorStart);
+    }
+
+    void ResetMarkAnchorStart() override
+    {
+        ViewAbstract::ResetMarkAnchorStart();
     }
 
     void SetOffsetLocalizedEdges(bool needLocalized) override

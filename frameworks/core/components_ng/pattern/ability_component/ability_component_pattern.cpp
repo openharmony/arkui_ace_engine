@@ -15,14 +15,11 @@
 
 #include "core/components_ng/pattern/ability_component/ability_component_pattern.h"
 
-#include "session/host/include/extension_session.h"
 #include "session_manager/include/extension_session_manager.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -42,6 +39,15 @@ AbilityComponentPattern::AbilityComponentPattern(const std::string& bundleName, 
     }
 }
 
+void AbilityComponentPattern::OnAttachToFrameNode()
+{
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+    if (!container || !container->IsSceneBoardEnabled()) {
+        return;
+    }
+    WindowPattern::OnAttachToFrameNode();
+}
+
 void AbilityComponentPattern::OnModifyDone()
 {
     auto container = Container::Current();
@@ -49,7 +55,7 @@ void AbilityComponentPattern::OnModifyDone()
         Pattern::OnModifyDone();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto hub = host->GetEventHub<EventHub>();
+        auto hub = host->GetOrCreateEventHub<EventHub>();
         CHECK_NULL_VOID(hub);
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
@@ -64,11 +70,11 @@ void AbilityComponentPattern::OnModifyDone()
     if (adapter_) {
         UpdateWindowRect();
     } else {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto windowId = pipelineContext->GetWindowId();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
+        auto pipelineContext = host->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto windowId = pipelineContext->GetWindowId();
         adapter_ = WindowExtensionConnectionProxyNG::CreateAdapter();
         CHECK_NULL_VOID(adapter_);
         if (container && container->IsSceneBoardEnabled()) {
@@ -91,7 +97,7 @@ void AbilityComponentPattern::FireConnect()
     auto pipeline = PipelineBase::GetCurrentContext();
     TransferFocusState(IsCurrentFocus());
 
-    auto abilityComponentEventHub = GetEventHub<AbilityComponentEventHub>();
+    auto abilityComponentEventHub = GetOrCreateEventHub<AbilityComponentEventHub>();
     CHECK_NULL_VOID(abilityComponentEventHub);
     abilityComponentEventHub->FireOnConnect();
 }
@@ -99,7 +105,7 @@ void AbilityComponentPattern::FireConnect()
 void AbilityComponentPattern::FireDisConnect()
 {
     hasConnectionToAbility_ = false;
-    auto abilityComponentEventHub = GetEventHub<AbilityComponentEventHub>();
+    auto abilityComponentEventHub = GetOrCreateEventHub<AbilityComponentEventHub>();
     CHECK_NULL_VOID(abilityComponentEventHub);
     abilityComponentEventHub->FireOnDisConnect();
 }
@@ -127,7 +133,7 @@ void AbilityComponentPattern::UpdateWindowRect()
     CHECK_NULL_VOID(host);
     auto size = host->GetGeometryNode()->GetFrameSize();
     auto offset = host->GetTransformRelativeOffset();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     Rect rect = pipeline->GetDisplayWindowRectInfo();
     rect = Rect(offset.GetX() + rect.Left(), offset.GetY() + rect.Top(), size.Width(), size.Height());
@@ -189,10 +195,7 @@ void AbilityComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     CHECK_NULL_VOID(pointerEvent);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto selfGlobalOffset = host->GetTransformRelativeOffset();
-    auto scale = host->GetTransformScale();
-    auto udegree = WindowPattern::CalculateTranslateDegree(host->GetId());
-    Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale, udegree);
+    Platform::CalculatePointerEvent(pointerEvent, host);
     WindowPattern::DispatchPointerEvent(pointerEvent);
     auto hub = host->GetFocusHub();
     CHECK_NULL_VOID(hub);
@@ -221,7 +224,7 @@ void AbilityComponentPattern::HandleMouseEvent(const MouseInfo& info)
 
 void AbilityComponentPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
-    focusHub->SetOnFocusInternal([weak = WeakClaim(this)]() {
+    focusHub->SetOnFocusInternal([weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleFocusEvent();
@@ -261,7 +264,10 @@ void AbilityComponentPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 
 void AbilityComponentPattern::HandleFocusEvent()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
     if (pipeline->GetIsFocusActive()) {
         WindowPattern::DisPatchFocusActiveEvent(true);
     }
@@ -284,7 +290,9 @@ bool AbilityComponentPattern::KeyEventConsumed(const KeyEvent& event)
 bool AbilityComponentPattern::OnKeyEvent(const KeyEvent& event)
 {
     if (event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto pipeline = host->GetContext();
         CHECK_NULL_RETURN(pipeline, false);
         // tab trigger consume the key event
         return pipeline->IsTabJustTriggerOnKeyEvent();

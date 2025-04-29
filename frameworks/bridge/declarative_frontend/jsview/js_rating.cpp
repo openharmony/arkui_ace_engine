@@ -22,26 +22,20 @@
 
 namespace OHOS::Ace {
 
-std::unique_ptr<RatingModel> RatingModel::instance_ = nullptr;
-std::mutex RatingModel::mutex_;
-
 RatingModel* RatingModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::RatingModelNG());
+    static NG::RatingModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::RatingModelNG());
-            } else {
-                instance_.reset(new Framework::RatingModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::RatingModelNG instance;
+        return &instance;
+    } else {
+        static Framework::RatingModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 
 } // namespace OHOS::Ace
@@ -79,15 +73,18 @@ void JSRating::Create(const JSCallbackInfo& info)
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
         auto getRating = paramObject->GetProperty("rating");
         auto getIndicator = paramObject->GetProperty("indicator");
-        if (getRating->IsNumber()) {
-            rating = getRating->ToNumber<double>();
-        } else if (getRating->IsObject()) {
+        if (getRating->IsObject()) {
             JSRef<JSObject> ratingObj = JSRef<JSObject>::Cast(getRating);
             changeEventVal = ratingObj->GetProperty("changeEvent");
             auto ratingValue = ratingObj->GetProperty("value");
             if (ratingValue->IsNumber()) {
                 rating = ratingValue->ToNumber<double>();
             }
+        } else if (paramObject->HasProperty("$rating")) {
+            changeEventVal = paramObject->GetProperty("$rating");
+            rating = getRating->ToNumber<double>();
+        } else if (getRating->IsNumber()) {
+            rating = getRating->ToNumber<double>();
         }
         if (rating < 0) {
             rating = RATING_SCORE_DEFAULT;
@@ -187,7 +184,7 @@ void JSRating::SetOnChange(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Rating.onChange");
         PipelineContext::SetCallBackNode(node);
-        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(stod(value)));
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(StringToDouble(value)));
         func->ExecuteJS(1, &newJSVal);
     };
 

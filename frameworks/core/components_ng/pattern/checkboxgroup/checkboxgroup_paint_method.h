@@ -44,6 +44,7 @@ public:
         CHECK_NULL_VOID(checkboxGroupModifier_);
         CHECK_NULL_VOID(paintWrapper);
         auto paintProperty = DynamicCast<CheckBoxGroupPaintProperty>(paintWrapper->GetPaintProperty());
+        CHECK_NULL_VOID(paintProperty);
         auto size = paintWrapper->GetContentSize();
         auto offset = paintWrapper->GetContentOffset();
         float strokePaintSize = size.Width();
@@ -76,7 +77,9 @@ public:
         checkboxGroupModifier_->UpdateAnimatableProperty();
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto checkboxTheme = pipeline->GetTheme<CheckboxTheme>();
+        auto host = paintWrapper->GetRenderContext() ? paintWrapper->GetRenderContext()->GetHost() : nullptr;
+        auto checkboxTheme = pipeline->GetTheme<CheckboxTheme>(host ? host->GetThemeScopeId() : 0);
+        CHECK_NULL_VOID(checkboxTheme);
         auto horizontalPadding = checkboxTheme->GetHotZoneHorizontalPadding().ConvertToPx();
         auto verticalPadding = checkboxTheme->GetHotZoneVerticalPadding().ConvertToPx();
         float boundsRectOriginX = offset.GetX() - horizontalPadding;
@@ -112,7 +115,7 @@ public:
     {
         auto host = checkBoxgroupPaintProperty->GetHost();
         CHECK_NULL_VOID(host);
-        auto eventHub = host->GetEventHub<EventHub>();
+        auto eventHub = host->GetOrCreateEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         auto inputEventHub = eventHub->GetInputEventHub();
         HoverEffectType hoverEffectType = HoverEffectType::AUTO;

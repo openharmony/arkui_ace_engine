@@ -67,8 +67,10 @@ bool JSSaveButton::ParseComponentStyle(const JSCallbackInfo& info,
     value = paramObject->GetProperty("buttonType");
     if (value->IsNumber()) {
         bg = value->ToNumber<int32_t>();
-        if ((bg < static_cast<int32_t>(ButtonType::NORMAL)) ||
-            (bg > static_cast<int32_t>(ButtonType::CIRCLE))) {
+        if ((bg != static_cast<int32_t>(ButtonType::NORMAL)) &&
+            (bg != static_cast<int32_t>(ButtonType::CIRCLE)) &&
+            (bg != static_cast<int32_t>(ButtonType::CAPSULE)) &&
+            (bg != static_cast<int32_t>(ButtonType::ROUNDED_RECTANGLE))) {
             return false;
         }
     } else {
@@ -111,20 +113,28 @@ void JsSaveButtonClickFunction::Execute(GestureEvent& info)
     clickEventParam->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     auto target = CreateEventTargetObject(info);
     clickEventParam->SetPropertyObject("target", target);
+    clickEventParam->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
 
     int32_t res = static_cast<int32_t>(SecurityComponentHandleResult::CLICK_GRANT_FAILED);
+    JSRef<JSObject> errorMessage = JSRef<JSObject>::New();
 #ifdef SECURITY_COMPONENT_ENABLE
     auto secEventValue = info.GetSecCompHandleEvent();
     if (secEventValue != nullptr) {
         res = secEventValue->GetInt("handleRes", res);
+        int32_t code = static_cast<int32_t>(SecurityComponentErrorCode::SUCCESS);
+        std::string message;
         if (res == static_cast<int32_t>(SecurityComponentHandleResult::DROP_CLICK)) {
             return;
         }
+        code = secEventValue->GetInt("code", code);
+        errorMessage->SetProperty<int32_t>("code", code);
+        message = secEventValue->GetString("message", message);
+        errorMessage->SetProperty<std::string>("message", message);
     }
 #endif
     JSRef<JSVal> errorParam = JSRef<JSVal>::Make(ToJSValue(res));
-    JSRef<JSVal> params[] = { clickEventParam, errorParam };
-    JsFunction::ExecuteJS(2, params);
+    JSRef<JSVal> params[] = { clickEventParam, errorParam, errorMessage };
+    JsFunction::ExecuteJS(3, params); // 3 means three params.
 }
 
 void JSSaveButton::JsOnClick(const JSCallbackInfo& info)
@@ -143,7 +153,12 @@ void JSSaveButton::JsOnClick(const JSCallbackInfo& info)
 #endif
     };
 
-    NG::ViewAbstract::SetOnClick(std::move(onTap));
+    double distanceThreshold = std::numeric_limits<double>::infinity();
+    if (info.Length() > 1 && info[1]->IsNumber()) {
+        distanceThreshold = info[1]->ToNumber<double>();
+        distanceThreshold = Dimension(distanceThreshold, DimensionUnit::VP).ConvertToPx();
+    }
+    NG::ViewAbstract::SetOnClick(std::move(onTap), distanceThreshold);
 }
 
 void JSSaveButton::JSBind(BindingTarget globalObj)
@@ -166,6 +181,7 @@ void JSSaveButton::JSBind(BindingTarget globalObj)
     JSClass<JSSaveButton>::StaticMethod("borderRadius", &JSSecButtonBase::SetBackgroundBorderRadius);
     JSClass<JSSaveButton>::StaticMethod("padding", &JSSecButtonBase::SetBackgroundPadding);
     JSClass<JSSaveButton>::StaticMethod("textIconSpace", &JSSecButtonBase::SetTextIconSpace);
+    JSClass<JSSaveButton>::StaticMethod("align", &JSSecButtonBase::SetAlign);
     JSClass<JSSaveButton>::StaticMethod("onClick", &JSSaveButton::JsOnClick);
     JSClass<JSSaveButton>::StaticMethod("key", &JSViewAbstract::JsKey);
     JSClass<JSSaveButton>::StaticMethod("position", &JSViewAbstract::JsPosition);
@@ -177,6 +193,16 @@ void JSSaveButton::JSBind(BindingTarget globalObj)
     JSClass<JSSaveButton>::StaticMethod("size", &JSViewAbstract::JsSize);
     JSClass<JSSaveButton>::StaticMethod("constraintSize", &JSViewAbstract::JsConstraintSize);
     JSClass<JSSaveButton>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
+    JSClass<JSSaveButton>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
+    JSClass<JSSaveButton>::StaticMethod("id", &JSViewAbstract::JsId);
+    JSClass<JSSaveButton>::StaticMethod("chainMode", &JSViewAbstract::JsChainMode);
+    JSClass<JSSaveButton>::StaticMethod("maxFontScale", &JSSecButtonBase::SetMaxFontScale);
+    JSClass<JSSaveButton>::StaticMethod("minFontScale", &JSSecButtonBase::SetMinFontScale);
+    JSClass<JSSaveButton>::StaticMethod("maxLines", &JSSecButtonBase::SetMaxLines);
+    JSClass<JSSaveButton>::StaticMethod("maxFontSize", &JSSecButtonBase::SetMaxFontSize);
+    JSClass<JSSaveButton>::StaticMethod("minFontSize", &JSSecButtonBase::SetMinFontSize);
+    JSClass<JSSaveButton>::StaticMethod("heightAdaptivePolicy", &JSSecButtonBase::SetHeightAdaptivePolicy);
+    JSClass<JSSaveButton>::StaticMethod("enabled", &JSViewAbstract::JsEnabled);
     JSClass<JSSaveButton>::Bind<>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

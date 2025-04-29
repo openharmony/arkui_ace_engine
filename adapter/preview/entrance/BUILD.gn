@@ -44,22 +44,27 @@ ohos_source_set("preview_entrance_source") {
       "ace_container.cpp",
       "ace_preview_helper.cpp",
       "ace_resource_register.cpp",
+      "ace_translate_manager.cpp",
       "ace_view_preview.cpp",
       "clipboard/clipboard_impl.cpp",
       "clipboard/clipboard_proxy_impl.cpp",
+      "clipboard/multiType_record_impl.cpp",
       "editing/text_input_client_mgr.cpp",
       "editing/text_input_connection_impl.cpp",
       "editing/text_input_impl.cpp",
       "event_dispatcher.cpp",
       "foldable_window_preview.cpp",
       "html/html_to_span.cpp",
+      "html/span_to_html.cpp",
       "msdp/interaction_impl.cpp",
+      "picker/picker_haptic_factory.cpp",
       "subwindow_preview.cpp",
-      "timepicker/timepicker_haptic_factory.cpp",
       "touch_event_convertor.cpp",
       "udmf/udmf_impl.cpp",
       "ui_content_impl.cpp",
+      "ui_session/ui_session_manager_preview.cpp",
       "vibrator/vibrator_utils.cpp",
+      "window_free_container.cpp",
       "xcollie/xcollieInterface_impl.cpp",
     ]
 
@@ -84,6 +89,23 @@ ohos_source_set("preview_entrance_source") {
       if (ace_use_rosen_drawing) {
         external_deps += [ "graphic_2d:2d_graphics" ]
       }
+    }
+
+    if (defined(config.enable_component_test) && config.enable_component_test &&
+        platform == "windows") {
+      sources += [
+        "$ace_root/frameworks/component_test/component_test_manager_impl.cpp",
+        "$ace_root/frameworks/component_test/component_test_proxy.cpp",
+        "$ace_root/frameworks/component_test/core/action.cpp",
+        "$ace_root/frameworks/component_test/core/combination_isscrollable.cpp",
+        "$ace_root/frameworks/component_test/core/component_test_component_impl.cpp",
+        "$ace_root/frameworks/component_test/core/component_test_matcher_impl.cpp",
+        "$ace_root/frameworks/component_test/core/component_test_tester_impl.cpp",
+        "$ace_root/frameworks/component_test/idle_watcher.cpp",
+        "$ace_root/frameworks/component_test/test_config.cpp",
+        "$ace_root/frameworks/component_test/test_result_recorder.cpp",
+        "$ace_root/frameworks/component_test/test_task_scheduler.cpp",
+      ]
     }
 
     if (!is_arkui_x) {

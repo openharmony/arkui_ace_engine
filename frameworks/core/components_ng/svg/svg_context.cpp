@@ -15,10 +15,17 @@
 
 #include "core/components_ng/svg/svg_context.h"
 
-#include "core/common/thread_checker.h"
+#include <sys/time.h>
+#include "core/components_ng/svg/base/svg_length_scale_rule.h"
 #include "core/components_ng/svg/parse/svg_node.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+#ifdef __OHOS__
+    constexpr int32_t MILLISECOND_DIVIDER = 1000;
+    constexpr int32_t TIME_LENGTH = 50;
+#endif
+}
 RefPtr<SvgNode> SvgContext::GetSvgNodeById(const std::string& id) const
 {
     auto item = idMapper_.find(id);
@@ -55,7 +62,6 @@ const AttrMap& SvgContext::GetAttrMap(const std::string& key) const
 
 void SvgContext::AddAnimator(int32_t key, const RefPtr<Animator>& animator)
 {
-    ++animatorSumCnt_;
     animators_[key] = animator;
 }
 
@@ -82,15 +88,37 @@ void SvgContext::ControlAnimators(bool play)
     }
 }
 
+void SvgContext::SetOnAnimationFinished(const std::function<void()>& onFinishCallback)
+{
+    onFinishCallbacks_.emplace_back(std::move(onFinishCallback));
+}
+
+void SvgContext::OnAnimationFinished()
+{
+    bool allDone = true;
+    for (auto it = animators_.begin(); it != animators_.end();) {
+        auto animator = it->second.Upgrade();
+        if (!animator) {
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "null animator in map");
+            continue;
+        }
+        ++it;
+        if (!animator->IsStopped()) {
+            allDone = false;
+            break;
+        }
+    }
+    if (allDone) {
+        for (const auto& callback : onFinishCallbacks_) {
+            callback();
+        }
+    }
+}
+
 void SvgContext::SetFuncAnimateFlush(FuncAnimateFlush&& funcAnimateFlush, const WeakPtr<CanvasImage>& imagePtr)
 {
     CHECK_NULL_VOID(funcAnimateFlush);
     animateCallbacks_[imagePtr] = funcAnimateFlush;
-}
-
-size_t SvgContext::GetAnimatorCount()
-{
-    return animators_.size();
 }
 
 void SvgContext::AnimateFlush()
@@ -107,9 +135,26 @@ void SvgContext::AnimateFlush()
     }
 }
 
+Rect GetBoundingRect(RefPtr<SvgNode>& boxNode, const SvgLengthScaleRule& boxMeasureRule)
+{
+    CHECK_NULL_RETURN(boxNode, Rect());
+    auto boxRect = boxNode->AsPath(boxMeasureRule).GetBounds();
+    return Rect(boxRect.GetLeft(), boxRect.GetTop(), boxRect.GetWidth(), boxRect.GetHeight());
+}
+
 void SvgContext::SetFuncNormalizeToPx(const FuncNormalizeToPx& funcNormalizeToPx)
 {
     funcNormalizeToPx_ = funcNormalizeToPx;
+}
+
+void SvgContext::CreateDumpInfo(SvgDumpInfo dumpInfo)
+{
+    dumpInfo_ = dumpInfo;
+}
+
+SvgDumpInfo& SvgContext::GetDumpInfo()
+{
+    return dumpInfo_;
 }
 
 double SvgContext::NormalizeToPx(const Dimension& value)
@@ -118,5 +163,21 @@ double SvgContext::NormalizeToPx(const Dimension& value)
         return 0.0;
     }
     return funcNormalizeToPx_(value);
+}
+
+std::string SvgContext::GetCurrentTimeString()
+{
+#ifdef __OHOS__
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    struct tm ptm;
+    localtime_noenv_r(&tv.tv_sec, &ptm);
+    char timeStr[TIME_LENGTH] = { 0 };
+    size_t charsWritten = strftime(timeStr, TIME_LENGTH, "%Y-%m-%d %H:%M:%S:", &ptm);
+    if (charsWritten > 0) {
+        return std::string(timeStr).append(std::to_string(tv.tv_usec / MILLISECOND_DIVIDER));
+    }
+#endif
+    return "";
 }
 } // namespace OHOS::Ace::NG

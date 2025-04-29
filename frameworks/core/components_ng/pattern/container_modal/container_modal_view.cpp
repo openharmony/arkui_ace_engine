@@ -20,30 +20,18 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/gestures/gesture_group.h"
 #include "core/components_ng/gestures/pan_gesture.h"
 #include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/container_modal/container_modal_utils.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/mouse_event.h"
-#include "core/image/image_source_info.h"
-#include "frameworks/bridge/common/utils/utils.h"
-
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -56,7 +44,11 @@ constexpr float CURRENT_RATIO = 0.86f;
 constexpr float CURRENT_DURATION = 0.25f;
 } // namespace
 float ContainerModalView::baseScale = 1.0f;
-RefPtr<ContainerModalPattern> ContainerModalView::containerModalPattern_;
+std::function<RefPtr<NG::FrameNode>()> ContainerModalView::customTitileBuilder_ = nullptr;
+std::function<RefPtr<NG::FrameNode>(
+    const WeakPtr<NG::ContainerModalPatternEnhance>& weakPattern, const RefPtr<NG::FrameNode>& containerTitleRow)>
+    ContainerModalView::customControlButtonBuilder_ = nullptr;
+
 /**
  * The structure of container_modal is designed as follows :
  * |--container_modal(stack)
@@ -90,7 +82,6 @@ RefPtr<FrameNode> ContainerModalView::Create(RefPtr<FrameNode>& content)
     column->AddChild(stack);
     auto containerPattern = containerModalNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_RETURN(containerPattern, nullptr);
-    containerModalPattern_ = containerPattern;
     containerModalNode->AddChild(column);
     containerModalNode->AddChild(BuildTitle(containerModalNode, true));
     containerModalNode->AddChild(AddControlButtons(controlButtonsRow));
@@ -102,7 +93,7 @@ RefPtr<FrameNode> ContainerModalView::Create(RefPtr<FrameNode>& content)
 
 RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNode, bool isFloatingTitle)
 {
-    LOGI("ContainerModalView BuildTitle called");
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "ContainerModalView BuildTitle called");
     auto customTitleContainer = BuildTitleContainer(containerNode, isFloatingTitle);
     CHECK_NULL_RETURN(customTitleContainer, nullptr);
     return customTitleContainer;
@@ -113,16 +104,31 @@ RefPtr<FrameNode> ContainerModalView::BuildTitleContainer(RefPtr<FrameNode>& con
     auto containerTitleRow = BuildTitleRow(isFloatingTitle);
     CHECK_NULL_RETURN(containerTitleRow, nullptr);
 
-    auto isSucc = ExecuteCustomTitleAbc();
-    if (!isSucc) {
-        return nullptr;
+    RefPtr<UINode> customTitleBarNode;
+    if (customTitileBuilder_) {
+        customTitleBarNode = customTitileBuilder_();
+    } else {
+        auto isSucc = ExecuteCustomTitleAbc();
+        if (!isSucc) {
+            return nullptr;
+        }
+        customTitleBarNode = NG::ViewStackProcessor::GetInstance()->GetCustomTitleNode();
     }
 
-    // get custom node
-    auto customTitleBarNode = NG::ViewStackProcessor::GetInstance()->GetCustomTitleNode();
     CHECK_NULL_RETURN(customTitleBarNode, nullptr);
-    containerTitleRow->AddChild(customTitleBarNode);
+    auto customTitleBarRow = FrameNode::CreateFrameNode(
+        V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<LinearLayoutPattern>(false));
+    customTitleBarRow->AddChild(customTitleBarNode);
+    containerTitleRow->AddChild(customTitleBarRow);
     return containerTitleRow;
+}
+
+void ContainerModalView::RegistCustomBuilder(std::function<RefPtr<NG::FrameNode>()>& title,
+    std::function<RefPtr<NG::FrameNode>(const WeakPtr<NG::ContainerModalPatternEnhance>& weakPattern,
+        const RefPtr<NG::FrameNode>& containerTitleRow)>& button)
+{
+    customTitileBuilder_ = title;
+    customControlButtonBuilder_ = button;
 }
 
 RefPtr<FrameNode> ContainerModalView::BuildTitleRow(bool isFloatingTitle)
@@ -133,7 +139,9 @@ RefPtr<FrameNode> ContainerModalView::BuildTitleRow(bool isFloatingTitle)
     if (isFloatingTitle) {
         auto renderContext = containerTitleRow->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, nullptr);
-        auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, nullptr);
+        auto theme = pipeline->GetTheme<ContainerModalTheme>();
         renderContext->UpdateBackgroundColor(theme->GetBackGroundColor(true));
     }
     return containerTitleRow;
@@ -255,6 +263,14 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
     buttonEventHub->AddGesture(clickGesture);
     buttonNode->SetDraggable(canDrag);
 
+    DimensionOffset offsetDimen(TITLE_BUTTON_RESPONSE_REGIOIN_OFFSET_X, TITLE_BUTTON_RESPONSE_REGIOIN_OFFSET_Y);
+    DimensionRect dimenRect(TITLE_BUTTON_RESPONSE_REGIOIN_WIDTH, TITLE_BUTTON_RESPONSE_REGIOIN_HEIGHT, offsetDimen);
+    std::vector<DimensionRect> result;
+    result.emplace_back(dimenRect);
+    auto gestureHub = buttonNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, nullptr);
+    gestureHub->SetResponseRegion(result);
+
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
     buttonLayoutProperty->UpdateType(ButtonType::CIRCLE);
@@ -368,15 +384,19 @@ void ContainerModalView::AddButtonStyleMouseEvent(
 void ContainerModalView::AddButtonHoverEvent(
     RefPtr<InputEventHub>& inputHub, RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode, bool isCloseBtn)
 {
-    auto task = [buttonWk = WeakClaim(RawPtr(buttonNode)), imageWk = WeakClaim(RawPtr(imageNode)),
-                    containerModalPatternWK = WeakClaim(RawPtr(containerModalPattern_)), isCloseBtn](bool isHover) {
-        auto containerModalPattern = containerModalPatternWK.Upgrade();
-        CHECK_NULL_VOID(containerModalPattern);
-        bool isFocus = containerModalPattern->GetIsFocus() || containerModalPattern->GetIsHoveredMenu();
+    auto task = [buttonWk = WeakClaim(RawPtr(buttonNode)), imageWk = WeakClaim(RawPtr(imageNode)), isCloseBtn](
+                    bool isHover) {
         auto buttonNode = buttonWk.Upgrade();
         CHECK_NULL_VOID(buttonNode);
         auto imageNode = imageWk.Upgrade();
         CHECK_NULL_VOID(imageNode);
+        auto pipeline = buttonNode->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        auto containerNode = AceType::DynamicCast<FrameNode>(pipeline->GetRootElement()->GetChildAtIndex(0));
+        auto containerModalPattern = containerNode->GetPattern<ContainerModalPattern>();
+        CHECK_NULL_VOID(containerModalPattern);
+        bool isFocus = containerModalPattern->GetIsFocus() || containerModalPattern->GetIsHoveredMenu();
+
         auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
         auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
         auto sourceInfo = imageLayoutProperty->GetImageSourceInfo();
@@ -429,4 +449,26 @@ void ContainerModalView::AddButtonOnEvent(
     inputHub->AddOnMouseEvent(onclickCallback);
 }
 
+bool ContainerModalView::ConfigCustomWindowMask(RefPtr<PipelineContext>& pipeline, bool enable)
+{
+    CHECK_NULL_RETURN(pipeline, false);
+    auto rootNode = pipeline->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, false);
+    if (!enable) {
+        auto customWindowMaskNode = NG::ViewStackProcessor::GetInstance()->GetCustomWindowMaskNode();
+        CHECK_NULL_RETURN(customWindowMaskNode, false);
+        rootNode->RemoveChild(customWindowMaskNode);
+        rootNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
+        return true;
+    }
+    auto isSucc = ExecuteCustomWindowMaskAbc();
+    if (!isSucc) {
+        return false;
+    }
+    auto customWindowMaskNode = NG::ViewStackProcessor::GetInstance()->GetCustomWindowMaskNode();
+    CHECK_NULL_RETURN(customWindowMaskNode, false);
+    customWindowMaskNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
+    return true;
+}
 } // namespace OHOS::Ace::NG

@@ -13,63 +13,16 @@
  * limitations under the License.
  */
 
-#include <array>
-#include <cstddef>
-#include <memory>
-#include <optional>
-#include <string>
-#include <unordered_map>
-#include <utility>
-#include <vector>
-
-#include "gtest/gtest.h"
-
-#define private public
-#define protected public
-
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_data_detector_mgr.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
 #include "test/unittest/core/pattern/test_ng.h"
+#include "test/unittest/core/pattern/text_input/mock/mock_text_field_select_overlay.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/offset.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/type_definition.h"
-#include "core/common/ai/data_detector_mgr.h"
-#include "core/common/ime/constant.h"
-#include "core/common/ime/text_editing_value.h"
-#include "core/common/ime/text_input_action.h"
-#include "core/common/ime/text_input_type.h"
-#include "core/common/ime/text_selection.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components/text_field/textfield_theme.h"
-#include "core/components/theme/theme_manager.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
-#include "core/event/key_event.h"
-#include "core/event/touch_event.h"
-#include "core/gestures/gesture_info.h"
-#include "core/components/common/properties/text_style_parser.h"
-
-#undef private
-#undef protected
 
 using namespace testing;
 using namespace testing::ext;
@@ -108,6 +61,7 @@ protected:
     static void TearDownTestSuite();
     void TearDown() override;
 
+    void FlushLayoutTask(const RefPtr<FrameNode>& frameNode);
     void CreateTextField(const std::string& text = "", const std::string& placeHolder = "",
         const std::function<void(TextFieldModelNG&)>& callback = nullptr);
     static void ExpectCallParagraphMethods(ExpectParagraphParams params);
@@ -134,6 +88,13 @@ void TextAreaMenuTestNg::SetUpTestSuite()
     textFieldTheme->textColor_ = Color::FromString("#ff182431");
     EXPECT_CALL(*themeManager, GetTheme(_))
         .WillRepeatedly([textFieldTheme = textFieldTheme](ThemeType type) -> RefPtr<Theme> {
+            if (type == ScrollBarTheme::TypeId()) {
+                return AceType::MakeRefPtr<ScrollBarTheme>();
+            }
+            return textFieldTheme;
+        });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([textFieldTheme = textFieldTheme](ThemeType type, int id) -> RefPtr<Theme> {
             if (type == ScrollBarTheme::TypeId()) {
                 return AceType::MakeRefPtr<ScrollBarTheme>();
             }
@@ -175,20 +136,34 @@ void TextAreaMenuTestNg::ExpectCallParagraphMethods(ExpectParagraphParams params
     EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(params.lineCount));
 }
 
+void TextAreaMenuTestNg::FlushLayoutTask(const RefPtr<FrameNode>& frameNode)
+{
+    frameNode->SetActive();
+    frameNode->isLayoutDirtyMarked_ = true;
+    frameNode->CreateLayoutTask();
+    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    auto wrapper = frameNode->CreatePaintWrapper();
+    if (wrapper != nullptr) {
+        wrapper->FlushRender();
+    }
+    paintProperty->CleanDirty();
+    frameNode->SetActive(false);
+}
+
 void TextAreaMenuTestNg::CreateTextField(
     const std::string& text, const std::string& placeHolder, const std::function<void(TextFieldModelNG&)>& callback)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     stack->StartGetAccessRecordingFor(DEFAULT_NODE_ID);
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextArea(placeHolder, text);
+    textFieldModelNG.CreateTextArea(StringUtils::Str8ToStr16(placeHolder), StringUtils::Str8ToStr16(text));
     if (callback) {
         callback(textFieldModelNG);
     }
     stack->StopGetAccessRecording();
     frameNode_ = AceType::DynamicCast<FrameNode>(stack->Finish());
     pattern_ = frameNode_->GetPattern<TextFieldPattern>();
-    eventHub_ = frameNode_->GetEventHub<TextFieldEventHub>();
+    eventHub_ = frameNode_->GetOrCreateEventHub<TextFieldEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
     FlushLayoutTask(frameNode_);
@@ -326,6 +301,9 @@ HWTEST_F(TextAreaMenuTestNg, SelectTextShowMenu004, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
+    EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
+    pattern_->selectOverlay_ = mockSelectOverlay;
 
     /**
      * @tc.steps: step2. Set start = end and menuPolicy as MenuPolicy::SHOW
@@ -365,6 +343,9 @@ HWTEST_F(TextAreaMenuTestNg, SelectTextShowMenu005, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
+    EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
+    pattern_->selectOverlay_ = mockSelectOverlay;
 
     /**
      * @tc.steps: step2. Set InputStyle::INLINE mode
@@ -576,6 +557,9 @@ HWTEST_F(TextAreaMenuTestNg, SelectTextShowMenu009, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
+    EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
+    pattern_->selectOverlay_ = mockSelectOverlay;
 
     /**
      * @tc.steps: step2. Set InputStyle::INLINE mode
@@ -639,7 +623,7 @@ HWTEST_F(TextAreaMenuTestNg, SetTextSelection001, TestSize.Level1)
 
 /**
  * @tc.name: SetTextSelection002
- * @tc.desc: Test SetTextSelection with setting MenuPolicy::DEFAULT menu policy
+ * @tc.desc: Test SetTextSelection with setting MenuPolicy::SHOW menu policy
  * @tc.type: FUNC
  */
 HWTEST_F(TextAreaMenuTestNg, SetTextSelection002, TestSize.Level1)
@@ -649,6 +633,9 @@ HWTEST_F(TextAreaMenuTestNg, SetTextSelection002, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
+    EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
+    pattern_->selectOverlay_ = mockSelectOverlay;
 
     /**
      * @tc.step: step2. Call HandleOnShowMenu
@@ -663,7 +650,7 @@ HWTEST_F(TextAreaMenuTestNg, SetTextSelection002, TestSize.Level1)
      * @tc.expected: The menu still pop up
      */
     SelectionOptions options;
-    options.menuPolicy = MenuPolicy::DEFAULT;
+    options.menuPolicy = MenuPolicy::SHOW;
     pattern_->textFieldController_->SetTextSelection(0, DEFAULT_TEXT.length(), options);
     ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
     EXPECT_TRUE(ret);
@@ -707,6 +694,9 @@ HWTEST_F(TextAreaMenuTestNg, SetTextSelection004, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
+    EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
+    pattern_->selectOverlay_ = mockSelectOverlay;
 
     /**
      * @tc.step: step2. Call HandleOnShowMenu
@@ -739,6 +729,9 @@ HWTEST_F(TextAreaMenuTestNg, SetTextSelection005, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
+    EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
+    pattern_->selectOverlay_ = mockSelectOverlay;
 
     /**
      * @tc.step: step2. Call SetTextSelection with no menu
@@ -765,6 +758,9 @@ HWTEST_F(TextAreaMenuTestNg, SetTextSelection006, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
+    EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
+    pattern_->selectOverlay_ = mockSelectOverlay;
 
     /**
      * @tc.step: step2. Call HandleOnShowMenu
@@ -819,7 +815,7 @@ HWTEST_F(TextAreaMenuTestNg, SetTextSelection007, TestSize.Level1)
 
 /**
  * @tc.name: SetTextSelection008
- * @tc.desc: Test SetTextSelection in inline mode with setting MenuPolicy::DEFAULT menu policy
+ * @tc.desc: Test SetTextSelection in inline mode with setting MenuPolicy::SHOW menu policy
  * @tc.type: FUNC
  */
 HWTEST_F(TextAreaMenuTestNg, SetTextSelection008, TestSize.Level1)
@@ -829,6 +825,9 @@ HWTEST_F(TextAreaMenuTestNg, SetTextSelection008, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
+    EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
+    pattern_->selectOverlay_ = mockSelectOverlay;
 
     /**
      * @tc.steps: step2. Set InputStyle::INLINE mode
@@ -851,7 +850,7 @@ HWTEST_F(TextAreaMenuTestNg, SetTextSelection008, TestSize.Level1)
      * @tc.expected: Text is selected and the menu still pop up
      */
     SelectionOptions options;
-    options.menuPolicy = MenuPolicy::DEFAULT;
+    options.menuPolicy = MenuPolicy::SHOW;
     pattern_->textFieldController_->SetTextSelection(0, DEFAULT_TEXT.length(), options);
     ret = pattern_->selectOverlay_->IsCurrentMenuVisibile();
     EXPECT_TRUE(ret);
@@ -903,6 +902,9 @@ HWTEST_F(TextAreaMenuTestNg, SetTextSelection010, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
+    EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
+    pattern_->selectOverlay_ = mockSelectOverlay;
 
     /**
      * @tc.steps: step2. Set InputStyle::INLINE mode
@@ -943,6 +945,9 @@ HWTEST_F(TextAreaMenuTestNg, SetTextSelection011, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
+    EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
+    pattern_->selectOverlay_ = mockSelectOverlay;
 
     /**
      * @tc.steps: step2. Set InputStyle::INLINE mode
@@ -977,6 +982,9 @@ HWTEST_F(TextAreaMenuTestNg, SetTextSelection012, TestSize.Level1)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
+    auto mockSelectOverlay = AceType::MakeRefPtr<MockTextFieldSelectOverlay>(pattern_);
+    EXPECT_CALL(*mockSelectOverlay, GetSelectArea()).WillRepeatedly(Return(RectF(0, 0, 5, 5)));
+    pattern_->selectOverlay_ = mockSelectOverlay;
 
     /**
      * @tc.steps: step2. Set InputStyle::INLINE mode

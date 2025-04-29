@@ -14,7 +14,6 @@
  */
 #include "core/interfaces/native/node/rect_modifier.h"
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/shape/rect_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -94,16 +93,34 @@ void ResetRectRadius(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIRectModifier* GetRectModifier()
 {
-    static const ArkUIRectModifier modifier = { SetRectRadiusWidth, ResetRectRadiusWidth, SetRectRadiusHeight,
-        ResetRectRadiusHeight, SetRectRadiusWithArray, SetRectRadiusWithValue, ResetRectRadius };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIRectModifier modifier = {
+        .setRectRadiusWidth = SetRectRadiusWidth,
+        .resetRectRadiusWidth = ResetRectRadiusWidth,
+        .setRectRadiusHeight = SetRectRadiusHeight,
+        .resetRectRadiusHeight = ResetRectRadiusHeight,
+        .setRectRadiusWithArray = SetRectRadiusWithArray,
+        .setRectRadiusWithValue = SetRectRadiusWithValue,
+        .resetRectRadius = ResetRectRadius,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIRectModifier* GetCJUIRectModifier()
 {
-    static const CJUIRectModifier modifier = { SetRectRadiusWidth, ResetRectRadiusWidth, SetRectRadiusHeight,
-        ResetRectRadiusHeight, SetRectRadiusWithArray, SetRectRadiusWithValue, ResetRectRadius };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIRectModifier modifier = {
+        .setRectRadiusWidth = SetRectRadiusWidth,
+        .resetRectRadiusWidth = ResetRectRadiusWidth,
+        .setRectRadiusHeight = SetRectRadiusHeight,
+        .resetRectRadiusHeight = ResetRectRadiusHeight,
+        .setRectRadiusWithArray = SetRectRadiusWithArray,
+        .setRectRadiusWithValue = SetRectRadiusWithValue,
+        .resetRectRadius = ResetRectRadius,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

@@ -1529,7 +1529,7 @@ HWTEST_F(GridRowTestNg, Breakpoint, TestSize.Level1)
     float columnWidth = frameRect.Width();
     EXPECT_EQ(columnWidth, DEFAULT_GRID_ROW_WIDTH / mdCols); // expect md
 
-    auto eventHub = rowNode_->GetEventHub<GridRowEventHub>();
+    auto eventHub = rowNode_->GetOrCreateEventHub<GridRowEventHub>();
     bool eventTriggerFlag = false;
     eventHub->SetOnBreakpointChange([&eventTriggerFlag, expectSize = std::string("lg")](const std::string& size) {
         eventTriggerFlag = true;
@@ -1663,9 +1663,9 @@ HWTEST_F(GridRowTestNg, GridColDefault001, TestSize.Level1)
 HWTEST_F(GridRowTestNg, GridColDefault002, TestSize.Level1)
 {
     GridColModelNG gridColModelNG;
-    RefPtr<V2::GridContainerSize> spanVal = AceType::MakeRefPtr<V2::GridContainerSize>(1);
-    RefPtr<V2::GridContainerSize> offsetVal = AceType::MakeRefPtr<V2::GridContainerSize>(0);
-    RefPtr<V2::GridContainerSize> orderVal = AceType::MakeRefPtr<V2::GridContainerSize>(0);
+    V2::GridContainerSize spanVal = V2::GridContainerSize(1);
+    V2::GridContainerSize offsetVal = V2::GridContainerSize(0);
+    V2::GridContainerSize orderVal = V2::GridContainerSize(0);
     gridColModelNG.Create(spanVal, offsetVal, orderVal);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(frameNode, nullptr);

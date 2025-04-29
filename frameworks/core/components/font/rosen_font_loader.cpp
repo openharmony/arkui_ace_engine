@@ -19,6 +19,7 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
 #include "core/components/font/rosen_font_collection.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
@@ -33,11 +34,15 @@ constexpr uint32_t RAWFILE_RESOURCE_MATCH_SIZE = 2;
 RosenFontLoader::RosenFontLoader(const std::string& familyName, const std::string& familySrc)
     : FontLoader(familyName, familySrc)
 {}
+RosenFontLoader::RosenFontLoader(const std::string& familyName, const std::vector<std::string>& familySrcArray)
+    : FontLoader(familyName, familySrcArray)
+{}
 
 void RosenFontLoader::AddFont(
     const RefPtr<PipelineBase>& context, const std::string& bundleName, const std::string& moduleName)
 {
     if (context == nullptr || familySrc_.empty()) {
+        TAG_LOGW(AceLogTag::ACE_FONT, "AddFont familySrc is empty:%{public}d", familySrc_.empty());
         return;
     }
 
@@ -57,7 +62,7 @@ void RosenFontLoader::AddFont(
     }
 }
 
-void RosenFontLoader::SetDefaultFontFamily(const char* fontFamily, const char* familySrc)
+void RosenFontLoader::SetDefaultFontFamily(const char* fontFamily, const std::vector<std::string>& familySrc)
 {
     RosenFontCollection::GetInstance().LoadFontFamily(fontFamily, familySrc);
 }
@@ -201,7 +206,9 @@ std::string RosenFontLoader::RemovePathHead(const std::string& uri)
         // the file uri format is like "file:///data/data...",
         // the memory uri format is like "memory://font.ttf" for example,
         // iter + 3 to get the absolutely file path substring : "/data/data..." or the font file name: "font.ttf"
-        return uri.substr(iter + 3);
+        auto startIndex = iter + 3;
+        startIndex = std::clamp(startIndex, static_cast<size_t>(0), uri.length());
+        return uri.substr(startIndex);
     }
     TAG_LOGW(AceLogTag::ACE_FONT, "Wrong scheme, not a valid File!");
     return std::string();
@@ -218,7 +225,7 @@ void RosenFontLoader::LoadFromResource(
             if (!fontLoader || !context) {
                 return;
             }
-            auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName);
+            auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, context->GetInstanceId());
             RefPtr<ResourceAdapter> resourceAdapter = nullptr;
             RefPtr<ThemeConstants> themeConstants = nullptr;
             if (SystemProperties::GetResourceDecoupling()) {
@@ -240,6 +247,7 @@ void RosenFontLoader::LoadFromResource(
                 rawFile = matches[1].str();
             }
             if (rawFile.empty()) {
+                TAG_LOGW(AceLogTag::ACE_FONT, "LoadFromResource rawFile is empty");
                 return;
             }
 
@@ -307,11 +315,30 @@ void RosenFontLoader::PostLoadFontTask(const std::vector<uint8_t>& fontData, con
 
 void RosenFontLoader::NotifyCallbacks()
 {
-    for (const auto& [node, callback] : callbacksNG_) {
+    for (const auto& [node, callback] : callbacks_) {
         if (callback) {
             callback();
         }
     }
+    callbacks_.clear();
+    std::stringstream ssNodes;
+    ssNodes << "[";
+    for (const auto& [node, callback] : callbacksNG_) {
+        auto uiNode = node.Upgrade();
+        if (uiNode) {
+            ssNodes << std::to_string(uiNode->GetId());
+            ssNodes << ", ";
+        }
+        if (callback) {
+            callback();
+        }
+    }
+    ssNodes << "]";
+    ACE_SCOPED_TRACE("Load Success! NotifyCallbacks [familyName:%s][size:%d][nodes:%s]", familyName_.c_str(),
+        static_cast<uint32_t>(callbacksNG_.size()), ssNodes.str().c_str());
+    TAG_LOGI(AceLogTag::ACE_FONT,
+        "Load Success! NotifyCallbacks [familyName:%{public}s][size:%{public}d][nodes:%{public}s]", familyName_.c_str(),
+        static_cast<uint32_t>(callbacksNG_.size()), ssNodes.str().c_str());
     callbacksNG_.clear();
     if (variationChanged_) {
         variationChanged_();

@@ -71,6 +71,7 @@ struct SpanPosition {
 struct SymbolSpanStyle {
     double fontSize = 0.0;
     double lineHeight = 0.0;
+    bool halfLeading = false;
     double letterSpacing = 0.0;
     double lineSpacing = 0.0;
     std::string symbolColor;
@@ -125,8 +126,10 @@ struct TextStyleResult {
     std::string fontColor;
     double fontSize = 0.0;
     double lineHeight = 0.0;
+    bool halfLeading = false;
     double letterSpacing = 0.0;
     double lineSpacing = 0.0;
+    std::optional<Dimension> paragraphSpacing;
     int32_t fontStyle = 0;
     int32_t fontWeight = 0;
     FONT_FEATURES_LIST fontFeature;
@@ -139,6 +142,7 @@ struct TextStyleResult {
     int32_t lineBreakStrategy = static_cast<int32_t>(LineBreakStrategy::GREEDY);
     std::string leadingMarginSize[2] = { "0.00px", "0.00px" };
     std::vector<Shadow> textShadows;
+    std::optional<TextBackgroundStyle> textBackgroundStyle;
 };
 
 struct ImageStyleResult {
@@ -153,8 +157,9 @@ struct ResultObject {
     SpanPosition spanPosition;
     SelectSpanType type = SelectSpanType::TYPESPAN;
     int32_t offsetInSpan[2] = { 0, 0 };
-    std::string valueString;
-    std::string previewText;
+    std::u16string valueString;
+    std::u16string previewText;
+    std::u16string urlAddress;
     RefPtr<PixelMap> valuePixelMap;
     TextStyleResult textStyle;
     ImageStyleResult imageStyle;
@@ -179,6 +184,11 @@ public:
     ~SelectionInfo() = default;
 
     Selection GetSelection() const
+    {
+        return selection_;
+    }
+
+    Selection& GetSelectionRef()
     {
         return selection_;
     }
@@ -235,6 +245,8 @@ struct ParagraphInfo {
     int32_t textAlign = 0;
     int32_t wordBreak = static_cast<int32_t>(WordBreak::BREAK_WORD);
     int32_t lineBreakStrategy = static_cast<int32_t>(LineBreakStrategy::GREEDY);
+    // unit of paragraphSpacing is fp
+    std::optional<double> paragraphSpacing;
 
     std::pair<int32_t, int32_t> range;
 };

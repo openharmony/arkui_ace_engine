@@ -60,7 +60,7 @@ void NodeContent::AddNode(UINode* node, int32_t position)
     }
 
     it = children_.begin();
-    std::advance(it, slot);
+    std::advance(it, position);
     children_.insert(it, child);
 }
 

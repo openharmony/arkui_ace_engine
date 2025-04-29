@@ -16,8 +16,7 @@
 #include "adapter/ohos/osal/resource_theme_style.h"
 
 #include <regex>
-#include <set>
-#include <string>
+#include <unordered_set>
 
 namespace OHOS::Ace {
 namespace {
@@ -38,9 +37,9 @@ constexpr char RES_PATH_TAG[] = "file:///";
 constexpr char RES_HAP_PATH[] = "/data/storage/el1/bundle/ohos.global.systemres/ohos.global.systemres/assets/";
 #endif
 
-const std::string DIMENSION_PATTERN = R"(^([+-]?\d+(\.\d+)?)(px|fp|lpx|vp|%)?)";
+const std::regex DIMENSION_REGEX(R"(^([+-]?\d+(\.\d+)?)(px|fp|lpx|vp|%)?)");
 constexpr int32_t WAIT_FOR_TIME = 50;
-static const std::set<std::string> stringAttrs = {
+static const std::unordered_set<std::string> stringAttrs = {
     "attribute_text_font_family_regular",
     "attribute_text_font_family_medium",
     "description_current_location",
@@ -64,6 +63,10 @@ static const std::set<std::string> stringAttrs = {
     "description_receive",
     "description_continue_to_receive",
     "description_save_to_gallery",
+    "description_export_to_gallery",
+    "description_quick_save_to_gallery",
+    "description_quick_resave_to_gallery",
+    "description_save_all",
     "draggable",
     "divider_shadow_enable",
     "camera_input",
@@ -72,11 +75,11 @@ static const std::set<std::string> stringAttrs = {
     "section_unfocus_effect_enable",
     "section_unfocus_color",
     "sheet_type",
+    "sheet_close",
     "multiple_dialog_display",
     "menu_expand_display",
     "popup_double_border_enable",
-    "popup_outer_border_color",
-    "popup_inner_border_color",
+    "tips_double_border_enable",
     "dialog_expand_display",
     "show_password_directly",
     "textfield_show_handle",
@@ -84,6 +87,8 @@ static const std::set<std::string> stringAttrs = {
     "dialog_icon_primary",
     "dialog_font_primary",
     "menu_has_filter",
+    "navigation_general_more",
+    "navigation_back",
     "calendar_picker_dialog_button_transparent",
     "calendar_picker_dialog_divider_transparent",
     "textfield_accessibility_property_clear",
@@ -91,21 +96,76 @@ static const std::set<std::string> stringAttrs = {
     "textfield_accessibility_hide_password",
     "rich_editor_show_handle",
     "text_show_handle",
+    "list_fadeout_enable",
+    "text_fadeout_enable",
+    "textfield_show_password_button",
+    "textfield_hide_password_button",
+    "textfield_has_showed_password",
+    "textfield_has_hidden_password",
+    "calendar_picker_mon",
+    "calendar_picker_tue",
+    "calendar_picker_wed",
+    "calendar_picker_thu",
+    "calendar_picker_fri",
+    "calendar_picker_sat",
+    "calendar_picker_sun",
+    "general_today",
+    "picker_dialog_lunar_switch",
+    "picker_dialog_previous_button",
+    "picker_dialog_next_button",
+    "filter_accessibility_expand",
+    "filter_accessibility_collapse",
+    "filter_accessibility_collapsed",
+    "filter_accessibility_expanded",
     "slider_accessibility_selected",
     "slider_accessibility_unselected",
     "slider_accessibility_unselectedDesc",
     "slider_accessibility_disabledDesc",
+    "stepper_back",
+    "stepper_skip",
+    "stepper_start",
+    "stepper_next",
     "textfield_writting_bundle_name",
     "textfield_writting_ability_name",
     "rich_editor_writting_bundle_name",
-    "rich_editor_writting_ability_name"
+    "rich_editor_writting_ability_name",
+    "textfield_writting_is_support",
+    "rich_editor_writting_is_support",
+    "ai_write_menu_name",
+    "menu_translate_is_support",
+    "text_menu_search_is_support",
+    "textfield_menu_search_is_support",
+    "richeditor_menu_search_is_support",
+    "textfield_accessibility_clear",
+    "pass_point",
+    "side_length",
+    "general_next_year",
+    "general_next_month",
+    "general_pre_year",
+    "general_pre_month",
+    "prev_arrow_accessibility_text",
+    "next_arrow_accessibility_text",
+    "menu_haptic_feedback",
+    "text_overlay_menu_cut_label",
+    "text_overlay_menu_copy_label",
+    "text_overlay_menu_paste_label",
+    "text_overlay_menu_select_all_label",
+    "text_overlay_menu_translate_label",
+    "text_overlay_menu_share_label",
+    "text_overlay_menu_search_label",
+    "switch_on_text",
+    "switch_off_text",
+    "common_cancel_text",
+    "common_ok_text",
+    "textoverlay_paste",
+    "text_overlay_menu_more_accessibility_text",
+    "text_overlay_menu_back_accessibility_text",
 };
 
 void ParseNumberUnit(const std::string& value, std::string& number, std::string& unit)
 {
-    std::regex regex(DIMENSION_PATTERN);
     std::smatch results;
-    if (std::regex_search(value, results, regex)) {
+    if (std::regex_search(value, results, DIMENSION_REGEX)) {
         number = results[1];
         // The unit is in the 3rd sub-match. If the value doesn't have unit,
         // the 3rd match result is empty.
@@ -131,7 +191,7 @@ DimensionUnit ParseDimensionUnit(const std::string& unit)
 
 void ResourceThemeStyle::ParseContent()
 {
-    for (auto& [attrName, attrValue] : rawAttrs_) {
+    for (const auto& [attrName, attrValue] : rawAttrs_) {
         if (attrName.empty() || attrValue.empty()) {
             continue;
         }
@@ -169,7 +229,7 @@ void ResourceThemeStyle::ParseContent()
 
 void ResourceThemeStyle::OnParseStyle()
 {
-    for (auto& [patternName, patternMap]: patternAttrs_) {
+    for (const auto& [patternName, patternMap]: patternAttrs_) {
         auto patternStyle = AceType::MakeRefPtr<ResourceThemeStyle>(resAdapter_);
         patternStyle->SetName(patternName);
         patternStyle->parentStyle_ = AceType::WeakClaim(this);
@@ -211,8 +271,7 @@ void ResourceThemeStyle::OnParseResourceMedia(const std::string& attrName, const
 
 void ResourceThemeStyle::CheckThemeStyleLoaded(const std::string& patternName)
 {
-    auto it = std::find(checkThemeStyleVector.begin(), checkThemeStyleVector.end(), patternName.c_str());
-    if (it == checkThemeStyleVector.end()) {
+    if (!CheckThemeStyle(patternName)) {
         return;
     }
     if (future_.valid()) {

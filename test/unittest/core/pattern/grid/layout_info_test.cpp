@@ -669,4 +669,359 @@ HWTEST_F(GridLayoutInfoTest, TransformAutoScrollAlign002, TestSize.Level1)
     info.endIndex_ = -1;
     EXPECT_EQ(info.TransformAutoScrollAlign(3, 1, 300.0f, 5.0f), ScrollAlign::END);
 }
+
+/**
+ * @tc.name: ItemAboveViewport001
+ * @tc.desc: Test GridLayoutInfo::ItemAboveViewport
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, ItemAboveViewport001, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 1 } } },
+        { 1, { { 0, 2 }, { 1, 3 } } },
+        { 2, { { 0, 4 }, { 1, 5 } } },
+    };
+    info.lineHeightMap_ = { { 0, 200.0f }, { 1, 500.0f }, { 2, 300.0f } };
+    info.crossCount_ = 2;
+
+    info.startMainLineIndex_ = 0;
+    info.endMainLineIndex_ = 2;
+    info.startIndex_ = 0;
+    info.endIndex_ = 5;
+
+    info.currentOffset_ = 0.0f;
+    EXPECT_FALSE(Negative(info.GetItemTopPos(0, 5.0f)));
+
+    info.currentOffset_ = -50.0f;
+    EXPECT_TRUE(Negative(info.GetItemTopPos(0, 5.0f)));
+
+    info.currentOffset_ = -200.0f;
+    EXPECT_TRUE(Negative(info.GetItemTopPos(0, 5.0f)));
+    EXPECT_FALSE(Negative(info.GetItemTopPos(1, 5.0f)));
+
+    // adding gap length
+    info.currentOffset_ = -205.0f;
+    EXPECT_TRUE(Negative(info.GetItemTopPos(0, 5.0f)));
+    EXPECT_FALSE(Negative(info.GetItemTopPos(1, 5.0f)));
+
+    EXPECT_TRUE(Negative(info.GetItemTopPos(1, 0.0f)));
+
+    info.startMainLineIndex_ = 1;
+    info.endMainLineIndex_ = 1;
+    info.startIndex_ = 2;
+    info.endIndex_ = 3;
+
+    info.currentOffset_ = 0.0f;
+    EXPECT_FALSE(Negative(info.GetItemTopPos(1, 5.0f)));
+
+    info.currentOffset_ = -1.0f;
+    EXPECT_TRUE(Negative(info.GetItemTopPos(1, 5.0f)));
+}
+
+
+/**
+ * @tc.name: ItemBelowViewport001
+ * @tc.desc: Test GridLayoutInfo::ItemBelowViewport
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, ItemBelowViewport001, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 1 } } },
+        { 1, { { 0, 2 }, { 1, 3 } } },
+        { 2, { { 0, 4 }, { 1, -1 } } },
+    };
+    info.lineHeightMap_ = { { 0, 200.0f }, { 1, 500.0f }, { 2, 300.0f } };
+    info.crossCount_ = 2;
+
+    info.startMainLineIndex_ = 0;
+    info.endMainLineIndex_ = 2;
+    info.startIndex_ = 0;
+    info.endIndex_ = 4;
+
+    info.currentOffset_ = 0.0f;
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 100.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 700.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 705.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 710.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 1005.0f));
+    EXPECT_FALSE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 1010.0f));
+
+    info.currentOffset_ = -50.0f;
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 100.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 700.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 705.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 710.0f));
+    EXPECT_TRUE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 955.0f));
+    EXPECT_FALSE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 960.0f));
+    EXPECT_FALSE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 1005.0f));
+    EXPECT_FALSE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 1010.0f));
+}
+
+/**
+ * @tc.name: SkipStartIndexByOffset001
+ * @tc.desc: Test GridLayoutInfo::SkipStartIndexByOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, SkipStartIndexByOffset001, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 0 } } },
+        { 1, { { 0, 1 }, { 1, 2 }, { 2, 3 } } },
+        { 2, { { 0, 4 }, { 1, 5 }, { 2, 6 } } },
+    };
+    info.lineHeightMap_ = { { 0, 162.5f }, { 1, 422.16f }, { 2, 422.16f } };
+    info.crossCount_ = 3;
+    info.childrenCount_ = 10000;
+
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 0, 8874, 8876, 8878, 8975, 8977, 8979, 8981, 9725 };
+
+    info.currentOffset_ = 26915.4f;
+    info.prevOffset_ = -164.25f;
+    info.currentHeight_ = 1396768.75f;
+
+    info.SkipStartIndexByOffset(option, 2.f);
+
+    EXPECT_EQ(info.startIndex_, 9675);
+}
+
+HWTEST_F(GridLayoutInfoTest, SkipStartIndexByOffset002, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 0 } } },
+        { 1, { { 0, 1 }, { 1, 1 }, { 2, 1 } } },
+        { 2, { { 0, 2 }, { 1, 2 }, { 2, 2 } } },
+    };
+    info.lineHeightMap_ = { { 0, 400.f }, { 1, 400.f }, { 2, 400.f } };
+    info.crossCount_ = 3;
+    info.childrenCount_ = 20;
+    info.lastRegularMainSize_ = 0;
+
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
+
+    info.currentOffset_ = -5000.f;
+    info.prevOffset_ = -20.f;
+    info.currentHeight_ = 420.f;
+
+    info.SkipStartIndexByOffset(option, 0.f);
+
+    EXPECT_EQ(info.startIndex_, 13);
+    EXPECT_EQ(info.currentOffset_, -200.f);
+    EXPECT_EQ(info.GetContentOffset(option, 0), 5400);
+}
+
+HWTEST_F(GridLayoutInfoTest, SkipStartIndexByOffset003, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {};
+    info.lineHeightMap_ = {};
+    info.crossCount_ = 3;
+    info.childrenCount_ = 20;
+    info.lastRegularMainSize_ = 400;
+    info.lastIrregularMainSize_ = 200;
+
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 0, 19 };
+
+    info.currentOffset_ = -2000.f;
+    info.prevOffset_ = -0.f;
+    info.currentHeight_ = 0.f;
+
+    info.SkipStartIndexByOffset(option, 0.f);
+
+    EXPECT_EQ(info.startIndex_, 13);
+    EXPECT_EQ(info.currentOffset_, -200.f);
+    EXPECT_EQ(info.GetContentOffset(option, 0), 2000);
+}
+
+HWTEST_F(GridLayoutInfoTest, SkipStartIndexByOffset004, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 0 } } },
+        { 1, { { 0, 1 }, { 1, 2 }, { 2, 3 } } },
+        { 2, { { 0, 4 }, { 1, 5 }, { 2, 6 } } },
+    };
+    info.lineHeightMap_ = { { 0, 200.f }, { 1, 400.f }, { 2, 400.f } };
+    info.crossCount_ = 3;
+    info.childrenCount_ = 20;
+
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 0, 19 };
+
+    info.currentOffset_ = -2000.f;
+    info.prevOffset_ = -0.f;
+    info.currentHeight_ = 0.f;
+
+    info.SkipStartIndexByOffset(option, 0.f);
+
+    EXPECT_EQ(info.startIndex_, 13);
+    EXPECT_EQ(info.currentOffset_, -200.f);
+    EXPECT_EQ(info.GetContentOffset(option, 0), 2000);
+}
+
+HWTEST_F(GridLayoutInfoTest, CheckGridMatrix001, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 0 } } },
+        { 1, { { 0, 1 }, { 1, 1 }, { 2, 1 } } },
+        { 2, { { 0, 2 }, { 1, 2 }, { 2, 2 } } },
+    };
+    info.startMainLineIndex_ = 0;
+    info.endMainLineIndex_ = 1;
+    info.startIndex_ = 0;
+    info.endIndex_ = 1;
+    EXPECT_TRUE(info.CheckGridMatrix(2));
+}
+
+HWTEST_F(GridLayoutInfoTest, CheckGridMatrix002, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 0 } } },
+        { 1, { { 0, 1 }, { 1, 1 }, { 2, 3 } } },
+        { 2, { { 0, 2 }, { 1, 2 }, { 2, 2 } } },
+    };
+    info.startMainLineIndex_ = 0;
+    info.endMainLineIndex_ = 1;
+    info.startIndex_ = 0;
+    info.endIndex_ = 3;
+    EXPECT_FALSE(info.CheckGridMatrix(2));
+}
+
+HWTEST_F(GridLayoutInfoTest, CheckGridMatrix003, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 0 } } },
+        { 1, { { 0, 1 }, { 1, 1 }, { 2, 3 } } },
+        { 2, { { 0, 2 }, { 1, 2 }, { 2, 2 } } },
+    };
+    info.startMainLineIndex_ = 0;
+    info.endMainLineIndex_ = 1;
+    info.startIndex_ = 0;
+    info.endIndex_ = 3;
+    EXPECT_TRUE(info.CheckGridMatrix(0));
+}
+
+HWTEST_F(GridLayoutInfoTest, CheckGridMatrix004, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 5 } } },
+        { 1, { { 0, 1 }, { 1, 1 }, { 2, 1 } } },
+        { 2, { { 0, 2 }, { 1, 2 }, { 2, 2 } } },
+        { 3, { { 0, 3 }, { 1, 4 }, { 2, 4 } } },
+    };
+    info.startMainLineIndex_ = 1;
+    info.endMainLineIndex_ = 3;
+    info.startIndex_ = 1;
+    info.endIndex_ = 4;
+    EXPECT_FALSE(info.CheckGridMatrix(2));
+}
+
+HWTEST_F(GridLayoutInfoTest, CheckGridMatrix005, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 5 } } },
+        { 1, { { 0, 1 }, { 1, 1 }, { 2, 1 } } },
+        { 2, { { 0, 2 }, { 1, 2 }, { 2, 2 } } },
+        { 3, { { 0, 3 }, { 1, 4 }, { 2, 4 } } },
+    };
+    info.startMainLineIndex_ = 1;
+    info.endMainLineIndex_ = 3;
+    info.startIndex_ = 1;
+    info.endIndex_ = 4;
+    EXPECT_TRUE(info.CheckGridMatrix(0));
+}
+
+/**
+ * @tc.name: GridLayoutInfo::UpdateStartIndexByStartLineTest001
+ * @tc.desc: test UpdateStartIndexByStartLine with empty GridMatrix
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, UpdateStartIndexByStartLineTest001, TestSize.Level1)
+{
+    // gridMatrix is empty
+    GridLayoutInfo info;
+    info.gridMatrix_ = {};
+    info.startMainLineIndex_ = 0;
+    info.startIndex_ = 0;
+
+    info.UpdateStartIndexByStartLine();
+
+    // Assert startIndex is not update
+    EXPECT_EQ(info.startIndex_, 0);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::UpdateStartIndexByStartLineTest002
+ * @tc.desc: test UpdateStartIndexByStartLine with startMainLineIndex not found
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, UpdateStartIndexByStartLineTest002, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = { { 0, { { 1, 10 }, { 2, 11 } } } };
+    info.startMainLineIndex_ = 1;
+    info.startIndex_ = 0;
+
+    info.UpdateStartIndexByStartLine();
+
+    // Assert startIndex is not update
+    EXPECT_EQ(info.startIndex_, 0);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::UpdateStartIndexByStartLineTest003
+ * @tc.desc: test UpdateStartIndexByStartLine with startLine not empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, UpdateStartIndexByStartLineTest003, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = { { 0, {} }, { 1, { { 1, 10 }, { 2, 11 } } } };
+    info.startMainLineIndex_ = 0;
+    info.startIndex_ = 0;
+
+    info.UpdateStartIndexByStartLine();
+
+    // Assert startIndex is not update
+    EXPECT_EQ(info.startIndex_, 0);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::UpdateStartIndexByStartLineTest004
+ * @tc.desc: test UpdateStartIndexByStartLine with startLine not empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, UpdateStartIndexByStartLineTest004, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = { { 0, { { 1, 10 }, { 2, 11 } } }, { 1, { { 1, 12 }, { 2, 13 } } } };
+    info.startMainLineIndex_ = 1;
+    info.startIndex_ = 0;
+
+    info.UpdateStartIndexByStartLine();
+
+    // Assert startIndex is updated
+    EXPECT_EQ(info.startIndex_, 12);
+}
 } // namespace OHOS::Ace::NG

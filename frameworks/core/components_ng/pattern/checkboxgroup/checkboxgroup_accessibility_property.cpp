@@ -19,10 +19,7 @@
 #include "accessibility_element_info.h"
 #endif
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
-#include "core/components_ng/pattern/stage/page_event_hub.h"
 
 namespace OHOS::Ace::NG {
 bool CheckBoxGroupAccessibilityProperty::IsCheckable() const
@@ -47,7 +44,7 @@ std::string CheckBoxGroupAccessibilityProperty::GetText() const
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, "");
-    auto checkBoxEventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
+    auto checkBoxEventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxGroupEventHub>();
     auto groupName = checkBoxEventHub ? checkBoxEventHub->GetGroupName() : "";
     return groupName;
 }
@@ -60,7 +57,7 @@ int32_t CheckBoxGroupAccessibilityProperty::GetCollectionItemCounts() const
     CHECK_NULL_RETURN(checkBoxGroupPattern, 0);
     auto groupManager = checkBoxGroupPattern->GetGroupManager();
     CHECK_NULL_RETURN(groupManager, 0);
-    auto checkBoxGroupEventHub = checkBoxGroupPattern->GetEventHub<CheckBoxGroupEventHub>();
+    auto checkBoxGroupEventHub = checkBoxGroupPattern->GetOrCreateEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_RETURN(checkBoxGroupEventHub, 0);
     auto group = checkBoxGroupEventHub->GetGroupName();
     auto list = groupManager->GetCheckboxList(group);

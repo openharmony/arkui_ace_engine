@@ -32,6 +32,7 @@ ArkUINativeModuleValue ListItemGroupBridge::SetDivider(ArkUIRuntimeCallInfo* run
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_INDEX);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> dividerStrokeWidthArgs = runtimeCallInfo->GetCallArgRef(STROKE_WIDTH_INDEX);
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(COLOR_INDEX);
@@ -48,7 +49,9 @@ ArkUINativeModuleValue ListItemGroupBridge::SetDivider(ArkUIRuntimeCallInfo* run
     CalcDimension dividerEndMargin;
     uint32_t color;
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, panda::NativePointerRef::New(vm, nullptr));
     auto themeManager = context->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, panda::NativePointerRef::New(vm, nullptr));
     auto listTheme = themeManager->GetTheme<ListTheme>();
@@ -92,6 +95,7 @@ ArkUINativeModuleValue ListItemGroupBridge::ResetDivider(ArkUIRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_INDEX);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetDivider(nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -116,6 +120,7 @@ ArkUINativeModuleValue ListItemGroupBridge::ResetChildrenMainSize(ArkUIRuntimeCa
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NODE_INDEX);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getListItemGroupModifier()->resetListItemGroupChildrenMainSize(nativeNode);
 
@@ -129,6 +134,7 @@ ArkUINativeModuleValue ListItemGroupBridge::SetListItemGroupInitialize(ArkUIRunt
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> spaceArg = runtimeCallInfo->GetCallArgRef(1); //1 is index of space
     Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(2); //2 is index of style
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     double space = 0.0;
@@ -148,6 +154,9 @@ ArkUINativeModuleValue ListItemGroupBridge::SetListItemGroupInitialize(ArkUIRunt
         GetArkUINodeModifiers()->getListItemGroupModifier()->setListItemGroupStyle(nativeNode, style);
     }
 
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    SetHeaderComponent(vm, nativeNode, info);
+    SetFooterComponent(vm, nativeNode, info);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -156,10 +165,61 @@ ArkUINativeModuleValue ListItemGroupBridge::ResetListItemGroupInitialize(ArkUIRu
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getListItemGroupModifier()->resetListItemGroupSpace(nativeNode);
     GetArkUINodeModifiers()->getListItemGroupModifier()->resetListItemGroupStyle(nativeNode);
+    GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetHeader(nativeNode);
+    GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetFooter(nativeNode);
 
     return panda::JSValueRef::Undefined(vm);
+}
+
+void ListItemGroupBridge::SetHeaderComponent(EcmaVM* vm, ArkUINodeHandle nativeNode, Framework::JsiCallbackInfo& info)
+{
+    // 3 means the third parameter, which represents the headerComponent
+    if (info[3]->IsObject()) {
+        // 3 means the third parameter, which represents the headerComponent
+        JSRef<JSObject> contentObject = JSRef<JSObject>::Cast(info[3]);
+        JSRef<JSVal> builderNodeParam = contentObject->GetProperty("builderNode_");
+        if (builderNodeParam->IsObject()) {
+            JSRef<JSObject> builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
+            JSRef<JSVal> nodeptr = builderNodeObject->GetProperty("nodePtr_");
+            if (!nodeptr.IsEmpty()) {
+                auto node = nodePtr(nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value());
+                GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupSetHeader(nativeNode, node);
+            } else {
+                GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetHeader(nativeNode);
+            }
+        } else {
+            GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetHeader(nativeNode);
+        }
+    } else {
+        GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetHeader(nativeNode);
+    }
+}
+
+void ListItemGroupBridge::SetFooterComponent(EcmaVM* vm, ArkUINodeHandle nativeNode, Framework::JsiCallbackInfo& info)
+{
+    // 4 means the fourth parameter, which represents the footerComponent
+    if (info[4]->IsObject()) {
+        // 4 means the fourth parameter, which represents the footerComponent
+        JSRef<JSObject> contentObject = JSRef<JSObject>::Cast(info[4]);
+        JSRef<JSVal> builderNodeParam = contentObject->GetProperty("builderNode_");
+        if (builderNodeParam->IsObject()) {
+            JSRef<JSObject> builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
+            JSRef<JSVal> nodeptr = builderNodeObject->GetProperty("nodePtr_");
+            if (!nodeptr.IsEmpty()) {
+                auto node = nodePtr(nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value());
+                GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupSetFooter(nativeNode, node);
+            } else {
+                GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetFooter(nativeNode);
+            }
+        } else {
+            GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetFooter(nativeNode);
+        }
+    } else {
+        GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetFooter(nativeNode);
+    }
 }
 } // namespace OHOS::Ace::NG

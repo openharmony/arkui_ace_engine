@@ -14,10 +14,12 @@
  */
 
 #include "uv_task_wrapper_impl.h"
+#include "base/utils/time_util.h"
 
 namespace OHOS::Ace::NG {
 
 UVTaskWrapperImpl::UVTaskWrapperImpl(napi_env env)
+    :env_(env)
 {
     if (env == nullptr) {
         LOGE("env is null");
@@ -28,7 +30,6 @@ UVTaskWrapperImpl::UVTaskWrapperImpl(napi_env env)
         LOGE("native engine is null");
         return;
     }
-    loop_ = engine->GetUVLoop();
     threadId_ = engine->GetTid();
 }
 
@@ -39,17 +40,55 @@ bool UVTaskWrapperImpl::WillRunOnCurrentThread()
 
 void UVTaskWrapperImpl::Call(const TaskExecutor::Task& task)
 {
-    if (loop_ == nullptr) {
+    napi_send_event(env_, [work = std::make_shared<UVWorkWrapper>(task)] {
+        (*work)();
+    }, napi_eprio_high);
+}
+
+void UVTaskWrapperImpl::Call(const TaskExecutor::Task& task, uint32_t delayTime)
+{
+    if (delayTime <= 0) {
+        Call(task);
+        return;
+    }
+
+    auto callInWorkerTask = [task, delayTime, env = env_] () {
+        UVTaskWrapperImpl::CallInWorker(task, delayTime, env);
+    };
+
+    Call(callInWorkerTask);
+}
+
+void UVTaskWrapperImpl::CallInWorker(const TaskExecutor::Task& task, uint32_t delayTime, napi_env env)
+{
+    LOGD("CallInWorker delayTime: %{public}u", delayTime);
+    uv_loop_t *loop = nullptr;
+    napi_get_uv_event_loop(env, &loop);
+    if (loop == nullptr) {
         LOGW("loop is null");
         return;
     }
-    UVWorkWrapper* workWrapper = new UVWorkWrapper(task);
-    uv_queue_work(
-        loop_, workWrapper->GetWorkPtr(), [](uv_work_t* req) {},
-        [](uv_work_t* req, int status) {
-            auto workWrapper = reinterpret_cast<UVWorkWrapper*>(req->data);
-            workWrapper->GetTask()();
-            delete workWrapper;
-        });
+    uv_update_time(loop);
+    uv_timer_t *timer = new uv_timer_t;
+    uv_timer_init(loop, timer);
+    timer->data = new UVTimerWorkWrapper(task, delayTime, GetCurrentTimestamp());
+    uv_timer_start(
+        timer,
+        [](uv_timer_t *timer) {
+            UVTimerWorkWrapper* workWrapper = reinterpret_cast<UVTimerWorkWrapper*>(timer->data);
+            if (workWrapper) {
+                LOGD("Start work delayTime: %{public}u, taskTime: %{public}" PRId64 ", curTime: %{public}" PRId64,
+                    workWrapper->GetDelayTime(), workWrapper->GetTaskTime(), GetCurrentTimestamp());
+                (*workWrapper)();
+                delete workWrapper;
+            }
+            uv_timer_stop(timer);
+            uv_close(
+                reinterpret_cast<uv_handle_t *>(timer),
+                [](uv_handle_t *timer) {
+                    delete reinterpret_cast<uv_timer_t *>(timer);
+            });
+        },
+        delayTime, 0);
 }
 } // namespace OHOS::Ace::NG

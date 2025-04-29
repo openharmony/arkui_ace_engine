@@ -90,6 +90,13 @@ static napi_value JSRegisterFont(napi_env env, napi_callback_info info)
 
     std::string bundleName = resourceInfo.bundleName.has_value() ? resourceInfo.bundleName.value() : "";
     std::string moduleName = resourceInfo.moduleName.has_value() ? resourceInfo.moduleName.value() : "";
+    auto container = Container::CurrentSafely();
+    if (bundleName.empty() && container) {
+        bundleName = container->GetBundleName();
+    }
+    if (moduleName.empty() && container) {
+        moduleName = container->GetModuleName();
+    }
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         return nullptr;

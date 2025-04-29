@@ -15,8 +15,8 @@
 
 #include "core/components_ng/pattern/root/root_layout_algorithm.h"
 
-#include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 

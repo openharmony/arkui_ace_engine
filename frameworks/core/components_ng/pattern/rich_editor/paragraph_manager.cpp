@@ -15,18 +15,19 @@
 
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 
-#include <iterator>
-#include <ostream>
-
-#include "base/utils/utils.h"
-#include "core/components/common/properties/text_layout_info.h"
-
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float MIN_RECT_TOP = -0.4f;
+constexpr float MIN_RECT_PRECISION = -0.5f;
+} // namespace
+
 float ParagraphManager::GetHeight() const
 {
     float res = 0.0f;
     for (auto&& info : paragraphs_) {
-        res += info.paragraph->GetHeight();
+        auto paragraph = info.paragraph;
+        CHECK_NULL_RETURN(paragraph, 0.0f);
+        res += paragraph->GetHeight();
     }
     return res;
 }
@@ -35,7 +36,9 @@ float ParagraphManager::GetMaxIntrinsicWidth() const
 {
     float res = 0.0f;
     for (auto &&info : paragraphs_) {
-        res = std::max(res, info.paragraph->GetMaxIntrinsicWidth());
+        auto paragraph = info.paragraph;
+        CHECK_NULL_RETURN(paragraph, 0.0f);
+        res = std::max(res, paragraph->GetMaxIntrinsicWidth());
     }
     return res;
 }
@@ -43,7 +46,9 @@ bool ParagraphManager::DidExceedMaxLines() const
 {
     bool res = false;
     for (auto &&info : paragraphs_) {
-        res |= info.paragraph->DidExceedMaxLines();
+        auto paragraph = info.paragraph;
+        CHECK_NULL_RETURN(paragraph, false);
+        res |= paragraph->DidExceedMaxLines();
     }
     return res;
 }
@@ -51,7 +56,9 @@ float ParagraphManager::GetLongestLine() const
 {
     float res = 0.0f;
     for (auto &&info : paragraphs_) {
-        res = std::max(res, info.paragraph->GetLongestLine());
+        auto paragraph = info.paragraph;
+        CHECK_NULL_RETURN(paragraph, 0.0f);
+        res = std::max(res, paragraph->GetLongestLine());
     }
     return res;
 }
@@ -59,7 +66,9 @@ float ParagraphManager::GetMaxWidth() const
 {
     float res = 0.0f;
     for (auto &&info : paragraphs_) {
-        res = std::max(res, info.paragraph->GetMaxWidth());
+        auto paragraph = info.paragraph;
+        CHECK_NULL_RETURN(paragraph, 0.0f);
+        res = std::max(res, paragraph->GetMaxWidth());
     }
     return res;
 }
@@ -67,7 +76,9 @@ float ParagraphManager::GetTextWidth() const
 {
     float res = 0.0f;
     for (auto &&info : paragraphs_) {
-        res = std::max(res, info.paragraph->GetTextWidth());
+        auto paragraph = info.paragraph;
+        CHECK_NULL_RETURN(paragraph, 0.0f);
+        res = std::max(res, paragraph->GetTextWidth());
     }
     return res;
 }
@@ -76,13 +87,21 @@ float ParagraphManager::GetTextWidthIncludeIndent() const
 {
     float res = 0.0f;
     for (auto &&info : paragraphs_) {
-        auto width = info.paragraph->GetTextWidth();
-        if (info.paragraph->GetLineCount() == 1) {
-            width += static_cast<float>(info.paragraphStyle.indent.ConvertToPx());
-        }
-        if (info.paragraphStyle.leadingMargin.has_value()) {
-            width += static_cast<float>(info.paragraphStyle.leadingMargin->size.Width().ConvertToPx());
-        }
+        auto paragraph = info.paragraph;
+        CHECK_NULL_RETURN(paragraph, 0.0f);
+        auto width = paragraph->GetTextWidth();
+        res = std::max(res, width);
+    }
+    return res;
+}
+
+float ParagraphManager::GetLongestLineWithIndent() const
+{
+    float res = 0.0f;
+    for (auto &&info : paragraphs_) {
+        auto paragraph = info.paragraph;
+        CHECK_NULL_RETURN(paragraph, 0.0f);
+        auto width = paragraph->GetLongestLineWithIndent();
         res = std::max(res, width);
     }
     return res;
@@ -92,7 +111,9 @@ size_t ParagraphManager::GetLineCount() const
 {
     size_t count = 0;
     for (auto &&info : paragraphs_) {
-        count += info.paragraph->GetLineCount();
+        auto paragraph = info.paragraph;
+        CHECK_NULL_RETURN(paragraph, 0);
+        count += paragraph->GetLineCount();
     }
     return count;
 }
@@ -162,7 +183,8 @@ int32_t ParagraphManager::GetGlyphIndexByCoordinate(Offset offset, bool isSelect
         // get offset relative to each paragraph
         offset.SetY(offset.GetY() - info.paragraph->GetHeight());
     }
-    return paragraphs_.back().end;
+    offset.SetY(offset.GetY() + paragraphs_.back().paragraph->GetHeight());
+    return paragraphs_.back().paragraph->GetGlyphIndexByCoordinate(offset, isSelectionPos) + paragraphs_.back().start;
 }
 
 bool ParagraphManager::GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) const
@@ -263,6 +285,29 @@ TextLineMetrics ParagraphManager::GetLineMetrics(size_t lineNumber)
     return TextLineMetrics();
 }
 
+bool ParagraphManager::IsIndexAtParagraphEnd(int32_t index)
+{
+    for (const auto& info : paragraphs_) {
+        if (info.end == index) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void ParagraphManager::GetPaintRegion(RectF& boundsRect, float x, float y) const
+{
+    if (paragraphs_.empty()) {
+        return;
+    }
+    for (const auto& info : paragraphs_) {
+        CHECK_NULL_VOID(info.paragraph);
+        auto rect = info.paragraph->GetPaintRegion(x, y);
+        boundsRect = boundsRect.CombineRectT(rect);
+        y += info.paragraph->GetHeight();
+    }
+}
+
 std::vector<ParagraphManager::TextBox> ParagraphManager::GetRectsForRange(
     int32_t start, int32_t end, RectHeightStyle heightStyle, RectWidthStyle widthStyle)
 {
@@ -282,6 +327,11 @@ std::vector<ParagraphManager::TextBox> ParagraphManager::GetRectsForRange(
         std::vector<TextDirection> tempTextDirections;
         info.paragraph->TxtGetRectsForRange(
             relativeStart, relativeEnd, heightStyle, widthStyle, tempRects, tempTextDirections);
+        if (tempTextDirections.size() < tempRects.size()) {
+            TAG_LOGE(AceLogTag::ACE_TEXT, "TxtGetRectsForRange failed, tempTextDirections size=%{public}zu is less "\
+                "than tempRects size=%{public}zu", tempTextDirections.size(), tempRects.size());
+            continue;
+        }
         for (size_t i = 0; i < tempRects.size(); ++i) {
             tempRects[i].SetTop(tempRects[i].Top() + y);
             resultTextBoxes.emplace_back(TextBox(tempRects[i], tempTextDirections[i]));
@@ -289,6 +339,17 @@ std::vector<ParagraphManager::TextBox> ParagraphManager::GetRectsForRange(
         y += info.paragraph->GetHeight();
     }
     return resultTextBoxes;
+}
+
+std::pair<size_t, size_t> ParagraphManager::GetEllipsisTextRange()
+{
+    std::pair<size_t, size_t> range = {std::numeric_limits<size_t>::max(), 0};
+    for (auto&& info : paragraphs_) {
+        const auto& ellipsisTextRange = info.paragraph->GetEllipsisTextRange();
+        range.first = std::min(range.first, ellipsisTextRange.first);
+        range.second = std::max(range.second, ellipsisTextRange.second);
+    }
+    return range;
 }
 
 std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy) const
@@ -316,6 +377,19 @@ std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end, RectHe
         y += info.paragraph->GetHeight();
     }
     return res;
+}
+
+ParagraphManager::ParagraphInfo ParagraphManager::GetParagraphInfo(int32_t position) const
+{
+    CHECK_EQUAL_RETURN(paragraphs_.empty(), true, {});
+    auto it = std::find_if(paragraphs_.begin(), paragraphs_.end(), [position](const ParagraphInfo& info) {
+        return (info.start <= position) && (position < info.end);
+    });
+    if (position == paragraphs_.back().end) {
+        --it;
+    }
+    CHECK_EQUAL_RETURN(it == paragraphs_.end(), true, {});
+    return (*it);
 }
 
 std::vector<std::pair<std::vector<RectF>, TextDirection>> ParagraphManager::GetParagraphsRects(
@@ -348,20 +422,210 @@ std::vector<std::pair<std::vector<RectF>, TextDirection>> ParagraphManager::GetP
     return paragraphsRects;
 }
 
+std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> ParagraphManager::GetTextBoxesForSelect(
+    int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy) const
+{
+    SelectData selectData;
+    selectData.secondResult = CalcCaretMetricsByPosition(end, selectData.secondMetrics, TextAffinity::UPSTREAM);
+    std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> paragraphsRects;
+    selectData.y = 0.0f;
+    for (auto&& info : paragraphs_) {
+        if (info.start > end) {
+            break;
+        }
+        CHECK_NULL_BREAK(info.paragraph);
+        if (info.end > start) {
+            std::vector<RectF> rects;
+            selectData.relativeStart = std::max(0, start - info.start);
+            selectData.relativeEnd = end - info.start;
+            selectData.paragraphSpacing = info.paragraphStyle.paragraphSpacing.ConvertToPx();
+            if (rectHeightPolicy == RectHeightPolicy::COVER_TEXT) {
+                info.paragraph->GetTightRectsForRange(selectData.relativeStart, selectData.relativeEnd, rects);
+            } else {
+                info.paragraph->GetRectsForRange(selectData.relativeStart, selectData.relativeEnd, rects);
+            }
+            MakeBlankLineRectsInParagraph(rects, info, selectData);
+            for (auto&& rect : rects) {
+                rect.SetTop(rect.Top() + selectData.y);
+            }
+            paragraphsRects.emplace_back(std::make_pair(rects, info.paragraphStyle));
+        }
+        selectData.y += info.paragraph->GetHeight();
+    }
+    if (!paragraphsRects.empty()) {
+        selectData.y = 0.0f;
+        RemoveBlankLineRectByHandler(paragraphsRects.back().first, selectData);
+    }
+    return paragraphsRects;
+}
+
+void ParagraphManager::MakeBlankLineRectsInParagraph(std::vector<RectF>& result, const ParagraphInfo& info,
+    const SelectData& selectData)
+{
+    const int32_t realEnd = info.end - info.start;
+    const bool isLastParagraph = (selectData.relativeEnd == 0) || (selectData.relativeEnd <= realEnd);
+    AppendParagraphSpacingBlankRect(result, selectData);
+    if (isLastParagraph && !result.empty() && IsRectOutByHandler(result.back(), selectData)) {
+        auto lastRect = result.back();
+        result.pop_back();
+        AddParagraphSpacingBlankRect(result, lastRect, selectData);
+        return;
+    }
+    CHECK_NULL_VOID(info.paragraph);
+    float height = info.paragraph->GetHeight();
+    if (Positive(selectData.paragraphSpacing) && !isLastParagraph && !result.empty() &&
+        NearZero(result.back().Width()) && selectData.relativeEnd != realEnd) {
+        result.emplace_back(RectF(0.0f, height - selectData.paragraphSpacing, 0.0f, selectData.paragraphSpacing));
+    }
+    const float lastBottom = result.empty() ? MIN_RECT_TOP : result.back().Bottom();
+    int32_t loopStart = std::min(realEnd, selectData.relativeEnd);
+    int32_t loopEnd = std::max(0, selectData.relativeStart);
+    std::vector<RectF> rects;
+    for (int32_t index = loopStart; index >= loopEnd; index--) {
+        if (GreatOrEqualCustomPrecision(lastBottom, height, MIN_RECT_PRECISION)) {
+            break;
+        }
+        CaretMetricsF caretMetrics;
+        bool res = info.paragraph->CalcCaretMetricsByPosition(index, caretMetrics, TextAffinity::UPSTREAM);
+        CHECK_NULL_BREAK(res)
+        RectF rect(caretMetrics.offset.GetX(), caretMetrics.offset.GetY(), 0.0f, caretMetrics.height);
+        if (GreatNotEqual(rect.Bottom(), height) || (isLastParagraph && IsRectOutByHandler(rect, selectData))) {
+            continue;
+        }
+        if (LessNotEqual(rect.Top(), lastBottom)) {
+            break;
+        }
+        height = rect.Top();
+        rects.emplace_back(rect);
+    }
+    std::reverse(rects.begin(), rects.end());
+    result.insert(result.end(), rects.begin(), rects.end());
+}
+
+void ParagraphManager::AppendParagraphSpacingBlankRect(std::vector<RectF>& rects, const SelectData& selectData)
+{
+    if (!Positive(selectData.paragraphSpacing) || rects.empty()) {
+        return;
+    }
+    std::vector<RectF> selectedRects = std::move(rects);
+    for (auto it = selectedRects.begin(); it != selectedRects.end(); it++) {
+        auto rect = *it;
+        if (NearZero(rect.Width()) && (it == selectedRects.begin() || !NearEqual(rect.Top(), std::prev(it)->Top()))) {
+            rect.SetHeight(rect.Height() + selectData.paragraphSpacing);
+        }
+        rects.push_back(rect);
+    }
+}
+
+void ParagraphManager::AddParagraphSpacingBlankRect(
+    std::vector<RectF>& rects, const RectF& lastRect, const SelectData& selectData)
+{
+    if (!Positive(selectData.paragraphSpacing) || rects.empty() || NearEqual(rects.back().Top(), lastRect.Top())) {
+        return;
+    }
+    rects.emplace_back(
+        RectF(lastRect.Left(), lastRect.Top() - selectData.paragraphSpacing, 0.0f, selectData.paragraphSpacing));
+}
+
+std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> ParagraphManager::GetRichEditorBoxesForSelect(
+    int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy) const
+{
+    SelectData selectData;
+    selectData.secondResult = CalcCaretMetricsByPosition(end, selectData.secondMetrics, TextAffinity::DOWNSTREAM);
+    std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> paragraphsRects;
+    selectData.y = 0.0f;
+    for (auto&& info : paragraphs_) {
+        if (info.start > end) {
+            break;
+        }
+        CHECK_NULL_BREAK(info.paragraph);
+        if (info.end > start) {
+            std::vector<RectF> rects;
+            selectData.relativeStart = std::max(0, start - info.start);
+            selectData.relativeEnd = end - info.start;
+            if (rectHeightPolicy == RectHeightPolicy::COVER_TEXT) {
+                info.paragraph->GetTightRectsForRange(selectData.relativeStart, selectData.relativeEnd, rects);
+            } else {
+                info.paragraph->GetRectsForRange(selectData.relativeStart, selectData.relativeEnd, rects);
+            }
+            MakeBlankRectsInRichEditor(rects, info, selectData);
+            for (auto&& rect : rects) {
+                rect.SetTop(rect.Top() + selectData.y);
+            }
+            paragraphsRects.emplace_back(std::make_pair(rects, info.paragraphStyle));
+            selectData.paragraphSpacing = info.paragraphStyle.paragraphSpacing.ConvertToPx();
+        }
+        selectData.y += info.paragraph->GetHeight();
+    }
+    if (!paragraphsRects.empty()) {
+        selectData.y = 0.0f;
+        RemoveBlankLineRectByHandler(paragraphsRects.back().first, selectData);
+    }
+    return paragraphsRects;
+}
+
+void ParagraphManager::MakeBlankRectsInRichEditor(std::vector<RectF>& result, const ParagraphInfo& info,
+    const SelectData& selectData)
+{
+    const int32_t realEnd = info.end - info.start;
+    const bool isLastParagraph = (selectData.relativeEnd == 0) || (selectData.relativeEnd < realEnd);
+    if (isLastParagraph && !result.empty() && IsRectOutByHandler(result.back(), selectData)) {
+        result.pop_back();
+        return;
+    }
+    CHECK_NULL_VOID(info.paragraph);
+    float height = info.paragraph->GetHeight();
+    const float lastBottom = result.empty() ? MIN_RECT_TOP : result.back().Bottom();
+    int32_t loopStart = std::min(realEnd, selectData.relativeEnd);
+    int32_t loopEnd = std::max(0, selectData.relativeStart);
+    std::vector<RectF> rects;
+    for (int32_t index = loopStart; index >= loopEnd; index--) {
+        if (GreatOrEqualCustomPrecision(lastBottom, height, MIN_RECT_PRECISION)) {
+            break;
+        }
+        CaretMetricsF caretMetrics;
+        bool res = info.paragraph->CalcCaretMetricsByPosition(index, caretMetrics, TextAffinity::UPSTREAM);
+        CHECK_NULL_BREAK(res)
+        RectF rect(caretMetrics.offset.GetX(), caretMetrics.offset.GetY(), 0.0f, caretMetrics.height);
+        height  = rect.Top();
+        rects.emplace_back(rect);
+        if (auto spacing = selectData.paragraphSpacing; index == 0 && !NearZero(spacing)) {
+            rects.emplace_back(caretMetrics.offset.GetX(), caretMetrics.offset.GetY() - spacing, 0, spacing);
+        }
+    }
+    std::reverse(rects.begin(), rects.end());
+    result.insert(result.end(), rects.begin(), rects.end());
+}
+
+void ParagraphManager::RemoveBlankLineRectByHandler(std::vector<RectF>& rects, const SelectData& selectData)
+{
+    while (!rects.empty()) {
+        CHECK_EQUAL_VOID(IsRectOutByHandler(rects.back(), selectData), false);
+        rects.pop_back();
+    }
+}
+
+bool ParagraphManager::IsRectOutByHandler(const RectF& rect, const SelectData& selectData)
+{
+    CHECK_EQUAL_RETURN(NearZero(rect.Width()), false, false);
+    CHECK_EQUAL_RETURN(selectData.secondResult, false, false);
+    return GreatOrEqual(rect.Top() + selectData.y, selectData.secondMetrics.offset.GetY());
+}
+
 bool ParagraphManager::IsSelectLineHeadAndUseLeadingMargin(int32_t start) const
 {
     for (auto iter = paragraphs_.begin(); iter != paragraphs_.end(); iter++) {
         auto curParagraph = *iter;
-        if (curParagraph.paragraph && curParagraph.paragraph->GetParagraphStyle().leadingMargin &&
-            curParagraph.start == start) {
-            return true;
+        if (auto paragraph = curParagraph.paragraph; curParagraph.start == start && paragraph) {
+            auto leadingMargin = paragraph->GetParagraphStyle().leadingMargin;
+            CHECK_EQUAL_RETURN(leadingMargin && leadingMargin.value().IsValid(), true, true);
         }
         auto next = std::next(iter);
         if (next != paragraphs_.end()) {
             auto nextParagraph = *next;
-            if (nextParagraph.paragraph && nextParagraph.paragraph->GetParagraphStyle().leadingMargin &&
-                nextParagraph.start == start + 1) {
-                return true;
+            if (auto paragraph = nextParagraph.paragraph; nextParagraph.start == start + 1) {
+                auto leadingMargin = paragraph->GetParagraphStyle().leadingMargin;
+                CHECK_EQUAL_RETURN(leadingMargin && leadingMargin.value().IsValid(), true, true);
             }
         }
     }

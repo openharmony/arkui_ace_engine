@@ -15,15 +15,8 @@
 
 #include "bridge/declarative_frontend/jsview/models/text_model_impl.h"
 
-#include <utility>
-
-#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/declaration/text/text_declaration.h"
-#include "core/components/text/text_theme.h"
-#include "core/components_ng/event/gesture_event_hub.h"
-#include "core/event/ace_event_handler.h"
 
 namespace OHOS::Ace::Framework {
 void TextModelImpl::Create(const std::string& content)
@@ -44,6 +37,11 @@ void TextModelImpl::Create(const std::string& content)
     constexpr Dimension fontSize = 30.0_px;
     textStyle.SetFontSize(fontSize);
     textComponent->SetTextStyle(textStyle);
+}
+
+void TextModelImpl::Create(const std::u16string& content)
+{
+    Create(UtfUtils::Str16DebugToStr8(content));
 }
 
 void TextModelImpl::SetFont(const Font& value) {}
@@ -69,6 +67,8 @@ void TextModelImpl::SetTextColor(const Color& value)
 }
 
 void TextModelImpl::SetTextShadow(const std::vector<Shadow>& value) {}
+void TextModelImpl::SetTextCaretColor(const Color& value) {}
+void TextModelImpl::SetSelectedBackgroundColor(const Color& value) {}
 
 void TextModelImpl::SetItalicFontStyle(Ace::FontStyle value)
 {
@@ -280,7 +280,7 @@ void TextModelImpl::OnSetAlign()
     }
 }
 
-void TextModelImpl::SetOnClick(std::function<void(BaseEventInfo*)>&& click)
+void TextModelImpl::SetOnClick(std::function<void(BaseEventInfo*)>&& click, double distanceThreshold)
 {
     auto clickId = EventMarker(std::move(click));
     auto gesture = ViewStackProcessor::GetInstance()->GetClickGestureListenerComponent();
@@ -312,41 +312,11 @@ void TextModelImpl::SetCopyOption(CopyOptions copyOption)
     component->SetCopyOption(copyOption);
 }
 
-void TextModelImpl::SetDraggable(bool draggable) {}
-
 void TextModelImpl::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
 {
     auto component = GetComponent();
     CHECK_NULL_VOID(component);
     component->SetOnDragStartId(ViewAbstractModelImpl::ToDragFunc(std::move(onDragStart)));
-}
-
-void TextModelImpl::SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter)
-{
-    auto component = GetComponent();
-    CHECK_NULL_VOID(component);
-    component->SetOnDragEnterId(onDragEnter);
-}
-
-void TextModelImpl::SetOnDragMove(NG::OnDragDropFunc&& onDragMove)
-{
-    auto component = GetComponent();
-    CHECK_NULL_VOID(component);
-    component->SetOnDragMoveId(onDragMove);
-}
-
-void TextModelImpl::SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave)
-{
-    auto component = GetComponent();
-    CHECK_NULL_VOID(component);
-    component->SetOnDragLeaveId(onDragLeave);
-}
-
-void TextModelImpl::SetOnDrop(NG::OnDragDropFunc&& onDrop)
-{
-    auto component = GetComponent();
-    CHECK_NULL_VOID(component);
-    component->SetOnDropId(onDrop);
 }
 
 void TextModelImpl::SetHalfLeading(bool halfLeading) {}

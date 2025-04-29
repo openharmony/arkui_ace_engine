@@ -15,6 +15,8 @@
 
 #include "text_input_base.h"
 
+#include "test/mock/core/rosen/mock_canvas.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
@@ -42,12 +44,16 @@ HWTEST_F(TextFieldUXTest, UpdateCaretByTouchMove001, TestSize.Level1)
     TouchLocationInfo touchLocationInfo1(0);
     touchLocationInfo1.touchType_ = TouchType::DOWN;
     touchLocationInfo1.localLocation_ = Offset(0.0f, 0.0f);
+    TouchLocationInfo touchLocationInfo11(0);
+    touchLocationInfo11.touchType_ = TouchType::DOWN;
+    touchLocationInfo11.localLocation_ = Offset(0.0f, 0.0f);
 
     /**
      * @tc.steps: step3. create touch info, touch type DOWN
      */
     TouchEventInfo touchInfo1("");
     touchInfo1.AddTouchLocationInfo(std::move(touchLocationInfo1));
+    touchInfo1.AddChangedTouchLocationInfo(std::move(touchLocationInfo11));
 
     /**
      * @tc.steps: step4. test touch down
@@ -61,12 +67,16 @@ HWTEST_F(TextFieldUXTest, UpdateCaretByTouchMove001, TestSize.Level1)
     TouchLocationInfo touchLocationInfo2(0);
     touchLocationInfo2.touchType_ = TouchType::MOVE;
     touchLocationInfo2.localLocation_ = Offset(0.0f, 0.0f);
+    TouchLocationInfo touchLocationInfo22(0);
+    touchLocationInfo22.touchType_ = TouchType::MOVE;
+    touchLocationInfo22.localLocation_ = Offset(0.0f, 0.0f);
 
     /**
      * @tc.steps: step6. create touch info, touch type MOVE
      */
     TouchEventInfo touchInfo2("");
     touchInfo2.AddTouchLocationInfo(std::move(touchLocationInfo2));
+    touchInfo2.AddChangedTouchLocationInfo(std::move(touchLocationInfo22));
 
     /**
      * @tc.steps: step7. test touch move
@@ -80,12 +90,16 @@ HWTEST_F(TextFieldUXTest, UpdateCaretByTouchMove001, TestSize.Level1)
     TouchLocationInfo touchLocationInfo3(0);
     touchLocationInfo3.touchType_ = TouchType::UP;
     touchLocationInfo3.localLocation_ = Offset(0.0f, 0.0f);
+    TouchLocationInfo touchLocationInfo33(0);
+    touchLocationInfo33.touchType_ = TouchType::UP;
+    touchLocationInfo33.localLocation_ = Offset(0.0f, 0.0f);
 
     /**
      * @tc.steps: step9. create touch info, touch type UP
      */
     TouchEventInfo touchInfo3("");
     touchInfo3.AddTouchLocationInfo(std::move(touchLocationInfo3));
+    touchInfo3.AddChangedTouchLocationInfo(std::move(touchLocationInfo33));
 
     /**
      * @tc.steps: step10. test touch up
@@ -108,6 +122,7 @@ HWTEST_F(TextFieldUXTest, CleanNode001, TestSize.Level1)
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
         model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -115,11 +130,12 @@ HWTEST_F(TextFieldUXTest, CleanNode001, TestSize.Level1)
      */
     auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
     auto stackNode = cleanNodeResponseArea->cleanNode_;
-    auto imageFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
-    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    auto iconFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
+    auto iconLayoutProperty = iconFrameNode->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(iconLayoutProperty, nullptr);
 
     /**
-     * @tc.steps: step5. create text inco size
+     * @tc.steps: step5. create text icon size
      */
     auto iconSize = Dimension(ICON_SIZE, DimensionUnit::PX);
 
@@ -127,14 +143,14 @@ HWTEST_F(TextFieldUXTest, CleanNode001, TestSize.Level1)
      * @tc.steps: step6. test Update clear node true
      */
     cleanNodeResponseArea->UpdateCleanNode(true);
-    EXPECT_EQ(imageLayoutProperty->calcLayoutConstraint_->selfIdealSize,
+    EXPECT_EQ(iconLayoutProperty->calcLayoutConstraint_->selfIdealSize,
         CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
 
     /**
      * @tc.steps: step7. test Update clear node false
      */
     cleanNodeResponseArea->UpdateCleanNode(false);
-    EXPECT_EQ(imageLayoutProperty->calcLayoutConstraint_->selfIdealSize, CalcSize(CalcLength(0.0), CalcLength(0.0)));
+    EXPECT_EQ(iconLayoutProperty->calcLayoutConstraint_->selfIdealSize, CalcSize(CalcLength(0.0), CalcLength(0.0)));
 }
 
 /**
@@ -151,6 +167,7 @@ HWTEST_F(TextFieldUXTest, CleanNode002, TestSize.Level1)
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
         model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -163,7 +180,149 @@ HWTEST_F(TextFieldUXTest, CleanNode002, TestSize.Level1)
      * @tc.steps: step3. test clean node clicked
      */
     cleanNodeResponseArea->OnCleanNodeClicked();
+    pattern_->BeforeCreateLayoutWrapper();
     EXPECT_EQ(pattern_->GetTextValue(), "");
+}
+
+/**
+ * @tc.name: CleanNode003
+ * @tc.desc: Test showCancelButtonSymbol false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, CleanNode003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input, set cancelButtonSymbol false
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(false);
+    });
+
+    /**
+     * @tc.steps: step2. Get clear node response area
+     */
+    auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(cleanNodeResponseArea, nullptr);
+
+    /**
+     * @tc.steps: step3. test clean node symbol false
+     */
+    EXPECT_FALSE(cleanNodeResponseArea->IsShowSymbol());
+    EXPECT_FALSE(cleanNodeResponseArea->IsSymbolIcon());
+}
+
+/**
+ * @tc.name: CleanNode004
+ * @tc.desc: Test showCancelButtonSymbol true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, CleanNode004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input, set cancelButtonSymbol true
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(true);
+    });
+
+    /**
+     * @tc.steps: step2. Get clear node response area
+     */
+    auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(cleanNodeResponseArea, nullptr);
+
+    /**
+     * @tc.steps: step3. test clean node symbol true
+     */
+    EXPECT_TRUE(cleanNodeResponseArea->IsShowSymbol());
+    EXPECT_TRUE(cleanNodeResponseArea->IsSymbolIcon());
+}
+
+/**
+ * @tc.name: CleanNode005
+ * @tc.desc: Test showCancelSymbolIcon true, since VERSION_EIGHTEEN
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, CleanNode005, TestSize.Level1)
+{
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+
+    /**
+     * @tc.steps: step1. Initialize text input, set cancelSymbolIcon not nullptr
+     */
+    auto onApply = [](WeakPtr<NG::FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        EXPECT_NE(node, nullptr);
+    };
+    CreateTextField(DEFAULT_TEXT, "", [onApply](TextFieldModelNG model) {
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(true);
+        model.SetCancelSymbolIcon(onApply);
+    });
+
+    /**
+     * @tc.steps: step2. Get clear node response area
+     */
+    auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(cleanNodeResponseArea, nullptr);
+
+    /**
+     * @tc.steps: step3. test cancelSymbolIcon is not nullptr
+     */
+    ASSERT_NE(layoutProperty_, nullptr);
+    EXPECT_NE(layoutProperty_->GetCancelIconSymbol(), nullptr);
+    EXPECT_TRUE(cleanNodeResponseArea->IsShowSymbol());
+    EXPECT_TRUE(cleanNodeResponseArea->IsSymbolIcon());
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
+}
+
+/**
+ * @tc.name: CleanNode006
+ * @tc.desc: Test showCancelSymbolIcon false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, CleanNode006, TestSize.Level1)
+{
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+
+    /**
+     * @tc.steps: step1. Initialize text input, set cancelSymbolIcon nullptr
+     */
+    auto onApply = nullptr;
+    CreateTextField(DEFAULT_TEXT, "", [onApply](TextFieldModelNG model) {
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(true);
+        model.SetCancelSymbolIcon(onApply);
+    });
+
+    /**
+     * @tc.steps: step2. Get clear node response area
+     */
+    auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(cleanNodeResponseArea, nullptr);
+
+    /**
+     * @tc.steps: step3. test cancelSymbolIcon is nullptr
+     */
+    ASSERT_NE(layoutProperty_, nullptr);
+    EXPECT_EQ(layoutProperty_->GetCancelIconSymbol(), nullptr);
+    EXPECT_TRUE(cleanNodeResponseArea->IsShowSymbol());
+    EXPECT_TRUE(cleanNodeResponseArea->IsSymbolIcon());
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
 }
 
 /**
@@ -236,6 +395,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusForward002, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -265,6 +425,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusForward003, TestSize.Level1)
         model.SetShowPasswordIcon(true);
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -343,6 +504,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusBackward002, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -398,6 +560,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusBackward004, TestSize.Level1)
         model.SetType(TextInputType::VISIBLE_PASSWORD);
         model.SetShowPasswordIcon(true);
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -545,7 +708,7 @@ HWTEST_F(TextFieldUXTest, HandleOnShowMenu001, TestSize.Level1)
     /**
      * @tc.steps: step10. Inset value
      */
-    pattern_->InsertValue("abc");
+    pattern_->InsertValue(u"abc");
 
     /**
      * @tc.steps: step11. Test menu open or close
@@ -794,7 +957,7 @@ HWTEST_F(TextFieldUXTest, CopyOption001, TestSize.Level1)
      * @tc.step: step2. test default copyOption
      */
     frameNode_->MarkModifyDone();
-    EXPECT_EQ(pattern_->GetCopyOptionString(), "CopyOptions.Distributed");
+    EXPECT_EQ(pattern_->GetCopyOptionString(), "CopyOptions.Local");
 }
 
 /**
@@ -866,6 +1029,29 @@ HWTEST_F(TextFieldUXTest, CopyOption004, TestSize.Level1)
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->AllowCopy(), false);
     EXPECT_EQ(pattern_->GetCopyOptionString(), "CopyOptions.None");
+}
+
+/**
+ * @tc.name: CopyOption005
+ * @tc.desc: test testInput CopyOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, CopyOption005, TestSize.Level1)
+{
+     /**
+     * @tc.steps: Create Text filed node with set copyOption
+     * @tc.expected: CopyOption is not vaild
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCopyOption(static_cast<CopyOptions>(99));
+    });
+
+    /**
+     * @tc.step: step2. Test CopyOption
+     */
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->AllowCopy(), true);
+    EXPECT_EQ(pattern_->GetCopyOptionString(), "CopyOptions.Local");
 }
 
 /**
@@ -1333,13 +1519,13 @@ HWTEST_F(TextFieldUXTest, testShowPasswordIcon001, TestSize.Level1)
 
 /**
  * @tc.name: testShowPasswordSymbol001
- * @tc.desc: test testInput showPasswordSymbol
+ * @tc.desc: test testInput showPasswordSymbol true, since VERSION_THIRTEEN
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldUXTest, testShowPasswordSymbol001, TestSize.Level1)
 {
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
 
     /**
      * @tc.steps: Create Text filed node
@@ -1366,13 +1552,13 @@ HWTEST_F(TextFieldUXTest, testShowPasswordSymbol001, TestSize.Level1)
 
 /**
  * @tc.name: testShowPasswordSymbol002
- * @tc.desc: test testInput showPasswordSymbol
+ * @tc.desc: test testInput showPasswordSymbol false, because VERSION_TWELVE
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldUXTest, testShowPasswordSymbol002, TestSize.Level1)
 {
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 
     /**
      * @tc.steps: Create Text filed node
@@ -1399,13 +1585,13 @@ HWTEST_F(TextFieldUXTest, testShowPasswordSymbol002, TestSize.Level1)
 
 /**
  * @tc.name: testShowPasswordSymbol003
- * @tc.desc: test testInput showPasswordSymbol
+ * @tc.desc: test testInput showPasswordSymbol false, because set SetPasswordIcon
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldUXTest, testShowPasswordSymbol003, TestSize.Level1)
 {
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
 
     /**
      * @tc.steps: Create Text filed node
@@ -1732,6 +1918,7 @@ HWTEST_F(TextFieldUXTest, HandleOnTab001, TestSize.Level1)
         model.SetType(TextInputType::VISIBLE_PASSWORD);
         model.SetShowPasswordIcon(true);
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -1796,7 +1983,7 @@ HWTEST_F(TextFieldUXTest, HandleOnUndoAction001, TestSize.Level1)
     pattern_->SetCaretPosition(5);
     pattern_->UpdateEditingValueToRecord();
     pattern_->HandleOnUndoAction();
-    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 5);
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 26);
 }
 
 /**
@@ -1976,6 +2163,27 @@ HWTEST_F(TextFieldUXTest, TextInputLineHeight001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextInputHalfLeading001
+ * @tc.desc: test TextInput halfLeading
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputHalfLeading001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with set halfLeading true
+     * @tc.expected: halfLeading is true
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetHalfLeading(true);
+    });
+
+    /**
+     * @tc.step: step2. test halfLeading
+     */
+    EXPECT_EQ(layoutProperty_->GetHalfLeading(), true);
+}
+
+/**
  * @tc.name: TextInputTextDecoration001
  * @tc.desc: test TextInput decoration
  * @tc.type: FUNC
@@ -2022,24 +2230,30 @@ HWTEST_F(TextFieldUXTest, HandleClickEventTest001, TestSize.Level1)
     pattern_->scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
     GestureEvent info;
     info.localLocation_ = Offset(1.0f, 110.0f);
-    pattern_->scrollBar_->barRect_ = Rect(0.0f, 0.0f, 30.0f, 500.0f);
-    pattern_->scrollBar_->touchRegion_ = Rect(10.0f, 100.0f, 30.0f, 100.0f);
-    pattern_->scrollBar_->isScrollable_ = true;
-    // /**
-    //  * @tc.steps: step2. Test HandleClickEvent.
-    //  * @tc.expect: CheckBarDirection equal BarDirection's Value.
-    //  */
+    auto setupScrolbar = [pattern = pattern_]() {
+        pattern->scrollBar_->barRect_ = Rect(0.0f, 0.0f, 30.0f, 500.0f);
+        pattern->scrollBar_->touchRegion_ = Rect(10.0f, 100.0f, 30.0f, 100.0f);
+        pattern->scrollBar_->isScrollable_ = true;
+    };
+
+    /**
+    * @tc.steps: step2. Test HandleClickEvent.
+    * @tc.expect: CheckBarDirection equal BarDirection's Value.
+    */
     pattern_->hasMousePressed_ = true;
     pattern_->HandleClickEvent(info);
     Point point(info.localLocation_.GetX(), info.localLocation_.GetY());
+    setupScrolbar();
     EXPECT_EQ(pattern_->scrollBar_->CheckBarDirection(point), BarDirection::BAR_NONE);
     info.localLocation_ = Offset(1.0f, 1.0f);
     pattern_->HandleClickEvent(info);
     Point point1(info.localLocation_.GetX(), info.localLocation_.GetY());
+    setupScrolbar();
     EXPECT_EQ(pattern_->scrollBar_->CheckBarDirection(point1), BarDirection::PAGE_UP);
     info.localLocation_ = Offset(1.0f, 300.0f);
     pattern_->HandleClickEvent(info);
     Point point2(info.localLocation_.GetX(), info.localLocation_.GetY());
+    setupScrolbar();
     EXPECT_EQ(pattern_->scrollBar_->CheckBarDirection(point2), BarDirection::PAGE_DOWN);
 }
 
@@ -2057,5 +2271,191 @@ HWTEST_F(TextFieldUXTest, SupportAvoidanceTest, TestSize.Level1)
     supportAvoidance = false;
     pattern_->SetCustomKeyboardOption(supportAvoidance);
     EXPECT_FALSE(pattern_->keyboardAvoidance_);
+}
+
+/**
+ * @tc.name: StopBackPress
+ * @tc.desc: Test whether the stopBackPress property is set successfully.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, StopBackPress, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG& model) {
+        model.SetStopBackPress(false);
+    });
+    pattern_->isCustomKeyboardAttached_ = true;
+    /**
+     * @tc.steps: step1. Test IsStopBackPress OnBackPressed.
+     * @tc.expect: return return false.
+     */
+    EXPECT_FALSE(pattern_->IsStopBackPress());
+    EXPECT_FALSE(pattern_->OnBackPressed());
+    /**
+     * @tc.steps: step2. Test SelectContentOverlayManager::IsStopBackPress.
+     * @tc.expect: return false.
+     */
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    manager->selectOverlayHolder_ = pattern_->selectOverlay_;
+    pattern_->selectOverlay_->OnBind(manager);
+    EXPECT_FALSE(manager->IsStopBackPress());
+    /**
+     * @tc.steps: step3. Set stopBackPress to true.
+     * @tc.expect: return true.
+     */
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateStopBackPress(true);
+
+    EXPECT_TRUE(pattern_->IsStopBackPress());
+    EXPECT_TRUE(pattern_->OnBackPressed());
+    EXPECT_TRUE(manager->IsStopBackPress());
+}
+
+/**
+ * @tc.name: SupportTextFadeoutTest002
+ * @tc.desc: Test whether the text node has the ability to support fadeout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SupportTextFadeoutTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Text field node with default text and placeholder.
+     * @tc.expected: Check the textinput node has the ability to support fadeout.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    EXPECT_FALSE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->GetTextFadeoutCapacity());
+}
+
+/**
+ * @tc.name: TextFadeoutStateTest001
+ * @tc.desc: Test the text fadeout and marquee state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextFadeoutStateTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node with default text and placeholder.
+     * @tc.expected: Check the node has the ability to support fadeout.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    EXPECT_TRUE(pattern_->GetTextFadeoutCapacity());
+    EXPECT_FALSE(pattern_->textFieldContentModifier_->textFadeoutEnabled_);
+
+    /**
+     * @tc.steps: step2. Set theme textFadeoutEnabled_.
+     */
+    auto pipelineContext = frameNode_->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    theme->textFadeoutEnabled_ = true;
+
+    /**
+     * @tc.steps: step3. Set contentSize size is less than text size and call UpdateContentModifier.
+     * @tc.expected: text need fadeout and marquee.
+     */
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    paintWrapper->GetGeometryNode()->SetContentSize({ 40.0f, 40.0f });
+    auto paintMethod = AceType::DynamicCast<TextFieldPaintMethod>(pattern_->CreateNodePaintMethod());
+    EXPECT_NE(paintMethod, nullptr);
+
+    paintMethod->UpdateContentModifier(paintWrapper);
+    EXPECT_TRUE(pattern_->GetParagraph()->GetTextWidth() > paintWrapper->GetContentSize().Width());
+    EXPECT_TRUE(pattern_->textFieldContentModifier_->textFadeoutEnabled_);
+}
+
+/**
+ * @tc.name: TextFadeoutStateTest002
+ * @tc.desc: Test the text fadeout and marquee state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextFadeoutStateTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node with default text and placeholder.
+     * @tc.expected: Check the node has the ability to support fadeout.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    EXPECT_TRUE(pattern_->GetTextFadeoutCapacity());
+    EXPECT_FALSE(pattern_->textFieldContentModifier_->textFadeoutEnabled_);
+
+    /**
+     * @tc.steps: step2. Set theme textFadeoutEnabled_.
+     */
+    auto pipelineContext = frameNode_->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    theme->textFadeoutEnabled_ = true;
+
+    /**
+     * @tc.steps: step3. Set contentSize size is larger than text size and call UpdateContentModifier.
+     * @tc.expected: text do not need fadeout.
+     */
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    paintWrapper->GetGeometryNode()->SetContentSize({ 500.0f, 500.0f });
+
+    auto paintMethod = AceType::DynamicCast<TextFieldPaintMethod>(pattern_->CreateNodePaintMethod());
+    EXPECT_NE(paintMethod, nullptr);
+
+    paintMethod->UpdateContentModifier(paintWrapper);
+    EXPECT_FALSE(pattern_->GetParagraph()->GetTextWidth() > paintWrapper->GetContentSize().Width());
+    EXPECT_FALSE(pattern_->textFieldContentModifier_->textFadeoutEnabled_);
+}
+
+/**
+ * @tc.name: TextInputMinFontScale001
+ * @tc.desc: test TextInput minFontScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputMinFontScale001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node with set minFontScale 1.0
+     * @tc.expected: minFontScale is 1.0
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetMinFontScale(1.0);
+    });
+
+    /**
+     * @tc.step: step2. test minFontScale
+     */
+    EXPECT_EQ(layoutProperty_->GetMinFontScale(), 1.0);
+}
+
+/**
+ * @tc.name: TextInputMaxFontScale001
+ * @tc.desc: test TextInput maxFontScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputMaxFontScale001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node with set maxFontScale 2.0
+     * @tc.expected: maxFontScale is 2.0
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetMaxFontScale(2.0);
+    });
+
+    /**
+     * @tc.step: step2. test maxFontScale
+     */
+    EXPECT_EQ(layoutProperty_->GetMaxFontScale(), 2.0);
 }
 } // namespace OHOS::Ace::NG

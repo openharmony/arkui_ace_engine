@@ -80,9 +80,50 @@ class GridItemColumnEndModifier extends ModifierWithKey<number> {
   }
 }
 
+class GridItemOptionsModifier extends ModifierWithKey<GridItemOptions> {
+  static identity: Symbol = Symbol('gridItemOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().gridItem.setGridItemOptions(node, undefined);
+    } else {
+      if (this.value?.style === undefined) {
+        getUINativeModule().gridItem.setGridItemOptions(node, undefined);
+      } else {
+        getUINativeModule().gridItem.setGridItemOptions(node, this.value.style);
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue?.style, this.value?.style);
+  }
+}
+
+class GridItemOnSelectedModifier extends ModifierWithKey<(isSelected: boolean) => void> {
+  constructor(value: (isSelected: boolean) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('gridItemOnSelected');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().gridItem.resetGridItemOnSelected(node);
+    } else {
+      getUINativeModule().gridItem.setGridItemOnSelected(node, this.value!);
+    }
+  }
+}
+
 class ArkGridItemComponent extends ArkComponent implements GridItemAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
+  }
+  allowChildCount(): number {
+    return 1;
+  }
+  initialize(value: Object[]): this {
+    if (value.length === 1 && isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, GridItemOptionsModifier.identity, GridItemOptionsModifier, value[0]);
+    }
+    return this;
   }
   rowStart(value: number): this {
     modifierWithKey(this._modifiersWithKeys, GridItemRowStartModifier.identity, GridItemRowStartModifier, value);
@@ -112,7 +153,8 @@ class ArkGridItemComponent extends ArkComponent implements GridItemAttribute {
     return this;
   }
   onSelect(event: (isSelected: boolean) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, GridItemOnSelectedModifier.identity, GridItemOnSelectedModifier, event);
+    return this;
   }
 }
 

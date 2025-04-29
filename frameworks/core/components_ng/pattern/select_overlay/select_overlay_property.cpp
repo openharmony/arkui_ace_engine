@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 
-#include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -24,7 +22,7 @@ namespace OHOS::Ace::NG {
 Dimension SelectHandleInfo::GetDefaultLineWidth()
 {
     const Dimension defaultLineWidth = 2.0_vp;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, defaultLineWidth);
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(theme, defaultLineWidth);
@@ -38,7 +36,7 @@ void SelectOverlayInfo::GetCallerNodeAncestorViewPort(RectF& viewPort)
     } else {
         auto frameNode = callerFrameNode.Upgrade();
         if (frameNode) {
-            auto viewPortOption = frameNode->GetViewPort();
+            auto viewPortOption = frameNode->GetViewPort(true);
             if (viewPortOption.has_value()) {
                 viewPort = viewPortOption.value();
             }
@@ -54,5 +52,13 @@ const RectF& SelectOverlayInfo::GetFirstHandlePaintRect()
 const RectF& SelectOverlayInfo::GetSecondHandlePaintRect()
 {
     return handleLevelMode == HandleLevelMode::OVERLAY ? secondHandle.paintRect : secondHandle.localPaintRect;
+}
+
+TextMenuShowMode CastToTextMenuShowMode(int32_t value)
+{
+    if (value <= static_cast<int32_t>(TextMenuShowMode::BEGIN) || value > static_cast<int32_t>(TextMenuShowMode::END)) {
+        return TextMenuShowMode::DEFAULT;
+    }
+    return static_cast<TextMenuShowMode>(value);
 }
 } // namespace OHOS::Ace::NG

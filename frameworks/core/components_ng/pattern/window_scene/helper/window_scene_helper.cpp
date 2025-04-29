@@ -16,8 +16,6 @@
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 
 #include "input_manager.h"
-#include "key_event.h"
-#include "pointer_event.h"
 
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "base/memory/referenced.h"
@@ -30,8 +28,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "session/host/include/session.h"
 
-#if not defined(ACE_UNITTEST)
-#if defined(ENABLE_STANDARD_INPUT)
+#ifndef ACE_UNITTEST
+#ifdef ENABLE_STANDARD_INPUT
 #include "input_method_controller.h"
 #endif
 #endif
@@ -42,8 +40,8 @@ RefPtr<UINode> WindowSceneHelper::FindWindowScene(const RefPtr<FrameNode>& targe
     CHECK_NULL_RETURN(targetNode, nullptr);
 
     auto container = Container::Current();
-    if (!container || !container->IsScenceBoardWindow() || !container->IsSceneBoardEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Container nullptr Or not ScenceBoardWindow.");
+    if (!container || !container->IsSceneBoardWindow() || !container->IsSceneBoardEnabled()) {
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Container nullptr Or not SceneBoardWindow.");
         return nullptr;
     }
 
@@ -151,7 +149,7 @@ void WindowSceneHelper::IsWindowSceneCloseKeyboard(const RefPtr<FrameNode>& fram
     if (!saveKeyboard && !isNeedKeyBoard) {
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
-            inputMethod->RequestHideInput();
+            inputMethod->RequestHideInput(true);
             inputMethod->Close();
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "scbSoftKeyboard Closes Successfully.");
         }
@@ -168,11 +166,12 @@ void WindowSceneHelper::IsCloseKeyboard(const RefPtr<FrameNode>& frameNode)
     bool isNeedKeyBoard = curPattern->NeedSoftKeyboard();
     auto saveKeyboard = IsFocusWindowSceneCloseKeyboard(frameNode);
     TAG_LOGI(AceLogTag::ACE_KEYBOARD,
-        "FrameNode(%{public}s/%{public}d) notNeedSoftKeyboard, Keep:%{public}d, Need:%{public}d)",
+        "FrameNode(%{public}s/%{public}d) notNeed SoftKeyboard, Keep:%{public}d, Need:%{public}d)",
         frameNode->GetTag().c_str(), frameNode->GetId(), !saveKeyboard, !isNeedKeyBoard);
     if (!saveKeyboard && !isNeedKeyBoard) {
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
+            inputMethod->RequestHideInput(true);
             inputMethod->Close();
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
         }
@@ -205,45 +204,6 @@ void CaculatePoint(const RefPtr<FrameNode>& node, const std::shared_ptr<OHOS::MM
         }
         pointerEvent->UpdatePointerItem(pointerId, item);
     }
-}
-
-void WindowSceneHelper::InjectPointerEvent(
-    const std::string& targetNodeName, const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
-{
-    if (!pointerEvent) {
-        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "InjectPointerEvent pointerEvent is null return.");
-        return;
-    }
-    if (targetNodeName.empty()) {
-        MMI::InputManager::GetInstance()->MarkProcessed(
-            pointerEvent->GetId(), pointerEvent->GetActionTime(), pointerEvent->IsMarkEnabled());
-        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "InjectPointerEvent eventId:%{public}d targetNodeName is null return.",
-            pointerEvent->GetId());
-        return;
-    }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    if (!pipelineContext) {
-        MMI::InputManager::GetInstance()->MarkProcessed(
-            pointerEvent->GetId(), pointerEvent->GetActionTime(), pointerEvent->IsMarkEnabled());
-        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "InjectPointerEvent eventId:%{public}d pipelineContext is null return.",
-            pointerEvent->GetId());
-        return;
-    }
-
-    auto rootNode = pipelineContext->GetRootElement();
-    if (!rootNode) {
-        MMI::InputManager::GetInstance()->MarkProcessed(
-            pointerEvent->GetId(), pointerEvent->GetActionTime(), pointerEvent->IsMarkEnabled());
-        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "InjectPointerEvent eventId:%{public}d rootNode is null return.",
-            pointerEvent->GetId());
-        return;
-    }
-    auto targetNode = FrameNode::FindChildByName(rootNode, targetNodeName);
-    if (!targetNode && pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
-        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
-            "PointerEvent Process to inject, targetNode is null. targetNodeName:%{public}s", targetNodeName.c_str());
-    }
-    InjectPointerEvent(targetNode, pointerEvent);
 }
 
 void WindowSceneHelper::InjectPointerEvent(
@@ -281,15 +241,49 @@ void WindowSceneHelper::InjectPointerEvent(
     OHOS::Ace::Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent, node, nullptr, true);
 }
 
+void WindowSceneHelper::InjectPointerEventForActionCancel(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
+{
+    if (!pointerEvent) {
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "InjectPointerEventForActionCancel pointerEvent is null return.");
+        return;
+    }
+
+    if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_CANCEL) {
+        MMI::InputManager::GetInstance()->MarkProcessed(
+            pointerEvent->GetId(), pointerEvent->GetActionTime(), pointerEvent->IsMarkEnabled());
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "InjectPointerEventForActionCancel only handle cancel event.");
+        return;
+    }
+
+    auto container = Container::Current();
+    if (!container) {
+        MMI::InputManager::GetInstance()->MarkProcessed(
+            pointerEvent->GetId(), pointerEvent->GetActionTime(), pointerEvent->IsMarkEnabled());
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
+            "InjectPointerEventForActionCancel eventId:%{public}d container is null return.", pointerEvent->GetId());
+        return;
+    }
+    auto aceView = AceType::DynamicCast<OHOS::Ace::Platform::AceViewOhos>(container->GetAceView());
+    if (!aceView) {
+        MMI::InputManager::GetInstance()->MarkProcessed(
+            pointerEvent->GetId(), pointerEvent->GetActionTime(), pointerEvent->IsMarkEnabled());
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
+            "InjectPointerEventForActionCancel eventId:%{public}d aceView is null return.", pointerEvent->GetId());
+        return;
+    }
+    OHOS::Ace::Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent, nullptr, nullptr, true);
+}
+
 bool WindowSceneHelper::InjectKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme)
 {
     CHECK_NULL_RETURN(keyEvent, false);
     if (!SystemProperties::GetAceCommercialLogEnabled()) {
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
-            "KeyEvent Process to inject, eventInfo: id:%{public}d, "
+            SEC_PLD(, "KeyEvent Process to inject, eventInfo: id:%{public}d, "
             "keyEvent info: keyCode is %{public}d, "
-            "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
-            keyEvent->GetId(), keyEvent->GetKeyCode(), keyEvent->GetKeyAction(), keyEvent->GetActionTime());
+            "keyAction is %{public}d, keyActionTime is %{public}" PRId64),
+            SEC_PARAM(keyEvent->GetId(), keyEvent->GetKeyCode(),
+            keyEvent->GetKeyAction(), keyEvent->GetActionTime()));
     }
 
     auto container = Container::Current();
@@ -320,6 +314,11 @@ bool WindowSceneHelper::IsTransformScene(uint32_t type)
     return type == static_cast<uint32_t>(WindowPatternType::TRANSFORM_SCENE);
 }
 
+bool WindowSceneHelper::IsAppOrSubScene(uint32_t type)
+{
+    return type == static_cast<uint32_t>(WindowPatternType::WINDOW_SCENE);
+}
+
 bool WindowSceneHelper::IsSystemWindowScene(uint32_t type)
 {
     return type == static_cast<uint32_t>(WindowPatternType::SYSTEM_WINDOW_SCENE);
@@ -333,5 +332,18 @@ bool WindowSceneHelper::IsPanelScene(uint32_t type)
 bool WindowSceneHelper::IsScreenScene(uint32_t type)
 {
     return type == static_cast<uint32_t>(WindowPatternType::SCREEN_SCENE);
+}
+
+bool WindowSceneHelper::IsNodeInKeyGuardWindow(const RefPtr<FrameNode>& node)
+{
+    auto window2patternSession = GetCurSession(node);
+    if (window2patternSession == nullptr) {
+        TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "The session between window and pattern is nullptr.");
+        return false;
+    }
+    
+    auto sessionWindowType = window2patternSession->GetWindowType();
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "The windowtype of window scene session is %{public}d", sessionWindowType);
+    return sessionWindowType == Rosen::WindowType::WINDOW_TYPE_KEYGUARD;
 }
 } // namespace OHOS::Ace::NG

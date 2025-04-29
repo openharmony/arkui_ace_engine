@@ -16,12 +16,42 @@
 #ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_EVENT_OBSERVER_H
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_EVENT_OBSERVER_H
 
+#include <functional>
+#include <memory>
 #include <string>
 #include <unordered_map>
 
 #include "macros.h"
 
 namespace OHOS::Ace {
+using OnInspectorTreeResult = std::function<void(const std::shared_ptr<std::string>)>;
+
+enum class InspectorInfoType: int32_t {
+    CONTENT = 0,
+    WINDOW_ID,
+    WEB_LANG,
+};
+
+enum class InspectorPageType: int32_t {
+    FOCUS = 0,
+    FOREGROUND,
+};
+
+struct ACE_FORCE_EXPORT TreeParams {
+    bool isNewVersion = true;
+    bool isVisibleOnly = false;
+    bool isContentOnly = false;
+    bool enableWeb = false;
+    std::string webContentJs;
+    bool isWindowIdOnly = false;
+    bool enableFullAttrs = false;
+    bool enableAllNodes = false;
+    bool enableBackground = false;
+    InspectorPageType inspectorType { InspectorPageType::FOCUS };
+    InspectorInfoType infoType { InspectorInfoType::CONTENT };
+    int32_t webId = 0;
+};
+
 class ACE_FORCE_EXPORT UIEventObserver {
 public:
     virtual ~UIEventObserver() = default;

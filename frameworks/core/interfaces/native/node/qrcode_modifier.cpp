@@ -14,12 +14,8 @@
  */
 #include "core/interfaces/native/node/qrcode_modifier.h"
 
-#include "core/components/common/layout/constants.h"
 #include "core/components/qrcode/qrcode_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 constexpr uint32_t DEFAULT_BG_COLOR = 0xffffffff;
@@ -86,16 +82,33 @@ void SetQRValue(ArkUINodeHandle node, ArkUI_CharPtr value)
 namespace NodeModifier {
 const ArkUIQRCodeModifier* GetQRCodeModifier()
 {
-    static const ArkUIQRCodeModifier modifier = { SetQRColor, ResetQRColor, SetQRBackgroundColor,
-        ResetQRBackgroundColor, SetContentOpacity, ResetContentOpacity, SetQRValue };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIQRCodeModifier modifier = {
+        .setQRColor = SetQRColor,
+        .resetQRColor = ResetQRColor,
+        .setQRBackgroundColor = SetQRBackgroundColor,
+        .resetQRBackgroundColor = ResetQRBackgroundColor,
+        .setContentOpacity = SetContentOpacity,
+        .resetContentOpacity = ResetContentOpacity,
+        .setQRValue = SetQRValue,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIQRCodeModifier* GetCJUIQRCodeModifier()
 {
-    static const CJUIQRCodeModifier modifier = { SetQRColor, ResetQRColor, SetQRBackgroundColor,
-        ResetQRBackgroundColor, SetContentOpacity, ResetContentOpacity };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIQRCodeModifier modifier = {
+        .setQRColor = SetQRColor,
+        .resetQRColor = ResetQRColor,
+        .setQRBackgroundColor = SetQRBackgroundColor,
+        .resetQRBackgroundColor = ResetQRBackgroundColor,
+        .setContentOpacity = SetContentOpacity,
+        .resetContentOpacity = ResetContentOpacity,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

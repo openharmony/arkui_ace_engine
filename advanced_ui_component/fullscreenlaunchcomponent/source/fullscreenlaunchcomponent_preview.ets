@@ -25,10 +25,10 @@ export struct FullScreenLaunchComponent {
   options?: AtomicServiceOptions
   @State private isShow: boolean = false;
   @Builder
-  doNothingBuilder(){
+  doNothingBuilder() {
   };
 
-  build(){
+  build() {
     Row() {
       this.content();
     }.justifyContent(FlexAlign.Center)

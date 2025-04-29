@@ -139,6 +139,50 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
     }
   }
 
+  class SymbolMinFontScaleModifier extends ModifierWithKey<Optional<number | Resource>> {
+    constructor(value: Optional<number | Resource>) {
+      super(value);
+    }
+    static identity: Symbol = Symbol('symbolGlyphMinFontScale');
+    applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+        getUINativeModule().symbolGlyph.resetMinFontScale(node);
+      } else {
+        getUINativeModule().symbolGlyph.setMinFontScale(node, this.value);
+      }
+    }
+
+    checkObjectDiff(): boolean {
+      if (isResource(this.stageValue) && isResource(this.value)) {
+        return !isResourceEqual(this.stageValue, this.value);
+      } else {
+        return true;
+      }
+    }
+  }
+
+  class SymbolMaxFontScaleModifier extends ModifierWithKey<Optional<number | Resource>> {
+    constructor(value: Optional<number | Resource>) {
+      super(value);
+    }
+    static identity: Symbol = Symbol('symbolGlyphMaxFontScale');
+    applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+        getUINativeModule().symbolGlyph.resetMaxFontScale(node);
+      } else {
+        getUINativeModule().symbolGlyph.setMaxFontScale(node, this.value);
+      }
+    }
+
+    checkObjectDiff(): boolean {
+      if (isResource(this.stageValue) && isResource(this.value)) {
+        return !isResourceEqual(this.stageValue, this.value);
+      } else {
+        return true;
+      }
+    }
+  }
+
   class SymbolContentModifier extends ModifierWithKey<Resource> {
     constructor(value: Resource) {
       super(value);
@@ -146,10 +190,9 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
     static identity: Symbol = Symbol('symbolContent');
     applyPeer(node: KNode, reset: boolean): void {
       if (reset) {
-        getUINativeModule().symbolGlyph.setSymbolId(node, '');
-      }
-      else {
-        getUINativeModule().symbolGlyph.setSymbolId(node, this.value);
+        getUINativeModule().symbolGlyph.resetSymbolGlyphInitialize(node);
+      } else {
+        getUINativeModule().symbolGlyph.setSymbolGlyphInitialize(node, this.value);
       }
     }
   }
@@ -158,9 +201,11 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
     constructor(nativePtr: KNode, classType?: ModifierType) {
       super(nativePtr, classType);
     }
-    initialize(value: Object[]): SymbolGlyphAttribute {
+    initialize(value: Object[]): this {
       if (value[0] !== undefined) {
         modifierWithKey(this._modifiersWithKeys, SymbolContentModifier.identity, SymbolContentModifier, value[0]);
+      } else {
+        modifierWithKey(this._modifiersWithKeys, SymbolContentModifier.identity, SymbolContentModifier, undefined);
       }
       return this;
     }

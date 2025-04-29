@@ -66,8 +66,10 @@ bool JSPasteButton::ParseComponentStyle(const JSCallbackInfo& info,
     value = paramObject->GetProperty("buttonType");
     if (value->IsNumber()) {
         bg = value->ToNumber<int32_t>();
-        if ((bg < static_cast<int32_t>(ButtonType::NORMAL)) ||
-            (bg > static_cast<int32_t>(ButtonType::CIRCLE))) {
+        if ((bg != static_cast<int32_t>(ButtonType::NORMAL)) &&
+            (bg != static_cast<int32_t>(ButtonType::CIRCLE)) &&
+            (bg != static_cast<int32_t>(ButtonType::CAPSULE)) &&
+            (bg != static_cast<int32_t>(ButtonType::ROUNDED_RECTANGLE))) {
             return false;
         }
     } else {
@@ -112,18 +114,25 @@ void JsPasteButtonClickFunction::Execute(GestureEvent& info)
     clickEventParam->SetPropertyObject("target", target);
 
     int32_t res = static_cast<int32_t>(SecurityComponentHandleResult::CLICK_GRANT_FAILED);
+    JSRef<JSObject> errorMessage = JSRef<JSObject>::New();
 #ifdef SECURITY_COMPONENT_ENABLE
     auto secEventValue = info.GetSecCompHandleEvent();
     if (secEventValue != nullptr) {
         res = secEventValue->GetInt("handleRes", res);
+        int32_t code = static_cast<int32_t>(SecurityComponentErrorCode::SUCCESS);
+        std::string message;
         if (res == static_cast<int32_t>(SecurityComponentHandleResult::DROP_CLICK)) {
             return;
         }
+        code = secEventValue->GetInt("code", code);
+        errorMessage->SetProperty<int32_t>("code", code);
+        message = secEventValue->GetString("message", message);
+        errorMessage->SetProperty<std::string>("message", message);
     }
 #endif
     JSRef<JSVal> errorParam = JSRef<JSVal>::Make(ToJSValue(res));
-    JSRef<JSVal> params[] = { clickEventParam, errorParam };
-    JsFunction::ExecuteJS(2, params);
+    JSRef<JSVal> params[] = { clickEventParam, errorParam, errorMessage };
+    JsFunction::ExecuteJS(3, params); // 3 means three params.
 }
 
 void JSPasteButton::JsOnClick(const JSCallbackInfo& info)
@@ -142,7 +151,12 @@ void JSPasteButton::JsOnClick(const JSCallbackInfo& info)
 #endif
     };
 
-    NG::ViewAbstract::SetOnClick(std::move(onTap));
+    double distanceThreshold = std::numeric_limits<double>::infinity();
+    if (info.Length() > 1 && info[1]->IsNumber()) {
+        distanceThreshold = info[1]->ToNumber<double>();
+        distanceThreshold = Dimension(distanceThreshold, DimensionUnit::VP).ConvertToPx();
+    }
+    NG::ViewAbstract::SetOnClick(std::move(onTap), distanceThreshold);
 }
 
 void JSPasteButton::JSBind(BindingTarget globalObj)
@@ -165,6 +179,7 @@ void JSPasteButton::JSBind(BindingTarget globalObj)
     JSClass<JSPasteButton>::StaticMethod("borderRadius", &JSSecButtonBase::SetBackgroundBorderRadius);
     JSClass<JSPasteButton>::StaticMethod("padding", &JSSecButtonBase::SetBackgroundPadding);
     JSClass<JSPasteButton>::StaticMethod("textIconSpace", &JSSecButtonBase::SetTextIconSpace);
+    JSClass<JSPasteButton>::StaticMethod("align", &JSSecButtonBase::SetAlign);
     JSClass<JSPasteButton>::StaticMethod("onClick", &JSPasteButton::JsOnClick);
     JSClass<JSPasteButton>::StaticMethod("key", &JSViewAbstract::JsKey);
     JSClass<JSPasteButton>::StaticMethod("position", &JSViewAbstract::JsPosition);
@@ -176,6 +191,16 @@ void JSPasteButton::JSBind(BindingTarget globalObj)
     JSClass<JSPasteButton>::StaticMethod("size", &JSViewAbstract::JsSize);
     JSClass<JSPasteButton>::StaticMethod("constraintSize", &JSViewAbstract::JsConstraintSize);
     JSClass<JSPasteButton>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
+    JSClass<JSPasteButton>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
+    JSClass<JSPasteButton>::StaticMethod("id", &JSViewAbstract::JsId);
+    JSClass<JSPasteButton>::StaticMethod("chainMode", &JSViewAbstract::JsChainMode);
+    JSClass<JSPasteButton>::StaticMethod("maxFontScale", &JSSecButtonBase::SetMaxFontScale);
+    JSClass<JSPasteButton>::StaticMethod("minFontScale", &JSSecButtonBase::SetMinFontScale);
+    JSClass<JSPasteButton>::StaticMethod("maxLines", &JSSecButtonBase::SetMaxLines);
+    JSClass<JSPasteButton>::StaticMethod("maxFontSize", &JSSecButtonBase::SetMaxFontSize);
+    JSClass<JSPasteButton>::StaticMethod("minFontSize", &JSSecButtonBase::SetMinFontSize);
+    JSClass<JSPasteButton>::StaticMethod("heightAdaptivePolicy", &JSSecButtonBase::SetHeightAdaptivePolicy);
+    JSClass<JSPasteButton>::StaticMethod("enabled", &JSViewAbstract::JsEnabled);
     JSClass<JSPasteButton>::Bind<>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

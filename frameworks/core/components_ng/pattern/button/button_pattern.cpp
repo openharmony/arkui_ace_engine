@@ -13,19 +13,11 @@
  * limitations under the License.
  */
 
+#include "base/log/dump_log.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
-
-#include "base/utils/utils.h"
-#include "core/common/recorder/node_data_cache.h"
-#include "core/components/button/button_theme.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/button/button_event_hub.h"
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/event/mouse_event.h"
-#include "core/pipeline/pipeline_base.h"
+#include "core/components/theme/shadow_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -34,7 +26,265 @@ constexpr int32_t MOUSE_HOVER_DURATION = 250;
 constexpr int32_t TYPE_TOUCH = 0;
 constexpr int32_t TYPE_HOVER = 1;
 constexpr int32_t TYPE_CANCEL = 2;
+constexpr float NORMAL_SCALE = 1.0f;
+constexpr float MINFONTSCALE = 0.85f;
+constexpr float MAXFONTSCALE = 3.20f;
+
+inline std::string ToString(const ButtonType& type)
+{
+    static const LinearEnumMapNode<ButtonType, std::string> table[] = {
+        { ButtonType::NORMAL, "NORMAL" }, { ButtonType::CAPSULE, "CAPSULE" },
+        { ButtonType::CIRCLE, "CIRCLE" }, { ButtonType::TEXT, "TEXT" },
+        { ButtonType::ARC, "ARC" }, { ButtonType::DOWNLOAD, "DOWNLOAD" },
+        { ButtonType::ICON, "ICON" }, { ButtonType::CUSTOM, "CUSTOM" },
+        { ButtonType::ROUNDED_RECTANGLE, "ROUNDED_RECTANGLE" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), type);
+    return iter != -1 ? table[iter].value : "";
+}
+
+inline std::string ToString(const ButtonStyleMode& mode)
+{
+    static const LinearEnumMapNode<ButtonStyleMode, std::string> table[] = {
+        { ButtonStyleMode::NORMAL, "NORMAL" },
+        { ButtonStyleMode::EMPHASIZE, "EMPHASIZE" },
+        { ButtonStyleMode::TEXT, "TEXT" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), mode);
+    return iter != -1 ? table[iter].value : "";
+}
+
+inline std::string ToString(const ControlSize& size)
+{
+    static const LinearEnumMapNode<ControlSize, std::string> table[] = {
+        { ControlSize::SMALL, "SMALL" },
+        { ControlSize::NORMAL, "NORMAL" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), size);
+    return iter != -1 ? table[iter].value : "";
+}
+
+inline std::string ToString(const ButtonRole& role)
+{
+    static const LinearEnumMapNode<ButtonRole, std::string> table[] = {
+        { ButtonRole::NORMAL, "NORMAL" },
+        { ButtonRole::ERROR, "ERROR" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), role);
+    return iter != -1 ? table[iter].value : "";
+}
+
+inline std::string ToString(const TextHeightAdaptivePolicy& policy)
+{
+    static const LinearEnumMapNode<TextHeightAdaptivePolicy, std::string> table[] = {
+        { TextHeightAdaptivePolicy::MAX_LINES_FIRST, "MAX_LINES_FIRST" },
+        { TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, "MIN_FONT_SIZE_FIRST" },
+        { TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST, "LAYOUT_CONSTRAINT_FIRST" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), policy);
+    return iter != -1 ? table[iter].value : "";
+}
 } // namespace
+
+FocusPattern ButtonPattern::GetFocusPattern() const
+{
+    if (buttonType_ == ComponentButtonType::POPUP || buttonType_ == ComponentButtonType::STEPPER) {
+        FocusPaintParam focusPaintParam;
+        focusPaintParam.SetPaintColor(focusBorderColor_);
+        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, focusPaintParam };
+    }
+    if (buttonType_ == ComponentButtonType::NAVIGATION) {
+        FocusPaintParam focusPaintParam;
+        focusPaintParam.SetPaintColor(focusBorderColor_);
+        focusPaintParam.SetPaintWidth(focusBorderWidth_);
+        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, focusPaintParam };
+    }
+    return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
+}
+
+bool ButtonPattern::IsNeedAdjustByAspectRatio()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(host, false);
+    auto isNeedAdjust = layoutProperty->HasAspectRatio() &&
+                        layoutProperty->GetType().value_or(ButtonType::CAPSULE) != ButtonType::CIRCLE;
+
+    return isNeedAdjust;
+}
+
+void ButtonPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    Pattern::ToJsonValue(json, filter);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto buttonTheme = context->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    auto textStyle = buttonTheme->GetTextStyle();
+    auto buttonType = layoutProperty->GetType().value_or(ButtonType::CAPSULE);
+    json->PutExtAttr("type",
+        host->GetTag() == "Toggle" ? "ToggleType.Button" : ConvertButtonTypeToString(buttonType).c_str(), filter);
+    json->PutExtAttr("fontSize",
+        layoutProperty->GetFontSizeValue(layoutProperty->HasLabel() ? textStyle.GetFontSize() : Dimension(0))
+            .ToString()
+            .c_str(),
+        filter);
+    json->PutExtAttr("fontWeight",
+        V2::ConvertWrapFontWeightToStirng(layoutProperty->GetFontWeight().value_or(FontWeight::MEDIUM)).c_str(),
+        filter);
+    json->PutExtAttr("fontColor",
+        layoutProperty->GetFontColor()
+            .value_or(layoutProperty->HasLabel() ? textStyle.GetTextColor() : Color::BLACK)
+            .ColorToString()
+            .c_str(),
+        filter);
+    json->PutExtAttr("fontStyle",
+        layoutProperty->GetFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL ? "FontStyle.Normal"
+                                                                                                  : "FontStyle.Italic",
+        filter);
+    json->PutExtAttr("label", layoutProperty->GetLabelValue("").c_str(), filter);
+    auto eventHub = host->GetOrCreateEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    json->PutExtAttr("stateEffect", eventHub->GetStateEffect() ? "true" : "false", filter);
+
+    auto optionJson = JsonUtil::Create(true);
+    optionJson->Put("type", ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::CAPSULE)).c_str());
+
+    optionJson->Put("stateEffect", eventHub->GetStateEffect() ? "true" : "false");
+    json->PutExtAttr("options", optionJson->ToString().c_str(), filter);
+    ToJsonValueAttribute(json, filter);
+}
+
+void ButtonPattern::ToJsonValueAttribute(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto fontFamilyVector = layoutProperty->GetFontFamily().value_or<std::vector<std::string>>({ "HarmonyOS Sans" });
+    std::string fontFamily;
+    if (!fontFamilyVector.empty()) {
+        fontFamily = fontFamilyVector.at(0);
+        for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
+            fontFamily += ',' + fontFamilyVector.at(i);
+        }
+    }
+    json->PutExtAttr("fontFamily", fontFamily.c_str(), filter);
+    auto fontJsValue = JsonUtil::Create(true);
+    fontJsValue->Put("size", layoutProperty->GetFontSizeValue(Dimension(0)).ToString().c_str());
+    fontJsValue->Put("weight",
+        V2::ConvertWrapFontWeightToStirng(layoutProperty->GetFontWeight().value_or(FontWeight::MEDIUM)).c_str());
+    fontJsValue->Put("family", fontFamily.c_str());
+    fontJsValue->Put("style", layoutProperty->GetFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
+                                  ? "FontStyle.Normal"
+                                  : "FontStyle.Italic");
+    auto labelJsValue = JsonUtil::Create(true);
+    labelJsValue->Put("overflow",
+        V2::ConvertWrapTextOverflowToString(layoutProperty->GetTextOverflow().value_or(TextOverflow::CLIP)).c_str());
+    labelJsValue->Put("maxLines", std::to_string(layoutProperty->GetMaxLines().value_or(DEFAULT_MAXLINES)).c_str());
+    labelJsValue->Put("minFontSize", layoutProperty->GetMinFontSizeValue(Dimension(0)).ToString().c_str());
+    labelJsValue->Put("maxFontSize", layoutProperty->GetMaxFontSizeValue(Dimension(0)).ToString().c_str());
+    labelJsValue->Put("heightAdaptivePolicy",
+        V2::ConvertWrapTextHeightAdaptivePolicyToString(
+            layoutProperty->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST))
+            .c_str());
+    labelJsValue->Put("font", fontJsValue->ToString().c_str());
+    json->PutExtAttr("labelStyle", labelJsValue->ToString().c_str(), filter);
+
+    json->PutExtAttr("buttonStyle",
+        ConvertButtonStyleToString(layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE)).c_str(),
+        filter);
+    json->PutExtAttr("controlSize",
+        ConvertControlSizeToString(layoutProperty->GetControlSize().value_or(ControlSize::NORMAL)).c_str(), filter);
+    json->PutExtAttr("role",
+        ConvertButtonRoleToString(layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL)).c_str(), filter);
+    json->PutExtAttr(
+        "minFontScale", std::to_string(layoutProperty->GetMinFontScaleValue(MINFONTSCALE)).c_str(), filter);
+    json->PutExtAttr(
+        "maxFontScale", std::to_string(layoutProperty->GetMaxFontScaleValue(MAXFONTSCALE)).c_str(), filter);
+}
+
+std::string ButtonPattern::ConvertButtonRoleToString(ButtonRole buttonRole)
+{
+    std::string result;
+    switch (buttonRole) {
+        case ButtonRole::NORMAL:
+            result = "ButtonRole.NORMAL";
+            break;
+        case ButtonRole::ERROR:
+            result = "ButtonRole.ERROR";
+            break;
+        default:
+            break;
+    }
+    return result;
+}
+
+std::string ButtonPattern::ConvertButtonTypeToString(ButtonType buttonType)
+{
+    std::string result;
+    switch (buttonType) {
+        case ButtonType::NORMAL:
+            result = "ButtonType.Normal";
+            break;
+        case ButtonType::CAPSULE:
+            result = "ButtonType.Capsule";
+            break;
+        case ButtonType::CIRCLE:
+            result = "ButtonType.Circle";
+            break;
+        case ButtonType::ROUNDED_RECTANGLE:
+            result = "ButtonType.ROUNDED_RECTANGLE";
+            break;
+        default:
+            break;
+    }
+    return result;
+}
+
+std::string ButtonPattern::ConvertButtonStyleToString(ButtonStyleMode buttonStyle)
+{
+    std::string result;
+    switch (buttonStyle) {
+        case ButtonStyleMode::NORMAL:
+            result = "ButtonStyleMode.NORMAL";
+            break;
+        case ButtonStyleMode::EMPHASIZE:
+            result = "ButtonStyleMode.EMPHASIZED";
+            break;
+        case ButtonStyleMode::TEXT:
+            result = "ButtonStyleMode.TEXTUAL";
+            break;
+        default:
+            break;
+    }
+    return result;
+}
+
+std::string ButtonPattern::ConvertControlSizeToString(ControlSize controlSize)
+{
+    std::string result;
+    switch (controlSize) {
+        case ControlSize::SMALL:
+            result = "ControlSize.SMALL";
+            break;
+        case ControlSize::NORMAL:
+            result = "ControlSize.NORMAL";
+            break;
+        default:
+            break;
+    }
+    return result;
+}
 
 Color ButtonPattern::GetColorFromType(const RefPtr<ButtonTheme>& theme, const int32_t& type)
 {
@@ -49,13 +299,13 @@ Color ButtonPattern::GetColorFromType(const RefPtr<ButtonTheme>& theme, const in
 
 void ButtonPattern::OnAttachToFrameNode()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     clickedColor_ = buttonTheme->GetClickedColor();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->SetAlphaOffscreen(true);
@@ -99,7 +349,7 @@ void ButtonPattern::UpdateTextLayoutProperty(
 {
     CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(textLayoutProperty);
-
+    UpdateTextFontScale(layoutProperty, textLayoutProperty);
     auto label = layoutProperty->GetLabelValue("");
     textLayoutProperty->UpdateContent(label);
     if (layoutProperty->GetFontSize().has_value()) {
@@ -150,7 +400,9 @@ void ButtonPattern::UpdateTextLayoutProperty(
 void ButtonPattern::UpdateTextStyle(
     RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = layoutProperty->GetHost();
+    CHECK_NULL_VOID(host);
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
@@ -199,20 +451,95 @@ void ButtonPattern::InitButtonLabel()
     CHECK_NULL_VOID(buttonRenderContext);
     auto textRenderContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(textRenderContext);
-    textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(true));
+    if (layoutProperty->HasType() && layoutProperty->GetType() == ButtonType::CIRCLE) {
+        textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(false));
+    } else {
+        textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(true));
+    }
+
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    if (buttonTheme->GetIsApplyTextFontSize()) {
+        ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
+        if (textLayoutProperty->GetFontSize() == buttonTheme->GetTextSize(controlSize) ||
+            textLayoutProperty->GetFontSize() == buttonTheme->GetTextButtonFontSize()) {
+            ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+            Dimension fontSize = (buttonStyle == ButtonStyleMode::TEXT && controlSize == ControlSize::NORMAL) ?
+                buttonTheme->GetTextButtonFontSize() : buttonTheme->GetTextSize(controlSize);
+            textLayoutProperty->UpdateFontSize(fontSize);
+        }
+    }
     textNode->MarkModifyDone();
     textNode->MarkDirtyNode();
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+    isTextFadeOut_ = textTheme->GetIsTextFadeout();
+    UpdateTexOverflow(isHover_);
 }
 
 void ButtonPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    CheckLocalizedBorderRadiuses();
     FireBuilder();
     InitButtonLabel();
     HandleBackgroundColor();
     HandleEnabled();
     InitHoverEvent();
     InitTouchEvent();
+    HandleBorderAndShadow();
+    HandleFocusStatusStyle();
+    HandleFocusActiveStyle();
+}
+
+void ButtonPattern::CheckLocalizedBorderRadiuses()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& property = host->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    auto direction = property->GetNonAutoLayoutDirection();
+    BorderRadiusProperty borderRadius;
+    BorderRadiusProperty borderRadiusProperty = property->GetBorderRadiusValue(BorderRadiusProperty {});
+    if (!borderRadiusProperty.radiusTopStart.has_value() && !borderRadiusProperty.radiusTopEnd.has_value() &&
+        !borderRadiusProperty.radiusBottomStart.has_value() && !borderRadiusProperty.radiusBottomEnd.has_value()) {
+        return;
+    }
+    if (borderRadiusProperty.radiusTopStart.has_value()) {
+        borderRadius.radiusTopStart = borderRadiusProperty.radiusTopStart;
+        if (direction == TextDirection::RTL) {
+            borderRadius.radiusTopRight = borderRadiusProperty.radiusTopStart;
+        } else {
+            borderRadius.radiusTopLeft = borderRadiusProperty.radiusTopStart;
+        }
+    }
+    if (borderRadiusProperty.radiusTopEnd.has_value()) {
+        borderRadius.radiusTopEnd = borderRadiusProperty.radiusTopEnd;
+        if (direction == TextDirection::RTL) {
+            borderRadius.radiusTopLeft = borderRadiusProperty.radiusTopEnd;
+        } else {
+            borderRadius.radiusTopRight = borderRadiusProperty.radiusTopEnd;
+        }
+    }
+    if (borderRadiusProperty.radiusBottomStart.has_value()) {
+        borderRadius.radiusBottomStart = borderRadiusProperty.radiusBottomStart;
+        if (direction == TextDirection::RTL) {
+            borderRadius.radiusBottomRight = borderRadiusProperty.radiusBottomStart;
+        } else {
+            borderRadius.radiusBottomLeft = borderRadiusProperty.radiusBottomStart;
+        }
+    }
+    if (borderRadiusProperty.radiusBottomEnd.has_value()) {
+        borderRadius.radiusBottomEnd = borderRadiusProperty.radiusBottomEnd;
+        if (direction == TextDirection::RTL) {
+            borderRadius.radiusBottomLeft = borderRadiusProperty.radiusBottomEnd;
+        } else {
+            borderRadius.radiusBottomRight = borderRadiusProperty.radiusBottomEnd;
+        }
+    }
+    property->UpdateBorderRadius(borderRadius);
 }
 
 void ButtonPattern::InitTouchEvent()
@@ -222,23 +549,25 @@ void ButtonPattern::InitTouchEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto gesture = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
-    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+    auto eventHub = host->GetOrCreateEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    touchListener_ = [weak = WeakClaim(this)](const UIState& state) {
         auto buttonPattern = weak.Upgrade();
         CHECK_NULL_VOID(buttonPattern);
-        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+        if (state == UI_STATE_PRESSED) {
             TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button touch down");
-            buttonPattern->OnTouchDown();
+            buttonPattern->HandlePressedStyle();
+            buttonPattern->UpdateTexOverflow(!(buttonPattern->isPress_));
         }
-        if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
-            info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
+        if (state == UI_STATE_NORMAL) {
             TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button touch up");
-            buttonPattern->OnTouchUp();
+            buttonPattern->HandleNormalStyle();
+            buttonPattern->UpdateTexOverflow(buttonPattern->isHover_ || buttonPattern->isFocus_);
         }
     };
-    touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    gesture->AddTouchEvent(touchListener_);
+    eventHub->AddSupportedUIStateWithCallback(UI_STATE_PRESSED | UI_STATE_NORMAL, touchListener_, true);
+    auto isSetStateStyle = eventHub->GetUserSetStateStyle();
+    eventHub->SetScrollingFeatureForbidden(isSetStateStyle);
 }
 
 void ButtonPattern::OnAfterModifyDone()
@@ -259,7 +588,7 @@ void ButtonPattern::InitHoverEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<ButtonEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<ButtonEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     auto hoverEffect = inputHub->GetHoverEffect();
     inputHub->SetHoverEffect(hoverEffect == HoverEffectType::BOARD ? HoverEffectType::AUTO : hoverEffect);
@@ -278,7 +607,7 @@ void ButtonPattern::InitHoverEvent()
     inputHub->AddOnHoverEvent(hoverListener_);
 }
 
-void ButtonPattern::OnTouchDown()
+void ButtonPattern::HandlePressedStyle()
 {
     isPress_ = true;
     FireBuilder();
@@ -287,7 +616,7 @@ void ButtonPattern::OnTouchDown()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto buttonEventHub = GetEventHub<ButtonEventHub>();
+    auto buttonEventHub = GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     if (buttonEventHub->GetStateEffect()) {
         auto renderContext = host->GetRenderContext();
@@ -305,7 +634,7 @@ void ButtonPattern::OnTouchDown()
     }
 }
 
-void ButtonPattern::OnTouchUp()
+void ButtonPattern::HandleNormalStyle()
 {
     isPress_ = false;
     FireBuilder();
@@ -314,7 +643,7 @@ void ButtonPattern::OnTouchUp()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto buttonEventHub = GetEventHub<ButtonEventHub>();
+    auto buttonEventHub = GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     auto toggleButtonPattern = host->GetPattern<ToggleButtonPattern>();
     if (toggleButtonPattern) {
@@ -341,7 +670,7 @@ void ButtonPattern::HandleHoverEvent(bool isHover)
     isHover_ = isHover;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto inputEventHub = host->GetOrCreateInputEventHub();
@@ -354,14 +683,26 @@ void ButtonPattern::HandleHoverEvent(bool isHover)
         CHECK_NULL_VOID(renderContext);
         AnimateTouchAndHover(renderContext, isHover ? TYPE_CANCEL : TYPE_HOVER, isHover ? TYPE_HOVER : TYPE_CANCEL,
             MOUSE_HOVER_DURATION, Curves::FRICTION);
+        if (isHover) {
+            auto pipeline = host->GetContextRefPtr();
+            CHECK_NULL_VOID(pipeline);
+            auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+            SetButtonScale(renderContext, buttonTheme);
+        } else {
+            if (scaleModify_) {
+                scaleModify_ = false;
+                renderContext->SetScale(1.0f, 1.0f);
+            }
+        }
     }
+    UpdateTexOverflow(isHover || isFocus_);
 }
 
 void ButtonPattern::HandleBackgroundColor()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -384,6 +725,228 @@ void ButtonPattern::HandleBackgroundColor()
     themeTextColor_ = buttonTheme->GetTextColor(buttonStyle, buttonRole);
 }
 
+Shadow ButtonPattern::GetShadowFromTheme(ShadowStyle shadowStyle)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Shadow::CreateShadow(shadowStyle));
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, Shadow::CreateShadow(shadowStyle));
+    auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
+    CHECK_NULL_RETURN(shadowTheme, Shadow::CreateShadow(shadowStyle));
+    auto colorMode = pipeline->GetColorMode();
+    return shadowTheme->GetShadow(shadowStyle, colorMode);
+}
+
+void ButtonPattern::HandleShadowStyle(ButtonStyleMode buttonStyle, ShadowStyle shadowStyle,
+    RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme)
+{
+    if (shadowStyle != ShadowStyle::None && isApplyShadow_) {
+        auto&& graphics = renderContext->GetOrCreateGraphics();
+        CHECK_NULL_VOID(graphics);
+        auto normalShadow = GetShadowFromTheme(static_cast<ShadowStyle>(buttonTheme->GetShadowNormal()));
+        if (!graphics->HasBackShadow() || graphics->GetBackShadowValue() == normalShadow) {
+            auto shadow = GetShadowFromTheme(
+                buttonStyle == ButtonStyleMode::TEXT ? ShadowStyle::None : shadowStyle);
+            renderContext->UpdateBackShadow(shadow);
+        }
+    }
+}
+
+void ButtonPattern::HandleBorderAndShadow()
+{
+    if (UseContentModifier()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+
+    ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+    ShadowStyle shadowStyle = static_cast<ShadowStyle>(buttonTheme->GetShadowNormal());
+    HandleShadowStyle(buttonStyle, shadowStyle, renderContext, buttonTheme);
+
+    if (!layoutProperty->GetBorderWidthProperty() || isLayoutUpdate_) {
+        ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
+        Dimension borderWidth = controlSize == ControlSize::NORMAL ?
+            buttonTheme->GetBorderWidth() : buttonTheme->GetBorderWidthSmall();
+        if (borderWidth.ConvertToPx() <= 0) {
+            return;
+        }
+        BorderWidthProperty borderWidthProperty;
+        borderWidthProperty.SetBorderWidth(0.0_vp);
+        if (!renderContext->HasBorderWidth() ||
+            IsDynamicSwitchButtonStyle(renderContext->GetBorderWidthValue(borderWidthProperty), buttonTheme)) {
+            borderWidthProperty.SetBorderWidth(buttonStyle == ButtonStyleMode::NORMAL ? borderWidth : 0.0_vp);
+            layoutProperty->UpdateBorderWidth(borderWidthProperty);
+            renderContext->UpdateBorderWidth(borderWidthProperty);
+            isLayoutUpdate_ = true;
+        }
+
+        BorderColorProperty borderColorProperty;
+        borderColorProperty.SetColor(Color());
+        if (!renderContext->HasBorderColor() ||
+            IsDynamicSwitchButtonStyle(renderContext->GetBorderColorValue(borderColorProperty), buttonTheme)) {
+            Color borderColor = controlSize == ControlSize::NORMAL ?
+                buttonTheme->GetBorderColor() : buttonTheme->GetBorderColorSmall();
+            borderColorProperty.SetColor(borderColor);
+            renderContext->UpdateBorderColor(borderColorProperty);
+        }
+        return;
+    }
+    isLayoutUpdate_ = false;
+}
+
+bool ButtonPattern::IsDynamicSwitchButtonStyle(const BorderColorProperty& color, RefPtr<ButtonTheme>& buttonTheme)
+{
+    Color normalColor = buttonTheme->GetBorderColor();
+    Color smallColor = buttonTheme->GetBorderColorSmall();
+    BorderColorProperty borderColorProperty;
+    borderColorProperty.SetColor(Color());
+    BorderColorProperty normalColorProperty;
+    normalColorProperty.SetColor(normalColor);
+    BorderColorProperty smallColorProperty;
+    smallColorProperty.SetColor(smallColor);
+    if (color == normalColorProperty || color == smallColorProperty || color == borderColorProperty) {
+        return true;
+    }
+    return false;
+}
+
+bool ButtonPattern::IsDynamicSwitchButtonStyle(const BorderWidthProperty& width, RefPtr<ButtonTheme>& buttonTheme)
+{
+    Dimension normalWidth = buttonTheme->GetBorderWidth();
+    Dimension smallWidth = buttonTheme->GetBorderWidthSmall();
+    BorderWidthProperty borderWidthProperty;
+    borderWidthProperty.SetBorderWidth(Dimension());
+    BorderWidthProperty normalWidthProperty;
+    normalWidthProperty.SetBorderWidth(normalWidth);
+    BorderWidthProperty smallWidthProperty;
+    smallWidthProperty.SetBorderWidth(smallWidth);
+    if (width == normalWidthProperty || width == smallWidthProperty || width == borderWidthProperty) {
+        return true;
+    }
+    return false;
+}
+
+void ButtonPattern::DumpInfo()
+{
+    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    if (layoutProperty->HasType()) {
+        DumpLog::GetInstance().AddDesc("Type: " + ToString(layoutProperty->GetTypeValue()));
+    }
+    if (layoutProperty->HasButtonStyle()) {
+        DumpLog::GetInstance().AddDesc("ButtonStyle: " + ToString(layoutProperty->GetButtonStyleValue()));
+    }
+    if (layoutProperty->HasControlSize()) {
+        DumpLog::GetInstance().AddDesc("ControlSize: " + ToString(layoutProperty->GetControlSizeValue()));
+    }
+    if (layoutProperty->HasButtonRole()) {
+        DumpLog::GetInstance().AddDesc("ButtonRole: " + ToString(layoutProperty->GetButtonRoleValue()));
+    }
+    if (layoutProperty->HasCreateWithLabel()) {
+        DumpLog::GetInstance().AddDesc(
+            "CreateWithLabel: " + std::string(layoutProperty->GetCreateWithLabelValue() ? "true" : "false"));
+    }
+    if (layoutProperty->HasLabel()) {
+        DumpLog::GetInstance().AddDesc("Label: " + layoutProperty->GetLabelValue());
+    }
+    if (layoutProperty->HasTextOverflow()) {
+        DumpLog::GetInstance().AddDesc(
+            "TextOverflow: " + StringUtils::ToString(layoutProperty->GetTextOverflowValue()));
+    }
+    if (layoutProperty->HasMaxLines()) {
+        DumpLog::GetInstance().AddDesc("MaxLines: " + std::to_string(layoutProperty->GetMaxLinesValue()));
+    }
+    if (layoutProperty->HasMinFontSize()) {
+        DumpLog::GetInstance().AddDesc("MinFontSize: " + layoutProperty->GetMinFontSizeValue().ToString());
+    }
+    if (layoutProperty->HasMaxFontSize()) {
+        DumpLog::GetInstance().AddDesc("MaxFontSize: " + layoutProperty->GetMaxFontSizeValue().ToString());
+    }
+    if (layoutProperty->HasHeightAdaptivePolicy()) {
+        DumpLog::GetInstance().AddDesc(
+            "HeightAdaptivePolicy: " + ToString(layoutProperty->GetHeightAdaptivePolicyValue()));
+    }
+
+    DumpSubInfo(layoutProperty);
+}
+
+void ButtonPattern::DumpSubInfo(RefPtr<ButtonLayoutProperty> layoutProperty)
+{
+    if (layoutProperty->HasFontSize()) {
+        DumpLog::GetInstance().AddDesc("FontSize: " + layoutProperty->GetFontSizeValue().ToString());
+    }
+    if (layoutProperty->HasFontWeight()) {
+        DumpLog::GetInstance().AddDesc("FontWeight: " + StringUtils::ToString(layoutProperty->GetFontWeightValue()));
+    }
+    if (layoutProperty->HasFontStyle()) {
+        DumpLog::GetInstance().AddDesc("FontStyle: " + StringUtils::ToString(layoutProperty->GetFontStyleValue()));
+    }
+    if (layoutProperty->HasFontFamily()) {
+        std::ostringstream oss;
+        auto vec = layoutProperty->GetFontFamilyValue();
+        for (size_t i = 0; i < vec.size(); ++i) {
+            oss << ((i == 0) ? "" : ",") << vec[i];
+        }
+        DumpLog::GetInstance().AddDesc("FontFamily: " + oss.str());
+    }
+    if (layoutProperty->HasFontColor()) {
+        DumpLog::GetInstance().AddDesc("FontColor: " + layoutProperty->GetFontColorValue().ToString());
+    }
+    if (layoutProperty->HasBorderRadius()) {
+        DumpLog::GetInstance().AddDesc("BorderRadius: " + layoutProperty->GetBorderRadiusValue().ToString());
+    }
+
+    auto eventHub = GetOrCreateEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    DumpLog::GetInstance().AddDesc("StateEffect: " + std::string(eventHub->GetStateEffect() ? "true" : "false"));
+}
+
+void ButtonPattern::UpdateTexOverflow(bool isMarqueeStart)
+{
+    if (isTextFadeOut_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+        CHECK_NULL_VOID(textNode);
+        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+        textLayoutProperty->UpdateTextMarqueeFadeout(true);
+        textLayoutProperty->UpdateTextMarqueeStart(isMarqueeStart);
+        textLayoutProperty->UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::DEFAULT);
+        auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        if (layoutProperty->GetTextOverflow().has_value()) {
+            textLayoutProperty->UpdateTextOverflow(layoutProperty->GetTextOverflow().value());
+        }
+        textNode->MarkDirtyNode();
+    }
+}
+
+void ButtonPattern::HandleFocusActiveStyle()
+{
+    if (UseContentModifier()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetIsFocusActive()) {
+        UpdateButtonStyle();
+    }
+}
+
 void ButtonPattern::HandleEnabled()
 {
     if (UseContentModifier()) {
@@ -391,12 +954,12 @@ void ButtonPattern::HandleEnabled()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(theme);
@@ -408,7 +971,9 @@ void ButtonPattern::HandleEnabled()
 void ButtonPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, int32_t typeFrom, int32_t typeTo,
     int32_t duration, const RefPtr<Curve>& curve)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(theme);
@@ -427,7 +992,7 @@ void ButtonPattern::SetButtonPress(double xPos, double yPos)
     CHECK_NULL_VOID(contentModifierNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     if (!enabled) {
@@ -499,7 +1064,7 @@ RefPtr<FrameNode> ButtonPattern::BuildContentModifierNode()
     auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     auto label = layoutProperty->GetLabel().value_or("");
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     ButtonConfiguration buttonConfiguration(label, isPress_, enabled);
@@ -509,6 +1074,7 @@ RefPtr<FrameNode> ButtonPattern::BuildContentModifierNode()
 void ButtonPattern::OnColorConfigurationUpdate()
 {
     auto node = GetHost();
+    CHECK_NULL_VOID(node);
     if (isColorUpdateFlag_) {
         node->SetNeedCallChildrenUpdate(false);
         return;
@@ -518,12 +1084,13 @@ void ButtonPattern::OnColorConfigurationUpdate()
     if (buttonLayoutProperty->GetCreateWithLabelValue(true)) {
         node->SetNeedCallChildrenUpdate(false);
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = node->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
-    auto renderContext = node->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
     ButtonStyleMode buttonStyle = buttonLayoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
     ButtonRole buttonRole = buttonLayoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     if (renderContext->GetBackgroundColor().value_or(themeBgColor_) == themeBgColor_) {
         auto color = buttonTheme->GetBgColor(buttonStyle, buttonRole);
         renderContext->UpdateBackgroundColor(color);
@@ -555,5 +1122,246 @@ void ButtonPattern::SetBuilderFunc(ButtonMakeCallback&& makeFunc)
         return;
     }
     makeFunc_ = std::move(makeFunc);
+}
+
+void ButtonPattern::UpdateTextFontScale(
+    RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(textLayoutProperty);
+    if (layoutProperty->GetMaxFontScale().has_value()) {
+        textLayoutProperty->UpdateMaxFontScale(layoutProperty->GetMaxFontScale().value());
+    } else {
+        if (layoutProperty->HasType() && layoutProperty->GetType() == ButtonType::CIRCLE) {
+            textLayoutProperty->UpdateMaxFontScale(NORMAL_SCALE);
+        } else {
+            textLayoutProperty->ResetMaxFontScale();
+        }
+    }
+    if (layoutProperty->GetMinFontScale().has_value()) {
+        textLayoutProperty->UpdateMinFontScale(layoutProperty->GetMinFontScale().value());
+    } else {
+        textLayoutProperty->ResetMinFontScale();
+    }
+}
+
+void ButtonPattern::OnFontScaleConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (NeedAgingUpdateText(layoutProperty)) {
+        if (!layoutProperty->GetMaxFontSize().has_value()) {
+            textLayoutProperty->ResetAdaptMaxFontSize();
+        } else {
+            textLayoutProperty->UpdateAdaptMaxFontSize(layoutProperty->GetMaxFontSize().value());
+        }
+        if (!layoutProperty->GetMinFontSize().has_value()) {
+            textLayoutProperty->ResetAdaptMinFontSize();
+        } else {
+            textLayoutProperty->UpdateAdaptMinFontSize(layoutProperty->GetMinFontSize().value());
+        }
+    } else {
+        if (layoutProperty->GetMaxFontSize().has_value()) {
+            textLayoutProperty->UpdateAdaptMaxFontSize(layoutProperty->GetMaxFontSize().value());
+        }
+        if (layoutProperty->GetMinFontSize().has_value()) {
+            textLayoutProperty->UpdateAdaptMinFontSize(layoutProperty->GetMinFontSize().value());
+        }
+    }
+    textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void ButtonPattern::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
+{
+    Pattern::ToTreeJson(json, config);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    json->Put(TreeKey::CONTENT, layoutProperty->GetLabelValue("").c_str());
+}
+
+void ButtonPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetIsFocus(isFocusAcitve);
+            pattern->UpdateButtonStyle();
+        };
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddIsFocusActiveUpdateEvent(host, isFocusActiveUpdateEvent_);
+}
+
+void ButtonPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveIsFocusActiveUpdateEvent(host);
+}
+
+void ButtonPattern::HandleFocusStyleTask()
+{
+    AddIsFocusActiveUpdateEvent();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+
+    if (pipeline->GetIsFocusActive()) {
+        SetIsFocus(true);
+        UpdateButtonStyle();
+    }
+}
+
+void ButtonPattern::HandleBlurStyleTask()
+{
+    SetIsFocus(false);
+    RemoveIsFocusActiveUpdateEvent();
+    UpdateButtonStyle();
+}
+
+void ButtonPattern::SetBlurButtonStyle(RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme,
+    RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<FrameNode>& textNode)
+{
+    ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+    ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+
+    if (buttonStyle != ButtonStyleMode::TEXT && shadowModify_) {
+        ShadowStyle shadowStyle = static_cast<ShadowStyle>(buttonTheme->GetShadowNormal());
+        Shadow shadow = GetShadowFromTheme(shadowStyle);
+        renderContext->UpdateBackShadow(shadow);
+        shadowModify_ = false;
+    }
+    if (scaleModify_) {
+        scaleModify_ = false;
+        renderContext->SetScale(1.0f, 1.0f);
+    }
+    if (bgColorModify_) {
+        bgColorModify_ = false;
+        renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor(buttonStyle, buttonRole));
+    }
+    if (focusTextColorModify_) {
+        focusTextColorModify_ = false;
+        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateTextColor(buttonTheme->GetTextColor(buttonStyle, buttonRole));
+        auto textRenderContext = textNode->GetRenderContext();
+        CHECK_NULL_VOID(textRenderContext);
+        textRenderContext->UpdateForegroundColor(buttonTheme->GetTextColor(buttonStyle, buttonRole));
+        textNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    UpdateTexOverflow(isHover_);
+}
+
+void ButtonPattern::SetFocusButtonStyle(RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme,
+    RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<FrameNode>& textNode)
+{
+    ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+    ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+
+    if (buttonStyle != ButtonStyleMode::TEXT) {
+        ShadowStyle shadowStyle = static_cast<ShadowStyle>(buttonTheme->GetShadowFocus());
+        HandleShadowStyle(buttonStyle, shadowStyle, renderContext, buttonTheme);
+        shadowModify_ = true;
+    }
+    SetButtonScale(renderContext, buttonTheme);
+    bgColorModify_ = renderContext->GetBackgroundColor() == buttonTheme->GetBgColor(buttonStyle, buttonRole);
+    if (bgColorModify_) {
+        if (buttonStyle == ButtonStyleMode::TEXT) {
+            renderContext->UpdateBackgroundColor(buttonTheme->GetTextBackgroundFocus());
+        } else if (buttonStyle == ButtonStyleMode::NORMAL) {
+            renderContext->UpdateBackgroundColor(buttonTheme->GetNormalBackgroundFocus());
+        } else if (buttonStyle == ButtonStyleMode::EMPHASIZE) {
+            renderContext->UpdateBackgroundColor(buttonTheme->GetEmphasizeBackgroundFocus());
+        }
+    }
+
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    focusTextColorModify_ =
+            textLayoutProperty->GetTextColor() == buttonTheme->GetTextColor(buttonStyle, buttonRole);
+    if (focusTextColorModify_ && buttonStyle != ButtonStyleMode::EMPHASIZE) {
+        textLayoutProperty->UpdateTextColor(buttonTheme->GetFocusTextColor(buttonStyle, buttonRole));
+        auto textRenderContext = textNode->GetRenderContext();
+        CHECK_NULL_VOID(textRenderContext);
+        textRenderContext->UpdateForegroundColor(buttonTheme->GetFocusTextColor(buttonStyle, buttonRole));
+        textNode->MarkDirtyNode();
+    }
+    UpdateTexOverflow(true);
+}
+
+void ButtonPattern::SetButtonScale(RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme)
+{
+    if (renderContext->GetOrCreateTransform()) {
+        float scaleHoverOrFocus = buttonTheme->GetScaleHoverOrFocus();
+        VectorF scale(scaleHoverOrFocus, scaleHoverOrFocus);
+        auto&& transform = renderContext->GetOrCreateTransform();
+        if (scaleHoverOrFocus != 1.0 && (!transform->HasTransformScale() || transform->GetTransformScale() == scale)) {
+            scaleModify_ = true;
+            renderContext->SetScale(scaleHoverOrFocus, scaleHoverOrFocus);
+        }
+    }
+}
+
+void ButtonPattern::UpdateButtonStyle()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (isFocus_) {
+        SetFocusButtonStyle(renderContext, buttonTheme, layoutProperty, textNode);
+    } else {
+        SetBlurButtonStyle(renderContext, buttonTheme, layoutProperty, textNode);
+    }
+}
+
+void ButtonPattern::HandleFocusStatusStyle()
+{
+    if (UseContentModifier()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button handle focus event");
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleFocusStyleTask();
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+
+    auto blurTask = [weak = WeakClaim(this)]() {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button handle blur event");
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurStyleTask();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
 }
 } // namespace OHOS::Ace::NG

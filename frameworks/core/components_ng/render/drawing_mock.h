@@ -47,12 +47,14 @@
 #include "test/mock/core/rosen/testing_scalar.h"
 #include "test/mock/core/rosen/testing_shader_effect.h"
 #include "test/mock/core/rosen/testing_shadowflags.h"
+#include "test/mock/core/rosen/testing_surface.h"
 #include "test/mock/core/rosen/testing_text_blob.h"
 #include "test/mock/core/rosen/testing_text_style.h"
 #include "test/mock/core/rosen/testing_typeface.h"
 #include "test/mock/core/rosen/testing_typography.h"
 #include "test/mock/core/rosen/testing_typography_create.h"
 #include "test/mock/core/rosen/testing_typography_style.h"
+#include "test/mock/core/rosen/testing_picture_recorder.h"
 
 namespace OHOS::Ace {
 namespace RSDrawing = Testing;
@@ -111,6 +113,7 @@ using RSColorSpace = Testing::TestingColorSpace;
 using RSData = Testing::TestingData;
 using RSRecordingCanvas = Testing::TestingRecordingCanvas;
 using RSDrawCmdList = Testing::TestingDrawCmdList;
+using RSHybridRenderType = Testing::TestingHybridRenderType;
 using RSFilterMode = Testing::FilterMode;
 using RSMipmapMode = Testing::MipmapMode;
 using RSRecordingPath = Testing::TestingPath;
@@ -123,16 +126,14 @@ using RSTextEncoding = Testing::TestingTextEncoding;
 using RSSaveLayerOps = Testing::TestingSaveLayerOps;
 using RSSrcRectConstraint = Testing::SrcRectConstraint;
 using RSImageBlurType = Testing::ImageBlurType;
-#ifdef USE_ROSEN_DRAWING
+using RSSurface = Testing::TestingSurface;
+using RSPictureRecorder =Testing::TestingPictureRecorder;
 using RSRecordingColorFilter = Testing::TestingColorFilter;
 using RSRecordingImageFilter = Testing::TestingImageFilter;
 using RSRecordingShaderEffect = Testing::TestingShaderEffect;
 using RSPicture = Testing::TestingPicture;
-#endif
-#ifdef USE_GRAPHIC_TEXT_GINE
 using RSTextRectHeightStyle = Testing::TestingTypographyProperties::TextRectHeightStyle;
 using RSTextRectWidthStyle = Testing::TestingTypographyProperties::TextRectWidthStyle;
 using RSTextRect = Testing::TestingTypographyProperties::TextRect;
-#endif
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_MOCK_H

@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "base/utils/utils.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
@@ -50,6 +51,7 @@ const RectF GetLastBoxRect(const std::vector<RectF>& boxes, const RectF& content
 {
     bool hasResult = false;
     RectF result;
+    RectF preBox;
     auto maxBottom = contentRect.GetY() + SystemProperties::GetDevicePhysicalHeight();
     for (const auto& box : boxes) {
         auto caculateBottom = box.Bottom() + textStartY;
@@ -57,7 +59,15 @@ const RectF GetLastBoxRect(const std::vector<RectF>& boxes, const RectF& content
         if (isReachingBottom && !hasResult) {
             result = box;
             hasResult = true;
+            auto isBoxExceedContent = GreatOrEqual(result.Top() + textStartY, contentRect.Bottom()) &&
+                LessNotEqual(preBox.Bottom() + textStartY, contentRect.Bottom());
+            isBoxExceedContent = isBoxExceedContent || (GreatOrEqual(result.Top() + textStartY, maxBottom) &&
+                LessNotEqual(preBox.Bottom() + textStartY, maxBottom));
+            CHECK_NULL_RETURN(!isBoxExceedContent, preBox);
             continue;
+        }
+        if (!hasResult) {
+            preBox = box;
         }
         if (hasResult && box.Bottom() == result.Bottom()) {
             result = box;
@@ -86,14 +96,40 @@ RefPtr<FrameNode> TextDragPattern::CreateDragNode(const RefPtr<FrameNode>& hostN
     auto dragPattern = dragNode->GetPattern<TextDragPattern>();
     auto data = CalculateTextDragData(hostPattern, dragNode);
     TAG_LOGI(AceLogTag::ACE_TEXT, "CreateDragNode SelectPositionInfo startX = %{public}f, startY = %{public}f,\
-             endX = %{public}f, endY = %{public}f", data.selectPosition_.startX_, data.selectPosition_.startY_,
-             data.selectPosition_.endX_, data.selectPosition_.endY_);
+             endX = %{public}f, endY = %{public}f, globalX = %{public}f, globalY = %{public}f",
+             data.selectPosition_.startX_, data.selectPosition_.startY_,
+             data.selectPosition_.endX_, data.selectPosition_.endY_,
+             data.selectPosition_.globalX_, data.selectPosition_.globalY_);
     dragPattern->Initialize(hostPattern->GetDragParagraph(), data);
     dragPattern->SetLastLineHeight(data.lineHeight_);
 
     CalcSize size(NG::CalcLength(dragPattern->GetFrameWidth()), NG::CalcLength(dragPattern->GetFrameHeight()));
     dragNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(size);
     return dragNode;
+}
+
+void TextDragPattern::CalculateOverlayOffset(RefPtr<FrameNode>& dragNode, OffsetF& offset)
+{
+    auto pipeline = dragNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto rootNode = overlayManager->GetRootNode().Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto rootGeometryNode = AceType::DynamicCast<FrameNode>(rootNode)->GetGeometryNode();
+    CHECK_NULL_VOID(rootGeometryNode);
+    auto rootOffset = rootGeometryNode->GetFrameOffset();
+    offset -= rootOffset;
+}
+
+void TextDragPattern::DropBlankLines(std::vector<RectF>& boxes)
+{
+    while (!boxes.empty() && NearZero(boxes.back().Width())) {
+        boxes.pop_back();
+    }
+    while (!boxes.empty() && NearZero(boxes.front().Width())) {
+        boxes.erase(boxes.begin());
+    }
 }
 
 TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragNode)
@@ -106,7 +142,9 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
     float bothOffset = TEXT_DRAG_OFFSET.ConvertToPx() * CONSTANT_HALF;
     auto boxes = pattern->GetTextBoxes();
     CHECK_NULL_RETURN(!boxes.empty(), {});
+    DropBlankLines(boxes);
     auto globalOffset = pattern->GetParentGlobalOffset();
+    CalculateOverlayOffset(dragNode, globalOffset);
     RectF leftHandler = GetHandler(true, boxes, contentRect, globalOffset, textStartOffset);
     RectF rightHandler = GetHandler(false, boxes, contentRect, globalOffset, textStartOffset);
     AdjustHandlers(contentRect, leftHandler, rightHandler);
@@ -126,7 +164,7 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
         }
     } else {
         globalX = contentRect.Left() + globalOffset.GetX() - dragOffset;
-        width = contentRect.Width();
+        dragPattern->AdjustMaxWidth(width, contentRect, boxes);
     }
     float contentX = (leftHandler.GetY() == rightHandler.GetY() ? box.Left() : 0) - dragOffset - delta / CONSTANT_HALF;
     dragPattern->SetContentOffset({contentX, box.Top() - dragOffset});
@@ -140,6 +178,20 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
     TextDragData data(rect, width + bothOffset, height + bothOffset, leftHandler.Height(), rightHandler.Height());
     data.initSelecitonInfo(info, leftHandler.GetY() == rightHandler.GetY());
     return data;
+}
+
+void TextDragPattern::AdjustMaxWidth(float& width, const RectF& contentRect, const std::vector<RectF>& boxes)
+{
+    width = contentRect.Width();
+    CHECK_NULL_VOID(!boxes.empty());
+    float startX = boxes.front().Left();
+    float endX = boxes.front().Right();
+    for (const auto& box : boxes) {
+        startX = std::min(startX, box.Left());
+        endX = std::max(endX, box.Right());
+    }
+    startX = std::min(0.0f, startX);
+    width = std::abs(startX - endX);
 }
 
 RectF TextDragPattern::GetHandler(const bool isLeftHandler, const std::vector<RectF> boxes, const RectF contentRect,
@@ -320,10 +372,19 @@ void TextDragPattern::CalculateLine(std::vector<TextPoint>& points, std::shared_
 
 Color TextDragPattern::GetDragBackgroundColor()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, Color(TEXT_DRAG_COLOR_BG));
     auto textTheme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(textTheme, Color(TEXT_DRAG_COLOR_BG));
     return textTheme->GetDragBackgroundColor();
+}
+
+Dimension TextDragPattern::GetDragCornerRadius()
+{
+    auto deviceType = SystemProperties::GetDeviceType();
+    if (deviceType == DeviceType::TWO_IN_ONE) {
+        return TEXT_DRAG_RADIUS_2IN1;
+    }
+    return TEXT_DRAG_RADIUS;
 }
 } // namespace OHOS::Ace::NG

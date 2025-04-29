@@ -41,6 +41,12 @@
     AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetLayoutTraceEnabled(), fmt, ##__VA_ARGS__)
 #define ACE_IMAGE_SCOPED_TRACE(fmt, ...) \
     AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetDebugEnabled(), fmt, ##__VA_ARGS__)
+#define ACE_MEASURE_SCOPED_TRACE(fmt, ...) \
+    AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetMeasureDebugTraceEnabled(), fmt, ##__VA_ARGS__)
+#define ACE_SAFE_AREA_SCOPED_TRACE(fmt, ...) \
+    AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetSafeAreaDebugTraceEnabled(), fmt, ##__VA_ARGS__)
+#define ACE_VSYNC_MODE_SCOPED_TRACE(fmt, ...) \
+    AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetVsyncModeTraceEnabled(), fmt, ##__VA_ARGS__)
 #ifdef ACE_DEBUG
 #define ACE_DEBUG_SCOPED_TRACE(fmt, ...) AceScopedTrace aceScopedTrace(fmt, ##__VA_ARGS__)
 #else
@@ -77,6 +83,7 @@
     } while (0)                    \
 
 #define ACE_FUNCTION_TRACE() ACE_SCOPED_TRACE(__func__)
+#define ACE_FUNCTION_TRACE_COMMERCIAL() ACE_SCOPED_TRACE_COMMERCIAL(__func__)
 
 #define ACE_COUNT_TRACE(count, fmt, ...) AceCountTraceWidthArgs(count, fmt, ##__VA_ARGS__)
 

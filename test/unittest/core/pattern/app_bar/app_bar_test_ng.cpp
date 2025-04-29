@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
@@ -96,21 +97,7 @@ HWTEST_F(AppBarTestNg, TestChildSize001, TestSize.Level1)
     auto appBar = AceType::MakeRefPtr<AppBarView>();
     auto atom = appBar->Create(stage);
 
-    EXPECT_EQ(atom->GetChildren().size(), 2);
-    auto menuBarRow = AceType::DynamicCast<FrameNode>(atom->GetChildAtIndex(1));
-    EXPECT_EQ(menuBarRow->GetChildren().size(), 1);
-    auto menuBar = AceType::DynamicCast<FrameNode>(menuBarRow->GetChildAtIndex(0));
-    EXPECT_EQ(menuBar->GetChildren().size(), 3);
-    auto menuButton = AceType::DynamicCast<FrameNode>(menuBar->GetChildAtIndex(0));
-    EXPECT_EQ(menuButton->GetChildren().size(), 1);
-    auto divider = AceType::DynamicCast<FrameNode>(menuBar->GetChildAtIndex(1));
-    EXPECT_EQ(divider->GetChildren().size(), 0);
-    auto closeButton = AceType::DynamicCast<FrameNode>(menuBar->GetChildAtIndex(2));
-    EXPECT_EQ(closeButton->GetChildren().size(), 1);
-    auto menuIcon = AceType::DynamicCast<FrameNode>(menuButton->GetChildAtIndex(0));
-    EXPECT_EQ(menuIcon->GetChildren().size(), 0);
-    auto closeIcon = AceType::DynamicCast<FrameNode>(closeButton->GetChildAtIndex(0));
-    EXPECT_EQ(closeIcon->GetChildren().size(), 0);
+    EXPECT_EQ(atom->GetChildren().size(), 1);
 }
 
 /**
@@ -132,7 +119,7 @@ HWTEST_F(AppBarTestNg, TestGetAppBarRect002, TestSize.Level1)
 
     pipeline->SetInstallationFree(1);
     rect = appBar->GetAppBarRect();
-    EXPECT_NE(rect, std::nullopt);
+    EXPECT_EQ(rect, std::nullopt);
 }
 
 /**
@@ -221,18 +208,6 @@ HWTEST_F(AppBarTestNg, TestGetChild007, TestSize.Level1)
     auto pattern = atom->GetPattern<AtomicServicePattern>();
 
     EXPECT_EQ(atom, appBar->atomicService_.Upgrade());
-    auto menuBarRow = AceType::DynamicCast<FrameNode>(atom->GetChildAtIndex(1));
-    EXPECT_EQ(menuBarRow, pattern->GetMenuBarRow());
-    auto menuBar = AceType::DynamicCast<FrameNode>(menuBarRow->GetChildAtIndex(0));
-    EXPECT_EQ(menuBar, pattern->GetMenuBar());
-    auto menuButton = AceType::DynamicCast<FrameNode>(menuBar->GetChildAtIndex(0));
-    EXPECT_EQ(menuButton, pattern->GetMenuButton());
-    auto closeButton = AceType::DynamicCast<FrameNode>(menuBar->GetChildAtIndex(2));
-    EXPECT_EQ(closeButton, pattern->GetCloseButton());
-    auto menuIcon = AceType::DynamicCast<FrameNode>(menuButton->GetChildAtIndex(0));
-    EXPECT_EQ(menuIcon, pattern->GetMenuIcon());
-    auto closeIcon = AceType::DynamicCast<FrameNode>(closeButton->GetChildAtIndex(0));
-    EXPECT_EQ(closeIcon, pattern->GetCloseIcon());
 }
 
 /**
@@ -248,7 +223,7 @@ HWTEST_F(AppBarTestNg, TestUpdateIconColor008, TestSize.Level1)
     auto pattern = atom->GetPattern<AtomicServicePattern>();
     auto pipeline = PipelineContext::GetCurrentContext();
     auto theme = pipeline->GetTheme<AppBarTheme>();
-    auto icon = pattern->GetMenuIcon();
+    auto icon = appBar->BuildIcon(true);
     auto renderContext = icon->GetRenderContext();
 
     pattern->UpdateIconColor(theme, icon, true);
@@ -268,7 +243,7 @@ HWTEST_F(AppBarTestNg, TestUpdateMenuBarLayout009, TestSize.Level1)
     auto pattern = atom->GetPattern<AtomicServicePattern>();
     auto pipeline = PipelineContext::GetCurrentContext();
     auto theme = pipeline->GetTheme<AppBarTheme>();
-    auto menuBar = pattern->GetMenuBar();
+    auto menuBar = appBar->BuildMenuBar();
     auto layoutProperty = menuBar->GetLayoutProperty<LinearLayoutProperty>();
 
     pattern->UpdateMenuBarLayout(theme, menuBar, false);
@@ -324,7 +299,7 @@ HWTEST_F(AppBarTestNg, TestUpdateIconLayout011, TestSize.Level1)
     auto pattern = atom->GetPattern<AtomicServicePattern>();
     auto pipeline = PipelineContext::GetCurrentContext();
     auto theme = pipeline->GetTheme<AppBarTheme>();
-    auto icon = pattern->GetMenuIcon();
+    auto icon = appBar->BuildIcon(true);
     auto layoutProperty = icon->GetLayoutProperty<ImageLayoutProperty>();
 
     pattern->UpdateIconLayout(theme, icon, true);
@@ -345,7 +320,7 @@ HWTEST_F(AppBarTestNg, TestUpdateIconLayout012, TestSize.Level1)
 {
     auto appBar = AceType::MakeRefPtr<AppBarView>();
     appBar->CreateServicePanel(true);
-    EXPECT_TRUE(true);
+    EXPECT_EQ(appBar->sessionId_, 0);
 }
 
 /**
@@ -367,7 +342,7 @@ HWTEST_F(AppBarTestNg, TestUpdateIconLayout013, TestSize.Level1)
     pattern->UpdateOverlayLayout();
     pattern->UpdateMenuBarColor(theme, menuBar, true);
     pattern->UpdateMenuBarColor(theme, menuBar, false);
-    EXPECT_TRUE(true);
+    EXPECT_EQ(appBar->sessionId_, 0);
 }
 
 /**
@@ -385,7 +360,7 @@ HWTEST_F(AppBarTestNg, TestUpdateIconLayout014, TestSize.Level1)
     auto theme = pipeline->GetTheme<AppBarTheme>();
     pipeline->safeAreaManager_ = AceType::MakeRefPtr<SafeAreaManager>();
     pattern->UpdateOverlayLayout();
-    EXPECT_TRUE(true);
+    EXPECT_EQ(appBar->sessionId_, 0);
 }
 
 /**
@@ -401,13 +376,13 @@ HWTEST_F(AppBarTestNg, TestUpdateIconLayout015, TestSize.Level1)
     auto pattern = atom->GetPattern<AtomicServicePattern>();
     auto pipeline = PipelineContext::GetCurrentContext();
     auto theme = pipeline->GetTheme<AppBarTheme>();
-    auto icon = pattern->GetMenuIcon();
+    auto icon = appBar->BuildIcon(true);
     auto renderContext = icon->GetRenderContext();
     auto button = appBar->BuildButton(true);
     auto layoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
     pipeline->safeAreaManager_ = AceType::MakeRefPtr<SafeAreaManager>();
     pattern->OnColorConfigurationUpdate();
-    EXPECT_TRUE(true);
+    EXPECT_EQ(appBar->sessionId_, 0);
 }
 
 /**
@@ -423,7 +398,7 @@ HWTEST_F(AppBarTestNg, TestUpdateIconLayout016, TestSize.Level1)
     auto pattern = atom->GetPattern<AtomicServicePattern>();
     auto pipeline = PipelineContext::GetCurrentContext();
     auto theme = pipeline->GetTheme<AppBarTheme>();
-    auto icon = pattern->GetMenuIcon();
+    auto icon = appBar->BuildIcon(true);
     auto renderContext = icon->GetRenderContext();
     auto button = appBar->BuildButton(true);
     auto layoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
@@ -431,12 +406,12 @@ HWTEST_F(AppBarTestNg, TestUpdateIconLayout016, TestSize.Level1)
     pattern->settedColorMode = true;
     pattern->OnColorConfigurationUpdate();
     pattern->UpdateColor(false);
-    EXPECT_TRUE(true);
+    EXPECT_EQ(appBar->sessionId_, 0);
 }
 
 /**
  * @tc.name: TestUpdateIconLayout017
- * @tc.desc: Test BindMenuCallback
+ * @tc.desc: Test UpdateOverlayLayout
  * @tc.type: FUNC
  */
 HWTEST_F(AppBarTestNg, TestUpdateIconLayout017, TestSize.Level1)
@@ -444,29 +419,38 @@ HWTEST_F(AppBarTestNg, TestUpdateIconLayout017, TestSize.Level1)
     auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
     auto appBar = AceType::MakeRefPtr<AppBarView>();
     auto atom = appBar->Create(stage);
+    auto menuBar = appBar->BuildMenuBar();
+    auto button = appBar->BuildButton(true);
+    auto driver = appBar->BuildDivider();
+    atom->AddChild(menuBar);
+    atom->AddChild(button);
+    atom->AddChild(driver);
+
     auto pattern = atom->GetPattern<AtomicServicePattern>();
-    auto menuBarRow = AceType::DynamicCast<FrameNode>(atom->GetChildAtIndex(1));
-    auto menuBar = AceType::DynamicCast<FrameNode>(menuBarRow->GetChildAtIndex(0));
-    auto menuButton = AceType::DynamicCast<FrameNode>(menuBar->GetChildAtIndex(0));
-    appBar->BindMenuCallback(menuButton);
-    auto eventHub = menuButton->GetOrCreateGestureEventHub();
-    auto actuator = eventHub->clickEventActuator_;
-    auto Events = actuator->clickEvents_;
-    GestureEvent info;
-    SystemProperties::extSurfaceEnabled_ = true;
-    for (const auto& callback : Events) {
-        (*callback)(info);
-    }
-    SystemProperties::extSurfaceEnabled_ = false;
-    for (const auto& callback : Events) {
-        (*callback)(info);
-    }
-    EXPECT_TRUE(true);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = pipeline->GetTheme<AppBarTheme>();
+    pattern->UpdateOverlayLayout();
+    pattern->UpdateColor(std::nullopt);
+    theme->clickEffectColorLight_ = Color::RED;
+    theme->focusedOutlineColorLight_ = Color::RED;
+    pattern->UpdateButtonColor(theme, button, true);
+    pattern->UpdateDividerColor(theme, driver, true);
+    auto buttonPattern1 = button->GetPattern<ButtonPattern>();
+    EXPECT_EQ(buttonPattern1->clickedColor_, Color::RED);
+    EXPECT_EQ(buttonPattern1->focusBorderColor_, Color::RED);
+
+    theme->clickEffectColorDark_ = Color::BLUE;
+    theme->focusedOutlineColorDark_ = Color::BLUE;
+    pattern->UpdateButtonColor(theme, button, false);
+    pattern->UpdateDividerColor(theme, driver, false);
+    auto buttonPattern2 = button->GetPattern<ButtonPattern>();
+    EXPECT_EQ(buttonPattern2->clickedColor_, Color::BLUE);
+    EXPECT_EQ(buttonPattern2->focusBorderColor_, Color::BLUE);
 }
 
 /**
  * @tc.name: TestUpdateIconLayout018
- * @tc.desc: Test BindCloseCallback
+ * @tc.desc: Test BeforeCreateLayoutWrapper
  * @tc.type: FUNC
  */
 HWTEST_F(AppBarTestNg, TestUpdateIconLayout018, TestSize.Level1)
@@ -475,25 +459,13 @@ HWTEST_F(AppBarTestNg, TestUpdateIconLayout018, TestSize.Level1)
     auto appBar = AceType::MakeRefPtr<AppBarView>();
     auto atom = appBar->Create(stage);
     auto pattern = atom->GetPattern<AtomicServicePattern>();
-    auto menuBarRow = AceType::DynamicCast<FrameNode>(atom->GetChildAtIndex(1));
-    auto menuBar = AceType::DynamicCast<FrameNode>(menuBarRow->GetChildAtIndex(0));
-    auto menuButton = AceType::DynamicCast<FrameNode>(menuBar->GetChildAtIndex(0));
-    MockContainer::SetUp();
-    MockContainer::Current()->isUIExtensionWindow_ = true;
-    appBar->BindCloseCallback(menuButton);
-    auto eventHub = menuButton->GetOrCreateGestureEventHub();
-    auto actuator = eventHub->clickEventActuator_;
-    auto Events = actuator->clickEvents_;
-    GestureEvent info;
-    for (const auto& callback : Events) {
-        (*callback)(info);
-    }
-    MockContainer::Current()->isUIExtensionWindow_ = false;
-    for (const auto& callback : Events) {
-        (*callback)(info);
-    }
-    MockContainer::TearDown();
-    EXPECT_TRUE(true);
+    pattern->BeforeCreateLayoutWrapper();
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto manager = pipeline->GetSafeAreaManager();
+    manager->keyboardSafeAreaEnabled_ = true;
+    pattern->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(appBar->sessionId_, 0);
 }
 
 /**

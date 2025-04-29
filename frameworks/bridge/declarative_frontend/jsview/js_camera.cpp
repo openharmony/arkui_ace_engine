@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_camera.h"
 
-#include "base/log/ace_trace.h"
 #include "core/components/camera/camera_component.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 

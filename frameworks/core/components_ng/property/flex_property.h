@@ -20,6 +20,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/json/json_util.h"
+#include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components_ng/base/inspector_filter.h"
@@ -28,94 +29,78 @@
 namespace OHOS::Ace::NG {
 using AlignRulesItem = std::map<AlignDirection, AlignRule>;
 using BiasPair = std::pair<float, float>;
+using ChainWeightPair = std::pair<std::optional<float>, std::optional<float>>; // <horizontal,vertical>
 using GuidelineItem = std::vector<GuidelineInfo>;
 using BarrierItem = std::vector<BarrierInfo>;
-namespace {
-constexpr int32_t HORIZONTAL_DIRECTION_RANGE = 3;
-constexpr int32_t VERTICAL_DIRECTION_RANGE = 6;
-std::string HorizontalAlignToString(HorizontalAlign align)
-{
-    switch (align) {
-        case HorizontalAlign::CENTER:
-            return "HorizontalAlign::Center";
-        case HorizontalAlign::START:
-            return "HorizontalAlign::Left";
-        case HorizontalAlign::END:
-            return "HorizontalAlign::End";
-        default:
-            return "Unknown";
-    }
-}
 
-std::string VerticalAlignToString(VerticalAlign align)
-{
-    switch (align) {
-        case VerticalAlign::TOP:
-            return "VerticalAlign::Top";
-        case VerticalAlign::CENTER:
-            return "VerticalAlign::Center";
-        case VerticalAlign::BOTTOM:
-            return "VerticalAlign::Bottom";
-        case VerticalAlign::BASELINE:
-            return "VerticalAlign::BaseLine";
-        default:
-            return "Unknown";
-    }
-}
+class FlexItemProperty {
+public:
+    FlexItemProperty() = default;
+    ~FlexItemProperty() = default;
 
-std::string AlignDirectionToString(AlignDirection direction)
-{
-    switch (direction) {
-        case AlignDirection::MIDDLE:
-            return "AlignDirection::Middle";
-        case AlignDirection::LEFT:
-            return "AlignDirection::Left";
-        case AlignDirection::RIGHT:
-            return "AlignDirection::Middle";
-        case AlignDirection::TOP:
-            return "AlignDirection::Top";
-        case AlignDirection::CENTER:
-            return "AlignDirection::Center";
-        case AlignDirection::BOTTOM:
-            return "AlignDirection::Bottom";
-        default:
-            return "Unknown";
+    std::string HorizontalAlignToString(HorizontalAlign align)
+    {
+        switch (align) {
+            case HorizontalAlign::CENTER:
+                return "HorizontalAlign::Center";
+            case HorizontalAlign::START:
+                return "HorizontalAlign::Left";
+            case HorizontalAlign::END:
+                return "HorizontalAlign::End";
+            default:
+                return "Unknown";
+        }
     }
-}
 
-std::string SingleAlignRuleToString(AlignDirection direction, AlignRule rule)
-{
-    std::string result = AlignDirectionToString(direction) + ": {'" + rule.anchor + "', ";
-    if (static_cast<int32_t>(direction) < HORIZONTAL_DIRECTION_RANGE) {
-        result += HorizontalAlignToString(rule.horizontal);
-    } else if (static_cast<int32_t>(direction) < VERTICAL_DIRECTION_RANGE) {
-        result += VerticalAlignToString(rule.vertical);
-    } else {
-        result += "Unknown";
+    std::string VerticalAlignToString(VerticalAlign align)
+    {
+        switch (align) {
+            case VerticalAlign::TOP:
+                return "VerticalAlign::Top";
+            case VerticalAlign::CENTER:
+                return "VerticalAlign::Center";
+            case VerticalAlign::BOTTOM:
+                return "VerticalAlign::Bottom";
+            case VerticalAlign::BASELINE:
+                return "VerticalAlign::BaseLine";
+            default:
+                return "Unknown";
+        }
     }
-    result += "}";
-    return result;
-}
-} // namespace
 
-struct FlexItemProperty {
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexGrow, float);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexShrink, float);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignSelf, FlexAlign);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexBasis, Dimension);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(DisplayIndex, int32_t);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignRules, AlignRulesItem);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(HorizontalChainStyle, ChainInfo);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(VerticalChainStyle, ChainInfo);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignLeft, float);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignMiddle, float);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignRight, float);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignTop, float);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignCenter, float);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignBottom, float);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(Bias, BiasPair);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(Barrier, BarrierItem);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(Guideline, GuidelineItem);
+    std::string AlignDirectionToString(AlignDirection direction)
+    {
+        switch (direction) {
+            case AlignDirection::MIDDLE:
+                return "AlignDirection::Middle";
+            case AlignDirection::LEFT:
+                return "AlignDirection::Left";
+            case AlignDirection::RIGHT:
+                return "AlignDirection::RIGHT";
+            case AlignDirection::TOP:
+                return "AlignDirection::Top";
+            case AlignDirection::CENTER:
+                return "AlignDirection::Center";
+            case AlignDirection::BOTTOM:
+                return "AlignDirection::Bottom";
+            default:
+                return "Unknown";
+        }
+    }
+
+    std::string SingleAlignRuleToString(AlignDirection direction, AlignRule rule)
+    {
+        std::string result = AlignDirectionToString(direction) + ": {'" + rule.anchor + "', ";
+        if (static_cast<int32_t>(direction) < HORIZONTAL_DIRECTION_RANGE) {
+            result += HorizontalAlignToString(rule.horizontal);
+        } else if (static_cast<int32_t>(direction) < VERTICAL_DIRECTION_RANGE) {
+            result += VerticalAlignToString(rule.vertical);
+        } else {
+            result += "Unknown";
+        }
+        result += "}";
+        return result;
+    }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {
@@ -125,24 +110,32 @@ struct FlexItemProperty {
         if (filter.IsFastFilter()) {
             return;
         }
-        json->PutExtAttr("flexBasis",
-            propFlexBasis.has_value() ? propFlexBasis.value().ToString().c_str() : "auto", filter);
+        json->PutExtAttr(
+            "flexBasis", propFlexBasis.has_value() ? propFlexBasis.value().ToString().c_str() : "auto", filter);
         json->PutExtAttr("flexGrow", round(static_cast<double>(propFlexGrow.value_or(0.0)) * 100) / 100, filter);
         json->PutExtAttr("flexShrink", round(static_cast<double>(propFlexShrink.value_or(1)) * 100) / 100, filter);
-        json->PutExtAttr("alignSelf",
-            ITEM_ALIGN[static_cast<int32_t>(propAlignSelf.value_or(FlexAlign::AUTO))], filter);
+        json->PutExtAttr(
+            "alignSelf", ITEM_ALIGN[static_cast<int32_t>(propAlignSelf.value_or(FlexAlign::AUTO))], filter);
         json->PutExtAttr("displayPriority", propDisplayIndex.value_or(1), filter);
+        auto res = JsonUtil::Create(true);
+        res->Put("horizontal", propChainWeight->first.value_or(0.0f));
+        res->Put("vertical", propChainWeight->second.value_or(0.0f));
+        json->PutExtAttr("chainWeight", res, filter);
     }
 
     std::string AlignRulesToString()
     {
-        std::string result;
         if (!HasAlignRules()) {
-            return result;
+            return "";
         }
-        auto rules = GetAlignRules().value();
-        auto iter = rules.begin();
-        for (; iter != rules.end(); iter++) {
+        return AlignRulesToString(GetAlignRules().value());
+    }
+
+    std::string AlignRulesToString(const AlignRulesItem& alignRules)
+    {
+        std::string result;
+        auto iter = alignRules.begin();
+        for (; iter != alignRules.end(); iter++) {
             result.append(SingleAlignRuleToString(iter->first, iter->second));
             result.append(", ");
         }
@@ -191,7 +184,7 @@ struct FlexItemProperty {
             operatorIter->second(value, *this);
             return;
         }
-        LOGE("Unknown Align Direction");
+        LOGW("Unknown Align Direction");
     }
 
     bool GetAligned(const AlignDirection& alignDirection)
@@ -208,7 +201,7 @@ struct FlexItemProperty {
         if (operatorIter != operators.end()) {
             return operatorIter->second(*this);
         }
-        LOGE("Unknown Align Direction");
+        LOGW("Unknown Align Direction");
         return false;
     }
 
@@ -226,9 +219,92 @@ struct FlexItemProperty {
         if (operatorIter != operators.end()) {
             return operatorIter->second(*this);
         }
-        LOGE("Unknown Align Direction");
+        LOGW("Unknown Align Direction");
         return 0.0f;
     }
+
+    bool NeedMarkParentMeasure()
+    {
+        return needMarkParentMeasure_;
+    }
+    void SetMarkParentMeasure(bool mark)
+    {
+        needMarkParentMeasure_ = mark;
+    }
+
+    std::string FlexLayoutInfoToString()
+    {
+        std::stringstream ss;
+        if (GetFlexBasis().has_value()) {
+            ss << "flexBasis:" << GetFlexBasis().value().ToString() << ", ";
+        }
+        if (GetFlexGrow().has_value()) {
+            ss << "flexGrow:" << GetFlexGrow().value() << ", ";
+        }
+        if (GetFlexShrink().has_value()) {
+            ss << "flexshrink:" << GetFlexShrink().value() << ", ";
+        }
+        if (GetAlignSelf().has_value()) {
+            ss << "alignSelf:" << static_cast<int32_t>(GetAlignSelf().value()) << ", ";
+        }
+        if (GetDisplayIndex().has_value()) {
+            ss << "displayPriority:" << GetDisplayIndex().value();
+        }
+        return ss.str();
+    }
+
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexGrow, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexShrink, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignSelf, FlexAlign);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexBasis, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(DisplayIndex, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(HorizontalChainStyle, ChainInfo);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(VerticalChainStyle, ChainInfo);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignLeft, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignMiddle, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignRight, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignTop, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignCenter, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(AlignBottom, float);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(Bias, BiasPair);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(Barrier, BarrierItem);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(Guideline, GuidelineItem);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM_WITH_CALLBACK(AlignRules, AlignRulesItem);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ChainWeight, ChainWeightPair); // <horizontal,vertical>
+
+private:
+    void OnAlignRulesUpdate(const AlignRulesItem& item)
+    {
+        auto prevValue = propAlignRules_;
+        if (TopologicalOrderMightChanged(item)) {
+            needMarkParentMeasure_ = true;
+        }
+    }
+    bool TopologicalOrderMightChanged(const AlignRulesItem& newValue)
+    {
+        // return if has no prev value, then relativeContainer must measure
+        if (!propAlignRules_.has_value()) {
+            return true;
+        }
+        auto& prevValue = propAlignRules_.value();
+        // target: container can skip redo topological ordering even children might have some changes related to
+        // alignRules Rule Ver.1: a. all key of new map must exist in prev map b. values related to the same key should
+        // have the same value c. when we have less alignRules than the last time, keeping topo order would be fine Next
+        // possible update: allowing new map has more align rules but extra anchor has lower topo order
+        //                          meaning a new dependency that will be measured earlier is added
+        for (auto iter = newValue.begin(); iter != newValue.end(); iter++) {
+            if (prevValue.find(iter->first) != prevValue.end()) {
+                if (prevValue[iter->first] != iter->second) {
+                    return true;
+                }
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool needMarkParentMeasure_ = false;
 };
 } // namespace OHOS::Ace::NG
 

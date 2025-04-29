@@ -17,17 +17,16 @@
 
 #include <cstddef>
 #include <string>
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/jsview/js_button.h"
 #include "bridge/declarative_frontend/jsview/models/toggle_model_impl.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_toggle_theme.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/toggle/toggle_theme.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
@@ -85,6 +84,8 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSToggle>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSToggle>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSToggle>::StaticMethod("borderRadius", &JSToggle::JsRadius);
+    JSClass<JSToggle>::StaticMethod("border", &JSToggle::JsBorder);
     JSClass<JSToggle>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -129,6 +130,9 @@ void JSToggle::Create(const JSCallbackInfo& info)
         changeEventVal = isOnObj->GetProperty("changeEvent");
         auto isOnProperty = isOnObj->GetProperty("value");
         isOn = isOnProperty->IsBoolean() ? isOnProperty->ToBoolean() : false;
+    } else if (paramObject->HasProperty("$isOn")) {
+        changeEventVal = paramObject->GetProperty("$isOn");
+        isOn = tempIsOn->IsBoolean() ? tempIsOn->ToBoolean() : false;
     } else {
         isOn = tempIsOn->IsBoolean() ? tempIsOn->ToBoolean() : false;
     }
@@ -137,7 +141,6 @@ void JSToggle::Create(const JSCallbackInfo& info)
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseToggleIsOnObject(info, changeEventVal);
     }
-    JSToggleTheme::ApplyTheme(NG::ToggleType(toggleType_));
 }
 
 void JSToggle::JsWidth(const JSCallbackInfo& info)
@@ -188,9 +191,7 @@ void JSToggle::JsHeight(const JSCallbackInfo& info)
 
 void JSToggle::JsHeight(const JSRef<JSVal>& jsValue)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+    auto switchTheme = GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
     auto defaultHeight = switchTheme->GetHeight();
     auto verticalPadding = switchTheme->GetHotZoneVerticalPadding();
@@ -251,9 +252,7 @@ void JSToggle::OnChange(const JSCallbackInfo& args)
         PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(isOn));
         func->ExecuteJS(1, &newJSVal);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Toggle.onChange");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Toggle.onChange");
     };
     ToggleModel::GetInstance()->OnChange(std::move(onChange));
     args.ReturnSelf();
@@ -279,14 +278,12 @@ void JSToggle::SwitchPointColor(const JSCallbackInfo& info)
         return;
     }
     Color color;
-    if (!ParseJsColor(info[0], color)) {
-        auto theme = GetTheme<SwitchTheme>();
-        if (theme) {
-            color = theme->GetPointColor();
-        }
+    std::optional<Color> switchPointColor;
+    if (ParseJsColor(info[0], color)) {
+        switchPointColor = color;
     }
 
-    ToggleModel::GetInstance()->SetSwitchPointColor(color);
+    ToggleModel::GetInstance()->SetSwitchPointColor(switchPointColor);
 }
 
 void JSToggle::JsPadding(const JSCallbackInfo& info)
@@ -346,34 +343,16 @@ NG::PaddingPropertyF JSToggle::GetOldPadding(const JSCallbackInfo& info)
 
 NG::PaddingProperty JSToggle::GetNewPadding(const JSCallbackInfo& info)
 {
-    NG::PaddingProperty padding({
-        NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp)
-    });
+    NG::PaddingProperty padding({ NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp),
+        NG::CalcLength(0.0_vp), std::nullopt, std::nullopt });
     if (info[0]->IsObject()) {
-        std::optional<CalcDimension> left;
-        std::optional<CalcDimension> right;
-        std::optional<CalcDimension> top;
-        std::optional<CalcDimension> bottom;
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
-
-        CalcDimension leftDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("left"), leftDimen)) {
-            left = leftDimen;
-        }
-        CalcDimension rightDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("right"), rightDimen)) {
-            right = rightDimen;
-        }
-        CalcDimension topDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("top"), topDimen)) {
-            top = topDimen;
-        }
-        CalcDimension bottomDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
-            bottom = bottomDimen;
-        }
-        if (left.has_value() || right.has_value() || top.has_value() || bottom.has_value()) {
-            padding = GetPadding(top, bottom, left, right);
+        CommonCalcDimension commonCalcDimension;
+        ParseCommonMarginOrPaddingCorner(paddingObj, commonCalcDimension);
+        if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
+            commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
+            padding = GetPadding(commonCalcDimension.top, commonCalcDimension.bottom, commonCalcDimension.left,
+                commonCalcDimension.right);
             return padding;
         }
     }
@@ -390,9 +369,8 @@ NG::PaddingProperty JSToggle::GetPadding(const std::optional<CalcDimension>& top
     const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
     const std::optional<CalcDimension>& right)
 {
-    NG::PaddingProperty padding({
-        NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp)
-    });
+    NG::PaddingProperty padding({ NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp),
+        NG::CalcLength(0.0_vp), std::nullopt, std::nullopt });
     if (left.has_value() && left.value().IsNonNegative()) {
         padding.left = NG::CalcLength(left.value());
     }
@@ -428,6 +406,9 @@ void JSToggle::JsHoverEffect(const JSCallbackInfo& info)
 
 void JSToggle::Pop()
 {
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSToggle][pop]", &JSToggle::Pop);
+    }
     ToggleModel::GetInstance()->Pop();
 }
 
@@ -476,6 +457,30 @@ void JSToggle::SwitchStyle(const JSCallbackInfo& info)
         ToggleModel::GetInstance()->SetTrackBorderRadius(trackRadius);
     } else {
         ToggleModel::GetInstance()->ResetTrackBorderRadius();
+    }
+}
+
+void JSToggle::JsRadius(const JSCallbackInfo& info)
+{
+    CalcDimension radius;
+    // when toggle equels button should follow button model.
+    if (static_cast<NG::ToggleType>(toggleType_) == NG::ToggleType::BUTTON) {
+        JSButton::JsRadius(info);
+    } else {
+        JSViewAbstract::JsBorderRadius(info);
+    }
+}
+
+void JSToggle::JsBorder(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsBorder(info);
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    if (static_cast<NG::ToggleType>(toggleType_) == NG::ToggleType::BUTTON) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+        auto valueRadius = object->GetProperty("radius");
+        JSButton::JsRadius(valueRadius);
     }
 }
 } // namespace OHOS::Ace::Framework

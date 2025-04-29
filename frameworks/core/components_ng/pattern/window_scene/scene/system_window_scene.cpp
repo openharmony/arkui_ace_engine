@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 
-#include "ui/rs_canvas_node.h"
 #include "ui/rs_surface_node.h"
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
@@ -62,7 +61,11 @@ void SystemWindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     session_->SetBounds(originBounds);
     windowRect.posX_ = std::round(bounds.x_ + session_->GetOffsetX());
     windowRect.posY_ = std::round(bounds.y_ + session_->GetOffsetY());
-    session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED, "OnBoundsChanged");
+    auto ret = session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED, "OnBoundsChanged");
+    if (ret != Rosen::WSError::WS_OK) {
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "Update rect failed, id: %{public}d, ret: %{public}d",
+            session_->GetPersistentId(), static_cast<int32_t>(ret));
+    }
 }
 
 void SystemWindowScene::OnVisibleChange(bool visible)
@@ -78,18 +81,24 @@ void SystemWindowScene::OnVisibleChange(bool visible)
     if (SystemProperties::GetFaultInjectEnabled() && session_->NeedCheckContextTransparent()) {
         PostFaultInjectTask();
     }
+    HandleVisibleChangeCallback(visible);
 }
 
 void SystemWindowScene::OnAttachToFrameNode()
 {
     CHECK_NULL_VOID(session_);
-    auto surfaceNode = session_->GetSurfaceNode();
-    CHECK_NULL_VOID(surfaceNode);
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_SCOPED_TRACE("OnAttachToFrameNode[id:%d][self:%d][type:%d][name:%s]",
+        session_->GetPersistentId(), host->GetId(), session_->GetWindowType(), session_->GetWindowName().c_str());
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+        "OnAttachToFrameNode id: %{public}d, node id: %{public}d, type: %{public}d, name: %{public}s",
+        session_->GetPersistentId(), host->GetId(), session_->GetWindowType(), session_->GetWindowName().c_str());
+
     host->SetWindowBoundary();
     session_->SetUINodeId(host->GetAccessibilityId());
+    auto surfaceNode = session_->GetSurfaceNode();
+    CHECK_NULL_VOID(surfaceNode);
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
     context->SetRSNode(surfaceNode);
@@ -121,14 +130,49 @@ void SystemWindowScene::OnAttachToFrameNode()
     if (session_->NeedCheckContextTransparent()) {
         PostCheckContextTransparentTask();
     }
+    SetWindowScenePosition();
+}
+
+void SystemWindowScene::SetWindowScenePosition()
+{
+    // set window scene position (x, y) and scale data, jsAccessibilityManager will use it
+    CHECK_NULL_VOID(session_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetGetWindowScenePosition([weakSession = wptr(session_)] (
+        NG::WindowSceneInfo& windowSceneInfo) {
+        auto session = weakSession.promote();
+        CHECK_NULL_VOID(session);
+        auto windowRect = session->GetSessionGlobalRect();
+
+        // get transform info in single hand mode,
+        // adjust the position (x, y) of window scene with the transform pos and scale data.
+        OHOS::Rosen::SingleHandTransform transform =
+            session->GetSingleHandTransform();
+        windowSceneInfo.left = windowRect.posX_ * transform.scaleX + transform.posX;
+        windowSceneInfo.top = windowRect.posY_ * transform.scaleY + transform.posY;
+        windowSceneInfo.scaleX = session->GetScaleX() * transform.scaleX;
+        windowSceneInfo.scaleY = session->GetScaleY() * transform.scaleY;
+
+        windowSceneInfo.innerWindowId = session->GetPersistentId();
+    });
 }
 
 void SystemWindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(session_);
+    CHECK_NULL_VOID(frameNode);
+    ACE_SCOPED_TRACE("OnDetachFromFrameNode[id:%d][self:%d][type:%d][name:%s]",
+        session_->GetPersistentId(), frameNode->GetId(), session_->GetWindowType(), session_->GetWindowName().c_str());
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+        "OnDetachFromFrameNode id: %{public}d, node id: %{public}d, type: %{public}d, name: %{public}s",
+        session_->GetPersistentId(), frameNode->GetId(), session_->GetWindowType(), session_->GetWindowName().c_str());
     if (session_->NeedCheckContextTransparent()) {
         checkContextTransparentTask_.Cancel();
     }
+    session_->SetNotifySystemSessionKeyEventFunc(nullptr);
 }
 
 void SystemWindowScene::OnAttachToMainTree()
@@ -173,14 +217,16 @@ void SystemWindowScene::RegisterEventCallback()
             if (!self) {
                 TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
                     "weakThis Upgrade null,id:%{public}d", PointerEvent->GetId());
-                PointerEvent->MarkProcessed();
+                PointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
+                WindowSceneHelper::InjectPointerEventForActionCancel(PointerEvent);
                 return;
             }
                 auto host = self->GetHost();
             if (!host) {
                 TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
                     "GetHost null,id:%{public}d", PointerEvent->GetId());
-                PointerEvent->MarkProcessed();
+                PointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
+                WindowSceneHelper::InjectPointerEventForActionCancel(PointerEvent);
                 return;
             }
                 WindowSceneHelper::InjectPointerEvent(host, PointerEvent);
@@ -188,11 +234,13 @@ void SystemWindowScene::RegisterEventCallback()
                 TaskExecutor::TaskType::UI, "ArkUIWindowInjectPointerEvent", PriorityType::VIP);
     };
     session_->SetNotifySystemSessionPointerEventFunc(std::move(pointerEventCallback));
-
-    auto keyEventCallback = [instanceId = instanceId_](std::shared_ptr<MMI::KeyEvent> KeyEvent,
-        bool isPreImeEvent) -> bool {
+    auto keyEventCallback = [weakThis = WeakClaim(this), instanceId = instanceId_](
+        std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent) -> bool {
+        CHECK_NULL_RETURN(keyEvent, false);
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_RETURN(self, false);
         ContainerScope Scope(instanceId);
-        return WindowSceneHelper::InjectKeyEvent(KeyEvent, isPreImeEvent);
+        return WindowSceneHelper::InjectKeyEvent(keyEvent, isPreImeEvent);
     };
     session_->SetNotifySystemSessionKeyEventFunc(std::move(keyEventCallback));
 }
@@ -243,12 +291,10 @@ void SystemWindowScene::RegisterFocusCallback()
 {
     CHECK_NULL_VOID(session_);
 
-    auto requestFocusCallback = [weakThis = WeakClaim(this), instanceId = instanceId_]() {
+    auto requestFocusCallback = [weakThis = WeakClaim(this), frameNode = frameNode_, instanceId = instanceId_]() {
         ContainerScope scope(instanceId);
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
-        auto pattern = weakThis.Upgrade();
-        auto frameNode = pattern ? pattern->GetHost() : nullptr;
         pipelineContext->SetFocusedWindowSceneNode(frameNode);
         pipelineContext->PostAsyncEvent([weakThis]() {
             auto pipeline = PipelineContext::GetCurrentContext();
@@ -257,6 +303,24 @@ void SystemWindowScene::RegisterFocusCallback()
             auto self = weakThis.Upgrade();
             CHECK_NULL_VOID(self);
             self->FocusViewShow();
+
+            CHECK_NULL_VOID(self->GetSession());
+            TAG_LOGD(AceLogTag::ACE_WINDOW_SCENE, "focus callback id:%{public}d, use-control-session:%{public}u",
+                self->GetSession()->GetPersistentId(), self->GetSession()->GetIsUseControlSession());
+            CHECK_EQUAL_VOID(self->GetSession()->GetIsUseControlSession(), false);
+            auto host = self->GetHost();
+            CHECK_NULL_VOID(host);
+            auto parentScene = WindowSceneHelper::FindWindowScene(host);
+            CHECK_NULL_VOID(parentScene);
+            auto parentFrame = AceType::DynamicCast<FrameNode>(parentScene);
+            CHECK_NULL_VOID(parentFrame);
+            auto parentType = parentFrame->GetWindowPatternType();
+            TAG_LOGD(AceLogTag::ACE_WINDOW_SCENE, "focus callback node:%{public}d, parent:%{public}d,"
+                " parentType:%{public}d", host->GetId(), parentFrame->GetId(), parentType);
+            CHECK_EQUAL_VOID(WindowSceneHelper::IsAppOrSubScene(parentType), false);
+            auto parentFocusHub = parentFrame->GetFocusHub();
+            CHECK_NULL_VOID(parentFocusHub);
+            parentFocusHub->SetParentFocusable(true);
         }, "ArkUIWindowFocusViewShow", TaskExecutor::TaskType::UI);
     };
     session_->SetNotifyUIRequestFocusFunc(requestFocusCallback);
@@ -292,6 +356,38 @@ void SystemWindowScene::LostViewFocus()
     auto screenNodeFocusHub = screenNode->GetFocusHub();
     CHECK_NULL_VOID(screenNodeFocusHub);
     screenNodeFocusHub->LostFocus(BlurReason::VIEW_SWITCH);
+}
+
+void SystemWindowScene::RegisterVisibleChangeCallback(
+    int32_t nodeId, const std::function<void(bool)>& callback)
+{
+    CHECK_NULL_VOID(callback);
+    CHECK_NULL_VOID(session_);
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "RegisterVisibleChangeCallback %{public}s[id:%{public}d]"
+        " nodeId: %{public}d, mapSize: %{public}zu", session_->GetSessionInfo().bundleName_.c_str(),
+        session_->GetPersistentId(), nodeId, visibleChangeCallbackMap_.size());
+    visibleChangeCallbackMap_[nodeId] = callback;
+}
+
+void SystemWindowScene::UnRegisterVisibleChangeCallback(int32_t nodeId)
+{
+    CHECK_NULL_VOID(session_);
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "UnRegisterVisibleChangeCallback %{public}s[id:%{public}d]"
+        " nodeId: %{public}d, mapSize: %{public}zu", session_->GetSessionInfo().bundleName_.c_str(),
+        session_->GetPersistentId(), nodeId, visibleChangeCallbackMap_.size());
+    auto iter = visibleChangeCallbackMap_.find(nodeId);
+    if (iter == visibleChangeCallbackMap_.end()) {
+        return;
+    }
+
+    visibleChangeCallbackMap_.erase(nodeId);
+}
+
+void SystemWindowScene::HandleVisibleChangeCallback(bool visible)
+{
+    for (const auto& item : visibleChangeCallbackMap_) {
+        item.second(visible);
+    }
 }
 
 void SystemWindowScene::PostCheckContextTransparentTask()

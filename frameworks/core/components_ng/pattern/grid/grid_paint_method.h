@@ -20,14 +20,15 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT GridPaintMethod : public ScrollablePaintMethod {
     DECLARE_ACE_TYPE(GridPaintMethod, ScrollablePaintMethod)
 public:
     explicit GridPaintMethod(const RefPtr<ScrollBar>& scrollBar) : scrollBar_(scrollBar) {}
-    explicit GridPaintMethod(bool vertical, const RefPtr<ScrollBar>& scrollBar)
-        : ScrollablePaintMethod(vertical), scrollBar_(scrollBar)
+    explicit GridPaintMethod(bool vertical, bool isReverse, const RefPtr<ScrollBar>& scrollBar)
+        : ScrollablePaintMethod(vertical, isReverse), scrollBar_(scrollBar)
     {}
 
     ~GridPaintMethod() override = default;
@@ -57,7 +58,6 @@ public:
     }
 
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
-
 
     void SetContentModifier(const RefPtr<GridContentModifier>& modify)
     {

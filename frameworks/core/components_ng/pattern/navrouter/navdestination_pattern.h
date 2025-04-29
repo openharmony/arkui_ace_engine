@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"
@@ -28,24 +29,20 @@
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_algorithm.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
+#include "core/components_ng/pattern/navrouter/navdestination_scrollable_processor.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
-class NavDestinationPattern : public Pattern, public FocusView, public AutoFillTriggerStateHolder {
-    DECLARE_ACE_TYPE(NavDestinationPattern, Pattern, FocusView, AutoFillTriggerStateHolder);
+class NavDestinationPattern : public NavDestinationPatternBase, public AutoFillTriggerStateHolder {
+    DECLARE_ACE_TYPE(NavDestinationPattern, NavDestinationPatternBase, AutoFillTriggerStateHolder);
 
 public:
     explicit NavDestinationPattern(const RefPtr<ShallowBuilder>& shallowBuilder);
     NavDestinationPattern();
     ~NavDestinationPattern() override;
-
-    bool IsAtomicNode() const override
-    {
-        return false;
-    }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
@@ -57,11 +54,6 @@ public:
         auto layout = MakeRefPtr<NavDestinationLayoutAlgorithm>();
         layout->SetIsShown(isOnShow_);
         return layout;
-    }
-    
-    bool CheckCustomAvoidKeyboard() const override
-    {
-        return !NearZero(avoidKeyboardOffset_);
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -81,7 +73,7 @@ public:
     void SetName(const std::string& name)
     {
         name_ = name;
-        auto eventHub = GetEventHub<NavDestinationEventHub>();
+        auto eventHub = GetOrCreateEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetName(name);
     }
@@ -93,7 +85,13 @@ public:
 
     void SetNavPathInfo(const RefPtr<NavPathInfo>& pathInfo)
     {
-        if (navDestinationContext_) {
+        if (!navDestinationContext_) {
+            return;
+        }
+        auto oldInfo = navDestinationContext_->GetNavPathInfo();
+        if (oldInfo) {
+            oldInfo->UpdateNavPathInfo(pathInfo);
+        } else {
             navDestinationContext_->SetNavPathInfo(pathInfo);
         }
     }
@@ -145,21 +143,6 @@ public:
         return customNode_;
     }
 
-    FocusPattern GetFocusPattern() const override
-    {
-        return { FocusType::SCOPE, true };
-    }
-
-    std::list<int32_t> GetRouteOfFirstScope() override
-    {
-        return {};
-    }
-
-    bool IsEntryFocusView() override
-    {
-        return false;
-    }
-
     void SetIsOnShow(bool isOnShow)
     {
         isOnShow_ = isOnShow;
@@ -179,13 +162,15 @@ public:
 
     NavDestinationState GetNavDestinationState() const
     {
-        auto eventHub = GetEventHub<NavDestinationEventHub>();
+        auto eventHub = GetOrCreateEventHub<NavDestinationEventHub>();
         CHECK_NULL_RETURN(eventHub, NavDestinationState::NONE);
         auto state = eventHub->GetState();
         return state;
     }
 
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
 
     uint64_t GetNavDestinationId() const
     {
@@ -245,15 +230,6 @@ public:
     }
 
     void OnLanguageConfigurationUpdate() override;
-    void SetAvoidKeyboardOffset(float avoidKeyboardOffset)
-    {
-        avoidKeyboardOffset_ = avoidKeyboardOffset;
-    }
-
-    float GetAvoidKeyboardOffset()
-    {
-        return avoidKeyboardOffset_;
-    }
 
     bool NeedIgnoreKeyboard();
 
@@ -267,14 +243,102 @@ public:
         return currStyle_;
     }
 
+    void OnWindowHide() override;
+
+    const RefPtr<NavDestinationScrollableProcessor>& GetScrollableProcessor() const
+    {
+        return scrollableProcessor_;
+    }
+    void SetScrollableProcessor(const RefPtr<NavDestinationScrollableProcessor>& processor)
+    {
+        scrollableProcessor_ = processor;
+    }
+    /**
+     * Respond to the scrolling events of the internal scrolling components of NavDestination,
+     * and hide part of the titleBar&toolBar( translate up or down in Y axis ), while changing
+     * the opacity of the titleBar&toolBar.
+     */
+    void UpdateTitleAndToolBarHiddenOffset(float offset);
+    // show titleBar&toolBar immediately.
+    void ShowTitleAndToolBar();
+    // cancel the delayed task if we have started, which will show titleBar&toolBar in the feature time.
+    void CancelShowTitleAndToolBarTask();
+    // Restore the titleBar&toolBar to its original position (hide or show state).
+    void ResetTitleAndToolBarState();
+    
+    void OnCoordScrollStart() override;
+    float OnCoordScrollUpdate(float offset, float currentOffset) override;
+    void OnCoordScrollEnd() override;
+    bool NeedCoordWithScroll() override
+    {
+        return IsNeedHandleScroll();
+    }
+
+    bool IsNeedHandleScroll() const override
+    {
+        auto eventHub = GetOrCreateEventHub<NavDestinationEventHub>();
+        if (eventHub && eventHub->HasOnCoordScrollStartAction()) {
+            return true;
+        }
+        return false;
+    }
+    
+    float GetTitleBarHeightLessThanMaxBarHeight() const override
+    {
+        return 0.0;
+    }
+    
+    bool CanCoordScrollUp(float offset) const override
+    {
+        return IsNeedHandleScroll();
+    }
+
+    void SetIsActive(bool isActive)
+    {
+        isActive_ = isActive;
+    }
+
+    bool IsActive() const
+    {
+        return isActive_;
+    }
+
 private:
+    struct HideBarOnSwipeContext {
+        CancelableCallback<void()> showBarTask;
+        bool isBarShowing = false;
+        bool isBarHiding = false;
+    };
+    HideBarOnSwipeContext& GetSwipeContext(bool isTitle)
+    {
+        return isTitle ? titleBarSwipeContext_ : toolBarSwipeContext_;
+    }
+    RefPtr<FrameNode> GetBarNode(const RefPtr<NavDestinationNodeBase>& nodeBase, bool isTitle);
+    bool EnableTitleBarSwipe(const RefPtr<NavDestinationNodeBase>& nodeBase);
+    bool EnableToolBarSwipe(const RefPtr<NavDestinationNodeBase>& nodeBase);
+    void UpdateBarHiddenOffset(const RefPtr<NavDestinationNodeBase>& nodeBase,
+        const RefPtr<FrameNode>& barNode, float offset, bool isTitle);
+    void StartHideOrShowBarInner(const RefPtr<NavDestinationNodeBase>& nodeBase,
+        float barHeight, float curTranslate, bool isTitle, bool isHide);
+    void StopHideBarIfNeeded(float curTranslate, bool isTitle);
+    void PostShowBarDelayedTask(bool isTitle);
+    void ResetBarState(const RefPtr<NavDestinationNodeBase>& nodeBase,
+        const RefPtr<FrameNode>& barNode, bool isTitle);
+
     void UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
     void UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
-    void UpdateTitlebarVisibility(RefPtr<NavDestinationGroupNode>& hostNode);
-    void InitBackButtonLongPressEvent(RefPtr<NavDestinationGroupNode>& hostNode);
-    void HandleLongPress();
-    void HandleLongPressActionEnd();
+    void MountTitleBar(
+        RefPtr<NavDestinationGroupNode>& hostNode, bool& needRunTitleBarAnimation);
     void OnFontScaleConfigurationUpdate() override;
+    void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+    void CloseLongPressDialog();
+    void CheckIfOrientationChanged();
+    void StopAnimation();
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void CheckIfStatusBarConfigChanged();
+    void CheckIfNavigationIndicatorConfigChagned();
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
@@ -284,19 +348,21 @@ private:
     WeakPtr<UINode> navigationNode_;
     RefPtr<OverlayManager> overlayManager_;
     bool isOnShow_ = false;
+    bool isActive_ = false;
     bool isUserDefinedBgColor_ = false;
     bool isRightToLeft_ = false;
     uint64_t navDestinationId_ = 0;
-    void OnAttachToFrameNode() override;
-    float avoidKeyboardOffset_ = 0.0f;
-
-    RefPtr<LongPressEvent> longPressEvent_;
-    RefPtr<FrameNode> dialogNode_;
 
     std::optional<RefPtr<SystemBarStyle>> backupStyle_;
     std::optional<RefPtr<SystemBarStyle>> currStyle_;
-};
 
+    RefPtr<NavDestinationScrollableProcessor> scrollableProcessor_;
+    HideBarOnSwipeContext titleBarSwipeContext_;
+    HideBarOnSwipeContext toolBarSwipeContext_;
+    bool isFirstTimeCheckOrientation_ = true;
+    bool isFirstTimeCheckStatusBarConfig_ = true;
+    bool isFirstTimeCheckNavigationIndicatorConfig_ = true;
+};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVROUTER_NAVDESTINATION_PATTERN_H

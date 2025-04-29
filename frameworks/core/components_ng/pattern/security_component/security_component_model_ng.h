@@ -28,6 +28,7 @@ struct SecurityComponentElementStyle {
     int32_t text;
     int32_t icon;
     int32_t backgroundType;
+    uint32_t symbolIcon;
 };
 
 class ACE_EXPORT SecurityComponentModelNG {
@@ -42,7 +43,9 @@ public:
         SecurityComponentElementStyle& style,
         const std::function<RefPtr<Pattern>(void)>& patternCreator, bool isArkuiComponent);
     static void SetIconSize(const Dimension& value);
+    static void SetSymbolIconSize(const Dimension& value);
     static void SetIconColor(const Color& value);
+    static void SetSymbolIconColor(const std::vector<Color>& value);
     static void SetFontSize(const Dimension& value);
     static void SetFontStyle(const Ace::FontStyle& value);
     static void SetFontWeight(const FontWeight& value);
@@ -53,11 +56,21 @@ public:
     static void SetBackgroundBorderColor(const Color& value);
     static void SetBackgroundBorderStyle(const BorderStyle& value);
     static void SetBackgroundBorderRadius(const Dimension& value);
+    static void SetBackgroundBorderRadius(const std::optional<Dimension>& topLeft,
+        const std::optional<Dimension>& topRight, const std::optional<Dimension>& bottomLeft,
+        const std::optional<Dimension>& bottomRight);
     static void SetBackgroundPadding(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom);
     static void SetBackgroundPadding(const std::optional<Dimension>& padding);
     static void SetTextIconSpace(const Dimension& value);
     static void SetTextIconLayoutDirection(const SecurityComponentLayoutDirection& value);
+    static void SetAlign(const Alignment alignment);
+    static void SetMaxFontScale(const float value);
+    static void SetMinFontScale(const float value);
+    static void SetMaxLines(const int32_t value);
+    static void SetAdaptMaxFontSize(const Dimension& value);
+    static void SetAdaptMinFontSize(const Dimension& value);
+    static void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value);
 
     virtual bool GetIconResource(int32_t iconStyle, InternalResource::ResourceId& id)
     {
@@ -90,16 +103,21 @@ protected:
 private:
     static void SetDefaultIconStyle(const RefPtr<FrameNode>& imageNode, InternalResource::ResourceId id,
         bool isButtonVisible);
+    static void SetDefaultSymbolIconStyle(const RefPtr<FrameNode>& symbolNode, uint32_t symbolId,
+        bool isButtonVisible);
     static void SetInvisibleBackgroundButton(const RefPtr<FrameNode>& buttonNode);
     static bool IsBackgroundVisible();
     static bool IsArkuiComponent();
+    static void NotifyFontColorSet();
     static bool IsBelowThreshold(const Color& value);
     static bool IsInReleaseList(uint32_t value);
     static void SetDefaultBackgroundButton(const RefPtr<FrameNode>& buttonNode,
         int32_t type);
     static void SetDefaultTextStyle(const RefPtr<FrameNode>& textNode, const std::string& text, bool isButtonVisible);
-    static void InitLayoutProperty(RefPtr<FrameNode>& node, int32_t text, int32_t icon,
+    static void InitLayoutProperty(RefPtr<FrameNode>& node, int32_t text, int32_t icon, uint32_t symbolIcon,
         int32_t backgroundType);
+    RefPtr<FrameNode> InitChild(const std::string& tag, int32_t nodeId,
+        SecurityComponentElementStyle& style, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_COMPONENT_SECURITY_COMPONENT_MODEL_NG_H

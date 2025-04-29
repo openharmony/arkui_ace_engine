@@ -15,18 +15,12 @@
 
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
 
-#include <stack>
 #include <string>
 
 #include "base/log/dump_log.h"
 #include "base/i18n/localization.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/texttimer/text_timer_layout_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -47,7 +41,7 @@ TextTimerPattern::TextTimerPattern()
 
 void TextTimerPattern::FireChangeEvent()
 {
-    auto textTimerEventHub = GetEventHub<TextTimerEventHub>();
+    auto textTimerEventHub = GetOrCreateEventHub<TextTimerEventHub>();
     CHECK_NULL_VOID(textTimerEventHub);
     auto utcTime = GetFormatDuration(GetMilliseconds());
     auto elapsedTime = GetFormatDuration(elapsedTime_);
@@ -98,7 +92,7 @@ void TextTimerPattern::InitTimerDisplay()
                 timer->Tick(duration);
             }
         };
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = host->GetContextRefPtr();
         CHECK_NULL_VOID(context);
         scheduler_ = SchedulerBuilder::Build(callback, context);
         auto count = isCountDown_ ? inputCount_ : 0;
@@ -168,6 +162,10 @@ void TextTimerPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        Pattern::OnModifyDone();
+    }
+
     if (!textNode_) {
         textNode_ = GetTextNode();
     }
@@ -207,7 +205,7 @@ void TextTimerPattern::RegisterVisibleAreaChangeCallback()
     isRegisteredAreaCallback_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto pattern = weak.Upgrade();
@@ -372,7 +370,7 @@ RefPtr<FrameNode> TextTimerPattern::BuildContentModifierNode()
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto eventHub = host->GetEventHub<TextTimerEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<TextTimerEventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     auto textTimerLayoutProperty = GetLayoutProperty<TextTimerLayoutProperty>();
@@ -396,5 +394,14 @@ void TextTimerPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("format: ", format);
     auto elapsedTime = GetFormatDuration(elapsedTime_);
     DumpLog::GetInstance().AddDesc("elapsedTime: ", elapsedTime);
+}
+
+void TextTimerPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto textTimerLayoutProperty = GetLayoutProperty<TextTimerLayoutProperty>();
+    CHECK_NULL_VOID(textTimerLayoutProperty);
+    json->Put("isCountDown", textTimerLayoutProperty->GetIsCountDown().value_or(false));
+    json->Put("format", textTimerLayoutProperty->GetFormat().value_or(DEFAULT_FORMAT).c_str());
+    json->Put("elapsedTime", std::to_string(GetFormatDuration(elapsedTime_)).c_str());
 }
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,6 +43,11 @@ public:
         return false;
     }
 
+    bool IsNeedPercent() const override
+    {
+        return true;
+    }
+
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<TabsLayoutProperty>();
@@ -73,17 +78,25 @@ public:
 
     void SetAnimationEndEvent(AnimationEndEvent&& event);
 
+    void SetOnSelectedEvent(std::function<void(const BaseEventInfo*)>&& event);
+
+    void SetOnUnselectedEvent(std::function<void(const BaseEventInfo*)>&& event);
+
     ChangeEventPtr GetTabBarClickEvent()
     {
         return onTabBarClickEvent_;
     }
 
     void OnModifyDone() override;
-	
+
     std::string ProvideRestoreInfo() override;
-    
+
     void OnRestoreInfo(const std::string& restoreInfo) override;
-	
+
+    void AddInnerOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) override;
+
+    void RecoverInnerOnGestureRecognizerJudgeBegin() override;
+
     void SetOnIndexChangeEvent(std::function<void(const BaseEventInfo*)>&& event);
 
     ChangeEventPtr GetIndexChangeEvent()
@@ -130,10 +143,7 @@ public:
         return interceptStatus_;
     }
 
-    void SetAnimateMode(TabAnimateMode mode)
-    {
-        animateMode_ = mode;
-    }
+    void SetAnimateMode(TabAnimateMode mode);
 
     TabAnimateMode GetAnimateMode() const
     {
@@ -142,8 +152,10 @@ public:
 
     void HandleChildrenUpdated(const RefPtr<FrameNode>& swiperNode, const RefPtr<FrameNode>& tabBarNode);
 
-    void UpdateSelectedState(const RefPtr<FrameNode>& tabBarNode, const RefPtr<FrameNode>& swiperNode,
-        const RefPtr<TabBarPattern>& tabBarPattern, const RefPtr<TabsLayoutProperty>& tabsLayoutProperty, int index);
+    void UpdateSelectedState(const RefPtr<FrameNode>& swiperNode, const RefPtr<TabBarPattern>& tabBarPattern,
+        const RefPtr<TabsLayoutProperty>& tabsLayoutProperty, int index);
+    int32_t OnInjectionEvent(const std::string& command) override;
+    void ReportComponentChangeEvent(int32_t currentIndex);
 
 private:
     void OnAttachToFrameNode() override;
@@ -156,19 +168,27 @@ private:
     void SetSwiperPaddingAndBorder();
     void RecordChangeEvent(int32_t index);
     void FireTabContentStateCallback(int32_t oldIndex, int32_t nextIndex) const;
-
+    void UpdateIndex(const RefPtr<FrameNode>& tabsNode, const RefPtr<FrameNode>& tabBarNode,
+        const RefPtr<FrameNode>& swiperNode, const RefPtr<TabsLayoutProperty>& tabsLayoutProperty);
+    void InitFocusEvent();
+    RefPtr<FocusHub> GetCurrentFocusNode(FocusIntension intension);
+    void InitAccessibilityZIndex();
+    bool GetTargetIndex(const std::string& command, int32_t& targetIndex);
     bool isCustomAnimation_ = false;
     bool isDisableSwipe_ = false;
     bool isInit_ = true;
 
     TabAnimateMode animateMode_ = TabAnimateMode::CONTENT_FIRST;
     ChangeEventWithPreIndexPtr onChangeEvent_;
+    ChangeEventPtr selectedEvent_;
+    ChangeEventPtr unselectedEvent_;
     ChangeEventPtr onTabBarClickEvent_;
     ChangeEventPtr onIndexChangeEvent_;
     AnimationStartEventPtr animationStartEvent_;
     AnimationEndEventPtr animationEndEvent_;
     std::function<bool(int32_t, int32_t)> callback_;
     bool interceptStatus_ = false;
+    BarPosition barPosition_ = BarPosition::END; // default accessibilityZIndex is consistent with BarPosition::END
 };
 
 } // namespace OHOS::Ace::NG

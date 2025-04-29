@@ -18,14 +18,19 @@
 
 #include <array>
 #include <map>
+#include <mutex>
 #include <string>
 
+
+#include "base/memory/referenced.h"
 #include "base/geometry/dimension.h"
 #include "base/log/log.h"
 #include "base/utils/noncopyable.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
+
+class PipelineBase;
+
 enum class ScreenSizeType {
     UNDEFINED = 0,
     XS,
@@ -55,6 +60,7 @@ public:
 
     void SetWindowInfo(double screenWidth, double density, double dipScale)
     {
+        std::lock_guard<std::mutex> guard(lock);
         screenWidth_ = screenWidth;
         density_ = density;
         dipScale_ = dipScale;
@@ -63,6 +69,7 @@ public:
 
     void SetWindowInfo(double density, double dipScale)
     {
+        std::lock_guard<std::mutex> guard(lock);
         density_ = density;
         dipScale_ = dipScale;
         viewScale_ = density / dipScale;
@@ -70,16 +77,11 @@ public:
 
     void OnSurfaceChanged(double width);
 
-    double GetScreenWidth(const RefPtr<PipelineBase>& pipeline = nullptr) const
-    {
-        if (pipeline) {
-            return pipeline->GetRootWidth();
-        }
-        return screenWidth_;
-    }
+    double GetScreenWidth(const RefPtr<PipelineBase>& pipeline = nullptr) const;
 
     double GetDipScale() const
     {
+        std::lock_guard<std::mutex> guard(lock);
         return dipScale_;
     }
 
@@ -87,11 +89,13 @@ public:
 
     ScreenSizeType GetCurrentSize() const
     {
+        std::lock_guard<std::mutex> guard(lock);
         return currentSize_;
     }
 
     double GetDensity() const
     {
+        std::lock_guard<std::mutex> guard(lock);
         return density_;
     }
 
@@ -105,7 +109,7 @@ private:
 private:
     ScreenSystemManager() = default;
     ~ScreenSystemManager() = default;
-
+    static std::mutex lock;
     ACE_DISALLOW_COPY_AND_MOVE(ScreenSystemManager);
 };
 

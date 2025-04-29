@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,10 +17,10 @@
 
 #include <utility>
 
+#include "base/utils/utf_helper.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -35,8 +35,8 @@ constexpr Dimension BOX_HOVER_RADIUS = 18.0_vp;
 bool isPaddingChanged;
 } // namespace
 
-RefPtr<TextFieldControllerBase> SearchModelImpl::Create(const std::optional<std::string>& value,
-    const std::optional<std::string>& placeholder, const std::optional<std::string>& icon)
+RefPtr<TextFieldControllerBase> SearchModelImpl::Create(const std::optional<std::u16string>& value,
+    const std::optional<std::u16string>& placeholder, const std::optional<std::string>& icon)
 {
     auto searchComponent = AceType::MakeRefPtr<OHOS::Ace::SearchComponent>();
     ViewStackProcessor::GetInstance()->ClaimElementId(searchComponent);
@@ -47,10 +47,10 @@ RefPtr<TextFieldControllerBase> SearchModelImpl::Create(const std::optional<std:
     InitializeComponent(searchComponent, textFieldComponent, searchTheme, textFieldTheme);
     PrepareSpecializedComponent(searchComponent, textFieldComponent);
     if (value.has_value()) {
-        textFieldComponent->SetValue(value.value());
+        textFieldComponent->SetValue(UtfUtils::Str16DebugToStr8(value.value()));
     }
     if (placeholder.has_value()) {
-        textFieldComponent->SetPlaceholder(placeholder.value());
+        textFieldComponent->SetPlaceholder(UtfUtils::Str16DebugToStr8(placeholder.value()));
     }
     if (icon.has_value()) {
         textFieldComponent->SetIconImage(icon.value());
@@ -87,7 +87,6 @@ void SearchModelImpl::SetPlaceholderColor(const Color& color)
         LOGE("text component error");
         return;
     }
-    textFieldComponent->SetPlaceholderColor(color);
     textFieldComponent->SetFocusPlaceholderColor(color);
 }
 
@@ -202,6 +201,10 @@ void SearchModelImpl::SetHeight(const Dimension& value)
     textFieldComponent->SetHeight(value);
 }
 
+void SearchModelImpl::SetMinFontScale(const float value) {}
+
+void SearchModelImpl::SetMaxFontScale(const float value) {}
+
 void SearchModelImpl::SetBackBorder()
 {
     auto stack = ViewStackProcessor::GetInstance();
@@ -231,21 +234,24 @@ void SearchModelImpl::SetOnSubmit(std::function<void(const std::string&)>&& onSu
     component->SetOnSubmit(std::move(onSubmit));
 }
 
-void SearchModelImpl::SetOnChange(std::function<void(const std::string&, PreviewText&)>&& onChange)
+void SearchModelImpl::SetOnCopy(std::function<void(const std::u16string&)>&& func)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<SearchComponent>(stack->GetMainComponent());
     CHECK_NULL_VOID(component);
-    auto onChangeImpl = [onChange] (const std::string& value) {
-        if (!onChange) {
-            PreviewText previewText {};
-            onChange(value, previewText);
+    auto childComponent = component->GetChild();
+    CHECK_NULL_VOID(childComponent);
+    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
+    CHECK_NULL_VOID(textFieldComponent);
+    auto onCopy = [func] (const std::string& value) {
+        if (!func) {
+            func(UtfUtils::Str8DebugToStr16(value));
         }
     };
-    component->SetOnChange(std::move(onChangeImpl));
+    textFieldComponent->SetOnCopy(std::move(onCopy));
 }
 
-void SearchModelImpl::SetOnCopy(std::function<void(const std::string&)>&& func)
+void SearchModelImpl::SetOnCut(std::function<void(const std::u16string&)>&& func)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<SearchComponent>(stack->GetMainComponent());
@@ -254,10 +260,15 @@ void SearchModelImpl::SetOnCopy(std::function<void(const std::string&)>&& func)
     CHECK_NULL_VOID(childComponent);
     auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
     CHECK_NULL_VOID(textFieldComponent);
-    textFieldComponent->SetOnCopy(std::move(func));
+    auto onCut = [func] (const std::string& value) {
+        if (!func) {
+            func(UtfUtils::Str8DebugToStr16(value));
+        }
+    };
+    textFieldComponent->SetOnCut(std::move(onCut));
 }
 
-void SearchModelImpl::SetOnCut(std::function<void(const std::string&)>&& func)
+void SearchModelImpl::SetOnPaste(std::function<void(const std::u16string&)>&& func)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<SearchComponent>(stack->GetMainComponent());
@@ -266,19 +277,12 @@ void SearchModelImpl::SetOnCut(std::function<void(const std::string&)>&& func)
     CHECK_NULL_VOID(childComponent);
     auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
     CHECK_NULL_VOID(textFieldComponent);
-    textFieldComponent->SetOnCut(std::move(func));
-}
-
-void SearchModelImpl::SetOnPaste(std::function<void(const std::string&)>&& func)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<SearchComponent>(stack->GetMainComponent());
-    CHECK_NULL_VOID(component);
-    auto childComponent = component->GetChild();
-    CHECK_NULL_VOID(childComponent);
-    auto textFieldComponent = AceType::DynamicCast<TextFieldComponent>(childComponent);
-    CHECK_NULL_VOID(textFieldComponent);
-    textFieldComponent->SetOnPaste(std::move(func));
+    auto onPaste = [func] (const std::string& value) {
+        if (!func) {
+            func(UtfUtils::Str8DebugToStr16(value));
+        }
+    };
+    textFieldComponent->SetOnPaste(std::move(onPaste));
 }
 
 void SearchModelImpl::InitializeDefaultValue(const RefPtr<BoxComponent>& boxComponent,

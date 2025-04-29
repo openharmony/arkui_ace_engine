@@ -42,6 +42,28 @@ int32_t UIContentServiceProxy::GetInspectorTree(const std::function<void(std::st
     return NO_ERROR;
 }
 
+int32_t UIContentServiceProxy::GetVisibleInspectorTree(
+    const std::function<void(std::string, int32_t, bool)>& eventCallback)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("GetVisibleInspectorTree write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("reportStub is nullptr");
+        return FAILED;
+    }
+    report_->RegisterGetInspectorTreeCallback(eventCallback);
+    if (Remote()->SendRequest(GET_VISIBLE_TREE, data, reply, option) != ERR_NONE) {
+        LOGW("GetVisibleInspectorTree send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
 int32_t UIContentServiceProxy::Connect(const EventCallback& eventCallback)
 {
     MessageParcel data;
@@ -53,6 +75,7 @@ int32_t UIContentServiceProxy::Connect(const EventCallback& eventCallback)
     }
     report_ = new (std::nothrow) UiReportStub();
     processId_ = IPCSkeleton::GetCallingRealPid();
+    isConnected = true;
     if (report_ == nullptr) {
         LOGW("connect failed,create reportStub failed");
         return FAILED;
@@ -169,10 +192,74 @@ int32_t UIContentServiceProxy::RegisterWebUnfocusEventCallback(
     }
     if (report_ == nullptr) {
         LOGW("reportStub is nullptr,connect is not execute");
+        return FAILED;
     }
     report_->RegisterWebUnfocusEventCallback(eventCallback);
     if (Remote()->SendRequest(REGISTER_WEB_UNFOCUS_EVENT, data, reply, option) != ERR_NONE) {
         LOGW("RegisterWebUnfocusEventCallback send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::SendCommand(int32_t id, const std::string& command)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendCommand write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteInt32(id) || !data.WriteString(command)) {
+        LOGW("SendCommand write data failed");
+        return FAILED;
+    }
+    if (Remote()->SendRequest(SENDCOMMAND_EVENT, data, reply, option) != ERR_NONE) {
+        LOGW("SendCommand send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::SendCommandAsync(int32_t id, const std::string& command)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendCommand Async write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteInt32(id) || !data.WriteString(command)) {
+        LOGW("SendCommand Async write data failed");
+        return FAILED;
+    }
+    return Remote()->SendRequest(SENDCOMMAND_ASYNC_EVENT, data, reply, option);
+}
+
+int32_t UIContentServiceProxy::SendCommand(const std::string command)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendCommand write interface token failed");
+        return FAILED;
+    }
+
+    if (report_ == nullptr) {
+        LOGW("SendCommand is nullptr,connect is not execute");
+        return FAILED;
+    }
+
+    if (!data.WriteString(command)) {
+        LOGW("SendCommand WriteStringVector  failed");
+        return FAILED;
+    }
+
+    if (Remote()->SendRequest(SEND_COMMAND, data, reply, option) != ERR_NONE) {
+        LOGW("SendCommand send request failed");
         return REPLY_ERROR;
     }
     return NO_ERROR;
@@ -273,10 +360,269 @@ int32_t UIContentServiceProxy::UnregisterWebUnfocusEventCallback()
     }
     if (report_ == nullptr) {
         LOGW("reportStub is nullptr,connect is not execute");
+        return FAILED;
     }
     report_->UnregisterComponentChangeEventCallback();
     if (Remote()->SendRequest(UNREGISTER_COMPONENT_EVENT, data, reply, option) != ERR_NONE) {
         LOGW("UnregisterComponentChangeEventCallback send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+bool UIContentServiceProxy::IsConnect()
+{
+    return isConnected;
+}
+
+int32_t UIContentServiceProxy::GetWebViewTranslateText(
+    const std::string& data, const std::function<void(int32_t, std::string)>& eventCallback)
+{
+    MessageParcel value;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!value.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("GetWebViewTranslateText write interface token failed");
+        return FAILED;
+    }
+
+    if (report_ == nullptr) {
+        LOGW("GetWebViewTranslateText is nullptr,connect is not execute");
+        return FAILED;
+    }
+    if (!value.WriteString(data)) {
+        LOGW("GetWebViewTranslateText write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("GetWebViewTranslateText is nullptr,connect is not execute");
+        return FAILED;
+    }
+    report_->RegisterGetTranslateTextCallback(eventCallback);
+
+    if (Remote()->SendRequest(GET_WEB_TRANSLATE_TEXT, value, reply, option) != ERR_NONE) {
+        LOGW("GetWebViewTranslateText send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::ResetTranslateTextAll()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("ResetTranslateTextAll write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("ResetTranslateTextAll is nullptr,connect is not execute");
+        return FAILED;
+    }
+    if (Remote()->SendRequest(RESET_ALL_TEXT, data, reply, option) != ERR_NONE) {
+        LOGW("ResetTranslateTextAll send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::ResetTranslateText(int32_t nodeId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("ResetTranslateText write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("ResetTranslateText is nullptr,connect is not execute");
+        return FAILED;
+    }
+    if (Remote()->SendRequest(RESET_TEXT_BY_ID, data, reply, option) != ERR_NONE) {
+        LOGW("ResetTranslateText send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::GetWebViewCurrentLanguage(const EventCallback& eventCallback)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("GetWebViewCurrentLanguage write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteInt32(processId_)) {
+        LOGW("write processId failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("GetWebViewCurrentLanguage is nullptr,connect is not execute");
+        return FAILED;
+    }
+    report_->RegisterGetWebViewCurrentLanguage(eventCallback);
+    if (Remote()->SendRequest(GET_WEB_VIEW_LANGUAGE, data, reply, option) != ERR_NONE) {
+        LOGW("GetWebViewCurrentLanguage send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::GetCurrentPageName(const std::function<void(std::string)>& finishCallback)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("GetCurrentPageName write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteInt32(processId_)) {
+        LOGW("write processId failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("GetCurrentPageName is nullptr,connect is not execute");
+        return FAILED;
+    }
+    report_->RegisterGetCurrentPageName(finishCallback);
+    if (Remote()->SendRequest(GET_CURRENT_PAGE_NAME, data, reply, option) != ERR_NONE) {
+        LOGW("GetCurrentPageName send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::StartWebViewTranslate(
+    const std::string& data, const std::function<void(int32_t, std::string)>& eventCallback)
+{
+    MessageParcel value;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!value.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("StartWebViewTranslate write interface token failed");
+        return FAILED;
+    }
+
+    if (report_ == nullptr) {
+        LOGW("StartWebViewTranslate is nullptr,connect is not execute");
+        return FAILED;
+    }
+    if (!value.WriteString(data)) {
+        LOGW("StartWebViewTranslate write interface token failed");
+        return FAILED;
+    }
+    if (!value.WriteInt32(processId_)) {
+        LOGW("write processId failed");
+        return FAILED;
+    }
+    report_->RegisterGetTranslateTextCallback(eventCallback);
+    if (Remote()->SendRequest(CONTINUE_GET_WEB_TEXT, value, reply, option) != ERR_NONE) {
+        LOGW("StartWebViewTranslate send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::SendTranslateResult(
+    int32_t nodeId, std::vector<std::string> results, std::vector<int32_t> ids)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendTranslateResult write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteInt32(nodeId)) {
+        LOGW("SendTranslateResult write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteStringVector(results)) {
+        LOGW("SendTranslateResult WriteStringVector  failed");
+        return FAILED;
+    }
+    if (!data.WriteInt32Vector(ids)) {
+        LOGW("SendTranslateResult WriteInt32Vector token failed");
+        return FAILED;
+    }
+    if (Remote()->SendRequest(SEND_TRANSLATE_RESULT, data, reply, option) != ERR_NONE) {
+        LOGW("SendTranslateResult send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::EndWebViewTranslate()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("ResetTranslateTextAll write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("ResetTranslateTextAll is nullptr,connect is not execute");
+        return FAILED;
+    }
+    if (Remote()->SendRequest(END_WEB_TRANSLATE, data, reply, option) != ERR_NONE) {
+        LOGW("ResetTranslateTextAll send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::SendTranslateResult(int32_t nodeId, std::string result)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendTranslateResult write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteInt32(nodeId)) {
+        LOGW("SendTranslateResult write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteString(result)) {
+        LOGW("SendTranslateResult WriteStringVector  failed");
+        return FAILED;
+    }
+
+    if (Remote()->SendRequest(SEND_TRANSLATE_RESULT_STR, data, reply, option) != ERR_NONE) {
+        LOGW("SendTranslateResult send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::GetCurrentImagesShowing(
+    const std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)>& finishCallback)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("GetCurrentImagesShowing write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteInt32(processId_)) {
+        LOGW("write processId failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("reportServiceStub is nullptr,connect is not execute");
+        return FAILED;
+    }
+    report_->RegisterGetShowingImageCallback(finishCallback);
+    if (Remote()->SendRequest(GET_CURRENT_SHOWING_IMAGE, data, reply, option) != ERR_NONE) {
+        LOGW("GetCurrentImagesShowing send request failed");
         return REPLY_ERROR;
     }
     return NO_ERROR;

@@ -40,15 +40,18 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 
 bool SystemProperties::svgTraceEnable_ = false;
 bool SystemProperties::developerModeOn_ = false;
-bool SystemProperties::layoutTraceEnable_ = false;
-bool SystemProperties::traceInputEventEnable_ = false;
-bool SystemProperties::stateManagerEnable_ = false;
+std::atomic<bool> SystemProperties::layoutTraceEnable_(false);
+std::atomic<bool> SystemProperties::traceInputEventEnable_(false);
+std::atomic<bool> SystemProperties::stateManagerEnable_(false);
 bool SystemProperties::buildTraceEnable_ = false;
 bool SystemProperties::syncDebugTraceEnable_ = false;
+bool SystemProperties::measureDebugTraceEnable_ = false;
+bool SystemProperties::safeAreaDebugTraceEnable_ = false;
 bool SystemProperties::pixelRoundEnable_ = true;
 bool SystemProperties::textTraceEnable_ = false;
 bool SystemProperties::syntaxTraceEnable_ = false;
 bool SystemProperties::accessTraceEnable_ = false;
+bool SystemProperties::vsyncModeTraceEnable_ = false;
 bool SystemProperties::accessibilityEnabled_ = false;
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
@@ -68,15 +71,18 @@ std::string SystemProperties::releaseType_ = UNDEFINED_PARAM;
 std::string SystemProperties::paramDeviceType_ = UNDEFINED_PARAM;
 int32_t SystemProperties::mcc_ = MCC_UNDEFINED;
 int32_t SystemProperties::mnc_ = MNC_UNDEFINED;
-ColorMode SystemProperties::colorMode_ = ColorMode::LIGHT;
 ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
 LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::unZipHap_ = true;
 bool SystemProperties::windowAnimationEnabled_ = false;
-bool SystemProperties::debugBoundaryEnabled_ = false;
+bool SystemProperties::debugEnabled_ = false;
+DebugFlags SystemProperties::debugFlags_ = 0;
+bool SystemProperties::layoutDetectEnabled_ = false;
+std::atomic<bool> SystemProperties::debugBoundaryEnabled_(false);
 bool SystemProperties::debugAutoUIEnabled_ = false;
 bool SystemProperties::debugOffsetLogEnabled_ = false;
 bool SystemProperties::downloadByNetworkEnabled_ = false;
+bool SystemProperties::recycleImageEnabled_ = false;
 bool SystemProperties::gpuUploadEnabled_ = false;
 bool SystemProperties::isHookModeEnabled_ = false;
 bool SystemProperties::astcEnabled_ = false;
@@ -96,14 +102,23 @@ bool SystemProperties::enableScrollableItemPool_ = false;
 bool SystemProperties::navigationBlurEnabled_ = true;
 bool SystemProperties::gridCacheEnabled_ = false;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
-bool SystemProperties::acePerformanceMonitorEnable_ = false;
+std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(false);
+std::atomic<bool> SystemProperties::asyncInitializeEnabled_(true);
+std::atomic<bool> SystemProperties::focusCanBeActive_(true);
 bool SystemProperties::aceCommercialLogEnable_ = false;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 bool SystemProperties::faultInjectEnabled_ = false;
 bool SystemProperties::imageFrameworkEnable_ = false;
+float SystemProperties::pageCount_ = 1.0f;
 float SystemProperties::dragStartDampingRatio_ = 0.2f;
 float SystemProperties::dragStartPanDisThreshold_ = 10.0f;
 uint32_t SystemProperties::canvasDebugMode_ = 0;
+double SystemProperties::scrollableDistance_ = 0.0;
+bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
+int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
+int32_t SystemProperties::touchAccelarate_ = 0;
+bool SystemProperties::pageTransitionFrzEnabled_ = false;
+bool SystemProperties::formSkeletonBlurEnabled_ = true;
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -203,12 +218,12 @@ bool SystemProperties::IsScoringEnabled(const std::string& name)
 
 bool SystemProperties::GetDebugEnabled()
 {
-    return false;
+    return debugEnabled_;
 }
 
 bool SystemProperties::GetLayoutDetectEnabled()
 {
-    return false;
+    return layoutDetectEnabled_;
 }
 
 std::string SystemProperties::GetLanguage()
@@ -325,4 +340,75 @@ float SystemProperties::GetDragStartPanDistanceThreshold()
 {
     return dragStartPanDisThreshold_;
 }
+
+bool SystemProperties::IsSmallFoldProduct()
+{
+    return false;
+}
+
+bool SystemProperties::IsBigFoldProduct()
+{
+    return false;
+}
+
+std::string SystemProperties::GetDebugInspectorId()
+{
+    return UNDEFINED_PARAM;
+}
+
+double SystemProperties::GetSrollableVelocityScale()
+{
+    return 0.0;
+}
+
+double SystemProperties::GetSrollableFriction()
+{
+    return 0.0;
+}
+
+double SystemProperties::GetScrollableDistance()
+{
+    return scrollableDistance_;
+}
+
+bool SystemProperties::IsNeedResampleTouchPoints()
+{
+    return true;
+}
+
+bool SystemProperties::IsNeedSymbol()
+{
+    return true;
+}
+
+int32_t SystemProperties::GetDragDropFrameworkStatus()
+{
+    return dragDropFrameworkStatus_;
+}
+
+int32_t SystemProperties::GetTouchAccelarate()
+{
+    return touchAccelarate_;
+}
+
+bool SystemProperties::GetContainerDeleteFlag()
+{
+    return true;
+}
+
+bool SystemProperties::IsSuperFoldDisplayDevice()
+{
+    return false;
+}
+
+bool SystemProperties::IsPageTransitionFreeze()
+{
+    return pageTransitionFrzEnabled_;
+}
+
+bool SystemProperties::IsFormSkeletonBlurEnabled()
+{
+    return formSkeletonBlurEnabled_;
+}
+
 } // namespace OHOS::Ace

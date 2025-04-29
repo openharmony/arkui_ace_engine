@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,9 @@
 
 namespace OHOS::Ace {
 
+constexpr double CAPSULE_NONE_SHADOW_VALUE = 6.0;
+constexpr double CAPSULE_HOVER_EFFECT_SCALE = 2.0;
+
 /**
  * ProgressTheme defines color and styles of ProgressComponent. ProgressTheme should be built
  * using ProgressTheme::Builder.
@@ -36,7 +39,7 @@ public:
     class Builder {
     public:
         Builder() = default;
-        ~Builder() = default;
+        virtual ~Builder() = default;
 
         RefPtr<ProgressTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
@@ -45,12 +48,15 @@ public:
                 return theme;
             }
             // Read style from system.
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParsePattern(themeConstants, theme);
             return theme;
         }
 
-        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<ProgressTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<ProgressTheme>& theme) const
         {
+            CHECK_NULL_VOID(themeConstants);
+            CHECK_NULL_VOID(theme);
+            auto themeStyle = themeConstants->GetThemeStyle();
             if (!themeStyle) {
                 return;
             }
@@ -111,6 +117,42 @@ public:
                 pattern->GetAttr<Color>("ring_progress_fg_color_begin", theme->trackSelectedColor_);
             theme->ringProgressBackgroundColor_ =
                 pattern->GetAttr<Color>("ring_progress_bg_color", Color::GRAY);
+            theme->loadingFocusedColor_ =
+                pattern->GetAttr<Color>("loading_progress_focused_color", theme->loadingColor_);
+            theme->capsuleBgFocusedColor_ = pattern->GetAttr<Color>("capsule_progress_bg_focused_color",
+                theme->capsuleBgColor_).BlendOpacity(pattern->GetAttr<double>("capsule_progress_bg_alpha", 1.0));
+            theme->capsuleTextFocusedColor_ =
+                pattern->GetAttr<Color>("capsule_progress_text_focused_color", theme->textColor_);
+            theme->capsuleSelectFocusedColor_ =
+                pattern->GetAttr<Color>("capsule_progress_select_focused_color", theme->capsuleSelectColor_)
+                    .BlendOpacity(pattern->GetAttr<double>("capsule_progress_select_focused_color_alpha", 1.0));
+            theme->capsuleInprogressBgColor_ =
+                pattern->GetAttr<Color>("capsule_progress_bg_inprogress_color", theme->capsuleBgColor_)
+                    .BlendOpacity(pattern->GetAttr<double>("capsule_progress_bg_inprogress_color_alpha", 1.0));
+            theme->capsuleInprogressBorderColor_ =
+                pattern->GetAttr<Color>("capsule_progress_inprogress_border_color", theme->borderColor_)
+                    .BlendOpacity(pattern->GetAttr<double>("capsule_progress_inprogress_border_color_alpha", 1.0));
+            theme->capsuleInprogressBorderWidth_ =
+                pattern->GetAttr<Dimension>("capsule_progress_inprogress_border_width", theme->borderWidth_);
+            theme->hoverBlendColor_ = pattern->GetAttr<Color>("progress_hover_blend_color", Color::TRANSPARENT);
+            theme->capsuleHoverEffectType_ = static_cast<int32_t>(
+                pattern->GetAttr<double>("capsule_progress_hover_effect_type", CAPSULE_HOVER_EFFECT_SCALE));
+            theme->loadingDefaultSize_ = pattern->GetAttr<Dimension>("loading_progress_default_size", 0.0_vp);
+            theme->textMargin_ = pattern->GetAttr<Dimension>("progress_text_margin", 8.0_vp);
+            theme->ringDefaultPadding_ = pattern->GetAttr<Dimension>("ring_progress_default_padding", 0.0_vp);
+            theme->capsuleFocusScale_ = pattern->GetAttr<double>("capsule_progress_focused_scale", 1.0);
+            theme->capsuleFocusedShadowStyle_ = static_cast<int32_t>(
+                pattern->GetAttr<double>("capsule_progress_focused_shadow_style", CAPSULE_NONE_SHADOW_VALUE));
+            theme->scaleTrackSelectedColor_ = pattern->GetAttr<Color>("fg_color", Color::RED);
+            theme->loadingParseFailedColor_ = pattern->GetAttr<Color>("fg_progress_color", Color::RED);
+            theme->capsuleParseFailedBgColor_ = pattern->GetAttr<Color>("capsule_progress_bg_color", Color::RED)
+                .BlendOpacity(pattern->GetAttr<double>("capsule_progress_bg_alpha", 1.0));
+            theme->ringProgressParseFailedBgColor_ = pattern->GetAttr<Color>("ring_progress_bg_color", Color::GRAY);
+            theme->trackParseFailedBgColor_ = pattern->GetAttr<Color>("bg_color", Color::RED);
+            theme->capsuleParseFailedSelectColor_ =
+                pattern->GetAttr<Color>("capsule_progress_select_color", Color::RED)
+                    .BlendOpacity(theme->selectColorAlpha_);
+            theme->trackParseFailedSelectedColor_ = pattern->GetAttr<Color>("fg_color", Color::RED);
 
             if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
                 theme->capsuleBgColor_ = theme->trackBgColor_;
@@ -331,10 +373,109 @@ public:
         return ringProgressBackgroundColor_;
     }
 
+    const Color& GetLoadingFocusedColor() const
+    {
+        return loadingFocusedColor_;
+    }
+
+    const Color& GetCapsuleBgFocusedColor() const
+    {
+        return capsuleBgFocusedColor_;
+    }
+
+    const Color& GetCapsuleTextFocusedColor() const
+    {
+        return capsuleTextFocusedColor_;
+    }
+
+    const Color& GetCapsuleSelectFocusedColor() const
+    {
+        return capsuleSelectFocusedColor_;
+    }
+
+    const Color& GetHoverBlendColor() const
+    {
+        return hoverBlendColor_;
+    }
+
+    const Color& GetCapsuleInprogressBgColor() const
+    {
+        return capsuleInprogressBgColor_;
+    }
+
+    const Color& GetCapsuleInprogressBorderColor() const
+    {
+        return capsuleInprogressBorderColor_;
+    }
+
+    const Dimension& GetCapsuleInprogressBorderWidth() const
+    {
+        return capsuleInprogressBorderWidth_;
+    }
+
+    const Dimension& GetLoadingDefaultSize() const
+    {
+        return loadingDefaultSize_;
+    }
+
+    const Dimension& GetRingDefaultPadding() const
+    {
+        return ringDefaultPadding_;
+    }
+
+    int32_t GetCapsuleHoverEffectType() const
+    {
+        return capsuleHoverEffectType_;
+    }
+
+    int32_t GetCapsuleFocusedShadowStyle() const
+    {
+        return capsuleFocusedShadowStyle_;
+    }
+
+    float GetCapsuleFocusScale() const
+    {
+        return capsuleFocusScale_;
+    }
+
+    const Color& GetScaleTrackSelectedColor() const
+    {
+        return scaleTrackSelectedColor_;
+    }
+
+    const Color& GetLoadingParseFailedColor() const
+    {
+        return loadingParseFailedColor_;
+    }
+
+    const Color& GetCapsuleParseFailedBgColor() const
+    {
+        return capsuleParseFailedBgColor_;
+    }
+
+    const Color& GetRingProgressParseFailedBgColor() const
+    {
+        return ringProgressParseFailedBgColor_;
+    }
+
+    const Color& GetTrackParseFailedBgColor() const
+    {
+        return trackParseFailedBgColor_;
+    }
+
+    const Color& GetCapsuleParseFailedSelectColor() const
+    {
+        return capsuleParseFailedSelectColor_;
+    }
+
+    const Color& GetTrackParseFailedSelectedColor() const
+    {
+        return trackParseFailedSelectedColor_;
+    }
+
 protected:
     ProgressTheme() = default;
 
-private:
     Dimension trackThickness_;
     Dimension trackWidth_;
     Color trackBgColor_;
@@ -377,7 +518,20 @@ private:
     float progressDisable_ = 0.4;
     Color clickEffect_;
     float selectColorAlpha_ = 1.0f;
-    const Dimension textMargin_ = 8.0_vp;
+    Dimension textMargin_ = 8.0_vp;
+    Color capsuleBgFocusedColor_;
+    Color capsuleTextFocusedColor_;
+    Color capsuleSelectFocusedColor_;
+    Color hoverBlendColor_;
+    Color capsuleInprogressBgColor_;
+    Color capsuleInprogressBorderColor_;
+    Color loadingFocusedColor_;
+    Dimension loadingDefaultSize_;
+    Dimension ringDefaultPadding_;
+    Dimension capsuleInprogressBorderWidth_;
+    int32_t capsuleHoverEffectType_;
+    int32_t capsuleFocusedShadowStyle_;
+    float capsuleFocusScale_ = 1.0f;
     Color capsuleBgColor_;
 
     // For ring progress.
@@ -386,6 +540,17 @@ private:
     Color ringProgressBackgroundColor_;
     float fontScale_ = 1.75f;
     Dimension fontScalePadding_;
+
+    // For scale progress.
+    Color scaleTrackSelectedColor_;
+
+    // For Parse Failed
+    Color loadingParseFailedColor_;
+    Color capsuleParseFailedBgColor_;
+    Color ringProgressParseFailedBgColor_;
+    Color trackParseFailedBgColor_;
+    Color capsuleParseFailedSelectColor_;
+    Color trackParseFailedSelectedColor_;
 };
 
 } // namespace OHOS::Ace

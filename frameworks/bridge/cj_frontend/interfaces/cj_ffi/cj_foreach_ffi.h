@@ -30,6 +30,12 @@ struct VectorToCFFIArrayString {
     void (*free)(VectorToCFFIArrayString*);
 };
 
+struct SetIdResultFFI {
+    VectorToCFFIArray diffIndexArrayPtr;
+    VectorToCFFIArray duplicateIdsPtr;
+    VectorToCFFIArray removedChildElmtIdsPtr;
+};
+
 typedef void (*ViewCallBack)(int64_t);
 typedef ExternalString (*IdCallBack)(int64_t);
 
@@ -39,6 +45,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkForEachCreate();
 CJ_EXPORT void FfiOHOSAceFrameworkForEachPop();
 CJ_EXPORT VectorToCFFIArrayString FfiOHOSAceFrameworkViewGetIdArray(int64_t elmtId);
 CJ_EXPORT VectorToCFFIArray FfiOHOSAceFrameworkViewSetIdArray(int64_t elmtId, VectorCJStringHandle vecHandle);
+CJ_EXPORT SetIdResultFFI FfiOHOSAceFrameworkViewSetIdArrayReturnStruct(int64_t elmtId, VectorCJStringHandle newIdArray);
 CJ_EXPORT void FfiOHOSAceFrameworkViewCreateNewChildStart(char* elmtId);
 CJ_EXPORT void FfiOHOSAceFrameworkViewCreateNewChildFinish(char* elmtId);
 }

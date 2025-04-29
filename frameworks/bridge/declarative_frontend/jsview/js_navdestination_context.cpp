@@ -32,6 +32,24 @@ napi_value JSNavPathInfo::GetParamObj() const
     return JsConverter::ConvertJsValToNapiValue(param_);
 }
 
+void JSNavPathInfo::OpenScope()
+{
+    if (param_->IsEmpty()) {
+        return;
+    }
+    if (!scope_) {
+        scope_ = new LocalScope(param_->GetEcmaVM());
+    }
+}
+
+void JSNavPathInfo::CloseScope()
+{
+    if (scope_) {
+        delete scope_;
+        scope_ = nullptr;
+    }
+}
+
 void JSNavDestinationContext::GetPathInfo(const JSCallbackInfo& info)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -41,6 +59,7 @@ void JSNavDestinationContext::GetPathInfo(const JSCallbackInfo& info)
         return;
     }
     obj->SetProperty<std::string>("name", pathInfo->GetName());
+    obj->SetProperty<bool>("isEntry", pathInfo->GetIsEntry());
     auto jsInfo = AceType::DynamicCast<JSNavPathInfo>(pathInfo);
     JSRef<JSVal> param;
     JSRef<JSVal> onPop;
@@ -149,5 +168,16 @@ void JSNavDestinationContext::Destructor(JSNavDestinationContext* context)
     if (context != nullptr) {
         context->DecRefCount();
     }
+}
+
+void JSNavPathInfo::UpdateNavPathInfo(const RefPtr<NG::NavPathInfo>& info)
+{
+    NG::NavPathInfo::UpdateNavPathInfo(info);
+    auto jsPathInfo = AceType::DynamicCast<JSNavPathInfo>(info);
+    if (!jsPathInfo) {
+        return;
+    }
+    param_ = jsPathInfo->GetParam();
+    onPop_ = jsPathInfo->GetOnPop();
 }
 } // namespace OHOS::Ace::Framework

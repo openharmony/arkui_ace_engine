@@ -26,13 +26,19 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SpanModelNG : public SpanModel {
 public:
-    void Create(const std::string& content) override;
+    void Create(const std::u16string& content) override;
     void SetFont(const Font& value) override;
+    void ResetFont() override;
     void SetFontSize(const Dimension& value) override;
+    void ResetFontSize() override;
     void SetTextColor(const Color& value) override;
+    void ResetTextColor() override;
     void SetItalicFontStyle(Ace::FontStyle value) override;
+    void ResetItalicFontStyle() override;
     void SetFontWeight(FontWeight value) override;
+    void ResetFontWeight() override;
     void SetFontFamily(const std::vector<std::string>& value) override;
+    void ResetFontFamily() override;
     void SetTextDecoration(TextDecoration value) override;
     void SetTextDecorationStyle(TextDecorationStyle value) override;
     void SetTextDecorationColor(const Color& value) override;
@@ -47,22 +53,34 @@ public:
     void SetAccessibilityDescription(const std::string& description) override;
     void SetAccessibilityImportance(const std::string& importance) override;
 
-    static RefPtr<SpanNode> CreateSpanNode(int32_t nodeId, const std::string& content);
-    static void InitSpan(UINode* uiNode, const std::string& content);
+    static RefPtr<SpanNode> CreateSpanNode(int32_t nodeId, const std::u16string& content);
+    static void InitSpan(UINode* uiNode, const std::u16string& content);
     static void SetFontWeight(UINode* uiNode, FontWeight value);
+    static void ResetFontWeight(UINode* uiNode);
     static void SetTextCase(UINode* uiNode, TextCase value);
+    static void ResetTextCase(UINode* uiNode);
     static void SetItalicFontStyle(UINode* uiNode, Ace::FontStyle value);
+    static void ResetItalicFontStyle(UINode* uiNode);
     static void SetLineHeight(UINode* uiNode, const Dimension& value);
+    static void ResetLineHeight(UINode* uiNode);
     static void SetFontSize(UINode* uiNode, const Dimension& value);
+    static void ResetFontSize(UINode* uiNode);
     static void SetFontFamily(UINode* uiNode, const std::vector<std::string>& value);
+    static void ResetFontFamily(UINode* uiNode);
     static void SetTextDecoration(UINode* uiNode, TextDecoration value);
+    static void ResetTextDecoration(UINode* uiNode);
     static void SetTextDecorationStyle(UINode* uiNode, TextDecorationStyle value);
+    static void ResetTextDecorationStyle(UINode* uiNode);
     static void SetTextDecorationColor(UINode* uiNode, const Color& value);
+    static void ResetTextDecorationColor(UINode* uiNode);
     static void SetTextColor(UINode* uiNode, const Color& value);
+    static void ResetTextColor(UINode* uiNode);
     static void SetLetterSpacing(UINode* uiNode, const Dimension& value);
+    static void ResetLetterSpacing(UINode* uiNode);
     static void SetBaselineOffset(UINode* uiNode, const Dimension& value);
     static void SetFont(UINode* uiNode, const Font& value);
-    static std::string GetContent(UINode* uiNode);
+    static void ResetFont(UINode* uiNode);
+    static std::u16string GetContent(UINode* uiNode);
     static Ace::TextDecoration GetTextDecoration(UINode* uiNode);
     static Color GetTextDecorationColor(UINode* uiNode);
     static Ace::TextDecorationStyle GetTextDecorationStyle(UINode* uiNode);
@@ -74,13 +92,14 @@ public:
     static Ace::TextCase GetTextCase(UINode* uiNode);
     static Dimension GetLetterSpacing(UINode* uiNode);
     static Dimension GetBaselineOffset(UINode* uiNode);
-    static TextStyle GetDefaultTextStyle();
+    static TextStyle GetDefaultTextStyle(int32_t themeScopeId);
     void CreateContainSpan() override;
     void SetTextBackgroundStyle(const TextBackgroundStyle& style) override;
     static void SetTextBackgroundStyle(UINode* uiNode, const TextBackgroundStyle& style);
     static void SetTextBackgroundStyleByBaseSpan(UINode* uiNode, const TextBackgroundStyle& style);
     static TextBackgroundStyle GetSpanTextBackgroundStyle(UINode* uiNode);
     static void SetTextShadow(UINode* uiNode, const std::vector<Shadow>& value);
+    static void ResetTextShadow(UINode* uiNode);
     static std::vector<Shadow> GetTextShadow(UINode* uiNode);
     static void SetOnClick(UINode* uiNode, GestureEventFunc&& click);
     static void ClearOnClick(UINode* uiNode);
@@ -88,11 +107,9 @@ public:
     static void SetAccessibilityDescription(UINode* uiNode, const std::string& description);
     static void SetAccessibilityImportance(UINode* uiNode, const std::string& importance);
     static std::vector<std::string> GetSpanFontFamily(UINode* uiNode);
-#ifdef USE_GRAPHIC_TEXT_GINE
     // impl in render/adapter/span_model_adapter.cpp
     static RefPtr<SpanItem> CreateSpanItem(ArkUI_SpanItem* item);
     static ParagraphStyle CreateParagraphStyle(ArkUI_StyledString* styledString);
-#endif
 };
 } // namespace OHOS::Ace::NG
 

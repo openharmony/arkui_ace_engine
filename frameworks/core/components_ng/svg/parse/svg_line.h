@@ -29,12 +29,8 @@ public:
     ~SvgLine() override = default;
     static RefPtr<SvgNode> Create();
 
-#ifndef USE_ROSEN_DRAWING
-    SkPath AsPath(const Size& viewPort) const override;
-#else
     RSRecordingPath AsPath(const Size& viewPort) const override;
-#endif
-
+    RSRecordingPath AsPath(const SvgLengthScaleRule& lengthRule) override;
     bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
 
 private:

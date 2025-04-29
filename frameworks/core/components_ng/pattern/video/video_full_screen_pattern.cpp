@@ -15,9 +15,6 @@
 
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 
-#include "base/log/log_wrapper.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/video/video_full_screen_node.h"
 
 namespace OHOS::Ace::NG {
@@ -31,7 +28,7 @@ void VideoFullScreenPattern::InitFullScreenParam(const RefPtr<VideoPattern>& vid
     RecoverState(videoPattern);
     auto video = videoPattern->GetHost();
     CHECK_NULL_VOID(video);
-    SetEventHub(video->GetEventHub<EventHub>());
+    SetEventHub(video->GetOrCreateEventHub<EventHub>());
 }
 
 void VideoFullScreenPattern::SetEventHub(const RefPtr<EventHub>& eventHub)
@@ -53,7 +50,9 @@ void VideoFullScreenPattern::RequestFullScreen(const RefPtr<VideoNode>& videoNod
     CHECK_NULL_VOID(fullScreenNode);
     fullScreenNode->InitVideoFullScreenNode(videoNode);
     // add node to root
-    auto pipelienContext = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelienContext = host->GetContext();
     CHECK_NULL_VOID(pipelienContext);
     auto rootNode = pipelienContext->GetRootElement();
     if (!rootNode) {
@@ -118,6 +117,8 @@ void VideoFullScreenPattern::UpdateState()
     UpdateAutoPlay(videoPattern->GetAutoPlay());
     UpdateProgressRate(videoPattern->GetProgressRate());
     UpdateAnalyzerState(videoPattern->GetAnalyzerState());
+    SetShortcutKeyEnabled(videoPattern->GetShortcutKeyEnabled());
+    SetCurrentVolume(videoPattern->GetCurrentVolume());
 
     // update full screen layout
     auto fullScreenNode = GetHost();

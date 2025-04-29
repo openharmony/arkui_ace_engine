@@ -14,27 +14,125 @@
  */
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 
-#include <string>
-
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> DialogView::CreateDialogNode(
     const DialogProperties& param, const RefPtr<UINode>& customNode = nullptr)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    return CreateDialogNode(nodeId, param, customNode);
+}
+
+void SetDialogTransitionEffects(
+    const RefPtr<FrameNode>& dialog, const DialogProperties& param, RefPtr<DialogPattern> pattern)
+{
+    auto dialogContext = dialog->GetRenderContext();
+    if (param.maskTransitionEffect != nullptr || param.dialogTransitionEffect != nullptr) {
+        dialogContext->UpdateBackgroundColor(Color(0x00000000));
+        if (param.dialogTransitionEffect != nullptr) {
+            auto contentNode = AceType::DynamicCast<FrameNode>(dialog->GetChildByIndex(0));
+            CHECK_NULL_VOID(contentNode);
+            contentNode->GetRenderContext()->UpdateChainedTransition(param.dialogTransitionEffect);
+        }
+        if (param.maskTransitionEffect != nullptr) {
+            auto maskNode = AceType::DynamicCast<FrameNode>(dialog->GetChildByIndex(1));
+            CHECK_NULL_VOID(maskNode);
+            maskNode->GetRenderContext()->UpdateChainedTransition(param.maskTransitionEffect);
+        }
+    } else if (param.transitionEffect != nullptr) {
+        dialogContext->UpdateChainedTransition(param.transitionEffect);
+    }
+    if (param.transitionEffect == nullptr && param.dialogTransitionEffect == nullptr &&
+        param.maskTransitionEffect == nullptr) {
+        // set open and close animation
+        pattern->SetOpenAnimation(param.openAnimation);
+        pattern->SetCloseAnimation(param.closeAnimation);
+    }
+}
+
+RefPtr<FrameNode> DialogView::CreateDialogNode(
+    const int32_t nodeId, const DialogProperties& param, const RefPtr<UINode>& customNode = nullptr)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, nullptr);
 
+    std::string tag = GetDialogTag(param);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag.c_str(), nodeId);
+    RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(tag, nodeId,
+        AceType::MakeRefPtr<DialogPattern>(dialogTheme, customNode));
+
+    if (customNode) {
+        customNode->Build(nullptr);
+    }
+
+    // update layout and render props
+    auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialog->GetLayoutProperty());
+    CHECK_NULL_RETURN(dialogLayoutProp, dialog);
+    DialogAlignment align = static_cast<DialogAlignment>(dialogTheme->GetAlignDialog());
+    if (param.alignment == DialogAlignment::DEFAULT && align == DialogAlignment::CENTER) {
+        dialogLayoutProp->UpdateDialogAlignment(align);
+    } else {
+        dialogLayoutProp->UpdateDialogAlignment(param.alignment);
+    }
+    dialogLayoutProp->UpdateDialogOffset(param.offset);
+    dialogLayoutProp->UpdateUseCustomStyle(param.customStyle);
+    dialogLayoutProp->UpdateAutoCancel(param.autoCancel);
+    dialogLayoutProp->UpdateShowInSubWindow(param.isShowInSubWindow);
+    dialogLayoutProp->UpdateDialogButtonDirection(param.buttonDirection);
+    dialogLayoutProp->UpdateIsModal(param.isModal);
+    dialogLayoutProp->UpdateIsSceneBoardDialog(param.isSceneBoardDialog);
+    if (param.width.has_value() && NonNegative(param.width.value().Value())) {
+        dialogLayoutProp->UpdateWidth(param.width.value());
+    } else {
+        dialogLayoutProp->UpdateGridCount(param.gridCount);
+    }
+    if (param.height.has_value() && NonNegative(param.height.value().Value())) {
+        dialogLayoutProp->UpdateHeight(param.height.value());
+    }
+    if (param.enableHoverMode.has_value()) {
+        dialogLayoutProp->UpdateEnableHoverMode(param.enableHoverMode.value());
+    }
+    if (param.hoverModeArea.has_value()) {
+        dialogLayoutProp->UpdateHoverModeArea(param.hoverModeArea.value());
+    }
+    // create gray background
+    auto dialogContext = dialog->GetRenderContext();
+    CHECK_NULL_RETURN(dialogContext, dialog);
+    auto pattern = dialog->GetPattern<DialogPattern>();
+    CHECK_NULL_RETURN(pattern, dialog);
+    pattern->SetDialogProperties(param);
+
+    if (dialogLayoutProp->GetShowInSubWindowValue(false) || !dialogLayoutProp->GetIsModal().value_or(true)) {
+        dialogContext->UpdateBackgroundColor(Color(0x00000000));
+    } else {
+        dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
+    }
+    if (dialogLayoutProp->GetIsSceneBoardDialog().value_or(false)) {
+        dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
+    }
+    SetDialogAccessibilityHoverConsume(dialog);
+    // set onCancel callback
+    auto hub = dialog->GetOrCreateEventHub<DialogEventHub>();
+    CHECK_NULL_RETURN(hub, dialog);
+    hub->SetOnCancel(param.onCancel);
+    hub->SetOnSuccess(param.onSuccess);
+
+    pattern->BuildChild(param);
+    pattern->SetOnWillDismiss(param.onWillDismiss);
+    pattern->SetOnWillDismissByNDK(param.onWillDismissCallByNDK);
+
+    SetDialogTransitionEffects(dialog, param, pattern);
+
+    dialog->MarkModifyDone();
+    return dialog;
+}
+
+std::string DialogView::GetDialogTag(const DialogProperties& param)
+{
     std::string tag;
     switch (param.type) {
         case DialogType::ALERT_DIALOG: {
@@ -49,71 +147,27 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
             tag = V2::DIALOG_ETS_TAG;
             break;
     }
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag.c_str(), nodeId);
-    RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(tag, nodeId,
-        AceType::MakeRefPtr<DialogPattern>(dialogTheme, customNode));
+    return tag;
+}
 
-    if (customNode) {
-        customNode->Build(nullptr);
-    }
-
-    // update layout and render props
-    auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialog->GetLayoutProperty());
-    CHECK_NULL_RETURN(dialogLayoutProp, dialog);
-    dialogLayoutProp->UpdateDialogAlignment(param.alignment);
-    dialogLayoutProp->UpdateDialogOffset(param.offset);
-    dialogLayoutProp->UpdateUseCustomStyle(param.customStyle);
-    dialogLayoutProp->UpdateAutoCancel(param.autoCancel);
-    dialogLayoutProp->UpdateShowInSubWindow(param.isShowInSubWindow);
-    dialogLayoutProp->UpdateDialogButtonDirection(param.buttonDirection);
-    dialogLayoutProp->UpdateIsModal(param.isModal);
-    dialogLayoutProp->UpdateIsScenceBoardDialog(param.isScenceBoardDialog);
-    if (param.width.has_value() && NonNegative(param.width.value().Value())) {
-        dialogLayoutProp->UpdateWidth(param.width.value());
-    } else {
-        dialogLayoutProp->UpdateGridCount(param.gridCount);
-    }
-    if (param.height.has_value() && NonNegative(param.height.value().Value())) {
-        dialogLayoutProp->UpdateHeight(param.height.value());
-    }
-    // create gray background
-    auto dialogContext = dialog->GetRenderContext();
-    CHECK_NULL_RETURN(dialogContext, dialog);
-    auto pattern = dialog->GetPattern<DialogPattern>();
-    CHECK_NULL_RETURN(pattern, dialog);
-    pattern->SetDialogProperties(param);
-
-    auto isSubWindow = dialogLayoutProp->GetShowInSubWindowValue(false) && !pattern->IsUIExtensionSubWindow();
-    if ((isSubWindow && dialogLayoutProp->GetIsModal().value_or(true)) ||
-        !dialogLayoutProp->GetIsModal().value_or(true)) {
-        dialogContext->UpdateBackgroundColor(Color(0x00000000));
-    } else {
-        dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
-    }
-    if (dialogLayoutProp->GetIsScenceBoardDialog().value_or(false)) {
-        dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
-    }
-    // set onCancel callback
-    auto hub = dialog->GetEventHub<DialogEventHub>();
-    CHECK_NULL_RETURN(hub, dialog);
-    hub->SetOnCancel(param.onCancel);
-    hub->SetOnSuccess(param.onSuccess);
-
-    pattern->BuildChild(param);
-    pattern->SetOnWillDismiss(param.onWillDismiss);
-    pattern->SetOnWillDismissByNDK(param.onWillDismissCallByNDK);
-
-    if (param.transitionEffect != nullptr) {
-        dialogContext->UpdateChainedTransition(param.transitionEffect);
-    } else {
-        // set open and close animation
-        pattern->SetOpenAnimation(param.openAnimation);
-        pattern->SetCloseAnimation(param.closeAnimation);
-    }
-
-    dialog->MarkModifyDone();
-    return dialog;
+void DialogView::SetDialogAccessibilityHoverConsume(const RefPtr<FrameNode>& dialog)
+{
+    auto dialogAccessibilityProperty = dialog->GetAccessibilityProperty<DialogAccessibilityProperty>();
+    CHECK_NULL_VOID(dialogAccessibilityProperty);
+    dialogAccessibilityProperty->SetAccessibilityHoverConsume(
+        [weak = AceType::WeakClaim(AceType::RawPtr(dialog))](const NG::PointF& point) {
+            auto dialogNode = weak.Upgrade();
+            CHECK_NULL_RETURN(dialogNode, true);
+            auto dialogLayoutProp = dialogNode->GetLayoutProperty<DialogLayoutProperty>();
+            CHECK_NULL_RETURN(dialogLayoutProp, true);
+            auto pattern = dialogNode->GetPattern<DialogPattern>();
+            CHECK_NULL_RETURN(pattern, true);
+            if (!dialogLayoutProp->GetIsModal().value_or(true) ||
+                (dialogLayoutProp->GetShowInSubWindowValue(false) && !pattern->IsUIExtensionSubWindow())) {
+                return false;
+            }
+            return true;
+        });
 }
 
 } // namespace OHOS::Ace::NG

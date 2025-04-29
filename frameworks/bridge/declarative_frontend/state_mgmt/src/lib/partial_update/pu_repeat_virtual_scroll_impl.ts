@@ -22,14 +22,16 @@ class __RepeatVirtualScrollImpl<T> {
     private arr_: Array<T>;
     private itemGenFuncs_: { [type: string]: RepeatItemGenFunc<T> };
     private keyGenFunc_?: RepeatKeyGenFunc<T>;
-    private typeGenFunc_: RepeatTypeGenFunc<T>;
+    private ttypeGenFunc_?: RepeatTTypeGenFunc<T>;
 
     private totalCount_: number;
     private totalCountSpecified : boolean = false;
     private templateOptions_: { [type: string]: RepeatTemplateImplOptions };
+    private reusable_: boolean = true;
 
     private mkRepeatItem_: (item: T, index?: number) => __RepeatItemFactoryReturn<T>;
     private onMoveHandler_?: OnMoveHandler;
+    private itemDragEventHandler?: ItemDragEventHandler;
 
     // index <-> key maps
     private key4Index_: Map<number, string> = new Map<number, string>();
@@ -49,25 +51,51 @@ class __RepeatVirtualScrollImpl<T> {
         this.arr_ = config.arr;
         this.itemGenFuncs_ = config.itemGenFuncs;
         this.keyGenFunc_ = config.keyGenFunc;
-        this.typeGenFunc_ = config.typeGenFunc;
+        this.ttypeGenFunc_ = config.ttypeGenFunc;
 
         // if totalCountSpecified==false, then need to create dependency on array length 
         // so when array length changes, will update totalCount
         this.totalCountSpecified = config.totalCountSpecified;
-        this.totalCount_ = (!this.totalCountSpecified || config.totalCount < 0) 
+        this.totalCount_ = (!this.totalCountSpecified || (config.totalCount as number) < 0) 
             ? this.arr_.length
-            : config.totalCount;
+            : config.totalCount as number;
 
         this.templateOptions_ = config.templateOptions;
 
         this.mkRepeatItem_ = config.mkRepeatItem;
         this.onMoveHandler_ = config.onMoveHandler;
+        this.itemDragEventHandler = config.itemDragEventHandler;
 
         if (isInitialRender) {
+            this.reusable_ = config.reusable;
+            if (!this.reusable_) {
+                for (let templateType in this.templateOptions_) {
+                    this.templateOptions_[templateType] = { cachedCountSpecified: true, cachedCount: 0 };
+                }
+            }
             this.initialRender(config.owningView_, ObserveV2.getCurrentRecordedId());
         } else {
             this.reRender();
         }
+    }
+
+    // wraps a type gen function with validation logic
+    private ttypeGenFunc(item: T, index: number): string {
+        if (this.ttypeGenFunc_ === undefined) {
+            return RepeatEachFuncTtype;
+        }
+        let ttype = RepeatEachFuncTtype;
+        try {
+            ttype = this.ttypeGenFunc_(item, index);
+        } catch (e) {
+            stateMgmtConsole.applicationError(`__RepeatVirtualScrollImpl. Error generating ttype at index: ${index}`,
+                e?.message);
+        }
+        if (ttype in this.itemGenFuncs_ === false) {
+            stateMgmtConsole.applicationError(`__RepeatVirtualScrollImpl. No template found for ttype '${ttype}'`);
+            ttype = RepeatEachFuncTtype;
+        }
+        return ttype;
     }
 
     /**/
@@ -79,7 +107,7 @@ class __RepeatVirtualScrollImpl<T> {
         this.repeatElmtId_ = repeatElmtId;
 
         const onCreateNode = (forIndex: number): void => {
-            stateMgmtConsole.debug(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) 2onCreateNode index ${forIndex} - start`);
+            stateMgmtConsole.debug(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onCreateNode index ${forIndex} - start`);
             if (forIndex < 0 || forIndex >= this.totalCount_ || forIndex >= this.arr_.length) {
                 // STATE_MGMT_NOTE check also index < totalCount
                 throw new Error(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onCreateNode: for index=${forIndex}  \
@@ -97,7 +125,7 @@ class __RepeatVirtualScrollImpl<T> {
 
             // execute the itemGen function
             this.initialRenderItem(repeatItem);
-            stateMgmtConsole.debug(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onCreateNode for index ${forIndex} key "${forKey}" - end `);
+            stateMgmtConsole.debug(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onCreateNode for index ${forIndex} key "${forKey}" - end`);
         }; // onCreateNode
 
         const onUpdateNode = (fromKey: string, forIndex: number): void => {
@@ -111,13 +139,15 @@ class __RepeatVirtualScrollImpl<T> {
             ObserveV2.getObserve().addRef4Id(this.repeatElmtId_, this.arr_, forIndex.toString());
             const repeatItem = this.repeatItem4Key_.get(fromKey);
             if (!repeatItem) {
-                stateMgmtConsole.error(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onUpdateNode: fromKey "${fromKey}", forIndex=${forIndex}, can not find RepeatItem for key. Unrecoverable error`);
+                stateMgmtConsole.error(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onUpdateNode: fromKey "${fromKey}", \
+                    forIndex=${forIndex}, can not find RepeatItem for key. Unrecoverable error.`);
                 return;
             }
             const forKey = this.getOrMakeKey4Index(forIndex);
-            stateMgmtConsole.debug(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onUpdateNode: fromKey "${fromKey}", forIndex=${forIndex} forKey="${forKey}". Updating RepeatItem ...`);
+            stateMgmtConsole.debug(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onUpdateNode: fromKey "${fromKey}", \
+                forIndex=${forIndex} forKey="${forKey}". Updating RepeatItem ...`);
 
-                        // update Map according to made update:
+            // update Map according to made update:
             // del fromKey entry and add forKey
             this.repeatItem4Key_.delete(fromKey);
             this.repeatItem4Key_.set(forKey, repeatItem);
@@ -127,16 +157,17 @@ class __RepeatVirtualScrollImpl<T> {
                 repeatItem.updateItem(this.arr_[forIndex]);
                 repeatItem.updateIndex(forIndex);
 
-                stateMgmtConsole.debug(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onUpdateNode: fromKey "${fromKey}", forIndex=${forIndex} forKey="${forKey}". Initiating UINodes update synchronously ...`);
+                stateMgmtConsole.debug(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onUpdateNode: fromKey "${fromKey}", \
+                    forIndex=${forIndex} forKey="${forKey}". Initiating UINodes update synchronously ...`);
                 ObserveV2.getObserve().updateDirty2(true);
             }
         }; // onUpdateNode
 
         const onGetKeys4Range = (from: number, to: number): Array<string> => {
             if (to > this.totalCount_ || to > this.arr_.length) {
-                stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId ${this.repeatElmtId_}:  onGetKeys4Range from ${from} to ${to} \
-                    with data array length ${this.arr_.length}, totalCount=${this.totalCount_} \
-                    Error!. Application fails to add more items to source data array. on time. Trying with corrected input parameters ...`);
+                stateMgmtConsole.applicationError(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onGetKeys4Range: \
+                    from ${from} to ${to} with data array length ${this.arr_.length}, totalCount=${this.totalCount_} \
+                    Error!. Application fails to add more items to source data array on time. Trying with corrected input parameters ...`);
                 to = this.totalCount_;
                 from = Math.min(to, from);
             }
@@ -159,8 +190,8 @@ class __RepeatVirtualScrollImpl<T> {
             result.forEach((key, index) => {
                 const forIndex = index + from;
                 // if repeatItem exists, and needs update then do the update, and call sync update as well
-            // thereby ensure cached items are up-to-date on C++ side. C++ does not need to request update 
-            // from TS side 
+                // thereby ensure cached items are up-to-date on C++ side. C++ does not need to request update 
+                // from TS side 
                 const repeatItem4Key = this.repeatItem4Key_.get(key);
                 // make sure the index is up-to-date
                 if (repeatItem4Key && (repeatItem4Key.item !== this.arr_[forIndex] || repeatItem4Key.index !== forIndex)) {
@@ -172,19 +203,21 @@ class __RepeatVirtualScrollImpl<T> {
             }); // forEach
 
             if (needsRerender) {
-                stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}) onGetKeys4Range:  Initiating UINodes update synchronously ...`);
+                stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}) onGetKeys4Range: \
+                    Initiating UINodes update synchronously ...`);
                 ObserveV2.getObserve().updateDirty2(true);
             }
 
-            stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}): onGetKeys4Range from ${from} to ${to} - returns ${result.toString()}`);
+            stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}): onGetKeys4Range \
+                from ${from} to ${to} - returns ${result.toString()}`);
             return result;
         }; // const onGetKeys4Range 
 
         const onGetTypes4Range = (from: number, to: number): Array<string> => {
             if (to > this.totalCount_ || to > this.arr_.length) {
-                stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId: ${this.repeatElmtId_}:  onGetTypes4Range from ${from} to ${to} \
-                  with data array length ${this.arr_.length}, totalCount=${this.totalCount_} \
-                  Error! Application fails to add more items to source data array.on time.Trying with corrected input parameters ...`);
+                stateMgmtConsole.applicationError(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onGetTypes4Range: \
+                    from ${from} to ${to} with data array length ${this.arr_.length}, totalCount=${this.totalCount_} \
+                    Error! Application fails to add more items to source data array on time. Trying with corrected input parameters ...`);
                 to = this.totalCount_;
                 from = Math.min(to, from);
             }
@@ -199,28 +232,47 @@ class __RepeatVirtualScrollImpl<T> {
             ObserveV2.getObserve().startRecordDependencies(owningView, this.repeatElmtId_, false);
 
             for (let i = from; i <= to && i < this.arr_.length; i++) {
-                let ttype = this.typeGenFunc_(this.arr_[i], i);
+                let ttype = this.ttypeGenFunc(this.arr_[i], i);
                 result.push(ttype);
             } // for
             ObserveV2.getObserve().stopRecordDependencies();
             ViewStackProcessor.StopGetAccessRecording();
 
-            stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}): onGetTypes4Range from ${from} to ${to} - returns ${result.toString()}`);
+            stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}): onGetTypes4Range \
+                from ${from} to ${to} - returns ${result.toString()}`);
             return result;
         }; // const onGetTypes4Range
 
         const onSetActiveRange = (from: number, to: number): void => {
-            stateMgmtConsole.debug(`__RepeatVirtualScrollImpl: onSetActiveRange(${from}, ${to})`);
+            stateMgmtConsole.debug(`__RepeatVirtualScrollImpl: onSetActiveRange(${from}, ${to}).`);
             // make sparse copy of this.arr_
             this.lastActiveRangeData_ = new Array<{item: T, ttype: string}>(this.arr_.length);
-            for (let i = from; i <= to && i < this.arr_.length; i++) {
-                const item = this.arr_[i];
-                const ttype = this.typeGenFunc_(this.arr_[i], i);
-                this.lastActiveRangeData_[i] = { item, ttype };
+
+            if (from <= to) {
+                for (let i = Math.max(0, from); i <= to && i < this.arr_.length; i++) {
+                    const item = this.arr_[i];
+                    const ttype = this.ttypeGenFunc(this.arr_[i], i);
+                    this.lastActiveRangeData_[i] = { item, ttype };
+                }
+            } else {
+                for (let i = 0; i <= to && i < this.arr_.length; i++) {
+                    const item = this.arr_[i];
+                    const ttype = this.ttypeGenFunc(this.arr_[i], i);
+                    this.lastActiveRangeData_[i] = { item, ttype };
+                }
+                for (let i = Math.max(0, from); i < this.arr_.length; i++) {
+                    const item = this.arr_[i];
+                    const ttype = this.ttypeGenFunc(this.arr_[i], i);
+                    this.lastActiveRangeData_[i] = { item, ttype };
+                }
+            }
+
+            if (!this.reusable_) {
+                this.updateRepeatItem4Key(from, to);
             }
         };
 
-        stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}): initialRenderVirtualScroll`);
+        stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}): initialRenderVirtualScroll ...`);
 
         RepeatVirtualScrollNative.create(this.totalCount_, Object.entries(this.templateOptions_), {
             onCreateNode,
@@ -228,14 +280,16 @@ class __RepeatVirtualScrollImpl<T> {
             onGetKeys4Range,
             onGetTypes4Range,
             onSetActiveRange
-        });
-        RepeatVirtualScrollNative.onMove(this.onMoveHandler_);
+        }, this.reusable_);
+        RepeatVirtualScrollNative.onMove(this.onMoveHandler_, this.itemDragEventHandler);
         stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}): initialRenderVirtualScroll`);
     }
 
     private reRender(): void {
         stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}): reRender ...`);
-        if (this.hasVisibleItemsChanged()) {
+
+        // When this.totalCount_ == 0 need render to clear visible items
+        if (this.hasVisibleItemsChanged() || this.totalCount_ === 0) {
             this.purgeKeyCache();
             RepeatVirtualScrollNative.updateRenderState(this.totalCount_, true);
             stateMgmtConsole.debug(`__RepeatVirtualScrollImpl: reRender - done.`);
@@ -248,14 +302,14 @@ class __RepeatVirtualScrollImpl<T> {
 
     private initialRenderItem(repeatItem: __RepeatItemFactoryReturn<T>): void {
         // execute the itemGen function
-        const itemType = this.typeGenFunc_(repeatItem.item, repeatItem.index);
+        const itemType = this.ttypeGenFunc(repeatItem.item, repeatItem.index);
+        const isTemplate: boolean = (itemType !== '');
         const itemFunc = this.itemGenFuncs_[itemType];
         itemFunc(repeatItem);
+        RepeatVirtualScrollNative.setCreateByTemplate(isTemplate);
     }
 
     private hasVisibleItemsChanged(): boolean {
-        let lastActiveRangeIndex = 0;
-
         // has any item or ttype in the active range changed?
         for (let i in this.lastActiveRangeData_) {
             if (!(i in this.arr_)) {
@@ -264,7 +318,7 @@ class __RepeatVirtualScrollImpl<T> {
             const oldItem = this.lastActiveRangeData_[+i]?.item;
             const oldType = this.lastActiveRangeData_[+i]?.ttype;
             const newItem = this.arr_[+i];
-            const newType = this.typeGenFunc_(this.arr_[+i], +i);
+            const newType = this.ttypeGenFunc(this.arr_[+i], +i);
 
             if (oldItem !== newItem) {
                 stateMgmtConsole.debug(`__RepeatVirtualScrollImpl.hasVisibleItemsChanged() i:#${i} item changed => true`);
@@ -274,7 +328,6 @@ class __RepeatVirtualScrollImpl<T> {
                 stateMgmtConsole.debug(`__RepeatVirtualScrollImpl.hasVisibleItemsChanged() i:#${i} ttype changed => true`);
                 return true;
             }
-            lastActiveRangeIndex = +i;
         }
 
         stateMgmtConsole.debug(`__RepeatVirtualScrollImpl.hasVisibleItemsChanged() => false`);
@@ -293,10 +346,11 @@ class __RepeatVirtualScrollImpl<T> {
         if (!key) {
             key = this.keyGenFunc_(this.arr_[forIndex], forIndex);
             const usedIndex = this.index4Key_.get(key);
-            if (usedIndex) {
+            if (usedIndex !== undefined) {
                 // duplicate key
-                stateMgmtConsole.applicationError(`Repeat key gen function elmtId ${this.repeatElmtId_}: Detected duplicate key ${key} for indices ${forIndex} and ${usedIndex}. \
-                            Generated random key will decrease Repeat performance. Correct the Key gen function in your application!`);
+                stateMgmtConsole.applicationError(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) getOrMakeKey4Index: \
+                    Detected duplicate key ${key} for indices ${forIndex} and ${usedIndex}. \
+                    Generated random key will decrease Repeat performance. Correct the key gen function in your application!`);
                 key = `___${forIndex}_+_${key}_+_${Math.random()}`;
             }
             this.key4Index_.set(forIndex, key);
@@ -306,7 +360,33 @@ class __RepeatVirtualScrollImpl<T> {
     }
 
     private purgeKeyCache(): void {
-        this.key4Index_.clear()
+        this.key4Index_.clear();
         this.index4Key_.clear();
+    }
+
+    private updateRepeatItem4Key(from: number, to: number): void {
+        let newRepeatItem4Key = new Map<string, __RepeatItemFactoryReturn<T>>();
+        if (from <= to) {
+            for (let i = Math.max(0, from); i <= to && i < this.arr_.length; i++) {
+                let key = this.key4Index_.get(i);
+                if (key && this.repeatItem4Key_.has(key)) {
+                    newRepeatItem4Key.set(key, this.repeatItem4Key_.get(key)!);
+                }
+            }
+        } else {
+            for (let i = 0; i <= to && i < this.arr_.length; i++) {
+                let key = this.key4Index_.get(i);
+                if (key && this.repeatItem4Key_.has(key)) {
+                    newRepeatItem4Key.set(key, this.repeatItem4Key_.get(key)!);
+                }
+            }
+            for (let i = Math.max(0, from); i < this.arr_.length; i++) {
+                let key = this.key4Index_.get(i);
+                if (key && this.repeatItem4Key_.has(key)) {
+                    newRepeatItem4Key.set(key, this.repeatItem4Key_.get(key)!);
+                }
+            }
+        }
+        this.repeatItem4Key_ = newRepeatItem4Key;
     }
 };

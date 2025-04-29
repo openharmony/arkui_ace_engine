@@ -15,28 +15,20 @@
 
 #include "core/components_ng/pattern/text/symbol_span_model_ng.h"
 
-#include "base/geometry/dimension.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-   
-#define ACE_UPDATE_SYMBOL_SPAN_PROPERTY(name, value, flag)                                                       \
+
+#define ACE_UPDATE_SYMBOL_SPAN_PROPERTY(name, value)                                                             \
     do {                                                                                                         \
         auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode()); \
         CHECK_NULL_VOID(spanNode);                                                                               \
         spanNode->Update##name(value);                                                                           \
-        spanNode->AddPropertyInfo(flag);                                                                         \
     } while (false)
 
-#define ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(name, value, flag, frameNode)                                       \
+#define ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(name, value, frameNode)                                             \
     do {                                                                                                         \
         auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);                                               \
         CHECK_NULL_VOID(spanNode);                                                                               \
         spanNode->Update##name(value);                                                                           \
-        spanNode->AddPropertyInfo(flag);                                                                         \
     } while (false)
 
 namespace OHOS::Ace::NG {
@@ -44,37 +36,46 @@ void SymbolSpanModelNG::Create(const uint32_t& unicode)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-   
+
     auto spanNode = SpanNode::GetOrCreateSpanNode(V2::SYMBOL_SPAN_ETS_TAG, nodeId);
     stack->Push(spanNode);
 
-    ACE_UPDATE_SYMBOL_SPAN_PROPERTY(Content, unicode, PropertyInfo::NONE);
+    ACE_UPDATE_SYMBOL_SPAN_PROPERTY(Content, unicode);
 }
 
 void SymbolSpanModelNG::SetFontSize(const Dimension& value)
 {
-    ACE_UPDATE_SYMBOL_SPAN_PROPERTY(FontSize, value, PropertyInfo::FONTSIZE);
+    ACE_UPDATE_SYMBOL_SPAN_PROPERTY(FontSize, value);
 }
 
 void SymbolSpanModelNG::SetFontWeight(Ace::FontWeight value)
 {
-    ACE_UPDATE_SYMBOL_SPAN_PROPERTY(FontWeight, value, PropertyInfo::FONTWEIGHT);
+    ACE_UPDATE_SYMBOL_SPAN_PROPERTY(FontWeight, value);
+}
+
+void SymbolSpanModelNG::SetFontFamilies(std::vector<std::string>& value)
+{
+    ACE_UPDATE_SYMBOL_SPAN_PROPERTY(FontFamily, value);
+}
+
+void SymbolSpanModelNG::SetSymbolType(SymbolType value)
+{
+    ACE_UPDATE_SYMBOL_SPAN_PROPERTY(SymbolType, value);
 }
 
 void SymbolSpanModelNG::SetFontColor(std::vector<Color>& symbolColor)
 {
-    ACE_UPDATE_SYMBOL_SPAN_PROPERTY(SymbolColorList, symbolColor, PropertyInfo::SYMBOL_COLOR);
+    ACE_UPDATE_SYMBOL_SPAN_PROPERTY(SymbolColorList, symbolColor);
 }
 
 void SymbolSpanModelNG::SetSymbolRenderingStrategy(const uint32_t renderingStrategy)
 {
-    ACE_UPDATE_SYMBOL_SPAN_PROPERTY(SymbolRenderingStrategy, renderingStrategy,
-        PropertyInfo::SYMBOL_RENDERING_STRATEGY);
+    ACE_UPDATE_SYMBOL_SPAN_PROPERTY(SymbolRenderingStrategy, renderingStrategy);
 }
 
 void SymbolSpanModelNG::SetSymbolEffect(const uint32_t effectStrategy)
 {
-    ACE_UPDATE_SYMBOL_SPAN_PROPERTY(SymbolEffectStrategy, effectStrategy, PropertyInfo::SYMBOL_EFFECT_STRATEGY);
+    ACE_UPDATE_SYMBOL_SPAN_PROPERTY(SymbolEffectStrategy, effectStrategy);
 }
 
 void SymbolSpanModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
@@ -82,7 +83,6 @@ void SymbolSpanModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value
     auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
     CHECK_NULL_VOID(spanNode);
     spanNode->UpdateFontSize(value);
-    spanNode->AddPropertyInfo(PropertyInfo::FONTSIZE);
 }
 
 void SymbolSpanModelNG::SetFontWeight(FrameNode* frameNode, FontWeight value)
@@ -90,33 +90,41 @@ void SymbolSpanModelNG::SetFontWeight(FrameNode* frameNode, FontWeight value)
     auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);
     CHECK_NULL_VOID(spanNode);
     spanNode->UpdateFontWeight(value);
-    spanNode->AddPropertyInfo(PropertyInfo::FONTWEIGHT);
 }
 
 void SymbolSpanModelNG::SetFontColor(FrameNode* frameNode, std::vector<Color>& symbolColor)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(SymbolColorList, symbolColor,
-        PropertyInfo::SYMBOL_COLOR, frameNode);
+    ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(SymbolColorList, symbolColor, frameNode);
 }
 
 void SymbolSpanModelNG::SetSymbolRenderingStrategy(FrameNode* frameNode, const uint32_t renderingStrategy)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(SymbolRenderingStrategy, renderingStrategy,
-        PropertyInfo::SYMBOL_RENDERING_STRATEGY, frameNode);
+    ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(SymbolRenderingStrategy, renderingStrategy, frameNode);
 }
 
 void SymbolSpanModelNG::SetSymbolEffect(FrameNode* frameNode, const uint32_t effectStrategy)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(SymbolEffectStrategy, effectStrategy,
-        PropertyInfo::SYMBOL_EFFECT_STRATEGY, frameNode);
+    ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(SymbolEffectStrategy, effectStrategy, frameNode);
 }
 
 void SymbolSpanModelNG::InitialSymbol(FrameNode* frameNode, const std::uint32_t& unicode)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(Content, unicode, PropertyInfo::NONE, frameNode);
+    ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(Content, unicode, frameNode);
+    ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(SymbolType, SymbolType::SYSTEM, frameNode);
+}
+
+void SymbolSpanModelNG::InitialCustomSymbol(FrameNode* frameNode, const std::uint32_t& unicode,
+    const char* fontFamilyName)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(Content, unicode, frameNode);
+    std::vector<std::string> fontFamilyNames;
+    fontFamilyNames.push_back(fontFamilyName);
+    ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(FontFamily, fontFamilyNames, frameNode);
+    ACE_UPDATE_NODE_SYMBOL_SPAN_PROPERTY(SymbolType, SymbolType::CUSTOM, frameNode);
 }
 } // namespace OHOS::Ace::NG

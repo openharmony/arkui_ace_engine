@@ -20,6 +20,12 @@
 
 namespace OHOS::Ace {
 
+struct KeyFrameConfig {
+    bool enableKeyFrame_ = false;
+    int32_t animationDuration_ = 0;
+    int32_t animationDelay_ = 0;
+};
+
 class ViewportConfig {
 public:
     ViewportConfig() = default;
@@ -90,6 +96,33 @@ public:
         return transform_;
     }
 
+    void SetDisplayId(uint64_t displayId)
+    {
+        displayId_ = displayId;
+    }
+
+    uint64_t DisplayId() const
+    {
+        return displayId_;
+    }
+
+    bool operator==(const ViewportConfig& other) const
+    {
+        return width_ == other.Width() &&
+            height_ == other.Height() &&
+            posX_ == other.Left() &&
+            posY_ == other.Top() &&
+            density_ == other.Density() &&
+            orientation_ == other.Orientation() &&
+            transform_ == other.TransformHint() &&
+            displayId_ == other.DisplayId();
+    }
+
+    bool operator!=(const ViewportConfig& other) const
+    {
+        return !operator==(other);
+    }
+
     std::string ToString() const
     {
         std::string config = "Viewport config:";
@@ -98,7 +131,20 @@ public:
         config.append(" density: " + std::to_string(density_));
         config.append(" position: (" + std::to_string(posX_) + ", " + std::to_string(posY_) + ")");
         config.append(" transformHint: " + std::to_string(transform_));
+        config.append(" displayId: " + std::to_string(displayId_));
         return config;
+    }
+
+    void SetKeyFrameConfig(bool enableKeyFrame, int32_t animationDuration, int32_t animationDelay)
+    {
+        keyFrameConfig_.enableKeyFrame_ = enableKeyFrame;
+        keyFrameConfig_.animationDuration_ = animationDuration;
+        keyFrameConfig_.animationDelay_ = animationDelay;
+    }
+
+    KeyFrameConfig GetKeyFrameConfig() const
+    {
+        return keyFrameConfig_;
     }
 
 private:
@@ -109,6 +155,8 @@ private:
     int32_t orientation_ = 0;
     float density_ = 1.0f;
     uint32_t transform_ = 0;
+    uint64_t displayId_ = 0;
+    KeyFrameConfig keyFrameConfig_;
 };
 
 } // namespace OHOS::Ace

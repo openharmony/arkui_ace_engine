@@ -53,6 +53,30 @@ public:
         }
     }
 
+    void SetOnScrollStop(TextChangeEvent&& onScrollStopEvent)
+    {
+        onScrollStopEvent_ = std::move(onScrollStopEvent);
+    }
+
+    void FireScrollStopEvent(const std::vector<std::string>& value, const std::vector<double>& index) const
+    {
+        if (onScrollStopEvent_) {
+            onScrollStopEvent_(value, index);
+        }
+    }
+
+    void SetOnEnterSelectedArea(TextChangeEvent&& onEnterSelectedArea)
+    {
+        onEnterSelectedAreaEvent_ = std::move(onEnterSelectedArea);
+    }
+
+    void FireEnterSelectedAreaEvent(const std::vector<std::string>& value, const std::vector<double>& index) const
+    {
+        if (onEnterSelectedAreaEvent_) {
+            onEnterSelectedAreaEvent_(value, index);
+        }
+    }
+
     void SetDialogChange(DialogTextEvent&& onChange)
     {
         DialogChangeEvent_ = std::move(onChange);
@@ -62,6 +86,30 @@ public:
     {
         if (DialogChangeEvent_) {
             DialogChangeEvent_(info);
+        }
+    }
+
+    void SetDialogScrollStop(DialogTextEvent&& onScrollStopEvent)
+    {
+        dialogScrollStopEvent_ = std::move(onScrollStopEvent);
+    }
+
+    void FireDialogScrollStopEvent(const std::string& info) const
+    {
+        if (dialogScrollStopEvent_) {
+            dialogScrollStopEvent_(info);
+        }
+    }
+
+    void SetDialogEnterSelectedArea(DialogTextEvent&& onEnterSelectedAreaEvent)
+    {
+        dialogEnterSelectedAreaEvent_ = std::move(onEnterSelectedAreaEvent);
+    }
+
+    void FireDialogEnterSelectedAreaEvent(const std::string& info) const
+    {
+        if (dialogEnterSelectedAreaEvent_) {
+            dialogEnterSelectedAreaEvent_(info);
         }
     }
 
@@ -88,7 +136,11 @@ public:
     }
 private:
     TextChangeEvent TextChangeEvent_;
+    TextChangeEvent onScrollStopEvent_;
+    TextChangeEvent onEnterSelectedAreaEvent_;
     DialogTextEvent DialogChangeEvent_;
+    DialogTextEvent dialogScrollStopEvent_;
+    DialogTextEvent dialogEnterSelectedAreaEvent_;
     DialogTextEvent DialogAcceptEvent_;
     TextValueChangeEvent onValueChangeEvent_;
     TextSelectedChangeEvent onSelectedChangeEvent_;

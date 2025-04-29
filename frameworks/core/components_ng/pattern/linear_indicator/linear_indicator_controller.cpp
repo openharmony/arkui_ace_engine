@@ -20,14 +20,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
-const float LinearIndicatorController::END_VALUE = 100.0f;
-const std::string LinearIndicatorController::LINEAR_INDICATOR_ANIMATION_NAME = "linear_indicator_animation";
-const std::string LinearIndicatorController::LINEAR_INDICATOR_INTERVAL_NAME = "linear_indicator_interval";
-const int32_t LinearIndicatorController::ANIMATION_TIME_MIN = 1;
-
 LinearIndicatorControllerData::LinearIndicatorControllerData()
-    : progressAnimation_(nullptr), animationTag_(0), ProgressInterval_(),
+    : progressAnimation_(nullptr), animationTag_(0), progressInterval_(),
       totalAnimationTime_(LinearIndicatorController::ANIMATION_TIME_MIN), totalIntervalTime_(0), isLoop_(true)
 {
     InitData();
@@ -42,14 +36,14 @@ void LinearIndicatorControllerData::InitData()
     intervalStart_ = std::chrono::system_clock::time_point();
 }
 
-int32_t LinearIndicatorController::GetProgressSize()
+int32_t LinearIndicatorController::GetProgressSize() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0);
     return host->GetChildren().size();
 }
 
-RefPtr<FrameNode> LinearIndicatorController::GetProgressNode(int32_t index)
+RefPtr<FrameNode> LinearIndicatorController::GetProgressNode(int32_t index) const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
@@ -111,9 +105,9 @@ void LinearIndicatorController::StartProgressInterval(int32_t intervalTime)
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    animationData_.ProgressInterval().Cancel();
+    animationData_.ProgressIntervalCancel();
     auto weak = AceType::WeakClaim(this);
-    animationData_.ProgressInterval().Reset([weak] {
+    animationData_.ProgressIntervalReset([weak] {
         auto control = weak.Upgrade();
         CHECK_NULL_VOID(control);
         control->StartProgressAnimation();
@@ -166,8 +160,7 @@ void LinearIndicatorController::StartProgressAnimation()
 
     host->UpdateAnimatablePropertyFloat(LINEAR_INDICATOR_ANIMATION_NAME, animationData_.Value());
 
-    float end = END_VALUE;
-    int32_t animationTime = animationData_.TotalAnimationTime() * (end - animationData_.Value()) / end;
+    int32_t animationTime = animationData_.TotalAnimationTime() * (END_VALUE - animationData_.Value()) / END_VALUE;
     AnimationOption option;
     option.SetDuration(animationTime);
     option.SetCurve(Curves::LINEAR);
@@ -206,7 +199,7 @@ void LinearIndicatorController::PlayingUpdateTime(int32_t animationTime, int32_t
         if (animationData_.IsIntervalTimeEqually(intervalTime)) {
             animationData_.SetTotalAnimationTime(animationTime);
         } else {
-            animationData_.ProgressInterval().Cancel();
+            animationData_.ProgressIntervalCancel();
             animationData_.SetTime(animationTime, intervalTime);
             int32_t consumeTime = animationData_.IntervalCurrentConsumeTime();
             if (consumeTime >= intervalTime) {
@@ -229,12 +222,8 @@ void LinearIndicatorController::PlayingUpdateTime(int32_t animationTime, int32_t
 
 void LinearIndicatorController::Start(int32_t animationTime, int32_t intervalTime)
 {
-    if (animationTime < ANIMATION_TIME_MIN) {
-        animationTime = ANIMATION_TIME_MIN;
-    }
-    if (intervalTime < 0) {
-        intervalTime = 0;
-    }
+    animationTime = std::max(animationTime, ANIMATION_TIME_MIN);
+    intervalTime = std::max(intervalTime, 0);
     if (animationData_.IsRuning()) {
         PlayingUpdateTime(animationTime, intervalTime);
     } else if (animationData_.IsPause()) {
@@ -264,7 +253,7 @@ void LinearIndicatorController::Pause()
     }
     if (animationData_.State() == LinearIndicatorControllerDataState::INTERVAL) {
         animationData_.SetState(LinearIndicatorControllerDataState::INTERVAL_PAUSE);
-        animationData_.ProgressInterval().Cancel();
+        animationData_.ProgressIntervalCancel();
         return;
     }
     StopAnimation(LinearIndicatorControllerDataState::ANIMATION_PAUSE);
@@ -274,7 +263,7 @@ void LinearIndicatorController::Stop()
 {
     if (animationData_.IsRuning()) {
         if (animationData_.State() == LinearIndicatorControllerDataState::INTERVAL) {
-            animationData_.ProgressInterval().Cancel();
+            animationData_.ProgressIntervalCancel();
         } else {
             StopAnimation(LinearIndicatorControllerDataState::STOP);
         }
@@ -311,7 +300,7 @@ void LinearIndicatorController::SetProgress(int32_t index, float value)
     bool isPause = animationData_.IsPause();
     if (isRuning) {
         if (animationData_.State() == LinearIndicatorControllerDataState::INTERVAL) {
-            animationData_.ProgressInterval().Cancel();
+            animationData_.ProgressIntervalCancel();
         } else {
             StopAnimation(LinearIndicatorControllerDataState::ANIMATION_PAUSE);
         }

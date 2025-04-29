@@ -15,15 +15,9 @@
 
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 
-#include <memory>
-
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
-#include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/event/event_info_convertor.h"
+
 namespace OHOS::Ace::NG {
 RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
     const SelectOverlayInfo& info, const WeakPtr<SelectionHost>& host, bool animation)
@@ -65,6 +59,7 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
     selectOverlayItem_ = selectOverlayNode;
 
     auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, nullptr);
     taskExecutor->PostTask(
         [weakRoot = rootNodeWeak_, overlayNode = selectOverlayNode, animation,
             isUsingMouse = infoPtr->isUsingMouse, weak = WeakClaim(this), weakCaller = infoPtr->callerFrameNode] {
@@ -76,7 +71,7 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
             }
             auto rootNode = weakRoot.Upgrade();
             auto container = Container::Current();
-            if (container && container->IsScenceBoardWindow()) {
+            if (container && container->IsSceneBoardWindow()) {
                 auto root = selectOverlayManager->FindWindowScene(weakCaller.Upgrade());
                 rootNode = DynamicCast<FrameNode>(root);
             }
@@ -99,15 +94,8 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
                 CHECK_NULL_VOID(node);
                 node->ShowSelectOverlay(animation);
             }
-            auto context = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(context);
-            context->AddAfterLayoutTask([weakNode = WeakPtr<FrameNode>(rootNode)]() {
-                auto hostNode = weakNode.Upgrade();
-                CHECK_NULL_VOID(hostNode);
-                hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN);
-            });
         },
-        TaskExecutor::TaskType::UI, "ArkUISelectOverlayShow");
+        TaskExecutor::TaskType::UI, "ArkUISelectOverlayShow", PriorityType::VIP);
 
     auto proxy = MakeRefPtr<SelectOverlayProxy>(selectOverlayNode->GetId());
     return proxy;
@@ -122,7 +110,7 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
 RefPtr<UINode> SelectOverlayManager::FindWindowScene(RefPtr<FrameNode> targetNode)
 {
     auto container = Container::Current();
-    if (!container || !container->IsScenceBoardWindow()) {
+    if (!container || !container->IsSceneBoardWindow()) {
         return rootNodeWeak_.Upgrade();
     }
     CHECK_NULL_RETURN(targetNode, nullptr);
@@ -158,13 +146,15 @@ bool SelectOverlayManager::DestroySelectOverlay(bool animation)
     return false;
 }
 
-bool SelectOverlayManager::ResetSelectionAndDestroySelectOverlay(bool animation)
+bool SelectOverlayManager::ResetSelectionAndDestroySelectOverlay(bool isBackPressed, bool animation)
 {
     NotifyOverlayClosed(true);
     auto isDestroyed = DestroySelectOverlay(animation);
     CHECK_NULL_RETURN(selectContentManager_, isDestroyed);
-    auto isClosed = selectContentManager_->CloseCurrent(animation, CloseReason::CLOSE_REASON_BACK_PRESSED);
-    auto closeFlag = isDestroyed || isClosed;
+    auto isStopBackPress = selectContentManager_->IsStopBackPress();
+    auto isClosed = selectContentManager_->CloseCurrent(
+        animation, isBackPressed ? CloseReason::CLOSE_REASON_BACK_PRESSED : CloseReason::CLOSE_REASON_NORMAL);
+    auto closeFlag = isDestroyed || (isClosed && isStopBackPress);
     TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "isDestroyed:%{public}d,isClosed:%{public}d", isDestroyed, isClosed);
     return closeFlag;
 }
@@ -202,17 +192,6 @@ void SelectOverlayManager::Destroy(const RefPtr<FrameNode>& overlay)
     rootNode->RemoveChild(overlay);
     rootNode->MarkNeedSyncRenderTree();
     rootNode->RebuildRenderContextTree();
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    context->AddAfterRenderTask([weakNode = WeakPtr<UINode>(rootNode)]() {
-        auto hostNode = weakNode.Upgrade();
-        CHECK_NULL_VOID(hostNode);
-        if (AceType::InstanceOf<FrameNode>(hostNode)) {
-            auto frameNode = AceType::DynamicCast<FrameNode>(hostNode);
-            CHECK_NULL_VOID(frameNode);
-            frameNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE);
-        }
-    });
 }
 
 bool SelectOverlayManager::HasSelectOverlay(int32_t overlayId)
@@ -303,6 +282,11 @@ void SelectOverlayManager::HandleGlobalEvent(
     if ((touchPoint.type != TouchType::DOWN || touchPoint.sourceType != SourceType::MOUSE) && !acceptTouchUp) {
         return;
     }
+    if (EventInfoConvertor::MatchCompatibleCondition() &&
+        (touchPoint.type == TouchType::DOWN && touchPoint.sourceType == SourceType::MOUSE) && !acceptTouchUp) {
+        return;
+    }
+
     if (!IsInSelectedOrSelectOverlayArea(point)) {
         NotifyOverlayClosed(true);
         DestroySelectOverlay();

@@ -17,6 +17,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_type_define.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -31,8 +32,12 @@ constexpr int32_t STROKE_WIDTH_INDEX = 1;
 constexpr int32_t COLOR_INDEX = 2;
 constexpr int32_t START_MARGIN_INDEX = 3;
 constexpr int32_t END_MARGIN_INDEX = 4;
+constexpr int32_t NUM_1 = 1;
 
 constexpr int32_t ARG_GROUP_LENGTH = 3;
+constexpr int PARAM_ARR_LENGTH_2 = 2;
+constexpr int NUM_0 = 0;
+constexpr int NUM_2 = 2;
 bool ParseDividerDimension(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& valueDim)
 {
     return !ArkTSUtils::ParseJsDimensionVpNG(vm, value, valueDim, false) || LessNotEqual(valueDim.Value(), 0.0f) ||
@@ -54,6 +59,30 @@ void PopulateUnits(const CalcDimension& dividerStrokeWidth, const CalcDimension&
     units[NODE_INDEX] = static_cast<int32_t>(dividerStrokeWidth.Unit());
     units[STROKE_WIDTH_INDEX] = static_cast<int32_t>(dividerStartMargin.Unit());
     units[COLOR_INDEX] = static_cast<int32_t>(dividerEndMargin.Unit());
+}
+
+void ParseFontSize(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen)
+{
+    if (value->IsNull() || value->IsUndefined()) {
+        dimen = Dimension(DEFAULT_NEGATIVE_NUM);
+    } else {
+        if (!ArkTSUtils::ParseJsDimensionNG(vm, value, dimen, DimensionUnit::FP, false)) {
+            dimen = Dimension(DEFAULT_NEGATIVE_NUM);
+        }
+    }
+}
+
+void ParseFontWeight(const EcmaVM* vm, const Local<JSValueRef>& value, std::string& weight)
+{
+    if (!value->IsNull() && !value->IsUndefined()) {
+        if (value->IsNumber()) {
+            weight = std::to_string(value->Int32Value(vm));
+        } else {
+            if (!ArkTSUtils::ParseJsString(vm, value, weight) || weight.empty()) {
+                weight = DEFAULT_ERR_CODE;
+            }
+        }
+    }
 }
 } // namespace
 
@@ -463,6 +492,283 @@ ArkUINativeModuleValue TextPickerBridge::ResetGradientHeight(ArkUIRuntimeCallInf
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextPickerModifier()->resetTextPickerGradientHeight(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextPickerBridge::SetDisableTextStyleAnimation(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> disableTextStyleAnimationArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    bool disableTextStyleAnimation = false;
+    if (disableTextStyleAnimationArg->IsBoolean()) {
+        disableTextStyleAnimation = disableTextStyleAnimationArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getTextPickerModifier()->setTextPickerDisableTextStyleAnimation(
+        nativeNode, disableTextStyleAnimation);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextPickerBridge::ResetDisableTextStyleAnimation(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextPickerModifier()->resetTextPickerDisableTextStyleAnimation(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextPickerBridge::SetDefaultTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(1);      // text color
+    Local<JSValueRef> fontSizeArg = runtimeCallInfo->GetCallArgRef(2);   // text font size
+    Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(3); // text font weight
+    Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(4); // text font family
+    Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(5);  // text font style
+    Local<JSValueRef> minFontSizeArg = runtimeCallInfo->GetCallArgRef(6); // text minFontSize
+    Local<JSValueRef> maxFontSizeArg = runtimeCallInfo->GetCallArgRef(7);  // text maxFontSize
+    Local<JSValueRef> overflowArg = runtimeCallInfo->GetCallArgRef(8);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Color textColor;
+    if (colorArg->IsNull() || colorArg->IsUndefined() || !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, textColor)) {
+        textColor.SetValue(DEFAULT_TIME_PICKER_TEXT_COLOR);
+    }
+    CalcDimension size;
+    ParseFontSize(vm, fontSizeArg, size);
+    std::string weight = DEFAULT_ERR_CODE;
+    ParseFontWeight(vm, fontWeightArg, weight);
+    std::string fontFamily;
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamily) || fontFamily.empty()) {
+        fontFamily = DEFAULT_ERR_CODE;
+    }
+    int32_t styleVal = 0;
+    if (!fontStyleArg->IsNull() && !fontStyleArg->IsUndefined() && fontStyleArg->IsNumber()) {
+        styleVal = fontStyleArg->Int32Value(vm);
+    }
+    CalcDimension minSize;
+    ParseFontSize(vm, minFontSizeArg, minSize);
+    CalcDimension maxSize;
+    ParseFontSize(vm, maxFontSizeArg, maxSize);
+    int32_t overflowVal = 0;
+    if (!overflowArg->IsNull() && !overflowArg->IsUndefined() && overflowArg->IsNumber()) {
+        overflowVal = overflowArg->Int32Value(vm);
+    }
+    std::string fontInfo =
+        StringUtils::FormatString(FORMAT_FONT.c_str(), size.ToString().c_str(), weight.c_str(), fontFamily.c_str());
+    GetArkUINodeModifiers()->getTextPickerModifier()->setTextPickerDefaultTextStyle(
+        nativeNode, textColor.GetValue(), fontInfo.c_str(), styleVal, minSize.ToString().c_str(),
+        maxSize.ToString().c_str(), overflowVal);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextPickerBridge::ResetDefaultTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextPickerModifier()->resetTextPickerDefaultTextStyle(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextPickerBridge::SetTextPickerEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);   // framenode
+    Local<JSValueRef> enableHapticFeedbackArg = runtimeCallInfo->GetCallArgRef(1); // isEnableHapticFeedback
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
+    auto modifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(modifiers, panda::NativePointerRef::New(vm, nullptr));
+    auto textPickerModifier = modifiers->getTextPickerModifier();
+    CHECK_NULL_RETURN(textPickerModifier, panda::NativePointerRef::New(vm, nullptr));
+    if (enableHapticFeedbackArg->IsBoolean()) {
+        bool value = enableHapticFeedbackArg->ToBoolean(vm)->Value();
+        textPickerModifier->setTextPickerEnableHapticFeedback(nativeNode, value);
+    } else {
+        textPickerModifier->resetTextPickerEnableHapticFeedback(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextPickerBridge::ResetTextPickerEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // framenode
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
+    auto modifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(modifiers, panda::NativePointerRef::New(vm, nullptr));
+    auto textPickerModifier = modifiers->getTextPickerModifier();
+    CHECK_NULL_RETURN(textPickerModifier, panda::NativePointerRef::New(vm, nullptr));
+    textPickerModifier->resetTextPickerEnableHapticFeedback(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextPickerBridge::SetDigitalCrownSensitivity(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_INDEX);
+    Local<JSValueRef> crownSensitivityArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    int32_t crownSensitivity = OHOS::Ace::NG::DEFAULT_CROWNSENSITIVITY;
+    if (crownSensitivityArg->IsNumber()) {
+        crownSensitivity = crownSensitivityArg->ToNumber(vm)->Value();
+    }
+    auto modifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(modifier, panda::NativePointerRef::New(vm, nullptr));
+    modifier->getTextPickerModifier()->setTextPickerDigitalCrownSensitivity(nativeNode, crownSensitivity);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextPickerBridge::ResetDigitalCrownSensitivity(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NODE_INDEX);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    auto modifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(modifier, panda::NativePointerRef::New(vm, nullptr));
+    modifier->getTextPickerModifier()->resetTextPickerDigitalCrownSensitivity(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+template<typename T>
+panda::Local<panda::JSValueRef> StringToStringValueWithVM(const EcmaVM* vm, T val)
+{
+    if constexpr (std::is_same_v<T, std::string>) {
+        return panda::StringRef::NewFromUtf8(vm, val.c_str());
+    } else if constexpr (std::is_same_v<T, const char*>) {
+        return panda::StringRef::NewFromUtf8(vm, val);
+    } else if constexpr (std::is_same_v<T, std::u16string>) {
+        return panda::StringRef::NewFromUtf16(vm, val.c_str());
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue TextPickerBridge::SetOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    int32_t argsNumber = runtimeCallInfo->GetArgsNumber();
+    if (argsNumber != NUM_2) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getTextPickerModifier()->resetTextPickerOnChange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(const std::vector<std::string>&, const std::vector<double>&)> callback =
+        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+            const std::vector<std::string>& value, const std::vector<double>& index) {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            if (value.size() == NUM_1 && index.size() == NUM_1) {
+                panda::Local<panda::NumberRef> paramIndex = panda::NumberRef::New(vm, index[NUM_0]);
+                panda::Local<panda::StringRef> paramVaule = StringToStringValueWithVM(vm, value[NUM_0].c_str());
+                panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = { paramVaule, paramIndex };
+                func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
+            } else {
+                int32_t i = NUM_0;
+                int32_t j = NUM_0;
+                auto valueArray = panda::ArrayRef::New(vm);
+                auto indexArray = panda::ArrayRef::New(vm);
+                for (const double& it : index) {
+                    panda::Local<panda::NumberRef> item = panda::NumberRef::New(vm, it);
+                    panda::ArrayRef::SetValueAt(vm, indexArray, i++, item);
+                }
+                for (const std::string& str : value) {
+                    panda::Local<panda::StringRef> item = StringToStringValueWithVM(vm, str.c_str());
+                    panda::ArrayRef::SetValueAt(vm, valueArray, j++, item);
+                }
+                panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = { valueArray, indexArray };
+                func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
+            }
+        };
+    GetArkUINodeModifiers()->getTextPickerModifier()->setTextPickerOnChange(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue TextPickerBridge::ResetOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextPickerModifier()->resetTextPickerOnChange(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue TextPickerBridge::SetOnScrollStop(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    int32_t argsNumber = runtimeCallInfo->GetArgsNumber();
+    if (argsNumber != NUM_2) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getTextPickerModifier()->resetTextPickerOnScrollStop(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(const std::vector<std::string>&, const std::vector<double>&)> callback =
+        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+            const std::vector<std::string>& value, const std::vector<double>& index) {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            if (value.size() == NUM_1 && index.size() == NUM_1) {
+                panda::Local<panda::NumberRef> paramIndex = panda::NumberRef::New(vm, index[NUM_0]);
+                panda::Local<panda::StringRef> paramVaule = StringToStringValueWithVM(vm, value[NUM_0].c_str());
+                panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = { paramVaule, paramIndex };
+                func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
+            } else {
+                int32_t i = NUM_0;
+                int32_t j = NUM_0;
+                auto valueArray = panda::ArrayRef::New(vm);
+                auto indexArray = panda::ArrayRef::New(vm);
+                for (const double& it : index) {
+                    panda::Local<panda::NumberRef> item = panda::NumberRef::New(vm, it);
+                    panda::ArrayRef::SetValueAt(vm, indexArray, i++, item);
+                }
+                for (const std::string& str : value) {
+                    panda::Local<panda::StringRef> item = StringToStringValueWithVM(vm, str.c_str());
+                    panda::ArrayRef::SetValueAt(vm, valueArray, j++, item);
+                }
+                panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = { valueArray, indexArray };
+                func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
+            }
+        };
+    GetArkUINodeModifiers()->getTextPickerModifier()->setTextPickerOnScrollStop(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue TextPickerBridge::ResetOnScrollStop(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextPickerModifier()->resetTextPickerOnScrollStop(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

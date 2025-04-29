@@ -16,10 +16,9 @@
 #include "core/common/task_runners.h"
 
 namespace OHOS::Ace {
-TaskRunners::TaskRunners(std::string label, RefPtr<TaskRunnerAdapter>& platform, RefPtr<TaskRunnerAdapter>& gpu,
-    RefPtr<TaskRunnerAdapter>& ui, RefPtr<TaskRunnerAdapter>& io)
-    : label_(std::move(label)), platform_(std::move(platform)), gpu_(std::move(gpu)), ui_(std::move(ui)),
-      io_(std::move(io))
+TaskRunners::TaskRunners(const std::string& label, const RefPtr<TaskRunnerAdapter>& platform,
+    const RefPtr<TaskRunnerAdapter>& gpu, const RefPtr<TaskRunnerAdapter>& ui, const RefPtr<TaskRunnerAdapter>& io)
+    : label_(label), platform_(platform), gpu_(gpu), ui_(ui), io_(io)
 {}
 
 RefPtr<TaskRunnerAdapter> TaskRunners::GetPlatformTaskRunner() const

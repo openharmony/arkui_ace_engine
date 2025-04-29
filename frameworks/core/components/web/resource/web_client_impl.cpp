@@ -96,15 +96,13 @@ bool OnJsCommonDialog(
     std::shared_ptr<NWeb::NWebJSDialogResult> result,
     const std::string &url,
     const std::string &message,
-    const std::string &value = "")
+    const std::string &value = "",
+    RefPtr<TaskExecutor> task = nullptr)
 {
+    CHECK_NULL_RETURN(task, false);
     bool jsResult = false;
     auto param = std::make_shared<WebDialogEvent>(url, message, value, dialogEventType,
         AceType::MakeRefPtr<ResultOhos>(result));
-    auto task = Container::CurrentTaskExecutor();
-    if (task == nullptr) {
-        return false;
-    }
     task->PostSyncTask(
         [&webClientImpl, dialogEventType, &param, &jsResult] {
             if (webClientImpl == nullptr) {
@@ -127,14 +125,6 @@ void DownloadListenerImpl::OnDownloadStart(const std::string& url, const std::st
     }
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnDownloadStart(url, userAgent, contentDisposition, mimetype, contentLength);
-}
-
-void AccessibilityEventListenerImpl::OnAccessibilityEvent(int64_t accessibilityId, uint32_t eventType)
-{
-    auto delegate = webDelegate_.Upgrade();
-    CHECK_NULL_VOID(delegate);
-    ContainerScope scope(delegate->GetInstanceId());
-    delegate->OnAccessibilityEvent(accessibilityId, static_cast<AccessibilityEventType>(eventType));
 }
 
 void FindListenerImpl::OnFindResultReceived(
@@ -198,7 +188,7 @@ bool WebClientImpl::OnConsoleLog(const std::shared_ptr<OHOS::NWeb::NWebConsoleLo
     CHECK_NULL_RETURN(delegate, false);
     ContainerScope scope(delegate->GetInstanceId());
     bool jsMessage = false;
-    auto task = Container::CurrentTaskExecutor();
+    auto task = delegate->GetTaskExecutor();
     if (!task) {
         return false;
     }
@@ -324,7 +314,7 @@ void WebClientImpl::OnHttpError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceReque
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());
-    auto task = Container::CurrentTaskExecutor();
+    auto task = delegate->GetTaskExecutor();
     if (task == nullptr) {
         return;
     }
@@ -390,7 +380,7 @@ bool WebClientImpl::OnHandleInterceptRequest(std::shared_ptr<OHOS::NWeb::NWebUrl
         request->FromGesture(), request->IsAboutMainFrame(), request->IsRequestRedirect());
     auto param = std::make_shared<OnInterceptRequestEvent>(webRequest);
     RefPtr<WebResponse> webResponse = nullptr;
-    auto task = Container::CurrentTaskExecutor();
+    auto task = delegate->GetTaskExecutor();
     if (task == nullptr) {
         return false;
     }
@@ -435,7 +425,8 @@ bool WebClientImpl::OnAlertDialogByJS(
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_RETURN(delegate, false);
     ContainerScope scope(delegate->GetInstanceId());
-    return OnJsCommonDialog(this, DialogEventType::DIALOG_EVENT_ALERT, result, url, message);
+    return OnJsCommonDialog(this, DialogEventType::DIALOG_EVENT_ALERT, result, url, message, "",
+        delegate->GetTaskExecutor());
 }
 
 bool WebClientImpl::OnBeforeUnloadByJS(
@@ -444,7 +435,8 @@ bool WebClientImpl::OnBeforeUnloadByJS(
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_RETURN(delegate, false);
     ContainerScope scope(delegate->GetInstanceId());
-    return OnJsCommonDialog(this, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD, result, url, message);
+    return OnJsCommonDialog(this, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD, result, url, message, "",
+        delegate->GetTaskExecutor());
 }
 
 bool WebClientImpl::OnConfirmDialogByJS(
@@ -453,7 +445,8 @@ bool WebClientImpl::OnConfirmDialogByJS(
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_RETURN(delegate, false);
     ContainerScope scope(delegate->GetInstanceId());
-    return OnJsCommonDialog(this, DialogEventType::DIALOG_EVENT_CONFIRM, result, url, message);
+    return OnJsCommonDialog(this, DialogEventType::DIALOG_EVENT_CONFIRM, result, url, message, "",
+        delegate->GetTaskExecutor());
 }
 
 bool WebClientImpl::OnPromptDialogByJS(const std::string &url, const std::string &message,
@@ -462,7 +455,8 @@ bool WebClientImpl::OnPromptDialogByJS(const std::string &url, const std::string
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_RETURN(delegate, false);
     ContainerScope scope(delegate->GetInstanceId());
-    return OnJsCommonDialog(this, DialogEventType::DIALOG_EVENT_PROMPT, result, url, message, defaultValue);
+    return OnJsCommonDialog(this, DialogEventType::DIALOG_EVENT_PROMPT, result, url, message, defaultValue,
+        delegate->GetTaskExecutor());
 }
 
 void WebClientImpl::OnRenderExited(OHOS::NWeb::RenderExitReason reason)
@@ -495,7 +489,7 @@ bool WebClientImpl::OnFileSelectorShow(
     bool jsResult = false;
     auto param = std::make_shared<FileSelectorEvent>(AceType::MakeRefPtr<FileSelectorParamOhos>(params),
         AceType::MakeRefPtr<FileSelectorResultOhos>(callback));
-    auto task = Container::CurrentTaskExecutor();
+    auto task = delegate->GetTaskExecutor();
     if (task == nullptr) {
         return false;
     }
@@ -514,10 +508,12 @@ bool WebClientImpl::OnFileSelectorShow(
 
 void WebClientImpl::OnResource(const std::string& url)
 {
+    // Don't use RefPtr<WebDelegate> object here!
+    // OnResource will be called in a background thread. When the RefPtr object is
+    // the last reference, the destructor will be called here, which may cause
+    // js-object-releasing of WebDelegate in non-main thread.
     auto task = Container::CurrentTaskExecutorSafely();
-    if (task == nullptr) {
-        return;
-    }
+    CHECK_NULL_VOID(task);
     std::weak_ptr<WebClientImpl> webClientWeak = shared_from_this();
     task->PostTask(
         [webClient = webClientWeak, url] {
@@ -561,10 +557,8 @@ bool WebClientImpl::OnHttpAuthRequestByJS(std::shared_ptr<NWeb::NWebJSHttpAuthRe
 
     bool jsResult = false;
     auto param = std::make_shared<WebHttpAuthEvent>(AceType::MakeRefPtr<AuthResultOhos>(result), host, realm);
-    auto task = Container::CurrentTaskExecutor();
-    if (task == nullptr) {
-        return false;
-    }
+    auto task = delegate->GetTaskExecutor();
+    CHECK_NULL_RETURN(task, false);
     task->PostSyncTask(
         [webClient = this, &param, &jsResult] {
             if (!webClient) {
@@ -588,10 +582,8 @@ bool WebClientImpl::OnSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSSslErrorRe
     bool jsResult = false;
     auto param = std::make_shared<WebSslErrorEvent>(AceType::MakeRefPtr<SslErrorResultOhos>(result),
         static_cast<int32_t>(error));
-    auto task = Container::CurrentTaskExecutor();
-    if (task == nullptr) {
-        return false;
-    }
+    auto task = delegate->GetTaskExecutor();
+    CHECK_NULL_RETURN(task, false);
     task->PostSyncTask(
         [webClient = this, &param, &jsResult] {
             if (!webClient) {
@@ -620,7 +612,7 @@ bool WebClientImpl::OnAllSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSAllSslE
     bool jsResult = false;
     auto param = std::make_shared<WebAllSslErrorEvent>(AceType::MakeRefPtr<AllSslErrorResultOhos>(result),
         static_cast<int32_t>(error), url, originalUrl, referrer, isFatalError, isMainFrame);
-    auto task = Container::CurrentTaskExecutor();
+    auto task = delegate->GetTaskExecutor();
     if (task == nullptr) {
         return false;
     }
@@ -651,7 +643,7 @@ bool WebClientImpl::OnSslSelectCertRequestByJS(
     bool jsResult = false;
     auto param = std::make_shared<WebSslSelectCertEvent>(AceType::MakeRefPtr<SslSelectCertResultOhos>(result),
         host, port, keyTypes, issuers);
-    auto task = Container::CurrentTaskExecutor();
+    auto task = delegate->GetTaskExecutor();
     if (task == nullptr) {
         return false;
     }
@@ -696,7 +688,7 @@ bool WebClientImpl::RunContextMenu(
     bool jsResult = false;
     auto param = std::make_shared<ContextMenuEvent>(AceType::MakeRefPtr<ContextMenuParamOhos>(params),
         AceType::MakeRefPtr<ContextMenuResultOhos>(callback));
-    auto task = Container::CurrentTaskExecutor();
+    auto task = delegate->GetTaskExecutor();
     if (task == nullptr) {
         return false;
     }
@@ -1080,6 +1072,22 @@ void WebClientImpl::OnPopupSize(int x, int y, int width, int height)
     delegate->OnPopupSize(x, y, width, height);
 }
 
+void WebClientImpl::GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->GetVisibleRectToWeb(visibleX, visibleY, visibleWidth, visibleHeight);
+}
+
+void WebClientImpl::RestoreRenderFit()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->RestoreRenderFit();
+}
+
 void WebClientImpl::OnPopupShow(bool show)
 {
     auto delegate = webDelegate_.Upgrade();
@@ -1186,6 +1194,16 @@ void WebClientImpl::OnShowAutofillPopup(
     delegate->OnShowAutofillPopup(offsetX, offsetY, menu_items);
 }
 
+void WebClientImpl::OnShowAutofillPopupV2(
+    const float offsetX, const float offsetY, const float height, const float width,
+    const std::vector<std::string>& menu_items)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnShowAutofillPopupV2(offsetX, offsetY, height, width, menu_items);
+}
+
 void WebClientImpl::OnHideAutofillPopup()
 {
     auto delegate = webDelegate_.Upgrade();
@@ -1260,5 +1278,73 @@ void WebClientImpl::StartVibraFeedback(const std::string& vibratorType)
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());
     delegate->StartVibraFeedback(vibratorType);
+}
+
+void WebClientImpl::OnNativeEmbedVisibilityChange(const std::string& embedId, bool visibility)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnNativeEmbedVisibilityChange(embedId, visibility);
+}
+
+bool WebClientImpl::CloseImageOverlaySelection()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    ContainerScope scope(delegate->GetInstanceId());
+    return delegate->CloseImageOverlaySelection();
+}
+
+bool WebClientImpl::OnSslErrorRequestByJSV2(std::shared_ptr<NWeb::NWebJSSslErrorResult> result,
+    OHOS::NWeb::SslError error, const std::vector<std::string>& certChainData)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    ContainerScope scope(delegate->GetInstanceId());
+
+    bool jsResult = false;
+    auto param = std::make_shared<WebSslErrorEvent>(AceType::MakeRefPtr<SslErrorResultOhos>(result),
+        static_cast<int32_t>(error), certChainData);
+    auto task = delegate->GetTaskExecutor();
+    CHECK_NULL_RETURN(task, false);
+    task->PostSyncTask(
+        [webClient = this, &param, &jsResult] {
+            if (!webClient) {
+                return;
+            }
+            auto delegate = webClient->webDelegate_.Upgrade();
+            if (delegate) {
+                jsResult = delegate->OnSslErrorRequest(param);
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientSslErrorRequest");
+    return jsResult;
+}
+
+void WebClientImpl::OnAccessibilityEventV2(int64_t accessibilityId, int32_t eventType, const std::string& argument)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "OnAccessibilityEvent accessibilityId: %{public}" PRId64 ", eventType: %{public}d, argument: %{public}s",
+        accessibilityId, eventType, argument.c_str());
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnAccessibilityEvent(accessibilityId, static_cast<AccessibilityEventType>(eventType), argument);
+}
+
+bool WebClientImpl::IsCurrentFocus()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    ContainerScope scope(delegate->GetInstanceId());
+    return delegate->IsCurrentFocus();
+}
+
+void WebClientImpl::OnScrollStart(const float x, const float y)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnScrollStart(x, y);
 }
 } // namespace OHOS::Ace

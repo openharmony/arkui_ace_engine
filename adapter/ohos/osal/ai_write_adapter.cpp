@@ -19,22 +19,30 @@
 #include "bool_wrapper.h"
 #include "int_wrapper.h"
 #include "want.h"
-#include "want_params.h"
-#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 
 namespace OHOS::Ace {
 const std::pair<std::string, std::string> UI_ENTENSION_TYPE = {"ability.want.params.uiExtensionType", "sys/commonUI"};
-const std::wstring BOUNDARY_SYMBOLS = L",.?!，。？！";
-const std::string SELECT_BUFFER = "selectBuffer";
-const std::string SENTENCE_BUFFER = "sentenceBuffer";
+const std::u16string BOUNDARY_SYMBOLS = u",.?，。？！";
 const std::string API_VERSION = "apiVersion";
 const std::string RESULT_BUFFER = "resultBuffer";
 const std::string SHEET_DISMISS = "sheetDismiss";
+const std::string PROCESS_ID = "processId";
+const std::string MAX_CONTENT_LENGTH = "maxContentLength";
+const std::string FIRST_HANDLE_RECT = "firstHandleRect";
+const std::string SECOND_HANDLE_RECT = "secondHandleRect";
+const std::string IS_AI_SUPPORT_METADATA = "isAiSupport";
+const std::string SELECT_CONTENT_LENGTH = "selectContentLength";
+const std::string REQUEST_LONG_CONTENT = "requestLongContent";
+const std::string LONG_SENTENCE_BUFFER = "longSentenceBuffer";
+const std::string LONG_SELECT_START = "longSelectStart";
+const std::string LONG_SELECT_END = "longSelectEnd";
+const std::string KEY_PACKAGE_NAME = "keyPackageApp";
+const std::string START_COMPONONT_TYPE = "startComponentType";
 
-bool AIWriteAdapter::IsSentenceBoundary(const wchar_t value)
+bool AIWriteAdapter::IsSentenceBoundary(const char16_t value)
 {
-    for (wchar_t item: BOUNDARY_SYMBOLS) {
+    for (char16_t item: BOUNDARY_SYMBOLS) {
         if (value == item) {
             return true;
         }
@@ -42,66 +50,138 @@ bool AIWriteAdapter::IsSentenceBoundary(const wchar_t value)
     return false;
 }
 
+uint32_t AIWriteAdapter::GetSelectLengthOnlyText(const std::u16string& content)
+{
+    uint32_t length = 0;
+    for (uint32_t i = 0; i < content.length(); i++) {
+        if (content[i] != u' ' && content[i] != u'\n') {
+            length++;
+        }
+    }
+    return length;
+}
+
 void AIWriteAdapter::CloseModalUIExtension()
 {
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "CloseModalUIExtension.");
     auto context = pipelineContext_.Upgrade();
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->CloseModalUIExtension(sessionId_);
+    SetAIWrite(false);
 }
 
 void AIWriteAdapter::ShowModalUIExtension(const AIWriteInfo& info,
     std::function<void(std::vector<uint8_t>&)> resultCallback)
 {
-    std::vector<int> selectBufferVec(info.selectBuffer.size());
-    std::transform(info.selectBuffer.begin(), info.selectBuffer.end(), selectBufferVec.begin(),
-        [](uint8_t x) { return static_cast<int>(x); });
-    std::vector<int> sentenceBufferVec(info.sentenceBuffer.size());
-    std::transform(info.sentenceBuffer.begin(), info.sentenceBuffer.end(), sentenceBufferVec.begin(),
-        [](uint8_t x) { return static_cast<int>(x); });
-    auto apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ShowModalUIExtension.");
     AAFwk::Want want;
-    want.SetElementName(bundleName_, abilityName_);
-    want.SetParam(UI_ENTENSION_TYPE.first, UI_ENTENSION_TYPE.second);
-    want.SetParam(SELECT_BUFFER, selectBufferVec);
-    want.SetParam(SENTENCE_BUFFER, sentenceBufferVec);
-    want.SetParam(API_VERSION, static_cast<int>(apiVersion));
-
+    SetWantParams(info, want);
     Ace::ModalUIExtensionCallbacks callbacks;
-    callbacks.onResult = [](int32_t code, const AAFwk::Want& want) {
-        TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension onResult, code: %{public}d", code);
-    };
-    callbacks.onDestroy = []() {
-        TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension onDestroy.");
-    };
-    callbacks.onError = [](int32_t code, const std::string& name, const std::string& message) {
-        TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-            "UIExtension onError, code: %{public}d, name: %{public}s, message: %{public}s",
-            code, name.c_str(), message.c_str());
-    };
-    callbacks.onRelease = [](int32_t code) {
-        TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension onRelease, code: %{public}d", code);
-    };
-    callbacks.onReceive = [weak = WeakClaim(this), cb = std::move(resultCallback)]
-        (const AAFwk::WantParams& wantParams) {
-        auto aiWriteAdapter = weak.Upgrade();
-        CHECK_NULL_VOID(aiWriteAdapter);
-        auto result = aiWriteAdapter->GetBufferParam(RESULT_BUFFER, wantParams);
-        auto isSheetClose = aiWriteAdapter->GetBoolParam(SHEET_DISMISS, wantParams);
-        if (cb && !result.empty()) {
-            cb(result);
-        }
-        if (isSheetClose) {
-            aiWriteAdapter->CloseModalUIExtension();
-        }
-    };
+    BindModalUIExtensionCallback(callbacks, resultCallback);
+
     auto context = pipelineContext_.Upgrade();
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     Ace::ModalUIExtensionConfig config;
     sessionId_ = overlayManager->CreateModalUIExtension(want, callbacks, config);
+    aiWriteInfo_ = info;
+}
+
+void AIWriteAdapter::SetWantParams(const AIWriteInfo& info, AAFwk::Want& want)
+{
+    auto apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    want.SetElementName(bundleName_, abilityName_);
+    want.SetParam(UI_ENTENSION_TYPE.first, UI_ENTENSION_TYPE.second);
+    want.SetParam(API_VERSION, static_cast<int>(apiVersion));
+    want.SetParam(PROCESS_ID, getpid());
+    want.SetParam(MAX_CONTENT_LENGTH, info.maxLength);
+    want.SetParam(SELECT_CONTENT_LENGTH, info.selectLength);
+    want.SetParam(FIRST_HANDLE_RECT, info.firstHandle);
+    want.SetParam(SECOND_HANDLE_RECT, info.secondHandle);
+    want.SetParam(KEY_PACKAGE_NAME, AceApplicationInfo::GetInstance().GetPackageName());
+    want.SetParam(START_COMPONONT_TYPE, info.componentType);
+}
+
+void AIWriteAdapter::BindModalUIExtensionCallback(
+    Ace::ModalUIExtensionCallbacks& callbacks, std::function<void(std::vector<uint8_t>&)> resultCallback)
+{
+    callbacks.onResult = [](int32_t code, const AAFwk::Want& want) {
+        TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension onResult, code: %{public}d", code);
+    };
+    callbacks.onDestroy = [weak = WeakClaim(this)]() {
+        TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension onDestroy.");
+        auto aiWriteAdapter = weak.Upgrade();
+        CHECK_NULL_VOID(aiWriteAdapter);
+        aiWriteAdapter->CloseModalUIExtension();
+    };
+    callbacks.onError = [weak = WeakClaim(this)](int32_t code, const std::string& name, const std::string& message) {
+        TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "UIExtension onError, code: %{public}d, name: %{public}s, message: %{public}s",
+            code, name.c_str(), message.c_str());
+        auto aiWriteAdapter = weak.Upgrade();
+        CHECK_NULL_VOID(aiWriteAdapter);
+        aiWriteAdapter->CloseModalUIExtension();
+    };
+    callbacks.onRelease = [](int32_t code) {
+        TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension onRelease, code: %{public}d", code);
+    };
+    callbacks.onRemoteReady = [weak = WeakClaim(this)](const std::shared_ptr<Ace::ModalUIExtensionProxy>& proxy) {
+        TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension onRemoteReady.");
+        auto aiWriteAdapter = weak.Upgrade();
+        CHECK_NULL_VOID(aiWriteAdapter);
+        aiWriteAdapter->SetModalUIExtensionProxy(proxy);
+    };
+    callbacks.onReceive = [weak = WeakClaim(this), cb = std::move(resultCallback)]
+        (const AAFwk::WantParams& wantParams) {
+        auto aiWriteAdapter = weak.Upgrade();
+        CHECK_NULL_VOID(aiWriteAdapter);
+        auto isSheetClose = false;
+        auto isRequest = false;
+        auto result = aiWriteAdapter->GetBufferParam(RESULT_BUFFER, wantParams);
+        isSheetClose = aiWriteAdapter->GetBoolParam(SHEET_DISMISS, wantParams);
+        isRequest = aiWriteAdapter->GetBoolParam(REQUEST_LONG_CONTENT, wantParams);
+        if (isRequest) {
+            aiWriteAdapter->SendData();
+            return;
+        }
+        if (cb && !result.empty()) {
+            cb(result);
+            return;
+        }
+        if (isSheetClose) {
+            aiWriteAdapter->CloseModalUIExtension();
+        }
+    };
+}
+
+void AIWriteAdapter::SendData()
+{
+    auto proxy = GetModalUIExtensionProxy();
+    AAFwk::WantParams wantParams;
+    SetArrayParam(wantParams, LONG_SENTENCE_BUFFER, aiWriteInfo_.sentenceBuffer);
+    wantParams.SetParam(LONG_SELECT_START, AAFwk::Integer::Box(aiWriteInfo_.start));
+    wantParams.SetParam(LONG_SELECT_END, AAFwk::Integer::Box(aiWriteInfo_.end));
+    proxy->SendData(wantParams);
+}
+
+void AIWriteAdapter::SetArrayParam(
+    AAFwk::WantParams& wantParams, const std::string& key, const std::vector<uint8_t>& value)
+{
+    std::vector<int> valueVec(value.size());
+    std::transform(value.begin(), value.end(), valueVec.begin(),
+        [](uint8_t x) { return static_cast<int>(x); });
+    size_t size = valueVec.size();
+    sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IInteger);
+    if (ao == nullptr) {
+        return;
+    }
+    for (size_t i = 0; i < size; i++) {
+        ao->Set(i, AAFwk::Integer::Box(value[i]));
+    }
+    wantParams.SetParam(key, ao);
 }
 
 std::vector<uint8_t> AIWriteAdapter::GetBufferParam(const std::string& key, const AAFwk::WantParams& wantParams)

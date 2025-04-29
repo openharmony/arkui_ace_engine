@@ -15,9 +15,6 @@
 
 #include "core/components_ng/pattern/node_container/node_container_event_hub.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/event/event_hub.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -54,5 +51,59 @@ void NodeContainerEventHub::FireOnDisappear()
         onDisappear();
     }
     EventHub::FireOnDisappear();
+}
+
+void NodeContainerEventHub::FireOnWillBind(int32_t containerId)
+{
+    if (onWillBindCallback_) {
+        auto onWillBind = onWillBindCallback_;
+        onWillBind(containerId);
+    }
+    EventHub::FireOnWillBind(containerId);
+}
+
+void NodeContainerEventHub::FireOnWillUnbind(int32_t containerId)
+{
+    if (onWillUnbindCallback_) {
+        auto onWillUnbind = onWillUnbindCallback_;
+        onWillUnbind(containerId);
+    }
+    EventHub::FireOnWillUnbind(containerId);
+}
+
+void NodeContainerEventHub::FireOnBind(int32_t containerId)
+{
+    if (onBindCallback_) {
+        auto onBind = onBindCallback_;
+        onBind(containerId);
+    }
+    EventHub::FireOnBind(containerId);
+}
+
+void NodeContainerEventHub::FireOnUnbind(int32_t containerId)
+{
+    if (onUnbindCallback_) {
+        auto onUnbind = onUnbindCallback_;
+        onUnbind(containerId);
+    }
+    EventHub::FireOnUnbind(containerId);
+}
+
+void NodeContainerEventHub::FireOnAttach()
+{
+    if (onAttachCallback_) {
+        auto onAttach = onAttachCallback_;
+        onAttach();
+    }
+    EventHub::FireOnAttach();
+}
+
+void NodeContainerEventHub::FireOnDetach()
+{
+    if (onDetachCallback_) {
+        auto onDetach = onDetachCallback_;
+        onDetach();
+    }
+    EventHub::FireOnDetach();
 }
 } // namespace OHOS::Ace::NG

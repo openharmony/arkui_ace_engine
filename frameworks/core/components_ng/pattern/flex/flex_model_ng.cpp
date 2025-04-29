@@ -15,16 +15,7 @@
 
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
 
-#include "base/log/log_wrapper.h"
-#include "base/utils/macros.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
-#include "core/components_ng/pattern/flex/flex_layout_property.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -224,6 +215,26 @@ void FlexModelNG::SetFlexAlignContent(FrameNode* frameNode, int32_t value)
         return;
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, Alignment, static_cast<WrapAlignment>(value), frameNode);
+}
+
+void FlexModelNG::SetWidthLayoutPolicy(uint8_t widthLayoutPolicy)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, WidthLayoutPolicy, widthLayoutPolicy);
+}
+
+void FlexModelNG::SetWidthLayoutPolicy(FrameNode* frameNode, uint8_t widthLayoutPolicy)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, WidthLayoutPolicy, widthLayoutPolicy, frameNode);
+}
+
+void FlexModelNG::SetHeightLayoutPolicy(uint8_t heightLayoutPolicy)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, HeightLayoutPolicy, heightLayoutPolicy);
+}
+
+void FlexModelNG::SetHeightLayoutPolicy(FrameNode* frameNode, uint8_t heightLayoutPolicy)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, HeightLayoutPolicy, heightLayoutPolicy, frameNode);
 }
 
 int FlexModelNG::GetFlexWrap(FrameNode* frameNode)

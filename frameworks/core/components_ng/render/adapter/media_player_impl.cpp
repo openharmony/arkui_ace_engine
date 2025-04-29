@@ -70,15 +70,19 @@ void MediaPlayerImpl::InitListener()
 
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
 
-    auto onPrepared = [uiTaskExecutor, weak = WeakClaim(this)](uint32_t width, uint32_t height, bool isPlaying,
-                          uint32_t duration, uint32_t currentPos, bool needFireEvent) {
-        uiTaskExecutor.PostSyncTask([weak, width, height, isPlaying, duration, currentPos, needFireEvent] {
+    auto onPrepared = [uiTaskExecutor, weak = WeakClaim(this)]([[maybe_unused]] uint32_t width,
+                          [[maybe_unused]] uint32_t height, [[maybe_unused]] bool isPlaying,
+                          [[maybe_unused]] uint32_t duration, [[maybe_unused]] uint32_t currentPos,
+                          [[maybe_unused]] bool needFireEvent) {
+        uiTaskExecutor.PostSyncTask(
+            [weak] {
                 auto player = weak.Upgrade();
                 CHECK_NULL_VOID(player);
                 if (player->stateChangeCallback_) {
                     player->stateChangeCallback_(PlaybackStatus::PREPARED);
                 }
-            }, "ArkUIVideoPlayerPrepared");
+            },
+            "ArkUIVideoPlayerPrepared");
     };
 
     auto onPlayerStatus = [weak = WeakClaim(this), uiTaskExecutor](bool isPlaying) {
@@ -116,10 +120,21 @@ void MediaPlayerImpl::InitListener()
             }, "ArkUIVideoPlayerCompletion");
     };
 
+    auto onSeekDone = [weak = WeakClaim(this), uiTaskExecutor](uint32_t currentPos) {
+        uiTaskExecutor.PostSyncTask([weak, currentPos] {
+                auto player = weak.Upgrade();
+                CHECK_NULL_VOID(player);
+                if (player->seekDoneCallback_) {
+                    player->seekDoneCallback_(currentPos);
+                }
+            }, "ArkUIVideoPlayerSeekDone");
+    };
+
     player_->AddPreparedListener(onPrepared);
     player_->AddPlayStatusListener(onPlayerStatus);
     player_->AddCurrentPosListener(onCurrentTimeChange);
     player_->AddCompletionListener(onCompletion);
+    player_->AddSeekDoneListener(onSeekDone);
 }
 
 void MediaPlayerImpl::ResetMediaPlayer() {}
@@ -135,7 +150,8 @@ void MediaPlayerImpl::SetVolume(float leftVolume, float rightVolume)
     player_->SetVolume(leftVolume);
 }
 
-bool MediaPlayerImpl::SetSource(const std::string& src)
+bool MediaPlayerImpl::SetSource(const std::string& src, const std::string& /* bundleName */,
+    const std::string& /* moduleName */)
 {
     CHECK_NULL_RETURN(player_, false);
     player_->SetSource(src);
@@ -168,6 +184,11 @@ void MediaPlayerImpl::RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUp
     errorCallback_ = errorEvent;
     resolutionChangeCallback_ = resolutionChangeEvent;
     startRenderFrameCallback_ = startRenderFrameEvent;
+}
+
+void MediaPlayerImpl::RegisterMediaPlayerSeekDoneEvent(SeekDoneEvent&& seekDoneEvent)
+{
+    seekDoneCallback_ = seekDoneEvent;
 }
 
 void MediaPlayerImpl::RegisterTextureEvent(TextureRefreshEnVent&& textureRefreshEvent)

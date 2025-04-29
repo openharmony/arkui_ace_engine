@@ -35,12 +35,13 @@
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas_image_data.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "core/common/card_scope.h"
-#include "core/common/container.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/base/inspector.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_v2/inspector/inspector.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_app_bar_register.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_modal_view_register.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_object_template.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -103,6 +104,7 @@ void RegisterCardUpdateCallback(int64_t cardId, const panda::Local<panda::Object
         ContainerScope scope(id);
         const EcmaVM* vm = storage->GetEcmaVM();
         CHECK_NULL_VOID(vm);
+        TAG_LOGI(AceLogTag::ACE_FORM, "setOrCreate, dataList length: %{public}zu", data.length());
         std::unique_ptr<JsonValue> jsonRoot = JsonUtil::ParseJsonString(data);
         CHECK_NULL_VOID(jsonRoot);
         auto child = jsonRoot->GetChild();
@@ -194,7 +196,7 @@ void UpdatePageLifeCycleFunctions(RefPtr<NG::FrameNode> pageNode, JSView* view)
 
 void UpdateCardRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectRef>& obj)
 {
-    auto* view = static_cast<JSView*>(obj->GetNativePointerField(vm, 0));
+    auto* view = JsiObjectTemplate::GetNativeView(obj, vm);
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return;
     }
@@ -240,6 +242,7 @@ void UpdateCardRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectR
 panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
+    LocalScope scope(vm);
     uint32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         return panda::JSValueRef::Undefined(vm);
@@ -265,24 +268,6 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtim
     shared_ptr<ArkJSRuntime> arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     arkRuntime->AddRootView(rootView);
 #endif
-
-    return panda::JSValueRef::Undefined(vm);
-}
-
-panda::Local<panda::JSValueRef> JsLoadCustomTitleBar(panda::JsiRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    uint32_t argc = runtimeCallInfo->GetArgsNumber();
-    if (argc != 1) {
-        return panda::JSValueRef::Undefined(vm);
-    }
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (!firstArg->IsObject(vm)) {
-        return panda::JSValueRef::Undefined(vm);
-    }
-
-    panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
-    AddCustomTitleBarComponent(obj);
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -374,7 +359,7 @@ panda::Local<panda::JSValueRef> JSPostCardAction(panda::JsiRuntimeCallInfo* runt
     }
 
     panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
-    auto* view = static_cast<JSView*>(obj->GetNativePointerField(vm, 0));
+    auto* view = JsiObjectTemplate::GetNativeView(obj, vm);
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -632,6 +617,9 @@ panda::Local<panda::JSValueRef> JsGetInspectorNodeById(panda::JsiRuntimeCallInfo
     }
     int32_t intValue = firstArg->Int32Value(vm);
     auto nodeInfo = accessibilityManager->DumpComposedElementToJson(intValue);
+    if (nodeInfo == nullptr) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     return panda::JSON::Parse(vm, panda::StringRef::NewFromUtf8(vm, nodeInfo->ToString().c_str()));
 }
 
@@ -681,6 +669,7 @@ panda::Local<panda::JSValueRef> JsGetFilteredInspectorTree(panda::JsiRuntimeCall
 
     NG::InspectorFilter filter;
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    bool isLayoutInspector = false;
     if (argc == PARAM_SIZE_ONE) {
         if (!firstArg->IsArray(vm)) {
             JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "invalid param type");
@@ -695,11 +684,15 @@ panda::Local<panda::JSValueRef> JsGetFilteredInspectorTree(panda::JsiRuntimeCall
                 return panda::StringRef::NewFromUtf8(vm, "");
             }
             auto itemVal = panda::Local<panda::StringRef>(subItemVal);
+            if (itemVal->ToString(vm) == "isLayoutInspector") {
+                isLayoutInspector = true;
+                continue;
+            }
             filter.AddFilterAttr(itemVal->ToString(vm));
         }
     }
     bool needThrow = false;
-    auto nodeInfos = NG::Inspector::GetInspector(false, filter, needThrow);
+    auto nodeInfos = NG::Inspector::GetInspector(isLayoutInspector, filter, needThrow);
     if (needThrow) {
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "get inspector failed");
         return panda::StringRef::NewFromUtf8(vm, "");
@@ -917,6 +910,9 @@ static KeyEvent GetKeyEventFromJS(const JsiObject& value)
     auto timeStamp = jsTimestamp->ToNumber<int64_t>();
     keyEvent.SetTimeStamp(timeStamp);
 
+    auto jsUnicode = value->GetProperty("unicode");
+    keyEvent.unicode = jsUnicode->ToNumber<uint32_t>();
+
     return keyEvent;
 }
 
@@ -944,7 +940,7 @@ panda::Local<panda::JSValueRef> JsSendKeyEvent(panda::JsiRuntimeCallInfo* runtim
     JsiObject obj(firstArg);
     KeyEvent keyEvent = GetKeyEventFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
-        [pipelineContext, keyEvent]() { pipelineContext->OnKeyEvent(keyEvent); },
+        [pipelineContext, keyEvent]() { pipelineContext->OnNonPointerEvent(keyEvent); },
         TaskExecutor::TaskType::UI, "ArkUIJsSendKeyEvent");
     return panda::BooleanRef::New(vm, result);
 }
@@ -1265,6 +1261,25 @@ panda::Local<panda::JSValueRef> RestoreDefault(panda::JsiRuntimeCallInfo* runtim
     return panda::JSValueRef::Undefined(vm);
 }
 
+panda::Local<panda::JSValueRef> JSHandleUncaughtException(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    ContainerScope scope(Container::CurrentIdSafely());
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    auto engine = EngineHelper::GetCurrentEngineSafely();
+    CHECK_NULL_RETURN(engine, panda::JSValueRef::Undefined(vm));
+    auto nativeEngine = engine->GetNativeEngine();
+    auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
+    CHECK_NULL_RETURN(arkNativeEngine, panda::JSValueRef::Undefined(vm));
+    NapiUncaughtExceptionCallback callback = arkNativeEngine->GetNapiUncaughtExceptionCallback();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsObject(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::ObjectRef> exception = firstArg->ToObject(vm);
+    callback(arkNativeEngine->ArkValueToNapiValue(reinterpret_cast<napi_env>(arkNativeEngine), exception));
+    return panda::JSValueRef::Undefined(vm);
+}
+
 #ifdef FORM_SUPPORTED
 void JsRegisterFormViews(
     BindingTarget globalObj, const std::unordered_set<std::string>& formModuleList, bool isReload, void* nativeEngine)
@@ -1332,6 +1347,9 @@ void JsRegisterFormViews(
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Lpx));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAppBgColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetAppBackgroundColor));
+    globalObj->Set(vm,
+        panda::StringRef::NewFromUtf8(vm, "_arkUIUncaughtPromiseError"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JSHandleUncaughtException));
 
     JsBindFormViews(globalObj, formModuleList, nativeEngine);
 
@@ -1403,6 +1421,11 @@ void JsRegisterFormViews(
     sliderStyle.Constant("InSet", 1);
     sliderStyle.Constant("NONE", 2);
 
+    JSObjectTemplate datePickerMode;
+    datePickerMode.Constant("DATE", static_cast<int>(DatePickerMode::DATE));
+    datePickerMode.Constant("YEAR_AND_MONTH", static_cast<int>(DatePickerMode::YEAR_AND_MONTH));
+    datePickerMode.Constant("MONTH_AND_DAY", static_cast<int>(DatePickerMode::MONTH_AND_DAY));
+
     JSObjectTemplate sliderChangeMode;
     sliderChangeMode.Constant("Begin", 0);
     sliderChangeMode.Constant("Moving", 1);
@@ -1420,6 +1443,10 @@ void JsRegisterFormViews(
     buttonType.Constant("Arc", (int)ButtonType::ARC);
     buttonType.Constant("ROUNDED_RECTANGLE", (int)ButtonType::ROUNDED_RECTANGLE);
 
+    JSObjectTemplate toolbaritemPlacement;
+    toolbaritemPlacement.Constant("TOP_BAR_LEADING", (int)ToolBarItemPlacement::TOP_BAR_LEADING);
+    toolbaritemPlacement.Constant("TOP_BAR_TRAILING", (int)ToolBarItemPlacement::TOP_BAR_TRAILING);
+
     JSObjectTemplate iconPosition;
     iconPosition.Constant("Start", 0);
     iconPosition.Constant("End", 1);
@@ -1436,11 +1463,13 @@ void JsRegisterFormViews(
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Align"), *alignment);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Overflow"), *overflow);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ButtonType"), *buttonType);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ToolBarItemPlacement"), *toolbaritemPlacement);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "LoadingProgressStyle"), *loadingProgressStyle);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ProgressStyle"), *progressStyle);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ToggleType"), *toggleType);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "RefreshStatus"), *refreshStatus);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "SliderStyle"), *sliderStyle);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "DatePickerMode"), *datePickerMode);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "SliderChangeMode"), *sliderChangeMode);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "IconPosition"), *iconPosition);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "PickerStyle"), *pickerStyle);
@@ -1511,6 +1540,9 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Lpx));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAppBgColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetAppBackgroundColor));
+    globalObj->Set(vm,
+        panda::StringRef::NewFromUtf8(vm, "_arkUIUncaughtPromiseError"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JSHandleUncaughtException));
 
     BindingTarget focusControlObj = panda::ObjectRef::New(const_cast<panda::EcmaVM*>(vm));
     focusControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "requestFocus"),
@@ -1524,6 +1556,12 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NG::ArkUINativeModule::GetArkUINativeModule));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadCustomTitleBar"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomTitleBar));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadCustomTitleButton"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomButton));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadCustomAppbar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomAppBar));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadCustomWindowMask"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomWindowMask));
 
     BindingTarget cursorControlObj = panda::ObjectRef::New(const_cast<panda::EcmaVM*>(vm));
     cursorControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCursor"),
@@ -1601,6 +1639,11 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
     sliderStyle.Constant("InSet", 1);
     sliderStyle.Constant("NONE", 2);
 
+    JSObjectTemplate datePickerMode;
+    datePickerMode.Constant("DATE", static_cast<int>(DatePickerMode::DATE));
+    datePickerMode.Constant("YEAR_AND_MONTH", static_cast<int>(DatePickerMode::YEAR_AND_MONTH));
+    datePickerMode.Constant("MONTH_AND_DAY", static_cast<int>(DatePickerMode::MONTH_AND_DAY));
+
     JSObjectTemplate sliderChangeMode;
     sliderChangeMode.Constant("Begin", 0);
     sliderChangeMode.Constant("Moving", 1);
@@ -1618,6 +1661,10 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
     buttonType.Constant("Circle", (int)ButtonType::CIRCLE);
     buttonType.Constant("Arc", (int)ButtonType::ARC);
     buttonType.Constant("ROUNDED_RECTANGLE", (int)ButtonType::ROUNDED_RECTANGLE);
+
+    JSObjectTemplate toolbaritemPlacement;
+    toolbaritemPlacement.Constant("TOP_BAR_LEADING", (int)ToolBarItemPlacement::TOP_BAR_LEADING);
+    toolbaritemPlacement.Constant("TOP_BAR_TRAILING", (int)ToolBarItemPlacement::TOP_BAR_TRAILING);
 
     JSObjectTemplate iconPosition;
     iconPosition.Constant("Start", 0);
@@ -1640,11 +1687,13 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Align"), *alignment);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Overflow"), *overflow);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ButtonType"), *buttonType);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ToolBarItemPlacement"), *toolbaritemPlacement);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "LoadingProgressStyle"), *loadingProgressStyle);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ProgressStyle"), *progressStyle);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ToggleType"), *toggleType);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "RefreshStatus"), *refreshStatus);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "SliderStyle"), *sliderStyle);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "DatePickerMode"), *datePickerMode);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "SliderChangeMode"), *sliderChangeMode);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "IconPosition"), *iconPosition);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "PickerStyle"), *pickerStyle);

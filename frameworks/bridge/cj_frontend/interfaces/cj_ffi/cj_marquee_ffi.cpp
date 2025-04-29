@@ -65,6 +65,16 @@ void FfiOHOSAceFrameworkMarqueeSetFontFamily(const char* fontFamily)
     MarqueeModel::GetInstance()->SetFontFamily(fontFamilies);
 }
 
+void FfiOHOSAceFrameworkMarqueeSetMarqueeUpdateStrategy(int32_t value)
+{
+    if (value == 0) {
+        MarqueeModel::GetInstance()->SetMarqueeUpdateStrategy(MarqueeUpdateStrategy::DEFAULT);
+    }
+    if (value == 1) {
+        MarqueeModel::GetInstance()->SetMarqueeUpdateStrategy(MarqueeUpdateStrategy::PRESERVE_POSITION);
+    }
+}
+
 void FfiOHOSAceFrameworkMarqueeOnStart(void (*callback)())
 {
     auto onStart = [lambda = CJLambda::Create(callback)]() {

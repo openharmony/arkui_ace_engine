@@ -25,13 +25,14 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr char LIBFFRT_LIB64_PATH[] = "/system/lib64/ndk/libffrt.z.so";
-}
+constexpr int32_t ENDORSE_LAYOUT_COUNT = 2;
+} // namespace
 uint64_t UITaskScheduler::frameId_ = 0;
 
 UITaskScheduler::UITaskScheduler()
 {
     if (access(LIBFFRT_LIB64_PATH, F_OK) == -1) {
-        return ;
+        return;
     }
     is64BitSystem_ = true;
 }
@@ -39,7 +40,6 @@ UITaskScheduler::UITaskScheduler()
 UITaskScheduler::~UITaskScheduler()
 {
     persistAfterLayoutTasks_.clear();
-    lastestFrameLayoutFinishTasks_.clear();
 }
 
 void UITaskScheduler::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
@@ -73,13 +73,10 @@ void UITaskScheduler::SetLayoutNodeRect()
         OffsetF offset;
         layoutNode->GetOneDepthVisibleFrameWithOffset(children, offset);
         for (auto& child : children) {
-            auto paintRect = child->GetRenderContext()->GetPaintRectWithoutTransform();
-            paintRect.SetOffset(paintRect.GetOffset() + offset);
-            child->GetRenderContext()->UpdatePaintRect(paintRect);
+            child->GetRenderContext()->SetExtraOffset(offset);
         }
     }
 }
-
 
 void UITaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
 {
@@ -116,13 +113,12 @@ void UITaskScheduler::FlushSyncGeometryNodeTasks()
 void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 {
     CHECK_RUN_ON(UI);
-    ACE_FUNCTION_TRACE();
+    ACE_FUNCTION_TRACE_COMMERCIAL();
     if (dirtyLayoutNodes_.empty()) {
         return;
     }
-    if (isLayouting_) {
-        LOGF("you are already in flushing layout!");
-        abort();
+    if (isLayouting_ && SystemProperties::GetLayoutDetectEnabled()) {
+        LOGF_ABORT("you are already in flushing layout!");
     }
 
 #ifdef FFRT_EXISTS
@@ -173,12 +169,14 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
     // Priority task creation
     int64_t time = 0;
     for (auto&& pageNodes : dirtyRenderNodes) {
-        ACE_SCOPED_TRACE("FlushRenderTask %zu", pageNodes.second.size());
+        ACE_SCOPED_TRACE_COMMERCIAL("FlushRenderTask %zu", pageNodes.second.size());
         for (auto&& node : pageNodes.second) {
             if (!node) {
                 continue;
             }
             if (node->IsInDestroying()) {
+                // reset RenderDirtyMarked for recycle node
+                node->ResetRenderDirtyMarked(false);
                 continue;
             }
             time = GetSysTimestamp();
@@ -220,23 +218,87 @@ bool UITaskScheduler::NeedAdditionalLayout()
     return ret;
 }
 
-void UITaskScheduler::FlushTask(bool triggeredByImplicitAnimation)
+void UITaskScheduler::FlushTaskWithCheck(bool triggeredByImplicitAnimation)
+{
+    layoutWithImplicitAnimation_.push(triggeredByImplicitAnimation);
+    if (IsLayouting()) {
+        multiLayoutCount_++;
+        return;
+    }
+    FlushTask();
+}
+
+void UITaskScheduler::FlushTask()
 {
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("UITaskScheduler::FlushTask");
-    FlushLayoutTask();
-    if (NeedAdditionalLayout()) {
+    // update for first entry from flushVSync
+    // and reset to avoid infinite add
+    int32_t layoutedCount = 0;
+    multiLayoutCount_ = 1;
+    singleDirtyNodesToFlush_.clear();
+    do {
+        if (layoutedCount >= ENDORSE_LAYOUT_COUNT && RequestFrameOnLayoutCountExceeds()) {
+            break;
+        }
         FlushLayoutTask();
-    }
-    if (!afterLayoutTasks_.empty()) {
-        FlushAfterLayoutTask();
-    }
-    FlushSafeAreaPaddingProcess();
-    if (!triggeredByImplicitAnimation && !afterLayoutCallbacksInImplicitAnimationTask_.empty()) {
-        FlushAfterLayoutCallbackInImplicitAnimationTask();
-    }
+        if (NeedAdditionalLayout()) {
+            FlushLayoutTask();
+        }
+        if (!afterLayoutTasks_.empty()) {
+            FlushAfterLayoutTask();
+        }
+        layoutedCount++;
+        multiLayoutCount_--;
+        FlushSafeAreaPaddingProcess();
+        auto triggeredByImplicitAnimation =
+            layoutWithImplicitAnimation_.empty() ? false : layoutWithImplicitAnimation_.front();
+        if (!triggeredByImplicitAnimation && !afterLayoutCallbacksInImplicitAnimationTask_.empty()) {
+            FlushAfterLayoutCallbackInImplicitAnimationTask();
+        }
+        if (!layoutWithImplicitAnimation_.empty()) {
+            layoutWithImplicitAnimation_.pop();
+        }
+    } while (multiLayoutCount_ > 0);
+    // abandon unused params
+    layoutWithImplicitAnimation_ = std::queue<bool>();
+    FlushAllSingleNodeTasks();
+    multiLayoutCount_ = 0;
     ElementRegister::GetInstance()->ClearPendingRemoveNodes();
     FlushRenderTask();
+}
+
+void UITaskScheduler::FlushAllSingleNodeTasks()
+{
+    // handle case of components executing FlushUITaskWithSingleDirtyNode during FlushLayoutTask
+    if (singleDirtyNodesToFlush_.empty()) {
+        return;
+    }
+    ACE_SCOPED_TRACE("Flush after-layout singleNode task, count %zu", singleDirtyNodesToFlush_.size());
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto singleDirtyNodes = std::move(singleDirtyNodesToFlush_);
+    for (const auto& node : singleDirtyNodes) {
+        // skip if already flushed by any previous tasks
+        if (!node || (!node->IsLayoutDirtyMarked() && !node->CheckNeedForceMeasureAndLayout())) {
+            continue;
+        }
+        pipeline->FlushUITaskWithSingleDirtyNode(node);
+    }
+}
+
+void UITaskScheduler::AddSingleNodeToFlush(const RefPtr<FrameNode>& dirtyNode)
+{
+    singleDirtyNodesToFlush_.insert(dirtyNode);
+}
+
+bool UITaskScheduler::RequestFrameOnLayoutCountExceeds()
+{
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    if (pipeline) {
+        pipeline->RequestFrame();
+    }
+    return true;
 }
 
 void UITaskScheduler::AddSafeAreaPaddingProcessTask(FrameNode* node)
@@ -254,28 +316,37 @@ void UITaskScheduler::FlushSafeAreaPaddingProcess()
     if (safeAreaPaddingProcessTasks_.empty()) {
         return;
     }
-    auto iter = safeAreaPaddingProcessTasks_.begin();
-    while (iter != safeAreaPaddingProcessTasks_.end()) {
+    auto safeAreaPaddingProcessTasks = safeAreaPaddingProcessTasks_;
+    auto iter = safeAreaPaddingProcessTasks.begin();
+    while (iter != safeAreaPaddingProcessTasks.end()) {
         auto node = *iter;
         if (!node) {
-            iter = safeAreaPaddingProcessTasks_.erase(iter);
+            iter = safeAreaPaddingProcessTasks.erase(iter);
         } else {
             node->ProcessSafeAreaPadding();
             ++iter;
         }
     }
     // clear caches after all process tasks
-    iter = safeAreaPaddingProcessTasks_.begin();
-    while (iter != safeAreaPaddingProcessTasks_.end()) {
+    iter = safeAreaPaddingProcessTasks.begin();
+    while (iter != safeAreaPaddingProcessTasks.end()) {
         auto node = *iter;
-        if (!node) {
-            iter = safeAreaPaddingProcessTasks_.erase(iter);
-        } else {
+        if (node) {
             const auto& geometryNode = node->GetGeometryNode();
             if (geometryNode) {
                 geometryNode->ResetAccumulatedSafeAreaPadding();
             }
-            ++iter;
+        }
+        ++iter;
+    }
+
+    auto eraseIter = safeAreaPaddingProcessTasks_.begin();
+    while (eraseIter != safeAreaPaddingProcessTasks_.end()) {
+        auto node = *eraseIter;
+        if (!node) {
+            eraseIter = safeAreaPaddingProcessTasks_.erase(eraseIter);
+        } else {
+            ++eraseIter;
         }
     }
 }
@@ -306,6 +377,11 @@ bool UITaskScheduler::isEmpty()
     return dirtyLayoutNodes_.empty() && dirtyRenderNodes_.empty();
 }
 
+bool UITaskScheduler::IsPredictTaskEmpty()
+{
+    return predictTask_.empty();
+}
+
 void UITaskScheduler::AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask)
 {
     if (isFlushInImplicitAnimationTask) {
@@ -319,13 +395,6 @@ void UITaskScheduler::AddPersistAfterLayoutTask(std::function<void()>&& task)
 {
     persistAfterLayoutTasks_.emplace_back(std::move(task));
     LOGI("AddPersistAfterLayoutTask size: %{public}u", static_cast<uint32_t>(persistAfterLayoutTasks_.size()));
-}
-
-void UITaskScheduler::AddLastestFrameLayoutFinishTask(std::function<void()>&& task)
-{
-    lastestFrameLayoutFinishTasks_.emplace_back(std::move(task));
-    LOGI("AddLastestFrameLayoutFinishTask size: %{public}u",
-        static_cast<uint32_t>(lastestFrameLayoutFinishTasks_.size()));
 }
 
 void UITaskScheduler::FlushAfterLayoutTask()
@@ -359,20 +428,6 @@ void UITaskScheduler::FlushPersistAfterLayoutTask()
     }
     ACE_SCOPED_TRACE("UITaskScheduler::FlushPersistAfterLayoutTask");
     for (const auto& task : persistAfterLayoutTasks_) {
-        if (task) {
-            task();
-        }
-    }
-}
-
-void UITaskScheduler::FlushLastestFrameLayoutFinishTask()
-{
-    // only execute after lastest layout finish
-    if (lastestFrameLayoutFinishTasks_.empty()) {
-        return;
-    }
-    ACE_SCOPED_TRACE("UITaskScheduler::FlushLastestFrameLayoutFinishTask");
-    for (const auto& task : lastestFrameLayoutFinishTasks_) {
         if (task) {
             task();
         }

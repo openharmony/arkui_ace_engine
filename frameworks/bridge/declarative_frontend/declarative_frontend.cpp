@@ -15,16 +15,9 @@
 
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
 
-#include <memory>
-
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_page.h"
-#include "core/common/container.h"
 #include "core/common/recorder/node_data_cache.h"
-#include "core/common/thread_checker.h"
-#include "core/components/navigator/navigator_component.h"
 #include "frameworks/bridge/card_frontend/form_frontend_delegate_declarative.h"
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.h"
 
@@ -157,14 +150,16 @@ void MouseInfoToString(const BaseEventInfo& info, std::string& eventParam)
 void SwipeInfoToString(const BaseEventInfo& info, std::string& eventParam)
 {
     const auto& swipeInfo = TypeInfoHelper::DynamicCast<SwipeEventInfo>(&info);
-    eventParam = swipeInfo->ToJsonParamInfo();
+    if (swipeInfo != nullptr) {
+        eventParam = swipeInfo->ToJsonParamInfo();
+    }
 }
 
 } // namespace
 
 DeclarativeFrontend::~DeclarativeFrontend() noexcept
 {
-    LOG_DESTROY();
+    LOGI("DeclarativeFrontend destroyed");
 }
 
 void DeclarativeFrontend::Destroy()
@@ -533,12 +528,13 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         };
         auto loadPageByBufferCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                             const std::shared_ptr<std::vector<uint8_t>>& content,
-                                            const std::function<void(const std::string&, int32_t)>& errorCallback) {
+                                            const std::function<void(const std::string&, int32_t)>& errorCallback,
+                                            const std::string& contentName) {
             auto jsEngine = weakEngine.Upgrade();
             if (!jsEngine) {
                 return false;
             }
-            return jsEngine->LoadPageSource(content, errorCallback);
+            return jsEngine->LoadPageSource(content, errorCallback, contentName);
         };
         auto loadNamedRouterCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                            const std::string& namedRouter, bool isTriggeredByJs) {
@@ -843,12 +839,18 @@ void DeclarativeFrontend::TransferJsResponseData(int callbackId, int32_t code, s
 
 napi_value DeclarativeFrontend::GetContextValue()
 {
-    return jsEngine_->GetContextValue();
+    if (jsEngine_) {
+        return jsEngine_->GetContextValue();
+    }
+    return nullptr;
 }
 
 napi_value DeclarativeFrontend::GetFrameNodeValueByNodeId(int32_t nodeId)
 {
-    return jsEngine_->GetFrameNodeValueByNodeId(nodeId);
+    if (jsEngine_) {
+        return jsEngine_->GetFrameNodeValueByNodeId(nodeId);
+    }
+    return nullptr;
 }
 
 #if defined(PREVIEW)
@@ -1179,6 +1181,14 @@ void DeclarativeFrontend::NotifyAppStorage(const std::string& key, const std::st
         return;
     }
     delegate_->NotifyAppStorage(jsEngine_, key, value);
+}
+
+std::string DeclarativeFrontend::GetPagePathByUrl(const std::string& url) const
+{
+    if (!delegate_) {
+        return "";
+    }
+    return delegate_->GetPagePathByUrl(url);
 }
 
 void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker)

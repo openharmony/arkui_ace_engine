@@ -17,16 +17,42 @@ ace_unittest("text_test_ng") {
   type = "new"
   sources = [
     "paragraph_manager_test_ng.cpp",
+    "span_accessibility_test_ng.cpp",
     "span_string_test_ng.cpp",
+    "span_string_test_two_ng.cpp",
     "span_sub_test_ng.cpp",
     "span_test_ng.cpp",
     "text_base.cpp",
     "text_test_ng.cpp",
+    "text_testeight_ng.cpp",
+    "text_testeleven_ng.cpp",
     "text_testfive_ng.cpp",
     "text_testfour_ng.cpp",
+    "text_testnine_ng.cpp",
+    "text_testseven_ng.cpp",
     "text_testsix_ng.cpp",
+    "text_testten_ng.cpp",
     "text_testthree_ng.cpp",
     "text_testtwo_ng.cpp",
     "typed_text_test_ng.cpp",
+  ]
+  cflags = [ "-fno-access-control" ]
+}
+
+ace_unittest("text_test_nullptr") {
+  type = "new"
+  sources = [
+    "text_base.cpp",
+    "text_nullptr_ng.cpp",
+  ]
+  defines = [ "NEED_PIPELINE_CONTEXT_BE_NULLPTR" ]
+  cflags = [ "-fno-access-control" ]
+}
+
+group("text_tests_ng") {
+  testonly = true
+  deps = [
+    ":text_test_ng",
+    ":text_test_nullptr",
   ]
 }

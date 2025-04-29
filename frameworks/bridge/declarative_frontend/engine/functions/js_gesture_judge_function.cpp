@@ -34,6 +34,7 @@ GestureJudgeResult JsGestureJudgeFunction::Execute(
     }
     gestureInfoObj->SetProperty<int32_t>("type", static_cast<int32_t>(gestureInfo->GetType()));
     gestureInfoObj->SetProperty<bool>("isSystemGesture", gestureInfo->IsSystemGesture());
+    gestureInfoObj->SetProperty<int32_t>("targetDisplayId", info->GetTargetDisplayId());
     auto obj = CreateGestureEventObject(info, gestureInfo->GetType());
     int32_t paramCount = 2;
     JSRef<JSVal> params[paramCount];
@@ -108,7 +109,29 @@ JSRef<JSObject> JsGestureJudgeFunction::CreateEventTargetObject(const std::share
     area->SetProperty<double>("width", info->GetTarget().area.GetWidth().ConvertToVp());
     area->SetProperty<double>("height", info->GetTarget().area.GetHeight().ConvertToVp());
     target->SetPropertyObject("area", area);
+    if (!info->GetTarget().id.empty()) {
+        target->SetProperty<const char*>("id", info->GetTarget().id.c_str());
+    } else {
+        target->SetPropertyObject("id", JsiValue::Undefined());
+    }
     return target;
+}
+
+void JsGestureJudgeFunction::ParsePanGestureEvent(JSRef<JSObject>& obj, const std::shared_ptr<BaseGestureEvent>& info)
+{
+    auto panGestureEvent = TypeInfoHelper::DynamicCast<PanGestureEvent>(info.get());
+    if (panGestureEvent) {
+        obj->SetProperty<double>(
+            "offsetX", PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetOffsetX()));
+        obj->SetProperty<double>(
+            "offsetY", PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetOffsetY()));
+        obj->SetProperty<double>(
+            "velocityX", PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetVelocity().GetVelocityX()));
+        obj->SetProperty<double>(
+            "velocityY", PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetVelocity().GetVelocityY()));
+        obj->SetProperty<double>("velocity",
+            PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetVelocity().GetVelocityValue()));
+    }
 }
 
 void JsGestureJudgeFunction::SetUniqueAttributes(
@@ -123,19 +146,7 @@ void JsGestureJudgeFunction::SetUniqueAttributes(
             break;
         }
         case OHOS::Ace::GestureTypeName::PAN_GESTURE: {
-            auto panGestureEvent = TypeInfoHelper::DynamicCast<PanGestureEvent>(info.get());
-            if (panGestureEvent) {
-                obj->SetProperty<double>(
-                    "offsetX", PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetOffsetX()));
-                obj->SetProperty<double>(
-                    "offsetY", PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetOffsetY()));
-                obj->SetProperty<double>(
-                    "velocityX", PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetVelocity().GetVelocityX()));
-                obj->SetProperty<double>(
-                    "velocityY", PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetVelocity().GetVelocityY()));
-                obj->SetProperty<double>("velocity",
-                    PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetVelocity().GetVelocityValue()));
-            }
+            ParsePanGestureEvent(obj, info);
             break;
         }
         case OHOS::Ace::GestureTypeName::PINCH_GESTURE: {
@@ -179,8 +190,10 @@ JSRef<JSObject> JsGestureJudgeFunction::CreateGestureEventObject(
     obj->SetProperty<double>("pressure", info->GetForce());
     obj->SetProperty<double>("tiltX", info->GetTiltX().value_or(0.0f));
     obj->SetProperty<double>("tiltY", info->GetTiltY().value_or(0.0f));
+    obj->SetProperty<double>("rollAngle", info->GetRollAngle().value_or(0.0f));
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info->GetSourceTool()));
     obj->SetProperty<double>("deviceId", static_cast<int32_t>(info->GetDeviceId()));
+    obj->SetProperty<int32_t>("targetDisplayId", info->GetTargetDisplayId());
 
     JSRef<JSArray> fingerArr = JSRef<JSArray>::New();
     const std::list<FingerInfo>& fingerList = info->GetFingerList();

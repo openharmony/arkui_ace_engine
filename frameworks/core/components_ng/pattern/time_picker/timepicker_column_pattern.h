@@ -18,6 +18,7 @@
 
 #include <utility>
 
+#include "adapter/ohos/entrance/picker/picker_haptic_interface.h"
 #include "base/i18n/localization.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/picker/picker_base_component.h"
@@ -27,9 +28,12 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_accessibility_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_layout_algorithm.h"
-#include "core/components_ng/pattern/time_picker/timepicker_haptic_interface.h"
 #include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/pattern/time_picker/toss_animation_controller.h"
+#include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 
 namespace OHOS::Ace::NG {
 
@@ -84,8 +88,12 @@ class TimePickerColumnPattern : public LinearLayoutPattern {
 
 public:
     TimePickerColumnPattern() : LinearLayoutPattern(true) {};
-
-    ~TimePickerColumnPattern() override = default;
+    ~TimePickerColumnPattern() override
+    {
+        if (circleUtils_) {
+            delete circleUtils_;
+        }
+    }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
@@ -304,6 +312,49 @@ public:
     }
 
     void InitHapticController(const RefPtr<FrameNode>& host);
+    bool IsStartEndTimeDefined();
+
+    void StopHaptic();
+    uint32_t GetEnterIndex() const
+    {
+        return currentEnterIndex_;
+    }
+
+    void SetEnterIndex(uint32_t value)
+    {
+        if (value != currentEnterIndex_) {
+            currentEnterIndex_ = value;
+        }
+    }
+
+    void HandleEnterSelectedAreaEventCallback(bool refresh)
+    {
+        if (enterSelectedAreaEventCallback_) {
+            enterSelectedAreaEventCallback_(refresh);
+        }
+    }
+
+    const EventCallback& GetEnterSelectedAreaEventCallback() const
+    {
+        return enterSelectedAreaEventCallback_;
+    }
+
+    void SetEnterSelectedAreaEventCallback(EventCallback&& value)
+    {
+        enterSelectedAreaEventCallback_ = value;
+    }
+
+    void SetSelectedMarkListener(const std::function<void(const std::string& selectedColumnId)>& listener);
+    void SetSelectedMark(bool focus = true, bool notify = true, bool reRender = true);
+    void SetSelectedMarkId(const std::string &strColumnId);
+    void UpdateUserSetSelectColor();
+#ifdef SUPPORT_DIGITAL_CROWN
+    std::string& GetSelectedColumnId();
+    bool IsCrownEventEnded();
+    int32_t GetDigitalCrownSensitivity();
+    void SetDigitalCrownSensitivity(int32_t crownSensitivity);
+    bool OnCrownEvent(const CrownEvent& event);
+#endif
 
 private:
     void OnModifyDone() override;
@@ -320,6 +371,15 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
+    void SetSelectedMarkPaint(bool paint);
+    void UpdateSelectedTextColor(const RefPtr<PickerTheme>& pickerTheme);
+    void GetAnimationColor(uint32_t index, uint32_t showCount, Color& color, bool selectedMark = false);
+    void UpdateAnimationColor(const RefPtr<PickerTheme>& pickerTheme);
+#ifdef SUPPORT_DIGITAL_CROWN
+    void HandleCrownBeginEvent(const CrownEvent& event);
+    void HandleCrownMoveEvent(const CrownEvent& event);
+    void HandleCrownEndEvent(const CrownEvent& event);
+#endif
     RefPtr<TouchEventImpl> CreateItemTouchEventListener();
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(const GestureEvent& event);
@@ -369,9 +429,12 @@ private:
     void AddHotZoneRectToText();
     void InitTextFontFamily();
     void RegisterWindowStateChangedCallback();
-    void UnregisterWindowStateChangedCallback();
+    void UnregisterWindowStateChangedCallback(FrameNode* frameNode);
     void OnWindowHide() override;
     void OnWindowShow() override;
+
+    void HandleEnterSelectedArea(double scrollDelta, float shiftDistance, TimePickerScrollDirection dir);
+
     double mainVelocity_ = 0.0;
     float localDownDistance_ = 0.0f;
     Color pressColor_;
@@ -380,12 +443,14 @@ private:
     FontWeight DisappearWeight_ = FontWeight::REGULAR;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
-    bool hour24_ = !Localization::GetInstance()->IsAmPmHour();
+    bool hour24_ = SystemProperties::Is24HourClock();
     // column options number
     std::map<WeakPtr<FrameNode>, uint32_t> optionsTotalCount_;
     ColumnChangeCallback changeCallback_;
     EventCallback EventCallback_;
+    EventCallback enterSelectedAreaEventCallback_;
     uint32_t currentIndex_ = 0;
+    uint32_t currentEnterIndex_ = 0;
     double yLast_ = 0.0;
     double yOffset_ = 0.0;
     double jumpInterval_ = 0.0;
@@ -406,6 +471,7 @@ private:
     bool hoverd_ = false;
     bool wheelModeEnabled_ = true;
     double scrollDelta_ = 0.0;
+    double enterDelta_ = 0.0;
     bool animationCreated_ = false;
     OffsetF offset_;
     SizeF size_;
@@ -423,8 +489,22 @@ private:
     bool hasUserDefinedSelectedFontFamily_ = false;
     bool isShow_ = true;
     bool isEnableHaptic_ = true;
-    std::shared_ptr<ITimepickerAudioHaptic> hapticController_ = nullptr;
+    bool stopHaptic_ = false;
+    bool isTossReadyToStop_ = false;
+
+    std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnPattern);
+
+    friend class PickerColumnPatternCircleUtils<TimePickerColumnPattern>;
+    PickerColumnPatternCircleUtils<TimePickerColumnPattern> *circleUtils_ = nullptr;
+    std::string selectedColumnId_ = "";
+    bool selectedMarkPaint_ = false;
+    std::function<void(std::string& selectedColumnId)> focusedListerner_ = nullptr;
+    bool isUserSetSelectColor_ = false;
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool isCrownEventEnded_ = true;
+    int32_t crownSensitivity_ = INVALID_CROWNSENSITIVITY;
+#endif
 };
 } // namespace OHOS::Ace::NG
 

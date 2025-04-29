@@ -15,7 +15,6 @@
 
 #include "core/components_ng/gestures/long_press_gesture.h"
 
-#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 
 namespace OHOS::Ace::NG {
@@ -23,7 +22,7 @@ namespace OHOS::Ace::NG {
 RefPtr<NGGestureRecognizer> LongPressGesture::CreateRecognizer()
 {
     auto longPressRecognizer = AceType::MakeRefPtr<LongPressRecognizer>(
-        duration_, fingers_, repeat_, isForDrag_, isDisableMouseLeft_);
+        duration_, fingers_, repeat_, isForDrag_, isDisableMouseLeft_, isLimitFingerCount_);
     longPressRecognizer->SetPriority(priority_);
     longPressRecognizer->SetPriorityMask(gestureMask_);
     longPressRecognizer->SetGestureInfo(gestureInfo_);

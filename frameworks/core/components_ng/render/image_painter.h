@@ -16,7 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_IMAGE_PAINT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_IMAGE_PAINT_H
 
-#include "core/components_ng/pattern/image/image_dfx.h"
+#include "core/components/common/properties/background_image.h"
+#include "core/components/common/properties/alignment.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 
@@ -24,9 +25,7 @@ namespace OHOS::Ace::NG {
 
 class ImagePainter {
 public:
-    explicit ImagePainter(const RefPtr<CanvasImage>& canvasImage, const ImageDfxConfig& imageDfxConfig = {})
-        : canvasImage_(canvasImage), imageDfxConfig_(imageDfxConfig)
-    {}
+    explicit ImagePainter(const RefPtr<CanvasImage>& canvasImage) : canvasImage_(canvasImage) {}
     ~ImagePainter() = default;
 
     void DrawObscuration(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
@@ -47,7 +46,7 @@ public:
 
 private:
     RefPtr<CanvasImage> canvasImage_;
-    ImageDfxConfig imageDfxConfig_;
+
     static void ApplyImageAlignmentFit(
         ImageFit imageFit, const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect);
     static const std::unordered_map<ImageFit, std::function<Alignment(bool)>> ALIMENT_OPERATIONS;

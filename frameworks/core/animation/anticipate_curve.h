@@ -16,25 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_ANTICIPATE_CURVE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_ANTICIPATE_CURVE_H
 
-#include "core/animation/curve.h"
-
-namespace OHOS::Ace {
-
-class AnticipateCurve : public Curve {
-    DECLARE_ACE_TYPE(AnticipateCurve, Curve);
-
-public:
-    explicit AnticipateCurve(float tension);
-    ~AnticipateCurve() override = default;
-
-    float MoveInternal(float time) override;
-
-private:
-    // Default amount of anticipation. When tension equals 0.0f, there is no anticipation and the interpolator
-    // becomes a simple acceleration interpolator.
-    const float tension_;
-};
-
-} // namespace OHOS::Ace
+#include "ui/animation/anticipate_curve.h"
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_ANTICIPATE_CURVE_H

@@ -18,9 +18,6 @@
 #include "base/json/json_util.h"
 #include "base/log/log.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
-#include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
-#include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace::Framework {
 

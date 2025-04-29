@@ -35,7 +35,23 @@ const char* AXIS_TYPE[] = {
     "Axis.FREE",
     "Axis.NONE",
 };
-
+const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
+    FontWeight::W100,
+    FontWeight::W200,
+    FontWeight::W300,
+    FontWeight::W400,
+    FontWeight::W500,
+    FontWeight::W600,
+    FontWeight::W700,
+    FontWeight::W800,
+    FontWeight::W900,
+    FontWeight::W700,       // FontWeight::BOLD
+    FontWeight::W400,       // FontWeight::NORMAL
+    FontWeight::W900,       // FontWeight::BOLDER,
+    FontWeight::W100,       // FontWeight::LIGHTER
+    FontWeight::W500,       // FontWeight::MEDIUM
+    FontWeight::W400,       // FontWeight::REGULAR
+};
 } // namespace
 
 inline std::string ConvertStackFitToString(StackFit stackFit)
@@ -83,6 +99,15 @@ inline std::string ConvertOverflowToString(Overflow overflow)
 inline std::string ConvertBoolToString(bool flag)
 {
     return flag ? "true" : "false";
+}
+
+inline bool ConvertStringToBool(const std::string& str)
+{
+    if (str == "true") {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 inline std::string ConvertTabBarModeToString(TabBarMode barMode)
@@ -409,7 +434,7 @@ inline std::string ConvertWrapTextOverflowToString(TextOverflow textOverflow)
     };
 
     auto index = BinarySearchFindIndex(textOverflowTable, ArraySize(textOverflowTable), textOverflow);
-    return index < 0 ? "TextAlign.Start" : textOverflowTable[index].value;
+    return index < 0 ? "TextOverflow.Clip" : textOverflowTable[index].value;
 }
 
 inline TextOverflow ConvertWrapStringToTextOverflow(const std::string& str)
@@ -427,6 +452,26 @@ inline TextOverflow ConvertWrapStringToTextOverflow(const std::string& str)
     return TextOverflow::CLIP;
 }
 
+inline MarqueeDirection ConvertWrapStringToMarqueeDirection(const std::string& str)
+{
+    static const std::unordered_map<std::string, MarqueeDirection> uMap {
+        { "MarqueeDirection.LEFT", MarqueeDirection::LEFT },
+        { "MarqueeDirection.RIGHT", MarqueeDirection::RIGHT },
+    };
+
+    return uMap.count(str) ? uMap.at(str) : MarqueeDirection::LEFT;
+}
+
+inline MarqueeStartPolicy ConvertWrapStringToMarqueeStartPolicy(const std::string& str)
+{
+    static const std::unordered_map<std::string, MarqueeStartPolicy> uMap {
+        { "MarqueeStartPolicy.DEFAULT", MarqueeStartPolicy::DEFAULT },
+        { "MarqueeStartPolicy.ON_FOCUS", MarqueeStartPolicy::ON_FOCUS },
+    };
+
+    return uMap.count(str) ? uMap.at(str) : MarqueeStartPolicy::DEFAULT;
+}
+
 inline std::string ConvertWrapFontStyleToStirng(FontStyle fontStyle)
 {
     static const LinearEnumMapNode<FontStyle, std::string> fontStyleTable[] = {
@@ -436,6 +481,11 @@ inline std::string ConvertWrapFontStyleToStirng(FontStyle fontStyle)
 
     auto index = BinarySearchFindIndex(fontStyleTable, ArraySize(fontStyleTable), fontStyle);
     return index < 0 ? "FontStyle.Normal" : fontStyleTable[index].value;
+}
+
+inline FontWeight ConvertFontWeight(FontWeight fontWeight)
+{
+    return FONT_WEIGHT_CONVERT_MAP[static_cast<int>(fontWeight)];
 }
 
 inline std::string ConvertWrapFontWeightToStirng(FontWeight fontWeight)
@@ -508,10 +558,24 @@ inline std::string ConvertWrapWordBreakToString(WordBreak wordBreak)
         { WordBreak::NORMAL, "normal" },
         { WordBreak::BREAK_ALL, "break-all" },
         { WordBreak::BREAK_WORD, "break-word" },
+        { WordBreak::HYPHENATION, "hyphenation" },
     };
 
     auto index = BinarySearchFindIndex(wordBreakTable, ArraySize(wordBreakTable), wordBreak);
     return index < 0 ? "break-word" : wordBreakTable[index].value;
+}
+
+inline std::string ConvertTextDirectionToString(TextDirection direction)
+{
+    static const LinearEnumMapNode<TextDirection, std::string> textDirectionTable[] = {
+        { TextDirection::AUTO, "AUTO" },
+        { TextDirection::INHERIT, "INHERIT" },
+        { TextDirection::LTR, "LTR" },
+        { TextDirection::RTL, "RTL" },
+    };
+
+    auto index = BinarySearchFindIndex(textDirectionTable, ArraySize(textDirectionTable), direction);
+    return index < 0 ? "AUTO" : textDirectionTable[index].value;
 }
 
 inline std::string ConvertEllipsisModeToString(EllipsisMode value)
@@ -617,6 +681,20 @@ inline std::string ConvertWrapMarqueeUpdateStrategyToStirng(MarqueeUpdateStrateg
     auto index = BinarySearchFindIndex(
         marqueeUpdateStrategyTable, ArraySize(marqueeUpdateStrategyTable), marqueeUpdateStrategy);
     return index < 0 ? "MarqueeUpdateStrategy.DEFAULT" : marqueeUpdateStrategyTable[index].value;
+}
+
+inline std::string ConvertSymbolColorToString(const std::vector<Color>& colors)
+{
+    if (colors.size() <= 0) {
+        return "";
+    }
+    auto colorStr = std::string("[");
+    for (auto color : colors) {
+        colorStr.append(color.ColorToString());
+        colorStr.append(",");
+    }
+    colorStr.append("]");
+    return colorStr;
 }
 
 } // namespace OHOS::Ace::V2

@@ -73,14 +73,14 @@ public:
 
     static RefPtr<StepperTheme> GetTheme()
     {
-        static RefPtr<StepperTheme> stepperTheme;
-        if (!stepperTheme) {
-            auto pipeline = PipelineContext::GetCurrentContext();
-            CHECK_NULL_RETURN(pipeline, nullptr);
-            stepperTheme = pipeline->GetTheme<StepperTheme>();
-            CHECK_NULL_RETURN(stepperTheme, nullptr);
-        }
-        return stepperTheme;
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_RETURN(pipeline, nullptr);
+        return pipeline->GetTheme<StepperTheme>();
+    }
+
+    bool GetIsLoadingButton() const
+    {
+        return isLoadingButton_;
     }
 
     int32_t GetCurrentIndex() const
@@ -92,11 +92,12 @@ public:
     {
         return ScopeFocusAlgorithm(true, true, ScopeType::OTHERS,
             [wp = WeakClaim(this)](
-                FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) {
+                FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) -> bool {
                 auto stepper = wp.Upgrade();
                 if (stepper) {
                     nextFocusNode = stepper->GetFocusNode(step, currFocusNode);
                 }
+                return nextFocusNode.Upgrade() != currFocusNode.Upgrade();
             });
     }
 

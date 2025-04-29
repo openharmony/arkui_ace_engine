@@ -105,7 +105,7 @@ private:
     T* Get(StyleValue* styleValue) const;
     Styles ParseStyleAttr(const std::string& style);
     bool IsParagraphAttr(const std::string& key);
-    void InitParagrap(const std::string& key, const std::string& value, const std::string& index, StyleValues& values);
+    void InitParagraph(const std::string& key, const std::string& value, const std::string& index, StyleValues& values);
     void InitFont(const std::string& key, const std::string& value, const std::string& index, StyleValues& values);
     bool IsFontAttr(const std::string& key);
     void InitDecoration(
@@ -118,6 +118,8 @@ private:
         const std::string& key, const std::string& value, const std::string& index, StyleValues& values);
     bool IsTextShadowAttr(const std::string& key);
     std::pair<std::string, double> GetUnitAndSize(const std::string& str);
+    bool IsLength(const std::string& str);
+    void InitShadow(Shadow &textShadow, std::vector<std::string> &attribute);
     void InitLineHeight(const std::string& key, const std::string& value, StyleValues& values);
     Dimension FromString(const std::string& str);
     TextAlign StringToTextAlign(const std::string& value);
@@ -156,7 +158,7 @@ private:
     void ToParagraphStyle(const Styles& styleMap, SpanParagraphStyle& style);
     void ToParagraphSpan(xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos);
 
-    void ParaseHtmlToSpanInfo(
+    void ParseHtmlToSpanInfo(
         xmlNodePtr node, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos,
         bool isNeedLoadPixelMap = true);
     void ToSpan(xmlNodePtr curNode, size_t& pos, std::string& allContent, std::vector<SpanInfo>& spanInfos,

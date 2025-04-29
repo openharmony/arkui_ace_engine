@@ -69,14 +69,13 @@ double GetLinearSlope(const LeastSquareImpl& axis)
         if (!NearEqual(x[count - 1], x[count - index])) {
             break;
         }
-        auto previousIndex = count - index;
-        auto lastIndex = count - 1;
-        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW,
+        [[maybe_unused]] auto previousIndex = count - index;
+        [[maybe_unused]] auto lastIndex = count - 1;
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, SEC_PLD(,
             "GetLinearSlope points time is same y[%{public}d]: %{public}f y[%{public}d]: %{public}f x[%{public}d]: "
-            "%{public}f x[%{public}d]: "
-            "%{public}f",
-            previousIndex, y[previousIndex], lastIndex, y[lastIndex], previousIndex, x[previousIndex], lastIndex,
-            x[lastIndex]);
+            "%{public}f x[%{public}d]: %{public}f"),
+            SEC_PARAM(previousIndex, y[previousIndex], lastIndex, y[lastIndex], previousIndex,
+            x[previousIndex], lastIndex, x[lastIndex]));
         index++;
     }
     if (index > MAX_INDEX || index > count) {
@@ -122,7 +121,7 @@ double UpdateAxisVelocity(LeastSquareImpl& axis)
 }
 } // namespace
 
-void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end)
+void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end, float range)
 {
     if (isFirstPoint_) {
         firstTrackPoint_ = event;
@@ -137,8 +136,6 @@ void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end)
     std::chrono::duration<double> diffTime = event.time - lastTimePoint_;
     lastTimePoint_ = event.time;
     lastPosition_ = event.GetOffset();
-    // judge duration is 500ms.
-    static const double range = 0.5;
     if (end) {
         Offset oriDelta;
         if (isFirstPoint_) {
@@ -206,9 +203,11 @@ void VelocityTracker::DumpVelocityPoints() const
         const auto& xVal = axis.GetXVals();
         const auto& yVal = axis.GetYVals();
         int32_t i = static_cast<int32_t>(xVal.size());
+        auto baseVal = yVal[0];
         for (int32_t cnt = VelocityTracker::POINT_NUMBER; i > 0 && cnt > 0; --cnt) {
             --i;
-            LOGI("%{public}s last tracker points[%{public}d] x=%{public}f y=%{public}f", str, cnt, xVal[i], yVal[i]);
+            LOGI("%{public}s last tracker points[%{public}d] x=%{public}f y=%{public}f", str, cnt, xVal[i],
+                yVal[i] - baseVal);
         }
     };
     func(xAxis_, "xAxis");

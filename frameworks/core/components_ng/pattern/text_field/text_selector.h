@@ -22,6 +22,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
+#include "frameworks/core/components/common/properties/decoration.h"
 
 // avoid windows build error about macro defined in wincon.h
 #ifdef DOUBLE_CLICK
@@ -93,6 +94,9 @@ struct TextSelector {
         }
         bool isChanged = baseOffset != destinationOffset || base != destination;
         baseOffset = base;
+        if (baseOffset >= 0) {
+            lastValidStart = baseOffset;
+        }
         destinationOffset = destination;
         if (isChanged) {
             FireAccessibilityCallback();
@@ -109,6 +113,9 @@ struct TextSelector {
         }
         baseOffset = both;
         destinationOffset = both;
+        if (baseOffset >= 0) {
+            lastValidStart = baseOffset;
+        }
     }
 
     void ReverseTextSelector()
@@ -180,6 +187,16 @@ struct TextSelector {
         return baseOffset == destinationOffset;
     }
 
+    bool StartGreaterDest() const
+    {
+        return baseOffset > destinationOffset;
+    }
+
+    bool ContainsRange(const std::pair<int32_t, int32_t>& range) const
+    {
+        return IsValid() && GetTextStart() <= range.first && range.second <= GetTextEnd();
+    }
+
     std::string ToString()
     {
         std::string result;
@@ -216,6 +233,7 @@ struct TextSelector {
     OffsetF firstHandleOffset_;
     OffsetF secondHandleOffset_;
     OnAccessibilityCallback onAccessibilityCallback_;
+    int32_t lastValidStart = 0;
 };
 
 enum class TextSpanType : int32_t {
@@ -233,9 +251,22 @@ enum class TextResponseType : int32_t {
     NONE,
 };
 
+enum class SelectionMenuType : int32_t {
+    SELECTION_MENU = 0,
+    PREVIEW_MENU = 1,
+};
+
+struct PreviewMenuOptions {
+    HapticFeedbackMode hapticFeedbackMode = HapticFeedbackMode::DISABLED;
+};
+
 struct SelectMenuParam {
     std::function<void(int32_t, int32_t)> onAppear;
     std::function<void()> onDisappear;
+    std::function<void(int32_t, int32_t)> onMenuShow;
+    std::function<void(int32_t, int32_t)> onMenuHide;
+    bool isValid = true;
+    PreviewMenuOptions previewMenuOptions;
 };
 
 struct SelectionMenuParams {
@@ -244,6 +275,9 @@ struct SelectionMenuParams {
     std::function<void(int32_t, int32_t)> onAppear;
     std::function<void()> onDisappear;
     TextResponseType responseType;
+    std::function<void(int32_t, int32_t)> onMenuShow;
+    std::function<void(int32_t, int32_t)> onMenuHide;
+    bool isValid = true;
 
     SelectionMenuParams(TextSpanType _type, std::function<void()> _buildFunc,
         std::function<void(int32_t, int32_t)> _onAppear, std::function<void()> _onDisappear,
@@ -251,6 +285,38 @@ struct SelectionMenuParams {
         : type(_type), buildFunc(_buildFunc), onAppear(_onAppear), onDisappear(_onDisappear),
           responseType(_responseType)
     {}
+};
+
+struct TextSpanTypeMapper {
+    static bool GetTextSpanTypeFromJsType(int32_t spanTypeId, NG::TextSpanType& spanType)
+    {
+        std::unordered_map<int32_t, NG::TextSpanType> spanTypeMap = {
+            { 0, NG::TextSpanType::TEXT },
+            { 1, NG::TextSpanType::IMAGE },
+            { 2, NG::TextSpanType::MIXED },
+            { 3, NG::TextSpanType::NONE }
+        };
+        if (spanTypeMap.find(spanTypeId) != spanTypeMap.end()) {
+            spanType = spanTypeMap[spanTypeId];
+            return true;
+        }
+        spanType = static_cast<NG::TextSpanType>(spanTypeId);
+        return false;
+    }
+
+    static int32_t GetJsSpanType(const NG::TextSpanType& spanType, bool isValid)
+    {
+        std::unordered_map<NG::TextSpanType, int32_t> spanTypeMap = {
+            { NG::TextSpanType::TEXT, 0 },
+            { NG::TextSpanType::IMAGE, 1 },
+            { NG::TextSpanType::MIXED, 2 },
+            { NG::TextSpanType::NONE, 3 }
+        };
+        if (isValid) {
+            return spanTypeMap[spanType];
+        }
+        return static_cast<int32_t>(spanType);
+    }
 };
 
 } // namespace OHOS::Ace::NG

@@ -107,17 +107,19 @@ public:
     void SetOverScrollMode(OverScrollMode mode) override;
     void SetCopyOptionMode(CopyOptions mode) override;
     void SetNativeEmbedModeEnabled(bool isEmbedModeEnabled) override;
+    void SetIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled) override;
     void RegisterNativeEmbedRule(const std::string& tag, const std::string& type) override;
     void SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetNativeEmbedVisibilityChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay) override;
-    void SetSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled) override;
     void SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)> && jsCallback) override;
     void SetRenderProcessRespondingId(std::function<void(const BaseEventInfo* info)> && jsCallback) override;
     void SetViewportFitChangedId(std::function<void(const BaseEventInfo* info)> && jsCallback) override;
     void SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)> && jsCallback) override;
     void SetUpdateInstanceIdCallback(std::function<void(int32_t)> &&callback) override;
+    void SetOptimizeParserBudgetEnabled(bool enable) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_WEB_MODEL_IMPL_H

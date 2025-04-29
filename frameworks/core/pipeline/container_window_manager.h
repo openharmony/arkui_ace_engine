@@ -26,11 +26,24 @@ namespace OHOS::Ace {
 
 using WindowCallback = std::function<void(void)>;
 using WindowModeCallback = std::function<WindowMode(void)>;
+using WindowMidSceneCallback = std::function<int32_t(bool&)>;
 using WindowTypeCallback = std::function<WindowType(void)>;
 using WindowSetMaximizeModeCallback = std::function<void(MaximizeMode)>;
 using WindowGetMaximizeModeCallback = std::function<MaximizeMode(void)>;
 using GetSystemBarStyleCallback = std::function<RefPtr<SystemBarStyle>(void)>;
 using SetSystemBarStyleCallback = std::function<void(const RefPtr<SystemBarStyle>&)>;
+using GetFreeMultiWindowModeEnabledStateCallback = std::function<bool(void)>;
+using WindowIsStartMovingCallback = std::function<bool(void)>;
+using WindowCallNativeCallback = std::function<void(const std::string&, const std::string&)>;
+
+struct DecorButtonStyle {
+    int32_t colorMode;
+    uint32_t spacingBetweenButtons;
+    uint32_t closeButtonRightMargin;
+    uint32_t buttonBackgroundSize;
+    uint32_t buttonIconSize;
+    uint32_t buttonBackgroundCornerRadius;
+};
 
 class WindowManager : public virtual AceType {
     DECLARE_ACE_TYPE(WindowManager, AceType);
@@ -99,6 +112,11 @@ public:
         windowGetModeCallback_ = std::move(callback);
     }
 
+    void SetWindowGetIsMidSceneCallBack(WindowMidSceneCallback&& callback)
+    {
+        windowGetIsMidSceneCallback_ = std::move(callback);
+    }
+
     void SetWindowGetTypeCallBack(WindowTypeCallback&& callback)
     {
         windowGetTypeCallback_ = std::move(callback);
@@ -107,6 +125,11 @@ public:
     void SetWindowStartMoveCallBack(WindowCallback&& callback)
     {
         windowStartMoveCallback_ = std::move(callback);
+    }
+
+    void SetWindowIsStartMovingCallBack(WindowIsStartMovingCallback&& callback)
+    {
+        WindowIsStartMovingCallback_ = std::move(callback);
     }
 
     void SetWindowSetMaximizeModeCallBack(WindowSetMaximizeModeCallback&& callback)
@@ -127,6 +150,28 @@ public:
     void SetSetSystemBarStyleCallBack(SetSystemBarStyleCallback&& callback)
     {
         setSystemBarStyleCallback_ = std::move(callback);
+    }
+
+    void SetGetFreeMultiWindowModeEnabledStateCallback(GetFreeMultiWindowModeEnabledStateCallback&& callback)
+    {
+        getFreeMultiWindowModeEnabledStateCallback_ = std::move(callback);
+    }
+
+    void SetPerformBackCallback(WindowCallback&& callback)
+    {
+        windowPerformBackCallback_ = callback;
+    }
+
+    void SetWindowCallNativeCallback(WindowCallNativeCallback&& callback)
+    {
+        callNativeCallback_ = std::move(callback);
+    }
+
+    void FireWindowCallNativeCallback(const std::string& name, const std::string& value)
+    {
+        if (callNativeCallback_) {
+            callNativeCallback_(name, value);
+        }
     }
 
     void WindowMinimize() const
@@ -179,12 +224,35 @@ public:
         }
     }
 
+    bool WindowIsStartMoving() const
+    {
+        if (WindowIsStartMovingCallback_) {
+            return WindowIsStartMovingCallback_();
+        }
+        return false;
+    }
+
+    void WindowPerformBack() const
+    {
+        if (windowPerformBackCallback_) {
+            windowPerformBackCallback_();
+        }
+    }
+
     WindowMode GetWindowMode() const
     {
         if (windowGetModeCallback_) {
             return windowGetModeCallback_();
         }
         return WindowMode::WINDOW_MODE_UNDEFINED;
+    }
+
+    int32_t GetIsMidScene(bool& isMidScene) const
+    {
+        if (windowGetIsMidSceneCallback_) {
+            return windowGetIsMidSceneCallback_(isMidScene);
+        }
+        return -1;
     }
 
     WindowType GetWindowType() const
@@ -235,6 +303,14 @@ public:
         }
     }
 
+    bool GetFreeMultiWindowModeEnabledState() const
+    {
+        if (getFreeMultiWindowModeEnabledStateCallback_) {
+            return getFreeMultiWindowModeEnabledStateCallback_();
+        }
+        return false;
+    }
+
 private:
     int32_t appLabelId_ = 0;
     int32_t appIconId_ = 0;
@@ -245,14 +321,19 @@ private:
     WindowCallback windowSplitPrimaryCallback_;
     WindowCallback windowSplitSecondaryCallback_;
     WindowCallback windowStartMoveCallback_;
+    WindowIsStartMovingCallback WindowIsStartMovingCallback_;
+    WindowCallback windowPerformBackCallback_;
     WindowCallback windowMaximizeCallback_;
     WindowCallback windowMaximizeFloatingCallback_;
     WindowSetMaximizeModeCallback windowSetMaximizeModeCallback_;
     WindowGetMaximizeModeCallback windowGetMaximizeModeCallback_;
     WindowModeCallback windowGetModeCallback_;
+    WindowMidSceneCallback windowGetIsMidSceneCallback_;
     WindowTypeCallback windowGetTypeCallback_;
     GetSystemBarStyleCallback getSystemBarStyleCallback_;
     SetSystemBarStyleCallback setSystemBarStyleCallback_;
+    GetFreeMultiWindowModeEnabledStateCallback getFreeMultiWindowModeEnabledStateCallback_;
+    WindowCallNativeCallback callNativeCallback_;
 };
 
 } // namespace OHOS::Ace

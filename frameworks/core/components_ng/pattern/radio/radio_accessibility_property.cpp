@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/radio/radio_accessibility_property.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -38,7 +36,7 @@ std::string RadioAccessibilityProperty::GetText() const
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, "");
-    auto radioEventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    auto radioEventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
     auto value = radioEventHub ? radioEventHub->GetValue() : "";
     return value;
 }

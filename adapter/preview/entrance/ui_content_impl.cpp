@@ -204,7 +204,7 @@ public:
                     pipeline->UpdateSystemSafeArea(safeArea);
                 } else if (type == Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
                     pipeline->UpdateNavSafeArea(navSafeArea);
-                } else if (type == Rosen::AvoidAreaType::TYPE_CUTOUT && pipeline->GetUseCutout()) {
+                } else if (type == Rosen::AvoidAreaType::TYPE_CUTOUT) {
                     pipeline->UpdateCutoutSafeArea(cutoutSafeArea);
                 }
                 // for ui extension component
@@ -319,6 +319,25 @@ UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window, const 
     return errorCode;
 }
 
+UIContentErrorCode UIContentImpl::InitializeByName(
+    OHOS::Rosen::Window* window, const std::string& name, napi_value storage)
+{
+    return InitializeInner(window, name, storage, true);
+}
+
+UIContentErrorCode UIContentImpl::InitializeInner(
+    OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter)
+{
+    auto errorCode = UIContentErrorCode::NO_ERRORS;
+    if (window) {
+        errorCode = CommonInitialize(window, contentInfo, storage);
+        CHECK_ERROR_CODE_RETURN(errorCode);
+    }
+    LOGI("[%{public}s][%{public}s][%{public}d]: Initialize: %{public}s, isNameRouter: %{public}d", bundleName_.c_str(),
+        moduleName_.c_str(), instanceId_, startUrl_.c_str(), isNamedRouter);
+    return Platform::AceContainer::RunPage(instanceId_, startUrl_, "", isNamedRouter);
+}
+
 std::string UIContentImpl::GetContentInfo(ContentInfoType type) const
 {
     return AceContainer::GetContentInfo(instanceId_, type);
@@ -337,7 +356,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
         ClipboardProxy::GetInstance()->SetDelegate(std::make_unique<Platform::ClipboardProxyImpl>());
     });
     rsWindow_ = window;
-
+    CHECK_NULL_RETURN(rsWindow_, UIContentErrorCode::NULL_WINDOW);
+    startUrl_ = contentInfo;
     AceApplicationInfo::GetInstance().SetLocale(language_, region_, script_, "");
     AceApplicationInfo::GetInstance().SetApiTargetVersion(targetVersion_);
     SetFontMgrConfig(containerSdkPath_);
@@ -346,7 +366,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
     SystemProperties::InitDeviceInfo(deviceWidth_, deviceHeight_,
         deviceConfig_.orientation == DeviceOrientation::PORTRAIT ? 0 : 1, deviceConfig_.density, isRound_);
     SystemProperties::InitDeviceType(deviceConfig_.deviceType);
-    SystemProperties::SetColorMode(deviceConfig_.colorMode);
     LOGI("CreateContainer with JSDECLARATIVE frontend, set MinPlatformVersion to %{public}d", compatibleVersion_);
     AceContainer::CreateContainer(instanceId_, FrontendType::DECLARATIVE_JS, useNewPipeline_);
     auto container = AceContainer::GetContainerInstance(instanceId_);
@@ -355,6 +374,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
     container->SetIsFRSCardContainer(false);
     container->SetBundleName(bundleName_);
     container->SetModuleName(moduleName_);
+    container->SetColorMode(deviceConfig_.colorMode);
     LOGI("Save bundle %{public}s, module %{public}s", bundleName_.c_str(), moduleName_.c_str());
     if (runtime_) {
         container->GetSettings().SetUsingSharedRuntime(true);
@@ -368,7 +388,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
     config.SetDeviceType(SystemProperties::GetDeviceType());
     config.SetOrientation(SystemProperties::GetDeviceOrientation());
     config.SetDensity(SystemProperties::GetResolution());
-    config.SetColorMode(SystemProperties::GetColorMode());
+    config.SetColorMode(container->GetColorMode());
     config.SetFontRatio(deviceConfig_.fontRatio);
     container->SetResourceConfiguration(config);
     container->SetPageProfile(pageProfile_);
@@ -478,6 +498,25 @@ void UIContentImpl::SetBackgroundColor(uint32_t color)
         TaskExecutor::TaskType::UI, "ArkUISetAppBackgroundColor");
 }
 
+void UIContentImpl::SetWindowContainerColor(uint32_t activeColor, uint32_t inactiveColor)
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "[%{public}s][%{public}s][%{public}d]: SetWindowContainerColor:"
+        "active color %{public}u, inactive color %{public}u",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, activeColor, inactiveColor);
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostSyncTask(
+        [container, activeColor, inactiveColor]() {
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->SetWindowContainerColor(Color(activeColor), Color(inactiveColor));
+        },
+        TaskExecutor::TaskType::UI, "ArkUISetWindowContainerColor");
+}
+
 bool UIContentImpl::ProcessBackPressed()
 {
     LOGI("Process Back Pressed Event");
@@ -517,8 +556,12 @@ bool UIContentImpl::ProcessVsyncEvent(uint64_t timeStampNanos)
 
 void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) {}
 
+void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config,
+    const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) {}
+
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
-    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
     LOGI("ViewportConfig: %{public}s", config.ToString().c_str());
     auto container = AceContainer::GetContainerInstance(instanceId_);

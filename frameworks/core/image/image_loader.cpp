@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,28 +15,25 @@
 
 #include "core/image/image_loader.h"
 
-#include "include/utils/SkBase64.h"
-
-#include "core/common/resource/resource_manager.h"
-#include "core/common/resource/resource_wrapper.h"
-#include "core/components_ng/pattern/image/image_dfx.h"
-
-#ifdef USE_ROSEN_DRAWING
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
-#endif
+#include "include/utils/SkBase64.h"
 
 #include "base/image/file_uri_helper.h"
 #include "base/image/image_source.h"
 #include "base/thread/background_task_executor.h"
+#include "base/utils/resource_configuration.h"
+#include "base/utils/system_properties.h"
 #include "core/common/container.h"
-#ifdef USE_ROSEN_DRAWING
-#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
-#endif
+#include "core/common/resource/resource_configuration.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_wrapper.h"
+#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
+#include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/image/image_file_cache.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 namespace {
-#ifdef USE_ROSEN_DRAWING
 struct SkDataWrapper {
     sk_sp<SkData> data;
 };
@@ -46,7 +43,6 @@ inline void SkDataWrapperReleaseProc(const void* /* pixels */, void* context)
     SkDataWrapper* wrapper = reinterpret_cast<SkDataWrapper*>(context);
     delete wrapper;
 }
-#endif
 
 constexpr size_t FILE_HEAD_LENGTH = 7;           // 7 is the size of "file://"
 constexpr size_t MEMORY_HEAD_LENGTH = 9;         // 9 is the size of "memory://"
@@ -94,7 +90,6 @@ std::string ImageLoader::RemovePathHead(const std::string& uri)
 RefPtr<ImageLoader> ImageLoader::CreateImageLoader(const ImageSourceInfo& imageSourceInfo)
 {
     SrcType srcType = imageSourceInfo.GetSrcType();
-    auto imageDfx = imageSourceInfo.GetImageDfxConfig();
     switch (srcType) {
         case SrcType::INTERNAL:
         case SrcType::FILE: {
@@ -131,20 +126,12 @@ RefPtr<ImageLoader> ImageLoader::CreateImageLoader(const ImageSourceInfo& imageS
             return MakeRefPtr<AstcImageLoader>();
         }
         default: {
-            TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "Image source type not supported! srcType: %{public}d, src: %{private}s. nodeId = "
-                "%{public}d-%{public}" PRId64,
-                srcType, imageSourceInfo.ToString().c_str(), imageDfx.nodeId_, imageDfx.accessibilityId_);
             return nullptr;
         }
     }
 }
 
-#ifndef USE_ROSEN_DRAWING
-sk_sp<SkData> ImageLoader::LoadDataFromCachedFile(const std::string& uri)
-#else
 std::shared_ptr<RSData> ImageLoader::LoadDataFromCachedFile(const std::string& uri)
-#endif
 {
     std::string cacheFilePath = ImageFileCache::GetInstance().GetImageCacheFilePath(uri);
     if (cacheFilePath.length() > PATH_MAX) {
@@ -164,25 +151,17 @@ std::shared_ptr<RSData> ImageLoader::LoadDataFromCachedFile(const std::string& u
     }
     std::unique_ptr<FILE, decltype(&fclose)> file(fopen(realPath, "rb"), fclose);
     if (file) {
-#ifndef USE_ROSEN_DRAWING
-        return SkData::MakeFromFILE(file.get());
-#else
         auto skData = SkData::MakeFromFILE(file.get());
         CHECK_NULL_RETURN(skData, nullptr);
         auto rsData = std::make_shared<RSData>();
         SkDataWrapper* wrapper = new SkDataWrapper { std::move(skData) };
         rsData->BuildWithProc(wrapper->data->data(), wrapper->data->size(), SkDataWrapperReleaseProc, wrapper);
         return rsData;
-#endif
     }
     return nullptr;
 }
 
-#ifndef USE_ROSEN_DRAWING
-sk_sp<SkData> ImageLoader::QueryImageDataFromImageCache(const ImageSourceInfo& sourceInfo)
-#else
 std::shared_ptr<RSData> ImageLoader::QueryImageDataFromImageCache(const ImageSourceInfo& sourceInfo)
-#endif
 {
     ACE_LAYOUT_SCOPED_TRACE("QueryImageDataFromImageCache[%s]", sourceInfo.ToString().c_str());
     auto pipelineCtx = PipelineContext::GetCurrentContext();
@@ -191,14 +170,9 @@ std::shared_ptr<RSData> ImageLoader::QueryImageDataFromImageCache(const ImageSou
     CHECK_NULL_RETURN(imageCache, nullptr);
     auto cacheData = imageCache->GetCacheImageData(sourceInfo.GetKey());
     CHECK_NULL_RETURN(cacheData, nullptr);
-#ifndef USE_ROSEN_DRAWING
-    const auto* skData = reinterpret_cast<const sk_sp<SkData>*>(cacheData->GetDataWrapper());
-    return *skData;
-#else
     auto rosenCachedImageData = AceType::DynamicCast<NG::DrawingImageData>(cacheData);
     CHECK_NULL_RETURN(rosenCachedImageData, nullptr);
     return rosenCachedImageData->GetRSData();
-#endif
 }
 
 void ImageLoader::CacheImageData(const std::string& key, const RefPtr<NG::ImageData>& imageData)
@@ -219,21 +193,10 @@ RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string&
 // NG ImageLoader entrance
 RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, const WeakPtr<PipelineBase>& context)
 {
-    ACE_FUNCTION_TRACE();
+    ACE_SCOPED_TRACE("GetImageData %s", src.ToString().c_str());
     if (src.IsPixmap()) {
         return LoadDecodedImageData(src, context);
     }
-#ifndef USE_ROSEN_DRAWING
-    auto cachedData = ImageLoader::QueryImageDataFromImageCache(src);
-    if (cachedData) {
-        return NG::ImageData::MakeFromDataWrapper(&cachedData);
-    }
-    auto skData = LoadImageData(src, context);
-    CHECK_NULL_RETURN(skData, nullptr);
-    auto data = NG::ImageData::MakeFromDataWrapper(&skData);
-    ImageLoader::CacheImageData(src.GetKey(), data);
-    return data;
-#else
     std::shared_ptr<RSData> rsData = nullptr;
     do {
         rsData = ImageLoader::QueryImageDataFromImageCache(src);
@@ -243,49 +206,39 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, cons
         rsData = LoadImageData(src, context);
         CHECK_NULL_RETURN(rsData, nullptr);
         ImageLoader::CacheImageData(src.GetKey(), AceType::MakeRefPtr<NG::DrawingImageData>(rsData));
-    } while (0);
+    } while (false);
     return AceType::MakeRefPtr<NG::DrawingImageData>(rsData);
-#endif
 }
 
 // NG ImageLoader entrance
-bool NetworkImageLoader::DownloadImage(
-    DownloadCallback&& downloadCallback, const std::string& src, bool sync, int32_t nodeId)
+bool NetworkImageLoader::DownloadImage(DownloadCallback&& downloadCallback, const std::string& src, bool sync)
 {
-    return sync ? DownloadManager::GetInstance()->DownloadSync(std::move(downloadCallback),
-                                                               src, Container::CurrentId(), nodeId)
-                : DownloadManager::GetInstance()->DownloadAsync(std::move(downloadCallback),
-                                                                src, Container::CurrentId(), nodeId);
+    return sync ? DownloadManager::GetInstance()->DownloadSyncWithPreload(
+                      std::move(downloadCallback), src, Container::CurrentId())
+                : DownloadManager::GetInstance()->DownloadAsyncWithPreload(
+                      std::move(downloadCallback), src, Container::CurrentId());
 }
 
-#ifndef USE_ROSEN_DRAWING
-sk_sp<SkData> FileImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& /* context */)
-#else
 std::shared_ptr<RSData> FileImageLoader::LoadImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& /* context */)
-#endif
 {
-    ACE_SCOPED_TRACE("LoadImageData %s", imageSourceInfo.ToString().c_str());
     const auto& src = imageSourceInfo.GetSrc();
     std::string filePath = RemovePathHead(src);
     auto imageDfxConfig = imageSourceInfo.GetImageDfxConfig();
+    ACE_SCOPED_TRACE("LoadImageData %s", imageDfxConfig.ToStringWithSrc().c_str());
     if (imageSourceInfo.GetSrcType() == SrcType::INTERNAL) {
         // the internal source uri format is like "internal://app/imagename.png", the absolute path of which is like
         // "/data/data/{bundleName}/files/imagename.png"
         auto bundleName = AceApplicationInfo::GetInstance().GetPackageName();
         if (bundleName.empty()) {
             TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "bundleName is empty, LoadImageData for internal source fail! Src = %{private}s, NodeId = "
-                "%{public}d-%{public}lld.",
-                imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.nodeId_,
-                static_cast<long long>(imageDfxConfig.accessibilityId_));
+                "bundleName is empty, LoadImageData for internal source fail! %{private}s-%{public}s.",
+                imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
             return nullptr;
         }
         if (!StringUtils::StartWith(filePath, "app/")) { // "app/" is infix of internal path
-            TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "internal path format is wrong. path is %{private}s, NodeId = %{public}d-%{public}lld.", src.c_str(),
-                imageDfxConfig.nodeId_, static_cast<long long>(imageDfxConfig.accessibilityId_));
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "internal path format is wrong. path is %{private}s-%{public}s.",
+                src.c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
             return nullptr;
         }
         filePath = std::string("/data/data/") // head of absolute path
@@ -296,8 +249,8 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(
         filePath = FileUriHelper::GetRealPath(src);
     }
     if (filePath.length() > PATH_MAX) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "src path is too long. NodeId = %{public}d-%{public}lld.",
-            imageDfxConfig.nodeId_, static_cast<long long>(imageDfxConfig.accessibilityId_));
+        TAG_LOGW(
+            AceLogTag::ACE_IMAGE, "path is too long. %{public}s.", imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
     char realPath[PATH_MAX] = { 0x00 };
@@ -306,21 +259,10 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(
     if (!result) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
             "read data failed, filePath: %{private}s, realPath: %{private}s, src: %{private}s, fail reason: "
-            "%{private}s. NodeId = %{public}d-%{public}lld.",
-            filePath.c_str(), src.c_str(), realPath, strerror(errno), imageDfxConfig.nodeId_,
-            static_cast<long long>(imageDfxConfig.accessibilityId_));
+            "%{private}s.%{public}s.",
+            filePath.c_str(), src.c_str(), realPath, strerror(errno), imageDfxConfig.ToStringWithoutSrc().c_str());
+        return nullptr;
     }
-#ifndef USE_ROSEN_DRAWING
-#ifdef PREVIEW
-    // on Windows previewer, SkData::MakeFromFile keeps the file open during SkData's lifetime
-    // return a copy to release the file handle
-    CHECK_NULL_RETURN(result, nullptr);
-    return SkData::MakeWithCopy(result->data(), result->size());
-#else
-    return result;
-#endif
-#else
-    CHECK_NULL_RETURN(result, nullptr);
     auto rsData = std::make_shared<RSData>();
 #ifdef PREVIEW
     // on Windows previewer, SkData::MakeFromFile keeps the file open during Drawing::Data's lifetime
@@ -332,16 +274,10 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(
                ? rsData
                : nullptr;
 #endif
-#endif
 }
 
-#ifndef USE_ROSEN_DRAWING
-sk_sp<SkData> DataProviderImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
-#else
 std::shared_ptr<RSData> DataProviderImageLoader::LoadImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
-#endif
 {
     const auto& src = imageSourceInfo.GetSrc();
     auto drawingData = ImageLoader::LoadDataFromCachedFile(src);
@@ -354,33 +290,23 @@ std::shared_ptr<RSData> DataProviderImageLoader::LoadImageData(
     CHECK_NULL_RETURN(dataProvider, nullptr);
     auto res = dataProvider->GetDataProviderResFromUri(src);
     CHECK_NULL_RETURN(res, nullptr);
-#ifndef USE_ROSEN_DRAWING
-    auto data = SkData::MakeFromMalloc(res->GetData().release(), res->GetSize());
-#else
     // function is ok, just pointer cast from SKData to RSData
     auto skData = SkData::MakeFromMalloc(res->GetData().release(), res->GetSize());
     CHECK_NULL_RETURN(skData, nullptr);
     auto data = std::make_shared<RSData>();
     SkDataWrapper* wrapper = new SkDataWrapper { std::move(skData) };
     data->BuildWithProc(wrapper->data->data(), wrapper->data->size(), SkDataWrapperReleaseProc, wrapper);
-#endif
     return data;
 }
 
-#ifndef USE_ROSEN_DRAWING
-sk_sp<SkData> AssetImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
-#else
 std::shared_ptr<RSData> AssetImageLoader::LoadImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
-#endif
 {
     ACE_FUNCTION_TRACE();
     const auto& src = imageSourceInfo.GetSrc();
     auto imageDfxConfig = imageSourceInfo.GetImageDfxConfig();
     if (src.empty()) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "image src is empty. NodeId = %{public}d-%{public}lld.", imageDfxConfig.nodeId_,
-            static_cast<long long>(imageDfxConfig.accessibilityId_));
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "image src is empty. %{public}s.", imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
 
@@ -392,31 +318,25 @@ std::shared_ptr<RSData> AssetImageLoader::LoadImageData(
     }
     auto pipelineContext = context.Upgrade();
     if (!pipelineContext) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "invalid pipeline context. NodeId = %{public}d-%{public}lld.",
-            imageDfxConfig.nodeId_, static_cast<long long>(imageDfxConfig.accessibilityId_));
+        TAG_LOGW(
+            AceLogTag::ACE_IMAGE, "invalid pipeline context. %{public}s", imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
     auto assetManager = pipelineContext->GetAssetManager();
     if (!assetManager) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "No asset manager! NodeId = %{public}d-%{public}lld.", imageDfxConfig.nodeId_,
-            static_cast<long long>(imageDfxConfig.accessibilityId_));
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "NoAssetManager! %{public}s", imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
     auto assetData = assetManager->GetAsset(assetSrc);
     if (!assetData) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "No asset data! NodeId = %{public}d-%{public}lld.", imageDfxConfig.nodeId_,
-            static_cast<long long>(imageDfxConfig.accessibilityId_));
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "NoAssetData-%{public}s", imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
     const uint8_t* data = assetData->GetData();
     const size_t dataSize = assetData->GetSize();
-#ifndef USE_ROSEN_DRAWING
-    return SkData::MakeWithCopy(data, dataSize);
-#else
     auto drawingData = std::make_shared<RSData>();
     drawingData->BuildWithCopy(data, dataSize);
     return drawingData;
-#endif
 }
 
 std::string AssetImageLoader::LoadJsonData(const std::string& src, const WeakPtr<PipelineBase> context)
@@ -449,20 +369,15 @@ std::string AssetImageLoader::LoadJsonData(const std::string& src, const WeakPtr
     return std::string((char*)assetData->GetData(), assetData->GetSize());
 }
 
-#ifndef USE_ROSEN_DRAWING
-sk_sp<SkData> NetworkImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
-#else
 std::shared_ptr<RSData> NetworkImageLoader::LoadImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
-#endif
 {
     auto uri = imageSourceInfo.GetSrc();
     auto pipelineContext = context.Upgrade();
     auto imageDfxConfig = imageSourceInfo.GetImageDfxConfig();
     if (!pipelineContext || pipelineContext->IsJsCard()) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "network image in JS card is forbidden. NodeId = %{public}d-%{public}lld",
-            imageDfxConfig.nodeId_, static_cast<long long>(imageDfxConfig.accessibilityId_));
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "network image in JS card is forbidden. %{public}s",
+            imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
     // 1. find in cache file path.
@@ -473,9 +388,8 @@ std::shared_ptr<RSData> NetworkImageLoader::LoadImageData(
 
     // 2. if not found. download it.
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_IMAGE,
-            "Download network image by loader, uri=%{private}s, nodeId = %{public}d-%{public}lld", uri.c_str(),
-            imageDfxConfig.nodeId_, static_cast<long long>(imageDfxConfig.accessibilityId_));
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "Download network image by loader, uri=%{private}s, %{public}s", uri.c_str(),
+            imageDfxConfig.ToStringWithoutSrc().c_str());
     }
 
 #ifndef OHOS_PLATFORM
@@ -498,21 +412,15 @@ std::shared_ptr<RSData> NetworkImageLoader::LoadImageData(
     return data;
 }
 
-#ifndef USE_ROSEN_DRAWING
-sk_sp<SkData> InternalImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
-#else
 std::shared_ptr<RSData> InternalImageLoader::LoadImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
-#endif
 {
     size_t imageSize = 0;
     const uint8_t* internalData =
         InternalResource::GetInstance().GetResource(imageSourceInfo.GetResourceId(), imageSize);
     if (internalData == nullptr) {
         auto imageDfxConfig = imageSourceInfo.GetImageDfxConfig();
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "Resource is invalid, nodeId = %{public}d-%{public}lld",
-            imageDfxConfig.nodeId_, static_cast<long long>(imageDfxConfig.accessibilityId_));
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Resource is invalid, %{public}s", imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
     auto drawingData = std::make_shared<RSData>();
@@ -520,20 +428,14 @@ std::shared_ptr<RSData> InternalImageLoader::LoadImageData(
     return drawingData;
 }
 
-#ifndef USE_ROSEN_DRAWING
-sk_sp<SkData> Base64ImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
-#else
 std::shared_ptr<RSData> Base64ImageLoader::LoadImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
-#endif
 {
     std::string_view base64Code = GetBase64ImageCode(imageSourceInfo.GetSrc());
     auto imageDfxConfig = imageSourceInfo.GetImageDfxConfig();
     if (base64Code.size() == 0) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "base64Code = %{private}s is empty. NodeId = %{public}d-%{public}lld.",
-            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.nodeId_,
-            static_cast<long long>(imageDfxConfig.accessibilityId_));
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "base64Code = %{private}s is empty. %{public}s.",
+            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
 
@@ -541,10 +443,9 @@ std::shared_ptr<RSData> Base64ImageLoader::LoadImageData(
     SkBase64::Error error = SkBase64::Decode(base64Code.data(), base64Code.size(), nullptr, &outputLen);
     if (error != SkBase64::Error::kNoError) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "error base64 image code = %{public}d! Base64Size = %{public}d, outputLen = %{public}d, nodeId = "
-            "%{public}d-%{public}lld",
+            "error base64 image code = %{public}d! Base64Size = %{public}d, outputLen = %{public}d, %{public}s",
             static_cast<int32_t>(base64Code.size()), static_cast<int32_t>(error), static_cast<int32_t>(outputLen),
-            imageDfxConfig.nodeId_, static_cast<long long>(imageDfxConfig.accessibilityId_));
+            imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
 
@@ -555,16 +456,14 @@ std::shared_ptr<RSData> Base64ImageLoader::LoadImageData(
     error = SkBase64::Decode(base64Code.data(), base64Code.size(), output, &outputLen);
     if (error != SkBase64::Error::kNoError) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "error base64 image code = %{public}d! Base64Size = %{public}d, outputLen = %{public}d, nodeId = "
-            "%{public}d-%{public}lld",
+            "error base64 image code = %{public}d! Base64Size = %{public}d, outputLen = %{public}d, %{public}s",
             static_cast<int32_t>(base64Code.size()), static_cast<int32_t>(error), static_cast<int32_t>(outputLen),
-            imageDfxConfig.nodeId_, static_cast<long long>(imageDfxConfig.accessibilityId_));
+            imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "base64 size=%{public}d, src=%{private}s. NodeId = %{public}d-%{public}lld.",
-            (int)base64Code.size(), imageSourceInfo.ToString().c_str(), imageDfxConfig.nodeId_,
-            static_cast<long long>(imageDfxConfig.accessibilityId_));
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "base64 size=%{public}d, src=%{private}s. %{public}s.", (int)base64Code.size(),
+            imageSourceInfo.ToString().c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
     }
     return resData;
 }
@@ -620,32 +519,35 @@ bool ResourceImageLoader::GetResourceName(const std::string& uri, std::string& r
     return false;
 }
 
-#ifndef USE_ROSEN_DRAWING
-sk_sp<SkData> ResourceImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
-#else
 std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
-#endif
 {
+    int32_t instanceId = Container::CurrentIdSafely();
     auto uri = imageSourceInfo.GetSrc();
     auto bundleName = imageSourceInfo.GetBundleName();
     auto moudleName = imageSourceInfo.GetModuleName();
 
-    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moudleName);
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moudleName, instanceId);
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-        CHECK_NULL_RETURN(resourceAdapter, nullptr);
+        auto adapterInCache = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        CHECK_NULL_RETURN(adapterInCache, nullptr);
+        ResourceConfiguration resConfig;
+        if (imageSourceInfo.GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED) {
+            resConfig.SetColorMode(imageSourceInfo.GetLocalColorMode());
+        } else {
+            resConfig.SetColorMode(Container::CurrentColorMode());
+        }
+        ConfigurationChange configChange { .colorModeUpdate = true };
+        resourceAdapter = adapterInCache->GetOverrideResourceAdapter(resConfig, configChange);
     } else {
         auto themeManager = PipelineBase::CurrentThemeManager();
         CHECK_NULL_RETURN(themeManager, nullptr);
         themeConstants = themeManager->GetThemeConstants();
         CHECK_NULL_RETURN(themeConstants, nullptr);
     }
-    auto resourceWrapper =
-        AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter, imageSourceInfo.GetLocalColorMode());
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
     std::unique_ptr<uint8_t[]> data;
     size_t dataLen = 0;
@@ -657,24 +559,16 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
                 uri.c_str(), rawFile.c_str());
             return nullptr;
         }
-#ifndef USE_ROSEN_DRAWING
-        return SkData::MakeWithCopy(data.get(), dataLen);
-#else
         auto drawingData = std::make_shared<RSData>();
         drawingData->BuildWithCopy(data.get(), dataLen);
         return drawingData;
-#endif
     }
     uint32_t resId = 0;
     if (!imageSourceInfo.GetIsUriPureNumber() && GetResourceId(uri, resId)) {
         if (resourceWrapper->GetMediaData(resId, dataLen, data, bundleName, moudleName)) {
-#ifndef USE_ROSEN_DRAWING
-            return SkData::MakeWithCopy(data.get(), dataLen);
-#else
             auto drawingData = std::make_shared<RSData>();
             drawingData->BuildWithCopy(data.get(), dataLen);
             return drawingData;
-#endif
         } else {
             TAG_LOGW(AceLogTag::ACE_IMAGE, "get image data by id failed, uri:%{private}s, id:%{public}u", uri.c_str(),
                 resId);
@@ -687,25 +581,16 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
                 uri.c_str(), resName.c_str());
             return nullptr;
         }
-#ifndef USE_ROSEN_DRAWING
-        return SkData::MakeWithCopy(data.get(), dataLen);
-#else
         auto drawingData = std::make_shared<RSData>();
         drawingData->BuildWithCopy(data.get(), dataLen);
         return drawingData;
-#endif
     }
     TAG_LOGW(AceLogTag::ACE_IMAGE, "load image data failed, as uri is invalid:%{private}s", uri.c_str());
     return nullptr;
 }
 
-#ifndef USE_ROSEN_DRAWING
-sk_sp<SkData> DecodedDataProviderImageLoader::LoadImageData(
-    const ImageSourceInfo& /* imageSourceInfo */, const WeakPtr<PipelineBase>& /* context */)
-#else
 std::shared_ptr<RSData> DecodedDataProviderImageLoader::LoadImageData(
     const ImageSourceInfo& /* imageSourceInfo */, const WeakPtr<PipelineBase>& /* context */)
-#endif
 {
     return nullptr;
 }
@@ -728,6 +613,7 @@ std::string DecodedDataProviderImageLoader::GetThumbnailOrientation(const ImageS
 
     // check image orientation
     auto imageSrc = ImageSource::Create(fd);
+    close(fd);
     CHECK_NULL_RETURN(imageSrc, "");
     std::string orientation = imageSrc->GetProperty("Orientation");
     return orientation;
@@ -736,46 +622,42 @@ std::string DecodedDataProviderImageLoader::GetThumbnailOrientation(const ImageS
 RefPtr<NG::ImageData> DecodedDataProviderImageLoader::LoadDecodedImageData(
     const ImageSourceInfo& src, const WeakPtr<PipelineBase>& pipelineWk)
 {
-#if !defined(PIXEL_MAP_SUPPORTED)
+#ifndef PIXEL_MAP_SUPPORTED
     return nullptr;
 #else
     ACE_FUNCTION_TRACE();
     auto pipeline = pipelineWk.Upgrade();
     auto imageDfxConfig = src.GetImageDfxConfig();
     if (!pipeline) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "Pipeline is empty in decodeData. NodeId = %{public}d-%{public}lld.",
-            imageDfxConfig.nodeId_, static_cast<long long>(imageDfxConfig.accessibilityId_));
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Pipeline is empty in decodeData. %{public}s.",
+            imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
     auto dataProvider = pipeline->GetDataProviderManager();
     if (!dataProvider) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "dataProvider is empty in pipeline. NodeId = %{public}d-%{public}lld.",
-            imageDfxConfig.nodeId_, static_cast<long long>(imageDfxConfig.accessibilityId_));
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "dataProvider is empty in pipeline. %{public}s.",
+            imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
 
     void* pixmapMediaUniquePtr = dataProvider->GetDataProviderThumbnailResFromUri(src.GetSrc());
     auto pixmap = PixelMap::CreatePixelMapFromDataAbility(pixmapMediaUniquePtr);
     if (!pixmap) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "DecodeData is Empty. NodeId = %{public}d-%{public}lld.", imageDfxConfig.nodeId_,
-            static_cast<long long>(imageDfxConfig.accessibilityId_));
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "DecodeData is Empty. %{public}s.", imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
     TAG_LOGI(AceLogTag::ACE_IMAGE,
-        "src=%{private}s, pixmap from Media width*height=%{public}d*%{public}d, ByteCount=%{public}d. NodeId = "
-        "%{public}d-%{public}lld.",
-        src.ToString().c_str(), pixmap->GetWidth(), pixmap->GetHeight(), pixmap->GetByteCount(), imageDfxConfig.nodeId_,
-        static_cast<long long>(imageDfxConfig.accessibilityId_));
+        "src=%{private}s, pixmap from Media width*height=%{public}d*%{public}d, ByteCount=%{public}d. %{public}s",
+        src.ToString().c_str(), pixmap->GetWidth(), pixmap->GetHeight(), pixmap->GetByteCount(),
+        imageDfxConfig.ToStringWithoutSrc().c_str());
     if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
         pixmap->SavePixelMapToFile("_fromMedia_");
     }
 
     auto cache = pipeline->GetImageCache();
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_IMAGE,
-            "DecodedDataProvider src=%{private}s,Key=%{private}s. NodeId = %{public}d-%{public}lld.",
-            src.ToString().c_str(), src.GetKey().c_str(), imageDfxConfig.nodeId_,
-            static_cast<long long>(imageDfxConfig.accessibilityId_));
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "DecodedDataProvider src=%{private}s,Key=%{private}s. %{public}s.",
+            src.ToString().c_str(), src.GetKey().c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
     }
     if (cache) {
         cache->CacheImageData(src.GetKey(), MakeRefPtr<NG::PixmapData>(pixmap));
@@ -784,13 +666,8 @@ RefPtr<NG::ImageData> DecodedDataProviderImageLoader::LoadDecodedImageData(
 #endif
 }
 
-#ifndef USE_ROSEN_DRAWING
-sk_sp<SkData> PixelMapImageLoader::LoadImageData(
-    const ImageSourceInfo& /* imageSourceInfo */, const WeakPtr<PipelineBase>& /* context */)
-#else
 std::shared_ptr<RSData> PixelMapImageLoader::LoadImageData(
     const ImageSourceInfo& /* imageSourceInfo */, const WeakPtr<PipelineBase>& /* context */)
-#endif
 {
     return nullptr;
 }
@@ -798,40 +675,32 @@ std::shared_ptr<RSData> PixelMapImageLoader::LoadImageData(
 RefPtr<NG::ImageData> PixelMapImageLoader::LoadDecodedImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {
-#if !defined(PIXEL_MAP_SUPPORTED)
+#ifndef PIXEL_MAP_SUPPORTED
     return nullptr;
 #else
     auto imageDfxConfig = imageSourceInfo.GetImageDfxConfig();
     if (!imageSourceInfo.GetPixmap()) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "no pixel map in imageSourceInfo, imageSourceInfo: %{private}s. NodeId = %{public}d-%{public}lld.",
-            imageSourceInfo.ToString().c_str(), imageDfxConfig.nodeId_,
-            static_cast<long long>(imageDfxConfig.accessibilityId_));
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "no pixel map in imageSourceInfo, imageSourceInfo: %{private}s. %{public}s.",
+            imageSourceInfo.ToString().c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "src is pixmap %{private}s, nodeId = %{public}d-%{public}lld.",
-            imageSourceInfo.ToString().c_str(), imageDfxConfig.nodeId_,
-            static_cast<long long>(imageDfxConfig.accessibilityId_));
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "src is pixmap %{private}s, %{public}s.", imageSourceInfo.ToString().c_str(),
+            imageDfxConfig.ToStringWithoutSrc().c_str());
     }
     return MakeRefPtr<NG::PixmapData>(imageSourceInfo.GetPixmap());
 #endif
 }
 
-#ifndef USE_ROSEN_DRAWING
-sk_sp<SkData> SharedMemoryImageLoader::LoadImageData(
-    const ImageSourceInfo& src, const WeakPtr<PipelineBase>& pipelineWk)
-#else
 std::shared_ptr<RSData> SharedMemoryImageLoader::LoadImageData(
     const ImageSourceInfo& src, const WeakPtr<PipelineBase>& pipelineWk)
-#endif
 {
     CHECK_RUN_ON(BACKGROUND);
     auto imageDfxConfig = src.GetImageDfxConfig();
     auto pipeline = pipelineWk.Upgrade();
     if (!pipeline) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "Pipeline is empty in sharedImageLoader. NodeId = %{public}d-%{public}lld.",
-            imageDfxConfig.nodeId_, static_cast<long long>(imageDfxConfig.accessibilityId_));
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Pipeline is empty in sharedImageLoader. %{public}s.",
+            imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
     auto manager = pipeline->GetOrCreateSharedImageManager();
@@ -844,23 +713,16 @@ std::shared_ptr<RSData> SharedMemoryImageLoader::LoadImageData(
         std::unique_lock<std::mutex> lock(mtx_);
         auto status = cv_.wait_for(lock, TIMEOUT_DURATION);
         if (status == std::cv_status::timeout) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "load SharedMemoryImage timeout! %{private}s, nodeId = %{public}d-%{public}lld.",
-                imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.nodeId_,
-                static_cast<long long>(imageDfxConfig.accessibilityId_));
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "load SharedMemoryImage timeout! %{private}s,  %{public}s.",
+                imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
             return nullptr;
         }
     }
 
     std::unique_lock<std::mutex> lock(mtx_);
-#ifndef USE_ROSEN_DRAWING
-    auto skData = SkData::MakeWithCopy(data_.data(), data_.size());
-    return skData;
-#else
     auto drawingData = std::make_shared<RSData>();
     drawingData->BuildWithCopy(data_.data(), data_.size());
     return drawingData;
-#endif
 }
 
 void SharedMemoryImageLoader::UpdateData(const std::string& uri, const std::vector<uint8_t>& memData)
@@ -874,13 +736,8 @@ void SharedMemoryImageLoader::UpdateData(const std::string& uri, const std::vect
     cv_.notify_one();
 }
 
-#ifndef USE_ROSEN_DRAWING
-sk_sp<SkData> AstcImageLoader::LoadImageData(
-    const ImageSourceInfo& /* ImageSourceInfo */, const WeakPtr<PipelineBase>& /* context */)
-#else
 std::shared_ptr<RSData> AstcImageLoader::LoadImageData(
     const ImageSourceInfo& /* ImageSourceInfo */, const WeakPtr<PipelineBase>& /* context */)
-#endif
 {
     return nullptr;
 }
@@ -888,48 +745,39 @@ std::shared_ptr<RSData> AstcImageLoader::LoadImageData(
 RefPtr<NG::ImageData> AstcImageLoader::LoadDecodedImageData(
     const ImageSourceInfo& src, const WeakPtr<PipelineBase>& pipelineWK)
 {
-#if !defined(PIXEL_MAP_SUPPORTED)
+#ifndef PIXEL_MAP_SUPPORTED
     return nullptr;
 #else
     ACE_FUNCTION_TRACE();
     auto imageDfxConfig = src.GetImageDfxConfig();
     auto pipeline = pipelineWK.Upgrade();
     if (!pipeline) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "Pipeline is empty in sharedImageLoader. Src = %{private}s, nodeId = %{public}d-%{public}lld.",
-            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.nodeId_,
-            static_cast<long long>(imageDfxConfig.accessibilityId_));
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Pipeline is empty in sharedImageLoader. Src = %{private}s-%{public}s.",
+            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
     auto dataProvider = pipeline->GetDataProviderManager();
     if (!dataProvider) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "DataProvider is empty in AstcLoading. Src = %{private}s, NodeId = %{public}d-%{public}lld.",
-            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.nodeId_,
-            static_cast<long long>(imageDfxConfig.accessibilityId_));
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "DataProvider is empty in AstcLoading. Src = %{private}s, %{public}s.",
+            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
 
     void* pixmapMediaUniquePtr = dataProvider->GetDataProviderThumbnailResFromUri(src.GetSrc());
     auto pixmap = PixelMap::CreatePixelMapFromDataAbility(pixmapMediaUniquePtr);
     if (!pixmap) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "Pixelmap is Empty. Src = %{private}s, nodeId = %{public}d-%{public}lld.",
-            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.nodeId_,
-            static_cast<long long>(imageDfxConfig.accessibilityId_));
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Pixelmap is Empty. Src = %{private}s, %{public}s.",
+            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_IMAGE,
-            "src=%{private}s,astc pixmap from Media width*height=%{public}d*%{public}d, ByteCount=%{public}d nodeId = "
-            "%{public}d-%{public}lld.",
-            src.ToString().c_str(), pixmap->GetWidth(), pixmap->GetHeight(), pixmap->GetByteCount(),
-            imageDfxConfig.nodeId_, static_cast<long long>(imageDfxConfig.accessibilityId_));
+            "src=%{public}s, astc pixmap from Media width*height=%{public}d*%{public}d, ByteCount=%{public}d.",
+            imageDfxConfig.ToStringWithSrc().c_str(), pixmap->GetWidth(), pixmap->GetHeight(), pixmap->GetByteCount());
     }
 
     if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
-        pixmap->SavePixelMapToFile(std::to_string(imageDfxConfig.nodeId_) + "_" +
-                                   std::to_string(imageDfxConfig.accessibilityId_) + "_ASTC_LOADER_");
+        pixmap->SavePixelMapToFile(imageDfxConfig.ToStringWithoutSrc() + "_ASTC_LOADER_");
     }
 
     auto cache = pipeline->GetImageCache();
@@ -954,6 +802,7 @@ std::string AstcImageLoader::GetThumbnailOrientation(const ImageSourceInfo& src)
     CHECK_NULL_RETURN(fd >= 0, "");
 
     auto imageSrc = ImageSource::Create(fd);
+    close(fd);
     CHECK_NULL_RETURN(imageSrc, "");
     std::string orientation = imageSrc->GetProperty("Orientation");
     return orientation;

@@ -15,10 +15,8 @@
 
 #include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
 
-#include "base/memory/referenced.h"
-#include "core/components_ng/pattern/ui_extension/security_session_wrapper_impl.h"
-#include "core/components_ng/pattern/ui_extension/session_wrapper_impl.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_session_wrapper_impl.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<SessionWrapper> SessionWrapperFactory::CreateSessionWrapper(SessionType sessionType,
@@ -27,6 +25,7 @@ RefPtr<SessionWrapper> SessionWrapperFactory::CreateSessionWrapper(SessionType s
     if (sessionType == SessionType::UI_EXTENSION_ABILITY || sessionType == SessionType::EMBEDDED_UI_EXTENSION) {
         return AceType::MakeRefPtr<SessionWrapperImpl>(hostPattern, instanceId, isTransferringCaller, sessionType);
     }
+    TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "CreateSessionWrapper return nullptr");
     return nullptr;
 }
 
@@ -38,6 +37,7 @@ RefPtr<SessionWrapper> SessionWrapperFactory::CreateSessionWrapper(
             sessionCreateParam.hostPattern, sessionCreateParam.instanceId,
             sessionCreateParam.isTransferringCaller, sessionType);
     }
+    TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "CreateSessionWrapper return nullptr");
     return nullptr;
 }
 } // namespace OHOS::Ace::NG

@@ -64,7 +64,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew002, TestSize.Level1)
     std::shared_ptr<Rosen::RectF> drawRect = std::make_shared<Rosen::RectF>(1.0, 1.0, 1.0, 1.0);
     rosenRenderContext->UpdateDrawRegion(5, drawRect); // 5 is the index of drawRegionRects_
     rosenRenderContext->NotifyHostTransformUpdated(false);
-    EXPECT_FALSE(frameNode->isLocalRevertMatrixAvailable_);
+    EXPECT_FALSE(frameNode->isTransformNotChanged_);
 }
 
 /**
@@ -309,6 +309,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew010, TestSize.Level1)
     layoutProperty->propVisibility_ = VisibleType::INVISIBLE;
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->isDisappearing_ = false;
+    frameNode->onMainTree_ = true;
     rosenRenderContext->DetachNodeAnimatableProperty(property);
     rosenRenderContext->OnTransitionOutFinish();
     EXPECT_TRUE(outFlag);
@@ -401,7 +402,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew013, TestSize.Level1)
     auto frameNode = FrameNode::GetOrCreateFrameNode("parent", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
     auto context = AceType::MakeRefPtr<RenderContext>();
-    rosenRenderContext->RegisterSharedTransition(context);
+    rosenRenderContext->RegisterSharedTransition(context, true);
     float scaleValue = 1.0; // 4.0 is the value of scaleValue
     rosenRenderContext->UpdatePlayAnimationValue(ClickEffectLevel::LIGHT, scaleValue);
     EXPECT_EQ(scaleValue, 1.0);
@@ -479,7 +480,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew016, TestSize.Level1)
     rosenRenderContext->SetUsingContentRectForRenderFrame(false, true);
     EXPECT_TRUE(rosenRenderContext->adjustRSFrameByContentRect_);
     EXPECT_FALSE(rosenRenderContext->useContentRectForRSFrame_);
-    rosenRenderContext->ResetPageTransitionEffect();
     rosenRenderContext->SetSharedTranslate(1.0, 1.0);
     rosenRenderContext->ResetSharedTranslate();
     auto childContextOne = AceType::MakeRefPtr<RosenRenderContext>();
@@ -504,7 +504,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew017, TestSize.Level1)
     auto frameNode =
         FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
-    rosenRenderContext->MaskAnimation(Color(SHAPE_MASK_DEFAULT_COLOR), Color(SHAPE_MASK_DEFAULT_COLOR));
     SafeAreaInsets::Inset left { 0, 1 };
     SafeAreaInsets::Inset top { 0, 1 };
     SafeAreaInsets::Inset right { 0, 1 };
@@ -512,15 +511,12 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew017, TestSize.Level1)
     SafeAreaInsets safeAreaInsets(left, top, right, bottom);
     auto context = PipelineContext::GetCurrentContext();
     context->UpdateSystemSafeArea(safeAreaInsets);
-    EXPECT_EQ(rosenRenderContext->GetStatusBarHeight(), 0.0);
     rosenRenderContext->paintRect_ = RectF(1.0, 1.0, 1.0, 1.0);
     OverlayOptions overlay;
     overlay.x = Dimension(1.0_px);
     rosenRenderContext->OnOverlayTextUpdate(overlay);
     rosenRenderContext->OnBloomUpdate(false);
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetBloom(), false);
-    auto func = []() {};
-    EXPECT_TRUE(rosenRenderContext->TriggerPageTransition(PageTransitionType::EXIT_PUSH, std::move(func)));
     rosenRenderContext->OnIlluminatedBorderWidthUpdate(Dimension(1.0_px));
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetIlluminatedBorderWidth(), 1.0);
     rosenRenderContext->OnLightIlluminatedUpdate(1);
@@ -553,8 +549,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew018, TestSize.Level1)
     option.routeType = RouteType::PUSH;
     auto effect = AceType::MakeRefPtr<PageTransitionEffect>(PageTransitionType::EXIT, option);
     pattern->AddPageTransition(effect);
-    auto func = []() {};
-    EXPECT_TRUE(rosenRenderContext->TriggerPageTransition(PageTransitionType::EXIT_PUSH, std::move(func)));
     rosenRenderContext->paintRect_ = RectF(1.0, 1.0, 1.0, 1.0);
     auto basicShape = AceType::MakeRefPtr<BasicShape>(BasicShapeType::CIRCLE);
     rosenRenderContext->UpdateClipShape(basicShape);
@@ -756,7 +750,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew023, TestSize.Level1)
     RoundRect roundRect;
     roundRect.SetRect(rect);
     roundRect.SetCornerRadius(1.0);
-    rosenRenderContext->PaintFocusState(roundRect, Color::BLUE, 1.0_vp, true);
+    rosenRenderContext->PaintFocusState(roundRect, Color::BLUE, 1.0_vp, true, true);
     rosenRenderContext->SetShadowRadius(1.0);
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetShadowRadius(), 1.0);
     rosenRenderContext->SetShadowElevation(1.0);
@@ -766,12 +760,12 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew023, TestSize.Level1)
     rosenRenderContext->FlushContentModifier(contentModifier);
     rosenRenderContext->FlushContentDrawFunction(std::move(func));
     rosenRenderContext->ClearFocusState();
-    rosenRenderContext->PaintFocusState(1.0_vp, Color::BLACK, 0.0_vp);
+    rosenRenderContext->PaintFocusState(1.0_vp, Color::BLACK, 0.0_vp, false);
     EXPECT_FALSE(rosenRenderContext->IsUniRenderEnabled());
     rosenRenderContext->SetOpacity(1.0);
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetAlpha(), 1.0);
     rosenRenderContext->PaintAccessibilityFocus();
-    rosenRenderContext->PaintFocusState(1.0_vp, Color::BLACK, 0.0_vp);
+    rosenRenderContext->PaintFocusState(1.0_vp, Color::BLACK, 0.0_vp, true);
     rosenRenderContext->SetFrame(0.0, 1.0, 0.0, 1.0);
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetFrame().data_[1], 1.0);
     rosenRenderContext->SetRenderPivot(1.0, 0.0);

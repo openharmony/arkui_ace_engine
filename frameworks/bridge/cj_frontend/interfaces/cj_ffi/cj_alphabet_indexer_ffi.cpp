@@ -16,6 +16,8 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_alphabet_indexer_ffi.h"
 
 #include "cj_lambda.h"
+
+#include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/indexer/indexer_model.h"
 
 using namespace OHOS::Ace;
@@ -28,6 +30,10 @@ const std::vector<NG::AlignStyle> NG_ALIGN_STYLE_ = { NG::AlignStyle::LEFT, NG::
 }; // namespace
 
 extern "C" {
+void FfiOHOSAceFrameworkAlphabetIndexerAutoCollapse(bool autoCollapse)
+{
+    IndexerModel::GetInstance()->SetAutoCollapse(autoCollapse);
+}
 void FfiOHOSAceFrameworkAlphabetIndexerCreate(VectorStringPtr vecContent, int32_t selected)
 {
     auto actualVec = reinterpret_cast<std::vector<std::string>*>(vecContent);
@@ -53,16 +59,42 @@ void FfiOHOSAceFrameworkAlphabetIndexerPopupBackground(int32_t color)
 {
     IndexerModel::GetInstance()->SetPopupBackground(Color(color));
 }
+void FfiOHOSAceFrameworkAlphabetIndexerPopupTitleBackground(int32_t color)
+{
+    IndexerModel::GetInstance()->SetPopupTitleBackground(Color(color));
+}
+void FfiOHOSAceFrameworkAlphabetIndexerPopupItemBackground(int32_t color)
+{
+    IndexerModel::GetInstance()->SetPopupItemBackground(Color(color));
+}
+void FfiOHOSAceFrameworkAlphabetIndexerPopupUnselectedColor(int32_t color)
+{
+    IndexerModel::GetInstance()->SetPopupUnselectedColor(Color(color));
+}
+void FfiOHOSAceFrameworkAlphabetIndexerPopupSelectedColor(int32_t color)
+{
+    IndexerModel::GetInstance()->SetPopupSelectedColor(Color(color));
+}
 void FfiOHOSAceFrameworkAlphabetIndexerUsingPopup(bool usingPop)
 {
     IndexerModel::GetInstance()->SetUsingPopup(usingPop);
+}
+void FfiOHOSAceFrameworkAlphabetIndexerPopupBackgroundBlurStyle(int32_t indexerBlurStyle)
+{
+    BlurStyleOption styleOption;
+    if (indexerBlurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+        indexerBlurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+        styleOption.blurStyle = static_cast<BlurStyle>(indexerBlurStyle);
+    }
+    IndexerModel::GetInstance()->SetPopupBackgroundBlurStyle(styleOption);
 }
 void FfiOHOSAceFrameworkAlphabetIndexerSelectedFont(
     double size, int32_t unit, const char* weight, const char* family, int32_t style)
 {
     std::optional<Dimension> fontSize = Dimension(size, DimensionUnit(unit));
-    std::optional<FontWeight> fontWeight = FontWeight::REGULAR;
-    std::optional<std::vector<std::string>> fontFamily = std::vector<std::string>{family};
+    std::string weightVal = weight;
+    std::optional<FontWeight> fontWeight = ConvertStrToFontWeight(weightVal);
+    std::optional<std::vector<std::string>> fontFamily = std::vector<std::string> { family };
     std::optional<FontStyle> fontStyle = static_cast<FontStyle>(style);
     IndexerModel::GetInstance()->SetSelectedFont(fontSize, fontWeight, fontFamily, fontStyle);
 }
@@ -70,19 +102,28 @@ void FfiOHOSAceFrameworkAlphabetIndexerPopupFont(
     double size, int32_t unit, const char* weight, const char* family, int32_t style)
 {
     std::optional<Dimension> fontSize = Dimension(size, DimensionUnit(unit));
-    std::optional<FontWeight> fontWeight = FontWeight::REGULAR;
-    std::optional<std::vector<std::string>> fontFamily = std::vector<std::string>{family};
+    std::string weightVal = weight;
+    std::optional<FontWeight> fontWeight = ConvertStrToFontWeight(weightVal);
+    std::optional<std::vector<std::string>> fontFamily = std::vector<std::string> { family };
     std::optional<FontStyle> fontStyle = static_cast<FontStyle>(style);
     IndexerModel::GetInstance()->SetPopupFont(fontSize, fontWeight, fontFamily, fontStyle);
 }
-void FfiOHOSAceFrameworkAlphabetIndexerFont(double size, int32_t unit, const char* weight,
-                                            const char* family, int32_t style)
+void FfiOHOSAceFrameworkAlphabetIndexerFont(
+    double size, int32_t unit, const char* weight, const char* family, int32_t style)
 {
     std::optional<Dimension> fontSize = Dimension(size, DimensionUnit(unit));
-    std::optional<FontWeight> fontWeight = FontWeight::REGULAR;
-    std::optional<std::vector<std::string>> fontFamily = std::vector<std::string>{family};
+    std::string weightVal = weight;
+    std::optional<FontWeight> fontWeight = ConvertStrToFontWeight(weightVal);
+    std::optional<std::vector<std::string>> fontFamily = std::vector<std::string> { family };
     std::optional<FontStyle> fontStyle = static_cast<FontStyle>(style);
     IndexerModel::GetInstance()->SetFont(fontSize, fontWeight, fontFamily, fontStyle);
+}
+void FfiOHOSAceFrameworkAlphabetIndexerPopupItemFont(double size, int32_t unit, const char* weight)
+{
+    Dimension fontSize(size, static_cast<DimensionUnit>(unit));
+    std::string weightVal = weight;
+    IndexerModel::GetInstance()->SetFontSize(fontSize);
+    IndexerModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weightVal));
 }
 void FfiOHOSAceFrameworkAlphabetIndexerItemSize(double size, int32_t unit)
 {
@@ -102,6 +143,11 @@ void FfiOHOSAceFrameworkAlphabetIndexerPopupPosition(double x, double y)
 {
     IndexerModel::GetInstance()->SetPopupPositionX(Dimension(x));
     IndexerModel::GetInstance()->SetPopupPositionY(Dimension(y));
+}
+void FfiOHOSAceFrameworkAlphabetIndexerPopupPositionWithUnit(double x, int32_t xUnit, double y, int32_t yUnit)
+{
+    IndexerModel::GetInstance()->SetPopupPositionX(Dimension(x, static_cast<DimensionUnit>(xUnit)));
+    IndexerModel::GetInstance()->SetPopupPositionY(Dimension(y, static_cast<DimensionUnit>(yUnit)));
 }
 void FfiOHOSAceFrameworkAlphabetIndexerOnSelected(void (*callback)(int32_t idx))
 {
@@ -123,5 +169,17 @@ void FfiOHOSAceFrameworkAlphabetIndexerOnPopupSelected(void (*callback)(int32_t 
 {
     auto onSelected = [ffiCallback = CJLambda::Create(callback)](int64_t idx) { ffiCallback(idx); };
     IndexerModel::GetInstance()->SetOnPopupSelected(std::move(onSelected));
+}
+void FfiOHOSAceFrameworkAlphabetIndexerItemBorderRadius(double radius)
+{
+    IndexerModel::GetInstance()->SetItemBorderRadius(Dimension(radius));
+}
+void FfiOHOSAceFrameworkAlphabetIndexerPopupItemBorderRadius(double radius)
+{
+    IndexerModel::GetInstance()->SetPopupItemBorderRadius(Dimension(radius));
+}
+void FfiOHOSAceFrameworkAlphabetIndexerEnableHapticFeedback(bool state)
+{
+    IndexerModel::GetInstance()->SetEnableHapticFeedback(state);
 }
 }

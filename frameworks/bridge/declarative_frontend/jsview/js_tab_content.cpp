@@ -23,6 +23,7 @@
 #include "bridge/declarative_frontend/jsview/models/tab_content_model_impl.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/tab_bar/tab_theme.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
@@ -73,7 +74,7 @@ void JSTabContent::Create(const JSCallbackInfo& info)
 
 void JSTabContent::CreateForPartialUpdate(const JSCallbackInfo& info)
 {
-    if (info.Length() <= 0 && !info[0]->IsFunction()) {
+    if (info.Length() <= 0 || !info[0]->IsFunction()) {
         TabContentModel::GetInstance()->Create();
         return;
     }
@@ -97,14 +98,35 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
     if (ParseJsString(tabBarInfo, infoStr)) {
         TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
         TabContentModel::GetInstance()->SetTabBar(infoStr, std::nullopt, std::nullopt, nullptr, true);
+        TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
         return;
     }
 
     if (!tabBarInfo->IsObject()) {
+        TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
+        TabContentModel::GetInstance()->SetTabBar(std::nullopt, std::nullopt, std::nullopt, nullptr, false);
+        TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
         return;
     }
 
     auto paramObject = JSRef<JSObject>::Cast(tabBarInfo);
+    JSRef<JSVal> contentParam = paramObject->GetProperty("builderNode_");
+    if (contentParam->IsObject()) {
+        auto builderNodeObject = JSRef<JSObject>::Cast(contentParam);
+        JSRef<JSVal> nodeptr = builderNodeObject->GetProperty("nodePtr_");
+        if (!nodeptr.IsEmpty()) {
+            const auto* vm = nodeptr->GetEcmaVM();
+            auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
+            auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+            CHECK_NULL_VOID(frameNode);
+            RefPtr<NG::FrameNode> refPtrFrameNode = AceType::Claim(frameNode);
+            CHECK_NULL_VOID(refPtrFrameNode);
+            TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
+            TabContentModel::GetInstance()->SetTabBar(std::nullopt, std::nullopt, std::nullopt, nullptr, false);
+            TabContentModel::GetInstance()->SetTabBarWithContent(refPtrFrameNode);
+            return;
+        }
+    }
     JSRef<JSVal> builderFuncParam = paramObject->GetProperty("builder");
     if (builderFuncParam->IsFunction()) {
         auto tabBarBuilder = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builderFuncParam));
@@ -119,6 +141,7 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
         TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
         TabContentModel::GetInstance()->SetTabBar(
             std::nullopt, std::nullopt, std::nullopt, std::move(tabBarBuilderFunc), false);
+        TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
         return;
     }
     JSRef<JSVal> typeParam = paramObject->GetProperty("type");
@@ -155,10 +178,14 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
     }
     TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
     TabContentModel::GetInstance()->SetTabBar(textOpt, iconOpt, std::nullopt, nullptr, false);
+    TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
 }
 
 void JSTabContent::Pop()
 {
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSTabContent][pop]", &JSTabContent::Pop);
+    }
     TabContentModel::GetInstance()->Pop();
 }
 
@@ -513,9 +540,6 @@ void JSTabContent::CompleteParameters(LabelStyle& labelStyle, bool isSubTabStyle
     if (!labelStyle.fontStyle.has_value()) {
         labelStyle.fontStyle = FontStyle::NORMAL;
     }
-    if (!labelStyle.fontFamily.has_value()) {
-        labelStyle.fontFamily = { "HarmonyOS Sans" };
-    }
     if (!labelStyle.heightAdaptivePolicy.has_value()) {
         labelStyle.heightAdaptivePolicy = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
     }
@@ -541,6 +565,7 @@ void SetBuilderNode(const JSRef<JSObject>& paramObject)
         return;
     }
     const auto* vm = nodeptr->GetEcmaVM();
+    CHECK_NULL_VOID(nodeptr->GetLocalHandle()->IsNativePointer(vm));
     auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -583,6 +608,7 @@ void JSTabContent::SetSubTabBarStyle(const JSRef<JSObject>& paramObject)
 
     TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
     TabContentModel::GetInstance()->SetTabBar(contentOpt, std::nullopt, std::nullopt, nullptr, false);
+    TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
 }
 
 void JSTabContent::SetLayoutMode(const JSRef<JSVal>& info)
@@ -667,6 +693,7 @@ void JSTabContent::SetBottomTabBarStyle(const JSCallbackInfo& info)
 
     TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
     TabContentModel::GetInstance()->SetTabBar(textOpt, iconOpt, tabBarSymbol, nullptr, false);
+    TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
 }
 
 void JSTabContent::SetOnWillShow(const JSCallbackInfo& info)

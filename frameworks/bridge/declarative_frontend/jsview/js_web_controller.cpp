@@ -90,7 +90,7 @@ std::shared_ptr<WebJSValue> ParseValue(const JSRef<JSVal>& resultValue, std::sha
         return std::make_shared<WebJSValue>();
     }
 
-    webviewValue->error_ = static_cast<int>(WebJavaScriptBridgeError::NO_ERROR);
+    webviewValue->error_ = static_cast<int>(WebJavaScriptBridgeError::NO_ERROR0);
     if (resultValue->IsBoolean()) {
         webviewValue->SetType(WebJSValue::Type::BOOLEAN);
         webviewValue->SetBoolean(resultValue->ToBoolean());

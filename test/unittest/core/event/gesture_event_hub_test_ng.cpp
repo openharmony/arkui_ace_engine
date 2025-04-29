@@ -15,6 +15,12 @@
 
 #include "test/unittest/core/event/gesture_event_hub_test_ng.h"
 
+#include "test/mock/base/mock_drag_window.h"
+#include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
+
+#include "frameworks/core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -147,7 +153,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest003, TestSize.Level1)
      * @tc.steps: step1. Create GestureEventHub.
      * @tc.expected: gestureEventHub is not null.
      */
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     EXPECT_TRUE(eventHub);
     auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     EXPECT_TRUE(gestureEventHub);
@@ -913,36 +920,36 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest014, TestSize.Level1)
     auto event = guestureEventHub->eventHub_.Upgrade();
     event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     auto result = guestureEventHub->IsAllowedDrag(eventHub);
-    ASSERT_FALSE(result);
+    EXPECT_FALSE(result);
     /**
      * @tc.steps: step2. call IsAllowedDrag
      * @tc.expected: result is correct
      */
     frameNode->userSet_ = true;
     result = guestureEventHub->IsAllowedDrag(eventHub);
-    ASSERT_FALSE(result);
+    EXPECT_FALSE(result);
 
     frameNode->userSet_ = false;
     auto func = [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) { return DragDropInfo(); };
     eventHub->onDragStart_ = func;
     result = guestureEventHub->IsAllowedDrag(eventHub);
-    ASSERT_TRUE(result);
+    EXPECT_TRUE(result);
 
     guestureEventHub->HandleOnDragStart(GestureEvent());
 
     frameNode->draggable_ = true;
     result = guestureEventHub->IsAllowedDrag(eventHub);
-    ASSERT_TRUE(result);
+    EXPECT_TRUE(result);
 
     frameNode->draggable_ = true;
     eventHub->onDragStart_ = nullptr;
     result = guestureEventHub->IsAllowedDrag(eventHub);
-    ASSERT_FALSE(result);
+    EXPECT_FALSE(result);
 }
 
 /**
  * @tc.name: GestureEventHubTest015
- * @tc.desc: Test StartDragTaskForWeb HandleNotallowDrag
+ * @tc.desc: Test StartDragTaskForWeb HandleNotAllowDrag
  * @tc.type: FUNC
  */
 HWTEST_F(GestureEventHubTestNg, GestureEventHubTest015, TestSize.Level1)
@@ -962,9 +969,9 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest015, TestSize.Level1)
 
     guestureEventHub->isReceivedDragGestureInfo_ = true;
     guestureEventHub->StartDragTaskForWeb();
-    ASSERT_FALSE(guestureEventHub->isReceivedDragGestureInfo_);
+    EXPECT_FALSE(guestureEventHub->isReceivedDragGestureInfo_);
 
-    guestureEventHub->HandleNotallowDrag(GestureEvent());
+    guestureEventHub->HandleNotAllowDrag(GestureEvent());
 
     frameNode = FrameNode::CreateFrameNode("Web", 102, AceType::MakeRefPtr<Pattern>());
     guestureEventHub = frameNode->GetOrCreateGestureEventHub();
@@ -976,8 +983,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest015, TestSize.Level1)
     event->onDragStart_ = func;
     guestureEventHub->HandleOnDragStart(GestureEvent());
 
-    guestureEventHub->HandleNotallowDrag(GestureEvent());
-    ASSERT_TRUE(guestureEventHub->isReceivedDragGestureInfo_);
+    guestureEventHub->HandleNotAllowDrag(GestureEvent());
+    EXPECT_TRUE(guestureEventHub->isReceivedDragGestureInfo_);
 }
 
 /**
@@ -1014,7 +1021,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest016, TestSize.Level1)
     guestureEventHub->touchEventActuator_ = AceType::MakeRefPtr<TouchEventActuator>();
     guestureEventHub->ClearUserOnClick();
     guestureEventHub->ClearUserOnTouch();
-    ASSERT_FALSE(guestureEventHub->clickEventActuator_->userCallback_);
+    EXPECT_FALSE(guestureEventHub->clickEventActuator_->userCallback_);
 }
 
 /**
@@ -1741,7 +1748,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest029, TestSize.Level1)
      * @tc.expected: retStr is equal to "HitTestMode.Default".
      */
     gestureEventHub->SetHitTestMode(HitTestMode(-1));
-    std::string retStr = gestureEventHub->GetHitTestModeStr();
+    std::string retStr = GestureEventHub::GetHitTestModeStr(gestureEventHub);
     EXPECT_EQ(retStr, "HitTestMode.Default");
 
     /**
@@ -1749,7 +1756,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest029, TestSize.Level1)
      * @tc.expected: retStr is equal to "HitTestMode.Default".
      */
     gestureEventHub->SetHitTestMode(HitTestMode(4));
-    retStr = gestureEventHub->GetHitTestModeStr();
+    retStr = GestureEventHub::GetHitTestModeStr(gestureEventHub);
     EXPECT_EQ(retStr, "HitTestMode.Default");
 }
 
@@ -1833,7 +1840,7 @@ HWTEST_F(GestureEventHubTestNg, ResetDragActionForWeb001, TestSize.Level1)
     auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(guestureEventHub, nullptr);
     guestureEventHub->ResetDragActionForWeb();
-    ASSERT_EQ(guestureEventHub->isReceivedDragGestureInfo_, false);
+    EXPECT_EQ(guestureEventHub->isReceivedDragGestureInfo_, false);
 }
 
 /**
@@ -1879,7 +1886,7 @@ HWTEST_F(GestureEventHubTestNg, SetMouseDragGatherPixelMaps001, TestSize.Level1)
     auto eventHub = guestureEventHub->eventHub_.Upgrade();
     guestureEventHub->SetMouseDragGatherPixelMaps();
     guestureEventHub->SetNotMouseDragGatherPixelMaps();
-    ASSERT_NE(PipelineContext::GetCurrentContext(), nullptr);
+    EXPECT_NE(PipelineContext::GetCurrentContext(), nullptr);
 }
 
 /**
@@ -1893,22 +1900,22 @@ HWTEST_F(GestureEventHubTestNg, IsTextCategoryComponent001, TestSize.Level1)
     auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
     string frameTag = V2::TEXTAREA_ETS_TAG;
     bool result = guestureEventHub->IsTextCategoryComponent(frameTag);
-    ASSERT_TRUE(result);
+    EXPECT_TRUE(result);
     frameTag = V2::TEXT_ETS_TAG;
     result = guestureEventHub->IsTextCategoryComponent(frameTag);
-    ASSERT_TRUE(result);
+    EXPECT_TRUE(result);
     frameTag = V2::TEXTINPUT_ETS_TAG;
     result = guestureEventHub->IsTextCategoryComponent(frameTag);
-    ASSERT_TRUE(result);
+    EXPECT_TRUE(result);
     frameTag = V2::SEARCH_Field_ETS_TAG;
     result = guestureEventHub->IsTextCategoryComponent(frameTag);
-    ASSERT_TRUE(result);
+    EXPECT_TRUE(result);
     frameTag = V2::RICH_EDITOR_ETS_TAG;
     result = guestureEventHub->IsTextCategoryComponent(frameTag);
-    ASSERT_TRUE(result);
+    EXPECT_TRUE(result);
     frameTag = "";
     result = guestureEventHub->IsTextCategoryComponent(frameTag);
-    ASSERT_FALSE(result);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -1928,7 +1935,7 @@ HWTEST_F(GestureEventHubTestNg, SetResponseRegion001, TestSize.Level1)
         callbackInfo = 1;
     });
     guestureEventHub->SetResponseRegion(responseRegion);
-    ASSERT_TRUE(guestureEventHub->isResponseRegion_);
+    EXPECT_TRUE(guestureEventHub->isResponseRegion_);
 }
 
 /**
@@ -1951,7 +1958,7 @@ HWTEST_F(GestureEventHubTestNg, RemoveLastResponseRect001, TestSize.Level1)
         callbackInfo = 1;
     });
     guestureEventHub->RemoveLastResponseRect();
-    ASSERT_FALSE(guestureEventHub->isResponseRegion_);
+    EXPECT_FALSE(guestureEventHub->isResponseRegion_);
 }
 
 /**
@@ -1966,6 +1973,72 @@ HWTEST_F(GestureEventHubTestNg, SetJSFrameNodeOnTouchEvent001, TestSize.Level1)
     guestureEventHub->touchEventActuator_ = nullptr;
     TouchEventFunc touchEventFunc = [](TouchEventInfo& info) {};
     guestureEventHub->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
-    ASSERT_NE(guestureEventHub->touchEventActuator_, nullptr);
+    EXPECT_NE(guestureEventHub->touchEventActuator_, nullptr);
+}
+
+/**
+ * @tc.name: SetDropAnimationTest
+ * @tc.desc: Test SetDropAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, SetDropAnimation, TestSize.Level1)
+{
+    auto dropAnimationFun = []() {};
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    EXPECT_FALSE(dragEvent->HasDropAnimation());
+    dragEvent->SetDropAnimation(std::move(dropAnimationFun));
+    EXPECT_TRUE(dragEvent->HasDropAnimation());
+}
+
+/**
+ * @tc.name: ExecuteDropAnimation
+ * @tc.desc: Test ExecuteDropAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, ExecuteDropAnimation, TestSize.Level1)
+{
+    bool isExecuted = false;
+    auto dropAnimationFun = [&isExecuted]() { isExecuted = true; };
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    EXPECT_FALSE(isExecuted);
+    dragEvent->SetDropAnimation(std::move(dropAnimationFun));
+    dragEvent->ExecuteDropAnimation();
+    EXPECT_TRUE(isExecuted);
+}
+
+/**
+ * @tc.name: StartVibratorByDrag001
+ * @tc.desc: Test StartVibratorByDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, StartVibratorByDrag001, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::WEB_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    NG::DragPreviewOption previewOption;
+    previewOption.enableHapticFeedback = true;
+    frameNode->SetDragPreviewOptions(previewOption, false);
+    DragDropGlobalController::GetInstance().UpdateDragFilterShowingStatus(true);
+    guestureEventHub->StartVibratorByDrag(frameNode);
+    bool dragFilter = DragDropGlobalController::GetInstance().IsDragFilterShowing();
+    EXPECT_FALSE(dragFilter);
+}
+
+/**
+ * @tc.name: StartVibratorByDrag002
+ * @tc.desc: Test StartVibratorByDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, StartVibratorByDrag002, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::RICH_EDITOR_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    NG::DragPreviewOption previewOption;
+    previewOption.enableHapticFeedback = true;
+    frameNode->SetDragPreviewOptions(previewOption, false);
+    DragDropGlobalController::GetInstance().UpdateDragFilterShowingStatus(true);
+    guestureEventHub->StartVibratorByDrag(frameNode);
+    bool dragFilter = DragDropGlobalController::GetInstance().IsDragFilterShowing();
+    EXPECT_FALSE(dragFilter);
 }
 } // namespace OHOS::Ace::NG

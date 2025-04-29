@@ -15,18 +15,9 @@
 
 #include "core/focus/focus_node.h"
 
-#include <algorithm>
-#include <atomic>
-#include <cinttypes>
-
 #include "base/log/dump_log.h"
-#include "base/log/log.h"
-#include "core/common/ace_application_info.h"
 #include "core/components/flex/flex_element.h"
-#include "core/event/ace_event_handler.h"
-#include "core/gestures/click_recognizer.h"
 #include "core/pipeline/base/composed_element.h"
-#include "core/pipeline/base/render_element.h"
 
 namespace OHOS::Ace {
 namespace {

@@ -24,10 +24,11 @@ const tag = 'AddFormMenuItem::ets::';
 
 const querySnapshotAsync = async (want: Want, componentId: string): Promise<void> => {
   let compInfo = componentUtils.getRectangleById(componentId);
+  let imagePackageApi = null;
   try {
-    const imagePackageApi: image.ImagePacker = image.createImagePacker();
+    imagePackageApi: image.ImagePacker = image.createImagePacker();
     const packOpts: image.PackingOption = {
-      format: 'image/jpeg',
+      format: 'image/webp',
       quality: 50,
     };
     let packPixmap: image.PixelMap = await componentSnapshot.get(componentId);
@@ -44,6 +45,8 @@ const querySnapshotAsync = async (want: Want, componentId: string): Promise<void
     hilog.info(0x3900, tag, 'pixelStr length:' + pixelStr.length);
   } catch (err) {
     hilog.error(0x3900, tag, 'get pixelmap string error:' + err);
+  } finally {
+    imagePackageApi?.release();
   }
 }
 
@@ -54,11 +57,13 @@ const querySnapshot = (want: Want, componentId: string): boolean => {
 
 @Builder
 AddFormMenuItem(want: Want, componentId: string, options?: AddFormOptions): void {
-  if (querySnapshot(want, componentId)) {
-  }
   FormMenuItem(options?.style?.options ? options.style.options : {
     startIcon: $r('sys.media.ic_form_menu_add'),
     content: $r('sys.string.ohos_add_form_to_desktop')
   })
-  .onRegClick(want, componentId, options?.formBindingData?.data, options?.callback)
+  .onClick(async () => {
+      let uiContext = this.getUIContext();
+      await querySnapshot(want, componentId, uiContext);
+      FormMenuItem.onRequestPublishFormWithSnapshot(want, options?.formBindingData?.data, options?.callback);
+    })
 }

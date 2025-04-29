@@ -15,9 +15,6 @@
 
 #include "bridge/declarative_frontend/jsview/models/text_timer_model_impl.h"
 
-#include <cstddef>
-
-#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {

@@ -60,16 +60,22 @@ public:
     struct AnimationParams {
         AnimationCallbacks callbacks;
         AnimationOperation type = AnimationOperation::PLAY;
+
+        void Reset()
+        {
+            callbacks.finishCb = nullptr;
+            callbacks.repeatCb = nullptr;
+            type = AnimationOperation::PLAY;
+        }
     };
-    void SetParams(int32_t duration, AnimationCallbacks&& param)
-    {
-        params_.callbacks = std::move(param);
-        params_.type = (duration <= 0) ? AnimationOperation::CANCEL : AnimationOperation::PLAY;
-    }
+
+    void SetParams(const AnimationOption& option, AnimationCallbacks&& cbs);
 
     void AddActiveProp(const WeakPtr<PropertyBase>& prop)
     {
-        activeProps_.insert(prop);
+        if (inScope_) {
+            activeProps_.insert(prop);
+        }
     }
 
     /**
@@ -78,7 +84,15 @@ public:
      */
     void Tick();
 
+    /**
+     * @brief Force update animations by @c delta to simulate velocity animation
+     *
+     */
+    void TickByVelocity(float velocity);
+
     void Reset();
+
+    bool AllFinished();
 
 private:
     void CancelAnimations();
