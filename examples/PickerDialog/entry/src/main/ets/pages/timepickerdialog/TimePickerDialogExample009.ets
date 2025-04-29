@@ -20,7 +20,7 @@ struct TimePickerDialogExample {
 
   build() {
     Column() {
-      Button("TimePickerDialog")
+      Button('TimePickerDialog')
         .margin(20)
         .onClick(() => {
           this.getUIContext().showTimePickerDialog({
@@ -31,7 +31,7 @@ struct TimePickerDialogExample {
               // 设置selectTime为按下确定按钮时的时间，这样当弹窗再次弹出时显示选中的为上一次确定的时间
               if (value.hour != undefined && value.minute != undefined) {
                 this.selectTime.setHours(value.hour, value.minute)
-                console.info("TimePickerDialog:onAccept()" + JSON.stringify(value))
+                console.info('TimePickerDialog:onAccept()' + JSON.stringify(value))
               }
             }
           })

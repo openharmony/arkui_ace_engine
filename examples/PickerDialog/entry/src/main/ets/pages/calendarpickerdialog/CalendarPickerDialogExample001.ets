@@ -20,10 +20,10 @@ struct CalendarPickerDialogExample {
 
   build() {
     Column() {
-      Button("Show CalendarPicker Dialog")
+      Button('Show CalendarPicker Dialog')
         .margin(20)
         .onClick(() => {
-          console.info("CalendarDialog.show")
+          console.info('CalendarDialog.show')
           CalendarPickerDialog.show({
             selected: this.selectedDate,
             backgroundColor: Color.Gray,
@@ -31,25 +31,25 @@ struct CalendarPickerDialogExample {
             shadow: ShadowStyle.OUTER_FLOATING_SM,
             onAccept: (value) => {
               this.selectedDate = value
-              console.info("calendar onAccept:" + JSON.stringify(value))
+              console.info('calendar onAccept:' + JSON.stringify(value))
             },
             onCancel: () => {
-              console.info("calendar onCancel")
+              console.info('calendar onCancel')
             },
             onChange: (value) => {
-              console.info("calendar onChange:" + JSON.stringify(value))
+              console.info('calendar onChange:' + JSON.stringify(value))
             },
             onDidAppear: () => {
-              console.info("calendar onDidAppear")
+              console.info('calendar onDidAppear')
             },
             onDidDisappear: () => {
-              console.info("calendar onDidDisappear")
+              console.info('calendar onDidDisappear')
             },
             onWillAppear: () => {
-              console.info("calendar onWillAppear")
+              console.info('calendar onWillAppear')
             },
             onWillDisappear: () => {
-              console.info("calendar onWillDisappear")
+              console.info('calendar onWillDisappear')
             }
           })
         })

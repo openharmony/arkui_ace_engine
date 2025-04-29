@@ -25,12 +25,12 @@ struct CalendarPickerExample {
       Column() {
         CalendarPicker({ hintRadius: 10, selected: this.selectedDate, start: this.startDate, end: this.endDate })
           .edgeAlign(CalendarAlign.END)
-          .textStyle({ color: "#ff182431", font: { size: 20, weight: FontWeight.Normal } })
+          .textStyle({ color: '#ff182431', font: { size: 20, weight: FontWeight.Normal } })
           .margin(10)
           .onChange((value) => {
-            console.info("CalendarPicker onChange:" + JSON.stringify(value))
+            console.info('CalendarPicker onChange:' + JSON.stringify(value))
           })
-      }.alignItems(HorizontalAlign.End).width("100%")
+      }.alignItems(HorizontalAlign.End).width('100%')
     }.width('100%').margin({ top: 350 })
   }
 }

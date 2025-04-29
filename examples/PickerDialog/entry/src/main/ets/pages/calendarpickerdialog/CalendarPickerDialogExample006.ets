@@ -26,10 +26,10 @@ struct CalendarPickerExample {
 
   build() {
     Column() {
-      Button("Show CalendarPicker Dialog")
+      Button('Show CalendarPicker Dialog')
         .margin(20)
         .onClick(() => {
-          console.info("CalendarDialog.show")
+          console.info('CalendarDialog.show')
           CalendarPickerDialog.show({ markToday: true, disabledDateRange: this.disabledDateRange })
         })
     }.width('100%').margin({ top: 350 })

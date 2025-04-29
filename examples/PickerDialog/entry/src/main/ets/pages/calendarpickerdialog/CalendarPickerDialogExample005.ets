@@ -23,10 +23,10 @@ struct CalendarPickerDialogExample {
   build() {
     Column() {
       Text('月历日期选择器').fontSize(30)
-      Button("Show CalendarPicker Dialog")
+      Button('Show CalendarPicker Dialog')
         .margin(20)
         .onClick(() => {
-          console.info("CalendarDialog.show")
+          console.info('CalendarDialog.show')
           CalendarPickerDialog.show({
             start: this.startDate,
             end: this.endDate,

@@ -30,7 +30,7 @@ struct CalendarPickerExample {
         .margin(10)
         .markToday(true)
         .onChange((value) => {
-          console.info("CalendarPicker onChange:" + JSON.stringify(value))
+          console.info('CalendarPicker onChange:' + JSON.stringify(value))
         })
     }.alignItems(HorizontalAlign.End).width('100%')
   }

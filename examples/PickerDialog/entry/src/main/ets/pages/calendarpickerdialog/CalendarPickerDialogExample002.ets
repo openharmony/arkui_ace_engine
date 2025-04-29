@@ -20,10 +20,10 @@ struct CalendarPickerDialogExample {
 
   build() {
     Column() {
-      Button("Show CalendarPicker Dialog")
+      Button('Show CalendarPicker Dialog')
         .margin(20)
         .onClick(() => {
-          console.info("CalendarDialog.show")
+          console.info('CalendarDialog.show')
           CalendarPickerDialog.show({
             selected: this.selectedDate,
             acceptButtonStyle: {
@@ -52,7 +52,7 @@ struct CalendarPickerDialogExample {
             },
             onAccept: (value) => {
               this.selectedDate = value
-              console.info("calendar onAccept:" + JSON.stringify(value))
+              console.info('calendar onAccept:' + JSON.stringify(value))
             }
           })
         })
