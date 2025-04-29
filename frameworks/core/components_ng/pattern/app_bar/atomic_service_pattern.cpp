@@ -24,9 +24,21 @@
 namespace OHOS::Ace::NG {
 constexpr int32_t ATOMIC_SERVICE_MIN_SIZE = 2;
 constexpr int32_t FIRST_OVERLAY_INDEX = 1;
+std::function<void(RefPtr<FrameNode> host, std::optional<bool> settedColorMode)>
+    AtomicServicePattern::beforeCreateLayoutBuilder_ = nullptr;
+
+void AtomicServicePattern::RegisterBeforeCreateLayoutBuilder(
+    std::function<void(RefPtr<FrameNode> host, std::optional<bool> settedColorMode)> beforeCreateLayoutBuilder)
+{
+    beforeCreateLayoutBuilder_ = beforeCreateLayoutBuilder;
+}
 
 void AtomicServicePattern::BeforeCreateLayoutWrapper()
 {
+    if (beforeCreateLayoutBuilder_) {
+        beforeCreateLayoutBuilder_(GetHost(), settedColorMode);
+        return;
+    }
     MenuBarSafeAreaCallBack();
     ContentSafeAreaCallBack();
     ColorConfigurationCallBack();

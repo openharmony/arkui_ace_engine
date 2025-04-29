@@ -53,6 +53,9 @@ public:
     void CreateServicePanel(const std::string& appGalleryBundleName, const std::string& abilityName,
         std::map<std::string, std::string>& params);
     static void BuildAppbar(RefPtr<PipelineBase> pipleline);
+    static void RegistAppBarNodeBuilder(
+        std::function<RefPtr<FrameNode>(NG::AppBarView* appBar, const RefPtr<FrameNode>& stage)> appBarNodeBuilder);
+
 private:
     RefPtr<FrameNode> BuildMenuBarRow();
     RefPtr<FrameNode> BuildMenuBar();
@@ -69,6 +72,7 @@ private:
 
     WeakPtr<FrameNode> atomicService_;
     RefPtr<FrameNode> contentStage_;
+    static std::function<RefPtr<FrameNode>(NG::AppBarView* appBar, const RefPtr<FrameNode>& stage)> appBarNodeBuilder_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_APP_BAR_VIEW_H
