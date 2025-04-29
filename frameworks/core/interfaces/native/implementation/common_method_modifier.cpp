@@ -5529,7 +5529,7 @@ void OnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
     std::function<void(bool, double)> onVisibleAreaApproximateChange = nullptr;
     if (arkCallback) {
         auto weakNode = AceType::WeakClaim(frameNode);
-        onVisibleAreaApproximateChange = 
+        onVisibleAreaApproximateChange =
             [callback = CallbackHelper(arkCallback.value()), node = weakNode](bool visible, double ratio) {
                 Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
                 Ark_Number currentRatio = Converter::ArkValue<Ark_Number>(static_cast<float>(ratio));

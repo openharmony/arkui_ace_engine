@@ -45,6 +45,7 @@ const auto MAX_RATIO = 1.0f;
 const auto EXPECTED_RATIO = 0.7f;
 const auto EXPECTED_PERIOD = 250;
 const auto DEFAULT_PERIOD = 1000;
+const auto INITIAL_PERIOD = 0;
 static const std::unordered_map<Ark_AccessibilityRoleType, std::string> ACCESSIBILITY_ROLE_MAP {
     { ARK_ACCESSIBILITY_ROLE_TYPE_ACTION_SHEET, "actionsheet" },
     { ARK_ACCESSIBILITY_ROLE_TYPE_ALERT_DIALOG, "alertdialog" },
@@ -1234,7 +1235,7 @@ HWTEST_F(CommonMethodModifierTest19, setOnVisibleAreaApproximateChangeTest2, Tes
     option.expectedUpdateInterval = Converter::ArkValue<Opt_Number>();
     auto cbInfoIni = eventHub->GetThrottledVisibleAreaCallback();
     EXPECT_EQ(cbInfoIni.callback, nullptr);
-    EXPECT_EQ(static_cast<int32_t>(cbInfoIni.period), 0);
+    EXPECT_EQ(static_cast<int32_t>(cbInfoIni.period), INITIAL_PERIOD);
     modifier_->setOnVisibleAreaApproximateChange(node_, &option, &func);
     auto cbInfo = eventHub->GetThrottledVisibleAreaCallback();
     EXPECT_EQ(cbInfo.callback, nullptr);
@@ -1267,7 +1268,7 @@ HWTEST_F(CommonMethodModifierTest19, setOnVisibleAreaApproximateChangeTest3, Tes
     auto emptyFunc = Converter::ArkValue<Opt_VisibleAreaChangeCallback>(arkEmptyfunc);
     auto cbInfoIni = eventHub->GetThrottledVisibleAreaCallback();
     EXPECT_EQ(cbInfoIni.callback, nullptr);
-    EXPECT_EQ(static_cast<int32_t>(cbInfoIni.period), 0);
+    EXPECT_EQ(static_cast<int32_t>(cbInfoIni.period), INITIAL_PERIOD);
     modifier_->setOnVisibleAreaApproximateChange(node_, &option, &emptyFunc);
     auto cbInfo2 = eventHub->GetThrottledVisibleAreaCallback();
     EXPECT_NE(cbInfo2.callback, nullptr);
