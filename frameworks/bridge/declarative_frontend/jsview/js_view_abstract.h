@@ -421,6 +421,7 @@ public:
     static void JsAspectRatio(const JSCallbackInfo& info);
     static void JsOverlay(const JSCallbackInfo& info);
     static Alignment ParseAlignment(int32_t align);
+    static LayoutCalPolicy ParseLayoutPolicy(const std::string& layoutPolicy);
     static void JsAlignRules(const JSCallbackInfo& info);
     static void JsChainMode(const JSCallbackInfo& info);
 

@@ -489,13 +489,12 @@ OptionalSizeF CreateIdealSizeByPercentRef(
 }
 
 OptionalSizeF ConstrainIdealSizeByLayoutPolicy(const LayoutConstraintF& layoutConstraint,
-    uint8_t widthLayoutPolicy, uint8_t heightLayoutPolicy, Axis axis)
+    LayoutCalPolicy widthLayoutPolicy, LayoutCalPolicy heightLayoutPolicy, Axis axis)
 {
     bool isHorizontal = axis == Axis::HORIZONTAL;
-    bool mainAxisMatchParent = (isHorizontal ? widthLayoutPolicy : heightLayoutPolicy) ==
-                               static_cast<uint8_t>(LayoutCalPolicy::MATCH_PARENT);
-    bool crossAxisMatchParent = (isHorizontal ? heightLayoutPolicy : widthLayoutPolicy) ==
-                                static_cast<uint8_t>(LayoutCalPolicy::MATCH_PARENT);
+    bool mainAxisMatchParent = (isHorizontal ? widthLayoutPolicy : heightLayoutPolicy) == LayoutCalPolicy::MATCH_PARENT;
+    bool crossAxisMatchParent =
+        (isHorizontal ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::MATCH_PARENT;
     OptionalSizeF idealSize;
     if (mainAxisMatchParent) {
         auto parentMainSize = GetMainAxisSize(layoutConstraint.parentIdealSize, axis);
