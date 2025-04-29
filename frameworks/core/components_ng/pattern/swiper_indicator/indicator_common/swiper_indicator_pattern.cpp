@@ -48,6 +48,7 @@ void SwiperIndicatorPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(host->GetRenderContext());
     host->GetRenderContext()->SetClipToBounds(false);
 }
 
