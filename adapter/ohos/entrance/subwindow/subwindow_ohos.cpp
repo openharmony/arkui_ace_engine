@@ -240,6 +240,7 @@ void SubwindowOhos::InitContainer()
         auto windowType = parentWindow->GetType();
         std::string windowTag = "";
         bool isAppSubwindow = false;
+        bool needFollowScreen = false;
         if (IsSystemTopMost()) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_TOAST);
             windowTag = "TOAST_SYSTEM_";
@@ -252,6 +253,7 @@ void SubwindowOhos::InitContainer()
             windowTag = isSelectOverlay ? "TEXT_MENU_" : "TOAST_TOPMOST_";
         } else if (parentContainer->IsSceneBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
+            needFollowScreen = true;
         } else if (windowType == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
             auto hostWindowId = parentPipeline->GetFocusWindowId();
             windowOption->SetIsUIExtFirstSubWindow(true);
@@ -262,6 +264,7 @@ void SubwindowOhos::InitContainer()
         } else if (windowType >= Rosen::WindowType::SYSTEM_WINDOW_BASE) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
             windowOption->SetParentId(parentWindowId);
+            needFollowScreen = true;
         } else {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
             windowOption->SetParentId(parentWindowId);
@@ -294,6 +297,7 @@ void SubwindowOhos::InitContainer()
         }
         CHECK_NULL_VOID(window_);
         window_->RegisterWindowAttachStateChangeListener(new MenuWindowSceneListener(WeakClaim(this)));
+        window_->SetFollowScreenChange(needFollowScreen);
         defaultDisplayId_ = displayId;
     }
     std::string url = "";
