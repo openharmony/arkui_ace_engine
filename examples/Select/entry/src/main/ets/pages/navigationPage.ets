@@ -26,6 +26,7 @@ struct NavIndex {
   pathStack: NavPathStack = new NavPathStack()
   paths: NavListItem[] = [
     { name: 'Select', path: 'SelectIndex' },
+    { name: 'Button', path: 'ButtonIndex' },
     { name: 'toggle', path: 'ToggleIndex' }
   ]
 

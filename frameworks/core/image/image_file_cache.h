@@ -57,6 +57,7 @@ public:
 
     RefPtr<NG::ImageData> GetDataFromCacheFile(const std::string& url, const std::string& suffix);
 
+    [[deprecated("SetCacheFileInfo is obsolete and will be removed in the future.")]]
     void SetCacheFileInfo();
     void WriteCacheFile(
         const std::string& url, const void* data, size_t size, const std::string& suffix = std::string());

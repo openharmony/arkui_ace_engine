@@ -236,8 +236,11 @@ void PagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipelineContext->GetMemoryManager()->RemoveRecyclePageNode(frameNode->GetId());
 }
 
-void PagePattern::OnWindowSizeChanged(int32_t /*width*/, int32_t /*height*/, WindowSizeChangeReason /*type*/)
+void PagePattern::OnWindowSizeChanged(int32_t /*width*/, int32_t /*height*/, WindowSizeChangeReason type)
 {
+    if (type == WindowSizeChangeReason::RESIZE) {
+        return;
+    }
     if (!isPageInTransition_) {
         return;
     }

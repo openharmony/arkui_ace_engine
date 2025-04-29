@@ -1,12 +1,6 @@
-// xxx.ets
-
 class MySwitchStyle implements ContentModifier<ToggleConfiguration> {
-  selectedColor: Color = Color.White;
-
-  constructor(selectedColor: Color) {
-    this.selectedColor = selectedColor;
+  constructor() {
   }
-
   applyContent(): WrappedBuilder<[ToggleConfiguration]> {
     return wrapBuilder(buildSwitch);
   }
@@ -20,14 +14,11 @@ function buildSwitch(config: ToggleConfiguration) {
       if (config.isOn) {
         // 开启状态 (正面)
         Column() {
-          Image($r('app.media.ic_sun'))
-            .width(40)
-            .height(40)
-            .margin({ bottom: 5 })
           Text('Sun raise')
             .fontSize(16)
             .fontColor('#FF2D55')
         }
+        .justifyContent(FlexAlign.Center)
         .width(120)
         .height(120)
         .backgroundColor('#ffffff')
@@ -39,14 +30,11 @@ function buildSwitch(config: ToggleConfiguration) {
       } else {
         // 关闭状态 (背面)
         Column() {
-          Image($r('app.media.ic_moon'))
-            .width(40)
-            .height(40)
-            .margin({ bottom: 5 })
           Text('Moon raise')
             .fontSize(16)
             .fontColor('#00F0FF')
         }
+        .justifyContent(FlexAlign.Center)
         .width(120)
         .height(120)
         .backgroundColor('#1A1A1A')
@@ -63,12 +51,12 @@ function buildSwitch(config: ToggleConfiguration) {
     .margin({ top: 30 })
 
     Row() {
-      Button("Sun raise")
+      Button('Sun raise')
         .onClick(() => {
           config.triggerChange(true);
         })
 
-      Button("Moon raise")
+      Button('Moon raise')
         .onClick(() => {
           config.triggerChange(false);
         })
@@ -90,7 +78,7 @@ struct toggleContentModifier {
       Column({ space: 50 }) {
         Toggle({ type: ToggleType.Switch })
           .enabled(true)
-          .contentModifier(new MySwitchStyle(Color.Yellow))
+          .contentModifier(new MySwitchStyle())
           .onChange((isOn: boolean) => {
             console.info('Switch Log:' + isOn);
           })

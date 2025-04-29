@@ -1286,5 +1286,7 @@ group("interfaces_unittest") {
     ":viewport_config_test",
     ":xcomponent_controller_test",
     "ace_kit:ace_kit_test",
+    "ace_gesture:ace_native_gesture_test",
+    "napi:arkui_napi_test",
   ]
 }

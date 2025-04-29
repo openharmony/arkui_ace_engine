@@ -680,7 +680,7 @@ public:
     virtual void SetIsCrownSpring(bool isCrownSpring) {}
 #endif
     int32_t GetMaxDisplayCount() const;
-
+    virtual bool GetDisableFlushFocus() { return false; }
     virtual void SaveCircleDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode) {}
     bool GetPrevMarginIgnoreBlank()
     {

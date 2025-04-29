@@ -472,6 +472,7 @@ private:
     void OnDirectionConfigurationUpdate() override;
     void OnIconConfigurationUpdate() override;
     void OnConfigurationUpdate();
+    ImageDfxConfig CreateImageDfxConfig(const ImageSourceInfo& src);
     void LoadImage(const ImageSourceInfo& src, const PropertyChangeFlag& propertyChangeFlag, VisibleType visibleType);
     void LoadAltImage(const ImageSourceInfo& altImageSourceInfo);
 

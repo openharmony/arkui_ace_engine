@@ -21,6 +21,101 @@
       "buildFunction": "SelectOptionBuilder"
     },
     {
+      "name": "SelectSymbolModifier",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectSymbolModifier.ets",
+      "buildFunction": "SelectSymbolModifierBuilder"
+    },
+    {
+      "name": "SelectLanguagePadding",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectLanguagePadding.ets",
+      "buildFunction": "SelectLanguagePaddingBuilder"
+    },
+    {
+      "name": "SelectOnSelect",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectOnSelect.ets",
+      "buildFunction": "SelectOnSelectBuilder"
+    },
+    {
+      "name": "SelectOptionMenu",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectNormal.ets",
+      "buildFunction": "SelectOptionMenuBuilder"
+    },
+    {
+      "name": "SelectSymbol",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectSymbol.ets",
+      "buildFunction": "SelectSymbolBuilder"
+    },
+    {
+      "name": "SelectCustom",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectCustom.ets",
+      "buildFunction": "SelectCustomBuilder"
+    },
+    {
+      "name": "SelectDividerOptions",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectDividerNormal.ets",
+      "buildFunction": "SelectDividerOptionsBuilder"
+    },
+    {
+      "name": "SelectDividerNull",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectDividerNull.ets",
+      "buildFunction": "SelectDividerNullBuilder"
+    },
+    {
+      "name": "SelectArrow",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectArrow.ets",
+      "buildFunction": "SelectArrowBuilder"
+    },
+    {
+      "name": "SelectOptionTextModifier",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectModifier.ets",
+      "buildFunction": "SelectOptionTextModifierBuilder"
+    },
+    {
+      "name": "ButtonIndex",
+      "pageSourceFile": "src/main/ets/pages/components/button/Index.ets",
+      "buildFunction": "ButtonIndexBuilder"
+    },
+    {
+      "name": "ButtonStyle",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonStyle.ets",
+      "buildFunction": "ButtonStyleBuilder"
+    },
+    {
+      "name": "ButtonJudgment",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonJudgment.ets",
+      "buildFunction": "ButtonJudgmentBuilder"
+    },
+    {
+      "name": "ButtonLabelStyle",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLabelStyle.ets",
+      "buildFunction": "ButtonLabelStyleBuilder"
+    },
+    {
+      "name": "ButtonControlSize",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonControlSize.ets",
+      "buildFunction": "ButtonControlSizeBuilder"
+    },
+    {
+      "name": "ButtonRole",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonRole.ets",
+      "buildFunction": "ButtonRoleBuilder"
+    },
+    {
+      "name": "ButtonCustom",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonCustom.ets",
+      "buildFunction": "ButtonCustomBuilder"
+    },
+    {
+      "name": "ButtonType",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonType.ets",
+      "buildFunction": "ButtonTypeBuilder"
+    },
+    {
+      "name": "ButtonModifier",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonModifier.ets",
+      "buildFunction": "ButtonModifierBuilder"
+    },
+    {
       "name": "ToggleIndex",
       "pageSourceFile": "src/main/ets/pages/components/toggle/index.ets",
       "buildFunction": "ToggleIndexBuilder"

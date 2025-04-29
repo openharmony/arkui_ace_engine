@@ -7,6 +7,62 @@
     {
       "name": "change_mode",
       "value": "#89ABE3FF"
+    },
+    {
+      "name": "select_font_color",
+      "value": "#182431"
+    },
+    {
+      "name": "background_color_1",
+      "value": "#45FFE0E0"
+    },
+    {
+      "name": "background_color_2",
+      "value": "#45E1BEE7"
+    },
+    {
+      "name": "background_color_3",
+      "value": "#45C8E6C9"
+    },
+    {
+      "name": "background_color_4",
+      "value": "#45F8BBD0"
+    },
+    {
+      "name": "background_color_5",
+      "value": "#F0F2F5"
+    },
+    {
+      "name": "shadow",
+      "value": "#888888"
+    },
+    {
+      "name": "symbol_glyph_modifier_color",
+      "value": "#999999"
+    },
+    {
+      "name": "text_modifier_color",
+      "value": "#333333"
+    },
+    {
+      "name": "selected_option_text_modifier_color",
+      "value": "#007BFF"
+    },
+    {
+      "name": "option_text_modifier_color",
+      "value": "#666666"
+    },
+    {
+      "name": "background_color_6",
+      "value": "#317aff"
+    },
+    {
+      "name": "text_font_color",
+      "value": "#CCCCCC"
+    },
+    {
+      "name": "background_color_7",
+      "value": "#F55A42"
     }
   ]
 }

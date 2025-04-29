@@ -27,7 +27,7 @@ export struct toggleWithDialog {
   build() {
     NavDestination() {
       Column() {
-        Text("点击弹出弹框开启关闭toggle").fontSize(20).margin({ bottom: 15 })
+        Text('点击弹出弹框开启关闭toggle').fontSize(20).margin({ bottom: 15 })
         Row() {
           Toggle({ type: ToggleType.Switch, isOn: this.isOpen })
             .width(70)
@@ -66,8 +66,8 @@ export struct toggleWithDialog {
                 console.info('Closed callbacks');
               },
               onWillDismiss: (dismissDialogAction: DismissDialogAction) => {
-                console.info("reason=" + JSON.stringify(dismissDialogAction.reason));
-                console.log("dialog onWillDismiss");
+                console.info('reason=' + JSON.stringify(dismissDialogAction.reason));
+                console.log('dialog onWillDismiss');
                 if (dismissDialogAction.reason === DismissReason.PRESS_BACK) {
                   dismissDialogAction.dismiss();
                 }
@@ -80,7 +80,7 @@ export struct toggleWithDialog {
         })
       }
       .justifyContent(FlexAlign.Center)
-      .width("100%")
+      .width('100%')
       .height(500)
       .justifyContent(FlexAlign.Center)
     }
