@@ -262,7 +262,7 @@ double RenderDialogTween::GetMaxWidthBasedOnGridType(
         return info->GetWidth(std::min(gridCount_, info->GetParent()->GetColumns()));
     }
 
-    if (deviceType == DeviceType::WATCH) {
+    if (deviceType == DeviceType::WATCH || deviceType == DeviceType::WEARABLE) {
         if (type == GridSizeType::SM) {
             return info->GetWidth(3);
         } else if (type == GridSizeType::MD) {
@@ -343,20 +343,21 @@ void RenderDialogTween::ComputeInnerLayoutParam(LayoutParam& innerLayout)
     // Set different layout param for different devices
     auto gridSizeType = ScreenSystemManager::GetInstance().GetSize(maxSize.Width());
     RefPtr<GridColumnInfo> columnInfo;
-    if (SystemProperties::GetDeviceType() == DeviceType::CAR) {
+    auto deviceType = SystemProperties::GetDeviceType();
+    if (deviceType == DeviceType::CAR) {
         columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::CAR_DIALOG);
     } else {
         columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::DIALOG);
     }
     columnInfo->GetParent()->BuildColumnWidth(maxSize.Width());
-    auto width = GetMaxWidthBasedOnGridType(columnInfo, gridSizeType, SystemProperties::GetDeviceType());
+    auto width = GetMaxWidthBasedOnGridType(columnInfo, gridSizeType, deviceType);
     if (!isLimit_) {
         innerLayout.SetMinSize(Size(0.0, 0.0));
         innerLayout.SetMaxSize(Size(maxSize.Width(), maxSize.Height()));
-    } else if (SystemProperties::GetDeviceType() == DeviceType::WATCH) {
+    } else if (deviceType == DeviceType::WATCH || deviceType == DeviceType::WEARABLE) {
         innerLayout.SetMinSize(Size(width, 0.0));
         innerLayout.SetMaxSize(Size(width, maxSize.Height()));
-    } else if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+    } else if (deviceType == DeviceType::PHONE) {
         if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
             innerLayout.SetMinSize(Size(width, 0.0));
             innerLayout.SetMaxSize(Size(width, maxSize.Height() * DIALOG_HEIGHT_RATIO_FOR_LANDSCAPE));
@@ -364,7 +365,7 @@ void RenderDialogTween::ComputeInnerLayoutParam(LayoutParam& innerLayout)
             innerLayout.SetMinSize(Size(width, 0.0));
             innerLayout.SetMaxSize(Size(width, maxSize.Height() * DIALOG_HEIGHT_RATIO));
         }
-    } else if (SystemProperties::GetDeviceType() == DeviceType::CAR) {
+    } else if (deviceType == DeviceType::CAR) {
         innerLayout.SetMinSize(Size(width, 0.0));
         innerLayout.SetMaxSize(Size(width, maxSize.Height() * DIALOG_HEIGHT_RATIO_FOR_CAR));
     } else {
