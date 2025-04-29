@@ -35,6 +35,7 @@ class ResourceObject : public AceType {
     DECLARE_ACE_TYPE(ResourceObject, AceType);
 
 public:
+    ResourceObject() = default;
     ResourceObject(int32_t id, int32_t type, const std::vector<ResourceObjectParams>& params,
         const std::string& bundleName, const std::string& moduleName, int32_t instanceId)
         : id_(id), type_(type), instanceId_(instanceId), params_(params), bundleName_(bundleName),
