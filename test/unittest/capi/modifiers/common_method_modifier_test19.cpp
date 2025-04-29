@@ -45,6 +45,7 @@ const auto MAX_RATIO = 1.0f;
 const auto EXPECTED_RATIO = 0.7f;
 const auto EXPECTED_PERIOD = 250;
 const auto DEFAULT_PERIOD = 1000;
+const auto INITIAL_PERIOD = 0;
 static const std::unordered_map<Ark_AccessibilityRoleType, std::string> ACCESSIBILITY_ROLE_MAP {
     { ARK_ACCESSIBILITY_ROLE_TYPE_ACTION_SHEET, "actionsheet" },
     { ARK_ACCESSIBILITY_ROLE_TYPE_ALERT_DIALOG, "alertdialog" },
@@ -1224,6 +1225,7 @@ HWTEST_F(CommonMethodModifierTest19, setOnVisibleAreaApproximateChangeTest2, Tes
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+
     auto func = Converter::ArkValue<Opt_VisibleAreaChangeCallback>();
     std::vector<float> ratioVec;
     ratioVec.push_back(0.5f);
@@ -1233,18 +1235,40 @@ HWTEST_F(CommonMethodModifierTest19, setOnVisibleAreaApproximateChangeTest2, Tes
     option.expectedUpdateInterval = Converter::ArkValue<Opt_Number>();
     auto cbInfoIni = eventHub->GetThrottledVisibleAreaCallback();
     EXPECT_EQ(cbInfoIni.callback, nullptr);
-    EXPECT_EQ(static_cast<int32_t>(cbInfoIni.period), 0);
+    EXPECT_EQ(static_cast<int32_t>(cbInfoIni.period), INITIAL_PERIOD);
     modifier_->setOnVisibleAreaApproximateChange(node_, &option, &func);
     auto cbInfo = eventHub->GetThrottledVisibleAreaCallback();
     EXPECT_EQ(cbInfo.callback, nullptr);
-    EXPECT_EQ(static_cast<int32_t>(cbInfo.period), 0);
+    EXPECT_EQ(static_cast<int32_t>(cbInfo.period), DEFAULT_PERIOD);
+}
 
+/*
+ * @tc.name: setOnVisibleAreaApproximateChangeTest3
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setOnVisibleAreaApproximateChangeTest3, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnVisibleAreaApproximateChange, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+
+    std::vector<float> ratioVec;
+    ratioVec.push_back(0.5f);
+    Converter::ArkArrayHolder<Array_Number> vecHolder(ratioVec);
+    Ark_VisibleAreaEventOptions option;
+    option.ratios = vecHolder.ArkValue();
+    option.expectedUpdateInterval = Converter::ArkValue<Opt_Number>();
     void (*emptyCallback)(const Ark_Int32, const Ark_Boolean, const Ark_Number) =
     [](const Ark_Int32 resourceId, const Ark_Boolean isExpanding, const Ark_Number currentRatio) {
     };
     const int32_t contextId = 123;
     auto arkEmptyfunc = Converter::ArkValue<VisibleAreaChangeCallback>(emptyCallback, contextId);
     auto emptyFunc = Converter::ArkValue<Opt_VisibleAreaChangeCallback>(arkEmptyfunc);
+    auto cbInfoIni = eventHub->GetThrottledVisibleAreaCallback();
+    EXPECT_EQ(cbInfoIni.callback, nullptr);
+    EXPECT_EQ(static_cast<int32_t>(cbInfoIni.period), INITIAL_PERIOD);
     modifier_->setOnVisibleAreaApproximateChange(node_, &option, &emptyFunc);
     auto cbInfo2 = eventHub->GetThrottledVisibleAreaCallback();
     EXPECT_NE(cbInfo2.callback, nullptr);

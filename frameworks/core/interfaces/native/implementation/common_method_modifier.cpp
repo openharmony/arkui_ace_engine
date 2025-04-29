@@ -5525,17 +5525,18 @@ void OnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    CHECK_NULL_VOID(event);
-    auto arkCallback = Converter::OptConvert<VisibleAreaChangeCallback>(*event);
-    CHECK_NULL_VOID(arkCallback);
-    auto weakNode = AceType::WeakClaim(frameNode);
-    auto onVisibleAreaApproximateChange =
-        [callback = CallbackHelper(arkCallback.value()), node = weakNode](bool visible, double ratio) {
-            Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
-            Ark_Number currentRatio = Converter::ArkValue<Ark_Number>(static_cast<float>(ratio));
-            PipelineContext::SetCallBackNode(node);
-            callback.Invoke(isExpanding, currentRatio);
-        };
+    auto arkCallback = event ? Converter::OptConvert<VisibleAreaChangeCallback>(*event) : std::nullopt;
+    std::function<void(bool, double)> onVisibleAreaApproximateChange = nullptr;
+    if (arkCallback) {
+        auto weakNode = AceType::WeakClaim(frameNode);
+        onVisibleAreaApproximateChange =
+            [callback = CallbackHelper(arkCallback.value()), node = weakNode](bool visible, double ratio) {
+                Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
+                Ark_Number currentRatio = Converter::ArkValue<Ark_Number>(static_cast<float>(ratio));
+                PipelineContext::SetCallBackNode(node);
+                callback.Invoke(isExpanding, currentRatio);
+            };
+    }
     std::vector<float> rawRatioVec = Converter::Convert<std::vector<float>>(options->ratios);
     size_t size = rawRatioVec.size();
     std::vector<double> ratioVec;
@@ -5552,10 +5553,11 @@ void OnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
     }
     auto expectedUpdateInterval = Converter::OptConvert<int32_t>(options->expectedUpdateInterval);
     if (expectedUpdateInterval) {
-        ViewAbstract::SetOnVisibleAreaApproximateChange(frameNode, onVisibleAreaApproximateChange, ratioVec,
-            expectedUpdateInterval.value());
+        ViewAbstract::SetOnVisibleAreaApproximateChange(frameNode, std::move(onVisibleAreaApproximateChange),
+            ratioVec, expectedUpdateInterval.value());
     } else {
-        ViewAbstract::SetOnVisibleAreaApproximateChange(frameNode, onVisibleAreaApproximateChange, ratioVec);
+        ViewAbstract::SetOnVisibleAreaApproximateChange(frameNode, std::move(onVisibleAreaApproximateChange),
+            ratioVec);
     }
 }
 void KeyboardShortcutImpl(Ark_NativePointer node,
