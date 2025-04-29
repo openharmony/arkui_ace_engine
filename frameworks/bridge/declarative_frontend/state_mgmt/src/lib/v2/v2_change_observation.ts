@@ -194,6 +194,12 @@ class ObserveV2 {
   // clear any previously created dependency view model object to elmtId
   // find these view model objects with the reverse map id2targets_
   public clearBinding(id: number): void {
+    // if there is no targets for current id, do not push it to idle task
+    // need to ensure the clearBinding is executed before addRef
+    // if there are exceptional cases, either fix them or remove this logic.
+    if (this.id2targets_[id] === undefined) {
+      return;
+    }
     if (this.idleTasks_) {
       this.idleTasks_[this.idleTasks_.end++] = [this.clearBindingInternal, id];
     } else {
@@ -253,14 +259,18 @@ class ObserveV2 {
     }
 
     while (this.idleTasks_.first < this.idleTasks_.end) {
-      const [func, ...args] = this.idleTasks_[this.idleTasks_.first++] || [];
+      const [func, ...args] = this.idleTasks_[this.idleTasks_.first] || [];
       func?.apply(this, args);
-      if (this.idleTasks_.first % 100 === 0 && Date.now() >= deadline - 1) {
+      delete this.idleTasks_[this.idleTasks_.first];
+      this.idleTasks_.first++;
+      // ensure that there is no accumulation in idleTask leading to oom
+      if (this.idleTasks_.end - this.idleTasks_.first < 1000 && this.idleTasks_.first % 100 === 0 && Date.now() >= deadline - 1) {
         return;
       }
     }
     this.idleTasks_.first = 0;
     this.idleTasks_.end = 0;
+    this.idleTasks_.length = 1000;
   }
 
   /**
