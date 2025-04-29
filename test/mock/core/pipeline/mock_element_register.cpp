@@ -24,6 +24,15 @@ namespace OHOS::Ace {
 thread_local ElementRegister* ElementRegister::instance_ = nullptr;
 std::mutex ElementRegister::mutex_;
 
+ElementRegister* ElementRegister::GetGlobalInstance()
+{
+    if (!ElementRegister::instance_) {
+        ElementRegister::instance_ = new ElementRegister();
+    }
+    static ElementRegister* globalInstance = ElementRegister::instance_;
+    return globalInstance;
+}
+
 ElementRegister* ElementRegister::GetInstance()
 {
     if (ElementRegister::instance_ == nullptr) {
