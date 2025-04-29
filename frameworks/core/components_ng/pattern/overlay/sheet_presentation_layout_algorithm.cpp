@@ -235,6 +235,7 @@ void SheetPresentationLayoutAlgorithm::ComputeCenterStyleOffset(LayoutWrapper* l
         }
     }
     sheetOffsetX_ = mainWindowRect.GetX() + (mainWindowRect.Width()  - sheetFrameSize.Width()) / DOUBLE_SIZE;
+    MinusSubwindowDistance(sheetWrapper);
     std::vector<Rect> rects;
     auto rect = Rect(sheetOffsetX_, sheetOffsetY_,
         sheetFrameSize.Width(), sheetFrameSize.Height());
@@ -255,19 +256,7 @@ void SheetPresentationLayoutAlgorithm::ComputePopupStyleOffset(LayoutWrapper* la
         CHECK_NULL_VOID(sheetWrapper);
         auto sheetWrapperPattern = sheetWrapper->GetPattern<SheetWrapperPattern>();
         CHECK_NULL_VOID(sheetWrapperPattern);
-        if (sheetWrapperPattern->ShowInUEC()) {
-            auto UECId = SubwindowManager::GetInstance()->GetParentContainerId(sheetWrapperPattern->GetSubWindowId());
-            auto container = AceEngine::Get().GetContainer(UECId);
-            CHECK_NULL_VOID(container);
-            auto mainWindowContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-            auto UECWindowGlobalRect = mainWindowContext->GetDisplayWindowRectInfo();
-            sheetOffsetX_ += UECWindowGlobalRect.Left();
-            sheetOffsetY_ += UECWindowGlobalRect.Top();
-        } else {
-            auto mainWindowRect = sheetWrapperPattern->GetMainWindowRect();
-            sheetOffsetX_ += mainWindowRect.GetX();
-            sheetOffsetY_ += mainWindowRect.GetY();
-        }
+        MinusSubwindowDistance(sheetWrapper);
         std::vector<Rect> rects;
         auto rect = Rect(sheetOffsetX_, sheetOffsetY_,
             host->GetGeometryNode()->GetFrameSize().Width(), host->GetGeometryNode()->GetFrameSize().Height());
@@ -276,6 +265,21 @@ void SheetPresentationLayoutAlgorithm::ComputePopupStyleOffset(LayoutWrapper* la
         subWindowMgr->SetHotAreas(rects, SubwindowType::TYPE_SHEET, host->GetId(),
             sheetWrapperPattern->GetSubWindowId());
     }
+}
+
+void SheetPresentationLayoutAlgorithm::MinusSubwindowDistance(const RefPtr<FrameNode>& sheetWrapper)
+{
+    // when subwindow is not full screen for split or small floating window
+    CHECK_NULL_VOID(sheetWrapper);
+    auto sheetWrapperPattern = sheetWrapper->GetPattern<SheetWrapperPattern>();
+    CHECK_NULL_VOID(sheetWrapperPattern);
+    auto subContainer = AceEngine::Get().GetContainer(sheetWrapperPattern->GetSubWindowId());
+    CHECK_NULL_VOID(subContainer);
+    auto subWindowContext = AceType::DynamicCast<NG::PipelineContext>(subContainer->GetPipelineContext());
+    CHECK_NULL_VOID(subWindowContext);
+    auto subWindowGlobalRect = subWindowContext->GetDisplayWindowRectInfo();
+    sheetOffsetX_ -= subWindowGlobalRect.Left();
+    sheetOffsetY_ -= subWindowGlobalRect.Top();
 }
 
 void SheetPresentationLayoutAlgorithm::LayoutTitleBuilder(const NG::OffsetF& translate,
