@@ -3184,4 +3184,43 @@ HWTEST_F(FrameNodeTestNg, FrameNodeSetCustomPropertyMapFlagByKey001, TestSize.Le
     EXPECT_EQ(value1, "value1");
     EXPECT_EQ(flagValue1, "0");
 }
+
+/**
+ * @tc.name: FrameNodeIsJsCustomPropertyUpdated001
+ * @tc.desc: Test IsJsCustomPropertyUpdated.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeIsJsCustomPropertyUpdated001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. customPropertyMap_ is empty, test IsJsCustomPropertyUpdated.
+     * @tc.expected: expect result true.
+     */
+    bool result = frameNode->IsJsCustomPropertyUpdated();
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step2. frameNode has one customProperty and flag 1.
+     * @tc.expected: expect result true.
+     */
+    frameNode->AddCustomProperty("key", "value");
+    result = frameNode->IsJsCustomPropertyUpdated();
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.steps: step3. frameNode has another customProperty and flag 0.
+     * @tc.expected: expect result false.
+     */
+    frameNode->AddCustomProperty("key1", "value1");
+    frameNode->SetCustomPropertyMapFlagByKey("key1");
+    result = frameNode->IsJsCustomPropertyUpdated();
+    EXPECT_FALSE(result);
+}
 } // namespace OHOS::Ace::NG
