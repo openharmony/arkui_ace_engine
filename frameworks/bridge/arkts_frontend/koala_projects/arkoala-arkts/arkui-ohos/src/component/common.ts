@@ -53,10 +53,11 @@ import { AnimationRange_Number } from "./type-replacements"
 import { ScrollState } from "./list"
 import { _animateTo } from "./../handwritten"
 import { GlobalScope } from "./GlobalScope"
-import { ArkCommonAttributeSet, applyUIAttributes } from "../handwritten/modifiers/ArkCommonModifier"
+import { ArkCommonAttributeSet, applyUIAttributes, applyUIAttributesUpdate } from "../handwritten/modifiers/ArkCommonModifier"
 import { CommonModifier } from "../CommonModifier"
 import { AttributeUpdater } from "../ohos.arkui.modifier"
 import { ArkBaseNode } from "../handwritten/modifiers/ArkBaseNode"
+import { CurrentStateEnum } from "../AttributeUpdater"
 export interface ICurve {
     interpolate(fraction: number): number
 }
@@ -9787,14 +9788,19 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this._modifierHost!
     }
-    getAttributeSet(): ArkCommonAttributeSet | undefined {
-        if (this.getPeer()._attributeSet == null) {
-            return undefined;
-        }
+    getAttributeSet(): ArkCommonAttributeSet  {
         return this.getPeer()._attributeSet as ArkCommonAttributeSet;
     }
-    initAttributeSet():void {
-        this.getPeer()._attributeSet = new ArkCommonAttributeSet();
+
+    initAttributeSet<T>(modifier: AttributeModifier<T>): void {
+        let isCommonModifier: boolean = modifier instanceof CommonModifier;
+        if (isCommonModifier) {
+            let commonModifier = modifier as object as CommonModifier;
+            this.getPeer()._attributeSet = commonModifier.attributeSet;
+        } else {
+            this.getPeer()._attributeSet = new ArkCommonAttributeSet();
+        }
+
     }
     getPeer(): ArkCommonMethodPeer {
         return (this.peer as ArkCommonMethodPeer)
@@ -12180,35 +12186,32 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         }
         return this
     }
+  
     /** @memo */
-    public attributeModifier<T>(modifier: AttributeModifier<T> ): this {
-        if (modifier == undefined) {
-            return this;
-        }
+    public attributeModifier<T>(modifier: AttributeModifier<T>): this {
+
         let peerNode = this.getPeer()
-        if (!this.getAttributeSet()) {
-            let isCommonModifier: boolean = (modifier instanceof CommonModifier);
-            if (isCommonModifier) {
-                let commonModifier = modifier as object as CommonModifier;
-                peerNode._attributeSet = commonModifier.attribute;
-            } else {
-                this.initAttributeSet();
-            }
-        }
-        applyUIAttributes(modifier!, peerNode);
+        this.initAttributeSet(modifier);
         let isAttributeUpdater: boolean = (modifier instanceof AttributeUpdater);
         if (isAttributeUpdater) {
             let attributeUpdater = modifier as object as AttributeUpdater<T, (...params:Object[]) => T>
-            attributeUpdater.initializeModifier(peerNode._attributeSet as T);
-            attributeUpdater.onComponentChanged(peerNode._attributeSet as T);
+            if(attributeUpdater.currentState == CurrentStateEnum.INIT) {
+                attributeUpdater.currentState = CurrentStateEnum.UPDATE;
+                attributeUpdater.initializeModifier(peerNode._attributeSet as T);
+            } else {
+                attributeUpdater.onComponentChanged(peerNode._attributeSet as T);
+            }
             attributeUpdater.attribute = this.getModifierHost() as T
             attributeUpdater.updateConstructorParams = (...params: Object[]) => {
                 let attribute = this.getModifierHost()! as T;
-                this.getModifierHost()!.constructParam(params);
+                this.getModifierHost()!.constructParam(...params);
                 return attribute;
             };
+            applyUIAttributesUpdate(modifier!, peerNode);
+        } else {
+            applyUIAttributes(modifier!, peerNode);
         }
-         this.getAttributeSet()!.applyModifierPatch(peerNode);
+         this.getAttributeSet().applyModifierPatch(peerNode);
         return this;
     }
 

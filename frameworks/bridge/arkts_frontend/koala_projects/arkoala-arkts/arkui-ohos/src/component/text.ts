@@ -27,7 +27,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ShadowOptions, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ShadowOptions, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod, AttributeModifier } from "./common"
 import { Font, ResourceColor, Length } from "./units"
 import { Resource } from "global/resource"
 import { FontStyle, FontWeight, TextAlign, TextCase, CopyOptions, TextHeightAdaptivePolicy, WordBreak, LineBreakStrategy, EllipsisMode, TextSelectableMode, Color, TextOverflow } from "./enums"
@@ -38,6 +38,7 @@ import { SelectionMenuOptions } from "./richEditor"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ArkTextNode } from "../handwritten/modifiers/ArkTextNode"
 import { ArkTextAttributeSet } from "../handwritten/modifiers/ArkTextModifier"
+import { CommonModifier } from "../CommonModifier"
 export class TextControllerInternal {
     public static fromPtr(ptr: KPointer): TextController {
         const obj : TextController = new TextController()
@@ -1296,14 +1297,11 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements UIText
         }
         return this._modifierHost!
     }
-    getAttributeSet(): ArkTextAttributeSet | undefined {
-        if (this.getPeer()._attributeSet == null) {
-            return undefined;
-        }
+    getAttributeSet(): ArkTextAttributeSet{
         return this.getPeer()._attributeSet as ArkTextAttributeSet;
     }
-    initAttributeSet():void {
-        this.getPeer()._attributeSet = new ArkTextAttributeSet();
+    initAttributeSet<T>(modifier: AttributeModifier<T>): void {
+     
     }
 
     getPeer(): ArkTextPeer {

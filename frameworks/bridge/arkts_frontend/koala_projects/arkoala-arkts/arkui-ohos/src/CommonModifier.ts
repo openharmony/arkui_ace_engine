@@ -3,11 +3,7 @@ import {  AttributeModifier, ClickEvent, CommonAttribute, Length, ResourceColor,
 
 export class CommonModifier implements AttributeModifier<CommonAttribute> {
     
-    private attributeSet: ArkCommonAttributeSet = new ArkCommonAttributeSet();
-
-    get attribute(): ArkCommonAttributeSet {
-        return this.attributeSet;
-    }
+    attributeSet: ArkCommonAttributeSet = new ArkCommonAttributeSet();
 
     applyNormalAttribute(instance: CommonAttribute): void {
     }

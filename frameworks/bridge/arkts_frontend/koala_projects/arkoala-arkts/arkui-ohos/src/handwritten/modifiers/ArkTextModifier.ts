@@ -17,7 +17,7 @@ import { int32 } from "@koalaui/common"
 
 
 import { ArkCommonAttributeSet, modifierNullWithKey, modifierWithKey, ModifierWithKey } from "./ArkCommonModifier";
-import { CopyOptions, CustomBuilder, DecorationStyleInterface, EditMenuOptions, EllipsisMode, Font, FontSettingOptions, FontStyle, FontWeight, Length, LineBreakStrategy, MarqueeState, ResourceColor, SelectionMenuOptions, ShadowOptions, TextAlign, TextAttribute, TextCase, TextDataDetectorConfig, TextHeightAdaptivePolicy, TextMarqueeOptions, TextOverflowOptions, TextResponseType, TextSelectableMode, TextSpanType, WordBreak } from "../../component";
+import { AttributeModifier, CopyOptions, CustomBuilder, DecorationStyleInterface, EditMenuOptions, EllipsisMode, Font, FontSettingOptions, FontStyle, FontWeight, Length, LineBreakStrategy, MarqueeState, ResourceColor, SelectionMenuOptions, ShadowOptions, TextAlign, TextAttribute, TextCase, TextDataDetectorConfig, TextHeightAdaptivePolicy, TextMarqueeOptions, TextOverflowOptions, TextResponseType, TextSelectableMode, TextSpanType, WordBreak } from "../../component";
 import { ArkCommonMethodPeer } from "../../component";
 import { ArkTextPeer } from "../../component";
 import { LengthMetrics } from "../../Graphics";
@@ -188,5 +188,13 @@ export class ArkTextAttributeSet extends ArkCommonAttributeSet implements TextAt
         return this;
     }
 
+}
+export class TextModifier extends ArkTextAttributeSet implements AttributeModifier<TextAttribute> {
+    attributeSet: ArkTextAttributeSet = new ArkTextAttributeSet();
+    applyNormalAttribute(instance: TextAttribute) : void {}
+    applyPressedAttribute(instance: TextAttribute) : void {}
+    applyFocusedAttribute(instance: TextAttribute) : void {}
+    applyDisabledAttribute(instance: TextAttribute) : void {}
+    applySelectedAttribute(instance: TextAttribute) : void {}
 }
 
