@@ -398,6 +398,19 @@ class ArkEdgeEffect {
   }
 }
 
+class ArkScrollBarMagin {
+  start?: LengthMetrics;
+  end?: LengthMetrics;
+  constructor() {
+    this.start = undefined;
+    this.end = undefined;
+  }
+  isEqual(another: ArkScrollBarMagin): boolean {
+    return (this.start === another.start) &&
+      (this.end === another.end);
+  }
+}
+
 class ArkFadingEdge {
   value: boolean;
   options?: FadingEdgeOptions | undefined;

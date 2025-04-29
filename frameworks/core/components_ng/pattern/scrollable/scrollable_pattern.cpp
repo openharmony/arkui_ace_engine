@@ -1142,6 +1142,14 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
         if (barColor) {
             scrollBar_->SetForegroundColor(barColor.value());
         }
+        auto scrollableBarMargin = property->GetScrollBarMargin();
+        if (scrollableBarMargin) {
+            auto scrollBarMargin = scrollBar_->GetScrollBarMargin();
+            if (!scrollBarMargin.has_value() || scrollBarMargin != scrollableBarMargin) {
+                scrollBar_->SetScrollBarMargin(scrollableBarMargin.value());
+                scrollBar_->FlushBarWidth();
+            }
+        }
     }
 }
 

@@ -415,4 +415,31 @@ bool ScrollableModelNG::GetBackToTop(FrameNode* frameNode)
     CHECK_NULL_RETURN(pattern, false);
     return pattern->GetBackToTop();
 }
+
+void ScrollableModelNG::SetScrollBarMargin(const ScrollBarMargin& scrollBarMargin)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetScrollBarMargin(frameNode, scrollBarMargin);
+}
+
+void ScrollableModelNG::SetScrollBarMargin(FrameNode* frameNode, const ScrollBarMargin& scrollBarMargin)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMargin, scrollBarMargin, frameNode);
+}
+
+void ScrollableModelNG::ResetScrollBarMargin(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMargin, frameNode);
+}
+
+void ScrollableModelNG::GetScrollBarMargin(FrameNode* frameNode, ScrollBarMargin& scrollBarMargin)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    scrollBarMargin = paintProperty->GetScrollBarMargin().value_or(ScrollBarMargin());
+}
 } // namespace OHOS::Ace::NG
