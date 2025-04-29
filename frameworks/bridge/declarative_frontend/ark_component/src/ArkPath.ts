@@ -18,14 +18,14 @@ class ArkPathComponent extends ArkCommonShapeComponent implements PathAttribute 
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  commands(value: string): this {
+  commands(value: ResourceStr): this {
     modifierWithKey(this._modifiersWithKeys, CommandsModifier.identity, CommandsModifier, value);
     return this;
   }
 }
 
-class CommandsModifier extends ModifierWithKey<string> {
-  constructor(value: string) {
+class CommandsModifier extends ModifierWithKey<ResourceStr> {
+  constructor(value: ResourceStr) {
     super(value);
   }
   static identity: Symbol = Symbol('commands');
@@ -38,11 +38,7 @@ class CommandsModifier extends ModifierWithKey<string> {
   }
 
   checkObjectDiff(): boolean {
-    if (isString(this.stageValue) && isString(this.value)) {
-      return this.stageValue !== this.value;
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 

@@ -49,15 +49,27 @@ void JSPath::Create(const JSCallbackInfo& info)
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> commands = obj->GetProperty("commands");
-        if (commands->IsString()) {
-            SetCommands(commands->ToString());
+        std::string strRet;
+        if (ParseJsString(commands, strRet)) {
+            PathModel::GetInstance()->SetCommands(strRet);
         }
     }
 }
 
-void JSPath::SetCommands(const std::string& commands)
+void JSPath::SetCommands(const JSCallbackInfo& info)
 {
-    PathModel::GetInstance()->SetCommands(commands);
+    if (info.Length() < 1) {
+        return;
+    }
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> commandsObj = JSRef<JSObject>::Cast(info[0]);
+        std::string strRet;
+        if (ParseJsString(commandsObj, strRet)) {
+            PathModel::GetInstance()->SetCommands(strRet);
+        }
+    } else if (info[0]->IsString()) {
+        PathModel::GetInstance()->SetCommands(info[0]->ToString());
+    }
 }
 
 void JSPath::ObjectCommands(const JSCallbackInfo& info)

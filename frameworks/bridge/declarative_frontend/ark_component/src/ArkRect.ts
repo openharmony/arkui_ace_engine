@@ -15,8 +15,8 @@
 
 /// <reference path='./import.ts' />
 /// <reference path="./ArkCommonShape.ts" />
-class RectRadiusWidthModifier extends ModifierWithKey<string | number> {
-  constructor(value: string | number) {
+class RectRadiusWidthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
     super(value);
   }
   static identity: Symbol = Symbol('rectRadiusWidth');
@@ -28,8 +28,8 @@ class RectRadiusWidthModifier extends ModifierWithKey<string | number> {
     }
   }
 }
-class RectRadiusHeightModifier extends ModifierWithKey<string | number> {
-  constructor(value: string | number) {
+class RectRadiusHeightModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
     super(value);
   }
   static identity: Symbol = Symbol('rectRadiusHeight');
@@ -41,8 +41,8 @@ class RectRadiusHeightModifier extends ModifierWithKey<string | number> {
     }
   }
 }
-class RectRadiusModifier extends ModifierWithKey<string | number | Array<any>> {
-  constructor(value: string | number | Array<any>) {
+class RectRadiusModifier extends ModifierWithKey<Length | Array<any>> {
+  constructor(value: Length | Array<any>) {
     super(value);
   }
   static identity: Symbol = Symbol('rectRadius');
@@ -55,22 +55,22 @@ class RectRadiusModifier extends ModifierWithKey<string | number | Array<any>> {
   }
 
   checkObjectDiff(): boolean {
-    return !(this.stageValue === this.value);
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 class ArkRectComponent extends ArkCommonShapeComponent implements RectAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  radiusWidth(value: string | number): this {
+  radiusWidth(value: Length): this {
     modifierWithKey(this._modifiersWithKeys, RectRadiusWidthModifier.identity, RectRadiusWidthModifier, value);
     return this;
   }
-  radiusHeight(value: string | number): this {
+  radiusHeight(value: Length): this {
     modifierWithKey(this._modifiersWithKeys, RectRadiusHeightModifier.identity, RectRadiusHeightModifier, value);
     return this;
   }
-  radius(value: string | number | Array<any>): this {
+  radius(value: Length | Array<any>): this {
     modifierWithKey(this._modifiersWithKeys, RectRadiusModifier.identity, RectRadiusModifier, value);
     return this;
   }
