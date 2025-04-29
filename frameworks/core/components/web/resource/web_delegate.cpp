@@ -74,6 +74,8 @@ constexpr char WEB_EVENT_PAGEFINISH[] = "onPageFinished";
 constexpr char WEB_EVENT_PAGEERROR[] = "onPageError";
 constexpr char WEB_EVENT_ONMESSAGE[] = "onMessage";
 constexpr char WEB_EVENT_ROUTERPUSH[] = "routerPush";
+constexpr char WEB_EVENT_LOADSTART[] = "OnLoadStarted";
+constexpr char WEB_EVENT_LOADFINISH[] = "OnLoadFinished";
 
 constexpr char WEB_CREATE[] = "web";
 constexpr char NTC_PARAM_WEB[] = "web";
@@ -882,6 +884,8 @@ void WebDelegate::UnregisterEvent()
     resRegister->UnregisterEvent(MakeEventHash(WEB_EVENT_PAGEERROR));
     resRegister->UnregisterEvent(MakeEventHash(WEB_EVENT_ROUTERPUSH));
     resRegister->UnregisterEvent(MakeEventHash(WEB_EVENT_ONMESSAGE));
+    resRegister->UnregisterEvent(MakeEventHash(WEB_EVENT_LOADSTART));
+    resRegister->UnregisterEvent(MakeEventHash(WEB_EVENT_LOADFINISH));
 }
 
 void WebDelegate::SetRenderWeb(const WeakPtr<RenderWeb>& renderWeb)
@@ -1810,6 +1814,12 @@ void WebDelegate::InitWebEvent()
     if (!webCom->GetMessageEventId().IsEmpty()) {
         onMessage_ = AceAsyncEvent<void(const std::string&)>::Create(webCom->GetMessageEventId(), context);
     }
+    if (!webCom->GetOnLoadStartedEventId().IsEmpty()) {
+        onLoadStarted_ = AceAsyncEvent<void(const std::string&)>::Create(webCom->GetOnLoadStartedEventId(), context);
+    }
+    if (!webCom->GetOnLoadFinishedEventId().IsEmpty()) {
+        onLoadFinished_ = AceAsyncEvent<void(const std::string&)>::Create(webCom->GetOnLoadFinishedEventId(), context);
+    }
 }
 
 #ifdef OHOS_STANDARD_SYSTEM
@@ -2024,6 +2034,12 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onAdsBlockedV2_ = useNewPipe ? eventHub->GetOnAdsBlockedEvent()
                                      : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                          webCom->GetAdsBlockedEventId(), oldContext);
+        onLoadStartedV2_ = useNewPipe ? eventHub->GetOnLoadStartedEvent()
+                                      : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                          webCom->GetOnLoadStartedEventId(), oldContext);
+        onLoadFinishedV2_ = useNewPipe ? eventHub->GetOnLoadFinishedEvent()
+                                      : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                          webCom->GetOnLoadFinishedEventId(), oldContext);
     }
     return true;
 }
@@ -2177,6 +2193,12 @@ void WebDelegate::RegisterOHOSWebEventAndMethord()
     }
     if (!webCom->GetPageErrorEventId().IsEmpty()) {
         onPageError_ = AceAsyncEvent<void(const std::string&)>::Create(webCom->GetPageErrorEventId(), context);
+    }
+    if (!webCom->GetOnLoadStartedEventId().IsEmpty()) {
+        onLoadStarted_ = AceAsyncEvent<void(const std::string&)>::Create(webCom->GetOnLoadStartedEventId(), context);
+    }
+    if (!webCom->GetOnLoadFinishedEventId().IsEmpty()) {
+        onLoadFinished_ = AceAsyncEvent<void(const std::string&)>::Create(webCom->GetOnLoadFinishedEventId(), context);
     }
 }
 
@@ -4662,6 +4684,18 @@ void WebDelegate::RegisterWebEvent()
             delegate->OnMessage(param);
         }
     });
+    resRegister->RegisterEvent(MakeEventHash(WEB_EVENT_LOADSTART), [weak = WeakClaim(this)](const std::string& param) {
+        auto delegate = weak.Upgrade();
+        if (delegate) {
+            delegate->OnLoadStarted(param);
+        }
+    });
+    resRegister->RegisterEvent(MakeEventHash(WEB_EVENT_LOADFINISH), [weak = WeakClaim(this)](const std::string& param) {
+        auto delegate = weak.Upgrade();
+        if (delegate) {
+            delegate->OnLoadFinished(param);
+        }
+    });
 }
 
 // upper ui component which inherited from WebComponent
@@ -4811,6 +4845,41 @@ void WebDelegate::OnPageFinished(const std::string& param)
             delegate->RecordWebEvent(Recorder::EventType::WEB_PAGE_END, param);
         },
         TaskExecutor::TaskType::JS, "ArkUIWebPageFinished");
+}
+
+void WebDelegate::OnLoadStarted(const std::string& param)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), param]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            webEventHub->FireOnLoadStartedEvent(std::make_shared<LoadStartedEvent>(param));
+            delegate->RecordWebEvent(Recorder::EventType::LOAD_STARTED, param);
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebLoadStarted");
+}
+
+void WebDelegate::OnLoadFinished(const std::string& param)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), param]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            webEventHub->FireOnLoadFinishedEvent(std::make_shared<LoadFinishedEvent>(param));
+            webPattern->OnScrollEndRecursive(std::nullopt);
+            delegate->RecordWebEvent(Recorder::EventType::LOAD_FINISHED, param);
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebLoadFinished");
 }
 
 void WebDelegate::OnProgressChanged(int param)

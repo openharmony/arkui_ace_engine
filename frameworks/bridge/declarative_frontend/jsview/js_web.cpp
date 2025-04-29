@@ -2058,6 +2058,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("runJavaScriptOnDocumentEnd", &JSWeb::RunJavaScriptOnDocumentEnd);
     JSClass<JSWeb>::StaticMethod("enableWebAVSession", &JSWeb::EnableWebAVSession);
     JSClass<JSWeb>::StaticMethod("enableFollowSystemFontWeight", &JSWeb::EnableFollowSystemFontWeight);
+    JSClass<JSWeb>::StaticMethod("onLoadStarted", &JSWeb::OnLoadStarted);
+    JSClass<JSWeb>::StaticMethod("onLoadFinished", &JSWeb::OnLoadFinished);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -2116,7 +2118,7 @@ JSRef<JSVal> WebDialogEventToJSValue(const WebDialogEvent& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
-JSRef<JSVal> LoadWebPageFinishEventToJSValue(const LoadWebPageFinishEvent& eventInfo)
+JSRef<JSVal> LoadEventToJSValue(const LoadEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty("url", eventInfo.GetLoadedUrl());
@@ -2149,13 +2151,6 @@ JSRef<JSVal> FullScreenEnterEventToJSValue(const FullScreenEnterEvent& eventInfo
 JSRef<JSVal> FullScreenExitEventToJSValue(const FullScreenExitEvent& eventInfo)
 {
     return JSRef<JSVal>::Make(ToJSValue(eventInfo.IsFullScreen()));
-}
-
-JSRef<JSVal> LoadWebPageStartEventToJSValue(const LoadWebPageStartEvent& eventInfo)
-{
-    JSRef<JSObject> obj = JSRef<JSObject>::New();
-    obj->SetProperty("url", eventInfo.GetLoadedUrl());
-    return JSRef<JSVal>::Cast(obj);
 }
 
 JSRef<JSVal> LoadWebProgressChangeEventToJSValue(const LoadWebProgressChangeEvent& eventInfo)
@@ -2670,7 +2665,7 @@ void JSWeb::OnPageStart(const JSCallbackInfo& args)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebPageStartEvent, 1>>(
-        JSRef<JSFunc>::Cast(args[0]), LoadWebPageStartEventToJSValue);
+        JSRef<JSFunc>::Cast(args[0]), LoadEventToJSValue);
 
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
@@ -2695,7 +2690,7 @@ void JSWeb::OnPageFinish(const JSCallbackInfo& args)
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadWebPageFinishEvent, 1>>(
-        JSRef<JSFunc>::Cast(args[0]), LoadWebPageFinishEventToJSValue);
+        JSRef<JSFunc>::Cast(args[0]), LoadEventToJSValue);
 
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
@@ -5736,4 +5731,55 @@ void JSWeb::EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)
 {
     WebModel::GetInstance()->SetEnableFollowSystemFontWeight(enableFollowSystemFontWeight);
 }
+
+void JSWeb::OnLoadStarted(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadStartedEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), LoadEventToJSValue);
+
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                          const BaseEventInfo* info) {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_VOID(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            pipelineContext->UpdateCurrentActiveNode(node);
+        }
+        auto* eventInfo = TypeInfoHelper::DynamicCast<LoadStartedEvent>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetOnLoadStarted(jsCallback);
+}
+
+void JSWeb::OnLoadFinished(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadFinishedEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), LoadEventToJSValue);
+
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                          const BaseEventInfo* info) {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_VOID(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            pipelineContext->UpdateCurrentActiveNode(node);
+        }
+        auto* eventInfo = TypeInfoHelper::DynamicCast<LoadFinishedEvent>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetOnLoadFinished(jsCallback);
+}
+
 } // namespace OHOS::Ace::Framework

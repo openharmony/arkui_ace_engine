@@ -1365,4 +1365,25 @@ bool WebClientImpl::OnBeforeUnloadByJSV2(
     return OnJsCommonDialog(this, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD, result, url, message, "",
         delegate->GetTaskExecutor(), isReload);
 }
+
+void WebClientImpl::OnLoadStarted(const std::string& url)
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnLoadStarted(url);
+}
+
+void WebClientImpl::OnLoadFinished(const std::string& url)
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnLoadFinished(url);
+}
+
 } // namespace OHOS::Ace
