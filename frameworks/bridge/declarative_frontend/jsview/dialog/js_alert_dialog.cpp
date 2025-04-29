@@ -432,7 +432,7 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         return;
     }
 
-    DialogProperties properties { .type = DialogType::ALERT_DIALOG };
+    DialogProperties properties { .type = DialogType::ALERT_DIALOG, .isAlertDialog = true };
     if (args[0]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(args[0]);
         auto dialogNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
