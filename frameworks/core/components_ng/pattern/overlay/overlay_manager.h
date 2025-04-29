@@ -385,6 +385,7 @@ public:
     void RemoveDragPixelMap();
     void UpdatePixelMapScale(float& scale);
     void RemoveFilter();
+    void RemoveFilterWithNode(const RefPtr<FrameNode>& filterNode);
     void RemoveFilterAnimation();
     void RemoveEventColumn();
     void UpdatePixelMapPosition(bool isSubwindowOverlay = false);
