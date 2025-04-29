@@ -23,13 +23,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TapRecognizerAccessor {
 void DestroyPeerImpl(Ark_TapRecognizer peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_TapRecognizer CtorImpl()
 {
-    auto* peer = new TapRecognizerPeer();
-    peer->tapRecognizer = AceType::MakeRefPtr<Ace::NG::ClickRecognizer>();
-    return peer;
+    return PeerUtils::CreatePeer<TapRecognizerPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {

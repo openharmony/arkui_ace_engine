@@ -25,21 +25,7 @@ using namespace testing;
 using namespace testing::ext;
 
 class TapRecognizerAccessorTest : public AccessorTestBase<GENERATED_ArkUITapRecognizerAccessor,
-    &GENERATED_ArkUIAccessors::getTapRecognizerAccessor, TapRecognizerPeer> {
-public:
-    // void *CreatePeerInstance() override
-    // {
-    //     auto value = Converter::ArkValue<Opt_TapGestureParameters>();
-    //     return accessor_->ctor(&value);
-    // }
-    // void SetUp(void) override
-    // {
-    //     AccessorTestCtorBase::SetUp();
-    //     gesture_ = AceType::MakeRefPtr<MockTapGesture>();
-    //     peer_->gesture = gesture_;
-    // }
-    // RefPtr<MockTapGesture> gesture_;
-};
+    &GENERATED_ArkUIAccessors::getTapRecognizerAccessor, TapRecognizerPeer> {};
 
 /**
  * @tc.name: CreatePeerTest
@@ -62,19 +48,15 @@ HWTEST_F(TapRecognizerAccessorTest, GetTapCountTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getTapCount, nullptr);
     ASSERT_NE(peer_, nullptr);
-    
+
     const int32_t fingers = 2;
     const int32_t expectedCount = 3;
     const double distanceThreshold = 4.0;
     const bool isLimitFingerCount = false;
-    peer_->tapRecognizer = AceType::MakeRefPtr<OHOS::Ace::NG::ClickRecognizer>(
-        fingers, 
-        expectedCount, 
-        distanceThreshold, 
-        isLimitFingerCount
-    );
+    peer_->tapRecognizer = AceType::MakeRefPtr<NG::ClickRecognizer>(fingers, expectedCount,
+        distanceThreshold, isLimitFingerCount);
     ASSERT_NE(peer_->tapRecognizer, nullptr);
-    
+
     auto resultCount = Converter::Convert<int32_t>(accessor_->getTapCount(peer_));
     EXPECT_EQ(resultCount, expectedCount) << "Passed value is: " << expectedCount;
 }

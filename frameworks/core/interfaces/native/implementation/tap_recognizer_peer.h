@@ -15,12 +15,13 @@
 
 #pragma once
 
-#include "core/components_ng/gestures/tap_gesture.h"
+#include "frameworks/core/interfaces/native/utility/peer_utils.h"
+#include "core/components_ng/gestures/recognizers/click_recognizer.h"
 
 struct TapRecognizerPeer final {
-    // Колбэки для взаимодействия с ArkUI
-    std::function<void()> onClick;
-    std::function<void()> onRemoteMessage;
-    std::function<void()> onAccessibility;
     OHOS::Ace::RefPtr<OHOS::Ace::NG::ClickRecognizer> tapRecognizer;
+protected:
+    TapRecognizerPeer() : tapRecognizer(OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::ClickRecognizer>()) {};
+    ~TapRecognizerPeer() = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };
