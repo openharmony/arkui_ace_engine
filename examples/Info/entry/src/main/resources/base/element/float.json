@@ -47,6 +47,46 @@
     {
       "name": "float_fu20",
       "value": "-20"
+    },
+    {
+      "name": "Length_Resource_150",
+      "value": "150"
+    },
+    {
+      "name": "Length_Resource_100",
+      "value": "100"
+    },
+    {
+      "name": "Length_Resource_10",
+      "value": "10"
+    },
+    {
+      "name": "Length_Resource_minus_100",
+      "value": "-100"
+    },
+    {
+      "name": "Length_Resource_minus_150",
+      "value": "-150"
+    },
+    {
+      "name": "Length_Resource_0",
+      "value": "0"
+    },
+    {
+      "name": "Length_Resource_360",
+      "value": "360"
+    },
+    {
+      "name": "Length_Resource_200",
+      "value": "200"
+    },
+    {
+      "name": "Length_Resource_60",
+      "value": "60"
+    },
+    {
+      "name": "Length_Resource_500",
+      "value": "500"
     }
   ]
 }
