@@ -139,35 +139,22 @@ void JSRating::SetStarStyle(const JSCallbackInfo& info)
     auto getBackgroundUri = paramObject->GetProperty("backgroundUri");
     auto getForegroundUri = paramObject->GetProperty("foregroundUri");
     auto getSecondaryUri = paramObject->GetProperty("secondaryUri");
+    
     std::string backgroundUri;
-    if (getBackgroundUri->IsString()) {
-        backgroundUri = getBackgroundUri->ToString();
-        if (backgroundUri.empty()) {
-            RatingModel::GetInstance()->SetBackgroundSrc("", true);
-        } else {
-            RatingModel::GetInstance()->SetBackgroundSrc(backgroundUri, false);
-        }
-    } else {
-        RatingModel::GetInstance()->SetBackgroundSrc("", true);
-    }
+    ParseJsMedia(getBackgroundUri, backgroundUri);
+    RatingModel::GetInstance()->SetBackgroundSrc(backgroundUri, backgroundUri.empty());
 
-    if (getForegroundUri->IsString()) {
-        std::string foregroundUri = getForegroundUri->ToString();
-        if (foregroundUri.empty()) {
-            RatingModel::GetInstance()->SetForegroundSrc("", true);
-        } else {
-            RatingModel::GetInstance()->SetForegroundSrc(foregroundUri, false);
-        }
-    } else {
-        RatingModel::GetInstance()->SetForegroundSrc("", true);
-    }
+    std::string foregroundUri;
+    ParseJsMedia(getForegroundUri, foregroundUri);
+    RatingModel::GetInstance()->SetForegroundSrc(foregroundUri, foregroundUri.empty());
 
-    if (getSecondaryUri->IsString() && !getSecondaryUri->ToString().empty()) {
-        RatingModel::GetInstance()->SetSecondarySrc(getSecondaryUri->ToString(), false);
-    } else if (getBackgroundUri->IsString() && !backgroundUri.empty()) {
-        RatingModel::GetInstance()->SetSecondarySrc(backgroundUri, false);
+    std::string secondaryUri;
+    ParseJsMedia(getSecondaryUri, secondaryUri);
+
+    if (secondaryUri.empty()) {
+        RatingModel::GetInstance()->SetSecondarySrc(backgroundUri, backgroundUri.empty());
     } else {
-        RatingModel::GetInstance()->SetSecondarySrc("", true);
+        RatingModel::GetInstance()->SetSecondarySrc(secondaryUri, false);
     }
 }
 
