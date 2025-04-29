@@ -1901,6 +1901,45 @@ void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool 
     }
 }
 
+void PipelineContext::UpdateSystemSafeAreaWithoutAnimation(const SafeAreaInsets& systemSafeArea,
+    bool checkSceneBoardWindow)
+{
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbSystemSafeArea(systemSafeArea);
+        return;
+    }
+    CHECK_NULL_VOID(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
+    if (safeAreaManager_->UpdateSystemSafeArea(systemSafeArea)) {
+        SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_AVOID_AREA);
+    }
+}
+
+void PipelineContext::UpdateCutoutSafeAreaWithoutAnimation(const SafeAreaInsets& cutoutSafeArea,
+    bool checkSceneBoardWindow)
+{
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbCutoutSafeArea(cutoutSafeArea);
+        return;
+    }
+    CHECK_NULL_VOID(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
+    if (safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea)) {
+        SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_AVOID_AREA);
+    }
+}
+
+void PipelineContext::UpdateNavSafeAreaWithoutAnimation(const SafeAreaInsets& navSafeArea,
+    bool checkSceneBoardWindow)
+{
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbNavSafeArea(navSafeArea);
+        return;
+    }
+    CHECK_NULL_VOID(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
+    if (safeAreaManager_->UpdateNavSafeArea(navSafeArea)) {
+        SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_AVOID_AREA);
+    }
+}
+
 void PipelineContext::CheckAndUpdateKeyboardInset(float keyboardHeight)
 {
     safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);

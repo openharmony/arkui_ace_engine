@@ -436,11 +436,6 @@ int32_t ReadTouchAccelarateMode()
     return system::GetIntParameter("debug.ace.touch.accelarate", 0);
 }
 
-bool IsAsyncInitializeEnabled()
-{
-    return system::GetBoolParameter("persist.ace.async.initialize", true);
-}
-
 std::string InitSysBrand()
 {
     const char* res = ::GetBrand();
@@ -500,7 +495,6 @@ std::string InitSysDeviceType()
     return SystemProperties::INVALID_PARAM;
 }
 
-std::atomic<bool> SystemProperties::asyncInitializeEnabled_(IsAsyncInitializeEnabled()); 
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
 std::atomic<bool> SystemProperties::layoutTraceEnable_(IsLayoutTraceEnabled() && developerModeOn_);
@@ -729,7 +723,6 @@ void SystemProperties::InitDeviceInfo(
     gridCacheEnabled_ = IsGridCacheEnabled();
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
     acePerformanceMonitorEnable_.store(IsAcePerformanceMonitorEnabled());
-    asyncInitializeEnabled_.store(IsAsyncInitializeEnabled());
     focusCanBeActive_.store(IsFocusCanBeActive());
     faultInjectEnabled_  = IsFaultInjectEnabled();
     windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
