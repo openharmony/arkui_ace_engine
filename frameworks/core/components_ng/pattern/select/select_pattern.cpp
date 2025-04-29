@@ -1243,9 +1243,12 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     } else {
         auto optionPattern = options_[0]->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(optionPattern);
-        json->PutExtAttr("optionBgColor", optionPattern->GetBgColor().ColorToString().c_str(), filter);
+        auto bgColor = selected_ == 0 ? selectedBgColor_ : optionPattern->GetBgColor();
+        json->PutExtAttr("optionBgColor", bgColor->ColorToString().c_str(), filter);
         json->PutExtAttr("optionFont", optionPattern->InspectorGetFont().c_str(), filter);
-        json->PutExtAttr("optionFontColor", optionPattern->GetFontColor().ColorToString().c_str(), filter);
+        auto fontColor =
+            selected_ == 0 ? selectedFont_.FontColor.value_or(Color::BLACK) : optionPattern->GetFontColor();
+        json->PutExtAttr("optionFontColor", fontColor.ColorToString().c_str(), filter);
     }
     ToJsonOptionAlign(json, filter);
     for (size_t i = 0; i < options_.size(); ++i) {
