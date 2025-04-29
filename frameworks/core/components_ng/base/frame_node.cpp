@@ -85,7 +85,6 @@ constexpr uint8_t APP_RENDER_GROUP_MARKED_MASK = 1 << 7;
 constexpr float HIGHT_RATIO_LIMIT = 0.8;
 // Min area for OPINC
 constexpr int32_t MIN_OPINC_AREA = 10000;
-constexpr char UPDATE_FLAG_KEY[] = "updateFlag";
 } // namespace
 namespace OHOS::Ace::NG {
 
@@ -1169,11 +1168,12 @@ void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json, const 
 
 bool FrameNode::IsJsCustomPropertyUpdated() const
 {
-    auto iter = customPropertyMap_.find(UPDATE_FLAG_KEY);
-    if (iter != customPropertyMap_.end()) {
-        return iter->second == "1";
+    for (const auto& iter : customPropertyMap_) {
+        if (!iter.second.empty() && iter.second[1] == "0") {
+            return false;
+        }
     }
-    return false;
+    return true;
 }
 
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -1209,7 +1209,7 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFil
     if (IsCNode() || !IsJsCustomPropertyUpdated()) {
         auto jsonNode = JsonUtil::Create(true);
         for (const auto &iter : customPropertyMap_) {
-            jsonNode->Put(iter.first.c_str(), iter.second.c_str());
+            jsonNode->Put(iter.first.c_str(), iter.second[0].c_str());
         }
         if (!customPropertyMap_.empty()) {
             json->Put("customProperty", jsonNode->ToString().c_str());
@@ -6433,12 +6433,9 @@ void FrameNode::ResetPredictNodes()
 void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc,
     std::function<std::string()>&& getCustomPropertyMapFunc)
 {
-    bool result = func();
+    func();
     if (IsCNode()) {
         return;
-    }
-    if (result) {
-        customPropertyMap_[UPDATE_FLAG_KEY] = "1";
     }
     if (!getCustomProperty_) {
         getCustomProperty_ = getFunc;
@@ -6450,21 +6447,26 @@ void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<st
 
 bool FrameNode::GetJSCustomProperty(const std::string& key, std::string& value)
 {
-    if (getCustomProperty_) {
-        value = getCustomProperty_(key);
-        return true;
+    auto iter = customPropertyMap_.find(key);
+    if (iter != customPropertyMap_.end() && !iter->second.empty()) {
+        if (iter->second[1] == "1") {
+            value = iter->second[0];
+            return true;
+        } else if (getCustomProperty_) {
+            value = getCustomProperty_(key);
+            iter->second[0] = value;
+            iter->second[1] = "1";
+            return true;
+        }
     }
     return false;
 }
 
 bool FrameNode::GetCapiCustomProperty(const std::string& key, std::string& value)
 {
-    if (!IsCNode()) {
-        return false;
-    }
     auto iter = customPropertyMap_.find(key);
     if (iter != customPropertyMap_.end()) {
-        value = iter->second;
+        value = iter->second[0];
         return true;
     }
     return false;
@@ -6472,7 +6474,7 @@ bool FrameNode::GetCapiCustomProperty(const std::string& key, std::string& value
 
 void FrameNode::AddCustomProperty(const std::string& key, const std::string& value)
 {
-    customPropertyMap_[key] = value;
+    customPropertyMap_[key] = {value, "1"};
 }
 
 void FrameNode::RemoveCustomProperty(const std::string& key)
@@ -6480,6 +6482,16 @@ void FrameNode::RemoveCustomProperty(const std::string& key)
     auto iter = customPropertyMap_.find(key);
     if (iter != customPropertyMap_.end()) {
         customPropertyMap_.erase(iter);
+    }
+}
+
+void FrameNode::SetCustomPropertyMapFlagByKey(const std::string& key)
+{
+    auto& valueVector = customPropertyMap_[key];
+    if (valueVector.empty()) {
+        valueVector = {"", "0"};
+    } else {
+        valueVector[1] = "0";
     }
 }
 
@@ -6585,8 +6597,8 @@ void FrameNode::SetKitNode(const RefPtr<Kit::FrameNode>& node)
 bool FrameNode::GetCustomPropertyByKey(const std::string& key, std::string& value)
 {
     auto iter = customPropertyMap_.find(key);
-    if (iter != customPropertyMap_.end()) {
-        value = iter->second;
+    if (iter != customPropertyMap_.end() && !iter->second.empty()) {
+        value = iter->second[0];
         return true;
     }
     return false;
