@@ -334,6 +334,7 @@ void SwiperPattern::SetLazyForEachFlag() const
 
 void SwiperPattern::ResetOnForceMeasure()
 {
+    hoverFlag_ = HOVER_NONE;
     resetLayoutTask_.Cancel();
     StopPropertyTranslateAnimation(isFinishAnimation_, false, true);
     StopTranslateAnimation();
@@ -419,7 +420,6 @@ void SwiperPattern::OnModifyDone()
     } else if (NeedForceMeasure()) {
         MarkDirtyBindIndicatorNode();
     }
-    hoverFlag_ = HOVER_NONE;
     InitArrow();
     InitCapture();
     CheckSpecialItemCount();
@@ -2475,6 +2475,7 @@ void SwiperPattern::InitIndicator()
     auto indicatorType = GetIndicatorType();
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    hoverFlag_ = HasIndicatorNode() != IsShowIndicator() ? HOVER_NONE : hoverFlag_;
     if (!HasIndicatorNode()) {
         if (!IsShowIndicator()) {
             return;
