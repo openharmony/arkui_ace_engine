@@ -302,6 +302,7 @@ OffsetF SheetWrapperLayoutAlgorithm::GetPopupStyleSheetOffset(LayoutWrapper* lay
             auto container = AceEngine::Get().GetContainer(UECId);
             CHECK_NULL_RETURN(container, OffsetF());
             auto mainWindowContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_RETURN(mainWindowContext, OffsetF());
             auto UECWindowGlobalRect = mainWindowContext->GetDisplayWindowRectInfo();
             targetOffset = OffsetF(targetNode->GetPaintRectOffset().GetX() + UECWindowGlobalRect.Left(),
                 targetNode->GetPaintRectOffset().GetY() + UECWindowGlobalRect.Top());
@@ -1061,6 +1062,7 @@ void SheetWrapperLayoutAlgorithm::LayoutMaskNode(LayoutWrapper* layoutWrapper)
     auto subContainer = AceEngine::Get().GetContainer(sheetWrapperPattern->GetSubWindowId());
     CHECK_NULL_VOID(subContainer);
     auto subWindowContext = AceType::DynamicCast<NG::PipelineContext>(subContainer->GetPipelineContext());
+    CHECK_NULL_VOID(subWindowContext);
     auto subWindowGlobalRect = subWindowContext->GetDisplayWindowRectInfo();
     auto contentOffset = OffsetF(rect.GetX() - subWindowGlobalRect.Left(),
         rect.GetY() - subWindowGlobalRect.Top());
