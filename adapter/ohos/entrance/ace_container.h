@@ -843,6 +843,8 @@ public:
         foldStatusFromListener_ = GetCurrentFoldStatus();
     }
 
+    void DispatchExtensionDataToHostWindow(uint32_t code, const AAFwk::Want& data, int32_t persistenId);
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
