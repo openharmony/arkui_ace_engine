@@ -20,6 +20,8 @@
 
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/peer_utils.h"
+#include "core/interfaces/native/implementation/indicator_component_controller_peer.h"
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/declaration/swiper/swiper_declaration.h"
@@ -584,6 +586,20 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestBoolean, TestSize.Level1)
     modifier_->setIndicator0(node_, &boolIndTrue);
     auto checkTrue = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkTrue, EXPECTED_TRUE);
+}
+
+/**
+ * @tc.name: setIndicator1TestController
+ * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Boolean type
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest, DISABLED_setIndicator1TestController, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setIndicator1, nullptr);
+
+    auto peer = PeerUtils::CreatePeer<IndicatorComponentControllerPeer>();
+    auto indicator = ArkUnion<Ark_Type_SwiperAttribute_indicator_indicator, Ark_IndicatorComponentController>(peer);
+    modifier_->setIndicator1(node_, &indicator);
 }
 
 /**
