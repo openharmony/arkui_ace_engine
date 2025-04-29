@@ -77,7 +77,7 @@ struct PopupExample01 {
     Placement.RightBottom
   ]
 
-  @Builder popupBuilder () {
+  @Builder popupBuilder() {
     Scroll() {
       Column() {
         Row({ space: 2 }) {
@@ -206,7 +206,7 @@ struct PopupExample01 {
             keyboardAvoidMode: KeyboardAvoidMode.DEFAULT,
             showInSubWindow: true,
             onStateChange: (e) => {
-              if(!e.isVisible) {
+              if (!e.isVisible) {
                 this.isShow = false
               }
             }
