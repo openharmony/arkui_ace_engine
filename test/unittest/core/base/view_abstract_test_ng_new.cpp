@@ -1920,7 +1920,7 @@ HWTEST_F(ViewAbstractTestNg, DisableOnCrownEvent002, TestSize.Level1)
 
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     eventHub->AttachHost(frameNode);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(WeakPtr(eventHub));
     focusHub->currentFocus_ = true;
 
     /**

@@ -57,7 +57,8 @@ public:
     void SetSelectedBorderRadius(const Dimension& value) override;
     void SetBlockSize(const Dimension& width, const Dimension& height) override;
     void SetBlockType(BlockStyleType value) override;
-    void SetBlockImage(const std::string& value, const std::string& bundleName, const std::string& moduleName) override;
+    void SetBlockImage(const std::string& value,
+        const std::string& bundleName, const std::string& moduleName) override;
     void SetBlockShape(const RefPtr<BasicShape>& value) override;
     void SetStepSize(const Dimension& value) override;
     void SetSliderInteractionMode(SliderInteraction mode) override;
@@ -95,26 +96,28 @@ public:
     static void SetStepSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetBlockType(FrameNode* frameNode, const std::optional<BlockStyleType>& value);
     static void SetBlockShape(FrameNode* frameNode, const RefPtr<BasicShape>& value);
-    static void SetBlockSize(
-        FrameNode* frameNode, const std::optional<Dimension>& width, const std::optional<Dimension>& height);
+    static void SetBlockSize(FrameNode* frameNode,
+        const std::optional<Dimension>& width, const std::optional<Dimension>& height);
     static void SetTrackBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetStepColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetBlockBorderColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetBlockBorderWidth(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetBlockColor(FrameNode* frameNode, const std::optional<Color>& value);
-    static void SetTrackBackgroundColor(
-        FrameNode* frameNode, const std::optional<Gradient>& value, bool isResourceColor = false);
-        static void SetSelectColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor = false);
+    static void SetTrackBackgroundColor(FrameNode* frameNode,
+        const std::optional<Gradient>& value, bool isResourceColor = false);
+    static void SetSelectColor(FrameNode* frameNode,
+        const std::optional<Gradient>& value, bool isResourceColor = false);
+    static void SetSelectColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetShowSteps(FrameNode* frameNode, bool value);
     static void SetSliderInteractionMode(FrameNode* frameNode, const std::optional<SliderInteraction>& mode);
     static void SetMinResponsiveDistance(FrameNode* frameNode, const std::optional<float>& value);
-    static void SetValidSlideRange(
-        FrameNode* frameNode, const std::optional<float>& fromValue, const std::optional<float>& toValue);
+    static void SetValidSlideRange(FrameNode* frameNode,
+        const std::optional<float>& fromValue, const std::optional<float>& toValue);
     static void SetBlockImage(
         FrameNode* frameNode, const std::string& value, const std::string& bundleName, const std::string& moduleName);
     static void SetSelectedBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& value);
 #ifdef SUPPORT_DIGITAL_CROWN
-    static void SetDigitalCrownSensitivity(FrameNode* frameNode, CrownSensitivity sensitivity);
+    static void SetDigitalCrownSensitivity(FrameNode* frameNode, const std::optional<CrownSensitivity>& sensitivity);
 #endif
 
     static void ResetBlockBorderColor(FrameNode* frameNode);
@@ -140,7 +143,6 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetOnChange(FrameNode* frameNode, SliderOnChangeEvent&& eventOnChange);
     static void SetOnChangeEvent(FrameNode* frameNode, SliderOnValueChangeEvent&& onChangeEvent);
-    static void SetSliderValue(FrameNode* frameNode, float value);
     static void SetSliderValue(FrameNode* frameNode, const std::optional<float>& value);
     static void SetMinLabel(FrameNode* frameNode, const std::optional<float>& value);
     static void SetMaxLabel(FrameNode* frameNode, const std::optional<float>& value);

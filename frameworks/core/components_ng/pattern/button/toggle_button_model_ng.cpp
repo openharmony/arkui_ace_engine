@@ -67,9 +67,13 @@ void ToggleButtonModelNG::SetBackgroundColor(const Color& backgroundColor, bool 
     NG::ViewAbstract::SetBackgroundColor(backgroundColor);
 }
 
-void ToggleButtonModelNG::SetSelectedColor(FrameNode* frameNode, const Color& selectedColor)
+void ToggleButtonModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& selectedColor)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ToggleButtonPaintProperty, SelectedColor, selectedColor, frameNode);
+    if (selectedColor) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ToggleButtonPaintProperty, SelectedColor, selectedColor.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ToggleButtonPaintProperty, SelectedColor, frameNode);
+    }
 }
 
 void ToggleButtonModelNG::ResetSelectedColor(FrameNode* frameNode)

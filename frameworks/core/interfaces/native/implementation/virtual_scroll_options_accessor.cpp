@@ -71,7 +71,4 @@ const GENERATED_ArkUIVirtualScrollOptionsAccessor* GetVirtualScrollOptionsAccess
     return &VirtualScrollOptionsAccessorImpl;
 }
 
-struct VirtualScrollOptionsPeer {
-    virtual ~VirtualScrollOptionsPeer() = default;
-};
 }

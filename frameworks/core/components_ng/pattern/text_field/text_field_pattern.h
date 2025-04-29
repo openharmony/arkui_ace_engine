@@ -251,7 +251,7 @@ class TextFieldPattern : public ScrollablePattern,
                          public LayoutInfoInterface {
     DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient, TextBase,
         Magnifier, TextGestureSelector);
-
+    UNITEST_FRIEND_CLASS;
 public:
     TextFieldPattern();
     ~TextFieldPattern() override;
@@ -1860,6 +1860,7 @@ private:
     bool IsAutoFillUserName(const AceAutoFillType& autoFillType);
     bool HasAutoFillPasswordNode();
     bool IsTriggerAutoFillPassword();
+    std::string GetLineBreakStrategy() const;
 
     void PauseContentScroll();
     void ScheduleContentScroll(float delay);
@@ -1917,7 +1918,7 @@ private:
     bool enableTouchAndHoverEffect_ = true;
     bool isOnHover_ = false;
     bool needToRequestKeyboardInner_ = false;
-    bool needToRequestKeyboardOnFocus_ = false;
+    bool needToRequestKeyboardOnFocus_ = true;
     bool isTransparent_ = false;
     bool contChange_ = false;
     bool counterChange_ = false;

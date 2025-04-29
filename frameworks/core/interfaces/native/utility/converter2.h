@@ -23,9 +23,11 @@
 
 #include "core/components_ng/pattern/toggle/toggle_model.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
+#include "core/components_ng/pattern/checkbox/checkbox_model.h"
 
 namespace OHOS::Ace::NG {
 namespace Converter {
+    template<> void AssignCast(std::optional<CheckBoxStyle>& dst, const Ark_CheckBoxShape& src);
     template<> void AssignCast(std::optional<DragRet>& dst, const Ark_DragResult& src);
     template<> void AssignCast(std::optional<ToggleType>& dst, const Ark_ToggleType& src);
     template<> void AssignCast(std::optional<TextSpanType>& dst, const Ark_RichEditorSpanType& src);

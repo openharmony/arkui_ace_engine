@@ -61,7 +61,4 @@ const GENERATED_ArkUICanvasGradientAccessor* GetCanvasGradientAccessor()
     return &CanvasGradientAccessorImpl;
 }
 
-struct CanvasGradientPeer {
-    virtual ~CanvasGradientPeer() = default;
-};
 }

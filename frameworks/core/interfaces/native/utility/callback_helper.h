@@ -82,25 +82,40 @@ public:
     ArkResultType InvokeWithObtainResult(Params&&... args) const
     {
         ArkResultType retValue {};
-        auto handler = [&retValue](const void *valuePtr) {
+        CallbackKeeper::AnyResultHandlerType handler = [&retValue](const void *valuePtr) {
             retValue = *(reinterpret_cast<const ArkResultType *>(valuePtr));
         };
-        CallbackKeeper::InvokeWithResultHandler<ArkResultType, ContinuationType>(
-            handler, *this, std::forward<Params>(args)...
-        );
+        auto continuation = CallbackKeeper::RegisterReverseCallback<ContinuationType>(handler);
+        InvokeSync(std::forward<Params>(args)..., continuation);
+        CallbackKeeper::ReleaseReverseCallback(continuation);
         return retValue;
+    }
+
+    // use for callbacks that return other callbacks (e.g. drag start which returns a builder callback)
+    template <typename ArkResultType, typename ContinuationType, typename... Params>
+    std::unique_ptr<CallbackHelper<ArkResultType>> InvokeWithObtainCallback(Params&&... args) const
+    {
+        std::unique_ptr<CallbackHelper<ArkResultType>> retValue = nullptr;
+        CallbackKeeper::AnyResultHandlerType handler = [&retValue](const void *valuePtr) {
+            retValue = std::make_unique<CallbackHelper<ArkResultType>>(*(
+                reinterpret_cast<const ArkResultType *>(valuePtr)));
+        };
+        auto continuation = CallbackKeeper::RegisterReverseCallback<ContinuationType>(handler);
+        InvokeSync(std::forward<Params>(args)..., continuation);
+        CallbackKeeper::ReleaseReverseCallback(continuation);
+        return std::move(retValue);
     }
 
     template <typename ResultType, typename ArkResultType, typename ContinuationType, typename... Params>
     std::optional<ResultType> InvokeWithOptConvertResult(Params&&... args) const
     {
         std::optional<ResultType> retValueOpt = std::nullopt;
-        auto handler = [&retValueOpt](const void *valuePtr) {
+        CallbackKeeper::AnyResultHandlerType handler = [&retValueOpt](const void *valuePtr) {
             retValueOpt = Converter::OptConvert<ResultType>(*(reinterpret_cast<const ArkResultType *>(valuePtr)));
         };
-        CallbackKeeper::InvokeWithResultHandler<ArkResultType, ContinuationType>(
-            handler, *this, std::forward<Params>(args)...
-        );
+        auto continuation = CallbackKeeper::RegisterReverseCallback<ContinuationType>(handler);
+        InvokeSync(std::forward<Params>(args)..., continuation);
+        CallbackKeeper::ReleaseReverseCallback(continuation);
         return retValueOpt;
     }
 
@@ -109,6 +124,20 @@ public:
     {
         return Referenced::Claim(reinterpret_cast<UINode*>(
             InvokeWithObtainResult<Ark_NativePointer, Callback_Pointer_Void>(std::forward<Params>(args)...)));
+    }
+
+    template <typename... Params>
+    void BuildAsync(const std::function<void(const RefPtr<UINode>&)>&& builderHandler, Params&&... args) const
+    {
+        CallbackKeeper::AnyResultHandlerType handler =
+            [builderHandler = std::move(builderHandler)](const void *valuePtr) {
+            auto retValue = *(reinterpret_cast<const Ark_NativePointer *>(valuePtr));
+            auto node = Referenced::Claim(reinterpret_cast<UINode*>(retValue));
+            builderHandler(node);
+        };
+        auto continuation = CallbackKeeper::RegisterReverseCallback<Callback_Pointer_Void>(handler);
+        Invoke(std::forward<Params>(args)..., continuation);
+        CallbackKeeper::ReleaseReverseCallback(continuation);
     }
 
     bool IsValid() const
@@ -128,7 +157,7 @@ public:
         CHECK_NULL_RETURN(pipeline, nullptr);
         auto rootNode = pipeline->GetRootElement();
         CHECK_NULL_RETURN(rootNode, nullptr);
-        auto rootPtr = reinterpret_cast<Ark_NodeHandle>(rootNode.GetRawPtr());
+        auto rootPtr = reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(rootNode));
         CHECK_NULL_RETURN(rootPtr, nullptr);
         auto companionNode = GeneratedApiImpl::GetCompanion(rootPtr);
         CHECK_NULL_RETURN(companionNode, nullptr);

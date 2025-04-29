@@ -284,6 +284,7 @@ void TitleImpl(Ark_NativePointer node,
                const Opt_Type_NavigationAttribute_title_value* value,
                const Opt_NavigationTitleOptions* options)
 {
+#ifdef WRONG_MERGE
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NavigationTitlebarOptions titleOptions;
@@ -317,6 +318,7 @@ void TitleImpl(Ark_NativePointer node,
         info.hasMainTitle = true;
         NavigationModelNG::ParseCommonTitle(frameNode, info);
     }
+#endif
 }
 void ToolbarConfigurationImpl(Ark_NativePointer node,
                               const Opt_Union_Array_ToolbarItem_CustomBuilder* value,

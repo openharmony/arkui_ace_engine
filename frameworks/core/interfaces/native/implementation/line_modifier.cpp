@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/generated/interface/node_api.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -77,11 +78,10 @@ void SetLineOptionsImpl(Ark_NativePointer node,
     auto opt = Converter::OptConvert<LineOptions>(*options);
     CHECK_NULL_VOID(opt);
     if (opt->width) {
-        ShapeAbstractModelNG::SetWidth(frameNode, opt->width.value());
+        ShapeAbstractModelNG::SetWidth(frameNode, opt->width);
     }
-
     if (opt->height) {
-        ShapeAbstractModelNG::SetHeight(frameNode, opt->height.value());
+        ShapeAbstractModelNG::SetHeight(frameNode, opt->height);
     }
 }
 } // LineInterfaceModifier
@@ -91,20 +91,24 @@ void StartPointImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    CHECK_EQUAL_VOID(value->tag, InteropTag::INTEROP_TAG_UNDEFINED);
-    auto point = Converter::Convert<ShapePoint>(value->value);
-    LineModelNG::StartPoint(frameNode, point);
+    auto convValue = Converter::OptConvert<ShapePoint>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    LineModelNG::StartPoint(frameNode, *convValue);
 }
 void EndPointImpl(Ark_NativePointer node,
                   const Opt_Array_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    CHECK_EQUAL_VOID(value->tag, InteropTag::INTEROP_TAG_UNDEFINED);
-    auto point = Converter::Convert<ShapePoint>(value->value);
-    LineModelNG::EndPoint(frameNode, point);
+    auto convValue = Converter::OptConvert<ShapePoint>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    LineModelNG::EndPoint(frameNode, *convValue);
 }
 } // LineAttributeModifier
 const GENERATED_ArkUILineModifier* GetLineModifier()

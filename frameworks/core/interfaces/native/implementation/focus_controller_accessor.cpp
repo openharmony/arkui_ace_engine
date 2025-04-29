@@ -21,6 +21,35 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FocusControllerAccessor {
 void RequestFocusImpl(const Ark_String* key)
 {
+    CHECK_NULL_VOID(key);
+    auto convKey = Converter::Convert<std::string>(*key);
+    bool isSyncRequest = true;
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    CHECK_NULL_VOID(focusManager);
+
+    auto focusCallback = [](NG::RequestFocusResult result) {
+        switch (result) {
+            case NG::RequestFocusResult::NON_FOCUSABLE:
+                LOGE("This component is not focusable. %{public}d", ERROR_CODE_NON_FOCUSABLE);
+                break;
+            case NG::RequestFocusResult::NON_FOCUSABLE_ANCESTOR:
+                LOGE("This component has unfocusable ancestor. %{public}d", ERROR_CODE_NON_FOCUSABLE_ANCESTOR);
+                break;
+            case NG::RequestFocusResult::NON_EXIST:
+                LOGE("The component doesn't exist, is currently invisible, or has been disabled. %{public}d",
+                    ERROR_CODE_NON_EXIST);
+                break;
+            default:
+                LOGE("An internal error occurred. %{public}d", ERROR_CODE_INTERNAL_ERROR);
+                break;
+        }
+    };
+
+    focusManager->SetRequestFocusCallback(focusCallback);
+    pipeline->RequestFocus(convKey, isSyncRequest);
+    focusManager->ResetRequestFocusCallback();
 }
 } // FocusControllerAccessor
 const GENERATED_ArkUIFocusControllerAccessor* GetFocusControllerAccessor()

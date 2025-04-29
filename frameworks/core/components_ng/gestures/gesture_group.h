@@ -55,6 +55,13 @@ public:
     {
         return gestures_;
     }
+
+#ifdef ARKUI_CAPI_UNITTEST
+    GestureMode GetMode()
+    {
+        return mode_;
+    }
+#endif // ARKUI_CAPI_UNITTEST
 private:
     GestureMode mode_;
     std::vector<RefPtr<Gesture>> gestures_;

@@ -29,7 +29,7 @@ std::string ContainerModalAccessibilityProperty::GetText() const
         return textLabel;
     }
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, "");
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, "");

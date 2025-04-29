@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/view_context/view_context_model.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {
@@ -70,7 +71,9 @@ void OpenImplicitAnimationImpl(const Ark_AnimateParam* param)
     if (SystemProperties::GetRosenBackendEnabled()) {
         option.SetAllowRunningAsynchronously(true);
     }
+#ifndef ARKUI_CAPI_UNITTEST
     ViewContextModel::GetInstance()->openAnimation(option);
+#endif
 }
 void CloseImplicitAnimationImpl()
 {
@@ -87,16 +90,73 @@ void CloseImplicitAnimationImpl()
             AceLogTag::ACE_FORM, "[Form animation] Form finish callback triggered animation cannot exceed 1000ms.");
         return;
     }
+#ifndef ARKUI_CAPI_UNITTEST
     AnimationOption option;
     ViewContextModel::GetInstance()->closeAnimation(option, true);
+#endif
 }
 void StartDoubleAnimationImpl(Ark_NativePointer node,
                               const Ark_DoubleAnimationParam* param)
 {
+    auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(param);
+
+    auto curve = Converter::OptConvert<RefPtr<Curve>>(param->curve).value_or(Framework::CreateCurve(-1, true));
+    auto duration = Converter::Convert<int32_t>(param->duration);
+    auto delay = Converter::Convert<int32_t>(param->delay);
+    auto propertyName = Converter::Convert<std::string>(param->propertyName);
+    auto startValue = Converter::Convert<float>(param->startValue);
+    auto endValue = Converter::Convert<float>(param->endValue);
+
+    auto progressFunction = Converter::OptConvert<Callback_Extender_OnProgress>(param->onProgress);
+    if (progressFunction) {
+        auto progressCallbackFn = [cb = CallbackHelper(progressFunction.value())](float progress) {
+            cb.Invoke(static_cast<Ark_Float32>(progress));
+        };
+
+        frameNode->CreateAnimatablePropertyFloat(propertyName, startValue, progressCallbackFn);
+        progressCallbackFn(startValue);
+    }
+
+    AnimationOption option(curve, duration);
+    option.SetDelay(delay);
+
+    auto finishFunction = Converter::OptConvert<Callback_Extender_OnFinish>(param->onFinish);
+    if (finishFunction) {
+        auto finishCallbackFn = [cb = CallbackHelper(finishFunction.value()), frameNode, propertyName]() {
+            frameNode->DeleteAnimatablePropertyFloat(propertyName);
+            cb.Invoke();
+        };
+
+        AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), finishCallbackFn);
+    } else {
+        AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), nullptr);
+    }
+
+    frameNode->UpdateAnimatablePropertyFloat(propertyName, endValue);
+    AnimationUtils::CloseImplicitAnimation();
 }
 void AnimationTranslateImpl(Ark_NativePointer node,
-                            const Ark_TranslateOptions* options)
+                            const Ark_TranslateOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+
+    TranslateOptions options = Converter::Convert<TranslateOptions>(*value);
+
+    if (options.x.Unit() == DimensionUnit::PERCENT) {
+        options.x = Dimension(options.x.Value() * frameNode->GetGeometryNode()->GetMarginFrameOffset().GetX(),
+                              DimensionUnit::PX);
+    }
+
+    if (options.y.Unit() == DimensionUnit::PERCENT) {
+        options.x = Dimension(options.y.Value() * frameNode->GetGeometryNode()->GetMarginFrameOffset().GetY(),
+                              DimensionUnit::PX);
+    }
+
+    ViewAbstract::SetTranslate(frameNode, options);
 }
 } // AnimationExtenderAccessor
 const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor()

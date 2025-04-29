@@ -13,18 +13,21 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
+#include "base/memory/referenced.h"
+#include "core/interfaces/native/implementation/nav_destination_context_peer.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/components_ng/pattern/navigation/navigation_route.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavDestinationContextAccessor {
 void DestroyPeerImpl(Ark_NavDestinationContext peer)
 {
+    delete peer;
 }
 Ark_NavDestinationContext CtorImpl()
 {
-    return nullptr;
+    return new NavDestinationContextPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,7 +35,36 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Opt_RouteMapConfig GetConfigInRouteMapImpl(Ark_NavDestinationContext peer)
 {
-    return {};
+    auto invalid = Converter::ArkValue<Opt_RouteMapConfig>();
+    CHECK_NULL_RETURN(peer && peer->handler, invalid);
+    auto container = Container::Current();
+    auto navigationRoute = container->GetNavigationRoute();
+    if (!navigationRoute) {
+        return invalid;
+    }
+    auto navPathInfo = peer->handler->GetNavPathInfo();
+    CHECK_NULL_RETURN(navPathInfo, invalid);
+    NG::RouteItem routeInfo;
+    if (!navigationRoute->GetRouteItem(navPathInfo->GetName(), routeInfo)) {
+        return invalid;
+    }
+
+    // a temp struct
+    struct RouteMapConfig : public Referenced {
+        std::string name = "";
+        std::string pageSourceFile = "";
+        std::map<std::string, std::string> data;
+    };
+
+    auto config = Referenced::MakeRefPtr<RouteMapConfig>();
+    config->IncRefCount();
+    config->name = navPathInfo->GetName();
+    config->pageSourceFile = routeInfo.pageSourceFile->c_str();
+    for (auto iter = routeInfo.data.begin(); iter != routeInfo.data.end(); iter++) {
+        config->data.insert(std::pair(iter->first, iter->second));
+    }
+
+    return invalid; // fix a return value
 }
 Ark_NavPathInfo GetPathInfoImpl(Ark_NavDestinationContext peer)
 {
@@ -41,6 +73,7 @@ Ark_NavPathInfo GetPathInfoImpl(Ark_NavDestinationContext peer)
 void SetPathInfoImpl(Ark_NavDestinationContext peer,
                      Ark_NavPathInfo pathInfo)
 {
+    LOGE("NavDestinationContext doesn't support set path info");
 }
 Ark_NavPathStack GetPathStackImpl(Ark_NavDestinationContext peer)
 {
@@ -49,14 +82,21 @@ Ark_NavPathStack GetPathStackImpl(Ark_NavDestinationContext peer)
 void SetPathStackImpl(Ark_NavDestinationContext peer,
                       Ark_NavPathStack pathStack)
 {
+    LOGE("NavDestinationContext doesn't support set nav path stack");
 }
 Opt_String GetNavDestinationIdImpl(Ark_NavDestinationContext peer)
 {
+    LOGE("NavDestinationContext doesn't support a return value"); // temp
+    CHECK_NULL_RETURN(peer && peer->handler, {});
+    auto id = std::to_string(peer->handler->GetNavDestinationId());
+    // fix a return value
+    Converter::ArkValue<Ark_String>(id);
     return {};
 }
 void SetNavDestinationIdImpl(Ark_NavDestinationContext peer,
                              const Ark_String* navDestinationId)
 {
+    LOGE("NavDestinationContext doesn't support set nav destination id");
 }
 } // NavDestinationContextAccessor
 const GENERATED_ArkUINavDestinationContextAccessor* GetNavDestinationContextAccessor()
@@ -76,7 +116,4 @@ const GENERATED_ArkUINavDestinationContextAccessor* GetNavDestinationContextAcce
     return &NavDestinationContextAccessorImpl;
 }
 
-struct NavDestinationContextPeer {
-    virtual ~NavDestinationContextPeer() = default;
-};
 }

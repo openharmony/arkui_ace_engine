@@ -28,7 +28,7 @@ Ark_ScrollMotion CtorImpl(const Ark_Number* position,
                           const Ark_Number* max,
                           Ark_SpringProp prop)
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -45,7 +45,4 @@ const GENERATED_ArkUIScrollMotionAccessor* GetScrollMotionAccessor()
     return &ScrollMotionAccessorImpl;
 }
 
-struct ScrollMotionPeer {
-    virtual ~ScrollMotionPeer() = default;
-};
 }

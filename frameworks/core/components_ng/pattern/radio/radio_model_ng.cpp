@@ -60,6 +60,14 @@ void RadioModelNG::SetBuilder(std::function<void()>&& buildFunc)
     radioPattern->SetBuilder(std::move(buildFunc));
 }
 
+void RadioModelNG::SetBuilder(FrameNode* frameNode, std::function<void()>&& builder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto radioPattern = frameNode->GetPattern<RadioPattern>();
+    CHECK_NULL_VOID(radioPattern);
+    radioPattern->SetBuilder(std::move(builder));
+}
+
 void RadioModelNG::SetRadioIndicator(int32_t indicator)
 {
     ACE_UPDATE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, indicator);
@@ -93,6 +101,14 @@ void RadioModelNG::SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange)
     auto eventHub = frameNode->GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
+}
+
+void RadioModelNG::SetOnChangeEvent(FrameNode* frameNode, ChangeEvent&& onChangeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChangeEvent(std::move(onChangeEvent));
 }
 
 void RadioModelNG::SetWidth(const Dimension& width)
@@ -154,24 +170,40 @@ void RadioModelNG::SetHoverEffect(HoverEffectType hoverEffect)
     pattern->SetShowHoverEffect(hoverEffect != HoverEffectType::NONE);
 }
 
-void RadioModelNG::SetChecked(FrameNode* frameNode, bool isChecked)
+void RadioModelNG::SetChecked(FrameNode* frameNode, const std::optional<bool> isChecked)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioCheck, isChecked, frameNode);
+    if (isChecked) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioCheck, isChecked.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioCheck, frameNode);
+    }
 }
 
-void RadioModelNG::SetCheckedBackgroundColor(FrameNode* frameNode, const Color& color)
+void RadioModelNG::SetCheckedBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioCheckedBackgroundColor, color, frameNode);
+    if (color) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioCheckedBackgroundColor, color.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioCheckedBackgroundColor, frameNode);
+    }
 }
 
-void RadioModelNG::SetUncheckedBorderColor(FrameNode* frameNode, const Color& color)
+void RadioModelNG::SetUncheckedBorderColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioUncheckedBorderColor, color, frameNode);
+    if (color) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioUncheckedBorderColor, color.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioUncheckedBorderColor, frameNode);
+    }
 }
 
-void RadioModelNG::SetIndicatorColor(FrameNode* frameNode, const Color& color)
+void RadioModelNG::SetIndicatorColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicatorColor, color, frameNode);
+    if (color) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicatorColor, color.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicatorColor, frameNode);
+    }
 }
 
 void RadioModelNG::SetWidth(FrameNode* frameNode, const Dimension& width)
@@ -220,6 +252,16 @@ void RadioModelNG::SetChangeValue(FrameNode* frameNode, bool value)
     auto pattern = frameNode->GetPattern<RadioPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetRadioChecked(value);
+}
+
+void RadioModelNG::SetRadioIndicatorType(FrameNode* frameNode, const std::optional<int32_t>& indicator)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (indicator.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, indicator.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, frameNode);
+    }
 }
 
 bool RadioModelNG::GetChecked(FrameNode* frameNode)

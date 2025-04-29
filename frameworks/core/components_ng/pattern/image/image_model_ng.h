@@ -89,7 +89,7 @@ public:
     static void ResetAutoResize(FrameNode* frameNode);
     static void SetImageRepeat(FrameNode* frameNode, const std::optional<ImageRepeat>& imageRepeat);
     static void SetImageRenderMode(FrameNode* frameNode, const std::optional<ImageRenderMode>& imageRenderMode);
-    static void SetOrientation(FrameNode* frameNode, ImageRotateOrientation orientation);
+    static void SetOrientation(FrameNode* frameNode, const std::optional<ImageRotateOrientation>& orientation);
     static void SetSyncMode(FrameNode* frameNode, bool syncMode);
     static void SetImageMatrix(FrameNode* frameNode, const Matrix4& value);
     static void SetImageFit(FrameNode* frameNode, ImageFit value);
@@ -132,7 +132,7 @@ public:
     static void ResetResizableLattice(FrameNode* frameNode);
     static ImageResizableSlice GetResizableSlice(FrameNode* frameNode);
     static void SetDynamicRangeMode(FrameNode* frameNode, const std::optional<DynamicRangeMode>& dynamicRangeMode);
-    static void SetEnhancedImageQuality(FrameNode* frameNode, AIImageQuality imageQuality);
+    static void SetEnhancedImageQuality(FrameNode* frameNode, const std::optional<AIImageQuality>& imageQuality);
     static bool GetFitOriginalSize(FrameNode* frameNode);
     static uint32_t GetFillColor(FrameNode* frameNode);
     static void SetPixelMap(FrameNode* frameNode, void* drawableDescriptor);

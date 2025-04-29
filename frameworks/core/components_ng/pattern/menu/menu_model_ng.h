@@ -49,10 +49,10 @@ public:
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
         const std::optional<Dimension>& radiusBottomRight);
     static void SetWidth(FrameNode* frameNode, const Dimension& width);
-    static void SetItemDivider(
-        FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider, const DividerMode& mode);
-    static void SetItemGroupDivider(
-        FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider, const DividerMode& mode);
+    static void SetItemDivider(FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider,
+        const std::optional<DividerMode>& mode);
+    static void SetItemGroupDivider(FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider,
+        const std::optional<DividerMode>& mode);
     static void SetExpandingMode(FrameNode* frameNode, const std::optional<SubMenuExpandingMode>& expandingMode);
 };
 } // namespace OHOS::Ace::NG

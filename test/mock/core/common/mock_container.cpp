@@ -98,9 +98,9 @@ bool Container::Dump(const std::vector<std::string>& /* params */, std::vector<s
     return true;
 }
 
-void MockContainer::SetUp()
+void MockContainer::SetUp(RefPtr<PipelineBase> pipelineContext)
 {
-    container_ = AceType::MakeRefPtr<MockContainer>();
+    container_ = AceType::MakeRefPtr<MockContainer>(pipelineContext);
 }
 
 void MockContainer::TearDown()

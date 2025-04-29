@@ -37,9 +37,8 @@ void SetSpanOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto text = Converter::OptConvert<std::string>(*value);
-    std::u16string u16Text = UtfUtils::Str8DebugToStr16(text.value_or(""));
-    SpanModelNG::InitSpan(frameNode, u16Text);
+    auto text = Converter::OptConvert<std::u16string>(*value);
+    SpanModelNG::InitSpan(frameNode, text);
 }
 } // SpanInterfaceModifier
 namespace SpanAttributeModifier {
@@ -48,25 +47,23 @@ void FontImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<Dimension> fontSizeValue;
-    std::optional<FontWeight> fontWeightValue;
-    std::optional<StringArray> families;
-    std::optional<Ace::FontStyle> fontStyleValue;
-    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        fontSizeValue = Converter::OptConvert<Dimension>((value->value).size);
-        fontWeightValue = Converter::OptConvert<FontWeight>((value->value).weight);
-        auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>((value->value).family);
-        if (fontfamiliesOpt) {
-            families = fontfamiliesOpt->families;
-        }
-        fontStyleValue = Converter::OptConvert<Ace::FontStyle>((value->value).style);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
     }
+    auto fontSizeValue = Converter::OptConvert<Dimension>(optValue->size);
     Validator::ValidateNonNegative(fontSizeValue);
     Validator::ValidateNonPercent(fontSizeValue);
     SpanModelNG::SetFontSize(frameNode, fontSizeValue);
+    auto fontWeightValue = Converter::OptConvert<FontWeight>(optValue->weight);
     SpanModelNG::SetFontWeight(frameNode, fontWeightValue);
-
+    std::optional<StringArray> families;
+    if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(optValue->family); fontfamiliesOpt) {
+        families = fontfamiliesOpt->families;
+    }
     SpanModelNG::SetFontFamily(frameNode, families);
+    auto fontStyleValue = Converter::OptConvert<Ace::FontStyle>(optValue->style);
     SpanModelNG::SetItalicFontStyle(frameNode, fontStyleValue);
 }
 void FontColorImpl(Ark_NativePointer node,
@@ -119,18 +116,12 @@ void DecorationImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value->tag != InteropTag::INTEROP_TAG_UNDEFINED);
-    std::optional<TextDecoration> decoration;
-    std::optional<Color> color;
-    std::optional<TextDecorationStyle> style;
-    
-    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        decoration = Converter::OptConvert<TextDecoration>((value->value).type);
-        color = Converter::OptConvert<Color>((value->value).color);
-        style = Converter::OptConvert<TextDecorationStyle>((value->value).style);
-    }
+    auto optValue = Converter::GetOptPtr(value);
+    auto decoration = optValue ? Converter::OptConvert<TextDecoration>(optValue->type) : std::nullopt;
     SpanModelNG::SetTextDecoration(frameNode, decoration);
+    auto color = optValue ? Converter::OptConvert<Color>(optValue->color) : std::nullopt;
     SpanModelNG::SetTextDecorationColor(frameNode, color);
+    auto style = optValue ? Converter::OptConvert<TextDecorationStyle>(optValue->style) : std::nullopt;
     SpanModelNG::SetTextDecorationStyle(frameNode, style);
 }
 void LetterSpacingImpl(Ark_NativePointer node,

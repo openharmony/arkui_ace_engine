@@ -21,7 +21,7 @@ namespace OHOS::Ace::NG {
 void DynamicComponentManager::TriggerOnAreaChangeCallback(FrameNode* frameNode, uint64_t nanoTimestamp)
 {
     ACE_SCOPED_TRACE("DynamicComponent TriggerOnAreaChangeCallback");
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto stageManager = context->GetStageManager();
     CHECK_NULL_VOID(stageManager);

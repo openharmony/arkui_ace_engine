@@ -13,43 +13,113 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/navigator/navigator_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/generated/interface/node_api.h"
+
+namespace OHOS::Ace::NG {
+struct NavigatorOptions {
+    std::string target;
+    std::optional<NavigatorType> type;
+};
+} // OHOS::Ace::NG
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+NavigatorOptions Convert(const Ark_Literal_String_target_NavigationType_type& src)
+{
+    return {
+        .target = Converter::Convert<std::string>(src.target),
+        .type = Converter::OptConvert<NavigatorType>(src.type),
+    };
+}
+
+template<>
+void AssignCast(std::optional<NavigatorType>& dst, const Ark_NavigationType& src)
+{
+    switch (src) {
+        case ARK_NAVIGATION_TYPE_PUSH: dst = NavigatorType::PUSH; break;
+        case ARK_NAVIGATION_TYPE_BACK: dst = NavigatorType::BACK; break;
+        case ARK_NAVIGATION_TYPE_REPLACE: dst = NavigatorType::REPLACE; break;
+        default: LOGE("Unexpected enum value in Ark_NavigationType: %{public}d", src);
+    }
+}
+} // OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavigatorModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return {};
+    auto frameNode = NavigatorModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // NavigatorModifier
 namespace NavigatorInterfaceModifier {
 void SetNavigatorOptions0Impl(Ark_NativePointer node,
                               const Opt_Literal_String_target_NavigationType_type* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto navOptionsOpt = Converter::OptConvert<NavigatorOptions>(*value);
+    CHECK_NULL_VOID(navOptionsOpt);
+
+    NavigatorModelNG::SetUri(frameNode, navOptionsOpt->target);
+    if (navOptionsOpt->type) {
+        NavigatorModelNG::SetType(frameNode, *(navOptionsOpt->type));
+    }
 }
 void SetNavigatorOptions1Impl(Ark_NativePointer node)
 {
+    // no sense to implement this due nothing arguments
 }
 } // NavigatorInterfaceModifier
 namespace NavigatorAttributeModifier {
 void ActiveImpl(Ark_NativePointer node,
                 const Opt_Boolean* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    NavigatorModelNG::SetActive(frameNode, *convValue);
 }
 void TypeImpl(Ark_NativePointer node,
               const Opt_NavigationType* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto typeOpt = Converter::OptConvert<NavigatorType>(*value);
+    CHECK_NULL_VOID(typeOpt);
+    NavigatorModelNG::SetType(frameNode, *typeOpt);
 }
 void TargetImpl(Ark_NativePointer node,
                 const Opt_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<std::string>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    NavigatorModelNG::SetUri(frameNode, *convValue);
 }
 void ParamsImpl(Ark_NativePointer node,
                 const Opt_Object* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //NavigatorModelNG::SetParams(frameNode, convValue);
+    LOGE("NavigatorAttributeModifier::ParamsImpl - the CustomObjects is not implemented yet!");
 }
 } // NavigatorAttributeModifier
 const GENERATED_ArkUINavigatorModifier* GetNavigatorModifier()
@@ -65,5 +135,4 @@ const GENERATED_ArkUINavigatorModifier* GetNavigatorModifier()
     };
     return &ArkUINavigatorModifierImpl;
 }
-
-}
+} // OHOS::Ace::NG::GeneratedModifier

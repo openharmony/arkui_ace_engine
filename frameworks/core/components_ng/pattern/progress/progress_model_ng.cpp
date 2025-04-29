@@ -85,9 +85,9 @@ RefPtr<FrameNode> ProgressModelNG::CreateFrameNode(int32_t nodeId, double value,
     auto frameNode = FrameNode::CreateFrameNode(V2::PROGRESS_ETS_TAG, nodeId, AceType::MakeRefPtr<ProgressPattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
-    ProgressModelNG::SetTotal(frameNode.GetRawPtr(), max);
-    ProgressModelNG::SetValue(frameNode.GetRawPtr(), value);
-    ProgressModelNG::SetType(frameNode.GetRawPtr(), type);
+    ProgressModelNG::SetTotal(Referenced::RawPtr(frameNode), max);
+    ProgressModelNG::SetValue(Referenced::RawPtr(frameNode), value);
+    ProgressModelNG::SetType(Referenced::RawPtr(frameNode), type);
     return frameNode;
 }
 
@@ -467,7 +467,7 @@ void ProgressModelNG::SetColor(FrameNode* frameNode, const std::optional<Color>&
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetUserInitiatedColor(true);
+    pattern->SetUserInitiatedColor(value.has_value());
     if (value) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, Color, value.value(), frameNode);
     } else {
@@ -816,7 +816,7 @@ void ProgressModelNG::SetPrivacySensitive(FrameNode* frameNode, const std::optio
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, IsSensitive, PROPERTY_UPDATE_RENDER, frameNode);
     }
-    // ViewAbstract::SetPrivacySensitive(frameNode, flag);
+    ViewAbstract::SetPrivacySensitive(frameNode, flag);
 }
 
 void ProgressModelNG::SetBorderRadius(const Dimension& value)

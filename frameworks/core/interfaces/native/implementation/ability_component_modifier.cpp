@@ -29,16 +29,29 @@ namespace AbilityComponentInterfaceModifier {
 void SetAbilityComponentOptionsImpl(Ark_NativePointer node,
                                     const Ark_Literal__want* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //AbilityComponentModelNG::SetSetAbilityComponentOptions(frameNode, convValue);
 }
 } // AbilityComponentInterfaceModifier
 namespace AbilityComponentAttributeModifier {
 void OnConnectImpl(Ark_NativePointer node,
                    const Opt_Callback_Void* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //AbilityComponentModelNG::SetOnConnect(frameNode, convValue);
 }
 void OnDisconnectImpl(Ark_NativePointer node,
                       const Opt_Callback_Void* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //AbilityComponentModelNG::SetOnDisconnect(frameNode, convValue);
 }
 } // AbilityComponentAttributeModifier
 const GENERATED_ArkUIAbilityComponentModifier* GetAbilityComponentModifier()

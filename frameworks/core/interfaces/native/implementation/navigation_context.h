@@ -28,12 +28,13 @@ class ExternalDataKeeper : public virtual Referenced {
 public:
     ExternalDataKeeper() = default;
     ~ExternalDataKeeper() override = default;
-    explicit ExternalDataKeeper(const Ark_CustomObject& data): data_(data) {}
-    Ark_CustomObject data_;
+    explicit ExternalDataKeeper(const Ark_Object& data): data_(data) {}
+    Ark_Object data_;
     ACE_DISALLOW_COPY_AND_MOVE(ExternalDataKeeper);
 };
 using ExternalData = RefPtr<ExternalDataKeeper>;
 using OnPopCallback = CallbackHelper<Callback_PopInfo_Void>;
+using NavDestBuildCallback = CallbackHelper<Callback_String_Opt_Object_Void>;
 
 enum class LaunchMode {
     STANDARD = 0,
@@ -76,6 +77,8 @@ public:
     bool fromRecovery_;
     int32_t mode_;
     bool needDelete_;
+
+    void InvokeOnPop(const PopInfo& popInfo);
 };
 
 using PopResultType = ExternalData;
@@ -97,7 +100,7 @@ class NavigationStack;
 constexpr bool DEFAULT_ANIMATED = true;
 constexpr LaunchMode DEFAULT_LAUNCH_MODE = LaunchMode::STANDARD;
 
-// this dublicates the functionality of JS NavPathStack class
+// this duplicates the functionality of JS NavPathStack class
 // (frameworks/bridge/declarative_frontend/engine/jsEnumStyle.js)
 class PathStack : public virtual Referenced {
 public:
@@ -147,8 +150,8 @@ public:
     void RemoveInvalidPage(size_t index);
     std::vector<std::string> GetAllPathName();
     std::vector<ParamType> GetParamByName(const std::string& name);
-    std::vector<uint32_t> GetIndexByName(const std::string& name);
-    size_t GetSize() const;
+    std::vector<size_t> GetIndexByName(const std::string& name);
+    size_t Size() const;
     void DisableAnimation(bool disableAnimation);
     void SetInterception(InterceptionType interception);
 protected:
@@ -185,6 +188,8 @@ public:
     }
     void SetDataSourceObj(const RefPtr<PathStack>& dataSourceObj);
     const RefPtr<PathStack>& GetDataSourceObj();
+
+    void SetNavDestBuilderFunc(const NavDestBuildCallback& navDestBuilderFunc);
 
     bool IsEmpty() override;
     void Pop() override;
@@ -228,18 +233,9 @@ public:
     bool IsFromRecovery(int32_t index) override;
     void SetFromRecovery(int32_t index, bool fromRecovery) override;
     int32_t GetRecoveredDestinationMode(int32_t index) override;
-    void AddCustomNode(int32_t index, const RefPtr<NG::UINode>& node)
-    {
-        nodes_.insert(std::pair<int32_t, RefPtr<NG::UINode>>(index, node));
-    }
-
-    void ClearNodeList()
-    {
-        nodes_.clear();
-    }
 protected:
-    std::map<int32_t, RefPtr<NG::UINode>> nodes_;
     RefPtr<PathStack> dataSourceObj_;
+    NavDestBuildCallback navDestBuilderFunc_;
     std::function<void()> onStateChangedCallback_;
 
 private:
@@ -247,6 +243,7 @@ private:
     {
         PathStack::SetIsReplace(static_cast<PathStack::IsReplace>(value));
     }
+    int32_t GetSize() const override;
     std::string GetNameByIndex(int32_t index) const;
     ParamType GetParamByIndex(int32_t index) const;
     OnPopCallback GetOnPopByIndex(int32_t index) const;
@@ -263,9 +260,9 @@ private:
 } // namespace OHOS::Ace::NG::GeneratedModifier::NavigationContext
 
 namespace OHOS::Ace::NG::Converter {
-void AssignArkValue(Ark_CustomObject& dst, const GeneratedModifier::NavigationContext::ExternalData& src);
+void AssignArkValue(Ark_Object& dst, const GeneratedModifier::NavigationContext::ExternalData& src);
 void AssignArkValue(Ark_NavPathInfo& dst, const GeneratedModifier::NavigationContext::PathInfo& src);
-template<> GeneratedModifier::NavigationContext::ExternalData Convert(const Ark_CustomObject& src);
+template<> GeneratedModifier::NavigationContext::ExternalData Convert(const Ark_Object& src);
 template<> GeneratedModifier::NavigationContext::PathInfo Convert(const Ark_NavPathInfo& src);
 } // namespace OHOS::Ace::NG::Converter
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_NAVIGATION_CONTEXT_H

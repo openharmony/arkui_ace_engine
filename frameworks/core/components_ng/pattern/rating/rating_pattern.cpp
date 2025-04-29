@@ -358,7 +358,7 @@ void RatingPattern::RecalculatedRatingScoreBasedOnEventPoint(double eventPointX,
     ratingScore = (ratingScore < 0.0) ? 0.0 : ratingScore;
     const double newDrawScore = fmin(ceil(ratingScore / stepSize) * stepSize, starNum);
     // step3.2: Determine whether the old and new ratingScores are same or not.
-    const double oldRatingScore = ratingRenderProperty->GetRatingScoreValue();
+    const double oldRatingScore = ratingRenderProperty->GetRatingScoreValue(themeRatingScore_);
     const double oldDrawScore = fmin(Round(oldRatingScore / stepSize) * stepSize, static_cast<double>(starNum));
 
     CHECK_NULL_VOID(!NearEqual(newDrawScore, oldDrawScore));
@@ -398,9 +398,10 @@ void RatingPattern::FireChangeEvent()
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
     std::stringstream ss;
-    ss << std::setprecision(2) << ratingRenderProperty->GetRatingScoreValue();
+    static const int32_t precision = 2;
+    ss << std::setprecision(precision) << ratingRenderProperty->GetRatingScoreValue(themeRatingScore_);
     ratingEventHub->FireChangeEvent(ss.str());
-    lastRatingScore_ = ratingRenderProperty->GetRatingScoreValue();
+    lastRatingScore_ = ratingRenderProperty->GetRatingScoreValue(themeRatingScore_);
 
     if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         return;
@@ -577,7 +578,7 @@ void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 float RatingPattern::GetFocusRectRadius(const RefPtr<RatingLayoutProperty>& property, float& focusSpace)
 {
     CHECK_NULL_RETURN(ratingModifier_, 0.0);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, 0.0);
     auto ratingTheme = pipeline->GetTheme<RatingTheme>();
     CHECK_NULL_RETURN(ratingTheme, 0.0);
@@ -713,7 +714,7 @@ void RatingPattern::OnBlurEvent()
     RemoveIsFocusActiveUpdateEvent();
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
-    focusRatingScore_ = ratingRenderProperty->GetRatingScoreValue();
+    focusRatingScore_ = ratingRenderProperty->GetRatingScoreValue(themeRatingScore_);
     MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

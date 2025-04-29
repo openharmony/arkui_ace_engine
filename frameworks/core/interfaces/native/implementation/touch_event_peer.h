@@ -20,5 +20,8 @@
 
 struct TouchEventPeer
     : public OHOS::Ace::NG::GeneratedModifier::SomeEventPeer<OHOS::Ace::TouchEventInfo> {
+protected:
+    TouchEventPeer() = default;
     ~TouchEventPeer() override = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };

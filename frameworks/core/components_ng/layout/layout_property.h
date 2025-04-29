@@ -151,8 +151,9 @@ public:
     void ResetSafeAreaPadding();
 
     void UpdateMargin(const MarginProperty& value);
+
     void ResetMargin();
-    
+
     void UpdateBorderWidth(const BorderWidthProperty& value);
 
     void UpdateOuterBorderWidth(const BorderWidthProperty& value);
@@ -434,7 +435,9 @@ private:
 
     const std::string PixelRoundToJsonValue() const;
 
-    void PaddingToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ExpandSafeAreaToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void PaddingToJsonValue(const std::unique_ptr<PaddingProperty>& padding,
+        std::string attrName, std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void MarginToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void SafeAreaPaddingToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 

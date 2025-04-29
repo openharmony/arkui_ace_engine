@@ -28,7 +28,7 @@ void SymbolModelNG::Create(const std::uint32_t& unicode)
         V2::SYMBOL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
 
     stack->Push(symbolNode);
-    
+
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolSourceInfo, SymbolSourceInfo{unicode});
 }
 
@@ -114,12 +114,13 @@ void SymbolModelNG::SetFontColor(FrameNode* frameNode, const std::vector<Color>&
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolColorList, symbolColor, frameNode);
 }
 
-void SymbolModelNG::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
+void SymbolModelNG::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize)
 {
-    if (value.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value.value(), frameNode);
+    if (fontSize.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, fontSize.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, FontSize, PROPERTY_UPDATE_MEASURE, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            TextLayoutProperty, FontSize, PROPERTY_UPDATE_MEASURE, frameNode);
     }
 }
 
@@ -135,6 +136,7 @@ void SymbolModelNG::SetFontWeight(FrameNode* frameNode, const std::optional<Font
 
 void SymbolModelNG::SetRenderingStrategy(FrameNode* frameNode, const std::optional<uint32_t>& renderingStrategy)
 {
+    CHECK_NULL_VOID(frameNode);
     if (renderingStrategy.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
             TextLayoutProperty, SymbolRenderingStrategy, renderingStrategy.value(), frameNode);
@@ -155,10 +157,18 @@ void SymbolModelNG::SetSymbolEffect(FrameNode* frameNode, const std::optional<ui
     }
 }
 
-void SymbolModelNG::InitialSymbol(FrameNode* frameNode, const std::uint32_t& unicode)
+void SymbolModelNG::InitialSymbol(FrameNode* frameNode, const std::optional<uint32_t>& unicode)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolSourceInfo, SymbolSourceInfo{unicode}, frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolType, SymbolType::SYSTEM, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (unicode.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolSourceInfo,
+            SymbolSourceInfo{unicode.value()}, frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolType, SymbolType::SYSTEM, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, SymbolSourceInfo,
+            PROPERTY_UPDATE_MEASURE, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolType, frameNode);
+    }
 }
 
 void SymbolModelNG::InitialCustomSymbol(FrameNode* frameNode, const std::uint32_t& unicode, const char* fontFamilyName)
@@ -191,14 +201,24 @@ void SymbolModelNG::SetCustomSymbolGlyphInitialize(FrameNode* frameNode, const s
     InitialCustomSymbol(frameNode, symbolId, fontFamilyName);
 }
 
-void SymbolModelNG::SetMinFontScale(FrameNode* frameNode, const float value)
+void SymbolModelNG::SetMinFontScale(FrameNode* frameNode, const std::optional<float>& optValue)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, value, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (optValue) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, optValue.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, frameNode);
+    }
 }
 
-void SymbolModelNG::SetMaxFontScale(FrameNode* frameNode, const float value)
+void SymbolModelNG::SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& optValue)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, value, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (optValue) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, optValue.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, frameNode);
+    }
 }
 
 void SymbolModelNG::UpdateSymbolEffect(FrameNode* frameNode, const std::uint32_t symbolEffectType, const bool isActive,

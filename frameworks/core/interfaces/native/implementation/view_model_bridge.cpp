@@ -201,8 +201,8 @@ namespace GeneratedBridge {
             case GENERATED_ARKUI_IMAGE_ANIMATOR: return GeneratedViewModel::createImageAnimatorNode(id);
             case GENERATED_ARKUI_IMAGE_SPAN: return GeneratedViewModel::createImageSpanNode(id);
             case GENERATED_ARKUI_INDICATOR_COMPONENT: return GeneratedViewModel::createIndicatorComponentNode(id);
-            // case GENERATED_ARKUI_LAZY_GRID_LAYOUT: return GeneratedViewModel::createLazyGridLayoutNode(id);
-            // case GENERATED_ARKUI_LAZY_VGRID_LAYOUT: return GeneratedViewModel::createLazyVGridLayoutNode(id);
+            case GENERATED_ARKUI_LAZY_GRID_LAYOUT: return GeneratedViewModel::createLazyGridLayoutNode(id);
+            case GENERATED_ARKUI_LAZY_VGRID_LAYOUT: return GeneratedViewModel::createLazyVGridLayoutNode(id);
             case GENERATED_ARKUI_LINE: return GeneratedViewModel::createLineNode(id);
             case GENERATED_ARKUI_LINEAR_INDICATOR: return GeneratedViewModel::createLinearIndicatorNode(id);
             case GENERATED_ARKUI_LIST: return GeneratedViewModel::createListNode(id);

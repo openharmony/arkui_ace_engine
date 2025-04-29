@@ -41,15 +41,28 @@ void LinearSplitModelNG::SetDivider(NG::SplitType splitType, const ItemDivider& 
     ACE_UPDATE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Divider, divider);
 }
 
+RefPtr<FrameNode> LinearSplitModelNG::CreateFrameNode(int32_t nodeId, SplitType splitType)
+{
+    std::string tag = splitType == SplitType::ROW_SPLIT ? V2::ROW_SPLIT_ETS_TAG : V2::COLUMN_SPLIT_ETS_TAG;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        tag, nodeId, [splitType]() { return AceType::MakeRefPtr<LinearSplitPattern>(splitType); });
+    return frameNode;
+}
+
 void LinearSplitModelNG::SetResizable(FrameNode* frameNode, NG::SplitType splitType, bool resizable)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Resizable, resizable, frameNode);
 }
-void LinearSplitModelNG::SetDivider(FrameNode* frameNode, NG::SplitType splitType, const ItemDivider& divider)
+void LinearSplitModelNG::SetDivider(FrameNode* frameNode, NG::SplitType splitType,
+    const std::optional<ItemDivider>& optDivider)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Divider, divider, frameNode);
+    if (optDivider) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Divider, optDivider.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Divider, frameNode);
+    }
 }
 }
 // namespace OHOS::Ace::NG

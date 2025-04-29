@@ -548,8 +548,7 @@ void GridModelNG::SetEdgeEffect(
     FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, const std::optional<bool>& alwaysEnabled,
     EffectEdge edge)
 {
-    ScrollableModelNG::SetEdgeEffect(frameNode,
-        edgeEffect.value_or(GetEdgeEffect(frameNode)), alwaysEnabled.value_or(GetAlwaysEnabled(frameNode)), edge);
+    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled, edge);
 }
 
 void GridModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt)
@@ -649,6 +648,43 @@ bool GridModelNG::GetShowCached(FrameNode* frameNode)
     bool show = false;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(GridLayoutProperty, ShowCachedItems, show, frameNode, false);
     return show;
+}
+
+void GridModelNG::SetGridItemTotalCount(FrameNode* frameNode, int totalCount)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->GetGridItemAdapter()->totalCount != totalCount) {
+        pattern->GetGridItemAdapter()->totalCount = static_cast<int32_t>(totalCount);
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void GridModelNG::SetGridItemAdapterFunc(FrameNode* frameNode, std::function<void(int start, int end)>&& requestFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->GetGridItemAdapter()->requestItemFunc = std::move(requestFunc);
+}
+
+void GridModelNG::SetGridItemAdapterCallFinish(FrameNode* frameNode, int start, int end)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->GetGridItemAdapter()->range.first = start;
+    pattern->GetGridItemAdapter()->range.second = end;
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void GridModelNG::SetGridItemGetFunc(FrameNode* frameNode, std::function<RefPtr<FrameNode>(int32_t index)>&& getFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->GetGridItemAdapter()->getItemFunc = std::move(getFunc);
 }
 
 void GridModelNG::InitScroller(FrameNode* frameNode, const RefPtr<ScrollControllerBase>& positionController,

@@ -51,13 +51,6 @@ public:
     void EnableAnalyzer(bool enable) override;
     void SetImageAnalyzerConfig(void* config) override;
     void SetImageAIOptions(void *options) override;
-    static void SetAutoPlay(FrameNode* frameNode, bool autoPlay);
-    static void SetControls(FrameNode* frameNode, bool controls);
-    static void SetObjectFit(FrameNode* frameNode, ImageFit objectFit);
-    static void SetLoop(FrameNode* frameNode, bool loop);
-    static void SetMuted(FrameNode* frameNode, bool muted);
-    static void SetSurfaceBackgroundColor(FrameNode* frameNode, Color color);
-    static void SetShortcutKeyEnabled(FrameNode* frameNode, bool isEnableShortcutKey);
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetSrc(FrameNode* frameNode,
@@ -65,6 +58,13 @@ public:
     static void SetProgressRate(FrameNode* frameNode, double progressRate);
     static void SetPosterSourceInfo(FrameNode* frameNode, const ImageSourceInfo& posterSourceInfo);
     static void SetVideoController(FrameNode* frameNode, const RefPtr<VideoControllerV2>& videoController);
+    static void SetAutoPlay(FrameNode* frameNode, bool autoPlay);
+    static void SetControls(FrameNode* frameNode, bool controls);
+    static void SetObjectFit(FrameNode* frameNode, std::optional<ImageFit> objectFit);
+    static void SetLoop(FrameNode* frameNode, bool loop);
+    static void SetMuted(FrameNode* frameNode, bool muted);
+    static void SetSurfaceBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetShortcutKeyEnabled(FrameNode* frameNode, bool isEnableShortcutKey);
     static void EnableAnalyzer(FrameNode* frameNode, bool enable);
     static void SetOnStart(FrameNode* frameNode, VideoEventFunc&& onStart);
     static void SetOnPause(FrameNode* frameNode, VideoEventFunc&& onPause);
@@ -76,6 +76,8 @@ public:
     static void SetOnUpdate(FrameNode* frameNode, VideoEventFunc&& onUpdate);
     static void SetOnError(FrameNode* frameNode, VideoEventFunc&& onError);
     static void SetOnStop(FrameNode* frameNode, VideoEventFunc&& onStop);
+private:
+    static void AddDragFrameNodeToManager(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

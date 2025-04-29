@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/panel/sliding_panel_layout_algorithm.h"
 
+#include "core/components/close_icon/close_icon_theme.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/panel/close_icon_layout_property.h"
 #include "core/components_ng/pattern/panel/sliding_panel_layout_property.h"
@@ -46,7 +47,8 @@ void SlidingPanelLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto maxSize = childLayoutConstraint.maxSize;
     auto idealSize =
         !invisibleFlag_
-            ? ((PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9)
+            ? ((PipelineBase::GetCurrentContextSafelyWithCheck() &&
+                PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() > 9)
                 ? CreateIdealSizeByPercentRef(layoutConstraint.value(), Axis::HORIZONTAL,
                     layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT)).ConvertToSizeT()
                 : CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL,
@@ -139,9 +141,15 @@ void SlidingPanelLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(closeIconWrapper);
     auto closeIconLayoutProperty = AceType::DynamicCast<CloseIconLayoutProperty>(closeIconWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(closeIconLayoutProperty);
-    auto closeIconWidth = closeIconLayoutProperty->GetCloseIconWidthValue();
-    auto closeIconMarginTop = closeIconLayoutProperty->GetCloseIconMarginTopValue();
-    auto closeIconMargionRight = closeIconLayoutProperty->GetCloseIconMarginRightValue();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto closeIconTheme = pipeline->GetTheme<CloseIconTheme>();
+    CHECK_NULL_VOID(closeIconTheme);
+    auto closeIconWidth = closeIconLayoutProperty->GetCloseIconWidthValue(closeIconTheme->GetCloseIconWidth());
+    auto closeIconMarginTop = closeIconLayoutProperty->GetCloseIconMarginTopValue(
+        closeIconTheme->GetCloseIconMarginTop());
+    auto closeIconMargionRight = closeIconLayoutProperty->GetCloseIconMarginRightValue(
+        closeIconTheme->GetCloseIconMarginRight());
     auto closeIconX = maxWidth_ + childOffsetX - static_cast<float>(closeIconWidth.ConvertToPx()) -
                       static_cast<float>(closeIconMargionRight.ConvertToPx());
     auto closeIconY = childOffset.GetY() + static_cast<float>(closeIconMarginTop.ConvertToPx());
@@ -179,8 +187,12 @@ void SlidingPanelLayoutAlgorithm::MeasureCloseIcon(
     CHECK_NULL_VOID(closeIconGeometryNode);
     auto closeIconLayoutProperty = AceType::DynamicCast<CloseIconLayoutProperty>(closeIconWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(closeIconLayoutProperty);
-    auto closeIconWidth = closeIconLayoutProperty->GetCloseIconWidthValue();
-    auto closeIconHeigth = closeIconLayoutProperty->GetCloseIconHeightValue();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto closeIconTheme = pipeline->GetTheme<CloseIconTheme>();
+    CHECK_NULL_VOID(closeIconTheme);
+    auto closeIconWidth = closeIconLayoutProperty->GetCloseIconWidthValue(closeIconTheme->GetCloseIconWidth());
+    auto closeIconHeigth = closeIconLayoutProperty->GetCloseIconHeightValue(closeIconTheme->GetCloseIconHeight());
     SizeF frameSize =
         SizeF(static_cast<float>(closeIconWidth.ConvertToPx()), static_cast<float>(closeIconHeigth.ConvertToPx()));
     closeIconGeometryNode->SetFrameSize(frameSize);

@@ -19,130 +19,127 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components/web/web_event.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier {
 
-void OnPageEnd(const CallbackHelper<Callback_OnPageEndEvent_Void>& arkCallback,
+void OnPageEnd(const Callback_OnPageEndEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnPageBegin(const CallbackHelper<Callback_OnPageBeginEvent_Void>& arkCallback,
+void OnPageBegin(const Callback_OnPageBeginEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnProgressChange(const CallbackHelper<Callback_OnProgressChangeEvent_Void>& arkCallback,
+void OnProgressChange(const Callback_OnProgressChangeEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnTitleReceive(const CallbackHelper<Callback_OnTitleReceiveEvent_Void>& arkCallback,
+void OnTitleReceive(const Callback_OnTitleReceiveEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnGeolocationHide(const CallbackHelper<Callback_Void>& arkCallback,
+void OnGeolocationHide(const Callback_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnGeolocationShow(const CallbackHelper<Callback_OnGeolocationShowEvent_Void>& arkCallback,
+void OnGeolocationShow(const Callback_OnGeolocationShowEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnRequestSelected(const CallbackHelper<Callback_Void>& arkCallback,
+void OnRequestSelected(const Callback_Void* value,
     WeakPtr<FrameNode> weakNode, const BaseEventInfo* info);
-bool OnAlert(const CallbackHelper<Callback_OnAlertEvent_Boolean>& arkCallback,
+bool OnAlert(const Callback_OnAlertEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-bool OnBeforeUnload(const CallbackHelper<Callback_OnBeforeUnloadEvent_Boolean>& arkCallback,
+bool OnBeforeUnload(const Callback_OnBeforeUnloadEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-bool OnConfirm(const CallbackHelper<Callback_OnConfirmEvent_Boolean>& arkCallback,
+bool OnConfirm(const Callback_OnConfirmEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-bool OnPrompt(const CallbackHelper<Callback_OnPromptEvent_Boolean>& arkCallback,
+bool OnPrompt(const Callback_OnPromptEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-bool OnConsole(const CallbackHelper<Callback_OnConsoleEvent_Boolean>& arkCallback,
+bool OnConsole(const Callback_OnConsoleEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, const BaseEventInfo* info);
-void OnErrorReceive(const CallbackHelper<Callback_OnErrorReceiveEvent_Void>& arkCallback,
+void OnErrorReceive(const Callback_OnErrorReceiveEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnHttpErrorReceive(const CallbackHelper<Callback_OnHttpErrorReceiveEvent_Void>& arkCallback,
+void OnHttpErrorReceive(const Callback_OnHttpErrorReceiveEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnDownloadStart(const CallbackHelper<Callback_OnDownloadStartEvent_Void>& arkCallback,
+void OnDownloadStart(const Callback_OnDownloadStartEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnRefreshAccessedHistory(const CallbackHelper<Callback_OnRefreshAccessedHistoryEvent_Void>& arkCallback,
+void OnRefreshAccessedHistory(const Callback_OnRefreshAccessedHistoryEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-bool OnUrlLoadIntercept(const CallbackHelper<Type_WebAttribute_onUrlLoadIntercept_callback>& arkCallback,
+bool OnUrlLoadIntercept(const Type_WebAttribute_onUrlLoadIntercept_callback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnRenderExited(const CallbackHelper<Callback_OnRenderExitedEvent_Void>& arkCallback,
+void OnRenderExited(const Callback_OnRenderExitedEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-bool OnShowFileSelector(const CallbackHelper<Callback_OnShowFileSelectorEvent_Boolean>& arkCallback,
+bool OnShowFileSelector(const Callback_OnShowFileSelectorEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnResourceLoad(const CallbackHelper<Callback_OnResourceLoadEvent_Void>& arkCallback,
+void OnResourceLoad(const Callback_OnResourceLoadEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnFullScreenExit(const CallbackHelper<Callback_Void>& arkCallback,
+void OnFullScreenExit(const Callback_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnFullScreenEnter(const CallbackHelper<OnFullScreenEnterCallback>& arkCallback,
+void OnFullScreenEnter(const OnFullScreenEnterCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnScaleChange(const CallbackHelper<Callback_OnScaleChangeEvent_Void>& arkCallback,
+void OnScaleChange(const Callback_OnScaleChangeEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-bool OnHttpAuthRequest(const CallbackHelper<Callback_OnHttpAuthRequestEvent_Boolean>& arkCallback,
+bool OnHttpAuthRequest(const Callback_OnHttpAuthRequestEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-RefPtr<WebResponse> OnInterceptRequest(
-    const CallbackHelper<Callback_OnInterceptRequestEvent_WebResourceResponse>& arkCallback,
+RefPtr<WebResponse> OnInterceptRequest(const Callback_OnInterceptRequestEvent_WebResourceResponse* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnPermissionRequest(const CallbackHelper<Callback_OnPermissionRequestEvent_Void>& arkCallback,
+void OnPermissionRequest(const Callback_OnPermissionRequestEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnScreenCaptureRequest(const CallbackHelper<Callback_OnScreenCaptureRequestEvent_Void>& arkCallback,
+void OnScreenCaptureRequest(const Callback_OnScreenCaptureRequestEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-bool OnContextMenuShow(const CallbackHelper<Callback_OnContextMenuShowEvent_Boolean>& arkCallback,
+bool OnContextMenuShow(const Callback_OnContextMenuShowEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnContextMenuHide(const CallbackHelper<OnContextMenuHideCallback>& arkCallback,
+void OnContextMenuHide(const OnContextMenuHideCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnSearchResultReceive(const CallbackHelper<Callback_OnSearchResultReceiveEvent_Void>& arkCallback,
+void OnSearchResultReceive(const Callback_OnSearchResultReceiveEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnScroll(const CallbackHelper<Callback_OnScrollEvent_Void>& arkCallback,
+void OnScroll(const Callback_OnScrollEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-bool OnSslErrorEventReceive(const CallbackHelper<Callback_OnSslErrorEventReceiveEvent_Void>& arkCallback,
+bool OnSslErrorEventReceive(const Callback_OnSslErrorEventReceiveEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-bool OnSslError(const CallbackHelper<OnSslErrorEventCallback>& arkCallback,
+bool OnSslError(const OnSslErrorEventCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-bool OnClientAuthentication(const CallbackHelper<Callback_OnClientAuthenticationEvent_Void>& arkCallback,
+bool OnClientAuthentication(const Callback_OnClientAuthenticationEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnWindowNew(const CallbackHelper<Callback_OnWindowNewEvent_Void>& arkCallback,
+void OnWindowNew(const Callback_OnWindowNewEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
-void OnWindowExit(const CallbackHelper<Callback_Void>& arkCallback,
+void OnWindowExit(const Callback_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-bool OnInterceptKey(const CallbackHelper<Callback_KeyEvent_Boolean>& arkCallback,
+bool OnInterceptKey(const Callback_KeyEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, KeyEventInfo& keyEventInfo);
-void OnTouchIconUrlReceived(const CallbackHelper<Callback_OnTouchIconUrlReceivedEvent_Void>& arkCallback,
+void OnTouchIconUrlReceived(const Callback_OnTouchIconUrlReceivedEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
-void OnFaviconReceived(const CallbackHelper<Callback_OnFaviconReceivedEvent_Void>& arkCallback,
+void OnFaviconReceived(const Callback_OnFaviconReceivedEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
-void OnPageVisible(const CallbackHelper<Callback_OnPageVisibleEvent_Void>& arkCallback,
+void OnPageVisible(const Callback_OnPageVisibleEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
-void OnDataResubmitted(const CallbackHelper<Callback_OnDataResubmittedEvent_Void>& arkCallback,
+void OnDataResubmitted(const Callback_OnDataResubmittedEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
-void OnAudioStateChanged(const CallbackHelper<Callback_OnAudioStateChangedEvent_Void>& arkCallback,
+void OnAudioStateChanged(const Callback_OnAudioStateChangedEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
-void OnFirstContentfulPaint(const CallbackHelper<Callback_OnFirstContentfulPaintEvent_Void>& arkCallback,
+void OnFirstContentfulPaint(const Callback_OnFirstContentfulPaintEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
-void OnFirstMeaningfulPaint(const CallbackHelper<OnFirstMeaningfulPaintCallback>& arkCallback,
+void OnFirstMeaningfulPaint(const OnFirstMeaningfulPaintCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
-void OnLargestContentfulPaint(const CallbackHelper<OnLargestContentfulPaintCallback>& arkCallback,
+void OnLargestContentfulPaint(const OnLargestContentfulPaintCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
-bool OnLoadIntercept(const CallbackHelper<Callback_OnLoadInterceptEvent_Boolean>& arkCallback,
+bool OnLoadIntercept(const Callback_OnLoadInterceptEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnControllerAttached(const CallbackHelper<Callback_Void>& arkCallback,
-    WeakPtr<FrameNode> weakNode, int32_t instanceId);
-void OnOverScroll(const CallbackHelper<Callback_OnOverScrollEvent_Void>& arkCallback,
+void OnControllerAttached(const Callback_Void* value, WeakPtr<FrameNode> weakNode, int32_t instanceId);
+void OnOverScroll(const Callback_OnOverScrollEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnSafeBrowsingCheckResult(const CallbackHelper<OnSafeBrowsingCheckResultCallback>& arkCallback,
+void OnSafeBrowsingCheckResult(const OnSafeBrowsingCheckResultCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
-void OnNavigationEntryCommitted(const CallbackHelper<OnNavigationEntryCommittedCallback>& arkCallback,
+void OnNavigationEntryCommitted(const OnNavigationEntryCommittedCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
-void OnIntelligentTrackingPrevention(const CallbackHelper<OnIntelligentTrackingPreventionCallback>& arkCallback,
+void OnIntelligentTrackingPrevention(const OnIntelligentTrackingPreventionCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
-void OnNativeEmbedDataInfo(const CallbackHelper<Callback_NativeEmbedDataInfo_Void>& arkCallback,
+void OnNativeEmbedDataInfo(const Callback_NativeEmbedDataInfo_Void* valueInfo,
     int32_t instanceId, const BaseEventInfo* info);
-void OnNativeEmbedVisibilityChange(const CallbackHelper<OnNativeEmbedVisibilityChangeCallback>& arkCallback,
+void OnNativeEmbedVisibilityChange(const OnNativeEmbedVisibilityChangeCallback* value,
     int32_t instanceId, const BaseEventInfo* info);
-void OnNativeEmbedTouchInfo(const CallbackHelper<Callback_NativeEmbedTouchInfo_Void>& arkCallback,
+void OnNativeEmbedTouchInfo(const Callback_NativeEmbedTouchInfo_Void* value,
     int32_t instanceId, const BaseEventInfo* info);
-bool OnOverrideUrlLoading(const CallbackHelper<OnOverrideUrlLoadingCallback>& arkCallback,
+bool OnOverrideUrlLoading(const OnOverrideUrlLoadingCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnRenderProcessNotResponding(const CallbackHelper<OnRenderProcessNotRespondingCallback>& arkCallback,
+void OnRenderProcessNotResponding(const OnRenderProcessNotRespondingCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnRenderProcessResponding(const CallbackHelper<OnRenderProcessRespondingCallback>& arkCallback,
+void OnRenderProcessResponding(const OnRenderProcessRespondingCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnViewportFitChanged(const CallbackHelper<OnViewportFitChangedCallback>& arkCallback,
+void OnViewportFitChanged(const OnViewportFitChangedCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-WebKeyboardOption OnWebKeyboard(const CallbackHelper<WebKeyboardCallback>& arkCallback,
+WebKeyboardOption OnWebKeyboard(const WebKeyboardCallback* valueCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnAdsBlocked(const CallbackHelper<OnAdsBlockedCallback>& arkCallback,
+void OnAdsBlocked(const OnAdsBlockedCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 
 } // namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier

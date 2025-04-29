@@ -19,15 +19,63 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LazyForEachOpsAccessor {
+Ark_NativePointer NeedMoreElementsImpl(Ark_NativePointer node,
+                                       Ark_NativePointer mark,
+                                       Ark_Int32 direction)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    //auto convValue = Converter::Convert<type>(node);
+    //auto convValue = Converter::OptConvert<type>(node); // for enums
+    //undefinedModelNG::SetNeedMoreElements(frameNode, convValue);
+    return nullptr;
+}
+void OnRangeUpdateImpl(Ark_NativePointer node,
+                       Ark_Int32 totalCount,
+                       const Callback_RangeUpdate* updater)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(node);
+    //auto convValue = Converter::OptConvert<type>(node); // for enums
+    //undefinedModelNG::SetOnRangeUpdate(frameNode, convValue);
+}
+void SetCurrentIndexImpl(Ark_NativePointer node,
+                         Ark_Int32 index)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(node);
+    //auto convValue = Converter::OptConvert<type>(node); // for enums
+    //undefinedModelNG::SetSetCurrentIndex(frameNode, convValue);
+}
+void PrepareImpl(Ark_NativePointer node,
+                 Ark_Int32,
+                 Ark_Int32)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(node);
+    //auto convValue = Converter::OptConvert<type>(node); // for enums
+    //undefinedModelNG::SetPrepare(frameNode, convValue);
+}
+void NotifyChangeImpl(Ark_NativePointer node,
+                      int32_t startIdx,
+                      int32_t endIdx,
+                      int32_t changeCnt)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+}
 } // LazyForEachOpsAccessor
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
 {
     static const GENERATED_ArkUILazyForEachOpsAccessor LazyForEachOpsAccessorImpl {
-        // LazyForEachOpsAccessor::NeedMoreElementsImpl,
-        // LazyForEachOpsAccessor::OnRangeUpdateImpl,
-        // LazyForEachOpsAccessor::SetCurrentIndexImpl,
-        // LazyForEachOpsAccessor::PrepareImpl,
-        // LazyForEachOpsAccessor::NotifyChangeImpl,
+        LazyForEachOpsAccessor::NeedMoreElementsImpl,
+        LazyForEachOpsAccessor::OnRangeUpdateImpl,
+        LazyForEachOpsAccessor::SetCurrentIndexImpl,
+        LazyForEachOpsAccessor::PrepareImpl,
+        LazyForEachOpsAccessor::NotifyChangeImpl,
     };
     return &LazyForEachOpsAccessorImpl;
 }

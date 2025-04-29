@@ -70,7 +70,7 @@ RefPtr<FrameNode> FolderStackModelNG::CreateFrameNode(int32_t nodeId)
         folderStackGroupNode->SetControlPartsStackNode(controlPartsNode);
     }
     std::vector<std::string> itemId;
-    SetUpdateUpperItems(folderStackGroupNode.GetRawPtr(), itemId);
+    SetUpdateUpperItems(Referenced::RawPtr(folderStackGroupNode), itemId);
     return folderStackGroupNode;
 }
 

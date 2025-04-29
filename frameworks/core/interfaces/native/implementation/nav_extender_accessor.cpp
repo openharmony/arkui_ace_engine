@@ -29,11 +29,6 @@ void SyncStackImpl(Ark_NavPathStack peer)
 Ark_Boolean CheckNeedCreateImpl(Ark_NativePointer navigation,
                                 Ark_Int32 index)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(navigation);
-    //auto convValue = Converter::OptConvert<type>(navigation); // for enums
-    //undefinedModelNG::SetCheckNeedCreate(frameNode, convValue);
     return {};
 }
 Ark_NativePointer NavigationCreateImpl(Ark_Int32 peer,

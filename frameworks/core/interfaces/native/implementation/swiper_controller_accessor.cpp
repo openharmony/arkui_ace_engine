@@ -13,18 +13,33 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
+#include "swiper_controller_modifier_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+inline void AssignCast(std::optional<Ark_Function>& dst, const Ark_Function& src)
+{
+    dst = src;
+}
+} // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwiperControllerAccessor {
 void DestroyPeerImpl(Ark_SwiperController peer)
 {
+    auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
+    if (peerImpl) {
+        peerImpl->DecRefCount();
+    }
 }
 Ark_SwiperController CtorImpl()
 {
-    return nullptr;
+    auto peerImpl = Referenced::MakeRefPtr<SwiperControllerPeerImpl>();
+    peerImpl->IncRefCount();
+    return reinterpret_cast<SwiperControllerPeer *>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,14 +47,26 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void ShowNextImpl(Ark_SwiperController peer)
 {
+    auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    peerImpl->TriggerShowNext();
 }
 void ShowPreviousImpl(Ark_SwiperController peer)
 {
+    auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    peerImpl->TriggerShowPrevious();
 }
 void ChangeIndex0Impl(Ark_SwiperController peer,
                       const Ark_Number* index,
                       const Opt_Boolean* useAnimation)
 {
+    auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(index);
+    auto aceIdx = Converter::Convert<Ark_Int32>(*index);
+    auto aceUseAnim = useAnimation ? Converter::OptConvert<bool>(*useAnimation) : std::nullopt;
+    peerImpl->TriggerChangeIndex(aceIdx, aceUseAnim);
 }
 void ChangeIndex1Impl(Ark_SwiperController peer,
                       const Ark_Number* index,
@@ -49,6 +76,16 @@ void ChangeIndex1Impl(Ark_SwiperController peer,
 void FinishAnimationImpl(Ark_SwiperController peer,
                          const Opt_VoidCallback* callback_)
 {
+    auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    auto arkCallbackOpt = callback_ ? Converter::OptConvert<VoidCallback>(*callback_) : std::nullopt;
+    if (arkCallbackOpt) {
+        auto onFinish = [arkCallback = CallbackHelper(*arkCallbackOpt)]() -> void {
+            arkCallback.Invoke();
+        };
+        peerImpl->SetFinishCallback(onFinish);
+    }
+    peerImpl->TriggerFinishAnimation();
 }
 void PreloadItemsImpl(Ark_VMContext vmContext,
                       Ark_AsyncWorkerPtr asyncWorker,
@@ -74,7 +111,4 @@ const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor()
     return &SwiperControllerAccessorImpl;
 }
 
-struct SwiperControllerPeer {
-    virtual ~SwiperControllerPeer() = default;
-};
 }

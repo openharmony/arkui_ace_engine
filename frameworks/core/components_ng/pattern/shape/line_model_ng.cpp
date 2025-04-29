@@ -59,6 +59,5 @@ RefPtr<FrameNode> LineModelNG::CreateFrameNode(int32_t nodeId)
 {
     return FrameNode::CreateFrameNode(V2::LINE_ETS_TAG, nodeId, AceType::MakeRefPtr<LinePattern>());
 }
-
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_LINE_MODEL_NG_CPP

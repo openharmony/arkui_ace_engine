@@ -32,6 +32,11 @@ class RadioPattern : public Pattern {
     DECLARE_ACE_TYPE(RadioPattern, Pattern);
 
 public:
+    enum class RadioIndicatorType {
+        TICK = 0,
+        DOT,
+        CUSTOM,
+    };
     RadioPattern() = default;
     ~RadioPattern() override = default;
 

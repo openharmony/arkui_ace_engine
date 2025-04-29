@@ -3235,15 +3235,12 @@ void WebPattern::OnModifyDone()
     renderContext->SetHandleChildBounds(true);
     if (!delegate_) {
         // first create case,
-        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(context);
-        instanceId_ = context->GetInstanceId();
-        TAG_LOGI(AceLogTag::ACE_WEB, "OnModify, instanceId:%{public}d", instanceId_);
-        CHECK_NULL_VOID(instanceId_);
-        ContainerScope scope(instanceId_);
-        delegate_ = AceType::MakeRefPtr<WebDelegate>(context, nullptr, "", instanceId_);
+        delegate_ = AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContextSafelyWithCheck(), nullptr, "",
+            Container::CurrentId());
+        instanceId_ = Container::CurrentId();
         CHECK_NULL_VOID(delegate_);
-        observer_ = AceType::MakeRefPtr<WebDelegateObserver>(delegate_, context);
+        observer_ = AceType::MakeRefPtr<WebDelegateObserver>(
+            delegate_, PipelineContext::GetCurrentContextSafelyWithCheck());
         CHECK_NULL_VOID(observer_);
         delegate_->SetObserver(observer_);
         delegate_->SetRenderMode(renderMode_);
@@ -3258,7 +3255,7 @@ void WebPattern::OnModifyDone()
         if (isEnhanceSurface_) {
             auto drawSize = Size(1, 1);
             delegate_->SetDrawSize(drawSize);
-            delegate_->InitOHOSWeb(context);
+            delegate_->InitOHOSWeb(PipelineContext::GetCurrentContextSafelyWithCheck());
         } else {
             auto drawSize = Size(1, 1);
             delegate_->SetDrawSize(drawSize);
@@ -3295,7 +3292,7 @@ void WebPattern::OnModifyDone()
             renderSurface_->SetTransformHint(rotation_);
             TAG_LOGD(AceLogTag::ACE_WEB, "OnModify done, set rotation %{public}u", rotation_);
             renderSurface_->UpdateSurfaceConfig();
-            delegate_->InitOHOSWeb(context, renderSurface_);
+            delegate_->InitOHOSWeb(PipelineContext::GetCurrentContextSafelyWithCheck(), renderSurface_);
 #if defined(ENABLE_ROSEN_BACKEND)
             delegate_->SetPopupSurface(popupRenderSurface_);
 #endif

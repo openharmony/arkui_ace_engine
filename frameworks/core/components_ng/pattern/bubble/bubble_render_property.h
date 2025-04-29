@@ -74,6 +74,27 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SecondaryButtonShow, bool, PROPERTY_UPDATE_RENDER);
 
     ACE_DISALLOW_COPY_AND_MOVE(BubbleRenderProperty);
+
+    virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
+    {
+        PaintProperty::ToJsonValue(json, filter);
+        CHECK_NULL_VOID(json);
+        auto bubbleRenderProperty = JsonUtil::Create(true);
+        bubbleRenderProperty->Put("arrowOffset", GetArrowOffset().value_or(Dimension()).ToString().c_str());
+        bubbleRenderProperty->Put("autoCancel", GetAutoCancel().value_or(true));
+        bubbleRenderProperty->Put("primaryButtonShow", GetPrimaryButtonShow().value_or(false));
+        bubbleRenderProperty->Put("secondaryButtonShow", GetSecondaryButtonShow().value_or(false));
+
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+        auto theme = context ? context->GetTheme<PopupTheme>() : nullptr;
+        auto defaultMaskColor = theme ? theme->GetMaskColor() : Color();
+        bubbleRenderProperty->Put("maskColor", GetMaskColor().value_or(defaultMaskColor).ToString().c_str());
+
+        auto defaultBgColor = theme ? theme->GetBackgroundColor() : Color();
+        bubbleRenderProperty->Put("popupColor", GetBackgroundColor().value_or(defaultBgColor).ToString().c_str());
+
+        json->PutExtAttr("bubbleRenderProperty", bubbleRenderProperty, filter);
+    }
 };
 
 } // namespace OHOS::Ace::NG

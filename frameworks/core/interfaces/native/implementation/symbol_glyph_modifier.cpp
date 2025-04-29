@@ -22,6 +22,7 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+constexpr float SCALE_LIMIT = 1.f;
 namespace SymbolGlyphModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
@@ -51,22 +52,33 @@ void FontSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateNonPercent(convValue);
-    SymbolModelNG::SetFontSize(frameNode, convValue.value());
+    SymbolModelNG::SetFontSize(frameNode, convValue);
 }
 void FontColorImpl(Ark_NativePointer node,
                    const Opt_Array_ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optFontColors = Converter::OptConvert<std::vector<std::optional<Color>>>(*value);
+    if (!optFontColors) {
+        // TODO: Reset value
+        return;
+    }
+    std::vector<Color> fontColors;
+    for (auto color : *optFontColors) {
+        if (color.has_value())
+            fontColors.emplace_back(color.value());
+    };
+    SymbolModelNG::SetFontColor(frameNode, fontColors);
 }
 void FontWeightImpl(Ark_NativePointer node,
                     const Opt_Union_Number_FontWeight_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Ace::FontWeight>(*value);
     SymbolModelNG::SetFontWeight(frameNode, convValue);
 }
@@ -75,7 +87,7 @@ void EffectStrategyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<SymbolEffectType>(*value); // for enums
+    auto convValue = Converter::OptConvert<SymbolEffectType>(*value);
     SymbolModelNG::SetSymbolEffect(frameNode, EnumToInt(convValue));
 }
 void RenderingStrategyImpl(Ark_NativePointer node,
@@ -83,18 +95,30 @@ void RenderingStrategyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<RenderingStrategy>(*value); // for enums
+    auto convValue = Converter::OptConvert<RenderingStrategy>(*value);
     SymbolModelNG::SetRenderingStrategy(frameNode, EnumToInt(convValue));
 }
 void MinFontScaleImpl(Ark_NativePointer node,
                       const Opt_Union_Number_Resource* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<float>(*value) : std::nullopt;
+    Validator::ValidatePositive(convValue);
+    Validator::ValidateLessOrEqual(convValue, SCALE_LIMIT);
+    SymbolModelNG::SetMinFontScale(frameNode, convValue);
 }
 void MaxFontScaleImpl(Ark_NativePointer node,
                       const Opt_Union_Number_Resource* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<float>(*value) : std::nullopt;
+    Validator::ValidatePositive(convValue);
+    Validator::ValidateGreatOrEqual(convValue, SCALE_LIMIT);
+    SymbolModelNG::SetMaxFontScale(frameNode, convValue);
 }
-void ParseSymbolEffectOptions(NG::SymbolEffectOptions& options, Ark_SymbolEffect symbolEffect)
+bool ParseSymbolEffectOptions(NG::SymbolEffectOptions& options, Ark_SymbolEffect symbolEffect)
 {
     options.SetEffectType(symbolEffect->type);
     if (symbolEffect->scope.has_value()) {
@@ -106,6 +130,7 @@ void ParseSymbolEffectOptions(NG::SymbolEffectOptions& options, Ark_SymbolEffect
     if (symbolEffect->fillStyle.has_value()) {
         options.SetFillStyle(symbolEffect->fillStyle.value());
     }
+    return true;
 }
 void SymbolEffect0Impl(Ark_NativePointer node,
                        const Opt_SymbolEffect* symbolEffect,
@@ -113,12 +138,19 @@ void SymbolEffect0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(symbolEffect);
-    CHECK_NULL_VOID(symbolEffect->tag != InteropTag::INTEROP_TAG_UNDEFINED);
+    auto optSymbolEffect = Converter::GetOptPtr(symbolEffect);
+    if (!optSymbolEffect) {
+        // TODO: Reset value
+        return;
+    }
     NG::SymbolEffectOptions symbolEffectOptions;
-    ParseSymbolEffectOptions(symbolEffectOptions, symbolEffect->value);
+    if (!ParseSymbolEffectOptions(symbolEffectOptions, *optSymbolEffect)) {
+        // TODO: Reset value
+        return;
+    }
     if (isActive) {
         auto optBool = Converter::OptConvert<bool>(*isActive);
+        // TODO: Reset value
         if (optBool.has_value()) {
             symbolEffectOptions.SetIsActive(optBool.value());
         }
@@ -131,11 +163,19 @@ void SymbolEffect1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(symbolEffect);
+    auto optSymbolEffect = Converter::GetOptPtr(symbolEffect);
+    if (!optSymbolEffect) {
+        // TODO: Reset value
+        return;
+    }
     NG::SymbolEffectOptions symbolEffectOptions;
-    ParseSymbolEffectOptions(symbolEffectOptions, symbolEffect->value);
+    if (!ParseSymbolEffectOptions(symbolEffectOptions, *optSymbolEffect)) {
+        // TODO: Reset value
+        return;
+    }
     if (triggerValue) {
         auto optTriggerNumb = Converter::OptConvert<int32_t>(*triggerValue);
+        // TODO: Reset value
         if (optTriggerNumb.has_value()) {
             symbolEffectOptions.SetTriggerNum(optTriggerNumb.value());
         }

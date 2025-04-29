@@ -309,7 +309,7 @@ public:
             LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
                 GetPatternTypeName(), T::TypeName());
         }
-        return reinterpret_cast<T*>(RawPtr(pattern_));
+        return static_cast<T*>(RawPtr(pattern_));
     }
 
     template<typename T>
@@ -333,7 +333,7 @@ public:
             LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
                 GetLayoutPropertyTypeName(), T::TypeName());
         }
-        return reinterpret_cast<T*>(RawPtr(layoutProperty_));
+        return static_cast<T*>(RawPtr(layoutProperty_));
     }
 
     template<typename T>
@@ -351,7 +351,7 @@ public:
             LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
                 GetPaintPropertyTypeName(), T::TypeName());
         }
-        return reinterpret_cast<T*>(RawPtr(paintProperty_));
+        return static_cast<T*>(RawPtr(paintProperty_));
     }
 
     template<typename T>
@@ -1158,7 +1158,7 @@ public:
     void SetDeleteRsNode(bool isDelete) {
         isDeleteRsNode_ = isDelete;
     }
- 
+
     bool GetIsDelete() const {
         return isDeleteRsNode_;
     }
@@ -1166,7 +1166,7 @@ public:
     void SetPositionZ(bool hasPositionZ) {
         hasPositionZ_ = hasPositionZ;
     }
- 
+
     bool HasPositionZ() const {
         return hasPositionZ_;
     }

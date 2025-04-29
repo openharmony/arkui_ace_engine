@@ -19,6 +19,7 @@
 #include <functional>
 
 #include "base/utils/macros.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_model.h"
 
@@ -52,17 +53,21 @@ public:
         NG::FrameNode* node = nullptr) override;
     void SetAutoScale(bool autoScale) override;
         
-    static void SetDeleteArea(FrameNode* frameNode, FrameNode* footerNode, OnDeleteEvent&& onDelete,
+    static void SetDeleteArea(FrameNode* frameNode, UINode* footerNode, OnDeleteEvent&& onDelete,
         OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
-        OnStateChangedEvent&& onStateChangeEvent, const Dimension& length, bool isStartArea);
+        OnStateChangedEvent&& onStateChangeEvent, const std::optional<Dimension>& length, bool isStartArea);
     static void SetSwiperAction(FrameNode* frameNode, std::function<void()>&& startAction,
         std::function<void()>&& endAction, OnOffsetChangeFunc&& onOffsetChangeFunc,
-        V2::SwipeEdgeEffect edgeEffect);
+        const std::optional<V2::SwipeEdgeEffect>& edgeEffect);
     static void SetSelected(FrameNode* frameNode, bool selected);
     static void SetSelectable(FrameNode* frameNode, bool selectable);
     static void SetAutoScale(FrameNode* frameNode, bool autoScale);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, bool isCreateArc = false);
     static void SetSelectCallback(FrameNode* frameNode, OnSelectFunc&& selectCallback);
+    static void SetSelectChangeEvent(FrameNode* frameNode, OnSelectFunc&& changeEvent);
+    static void SetSticky(FrameNode* frameNode, const std::optional<V2::StickyMode>& stickyMode);
+    static void SetEditMode(FrameNode* frameNode, uint32_t editMode);
+    static void SetStyle(FrameNode* frameNode, const std::optional<V2::ListItemStyle>& style);
 private:
     void InstallSwiperCallBack(RefPtr<ListItemEventHub> eventHub,
                                OnDeleteEvent&& onDelete,
@@ -70,6 +75,7 @@ private:
                                OnExitDeleteAreaEvent&& onExitDeleteArea,
                                OnStateChangedEvent&& onStateChangeEvent,
                                bool isStartArea);
+    static RefPtr<FrameNode> CreateListItem(int32_t nodeId);
 };
 } // namespace OHOS::Ace::NG
 

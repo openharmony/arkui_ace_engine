@@ -46,7 +46,4 @@ const GENERATED_ArkUIRotationRecognizerAccessor* GetRotationRecognizerAccessor()
     return &RotationRecognizerAccessorImpl;
 }
 
-struct RotationRecognizerPeer {
-    virtual ~RotationRecognizerPeer() = default;
-};
 }

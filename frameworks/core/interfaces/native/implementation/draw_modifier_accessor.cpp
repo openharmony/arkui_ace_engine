@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -21,10 +22,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DrawModifierAccessor {
 void DestroyPeerImpl(Ark_DrawModifier peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->frameNode = nullptr;
+    peer->drawModifier = nullptr;
+    delete peer;
 }
 Ark_DrawModifier CtorImpl()
 {
-    return nullptr;
+    auto peer = new DrawModifierPeer();
+    peer->drawModifier = AceType::MakeRefPtr<DrawModifier>();
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -33,17 +40,30 @@ Ark_NativePointer GetFinalizerImpl()
 void DrawBehindImpl(Ark_DrawModifier peer,
                     const Ark_DrawContext* drawContext)
 {
+    LOGE("DrawModifierAccessor::DrawBehindImpl - is not implemented");
 }
 void DrawContentImpl(Ark_DrawModifier peer,
                      const Ark_DrawContext* drawContext)
 {
+    LOGE("DrawModifierAccessor::DrawContentImpl - is not implemented");
 }
 void DrawFrontImpl(Ark_DrawModifier peer,
                    const Ark_DrawContext* drawContext)
 {
+    LOGE("DrawModifierAccessor::DrawFrontImpl - is not implemented");
 }
 void InvalidateImpl(Ark_DrawModifier peer)
 {
+    CHECK_NULL_VOID(peer);
+    auto frameNode = peer->frameNode.Upgrade();
+    if (frameNode) {
+        const auto& extensionHandler = frameNode->GetExtensionHandler();
+        if (extensionHandler) {
+            extensionHandler->InvalidateRender();
+        } else {
+            frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
+        }
+    }
 }
 } // DrawModifierAccessor
 const GENERATED_ArkUIDrawModifierAccessor* GetDrawModifierAccessor()
@@ -60,7 +80,4 @@ const GENERATED_ArkUIDrawModifierAccessor* GetDrawModifierAccessor()
     return &DrawModifierAccessorImpl;
 }
 
-struct DrawModifierPeer {
-    virtual ~DrawModifierPeer() = default;
-};
 }

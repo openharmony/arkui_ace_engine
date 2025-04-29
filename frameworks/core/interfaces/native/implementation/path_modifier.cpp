@@ -18,6 +18,7 @@
 
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/shape/path_model_ng.h"
+#include "core/interfaces/native/generated/interface/node_api.h"
 
 
 namespace OHOS::Ace::NG {
@@ -78,9 +79,12 @@ void CommandsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    CHECK_EQUAL_VOID(value->tag, InteropTag::INTEROP_TAG_UNDEFINED);
-    PathModelNG::SetCommands(frameNode, Converter::Convert<std::string>(value->value));
+    auto convValue = Converter::OptConvert<std::string>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    PathModelNG::SetCommands(frameNode, *convValue);
 }
 } // PathAttributeModifier
 const GENERATED_ArkUIPathModifier* GetPathModifier()

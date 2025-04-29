@@ -40,9 +40,13 @@ void QRCodePaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     } else if (renderContext->HasForegroundColorStrategy()) {
         paintProperty->UpdateColor(Color::FOREGROUND);
     }
-    auto color = paintProperty->GetColorValue();
-    auto backgroundColor = paintProperty->GetBackgroundColorValue();
-    auto opacity = paintProperty->GetOpacityValue();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    RefPtr<QrcodeTheme> qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
+    CHECK_NULL_VOID(qrCodeTheme);
+    auto color = paintProperty->GetColorValue(qrCodeTheme->GetQrcodeColor());
+    auto backgroundColor = paintProperty->GetBackgroundColorValue(qrCodeTheme->GetBackgroundColor());
+    auto opacity = paintProperty->GetOpacityValue(1.0f);
 
     // For the long string, just show the length as 256.
     if (value.size() > QRCODE_VALUE_MAX_LENGTH) {

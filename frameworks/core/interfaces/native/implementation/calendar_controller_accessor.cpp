@@ -16,15 +16,21 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/calendar_controller_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CalendarControllerAccessor {
 void DestroyPeerImpl(Ark_CalendarController peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->controller = nullptr;
+    delete peer;
 }
 Ark_CalendarController CtorImpl()
 {
-    return nullptr;
+    return new CalendarControllerPeer {
+        .controller = Referenced::MakeRefPtr<CalendarControllerNg>()
+    };
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,10 +38,19 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void BackToTodayImpl(Ark_CalendarController peer)
 {
+    CHECK_NULL_VOID(peer && peer->controller);
+    peer->controller->BackToToday();
 }
 void GoToImpl(Ark_CalendarController peer,
               const Ark_Literal_Number_day_month_year* value)
 {
+    CHECK_NULL_VOID(peer && peer->controller);
+    CHECK_NULL_VOID(value);
+    peer->controller->GoTo(
+        Converter::Convert<int32_t>(value->year),
+        Converter::Convert<int32_t>(value->month),
+        Converter::Convert<int32_t>(value->day)
+    );
 }
 } // CalendarControllerAccessor
 const GENERATED_ArkUICalendarControllerAccessor* GetCalendarControllerAccessor()
@@ -50,7 +65,4 @@ const GENERATED_ArkUICalendarControllerAccessor* GetCalendarControllerAccessor()
     return &CalendarControllerAccessorImpl;
 }
 
-struct CalendarControllerPeer {
-    virtual ~CalendarControllerPeer() = default;
-};
 }

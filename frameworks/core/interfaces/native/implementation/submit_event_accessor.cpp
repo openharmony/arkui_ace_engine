@@ -15,16 +15,18 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/implementation/submit_event_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SubmitEventAccessor {
 void DestroyPeerImpl(Ark_SubmitEvent peer)
 {
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_SubmitEvent CtorImpl()
 {
-    return nullptr;
+    return PeerUtils::CreatePeer<SubmitEventPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,14 +34,25 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void KeepEditableStateImpl(Ark_SubmitEvent peer)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(peer->GetEventInfo());
+    peer->GetEventInfo()->SetKeepEditable(true);
 }
 Ark_String GetTextImpl(Ark_SubmitEvent peer)
 {
-    return {};
+    std::u16string result = u"";
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_String>(result, Converter::FC));
+    CHECK_NULL_RETURN(peer->GetEventInfo(), Converter::ArkValue<Ark_String>(result, Converter::FC));
+    result = peer->GetEventInfo()->GetText();
+    return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 void SetTextImpl(Ark_SubmitEvent peer,
                  const Ark_String* text)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(peer->GetEventInfo());
+    auto string = Converter::Convert<std::u16string>(*text);
+    peer->GetEventInfo()->SetText(string);
 }
 } // SubmitEventAccessor
 const GENERATED_ArkUISubmitEventAccessor* GetSubmitEventAccessor()
@@ -55,7 +68,4 @@ const GENERATED_ArkUISubmitEventAccessor* GetSubmitEventAccessor()
     return &SubmitEventAccessorImpl;
 }
 
-struct SubmitEventPeer {
-    virtual ~SubmitEventPeer() = default;
-};
 }

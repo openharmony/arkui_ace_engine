@@ -90,8 +90,8 @@ public:
     static void SetBuilderFunc(FrameNode* frameNode, ProgressMakeCallback&& jsMake);
     static void ProgressInitialize(
         FrameNode* frameNode, double min, double value, double cachedValue, double max, NG::ProgressType type);
-    static void SetBorderRadius(FrameNode* frameNode, const Dimension& value);
     static void SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag);
+    static void SetBorderRadius(FrameNode* frameNode, const Dimension& value);
     static void ResetBorderRadius(FrameNode* frameNode);
     static void ResetColor(FrameNode* frameNode);
     static void ResetBackgroundColor(FrameNode* frameNode);

@@ -269,7 +269,7 @@ void ImagePainter::ApplyImageAlignmentFit(
 void ImagePainter::ApplyImageFit(
     ImageFit imageFit, const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     float viewScale = context ? context->GetViewScale() : 1.0;
     srcRect.SetOffset(OffsetF());
     srcRect.SetSize(rawPicSize);

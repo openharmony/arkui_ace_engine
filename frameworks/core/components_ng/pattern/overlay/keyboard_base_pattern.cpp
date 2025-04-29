@@ -65,7 +65,7 @@ void KeyboardPattern::DumpInfo()
 
 void KeyboardPattern::OnModifyDone()
 {
-    auto context = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
+    auto context = OHOS::Ace::NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->AddOnAreaChangeNode(GetHost()->GetId());
 }
@@ -142,7 +142,7 @@ float KeyboardPattern::GetKeyboardHeight()
 
 void KeyboardPattern::OnDetachFromFrameNode(FrameNode* node)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveOnAreaChangeNode(node->GetId());
 }

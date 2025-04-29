@@ -136,7 +136,7 @@ RefPtr<FrameNode> ContainerModalView::BuildTitleRow(bool isFloatingTitle)
     if (isFloatingTitle) {
         auto renderContext = containerTitleRow->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, nullptr);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, nullptr);
         auto theme = pipeline->GetTheme<ContainerModalTheme>();
         renderContext->UpdateBackgroundColor(theme->GetBackGroundColor(true));
@@ -146,7 +146,7 @@ RefPtr<FrameNode> ContainerModalView::BuildTitleRow(bool isFloatingTitle)
 
 RefPtr<FrameNode> ContainerModalView::AddControlButtons(RefPtr<FrameNode>& controlButtonsRow)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);
@@ -207,7 +207,7 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE, CLOSE_KEY },
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_CLOSE, CLOSE_KEY },
     };
-    auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
+    auto theme = PipelineContext::GetCurrentContextSafelyWithCheck()->GetTheme<ContainerModalTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
     // button image icon
     ImageSourceInfo imageSourceInfo;
@@ -394,7 +394,7 @@ void ContainerModalView::AddButtonHoverEvent(
         CHECK_NULL_VOID(containerModalPattern);
         bool isFocus = containerModalPattern->GetIsFocus() || containerModalPattern->GetIsHoveredMenu();
 
-        auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
+        auto theme = PipelineContext::GetCurrentContextSafelyWithCheck()->GetTheme<ContainerModalTheme>();
         auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
         auto sourceInfo = imageLayoutProperty->GetImageSourceInfo();
         ControlBtnColorType isHoverFillType = ControlBtnColorType::HOVER_FILL;
@@ -425,7 +425,7 @@ void ContainerModalView::AddButtonOnEvent(
         CHECK_NULL_VOID(buttonNode);
         auto imageNode = imageWk.Upgrade();
         CHECK_NULL_VOID(imageNode);
-        auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
+        auto theme = PipelineContext::GetCurrentContextSafelyWithCheck()->GetTheme<ContainerModalTheme>();
         if (info.GetAction() == MouseAction::PRESS || info.GetAction() == MouseAction::RELEASE) {
             auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
             CHECK_NULL_VOID(imageLayoutProperty);

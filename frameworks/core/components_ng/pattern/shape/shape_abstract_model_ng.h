@@ -40,9 +40,9 @@ public:
     void SetAntiAlias(bool antiAlias) override;
     void SetWidth(Dimension& width) override;
     void SetHeight(Dimension& height) override;
-    static void SetWidth(FrameNode* frameNode, Dimension& width);
+    static void SetWidth(FrameNode* frameNode, const std::optional<Dimension>& width);
     static void ResetWidth(FrameNode* frameNode);
-    static void SetHeight(FrameNode* frameNode, Dimension& height);
+    static void SetHeight(FrameNode* frameNode, const std::optional<Dimension>& height);
     static void ResetHeight(FrameNode* frameNode);
     static void SetStroke(FrameNode* frameNode, const Color& color);
     static void SetFill(FrameNode* frameNode, const Color& color);

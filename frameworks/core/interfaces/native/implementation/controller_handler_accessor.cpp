@@ -48,13 +48,13 @@ void SetWebControllerImpl(Ark_ControllerHandler peer,
     }
 
     if (controller == nullptr) {
-        // WebModelNG::NotifyPopupWindowResultStatic(parentNWebId, false);
+        WebModelNG::NotifyPopupWindowResultStatic(parentNWebId, false);
         return;
     }
 
     int32_t childWebId = controller->nwebId;
     if (childWebId == parentNWebId || childWebId != -1) {
-        // WebModelNG::NotifyPopupWindowResultStatic(parentNWebId, false);
+        WebModelNG::NotifyPopupWindowResultStatic(parentNWebId, false);
         return;
     }
     ControllerHandlerPeer::ChildWindowInfo info { parentNWebId, Referenced::Claim(controller) };
@@ -74,7 +74,4 @@ const GENERATED_ArkUIControllerHandlerAccessor* GetControllerHandlerAccessor()
     return &ControllerHandlerAccessorImpl;
 }
 
-struct ControllerHandlerPeer {
-    virtual ~ControllerHandlerPeer() = default;
-};
 }

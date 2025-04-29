@@ -26,7 +26,7 @@ Ark_FrictionMotion CtorImpl(const Ark_Number* friction,
                             const Ark_Number* position,
                             const Ark_Number* velocity)
 {
-    return nullptr;
+    return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -43,7 +43,4 @@ const GENERATED_ArkUIFrictionMotionAccessor* GetFrictionMotionAccessor()
     return &FrictionMotionAccessorImpl;
 }
 
-struct FrictionMotionPeer {
-    virtual ~FrictionMotionPeer() = default;
-};
 }

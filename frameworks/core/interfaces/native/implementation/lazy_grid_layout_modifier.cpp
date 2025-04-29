@@ -29,10 +29,18 @@ namespace LazyGridLayoutAttributeModifier {
 void RowsGapImpl(Ark_NativePointer node,
                  const Opt_LengthMetrics* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //LazyGridLayoutModelNG::SetRowsGap(frameNode, convValue);
 }
 void ColumnsGapImpl(Ark_NativePointer node,
                     const Opt_LengthMetrics* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //LazyGridLayoutModelNG::SetColumnsGap(frameNode, convValue);
 }
 } // LazyGridLayoutAttributeModifier
 const GENERATED_ArkUILazyGridLayoutModifier* GetLazyGridLayoutModifier()
