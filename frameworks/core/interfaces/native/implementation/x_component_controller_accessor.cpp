@@ -19,6 +19,7 @@
 #endif //XCOMPONENT_SUPPORTED
 #include "core/interfaces/native/implementation/x_component_controller_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/promise_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
@@ -34,7 +35,7 @@ Ark_XComponentController CtorImpl()
     auto peer = Referenced::MakeRefPtr<XComponentControllerPeer>();
     peer->IncRefCount();
 #ifdef XCOMPONENT_SUPPORTED
-    peer->controller = std::make_shared<OHOS::Ace::NG::XComponentControllerNG>();
+    peer->controller = std::make_shared<XComponentControllerNG>();
 #endif //XCOMPONENT_SUPPORTED
     return Referenced::RawPtr(peer);
 }
@@ -175,9 +176,17 @@ void StartImageAnalyzerImpl(Ark_VMContext vmContext,
                             const Ark_ImageAnalyzerConfig* config,
                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
+    PromiseHelper promise(outputArgumentForReturningPromise);
 #ifdef XCOMPONENT_SUPPORTED
-    CHECK_NULL_VOID(peer);
-    peer->TriggerStartImageAnalyzer(config, outputArgumentForReturningPromise);
+    if (peer == nullptr) {
+        Converter::ArkArrayHolder<Array_String> vectorHolder({"the object is null"});
+        promise.Reject(vectorHolder.OptValue<Opt_Array_String>());
+        return;
+    }
+    peer->TriggerStartImageAnalyzer(config, std::move(promise));
+#else
+    Converter::ArkArrayHolder<Array_String> vectorHolder({"XComponent is not supported"});
+    promise.Reject(vectorHolder.OptValue<Opt_Array_String>());
 #endif //XCOMPONENT_SUPPORTED
 }
 void StopImageAnalyzerImpl(Ark_XComponentController peer)

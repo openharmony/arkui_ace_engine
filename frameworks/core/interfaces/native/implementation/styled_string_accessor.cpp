@@ -16,9 +16,10 @@
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/buffer_keeper.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/promise_helper.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/background_color_style_peer.h"
 #include "core/interfaces/native/implementation/baseline_offset_style_peer.h"
 #include "core/interfaces/native/implementation/decoration_style_peer.h"
@@ -84,7 +85,8 @@ RefPtr<SpanBase> Convert(const Ark_StyleOptions& src)
         [&result, &src](const Ark_UserDataSpan& peer) {
             auto start = Converter::OptConvert<int32_t>(src.start).value_or(0);
             auto end = Converter::OptConvert<int32_t>(src.length).value_or(0) + start;
-            result = AceType::MakeRefPtr<ExtSpan>(start, end);
+            result = AceType::MakeRefPtr<ExtSpan>(start, end);  // Ark_UserDataSpan is temporarily ignored.
+            LOGE("Converter::Convert(Ark_StyleOptions) the Ark_UserDataSpan is not implemented.");
         },
         [](const Ark_ImageAttachment& style) {
             LOGE("Converter::Convert(Ark_StyleOptions) the Ark_ImageAttachment is not implemented.");
@@ -246,52 +248,25 @@ void FromHtmlImpl(Ark_VMContext vmContext,
                   const Ark_String* html,
                   const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    ContainerScope scope(Container::CurrentIdSafely());
-    StringArray errorsStr;
-    Ark_StyledString peer = GetMutableStyledStringAccessor()->ctor();
-
-    auto callback = [arkCallback = CallbackHelper(*outputArgumentForReturningPromise)]
-        (Ark_StyledString peer, const StringArray& errors) {
-        Converter::ArkArrayHolder<Array_String> errorHolder(errors);
-        arkCallback.Invoke(Converter::ArkValue<Opt_StyledString>(peer), errorHolder.OptValue<Opt_Array_String>());
-    };
-
+    auto promise = std::make_shared<PromiseHelper<Callback_Opt_StyledString_Opt_Array_String_Void>>(
+        outputArgumentForReturningPromise);
     auto htmlStr = html ? Converter::Convert<std::string>(*html) : std::string();
     if (htmlStr.empty()) {
-        errorsStr.emplace_back("html is empty");
-        callback(peer, errorsStr);
+        Converter::ArkArrayHolder<Array_String> errors({"html is empty"});
+        promise->Reject(Converter::ArkValue<Opt_StyledString>(Ark_Empty()), errors.OptValue<Opt_Array_String>());
         return;
     }
-    auto taskExecutor = CreateTaskExecutor(errorsStr);
-    if (taskExecutor == nullptr) {
-        callback(peer, errorsStr);
-        return;
-    }
-
-    auto instanceId = Container::CurrentIdSafely();
-    taskExecutor->PostTask([callback, peer, htmlStr, errors = errorsStr, instanceId]() mutable {
-        ContainerScope scope(instanceId);
+    promise->StartAsync(vmContext, asyncWorker, [promise, htmlStr]() {
         if (auto styledString = OHOS::Ace::HtmlUtils::FromHtml(htmlStr); styledString) {
+            Ark_StyledString peer = GetMutableStyledStringAccessor()->ctor();
             peer->spanString = styledString;
+            promise->Resolve(Converter::ArkValue<Opt_StyledString, Ark_StyledString>(peer),
+                Converter::ArkValue<Opt_Array_String>(Ark_Empty()));
         } else {
-            errors.emplace_back("Convert html to styledString fails");
+            Converter::ArkArrayHolder<Array_String> errors({"Convert html to styledString fails"});
+            promise->Reject(Converter::ArkValue<Opt_StyledString>(Ark_Empty()), errors.OptValue<Opt_Array_String>());
         }
-        auto container = OHOS::Ace::AceEngine::Get().GetContainer(instanceId);
-        if (!container) {
-            errors.emplace_back("FromHtmlReturn container is null");
-            callback(peer, errors);
-            return;
-        }
-        auto taskExecutor = container->GetTaskExecutor();
-        if (!taskExecutor) {
-            errors.emplace_back("FromHtmlReturn taskExecutor is null");
-            callback(peer, errors);
-            return;
-        }
-        taskExecutor->PostTask(
-            [callback, peer, errors]() mutable { callback(peer, errors); },
-            TaskExecutor::TaskType::UI, "FromHtmlReturn", PriorityType::VIP);
-        }, TaskExecutor::TaskType::BACKGROUND, "FromHtml", PriorityType::IMMEDIATE);
+    });
 }
 Ark_String ToHtmlImpl(Ark_VMContext vmContext,
                       Ark_StyledString styledString)
@@ -331,32 +306,45 @@ void Unmarshalling0Impl(Ark_VMContext vmContext,
                         const StyledStringUnmarshallCallback* callback_,
                         const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
+    auto promise = std::make_shared<PromiseHelper<Callback_Opt_StyledString_Opt_Array_String_Void>>(
+        outputArgumentForReturningPromise);
+    auto str = buffer ? Converter::Convert<std::string>(*buffer) : std::string();
+    if (str.empty()) {
+        Converter::ArkArrayHolder<Array_String> errors({"buffer is empty"});
+        promise->Reject(Converter::ArkValue<Opt_StyledString>(Ark_Empty()), errors.OptValue<Opt_Array_String>());
+        return;
+    }
+
+    auto unmarshallingExec = [promise, str = std::move(str), instanceId = Container::CurrentIdSafely(), callback_]() {
+        std::function<RefPtr<ExtSpan>(const std::vector<uint8_t>&, int32_t, int32_t)> unmarshall;
+        if (callback_) {
+            unmarshall = [instanceId, arkCallback = CallbackHelper(*callback_)]
+            (const std::vector<uint8_t>& buff, int32_t spanStart, int32_t spanLength) -> RefPtr<ExtSpan> {
+                ContainerScope scope(instanceId);
+                Ark_Buffer arkBuffer = BufferKeeper::Allocate(buff.size());
+                copy(buff.begin(), buff.end(), reinterpret_cast<uint8_t*>(arkBuffer.data));
+                auto arkResult = arkCallback.InvokeWithObtainResult<Ark_UserDataSpan,
+                    Callback_StyledStringMarshallingValue_Void>(arkBuffer);
+                LOGE("StyledStringAccessor::Unmarshalling0Impl. Ark_UserDataSpan is not implemented. %{public}p",
+                    arkResult.handle);
+                return AceType::MakeRefPtr<ExtSpan>(spanStart, spanLength); // Ark_UserDataSpan is temporarily ignored.
+            };
+        }
+        std::vector<uint8_t> buff(str.begin(), str.end());
+        Ark_StyledString peer = StyledStringPeer::Create();
+        peer->spanString = SpanString::DecodeTlv(buff, std::move(unmarshall), instanceId);
+        promise->Resolve(Converter::ArkValue<Opt_StyledString, Ark_StyledString>(peer),
+            Converter::ArkValue<Opt_Array_String>(Ark_Empty()));
+    };
+
+    promise->StartAsync(vmContext, asyncWorker, std::move(unmarshallingExec));
 }
 void Unmarshalling1Impl(Ark_VMContext vmContext,
                         Ark_AsyncWorkerPtr asyncWorker,
                         const Ark_Buffer* buffer,
                         const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    CHECK_NULL_VOID(outputArgumentForReturningPromise);
-    std::vector<std::string> errorsStr;
-    StyledStringPeer *peer = StyledStringPeer::Create();
-
-    auto callback = [arkCallback = CallbackHelper(*outputArgumentForReturningPromise)]
-        (StyledStringPeer* peer, const StringArray& errors) {
-        Converter::ArkArrayHolder<Array_String> errorHolder(errors);
-        arkCallback.Invoke(Converter::ArkValue<Opt_StyledString>(peer), errorHolder.OptValue<Opt_Array_String>());
-    };
-
-    auto str = Converter::Convert<std::string>(*buffer);
-    if (str.empty()) {
-        errorsStr.emplace_back("buffer is empty");
-        callback(peer, errorsStr);
-        return;
-    }
-    std::vector<uint8_t> vec(str.begin(), str.end());
-    peer->spanString = SpanString::DecodeTlv(vec);
-
-    callback(peer, errorsStr);
+    Unmarshalling0Impl(vmContext, asyncWorker, buffer, nullptr, outputArgumentForReturningPromise);
 }
 Ark_Number GetLengthImpl(Ark_StyledString peer)
 {

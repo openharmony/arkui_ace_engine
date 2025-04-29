@@ -57,7 +57,7 @@ public:
     MOCK_METHOD(void, SetShadowColor, (const Ace::Color&), (override));
     MOCK_METHOD(void, SetPattern, (RefPtr<AceType>), (override));
 };
-class StubCanvasRenderingContext2DPeerImpl : public GeneratedModifier::CanvasRenderingContext2DPeerImpl {
+class StubCanvasRenderingContext2DPeerImpl : public CanvasRenderingContext2DPeer {
 public:
     StubCanvasRenderingContext2DPeerImpl() = default;
     ~StubCanvasRenderingContext2DPeerImpl() override = default;

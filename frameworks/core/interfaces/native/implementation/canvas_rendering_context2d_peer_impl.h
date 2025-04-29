@@ -16,6 +16,7 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_RENDERING_CONTEXT2D_PEER_IMPL_H
 
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/promise_helper.h"
 #include "canvas_renderer_peer_impl.h"
 #include "arkoala_api_generated.h"
 
@@ -37,7 +38,7 @@ public:
     void OnAttachToCanvas();
     void OnDetachFromCanvas();
     void StartImageAnalyzer(
-    const Ark_ImageAnalyzerConfig* config, const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    const Ark_ImageAnalyzerConfig* config, PromiseHelper<Callback_Opt_Array_String_Void>&& promise);
     void StopImageAnalyzer();
     double GetHeight();
     double GetWidth();
@@ -57,4 +58,7 @@ private:
 };
 
 } // namespace OHOS::Ace::NG::GeneratedModifier
+
+struct CanvasRenderingContext2DPeer : public OHOS::Ace::NG::GeneratedModifier::CanvasRenderingContext2DPeerImpl {
+};
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_SCROLLER_PEER_IMPL_H
