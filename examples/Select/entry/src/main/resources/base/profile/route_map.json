@@ -19,6 +19,26 @@
       "name": "SelectOption",
       "pageSourceFile": "src/main/ets/pages/components/select/selectOption.ets",
       "buildFunction": "SelectOptionBuilder"
+    },
+    {
+      "name": "ToggleIndex",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/index.ets",
+      "buildFunction": "ToggleIndexBuilder"
+    },
+    {
+      "name": "ToggleWithDialog",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleWithDialog.ets",
+      "buildFunction": "ToggleWithDialogBuilder"
+    },
+    {
+      "name": "ToggleUnion",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleUnion.ets",
+      "buildFunction": "ToggleUnionBuilder"
+    },
+    {
+      "name": "ToggleContentModifier",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleContentModifier.ets",
+      "buildFunction": "ToggleContentModifierBuilder"
     }
   ]
 }
