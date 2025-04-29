@@ -49,9 +49,6 @@ public:
     bool GetNavOrSideBarNodes();
     void ToInitNavOrSideBarNode();
 
-    void UpdateToolbarLayoutBasedOnTargetNodes();
-    void ExpandStackLayout();
-    void UpdateTargetNodesBarMargin();
     void SetExpandStackLayout(bool isExpand)
     {
         CHECK_NULL_VOID(toolbarManager_);
@@ -62,6 +59,15 @@ public:
         return toolbarManager_->GetIsMoveUp();
     }
 
+    void UpdateSideTitleBgColor(
+        const Color& sideBarColor, const Color& sideBarContainerColor, const BlurStyle& blurStyle);
+    void UpdateTargetNodesBarMargin(bool reset = false);
+    void ExpandStackNodeLayout(bool reset = false);
+    void ResetExpandStackNode(bool changeToFloating = false);
+    void SetIsFloatingMode(bool isFloatingMode)
+    {
+        isFloatingMode_ = isFloatingMode;
+    }
 protected:
     void UpdateTitleAfterRemove();
     void RemoveToolbarItem(const RefPtr<FrameNode>& frameNode);
@@ -133,6 +139,10 @@ private:
     bool hasNavOrSideBarNodes_ = false;
     bool hasSetOnchangeCallback_ = false;
     bool isSafeAreaOn_ = false;
+
+    bool isFloatingMode_ = false;
+    bool hasSetUpdateSideTitleBgColor_ = false;
+    bool isUpdateTargetNode_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_TOOLBAR_H

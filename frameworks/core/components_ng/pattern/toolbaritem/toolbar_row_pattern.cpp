@@ -70,14 +70,15 @@ WeakPtr<FocusHub> ToolBarRowPattern::GetNextFocusNode(FocusStep step, const Weak
 
     if ((step == FocusStep::TAB || step == FocusStep::RIGHT) && rightRow) {
         isHead = true;
-        nextFocusNode = rightRow->GetFocusHub();
+        auto rightRowFocusHub = rightRow->GetFocusHub();
+        nextFocusNode = rightRowFocusHub->GetHeadOrTailChild(true);
     } else if ((step == FocusStep::SHIFT_TAB || step == FocusStep::LEFT) && leftRow) {
         isHead = false;
-        nextFocusNode = leftRow->GetFocusHub();
+        auto leftRowFocusHub = leftRow->GetFocusHub();
+        nextFocusNode = leftRowFocusHub->GetHeadOrTailChild(true);
     }
 
-    if (!leftRow || !rightRow) {
-        GetCurrentFocusView()->FocusViewClose();
+    if (!nextFocusNode && (step == FocusStep::TAB || step == FocusStep::SHIFT_TAB)) {
         return pageFocusHub->GetHeadOrTailChild(isHead);
     }
 
@@ -92,11 +93,8 @@ WeakPtr<FocusHub> ToolBarRowPattern::GetNextFocusNode(FocusStep step, const Weak
     if (nextFocusNode && (step == FocusStep::LEFT || step == FocusStep::RIGHT)) {
         if (!nextFocusNode->IsCurrentFocus()) {
             return nextFocusNode;
-        } else {
-            return nullptr;
         }
     }
-
     return nullptr;
 }
 } // namespace OHOS::Ace::NG

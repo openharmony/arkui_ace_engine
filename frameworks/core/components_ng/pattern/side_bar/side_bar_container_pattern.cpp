@@ -426,6 +426,7 @@ void SideBarContainerPattern::OnModifyDone()
         hasInit_ = true;
     }
     SideBarModifyDoneToolBarManager();
+    UpdateSideBarColorToToolbarManager();
 }
 
 void SideBarContainerPattern::CreateAndMountNodes()
@@ -454,7 +455,6 @@ void SideBarContainerPattern::CreateAndMountNodes()
             auto sideBarTheme = context->GetTheme<SideBarTheme>();
             CHECK_NULL_VOID(sideBarTheme);
             Color bgColor = sideBarTheme->GetSideBarBackgroundColor();
-            UpdateSideBarColorToolBarManager(bgColor);
             renderContext->UpdateBackgroundColor(bgColor);
         }
         if (SystemProperties::GetSideBarContainerBlurEnable() &&
@@ -1495,13 +1495,37 @@ void SideBarContainerPattern::SideBarModifyDoneToolBarManager()
     toolbarManager_->OnToolBarManagerModifyDone();
 }
 
-void SideBarContainerPattern::UpdateSideBarColorToolBarManager(const Color& backgroudColor)
+void SideBarContainerPattern::UpdateSideBarColorToToolbarManager()
 {
-    InitToolBarManager();
-    auto color = toolbarManager_->GetSideBarColor();
-    if (color == backgroudColor) {
+    CHECK_NULL_VOID(toolbarManager_);
+    if (!toolbarManager_->GetIsMoveUp()) {
         return;
     }
-    toolbarManager_->SetSideBarColor(backgroudColor);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto ctx = host->GetRenderContext();
+    if (ctx) {
+        auto bgColor = ctx->GetBackgroundColor().value_or(Color::TRANSPARENT);
+        toolbarManager_->SetSideBarContainerColor(bgColor);
+    }
+    auto children = host->GetChildren();
+    if (children.size() < DEFAULT_MIN_CHILDREN_SIZE_WITHOUT_BUTTON_AND_DIVIDER) {
+        return;
+    }
+    auto sideBarNode = children.front();
+    auto sideBarFrameNode = AceType::DynamicCast<FrameNode>(sideBarNode);
+    CHECK_NULL_VOID(sideBarFrameNode);
+    ctx = sideBarFrameNode->GetRenderContext();
+    CHECK_NULL_VOID(ctx);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto sideBarTheme = context->GetTheme<SideBarTheme>();
+    CHECK_NULL_VOID(sideBarTheme);
+    Color bgColor = ctx->GetBackgroundColor().value_or(sideBarTheme->GetSideBarBackgroundColor());
+    toolbarManager_->SetSideBarColor(bgColor);
+    auto blurStyleOption = ctx->GetBackBlurStyle();
+    auto blurStyle = blurStyleOption.has_value() ? blurStyleOption.value().blurStyle : BlurStyle::NO_MATERIAL;
+    toolbarManager_->SetSideBarBlurStyle(blurStyle);
+    toolbarManager_->OnChangeSideBarColor();
 }
 } // namespace OHOS::Ace::NG

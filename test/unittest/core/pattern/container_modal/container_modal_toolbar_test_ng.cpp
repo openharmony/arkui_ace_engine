@@ -48,6 +48,11 @@
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float TITLE_ITEM_HEIGT_S = 56.0; // 56vp height of title
+constexpr float TITLE_ITEM_HEIGT_M = 64.0; // 64vp height of title
+constexpr float TITLE_ITEM_HEIGT_L = 72.0; // 72vp height of title
+} // namespace
 class ContainerModelToolBarTestNg : public TestNG {
 protected:
     static void SetUpTestSuite();
@@ -135,7 +140,6 @@ void ContainerModelToolBarTestNg::CreateContainerModal()
     RefPtr<FrameNode> content = CreateContent();
     auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
-    ;
     content->AddChild(pageNode);
     auto frameNode = view.Create(content);
     ViewStackProcessor::GetInstance()->Push(frameNode);
@@ -145,11 +149,728 @@ void ContainerModelToolBarTestNg::CreateContainerModal()
 }
 
 /**
- * @tc.name: FocusEventTest001
+ * @tc.name: ToolbarManager
+ * @tc.desc: Test InitToolBarManager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, ToolbarManagerTest, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+}
+
+/**
+ * @tc.name: SetToolbarBuilder
+ * @tc.desc: Test SetToolbarBuilder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, SetToolbarBuilder, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+    auto parentNode = FrameNode::CreateFrameNode("parentNode", 1, AceType::MakeRefPtr<Pattern>());
+    std::function<RefPtr<UINode>()> builder = []() -> RefPtr<UINode> {
+        auto ToolbarNode =
+            FrameNode::GetOrCreateFrameNode(V2::TOOLBAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+        CHECK_NULL_RETURN(ToolbarNode, nullptr);
+        auto ToolbarItemNode = FrameNode::GetOrCreateFrameNode(V2::TOOLBARITEM_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ToolBarItemPattern>(); });
+        CHECK_NULL_RETURN(ToolbarItemNode, nullptr);
+        ToolbarNode->AddChild(ToolbarItemNode);
+        return ToolbarNode;
+    };
+    titleMgr_->SetToolbarBuilder(parentNode, builder);
+    auto& items = titleMgr_->itemsWillOnTree_[parentNode];
+    EXPECT_EQ(items.size(), 1);
+    EXPECT_EQ(parentNode->removeToolbarItemCallbacks_.size(), 1);
+}
+
+/**
+ * @tc.name: ParsePlacementType
+ * @tc.desc: Test ParsePlacementType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, ParsePlacementType, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+    // clear itemsWillOnTree_ and itemWillAdd_
+    titleMgr_->itemsWillOnTree_.clear();
+    titleMgr_->itemWillAdd_.clear();
+
+    // create toolbarItem and mountToParent
+    auto noneNode = FrameNode::CreateFrameNode("NONE", 1, AceType::MakeRefPtr<Pattern>());
+    auto toolbarItem =
+        FrameNode::CreateFrameNode(V2::TOOLBARITEM_ETS_TAG, 2, AceType::MakeRefPtr<ToolBarItemPattern>());
+    titleMgr_->itemsWillOnTree_[noneNode].push_back(toolbarItem);
+    titleMgr_->ParsePlacementType();
+    auto size = titleMgr_->itemsWillOnTree_[noneNode].size();
+    EXPECT_EQ(size, 1);
+    size = titleMgr_->itemWillAdd_[ItemPlacementType::NONE].size();
+    EXPECT_EQ(size, 0);
+
+    // init toolbarManager_ and set HasNavBar is false
+    titleMgr_->InitToolBarManager();
+    EXPECT_TRUE(titleMgr_->toolbarManager_);
+    titleMgr_->toolbarManager_->SetHasNavBar(false);
+
+    // clear itemsWillOnTree_ and itemWillAdd_
+    titleMgr_->itemsWillOnTree_.clear();
+    titleMgr_->itemWillAdd_.clear();
+
+    // create navigation and navbar
+    auto navigationNode = FrameNode::CreateFrameNode(V2::NAVIGATION_VIEW_ETS_TAG, 3, AceType::MakeRefPtr<Pattern>());
+    auto navbarNode = FrameNode::CreateFrameNode(V2::NAVBAR_ETS_TAG, 4, AceType::MakeRefPtr<Pattern>());
+    navigationNode->AddChild(navbarNode);
+    titleMgr_->navigationNode_ = AceType::WeakClaim(AceType::RawPtr(navigationNode));
+
+    // create toolbarItem and mountToParent
+    auto toolbarItem2 =
+        FrameNode::CreateFrameNode(V2::TOOLBARITEM_ETS_TAG, 5, AceType::MakeRefPtr<ToolBarItemPattern>());
+    titleMgr_->itemsWillOnTree_[navbarNode].push_back(toolbarItem);
+    titleMgr_->ParsePlacementType();
+    size = titleMgr_->itemsWillOnTree_[navbarNode].size();
+    EXPECT_EQ(size, 0);
+    size = titleMgr_->itemWillAdd_[ItemPlacementType::NAV_BAR_START].size();
+    EXPECT_EQ(size, 1);
+}
+
+/**
+ * @tc.name: HandleToolbarItemList
+ * @tc.desc: Test HandleToolbarItemList.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, HandleToolbarItemList, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+    auto navigationNode = FrameNode::CreateFrameNode(V2::NAVIGATION_VIEW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto navbarNode = FrameNode::CreateFrameNode(V2::NAVBAR_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    navigationNode->AddChild(navbarNode);
+    titleMgr_->navigationNode_ = AceType::WeakClaim(AceType::RawPtr(navigationNode));
+    std::list<RefPtr<UINode>> items;
+    auto toolbarNode =
+        FrameNode::CreateFrameNode(V2::TOOLBARITEM_ETS_TAG, 3, AceType::MakeRefPtr<ToolBarItemPattern>());
+    items.push_back(toolbarNode);
+    bool result = titleMgr_->HandleToolbarItemList(navbarNode, items);
+    EXPECT_TRUE(result);
+    auto invalidParent = FrameNode::CreateFrameNode("Invalid", 4, AceType::MakeRefPtr<Pattern>());
+    result = titleMgr_->HandleToolbarItemList(invalidParent, items);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetItemTypeFromTag
+ * @tc.desc: Test GetItemTypeFromTag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, GetItemTypeFromTag, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    // Test the navbar tag
+    auto type = titleMgr_->GetItemTypeFromTag(V2::NAVBAR_ETS_TAG, 0);
+    EXPECT_EQ(type, ItemPlacementType::NAV_BAR_START);
+    type = titleMgr_->GetItemTypeFromTag(V2::NAVBAR_ETS_TAG, 1);
+    EXPECT_EQ(type, ItemPlacementType::NAV_BAR_END);
+
+    // Test the sidebar tag
+    type = titleMgr_->GetItemTypeFromTag(V2::SIDE_BAR_ETS_TAG, 0);
+    EXPECT_EQ(type, ItemPlacementType::SIDE_BAR_START);
+    type = titleMgr_->GetItemTypeFromTag(V2::SIDE_BAR_ETS_TAG, 1);
+    EXPECT_EQ(type, ItemPlacementType::SIDE_BAR_END);
+
+    // Test the navdestination view tag
+    type = titleMgr_->GetItemTypeFromTag(V2::NAVDESTINATION_VIEW_ETS_TAG, 0);
+    EXPECT_EQ(type, ItemPlacementType::NAVDEST_START);
+    type = titleMgr_->GetItemTypeFromTag(V2::NAVDESTINATION_VIEW_ETS_TAG, 1);
+    EXPECT_EQ(type, ItemPlacementType::NAVDEST_END);
+
+    // Test invalid tag
+    type = titleMgr_->GetItemTypeFromTag("InvalidTag", 0);
+    EXPECT_EQ(type, ItemPlacementType::NONE);
+    type = titleMgr_->GetItemTypeFromTag("InvalidTag", 1);
+    EXPECT_EQ(type, ItemPlacementType::NONE);
+}
+
+/**
+ * @tc.name: RemoveToolbarItem
+ * @tc.desc: Test RemoveToolbarItem.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, RemoveToolbarItem, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+    auto parentNode = FrameNode::CreateFrameNode(V2::NAVBAR_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto toolbarItem =
+        FrameNode::CreateFrameNode(V2::TOOLBARITEM_ETS_TAG, 2, AceType::MakeRefPtr<ToolBarItemPattern>());
+    parentNode->AddChild(toolbarItem);
+    titleMgr_->itemsOnTree_[parentNode].push_back(toolbarItem);
+    titleMgr_->RemoveToolbarItem(parentNode);
+    EXPECT_TRUE(titleMgr_->itemsOnTree_.empty());
+}
+
+/**
+ * @tc.name: GetTagFromNode
+ * @tc.desc: Test GetTagFromNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, GetTagFromNode, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+    auto navigationNode = FrameNode::CreateFrameNode(V2::NAVIGATION_VIEW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto navbarNode = FrameNode::CreateFrameNode(V2::NAVBAR_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
+    navigationNode->AddChild(navbarNode);
+    titleMgr_->navigationNode_ = AceType::WeakClaim(AceType::RawPtr(navigationNode));
+    std::string ret = titleMgr_->GetTagFromNode(navbarNode);
+    EXPECT_EQ(ret, navbarNode->GetTag());
+    auto navDestContentNode = FrameNode::CreateFrameNode("navDestContentNode", 3, AceType::MakeRefPtr<Pattern>());
+    auto navDestNode = FrameNode::CreateFrameNode(V2::NAVDESTINATION_VIEW_ETS_TAG, 4, AceType::MakeRefPtr<Pattern>());
+    navDestContentNode->AddChild(navDestNode);
+    navigationNode->AddChild(navDestContentNode);
+    ret = titleMgr_->GetTagFromNode(navDestNode);
+    EXPECT_EQ(ret, navDestNode->GetTag());
+}
+
+/**
+ * @tc.name: AddToolbarItemToContainer
+ * @tc.desc: Test AddToolbarItemToContainer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, AddToolbarItemToContainer, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+    titleMgr_->toolbarManager_->SetHasNavBar(true);
+
+    auto toolbarItem = FrameNode::CreateFrameNode("toolbarItem", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
+    titleMgr_->itemWillAdd_[ItemPlacementType::NAV_BAR_START].emplace_back(toolbarItem);
+    titleMgr_->AddToolbarItemToContainer();
+
+    EXPECT_EQ(titleMgr_->itemWillAdd_.size(), 1);
+    EXPECT_EQ(titleMgr_->itemsWillOnTree_.size(), 0);
+}
+
+/**
+ * @tc.name: AddToolbarItemToRow_001
+ * @tc.desc: Test AddToolbarItemToRow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, AddToolbarItemToRow_001, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+
+    ToolbarInfo sideBarInfo_ = { true, 200.0f };
+    ToolbarInfo sideBarDividerInfo_ = { true, 20.0f };
+    ToolbarInfo navBarInfo_ = { true, 500.0f };
+    ToolbarInfo navBarDividerInfo_ = { true, 10.0f };
+    ToolbarInfo navDestInfo_ = { true, 1200.0f };
+
+    titleMgr_->toolbarManager_->SetSideBarDividerInfo(sideBarDividerInfo_);
+    titleMgr_->toolbarManager_->SetSideBarInfo(sideBarInfo_);
+    titleMgr_->toolbarManager_->SetNavBarInfo(navBarInfo_);
+    titleMgr_->toolbarManager_->SetNavBarDividerInfo(navBarDividerInfo_);
+    titleMgr_->toolbarManager_->SetNavDestInfo(navDestInfo_);
+
+    // test Invalid Input
+    bool result1 = titleMgr_->AddToolbarItemToRow(ItemPlacementType::NAV_BAR_START, nullptr);
+    EXPECT_FALSE(result1);
+
+    bool result2 = titleMgr_->AddToolbarItemToRow(ItemPlacementType::NAVDEST_START, nullptr);
+    EXPECT_FALSE(result2);
+
+    auto toolbarItem = FrameNode::CreateFrameNode("toolbarItem", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
+    bool result3 = titleMgr_->AddToolbarItemToRow(ItemPlacementType::NONE, toolbarItem);
+    EXPECT_FALSE(result3);
+
+    titleMgr_->toolbarManager_->SetHasNavBar(false);
+    bool result4 = titleMgr_->AddToolbarItemToRow(ItemPlacementType::NAV_BAR_START, toolbarItem);
+    EXPECT_FALSE(result4);
+
+    bool result5 = titleMgr_->AddToolbarItemToRow(ItemPlacementType::NAV_BAR_END, toolbarItem);
+    EXPECT_FALSE(result5);
+
+    titleMgr_->toolbarManager_->SetHasNavDest(false);
+    bool result6 = titleMgr_->AddToolbarItemToRow(ItemPlacementType::NAVDEST_START, toolbarItem);
+    EXPECT_FALSE(result6);
+
+    bool result7 = titleMgr_->AddToolbarItemToRow(ItemPlacementType::NAVDEST_END, toolbarItem);
+    EXPECT_FALSE(result7);
+}
+
+/**
+ * @tc.name: AddToolbarItemToRow_002
+ * @tc.desc: Test AddToolbarItemToRow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, AddToolbarItemToRow_002, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+
+    auto customTitleRow = pattern_->GetCustomTitleRow();
+    ASSERT_NE(customTitleRow, nullptr);
+
+    ToolbarInfo sideBarInfo_ = { true, 200.0f };
+    ToolbarInfo sideBarDividerInfo_ = { true, 20.0f };
+    ToolbarInfo navBarInfo_ = { true, 500.0f };
+    ToolbarInfo navBarDividerInfo_ = { true, 10.0f };
+    ToolbarInfo navDestInfo_ = { true, 1200.0f };
+
+    titleMgr_->toolbarManager_->SetSideBarDividerInfo(sideBarDividerInfo_);
+    titleMgr_->toolbarManager_->SetSideBarInfo(sideBarInfo_);
+    titleMgr_->toolbarManager_->SetHasNavBar(true);
+    titleMgr_->toolbarManager_->SetNavBarInfo(navBarInfo_);
+    titleMgr_->toolbarManager_->SetNavBarDividerInfo(navBarDividerInfo_);
+    titleMgr_->toolbarManager_->SetHasNavDest(true);
+    titleMgr_->toolbarManager_->SetNavDestInfo(navDestInfo_);
+
+    // test Valid Inputs
+    auto toolbarItem = FrameNode::CreateFrameNode("toolbarItem", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
+    titleMgr_->AddToolbarItemToRow(ItemPlacementType::NAV_BAR_START, toolbarItem);
+    EXPECT_EQ(titleMgr_->leftNavRow_->GetChildren().size(), 1);
+
+    titleMgr_->AddToolbarItemToRow(ItemPlacementType::NAV_BAR_END, toolbarItem);
+    EXPECT_EQ(titleMgr_->rightNavRow_->GetChildren().size(), 1);
+
+    titleMgr_->AddToolbarItemToRow(ItemPlacementType::NAVDEST_START, toolbarItem);
+    EXPECT_EQ(titleMgr_->leftNavDestRow_->GetChildren().size(), 1);
+
+    titleMgr_->AddToolbarItemToRow(ItemPlacementType::NAVDEST_END, toolbarItem);
+    EXPECT_EQ(titleMgr_->rightNavDestRow_->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: AddToolbarItemToSpecificRow
+ * @tc.desc: Test AddToolbarItemToSpecificRow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, AddToolbarItemToSpecificRow, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+
+    // setting the Split Controller Information
+    ToolbarInfo navDestInfo_ = { true, 1200.0f };
+    titleMgr_->toolbarManager_->SetNavDestInfo(navDestInfo_);
+
+    // valid Inputs
+    auto toolbarItem = FrameNode::CreateFrameNode("toolbarItem", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
+    titleMgr_->AddToolbarItemToSpecificRow(ItemPlacementType::NAVDEST_START, toolbarItem);
+    EXPECT_EQ(titleMgr_->leftNavDestRow_->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: AddToolbarItemToNavBarStart
+ * @tc.desc: Test AddToolbarItemToNavBarStart.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, AddToolbarItemToNavBarStart, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+
+    // setting the Split Controller Information
+    titleMgr_->toolbarManager_->SetHasNavBar(true);
+
+    // valid Inputs
+    auto toolbarItem = FrameNode::CreateFrameNode("toolbarItem", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
+    titleMgr_->AddToolbarItemToNavBarStart(toolbarItem);
+    EXPECT_EQ(titleMgr_->leftNavRow_->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: AddToolbarItemToNavBarEnd
+ * @tc.desc: Test AddToolbarItemToNavBarEnd.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, AddToolbarItemToNavBarEnd, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+
+    // setting the Split Controller Information
+    titleMgr_->toolbarManager_->SetHasNavBar(true);
+
+    // valid Inputs
+    auto toolbarItem = FrameNode::CreateFrameNode("toolbarItem", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
+    titleMgr_->AddToolbarItemToNavBarEnd(toolbarItem);
+    EXPECT_EQ(titleMgr_->rightNavRow_->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: AddToolbarItemToNavDestStart
+ * @tc.desc: Test AddToolbarItemToNavDestStart.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, AddToolbarItemToNavDestStart, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+
+    // setting the Split Controller Information
+    titleMgr_->toolbarManager_->SetHasNavDest(true);
+
+    // valid Inputs
+    auto toolbarItem = FrameNode::CreateFrameNode("toolbarItem", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
+    titleMgr_->AddToolbarItemToNavDestStart(toolbarItem);
+    EXPECT_EQ(titleMgr_->leftNavDestRow_->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: AddToolbarItemToNavDestEnd
+ * @tc.desc: Test AddToolbarItemToNavDestEnd.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, AddToolbarItemToNavDestEnd, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+
+    // setting the Split Controller Information
+    titleMgr_->toolbarManager_->SetHasNavDest(true);
+
+    // valid Inputs
+    auto toolbarItem = FrameNode::CreateFrameNode("toolbarItem", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
+    titleMgr_->AddToolbarItemToNavDestEnd(toolbarItem);
+    EXPECT_EQ(titleMgr_->rightNavDestRow_->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: AddNavBarRow
+ * @tc.desc: Test AddNavBarRow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, AddNavBarRow, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+
+    titleMgr_->toolbarManager_->SetHasNavBar(true);
+
+    // adding a navigation bar row
+    titleMgr_->AddNavBarRow();
+    ASSERT_NE(titleMgr_->navbarRow_, nullptr);
+    EXPECT_EQ(titleMgr_->navbarRow_->GetChildren().size(), 0);
+
+    // adding left navigation bar row
+    titleMgr_->AddLeftNavRow();
+    ASSERT_NE(titleMgr_->leftNavRow_, nullptr);
+
+    // adding right navigation bar row
+    titleMgr_->AddRightNavRow();
+    ASSERT_NE(titleMgr_->rightNavRow_, nullptr);
+}
+
+/**
+ * @tc.name: AddNavDestBarRow
+ * @tc.desc: Test AddNavDestBarRow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, AddNavDestBarRow, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+
+    titleMgr_->toolbarManager_->SetHasNavDest(true);
+
+    // adding navigation destination bar row
+    titleMgr_->AddNavDestBarRow();
+    ASSERT_NE(titleMgr_->navDestbarRow_, nullptr);
+    EXPECT_EQ(titleMgr_->navDestbarRow_->GetChildren().size(), 0);
+
+    // adding left navigation destination row
+    titleMgr_->AddLeftNavDestRow();
+    ASSERT_NE(titleMgr_->leftNavDestRow_, nullptr);
+
+    // adding right navigation destination row
+    titleMgr_->AddRightNavDestRow();
+    ASSERT_NE(titleMgr_->rightNavDestRow_, nullptr);
+}
+
+/**
+ * @tc.name: RemoveToolbarRowContainers
+ * @tc.desc: Test RemoveToolbarRowContainers.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, RemoveToolbarRowContainers, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+
+    titleMgr_->toolbarManager_->SetHasNavBar(true);
+    titleMgr_->toolbarManager_->SetHasNavDest(true);
+
+    // add toolbar row and remove
+    titleMgr_->AddNavBarRow();
+    ASSERT_NE(titleMgr_->navbarRow_, nullptr);
+
+    titleMgr_->AddNavDestBarRow();
+    ASSERT_NE(titleMgr_->navDestbarRow_, nullptr);
+
+    titleMgr_->RemoveToolbarRowContainers();
+
+    ASSERT_EQ(titleMgr_->navbarRow_, nullptr);
+    ASSERT_EQ(titleMgr_->navDestbarRow_, nullptr);
+}
+
+/**
+ * @tc.name: AdjustNavbarRowWidth
+ * @tc.desc: Test AdjustNavbarRowWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, AdjustNavbarRowWidth, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+
+    ToolbarInfo sideBarInfo_ = { true, 200.0f };
+    ToolbarInfo sideBarDividerInfo_ = { true, 20.0f };
+    ToolbarInfo navBarInfo_ = { true, 500.0f };
+    ToolbarInfo navBarDividerInfo_ = { true, 10.0f };
+
+    titleMgr_->toolbarManager_->SetSideBarDividerInfo(sideBarDividerInfo_);
+    titleMgr_->toolbarManager_->SetSideBarInfo(sideBarInfo_);
+    titleMgr_->toolbarManager_->SetHasNavBar(true);
+    titleMgr_->toolbarManager_->SetNavBarInfo(navBarInfo_);
+    titleMgr_->toolbarManager_->SetNavBarDividerInfo(navBarDividerInfo_);
+
+    auto customTitleRow = pattern_->GetCustomTitleRow();
+    ASSERT_NE(customTitleRow, nullptr);
+
+    auto toolbarItem = FrameNode::CreateFrameNode("toolbarItem", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
+    titleMgr_->AddToolbarItemToNavBarStart(toolbarItem);
+    titleMgr_->AdjustNavbarRowWidth();
+
+    // Checking the width of the titleNode
+    auto titleNode = AceType::DynamicCast<FrameNode>(customTitleRow->GetChildren().front());
+    ASSERT_NE(titleNode, nullptr);
+    LayoutConstraintF titleNodeconstraint;
+    titleNode->Measure(titleNodeconstraint);
+    float titleNodeWidth = sideBarInfo_.isShow ? sideBarInfo_.width : 0;
+    auto titleNode2 = titleNode->GetGeometryNode();
+    ASSERT_NE(titleNode2, nullptr);
+    EXPECT_EQ(titleNode2->GetFrameSize().Width(), titleNodeWidth);
+
+    // Checking the width of the navbarRow
+    LayoutConstraintF constraint;
+    titleMgr_->navbarRow_->Measure(constraint);
+    auto navbarRowNode = titleMgr_->navbarRow_->GetGeometryNode();
+    ASSERT_NE(navbarRowNode, nullptr);
+    float navbarRowWidth = navbarRowNode->GetFrameSize().Width();
+    EXPECT_EQ(navbarRowWidth, navBarInfo_.width);
+
+    // Checking margin
+    auto navbarRowProperty = titleMgr_->navbarRow_->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(navbarRowProperty);
+    MarginProperty navbarRowMargin;
+    navbarRowMargin.left = sideBarInfo_.isShow ? CalcLength(sideBarDividerInfo_.width) : CalcLength(0);
+    navbarRowMargin.right = CalcLength(navBarDividerInfo_.width);
+    navbarRowProperty->UpdateMargin(navbarRowMargin);
+    titleMgr_->navbarRow_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    EXPECT_EQ(navbarRowMargin.left.value(), CalcLength(sideBarDividerInfo_.width));
+    EXPECT_EQ(navbarRowMargin.right.value(), CalcLength(navBarDividerInfo_.width));
+}
+
+/**
+ * @tc.name: AdjustNavDestRowWidth_001
+ * @tc.desc: Test AdjustNavDestRowWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, AdjustNavDestRowWidth_001, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+
+    ToolbarInfo sideBarInfo_ = { true, 200.0f };
+    ToolbarInfo sideBarDividerInfo_ = { true, 20.0f };
+    ToolbarInfo navBarInfo_ = { true, 500.0f };
+    ToolbarInfo navBarDividerInfo_ = { true, 10.0f };
+    ToolbarInfo navDestInfo_ = { true, 1200.0f };
+
+    titleMgr_->toolbarManager_->SetSideBarDividerInfo(sideBarDividerInfo_);
+    titleMgr_->toolbarManager_->SetSideBarInfo(sideBarInfo_);
+    titleMgr_->toolbarManager_->SetHasNavBar(true);
+    titleMgr_->toolbarManager_->SetNavBarInfo(navBarInfo_);
+    titleMgr_->toolbarManager_->SetNavBarDividerInfo(navBarDividerInfo_);
+    titleMgr_->toolbarManager_->SetHasNavDest(true);
+    titleMgr_->toolbarManager_->SetNavDestInfo(navDestInfo_);
+
+    auto controlButtonsRow = pattern_->GetControlButtonRow();
+    ASSERT_NE(controlButtonsRow, nullptr);
+    auto controlButtonsWidth = pattern_->GetControlButtonRowWidth().GetDimension().ConvertToVp();
+
+    auto toolbarItem = FrameNode::CreateFrameNode("toolbarItem", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
+    titleMgr_->AddToolbarItemToNavDestStart(toolbarItem);
+    titleMgr_->AdjustNavDestRowWidth();
+
+    // Checking the width of the navDestRow
+    LayoutConstraintF constraint;
+    titleMgr_->navDestbarRow_->Measure(constraint);
+    auto navDestRowNode = titleMgr_->navDestbarRow_->GetGeometryNode();
+    ASSERT_NE(navDestRowNode, nullptr);
+    float navDestRowWidth = navDestRowNode->GetFrameSize().Width();
+    EXPECT_EQ(navDestRowWidth, navDestInfo_.width - controlButtonsWidth);
+}
+
+/**
+ * @tc.name: AdjustNavDestRowWidth_002
+ * @tc.desc: Test AdjustNavDestRowWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, AdjustNavDestRowWidth_002, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+
+    ToolbarInfo sideBarInfo_ = { true, 200.0f };
+    ToolbarInfo sideBarDividerInfo_ = { true, 20.0f };
+    ToolbarInfo navBarInfo_ = { true, 500.0f };
+    ToolbarInfo navBarDividerInfo_ = { true, 10.0f };
+    ToolbarInfo navDestInfo_ = { true, 1200.0f };
+
+    titleMgr_->toolbarManager_->SetSideBarDividerInfo(sideBarDividerInfo_);
+    titleMgr_->toolbarManager_->SetSideBarInfo(sideBarInfo_);
+    titleMgr_->toolbarManager_->SetHasNavBar(true);
+    titleMgr_->toolbarManager_->SetNavBarInfo(navBarInfo_);
+    titleMgr_->toolbarManager_->SetNavBarDividerInfo(navBarDividerInfo_);
+    titleMgr_->toolbarManager_->SetHasNavDest(true);
+    titleMgr_->toolbarManager_->SetNavDestInfo(navDestInfo_);
+
+    auto controlButtonsRow = pattern_->GetControlButtonRow();
+    ASSERT_NE(controlButtonsRow, nullptr);
+    auto controlButtonsWidth = pattern_->GetControlButtonRowWidth().GetDimension().ConvertToVp();
+
+    auto toolbarItem = FrameNode::CreateFrameNode("toolbarItem", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
+    titleMgr_->AddToolbarItemToNavDestStart(toolbarItem);
+    titleMgr_->AdjustNavDestRowWidth();
+
+    // Checking the margin of the navDestRow
+    float navDestbarRowLeftMargin = 0.0f;
+
+    if (titleMgr_->navbarRow_) {
+        navDestbarRowLeftMargin = navBarDividerInfo_.width;
+    } else if (!sideBarInfo_.isShow && !navBarInfo_.isShow) {
+        navDestbarRowLeftMargin = 0.0f;
+    } else if (!sideBarInfo_.isShow) {
+        navDestbarRowLeftMargin = navBarInfo_.width + navBarDividerInfo_.width;
+    } else if (!navBarInfo_.isShow) {
+        navDestbarRowLeftMargin = sideBarDividerInfo_.width;
+    } else {
+        navDestbarRowLeftMargin = sideBarDividerInfo_.width + navBarInfo_.width + navBarDividerInfo_.width;
+    }
+    auto navDestbarRowProperty = titleMgr_->navDestbarRow_->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(navDestbarRowProperty);
+    MarginProperty navDestbarRowMargin;
+    navDestbarRowMargin.left = CalcLength(navDestbarRowLeftMargin);
+    navDestbarRowMargin.right = CalcLength(controlButtonsWidth);
+    navDestbarRowProperty->UpdateMargin(navDestbarRowMargin);
+    navDestbarRowMargin.left = CalcLength(navDestbarRowLeftMargin);
+    EXPECT_EQ(navDestbarRowMargin.left.value(),
+        CalcLength(sideBarDividerInfo_.width + navBarInfo_.width + navBarDividerInfo_.width));
+    EXPECT_EQ(navDestbarRowMargin.right.value(), CalcLength(controlButtonsWidth));
+}
+
+/**
+ * @tc.name: AdjustContainerModalTitleHeight
+ * @tc.desc: Test AdjustContainerModalTitleHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, AdjustContainerModalTitleHeight, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+
+    titleMgr_->toolbarManager_->SetHasNavBar(true);
+
+    auto parentNode = FrameNode::CreateFrameNode(V2::NAVBAR_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto toolbarItem =
+        FrameNode::CreateFrameNode(V2::TOOLBARITEM_ETS_TAG, 2, AceType::MakeRefPtr<ToolBarItemPattern>());
+    parentNode->AddChild(toolbarItem);
+    titleMgr_->itemsOnTree_[parentNode].push_back(toolbarItem);
+
+    // test the title height of different toolbar items
+    titleMgr_->toolbarItemMaxHeight_ = 50.0f;
+    titleMgr_->AdjustContainerModalTitleHeight();
+    EXPECT_EQ(pattern_->titleHeight_, Dimension(TITLE_ITEM_HEIGT_S, DimensionUnit::VP));
+
+    titleMgr_->toolbarItemMaxHeight_ = 60.0f;
+    titleMgr_->AdjustContainerModalTitleHeight();
+    EXPECT_EQ(pattern_->titleHeight_, Dimension(TITLE_ITEM_HEIGT_M, DimensionUnit::VP));
+
+    titleMgr_->toolbarItemMaxHeight_ = 90.0f;
+    titleMgr_->AdjustContainerModalTitleHeight();
+    EXPECT_EQ(pattern_->titleHeight_, Dimension(TITLE_ITEM_HEIGT_L, DimensionUnit::VP));
+
+    // set the maximum height of toolbar items to 0
+    titleMgr_->toolbarItemMaxHeight_ = 0;
+    titleMgr_->AdjustContainerModalTitleHeight();
+    EXPECT_EQ(pattern_->titleHeight_, CONTAINER_TITLE_HEIGHT);
+
+    // set to default height if there are no toolbar items
+    titleMgr_->itemsOnTree_.clear();
+    titleMgr_->AdjustContainerModalTitleHeight();
+    EXPECT_EQ(pattern_->titleHeight_, CONTAINER_TITLE_HEIGHT);
+}
+
+/**
+ * @tc.name: FocusEventTest_001
  * @tc.desc: Test PagePattern GetScopeFocusAlgorithm.
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerModelToolBarTestNg, FocusEventTest001, TestSize.Level1)
+HWTEST_F(ContainerModelToolBarTestNg, FocusEventTest_001, TestSize.Level1)
 {
     CreateContainerModal();
     ASSERT_NE(pattern_, nullptr);
@@ -166,11 +887,11 @@ HWTEST_F(ContainerModelToolBarTestNg, FocusEventTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: FocusEventTest002
+ * @tc.name: FocusEventTest_002
  * @tc.desc: Test ToolBarRowPattern GetScopeFocusAlgorithm.
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerModelToolBarTestNg, FocusEventTest002, TestSize.Level1)
+HWTEST_F(ContainerModelToolBarTestNg, FocusEventTest_002, TestSize.Level1)
 {
     CreateContainerModal();
     ASSERT_NE(pattern_, nullptr);
@@ -183,4 +904,4 @@ HWTEST_F(ContainerModelToolBarTestNg, FocusEventTest002, TestSize.Level1)
     auto focusAlgorithm = toolBarRowPattern->GetScopeFocusAlgorithm();
     ASSERT_NE(focusAlgorithm.getNextFocusNode, nullptr);
 }
-}
+} // namespace OHOS::Ace::NG

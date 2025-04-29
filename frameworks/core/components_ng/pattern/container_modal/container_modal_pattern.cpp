@@ -35,7 +35,6 @@ constexpr double MOUSE_MOVE_POPUP_DISTANCE = 5.0; // 5.0px
 constexpr double MOVE_POPUP_DISTANCE_X = 40.0;    // 40.0px
 constexpr double MOVE_POPUP_DISTANCE_Y = 20.0;    // 20.0px
 constexpr double TITLE_POPUP_DISTANCE = 37.0;     // 37vp height of title
-constexpr int8_t ALPHA_MASK_OPAQUE = -1;
 } // namespace
 
 void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate)
@@ -540,6 +539,14 @@ void ContainerModalPattern::SetWindowContainerColor(const Color& activeColor, co
     inactiveColor_ = inactiveColor;
     isCustomColor_ = true;
     renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
+
+    auto titleMgr = GetTitleManager();
+    CHECK_NULL_VOID(titleMgr);
+    if (IsContainerModalTransparent()) {
+        titleMgr->UpdateTargetNodesBarMargin();
+    } else {
+        titleMgr->ResetExpandStackNode();
+    }
 }
 
 Color ContainerModalPattern::GetContainerColor(bool isFocus)
@@ -956,14 +963,10 @@ bool ContainerModalPattern::CanShowCustomTitle()
 
 bool ContainerModalPattern::IsContainerModalTransparent()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, false);
-    auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
-    auto newActiveColor = theme->GetBackGroundColor(true);
-    auto newInactiveColor = theme->GetBackGroundColor(false);
-    int8_t activeColorAlpha = newActiveColor.GetAlpha();
-    int8_t inactiveColorAlpha = newInactiveColor.GetAlpha();
-    return (activeColorAlpha == ALPHA_MASK_OPAQUE && inactiveColorAlpha == ALPHA_MASK_OPAQUE)? false : true;
+    if (!isCustomColor_) {
+        return false;
+    }
+    return activeColor_.GetAlpha() == 0 && inactiveColor_.GetAlpha() == 0;
 }
 
 void ContainerModalPattern::TrimFloatingWindowLayout()

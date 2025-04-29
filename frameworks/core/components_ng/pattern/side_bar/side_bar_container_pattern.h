@@ -166,6 +166,7 @@ public:
             CHECK_NULL_VOID(pipeline);
             toolbarManager_ = pipeline->GetToolbarManager();
             UpdateSideBarStatus();
+            UpdateSideBarColorToToolbarManager();
         }
     }
 
@@ -226,7 +227,7 @@ private:
     void UpdateSideBarStatus();
     void SetSideBarWidthToolBarManager(bool isShow, float sideBarWidth, float dividerWidth);
     void SideBarModifyDoneToolBarManager();
-    void UpdateSideBarColorToolBarManager(const Color& backgroudColor);
+    void UpdateSideBarColorToToolbarManager();
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<InputEvent> dividerMouseEvent_;

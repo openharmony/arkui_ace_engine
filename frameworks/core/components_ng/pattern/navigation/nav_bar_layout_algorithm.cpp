@@ -18,6 +18,7 @@
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_util.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
@@ -246,7 +247,7 @@ float MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>
 }
 
 float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostNode,
-    const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty)
+    const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty, float decorBarHeight = 0.0f)
 {
     /**
      * When all the following conditions are met, we consider the titleBar height to be 0:
@@ -265,6 +266,7 @@ float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hos
     auto geometryNode = titleBarWrapper->GetGeometryNode();
     float offsetY = 0.0f;
     offsetY = NavigationTitleUtil::CalculateTitlebarOffset(titleBarNode);
+    offsetY += decorBarHeight;
     auto titleBarOffset = OffsetF(0.0f, offsetY);
     auto navBarPattern = hostNode->GetPattern<NavBarPattern>();
     CHECK_NULL_RETURN(navBarPattern, 0.0f);
@@ -383,8 +385,20 @@ void NavBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (edgeTopOverLayCondition || edgeBottomOverLayCondition) {
         Measure(layoutWrapper);
     }
-
-    float titlebarHeight = LayoutTitleBar(layoutWrapper, hostNode, navBarLayoutProperty);
+    float decorBarHeight = 0.0f;
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(hostNode->GetNavigationNode());
+    if (navigationNode) {
+        auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+        auto navBarPattern = hostNode->GetPattern<NavBarPattern>();
+        if (navigationPattern && navBarPattern) {
+            auto toolbarManager = navigationPattern->GetToolBarManager();
+            auto barStyle = navBarPattern->GetTitleBarStyle().value_or(BarStyle::STANDARD);
+            if (toolbarManager && toolbarManager->GetIsMoveUp() && barStyle == BarStyle::STACK) {
+                decorBarHeight = static_cast<float>(toolbarManager->GetTitleHeight().ConvertToPx());
+            }
+        }
+    }
+    float titlebarHeight = LayoutTitleBar(layoutWrapper, hostNode, navBarLayoutProperty, decorBarHeight);
     auto transferedTitleBarHeight = TransferBarHeight(hostNode, titlebarHeight, true);
     LayoutContent(layoutWrapper, hostNode, navBarLayoutProperty, transferedTitleBarHeight);
     float toolbarHeight = NavigationLayoutUtil::LayoutToolBar(

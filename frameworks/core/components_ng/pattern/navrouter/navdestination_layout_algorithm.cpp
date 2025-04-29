@@ -484,11 +484,12 @@ void NavDestinationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(hostNode->GetNavigationNode());
     if (navigationNode) {
         auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-        if (navigationPattern) {
-            RefPtr<ToolbarManager> toolbarManager = navigationPattern->GetToolBarManager();
-            if (toolbarManager != nullptr && toolbarManager->GetIsMoveUp()) {
-                Dimension containerModelTitlebarHeight = toolbarManager->GetTitleHeight();
-                decorBarHeight = static_cast<float>(containerModelTitlebarHeight.ConvertToPx());
+        auto navDestinationPattern = hostNode->GetPattern<NavDestinationPattern>();
+        if (navigationPattern && navDestinationPattern) {
+            auto toolbarManager = navigationPattern->GetToolBarManager();
+            auto barStyle = navDestinationPattern->GetTitleBarStyle().value_or(BarStyle::STANDARD);
+            if (toolbarManager && toolbarManager->GetIsMoveUp() && barStyle == BarStyle::STACK) {
+                decorBarHeight = static_cast<float>(toolbarManager->GetTitleHeight().ConvertToPx());
             }
         }
     }
