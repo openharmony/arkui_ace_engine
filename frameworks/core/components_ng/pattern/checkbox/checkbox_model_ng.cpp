@@ -385,6 +385,14 @@ void CheckBoxModelNG::SetBuilder(FrameNode* frameNode, std::function<void(void)>
     checkBoxPattern->SetIndicatorBuilder(buildFunc);
 }
 
+void CheckBoxModelNG::SetBuilder(FrameNode* frameNode, std::optional<std::function<void(void)>>& buildFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto checkBoxPattern = frameNode->GetPattern<CheckBoxPattern>();
+    CHECK_NULL_VOID(checkBoxPattern);
+    checkBoxPattern->SetIndicatorBuilder(buildFunc);
+}
+
 void CheckBoxModelNG::SetBuilderFunc(FrameNode* frameNode, NG::CheckBoxMakeCallback&& makeFunc)
 {
     CHECK_NULL_VOID(frameNode);

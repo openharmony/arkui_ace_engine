@@ -69,6 +69,7 @@ public:
     static void SetPadding(FrameNode* frameNode, const NG::PaddingProperty& padding);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetBuilder(FrameNode* frameNode, std::function<void(void)>&& buildFunc);
+    static void SetBuilder(FrameNode* frameNode, std::optional<std::function<void(void)>>& buildFunc);
     static void SetBuilderFunc(FrameNode* frameNode, NG::CheckBoxMakeCallback&& jsMake);
     static void SetChangeValue(FrameNode* frameNode, bool value);
     static void SetCheckboxStyle(FrameNode* frameNode, const std::optional<CheckBoxStyle>& checkboxStyle);
