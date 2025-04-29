@@ -1753,4 +1753,25 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgIsShowInFlo
     container->ResetContainer();
     MockSystemProperties::g_isSuperFoldDisplayDevice = false;
 }
+
+/**
+ * @tc.name: DialogPatternTestSetDialogAccessibilityHoverConsume
+ * @tc.desc: Test SetDialogAccessibilityHoverConsume
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternTestSetDialogAccessibilityHoverConsume, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step0. create dialog node.
+     * @tc.expected: the dialog node created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialog, nullptr);
+    DialogView::SetDialogAccessibilityHoverConsume(dialog);
+    auto dialogAccessibilityProperty = dialog->GetAccessibilityProperty<DialogAccessibilityProperty>();
+    ASSERT_NE(dialogAccessibilityProperty, nullptr);
+}
 } // namespace OHOS::Ace::NG
