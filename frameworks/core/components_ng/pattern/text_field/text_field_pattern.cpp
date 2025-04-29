@@ -1124,18 +1124,18 @@ void TextFieldPattern::ClearFocusStyle()
     auto textFieldTheme = GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
 
-    if (isFocusBGColorSet_) {
+    if (isFocusBGColorSet_ && !paintProperty->HasBackgroundColor()) {
         renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
-        isFocusBGColorSet_ = false;
     }
-    if (isFocusTextColorSet_) {
+    if (isFocusTextColorSet_ && !paintProperty->HasTextColorFlagByUser()) {
         layoutProperty->UpdateTextColor(textFieldTheme->GetTextColor());
-        isFocusTextColorSet_ = false;
     }
-    if (isFocusPlaceholderColorSet_) {
+    if (isFocusPlaceholderColorSet_ && !paintProperty->GetPlaceholderColorFlagByUserValue(false)) {
         layoutProperty->UpdatePlaceholderTextColor(textFieldTheme->GetPlaceholderColor());
-        isFocusPlaceholderColorSet_ = false;
     }
+    isFocusBGColorSet_ = false;
+    isFocusTextColorSet_ = false;
+    isFocusPlaceholderColorSet_ = false;
 }
 
 void TextFieldPattern::ProcessAutoFillOnFocus()
