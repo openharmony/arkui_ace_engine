@@ -41,6 +41,9 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+#include "accessibility_element_info.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -64,6 +67,10 @@ constexpr Dimension MIN_OPTION_WIDTH = 56.0_vp;
 constexpr Dimension OPTION_MARGIN = 8.0_vp;
 constexpr int32_t COLUMN_NUM = 2;
 constexpr Dimension BORDER_DEFAULT_WIDTH = 0.0_vp;
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+constexpr const char* MENU_STATE_COLLAPSED = "collapsed";
+constexpr const char* MENU_STATE_EXPANDED = "expanded";
+#endif
 
 void UpdateFontSize(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutProperty>& menuProperty,
     const std::optional<Dimension>& fontSize, const Dimension& defaultFontSize)
@@ -2012,6 +2019,17 @@ void MenuItemPattern::AddClickableArea()
         auto accessibilityProperty = clickableArea->GetAccessibilityProperty<AccessibilityProperty>();
         CHECK_NULL_VOID(accessibilityProperty);
         accessibilityProperty->SetAccessibilityText(content + "," + label);
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+        accessibilityProperty->SetAccessibilityCustomRole("MenuItem");
+        accessibilityProperty->SetRelatedElementInfoCallback(
+            [weak = WeakClaim(this)] (Accessibility::ExtraElementInfo& extraInfo) {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                std::string expandedState = pattern->IsExpanded() ? MENU_STATE_EXPANDED : MENU_STATE_COLLAPSED;
+                extraInfo.SetExtraElementInfo("expandedState", expandedState);
+                TAG_LOGI(AceLogTag::ACE_MENU, "Get embeeded menu expanded stated: %{public}s.", expandedState.c_str());
+        });
+#endif
         clickableArea_ = clickableArea;
         clickableArea_->MountToParent(host, CLICKABLE_AREA_VIEW_INDEX);
 
