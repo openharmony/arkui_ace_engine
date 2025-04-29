@@ -573,7 +573,7 @@ namespace Converter {
     template<> Rect Convert(const Ark_RectResult& src);
     // template<> ScrollFrameResult Convert<ScrollFrameResult>(const Ark_ScrollResult& src);
     template<> ShapePoint Convert(const Ark_Point& src);
-
+    template<> std::u16string Convert(const Ark_String& src);
     // SORTED_SECTION: Non-enum specializations. No multiline declarations, please!
     template<> void AssignCast(std::optional<Color>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<FontFamilies>& dst, const Ark_Resource& value);
@@ -742,7 +742,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<WordBreak>& dst, const Ark_WordBreak& src);
     template<> void AssignCast(std::optional<XComponentType>& dst, const Ark_XComponentType& src);
     template<> void AssignCast(std::optional<CheckBoxStyle>& dst, const Ark_CheckBoxShape& src);
-
+    template<> void AssignCast(std::optional<std::u16string>& dst, const Ark_Resource& src);
     template<>
     void AssignCast(std::optional<SharedTransitionEffectType>& dst, const Ark_SharedTransitionEffectType& src);
     template<>

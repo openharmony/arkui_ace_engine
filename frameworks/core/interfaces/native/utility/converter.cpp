@@ -622,6 +622,13 @@ SheetHeight Convert(const Ark_Length& src)
 }
 
 template<>
+std::u16string Convert(const Ark_String& src)
+{
+    auto str8 =  Converter::Convert<std::string>(src);
+    return UtfUtils::Str8ToStr16(str8);
+}
+
+template<>
 std::vector<ImageAnalyzerType> Convert(const Array_ImageAnalyzerType& src)
 {
     std::vector<ImageAnalyzerType> dst;
@@ -2274,4 +2281,14 @@ void AssignCast(std::optional<NavigationTitlebarOptions>& dst, const Ark_Navigat
         dst->brOptions.paddingStart = Converter::OptConvert<Dimension>(value.paddingStart);
     }
 }
+
+template<>
+void AssignCast(std::optional<std::u16string>& dst, const Ark_Resource& src)
+{
+    auto str8 = OptConvert<std::string>(src);
+    if (str8) {
+        dst = UtfUtils::Str8ToStr16(str8.value());
+    }
+}
+
 } // namespace OHOS::Ace::NG::Converter

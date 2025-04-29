@@ -43,13 +43,13 @@ void SetTextAreaOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    std::optional<std::string> placeholder;
-    std::optional<std::string> text;
+    std::optional<std::u16string> placeholder;
+    std::optional<std::u16string> text;
     TextAreaControllerPeer* peerPtr = nullptr;
     auto textAreaOptions = Converter::OptConvert<Ark_TextAreaOptions>(*value);
     if (textAreaOptions.has_value()) {
-        placeholder = Converter::OptConvert<std::string>(textAreaOptions.value().placeholder);
-        text = Converter::OptConvert<std::string>(textAreaOptions.value().text);
+        placeholder = Converter::OptConvert<std::u16string>(textAreaOptions.value().placeholder);
+        text = Converter::OptConvert<std::u16string>(textAreaOptions.value().text);
         auto controller = Converter::OptConvert<Ark_TextAreaController>(textAreaOptions.value().controller);
         if (controller.has_value()) {
             peerPtr = controller.value();
