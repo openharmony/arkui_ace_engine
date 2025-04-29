@@ -16,15 +16,19 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+#include "tap_recognizer_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TapRecognizerAccessor {
 void DestroyPeerImpl(Ark_TapRecognizer peer)
 {
+    delete peer;
 }
 Ark_TapRecognizer CtorImpl()
 {
-    return nullptr;
+    auto* peer = new TapRecognizerPeer();
+    peer->recognizer = Ace::MakeRefPtr<Ace::NG::ClickRecognizer>();
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,7 +36,10 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Number GetTapCountImpl(Ark_TapRecognizer peer)
 {
-    return {};
+    if (!peer || !peer->recognizer) {
+        return Converter::ArkValue<Ark_Number>(0);
+    }
+    return Converter::ArkValue<Ark_Number>(peer->tapRecognizer->GetTapCount());
 }
 } // TapRecognizerAccessor
 const GENERATED_ArkUITapRecognizerAccessor* GetTapRecognizerAccessor()
