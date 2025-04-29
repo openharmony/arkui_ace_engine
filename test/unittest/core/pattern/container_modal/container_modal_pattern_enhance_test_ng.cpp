@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
+#include "core/components_ng/pattern/custom/custom_title_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -827,5 +828,53 @@ HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceTest030
     ASSERT_NE(containerPattern, nullptr);
     containerPattern->CallContainerModalNative("name", "value");
     EXPECT_NE(containerPattern, nullptr);
+}
+
+/**
+ * @tc.name: windowFocus or active
+ * @tc.desc: Test windowFocus or active.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModalPatternEnhanceTestNg, ContainerModalPatternEnhanceTest031, TestSize.Level1)
+{
+    CreateContainerModal();
+    auto cloumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(cloumn, nullptr);
+    frameNode_->AddChild(cloumn);
+    auto titleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto titleRow2 = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto floatingTitleRow =
+        FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    ASSERT_NE(titleRow, nullptr);
+    ASSERT_NE(titleRow2, nullptr);
+    ASSERT_NE(floatingTitleRow, nullptr);
+    frameNode_->AddChild(floatingTitleRow);
+    cloumn->AddChild(titleRow);
+    titleRow->AddChild(titleRow2);
+    auto customTitleNode = CustomTitleNode::CreateCustomTitleNode(-1, "");
+    auto customFloatingTitleNode = CustomTitleNode::CreateCustomTitleNode(-1, "");
+    ASSERT_NE(customTitleNode, nullptr);
+    ASSERT_NE(customFloatingTitleNode, nullptr);
+    titleRow2->AddChild(customTitleNode);
+    floatingTitleRow->AddChild(customFloatingTitleNode);
+    auto titleResult = false;
+    auto focusCallback = [&titleResult]() { titleResult = true; };
+    auto unfocusCallback = [&titleResult]() { titleResult = false; };
+    auto floatingTitleResult = false;
+    auto focusCallback2 = [&floatingTitleResult]() { floatingTitleResult = true; };
+    auto unfocusCallback2 = [&floatingTitleResult]() { floatingTitleResult = false; };
+    customTitleNode->SetOnWindowFocusedCallback(focusCallback);
+    customFloatingTitleNode->SetOnWindowFocusedCallback(focusCallback2);
+    customTitleNode->SetOnWindowUnfocusedCallback(unfocusCallback);
+    customFloatingTitleNode->SetOnWindowUnfocusedCallback(unfocusCallback2);
+
+    pattern_->WindowFocus(true);
+    EXPECT_TRUE(pattern_->isFocus_);
+    EXPECT_TRUE(titleResult);
+    EXPECT_TRUE(floatingTitleResult);
+    pattern_->WindowFocus(false);
+    EXPECT_FALSE(pattern_->isFocus_);
+    EXPECT_FALSE(titleResult);
+    EXPECT_FALSE(floatingTitleResult);
 }
 } // namespace OHOS::Ace::NG
