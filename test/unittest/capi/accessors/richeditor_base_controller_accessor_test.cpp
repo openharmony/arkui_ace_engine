@@ -65,6 +65,19 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
+namespace Converter {
+template<>
+void AssignCast(std::optional<RectF>& dst, const Ark_RectResult& src)
+{
+    dst = RectF(
+        Converter::Convert<float>(src.x),
+        Converter::Convert<float>(src.y),
+        Converter::Convert<float>(src.width),
+        Converter::Convert<float>(src.height)
+    );
+}
+}
+
 UpdateSpanStyle GetUpdateSpanStyle()
 {
     UpdateSpanStyle ret;
@@ -121,6 +134,7 @@ class MockRichEditorBaseController : public RichEditorBaseController {
 public:
     MockRichEditorBaseController() = default;
     ~MockRichEditorBaseController() override = default;
+    MOCK_METHOD(RectF, GetCaretRect, ());
     MOCK_METHOD(int32_t, GetCaretOffset, ());
     MOCK_METHOD(bool, SetCaretOffset, (int32_t));
     MOCK_METHOD(void, CloseSelectionMenu, ());
@@ -333,6 +347,39 @@ HWTEST_F(RichEditorBaseControllerAccessorTest, GetLayoutManagerTest, TestSize.Le
         GetLayoutInfoInterface()).Times(1).WillOnce(Return(layoutInfo.GetLayoutInfoInterface()));
     Ark_NativePointer manager = accessor_->getLayoutManager(peer_);
     ASSERT_NE(manager, nullptr);
+}
+
+/**
+ * @tc.name: GetCaretRectTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseControllerAccessorTest, GetCaretRectTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getCaretRect, nullptr);
+    auto rectF = OHOS::Ace::NG::RectF(0.45f, 1.37f, 53.3f, 657.6f);
+    EXPECT_CALL(*mockRichEditorController_,
+        GetCaretRect()).Times(1).WillOnce(Return(rectF));
+    Opt_RectResult rectResult = accessor_->getCaretRect(peer_);
+    auto rectOpt = Converter::OptConvert<RectF>(rectResult);
+    ASSERT_TRUE(rectOpt.has_value());
+    EXPECT_NEAR(rectOpt->GetOffset().GetX(), 0.45f, FLT_EPSILON);
+    EXPECT_NEAR(rectOpt->GetOffset().GetY(), 1.37f, FLT_EPSILON);
+    EXPECT_NEAR(rectOpt->Width(), 53.3f, FLT_EPSILON);
+    EXPECT_NEAR(rectOpt->Height(), 657.6f, FLT_EPSILON);
+
+    // invalid
+    rectResult = accessor_->getCaretRect(nullptr);
+    rectOpt = Converter::OptConvert<RectF>(rectResult);
+    EXPECT_FALSE(rectOpt.has_value());
+
+    // invalid
+    rectF = OHOS::Ace::NG::RectF(0.45f, 1.37f, -53.3f, 657.6f);
+    EXPECT_CALL(*mockRichEditorController_,
+        GetCaretRect()).Times(1).WillOnce(Return(rectF));
+    rectResult = accessor_->getCaretRect(peer_);
+    rectOpt = Converter::OptConvert<RectF>(rectResult);
+    EXPECT_FALSE(rectOpt.has_value());
 }
 
 } // namespace OHOS::Ace::NG

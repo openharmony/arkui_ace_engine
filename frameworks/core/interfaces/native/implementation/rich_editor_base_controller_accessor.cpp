@@ -214,7 +214,12 @@ Ark_PreviewText GetPreviewTextImpl(Ark_RichEditorBaseController peer)
 }
 Opt_RectResult GetCaretRectImpl(Ark_RichEditorBaseController peer)
 {
-    return {};
+    auto invalidValue = Converter::ArkValue<Opt_RectResult>(Ark_Empty());
+    CHECK_NULL_RETURN(peer, invalidValue);
+    auto caretRect = peer->GetCaretRect();
+    CHECK_NULL_RETURN(caretRect, invalidValue);
+    CHECK_EQUAL_RETURN(caretRect->IsValid(), false, invalidValue);
+    return Converter::ArkValue<Opt_RectResult>(*caretRect);
 }
 } // RichEditorBaseControllerAccessor
 const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControllerAccessor()
