@@ -64,6 +64,13 @@ constexpr char OCCUPIED_AREA_CHANGE_KEY[] = "ability.want.params.IsNotifyOccupie
 constexpr const char* const UIEXTENSION_CONFIG_FIELD = "ohos.system.window.uiextension.params";
 } // namespace
 
+static bool IsDispatchExtensionDataToHostWindow(uint32_t customId)
+{
+    auto businessCode = static_cast<UIContentBusinessCode>(customId);
+    return (businessCode >= UIContentBusinessCode::WINDOW_CODE_BEGIN &&
+        businessCode <= UIContentBusinessCode::WINDOW_CODE_END);
+}
+
 class SecurityUIExtensionLifecycleListener : public Rosen::ILifecycleListener {
 public:
     explicit SecurityUIExtensionLifecycleListener(const WeakPtr<SessionWrapper>& sessionWrapper)
@@ -865,6 +872,30 @@ bool SecuritySessionWrapperImpl::SendBusinessData(
     return true;
 }
 
+void SecuritySessionWrapperImpl::DispatchExtensionDataToHostWindow(uint32_t customId, const AAFwk::Want& data)
+{
+    int32_t callSessionId = GetSessionId();
+    CHECK_NULL_VOID(taskExecutor_);
+    auto instanceId = GetInstanceIdFromHost();
+    taskExecutor_->PostTask(
+        [instanceId, weak = hostPattern_, customId, data, callSessionId]() {
+            ContainerScope scope(instanceId);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (callSessionId != pattern->GetSessionId()) {
+                TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                    "Sec DispatchExtensionDataToHostWindow: The callSessionId(%{public}d)"
+                        " is inconsistent with the curSession(%{public}d)",
+                    callSessionId, pattern->GetSessionId());
+                return;
+            }
+            auto container = Platform::AceContainer::GetContainer(instanceId);
+            CHECK_NULL_VOID(container);
+            container->DispatchExtensionDataToHostWindow(customId, data, callSessionId);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIDispatchExtensionSecDataToHostWindow");
+}
+
 void SecuritySessionWrapperImpl::PostBusinessDataConsumeAsync(uint32_t customId, const AAFwk::Want& data)
 {
     PLATFORM_LOGI("PostBusinessDataConsumeAsync, businessCode=%{public}u.", customId);
@@ -923,14 +954,18 @@ bool SecuritySessionWrapperImpl::RegisterDataConsumer()
         auto instanceId = sessionWrapper->GetInstanceIdFromHost();
         ContainerScope scope(instanceId);
         if (id != subSystemId) {
-            return 0;
+            return false;
+        }
+        if (IsDispatchExtensionDataToHostWindow(customId)) {
+            sessionWrapper->DispatchExtensionDataToHostWindow(customId, data);
+            return true;
         }
         if (reply.has_value()) {
             sessionWrapper->PostBusinessDataConsumeSyncReply(customId, data, reply);
         } else {
             sessionWrapper->PostBusinessDataConsumeAsync(customId, data);
         }
-        return 0;
+        return false;
     };
     auto result = dataHandler->RegisterDataConsumer(subSystemId, std::move(callback));
     if (result != Rosen::DataHandlerErr::OK) {
