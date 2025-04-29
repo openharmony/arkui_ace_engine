@@ -343,4 +343,32 @@ HWTEST_F(MenuViewTestNg, UpdateMenuProperties001, TestSize.Level1)
     MenuView::UpdateMenuProperties(wrapperNode_, menuFrameNode_, menuParam, MenuType::MENU);
     EXPECT_EQ(menuWrapperPattern->GetMenuParam().outlineWidth->leftDimen->ToString(), "10.00px");
 }
+
+/**
+ * @tc.name: SetWordBreak001
+ * @tc.desc: Test MenuView GetSetWordBreak is BREAK_WORD.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SetWordBreak001, TestSize.Level1)
+{
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->menuWordBreak_ = WordBreak::BREAK_WORD;
+    auto textProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    textProperty->UpdateWordBreak(theme->GetWordBreak());
+    EXPECT_EQ(textProperty->GetWordBreak(), WordBreak::BREAK_WORD);
+}
+
+/**
+ * @tc.name: SetWordBreak002
+ * @tc.desc: Test MenuView GetSetWordBreak is BREAK_ALL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, SetWordBreak002, TestSize.Level1)
+{
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->menuWordBreak_ = WordBreak::BREAK_ALL;
+    auto textProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    textProperty->UpdateWordBreak(theme->GetWordBreak());
+    EXPECT_EQ(textProperty->GetWordBreak(), WordBreak::BREAK_ALL);
+}
 } // namespace OHOS::Ace::NG
