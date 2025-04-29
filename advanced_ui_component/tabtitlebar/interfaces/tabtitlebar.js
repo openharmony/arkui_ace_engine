@@ -577,8 +577,8 @@ class CollapsibleMenuSection extends ViewPU {
             this.maxFontScale = c44.getMaxFontScale();
         }
         catch (z43) {
-            let a44 = z43.code;
-            let b44 = z43.message;
+            let a44 = z43?.code;
+            let b44 = z43?.message;
             hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${a44}, message: ${b44}`);
         }
         this.menuItems.forEach((x43, y43) => {
@@ -590,10 +590,16 @@ class CollapsibleMenuSection extends ViewPU {
         this.fontSize = this.decideFontScale();
     }
     decideFontScale() {
-        let w43 = this.getUIContext();
-        this.systemFontScale = w43.getHostContext()?.config?.fontSizeScale ?? 1;
-        if (!this.isFollowingSystemFontScale) {
-            return 1;
+        try {
+            let w43 = this.getUIContext();
+            this.systemFontScale = w43.getHostContext()?.config?.fontSizeScale ?? 1;
+            if (!this.isFollowingSystemFontScale) {
+                return 1;
+            }
+        } catch (z43) {
+            let a44 = z43?.code;
+            let b44 = z43?.message;
+            hilog.error(0x3900, 'tabTitleBar', `Faild to getSystemFontScale,cause, code: ${a44}, message: ${b44}`);
         }
         return Math.min(this.systemFontScale, this.maxFontScale);
     }
@@ -1736,15 +1742,20 @@ class TabTitleBarDialog extends ViewPU {
         If.pop();
     }
     async aboutToAppear() {
-        let r36 = this.getUIContext().getHostContext();
-        this.mainWindowStage = r36.windowStage.getMainWindowSync();
-        let s36 = this.mainWindowStage.getWindowProperties();
-        let t36 = s36.windowRect;
-        if (px2vp(t36.height) > this.screenWidth) {
-            this.maxLines = this.verticalScreenLines;
-        }
-        else {
-            this.maxLines = this.horizontalsScreenLines;
+        try {
+            let r36 = this.getUIContext().getHostContext();
+            this.mainWindowStage = r36.windowStage.getMainWindowSync();
+            let s36 = this.mainWindowStage.getWindowProperties();
+            let t36 = s36.windowRect;
+            if (px2vp(t36.height) > this.screenWidth) {
+                this.maxLines = this.verticalScreenLines;
+            } else {
+                this.maxLines = this.horizontalsScreenLines;
+            }
+        } catch (z43) {
+            let a44 = z43?.code;
+            let b44 = z43?.message;
+            hilog.error(0x3900, 'tabTitleBar', `Faild to getSystemFontScale,cause, code: ${a44}, message: ${b44}`);
         }
     }
     rerender() {

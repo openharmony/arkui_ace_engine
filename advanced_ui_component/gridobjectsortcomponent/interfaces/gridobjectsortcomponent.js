@@ -880,8 +880,8 @@ export class GridObjectSortComponent extends ViewPU {
             this.callbackId = getContext()?.getApplicationContext()?.on('environment', this.envCallback);
         }
         catch (y104) {
-            let z104 = y104.code;
-            let a105 = y104.message;
+            let z104 = y104?.code;
+            let a105 = y104?.message;
             hilog.error(0x3900, 'Ace', `GridObjectSortComponent Faild to get environment param error: ${z104}, ${a105}`);
         }
         this.calcGridHeight();
@@ -1538,14 +1538,21 @@ export class GridObjectSortComponent extends ViewPU {
                 }
                 else {
                     if (this.isPointToEditTitleBarSaveButton) {
-                        let c100 = ({
-                            type: 'announceForAccessibility',
-                            bundleName: this.bundleName,
-                            triggerAction: 'common',
-                            textAnnouncedForAccessibility: getContext().resourceManager
-                                .getStringByNameSync(ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE)
-                        });
-                        accessibility.sendAccessibilityEvent(c100);
+                        try {
+                            let c100 = ({
+                                type: 'announceForAccessibility',
+                                bundleName: this.bundleName,
+                                triggerAction: 'common',
+                                textAnnouncedForAccessibility: getContext().resourceManager
+                                    .getStringByNameSync(ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE)
+                            });
+                            accessibility.sendAccessibilityEvent(c100);
+                        } catch (y104) {
+                            let z104 = y104?.code;
+                            let a105 = y104?.message;
+                            hilog.error(0x3900, 'Ace',
+                                `GridObjectSortComponent Faild to get environment param error: ${z104}, ${a105}`);
+                        }
                     }
                 }
             });
