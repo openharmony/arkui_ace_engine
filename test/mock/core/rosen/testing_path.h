@@ -128,6 +128,11 @@ public:
 
     virtual void TransformWithPerspectiveClip(const TestingMatrix& matrix, TestingPath* dst,
         bool applyPerspectiveClip) {}
+
+    void Dump(std::string& out) const
+    {
+        return;
+    }
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_PATH_H

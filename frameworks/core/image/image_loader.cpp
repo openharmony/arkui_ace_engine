@@ -233,7 +233,7 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(
         if (bundleName.empty()) {
             TAG_LOGW(AceLogTag::ACE_IMAGE,
                 "bundleName is empty, LoadImageData for internal source fail! %{private}s-%{public}s.",
-                imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
+                imageDfxConfig.GetImageSrc().c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
             return nullptr;
         }
         if (!StringUtils::StartWith(filePath, "app/")) { // "app/" is infix of internal path
@@ -435,7 +435,7 @@ std::shared_ptr<RSData> Base64ImageLoader::LoadImageData(
     auto imageDfxConfig = imageSourceInfo.GetImageDfxConfig();
     if (base64Code.size() == 0) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "base64Code = %{private}s is empty. %{public}s.",
-            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
+            imageDfxConfig.GetImageSrc().c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
 
@@ -714,7 +714,7 @@ std::shared_ptr<RSData> SharedMemoryImageLoader::LoadImageData(
         auto status = cv_.wait_for(lock, TIMEOUT_DURATION);
         if (status == std::cv_status::timeout) {
             TAG_LOGW(AceLogTag::ACE_IMAGE, "load SharedMemoryImage timeout! %{private}s,  %{public}s.",
-                imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
+                imageDfxConfig.GetImageSrc().c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
             return nullptr;
         }
     }
@@ -753,13 +753,13 @@ RefPtr<NG::ImageData> AstcImageLoader::LoadDecodedImageData(
     auto pipeline = pipelineWK.Upgrade();
     if (!pipeline) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "Pipeline is empty in sharedImageLoader. Src = %{private}s-%{public}s.",
-            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
+            imageDfxConfig.GetImageSrc().c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
     auto dataProvider = pipeline->GetDataProviderManager();
     if (!dataProvider) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "DataProvider is empty in AstcLoading. Src = %{private}s, %{public}s.",
-            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
+            imageDfxConfig.GetImageSrc().c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
 
@@ -767,7 +767,7 @@ RefPtr<NG::ImageData> AstcImageLoader::LoadDecodedImageData(
     auto pixmap = PixelMap::CreatePixelMapFromDataAbility(pixmapMediaUniquePtr);
     if (!pixmap) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "Pixelmap is Empty. Src = %{private}s, %{public}s.",
-            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
+            imageDfxConfig.GetImageSrc().c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
     if (SystemProperties::GetDebugEnabled()) {
