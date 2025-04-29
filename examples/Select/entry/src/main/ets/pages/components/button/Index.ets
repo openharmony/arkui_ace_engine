@@ -13,34 +13,40 @@
  * limitations under the License.
  */
 
-import { NavList, NavListItem } from './utils/navigationList'
+import { NavList, NavListItem } from '../../utils/navigationList'
 
 @Builder
-export function NavIndexBuilder(name: string, param: Object) {
-  NavIndex()
+export function ButtonIndexBuilder(name: string, param: Object) {
+  ButtonIndex()
 }
 
 @Entry
 @Component
-struct NavIndex {
+export struct ButtonIndex {
   pathStack: NavPathStack = new NavPathStack()
   paths: NavListItem[] = [
-    { name: 'Select', path: 'SelectIndex' },
-    { name: 'Button', path: 'ButtonIndex' },
+    { name: 'ButtonStyle', path: 'ButtonStyle' },
+    { name: 'ButtonJudgment', path: 'ButtonJudgment' },
+    { name: 'ButtonLabelStyle', path: 'ButtonLabelStyle' },
+    { name: 'ButtonControlSize', path: 'ButtonControlSize' },
+    { name: 'ButtonRole', path: 'ButtonRole' },
+    { name: 'ButtonCustom', path: 'ButtonCustom' },
+    { name: 'ButtonType', path: 'ButtonType' },
+    { name: 'ButtonModifier', path: 'ButtonModifier' },
   ]
 
   build() {
     NavDestination() {
-      NavList({
-        pages: this.paths,
-        onPathChange: (item: NavListItem) => {
-          this.pathStack.pushPath( { name: item.path } )
-        }
-      })
+      Scroll() {
+        NavList({
+          pages: this.paths,
+          onPathChange: (item: NavListItem) => {
+            this.pathStack.pushPath({ name: item.path })
+          }
+        })
+      }
     }
-    .title('表单')
-    .height('100%')
-    .width('100%')
+    .title('Button')
     .onBackPressed(() => {
       this.pathStack.pop()
       return true

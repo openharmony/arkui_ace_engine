@@ -13,34 +13,45 @@
  * limitations under the License.
  */
 
-import { NavList, NavListItem } from './utils/navigationList'
-
 @Builder
-export function NavIndexBuilder(name: string, param: Object) {
-  NavIndex()
+export function ButtonLabelStyleBuilder(name: string, param: Object) {
+  ButtonLabelStyleExample()
 }
 
 @Entry
 @Component
-struct NavIndex {
+struct ButtonLabelStyleExample {
   pathStack: NavPathStack = new NavPathStack()
-  paths: NavListItem[] = [
-    { name: 'Select', path: 'SelectIndex' },
-    { name: 'Button', path: 'ButtonIndex' },
-  ]
+  @State txt: string = 'overflowTextOverLengthTextOverflow.Clip';
+  @State widthShortSize: number = 210;
 
   build() {
     NavDestination() {
-      NavList({
-        pages: this.paths,
-        onPathChange: (item: NavListItem) => {
-          this.pathStack.pushPath( { name: item.path } )
+      Row() {
+        Column() {
+          Button(this.txt)
+            .width(this.widthShortSize)
+            .height(100)
+            .backgroundColor($r('app.color.background_color_6'))
+            .labelStyle({
+              overflow: TextOverflow.Clip,
+              maxLines: 1,
+              minFontSize: 20,
+              maxFontSize: 20,
+              font: {
+                size: 20,
+                weight: FontWeight.Bolder,
+                family: 'cursive',
+                style: FontStyle.Italic
+              }
+            })
+            .fontSize(40)
         }
-      })
+        .width('100%')
+      }
+      .height('100%')
     }
-    .title('表单')
-    .height('100%')
-    .width('100%')
+    .title('ButtonLabelStyle')
     .onBackPressed(() => {
       this.pathStack.pop()
       return true
