@@ -641,6 +641,10 @@ HWTEST_F(NavigationGroupNodeTestNg, CheckIsNeedForceExitWindow008, TestSize.Leve
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
     auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavPathList list;
+    auto uiNode = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    list.emplace_back(std::make_pair("pageOne", uiNode));
+    navigationStack->SetNavPathList(list);
     navigationStack->size_ = 1;
     navigationPattern->SetNavigationStack(navigationStack);
     auto pipelineContext = navigationNode->GetContext();
