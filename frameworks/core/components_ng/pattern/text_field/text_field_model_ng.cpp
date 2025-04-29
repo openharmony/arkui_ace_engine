@@ -1862,6 +1862,16 @@ void TextFieldModelNG::SetLineSpacing(FrameNode* frameNode, const Dimension& val
         TextFieldLayoutProperty, IsOnlyBetweenLines, isOnlyBetweenLines, frameNode);
 }
 
+float TextFieldModelNG::GetLineSpacing(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    Dimension defaultLineSpacing(0);
+    auto value = layoutProperty->GetLineSpacing().value_or(defaultLineSpacing);
+    return static_cast<float>(value.Value());
+}
+
 void TextFieldModelNG::TextFieldModelNG::SetWordBreak(FrameNode* frameNode, Ace::WordBreak value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, WordBreak, value, frameNode);
