@@ -321,6 +321,16 @@ public:
     bool IsShowInFloatingWindow();
     void AddExtraMaskNode(const DialogProperties& props);
 
+    int32_t getTransitionNodeCount()
+    {
+        return transitionNodeCount_;
+    }
+
+    void addTransitionNodeCount()
+    {
+        transitionNodeCount_++;
+    }
+
     void OverlayDismissDialog(const RefPtr<FrameNode>& dialogNode);
     RefPtr<OverlayManager> GetEmbeddedOverlay(const RefPtr<OverlayManager>& context);
     void MountMaskToUECHost();
@@ -448,6 +458,7 @@ private:
     float fontScaleForElderly_ = 1.0f;
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
     RefPtr<FrameNode> titleContainer_;
+    int32_t transitionNodeCount_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogPattern);
 

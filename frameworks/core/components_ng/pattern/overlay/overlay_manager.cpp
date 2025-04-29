@@ -142,6 +142,8 @@ constexpr int32_t DUMP_LOG_DEPTH_2 = 2;
 
 constexpr int32_t EVENT_COLUMN_SLOT = -2;
 
+constexpr int32_t TRANSITION_NODE_2 = 2;
+
 const float MINIMUM_AMPLITUDE_RATION = 0.08f;
 const float PREVIEW_MINIMUM_AMPLITUDE_RATION = 0.015f;
 
@@ -959,11 +961,34 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "close dialog animation");
 }
 
+void OverlayManager::UpdateChildVisible(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& childNode)
+{
+    auto layoutProperty = childNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
+    auto ctx = childNode->GetRenderContext();
+    CHECK_NULL_VOID(ctx);
+    ctx->SetTransitionInCallback([weak = WeakClaim(this), nodeWK = WeakPtr<FrameNode>(node)] {
+        auto overlayManager = weak.Upgrade();
+        auto node = nodeWK.Upgrade();
+        CHECK_NULL_VOID(overlayManager && node);
+        auto dialogPattern = node->GetPattern<DialogPattern>();
+        CHECK_NULL_VOID(dialogPattern);
+        dialogPattern->addTransitionNodeCount();
+        if (dialogPattern->getTransitionNodeCount() == TRANSITION_NODE_2) {
+            dialogPattern->CallDialogDidAppearCallback();
+        } else if (dialogPattern->getTransitionNodeCount() > TRANSITION_NODE_2) {
+            TAG_LOGE(AceLogTag::ACE_OVERLAY, "transition node over two");
+        }
+    });
+}
+
 void OverlayManager::SetTransitionCallbacks(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& contentNode,
     const RefPtr<FrameNode>& maskNode, const DialogProperties& dialogProps)
 {
-    if (contentNode) {
+    if (!maskNode) {
         auto layoutProperty = contentNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
         auto ctx = contentNode->GetRenderContext();
         CHECK_NULL_VOID(ctx);
@@ -981,16 +1006,31 @@ void OverlayManager::SetTransitionCallbacks(const RefPtr<FrameNode>& node, const
             CHECK_NULL_VOID(dialogPattern);
             dialogPattern->CallDialogDidAppearCallback();
         }
-    }
-    if (maskNode) {
-        auto layoutProperty = maskNode->GetLayoutProperty();
-        layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
-        auto ctx = maskNode->GetRenderContext();
-        CHECK_NULL_VOID(ctx);
-        ctx->SetTransitionInCallback([weak = WeakClaim(this), nodeWK = WeakPtr<FrameNode>(node)] {
-            auto overlayManager = weak.Upgrade();
-            auto node = nodeWK.Upgrade();
-        });
+    } else {
+        bool defaultAnimation = true;
+        if (dialogProps.dialogTransitionEffect != nullptr) {
+            defaultAnimation = false;
+            UpdateChildVisible(node, contentNode);
+        } else {
+            auto dialogPattern = node->GetPattern<DialogPattern>();
+            CHECK_NULL_VOID(dialogPattern);
+            dialogPattern->addTransitionNodeCount();
+        }
+
+        if (dialogProps.maskTransitionEffect != nullptr) {
+            defaultAnimation = false;
+            UpdateChildVisible(node, maskNode);
+        } else {
+            auto dialogPattern = node->GetPattern<DialogPattern>();
+            CHECK_NULL_VOID(dialogPattern);
+            dialogPattern->addTransitionNodeCount();
+        }
+
+        if (defaultAnimation) {
+            auto dialogPattern = node->GetPattern<DialogPattern>();
+            CHECK_NULL_VOID(dialogPattern);
+            dialogPattern->CallDialogDidAppearCallback();
+        }
     }
 }
 
