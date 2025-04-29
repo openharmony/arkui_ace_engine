@@ -473,7 +473,7 @@ private:
     void OnIconConfigurationUpdate() override;
     void OnConfigurationUpdate();
     ImageDfxConfig CreateImageDfxConfig(const ImageSourceInfo& src);
-    void LoadImage(const ImageSourceInfo& src, const PropertyChangeFlag& propertyChangeFlag, VisibleType visibleType);
+    void LoadImage(const ImageSourceInfo& src, bool needLayout);
     void LoadAltImage(const ImageSourceInfo& altImageSourceInfo);
 
     void CreateAnalyzerOverlay();
