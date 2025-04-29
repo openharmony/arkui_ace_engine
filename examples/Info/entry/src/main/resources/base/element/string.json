@@ -59,6 +59,118 @@
     {
       "name": "number_15",
       "value": "15"
+    },
+    {
+      "name": "number120",
+      "value": "120"
+    },
+    {
+      "name": "number1",
+      "value": "1"
+    },
+    {
+      "name": "string_10vp",
+      "value": "10vp"
+    },
+    {
+      "name": "string_15vp",
+      "value": "15vp"
+    },
+    {
+      "name": "string_20vp",
+      "value": "20vp"
+    },
+    {
+      "name": "string_50vp",
+      "value": "50vp"
+    },
+    {
+      "name": "string_float",
+      "value": "0.8"
+    },
+    {
+      "name": "Length_Resource_40percent",
+      "value": "40%"
+    },
+    {
+      "name": "Length_Resource_20percent",
+      "value": "20%"
+    },
+    {
+      "name": "Length_Resource_minus_40percent",
+      "value": "-40%"
+    },
+    {
+      "name": "Length_Resource_minus_20percent",
+      "value": "-20%"
+    },
+    {
+      "name": "Length_Resource_0percent",
+      "value": "0%"
+    },
+    {
+      "name": "Length_Resource_98percent",
+      "value": "98%"
+    },
+    {
+      "name": "Length_Resource_120percent",
+      "value": "120%"
+    },
+    {
+      "name": "Length_Resource_0",
+      "value": "0"
+    },
+    {
+      "name": "Length_Resource_40",
+      "value": "40"
+    },
+    {
+      "name": "Length_Resource_20",
+      "value": "20"
+    },
+    {
+      "name": "Length_Resource_minus_40",
+      "value": "-40"
+    },
+    {
+      "name": "Length_Resource_minus_20",
+      "value": "-20"
+    },
+    {
+      "name": "Length_Resource_98",
+      "value": "98"
+    },
+    {
+      "name": "Length_Resource_120",
+      "value": "120"
+    },
+    {
+      "name": "Length_Resource_98_percent",
+      "value": "98percent"
+    },
+    {
+      "name": "Length_Resource_40_percent",
+      "value": "40percent"
+    },
+    {
+      "name": "Length_Resource_120_percent",
+      "value": "120percent"
+    },
+    {
+      "name": "Length_Resource_120px",
+      "value": "120px"
+    },
+    {
+      "name": "Length_Resource_40px",
+      "value": "40px"
+    },
+    {
+      "name": "Length_Resource_120vp",
+      "value": "120vp"
+    },
+    {
+      "name": "Length_Resource_40vp",
+      "value": "40vp"
     }
   ]
 }
