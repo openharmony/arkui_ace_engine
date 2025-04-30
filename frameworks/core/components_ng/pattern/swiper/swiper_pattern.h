@@ -1179,6 +1179,7 @@ private:
 
     void ResetOnForceMeasure();
     void UpdateTabBarIndicatorCurve();
+    const RefPtr<Curve> GetTabBarAnimationCurve(const RefPtr<Curve>& curve);
     bool CheckDragOutOfBoundary(double dragVelocity);
     void UpdateCurrentFocus();
 

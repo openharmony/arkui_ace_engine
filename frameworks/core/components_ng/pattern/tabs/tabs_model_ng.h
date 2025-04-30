@@ -47,6 +47,7 @@ public:
     void SetBarAdaptiveHeight(bool barAdaptiveHeight) override;
     void SetIsVertical(bool isVertical) override;
     void SetScrollable(bool scrollable) override;
+    void SetAnimationCurve(const RefPtr<Curve>& curve) override;
     void SetAnimationDuration(float duration) override;
     void SetOnChange(std::function<void(const BaseEventInfo*)>&& onChange) override;
     void SetOnTabBarClick(std::function<void(const BaseEventInfo*)>&& onTabBarClick) override;
@@ -91,6 +92,7 @@ public:
     static void SetScrollable(FrameNode* frameNode, bool scrollable);
     static void SetTabBarWidth(FrameNode* frameNode, const Dimension& tabBarWidth);
     static void SetTabBarHeight(FrameNode* frameNode, const Dimension& tabBarHeight);
+    static void SetAnimationCurve(FrameNode* frameNode, const RefPtr<Curve>& curve);
     static void SetAnimationDuration(FrameNode* frameNode, float duration);
     static void SetBarAdaptiveHeight(FrameNode* frameNode, bool barAdaptiveHeight);
     static void SetScrollableBarModeOptions(FrameNode* frameNode, const ScrollableBarModeOptions& option);

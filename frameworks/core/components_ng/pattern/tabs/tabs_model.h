@@ -132,6 +132,7 @@ public:
     virtual void SetBarAdaptiveHeight(bool barAdaptiveHeight) = 0;
     virtual void SetIsVertical(bool isVertical) = 0;
     virtual void SetScrollable(bool scrollable) = 0;
+    virtual void SetAnimationCurve(const RefPtr<Curve>& curve) {};
     virtual void SetAnimationDuration(float duration) = 0;
     virtual void SetOnChange(std::function<void(const BaseEventInfo*)>&& onChange) = 0;
     virtual void SetOnTabBarClick(std::function<void(const BaseEventInfo*)>&& onTabBarClick) = 0;
