@@ -1471,7 +1471,7 @@ ArkUINativeModuleValue FrameNodeBridge::IsAttached(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::BooleanRef::New(vm, false));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    bool isAttached = GetArkUINodeModifiers()->getFrameNodeModifier()->isAttached(nativeNode);
+    bool isAttached = GetArkUINodeModifiers()->getFrameNodeModifier()->isVisible(nativeNode);
     return panda::BooleanRef::New(vm, isAttached);
 }
 ArkUINativeModuleValue FrameNodeBridge::GetInspectorInfo(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -1595,6 +1595,7 @@ std::function<bool()> ParseFunc(ArkUIRuntimeCallInfo* runtimeCallInfo)
         auto function = panda::CopyableGlobal(vm, func);
         auto customPropertyExisted = function->Call(vm, function.ToLocal(), params3, 3)->ToBoolean(vm)->Value();
         if (customPropertyExisted) {
+            frameNode->SetCustomPropertyMapFlagByKey(params3[1]->ToString(vm)->ToString(vm));
             frameNode->SetRemoveCustomProperties([vm, nodeId]() -> void {
                 CHECK_NULL_VOID(vm);
                 panda::LocalScope scope(vm);

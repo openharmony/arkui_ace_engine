@@ -16,4 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("movingphoto_test_ng") {
   type = "new"
   sources = [ "movingphoto_test_ng.cpp" ]
+  if (current_os == "ohos") {
+    external_deps = [ "napi:ace_napi" ]
+  }
 }

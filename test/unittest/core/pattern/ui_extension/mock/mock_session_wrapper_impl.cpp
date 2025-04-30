@@ -296,4 +296,8 @@ bool SessionWrapperImpl::SendBusinessData(
 void SessionWrapperImpl::NotifyHostWindowMode(int32_t mode) {}
 
 void SessionWrapperImpl::ReDispatchWantParams() {}
+
+void SessionWrapperImpl::DispatchExtensionDataToHostWindow(uint32_t customId, const AAFwk::Want& data)
+{
+}
 } // namespace OHOS::Ace::NG

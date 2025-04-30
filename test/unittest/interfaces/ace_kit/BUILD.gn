@@ -120,6 +120,13 @@ ohos_source_set("ace_kit_mock") {
     "googletest:gmock",
     "googletest:gtest_main",
   ]
+  if (current_os == "ohos") {
+    external_deps += [
+      "c_utils:utils",
+      "napi:ace_napi",
+      "skia:skia_canvaskit",
+    ]
+  }
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
 
@@ -198,6 +205,8 @@ ohos_unittest("ace_kit_test") {
   external_deps = [
     "googletest:gmock",
     "googletest:gtest_main",
+    "graphic_2d:2d_graphics",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "napi:ace_napi",
   ]

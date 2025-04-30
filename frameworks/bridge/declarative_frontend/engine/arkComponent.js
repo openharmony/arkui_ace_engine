@@ -3517,18 +3517,22 @@ class ArkComponent {
     });
   }
   onGestureJudgeBegin(callback) {
+    this._onGestureJudgeBegin = callback;
     modifierWithKey(this._modifiersWithKeys, OnGestureJudgeBeginModifier.identity, OnGestureJudgeBeginModifier, callback);
     return this;
   }
   onGestureRecognizerJudgeBegin(callback) {
+    this._onGestureRecognizerJudgeBegin = callback;
     modifierWithKey(this._modifiersWithKeys, OnGestureRecognizerJudgeBeginModifier.identity, OnGestureRecognizerJudgeBeginModifier, callback);
     return this;
   }
   shouldBuiltInRecognizerParallelWith(callback) {
+    this._shouldBuiltInRecognizerParallelWith = callback;
     modifierWithKey(this._modifiersWithKeys, ShouldBuiltInRecognizerParallelWithModifier.identity, ShouldBuiltInRecognizerParallelWithModifier, callback);
     return this;
   }
   onSizeChange(callback) {
+    this._onSizeChange = callback;
     modifierWithKey(this._modifiersWithKeys, OnSizeChangeModifier.identity, OnSizeChangeModifier, callback);
     return this;
   }
@@ -4006,14 +4010,17 @@ class ArkComponent {
     return this;
   }
   onClick(event) {
+    this._clickEvent = event;
     modifierWithKey(this._modifiersWithKeys, ClickModifier.identity, ClickModifier, event);
     return this;
   }
   onHover(event) {
+    this._onHover = event;
     modifierWithKey(this._modifiersWithKeys, OnHoverModifier.identity, OnHoverModifier, event);
     return this;
   }
   onHoverMove(event) {
+    this._onHoverMove = event;
     modifierWithKey(this._modifiersWithKeys, OnHoverMoveModifier.identity, OnHoverMoveModifier, event);
     return this;
   }
@@ -4022,30 +4029,37 @@ class ArkComponent {
     return this;
   }
   onMouse(event) {
+    this._onMouse = event;
     modifierWithKey(this._modifiersWithKeys, OnMouseModifier.identity, OnMouseModifier, event);
     return this;
   }
   onAxisEvent(event) {
+    this._onAxis = event;
     modifierWithKey(this._modifiersWithKeys, OnAxisEventModifier.identity, OnAxisEventModifier, event);
     return this;
   }
   onTouch(event) {
+    this._touchEvent = event;
     modifierWithKey(this._modifiersWithKeys, OnTouchModifier.identity, OnTouchModifier, event);
     return this;
   }
   onKeyEvent(event) {
+    this._onKeyEvent = event;
     modifierWithKey(this._modifiersWithKeys, OnKeyEventModifier.identity, OnKeyEventModifier, event);
     return this;
   }
   onKeyPreIme(event) {
+    this._onKeyPreIme = event;
     modifierWithKey(this._modifiersWithKeys, OnKeyPreImeModifier.identity, OnKeyPreImeModifier, event);
     return this;
   }
   onKeyEventDispatch(event) {
+    this._onKeyEventDispatch = event;
     modifierWithKey(this._modifiersWithKeys, OnKeyEventDispatchModifier.identity, OnKeyEventDispatchModifier, event);
     return this;
   }
   onFocusAxisEvent(event) {
+    this._onFocusAxisEvent = event;
     modifierWithKey(this._modifiersWithKeys, OnFocusAxisEventModifier.identity, OnFocusAxisEventModifier, event);
     return this;
   }
@@ -4281,22 +4295,27 @@ class ArkComponent {
     return this;
   }
   onAppear(event) {
+    this._onAppearEvent = event;
     modifierWithKey(this._modifiersWithKeys, OnAppearModifier.identity, OnAppearModifier, event);
     return this;
   }
   onDisAppear(event) {
+    this._onDisappearEvent = event;
     modifierWithKey(this._modifiersWithKeys, OnDisappearModifier.identity, OnDisappearModifier, event);
     return this;
   }
   onAttach(event) {
+    this._onAttach = event;
     modifierWithKey(this._modifiersWithKeys, OnAttachModifier.identity, OnAttachModifier, event);
     return this;
   }
   onDetach(event) {
+    this._onDetach = event;
     modifierWithKey(this._modifiersWithKeys, OnDetachModifier.identity, OnDetachModifier, event);
     return this;
   }
   onAreaChange(event) {
+    this._onAreaChange = event;
     modifierWithKey(this._modifiersWithKeys, OnAreaChangeModifier.identity, OnAreaChangeModifier, event);
     return this;
   }

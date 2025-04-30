@@ -42,7 +42,11 @@ ace_unittest("util_test") {
     "utf_helper_testone_ng.cpp",
   ]
 
-  external_deps = [ "bounds_checking_function:libsec_shared" ]
+  external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "icu:shared_icui18n",
+    "icu:shared_icuuc",
+  ]
 }
 
 group("base_unittest") {

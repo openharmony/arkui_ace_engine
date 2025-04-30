@@ -790,7 +790,10 @@ private:
     bool PostTask(const TaskExecutor::Task& task, const std::string& name);
     void CheckSheetHeightChange();
     float GetWrapperHeight();
+    float GetWrapperWidth();
     bool SheetHeightNeedChanged();
+    bool SheetWidthNeedChanged();
+    void PopupSheetChanged();
     void InitSheetDetents();
     void InitDetents(SheetStyle sheetStyle, float height, double mediumSize, float largeHeightOfTheme,
         double largeHeight);
@@ -875,7 +878,9 @@ private:
     float sheetHeightUp_ = 0.0f; // sheet offset to move up when avoiding keyboard
     float height_ = 0.0f; // sheet height, start from the bottom, before avoiding keyboard
     float sheetHeight_ = 0.0f; // sheet frameSize Height
+    float sheetWidth_ = 0.0f; // sheet frameSize Width
     float wrapperHeight_ = 0.0f; // sheetWrapper frameSize Height
+    float wrapperWidth_ = 0.0f; // sheetWrapper frameSize Width
     float pageHeight_ = 0.0f; // root Height, = maxSize.Height()
     float scrollHeight_ = 0.0f;
     float preWidth_ = 0.0f;

@@ -22,16 +22,8 @@ ohos_unittest("web_pattern_unit_test_ohos") {
   defines += [ "WEB_SUPPORTED" ]
 
   include_dirs = [
-    "//commonlibrary/c_utils/base/include",
-    "//foundation/window/window_manager/interfaces/innerkits/wm",
-    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
-    "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
-    "//foundation/multimedia/image_framework/interfaces/innerkits/include",
-    "//foundation/window/window_manager/interfaces/innerkits",
-    "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
     "$ace_root/interfaces/inner_api/ui_session",
     "$ace_root/adapter/ohos/capability/html",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include/common/rs_common_def.h",
   ]
 
   # pattern_ng
@@ -689,7 +681,6 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "$ace_root/test/unittest:ace_components_syntax",
     "$ace_root/test/unittest:ace_core_animation",
     "$ace_root/test/unittest:ace_core_extra",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
   ]
 
   sources += [

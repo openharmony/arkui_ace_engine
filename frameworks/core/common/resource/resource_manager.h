@@ -80,11 +80,13 @@ public:
         }
     }
 
-    void UpdateResourceAdapter(const std::string& bundleName, const std::string& moduleName, int32_t instanceId,
+    void UpdateMainResourceAdapter(const std::string& bundleName, const std::string& moduleName, int32_t instanceId,
         RefPtr<ResourceAdapter>& resourceAdapter)
     {
-        AddResourceAdapter("", "", instanceId, resourceAdapter, true);
-        AddResourceAdapter(bundleName, moduleName, instanceId, resourceAdapter, true);
+        auto defaultKey = MakeCacheKey("", "", instanceId);
+        auto key = MakeCacheKey(bundleName, moduleName, instanceId);
+        resourceAdapters_[key] = resourceAdapter;
+        resourceAdapters_[defaultKey] = resourceAdapter;
     }
 
     bool IsResourceAdapterRecord(const std::string& bundleName, const std::string& moduleName, int32_t instanceId)

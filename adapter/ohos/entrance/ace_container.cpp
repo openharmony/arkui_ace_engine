@@ -39,7 +39,6 @@
 #include "base/log/event_report.h"
 #include "base/log/jank_frame_report.h"
 #include "base/thread/background_task_executor.h"
-#include "base/thread/task_dependency_manager.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "bridge/card_frontend/card_frontend.h"
 #include "bridge/card_frontend/form_frontend_declarative.h"
@@ -2598,11 +2597,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     pipelineContext_->SetAccessibilityEventCallback(accessibilityEventCallback);
 
     if (GetSettings().usePlatformAsUIThread) {
-        std::string frameReportInitTaskKey = "FrameReportInit";
-        TaskDependencyManager::GetInstance()->PostTaskToBg([] {
-                ACE_SCOPED_TRACE("FrameReport INIT");
-                FrameReport::GetInstance().Init();
-            }, frameReportInitTaskKey);
+        FrameReport::GetInstance().Init();
     } else {
         taskExecutor_->PostTask([] { FrameReport::GetInstance().Init(); },
             TaskExecutor::TaskType::UI, "ArkUIFrameReportInit");
@@ -4057,6 +4052,14 @@ void AceContainer::DispatchUIExtDataConsume(
             },
             TaskExecutor::TaskType::UI, "ArkUIUIxtDispatchDataConsumeCallback");
     }
+}
+
+void AceContainer::DispatchExtensionDataToHostWindow(uint32_t code, const AAFwk::Want& data, int32_t persistenId)
+{
+    CHECK_NULL_VOID(uiWindow_);
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "DispatchExtensionDataToHostWindow code=%{public}u, want=%{public}s, persistenId=%{public}d.",
+        code, data.ToString().c_str(), persistenId);
 }
 
 bool AceContainer::FireUIExtDataSendToHost(

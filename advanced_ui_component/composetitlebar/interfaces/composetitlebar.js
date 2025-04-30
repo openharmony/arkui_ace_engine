@@ -147,7 +147,15 @@ class ComposeTitleBar extends ViewPU {
                 alignItems: ItemAlign.Stretch
             });
             Flex.onAppear(() => {
-                this.uniqueId = this.getUIContext().getFrameNodeByUniqueId(this.getUniqueId())?.getFirstChild()?.getUniqueId();
+                try {
+                    this.uniqueId =
+                        this.getUIContext().getFrameNodeByUniqueId(this.getUniqueId())?.getFirstChild()?.getUniqueId();
+                } catch (u18) {
+                    let v18 = u18?.code;
+                    let w18 = u18?.message;
+                    hilog.error(0x3900, 'ComposeTitleBar',
+                        `Failed to init getFrameNodeByUniqueId info, cause, code: ${v18}, message: ${w18}`);
+                }
             });
             Flex.width('100%');
             Flex.height(ComposeTitleBar.totalHeight);
@@ -530,8 +538,8 @@ class CollapsibleMenuSection extends ViewPU {
             this.maxFontScale = x18.getMaxFontScale();
         }
         catch (u18) {
-            let v18 = u18.code;
-            let w18 = u18.message;
+            let v18 = u18?.code;
+            let w18 = u18?.message;
             hilog.error(0x3900, 'ComposeTitleBar', `Failed to init fontsizescale info, cause, code: ${v18}, message: ${w18}`);
         }
         if (this.menuItems) {
@@ -554,8 +562,8 @@ class CollapsibleMenuSection extends ViewPU {
             return Math.min(this.systemFontScale, this.maxFontScale);
         }
         catch (o18) {
-            let p18 = o18.code;
-            let q18 = o18.message;
+            let p18 = o18?.code;
+            let q18 = o18?.message;
             hilog.error(0x3900, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${p18}, message: ${q18}`);
             return 1;
         }
@@ -1028,8 +1036,8 @@ class ImageMenuItem extends ViewPU {
             this.maxFontScale = k15.getMaxFontScale();
         }
         catch (h15) {
-            let i15 = h15.code;
-            let j15 = h15.message;
+            let i15 = h15?.code;
+            let j15 = h15?.message;
             hilog.error(0x3900, 'ComposeTitleBar', `Failed to init fontsizescale info, cause, code: ${i15}, message: ${j15}`);
         }
         this.fontSize = this.decideFontScale();
@@ -1047,8 +1055,8 @@ class ImageMenuItem extends ViewPU {
             return Math.min(this.systemFontScale, this.maxFontScale);
         }
         catch (d15) {
-            let e15 = d15.code;
-            let f15 = d15.message;
+            let e15 = d15?.code;
+            let f15 = d15?.message;
             hilog.error(0x3900, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${e15}, message: ${f15}`);
             return 1;
         }
@@ -1601,15 +1609,21 @@ class ComposeTitleBarDialog extends ViewPU {
         If.pop();
     }
     async aboutToAppear() {
-        let c12 = this.getUIContext().getHostContext();
-        this.mainWindowStage = c12.windowStage.getMainWindowSync();
-        let d12 = this.mainWindowStage.getWindowProperties();
-        let e12 = d12.windowRect;
-        if (px2vp(e12.height) > this.screenWidth) {
-            this.maxLines = this.verticalScreenLines;
-        }
-        else {
-            this.maxLines = this.horizontalsScreenLines;
+        try {
+            let c12 = this.getUIContext().getHostContext();
+            this.mainWindowStage = c12.windowStage.getMainWindowSync();
+            let d12 = this.mainWindowStage.getWindowProperties();
+            let e12 = d12.windowRect;
+            if (px2vp(e12.height) > this.screenWidth) {
+                this.maxLines = this.verticalScreenLines;
+            } else {
+                this.maxLines = this.horizontalsScreenLines;
+            }
+        } catch (u18) {
+            let v18 = u18?.code;
+            let w18 = u18?.message;
+            hilog.error(0x3900, 'ComposeTitleBar',
+                `Failed to init getMainWindowSync info, cause, code: ${v18}, message: ${w18}`);
         }
     }
     rerender() {

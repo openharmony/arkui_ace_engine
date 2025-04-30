@@ -9193,6 +9193,7 @@ std::function<bool()> ParseJsFunc(const JSCallbackInfo& info, int32_t nodeId)
         auto function = panda::CopyableGlobal(vm, func);
         auto customPropertyExisted = function->Call(vm, function.ToLocal(), params3, 3)->ToBoolean(vm)->Value();
         if (customPropertyExisted) {
+            frameNode->SetCustomPropertyMapFlagByKey(params3[1]->ToString(vm)->ToString(vm));
             frameNode->SetRemoveCustomProperties([vm, nodeId]() -> void {
                 CHECK_NULL_VOID(vm);
                 panda::LocalScope scope(vm);

@@ -100,7 +100,6 @@ void ImagePaintMethod::UpdateBorderRadius(PaintWrapper* paintWrapper, ImageDfxCo
     NormalizeRadius(radiusXY, paintWrapper->GetContentSize());
     auto&& config = canvasImage_->GetPaintConfig();
     config.borderRadiusXY_ = std::make_shared<BorderRadiusArray>(radiusXY);
-    imageDfxConfig.borderRadiusValue_ = borderRadius->ToString();
 }
 
 void ImagePaintMethod::UpdatePaintConfig(PaintWrapper* paintWrapper)

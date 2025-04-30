@@ -11,6 +11,28 @@
     {
       "name": "rColor1",
       "value": "#DDBA3333"
+    },
+    {
+      "name": "Orange",
+      "value": "#ff9900"
+    },{
+      "name": "Blue",
+      "value": "#66ffff"
+    },{
+      "name": "purple",
+      "value": "#660099"
+    },
+    {
+      "name": "yellow",
+      "value": "#FFFF00"
+    },
+    {
+      "name": "blue",
+      "value": "#0000FF"
+    },
+    {
+      "name": "green",
+      "value": "#00FF00"
     }
   ]
 }

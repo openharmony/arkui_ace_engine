@@ -1259,7 +1259,7 @@ HWTEST_F(ImagePatternTestNg, CheckCallback002, TestSize.Level1)
     };
     imagePattern->SetOnProgressCallback(std::move(onProgress));
     imagePattern->onProgressCallback_(uint32_t(0), uint32_t(1));
-    imagePattern->LoadImage(ImageSourceInfo(""), PROPERTY_UPDATE_NORMAL, VisibleType::GONE);
+    imagePattern->LoadImage(ImageSourceInfo(""), false);
     EXPECT_EQ(testData, 1);
 }
 

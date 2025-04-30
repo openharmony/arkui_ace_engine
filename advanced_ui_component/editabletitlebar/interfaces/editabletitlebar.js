@@ -234,8 +234,8 @@ export class EditableTitleBar extends ViewPU {
             this.maxFontScale = y66.getMaxFontScale();
         }
         catch (v66) {
-            let w66 = v66.code;
-            let x66 = v66.message;
+            let w66 = v66?.code;
+            let x66 = v66?.message;
             hilog.error(0x3900, 'Ace', `Faild to init fontsizescale info,cause, code: ${w66}, message: ${x66}`);
         }
     }
@@ -791,8 +791,8 @@ class ImageMenuItem extends ViewPU {
                     this.buttonGestureModifier.fontSize = this.fontSize;
                 }
                 catch (y) {
-                    let z = y.code;
-                    let a1 = y.message;
+                    let z = y?.code;
+                    let a1 = y?.message;
                     hilog.error(0x3900, 'Ace', `EditableTitleBar environmentCallback error: ${z}, ${a1}`);
                 }
             },
@@ -930,8 +930,8 @@ class ImageMenuItem extends ViewPU {
             this.callbackId = getContext()?.getApplicationContext()?.on('environment', this.envCallback);
         }
         catch (t) {
-            let u = t.code;
-            let v = t.message;
+            let u = t?.code;
+            let v = t?.message;
             hilog.error(0x3900, 'Ace', `EditableTitleBar Faild to get environment param error: ${u}, ${v}`);
         }
         this.fontSize = this.decideFontScale();
@@ -947,8 +947,8 @@ class ImageMenuItem extends ViewPU {
             return Math.min(this.systemFontScale, this.maxFontScale);
         }
         catch (p) {
-            let q = p.code;
-            let r = p.message;
+            let q = p?.code;
+            let r = p?.message;
             hilog.error(0x3900, 'EditableTitleBar', `Faild to decideFontScale,cause, code: ${q}, message: ${r}`);
             return 1;
         }
@@ -1546,17 +1546,24 @@ class EditableTitleBarDialog extends ViewPU {
         If.pop();
     }
     async aboutToAppear() {
-        let t59 = this.getUIContext().getHostContext();
-        this.mainWindowStage = t59.windowStage.getMainWindowSync();
+        try {
+            let t59 = this.getUIContext().getHostContext();
+            this.mainWindowStage = t59.windowStage.getMainWindowSync();
+        } catch (p59) {
+            let q59 = p59?.code;
+            let r59 = p59?.message;
+            hilog.error(0x3900, 'Ace', `EditableTitleBar getNumberByResource error, code: ${q59},message:${r59}`);
+            return 0;
+        }
         let u59 = this.mainWindowStage.getWindowProperties();
         let v59 = u59.windowRect;
         if (px2vp(v59.height) > this.screenWidth) {
             this.maxLines = this.verticalScreenLines;
-        }
-        else {
+        } else {
             this.maxLines = this.horizontalsScreenLines;
         }
     }
+
     rerender() {
         this.updateDirtyElements();
     }
@@ -1572,8 +1579,8 @@ function getNumberByResource(n59, o59) {
         }
     }
     catch (p59) {
-        let q59 = p59.code;
-        let r59 = p59.message;
+        let q59 = p59?.code;
+        let r59 = p59?.message;
         hilog.error(0x3900, 'Ace', `EditableTitleBar getNumberByResource error, code: ${q59},message:${r59}`);
         return 0;
     }

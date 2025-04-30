@@ -61,6 +61,12 @@ ohos_source_set("rosen_render_context_test_mock") {
     "$ace_root/test/unittest/core/rosen/mock_pixmap_image.cpp",
   ]
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+  if (current_os == "ohos") {
+    external_deps = [
+      "c_utils:utils",
+      "skia:skia_canvaskit",
+    ]
+  }
 }
 
 ohos_unittest("arkui_rosen_render_context_test") {
@@ -172,6 +178,7 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "googletest:gmock_main",
     "graphic_2d:2d_graphics",
     "graphic_2d:librender_service_client",
+    "hilog:libhilog",
     "skia:skia_canvaskit",
     "window_manager:libwm",
   ]
@@ -284,6 +291,7 @@ ohos_unittest("gradient_style_modifier_test") {
     "googletest:gmock_main",
     "graphic_2d:2d_graphics",
     "graphic_2d:librender_service_client",
+    "hilog:libhilog",
     "skia:skia_canvaskit",
     "window_manager:libwm",
   ]

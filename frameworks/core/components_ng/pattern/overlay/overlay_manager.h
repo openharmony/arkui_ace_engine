@@ -216,7 +216,7 @@ public:
     void ShowToast(const NG::ToastInfo& toastInfo, const std::function<void(int32_t)>& callback);
     void CloseToast(int32_t toastId, const std::function<void(int32_t)>& callback);
 
-    void FireAutoSave(const RefPtr<FrameNode>& ContainerNode);
+    void FireAutoSave(const RefPtr<FrameNode>& containerNode);
 
     std::unordered_map<int32_t, RefPtr<FrameNode>> GetDialogMap()
     {
@@ -284,6 +284,8 @@ public:
      */
     bool RemoveOverlay(bool isBackPressed, bool isPageRouter = false);
     bool RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed, bool isPageRouter = false);
+    bool RemoveDialogWithContent(
+        const RefPtr<FrameNode>& overlay, const DialogProperties& props, bool isBackPressed, bool isPageRouter = false);
     bool RemoveBubble(const RefPtr<FrameNode>& overlay);
     bool RemoveMenu(const RefPtr<FrameNode>& overlay);
     bool RemoveDragPreview(const RefPtr<FrameNode>& overlay);

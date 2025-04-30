@@ -1672,7 +1672,7 @@ void SetLinearGradientBlur(ArkUINodeHandle node, ArkUI_Float32 blurRadius, const
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    blurRadius = std::clamp(blurRadius, 0.0f, 60.0f); // 60.0 represents largest blur radius;
+    blurRadius = std::max(0.0f, blurRadius);
     std::vector<std::pair<float, float>> fractionStops;
     if ((stopsLength & 0x1) == 0) {
         float tmpPos = -1.0f;

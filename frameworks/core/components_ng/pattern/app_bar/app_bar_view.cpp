@@ -85,6 +85,7 @@ RefPtr<FrameNode> AppBarView::Create(const RefPtr<FrameNode>& stage)
         AceType::MakeRefPtr<AtomicServicePattern>());
     // add children
     if (appBarNodeBuilder_) {
+        // app bar builder for cj frontend
         return appBarNodeBuilder_(this, stage);
     }
     contentStage_ = stage;

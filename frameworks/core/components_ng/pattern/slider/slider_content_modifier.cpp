@@ -23,6 +23,7 @@ namespace {
 constexpr float HALF = 0.5f;
 constexpr float SPRING_MOTION_RESPONSE = 0.314f;
 constexpr float SPRING_MOTION_DAMPING_FRACTION = 0.95f;
+constexpr double DEFAULT_SCALE_VALUE = 1.0;
 } // namespace
 SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     std::function<void(float)> updateImageCenterX, std::function<void(float)> updateImageCenterY)
@@ -875,6 +876,9 @@ void SliderContentModifier::UpdateContentDirtyRect(const SizeF& frameSize)
                               : theme->GetInsetHotBlockShadowWidth().ConvertToPx();
     auto circleSize =
         SizeF(blockSize_->Get().Width() + hotShadowWidth / HALF, blockSize_->Get().Height() + hotShadowWidth / HALF);
+    if (GreatNotEqual(scaleValue_, DEFAULT_SCALE_VALUE)) {
+        circleSize = circleSize * scaleValue_;
+    }
     RectF rect;
     if (directionAxis_->Get() == static_cast<int32_t>(Axis::HORIZONTAL)) {
         auto maxWidth = std::max(circleSize.Height(), frameSize.Height()) * HALF;

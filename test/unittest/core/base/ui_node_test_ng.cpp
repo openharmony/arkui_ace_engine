@@ -2369,6 +2369,23 @@ HWTEST_F(UINodeTestNg, UINodeTestNg071, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UINodeTestNg072
+ * @tc.desc: Test ui node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestNg072, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create FrameNode node and construct params
+     */
+    ZERO->hostPageId_ = 0;
+    ZERO->SetInDestroying();
+    EXPECT_EQ(ZERO->OnRemoveFromParent(false), false);
+    ZERO->SetDestroying(false);
+    ZERO->Clean();
+}
+
+/**
  * @tc.name: GetPerformanceCheckData004
  * @tc.desc: Test ui node method GetPerformanceCheckData
  * @tc.type: FUNC

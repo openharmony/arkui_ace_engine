@@ -1541,7 +1541,8 @@ void DialogPattern::UpdatePropertyForElderly(const std::vector<ButtonInfo>& butt
     TAG_LOGI(AceLogTag::ACE_DIALOG, "dialog GetContext fontScale : %{public}f", dialogContext->GetFontScale());
     if (GreatOrEqual(dialogContext->GetFontScale(), dialogTheme_->GetMinFontScaleForElderly())) {
         if (pipeline->GetRootHeight() < dialogTheme_->GetDialogLandscapeHeightBoundary().ConvertToPx() &&
-            windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
+            (windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+                windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_SECONDARY)) {
             notAdapationAging_ = true;
             return;
         }

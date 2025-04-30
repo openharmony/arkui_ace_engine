@@ -35,6 +35,7 @@ void AtomicServicePattern::RegisterBeforeCreateLayoutBuilder(
 
 void AtomicServicePattern::BeforeCreateLayoutWrapper()
 {
+    // before create layout builder for cj frontend
     if (beforeCreateLayoutBuilder_) {
         beforeCreateLayoutBuilder_(GetHost(), settedColorMode);
         return;

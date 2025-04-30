@@ -682,11 +682,6 @@ public:
 
     static bool IsNeedResampleTouchPoints();
 
-    static bool GetAsyncInitializeEnabled()
-    {
-        return asyncInitializeEnabled_.load();
-    }
-
     static bool IsNeedSymbol();
 
     static bool GetTaskPriorityAdjustmentEnable()
@@ -770,7 +765,6 @@ private:
     static bool sideBarContainerBlurEnable_;
     static std::atomic<bool> stateManagerEnable_;
     static std::atomic<bool> acePerformanceMonitorEnable_;
-    static std::atomic<bool> asyncInitializeEnabled_;
     static std::atomic<bool> focusCanBeActive_;
     static bool aceCommercialLogEnable_;
     static bool faultInjectEnabled_;

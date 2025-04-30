@@ -355,6 +355,8 @@ class __RepeatVirtualScroll2Impl<T> {
     // request container re-layout
     private firstIndexChanged_: number = 0;
 
+    private firstIndexChangedInTryFastRelayout_: number = Number.NaN;
+
     // optimization: true if any items have bindings with their indexes
     private hasItemBindingsToIndex_ = false;
 
@@ -482,8 +484,6 @@ class __RepeatVirtualScroll2Impl<T> {
             this.templateOptions_ = config.templateOptions;
 
             this.keyGenFunc_ = config.keyGenFunc;
-            this.useKeys_ = config.keyGenFuncSpecified;
-
             this.allowUpdate_ = config.reusable;
 
             this.mkRepeatItem_ = config.mkRepeatItem;
@@ -629,6 +629,10 @@ class __RepeatVirtualScroll2Impl<T> {
             `\nfirst item changed at index ${this.firstIndexChanged_} .`);
 
         const arrLen = this.onLazyLoadingFunc_ ? this.totalCount_ : this.arr_.length;
+        if (!isNaN(this.firstIndexChangedInTryFastRelayout_)) {
+            this.firstIndexChanged_ = Math.min(this.firstIndexChanged_, this.firstIndexChangedInTryFastRelayout_);
+            this.firstIndexChangedInTryFastRelayout_ = Number.NaN;
+        }
         RepeatVirtualScroll2Native.updateL1Rid4Index(
             this.repeatElmtId_, arrLen, this.totalCount_, this.firstIndexChanged_, Array.from(newL1Rid4Index));
 
@@ -904,10 +908,6 @@ class __RepeatVirtualScroll2Impl<T> {
                 stateMgmtConsole.debug(`correcting key of activeDataItem index ${prevIndex} from `,
                     `'${activateDataItems[prevIndex].key}' to '${prevKey}'.`);
                 activateDataItems[prevIndex].key = prevKey;
-
-                if (!this.rerenderOngoing_) {
-                    this.owningViewV2_.uiNodeNeedUpdateV2(this.repeatElmtId_);
-                }
             }
         }
         stateMgmtConsole.applicationError(`${this.constructor.name}(${this.repeatElmtId_}): `,
@@ -1523,6 +1523,7 @@ class __RepeatVirtualScroll2Impl<T> {
         this.adjustActiveRangeStart(nIndex, nDeleteCount, addCount);
 
         if (this.lazyLoadingIndex_ === -1 && this.needRerenderChange(nIndex, nDeleteCount, addCount)) {
+            this.updateFirstIndexChangedInTryFastRelayout(nIndex);
             return false;
         }
 
@@ -1530,6 +1531,7 @@ class __RepeatVirtualScroll2Impl<T> {
         if ((nDeleteCount !== addCount) && !this.canUpdateTotalCount()) {
             stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) tryFastRelayoutForChange`,
                 `can't update total count, need to rerender! It's better to define onTotalCount!`);
+            this.updateFirstIndexChangedInTryFastRelayout(nIndex);
             return false;
         }
         
@@ -1537,6 +1539,14 @@ class __RepeatVirtualScroll2Impl<T> {
         this.updateTotalCount();
 
         return this.tryFastRelayoutFinalStep(nIndex);
+    }
+
+    private updateFirstIndexChangedInTryFastRelayout(index: number): void {
+        if (isNaN(this.firstIndexChangedInTryFastRelayout_)) {
+            this.firstIndexChangedInTryFastRelayout_ = index;
+        } else {
+            this.firstIndexChangedInTryFastRelayout_ = Math.min(this.firstIndexChangedInTryFastRelayout_, index);
+        }
     }
 
     private tryFastRelayoutFinalStep(changeIndex: number): boolean {

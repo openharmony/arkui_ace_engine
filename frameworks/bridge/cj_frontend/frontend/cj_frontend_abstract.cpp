@@ -197,7 +197,7 @@ void CJFrontendAbstract::InternalRunPage(const std::string& url, const std::stri
     LOGI("InternalRunPage %{public}s", url.c_str());
     taskExecutor_->PostTask(
         [pageRouterManager = pageRouterManager_, url, params] { pageRouterManager->RunPage(url, params); },
-        TaskExecutor::TaskType::UI, "CJFroentendInternalRunPage");
+        TaskExecutor::TaskType::UI, "CJFrontendInternalRunPage");
 }
 
 double CJFrontendAbstract::MeasureText(const MeasureContext& context)

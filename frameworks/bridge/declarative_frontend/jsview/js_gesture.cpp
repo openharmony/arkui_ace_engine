@@ -390,6 +390,13 @@ napi_value JSPanGesture::ParsePanDistanceMap(JSRef<JSVal> jsDistanceMap, PanDist
         NAPI_CALL(env, napi_get_named_property(env, next, "value", &entry));
         NAPI_CALL(env, napi_get_element(env, entry, 0, &key));
         NAPI_CALL(env, napi_get_element(env, entry, 1, &value));
+        napi_valuetype kType = napi_undefined;
+        NAPI_CALL(env, napi_typeof(env, key, &kType));
+        napi_valuetype vType = napi_undefined;
+        NAPI_CALL(env, napi_typeof(env, value, &vType));
+        if (kType != napi_number || vType != napi_number) {
+            continue;
+        }
         int32_t sourceTool = 0;
         NAPI_CALL(env, napi_get_value_int32(env, key, &sourceTool));
         double distance = 0.0;
@@ -407,6 +414,12 @@ void JSPanGesture::ParsePanDistance(const JSRef<JSObject>& obj, PanDistanceMap& 
 {
     JSRef<JSVal> distance = obj->GetProperty(GESTURE_DISTANCE);
     JSRef<JSVal> jsDistanceMap = obj->GetProperty(GESTURE_DISTANCE_MAP);
+    if (jsDistanceMap->IsObject()) {
+        distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() }, {
+            SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+        ParsePanDistanceMap(jsDistanceMap, distanceMap);
+        return;
+    }
     if (distance->IsNumber()) {
         double distanceNumber = distance->ToNumber<double>();
         if (!LessNotEqual(distanceNumber, 0.0)) {
@@ -417,9 +430,6 @@ void JSPanGesture::ParsePanDistance(const JSRef<JSObject>& obj, PanDistanceMap& 
         }
     } else {
         distanceMap[SourceTool::PEN] = DEFAULT_PEN_PAN_DISTANCE.ConvertToPx();
-    }
-    if (jsDistanceMap->IsObject()) {
-        ParsePanDistanceMap(jsDistanceMap, distanceMap);
     }
 }
 

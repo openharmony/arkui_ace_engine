@@ -823,4 +823,339 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew024, TestSize.Level1)
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetBackgroundColor(),
         OHOS::Rosen::RSColor::FromArgbInt((Color::BLACK).GetValue()));
 }
+
+/**
+ * @tc.name: RosenRenderContextTestNew025
+ * @tc.desc: AdjustPaintRect().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew025, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    RectF rect(10.0f, 10.0f, 10.0f, 10.0f);
+    float xRad = 10.0;
+    float yRad = 10.0f;
+    RoundRect roundRect(rect, xRad, yRad);
+    rosenRenderContext->InitAccessibilityFocusModidifer(roundRect, Color::BLACK, 20.0f);
+    EXPECT_NE(rosenRenderContext->accessibilityFocusStateModifier_, nullptr);
+}
+
+/**
+ * @tc.name: RosenRenderContextTestNew026
+ * @tc.desc: OnBackgroundColorUpdate().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew026, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    rosenRenderContext->OnBackgroundColorUpdate(Color::BLUE);
+    auto rsNdoe = rosenRenderContext->GetRSNode();
+    auto stagingProperties = rsNdoe->GetStagingProperties();
+    auto color = stagingProperties.GetBackgroundColor();
+    EXPECT_EQ(color, OHOS::Rosen::RSColor::FromArgbInt(Color::BLUE.GetValue()));
+}
+
+
+/**
+ * @tc.name: RosenRenderContextTestNew027
+ * @tc.desc: SetChildBounds().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew027, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    RectF rect(10.0f, 10.0f, 10.0f, 10.0f);
+    rosenRenderContext->SetChildBounds(rect);
+    auto rsNdoe = rosenRenderContext->GetRSNode();
+    auto stagingProperties = rsNdoe->GetStagingProperties();
+    auto bounds = stagingProperties.GetBounds();
+    EXPECT_NEAR(bounds[3], 0.0f, 0.01f);
+}
+
+/**
+ * @tc.name: RosenRenderContextTestNew028
+ * @tc.desc: SetFrameGravity().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew028, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    rosenRenderContext->SetFrameGravity(Rosen::Gravity::LEFT);
+    auto rsNdoe = rosenRenderContext->GetRSNode();
+    auto stagingProperties = rsNdoe->GetStagingProperties();
+    auto frame = stagingProperties.GetFrameGravity();
+    EXPECT_EQ(frame, Rosen::Gravity::LEFT);
+}
+
+/**
+ * @tc.name: RosenRenderContextTestNew029
+ * @tc.desc: GetPositionZ().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew029, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    rosenRenderContext->OnZIndexUpdate(3);
+    auto rsNdoe = rosenRenderContext->GetRSNode();
+    auto stagingProperties = rsNdoe->GetStagingProperties();
+    auto positionZ = stagingProperties.GetPositionZ();
+    EXPECT_NEAR(positionZ, 3.0f, 0.01f);
+}
+
+/**
+ * @tc.name: RosenRenderContextTestNew030
+ * @tc.desc: GetPositionZ().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew030, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    rosenRenderContext->OnZIndexUpdate(3);
+    auto rsNdoe = rosenRenderContext->GetRSNode();
+    auto stagingProperties = rsNdoe->GetStagingProperties();
+    auto positionZ = stagingProperties.GetPositionZ();
+    EXPECT_NEAR(positionZ, 3.0f, 0.01f);
+}
+
+
+/**
+ * @tc.name: RosenRenderContextTestNew031
+ * @tc.desc: SetRenderPivot().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew031, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    rosenRenderContext->SetRenderPivot(3, 4);
+    auto rsNdoe = rosenRenderContext->GetRSNode();
+    auto stagingProperties = rsNdoe->GetStagingProperties();
+    auto pivot = stagingProperties.GetPivot();
+    EXPECT_NEAR(pivot[0], 3.0f, 0.01f);
+}
+
+/**
+ * @tc.name: RosenRenderContextTestNew032
+ * @tc.desc: SetPivotZ().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew032, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    rosenRenderContext->SetPivot(1.0f, 2.0f, 3.0f);
+    auto rsNdoe = rosenRenderContext->GetRSNode();
+    auto stagingProperties = rsNdoe->GetStagingProperties();
+    auto pivotZ = stagingProperties.GetPivotZ();
+    EXPECT_NEAR(pivotZ, 3.0f, 0.01f);
+}
+
+/**
+ * @tc.name: RosenRenderContextTestNew033
+ * @tc.desc: SetPivotZ().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew033, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    rosenRenderContext->SetPivot(1.0f, 2.0f, 3.0f);
+    auto rsNdoe = rosenRenderContext->GetRSNode();
+    auto stagingProperties = rsNdoe->GetStagingProperties();
+    auto pivotZ = stagingProperties.GetPivotZ();
+    EXPECT_NEAR(pivotZ, 3.0f, 0.01f);
+}
+
+/**
+ * @tc.name: RosenRenderContextTestNew034
+ * @tc.desc: SetRotation().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew034, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    rosenRenderContext->SetRotation(1.0f, 2.0f, 3.0f);
+    auto rsNdoe = rosenRenderContext->GetRSNode();
+    auto stagingProperties = rsNdoe->GetStagingProperties();
+    auto rotation = stagingProperties.GetRotation();
+    EXPECT_NEAR(rotation, 3.0f, 0.01f);
+}
+
+/**
+ * @tc.name: RosenRenderContextTestNew035
+ * @tc.desc: SetAlphaOffscreen().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew035, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    rosenRenderContext->SetAlphaOffscreen(false);
+    auto rsNdoe = rosenRenderContext->GetRSNode();
+    auto stagingProperties = rsNdoe->GetStagingProperties();
+    auto alphaOffscreen = stagingProperties.GetAlphaOffscreen();
+    EXPECT_EQ(false, alphaOffscreen);
+}
+
+/**
+ * @tc.name: RosenRenderContextTestNew036
+ * @tc.desc: SetCornerRadius().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew036, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    Dimension defaultDimension(10);
+    BorderRadiusProperty borderRadius = { defaultDimension, defaultDimension, defaultDimension, defaultDimension };
+    rosenRenderContext->SetBorderRadius(borderRadius);
+    auto rsNdoe = rosenRenderContext->GetRSNode();
+    auto stagingProperties = rsNdoe->GetStagingProperties();
+    auto radius = stagingProperties.GetCornerRadius();
+    EXPECT_NEAR(radius[0], 10.0f, 0.01f);
+}
+
+/**
+ * @tc.name: RosenRenderContextTestNew037
+ * @tc.desc: SetCornerRadius().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew037, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    Dimension defaultDimension(10);
+    BorderRadiusProperty borderRadius = { defaultDimension, defaultDimension, defaultDimension, defaultDimension };
+    rosenRenderContext->SetBorderRadius(borderRadius);
+    auto rsNdoe = rosenRenderContext->GetRSNode();
+    auto stagingProperties = rsNdoe->GetStagingProperties();
+    auto radius = stagingProperties.GetCornerRadius();
+    EXPECT_NEAR(radius[0], 10.0f, 0.01f);
+}
+
+/**
+ * @tc.name: RosenRenderContextTestNew038
+ * @tc.desc: SetBorderWidth().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew038, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    BorderWidthProperty borderWidthProperty = { 1.0_vp, 1.0_vp, 1.0_vp, 1.0_vp };
+    rosenRenderContext->SetBorderWidth(borderWidthProperty);
+    auto rsNdoe = rosenRenderContext->GetRSNode();
+    auto stagingProperties = rsNdoe->GetStagingProperties();
+    auto borderWidth = stagingProperties.GetBorderWidth();
+    EXPECT_NEAR(borderWidth[0], 1.0f, 0.01f);
+}
+
+/**
+ * @tc.name: RosenRenderContextTestNew039
+ * @tc.desc: OnBorderStyleUpdate().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew039, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    std::optional<BorderStyle> borderStyle = BorderStyle::DASHED;
+    auto borderStyleProperty = NG::BorderStyleProperty({ borderStyle, borderStyle, borderStyle, borderStyle });
+    rosenRenderContext->OnBorderStyleUpdate(borderStyleProperty);
+    auto rsNdoe = rosenRenderContext->GetRSNode();
+    auto stagingProperties = rsNdoe->GetStagingProperties();
+    auto borderStyleRet = stagingProperties.GetBorderStyle();
+    EXPECT_EQ(borderStyleRet[0], 1);
+}
+
+/**
+ * @tc.name: RosenRenderContextTestNew040
+ * @tc.desc: GetBorderDashWidth().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew040, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    BorderWidthProperty borderWidth({ 1.0_vp, 1.0_vp, 1.0_vp, 1.0_vp });
+    rosenRenderContext->SetDashWidth(borderWidth);
+    auto rsNdoe = rosenRenderContext->GetRSNode();
+    auto stagingProperties = rsNdoe->GetStagingProperties();
+    auto borderDashWidth = stagingProperties.GetBorderDashWidth();
+    EXPECT_NEAR(borderDashWidth[0], 1.0f, 0.01f);
+}
+
+/**
+ * @tc.name: RosenRenderContextTestNew041
+ * @tc.desc: GetClipToFrame().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew041, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    rosenRenderContext->OnClipEdgeUpdate(false);
+    auto rsNdoe = rosenRenderContext->GetRSNode();
+    auto stagingProperties = rsNdoe->GetStagingProperties();
+    auto clipToFrame = stagingProperties.GetClipToFrame();
+    EXPECT_EQ(clipToFrame, false);
+}
+
+/**
+ * @tc.name: RosenRenderContextTestNew042
+ * @tc.desc: GetClipToFrame().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew042, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    rosenRenderContext->OnClipEdgeUpdate(false);
+    auto rsNdoe = rosenRenderContext->GetRSNode();
+    auto stagingProperties = rsNdoe->GetStagingProperties();
+    auto clipToFrame = stagingProperties.GetClipToFrame();
+    EXPECT_EQ(clipToFrame, false);
+}
+
+/**
+ * @tc.name: RosenRenderContextTestNew043
+ * @tc.desc: OnSphericalEffectUpdate().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew043, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    rosenRenderContext->OnSphericalEffectUpdate(10);
+    auto rsNdoe = rosenRenderContext->GetRSNode();
+    auto stagingProperties = rsNdoe->GetStagingProperties();
+    auto spherizeDegree = stagingProperties.GetSpherizeDegree();
+    EXPECT_NEAR(spherizeDegree, 10.0f, 0.01f);
+}
 } // namespace OHOS::Ace::NG

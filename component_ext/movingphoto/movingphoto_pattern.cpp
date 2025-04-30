@@ -42,6 +42,11 @@ const std::string THUMBNAIL_MEDIUM_JOINT = "?&oper=thumbnail&width=-1&height=-1&
 const std::string COVER_POSITION = "cover_positon";
 const std::string IMAGE_URI = "uri";
 const std::string VIDEO_SCALE = "video_scale_type";
+const std::string IMAGE_LENGTH = "ImageLength";
+const std::string IMAGE_WIDTH = "ImageWidth";
+const std::string HW_MNOTE_XMAGE_MODE = "HwMnoteXmageMode";
+const std::string HW_MNOTE_XMAGE_BOTTOM = "HwMnoteXmageBottom";
+const std::string DEFAULT_EXIF_VALUE = "default_exif_value";
 constexpr int32_t ANALYZER_DELAY_TIME = 100;
 constexpr int32_t ANALYZER_CAPTURE_DELAY_TIME = 1000;
 constexpr int32_t AVERAGE_VALUE = 2;
@@ -998,19 +1003,20 @@ void MovingPhotoPattern::GetXmageHeight()
     auto imageSrc = ImageSource::Create(fd);
     close(fd);
     CHECK_NULL_VOID(imageSrc);
-    auto imageLength = imageSrc->GetProperty("ImageLength");
-    auto imageWidth = imageSrc->GetProperty("ImageWidth");
-    if (imageLength.empty() || imageWidth.empty()) {
+    auto imageLength = imageSrc->GetProperty(IMAGE_LENGTH);
+    auto imageWidth = imageSrc->GetProperty(IMAGE_WIDTH);
+    if (imageLength.empty() || imageWidth.empty() || imageLength == DEFAULT_EXIF_VALUE ||
+        imageWidth == DEFAULT_EXIF_VALUE) {
         TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto imageLength or imageWidth is null");
         return;
     }
 
-    std::string modeValue = imageSrc->GetProperty("HwMnoteXmageMode");
+    std::string modeValue = imageSrc->GetProperty(HW_MNOTE_XMAGE_MODE);
     SizeF imageSize = SizeF(-1, -1);
-    if (!modeValue.empty()) {
+    if (!modeValue.empty() && modeValue != DEFAULT_EXIF_VALUE) {
         isXmageMode_ = true;
-        std::string bottomValue = imageSrc->GetProperty("HwMnoteXmageBottom");
-        if (bottomValue.empty()) {
+        std::string bottomValue = imageSrc->GetProperty(HW_MNOTE_XMAGE_BOTTOM);
+        if (bottomValue.empty() || bottomValue == DEFAULT_EXIF_VALUE) {
             TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto bottomValue is null");
             return;
         }

@@ -244,8 +244,8 @@ export struct GridObjectSortComponent {
     try {
       this.callbackId = getContext()?.getApplicationContext()?.on('environment', this.envCallback);
     } catch (paramError) {
-      let code = (paramError as BusinessError).code;
-      let message = (paramError as BusinessError).message;
+      let code = (paramError as BusinessError)?.code;
+      let message = (paramError as BusinessError)?.message;
       hilog.error(0x3900, 'Ace',
         `GridObjectSortComponent Faild to get environment param error: ${code}, ${message}`);
     }
@@ -965,14 +965,21 @@ export struct GridObjectSortComponent {
           this.pointToAddTitleBarEditButton();
         } else {
           if (this.isPointToEditTitleBarSaveButton) {
-            let eventInfo: accessibility.EventInfo = ({
-              type: 'announceForAccessibility', // 表示主动播报的事件。
-              bundleName: this.bundleName, // 目标应用名；不可缺省。
-              triggerAction: 'common', // 表示没有特定操作，用于主动聚焦、主动播报等场景。
-              textAnnouncedForAccessibility: getContext().resourceManager
-                .getStringByNameSync(ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE) // 主动播报的内容。
-            });
-            accessibility.sendAccessibilityEvent(eventInfo);
+            try {
+              let eventInfo: accessibility.EventInfo = ({
+                type: 'announceForAccessibility', // 表示主动播报的事件。
+                bundleName: this.bundleName, // 目标应用名；不可缺省。
+                triggerAction: 'common', // 表示没有特定操作，用于主动聚焦、主动播报等场景。
+                textAnnouncedForAccessibility: getContext().resourceManager
+                  .getStringByNameSync(ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE) // 主动播报的内容。
+              });
+              accessibility.sendAccessibilityEvent(eventInfo);
+            } catch (paramError) {
+              let code = (paramError as BusinessError)?.code;
+              let message = (paramError as BusinessError)?.message;
+              hilog.error(0x3900, 'Ace',
+                `GridObjectSortComponent Faild to get textAnnouncedForAccessibility param error: ${code}, ${message}`);
+            }
           }
         }
       })
@@ -1739,8 +1746,15 @@ export struct GridObjectSortComponent {
       customId = `edit_grid_item_${index}`
     }
 
-    this.textAnnouncedForAccessibility = getContext().resourceManager
-      .getStringByNameSync(ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE);
+    try {
+      this.textAnnouncedForAccessibility = getContext().resourceManager
+        .getStringByNameSync(ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE);
+    } catch (paramError) {
+      let code = (paramError as BusinessError)?.code;
+      let message = (paramError as BusinessError)?.message;
+      hilog.error(0x3900, 'Ace',
+        `GridObjectSortComponent Faild to get textAnnouncedForAccessibility error: ${code}, ${message}`);
+    }
 
     let eventInfo: accessibility.EventInfo = ({
       type: 'requestFocusForAccessibility',

@@ -40,13 +40,24 @@ public:
     SvgDumpInfo(Size contentSize, std::string drawTime) : contentSize_(contentSize), drawTime_(drawTime) {}
     SvgDumpInfo() = default;
     ~SvgDumpInfo() = default;
+    void SetSvgDrawPathInfoDump(const std::string& pathInfo)
+    {
+        svgDrawPathInfo_ = pathInfo;
+    }
     std::string ToString()
     {
-        return std::string("contentSize: ").append(contentSize_.ToString()).append(", drawTime: ").append(drawTime_);
+        return std::string("contentSize: ")
+            .append(contentSize_.ToString())
+            .append(", drawTime: ")
+            .append(drawTime_)
+            .append(", svgDrawPathInfo: ")
+            .append(svgDrawPathInfo_);
     }
+
 private:
-   Size contentSize_;
-   std::string drawTime_;
+    Size contentSize_;
+    std::string drawTime_;
+    std::string svgDrawPathInfo_;
 };
 
 class SvgNode;
@@ -108,6 +119,7 @@ public:
     void SetOnAnimationFinished(const std::function<void()>& onFinishCallback);
     void OnAnimationFinished();
     void CreateDumpInfo(SvgDumpInfo dumpInfo);
+    void SetSvgDrawPathInfoDump(const std::string& pathInfo);
     void SetContentSize(Size& contentSize)
     {
         contentSize_ = contentSize;
@@ -116,7 +128,15 @@ public:
     {
         return contentSize_;
     }
-    SvgDumpInfo& GetDumpInfo();
+    bool GetHasRecordedPath() const
+    {
+        return hasRecordedPath_;
+    }
+    void SetGetHasRecordedPath(bool hasRecordedPath)
+    {
+        hasRecordedPath_ = hasRecordedPath;
+    }
+    std::string GetDumpInfo();
     std::string GetCurrentTimeString();
     void SetFillColor(std::optional<Color>& fillColor)
     {
@@ -139,6 +159,7 @@ private:
     Size viewPort_;
     std::list<std::function<void()>> onFinishCallbacks_;
     Size contentSize_;
+    bool hasRecordedPath_ = false;
     SvgDumpInfo dumpInfo_;
     std::optional<Color> fillColor_;
     ACE_DISALLOW_COPY_AND_MOVE(SvgContext);

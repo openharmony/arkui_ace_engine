@@ -1592,6 +1592,86 @@ HWTEST_F(SwiperTestNg, SwiperPattern_OnDirtyLayoutWrapperSwap003, TestSize.Level
 }
 
 /**
+ * @tc.name: OnModifyDone_StopAndResetSpringAnimation
+ * @tc.desc: Test SwiperPattern OnModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, OnModifyDone_StopAndResetSpringAnimation, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    RefPtr<SwiperLayoutProperty> swiperLayoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->children_.clear();
+    frameNode->nodeId_ = 2;
+    RefPtr<SwiperEventHub> swiperEventHub = AceType::MakeRefPtr<SwiperEventHub>();
+    WeakPtr<EventHub> eventHub = swiperEventHub;
+    RefPtr<GestureEventHub> gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    swiperEventHub->gestureEventHub_ = gestureEventHub;
+    frameNode->eventHub_ = swiperEventHub;
+    swiperLayoutProperty->propIndex_ = 2;
+    frameNode->layoutProperty_ = swiperLayoutProperty;
+    swiperPattern->frameNode_ = frameNode;
+    swiperPattern->currentIndex_ = 3;
+    swiperPattern->isTouchDownSpringAnimation_ = false;
+    swiperPattern->springAnimationIsRunning_ = true;
+    swiperPattern->isBindIndicator_ = true;
+    swiperPattern->currentDelta_ = 2.0f;
+    swiperPattern->OnModifyDone();
+    EXPECT_EQ(swiperPattern->currentDelta_, 0.0f);
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap_GetJumpIndex
+ * @tc.desc: Test SwiperPattern OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, OnDirtyLayoutWrapperSwap_GetJumpIndex, TestSize.Level1)
+{
+    RefPtr<SwiperPattern> swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    RefPtr<SwiperLayoutProperty> swiperLayoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    RefPtr<SwiperPaintProperty> swiperPaintProperty = AceType::MakeRefPtr<SwiperPaintProperty>();
+    RefPtr<SwiperLayoutAlgorithm> swiperLayoutAlgorithm = AceType::MakeRefPtr<SwiperLayoutAlgorithm>();
+    swiperLayoutAlgorithm->jumpIndex_ = 3;
+    swiperPaintProperty->UpdateAutoPlay(true);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->children_.clear();
+    frameNode->layoutProperty_ = swiperLayoutProperty;
+    frameNode->paintProperty_ = swiperPaintProperty;
+    swiperPattern->frameNode_ = frameNode;
+    RefPtr<SwiperIndicatorLayoutProperty> swiperIndicatorLayoutProperty =
+        AceType::MakeRefPtr<SwiperIndicatorLayoutProperty>();
+    swiperPattern->frameNode_ = frameNode;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, swiperLayoutProperty);
+    layoutWrapper->hostNode_ = frameNode;
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(swiperLayoutAlgorithm);
+    layoutAlgorithmWrapper->layoutAlgorithm_ = swiperLayoutAlgorithm;
+    layoutWrapper->layoutAlgorithm_ = layoutAlgorithmWrapper;
+    SwiperItemInfo itemInfo;
+    itemInfo.startPos = 2.0f;
+    itemInfo.endPos = 8.0f;
+    swiperPattern->itemPosition_.clear();
+    swiperPattern->itemPosition_[0] = itemInfo;
+    DirtySwapConfig config;
+    config.skipLayout = false;
+    config.skipMeasure = false;
+    swiperPattern->isDragging_ = true;
+    swiperPattern->isInit_ = false;
+    swiperPattern->isUserFinish_ = false;
+    swiperPattern->currentIndex_ = 3;
+    swiperPattern->targetIndex_.reset();
+    swiperPattern->jumpIndex_.reset();
+    swiperPattern->currentIndexOffset_ = 2.0f;
+    swiperPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_EQ(swiperPattern->currentIndexOffset_, 0.0f);
+}
+
+/**
  * @tc.name: OnInjectionEventTest001
  * @tc.desc: test OnInjectionEvent
  * @tc.type: FUNC
