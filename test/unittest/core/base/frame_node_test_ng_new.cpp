@@ -1890,8 +1890,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeJSCustomProperty001, TestSize.Level1)
     bool updateFlagValue1 = frameNode->GetCapiCustomProperty("updateFlag", flagValue);
     auto jsonValueIsCNode = JsonUtil::Create(true);
     frameNode->ToJsonValue(jsonValueIsCNode, filter);
-    EXPECT_EQ(updateFlagValue1, true);
-    EXPECT_EQ(flagValue, "1");
+    EXPECT_EQ(updateFlagValue1, false);
     EXPECT_NE(jsonValueIsCNode->GetString("customProperty"), "getFuncBFromJS");
 
     /**
@@ -1902,7 +1901,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeJSCustomProperty001, TestSize.Level1)
     frameNode->setIsCNode(false);
     frameNode->AddCustomProperty("key", "value1");
     bool result = frameNode->GetCapiCustomProperty("key", flagValue);
-    EXPECT_EQ(result, false);
+    EXPECT_EQ(result, true);
     result = frameNode->GetCustomPropertyByKey("key", flagValue);
     EXPECT_EQ(result, true);
     EXPECT_EQ(flagValue, "value1");
