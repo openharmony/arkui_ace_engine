@@ -25,9 +25,9 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SWIPER_INDEX = 0;
-constexpr int32_t EFFECT_INDEX = 1;
-constexpr int32_t DIVIDER_INDEX = 2;
-constexpr int32_t TAB_BAR_INDEX = 3;
+constexpr int32_t DIVIDER_INDEX = 1;
+constexpr int32_t TAB_BAR_INDEX = 2;
+constexpr int32_t EFFECT_INDEX = 3;
 } // namespace
 class InspectorFilter;
 
@@ -56,11 +56,6 @@ public:
     bool HasDividerNode() const
     {
         return dividerId_.has_value();
-    }
-
-    bool HasEffectNode() const
-    {
-        return effectId_.has_value();
     }
 
     bool HasSelectedMaskNode() const

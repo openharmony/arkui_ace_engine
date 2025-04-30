@@ -21,9 +21,9 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SWIPER_INDEX = 0;
-constexpr int32_t EFFECT_INDEX = 1;
-constexpr int32_t DIVIDER_INDEX = 2;
-constexpr int32_t TAB_BAR_INDEX = 3;
+constexpr int32_t DIVIDER_INDEX = 1;
+constexpr int32_t TAB_BAR_INDEX = 2;
+constexpr int32_t EFFECT_INDEX = 3;
 } // namespace
 
 void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -110,7 +110,7 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(DIVIDER_INDEX);
     auto effectWrapper = layoutWrapper->GetChildByIndex(EFFECT_INDEX);
     auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(SWIPER_INDEX);
-    if (!tabBarWrapper || !dividerWrapper || !swiperWrapper || !effectWrapper) {
+    if (!tabBarWrapper || !dividerWrapper || !swiperWrapper) {
         return;
     }
 
@@ -127,9 +127,11 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto dividerWidth = dividerWrapper->GetGeometryNode()->GetFrameSize().Width();
         auto& dividerOffset = offsetList[DIVIDER_INDEX];
         dividerOffset = OffsetF((tabsWidth - dividerOffset.GetX() - dividerWidth), dividerOffset.GetY());
-        auto effectWidth = effectWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
-        auto& effectOffset = offsetList[EFFECT_INDEX];
-        effectOffset = OffsetF((tabsWidth - effectOffset.GetX() - effectWidth), effectOffset.GetY());
+        if (effectWrapper) {
+            auto effectWidth = effectWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
+            auto& effectOffset = offsetList[EFFECT_INDEX];
+            effectOffset = OffsetF((tabsWidth - effectOffset.GetX() - effectWidth), effectOffset.GetY());
+        }
         auto tabBarWidth = tabBarWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
         auto& tabBarOffset = offsetList[TAB_BAR_INDEX];
         tabBarOffset = OffsetF((tabsWidth - tabBarOffset.GetX() - tabBarWidth), tabBarOffset.GetY());
@@ -139,9 +141,11 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     dividerWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[DIVIDER_INDEX]);
     dividerWrapper->Layout();
-    
-    effectWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[EFFECT_INDEX]);
-    effectWrapper->Layout();
+
+    if (effectWrapper) {
+        effectWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[EFFECT_INDEX]);
+        effectWrapper->Layout();
+    }
 
     tabBarWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[TAB_BAR_INDEX]);
     tabBarWrapper->Layout();
@@ -160,10 +164,10 @@ std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetList(
     auto barPosition = GetBarPosition(layoutWrapper);
     auto divider = GetDivider(layoutWrapper);
     auto tabBarGeometryNode = tabBarWrapper->GetGeometryNode();
-    auto effectNodeGeometryNode = effectNodeWrapper->GetGeometryNode();
+    auto effectNodeGeometryNode = effectNodeWrapper ? effectNodeWrapper->GetGeometryNode() : RefPtr<GeometryNode>();
     CHECK_NULL_RETURN(tabBarGeometryNode, offsetList);
     auto tabBarFrameSize = tabBarGeometryNode->GetMarginFrameSize();
-    auto effectNodeFrameSize = effectNodeGeometryNode->GetMarginFrameSize();
+    auto effectNodeFrameSize = effectNodeGeometryNode ? effectNodeGeometryNode->GetMarginFrameSize() : SizeF();
     auto dividerStrokeWidth = divider.isNull ? 0.0f : divider.strokeWidth.ConvertToPx();
     auto dividerStartMargin = divider.startMargin.ConvertToPx();
     auto layoutProperty = DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -211,9 +215,9 @@ std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetList(
         }
     }
     offsetList.emplace_back(swiperOffset);
-    offsetList.emplace_back(effectOffset);
     offsetList.emplace_back(dividerOffset);
     offsetList.emplace_back(tabBarOffset);
+    offsetList.emplace_back(effectOffset);
     return offsetList;
 }
 
