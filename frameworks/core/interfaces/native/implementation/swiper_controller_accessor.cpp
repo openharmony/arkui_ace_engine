@@ -94,13 +94,9 @@ void PreloadItemsImpl(Ark_VMContext vmContext,
                       const Opt_Array_Number* indices,
                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    PromiseHelper promise(outputArgumentForReturningPromise);
+    CHECK_NULL_VOID(asyncWorker);
     auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
-    if (peerImpl == nullptr) {
-        Converter::ArkArrayHolder<Array_String> vectorHolder({"the object is null"});
-        promise.Reject(vectorHolder.OptValue<Opt_Array_String>());
-        return;
-    }
+    CHECK_NULL_VOID(peerImpl);
 
     auto indexVectOpt = !indices ? std::nullopt : Converter::OptConvert<std::vector<int32_t>>(*indices);
     auto execFunc = [peerImpl, indexVectOpt = std::move(indexVectOpt)]() {
@@ -111,15 +107,13 @@ void PreloadItemsImpl(Ark_VMContext vmContext,
             peerImpl->TriggerPreloadItems({});
         }
     };
-    promise.StartAsync(vmContext, asyncWorker, std::move(execFunc));
+    PromiseHelper promise(outputArgumentForReturningPromise, vmContext, *asyncWorker, std::move(execFunc));
 
     auto finishFunc = [promise = std::move(promise)](const int32_t errCode, const std::string errStr) {
         if (errCode == ERROR_CODE_NO_ERROR) {
-            promise.Resolve(Converter::ArkValue<Opt_Array_String>(Ark_Empty()));
+            promise.Resolve();
         } else {
-            std::initializer_list<std::string> initList {std::to_string(errCode), errStr};
-            Converter::ArkArrayHolder<Array_String> vectorHolder(initList);
-            promise.Reject(vectorHolder.OptValue<Opt_Array_String>());
+            promise.Reject({std::to_string(errCode), errStr});
         }
     };
     peerImpl->TriggerSetPreloadFinishCallback(finishFunc);

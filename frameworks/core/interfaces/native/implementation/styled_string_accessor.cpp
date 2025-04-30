@@ -248,23 +248,21 @@ void FromHtmlImpl(Ark_VMContext vmContext,
                   const Ark_String* html,
                   const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
+    CHECK_NULL_VOID(asyncWorker);
     auto promise = std::make_shared<PromiseHelper<Callback_Opt_StyledString_Opt_Array_String_Void>>(
         outputArgumentForReturningPromise);
     auto htmlStr = html ? Converter::Convert<std::string>(*html) : std::string();
     if (htmlStr.empty()) {
-        Converter::ArkArrayHolder<Array_String> errors({"html is empty"});
-        promise->Reject(Converter::ArkValue<Opt_StyledString>(Ark_Empty()), errors.OptValue<Opt_Array_String>());
+        promise->Reject<Opt_StyledString>({"html is empty"});
         return;
     }
-    promise->StartAsync(vmContext, asyncWorker, [promise, htmlStr]() {
+    promise->StartAsync(vmContext, *asyncWorker, [promise, htmlStr]() {
         if (auto styledString = OHOS::Ace::HtmlUtils::FromHtml(htmlStr); styledString) {
             Ark_StyledString peer = GetMutableStyledStringAccessor()->ctor();
             peer->spanString = styledString;
-            promise->Resolve(Converter::ArkValue<Opt_StyledString, Ark_StyledString>(peer),
-                Converter::ArkValue<Opt_Array_String>(Ark_Empty()));
+            promise->Resolve(Converter::ArkValue<Opt_StyledString, Ark_StyledString>(peer));
         } else {
-            Converter::ArkArrayHolder<Array_String> errors({"Convert html to styledString fails"});
-            promise->Reject(Converter::ArkValue<Opt_StyledString>(Ark_Empty()), errors.OptValue<Opt_Array_String>());
+            promise->Reject<Opt_StyledString>({"Convert html to styledString fails"});
         }
     });
 }
@@ -306,12 +304,12 @@ void Unmarshalling0Impl(Ark_VMContext vmContext,
                         const StyledStringUnmarshallCallback* callback_,
                         const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
+    CHECK_NULL_VOID(asyncWorker);
     auto promise = std::make_shared<PromiseHelper<Callback_Opt_StyledString_Opt_Array_String_Void>>(
         outputArgumentForReturningPromise);
     auto str = buffer ? Converter::Convert<std::string>(*buffer) : std::string();
     if (str.empty()) {
-        Converter::ArkArrayHolder<Array_String> errors({"buffer is empty"});
-        promise->Reject(Converter::ArkValue<Opt_StyledString>(Ark_Empty()), errors.OptValue<Opt_Array_String>());
+        promise->Reject<Opt_StyledString>({"buffer is empty"});
         return;
     }
 
@@ -333,11 +331,10 @@ void Unmarshalling0Impl(Ark_VMContext vmContext,
         std::vector<uint8_t> buff(str.begin(), str.end());
         Ark_StyledString peer = StyledStringPeer::Create();
         peer->spanString = SpanString::DecodeTlv(buff, std::move(unmarshall), instanceId);
-        promise->Resolve(Converter::ArkValue<Opt_StyledString, Ark_StyledString>(peer),
-            Converter::ArkValue<Opt_Array_String>(Ark_Empty()));
+        promise->Resolve(Converter::ArkValue<Opt_StyledString, Ark_StyledString>(peer));
     };
 
-    promise->StartAsync(vmContext, asyncWorker, std::move(unmarshallingExec));
+    promise->StartAsync(vmContext, *asyncWorker, std::move(unmarshallingExec));
 }
 void Unmarshalling1Impl(Ark_VMContext vmContext,
                         Ark_AsyncWorkerPtr asyncWorker,

@@ -62,13 +62,8 @@ void StartImageAnalyzerImpl(Ark_VMContext vmContext,
                             const Ark_ImageAnalyzerConfig* config,
                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    PromiseHelper promise(outputArgumentForReturningPromise);
-    if (peer == nullptr) {
-        Converter::ArkArrayHolder<Array_String> vectorHolder({"the object is null"});
-        promise.Reject(vectorHolder.OptValue<Opt_Array_String>());
-        return;
-    }
-    peer->StartImageAnalyzer(config, std::move(promise));
+    CHECK_NULL_VOID(peer);
+    peer->StartImageAnalyzer(vmContext, asyncWorker, config, outputArgumentForReturningPromise);
 }
 void StopImageAnalyzerImpl(Ark_CanvasRenderingContext2D peer)
 {

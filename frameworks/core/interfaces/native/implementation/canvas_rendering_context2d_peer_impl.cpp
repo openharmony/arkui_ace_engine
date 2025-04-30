@@ -127,44 +127,42 @@ void CanvasRenderingContext2DPeerImpl::Off(CallbackHelper<Callback_Void> &&callb
 {
     DeleteCallbackFromList(callback, type);
 }
-void CanvasRenderingContext2DPeerImpl::StartImageAnalyzer(const Ark_ImageAnalyzerConfig* config,
-    PromiseHelper<Callback_Opt_Array_String_Void>&& promise)
+void CanvasRenderingContext2DPeerImpl::StartImageAnalyzer(Ark_VMContext vmContext, Ark_AsyncWorkerPtr asyncWorker,
+    const Ark_ImageAnalyzerConfig* config, const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
-    if (!canvasRenderingContext2DModel || !config) {
-        Converter::ArkArrayHolder<Array_String> vectorHolder({"the arguments are not valid"});
-        promise.Reject(vectorHolder.OptValue<Opt_Array_String>());
-        return;
-    }
+    CHECK_NULL_VOID(asyncWorker);
+    CHECK_NULL_VOID(config);
+    auto promise = std::make_shared<PromiseHelper<Callback_Opt_Array_String_Void>>(outputArgumentForReturningPromise);
     if (isImageAnalyzing_) {
-        auto error = PeerUtils::CreateAIError(ImageAnalyzerState::ONGOING);
-        Converter::ArkArrayHolder<Array_String> errorHolder(error);
-        promise.Reject(errorHolder.OptValue<Opt_Array_String>());
+        promise->Reject(PeerUtils::CreateAIError(ImageAnalyzerState::ONGOING));
         return;
     }
-    auto vectorIATypes = Converter::Convert<std::vector<ImageAnalyzerType>>(config->types);
-    std::set<ImageAnalyzerType> types(vectorIATypes.begin(), vectorIATypes.end());
-    config_.types = std::move(types);
-    void* aceConfig = reinterpret_cast<void*>(&config_);
-    OnAnalyzedCallback onAnalyzed = [weakCtx = WeakClaim(this),
-        promise = std::move(promise)](ImageAnalyzerState state) -> void {
-        auto ctx = weakCtx.Upgrade();
-        if (ctx == nullptr) {
-            Converter::ArkArrayHolder<Array_String> errorHolder({"the object is null"});
-            promise.Reject(errorHolder.OptValue<Opt_Array_String>());
-            return;
-        }
+    isImageAnalyzing_ = true;
+
+    auto onAnalyzed = [peer = Claim(this), promise](ImageAnalyzerState state) {
+        peer->isImageAnalyzing_ = false;
         auto error = PeerUtils::CreateAIError(state);
         if (error.empty()) {
-            promise.Resolve(Converter::ArkValue<Opt_Array_String>(Ark_Empty()));
+            promise->Resolve();
         } else {
-            Converter::ArkArrayHolder<Array_String> errorHolder(error);
-            promise.Reject(errorHolder.OptValue<Opt_Array_String>());
+            promise->Reject(error);
         }
-        ctx->isImageAnalyzing_ = false;
     };
-    isImageAnalyzing_ = true;
-    canvasRenderingContext2DModel->StartImageAnalyzer(aceConfig, onAnalyzed);
+    auto vectorIATypes = Converter::Convert<std::vector<ImageAnalyzerType>>(config->types);
+    std::set<ImageAnalyzerType> types(vectorIATypes.begin(), vectorIATypes.end());
+    config_ = {
+        .types = std::move(types)
+    };
+
+    promise->StartAsync(vmContext, *asyncWorker, [peer = Claim(this), onAnalyzed = std::move(onAnalyzed)]() {
+        auto model = AceType::DynamicCast<CanvasRenderingContext2DModel>(peer->renderingContext2DModel_);
+        if (model) {
+            OnAnalyzedCallback optOnAnalyzed = std::move(onAnalyzed);
+            model->StartImageAnalyzer(reinterpret_cast<void*>(&peer->config_), optOnAnalyzed);
+        } else {
+            onAnalyzed(ImageAnalyzerState::STOPPED);
+        }
+    });
 }
 void CanvasRenderingContext2DPeerImpl::StopImageAnalyzer()
 {

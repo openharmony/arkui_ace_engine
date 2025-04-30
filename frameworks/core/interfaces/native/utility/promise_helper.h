@@ -18,6 +18,7 @@
 #include "core/interfaces/native/utility/async_work_helper.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
 /**
@@ -27,41 +28,51 @@ namespace OHOS::Ace::NG {
  * 2 (optional) - create the request for an async work with the context and worker.
  * `promise.StartAsync(vmContext, *asyncWorker, std::move(execFunc));`
  * 3 - Finish work. Use Resolve or Reject with results for CallbackHelper<PromiseCallback>::InvokeSync.
- * For Resolve the error needs to be Converter::ArkValue<Ark_Xxx>(Ark_Empty).
- * `promise.Resolve(Converter::ArkValue<Ark_Xxx>(Ark_Empty));`
+ * `promise.Resolve();`
  */
 template<typename PromiseCallback>
 class PromiseHelper final {
 public:
+    // Create without the request for an async work.
     explicit PromiseHelper(const PromiseCallback* callback)
         : callback_(callback ? CallbackHelper(*callback) : CallbackHelper<PromiseCallback>()) {}
 
-    void StartAsync(Ark_VMContext vmContext, const Ark_AsyncWorkerPtr asyncWorker,
+    // Create with the request for an async work.
+    PromiseHelper(const PromiseCallback* callback, Ark_VMContext vmContext, const Ark_AsyncWorker& asyncWorker,
+            AsyncWorkHelper::AsyncExecFunc&& execFunc)
+        : work_(AsyncWorkHelper::CreateWork(vmContext, asyncWorker, std::move(execFunc))),
+        callback_(callback ? CallbackHelper(*callback) : CallbackHelper<PromiseCallback>()) {}
+
+    void StartAsync(Ark_VMContext vmContext, const Ark_AsyncWorker& asyncWorker,
         AsyncWorkHelper::AsyncExecFunc&& execFunc)
     {
-        CHECK_NULL_VOID(asyncWorker);
-        work_ = AsyncWorkHelper::CreateWork(vmContext, *asyncWorker, std::move(execFunc));
+        work_ = AsyncWorkHelper::CreateWork(vmContext, asyncWorker, std::move(execFunc));
     }
 
-    // Resolve the promise. The error needs to be Converter::ArkValue<Ark_Xxx>(Ark_Empty).
-    // It is mandatory to pass an empty error, but this requirement may be waived in the future.
-    template<typename... Results>
-    void Resolve(Results&&... results) const
+    // Resolve the promise.
+    template<typename... ArkResult>
+    void Resolve(ArkResult&&... result) const
     {
-        callback_.InvokeSync(std::forward<Results>(results)...);
+        callback_.InvokeSync(std::forward<ArkResult>(result)..., Converter::ArkValue<Opt_Array_String>(Ark_Empty()));
         AsyncWorkHelper::ResolveWork(work_);
     }
 
     // Reject the promise.
-    template<typename... Results>
-    void Reject(Results&&... results) const
+    template<typename ArkResult = void>
+    void Reject(const StringArray& errors) const
     {
-        callback_.InvokeSync(std::forward<Results>(results)...);
+        Converter::ConvContext ctx;
+        auto arkErrors = Converter::ArkValue<Opt_Array_String>(errors, &ctx);
+        if constexpr (std::is_same_v<ArkResult, void>) {
+            callback_.InvokeSync(arkErrors);
+        } else {
+            callback_.InvokeSync(Converter::ArkValue<ArkResult>(Ark_Empty()), arkErrors);
+        }
         AsyncWorkHelper::RejectWork(work_);
     }
 
 private:
     Ark_AsyncWork work_ {};
-    CallbackHelper<PromiseCallback> callback_;
+    CallbackHelper<PromiseCallback> callback_ {};
 };
 } // namespace OHOS::Ace::NG

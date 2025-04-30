@@ -47,6 +47,7 @@ void ContextSetOptionsHelper(FrameNode *frameNode, const T* context)
     }
     Converter::VisitUnion(*context,
         [pattern](const Ark_CanvasRenderingContext2D& peer) {
+            CHECK_NULL_VOID(peer);
             peer->SetInstanceId(Container::CurrentId());
             peer->SetCanvasPattern(pattern);
             peer->CanvasRendererPeerImpl::SetAntiAlias();

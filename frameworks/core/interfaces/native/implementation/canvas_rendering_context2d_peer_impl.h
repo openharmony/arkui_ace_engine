@@ -16,7 +16,6 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_RENDERING_CONTEXT2D_PEER_IMPL_H
 
 #include "core/interfaces/native/utility/callback_helper.h"
-#include "core/interfaces/native/utility/promise_helper.h"
 #include "canvas_renderer_peer_impl.h"
 #include "arkoala_api_generated.h"
 
@@ -37,8 +36,8 @@ public:
     void SetOptions(const std::optional<RenderingContextSettingsPeer*>& optSettings);
     void OnAttachToCanvas();
     void OnDetachFromCanvas();
-    void StartImageAnalyzer(
-    const Ark_ImageAnalyzerConfig* config, PromiseHelper<Callback_Opt_Array_String_Void>&& promise);
+    void StartImageAnalyzer(Ark_VMContext vmContext, Ark_AsyncWorkerPtr asyncWorker,
+        const Ark_ImageAnalyzerConfig* config, const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
     void StopImageAnalyzer();
     double GetHeight();
     double GetWidth();

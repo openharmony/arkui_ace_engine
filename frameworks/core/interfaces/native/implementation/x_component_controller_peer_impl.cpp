@@ -14,56 +14,52 @@
  */
 
 #include "x_component_controller_peer_impl.h"
-#include "core/interfaces/native/utility/peer_utils.h"
 
 #ifdef XCOMPONENT_SUPPORTED
 #include "base/utils/utils.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 #include "core/interfaces/native/utility/promise_helper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-void XComponentControllerPeerImpl::TriggerStartImageAnalyzer(const Ark_ImageAnalyzerConfig* config,
-    PromiseHelper<Callback_Opt_Array_String_Void>&& promise)
+void XComponentControllerPeerImpl::TriggerStartImageAnalyzer(Ark_VMContext vmContext, Ark_AsyncWorkerPtr asyncWorker,
+    const Ark_ImageAnalyzerConfig* config, const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    if (!controller || !config) {
-        Converter::ArkArrayHolder<Array_String> vectorHolder({"the arguments are not valid"});
-        promise.Reject(vectorHolder.OptValue<Opt_Array_String>());
-        return;
-    }
+    CHECK_NULL_VOID(asyncWorker);
+    CHECK_NULL_VOID(config);
+    auto promise = std::make_shared<PromiseHelper<Callback_Opt_Array_String_Void>>(outputArgumentForReturningPromise);
     if (isImageAnalyzing_) {
-        auto error = PeerUtils::CreateAIError(ImageAnalyzerState::ONGOING);
-        Converter::ArkArrayHolder<Array_String> errorHolder(error);
-        promise.Reject(errorHolder.OptValue<Opt_Array_String>());
+        promise->Reject(PeerUtils::CreateAIError(ImageAnalyzerState::ONGOING));
         return;
     }
+    isImageAnalyzing_ = true;
 
-    auto vectorIATypes = Converter::Convert<std::vector<ImageAnalyzerType>>(config->types);
-    std::set<ImageAnalyzerType> types(vectorIATypes.begin(), vectorIATypes.end());
-    config_.types = std::move(types);
-    void* aceConfig = reinterpret_cast<void*>(&config_);
-
-    OnAnalyzedCallback onAnalyzed = [weakCtx = Referenced::WeakClaim(this), promise = std::move(promise)](
-            ImageAnalyzerState state) -> void {
-        auto ctx = weakCtx.Upgrade();
-        if (ctx == nullptr) {
-            Converter::ArkArrayHolder<Array_String> errorHolder({"the object is null"});
-            promise.Reject(errorHolder.OptValue<Opt_Array_String>());
-            return;
-        }
+    auto onAnalyzed = [peer = Claim(this), promise](ImageAnalyzerState state) {
+        peer->isImageAnalyzing_ = false;
         auto error = PeerUtils::CreateAIError(state);
         if (error.empty()) {
-            promise.Resolve(Converter::ArkValue<Opt_Array_String>(Ark_Empty()));
+            promise->Resolve();
         } else {
-            Converter::ArkArrayHolder<Array_String> errorHolder(error);
-            promise.Reject(errorHolder.OptValue<Opt_Array_String>());
+            Converter::ConvContext ctx;
+            promise->Reject(error);
         }
-        ctx->isImageAnalyzing_ = false;
+    };
+    auto vectorIATypes = Converter::Convert<std::vector<ImageAnalyzerType>>(config->types);
+    std::set<ImageAnalyzerType> types(vectorIATypes.begin(), vectorIATypes.end());
+    config_ = {
+        .types = std::move(types)
     };
 
-    isImageAnalyzing_ = true;
-    controller->StartImageAnalyzer(aceConfig, onAnalyzed);
+    promise->StartAsync(vmContext, *asyncWorker, [peer = Claim(this), onAnalyzed = std::move(onAnalyzed)]() {
+        if (peer->controller) {
+            OnAnalyzedCallback optOnAnalyzed = std::move(onAnalyzed);
+            peer->controller->StartImageAnalyzer(reinterpret_cast<void*>(&peer->config_), optOnAnalyzed);
+        } else {
+            onAnalyzed(ImageAnalyzerState::STOPPED);
+        }
+    });
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier
 

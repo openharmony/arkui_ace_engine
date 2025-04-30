@@ -20,14 +20,13 @@
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
-#include "core/interfaces/native/utility/promise_helper.h"
 #endif // XCOMPONENT_SUPPORTED
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 struct XComponentControllerPeerImpl : public Referenced {
 #ifdef XCOMPONENT_SUPPORTED
-    void TriggerStartImageAnalyzer(const Ark_ImageAnalyzerConfig* config,
-        PromiseHelper<Callback_Opt_Array_String_Void>&& promise);
+    void TriggerStartImageAnalyzer(Ark_VMContext vmContext, Ark_AsyncWorkerPtr asyncWorker,
+        const Ark_ImageAnalyzerConfig* config, const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
     std::shared_ptr<XComponentControllerNG> controller;
 
 private:

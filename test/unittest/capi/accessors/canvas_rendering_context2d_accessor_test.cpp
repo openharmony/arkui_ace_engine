@@ -146,138 +146,63 @@ public:
 };
 
 /**
- * @tc.name: startImageAnalyzerTestValid
+ * @tc.name: startImageAnalyzerTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRenderingContext2DAccessorTest, startImageAnalyzerTestValid, TestSize.Level1)
+HWTEST_F(CanvasRenderingContext2DAccessorTest, startImageAnalyzerTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->startImageAnalyzer, nullptr);
 
     static constexpr int32_t EXPECTED_NODE_ID = 10;
-    static bool promiseFinished = false;
-    auto returnResFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Opt_Array_String error) {
-        EXPECT_EQ(resourceId, EXPECTED_NODE_ID);
-        EXPECT_FALSE(Converter::GetOpt(error).has_value());
-        promiseFinished = true;
+    struct CheckEvent {
+        int32_t nodeId;
+        std::optional<StringArray> errors;
     };
-    const Callback_Opt_Array_String_Void arkCallback = Converter::ArkValue<Callback_Opt_Array_String_Void>(
-        returnResFunc, EXPECTED_NODE_ID);
+    static std::optional<CheckEvent> checkEvent;
 
-    const Ark_ImageAnalyzerConfig arkConfig {
-        .types = Converter::ArkValue<Array_ImageAnalyzerType>(ARK_IMAGE_TYPE_TEST_PLAN, Converter::FC)
+    const std::vector<std::tuple<ImageAnalyzerState, std::optional<StringArray>>> testPlan {
+        {ImageAnalyzerState::FINISHED, std::nullopt},
+        {ImageAnalyzerState::STOPPED, std::make_optional<StringArray>({"110003"})}
     };
+    for (const auto& [state, expectedErrors] : testPlan) {
+        checkEvent = std::nullopt;
+        auto returnResFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Opt_Array_String error) {
+            checkEvent = {
+                .nodeId = resourceId,
+                .errors = Converter::OptConvert<StringArray>(error)
+            };
+        };
+        const Callback_Opt_Array_String_Void arkCallback = Converter::ArkValue<Callback_Opt_Array_String_Void>(
+            returnResFunc, EXPECTED_NODE_ID);
+        const Ark_ImageAnalyzerConfig arkConfig {
+            .types = Converter::ArkValue<Array_ImageAnalyzerType>(ARK_IMAGE_TYPE_TEST_PLAN, Converter::FC)
+        };
+        void* target = nullptr;
+        Ace::OnAnalyzedCallback onAnalyzed;
+        EXPECT_CALL(*renderingModel_, StartImageAnalyzer(_, _))
+            .WillOnce(DoAll(SaveArg<0>(&target), SaveArg<1>(&onAnalyzed)));
+        accessor_->startImageAnalyzer(vmContext_, AsyncWorkTestHelper::GetWorkerPtr(), peer_, &arkConfig, &arkCallback);
+        EXPECT_TRUE(AsyncWorkTestHelper::HasWorkCreated());
+        ASSERT_EQ(target, nullptr);
 
-    void* target = nullptr;
-    Ace::OnAnalyzedCallback onAnalyzed;
-    EXPECT_CALL(*renderingModel_, StartImageAnalyzer(_, _))
-        .WillOnce(DoAll(SaveArg<0>(&target), SaveArg<1>(&onAnalyzed)));
-    accessor_->startImageAnalyzer(vmContext_, AsyncWorkTestHelper::GetWorkerPtr(), peer_, &arkConfig, &arkCallback);
+        AsyncWorkTestHelper::DoExeceute();
+        ASSERT_NE(target, nullptr);
+        ImageAnalyzerConfig* configPtr = reinterpret_cast<ImageAnalyzerConfig*>(target);
+        const std::set<ImageAnalyzerType>& configTypes = configPtr->types;
+        EXPECT_EQ(configTypes.size(), IMAGE_TYPE_TEST_PLAN.size());
+        for (const ImageAnalyzerType& expected : IMAGE_TYPE_TEST_PLAN) {
+            EXPECT_EQ(configTypes.count(expected), 1);
+        }
+        EXPECT_FALSE(checkEvent.has_value());
+        ASSERT_TRUE(onAnalyzed.has_value());
+        onAnalyzed.value()(state);
+        ASSERT_TRUE(checkEvent.has_value());
+        ASSERT_EQ(checkEvent->nodeId, EXPECTED_NODE_ID);
+        ASSERT_EQ(checkEvent->errors, expectedErrors);
 
-    ImageAnalyzerConfig* configPtr = reinterpret_cast<ImageAnalyzerConfig*>(target);
-    ASSERT_NE(configPtr, nullptr);
-    const std::set<ImageAnalyzerType>& configTypes = configPtr->types;
-    EXPECT_EQ(configTypes.size(), IMAGE_TYPE_TEST_PLAN.size());
-    for (const ImageAnalyzerType& expected : IMAGE_TYPE_TEST_PLAN) {
-        EXPECT_EQ(configTypes.count(expected), 1);
+        AsyncWorkTestHelper::DoComplete();
     }
-
-    ASSERT_TRUE(onAnalyzed.has_value());
-    EXPECT_FALSE(promiseFinished);
-    onAnalyzed.value()(ImageAnalyzerState::FINISHED);
-    EXPECT_TRUE(promiseFinished);
-
-    AsyncWorkTestHelper::DoComplete();
-}
-
-/**
- * @tc.name: startImageAnalyzerTestInvalid
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRenderingContext2DAccessorTest, startImageAnalyzerTestInvalid, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->startImageAnalyzer, nullptr);
-
-    static constexpr int32_t EXPECTED_NODE_ID = 20;
-    static bool promiseFinished = false;
-    auto returnResFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Opt_Array_String error) {
-        EXPECT_EQ(resourceId, EXPECTED_NODE_ID);
-        const std::optional<StringArray> optErrors = Converter::OptConvert<StringArray>(error);
-        ASSERT_TRUE(optErrors.has_value());
-        ASSERT_EQ(optErrors->size(), 1);
-        EXPECT_EQ(optErrors->front(), "110003");
-        promiseFinished = true;
-    };
-    const Callback_Opt_Array_String_Void arkCallback = Converter::ArkValue<Callback_Opt_Array_String_Void>(
-        returnResFunc, EXPECTED_NODE_ID);
-
-    const Ark_ImageAnalyzerConfig arkConfig {
-        .types = Converter::ArkValue<Array_ImageAnalyzerType>(ARK_IMAGE_TYPE_TEST_PLAN, Converter::FC)
-    };
-
-    void* target = nullptr;
-    Ace::OnAnalyzedCallback onAnalyzed;
-    EXPECT_CALL(*renderingModel_, StartImageAnalyzer(_, _))
-        .WillOnce(DoAll(SaveArg<0>(&target), SaveArg<1>(&onAnalyzed)));
-    accessor_->startImageAnalyzer(vmContext_, AsyncWorkTestHelper::GetWorkerPtr(), peer_, &arkConfig, &arkCallback);
-
-    ImageAnalyzerConfig* configPtr = reinterpret_cast<ImageAnalyzerConfig*>(target);
-    ASSERT_NE(configPtr, nullptr);
-    const std::set<ImageAnalyzerType>& configTypes = configPtr->types;
-    EXPECT_EQ(configTypes.size(), IMAGE_TYPE_TEST_PLAN.size());
-    for (const ImageAnalyzerType& expected : IMAGE_TYPE_TEST_PLAN) {
-        EXPECT_EQ(configTypes.count(expected), 1);
-    }
-
-    ASSERT_TRUE(onAnalyzed.has_value());
-    EXPECT_FALSE(promiseFinished);
-    onAnalyzed.value()(ImageAnalyzerState::STOPPED);
-    EXPECT_TRUE(promiseFinished);
-
-    AsyncWorkTestHelper::DoComplete();
-}
-
-/**
- * @tc.name: startImageAnalyzerTestInvalidWithNull
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRenderingContext2DAccessorTest, startImageAnalyzerTestInvalidWithNull, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->startImageAnalyzer, nullptr);
-
-    static constexpr int32_t EXPECTED_NODE_ID = 30;
-    static std::string expectedError;
-    static bool promiseFinished = false;
-    auto returnResFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Opt_Array_String error) {
-        EXPECT_EQ(resourceId, EXPECTED_NODE_ID);
-        const std::optional<StringArray> optErrors = Converter::OptConvert<StringArray>(error);
-        ASSERT_TRUE(optErrors.has_value());
-        ASSERT_EQ(optErrors->size(), 1);
-        EXPECT_EQ(optErrors->front(), expectedError);
-        promiseFinished = true;
-    };
-    const Callback_Opt_Array_String_Void arkCallback = Converter::ArkValue<Callback_Opt_Array_String_Void>(
-        returnResFunc, EXPECTED_NODE_ID);
-
-    const Ark_ImageAnalyzerConfig arkConfig {
-        .types = Converter::ArkValue<Array_ImageAnalyzerType>(ARK_IMAGE_TYPE_TEST_PLAN, Converter::FC)
-    };
-
-    EXPECT_CALL(*renderingModel_, StartImageAnalyzer(_, _)).Times(0);
-
-    expectedError = "the object is null";
-    promiseFinished = false;
-    accessor_->startImageAnalyzer(vmContext_, AsyncWorkTestHelper::GetWorkerPtr(), nullptr, &arkConfig, &arkCallback);
-    EXPECT_TRUE(promiseFinished);
-
-    expectedError = "the arguments are not valid";
-    promiseFinished = false;
-    accessor_->startImageAnalyzer(vmContext_, AsyncWorkTestHelper::GetWorkerPtr(), peer_, nullptr, &arkCallback);
-    EXPECT_TRUE(promiseFinished);
-
-    AsyncWorkTestHelper::DoComplete();
 }
 
 /**
