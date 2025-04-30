@@ -201,9 +201,6 @@ void SheetPresentationPattern::InitPageHeight()
     if (!NearEqual(currentTopSafeArea, sheetTopSafeArea_)) {
         topSafeAreaChanged_ = true;
     }
-    auto sheetTheme = pipelineContext->GetTheme<SheetTheme>();
-    CHECK_NULL_VOID(sheetTheme);
-    sheetThemeType_ = sheetTheme->GetSheetType();
     InitSheetMode();
 }
 
@@ -361,6 +358,9 @@ void SheetPresentationPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(targetNode);
     auto targetNodeContext = targetNode->GetContext();
     CHECK_NULL_VOID(targetNodeContext);
+    auto sheetTheme = targetNodeContext->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    sheetThemeType_ = sheetTheme->GetSheetType();
     scale_ = targetNodeContext->GetFontScale();
     targetNodeContext->AddWindowSizeChangeCallback(host->GetId());
     targetNodeContext->AddOnAreaChangeNode(targetNode->GetId());
