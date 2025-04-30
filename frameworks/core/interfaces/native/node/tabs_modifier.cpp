@@ -170,7 +170,7 @@ void SetTabsOptionsIndex(ArkUINodeHandle node, ArkUI_Int32 indexVal)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TabsModelNG::SetTabBarIndex(frameNode, indexVal);
+    TabsModelNG::SetTabBarIndex(frameNode, indexVal < 0 ? 0 : indexVal);
 }
 void SetTabsOptionsController(ArkUINodeHandle node, ArkUINodeHandle tabsController)
 {
