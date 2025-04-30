@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 
 #include "base/geometry/dimension.h"
+#include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
@@ -1635,7 +1636,7 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, std::vector<Op
         AceType::MakeRefPtr<MenuItemRowPattern>());
 
 #ifdef OHOS_PLATFORM
-    std::string buttonPasteText = "";
+    std::string buttonPasteText = Localization::GetInstance()->GetEntryLetters("textoverlay.paste");
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     if (pipeline) {
         auto theme = pipeline->GetTheme<ButtonTheme>();
@@ -1663,7 +1664,7 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, const OptionVa
         AceType::MakeRefPtr<MenuItemRowPattern>());
 
 #ifdef OHOS_PLATFORM
-    std::string buttonPasteText = "";
+    std::string buttonPasteText = Localization::GetInstance()->GetEntryLetters("textoverlay.paste");
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     if (pipeline) {
         auto theme = pipeline->GetTheme<ButtonTheme>();
