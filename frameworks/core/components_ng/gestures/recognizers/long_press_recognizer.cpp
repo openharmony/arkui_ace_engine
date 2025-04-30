@@ -441,13 +441,14 @@ bool LongPressRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recog
     }
 
     if (curr->duration_ != duration_ || curr->fingers_ != fingers_ || curr->repeat_ != repeat_ ||
-        curr->priorityMask_ != priorityMask_ || curr->isLimitFingerCount_ != isLimitFingerCount_) {
+        curr->priorityMask_ != priorityMask_) {
         if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) > 0) {
             SendCallbackMsg(onActionCancel_, false, GestureCallbackType::CANCEL);
         }
         ResetStatus();
         return false;
     }
+    isLimitFingerCount_ = curr->isLimitFingerCount_;
 
     onAction_ = std::move(curr->onAction_);
     onActionEnd_ = std::move(curr->onActionEnd_);
