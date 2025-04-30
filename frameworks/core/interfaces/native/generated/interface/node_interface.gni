@@ -186,6 +186,7 @@ generated_sources = [
   "implementation/navigation_transition_proxy_accessor.cpp",
   "implementation/navigator_modifier.cpp",
   "implementation/node_container_modifier.cpp",
+  "implementation/node_content_accessor.cpp",
   "implementation/offscreen_canvas_accessor.cpp",
   "implementation/offscreen_canvas_rendering_context2d_accessor.cpp",
   "implementation/pan_gesture_event_accessor.cpp",

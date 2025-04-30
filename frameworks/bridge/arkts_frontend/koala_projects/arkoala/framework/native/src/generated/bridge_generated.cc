@@ -34098,6 +34098,24 @@ Ark_NativePointer impl_Matrix4Transit_setPolyToPoly(Ark_NativePointer thisPtr, K
         return GetAccessors()->getMatrix4TransitAccessor()->setPolyToPoly(self, (const Ark_PolyToPolyOptions*)&options_value);
 }
 KOALA_INTEROP_DIRECT_3(Matrix4Transit_setPolyToPoly, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_NodeContent_ctor() {
+        return GetAccessors()->getNodeContentAccessor()->ctor();
+}
+KOALA_INTEROP_DIRECT_0(NodeContent_ctor, Ark_NativePointer)
+Ark_NativePointer impl_NodeContent_getFinalizer() {
+        return GetAccessors()->getNodeContentAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(NodeContent_getFinalizer, Ark_NativePointer)
+Ark_Boolean impl_NodeContent_addFrameNode(Ark_NativePointer thisPtr, Ark_NativePointer node) {
+        Ark_NodeContent self = reinterpret_cast<Ark_NodeContent>(thisPtr);
+        return GetAccessors()->getNodeContentAccessor()->addFrameNode(self, static_cast<Ark_FrameNode>(node));
+}
+KOALA_INTEROP_DIRECT_2(NodeContent_addFrameNode, Ark_Boolean, Ark_NativePointer, Ark_NativePointer)
+Ark_Boolean impl_NodeContent_removeFrameNode(Ark_NativePointer thisPtr, Ark_NativePointer node) {
+        Ark_NodeContent self = reinterpret_cast<Ark_NodeContent>(thisPtr);
+        return GetAccessors()->getNodeContentAccessor()->removeFrameNode(self, static_cast<Ark_FrameNode>(node));
+}
+KOALA_INTEROP_DIRECT_2(NodeContent_removeFrameNode, Ark_Boolean, Ark_NativePointer, Ark_NativePointer)
 Ark_NativePointer impl_PixelMap_ctor() {
         return GetAccessors()->getPixelMapAccessor()->ctor();
 }

@@ -13646,6 +13646,33 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // Matrix4TransitAccessor
+    namespace NodeContentAccessor {
+    void DestroyPeerImpl(Ark_NodeContent peer)
+    {
+        auto peerImpl = reinterpret_cast<NodeContentPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_NodeContent CtorImpl()
+    {
+        return new NodeContentPeer();
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    Ark_Boolean AddFrameNodeImpl(Ark_NodeContent peer,
+                                 Ark_FrameNode node)
+    {
+        return {};
+    }
+    Ark_Boolean RemoveFrameNodeImpl(Ark_NodeContent peer,
+                                    Ark_FrameNode node)
+    {
+        return {};
+    }
+    } // NodeContentAccessor
     namespace PixelMapAccessor {
     void DestroyPeerImpl(Ark_PixelMap peer)
     {
@@ -21293,6 +21320,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct Matrix4TransitPeer {
         virtual ~Matrix4TransitPeer() = default;
     };
+
+    const GENERATED_ArkUINodeContentAccessor* GetNodeContentAccessor()
+    {
+        static const GENERATED_ArkUINodeContentAccessor NodeContentAccessorImpl {
+            NodeContentAccessor::DestroyPeerImpl,
+            NodeContentAccessor::CtorImpl,
+            NodeContentAccessor::GetFinalizerImpl,
+            NodeContentAccessor::AddFrameNodeImpl,
+            NodeContentAccessor::RemoveFrameNodeImpl,
+        };
+        return &NodeContentAccessorImpl;
+    }
+
+    struct NodeContentPeer {
+        virtual ~NodeContentPeer() = default;
+    };
     const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor()
     {
         static const GENERATED_ArkUIPixelMapAccessor PixelMapAccessorImpl {
@@ -24336,6 +24379,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetShapeMaskAccessor,
             GetShapeClipAccessor,
             GetMatrix4TransitAccessor,
+            GetNodeContentAccessor,
             GetPixelMapAccessor,
             GetRenderNodeAccessor,
             GetGridItemOpsAccessor,

@@ -163,7 +163,6 @@ import { MenuItemOptions } from "./../menuItem"
 import { MenuCallback, OnHoverCallback } from "./../sdk-stubs"
 import { TerminationInfo } from "./../embeddedComponent"
 import { TextBackgroundStyle } from "./../span"
-import { Content } from "./../contentSlot"
 import { IObservedObject, IWatchTrigger } from "./../../stateManagement"
 
 export class TypeChecker {
@@ -604,9 +603,6 @@ export class TypeChecker {
     }
     static isConstraintSizeOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof ConstraintSizeOptions
-    }
-    static isContent(value: Object | string | number | undefined, arg0: boolean): boolean {
-        return value instanceof Content
     }
     static isContentClipMode(value: Object | string | number | undefined): boolean {
         return value instanceof ContentClipMode

@@ -161,7 +161,6 @@ import { MenuItemOptions } from "./../menuItem"
 import { MenuCallback, OnHoverCallback } from "./../sdk-stubs"
 import { TerminationInfo } from "./../embeddedComponent"
 import { TextBackgroundStyle } from "./../span"
-import { Content } from "./../contentSlot"
 import { IObservedObject, IWatchTrigger } from "./../../stateManagement"
 
 export class TypeChecker {
@@ -2935,14 +2934,6 @@ export class TypeChecker {
         }
         else {
             throw new Error("Can not discriminate value typeof ConstraintSizeOptions")
-        }
-    }
-    static isContent(value: Object | string | number | undefined | boolean, duplicated__ContentStub: boolean): boolean {
-        if ((!duplicated__ContentStub) && (value?.hasOwnProperty("_ContentStub"))) {
-            return true
-        }
-        else {
-            throw new Error("Can not discriminate value typeof Content")
         }
     }
     static isContentClipMode(value: Object | string | number | undefined | boolean): boolean {

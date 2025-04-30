@@ -4286,6 +4286,14 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _Matrix4Transit_setPolyToPoly(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
+    native static _NodeContent_ctor(): KPointer
+    @ani.unsafe.Direct
+    native static _NodeContent_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _NodeContent_addFrameNode(ptr: KPointer, node: KPointer): boolean
+    @ani.unsafe.Direct
+    native static _NodeContent_removeFrameNode(ptr: KPointer, node: KPointer): boolean
+    @ani.unsafe.Direct
     native static _PixelMap_ctor(): KPointer
     @ani.unsafe.Direct
     native static _PixelMap_getFinalizer(): KPointer

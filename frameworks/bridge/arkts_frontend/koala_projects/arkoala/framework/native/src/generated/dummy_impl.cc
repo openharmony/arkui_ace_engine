@@ -27205,6 +27205,58 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return (Ark_Matrix4Transit) 300;
     }
     } // Matrix4TransitAccessor
+    namespace NodeContentAccessor {
+    void DestroyPeerImpl(Ark_NodeContent peer)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_NodeContent CtorImpl()
+    {
+        if (!needGroupedLog(1))
+            return (Ark_NodeContent) 100;
+        string out("new NodeContent(");
+        out.append(") \n");
+        out.append("[return (Ark_NodeContent) 100] \n");
+        appendGroupedLog(1, out);
+        return (Ark_NodeContent) 100;
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    Ark_Boolean AddFrameNodeImpl(Ark_NodeContent peer,
+                          Ark_FrameNode node)
+    {
+        if (!needGroupedLog(1))
+            return 0;
+        string out("addFrameNode(");
+        WriteToString(&out, node);
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    Ark_Boolean RemoveFrameNodeImpl(Ark_NodeContent peer,
+                             Ark_FrameNode node)
+    {
+        if (!needGroupedLog(1))
+            return 0;
+        string out("removeFrameNode(");
+        WriteToString(&out, node);
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    } // NodeContentAccessor
     namespace PixelMapAccessor {
     void DestroyPeerImpl(Ark_PixelMap peer)
     {
@@ -43389,6 +43441,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct Matrix4TransitPeer {
         virtual ~Matrix4TransitPeer() = default;
     };
+    const GENERATED_ArkUINodeContentAccessor* GetNodeContentAccessor()
+    {
+        static const GENERATED_ArkUINodeContentAccessor NodeContentAccessorImpl {
+            NodeContentAccessor::DestroyPeerImpl,
+            NodeContentAccessor::CtorImpl,
+            NodeContentAccessor::GetFinalizerImpl,
+            NodeContentAccessor::AddFrameNodeImpl,
+            NodeContentAccessor::RemoveFrameNodeImpl,
+        };
+        return &NodeContentAccessorImpl;
+    }
+
+    struct NodeContentPeer {
+        virtual ~NodeContentPeer() = default;
+    };
     const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor()
     {
         static const GENERATED_ArkUIPixelMapAccessor PixelMapAccessorImpl {
@@ -46424,6 +46491,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetShapeMaskAccessor,
             GetShapeClipAccessor,
             GetMatrix4TransitAccessor,
+            GetNodeContentAccessor,
             GetPixelMapAccessor,
             GetRenderNodeAccessor,
             GetFilterAccessor,
