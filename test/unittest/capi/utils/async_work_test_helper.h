@@ -44,6 +44,7 @@ public:
     inline static void DoComplete()
     {
         complete_ ? complete_(handle_) : (void)0;
+        Reset();
         handle_ = nullptr;
         execute_ = nullptr;
         complete_ = nullptr;
