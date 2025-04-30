@@ -1329,14 +1329,16 @@ void SwiperPattern::HandleTargetIndex(const RefPtr<LayoutWrapper>& dirty, const 
     bool isNeedBackwardTranslate = IsNeedBackwardTranslate(props, targetIndexValue);
     bool isNeedPlayTranslateAnimation = translateAnimationIsRunning_ || isNeedForwardTranslate ||
                                         isNeedBackwardTranslate || AutoLinearAnimationNeedReset(targetPos);
+    // remove space at end when displayCount is auto and loop is false
+    if (!SwiperUtils::IsStretch(props) && !IsLoop()) {
+        auto item = itemPosition_.rbegin();
+        if (item->first == TotalCount() - 1) {
+            auto endSpace = CalculateVisibleSize() - (item->second.endPos - targetPos);
+            targetPos -= Positive(endSpace) ? endSpace : 0.0f;
+        }
+    }
     auto context = GetContext();
     if (context && !isNeedPlayTranslateAnimation && !SupportSwiperCustomAnimation()) {
-        auto props = GetLayoutProperty<SwiperLayoutProperty>();
-        bool isNeedOffset = (GetLoopIndex(iter->first) == TotalCount() - 1) && !props->GetDisplayCount().has_value() &&
-                            !IsLoop() &&
-                            LessNotEqual(iter->second.endPos - iter->second.startPos, CalculateVisibleSize());
-        float offset = isNeedOffset ? CalculateVisibleSize() - iter->second.endPos + iter->second.startPos : 0.0;
-        targetPos -= offset;
         std::optional<float> pixelRoundTargetPos;
 #ifdef SUPPORT_DIGITAL_CROWN
         // translate property will be pixel rounded in common scenarios.
