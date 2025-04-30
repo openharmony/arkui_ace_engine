@@ -13,39 +13,35 @@
  * limitations under the License.
  */
 
-import { NavList, NavListItem } from './utils/navigationList'
+import { NavList, NavListItem } from '../../utils/navigationList'
 
 @Builder
-export function NavIndexBuilder(name: string, param: Object) {
-  NavIndex()
+export function RatingIndexBuilder(name: string, param: Object) {
+  RatingIndex()
 }
 
 @Entry
 @Component
-struct NavIndex {
+export struct RatingIndex {
   pathStack: NavPathStack = new NavPathStack()
   paths: NavListItem[] = [
-    { name: 'Select', path: 'SelectIndex' },
-    { name: 'Button', path: 'ButtonIndex' },
-    { name: 'Toggle', path: 'ToggleIndex' },
-    { name: 'Checkbox', path: 'CheckboxIndex' },
-    { name: 'Rating', path: 'RatingIndex' },
-    { name: 'Slider', path: 'SliderIndex' },
-    { name: 'Radio', path: 'RadioIndex' },
+    { name: 'RatingNormal', path: 'RatingNormal' },
+    { name: 'RatingStarStyle', path: 'RatingStarStyle' },
+    { name: 'RatingCustom', path: 'RatingCustom' },
   ]
 
   build() {
     NavDestination() {
-      NavList({
-        pages: this.paths,
-        onPathChange: (item: NavListItem) => {
-          this.pathStack.pushPath( { name: item.path } )
-        }
-      })
+      Scroll() {
+        NavList({
+          pages: this.paths,
+          onPathChange: (item: NavListItem) => {
+            this.pathStack.pushPath({ name: item.path })
+          }
+        })
+      }
     }
-    .title('表单')
-    .height('100%')
-    .width('100%')
+    .title('Rating')
     .onBackPressed(() => {
       this.pathStack.pop()
       return true
