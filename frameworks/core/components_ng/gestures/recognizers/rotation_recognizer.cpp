@@ -449,6 +449,7 @@ bool RotationRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recogn
         ResetStatus();
         return false;
     }
+    isLimitFingerCount_ = curr->isLimitFingerCount_;
 
     onActionStart_ = std::move(curr->onActionStart_);
     onActionUpdate_ = std::move(curr->onActionUpdate_);

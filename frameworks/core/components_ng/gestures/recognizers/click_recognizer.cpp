@@ -607,6 +607,7 @@ bool ClickRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognize
         ResetStatus();
         return false;
     }
+    isLimitFingerCount_ = curr->isLimitFingerCount_;
 
     onAction_ = std::move(curr->onAction_);
     ReconcileGestureInfoFrom(recognizer);

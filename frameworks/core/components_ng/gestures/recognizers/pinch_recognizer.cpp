@@ -496,6 +496,7 @@ bool PinchRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognize
         ResetStatus();
         return false;
     }
+    isLimitFingerCount_ = curr->isLimitFingerCount_;
 
     onActionStart_ = std::move(curr->onActionStart_);
     onActionUpdate_ = std::move(curr->onActionUpdate_);
