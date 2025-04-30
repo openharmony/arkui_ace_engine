@@ -759,8 +759,7 @@ ImageDfxConfig ImagePattern::CreateImageDfxConfig(const ImageSourceInfo& src)
     };
 }
 
-void ImagePattern::LoadImage(
-    const ImageSourceInfo& src, const PropertyChangeFlag& propertyChangeFlag, VisibleType visibleType)
+void ImagePattern::LoadImage(const ImageSourceInfo& src, bool needLayout)
 {
     if (loadingCtx_) {
         auto srcKey = src.GetKey();
@@ -781,8 +780,7 @@ void ImagePattern::LoadImage(
     if (onProgressCallback_) {
         loadingCtx_->SetOnProgressCallback(std::move(onProgressCallback_));
     }
-    if (!((propertyChangeFlag & PROPERTY_UPDATE_LAYOUT) == PROPERTY_UPDATE_LAYOUT) ||
-        visibleType == VisibleType::GONE) {
+    if (!needLayout) {
         loadingCtx_->FinishMearuse();
     }
     // Before loading new image data, reset the render success status to `false`.
@@ -811,15 +809,16 @@ void ImagePattern::LoadImageDataIfNeed()
 {
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
 
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src || isImageReloadNeeded_ || isOrientationChange_) {
-        LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag(),
-            imageLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE));
+        bool needLayout = host->CheckNeedForceMeasureAndLayout() &&
+                          imageLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE) != VisibleType::GONE;
+        LoadImage(src, needLayout);
     } else if (IsSupportImageAnalyzerFeature()) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
@@ -1935,11 +1934,13 @@ void ImagePattern::OnConfigurationUpdate()
         imageDfxConfig_.ToStringWithoutSrc().c_str(), loadingCtx_ ? 1 : 0);
     CHECK_NULL_VOID(loadingCtx_);
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
-
-    LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag(),
-        imageLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE));
+    bool needLayout = host->CheckNeedForceMeasureAndLayout() &&
+                          imageLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE) != VisibleType::GONE;
+    LoadImage(src, needLayout);
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
         auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
         if (altLoadingCtx_ && altLoadingCtx_->GetSourceInfo() == altImageSourceInfo) {
