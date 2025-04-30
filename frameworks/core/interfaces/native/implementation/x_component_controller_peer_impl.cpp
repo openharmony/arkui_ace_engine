@@ -42,7 +42,6 @@ void XComponentControllerPeerImpl::TriggerStartImageAnalyzer(Ark_VMContext vmCon
         if (error.empty()) {
             promise->Resolve();
         } else {
-            Converter::ConvContext ctx;
             promise->Reject(error);
         }
     };
