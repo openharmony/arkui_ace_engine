@@ -138,14 +138,19 @@ void IndicatorModelNG::SetLoop(FrameNode* frameNode, bool loop)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperIndicatorLayoutProperty, Loop, loop, frameNode);
 }
 
-void IndicatorModelNG::SetInitialIndex(FrameNode* frameNode, uint32_t index)
+void IndicatorModelNG::SetInitialIndex(FrameNode* frameNode, std::optional<uint32_t> index)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperIndicatorLayoutProperty, InitialIndex, index, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperIndicatorLayoutProperty, InitialIndex,
+        index.value_or(DEFAULT_SWIPER_CURRENT_INDEX), frameNode);
 }
 
-void IndicatorModelNG::SetCount(FrameNode* frameNode, uint32_t count)
+void IndicatorModelNG::SetCount(FrameNode* frameNode, std::optional<uint32_t> count)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperIndicatorLayoutProperty, Count, count, frameNode);
+    if (count) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperIndicatorLayoutProperty, Count, *count, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperIndicatorLayoutProperty, Count, frameNode);
+    }
 }
 
 void IndicatorModelNG::SetDigitIndicatorStyle(
@@ -157,9 +162,10 @@ void IndicatorModelNG::SetDigitIndicatorStyle(
     pattern->SetSwiperDigitalParameters(swiperDigitalParameters);
 }
 
-void IndicatorModelNG::SetIndicatorType(FrameNode* frameNode, SwiperIndicatorType indicatorType)
+void IndicatorModelNG::SetIndicatorType(FrameNode* frameNode, std::optional<SwiperIndicatorType> indicatorType)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperIndicatorLayoutProperty, IndicatorType, indicatorType, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperIndicatorLayoutProperty, IndicatorType,
+        indicatorType.value_or(SwiperIndicatorType::DOT), frameNode);
 }
 
 void IndicatorModelNG::SetDotIndicatorStyle(FrameNode* frameNode, const SwiperParameters& swiperParameters)
@@ -201,5 +207,13 @@ int32_t  IndicatorModelNG::GetCount(FrameNode* frameNode)
     int32_t  value = 0;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperIndicatorLayoutProperty, Count, value, frameNode, value);
     return value;
+}
+
+RefPtr<IndicatorController> IndicatorModelNG::GetIndicatorController(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<IndicatorPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetIndicatorController();
 }
 } // namespace OHOS::Ace::NG

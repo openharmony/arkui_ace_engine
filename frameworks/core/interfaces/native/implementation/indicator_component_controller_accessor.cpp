@@ -34,14 +34,24 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void ShowNextImpl(Ark_IndicatorComponentController peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->ShowNext();
 }
 void ShowPreviousImpl(Ark_IndicatorComponentController peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->ShowPrevious();
 }
 void ChangeIndexImpl(Ark_IndicatorComponentController peer,
                      const Ark_Number* index,
                      const Opt_Boolean* useAnimation)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(index);
+    auto idx = Converter::Convert<int32_t>(*index);
+    idx = idx < 0 ? 0 : idx;
+    auto useAnim = useAnimation ? Converter::OptConvert<bool>(*useAnimation).value_or(false) : false;
+    peer->ChangeIndex(idx, useAnim);
 }
 } // IndicatorComponentControllerAccessor
 const GENERATED_ArkUIIndicatorComponentControllerAccessor* GetIndicatorComponentControllerAccessor()

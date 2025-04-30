@@ -38,16 +38,16 @@ public:
     static void SetOnChange(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onChange);
     static void SetDigitIndicatorStyle(FrameNode* frameNode, const SwiperDigitalParameters& swiperDigitalParameters);
     static void SetDotIndicatorStyle(FrameNode* frameNode, const SwiperParameters& swiperParameters);
-    static void SetIndicatorType(FrameNode* frameNode, SwiperIndicatorType indicatorType);
-
+    static void SetIndicatorType(FrameNode* frameNode, std::optional<SwiperIndicatorType> indicatorType);
     static bool GetLoop(FrameNode* frameNode);
-    static void SetInitialIndex(FrameNode* frameNode, uint32_t index);
-    static void SetCount(FrameNode* frameNode, uint32_t count);
+    static void SetInitialIndex(FrameNode* frameNode, std::optional<uint32_t> index);
+    static void SetCount(FrameNode* frameNode, std::optional<uint32_t> count);
     static void SetLoop(FrameNode* frameNode, bool loop);
     static void SetDirection(FrameNode* frameNode, Axis axis);
     static void SetIsIndicatorCustomSize(FrameNode* frameNode, bool isCustomSize);
     static void SetShowIndicator(FrameNode* frameNode, bool showIndicator);
     static int32_t GetCount(FrameNode* frameNode);
+    static RefPtr<IndicatorController> GetIndicatorController(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

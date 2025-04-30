@@ -186,7 +186,7 @@ void AssignArkValue(Ark_SwiperContentWillScrollResult &dst, const SwiperContentW
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG {
-namespace {
+namespace SwiperAttributeModifierInternal {
 std::optional<OHOS::Ace::Dimension> &ResetIfInvalid(std::optional<OHOS::Ace::Dimension> &dimOpt)
 {
     if (dimOpt && dimOpt->IsNegative()) {
@@ -234,8 +234,9 @@ void CheckSwiperDigitalParameters(SwiperDigitalParameters& p)
     ResetIfInvalid(p.fontSize);
     ResetIfInvalid(p.selectedFontSize);
 }
-} // namespace
+} // namespace SwiperAttributeModifierInternal
 } // namespace OHOS::Ace::NG
+using namespace OHOS::Ace::NG::SwiperAttributeModifierInternal;
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwiperModifier {
