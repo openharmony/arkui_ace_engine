@@ -827,6 +827,8 @@ GestureJudgeResult PanRecognizer::TriggerGestureJudgeCallback()
         info->SetVelocity(Velocity());
         info->SetMainVelocity(0.0);
         info->SetSourceTool(lastAxisEvent_.sourceTool);
+        info->SetVerticalAxis(lastAxisEvent_.verticalAxis);
+        info->SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
     } else {
         info->SetVelocity(panVelocity_.GetVelocity());
         info->SetMainVelocity(panVelocity_.GetMainAxisVelocity());
