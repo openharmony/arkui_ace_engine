@@ -479,10 +479,11 @@ bool SwipeRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognize
     }
 
     if (curr->fingers_ != fingers_ || (curr->direction_.type != direction_.type) || !NearZero(curr->speed_ - speed_) ||
-        priorityMask_ != curr->priorityMask_ || curr->isLimitFingerCount_ != isLimitFingerCount_) {
+        priorityMask_ != curr->priorityMask_) {
         ResetStatus();
         return false;
     }
+    isLimitFingerCount_ = curr->isLimitFingerCount_;
 
     onAction_ = std::move(curr->onAction_);
     ReconcileGestureInfoFrom(recognizer);
