@@ -13,35 +13,34 @@
  * limitations under the License.
  */
 
-import { NavList, NavListItem } from './utils/navigationList'
+import { NavList, NavListItem } from '../../utils/navigationList'
 
 @Builder
-export function NavIndexBuilder(name: string, param: Object) {
-  NavIndex()
+export function ToggleIndexBuilder(name: string, param: Object) {
+  ToggleIndex()
 }
 
-@Entry
 @Component
-struct NavIndex {
+export struct ToggleIndex {
   pathStack: NavPathStack = new NavPathStack()
   paths: NavListItem[] = [
-    { name: 'Select', path: 'SelectIndex' },
-    { name: 'Button', path: 'ButtonIndex' },
-    { name: 'toggle', path: 'ToggleIndex' }
+    { name: 'toggle弹窗确认场景', path: 'ToggleWithDialog' },
+    { name: 'toggle自定义场景', path: 'ToggleContentModifier' },
+    { name: 'toggle场景测试合集', path: 'ToggleUnion' },
   ]
 
   build() {
     NavDestination() {
-      NavList({
-        pages: this.paths,
-        onPathChange: (item: NavListItem) => {
-          this.pathStack.pushPath( { name: item.path } )
-        }
-      })
+      Scroll() {
+        NavList({
+          pages: this.paths,
+          onPathChange: (item: NavListItem) => {
+            this.pathStack.pushPath({ name: item.path })
+          }
+        })
+      }
     }
-    .title('表单')
-    .height('100%')
-    .width('100%')
+    .title('Toggle')
     .onBackPressed(() => {
       this.pathStack.pop()
       return true
