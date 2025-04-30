@@ -30,7 +30,7 @@ public:
     AutoCallbackKeeper(std::function<void()>&& handler);
     ~AutoCallbackKeeper();
 
-    TCallbackType ArkValue() const;
+    TCallbackType ArkValue() const &;
 
 private:
     TCallbackType arkCallback_;
@@ -149,7 +149,7 @@ inline AutoCallbackKeeper<TCallbackType>::~AutoCallbackKeeper()
 }
 
 template<typename TCallbackType>
-inline TCallbackType AutoCallbackKeeper<TCallbackType>::ArkValue() const
+inline TCallbackType AutoCallbackKeeper<TCallbackType>::ArkValue() const &
 {
     return arkCallback_;
 }

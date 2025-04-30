@@ -21,7 +21,7 @@
 #include "core/interfaces/native/implementation/canvas_rendering_context2d_peer_impl.h"
 #include "core/interfaces/native/implementation/rendering_context_settings_peer.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-
+#include "test/unittest/capi/utils/async_work_test_helper.h"
 #include "accessor_test_base.h"
 
 namespace OHOS::Ace::NG {
@@ -66,8 +66,8 @@ const std::vector<ImageAnalyzerType> IMAGE_TYPE_TEST_PLAN {
 };
 
 const std::vector<Ark_ImageAnalyzerType> ARK_IMAGE_TYPE_TEST_PLAN {
-    Ark_ImageAnalyzerType::ARK_IMAGE_ANALYZER_TYPE_TEXT,
-    Ark_ImageAnalyzerType::ARK_IMAGE_ANALYZER_TYPE_SUBJECT,
+    ARK_IMAGE_ANALYZER_TYPE_TEXT,
+    ARK_IMAGE_ANALYZER_TYPE_SUBJECT,
     static_cast<Ark_ImageAnalyzerType>(100),
     static_cast<Ark_ImageAnalyzerType>(-100)
 };
@@ -112,8 +112,7 @@ public:
     {
         AccessorTestCtorBase::SetUp();
         renderingModel_ = AceType::MakeRefPtr<NiceMock<MockCanvasRenderingContext2DModel>>();
-        reinterpret_cast<GeneratedModifier::CanvasRenderingContext2DPeerImpl*>(peer_)->SetRenderingContext2DModel(
-            renderingModel_);
+        peer_->SetRenderingContext2DModel(renderingModel_);
     }
 
     void TearDown() override
@@ -155,35 +154,55 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, startImageAnalyzerTest, TestSize.
 {
     ASSERT_NE(accessor_->startImageAnalyzer, nullptr);
 
-    std::vector<Ark_ImageAnalyzerType> src = ARK_IMAGE_TYPE_TEST_PLAN;
-    Ark_ImageAnalyzerConfig arkConfig = {
-        .types.array = reinterpret_cast<Ark_ImageAnalyzerType*>(src.data()),
-        .types.length = static_cast<Ark_Int32>(src.size()),
+    static constexpr int32_t EXPECTED_NODE_ID = 10;
+    struct CheckEvent {
+        int32_t nodeId;
+        std::optional<StringArray> errors;
     };
-    Callback_Opt_Array_String_Void cont {};
+    static std::optional<CheckEvent> checkEvent;
+    const StringArray stoppedError {"110003"};
+    const std::vector<std::tuple<ImageAnalyzerState, std::optional<StringArray>>> testPlan {
+        {ImageAnalyzerState::FINISHED, std::nullopt},
+        {ImageAnalyzerState::STOPPED, std::make_optional<StringArray>(stoppedError)}
+    };
+    for (const auto& [state, expectedErrors] : testPlan) {
+        checkEvent = std::nullopt;
+        auto returnResFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Opt_Array_String error) {
+            checkEvent = {
+                .nodeId = resourceId,
+                .errors = Converter::OptConvert<StringArray>(error)
+            };
+        };
+        const Callback_Opt_Array_String_Void arkCallback = Converter::ArkValue<Callback_Opt_Array_String_Void>(
+            returnResFunc, EXPECTED_NODE_ID);
+        const Ark_ImageAnalyzerConfig arkConfig {
+            .types = Converter::ArkValue<Array_ImageAnalyzerType>(ARK_IMAGE_TYPE_TEST_PLAN, Converter::FC)
+        };
+        void* target = nullptr;
+        Ace::OnAnalyzedCallback onAnalyzed;
+        EXPECT_CALL(*renderingModel_, StartImageAnalyzer(_, _))
+            .WillOnce(DoAll(SaveArg<0>(&target), SaveArg<1>(&onAnalyzed)));
+        accessor_->startImageAnalyzer(vmContext_, AsyncWorkTestHelper::GetWorkerPtr(), peer_, &arkConfig, &arkCallback);
+        EXPECT_TRUE(AsyncWorkTestHelper::HasWorkCreated());
+        ASSERT_EQ(target, nullptr);
 
-    void* target;
-    Ace::OnAnalyzedCallback onAnalyzed;
-    EXPECT_CALL(*renderingModel_, StartImageAnalyzer(_, _))
-        .WillOnce(DoAll(SaveArg<0>(&target), SaveArg<1>(&onAnalyzed)));
-    accessor_->startImageAnalyzer(vmContext_, asyncWorker_, peer_, &arkConfig, &cont);
+        AsyncWorkTestHelper::DoExeceute();
+        ASSERT_NE(target, nullptr);
+        ImageAnalyzerConfig* configPtr = reinterpret_cast<ImageAnalyzerConfig*>(target);
+        const std::set<ImageAnalyzerType>& configTypes = configPtr->types;
+        EXPECT_EQ(configTypes.size(), IMAGE_TYPE_TEST_PLAN.size());
+        for (const ImageAnalyzerType& expected : IMAGE_TYPE_TEST_PLAN) {
+            EXPECT_EQ(configTypes.count(expected), 1);
+        }
+        EXPECT_FALSE(checkEvent.has_value());
+        ASSERT_TRUE(onAnalyzed.has_value());
+        onAnalyzed.value()(state);
+        ASSERT_TRUE(checkEvent.has_value());
+        ASSERT_EQ(checkEvent->nodeId, EXPECTED_NODE_ID);
+        ASSERT_EQ(checkEvent->errors, expectedErrors);
 
-    ImageAnalyzerConfig* configPtr = reinterpret_cast<ImageAnalyzerConfig*>(target);
-    ASSERT_NE(configPtr, nullptr);
-    ImageAnalyzerConfig config = *configPtr;
-    auto length = IMAGE_TYPE_TEST_PLAN.size();
-    EXPECT_EQ(config.types.size(), length);
-    for (int i = 0; i < length; i++) {
-        ImageAnalyzerType expected = IMAGE_TYPE_TEST_PLAN[i];
-        EXPECT_TRUE(config.types.count(expected));
+        AsyncWorkTestHelper::DoComplete();
     }
-
-    EXPECT_CALL(*renderingModel_, StartImageAnalyzer(_, _)).Times(0);
-    accessor_->startImageAnalyzer(vmContext_, asyncWorker_, peer_, &arkConfig, &cont);
-
-    (onAnalyzed.value())(ImageAnalyzerState::FINISHED);
-    EXPECT_CALL(*renderingModel_, StartImageAnalyzer(_, _)).Times(1);
-    accessor_->startImageAnalyzer(vmContext_, asyncWorker_, peer_, &arkConfig, &cont);
 }
 
 /**
@@ -262,7 +281,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, onOnAttachTest, TestSize.Level1)
     };
     auto onAttach = [this]() {
         CHECK_NULL_VOID(this->peer_);
-        reinterpret_cast<GeneratedModifier::CanvasRenderingContext2DPeerImpl*>(this->peer_)->OnAttachToCanvas();
+        this->peer_->OnAttachToCanvas();
     };
     static size_t eventsSize = 10;
     static size_t counter = 0;
@@ -308,7 +327,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, onOnDetachTest, TestSize.Level1)
     };
     auto onDetach = [this]() {
         CHECK_NULL_VOID(this->peer_);
-        reinterpret_cast<GeneratedModifier::CanvasRenderingContext2DPeerImpl*>(this->peer_)->OnDetachFromCanvas();
+        this->peer_->OnDetachFromCanvas();
     };
     static size_t eventsSize = 10;
     static size_t counter = 0;
@@ -355,7 +374,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnAttachTest, TestSize.Level1)
     };
     auto onAttach = [this]() {
         CHECK_NULL_VOID(this->peer_);
-        reinterpret_cast<GeneratedModifier::CanvasRenderingContext2DPeerImpl*>(this->peer_)->OnAttachToCanvas();
+        this->peer_->OnAttachToCanvas();
     };
     static size_t eventsSize = 10;
     static size_t counter = 0;
@@ -409,7 +428,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnAttachTestAll, TestSize.Leve
     };
     auto onAttach = [this]() {
         CHECK_NULL_VOID(this->peer_);
-        reinterpret_cast<GeneratedModifier::CanvasRenderingContext2DPeerImpl*>(this->peer_)->OnAttachToCanvas();
+        this->peer_->OnAttachToCanvas();
     };
     static size_t eventsSize = 10;
     using TestCallback = std::pair<Opt_Callback_Void, std::optional<CheckEvent>>;
@@ -451,7 +470,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnDetachTest, TestSize.Level1)
     };
     auto onDetach = [this]() {
         CHECK_NULL_VOID(this->peer_);
-        reinterpret_cast<GeneratedModifier::CanvasRenderingContext2DPeerImpl*>(this->peer_)->OnDetachFromCanvas();
+        this->peer_->OnDetachFromCanvas();
     };
     static size_t eventsSize = 10;
     static size_t counter = 0;
@@ -505,7 +524,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnDetachTestAll, TestSize.Leve
     };
     auto onDetach = [this]() {
         CHECK_NULL_VOID(this->peer_);
-        reinterpret_cast<GeneratedModifier::CanvasRenderingContext2DPeerImpl*>(this->peer_)->OnDetachFromCanvas();
+        this->peer_->OnDetachFromCanvas();
     };
     static size_t eventsSize = 10;
     using TestCallback = std::pair<Opt_Callback_Void, std::optional<CheckEvent>>;

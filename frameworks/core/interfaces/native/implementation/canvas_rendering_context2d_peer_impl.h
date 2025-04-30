@@ -36,8 +36,8 @@ public:
     void SetOptions(const std::optional<RenderingContextSettingsPeer*>& optSettings);
     void OnAttachToCanvas();
     void OnDetachFromCanvas();
-    void StartImageAnalyzer(
-    const Ark_ImageAnalyzerConfig* config, const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void StartImageAnalyzer(Ark_VMContext vmContext, Ark_AsyncWorkerPtr asyncWorker,
+        const Ark_ImageAnalyzerConfig* config, const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
     void StopImageAnalyzer();
     double GetHeight();
     double GetWidth();
@@ -57,4 +57,7 @@ private:
 };
 
 } // namespace OHOS::Ace::NG::GeneratedModifier
+
+struct CanvasRenderingContext2DPeer : public OHOS::Ace::NG::GeneratedModifier::CanvasRenderingContext2DPeerImpl {
+};
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_SCROLLER_PEER_IMPL_H

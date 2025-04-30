@@ -30,30 +30,37 @@ public:
     {
         CHECK_NULL_RETURN(asyncWorker.createWork, {});
         auto handler = static_cast<Handler>(new AsyncExecFunc(std::move(execFunc)));
+        storage_.push_back(handler);
         return (*asyncWorker.createWork)(vmContext, handler, &Execute, &Destroy);
     }
 
-    static void FinishWork(const Ark_AsyncWork& work, int32_t errCode)
+    static void ResolveWork(const Ark_AsyncWork& work)
     {
-        if (errCode == ERROR_CODE_NO_ERROR) {
-            CHECK_NULL_VOID(work.queue);
-            (*work.queue)(work.workId);
-        } else {
-            CHECK_NULL_VOID(work.cancel);
-            (*work.cancel)(work.workId);
-        }
+        CHECK_NULL_VOID(work.queue);
+        (*work.queue)(work.workId);
+    }
+
+    static void RejectWork(const Ark_AsyncWork& work)
+    {
+        CHECK_NULL_VOID(work.cancel);
+        (*work.cancel)(work.workId);
     }
 
 private:
+    inline static std::vector<Handler> storage_;
     static void Execute(Handler handler)
     {
-        if (auto execFunc = static_cast<AsyncExecFunc*>(handler); execFunc) {
-            (*execFunc)();
+        if (std::find(storage_.begin(), storage_.end(), handler) != storage_.end()) {
+            if (auto execFunc = static_cast<AsyncExecFunc*>(handler); execFunc) {
+                (*execFunc)();
+            }
         }
     }
     static void Destroy(Handler handler)
     {
-        delete static_cast<AsyncExecFunc*>(handler);
+        if (std::find(storage_.begin(), storage_.end(), handler) != storage_.end()) {
+            delete static_cast<AsyncExecFunc*>(handler);
+        }
     }
 };
 } // namespace OHOS::Ace::NG

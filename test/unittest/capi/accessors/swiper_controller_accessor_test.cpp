@@ -205,12 +205,14 @@ HWTEST_F(SwiperControllerAccessorTest, preloadItemsTest, TestSize.Level1)
     std::set<int32_t> expectedIndexSet(indexList);
     const std::string expectedErrStr{"smth went wrong"};
     static const int32_t expectedResourceId{123};
+    static bool promiseFinished = false;
     static std::optional<StringArray> arrayResultStr{};
 
     ASSERT_NE(accessor_->preloadItems, nullptr);
 
     auto returnResFunc = [] (Ark_VMContext context, const Ark_Int32 resourceId, const Opt_Array_String error) {
         EXPECT_EQ(resourceId, expectedResourceId);
+        promiseFinished = true;
         Converter::AssignOptionalTo(arrayResultStr, error);
     };
     auto cont = Converter::ArkValue<Callback_Opt_Array_String_Void>(returnResFunc, expectedResourceId);
@@ -228,13 +230,17 @@ HWTEST_F(SwiperControllerAccessorTest, preloadItemsTest, TestSize.Level1)
     AsyncWorkTestHelper::DoExeceute();
 
     // check of the simulated finish cases
+    EXPECT_FALSE(promiseFinished);
     fireFinish(ERROR_CODE_NO_ERROR, {}); // the good case
     EXPECT_TRUE(AsyncWorkTestHelper::HasResolved());
+    EXPECT_TRUE(promiseFinished);
     AsyncWorkTestHelper::Reset();
+    promiseFinished = false;
     EXPECT_FALSE(arrayResultStr.has_value());
 
     fireFinish(ERROR_CODE_PARAM_INVALID, expectedErrStr); // the bad case
     EXPECT_TRUE(AsyncWorkTestHelper::HasRejected());
+    EXPECT_TRUE(promiseFinished);
     AsyncWorkTestHelper::Reset();
     ASSERT_TRUE(arrayResultStr.has_value());
     ASSERT_EQ(arrayResultStr->size(), 2);

@@ -56,11 +56,11 @@ HWTEST_F(CanvasPatternAccessorTest, setTransformScaleTest, TestSize.Level1)
     ASSERT_NE(accessor_->setTransform, nullptr);
 
     auto renderingModel_ = AceType::MakeRefPtr<NiceMock<MockCanvasRenderingContext2DModel>>();
-    auto peerImpl = Referenced::MakeRefPtr<GeneratedModifier::CanvasRenderingContext2DPeerImpl>();
-    peerImpl->SetRenderingContext2DModel(renderingModel_);
+    auto canvasPeer = Referenced::MakeRefPtr<CanvasRenderingContext2DPeer>();
+    canvasPeer->SetRenderingContext2DModel(renderingModel_);
     auto bitmap = PeerUtils::CreatePeer<ImageBitmapPeer>();
     auto repeat = std::make_optional(REPEAT_STRING);
-    peerImpl->CreatePattern(bitmap, peer_, repeat);
+    canvasPeer->CreatePattern(bitmap, peer_, repeat);
     auto peer = PeerUtils::CreatePeer<Matrix2DPeer>();
     auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(peer);
     for (const auto& actualX : numberTestPlan) {
@@ -99,11 +99,11 @@ HWTEST_F(CanvasPatternAccessorTest, setTransformRotateTest, TestSize.Level1)
     ASSERT_NE(accessor_->setTransform, nullptr);
 
     auto renderingModel_ = AceType::MakeRefPtr<NiceMock<MockCanvasRenderingContext2DModel>>();
-    auto peerImpl = Referenced::MakeRefPtr<GeneratedModifier::CanvasRenderingContext2DPeerImpl>();
-    peerImpl->SetRenderingContext2DModel(renderingModel_);
+    auto canvasPeer = Referenced::MakeRefPtr<CanvasRenderingContext2DPeer>();
+    canvasPeer->SetRenderingContext2DModel(renderingModel_);
     auto bitmap = PeerUtils::CreatePeer<ImageBitmapPeer>();
     auto repeat = std::make_optional(REPEAT_STRING);
-    peerImpl->CreatePattern(bitmap, peer_, repeat);
+    canvasPeer->CreatePattern(bitmap, peer_, repeat);
     auto peer = PeerUtils::CreatePeer<Matrix2DPeer>();
     auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(peer);
     for (const auto& actualX : numberTestPlan) {
@@ -139,11 +139,11 @@ HWTEST_F(CanvasPatternAccessorTest, setTransformTranslateTest, TestSize.Level1)
     ASSERT_NE(accessor_->setTransform, nullptr);
 
     auto renderingModel_ = AceType::MakeRefPtr<NiceMock<MockCanvasRenderingContext2DModel>>();
-    auto peerImpl = Referenced::MakeRefPtr<GeneratedModifier::CanvasRenderingContext2DPeerImpl>();
-    peerImpl->SetRenderingContext2DModel(renderingModel_);
+    auto canvasPeer = Referenced::MakeRefPtr<CanvasRenderingContext2DPeer>();
+    canvasPeer->SetRenderingContext2DModel(renderingModel_);
     auto bitmap = PeerUtils::CreatePeer<ImageBitmapPeer>();
     auto repeat = std::make_optional(REPEAT_STRING);
-    peerImpl->CreatePattern(bitmap, peer_, repeat);
+    canvasPeer->CreatePattern(bitmap, peer_, repeat);
     auto peer = PeerUtils::CreatePeer<Matrix2DPeer>();
     auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(peer);
     for (const auto& actualX : numberTestPlan) {

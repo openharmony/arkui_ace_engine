@@ -17,7 +17,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
-#include "core/interfaces/native/utility/async_work_helper.h"
+#include "core/interfaces/native/utility/promise_helper.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -60,7 +60,6 @@ void PreloadItemsImpl(Ark_VMContext vmContext,
 
     auto indexVectOpt = !indices ? std::nullopt : Converter::OptConvert<std::vector<int32_t>>(*indices);
     auto execFunc = [peerImpl, indexVectOpt = std::move(indexVectOpt)]() {
-        CHECK_NULL_VOID(peerImpl);
         if (indexVectOpt) {
             std::set<int32_t> indexSet(indexVectOpt->begin(), indexVectOpt->end());
             peerImpl->TriggerPreloadItems(indexSet);
@@ -68,17 +67,14 @@ void PreloadItemsImpl(Ark_VMContext vmContext,
             peerImpl->TriggerPreloadItems({});
         }
     };
-    auto work = AsyncWorkHelper::CreateWork(vmContext, *asyncWorker, std::move(execFunc));
+    PromiseHelper promise(outputArgumentForReturningPromise, vmContext, *asyncWorker, std::move(execFunc));
 
-    auto errorCbOpt = !outputArgumentForReturningPromise ? std::nullopt
-        : std::make_optional(CallbackHelper(*outputArgumentForReturningPromise));
-    auto finishFunc = [work, errorCbOpt = std::move(errorCbOpt)](const int32_t errCode, const std::string errStr) {
-        if (errorCbOpt && errCode != ERROR_CODE_NO_ERROR) {
-            std::initializer_list<std::string> initList {std::to_string(errCode), errStr};
-            Converter::ArkArrayHolder<Array_String> vectorHolder (initList);
-            errorCbOpt->InvokeSync(vectorHolder.OptValue<Opt_Array_String>());
+    auto finishFunc = [promise = std::move(promise)](const int32_t errCode, const std::string errStr) {
+        if (errCode == ERROR_CODE_NO_ERROR) {
+            promise.Resolve();
+        } else {
+            promise.Reject({std::to_string(errCode), errStr});
         }
-        AsyncWorkHelper::FinishWork(work, errCode);
     };
     peerImpl->TriggerSetPreloadFinishCallback(finishFunc);
 }
