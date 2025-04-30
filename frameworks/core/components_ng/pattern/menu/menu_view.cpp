@@ -1671,7 +1671,7 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, const OptionVa
             buttonPasteText = theme->GetPasteText();
         }
     }
-    if (params[index].value == buttonPasteText) {
+    if (value.value == buttonPasteText) {
         CreatePasteButton(optionsHasIcon, option, row, onClickFunc, icon);
     } else {
         CreateOption(optionsHasIcon, value.value, icon, row, option, onClickFunc);
