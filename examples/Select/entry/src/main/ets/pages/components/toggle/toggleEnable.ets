@@ -13,39 +13,32 @@
  * limitations under the License.
  */
 
-import { NavList, NavListItem } from '../../utils/navigationList'
-
 @Builder
-export function ToggleIndexBuilder(name: string, param: Object) {
-  ToggleIndex()
+export function ToggleEnableBuilder(name: string, param: Object) {
+  ToggleEnableExample()
 }
 
+@Entry
 @Component
-export struct ToggleIndex {
+struct ToggleEnableExample {
   pathStack: NavPathStack = new NavPathStack()
-  paths: NavListItem[] = [
-    { name: 'toggle弹窗确认场景', path: 'ToggleWithDialog' },
-    { name: 'toggle自定义场景', path: 'ToggleContentModifier' },
-    { name: 'toggle场景测试合集', path: 'ToggleUnion' },
-    { name: 'ToggleType', path: 'ToggleType' },
-    { name: 'ToggleSwitch', path: 'ToggleSwitch' },
-    { name: 'ToggleColor', path: 'ToggleColor' },
-    { name: 'ToggleNormal', path: 'ToggleNormal' },
-    { name: 'ToggleEnable', path: 'ToggleEnable' },
-  ]
 
   build() {
     NavDestination() {
-      Scroll() {
-        NavList({
-          pages: this.paths,
-          onPathChange: (item: NavListItem) => {
-            this.pathStack.pushPath({ name: item.path })
-          }
-        })
+      Column({ space: 10 }) {
+        Text('手柄在enable,false的情况下，有透明度')
+          .margin({ top: 50, bottom: 50 })
+
+        Toggle({ type: ToggleType.Switch })
+          .enabled(false)
+
       }
+      .width('100%')
+      .padding(24)
+      .height('100%')
+      .backgroundColor(Color.Pink)
     }
-    .title('Toggle')
+    .title('ToggleEnable')
     .onBackPressed(() => {
       this.pathStack.pop()
       return true
@@ -55,3 +48,5 @@ export struct ToggleIndex {
     })
   }
 }
+
+export { ToggleEnableExample };

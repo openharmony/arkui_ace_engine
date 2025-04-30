@@ -83,47 +83,7 @@ export struct toggleUnion {
 
           Divider().strokeWidth(1).margin(10)
 
-          // 2. 动态开关列表
-          Text('设备设置').fontSize(18).width('100%').textAlign(TextAlign.Start)
-          Column() {
-            ForEach(this.toggleItems, (item: toggleItem) => {
-              Row() {
-                Toggle({ type: ToggleType.Switch, isOn: item.isOn })
-                  .onChange((isOn: boolean) => {
-                    let newItems = [...this.toggleItems]
-                    const index = newItems.findIndex(i => i.id === item.id)
-                    if (index !== -1) {
-                      newItems[index].isOn = isOn
-                      this.toggleItems = newItems
-
-                      // 特殊逻辑：如果开启飞行模式，自动关闭Wi-Fi和蓝牙
-                      if (item.id === 'airplane' && isOn) {
-                        this.toggleItems = this.toggleItems.map(i => {
-                          if (i.id === 'wifi' || i.id === 'bluetooth') {
-                            return { ...i, isOn: false }
-                          }
-                          return i
-                        })
-                      }
-                    }
-                    console.log(`${item.label} 状态变化:`, isOn)
-                  })
-                  .enabled(!item.disabled)
-                  .selectedColor(item.color || '')
-                Text(item.label)
-                  .fontSize(16)
-                  .margin({ left: 10 })
-                  .fontColor(item.disabled ? '#999999' : '#000000')
-              }
-              .width('100%')
-              .justifyContent(FlexAlign.Start)
-              .margin({ bottom: 10 })
-            })
-          }.width('100%')
-
-          Divider().strokeWidth(1).margin(10)
-
-          // 3. 主从联动开关
+          // 2. 主从联动开关
           Text('联动控制').fontSize(18).width('100%').textAlign(TextAlign.Start)
           Row() {
             Toggle({ type: ToggleType.Switch, isOn: this.masterToggle })
@@ -163,7 +123,7 @@ export struct toggleUnion {
 
           Divider().strokeWidth(1).margin(10)
 
-          // 4. 自定义样式开关
+          // 3. 自定义样式开关
           Text('自定义样式').fontSize(18).width('100%').textAlign(TextAlign.Start)
           Row() {
             Toggle({ type: ToggleType.Switch, isOn: this.customToggle })
@@ -178,7 +138,7 @@ export struct toggleUnion {
             Text('番茄主题开关').fontSize(16).margin({ left: 10 })
           }.width('100%').justifyContent(FlexAlign.Start)
 
-          // 5. 按钮式开关
+          // 4. 按钮式开关
           Text('按钮式开关').fontSize(18).width('100%').textAlign(TextAlign.Start)
           Row() {
             Toggle({ type: ToggleType.Button, isOn: false })
@@ -199,7 +159,6 @@ export struct toggleUnion {
     .onReady((context: NavDestinationContext) => {
       this.pathStack = context.pathStack;
     })
-
   }
 }
 

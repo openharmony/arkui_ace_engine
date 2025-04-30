@@ -16,22 +16,20 @@
 import { NavList, NavListItem } from '../../utils/navigationList'
 
 @Builder
-export function ToggleIndexBuilder(name: string, param: Object) {
-  ToggleIndex()
+export function SliderIndexBuilder(name: string, param: Object) {
+  SliderIndex()
 }
 
+@Entry
 @Component
-export struct ToggleIndex {
+export struct SliderIndex {
   pathStack: NavPathStack = new NavPathStack()
   paths: NavListItem[] = [
-    { name: 'toggle弹窗确认场景', path: 'ToggleWithDialog' },
-    { name: 'toggle自定义场景', path: 'ToggleContentModifier' },
-    { name: 'toggle场景测试合集', path: 'ToggleUnion' },
-    { name: 'ToggleType', path: 'ToggleType' },
-    { name: 'ToggleSwitch', path: 'ToggleSwitch' },
-    { name: 'ToggleColor', path: 'ToggleColor' },
-    { name: 'ToggleNormal', path: 'ToggleNormal' },
-    { name: 'ToggleEnable', path: 'ToggleEnable' },
+    { name: 'SliderStyle', path: 'SliderStyle' },
+    { name: 'SliderBlockStyle', path: 'SliderBlockStyle' },
+    { name: 'SliderCustom', path: 'SliderCustom' },
+    { name: 'SliderTips', path: 'SliderTips' },
+    { name: 'SliderNormal', path: 'SliderNormal' },
   ]
 
   build() {
@@ -45,7 +43,7 @@ export struct ToggleIndex {
         })
       }
     }
-    .title('Toggle')
+    .title('Slider')
     .onBackPressed(() => {
       this.pathStack.pop()
       return true
