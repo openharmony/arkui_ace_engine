@@ -133,7 +133,6 @@ void DragDropInitiatingStatePress::HandlePanOnActionEnd(const GestureEvent& info
 void DragDropInitiatingStatePress::Init(int32_t currentState)
 {
     TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger long press for 500ms.");
-    InteractionInterface::GetInstance()->SetDraggableState(true);
     auto machine = GetStateMachine();
     CHECK_NULL_VOID(machine);
     auto params = machine->GetDragDropInitiatingParams();

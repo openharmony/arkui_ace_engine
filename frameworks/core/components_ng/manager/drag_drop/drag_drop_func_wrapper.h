@@ -104,7 +104,6 @@ public:
         const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
     static void RecordMenuWrapperNodeForDrag(int32_t targetId);
     static RefPtr<FrameNode> GetFrameNodeByInspectorId(const std::string& inspectorId);
-    static void TrySetDraggableStateAsync(const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
 
     // modifier
     static BorderRadiusProperty GetDragFrameNodeBorderRadius(const RefPtr<FrameNode>& frameNode);
