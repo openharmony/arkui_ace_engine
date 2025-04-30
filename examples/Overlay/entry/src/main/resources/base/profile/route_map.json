@@ -207,6 +207,11 @@
       "buildFunction": "PopupDragBuilder"
     },
     {
+      "name": "PopupMessageTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupMessageTest.ets",
+      "buildFunction": "PopupMessageBuilder"
+    },
+    {
       "name": "ToastIndex",
       "pageSourceFile": "src/main/ets/pages/components/toast/Index.ets",
       "buildFunction": "ToastIndexBuilder"

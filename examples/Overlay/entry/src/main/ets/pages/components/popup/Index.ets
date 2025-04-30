@@ -33,6 +33,7 @@ export struct PopupIndex {
     { name: 'PopupAnimateTest', path: 'PopupAnimateTest' },
     { name: 'PopupTipTest', path: 'PopupTipTest' },
     { name: 'PopupDragTest', path: 'PopupDragTest' },
+    { name: 'PopupMessageTest', path: 'PopupMessageTest' },
   ]
 
   build() {

@@ -65,14 +65,14 @@ struct PopupExample04 {
           fontSize: 15,
           fontColor: Color.Black,
         },
-          {
-            text: 'cancel',
-            action: () => {
-              console.info('cancel button click')
-            },
-            fontSize: 15,
-            fontColor: Color.Black
-          },] as [PopupButtonOptions?, PopupButtonOptions?]
+        {
+          text: 'cancel',
+          action: () => {
+            console.info('cancel button click')
+          },
+          fontSize: 15,
+          fontColor: Color.Black
+        }] as [PopupButtonOptions?, PopupButtonOptions?]
       })
     }
     .width(300)
@@ -129,14 +129,14 @@ struct PopupExample04 {
               fontSize: 15,
               fontColor: Color.Black,
             },
-              {
-                text: 'cancel',
-                action: () => {
-                  console.info('cancel button click')
-                },
-                fontSize: 15,
-                fontColor: Color.Black
-              },] as [PopupButtonOptions?, PopupButtonOptions?]
+            {
+              text: 'cancel',
+              action: () => {
+                console.info('cancel button click')
+              },
+              fontSize: 15,
+              fontColor: Color.Black
+            }] as [PopupButtonOptions?, PopupButtonOptions?]
           })
         }
         .border({ color: Color.Black, width: 2 })
