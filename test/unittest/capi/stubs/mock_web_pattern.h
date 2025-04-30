@@ -123,7 +123,8 @@ public:
         isNewDragStyle_ = isNewDragStyle;
     }
 
-    void SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param) {}
+    void RemovePreviewMenuNode();
+    void SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param);
 
     void SetOnControllerAttachedCallback(OnControllerAttachedCallback&& callback);
     OnControllerAttachedCallback GetOnControllerAttachedCallback();
@@ -169,6 +170,9 @@ public:
     {
         return onHeadReadyScriptItemsByOrder_;
     }
+
+    std::shared_ptr<WebPreviewSelectionMenuParam> GetPreviewSelectionMenuParams(
+        const WebElementType& type, const ResponseType& responseType);
 
 private:
     std::string GetMixedModeAsString() const;
@@ -271,6 +275,11 @@ private:
     std::optional<ScriptItemsByOrder> onDocumentStartScriptItemsByOrder_;
     std::optional<ScriptItemsByOrder> onDocumentEndScriptItemsByOrder_;
     std::optional<ScriptItemsByOrder> onHeadReadyScriptItemsByOrder_;
+    std::map<std::pair<WebElementType, ResponseType>,
+        std::shared_ptr<WebPreviewSelectionMenuParam>> previewSelectionMenuMap_ = {};
+    std::optional<int32_t> previewImageNodeId_ = std::nullopt;
+    bool curContextMenuResult_ = false;
+    RefPtr<ContextMenuResult> contextMenuResult_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 #endif // CAPI_STUBS_MOCK_WEB_PATTERN_H
