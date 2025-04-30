@@ -16,22 +16,20 @@
 import { NavList, NavListItem } from '../../utils/navigationList'
 
 @Builder
-export function ToggleIndexBuilder(name: string, param: Object) {
-  ToggleIndex()
+export function RadioIndexBuilder(name: string, param: Object) {
+  RadioIndex()
 }
 
+@Entry
 @Component
-export struct ToggleIndex {
+export struct RadioIndex {
   pathStack: NavPathStack = new NavPathStack()
   paths: NavListItem[] = [
-    { name: 'toggle弹窗确认场景', path: 'ToggleWithDialog' },
-    { name: 'toggle自定义场景', path: 'ToggleContentModifier' },
-    { name: 'toggle场景测试合集', path: 'ToggleUnion' },
-    { name: 'ToggleType', path: 'ToggleType' },
-    { name: 'ToggleSwitch', path: 'ToggleSwitch' },
-    { name: 'ToggleColor', path: 'ToggleColor' },
-    { name: 'ToggleNormal', path: 'ToggleNormal' },
-    { name: 'ToggleEnable', path: 'ToggleEnable' },
+    { name: 'RadioCheckedBackgroundColor', path: 'RadioCheckedBackgroundColor' },
+    { name: 'RadioSelected', path: 'RadioSelected' },
+    { name: 'RadioCustom', path: 'RadioCustom' },
+    { name: 'RadioResponse', path: 'RadioResponse' },
+    { name: 'RadioBuild', path: 'RadioBuild' },
   ]
 
   build() {
@@ -45,7 +43,7 @@ export struct ToggleIndex {
         })
       }
     }
-    .title('Toggle')
+    .title('Radio')
     .onBackPressed(() => {
       this.pathStack.pop()
       return true

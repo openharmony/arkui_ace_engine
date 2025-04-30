@@ -13,39 +13,35 @@
  * limitations under the License.
  */
 
-import { NavList, NavListItem } from '../../utils/navigationList'
-
 @Builder
-export function ToggleIndexBuilder(name: string, param: Object) {
-  ToggleIndex()
+export function SliderNormalBuilder(name: string, param: Object) {
+  SliderNormalExample()
 }
 
 @Component
-export struct ToggleIndex {
+struct SliderNormalExample {
   pathStack: NavPathStack = new NavPathStack()
-  paths: NavListItem[] = [
-    { name: 'toggle弹窗确认场景', path: 'ToggleWithDialog' },
-    { name: 'toggle自定义场景', path: 'ToggleContentModifier' },
-    { name: 'toggle场景测试合集', path: 'ToggleUnion' },
-    { name: 'ToggleType', path: 'ToggleType' },
-    { name: 'ToggleSwitch', path: 'ToggleSwitch' },
-    { name: 'ToggleColor', path: 'ToggleColor' },
-    { name: 'ToggleNormal', path: 'ToggleNormal' },
-    { name: 'ToggleEnable', path: 'ToggleEnable' },
-  ]
+  @State logStr: string = ''
 
   build() {
     NavDestination() {
-      Scroll() {
-        NavList({
-          pages: this.paths,
-          onPathChange: (item: NavListItem) => {
-            this.pathStack.pushPath({ name: item.path })
-          }
-        })
+      Flex({ direction: FlexDirection.Column }) {
+
+        Text('点击轨道只会发送Begin跟End,即 0 2')
+          .margin({ top: 100 })
+
+        Slider({ min: 0, max: 5, value: 2 })
+          .sliderInteractionMode(SliderInteraction.SLIDE_ONLY)
+          .width(300)
+          .margin({ top: 100 })
+          .onChange((value: number, mode: SliderChangeMode) => {
+            this.logStr += mode + ','
+          })
+
+        Text(this.logStr)
       }
     }
-    .title('Toggle')
+    .title('SliderNormal')
     .onBackPressed(() => {
       this.pathStack.pop()
       return true
@@ -55,3 +51,5 @@ export struct ToggleIndex {
     })
   }
 }
+
+export { SliderNormalExample };

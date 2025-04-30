@@ -13,39 +13,29 @@
  * limitations under the License.
  */
 
-import { NavList, NavListItem } from '../../utils/navigationList'
-
 @Builder
-export function ToggleIndexBuilder(name: string, param: Object) {
-  ToggleIndex()
+export function SliderTipsBuilder(name: string, param: Object) {
+  SliderTipsExample()
 }
 
 @Component
-export struct ToggleIndex {
+struct SliderTipsExample {
   pathStack: NavPathStack = new NavPathStack()
-  paths: NavListItem[] = [
-    { name: 'toggle弹窗确认场景', path: 'ToggleWithDialog' },
-    { name: 'toggle自定义场景', path: 'ToggleContentModifier' },
-    { name: 'toggle场景测试合集', path: 'ToggleUnion' },
-    { name: 'ToggleType', path: 'ToggleType' },
-    { name: 'ToggleSwitch', path: 'ToggleSwitch' },
-    { name: 'ToggleColor', path: 'ToggleColor' },
-    { name: 'ToggleNormal', path: 'ToggleNormal' },
-    { name: 'ToggleEnable', path: 'ToggleEnable' },
-  ]
 
   build() {
     NavDestination() {
-      Scroll() {
-        NavList({
-          pages: this.paths,
-          onPathChange: (item: NavListItem) => {
-            this.pathStack.pushPath({ name: item.path })
-          }
-        })
+      Flex({ direction: FlexDirection.Column }) {
+
+        Text('Slider的tip展示需要截断，显示AA..')
+          .margin({ top: 100 })
+
+        Slider()
+          .showTips(true, 'AAAAAAAAA')
+          .width(300)
+          .margin({ top: 100 })
       }
     }
-    .title('Toggle')
+    .title('SliderTips')
     .onBackPressed(() => {
       this.pathStack.pop()
       return true
@@ -55,3 +45,5 @@ export struct ToggleIndex {
     })
   }
 }
+
+export { SliderTipsExample };
