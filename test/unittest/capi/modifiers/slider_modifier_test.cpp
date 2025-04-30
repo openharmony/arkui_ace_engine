@@ -1153,7 +1153,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setTrackColorLinearGradientTestValidValues
         std::make_pair(Color::BLUE, Dimension(1.0f)),
     };
 
-    Ark_LinearGradient gradient = new LinearGradientPeer {colorStopValues};
+    Ark_LinearGradient gradient = PeerUtils::CreatePeer<LinearGradientPeer>(colorStopValues);
     auto colorGradientUnion =
         Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
 
@@ -1184,7 +1184,7 @@ HWTEST_F(SliderModifierTest, setTrackColorLinearGradientTestInvalidValues, TestS
         std::make_pair(Color::BLUE, Dimension(1.0f)),
     };
 
-    Ark_LinearGradient gradient = new LinearGradientPeer {colorStopValues};
+    Ark_LinearGradient gradient = PeerUtils::CreatePeer<LinearGradientPeer>(colorStopValues);
     auto colorGradientUnion =
         Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
 
@@ -1383,7 +1383,7 @@ HWTEST_F(SliderModifierTest, setSelectedColor1LinearGradientTestValidValues, Tes
         std::make_pair(Color::BLUE, Dimension(1.0f)),
     };
 
-    Ark_LinearGradient gradient = new LinearGradientPeer {colorStopValues};
+    Ark_LinearGradient gradient = PeerUtils::CreatePeer<LinearGradientPeer>(colorStopValues);
     auto colorGradientUnion =
         Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
 
@@ -1414,7 +1414,7 @@ HWTEST_F(SliderModifierTest, setTrackColor1LinearGradientTestInvalidValues, Test
         std::make_pair(Color::BLUE, Dimension(1.0f)),
     };
 
-    Ark_LinearGradient gradient = new LinearGradientPeer {colorStopValues};
+    Ark_LinearGradient gradient = PeerUtils::CreatePeer<LinearGradientPeer>(colorStopValues);
     auto colorGradientUnion =
         Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
 
