@@ -905,7 +905,15 @@ public:
         return isDensityChanged_;
     }
 
+    bool IsNeedReloadDensity() const override
+    {
+        return isNeedReloadDensity_;
+    }
 
+    void SetIsNeedReloadDensity(bool isNeedReloadDensity) override
+    {
+        isNeedReloadDensity_ = isNeedReloadDensity;
+    }
     void AddFrameNodeChangeListener(const WeakPtr<FrameNode>& node);
     void RemoveFrameNodeChangeListener(int32_t nodeId);
     bool AddChangedFrameNode(const WeakPtr<FrameNode>& node);
@@ -1166,6 +1174,7 @@ private:
     bool canUseLongPredictTask_ = false;
     bool isWindowSceneConsumed_ = false;
     bool isDensityChanged_ = false;
+    bool isNeedReloadDensity_ = false;
     bool isBeforeDragHandleAxis_ = false;
     WeakPtr<FrameNode> activeNode_;
     std::unique_ptr<MouseEvent> lastMouseEvent_;
