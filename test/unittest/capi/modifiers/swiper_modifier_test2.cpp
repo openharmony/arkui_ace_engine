@@ -19,6 +19,7 @@
 #include "swiper_modifier_test.h"
 #include "modifier_test_base.h"
 
+#include "core/interfaces/native/implementation/indicator_component_controller_peer.h"
 #include "core/interfaces/native/implementation/swiper_controller_modifier_peer_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -26,6 +27,7 @@
 
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -64,6 +66,27 @@ public:
         auto pattern = node->GetPattern<SwiperPattern>();
         CHECK_NULL_RETURN(pattern, std::nullopt);
         return pattern->OnContentWillScroll(currentIndex, comingIndex, offset);
+    }
+
+    Ark_NodeHandle CreateIndicatorComponent(Ark_IndicatorComponentController controller)
+    {
+        auto indicatorModifier = (*(nodeModifiers_->getIndicatorComponentModifier))();
+        CHECK_NULL_RETURN(indicatorModifier, nullptr);
+        auto indicatorNode = indicatorModifier->construct(GetId(), 0);
+        auto optValue = Converter::ArkValue<Opt_IndicatorComponentController>(controller);
+        indicatorModifier->setIndicatorComponentOptions(indicatorNode, &optValue);
+        return static_cast<Ark_NodeHandle>(indicatorNode);
+    }
+
+    Ark_NodeHandle GetBoundSwiperNodeFromIndicator(Ark_NodeHandle indicatorNode)
+    {
+        auto frameNode = reinterpret_cast<FrameNode*>(indicatorNode);
+        CHECK_NULL_RETURN(frameNode, nullptr);
+        auto pattern = frameNode->GetPattern<IndicatorPattern>();
+        CHECK_NULL_RETURN(pattern, nullptr);
+        auto swiperNode = pattern->GetBindSwiperNode();
+        CHECK_NULL_RETURN(swiperNode, nullptr);
+        return reinterpret_cast<Ark_NodeHandle>(Referenced::RawPtr(swiperNode));
     }
 };
 
@@ -311,5 +334,35 @@ HWTEST_F(SwiperModifierTest2, setOnContentWillScrollTest, TestSize.Level1)
     EXPECT_EQ(checkEvent->offset, TEST_WILL_SCROLL_OFFSET);
     ASSERT_TRUE(result2.has_value());
     EXPECT_TRUE(result2.value());
+}
+
+/**
+ * @tc.name: setIndicator1TestController
+ * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Boolean type
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest2, setIndicator1TestController, TestSize.Level1)
+{
+    using namespace Converter;
+    ASSERT_NE(modifier_->setIndicator1, nullptr);
+
+    // create the external IndicatorComponentController
+    auto peer = PeerUtils::CreatePeer<IndicatorComponentControllerPeer>();
+    ASSERT_NE(peer, nullptr);
+
+    // it should be attached to separate IndicatorComponent node
+    auto indicatorNode = CreateIndicatorComponent(peer);
+
+    // check initial state
+    EXPECT_EQ(GetBoundSwiperNodeFromIndicator(indicatorNode), nullptr);
+
+    // attach this modifier to external IndicatorComponentController
+    auto indicator = ArkUnion<Ark_Type_SwiperAttribute_indicator_indicator, Ark_IndicatorComponentController>(peer);
+    modifier_->setIndicator1(node_, &indicator);
+
+    // check the expected state
+    EXPECT_EQ(GetBoundSwiperNodeFromIndicator(indicatorNode), node_);
+
+    DisposeNode(indicatorNode);
 }
 } // namespace OHOS::Ace::NG
