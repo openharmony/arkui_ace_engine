@@ -164,7 +164,7 @@ HWTEST_F(DynamicPatternManagerTestNg, DynamicPatternManagerTestNg003, TestSize.L
     geometryNode->frame_.rect_.SetWidth(NEGATIVE_SIZE);
     geometryNode->frame_.rect_.SetHeight(NEGATIVE_SIZE);
     EXPECT_FALSE(geometryNode->GetMarginFrameSize().IsPositive());
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto func = [](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin) {};
     eventHub->SetOnAreaChanged(std::move(func));
