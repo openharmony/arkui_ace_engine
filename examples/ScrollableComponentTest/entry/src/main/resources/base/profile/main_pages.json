@@ -52,6 +52,7 @@
     "pages/refresh/RefreshMainPage",
     "pages/refresh/RefreshingContent",
     "pages/refresh/RefreshAndLoad",
+    "pages/grid/GridDragAnimation",
     "pages/grid/GridMainPage",
     "pages/grid/GridObjectSort",
     "pages/grid/GridPinchToZoom",
