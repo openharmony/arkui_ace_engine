@@ -15,16 +15,27 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/rotation_recognizer_peer.h"
 
+namespace {
+    constexpr int32_t DEFAULT_ROTATION_FINGERS = 2;
+    constexpr double DEFAULT_ROTATION_ANGLE = 1.0;
+    constexpr bool DEFAULT_IS_LIMIT_FINGER_COUNT = false;
+}
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RotationRecognizerAccessor {
 void DestroyPeerImpl(Ark_RotationRecognizer peer)
 {
+    delete peer;
 }
 Ark_RotationRecognizer CtorImpl()
 {
-    return nullptr;
+    auto* peer = new RotationRecognizerPeer();
+    peer->rotationRecognizer  = AceType::MakeRefPtr<Ace::NG::RotationRecognizer>(DEFAULT_ROTATION_FINGERS,
+        DEFAULT_ROTATION_ANGLE, DEFAULT_IS_LIMIT_FINGER_COUNT);
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,7 +43,11 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Number GetAngleImpl(Ark_RotationRecognizer peer)
 {
-    return {};
+    if (!peer || !peer->rotationRecognizer) {
+        return Converter::ArkValue<Ark_Number>(0);
+    }
+    auto rotationRecognizer = peer->rotationRecognizer;
+    return Converter::ArkValue<Ark_Number>(rotationRecognizer->GetAngle());
 }
 } // RotationRecognizerAccessor
 const GENERATED_ArkUIRotationRecognizerAccessor* GetRotationRecognizerAccessor()
