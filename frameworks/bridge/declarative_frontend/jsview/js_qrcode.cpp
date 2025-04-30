@@ -52,8 +52,10 @@ QRCodeModel* QRCodeModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
-void JSQRCode::Create(const std::string& value)
+void JSQRCode::Create(const JSCallbackInfo& info)
 {
+    std::string value;
+    ParseJsString(info[0], value);
     QRCodeModel::GetInstance()->Create(value);
     JSQRCodeTheme::ApplyTheme();
 }

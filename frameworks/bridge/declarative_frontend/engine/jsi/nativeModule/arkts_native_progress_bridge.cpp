@@ -560,7 +560,8 @@ ArkUINativeModuleValue ProgressBridge::SetProgressStyle(ArkUIRuntimeCallInfo* ru
     auto progressLayoutProperty = frameNode->GetLayoutProperty<ProgressLayoutProperty>();
     CHECK_NULL_RETURN(progressLayoutProperty, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> contentArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_STYLE_CONTENT);
-    std::string content = contentArg->ToString(vm)->ToString(vm);
+    std::string content;
+    ArkTSUtils::ParseJsString(vm, contentArg, content);
     auto progresstype = progressLayoutProperty->GetType();
     if (progresstype == ProgressType::LINEAR) {
         ParseLinearStyle(vm, runtimeCallInfo, progressStyle);
@@ -568,7 +569,7 @@ ArkUINativeModuleValue ProgressBridge::SetProgressStyle(ArkUIRuntimeCallInfo* ru
         ParseRingStyle(vm, runtimeCallInfo, progressStyle);
     } else if (progresstype == ProgressType::CAPSULE) {
         ParseCapsuleStyle(vm, runtimeCallInfo, progressStyle, fontFamilies, families);
-        progressStyle.content = (contentArg->IsString(vm)) ? content.c_str() : nullptr;
+        progressStyle.content = (contentArg->IsString(vm) || contentArg->IsObject(vm)) ? content.c_str() : nullptr;
     } else {
         ParseProgressStyle(vm, runtimeCallInfo, progressStyle);
     }
