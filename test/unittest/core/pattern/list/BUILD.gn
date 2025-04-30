@@ -33,6 +33,7 @@ ace_unittest("list_test_ng") {
     "list_item_group_pattern_test_ng.cpp",
     "list_lanes_layout_test_ng.cpp",
     "list_layout_test_ng.cpp",
+    "list_pattern_test_ng.cpp",
     "list_scroller_event_test_ng.cpp",
     "list_scroller_test_ng.cpp",
     "list_scroller_visible_content_change_test_ng.cpp",
