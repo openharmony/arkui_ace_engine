@@ -25,4 +25,7 @@ ace_unittest("xcomponent_test_ng") {
   ]
 
   external_deps = [ "bounds_checking_function:libsec_shared" ]
+  if (current_os == "ohos") {
+    external_deps += [ "napi:ace_napi" ]
+  }
 }

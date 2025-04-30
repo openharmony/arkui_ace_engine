@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "../relative_container_base_test_ng.h"
+#include "test/unittest/core/pattern/relative_container/relative_container_base_test_ng.h"
 using namespace std;
 
 namespace OHOS::Ace::NG {

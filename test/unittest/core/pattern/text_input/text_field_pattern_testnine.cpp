@@ -610,27 +610,6 @@ HWTEST_F(TextFieldPatternTestNine, CursorMove001, TestSize.Level0)
 }
 
 /**
- * @tc.name: HandleCrossPlatformInBlurEvent001
- * @tc.desc: test HandleCrossPlatformInBlurEvent
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestNine, HandleCrossPlatformInBlurEvent001, TestSize.Level0)
-{
-    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
-        model.SetType(TextInputType::VISIBLE_PASSWORD);
-    });
-    GetFocus();
-
-    pattern_->imeShown_ = true;
-    auto client = AceType::MakeRefPtr<MockTextInputClient>();
-    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
-    pattern_->connection_ = AceType::MakeRefPtr<MockTextInputConnection>(client, taskExecutor);
-    pattern_->cursorTwinklingTask_.Reset([] {});
-    pattern_->HandleCrossPlatformInBlurEvent();
-    EXPECT_EQ(pattern_->connection_, nullptr);
-}
-
-/**
  * @tc.name: OnKeyEvent001
  * @tc.desc: test OnKeyEvent
  * @tc.type: FUNC

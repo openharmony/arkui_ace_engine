@@ -248,6 +248,7 @@ ohos_unittest("form_render_delegate_stub_test") {
 
   external_deps = [
     "ability_base:want",
+    "bundle_framework:appexecfwk_core",
     "cJSON:cjson",
     "c_utils:utils",
     "eventhandler:libeventhandler",
@@ -339,6 +340,7 @@ ohos_unittest("form_render_delegate_impl_test") {
 
   external_deps = [
     "ability_base:want",
+    "bundle_framework:appexecfwk_core",
     "cJSON:cjson",
     "c_utils:utils",
     "eventhandler:libeventhandler",
