@@ -241,6 +241,26 @@ public:
         operatingHand_ = operatingHand;
     }
 
+    float GetHorizontalAxis() const
+    {
+        return horizontalAxis_;
+    }
+
+    float GetVerticalAxis() const
+    {
+        return verticalAxis_;
+    }
+
+    void SetHorizontalAxis(float axis)
+    {
+        horizontalAxis_ = axis;
+    }
+
+    void SetVerticalAxis(float axis)
+    {
+        verticalAxis_ = axis;
+    }
+
 protected:
     // Event type like onTouchDown, onClick and so on.
     std::string type_;
@@ -264,6 +284,8 @@ protected:
     bool isPostEventResult_ = false;
     int32_t postEventNodeId_ = -1;
     int32_t operatingHand_ = 0;
+    float horizontalAxis_ = 0.0;
+    float verticalAxis_ = 0.0;
 };
 
 class PropagationEventInfo : public virtual TypeInfoBase {
