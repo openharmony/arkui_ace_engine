@@ -1568,6 +1568,8 @@ typedef struct ScrollOnWillScrollCallback ScrollOnWillScrollCallback;
 typedef struct Opt_ScrollOnWillScrollCallback Opt_ScrollOnWillScrollCallback;
 typedef struct SearchSubmitCallback SearchSubmitCallback;
 typedef struct Opt_SearchSubmitCallback Opt_SearchSubmitCallback;
+typedef struct SelectedCallback SelectedCallback;
+typedef struct Opt_SelectedCallback Opt_SelectedCallback;
 typedef struct ShouldBuiltInRecognizerParallelWithCallback ShouldBuiltInRecognizerParallelWithCallback;
 typedef struct Opt_ShouldBuiltInRecognizerParallelWithCallback Opt_ShouldBuiltInRecognizerParallelWithCallback;
 typedef struct SizeChangeCallback SizeChangeCallback;
@@ -11258,6 +11260,15 @@ typedef struct Opt_SearchSubmitCallback {
     Ark_Tag tag;
     SearchSubmitCallback value;
 } Opt_SearchSubmitCallback;
+typedef struct SelectedCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Boolean selected);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Boolean selected);
+} SelectedCallback;
+typedef struct Opt_SelectedCallback {
+    Ark_Tag tag;
+    SelectedCallback value;
+} Opt_SelectedCallback;
 typedef struct ShouldBuiltInRecognizerParallelWithCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_GestureRecognizer current, const Array_GestureRecognizer others, const Callback_GestureRecognizer_Void continuation);
@@ -23684,6 +23695,12 @@ typedef struct GENERATED_ArkUIRenderNodeAccessor {
                                  Ark_LengthMetricsUnit lengthMetricsUnit);
 } GENERATED_ArkUIRenderNodeAccessor;
 
+typedef struct GENERATED_ArkUIGridItemOpsAccessor {
+    Ark_NativePointer (*registerSelectedCallback)(Ark_NativePointer node,
+                                                  Ark_Boolean value,
+                                                  const SelectedCallback* callback);
+} GENERATED_ArkUIGridItemOpsAccessor;
+
 typedef struct GENERATED_ArkUIFilterAccessor {
     void (*destroyPeer)(Ark_Filter peer);
     Ark_Filter (*ctor)();
@@ -26467,6 +26484,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIMatrix4TransitAccessor* (*getMatrix4TransitAccessor)();
     const GENERATED_ArkUIPixelMapAccessor* (*getPixelMapAccessor)();
     const GENERATED_ArkUIRenderNodeAccessor* (*getRenderNodeAccessor)();
+    const GENERATED_ArkUIGridItemOpsAccessor* (*getGridItemOpsAccessor)();
     const GENERATED_ArkUIFilterAccessor* (*getFilterAccessor)();
     const GENERATED_ArkUIVisualEffectAccessor* (*getVisualEffectAccessor)();
     const GENERATED_ArkUINavExtenderAccessor* (*getNavExtenderAccessor)();

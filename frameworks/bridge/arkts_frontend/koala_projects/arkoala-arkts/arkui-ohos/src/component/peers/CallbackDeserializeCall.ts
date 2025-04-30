@@ -91,6 +91,7 @@ import { PageTransitionCallback, RouteType } from "./../pageTransition"
 import { PasteButtonCallback, PasteButtonOnClickResult } from "./../pasteButton"
 import { PluginErrorCallback, PluginErrorData } from "./../pluginComponent"
 import { SaveButtonCallback, SaveButtonOnClickResult } from "./../saveButton"
+import { SelectedCallback } from "./../griditemops"
 import { TypeChecker } from "#components"
 export function deserializeAndCallAccessibilityCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -2190,6 +2191,12 @@ export function deserializeAndCallSearchSubmitCallback(thisDeserializer: Deseria
     let event : SubmitEvent | undefined = event_buf
     _call(searchContent, event)
 }
+export function deserializeAndCallSelectedCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as SelectedCallback)
+    let selected : boolean = thisDeserializer.readBoolean()
+    _call(selected)
+}
 export function deserializeAndCallShouldBuiltInRecognizerParallelWithCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ShouldBuiltInRecognizerParallelWithCallback)
@@ -2739,6 +2746,7 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case -1265626662/*CallbackKind.Kind_ScrollOnScrollCallback*/: return deserializeAndCallScrollOnScrollCallback(thisDeserializer);
         case -721521596/*CallbackKind.Kind_ScrollOnWillScrollCallback*/: return deserializeAndCallScrollOnWillScrollCallback(thisDeserializer);
         case 1717691617/*CallbackKind.Kind_SearchSubmitCallback*/: return deserializeAndCallSearchSubmitCallback(thisDeserializer);
+        case -1480175598/*CallbackKind.Kind_SelectedCallback*/: return deserializeAndCallSelectedCallback(thisDeserializer);
         case -250780276/*CallbackKind.Kind_ShouldBuiltInRecognizerParallelWithCallback*/: return deserializeAndCallShouldBuiltInRecognizerParallelWithCallback(thisDeserializer);
         case -1716637992/*CallbackKind.Kind_SizeChangeCallback*/: return deserializeAndCallSizeChangeCallback(thisDeserializer);
         case 711649376/*CallbackKind.Kind_SliderTriggerChangeCallback*/: return deserializeAndCallSliderTriggerChangeCallback(thisDeserializer);

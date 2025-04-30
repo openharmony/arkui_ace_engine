@@ -263,6 +263,7 @@ typedef enum CallbackKind {
     Kind_ScrollOnScrollCallback = -1265626662,
     Kind_ScrollOnWillScrollCallback = -721521596,
     Kind_SearchSubmitCallback = 1717691617,
+    Kind_SelectedCallback = -1480175598,
     Kind_ShouldBuiltInRecognizerParallelWithCallback = -250780276,
     Kind_SizeChangeCallback = -1716637992,
     Kind_SliderTriggerChangeCallback = 711649376,

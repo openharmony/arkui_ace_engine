@@ -17,17 +17,18 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, InteropNativeModule } from "@koalaui/interop"
 import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod, Bindable } from "./common"
 import { Callback_Boolean_Void } from "./navigation"
 import { Callback_Opt_Boolean_Void } from "./checkbox"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { GridItemOpsHandWritten } from "./../handwritten"
 
 export class ArkGridItemPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -170,7 +171,7 @@ export interface GridItemAttribute extends CommonMethod {
     columnEnd(value: number | undefined): this
     forceRebuild(value: boolean | undefined): this
     selectable(value: boolean | undefined): this
-    selected(value: boolean | undefined): this
+    selected(value: boolean | Bindable<boolean> | undefined): this
     onSelect(value: ((isVisible: boolean) => void) | undefined): this
     _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void
 }
@@ -188,7 +189,7 @@ export interface UIGridItemAttribute extends UICommonMethod {
     /** @memo */
     selectable(value: boolean | undefined): this
     /** @memo */
-    selected(value: boolean | undefined): this
+    selected(value: boolean | Bindable<boolean> | undefined): this
     /** @memo */
     onSelect(value: ((isVisible: boolean) => void) | undefined): this
     /** @memo */
@@ -202,7 +203,7 @@ export class ArkGridItemStyle extends ArkCommonMethodStyle implements GridItemAt
     columnEnd_value?: number | undefined
     forceRebuild_value?: boolean | undefined
     selectable_value?: boolean | undefined
-    selected_value?: boolean | undefined
+    selected_value?: boolean | Bindable<boolean> | undefined
     onSelect_value?: ((isVisible: boolean) => void) | undefined
     public rowStart(value: number | undefined): this {
         return this
@@ -222,7 +223,7 @@ export class ArkGridItemStyle extends ArkCommonMethodStyle implements GridItemAt
     public selectable(value: boolean | undefined): this {
         return this
     }
-    public selected(value: boolean | undefined): this {
+    public selected(value: boolean | Bindable<boolean> | undefined): this {
         return this
     }
     public onSelect(value: ((isVisible: boolean) => void) | undefined): this {
@@ -301,12 +302,16 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements UI
         return this
     }
     /** @memo */
-    public selected(value: boolean | undefined): this {
-        if (this.checkPriority("selected")) {
-            const value_casted = value as (boolean | undefined)
-            this.getPeer()?.selectedAttribute(value_casted)
-            return this
+    public selected(value: boolean | Bindable<boolean> | undefined): this {
+        if (typeof value === "boolean" || typeof value === undefined) {
+            if (this.checkPriority("selected")) {
+                const value_casted = value as (boolean | undefined)
+                this.getPeer()?.selectedAttribute(value_casted)
+                return this
+            }
         }
+        GridItemOpsHandWritten.hookGridItemAttributeSelectedImpl(this.getPeer().peer.ptr,
+            (value as Bindable<boolean>));
         return this
     }
     /** @memo */

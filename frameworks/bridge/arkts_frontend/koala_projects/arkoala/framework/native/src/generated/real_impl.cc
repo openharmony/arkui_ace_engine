@@ -13739,6 +13739,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // RenderNodeAccessor
+    namespace GridItemOpsAccessor {
+    Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
+                                                    Ark_Boolean value,
+                                                    const SelectedCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterSelectedCallback(frameNode, convValue);
+        return {};
+    }
+    } // GridItemOpsAccessor
     namespace FilterAccessor {
     void DestroyPeerImpl(Ark_Filter peer)
     {
@@ -21104,6 +21117,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct RenderNodePeer {
         virtual ~RenderNodePeer() = default;
     };
+    const GENERATED_ArkUIGridItemOpsAccessor* GetGridItemOpsAccessor()
+    {
+        static const GENERATED_ArkUIGridItemOpsAccessor GridItemOpsAccessorImpl {
+            GridItemOpsAccessor::RegisterSelectedCallbackImpl,
+        };
+        return &GridItemOpsAccessorImpl;
+    }
+
     const GENERATED_ArkUIFilterAccessor* GetFilterAccessor()
     {
         static const GENERATED_ArkUIFilterAccessor FilterAccessorImpl {
@@ -24041,6 +24062,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetMatrix4TransitAccessor,
             GetPixelMapAccessor,
             GetRenderNodeAccessor,
+            GetGridItemOpsAccessor,
             GetFilterAccessor,
             GetVisualEffectAccessor,
             GetNavExtenderAccessor,

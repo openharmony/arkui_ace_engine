@@ -4368,6 +4368,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RenderNode_setLengthMetricsUnit(ptr: KPointer, lengthMetricsUnit: KInt): void
     @ani.unsafe.Direct
+    native static _GridItemOps_registerSelectedCallback(node: KPointer, value: KInt, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
     native static _Filter_ctor(): KPointer
     @ani.unsafe.Direct
     native static _Filter_getFinalizer(): KPointer
