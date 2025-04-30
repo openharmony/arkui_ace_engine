@@ -1554,7 +1554,11 @@ RefPtr<FrameNode> PageRouterManager::CreatePage(int32_t pageId, const RouterPage
         TAG_LOGE(AceLogTag::ACE_ROUTER, "Update RootComponent Failed or LoadNamedRouter Failed");
 #if !defined(PREVIEW)
         if (!target.isNamedRouterMode && target.url.substr(0, strlen(BUNDLE_TAG)) != BUNDLE_TAG) {
-            ThrowError("Load Page Failed: " + target.url, ERROR_CODE_INTERNAL_ERROR);
+            const std::string errorMsg =
+                "Load Page Failed: " + target.url + ", probably caused by reasons as follows:\n"
+                "1. there is a js error in target page;\n"
+                "2. invalid moduleName or bundleName in target page.";
+            ThrowError(errorMsg, ERROR_CODE_INTERNAL_ERROR);
         }
 #endif
         pageRouterStack_.pop_back();
