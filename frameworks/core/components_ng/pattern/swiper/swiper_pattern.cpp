@@ -1342,7 +1342,7 @@ void SwiperPattern::HandleTargetIndex(const RefPtr<LayoutWrapper>& dirty, const 
         std::optional<float> pixelRoundTargetPos;
 #ifdef SUPPORT_DIGITAL_CROWN
         // translate property will be pixel rounded in common scenarios.
-        if (!isNeedOffset && !IsHorizontalAndRightToLeft() && SwiperUtils::CheckIsSingleCase(props) &&
+        if (!IsHorizontalAndRightToLeft() && SwiperUtils::CheckIsSingleCase(props) &&
             iter->second.node && iter->second.node->GetRenderContext()) {
             auto paintRect = iter->second.node->GetRenderContext()->GetPaintRectWithoutTransform();
             pixelRoundTargetPos = -(GetDirection() == Axis::HORIZONTAL ? paintRect.GetX() : paintRect.GetY());
