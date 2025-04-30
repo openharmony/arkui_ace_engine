@@ -124,10 +124,9 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg001, TestSize.Level1)
         V2::SWIPER_INDICATOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndicatorPattern>(); });
     EXPECT_NE(indicatorNode_, nullptr);
     auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
+    indicatorPattern->InitIndicatorController();
     indicatorController_ = indicatorPattern->GetIndicatorController();
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     EXPECT_EQ(layoutProperty_->GetIndicatorType(), SwiperIndicatorType::DOT);
     EXPECT_EQ(indicatorPattern->GetDirection(), Axis::HORIZONTAL);
     EXPECT_FALSE(indicatorPattern->IsLoop());
@@ -169,10 +168,9 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg002, TestSize.Level1)
         V2::SWIPER_INDICATOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndicatorPattern>(); });
     EXPECT_NE(indicatorNode_, nullptr);
     auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
+    indicatorPattern->InitIndicatorController();
     indicatorController_ = indicatorPattern->GetIndicatorController();
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     EXPECT_EQ(layoutProperty_->GetIndicatorType(), SwiperIndicatorType::DOT);
     EXPECT_FALSE(indicatorPattern->IsLoop());
     /**
@@ -212,9 +210,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg003, TestSize.Level1)
     EXPECT_NE(indicatorNode_, nullptr);
     auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
     indicatorController_ = indicatorPattern->GetIndicatorController();
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     EXPECT_EQ(layoutProperty_->GetIndicatorType(), SwiperIndicatorType::DOT);
     EXPECT_FALSE(indicatorPattern->IsLoop());
     /**
@@ -256,9 +252,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg004, TestSize.Level1)
     EXPECT_NE(indicatorNode_, nullptr);
     auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
     indicatorController_ = indicatorPattern->GetIndicatorController();
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
 
     EXPECT_EQ(layoutProperty_->GetIndicatorType(), SwiperIndicatorType::DIGIT);
     EXPECT_FALSE(indicatorPattern->IsLoop());
@@ -299,10 +293,9 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg005, TestSize.Level1)
         V2::SWIPER_INDICATOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndicatorPattern>(); });
     EXPECT_NE(indicatorNode_, nullptr);
     auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
+    indicatorPattern->InitIndicatorController();
     indicatorController_ = indicatorPattern->GetIndicatorController();
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
 
     EXPECT_EQ(layoutProperty_->GetIndicatorType(), SwiperIndicatorType::DIGIT);
     EXPECT_FALSE(indicatorPattern->IsLoop());
@@ -345,9 +338,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg006, TestSize.Level1)
     EXPECT_NE(indicatorNode_, nullptr);
     auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
     indicatorController_ = indicatorPattern->GetIndicatorController();
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
 
     EXPECT_EQ(layoutProperty_->GetIndicatorType(), SwiperIndicatorType::DIGIT);
     EXPECT_FALSE(indicatorPattern->IsLoop());
@@ -388,9 +379,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg007, TestSize.Level1)
     EXPECT_NE(indicatorNode_, nullptr);
     auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
     indicatorController_ = indicatorPattern->GetIndicatorController();
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     EXPECT_EQ(layoutProperty_->GetIndicatorType(), SwiperIndicatorType::DOT);
     EXPECT_TRUE(indicatorPattern->IsLoop());
 
@@ -433,9 +422,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg008, TestSize.Level1)
     EXPECT_NE(indicatorNode_, nullptr);
     auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
     indicatorController_ = indicatorPattern->GetIndicatorController();
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     EXPECT_EQ(layoutProperty_->GetIndicatorType(), SwiperIndicatorType::DIGIT);
     EXPECT_TRUE(indicatorPattern->IsLoop());
 
@@ -477,10 +464,9 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg009, TestSize.Level1)
         V2::SWIPER_INDICATOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndicatorPattern>(); });
     EXPECT_NE(indicatorNode_, nullptr);
     auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
+    indicatorPattern->InitIndicatorController();
     indicatorController_ = indicatorPattern->GetIndicatorController();
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     EXPECT_EQ(layoutProperty_->GetIndicatorType(), SwiperIndicatorType::DOT);
     EXPECT_FALSE(indicatorPattern->IsLoop());
 
@@ -522,9 +508,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg010, TestSize.Level1)
     EXPECT_NE(indicatorNode_, nullptr);
     auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
     indicatorController_ = indicatorPattern->GetIndicatorController();
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
 
     EXPECT_EQ(layoutProperty_->GetIndicatorType(), SwiperIndicatorType::DIGIT);
     EXPECT_FALSE(indicatorPattern->IsLoop());
@@ -567,9 +551,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg011, TestSize.Level1)
     EXPECT_NE(indicatorNode_, nullptr);
     auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
     indicatorController_ = indicatorPattern->GetIndicatorController();
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     EXPECT_EQ(layoutProperty_->GetIndicatorType(), SwiperIndicatorType::DOT);
     EXPECT_FALSE(indicatorPattern->IsLoop());
     /**
@@ -623,10 +605,9 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg012, TestSize.Level1)
         V2::SWIPER_INDICATOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndicatorPattern>(); });
     EXPECT_NE(indicatorNode_, nullptr);
     auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
+    indicatorPattern->InitIndicatorController();
     indicatorController_ = indicatorPattern->GetIndicatorController();
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     SwiperHelper::SaveDigitIndicatorProperty(indicatorNode_, *(AceType::RawPtr(pattern_)));
 
     EXPECT_EQ(layoutProperty_->GetIndicatorType(), SwiperIndicatorType::DIGIT);
@@ -671,9 +652,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg013, TestSize.Level1)
     EXPECT_NE(indicatorPattern, nullptr);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     EXPECT_TRUE(indicatorPattern->IsLoop());
     /**
@@ -717,9 +696,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg014, TestSize.Level1)
     EXPECT_NE(indicatorPattern, nullptr);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     EXPECT_TRUE(indicatorPattern->IsLoop());
     /**
@@ -763,9 +740,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg015, TestSize.Level1)
     EXPECT_NE(indicatorPattern, nullptr);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     EXPECT_FALSE(indicatorPattern->IsLoop());
     /**
@@ -817,9 +792,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg016, TestSize.Level1)
     EXPECT_NE(indicatorPattern, nullptr);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     EXPECT_TRUE(indicatorPattern->IsLoop());
     /**
@@ -864,9 +837,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg017, TestSize.Level1)
     EXPECT_NE(indicatorPattern, nullptr);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     EXPECT_TRUE(indicatorPattern->IsLoop());
     /**
@@ -918,9 +889,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg018, TestSize.Level1)
     EXPECT_NE(indicatorPattern, nullptr);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     EXPECT_TRUE(indicatorPattern->IsLoop());
     /**
@@ -973,9 +942,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg019, TestSize.Level1)
     EXPECT_NE(indicatorPattern, nullptr);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     EXPECT_TRUE(indicatorPattern->IsLoop());
     /**
@@ -1033,9 +1000,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg020, TestSize.Level1)
     EXPECT_NE(indicatorPattern, nullptr);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     EXPECT_FALSE(indicatorPattern->IsLoop());
     /**
@@ -1092,9 +1057,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg021, TestSize.Level1)
     EXPECT_NE(indicatorPattern, nullptr);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     EXPECT_TRUE(indicatorPattern->IsLoop());
     /**
@@ -1147,9 +1110,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg022, TestSize.Level1)
     EXPECT_NE(indicatorPattern, nullptr);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     EXPECT_EQ(indicatorPattern->GetCurrentIndex(), 0);
     /**
@@ -1200,9 +1161,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg023, TestSize.Level1)
     EXPECT_NE(indicatorPattern, nullptr);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     EXPECT_EQ(indicatorPattern->GetCurrentIndex(), 1);
     /**
@@ -1245,9 +1204,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg024, TestSize.Level1)
     EXPECT_NE(indicatorPattern, nullptr);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     EXPECT_EQ(indicatorPattern->GetCurrentIndex(), 0);
     /**
@@ -1291,9 +1248,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg025, TestSize.Level1)
     EXPECT_NE(indicatorPattern, nullptr);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     EXPECT_EQ(indicatorPattern->GetCurrentIndex(), 0);
     /**
@@ -1346,9 +1301,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg026, TestSize.Level1)
     EXPECT_NE(indicatorPattern, nullptr);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     EXPECT_EQ(indicatorPattern->GetCurrentIndex(), 2);
     /**
@@ -1401,9 +1354,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg027, TestSize.Level1)
     EXPECT_NE(indicatorPattern, nullptr);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     EXPECT_EQ(indicatorPattern->GetCurrentIndex(), 1);
     /**
@@ -1462,9 +1413,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg028, TestSize.Level1)
     EXPECT_NE(indicatorPattern, nullptr);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     EXPECT_EQ(indicatorPattern->GetCurrentIndex(), 2);
     /**
@@ -1526,9 +1475,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg029, TestSize.Level1)
     EXPECT_NE(indicatorPattern, nullptr);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     EXPECT_EQ(indicatorPattern->GetDirection(), Axis::HORIZONTAL);
 }
@@ -1558,9 +1505,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg030, TestSize.Level1)
     EXPECT_NE(indicatorPattern, nullptr);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     EXPECT_EQ(indicatorPattern->GetDirection(), Axis::HORIZONTAL);
 }
@@ -1588,9 +1533,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg031, TestSize.Level1)
     EXPECT_NE(indicatorPattern, nullptr);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     EXPECT_EQ(indicatorPattern->GetDirection(), Axis::HORIZONTAL);
 }
@@ -1620,9 +1563,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg032, TestSize.Level1)
     EXPECT_NE(indicatorPattern, nullptr);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     EXPECT_EQ(indicatorPattern->GetDirection(), Axis::HORIZONTAL);
     /**
@@ -1657,9 +1598,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg033, TestSize.Level1)
     EXPECT_NE(indicatorPattern, nullptr);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     EXPECT_EQ(indicatorPattern->GetDirection(), Axis::HORIZONTAL);
     /**
@@ -1697,9 +1636,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg034, TestSize.Level1)
     EXPECT_NE(indicatorPattern, nullptr);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     EXPECT_EQ(indicatorPattern->GetDirection(), Axis::HORIZONTAL);
     /**
@@ -1742,9 +1679,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg035, TestSize.Level1)
     EXPECT_NE(indicatorPattern, nullptr);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     auto pattern = indicatorPattern->GetSwiperPattern();
     EXPECT_EQ(indicatorPattern->GetDirection(), Axis::HORIZONTAL);
@@ -1800,9 +1735,7 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg036, TestSize.Level1)
     indicatorPattern->CreateDotIndicatorPaintMethod(pattern_);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     EXPECT_NE(indicatorPattern->RealTotalCount(), 2);
 }
@@ -1928,9 +1861,7 @@ HWTEST_F(SwiperModelTestNg, OnKeyEvent005, TestSize.Level1)
     EXPECT_NE(indicatorPattern, nullptr);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     EXPECT_EQ(indicatorPattern->GetDirection(), Axis::HORIZONTAL);
     auto swiperLayoutProperty = pattern_->GetLayoutProperty<SwiperLayoutProperty>();
@@ -1963,9 +1894,7 @@ HWTEST_F(SwiperModelTestNg, OnKeyEvent006, TestSize.Level1)
     EXPECT_NE(indicatorPattern, nullptr);
     indicatorController_ = indicatorPattern->GetIndicatorController();
     EXPECT_NE(indicatorController_, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    indicatorController_->SetSwiperNode(targetNode, indicatorNode);
+    indicatorController_->SetSwiperNode(frameNode_);
     FlushUITasks(indicatorNode_);
     EXPECT_EQ(indicatorPattern->GetDirection(), Axis::HORIZONTAL);
     auto swiperLayoutProperty = pattern_->GetLayoutProperty<SwiperLayoutProperty>();

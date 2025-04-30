@@ -889,8 +889,8 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperIndicator(ArkUIRuntimeCallInfo* ru
             Framework::JSRef<Framework::JSObject>::Cast(info[INDICATOR_VALUE_INDEX])
                 ->Unwrap<Framework::JSIndicatorController>();
         if (jsController) {
-            WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(frameNode);
-            jsController->SetSwiperNode(targetNode);
+            auto targetNode = AceType::Claim(frameNode);
+            jsController->SetSwiperNodeBySwiper(targetNode);
         }
         indicatorStr = "IndicatorComponentController|";
     } else {

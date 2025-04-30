@@ -211,9 +211,7 @@ HWTEST_F(SwiperIndicatorTestNg, HandleMouseClick003, TestSize.Level1)
     EXPECT_NE(indicatorNode_, nullptr);
     auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
     auto controller = indicatorPattern->GetIndicatorController();
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    controller->SetSwiperNode(targetNode, indicatorNode);
+    controller->SetSwiperNode(frameNode_);
     indicatorPattern->OnModifyDone();
     FlushUITasks();
     indicatorPattern->isRepeatClicked_ = false;
@@ -514,9 +512,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTouchBottom002, TestSize.L
     EXPECT_NE(indicatorNode_, nullptr);
     auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
     auto controller = indicatorPattern->GetIndicatorController();
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    controller->SetSwiperNode(targetNode, indicatorNode);
+    controller->SetSwiperNode(frameNode_);
 
     GestureEvent info;
     info.mainDelta_ = 1.0f;
@@ -659,9 +655,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex004, TestSize.L
     EXPECT_NE(indicatorNode_, nullptr);
     auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
     auto controller = indicatorPattern->GetIndicatorController();
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    controller->SetSwiperNode(targetNode, indicatorNode);
+    controller->SetSwiperNode(frameNode_);
     indicatorPattern->OnModifyDone();
     FlushUITasks();
 
@@ -810,9 +804,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg0021, TestSize.Level
     EXPECT_NE(indicatorNode_, nullptr);
     auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
     auto controller = indicatorPattern->GetIndicatorController();
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    controller->SetSwiperNode(targetNode, indicatorNode);
+    controller->SetSwiperNode(frameNode_);
 
     GestureEvent info;
     info.mainDelta_ = 1.0f;
