@@ -1302,12 +1302,13 @@ void JSViewAbstract::JsBindTips(const JSCallbackInfo& info)
     if (info[0]->IsString()) {
         value = info[0]->ToString();
     } else {
-        if (!info[0]->IsObject()) {
+        auto infoParam = info[0];
+        if (!infoParam->IsObject()) {
             return;
         }
-        auto* spanString = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>();
+        auto* spanString = JSRef<JSObject>::Cast(infoParam)->Unwrap<JSSpanString>();
         if (!spanString) {
-            JSViewAbstract::ParseJsString(info[0], value);
+            JSViewAbstract::ParseJsString(infoParam, value);
         } else {
             styledString = spanString->GetController();
         }
