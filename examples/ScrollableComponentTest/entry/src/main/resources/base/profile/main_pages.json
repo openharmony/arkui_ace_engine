@@ -36,6 +36,7 @@
     "pages/List/DeleteAndShift/DeleteAndShift",
     "pages/List/DragAndDropSorting/DragAndDropSorting",
     "pages/List/FadingEdge/FadingEdge",
+    "pages/List/ListNestedGrid/ListGridDemo",
     "pages/List/LoopScrolling/LoopScrolling",
     "pages/List/Sideslip/Sideslip",
     "pages/alphabetIndexer/AlphabetIndexerMainPage",
