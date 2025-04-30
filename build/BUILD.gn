@@ -111,12 +111,8 @@ config("lto_link_config") {
       "-Wl,-mllvm,-force-sched-model=${ace_engine_feature_sched_model}",
       "-Wl,-Bsymbolic",
       "-Wl,--aarch64-inline-plt",
-      "-Wl,--symbol-ordering-file=" +
-          rebase_path("${ace_engine_feature_pgo_path}/libace_compatible.txt",
-                      root_build_dir),
-      "-Wl,--no-warn-symbol-ordering",
     ]
-    if (ace_engine_feature_enable_mfs) {
+    if (ace_engine_feature_enable_codemerge) {
       ldflags += [
         "-Wl,-plugin-opt=-split-machine-functions",
         "-Wl,-mllvm",
@@ -126,6 +122,10 @@ config("lto_link_config") {
         "-Wl,-mfs-psi-cutoff=999500",
         "-Wl,-z",
         "-Wl,keep-text-section-prefix",
+        "-Wl,--symbol-ordering-file=" +
+            rebase_path("${ace_engine_feature_pgo_path}/libace_compatible.txt",
+                        root_build_dir),
+        "-Wl,--no-warn-symbol-ordering",
       ]
     }
   }
