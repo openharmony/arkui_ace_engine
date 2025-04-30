@@ -28,14 +28,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RotationRecognizerAccessor {
 void DestroyPeerImpl(Ark_RotationRecognizer peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_RotationRecognizer CtorImpl()
 {
-    auto* peer = new RotationRecognizerPeer();
-    peer->rotationRecognizer  = AceType::MakeRefPtr<Ace::NG::RotationRecognizer>(DEFAULT_ROTATION_FINGERS,
+    return PeerUtils::CreatePeer<RotationRecognizerPeer>(DEFAULT_ROTATION_FINGERS,
         DEFAULT_ROTATION_ANGLE, DEFAULT_IS_LIMIT_FINGER_COUNT);
-    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

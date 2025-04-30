@@ -15,8 +15,15 @@
 
 #pragma once
 
+#include "core/interfaces/native/utility/peer_utils.h"
 #include "core/components_ng/gestures/recognizers/rotation_recognizer.h"
 
 struct RotationRecognizerPeer final {
     OHOS::Ace::RefPtr<OHOS::Ace::NG::RotationRecognizer> rotationRecognizer;
+protected:
+    RotationRecognizerPeer(int32_t fingers, double angle, bool isLimitFingerCount = false)
+        : rotationRecognizer(OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::NG::RotationRecognizer>(
+        fingers, angle, isLimitFingerCount)) {};
+    ~RotationRecognizerPeer() = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };
