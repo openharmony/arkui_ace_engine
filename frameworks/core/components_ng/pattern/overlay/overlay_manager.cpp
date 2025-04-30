@@ -119,6 +119,8 @@ constexpr float PIXELMAP_ANIMATION_DEFAULT_LIMIT_SCALE = 0.5f;
 constexpr int32_t FULL_MODAL_ALPHA_ANIMATION_DURATION = 200;
 
 constexpr int32_t SHEET_HALF_SIZE = 2;
+constexpr int32_t MODAL_OPACITY_VALUE = 1;
+
 // dialog animation params
 const RefPtr<Curve> SHOW_SCALE_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.38f, 1.33f, 0.6f, 1.0f);
 
@@ -5277,6 +5279,11 @@ void OverlayManager::DeleteModalNode(
         // Fire hidden event of navdestination on the disappeared modal
         FireNavigationStateChange(false, modalNode);
         RemoveChildWithService(rootNode, modalNode);
+        auto lastModalNode = lastModalNode_.Upgrade();
+        CHECK_NULL_VOID(lastModalNode);
+        auto lastModalContext = lastModalNode->GetRenderContext();
+        CHECK_NULL_VOID(lastModalContext);
+        lastModalContext->UpdateOpacity(MODAL_OPACITY_VALUE);
     } else {
         auto sheetPattern = modalNode->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_VOID(sheetPattern);
