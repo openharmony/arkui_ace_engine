@@ -3391,6 +3391,11 @@ void PipelineContext::DumpPipelineInfo() const
 void PipelineContext::CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents)
 {
     auto targetTimeStamp = compensationValue_ > 0 ? GetVsyncTime() - compensationValue_ : GetVsyncTime();
+    if (touchEvents_.size() >= 40) { // TP:140Hz, vsync:30Hz, Fingers:10
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
+            "Too many touch events in current vsync.(vsync: %{public}" PRIu64 ", eventsCnt: %{public}u)",
+            GetVsyncTime(), static_cast<uint32_t>(touchEvents_.size()));
+    }
     for (auto iter = touchEvents_.begin(); iter != touchEvents_.end();) {
         auto timeStamp = std::chrono::duration_cast<std::chrono::nanoseconds>(iter->time.time_since_epoch()).count();
         if (targetTimeStamp < static_cast<uint64_t>(timeStamp)) {
