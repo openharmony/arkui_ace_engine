@@ -2421,7 +2421,7 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged, bool noAnimation)
     auto pattern = GetPattern<SelectOverlayPattern>();
     CHECK_NULL_VOID(pattern);
     if (!pattern->CheckIfNeedMenu()) {
-        NotifyUpdateToolBar(menuItemChanged);
+        NotifyUpdateToolBar(menuItemChanged, noAnimation);
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         return;
     }
@@ -2902,7 +2902,7 @@ void SelectOverlayNode::SetBackButtonOpacity(float value)
     backButton_->GetRenderContext()->UpdateOpacity(value);
 }
 
-void SelectOverlayNode::NotifyUpdateToolBar(bool itemChanged)
+void SelectOverlayNode::NotifyUpdateToolBar(bool itemChanged, bool withoutAnimation)
 {
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
@@ -2910,7 +2910,7 @@ void SelectOverlayNode::NotifyUpdateToolBar(bool itemChanged)
     CHECK_NULL_VOID(overlayManager);
     auto newOverlayManager = overlayManager->GetSelectContentOverlayManager();
     CHECK_NULL_VOID(newOverlayManager);
-    newOverlayManager->NotifyUpdateToolBar(itemChanged);
+    newOverlayManager->NotifyUpdateToolBar(itemChanged, withoutAnimation);
 }
 
 void SelectOverlayNode::SwitchToOverlayMode()

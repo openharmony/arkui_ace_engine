@@ -86,7 +86,7 @@ public:
     RefPtr<Pattern> GetMenuPattern();
     RefPtr<Pattern> GetHandlePattern();
     RefPtr<FrameNode> GetHandleOverlayNode();
-    void NotifyUpdateToolBar(bool itemChanged);
+    void NotifyUpdateToolBar(bool itemChanged, bool withoutAnimation = false);
     void SwitchToHandleMode(HandleLevelMode mode, bool forceChange = true);
     float GetHandleDiameter();
     void ConvertPointRelativeToNode(const RefPtr<FrameNode>& node, PointF& point);

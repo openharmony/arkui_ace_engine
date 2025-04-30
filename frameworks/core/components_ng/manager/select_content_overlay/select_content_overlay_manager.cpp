@@ -1101,11 +1101,11 @@ RefPtr<FrameNode> SelectContentOverlayManager::GetHandleOverlayNode()
     return handleNode_.Upgrade();
 }
 
-void SelectContentOverlayManager::NotifyUpdateToolBar(bool itemChanged)
+void SelectContentOverlayManager::NotifyUpdateToolBar(bool itemChanged, bool withoutAnimation)
 {
     auto menuNode = DynamicCast<SelectOverlayNode>(menuNode_.Upgrade());
     CHECK_NULL_VOID(menuNode);
-    menuNode->UpdateToolBar(itemChanged);
+    menuNode->UpdateToolBar(itemChanged, withoutAnimation);
 }
 
 float SelectContentOverlayManager::GetHandleDiameter()
