@@ -405,4 +405,15 @@ HWTEST_F(WebPatternTest, OnWindowShowTest011, TestSize.Level1)
     g_webPattern->OnVisibleChange(true);
 #endif
 }
+
+/**
+ * @tc.name: UpdateScrollBarWithBorderRadiusTest012
+ * @tc.desc: Test UpdateScrollBarWithBorderRadius.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, UpdateScrollBarWithBorderRadiusTest012, TestSize.Level1)
+{
+    g_webPattern->UpdateScrollBarWithBorderRadius();
+    EXPECT_EQ(g_webPattern->delegate_, nullptr);
+}
 } // namespace OHOS::Ace::NG

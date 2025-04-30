@@ -8000,4 +8000,13 @@ void WebDelegate::RestoreRenderFit()
     CHECK_NULL_VOID(webPattern);
     webPattern->RestoreRenderFit();
 }
+
+void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight,
+    double borderRadiusBottomLeft, double borderRadiusBottomRight)
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->SetBorderRadiusFromWeb(
+        borderRadiusTopLeft, borderRadiusTopRight, borderRadiusBottomLeft, borderRadiusBottomRight);
+}
+
 } // namespace OHOS::Ace
