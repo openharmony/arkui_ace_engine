@@ -390,6 +390,13 @@ napi_value JSPanGesture::ParsePanDistanceMap(JSRef<JSVal> jsDistanceMap, PanDist
         NAPI_CALL(env, napi_get_named_property(env, next, "value", &entry));
         NAPI_CALL(env, napi_get_element(env, entry, 0, &key));
         NAPI_CALL(env, napi_get_element(env, entry, 1, &value));
+        napi_valuetype kType = napi_undefined;
+        NAPI_CALL(env, napi_typeof(env, key, &kType));
+        napi_valuetype vType = napi_undefined;
+        NAPI_CALL(env, napi_typeof(env, value, &vType));
+        if (kType != napi_number || vType != napi_number) {
+            continue;
+        }
         int32_t sourceTool = 0;
         NAPI_CALL(env, napi_get_value_int32(env, key, &sourceTool));
         double distance = 0.0;
