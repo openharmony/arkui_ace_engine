@@ -13,3 +13,4 @@ export * from './decorators/decoratorStorageProp';
 
 export * from './storages/appStorage';
 export * from './storages/localStorage';
+export * from './tools/requestFrame';

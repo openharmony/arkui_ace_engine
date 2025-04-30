@@ -199,6 +199,14 @@ void ViewAbstract::SetBackgroundAlign(const Alignment& align)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundAlign, align);
 }
 
+void ViewAbstract::RequestFrame()
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    if (pipeline != nullptr) {
+        pipeline->RequestFrame();
+    }
+}
+
 void ViewAbstract::SetBackgroundColor(const Color& color)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

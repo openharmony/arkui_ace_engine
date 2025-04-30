@@ -16362,6 +16362,7 @@ typedef struct GENERATED_ArkUIColumnSplitModifier {
 } GENERATED_ArkUIColumnSplitModifier;
 
 typedef struct GENERATED_ArkUICommonMethodModifier {
+    void (*setRequestFrame)();
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
     void (*setWidth)(Ark_NativePointer node,

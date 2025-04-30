@@ -24,6 +24,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _Root_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
+    native static _CommonMethod_requestFrame(): void
+    @ani.unsafe.Direct
     native static _ComponentRoot_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _AbilityComponent_construct(id: KInt, flags: KInt): KPointer

@@ -165,7 +165,7 @@ public:
     static void SetChainWeight(const NG::ChainWeightPair& value);
     static void SetPixelRound(uint16_t value);
     static void SetLayoutDirection(TextDirection value);
-
+    static void RequestFrame();
     static void SetBackgroundColor(const Color &color);
     static void SetBackgroundImage(const ImageSourceInfo &src);
     static void SetBackgroundImageRepeat(const ImageRepeat &imageRepeat);
