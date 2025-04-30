@@ -209,11 +209,12 @@ int32_t  IndicatorModelNG::GetCount(FrameNode* frameNode)
     return value;
 }
 
-RefPtr<IndicatorController> IndicatorModelNG::GetIndicatorController(FrameNode* frameNode)
+RefPtr<IndicatorController> IndicatorModelNG::InitIndicatorController(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<IndicatorPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
+    pattern->InitIndicatorController();
     return pattern->GetIndicatorController();
 }
 } // namespace OHOS::Ace::NG

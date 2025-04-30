@@ -47,7 +47,7 @@ public:
     static void SetIsIndicatorCustomSize(FrameNode* frameNode, bool isCustomSize);
     static void SetShowIndicator(FrameNode* frameNode, bool showIndicator);
     static int32_t GetCount(FrameNode* frameNode);
-    static RefPtr<IndicatorController> GetIndicatorController(FrameNode* frameNode);
+    static RefPtr<IndicatorController> InitIndicatorController(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

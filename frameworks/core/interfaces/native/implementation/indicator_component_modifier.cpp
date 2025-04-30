@@ -59,11 +59,11 @@ void SetIndicatorComponentOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(peerImplPtr);
 
     // obtain the internal IndicatorController
-    auto internalSwiperController = IndicatorModelNG::GetIndicatorController(frameNode);
+    auto internalController = IndicatorModelNG::InitIndicatorController(frameNode);
 
     // pass the internal controller to external management
     auto indicatorNode = AceType::Claim<NG::FrameNode>(frameNode);
-    peerImplPtr->SetController(internalSwiperController, indicatorNode);
+    peerImplPtr->SetController(internalController, indicatorNode);
 }
 } // IndicatorComponentInterfaceModifier
 namespace IndicatorComponentAttributeModifier {
