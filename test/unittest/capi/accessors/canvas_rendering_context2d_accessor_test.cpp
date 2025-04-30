@@ -160,10 +160,10 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, startImageAnalyzerTest, TestSize.
         std::optional<StringArray> errors;
     };
     static std::optional<CheckEvent> checkEvent;
-
+    const StringArray stoppedError {"110003"};
     const std::vector<std::tuple<ImageAnalyzerState, std::optional<StringArray>>> testPlan {
         {ImageAnalyzerState::FINISHED, std::nullopt},
-        {ImageAnalyzerState::STOPPED, std::make_optional<StringArray>({"110003"})}
+        {ImageAnalyzerState::STOPPED, std::make_optional<StringArray>(stoppedError)}
     };
     for (const auto& [state, expectedErrors] : testPlan) {
         checkEvent = std::nullopt;
