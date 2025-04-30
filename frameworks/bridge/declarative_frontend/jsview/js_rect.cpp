@@ -81,10 +81,16 @@ void JSRect::Create(const JSCallbackInfo& info)
         }
         if ((propertyFlag & HAS_RADIUS) == HAS_RADIUS) {
             JSRef<JSVal> radius = obj->GetProperty("radius");
-            if (radius->IsNumber() || radius->IsString() || radius->IsObject()) {
+            if (radius->IsNumber() || radius->IsString()) {
                 SetRadiusWithJsVal(nullptr, radius);
-            } else if (radius->IsArray()) {
-                SetRadiusWithArrayValue(nullptr, radius);
+            } else if (radius->IsObject()) {
+                auto radiusObj = JSRef<JSObject>::Cast(radius);
+                auto resType = radiusObj->GetPropertyValue("type", -1); //-1 means unkown resource type
+                if (resType == -1) {
+                    SetRadiusWithArrayValue(nullptr, radius);
+                } else {
+                    SetRadiusWithJsVal(nullptr, radius);
+                }
             }
         }
         info.SetReturnValue(info.This());
