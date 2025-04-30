@@ -19,8 +19,5 @@
 
 struct PanGestureEventPeer
     : public OHOS::Ace::NG::GeneratedModifier::SomeGestureEventPeer<OHOS::Ace::PanGestureEvent> {
-protected:
-    PanGestureEventPeer() = default;
     ~PanGestureEventPeer() override = default;
-    friend OHOS::Ace::NG::PeerUtils;
 };

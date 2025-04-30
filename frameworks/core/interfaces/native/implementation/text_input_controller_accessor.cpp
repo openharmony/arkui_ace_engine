@@ -13,15 +13,18 @@
  * limitations under the License.
  */
 
+#include "arkoala_api_generated.h"
+
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/text_input_controller_peer.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextInputControllerAccessor {
 void DestroyPeerImpl(Ark_TextInputController peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->controller_ = nullptr;
     delete peer;
 }
 Ark_TextInputController CtorImpl()
@@ -69,4 +72,7 @@ const GENERATED_ArkUITextInputControllerAccessor* GetTextInputControllerAccessor
     return &TextInputControllerAccessorImpl;
 }
 
+struct TextInputControllerPeer {
+    virtual ~TextInputControllerPeer() = default;
+};
 }

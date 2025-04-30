@@ -31,7 +31,7 @@ CanvasDrawFunction MenuItemGroupPaintMethod::GetOverlayDrawFunction(PaintWrapper
                 return;
             }
             bool needHeaderPadding = props->GetNeedHeaderPadding().value_or(false);
-            auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+            auto pipeline = PipelineBase::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
             GroupDividerInfo info = group->PreparePaintData(pipeline, props, paintWrapper);
             bool needHeaderDivider = props->GetNeedHeaderDivider().value_or(true);

@@ -26,14 +26,10 @@
 #include "core/animation/animation_pub.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/property/property.h"
-#include "frameworks/base/json/json_util.h"
+
 
 namespace OHOS::Ace::NG {
 
-namespace {
-    constexpr float DEFAULT_TRANSITION_OPACITY = 0.0f;
-    constexpr auto DEFAULT_TRANSITION_TYPE = TransitionType::ALL;
-}
 struct TranslateOptions {
     CalcDimension x;
     CalcDimension y;
@@ -49,15 +45,6 @@ struct TranslateOptions {
     std::string ToString() const
     {
         return "translate:[" + x.ToString() + ", " + y.ToString() + ", " + z.ToString() + "]";
-    }
-
-    std::unique_ptr<JsonValue> ToJsonValue() const
-    {
-        auto json = JsonUtil::Create(true);
-        json->Put("x", x.ToString().c_str());
-        json->Put("y", y.ToString().c_str());
-        json->Put("z", z.ToString().c_str());
-        return json;
     }
 };
 struct ScaleOptions {
@@ -79,17 +66,6 @@ struct ScaleOptions {
     {
         return "scale:[" + std::to_string(xScale) + "," + std::to_string(yScale) + "," + std::to_string(zScale) + "," +
                centerX.ToString() + "," + centerY.ToString() + "]";
-    }
-
-    std::unique_ptr<JsonValue> ToJsonValue() const
-    {
-        auto json = JsonUtil::Create(true);
-        json->Put("x", xScale);
-        json->Put("y", yScale);
-        json->Put("z", zScale);
-        json->Put("centerX", centerX.ToString().c_str());
-        json->Put("centerY", centerY.ToString().c_str());
-        return json;
     }
 };
 struct RotateOptions {
@@ -123,23 +99,9 @@ struct RotateOptions {
                "," + centerZ.ToString() + ", angle:" + std::to_string(angle) + ", perspective:" +
                std::to_string(perspective) + "]";
     }
-
-    std::unique_ptr<JsonValue> ToJsonValue() const
-    {
-        auto json = JsonUtil::Create(true);
-        json->Put("x", xDirection);
-        json->Put("y", yDirection);
-        json->Put("z", zDirection);
-        json->Put("centerX", centerX.ToString().c_str());
-        json->Put("centerY", centerY.ToString().c_str());
-        json->Put("centerZ", centerZ.ToString().c_str());
-        json->Put("perspective", perspective);
-        return json;
-    }
 };
 struct TransitionOptions {
-    TransitionType Type = DEFAULT_TRANSITION_TYPE;
-
+    TransitionType Type = TransitionType::ALL;
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Opacity, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Translate, TranslateOptions);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Scale, ScaleOptions);
@@ -148,7 +110,7 @@ struct TransitionOptions {
     {
         TransitionOptions options;
         options.Type = type;
-        options.UpdateOpacity(DEFAULT_TRANSITION_OPACITY);
+        options.UpdateOpacity(0.0f);
         return options;
     }
     bool operator==(const TransitionOptions& other) const
@@ -167,28 +129,6 @@ struct TransitionOptions {
            << (HasScale() ? GetScale()->ToString() : "scale: none") << ", "
            << (HasRotate() ? GetRotate()->ToString() : "rotate: none");
         return ss.str();
-    }
-
-    std::string TypeToString() const
-    {
-        return Type == TransitionType::ALL ?
-            "TransitionType.ALL" : (Type == TransitionType::APPEARING ?
-             "TransitionType.Insert" : "TransitionType.Delete");
-    }
-
-    std::unique_ptr<JsonValue> ToJsonValue() const
-    {
-        auto json = JsonUtil::Create(true);
-        json->Put("type", TypeToString().c_str());
-        auto opacity = HasOpacity() ? GetOpacityValue() : DEFAULT_TRANSITION_OPACITY;
-        json->Put("opacity", opacity);
-        auto rotate = HasRotate() ? GetRotateValue() : RotateOptions();
-        json->Put("rotate", rotate.ToJsonValue());
-        auto translate = HasTranslate() ? GetTranslateValue() : TranslateOptions();
-        json->Put("translate", translate.ToJsonValue());
-        auto scale = HasScale() ? GetScaleValue() : ScaleOptions();
-        json->Put("scale", scale.ToJsonValue());
-        return json;
     }
 };
 

@@ -50,4 +50,7 @@ const GENERATED_ArkUISceneAccessor* GetSceneAccessor()
     return &SceneAccessorImpl;
 }
 
+struct ScenePeer {
+    virtual ~ScenePeer() = default;
+};
 }

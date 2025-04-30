@@ -29,60 +29,32 @@ namespace IndicatorComponentInterfaceModifier {
 void SetIndicatorComponentOptionsImpl(Ark_NativePointer node,
                                       const Opt_IndicatorComponentController* controller)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = controller ? Converter::OptConvert<type>(*controller) : std::nullopt;
-    //IndicatorComponentModelNG::SetSetIndicatorComponentOptions(frameNode, convValue);
 }
 } // IndicatorComponentInterfaceModifier
 namespace IndicatorComponentAttributeModifier {
 void InitialIndexImpl(Ark_NativePointer node,
                       const Opt_Number* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //IndicatorComponentModelNG::SetInitialIndex(frameNode, convValue);
 }
 void CountImpl(Ark_NativePointer node,
                const Opt_Number* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //IndicatorComponentModelNG::SetCount(frameNode, convValue);
 }
 void StyleImpl(Ark_NativePointer node,
                const Opt_Union_DotIndicator_DigitIndicator* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //IndicatorComponentModelNG::SetStyle(frameNode, convValue);
 }
 void LoopImpl(Ark_NativePointer node,
               const Opt_Boolean* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //IndicatorComponentModelNG::SetLoop(frameNode, convValue);
 }
 void VerticalImpl(Ark_NativePointer node,
                   const Opt_Boolean* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //IndicatorComponentModelNG::SetVertical(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
                   const Opt_Callback_Number_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //IndicatorComponentModelNG::SetOnChange(frameNode, convValue);
 }
 } // IndicatorComponentAttributeModifier
 const GENERATED_ArkUIIndicatorComponentModifier* GetIndicatorComponentModifier()

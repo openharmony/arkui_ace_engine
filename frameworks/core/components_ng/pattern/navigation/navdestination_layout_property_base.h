@@ -101,38 +101,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TitleBarTranslateState, BarTranslateState, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ToolBarTranslateState, BarTranslateState, PROPERTY_UPDATE_MEASURE);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
-    {
-        LayoutProperty::ToJsonValue(json, filter);
-        /* no fixed attr below, just return */
-        if (filter.IsFastFilter()) {
-            return;
-        }
-        auto hide = CloneHideTitleBar();
-        json->PutExtAttr("hideTitleBar", hide.value_or(false) ? "true" : "false", filter);
-        auto isAnimatedTitleBar = CloneIsAnimatedTitleBar();
-        json->PutExtAttr("isAnimatedTitleBar", isAnimatedTitleBar.value_or(false) ? "true" : "false", filter);
-        auto ignoreOpt = CloneIgnoreLayoutSafeArea();
-        if (ignoreOpt.has_value()) {
-            auto ignore = ignoreOpt.value();
-            if (ignore.type == NG::SAFE_AREA_TYPE_SYSTEM) {
-                json->PutExtAttr("ignoreLayoutSafeAreaTypes", "SAFE_AREA_TYPE_SYSTEM", filter);
-            } else {
-                json->PutExtAttr("ignoreLayoutSafeAreaTypes", "SAFE_AREA_TYPE_NONE", filter);
-            }
-            if (ignore.edges == NG::SAFE_AREA_EDGE_TOP) {
-                json->PutExtAttr("ignoreLayoutSafeAreaEdges", "SAFE_AREA_EDGE_TOP", filter);
-            } else if (ignore.edges == NG::SAFE_AREA_EDGE_BOTTOM) {
-                json->PutExtAttr("ignoreLayoutSafeAreaEdges", "SAFE_AREA_EDGE_BOTTOM", filter);
-            } else {
-                json->PutExtAttr("ignoreLayoutSafeAreaEdges", "SAFE_AREA_EDGE_NONE", filter);
-            }
-        } else {
-            json->PutExtAttr("ignoreLayoutSafeAreaTypes", "SAFE_AREA_TYPE_NONE", filter);
-            json->PutExtAttr("ignoreLayoutSafeAreaEdges", "SAFE_AREA_EDGE_NONE", filter);
-        }
-    }
-
 protected:
     void UpdateBaseLayoutProperty(const NavDestinationLayoutPropertyBase* layoutProperty)
     {

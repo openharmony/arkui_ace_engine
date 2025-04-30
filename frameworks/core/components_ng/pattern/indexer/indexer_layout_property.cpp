@@ -58,7 +58,7 @@ void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
     json->PutExtAttr("font", ToJsonObjectValue(propFont_.value_or(defaultFont)), filter);
     json->PutExtAttr("selectedFont", ToJsonObjectValue(propSelectedFont_.value_or(defaultFont)), filter);
     json->PutExtAttr("popupFont", ToJsonObjectValue(propPopupFont_.value_or(defaultFont)), filter);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
@@ -78,9 +78,8 @@ std::unique_ptr<JsonValue> IndexerLayoutProperty::ToJsonObjectValue(const TextSt
 {
     auto fontJsonObject = JsonUtil::Create(true);
     fontJsonObject->Put("fontSize", textStyle.GetFontSize().ToString().c_str());
-    fontJsonObject->Put("fontStyle",
-        textStyle.GetFontStyle() == FontStyle::NORMAL ? "FontStyle::NORMAL" : "FontStyle::ITALIC");
-
+    fontJsonObject->Put(
+        "fontStyle", textStyle.GetFontStyle() == FontStyle::NORMAL ? "FontStyle::NORMAL" : "FontStyle::ITALIC");
     fontJsonObject->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(textStyle.GetFontWeight()).c_str());
     auto fontFamilyVector = textStyle.GetFontFamilies();
     std::string fontFamily;

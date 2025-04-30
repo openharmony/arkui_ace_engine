@@ -19,7 +19,7 @@
 
 #include "arkoala-macros.h"
 #include "arkoala_api_generated.h"
-#include "node_api.h"
+// #include "node_api.h"
 
 namespace OHOS::Ace::NG {
 namespace GeneratedApiImpl {
@@ -816,7 +816,7 @@ const GenericServiceAPI* GetServiceAPI()
 EXTERN_C IDLIZE_API_EXPORT const OH_AnyAPI* GENERATED_GetArkAnyAPI(
     GENERATED_Ark_APIVariantKind kind, int version)
 {
-    switch (static_cast<int>(kind)) {
+    switch (kind) {
         case GENERATED_FULL:
             if (version == GENERATED_ARKUI_FULL_API_VERSION)   {
                 return reinterpret_cast<const OH_AnyAPI*>(GENERATED_GetFullAPI());
@@ -832,11 +832,11 @@ EXTERN_C IDLIZE_API_EXPORT const OH_AnyAPI* GENERATED_GetArkAnyAPI(
                 return reinterpret_cast<const OH_AnyAPI*>(GENERATED_GetExtendedAPI());
             }
             break;
-        case GENERIC_SERVICE_API_KIND:
-            if (version == GENERIC_SERVICE_API_VERSION)   {
-                return reinterpret_cast<const OH_AnyAPI*>(GetServiceAPI());
-            }
-            break;
+        // case GENERIC_SERVICE_API_KIND:
+        //     if (version == GENERIC_SERVICE_API_VERSION)   {
+        //         return reinterpret_cast<const OH_AnyAPI*>(GetServiceAPI());
+        //     }
+        //     break;
         default:
             break;
     }

@@ -112,49 +112,9 @@ void ListItemGroupModelNG::SetFooter(FrameNode* frameNode, FrameNode* footerNode
     pattern->SetFooterComponentContentExist(true);
 }
 
-void ListItemGroupModelNG::SetHeader(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
-    CHECK_NULL_VOID(pattern);
-    RefPtr<UINode> unitNode = builder();
-    pattern->AddHeader(unitNode);
-}
-
-void ListItemGroupModelNG::SetFooter(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
-    CHECK_NULL_VOID(pattern);
-    RefPtr<UINode> unitNode = builder();
-    pattern->AddFooter(unitNode);
-}
-
 RefPtr<ListChildrenMainSize> ListItemGroupModelNG::GetOrCreateListChildrenMainSize()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
-    return pattern->GetOrCreateListChildrenMainSize();
-}
-
-RefPtr<ListChildrenMainSize> ListItemGroupModelNG::GetOrCreateListChildrenMainSize(
-    FrameNode* frameNode, const std::optional<float>& defaultSize)
-{
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
-    auto childrenMainSize = pattern->GetOrCreateListChildrenMainSize();
-    if (defaultSize.has_value()) {
-        childrenMainSize->UpdateDefaultSize(defaultSize.value());
-    }
-    return childrenMainSize;
-}
-
-RefPtr<ListChildrenMainSize> ListItemGroupModelNG::GetOrCreateListChildrenMainSize(
-    FrameNode* frameNode)
-{
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
@@ -185,21 +145,17 @@ V2::ItemDivider ListItemGroupModelNG::GetDivider(FrameNode* frameNode)
     return value;
 }
 
-void ListItemGroupModelNG::SetSpace(FrameNode* frameNode, const std::optional<Dimension>& space)
+void ListItemGroupModelNG::SetSpace(FrameNode* frameNode, const Dimension& space)
 {
-    if (space.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Space, space.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Space, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Space, space, frameNode);
 }
 
-void ListItemGroupModelNG::SetStyle(FrameNode* frameNode, const std::optional<V2::ListItemGroupStyle>& style)
+void ListItemGroupModelNG::SetStyle(FrameNode* frameNode, V2::ListItemGroupStyle style)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetListItemGroupStyle(style.value_or(V2::ListItemGroupStyle::NONE));
+    pattern->SetListItemGroupStyle(style);
 }
 
 void ListItemGroupModelNG::SetFooterComponent(const RefPtr<NG::UINode>& footerComponent)

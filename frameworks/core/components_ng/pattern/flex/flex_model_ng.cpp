@@ -132,11 +132,6 @@ void FlexModelNG::SetCrossAxisAlign(FlexAlign align)
     ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAxisAlign, align);
 }
 
-void FlexModelNG::SetWrapCrossAlignment(WrapAlignment value)
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAlignment, value);
-}
-
 void FlexModelNG::SetWrapCrossAlignment(FrameNode* frameNode, std::optional<WrapAlignment>& align)
 {
     CHECK_NULL_VOID(frameNode);
@@ -145,6 +140,11 @@ void FlexModelNG::SetWrapCrossAlignment(FrameNode* frameNode, std::optional<Wrap
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAlignment, frameNode);
     }
+}
+
+void FlexModelNG::SetWrapCrossAlignment(WrapAlignment value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAlignment, value);
 }
 
 void FlexModelNG::SetWrapAlignment(WrapAlignment value)

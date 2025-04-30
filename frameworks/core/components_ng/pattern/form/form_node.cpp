@@ -20,11 +20,7 @@
 #include "core/components_ng/pattern/form/form_pattern.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#ifndef ARKUI_CAPI_UNITTEST
 #include "pointer_event.h"
-#else
-#include "test/unittest/capi/stubs/mock_pointer_event.h"
-#endif // ARKUI_CAPI_UNITTEST
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -208,7 +204,7 @@ private:
 
 FormNode::~FormNode()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
@@ -239,9 +235,7 @@ HitTestResult FormNode::AxisTest(const PointF& globalPoint, const PointF& parent
         };
         auto mgr = context->GetFormEventManager();
         if (mgr) {
-#ifndef ARKUI_CAPI_UNITTEST
             mgr->AddEtsCardAxisEventCallback(touchRestrict.touchEvent.id, callback);
-#endif
         }
         return testResult;
     }
@@ -283,9 +277,7 @@ HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& paren
         };
         auto mgr = context->GetFormEventManager();
         if (mgr) {
-#ifndef ARKUI_CAPI_UNITTEST
             mgr->AddEtsCardTouchEventCallback(touchRestrict.touchEvent.id, callback);
-#endif
         }
         return testResult;
     }
@@ -366,7 +358,7 @@ void FormNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
 
 void FormNode::InitializeFormAccessibility()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
@@ -378,7 +370,7 @@ void FormNode::InitializeFormAccessibility()
 
 void FormNode::NotifyAccessibilityChildTreeRegister()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);

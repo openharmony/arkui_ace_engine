@@ -27,8 +27,8 @@ namespace OHOS::Ace::NG::Converter {
 template<>
 DimensionOffset Convert(const Ark_ActionSheetOffset& src)
 {
-    return DimensionOffset(OptConvert<Dimension>(src.dx).value_or(Dimension()),
-        OptConvert<Dimension>(src.dy).value_or(Dimension()));
+    return DimensionOffset(
+        OptConvert<Dimension>(src.dx).value_or(Dimension()), OptConvert<Dimension>(src.dy).value_or(Dimension()));
 }
 
 template<>
@@ -45,9 +45,7 @@ ActionSheetInfo Convert(const Ark_SheetInfo& src)
     }
 
     auto action = Converter::OptConvert<VoidCallback>(src.action);
-    auto onClick = [callback = CallbackHelper(*action)](GestureEvent& info) {
-        callback.Invoke();
-    };
+    auto onClick = [callback = CallbackHelper(*action)](GestureEvent& info) { callback.Invoke(); };
     info.action = AceType::MakeRefPtr<NG::ClickEvent>(std::move(onClick));
     return info;
 }
@@ -96,14 +94,12 @@ void UpdateDynamicDialogProperties(DialogProperties& dialogProps, const Ark_Acti
     dialogProps.borderColor = Converter::OptConvert<BorderColorProperty>(options.borderColor);
     dialogProps.borderRadius = Converter::OptConvert<BorderRadiusProperty>(options.cornerRadius);
     dialogProps.borderStyle = Converter::OptConvert<BorderStyleProperty>(options.borderStyle);
-    dialogProps.alignment = Converter::OptConvert<DialogAlignment>(
-        options.alignment).value_or(DialogAlignment::BOTTOM);
-    auto isTopAligned = dialogProps.alignment == DialogAlignment::TOP
-        || dialogProps.alignment == DialogAlignment::TOP_START
-        || dialogProps.alignment == DialogAlignment::TOP_END;
-    dialogProps.offset = Converter::OptConvert<DimensionOffset>(options.offset).value_or(
-        isTopAligned ? DEFAULT_OFFSET_TOP : DEFAULT_OFFSET
-    );
+    dialogProps.alignment = Converter::OptConvert<DialogAlignment>(options.alignment).value_or(DialogAlignment::BOTTOM);
+    auto isTopAligned = dialogProps.alignment == DialogAlignment::TOP ||
+                        dialogProps.alignment == DialogAlignment::TOP_START ||
+                        dialogProps.alignment == DialogAlignment::TOP_END;
+    dialogProps.offset = Converter::OptConvert<DimensionOffset>(options.offset)
+                             .value_or(isTopAligned ? DEFAULT_OFFSET_TOP : DEFAULT_OFFSET);
     dialogProps.maskRect = Converter::OptConvert<DimensionRect>(options.maskRect);
     dialogProps.sheetsInfo = Converter::Convert<std::vector<ActionSheetInfo>>(options.sheets);
     auto transition = Converter::OptConvert<RefPtr<NG::ChainedTransitionEffect>>(options.transition);
@@ -113,12 +109,10 @@ void UpdateDynamicDialogProperties(DialogProperties& dialogProps, const Ark_Acti
 }
 void ShowImpl(const Ark_ActionSheetOptions* value)
 {
-    DialogProperties dialogProps {
-        .type = DialogType::ACTION_SHEET
-    };
+    DialogProperties dialogProps { .type = DialogType::ACTION_SHEET };
     UpdateDynamicDialogProperties(dialogProps, *value);
-    dialogProps.backgroundBlurStyle = static_cast<int32_t>(Converter::OptConvert<BlurStyle>(
-        value->backgroundBlurStyle).value_or(BlurStyle::COMPONENT_REGULAR));
+    dialogProps.backgroundBlurStyle = static_cast<int32_t>(
+        Converter::OptConvert<BlurStyle>(value->backgroundBlurStyle).value_or(BlurStyle::COMPONENT_REGULAR));
     dialogProps.backgroundColor = Converter::OptConvert<Color>(value->backgroundColor);
     dialogProps.enableHoverMode =
         Converter::OptConvert<bool>(value->enableHoverMode).value_or(dialogProps.enableHoverMode);
@@ -137,13 +131,11 @@ void ShowImpl(const Ark_ActionSheetOptions* value)
         dialogProps.onCancel = cancelFunc;
     }
     dialogProps.onLanguageChange = [value, updateDialogProperties = UpdateDynamicDialogProperties](
-        DialogProperties& dialogProps) {
-        updateDialogProperties(dialogProps, *value);
-    };
+                                       DialogProperties& dialogProps) { updateDialogProperties(dialogProps, *value); };
     OHOS::Ace::NG::ActionSheetModelNG sheetModel;
     sheetModel.ShowActionSheet(dialogProps);
 }
-} // ActionSheetAccessor
+} // namespace ActionSheetAccessor
 const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor()
 {
     static const GENERATED_ArkUIActionSheetAccessor ActionSheetAccessorImpl {
@@ -151,5 +143,4 @@ const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor()
     };
     return &ActionSheetAccessorImpl;
 }
-
-}
+} // namespace OHOS::Ace::NG::GeneratedModifier

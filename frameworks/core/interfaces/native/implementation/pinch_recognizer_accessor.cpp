@@ -46,4 +46,7 @@ const GENERATED_ArkUIPinchRecognizerAccessor* GetPinchRecognizerAccessor()
     return &PinchRecognizerAccessorImpl;
 }
 
+struct PinchRecognizerPeer {
+    virtual ~PinchRecognizerPeer() = default;
+};
 }

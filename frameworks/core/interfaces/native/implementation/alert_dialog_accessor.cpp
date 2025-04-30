@@ -130,8 +130,7 @@ void UpdateDynamicDialogProperties(DialogProperties& dialogProps, const DialogPr
     dialogProps.borderColor = Converter::OptConvert<BorderColorProperty>(props.borderColor);
     dialogProps.borderRadius = Converter::OptConvert<BorderRadiusProperty>(props.cornerRadius);
     dialogProps.borderStyle = Converter::OptConvert<BorderStyleProperty>(props.borderStyle);
-    dialogProps.alignment = Converter::OptConvert<DialogAlignment>(
-        props.alignment).value_or(DialogAlignment::BOTTOM);
+    dialogProps.alignment = Converter::OptConvert<DialogAlignment>(props.alignment).value_or(DialogAlignment::BOTTOM);
     dialogProps.offset = Converter::OptConvert<DimensionOffset>(props.offset).value_or(dialogProps.offset);
     dialogProps.maskRect = Converter::OptConvert<DimensionRect>(props.maskRect);
     if (auto textStyle = Converter::OptConvert<Ark_TextStyle_alert_dialog>(props.textStyle); textStyle) {
@@ -167,9 +166,7 @@ DialogProperties CreateDialogProperties(const DialogPropsForUpdate props)
         dialogProps.onCancel = cancelFunc;
     }
     dialogProps.onLanguageChange = [props, updateDialogProperties = UpdateDynamicDialogProperties](
-        DialogProperties& dialogProps) {
-        updateDialogProperties(dialogProps, props);
-    };
+                                       DialogProperties& dialogProps) { updateDialogProperties(dialogProps, props); };
     return dialogProps;
 }
 DialogPropsForUpdate GetPropsWithConfirm(const Ark_AlertDialogParamWithConfirm params)
@@ -216,8 +213,8 @@ void ShowWithConfirm(const Ark_AlertDialogParamWithConfirm params)
     auto dialogProps = CreateDialogProperties(GetPropsWithConfirm(params));
     UpdateConfirmButton(dialogProps, params);
     dialogProps.onLanguageChange = [params, getProps = GetPropsWithConfirm,
-        updateDialogProperties = UpdateDynamicDialogProperties,
-        updateButtons = UpdateConfirmButton](DialogProperties& dialogProps) {
+                                       updateDialogProperties = UpdateDynamicDialogProperties,
+                                       updateButtons = UpdateConfirmButton](DialogProperties& dialogProps) {
         updateDialogProperties(dialogProps, getProps(params));
         updateButtons(dialogProps, params);
     };
@@ -273,8 +270,8 @@ void ShowWithButtons(const Ark_AlertDialogParamWithButtons params)
     auto dialogProps = CreateDialogProperties(GetPropsWithButtons(params));
     UpdateButtons(dialogProps, params);
     dialogProps.onLanguageChange = [params, getProps = GetPropsWithButtons,
-        updateDialogProperties = UpdateDynamicDialogProperties,
-        updateButtons = UpdateButtons](DialogProperties& dialogProps) {
+                                       updateDialogProperties = UpdateDynamicDialogProperties,
+                                       updateButtons = UpdateButtons](DialogProperties& dialogProps) {
         updateDialogProperties(dialogProps, getProps(params));
         updateButtons(dialogProps, params);
     };
@@ -329,8 +326,8 @@ void ShowWithOptions(const Ark_AlertDialogParamWithOptions params)
     auto dialogProps = CreateDialogProperties(GetPropsWithOptions(params));
     UpdateOptionsButtons(dialogProps, params);
     dialogProps.onLanguageChange = [params, getProps = GetPropsWithOptions,
-        updateDialogProperties = UpdateDynamicDialogProperties,
-        updateButtons = UpdateOptionsButtons](DialogProperties& dialogProps) {
+                                       updateDialogProperties = UpdateDynamicDialogProperties,
+                                       updateButtons = UpdateOptionsButtons](DialogProperties& dialogProps) {
         updateDialogProperties(dialogProps, getProps(params));
         updateButtons(dialogProps, params);
     };
@@ -340,13 +337,12 @@ void ShowWithOptions(const Ark_AlertDialogParamWithOptions params)
 }
 void ShowImpl(const Ark_Type_AlertDialog_show_value* value)
 {
-    using DialogParamsVariant = std::variant<
-        Ark_AlertDialogParamWithConfirm,
-        Ark_AlertDialogParamWithButtons,
-        Ark_AlertDialogParamWithOptions
-    >;
+    using DialogParamsVariant =
+        std::variant<Ark_AlertDialogParamWithConfirm, Ark_AlertDialogParamWithButtons, Ark_AlertDialogParamWithOptions>;
     auto params = Converter::OptConvert<DialogParamsVariant>(*value);
-    if (!params) { return; }
+    if (!params) {
+        return;
+    }
     if (auto paramsWithConfirm = std::get_if<Ark_AlertDialogParamWithConfirm>(&(*params)); paramsWithConfirm) {
         ShowWithConfirm(*paramsWithConfirm);
     } else if (auto paramsWithButtons = std::get_if<Ark_AlertDialogParamWithButtons>(&(*params)); paramsWithButtons) {
@@ -355,7 +351,7 @@ void ShowImpl(const Ark_Type_AlertDialog_show_value* value)
         ShowWithOptions(*paramsWithOptions);
     }
 }
-} // AlertDialogAccessor
+} // namespace AlertDialogAccessor
 const GENERATED_ArkUIAlertDialogAccessor* GetAlertDialogAccessor()
 {
     static const GENERATED_ArkUIAlertDialogAccessor AlertDialogAccessorImpl {
@@ -363,5 +359,4 @@ const GENERATED_ArkUIAlertDialogAccessor* GetAlertDialogAccessor()
     };
     return &AlertDialogAccessorImpl;
 }
-
-}
+} // namespace OHOS::Ace::NG::GeneratedModifier

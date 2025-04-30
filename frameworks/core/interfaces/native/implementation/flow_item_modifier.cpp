@@ -16,23 +16,18 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
-#include "frameworks/core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FlowItemModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = WaterFlowItemModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return {};
 }
 } // FlowItemModifier
 namespace FlowItemInterfaceModifier {
 void SetFlowItemOptionsImpl(Ark_NativePointer node)
 {
-    // keep it empty because FlowItem doesn`t have any options
 }
 } // FlowItemInterfaceModifier
 const GENERATED_ArkUIFlowItemModifier* GetFlowItemModifier()

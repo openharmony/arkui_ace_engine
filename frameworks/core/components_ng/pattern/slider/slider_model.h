@@ -54,6 +54,7 @@ public:
         SLIDE_AND_CLICK_UP,
     };
 
+    // need check
     enum class SliderChangeMode {
         BEGIN,
         MOVING,

@@ -248,60 +248,6 @@ void VideoModelNG::SetOnFullScreenChange(VideoEventFunc&& onFullScreenChange)
     eventHub->SetOnFullScreenChange(std::move(onFullScreenChange));
 }
 
-void VideoModelNG::AddDragFrameNodeToManager(FrameNode* frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::Claim(frameNode));
-}
-
-RefPtr<FrameNode> VideoModelNG::CreateFrameNode(int32_t nodeId)
-{
-    auto videoNode = VideoNode::GetOrCreateVideoNode(
-        V2::VIDEO_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<VideoPattern>(nullptr); });
-    auto videoFocusHub = videoNode->GetFocusHub();
-    if (videoFocusHub) {
-        videoFocusHub->SetIsFocusUnit(true);
-    }
-    bool hasPreviewImageNode = videoNode->HasPreviewImageNode();
-    bool hasControllerRowNode = videoNode->HasControllerRowNode();
-    bool hasMediaColumnNode = videoNode->HasMediaColumnNode();
-    if (!hasMediaColumnNode) {
-        auto mediaColumnId = videoNode->GetMediaColumnId();
-        auto mediaColumNode = FrameNode::GetOrCreateFrameNode(
-            V2::COLUMN_ETS_TAG, mediaColumnId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-        CHECK_NULL_RETURN(mediaColumNode, videoNode);
-        videoNode->AddChild(mediaColumNode);
-    }
-    if (!hasPreviewImageNode) {
-        auto previewImageId = videoNode->GetPreviewImageId();
-        auto previewImageNode = FrameNode::GetOrCreateFrameNode(
-            V2::IMAGE_ETS_TAG, previewImageId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
-        CHECK_NULL_RETURN(previewImageNode, videoNode);
-        videoNode->AddChild(previewImageNode);
-    }
-    if (!hasControllerRowNode) {
-        auto controllerRowId = videoNode->GetControllerRowId();
-        auto videoPattern = AceType::DynamicCast<VideoPattern>(videoNode->GetPattern());
-        CHECK_NULL_RETURN(videoPattern, videoNode);
-        auto controllerRowNode = videoPattern->CreateControlBar(controllerRowId);
-        CHECK_NULL_RETURN(controllerRowNode, videoNode);
-        videoNode->AddChild(controllerRowNode);
-    }
-    VideoModelNG::AddDragFrameNodeToManager(Referenced::RawPtr(videoNode));
-    return videoNode;
-}
-
-void VideoModelNG::SetVideoController(FrameNode* frameNode, const RefPtr<VideoControllerV2>& videoController)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
-    videoPattern->SetVideoController(videoController);
-}
-
 void VideoModelNG::SetAutoPlay(FrameNode* frameNode, bool autoPlay)
 {
     CHECK_NULL_VOID(frameNode);
@@ -315,9 +261,9 @@ void VideoModelNG::SetControls(FrameNode* frameNode, bool controls)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(VideoLayoutProperty, Controls, controls, frameNode);
 }
 
-void VideoModelNG::SetObjectFit(FrameNode* frameNode, std::optional<ImageFit> objectFit)
+void VideoModelNG::SetObjectFit(FrameNode* frameNode, ImageFit objectFit)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(VideoLayoutProperty, ObjectFit, objectFit.value_or(ImageFit::COVER), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(VideoLayoutProperty, ObjectFit, objectFit, frameNode);
 }
 
 void VideoModelNG::SetMuted(FrameNode* frameNode, bool muted)
@@ -328,12 +274,12 @@ void VideoModelNG::SetMuted(FrameNode* frameNode, bool muted)
     videoPattern->UpdateMuted(muted);
 }
 
-void VideoModelNG::SetSurfaceBackgroundColor(FrameNode* frameNode, const std::optional<Color>& optColor)
+void VideoModelNG::SetSurfaceBackgroundColor(FrameNode* frameNode, Color color)
 {
     CHECK_NULL_VOID(frameNode);
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(videoPattern);
-    videoPattern->SetSurfaceBackgroundColor(optColor.value_or(Color::BLACK));
+    videoPattern->SetSurfaceBackgroundColor(color);
 }
 
 void VideoModelNG::SetLoop(FrameNode* frameNode, bool loop)
@@ -377,6 +323,71 @@ void VideoModelNG::SetImageAIOptions(void *options)
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(videoPattern);
     videoPattern->SetImageAIOptions(options);
+}
+
+RefPtr<FrameNode> VideoModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto videoNode = VideoNode::GetOrCreateVideoNode(
+        V2::VIDEO_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<VideoPattern>(nullptr); });
+    auto videoFocusHub = videoNode->GetFocusHub();
+    if (videoFocusHub) {
+        videoFocusHub->SetIsFocusUnit(true);
+    }
+    bool hasPreviewImageNode = videoNode->HasPreviewImageNode();
+    bool hasControllerRowNode = videoNode->HasControllerRowNode();
+    bool hasMediaColumnNode = videoNode->HasMediaColumnNode();
+    if (!hasMediaColumnNode) {
+        auto mediaColumnId = videoNode->GetMediaColumnId();
+        auto mediaColumNode = FrameNode::GetOrCreateFrameNode(
+            V2::COLUMN_ETS_TAG, mediaColumnId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        CHECK_NULL_RETURN(mediaColumNode, videoNode);
+        videoNode->AddChild(mediaColumNode);
+    }
+    if (!hasPreviewImageNode) {
+        auto previewImageId = videoNode->GetPreviewImageId();
+        auto previewImageNode = FrameNode::GetOrCreateFrameNode(
+            V2::IMAGE_ETS_TAG, previewImageId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+        CHECK_NULL_RETURN(previewImageNode, videoNode);
+        videoNode->AddChild(previewImageNode);
+    }
+    if (!hasControllerRowNode) {
+        auto controllerRowId = videoNode->GetControllerRowId();
+        auto videoPattern = AceType::DynamicCast<VideoPattern>(videoNode->GetPattern());
+        CHECK_NULL_RETURN(videoPattern, videoNode);
+        auto controllerRowNode = videoPattern->CreateControlBar(controllerRowId);
+        CHECK_NULL_RETURN(controllerRowNode, videoNode);
+        videoNode->AddChild(controllerRowNode);
+    }
+    return videoNode;
+}
+
+void VideoModelNG::SetSrc(FrameNode* frameNode,
+    const std::string& src, const std::string& bundleName, const std::string& moduleName)
+{
+    VideoSourceInfo videoSrcInfo;
+    videoSrcInfo.src_ = src;
+    videoSrcInfo.bundleName_ = bundleName;
+    videoSrcInfo.moduleName_ = moduleName;
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(VideoLayoutProperty, VideoSource, videoSrcInfo, frameNode);
+}
+
+void VideoModelNG::SetProgressRate(FrameNode* frameNode, double progressRate)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    videoPattern->UpdateProgressRate(progressRate);
+}
+
+void VideoModelNG::SetPosterSourceInfo(FrameNode* frameNode, const ImageSourceInfo& posterSourceInfo)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(VideoLayoutProperty, PosterImageInfo, posterSourceInfo, frameNode);
+}
+
+void VideoModelNG::SetVideoController(FrameNode* frameNode, const RefPtr<VideoControllerV2>& videoController)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    videoPattern->SetVideoController(videoController);
 }
 
 void VideoModelNG::EnableAnalyzer(FrameNode* frameNode, bool enable)
@@ -464,27 +475,5 @@ void VideoModelNG::SetOnStop(FrameNode* frameNode, VideoEventFunc&& onStop)
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStop(std::move(onStop));
-}
-
-void VideoModelNG::SetSrc(FrameNode* frameNode,
-    const std::string& src, const std::string& bundleName, const std::string& moduleName)
-{
-    VideoSourceInfo videoSrcInfo;
-    videoSrcInfo.src_ = src;
-    videoSrcInfo.bundleName_ = bundleName;
-    videoSrcInfo.moduleName_ = moduleName;
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(VideoLayoutProperty, VideoSource, videoSrcInfo, frameNode);
-}
-
-void VideoModelNG::SetProgressRate(FrameNode* frameNode, double progressRate)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
-    videoPattern->UpdateProgressRate(progressRate);
-}
-
-void VideoModelNG::SetPosterSourceInfo(FrameNode* frameNode, const ImageSourceInfo& posterSourceInfo)
-{
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(VideoLayoutProperty, PosterImageInfo, posterSourceInfo, frameNode);
 }
 } // namespace OHOS::Ace::NG

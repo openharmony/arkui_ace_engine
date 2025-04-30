@@ -160,7 +160,7 @@ ImageSourceInfo::ImageSourceInfo(std::string imageSrc, std::string bundleName, s
         TAG_LOGW(AceLogTag::ACE_IMAGE, "ImageSourceInfo: multi image source set, only one will be load.");
     }
 
-    auto pipelineContext = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         localColorMode_ = pipelineContext->GetLocalColorMode();
     }
@@ -194,7 +194,7 @@ ImageSourceInfo::ImageSourceInfo(const std::shared_ptr<std::string>& imageSrc, s
         TAG_LOGW(AceLogTag::ACE_IMAGE, "ImageSourceInfo: multi image source set, only one will be load.");
     }
 
-    auto pipelineContext = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         localColorMode_ = pipelineContext->GetLocalColorMode();
     }

@@ -41,14 +41,9 @@ void PolygonModelNG::SetPoints(const ShapePoints& points)
     ACE_UPDATE_PAINT_PROPERTY(PolygonPaintProperty, Points, points);
 }
 
-void PolygonModelNG::SetPoints(FrameNode* frameNode, const std::optional<ShapePoints>& points)
+void PolygonModelNG::SetPoints(FrameNode* frameNode, const ShapePoints& points)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (points) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(PolygonPaintProperty, Points, points.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(PolygonPaintProperty, Points, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(PolygonPaintProperty, Points, points, frameNode);
 }
 
 RefPtr<FrameNode> PolygonModelNG::CreateFrameNode(int32_t nodeId, bool isPolygon)

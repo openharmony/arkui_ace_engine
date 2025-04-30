@@ -138,18 +138,15 @@ void MenuModelNG::SetItemDivider(const V2::ItemDivider& divider, const DividerMo
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDividerMode, mode);
 }
 
-void MenuModelNG::SetItemDivider(FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider,
-    const std::optional<DividerMode>& mode)
+void MenuModelNG::SetItemDivider(
+    FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider, const DividerMode& mode)
 {
     CHECK_NULL_VOID(frameNode);
     if (divider.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDivider, divider.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDividerMode, mode, frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDivider, frameNode);
-    }
-    if (mode.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDividerMode, mode.value(), frameNode);
-    } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDividerMode, frameNode);
     }
 }
@@ -160,25 +157,21 @@ void MenuModelNG::SetItemGroupDivider(const V2::ItemDivider& divider, const Divi
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDividerMode, mode);
 }
 
-void MenuModelNG::SetItemGroupDivider(FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider,
-    const std::optional<DividerMode>& mode)
+void MenuModelNG::SetItemGroupDivider(
+    FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider, const DividerMode& mode)
 {
     CHECK_NULL_VOID(frameNode);
     if (divider.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDivider, divider.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDividerMode, mode, frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDivider, frameNode);
-    }
-    if (mode.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDividerMode, mode.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDividerMode, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDividerMode, frameNode);
     }
 }
 
 void MenuModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    CHECK_NULL_VOID(frameNode);
     if (color.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor, color.value(), frameNode);
     } else {
@@ -245,7 +238,6 @@ void MenuModelNG::SetBorderRadius(FrameNode* frameNode, const std::optional<Dime
 
 void MenuModelNG::ResetBorderRadius(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(frameNode);
     ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(MenuLayoutProperty, BorderRadius, PROPERTY_UPDATE_MEASURE, frameNode);
 }
 
@@ -253,7 +245,6 @@ void MenuModelNG::SetBorderRadius(FrameNode* frameNode, const std::optional<Dime
     const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
     const std::optional<Dimension>& radiusBottomRight)
 {
-    CHECK_NULL_VOID(frameNode);
     NG::BorderRadiusProperty borderRadius;
     borderRadius.radiusTopLeft = radiusTopLeft;
     borderRadius.radiusTopRight = radiusTopRight;

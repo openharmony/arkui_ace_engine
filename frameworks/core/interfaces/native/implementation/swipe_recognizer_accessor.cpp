@@ -51,4 +51,7 @@ const GENERATED_ArkUISwipeRecognizerAccessor* GetSwipeRecognizerAccessor()
     return &SwipeRecognizerAccessorImpl;
 }
 
+struct SwipeRecognizerPeer {
+    virtual ~SwipeRecognizerPeer() = default;
+};
 }

@@ -18,13 +18,7 @@
 #include <optional>
 #include <string>
 #include "arkoala_api_generated.h"
-#include "core/interfaces/native/utility/peer_utils.h"
 
-struct TextMenuItemIdPeer final {
+struct TextMenuItemIdPeer {
     std::optional<std::string> id;
-
-protected:
-    explicit TextMenuItemIdPeer(std::optional<std::string> idVal = std::nullopt) : id(idVal) {}
-    virtual ~TextMenuItemIdPeer() = default;
-    friend OHOS::Ace::NG::PeerUtils;
 };

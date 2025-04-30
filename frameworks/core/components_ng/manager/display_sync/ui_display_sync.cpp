@@ -155,21 +155,21 @@ bool UIDisplaySync::IsAddToPipeline(WeakPtr<PipelineBase>& pipelineContext)
 
 void UIDisplaySync::AddToPipelineOnContainer()
 {
-    WeakPtr<PipelineBase> pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    WeakPtr<PipelineBase> pipeline = PipelineBase::GetCurrentContext();
     AddToPipeline(pipeline);
     return;
 }
 
 void UIDisplaySync::DelFromPipelineOnContainer()
 {
-    WeakPtr<PipelineBase> pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    WeakPtr<PipelineBase> pipeline = PipelineBase::GetCurrentContext();
     DelFromPipeline(pipeline);
     return;
 }
 
 bool UIDisplaySync::IsOnPipeline()
 {
-    WeakPtr<PipelineBase> pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    WeakPtr<PipelineBase> pipeline = PipelineBase::GetCurrentContext();
     return IsAddToPipeline(pipeline);
 }
 

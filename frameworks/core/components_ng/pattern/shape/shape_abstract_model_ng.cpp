@@ -120,30 +120,20 @@ void ShapeAbstractModelNG::SetHeight(Dimension& height)
     ViewAbstract::SetHeight(CalcLength(height));
 }
 
-void ShapeAbstractModelNG::SetWidth(FrameNode* frameNode, const std::optional<Dimension>& width)
+void ShapeAbstractModelNG::SetWidth(FrameNode* frameNode, Dimension& width)
 {
-    if (width) {
-        Dimension val = width.value();
-        if (LessNotEqual(val.Value(), 0.0)) {
-            val.SetValue(0.0);
-        }
-        ViewAbstract::SetWidth(frameNode, CalcLength(val));
-    } else {
-        ViewAbstract::ClearWidthOrHeight(frameNode, false);
+    if (LessNotEqual(width.Value(), 0.0)) {
+        width.SetValue(0.0);
     }
+    ViewAbstract::SetWidth(frameNode, CalcLength(width));
 }
 
-void ShapeAbstractModelNG::SetHeight(FrameNode* frameNode, const std::optional<Dimension>& height)
+void ShapeAbstractModelNG::SetHeight(FrameNode* frameNode, Dimension& height)
 {
-    if (height) {
-        Dimension val = height.value();
-        if (LessNotEqual(val.Value(), 0.0)) {
-            val.SetValue(0.0);
-        }
-        ViewAbstract::SetHeight(frameNode, CalcLength(val));
-    } else {
-        ViewAbstract::ClearWidthOrHeight(frameNode, true);
+    if (LessNotEqual(height.Value(), 0.0)) {
+        height.SetValue(0.0);
     }
+    ViewAbstract::SetHeight(frameNode, CalcLength(height));
 }
 
 void ShapeAbstractModelNG::ResetWidth(FrameNode* frameNode)

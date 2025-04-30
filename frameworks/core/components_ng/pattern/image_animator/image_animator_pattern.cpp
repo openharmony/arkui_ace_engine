@@ -589,7 +589,7 @@ bool ImageAnimatorPattern::IsShowingSrc(const RefPtr<FrameNode>& imageFrameNode,
 
 bool ImageAnimatorPattern::IsFormRender()
 {
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     return pipeline->IsFormRenderExceptDynamicComponent();
 }

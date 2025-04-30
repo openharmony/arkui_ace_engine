@@ -117,105 +117,57 @@ void ShapeModelNG::SetAntiAlias(bool antiAlias)
     ShapeAbstractModelNG().SetAntiAlias(antiAlias);
 }
 
-void ShapeModelNG::InitBox(FrameNode* frameNode, const RefPtr<PixelMap>& pixMap)
-{
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
-        ImageSourceInfo pixelMapInfo(pixMap);
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ShapeContainerPaintProperty, PixelMapInfo, pixelMapInfo, frameNode);
-    }
-}
-
 void ShapeModelNG::SetStrokeDashArray(FrameNode* frameNode, const std::vector<Ace::Dimension>& segments)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashArray, segments, frameNode);
 }
 
-void ShapeModelNG::SetStroke(FrameNode* frameNode, const std::optional<Color>& color)
+void ShapeModelNG::SetStroke(FrameNode* frameNode, const Color& color)
 {
-    if (color) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, Stroke, *color, frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ShapePaintProperty, Stroke, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, Stroke, color, frameNode);
 }
 
-void ShapeModelNG::SetFill(FrameNode* frameNode, const std::optional<Color>& color)
+void ShapeModelNG::SetFill(FrameNode* frameNode, const Color& color)
 {
-    if (color) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, Fill, *color, frameNode);
-        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, *color, frameNode);
-        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ShapePaintProperty, Fill, frameNode);
-        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
-        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, false, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, Fill, color, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
 }
 
-void ShapeModelNG::SetStrokeDashOffset(FrameNode* frameNode, const std::optional<Ace::Dimension>& dashOffset)
+void ShapeModelNG::SetStrokeDashOffset(FrameNode* frameNode, const Ace::Dimension& dashOffset)
 {
-    if (dashOffset) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashOffset, dashOffset.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashOffset, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashOffset, dashOffset, frameNode);
 }
 
-void ShapeModelNG::SetStrokeLineCap(FrameNode* frameNode, const std::optional<int>& lineCapStyle)
+void ShapeModelNG::SetStrokeLineCap(FrameNode* frameNode, int lineCapStyle)
 {
-    if (lineCapStyle) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeLineCap, lineCapStyle.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeLineCap, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeLineCap, lineCapStyle, frameNode);
 }
 
-void ShapeModelNG::SetStrokeLineJoin(FrameNode* frameNode, const std::optional<int>& lineJoinStyle)
+void ShapeModelNG::SetStrokeLineJoin(FrameNode* frameNode, int lineJoinStyle)
 {
-    if (lineJoinStyle) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeLineJoin, lineJoinStyle.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeLineJoin, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeLineJoin, lineJoinStyle, frameNode);
 }
 
-void ShapeModelNG::SetStrokeMiterLimit(FrameNode* frameNode, const std::optional<double>& miterLimit)
+void ShapeModelNG::SetStrokeMiterLimit(FrameNode* frameNode, double miterLimit)
 {
-    if (miterLimit) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeMiterLimit, miterLimit.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeMiterLimit, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeMiterLimit, miterLimit, frameNode);
 }
 
-void ShapeModelNG::SetFillOpacity(FrameNode* frameNode, const std::optional<double>& fillOpacity)
+void ShapeModelNG::SetFillOpacity(FrameNode* frameNode, double fillOpacity)
 {
-    if (fillOpacity) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(
-            ShapePaintProperty, FillOpacity,
-            std::clamp(fillOpacity.value(), FILL_OPACITY_MIN, FILL_OPACITY_MAX),
-            frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ShapePaintProperty, FillOpacity, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(
+        ShapePaintProperty, FillOpacity, std::clamp(fillOpacity, FILL_OPACITY_MIN, FILL_OPACITY_MAX), frameNode);
 }
 
-void ShapeModelNG::SetStrokeOpacity(FrameNode* frameNode, const std::optional<double>& strokeOpacity)
+void ShapeModelNG::SetStrokeOpacity(FrameNode* frameNode, double strokeOpacity)
 {
-    if (strokeOpacity) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeOpacity, strokeOpacity.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeOpacity, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeOpacity, strokeOpacity, frameNode);
 }
 
-void ShapeModelNG::SetStrokeWidth(FrameNode* frameNode, const std::optional<Ace::Dimension>& strokeWidth)
+void ShapeModelNG::SetStrokeWidth(FrameNode* frameNode, const Ace::Dimension& strokeWidth)
 {
-    if (strokeWidth) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeWidth, strokeWidth.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeWidth, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeWidth, strokeWidth, frameNode);
 }
 
 void ShapeModelNG::SetAntiAlias(FrameNode* frameNode, bool antiAlias)
@@ -223,20 +175,14 @@ void ShapeModelNG::SetAntiAlias(FrameNode* frameNode, bool antiAlias)
     ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, AntiAlias, antiAlias, frameNode);
 }
 
-void ShapeModelNG::SetViewPort(FrameNode* frameNode,
-    const std::optional<Dimension>& dimLeft, const std::optional<Dimension>& dimTop,
-    const std::optional<Dimension>& dimWidth, const std::optional<Dimension>& dimHeight)
+void ShapeModelNG::SetViewPort(FrameNode* frameNode, const Dimension& dimLeft, const Dimension& dimTop,
+    const Dimension& dimWidth, const Dimension& dimHeight)
 {
-    if (!dimLeft && !dimTop && !dimWidth && !dimHeight) {
-        ACE_RESET_NODE_PAINT_PROPERTY(ShapeContainerPaintProperty, ShapeViewBox, frameNode);
-        return;
-    }
-    Dimension defaultVal(0.0);
     ShapeViewBox shapeViewBox;
-    shapeViewBox.SetLeft(dimLeft.value_or(defaultVal));
-    shapeViewBox.SetTop(dimTop.value_or(defaultVal));
-    shapeViewBox.SetWidth(dimWidth.value_or(defaultVal));
-    shapeViewBox.SetHeight(dimHeight.value_or(defaultVal));
+    shapeViewBox.SetLeft(dimLeft);
+    shapeViewBox.SetTop(dimTop);
+    shapeViewBox.SetWidth(dimWidth);
+    shapeViewBox.SetHeight(dimHeight);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ShapeContainerPaintProperty, ShapeViewBox, shapeViewBox, frameNode);
 }
 
@@ -244,6 +190,14 @@ void ShapeModelNG::SetBitmapMesh(FrameNode* frameNode, const std::vector<float>&
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(
         ShapeContainerPaintProperty, ImageMesh, ImageMesh(mesh, (int32_t)column, (int32_t)row), frameNode);
+}
+
+void ShapeModelNG::InitBox(FrameNode* frameNode, const RefPtr<PixelMap>& pixMap)
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        ImageSourceInfo pixelMapInfo(pixMap);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ShapeContainerPaintProperty, PixelMapInfo, pixelMapInfo, frameNode);
+    }
 }
 
 RefPtr<NG::FrameNode> ShapeModelNG::CreateFrameNode(int32_t nodeId)

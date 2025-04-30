@@ -90,7 +90,7 @@ void UITaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
 
 void UITaskScheduler::ExpandSafeArea()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);

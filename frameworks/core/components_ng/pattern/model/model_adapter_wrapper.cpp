@@ -48,7 +48,7 @@ ModelAdapterWrapper::ModelAdapterWrapper(uint32_t key, const ModelViewContext& c
     });
 
 #if MULTI_ECS_UPDATE_AT_ONCE
-    RefPtr<PipelineBase> pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    RefPtr<PipelineBase> pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     if (pipeline) {
         Render3D::GraphicsManager::GetInstance().AttachContext(pipeline);
@@ -307,7 +307,7 @@ void ModelAdapterWrapper::UpdateScene(const RefPtr<ModelPaintProperty>& modelPai
         return;
     }
 #endif
-    if (!modelPaintProperty->HasModelSource() || modelPaintProperty->GetModelSourceValue().empty()) {
+    if (modelPaintProperty->GetModelSourceValue().empty()) {
         LOGW("UpdateScene invalid model source");
         return;
     }
@@ -329,8 +329,7 @@ void ModelAdapterWrapper::UpdateEnviroment(const RefPtr<ModelPaintProperty>& mod
         return;
     }
 #endif
-    if (!modelPaintProperty->HasModelBackground() ||
-            modelPaintProperty->GetModelBackgroundValue().empty()) {
+    if (modelPaintProperty->GetModelBackgroundValue().empty()) {
         LOGW("UpdateEnviroment invalid model background");
         return;
     }
@@ -394,7 +393,7 @@ void ModelAdapterWrapper::UpdateShaderPath(const RefPtr<ModelPaintProperty>& mod
         return;
     }
 #endif
-    if (!modelPaintProperty->HasShaderPath() || modelPaintProperty->GetShaderPathValue().empty()) {
+    if (modelPaintProperty->GetShaderPathValue().empty()) {
         LOGW("UpdateShaderPath invalid shader path");
         return;
     }
@@ -417,8 +416,7 @@ void ModelAdapterWrapper::UpdateImageTexturePaths(const RefPtr<ModelPaintPropert
         return;
     }
 #endif
-    if (!modelPaintProperty->HasModelImageTexturePaths() ||
-            modelPaintProperty->GetModelImageTexturePathsValue().empty()) {
+    if (modelPaintProperty->GetModelImageTexturePathsValue().empty()) {
         LOGW("UpdateImageTexturePaths invalid image texture");
         return;
     }
@@ -441,8 +439,7 @@ void ModelAdapterWrapper::UpdateShaderInputBuffers(const RefPtr<ModelPaintProper
         return;
     }
 #endif
-    if (!modelPaintProperty->HasModelShaderInputBuffer() ||
-            modelPaintProperty->GetModelShaderInputBufferValue() == nullptr) {
+    if (modelPaintProperty->GetModelShaderInputBufferValue() == nullptr) {
         LOGW("UpdateShaderInputBuffers invalid shader input buffer");
         return;
     }

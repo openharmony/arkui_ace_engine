@@ -15,42 +15,16 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/peer_utils.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/utility/callback_helper.h"
-#include "rotation_gesture_interface_peer.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RotationGestureInterfaceAccessor {
-namespace {
-    constexpr int32_t DEFAULT_ROTATION_FINGERS = 2;
-    constexpr double DEFAULT_ROTATION_ANGLE = 1.0;
-    constexpr bool DEFAULT_IS_LIMIT_FINGER_COUNT = false;
-}
 void DestroyPeerImpl(Ark_RotationGestureInterface peer)
 {
-    PeerUtils::DestroyPeer(peer);
 }
 Ark_RotationGestureInterface CtorImpl(const Opt_Literal_Number_angle_fingers* value)
 {
-    auto peer =  PeerUtils::CreatePeer<RotationGestureInterfacePeer>();
-    int32_t fingers = DEFAULT_ROTATION_FINGERS;
-    double angle = DEFAULT_ROTATION_ANGLE;
-    bool isLimitFingerCount = DEFAULT_IS_LIMIT_FINGER_COUNT;
-    std::optional<Ark_Literal_Number_angle_fingers> params = value ? Converter::GetOpt(*value) : std::nullopt;
-    if (params.has_value()) {
-        fingers = Converter::OptConvert<int32_t>(params->fingers).value_or(DEFAULT_ROTATION_FINGERS);
-        fingers = fingers <= DEFAULT_ROTATION_FINGERS ? DEFAULT_ROTATION_FINGERS : fingers;
-        auto angleOpt = Converter::OptConvert<float>(params->angle);
-        if (angleOpt.has_value()) {
-            angle = static_cast<double>(angleOpt.value());
-            angle = LessNotEqual(angle, 0.0) ? DEFAULT_ROTATION_ANGLE : angle;
-        }
-        LOGE("Arkoala method RotationGestureInterfaceAccessor.CtorImpl use default value for isLimitFingerCount");
-    }
-    peer->gesture = AceType::MakeRefPtr<RotationGesture>(fingers, angle, isLimitFingerCount);
-    return peer;
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -59,56 +33,27 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_RotationGestureInterface OnActionStartImpl(Ark_RotationGestureInterface peer,
                                                const Callback_GestureEvent_Void* event)
 {
-    CHECK_NULL_RETURN(peer && peer->gesture && event, peer);
-    auto onActionStart = [arkCallback = CallbackHelper(*event)](GestureEvent& aceEvent) {
-        auto arkEvent = Converter::ArkGestureEventSync(aceEvent);
-        arkCallback.InvokeSync(arkEvent.ArkValue());
-    };
-    peer->gesture->SetOnActionStartId(onActionStart);
-    return peer;
+    return {};
 }
 Ark_RotationGestureInterface OnActionUpdateImpl(Ark_RotationGestureInterface peer,
                                                 const Callback_GestureEvent_Void* event)
 {
-    CHECK_NULL_RETURN(peer && peer->gesture && event, peer);
-    auto onActionUpdate = [arkCallback = CallbackHelper(*event)](GestureEvent& aceEvent) {
-        const auto arkEvent = Converter::ArkGestureEventSync(aceEvent);
-        arkCallback.InvokeSync(arkEvent.ArkValue());
-    };
-    peer->gesture->SetOnActionUpdateId(onActionUpdate);
-    return peer;
+    return {};
 }
 Ark_RotationGestureInterface OnActionEndImpl(Ark_RotationGestureInterface peer,
                                              const Callback_GestureEvent_Void* event)
 {
-    CHECK_NULL_RETURN(peer && peer->gesture && event, peer);
-    auto onActionEnd = [arkCallback = CallbackHelper(*event)](GestureEvent& aceEvent) {
-        const auto arkEvent = Converter::ArkGestureEventSync(aceEvent);
-        arkCallback.InvokeSync(arkEvent.ArkValue());
-    };
-    peer->gesture->SetOnActionEndId(onActionEnd);
-    return peer;
+    return {};
 }
 Ark_RotationGestureInterface OnActionCancel0Impl(Ark_RotationGestureInterface peer,
                                                  const Callback_Void* event)
 {
-    CHECK_NULL_RETURN(peer && peer->gesture && event, peer);
-    auto onActionCancel = [arkCallback = CallbackHelper(*event)](GestureEvent& info) {
-        arkCallback.Invoke();
-    };
-    peer->gesture->SetOnActionCancelId(std::move(onActionCancel));
-    return peer;
+    return {};
 }
 Ark_RotationGestureInterface OnActionCancel1Impl(Ark_RotationGestureInterface peer,
                                                  const Callback_GestureEvent_Void* event)
 {
-    CHECK_NULL_RETURN(peer && peer->gesture && event, peer);
-    auto onActionCancel = [arkCallback = CallbackHelper(*event)](GestureEvent& aceEvent) {
-        const auto arkEvent = Converter::ArkGestureEventSync(aceEvent);
-        arkCallback.InvokeSync(arkEvent.ArkValue());
-    };
-    peer->gesture->SetOnActionCancelId(onActionCancel);
-    return peer;
+    return {};
 }
 } // RotationGestureInterfaceAccessor
 const GENERATED_ArkUIRotationGestureInterfaceAccessor* GetRotationGestureInterfaceAccessor()
@@ -126,4 +71,7 @@ const GENERATED_ArkUIRotationGestureInterfaceAccessor* GetRotationGestureInterfa
     return &RotationGestureInterfaceAccessorImpl;
 }
 
+struct RotationGestureInterfacePeer {
+    virtual ~RotationGestureInterfacePeer() = default;
+};
 }

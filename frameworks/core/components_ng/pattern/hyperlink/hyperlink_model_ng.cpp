@@ -31,7 +31,7 @@ void HyperlinkModelNG::Create(const std::string& address, const std::string& con
     stack->Push(hyperlinkNode);
     SetTextStyle(hyperlinkNode, content, address);
 
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto draggable = pipeline->GetDraggable<HyperlinkTheme>();
     SetDraggable(draggable);
@@ -56,10 +56,10 @@ void HyperlinkModelNG::SetTextStyle(
     CHECK_NULL_VOID(hyperlinkNode);
     auto textLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    auto textStyle = PipelineBase::GetCurrentContextSafelyWithCheck()->GetTheme<TextTheme>()->GetTextStyle();
+    auto textStyle = PipelineBase::GetCurrentContext()->GetTheme<TextTheme>()->GetTextStyle();
     textLayoutProperty->UpdateContent(content.empty() ? address : content);
     textLayoutProperty->UpdateAddress(address);
-    auto theme = PipelineContext::GetCurrentContextSafelyWithCheck()->GetTheme<HyperlinkTheme>();
+    auto theme = PipelineContext::GetCurrentContext()->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
@@ -74,23 +74,17 @@ void HyperlinkModelNG::SetTextStyle(
 }
 
 void HyperlinkModelNG::SetTextStyle(
-    FrameNode* frameNode, const std::string& address, const std::optional<std::string>& content)
+    FrameNode* hyperlinkNode, const std::string& address, const std::optional<std::string>& content)
 {
-    CHECK_NULL_VOID(frameNode);
-    auto textLayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    CHECK_NULL_VOID(hyperlinkNode);
+    auto textLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateContent(
-        (!content.has_value() || content.value().empty()) ? address : content.value());
+    auto textStyle = PipelineBase::GetCurrentContext()->GetTheme<TextTheme>()->GetTextStyle();
+    auto contentValue = content.value_or("");
+    textLayoutProperty->UpdateContent(contentValue.empty() ? address : contentValue);
     textLayoutProperty->UpdateAddress(address);
-
-    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(context);
-    auto textTheme = context->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(textTheme);
-    auto textStyle = textTheme->GetTextStyle();
-    auto theme = PipelineContext::GetCurrentContextSafelyWithCheck()->GetTheme<HyperlinkTheme>();
+    auto theme = PipelineContext::GetCurrentContext()->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);
-
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
     textLayoutProperty->UpdateTextColor(theme->GetTextColor());
@@ -99,8 +93,8 @@ void HyperlinkModelNG::SetTextStyle(
     textLayoutProperty->UpdateAdaptMinFontSize(10.0_vp);
     textLayoutProperty->UpdateAdaptMaxFontSize(textStyle.GetFontSize());
     textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
-    frameNode->MarkModifyDone();
-    frameNode->MarkDirtyNode();
+    hyperlinkNode->MarkModifyDone();
+    hyperlinkNode->MarkDirtyNode();
 }
 
 
@@ -125,7 +119,7 @@ void HyperlinkModelNG::SetColor(FrameNode* frameNode, const std::optional<Color>
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, TextColor, frameNode);
         ACE_RESET_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, Color, frameNode);
-        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(RenderContext, ForegroundColor, frameNode);
     }
 }
 

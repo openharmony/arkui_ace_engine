@@ -20,8 +20,5 @@
 
 struct SubmitEventPeer
     : public OHOS::Ace::NG::GeneratedModifier::SomeEventPeer<OHOS::Ace::NG::TextFieldCommonEvent> {
-protected:
-    SubmitEventPeer() = default;
     ~SubmitEventPeer() override = default;
-    friend OHOS::Ace::NG::PeerUtils;
 };

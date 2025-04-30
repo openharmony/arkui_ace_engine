@@ -37,15 +37,6 @@
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
-struct ListItemAdapter {
-    int32_t totalCount = 0;
-    std::pair<int32_t, int32_t> range = { 0, 0 };
-    std::function<void(int32_t start, int32_t end)> requestItemFunc;
-    // which directional item request.
-    std::pair<bool, bool> requestFeature = { false, false };
-    std::function<RefPtr<FrameNode>(int32_t index)> getItemFunc;
-};
-
 struct ListItemGroupPara {
     int32_t lanes = -1;
     int32_t itemEndIndex = -1;
@@ -394,21 +385,6 @@ public:
     {
         return static_cast<bool>(childrenSize_);
     }
-
-    const std::shared_ptr<ListItemAdapter>& GetListItemAdapter()
-    {
-        if (adapter_) {
-            return adapter_;
-        }
-        adapter_ = std::make_shared<ListItemAdapter>();
-        return adapter_;
-    }
-
-    void CheckListItemRange(const std::pair<int32_t, int32_t>& range);
-    void CheckScrollItemRange();
-
-    RefPtr<FrameNode> GetOrCreateChildByIndex(uint32_t index) override;
-
     void UpdateChildPosInfo(int32_t index, float delta, float sizeChange);
 
     SizeF GetChildrenExpandedSize() override;
@@ -599,8 +575,6 @@ private:
     bool needReEstimateOffset_ = false;
     std::optional<ListPredictLayoutParam> predictLayoutParam_;
     std::optional<ListPredictLayoutParamV2> predictLayoutParamV2_;
-
-    std::shared_ptr<ListItemAdapter> adapter_;
 
     bool isNeedToUpdateListDirection_ = false;
     bool startIndexChanged_ = false;

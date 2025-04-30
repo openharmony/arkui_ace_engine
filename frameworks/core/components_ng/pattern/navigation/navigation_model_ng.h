@@ -81,29 +81,22 @@ public:
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetNavigationStack(FrameNode* frameNode);
-    static void SetNavigationStack(FrameNode* frameNode, const RefPtr<NG::NavigationStack>& navigationStack);
-    static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated = false);
+    static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated);
     static void SetEnableModeChangeAnimation(FrameNode* frameNode, bool isEnable);
     static void SetMinContentWidth(FrameNode* frameNode, const Dimension& value);
     static void SetMinNavBarWidth(FrameNode* frameNode, const Dimension& value);
     static void SetMaxNavBarWidth(FrameNode* frameNode, const Dimension& value);
     static void SetNavBarWidth(FrameNode* frameNode, const Dimension& value);
-    static void SetNavBarPosition(FrameNode* frameNode, const std::optional<NG::NavBarPosition>& mode);
-    static void SetUsrNavigationMode(FrameNode* frameNode, const std::optional<NavigationMode>& mode);
+    static void SetNavBarPosition(FrameNode* frameNode, NG::NavBarPosition mode);
+    static void SetUsrNavigationMode(FrameNode* frameNode, NavigationMode mode);
     static void SetBackButtonIcon(FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
         const std::string& src, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap);
-    static void SetBackButtonIcon(FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
-        const ImageSourceInfo& imageSourceInfo, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap);
     static void SetHideNavBar(FrameNode* frameNode, bool hideNavBar);
-    static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated = false);
+    static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated);
     static void SetSubtitle(FrameNode* frameNode, const std::string& subtitle);
     static void SetHideBackButton(FrameNode* frameNode, bool hideBackButton);
-    static void SetTitleMode(FrameNode* frameNode, const std::optional<NG::NavigationTitleMode>& mode);
     static void SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMode mode);
-    static void SetOnNavBarStateChange(FrameNode* frameNode, std::function<void(bool)>&& onNavBarStateChange);
-    static void SetOnNavigationModeChange(FrameNode* frameNode,
-        std::function<void(NG::NavigationMode)>&& onModeChange);
-    static void SetRecoverable(FrameNode* frameNode, const std::optional<bool>& recoverable);
+    static void SetRecoverable(FrameNode* frameNode, bool recoverable);
     static void SetEnableDragBar(FrameNode* frameNode, bool enableDragBar);
     static void SetEnableToolBarAdaptation(FrameNode* frameNode, bool enable);
 
@@ -117,9 +110,6 @@ public:
     static void SetMenuItemAction(FrameNode* frameNode, std::function<void()>&& action, uint32_t index);
     static void SetMenuItemSymbol(FrameNode* frameNode,
         std::function<void(WeakPtr<NG::FrameNode>)>&& symbol, uint32_t index);
-    static void SetOnTitleModeChange(FrameNode* frameNode,
-        std::function<void(NG::NavigationTitleMode)>&& onTitleModeChange,
-        std::function<void(const BaseEventInfo* baseInfo)>&& eventInfo);
     static void SetCustomTitle(FrameNode* frameNode, const RefPtr<AceType>& customNode);
     static RefPtr<FrameNode> GetCustomTitle(FrameNode* frameNode);
     static void SetTitleHeight(FrameNode* frameNode, const Dimension& height, bool isValid = true);

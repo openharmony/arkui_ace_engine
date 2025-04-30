@@ -13,19 +13,18 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/implementation/swiper_content_transition_proxy_peer.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwiperContentTransitionProxyAccessor {
 void DestroyPeerImpl(Ark_SwiperContentTransitionProxy peer)
 {
-    delete peer;
 }
 Ark_SwiperContentTransitionProxy CtorImpl()
 {
-    return new SwiperContentTransitionProxyPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -33,60 +32,38 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void FinishTransitionImpl(Ark_SwiperContentTransitionProxy peer)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
-    peer->handler->FinishTransition();
 }
 Ark_Number GetSelectedIndexImpl(Ark_SwiperContentTransitionProxy peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer && peer->handler, errValue);
-    return Converter::ArkValue<Ark_Number>(peer->handler->GetSelectedIndex());
+    return {};
 }
 void SetSelectedIndexImpl(Ark_SwiperContentTransitionProxy peer,
                           const Ark_Number* selectedIndex)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
-    CHECK_NULL_VOID(selectedIndex);
-    peer->handler->SetSelectedIndex(Converter::Convert<int32_t>(*selectedIndex));
 }
 Ark_Number GetIndexImpl(Ark_SwiperContentTransitionProxy peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer && peer->handler, errValue);
-    return Converter::ArkValue<Ark_Number>(peer->handler->GetIndex());
+    return {};
 }
 void SetIndexImpl(Ark_SwiperContentTransitionProxy peer,
                   const Ark_Number* index)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
-    CHECK_NULL_VOID(index);
-    peer->handler->SetIndex(Converter::Convert<float>(*index));
 }
 Ark_Number GetPositionImpl(Ark_SwiperContentTransitionProxy peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer && peer->handler, errValue);
-    return Converter::ArkValue<Ark_Number>(peer->handler->GetPosition());
+    return {};
 }
 void SetPositionImpl(Ark_SwiperContentTransitionProxy peer,
                      const Ark_Number* position)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
-    CHECK_NULL_VOID(position);
-    peer->handler->SetPosition(Converter::Convert<float>(*position));
 }
 Ark_Number GetMainAxisLengthImpl(Ark_SwiperContentTransitionProxy peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer && peer->handler, errValue);
-    return Converter::ArkValue<Ark_Number>(peer->handler->GetMainAxisLength());
+    return {};
 }
 void SetMainAxisLengthImpl(Ark_SwiperContentTransitionProxy peer,
                            const Ark_Number* mainAxisLength)
 {
-    CHECK_NULL_VOID(peer && peer->handler);
-    CHECK_NULL_VOID(mainAxisLength);
-    peer->handler->SetMainAxisLength(Converter::Convert<float>(*mainAxisLength));
 }
 } // SwiperContentTransitionProxyAccessor
 const GENERATED_ArkUISwiperContentTransitionProxyAccessor* GetSwiperContentTransitionProxyAccessor()
@@ -108,4 +85,7 @@ const GENERATED_ArkUISwiperContentTransitionProxyAccessor* GetSwiperContentTrans
     return &SwiperContentTransitionProxyAccessorImpl;
 }
 
+struct SwiperContentTransitionProxyPeer {
+    virtual ~SwiperContentTransitionProxyPeer() = default;
+};
 }

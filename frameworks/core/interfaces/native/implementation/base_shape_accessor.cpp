@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_BaseShape peer)
 }
 Ark_BaseShape CtorImpl()
 {
-    return {};
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -59,4 +59,7 @@ const GENERATED_ArkUIBaseShapeAccessor* GetBaseShapeAccessor()
     return &BaseShapeAccessorImpl;
 }
 
+struct BaseShapePeer {
+    virtual ~BaseShapePeer() = default;
+};
 }

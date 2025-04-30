@@ -15,10 +15,8 @@
 
 #include "base/log/jank_frame_report.h"
 #include "base/perfmonitor/perf_monitor.h"
-#include "mock_jank_frame_report.h"
 
 namespace OHOS::Ace {
-PerfMonitor* PerfMonitor::pMonitor = nullptr;
 JankFrameReport& JankFrameReport::GetInstance()
 {
     static thread_local JankFrameReport instance;
@@ -41,25 +39,12 @@ void JankFrameReport::RecordFrameUpdate() {}
 
 PerfMonitor* PerfMonitor::GetPerfMonitor()
 {
-    return PerfMonitor::pMonitor;
+    return nullptr;
 }
 
-void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const std::string& note)
-{
-    auto holder = PerfMonitorTestHolder::GetInstance();
-    holder->isCalled = true;
-    holder->scene = sceneId;
-    holder->actionType = type;
-    holder->note = note;
-}
+void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const std::string& note) {}
 
-void PerfMonitor::End(const std::string& sceneId, bool isJsApi)
-{
-    auto holder = PerfMonitorTestHolder::GetInstance();
-    holder->isCalled = true;
-    holder->scene = sceneId;
-    holder->isJsApi = isJsApi;
-}
+void PerfMonitor::End(const std::string& sceneId, bool isJsApi) {}
 
 void PerfMonitor::StartCommercial(const std::string& sceneId, PerfActionType type, const std::string& note) {}
 
@@ -71,14 +56,7 @@ void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t durition, double jank,
 
 void PerfMonitor::ReportJankFrameApp(double jank) {}
 
-void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time)
-{
-    auto holder = PerfMonitorTestHolder::GetInstance();
-    holder->isCalled = true;
-    holder->actionType = type;
-    holder->sourceType = sourceType;
-    holder->time = time;
-}
+void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time) {}
 
 int64_t PerfMonitor::GetInputTime(const std::string& sceneId, PerfActionType type, const std::string& note)
 {
@@ -96,7 +74,6 @@ void PerfMonitor::SetAppStartStatus() {}
 void PerfMonitor::SetPageName(const std::string& pageName) {}
 void PerfMonitor::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
                                     const std::string& pageName) {}
-void JankFrameReport::RecordAnimateEnd() {}
 void PerfMonitor::NotifyAppJankStatsBegin() {}
 void PerfMonitor::NotifyAppJankStatsEnd() {}
 } // namespace OHOS::Ace

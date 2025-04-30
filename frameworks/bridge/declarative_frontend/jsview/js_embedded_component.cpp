@@ -39,6 +39,8 @@
 #include "frameworks/core/components_ng/base/view_abstract_model.h"
 
 namespace OHOS::Ace::Framework {
+const CalcDimension EMBEDDED_COMPONENT_MIN_WIDTH(10.0f, DimensionUnit::VP);
+const CalcDimension EMBEDDED_COMPONENT_MIN_HEIGHT(10.0f, DimensionUnit::VP);
 
 void JSEmbeddedComponent::JSBind(BindingTarget globalObj)
 {
@@ -67,16 +69,16 @@ void JSEmbeddedComponent::Create(const JSCallbackInfo& info)
     auto wantObj = JSRef<JSObject>::Cast(info[0]);
     RefPtr<OHOS::Ace::WantWrap> want = CreateWantWrapFromNapiValue(wantObj);
 
-    NG::SessionType sessionType = NG::DEFAULT_EMBEDDED_SESSION_TYPE;
+    NG::SessionType sessionType = NG::SessionType::EMBEDDED_UI_EXTENSION;
     if (info.Length() > 1 && info[1]->IsNumber()) {
         sessionType = static_cast<NG::SessionType>(info[1]->ToNumber<int32_t>());
     }
 
     UIExtensionModel::GetInstance()->Create(want, sessionType);
-    ViewAbstractModel::GetInstance()->SetWidth(NG::EMBEDDED_COMPONENT_MIN_WIDTH);
-    ViewAbstractModel::GetInstance()->SetHeight(NG::EMBEDDED_COMPONENT_MIN_HEIGHT);
-    ViewAbstractModel::GetInstance()->SetMinWidth(NG::EMBEDDED_COMPONENT_MIN_WIDTH);
-    ViewAbstractModel::GetInstance()->SetMinHeight(NG::EMBEDDED_COMPONENT_MIN_HEIGHT);
+    ViewAbstractModel::GetInstance()->SetWidth(EMBEDDED_COMPONENT_MIN_WIDTH);
+    ViewAbstractModel::GetInstance()->SetHeight(EMBEDDED_COMPONENT_MIN_HEIGHT);
+    ViewAbstractModel::GetInstance()->SetMinWidth(EMBEDDED_COMPONENT_MIN_WIDTH);
+    ViewAbstractModel::GetInstance()->SetMinHeight(EMBEDDED_COMPONENT_MIN_HEIGHT);
 }
 
 void JSEmbeddedComponent::OnTerminated(const JSCallbackInfo& info)

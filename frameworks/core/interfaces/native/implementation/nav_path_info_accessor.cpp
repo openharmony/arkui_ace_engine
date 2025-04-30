@@ -14,47 +14,19 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/implementation/nav_path_info_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "nav_path_info_peer_impl.h"
 #include "arkoala_api_generated.h"
-
-namespace Nav = OHOS::Ace::NG::GeneratedModifier::NavigationContext;
-
-namespace OHOS::Ace::NG::Converter {
-void AssignArkValue(Ark_Object& dst, const Nav::ExternalData& src)
-{
-    if (src) {
-        dst = src->data_;
-    }
-}
-void AssignArkValue(Ark_NavPathInfo& dst, const Nav::PathInfo& src)
-{
-    auto peer = new NavPathInfoPeer();
-    CHECK_NULL_VOID(peer);
-    peer->data = src;
-}
-
-template<>
-Nav::ExternalData Convert(const Ark_Object& src)
-{
-    return Referenced::MakeRefPtr<Nav::ExternalDataKeeper>(src);
-}
-
-template<>
-Nav::PathInfo Convert(const Ark_NavPathInfo& src)
-{
-    return src ? src->data : Nav::PathInfo();
-}
-} // namespace OHOS::Ace::NG::Converter
-
-using namespace OHOS::Ace::NG::Converter;
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavPathInfoAccessor {
 void DestroyPeerImpl(Ark_NavPathInfo peer)
 {
-    delete peer;
+    if (peer) {
+        delete peer;
+        peer = nullptr;
+    }
 }
 Ark_NavPathInfo CtorImpl(const Ark_String* name,
                          const Ark_Object* param,
@@ -64,20 +36,8 @@ Ark_NavPathInfo CtorImpl(const Ark_String* name,
     CHECK_NULL_RETURN(name, nullptr);
     auto peer = new NavPathInfoPeer();
     CHECK_NULL_RETURN(peer, nullptr);
-    peer->data.name_ = Convert<std::string>(*name);
-    if (param) {
-        peer->data.param_ = Convert<Nav::ExternalData>(*param);
-    }
-    if (onPop) {
-        if (auto onPopOpt = OptConvert<Callback_PopInfo_Void>(*onPop); onPopOpt) {
-            peer->data.onPop_ = CallbackHelper(*onPopOpt);
-        }
-    }
-    if (isEntry) {
-        if (auto isEntryOpt = OptConvert<bool>(*isEntry); isEntryOpt) {
-            peer->data.isEntry_ = *isEntryOpt;
-        }
-    }
+    peer->data.name_ = Converter::Convert<std::string>(*name);
+    peer->data.isEntry_ = Converter::OptConvert<bool>(*isEntry).value_or(false);
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -86,15 +46,11 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_String GetNameImpl(Ark_NavPathInfo peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    return ArkValue<Ark_String>(peer->data.name_, Converter::FC);
+    return {};
 }
 void SetNameImpl(Ark_NavPathInfo peer,
                  const Ark_String* name)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(name);
-    peer->data.name_ = Convert<std::string>(*name);
 }
 Opt_Object GetParamImpl(Ark_NavPathInfo peer)
 {
@@ -103,36 +59,22 @@ Opt_Object GetParamImpl(Ark_NavPathInfo peer)
 void SetParamImpl(Ark_NavPathInfo peer,
                   const Opt_Object* param)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(param);
-#ifdef WRONG_GEN
-    peer->data.param_ = Convert<Nav::ExternalData>(*param);
-#endif
 }
 Opt_Callback_PopInfo_Void GetOnPopImpl(Ark_NavPathInfo peer)
 {
-    auto invalid = Converter::ArkValue<Opt_Callback_PopInfo_Void>();
-    CHECK_NULL_RETURN(peer, invalid);
-    return Converter::ArkValue<Opt_Callback_PopInfo_Void>(peer->data.onPop_.GetCallback());
+    return {};
 }
 void SetOnPopImpl(Ark_NavPathInfo peer,
                   const Callback_PopInfo_Void* onPop)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(onPop);
-    peer->data.onPop_ = CallbackHelper(*onPop);
 }
 Opt_Boolean GetIsEntryImpl(Ark_NavPathInfo peer)
 {
-    auto invalid = Converter::ArkValue<Opt_Boolean>();
-    CHECK_NULL_RETURN(peer, invalid);
-    return ArkValue<Opt_Boolean>(peer->data.isEntry_);
+    return {};
 }
 void SetIsEntryImpl(Ark_NavPathInfo peer,
                     Ark_Boolean isEntry)
 {
-    CHECK_NULL_VOID(peer);
-    peer->data.isEntry_ = Convert<bool>(isEntry);
 }
 Opt_String GetNavDestinationIdImpl(Ark_NavPathInfo peer)
 {
@@ -163,4 +105,7 @@ const GENERATED_ArkUINavPathInfoAccessor* GetNavPathInfoAccessor()
     return &NavPathInfoAccessorImpl;
 }
 
+struct NavPathInfoPeer {
+    virtual ~NavPathInfoPeer() = default;
+};
 }

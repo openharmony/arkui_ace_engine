@@ -41,4 +41,7 @@ const GENERATED_ArkUIPixelMapDrawableDescriptorAccessor* GetPixelMapDrawableDesc
     return &PixelMapDrawableDescriptorAccessorImpl;
 }
 
+struct PixelMapDrawableDescriptorPeer {
+    virtual ~PixelMapDrawableDescriptorPeer() = default;
+};
 }

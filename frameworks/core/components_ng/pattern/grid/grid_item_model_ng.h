@@ -19,7 +19,6 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/pattern/grid/grid_item_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_item_model.h"
-#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 

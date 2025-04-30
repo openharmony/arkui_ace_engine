@@ -21,11 +21,6 @@
 namespace OHOS::Ace::NG {
 void ViewContextModelNG::closeAnimation(const AnimationOption& option, bool needFlush)
 {
-    ViewContextModelNG::closeAnimationInternal(option, needFlush);
-}
-
-void ViewContextModelNG::closeAnimationInternal(const AnimationOption& option, bool needFlush)
-{
     NG::ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
     if (needFlush) {
         NG::ViewStackProcessor::GetInstance()->FlushImplicitAnimation();
@@ -38,11 +33,6 @@ void ViewContextModelNG::closeAnimationInternal(const AnimationOption& option, b
 }
 
 void ViewContextModelNG::openAnimation(const AnimationOption& option)
-{
-    ViewContextModelNG::openAnimationInternal(option);
-}
-
-void ViewContextModelNG::openAnimationInternal(const AnimationOption& option)
 {
     NG::ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
     NG::ViewStackProcessor::GetInstance()->FlushImplicitAnimation();

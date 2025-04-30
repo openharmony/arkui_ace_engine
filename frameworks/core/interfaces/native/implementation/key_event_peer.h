@@ -20,8 +20,5 @@
 
 struct KeyEventPeer
     : public OHOS::Ace::NG::GeneratedModifier::SomeEventPeer<OHOS::Ace::KeyEventInfo> {
-protected:
-    KeyEventPeer() = default;
     ~KeyEventPeer() override = default;
-    friend OHOS::Ace::NG::PeerUtils;
 };

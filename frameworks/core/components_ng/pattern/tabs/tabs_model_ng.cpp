@@ -557,9 +557,7 @@ RefPtr<SwiperPaintProperty> TabsModelNG::GetSwiperPaintProperty()
 
 void TabsModelNG::Pop()
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(tabsNode);
     auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
     CHECK_NULL_VOID(tabsLayoutProperty);
@@ -570,7 +568,32 @@ void TabsModelNG::Pop()
 
     tabBarNode->MarkModifyDone();
     tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-    InitDivider(frameNode);
+    auto dividerNode = AceType::DynamicCast<FrameNode>(tabsNode->GetDivider());
+    CHECK_NULL_VOID(dividerNode);
+    auto layoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto axis = layoutProperty->GetAxis().value_or((Axis::HORIZONTAL));
+    TabsItemDivider defaultDivider;
+    auto divider = layoutProperty->GetDivider().value_or(defaultDivider);
+    auto dividerColor = divider.color;
+    auto dividerStrokeWidth = divider.strokeWidth;
+
+    auto dividerHub = dividerNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(dividerHub);
+
+    auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_VOID(dividerRenderProperty);
+    dividerRenderProperty->UpdateDividerColor(dividerColor);
+    dividerRenderProperty->UpdateLineCap(LineCap::BUTT);
+
+    auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
+    CHECK_NULL_VOID(dividerLayoutProperty);
+    dividerLayoutProperty->UpdateVertical(axis == Axis::VERTICAL);
+    dividerLayoutProperty->UpdateStrokeWidth(dividerStrokeWidth);
+    dividerLayoutProperty->UpdateStrokeWidthLimitation(false);
+    CHECK_NULL_VOID(dividerNode);
+    dividerNode->MarkModifyDone();
 
     swiperNode->MarkModifyDone();
     swiperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -759,39 +782,6 @@ void TabsModelNG::SetDivider(FrameNode* frameNode, const std::optional<TabsItemD
     }
 }
 
-void TabsModelNG::InitDivider(FrameNode* frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
-    CHECK_NULL_VOID(tabsNode);
-    auto dividerNode = AceType::DynamicCast<FrameNode>(tabsNode->GetDivider());
-    CHECK_NULL_VOID(dividerNode);
-    auto layoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-
-    auto axis = layoutProperty->GetAxis().value_or((Axis::HORIZONTAL));
-    TabsItemDivider defaultDivider;
-    auto divider = layoutProperty->GetDivider().value_or(defaultDivider);
-    auto dividerColor = divider.color;
-    auto dividerStrokeWidth = divider.strokeWidth;
-
-    auto dividerHub = dividerNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(dividerHub);
-
-    auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
-    CHECK_NULL_VOID(dividerRenderProperty);
-    dividerRenderProperty->UpdateDividerColor(dividerColor);
-    dividerRenderProperty->UpdateLineCap(LineCap::BUTT);
-
-    auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
-    CHECK_NULL_VOID(dividerLayoutProperty);
-    dividerLayoutProperty->UpdateVertical(axis == Axis::VERTICAL);
-    dividerLayoutProperty->UpdateStrokeWidth(dividerStrokeWidth);
-    dividerLayoutProperty->UpdateStrokeWidthLimitation(false);
-    CHECK_NULL_VOID(dividerNode);
-    dividerNode->MarkModifyDone();
-}
-
 void TabsModelNG::SetFadingEdge(FrameNode* frameNode, bool fadingEdge)
 {
     CHECK_NULL_VOID(frameNode);
@@ -886,9 +876,9 @@ void TabsModelNG::SetTabBarPosition(FrameNode* frameNode, const std::optional<Ba
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, TabBarPosition, frameNode);
     }
-
-    if ((!oldTabBarPosition.has_value() && tabBarPositionOpt == BarPosition::END) ||
-        (oldTabBarPosition == tabBarPositionOpt)) {
+    auto tabBarPosition = tabBarPositionOpt.value_or(BarPosition::START);
+    if ((!oldTabBarPosition.has_value() && tabBarPosition == BarPosition::END) ||
+        (oldTabBarPosition.has_value() && oldTabBarPosition.value() == tabBarPosition)) {
         return;
     }
 
@@ -897,7 +887,7 @@ void TabsModelNG::SetTabBarPosition(FrameNode* frameNode, const std::optional<Ba
     auto tabsFocusNode = tabsNode->GetFocusHub();
     CHECK_NULL_VOID(tabsFocusNode);
     if (!tabsFocusNode->IsCurrentFocus()) {
-        auto tabBarPosition = tabsLayoutProperty->GetTabBarPosition().value_or(BarPosition::START);
+        tabBarPosition = tabsLayoutProperty->GetTabBarPosition().value_or(BarPosition::START);
         if (tabBarPosition == BarPosition::START) {
             auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
             CHECK_NULL_VOID(tabBarNode);
@@ -993,13 +983,12 @@ void TabsModelNG::SetAnimationDuration(FrameNode* frameNode, float duration)
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     tabBarPattern->SetAnimationDuration(static_cast<int32_t>(duration));
+    if (static_cast<int32_t>(duration) < 0) {
+        return;
+    }
     auto swiperPaintProperty = GetSwiperPaintProperty(frameNode);
     CHECK_NULL_VOID(swiperPaintProperty);
-    if (static_cast<int32_t>(duration) < 0) {
-        swiperPaintProperty->ResetDuration();
-    } else {
-        swiperPaintProperty->UpdateDuration(static_cast<int32_t>(duration));
-    }
+    swiperPaintProperty->UpdateDuration(static_cast<int32_t>(duration));
 }
 
 void TabsModelNG::SetScrollableBarModeOptions(FrameNode* frameNode, const ScrollableBarModeOptions& option)
@@ -1272,16 +1261,12 @@ void TabsModelNG::SetCachedMaxCount(std::optional<int32_t> cachedMaxCount, TabsC
 }
 
 void TabsModelNG::SetCachedMaxCount(
-    FrameNode* frameNode, std::optional<int32_t> cachedMaxCount, std::optional<TabsCacheMode> cacheMode)
+    FrameNode* frameNode, std::optional<int32_t> cachedMaxCount, TabsCacheMode cacheMode)
 {
     CHECK_NULL_VOID(frameNode);
     if (cachedMaxCount.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, CachedMaxCount, cachedMaxCount.value(), frameNode);
-        if (cacheMode.has_value()) {
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, CacheMode, cacheMode.value(), frameNode);
-        } else {
-            ACE_RESET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, CacheMode, frameNode);
-        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, CacheMode, cacheMode, frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, CachedMaxCount, frameNode);
         ACE_RESET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, CacheMode, frameNode);

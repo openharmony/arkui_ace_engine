@@ -18,6 +18,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebControllerAccessor {
@@ -245,4 +246,7 @@ const GENERATED_ArkUIWebControllerAccessor* GetWebControllerAccessor()
     return &WebControllerAccessorImpl;
 }
 
+struct WebControllerPeer {
+    virtual ~WebControllerPeer() = default;
+};
 }

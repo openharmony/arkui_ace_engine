@@ -187,7 +187,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildMenuItemIcon(InternalResource:
     auto iconLayoutProperty = icon->GetLayoutProperty<ImageLayoutProperty>();
     ImageSourceInfo sourceInfo;
     sourceInfo.SetResourceId(resourceId);
-    auto theme = PipelineContext::GetCurrentContextSafelyWithCheck()->GetTheme<AdvancedPatternTheme>();
+    auto theme = PipelineContext::GetCurrentContext()->GetTheme<AdvancedPatternTheme>();
     if (theme) {
         sourceInfo.SetFillColor(theme->GetPrimaryColor());
     } else {

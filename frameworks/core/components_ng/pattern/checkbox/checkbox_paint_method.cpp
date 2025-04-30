@@ -216,7 +216,7 @@ CheckBoxModifier::CheckBoxModifier(bool isSelect, const Color& boardColor, const
 
 void CheckBoxModifier::InitializeParam(TokenThemeScopeId themeScopeId)
 {
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>(themeScopeId);
     CHECK_NULL_VOID(checkBoxTheme);

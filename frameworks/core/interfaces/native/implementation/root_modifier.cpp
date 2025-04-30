@@ -13,15 +13,14 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RootModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                Ark_Int32 flags)
+Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
 {
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, nullptr);
@@ -33,7 +32,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     auto stageManager = context->GetStageManager();
     CHECK_NULL_RETURN(stageManager, nullptr);
     auto stageNode = stageManager->GetStageNode();
-    TAG_LOGD(AceLogTag::ACE_NATIVE_NODE, "createRootNode: stageNode %{public}p", AceType::RawPtr(stageNode));
+    TAG_LOGI(AceLogTag::ACE_NATIVE_NODE, "createRootNode: stageNode %{public}p", AceType::RawPtr(stageNode));
 
     // create page node as CAPI root node to support existing
     // PageNode functionality like status bar offset supporting for example
@@ -50,7 +49,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 
     return AceType::RawPtr(stageNode);
 }
-} // RootModifier
+} // namespace RootModifier
 const GENERATED_ArkUIRootModifier* GetRootModifier()
 {
     static const GENERATED_ArkUIRootModifier ArkUIRootModifierImpl {
@@ -59,4 +58,4 @@ const GENERATED_ArkUIRootModifier* GetRootModifier()
     return &ArkUIRootModifierImpl;
 }
 
-}
+} // namespace OHOS::Ace::NG::GeneratedModifier

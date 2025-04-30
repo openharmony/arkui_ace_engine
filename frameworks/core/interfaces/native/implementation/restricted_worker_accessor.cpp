@@ -168,4 +168,7 @@ const GENERATED_ArkUIRestrictedWorkerAccessor* GetRestrictedWorkerAccessor()
     return &RestrictedWorkerAccessorImpl;
 }
 
+struct RestrictedWorkerPeer {
+    virtual ~RestrictedWorkerPeer() = default;
+};
 }

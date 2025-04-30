@@ -72,11 +72,11 @@ void ToggleButtonPattern::OnModifyDone()
     auto buttonPaintProperty = GetPaintProperty<ToggleButtonPaintProperty>();
     CHECK_NULL_VOID(buttonPaintProperty);
     if (!isOn_.has_value()) {
-        isOn_ = buttonPaintProperty->GetIsOnValue(false);
+        isOn_ = buttonPaintProperty->GetIsOnValue();
     }
     bool changed = false;
     if (buttonPaintProperty->HasIsOn()) {
-        bool isOn = buttonPaintProperty->GetIsOnValue(false);
+        bool isOn = buttonPaintProperty->GetIsOnValue();
         changed = isOn ^ isOn_.value();
         isOn_ = isOn;
     }

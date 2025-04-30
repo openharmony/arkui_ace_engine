@@ -431,8 +431,8 @@ void ApplyConstraint(OptionalSizeF& idealSize, const LayoutConstraintF& layoutCo
         UpdateConstraintByRawConstraint(validMinSize, validMaxSize, rawConstraint);
     }
     idealSize.Constrain(validMinSize, validMaxSize,
-        PipelineBase::GetCurrentContextSafelyWithCheck() &&
-            PipelineBase::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN,
+        PipelineBase::GetCurrentContext() &&
+            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN,
         rawConstraint != nullptr);
 }
 

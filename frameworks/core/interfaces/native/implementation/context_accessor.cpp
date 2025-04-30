@@ -167,4 +167,7 @@ const GENERATED_ArkUIContextAccessor* GetContextAccessor()
     return &ContextAccessorImpl;
 }
 
+struct ContextPeer {
+    virtual ~ContextPeer() = default;
+};
 }

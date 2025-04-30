@@ -3110,6 +3110,10 @@ typedef struct Ark_RichEditorSpan Ark_RichEditorSpan;
 typedef struct Opt_RichEditorSpan Opt_RichEditorSpan;
 typedef Ark_Object Ark_ContentModifier;
 typedef Opt_Object Opt_ContentModifier;
+
+typedef struct GENERATED_ArkUIAnyAPI {
+    Ark_Int32 version;
+ } GENERATED_ArkUIAnyAPI;
 typedef enum Ark_AccessibilityHoverType {
     ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_ENTER = 0,
     ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_MOVE = 1,
@@ -14779,7 +14783,7 @@ typedef struct Ark_Union_ImageBitmap_PixelMap {
     Ark_Int32 selector;
     union {
         Ark_ImageBitmap value0;
-        Ark_PixelMap value1;
+        Ark_NativePointer value1;
     };
 } Ark_Union_ImageBitmap_PixelMap;
 typedef struct Opt_Union_ImageBitmap_PixelMap {
@@ -19810,7 +19814,7 @@ typedef struct GENERATED_ArkUICheckboxModifier {
     void (*setContentModifier1)(Ark_NativePointer node,
                                 const Opt_ContentModifier* value);
     void (*set_onChangeEvent_select)(Ark_NativePointer node,
-                                     const Callback_Opt_Boolean_Void* callback);
+                                     const Opt_Callback_Boolean_Void* callback);
 } GENERATED_ArkUICheckboxModifier;
 
 typedef struct GENERATED_ArkUICheckboxGroupModifier {
@@ -19843,7 +19847,7 @@ typedef struct GENERATED_ArkUICheckboxGroupModifier {
     void (*setCheckboxShape1)(Ark_NativePointer node,
                               const Opt_CheckBoxShape* value);
     void (*set_onChangeEvent_selectAll)(Ark_NativePointer node,
-                                        const Callback_Opt_Boolean_Void* callback);
+                                        const Opt_Callback_Boolean_Void* callback);
 } GENERATED_ArkUICheckboxGroupModifier;
 
 typedef struct GENERATED_ArkUICircleModifier {
@@ -20615,7 +20619,7 @@ typedef struct GENERATED_ArkUIMenuItemModifier {
     void (*setLabelFontColor)(Ark_NativePointer node,
                               const Opt_ResourceColor* value);
     void (*set_onChangeEvent_selected)(Ark_NativePointer node,
-                                       const Callback_Opt_Boolean_Void* callback);
+                                       const Opt_Callback_Boolean_Void* callback);
 } GENERATED_ArkUIMenuItemModifier;
 
 typedef struct GENERATED_ArkUIMenuItemGroupModifier {
@@ -23467,7 +23471,7 @@ typedef struct GENERATED_ArkUIReplaceSymbolEffectAccessor {
 
 typedef struct GENERATED_ArkUIFrameNodeAccessor {
     void (*destroyPeer)(Ark_FrameNode peer);
-    Ark_FrameNode (*ctor)(Ark_UIContext uiContext);
+    Ark_FrameNode (*ctor)();
     Ark_NativePointer (*getFinalizer)();
     Ark_Boolean (*isModifiable)(Ark_FrameNode peer);
     void (*appendChild)(Ark_FrameNode peer,
@@ -24633,7 +24637,7 @@ typedef struct GENERATED_ArkUICanvasRendererAccessor {
                                   const Ark_Number* sy,
                                   const Ark_Number* sw,
                                   const Ark_Number* sh);
-    Ark_PixelMap (*getPixelMap)(Ark_CanvasRenderer peer,
+    Ark_NativePointer (*getPixelMap)(Ark_CanvasRenderer peer,
                                 const Ark_Number* sx,
                                 const Ark_Number* sy,
                                 const Ark_Number* sw,
@@ -24709,7 +24713,7 @@ typedef struct GENERATED_ArkUICanvasRendererAccessor {
                       const Ark_Number* x,
                       const Ark_Number* y);
     void (*setPixelMap)(Ark_CanvasRenderer peer,
-                        const Opt_PixelMap* value);
+                        const Opt_NativePointer* value);
     void (*transferFromImageBitmap)(Ark_CanvasRenderer peer,
                                     Ark_ImageBitmap bitmap);
     void (*saveLayer)(Ark_CanvasRenderer peer);

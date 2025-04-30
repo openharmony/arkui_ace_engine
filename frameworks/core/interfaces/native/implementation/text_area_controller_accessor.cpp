@@ -14,14 +14,16 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/text_area_controller_peer.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/implementation/text_area_controller_peer.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextAreaControllerAccessor {
 void DestroyPeerImpl(Ark_TextAreaController peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->controller_ = nullptr;
     delete peer;
 }
 Ark_TextAreaController CtorImpl()
@@ -69,4 +71,7 @@ const GENERATED_ArkUITextAreaControllerAccessor* GetTextAreaControllerAccessor()
     return &TextAreaControllerAccessorImpl;
 }
 
+struct TextAreaControllerPeer {
+    virtual ~TextAreaControllerPeer() = default;
+};
 }

@@ -49,7 +49,7 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Barrier, std::vector<BarrierInfo>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Guideline, std::vector<GuidelineInfo>, PROPERTY_UPDATE_MEASURE);
-
+    
     std::unique_ptr<OHOS::Ace::JsonValue> GuidelineInfoToJsonObject(GuidelineInfo& info) const
     {
         auto json = JsonUtil::Create(true);

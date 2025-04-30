@@ -66,17 +66,6 @@ public:
             styledStringController->SetOnDidChange(std::move(func));
         }
     }
-
-    SelectionRangeInfo GetSelection()
-    {
-        if (auto controller = handler_.Upgrade(); controller) {
-            auto styledStringController = AceType::DynamicCast<RichEditorStyledStringControllerBase>(controller);
-            if (styledStringController) {
-                return styledStringController->GetSelection();
-            }
-        }
-        return SelectionRangeInfo(-1, -1);
-    }
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
 

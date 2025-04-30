@@ -115,7 +115,7 @@ void TextPickerPaintMethod::PaintCustomDividerLines(RSCanvas& canvas, const Rect
 void TextPickerPaintMethod::PaintDefaultDividerLines(RSCanvas& canvas, const RectF &contentRect,
     double dividerHeight)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PickerTheme>();
     auto dividerColor = theme->GetDividerColor();
@@ -141,7 +141,7 @@ void TextPickerPaintMethod::PaintDefaultDividerLines(RSCanvas& canvas, const Rec
 bool TextPickerPaintMethod::SetStrokeWidth(const ItemDivider &divider, double dividerHeight, DividerInfo& info)
 {
     if (divider.strokeWidth.ConvertToPx() > dividerHeight / DOUBLE) {
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        auto pipeline = PipelineContext::GetCurrentContext();
         if (!pipeline) {
             return false;
         }

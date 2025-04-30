@@ -44,14 +44,6 @@ void CanvasModelNG::DetachRenderContext()
     pattern->DetachRenderContext();
 }
 
-void CanvasModelNG::DetachRenderContext(FrameNode* frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<CanvasPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->DetachRenderContext();
-}
-
 void CanvasModelNG::SetOnReady(std::function<void()>&& onReady)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -67,14 +59,6 @@ void CanvasModelNG::SetOnReady(std::function<void()>&& onReady)
 void CanvasModelNG::EnableAnalyzer(bool enable)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<CanvasPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->EnableAnalyzer(enable);
-}
-
-void CanvasModelNG::EnableAnalyzer(FrameNode* frameNode, bool enable)
-{
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<CanvasPattern>();
     CHECK_NULL_VOID(pattern);

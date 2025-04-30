@@ -43,7 +43,7 @@ bool CheckTopEdgeOverlap(const RefPtr<NavDestinationLayoutProperty>& navDestinat
         return false;
     }
 
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
 
@@ -86,7 +86,7 @@ bool CheckBottomEdgeOverlap(const RefPtr<NavDestinationLayoutProperty>& navDesti
         return false;
     }
 
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
 
@@ -114,7 +114,7 @@ NavSafeArea CheckIgnoreLayoutSafeArea(LayoutWrapper* layoutWrapper,
     auto opts = navDestinationLayoutProperty->GetIgnoreLayoutSafeAreaValue({.type = SAFE_AREA_TYPE_NONE,
         .edges = SAFE_AREA_TYPE_NONE});
 
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, safeArea);
     auto inset = pipeline->GetSafeArea();
     auto safeAreaManager = pipeline->GetSafeAreaManager();
@@ -452,7 +452,7 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     size.SetHeight(
         transferedTitleBarHeight + transferedToolBarHeight + transferedToolBarDividerHeight + contentChildHeight);
     if (NearZero(size.Height())) {
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto height = pipeline->GetRootHeight();
         size.SetHeight(height);

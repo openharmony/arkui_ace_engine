@@ -60,12 +60,6 @@ public:
         return count_;
     }
 
-#ifdef ARKUI_CAPI_UNITTEST
-    double GetDistanceThreshold()
-    {
-        return distanceThreshold_;
-    }
-#endif // ARKUI_CAPI_UNITTEST
 protected:
     RefPtr<NGGestureRecognizer> CreateRecognizer() override;
 

@@ -39,17 +39,12 @@ public:
         return taskExecutor_;
     }
 
-    virtual void SetTaskExecutor(const RefPtr<TaskExecutor> &taskExecutor)
-    {
-        taskExecutor_ = taskExecutor;
-    };
-
     RefPtr<DisplayInfo> GetMockDisplayInfo()
     {
         return displayInfo_;
     }
 
-    static void SetUp(RefPtr<PipelineBase> pipelineContext = nullptr);
+    static void SetUp();
     static void TearDown();
     static RefPtr<MockContainer> Current();
     static RefPtr<MockContainer> GetContainer(int32_t containerId);

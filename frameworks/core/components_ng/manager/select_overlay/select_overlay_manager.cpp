@@ -307,7 +307,7 @@ bool SelectOverlayManager::PreProcessTouchEvent(const NG::PointF& point, const T
         }
         auto deltaOffset = touchPoint.GetOffset() - touchDownPoints_.back().GetOffset();
         auto deltaDistance = deltaOffset.GetDistance();
-        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+        auto context = PipelineBase::GetCurrentContext();
         auto thresholdDistance = context ? context->NormalizeToPx(Dimension(5, DimensionUnit::VP)) : 5;
         if (deltaDistance > thresholdDistance) {
             touchDownPoints_.clear();
@@ -462,7 +462,7 @@ void SelectOverlayManager::OnFontChanged()
 
 SelectOverlayManager::~SelectOverlayManager()
 {
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     if (pipeline) {
         auto fontManager = pipeline->GetFontManager();
         if (fontManager) {

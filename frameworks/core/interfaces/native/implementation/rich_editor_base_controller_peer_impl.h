@@ -130,7 +130,8 @@ public:
         if (auto controller = handler_.Upgrade(); controller) {
             auto richEditorController = AceType::DynamicCast<RichEditorController>(controller);
             CHECK_NULL_RETURN(richEditorController, nullptr);
-            return richEditorController->GetPattern();
+            // need check
+            // return richEditorController->GetPattern();
         }
         return nullptr;
     }

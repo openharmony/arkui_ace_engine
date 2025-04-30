@@ -33,7 +33,7 @@ constexpr float ZERO_CORNER_RADIUS = 0.0f;
 
 DataPanelModifier::DataPanelModifier()
 {
-    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<DataPanelTheme>();
     auto colors = theme->GetColorsArray();

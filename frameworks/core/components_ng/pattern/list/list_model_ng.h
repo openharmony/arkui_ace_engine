@@ -19,7 +19,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_model.h"
 #include "core/components_v2/list/list_properties.h"
-#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
 namespace OHOS::Ace::NG {
 
@@ -76,12 +75,6 @@ public:
     void SetOnItemDrop(OnItemDropFunc&& onItemDrop) override;
     RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize() override;
 
-    static void SetListItemTotalCount(FrameNode* frameNode, int totalCount);
-    static void SetListItemAdapterFunc(FrameNode* frameNode, std::function<void(int start, int end)>&& requestFunc);
-    static void SetListItemAdapterCallFinish(FrameNode* frameNode, int start, int end);
-    static void SetListItemGetFunc(FrameNode* frameNode, std::function<RefPtr<FrameNode>(int32_t index)>&& getFunc);
-    static RefPtr<FrameNode> CreateList(int32_t nodeId);
-
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static RefPtr<ScrollProxy> GetOrCreateScrollBarProxy(FrameNode* frameNode);
     static void ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeType, bool smooth);
@@ -98,7 +91,7 @@ public:
     static int32_t GetSticky(FrameNode* frameNode);
     static void SetSticky(FrameNode* frameNode, const std::optional<int32_t>& stickyStyle);
     static void SetEdgeEffect(FrameNode* frameNode, const std::optional<int32_t>& edgeEffect,
-        const std::optional<bool>& alwaysEnabled, EffectEdge edge = EffectEdge::ALL);
+        const std::optional<bool>& alwaysEnabled, const std::optional<EffectEdge>& edge);
     static int32_t GetListDirection(FrameNode* frameNode);
     static void SetListDirection(FrameNode* frameNode, const std::optional<int32_t>& axis);
     static float GetListFriction(FrameNode* frameNode);
@@ -173,13 +166,11 @@ public:
     static void SetOnItemDragLeave(FrameNode* frameNode, OnItemDragLeaveFunc&& onItemDragLeave);
     static void SetOnItemDragMove(FrameNode* frameNode, OnItemDragMoveFunc&& onItemDragMove);
     static void SetOnItemDrop(FrameNode* frameNode, OnItemDropFunc&& onItemDrop);
-    static RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(
-        FrameNode* frameNode, const std::optional<float>& defaultSize);
-    static RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(FrameNode* frameNode);
     static void ScrollToItemInGroup(
         FrameNode* frameNode, int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align);
     static void SetHeader(FrameNode* frameNode, FrameNode* headerNode);
 private:
+    void AddDragFrameNodeToManager() const;
     static void AddDragFrameNodeToManager(FrameNode* frameNode);
 };
 

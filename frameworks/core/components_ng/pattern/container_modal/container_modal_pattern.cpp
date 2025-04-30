@@ -51,7 +51,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
         return;
     }
 
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
     auto stackNode = GetStackNode();
@@ -267,7 +267,7 @@ void ContainerModalPattern::AddPanEvent(const RefPtr<FrameNode>& controlButtonsN
     panDirection.type = PanDirection::ALL;
 
     if (!panEvent_) {
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto windowManager = pipeline->GetWindowManager();
         CHECK_NULL_VOID(windowManager);
@@ -314,7 +314,7 @@ void ContainerModalPattern::OnWindowForceUnfocused() {}
 
 void ContainerModalPattern::WindowFocus(bool isFocus)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
     isFocus_ = isFocus;
@@ -366,7 +366,7 @@ void ContainerModalPattern::ChangeControlButtons(bool isFocus)
     auto maximizeButton =
         AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MAX_RECOVER_BUTTON_INDEX));
     CHECK_NULL_VOID(maximizeButton);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     auto windowManager = pipeline->GetWindowManager();
     MaximizeMode mode = windowManager->GetCurrentWindowMaximizeMode();
     InternalResource::ResourceId maxId;
@@ -403,7 +403,7 @@ void ContainerModalPattern::ChangeFloatingTitle(bool isFocus)
 void ContainerModalPattern::ChangeTitleButtonIcon(
     const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus, bool isCloseBtn)
 {
-    auto theme = PipelineContext::GetCurrentContextSafelyWithCheck()->GetTheme<ContainerModalTheme>();
+    auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto colorType = isFocus ? ControlBtnColorType::NORMAL : ControlBtnColorType::UNFOCUS;
@@ -528,7 +528,7 @@ void ContainerModalPattern::SetCloseButtonStatus(bool isEnabled)
 
 void ContainerModalPattern::SetWindowContainerColor(const Color& activeColor, const Color& inactiveColor)
 {
-    auto theme = PipelineContext::GetCurrentContextSafelyWithCheck()->GetTheme<ContainerModalTheme>();
+    auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
     auto containerNode = GetHost();
     CHECK_NULL_VOID(containerNode);
     // update container modal background
@@ -542,7 +542,7 @@ void ContainerModalPattern::SetWindowContainerColor(const Color& activeColor, co
 
 Color ContainerModalPattern::GetContainerColor(bool isFocus)
 {
-    auto theme = PipelineContext::GetCurrentContextSafelyWithCheck()->GetTheme<ContainerModalTheme>();
+    auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
     return isCustomColor_ ? (isFocus ? activeColor_ : inactiveColor_) : theme->GetBackGroundColor(isFocus);
 }
 
@@ -740,7 +740,7 @@ void ContainerModalPattern::CallButtonsRectChange()
 
 void ContainerModalPattern::InitTitle()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
@@ -767,7 +767,7 @@ void ContainerModalPattern::Init()
 
 void ContainerModalPattern::InitContainerColor()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
     activeColor_ = theme->GetBackGroundColor(true);
@@ -976,7 +976,7 @@ bool ContainerModalPattern::OnDirtyLayoutWrapperSwap(
 
 void ContainerModalPattern::CallSetContainerWindow(bool considerFloatingWindow)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto curWindowRect = pipelineContext->GetCurrentWindowRect();
     auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL;

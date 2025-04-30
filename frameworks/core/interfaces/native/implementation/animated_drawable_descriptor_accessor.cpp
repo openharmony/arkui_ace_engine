@@ -42,4 +42,7 @@ const GENERATED_ArkUIAnimatedDrawableDescriptorAccessor* GetAnimatedDrawableDesc
     return &AnimatedDrawableDescriptorAccessorImpl;
 }
 
+struct AnimatedDrawableDescriptorPeer {
+    virtual ~AnimatedDrawableDescriptorPeer() = default;
+};
 }

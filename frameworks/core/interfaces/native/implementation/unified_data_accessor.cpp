@@ -16,17 +16,15 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
-#include "unified_data_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UnifiedDataAccessor {
 void DestroyPeerImpl(Ark_UnifiedData peer)
 {
-    delete peer;
 }
 Ark_UnifiedData CtorImpl()
 {
-    return new UnifiedDataPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -54,4 +52,7 @@ const GENERATED_ArkUIUnifiedDataAccessor* GetUnifiedDataAccessor()
     return &UnifiedDataAccessorImpl;
 }
 
+struct UnifiedDataPeer {
+    virtual ~UnifiedDataPeer() = default;
+};
 }

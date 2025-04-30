@@ -20,33 +20,35 @@
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
-
-static const double STROKE_MITER_LIMIT_MIN_VALUE = 1.0;
 
 namespace OHOS::Ace::NG {
-struct ShapeOptions {
-    std::optional<Dimension> x;
-    std::optional<Dimension> y;
-    std::optional<Dimension> width;
-    std::optional<Dimension> height;
+struct ShapeViewPortOptions {
+    Dimension x;
+    Dimension y;
+    Dimension width;
+    Dimension height;
 };
 }
 
 namespace OHOS::Ace::NG::Converter {
 template<>
-ShapeOptions Convert(const Ark_ViewportRect& src)
+ShapeViewPortOptions Convert(const Ark_ViewportRect& src)
 {
-    ShapeOptions options;
-    options.x = Converter::OptConvert<Dimension>(src.x);
-    options.y = Converter::OptConvert<Dimension>(src.y);
-    options.width = Converter::OptConvert<Dimension>(src.width);
-    options.height = Converter::OptConvert<Dimension>(src.height);
+    ShapeViewPortOptions options;
+    options.x = Converter::OptConvert<Dimension>(src.x).value_or(0.0_vp);
+    options.y = Converter::OptConvert<Dimension>(src.y).value_or(0.0_vp);
+    options.width = Converter::OptConvert<Dimension>(src.width).value_or(0.0_vp);
+    options.height = Converter::OptConvert<Dimension>(src.height).value_or(0.0_vp);
     return options;
 }
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace {
+    const Color STROKE_DEFAULT = Color::TRANSPARENT;
+    const Color FILL_DEFAULT = Color::BLACK;
+    const double STROKE_MITERLIMIT_DEFAULT = 4.0f;
+} // namespace
 namespace ShapeModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
@@ -85,50 +87,54 @@ void ViewPortImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto options = Converter::OptConvert<ShapeOptions>(*value);
-    CHECK_NULL_VOID(options);
-    ShapeModelNG::SetViewPort(frameNode, options->x, options->y, options->width, options->height);
+    CHECK_NULL_VOID(value);
+    CHECK_EQUAL_VOID(value->tag, InteropTag::INTEROP_TAG_UNDEFINED);
+    auto options = Converter::Convert<ShapeViewPortOptions>(value->value);
+    ShapeModelNG::SetViewPort(frameNode, options.x, options.y, options.width, options.height);
 }
 void StrokeImpl(Ark_NativePointer node,
                 const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ShapeModelNG::SetStroke(frameNode, Converter::OptConvert<Color>(*value));
+    CHECK_NULL_VOID(value);
+    auto color = Converter::OptConvert<Color>(*value);
+    ShapeModelNG::SetStroke(frameNode, color.value_or(STROKE_DEFAULT));
 }
 void FillImpl(Ark_NativePointer node,
               const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ShapeModelNG::SetFill(frameNode, Converter::OptConvert<Color>(*value));
+    CHECK_NULL_VOID(value);
+    auto color = Converter::OptConvert<Color>(*value);
+    ShapeModelNG::SetFill(frameNode, color.value_or(FILL_DEFAULT));
 }
-
 void StrokeDashOffsetImpl(Ark_NativePointer node,
                           const Opt_Union_Number_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto strokeDashOffset = Converter::OptConvert<Dimension>(*value);
     Validator::ValidatePositive(strokeDashOffset);
     Validator::ValidateNonPercent(strokeDashOffset);
-    ShapeModelNG::SetStrokeDashOffset(frameNode, strokeDashOffset);
+    ShapeModelNG::SetStrokeDashOffset(frameNode, strokeDashOffset.value_or(Dimension(0.0)));
 }
-
 void StrokeDashArrayImpl(Ark_NativePointer node,
                          const Opt_Array_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<std::vector<Dimension>>(*value);
-    if (!convValue) {
-        // TODO: Reset value
+    CHECK_NULL_VOID(value);
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        ShapeModelNG::SetStrokeDashArray(frameNode, {});
         return;
     }
-    auto dashArray = *convValue;
+    auto dashArray = Converter::Convert<std::vector<Dimension>>(value->value);
     // if odd,add twice
-    auto length = dashArray.size();
-    if (length & 1) {
+    auto length = value->value.length;
+    if (static_cast<uint32_t>(length) == dashArray.size() && (static_cast<uint32_t>(length) & 1)) {
         for (int32_t i = 0; i < length; i++) {
             dashArray.emplace_back(dashArray[i]);
         }
@@ -140,69 +146,69 @@ void StrokeLineCapImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto enumLineCapStyle = Converter::OptConvert<LineCapStyle>(*value);
     auto intLineCapStyle = EnumToInt(enumLineCapStyle);
-    ShapeModelNG::SetStrokeLineCap(frameNode, intLineCapStyle);
+    ShapeModelNG::SetStrokeLineCap(frameNode, intLineCapStyle.value_or(0));
 }
 void StrokeLineJoinImpl(Ark_NativePointer node,
                         const Opt_LineJoinStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto enumLineJoinStyle = Converter::OptConvert<LineJoinStyle>(*value);
     auto intLineJoinStyle = EnumToInt(enumLineJoinStyle);
-    ShapeModelNG::SetStrokeLineJoin(frameNode, intLineJoinStyle);
+    ShapeModelNG::SetStrokeLineJoin(frameNode, intLineJoinStyle.value_or(0));
 }
 void StrokeMiterLimitImpl(Ark_NativePointer node,
                           const Opt_Union_Number_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto limit = Converter::OptConvert<float>(*value);
-    if (limit && limit.value() < STROKE_MITER_LIMIT_MIN_VALUE) {
-        limit = 1.0;
-    }
-    ShapeModelNG::SetStrokeMiterLimit(frameNode, limit);
+    ShapeModelNG::SetStrokeMiterLimit(frameNode, limit.value_or(STROKE_MITERLIMIT_DEFAULT));
 }
 void StrokeOpacityImpl(Ark_NativePointer node,
                        const Opt_Union_Number_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto strokeOpacity = Converter::OptConvert<float>(*value);
     Validator::ValidateOpacity(strokeOpacity);
-    ShapeModelNG::SetStrokeOpacity(frameNode, strokeOpacity);
+    ShapeModelNG::SetStrokeOpacity(frameNode, strokeOpacity.value_or(1.0));
 }
 void FillOpacityImpl(Ark_NativePointer node,
                      const Opt_Union_Number_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto strokeOpacity = Converter::OptConvert<float>(*value);
     Validator::ValidateOpacity(strokeOpacity);
-    ShapeModelNG::SetFillOpacity(frameNode, strokeOpacity);
+    ShapeModelNG::SetFillOpacity(frameNode, strokeOpacity.value_or(1.0));
 }
 void StrokeWidthImpl(Ark_NativePointer node,
                      const Opt_Union_Number_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto strokeWidth = Converter::OptConvert<Dimension>(*value);
     Validator::ValidatePositive(strokeWidth);
     Validator::ValidateNonPercent(strokeWidth);
-    ShapeModelNG::SetStrokeWidth(frameNode, strokeWidth);
+    ShapeModelNG::SetStrokeWidth(frameNode, strokeWidth.value_or(1.0_vp));
 }
 void AntiAliasImpl(Ark_NativePointer node,
                    const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    ShapeModelNG::SetAntiAlias(frameNode, *convValue);
+    CHECK_NULL_VOID(value);
+    auto antiAlias = Converter::OptConvert<bool>(*value);
+    ShapeModelNG::SetAntiAlias(frameNode, antiAlias.value_or(false));
 }
 void MeshImpl(Ark_NativePointer node,
               const Array_Number* value,

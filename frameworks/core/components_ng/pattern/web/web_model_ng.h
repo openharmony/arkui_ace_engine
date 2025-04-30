@@ -245,11 +245,8 @@ public:
     static void SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEnabled);
     static void SetOnLineImageAccessEnabled(FrameNode* frameNode, bool isOnLineImageAccessEnabled);
     static void SetDomStorageAccessEnabled(FrameNode* frameNode, bool isDomStorageAccessEnabled);
-    static void SetMixedMode(FrameNode* frameNode, MixedModeContent mixedMode);
     static void SetImageAccessEnabled(FrameNode* frameNode, bool isImageAccessEnabled);
     static void SetZoomAccessEnabled(FrameNode* frameNode, bool isZoomAccessEnabled);
-    static void SetCacheMode(FrameNode* frameNode, WebCacheMode cacheMode);
-    static void SetDarkMode(FrameNode* frameNode, WebDarkMode mode);
     static void SetGeolocationAccessEnabled(FrameNode* frameNode, bool isGeolocationAccessEnabled);
     static void SetForceDarkAccess(FrameNode* frameNode, bool access);
     static void SetOverviewModeAccessEnabled(FrameNode* frameNode, bool isOverviewModeAccessEnabled);
@@ -265,6 +262,7 @@ public:
     static void SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllowWindowOpenMethod);
     static void SetNativeEmbedModeEnabled(FrameNode* frameNode, bool isEmbedModeEnabled);
     static void SetTextAutosizing(FrameNode* frameNode, bool isTextAutosizing);
+    static void SetSmoothDragResizeEnabled(FrameNode* frameNode, bool isSmoothDragResizeEnabled);
     static void SetEnabledHapticFeedback(FrameNode* frameNode, bool isEnabled);
     static void SetMixedMode(FrameNode* frameNode, const std::optional<MixedModeContent>& mixedMode);
     static void SetCacheMode(FrameNode* frameNode, const std::optional<WebCacheMode>& cacheMode);
@@ -295,8 +293,6 @@ public:
     static void JavaScriptOnDocumentEnd(FrameNode* frameNode, const ScriptItems& scriptItems);
     static void SetNestedScrollExt(FrameNode* frameNode, const std::optional<NestedScrollOptionsExt>& nestedOpt);
     static void SetSelectionMenuOptions(FrameNode* frameNode, const WebMenuOptionsParam& webMenuOption);
-    static void SetEditMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-        const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void SetNewDragStyle(FrameNode* frameNode, bool isNewDragStyle);
     static void SetPreviewSelectionMenu(
         FrameNode* frameNode, const std::shared_ptr<WebPreviewSelectionMenuParam>& param);

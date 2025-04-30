@@ -345,4 +345,7 @@ const GENERATED_ArkUIRenderNodeAccessor* GetRenderNodeAccessor()
     return &RenderNodeAccessorImpl;
 }
 
+struct RenderNodePeer {
+    virtual ~RenderNodePeer() = default;
+};
 }

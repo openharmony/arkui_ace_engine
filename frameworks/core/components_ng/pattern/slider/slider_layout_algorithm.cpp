@@ -31,7 +31,7 @@ bool JudgeTrackness(Axis direction, float blockDiameter, float trackThickness, f
 
 RefPtr<SliderTheme> GetTheme()
 {
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     return pipeline->GetTheme<SliderTheme>();
 }

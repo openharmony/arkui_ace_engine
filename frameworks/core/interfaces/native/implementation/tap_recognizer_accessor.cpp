@@ -46,4 +46,7 @@ const GENERATED_ArkUITapRecognizerAccessor* GetTapRecognizerAccessor()
     return &TapRecognizerAccessorImpl;
 }
 
+struct TapRecognizerPeer {
+    virtual ~TapRecognizerPeer() = default;
+};
 }

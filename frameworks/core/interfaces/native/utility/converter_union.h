@@ -326,16 +326,5 @@ void VisitUnion(const T& src, Fs... funcs)
         detail::Overloaded{funcs...}();
     }
 }
-
-template<typename T, typename... Fs, decltype(T().value.selector) = 0>
-void VisitUnionPtr(const T* src, Fs... funcs)
-{
-    if (src && src->tag != INTEROP_TAG_UNDEFINED) {
-        using U = decltype(T().value);
-        detail::UnionVisitor<U, UnionLastIndex<U>>::Visit(src->value, detail::Overloaded{funcs...});
-    } else {
-        detail::Overloaded{funcs...}();
-    }
-}
 } // namespace OHOS::Ace::NG::Converter
 #endif // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_CONVERTER_UNION_H

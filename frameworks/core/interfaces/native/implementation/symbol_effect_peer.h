@@ -17,84 +17,66 @@
 
 #include <optional>
 #include "core/components_ng/pattern/symbol/constants.h"
-#include "core/interfaces/native/utility/peer_utils.h"
 
 struct SymbolEffectPeer {
-    using Type = OHOS::Ace::SymbolEffectType;
-    using Scope = std::optional<OHOS::Ace::ScopeType>;
-    using Direction = std::optional<OHOS::Ace::CommonSubType>;
-    using FillStyle = std::optional<OHOS::Ace::FillStyle>;
+    OHOS::Ace::SymbolEffectType type;
+    std::optional<OHOS::Ace::ScopeType> scope;
+    std::optional<OHOS::Ace::CommonSubType> direction;
+    std::optional<OHOS::Ace::FillStyle> fillStyle;
 
-    const Type type;
-    Scope scope;
-    Direction direction;
-    FillStyle fillStyle;
-
-protected:
-    explicit SymbolEffectPeer(
-        Type symbolEffectType = Type::NONE,
-        Scope optScope = std::nullopt,
-        Direction optDirection = std::nullopt,
-        FillStyle optFillStyle = std::nullopt
-    ) : type(symbolEffectType), scope(optScope), direction(optDirection), fillStyle(optFillStyle) {}
-    virtual ~SymbolEffectPeer() = default;
-    friend OHOS::Ace::NG::PeerUtils;
+    SymbolEffectPeer(std::optional<OHOS::Ace::ScopeType> optScope, std::optional<OHOS::Ace::CommonSubType> optDirection)
+    {
+        scope = optScope;
+        direction = optDirection;
+    }
 };
 
 struct BounceSymbolEffectPeer : SymbolEffectPeer {
-protected:
-    BounceSymbolEffectPeer(Scope optScope, Direction optDirection)
-        : SymbolEffectPeer(Type::BOUNCE, optScope, optDirection) {}
-    ~BounceSymbolEffectPeer() override = default;
-    friend OHOS::Ace::NG::PeerUtils;
+    BounceSymbolEffectPeer(
+        std::optional<OHOS::Ace::ScopeType> optScope, std::optional<OHOS::Ace::CommonSubType> optDirection)
+        : SymbolEffectPeer(optScope, optDirection)
+    {
+        type = OHOS::Ace::SymbolEffectType::BOUNCE;
+    }
 };
 
 struct HierarchicalSymbolEffectPeer : SymbolEffectPeer {
-protected:
-    explicit HierarchicalSymbolEffectPeer(FillStyle optFillStyle)
-        : SymbolEffectPeer(Type::HIERARCHICAL, std::nullopt, std::nullopt, optFillStyle) {}
-    ~HierarchicalSymbolEffectPeer() override = default;
-    friend OHOS::Ace::NG::PeerUtils;
+    HierarchicalSymbolEffectPeer(std::optional<OHOS::Ace::FillStyle> optFillStyle)
+        : SymbolEffectPeer(std::nullopt, std::nullopt)
+    {
+        type = OHOS::Ace::SymbolEffectType::HIERARCHICAL;
+        fillStyle = optFillStyle;
+    }
 };
 
 struct ScaleSymbolEffectPeer : SymbolEffectPeer {
-protected:
-    ScaleSymbolEffectPeer(Scope optScope, Direction optDirection)
-        : SymbolEffectPeer(Type::SCALE, optScope, optDirection) {}
-    ~ScaleSymbolEffectPeer() override = default;
-    friend OHOS::Ace::NG::PeerUtils;
+    ScaleSymbolEffectPeer(
+        std::optional<OHOS::Ace::ScopeType> optScope, std::optional<OHOS::Ace::CommonSubType> optDirection)
+        : SymbolEffectPeer(optScope, optDirection)
+    {
+        type = OHOS::Ace::SymbolEffectType::SCALE;
+    }
 };
 
 struct ReplaceSymbolEffectPeer : SymbolEffectPeer {
-protected:
-    explicit ReplaceSymbolEffectPeer(Scope optScope)
-        : SymbolEffectPeer(Type::REPLACE, optScope) {}
-    ~ReplaceSymbolEffectPeer() override = default;
-    friend OHOS::Ace::NG::PeerUtils;
+    ReplaceSymbolEffectPeer(std::optional<OHOS::Ace::ScopeType> optScope) : SymbolEffectPeer(optScope, std::nullopt)
+    {
+        type = OHOS::Ace::SymbolEffectType::REPLACE;
+    }
 };
 
 struct AppearSymbolEffectPeer : SymbolEffectPeer {
-protected:
-    explicit AppearSymbolEffectPeer(Scope optScope)
-        : SymbolEffectPeer(Type::APPEAR, optScope) {}
-    ~AppearSymbolEffectPeer() override = default;
-    friend OHOS::Ace::NG::PeerUtils;
+    AppearSymbolEffectPeer(std::optional<OHOS::Ace::ScopeType> optScope) : SymbolEffectPeer(optScope, std::nullopt)
+    {
+        type = OHOS::Ace::SymbolEffectType::APPEAR;
+    }
 };
 
 struct DisappearSymbolEffectPeer : SymbolEffectPeer {
-protected:
-    explicit DisappearSymbolEffectPeer(Scope optScope)
-        : SymbolEffectPeer(Type::DISAPPEAR, optScope) {}
-    ~DisappearSymbolEffectPeer() override = default;
-    friend OHOS::Ace::NG::PeerUtils;
-};
-
-struct PulseSymbolEffectPeer : SymbolEffectPeer {
-protected:
-    PulseSymbolEffectPeer()
-        : SymbolEffectPeer(Type::PULSE) {}
-    ~PulseSymbolEffectPeer() override = default;
-    friend OHOS::Ace::NG::PeerUtils;
+    DisappearSymbolEffectPeer(std::optional<OHOS::Ace::ScopeType> optScope) : SymbolEffectPeer(optScope, std::nullopt)
+    {
+        type = OHOS::Ace::SymbolEffectType::DISAPPEAR;
+    }
 };
 
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_SYMBOL_EFFECT_PEER_H

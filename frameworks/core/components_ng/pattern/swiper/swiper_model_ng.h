@@ -93,9 +93,9 @@ public:
         const std::optional<bool> &ignoreBlank = false);
     static void SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin,
         const std::optional<bool> &ignoreBlank = false);
-    static void SetIndex(FrameNode* frameNode, int32_t index);
-    static void SetAutoPlayInterval(FrameNode* frameNode, int32_t interval);
-    static void SetDuration(FrameNode* frameNode, int32_t duration);
+    static void SetIndex(FrameNode* frameNode, uint32_t index);
+    static void SetAutoPlayInterval(FrameNode* frameNode, uint32_t interval);
+    static void SetDuration(FrameNode* frameNode, uint32_t duration);
     static void SetCachedCount(FrameNode* frameNode, int32_t cachedCount);
     static int32_t GetCachedCount(FrameNode* frameNode);
     static void SetCachedIsShown(FrameNode* frameNode, bool isShown);
@@ -164,8 +164,6 @@ public:
     static bool GetIndicatorInteractive(FrameNode* frameNode);
     static void SetPageFlipMode(FrameNode* frameNode, int32_t options);
     static int32_t GetPageFlipMode(FrameNode* frameNode);
-    static void SetOnChangeEvent(FrameNode* frameNode,
-        std::function<void(const BaseEventInfo* info)>&& onChangeEvent);
     static int GetSwipeByGroup(FrameNode* frameNode);
     static SwiperDisplayMode GetDisplayMode(FrameNode* frameNode);
     static float GetMinSize(FrameNode* frameNode);
@@ -173,6 +171,8 @@ public:
     static void ResetIndicatorStyle(FrameNode* frameNode);
     static SwiperArrowParameters GetArrowStyle(FrameNode* frameNode);
     static std::shared_ptr<SwiperDigitalParameters> GetDigitIndicator(FrameNode* frameNode);
+    static void SetOnChangeEvent(FrameNode* frameNode,
+        std::function<void(const BaseEventInfo* info)>&& onChangeEvent);
 };
 
 } // namespace OHOS::Ace::NG

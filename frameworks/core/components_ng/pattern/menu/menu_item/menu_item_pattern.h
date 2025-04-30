@@ -284,12 +284,12 @@ public:
     void HideEmbedded(bool isNeedAnimation = true);
     void OnHover(bool isHover);
     void NotifyPressStatus(bool isPress);
-    void SetBgColor(const std::optional<Color>& color);
-    void SetFontColor(const std::optional<Color>& color);
+    void SetBgColor(const Color& color);
+    void SetFontColor(const Color& color);
     void SetFontFamily(const std::vector<std::string>& value);
-    void SetFontSize(const std::optional<Dimension>& value);
-    void SetFontWeight(const std::optional<FontWeight>& value);
-    void SetItalicFontStyle(const std::optional<Ace::FontStyle>& value);
+    void SetFontSize(const Dimension& value);
+    void SetFontWeight(const FontWeight& value);
+    void SetItalicFontStyle(const Ace::FontStyle& value);
     void SetSelected(int32_t selected);
     void SetBorderColor(const Color& color);
     Color GetBorderColor() const;
@@ -393,11 +393,11 @@ public:
     {
         isOptionFontColorSetByUser_ = isSet;
     }
-    inline void SetSelectFontColor(const std::optional<Color>& color)
+    inline void SetSelectFontColor(const Color& color)
     {
         selectFontColor_ = color;
     }
-    inline void SetOptionFontColor(const std::optional<Color>& color)
+    inline void SetOptionFontColor(const Color& color)
     {
         optionFontColor_ = color;
     }
@@ -405,7 +405,7 @@ public:
     {
         isOptionBgColorSetByUser_ = isSet;
     }
-    inline void SetOptionBgColor(const std::optional<Color>& color)
+    inline void SetOptionBgColor(const Color& color)
     {
         optionBgColor_ = color;
     }
@@ -413,7 +413,6 @@ public:
     void RemoveBottomDivider();
 
 protected:
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void RegisterOnKeyEvent();
     void RegisterOnTouch();
     void CreateBottomDivider();

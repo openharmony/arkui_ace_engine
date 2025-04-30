@@ -36,7 +36,6 @@ struct PasteButtonStyle {
     std::optional<PasteButtonIconStyle> icon;
     std::optional<ButtonType> backgroundType;
 };
-
 class ACE_EXPORT PasteButtonModelNG : public SecurityComponentModelNG {
 public:
     static PasteButtonModelNG* GetInstance();

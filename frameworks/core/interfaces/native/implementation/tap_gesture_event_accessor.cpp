@@ -15,17 +15,16 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/implementation/tap_gesture_event_peer.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TapGestureEventAccessor {
 void DestroyPeerImpl(Ark_TapGestureEvent peer)
 {
-    PeerUtils::DestroyPeer(peer);
 }
 Ark_TapGestureEvent CtorImpl()
 {
-    return PeerUtils::CreatePeer<TapGestureEventPeer>();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -42,4 +41,7 @@ const GENERATED_ArkUITapGestureEventAccessor* GetTapGestureEventAccessor()
     return &TapGestureEventAccessorImpl;
 }
 
+struct TapGestureEventPeer {
+    virtual ~TapGestureEventPeer() = default;
+};
 }

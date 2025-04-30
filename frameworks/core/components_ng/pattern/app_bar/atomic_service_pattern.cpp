@@ -34,7 +34,7 @@ void AtomicServicePattern::BeforeCreateLayoutWrapper()
 
 void AtomicServicePattern::MenuBarSafeAreaCallBack()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<AppBarTheme>();
     CHECK_NULL_VOID(theme);
@@ -138,7 +138,7 @@ void AtomicServicePattern::AppBgColorCallBack()
 
 void AtomicServicePattern::UpdateLayoutMargin()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto safeArea = pipeline->GetSafeArea();
     auto atom = GetHost();
@@ -244,7 +244,7 @@ RefPtr<FrameNode> AtomicServicePattern::GetCloseIcon()
 
 void AtomicServicePattern::UpdateColor(std::optional<bool> isLight)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<AppBarTheme>();
     if (!(isLight.has_value())) {
@@ -339,7 +339,7 @@ void AtomicServicePattern::UpdateIconColor(RefPtr<AppBarTheme>& theme, RefPtr<Fr
 
 void AtomicServicePattern::UpdateLayout()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<AppBarTheme>();
     CHECK_NULL_VOID(theme);

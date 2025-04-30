@@ -287,13 +287,15 @@ void CustomDialogControllerPeerImpl::OpenDialog()
         }
     }
     dialogProperties_.isSysBlurStyle = true;
-    CustomDialogControllerModelNG::SetOpenDialog(dialogProperties_, dialogs_, WeakClaim(this), std::move(builder_));
+    // need check
+    // CustomDialogControllerModelNG::SetOpenDialog(dialogProperties_, dialogs_, WeakClaim(this), std::move(builder_));
 }
 
 void CustomDialogControllerPeerImpl::CloseDialog()
 {
     ContainerScope scope(instanceId_);
-    CustomDialogControllerModelNG::SetCloseDialog(dialogProperties_, dialogs_, WeakClaim(this));
+    // need check
+    // CustomDialogControllerModelNG::SetCloseDialog(dialogProperties_, dialogs_, WeakClaim(this));
 }
 
 RefPtr<UINode> CustomDialogControllerPeerImpl::GetWindowScene() const

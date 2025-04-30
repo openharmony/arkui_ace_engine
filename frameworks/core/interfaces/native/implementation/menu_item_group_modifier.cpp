@@ -14,10 +14,10 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
 #include "core/interfaces/native/utility/callback_helper.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MenuItemGroupModifier {
@@ -44,12 +44,10 @@ void SetMenuItemGroupOptionsImpl(Ark_NativePointer node,
             MenuItemGroupView::SetHeader(frameNode, valueString);
         },
         [frameNode, node](const CustomNodeBuilder& value) {
-            CallbackHelper(value).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
-                auto builder = [uiNode]() -> RefPtr<UINode> {
-                    return uiNode;
-                };
-                MenuItemGroupView::SetHeader(frameNode, std::move(builder));
-                }, node);
+            auto builder = [callback = CallbackHelper(value), node]() -> RefPtr<UINode> {
+                return callback.BuildSync(node);
+            };
+            MenuItemGroupView::SetHeader(frameNode, std::move(builder));
         },
         []() {}
     );
@@ -59,12 +57,10 @@ void SetMenuItemGroupOptionsImpl(Ark_NativePointer node,
             MenuItemGroupView::SetFooter(frameNode, valueString);
         },
         [frameNode, node](const CustomNodeBuilder& value) {
-            CallbackHelper(value).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
-                auto builder = [uiNode]() -> RefPtr<UINode> {
-                    return uiNode;
-                };
-                MenuItemGroupView::SetFooter(frameNode, std::move(builder));
-                }, node);
+            auto builder = [callback = CallbackHelper(value), node]() -> RefPtr<UINode> {
+                return callback.BuildSync(node);
+            };
+            MenuItemGroupView::SetFooter(frameNode, std::move(builder));
         },
         []() {}
     );

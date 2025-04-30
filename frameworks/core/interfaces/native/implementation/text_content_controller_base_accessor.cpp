@@ -13,21 +13,19 @@
  * limitations under the License.
  */
 
+#include "arkoala_api_generated.h"
+
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/text_content_controller_base_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::Converter {
-template<> void AssignCast(std::optional<int32_t>& dst, const Ark_TextContentControllerOptions& src)
-{
-    dst = Converter::OptConvert<int32_t>(src.offset);
-}
-}
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextContentControllerBaseAccessor {
 void DestroyPeerImpl(Ark_TextContentControllerBase peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->controller_ = nullptr;
     delete peer;
 }
 Ark_TextContentControllerBase CtorImpl()
@@ -60,30 +58,15 @@ Ark_Number AddTextImpl(Ark_TextContentControllerBase peer,
                        const Ark_String* text,
                        const Opt_TextContentControllerOptions* textOperationOptions)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(peer && peer->controller_ && text, errValue);
-    auto textConv = Converter::Convert<std::u16string>(*text);
-    auto optionsConv =
-        textOperationOptions ? Converter::OptConvert<int32_t>(*textOperationOptions) : std::nullopt;
-    const auto defaultOffset = -1;
-    auto retValue = peer->controller_->AddText(textConv, optionsConv.value_or(defaultOffset));
-    return Converter::ArkValue<Ark_Number>(retValue);
+    return {};
 }
 void DeleteTextImpl(Ark_TextContentControllerBase peer,
                     const Opt_TextRange* range)
 {
-    CHECK_NULL_VOID(peer && peer->controller_);
-    auto rangeConv = range ? Converter::OptConvert<TextRange>(*range) : std::nullopt;
-    if (rangeConv.has_value()) {
-        peer->controller_->DeleteText(rangeConv.value().start, rangeConv.value().end);
-    }
 }
 Ark_TextRange GetSelectionImpl(Ark_TextContentControllerBase peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_TextRange>(TextRange{});
-    CHECK_NULL_RETURN(peer && peer->controller_, errValue);
-    auto retValue = peer->controller_->GetSelection();
-    return Converter::ArkValue<Ark_TextRange>(retValue);
+    return {};
 }
 void ClearPreviewTextImpl(Ark_TextContentControllerBase peer)
 {
@@ -112,4 +95,7 @@ const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentController
     return &TextContentControllerBaseAccessorImpl;
 }
 
+struct TextContentControllerBasePeer {
+    virtual ~TextContentControllerBasePeer() = default;
+};
 }

@@ -56,7 +56,7 @@ void NavigatorEventHub::NavigatePage()
 void NavigatorEventHub::SetActive(bool active)
 {
     if (active) {
-        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
+        auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->GetTaskExecutor()->PostTask(
             [weak = WeakClaim(this)] {

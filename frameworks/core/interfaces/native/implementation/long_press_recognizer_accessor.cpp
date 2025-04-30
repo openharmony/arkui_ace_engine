@@ -51,4 +51,7 @@ const GENERATED_ArkUILongPressRecognizerAccessor* GetLongPressRecognizerAccessor
     return &LongPressRecognizerAccessorImpl;
 }
 
+struct LongPressRecognizerPeer {
+    virtual ~LongPressRecognizerPeer() = default;
+};
 }

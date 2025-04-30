@@ -46,4 +46,7 @@ const GENERATED_ArkUIPanRecognizerAccessor* GetPanRecognizerAccessor()
     return &PanRecognizerAccessorImpl;
 }
 
+struct PanRecognizerPeer {
+    virtual ~PanRecognizerPeer() = default;
+};
 }

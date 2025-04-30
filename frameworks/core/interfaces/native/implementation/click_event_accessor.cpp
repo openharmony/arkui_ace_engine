@@ -13,27 +13,21 @@
  * limitations under the License.
  */
 
-#include <unordered_set>
-
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/callback_helper.h"
+#include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/click_event_peer.h"
-
-namespace {
-const std::unordered_set<std::string> g_clickPreventDefPattern = { "RichEditor", "Checkbox", "CheckboxGroup",
-    "Rating", "Radio", "Toggle", "Hyperlink" };
-}
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ClickEventAccessor {
 void DestroyPeerImpl(Ark_ClickEvent peer)
 {
-    PeerUtils::DestroyPeer(peer);
+    delete peer;
 }
 Ark_ClickEvent CtorImpl()
 {
-    return PeerUtils::CreatePeer<ClickEventPeer>();
+    return new ClickEventPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -211,23 +205,11 @@ void SetHandImpl(Ark_ClickEvent peer,
 }
 Callback_Void GetPreventDefaultImpl(Ark_ClickEvent peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    auto callback = CallbackKeeper::DefineReverseCallback<Callback_Void>([peer]() {
-        GestureEvent* info = peer->GetEventInfo();
-        CHECK_NULL_VOID(info);
-        auto patternName = info->GetPatternName();
-        if (g_clickPreventDefPattern.find(patternName.c_str()) == g_clickPreventDefPattern.end()) {
-            LOGE("ARKOALA Component does not support prevent function.");
-            return;
-        }
-        info->SetPreventDefault(true);
-    });
-    return callback;
+    return {};
 }
 void SetPreventDefaultImpl(Ark_ClickEvent peer,
                            const Callback_Void* preventDefault)
 {
-    LOGE("ClickEventAccessor::SetPreventDefaultImpl wen can only GET preventDefault callback");
 }
 } // ClickEventAccessor
 const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
@@ -260,4 +242,7 @@ const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
     return &ClickEventAccessorImpl;
 }
 
+struct ClickEventPeer {
+    virtual ~ClickEventPeer() = default;
+};
 }

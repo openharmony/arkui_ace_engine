@@ -57,7 +57,7 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(
     pattern->SetDensityDpi(config.isDensityFollowHost);
     pattern->SetIsWindowModeFollowHost(config.isWindowModeFollowHost);
     pattern->UpdateWant(want);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, frameNode);
     pipeline->AddWindowStateChangedCallback(nodeId);
     pattern->SetOnReleaseCallback(std::move(callbacks.onRelease));
@@ -70,28 +70,6 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(
     CHECK_NULL_RETURN(dragDropManager, frameNode);
     dragDropManager->AddDragFrameNode(nodeId, AceType::WeakClaim(AceType::RawPtr(frameNode)));
     return frameNode;
-}
-
-RefPtr<FrameNode> UIExtensionModelNG::CreateFrameNode(int32_t nodeId)
-{
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
-    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
-    CHECK_NULL_RETURN(pattern, frameNode);
-    return frameNode;
-}
-
-void UIExtensionModelNG::UpdateWant(FrameNode* frameNode, const AAFwk::Want& want, bool isTransferringCaller,
-    bool densityDpi)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
-    CHECK_NULL_VOID(pattern);
-    if (pattern->GetIsTransferringCaller() != isTransferringCaller) {
-        pattern->UpdateSessionWraper(isTransferringCaller);
-    }
-    pattern->SetDensityDpi(densityDpi);
-    pattern->UpdateWant(want);
 }
 
 void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap,
@@ -109,7 +87,7 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap,
     pattern->SetIsWindowModeFollowHost(isWindowModeFollowHost);
     pattern->UpdateWant(wantWrap);
     stack->Push(frameNode);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
     auto dragDropManager = pipeline->GetDragDropManager();
@@ -131,7 +109,7 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, Ses
         pattern->UpdateWant(wantWrap);
     }
     stack->Push(frameNode);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
     auto dragDropManager = pipeline->GetDragDropManager();
@@ -139,24 +117,6 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, Ses
     dragDropManager->AddDragFrameNode(nodeId, AceType::WeakClaim(AceType::RawPtr(frameNode)));
 }
 
-RefPtr<FrameNode> UIExtensionModelNG::CreateEmbeddedFrameNode(int32_t nodeId)
-{
-    return FrameNode::GetOrCreateFrameNode(V2::EMBEDDED_COMPONENT_ETS_TAG, nodeId,
-        []() { return AceType::MakeRefPtr<UIExtensionPattern>(false, false, false, DEFAULT_EMBEDDED_SESSION_TYPE); });
-}
-
-void UIExtensionModelNG::UpdateEmbeddedFrameNode(FrameNode* frameNode,
-    const AAFwk::Want& wantWrap, SessionType sessionType)
-{
-    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
-    CHECK_NULL_VOID(pattern);
-    if (frameNode->GetNodeStatus() == NodeStatus::NORMAL_NODE) {
-        pattern->UpdateWant(wantWrap);
-    }
-    pattern->UpdateSessionType(sessionType);
-}
-
-// for DynamicComponent
 void UIExtensionModelNG::Create(const UIExtensionConfig& config)
 {
     switch (config.sessionType) {
@@ -197,7 +157,7 @@ void UIExtensionModelNG::CreateIsolatedComponent(const UIExtensionConfig& config
     auto pattern = frameNode->GetPattern<IsolatedPattern>();
     CHECK_NULL_VOID(pattern);
     stack->Push(frameNode);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
 }
@@ -216,7 +176,7 @@ void UIExtensionModelNG::CreateSecurityUIExtension(const UIExtensionConfig& conf
     pattern->UpdateWant(config.wantWrap);
     pattern->SetDensityDpi(config.densityDpi);
     stack->Push(frameNode);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
     auto dragDropManager = pipeline->GetDragDropManager();
@@ -267,15 +227,6 @@ void UIExtensionModelNG::SetOnRemoteReady(std::function<void(const RefPtr<UIExte
     pattern->SetOnRemoteReadyCallback(std::move(onRemoteReady));
 }
 
-void UIExtensionModelNG::SetOnRemoteReady(FrameNode* frameNode,
-    std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetOnRemoteReadyCallback(std::move(onRemoteReady));
-}
-
 void UIExtensionModelNG::SetSecurityOnRemoteReady(
     std::function<void(const RefPtr<NG::SecurityUIExtensionProxy>&)>&& onRemoteReady)
 {
@@ -296,28 +247,11 @@ void UIExtensionModelNG::SetOnRelease(std::function<void(int32_t)>&& onRelease)
     pattern->SetOnReleaseCallback(std::move(onRelease));
 }
 
-void UIExtensionModelNG::SetOnRelease(FrameNode* frameNode, std::function<void(int32_t)>&& onRelease)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetOnReleaseCallback(std::move(onRelease));
-}
-
 void UIExtensionModelNG::SetOnResult(std::function<void(int32_t, const AAFwk::Want&)>&& onResult)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetOnResultCallback(std::move(onResult));
-}
-
-void UIExtensionModelNG::SetOnResult(FrameNode* frameNode, std::function<void(int32_t, const AAFwk::Want&)>&& onResult)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
-    CHECK_NULL_VOID(pattern);
     pattern->SetOnResultCallback(std::move(onResult));
 }
 
@@ -334,23 +268,6 @@ void UIExtensionModelNG::SetOnTerminated(
     }
 
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetOnTerminatedCallback(std::move(onTerminated));
-}
-
-void UIExtensionModelNG::SetOnTerminated(FrameNode* frameNode,
-    std::function<void(int32_t, const RefPtr<WantWrap>&)>&& onTerminated, NG::SessionType sessionType)
-{
-    CHECK_NULL_VOID(frameNode);
-    if (sessionType == SessionType::SECURITY_UI_EXTENSION_ABILITY) {
-        auto eventHub = frameNode->GetEventHub<UIExtensionHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->SetOnTerminatedCallback(std::move(onTerminated));
-        return;
-    }
-
-    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
-    CHECK_NULL_VOID(pattern);
     pattern->SetOnTerminatedCallback(std::move(onTerminated));
 }
 
@@ -367,24 +284,6 @@ void UIExtensionModelNG::SetOnReceive(
     }
 
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetOnReceiveCallback(std::move(onReceive));
-}
-
-void UIExtensionModelNG::SetOnReceive(FrameNode* frameNode,
-    std::function<void(const AAFwk::WantParams&)>&& onReceive,
-    NG::SessionType sessionType)
-{
-    CHECK_NULL_VOID(frameNode);
-    if (sessionType == SessionType::SECURITY_UI_EXTENSION_ABILITY) {
-        auto eventHub = frameNode->GetEventHub<UIExtensionHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->SetOnReceiveCallback(std::move(onReceive));
-        return;
-    }
-
-    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
-    CHECK_NULL_VOID(pattern);
     pattern->SetOnReceiveCallback(std::move(onReceive));
 }
 
@@ -413,22 +312,6 @@ void UIExtensionModelNG::SetOnError(
         return;
     }
 
-    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetOnErrorCallback(std::move(onError));
-}
-
-void UIExtensionModelNG::SetOnError(FrameNode* frameNode,
-    std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError,
-    NG::SessionType sessionType)
-{
-    CHECK_NULL_VOID(frameNode);
-    if (sessionType == SessionType::SECURITY_UI_EXTENSION_ABILITY) {
-        auto pattern = frameNode->GetPattern<SecurityUIExtensionPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetOnErrorCallback(std::move(onError));
-        return;
-    }
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOnErrorCallback(std::move(onError));

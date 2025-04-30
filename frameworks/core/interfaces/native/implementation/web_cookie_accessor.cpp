@@ -18,6 +18,7 @@
 #include "core/interfaces/native/utility/converter.h"
 
 #include "web_cookie_peer.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebCookieAccessor {
@@ -40,13 +41,9 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void SetCookieImpl(Ark_WebCookie peer)
 {
-    // deprecated
-    LOGE("WebCookieAccessor::SetCookieImpl deprecated method");
 }
 void SaveCookieImpl(Ark_WebCookie peer)
 {
-    // deprecated
-    LOGE("WebCookieAccessor::SaveCookieImpl deprecated method");
 }
 } // WebCookieAccessor
 const GENERATED_ArkUIWebCookieAccessor* GetWebCookieAccessor()
@@ -61,4 +58,7 @@ const GENERATED_ArkUIWebCookieAccessor* GetWebCookieAccessor()
     return &WebCookieAccessorImpl;
 }
 
+struct WebCookiePeer {
+    virtual ~WebCookiePeer() = default;
+};
 }

@@ -78,4 +78,7 @@ const GENERATED_ArkUIImageDataAccessor* GetImageDataAccessor()
     return &ImageDataAccessorImpl;
 }
 
+struct ImageDataPeer {
+    virtual ~ImageDataPeer() = default;
+};
 }

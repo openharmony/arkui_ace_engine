@@ -43,9 +43,6 @@ bool GridProperty::UpdateContainer(const RefPtr<Property>& container, const RefP
     auto currentContainer = DynamicCast<GridContainerLayoutProperty>(container);
     auto gridContainer = currentContainer->GetReserveObj();
     GridColumnInfo::Builder builder;
-    if (!gridContainer->HasContainerInfo()) {
-        return false;
-    }
     auto containerInfo = AceType::MakeRefPtr<GridContainerInfo>(gridContainer->GetContainerInfoValue());
     builder.SetParent(containerInfo);
     for (const auto& item : typedPropertySet_) {

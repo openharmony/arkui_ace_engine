@@ -21,6 +21,7 @@
 #include "mutable_styled_string_peer.h"
 #include "rich_editor_styled_string_controller_peer_impl.h"
 #include "styled_string_peer.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG {
 void AssignArkValue(Ark_StyledStringChangeValue& dst, const StyledStringChangeValue& src)
@@ -63,8 +64,8 @@ Ark_MutableStyledString GetStyledStringImpl(Ark_RichEditorStyledStringController
 Ark_RichEditorRange GetSelectionImpl(Ark_RichEditorStyledStringController peer)
 {
     CHECK_NULL_RETURN(peer, {});
-    SelectionRangeInfo selection = peer->GetSelection();
-    return Converter::ArkValue<Ark_RichEditorRange>(selection);
+    LOGW("RichEditorStyledString Accessor:: GetSelectionImpl is not implemented");
+    return {};
 }
 void OnContentChangedImpl(Ark_RichEditorStyledStringController peer,
                           const Ark_StyledStringChangedListener* listener)
@@ -107,4 +108,8 @@ const GENERATED_ArkUIRichEditorStyledStringControllerAccessor* GetRichEditorStyl
     };
     return &RichEditorStyledStringControllerAccessorImpl;
 }
+
+struct RichEditorStyledStringControllerPeer {
+    virtual ~RichEditorStyledStringControllerPeer() = default;
+};
 }

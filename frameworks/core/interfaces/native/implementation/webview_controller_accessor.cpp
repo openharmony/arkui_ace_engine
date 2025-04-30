@@ -90,4 +90,7 @@ const GENERATED_ArkUIWebviewControllerAccessor* GetWebviewControllerAccessor()
     return &WebviewControllerAccessorImpl;
 }
 
+struct WebviewControllerPeer {
+    virtual ~WebviewControllerPeer() = default;
+};
 }

@@ -19,12 +19,8 @@
 #include "core/interfaces/native/implementation/base_event_peer.h"
 
 struct BaseGestureEventPeer : public BaseEventPeer {
-protected:
-    BaseGestureEventPeer() = default;
     ~BaseGestureEventPeer() override = default;
-    friend OHOS::Ace::NG::PeerUtils;
 
-public:
     virtual OHOS::Ace::BaseGestureEvent* GetBaseGestureInfo() = 0;
 };
 
@@ -34,11 +30,9 @@ template<typename AceGestureInfo,
     std::enable_if_t<std::is_base_of_v<BaseGestureEvent, AceGestureInfo>, bool> = true
 >
 class SomeGestureEventPeer : public BaseGestureEventPeer {
-protected:
-    SomeGestureEventPeer() = default;
+public:
     ~SomeGestureEventPeer() override = default;
 
-public:
     BaseEventInfo* GetBaseInfo() override
     {
         return GetEventInfo();
@@ -63,10 +57,5 @@ private:
     std::shared_ptr<AceGestureInfo> eventInfo;
 };
 
-struct BaseGestureEventPeerImpl : public SomeGestureEventPeer<BaseGestureEvent> {
-protected:
-    BaseGestureEventPeerImpl() = default;
-    ~BaseGestureEventPeerImpl() override = default;
-    friend PeerUtils;
-};
+using BaseGestureEventPeerImpl = SomeGestureEventPeer<BaseGestureEvent>;
 } // namespace OHOS::Ace::NG::GeneratedModifier

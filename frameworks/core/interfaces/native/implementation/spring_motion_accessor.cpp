@@ -27,7 +27,7 @@ Ark_SpringMotion CtorImpl(const Ark_Number* start,
                           const Ark_Number* velocity,
                           Ark_SpringProp prop)
 {
-    return {};
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -44,4 +44,7 @@ const GENERATED_ArkUISpringMotionAccessor* GetSpringMotionAccessor()
     return &SpringMotionAccessorImpl;
 }
 
+struct SpringMotionPeer {
+    virtual ~SpringMotionPeer() = default;
+};
 }

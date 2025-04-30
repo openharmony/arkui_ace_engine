@@ -290,6 +290,13 @@ void WebModelNG::SetTextAutosizing(FrameNode* frameNode, bool isTextAutosizing)
     webPattern->UpdateTextAutosizing(isTextAutosizing);
 }
 
+void WebModelNG::SetSmoothDragResizeEnabled(FrameNode* frameNode, bool isSmoothDragResizeEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPattern);
+}
+
 void WebModelNG::SetEnabledHapticFeedback(FrameNode* frameNode, bool isEnabled)
 {
     CHECK_NULL_VOID(frameNode);
@@ -575,15 +582,6 @@ void WebModelNG::SetSelectionMenuOptions(FrameNode* frameNode, const WebMenuOpti
     auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateSelectionMenuOptions(std::move(webMenuOption));
-}
-
-void WebModelNG::SetEditMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-    const NG::OnMenuItemClickCallback&& onMenuItemClick)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateEditMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 
 void WebModelNG::SetNewDragStyle(FrameNode* frameNode, bool isNewDragStyle)

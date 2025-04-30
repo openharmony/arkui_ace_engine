@@ -131,34 +131,34 @@ public:
     static void SetSearchButtonFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetSearchButtonFontColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetSearchButtonAutoDisable(FrameNode* frameNode, bool needToDisable);
-    static void SetTextColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void ResetTextColor(FrameNode* frameNode);
+    static void SetTextColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetCopyOption(FrameNode* frameNode, const std::optional<CopyOptions>& copyOptionOpt);
     static void SetTextFont(FrameNode* frameNode, const std::optional<Font>& font);
     static void SetPlaceholderColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void ResetPlaceholderColor(FrameNode* frameNode);
     static void SetSelectionMenuHidden(FrameNode* frameNode, bool selectionMenuHidden);
+    static void ResetCaretColor(FrameNode* frameNode);
     static void SetCaretWidth(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetCaretColor(FrameNode* frameNode, const std::optional<Color>& color);
-    static void ResetCaretColor(FrameNode* frameNode);
     static void SetTextAlign(FrameNode* frameNode, const std::optional<TextAlign>& valueOpt);
-    static void SetMinFontScale(FrameNode* frameNode, const std::optional<float>& value);
-    static void SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& value);
+    static void SetMinFontScale(FrameNode* frameNode, const float value);
+    static void SetMaxFontScale(FrameNode* frameNode, const float value);
     static void SetRightIconSrcPath(FrameNode* frameNode, const std::string& src);
     static void SetCancelIconColor(FrameNode* frameNode, const Color& color);
     static void SetCancelIconSize(FrameNode* frameNode, const Dimension& value);
     static void SetCancelButtonStyle(FrameNode* frameNode, const std::optional<CancelButtonStyle>& style);
-    static void SetCancelImageIcon(FrameNode* frameNode, const std::optional<NG::IconOptions>& iconOptions);
+    static void SetCancelImageIcon(FrameNode* frameNode, const std::optional<IconOptions>& iconOptions);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
-    static void SetSearchEnterKeyType(FrameNode* frameNode, const std::optional<TextInputAction>& valueOpt);
     static void SetAutoCapitalizationMode(FrameNode* frameNode, AutoCapitalizationMode value);
     static void SetId(FrameNode* frameNode, const std::string& key);
+    static void SetSearchEnterKeyType(FrameNode* frameNode, const std::optional<TextInputAction>& valueOpt);
     static void SetTextDecoration(FrameNode* frameNode, const std::optional<Ace::TextDecoration>& valueOpt);
     static void SetTextDecorationColor(FrameNode* frameNode, const std::optional<Color>& valueOpt);
     static void SetTextDecorationStyle(FrameNode* frameNode, const std::optional<Ace::TextDecorationStyle>& valueOpt);
     static void SetLetterSpacing(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
     static void SetLineHeight(FrameNode* frameNode, const std::optional<Dimension>& valueOpt);
-    static void SetHalfLeading(FrameNode* frameNode, const std::optional<bool>& value);
+    static void SetHalfLeading(FrameNode* frameNode, const bool& value);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void ResetSelectedBackgroundColor(FrameNode* frameNode);
@@ -173,7 +173,7 @@ public:
     static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const std::u16string&)>&& onChangeEvent);
     static void SetMaxLength(FrameNode* frameNode, uint32_t value);
     static void ResetMaxLength(FrameNode* frameNode);
-    static void SetType(FrameNode* frameNode, const std::optional<TextInputType>& valueOpt);;
+    static void SetType(FrameNode* frameNode, const std::optional<TextInputType>& valueOpt);
     static void SetOnEditChange(FrameNode* frameNode, std::function<void(bool)>&& func);
     static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);
     static void SetOnContentScroll(FrameNode* frameNode, std::function<void(float, float)>&& func);
@@ -190,11 +190,9 @@ public:
     static void OnMenuItemClickCallbackUpdate(
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
+    static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
+    static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
     static void SetCustomKeyboard(FrameNode* frameNode, const std::function<void()>&& buildFunc, bool supportAvoidance);
-    static void SetStopBackPress(FrameNode* frameNode, const std::optional<bool>& isStopBackPress);
-    static void SetKeyboardAppearance(FrameNode* frameNode, const std::optional<KeyboardAppearance>& value);
-    static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-        const NG::OnMenuItemClickCallback&& onMenuItemClick);
 
 private:
     static RefPtr<SearchTheme> GetTheme(const RefPtr<SearchNode>& frameNode);

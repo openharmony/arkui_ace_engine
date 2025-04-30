@@ -265,7 +265,7 @@ void LoadingProgressModifier::AdjustMatrix(RSCamera3D& camera, RSMatrix& matrix)
 
 void LoadingProgressModifier::StartRecycleRingAnimation()
 {
-    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto previousStageCurve = AceType::MakeRefPtr<CubicCurve>(0.0f, 0.0f, 0.67f, 1.0f);
     AnimationOption option;
@@ -302,7 +302,7 @@ void LoadingProgressModifier::StartRecycleRingAnimation()
 
 void LoadingProgressModifier::StartRecycleCometAnimation()
 {
-    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto curve = AceType::MakeRefPtr<LinearCurve>();
     AnimationOption option;
@@ -412,7 +412,7 @@ uint32_t LoadingProgressModifier::GetCometNumber()
 
 void LoadingProgressModifier::StartRecycle()
 {
-    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     if (isLoading_) {
         return;

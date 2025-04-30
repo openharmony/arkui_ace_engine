@@ -26,7 +26,7 @@ Ark_SpringProp CtorImpl(const Ark_Number* mass,
                         const Ark_Number* stiffness,
                         const Ark_Number* damping)
 {
-    return {};
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -43,4 +43,7 @@ const GENERATED_ArkUISpringPropAccessor* GetSpringPropAccessor()
     return &SpringPropAccessorImpl;
 }
 
+struct SpringPropPeer {
+    virtual ~SpringPropPeer() = default;
+};
 }

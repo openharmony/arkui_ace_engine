@@ -47,7 +47,7 @@ void TextPaintMethod::DoStartTextRace()
     CHECK_NULL_VOID(pManager);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);

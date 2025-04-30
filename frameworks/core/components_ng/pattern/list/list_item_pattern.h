@@ -80,7 +80,7 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         if (listItemStyle_ == V2::ListItemStyle::CARD) {
-            auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
+            auto pipelineContext = PipelineBase::GetCurrentContext();
             CHECK_NULL_RETURN(pipelineContext, FocusPattern());
             auto listItemTheme = pipelineContext->GetTheme<ListItemTheme>();
             CHECK_NULL_RETURN(listItemTheme, FocusPattern());
@@ -204,14 +204,9 @@ public:
         return MakeRefPtr<ListItemAccessibilityProperty>();
     }
 
-    V2::ListItemStyle GetListItemStyle() const
+    V2::ListItemStyle GetListItemStyle()
     {
         return listItemStyle_;
-    }
-
-    void SetListItemStyle(V2::ListItemStyle style)
-    {
-        listItemStyle_ = style;
     }
 
     void SetOffsetChangeCallBack(OnOffsetChangeFunc&& offsetChangeCallback);
@@ -325,7 +320,7 @@ private:
     bool isLayouted_ = false;
     bool isSpringMotionRunning_ = false;
     bool isDragging_ = false;
-
+    
     PendingSwipeFunc pendingSwipeFunc_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListItemPattern);

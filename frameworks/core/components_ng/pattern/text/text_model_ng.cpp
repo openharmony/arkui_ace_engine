@@ -182,23 +182,20 @@ void TextModelNG::ResetTextColor()
     textPattern->ResetCustomFontColor();
 }
 
-void TextModelNG::SetTextColor(FrameNode* frameNode, const std::optional<Color>& color)
+void TextModelNG::SetTextColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
-    if (!color) {
-        ResetTextColor(frameNode);
-        return;
-    }
-    Color value = color.value();
+    auto themeScopeId = frameNode ? frameNode->GetThemeScopeId() : 0;
+    Color color = value.value_or(GetDefaultColor(themeScopeId));
     CHECK_NULL_VOID(frameNode);
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateTextColorByRender(value);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
+    textLayoutProperty->UpdateTextColorByRender(color);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    textPattern->UpdateFontColor(value);
+    textPattern->UpdateFontColor(color);
 }
 
 void TextModelNG::ResetTextColor(FrameNode* frameNode)
@@ -533,7 +530,7 @@ void TextModelNG::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
     ViewAbstract::SetOnDragStart(std::move(dragStart));
 }
 
-void TextModelNG::InitText(FrameNode* frameNode, const std::u16string& value)
+void TextModelNG::InitText(FrameNode* frameNode, std::u16string& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, Content, value, frameNode);
 }
@@ -667,11 +664,19 @@ void TextModelNG::SetBaselineOffset(FrameNode* frameNode, const std::optional<Di
 
 void TextModelNG::SetFont(FrameNode* frameNode, const Font& value)
 {
-    SetFontSize(frameNode, value.fontSize);
-    SetFontWeight(frameNode, value.fontWeight);
-    SetFontFamily(frameNode, value.fontFamilies.empty() ? std::nullopt : std::make_optional(value.fontFamilies));
-    SetItalicFontStyle(frameNode, value.fontStyle);
-    SetEnableVariableFontWeight(frameNode, value.enableVariableFontWeight);
+    if (value.fontSize.has_value()) {
+        SetFontSize(frameNode, value.fontSize.value());
+    }
+    if (value.fontWeight.has_value()) {
+        SetFontWeight(frameNode, value.fontWeight.value());
+    }
+    if (!value.fontFamilies.empty()) {
+        SetFontFamily(frameNode, value.fontFamilies);
+    }
+    if (value.fontStyle.has_value()) {
+        SetItalicFontStyle(frameNode, value.fontStyle.value());
+    }
+    SetEnableVariableFontWeight(frameNode, value.enableVariableFontWeight.value_or(false));
 }
 
 void TextModelNG::SetFont(FrameNode* frameNode, const std::optional<Font>& value)
@@ -1306,15 +1311,6 @@ void TextModelNG::SetSelectionMenuOptions(
     const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
 {
     auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>();
-    CHECK_NULL_VOID(textPattern);
-    textPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
-}
-
-void TextModelNG::SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-    const NG::OnMenuItemClickCallback&& onMenuItemClick)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }

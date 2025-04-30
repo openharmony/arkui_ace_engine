@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/symbol_effect_peer.h"
+#include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DisappearSymbolEffectAccessor {
 void DestroyPeerImpl(Ark_DisappearSymbolEffect peer)
 {
-    PeerUtils::DestroyPeer(peer);
+    delete peer;
 }
 Ark_DisappearSymbolEffect CtorImpl(const Opt_EffectScope* scope)
 {
@@ -31,7 +31,7 @@ Ark_DisappearSymbolEffect CtorImpl(const Opt_EffectScope* scope)
     if (scope) {
         optScope = Converter::OptConvert<OHOS::Ace::ScopeType>(*scope);
     }
-    return PeerUtils::CreatePeer<DisappearSymbolEffectPeer>(optScope);
+    return new DisappearSymbolEffectPeer(optScope);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -39,9 +39,18 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Opt_EffectScope GetScopeImpl(Ark_DisappearSymbolEffect peer)
 {
-    auto invalid = Converter::ArkValue<Opt_EffectScope>();
-    CHECK_NULL_RETURN(peer, invalid);
-    return Converter::ArkValue<Opt_EffectScope>(peer->scope);
+    //ToDo need check
+    Opt_EffectScope effectScope { INTEROP_TAG_INT32, ARK_EFFECT_SCOPE_LAYER };
+    CHECK_NULL_RETURN(peer, effectScope);
+    CHECK_NULL_RETURN(peer->scope, effectScope);
+    switch (peer->scope.value()) {
+        case OHOS::Ace::ScopeType::WHOLE:
+            effectScope.value = ARK_EFFECT_SCOPE_WHOLE;
+            break;
+        default:
+            break;
+    }
+    return effectScope;
 }
 void SetScopeImpl(Ark_DisappearSymbolEffect peer,
                   Ark_EffectScope scope)
@@ -61,4 +70,8 @@ const GENERATED_ArkUIDisappearSymbolEffectAccessor* GetDisappearSymbolEffectAcce
     };
     return &DisappearSymbolEffectAccessorImpl;
 }
+
+struct DisappearSymbolEffectPeer {
+    virtual ~DisappearSymbolEffectPeer() = default;
+};
 }

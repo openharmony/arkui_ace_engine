@@ -329,7 +329,7 @@ public:
     {
         swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>(swiperDigitalParameters);
     }
-
+    
     void ResetIndicatorParameters()
     {
         if (GetIndicatorType() == SwiperIndicatorType::DOT) {
@@ -639,8 +639,8 @@ public:
         isIndicatorInteractive_ = isInteractive;
     }
 
-    virtual bool IsAtStart() const;
-    virtual bool IsAtEnd() const;
+    bool IsAtStart() const;
+    bool IsAtEnd() const;
 
     bool IsIndicatorInteractive() const
     {

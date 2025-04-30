@@ -543,7 +543,15 @@ private:
     std::vector<std::string> certChainData_;
 };
 
-using AllSslErrorResult = SslErrorResult;
+class ACE_EXPORT AllSslErrorResult : public AceType {
+    DECLARE_ACE_TYPE(AllSslErrorResult, AceType)
+
+public:
+    AllSslErrorResult() = default;
+    ~AllSslErrorResult() = default;
+    virtual void HandleConfirm() = 0;
+    virtual void HandleCancel() = 0;
+};
 
 class ACE_EXPORT WebAllSslErrorEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(WebAllSslErrorEvent, BaseEventInfo);

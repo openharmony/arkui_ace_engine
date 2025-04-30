@@ -24,6 +24,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebResourceRequestAccessor {
 void DestroyPeerImpl(Ark_WebResourceRequest peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->webRequest = nullptr;
     delete peer;
 }
 Ark_WebResourceRequest CtorImpl()
@@ -94,4 +96,7 @@ const GENERATED_ArkUIWebResourceRequestAccessor* GetWebResourceRequestAccessor()
     return &WebResourceRequestAccessorImpl;
 }
 
+struct WebResourceRequestPeer {
+    virtual ~WebResourceRequestPeer() = default;
+};
 }

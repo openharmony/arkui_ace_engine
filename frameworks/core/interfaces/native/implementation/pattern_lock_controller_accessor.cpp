@@ -16,35 +16,15 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
-#include "core/interfaces/native/implementation/pattern_lock_controller_accessor_peer_impl.h"
-#include "core/components_v2/pattern_lock/pattern_lock_controller.h"
-namespace OHOS::Ace::NG::Converter {
-template<>
-void AssignCast(std::optional<V2::PatternLockChallengeResult>& dst, const Ark_PatternLockChallengeResult& src)
-{
-    switch (src) {
-        case ARK_PATTERN_LOCK_CHALLENGE_RESULT_CORRECT: dst = V2::PatternLockChallengeResult::CORRECT; break;
-        case ARK_PATTERN_LOCK_CHALLENGE_RESULT_WRONG: dst = V2::PatternLockChallengeResult::WRONG; break;
-        default: LOGE("PatternLockControllerAccessor::Unexpected enum value in "
-            "Ark_PatternLockChallengeResult: %{public}d", src);
-    }
-}
-}
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PatternLockControllerAccessor {
 void DestroyPeerImpl(Ark_PatternLockController peer)
 {
-    auto peerImpl = reinterpret_cast<PatternLockControllerPeerImpl *>(peer);
-    if (peerImpl) {
-        if (peerImpl->handler) {
-            peerImpl->handler = nullptr;
-        }
-        delete peerImpl;
-    }
 }
 Ark_PatternLockController CtorImpl()
 {
-    return reinterpret_cast<PatternLockControllerPeer *>(new PatternLockControllerPeerImpl());
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -52,19 +32,10 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void ResetImpl(Ark_PatternLockController peer)
 {
-    auto peerImpl = reinterpret_cast<PatternLockControllerPeerImpl *>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    peerImpl->handler->Reset();
 }
 void SetChallengeResultImpl(Ark_PatternLockController peer,
                             Ark_PatternLockChallengeResult result)
 {
-    auto peerImpl = reinterpret_cast<PatternLockControllerPeerImpl *>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    auto optResult = Converter::OptConvert<V2::PatternLockChallengeResult>(result);
-    if (optResult.has_value()) {
-        peerImpl->handler->SetChallengeResult(optResult.value());
-    }
 }
 } // PatternLockControllerAccessor
 const GENERATED_ArkUIPatternLockControllerAccessor* GetPatternLockControllerAccessor()
@@ -79,4 +50,7 @@ const GENERATED_ArkUIPatternLockControllerAccessor* GetPatternLockControllerAcce
     return &PatternLockControllerAccessorImpl;
 }
 
+struct PatternLockControllerPeer {
+    virtual ~PatternLockControllerPeer() = default;
+};
 }

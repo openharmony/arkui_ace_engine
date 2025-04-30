@@ -63,4 +63,7 @@ const GENERATED_ArkUIComponentContentAccessor* GetComponentContentAccessor()
     return &ComponentContentAccessorImpl;
 }
 
+struct ComponentContentPeer {
+    virtual ~ComponentContentPeer() = default;
+};
 }

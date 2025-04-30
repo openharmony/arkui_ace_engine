@@ -72,4 +72,7 @@ const GENERATED_ArkUIMeasurableAccessor* GetMeasurableAccessor()
     return &MeasurableAccessorImpl;
 }
 
+struct MeasurablePeer {
+    virtual ~MeasurablePeer() = default;
+};
 }

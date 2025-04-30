@@ -29,10 +29,6 @@ namespace GridContainerInterfaceModifier {
 void SetGridContainerOptionsImpl(Ark_NativePointer node,
                                  const Opt_GridContainerOptions* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //GridContainerModelNG::SetSetGridContainerOptions(frameNode, convValue);
 }
 } // GridContainerInterfaceModifier
 const GENERATED_ArkUIGridContainerModifier* GetGridContainerModifier()

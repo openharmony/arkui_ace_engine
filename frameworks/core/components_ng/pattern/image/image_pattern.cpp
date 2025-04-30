@@ -1423,7 +1423,7 @@ void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CloseSelectOverlay();
 
     auto id = frameNode->GetId();
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContextSafelyWithCheck());
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveNodesToNotifyMemoryLevel(id);
@@ -1623,11 +1623,6 @@ void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
     Matrix4 defaultMatrixValue = Matrix4(1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f);
     Matrix4 matrixValue = renderProp->HasImageMatrix() ? renderProp->GetImageMatrixValue() : defaultMatrixValue;
     json->PutExtAttr("imageMatrix", matrixValue.ToString().c_str(), filter);
-    static const std::vector<std::string> QUALITY_OPTIONS { "ResolutionQuality.NONE", "ResolutionQuality.LOW",
-        "ResolutionQuality.MEDIUM", "ResolutionQuality.HIGH" };
-    auto imageQuality = QUALITY_OPTIONS[
-        std::clamp(static_cast<int32_t>(imageQuality_), 0, static_cast<int32_t>(QUALITY_OPTIONS.size()))];
-    json->PutExtAttr("enhancedImageQuality", imageQuality.c_str(), filter);
 }
 
 void ImagePattern::DumpLayoutInfo()
@@ -2387,7 +2382,7 @@ bool ImagePattern::IsShowingSrc(const RefPtr<FrameNode>& imageFrameNode, const R
 
 bool ImagePattern::IsFormRender()
 {
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     return pipeline->IsFormRenderExceptDynamicComponent();
 }

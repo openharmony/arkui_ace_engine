@@ -21,7 +21,7 @@ const std::string DEFAULT_PATH = "resource:///ohos_test_image.svg";
 } // namespace
 RefPtr<IconTheme> IconTheme::Builder::Build(const RefPtr<ThemeConstants>& /* themeConstants */) const
 {
-    return AceType::Claim(new IconTheme());
+    return nullptr;
 }
 
 void IconTheme::Builder::ParsePattern(

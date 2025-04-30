@@ -79,4 +79,7 @@ const GENERATED_ArkUIDrawingColorFilterAccessor* GetDrawingColorFilterAccessor()
     return &DrawingColorFilterAccessorImpl;
 }
 
+struct DrawingColorFilterPeer {
+    virtual ~DrawingColorFilterPeer() = default;
+};
 }

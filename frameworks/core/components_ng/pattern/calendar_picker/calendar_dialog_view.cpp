@@ -232,7 +232,7 @@ void CalendarDialogView::DisableResetOptionButtonColor(
 void CalendarDialogView::SetTitleIdealSize(
     const RefPtr<CalendarTheme>& theme, const RefPtr<LinearLayoutProperty>& layoutProps)
 {
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto fontSizeScale = pipeline->GetFontScale();
     if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CheckOrientationChange()) {
@@ -332,7 +332,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateWeekNode(const RefPtr<FrameNode>& ca
     auto weekFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(weekFrameNode, nullptr);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
@@ -408,7 +408,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleImageNode(
 void CalendarDialogView::SetCalendarIdealSize(const RefPtr<CalendarTheme>& theme,
     const RefPtr<LayoutProperty>& calendarLayoutProperty, const Dimension& weekHeight)
 {
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto fontSizeScale = pipeline->GetFontScale();
     if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CheckOrientationChange()) {
@@ -718,7 +718,7 @@ void CalendarDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& butto
     }
     CHECK_NULL_VOID(buttonLayoutProperty);
     CHECK_NULL_VOID(buttonRenderContext);
-    auto buttonTheme = PipelineBase::GetCurrentContextSafelyWithCheck()->GetTheme<ButtonTheme>();
+    auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     if (buttonInfos[index].type.has_value()) {
         buttonLayoutProperty->UpdateType(buttonInfos[index].type.value());

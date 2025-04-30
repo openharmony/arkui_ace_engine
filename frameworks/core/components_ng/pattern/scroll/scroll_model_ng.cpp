@@ -17,7 +17,6 @@
 
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
-#include "core/interfaces/native/node/node_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -105,14 +104,6 @@ void ScrollModelNG::SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& 
     auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollStart(std::move(event));
-}
-
-void ScrollModelNG::SetOnScrollEnd(FrameNode* frameNode, ScrollEndEvent&& event)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnScrollEnd(std::move(event));
 }
 
 void ScrollModelNG::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& event)
@@ -325,12 +316,15 @@ void ScrollModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollOpti
 }
 
 void ScrollModelNG::SetNestedScroll(FrameNode* frameNode,
-    const std::optional<NestedScrollMode>& forward, const std::optional<NestedScrollMode>& backward)
+    const std::optional<NestedScrollMode> forward, const std::optional<NestedScrollMode> backward)
 {
-    NestedScrollOptions nestedOpt = {
-        .forward = forward.value_or(NestedScrollMode::SELF_ONLY),
-        .backward = backward.value_or(NestedScrollMode::SELF_ONLY)};
-    SetNestedScroll(frameNode, nestedOpt);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    NestedScrollOptions nestedOpt;
+    nestedOpt.forward = forward.value_or(NestedScrollMode::SELF_ONLY);
+    nestedOpt.backward = backward.value_or(NestedScrollMode::SELF_ONLY);
+    pattern->SetNestedScroll(nestedOpt);
 }
 
 float ScrollModelNG::GetFriction(FrameNode* frameNode)
@@ -341,12 +335,12 @@ float ScrollModelNG::GetFriction(FrameNode* frameNode)
     return pattern->GetFriction();
 }
 
-void ScrollModelNG::SetFriction(FrameNode* frameNode, const std::optional<float> friction)
+void ScrollModelNG::SetFriction(FrameNode* frameNode, std::optional<double> friction)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetFriction(friction.value_or(-1.0f));
+    pattern->SetFriction(friction.value_or(-1.0));
 }
 
 ScrollSnapOptions ScrollModelNG::GetScrollSnap(FrameNode* frameNode)
@@ -494,9 +488,8 @@ void ScrollModelNG::SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimensi
     pattern->SetEnableSnapToSide(enableSnapToSide);
 }
 
-void ScrollModelNG::SetAxis(FrameNode* frameNode, const std::optional<Axis>& axisI)
+void ScrollModelNG::SetAxis(FrameNode* frameNode, Axis axis)
 {
-    auto axis = axisI.value_or(Axis::VERTICAL);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, Axis, axis, frameNode);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
@@ -504,9 +497,14 @@ void ScrollModelNG::SetAxis(FrameNode* frameNode, const std::optional<Axis>& axi
     pattern->SetAxis(axis);
 }
 
+void ScrollModelNG::SetAxis(FrameNode* frameNode, std::optional<Axis> axis)
+{
+    SetAxis(frameNode, axis.value_or(Axis::VERTICAL));
+}
+
 void ScrollModelNG::SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    if (color) {
+    if (color.has_value()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color.value(), frameNode);
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, frameNode);
@@ -515,17 +513,24 @@ void ScrollModelNG::SetScrollBarColor(FrameNode* frameNode, const std::optional<
 
 void ScrollModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& dimension)
 {
-    if (dimension) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth,  dimension.value(), frameNode);
+    if (dimension.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, dimension.value(), frameNode);
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, frameNode);
     }
 }
 
-void ScrollModelNG::SetEdgeEffect(FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect,
-    const std::optional<bool>& alwaysEnabled, EffectEdge edge)
+void ScrollModelNG::SetEdgeEffect(
+    FrameNode* frameNode, const EdgeEffect& edgeEffect, bool alwaysEnabled, EffectEdge edge)
 {
     ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled, edge);
+}
+
+void ScrollModelNG::SetEdgeEffect(
+    FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, std::optional<bool> alwaysEnabled)
+{
+    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect.value_or(EdgeEffect::NONE),
+        alwaysEnabled.value_or(true), EffectEdge::ALL);
 }
 
 void ScrollModelNG::SetEnablePaging(FrameNode* frameNode, bool enablePaging)
@@ -626,6 +631,14 @@ void ScrollModelNG::SetScrollBarProxy(FrameNode* frameNode, const RefPtr<ScrollP
     pattern->SetScrollBarProxy(scrollBarProxy);
 }
 
+void ScrollModelNG::SetOnScrollEnd(FrameNode* frameNode, NG::ScrollEndEvent&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollEnd(std::move(event));
+}
+
 RefPtr<ScrollProxy> ScrollModelNG::GetOrCreateScrollBarProxy(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -638,5 +651,4 @@ RefPtr<ScrollProxy> ScrollModelNG::GetOrCreateScrollBarProxy(FrameNode* frameNod
     }
     return scrollBarProxy;
 }
-
 } // namespace OHOS::Ace::NG

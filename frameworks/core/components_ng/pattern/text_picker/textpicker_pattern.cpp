@@ -1121,7 +1121,7 @@ void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     }
     auto columnNode = GetColumnNode();
     CHECK_NULL_VOID(columnNode);
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
@@ -1421,7 +1421,7 @@ bool TextPickerPattern::HandleDirectionKey(KeyCode code)
 }
 
 std::string TextPickerPattern::GetSelectedObjectMulti(const std::vector<std::string>& values,
-    const std::vector<uint32_t>& indexs, int32_t status)
+    const std::vector<uint32_t>& indexs, int32_t status) const
 {
     std::string result = "";
     result = std::string("{\"value\":") + "[";
@@ -1484,7 +1484,8 @@ std::string TextPickerPattern::GetSelectedObject(
     CHECK_NULL_RETURN(context, "");
     if (context->GetIsDeclarative()) {
         if (values.size() == 1) {
-            return GetSelectedObjectStr(values[0], indexs[0], status);
+            return std::string("{\"value\":") + "\"" + values[0] + "\"" + ",\"index\":" + std::to_string(indexs[0]) +
+                   ",\"status\":" + std::to_string(status) + "}";
         } else {
             return GetSelectedObjectMulti(values, indexs, status);
         }
@@ -1513,7 +1514,6 @@ void TextPickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
         }
     }
     json->PutExtAttr("enableHapticFeedback", isEnableHaptic_, filter);
-    json->PutExtAttr("disableTextStyleAnimation", isDisableTextStyleAnimation_, filter);
     if (!columnWidths_.empty()) {
         json->PutExtAttr("columnWidths", GetColumnWidthsStr().c_str(), filter);
     }

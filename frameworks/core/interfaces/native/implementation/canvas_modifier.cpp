@@ -20,7 +20,6 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/canvas_rendering_context2d_peer_impl.h"
 #include "core/interfaces/native/implementation/drawing_rendering_context_peer_impl.h"
-#include "core/interfaces/native/generated/interface/node_api.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasModifier {
@@ -60,7 +59,8 @@ void ContextSetOptionsHelper(FrameNode *frameNode, const T* context)
             peerImplPtr->SetCanvasPattern(pattern);
         },
         [frameNode]() {
-            CanvasModelNG::DetachRenderContext(frameNode);
+            // need check
+            // CanvasModelNG::DetachRenderContext(frameNode);
         });
 }
 
@@ -96,12 +96,9 @@ void OnReadyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() { arkCallback.Invoke(); };
+    CHECK_NULL_VOID(value);
+    CHECK_EQUAL_VOID(value->tag, InteropTag::INTEROP_TAG_UNDEFINED);
+    auto onEvent = [arkCallback = CallbackHelper(value->value)]() { arkCallback.Invoke(); };
     CanvasModelNG::SetOnReady(frameNode, std::move(onEvent));
 }
 void EnableAnalyzerImpl(Ark_NativePointer node,
@@ -109,12 +106,8 @@ void EnableAnalyzerImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    CanvasModelNG::EnableAnalyzer(frameNode, *convValue);
+    // need check
+    // CanvasModelNG::EnableAnalyzer(frameNode, Converter::Convert<bool>(value));
 }
 } // CanvasAttributeModifier
 const GENERATED_ArkUICanvasModifier* GetCanvasModifier()

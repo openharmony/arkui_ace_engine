@@ -23,6 +23,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebResourceErrorAccessor {
 void DestroyPeerImpl(Ark_WebResourceError peer)
 {
+    CHECK_NULL_VOID(peer);
+    peer->handler = nullptr;
     delete peer;
 }
 Ark_WebResourceError CtorImpl()
@@ -59,4 +61,7 @@ const GENERATED_ArkUIWebResourceErrorAccessor* GetWebResourceErrorAccessor()
     return &WebResourceErrorAccessorImpl;
 }
 
+struct WebResourceErrorPeer {
+    virtual ~WebResourceErrorPeer() = default;
+};
 }

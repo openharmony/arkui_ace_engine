@@ -619,7 +619,7 @@ bool SwitchPattern::OnKeyEvent(const KeyEvent& keyEventInfo)
 
 void SwitchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
-    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto switchTheme = pipelineContext->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);

@@ -483,7 +483,7 @@ FrameNode::~FrameNode()
             CleanVisibleAreaInnerCallback();
         }
     }
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     if (pipeline) {
         pipeline->RemoveOnAreaChangeNode(GetId());
         pipeline->RemoveVisibleAreaChangeNode(GetId());
@@ -521,14 +521,6 @@ void FrameNode::CreateEventHubInner()
     }
 }
 
-RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
-    const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
-{
-    auto newChild = CreateFrameNode(tag, nodeId, pattern, true);
-    newChild->SetDepth(1);
-    return newChild;
-}
-
 int32_t FrameNode::GetTotalChildCount() const
 {
     auto overrideCount = pattern_->GetTotalChildCount();
@@ -536,6 +528,14 @@ int32_t FrameNode::GetTotalChildCount() const
         return UINode::TotalChildCount();
     }
     return overrideCount;
+}
+
+RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
+    const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
+{
+    auto newChild = CreateFrameNode(tag, nodeId, pattern, true);
+    newChild->SetDepth(1);
+    return newChild;
 }
 
 RefPtr<FrameNode> FrameNode::GetOrCreateFrameNode(
@@ -2448,7 +2448,7 @@ void FrameNode::MarkModifyDoneInner()
     renderContext_->OnModifyDone();
 #if (defined(__aarch64__) || defined(__x86_64__))
     if (Recorder::IsCacheAvaliable()) {
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterRenderTask([weak = WeakPtr(pattern_)]() {
             auto pattern = weak.Upgrade();
@@ -4841,17 +4841,23 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
 
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache)
 {
-    RefPtr<LayoutWrapper> overrideChild = pattern_->GetOrCreateChildByIndex(index);
-    if (!overrideChild) {
-        overrideChild = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
+    auto* scrollWindowAdapter = GetScrollWindowAdapter();
+    RefPtr<LayoutWrapper> child;
+
+    if (scrollWindowAdapter) {
+        child = scrollWindowAdapter->GetChildByIndex(index);
+    } else {
+        child = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
     }
-    if (overrideChild) {
-        overrideChild->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
+
+    if (child) {
+        child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
         if (addToRenderTree) {
-            overrideChild->SetActive(true);
+            child->SetActive(true);
         }
     }
-    return overrideChild;
+
+    return child;
 }
 
 RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index, bool isCache)
@@ -4955,7 +4961,7 @@ bool FrameNode::CheckNeedForceMeasureAndLayout()
 OffsetF FrameNode::GetOffsetInScreen()
 {
     auto frameOffset = GetPaintRectOffset(false, true);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF(0.0f, 0.0f));
     auto window = pipelineContext->GetWindow();
     CHECK_NULL_RETURN(window, OffsetF(0.0f, 0.0f));

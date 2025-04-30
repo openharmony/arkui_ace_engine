@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "base/geometry/dimension.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
+
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
@@ -28,7 +28,7 @@ void SetDefaultBorderRadius(void)
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DataPanelTheme>();
     CHECK_NULL_VOID(theme);
@@ -54,12 +54,6 @@ void DataPanelModelNG::Create(const std::vector<double>& values, double max, int
     if (dataPanelType != TYPE_CYCLE) {
         SetDefaultBorderRadius();
     }
-}
-
-RefPtr<FrameNode> DataPanelModelNG::CreateFrameNode(int32_t nodeId)
-{
-    return FrameNode::GetOrCreateFrameNode(
-        V2::DATA_PANEL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DataPanelPattern>(); });
 }
 
 void DataPanelModelNG::SetEffect(bool isCloseEffect)
@@ -92,24 +86,14 @@ void DataPanelModelNG::SetCloseEffect(FrameNode* frameNode, bool isClose)
     ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, Effect, !isClose, frameNode);
 }
 
-void DataPanelModelNG::SetTrackBackground(FrameNode* frameNode, const std::optional<Color>& trackBackgroundColor)
+void DataPanelModelNG::SetTrackBackground(FrameNode* frameNode, const Color& trackBackgroundColor)
 {
-    if (trackBackgroundColor.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty,
-            TrackBackground, trackBackgroundColor.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackground, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackground, trackBackgroundColor, frameNode);
 }
 
-void DataPanelModelNG::SetStrokeWidth(FrameNode* frameNode, const std::optional<Dimension>& strokeWidth)
+void DataPanelModelNG::SetStrokeWidth(FrameNode* frameNode, const Dimension& strokeWidth)
 {
-    
-    if (strokeWidth.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidth, strokeWidth.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidth, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidth, strokeWidth, frameNode);
 }
 
 void DataPanelModelNG::SetShadowOption(FrameNode* frameNode, const DataPanelShadow& shadowOption)
@@ -117,13 +101,9 @@ void DataPanelModelNG::SetShadowOption(FrameNode* frameNode, const DataPanelShad
     ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, ShadowOption, shadowOption, frameNode);
 }
 
-void DataPanelModelNG::SetValueColors(FrameNode* frameNode, const std::optional<std::vector<Gradient>>& valueColors)
+void DataPanelModelNG::SetValueColors(FrameNode* frameNode, const std::vector<Gradient>& valueColors)
 {
-    if (valueColors.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, ValueColors, valueColors.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(DataPanelPaintProperty, ValueColors, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, ValueColors, valueColors, frameNode);
 }
 
 void DataPanelModelNG::SetBuilderFunc(FrameNode* frameNode, NG::DataPanelMakeCallback&& makeFunc)
@@ -132,35 +112,5 @@ void DataPanelModelNG::SetBuilderFunc(FrameNode* frameNode, NG::DataPanelMakeCal
     auto pattern = frameNode->GetPattern<DataPanelPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetBuilderFunc(std::move(makeFunc));
-}
-
-void DataPanelModelNG::SetValues(FrameNode* frameNode, const std::optional<std::vector<double>>& values)
-{
-    if (values.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, Values, values.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(DataPanelPaintProperty, Values, frameNode);
-    }
-}
-
-void DataPanelModelNG::SetMax(FrameNode* frameNode, const std::optional<double>& max)
-{
-    if (max.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, Max, max.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(DataPanelPaintProperty, Max, frameNode);
-    }
-}
-
-void DataPanelModelNG::SetType(FrameNode* frameNode, const std::optional<int32_t>& type)
-{
-    if (type.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, DataPanelType, type.value(), frameNode);
-        if (type.value() != static_cast<int32_t>(DataPanelType::CIRCLE)) {
-            SetDefaultBorderRadius();
-        }
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(DataPanelPaintProperty, DataPanelType, frameNode);
-    }
 }
 } // namespace OHOS::Ace::NG

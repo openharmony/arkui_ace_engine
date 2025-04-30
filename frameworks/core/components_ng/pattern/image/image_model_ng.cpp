@@ -255,7 +255,7 @@ void ImageModelNG::SetSmoothEdge(float value)
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, SmoothEdge, value);
 }
 
-void ImageModelNG::SetSmoothEdge(FrameNode *frameNode, const std::optional<float>& value)
+void ImageModelNG::SetSmoothEdge(FrameNode* frameNode, const std::optional<float>& value)
 {
     CHECK_NULL_VOID(frameNode);
     if (value) {
@@ -289,12 +289,11 @@ void ImageModelNG::SetEnhancedImageQuality(AIImageQuality imageQuality)
     pattern->SetImageQuality(imageQuality);
 }
 
-void ImageModelNG::SetEnhancedImageQuality(FrameNode* frameNode, const std::optional<AIImageQuality>& imageQuality)
+void ImageModelNG::SetEnhancedImageQuality(FrameNode* frameNode, AIImageQuality imageQuality)
 {
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ImagePattern>();
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    pattern->SetImageQuality(imageQuality.value_or(AIImageQuality::NONE));
+    pattern->SetImageQuality(imageQuality);
 }
 
 void ImageModelNG::SetBorder(const Border& border) {}
@@ -581,7 +580,7 @@ bool ImageModelNG::UpdateDragItemInfo(DragItemInfo& itemInfo)
     return false;
 }
 
-void ImageModelNG::InitImage(FrameNode *frameNode, const std::string& src)
+void ImageModelNG::InitImage(FrameNode* frameNode, const std::string& src)
 {
     std::string bundleName;
     std::string moduleName;
@@ -656,7 +655,7 @@ void ImageModelNG::SetDrawingColorFilter(FrameNode* frameNode, RefPtr<DrawingCol
     ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, ColorFilter, frameNode);
 }
 
-void ImageModelNG::SetCopyOption(FrameNode *frameNode, const std::optional<CopyOptions>& copyOption)
+void ImageModelNG::SetCopyOption(FrameNode* frameNode, const std::optional<CopyOptions>& copyOption)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>(frameNode);
@@ -708,7 +707,7 @@ void ImageModelNG::ResetResizableLattice(FrameNode* frameNode)
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableLattice, nullptr, frameNode);
 }
 
-void ImageModelNG::SetImageRepeat(FrameNode *frameNode, const std::optional<ImageRepeat>& imageRepeat)
+void ImageModelNG::SetImageRepeat(FrameNode* frameNode, const std::optional<ImageRepeat>& imageRepeat)
 {
     CHECK_NULL_VOID(frameNode);
     if (imageRepeat) {
@@ -718,7 +717,12 @@ void ImageModelNG::SetImageRepeat(FrameNode *frameNode, const std::optional<Imag
     }
 }
 
-void ImageModelNG::SetImageRenderMode(FrameNode *frameNode, const std::optional<ImageRenderMode>& imageRenderMode)
+void ImageModelNG::SetImageMatrix(FrameNode* frameNode, const Matrix4& value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageMatrix, value, frameNode);
+}
+
+void ImageModelNG::SetImageRenderMode(FrameNode* frameNode, const std::optional<ImageRenderMode>& imageRenderMode)
 {
     CHECK_NULL_VOID(frameNode);
     if (imageRenderMode) {
@@ -728,18 +732,13 @@ void ImageModelNG::SetImageRenderMode(FrameNode *frameNode, const std::optional<
     }
 }
 
-void ImageModelNG::SetImageMatrix(FrameNode* frameNode, const Matrix4& value)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageMatrix, value, frameNode);
-}
-
 void ImageModelNG::SetImageFit(FrameNode* frameNode, ImageFit value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFit, value, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageFit, value, frameNode);
 }
 
-void ImageModelNG::SetImageFit(FrameNode *frameNode, std::optional<ImageFit> value)
+void ImageModelNG::SetImageFit(FrameNode* frameNode, std::optional<ImageFit> value)
 {
     SetImageFit(frameNode, value.value_or(ImageFit::COVER));
 }
@@ -756,7 +755,7 @@ void ImageModelNG::SetSyncMode(FrameNode* frameNode, bool syncMode)
     pattern->SetSyncLoad(syncMode);
 }
 
-void ImageModelNG::SetImageSourceSize(FrameNode *frameNode, const std::optional<std::pair<Dimension, Dimension>> &size)
+void ImageModelNG::SetImageSourceSize(FrameNode* frameNode, const std::optional<std::pair<Dimension, Dimension>>& size)
 {
     CHECK_NULL_VOID(frameNode);
     if (size) {
@@ -773,7 +772,7 @@ void ImageModelNG::SetMatchTextDirection(FrameNode* frameNode, bool value)
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, MatchTextDirection, value, frameNode);
 }
 
-void ImageModelNG::SetImageFill(FrameNode *frameNode, const std::optional<Color> &color)
+void ImageModelNG::SetImageFill(FrameNode* frameNode, const std::optional<Color>& color)
 {
     CHECK_NULL_VOID(frameNode);
     if (color) {
@@ -785,7 +784,7 @@ void ImageModelNG::SetImageFill(FrameNode *frameNode, const std::optional<Color>
     }
 }
 
-void ImageModelNG::SetAlt(FrameNode *frameNode, const std::optional<ImageSourceInfo>& src)
+void ImageModelNG::SetAlt(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src)
 {
     CHECK_NULL_VOID(frameNode);
     if (src) {
@@ -817,7 +816,7 @@ void ImageModelNG::SetAltPixelMap(FrameNode* frameNode, void* pixelMap)
 #endif
 }
 
-void ImageModelNG::SetImageInterpolation(FrameNode *frameNode, const std::optional<ImageInterpolation>& interpolation)
+void ImageModelNG::SetImageInterpolation(FrameNode* frameNode, const std::optional<ImageInterpolation>& interpolation)
 {
     CHECK_NULL_VOID(frameNode);
     if (interpolation) {
@@ -1116,13 +1115,12 @@ void ImageModelNG::SetOrientation(ImageRotateOrientation orientation)
     pattern->SetOrientation(orientation);
 }
 
-void ImageModelNG::SetOrientation(FrameNode* frameNode, const std::optional<ImageRotateOrientation>& orientation)
+void ImageModelNG::SetOrientation(FrameNode* frameNode, ImageRotateOrientation orientation)
 {
-    const auto orientationValue = orientation.value_or(ImageRotateOrientation::UP);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageRotateOrientation, orientationValue, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageRotateOrientation, orientation, frameNode);
     auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetOrientation(orientationValue);
+    pattern->SetOrientation(orientation);
 }
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

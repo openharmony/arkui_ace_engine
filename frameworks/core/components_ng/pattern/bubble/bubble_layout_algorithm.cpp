@@ -312,7 +312,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         measureChildSizeLast_ = child->GetGeometryNode()->GetFrameSize();
     }
     if (useCustom_ && !showInSubWindow) {
-        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+        auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
         float rootH = context->GetRootHeight();
         float rootW = context->GetRootWidth();
@@ -621,7 +621,7 @@ void BubbleLayoutAlgorithm::UpdateDumpInfo()
 void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp, bool showInSubWindow,
     LayoutWrapper* layoutWrapper)
 {
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto popupTheme = pipeline->GetTheme<PopupTheme>();
     CHECK_NULL_VOID(popupTheme);

@@ -108,13 +108,7 @@ void AssignArkValue(Ark_RichEditorTextStyle& dst, const UpdateSpanStyle& src, Co
     dst.letterSpacing = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(str);
     str = Converter::ArkValue<Ark_String>(src.updateLineHeight.value_or(CalcDimension()).ToString(), ctx);
     dst.lineHeight = Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(str);
-    dst.fontFeature = Converter::ArkValue<Opt_String>(src.updateFontFeature, ctx);
-}
-
-void AssignArkValue(Ark_PreviewText& dst, const PreviewTextInfo& src, Converter::ConvContext *ctx)
-{
-    dst.offset = ArkValue<Ark_Number>(src.offset.value_or(0.0f));
-    dst.value = ArkValue<Ark_String>(src.value.value_or(std::u16string()), ctx);
+    dst.fontFeature = Converter::ArkValue<Opt_String>(src.updateFontFeature);
 }
 }
 
@@ -123,9 +117,6 @@ const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor();
 namespace RichEditorBaseControllerAccessor {
 void DestroyPeerImpl(Ark_RichEditorBaseController peer)
 {
-    if (peer) {
-        delete peer;
-    }
 }
 Ark_RichEditorBaseController CtorImpl()
 {
@@ -238,4 +229,7 @@ const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControll
     return &RichEditorBaseControllerAccessorImpl;
 }
 
+struct RichEditorBaseControllerPeer {
+    virtual ~RichEditorBaseControllerPeer() = default;
+};
 }

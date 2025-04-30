@@ -62,9 +62,13 @@ void SetPolygonOptionsImpl(Ark_NativePointer node,
     auto opt = Converter::OptConvert<PolygonOptions>(*options);
     CHECK_NULL_VOID(opt);
     Validator::ValidateNonNegative(opt->width);
-    ShapeAbstractModelNG::SetWidth(frameNode, opt->width);
+    if (opt->width) {
+        ShapeAbstractModelNG::SetWidth(frameNode, opt->width.value());
+    }
     Validator::ValidateNonNegative(opt->height);
-    ShapeAbstractModelNG::SetHeight(frameNode, opt->height);
+    if (opt->height) {
+        ShapeAbstractModelNG::SetHeight(frameNode, opt->height.value());
+    }
 }
 } // PolygonInterfaceModifier
 namespace PolygonAttributeModifier {
@@ -73,11 +77,12 @@ void PointsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<ShapePoints> points = Converter::OptConvert<std::vector<ShapePoint>>(*value);
-    if (points && points->size() < POINTS_NUMBER_MIN) {
-        points.reset();
+    CHECK_NULL_VOID(value);
+    CHECK_EQUAL_VOID(value->tag, InteropTag::INTEROP_TAG_UNDEFINED);
+    auto points = Converter::Convert<std::vector<ShapePoint>>(value->value);
+    if (points.size() >= POINTS_NUMBER_MIN) {
+        PolygonModelNG::SetPoints(frameNode, points);
     }
-    PolygonModelNG::SetPoints(frameNode, points);
 }
 } // PolygonAttributeModifier
 const GENERATED_ArkUIPolygonModifier* GetPolygonModifier()

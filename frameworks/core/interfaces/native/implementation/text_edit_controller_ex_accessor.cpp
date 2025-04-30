@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
+#include "arkoala_api_generated.h"
+
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/text_edit_controller_ex_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "arkoala_api_generated.h"
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextEditControllerExAccessor {
 void DestroyPeerImpl(Ark_TextEditControllerEx peer)
@@ -77,4 +78,7 @@ const GENERATED_ArkUITextEditControllerExAccessor* GetTextEditControllerExAccess
     return &TextEditControllerExAccessorImpl;
 }
 
+struct TextEditControllerExPeer {
+    virtual ~TextEditControllerExPeer() = default;
+};
 }

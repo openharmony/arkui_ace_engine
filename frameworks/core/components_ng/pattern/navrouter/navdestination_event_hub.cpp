@@ -32,7 +32,7 @@ void NavDestinationEventHub::FireOnDisappear()
         pattern->SetCustomNode(nullptr);
         return;
     }
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddAfterLayoutTask([destination = navDestination]() {
         auto eventHub = destination->GetEventHub<NavDestinationEventHub>();
@@ -148,7 +148,7 @@ void NavDestinationEventHub::FireOnAppear()
         onAppearAction();
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto navigationManager = pipeline->GetNavigationManager();
     auto pattern = navDestination->GetPattern<NavDestinationPattern>();

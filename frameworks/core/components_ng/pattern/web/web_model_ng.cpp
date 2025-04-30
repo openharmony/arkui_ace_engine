@@ -22,7 +22,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
-#include "base/web/webview/ohos_nweb/include/nweb_helper.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #else
 #include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
@@ -1357,29 +1356,4 @@ void WebModelNG::SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeig
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateEnableFollowSystemFontWeight(enableFollowSystemFontWeight);
 }
-
-void WebModelNG::SetMixedMode(FrameNode* frameNode, MixedModeContent mixedContentMode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateMixedMode(mixedContentMode);
-}
-
-void WebModelNG::SetCacheMode(FrameNode* frameNode, WebCacheMode cacheMode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateCacheMode(cacheMode);
-}
-
-void WebModelNG::SetDarkMode(FrameNode* frameNode, WebDarkMode mode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateDarkMode(mode);
-}
-
 } // namespace OHOS::Ace::NG

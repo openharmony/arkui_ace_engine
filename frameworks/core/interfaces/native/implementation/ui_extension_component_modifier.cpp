@@ -18,7 +18,7 @@
 #include "arkoala_api_generated.h"
 
 #ifdef WINDOW_SCENE_SUPPORTED
-#include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_model_adapter.h"
 #include "core/interfaces/native/implementation/ui_extension_proxy_peer.h"
 #include "want.h"
 #endif //WINDOW_SCENE_SUPPORTED
@@ -28,42 +28,40 @@
 namespace OHOS::Ace::NG {
 namespace {
 #ifdef WINDOW_SCENE_SUPPORTED
-#ifdef WRONG_GEN
-AAFwk::Want CreateWant(const Ark_Want* want)
-{
-    AAFwk::Want aaFwkWant;
-    CHECK_NULL_RETURN(want, aaFwkWant);
-    auto bundleName = Converter::OptConvert<std::string>(want->bundleName);
-    auto abilityName = Converter::OptConvert<std::string>(want->abilityName);
-    auto deviceId = Converter::OptConvert<std::string>(want->deviceId);
-    auto moduleName = Converter::OptConvert<std::string>(want->moduleName);
-    aaFwkWant.SetElementName(
-        deviceId.value_or(""), bundleName.value_or(""), abilityName.value_or(""), moduleName.value_or(""));
-    auto uri = Converter::OptConvert<std::string>(want->uri);
-    if (uri) {
-        aaFwkWant.SetUri(uri.value());
-    }
-    auto type = Converter::OptConvert<std::string>(want->type);
-    if (type) {
-        aaFwkWant.SetType(type.value());
-    }
-    auto flags = Converter::OptConvert<int32_t>(want->flags);
-    if (flags) {
-        aaFwkWant.SetFlags(flags.value());
-    }
-    auto action = Converter::OptConvert<std::string>(want->action);
-    if (action) {
-        aaFwkWant.SetAction(action.value());
-    }
-    LOGE("CreateWant - 'want->parameters' is not supported");
-    auto entitiesArray = Converter::OptConvert<Array_String>(want->entities);
-    if (entitiesArray) {
-        auto entities = Converter::Convert<std::vector<std::string>>(entitiesArray.value());
-        aaFwkWant.SetEntities(entities);
-    }
-    return aaFwkWant;
-}
-#endif
+// AAFwk::Want CreateWant(const Ark_Want* want)
+// {
+//     AAFwk::Want aaFwkWant;
+//     CHECK_NULL_RETURN(want, aaFwkWant);
+//     auto bundleName = Converter::OptConvert<std::string>(want->bundleName);
+//     auto abilityName = Converter::OptConvert<std::string>(want->abilityName);
+//     auto deviceId = Converter::OptConvert<std::string>(want->deviceId);
+//     auto moduleName = Converter::OptConvert<std::string>(want->moduleName);
+//     aaFwkWant.SetElementName(
+//         deviceId.value_or(""), bundleName.value_or(""), abilityName.value_or(""), moduleName.value_or(""));
+//     auto uri = Converter::OptConvert<std::string>(want->uri);
+//     if (uri) {
+//         aaFwkWant.SetUri(uri.value());
+//     }
+//     auto type = Converter::OptConvert<std::string>(want->type);
+//     if (type) {
+//         aaFwkWant.SetType(type.value());
+//     }
+//     auto flags = Converter::OptConvert<int32_t>(want->flags);
+//     if (flags) {
+//         aaFwkWant.SetFlags(flags.value());
+//     }
+//     auto action = Converter::OptConvert<std::string>(want->action);
+//     if (action) {
+//         aaFwkWant.SetAction(action.value());
+//     }
+//     LOGE("CreateWant - 'want->parameters' is not supported");
+//     auto entitiesArray = Converter::OptConvert<Array_String>(want->entities);
+//     if (entitiesArray) {
+//         auto entities = Converter::Convert<std::vector<std::string>>(entitiesArray.value());
+//         aaFwkWant.SetEntities(entities);
+//     }
+//     return aaFwkWant;
+// }
 #endif //WINDOW_SCENE_SUPPORTED
 }
 }
@@ -80,7 +78,10 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
-    auto frameNode = UIExtensionModelNG::CreateFrameNode(id);
+    auto frameNode = NG::UIExtensionAdapter::CreateFrameNode(id);
+    if (!frameNode) {
+        return {};
+    }
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 #else
@@ -89,9 +90,8 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // UIExtensionComponentModifier
 namespace UIExtensionComponentInterfaceModifier {
-void SetUIExtensionComponentOptionsImpl(Ark_NativePointer node,
-                                        const Ark_Want* want,
-                                        const Opt_UIExtensionOptions* options)
+void SetUIExtensionComponentOptionsImpl(
+    Ark_NativePointer node, const Ark_Want* want, const Opt_UIExtensionOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -115,26 +115,20 @@ void SetUIExtensionComponentOptionsImpl(Ark_NativePointer node,
         }
     }
 #ifdef WINDOW_SCENE_SUPPORTED
-#ifdef WRONG_GEN
-    UIExtensionModelNG::UpdateWant(frameNode, CreateWant(want), isTransferringCaller, densityDpi);
-#endif
+    // UIExtensionModelNG::UpdateWant(frameNode, CreateWant(want), isTransferringCaller, densityDpi);
 #endif //WINDOW_SCENE_SUPPORTED
 }
 } // UIExtensionComponentInterfaceModifier
 namespace UIExtensionComponentAttributeModifier {
-void OnRemoteReadyImpl(Ark_NativePointer node,
-                       const Opt_Callback_UIExtensionProxy_Void* value)
+void OnRemoteReadyImpl(
+    Ark_NativePointer node, const Opt_Callback_UIExtensionProxy_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
 #ifdef WINDOW_SCENE_SUPPORTED
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
     auto onRemoteReady =
-        [arkCallback = CallbackHelper(*optValue)](const RefPtr<UIExtensionProxy>& proxy) {
+        [arkCallback = CallbackHelper(value->value)](const RefPtr<UIExtensionProxy>& proxy) {
             auto accessor = GetUIExtensionProxyAccessor();
             CHECK_NULL_VOID(accessor);
             auto peer = accessor->ctor();
@@ -143,30 +137,26 @@ void OnRemoteReadyImpl(Ark_NativePointer node,
             uiExtensionProxyPeerPtr->SetProxy(proxy);
             arkCallback.Invoke(peer);
         };
-    UIExtensionModelNG::SetOnRemoteReady(frameNode, std::move(onRemoteReady));
+    NG::UIExtensionAdapter::SetOnRemoteReady(frameNode, std::move(onRemoteReady));
 #endif //WINDOW_SCENE_SUPPORTED
 }
-void OnReceiveImpl(Ark_NativePointer node,
-                   const Opt_Callback_Map_String_Object_Void* value)
+void OnReceiveImpl(
+    Ark_NativePointer node, const Opt_Callback_Map_String_Object_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     LOGE("UIExtensionComponentInterfaceModifier::OnReceiveImpl - is not supported");
 }
-void OnResultImpl(Ark_NativePointer node,
-                  const Opt_Callback_Literal_Number_code__want_Void* value)
+void OnResultImpl(
+    Ark_NativePointer node, const Opt_Callback_Literal_Number_code__want_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
 #ifdef WINDOW_SCENE_SUPPORTED
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
     auto onResult =
-        [arkCallback = CallbackHelper(*optValue)](int32_t code, const AAFwk::Want& want) {
-#ifdef WRONG_GEN
+        [arkCallback = CallbackHelper(value->value)](int32_t code, const AAFwk::Want& want) {
             Ark_Want arkWant;
             auto bundleName = want.GetBundle();
             arkWant.bundleName = Converter::ArkValue<Opt_String>(bundleName);
@@ -195,44 +185,35 @@ void OnResultImpl(Ark_NativePointer node,
             parameter.code = Converter::ArkValue<Ark_Number>(code);
             parameter.want = Converter::ArkValue<Opt_Want>(arkWant);
             arkCallback.Invoke(parameter);
-#endif
         };
-    UIExtensionModelNG::SetOnResult(frameNode, std::move(onResult));
+    // UIExtensionModelNG::SetOnResult(frameNode, std::move(onResult));
 #endif //WINDOW_SCENE_SUPPORTED
 }
-void OnReleaseImpl(Ark_NativePointer node,
-                   const Opt_Callback_Number_Void* value)
+void OnReleaseImpl(
+    Ark_NativePointer node, const Opt_Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
 #ifdef WINDOW_SCENE_SUPPORTED
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
     auto onRelease =
-        [arkCallback = CallbackHelper(*optValue)](int32_t index) {
+        [arkCallback = CallbackHelper(value->value)](int32_t index) {
             Ark_Number arkIndex = Converter::ArkValue<Ark_Number>(index);
             arkCallback.Invoke(arkIndex);
         };
-    UIExtensionModelNG::SetOnRelease(frameNode, std::move(onRelease));
+    // UIExtensionModelNG::SetOnRelease(frameNode, std::move(onRelease));
 #endif //WINDOW_SCENE_SUPPORTED
 }
-void OnErrorImpl(Ark_NativePointer node,
-                 const Opt_ErrorCallback* value)
+void OnErrorImpl(
+    Ark_NativePointer node, const Opt_ErrorCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
 #ifdef WINDOW_SCENE_SUPPORTED
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
     auto instanceId = ContainerScope::CurrentId();
     auto weakNode = AceType::WeakClaim<NG::FrameNode>(frameNode);
-    auto onError = [arkCallback = CallbackHelper(*optValue), instanceId, weakNode](
+    auto onError = [arkCallback = CallbackHelper(value->value), instanceId, weakNode](
         int32_t code, const std::string& name, const std::string& message) {
         ContainerScope scope(instanceId);
         auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -243,23 +224,18 @@ void OnErrorImpl(Ark_NativePointer node,
             .message = Converter::ArkValue<Ark_String>(message, Converter::FC),
             .code = Converter::ArkValue<Ark_Number>(code)});
     };
-    UIExtensionModelNG::SetOnError(frameNode, std::move(onError));
+    // UIExtensionModelNG::SetOnError(frameNode, std::move(onError));
 #endif //WINDOW_SCENE_SUPPORTED
 }
-void OnTerminatedImpl(Ark_NativePointer node,
-                      const Opt_Callback_TerminationInfo_Void* value)
+void OnTerminatedImpl(
+    Ark_NativePointer node, const Opt_Callback_TerminationInfo_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
 #ifdef WINDOW_SCENE_SUPPORTED
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
     auto onTerminated =
-        [arkCallback = CallbackHelper(*optValue)](int32_t code, const RefPtr<WantWrap>& wantWrape) {
-#ifdef WRONG_GEN
+        [arkCallback = CallbackHelper(value->value)](int32_t code, const RefPtr<WantWrap>& wantWrape) {
             auto want = wantWrape->GetWant();
             Ark_Want arkWant;
             auto bundleName = want.GetBundle();
@@ -289,18 +265,9 @@ void OnTerminatedImpl(Ark_NativePointer node,
             terminatedInfo.code = Converter::ArkValue<Ark_Number>(code);
             terminatedInfo.want = Converter::ArkValue<Opt_Want>(arkWant);
             arkCallback.Invoke(terminatedInfo);
-#endif
         };
-    UIExtensionModelNG::SetOnTerminated(frameNode, std::move(onTerminated));
+    // UIExtensionModelNG::SetOnTerminated(frameNode, std::move(onTerminated));
 #endif //WINDOW_SCENE_SUPPORTED
-}
-void OnDrawReadyImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //UIExtensionComponentModelNG::SetOnDrawReady(frameNode, convValue);
 }
 } // UIExtensionComponentAttributeModifier
 const GENERATED_ArkUIUIExtensionComponentModifier* GetUIExtensionComponentModifier()
@@ -314,7 +281,6 @@ const GENERATED_ArkUIUIExtensionComponentModifier* GetUIExtensionComponentModifi
         UIExtensionComponentAttributeModifier::OnReleaseImpl,
         UIExtensionComponentAttributeModifier::OnErrorImpl,
         UIExtensionComponentAttributeModifier::OnTerminatedImpl,
-        UIExtensionComponentAttributeModifier::OnDrawReadyImpl,
     };
     return &ArkUIUIExtensionComponentModifierImpl;
 }

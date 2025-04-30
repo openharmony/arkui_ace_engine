@@ -42,14 +42,14 @@ public:
     static void SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& fontWeight);
     static void SetRenderingStrategy(FrameNode* frameNode, const std::optional<uint32_t>& renderingStrategy);
     static void SetSymbolEffect(FrameNode* frameNode, const std::optional<uint32_t>& effectStrategy);
-    static void InitialSymbol(FrameNode* frameNode, const std::optional<uint32_t>& unicode);
+    static void InitialSymbol(FrameNode* frameNode, const std::uint32_t& unicode);
     static void InitialCustomSymbol(FrameNode* frameNode, const std::uint32_t& unicode, const char* fontFamilyName);
     static void SetSymbolEffectOptions(FrameNode* frameNode, NG::SymbolEffectOptions& symbolEffectOptions);
     static void SetSymbolGlyphInitialize(FrameNode* framwNode, const std::uint32_t& symbolId);
     static void SetCustomSymbolGlyphInitialize(FrameNode* frameNode, const std::uint32_t& symbolId,
         const char* fontFamilyName);
-    static void SetMinFontScale(FrameNode* frameNode, const std::optional<float>& value);
-    static void SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& value);
+    static void SetMinFontScale(FrameNode* frameNode, const float value);
+    static void SetMaxFontScale(FrameNode* frameNode, const float value);
     static void UpdateSymbolEffect(FrameNode* frameNode, const std::uint32_t symbolEffectType, const bool isActive,
         const std::int16_t isTxtActiveSource);
 };

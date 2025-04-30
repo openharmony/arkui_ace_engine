@@ -159,7 +159,6 @@ struct SysScale {
 class RichEditorPattern
     : public TextPattern, public ScrollablePattern, public TextInputClient, public SpanWatcher {
     DECLARE_ACE_TYPE(RichEditorPattern, TextPattern, ScrollablePattern, TextInputClient, SpanWatcher);
-    UNITEST_FRIEND_CLASS;
 
 public:
     RichEditorPattern();
@@ -946,19 +945,19 @@ public:
 
     void OnVirtualKeyboardAreaChanged() override;
 
-    void SetCaretColor(const std::optional<Color>& caretColor)
+    void SetCaretColor(const Color& caretColor)
     {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "setCaretColor=%{public}s", caretColor->ToString().c_str());
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "setCaretColor=%{public}s", caretColor.ToString().c_str());
         caretColor_ = caretColor;
         IF_TRUE(SelectOverlayIsOn(), selectOverlay_->UpdateHandleColor());
     }
 
     Color GetCaretColor();
 
-    void SetSelectedBackgroundColor(const std::optional<Color>& selectedBackgroundColor)
+    void SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetSelectedBackgroundColor=%{public}s",
-            selectedBackgroundColor->ToString().c_str());
+            selectedBackgroundColor.ToString().c_str());
         selectedBackgroundColor_ = selectedBackgroundColor;
     }
 

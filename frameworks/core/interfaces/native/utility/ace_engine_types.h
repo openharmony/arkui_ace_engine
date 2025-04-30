@@ -19,6 +19,8 @@
 #include <variant>
 
 #include "base/geometry/dimension.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_v2/list/list_properties.h"
@@ -93,11 +95,6 @@ struct SymbolData {
 
 struct FontFamilies {
     std::vector<std::string> families;
-};
-
-struct FontWeightInt {
-    std::optional<FontWeight> fixed;
-    std::optional<int32_t> variable;
 };
 
 enum class MessageLevel {

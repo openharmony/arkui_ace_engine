@@ -14,22 +14,17 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/implementation/tab_content_transition_proxy_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
-struct TabContentTransitionProxyPeer : public OHOS::Ace::NG::GeneratedModifier::TabContentTransitionProxyPeerImpl {};
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabContentTransitionProxyAccessor {
 void DestroyPeerImpl(Ark_TabContentTransitionProxy peer)
 {
-    if (peer) {
-        delete peer;
-    }
 }
 Ark_TabContentTransitionProxy CtorImpl()
 {
-    return new TabContentTransitionProxyPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -37,36 +32,22 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void FinishTransitionImpl(Ark_TabContentTransitionProxy peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->FinishTransition();
 }
 Ark_Number GetFromImpl(Ark_TabContentTransitionProxy peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
-    auto idx = peer->GetFrom();
-    return Converter::ArkValue<Ark_Number>(idx);
+    return {};
 }
 void SetFromImpl(Ark_TabContentTransitionProxy peer,
                  const Ark_Number* from)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(from);
-    int32_t idx = Converter::Convert<int32_t>(*from);
-    peer->SetFrom(idx);
 }
 Ark_Number GetToImpl(Ark_TabContentTransitionProxy peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
-    auto idx = peer->GetTo();
-    return Converter::ArkValue<Ark_Number>(idx);
+    return {};
 }
 void SetToImpl(Ark_TabContentTransitionProxy peer,
                const Ark_Number* to)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(to);
-    int32_t idx = Converter::Convert<int32_t>(*to);
-    peer->SetTo(idx);
 }
 } // TabContentTransitionProxyAccessor
 const GENERATED_ArkUITabContentTransitionProxyAccessor* GetTabContentTransitionProxyAccessor()
@@ -84,4 +65,7 @@ const GENERATED_ArkUITabContentTransitionProxyAccessor* GetTabContentTransitionP
     return &TabContentTransitionProxyAccessorImpl;
 }
 
+struct TabContentTransitionProxyPeer {
+    virtual ~TabContentTransitionProxyPeer() = default;
+};
 }

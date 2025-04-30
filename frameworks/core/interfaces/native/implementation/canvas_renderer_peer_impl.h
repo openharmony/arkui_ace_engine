@@ -19,6 +19,9 @@
 #include "canvas_path_peer_impl.h"
 #include "arkoala_api_generated.h"
 
+namespace OHOS::Media {
+class PixelMapAni;
+}
 namespace OHOS::Ace::NG::GeneratedModifier {
 const auto IMAGE_FLAG_0 = 0;
 const auto IMAGE_FLAG_1 = 1;
@@ -74,7 +77,7 @@ public:
     static RefPtr<CanvasPath2D> MakePath2D();
     void DrawImage(ImageBitmapPeer* bitmap, const DrawImageParam& params);
     void DrawSvgImage(ImageBitmapPeer* bitmap, const DrawImageParam& params);
-    void DrawPixelMap(PixelMapPeer* pixelMap, const DrawImageParam& params);
+    void DrawPixelMap(void* nativePixelMap, const DrawImageParam& params);
     void BeginPath();
     void Clip(const std::optional<std::string>& ruleStr);
     void Clip(const std::optional<std::string>& ruleStr, const RefPtr<CanvasPath2D>& path);
@@ -92,7 +95,7 @@ public:
     void CreateImageData(
         std::vector<uint8_t>& vbuffer, const Ace::ImageData& imageData, uint32_t& width, uint32_t& height);
     void GetImageData(std::vector<uint8_t>& vbuffer, Ace::ImageSize& imageSize, uint32_t& width, uint32_t& height);
-    RefPtr<Ace::PixelMap> GetPixelMap(const double x, const double y, const double width, const double height);
+    Media::PixelMapAni* GetPixelMap(const double x, const double y, const double width, const double height);
     void PutImageData(Ace::ImageData& src, const PutImageDataParam& params);
     std::vector<double> GetLineDash();
     void SetLineDash(const std::vector<double>& segments);
@@ -113,7 +116,7 @@ public:
     void SetTransform(unsigned int id, const TransformParam& transform);
     void Transform(TransformParam& param);
     void Translate(double x, double y);
-    void SetPixelMap(const RefPtr<Ace::PixelMap>& pixelMap);
+    void SetPixelMap(void* nativePixelMap);
     void TransferFromImageBitmap(ImageBitmapPeer* bitmap);
     void SaveLayer();
     void RestoreLayer();
@@ -144,8 +147,15 @@ public:
     void SetFont(std::string fontStr);
     void SetTextAlign(const std::string& alignStr);
     void SetTextBaseline(const std::string& baselineStr);
-    void SetLetterSpacing(const std::string& letterSpacing);
-    void SetLetterSpacing(const Ace::Dimension& letterSpacing);
+    void Path2DArc(const ArcParam& params) override;
+    void Path2DArcTo(const ArcToParam& params) override;
+    void Path2DBezierCurveTo(const BezierCurveToParam& params) override;
+    void Path2DClosePath() override;
+    void Path2DEllipse(const EllipseParam& params) override;
+    void Path2DLineTo(double x, double y) override;
+    void Path2DMoveTo(double x, double y) override;
+    void Path2DQuadraticCurveTo(double cpx, double cpy, double x, double y) override;
+    void Path2DRect(double x, double y, double width, double height) override;
 
     // inheritance
     void ResetPaintState();
@@ -209,6 +219,7 @@ public:
     }
 
 protected:
+    OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> UnwrapNativePixelMap(Media::PixelMapAni* pixelMapAni);
     OHOS::Ace::RefPtr<OHOS::Ace::RenderingContext2DModel> renderingContext2DModel_;
     OHOS::Ace::RefPtr<OHOS::Ace::AceType> offscreenPattern_;
     bool anti_ = false;
@@ -221,7 +232,6 @@ private:
     Ace::Pattern GetPattern(unsigned int id);
     std::shared_ptr<Ace::Pattern> GetPatternPtr(int32_t id);
     void ParseImageData(Ace::ImageData& imageData, const PutImageDataParam& params);
-    bool IsValidLetterSpacing(const std::string& letterSpacing);
 
     static std::unordered_map<int32_t, std::shared_ptr<Ace::Pattern>> pattern_;
     static unsigned int patternCount_;

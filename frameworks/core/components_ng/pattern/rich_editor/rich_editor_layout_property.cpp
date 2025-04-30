@@ -18,22 +18,4 @@
 namespace OHOS::Ace::NG {
 RichEditorLayoutProperty::RichEditorLayoutProperty() = default;
 RichEditorLayoutProperty::~RichEditorLayoutProperty() = default;
-
-static std::string DisplayModeEnumToString(DisplayMode mode)
-{
-    switch (mode) {
-        case DisplayMode::OFF: return "BarState.Off";
-        case DisplayMode::AUTO: return "BarState.Auto";
-        case DisplayMode::ON: return "BarState.On";
-        default: return "BarState.Auto";
-    }
-}
-
-void RichEditorLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
-{
-    TextLayoutProperty::ToJsonValue(json, filter);
-    auto barState = GetDisplayMode().value_or(DisplayMode::AUTO);
-    json->Put("barState", DisplayModeEnumToString(barState).c_str());
-    json->PutExtAttr("fontColor", GetTextColor().value_or(Color::BLACK).ColorToString().c_str(), filter);
-};
 } // namespace OHOS::Ace::NG

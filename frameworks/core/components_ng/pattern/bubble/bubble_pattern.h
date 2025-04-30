@@ -77,7 +77,7 @@ public:
         bubbleMethod->SetArrowHeight(arrowHeight_);
         bubbleMethod->SetBorder(border_);
         bubbleMethod->SetArrowBuildPlacement(arrowBuildPlacement_);
-        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+        auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, bubbleMethod);
         auto theme = pipeline->GetTheme<PopupTheme>();
         CHECK_NULL_RETURN(theme, bubbleMethod);

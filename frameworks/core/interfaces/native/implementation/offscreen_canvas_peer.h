@@ -35,8 +35,9 @@ struct OffscreenCanvasPeer {
 
     double GetDensity()
     {
-        double density = OHOS::Ace::PipelineBase::GetCurrentDensity();
-        return ((GetUnit() == OHOS::Ace::CanvasUnit::DEFAULT) && !OHOS::Ace::NearZero(density)) ? density : 1.0;
+        // double density = OHOS::Ace::PipelineBase::GetCurrentDensity();
+        // return ((GetUnit() == OHOS::Ace::CanvasUnit::DEFAULT) && !OHOS::Ace::NearZero(density)) ? density : 1.0;
+        return 0;
     }
     void SetWidth(double value)
     {

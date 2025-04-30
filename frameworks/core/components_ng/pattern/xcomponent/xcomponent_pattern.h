@@ -142,7 +142,7 @@ public:
         return "nodeId:" + (host ? std::to_string(host->GetId()) : "-1");
     }
 
-    void SetId(const std::optional<std::string>& id)
+    void SetId(const std::string& id)
     {
         id_ = id;
     }

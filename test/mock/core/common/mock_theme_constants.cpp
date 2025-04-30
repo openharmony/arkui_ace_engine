@@ -14,14 +14,13 @@
  */
 
 #include "core/components/theme/theme_constants.h"
-#include "mock_theme_style.h"
 
 namespace OHOS::Ace {
 namespace {
 constexpr InternalResource::ResourceId ERROR_VALUE_RESOURCE_ID = InternalResource::ResourceId::NO_ID;
 constexpr double BLEND_ALPHA_MAX = 1.0;
-constexpr double DIMENSION_DEFAULT = 10.0;
-constexpr int32_t INT_DEFAULT = 5;
+constexpr double DIMENSION_DEFALUT = 10.0;
+constexpr int32_t INT_DEFALUT = 5;
 const ResValueWrapper ERROR_VALUE = { .type = ThemeConstantsType::ERROR };
 } // namespace
 void ThemeConstants::InitDeviceType()
@@ -35,81 +34,51 @@ const ResValueWrapper* ThemeConstants::GetPlatformConstants(uint32_t key)
 
 Color ThemeConstants::GetColor(uint32_t key) const
 {
-    if (currentThemeStyle_) {
-        return currentThemeStyle_->GetAttr<Color>(std::to_string(key), Color::RED);
-    }
     return Color::RED;
 }
 
 Color ThemeConstants::GetColorByName(const std::string& resName) const
 {
-    if (currentThemeStyle_) {
-        return currentThemeStyle_->GetAttr<Color>(resName, Color::RED);
-    }
     return Color::RED;
 }
 
 Dimension ThemeConstants::GetDimension(uint32_t key) const
 {
-    if (currentThemeStyle_) {
-        return currentThemeStyle_->GetAttr<Dimension>(std::to_string(key), Dimension(DIMENSION_DEFAULT));
-    }
-    return Dimension(DIMENSION_DEFAULT);
+    return Dimension(DIMENSION_DEFALUT);
 }
 
 Dimension ThemeConstants::GetDimensionByName(const std::string& resName) const
 {
-    if (currentThemeStyle_) {
-        return currentThemeStyle_->GetAttr<Dimension>(resName, Dimension(DIMENSION_DEFAULT));
-    }
-    return Dimension(DIMENSION_DEFAULT);
+    return Dimension(DIMENSION_DEFALUT);
 }
 
 int32_t ThemeConstants::GetInt(uint32_t key) const
 {
-    if (currentThemeStyle_) {
-        return currentThemeStyle_->GetAttr<int32_t>(std::to_string(key), INT_DEFAULT);
-    }
-    return INT_DEFAULT;
+    return INT_DEFALUT;
 }
 
 int32_t ThemeConstants::GetIntByName(const std::string& resName) const
 {
-    if (currentThemeStyle_) {
-        return currentThemeStyle_->GetAttr<int32_t>(resName, 0);
-    }
     return 0;
 }
 
 double ThemeConstants::GetDouble(uint32_t key) const
 {
-    if (currentThemeStyle_) {
-        return currentThemeStyle_->GetAttr<double>(std::to_string(key), 0.0f);
-    }
     return 0;
 }
 
 double ThemeConstants::GetDoubleByName(const std::string& resName) const
 {
-    if (currentThemeStyle_) {
-        return currentThemeStyle_->GetAttr<double>(resName, 0.0f);
-    }
     return 0;
 }
 
 std::string ThemeConstants::GetString(uint32_t key) const
 {
-    if (currentThemeStyle_) {
-        return currentThemeStyle_->GetAttr<std::string>(std::to_string(key), "");
-    }
     return "";
 }
 
 std::string ThemeConstants::GetStringByName(const std::string& resName) const
 {
-    if (currentThemeStyle_) {
-        return currentThemeStyle_->GetAttr<std::string>(resName, "");
-    }
     return "";
 }
 
@@ -125,27 +94,11 @@ std::string ThemeConstants::GetPluralStringByName(const std::string& resName, in
 
 std::vector<std::string> ThemeConstants::GetStringArray(uint32_t key) const
 {
-    if (currentThemeStyle_) {
-        auto value = currentThemeStyle_->GetAttr<std::string>(std::to_string(key), "");
-        if (value.empty()) {
-            return {};
-        } else {
-            return { value };
-        }
-    }
     return {};
 }
 
 std::vector<std::string> ThemeConstants::GetStringArrayByName(const std::string& resName) const
 {
-    if (currentThemeStyle_) {
-        auto value = currentThemeStyle_->GetAttr<std::string>(resName, "");
-        if (value.empty()) {
-            return {};
-        } else {
-            return { value };
-        }
-    }
     return {};
 }
 
@@ -186,14 +139,6 @@ bool ThemeConstants::GetBooleanByName(const std::string& resName) const
 
 uint32_t ThemeConstants::GetSymbolByName(const char* name) const
 {
-    if (currentThemeStyle_) {
-        return currentThemeStyle_->GetAttr<int32_t>(name, -1);
-    }
-    return -1;
-}
-
-uint32_t ThemeConstants::GetSymbolById(const int32_t& id) const
-{
     return -1;
 }
 
@@ -229,7 +174,6 @@ double ThemeConstants::GetBlendAlpha(const BlendAlpha& blendAlpha) const
 
 void ThemeConstants::LoadTheme(int32_t themeId)
 {
-    currentThemeStyle_ = MockThemeStyle::GetInstance();
 }
 
 void ThemeConstants::ParseTheme()

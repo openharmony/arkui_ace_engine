@@ -56,4 +56,7 @@ const GENERATED_ArkUICanvasPatternAccessor* GetCanvasPatternAccessor()
     return &CanvasPatternAccessorImpl;
 }
 
+struct CanvasPatternPeer {
+    virtual ~CanvasPatternPeer() = default;
+};
 }

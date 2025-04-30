@@ -36,7 +36,6 @@ struct SaveButtonStyle {
     std::optional<SaveButtonSaveDescription> text;
     std::optional<ButtonType> backgroundType;
 };
-
 class ACE_EXPORT SaveButtonModelNG : public SecurityComponentModelNG {
 public:
     static SaveButtonModelNG* GetInstance();

@@ -19,6 +19,11 @@
 #include "canvas_pattern_peer.h"
 #include "image_bitmap_peer_impl.h"
 #include "pixel_map_peer.h"
+#if defined(PIXEL_MAP_SUPPORTED)
+#include "pixel_map_ani.h"
+#include "pixel_map.h"
+#include "base/image/pixel_map.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -108,10 +113,7 @@ CanvasRendererPeerImpl::CanvasRendererPeerImpl()
     instanceId_ = Container::CurrentIdSafely();
     density_ = PipelineBase::GetCurrentDensity();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
-        paintState_ = PaintState();
-        paintState_.SetTextAlign(TextAlign::START);
-        paintState_.SetOffTextDirection(TextDirection::INHERIT);
-        paintState_.SetFontSize(DEFAULT_FONT_SIZE);
+        // paintState_ = PaintState(TextAlign::START, TextDirection::INHERIT, DEFAULT_FONT_SIZE);
     }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         isJudgeSpecialValue_ = true;
@@ -174,17 +176,21 @@ void CanvasRendererPeerImpl::DrawSvgImage(ImageBitmapPeer* bitmap, const DrawIma
     imageInfo.imageFit = bitmap->GetImageFit();
     renderingContext2DModel_->DrawSvgImage(imageInfo);
 }
-void CanvasRendererPeerImpl::DrawPixelMap(PixelMapPeer* pixelMap, const DrawImageParam& params)
+void CanvasRendererPeerImpl::DrawPixelMap(void* nativePixelMap, const DrawImageParam& params)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
-    CHECK_NULL_VOID(pixelMap);
+    CHECK_NULL_VOID(nativePixelMap);
 #if !defined(PREVIEW)
+    Media::PixelMapAni* pixelMapAni = reinterpret_cast<Media::PixelMapAni*>(nativePixelMap);
+    CHECK_NULL_VOID(pixelMapAni);
+    auto pixelMap = UnwrapNativePixelMap(pixelMapAni);
+    CHECK_NULL_VOID(pixelMap);
+
     Ace::CanvasImage image;
     ExtractInfoToImage(image, params, false);
-
     Ace::ImageInfo imageInfo;
     imageInfo.image = image;
-    imageInfo.pixelMap = pixelMap->pixelMap;
+    imageInfo.pixelMap = pixelMap;
     CHECK_NULL_VOID(imageInfo.pixelMap);
     renderingContext2DModel_->DrawPixelMap(imageInfo);
 #endif
@@ -401,7 +407,7 @@ void CanvasRendererPeerImpl::GetImageData(
     width = finalWidth;
     height = finalHeight;
 }
-RefPtr<Ace::PixelMap> CanvasRendererPeerImpl::GetPixelMap(
+Media::PixelMapAni* CanvasRendererPeerImpl::GetPixelMap(
     const double x, const double y, const double width, const double height)
 {
 #ifdef PIXEL_MAP_SUPPORTED
@@ -417,7 +423,13 @@ RefPtr<Ace::PixelMap> CanvasRendererPeerImpl::GetPixelMap(
     if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
         return nullptr;
     }
-    return renderingContext2DModel_->GetPixelMap(imageSize);
+    auto pixelMap = renderingContext2DModel_->GetPixelMap(imageSize);
+    CHECK_NULL_RETURN(pixelMap, nullptr);
+    auto pixelMapSharedPtr = pixelMap->GetPixelMapSharedPtr();
+    CHECK_NULL_RETURN(pixelMap, nullptr);
+    Media::PixelMapAni* pixelMapAni = new Media::PixelMapAni();
+    pixelMapAni->nativePixelMap_ = pixelMapSharedPtr;
+    return pixelMapAni;
 #else
     LOGE("ARKOALA CanvasRendererPeerImpl::GetPixelMap PixelMap is not supported on current platform.");
     return nullptr;
@@ -657,12 +669,27 @@ void CanvasRendererPeerImpl::Translate(double x, double y)
         renderingContext2DModel_->Translate(x * density, y * density);
     }
 }
-void CanvasRendererPeerImpl::SetPixelMap(const RefPtr<Ace::PixelMap>& pixelMap)
+OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> CanvasRendererPeerImpl::UnwrapNativePixelMap(Media::PixelMapAni* pixelMapAni)
 {
+#if defined(PIXEL_MAP_SUPPORTED)
+    auto pixelMap = pixelMapAni->nativePixelMap_;
+    CHECK_NULL_RETURN(pixelMap, nullptr);
+    return PixelMap::CreatePixelMap(&pixelMap);
+#endif
+    return nullptr;
+}
+void CanvasRendererPeerImpl::SetPixelMap(void* nativePixelMap)
+{
+#if defined(PIXEL_MAP_SUPPORTED)
     CHECK_NULL_VOID(renderingContext2DModel_);
+    CHECK_NULL_VOID(nativePixelMap);
+    Media::PixelMapAni* pixelMapAni = reinterpret_cast<Media::PixelMapAni*>(nativePixelMap);
+    CHECK_NULL_VOID(pixelMapAni);
+    auto pixelMap = UnwrapNativePixelMap(pixelMapAni);
     CHECK_NULL_VOID(pixelMap);
     ImageInfo imageInfo = { .pixelMap = pixelMap };
     renderingContext2DModel_->DrawPixelMap(imageInfo);
+#endif
 }
 void CanvasRendererPeerImpl::TransferFromImageBitmap(ImageBitmapPeer* bitmap)
 {
@@ -735,7 +762,7 @@ void CanvasRendererPeerImpl::SetFillStyle(const std::string& colorStr)
 void CanvasRendererPeerImpl::SetFillStyle(const uint32_t colorNum)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
-    renderingContext2DModel_->SetFillColor(Color(ColorAlphaAdapt(colorNum)), false);
+    renderingContext2DModel_->SetFillColor(Color(colorNum), false);
 }
 void CanvasRendererPeerImpl::SetFillStyle(const std::shared_ptr<Ace::Gradient>& gradient)
 {
@@ -946,37 +973,117 @@ void CanvasRendererPeerImpl::SetTextBaseline(const std::string& baselineStr)
     paintState_.SetTextBaseline(baseline);
     renderingContext2DModel_->SetTextBaseline(baseline);
 }
-void CanvasRendererPeerImpl::SetLetterSpacing(const std::string& letterSpacingStr)
+void CanvasRendererPeerImpl::Path2DArc(const ArcParam& params)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
-    if (!letterSpacingStr.empty() && IsValidLetterSpacing(letterSpacingStr)) {
-        if (letterSpacingStr.find("vp") != std::string::npos || letterSpacingStr.find("px") != std::string::npos) {
-            renderingContext2DModel_->SetLetterSpacing(GetDimensionValue(letterSpacingStr));
-            return;
-        }
-        renderingContext2DModel_->SetLetterSpacing(
-            Dimension(StringUtils::StringToDouble(letterSpacingStr) * GetDensity()));
+    double x = 0.0;
+    double y = 0.0;
+    double radius = 0.0;
+    double startAngle = 0.0;
+    double endAngle = 0.0;
+    if (GetDoubleArg(x, params.x) && GetDoubleArg(y, params.y) && GetDoubleArg(radius, params.radius) &&
+        GetDoubleArg(startAngle, params.startAngle) && GetDoubleArg(endAngle, params.endAngle)) {
+        bool anticlockwise = params.anticlockwise.value_or(false);
+        double density = GetDensity();
+        renderingContext2DModel_->Arc({x * density, y * density, radius * density,
+            startAngle, endAngle, anticlockwise});
     }
 }
-void CanvasRendererPeerImpl::SetLetterSpacing(const Ace::Dimension& letterSpacing)
+void CanvasRendererPeerImpl::Path2DArcTo(const ArcToParam& params)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
-    auto letterSpacingCal = CalcDimension(letterSpacing.Value(), letterSpacing.Unit());
-    if (letterSpacingCal.Unit() != DimensionUnit::PX && letterSpacingCal.Unit() != DimensionUnit::VP) {
-        letterSpacingCal.Reset();
+    double x1 = 0.0;
+    double y1 = 0.0;
+    double x2 = 0.0;
+    double y2 = 0.0;
+    double radius = 0.0;
+    if (GetDoubleArg(x1, params.x1) && GetDoubleArg(y1, params.y1) && GetDoubleArg(x2, params.x2) &&
+        GetDoubleArg(y2, params.y2) && GetDoubleArg(radius, params.radius)) {
+        double density = GetDensity();
+        renderingContext2DModel_->ArcTo({x1 * density, y1 * density, x2 * density, y2 * density, radius * density});
     }
-    renderingContext2DModel_->SetLetterSpacing(letterSpacingCal);
+}
+void CanvasRendererPeerImpl::Path2DBezierCurveTo(const BezierCurveToParam& params)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    double cp1x = 0.0;
+    double cp1y = 0.0;
+    double cp2x = 0.0;
+    double cp2y = 0.0;
+    double x = 0.0;
+    double y = 0.0;
+    if (GetDoubleArg(cp1x, params.cp1x) && GetDoubleArg(cp1y, params.cp1y) && GetDoubleArg(cp2x, params.cp2x) &&
+        GetDoubleArg(cp2y, params.cp2y) && GetDoubleArg(x, params.x) && GetDoubleArg(y, params.y)) {
+        double density = GetDensity();
+        renderingContext2DModel_->BezierCurveTo({
+            cp1x * density, cp1y * density, cp2x * density, cp2y * density, x * density, y * density});
+    }
+}
+void CanvasRendererPeerImpl::Path2DClosePath()
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    renderingContext2DModel_->ClosePath();
+}
+void CanvasRendererPeerImpl::Path2DEllipse(const EllipseParam& params)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    double x = 0.0;
+    double y =  0.0;
+    double radiusX =  0.0;
+    double radiusY =  0.0;
+    double rotation =  0.0;
+    double startAngle =  0.0;
+    double endAngle =  0.0;
+    if (GetDoubleArg(x, params.x) && GetDoubleArg(y, params.y) && GetDoubleArg(radiusX, params.radiusX) &&
+        GetDoubleArg(radiusY, params.radiusY) && GetDoubleArg(rotation, params.rotation) &&
+        GetDoubleArg(startAngle, params.startAngle) && GetDoubleArg(endAngle, params.endAngle)) {
+        bool anticlockwise = params.anticlockwise.value_or(false);
+        double density = GetDensity();
+        renderingContext2DModel_->Ellipse({x * density, y * density, radiusX * density, radiusY * density,
+            rotation, startAngle, endAngle, anticlockwise});
+    }
+}
+void CanvasRendererPeerImpl::Path2DLineTo(double x, double y)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (IfJudgeSpecialValue(x) && IfJudgeSpecialValue(y)) {
+        double density = GetDensity();
+        renderingContext2DModel_->LineTo(x * density, y * density);
+    }
+}
+void CanvasRendererPeerImpl::Path2DMoveTo(double x, double y)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (IfJudgeSpecialValue(x) && IfJudgeSpecialValue(y)) {
+        double density = GetDensity();
+        renderingContext2DModel_->MoveTo(x * density, y * density);
+    }
+}
+void CanvasRendererPeerImpl::Path2DQuadraticCurveTo(double cpx, double cpy, double x, double y)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (IfJudgeSpecialValue(cpx) && IfJudgeSpecialValue(cpy) && IfJudgeSpecialValue(x) && IfJudgeSpecialValue(y)) {
+        double density = GetDensity();
+        renderingContext2DModel_->QuadraticCurveTo({cpx * density, cpy * density, x * density, y * density});
+    }
+}
+void CanvasRendererPeerImpl::Path2DRect(double x, double y, double width, double height)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (IfJudgeSpecialValue(x) && IfJudgeSpecialValue(y) && IfJudgeSpecialValue(width) && IfJudgeSpecialValue(height)) {
+        double density = GetDensity();
+        renderingContext2DModel_->AddRect({x * density, y * density, width * density, height * density});
+    }
 }
 // inheritance
 void CanvasRendererPeerImpl::ResetPaintState()
 {
-    paintState_ = PaintState();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
         // The default value of TextAlign is TextAlign::START and Direction is TextDirection::INHERIT.
         // The default value of the font size in canvas is 14px.
-        paintState_.SetTextAlign(TextAlign::START);
-        paintState_.SetOffTextDirection(TextDirection::INHERIT);
-        paintState_.SetFontSize(DEFAULT_FONT_SIZE);
+        // paintState_ = PaintState(TextAlign::START, TextDirection::INHERIT, DEFAULT_FONT_SIZE);
+    } else {
+        paintState_ = PaintState();
     }
     std::vector<PaintState>().swap(savePaintState_);
     isInitializeShadow_ = false;
@@ -1110,10 +1217,5 @@ void CanvasRendererPeerImpl::ParseImageData(Ace::ImageData& imageData, const Put
     if (params.dirtyHeight) {
         imageData.dirtyHeight = static_cast<int32_t>(GetDimensionValue(*params.dirtyHeight).Value());
     }
-}
-bool CanvasRendererPeerImpl::IsValidLetterSpacing(const std::string& letterSpacing)
-{
-    std::regex pattern(R"(^[+-]?(\d+(\.\d+)?|\.\d+)((vp|px)$)?$)", std::regex::icase);
-    return std::regex_match(letterSpacing, pattern);
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier

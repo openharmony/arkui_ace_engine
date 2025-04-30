@@ -20,8 +20,5 @@
 
 struct GestureEventPeer
     : public OHOS::Ace::NG::GeneratedModifier::SomeEventPeer<OHOS::Ace::GestureEvent> {
-protected:
-    GestureEventPeer() = default;
     ~GestureEventPeer() override = default;
-    friend OHOS::Ace::NG::PeerUtils;
 };

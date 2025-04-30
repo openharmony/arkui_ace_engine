@@ -117,4 +117,7 @@ const GENERATED_ArkUIMenuItemConfigurationAccessor* GetMenuItemConfigurationAcce
     return &MenuItemConfigurationAccessorImpl;
 }
 
+struct MenuItemConfigurationPeer {
+    virtual ~MenuItemConfigurationPeer() = default;
+};
 }

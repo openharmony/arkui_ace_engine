@@ -22,7 +22,6 @@
 namespace OHOS::Ace::NG {
 class RichEditorSelectOverlay : public TextSelectOverlay {
     DECLARE_ACE_TYPE(RichEditorSelectOverlay, TextSelectOverlay);
-    UNITEST_FRIEND_CLASS;
 
 public:
     explicit RichEditorSelectOverlay(const WeakPtr<TextBase>& textBase) : TextSelectOverlay(textBase) {}

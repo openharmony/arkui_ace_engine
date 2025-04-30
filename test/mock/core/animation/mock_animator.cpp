@@ -122,7 +122,6 @@ void Animator::SetDuration(int32_t duration)
 
 bool Animator::SetIteration(int32_t iteration)
 {
-    iteration_ = iteration;
     return true;
 }
 
@@ -306,6 +305,4 @@ bool Animator::PrintVsyncInfoIfNeed() const
 {
     return false;
 }
-
-void Animator::ResetIsReverse() {}
 } // namespace OHOS::Ace

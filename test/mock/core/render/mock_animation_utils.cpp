@@ -20,7 +20,6 @@
 
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "mock_animation_utils.h"
 
 namespace OHOS::Ace {
 
@@ -36,6 +35,11 @@ public:
 #else
 class AnimationUtils::Animation {};
 #endif
+
+class AnimationUtils::InteractiveAnimation {
+public:
+    FinishCallback finishCallback_;
+};
 
 void AnimationUtils::OpenImplicitAnimation(
     const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& wrapFinishCallback)
@@ -204,9 +208,7 @@ std::shared_ptr<AnimationUtils::InteractiveAnimation> AnimationUtils::CreateInte
 
 void AnimationUtils::UpdateInteractiveAnimation(
     const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation, float progress)
-{
-    interactiveAnimation->progress_ = progress;
-}
+{}
 
 void AnimationUtils::ContinueInteractiveAnimation(
     const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation)

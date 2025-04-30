@@ -33,7 +33,7 @@ RefPtr<Modifier> RichEditorDragPaintMethod::GetContentModifier(PaintWrapper* pai
 
 void RichEditorDragPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
-    auto pipleline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipleline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipleline);
     auto textOverlayTheme = pipleline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);

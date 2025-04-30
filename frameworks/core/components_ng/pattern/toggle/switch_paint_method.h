@@ -71,7 +71,7 @@ public:
         CHECK_NULL_VOID(switchModifier_);
         auto size = paintWrapper->GetContentSize();
         auto offset = paintWrapper->GetContentOffset();
-        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+        auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto switchTheme = pipeline->GetTheme<SwitchTheme>();
         auto horizontalPadding = switchTheme->GetHotZoneHorizontalPadding().ConvertToPx();

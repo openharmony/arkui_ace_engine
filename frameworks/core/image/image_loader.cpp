@@ -164,7 +164,7 @@ std::shared_ptr<RSData> ImageLoader::LoadDataFromCachedFile(const std::string& u
 std::shared_ptr<RSData> ImageLoader::QueryImageDataFromImageCache(const ImageSourceInfo& sourceInfo)
 {
     ACE_LAYOUT_SCOPED_TRACE("QueryImageDataFromImageCache[%s]", sourceInfo.ToString().c_str());
-    auto pipelineCtx = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineCtx = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineCtx, nullptr);
     auto imageCache = pipelineCtx->GetImageCache();
     CHECK_NULL_RETURN(imageCache, nullptr);
@@ -177,7 +177,7 @@ std::shared_ptr<RSData> ImageLoader::QueryImageDataFromImageCache(const ImageSou
 
 void ImageLoader::CacheImageData(const std::string& key, const RefPtr<NG::ImageData>& imageData)
 {
-    auto pipelineCtx = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineCtx = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineCtx);
     auto imageCache = pipelineCtx->GetImageCache();
     CHECK_NULL_VOID(imageCache);
@@ -598,7 +598,7 @@ std::shared_ptr<RSData> DecodedDataProviderImageLoader::LoadImageData(
 // return orientation of pixmap for cache key
 std::string DecodedDataProviderImageLoader::GetThumbnailOrientation(const ImageSourceInfo& src)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, "");
     auto dataProvider = pipeline->GetDataProviderManager();
     CHECK_NULL_RETURN(dataProvider, "");
@@ -790,7 +790,7 @@ RefPtr<NG::ImageData> AstcImageLoader::LoadDecodedImageData(
 
 std::string AstcImageLoader::GetThumbnailOrientation(const ImageSourceInfo& src)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, "");
     auto dataProvider = pipeline->GetDataProviderManager();
     CHECK_NULL_RETURN(dataProvider, "");

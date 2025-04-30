@@ -24,7 +24,7 @@ void DestroyPeerImpl(Ark_CommonShape peer)
 }
 Ark_CommonShape CtorImpl()
 {
-    return {};
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -59,4 +59,7 @@ const GENERATED_ArkUICommonShapeAccessor* GetCommonShapeAccessor()
     return &CommonShapeAccessorImpl;
 }
 
+struct CommonShapePeer {
+    virtual ~CommonShapePeer() = default;
+};
 }

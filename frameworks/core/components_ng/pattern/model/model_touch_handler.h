@@ -18,11 +18,9 @@
 
 #include <functional>
 #include <unordered_map>
-#ifdef ARKUI_CAPI_UNITTEST
-#include "test/unittest/capi/stubs/mock_custom_render_descriptor.h"
-#else
+
 #include "data_type/pointer_event.h"
-#endif // ARKUI_CAPI_UNITTEST
+
 #include "base/memory/referenced.h"
 #include "core/components_ng/event/touch_event.h"
 

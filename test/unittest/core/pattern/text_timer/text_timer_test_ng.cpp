@@ -901,13 +901,11 @@ HWTEST_F(TextTimerTestNg, TextTimerTest015, TestSize.Level1)
     /**
      * @tc.steps: step2. SetIsCountDown.
      */
-    std::optional<bool> isCountDown = IS_COUNT_DOWN_2;
-    TextTimerModelNG::SetIsCountDown(node, isCountDown);
+    TextTimerModelNG::SetIsCountDown(node, true);
     auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    EXPECT_EQ(layoutProperty->GetIsCountDownValue(), IS_COUNT_DOWN_2);
-    std::optional<double> count = INPUT_COUNT;
-    TextTimerModelNG::SetInputCount(node, count);
+    EXPECT_EQ(layoutProperty->GetIsCountDownValue(), true);
+    TextTimerModelNG::SetInputCount(node, INPUT_COUNT);
     EXPECT_EQ(layoutProperty->GetInputCountValue(), INPUT_COUNT);
 
     /**

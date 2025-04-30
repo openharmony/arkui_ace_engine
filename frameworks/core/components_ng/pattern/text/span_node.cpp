@@ -94,7 +94,6 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
         TextBackgroundStyle::ToJsonValue(json, backgroundStyle, filter);
         return;
     }
-    json->PutExtAttr("unicode", std::to_string(GetSymbolUnicode()).c_str(), filter);
     if (fontStyle) {
         json->PutExtAttr("font", GetFont().c_str(), filter);
         json->PutExtAttr("fontSize", GetFontSizeInJson(fontStyle->GetFontSize()).c_str(), filter);
@@ -115,7 +114,7 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
             "effectStrategy", GetSymbolEffectStrategyInJson(fontStyle->GetSymbolEffectStrategy()).c_str(), filter);
         json->Put("symbolEffect",
             GetSymbolEffectOptionsInJson(fontStyle->GetSymbolEffectOptions().value_or(SymbolEffectOptions())).c_str());
-        json->Put("SymbolColor", SymbolColorToString().c_str());
+
         auto shadow = fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
         // Determines if there are multiple textShadows
         auto jsonShadow = (shadow.size() == 1) ? ConvertShadowToJson(shadow.front()) : ConvertShadowsToJson(shadow);
@@ -750,7 +749,7 @@ std::u16string SpanItem::GetSpanContent()
     return content;
 }
 
-uint32_t SpanItem::GetSymbolUnicode() const
+uint32_t SpanItem::GetSymbolUnicode()
 {
     return unicode;
 }
@@ -1029,7 +1028,7 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
     return sameSpan;
 }
 
-std::string SpanItem::SymbolColorToString() const
+std::string SpanItem::SymbolColorToString()
 {
     auto colors = fontStyle->GetSymbolColorList();
     auto colorStr = std::string("[");
