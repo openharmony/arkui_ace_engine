@@ -15,6 +15,8 @@
 
 #include "base/geometry/size.h"
 #include "core/interfaces/native/implementation/render_node_peer_impl.h"
+#include "core/interfaces/native/implementation/shape_clip_peer.h"
+#include "core/interfaces/native/implementation/shape_mask_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -93,6 +95,68 @@ TranslateOptions Convert(const Ark_Vector2& value)
         Converter::Convert<CalcDimension>(value.y),
         CalcDimension(0.f)
     };
+}
+
+template<>
+BorderWidthProperty Convert(const Ark_Edges& src)
+{
+    BorderWidthProperty property;
+    property.leftDimen = OptConvert<Dimension>(src.left);
+    property.topDimen = OptConvert<Dimension>(src.top);
+    property.rightDimen = OptConvert<Dimension>(src.right);
+    property.bottomDimen = OptConvert<Dimension>(src.bottom);
+    property.multiValued = true;
+    return property;
+}
+
+template<>
+BorderRadiusProperty Convert(const Ark_BorderRadiuses_graphics& src)
+{
+    BorderRadiusProperty property;
+    property.radiusTopLeft = OptConvert<Dimension>(src.topLeft);
+    property.radiusTopRight = OptConvert<Dimension>(src.topRight);
+    property.radiusBottomLeft = OptConvert<Dimension>(src.bottomLeft);
+    property.radiusBottomRight = OptConvert<Dimension>(src.bottomRight);
+    return property;
+}
+
+template<>
+Color Convert(const Ark_Length& src)
+{
+    if (src.type == Ark_Tag::INTEROP_TAG_RESOURCE) {
+        auto resource = ArkValue<Ark_Resource>(src);
+        ResourceConverter converter(resource);
+        return converter.ToColor().value_or(Color());
+    } else {
+        return Color(static_cast<uint32_t>(src.value));
+    }
+}
+
+template<>
+BorderColorProperty Convert(const Ark_Edges& src)
+{
+    BorderColorProperty property;
+    property.leftColor = OptConvert<Color>(src.left);
+    property.topColor = OptConvert<Color>(src.top);
+    property.rightColor = OptConvert<Color>(src.right);
+    property.bottomColor = OptConvert<Color>(src.bottom);
+    property.multiValued = true;
+    return property;
+}
+
+template<>
+Offset Convert(const Ark_Vector2& value)
+{
+    return Offset{
+        Converter::Convert<float>(value.x),
+        Converter::Convert<float>(value.y)
+    };
+}
+
+void AssignArkValue(Ark_Vector2& dst, const Offset& src)
+{
+    dst.x = Converter::ArkValue<Ark_Number>(src.GetX());
+    dst.y = Converter::ArkValue<Ark_Number>(src.GetY());
 }
 
 void AssignArkValue(Ark_Vector2& dst, const DimensionOffset& src)
@@ -180,6 +244,107 @@ void AssignArkValue(Ark_EdgeStyles& dst, const BorderStyleProperty& src)
         dst.left = Converter::ArkValue<Opt_BorderStyle>(Ark_Empty());
     }
 }
+
+void AssignArkValue(Ark_Edges& dst, const BorderWidthProperty& src)
+{
+    if (src.topDimen.has_value()) {
+        dst.top = Converter::ArkValue<Opt_Length>(src.topDimen.value());
+    } else {
+        dst.top = Converter::ArkValue<Opt_Length>(Ark_Empty());
+    }
+
+    if (src.rightDimen.has_value()) {
+        dst.right = Converter::ArkValue<Opt_Length>(src.rightDimen.value());
+    } else {
+        dst.right = Converter::ArkValue<Opt_Length>(Ark_Empty());
+    }
+
+    if (src.bottomDimen.has_value()) {
+        dst.bottom = Converter::ArkValue<Opt_Length>(src.bottomDimen.value());
+    } else {
+        dst.bottom = Converter::ArkValue<Opt_Length>(Ark_Empty());
+    }
+
+    if (src.leftDimen.has_value()) {
+        dst.left = Converter::ArkValue<Opt_Length>(src.leftDimen.value());
+    } else {
+        dst.left = Converter::ArkValue<Opt_Length>(Ark_Empty());
+    }
+}
+
+void AssignArkValue(Ark_BorderRadiuses_graphics& dst, const BorderRadiusProperty& src)
+{
+    if (src.radiusTopLeft.has_value()) {
+        dst.topLeft = Converter::ArkValue<Ark_Number>(src.radiusTopLeft.value());
+    } else {
+        dst.topLeft = Converter::ArkValue<Ark_Number>(0);
+    }
+
+    if (src.radiusTopRight.has_value()) {
+        dst.topRight = Converter::ArkValue<Ark_Number>(src.radiusTopRight.value());
+    } else {
+        dst.topRight = Converter::ArkValue<Ark_Number>(0);
+    }
+
+    if (src.radiusBottomRight.has_value()) {
+        dst.bottomRight = Converter::ArkValue<Ark_Number>(src.radiusBottomRight.value());
+    } else {
+        dst.bottomRight = Converter::ArkValue<Ark_Number>(0);
+    }
+
+    if (src.radiusBottomLeft.has_value()) {
+        dst.bottomLeft = Converter::ArkValue<Ark_Number>(src.radiusBottomLeft.value());
+    } else {
+        dst.bottomLeft = Converter::ArkValue<Ark_Number>(0);
+    }
+}
+
+void AssignArkValue(Ark_Edges& dst, const BorderColorProperty& src)
+{
+    if (src.topColor.has_value()) {
+        dst.top = Converter::ArkValue<Opt_Length>(static_cast<float>(src.topColor.value().GetValue()));
+    } else {
+        dst.top = Converter::ArkValue<Opt_Length>(Ark_Empty());
+    }
+
+    if (src.rightColor.has_value()) {
+        dst.right = Converter::ArkValue<Opt_Length>(static_cast<float>(src.rightColor.value().GetValue()));
+    } else {
+        dst.right = Converter::ArkValue<Opt_Length>(Ark_Empty());
+    }
+
+    if (src.bottomColor.has_value()) {
+        dst.bottom = Converter::ArkValue<Opt_Length>(static_cast<float>(src.bottomColor.value().GetValue()));
+    } else {
+        dst.bottom = Converter::ArkValue<Opt_Length>(Ark_Empty());
+    }
+
+    if (src.leftColor.has_value()) {
+        dst.left = Converter::ArkValue<Opt_Length>(static_cast<float>(src.leftColor.value().GetValue()));
+    } else {
+        dst.left = Converter::ArkValue<Opt_Length>(Ark_Empty());
+    }
+}
+
+template<>
+void AssignCast(std::optional<RenderNodePeer::LengthMetricsUnit>& dst, const Ark_LengthMetricsUnit& src)
+{
+    switch (src) {
+        case ARK_LENGTH_METRICS_UNIT_DEFAULT: dst = RenderNodePeer::LengthMetricsUnit::DEFAULT; break;
+        case ARK_LENGTH_METRICS_UNIT_PX: dst = RenderNodePeer::LengthMetricsUnit::PX; break;
+        default: LOGE("Unexpected enum value in Ark_LengthMetricsUnit: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_LengthMetricsUnit& dst, const RenderNodePeer::LengthMetricsUnit& src)
+{
+    switch (src) {
+        case RenderNodePeer::LengthMetricsUnit::DEFAULT: dst = ARK_LENGTH_METRICS_UNIT_DEFAULT; break;
+        case RenderNodePeer::LengthMetricsUnit::PX: dst = ARK_LENGTH_METRICS_UNIT_PX; break;
+        default: dst = static_cast<Ark_LengthMetricsUnit>(-1);
+            LOGE("Unexpected enum value in RenderNodePeer::LengthMetricsUnit: %{public}d", src);
+    }
+}
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -202,6 +367,11 @@ RefPtr<RenderContext> GetRenderContext(RefPtr<FrameNode>& node, bool checkProxy 
         CHECK_NULL_RETURN(node->GetTag() != "BuilderProxyNode", nullptr);
     }
     return node->GetRenderContext();
+}
+
+RefPtr<OHOS::Ace::BasicShape> GetBasicShape(Ark_BaseShape peer)
+{
+    return nullptr;
 }
 
 void DestroyPeerImpl(Ark_RenderNode peer)
@@ -383,7 +553,7 @@ void SetClipToFrameImpl(Ark_RenderNode peer,
 }
 Ark_Number GetOpacityImpl(Ark_RenderNode peer)
 {
-     // 1.f by default
+    // 1.f by default
     auto errorValue = Converter::ArkValue<Ark_Number>(1.f);
     CHECK_NULL_RETURN(peer && peer->node, errorValue);
     auto opacityValue = ViewAbstract::GetOpacity(Referenced::RawPtr(peer->node));
@@ -416,7 +586,9 @@ Ark_Size GetSizeImpl(Ark_RenderNode peer)
     auto layoutProperty = currentNodeRef->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, retValue);
 
-    auto calcSizeConv = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
+    const auto& constraint = layoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_RETURN(constraint, retValue);
+    auto calcSizeConv = constraint->selfIdealSize;
     if (calcSizeConv.has_value()) {
         auto width = calcSizeConv.value().Width().value_or(CalcLength()).GetDimension();
         auto height = calcSizeConv.value().Height().value_or(CalcLength()).GetDimension();
@@ -530,7 +702,7 @@ void SetPivotImpl(Ark_RenderNode peer,
     CHECK_NULL_VOID(peer && peer->node && pivot);
     auto pivotConv = Converter::Convert<VectorF>(*pivot);
     auto x = GreatOrEqual(pivotConv.x, 0.f) && LessOrEqual(pivotConv.x, 1.f) ? pivotConv.x : 0.5f;
-    auto y = GreatOrEqual(pivotConv.x, 0.f) && LessOrEqual(pivotConv.x, 1.f) ? pivotConv.x : 0.5f;
+    auto y = GreatOrEqual(pivotConv.y, 0.f) && LessOrEqual(pivotConv.y, 1.f) ? pivotConv.y : 0.5f;
     ViewAbstract::SetPivot(Referenced::RawPtr(peer->node), DimensionOffset(Dimension(x), Dimension(y)));
 }
 Ark_Vector2 GetScaleImpl(Ark_RenderNode peer)
@@ -604,21 +776,51 @@ void SetTransformImpl(Ark_RenderNode peer,
 }
 Ark_Number GetShadowColorImpl(Ark_RenderNode peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_Number>(static_cast<int32_t>(Color::TRANSPARENT.GetValue()));
+    CHECK_NULL_RETURN(peer && peer->node, errorValue);
+    auto shadow = ViewAbstract::GetShadow(Referenced::RawPtr(peer->node));
+    if (shadow.has_value()) {
+        auto color = shadow.value().GetColor();
+        return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(color.GetValue()));
+    }
+    return errorValue;
 }
 void SetShadowColorImpl(Ark_RenderNode peer,
                         const Ark_Number* shadowColor)
 {
+    CHECK_NULL_VOID(peer && peer->node && shadowColor);
+    auto colorConv = Converter::Convert<int32_t>(*shadowColor);
+    auto shadow = ViewAbstract::GetShadow(Referenced::RawPtr(peer->node));
+    if (shadow.has_value()) {
+        auto color = Color(colorConv);
+        if (peer->shadowAlpha.has_value()) {
+            color = color.ChangeAlpha(peer->shadowAlpha.value());
+        }
+        shadow->SetColor(color);
+        ViewAbstract::SetBackShadow(Referenced::RawPtr(peer->node), shadow.value());
+    }
 }
 Ark_Vector2 GetShadowOffsetImpl(Ark_RenderNode peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_Vector2>(Offset(0, 0));
+    CHECK_NULL_RETURN(peer && peer->node, errorValue);
+    auto shadow = ViewAbstract::GetShadow(Referenced::RawPtr(peer->node));
+    if (shadow.has_value()) {
+        auto offset = shadow.value().GetOffset();
+        return Converter::ArkValue<Ark_Vector2>(offset);
+    }
+    return errorValue;
 }
 void SetShadowOffsetImpl(Ark_RenderNode peer,
                          const Ark_Vector2* shadowOffset)
 {
     CHECK_NULL_VOID(peer && peer->node && shadowOffset);
-    auto shadowOffsetConv = Converter::Convert<VectorF>(*shadowOffset);
+    auto offsetConv = Converter::Convert<Offset>(*shadowOffset);
+    auto shadow = ViewAbstract::GetShadow(Referenced::RawPtr(peer->node));
+    if (shadow.has_value()) {
+        shadow->SetOffset(offsetConv);
+        ViewAbstract::SetBackShadow(Referenced::RawPtr(peer->node), shadow.value());
+    }
 }
 Ark_String GetLabelImpl(Ark_RenderNode peer)
 {
@@ -644,81 +846,158 @@ void SetLabelImpl(Ark_RenderNode peer,
 }
 Ark_Number GetShadowAlphaImpl(Ark_RenderNode peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, errorValue);
+    if (peer->shadowAlpha.has_value()) {
+        return Converter::ArkValue<Ark_Number>(peer->shadowAlpha.value());
+    }
+    return errorValue;
 }
 void SetShadowAlphaImpl(Ark_RenderNode peer,
                         const Ark_Number* shadowAlpha)
 {
+    CHECK_NULL_VOID(peer && peer->node && shadowAlpha);
+    auto alphaConv = Converter::Convert<uint32_t>(*shadowAlpha);
+    peer->shadowAlpha = alphaConv;
+    auto shadow = ViewAbstract::GetShadow(Referenced::RawPtr(peer->node));
+    if (shadow.has_value()) {
+        auto color = shadow.value().GetColor();
+        if (peer->shadowAlpha.has_value()) {
+            color = color.ChangeAlpha(peer->shadowAlpha.value());
+        }
+        shadow->SetColor(color);
+        ViewAbstract::SetBackShadow(Referenced::RawPtr(peer->node), shadow.value());
+    }
 }
 Ark_Number GetShadowElevationImpl(Ark_RenderNode peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_Number>(0.f);
+    CHECK_NULL_RETURN(peer && peer->node, errorValue);
+    auto shadow = ViewAbstract::GetShadow(Referenced::RawPtr(peer->node));
+    if (shadow.has_value()) {
+        auto elevation = shadow.value().GetElevation();
+        return Converter::ArkValue<Ark_Number>(elevation);
+    }
+    return errorValue;
 }
 void SetShadowElevationImpl(Ark_RenderNode peer,
                             const Ark_Number* shadowElevation)
 {
+    CHECK_NULL_VOID(peer && peer->node && shadowElevation);
+    auto elevationConv = Converter::Convert<float>(*shadowElevation);
+    auto shadow = ViewAbstract::GetShadow(Referenced::RawPtr(peer->node));
+    if (shadow.has_value()) {
+        shadow->SetElevation(elevationConv);
+        ViewAbstract::SetBackShadow(Referenced::RawPtr(peer->node), shadow.value());
+    }
 }
 Ark_Number GetShadowRadiusImpl(Ark_RenderNode peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_Number>(0.f);
+    CHECK_NULL_RETURN(peer && peer->node, errorValue);
+    auto shadow = ViewAbstract::GetShadow(Referenced::RawPtr(peer->node));
+    if (shadow.has_value()) {
+        auto radius = shadow.value().GetBlurRadius();
+        return Converter::ArkValue<Ark_Number>(radius);
+    }
+    return errorValue;
 }
 void SetShadowRadiusImpl(Ark_RenderNode peer,
                          const Ark_Number* shadowRadius)
 {
+    CHECK_NULL_VOID(peer && peer->node && shadowRadius);
+    auto radiusConv = Converter::Convert<float>(*shadowRadius);
+    auto shadow = ViewAbstract::GetShadow(Referenced::RawPtr(peer->node));
+    if (shadow.has_value()) {
+        shadow->SetBlurRadius(radiusConv);
+        ViewAbstract::SetBackShadow(Referenced::RawPtr(peer->node), shadow.value());
+    }
 }
 Ark_EdgeStyles GetBorderStyleImpl(Ark_RenderNode peer)
 {
     auto errorValue = Converter::ArkValue<Ark_EdgeStyles>(BorderStyleProperty());
     CHECK_NULL_RETURN(peer && peer->node, errorValue);
-    auto styleValue = ViewAbstract::GetBorderStyle(Referenced::RawPtr(peer->node));
-    return Converter::ArkValue<Ark_EdgeStyles>(styleValue);
+    auto value = ViewAbstract::GetBorderStyle(Referenced::RawPtr(peer->node));
+    return Converter::ArkValue<Ark_EdgeStyles>(value);
 }
 void SetBorderStyleImpl(Ark_RenderNode peer,
                         const Ark_EdgeStyles* borderStyle)
 {
     CHECK_NULL_VOID(peer && peer->node && borderStyle);
-    auto style = Converter::Convert<BorderStyleProperty>(*borderStyle);
-    ViewAbstract::SetBorderStyle(Referenced::RawPtr(peer->node), style);
+    auto value = Converter::Convert<BorderStyleProperty>(*borderStyle);
+    ViewAbstract::SetBorderStyle(Referenced::RawPtr(peer->node), value);
 }
 Ark_Edges GetBorderWidthImpl(Ark_RenderNode peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_Edges>(BorderWidthProperty());
+    CHECK_NULL_RETURN(peer && peer->node, errorValue);
+    auto value = ViewAbstract::GetBorderWidth(Referenced::RawPtr(peer->node));
+    return Converter::ArkValue<Ark_Edges>(value);
 }
 void SetBorderWidthImpl(Ark_RenderNode peer,
                         const Ark_Edges* borderWidth)
 {
+    CHECK_NULL_VOID(peer && peer->node && borderWidth);
+    auto value = Converter::Convert<BorderWidthProperty>(*borderWidth);
+    ViewAbstract::SetBorderWidth(Referenced::RawPtr(peer->node), value);
 }
 Ark_Edges GetBorderColorImpl(Ark_RenderNode peer)
 {
-    return {};
+    Color defaultColor(0xff000000);
+    BorderColorProperty borderColors = {
+        defaultColor, defaultColor, defaultColor, defaultColor, std::nullopt, std::nullopt
+    };
+    auto errorValue = Converter::ArkValue<Ark_Edges>(borderColors);
+    CHECK_NULL_RETURN(peer && peer->node, errorValue);
+    auto value = ViewAbstract::GetBorderColor(Referenced::RawPtr(peer->node));
+    return Converter::ArkValue<Ark_Edges>(value);
 }
 void SetBorderColorImpl(Ark_RenderNode peer,
                         const Ark_Edges* borderColor)
 {
+    CHECK_NULL_VOID(peer && peer->node && borderColor);
+    auto value = Converter::Convert<BorderColorProperty>(*borderColor);
+    ViewAbstract::SetBorderColor(Referenced::RawPtr(peer->node), value);
 }
 Ark_BorderRadiuses_graphics GetBorderRadiusImpl(Ark_RenderNode peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_BorderRadiuses_graphics>(BorderRadiusProperty());
+    CHECK_NULL_RETURN(peer && peer->node, errorValue);
+    auto value = ViewAbstract::GetBorderRadius(Referenced::RawPtr(peer->node));
+    return Converter::ArkValue<Ark_BorderRadiuses_graphics>(value);
 }
 void SetBorderRadiusImpl(Ark_RenderNode peer,
                          const Ark_BorderRadiuses_graphics* borderRadius)
 {
+    CHECK_NULL_VOID(peer && peer->node && borderRadius);
+    auto value = Converter::Convert<BorderRadiusProperty>(*borderRadius);
+    ViewAbstract::SetBorderRadius(Referenced::RawPtr(peer->node), value);
 }
 Ark_ShapeMask GetShapeMaskImpl(Ark_RenderNode peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer && peer->node, nullptr);
+    auto value = ViewAbstract::GetMask(Referenced::RawPtr(peer->node));
+    return PeerUtils::CreatePeer<ShapeMaskPeer>();
 }
 void SetShapeMaskImpl(Ark_RenderNode peer,
                       Ark_ShapeMask shapeMask)
 {
+    CHECK_NULL_VOID(peer && peer->node && shapeMask);
+    auto value = GetBasicShape(shapeMask);
+    ViewAbstract::SetMask(Referenced::RawPtr(peer->node), value);
 }
 Ark_ShapeClip GetShapeClipImpl(Ark_RenderNode peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer && peer->node, nullptr);
+    auto value = ViewAbstract::GetClipShape(Referenced::RawPtr(peer->node));
+    return PeerUtils::CreatePeer<ShapeClipPeer>();
 }
 void SetShapeClipImpl(Ark_RenderNode peer,
                       Ark_ShapeClip shapeClip)
 {
+    CHECK_NULL_VOID(peer && peer->node && shapeClip);
+    auto value = GetBasicShape(shapeClip);
+    ViewAbstract::SetClipShape(Referenced::RawPtr(peer->node), value);
 }
 Ark_Boolean GetMarkNodeGroupImpl(Ark_RenderNode peer)
 {
@@ -731,15 +1010,20 @@ void SetMarkNodeGroupImpl(Ark_RenderNode peer,
                           Ark_Boolean markNodeGroup)
 {
     CHECK_NULL_VOID(peer && peer->node);
-    ViewAbstract::SetRenderGroup(Converter::Convert<bool>(markNodeGroup));
+    ViewAbstract::SetRenderGroup(Referenced::RawPtr(peer->node), Converter::Convert<bool>(markNodeGroup));
 }
 Ark_LengthMetricsUnit GetLengthMetricsUnitImpl(Ark_RenderNode peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_LengthMetricsUnit>(RenderNodePeer::LengthMetricsUnit::DEFAULT);
+    CHECK_NULL_RETURN(peer && peer->node, errorValue);
+    return Converter::ArkValue<Ark_LengthMetricsUnit>(peer->lengthMetricsUnit);
 }
 void SetLengthMetricsUnitImpl(Ark_RenderNode peer,
                               Ark_LengthMetricsUnit lengthMetricsUnit)
 {
+    CHECK_NULL_VOID(peer && peer->node);
+    auto value = Converter::OptConvert<RenderNodePeer::LengthMetricsUnit>(lengthMetricsUnit);
+    peer->lengthMetricsUnit = value.has_value() ? value.value() : RenderNodePeer::LengthMetricsUnit::DEFAULT;
 }
 } // RenderNodeAccessor
 const GENERATED_ArkUIRenderNodeAccessor* GetRenderNodeAccessor()
