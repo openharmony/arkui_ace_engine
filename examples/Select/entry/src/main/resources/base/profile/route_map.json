@@ -134,6 +134,166 @@
       "name": "ToggleContentModifier",
       "pageSourceFile": "src/main/ets/pages/components/toggle/toggleContentModifier.ets",
       "buildFunction": "ToggleContentModifierBuilder"
+    },
+    {
+      "name": "ToggleType",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleType.ets",
+      "buildFunction": "ToggleTypeBuilder"
+    },
+    {
+      "name": "ToggleSwitch",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleSwitch.ets",
+      "buildFunction": "ToggleSwitchBuilder"
+    },
+    {
+      "name": "ToggleColor",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleColor.ets",
+      "buildFunction": "ToggleColorBuilder"
+    },
+    {
+      "name": "ToggleNormal",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleNormal.ets",
+      "buildFunction": "ToggleBuilder"
+    },
+    {
+      "name": "ToggleEnable",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleEnable.ets",
+      "buildFunction": "ToggleEnableBuilder"
+    },
+    {
+      "name": "CheckboxIndex",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/Index.ets",
+      "buildFunction": "CheckboxIndexBuilder"
+    },
+    {
+      "name": "CheckboxShape",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxShape.ets",
+      "buildFunction": "CheckboxShapeBuilder"
+    },
+    {
+      "name": "CheckboxMark",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxMark.ets",
+      "buildFunction": "CheckboxMarkBuilder"
+    },
+    {
+      "name": "CheckboxCustom",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxCustom.ets",
+      "buildFunction": "CheckboxCustomBuilder"
+    },
+    {
+      "name": "CheckboxIndicator",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxIndicator.ets",
+      "buildFunction": "CheckboxIndicatorBuilder"
+    },
+    {
+      "name": "CheckboxSize",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxSize.ets",
+      "buildFunction": "CheckboxSizeBuilder"
+    },
+    {
+      "name": "CheckboxGroup",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxGroup.ets",
+      "buildFunction": "CheckboxGroupBuilder"
+    },
+    {
+      "name": "CheckboxChange",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxChange.ets",
+      "buildFunction": "CheckboxChangeBuilder"
+    },
+    {
+      "name": "CheckboxGroupIndicator",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxGroupIndicator.ets",
+      "buildFunction": "CheckboxGroupIndicatorBuilder"
+    },
+    {
+      "name": "CheckboxGroupCustom",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxGroupCustom.ets",
+      "buildFunction": "CheckboxGroupCustomBuilder"
+    },
+    {
+      "name": "CheckboxModifier",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxModifier.ets",
+      "buildFunction": "CheckboxModifierBuilder"
+    },
+    {
+      "name": "RatingIndex",
+      "pageSourceFile": "src/main/ets/pages/components/rating/Index.ets",
+      "buildFunction": "RatingIndexBuilder"
+    },
+    {
+      "name": "RatingNormal",
+      "pageSourceFile": "src/main/ets/pages/components/rating/ratingNormal.ets",
+      "buildFunction": "RatingNormalBuilder"
+    },
+    {
+      "name": "RatingStarStyle",
+      "pageSourceFile": "src/main/ets/pages/components/rating/ratingStarStyle.ets",
+      "buildFunction": "RatingStarStyleBuilder"
+    },
+    {
+      "name": "RatingCustom",
+      "pageSourceFile": "src/main/ets/pages/components/rating/ratingCustom.ets",
+      "buildFunction": "RatingCustomBuilder"
+    },
+    {
+      "name": "SliderIndex",
+      "pageSourceFile": "src/main/ets/pages/components/slider/Index.ets",
+      "buildFunction": "SliderIndexBuilder"
+    },
+    {
+      "name": "SliderStyle",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderStyle.ets",
+      "buildFunction": "SliderStyleBuilder"
+    },
+    {
+      "name": "SliderBlockStyle",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderBlockStyle.ets",
+      "buildFunction": "SliderBlockStyleBuilder"
+    },
+    {
+      "name": "SliderCustom",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderCustom.ets",
+      "buildFunction": "SliderCustomBuilder"
+    },
+    {
+      "name": "SliderTips",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderTips.ets",
+      "buildFunction": "SliderTipsBuilder"
+    },
+    {
+      "name": "SliderNormal",
+      "pageSourceFile": "src/main/ets/pages/components/slider/sliderNormal.ets",
+      "buildFunction": "SliderNormalBuilder"
+    },
+    {
+      "name": "RadioIndex",
+      "pageSourceFile": "src/main/ets/pages/components/radio/Index.ets",
+      "buildFunction": "RadioIndexBuilder"
+    },
+    {
+      "name": "RadioCheckedBackgroundColor",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioCheckedBackgroundColor.ets",
+      "buildFunction": "RadioCheckedBackgroundColorBuilder"
+    },
+    {
+      "name": "RadioSelected",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioSelected.ets",
+      "buildFunction": "RadioSelectedBuilder"
+    },
+    {
+      "name": "RadioCustom",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioCustom.ets",
+      "buildFunction": "RadioCustomBuilder"
+    },
+    {
+      "name": "RadioResponse",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioResponse.ets",
+      "buildFunction": "RadioResponseBuilder"
+    },
+    {
+      "name": "RadioBuild",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioBuild.ets",
+      "buildFunction": "RadioBuildBuilder"
     }
   ]
 }
