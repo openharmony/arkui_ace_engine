@@ -41,6 +41,12 @@ struct IndexPage {
     new TextList(7, 'FadingEdge', 'pages/List/FadingEdge/FadingEdge'),
     new TextList(8, 'LoopScrolling', 'pages/List/LoopScrolling/LoopScrolling'),
     new TextList(9, 'Sideslip', 'pages/List/Sideslip/Sideslip')
+    new TextList(10, 'MouseDragSlide', 'pages/List/MouseDragSlide'),
+    new TextList(11, 'LayoutFromBottom', 'pages/List/LayoutFromBottom'),
+    new TextList(12, 'CustomSlidingCurve', 'pages/List/CustomSlidingCurve'),
+    new TextList(13, 'SlideHorizontallyOneSide', 'pages/List/SlideHorizontallyOneSide'),
+    new TextList(14, 'FoldExpand', 'pages/List/FoldExpand'),
+    new TextList(15, 'MultiSelectSliding', 'pages/List/MultiSelectSliding'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {
