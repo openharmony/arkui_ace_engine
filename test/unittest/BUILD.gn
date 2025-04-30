@@ -44,7 +44,10 @@ group("linux_unittest") {
 
 group("fake_linux_unittest") {
   testonly = true
-  deps = [ "capi:linux_capi_unittest" ]
+  deps = [
+    "capi:capi_fake_test",
+    "capi:linux_capi_unittest",
+  ]
 }
 
 group("linux_unittest_capi") {
