@@ -55,6 +55,14 @@ bool NGGestureRecognizer::ShouldResponse()
     return true;
 }
 
+bool NGGestureRecognizer::CheckoutDownFingers(int32_t fingerId)
+{
+    auto eventManager = GetCurrentEventManager();
+    CHECK_NULL_RETURN(eventManager, true);
+    auto downFingerIds = eventManager->GetDownFingerIds();
+    return downFingerIds.find(fingerId) != downFingerIds.end();
+}
+
 bool NGGestureRecognizer::IsAllowedType(SourceTool type)
 {
     // allow all types by default

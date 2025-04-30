@@ -66,6 +66,7 @@ void SwipeRecognizer::OnAccepted()
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Swipe accepted, tag = %{public}s",
         node ? node->GetTag().c_str() : "null");
     auto lastRefereeState = refereeState_;
+    lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
     TouchEvent touchPoint = {};
     if (!touchPoints_.empty()) {
@@ -88,6 +89,7 @@ void SwipeRecognizer::OnAccepted()
 void SwipeRecognizer::OnRejected()
 {
     SendRejectMsg();
+    lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::FAIL;
     firstInputTime_.reset();
 }
@@ -124,6 +126,7 @@ void SwipeRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
     if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
         touchDownTime_ = event.time;
+        lastRefereeState_ = refereeState_;
         refereeState_ = RefereeState::DETECTING;
     }
 }
@@ -147,6 +150,7 @@ void SwipeRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     axisOffset_.Reset();
     touchDownTime_ = event.time;
     time_ = event.time;
+    lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::DETECTING;
 }
 

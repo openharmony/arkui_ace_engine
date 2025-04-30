@@ -74,6 +74,7 @@ public:
         fingerList_.clear();
         activeFingers_.clear();
         currentFingers_ = 0;
+        lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
         lastPointEvent_.reset();
@@ -129,6 +130,7 @@ protected:
         activeFingers_.clear();
         lastPointEvent_.reset();
         currentFingers_ = 0;
+        lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
         backupTouchPointsForSucceedBlock_.reset();
