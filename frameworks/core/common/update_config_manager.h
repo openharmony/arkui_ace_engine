@@ -62,6 +62,11 @@ public:
         }
     }
 
+    void CancelUselessTaskLocked()
+    {
+        currentTask_.updateTask.Cancel();
+    }
+
     void UpdatePromiseConfig(const T& config, std::function<void()> &&task, const RefPtr<Container>& container,
         int32_t taskId, const std::string& taskName, TaskExecutor::TaskType type = TaskExecutor::TaskType::PLATFORM)
     {
@@ -118,11 +123,6 @@ private:
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(currentTask_.updateTask, type, taskName);
-    }
-
-    void CancelUselessTaskLocked()
-    {
-        currentTask_.updateTask.Cancel();
     }
 
     std::mutex updateTaskMutex_;
