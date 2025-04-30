@@ -3416,6 +3416,7 @@ void WebPattern::OnModifyDone()
         if (GetEnableFollowSystemFontWeight()) {
             delegate_->UpdateEnableFollowSystemFontWeight(GetEnableFollowSystemFontWeight().value());
         }
+        UpdateScrollBarWithBorderRadius();
     }
 
     if (!GetBackgroundColor()) {
@@ -3458,11 +3459,42 @@ void WebPattern::OnModifyDone()
     if (delegate_) {
         delegate_->SetSurfaceDensity(density_);
     }
+    UpdateScrollBarWithBorderRadius();
 }
 
 void WebPattern::SetSurfaceDensity(double density)
 {
     density_ = density;
+}
+
+void WebPattern::UpdateScrollBarWithBorderRadius()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    if (!renderContext->GetBorderRadius().has_value()) {
+        return;
+    }
+    auto borderRadius = renderContext->GetBorderRadius().value();
+    auto clipState = renderContext->GetClipEdge().value_or(false);
+
+    bool hasBorderRadiusValue = !borderRadius.radiusTopLeft.has_value() || !borderRadius.radiusTopRight.has_value() ||
+                                !borderRadius.radiusBottomLeft.has_value() ||
+                                !borderRadius.radiusBottomRight.has_value();
+    if (hasBorderRadiusValue) {
+        return;
+    }
+
+    CHECK_NULL_VOID(delegate_);
+    if (clipState) {
+        delegate_->SetBorderRadiusFromWeb(borderRadius.radiusTopLeft.value().Value(),
+            borderRadius.radiusTopRight.value().Value(), borderRadius.radiusBottomLeft.value().Value(),
+            borderRadius.radiusBottomRight.value().Value());
+    } else {
+        delegate_->SetBorderRadiusFromWeb(0.0f, 0.0f, 0.0f, 0.0f);
+    }
 }
 
 extern "C" {
@@ -5619,6 +5651,7 @@ void WebPattern::OnInActive()
 
 void WebPattern::OnActive()
 {
+    UpdateScrollBarWithBorderRadius();
     CHECK_NULL_VOID(delegate_);
     bool policyDisable = delegate_->IsActivePolicyDisable();
     TAG_LOGI(AceLogTag::ACE_WEB,
