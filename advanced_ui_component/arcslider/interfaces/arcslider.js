@@ -1152,7 +1152,7 @@ export class ArcSlider extends ViewV2 {
             this.startTouchAnimator();
             this.calcBlur();
         }
-        else if ((event.action === CrownAction.BEGIN || CrownAction.UPDATE) && this.isEnlarged) {
+        else if ((event.action === CrownAction.BEGIN) && this.isEnlarged) {
             this.clearTimeout();
             this.crownDeltaAngle = this.getUIContext().px2vp(-event.degree *
             this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.radius;
@@ -1164,6 +1164,7 @@ export class ArcSlider extends ViewV2 {
             this.crownDeltaAngle = this.getUIContext().px2vp(-event.degree *
             this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.radius;
             this.calcCrownValue(this.crownDeltaAngle);
+            this.setVibration();
         }
         else if (this.isEnlarged && event.action === CrownAction.END) {
             this.clearTimeout();
@@ -1257,7 +1258,7 @@ export class ArcSlider extends ViewV2 {
             Button.focusable(true);
             Button.focusOnTouch(true);
             Button.onDigitalCrown((event) => {
-                if (event && this.isFocus) {
+                if (event) {
                     this.onDigitalCrownEvent(event);
                 }
                 this.options.onChange?.(this.options.valueOptions.progress);
