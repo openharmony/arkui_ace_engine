@@ -14,15 +14,33 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components/swiper/swiper_component.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_model_ng.h"
+#include "core/interfaces/native/implementation/indicator_component_controller_peer.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/validators.h"
+
+namespace OHOS::Ace::NG::Converter {
+template<> SwiperDigitalParameters Convert(const Ark_DigitIndicator& src);
+template<> SwiperParameters Convert(const Ark_DotIndicator& src);
+} // namespace OHOS::Ace::NG::Converter
+
+namespace OHOS::Ace::NG::SwiperAttributeModifierInternal {
+bool CheckSwiperParameters(SwiperParameters& p);
+void CheckSwiperDigitalParameters(SwiperDigitalParameters& p);
+} // namespace OHOS::Ace::NG::SwiperAttributeModifierInternal
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace IndicatorComponentModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return {};
+    auto frameNode = IndicatorModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return Referenced::RawPtr(frameNode);
 }
 } // IndicatorComponentModifier
 namespace IndicatorComponentInterfaceModifier {
@@ -31,8 +49,21 @@ void SetIndicatorComponentOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = controller ? Converter::OptConvert<type>(*controller) : std::nullopt;
-    //IndicatorComponentModelNG::SetSetIndicatorComponentOptions(frameNode, convValue);
+    CHECK_NULL_VOID(controller);
+
+    // obtain the peer of external IndicatorController
+    Ark_IndicatorComponentController peerImplPtr{};
+    if (auto opt = Converter::OptConvert<Ark_IndicatorComponentController>(*controller); opt) {
+        peerImplPtr = *opt;
+    }
+    CHECK_NULL_VOID(peerImplPtr);
+
+    // obtain the internal IndicatorController
+    auto internalController = IndicatorModelNG::InitIndicatorController(frameNode);
+
+    // pass the internal controller to external management
+    auto indicatorNode = AceType::Claim<NG::FrameNode>(frameNode);
+    peerImplPtr->SetController(internalController, indicatorNode);
 }
 } // IndicatorComponentInterfaceModifier
 namespace IndicatorComponentAttributeModifier {
@@ -42,8 +73,9 @@ void InitialIndexImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //IndicatorComponentModelNG::SetInitialIndex(frameNode, convValue);
+    auto aceVal = Converter::OptConvert<int32_t>(*value);
+    Validator::ValidateNonNegative(aceVal);
+    IndicatorModelNG::SetInitialIndex(frameNode, aceVal);
 }
 void CountImpl(Ark_NativePointer node,
                const Ark_Number* value)
@@ -51,8 +83,9 @@ void CountImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //IndicatorComponentModelNG::SetCount(frameNode, convValue);
+    auto aceVal = Converter::OptConvert<int32_t>(*value);
+    Validator::ValidateNonNegative(aceVal);
+    IndicatorModelNG::SetCount(frameNode, aceVal);
 }
 void StyleImpl(Ark_NativePointer node,
                const Ark_Union_DotIndicator_DigitIndicator* value)
@@ -60,8 +93,26 @@ void StyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //IndicatorComponentModelNG::SetStyle(frameNode, convValue);
+    Converter::VisitUnion(*value,
+        [frameNode](const Ark_DotIndicator& value) {
+            auto dotParam = Converter::Convert<SwiperParameters>(value);
+            auto isCustomSize = SwiperAttributeModifierInternal::CheckSwiperParameters(dotParam);
+            IndicatorModelNG::SetDotIndicatorStyle(frameNode, dotParam);
+            IndicatorModelNG::SetIsIndicatorCustomSize(frameNode, isCustomSize);
+            IndicatorModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
+            IndicatorModelNG::SetShowIndicator(frameNode, true);
+        },
+        [frameNode](const Ark_DigitIndicator& value) {
+            auto digitParam = Converter::Convert<SwiperDigitalParameters>(value);
+            SwiperAttributeModifierInternal::CheckSwiperDigitalParameters(digitParam);
+            IndicatorModelNG::SetDigitIndicatorStyle(frameNode, digitParam);
+            IndicatorModelNG::SetIsIndicatorCustomSize(frameNode, false);
+            IndicatorModelNG::SetIndicatorType(frameNode, SwiperIndicatorType::DIGIT);
+            IndicatorModelNG::SetShowIndicator(frameNode, true);
+        },
+        [frameNode]() {
+            IndicatorModelNG::SetShowIndicator(frameNode, false);
+        });
 }
 void LoopImpl(Ark_NativePointer node,
               Ark_Boolean value)
@@ -69,7 +120,7 @@ void LoopImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //IndicatorComponentModelNG::SetLoop(frameNode, convValue);
+    IndicatorModelNG::SetLoop(frameNode, convValue);
 }
 void VerticalImpl(Ark_NativePointer node,
                   Ark_Boolean value)
@@ -77,7 +128,7 @@ void VerticalImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //IndicatorComponentModelNG::SetVertical(frameNode, convValue);
+    IndicatorModelNG::SetDirection(frameNode, convValue ? Axis::VERTICAL : Axis::HORIZONTAL);
 }
 void OnChangeImpl(Ark_NativePointer node,
                   const Callback_Number_Void* value)
@@ -85,8 +136,16 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //IndicatorComponentModelNG::SetOnChange(frameNode, convValue);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(frameNode);
+    auto onChange = [arkCallback = CallbackHelper(*value), node = targetNode](const BaseEventInfo* info) {
+        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        if (!swiperInfo) {
+            return;
+        }
+        PipelineContext::SetCallBackNode(node);
+        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(swiperInfo->GetIndex()));
+    };
+    IndicatorModelNG::SetOnChange(frameNode, std::move(onChange));
 }
 } // IndicatorComponentAttributeModifier
 const GENERATED_ArkUIIndicatorComponentModifier* GetIndicatorComponentModifier()
