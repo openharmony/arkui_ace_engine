@@ -1314,4 +1314,6 @@ void WebDelegate::UpdateSingleHandleVisible(bool isVisible) {}
 bool WebDelegate::ShowMagnifier() { return false; }
 bool WebDelegate::HideMagnifier() { return false; }
 void WebDelegate::SetTouchHandleExistState(bool touchHandleExist) {}
+void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight,
+    double borderRadiusBottomLeft, double borderRadiusBottomRight) {}
 } // namespace OHOS::Ace
