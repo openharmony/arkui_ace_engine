@@ -1128,6 +1128,22 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAdvancedBlendMode));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "registerFrameNodeDestructorCallback"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::RegisterFrameNodeDestructorCallback));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnTouchIntercept"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnTouchIntercept));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnTouchIntercept"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnTouchIntercept));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnVisibleAreaChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnVisibleAreaChange));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnVisibleAreaChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnVisibleAreaChange));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnPreDrag"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnPreDrag));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnPreDrag"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnPreDrag));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnChildTouchTest"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnChildTouchTest));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnChildTouchTest"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnChildTouchTest));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "common"), common);
 
     auto nativeUtils = panda::ObjectRef::New(vm);
