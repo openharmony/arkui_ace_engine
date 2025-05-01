@@ -126,8 +126,10 @@ void SetSourceImpl(Ark_BaseEvent peer,
 }
 Opt_Number GetAxisHorizontalImpl(Ark_BaseEvent peer)
 {
-    LOGE("BaseEventAccessor.GetAxisHorizontalImpl does nothing");
-    return {};
+    auto invalid = Converter::ArkValue<Opt_Number>();
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
+    int32_t value = peer->GetBaseInfo()->GetHorizontalAxis();
+    return Converter::ArkValue<Opt_Number>(value);
 }
 void SetAxisHorizontalImpl(Ark_BaseEvent peer,
                            const Ark_Number* axisHorizontal)

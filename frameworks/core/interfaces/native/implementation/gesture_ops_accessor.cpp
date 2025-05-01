@@ -37,20 +37,6 @@ struct GestureOpsPeer {
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GestureOpsAccessor {
-Ark_GestureOps CtorImpl()
-{
-    return new GestureOpsPeer();
-}
-
-void DestroyPeerImpl(GestureOpsPeer* peer)
-{
-    delete peer;
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void*>(&DestroyPeerImpl);
-}
-
 Ark_NativePointer CreateTapGestureImpl(const Ark_Number* fingers, const Ark_Number* count,
     const Ark_Number* distanceThreshold, Ark_Boolean isFingerCountLimited)
 {
@@ -160,16 +146,24 @@ void SetOnActionEndImpl(Ark_NativePointer gesture, const Callback_GestureEvent_V
     };
     gesturePtr->SetOnActionEndId(onActionEndEvent);
 }
-void SetOnActionCancelImpl(Ark_NativePointer gesture, const Callback_Void* onActionCancel)
+void SetOnActionCancelImpl(Ark_NativePointer gesture, const Callback_GestureEvent_Void* onActionCancel)
 {
-    // LOGE("zcb SetOnActionCancelImpl");
-    // auto* gesturePtr = reinterpret_cast<Gesture*>(gesture);
-    // CHECK_NULL_VOID(gesturePtr);
-    // auto onActionCancelEvent = [callback = CallbackHelper(*onActionCancel)]() {
-    //     LOGE("zcb SetOnActionCancelImpl onActionEvent trigger");
-    //     callback.InvokeSync();
-    // };
-    // gesturePtr->SetOnActionCancelId(onActionCancelEvent);
+    auto* gesturePtr = reinterpret_cast<Gesture*>(gesture);
+    CHECK_NULL_VOID(gesturePtr);
+    auto onActionCancelEvent = [callback = CallbackHelper(*onActionCancel)](GestureEvent& info) {
+        const auto gestureEvent = Converter::ArkGestureEventSync(info);
+        callback.InvokeSync(gestureEvent.ArkValue());
+    };
+    gesturePtr->SetOnActionCancelId(onActionCancelEvent);
+}
+void SetOnCancelImpl(Ark_NativePointer gesture, const Callback_Void* onCancel)
+{
+    auto* gesturePtr = reinterpret_cast<Gesture*>(gesture);
+    CHECK_NULL_VOID(gesturePtr);
+    auto onCancelEvent = [callback = CallbackHelper(*onCancel)](GestureEvent& info) {
+        callback.InvokeSync();
+    };
+    gesturePtr->SetOnActionCancelId(onCancelEvent);
 }
 void SetGestureTagImpl(Ark_NativePointer gesture, const Ark_String* tag)
 {
@@ -209,9 +203,6 @@ void AddGestureToGroupImpl(Ark_NativePointer group, Ark_NativePointer gesture)
 const GENERATED_ArkUIGestureOpsAccessor* GetGestureOpsAccessor()
 {
     static const GENERATED_ArkUIGestureOpsAccessor GestureOpsAccessorImpl {
-        GestureOpsAccessor::DestroyPeerImpl,
-        GestureOpsAccessor::CtorImpl,
-        GestureOpsAccessor::GetFinalizerImpl,
         GestureOpsAccessor::CreateTapGestureImpl,
         GestureOpsAccessor::CreateLongPressGestureImpl,
         GestureOpsAccessor::CreatePanGestureImpl,
@@ -224,6 +215,7 @@ const GENERATED_ArkUIGestureOpsAccessor* GetGestureOpsAccessor()
         GestureOpsAccessor::SetOnActionUpdateImpl,
         GestureOpsAccessor::SetOnActionEndImpl,
         GestureOpsAccessor::SetOnActionCancelImpl,
+        GestureOpsAccessor::SetOnCancelImpl,
         GestureOpsAccessor::SetGestureTagImpl,
         GestureOpsAccessor::SetAllowedTypesImpl,
         GestureOpsAccessor::AddGestureToNodeImpl,
