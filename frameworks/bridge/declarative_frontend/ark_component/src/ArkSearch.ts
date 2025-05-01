@@ -310,9 +310,7 @@ class SearchDecorationModifier extends ModifierWithKey<{ type: TextDecorationTyp
     if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
       return true;
     }
-    if (isResource(this.stageValue.color) && isResource(this.value.color)) {
-      return !isResourceEqual(this.stageValue.color, this.value.color);
-    } else if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
+    if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
       return !(this.stageValue.color === this.value.color);
     } else {
       return true;

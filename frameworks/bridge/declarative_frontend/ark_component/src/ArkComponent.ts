@@ -148,13 +148,8 @@ function isResource(variable: any): variable is Resource {
   return (variable as Resource)?.bundleName !== undefined;
 }
 
-function isResourceEqual(stageValue: Resource, value: Resource): boolean {
-  return false;
-}
 function isBaseOrResourceEqual(stageValue: any, value: any): boolean {
-  if (isResource(stageValue) && isResource(value)) {
-    return isResourceEqual(stageValue, value);
-  } else if (!isResource(stageValue) && !isResource(value)) {
+  if (!isResource(stageValue) && !isResource(value)) {
     return (stageValue === value);
   }
   return false;
@@ -357,9 +352,7 @@ class BorderWidthModifier extends ModifierWithKey<Length | EdgeWidths> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       if ((Object.keys(this.value).indexOf('start') >= 0) ||
           (Object.keys(this.value).indexOf('end') >= 0)) {
         return !((this.stageValue as LocalizedEdgeWidths).start === (this.value as LocalizedEdgeWidths).start &&
@@ -446,9 +439,7 @@ class BorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses | Loc
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       if ((Object.keys(this.value).indexOf('topStart') >= 0) ||
           (Object.keys(this.value).indexOf('topEnd') >= 0) ||
           (Object.keys(this.value).indexOf('bottomStart') >= 0) ||
@@ -542,9 +533,7 @@ class BorderColorModifier extends ModifierWithKey<ResourceColor | EdgeColors | L
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       if ((Object.keys(this.value).indexOf('start') >= 0) ||
           (Object.keys(this.value).indexOf('end') >= 0)) {
         return !((this.stageValue as LocalizedEdgeColors).start === (this.value as LocalizedEdgeColors).start &&
@@ -1159,9 +1148,7 @@ class OutlineColorModifier extends ModifierWithKey<ResourceColor | EdgeColors> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       return !((this.stageValue as EdgeColors).left === (this.value as EdgeColors).left &&
         (this.stageValue as EdgeColors).right === (this.value as EdgeColors).right &&
         (this.stageValue as EdgeColors).top === (this.value as EdgeColors).top &&
@@ -1192,9 +1179,7 @@ class OutlineRadiusModifier extends ModifierWithKey<Dimension | OutlineRadiuses>
     }
   }
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       return !((this.stageValue as BorderRadiuses).topLeft === (this.value as BorderRadiuses).topLeft &&
         (this.stageValue as BorderRadiuses).topRight === (this.value as BorderRadiuses).topRight &&
         (this.stageValue as BorderRadiuses).bottomLeft === (this.value as BorderRadiuses).bottomLeft &&
@@ -1255,9 +1240,7 @@ class OutlineWidthModifier extends ModifierWithKey<Dimension | EdgeOutlineWidths
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       return !((this.stageValue as EdgeOutlineWidths).left === (this.value as EdgeOutlineWidths).left &&
         (this.stageValue as EdgeOutlineWidths).right === (this.value as EdgeOutlineWidths).right &&
         (this.stageValue as EdgeOutlineWidths).top === (this.value as EdgeOutlineWidths).top &&

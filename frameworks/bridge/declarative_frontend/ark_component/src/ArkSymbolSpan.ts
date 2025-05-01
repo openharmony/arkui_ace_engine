@@ -26,13 +26,6 @@ class SymbolSpanFontColorModifier extends ModifierWithKey<object> {
     getUINativeModule().symbolSpan.setFontColor(node, this.value);
     }
   }
-  checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
-  }
 }
 
 class SymbolSpanFontSizeModifier extends ModifierWithKey<number | string | Resource> {
@@ -45,14 +38,6 @@ class SymbolSpanFontSizeModifier extends ModifierWithKey<number | string | Resou
       getUINativeModule().symbolSpan.resetFontSize(node);
     } else {
       getUINativeModule().symbolSpan.setFontSize(node, this.value);
-    }
-  }
-
-  checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
     }
   }
 }
@@ -69,13 +54,6 @@ class SymbolSpanFontWeightModifier extends ModifierWithKey<number | FontWeight |
       getUINativeModule().symbolSpan.setFontWeight(node, this.value);
     }
   }
-  checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
-  }
 }
 
 class SymbolSpanEffectStrategyModifier extends ModifierWithKey<SymbolEffectStrategy> {
@@ -90,14 +68,6 @@ class SymbolSpanEffectStrategyModifier extends ModifierWithKey<SymbolEffectStrat
       getUINativeModule().symbolSpan.setEffectStrategy(node, this.value);
     }
   }
-
-  checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
-  }
 }
 
 class SymbolSpanRenderingStrategyModifier extends ModifierWithKey<SymbolRenderingStrategy> {
@@ -110,13 +80,6 @@ class SymbolSpanRenderingStrategyModifier extends ModifierWithKey<SymbolRenderin
       getUINativeModule().symbolSpan.resetRenderingStrategy(node);
     } else {
       getUINativeModule().symbolSpan.setRenderingStrategy(node, this.value);
-    }
-  }
-  checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
     }
   }
 }

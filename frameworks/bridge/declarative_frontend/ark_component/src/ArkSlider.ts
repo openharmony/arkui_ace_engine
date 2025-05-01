@@ -248,14 +248,6 @@ class BlockSizeModifier extends ModifierWithKey<SizeOptions> {
       getUINativeModule().slider.setBlockSize(node, this.value!.width, this.value!.height);
     }
   }
-
-  checkObjectDiff(): boolean {
-    if (isResource(this.stageValue.height) && isResource(this.value.height) && isResource(this.stageValue.width) && isResource(this.value.width)) {
-      return !(isResourceEqual(this.stageValue.height, this.value.height) && isResourceEqual(this.stageValue.width, this.value.width));
-    } else {
-      return true;
-    }
-  }
 }
 
 class TrackBorderRadiusModifier extends ModifierWithKey<Length> {
