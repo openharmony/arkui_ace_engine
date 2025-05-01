@@ -1011,6 +1011,10 @@ void SessionWrapperImpl::NotifyBackground(bool isHandleError)
     UIEXT_LOGI("NotifyBackground, persistentid = %{public}d, isHandleError = %{public}d, componentId=%{public}d.",
         session_->GetPersistentId(), isHandleError, GetFrameNodeId());
     if (isHandleError) {
+        if (backgroundCallback_ == nullptr) {
+            InitBackgroundCallback();
+        }
+
         Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
             session_, std::move(backgroundCallback_));
     } else {
