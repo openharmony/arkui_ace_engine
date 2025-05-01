@@ -333,6 +333,17 @@ export class GestureOps {
         GestureOps.addGestureToGroup_serialize(group_casted, gesture_casted)
         return
     }
+    public static removeGestureByTag(node: KPointer, tag: string): void {
+        const node_casted = node as (KPointer)
+        const tag_casted = tag as (string)
+        GestureOps.removeGestureByTag_serialize(node_casted, tag_casted)
+        return
+    }
+    public static clearGestures(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        GestureOps.clearGestures_serialize(node_casted)
+        return
+    }
     private static createTapGesture_serialize(fingers: number, count: number, distanceThreshold: number, isFingerCountLimited: boolean): KPointer {
         const retval  = ArkUIGeneratedNativeModule._GestureOps_createTapGesture(fingers, count, distanceThreshold, isFingerCountLimited ? 1 : 0)
         return retval
@@ -415,6 +426,12 @@ export class GestureOps {
     }
     private static addGestureToGroup_serialize(group: KPointer, gesture: KPointer): void {
         ArkUIGeneratedNativeModule._GestureOps_addGestureToGroup(group, gesture)
+    }
+    private static removeGestureByTag_serialize(node: KPointer, tag: string): void {
+        ArkUIGeneratedNativeModule._GestureOps_removeGestureByTag(node, tag)
+    }
+    private static clearGestures_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._GestureOps_clearGestures(node)
     }
 }
 export class FocusController {

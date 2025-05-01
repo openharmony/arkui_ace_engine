@@ -23103,6 +23103,9 @@ typedef struct GENERATED_ArkUIGestureOpsAccessor {
                              Ark_NativePointer gesture);
     void (*addGestureToGroup)(Ark_NativePointer group,
                               Ark_NativePointer gesture);
+    void (*removeGestureByTag)(Ark_NativePointer node,
+                               const Ark_String* tag);
+    void (*clearGestures)(Ark_NativePointer node);
 } GENERATED_ArkUIGestureOpsAccessor;
 
 typedef struct GENERATED_ArkUIFocusControllerAccessor {

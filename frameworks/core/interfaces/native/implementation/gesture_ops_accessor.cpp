@@ -198,6 +198,22 @@ void AddGestureToGroupImpl(Ark_NativePointer group, Ark_NativePointer gesture)
     gestureGroup->AddGesture(AceType::Claim(gesturePtr));
     gesturePtr->DecRefCount();
 }
+void RemoveGestureByTagImpl(Ark_NativePointer node, const Ark_String* tag)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    std::string gestureTag = Converter::Convert<std::string>(*tag);
+    gestureHub->RemoveGesturesByTag(gestureTag);
+}
+void ClearGesturesImpl(Ark_NativePointer node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    gestureHub->ClearModifierGesture();
+}
 } // namespace GestureOpsAccessor
 
 const GENERATED_ArkUIGestureOpsAccessor* GetGestureOpsAccessor()
@@ -220,6 +236,8 @@ const GENERATED_ArkUIGestureOpsAccessor* GetGestureOpsAccessor()
         GestureOpsAccessor::SetAllowedTypesImpl,
         GestureOpsAccessor::AddGestureToNodeImpl,
         GestureOpsAccessor::AddGestureToGroupImpl,
+        GestureOpsAccessor::RemoveGestureByTagImpl,
+        GestureOpsAccessor::ClearGesturesImpl,
     };
     return &GestureOpsAccessorImpl;
 }

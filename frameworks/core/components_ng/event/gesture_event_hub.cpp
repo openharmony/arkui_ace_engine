@@ -921,8 +921,8 @@ void GestureEventHub::RemoveGesturesByTag(const std::string& gestureTag)
     for (auto iter = modifierGestures_.begin(); iter != modifierGestures_.end();) {
         auto tag = (*iter)->GetTag();
         if (tag.has_value() && tag.value() == gestureTag) {
-            iter = modifierGestures_.erase(iter);
             backupModifierGestures_.remove(*iter);
+            iter = modifierGestures_.erase(iter);
             needRecollect = true;
         } else {
             auto group = AceType::DynamicCast<GestureGroup>(*iter);

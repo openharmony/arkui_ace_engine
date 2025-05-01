@@ -24213,6 +24213,27 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void RemoveGestureByTagImpl(Ark_NativePointer node,
+                                const Ark_String* tag)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("removeGestureByTag(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, tag);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ClearGesturesImpl(Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("clearGestures(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // GestureOpsAccessor
     namespace FocusControllerAccessor {
     void RequestFocusImpl(const Ark_String* key)
@@ -42577,6 +42598,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GestureOpsAccessor::SetAllowedTypesImpl,
             GestureOpsAccessor::AddGestureToNodeImpl,
             GestureOpsAccessor::AddGestureToGroupImpl,
+            GestureOpsAccessor::RemoveGestureByTagImpl,
+            GestureOpsAccessor::ClearGesturesImpl,
         };
         return &GestureOpsAccessorImpl;
     }

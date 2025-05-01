@@ -12288,6 +12288,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         //auto convValue = Converter::OptConvert<type>(group); // for enums
         //undefinedModelNG::SetAddGestureToGroup(frameNode, convValue);
     }
+    void RemoveGestureByTagImpl(Ark_NativePointer node,
+                                const Ark_String* tag)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRemoveGestureByTag(frameNode, convValue);
+    }
+    void ClearGesturesImpl(Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetClearGestures(frameNode, convValue);
+    }
     } // GestureOpsAccessor
     namespace FocusControllerAccessor {
     void RequestFocusImpl(const Ark_String* key)
@@ -20595,6 +20612,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GestureOpsAccessor::SetAllowedTypesImpl,
             GestureOpsAccessor::AddGestureToNodeImpl,
             GestureOpsAccessor::AddGestureToGroupImpl,
+            GestureOpsAccessor::RemoveGestureByTagImpl,
+            GestureOpsAccessor::ClearGesturesImpl,
         };
         return &GestureOpsAccessorImpl;
     }
