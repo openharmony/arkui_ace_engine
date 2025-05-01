@@ -327,9 +327,17 @@ public:
 
     // for number and string with no unit, use default dimension unit.
     static bool ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit);
+    static bool ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit,
+        RefPtr<ResourceObject>& resObj);
     static bool ParseJsDimensionVp(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static bool ParseJsDimensionVp(const JSRef<JSVal>& jsValue, CalcDimension& result,
+        RefPtr<ResourceObject>& resObj);
     static bool ParseJsDimensionFp(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static bool ParseJsDimensionFp(const JSRef<JSVal>& jsValue, CalcDimension& result,
+        RefPtr<ResourceObject>& resObj);
     static bool ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static bool ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimension& result,
+        RefPtr<ResourceObject>& resObj);
     static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseLengthMetricsToPositiveDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result);
@@ -379,6 +387,8 @@ public:
         RefPtr<ResourceObject>& resObj);
     static bool ParseJsMediaWithBundleName(const JSRef<JSVal>& jsValue, std::string& result, std::string& bundleName,
         std::string& moduleName, int32_t& resId);
+    static bool ParseJsMediaWithBundleName(const JSRef<JSVal>& jsValue, std::string& result,
+        std::string& bundleName, std::string& moduleName, int32_t& resId, RefPtr<ResourceObject>& resObj);
     static bool ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& result,
         RefPtr<ResourceObject>& resObj);
     static bool ParseJsBool(const JSRef<JSVal>& jsValue, bool& result);
@@ -760,6 +770,8 @@ private:
         const JSRef<JSObject>& jsObj, int32_t resType, const RefPtr<ResourceWrapper>& resourceWrapper, double& result);
     static bool ParseResourceToDoubleById(
         int32_t resId, int32_t resType, const RefPtr<ResourceWrapper>& resourceWrapper, double& result);
+    static bool ParseJsDimensionInternal(const JSRef<JSObject>& jsObj, CalcDimension& result,
+        DimensionUnit defaultUnit, RefPtr<ResourceWrapper>& resourceWrapper, int32_t resType);
 
     static std::vector<NG::MenuOptionsParam> ParseMenuItems(const JSRef<JSArray>& menuItemsArray);
     static void ParseOnCreateMenu(

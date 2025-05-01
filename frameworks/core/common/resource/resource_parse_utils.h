@@ -65,6 +65,15 @@ public:
         CalcDimension& result, bool isSupportPercent = true);
     static bool ParseResDimensionNG(const RefPtr<ResourceObject>& resObj, CalcDimension& result,
         DimensionUnit defaultUnit, bool isSupportPercent = true);
+    static bool ParseResDimension(const RefPtr<ResourceObject>& resObj, CalcDimension& result,
+        DimensionUnit defaultUnit);
+    static bool ParseResDimensionVp(const RefPtr<ResourceObject>& resObj, CalcDimension& result);
+    static bool ParseResDimensionFp(const RefPtr<ResourceObject>& resObj, CalcDimension& result);
+    static bool ParseResDimensionPx(const RefPtr<ResourceObject>& resObj, CalcDimension& result);
+    template<class T>
+    static bool ConvertFromResObjNG(const RefPtr<ResourceObject>& resObj, T& result);
+    template<class T>
+    static bool ConvertFromResObj(const RefPtr<ResourceObject>& resObj, T& result);
 
     static bool IsNumberType(int32_t type)
     {

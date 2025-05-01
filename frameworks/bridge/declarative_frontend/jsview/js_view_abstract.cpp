@@ -4440,6 +4440,39 @@ bool JSViewAbstract::ParseJsLengthVpNG(const JSRef<JSVal>& jsValue, NG::CalcLeng
 
 bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit)
 {
+    RefPtr<ResourceObject> resObj;
+    return ParseJsDimension(jsValue, result, defaultUnit, resObj);
+}
+
+bool JSViewAbstract::ParseJsDimensionInternal(const JSRef<JSObject>& jsObj, CalcDimension& result,
+    DimensionUnit defaultUnit, RefPtr<ResourceWrapper>& resourceWrapper, int32_t resType)
+{
+    if (!IsGetResourceByName(jsObj)) {
+        return false;
+    }
+    JSRef<JSVal> args = jsObj->GetProperty("params");
+    if (!args->IsArray()) {
+        return false;
+    }
+    JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
+    auto param = params->GetValueAt(0);
+    if (resType == static_cast<int32_t>(ResourceType::STRING)) {
+        auto value = resourceWrapper->GetStringByName(param->ToString());
+        result = StringUtils::StringToCalcDimension(value, false, defaultUnit);
+        return true;
+    }
+    if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
+        auto value = std::to_string(resourceWrapper->GetIntByName(param->ToString()));
+        result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
+        return true;
+    }
+    result = resourceWrapper->GetDimensionByName(param->ToString());
+    return true;
+}
+
+bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit,
+    RefPtr<ResourceObject>& resObj)
+{
     if (jsValue->IsNumber()) {
         result = CalcDimension(jsValue->ToNumber<double>(), defaultUnit);
         return true;
@@ -4457,8 +4490,9 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
     if (!resId->IsNumber()) {
         return false;
     }
-    auto resourceObject = GetResourceObjectByBundleAndModule(jsObj);
-    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    resObj = SystemProperties::ConfigChangePerform() ? GetResourceObject(jsObj) :
+        GetResourceObjectByBundleAndModule(jsObj);
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
     if (!resourceWrapper) {
         return false;
     }
@@ -4468,27 +4502,7 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
         return false;
     }
     if (resIdNum == -1) {
-        if (!IsGetResourceByName(jsObj)) {
-            return false;
-        }
-        JSRef<JSVal> args = jsObj->GetProperty("params");
-        if (!args->IsArray()) {
-            return false;
-        }
-        JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
-        auto param = params->GetValueAt(0);
-        if (resType == static_cast<int32_t>(ResourceType::STRING)) {
-            auto value = resourceWrapper->GetStringByName(param->ToString());
-            result = StringUtils::StringToCalcDimension(value, false, defaultUnit);
-            return true;
-        }
-        if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
-            auto value = std::to_string(resourceWrapper->GetIntByName(param->ToString()));
-            result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
-            return true;
-        }
-        result = resourceWrapper->GetDimensionByName(param->ToString());
-        return true;
+        return ParseJsDimensionInternal(jsObj, result, defaultUnit, resourceWrapper, resType);
     }
     if (resType == static_cast<int32_t>(ResourceType::STRING)) {
         auto value = resourceWrapper->GetString(resId->ToNumber<uint32_t>());
@@ -4535,14 +4549,30 @@ bool JSViewAbstract::ParseJsLengthMetricsVp(const JSRef<JSObject>& jsObj, CalcDi
 
 bool JSViewAbstract::ParseJsDimensionVp(const JSRef<JSVal>& jsValue, CalcDimension& result)
 {
+    RefPtr<ResourceObject> resObj;
     // 'vp' -> the value varies with pixel density of device.
-    return ParseJsDimension(jsValue, result, DimensionUnit::VP);
+    return ParseJsDimension(jsValue, result, DimensionUnit::VP, resObj);
+}
+
+bool JSViewAbstract::ParseJsDimensionVp(const JSRef<JSVal>& jsValue, CalcDimension& result,
+    RefPtr<ResourceObject>& resObj)
+{
+    // 'vp' -> the value varies with pixel density of device.
+    return ParseJsDimension(jsValue, result, DimensionUnit::VP, resObj);
 }
 
 bool JSViewAbstract::ParseJsDimensionFp(const JSRef<JSVal>& jsValue, CalcDimension& result)
 {
+    RefPtr<ResourceObject> resObj;
     // the 'fp' unit is used for text scenes.
-    return ParseJsDimension(jsValue, result, DimensionUnit::FP);
+    return ParseJsDimension(jsValue, result, DimensionUnit::FP, resObj);
+}
+
+bool JSViewAbstract::ParseJsDimensionFp(const JSRef<JSVal>& jsValue, CalcDimension& result,
+    RefPtr<ResourceObject>& resObj)
+{
+    // the 'fp' unit is used for text scenes.
+    return ParseJsDimension(jsValue, result, DimensionUnit::FP, resObj);
 }
 
 bool JSViewAbstract::ParseJsDimensionFpNG(const JSRef<JSVal>& jsValue, CalcDimension& result, bool isSupportPercent)
@@ -4560,7 +4590,14 @@ bool JSViewAbstract::ParseJsDimensionFpNG(const JSRef<JSVal>& jsValue, CalcDimen
 
 bool JSViewAbstract::ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimension& result)
 {
-    return ParseJsDimension(jsValue, result, DimensionUnit::PX);
+    RefPtr<ResourceObject> resObj;
+    return ParseJsDimension(jsValue, result, DimensionUnit::PX, resObj);
+}
+
+bool JSViewAbstract::ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimension& result,
+    RefPtr<ResourceObject>& resObj)
+{
+    return ParseJsDimension(jsValue, result, DimensionUnit::PX, resObj);
 }
 
 bool JSViewAbstract::ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result)
@@ -5216,6 +5253,14 @@ bool JSViewAbstract::ParseJsMedia(const JSRef<JSVal>& jsValue, std::string& resu
 bool JSViewAbstract::ParseJsMediaWithBundleName(
     const JSRef<JSVal>& jsValue, std::string& result, std::string& bundleName, std::string& moduleName, int32_t& resId)
 {
+    RefPtr<ResourceObject> resObj;
+    return ParseJsMediaWithBundleName(jsValue, result, bundleName, moduleName, resId, resObj);
+}
+
+bool JSViewAbstract::ParseJsMediaWithBundleName(
+    const JSRef<JSVal>& jsValue, std::string& result, std::string& bundleName, std::string& moduleName,
+    int32_t& resId, RefPtr<ResourceObject>& resObj)
+{
     if (!jsValue->IsObject() && !jsValue->IsString()) {
         return JSViewAbstract::GetJsMediaBundleInfo(jsValue, bundleName, moduleName);
     }
@@ -5225,7 +5270,6 @@ bool JSViewAbstract::ParseJsMediaWithBundleName(
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObjectWithBundleName(jsObj, bundleName, moduleName, resId);
-    RefPtr<ResourceObject> resObj;
     return ParseJSMediaInternal(jsObj, result, resObj);
 }
 
@@ -7887,6 +7931,9 @@ bool JSViewAbstract::ParseJsResource(const JSRef<JSVal>& jsValue, CalcDimension&
     uint32_t type = jsObj->GetPropertyValue<uint32_t>(static_cast<int32_t>(ArkUIIndex::TYPE), 0);
     if (type == 0) {
         return false;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        resObj = GetResourceObject(jsObj);
     }
     auto resourceWrapper = CreateResourceWrapper();
     CHECK_NULL_RETURN(resourceWrapper, false);

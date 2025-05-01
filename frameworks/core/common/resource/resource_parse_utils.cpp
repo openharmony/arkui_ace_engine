@@ -373,6 +373,9 @@ bool ResourceParseUtils::ParseResString(const RefPtr<ResourceObject>& resObj, st
 bool ResourceParseUtils::ParseResStringObj(const std::vector<ResourceObjectParams>& params,
     RefPtr<ResourceWrapper>& resourceWrapper, std::string& result, int32_t type)
 {
+    if (params.empty()) {
+        return false;
+    }
     auto param = params[0];
     if (type == static_cast<int32_t>(ResourceType::STRING)) {
         auto originStr = resourceWrapper->GetStringByName(param.value.value());
@@ -401,9 +404,6 @@ bool ResourceParseUtils::ParseResString(const RefPtr<ResourceObject>& resObj, st
         return false;
     }
     auto params = resObj->GetParams();
-    if (params.empty()) {
-        return false;
-    }
     auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
     RefPtr<ThemeConstants> themeConstants = nullptr;
     auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
@@ -419,6 +419,9 @@ bool ResourceParseUtils::ParseResString(const RefPtr<ResourceObject>& resObj, st
         ReplaceHolder(originStr, params, 0);
         result = originStr;
     } else if (type == static_cast<int32_t>(ResourceType::PLURAL)) {
+        if (params.empty()) {
+            return false;
+        }
         auto countJsVal = params[0];
         int count = 0;
         if (!IsNumberType(static_cast<int32_t>(countJsVal.type))) {
@@ -442,7 +445,7 @@ bool ResourceParseUtils::ParseResMedia(const RefPtr<ResourceObject>& resObj, std
 {
     auto type = resObj->GetType();
     auto resIdNum = resObj->GetId();
-    if (type == UNKNOWN_RESOURCE_TYPE && resIdNum != -1) {
+    if (type != UNKNOWN_RESOURCE_TYPE) {
         auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
         RefPtr<ThemeConstants> themeConstants = nullptr;
         auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
@@ -624,6 +627,71 @@ bool ResourceParseUtils::ParseResDimensionNG(
     return true;
 }
 
+bool ResourceParseUtils::ParseResDimensionVp(const RefPtr<ResourceObject>& resObj, CalcDimension& result)
+{
+    // 'vp' -> the value varies with pixel density of device.
+    return ParseResDimension(resObj, result, DimensionUnit::VP);
+}
+
+bool ResourceParseUtils::ParseResDimensionFp(const RefPtr<ResourceObject>& resObj, CalcDimension& result)
+{
+    // the 'fp' unit is used for text scenes.
+    return ParseResDimension(resObj, result, DimensionUnit::FP);
+}
+
+bool ResourceParseUtils::ParseResDimensionPx(const RefPtr<ResourceObject>& resObj, CalcDimension& result)
+{
+    return ParseResDimension(resObj, result, DimensionUnit::PX);
+}
+
+bool ResourceParseUtils::ParseResDimension(
+    const RefPtr<ResourceObject>& resObj, CalcDimension& result, DimensionUnit defaultUnit)
+{
+    if (!resObj) {
+        return false;
+    }
+    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+    if (!resourceWrapper) {
+        return false;
+    }
+    auto resIdNum = resObj->GetId();
+    auto type = resObj->GetType();
+    if (type == UNKNOWN_RESOURCE_TYPE) {
+        return false;
+    }
+    auto params = resObj->GetParams();
+    if (resIdNum == -1) {
+        if (params.empty()) {
+            return false;
+        }
+        auto param = params[0];
+        if (type == static_cast<int32_t>(ResourceType::STRING)) {
+            auto value = resourceWrapper->GetStringByName(param.value.value());
+            result = StringUtils::StringToCalcDimension(value, false, defaultUnit);
+            return true;
+        } else if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
+            auto value = std::to_string(resourceWrapper->GetIntByName(param.value.value()));
+            result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
+            return true;
+        }
+        result = resourceWrapper->GetDimensionByName(param.value.value());
+        return true;
+    }
+    if (type == static_cast<int32_t>(ResourceType::STRING)) {
+        auto value = resourceWrapper->GetString(resIdNum);
+        result = StringUtils::StringToCalcDimension(value, false, defaultUnit);
+        return true;
+    } else if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
+        auto value = std::to_string(resourceWrapper->GetInt(resIdNum));
+        result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
+        return true;
+    }
+    result = resourceWrapper->GetDimension(resIdNum);
+    return true;
+}
+
 bool ResourceParseUtils::ParseResResource(const RefPtr<ResourceObject>& resObj, CalcDimension& result)
 {
     if (!resObj) {
@@ -651,6 +719,58 @@ bool ResourceParseUtils::ParseResResource(const RefPtr<ResourceObject>& resObj, 
     if (type == static_cast<uint32_t>(ResourceType::FLOAT)) {
         result = resourceWrapper->GetDimension(resIdNum);
         return true;
+    }
+    return false;
+}
+
+template<class T>
+bool ResourceParseUtils::ConvertFromResObjNG(const RefPtr<ResourceObject>& resObj, T& result)
+{
+    if (!resObj) {
+        return false;
+    }
+    if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
+        double value;
+        if (ParseResDouble(resObj, value)) {
+            result = static_cast<T>(value);
+            return true;
+        }
+        result = 0;
+    } else if constexpr (std::is_same_v<T, Dimension>) {
+        CalcDimension calc;
+        bool ret = ParseResDimensionVpNG(resObj, calc);
+        result = calc;
+        return ret;
+    } else if constexpr (std::is_same_v<T, CalcDimension>) {
+        return ParseResDimensionVpNG(resObj, result);
+    } else if constexpr (std::is_same_v<T, Color>) {
+        return ParseResColor(resObj, result);
+    }
+    return false;
+}
+
+template<class T>
+bool ResourceParseUtils::ConvertFromResObj(const RefPtr<ResourceObject>& resObj, T& result)
+{
+    if (!resObj) {
+        return false;
+    }
+    if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
+        double value;
+        if (ParseResDouble(resObj, value)) {
+            result = static_cast<T>(value);
+            return true;
+        }
+        result = 0;
+    } else if constexpr (std::is_same_v<T, Dimension>) {
+        CalcDimension calc;
+        bool ret = ParseResDimensionVp(resObj, calc);
+        result = calc;
+        return ret;
+    } else if constexpr (std::is_same_v<T, CalcDimension>) {
+        return ParseResDimensionVp(resObj, result);
+    } else if constexpr (std::is_same_v<T, Color>) {
+        return ParseResColor(resObj, result);
     }
     return false;
 }
