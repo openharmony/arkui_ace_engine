@@ -260,6 +260,7 @@ HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue001, TestSize.Level1)
         ASSERT_NE(eventHub, nullptr);
         auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
         ASSERT_NE(gestureEventHub, nullptr);
+        eventHub->gestureEventHub_ = gestureEventHub;
         gestureEventHub->SetDragForbiddenForcely(testCase.dragInfo.isDragForbidden);
         auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
             AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
@@ -273,6 +274,7 @@ HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue001, TestSize.Level1)
         ASSERT_NE(frameNode, nullptr);
         frameNode->draggable_ = testCase.dragInfo.isDraggable;
         frameNode->customerSet_ = testCase.dragInfo.isCustomerSet;
+        frameNode->eventHub_ = eventHub;
         TouchRestrict dragTouchRestrict = { TouchRestrict::NONE };
         dragTouchRestrict.inputEventType = testCase.inputEventType;
         auto status = dragEventActuator->IsCurrentNodeStatusSuitableForDragging(frameNode, dragTouchRestrict);
@@ -297,6 +299,7 @@ HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue002, TestSize.Level1)
         ASSERT_NE(eventHub, nullptr);
         auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
         ASSERT_NE(gestureEventHub, nullptr);
+        eventHub->gestureEventHub_ = gestureEventHub;
         gestureEventHub->SetDragForbiddenForcely(testCase.dragInfo.isDragForbidden);
         gestureEventHub->SetTextDraggable(true);
         auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
@@ -311,6 +314,7 @@ HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue002, TestSize.Level1)
         ASSERT_NE(frameNode, nullptr);
         frameNode->draggable_ = testCase.dragInfo.isDraggable;
         frameNode->customerSet_ = testCase.dragInfo.isCustomerSet;
+        frameNode->eventHub_ = eventHub;
         auto textPattern = frameNode->GetPattern<TextBase>();
         ASSERT_NE(textPattern, nullptr);
         if (testCase.dragInfo.textIsSelected) {
