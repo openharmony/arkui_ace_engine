@@ -19,4 +19,4 @@
 import { int32, int64, float32 } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
-export type NavExtender_OnUpdateStack = (name: string) => void;
+export type NavExtender_OnUpdateStack = () => void;

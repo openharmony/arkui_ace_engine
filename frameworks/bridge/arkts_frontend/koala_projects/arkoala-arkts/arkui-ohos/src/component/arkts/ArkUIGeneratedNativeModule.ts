@@ -4453,6 +4453,20 @@ export class ArkUIGeneratedNativeModule {
     native static _NavExtender_title(navigation: KPointer, title: KStringPtr, hasSubTitle: KInt): void
     @ani.unsafe.Quick
     native static _NavExtender_subTitle(navigation: KPointer, subTitle: KStringPtr): void
+    @ani.unsafe.Quick
+    native static _NavExtender_pushPath(pathStack: KPointer, info: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _NavExtender_replacePath(pathStack: KPointer, info: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _NavExtender_pop(pathStack: KPointer, isAnimated: KInt): string
+    @ani.unsafe.Quick
+    native static _NavExtender_getIdByIndex(pathStack: KPointer, index: KInt): string
+    @ani.unsafe.Quick
+    native static _NavExtender_getIdByName(pathStack: KPointer, name: KStringPtr): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _NavExtender_getNavDestinationId(info: KPointer): string
+    @ani.unsafe.Quick
+    native static _NavExtender_setOnPopCallback(pathStack: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _EventEmulator_emitClickEvent(node: KPointer, event: KPointer): void
     @ani.unsafe.Quick
@@ -5027,7 +5041,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _GestureModifier_applyGesture(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
-    native static _NavPathInfo_ctor(name: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    native static _NavPathInfo_ctor(name: KStringPtr, isEntry: KInt): KPointer
     @ani.unsafe.Direct
     native static _NavPathInfo_getFinalizer(): KPointer
     @ani.unsafe.Quick

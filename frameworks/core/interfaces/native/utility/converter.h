@@ -43,6 +43,7 @@
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
@@ -504,6 +505,7 @@ namespace Converter {
     template<> ListItemGroupIndex Convert(const Ark_VisibleListContentInfo& src);
     template<> ListItemIndex Convert(const Ark_VisibleListContentInfo& src);
     template<> MenuOptionsParam Convert(const Ark_TextMenuItem& src);
+    template<> NavigationOptions Convert(const Ark_NavigationOptions& src);
     template<> NestedScrollOptions Convert(const Ark_NestedScrollOptions& src);
     template<> OHOS::Ace::TextMetrics Convert(const Ark_TextMetrics& src);
     template<> OptionParam Convert(const Ark_MenuElement& src);
@@ -568,6 +570,9 @@ namespace Converter {
     template<> TextRange Convert(const Ark_TextRange& src);
     template<> TranslateOptions Convert(const Ark_TranslateOptions& src);
     template<> bool Convert(const Ark_EdgeEffectOptions& src);
+    template<> uint32_t Convert(const Ark_LayoutSafeAreaEdge& src);
+    template<> uint32_t Convert(const Ark_LayoutSafeAreaType& src);
+    template<> NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src);
     template<> float Convert(const Ark_Float32& src);
     template<> std::map<std::string, std::string> Convert(const Map_String_String& src);
     template<> std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src);
@@ -582,6 +587,9 @@ namespace Converter {
     template<> std::vector<ImageAnalyzerType> Convert(const Array_ImageAnalyzerType& src);
     template<> std::vector<Shadow> Convert(const Ark_ShadowOptions& src);
     template<> std::vector<uint32_t> Convert(const Ark_Buffer& src);
+    template<> std::vector<uint32_t> Convert(const Array_LayoutSafeAreaType& src);
+    template<> std::vector<uint32_t> Convert(const Array_LayoutSafeAreaEdge& src);
+    template<> std::vector<NG::BarItem> Convert(const Array_NavigationMenuItem& src);
 
     // SORTED_SECTION: No multiline declarations, please!
     template<> void AssignCast(std::optional<AIImageQuality>& dst, const Ark_ResolutionQuality& src);
@@ -671,7 +679,10 @@ namespace Converter {
     template<> void AssignCast(std::optional<ModifierKey>& dst, const Ark_ModifierKey& src);
     template<> void AssignCast(std::optional<NavDestinationMode>& dst, const Ark_NavDestinationMode& src);
     template<> void AssignCast(std::optional<NavRouteMode>& dst, const Ark_NavRouteMode& src);
+    template<> void AssignCast(std::optional<NavigationTitlebarOptions>& dst, const Ark_NavigationTitleOptions& src);
     template<> void AssignCast(std::optional<NavigationType>& dst, const Ark_WebNavigationType& src);
+    template<> void AssignCast(std::optional<LaunchMode>& dst, const Ark_LaunchMode& src);
+    template<> void AssignCast(std::optional<NavigationOptions>& dst, const Ark_NavigationOptions& src);
     template<> void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_NestedScrollMode& src);
     template<> void AssignCast(std::optional<OHOS::Ace::CommonSubType>& dst, const Ark_EffectDirection& src);
     template<> void AssignCast(std::optional<OHOS::Ace::FillStyle>& dst, const Ark_EffectFillStyle& src);

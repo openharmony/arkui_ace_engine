@@ -15,36 +15,12 @@
 
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/interfaces/native/implementation/nav_path_info_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-
-namespace Nav = OHOS::Ace::NG::GeneratedModifier::NavigationContext;
-
-
-namespace OHOS::Ace::NG::Converter {
-template<>
-void AssignCast(std::optional<Nav::LaunchMode>& dst, const Ark_LaunchMode& src)
-{
-    switch (src) {
-        case ARK_LAUNCH_MODE_STANDARD: dst = Nav::LaunchMode::STANDARD; break;
-        case ARK_LAUNCH_MODE_MOVE_TO_TOP_SINGLETON: dst = Nav::LaunchMode::MOVE_TO_TOP_SINGLETON; break;
-        case ARK_LAUNCH_MODE_POP_TO_SINGLETON: dst = Nav::LaunchMode::POP_TO_SINGLETON; break;
-        case ARK_LAUNCH_MODE_NEW_INSTANCE: dst = Nav::LaunchMode::NEW_INSTANCE; break;
-        default: LOGE("Unexpected enum value in Ark_LaunchMode: %{public}d", src);
-    }
-}
-
-template<>
-Nav::Options Convert(const Ark_NavigationOptions& src)
-{
-    return {
-        .launchMode = OptConvert<Nav::LaunchMode>(src.launchMode),
-        .animated = OptConvert<bool>(src.animated)
-    };
-}
-} // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavPathStackAccessor {
@@ -66,31 +42,11 @@ void PushPath0Impl(Ark_NavPathStack peer,
                    Ark_NavPathInfo info,
                    const Opt_Boolean* animated)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(info);
-    auto navStack = peer->GetNavPathStack();
-    if (!navStack) {
-        LOGE("NavPathStackAccessor::PushPath0Impl. Navigation Stack isn't bound to a component.");
-        return;
-    }
-    auto convNavInfo = Converter::Convert<Nav::PathInfo>(info);
-    auto convAnimated = animated ? Converter::OptConvert<bool>(*animated) : std::nullopt;
-    navStack->Nav::PathStack::PushPath(convNavInfo, Nav::Options{std::nullopt, convAnimated});
 }
 void PushPath1Impl(Ark_NavPathStack peer,
                    Ark_NavPathInfo info,
                    const Opt_NavigationOptions* options)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(info);
-    auto navStack = peer->GetNavPathStack();
-    if (!navStack) {
-        LOGE("NavPathStackAccessor::PushPath1Impl. Navigation Stack isn't bound to a component.");
-        return;
-    }
-    auto convNavInfo = Converter::Convert<Nav::PathInfo>(info);
-    auto convNavOptions = options ? Converter::OptConvert<Nav::Options>(*options) : std::nullopt;
-    navStack->Nav::PathStack::PushPath(convNavInfo, convNavOptions);
 }
 void PushDestination0Impl(Ark_VMContext vmContext,
                           Ark_AsyncWorkerPtr asyncWorker,
@@ -99,18 +55,6 @@ void PushDestination0Impl(Ark_VMContext vmContext,
                           const Opt_Boolean* animated,
                           const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    LOGE("NavPathStackAccessor::PushDestination0Impl is not implemented yet.");
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(info);
-    auto navStack = peer->GetNavPathStack();
-    if (!navStack) {
-        LOGE("NavPathStackAccessor::PushDestination0Impl. Navigation Stack isn't bound to a component.");
-        return;
-    }
-    auto convNavInfo = Converter::Convert<Nav::PathInfo>(info);
-    auto convAnimated = animated ? Converter::OptConvert<bool>(*animated) : std::nullopt;
-    LOGE("NavPathStackAccessor::PushDestination0Impl does not return required type");
-    navStack->Nav::PathStack::PushDestination(convNavInfo, Nav::Options{std::nullopt, convAnimated});
 }
 void PushDestination1Impl(Ark_VMContext vmContext,
                           Ark_AsyncWorkerPtr asyncWorker,
@@ -119,16 +63,6 @@ void PushDestination1Impl(Ark_VMContext vmContext,
                           const Opt_NavigationOptions* options,
                           const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(info);
-    auto navStack = peer->GetNavPathStack();
-    if (!navStack) {
-        LOGE("NavPathStackAccessor::PushDestination1Impl. Navigation Stack isn't bound to a component.");
-        return;
-    }
-    auto convNavInfo = Converter::Convert<Nav::PathInfo>(info);
-    auto convNavOptions = options ? Converter::OptConvert<Nav::Options>(*options) : std::nullopt;
-    navStack->Nav::PathStack::PushDestination(convNavInfo, convNavOptions);
 }
 void PushPathByName0Impl(Ark_NavPathStack peer,
                          const Ark_String* name,
@@ -230,17 +164,6 @@ void ReplacePath0Impl(Ark_NavPathStack peer,
                       Ark_NavPathInfo info,
                       const Opt_Boolean* animated)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(info);
-    CHECK_NULL_VOID(animated);
-    auto navStack = peer->GetNavPathStack();
-    if (!navStack) {
-        LOGE("NavPathStackAccessor::ReplacePath0Impl. Navigation Stack isn't bound to a component.");
-        return;
-    }
-    auto convNavInfo = Converter::Convert<Nav::PathInfo>(info);
-    auto convAnimated = animated ? Converter::OptConvert<bool>(*animated) : std::nullopt;
-    navStack->Nav::PathStack::ReplacePath(convNavInfo, Nav::Options{std::nullopt, convAnimated});
 }
 void ReplacePath1Impl(Ark_NavPathStack peer,
                       Ark_NavPathInfo info,
@@ -264,7 +187,14 @@ void ReplacePathByNameImpl(Ark_NavPathStack peer,
 Ark_Number RemoveByIndexesImpl(Ark_NavPathStack peer,
                                const Array_Number* indexes)
 {
-    return {};
+    auto invalidVal = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, invalidVal);
+    CHECK_NULL_RETURN(indexes, invalidVal);
+    auto removeIndexes = Converter::Convert<std::vector<int>>(*indexes);
+    auto navStack = peer->GetNavPathStack();
+    CHECK_NULL_RETURN(navStack, invalidVal);
+    auto size = navStack->RemoveByIndexes(removeIndexes);
+    return Converter::ArkValue<Ark_Number>(size);
 }
 Ark_Number RemoveByNameImpl(Ark_NavPathStack peer,
                             const Ark_String* name)
@@ -279,27 +209,13 @@ Ark_Boolean RemoveByNavDestinationIdImpl(Ark_NavPathStack peer,
 Opt_NavPathInfo Pop0Impl(Ark_NavPathStack peer,
                          const Opt_Boolean* animated)
 {
-    auto invalid = Converter::ArkValue<Opt_NavPathInfo>();
-    CHECK_NULL_RETURN(peer, invalid);
-    auto navStack = peer->GetNavPathStack();
-    CHECK_NULL_RETURN(navStack, invalid);
-    auto convAnimated = animated ? Converter::OptConvert<bool>(*animated) : std::nullopt;
-    auto pathInfo = navStack->Nav::PathStack::Pop(Nav::PopResultType(), convAnimated);
-    return Converter::ArkValue<Opt_NavPathInfo>(pathInfo);
+    return {};
 }
 Opt_NavPathInfo Pop1Impl(Ark_NavPathStack peer,
                          const Ark_Object* result,
                          const Opt_Boolean* animated)
 {
-    auto invalid = Converter::ArkValue<Opt_NavPathInfo>();
-    CHECK_NULL_RETURN(peer, invalid);
-    CHECK_NULL_RETURN(result, invalid);
-    auto navStack = peer->GetNavPathStack();
-    CHECK_NULL_RETURN(navStack, invalid);
-    auto convAnimated = animated ? Converter::OptConvert<bool>(*animated) : std::nullopt;
-    auto convResult = Converter::Convert<Nav::ExternalData>(*result);
-    auto pathInfo = navStack->Nav::PathStack::Pop(convResult, convAnimated);
-    return Converter::ArkValue<Opt_NavPathInfo>(pathInfo);
+    return {};
 }
 Ark_Number PopToName0Impl(Ark_NavPathStack peer,
                           const Ark_String* name,
@@ -329,7 +245,15 @@ Ark_Number MoveToTopImpl(Ark_NavPathStack peer,
                          const Ark_String* name,
                          const Opt_Boolean* animated)
 {
-    return {};
+    auto invalidVal = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, invalidVal);
+    CHECK_NULL_RETURN(name, invalidVal);
+    auto navStack = peer->GetNavPathStack();
+    CHECK_NULL_RETURN(navStack, invalidVal);
+    auto pathName = Converter::Convert<std::string>(*name);
+    bool isAnimated = Converter::OptConvert<bool>(*animated).value_or(true);
+    auto index = navStack->NavigationContext::PathStack::MoveToTop(pathName, isAnimated);
+    return Converter::ArkValue<Ark_Number>(index);
 }
 void MoveIndexToTopImpl(Ark_NavPathStack peer,
                         const Ark_Number* index,
@@ -339,10 +263,23 @@ void MoveIndexToTopImpl(Ark_NavPathStack peer,
 void ClearImpl(Ark_NavPathStack peer,
                const Opt_Boolean* animated)
 {
+    CHECK_NULL_VOID(peer);
+    auto navStack = peer->GetNavPathStack();
+    CHECK_NULL_VOID(navStack);
+    auto isAnimated = Converter::OptConvert<bool>(*animated).value_or(true);
+    navStack->NavigationContext::PathStack::Clear(isAnimated);
 }
 Array_String GetAllPathNameImpl(Ark_NavPathStack peer)
 {
-    return {};
+    std::vector<std::string> result;
+    auto invalidVal = Converter::ArkValue<Array_String>(result, Converter::FC);
+    CHECK_NULL_RETURN(peer, invalidVal);
+    auto navStack = peer->GetNavPathStack();
+    CHECK_NULL_RETURN(navStack, invalidVal);
+    std::vector<std::string> allName = navStack->NavigationContext::PathStack::GetAllPathName();
+    Array_String values = Converter::ArkValue<Array_String>(allName, Converter::FC);
+    Ark_Int32 len = values.length;
+    return values;
 }
 Opt_Object GetParamByIndexImpl(Ark_NavPathStack peer,
                                const Ark_Number* index)
@@ -361,7 +298,15 @@ Array_Opt_Object GetParamByNameImpl(Ark_NavPathStack peer,
 Array_Number GetIndexByNameImpl(Ark_NavPathStack peer,
                                 const Ark_String* name)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, {});
+    auto pathStack = peer->GetNavPathStack();
+    CHECK_NULL_RETURN(pathStack, {});
+    auto pathName = Converter::Convert<std::string>(*name);
+    std::vector<size_t> allIndexes = pathStack->NavigationContext::PathStack::GetIndexByName(pathName);
+    std::vector<uint32_t> indexes;
+    indexes.assign(allIndexes.begin(), allIndexes.end());
+    Array_Number result = Converter::ArkValue<Array_Number>(indexes, Converter::FC);
+    return result;
 }
 Opt_NavPathStack GetParentImpl(Ark_NavPathStack peer)
 {
@@ -369,11 +314,21 @@ Opt_NavPathStack GetParentImpl(Ark_NavPathStack peer)
 }
 Ark_Number SizeImpl(Ark_NavPathStack peer)
 {
-    return {};
+    auto invalidVal = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, invalidVal);
+    auto pathStack = peer->GetNavPathStack();
+    CHECK_NULL_RETURN(pathStack, invalidVal);
+    auto size = static_cast<int32_t>(pathStack->NavigationContext::PathStack::Size());
+    return Converter::ArkValue<Ark_Number>(size);
 }
 void DisableAnimationImpl(Ark_NavPathStack peer,
                           Ark_Boolean value)
 {
+    CHECK_NULL_VOID(peer);
+    auto animated = Converter::Convert<bool>(value);
+    auto pathStack = peer->GetNavPathStack();
+    CHECK_NULL_VOID(pathStack);
+    pathStack->DisableAnimation(animated);
 }
 void SetInterceptionImpl(Ark_NavPathStack peer,
                          const Ark_NavigationInterception* interception)

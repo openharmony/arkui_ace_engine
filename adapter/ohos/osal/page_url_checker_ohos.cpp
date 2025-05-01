@@ -313,10 +313,13 @@ void PageUrlCheckerOhos::GetTargetPageInfo(const std::string& pageName, std::str
     } else {
         targetBundleName = abilityInfo_->bundleName;
         std::string moduleName = moduleNameCallback_(pageName);
-        if (moduleName == "") {
-            moduleName = abilityInfo_->moduleName;
+        if (moduleNameCallback_) {
+            std::string moduleName = moduleNameCallback_(pageName);
+            if (moduleName == "") {
+                moduleName = abilityInfo_->moduleName;
+            }
+            targetModuleName = moduleName;
         }
-        targetModuleName = moduleName;
     }
 }
 

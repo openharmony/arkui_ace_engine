@@ -10703,8 +10703,8 @@ typedef struct Opt_NavDestinationTransitionDelegate {
 } Opt_NavDestinationTransitionDelegate;
 typedef struct NavExtender_OnUpdateStack {
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_String name);
-    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_String name);
+    void (*call)(const Ark_Int32 Callback_ResourceStr_Void);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId);
 } NavExtender_OnUpdateStack;
 typedef struct Opt_NavExtender_OnUpdateStack {
     Ark_Tag tag;
@@ -23807,6 +23807,21 @@ typedef struct GENERATED_ArkUINavExtenderAccessor {
                   Ark_Boolean hasSubTitle);
     void (*subTitle)(Ark_NativePointer navigation,
                      const Ark_String* subTitle);
+    void (*pushPath)(Ark_NavPathStack pathStack,
+                    Ark_NavPathInfo info,
+                    const Ark_NavigationOptions* options);
+    void (*replacePath)(Ark_NavPathStack pathStack,
+                        Ark_NavPathInfo info,
+                        const Ark_NavigationOptions* options);
+    Ark_String (*pop)(Ark_NavPathStack pathStack,
+                        Ark_Boolean isAnimated);
+    Ark_String (*getIdByIndex)(Ark_NavPathStack pathStack,
+                                Ark_Int32 index);
+    Array_String (*getIdByName)(Ark_NavPathStack pathStack,
+                                const Ark_String* name);
+    void (*setOnPopCallback)(Ark_NavPathStack pathStack,
+                            const Callback_String_Void* callback);
+    Ark_String (*getNavDestinationId)(Ark_NavPathInfo info);
 } GENERATED_ArkUINavExtenderAccessor;
 
 typedef struct GENERATED_ArkUIEventEmulatorAccessor {
@@ -24363,9 +24378,7 @@ typedef struct GENERATED_ArkUIGestureModifierAccessor {
 typedef struct GENERATED_ArkUINavPathInfoAccessor {
     void (*destroyPeer)(Ark_NavPathInfo peer);
     Ark_NavPathInfo (*ctor)(const Ark_String* name,
-                            const Ark_Object* param,
-                            const Opt_Callback_PopInfo_Void* onPop,
-                            const Opt_Boolean* isEntry);
+                            Ark_Boolean isEntry);
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*getName)(Ark_NavPathInfo peer);
     void (*setName)(Ark_NavPathInfo peer,

@@ -18,6 +18,7 @@
 #include "base/error/error_code.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -35,13 +36,6 @@ public:
 using ExternalData = RefPtr<ExternalDataKeeper>;
 using OnPopCallback = CallbackHelper<Callback_PopInfo_Void>;
 using NavDestBuildCallback = CallbackHelper<Callback_String_Opt_Object_Void>;
-
-enum class LaunchMode {
-    STANDARD = 0,
-    MOVE_TO_TOP_SINGLETON = 1,
-    POP_TO_SINGLETON = 2,
-    NEW_INSTANCE = 3,
-};
 
 struct Interception {
     CallbackHelper<InterceptionModeCallback> modeChange;
@@ -90,11 +84,6 @@ struct PopInfo {
 
 using PushDestinationResultType = int32_t;
 
-struct Options {
-    std::optional<LaunchMode> launchMode;
-    std::optional<bool> animated;
-};
-
 class NavigationStack;
 
 constexpr bool DEFAULT_ANIMATED = true;
@@ -116,24 +105,24 @@ public:
     int GetJsIndexFromNativeIndex(int index);
     void InitNavPathIndex(const std::vector<std::string>& pathName);
     std::vector<int> GetAllPathIndex();
-    std::pair<int, std::optional<std::string>> FindInPopArray(const std::string& name);
+    std::pair<int, std::optional<std::string>> FindInPopArray(const PathInfo& info);
     void SetParent(const RefPtr<NavigationStack>& parent);
     RefPtr<NavigationStack> GetParent();
     void PushName(const std::string& name, const ParamType& param);
     void PushPathByName(const std::string& name,
         const ParamType& param, const OnPopCallback& onPop, std::optional<bool> animated);
-    std::pair<LaunchMode, bool> ParseNavigationOptions(const std::optional<Options>& param);
+    std::pair<LaunchMode, bool> ParseNavigationOptions(const std::optional<NavigationOptions>& param);
     bool PushWithLaunchModeAndAnimated(PathInfo info, LaunchMode launchMode, bool animated);
-    void PushPath(PathInfo info, const std::optional<Options>& optionParam);
+    void PushPath(PathInfo info, const std::optional<NavigationOptions>& optionParam);
     PushDestinationResultType PushDestinationByName(const std::string& name,
         const ParamType& param, const OnPopCallback& onPop, std::optional<bool> animated);
     PushDestinationResultType PushDestination(PathInfo info,
-        const std::optional<Options>& optionParam);
-    void ReplacePath(PathInfo info, const std::optional<Options>& optionParam);
+        const std::optional<NavigationOptions>& optionParam);
+    void ReplacePath(PathInfo info, const std::optional<NavigationOptions>& optionParam);
     void ReplacePathByName(std::string name, const ParamType&  param, const std::optional<bool>& animated);
     void SetIsReplace(enum IsReplace value);
     void SetAnimated(bool value);
-    PathInfo Pop(const PopResultType& result, const std::optional<bool>& animated);
+    PathInfo Pop(bool isAnimated);
     void PopTo(const std::string& name, const std::optional<bool>& animated);
     int PopToName(const std::string& name, const PopResultType& result, const std::optional<bool>& animated);
     void PopToIndex(size_t index, const PopResultType& result, const std::optional<bool>& animated);
@@ -154,6 +143,8 @@ public:
     size_t Size() const;
     void DisableAnimation(bool disableAnimation);
     void SetInterception(InterceptionType interception);
+    PathInfo* GetPathInfo(size_t index);
+    std::vector<std::string> GetIdByName(const std::string& name);
 protected:
     std::vector<PathInfo> pathArray_;
     enum IsReplace isReplace_ = NO_ANIM_NO_REPLACE;
@@ -166,7 +157,6 @@ protected:
     void SetOnStateChangedCallback(std::function<void()> callback); // the extra NavigationStack invokes this
     void InvokeOnStateChanged();
     std::vector<PathInfo>::iterator FindNameInternal(const std::string& name);
-    PathInfo* GetPathInfo(size_t index);
     const PathInfo* GetPathInfo(size_t index) const;
 };
 
@@ -233,7 +223,17 @@ public:
     bool IsFromRecovery(int32_t index) override;
     void SetFromRecovery(int32_t index, bool fromRecovery) override;
     int32_t GetRecoveredDestinationMode(int32_t index) override;
+    void AddCustomNode(int32_t index, const RefPtr<NG::UINode>& node)
+    {
+        nodes_.insert(std::pair<int32_t, RefPtr<NG::UINode>>(index, node));
+    }
+
+    void ClearNodeList()
+    {
+        nodes_.clear();
+    }
 protected:
+    std::map<int32_t, RefPtr<NG::UINode>> nodes_;
     RefPtr<PathStack> dataSourceObj_;
     NavDestBuildCallback navDestBuilderFunc_;
     std::function<void()> onStateChangedCallback_;

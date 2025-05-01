@@ -16,9 +16,9 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { NavPathStack, NavPathStackInternal, NavigationMode, Callback_Boolean_Void, Callback_NavigationTitleMode_Void, NavigationTitleMode } from "./navigation"
+import { NavPathStack, NavPathStackInternal, NavigationMode, Callback_Boolean_Void, Callback_NavigationTitleMode_Void, NavigationTitleMode, NavPathInfo, NavigationOptions } from "./navigation"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, InteropNativeModule } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -42,17 +42,6 @@ export class NavExtender {
         const index_casted = index as (int32)
         return NavExtender.checkNeedCreate_serialize(navigation_casted, index_casted)
     }
-    public static navigationCreate(peer: int32, flag: int32): KPointer {
-        const peer_casted = peer as (int32)
-        const flag_casted = flag as (int32)
-        return NavExtender.navigationCreate_serialize(peer_casted, flag_casted)
-    }
-    public static setNavigationOptions(navigation: KPointer, stack: NavPathStack): void {
-        const navigation_casted = navigation as (KPointer)
-        const stack_casted = stack as (NavPathStack)
-        NavExtender.setNavigationOptions_serialize(navigation_casted, stack_casted)
-        return
-    }
     public static setNavDestinationNode(peer: NavPathStack, index: int32, node: KPointer): void {
         const peer_casted = peer as (NavPathStack)
         const index_casted = index as (int32)
@@ -60,68 +49,37 @@ export class NavExtender {
         NavExtender.setNavDestinationNode_serialize(peer_casted, index_casted, node_casted)
         return
     }
-    public static setNavigationMode(navigation: KPointer, mode: NavigationMode): void {
-        const navigation_casted = navigation as (KPointer)
-        const mode_casted = mode as (NavigationMode)
-        NavExtender.setNavigationMode_serialize(navigation_casted, mode_casted)
-        return
+    public static pushPath(pathStack: NavPathStack, info: NavPathInfo, options: NavigationOptions): void {
+        const path_casted = pathStack as (NavPathStack)
+        const info_casted = info  as (NavPathInfo)
+        const options_casted = options as (NavigationOptions)
+        NavExtender.pushPath_serialize(path_casted, info_casted, options_casted)
     }
-    public static hideTitleBar(navigation: KPointer, isHide: boolean, isAnimated: boolean): void {
-        const navigation_casted = navigation as (KPointer)
-        const isHide_casted = isHide as (boolean)
-        const isAnimated_casted = isAnimated as (boolean)
-        NavExtender.hideTitleBar_serialize(navigation_casted, isHide_casted, isAnimated_casted)
-        return
+    public static replacePath(pathStack: NavPathStack, info: NavPathInfo, options: NavigationOptions): void {
+        const path_casted = pathStack as (NavPathStack)
+        const info_casted = info as (NavPathInfo)
+        const options_casted = options as (NavigationOptions)
+        NavExtender.replacePath_serialize(path_casted, info_casted, options_casted)
     }
-    public static hideToolBar(navigation: KPointer, isHide: boolean, isAnimated: boolean): void {
-        const navigation_casted = navigation as (KPointer)
-        const isHide_casted = isHide as (boolean)
-        const isAnimated_casted = isAnimated as (boolean)
-        NavExtender.hideToolBar_serialize(navigation_casted, isHide_casted, isAnimated_casted)
-        return
+    public static pop(pathStack: NavPathStack, animated: boolean): string {
+        const path_casted = pathStack as (NavPathStack)
+        const animated_casted = animated as (boolean)
+        return NavExtender.pop_serialize(path_casted, animated_casted)
     }
-    public static hideNavBar(navigation: KPointer, hide: boolean): void {
-        const navigation_casted = navigation as (KPointer)
-        const hide_casted = hide as (boolean)
-        NavExtender.hideNavBar_serialize(navigation_casted, hide_casted)
-        return
+    public static setOnPopCallback(pathStack: NavPathStack, callback: (id: string) => void): void {
+        const pathStack_casted = pathStack as (NavPathStack)
+        const callback_casted = callback as ((id: string) => void)
+        NavExtender.setOnPopCallback_serialize(pathStack_casted, callback_casted)
     }
-    public static hideBackButton(navigation: KPointer, hide: boolean): void {
-        const navigation_casted = navigation as (KPointer)
-        const hide_casted = hide as (boolean)
-        NavExtender.hideBackButton_serialize(navigation_casted, hide_casted)
-        return
+    public static getIdByIndex(pathStack: NavPathStack, index: int32): string {
+        const pathStack_casted = pathStack as (NavPathStack)
+        const index_casted = index  as (int32)
+        return NavExtender.getIdByIndex_serialize(pathStack_casted, index_casted)
     }
-    public static setNavBarStateChange(navigation: KPointer, stateCallback: ((isVisible: boolean) => void)): void {
-        const navigation_casted = navigation as (KPointer)
-        const stateCallback_casted = stateCallback as (((isVisible: boolean) => void))
-        NavExtender.setNavBarStateChange_serialize(navigation_casted, stateCallback_casted)
-        return
-    }
-    public static setTitleModeChange(navigation: KPointer, titleCallback: ((titleMode: NavigationTitleMode) => void)): void {
-        const navigation_casted = navigation as (KPointer)
-        const titleCallback_casted = titleCallback as (((titleMode: NavigationTitleMode) => void))
-        NavExtender.setTitleModeChange_serialize(navigation_casted, titleCallback_casted)
-        return
-    }
-    public static setTitleMode(navigation: KPointer, titleMode: NavigationTitleMode): void {
-        const navigation_casted = navigation as (KPointer)
-        const titleMode_casted = titleMode as (NavigationTitleMode)
-        NavExtender.setTitleMode_serialize(navigation_casted, titleMode_casted)
-        return
-    }
-    public static title(navigation: KPointer, title: string, hasSubTitle: boolean): void {
-        const navigation_casted = navigation as (KPointer)
-        const title_casted = title as (string)
-        const hasSubTitle_casted = hasSubTitle as (boolean)
-        NavExtender.title_serialize(navigation_casted, title_casted, hasSubTitle_casted)
-        return
-    }
-    public static subTitle(navigation: KPointer, subTitle: string): void {
-        const navigation_casted = navigation as (KPointer)
-        const subTitle_casted = subTitle as (string)
-        NavExtender.subTitle_serialize(navigation_casted, subTitle_casted)
-        return
+    public static getIdByName(pathStack: NavPathStack, name: string): Array<string> {
+        const pathStack_casted = pathStack as (NavPathStack)
+        const name_casted = name as (string)
+        return NavExtender.getIdByName_serialize(pathStack_casted, name_casted)
     }
     private static setUpdateStackCallback_serialize(peer: NavPathStack, callback: NavExtender_OnUpdateStack): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -136,51 +94,43 @@ export class NavExtender {
         const retval  = ArkUIGeneratedNativeModule._NavExtender_checkNeedCreate(navigation, index)
         return retval
     }
-    private static navigationCreate_serialize(peer: int32, flag: int32): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._NavExtender_navigationCreate(peer, flag)
-        return retval
-    }
-    private static setNavigationOptions_serialize(navigation: KPointer, stack: NavPathStack): void {
-        ArkUIGeneratedNativeModule._NavExtender_setNavigationOptions(navigation, toPeerPtr(stack))
-    }
     private static setNavDestinationNode_serialize(peer: NavPathStack, index: int32, node: KPointer): void {
         ArkUIGeneratedNativeModule._NavExtender_setNavDestinationNode(toPeerPtr(peer), index, node)
     }
-    private static setNavigationMode_serialize(navigation: KPointer, mode: NavigationMode): void {
-        ArkUIGeneratedNativeModule._NavExtender_setNavigationMode(navigation, TypeChecker.NavigationMode_ToNumeric(mode))
-    }
-    private static hideTitleBar_serialize(navigation: KPointer, isHide: boolean, isAnimated: boolean): void {
-        ArkUIGeneratedNativeModule._NavExtender_hideTitleBar(navigation, isHide ? 1 : 0, isAnimated ? 1 : 0)
-    }
-    private static hideToolBar_serialize(navigation: KPointer, isHide: boolean, isAnimated: boolean): void {
-        ArkUIGeneratedNativeModule._NavExtender_hideToolBar(navigation, isHide ? 1 : 0, isAnimated ? 1 : 0)
-    }
-    private static hideNavBar_serialize(navigation: KPointer, hide: boolean): void {
-        ArkUIGeneratedNativeModule._NavExtender_hideNavBar(navigation, hide ? 1 : 0)
-    }
-    private static hideBackButton_serialize(navigation: KPointer, hide: boolean): void {
-        ArkUIGeneratedNativeModule._NavExtender_hideBackButton(navigation, hide ? 1 : 0)
-    }
-    private static setNavBarStateChange_serialize(navigation: KPointer, stateCallback: ((isVisible: boolean) => void)): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.holdAndWriteCallback(stateCallback)
-        ArkUIGeneratedNativeModule._NavExtender_setNavBarStateChange(navigation, thisSerializer.asBuffer(), thisSerializer.length())
+    private static pushPath_serialize(stack: NavPathStack, info: NavPathInfo, options: NavigationOptions): void {
+        const thisSerializer: Serializer = Serializer.hold()
+        thisSerializer.writeNavigationOptions(options)
+        ArkUIGeneratedNativeModule._NavExtender_pushPath(toPeerPtr(stack), toPeerPtr(info), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private static setTitleModeChange_serialize(navigation: KPointer, titleCallback: ((titleMode: NavigationTitleMode) => void)): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.holdAndWriteCallback(titleCallback)
-        ArkUIGeneratedNativeModule._NavExtender_setTitleModeChange(navigation, thisSerializer.asBuffer(), thisSerializer.length())
+    private static replacePath_serialize(stack: NavPathStack, info: NavPathInfo, options: NavigationOptions): void {
+        const thisSerializer: Serializer = Serializer.hold()
+        thisSerializer.writeNavigationOptions(options)
+        ArkUIGeneratedNativeModule._NavExtender_replacePath(toPeerPtr(stack), toPeerPtr(info), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private static setTitleMode_serialize(navigation: KPointer, titleMode: NavigationTitleMode): void {
-        ArkUIGeneratedNativeModule._NavExtender_setTitleMode(navigation, TypeChecker.NavigationTitleMode_ToNumeric(titleMode))
+    private static pop_serialize(stack: NavPathStack, animated: boolean): string {
+        return ArkUIGeneratedNativeModule._NavExtender_pop(toPeerPtr(stack), animated ?  1 : 0)
     }
-    private static title_serialize(navigation: KPointer, title: string, hasSubTitle: boolean): void {
-        ArkUIGeneratedNativeModule._NavExtender_title(navigation, title, hasSubTitle ? 1 : 0)
+    private static setOnPopCallback_serialize(stack: NavPathStack, callback: (id: string) => void): void {
+        const thisSerializer: Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(callback)
+        ArkUIGeneratedNativeModule._NavExtender_setOnPopCallback(toPeerPtr(stack), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
-    private static subTitle_serialize(navigation: KPointer, subTitle: string): void {
-        ArkUIGeneratedNativeModule._NavExtender_subTitle(navigation, subTitle)
+    private static getIdByIndex_serialize(pathStack: NavPathStack, index: int32): string {
+        return ArkUIGeneratedNativeModule._NavExtender_getIdByIndex(toPeerPtr(pathStack), index)
+    }
+    private static getIdByName_serialize(pathStack: NavPathStack, name: string): Array<string> {
+        const retval = ArkUIGeneratedNativeModule._NavExtender_getIdByName(toPeerPtr(pathStack), name)
+        let retvalDeserializer: Deserializer = new Deserializer(retval, retval.length as int32)
+        const buffer_length: int32 = retvalDeserializer.readInt32()
+        let buffer: Array<string> = new Array<string>(buffer_length)
+        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
+            buffer[buffer_i] = (retvalDeserializer.readString() as string)
+        }
+        const returnResult: Array<string> = buffer
+        return returnResult
     }
 }
-export type NavExtender_OnUpdateStack = (name: string) => void;
+export type NavExtender_OnUpdateStack = () => void;

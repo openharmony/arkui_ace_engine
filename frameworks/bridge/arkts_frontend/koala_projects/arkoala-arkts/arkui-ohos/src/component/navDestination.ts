@@ -264,7 +264,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
-            if ((RuntimeType.STRING == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
+            if ((RuntimeType.STRING == value_value_type) || TypeChecker.isResource(value_value, false, false, false, false, false)) {
                 thisSerializer.writeInt8(0 as int32)
                 const value_value_0  = value_value as ResourceStr
                 let value_value_0_type : int32 = RuntimeType.UNDEFINED
@@ -274,7 +274,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
                     const value_value_0_0  = value_value_0 as string
                     thisSerializer.writeString(value_value_0_0)
                 }
-                else if (RuntimeType.OBJECT == value_value_0_type) {
+                else if (TypeChecker.isResource(value_value, false, false, false, false, false)) {
                     thisSerializer.writeInt8(1 as int32)
                     const value_value_0_1  = value_value_0 as Resource
                     thisSerializer.writeResource(value_value_0_1)
@@ -303,7 +303,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
             const icon_value  = icon!
             let icon_value_type : int32 = RuntimeType.UNDEFINED
             icon_value_type = runtimeType(icon_value)
-            if ((RuntimeType.STRING == icon_value_type) || (RuntimeType.OBJECT == icon_value_type)) {
+            if ((RuntimeType.STRING == icon_value_type) || TypeChecker.isResource(icon_value_type, false, false, false, false, false)) {
                 thisSerializer.writeInt8(0 as int32)
                 const icon_value_0  = icon_value as ResourceStr
                 let icon_value_0_type : int32 = RuntimeType.UNDEFINED
@@ -313,7 +313,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
                     const icon_value_0_0  = icon_value_0 as string
                     thisSerializer.writeString(icon_value_0_0)
                 }
-                else if (RuntimeType.OBJECT == icon_value_0_type) {
+                else if (TypeChecker.isResource(icon_value_type, false, false, false, false, false)) {
                     thisSerializer.writeInt8(1 as int32)
                     const icon_value_0_1  = icon_value_0 as Resource
                     thisSerializer.writeResource(icon_value_0_1)
@@ -1116,12 +1116,15 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         if (this.checkPriority("backButtonIcon")) {
             const icon_type = runtimeType(icon)
             const accessibilityText_type = runtimeType(accessibilityText)
-            if ((RuntimeType.STRING == icon_type) || (RuntimeType.OBJECT == icon_type) || (RuntimeType.OBJECT == icon_type) || (RuntimeType.OBJECT == icon_type) || (RuntimeType.UNDEFINED == icon_type)) {
+            if (((RuntimeType.STRING == icon_type) || (RuntimeType.OBJECT == icon_type) ||
+                (RuntimeType.UNDEFINED == icon_type)) && (RuntimeType.UNDEFINED == accessibilityText_type)) {
                 const value_casted = icon as (ResourceStr | PixelMap | SymbolGlyphModifier | undefined)
                 this.getPeer()?.backButtonIcon0Attribute(value_casted)
                 return this
             }
-            if ((RuntimeType.STRING == icon_type) || (RuntimeType.OBJECT == icon_type) || (RuntimeType.OBJECT == icon_type) || (RuntimeType.OBJECT == icon_type) || (RuntimeType.UNDEFINED == icon_type)) {
+            if (((RuntimeType.STRING == icon_type) || (RuntimeType.OBJECT == icon_type) ||
+                (RuntimeType.UNDEFINED == icon_type)) && ((RuntimeType.STRING == accessibilityText_type) ||
+                (RuntimeType.OBJECT == accessibilityText_type))) {
                 const icon_casted = icon as (ResourceStr | PixelMap | SymbolGlyphModifier | undefined)
                 const accessibilityText_casted = accessibilityText as (ResourceStr)
                 this.getPeer()?.backButtonIcon1Attribute(icon_casted, accessibilityText_casted)

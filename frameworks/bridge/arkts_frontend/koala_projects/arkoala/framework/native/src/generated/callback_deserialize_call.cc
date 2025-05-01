@@ -4512,19 +4512,18 @@ void deserializeAndCallNavExtender_OnUpdateStack(KSerializerBuffer thisArray, Ar
 {
     Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_String name)>(thisDeserializer.readPointer());
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointer());
     thisDeserializer.readPointer();
-    Ark_String name = static_cast<Ark_String>(thisDeserializer.readString());
-    _call(_resourceId, name);
+    _call(_resourceId);
 }
 void deserializeAndCallSyncNavExtender_OnUpdateStack(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
-    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String name)>(thisDeserializer.readPointer());
-    Ark_String name = static_cast<Ark_String>(thisDeserializer.readString());
-    _callSync(vmContext, _resourceId, name);
+    const auto _callSync =
+        reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointer());
+    _callSync(vmContext, _resourceId);
 }
 void deserializeAndCallOnAdsBlockedCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
