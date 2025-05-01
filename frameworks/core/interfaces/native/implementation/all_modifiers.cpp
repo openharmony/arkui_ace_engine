@@ -210,6 +210,7 @@ const GENERATED_ArkUIContextAccessor* GetContextAccessor();
 const GENERATED_ArkUIUnifiedDataAccessor* GetUnifiedDataAccessor();
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor();
 const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor();
+const GENERATED_ArkUIGestureOpsAccessor* GetGestureOpsAccessor();
 const GENERATED_ArkUIFocusControllerAccessor* GetFocusControllerAccessor();
 const GENERATED_ArkUIComponentContentAccessor* GetComponentContentAccessor();
 const GENERATED_ArkUISceneAccessor* GetSceneAccessor();
@@ -535,6 +536,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetUnifiedDataAccessor,
         GetLazyForEachOpsAccessor,
         GetSystemOpsAccessor,
+        GetGestureOpsAccessor,
         GetFocusControllerAccessor,
         GetComponentContentAccessor,
         GetSceneAccessor,

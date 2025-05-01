@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, nullptr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -26,7 +26,9 @@ import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { Callback_Void } from "./abilityComponent"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { InteractionHand } from "./enums"
-import { SourceTool, BaseEvent, BaseEventInternal } from "./common"
+import { SourceTool, BaseEvent, BaseEventInternal, Callback } from "./common"
+import { GestureOps } from "./arkui-custom"
+import { PeerNode } from "../PeerNode"
 export interface TapGestureInterface {
     onAction(event: ((event: GestureEvent) => void)): TapGestureInterface
 }
@@ -733,41 +735,41 @@ export class GestureGroupInterfaceInternal implements MaterializedBase,GestureGr
             const gesture_element : GestureType = gesture[i]
             let gesture_element_type : int32 = RuntimeType.UNDEFINED
             gesture_element_type = runtimeType(gesture_element)
-            if (TypeChecker.isTapGestureInterface(gesture_element)) {
-                thisSerializer.writeInt8(0 as int32)
-                const gesture_element_0  = gesture_element as TapGestureInterface
-                thisSerializer.writeTapGestureInterface(gesture_element_0)
-            }
-            else if (TypeChecker.isLongPressGestureInterface(gesture_element)) {
-                thisSerializer.writeInt8(1 as int32)
-                const gesture_element_1  = gesture_element as LongPressGestureInterface
-                thisSerializer.writeLongPressGestureInterface(gesture_element_1)
-            }
-            else if (TypeChecker.isPanGestureInterface(gesture_element)) {
-                thisSerializer.writeInt8(2 as int32)
-                const gesture_element_2  = gesture_element as PanGestureInterface
-                thisSerializer.writePanGestureInterface(gesture_element_2)
-            }
-            else if (TypeChecker.isPinchGestureInterface(gesture_element)) {
-                thisSerializer.writeInt8(3 as int32)
-                const gesture_element_3  = gesture_element as PinchGestureInterface
-                thisSerializer.writePinchGestureInterface(gesture_element_3)
-            }
-            else if (TypeChecker.isSwipeGestureInterface(gesture_element)) {
-                thisSerializer.writeInt8(4 as int32)
-                const gesture_element_4  = gesture_element as SwipeGestureInterface
-                thisSerializer.writeSwipeGestureInterface(gesture_element_4)
-            }
-            else if (TypeChecker.isRotationGestureInterface(gesture_element)) {
-                thisSerializer.writeInt8(5 as int32)
-                const gesture_element_5  = gesture_element as RotationGestureInterface
-                thisSerializer.writeRotationGestureInterface(gesture_element_5)
-            }
-            else if (TypeChecker.isGestureGroupInterface(gesture_element)) {
-                thisSerializer.writeInt8(6 as int32)
-                const gesture_element_6  = gesture_element as GestureGroupInterface
-                thisSerializer.writeGestureGroupInterface(gesture_element_6)
-            }
+            // if (TypeChecker.isTapGestureInterface(gesture_element)) {
+            //     thisSerializer.writeInt8(0 as int32)
+            //     const gesture_element_0  = gesture_element as TapGestureInterface
+            //     thisSerializer.writeTapGestureInterface(gesture_element_0)
+            // }
+            // else if (TypeChecker.isLongPressGestureInterface(gesture_element)) {
+            //     thisSerializer.writeInt8(1 as int32)
+            //     const gesture_element_1  = gesture_element as LongPressGestureInterface
+            //     thisSerializer.writeLongPressGestureInterface(gesture_element_1)
+            // }
+            // else if (TypeChecker.isPanGestureInterface(gesture_element)) {
+            //     thisSerializer.writeInt8(2 as int32)
+            //     const gesture_element_2  = gesture_element as PanGestureInterface
+            //     thisSerializer.writePanGestureInterface(gesture_element_2)
+            // }
+            // else if (TypeChecker.isPinchGestureInterface(gesture_element)) {
+            //     thisSerializer.writeInt8(3 as int32)
+            //     const gesture_element_3  = gesture_element as PinchGestureInterface
+            //     thisSerializer.writePinchGestureInterface(gesture_element_3)
+            // }
+            // else if (TypeChecker.isSwipeGestureInterface(gesture_element)) {
+            //     thisSerializer.writeInt8(4 as int32)
+            //     const gesture_element_4  = gesture_element as SwipeGestureInterface
+            //     thisSerializer.writeSwipeGestureInterface(gesture_element_4)
+            // }
+            // else if (TypeChecker.isRotationGestureInterface(gesture_element)) {
+            //     thisSerializer.writeInt8(5 as int32)
+            //     const gesture_element_5  = gesture_element as RotationGestureInterface
+            //     thisSerializer.writeRotationGestureInterface(gesture_element_5)
+            // }
+            // else if (TypeChecker.isGestureGroupInterface(gesture_element)) {
+            //     thisSerializer.writeInt8(6 as int32)
+            //     const gesture_element_6  = gesture_element as GestureGroupInterface
+            //     thisSerializer.writeGestureGroupInterface(gesture_element_6)
+            // }
         }
         const retval  = ArkUIGeneratedNativeModule._GestureGroupInterface_ctor(TypeChecker.GestureMode_ToNumeric(mode), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -989,7 +991,7 @@ export interface FingerInfo {
     displayY: number;
     hand?: InteractionHand;
 }
-export type GestureType = TapGestureInterface | LongPressGestureInterface | PanGestureInterface | PinchGestureInterface | SwipeGestureInterface | RotationGestureInterface | GestureGroupInterface;
+export type GestureType = Gesture | GestureGroup;
 export interface GestureInterface<T> {
 }
 export interface BaseHandlerOptions {
@@ -1137,7 +1139,7 @@ export class BaseGestureEventInternal extends BaseEventInternal implements Mater
         return obj
     }
 }
-export interface GestureEvent {
+export interface GestureEvent extends BaseEvent {
     repeat: boolean
     fingerList: Array<FingerInfo>
     offsetX: number
@@ -1159,7 +1161,7 @@ export class GestureEventInternal extends BaseEventInternal implements Materiali
         this.setRepeat(repeat)
     }
     get fingerList(): Array<FingerInfo> {
-        throw new Error("Not implemented")
+        return this.getFingerList()
     }
     set fingerList(fingerList: Array<FingerInfo>) {
         this.setFingerList(fingerList)
@@ -2054,5 +2056,387 @@ export namespace GestureControl {
         ROTATION_GESTURE = 5,
         DRAG = 6,
         CLICK = 7
+    }
+}
+
+export class Gesture {
+    gestureTag: string | undefined;
+    types: Array<SourceTool> | undefined;
+    tag(tag: string): this {
+        this.gestureTag = tag;
+        return this;
+    }
+    allowedTypes(value: Array<SourceTool>): this {
+        this.types = value;
+        return this;
+    }
+    setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void { }
+    addGestureToGroup(group: KPointer): void { }
+}
+export class TapGesture extends Gesture {
+    finger?: number;
+    count?: number;
+    distanceThreshold?: number;
+    isFingerCountLimited?: boolean;
+    onActionCallback?: Callback<GestureEvent>;
+    pointer: KPointer = nullptr;
+    static $_instantiate(factory: () => TapGesture, value?: TapGestureParameters): TapGesture {
+        const tap = factory();
+        tap.finger = value?.fingers;
+        tap.count = value?.count;
+        tap.distanceThreshold = value?.distanceThreshold;
+        return tap;
+    }
+    onAction(event: Callback<GestureEvent>): this {
+        this.onActionCallback = event;
+        return this;
+    }
+    createAndSetTapGestureAttr(): void {
+        this.pointer = GestureOps.createTapGesture(this.finger ?? 1, this.count ?? 1, this.distanceThreshold ?? Infinity, this.isFingerCountLimited ?? false);
+        if (this.gestureTag !== undefined) {
+            GestureOps.setGestureTag(this.pointer, this.gestureTag ?? "");
+        }
+        if (this.onActionCallback !== undefined) {
+            GestureOps.setOnAction(this.pointer, this.onActionCallback as (Callback<GestureEvent>));
+        }
+    }
+    setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
+        if (node) {
+            this.createAndSetTapGestureAttr();
+            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer);
+        }
+    }
+    addGestureToGroup(group: KPointer): void {
+        this.createAndSetTapGestureAttr();
+        GestureOps.addGestureToGroup(group, this.pointer);
+    }
+}
+export class LongPressGesture extends Gesture {
+    finger?: number;
+    duration?: number;
+    repeat?: boolean;
+    isFingerCountLimited?: boolean;
+    pointer: KPointer = nullptr;
+    onActionCallback?: Callback<GestureEvent>;
+    onActionEndCallback?: Callback<GestureEvent>;
+    onActionCancelCallback?: Callback<GestureEvent>;
+    static $_instantiate(factory: () => LongPressGesture, value?: LongPressGestureHandlerOptions): LongPressGesture {
+        const longPress = factory();
+        longPress.finger = value?.fingers;
+        longPress.duration = value?.duration;
+        longPress.repeat = value?.repeat;
+        return longPress;
+    }
+    onAction(event: Callback<GestureEvent>): this {
+        this.onActionCallback = event;
+        return this;
+    }
+    onActionEnd(event: Callback<GestureEvent>): this {
+        this.onActionEndCallback = event;
+        return this;
+    }
+    onActionCancel(event: Callback<GestureEvent>): this {
+        this.onActionCancelCallback = event;
+        return this;
+    }
+    createAndSetLongPressGestureAttr(): void {
+        this.pointer = GestureOps.createLongPressGesture(this.finger ?? 1, this.repeat ?? false, this.duration ?? 500, this.isFingerCountLimited ?? false);
+        if (this.gestureTag !== undefined) {
+            GestureOps.setGestureTag(this.pointer, this.gestureTag ?? "");
+        }
+        if (this.onActionCallback !== undefined) {
+            GestureOps.setOnAction(this.pointer, this.onActionCallback as (Callback<GestureEvent>));
+        }
+        if (this.onActionEndCallback !== undefined) {
+            GestureOps.setOnActionEnd(this.pointer, this.onActionEndCallback as (Callback<GestureEvent>));
+        }
+        if (this.onActionCancelCallback !== undefined) {
+            GestureOps.setOnActionCancel(this.pointer, this.onActionCancelCallback as (() => void));
+        }
+    }
+    setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
+        if (node) {
+            this.createAndSetLongPressGestureAttr();
+            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer);
+        }
+    }
+    addGestureToGroup(group: KPointer): void {
+        this.createAndSetLongPressGestureAttr();
+        GestureOps.addGestureToGroup(group, this.pointer);
+    }
+}
+export class PanGesture extends Gesture {
+    finger?: number;
+    direction?: PanDirection;
+    distance?: number;
+    isFingerCountLimited?: boolean;
+    pointer: KPointer = nullptr;
+    onActionStartCallback?: Callback<GestureEvent>;
+    onActionUpdateCallback?: Callback<GestureEvent>;
+    onActionEndCallback?: Callback<GestureEvent>;
+    onActionCancelCallback?: Callback<GestureEvent>;
+    static $_instantiate(factory: () => PanGesture, value?: PanGestureHandlerOptions | PanGestureOptions): PanGesture {
+        const pan = factory();
+        if (TypeChecker.isPanGestureHandlerOptions(value, false, false, false)) {
+            let options = value as PanGestureHandlerOptions;
+            pan.finger = options?.fingers;
+            pan.direction = options?.direction;
+            pan.distance = options?.distance;
+        } else {
+            // TODO
+            // let panGestureOptions = value as PanGestureOptions;
+            // pan.finger = panGestureOptions?.;
+            // pan.direction = panGestureOptions?.direction;
+            // pan.distance = panGestureOptions?.distance;
+        }
+        
+        return pan;
+    }
+    onActionStart(event: Callback<GestureEvent>): this {
+        this.onActionStartCallback = event;
+        return this;
+    }
+    onActionUpdate(event: Callback<GestureEvent>): this {
+        this.onActionUpdateCallback = event;
+        return this;
+    }
+    onActionEnd(event: Callback<GestureEvent>): this {
+        this.onActionEndCallback = event;
+        return this;
+    }
+    onActionCancel(event: Callback<GestureEvent>): this {
+        this.onActionCancelCallback = event;
+        return this;
+    }
+    createAndSetPanGestureAttr(): void {
+        this.pointer = GestureOps.createPanGesture(this.finger ?? 1, this.direction ?? PanDirection.ALL, this.distance ?? 5, this.isFingerCountLimited ?? false);
+        if (this.gestureTag !== undefined) {
+            GestureOps.setGestureTag(this.pointer, this.gestureTag ?? "");
+        }
+        if (this.onActionStartCallback !== undefined) {
+            GestureOps.setOnActionStart(this.pointer, this.onActionStartCallback as (Callback<GestureEvent>));
+        }
+        if (this.onActionUpdateCallback !== undefined) {
+            GestureOps.setOnActionUpdate(this.pointer, this.onActionUpdateCallback as (Callback<GestureEvent>));
+        }
+        if (this.onActionEndCallback !== undefined) {
+            GestureOps.setOnActionEnd(this.pointer, this.onActionEndCallback as (Callback<GestureEvent>));
+        }
+        if (this.onActionCancelCallback !== undefined) {
+            GestureOps.setOnActionCancel(this.pointer, this.onActionCancelCallback as (() => void));
+        }
+    }
+    setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
+        if (node) {
+            this.createAndSetPanGestureAttr();
+            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer);
+        }
+    }
+    addGestureToGroup(group: KPointer): void {
+        this.createAndSetPanGestureAttr();
+        GestureOps.addGestureToGroup(group, this.pointer);
+    }
+}
+export class PinchGesture extends Gesture {
+    finger?: number;
+    distance?: number;
+    isFingerCountLimited?: boolean;
+    pointer: KPointer = nullptr;
+    onActionStartCallback?: Callback<GestureEvent>;
+    onActionUpdateCallback?: Callback<GestureEvent>;
+    onActionEndCallback?: Callback<GestureEvent>;
+    onActionCancelCallback?: Callback<GestureEvent>;
+    static $_instantiate(factory: () => PinchGesture, value?: PinchGestureHandlerOptions): PinchGesture {
+        const pinch = factory();
+        pinch.finger = value?.fingers;
+        pinch.distance = value?.distance;
+        return pinch;
+    }
+    onActionStart(event: Callback<GestureEvent>): this {
+        this.onActionStartCallback = event;
+        return this;
+    }
+    onActionUpdate(event: Callback<GestureEvent>): this {
+        this.onActionUpdateCallback = event;
+        return this;
+    }
+    onActionEnd(event: Callback<GestureEvent>): this {
+        this.onActionEndCallback = event;
+        return this;
+    }
+    onActionCancel(event: Callback<GestureEvent>): this {
+        this.onActionCancelCallback = event;
+        return this;
+    }
+    createAndSetPinchGestureAttr(): void {
+        this.pointer = GestureOps.createPinchGesture(this.finger ?? 2, this.distance ?? 5, this.isFingerCountLimited ?? false);
+        if (this.gestureTag !== undefined) {
+            GestureOps.setGestureTag(this.pointer, this.gestureTag ?? "");
+        }
+        if (this.onActionStartCallback !== undefined) {
+            GestureOps.setOnActionStart(this.pointer, this.onActionStartCallback as (Callback<GestureEvent>));
+        }
+        if (this.onActionUpdateCallback !== undefined) {
+            GestureOps.setOnActionUpdate(this.pointer, this.onActionUpdateCallback as (Callback<GestureEvent>));
+        }
+        if (this.onActionEndCallback !== undefined) {
+            GestureOps.setOnActionEnd(this.pointer, this.onActionEndCallback as (Callback<GestureEvent>));
+        }
+        if (this.onActionCancelCallback !== undefined) {
+            GestureOps.setOnActionCancel(this.pointer, this.onActionCancelCallback as (() => void));
+        }
+    }
+    setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
+        if (node) {
+            this.createAndSetPinchGestureAttr();
+            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer);
+        }
+    }
+    addGestureToGroup(group: KPointer): void {
+        this.createAndSetPinchGestureAttr();
+        GestureOps.addGestureToGroup(group, this.pointer);
+    }
+}
+export class RotationGesture extends Gesture {
+    finger?: number;
+    angle?: number;
+    isFingerCountLimited?: boolean;
+    pointer: KPointer = nullptr;
+    onActionStartCallback?: Callback<GestureEvent>;
+    onActionUpdateCallback?: Callback<GestureEvent>;
+    onActionEndCallback?: Callback<GestureEvent>;
+    onActionCancelCallback?: Callback<GestureEvent>;
+    static $_instantiate(factory: () => RotationGesture, value?: RotationGestureHandlerOptions): RotationGesture {
+        const rotation = factory();
+        rotation.finger = value?.fingers;
+        rotation.angle = value?.angle;
+        return rotation;
+    }
+    onActionStart(event: Callback<GestureEvent>): this {
+        this.onActionStartCallback = event;
+        return this;
+    }
+    onActionUpdate(event: Callback<GestureEvent>): this {
+        this.onActionUpdateCallback = event;
+        return this;
+    }
+    onActionEnd(event: Callback<GestureEvent>): this {
+        this.onActionEndCallback = event;
+        return this;
+    }
+    onActionCancel(event: Callback<GestureEvent>): this {
+        this.onActionCancelCallback = event;
+        return this;
+    }
+    createAndSetRotationGestureAttr(): void {
+        this.pointer = GestureOps.createRotationGesture(this.finger ?? 2, this.angle ?? 1, this.isFingerCountLimited ?? false);
+        if (this.gestureTag !== undefined) {
+            GestureOps.setGestureTag(this.pointer, this.gestureTag ?? "");
+        }
+        if (this.onActionStartCallback !== undefined) {
+            GestureOps.setOnActionStart(this.pointer, this.onActionStartCallback as (Callback<GestureEvent>));
+        }
+        if (this.onActionUpdateCallback !== undefined) {
+            GestureOps.setOnActionUpdate(this.pointer, this.onActionUpdateCallback as (Callback<GestureEvent>));
+        }
+        if (this.onActionEndCallback !== undefined) {
+            GestureOps.setOnActionEnd(this.pointer, this.onActionEndCallback as (Callback<GestureEvent>));
+        }
+        if (this.onActionCancelCallback !== undefined) {
+            GestureOps.setOnActionCancel(this.pointer, this.onActionCancelCallback as (() => void));
+        }
+    }
+    setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
+        if (node) {
+            this.createAndSetRotationGestureAttr();
+            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer);
+        }
+    }
+    addGestureToGroup(group: KPointer): void {
+        this.createAndSetRotationGestureAttr();
+        GestureOps.addGestureToGroup(group, this.pointer);
+    }
+}
+export class SwipeGesture extends Gesture {
+    finger?: number;
+    direction?: SwipeDirection;
+    speed?: number;
+    isFingerCountLimited?: boolean;
+    onActionCallback?: Callback<GestureEvent>;
+    pointer: KPointer = nullptr;
+    static $_instantiate(factory: () => SwipeGesture, value?: SwipeGestureHandlerOptions): SwipeGesture {
+        const swipe = factory();
+        swipe.finger = value?.fingers;
+        swipe.direction = value?.direction;
+        swipe.speed = value?.speed;
+        return swipe;
+    }
+    onAction(event: Callback<GestureEvent>): this {
+        this.onActionCallback = event;
+        return this;
+    }
+    createAndSetSwipeGestureAttr(): void {
+        this.pointer = GestureOps.createSwipeGesture(this.finger ?? 1, this.direction ?? SwipeDirection.ALL, this.speed ?? 100, this.isFingerCountLimited ?? false);
+        if (this.gestureTag !== undefined) {
+            GestureOps.setGestureTag(this.pointer, this.gestureTag ?? "");
+        }
+        if (this.onActionCallback !== undefined) {
+            GestureOps.setOnAction(this.pointer, this.onActionCallback as ((Callback<GestureEvent>)));
+        }
+    }
+    setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
+        if (node) {
+            this.createAndSetSwipeGestureAttr();
+            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer);
+        }
+    }
+    addGestureToGroup(group: KPointer): void {
+        this.createAndSetSwipeGestureAttr();
+        GestureOps.addGestureToGroup(group, this.pointer);
+    }
+}
+export class GestureGroup {
+    mode: GestureMode = GestureMode.SEQUENCE;
+    gestures: GestureType[] = [];
+    onCancelCallback?: () => void;
+    pointer: KPointer = nullptr;
+    static $_instantiate(factory: () => GestureGroup, mode: GestureMode, ...gestures: GestureType[]): GestureGroup {
+        const group = factory();
+        group.mode = mode;
+        group.gestures = gestures;
+        return group;
+    }
+    onCancel(event: () => void): this {
+        this.onCancelCallback = event;
+        return this;
+    }
+    createGestureGroup(): KPointer {
+        this.pointer = GestureOps.createGestureGroup(this.mode);
+        return this.pointer;
+    }
+    // TODO: check
+    addGestureToGroup(group: KPointer): void {
+        this.createGestureGroup();
+        GestureOps.addGestureToGroup(group, this.pointer);
+    }
+    addGestureGroupToNode(priority: number, node?: PeerNode, mask?: GestureMask): void {
+        this.createGestureGroup();
+        if (this.onCancelCallback !== undefined) {
+            GestureOps.setOnCancel(this.pointer, this.onCancelCallback as (() => void));
+        }
+        for (let gesture of this.gestures) {
+            if (gesture instanceof Gesture) {
+                let singleGesture = gesture as Gesture;
+                singleGesture.addGestureToGroup(this.pointer);
+            }
+            // TODO: check
+            if (gesture instanceof GestureGroup) {
+                let gestureGroup = gesture as GestureGroup;
+                gestureGroup.addGestureToGroup(this.pointer);
+            }
+        }
+        if (node) {
+            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer);
+        }
     }
 }
