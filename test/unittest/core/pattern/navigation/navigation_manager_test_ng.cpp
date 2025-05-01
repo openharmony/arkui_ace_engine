@@ -510,7 +510,6 @@ HWTEST_F(NavigationManagerTestNg, NavigationMapsTest002, TestSize.Level1)
  */
 HWTEST_F(NavigationManagerTestNg, CheckNodeNeedCacheTest001, TestSize.Level1)
 {
-    std::cout << "[NEW_TDD] --- START ---" << std::endl;
     /**
      * @tc.steps: step1. get navigation manager
      */
