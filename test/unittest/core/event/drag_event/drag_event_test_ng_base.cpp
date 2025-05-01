@@ -186,8 +186,17 @@ void DragEventTestNgBase::MockTouchDown(const RefPtr<DragEventActuator>& actuato
 void DragEventTestNgBase::MockDragPanSuccess(const RefPtr<DragEventActuator>& actuator, GestureEvent info)
 {
     ASSERT_NE(actuator, nullptr);
-    if (actuator->actionStart_) {
-        actuator->actionStart_(info);
+    if (actuator->GetIsNewFwk()) {
+        if (actuator->panRecognizer_ && actuator->panRecognizer_->onActionStart_) {
+            auto callback = *(actuator->panRecognizer_->onActionStart_);
+            if (callback) {
+                callback(info);
+            }
+        }
+    } else {
+        if (actuator->actionStart_) {
+            actuator->actionStart_(info);
+        }
     }
 }
 
