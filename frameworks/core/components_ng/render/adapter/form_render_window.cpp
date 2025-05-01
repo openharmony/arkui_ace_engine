@@ -158,6 +158,18 @@ void FormRenderWindow::Unlock()
 {
 }
 
+int64_t FormRenderWindow::GetVSyncPeriod() const
+{
+    int64_t vSyncPeriod = 0;
+#if defined(ENABLE_ROSEN_BACKEND) && defined(__OHOS__)
+    if (receiver_) {
+        receiver_->GetVSyncPeriod(vSyncPeriod);
+    }
+#endif
+
+    return vSyncPeriod;
+}
+
 void FormRenderWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType)
 {
 #ifdef ENABLE_ROSEN_BACKEND

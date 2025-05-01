@@ -105,6 +105,7 @@ public:
 
     void Lock() override;
     void Unlock() override;
+    int64_t GetVSyncPeriod() const override;
 
 private:
     WeakPtr<TaskExecutor> taskExecutor_ = nullptr;
