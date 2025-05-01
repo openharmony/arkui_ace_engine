@@ -64,7 +64,7 @@ build() {
     Select(this.selectOptions)
       .selected(this.selectIdx)
       .value(this.selectIdx.toString())
-      .key('selectIdx')
+      .id('selectIdx')
       .onSelect((index: number) => {
         this.selectIdx = index;
       })

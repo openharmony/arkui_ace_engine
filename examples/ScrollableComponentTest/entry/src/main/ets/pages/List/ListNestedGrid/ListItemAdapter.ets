@@ -1,4 +1,4 @@
-export class ListItemAdapter implements IDataSource {
+export class ListItemAdapter<T> implements IDataSource {
   private listItems: T[] = [];
   private listeners: DataChangeListener[] = [];
 

@@ -111,7 +111,7 @@ struct MySwipeActionItem2 {
   private ITEM_SPACE: number = 8
   private SELF_HEIGHT: number = 74
   private SELF_PADDING: number = 12
-  private onDelete: () => void = () => {
+  onDelete: () => void = () => {
   }
 
   @Styles
@@ -263,7 +263,7 @@ struct ListItemExample2 {
 
   @Builder
   itemEnd(item: Item) {
-    MySwipeActionItem2({ item: item as Item, onDelete: () => {
+    MySwipeActionItem2({ item: item, onDelete: () => {
       this.onDelete(item)
     } })
   }
@@ -305,7 +305,7 @@ struct ListItemExample2 {
         }, (item: Item) => item.data)
       }
       .scrollBar(BarState.Off)
-      .onScroll((scrollOffset: number, scrollState: ScrollState) => {
+      .onDidScroll((scrollOffset: number, scrollState: ScrollState) => {
         this.endOffset = scrollOffset
       })
     }

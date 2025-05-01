@@ -1,4 +1,4 @@
-import { GridDataSource } from './GridDataSource';
+import { WaterFlowDataSource } from '../scrollable/WaterFlowDataSource';
 
 @Reusable
 @Component
@@ -35,13 +35,13 @@ struct GridPinchDemo {
   @State gestureEnd: boolean = false // Pinch手势是否结束
   private pinchTime: number = 0 // 上次Pinch事件时间
   dataCount: number = 100
-  dataSource: WaterFlowDataSource = new WaterFlowDataSource(this.dataCount)
+  dataSource: WaterFlowDataSource = new WaterFlowDataSource()
 
   aboutToAppear() {
     // 读取上次的最终列数
-    let lastCount = AppStorage.get('columnsCount')
+    let lastCount: number | undefined = AppStorage.get('columnsCount')
     if (typeof lastCount != 'undefined') {
-      this.columns = lastCount
+      this.columns = lastCount;
     }
   }
 

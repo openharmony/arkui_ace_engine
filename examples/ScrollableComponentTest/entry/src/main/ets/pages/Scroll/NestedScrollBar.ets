@@ -86,7 +86,7 @@ struct StickyNestedScroll {
       .scrollBar(BarState.Off)
       .width('100%')
       .height('100%')
-      .key('scroll1')
+      .id('scroll1')
 
       Scroll(this.scrollBarScroller) {
         // 设置内容高度为scroll1内容高度和list内容高度之和
@@ -115,7 +115,7 @@ struct StickyNestedScroll {
       .margin({
         end: new LengthMetrics(12)
       })
-      .key('scroll2')
+      .id('scroll2')
     }.alignContent(Alignment.End)
   }
 
