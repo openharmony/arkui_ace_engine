@@ -5897,6 +5897,7 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    host->NotifyTransformInfoChanged();
     host->OnNodeTransitionInfoUpdate();
 }
 
