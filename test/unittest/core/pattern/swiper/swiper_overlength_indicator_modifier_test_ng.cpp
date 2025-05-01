@@ -1743,4 +1743,178 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, AdjustTargetStatus002, TestSiz
     dotIndicatorModifier.AdjustTargetStatus(targetPageIndex);
     EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 1);
 }
+
+/**
+ * @tc.name: PaintUnselectedIndicator001
+ * @tc.desc: Test PaintUnselectedIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, PaintUnselectedIndicator001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    RSCanvas canvas;
+    auto offset = OffsetF(0.1f, 0.2f);
+    float width = 10;
+    float height = 10;
+    dotIndicatorModifier.isCustomSize_ = false;
+    dotIndicatorModifier.PaintUnselectedIndicator(canvas, offset, width, height, LinearColor(Color::TRANSPARENT));
+    EXPECT_TRUE(dotIndicatorModifier.isCustomSize_ == false);
+}
+
+/**
+ * @tc.name: PaintUnselectedIndicator002
+ * @tc.desc: Test PaintUnselectedIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, PaintUnselectedIndicator002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    RSCanvas canvas;
+    auto offset = OffsetF(0.1f, 0.2f);
+    float width = 10.5f;
+    float height = 2.4f;
+    dotIndicatorModifier.isCustomSize_ = true;
+    dotIndicatorModifier.PaintUnselectedIndicator(canvas, offset, width, height, LinearColor(Color::TRANSPARENT));
+    EXPECT_TRUE(dotIndicatorModifier.isCustomSize_ == true);
+}
+
+/**
+ * @tc.name: PaintUnselectedIndicator003
+ * @tc.desc: Test PaintUnselectedIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, PaintUnselectedIndicator003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    RSCanvas canvas;
+    auto offset = OffsetF(0.1f, 0.2f);
+    float width = 10;
+    float height = 20;
+    dotIndicatorModifier.isCustomSize_ = true;
+    dotIndicatorModifier.PaintUnselectedIndicator(canvas, offset, width, height, LinearColor(Color::TRANSPARENT));
+    EXPECT_TRUE(dotIndicatorModifier.isCustomSize_ == true);
+}
+
+/**
+ * @tc.name: PaintUnselectedIndicator004
+ * @tc.desc: Test PaintUnselectedIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, PaintUnselectedIndicator004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    RSCanvas canvas;
+    auto offset = OffsetF(0.1f, 0.2f);
+    float width = 10.0f;
+    float height = 10.1f;
+    dotIndicatorModifier.isCustomSize_ = true;
+    dotIndicatorModifier.PaintUnselectedIndicator(canvas, offset, width, height, LinearColor(Color::TRANSPARENT));
+    EXPECT_TRUE(dotIndicatorModifier.isCustomSize_ == true);
+}
+
+/**
+ * @tc.name: CalcTargetSelectedIndexOnForward001
+ * @tc.desc: Test CalcTargetSelectedIndexOnForward
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, CalcTargetSelectedIndexOnForward001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    int32_t currentPageIndex = 1;
+    int32_t targetPageIndex = 2;
+    dotIndicatorModifier.targetSelectedIndex_ = 0;
+    dotIndicatorModifier.maxDisplayCount_ = 10;
+    dotIndicatorModifier.currentSelectedIndex_ = 20;
+    dotIndicatorModifier.CalcTargetSelectedIndexOnForward(currentPageIndex, targetPageIndex);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 2);
+}
+
+/**
+ * @tc.name: NeedUpdateWhenAnimationFinish001
+ * @tc.desc: Test NeedUpdateWhenAnimationFinish
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, NeedUpdateWhenAnimationFinish001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.forceStopPageRate_ = 10;
+    auto result = dotIndicatorModifier.NeedUpdateWhenAnimationFinish();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: NeedUpdateWhenAnimationFinish002
+ * @tc.desc: Test NeedUpdateWhenAnimationFinish
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, NeedUpdateWhenAnimationFinish002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+
+    OverlengthDotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.forceStopPageRate_ = -1.0f;
+    auto result = dotIndicatorModifier.NeedUpdateWhenAnimationFinish();
+    EXPECT_TRUE(result);
+}
 } // namespace OHOS::Ace::NG

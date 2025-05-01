@@ -753,4 +753,104 @@ HWTEST_F(ArcSwiperPatternTestNg, PlayPropertyTranslateFlipAnimation005, TestSize
     arcSwiperPattern->PlayPropertyTranslateFlipAnimation(offset);
     EXPECT_FALSE(arcSwiperPattern->itemPositionInAnimation_.empty());
 }
+
+/**
+ * @tc.name: AddFinishAnimation001
+ * @tc.desc: Test ArcSwiperPattern AddFinishAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternTestNg, AddFinishAnimation001, TestSize.Level1)
+{
+    RefPtr<ArcSwiperPattern> arcSwiperPattern = AceType::MakeRefPtr<ArcSwiperPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, -1, arcSwiperPattern);
+    RefPtr<LayoutProperty> layoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    layoutProperty->layoutDirection_ = TextDirection::RTL;
+    frameNode->layoutProperty_ = layoutProperty;
+    arcSwiperPattern->frameNode_ = frameNode;
+    arcSwiperPattern->hasTabsAncestor_ = false;
+    for (int32_t i = 0; i < 7; i++) {
+        arcSwiperPattern->animationFinishList_.emplace_back(ArcSwiperPattern::AnimationFinishType::EXIT_SCALE);
+    }
+    OffsetF offset(0.0f, 0.0f);
+    ArcSwiperPattern::AnimationFinishType animationFinishType = ArcSwiperPattern::AnimationFinishType::ENTRY_OFFSET;
+    bool vertical = false;
+    bool rollBack = false;
+    arcSwiperPattern->AddFinishAnimation(animationFinishType, vertical, rollBack);
+    EXPECT_EQ(arcSwiperPattern->offset_, offset);
+}
+
+/**
+ * @tc.name: AddFinishAnimation002
+ * @tc.desc: Test ArcSwiperPattern AddFinishAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternTestNg, AddFinishAnimation002, TestSize.Level1)
+{
+    RefPtr<ArcSwiperPattern> arcSwiperPattern = AceType::MakeRefPtr<ArcSwiperPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, -1, arcSwiperPattern);
+    RefPtr<LayoutProperty> layoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    layoutProperty->layoutDirection_ = TextDirection::RTL;
+    frameNode->layoutProperty_ = layoutProperty;
+    arcSwiperPattern->frameNode_ = frameNode;
+    arcSwiperPattern->hasTabsAncestor_ = false;
+    for (int32_t i = 0; i < 7; i++) {
+        arcSwiperPattern->animationFinishList_.emplace_back(ArcSwiperPattern::AnimationFinishType::EXIT_SCALE);
+    }
+    OffsetF offset(0.0f, 0.0f);
+    ArcSwiperPattern::AnimationFinishType animationFinishType = ArcSwiperPattern::AnimationFinishType::ENTRY_OFFSET;
+    bool vertical = true;
+    bool rollBack = true;
+    arcSwiperPattern->AddFinishAnimation(animationFinishType, vertical, rollBack);
+    EXPECT_EQ(arcSwiperPattern->offset_, offset);
+}
+
+/**
+ * @tc.name: AddFinishAnimation003
+ * @tc.desc: Test ArcSwiperPattern AddFinishAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternTestNg, AddFinishAnimation003, TestSize.Level1)
+{
+    RefPtr<ArcSwiperPattern> arcSwiperPattern = AceType::MakeRefPtr<ArcSwiperPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, -1, arcSwiperPattern);
+    RefPtr<LayoutProperty> layoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    layoutProperty->layoutDirection_ = TextDirection::RTL;
+    frameNode->layoutProperty_ = layoutProperty;
+    arcSwiperPattern->frameNode_ = frameNode;
+    arcSwiperPattern->hasTabsAncestor_ = false;
+    for (int32_t i = 0; i < 7; i++) {
+        arcSwiperPattern->animationFinishList_.emplace_back(ArcSwiperPattern::AnimationFinishType::EXIT_SCALE);
+    }
+    OffsetF offset(0.0f, 0.0f);
+    ArcSwiperPattern::AnimationFinishType animationFinishType = ArcSwiperPattern::AnimationFinishType::ENTRY_OFFSET;
+    bool vertical = true;
+    bool rollBack = false;
+    arcSwiperPattern->AddFinishAnimation(animationFinishType, vertical, rollBack);
+    EXPECT_EQ(arcSwiperPattern->offset_, offset);
+}
+
+/**
+ * @tc.name: AddFinishAnimation004
+ * @tc.desc: Test ArcSwiperPattern AddFinishAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternTestNg, AddFinishAnimation004, TestSize.Level1)
+{
+    RefPtr<ArcSwiperPattern> arcSwiperPattern = AceType::MakeRefPtr<ArcSwiperPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, -1, arcSwiperPattern);
+    RefPtr<LayoutProperty> layoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    layoutProperty->layoutDirection_ = TextDirection::RTL;
+    frameNode->layoutProperty_ = layoutProperty;
+    arcSwiperPattern->frameNode_ = frameNode;
+    arcSwiperPattern->hasTabsAncestor_ = false;
+    for (int32_t i = 0; i < 8; i++) {
+        arcSwiperPattern->animationFinishList_.emplace_back(ArcSwiperPattern::AnimationFinishType::EXIT_SCALE);
+    }
+    OffsetF offset(0.0f, 0.0f);
+    ArcSwiperPattern::AnimationFinishType animationFinishType = ArcSwiperPattern::AnimationFinishType::ENTRY_OFFSET;
+    bool vertical = true;
+    bool rollBack = false;
+    arcSwiperPattern->AddFinishAnimation(animationFinishType, vertical, rollBack);
+    EXPECT_EQ(arcSwiperPattern->offset_, offset);
+}
 } // namespace OHOS::Ace::NG

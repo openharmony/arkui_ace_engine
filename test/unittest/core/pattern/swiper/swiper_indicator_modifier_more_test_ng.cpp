@@ -801,6 +801,29 @@ HWTEST_F(SwiperIndicatorModifierMoreTestNg, GetTailCurve003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetTailCurve004
+ * @tc.desc: Test DotIndicatorModifier GetTailCurve
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierMoreTestNg, GetTailCurve004, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    modifier->currentIndex_ = 5;
+    modifier->currentIndexActual_ = 3;
+    /**
+     * @tc.steps: step3. call GetTailCurve.
+     * @tc.expected: run success
+     */
+    auto result = modifier->GetTailCurve();
+    EXPECT_EQ(result->stiffness_, 108);
+    EXPECT_EQ(result->damping_, 16);
+}
+
+/**
  * @tc.name: CalcAndAdjustIndicatorPaintRect001
  * @tc.desc: Test DotIndicatorModifier CalcAndAdjustIndicatorPaintRect
  * @tc.type: FUNC
