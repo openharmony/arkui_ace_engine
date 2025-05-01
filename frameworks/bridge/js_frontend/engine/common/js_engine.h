@@ -325,6 +325,11 @@ public:
 
     virtual void SetJsContext(const std::shared_ptr<Framework::JsValue>& jsContext) {}
 
+    virtual std::shared_ptr<void> SerializeValue(
+        const std::shared_ptr<Framework::JsValue>& jsValue) { return nullptr; }
+
+    virtual void SetJsContextWithDeserialize(const std::shared_ptr<void>& recoder) {}
+
     virtual void SetPkgNameList(const std::map<std::string, std::string>& map) {}
 
     virtual void SetPkgAliasList(const std::map<std::string, std::string>& map) {}

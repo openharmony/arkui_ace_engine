@@ -709,6 +709,36 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContext()
     return context;
 }
 
+std::shared_ptr<void> AceContainer::SerializeValue(
+    const std::shared_ptr<Framework::JsValue>& jsValue)
+{
+    ContainerScope scope(instanceId_);
+#ifdef NG_BUILD
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend_);
+#else
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+#endif
+    CHECK_NULL_RETURN(declarativeFrontend, nullptr);
+    auto jsEngine = AceType::DynamicCast<Framework::JsiDeclarativeEngine>(
+        declarativeFrontend->GetJsEngine());
+    CHECK_NULL_RETURN(jsEngine, nullptr);
+    return jsEngine->SerializeValue(jsValue);
+}
+
+void AceContainer::SetJsContextWithDeserialize(const std::shared_ptr<void>& recoder)
+{
+    ContainerScope scope(instanceId_);
+#ifdef NG_BUILD
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend_);
+#else
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+#endif
+    CHECK_NULL_VOID(declarativeFrontend);
+    auto jsEngine = AceType::DynamicCast<Framework::JsiDeclarativeEngine>(declarativeFrontend->GetJsEngine());
+    CHECK_NULL_VOID(jsEngine);
+    jsEngine->SetJsContextWithDeserialize(recoder);
+}
+
 void AceContainer::SetJsContext(const std::shared_ptr<Framework::JsValue>& jsContext)
 {
     ContainerScope scope(instanceId_);

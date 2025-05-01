@@ -28,10 +28,7 @@ std::unordered_map<int32_t, std::weak_ptr<JsValue>> JsiContextModule::weakptrCon
 namespace {
 bool IsDynamicComponentUiContentType(int32_t instanceId)
 {
-    auto container = Container::GetContainer(instanceId);
-    CHECK_NULL_RETURN(container, false);
-    auto uIContentType = container->GetUIContentType();
-    return uIContentType == UIContentType::DYNAMIC_COMPONENT;
+    return false;
 }
 }
 

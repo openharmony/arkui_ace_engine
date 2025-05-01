@@ -35,8 +35,8 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-    const std::string BUNDLE_NAME = "Test bundle name";
-    const std::string ABILITY_NAME = "Test ability name";
+    const std::string BUNDLE_NAME = "Test DC bundle name";
+    const std::string ABILITY_NAME = "Test DC ability name";
     const std::string DYNAMIC_COMPONENT_ETS_TAG = "DynamicComponent";
     const std::string MOCK_ABC_ENTRY_POINT = "Test entry point";
     const SizeF CONTENT_SIZE = SizeF(400.0, 500.0);

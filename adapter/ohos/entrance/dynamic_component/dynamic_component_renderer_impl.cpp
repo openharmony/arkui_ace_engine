@@ -293,7 +293,13 @@ void DynamicComponentRendererImpl::InitUiContent(
     RegisterSizeChangedCallback();
     RegisterConfigChangedCallback();
     AttachRenderContext();
-    SetUIContentJsContext();
+    auto hostTaskExecutor = GetHostTaskExecutor();
+    CHECK_NULL_VOID(hostTaskExecutor);
+    hostTaskExecutor->PostTask(
+        [weak = WeakClaim(this)] () {
+            auto render = weak.Upgrade();
+            render->SetUIContentJsContext();
+        }, TaskExecutor::TaskType::UI, "HostSetUIContentJsContext");
     rendererDumpInfo_.limitedWorkerInitTime = GetCurrentTimestamp();
     TAG_LOGI(aceLogTag_, "foreground dynamic UI content");
     uiContent_->Foreground();
@@ -328,9 +334,29 @@ void DynamicComponentRendererImpl::RegisterContainerHandler()
 
 void DynamicComponentRendererImpl::SetUIContentJsContext()
 {
+    CHECK_NULL_VOID(uiContent_);
+    auto taskExecutor = GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
     auto jsContext = hostJsContext_.lock();
     CHECK_NULL_VOID(jsContext);
-    CHECK_NULL_VOID(uiContent_);
+    auto hostContainer = Container::GetContainer(hostInstanceId_);
+    CHECK_NULL_VOID(hostContainer);
+    auto aceHostContainer = AceType::DynamicCast<Platform::AceContainer>(hostContainer);
+    CHECK_NULL_VOID(aceHostContainer);
+    auto data = aceHostContainer->SerializeValue(jsContext);
+    if (data == nullptr) {
+        TAG_LOGW(aceLogTag_, "set JsContext: data is null");
+        return;
+    }
+
+    taskExecutor->PostTask(
+        [instanceId = uiContent_->GetInstanceId(), data] {
+            auto container = Container::GetContainer(instanceId);
+            CHECK_NULL_VOID(container);
+            auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+            CHECK_NULL_VOID(aceContainer);
+            aceContainer->SetJsContextWithDeserialize(data);
+        }, TaskExecutor::TaskType::UI, "WorkerSetJsContextWithDeserialize");
     auto container = Container::GetContainer(uiContent_->GetInstanceId());
     CHECK_NULL_VOID(container);
     auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
