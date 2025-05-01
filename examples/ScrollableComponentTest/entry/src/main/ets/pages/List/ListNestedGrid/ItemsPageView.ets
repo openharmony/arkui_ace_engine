@@ -3,7 +3,7 @@ import { ListItemAdapter } from './ListItemAdapter'
 @Component
 export struct ItemsPageView {
   @Prop tabBarIndex: number
-  @State private adapter: ListItemAdapter = new ListItemAdapter();
+  @State private adapter: ListItemAdapter<DataModel> = new ListItemAdapter();
   gridItems: DataModel = {
     itemType: ItemType.gridItems,
     'result': [
@@ -93,8 +93,8 @@ export interface Grids {
 
 @Component
 export struct GridComponent {
-  girdAdapter: ListItemAdapter = new ListItemAdapter();
-  gridItemData: Array = []
+  girdAdapter: ListItemAdapter<ESObject> = new ListItemAdapter();
+  gridItemData: Array<ESObject> = []
 
   aboutToAppear(): void {
     this.girdAdapter.addList(this.gridItemData)
@@ -131,8 +131,8 @@ export interface Lists {
 
 @Component
 export struct ListComponent {
-  listAdapter: ListItemAdapter = new ListItemAdapter();
-  listItemData: Array = []
+  listAdapter: ListItemAdapter<ESObject> = new ListItemAdapter();
+  listItemData: Array<ESObject> = []
 
   aboutToAppear(): void {
     this.listAdapter.addList(this.listItemData)

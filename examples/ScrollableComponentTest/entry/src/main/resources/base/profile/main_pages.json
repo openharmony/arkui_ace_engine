@@ -31,6 +31,7 @@
     "pages/Swiper/SwiperChangeIndex",
     "pages/Swiper/SwiperNestSwiper",
     "pages/Swiper/SwiperNestList",
+    "pages/Swiper/SwiperHeightChangeDemo",
     "pages/List/ListMainPage",
     "pages/List/childrenMainSize/ListItemGroupScenario",
     "pages/List/RepeatList/RepeatList1",

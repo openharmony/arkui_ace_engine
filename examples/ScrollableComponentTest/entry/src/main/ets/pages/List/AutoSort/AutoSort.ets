@@ -167,14 +167,14 @@ struct ListAutoSortExample {
                 begin: 0,
                 end: - length
               })
-              this.backAnimator.onframe = (value) => {
+              this.backAnimator.onFrame = (value) => {
                 this.dragSortCtrl.onMove(item, value)
                 if (Math.abs(value + length) < 50 && this.dropFlag){
                   this.dropFlag = false
                   this.dragSortCtrl.onDrop(item)
                 }
               }
-              this.backAnimator.onfinish = () => {
+              this.backAnimator.onFinish = () => {
                 this.dropFlag = true
               }
               this.backAnimator.play()

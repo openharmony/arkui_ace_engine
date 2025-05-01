@@ -40,7 +40,7 @@ struct IndexPage {
     new TextList(6, 'DragAndDropSorting', 'pages/List/DragAndDropSorting/DragAndDropSorting'),
     new TextList(7, 'FadingEdge', 'pages/List/FadingEdge/FadingEdge'),
     new TextList(8, 'LoopScrolling', 'pages/List/LoopScrolling/LoopScrolling'),
-    new TextList(9, 'Sideslip', 'pages/List/Sideslip/Sideslip')
+    new TextList(9, 'Sideslip', 'pages/List/Sideslip/Sideslip'),
     new TextList(10, 'MouseDragSlide', 'pages/List/MouseDragSlide'),
     new TextList(11, 'LayoutFromBottom', 'pages/List/LayoutFromBottom'),
     new TextList(12, 'CustomSlidingCurve', 'pages/List/CustomSlidingCurve'),

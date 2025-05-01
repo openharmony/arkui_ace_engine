@@ -4,7 +4,7 @@ import { ItemsPageView } from './ItemsPageView';
 @Component
 struct ListGridDemo {
   @State curIndex: number = 0;
-  @State tabItem:Array =
+  @State tabItem:Array<string> =
     ['全部', '咨询', '医生', '经络', '膳食', '茶饮', '运动', '足浴']
 
   @Builder
