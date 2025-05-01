@@ -1009,7 +1009,7 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
         selectOverlay_->SwitchToOverlayMode();
         return;
     }
-    if (!isMousePressed_) {
+    if (!isMousePressed_ && !isTryEntityDragging_) {
         HandleClickAISpanEvent(textOffset);
     }
     if (dataDetectorAdapter_->hasClickedAISpan_) {
@@ -1866,6 +1866,7 @@ void TextPattern::HandleMouseLeftPressAction(const MouseInfo& info, const Offset
         return;
     }
     mouseStatus_ = MouseStatus::PRESSED;
+    lastLeftMouseClickStyle_ = currentMouseStyle_;
     CHECK_NULL_VOID(pManager_);
     if (shiftFlag_) {
         auto end = pManager_->GetGlyphIndexByCoordinate(textOffset);
@@ -1889,11 +1890,12 @@ void TextPattern::CheckPressedSpanPosition(const Offset& textOffset)
 
 void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset)
 {
-    if (blockPress_) {
-        blockPress_ = false;
-    }
+    blockPress_ = blockPress_ ? false : blockPress_;
     auto oldMouseStatus = mouseStatus_;
     mouseStatus_ = MouseStatus::RELEASED;
+    auto oldEntityDragging = isTryEntityDragging_;
+    isTryEntityDragging_ = false;
+    lastLeftMouseClickStyle_ = MouseFormat::DEFAULT;
     ShowShadow({ textOffset.GetX(), textOffset.GetY() }, GetUrlHoverColor());
     if (isDoubleClick_) {
         isDoubleClick_ = false;
@@ -1901,7 +1903,8 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
         leftMousePressed_ = false;
         return;
     }
-    if (oldMouseStatus != MouseStatus::MOVE && oldMouseStatus == MouseStatus::PRESSED && !IsDragging()) {
+    if (oldMouseStatus != MouseStatus::MOVE && oldMouseStatus == MouseStatus::PRESSED &&
+        !IsDragging() && !oldEntityDragging) {
         HandleClickAISpanEvent(PointF(textOffset.GetX(), textOffset.GetY()));
         if (dataDetectorAdapter_->hasClickedAISpan_) {
             selectOverlay_->DisableMenu();
@@ -1943,6 +1946,7 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
 void TextPattern::HandleMouseLeftMoveAction(const MouseInfo& info, const Offset& textOffset)
 {
     if (!IsSelectableAndCopy()) {
+        isTryEntityDragging_ = lastLeftMouseClickStyle_ == MouseFormat::HAND_POINTING;
         isMousePressed_ = false;
         leftMousePressed_ = false;
         return;
