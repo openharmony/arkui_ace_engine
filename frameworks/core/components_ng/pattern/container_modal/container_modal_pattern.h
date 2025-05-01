@@ -240,6 +240,10 @@ public:
     bool IsContainerModalTransparent();
 
     Dimension titleHeight_ = CONTAINER_TITLE_HEIGHT;
+    RefPtr<ContainerModalToolBar> GetTitleManager()
+    {
+        return titleMgr_;
+    }
 
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)

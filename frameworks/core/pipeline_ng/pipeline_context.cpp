@@ -4204,8 +4204,18 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpd
     CHECK_NULL_VOID(containerNode);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_VOID(containerPattern);
-    containerPattern->ShowTitle(isShow, hasDeco, needUpdate);
     isShowTitle_ = isShow && hasDeco;
+    auto titleMgr = containerPattern->GetTitleManager();
+    if (titleMgr) {
+        if (isShowTitle_) {
+            titleMgr->SetIsFloatingMode(false);
+            titleMgr->UpdateTargetNodesBarMargin();
+        } else {
+            titleMgr->SetIsFloatingMode(true);
+            titleMgr->ResetExpandStackNode(true);
+        }
+    }
+    containerPattern->ShowTitle(isShow, hasDeco, needUpdate);
 }
 
 void PipelineContext::UpdateTitleInTargetPos(bool isShow, int32_t height)

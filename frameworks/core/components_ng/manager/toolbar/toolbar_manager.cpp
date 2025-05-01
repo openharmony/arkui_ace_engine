@@ -73,17 +73,17 @@ void ToolbarManager::OnToolBarManagerModifyDone()
     }
 }
 
-void ToolbarManager::SetSideBarColorChangeCallback(const std::function<void()>&& callback)
+void ToolbarManager::SetSideBarColorChangeCallback(
+    const std::function<void(const Color&, const Color&, const BlurStyle&)>&& callback)
 {
-    sideBarColorChangeCallbackFunc_.emplace_back(std::move(callback));
+    sideBarColorChangeCallbackFunc_ = std::move(callback);
 }
 
 void ToolbarManager::OnChangeSideBarColor()
 {
-    for (auto sideBarColorChangeCallbackFuncCopy : sideBarColorChangeCallbackFunc_) {
-        if (sideBarColorChangeCallbackFuncCopy) {
-            sideBarColorChangeCallbackFuncCopy();
-        }
+    auto sideBarColorChangeCallbackFuncCopy = sideBarColorChangeCallbackFunc_;
+    if (sideBarColorChangeCallbackFuncCopy) {
+        sideBarColorChangeCallbackFuncCopy(sideBarBgColor_, sideBarContainerBgColor_, sideBarBlurStyle_);
     }
 }
 } // namespace OHOS::Ace::NG

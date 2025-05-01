@@ -618,18 +618,14 @@ void SideBarContainerLayoutAlgorithm::LayoutControlButton(
     auto controlButtonTopPx = ConvertToPx(controlButtonTop, scaleProperty, parentWidth).value_or(0);
     controlButtonLeftPx += padding.left.value_or(0);
     controlButtonTopPx += padding.top.value_or(0);
-    float decorBarHeight = 0.0f;
-    auto hostNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(hostNode);
     auto sideBarContainerPattern = AceType::DynamicCast<SideBarContainerPattern>(pattern_.Upgrade());
     if (sideBarContainerPattern) {
-        RefPtr<ToolbarManager> toolbarManager = sideBarContainerPattern->GetToolBarManager();
+        auto toolbarManager = sideBarContainerPattern->GetToolBarManager();
         if (toolbarManager != nullptr && toolbarManager->GetIsMoveUp()) {
-            Dimension containerModelTitlebarHeight = toolbarManager->GetTitleHeight();
-            decorBarHeight = static_cast<float>(containerModelTitlebarHeight.ConvertToPx());
+            auto decorBarHeight = static_cast<float>(toolbarManager->GetTitleHeight().ConvertToPx());
+            controlButtonTopPx += decorBarHeight;
         }
     }
-    controlButtonTopPx += decorBarHeight;
     /*
      * Control buttion left position need to special handle:
      *   1. when sideBarPosition set to END and controlButtonLeft do not set in ButtonStyle
@@ -693,7 +689,15 @@ void SideBarContainerLayoutAlgorithm::LayoutSideBar(
             break;
     }
 
-    sideBarOffset_ = OffsetF(sideBarOffsetX, sideBarOffsetY);
+    auto decorBarHeight = 0.0f;
+    auto sideBarContainerPattern = AceType::DynamicCast<SideBarContainerPattern>(pattern_.Upgrade());
+    if (sideBarContainerPattern) {
+        auto toolbarManager = sideBarContainerPattern->GetToolBarManager();
+        if (toolbarManager && toolbarManager->GetIsMoveUp()) {
+            decorBarHeight = static_cast<float>(toolbarManager->GetTitleHeight().ConvertToPx());
+        }
+    }
+    sideBarOffset_ = OffsetF(sideBarOffsetX, sideBarOffsetY + decorBarHeight);
     sideBarLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(sideBarOffset_);
     sideBarLayoutWrapper->Layout();
 }

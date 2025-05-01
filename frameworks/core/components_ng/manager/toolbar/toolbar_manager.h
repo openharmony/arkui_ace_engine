@@ -99,16 +99,36 @@ public:
 
     void SetSideBarColor(const Color& color)
     {
-        sideBarColor_ = color;
-        OnChangeSideBarColor();
+        sideBarBgColor_ = color;
+    }
+
+    void SetSideBarContainerColor(const Color& bgColor)
+    {
+        sideBarContainerBgColor_ = bgColor;
+    }
+
+    Color GetSideBarContainerBgColor() const
+    {
+        return sideBarContainerBgColor_;
+    }
+
+    void SetSideBarBlurStyle(const BlurStyle& blurStyle)
+    {
+        sideBarBlurStyle_ = blurStyle;
+    }
+
+    BlurStyle GetSideBarBlurStyle() const
+    {
+        return sideBarBlurStyle_;
     }
 
     Color GetSideBarColor() const
     {
-        return sideBarColor_;
+        return sideBarBgColor_;
     }
 
-    void SetSideBarColorChangeCallback(const std::function<void()>&& callback);
+    void SetSideBarColorChangeCallback(
+        const std::function<void(const Color&, const Color&, const BlurStyle&)>&& callback);
     void OnChangeSideBarColor();
     void SetToolBarChangeCallback(const std::function<void()>&& callback);
     void OnChange();
@@ -211,13 +231,15 @@ private:
     bool hasNavDest_ = false;
     bool isMoveUp_ = false;
     ToolbarInfo sideBarInfo_;
-    Color sideBarColor_;
+    Color sideBarBgColor_;
+    Color sideBarContainerBgColor_;
+    BlurStyle sideBarBlurStyle_ = BlurStyle::NO_MATERIAL;
     Dimension titleHeight_ = Dimension(0.0f);
     ToolbarInfo sideBarDividerInfo_;
     ToolbarInfo navBarInfo_;
     ToolbarInfo navBarDividerInfo_;
     ToolbarInfo navDestInfo_;
-    std::list<std::function<void()>> sideBarColorChangeCallbackFunc_;
+    std::function<void(const Color&, const Color&, const BlurStyle&)> sideBarColorChangeCallbackFunc_;
     std::list<std::function<void()>> onChangeCallbackFuncs_;
     std::list<std::function<void()>> modifyDoneCallbackFuncs_;
 
