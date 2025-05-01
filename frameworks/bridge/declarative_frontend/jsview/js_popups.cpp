@@ -2215,6 +2215,7 @@ void JSViewAbstract::ParseContentMenuCommonParam(
         menuParam.previewMode = static_cast<MenuPreviewMode>(previewMode);
         if (previewMode == static_cast<int32_t>(MenuPreviewMode::IMAGE)) {
             ParseContentPreviewAnimationOptionsParam(info, menuObj, menuParam);
+            menuParam.enableArrow = false;
         }
     }
 }
