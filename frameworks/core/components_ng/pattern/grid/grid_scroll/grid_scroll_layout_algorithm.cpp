@@ -1064,6 +1064,7 @@ void GridScrollLayoutAlgorithm::UpdateCurrentOffsetForJumpTo(float mainSize)
     }
     if (info_.extraOffset_.has_value() && !info_.targetIndex_.has_value()) {
         info_.currentOffset_ += info_.extraOffset_.value();
+        info_.prevOffset_ = info_.currentOffset_;
     }
 }
 
