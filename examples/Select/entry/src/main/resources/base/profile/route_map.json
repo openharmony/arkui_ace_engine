@@ -294,6 +294,11 @@
       "name": "RadioBuild",
       "pageSourceFile": "src/main/ets/pages/components/radio/radioBuild.ets",
       "buildFunction": "RadioBuildBuilder"
+    },
+    {
+      "name": "FormIndex",
+      "pageSourceFile": "src/main/ets/pages/components/form.ets",
+      "buildFunction": "FormIndexBuilder"
     }
   ]
 }

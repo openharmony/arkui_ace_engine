@@ -32,6 +32,7 @@ struct NavIndex {
     { name: 'Rating', path: 'RatingIndex' },
     { name: 'Slider', path: 'SliderIndex' },
     { name: 'Radio', path: 'RadioIndex' },
+    { name: 'Form', path:'FormIndex'}
   ]
 
   build() {
