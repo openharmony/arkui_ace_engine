@@ -1639,7 +1639,7 @@ const RefPtr<Subwindow> SubwindowManager::GetSubwindowByType(int32_t instanceId,
     std::lock_guard<std::mutex> lock(subwindowMutex_);
     auto result = subwindowMap_.find(searchKey);
     if (result != subwindowMap_.end()) {
-        return result->second;
+        return CheckSubwindowDisplayId(searchKey, result->second);
     } else {
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in subwindowMap_, searchKey is %{public}s.",
             searchKey.ToString().c_str());
@@ -1729,7 +1729,7 @@ RefPtr<Subwindow> SubwindowManager::GetSubwindowBySearchKey(const SubwindowKey& 
     std::lock_guard<std::mutex> lock(subwindowMutex_);
     auto result = subwindowMap_.find(searchKey);
     if (result != subwindowMap_.end()) {
-        return result->second;
+        return CheckSubwindowDisplayId(searchKey, result->second);
     } else {
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in subwindowMap_, searchKey is %{public}s.",
             searchKey.ToString().c_str());
@@ -1759,6 +1759,22 @@ void SubwindowManager::AddSubwindowBySearchKey(const SubwindowKey& searchKey, co
         return;
     }
     AddInstanceSubwindowMap(subwindow->GetChildContainerId(), subwindow);
+}
+
+RefPtr<Subwindow> SubwindowManager::CheckSubwindowDisplayId(const SubwindowKey& searchKey,
+    const RefPtr<Subwindow>& subwindow)
+{
+    CHECK_NULL_RETURN(subwindow, nullptr);
+    if (searchKey.displayId != subwindow->GetDisplayId() && !subwindow->GetShown()) {
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Remove subwindow by displayId changed, "
+            "searchKey: %{public}s, subwindowId: %{public}d, newDisplayId: %{public}u, oldDisplayId: %{public}u",
+            searchKey.ToString().c_str(), subwindow->GetSubwindowId(), (uint32_t)searchKey.displayId,
+            (uint32_t)subwindow->GetDisplayId());
+        subwindowMap_.erase(searchKey);
+        subwindow->DestroyWindow();
+        return nullptr;
+    }
+    return subwindow;
 }
 
 void SubwindowManager::AddMaskSubwindowMap(int32_t dialogId, const RefPtr<Subwindow>& subwindow)
