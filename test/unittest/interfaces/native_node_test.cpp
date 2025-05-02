@@ -7118,4 +7118,45 @@ HWTEST_F(NativeNodeTest, NativeNodeTest141, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_EMBEDDED_COMPONENT_OPTION, &item0);
     nodeAPI->disposeNode(rootNode);
 }
+
+/**
+ * @tc.name: NativeNodeTest_BackgroundImageResizable_001
+ * @tc.desc: Test NODE_BACKGROUND_IMAGE_RESIZABLE_WITH_SLICE function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest_BackgroundImageResizable_001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto childNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+    int32_t ret1 = nodeAPI->addChild(rootNode, childNode);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
+    float size = 100.0f;
+    float left = -1.0f;
+    float top = 0.0f;
+    float right  = 8.0f;
+    float bottom = 9.0f;
+    ArkUI_NumberValue value[] = {{.f32 = size}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+
+    ArkUI_NumberValue value2[] = {{.f32 = left}, {.f32 = top}, {.f32 = right}, {.f32 = bottom}};
+    ArkUI_AttributeItem item2 = {value2, sizeof(value2) / sizeof(ArkUI_NumberValue)};
+
+    nodeAPI->setAttribute(rootNode, NODE_WIDTH, &item);
+    auto widthVal = nodeAPI->getAttribute(rootNode, NODE_WIDTH);
+    EXPECT_EQ(widthVal->value[0].f32, size);
+
+    nodeAPI->setAttribute(rootNode, NODE_HEIGHT, &item);
+    auto heightVal = nodeAPI->getAttribute(rootNode, NODE_HEIGHT);
+    EXPECT_EQ(heightVal->value[0].f32, size);
+
+    nodeAPI->setAttribute(rootNode, NODE_BACKGROUND_IMAGE_RESIZABLE_WITH_SLICE, &item2);
+    auto sliceVal = nodeAPI->getAttribute(rootNode, NODE_BACKGROUND_IMAGE_RESIZABLE_WITH_SLICE);
+    EXPECT_EQ(sliceVal->value[0].f32, 0.0f);
+    EXPECT_EQ(sliceVal->value[1].f32, top);
+    EXPECT_EQ(sliceVal->value[2].f32, right);
+    EXPECT_EQ(sliceVal->value[3].f32, bottom);
+}
 } // namespace OHOS::Ace
