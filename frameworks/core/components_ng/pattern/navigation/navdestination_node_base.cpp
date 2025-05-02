@@ -105,7 +105,7 @@ bool NavDestinationNodeBase::CustomizeExpandSafeArea()
     auto angle = rotateAngle_.value();
     if (geometryNode) {
         backupParentAdjust = geometryNode->GetParentAdjust();
-        if (angle == ROTATION_90 || angle == ROTATION_270) {
+        if (angle == ROTATION_90 || angle == ROTATION_180 || angle == ROTATION_270) {
             RectF parentAdjust{ safeAreaInsets_.left_.end, safeAreaInsets_.top_.end, 0.0f, 0.0f };
             geometryNode->SetParentAdjust(parentAdjust);
         }
@@ -359,18 +359,5 @@ OffsetF NavDestinationNodeBase::CalcTranslateForSlideTransition(
 
     auto translate = OffsetF{ isRight ? width : 0.0f, isRight ? 0.0f : height };
     return translate;
-}
-
-std::optional<Orientation> NavDestinationNodeBase::GetEffectiveOrientation()
-{
-    if (orientation_.has_value()) {
-        return orientation_;
-    }
-    auto context = GetContext();
-    CHECK_NULL_RETURN(context, std::nullopt);
-    auto mgr = context->GetNavigationManager();
-    CHECK_NULL_RETURN(mgr, std::nullopt);
-    auto ori = mgr->GetOrientationByWindowApi();
-    return ori;
 }
 } // namespace OHOS::Ace::NG

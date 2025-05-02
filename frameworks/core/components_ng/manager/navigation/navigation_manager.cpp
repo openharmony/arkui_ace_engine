@@ -522,43 +522,4 @@ void NavigationManager::OnOrientationChanged()
         }
     }
 }
-
-void NavigationManager::SetStatusBarConfig(const std::optional<std::pair<bool, bool>>& config)
-{
-    auto pipeline = pipeline_.Upgrade();
-    CHECK_NULL_VOID(pipeline);
-    auto container = Container::GetContainer(pipeline->GetInstanceId());
-    CHECK_NULL_VOID(container);
-    bool enable = false;
-    bool animated = false;
-    if (config.has_value()) {
-        // developer set statusBar config to NavDestination
-        enable = config.value().first;
-        animated = config.value().second;
-    } else {
-        // developer didn't use interface of NavDestination, fallback to setting in window.d.ts
-        enable = statusBarConfigByWindowApi_.first;
-        animated = statusBarConfigByWindowApi_.second;
-    }
-
-    container->SetSystemBarEnabled(SystemBarType::STATUS, enable, animated);
-}
-
-void NavigationManager::SetNavigationIndicatorConfig(std::optional<bool> config)
-{
-    auto pipeline = pipeline_.Upgrade();
-    CHECK_NULL_VOID(pipeline);
-    auto container = Container::GetContainer(pipeline->GetInstanceId());
-    CHECK_NULL_VOID(container);
-    bool enable = false;
-    if (config.has_value()) {
-        // developer set navigationIndicator config to NavDestination
-        enable = config.value();
-    } else {
-        // developer didn't use interface of NavDestination, fallback to setting in window.d.ts
-        enable = navigationIndicatorConfigByWindowApi_;
-    }
-
-    container->SetSystemBarEnabled(SystemBarType::NAVIGATION_INDICATOR, enable, false);
-}
 } // namespace OHOS::Ace::NG

@@ -170,34 +170,6 @@ public:
 
     void FireSubWindowLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason);
 
-    // set by developer in window.d.ts
-    void SetOrientationByWindowApi(Orientation ori)
-    {
-        orientationByWindowApi_ = ori;
-    }
-    Orientation GetOrientationByWindowApi() const
-    {
-        return orientationByWindowApi_;
-    }
-    void SetStatusBarConfigByWindowApi(std::pair<bool, bool> config)
-    {
-        statusBarConfigByWindowApi_ = config;
-    }
-    const std::pair<bool, bool>& GetStatusBarConfigByWindowApi() const
-    {
-        return statusBarConfigByWindowApi_;
-    }
-    void SetNavigationIndicatorConfigByWindowApi(bool config)
-    {
-        navigationIndicatorConfigByWindowApi_ = config;
-    }
-    bool GetNavigationIndicatorConfigByWindowApi() const
-    {
-        return navigationIndicatorConfigByWindowApi_;
-    }
-    void SetStatusBarConfig(const std::optional<std::pair<bool, bool>>& config);
-    void SetNavigationIndicatorConfig(std::optional<bool> config);
-
     // for non-animation
     void AddBeforeOrientationChangeTask(const std::function<void()>&& task);
     void ClearBeforeOrientationChangeTask();
@@ -241,13 +213,7 @@ private:
     int32_t interactiveAnimationId_ = -1;
 
     WeakPtr<PipelineContext> pipeline_;
-
-    // set by developer in window.d.ts setPreferredOrientation
-    Orientation orientationByWindowApi_ = Orientation::UNSPECIFIED;
     std::vector<std::function<void()>> beforeOrientationChangeTasks_;
-    // set by developer in window.d.ts setSpecificSystemBarEnabled
-    std::pair<bool, bool> statusBarConfigByWindowApi_;
-    bool navigationIndicatorConfigByWindowApi_ = true;
 };
 } // namespace OHOS::Ace::NG
 

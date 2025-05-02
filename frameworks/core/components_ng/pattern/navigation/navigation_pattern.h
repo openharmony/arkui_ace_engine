@@ -492,14 +492,6 @@ public:
         return isInDividerDrag_;
     }
 
-    std::optional<std::pair<bool, bool>> GetPreStatusBarConfig() const
-    {
-        return preStatusBarConfig_;
-    }
-    std::optional<bool> GetPreNavIndicatorConfig() const
-    {
-        return preNavIndicatorConfig_;
-    }
     void SetPageViewportConfig(const RefPtr<PageViewportConfig>& config) override;
     bool IsPageLevelConfigEnabled(bool considerSize = true);
     void OnStartOneTransitionAnimation();
@@ -632,15 +624,9 @@ private:
     void OnAllTransitionAnimationFinish();
     void UpdatePageLevelConfigForSizeChanged();
     RefPtr<NavDestinationNodeBase> GetLastStandardNodeOrNavBar();
-    void ShowOrHideSystemBarIfNeeded(bool isShow,
-        std::optional<std::pair<bool, bool>> preStatusBarConfig, std::optional<bool> showStatusBar,
-        std::optional<bool> preNavIndicatorConfig, std::optional<bool> showNavIndicator);
-    void ShowOrHideStatusBarIfNeeded(bool isShow, std::optional<std::pair<bool, bool>> curStatusBarConfig,
-        std::optional<std::pair<bool, bool>> preStatusBarConfig, std::optional<bool> showStatusBar);
-    void ShowOrHideNavIndicatorIfNeeded(bool isShow, std::optional<bool> curNavIndicatorConfig,
-        std::optional<bool> preNavIndicatorConfig, std::optional<bool> showNavIndicator);
+    void HideSystemBarIfNeeded();
+    void ShowOrRestoreSystemBarIfNeeded();
     bool IsEquivalentToStackMode();
-    void BackupPreSystemBarConfigIfNeeded(const std::vector<WeakPtr<NavDestinationNodeBase>>& visibleNodes);
     void ClearPageAndNavigationConfig();
     bool CustomizeExpandSafeArea() override;
 
@@ -704,10 +690,6 @@ private:
 
     std::vector<WeakPtr<NavDestinationNodeBase>> preVisibleNodes_;
     int32_t runningTransitionCount_ = 0;
-    std::optional<bool> showStatusBar_;
-    std::optional<std::pair<bool, bool>> preStatusBarConfig_;
-    std::optional<bool> showNavIndicator_;
-    std::optional<bool> preNavIndicatorConfig_;
     bool isTransitionAnimationAborted_ = false;
 };
 

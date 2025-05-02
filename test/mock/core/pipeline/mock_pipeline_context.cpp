@@ -20,6 +20,7 @@
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/common/page_viewport_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
@@ -1352,3 +1353,26 @@ void NG::PipelineContext::SetWindowSizeChangeReason(WindowSizeChangeReason reaso
 }
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================
+
+// WindowManager ===============================================================
+namespace OHOS::Ace {
+RefPtr<PageViewportConfig> WindowManager::GetCurrentViewportConfig()
+{
+    if (getCurrentViewportConfigCallback_) {
+        return getCurrentViewportConfigCallback_();
+    }
+    return nullptr;
+}
+
+RefPtr<PageViewportConfig> WindowManager::GetTargetViewportConfig(
+    std::optional<Orientation> orientation, std::optional<bool> enableStatusBar,
+    std::optional<bool> statusBarAnimation, std::optional<bool> enableNavIndicator)
+{
+    if (getTargetViewportConfigCallback_) {
+        return getTargetViewportConfigCallback_(
+            orientation, enableStatusBar, statusBarAnimation, enableNavIndicator);
+    }
+    return nullptr;
+}
+} // namespace OHOS::Ace
+// WindowManager ===============================================================
