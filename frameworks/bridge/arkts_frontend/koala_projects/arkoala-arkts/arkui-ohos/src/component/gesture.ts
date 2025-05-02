@@ -1074,7 +1074,7 @@ export class TapGestureHandler extends GestureHandler {
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
         if (node) {
             this.createAndSetTapGestureAttr();
-            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer);
+            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer, true);
         }
     }
     addGestureToGroup(group: KPointer): void {
@@ -1133,7 +1133,7 @@ export class LongPressGestureHandler extends GestureHandler {
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
         if (node) {
             this.createAndSetLongPressGestureAttr();
-            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer);
+            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer, true);
         }
     }
     addGestureToGroup(group: KPointer): void {
@@ -1200,7 +1200,7 @@ export class PanGestureHandler extends GestureHandler {
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
         if (node) {
             this.createAndSetPanGestureAttr();
-            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer);
+            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer, true);
         }
     }
     addGestureToGroup(group: KPointer): void {
@@ -1243,7 +1243,7 @@ export class SwipeGestureHandler extends GestureHandler {
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
         if (node) {
             this.createAndSetSwipeGestureAttr();
-            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer);
+            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer, true);
         }
     }
     addGestureToGroup(group: KPointer): void {
@@ -1307,7 +1307,7 @@ export class PinchGestureHandler extends GestureHandler {
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
         if (node) {
             this.createAndSetPinchGestureAttr();
-            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer);
+            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer, true);
         }
     }
     addGestureToGroup(group: KPointer): void {
@@ -1371,7 +1371,7 @@ export class RotationGestureHandler extends GestureHandler {
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
         if (node) {
             this.createAndSetRotationGestureAttr();
-            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer);
+            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer, true);
         }
     }
     addGestureToGroup(group: KPointer): void {
@@ -1426,7 +1426,7 @@ export class GestureGroupHandler extends GestureHandler {
             }
         }
         if (node) {
-            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer);
+            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer, true);
         }
     }
 }
@@ -2445,6 +2445,7 @@ export class TapGesture extends Gesture {
         tap.finger = value?.fingers;
         tap.count = value?.count;
         tap.distanceThreshold = value?.distanceThreshold;
+        tap.isFingerCountLimited = value?.isFingerCountLimited;
         return tap;
     }
     onAction(event: Callback<GestureEvent>): this {
@@ -2463,7 +2464,7 @@ export class TapGesture extends Gesture {
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
         if (node) {
             this.createAndSetTapGestureAttr();
-            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer);
+            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer, false);
         }
     }
     addGestureToGroup(group: KPointer): void {
@@ -2485,6 +2486,7 @@ export class LongPressGesture extends Gesture {
         longPress.finger = value?.fingers;
         longPress.duration = value?.duration;
         longPress.repeat = value?.repeat;
+        longPress.isFingerCountLimited = value?.isFingerCountLimited;
         return longPress;
     }
     onAction(event: Callback<GestureEvent>): this {
@@ -2517,7 +2519,7 @@ export class LongPressGesture extends Gesture {
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
         if (node) {
             this.createAndSetLongPressGestureAttr();
-            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer);
+            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer, false);
         }
     }
     addGestureToGroup(group: KPointer): void {
@@ -2542,6 +2544,7 @@ export class PanGesture extends Gesture {
             pan.finger = options?.fingers;
             pan.direction = options?.direction;
             pan.distance = options?.distance;
+            pan.isFingerCountLimited = options?.isFingerCountLimited;
         } else {
             // TODO
             // let panGestureOptions = value as PanGestureOptions;
@@ -2589,7 +2592,7 @@ export class PanGesture extends Gesture {
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
         if (node) {
             this.createAndSetPanGestureAttr();
-            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer);
+            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer, false);
         }
     }
     addGestureToGroup(group: KPointer): void {
@@ -2610,6 +2613,7 @@ export class PinchGesture extends Gesture {
         const pinch = factory();
         pinch.finger = value?.fingers;
         pinch.distance = value?.distance;
+        pinch.isFingerCountLimited = value?.isFingerCountLimited;
         return pinch;
     }
     onActionStart(event: Callback<GestureEvent>): this {
@@ -2649,7 +2653,7 @@ export class PinchGesture extends Gesture {
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
         if (node) {
             this.createAndSetPinchGestureAttr();
-            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer);
+            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer, false);
         }
     }
     addGestureToGroup(group: KPointer): void {
@@ -2670,6 +2674,7 @@ export class RotationGesture extends Gesture {
         const rotation = factory();
         rotation.finger = value?.fingers;
         rotation.angle = value?.angle;
+        rotation.isFingerCountLimited = value?.isFingerCountLimited;
         return rotation;
     }
     onActionStart(event: Callback<GestureEvent>): this {
@@ -2709,7 +2714,7 @@ export class RotationGesture extends Gesture {
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
         if (node) {
             this.createAndSetRotationGestureAttr();
-            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer);
+            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer, false);
         }
     }
     addGestureToGroup(group: KPointer): void {
@@ -2729,6 +2734,7 @@ export class SwipeGesture extends Gesture {
         swipe.finger = value?.fingers;
         swipe.direction = value?.direction;
         swipe.speed = value?.speed;
+        swipe.isFingerCountLimited = value?.isFingerCountLimited;
         return swipe;
     }
     onAction(event: Callback<GestureEvent>): this {
@@ -2747,7 +2753,7 @@ export class SwipeGesture extends Gesture {
     setGesture(priority: number, node?: PeerNode, mask?: GestureMask): void {
         if (node) {
             this.createAndSetSwipeGestureAttr();
-            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer);
+            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer, false);
         }
     }
     addGestureToGroup(group: KPointer): void {
@@ -2796,7 +2802,7 @@ export class GestureGroup {
             }
         }
         if (node) {
-            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer);
+            GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer, false);
         }
     }
 }

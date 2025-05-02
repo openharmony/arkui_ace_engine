@@ -31991,10 +31991,10 @@ void impl_GestureOps_setAllowedTypes(Ark_NativePointer gesture, KSerializerBuffe
         GetAccessors()->getGestureOpsAccessor()->setAllowedTypes(gesture, (const Array_SourceTool*)&types_value);
 }
 KOALA_INTEROP_DIRECT_V3(GestureOps_setAllowedTypes, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_GestureOps_addGestureToNode(Ark_NativePointer node, KInteropNumber priority, Ark_Int32 mask, Ark_NativePointer gesture) {
-        GetAccessors()->getGestureOpsAccessor()->addGestureToNode(node, (const Ark_Number*) (&priority), static_cast<Ark_GestureMask>(mask), gesture);
+void impl_GestureOps_addGestureToNode(Ark_NativePointer node, KInteropNumber priority, Ark_Int32 mask, Ark_NativePointer gesture, Ark_Boolean isModifier) {
+        GetAccessors()->getGestureOpsAccessor()->addGestureToNode(node, (const Ark_Number*) (&priority), static_cast<Ark_GestureMask>(mask), gesture, isModifier);
 }
-KOALA_INTEROP_DIRECT_V4(GestureOps_addGestureToNode, Ark_NativePointer, KInteropNumber, Ark_Int32, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_V5(GestureOps_addGestureToNode, Ark_NativePointer, KInteropNumber, Ark_Int32, Ark_NativePointer, Ark_Boolean)
 void impl_GestureOps_addGestureToGroup(Ark_NativePointer group, Ark_NativePointer gesture) {
         GetAccessors()->getGestureOpsAccessor()->addGestureToGroup(group, gesture);
 }

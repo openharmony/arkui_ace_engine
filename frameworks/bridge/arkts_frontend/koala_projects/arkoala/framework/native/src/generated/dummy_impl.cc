@@ -24186,7 +24186,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void AddGestureToNodeImpl(Ark_NativePointer node,
                               const Ark_Number* priority,
                               Ark_GestureMask mask,
-                              Ark_NativePointer gesture)
+                              Ark_NativePointer gesture,
+                              Ark_Boolean isModifier)
     {
         if (!needGroupedLog(1))
             return;
@@ -24198,6 +24199,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, mask);
         out.append(", ");
         WriteToString(&out, gesture);
+        out.append(", ");
+        WriteToString(&out, isModifier);
         out.append(") \n");
         appendGroupedLog(1, out);
     }

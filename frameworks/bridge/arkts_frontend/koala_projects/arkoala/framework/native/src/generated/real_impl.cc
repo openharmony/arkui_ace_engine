@@ -12271,7 +12271,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void AddGestureToNodeImpl(Ark_NativePointer node,
                               const Ark_Number* priority,
                               Ark_GestureMask mask,
-                              Ark_NativePointer gesture)
+                              Ark_NativePointer gesture,
+                              Ark_Boolean isModifier)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
