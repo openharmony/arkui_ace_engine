@@ -48,7 +48,7 @@ struct DialogStrings {
 
 DialogStrings GetDialogStrings()
 {
-    DialogStrings strs = {"", ""};
+    DialogStrings strs = {"Cancel", "OK"};
     auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, strs);
     auto dialogTheme = context->GetTheme<DialogTheme>();

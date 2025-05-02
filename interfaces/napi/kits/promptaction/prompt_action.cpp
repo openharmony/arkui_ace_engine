@@ -809,7 +809,7 @@ bool ParseButtonsPara(napi_env env, std::shared_ptr<PromptAsyncContext>& context
         return false;
     }
     if (isShowActionMenu) {
-        std::string buttonCancelText = "";
+        std::string buttonCancelText = "Cancel";
         auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         if (pipeline) {
             auto theme = pipeline->GetTheme<ButtonTheme>();

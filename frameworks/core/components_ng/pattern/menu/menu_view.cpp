@@ -1635,7 +1635,7 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, std::vector<Op
         AceType::MakeRefPtr<MenuItemRowPattern>());
 
 #ifdef OHOS_PLATFORM
-    std::string buttonPasteText = "";
+    std::string buttonPasteText = "Paste";
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     if (pipeline) {
         auto theme = pipeline->GetTheme<ButtonTheme>();
@@ -1663,7 +1663,7 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, const OptionVa
         AceType::MakeRefPtr<MenuItemRowPattern>());
 
 #ifdef OHOS_PLATFORM
-    std::string buttonPasteText = "";
+    std::string buttonPasteText = "Paste";
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     if (pipeline) {
         auto theme = pipeline->GetTheme<ButtonTheme>();
