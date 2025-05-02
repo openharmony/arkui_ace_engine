@@ -35,6 +35,8 @@ export struct CheckboxIndex {
     { name: 'CheckboxGroupIndicator', path: 'CheckboxGroupIndicator' },
     { name: 'CheckboxGroupCustom', path: 'CheckboxGroupCustom' },
     { name: 'CheckboxModifier', path: 'CheckboxModifier' },
+    { name: 'CheckboxThemeControl', path: 'CheckboxThemeControl' },
+    { name: 'Checkbox组合场景1', path: 'CheckboxMultiTestLevel0' },
   ]
 
   build() {

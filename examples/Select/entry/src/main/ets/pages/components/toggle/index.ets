@@ -32,6 +32,12 @@ export struct ToggleIndex {
     { name: 'ToggleColor', path: 'ToggleColor' },
     { name: 'ToggleNormal', path: 'ToggleNormal' },
     { name: 'ToggleEnable', path: 'ToggleEnable' },
+    { name: 'Toggle组合场景1', path: 'ToggleMultiTestLevel0' },
+    { name: 'Toggle组合场景2', path: 'ToggleMultiTestLevel1' },
+    { name: 'Toggle组合场景3', path: 'ToggleMultiTestLevel2' },
+    { name: 'Toggle组合场景4', path: 'ToggleMultiTestLevel3' },
+    { name: 'Toggle组合场景5', path: 'ToggleMultiTestLevel4' },
+    { name: 'Toggle组合场景6', path: 'ToggleMultiTestLevel5' },
   ]
 
   build() {

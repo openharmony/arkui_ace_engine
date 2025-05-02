@@ -86,18 +86,19 @@
     },
     {
       "name": "toggle_unselected_color",
-      "value": "#FF989292"
-    },{
+      "value": "#FFEAC6C6"
+    },
+    {
       "name": "checkbox_unselected_color",
-      "value": "#FFDEA2A2"
+      "value": "#FFAE0707"
     },
     {
       "name": "checkbox_selected_color",
       "value": "#FFAE0707"
     },
     {
-      "name": "white",
-      "value": "#FFFFFF"
+      "name": "checkbox_mark_color",
+      "value": "#FFAE0707"
     },
     {
       "name": "purple",
@@ -129,51 +130,31 @@
     },
     {
       "name": "Color_orange",
-      "value": "#FFFF7E00"
-    },
-    {
-      "name": "Color_red",
-      "value": "#FFFF0000"
-    },
-    {
-      "name": "Color_pink",
-      "value": "#FFFF7EFF"
-    },
-    {
-      "name": "backgroundColor",
-      "value": "#FFB6C1"
-    },
-    {
-      "name": "fontColor",
-      "value": "#FFC0CB"
-    },
-    {
-      "name": "selectedColor",
-      "value": "#4B0082"
-    },
-    {
-      "name": "switchPointColor",
-      "value": "#1E90FF"
-    },
-    {
-      "name": "Color_green",
-      "value": "#6495ED"
-    },
-    {
-      "name": "Color_test1",
-      "value": "#708090"
-    },
-    {
-      "name": "Color_test2",
       "value": "#808000"
     },
     {
+      "name": "Color_red",
+      "value": "#FF6347"
+    },
+    {
+      "name": "Color_green",
+      "value": "#E1FFFF"
+    },
+    {
+      "name": "Color_test1",
+      "value": "#B8860B"
+    },
+    {
+      "name": "Color_test2",
+      "value": "#00FF00"
+    },
+    {
       "name": "Color_test3",
-      "value": "#4682B4"
+      "value": "#D8BFD8"
     },
     {
       "name": "Color_test4",
-      "value": "#008B8B"
+      "value": "#6A5ACD"
     }
   ]
 }
