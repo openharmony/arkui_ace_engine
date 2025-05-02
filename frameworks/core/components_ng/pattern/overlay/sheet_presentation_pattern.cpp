@@ -1936,6 +1936,7 @@ SheetType SheetPresentationPattern::ComputeSheetTypeInSubWindow() const
     CHECK_NULL_RETURN(mainWindowContext, SheetType::SHEET_CENTER);
     auto windowWidth = mainWindowContext->GetDisplayWindowRectInfo().Width();
     auto windowHeight = mainWindowContext->GetDisplayWindowRectInfo().Height();
+    auto manager = mainWindowContext->GetWindowManager();
     if (container->IsUIExtensionWindow()) {
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(GetSubWindowId(),
             SubwindowType::TYPE_SHEET);
@@ -1947,7 +1948,7 @@ SheetType SheetPresentationPattern::ComputeSheetTypeInSubWindow() const
     CHECK_NULL_RETURN(layoutProperty, SheetType::SHEET_CENTER);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     auto sheetType =  SheetType::SHEET_CENTER;
-    if (container->IsPcOrPadFreeMultiWindowMode()) {
+    if (manager && manager->IsPcOrPadFreeMultiWindowMode()) {
         // Two in one or pad free-window mode
         if (sheetStyle.sheetType.has_value() &&
             sheetStyle.sheetType.value() == SheetType::SHEET_POPUP && sheetKey_.hasValidTargetNode) {

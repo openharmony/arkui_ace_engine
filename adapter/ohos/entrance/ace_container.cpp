@@ -106,6 +106,13 @@ const char* GetEngineSharedLibrary()
 }
 #endif
 
+inline void SetSystemBarPropertyEnableFlag(Rosen::SystemBarProperty& property)
+{
+    property.settingFlag_ = static_cast<Rosen::SystemBarSettingFlag>(
+        static_cast<int32_t>(property.settingFlag_) |
+        static_cast<int32_t>(Rosen::SystemBarSettingFlag::ENABLE_SETTING));
+}
+
 std::string StringifyAvoidAreas(const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
     std::string res = "[";
@@ -116,39 +123,6 @@ std::string StringifyAvoidAreas(const std::map<OHOS::Rosen::AvoidAreaType, OHOS:
     res = res + "]";
     return res;
 }
-
-class FrontendOrientationListener : public OHOS::Rosen::IPreferredOrientationChangeListener  {
-public:
-    explicit FrontendOrientationListener(int32_t instanceId, WeakPtr<NG::NavigationManager> mgr)
-        : instanceId_(instanceId), mgr_(mgr) {}
-    ~FrontendOrientationListener() = default;
-
-    void OnPreferredOrientationChange(OHOS::Rosen::Orientation ori) override
-    {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "set orientation to: %{public}d", static_cast<int32_t>(ori));
-        auto container = AceContainer::GetContainer(instanceId_);
-        CHECK_NULL_VOID(container);
-        auto pipeline = container->GetPipelineContext();
-        CHECK_NULL_VOID(pipeline);
-        auto taskExecutor = container->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        auto task = [mgr = mgr_, ori]() {
-            auto navMgr = mgr.Upgrade();
-            CHECK_NULL_VOID(navMgr);
-            navMgr->SetOrientationByWindowApi(static_cast<Orientation>(static_cast<int32_t>(ori)));
-        };
-        if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
-            task();
-            return;
-        }
-        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI,
-            "ArkUIOnFrontendOrientationSetted", PriorityType::VIP);
-    }
-
-private:
-    int32_t instanceId_ = -1;
-    WeakPtr<NG::NavigationManager> mgr_;
-};
 
 class WindowOrientationChangeListener : public OHOS::Rosen::IWindowOrientationChangeListener {
 public:
@@ -2480,9 +2454,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         LOGE("pipeline invalid,only new ArkUI pipeline support UIsession");
     }
 #endif
-    RegisterOrientationUpdateListener();
     RegisterOrientationChangeListener();
-    InitSystemBarConfig();
     RegisterUIExtDataConsumer();
     RegisterUIExtDataSendToHost();
     RegisterAvoidInfoCallback();
@@ -2868,6 +2840,47 @@ void AceContainer::InitWindowCallback()
     windowManager->SetSetSystemBarStyleCallBack([window = uiWindow_](const RefPtr<SystemBarStyle>& style) {
         SystemBarStyleOhos::SetSystemBarStyle(window, style);
     });
+    windowManager->SetWindowSetSystemBarEnabledCallback([window = uiWindow_](SystemBarType type,
+        std::optional<bool> enable, std::optional<bool> needAnimation) -> bool {
+            CHECK_NULL_RETURN(window, false);
+            return AceContainer::SetSystemBarEnabled(window, type, enable, needAnimation);
+        });
+    windowManager->SetGetCurrentViewportConfigCallback(
+        [weakContainer = WeakClaim(this)]() -> RefPtr<PageViewportConfig> {
+            auto container = weakContainer.Upgrade();
+            CHECK_NULL_RETURN(container, nullptr);
+            return container->GetCurrentViewportConfig();
+        });
+    windowManager->SetGetTargetViewportConfigCallback([weakContainer = WeakClaim(this)](
+        std::optional<Orientation> orientation, std::optional<bool> enableStatusBar,
+        std::optional<bool> statusBarAnimation, std::optional<bool> enableNavIndicator) -> RefPtr<PageViewportConfig> {
+            auto container = weakContainer.Upgrade();
+            CHECK_NULL_RETURN(container, nullptr);
+            return container->GetTargetViewportConfig(
+                orientation, enableStatusBar, statusBarAnimation, enableNavIndicator);
+        });
+    windowManager->SetSetRequestedOrientationCallback(
+        [window = uiWindow_](std::optional<Orientation> orientation, bool needAnimation) {
+            auto ori = Rosen::Orientation::INVALID;
+            if (orientation.has_value()) {
+                ori = static_cast<Rosen::Orientation>(static_cast<int32_t>(orientation.value()));
+            }
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "SetRequestedOrientation ori:%{public}d, needAnimation:%{public}d",
+                static_cast<int32_t>(ori), needAnimation);
+            window->SetRequestedOrientation(ori, needAnimation);
+        });
+    windowManager->SetGetRequestedOrientationCallback(
+        [window = uiWindow_]() -> Orientation {
+            auto ori = window->GetRequestedOrientation();
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "GetRequestedOrientation ori:%{public}d", static_cast<int32_t>(ori));
+            return static_cast<Orientation>(static_cast<int32_t>(ori));
+        });
+    windowManager->SetIsFullScreenWindowCallback(
+        [window = uiWindow_]() -> bool {
+            return window->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN;
+        });
+    windowManager->SetIsPcOrPadFreeMultiWindowModeCallback(
+        [window = uiWindow_]() -> bool { return window->IsPcOrPadFreeMultiWindowMode(); });
     windowManager->SetGetFreeMultiWindowModeEnabledStateCallback(
         [window = uiWindow_]() -> bool { return window->GetFreeMultiWindowModeEnabledState(); });
     windowManager->SetWindowCallNativeCallback([window = uiWindow_](const std::string& name, const std::string& value) {
@@ -4312,7 +4325,6 @@ void AceContainer::RegisterAvoidInfoDataProcessCallback()
 
 RefPtr<PageViewportConfig> AceContainer::GetCurrentViewportConfig() const
 {
-    CHECK_NULL_RETURN(uiWindow_, nullptr);
     auto config = AceType::MakeRefPtr<PageViewportConfigOhos>();
     CHECK_NULL_RETURN(config, nullptr);
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
@@ -4335,15 +4347,16 @@ RefPtr<PageViewportConfig> AceContainer::GetCurrentViewportConfig() const
 
     AvoidAreaInfo avoidAreas;
     auto insets = mgr->GetSystemSafeArea();
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "TYPE_SYSTEM safeArea:%{public}s", insets.ToString().c_str());
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "current TYPE_SYSTEM safeArea:%{public}s", insets.ToString().c_str());
     auto systemAvoidArea = ConvertAvoidArea(insets, width, height);
     avoidAreas.emplace(OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM, systemAvoidArea);
     insets = mgr->GetCutoutSafeArea();
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "TYPE_CUTOUT safeArea:%{public}s", insets.ToString().c_str());
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "current TYPE_CUTOUT safeArea:%{public}s", insets.ToString().c_str());
     auto cutoutArea = ConvertAvoidArea(insets, width, height);
     avoidAreas.emplace(OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT, cutoutArea);
     insets = mgr->GetNavSafeArea();
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "TYPE_NAVIGATION_INDICATOR safeArea:%{public}s", insets.ToString().c_str());
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "current TYPE_NAVIGATION_INDICATOR safeArea:%{public}s", insets.ToString().c_str());
     auto navArea = ConvertAvoidArea(insets, width, height);
     avoidAreas.emplace(OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR, navArea);
     config->SetAvoidAreas(avoidAreas);
@@ -4351,8 +4364,9 @@ RefPtr<PageViewportConfig> AceContainer::GetCurrentViewportConfig() const
     return config;
 }
 
-RefPtr<PageViewportConfig> AceContainer::GetTargetViewportConfig(Orientation orientation,
-    bool enableStatusBar, bool statusBarAnimated, bool enableNavigationIndicator)
+RefPtr<PageViewportConfig> AceContainer::GetTargetViewportConfig(
+    std::optional<Orientation> orientation, std::optional<bool> enableStatusBar,
+    std::optional<bool> statusBarAnimation, std::optional<bool> enableNavIndicator) const
 {
     CHECK_NULL_RETURN(uiWindow_, nullptr);
     auto config = AceType::MakeRefPtr<PageViewportConfigOhos>();
@@ -4362,22 +4376,35 @@ RefPtr<PageViewportConfig> AceContainer::GetTargetViewportConfig(Orientation ori
     config->SetPipelineContext(WeakPtr(context));
 
     std::map<Rosen::WindowType, Rosen::SystemBarProperty> properties;
-    auto statusBarProperty = uiWindow_->GetSystemBarPropertyByType(Rosen::WindowType::WINDOW_TYPE_STATUS_BAR);
-    statusBarProperty.enable_ = enableStatusBar;
-    statusBarProperty.enableAnimation_ = statusBarAnimated;
-    properties.emplace(Rosen::WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProperty);
-    auto navigationIndicatorProperty =
-        uiWindow_->GetSystemBarPropertyByType(Rosen::WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
-    navigationIndicatorProperty.enable_ = enableNavigationIndicator;
-    properties.emplace(Rosen::WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, navigationIndicatorProperty);
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-        "enableStatusBar:%{public}d, statusBarAnimated:%{public}d, enableNavIndicator:%{public}d",
-        enableStatusBar, statusBarAnimated, enableNavigationIndicator);
+    if (enableStatusBar.has_value()) {
+        auto property = uiWindow_->GetSystemBarPropertyByType(Rosen::WindowType::WINDOW_TYPE_STATUS_BAR);
+        property.enable_ = enableStatusBar.value();
+        property.enableAnimation_ = statusBarAnimation.value_or(false);
+        SetSystemBarPropertyEnableFlag(property);
+        properties.emplace(Rosen::WindowType::WINDOW_TYPE_STATUS_BAR, property);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+            "GetTargetViewportInfo with enableStatusBar:%{public}d, statusBarAnimation:%{public}d",
+            enableStatusBar.value(), statusBarAnimation.value_or(false));
+    }
+    if (enableNavIndicator.has_value()) {
+        auto property = uiWindow_->GetSystemBarPropertyByType(Rosen::WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
+        property.enable_ = enableNavIndicator.value();
+        SetSystemBarPropertyEnableFlag(property);
+        properties.emplace(Rosen::WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, property);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "GetTargetViewportInfo with enableNavIndicator:%{public}d",
+            enableNavIndicator.value());
+    }
+    Rosen::Orientation ori = Rosen::Orientation::INVALID;
+    if (orientation.has_value()) {
+        ori = static_cast<Rosen::Orientation>(static_cast<int32_t>(orientation.value()));
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+            "GetTargetViewportInfo with orientation:%{public}d", static_cast<int32_t>(ori));
+    }
 
     ViewportConfig viewportConfig;
     AvoidAreaInfo avoidAreas;
-    auto ret = uiWindow_->GetTargetOrientationConfigInfo(
-        static_cast<Rosen::Orientation>(static_cast<int32_t>(orientation)), properties, viewportConfig, avoidAreas);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "get targetConfigInfo with ori:%{public}d", static_cast<int32_t>(ori));
+    auto ret = uiWindow_->GetTargetOrientationConfigInfo(ori, properties, viewportConfig, avoidAreas);
     if (Rosen::WMError::WM_OK != ret) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to get targetOrientationInfo from window, error:%{public}d",
             static_cast<int32_t>(ret));
@@ -4390,39 +4417,6 @@ RefPtr<PageViewportConfig> AceContainer::GetTargetViewportConfig(Orientation ori
     config->SetAvoidAreas(avoidAreas);
 
     return config;
-}
-
-void AceContainer::SetRequestedOrientation(Orientation orientation, bool needAnimation)
-{
-    CHECK_NULL_VOID(uiWindow_);
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "SetRequestedOrientation ori:%{public}d, needAnimation:%{public}d",
-        static_cast<int32_t>(orientation), needAnimation);
-    uiWindow_->SetRequestedOrientation(
-        static_cast<Rosen::Orientation>(static_cast<int32_t>(orientation)), needAnimation);
-}
-
-Orientation AceContainer::GetRequestedOrientation()
-{
-    CHECK_NULL_RETURN(uiWindow_, Orientation::UNSPECIFIED);
-    auto ori = uiWindow_->GetRequestedOrientation();
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "GetRequestedOrientation ori:%{public}d", static_cast<int32_t>(ori));
-    return static_cast<Orientation>(static_cast<int32_t>(ori));
-}
-
-void AceContainer::RegisterOrientationUpdateListener()
-{
-    CHECK_NULL_VOID(uiWindow_);
-    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
-    CHECK_NULL_VOID(context);
-    auto navigationMgr = context->GetNavigationManager();
-    CHECK_NULL_VOID(navigationMgr);
-    auto orientation = uiWindow_->GetRequestedOrientation();
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set initial ori:%{public}d", static_cast<int32_t>(orientation));
-    navigationMgr->SetOrientationByWindowApi(static_cast<Orientation>(static_cast<int32_t>(orientation)));
-    auto listener = new FrontendOrientationListener(GetInstanceId(), WeakPtr(navigationMgr));
-    if (uiWindow_->RegisterPreferredOrientationChangeListener(listener) != Rosen::WMError::WM_OK) {
-        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to register Orientation listener");
-    }
 }
 
 void AceContainer::RegisterOrientationChangeListener()
@@ -4438,31 +4432,10 @@ void AceContainer::RegisterOrientationChangeListener()
     }
 }
 
-void AceContainer::InitSystemBarConfig()
+bool AceContainer::SetSystemBarEnabled(const sptr<OHOS::Rosen::Window>& window, SystemBarType type,
+    std::optional<bool> enable, std::optional<bool> animation)
 {
-    CHECK_NULL_VOID(uiWindow_);
-    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
-    CHECK_NULL_VOID(context);
-    auto navigationMgr = context->GetNavigationManager();
-    CHECK_NULL_VOID(navigationMgr);
-    auto property = uiWindow_->GetSystemBarPropertyByType(Rosen::WindowType::WINDOW_TYPE_STATUS_BAR);
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set initial statusBar, enabled:%{public}d, animated:%{public}d",
-        property.enable_, property.enableAnimation_);
-    navigationMgr->SetStatusBarConfigByWindowApi(std::make_pair(property.enable_, property.enableAnimation_));
-    property = uiWindow_->GetSystemBarPropertyByType(Rosen::WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set initial navigationIndicator, enabled:%{public}d", property.enable_);
-    navigationMgr->SetNavigationIndicatorConfigByWindowApi(property.enable_);
-}
-
-bool AceContainer::IsPcOrPadFreeMultiWindowMode() const
-{
-    CHECK_NULL_RETURN(uiWindow_, false);
-    return uiWindow_->IsPcOrPadFreeMultiWindowMode();
-}
-
-bool AceContainer::SetSystemBarEnabled(SystemBarType type, bool enable, bool animation)
-{
-    CHECK_NULL_RETURN(uiWindow_, false);
+    CHECK_NULL_RETURN(window, false);
     Rosen::WindowType winType;
     switch (type) {
         case SystemBarType::STATUS:
@@ -4474,16 +4447,23 @@ bool AceContainer::SetSystemBarEnabled(SystemBarType type, bool enable, bool ani
         default:
             return false;
     }
-    auto property = uiWindow_->GetSystemBarPropertyByType(winType);
-    property.enable_ = enable;
-    property.enableAnimation_ = animation;
-    property.settingFlag_ = static_cast<Rosen::SystemBarSettingFlag>(
-        static_cast<int32_t>(property.settingFlag_) |
-        static_cast<int32_t>(Rosen::SystemBarSettingFlag::ENABLE_SETTING));
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set SystemBar: type:%{public}d, enable:%{public}d, animation:%{public}d",
-        static_cast<int32_t>(type), enable, animation);
-    if (Rosen::WMError::WM_OK != uiWindow_->SetSpecificBarProperty(winType, property)) {
-        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to set systemBar property");
+
+    std::optional<Rosen::SystemBarProperty> newProperty;
+    if (enable.has_value()) {
+        auto property = window->GetSystemBarPropertyByType(winType);
+        property.enable_ = enable.value();
+        property.enableAnimation_ = animation.value_or(false);
+        SetSystemBarPropertyEnableFlag(property);
+        newProperty = property;
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+            "Set page-level SystemBar: type:%{public}d, enable:%{public}d, animation:%{public}d",
+            static_cast<int32_t>(winType), enable.value(), animation.value_or(false));
+    } else {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Clear page-level SystemBar type:%{public}d",
+            static_cast<int32_t>(winType));
+    }
+    if (Rosen::WMError::WM_OK != window->SetSystemBarPropertyForPage(winType, newProperty)) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to set page-level systemBar property");
         return false;
     }
     return true;

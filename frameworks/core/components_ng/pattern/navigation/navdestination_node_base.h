@@ -21,6 +21,7 @@
 
 #include "core/animation/page_transition_common.h"
 #include "core/common/display_info.h"
+#include "core/common/page_viewport_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
@@ -207,7 +208,6 @@ public:
     {
         return orientation_;
     }
-    std::optional<Orientation> GetEffectiveOrientation();
     void SetPreOrientation(const std::optional<Orientation>& ori)
     {
         preOrientation_ = ori;

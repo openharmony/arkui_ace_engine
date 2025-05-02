@@ -2304,6 +2304,7 @@ frameworks/core/image/ @arkui_image
 frameworks/core/image/test/ @arkui_image
 frameworks/core/pipeline/base/ @arkuiframework
 frameworks/core/pipeline/BUILD.gn @arkui_architecture
+frameworks/core/pipeline/container_window_manager.cpp @arkuiframework
 frameworks/core/pipeline/container_window_manager.h @arkuiframework
 frameworks/core/pipeline/layers/ @arkuiframework
 frameworks/core/pipeline/LICENSE @arkuiframework

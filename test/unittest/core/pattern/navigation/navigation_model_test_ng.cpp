@@ -1434,10 +1434,6 @@ HWTEST_F(NavigationModelTestNg, NavigationManager007, TestSize.Level1)
 
     auto navigationMgr = context->GetNavigationManager();
     ASSERT_NE(navigationMgr, nullptr);
-    std::optional<std::pair<bool, bool>> config;
-    navigationMgr->SetStatusBarConfig(config);
-    std::optional<bool> navigationConfig;
-    navigationMgr->SetNavigationIndicatorConfig(navigationConfig);
     navigationMgr->FireSubWindowLifecycle(nullptr, 1, 1);
     auto overlayNode = FrameNode::CreateCommonNode(V2::OVERLAY_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             true, AceType::MakeRefPtr<OverlayContainerPattern>());

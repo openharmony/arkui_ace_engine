@@ -151,13 +151,7 @@ public:
     MOCK_METHOD(void, DumpHeapSnapshot, (bool isPrivate), (override));
     MOCK_METHOD(void, TriggerGarbageCollection, (), (override));
     MOCK_METHOD(bool, WindowIsShow, (), (const, override));
-    MOCK_METHOD(bool, IsPcOrPadFreeMultiWindowMode, (), (const, override));
     MOCK_METHOD(bool, IsMainWindow, (), (const, override));
-    MOCK_METHOD(bool, IsFullScreenWindow, (), (const, override));
-    MOCK_METHOD(RefPtr<PageViewportConfig>, GetCurrentViewportConfig, (), (const, override));
-    MOCK_METHOD(RefPtr<PageViewportConfig>, GetTargetViewportConfig, (Orientation orientation,
-        bool enableStatusBar, bool statusBarAnimated, bool enableNavigationIndicator), (override));
-    MOCK_METHOD(bool, SetSystemBarEnabled, (SystemBarType type, bool enable, bool animation), (override));
     static RefPtr<MockContainer> container_;
     static ColorMode mockColorMode_;
 

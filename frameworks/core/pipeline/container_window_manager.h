@@ -17,12 +17,14 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_CONTAINER_WINDOW_MANAGER_H
 
 #include <functional>
+#include <optional>
 
 #include "base/memory/ace_type.h"
 #include "base/system_bar/system_bar_style.h"
 #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace {
+class PageViewportConfig;
 
 using WindowCallback = std::function<void(void)>;
 using WindowModeCallback = std::function<WindowMode(void)>;
@@ -35,6 +37,14 @@ using SetSystemBarStyleCallback = std::function<void(const RefPtr<SystemBarStyle
 using GetFreeMultiWindowModeEnabledStateCallback = std::function<bool(void)>;
 using WindowIsStartMovingCallback = std::function<bool(void)>;
 using WindowCallNativeCallback = std::function<void(const std::string&, const std::string&)>;
+using WindowSetSystemBarEnabledCallback = std::function<bool(SystemBarType, std::optional<bool>, std::optional<bool>)>;
+using GetCurrentViewportConfigCallback = std::function<RefPtr<PageViewportConfig>(void)>;
+using GetTargetViewportConfigCallback = std::function<RefPtr<PageViewportConfig>(std::optional<Orientation>,
+    std::optional<bool>, std::optional<bool>, std::optional<bool>)>;
+using SetRequestedOrientationCallback = std::function<void(std::optional<Orientation>, bool)>;
+using GetRequestedOrientationCallback = std::function<Orientation(void)>;
+using IsFullScreenWindowCallback = std::function<bool(void)>;
+using IsPcOrPadFreeMultiWindowModeCallback = std::function<bool(void)>;
 
 struct DecorButtonStyle {
     int32_t colorMode;
@@ -150,6 +160,41 @@ public:
     void SetSetSystemBarStyleCallBack(SetSystemBarStyleCallback&& callback)
     {
         setSystemBarStyleCallback_ = std::move(callback);
+    }
+
+    void SetWindowSetSystemBarEnabledCallback(WindowSetSystemBarEnabledCallback&& callback)
+    {
+        windowSetSystemBarEnabledCallback_ = std::move(callback);
+    }
+
+    void SetGetCurrentViewportConfigCallback(GetCurrentViewportConfigCallback&& callback)
+    {
+        getCurrentViewportConfigCallback_ = std::move(callback);
+    }
+
+    void SetGetTargetViewportConfigCallback(GetTargetViewportConfigCallback&& callback)
+    {
+        getTargetViewportConfigCallback_ = std::move(callback);
+    }
+
+    void SetSetRequestedOrientationCallback(SetRequestedOrientationCallback&& callback)
+    {
+        setRequestedOrientationCallback_ = std::move(callback);
+    }
+
+    void SetGetRequestedOrientationCallback(GetRequestedOrientationCallback&& callback)
+    {
+        getRequestedOrientationCallback_ = std::move(callback);
+    }
+
+    void SetIsFullScreenWindowCallback(IsFullScreenWindowCallback&& callback)
+    {
+        isFullScreenWindowCallback_ = std::move(callback);
+    }
+
+    void SetIsPcOrPadFreeMultiWindowModeCallback(IsPcOrPadFreeMultiWindowModeCallback&& callback)
+    {
+        isPcOrPadFreeMultiWindowModeCallback_ = std::move(callback);
     }
 
     void SetGetFreeMultiWindowModeEnabledStateCallback(GetFreeMultiWindowModeEnabledStateCallback&& callback)
@@ -303,6 +348,50 @@ public:
         }
     }
 
+    bool SetWindowSystemBarEnabled(SystemBarType type, std::optional<bool> enabled, std::optional<bool> needAnimation)
+    {
+        if (windowSetSystemBarEnabledCallback_) {
+            return windowSetSystemBarEnabledCallback_(type, enabled, needAnimation);
+        }
+        return false;
+    }
+
+    RefPtr<PageViewportConfig> GetCurrentViewportConfig();
+    RefPtr<PageViewportConfig> GetTargetViewportConfig(
+        std::optional<Orientation> orientation, std::optional<bool> enableStatusBar,
+        std::optional<bool> statusBarAnimation, std::optional<bool> enableNavIndicator);
+
+    void SetRequestedOrientation(std::optional<Orientation> orientation, bool needAnimation = true)
+    {
+        if (setRequestedOrientationCallback_) {
+            setRequestedOrientationCallback_(orientation, needAnimation);
+        }
+    }
+
+    Orientation GetRequestedOrientation() const
+    {
+        if (getRequestedOrientationCallback_) {
+            return getRequestedOrientationCallback_();
+        }
+        return Orientation::UNSPECIFIED;
+    }
+
+    bool IsFullScreenWindow() const
+    {
+        if (isFullScreenWindowCallback_) {
+            return isFullScreenWindowCallback_();
+        }
+        return false;
+    }
+
+    bool IsPcOrPadFreeMultiWindowMode() const
+    {
+        if (isPcOrPadFreeMultiWindowModeCallback_) {
+            return isPcOrPadFreeMultiWindowModeCallback_();
+        }
+        return false;
+    }
+
     bool GetFreeMultiWindowModeEnabledState() const
     {
         if (getFreeMultiWindowModeEnabledStateCallback_) {
@@ -332,6 +421,13 @@ private:
     WindowTypeCallback windowGetTypeCallback_;
     GetSystemBarStyleCallback getSystemBarStyleCallback_;
     SetSystemBarStyleCallback setSystemBarStyleCallback_;
+    WindowSetSystemBarEnabledCallback windowSetSystemBarEnabledCallback_;
+    GetCurrentViewportConfigCallback getCurrentViewportConfigCallback_;
+    GetTargetViewportConfigCallback getTargetViewportConfigCallback_;
+    SetRequestedOrientationCallback setRequestedOrientationCallback_;
+    GetRequestedOrientationCallback getRequestedOrientationCallback_;
+    IsFullScreenWindowCallback isFullScreenWindowCallback_;
+    IsPcOrPadFreeMultiWindowModeCallback isPcOrPadFreeMultiWindowModeCallback_;
     GetFreeMultiWindowModeEnabledStateCallback getFreeMultiWindowModeEnabledStateCallback_;
     WindowCallNativeCallback callNativeCallback_;
 };
