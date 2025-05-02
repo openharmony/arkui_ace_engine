@@ -137,6 +137,8 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("autoCapitalizationMode", &JSTextField::SetCapitalizationMode);
     JSClass<JSTextInput>::StaticMethod("stopBackPress", &JSTextField::SetStopBackPress);
     JSClass<JSTextInput>::StaticMethod("keyboardAppearance", &JSTextField::SetKeyboardAppearance);
+    JSClass<JSTextInput>::StaticMethod("strokeWidth", &JSTextField::SetStrokeWidth);
+    JSClass<JSTextInput>::StaticMethod("strokeColor", &JSTextField::SetStrokeColor);
     JSClass<JSTextInput>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

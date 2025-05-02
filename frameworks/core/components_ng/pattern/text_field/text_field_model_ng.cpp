@@ -2394,4 +2394,48 @@ void TextFieldModelNG::SetStopBackPress(FrameNode* frameNode, bool isStopBackPre
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StopBackPress, isStopBackPress, frameNode);
 }
+
+void TextFieldModelNG::SetStrokeWidth(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeWidth, value);
+}
+
+Dimension TextFieldModelNG::GetStrokeWidth(FrameNode* frameNode)
+{
+    Dimension value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, StrokeWidth, value, frameNode, value);
+    return value;
+}
+
+void TextFieldModelNG::SetStrokeColor(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeColor, value);
+}
+
+Color TextFieldModelNG::GetStrokeColor(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, StrokeColor, value, frameNode, value);
+    return value;
+}
+
+void TextFieldModelNG::ResetStrokeColor()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextFieldLayoutProperty, StrokeColor, PROPERTY_UPDATE_MEASURE);
+}
+
+void TextFieldModelNG::SetStrokeWidth(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeWidth, value, frameNode);
+}
+
+void TextFieldModelNG::SetStrokeColor(FrameNode* frameNode, const Color& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeColor, value, frameNode);
+}
+
+void TextFieldModelNG::ResetStrokeColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeColor, frameNode);
+}
 } // namespace OHOS::Ace::NG

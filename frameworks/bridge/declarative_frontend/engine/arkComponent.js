@@ -10803,6 +10803,45 @@ class SearchKeyboardAppearanceModifier extends ModifierWithKey {
 }
 SearchKeyboardAppearanceModifier.identity = Symbol('searchKeyboardAppearance');
 
+class SearchStrokeWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetStrokeWidth(node);
+    }
+    else if (!isObject(this.value)) {
+      getUINativeModule().search.resetStrokeWidth(node);
+    }
+    else {
+      getUINativeModule().search.setStrokeWidth(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchStrokeWidthModifier.identity = Symbol('searchStrokeWidth');
+
+class SearchStrokeColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetStrokeColor(node);
+    }
+    else {
+      getUINativeModule().search.setStrokeColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchStrokeColorModifier.identity = Symbol('searchStrokeColor');
+
 class ArkSearchComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -11040,6 +11079,14 @@ class ArkSearchComponent extends ArkComponent {
   }
   keyboardAppearance(value) {
     modifierWithKey(this._modifiersWithKeys, SearchKeyboardAppearanceModifier.identity, SearchKeyboardAppearanceModifier, value);
+    return this;
+  }
+  strokeWidth(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchStrokeWidthModifier.identity, SearchStrokeWidthModifier, value);
+    return this;
+  }
+  strokeColor(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchStrokeColorModifier.identity, SearchStrokeColorModifier, value);
     return this;
   }
 }
@@ -14812,6 +14859,45 @@ class TextAreaKeyboardAppearanceModifier extends ModifierWithKey {
 }
 TextAreaKeyboardAppearanceModifier.identity = Symbol('textAreaKeyboardAppearance');
 
+class TextAreaStrokeWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetStrokeWidth(node);
+    }
+    else if (!isObject(this.value)) {
+      getUINativeModule().textArea.resetStrokeWidth(node);
+    }
+    else {
+      getUINativeModule().textArea.setStrokeWidth(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaStrokeWidthModifier.identity = Symbol('textAreaStrokeWidth');
+
+class TextAreaStrokeColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetStrokeColor(node);
+    }
+    else {
+      getUINativeModule().textArea.setStrokeColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaStrokeColorModifier.identity = Symbol('textAreaStrokeColor');
+
 class ArkTextAreaComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -15177,6 +15263,14 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   keyboardAppearance(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaKeyboardAppearanceModifier.identity, TextAreaKeyboardAppearanceModifier, value);
+    return this;
+  }
+  strokeWidth(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaStrokeWidthModifier.identity, TextAreaStrokeWidthModifier, value);
+    return this;
+  }
+  strokeColor(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaStrokeColorModifier.identity, TextAreaStrokeColorModifier, value);
     return this;
   }
 }
@@ -16682,6 +16776,45 @@ class TextInputKeyboardAppearanceModifier extends ModifierWithKey {
 }
 TextInputKeyboardAppearanceModifier.identity = Symbol('textInputKeyboardAppearance');
 
+class TextInputStrokeWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetStrokeWidth(node);
+    }
+    else if (!isObject(this.value)) {
+      getUINativeModule().textInput.resetStrokeWidth(node);
+    }
+    else {
+      getUINativeModule().textInput.setStrokeWidth(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputStrokeWidthModifier.identity = Symbol('textInputStrokeWidth');
+
+class TextInputStrokeColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetStrokeColor(node);
+    }
+    else {
+      getUINativeModule().textInput.setStrokeColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputStrokeColorModifier.identity = Symbol('textInputStrokeColor');
+
 class ArkTextInputComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -17092,6 +17225,14 @@ class ArkTextInputComponent extends ArkComponent {
   }
   keyboardAppearance(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputKeyboardAppearanceModifier.identity, TextInputKeyboardAppearanceModifier, value);
+    return this;
+  }
+  strokeWidth(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputStrokeWidthModifier.identity, TextInputStrokeWidthModifier, value);
+    return this;
+  }
+  strokeColor(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputStrokeColorModifier.identity, TextInputStrokeColorModifier, value);
     return this;
   }
 }
