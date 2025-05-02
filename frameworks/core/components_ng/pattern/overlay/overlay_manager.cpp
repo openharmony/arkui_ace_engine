@@ -3798,6 +3798,7 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
     if (dialogCount_ == 0) {
         SetContainerButtonEnable(true);
     }
+    SubwindowManager::GetInstance()->CloseDialogMaskNG(dialogNode);
     FireNavigationLifecycle(dialogNode, static_cast<int32_t>(NavDestinationLifecycle::ON_ACTIVE), true,
         static_cast<int32_t>(NavDestinationActiveReason::DIALOG));
     CallOnHideDialogCallback();
@@ -6907,7 +6908,7 @@ void OverlayManager::UpdatePixelMapScale(float& scale)
 void OverlayManager::RemoveFilterAnimation()
 {
     if (!hasFilter_) {
-        TAG_LOGI(AceLogTag::ACE_OVERLAY, "filter node is not exist");
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "filter node is not exist");
         return;
     }
     auto filterNode = filterColumnNodeWeak_.Upgrade();
@@ -6966,7 +6967,7 @@ void OverlayManager::RemoveFilterWithNode(const RefPtr<FrameNode>& filterNode)
 void OverlayManager::RemoveFilter()
 {
     if (!hasFilter_) {
-        TAG_LOGI(AceLogTag::ACE_OVERLAY, "filter node is not exist");
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "filter node is not exist");
         return;
     }
     auto columnNode = filterColumnNodeWeak_.Upgrade();

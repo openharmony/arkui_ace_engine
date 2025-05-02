@@ -113,6 +113,7 @@ build_component_ng("pattern_ng") {
     "dialog/dialog_accessibility_property.cpp",
     "dialog/dialog_event_hub.cpp",
     "dialog/dialog_layout_algorithm.cpp",
+    "dialog/dialog_mask_pattern.cpp",
     "dialog/dialog_pattern.cpp",
     "dialog/dialog_view.cpp",
     "divider/divider_layout_algorithm.cpp",

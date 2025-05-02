@@ -323,7 +323,7 @@ public:
 
     void OverlayDismissDialog(const RefPtr<FrameNode>& dialogNode);
     RefPtr<OverlayManager> GetEmbeddedOverlay(const RefPtr<OverlayManager>& context);
-    void MountMaskToUECHost();
+    void MountUECMask();
     void CloseDialog();
     void CloseDialogByEvent(DialogDismissReason reason = DialogDismissReason::DIALOG_TOUCH_OUTSIDE);
     void SetUECHostMaskInfo(UECHostMaskInfo maskInfo)
@@ -334,6 +334,16 @@ public:
     UECHostMaskInfo GetUECHostMaskInfo()
     {
         return hostMaskInfo_;
+    }
+
+    void SetUECMaskNode(const RefPtr<FrameNode>& dialogNode)
+    {
+        uecMaskNode_ = dialogNode;
+    }
+
+    const RefPtr<FrameNode> GetUECMaskNode()
+    {
+        return uecMaskNode_.Upgrade();
     }
 
 private:
@@ -460,6 +470,7 @@ private:
     bool isDialogDisposed_ = false;
     RectF hostWindowRect_;
     UECHostMaskInfo hostMaskInfo_;
+    WeakPtr<FrameNode> uecMaskNode_;
 };
 } // namespace OHOS::Ace::NG
 
