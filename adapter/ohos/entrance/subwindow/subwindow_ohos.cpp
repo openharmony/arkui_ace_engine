@@ -102,6 +102,12 @@ public:
             [subWindow, enable]() {
                 CHECK_NULL_VOID(subWindow);
                 subWindow->OnFreeMultiWindowSwitch(enable);
+                if (enable) {
+                    subWindow->SetFollowParentWindowLayoutEnabled(false);
+                    subWindow->ResizeWindow();
+                } else {
+                    subWindow->SetFollowParentWindowLayoutEnabled(true);
+                }
             },
             TaskExecutor::TaskType::UI, "ArkUIFreeMultiWindowSwitch");
     }
@@ -1234,9 +1240,10 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, nullptr);
     if (dialogTheme->GetExpandDisplay() || parentAceContainer->IsFreeMultiWindow()) {
+        SetFollowParentWindowLayoutEnabled(false);
         ResizeWindow();
     } else {
-        window_->SetFollowParentWindowLayoutEnabled(true);
+        SetFollowParentWindowLayoutEnabled(true);
     }
     ShowWindow(dialogProps.focusable);
     CHECK_NULL_RETURN(window_, nullptr);
@@ -1273,9 +1280,10 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNGWithNode(
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, nullptr);
     if (dialogTheme->GetExpandDisplay() || parentAceContainer->IsFreeMultiWindow()) {
+        SetFollowParentWindowLayoutEnabled(false);
         ResizeWindow();
     } else {
-        window_->SetFollowParentWindowLayoutEnabled(true);
+        SetFollowParentWindowLayoutEnabled(true);
     }
     ShowWindow(dialogProps.focusable);
     CHECK_NULL_RETURN(window_, nullptr);
@@ -1326,9 +1334,10 @@ void SubwindowOhos::OpenCustomDialogNG(const DialogProperties& dialogProps, std:
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
     if (dialogTheme->GetExpandDisplay() || parentAceContainer->IsFreeMultiWindow()) {
+        SetFollowParentWindowLayoutEnabled(false);
         ResizeWindow();
     } else {
-        window_->SetFollowParentWindowLayoutEnabled(true);
+        SetFollowParentWindowLayoutEnabled(true);
     }
     ShowWindow(dialogProps.focusable);
     CHECK_NULL_VOID(window_);
