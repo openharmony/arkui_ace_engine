@@ -64,6 +64,8 @@ private:
     void PreloadItems(LayoutWrapper* layoutWrapper) override;
     static bool PredictBuildItem(FrameNode& host, int32_t itemIdx, const GridPredictLayoutParam& param,
         std::map<int32_t, std::pair<int32_t, int32_t>> itemCrossMap);
+    
+    int32_t GetStartingItem(LayoutWrapper* layoutWrapper, int32_t currentIndex) override;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollWithOptionsLayoutAlgorithm);
 };

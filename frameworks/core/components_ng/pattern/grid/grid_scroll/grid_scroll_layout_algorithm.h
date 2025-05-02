@@ -141,7 +141,7 @@ private:
         float mainSize, SizeF idealSize, bool matchChildren);
     void UpdateOffsetOnHeightChangeDuringAnimation(LayoutWrapper* layoutWrapper, float mainSize);
 
-    int32_t GetStartingItem(LayoutWrapper* layoutWrapper, int32_t currentIndex);
+    virtual int32_t GetStartingItem(LayoutWrapper* layoutWrapper, int32_t currentIndex);
 
     OffsetF CalculateLargeItemOffset(
         OffsetF currOffset, int32_t itemIndex, int32_t currLineIndex, int32_t currentCrossIndex);
