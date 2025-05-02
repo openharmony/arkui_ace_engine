@@ -29,6 +29,7 @@ export struct SelectIndex {
     { name: 'SelectOption', path: 'SelectOption' },
     { name: 'SelectSymbolModifier', path: 'SelectSymbolModifier' },
     { name: 'SelectLanguagePadding', path: 'SelectLanguagePadding' },
+    { name: 'SelectLanguageChange', path: 'SelectLanguageChange' },
     { name: 'SelectOnSelect', path: 'SelectOnSelect' },
     { name: 'SelectNormal', path: 'SelectOptionMenu' },
     { name: 'SelectSymbol', path: 'SelectSymbol' },

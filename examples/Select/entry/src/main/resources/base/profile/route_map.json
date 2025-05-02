@@ -31,6 +31,11 @@
       "buildFunction": "SelectLanguagePaddingBuilder"
     },
     {
+      "name": "SelectLanguageChange",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectLanguageChange.ets",
+      "buildFunction": "SelectLanguageChangeBuilder"
+    },
+    {
       "name": "SelectOnSelect",
       "pageSourceFile": "src/main/ets/pages/components/select/selectOnSelect.ets",
       "buildFunction": "SelectOnSelectBuilder"
@@ -161,6 +166,36 @@
       "buildFunction": "ToggleEnableBuilder"
     },
     {
+      "name": "ToggleMultiTestLevel0",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleMultiTestLevel0.ets",
+      "buildFunction": "ToggleMultiTestLevel0Builder"
+    },
+    {
+      "name": "ToggleMultiTestLevel1",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleMultiTestLevel1.ets",
+      "buildFunction": "ToggleMultiTestLevel1Builder"
+    },
+    {
+      "name": "ToggleMultiTestLevel2",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleMultiTestLevel2.ets",
+      "buildFunction": "ToggleMultiTestLevel2Builder"
+    },
+    {
+      "name": "ToggleMultiTestLevel3",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleMultiTestLevel3.ets",
+      "buildFunction": "ToggleMultiTestLevel3Builder"
+    },
+    {
+      "name": "ToggleMultiTestLevel4",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleMultiTestLevel4.ets",
+      "buildFunction": "ToggleMultiTestLevel4Builder"
+    },
+    {
+      "name": "ToggleMultiTestLevel5",
+      "pageSourceFile": "src/main/ets/pages/components/toggle/toggleMultiTestLevel5.ets",
+      "buildFunction": "ToggleMultiTestLevel5Builder"
+    },
+    {
       "name": "CheckboxIndex",
       "pageSourceFile": "src/main/ets/pages/components/checkbox/Index.ets",
       "buildFunction": "CheckboxIndexBuilder"
@@ -214,6 +249,16 @@
       "name": "CheckboxModifier",
       "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxModifier.ets",
       "buildFunction": "CheckboxModifierBuilder"
+    },
+    {
+      "name": "CheckboxThemeControl",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxThemeControl.ets",
+      "buildFunction": "CheckboxThemeControlBuilder"
+    },
+    {
+      "name": "CheckboxMultiTestLevel0",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxMultiTestLevel0.ets",
+      "buildFunction": "CheckboxMultiTestLevel0Builder"
     },
     {
       "name": "RatingIndex",
