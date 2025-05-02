@@ -83,6 +83,8 @@ constexpr int32_t DEFAULT_RECORD_SECOND = 5;
 constexpr int32_t SECOND_TO_MILLISEC = 1000;
 constexpr int32_t USED_ID_FIND_FLAG = 3;
 constexpr int32_t USED_JSON_PARAM = 4;
+constexpr int32_t MAX_FRAME_COUNT_WITHOUT_JS_UNREGISTRATION = 100;
+constexpr int32_t  RATIO_OF_VSYNC_PERIOD = 2;
 constexpr char PID_FLAG[] = "pidflag";
 } // namespace
 
@@ -4888,7 +4890,19 @@ void PipelineContext::OnIdle(int64_t deadline)
     currentTime = GetSysTimestamp();
     if (currentTime < deadline) {
         ElementRegister::GetInstance()->CallJSCleanUpIdleTaskFunc(deadline - currentTime);
+        frameCountForNotCallJSCleanUp_ = 0;
+    } else {
+        frameCountForNotCallJSCleanUp_++;
     }
+
+    // Check if there is more than 100 frame which does not execute the CallJSCleanUpIdleTaskFunc
+    // Force to invoke CallJSCleanUpIdleTaskFunc to make sure no OOM in JS side
+    if (frameCountForNotCallJSCleanUp_ >= MAX_FRAME_COUNT_WITHOUT_JS_UNREGISTRATION) {
+        // The longest execution time is half of vsync period
+        ElementRegister::GetInstance()->CallJSCleanUpIdleTaskFunc(window_->GetVSyncPeriod() / RATIO_OF_VSYNC_PERIOD);
+        frameCountForNotCallJSCleanUp_ = 0;
+    }
+
     TriggerIdleCallback(deadline);
 }
 

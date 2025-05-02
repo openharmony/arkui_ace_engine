@@ -1529,7 +1529,7 @@ private:
     std::unordered_set<UINode*> attachedNodeSet_;
     std::list<std::function<void()>> afterReloadAnimationTasks_;
     Offset lastHostParentOffsetToWindow_ { 0, 0 };
-
+    int32_t frameCountForNotCallJSCleanUp_ = 0;
     RefPtr<Kit::UIContextImpl> uiContextImpl_;
     std::shared_ptr<UiTranslateManagerImpl> uiTranslateManager_;
     RotationEndCallbackMap rotationEndCallbackMap_ {};
