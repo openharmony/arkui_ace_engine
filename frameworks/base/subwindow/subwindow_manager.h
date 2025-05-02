@@ -237,6 +237,7 @@ private:
     RefPtr<Subwindow> GetSubwindowBySearchKey(const SubwindowKey& searchKey);
     void RemoveSubwindowBySearchKey(const SubwindowKey& searchKey);
     void AddSubwindowBySearchKey(const SubwindowKey& searchKey, const RefPtr<Subwindow>& subwindow);
+    RefPtr<Subwindow> CheckSubwindowDisplayId(const SubwindowKey& searchKey, const RefPtr<Subwindow>& subwindow);
     static std::mutex instanceMutex_;
     static std::shared_ptr<SubwindowManager> instance_;
 
