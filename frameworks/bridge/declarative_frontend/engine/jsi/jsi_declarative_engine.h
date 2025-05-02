@@ -385,6 +385,10 @@ public:
 
     void SetJsContext(const std::shared_ptr<Framework::JsValue>& jsContext) override;
 
+    std::shared_ptr<void> SerializeValue(const std::shared_ptr<Framework::JsValue>& jsValue) override;
+
+    void SetJsContextWithDeserialize(const std::shared_ptr<void>& recoder) override;
+
     void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
 
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
@@ -503,6 +507,7 @@ private:
     bool ExecuteDynamicAbc(const std::string& fileName, const std::string& entryPoint);
     bool InnerExecuteIsolatedAbc(const std::string& fileName, const std::string& entryPoint);
     bool InnerExecuteDynamicAbc(const std::string& fileName, const std::string& entryPoint);
+    std::shared_ptr<JsValue> Deserialize(const std::shared_ptr<void>& recoder);
 
     RefPtr<JsiDeclarativeEngineInstance> engineInstance_;
 
