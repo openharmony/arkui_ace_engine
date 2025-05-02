@@ -1138,7 +1138,7 @@ OperationType StringToOperationType(const std::string& id)
     }
 }
 
-void UpdateOptionsLabelInfo(std::vector<NG::MenuItemParam>& params)
+void UpdateOptionsInfo(std::vector<NG::MenuItemParam>& params)
 {
     for (auto& param : params) {
         auto opType = StringToOperationType(param.menuOptionsParam.id);
@@ -1149,18 +1149,23 @@ void UpdateOptionsLabelInfo(std::vector<NG::MenuItemParam>& params)
         switch (opType) {
             case OperationType::COPY:
                 param.menuOptionsParam.labelInfo = theme->GetCopyLabelInfo();
+                param.menuOptionsParam.symbolId = theme->GetCopySymbolId();
                 break;
             case OperationType::PASTE:
                 param.menuOptionsParam.labelInfo = theme->GetPasteLabelInfo();
+                param.menuOptionsParam.symbolId = theme->GetPasteSymbolId();
                 break;
             case OperationType::CUT:
                 param.menuOptionsParam.labelInfo = theme->GetCutLabelInfo();
+                param.menuOptionsParam.symbolId = theme->GetCutSymbolId();
                 break;
             case OperationType::SELECT_ALL:
                 param.menuOptionsParam.labelInfo = theme->GetSelectAllLabelInfo();
+                param.menuOptionsParam.symbolId = theme->GetCopyAllSymbolId();
                 break;
             default:
                 param.menuOptionsParam.labelInfo = "";
+                param.menuOptionsParam.symbolId = 0;
                 break;
         }
     }
@@ -4939,6 +4944,10 @@ bool JSViewAbstract::ParseJsSymbolId(
     if (jsValue->IsNull() || jsValue->IsUndefined()) {
         symbolId = 0;
         return false;
+    }
+    if (jsValue->IsNumber()) {
+        symbolId = jsValue->ToNumber<uint32_t>();
+        return true;
     }
     if (!jsValue->IsObject()) {
         return false;
@@ -9690,7 +9699,7 @@ void JSViewAbstract::JsCompositingFilter(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetCompositingFilter(compositingFilter);
 }
 
-std::vector<NG::MenuOptionsParam> JSViewAbstract::ParseMenuItems(const JSRef<JSArray>& menuItemsArray)
+std::vector<NG::MenuOptionsParam> JSViewAbstract::ParseMenuItems(const JSRef<JSArray>& menuItemsArray, bool showShortcut)
 {
     std::vector<NG::MenuOptionsParam> menuParams;
     for (size_t i = 0; i <= menuItemsArray->Length(); i++) {
@@ -9708,6 +9717,15 @@ std::vector<NG::MenuOptionsParam> JSViewAbstract::ParseMenuItems(const JSRef<JSA
         std::string icon;
         ParseJsMedia(jsStartIcon, icon);
         menuOptionsParam.icon = icon;
+        if (showShortcut) {
+            uint32_t symbolId = 0;
+            RefPtr<ResourceObject> resourceObject;
+
+            if (ParseJsSymbolId(jsStartIcon, symbolId, resourceObject)) {
+                menuOptionsParam.symbolId = symbolId;
+            }
+        }
+
         auto jsTextMenuId = menuItemObject->GetProperty("id");
         std::string id;
         if (jsTextMenuId->IsObject()) {
@@ -9745,14 +9763,17 @@ void JSViewAbstract::ParseOnCreateMenu(
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, menuParams);
         pipelineContext->UpdateCurrentActiveNode(node);
+        auto textOverlayTheme = pipelineContext->GetTheme<TextOverlayTheme>();
+        CHECK_NULL_RETURN(textOverlayTheme, menuParams);
+        bool showShortcut = textOverlayTheme->GetShowShortcut();
         auto modifiedSystemMenuItems = systemMenuItems;
-        UpdateOptionsLabelInfo(modifiedSystemMenuItems);
+        UpdateOptionsInfo(modifiedSystemMenuItems);
         auto menuItem = func->ExecuteWithValue(modifiedSystemMenuItems);
         if (!menuItem->IsArray()) {
             return menuParams;
         }
         auto menuItemsArray = JSRef<JSArray>::Cast(menuItem);
-        menuParams = ParseMenuItems(menuItemsArray);
+        menuParams = ParseMenuItems(menuItemsArray, showShortcut);
         return menuParams;
     };
     onCreateMenuCallback = jsCallback;
@@ -9865,6 +9886,9 @@ JSRef<JSVal> JSViewAbstract::CreateJsTextMenuItem(const NG::MenuItemParam& menuI
     JSRef<JSObject> obj = CreateJsTextMenuId(menuItemParam.menuOptionsParam.id);
     TextMenuItem->SetPropertyObject("id", obj);
     TextMenuItem->SetProperty<std::string>("labelInfo", menuItemParam.menuOptionsParam.labelInfo.value_or(""));
+    if (menuItemParam.menuOptionsParam.symbolId.has_value()) {
+        TextMenuItem->SetProperty<uint32_t>("icon", menuItemParam.menuOptionsParam.symbolId.value());
+    }
     return JSRef<JSVal>::Cast(TextMenuItem);
 }
 

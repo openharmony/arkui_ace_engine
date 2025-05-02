@@ -26,6 +26,7 @@ struct MenuOptionsParam {
     std::optional<std::string> labelInfo;
     std::string id;
     std::function<void(const std::string&)> action;
+    std::optional<uint32_t> symbolId;
 
     // Used for the display of the first options extra-long.
     bool isFirstOption = false;
