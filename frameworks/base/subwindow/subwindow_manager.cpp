@@ -1737,6 +1737,22 @@ RefPtr<Subwindow> SubwindowManager::GetSubwindowBySearchKey(const SubwindowKey& 
     }
 }
 
+RefPtr<Subwindow> SubwindowManager::CheckSubwindowDisplayId(const SubwindowKey& searchKey,
+    const RefPtr<Subwindow>& subwindow)
+{
+    CHECK_NULL_RETURN(subwindow, nullptr);
+    if (searchKey.displayId != subwindow->GetDisplayId() && !subwindow->GetShown()) {
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Remove subwindow by displayId changed, "
+            "searchKey: %{public}s, subwindowId: %{public}d, newDisplayId: %{public}u, oldDisplayId: %{public}u",
+            searchKey.ToString().c_str(), subwindow->GetSubwindowId(), (uint32_t)searchKey.displayId,
+            (uint32_t)subwindow->GetDisplayId());
+        subwindowMap_.erase(searchKey);
+        subwindow->DestroyWindow();
+        return nullptr;
+    }
+    return subwindow;
+}
+
 void SubwindowManager::RemoveSubwindowBySearchKey(const SubwindowKey& searchKey)
 {
     std::lock_guard<std::mutex> lock(subwindowMutex_);
@@ -1759,22 +1775,6 @@ void SubwindowManager::AddSubwindowBySearchKey(const SubwindowKey& searchKey, co
         return;
     }
     AddInstanceSubwindowMap(subwindow->GetChildContainerId(), subwindow);
-}
-
-RefPtr<Subwindow> SubwindowManager::CheckSubwindowDisplayId(const SubwindowKey& searchKey,
-    const RefPtr<Subwindow>& subwindow)
-{
-    CHECK_NULL_RETURN(subwindow, nullptr);
-    if (searchKey.displayId != subwindow->GetDisplayId() && !subwindow->GetShown()) {
-        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Remove subwindow by displayId changed, "
-            "searchKey: %{public}s, subwindowId: %{public}d, newDisplayId: %{public}u, oldDisplayId: %{public}u",
-            searchKey.ToString().c_str(), subwindow->GetSubwindowId(), (uint32_t)searchKey.displayId,
-            (uint32_t)subwindow->GetDisplayId());
-        subwindowMap_.erase(searchKey);
-        subwindow->DestroyWindow();
-        return nullptr;
-    }
-    return subwindow;
 }
 
 void SubwindowManager::AddMaskSubwindowMap(int32_t dialogId, const RefPtr<Subwindow>& subwindow)
