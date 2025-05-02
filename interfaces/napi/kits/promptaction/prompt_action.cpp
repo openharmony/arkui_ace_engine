@@ -809,11 +809,15 @@ bool ParseButtonsPara(napi_env env, std::shared_ptr<PromptAsyncContext>& context
         return false;
     }
     if (isShowActionMenu) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, false);
-        auto theme = pipeline->GetTheme<ButtonTheme>();
-        CHECK_NULL_RETURN(theme, false);
-        ButtonInfo buttonInfo = { .text = theme->GetCancelText(),
+        std::string buttonCancelText = "Cancel";
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+        if (pipeline) {
+            auto theme = pipeline->GetTheme<ButtonTheme>();
+            if (theme) {
+                buttonCancelText = theme->GetCancelText();
+            }
+        }
+        ButtonInfo buttonInfo = { .text = buttonCancelText,
             .textColor = "", .isPrimary = primaryButtonNum == 0 ? true : false};
         context->buttons.emplace_back(buttonInfo);
     }

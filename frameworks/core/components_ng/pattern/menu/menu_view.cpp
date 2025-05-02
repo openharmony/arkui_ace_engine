@@ -1635,11 +1635,15 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, std::vector<Op
         AceType::MakeRefPtr<MenuItemRowPattern>());
 
 #ifdef OHOS_PLATFORM
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<ButtonTheme>();
-    CHECK_NULL_RETURN(theme, nullptr);
-    if (params[index].value == theme->GetPasteText()) {
+    std::string buttonPasteText = "Paste";
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    if (pipeline) {
+        auto theme = pipeline->GetTheme<ButtonTheme>();
+        if (theme) {
+            buttonPasteText = theme->GetPasteText();
+        }
+    }
+    if (params[index].value == buttonPasteText) {
         CreatePasteButton(optionsHasIcon, option, row, params[index].action);
     } else {
         CreateOption(optionsHasIcon, params, index, row, option);
@@ -1659,11 +1663,15 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, const OptionVa
         AceType::MakeRefPtr<MenuItemRowPattern>());
 
 #ifdef OHOS_PLATFORM
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<ButtonTheme>();
-    CHECK_NULL_RETURN(theme, nullptr);
-    if (value.value == theme->GetPasteText()) {
+    std::string buttonPasteText = "Paste";
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    if (pipeline) {
+        auto theme = pipeline->GetTheme<ButtonTheme>();
+        if (theme) {
+            buttonPasteText = theme->GetPasteText();
+        }
+    }
+    if (value.value == buttonPasteText) {
         CreatePasteButton(optionsHasIcon, option, row, onClickFunc, icon);
     } else {
         CreateOption(optionsHasIcon, value.value, icon, row, option, onClickFunc);
