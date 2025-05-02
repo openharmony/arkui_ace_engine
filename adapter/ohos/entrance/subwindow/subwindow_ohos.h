@@ -217,6 +217,9 @@ public:
         detachState_ = t;
     }
 
+    void ShowDialogMaskNG(const RefPtr<NG::FrameNode>& dialog) override;
+    void CloseDialogMaskNG(const RefPtr<NG::FrameNode>& dialog) override;
+
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);

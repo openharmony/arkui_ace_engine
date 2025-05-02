@@ -2267,7 +2267,7 @@ void DialogPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    MountMaskToUECHost();
+    MountUECMask();
     auto parentNode = AceType::DynamicCast<FrameNode>(host->GetParent());
     CHECK_NULL_VOID(parentNode);
     if (parentNode->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG) {
@@ -2308,20 +2308,13 @@ void DialogPattern::OnDetachFromMainTree()
     overlay->RemoveDialogFromMapForcefully(host);
 }
 
-void DialogPattern::MountMaskToUECHost()
+void DialogPattern::MountUECMask()
 {
-    auto hasHostMask = !hostMaskInfo_.uuid.empty();
-    if (dialogProperties_.isMask || hasHostMask) {
-        return;
-    }
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
     if (isUIExtensionSubWindow_ && dialogProperties_.isModal) {
-        auto pipeline = host->GetContextRefPtr();
-        auto instanceId = pipeline ? pipeline->GetInstanceId() : -1;
-        NG::OverlayMaskManager::GetInstance().SendDialogMaskInfoToHost(host, UECHostMaskAction::MOUNT, instanceId);
+        SubwindowManager::GetInstance()->ShowDialogMaskNG(host);
     }
 }
 
