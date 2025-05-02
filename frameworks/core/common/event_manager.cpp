@@ -1718,6 +1718,7 @@ bool EventManager::DispatchRotationEvent(
 
 void EventManager::ClearResults()
 {
+    FlushCursorStyleRequests();
     touchTestResults_.clear();
     postEventTouchTestResults_.clear();
     mouseTestResults_.clear();

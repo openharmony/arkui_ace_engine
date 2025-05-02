@@ -96,9 +96,6 @@ std::shared_ptr<ArkUIPerfMonitor> PipelineBase::GetPerfMonitor()
 
 PipelineBase::~PipelineBase()
 {
-    if (eventManager_) {
-        eventManager_->FlushCursorStyleRequests();
-    }
     std::lock_guard lock(destructMutex_);
     LOGI("PipelineBase destroyed");
 }
