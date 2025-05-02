@@ -1594,6 +1594,15 @@ public:
     {
         return cancelButtonTouched_;
     }
+
+    bool IsUnderlineAndButtonMode() const
+    {
+        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProperty, false);
+        auto cleanNodeStyle = layoutProperty->GetCleanNodeStyle().value_or(CleanNodeStyle::INPUT);
+        auto isCancelMode = IsShowCancelButtonMode() && !(cleanNodeStyle == CleanNodeStyle::INVISIBLE);
+        return IsUnderlineMode() && (isCancelMode || IsInPasswordMode());
+    }
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -1845,6 +1854,8 @@ private:
     void SetThemeAttr();
     void SetThemeBorderAttr();
     void ProcessInlinePaddingAndMargin();
+    Edge GetUnderlinePadding(const RefPtr<TextFieldTheme>& theme, bool processLeftPadding,
+        bool processRightPadding) const;
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     void HandleCountStyle();
     void HandleDeleteOnCounterScene();

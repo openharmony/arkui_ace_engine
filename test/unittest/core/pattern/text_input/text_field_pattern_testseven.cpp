@@ -324,4 +324,29 @@ HWTEST_F(TextFieldPatternTestSeven, SetPreviewText001, TestSize.Level0)
     auto ret = pattern->SetPreviewText(previewValue, range);
     ASSERT_EQ(ret, 0);
 }
+
+/**
+ * @tc.name: ProcessThemePadding001
+ * @tc.desc: test testInput text ProcessThemePadding
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, ProcessThemePadding001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto theme = GetTheme();
+    CHECK_NULL_VOID(theme);
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto themePadding = pattern->IsUnderlineMode()
+        ? pattern->GetUnderlinePadding(textFieldTheme, true, false) : textFieldTheme->GetPadding();
+    ASSERT_EQ(themePadding.Left(), theme->GetPadding().Left());
+}
 }

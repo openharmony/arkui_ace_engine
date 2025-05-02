@@ -310,7 +310,7 @@ void CounterDecorator::HandleNonTextArea()
     CHECK_NULL_VOID(pipeline);
     auto theme = textFieldPattern->GetTheme();
     CHECK_NULL_VOID(theme);
-    
+
     bool isRTL = decoratedNodeProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     RectF frameRect = decoratedNode->GetGeometryNode()->GetFrameRect();
     RectF contentRect = decoratedNode->GetGeometryNode()->GetContentRect();
@@ -329,6 +329,11 @@ void CounterDecorator::HandleNonTextArea()
             }
         }
     };
+    if (textFieldPattern->IsUnderlineAndButtonMode() &&
+        decoratedNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        countX = isRTL ? countX - textFieldPattern->GetPaddingLeft() :
+                         countX + textFieldPattern->GetPaddingRight();
+    }
     updateCountXWithArea({responseArea, cleanNodeResponseArea});
     auto curFontScale = pipeline->GetFontScale();
     auto countY = (NearEqual(curFontScale, 1.0f)) ? (frameRect.Height() + textGeometryNode->GetFrameRect().Height()) :
