@@ -503,4 +503,737 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonObjectFitBottomEnd, TestSize.Level
     EXPECT_EQ(json->GetString("objectFit"), "ImageFit.BOTTOM_END");
 }
 
+/**
+ * @tc.name: TestImageJsonImageRepeatX
+ * @tc.desc: Test image tojson.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestToJson, TestImageJsonImageRepeatX, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    image.SetImageRepeat(ImageRepeat::REPEAT_X);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     * @tc.expected: as follows
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    frameNode->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: check the key value.
+     * @tc.expected: it should be REPEAT_X.
+     */
+    EXPECT_EQ(json->GetString("objectRepeat"), "ImageRepeat.REPEAT_X");
+}
+
+/**
+ * @tc.name: TestImageJsonImageRepeatY
+ * @tc.desc: Test image tojson.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestToJson, TestImageJsonImageRepeatY, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    image.SetImageRepeat(ImageRepeat::REPEAT_Y);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     * @tc.expected: as follows
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    frameNode->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: check the key value.
+     * @tc.expected: it should be REPEAT_Y.
+     */
+    EXPECT_EQ(json->GetString("objectRepeat"), "ImageRepeat.REPEAT_Y");
+}
+
+/**
+ * @tc.name: TestImageJsonImageRepeatXY
+ * @tc.desc: Test image tojson.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestToJson, TestImageJsonImageRepeatXY, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    image.SetImageRepeat(ImageRepeat::REPEAT);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     * @tc.expected: as follows
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    frameNode->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: check the key value.
+     * @tc.expected: it should be REPEAT_XY.
+     */
+    EXPECT_EQ(json->GetString("objectRepeat"), "ImageRepeat.REPEAT");
+}
+
+/**
+ * @tc.name: TestImageJsonImageRepeatNO
+ * @tc.desc: Test image tojson.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestToJson, TestImageJsonImageRepeatNO, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    image.SetImageRepeat(ImageRepeat::NO_REPEAT);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     * @tc.expected: as follows
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    frameNode->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: check the key value.
+     * @tc.expected: it should be NO_REPEAT.
+     */
+    EXPECT_EQ(json->GetString("objectRepeat"), "ImageRepeat.NO_REPEAT");
+}
+
+/**
+ * @tc.name: TestImageJsonRenderModeOriginal
+ * @tc.desc: Test image tojson.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestToJson, TestImageJsonRenderModeOriginal, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    image.SetImageRenderMode(ImageRenderMode::ORIGINAL);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     * @tc.expected: as follows
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    frameNode->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: check the key value.
+     * @tc.expected: it should be ImageRenderMode::Original.
+     */
+    EXPECT_EQ(json->GetString("renderMode"), "ImageRenderMode::Original");
+}
+
+/**
+ * @tc.name: TestImageJsonRenderModeTemplate
+ * @tc.desc: Test image tojson.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestToJson, TestImageJsonRenderModeTemplate, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    image.SetImageRenderMode(ImageRenderMode::TEMPLATE);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     * @tc.expected: as follows
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    frameNode->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: check the key value.
+     * @tc.expected: it should be ImageRenderMode::Template.
+     */
+    EXPECT_EQ(json->GetString("renderMode"), "ImageRenderMode::Template");
+}
+
+
+/**
+ * @tc.name: TestImageJsonfillColor01
+ * @tc.desc: Test image tojson.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestToJson, TestImageJsonfillColor01, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    image.SetImageFill(frameNode, Color::BLUE);
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     * @tc.expected: as follows
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    frameNode->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: check the key value.
+     * @tc.expected: it should be #FF0000FF.
+     */
+    EXPECT_EQ(json->GetString("fillColor"), "#FF0000FF");
+}
+
+
+/**
+ * @tc.name: TestImageJsonfillColor02
+ * @tc.desc: Test image tojson.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestToJson, TestImageJsonfillColor02, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     * @tc.expected: as follows
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    frameNode->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: check the key value.
+     * @tc.expected: it should be default #FF000000.
+     */
+    EXPECT_EQ(json->GetString("fillColor"), "#FF000000");
+}
+
+
+/**
+ * @tc.name: TestImageJsonfillColor03
+ * @tc.desc: Test image tojson.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestToJson, TestImageJsonfillColor03, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    image.SetImageFill(frameNode, Color::RED);
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     * @tc.expected: as follows
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    frameNode->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: check the key value.
+     * @tc.expected: it should be default #FFFF0000.
+     */
+    EXPECT_EQ(json->GetString("fillColor"), "#FFFF0000");
+}
+
+/**
+ * @tc.name: TestImageJsonfillColor04
+ * @tc.desc: Test image tojson.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestToJson, TestImageJsonfillColor04, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    image.SetImageFill(frameNode, Color::GREEN);
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     * @tc.expected: as follows
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    frameNode->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: check the key value.
+     * @tc.expected: it should be default #FF00FF00.
+     */
+    EXPECT_EQ(json->GetString("fillColor"), "#FF00FF00");
+}
+
+/**
+ * @tc.name: TestImageJsonCopyOption01
+ * @tc.desc: Test image tojson.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestToJson, TestImageJsonCopyOption01, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    image.SetCopyOption(CopyOptions::None);
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     * @tc.expected: as follows
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    frameNode->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: check the key value.
+     * @tc.expected: it should be None.
+     */
+    EXPECT_EQ(json->GetString("copyOption"), "CopyOptions.None");
+}
+
+/**
+ * @tc.name: TestImageJsonCopyOption02
+ * @tc.desc: Test image tojson.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestToJson, TestImageJsonCopyOption02, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    image.SetCopyOption(CopyOptions::InApp);
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     * @tc.expected: as follows
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    frameNode->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: check the key value.
+     * @tc.expected: it should be InApp.
+     */
+    EXPECT_EQ(json->GetString("copyOption"), "CopyOptions.InApp");
+}
+
+/**
+ * @tc.name: TestImageJsonCopyOption03
+ * @tc.desc: Test image tojson.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestToJson, TestImageJsonCopyOption03, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    image.SetCopyOption(CopyOptions::Local);
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     * @tc.expected: as follows
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    frameNode->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: check the key value.
+     * @tc.expected: it should be Local.
+     */
+    EXPECT_EQ(json->GetString("copyOption"), "CopyOptions.Local");
+}
+
+/**
+ * @tc.name: TestImageJsonCopyOption04
+ * @tc.desc: Test image tojson.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestToJson, TestImageJsonCopyOption04, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    image.SetCopyOption(CopyOptions::Distributed);
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     * @tc.expected: as follows
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    frameNode->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: check the key value.
+     * @tc.expected: it should be Distributed.
+     */
+    EXPECT_EQ(json->GetString("copyOption"), "CopyOptions.Distributed");
+}
+
+/**
+ * @tc.name: TestImageJsonHdrBrightless001
+ * @tc.desc: Test image tojson.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestToJson, TestImageJsonHdrBrightless001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    image.SetHdrBrightness(0.1);
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     * @tc.expected: as follows
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    frameNode->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: check the key value.
+     * @tc.expected: it should be Distributed.
+     */
+    EXPECT_EQ(json->GetDouble("hdrBrightness"), 0.1);
+}
+
+/**
+ * @tc.name: TestImageJsonHdrBrightless002
+ * @tc.desc: Test image tojson.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestToJson, TestImageJsonHdrBrightless002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    image.SetHdrBrightness(0.2);
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     * @tc.expected: as follows
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    frameNode->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: check the key value.
+     * @tc.expected: it should be 0.2.
+     */
+    EXPECT_EQ(json->GetDouble("hdrBrightness"), 0.2);
+}
+
+/**
+ * @tc.name: TestImageJsonHdrBrightless003
+ * @tc.desc: Test image tojson.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestToJson, TestImageJsonHdrBrightless003, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    image.SetHdrBrightness(1.0);
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     * @tc.expected: as follows
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    frameNode->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: check the key value.
+     * @tc.expected: it should be 1.0.
+     */
+    EXPECT_EQ(json->GetDouble("hdrBrightness"), 1.0);
+}
+
+/**
+ * @tc.name: TestImageJsonWidth01
+ * @tc.desc: Test image tojson.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestToJson, TestImageJsonWidth01, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     * @tc.expected: as follows
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    frameNode->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: check the key value.
+     * @tc.expected: it should be -.
+     */
+    EXPECT_EQ(json->GetString("width"), "-");
+}
+
+
+/**
+ * @tc.name: TestImageJsonHeight01
+ * @tc.desc: Test image tojson.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestToJson, TestImageJsonHeight01, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     * @tc.expected: as follows
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    frameNode->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: check the key value.
+     * @tc.expected: it should be -.
+     */
+    EXPECT_EQ(json->GetString("height"), "-");
+}
+
 } // namespace OHOS::Ace::NG
