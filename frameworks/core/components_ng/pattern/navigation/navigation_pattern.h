@@ -505,6 +505,8 @@ public:
     void OnStartOneTransitionAnimation();
     void OnFinishOneTransitionAnimation();
 
+    bool CheckNeedCreate(int32_t index);
+
 private:
     void FireOnNewParam(const RefPtr<UINode>& uiNode);
     void UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host);

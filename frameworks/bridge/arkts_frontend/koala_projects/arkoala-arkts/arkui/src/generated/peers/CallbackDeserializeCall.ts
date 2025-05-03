@@ -1481,8 +1481,7 @@ export function deserializeAndCallMenuOnAppearCallback(thisDeserializer: Deseria
 export function deserializeAndCallNavExtender_OnUpdateStack(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as NavExtender_OnUpdateStack)
-    let name : string = (thisDeserializer.readString() as string)
-    _call(name)
+    _call()
 }
 export function deserializeAndCallOnAdsBlockedCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()

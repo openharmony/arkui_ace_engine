@@ -266,6 +266,13 @@ enum class NavigationSystemTransitionType {
     SLIDE_BOTTOM = 1 << 5,
 };
 
+enum class LaunchMode {
+    STANDARD = 0,
+    MOVE_TO_TOP_SINGLETON = 1,
+    POP_TO_SINGLETON = 2,
+    NEW_INSTANCE = 3,
+};
+
 inline NavigationSystemTransitionType operator& (NavigationSystemTransitionType lv, NavigationSystemTransitionType rv)
 {
     return static_cast<NavigationSystemTransitionType>(static_cast<uint32_t>(lv) & static_cast<uint32_t>(rv));
@@ -281,6 +288,11 @@ struct NavDestinationTransition {
     RefPtr<Curve> curve;
     std::function<void()> event;
     std::function<void()> onTransitionEnd;
+};
+
+struct NavigationOptions {
+    LaunchMode launchMode = LaunchMode::STANDARD;
+    bool animated = true;
 };
 
 using NavDestinationTransitionDelegate = std::function<std::optional<std::vector<NavDestinationTransition>>(

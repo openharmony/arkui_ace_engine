@@ -13,26 +13,33 @@
  * limitations under the License.
  */
 
+#include "arkoala_api_generated.h"
+
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
-#include "core/components_ng/pattern/navigation/navigation_model_ng.h"
+#include "core/components_ng/pattern/navigation/navigation_model_static.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace {
+constexpr uint32_t SAFE_AREA_TYPE_LIMIT = 3;
+constexpr uint32_t SAFE_AREA_EDGE_LIMIT = 4;
+constexpr uint32_t SAFE_AREA_EDGE_SYSTEM = 0;
+constexpr uint32_t SAFE_AREA_EDGE_TOP = 0;
+constexpr uint32_t SAFE_AREA_EDGE_BOTTOM = 1;
+} // namespace
 namespace NavigationModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                Ark_Int32 flags)
+Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
 {
-    auto frameNode = NavigationModelNG::CreateFrameNode(id);
+    auto frameNode = NavigationModelStatic::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
-} // NavigationModifier
+} // namespace NavigationModifier
 namespace NavigationInterfaceModifier {
 void SetNavigationOptions0Impl(Ark_NativePointer node)
 {
@@ -49,7 +56,7 @@ void SetNavigationOptions1Impl(Ark_NativePointer node,
     navigationPattern->SetNavigationStack(navigationStack);
     navigationStack->SetOnStateChangedCallback(nullptr);
 }
-} // NavigationInterfaceModifier
+} // namespace NavigationInterfaceModifier
 namespace NavigationAttributeModifier {
 void NavBarWidthImpl(Ark_NativePointer node,
                      const Opt_Length* value)
@@ -57,7 +64,7 @@ void NavBarWidthImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto result = Converter::OptConvert<Dimension>(*value);
-    NavigationModelNG::SetNavBarWidth(frameNode, result.value());
+    NavigationModelStatic::SetNavBarWidth(frameNode, result.value());
 }
 void NavBarPositionImpl(Ark_NativePointer node,
                         const Opt_NavBarPosition* value)
@@ -77,20 +84,107 @@ void ModeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
-        NavigationModelNG::SetUsrNavigationMode(frameNode, NavigationMode::AUTO);
+        NavigationModelStatic::SetUsrNavigationMode(frameNode, NavigationMode::AUTO);
         return;
     }
     auto navigationMode = static_cast<NavigationMode>(value->value);
-    NavigationModelNG::SetUsrNavigationMode(frameNode, navigationMode);
+    NavigationModelStatic::SetUsrNavigationMode(frameNode, navigationMode);
 }
-void BackButtonIcon0Impl(Ark_NativePointer node,
-                         const Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier* value)
+void BackButtonIcon0Impl(Ark_NativePointer node, const Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    std::string src;
+    std::string bundleName;
+    std::string moduleName;
+    std::vector<std::string> nameList;
+    NG::ImageOption imageOption;
+    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
+    RefPtr<PixelMap> pixMap = nullptr;
+    bool isValidImage = false;
+    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto valueType = Converter::Convert<int32_t>(value->value.selector);
+        const uint32_t stringType = 0;
+        const uint32_t pixelType = 1;
+        const uint32_t resourceType = 2;
+        const uint32_t symbolType = 3;
+        switch (valueType) {
+            case stringType: {
+                src = Converter::Convert<std::string>(value->value.value0);
+                break;
+            }
+            case pixelType: {
+                break;
+            }
+            case resourceType: {
+                Converter::ResourceConverter converter(value->value.value2);
+                src = converter.ToString().value_or("");
+                break;
+            }
+            case symbolType: {
+                break;
+            }
+            default:
+                break;
+        }
+    }
+    NavigationModelStatic::SetBackButtonIcon(frameNode, iconSymbol, src, imageOption, pixMap, nameList);
 }
 void BackButtonIcon1Impl(Ark_NativePointer node,
                          const Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier* icon,
                          const Opt_ResourceStr* accessibilityText)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(icon);
+    CHECK_NULL_VOID(accessibilityText);
+    std::string src;
+    std::string bundleName;
+    std::string moduleName;
+    std::vector<std::string> nameList;
+    NG::ImageOption imageOption;
+    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
+    RefPtr<PixelMap> pixMap = nullptr;
+    bool isValidImage = false;
+    std::string backButtonAccessibilityText;
+    if (icon->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto valueType = Converter::Convert<int32_t>(icon->value.selector);
+        const uint32_t stringType = 0;
+        const uint32_t pixelType = 1;
+        const uint32_t resourceType = 2;
+        const uint32_t symbolType = 3;
+        switch (valueType) {
+            case stringType: {
+                src = Converter::Convert<std::string>(icon->value.value0);
+                break;
+            }
+            case pixelType: {
+                break;
+            }
+            case resourceType: {
+                Converter::ResourceConverter converter(icon->value.value2);
+                src = converter.ToString().value_or("");
+                break;
+            }
+            case symbolType: {
+                break;
+            }
+            default:
+                break;
+        }
+    }
+    if (accessibilityText->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto accessType = Converter::Convert<int32_t>(accessibilityText->value.selector);
+        if (accessType == 0) {
+            backButtonAccessibilityText = Converter::Convert<std::string>(accessibilityText->value.value0);
+        } else if (accessType == 1) {
+            Converter::ResourceConverter converter(accessibilityText->value.value1);
+            backButtonAccessibilityText = converter.ToString().value_or("");
+        }
+    }
+    NavigationModelStatic::SetBackButtonIcon(
+        frameNode, iconSymbol, src, imageOption, pixMap, nameList, true, backButtonAccessibilityText);
 }
 void HideNavBarImpl(Ark_NativePointer node,
                     const Opt_Boolean* value)
@@ -98,14 +192,10 @@ void HideNavBarImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto isHide = Converter::OptConvert<bool>(*value).value_or(false);
-    NavigationModelNG::SetHideNavBar(frameNode, isHide);
+    NavigationModelStatic::SetHideNavBar(frameNode, isHide);
 }
-void SubTitleImpl(Ark_NativePointer node,
-                  const Opt_String* value)
-{
-}
-void HideTitleBar0Impl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
+void SubTitleImpl(Ark_NativePointer node, const Opt_String* value) {}
+void HideTitleBar0Impl(Ark_NativePointer node, const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -113,7 +203,7 @@ void HideTitleBar0Impl(Ark_NativePointer node,
     if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         hide = Converter::OptConvert<bool>(*value).value_or(false);
     }
-    NavigationModelNG::SetHideTitleBar(frameNode, hide, false);
+    NavigationModelStatic::SetHideTitleBar(frameNode, hide, false);
 }
 void HideTitleBar1Impl(Ark_NativePointer node,
                        const Opt_Boolean* hide,
@@ -129,10 +219,9 @@ void HideTitleBar1Impl(Ark_NativePointer node,
     if (animated->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         isAnimated = Converter::OptConvert<bool>(*animated).value_or(false);
     }
-    NavigationModelNG::SetHideTitleBar(frameNode, isHide, isAnimated);
+    NavigationModelStatic::SetHideTitleBar(frameNode, isHide, isAnimated);
 }
-void HideBackButtonImpl(Ark_NativePointer node,
-                        const Opt_Boolean* value)
+void HideBackButtonImpl(Ark_NativePointer node, const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -140,7 +229,7 @@ void HideBackButtonImpl(Ark_NativePointer node,
     if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         isHide = Converter::OptConvert<bool>(*value).value_or(false);
     }
-    NavigationModelNG::SetHideBackButton(frameNode, isHide);
+    NavigationModelStatic::SetHideBackButton(frameNode, isHide);
 }
 void TitleModeImpl(Ark_NativePointer node,
                    const Opt_NavigationTitleMode* value)
@@ -151,16 +240,48 @@ void TitleModeImpl(Ark_NativePointer node,
     if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         titleMode = static_cast<NavigationTitleMode>(value->value);
     }
-    NavigationModelNG::SetTitleMode(frameNode, titleMode);
+    NavigationModelStatic::SetTitleMode(frameNode, titleMode);
 }
-void Menus0Impl(Ark_NativePointer node,
-                const Opt_Union_Array_NavigationMenuItem_CustomBuilder* value)
+void Menus0Impl(Ark_NativePointer node, const Opt_Union_Array_NavigationMenuItem_CustomBuilder* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    NG::NavigationMenuOptions options;
+    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto typeValue = value->value.selector;
+        if (typeValue == 0) {
+            auto menuItemArray = Converter::Convert<std::vector<NG::BarItem>>(value->value.value0);
+            NavigationModelStatic::SetMenuItems(frameNode, std::move(menuItemArray));
+        } else if (typeValue == 1) {
+        }
+    }
+    NavigationModelStatic::SetMenuOptions(frameNode, std::move(options));
 }
 void Menus1Impl(Ark_NativePointer node,
                 const Opt_Union_Array_NavigationMenuItem_CustomBuilder* items,
                 const Opt_NavigationMenuOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(items);
+    CHECK_NULL_VOID(options);
+    NG::NavigationMenuOptions menuOptions;
+    if (items->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto typeValue = items->value.selector;
+        if (typeValue == 0) {
+            auto menuItemArray = Converter::Convert<std::vector<NG::BarItem>>(items->value.value0);
+            NavigationModelStatic::SetMenuItems(frameNode, std::move(menuItemArray));
+        } else if (typeValue == 1) {
+        }
+    }
+    if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED &&
+        options->value.moreButtonOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        NG::NavigationBackgroundOptions bgOptions =
+            Converter::Convert<NG::NavigationBackgroundOptions>(options->value.moreButtonOptions.value);
+        menuOptions.mbOptions.bgOptions = bgOptions;
+    }
+    NavigationModelStatic::SetMenuOptions(frameNode, std::move(menuOptions));
 }
 void ToolBarImpl(Ark_NativePointer node,
                  const Opt_CustomNodeBuilder* value)
@@ -175,11 +296,9 @@ void HideToolBar0Impl(Ark_NativePointer node,
     if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         isHide = Converter::OptConvert<bool>(*value).value_or(false);
     }
-    NavigationModelNG::SetHideToolBar(frameNode, isHide, false);
+    NavigationModelStatic::SetHideToolBar(frameNode, isHide, false);
 }
-void HideToolBar1Impl(Ark_NativePointer node,
-                      const Opt_Boolean* hide,
-                      const Opt_Boolean* animated)
+void HideToolBar1Impl(Ark_NativePointer node, const Opt_Boolean* hide, const Opt_Boolean* animated)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -191,7 +310,7 @@ void HideToolBar1Impl(Ark_NativePointer node,
     if (animated->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         isAnimated = Converter::OptConvert<bool>(*animated).value_or(false);
     }
-    NavigationModelNG::SetHideToolBar(frameNode, isHide, isAnimated);
+    NavigationModelStatic::SetHideToolBar(frameNode, isHide, isAnimated);
 }
 void EnableToolBarAdaptationImpl(Ark_NativePointer node,
                                  const Opt_Boolean* value)
@@ -224,8 +343,7 @@ void OnTitleModeChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnTitleModeChange(eventChange);
 }
-void OnNavBarStateChangeImpl(Ark_NativePointer node,
-                             const Opt_Callback_Boolean_Void* value)
+void OnNavBarStateChangeImpl(Ark_NativePointer node, const Opt_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -233,7 +351,7 @@ void OnNavBarStateChangeImpl(Ark_NativePointer node,
         return;
     }
     auto stateCallback = [changeCallback = CallbackHelper(value->value)](bool isVisible) {
-    auto visible = Converter::ArkValue<Ark_Boolean>(isVisible);
+        auto visible = Converter::ArkValue<Ark_Boolean>(isVisible);
         changeCallback.Invoke(visible);
     };
     auto eventHub = frameNode->GetEventHub<NavigationEventHub>();
@@ -256,49 +374,31 @@ void OnNavigationModeChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnNavigationModeChange(modeCallback);
 }
-void NavDestinationImpl(Ark_NativePointer node,
-                        const Opt_Callback_String_Opt_Object_Void* value)
+void NavDestinationImpl(Ark_NativePointer node, const Opt_Callback_String_Opt_Object_Void* value) {}
+void CustomNavContentTransitionImpl(
+    Ark_NativePointer node, const Opt_Type_NavigationAttribute_customNavContentTransition_delegate* value)
+{}
+void SystemBarStyleImpl(Ark_NativePointer node, const Opt_SystemBarStyle* value) {}
+void RecoverableImpl(Ark_NativePointer node, const Opt_Boolean* value) {}
+void EnableDragBarImpl(Ark_NativePointer node, const Opt_Boolean* value) {}
+void EnableModeChangeAnimationImpl(Ark_NativePointer node, const Opt_Boolean* value) {}
+void TitleImpl(Ark_NativePointer node, const Opt_Type_NavigationAttribute_title_value* value,
+    const Opt_NavigationTitleOptions* options)
 {
-}
-void CustomNavContentTransitionImpl(Ark_NativePointer node,
-                                    const Opt_Type_NavigationAttribute_customNavContentTransition_delegate* value)
-{
-}
-void SystemBarStyleImpl(Ark_NativePointer node,
-                        const Opt_SystemBarStyle* value)
-{
-}
-void RecoverableImpl(Ark_NativePointer node,
-                     const Opt_Boolean* value)
-{
-}
-void EnableDragBarImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
-{
-}
-void EnableModeChangeAnimationImpl(Ark_NativePointer node,
-                                   const Opt_Boolean* value)
-{
-}
-void TitleImpl(Ark_NativePointer node,
-               const Opt_Type_NavigationAttribute_title_value* value,
-               const Opt_NavigationTitleOptions* options)
-{
-#ifdef WRONG_MERGE
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NavigationTitlebarOptions titleOptions;
     if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         titleOptions = Converter::OptConvert<NavigationTitlebarOptions>(options->value).value_or(titleOptions);
     }
-    NavigationModelNG::SetTitlebarOptions(frameNode, std::move(titleOptions));
+    NavigationModelStatic::SetTitlebarOptions(frameNode, std::move(titleOptions));
     NavigationTitleInfo info;
     if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
         info.hasMainTitle = true;
         info.hasSubTitle = false;
         info.title = "";
         info.subtitle = "";
-        NavigationModelNG::ParseCommonTitle(frameNode, info);
+        NavigationModelStatic::ParseCommonTitle(frameNode, info);
         return;
     }
     auto selector = Converter::Convert<int32_t>(value->value.selector);
@@ -307,7 +407,7 @@ void TitleImpl(Ark_NativePointer node,
         info.title = Converter::OptConvert<std::string>(value->value.value0).value_or("");
         info.hasMainTitle = true;
         info.hasSubTitle = false;
-        NavigationModelNG::ParseCommonTitle(frameNode, info);
+        NavigationModelStatic::ParseCommonTitle(frameNode, info);
         return;
     }
     const int8_t commonTitleSelector = 2;
@@ -316,9 +416,8 @@ void TitleImpl(Ark_NativePointer node,
         info.subtitle = Converter::OptConvert<std::string>(value->value.value2.sub).value_or("");
         info.hasSubTitle = true;
         info.hasMainTitle = true;
-        NavigationModelNG::ParseCommonTitle(frameNode, info);
+        NavigationModelStatic::ParseCommonTitle(frameNode, info);
     }
-#endif
 }
 void ToolbarConfigurationImpl(Ark_NativePointer node,
                               const Opt_Union_Array_ToolbarItem_CustomBuilder* value,
@@ -329,8 +428,37 @@ void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
                               const Opt_Array_LayoutSafeAreaType* types,
                               const Opt_Array_LayoutSafeAreaEdge* edges)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL };
+    if (types->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto typeRawArray = Converter::Convert<std::vector<uint32_t>>(types->value);
+        uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
+        for (auto typeValue : typeRawArray) {
+            if (typeValue >= SAFE_AREA_TYPE_LIMIT || typeValue == SAFE_AREA_EDGE_SYSTEM) {
+                safeAreaType = NG::SAFE_AREA_TYPE_SYSTEM;
+                break;
+            }
+        }
+        opts.type = safeAreaType;
+    }
+    if (edges->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto edgeRawArray = Converter::Convert<std::vector<uint32_t>>(edges->value);
+        uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
+        for (auto edgeValue : edgeRawArray) {
+            if (edgeValue >= SAFE_AREA_EDGE_LIMIT) {
+                safeAreaEdge = NG::SAFE_AREA_EDGE_ALL;
+                break;
+            }
+            if (edgeValue == SAFE_AREA_EDGE_TOP || edgeValue == SAFE_AREA_EDGE_BOTTOM) {
+                safeAreaEdge |= (1 << edgeValue);
+            }
+        }
+        opts.edges = safeAreaEdge;
+    }
+    NavigationModelStatic::SetIgnoreLayoutSafeArea(frameNode, opts);
 }
-} // NavigationAttributeModifier
+} // namespace NavigationAttributeModifier
 const GENERATED_ArkUINavigationModifier* GetNavigationModifier()
 {
     static const GENERATED_ArkUINavigationModifier ArkUINavigationModifierImpl {
@@ -372,4 +500,4 @@ const GENERATED_ArkUINavigationModifier* GetNavigationModifier()
     return &ArkUINavigationModifierImpl;
 }
 
-}
+} // namespace OHOS::Ace::NG::GeneratedModifier

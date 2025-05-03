@@ -532,6 +532,55 @@ std::vector<Shadow> Convert(const Ark_ShadowOptions& src)
 }
 
 template<>
+std::vector<uint32_t> Convert(const Array_LayoutSafeAreaType& src)
+{
+    std::vector<uint32_t> dst;
+    auto length = Converter::Convert<int>(src.length);
+    for (int i = 0; i < length; i++) {
+        auto value = Converter::Convert<uint32_t>(*(src.array + i));
+        dst.push_back(value);
+    }
+    return dst;
+}
+
+template<>
+std::vector<uint32_t> Convert(const Array_LayoutSafeAreaEdge& src)
+{
+    std::vector<uint32_t> dst;
+    auto length = Converter::Convert<int>(src.length);
+    for (int i = 0; i < length; i++) {
+        auto value = Converter::Convert<uint32_t>(*(src.array + i));
+        dst.push_back(value);
+    }
+    return dst;
+}
+
+template<>
+std::vector<NG::BarItem> Convert(const Array_NavigationMenuItem& src)
+{
+    std::vector<NG::BarItem> dst;
+    auto length = Converter::Convert<int>(src.length);
+    for (int i = 0; i < length; i++) {
+        auto menuItem = *(src.array + i);
+        NG::BarItem item;
+        item.text = Converter::OptConvert<std::string>(menuItem.value).value_or("");
+        item.icon = Converter::OptConvert<std::string>(menuItem.icon);
+        // iconSymbol is not dealed
+        item.isEnabled = Converter::OptConvert<bool>(menuItem.isEnabled);
+        if (menuItem.action.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+            auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+            auto actionCallback = [changeCallback = CallbackHelper(menuItem.action.value), node = targetNode]() {
+                PipelineContext::SetCallBackNode(node);
+                changeCallback.Invoke();
+            };
+            item.action = actionCallback;
+        }
+        dst.push_back(item);
+    }
+    return dst;
+}
+
+template<>
 Dimension Convert(const Ark_String& src)
 {
     auto str = Convert<std::string>(src);
@@ -1213,6 +1262,43 @@ template<>
 bool Convert(const Ark_EdgeEffectOptions& src)
 {
     return static_cast<bool>(src.alwaysEnabled);
+}
+
+template<>
+uint32_t Convert(const Ark_LayoutSafeAreaEdge& src)
+{
+    return static_cast<uint32_t>(src);
+}
+
+template<>
+uint32_t Convert(const Ark_LayoutSafeAreaType& src)
+{
+    return static_cast<uint32_t>(src);
+}
+
+template<>
+NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src)
+{
+    NG::NavigationBackgroundOptions options;
+    options.color.reset();
+    options.blurStyleOption.reset();
+    options.effectOption.reset();
+    BlurStyleOption styleOptions;
+    if (src.backgroundBlurStyleOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        styleOptions = Converter::Convert<BlurStyleOption>(src.backgroundBlurStyleOptions.value);
+    }
+
+    if (src.backgroundBlurStyle.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto blurStyle = static_cast<int32_t>(src.backgroundBlurStyle.value);
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+            styleOptions.blurStyle = static_cast<BlurStyle>(blurStyle);
+        }
+    }
+
+    if (src.backgroundEffect.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+    }
+    return options;
 }
 
 template<>
@@ -2376,5 +2462,26 @@ template<>
 std::string Convert(const Ark_CommandPath& src)
 {
     return Converter::Convert<std::string>(src.commands);
+}
+
+template<>
+NavigationOptions Convert(const Ark_NavigationOptions& src)
+{
+    return {
+        .animated = Converter::OptConvert<bool>(src.animated).value_or(true),
+        .launchMode = Converter::OptConvert<LaunchMode>(src.launchMode).value_or(LaunchMode::STANDARD)
+    };
+}
+
+template<>
+void AssignCast(std::optional<NavigationTitlebarOptions>& dst, const Ark_NavigationTitleOptions& value)
+{
+    dst = NavigationTitlebarOptions();
+    if (value.backgroundColor.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        dst->bgOptions.color = Converter::OptConvert<Color>(value.backgroundColor);
+    }
+    if (value.paddingStart.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        dst->brOptions.paddingStart = Converter::OptConvert<Dimension>(value.paddingStart);
+    }
 }
 } // namespace OHOS::Ace::NG::Converter

@@ -14077,6 +14077,39 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         //auto convValue = Converter::OptConvert<type>(navigation); // for enums
         //undefinedModelNG::SetSubTitle(frameNode, convValue);
     }
+    void PushPathImpl(Ark_NavPathStack pathStack,
+                      Ark_NavPathInfo info,
+                      const Ark_NavigationOptions* options)
+    {
+    }
+    void ReplacePathImpl(Ark_NavPathStack pathStack,
+                         Ark_NavPathInfo info,
+                         const Ark_NavigationOptions* options)
+    {
+    }
+    Ark_String PopImpl(Ark_NavPathStack pathStack,
+                       Ark_Boolean isAnimated)
+    {
+        return {};
+    }
+    Ark_String GetIdByIndexImpl(Ark_NavPathStack pathStack,
+                            Ark_Int32 index)
+    {
+        return {};
+    }
+    Array_String GetIdByNameImpl(Ark_NavPathStack pathStack,
+                             const Ark_String* name)
+    {
+        return {};
+    }
+    void SetOnPopCallbackImpl(Ark_NavPathStack pathStack,
+                              const Callback_String_Void* callback)
+    {
+    }
+    Ark_String GetNavDestinationIdImpl(Ark_NavPathInfo info)
+    {
+        return {};
+    }
     } // NavExtenderAccessor
     namespace EventEmulatorAccessor {
     void EmitTextInputEventImpl(Ark_NativePointer node,
@@ -21317,6 +21350,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NavExtenderAccessor::SetTitleModeImpl,
             NavExtenderAccessor::TitleImpl,
             NavExtenderAccessor::SubTitleImpl,
+            NavExtenderAccessor::PushPathImpl,
+            NavExtenderAccessor::ReplacePathImpl,
+            NavExtenderAccessor::PopImpl,
+            NavExtenderAccessor::GetIdByIndexImpl,
+            NavExtenderAccessor::GetIdByNameImpl,
+            NavExtenderAccessor::SetOnPopCallbackImpl,
+            NavExtenderAccessor::GetNavDestinationIdImpl,
         };
         return &NavExtenderAccessorImpl;
     }

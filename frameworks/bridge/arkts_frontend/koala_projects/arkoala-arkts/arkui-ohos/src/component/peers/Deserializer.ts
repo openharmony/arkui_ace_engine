@@ -4480,12 +4480,11 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (name: string):void => { 
+        return ():void => { 
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeString(name);
     (isSync) ? (InteropNativeModule._CallCallbackSync(-588228933, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-588228933, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
@@ -17463,7 +17462,7 @@ export class Deserializer extends DeserializerBase {
         {
             symbolIcon_buf = valueDeserializer.readSymbolGlyphModifier()
         }
-        const symbolIcon_result : SymbolGlyphModifier | undefined = symbolIcon_buf
+        const symbolIcon_result : SymbolGlyphModifier | undefined = undefined
         const isEnabled_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let isEnabled_buf : boolean | undefined
         if ((RuntimeType.UNDEFINED) != (isEnabled_buf_runtimeType))

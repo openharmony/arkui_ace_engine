@@ -28166,6 +28166,104 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void PushPathImpl(Ark_NavPathStack pathStack,
+                      Ark_NavPathInfo info,
+                      const Ark_NavigationOptions* options)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("pushPath(");
+        WriteToString(&out, pathStack);
+        out.append(", ");
+        WriteToString(&out, info);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ReplacePathImpl(Ark_NavPathStack pathStack,
+                         Ark_NavPathInfo info,
+                         const Ark_NavigationOptions* options)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("pushPath(");
+        WriteToString(&out, pathStack);
+        out.append(", ");
+        WriteToString(&out, info);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_String PopImpl(Ark_NavPathStack pathStack,
+                 Ark_Boolean isAnimated)
+    {
+        if (!needGroupedLog(1)) {
+            return {};
+        }
+        string out("pop(");
+        WriteToString(&out, pathStack);
+        out.append(", ");
+        WriteToString(&out, isAnimated);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Ark_String GetIdByIndexImpl(Ark_NavPathStack pathStack,
+                                Ark_Int32 index)
+    {
+        if (!needGroupedLog(1)) {
+            return {};
+        }
+        string out("getIdByIndex(");
+        WriteToString(&out, pathStack);
+        out.append(", ");
+        WriteToString(&out, index);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Array_String GetIdByNameImpl(Ark_NavPathStack pathStack,
+                             const Ark_String* name)
+    {
+        if (!needGroupedLog(1)) {
+            return {};
+        }
+        string out("getIdByName(");
+        WriteToString(&out, pathStack);
+        out.append(", ");
+        WriteToString(&out, name);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    void SetOnPopCallbackImpl(Ark_NavPathStack pathStack,
+                              const Callback_String_Void* callback)
+    {
+        if (!needGroupedLog(1)) {
+            return;
+        }
+        string out("setOnPopCallback(");
+        WriteToString(&out, pathStack);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_String GetNavDestinationId(Ark_NavPathInfo info)
+    {
+        if (!needGroupedLog(1)) {
+            return {};
+        }
+        string out("getNavDestiantionId(");
+        WriteToString(&out, info);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     } // NavExtenderAccessor
     namespace EventEmulatorAccessor {
     void EmitTextInputEventImpl(Ark_NativePointer node,
@@ -43299,6 +43397,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NavExtenderAccessor::SetTitleModeImpl,
             NavExtenderAccessor::TitleImpl,
             NavExtenderAccessor::SubTitleImpl,
+            NavExtenderAccessor::PushPathImpl,
+            NavExtenderAccessor::ReplacePathImpl,
+            NavExtenderAccessor::PopImpl,
+            NavExtenderAccessor::GetIdByIndexImpl,
+            NavExtenderAccessor::GetIdByNameImpl,
+            NavExtenderAccessor::SetOnPopCallbackImpl,
+            NavExtenderAccessor::GetNavDestinationIdImpl,
         };
         return &NavExtenderAccessorImpl;
     }
