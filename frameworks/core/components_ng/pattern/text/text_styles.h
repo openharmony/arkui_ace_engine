@@ -194,6 +194,7 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextShadow, std::vector<Shadow>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ItalicFontStyle, Ace::FontStyle);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(Superscript, SuperscriptStyle);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontWeight, FontWeight);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(VariableFontWeight, int32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableVariableFontWeight, bool);

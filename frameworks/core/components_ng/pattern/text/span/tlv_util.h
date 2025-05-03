@@ -142,6 +142,9 @@ constexpr uint8_t TLV_FLOAT_TAG = 0x9A;
 
 constexpr uint8_t TLV_SPAN_STRING_MODE_FLAG = 0x9B;
 
+constexpr uint8_t TLV_SUPERSCRIPT_TAG = 0x9C;
+constexpr uint8_t TLV_SPAN_FONT_STYLE_SUPERSCRIPT = 0x9D;
+
 #define TLV_DEFINE_ENUM_TYPE(type, tag) \
 public:                                                                     \
     static void Write##type(std::vector<uint8_t>& buff, type value)         \
@@ -201,6 +204,7 @@ public:
 
     TLV_DEFINE_ENUM_TYPE(FontStyle, TLV_ITALICSFONTSTYLE_TAG);
     TLV_DEFINE_ENUM_TYPE(FontWeight, TLV_FONTWEIGHT_TAG);
+    TLV_DEFINE_ENUM_TYPE(SuperscriptStyle, TLV_SUPERSCRIPT_TAG);
     TLV_DEFINE_ENUM_TYPE(TextDecoration, TLV_TEXTDECORATION_TAG);
     TLV_DEFINE_ENUM_TYPE(TextDecorationStyle, TLV_TEXTDECORATIONSTYLE_TAG);
     TLV_DEFINE_ENUM_TYPE(TextCase, TLV_TEXTCASE_TAG);

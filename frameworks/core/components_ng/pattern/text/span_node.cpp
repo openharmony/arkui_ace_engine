@@ -465,6 +465,7 @@ void SpanItem::UpdateFontStyle(TextStyle& spanTextStyle, const TextStyle& textSt
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextColor, TextColor);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextShadow, TextShadows);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, ItalicFontStyle, FontStyle);
+    UPDATE_SPAN_TEXT_STYLE(fontStyle, Superscript, Superscript);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, FontWeight, FontWeight);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, FontFeature, FontFeatures);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextDecoration, TextDecoration);
@@ -823,25 +824,7 @@ ResultObject SpanItem::GetSpanResultObject(int32_t start, int32_t end)
 RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
 {
     auto sameSpan = MakeRefPtr<SpanItem>();
-    COPY_TEXT_STYLE(fontStyle, FontSize, UpdateFontSize);
-    COPY_TEXT_STYLE(fontStyle, TextColor, UpdateTextColor);
-    COPY_TEXT_STYLE(fontStyle, TextShadow, UpdateTextShadow);
-    COPY_TEXT_STYLE(fontStyle, ItalicFontStyle, UpdateItalicFontStyle);
-    COPY_TEXT_STYLE(fontStyle, FontWeight, UpdateFontWeight);
-    COPY_TEXT_STYLE(fontStyle, FontFamily, UpdateFontFamily);
-    COPY_TEXT_STYLE(fontStyle, FontFeature, UpdateFontFeature);
-    COPY_TEXT_STYLE(fontStyle, StrokeWidth, UpdateStrokeWidth);
-    COPY_TEXT_STYLE(fontStyle, StrokeColor, UpdateStrokeColor);
-    COPY_TEXT_STYLE(fontStyle, TextDecoration, UpdateTextDecoration);
-    COPY_TEXT_STYLE(fontStyle, TextDecorationColor, UpdateTextDecorationColor);
-    COPY_TEXT_STYLE(fontStyle, TextDecorationStyle, UpdateTextDecorationStyle);
-    COPY_TEXT_STYLE(fontStyle, LineThicknessScale, UpdateLineThicknessScale);
-    COPY_TEXT_STYLE(fontStyle, TextCase, UpdateTextCase);
-    COPY_TEXT_STYLE(fontStyle, AdaptMinFontSize, UpdateAdaptMinFontSize);
-    COPY_TEXT_STYLE(fontStyle, AdaptMaxFontSize, UpdateAdaptMaxFontSize);
-    COPY_TEXT_STYLE(fontStyle, LetterSpacing, UpdateLetterSpacing);
-    COPY_TEXT_STYLE(fontStyle, MinFontScale, UpdateMinFontScale);
-    COPY_TEXT_STYLE(fontStyle, MaxFontScale, UpdateMaxFontScale);
+    GetFontStyleSpanItem(sameSpan);
     COPY_TEXT_STYLE(textLineStyle, LineHeight, UpdateLineHeight);
     COPY_TEXT_STYLE(textLineStyle, LineSpacing, UpdateLineSpacing);
     COPY_TEXT_STYLE(textLineStyle, OptimizeTrailingSpace, UpdateOptimizeTrailingSpace);
@@ -870,6 +853,30 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
     sameSpan->onLongPress = onLongPress;
     sameSpan->onTouch = onTouch;
     return sameSpan;
+}
+
+void SpanItem::GetFontStyleSpanItem(RefPtr<SpanItem>& sameSpan) const
+{
+    COPY_TEXT_STYLE(fontStyle, FontSize, UpdateFontSize);
+    COPY_TEXT_STYLE(fontStyle, TextColor, UpdateTextColor);
+    COPY_TEXT_STYLE(fontStyle, TextShadow, UpdateTextShadow);
+    COPY_TEXT_STYLE(fontStyle, ItalicFontStyle, UpdateItalicFontStyle);
+    COPY_TEXT_STYLE(fontStyle, Superscript, UpdateSuperscript);
+    COPY_TEXT_STYLE(fontStyle, FontWeight, UpdateFontWeight);
+    COPY_TEXT_STYLE(fontStyle, FontFamily, UpdateFontFamily);
+    COPY_TEXT_STYLE(fontStyle, FontFeature, UpdateFontFeature);
+    COPY_TEXT_STYLE(fontStyle, StrokeWidth, UpdateStrokeWidth);
+    COPY_TEXT_STYLE(fontStyle, StrokeColor, UpdateStrokeColor);
+    COPY_TEXT_STYLE(fontStyle, TextDecoration, UpdateTextDecoration);
+    COPY_TEXT_STYLE(fontStyle, TextDecorationColor, UpdateTextDecorationColor);
+    COPY_TEXT_STYLE(fontStyle, TextDecorationStyle, UpdateTextDecorationStyle);
+    COPY_TEXT_STYLE(fontStyle, LineThicknessScale, UpdateLineThicknessScale);
+    COPY_TEXT_STYLE(fontStyle, TextCase, UpdateTextCase);
+    COPY_TEXT_STYLE(fontStyle, AdaptMinFontSize, UpdateAdaptMinFontSize);
+    COPY_TEXT_STYLE(fontStyle, AdaptMaxFontSize, UpdateAdaptMaxFontSize);
+    COPY_TEXT_STYLE(fontStyle, LetterSpacing, UpdateLetterSpacing);
+    COPY_TEXT_STYLE(fontStyle, MinFontScale, UpdateMinFontScale);
+    COPY_TEXT_STYLE(fontStyle, MaxFontScale, UpdateMaxFontScale);
 }
 
 #define WRITE_TLV_INHERIT(group, name, tag, type, inheritName)   \
@@ -930,6 +937,7 @@ void SpanItem::EncodeFontStyleTlv(std::vector<uint8_t>& buff) const
     WRITE_TLV_INHERIT(fontStyle, ItalicFontStyle, TLV_SPAN_FONT_STYLE_ITALICFONTSTYLE, FontStyle, FontStyle);
     WRITE_TLV_INHERIT(fontStyle, FontWeight, TLV_SPAN_FONT_STYLE_FONTWEIGHT, FontWeight, FontWeight);
     WRITE_TLV_INHERIT(fontStyle, FontFamily, TLV_SPAN_FONT_STYLE_FONTFAMILY, FontFamily, FontFamilies);
+    WRITE_TLV_INHERIT(fontStyle, Superscript, TLV_SPAN_FONT_STYLE_SUPERSCRIPT, SuperscriptStyle, Superscript);
     WRITE_TLV_INHERIT(fontStyle, FontFeature, TLV_SPAN_FONT_STYLE_FONTFEATURE, FontFeature, FontFeatures);
     WRITE_TLV_INHERIT(
         fontStyle, TextDecorationColor, TLV_SPAN_FONT_STYLE_TEXTDECORATIONCOLOR, Color, TextDecorationColor);
@@ -990,6 +998,7 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
             READ_TEXT_STYLE_TLV(fontStyle, UpdateItalicFontStyle, TLV_SPAN_FONT_STYLE_ITALICFONTSTYLE, FontStyle);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateFontWeight, TLV_SPAN_FONT_STYLE_FONTWEIGHT, FontWeight);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateFontFamily, TLV_SPAN_FONT_STYLE_FONTFAMILY, FontFamily);
+            READ_TEXT_STYLE_TLV(fontStyle, UpdateSuperscript, TLV_SPAN_FONT_STYLE_SUPERSCRIPT, SuperscriptStyle);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateFontFeature, TLV_SPAN_FONT_STYLE_FONTFEATURE, FontFeature);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateTextDecorationColor, TLV_SPAN_FONT_STYLE_TEXTDECORATIONCOLOR, Color);
             READ_TEXT_STYLE_TLV(fontStyle, UpdateTextDecorationStyle,

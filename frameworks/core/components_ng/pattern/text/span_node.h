@@ -298,6 +298,7 @@ public:
     virtual bool IsDragging();
     virtual ResultObject GetSpanResultObject(int32_t start, int32_t end);
     virtual RefPtr<SpanItem> GetSameStyleSpanItem(bool isEncodeTlvS = false) const;
+    void GetFontStyleSpanItem(RefPtr<SpanItem>& sameSpan) const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
     std::u16string urlAddress;
     std::function<void()> urlOnRelease;
@@ -587,6 +588,7 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFamily, std::vector<std::string>, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(StrokeWidth, Dimension, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(StrokeColor, Color, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_FONT_STYLE_ITEM(Superscript, SuperscriptStyle, ChangeFlag::RE_CREATE);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, std::vector<TextDecoration>, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationStyle, TextDecorationStyle, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationColor, Color, ChangeFlag::RE_LAYOUT);
