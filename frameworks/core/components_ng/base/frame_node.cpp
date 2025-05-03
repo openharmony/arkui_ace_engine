@@ -1414,8 +1414,8 @@ void FrameNode::NotifyColorModeChange(uint32_t colorMode)
     }
 
     if (pattern_) {
-        pattern_->OnColorModeChange(colorMode);
         pattern_->OnColorConfigurationUpdate();
+        pattern_->OnColorModeChange(colorMode);
     }
 
     auto frameNode = AceType::DynamicCast<FrameNode>(this);
