@@ -25,7 +25,7 @@ void SliderPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(sliderContentModifier_);
     auto paintProperty = DynamicCast<SliderPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto renderContext = paintWrapper->GetRenderContext();
     CHECK_NULL_VOID(renderContext);

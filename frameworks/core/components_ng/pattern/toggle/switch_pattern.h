@@ -88,7 +88,7 @@ public:
     {
         FocusPaintParam focusPaintParams;
 
-        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
+        auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, FocusPattern());
         auto switchTheme = pipelineContext->GetTheme<SwitchTheme>(GetThemeScopeId());
         CHECK_NULL_RETURN(switchTheme, FocusPattern());

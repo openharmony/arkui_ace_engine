@@ -342,7 +342,7 @@ float SafeAreaManager::GetKeyboardOffset(bool withoutProcess) const
 
 OffsetF SafeAreaManager::GetWindowWrapperOffset()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto windowManager = pipelineContext->GetWindowManager();
     auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
@@ -360,7 +360,7 @@ void SafeAreaManager::ExpandSafeArea()
     ACE_SCOPED_TRACE("ExpandSafeArea node count %zu, IsSafeAreaValid: %d, ignoreSafeArea: %d, isFullScreen: %d, "
                      "isNeedAvoidWindow %d",
         needExpandNodes_.size(), IsSafeAreaValid(), ignoreSafeArea_, isFullScreen_, isNeedAvoidWindow_);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetSafeAreaManager();
     auto iter = needExpandNodes_.begin();

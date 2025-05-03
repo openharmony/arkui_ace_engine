@@ -163,7 +163,7 @@ void DialogPattern::RegisterHoverModeChangeCallback()
 
 void DialogPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
     if (HasFoldDisplayModeChangedCallbackId()) {
@@ -865,7 +865,7 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     // set button default height
     auto layoutProps = buttonNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProps, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
@@ -1474,7 +1474,7 @@ void DialogPattern::UpdatePropertyForElderly(const std::vector<ButtonInfo>& butt
 {
     isSuitableForElderly_ = false;
     notAdapationAging_ = false;
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_VOID(windowManager);

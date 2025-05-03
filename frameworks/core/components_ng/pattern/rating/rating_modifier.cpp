@@ -95,7 +95,7 @@ double RatingModifier::GetDistanceFromTheme()
 }
 void RatingModifier::PaintBoard(DrawingContext& context)
 {
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto ratingTheme = pipeline->GetTheme<RatingTheme>();
     CHECK_NULL_VOID(ratingTheme);

@@ -302,7 +302,7 @@ void AppBarView::BindMenuCallback(const RefPtr<FrameNode>& menuButton)
 void AppBarView::BindCloseCallback(const RefPtr<FrameNode>& closeButton)
 {
     auto clickCallback = [](GestureEvent& info) {
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto container = Container::Current();
         CHECK_NULL_VOID(container);

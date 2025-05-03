@@ -118,7 +118,7 @@ void NavToolbarPattern::OnModifyDone()
     CHECK_NULL_VOID(containerNode);
     auto gestureHub = containerNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     float scale = context->GetFontScale();
     if (LessNotEqual(scale, AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {

@@ -42,7 +42,7 @@ void MarqueePattern::OnAttachToFrameNode()
     }
     host->GetRenderContext()->SetUsingContentRectForRenderFrame(true);
     host->GetRenderContext()->SetClipToFrame(true);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowSizeChangeCallback(host->GetId());
     pipeline->AddWindowStateChangedCallback(host->GetId());
@@ -51,7 +51,7 @@ void MarqueePattern::OnAttachToFrameNode()
 
 void MarqueePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
     pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
@@ -116,7 +116,7 @@ void MarqueePattern::OnModifyDone()
     auto gestureHub = textChild->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetHitTestMode(HitTestMode::HTMNONE);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
@@ -158,7 +158,7 @@ void MarqueePattern::StartMarqueeAnimation()
     }
     auto paintProperty = host->GetPaintProperty<MarqueePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto repeatCount = paintProperty->GetLoop().value_or(DEFAULT_MARQUEE_LOOP);
     if (pipeline->IsFormRenderExceptDynamicComponent()) {
@@ -543,7 +543,7 @@ void MarqueePattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(textChildNode);
     auto textLayoutProperty = textChildNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<MarqueeTheme>();
     CHECK_NULL_VOID(theme);

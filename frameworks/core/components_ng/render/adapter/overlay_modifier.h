@@ -97,7 +97,7 @@ public:
         paraStyle.fontSize = fontSize.Value();
         auto builder = RSParagraphBuilder::Create(paraStyle, RSFontCollection::Create());
         CHECK_NULL_RETURN(builder, nullptr);
-        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
+        auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, nullptr);
         builder->PushStyle(ToRSTextStyle(pipelineContext, textStyle));
         builder->AppendText(StringUtils::Str8ToStr16(overlayOptions.content));
@@ -139,7 +139,7 @@ public:
 
     bool IsCustomFont()
     {
-        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
+        auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, false);
         auto fontManager = pipelineContext->GetFontManager();
         CHECK_NULL_RETURN(fontManager, false);

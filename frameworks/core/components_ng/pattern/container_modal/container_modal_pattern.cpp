@@ -528,7 +528,7 @@ void ContainerModalPattern::SetCloseButtonStatus(bool isEnabled)
 
 void ContainerModalPattern::SetWindowContainerColor(const Color& activeColor, const Color& inactiveColor)
 {
-    auto theme = PipelineContext::GetCurrentContextSafelyWithCheck()->GetTheme<ContainerModalTheme>();
+    auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
     auto containerNode = GetHost();
     CHECK_NULL_VOID(containerNode);
     // update container modal background
@@ -542,7 +542,7 @@ void ContainerModalPattern::SetWindowContainerColor(const Color& activeColor, co
 
 Color ContainerModalPattern::GetContainerColor(bool isFocus)
 {
-    auto theme = PipelineContext::GetCurrentContextSafelyWithCheck()->GetTheme<ContainerModalTheme>();
+    auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
     return isCustomColor_ ? (isFocus ? activeColor_ : inactiveColor_) : theme->GetBackGroundColor(isFocus);
 }
 
@@ -740,7 +740,7 @@ void ContainerModalPattern::CallButtonsRectChange()
 
 void ContainerModalPattern::InitTitle()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
@@ -767,7 +767,7 @@ void ContainerModalPattern::Init()
 
 void ContainerModalPattern::InitContainerColor()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
     activeColor_ = theme->GetBackGroundColor(true);
@@ -976,7 +976,7 @@ bool ContainerModalPattern::OnDirtyLayoutWrapperSwap(
 
 void ContainerModalPattern::CallSetContainerWindow(bool considerFloatingWindow)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto curWindowRect = pipelineContext->GetCurrentWindowRect();
     auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL;

@@ -29,7 +29,7 @@ RefPtr<Modifier> TextDragPaintMethod::GetOverlayModifier(PaintWrapper* paintWrap
 
 void TextDragPaintMethod::UpdateHandleInfo(const TextDragInfo& info)
 {
-    auto pipleline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipleline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipleline);
     auto textOverlayTheme = pipleline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);

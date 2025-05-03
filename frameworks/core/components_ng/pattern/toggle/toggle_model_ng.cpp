@@ -89,7 +89,7 @@ void ToggleModelNG::SetSelectedColor(const std::optional<Color>& selectedColor)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     CHECK_NULL_VOID(stack);
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -622,9 +622,9 @@ void ToggleModelNG::SetToggleState(FrameNode* frameNode, bool isOn)
     CHECK_NULL_VOID(pattern);
     if (AceType::InstanceOf<SwitchPattern>(pattern)) {
         UpdateSwitchIsOn(refNode, isOn);
-    } else if (AceType::InstanceOf<ToggleCheckBoxPattern>(pattern)) {
+    } else if (AceType::InstanceOf<CheckBoxPattern>(pattern)) {
         UpdateCheckboxIsOn(refNode, isOn);
-    } else if (AceType::InstanceOf<ToggleButtonPattern>(pattern)) {
+    } else if (AceType::InstanceOf<ButtonPattern>(pattern)) {
         UpdateToggleButtonIsOn(refNode, isOn);
     }
 }

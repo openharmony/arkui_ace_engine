@@ -102,7 +102,7 @@ PipelineBase::~PipelineBase()
 
 void PipelineBase::SetCallBackNode(const WeakPtr<NG::FrameNode>& node)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(node);
 }
@@ -260,7 +260,7 @@ void PipelineBase::SetFontScale(float fontScale)
         if ((isJsCard_ || (isFormRender_ && !isDynamicRender_)) && GreatOrEqual(fontScale_, CARD_MAX_FONT_SCALE)) {
             fontScale_ = CARD_MAX_FONT_SCALE;
         }
-        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+        auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->RebuildFontNode();
     }
@@ -287,7 +287,7 @@ void PipelineBase::SetFontWeightScale(float fontWeightScale)
         if (isJsCard_ && GreatOrEqual(fontWeightScale_, CARD_MAX_FONT_WEIGHT_SCALE)) {
             fontWeightScale_ = CARD_MAX_FONT_WEIGHT_SCALE;
         }
-        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+        auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->RebuildFontNode();
     }

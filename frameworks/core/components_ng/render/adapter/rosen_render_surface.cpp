@@ -132,7 +132,7 @@ void RosenRenderSurface::InitSurface()
 {
     auto renderContext = renderContext_.Upgrade();
     if (!renderContext && SystemProperties::GetExtSurfaceEnabled()) {
-        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+        auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         auto windowId = context->GetWindowId();
         surfaceDelegate_ = new OHOS::SurfaceDelegate(windowId);
@@ -373,7 +373,7 @@ bool RosenRenderSurface::CompareBufferSize(
 {
     int32_t bufferWidth = surfaceNode->buffer_->GetSurfaceBufferWidth();
     int32_t bufferHeight = surfaceNode->buffer_->GetSurfaceBufferHeight();
-    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(PipelineBase::GetCurrentContextSafelyWithCheck());
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_RETURN(pipeline, true);
     ACE_SCOPED_TRACE("Web CompareBufferSize (width %d, height %d, bufferWidth %d, bufferHeight %d)"
                      " pipeline freeze status = %d",
