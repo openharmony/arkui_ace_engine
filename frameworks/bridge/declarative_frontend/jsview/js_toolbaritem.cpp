@@ -44,14 +44,15 @@ namespace {} // namespace
 void JSToolBarItem::Create(const JSCallbackInfo& info)
 {
     JSRef<JSObject> toolbaritemObj = JSRef<JSObject>::Cast(info[0]);
-    int32_t value = static_cast<int32_t>(ToolBarItemPlacement::TOP_BAR_LEADING);
+    ToolBarItemPlacement value = ToolBarItemPlacement::TOP_BAR_LEADING;
     if (toolbaritemObj->GetProperty(JSToolBarItem::PLACEMENT)->IsNumber()) {
-        value = static_cast<int32_t>(toolbaritemObj->GetProperty(JSToolBarItem::PLACEMENT)->ToNumber<int32_t>());
+        value = static_cast<ToolBarItemPlacement>(
+            toolbaritemObj->GetProperty(JSToolBarItem::PLACEMENT)->ToNumber<int32_t>());
     }
-    if ((ToolBarItemPlacement)value == ToolBarItemPlacement::TOP_BAR_LEADING ||
-        (ToolBarItemPlacement)value == ToolBarItemPlacement::TOP_BAR_TRAILING) {
-        ToolBarItemModel::GetInstance()->Create(value);
+    if (value != ToolBarItemPlacement::TOP_BAR_LEADING && value != ToolBarItemPlacement::TOP_BAR_TRAILING) {
+        value = ToolBarItemPlacement::TOP_BAR_LEADING;
     }
+    ToolBarItemModel::GetInstance()->Create(static_cast<int32_t>(value));
 }
 
 void JSToolBarItem::JSBind(BindingTarget globalObj)

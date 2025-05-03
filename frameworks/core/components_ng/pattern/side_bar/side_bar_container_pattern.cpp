@@ -1473,8 +1473,9 @@ void SideBarContainerPattern::SetSideBarWidthToolBarManager(bool isShow, float s
     CHECK_NULL_VOID(toolbarManager_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    toolbarManager_->SetSideBarContainerModel(host);
     auto sideBarInfo = toolbarManager_->GetSideBarInfo();
-    if (!NearEqual(sideBarInfo.isShow, sideBarWidth) || !NearEqual(sideBarInfo.width, sideBarWidth)) {
+    if (sideBarInfo.isShow != isShow || !NearEqual(sideBarInfo.width, sideBarWidth)) {
         sideBarInfo.isShow = isShow;
         sideBarInfo.width = sideBarWidth;
         toolbarManager_->SetHasSideBar(true);

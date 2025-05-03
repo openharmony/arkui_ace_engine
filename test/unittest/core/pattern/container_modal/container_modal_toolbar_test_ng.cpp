@@ -655,11 +655,48 @@ HWTEST_F(ContainerModelToolBarTestNg, RemoveToolbarRowContainers, TestSize.Level
 }
 
 /**
- * @tc.name: AdjustNavbarRowWidth
+ * @tc.name: AdjustTitleNodeWidth
+ * @tc.desc: Test AdjustTitleNodeWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, AdjustTitleNodeWidth, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+
+    ToolbarInfo sideBarInfo_ = { true, 200.0f };
+    ToolbarInfo sideBarDividerInfo_ = { true, 20.0f };
+
+    titleMgr_->toolbarManager_->SetSideBarDividerInfo(sideBarDividerInfo_);
+    titleMgr_->toolbarManager_->SetSideBarInfo(sideBarInfo_);
+
+    auto customTitleRow = pattern_->GetCustomTitleRow();
+    ASSERT_NE(customTitleRow, nullptr);
+
+    auto toolbarItem = FrameNode::CreateFrameNode("toolbarItem", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
+    titleMgr_->AddToolbarItemToNavBarStart(toolbarItem);
+    titleMgr_->AdjustTitleNodeWidth();
+
+    // Checking the width of the titleNode
+    auto titleNode = AceType::DynamicCast<FrameNode>(customTitleRow->GetChildren().front());
+    ASSERT_NE(titleNode, nullptr);
+    LayoutConstraintF titleNodeconstraint;
+    titleNode->Measure(titleNodeconstraint);
+    float titleNodeWidth = sideBarInfo_.isShow ? sideBarInfo_.width : 0;
+    auto titleNode2 = titleNode->GetGeometryNode();
+    ASSERT_NE(titleNode2, nullptr);
+    EXPECT_EQ(titleNode2->GetFrameSize().Width(), titleNodeWidth);
+}
+
+/**
+ * @tc.name: AdjustNavbarRowWidth_001
  * @tc.desc: Test AdjustNavbarRowWidth.
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerModelToolBarTestNg, AdjustNavbarRowWidth, TestSize.Level1)
+HWTEST_F(ContainerModelToolBarTestNg, AdjustNavbarRowWidth_001, TestSize.Level1)
 {
     CreateContainerModal();
     ASSERT_NE(titleMgr_, nullptr);
@@ -671,29 +708,19 @@ HWTEST_F(ContainerModelToolBarTestNg, AdjustNavbarRowWidth, TestSize.Level1)
     ToolbarInfo sideBarDividerInfo_ = { true, 20.0f };
     ToolbarInfo navBarInfo_ = { true, 500.0f };
     ToolbarInfo navBarDividerInfo_ = { true, 10.0f };
+    ToolbarInfo navDestInfo_ = { true, 1200.0f };
 
     titleMgr_->toolbarManager_->SetSideBarDividerInfo(sideBarDividerInfo_);
     titleMgr_->toolbarManager_->SetSideBarInfo(sideBarInfo_);
     titleMgr_->toolbarManager_->SetHasNavBar(true);
     titleMgr_->toolbarManager_->SetNavBarInfo(navBarInfo_);
     titleMgr_->toolbarManager_->SetNavBarDividerInfo(navBarDividerInfo_);
-
-    auto customTitleRow = pattern_->GetCustomTitleRow();
-    ASSERT_NE(customTitleRow, nullptr);
+    titleMgr_->toolbarManager_->SetHasNavDest(true);
+    titleMgr_->toolbarManager_->SetNavDestInfo(navDestInfo_);
 
     auto toolbarItem = FrameNode::CreateFrameNode("toolbarItem", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
     titleMgr_->AddToolbarItemToNavBarStart(toolbarItem);
     titleMgr_->AdjustNavbarRowWidth();
-
-    // Checking the width of the titleNode
-    auto titleNode = AceType::DynamicCast<FrameNode>(customTitleRow->GetChildren().front());
-    ASSERT_NE(titleNode, nullptr);
-    LayoutConstraintF titleNodeconstraint;
-    titleNode->Measure(titleNodeconstraint);
-    float titleNodeWidth = sideBarInfo_.isShow ? sideBarInfo_.width : 0;
-    auto titleNode2 = titleNode->GetGeometryNode();
-    ASSERT_NE(titleNode2, nullptr);
-    EXPECT_EQ(titleNode2->GetFrameSize().Width(), titleNodeWidth);
 
     // Checking the width of the navbarRow
     LayoutConstraintF constraint;
@@ -702,8 +729,228 @@ HWTEST_F(ContainerModelToolBarTestNg, AdjustNavbarRowWidth, TestSize.Level1)
     ASSERT_NE(navbarRowNode, nullptr);
     float navbarRowWidth = navbarRowNode->GetFrameSize().Width();
     EXPECT_EQ(navbarRowWidth, navBarInfo_.width);
+}
 
-    // Checking margin
+/**
+ * @tc.name: AdjustNavbarRowWidth_002
+ * @tc.desc: Test AdjustNavbarRowWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, AdjustNavbarRowWidth_002, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+
+    ToolbarInfo sideBarInfo_ = { true, 200.0f };
+    ToolbarInfo sideBarDividerInfo_ = { true, 20.0f };
+    ToolbarInfo navBarInfo_ = { true, 500.0f };
+    ToolbarInfo navBarDividerInfo_ = { true, 10.0f };
+    ToolbarInfo navDestInfo_ = { true, 100.0f };
+
+    titleMgr_->toolbarManager_->SetSideBarDividerInfo(sideBarDividerInfo_);
+    titleMgr_->toolbarManager_->SetSideBarInfo(sideBarInfo_);
+    titleMgr_->toolbarManager_->SetHasNavBar(true);
+    titleMgr_->toolbarManager_->SetNavBarInfo(navBarInfo_);
+    titleMgr_->toolbarManager_->SetNavBarDividerInfo(navBarDividerInfo_);
+    titleMgr_->toolbarManager_->SetHasNavDest(true);
+    titleMgr_->toolbarManager_->SetNavDestInfo(navDestInfo_);
+
+    auto controlButtonsRow = pattern_->GetControlButtonRow();
+    ASSERT_NE(controlButtonsRow, nullptr);
+    auto controlButtonsWidth = pattern_->GetControlButtonRowWidth();
+
+    auto toolbarItem = FrameNode::CreateFrameNode("toolbarItem", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
+    titleMgr_->AddToolbarItemToNavBarStart(toolbarItem);
+    titleMgr_->AdjustNavbarRowWidth();
+    float navbarRowWidth = navDestInfo_.width + navBarInfo_.width - controlButtonsWidth.GetDimension().ConvertToPx();
+
+    // Checking the width of the navbarRow
+    LayoutConstraintF constraint;
+    titleMgr_->navbarRow_->Measure(constraint);
+    auto navbarRowNode = titleMgr_->navbarRow_->GetGeometryNode();
+    ASSERT_NE(navbarRowNode, nullptr);
+    float navbarRowRealWidth = navbarRowNode->GetFrameSize().Width();
+    EXPECT_EQ(navbarRowRealWidth, navbarRowWidth);
+}
+
+/**
+ * @tc.name: AdjustNavbarRowWidth_003
+ * @tc.desc: Test AdjustNavbarRowWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, AdjustNavbarRowWidth_003, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+
+    ToolbarInfo sideBarInfo_ = { true, 200.0f };
+    ToolbarInfo sideBarDividerInfo_ = { true, 20.0f };
+    ToolbarInfo navBarInfo_ = { true, 500.0f };
+    ToolbarInfo navBarDividerInfo_ = { true, 10.0f };
+    ToolbarInfo navDestInfo_ = { true, 100.0f };
+
+    titleMgr_->toolbarManager_->SetSideBarDividerInfo(sideBarDividerInfo_);
+    titleMgr_->toolbarManager_->SetSideBarInfo(sideBarInfo_);
+    titleMgr_->toolbarManager_->SetHasNavBar(true);
+    titleMgr_->toolbarManager_->SetNavBarInfo(navBarInfo_);
+    titleMgr_->toolbarManager_->SetNavBarDividerInfo(navBarDividerInfo_);
+    titleMgr_->toolbarManager_->SetHasNavDest(true);
+    titleMgr_->toolbarManager_->SetNavDestInfo(navDestInfo_);
+
+    auto controlButtonsRow = pattern_->GetControlButtonRow();
+    ASSERT_NE(controlButtonsRow, nullptr);
+    auto controlButtonsWidth = pattern_->GetControlButtonRowWidth();
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+
+    auto toolbarItem = FrameNode::CreateFrameNode("toolbarItem", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
+    titleMgr_->AddToolbarItemToNavBarStart(toolbarItem);
+    titleMgr_->AdjustNavbarRowWidth();
+
+    // Checking the margin of the navbarRow
+    auto navbarRowProperty = titleMgr_->navbarRow_->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(navbarRowProperty);
+    MarginProperty navbarRowMargin;
+    navbarRowMargin.left = CalcLength(controlButtonsWidth.GetDimension().ConvertToPx());
+    navbarRowMargin.right = sideBarInfo_.isShow ? CalcLength(sideBarDividerInfo_.width) : CalcLength(0);
+    navbarRowProperty->UpdateMargin(navbarRowMargin);
+    titleMgr_->navbarRow_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    EXPECT_EQ(navbarRowMargin.left.value(), CalcLength(controlButtonsWidth.GetDimension().ConvertToPx()));
+    EXPECT_EQ(navbarRowMargin.right.value(), CalcLength(sideBarDividerInfo_.width));
+}
+
+/**
+ * @tc.name: AdjustNavbarRowWidth_004
+ * @tc.desc: Test AdjustNavbarRowWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, AdjustNavbarRowWidth_004, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+
+    ToolbarInfo sideBarInfo_ = { true, 200.0f };
+    ToolbarInfo sideBarDividerInfo_ = { true, 20.0f };
+    ToolbarInfo navBarInfo_ = { true, 500.0f };
+    ToolbarInfo navBarDividerInfo_ = { true, 10.0f };
+    ToolbarInfo navDestInfo_ = { true, 1200.0f };
+
+    titleMgr_->toolbarManager_->SetSideBarDividerInfo(sideBarDividerInfo_);
+    titleMgr_->toolbarManager_->SetSideBarInfo(sideBarInfo_);
+    titleMgr_->toolbarManager_->SetHasNavBar(true);
+    titleMgr_->toolbarManager_->SetNavBarInfo(navBarInfo_);
+    titleMgr_->toolbarManager_->SetNavBarDividerInfo(navBarDividerInfo_);
+    titleMgr_->toolbarManager_->SetHasNavDest(true);
+    titleMgr_->toolbarManager_->SetNavDestInfo(navDestInfo_);
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+
+    auto toolbarItem = FrameNode::CreateFrameNode("toolbarItem", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
+    titleMgr_->AddToolbarItemToNavBarStart(toolbarItem);
+    titleMgr_->AdjustNavbarRowWidth();
+
+    // Checking the margin of the navbarRow
+    auto navbarRowProperty = titleMgr_->navbarRow_->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(navbarRowProperty);
+    MarginProperty navbarRowMargin;
+    navbarRowMargin.left = CalcLength(navBarDividerInfo_.width);
+    navbarRowMargin.right = sideBarInfo_.isShow ? CalcLength(sideBarDividerInfo_.width) : CalcLength(0);
+    navbarRowProperty->UpdateMargin(navbarRowMargin);
+    titleMgr_->navbarRow_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    EXPECT_EQ(navbarRowMargin.left.value(), CalcLength(navBarDividerInfo_.width));
+    EXPECT_EQ(navbarRowMargin.right.value(), CalcLength(sideBarDividerInfo_.width));
+}
+
+/**
+ * @tc.name: AdjustNavbarRowWidth_005
+ * @tc.desc: Test AdjustNavbarRowWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, AdjustNavbarRowWidth_005, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+
+    ToolbarInfo sideBarInfo_ = { true, 200.0f };
+    ToolbarInfo sideBarDividerInfo_ = { true, 20.0f };
+    ToolbarInfo navBarInfo_ = { true, 500.0f };
+    ToolbarInfo navBarDividerInfo_ = { true, 10.0f };
+    ToolbarInfo navDestInfo_ = { true, 100.0f };
+
+    titleMgr_->toolbarManager_->SetSideBarDividerInfo(sideBarDividerInfo_);
+    titleMgr_->toolbarManager_->SetSideBarInfo(sideBarInfo_);
+    titleMgr_->toolbarManager_->SetHasNavBar(true);
+    titleMgr_->toolbarManager_->SetNavBarInfo(navBarInfo_);
+    titleMgr_->toolbarManager_->SetNavBarDividerInfo(navBarDividerInfo_);
+    titleMgr_->toolbarManager_->SetHasNavDest(true);
+    titleMgr_->toolbarManager_->SetNavDestInfo(navDestInfo_);
+
+    auto controlButtonsRow = pattern_->GetControlButtonRow();
+    ASSERT_NE(controlButtonsRow, nullptr);
+    auto controlButtonsWidth = pattern_->GetControlButtonRowWidth();
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+
+    auto toolbarItem = FrameNode::CreateFrameNode("toolbarItem", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
+    titleMgr_->AddToolbarItemToNavBarStart(toolbarItem);
+    titleMgr_->AdjustNavbarRowWidth();
+
+    // Checking the margin of the navbarRow
+    auto navbarRowProperty = titleMgr_->navbarRow_->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(navbarRowProperty);
+    MarginProperty navbarRowMargin;
+    navbarRowMargin.left = sideBarInfo_.isShow ? CalcLength(sideBarDividerInfo_.width) : CalcLength(0);
+    navbarRowMargin.right = CalcLength(controlButtonsWidth.GetDimension().ConvertToPx());
+    navbarRowProperty->UpdateMargin(navbarRowMargin);
+    titleMgr_->navbarRow_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    EXPECT_EQ(navbarRowMargin.left.value(), CalcLength(sideBarDividerInfo_.width));
+    EXPECT_EQ(navbarRowMargin.right.value(), CalcLength(controlButtonsWidth.GetDimension().ConvertToPx()));
+}
+
+/**
+ * @tc.name: AdjustNavbarRowWidth_006
+ * @tc.desc: Test AdjustNavbarRowWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, AdjustNavbarRowWidth_006, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+
+    ToolbarInfo sideBarInfo_ = { true, 200.0f };
+    ToolbarInfo sideBarDividerInfo_ = { true, 20.0f };
+    ToolbarInfo navBarInfo_ = { true, 500.0f };
+    ToolbarInfo navBarDividerInfo_ = { true, 10.0f };
+    ToolbarInfo navDestInfo_ = { true, 1200.0f };
+
+    titleMgr_->toolbarManager_->SetSideBarDividerInfo(sideBarDividerInfo_);
+    titleMgr_->toolbarManager_->SetSideBarInfo(sideBarInfo_);
+    titleMgr_->toolbarManager_->SetHasNavBar(true);
+    titleMgr_->toolbarManager_->SetNavBarInfo(navBarInfo_);
+    titleMgr_->toolbarManager_->SetNavBarDividerInfo(navBarDividerInfo_);
+    titleMgr_->toolbarManager_->SetHasNavDest(true);
+    titleMgr_->toolbarManager_->SetNavDestInfo(navDestInfo_);
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+
+    auto toolbarItem = FrameNode::CreateFrameNode("toolbarItem", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
+    titleMgr_->AddToolbarItemToNavBarStart(toolbarItem);
+    titleMgr_->AdjustNavbarRowWidth();
+
+    // Checking the margin of the navbarRow
     auto navbarRowProperty = titleMgr_->navbarRow_->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(navbarRowProperty);
     MarginProperty navbarRowMargin;
@@ -744,7 +991,7 @@ HWTEST_F(ContainerModelToolBarTestNg, AdjustNavDestRowWidth_001, TestSize.Level1
 
     auto controlButtonsRow = pattern_->GetControlButtonRow();
     ASSERT_NE(controlButtonsRow, nullptr);
-    auto controlButtonsWidth = pattern_->GetControlButtonRowWidth().GetDimension().ConvertToVp();
+    auto controlButtonsWidth = pattern_->GetControlButtonRowWidth();
 
     auto toolbarItem = FrameNode::CreateFrameNode("toolbarItem", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
     titleMgr_->AddToolbarItemToNavDestStart(toolbarItem);
@@ -756,7 +1003,7 @@ HWTEST_F(ContainerModelToolBarTestNg, AdjustNavDestRowWidth_001, TestSize.Level1
     auto navDestRowNode = titleMgr_->navDestbarRow_->GetGeometryNode();
     ASSERT_NE(navDestRowNode, nullptr);
     float navDestRowWidth = navDestRowNode->GetFrameSize().Width();
-    EXPECT_EQ(navDestRowWidth, navDestInfo_.width - controlButtonsWidth);
+    EXPECT_EQ(navDestRowWidth, navDestInfo_.width - controlButtonsWidth.GetDimension().ConvertToPx());
 }
 
 /**
@@ -788,13 +1035,74 @@ HWTEST_F(ContainerModelToolBarTestNg, AdjustNavDestRowWidth_002, TestSize.Level1
 
     auto controlButtonsRow = pattern_->GetControlButtonRow();
     ASSERT_NE(controlButtonsRow, nullptr);
-    auto controlButtonsWidth = pattern_->GetControlButtonRowWidth().GetDimension().ConvertToVp();
+    auto controlButtonsWidth = pattern_->GetControlButtonRowWidth();
 
     auto toolbarItem = FrameNode::CreateFrameNode("toolbarItem", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
     titleMgr_->AddToolbarItemToNavDestStart(toolbarItem);
     titleMgr_->AdjustNavDestRowWidth();
 
     // Checking the margin of the navDestRow
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    float navDestbarRowLeftMargin = 0.0f;
+
+    if (titleMgr_->navbarRow_) {
+        navDestbarRowLeftMargin = navBarDividerInfo_.width;
+    } else if (!sideBarInfo_.isShow && !navBarInfo_.isShow) {
+        navDestbarRowLeftMargin = 0.0f;
+    } else if (!sideBarInfo_.isShow) {
+        navDestbarRowLeftMargin = navBarInfo_.width + navBarDividerInfo_.width;
+    } else if (!navBarInfo_.isShow) {
+        navDestbarRowLeftMargin = sideBarDividerInfo_.width;
+    } else {
+        navDestbarRowLeftMargin = sideBarDividerInfo_.width + navBarInfo_.width + navBarDividerInfo_.width;
+    }
+    auto navDestbarRowProperty = titleMgr_->navDestbarRow_->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(navDestbarRowProperty);
+    MarginProperty navDestbarRowMargin;
+    navDestbarRowMargin.left = CalcLength(controlButtonsWidth.GetDimension().ConvertToPx());
+    navDestbarRowMargin.right = CalcLength(navDestbarRowLeftMargin);
+    navDestbarRowProperty->UpdateMargin(navDestbarRowMargin);
+    EXPECT_EQ(navDestbarRowMargin.left.value(), CalcLength(controlButtonsWidth.GetDimension().ConvertToPx()));
+    EXPECT_EQ(navDestbarRowMargin.right.value(), CalcLength(navDestbarRowLeftMargin));
+}
+
+/**
+ * @tc.name: AdjustNavDestRowWidth_003
+ * @tc.desc: Test AdjustNavDestRowWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelToolBarTestNg, AdjustNavDestRowWidth_003, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(titleMgr_, nullptr);
+
+    titleMgr_->InitToolBarManager();
+    ASSERT_NE(titleMgr_->toolbarManager_, nullptr);
+
+    ToolbarInfo sideBarInfo_ = { true, 200.0f };
+    ToolbarInfo sideBarDividerInfo_ = { true, 20.0f };
+    ToolbarInfo navBarInfo_ = { true, 500.0f };
+    ToolbarInfo navBarDividerInfo_ = { true, 10.0f };
+    ToolbarInfo navDestInfo_ = { true, 1200.0f };
+
+    titleMgr_->toolbarManager_->SetSideBarDividerInfo(sideBarDividerInfo_);
+    titleMgr_->toolbarManager_->SetSideBarInfo(sideBarInfo_);
+    titleMgr_->toolbarManager_->SetHasNavBar(true);
+    titleMgr_->toolbarManager_->SetNavBarInfo(navBarInfo_);
+    titleMgr_->toolbarManager_->SetNavBarDividerInfo(navBarDividerInfo_);
+    titleMgr_->toolbarManager_->SetHasNavDest(true);
+    titleMgr_->toolbarManager_->SetNavDestInfo(navDestInfo_);
+
+    auto controlButtonsRow = pattern_->GetControlButtonRow();
+    ASSERT_NE(controlButtonsRow, nullptr);
+    auto controlButtonsWidth = pattern_->GetControlButtonRowWidth();
+
+    auto toolbarItem = FrameNode::CreateFrameNode("toolbarItem", 1, AceType::MakeRefPtr<ToolBarItemPattern>());
+    titleMgr_->AddToolbarItemToNavDestStart(toolbarItem);
+    titleMgr_->AdjustNavDestRowWidth();
+
+    // Checking the margin of the navDestRow
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
     float navDestbarRowLeftMargin = 0.0f;
 
     if (titleMgr_->navbarRow_) {
@@ -812,12 +1120,10 @@ HWTEST_F(ContainerModelToolBarTestNg, AdjustNavDestRowWidth_002, TestSize.Level1
     CHECK_NULL_VOID(navDestbarRowProperty);
     MarginProperty navDestbarRowMargin;
     navDestbarRowMargin.left = CalcLength(navDestbarRowLeftMargin);
-    navDestbarRowMargin.right = CalcLength(controlButtonsWidth);
+    navDestbarRowMargin.right = CalcLength(controlButtonsWidth.GetDimension().ConvertToPx());
     navDestbarRowProperty->UpdateMargin(navDestbarRowMargin);
-    navDestbarRowMargin.left = CalcLength(navDestbarRowLeftMargin);
-    EXPECT_EQ(navDestbarRowMargin.left.value(),
-        CalcLength(sideBarDividerInfo_.width + navBarInfo_.width + navBarDividerInfo_.width));
-    EXPECT_EQ(navDestbarRowMargin.right.value(), CalcLength(controlButtonsWidth));
+    EXPECT_EQ(navDestbarRowMargin.left.value(), CalcLength(navDestbarRowLeftMargin));
+    EXPECT_EQ(navDestbarRowMargin.right.value(), CalcLength(controlButtonsWidth.GetDimension().ConvertToPx()));
 }
 
 /**
@@ -842,18 +1148,17 @@ HWTEST_F(ContainerModelToolBarTestNg, AdjustContainerModalTitleHeight, TestSize.
     titleMgr_->itemsOnTree_[parentNode].push_back(toolbarItem);
 
     // test the title height of different toolbar items
-    titleMgr_->toolbarItemMaxHeight_ = 50.0f;
+    titleMgr_->toolbarItemMaxHeight_ = 40.0f;
     titleMgr_->AdjustContainerModalTitleHeight();
     EXPECT_EQ(pattern_->titleHeight_, Dimension(TITLE_ITEM_HEIGT_S, DimensionUnit::VP));
 
-    titleMgr_->toolbarItemMaxHeight_ = 60.0f;
+    titleMgr_->toolbarItemMaxHeight_ = 50.0f;
     titleMgr_->AdjustContainerModalTitleHeight();
     EXPECT_EQ(pattern_->titleHeight_, Dimension(TITLE_ITEM_HEIGT_M, DimensionUnit::VP));
 
-    titleMgr_->toolbarItemMaxHeight_ = 90.0f;
+    titleMgr_->toolbarItemMaxHeight_ = 60.0f;
     titleMgr_->AdjustContainerModalTitleHeight();
     EXPECT_EQ(pattern_->titleHeight_, Dimension(TITLE_ITEM_HEIGT_L, DimensionUnit::VP));
-
     // set the maximum height of toolbar items to 0
     titleMgr_->toolbarItemMaxHeight_ = 0;
     titleMgr_->AdjustContainerModalTitleHeight();

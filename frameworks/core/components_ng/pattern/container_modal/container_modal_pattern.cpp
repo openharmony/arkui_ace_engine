@@ -634,9 +634,6 @@ void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
         auto floatingTitleRow = GetFloatingTitleRow();
         CHECK_NULL_VOID(floatingTitleRow);
         UpdateRowHeight(floatingTitleRow, titleHeight_);
-        auto buttonsRowProperty = controlButtonsRow->GetLayoutProperty<LinearLayoutProperty>();
-        CHECK_NULL_VOID(buttonsRowProperty);
-        buttonsRowProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
     }
     if (titleMgr_ != nullptr) {
         titleMgr_->UpdateTargetNodesBarMargin();
@@ -838,7 +835,7 @@ void ContainerModalPattern::InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRo
     CHECK_NULL_VOID(titleRowProperty);
     titleRowProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto rowHeight = CONTAINER_TITLE_HEIGHT;
-    if (!isFloating) {
+    if (!isFloating || (isFloating && floatTitleMgr_ != nullptr)) {
         rowHeight = (CONTAINER_TITLE_HEIGHT == titleHeight_) ? CONTAINER_TITLE_HEIGHT : titleHeight_;
     }
     titleRowProperty->UpdateUserDefinedIdealSize(
