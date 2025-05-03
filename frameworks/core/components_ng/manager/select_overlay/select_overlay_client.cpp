@@ -109,7 +109,7 @@ void SelectOverlayClient::RequestOpenSelectOverlay(ClientOverlayInfo& showOverla
 
 void SelectOverlayClient::CreateSelectOverlay(const ClientOverlayInfo& clientOverlayInfo)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto overlayInfo = GetSelectOverlayInfo(clientOverlayInfo);
     CHECK_NULL_VOID(overlayInfo);
@@ -202,7 +202,7 @@ void SelectOverlayClient::RequestCloseSelectOverlay(bool animation)
 
 bool SelectOverlayClient::SelectOverlayIsOn()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     CHECK_NULL_RETURN(selectOverlayProxy_, false);
     auto overlayId = selectOverlayProxy_->GetSelectOverlayId();

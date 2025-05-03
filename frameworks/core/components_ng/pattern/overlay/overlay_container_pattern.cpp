@@ -21,7 +21,7 @@
 namespace OHOS::Ace::NG {
 void OverlayContainerPattern::BeforeCreateLayoutWrapper()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
 
     auto inset = pipeline->GetSafeArea();

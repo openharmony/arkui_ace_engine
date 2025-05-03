@@ -1188,7 +1188,7 @@ bool TextContentModifier::SetTextRace(const MarqueeOption& option)
     auto pManager = textPattern->GetParagraphManager();
     CHECK_NULL_RETURN(pManager, false);
     textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     if (pipeline) {
         textRaceSpaceWidth_ *= pipeline->GetDipScale();
     }
@@ -1345,7 +1345,7 @@ float TextContentModifier::GetFadeoutPercent()
 
     auto contentWidth = contentSize_->Get().Width();
     if (contentWidth > 0) {
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, marqueeGradientPercent_);
         auto theme = pipeline->GetTheme<TextTheme>();
         CHECK_NULL_RETURN(theme, marqueeGradientPercent_);

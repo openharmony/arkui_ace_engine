@@ -372,7 +372,7 @@ void ButtonLayoutAlgorithm::MarkNeedFlushMouseEvent(LayoutWrapper* layoutWrapper
     auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     if (frameSize != pattern->GetPreFrameSize()) {
         pattern->SetPreFrameSize(frameSize);
-        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+        auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->MarkNeedFlushMouseEvent(MockFlushEventType::REJECT);
     }

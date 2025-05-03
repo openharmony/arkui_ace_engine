@@ -50,7 +50,7 @@ public:
         propSelectedBackgroundColor_.value_or(Color(ARC_INDEXER_SELECTED_BG_COLOR)).ColorToString().c_str(), filter);
         json->PutExtAttr("popupBackground",
             propPopupBackground_.value_or(Color(ARC_POPUP_BG_COLOR)).ColorToString().c_str(), filter);
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
         CHECK_NULL_VOID(indexerTheme);

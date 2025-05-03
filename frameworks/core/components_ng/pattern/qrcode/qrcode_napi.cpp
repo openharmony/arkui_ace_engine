@@ -43,7 +43,7 @@ std::unique_ptr<QRCodeModel> QRCodeModel::instance_ = nullptr;
 template<typename T>
 RefPtr<T> GetTheme()
 {
-    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto themeManager = pipelineContext->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, nullptr);
