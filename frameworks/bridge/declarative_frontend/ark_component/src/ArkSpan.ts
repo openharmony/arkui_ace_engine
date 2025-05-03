@@ -673,7 +673,7 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     throw new Error('Method not implemented.');
   }
 
-  rotate(value: RotateOptions): this {
+  rotate(value: RotateOptions | RotateAngleOptions): this {
     throw new Error('Method not implemented.');
   }
 

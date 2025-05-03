@@ -2291,6 +2291,30 @@ void SetRotate(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 va
     ViewAbstract::SetPivot(frameNode, center);
 }
 
+void SetRotateAngle(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength, const ArkUI_Int32* units,
+    ArkUI_Int32 unitLength)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (valLength != NUM_7 || unitLength != NUM_3) {
+        return;
+    }
+    auto centerX = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
+    auto centerY = Dimension(values[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
+    auto centerZ = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
+    auto angleX = values[NUM_3];
+    auto angleY = values[NUM_4];
+    auto angleZ = values[NUM_5];
+    auto perspective = values[NUM_6];
+    ViewAbstract::SetRotateAngle(frameNode, NG::Vector4F(angleX, angleY, angleZ, perspective));
+
+    DimensionOffset center(centerX, centerY);
+    if (!NearZero(centerZ.Value())) {
+        center.SetZ(centerZ);
+    }
+    ViewAbstract::SetPivot(frameNode, center);
+}
+
 /**
  * @param values
  * values[0]: xDirection;values[1]: yDirection;values[2]: zDirection
@@ -2313,6 +2337,22 @@ void SetRotateWithoutTransformCenter(ArkUINodeHandle node, const ArkUI_Float32* 
     ViewAbstract::SetRotate(frameNode, NG::Vector5F(xDirection, yDirection, zDirection, angle, perspective));
 }
 
+void SetRotateAngleWithoutTransformCenter(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    if (valLength != NUM_4) {
+        return;
+    }
+
+    auto angleX = values[NUM_0];
+    auto angleY = values[NUM_1];
+    auto angleZ = values[NUM_2];
+    auto perspective = values[NUM_3];
+    ViewAbstract::SetRotateAngle(frameNode, NG::Vector4F(angleX, angleY, angleZ, perspective));
+}
+
 void ResetRotate(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2320,6 +2360,21 @@ void ResetRotate(ArkUINodeHandle node)
     NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct, 0.0f, 0.0f);
     ViewAbstract::SetRotate(
         frameNode, NG::Vector5F(rotate.xDirection, rotate.yDirection, rotate.zDirection, 0.0, rotate.perspective));
+
+    DimensionOffset center(rotate.centerX, rotate.centerY);
+    if (!NearZero(rotate.centerZ.Value())) {
+        center.SetZ(rotate.centerZ);
+    }
+    ViewAbstract::SetPivot(frameNode, center);
+}
+
+void ResetRotateAngle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::RotateAngleOptions rotate(0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct, 0.0f, 0.0f);
+    ViewAbstract::SetRotate(
+        frameNode, NG::Vector5F(rotate.angleX, rotate.angleY, rotate.angleZ, 0.0, rotate.perspective));
 
     DimensionOffset center(rotate.centerX, rotate.centerY);
     if (!NearZero(rotate.centerZ.Value())) {
@@ -7134,8 +7189,11 @@ const ArkUICommonModifier* GetCommonModifier()
         .setScaleWithoutTransformCenter = SetScaleWithoutTransformCenter,
         .resetScale = ResetScale,
         .setRotate = SetRotate,
+        .setRotateAngle = SetRotateAngle,
         .setRotateWithoutTransformCenter = SetRotateWithoutTransformCenter,
+        .setRotateAngleWithoutTransformCenter = SetRotateAngleWithoutTransformCenter,
         .resetRotate = ResetRotate,
+        .resetRotateAngle = ResetRotateAngle,
         .setGeometryTransition = SetGeometryTransition,
         .resetGeometryTransition = ResetGeometryTransition,
         .setBindTips = SetBindTips,

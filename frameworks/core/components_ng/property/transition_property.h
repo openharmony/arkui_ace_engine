@@ -100,6 +100,22 @@ struct RotateOptions {
                std::to_string(perspective) + "]";
     }
 };
+
+struct RotateAngleOptions {
+    float angleX = 0.0f;
+    float angleY = 0.0f;
+    float angleZ = 0.0f;
+    CalcDimension centerX;
+    CalcDimension centerY;
+    CalcDimension centerZ;
+    float perspective = 0.0f;
+    RotateAngleOptions(float angleX, float angleY, float angleZ, const CalcDimension& centerX,
+        const CalcDimension& centerY, const CalcDimension& centerZ = CalcDimension(0.0f, DimensionUnit::VP),
+        const float perspective = 0.0f)
+        : angleX(angleX), angleY(angleY), angleZ(angleZ), centerX(centerX), centerY(centerY), centerZ(centerZ),
+          perspective(perspective) {}
+};
+
 struct TransitionOptions {
     TransitionType Type = TransitionType::ALL;
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Opacity, float);

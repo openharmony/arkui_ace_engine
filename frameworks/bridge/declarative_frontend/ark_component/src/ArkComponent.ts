@@ -1554,8 +1554,8 @@ class ScaleModifier extends ModifierWithKey<ScaleOptions> {
   }
 }
 
-class RotateModifier extends ModifierWithKey<RotateOptions> {
-  constructor(value: RotateOptions) {
+class RotateModifier extends ModifierWithKey<RotateOptions | RotateAngleOptions> {
+  constructor(value: RotateOptions | RotateAngleOptions) {
     super(value);
   }
   static identity: Symbol = Symbol('rotate');
@@ -1563,12 +1563,35 @@ class RotateModifier extends ModifierWithKey<RotateOptions> {
     if (reset) {
       getUINativeModule().common.resetRotate(node);
     } else {
-      getUINativeModule().common.setRotate(node, this.value.x, this.value.y, this.value.z, this.value.angle,
-        this.value.centerX, this.value.centerY, this.value.centerY, this.value.perspective);
+      if ('angle' in this.value) {
+        getUINativeModule().common.setRotate(
+          node,
+          this.value.x,
+          this.value.y,
+          this.value.z,
+          this.value.angle,
+          this.value.centerX,
+          this.value.centerY,
+          this.value.centerZ,
+          this.value.perspective
+        );
+      } else {
+        getUINativeModule().common.setRotateAngle(
+          node,
+          this.value.angleX,
+          this.value.angleY,
+          this.value.angleZ,
+          this.value.centerX,
+          this.value.centerY,
+          this.value.centerZ,
+          this.value.perspective
+        );
+      }
     }
   }
   checkObjectDiff(): boolean {
-    return !(
+    if ('angle' in this.value) {
+      return !(
       this.value.x === this.stageValue.x &&
       this.value.y === this.stageValue.y &&
       this.value.z === this.stageValue.z &&
@@ -1577,7 +1600,18 @@ class RotateModifier extends ModifierWithKey<RotateOptions> {
       this.value.centerY === this.stageValue.centerY &&
       this.value.centerZ === this.stageValue.centerZ &&
       this.value.perspective === this.stageValue.perspective
-    );
+      );
+    } else {
+      return !(
+        this.value.angleX === this.stageValue.angleX &&
+        this.value.angleY === this.stageValue.angleY &&
+        this.value.angleZ === this.stageValue.angleZ &&
+        this.value.centerX === (this.stageValue.centerX) &&
+        this.value.centerY === (this.stageValue.centerY) &&
+        this.value.centerZ === (this.stageValue.centerZ) &&
+        this.value.perspective === this.stageValue.perspective
+      );
+    }
   }
 }
 

@@ -1954,12 +1954,53 @@ void ViewAbstract::SetRotate(const NG::Vector5F& value)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->HasTransformRotateAngle()) {
+        renderContext->ResetTransformRotate();
+        renderContext->ResetTransformRotateAngle();
+    }
     ACE_UPDATE_RENDER_CONTEXT(TransformRotate, value);
+}
+
+void ViewAbstract::SetRotateAngle(const NG::Vector4F& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->HasTransformRotate()) {
+        renderContext->ResetTransformRotate();
+        renderContext->ResetTransformRotateAngle();
+    }
+    ACE_UPDATE_RENDER_CONTEXT(TransformRotateAngle, value);
 }
 
 void ViewAbstract::SetRotate(FrameNode* frameNode, const NG::Vector5F& value)
 {
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->HasTransformRotateAngle()) {
+        renderContext->ResetTransformRotate();
+        renderContext->ResetTransformRotateAngle();
+    }
     ACE_UPDATE_NODE_RENDER_CONTEXT(TransformRotate, value, frameNode);
+}
+
+void ViewAbstract::SetRotateAngle(FrameNode* frameNode, const NG::Vector4F& value)
+{
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->HasTransformRotate()) {
+        renderContext->ResetTransformRotate();
+        renderContext->ResetTransformRotateAngle();
+    }
+    ACE_UPDATE_NODE_RENDER_CONTEXT(TransformRotateAngle, value, frameNode);
 }
 
 void ViewAbstract::SetTransformMatrix(const Matrix4& matrix)

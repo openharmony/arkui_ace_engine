@@ -85,6 +85,21 @@ struct ACE_EXPORT RotateOperation {
     static RotateOperation Blend(const RotateOperation& to, const RotateOperation& from, float progress);
 };
 
+struct ACE_EXPORT RotateAngleOperation {
+    RotateAngleOperation() = default;
+    RotateAngleOperation(float x, float y, float z) : dx(x), dy(y), dz(z) {};
+    bool operator==(const RotateAngleOperation& other) const
+    {
+        return NearEqual(dx, other.dx, epsilon) && NearEqual(dy, other.dy, epsilon) &&
+               NearEqual(dz, other.dz, epsilon);
+    }
+    float dx = 0.0f;
+    float dy = 0.0f;
+    float dz = 0.0f;
+
+    static RotateAngleOperation Blend(const RotateAngleOperation& to, const RotateAngleOperation& from, float progress);
+};
+
 struct ACE_EXPORT PerspectiveOperation {
     PerspectiveOperation() = default;
     explicit PerspectiveOperation(const Dimension& dis) : distance(dis) {}
@@ -127,6 +142,7 @@ struct ACE_EXPORT TransformOperation {
         ScaleOperation scaleOperation_;
         SkewOperation skewOperation_;
         RotateOperation rotateOperation_;
+        RotateAngleOperation rotateAngleOperation_;
         PerspectiveOperation perspectiveOperation_;
     };
 

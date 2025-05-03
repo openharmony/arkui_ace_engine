@@ -64,6 +64,7 @@ constexpr int SIZE_OF_TWO = 2;
 constexpr int SIZE_OF_THREE = 3;
 constexpr int SIZE_OF_FOUR = 4;
 constexpr int SIZE_OF_FIVE = 5;
+constexpr int SIZE_OF_SEVEN = 7;
 constexpr int SIZE_OF_EIGHT = 8;
 constexpr int32_t ALIGN_RULES_NUM = 6;
 constexpr int32_t ALIGN_DIRECTION_DEFAULT = 2;
@@ -1206,6 +1207,49 @@ void ParseCenterDimension(const EcmaVM* vm, const Local<JSValueRef>& centerArg, 
     if (!ArkTSUtils::ParseJsDimensionVp(vm, centerArg, centerDimension, false)) {
         centerDimension = Dimension(0.5f, DimensionUnit::PERCENT);
     }
+}
+
+bool ParseRotateAngle(ArkUIRuntimeCallInfo *runtimeCallInfo, ArkUI_Float32 values[], int units[],
+    int valuesLength, int unitsLength)
+{
+    if (valuesLength != SIZE_OF_SEVEN || unitsLength != SIZE_OF_THREE) {
+        return false;
+    }
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> angleXArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> angleYArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> angleZArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> centerXArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    Local<JSValueRef> centerYArg = runtimeCallInfo->GetCallArgRef(NUM_5);
+    Local<JSValueRef> centerZArg = runtimeCallInfo->GetCallArgRef(NUM_6);
+    Local<JSValueRef> perspectiveArg = runtimeCallInfo->GetCallArgRef(NUM_7);
+    float angleX = 0.0f;
+    float angleY = 0.0f;
+    float angleZ = 0.0f;
+    CalcDimension centerX = 0.5_pct;
+    CalcDimension centerY = 0.5_pct;
+    CalcDimension centerZ = CalcDimension(0.0f, DimensionUnit::VP);
+
+    double perspective = 0.0;
+
+    ParseDirection(vm, angleXArg, angleX);
+    ParseDirection(vm, angleYArg, angleY);
+    ParseDirection(vm, angleZArg, angleZ);
+    ParseCenterDimension(vm, centerXArg, centerX);
+    ParseCenterDimension(vm, centerYArg, centerY);
+    ParseCenterDimension(vm, centerZArg, centerZ);
+    ArkTSUtils::ParseJsDouble(vm, perspectiveArg, perspective);
+    values[NUM_0] = static_cast<ArkUI_Float32>(centerX.Value());
+    units[NUM_0] = static_cast<int>(centerX.Unit());
+    values[NUM_1] = static_cast<ArkUI_Float32>(centerY.Value());
+    units[NUM_1] = static_cast<int>(centerY.Unit());
+    values[NUM_2] = static_cast<ArkUI_Float32>(centerZ.Value());
+    units[NUM_2] = static_cast<int>(centerZ.Unit());
+    values[NUM_3] = static_cast<ArkUI_Float32>(angleX);
+    values[NUM_4] = static_cast<ArkUI_Float32>(angleY);
+    values[NUM_5] = static_cast<ArkUI_Float32>(angleZ);
+    values[NUM_6] = static_cast<ArkUI_Float32>(perspective);
+    return true;
 }
 
 bool ParseRotate(ArkUIRuntimeCallInfo *runtimeCallInfo, ArkUI_Float32 values[], int units[],
@@ -3419,6 +3463,35 @@ ArkUINativeModuleValue CommonBridge::ResetScale(ArkUIRuntimeCallInfo *runtimeCal
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getCommonModifier()->resetScale(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetRotateAngle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    ArkUI_Float32 values[SIZE_OF_SEVEN];
+    int units[SIZE_OF_THREE];
+
+    if (ParseRotateAngle(runtimeCallInfo, values, units, SIZE_OF_SEVEN, SIZE_OF_THREE)) {
+        GetArkUINodeModifiers()->getCommonModifier()->setRotateAngle(
+            nativeNode, values, SIZE_OF_SEVEN, units, SIZE_OF_THREE);
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->resetRotateAngle(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetRotateAngle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetRotateAngle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

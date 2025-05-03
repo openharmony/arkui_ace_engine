@@ -266,6 +266,46 @@ void ParseJsRotate(const JSRef<JSVal>& jsValue, NG::RotateOptions& rotate, std::
     JSViewAbstract::GetJsPerspective(static_cast<int32_t>(ArkUIIndex::PERSPECTIVE), jsObj, rotate.perspective);
 }
 
+void ParseJsRotateAngle(const JSRef<JSVal>& jsValue, NG::RotateAngleOptions& rotateAngle, std::optional<float>& angle)
+{
+    if (!jsValue->IsObject()) {
+        return;
+    }
+
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    JSViewAbstract::GetJsAngle(static_cast<int32_t>(ArkUIIndex::ANGLE), jsObj, angle);
+
+    double angleX = 0.0;
+    double angleY = 0.0;
+    double angleZ = 0.0;
+
+    JSViewAbstract::ParseJsDouble(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::ANGLE_X)), angleX);
+    JSViewAbstract::ParseJsDouble(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::ANGLE_Y)), angleY);
+    JSViewAbstract::ParseJsDouble(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::ANGLE_Z)), angleZ);
+
+    rotateAngle.angleX = static_cast<float>(angleX);
+    rotateAngle.angleY = static_cast<float>(angleY);
+    rotateAngle.angleZ = static_cast<float>(angleZ);
+
+    // if specify centerX
+    if (!JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::CENTER_X)),
+    rotateAngle.centerX)) {
+        rotateAngle.centerX = Dimension(0.5f, DimensionUnit::PERCENT);
+    }
+    // if specify centerY
+    if (!JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::CENTER_Y)), 
+    rotateAngle.centerY)) {
+        rotateAngle.centerY = Dimension(0.5f, DimensionUnit::PERCENT);
+    }
+    // if specify centerZ
+    if (!JSViewAbstract::ParseJsDimensionVp(jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::CENTER_Z)),
+    rotateAngle.centerZ)) {
+        rotateAngle.centerZ = Dimension(0.5f, DimensionUnit::PERCENT);
+    }
+    rotateAngle.perspective = 0.0f;
+    JSViewAbstract::GetJsPerspective(static_cast<int32_t>(ArkUIIndex::PERSPECTIVE), jsObj, rotateAngle.perspective);
+}
+
 bool ParseMotionPath(const JSRef<JSVal>& jsValue, MotionPathOption& option)
 {
     if (!jsValue->IsObject()) {
@@ -1391,14 +1431,24 @@ void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
 
     if (jsVal->IsObject()) {
         NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
+        NG::RotateAngleOptions rotateAngle(0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
         std::optional<float> angle;
-        ParseJsRotate(jsVal, rotate, angle);
-        if (angle) {
-            ViewAbstractModel::GetInstance()->SetRotate(
-                rotate.xDirection, rotate.yDirection, rotate.zDirection, angle.value(), rotate.perspective);
-            ViewAbstractModel::GetInstance()->SetPivot(rotate.centerX, rotate.centerY, rotate.centerZ);
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsVal);
+        bool hasAngleProp = jsObj->HasProperty(static_cast<int32_t>(ArkUIIndex::ANGLE));
+        if (hasAngleProp) {
+            ParseJsRotate(jsVal, rotate, angle);
+            if (angle) {
+                ViewAbstractModel::GetInstance()->SetRotate(
+                    rotate.xDirection, rotate.yDirection, rotate.zDirection, angle.value(), rotate.perspective);
+                ViewAbstractModel::GetInstance()->SetPivot(rotate.centerX, rotate.centerY, rotate.centerZ);
+            } else {
+                SetDefaultRotate();
+            }
         } else {
-            SetDefaultRotate();
+            ParseJsRotateAngle(jsVal, rotateAngle, angle);
+            ViewAbstractModel::GetInstance()->SetRotateAngle(
+                rotateAngle.angleX, rotateAngle.angleY, rotateAngle.angleZ, rotateAngle.perspective);
+            ViewAbstractModel::GetInstance()->SetPivot(rotateAngle.centerX, rotateAngle.centerY, rotateAngle.centerZ);
         }
         return;
     }

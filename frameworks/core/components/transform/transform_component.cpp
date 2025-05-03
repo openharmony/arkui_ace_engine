@@ -102,6 +102,14 @@ void TransformComponent::Rotate(float dx, float dy, float dz, float angle, const
     transformEffects.AddTransformOperation(operation, animationOption);
 }
 
+void TransformComponent::RotateAngle(float dx, float dy, float dz, const AnimationOption& animationOption)
+{
+    TransformOperation operation;
+    operation.type_ = TransformOperationType::ROTATE;
+    operation.rotateAngleOperation_ = RotateAngleOperation(dx, dy, dz);
+    transformEffects.AddTransformOperation(operation, animationOption);
+}
+
 void TransformComponent::RotateX(float angle, const AnimationOption& animationOption)
 {
     Rotate(1.0f, 0.0f, 0.0f, angle, animationOption);

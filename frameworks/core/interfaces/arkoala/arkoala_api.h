@@ -2041,8 +2041,13 @@ struct ArkUICommonModifier {
     void (*resetScale)(ArkUINodeHandle node);
     void (*setRotate)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength,
         const ArkUI_Int32* units, ArkUI_Int32 unitLength);
+    void (*setRotateAngle)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength,
+        const ArkUI_Int32* units, ArkUI_Int32 unitLength);
     void (*setRotateWithoutTransformCenter)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength);
+    void (*setRotateAngleWithoutTransformCenter)(
+        ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength);
     void (*resetRotate)(ArkUINodeHandle node);
+    void (*resetRotateAngle)(ArkUINodeHandle node);
     void (*setGeometryTransition)(
         ArkUINodeHandle node, ArkUI_CharPtr id, const ArkUIGeometryTransitionOptions* options);
     void (*resetGeometryTransition)(ArkUINodeHandle node);

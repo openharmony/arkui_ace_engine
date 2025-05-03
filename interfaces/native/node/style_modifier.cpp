@@ -1386,6 +1386,23 @@ int32_t SetRotate(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     return ERROR_CODE_NO_ERROR;
 }
 
+int32_t SetRotateAngle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_FOUR_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto fullImpl = GetFullImpl();
+    ArkUI_Float32 values[item->size];
+    for (int i = 0; i < item->size; ++i) {
+        values[i] = item->value[i].f32;
+    }
+
+    fullImpl->getNodeModifiers()->getCommonModifier()->setRotateAngleWithoutTransformCenter(
+        node->uiNodeHandle, values, item->size);
+    return ERROR_CODE_NO_ERROR;
+}
+
 void ResetRotate(ArkUI_NodeHandle node)
 {
     // already check in entry point.
@@ -15059,6 +15076,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetNextFocus,
         SetAreaChangeApproximateOptions,
         SetTranslateWithPercentage,
+        SetRotateAngle,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
