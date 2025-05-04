@@ -694,6 +694,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_UIInputEvent_GetDeviceId002, TestSize.Level1
 {
     ArkUI_UIInputEvent event;
     event.eventTypeId = TOUCH_EVENT_ID;
+    event.apiVersion = 20;
     event.inputEvent = nullptr;
     auto ret = OH_ArkUI_UIInputEvent_GetDeviceId(&event);
     EXPECT_EQ(ret, -1);
