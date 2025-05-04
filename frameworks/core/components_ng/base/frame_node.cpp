@@ -5499,6 +5499,25 @@ void FrameNode::PaintDebugBoundary(bool flag)
     }
 }
 
+void SetChangeInfo(const TouchEvent& touchEvent, TouchLocationInfo &changedInfo)
+{
+    changedInfo.SetGlobalLocation(Offset(touchEvent.x, touchEvent.y));
+    changedInfo.SetScreenLocation(Offset(touchEvent.screenX, touchEvent.screenY));
+    changedInfo.SetTouchType(touchEvent.type);
+    changedInfo.SetForce(touchEvent.force);
+    changedInfo.SetPressedTime(touchEvent.pressedTime);
+    changedInfo.SetWidth(touchEvent.width);
+    changedInfo.SetHeight(touchEvent.height);
+    if (touchEvent.tiltX.has_value()) {
+        changedInfo.SetTiltX(touchEvent.tiltX.value());
+    }
+    if (touchEvent.tiltY.has_value()) {
+        changedInfo.SetTiltY(touchEvent.tiltY.value());
+    }
+    changedInfo.SetSourceTool(touchEvent.sourceTool);
+    changedInfo.SetDeviceId(touchEvent.deviceId);
+}
+
 HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
 {
     auto gestureHub = eventHub_ ? eventHub_->GetGestureEventHub() : nullptr;
@@ -5515,20 +5534,7 @@ HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
     auto localX = static_cast<float>(lastLocalPoint.GetX());
     auto localY = static_cast<float>(lastLocalPoint.GetY());
     changedInfo.SetLocalLocation(Offset(localX, localY));
-    changedInfo.SetGlobalLocation(Offset(touchEvent.x, touchEvent.y));
-    changedInfo.SetScreenLocation(Offset(touchEvent.screenX, touchEvent.screenY));
-    changedInfo.SetTouchType(touchEvent.type);
-    changedInfo.SetForce(touchEvent.force);
-    changedInfo.SetPressedTime(touchEvent.pressedTime);
-    changedInfo.SetWidth(touchEvent.width);
-    changedInfo.SetHeight(touchEvent.height);
-    if (touchEvent.tiltX.has_value()) {
-        changedInfo.SetTiltX(touchEvent.tiltX.value());
-    }
-    if (touchEvent.tiltY.has_value()) {
-        changedInfo.SetTiltY(touchEvent.tiltY.value());
-    }
-    changedInfo.SetSourceTool(touchEvent.sourceTool);
+    SetChangeInfo(touchEvent, changedInfo);
     event.AddChangedTouchLocationInfo(std::move(changedInfo));
 
     AddTouchEventAllFingersInfo(event, touchEvent);

@@ -1320,6 +1320,7 @@ struct ArkUIAPIEventGestureAsyncEvent {
     ArkUI_Float32 velocity;
     ArkUI_Int32 inputEventType;
     ArkUI_Int32 targetDisplayId;
+    ArkUI_Int64 deviceId;
     void* rawPointerEvent;
 };
 
@@ -1410,6 +1411,7 @@ struct ArkUINodeEvent {
     ArkUI_Int32 kind; // Actually ArkUIEventCategory.
     ArkUI_Int32 nodeId;
     ArkUI_Int64 extraParam;
+    ArkUI_Int32 apiVersion = 0;
     union {
         ArkUIAPIEventSinglePointer singlePointer;
         ArkUIAPIEventMultiPointer multiPointer;

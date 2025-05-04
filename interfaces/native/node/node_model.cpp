@@ -480,12 +480,16 @@ void HandleMouseEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
 
 void HandleKeyEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
 {
+    uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_KEY;
+    uiEvent.apiVersion = innerEvent->apiVersion;
     uiEvent.eventTypeId = C_KEY_EVENT_ID;
     uiEvent.inputEvent = &(innerEvent->keyEvent);
 }
 
 void HandleFocusAxisEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
 {
+    uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_AXIS;
+    uiEvent.apiVersion = innerEvent->apiVersion;
     uiEvent.eventTypeId = C_FOCUS_AXIS_EVENT_ID;
     uiEvent.inputEvent = &(innerEvent->focusAxisEvent);
 }
@@ -493,6 +497,7 @@ void HandleFocusAxisEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEven
 void HandleAxisEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
 {
     uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_AXIS;
+    uiEvent.apiVersion = innerEvent->apiVersion;
     uiEvent.eventTypeId = C_AXIS_EVENT_ID;
     uiEvent.inputEvent = &(innerEvent->axisEvent);
 }
