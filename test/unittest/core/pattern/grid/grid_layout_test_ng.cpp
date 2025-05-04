@@ -1983,4 +1983,66 @@ HWTEST_F(GridLayoutTestNg, MarginPadding001, TestSize.Level1)
     EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameRect(), RectF(1, 5, 480, 800)));
     EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 2), RectF(3, 211, 233, 200)));
 }
+
+/**
+ * @tc.name: GridLayoutInfo001
+ * @tc.desc: Test Grid Layout Info
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GridLayoutInfo001, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.irregularIndexes = { 0 };
+    auto onGetRectByIndex = [](int32_t index) {
+        GridItemRect gridItemRect { 2, 2, 1, 1 };
+        return gridItemRect;
+    };
+    option.getRectByIndex = std::move(onGetRectByIndex);
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetRowsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+    model.SetColumnsGap(Dimension(COL_GAP));
+    model.SetRowsGap(Dimension(ROW_GAP));
+    CreateFixedItems(1);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->gridLayoutInfo_.startIndex_, 0);
+    EXPECT_EQ(pattern_->gridLayoutInfo_.endIndex_, 0);
+    EXPECT_EQ(pattern_->gridLayoutInfo_.startMainLineIndex_, 2);
+    EXPECT_EQ(pattern_->gridLayoutInfo_.endMainLineIndex_, 2);
+}
+
+/**
+ * @tc.name: GridLayoutInfo002
+ * @tc.desc: Test Grid Layout Info
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GridLayoutInfo002, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    auto onGetRectByIndex = [](int32_t index) {
+        if (index == 0) {
+            GridItemRect gridItemRect { 2, 2, 1, 1 };
+            return gridItemRect;
+        } else {
+            GridItemRect gridItemRect { 1, 1, 1, 1 };
+            return gridItemRect;
+        }
+    };
+    option.getRectByIndex = std::move(onGetRectByIndex);
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetRowsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+    model.SetColumnsGap(Dimension(COL_GAP));
+    model.SetRowsGap(Dimension(ROW_GAP));
+    CreateFixedItems(2);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->gridLayoutInfo_.startIndex_, 0);
+    EXPECT_EQ(pattern_->gridLayoutInfo_.endIndex_, 1);
+    EXPECT_EQ(pattern_->gridLayoutInfo_.startMainLineIndex_, 1);
+    EXPECT_EQ(pattern_->gridLayoutInfo_.endMainLineIndex_, 2);
+}
 } // namespace OHOS::Ace::NG
