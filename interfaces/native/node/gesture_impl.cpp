@@ -843,10 +843,14 @@ void HandleGestureEvent(ArkUINodeEvent* event)
     } else if (gestureEvent->eventData.inputEventType == static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_AXIS)) {
         uiEvent.eventTypeId = C_AXIS_EVENT_ID;
         uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_AXIS;
+    } else if (gestureEvent->eventData.inputEventType == static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_KEY)) {
+        uiEvent.eventTypeId = C_CLICK_EVENT_ID;
+        uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_KEY;
     } else {
         uiEvent.eventTypeId = C_TOUCH_EVENT_ID;
         uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_TOUCH;
     }
+    uiEvent.apiVersion = event->apiVersion;
     uiEvent.inputEvent = gestureEvent->eventData.rawPointerEvent;
     gestureEvent->eventData.rawPointerEvent = &uiEvent;
     if (extraData->gesture) {
