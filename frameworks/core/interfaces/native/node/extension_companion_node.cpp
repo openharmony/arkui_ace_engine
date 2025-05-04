@@ -173,17 +173,17 @@ void ExtensionCompanionNode::OnDraw(DrawingContext& context)
         InnerDraw(context);
     }
 
-    if (flags_ & ArkUIAPINodeFlags::CUSTOM_DRAW_BEHIND) {
+    if (flags_ & ArkUIAPINodeFlags::CUSTOM_DRAW_FRONT) {
         auto canvas = reinterpret_cast<uintptr_t>(&context.canvas);
-        ArkUICustomNodeEvent eventDrawBehind;
-        eventDrawBehind.kind = ArkUIAPINodeFlags::CUSTOM_DRAW_BEHIND;
-        eventDrawBehind.extraParam = GetExtraParam(static_cast<ArkUI_Int32>(ArkUIAPINodeFlags::CUSTOM_DRAW_BEHIND));
-        eventDrawBehind.data[NUM_0] = (ArkUI_Int32)(canvas & 0xffffffff);
-        eventDrawBehind.data[NUM_1] = (ArkUI_Int32)((static_cast<uint64_t>(canvas) >> NUM_32) & 0xffffffff);
-        eventDrawBehind.data[NUM_2] = context.width;
-        eventDrawBehind.data[NUM_3] = context.height;
-        eventDrawBehind.canvas = reinterpret_cast<intptr_t>(&context.canvas);
-        SendArkUIAsyncCustomEvent(&eventDrawBehind);
+        ArkUICustomNodeEvent eventDrawFront;
+        eventDrawFront.kind = ArkUIAPINodeFlags::CUSTOM_DRAW_FRONT;
+        eventDrawFront.extraParam = GetExtraParam(static_cast<ArkUI_Int32>(ArkUIAPINodeFlags::CUSTOM_DRAW_FRONT));
+        eventDrawFront.data[NUM_0] = (ArkUI_Int32)(canvas & 0xffffffff);
+        eventDrawFront.data[NUM_1] = (ArkUI_Int32)((static_cast<uint64_t>(canvas) >> NUM_32) & 0xffffffff);
+        eventDrawFront.data[NUM_2] = context.width;
+        eventDrawFront.data[NUM_3] = context.height;
+        eventDrawFront.canvas = reinterpret_cast<intptr_t>(&context.canvas);
+        SendArkUIAsyncCustomEvent(&eventDrawFront);
     }
 }
 
