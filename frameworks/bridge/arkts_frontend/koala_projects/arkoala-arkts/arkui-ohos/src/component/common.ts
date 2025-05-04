@@ -13908,3 +13908,8 @@ export interface Type_CommonMethod_radialGradient_value {
     colors: Array<[ ResourceColor, number ]>;
     repeating?: boolean;
 }
+export declare function $$<T>(value: T): Bindable<T>;
+export interface Bindable<T> {
+    readonly value: T;
+    readonly onChange: (value: T) => void;
+}

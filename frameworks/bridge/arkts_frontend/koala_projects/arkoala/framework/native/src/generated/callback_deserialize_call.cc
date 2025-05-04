@@ -5879,6 +5879,24 @@ void deserializeAndCallSyncSearchSubmitCallback(Ark_VMContext vmContext, KSerial
     Opt_SubmitEvent event = event_buf;
     _callSync(vmContext, _resourceId, searchContent, event);
 }
+void deserializeAndCallSelectedCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean selected)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_Boolean selected = thisDeserializer.readBoolean();
+    _call(_resourceId, selected);
+}
+void deserializeAndCallSyncSelectedCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean selected)>(thisDeserializer.readPointer());
+    Ark_Boolean selected = thisDeserializer.readBoolean();
+    _callSync(vmContext, _resourceId, selected);
+}
 void deserializeAndCallShouldBuiltInRecognizerParallelWithCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
@@ -6908,6 +6926,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case -1265626662/*Kind_ScrollOnScrollCallback*/: return deserializeAndCallScrollOnScrollCallback(thisArray, thisLength);
         case -721521596/*Kind_ScrollOnWillScrollCallback*/: return deserializeAndCallScrollOnWillScrollCallback(thisArray, thisLength);
         case 1717691617/*Kind_SearchSubmitCallback*/: return deserializeAndCallSearchSubmitCallback(thisArray, thisLength);
+        case -1480175598/*Kind_SelectedCallback*/: return deserializeAndCallSelectedCallback(thisArray, thisLength);
         case -250780276/*Kind_ShouldBuiltInRecognizerParallelWithCallback*/: return deserializeAndCallShouldBuiltInRecognizerParallelWithCallback(thisArray, thisLength);
         case -1716637992/*Kind_SizeChangeCallback*/: return deserializeAndCallSizeChangeCallback(thisArray, thisLength);
         case 711649376/*Kind_SliderTriggerChangeCallback*/: return deserializeAndCallSliderTriggerChangeCallback(thisArray, thisLength);
@@ -7196,6 +7215,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case -1265626662/*Kind_ScrollOnScrollCallback*/: return deserializeAndCallSyncScrollOnScrollCallback(vmContext, thisArray, thisLength);
         case -721521596/*Kind_ScrollOnWillScrollCallback*/: return deserializeAndCallSyncScrollOnWillScrollCallback(vmContext, thisArray, thisLength);
         case 1717691617/*Kind_SearchSubmitCallback*/: return deserializeAndCallSyncSearchSubmitCallback(vmContext, thisArray, thisLength);
+        case -1480175598/*Kind_SelectedCallback*/: return deserializeAndCallSyncSelectedCallback(vmContext, thisArray, thisLength);
         case -250780276/*Kind_ShouldBuiltInRecognizerParallelWithCallback*/: return deserializeAndCallSyncShouldBuiltInRecognizerParallelWithCallback(vmContext, thisArray, thisLength);
         case -1716637992/*Kind_SizeChangeCallback*/: return deserializeAndCallSyncSizeChangeCallback(vmContext, thisArray, thisLength);
         case 711649376/*Kind_SliderTriggerChangeCallback*/: return deserializeAndCallSyncSliderTriggerChangeCallback(vmContext, thisArray, thisLength);
