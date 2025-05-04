@@ -7771,7 +7771,7 @@ typedef enum {
     ARKUI_NODE_CUSTOM_EVENT_ON_OVERLAY_DRAW = 1 << 4,
     /** Draw front type. */
     ARKUI_NODE_CUSTOM_EVENT_ON_DRAW_FRONT = 1 << 5,
-    /** Draw behind type. */   
+    /** Draw behind type. */
     ARKUI_NODE_CUSTOM_EVENT_ON_DRAW_BEHIND = 1 << 6,
 } ArkUI_NodeCustomEventType;
 
