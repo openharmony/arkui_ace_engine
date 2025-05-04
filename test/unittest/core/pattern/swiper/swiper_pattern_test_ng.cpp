@@ -13,14 +13,9 @@
  * limitations under the License.
  */
 
-#include <optional>
-
 #include "gtest/gtest.h"
 #include "swiper_test_ng.h"
 
-#include "core/components_ng/layout/layout_wrapper_node.h"
-#include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
-#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_caches.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
@@ -1423,5 +1418,210 @@ HWTEST_F(SwiperPatternTestNg, GetDistanceToEdge001, TestSize.Level1)
     swiperPattern->itemPosition_[0] = itemInfo;
     auto result = swiperPattern->GetDistanceToEdge();
     EXPECT_EQ(result, -2.0f);
+}
+
+/**
+ * @tc.name: FocusMoveOnKey001
+ * @tc.desc: Test SwiperPattern OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, FocusMoveOnKey001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper with displayCount 4 and 10 items.
+     */
+    SwiperModelNG model = CreateSwiper();
+    SwiperModelNG::SetDisplayCount(AceType::RawPtr(frameNode_), 4);
+    CreateSwiperItems(10);
+    CreateSwiperDone();
+    EXPECT_EQ(pattern_->itemPosition_.size(), 4);
+    EXPECT_EQ(pattern_->currentFocusIndex_, 0);
+    for (auto& item : pattern_->itemPosition_) {
+        auto child = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(item.first));
+        auto focusHub = child->GetFocusHub();
+        EXPECT_TRUE(focusHub->IsEnabled());
+        EXPECT_TRUE(focusHub->IsShow());
+        EXPECT_TRUE(focusHub->focusable_);
+        EXPECT_TRUE(focusHub->parentFocusable_);
+    }
+    /**
+     * @tc.steps: step2. Press right key.
+     * @tc.expected: currentFocusIndex_ change from 0 to 1.
+     */
+    EXPECT_TRUE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN)));
+    EXPECT_EQ(pattern_->currentFocusIndex_, 1);
+}
+
+/**
+ * @tc.name: FocusMoveOnKey002
+ * @tc.desc: Test SwiperPattern OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, FocusMoveOnKey002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper with displayCount 4 and 10 items.
+     */
+    SwiperModelNG model = CreateSwiper();
+    SwiperModelNG::SetDisplayCount(AceType::RawPtr(frameNode_), 4);
+    CreateSwiperItems(10);
+    CreateSwiperDone();
+    EXPECT_EQ(pattern_->itemPosition_.size(), 4);
+    EXPECT_EQ(pattern_->currentFocusIndex_, 0);
+    /**
+     * @tc.steps: step2. Make the second child not focusable and press right key.
+     * @tc.expected: currentFocusIndex_ change from 0 to 2.
+     */
+    auto secondChild = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(1));
+    ViewAbstract::SetFocusable(AceType::RawPtr(secondChild), false);
+    EXPECT_TRUE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN)));
+    EXPECT_EQ(pattern_->currentFocusIndex_, 2);
+}
+
+/**
+ * @tc.name: FocusMoveOnKey003
+ * @tc.desc: Test SwiperPattern OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, FocusMoveOnKey003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper with displayCount 4 and 10 items.
+     */
+    SwiperModelNG model = CreateSwiper();
+    SwiperModelNG::SetDisplayCount(AceType::RawPtr(frameNode_), 4);
+    CreateSwiperItems(10);
+    CreateSwiperDone();
+    EXPECT_EQ(pattern_->itemPosition_.size(), 4);
+    EXPECT_EQ(pattern_->currentFocusIndex_, 0);
+    /**
+     * @tc.steps: step2. Make the second child not visible and press right key.
+     * @tc.expected: currentFocusIndex_ change from 0 to 2, currentIndex_ not change.
+     */
+    auto secondChild = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(1));
+    ViewAbstract::SetVisibility(AceType::RawPtr(secondChild), VisibleType::INVISIBLE);
+    EXPECT_TRUE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN)));
+    EXPECT_EQ(pattern_->currentFocusIndex_, 2);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+    /**
+     * @tc.steps: step3. Press left key.
+     * @tc.expected: currentFocusIndex_ change from 2 to 0, currentIndex_ not change.
+     */
+    EXPECT_TRUE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN)));
+    EXPECT_EQ(pattern_->currentFocusIndex_, 0);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+}
+
+/**
+ * @tc.name: FocusMoveOnKey004
+ * @tc.desc: Test SwiperPattern OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, FocusMoveOnKey004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper with displayCount 4 and 10 items.
+     */
+    SwiperModelNG model = CreateSwiper();
+    SwiperModelNG::SetDisplayCount(AceType::RawPtr(frameNode_), 4);
+    CreateSwiperItems(10);
+    CreateSwiperDone();
+    EXPECT_EQ(pattern_->itemPosition_.size(), 4);
+    EXPECT_EQ(pattern_->currentFocusIndex_, 0);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+    /**
+     * @tc.steps: step2. Make the children from 2 to 4 not enabled and press right key.
+     * @tc.expected: currentIndex_ change from 0 to 1, currentFocusIndex_ change from 0 to 4.
+     */
+    for (auto i = 1; i < 4; i++) {
+        auto secondChild = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(i));
+        ViewAbstract::SetEnabled(AceType::RawPtr(secondChild), false);
+    }
+    EXPECT_TRUE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN)));
+    EXPECT_EQ(pattern_->currentFocusIndex_, 4);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+    /**
+     * @tc.steps: step3. Press left key.
+     * @tc.expected: currentIndex_ change from 1 to 0, currentFocusIndex_ change from 4 to 0.
+     */
+    EXPECT_TRUE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN)));
+    EXPECT_EQ(pattern_->currentFocusIndex_, 0);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+}
+
+/**
+ * @tc.name: FocusMoveOnKey005
+ * @tc.desc: Test SwiperPattern OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, FocusMoveOnKey005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper with displayCount 4, swipeByGroup and 10 items.
+     */
+    SwiperModelNG model = CreateSwiper();
+    SwiperModelNG::SetDisplayCount(AceType::RawPtr(frameNode_), 4);
+    SwiperModelNG::SetSwipeByGroup(AceType::RawPtr(frameNode_), true);
+    CreateSwiperItems(10);
+    CreateSwiperDone();
+    EXPECT_EQ(pattern_->itemPosition_.size(), 4);
+    EXPECT_EQ(pattern_->currentFocusIndex_, 0);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+    /**
+     * @tc.steps: step2. Make the children from 2 to 5 not enabled and press right key.
+     * @tc.expected: currentIndex_ change from 0 to 5, currentFocusIndex_ change from 0 to 4.
+     */
+    for (auto i = 1; i < 5; i++) {
+        auto secondChild = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(i));
+        ViewAbstract::SetEnabled(AceType::RawPtr(secondChild), false);
+    }
+    EXPECT_TRUE(pattern_->isVisibleArea_);
+    EXPECT_TRUE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN)));
+    EXPECT_EQ(pattern_->currentFocusIndex_, 5);
+    EXPECT_EQ(pattern_->currentIndex_, 4);
+    /**
+     * @tc.steps: step3. Press left key.
+     * @tc.expected: currentIndex_ change from 4 to -1, currentFocusIndex_ change from 4 to 0.
+     */
+    EXPECT_TRUE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN)));
+    EXPECT_EQ(pattern_->currentFocusIndex_, -1);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+}
+
+/**
+ * @tc.name: FocusMoveOnKey006
+ * @tc.desc: Test SwiperPattern OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, FocusMoveOnKey006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper with displayCount 4, swipeByGroup and 10 items.
+     */
+    SwiperModelNG model = CreateSwiper();
+    SwiperModelNG::SetDisplayCount(AceType::RawPtr(frameNode_), 4);
+    SwiperModelNG::SetSwipeByGroup(AceType::RawPtr(frameNode_), true);
+    CreateSwiperItems(10);
+    CreateSwiperDone();
+    EXPECT_EQ(pattern_->itemPosition_.size(), 4);
+    EXPECT_EQ(pattern_->currentFocusIndex_, 0);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+    EXPECT_TRUE(SwiperModelNG::GetLoop(AceType::RawPtr(frameNode_)));
+    /**
+     * @tc.steps: step2. Make the second child not enabled and press right key.
+     * @tc.expected: currentIndex_ is not changed, currentFocusIndex_ change from 0 to 2.
+     */
+    auto secondChild = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(1));
+    ViewAbstract::SetEnabled(AceType::RawPtr(secondChild), false);
+    EXPECT_TRUE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN)));
+    EXPECT_EQ(pattern_->currentFocusIndex_, 2);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+    /**
+     * @tc.steps: step3. Press left key.
+     * @tc.expected: currentIndex_ is not changed, currentFocusIndex_ change from 2 to 0.
+     */
+    EXPECT_TRUE(pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN)));
+    EXPECT_EQ(pattern_->currentFocusIndex_, 0);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
 }
 } // namespace OHOS::Ace::NG

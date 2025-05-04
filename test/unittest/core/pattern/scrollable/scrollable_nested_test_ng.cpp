@@ -985,8 +985,11 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest002, TestSize.Level1)
     FlushUITasks(rootNode);
     FlushUITasks(listNode);
     MockAnimationManager::GetInstance().Tick();
+    // skip large offset when backToTop
+    EXPECT_TRUE(listPattern->isNeedCheckOffset_);
     FlushUITasks(rootNode);
     FlushUITasks(listNode);
+    EXPECT_FALSE(listPattern->isNeedCheckOffset_);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -200);
 

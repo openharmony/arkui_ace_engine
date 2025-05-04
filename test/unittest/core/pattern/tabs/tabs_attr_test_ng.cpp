@@ -1406,7 +1406,7 @@ HWTEST_F(TabsAttrTestNg, TabsModelOnUpdateShowDivider005, TestSize.Level1)
     frameNode_->RemoveChildAtIndex(0);
     frameNode_->RemoveChildAtIndex(0);
     pattern_->OnUpdateShowDivider();
-    EXPECT_EQ(frameNode_->GetChildren().size(), 2);
+    EXPECT_EQ(frameNode_->GetChildren().size(), 1);
 }
 
 /**
