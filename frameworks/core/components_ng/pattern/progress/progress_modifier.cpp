@@ -1558,6 +1558,7 @@ void ProgressModifier::PaintCapsuleRightBorder(
     float offsetY = offset.GetY();
     float progressWidth =
         std::min((value_->Get() / maxValue_->Get()) * totalDegree * contentSize.Width(), contentSize.Width());
+    progressWidth = std::max(progressWidth, DEFAULT_MIN_PROGRESS_WIDTH);
     if (LessNotEqual(progressWidth, borderRadius)) {
         PaintCapsuleProgressLessRadiusScene(path, offset, contentSize, borderRadius);
     } else if (GreatNotEqual(progressWidth, contentSize.Width() - borderRadius)) {
@@ -1621,6 +1622,7 @@ void ProgressModifier::PaintCapsuleProgressGreaterRadiusScene(
     float offsetY = offset.GetY();
     float progressWidth =
         std::min((value_->Get() / maxValue_->Get()) * totalDegree * contentSize.Width(), contentSize.Width());
+    progressWidth = std::max(progressWidth, DEFAULT_MIN_PROGRESS_WIDTH);
     bool isDefault = GreatOrEqual(borderRadius, contentSize.Height() / INT32_TWO);
     if (isDefault) {
         if (!isRightToLeft_->Get()) {
@@ -1667,6 +1669,7 @@ void ProgressModifier::PaintVerticalCapsule(
     float offsetY = offset.GetY();
     float progressWidth =
         std::min((value_->Get() / maxValue_->Get()) * totalDegree * contentSize.Height(), contentSize.Height());
+    progressWidth = std::max(progressWidth, DEFAULT_MIN_PROGRESS_WIDTH);
     bool isDefault = GreatOrEqual(borderRadius, contentSize.Width() / INT32_TWO);
     RSBrush brush;
     brush.SetAntiAlias(true);
