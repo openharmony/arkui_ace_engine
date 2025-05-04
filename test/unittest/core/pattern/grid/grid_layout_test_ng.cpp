@@ -677,4 +677,66 @@ HWTEST_F(GridLayoutTestNg, EstimateHeight001, TestSize.Level1)
     pattern_->info_ = tempGridLayoutInfo;
     EXPECT_EQ(pattern_->EstimateHeight(), 100.0f);
 }
+
+/**
+ * @tc.name: GridLayoutInfo001
+ * @tc.desc: Test Grid Layout Info
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GridLayoutInfo001, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.irregularIndexes = { 0 };
+    auto onGetRectByIndex = [](int32_t index) {
+        GridItemRect gridItemRect { 2, 2, 1, 1 };
+        return gridItemRect;
+    };
+    option.getRectByIndex = std::move(onGetRectByIndex);
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetRowsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+    model.SetColumnsGap(Dimension(COL_GAP));
+    model.SetRowsGap(Dimension(ROW_GAP));
+    CreateFixedItems(1);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 0);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 2);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 2);
+}
+
+/**
+ * @tc.name: GridLayoutInfo002
+ * @tc.desc: Test Grid Layout Info
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GridLayoutInfo002, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    auto onGetRectByIndex = [](int32_t index) {
+        if (index == 0) {
+            GridItemRect gridItemRect { 2, 2, 1, 1 };
+            return gridItemRect;
+        } else {
+            GridItemRect gridItemRect { 1, 1, 1, 1 };
+            return gridItemRect;
+        }
+    };
+    option.getRectByIndex = std::move(onGetRectByIndex);
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetRowsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+    model.SetColumnsGap(Dimension(COL_GAP));
+    model.SetRowsGap(Dimension(ROW_GAP));
+    CreateFixedItems(2);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(pattern_->info_.endIndex_, 1);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 1);
+    EXPECT_EQ(pattern_->info_.endMainLineIndex_, 2);
+}
 } // namespace OHOS::Ace::NG
