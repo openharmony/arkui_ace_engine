@@ -35,9 +35,9 @@
         "commander": "^13.1.0"
     },
     "scripts": {
-        "clean:all": "npm run clean --prefix libarkts && npm run clean:plugins --prefix libarkts && npm run clean --prefix memo-plugin && npm run runtime:clean --prefix memo-plugin && npm run clean --prefix memo-plugin/demo && npm run clean --prefix ../arkoala-arkts/arkui && npm run clean --prefix ../arkoala-arkts/trivial/user",
+        "clean:all": "npm run clean --prefix libarkts && npm run clean:plugins --prefix libarkts && npm run clean --prefix memo-plugin && npm run runtime:clean --prefix memo-plugin && npm run clean --prefix memo-plugin/demo",
         "build:all": "npm run compile --prefix libarkts && npm run compile:plugins --prefix libarkts && npm run compile --prefix memo-plugin && npm run runtime:prepare --prefix memo-plugin && npm run compile --prefix ui-plugins",
-        "test:all": "npm run build:arkui:pure-ets --prefix ../arkoala-arkts/arkui && npm run run --prefix libarkts && npm run test --prefix libarkts && npm run demo:run --prefix memo-plugin && npm run test:all --prefix memo-plugin && npm run run:user:pure-ets --prefix ../arkoala-arkts/trivial/user",
+        "test:all": "npm run build:arkui:pure-ets --prefix ../arkoala-arkts/arkui && npm run run --prefix libarkts && npm run test --prefix libarkts && npm run demo:run --prefix memo-plugin && npm run test:all --prefix memo-plugin",
         "all": "npm run clean:all && npm run build:all && npm run test:all"
     }
 }

@@ -24,7 +24,6 @@
     },
     "include": ["src/interop/**/*", "src/napi/**/*", "src/wasm/**/*", "src/arkts/ResourceManager.ts"],
     "references": [
-        { "path": "../incremental/compiler-plugin" },
         { "path": "../incremental/compat" },
         { "path": "../incremental/common" }
     ]
