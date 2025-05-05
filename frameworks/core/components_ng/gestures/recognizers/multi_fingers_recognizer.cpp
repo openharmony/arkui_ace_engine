@@ -38,6 +38,11 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
     lastPointEvent_.reset();
     auto maxTimeStamp = TimeStamp::min().time_since_epoch().count();
     for (const auto& point : touchPoints_) {
+        if (!CheckoutDownFingers(point.second.id) &&
+            lastRefereeState_ != RefereeState::PENDING &&
+            refereeState_ != RefereeState::PENDING) {
+            continue;
+        }
         PointF localPoint(point.second.x, point.second.y);
         TransformForRecognizer(
             localPoint, GetAttachedNode(), false, isPostEventResult_, point.second.postEventNodeId);
@@ -95,6 +100,7 @@ void MultiFingersRecognizer::CleanRecognizerState()
         refereeState_ == RefereeState::FAIL ||
         refereeState_ == RefereeState::DETECTING) &&
         currentFingers_ == 0) {
+        lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
     }

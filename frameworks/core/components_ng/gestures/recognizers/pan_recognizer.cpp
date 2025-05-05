@@ -142,6 +142,7 @@ void PanRecognizer::OnAccepted()
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
         "Pan accepted, tag = %{public}s, averageDistance is x %{public}f, y %{public}f",
         node ? node->GetTag().c_str() : "null", averageDistance_.GetX(), averageDistance_.GetY());
+    lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
     TouchEvent touchPoint = {};
     if (!touchPoints_.empty()) {
@@ -169,6 +170,7 @@ void PanRecognizer::OnRejected()
 {
     // fix griditem drag interrupted by click while pull moving
     if (refereeState_ != RefereeState::SUCCEED) {
+        lastRefereeState_ = refereeState_;
         refereeState_ = RefereeState::FAIL;
     }
     SendRejectMsg();
@@ -265,6 +267,7 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         if (refereeState_ == RefereeState::READY) {
             panVelocity_.Reset(event.id);
             UpdateTouchPointInVelocityTracker(event);
+            lastRefereeState_ = refereeState_;
             refereeState_ = RefereeState::DETECTING;
         } else {
             TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan gesture refereeState is not READY");
@@ -314,6 +317,7 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     pesudoTouchEvent.y = revertAxisValue.second;
     pesudoTouchEvent.sourceTool = event.sourceTool;
     panVelocity_.UpdateTouchPoint(event.id, pesudoTouchEvent, false);
+    lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::DETECTING;
 }
 
@@ -356,6 +360,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             SendCallbackMsg(onActionEnd_, GestureCallbackType::END);
             averageDistance_.Reset();
             AddOverTimeTrace();
+            lastRefereeState_ = RefereeState::READY;
             refereeState_ = RefereeState::READY;
             if (currentFingers_ > 1) {
                 isNeedResetVoluntarily_ = true;
@@ -571,6 +576,7 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     if (refereeState_ == RefereeState::SUCCEED && currentFingers_ == fingers_) {
         // AxisEvent is single one.
         SendCallbackMsg(onActionCancel_, GestureCallbackType::CANCEL);
+        lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
     } else if (refereeState_ == RefereeState::SUCCEED) {
         TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
