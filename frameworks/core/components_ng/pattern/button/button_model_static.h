@@ -20,7 +20,7 @@
 #include "core/components/button/button_theme.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT ButtonModelStatic : {
+class ACE_EXPORT ButtonModelStatic {
 public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize);
@@ -45,7 +45,6 @@ public:
     static Color GetFontColor(FrameNode* frameNode);
     static void SetRole(FrameNode* frameNode, const std::optional<ButtonRole>& buttonRole);
     static void SetButtonStyle(FrameNode* frameNode, const std::optional<ButtonStyleMode>& buttonStyle);
-    static void SetBuilderFunc(FrameNode* frameNode, NG::ButtonMakeCallback&& jsMake);
     static void TriggerClick(FrameNode* frameNode, double xPos, double yPos);
     static void SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize);
     static ButtonType GetType(FrameNode* frameNode);
@@ -59,9 +58,6 @@ public:
     static float GetMaxFontScale(FrameNode* frameNode);
 
 private:
-    static void CreateWithLabel(const std::string& label);
-    static void Create(const std::string& tagName);
-    static void SetTypeAndStateEffect(const std::optional<ButtonType>& type, const std::optional<bool>& stateEffect);
     static void SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const std::string& label);
     static void SetButtonSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize,
         RefPtr<ButtonTheme> buttonTheme);
