@@ -74,6 +74,7 @@ constexpr int32_t API_PROTEXTION_GREATER_NINE = 9;
 const std::u16string SYMBOL_TRANS = u"\uF0001";
 constexpr float RICH_DEFAULT_SHADOW_COLOR = 0x33000000;
 constexpr float RICH_DEFAULT_ELEVATION = 120.0f;
+constexpr Dimension CLICK_THRESHOLD = 5.0_vp;
 }; // namespace
 
 TextPattern::~TextPattern()
@@ -803,6 +804,12 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
     textContentRect.SetHeight(contentRect_.Height() - std::max(baselineOffset_, 0.0f));
     PointF textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
         info.GetLocalLocation().GetY() - textContentRect.GetY() };
+
+    if (IsUsingMouse() && isMousePressed_ && leftMousePressed_ && moveOverClickThreshold_) {
+        TAG_LOGI(ACE_TEXT, "not trigger click after mouse move");
+        moveOverClickThreshold_ = false;
+        return;
+    }
     if (IsSelectableAndCopy()) {
         CheckClickedOnSpanOrText(textContentRect, info.GetLocalLocation());
     }
@@ -1298,6 +1305,7 @@ void TextPattern::HandleMouseLeftButton(const MouseInfo& info, const Offset& tex
 void TextPattern::HandleMouseLeftPressAction(const MouseInfo& info, const Offset& textOffset)
 {
     isMousePressed_ = true;
+    CheckPressedSpanPosition(textOffset);
     leftMousePressed_ = true;
     if (BetweenSelectedPosition(info.GetGlobalLocation())) {
         blockPress_ = true;
@@ -1318,6 +1326,11 @@ void TextPattern::HandleMouseLeftPressAction(const MouseInfo& info, const Offset
     if (scrollableParent_.Upgrade() && host) {
         host->RegisterNodeChangeListener();
     }
+}
+
+void TextPattern::CheckPressedSpanPosition(const Offset& textOffset)
+{
+    leftMousePressedOffset_ = textOffset;
 }
 
 void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset)
@@ -1362,6 +1375,7 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
     }
     isMousePressed_ = false;
     leftMousePressed_ = false;
+    moveOverClickThreshold_ = false;
 }
 
 void TextPattern::HandleMouseLeftMoveAction(const MouseInfo& info, const Offset& textOffset)
@@ -1380,6 +1394,11 @@ void TextPattern::HandleMouseLeftMoveAction(const MouseInfo& info, const Offset&
         CHECK_NULL_VOID(pManager_);
         auto end = pManager_->GetGlyphIndexByCoordinate(textOffset);
         HandleSelectionChange(textSelector_.baseOffset, end);
+        auto distance = (textOffset - leftMousePressedOffset_).GetDistance();
+        if (distance >= CLICK_THRESHOLD.ConvertToPx()) {
+            moveOverClickThreshold_ = true;
+            return;
+        }
     }
 }
 
