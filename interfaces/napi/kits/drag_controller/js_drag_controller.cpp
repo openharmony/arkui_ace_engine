@@ -805,6 +805,10 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
     CHECK_NULL_RETURN(container, false);
     if (shadowInfos.empty()) {
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(asyncCtx->env, &scope);
+        HandleFail(asyncCtx, ERROR_CODE_PARAM_INVALID, "shadowInfo array is empty");
+        napi_close_handle_scope(asyncCtx->env, scope);
         TAG_LOGE(AceLogTag::ACE_DRAG, "shadowInfo array is empty");
         return false;
     }
@@ -813,6 +817,7 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
         napi_open_handle_scope(asyncCtx->env, &scope);
         HandleFail(asyncCtx, ERROR_CODE_PARAM_INVALID, "touchPoint's coordinate out of range");
         napi_close_handle_scope(asyncCtx->env, scope);
+        TAG_LOGE(AceLogTag::ACE_DRAG, "touchPoint's coordinate out of range");
         return false;
     }
     if (!container->GetLastMovingPointerPosition(asyncCtx->dragPointerEvent)) {
@@ -820,6 +825,7 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
         napi_open_handle_scope(asyncCtx->env, &scope);
         HandleFail(asyncCtx, ERROR_CODE_INTERNAL_ERROR, "can not find current pointerId or not in press");
         napi_close_handle_scope(asyncCtx->env, scope);
+        TAG_LOGE(AceLogTag::ACE_DRAG, "can not find current pointerId or not in press");
         return false;
     }
     std::string udKey;
@@ -829,6 +835,7 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
     if (badgeNumber.has_value()) {
         recordSize = badgeNumber.value();
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Use custom badge number, value is %{public}d", recordSize);
     }
     auto windowId = container->GetWindowId();
     auto arkExtraInfoJson = JsonUtil::Create(true);
@@ -839,13 +846,6 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
         asyncCtx->dragPointerEvent.sourceType, recordSize, asyncCtx->dragPointerEvent.pointerId,
         static_cast<int32_t>(asyncCtx->dragPointerEvent.sourceTool), asyncCtx->dragPointerEvent.displayX,
         asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId, windowId, true, false, summary };
-    if (!dragData) {
-        napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(asyncCtx->env, &scope);
-        HandleFail(asyncCtx, ERROR_CODE_PARAM_INVALID, "did not has any drag data.");
-        napi_close_handle_scope(asyncCtx->env, scope);
-        return false;
-    }
     return true;
 }
 
