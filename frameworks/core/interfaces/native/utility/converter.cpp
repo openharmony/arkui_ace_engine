@@ -2357,6 +2357,29 @@ RefPtr<ShapeRect> Convert(const Ark_Rect& src)
     return dst;
 }
 template<>
+RefPtr<Ellipse> Convert(const Ark_Rect& src)
+{
+    const auto two = 2;
+    auto dst = AceType::MakeRefPtr<Ellipse>();
+    float left = Converter::Convert<float>(src.left);
+    float top = Converter::Convert<float>(src.top);
+    float right = Converter::Convert<float>(src.right);
+    float bottom = Converter::Convert<float>(src.bottom);
+    auto width = Dimension(right - left);
+    auto height = Dimension(bottom - top);
+    auto deltaX = Dimension(left);
+    auto deltaY = Dimension(top);
+    auto position = DimensionOffset(deltaX, deltaY);
+    dst->SetWidth(width);
+    dst->SetHeight(height);
+    dst->SetPosition(position);
+    dst->SetRadiusX(Dimension((right - left) / two));
+    dst->SetRadiusY(Dimension((bottom - top) / two));
+    dst->SetAxisX(Dimension(left + (right - left) / two));
+    dst->SetAxisY(Dimension(top + (bottom - top) / two));
+    return dst;
+}
+template<>
 Radius Convert(const Ark_Vector2& src)
 {
     Radius dst;
