@@ -1557,6 +1557,27 @@ ArkUISwiperIndicatorType GetIndicatorType(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ArkUISwiperIndicatorType::DOT);
     return static_cast<ArkUISwiperIndicatorType>(SwiperModelNG::GetIndicatorType(frameNode));
 }
+
+void SetMaintainVisibleContentPosition(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetMaintainVisibleContentPosition(frameNode, value);
+}
+
+void ResetMaintainVisibleContentPosition(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetMaintainVisibleContentPosition(frameNode, false);
+}
+
+ArkUI_Int32 GetMaintainVisibleContentPosition(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    return SwiperModelNG::GetMaintainVisibleContentPosition(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1665,6 +1686,9 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .getSwiperSwipeByGroup = GetSwiperSwipeByGroup,
         .getSwiperDisplayMode = GetSwiperDisplayMode,
         .getSwiperArrowStyle = GetSwiperArrowStyle,
+        .setMaintainVisibleContentPosition = SetMaintainVisibleContentPosition,
+        .resetMaintainVisibleContentPosition = ResetMaintainVisibleContentPosition,
+        .getMaintainVisibleContentPosition = GetMaintainVisibleContentPosition,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
