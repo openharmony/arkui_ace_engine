@@ -47,9 +47,9 @@ int32_t InteractionImpl::UpdateShadowPic(const OHOS::Ace::ShadowInfoCore& shadow
     return InteractionManager::GetInstance()->UpdateShadowPic(msdpShadowInfo);
 }
 
-int32_t InteractionImpl::SetDragWindowVisible(bool visible)
+int32_t InteractionImpl::SetDragWindowVisible(bool visible, const std::shared_ptr<Rosen::RSTransaction>& rSTransaction)
 {
-    return InteractionManager::GetInstance()->SetDragWindowVisible(visible);
+    return InteractionManager::GetInstance()->SetDragWindowVisible(visible, false, rSTransaction);
 }
 
 int32_t InteractionImpl::SetMouseDragMonitorState(bool state)

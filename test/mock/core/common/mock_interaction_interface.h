@@ -29,7 +29,8 @@ class MockInteractionInterface : public InteractionInterface {
 public:
     MOCK_METHOD(int32_t, UpdateShadowPic, (const ShadowInfoCore& shadowInfo), (override));
 
-    MOCK_METHOD(int32_t, SetDragWindowVisible, (bool visible), (override));
+    MOCK_METHOD(int32_t, SetDragWindowVisible,
+        (bool visible, const std::shared_ptr<Rosen::RSTransaction>& rSTransaction), (override));
 
     MOCK_METHOD(int32_t, SetMouseDragMonitorState, (bool state), (override));
 

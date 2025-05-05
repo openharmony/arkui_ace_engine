@@ -28,7 +28,7 @@ int32_t InteractionImpl::UpdateShadowPic(const OHOS::Ace::ShadowInfoCore& shadow
     return -1;
 }
 
-int32_t InteractionImpl::SetDragWindowVisible(bool visible)
+int32_t InteractionImpl::SetDragWindowVisible(bool visible, const std::shared_ptr<Rosen::RSTransaction>& rSTransaction)
 {
     return -1;
 }
