@@ -88,7 +88,23 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
-            thisSerializer.writeLength(value_value)
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as number
+                thisSerializer.writeNumber(value_value_0)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as string
+                thisSerializer.writeString(value_value_1)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as Resource
+                thisSerializer.writeResource(value_value_2)
+            }
         }
         ArkUIGeneratedNativeModule._MarqueeAttribute_fontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
