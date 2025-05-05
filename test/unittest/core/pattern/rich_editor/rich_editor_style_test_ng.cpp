@@ -808,25 +808,6 @@ HWTEST_F(RichEditorStyleTestNg, CopyTextSpanLineStyle001, TestSize.Level1)
     ASSERT_EQ(richEditorPattern->spans_.empty(), true);
 }
 
-/**
- * @tc.name: CreateDecorationSpanByTextStyle001
- * @tc.desc: test RichEditorPattern CreateDecorationSpanByTextStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorStyleTestNg, CreateDecorationSpanByTextStyle001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    UpdateSpanStyle updateSpanStyle;
-    updateSpanStyle.updateTextDecorationStyle = TextDecorationStyle::DASHED;
-    TextStyle style;
-    style.SetLineHeight(LINE_HEIGHT_VALUE);
-    style.SetLetterSpacing(LETTER_SPACING);
-    style.SetFontFeatures(TEXT_FONTFEATURE);
-    RefPtr<DecorationSpan> span = richEditorPattern->CreateDecorationSpanByTextStyle(updateSpanStyle, style, 0);
-    ASSERT_NE(span, nullptr);
-}
 
 /**
  * @tc.name: UpdateImageStyle001

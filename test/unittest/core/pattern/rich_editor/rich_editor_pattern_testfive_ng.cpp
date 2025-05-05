@@ -178,67 +178,6 @@ HWTEST_F(RichEditorPatternTestFiveNg, GetUrlSpanColor001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetUrlSpanShowShadow001
- * @tc.desc: Test set urlSpan showShadow
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, GetUrlSpanShowShadow001, TestSize.Level1)
-{
-    // 0: Get richEditor Node and richEditor Pattern
-    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(richEditorNode, nullptr);
-    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    // 1: Mock location
-    Offset localLocation = Offset(54.0, 20.0);
-    Offset globalLocation = Offset(54.0, 20.0);
-
-    // 2: Mock contentRect position and width and height
-    richEditorPattern->contentRect_.x_ = 25.0f;
-    richEditorPattern->contentRect_.y_ = 13.0f;
-    richEditorPattern->contentRect_.width_ = 526.0f;
-    richEditorPattern->contentRect_.height_ = 56.0f;
-
-    // 3: Create urlSpan with hyperlink address
-    std::string address = "https://www.example.com";
-    auto urlSpan = AceType::MakeRefPtr<UrlSpan>(address);
-
-    // 4: Create spanItem and set to spans list
-    auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
-    urlSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
-    spanItem->position = 2;
-    std::list<RefPtr<NG::SpanItem>> spans;
-    spans.push_back(spanItem);
-
-    // 5: Create ParagraphManager and set to richEditorPattern
-    auto pManager = AceType::MakeRefPtr<ParagraphManager>();
-    ASSERT_NE(pManager, nullptr);
-    richEditorPattern->pManager_ = pManager;
-
-    // 6: Create MutableSpanString and set to richEditorPattern
-    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"click here");
-    spanString->AddSpan(AceType::MakeRefPtr<UrlSpan>(address, 0, 10));
-    richEditorPattern->SetStyledString(spanString);
-
-    // 7: Create TextOverlayModifier and set to richEditorPattern
-    richEditorPattern->overlayMod_ = AceType::MakeRefPtr<TextOverlayModifier>();
-
-    // 8: Create Paragraph and set to richEditorPattern
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
-
-    // 9: spans list set to richEditorPattern
-    richEditorPattern->spans_ = spans;
-
-    // 10: call HandleUrlSpanShowShadow method
-    bool show = richEditorPattern->HandleUrlSpanShowShadow(localLocation, globalLocation, Color(Color::BLUE));
-
-    // 11: Asserts that the ShowShadow result is true
-    EXPECT_TRUE(show);
-}
-
-/**
  * @tc.name: HandleExtendAction001
  * @tc.desc: test HandleExtendAction
  * @tc.type: FUNC

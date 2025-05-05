@@ -409,8 +409,10 @@ HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset002, TestSize.Level1)
     /**
      * @tc.steps: step1. init and call function.
     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    auto richEditorNode = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StyledStringRichEditorPattern>(); });
+    auto richEditorPattern = richEditorNode->GetPattern<StyledStringRichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
     EXPECT_NE(richEditorPattern->contentMod_, nullptr);

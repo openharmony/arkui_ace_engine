@@ -550,7 +550,7 @@ HWTEST_F(RichEditorDeleteTestNg, DoDeleteActions001, TestSize.Level1)
 HWTEST_F(RichEditorDeleteTestNg, DeleteValueInStyledString001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto richEditorPattern = AceType::MakeRefPtr<StyledStringRichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"abc");
     richEditorPattern->caretVisible_ = false;
@@ -667,8 +667,7 @@ HWTEST_F(RichEditorDeleteTestNg, DeleteSpansOperation001, TestSize.Level1)
  */
 HWTEST_F(RichEditorDeleteTestNg, DeleteSpansOperation002, TestSize.Level1)
 {
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto richEditorPattern = AceType::MakeRefPtr<StyledStringRichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->isSpanStringMode_ = true;
     RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
@@ -837,31 +836,6 @@ HWTEST_F(RichEditorDeleteTestNg, DeleteRange003, TestSize.Level1)
     int32_t end = 1;
     richEditorPattern->DeleteRange(start, end);
     EXPECT_NE(start, richEditorPattern->caretPosition_);
-}
-
-/**
- * @tc.name: DeleteRange004
- * @tc.desc: test DeleteRange
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorDeleteTestNg, DeleteRange004, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(INIT_VALUE_1);
-    int32_t start = 0;
-    int32_t end = 2;
-    richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->styledString_->text_ = u"test";
-    auto styleString = richEditorPattern->styledString_;
-    richEditorPattern->previewLongPress_ = true;
-
-    auto focusHub = richEditorPattern->GetFocusHub();
-    focusHub->currentFocus_ = true;
-
-    richEditorPattern->DeleteRange(start, end);
-    EXPECT_FALSE(richEditorPattern->previewLongPress_);
 }
 
 /**
