@@ -45,29 +45,22 @@ public:
     void SetOnChangeCallback();
     void SetToolbarBuilder(const RefPtr<FrameNode>& parent, std::function<RefPtr<UINode>()>& builder);
     void OnToolBarLayoutChange();
+    void AdjustNavDestRowWidth();
+    void AdjustContainerModalTitleHeight();
 
     bool GetNavOrSideBarNodes();
     void ToInitNavOrSideBarNode();
-
-    void SetExpandStackLayout(bool isExpand)
-    {
-        CHECK_NULL_VOID(toolbarManager_);
-        toolbarManager_->SetIsMoveUp(isExpand);
-    }
-    bool GetExpandStackLayout() const
-    {
-        return toolbarManager_->GetIsMoveUp();
-    }
 
     void UpdateSideTitleBgColor(
         const Color& sideBarColor, const Color& sideBarContainerColor, const BlurStyle& blurStyle);
     void UpdateTargetNodesBarMargin(bool reset = false);
     void ExpandStackNodeLayout(bool reset = false);
-    void ResetExpandStackNode(bool changeToFloating = false);
+    void ResetExpandStackNode();
     void SetIsFloatingMode(bool isFloatingMode)
     {
         isFloatingMode_ = isFloatingMode;
     }
+
 protected:
     void UpdateTitleAfterRemove();
     void RemoveToolbarItem(const RefPtr<FrameNode>& frameNode);
@@ -93,9 +86,8 @@ private:
     void AddRightNavDestRow();
     void RemoveToolbarRowContainers();
 
+    void AdjustTitleNodeWidth();
     void AdjustNavbarRowWidth();
-    void AdjustNavDestRowWidth();
-    void AdjustContainerModalTitleHeight();
     void SetcustomTitleRowBlurStyle(BlurStyle& blurStyle);
     void UpdateSidebarMargin();
     void UpdateNavbarTitlebarMargin();
@@ -138,7 +130,6 @@ private:
     WeakPtr<FrameNode> navDestNode_;
     bool hasNavOrSideBarNodes_ = false;
     bool hasSetOnchangeCallback_ = false;
-    bool isSafeAreaOn_ = false;
 
     bool isFloatingMode_ = false;
     bool hasSetUpdateSideTitleBgColor_ = false;

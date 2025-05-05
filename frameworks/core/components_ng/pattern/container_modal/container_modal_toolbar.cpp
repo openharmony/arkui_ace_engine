@@ -45,6 +45,10 @@ namespace {
 constexpr float TITLE_ITEM_HEIGT_S = 56.0; // 56vp height of title
 constexpr float TITLE_ITEM_HEIGT_M = 64.0; // 64vp height of title
 constexpr float TITLE_ITEM_HEIGT_L = 72.0; // 72vp height of title
+constexpr float ROW_MARGIN = 4.0;
+constexpr float ROW_TOTAL_MARGIN = 8.0;
+constexpr uint32_t TITLE_MGR_CALLBACK_ID = 0;
+constexpr uint32_t FLOATING_TITLE_MGR_CALLBACK_ID = 1;
 } // namespace
 
 void ContainerModalToolBar::InitToolBarManager()
@@ -86,10 +90,8 @@ void ContainerModalToolBar::SetOnChangeCallback()
 void ContainerModalToolBar::SetToolbarBuilder(const RefPtr<FrameNode>& parent, std::function<RefPtr<UINode>()>& builder)
 {
     CHECK_NULL_VOID(parent);
-    if (builder == nullptr) {
-        RemoveToolbarItem(parent);
-        return;
-    }
+    RemoveToolbarItem(parent);
+    CHECK_NULL_VOID(builder);
     auto nodes = builder();
     CHECK_NULL_VOID(nodes);
     auto it = itemsWillOnTree_.find(parent);
@@ -107,7 +109,8 @@ void ContainerModalToolBar::SetToolbarBuilder(const RefPtr<FrameNode>& parent, s
         CHECK_NULL_VOID(frameNode);
         toolbar->RemoveToolbarItem(frameNode);
     };
-    parent->RemoveToolbarItemCallback(std::move(callback));
+    parent->SetRemoveToolbarItemCallback(
+        isFloating_ ? FLOATING_TITLE_MGR_CALLBACK_ID : TITLE_MGR_CALLBACK_ID, std::move(callback));
     InitToolBarManager();
     SetOnChangeCallback();
     auto pattern = pattern_.Upgrade();
@@ -124,10 +127,6 @@ void ContainerModalToolBar::SetToolbarBuilder(const RefPtr<FrameNode>& parent, s
             } else {
                 return;
             }
-        }
-        auto frameNode = frame.Upgrade();
-        if (frameNode) {
-            toolbar->RemoveToolbarItem(frameNode);
         }
         toolbar->ParsePlacementType();
     });
@@ -418,6 +417,11 @@ void ContainerModalToolBar::AddLeftNavRow()
             leftNavRow_ = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
                 MakeRefPtr<LinearLayoutPattern>(false));
             leftNavRow_->UpdateInspectorId("LeftNavRow");
+            auto layout = leftNavRow_->GetLayoutProperty<LinearLayoutProperty>();
+            CHECK_NULL_VOID(layout);
+            MarginProperty margin;
+            margin.SetEdges(CalcLength(Dimension(ROW_MARGIN, DimensionUnit::VP)));
+            layout->UpdateMargin(margin);
             navbarRow_->AddChild(leftNavRow_, 0);
             leftNavRow_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         }
@@ -437,6 +441,9 @@ void ContainerModalToolBar::AddRightNavRow()
             navbarRow_->AddChild(rightNavRow_);
             auto layout = rightNavRow_->GetLayoutProperty<LinearLayoutProperty>();
             CHECK_NULL_VOID(layout);
+            MarginProperty margin;
+            margin.SetEdges(CalcLength(Dimension(ROW_MARGIN, DimensionUnit::VP)));
+            layout->UpdateMargin(margin);
             layout->UpdateMainAxisAlign(FlexAlign::FLEX_END);
             rightNavRow_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         }
@@ -475,6 +482,11 @@ void ContainerModalToolBar::AddLeftNavDestRow()
             leftNavDestRow_ = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG,
                 ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<LinearLayoutPattern>(false));
             leftNavDestRow_->UpdateInspectorId("LeftNavDest");
+            auto layout = leftNavDestRow_->GetLayoutProperty<LinearLayoutProperty>();
+            CHECK_NULL_VOID(layout);
+            MarginProperty margin;
+            margin.SetEdges(CalcLength(Dimension(ROW_MARGIN, DimensionUnit::VP)));
+            layout->UpdateMargin(margin);
             navDestbarRow_->AddChild(leftNavDestRow_, 0);
             leftNavDestRow_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         }
@@ -494,6 +506,9 @@ void ContainerModalToolBar::AddRightNavDestRow()
             navDestbarRow_->AddChild(rightNavDestRow_);
             auto layout = rightNavDestRow_->GetLayoutProperty<LinearLayoutProperty>();
             CHECK_NULL_VOID(layout);
+            MarginProperty margin;
+            margin.SetEdges(CalcLength(Dimension(ROW_MARGIN, DimensionUnit::VP)));
+            layout->UpdateMargin(margin);
             layout->UpdateMainAxisAlign(FlexAlign::FLEX_END);
             rightNavDestRow_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         }
@@ -540,6 +555,7 @@ void ContainerModalToolBar::OnToolBarLayoutChange()
     if (!toolbarManager_) {
         return;
     }
+    AdjustTitleNodeWidth();
     if (toolbarManager_->GetNavBarInfo().isShow) {
         AdjustNavbarRowWidth();
     }
@@ -548,34 +564,70 @@ void ContainerModalToolBar::OnToolBarLayoutChange()
     }
 }
 
+void ContainerModalToolBar::AdjustTitleNodeWidth()
+{
+    auto sideBarInfo = toolbarManager_->GetSideBarInfo();
+    float titleNodeWidth = sideBarInfo.isShow ? sideBarInfo.width : 0;
+
+    auto titleNode = AceType::DynamicCast<FrameNode>(title_->GetChildren().front());
+    CHECK_NULL_VOID(titleNode);
+
+    auto titleNodeProperty = titleNode->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(titleNodeProperty);
+    titleNodeProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+
+    auto renderContext = titleNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetClipToFrame(true);
+
+    titleNodeProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(titleNodeWidth), CalcLength(1.0, DimensionUnit::PERCENT)));
+    titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+}
+
 void ContainerModalToolBar::AdjustNavbarRowWidth()
 {
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+
     auto sideBarInfo = toolbarManager_->GetSideBarInfo();
     auto sideBarDividerInfo = toolbarManager_->GetSideBarDividerInfo();
     auto navbarInfo = toolbarManager_->GetNavBarInfo();
     auto navbarDividerInfo = toolbarManager_->GetNavBarDividerInfo();
-
-    float titleNodeWidth = sideBarInfo.isShow ? sideBarInfo.width : 0;
-    auto titleNode = AceType::DynamicCast<FrameNode>(title_->GetChildren().front());
-    CHECK_NULL_VOID(titleNode);
-    auto titleNodeProperty = titleNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(titleNodeProperty);
-    titleNodeProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    auto renderContext = titleNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->SetClipToFrame(true);
-    titleNodeProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(titleNodeWidth), CalcLength(1.0, DimensionUnit::PERCENT)));
-    titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-    titleNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto navDestInfo = toolbarManager_->GetNavDestInfo();
+    auto controlButtonsWidth = pattern->GetControlButtonRowWidth();
+    float navbarRowWidth = 0.0f;
 
     if (navbarInfo.isShow && navbarRow_) {
         auto navbarRowProperty = navbarRow_->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_VOID(navbarRowProperty);
-        navbarRowProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(navbarInfo.width), std::nullopt));
+        if (navDestInfo.isShow && LessOrEqual(navDestInfo.width, controlButtonsWidth.GetDimension().ConvertToPx())) {
+            navbarRowWidth = navDestInfo.width + navbarInfo.width - controlButtonsWidth.GetDimension().ConvertToPx();
+        } else {
+            navbarRowWidth = navbarInfo.width;
+        }
+        navbarRowProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(navbarRowWidth), std::nullopt));
+        auto isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
         MarginProperty navbarRowMargin;
-        navbarRowMargin.left = sideBarInfo.isShow ? CalcLength(sideBarDividerInfo.width) : CalcLength(0);
-        navbarRowMargin.right = CalcLength(navbarDividerInfo.width);
+        if (isRtl) {
+            if (navDestInfo.isShow &&
+                LessOrEqual(navDestInfo.width, controlButtonsWidth.GetDimension().ConvertToPx())) {
+                navbarRowMargin.left = CalcLength(controlButtonsWidth.GetDimension().ConvertToPx());
+                navbarRowMargin.right = sideBarInfo.isShow ? CalcLength(sideBarDividerInfo.width) : CalcLength(0);
+            } else {
+                navbarRowMargin.left = CalcLength(navbarDividerInfo.width);
+                navbarRowMargin.right = sideBarInfo.isShow ? CalcLength(sideBarDividerInfo.width) : CalcLength(0);
+            }
+        } else {
+            if (navDestInfo.isShow &&
+                LessOrEqual(navDestInfo.width, controlButtonsWidth.GetDimension().ConvertToPx())) {
+                navbarRowMargin.left = sideBarInfo.isShow ? CalcLength(sideBarDividerInfo.width) : CalcLength(0);
+                navbarRowMargin.right = CalcLength(controlButtonsWidth.GetDimension().ConvertToPx());
+            } else {
+                navbarRowMargin.left = sideBarInfo.isShow ? CalcLength(sideBarDividerInfo.width) : CalcLength(0);
+                navbarRowMargin.right = CalcLength(navbarDividerInfo.width);
+            }
+        }
         navbarRowProperty->UpdateMargin(navbarRowMargin);
         navbarRow_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         navbarRowProperty->UpdateVisibility(
@@ -588,6 +640,7 @@ void ContainerModalToolBar::AdjustNavDestRowWidth()
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
 
+    CHECK_NULL_VOID(toolbarManager_);
     auto sideBarInfo = toolbarManager_->GetSideBarInfo();
     auto sideBarDividerInfo = toolbarManager_->GetSideBarDividerInfo();
     auto navbarInfo = toolbarManager_->GetNavBarInfo();
@@ -613,9 +666,15 @@ void ContainerModalToolBar::AdjustNavDestRowWidth()
         } else {
             navDestbarRowLeftMargin = sideBarDividerInfo.width + navbarInfo.width + navbarDividerInfo.width;
         }
+        auto isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
         MarginProperty navDestbarRowMargin;
-        navDestbarRowMargin.left = CalcLength(navDestbarRowLeftMargin);
-        navDestbarRowMargin.right = CalcLength(controlButtonsWidth.GetDimension().ConvertToPx());
+        if (isRtl) {
+            navDestbarRowMargin.left = CalcLength(controlButtonsWidth.GetDimension().ConvertToPx());
+            navDestbarRowMargin.right = CalcLength(navDestbarRowLeftMargin);
+        } else {
+            navDestbarRowMargin.left = CalcLength(navDestbarRowLeftMargin);
+            navDestbarRowMargin.right = CalcLength(controlButtonsWidth.GetDimension().ConvertToPx());
+        }
         navDestbarRowProperty->UpdateMargin(navDestbarRowMargin);
         navDestbarRow_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         navDestbarRowProperty->UpdateVisibility(
@@ -635,14 +694,14 @@ void ContainerModalToolBar::AdjustContainerModalTitleHeight()
         return;
     }
 
+    auto rowHeight = toolbarItemMaxHeight_ + ROW_TOTAL_MARGIN;
     if (NearEqual(toolbarItemMaxHeight_, 0.0f)) {
         pattern->titleHeight_ = CONTAINER_TITLE_HEIGHT;
-    } else if (LessOrEqual(toolbarItemMaxHeight_, TITLE_ITEM_HEIGT_S)) {
+    } else if (LessOrEqual(rowHeight, TITLE_ITEM_HEIGT_S)) {
         pattern->titleHeight_ = Dimension(TITLE_ITEM_HEIGT_S, DimensionUnit::VP);
-    } else if (GreatNotEqual(toolbarItemMaxHeight_, TITLE_ITEM_HEIGT_S) &&
-               LessOrEqual(toolbarItemMaxHeight_, TITLE_ITEM_HEIGT_M)) {
+    } else if (GreatNotEqual(rowHeight, TITLE_ITEM_HEIGT_S) && LessOrEqual(rowHeight, TITLE_ITEM_HEIGT_M)) {
         pattern->titleHeight_ = Dimension(TITLE_ITEM_HEIGT_M, DimensionUnit::VP);
-    } else if (GreatNotEqual(toolbarItemMaxHeight_, TITLE_ITEM_HEIGT_M)) {
+    } else if (GreatNotEqual(rowHeight, TITLE_ITEM_HEIGT_M)) {
         pattern->titleHeight_ = Dimension(TITLE_ITEM_HEIGT_L, DimensionUnit::VP);
     }
     pattern->SetContainerModalTitleHeight(pattern->titleHeight_.ConvertToPx());
@@ -901,13 +960,24 @@ void ContainerModalToolBar::UpdateNavDestinationTitlebarMargin()
 {
     CHECK_NULL_VOID(toolbarManager_);
     if (toolbarManager_->GetIsMoveUp()) {
-        auto navgationContentNode = toolbarManager_->GetNavDest().Upgrade();
-        CHECK_NULL_VOID(navgationContentNode);
-        auto navDestFrameNode = AceType::DynamicCast<FrameNode>(navgationContentNode->GetChildren().front());
-        CHECK_NULL_VOID(navDestFrameNode);
-        navDestFrameNode->MarkDirtyNode(
+        auto navigationContentNode = toolbarManager_->GetNavDest().Upgrade();
+        CHECK_NULL_VOID(navigationContentNode);
+        auto navigationFrameNode = AceType::DynamicCast<FrameNode>(navigationContentNode->GetParent());
+        CHECK_NULL_VOID(navigationFrameNode);
+        auto navigationPattern = navigationFrameNode->GetPattern<NG::NavigationPattern>();
+        CHECK_NULL_VOID(navigationPattern);
+        auto navigationStack = navigationPattern->GetNavigationStack();
+        CHECK_NULL_VOID(navigationStack);
+        auto topNavDestinationNode = navigationStack->GetTopNavPath();
+        if (!topNavDestinationNode.has_value()) {
+            return;
+        }
+        auto navDestinationNode = AceType::DynamicCast<NG::NavDestinationGroupNode>(
+            NG::NavigationGroupNode::GetNavDestinationNode(topNavDestinationNode->second));
+        CHECK_NULL_VOID(navDestinationNode);
+        navDestinationNode->MarkDirtyNode(
             PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_RENDER | PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-            navDestFrameNode->MarkModifyDone();
+        navDestinationNode->MarkModifyDone();
         isUpdateTargetNode_ = true;
     }
 }
@@ -919,34 +989,25 @@ void ContainerModalToolBar::UpdateTargetNodesBarMargin(bool reset)
     }
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
-    if (!isSafeAreaOn_ && pattern->GetIsHaveToolBar() && pattern->IsContainerModalTransparent() && !isFloatingMode_) {
-        ExpandStackNodeLayout();
-        BlurStyle blurStyle = BlurStyle::THIN;
-        SetcustomTitleRowBlurStyle(blurStyle);
-        SetExpandStackLayout(true);
-    }
-
-    if (reset && !isUpdateTargetNode_) {
-        return;
-    }
     if (reset) {
+        if (!isUpdateTargetNode_) {
+            return;
+        }
         toolbarManager_->SetTitleHeight(Dimension(0.0f));
     } else {
+        if (!isUpdateTargetNode_ && pattern->GetIsHaveToolBar() && pattern->IsContainerModalTransparent() &&
+            !isFloatingMode_) {
+            ExpandStackNodeLayout();
+            BlurStyle blurStyle = BlurStyle::THIN;
+            SetcustomTitleRowBlurStyle(blurStyle);
+            toolbarManager_->SetIsMoveUp(true);
+        }
         toolbarManager_->SetTitleHeight(pattern->titleHeight_);
     }
-    if (toolbarManager_->HasNavDest()) {
-        UpdateNavDestinationTitlebarMargin();
-    }
-    if (toolbarManager_->HasNavBar()) {
-        UpdateNavbarTitlebarMargin();
-    }
-    if (toolbarManager_->HasSideBar()) {
-        UpdateSidebarMargin();
-    }
-    auto stackNode = pattern->GetStackNode();
-    CHECK_NULL_VOID(stackNode);
-    stackNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_RENDER | PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-    stackNode->MarkModifyDone();
+
+    UpdateNavDestinationTitlebarMargin();
+    UpdateNavbarTitlebarMargin();
+    UpdateSidebarMargin();
 }
 
 void ContainerModalToolBar::ExpandStackNodeLayout(bool reset)
@@ -964,9 +1025,8 @@ void ContainerModalToolBar::ExpandStackNodeLayout(bool reset)
         auto titleRenderContext = title_->GetRenderContext();
         CHECK_NULL_VOID(titleRenderContext);
         titleRenderContext->ResetBackBlurStyle();
-        auto zIndex = titleRenderContext->GetZIndexValue(ZINDEX_DEFAULT_VALUE);
-        renderContext->UpdatePosition(OffsetT(Dimension(0.0f), Dimension(pattern->titleHeight_)));
-        renderContext->UpdateZIndex(zIndex);
+        renderContext->ResetPosition();
+        renderContext->ResetZIndex();
         auto titleNode = AceType::DynamicCast<FrameNode>(title_->GetChildren().front());
         CHECK_NULL_VOID(titleNode);
         auto titleNodeCtx = titleNode->GetRenderContext();
@@ -976,22 +1036,22 @@ void ContainerModalToolBar::ExpandStackNodeLayout(bool reset)
     } else {
         renderContext->UpdatePosition(OffsetT(Dimension(0.0f), Dimension(0.0f)));
         renderContext->UpdateZIndex(-1);
-        stackLayoutProperty->UpdateUserDefinedIdealSize(
-            CalcSize(std::nullopt, CalcLength(1.0, DimensionUnit::PERCENT)));
     }
+    auto columnNode = pattern->GetColumnNode();
+    CHECK_NULL_VOID(columnNode);
+    columnNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_RENDER | PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    columnNode->MarkModifyDone();
 }
 
-void ContainerModalToolBar::ResetExpandStackNode(bool changeToFloating)
+void ContainerModalToolBar::ResetExpandStackNode()
 {
-    if (!isSafeAreaOn_ || isFloating_ || !toolbarManager_) {
+    if (!isUpdateTargetNode_ || isFloating_ || !toolbarManager_) {
         return;
     }
     UpdateTargetNodesBarMargin(true);
     isUpdateTargetNode_ = false;
-    SetExpandStackLayout(false);
-    if (!changeToFloating) {
-        ExpandStackNodeLayout(true);
-    }
+    toolbarManager_->SetIsMoveUp(false);
+    ExpandStackNodeLayout(true);
 }
 
 } // namespace OHOS::Ace::NG

@@ -967,5 +967,13 @@ void ContainerModalPatternEnhance::NotifyButtonsRectChange(const RectF& containe
             pair.second(containerModal, buttonsRect);
         }
     }
+
+    if (titleMgr_ != nullptr) {
+        titleMgr_->AdjustNavDestRowWidth();
+    }
+
+    if (floatTitleMgr_ != nullptr) {
+        floatTitleMgr_->AdjustNavDestRowWidth();
+    }
 }
 } // namespace OHOS::Ace::NG

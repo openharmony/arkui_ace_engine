@@ -1347,9 +1347,10 @@ public:
     void AddVisibilityDumpInfo(const std::pair<uint64_t, std::pair<VisibleType, bool>>& dumpInfo);
 
     std::string PrintVisibilityDumpInfo() const;
-    void RemoveToolbarItemCallback(std::function<void()>&& callback)
+    
+    void SetRemoveToolbarItemCallback(uint32_t id, std::function<void()>&& callback)
     {
-        removeToolbarItemCallbacks_.emplace_back(std::move(callback));
+        removeToolbarItemCallbacks_[id] = callback;
     }
 
     int32_t OnRecvCommand(const std::string& command) override;
@@ -1662,7 +1663,7 @@ private:
     RefPtr<Kit::FrameNode> kitNode_;
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);
 
-    std::list<std::function<void()>> removeToolbarItemCallbacks_;
+    std::unordered_map<uint32_t, std::function<void()>> removeToolbarItemCallbacks_;
 
     RefPtr<FrameNode> cornerMarkNode_ = nullptr;
 };

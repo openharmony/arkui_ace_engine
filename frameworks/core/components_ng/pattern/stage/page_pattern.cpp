@@ -1067,10 +1067,10 @@ WeakPtr<FocusHub> PagePattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     auto toolBarRowFocusHub = toolBarRow->GetFocusHub();
     CHECK_NULL_RETURN(toolBarRowFocusHub, nullptr);
 
-    if (step == FocusStep::UP || step == FocusStep::TAB) {
+    if (step == FocusStep::UP) {
         return toolBarRowFocusHub->GetHeadOrTailChild(true);
-    } else if (step == FocusStep::SHIFT_TAB) {
-        return toolBarRowFocusHub->GetHeadOrTailChild(false);
+    } else if (step == FocusStep::TAB || step == FocusStep::SHIFT_TAB) {
+        return toolBarRowFocusHub;
     }
     return nullptr;
 }
@@ -1086,6 +1086,11 @@ ScopeFocusAlgorithm PagePattern::GetScopeFocusAlgorithm()
     CHECK_NULL_RETURN(container && container->GetTag() == V2::CONTAINER_MODAL_ETS_TAG, focusAlgorithm);
     auto pattern = container->GetPattern<NG::ContainerModalPattern>();
     CHECK_NULL_RETURN(pattern && pattern->GetIsHaveToolBar(), focusAlgorithm);
+    auto toolBarRow = pattern->GetCustomTitleRow();
+    CHECK_NULL_RETURN(toolBarRow, focusAlgorithm);
+    auto toolBarRowFocusHub = toolBarRow->GetFocusHub();
+    CHECK_NULL_RETURN(toolBarRowFocusHub, focusAlgorithm);
+    CHECK_NULL_RETURN(toolBarRowFocusHub->GetHeadOrTailChild(true), focusAlgorithm);
     focusAlgorithm.getNextFocusNode = [wp = WeakClaim(this)](FocusStep step, const WeakPtr<FocusHub>& currFocusNode,
                                           WeakPtr<FocusHub>& nextFocusNode) -> bool {
         auto page = wp.Upgrade();

@@ -51,48 +51,30 @@ WeakPtr<FocusHub> ToolBarRowPattern::GetNextFocusNode(FocusStep step, const Weak
     CHECK_NULL_RETURN(page, nullptr);
     auto pageFocusHub = page->GetFocusHub();
     CHECK_NULL_RETURN(pageFocusHub, nullptr);
-
     auto toolBarRow = pattern->GetCustomTitleRow();
     CHECK_NULL_RETURN(toolBarRow, nullptr);
-    auto toolBarRowFocusHub = toolBarRow->GetFocusHub();
-    CHECK_NULL_RETURN(toolBarRowFocusHub, nullptr);
-
     auto leftRow = AceType::DynamicCast<FrameNode>(toolBarRow->GetChildAtIndex(1));
     auto rightRow = AceType::DynamicCast<FrameNode>(toolBarRow->GetChildAtIndex(2));
-
     RefPtr<FocusHub> nextFocusNode = nullptr;
     bool isHead = true;
-
     if (step == FocusStep::DOWN) {
-        GetCurrentFocusView()->FocusViewClose();
         return pageFocusHub->GetHeadOrTailChild(true);
     }
-
     if ((step == FocusStep::TAB || step == FocusStep::RIGHT) && rightRow) {
         isHead = true;
-        auto rightRowFocusHub = rightRow->GetFocusHub();
-        nextFocusNode = rightRowFocusHub->GetHeadOrTailChild(true);
+        nextFocusNode = rightRow->GetFocusHub();
     } else if ((step == FocusStep::SHIFT_TAB || step == FocusStep::LEFT) && leftRow) {
         isHead = false;
-        auto leftRowFocusHub = leftRow->GetFocusHub();
-        nextFocusNode = leftRowFocusHub->GetHeadOrTailChild(true);
+        nextFocusNode = leftRow->GetFocusHub();
     }
-
     if (!nextFocusNode && (step == FocusStep::TAB || step == FocusStep::SHIFT_TAB)) {
-        return pageFocusHub->GetHeadOrTailChild(isHead);
+        return pageFocusHub;
     }
-
-    if (nextFocusNode && (step == FocusStep::TAB || step == FocusStep::SHIFT_TAB)) {
-        if (!nextFocusNode->IsCurrentFocus()) {
+    if (nextFocusNode) {
+        if (!nextFocusNode->IsCurrentFocus() && nextFocusNode->GetHeadOrTailChild(isHead)) {
             return nextFocusNode;
-        } else {
-            GetCurrentFocusView()->FocusViewClose();
-            return pageFocusHub->GetHeadOrTailChild(isHead);
-        }
-    }
-    if (nextFocusNode && (step == FocusStep::LEFT || step == FocusStep::RIGHT)) {
-        if (!nextFocusNode->IsCurrentFocus()) {
-            return nextFocusNode;
+        } else if (step == FocusStep::TAB || step == FocusStep::SHIFT_TAB) {
+            return pageFocusHub;
         }
     }
     return nullptr;
