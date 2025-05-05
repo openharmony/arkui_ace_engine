@@ -28,6 +28,8 @@ import { nullptr } from "@koalaui/interop"
 import { _animateTo } from "./src/handwritten"
 // import { AnimateParam } from './src/component'
 import { AnimatorResult , AnimatorOptions, Animator} from "@ohos/animator"
+import { Context } from "#external"
+import { ArkUIAniModule } from "arkui.ani"
 
 export class Font {
     instanceId_: int32 = 10001;
@@ -73,7 +75,7 @@ export class MeasureUtils {
 }
 
 export class UIContext {
-    instanceId_: int32 = 10001;
+    instanceId_: int32 = 100000;
     constructor(instanceId: int32) {
         this.instanceId_ = instanceId;
     }
@@ -86,7 +88,6 @@ export class UIContext {
         return measureUtils;
     }
     public getFrameNodeById(id: string): FrameNode | null {
-        console.log(`TODO SHOPPING: @ohos.arkui.UIContext getFrameNodeById`);
         const id_casted = id as (string);
         ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
         const retval  = ArkUIGeneratedNativeModule._FrameNode_getFrameNodeByKey(id_casted);
@@ -98,7 +99,9 @@ export class UIContext {
         ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
         return null;
     }
-
+    getHostContext(): Context | undefined {
+        return ArkUIAniModule._Common_GetHostContext();
+    }
     // public animateTo(param: AnimateParam, event: (() => void)): void {
     //     ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
     //     _animateTo(param, event);

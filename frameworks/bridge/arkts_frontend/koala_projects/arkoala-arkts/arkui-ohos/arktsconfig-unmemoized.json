@@ -49,6 +49,15 @@
             "@ohos/arkui/UIContext": [
                 "../ohos.arkui.UIContext.ts"
             ],
+            "@ohos.arkui.UIContext": [
+                "../ohos.arkui.UIContext.ts"
+            ],
+            "@ohos.arkui.stateManagement": [
+                "./stateManagement/index.ts"
+            ],
+            "@ohos.arkui.node": [
+                "./ohos.arkui.node.ts"
+            ],
             "@ohos/measure": [
                 "../ohos.measure.ts"
             ],
@@ -70,7 +79,7 @@
         "build/unmemoized/ohos.measure.ts",
         "build/unmemoized/ohos.font.ts",
         "build/unmemoized/ohos.animator.ts",
-        "src/ani/**/*.ts",
+        "src/ani/arkts/*.ts",
         "build/unmemoized/ohos.router.ts"
     ],
     "exclude": [

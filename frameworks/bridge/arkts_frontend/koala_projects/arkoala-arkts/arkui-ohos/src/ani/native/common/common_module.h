@@ -13,19 +13,13 @@
  * limitations under the License.
  */
 
-#include "image_ani_modifier.h"
-#include "web_ani_modifier.h"
-#include "common_ani_modifier.h"
+#ifndef KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_COMMON_MODULE
+#define KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_COMMON_MODULE
 
-extern "C" {
-const ArkUIAniModifiers* GetArkUIAniModifiers()
-{
-    static const ArkUIAniModifiers impl = {
-        .version = ARKUI_ANI_API_VERSION,
-        .getImageAniModifier = OHOS::Ace::NG::GetImageAniModifier,
-        .getWebAniModifier = OHOS::Ace::NG::GetWebAniModifier,
-        .getCommonAniModifier = OHOS::Ace::NG::GetCommonAniModifier,
-    };
-    return &impl;
-}
-}
+#include "ani.h"
+
+namespace OHOS::Ace::Ani {
+ani_object GetHostContext([[maybe_unused]] ani_env* env);
+} // namespace OHOS::Ace::Ani
+
+#endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_COMMON_MODULE

@@ -18,6 +18,7 @@
 #include "ani.h"
 #include "load.h"
 
+#include "common_module.h"
 #include "utils/convert_utils.h"
 #include "web_module_methods.h"
 
@@ -69,6 +70,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_ConvertUtils_ConvertToPixelMapAni",
             "J:L@ohos/multimedia/image/image/PixelMap;",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConvertToPixelMapAni)
+        },
+        ani_native_function {
+            "_Common_GetHostContext",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetHostContext)
         }
     };
 

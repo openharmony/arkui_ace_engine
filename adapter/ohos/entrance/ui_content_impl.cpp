@@ -2282,7 +2282,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             pipeline->SetMinPlatformVersion(appInfo->apiCompatibleVersion);
         }
     }
-    if (runtime_ && storageWrapper.napiStorage_.has_value()) {
+    if (runtime_ && storageWrapper.napiStorage_.has_value()) { // 1.1 SetLocalStorage
         auto storage = storageWrapper.napiStorage_.value();
         auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
         if (!storage) {
@@ -2294,10 +2294,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             container->SetLocalStorage(reinterpret_cast<NativeReference*>(ref), context);
         }
     }
-    if (runtime_ && storageWrapper.aniStorage_.has_value()) {
+    if (runtime_ && storageWrapper.aniStorage_.has_value()) { // 1.2 SetAniLocalStorage
         auto storage = storageWrapper.aniStorage_.value();
         if (!storage) {
-            container->SetLocalStorage(nullptr, context);
+            container->SetAniLocalStorage(nullptr, context);
         } else {
             auto* env = reinterpret_cast<ani_env*>(runtime_);
             ani_ref ref;

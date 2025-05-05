@@ -20,6 +20,7 @@
 #include "interfaces/inner_api/ace/constants.h"
 
 #include "bridge/arkts_frontend/arkts_ani_utils.h"
+#include "bridge/arkts_frontend/ani_context_module.h"
 #include "bridge/arkts_frontend/entry/arkts_entry_loader.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -273,5 +274,11 @@ ani_object ArktsFrontend::CallGetUIContextFunc()
         return result;
     }
     return result;
+}
+
+void ArktsFrontend::SetAniContext(int32_t instanceId, ani_ref* context)
+{
+    std::shared_ptr<ani_ref> shared_ptr(context);
+    Framework::AniContextModule::AddAniContext(instanceId, shared_ptr);
 }
 } // namespace OHOS::Ace

@@ -273,6 +273,8 @@ public:
 
     ani_object CallGetUIContextFunc();
 
+    void SetAniContext(int32_t instanceId, ani_ref* context);
+
 private:
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<NG::PipelineContext> pipeline_;

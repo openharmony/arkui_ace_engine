@@ -13,19 +13,24 @@
  * limitations under the License.
  */
 
-#include "image_ani_modifier.h"
-#include "web_ani_modifier.h"
-#include "common_ani_modifier.h"
+#include <memory>
+#include "common_module.h"
 
-extern "C" {
-const ArkUIAniModifiers* GetArkUIAniModifiers()
+#include "load.h"
+
+namespace OHOS::Ace::Ani {
+
+ani_object GetHostContext([[maybe_unused]] ani_env* env)
 {
-    static const ArkUIAniModifiers impl = {
-        .version = ARKUI_ANI_API_VERSION,
-        .getImageAniModifier = OHOS::Ace::NG::GetImageAniModifier,
-        .getWebAniModifier = OHOS::Ace::NG::GetWebAniModifier,
-        .getCommonAniModifier = OHOS::Ace::NG::GetCommonAniModifier,
-    };
-    return &impl;
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return nullptr;
+    }
+    ani_ref* context = modifier->getCommonAniModifier()->getHostContext();
+    if (context) {
+        ani_object context_object = reinterpret_cast<ani_object>(*context);
+        return context_object;
+    }
+    return nullptr;
 }
-}
+} // namespace OHOS::Ace::Ani

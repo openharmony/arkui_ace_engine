@@ -2287,6 +2287,9 @@ void AceContainer::SetAniLocalStorage(void* storage, const std::shared_ptr<OHOS:
             ReleaseStorageReference(sharedRuntime, storage);
             return;
         }
+        if (contextRef->GetBindingObject() && contextRef->GetBindingObject()->Get<ani_ref>()) {
+            arktsFrontend->SetAniContext(id, contextRef->GetBindingObject()->Get<ani_ref>());
+        }
         arktsFrontend->RegisterLocalStorage(id, storage);
     }, TaskExecutor::TaskType::UI, "ArkUISetAniLocalStorage");
 }
