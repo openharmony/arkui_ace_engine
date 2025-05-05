@@ -35,7 +35,9 @@ const std::string CONVERT_ASTC_FORMAT = "image/astc/4*4";
 const std::string SLASH = "/";
 const std::string BACKSLASH = "\\";
 const mode_t CHOWN_RW_UG = 0660;
+const mode_t DIRECTORY_PERMISSION = 0700;
 const std::string SVG_FORMAT = "image/svg+xml";
+const std::string IMAGE_FILE_CACHE_DIR = "image_file_cache";
 
 bool EndsWith(const std::string& str, const std::string& substr)
 {
@@ -64,7 +66,21 @@ void ImageFileCache::SetImageCacheFilePath(const std::string& cacheFilePath)
 {
     std::unique_lock<std::shared_mutex> lock(cacheFilePathMutex_);
     if (cacheFilePath_.empty()) {
-        cacheFilePath_ = cacheFilePath;
+        cacheFilePath_ = cacheFilePath + SLASH + IMAGE_FILE_CACHE_DIR;
+#ifndef WINDOWS_PLATFORM
+        if (mkdir(cacheFilePath_.c_str(), DIRECTORY_PERMISSION)) {
+#else
+        if (mkdir(cacheFilePath_.c_str())) {
+#endif
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "mkdir cache file path failed.");
+            return;
+        }
+#ifndef WINDOWS_PLATFORM
+        if (chmod(cacheFilePath_.c_str(), DIRECTORY_PERMISSION) != 0) {
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "mkdir cache file path chmod failed.");
+            return;
+        }
+#endif
     }
 }
 
