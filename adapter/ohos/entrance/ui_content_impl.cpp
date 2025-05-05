@@ -1762,6 +1762,10 @@ void UIContentImpl::StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::C
     if (!fontWeightScale.empty()) {
         SystemProperties::SetFontWeightScale(string2float(fontWeightScale));
     }
+    auto deviceType = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::DEVICE_TYPE);
+    if (!deviceType.empty()) {
+        SystemProperties::SetConfigDeviceType(deviceType);
+    }
 }
 
 std::shared_ptr<Rosen::RSSurfaceNode> UIContentImpl::GetFormRootNode()
