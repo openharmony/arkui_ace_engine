@@ -58,16 +58,16 @@ export class VideoController implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._VideoController_getFinalizer()
     }
-    public start(): undefined {
+    public start(): void {
         return this.start_serialize()
     }
-    public pause(): undefined {
+    public pause(): void {
         return this.pause_serialize()
     }
-    public stop(): undefined {
+    public stop(): void {
         return this.stop_serialize()
     }
-    public setCurrentTime(value: number, seekMode?: SeekMode): undefined {
+    public setCurrentTime(value: number, seekMode?: SeekMode): void {
         const value_type = runtimeType(value)
         const seekMode_type = runtimeType(seekMode)
         if (RuntimeType.UNDEFINED == seekMode_type) {
@@ -81,44 +81,44 @@ export class VideoController implements MaterializedBase {
         }
         throw new Error("Can not select appropriate overload")
     }
-    public requestFullscreen(value: boolean): undefined {
+    public requestFullscreen(value: boolean): void {
         const value_casted = value as (boolean)
         return this.requestFullscreen_serialize(value_casted)
     }
-    public exitFullscreen(): undefined {
+    public exitFullscreen(): void {
         return this.exitFullscreen_serialize()
     }
     public reset(): void {
         this.reset_serialize()
         return
     }
-    private start_serialize(): undefined {
+    private start_serialize(): void {
         const retval  = ArkUIGeneratedNativeModule._VideoController_start(this.peer!.ptr)
-        return retval
+        return
     }
-    private pause_serialize(): undefined {
+    private pause_serialize(): void {
         const retval  = ArkUIGeneratedNativeModule._VideoController_pause(this.peer!.ptr)
-        return retval
+        return
     }
-    private stop_serialize(): undefined {
+    private stop_serialize(): void {
         const retval  = ArkUIGeneratedNativeModule._VideoController_stop(this.peer!.ptr)
-        return retval
+        return
     }
-    private setCurrentTime0_serialize(value: number): undefined {
+    private setCurrentTime0_serialize(value: number): void {
         const retval  = ArkUIGeneratedNativeModule._VideoController_setCurrentTime0(this.peer!.ptr, value)
-        return retval
+        return
     }
-    private setCurrentTime1_serialize(value: number, seekMode: SeekMode): undefined {
+    private setCurrentTime1_serialize(value: number, seekMode: SeekMode): void {
         const retval  = ArkUIGeneratedNativeModule._VideoController_setCurrentTime1(this.peer!.ptr, value, TypeChecker.SeekMode_ToNumeric(seekMode))
-        return retval
+        return
     }
-    private requestFullscreen_serialize(value: boolean): undefined {
+    private requestFullscreen_serialize(value: boolean): void {
         const retval  = ArkUIGeneratedNativeModule._VideoController_requestFullscreen(this.peer!.ptr, value ? 1 : 0)
-        return retval
+        return
     }
-    private exitFullscreen_serialize(): undefined {
+    private exitFullscreen_serialize(): void {
         const retval  = ArkUIGeneratedNativeModule._VideoController_exitFullscreen(this.peer!.ptr)
-        return retval
+        return
     }
     private reset_serialize(): void {
         ArkUIGeneratedNativeModule._VideoController_reset(this.peer!.ptr)
@@ -309,7 +309,7 @@ export class ArkVideoPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._VideoAttribute_onError(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    onStopAttribute(value: (() => void) | undefined): void {
+    onStopAttribute(value: ((value: undefined) => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -431,7 +431,7 @@ export interface VideoAttribute extends CommonMethod {
     onSeeked(value: ((parameter: PlaybackInfo) => void) | undefined): this
     onUpdate(value: ((parameter: PlaybackInfo) => void) | undefined): this
     onError(value: (() => void) | undefined): this
-    onStop(value: (() => void) | undefined): this
+    onStop(value: ((value: undefined) => void) | undefined): this
     enableAnalyzer(value: boolean | undefined): this
     analyzerConfig(value: ImageAnalyzerConfig | undefined): this
     surfaceBackgroundColor(value: ColorMetrics | undefined): this
@@ -467,7 +467,7 @@ export interface UIVideoAttribute extends UICommonMethod {
     /** @memo */
     onError(value: (() => void) | undefined): this
     /** @memo */
-    onStop(value: (() => void) | undefined): this
+    onStop(value: ((value: undefined) => void) | undefined): this
     /** @memo */
     enableAnalyzer(value: boolean | undefined): this
     /** @memo */
@@ -493,7 +493,7 @@ export class ArkVideoStyle extends ArkCommonMethodStyle implements VideoAttribut
     onSeeked_value?: ((parameter: PlaybackInfo) => void) | undefined
     onUpdate_value?: ((parameter: PlaybackInfo) => void) | undefined
     onError_value?: (() => void) | undefined
-    onStop_value?: (() => void) | undefined
+    onStop_value?: ((value: undefined) => void) | undefined
     enableAnalyzer_value?: boolean | undefined
     analyzerConfig_value?: ImageAnalyzerConfig | undefined
     surfaceBackgroundColor_value?: ColorMetrics | undefined
@@ -540,7 +540,7 @@ export class ArkVideoStyle extends ArkCommonMethodStyle implements VideoAttribut
     public onError(value: (() => void) | undefined): this {
         return this
     }
-    public onStop(value: (() => void) | undefined): this {
+    public onStop(value: ((value: undefined) => void) | undefined): this {
         return this
     }
     public enableAnalyzer(value: boolean | undefined): this {
@@ -697,7 +697,7 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements UIVid
         return this
     }
     /** @memo */
-    public onStop(value: (() => void) | undefined): this {
+    public onStop(value: ((value: undefined) => void) | undefined): this {
         if (this.checkPriority("onStop")) {
             const value_casted = value as ((() => void) | undefined)
             this.getPeer()?.onStopAttribute(value_casted)

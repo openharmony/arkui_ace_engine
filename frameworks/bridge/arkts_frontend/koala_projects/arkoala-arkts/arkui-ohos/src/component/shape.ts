@@ -26,7 +26,8 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { ResourceColor, Length } from "./units"
 import { LineCapStyle, LineJoinStyle, Color } from "./enums"
 import { Resource } from "global/resource"
-import { PixelMap } from "./arkui-pixelmap"
+import { PixelMap } from "#external"
+import { ArkUIAniModule } from "arkui.ani"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -43,7 +44,9 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
         return _peer
     }
     setShapeOptions0Attribute(value: PixelMap): void {
-        ArkUIGeneratedNativeModule._ShapeInterface_setShapeOptions0(this.peer.ptr, toPeerPtr(value))
+        let ptr = ArkUIAniModule._ConvertUtils_ConvertFromPixelMapAni(value);
+        const ptr_value = ptr as KPointer;
+        ArkUIGeneratedNativeModule._ShapeInterface_setShapeOptions0(this.peer.ptr, ptr_value)
     }
     setShapeOptions1Attribute(): void {
         ArkUIGeneratedNativeModule._ShapeInterface_setShapeOptions1(this.peer.ptr)
@@ -333,7 +336,7 @@ export interface ShapeAttribute extends CommonMethod {
     fillOpacity(value: number | string | Resource | undefined): this
     strokeWidth(value: number | string | undefined): this
     antiAlias(value: boolean | undefined): this
-    mesh(value: Array<number>, column: number, row: number): this
+    mesh(value: Array<number> | undefined, column: number | undefined, row: number | undefined): this
 }
 export interface UIShapeAttribute extends UICommonMethod {
     /** @memo */
@@ -361,7 +364,7 @@ export interface UIShapeAttribute extends UICommonMethod {
     /** @memo */
     antiAlias(value: boolean | undefined): this
     /** @memo */
-    mesh(value: Array<number>, column: number, row: number): this
+    mesh(value: Array<number> | undefined, column: number | undefined, row: number | undefined): this
     /** @memo */
 }
 export class ArkShapeStyle extends ArkCommonMethodStyle implements ShapeAttribute {
@@ -413,7 +416,7 @@ export class ArkShapeStyle extends ArkCommonMethodStyle implements ShapeAttribut
     public antiAlias(value: boolean | undefined): this {
         return this
     }
-    public mesh(value: Array<number>, column: number, row: number): this {
+    public mesh(value: Array<number> | undefined, column: number | undefined, row: number | undefined): this {
         return this
         }
 }
@@ -425,8 +428,14 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements UISha
     /** @memo */
     public setShapeOptions(value?: PixelMap): this {
         if (this.checkPriority("setShapeOptions")) {
+            const value_casted = value as (PixelMap | undefined);
             const value_type = runtimeType(value)
-            this.getPeer()?.setShapeOptions1Attribute()
+            if ((RuntimeType.UNDEFINED) != (value_type)) {
+                const pixelMap = value_casted as PixelMap;
+                this.getPeer()?.setShapeOptions0Attribute(pixelMap)
+            } else {
+                this.getPeer()?.setShapeOptions1Attribute()
+            }
             return this
         }
         return this
@@ -540,7 +549,10 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements UISha
         return this
     }
     /** @memo */
-    public mesh(value: Array<number>, column: number, row: number): this {
+    public mesh(value: Array<number> | undefined, column: number | undefined, row: number | undefined): this {
+        if (value == undefined || column == undefined || row == undefined) {
+            return this;
+        }
         if (this.checkPriority("mesh")) {
             const value_casted = value as (Array<number>)
             const column_casted = column as (number)

@@ -720,15 +720,15 @@ export class ArkCanvasComponent extends ArkCommonMethodComponent implements UICa
         if (this.checkPriority("setCanvasOptions")) {
             const context_type = runtimeType(context)
             const imageAIOptions_type = runtimeType(imageAIOptions)
+            if ((RuntimeType.OBJECT == context_type) || (RuntimeType.OBJECT == context_type) || (RuntimeType.UNDEFINED == context_type)) {
+                const context_casted = context as (CanvasRenderingContext2D | DrawingRenderingContext | undefined)
+                this.getPeer()?.setCanvasOptions0Attribute(context_casted)
+                return this
+            }
             if ((TypeChecker.isCanvasRenderingContext2D(context, false, false, false)) || (TypeChecker.isDrawingRenderingContext(context, false, false))) {
                 const context_casted = context as (CanvasRenderingContext2D | DrawingRenderingContext)
                 const imageAIOptions_casted = imageAIOptions as (ImageAIOptions)
                 this.getPeer()?.setCanvasOptions1Attribute(context_casted, imageAIOptions_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == context_type) || (RuntimeType.OBJECT == context_type) || (RuntimeType.UNDEFINED == context_type)) {
-                const context_casted = context as (CanvasRenderingContext2D | DrawingRenderingContext | undefined)
-                this.getPeer()?.setCanvasOptions0Attribute(context_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")

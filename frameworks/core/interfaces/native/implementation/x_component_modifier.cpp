@@ -52,7 +52,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
 #ifdef XCOMPONENT_SUPPORTED
-    auto frameNode = XComponentModelNG::CreateFrameNode(id, std::nullopt, XComponentType::SURFACE, std::nullopt);
+    auto frameNode = XComponentModelNG::CreateFrameNodePeer(id, std::nullopt, XComponentType::SURFACE, std::nullopt);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 #else
@@ -136,7 +136,11 @@ void SetXComponentOptions2Impl(Ark_NativePointer node,
 
 #ifdef WRONG_MERGE
     auto peerPtr = options->controller;
-    XComponentModelNG::SetXComponentController(frameNode, peerPtr->controller);
+    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl>(peerPtr);
+    XComponentModelNG::SetXComponentController(frameNode, peerImpl->controller);
+    XComponentModelNG::SetControllerOnCreated(frameNode, peerImpl->GetOnSurfaceCreatedEvent());
+    XComponentModelNG::SetControllerOnChanged(frameNode, peerImpl->GetOnSurfaceChangedEvent());
+    XComponentModelNG::SetControllerOnDestroyed(frameNode, peerImpl->GetOnSurfaceDestroyedEvent());
 #endif
 #endif // XCOMPONENT_SUPPORTED
 }
@@ -212,7 +216,7 @@ void HdrBrightnessImpl(Ark_NativePointer node,
     #ifdef XCOMPONENT_SUPPORTED
     auto convValue = Converter::OptConvert<float>(*value);
     if (!convValue) {
-        // TODO: Reset value
+        XComponentModelNG::HdrBrightness(frameNode, 1.0f);
         return;
     }
     XComponentModelNG::HdrBrightness(frameNode, *convValue);
