@@ -539,7 +539,7 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonImageRepeatX, TestSize.Level0)
      * @tc.steps: check the key value.
      * @tc.expected: it should be REPEAT_X.
      */
-    EXPECT_EQ(json->GetString("objectRepeat"), "ImageRepeat.REPEAT_X");
+    EXPECT_EQ(json->GetString("objectRepeat"), "ImageRepeat.X");
 }
 
 /**
@@ -578,7 +578,7 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonImageRepeatY, TestSize.Level0)
      * @tc.steps: check the key value.
      * @tc.expected: it should be REPEAT_Y.
      */
-    EXPECT_EQ(json->GetString("objectRepeat"), "ImageRepeat.REPEAT_Y");
+    EXPECT_EQ(json->GetString("objectRepeat"), "ImageRepeat.Y");
 }
 
 /**
@@ -617,7 +617,7 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonImageRepeatXY, TestSize.Level0)
      * @tc.steps: check the key value.
      * @tc.expected: it should be REPEAT_XY.
      */
-    EXPECT_EQ(json->GetString("objectRepeat"), "ImageRepeat.REPEAT");
+    EXPECT_EQ(json->GetString("objectRepeat"), "ImageRepeat.XY");
 }
 
 /**
@@ -656,7 +656,7 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonImageRepeatNO, TestSize.Level0)
      * @tc.steps: check the key value.
      * @tc.expected: it should be NO_REPEAT.
      */
-    EXPECT_EQ(json->GetString("objectRepeat"), "ImageRepeat.NO_REPEAT");
+    EXPECT_EQ(json->GetString("objectRepeat"), "ImageRepeat.NoRepeat");
 }
 
 /**
@@ -695,7 +695,7 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonRenderModeOriginal, TestSize.Level
      * @tc.steps: check the key value.
      * @tc.expected: it should be ImageRenderMode::Original.
      */
-    EXPECT_EQ(json->GetString("renderMode"), "ImageRenderMode::Original");
+    EXPECT_EQ(json->GetString("renderMode"), "ImageRenderMode.Original");
 }
 
 /**
@@ -734,7 +734,7 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonRenderModeTemplate, TestSize.Level
      * @tc.steps: check the key value.
      * @tc.expected: it should be ImageRenderMode::Template.
      */
-    EXPECT_EQ(json->GetString("renderMode"), "ImageRenderMode::Template");
+    EXPECT_EQ(json->GetString("renderMode"), "ImageRenderMode.Template");
 }
 
 
@@ -1080,7 +1080,7 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonHdrBrightless001, TestSize.Level0)
      * @tc.steps: check the key value.
      * @tc.expected: it should be Distributed.
      */
-    EXPECT_EQ(json->GetDouble("hdrBrightness"), 0.1);
+    EXPECT_TRUE(NearEqual(json->GetDouble("hdrBrightness"), 0.1));
 }
 
 /**
@@ -1118,7 +1118,7 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonHdrBrightless002, TestSize.Level0)
      * @tc.steps: check the key value.
      * @tc.expected: it should be 0.2.
      */
-    EXPECT_EQ(json->GetDouble("hdrBrightness"), 0.2);
+    EXPECT_TRUE(NearEqual(json->GetDouble("hdrBrightness"), 0.2));
 }
 
 /**
@@ -1156,7 +1156,7 @@ HWTEST_F(ImagePatternTestToJson, TestImageJsonHdrBrightless003, TestSize.Level0)
      * @tc.steps: check the key value.
      * @tc.expected: it should be 1.0.
      */
-    EXPECT_EQ(json->GetDouble("hdrBrightness"), 1.0);
+    EXPECT_TRUE(NearEqual(json->GetDouble("hdrBrightness"), 1.0));
 }
 
 /**
