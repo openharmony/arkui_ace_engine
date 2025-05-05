@@ -73,6 +73,7 @@ namespace OHOS::Ace::NG {
 using VsyncCallbackFun = std::function<void()>;
 using FrameCallbackFunc = std::function<void(uint64_t nanoTimestamp)>;
 using FrameCallbackFuncFromCAPI = std::function<void(uint64_t nanoTimestamp, uint32_t frameCount)>;
+class NodeRenderStatusMonitor;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -1173,6 +1174,8 @@ public:
         uiTranslateManager_->AddPixelMap(nodeId, pixelMap);
     }
 
+    const RefPtr<NodeRenderStatusMonitor>& GetNodeRenderStatusMonitor();
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1494,6 +1497,7 @@ private:
     std::shared_ptr<UiTranslateManagerImpl> uiTranslateManager_;
     friend class ScopedLayout;
     friend class FormGestureManager;
+    RefPtr<NodeRenderStatusMonitor> nodeRenderStatusMonitor_;
 };
 
 /**
