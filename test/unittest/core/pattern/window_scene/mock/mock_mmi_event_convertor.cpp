@@ -38,6 +38,10 @@ void ConvertCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, C
 
 void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, AxisEvent& event) {}
 
+void ConvertAxisEventToTouchEvent(
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent, TouchEvent& touchEvt, PointerEvent& axisFakePntEvt_)
+{}
+
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event) {}
 
 void ConvertFocusAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, NG::FocusAxisEvent& event)

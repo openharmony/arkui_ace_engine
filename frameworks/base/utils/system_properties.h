@@ -490,6 +490,20 @@ public:
         return isDeviceAccess_;
     }
 
+    static void SetConfigDeviceType(const std::string& type)
+    {
+        configDeviceType_ = type;
+    }
+
+    static const std::string& GetConfigDeviceType()
+    {
+        return configDeviceType_;
+    }
+
+    static float GetScrollCoefficients();
+
+    static bool GetTransformEnabled();
+
     static void InitMccMnc(int32_t mcc, int32_t mnc);
 
     static ScreenShape GetScreenShape()
@@ -746,6 +760,9 @@ private:
     static bool rosenBackendEnabled_;
     static bool windowAnimationEnabled_;
     static bool debugEnabled_;
+    static std::string configDeviceType_;
+    static bool transformEnabled_;
+    static float scrollCoefficients_;
     static DebugFlags debugFlags_;
     static bool containerDeleteFlag_;
     static bool layoutDetectEnabled_;
