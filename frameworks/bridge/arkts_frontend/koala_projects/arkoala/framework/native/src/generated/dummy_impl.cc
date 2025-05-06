@@ -24186,7 +24186,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void AddGestureToNodeImpl(Ark_NativePointer node,
                               const Ark_Number* priority,
                               Ark_GestureMask mask,
-                              Ark_NativePointer gesture)
+                              Ark_NativePointer gesture,
+                              Ark_Boolean isModifier)
     {
         if (!needGroupedLog(1))
             return;
@@ -24198,6 +24199,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, mask);
         out.append(", ");
         WriteToString(&out, gesture);
+        out.append(", ");
+        WriteToString(&out, isModifier);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -24210,6 +24213,27 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, group);
         out.append(", ");
         WriteToString(&out, gesture);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void RemoveGestureByTagImpl(Ark_NativePointer node,
+                                const Ark_String* tag)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("removeGestureByTag(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, tag);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ClearGesturesImpl(Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("clearGestures(");
+        WriteToString(&out, node);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -42694,6 +42718,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GestureOpsAccessor::SetAllowedTypesImpl,
             GestureOpsAccessor::AddGestureToNodeImpl,
             GestureOpsAccessor::AddGestureToGroupImpl,
+            GestureOpsAccessor::RemoveGestureByTagImpl,
+            GestureOpsAccessor::ClearGesturesImpl,
         };
         return &GestureOpsAccessorImpl;
     }

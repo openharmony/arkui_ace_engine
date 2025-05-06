@@ -3813,9 +3813,13 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _GestureOps_setAllowedTypes(gesture: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _GestureOps_addGestureToNode(node: KPointer, priority: number, mask: KInt, gesture: KPointer): void
+    native static _GestureOps_addGestureToNode(node: KPointer, priority: number, mask: KInt, gesture: KPointer, isModifier: KInt): void
     @ani.unsafe.Direct
     native static _GestureOps_addGestureToGroup(group: KPointer, gesture: KPointer): void
+    @ani.unsafe.Quick
+    native static _GestureOps_removeGestureByTag(node: KPointer, tag: KStringPtr): void
+    @ani.unsafe.Direct
+    native static _GestureOps_clearGestures(node: KPointer): void
     @ani.unsafe.Quick
     native static _FocusController_requestFocus(key: KStringPtr): void
     @ani.unsafe.Direct

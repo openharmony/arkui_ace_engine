@@ -319,18 +319,30 @@ export class GestureOps {
         GestureOps.setAllowedTypes_serialize(gesture_casted, types_casted)
         return
     }
-    public static addGestureToNode(node: KPointer, priority: number, mask: GestureMask, gesture: KPointer): void {
+    public static addGestureToNode(node: KPointer, priority: number, mask: GestureMask, gesture: KPointer, isModifier: boolean): void {
         const node_casted = node as (KPointer)
         const priority_casted = priority as (number)
         const mask_casted = mask as (GestureMask)
         const gesture_casted = gesture as (KPointer)
-        GestureOps.addGestureToNode_serialize(node_casted, priority_casted, mask_casted, gesture_casted)
+        const isModifier_casted = isModifier as (boolean)
+        GestureOps.addGestureToNode_serialize(node_casted, priority_casted, mask_casted, gesture_casted, isModifier_casted)
         return
     }
     public static addGestureToGroup(group: KPointer, gesture: KPointer): void {
         const group_casted = group as (KPointer)
         const gesture_casted = gesture as (KPointer)
         GestureOps.addGestureToGroup_serialize(group_casted, gesture_casted)
+        return
+    }
+    public static removeGestureByTag(node: KPointer, tag: string): void {
+        const node_casted = node as (KPointer)
+        const tag_casted = tag as (string)
+        GestureOps.removeGestureByTag_serialize(node_casted, tag_casted)
+        return
+    }
+    public static clearGestures(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        GestureOps.clearGestures_serialize(node_casted)
         return
     }
     private static createTapGesture_serialize(fingers: number, count: number, distanceThreshold: number, isFingerCountLimited: boolean): KPointer {
@@ -410,11 +422,17 @@ export class GestureOps {
         ArkUIGeneratedNativeModule._GestureOps_setAllowedTypes(gesture, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private static addGestureToNode_serialize(node: KPointer, priority: number, mask: GestureMask, gesture: KPointer): void {
-        ArkUIGeneratedNativeModule._GestureOps_addGestureToNode(node, priority, TypeChecker.GestureMask_ToNumeric(mask), gesture)
+    private static addGestureToNode_serialize(node: KPointer, priority: number, mask: GestureMask, gesture: KPointer, isModifier: boolean): void {
+        ArkUIGeneratedNativeModule._GestureOps_addGestureToNode(node, priority, TypeChecker.GestureMask_ToNumeric(mask), gesture, isModifier ? 1 : 0)
     }
     private static addGestureToGroup_serialize(group: KPointer, gesture: KPointer): void {
         ArkUIGeneratedNativeModule._GestureOps_addGestureToGroup(group, gesture)
+    }
+    private static removeGestureByTag_serialize(node: KPointer, tag: string): void {
+        ArkUIGeneratedNativeModule._GestureOps_removeGestureByTag(node, tag)
+    }
+    private static clearGestures_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._GestureOps_clearGestures(node)
     }
 }
 export class FocusController {

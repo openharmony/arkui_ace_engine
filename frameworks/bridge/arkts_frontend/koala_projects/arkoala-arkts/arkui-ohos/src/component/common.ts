@@ -25,7 +25,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { DrawContext, Edges } from "./arkui-graphics"
 import { LengthMetrics } from "../Graphics"
-import { UnifiedData, UnifiedDataInternal, ComponentContent, Context, PointerStyle, ContextInternal } from "./arkui-custom"
+import { UnifiedData, UnifiedDataInternal, ComponentContent, Context, PointerStyle, ContextInternal, GestureOps } from "./arkui-custom"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { Summary, IntentionCode, EdgeStyles, CircleShape, EllipseShape, PathShape, RectShape, SymbolGlyphModifier, ImageModifier } from "./arkui-external"
 import { Callback_Void } from "./abilityComponent"
@@ -40,7 +40,7 @@ import { VisualEffect, Filter, BrightnessBlender } from "./arkui-uieffect"
 import { FocusBoxStyle, FocusPriority } from "./focus"
 import { TransformationMatrix } from "./arkui-common"
 import { UniformDataType } from "./arkui-uniformtypedescriptor"
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureHandler, GesturePriority, Gesture, GestureGroup } from "./gesture"
+import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureHandler, GesturePriority, Gesture, GestureGroup, GestureGroupHandler } from "./gesture"
 import { PixelMap } from "./arkui-pixelmap"
 import { BlendMode } from "./arkui-drawing"
 import { StyledString } from "./styledString"
@@ -9583,7 +9583,41 @@ export interface VisibleAreaEventOptions {
     expectedUpdateInterval?: number;
 }
 export type VisibleAreaChangeCallback = (isExpanding: boolean, currentRatio: number) => void;
-export interface UIGestureEvent {
+export class UIGestureEvent {
+    private peer?: PeerNode
+    setPeer(peer?: PeerNode) {
+        this.peer = peer
+    }
+    addGesture(gesture: GestureHandler, priority?: GesturePriority, mask?: GestureMask): void {
+        InteropNativeModule._NativeLog("zcb UIGestureEvent addGesture");
+        if (gesture instanceof GestureGroupHandler) {
+            let gestureGroup = gesture as GestureGroupHandler;
+            gestureGroup.addGestureGroupToNode(priority ?? GesturePriority.NORMAL, this.peer, mask)
+        } else if (gesture instanceof GestureHandler) {
+            gesture.setGesture(priority ?? GesturePriority.NORMAL, this.peer, mask);
+        }
+    }
+    addParallelGesture(gesture: GestureHandler, mask?: GestureMask): void {
+        InteropNativeModule._NativeLog("zcb UIGestureEvent addParallelGesture");
+        if (gesture instanceof GestureGroupHandler) {
+            let gestureGroup = gesture as GestureGroupHandler;
+            gestureGroup.addGestureGroupToNode(2, this.peer, mask)
+        } else if (gesture instanceof GestureHandler) {
+            gesture.setGesture(2, this.peer, mask);
+        }
+    }
+    removeGestureByTag(tag: string): void {
+        if (this.peer) {
+            let peerNode = this.peer as PeerNode;
+            GestureOps.removeGestureByTag(peerNode.peer.ptr, tag);
+        }
+    }
+    clearGestures(): void {
+        if (this.peer) {
+            let peerNode = this.peer as PeerNode;
+            GestureOps.clearGestures(peerNode.peer.ptr);
+        }
+    }
 }
 export interface SelectionOptions {
     menuPolicy?: MenuPolicy;
@@ -9633,6 +9667,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
     }
     getPeer(): ArkCommonMethodPeer {
         return (this.peer as ArkCommonMethodPeer)
+    }
+    getOrCreateGestureEvent(): UIGestureEvent {
+        if (this.gestureEvent === undefined) {
+            let gestureEvent = new UIGestureEvent();
+            gestureEvent.setPeer(this.peer);
+            this.setGestureEvent(gestureEvent);
+        }
+        return this.gestureEvent as UIGestureEvent;
     }
     /** @memo */
     public width(value: Length | undefined | Length | LayoutPolicy | undefined): this {
@@ -11478,8 +11520,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
     /** @memo */
     public gestureModifier(value: GestureModifier | undefined): this {
         if (this.checkPriority("gestureModifier")) {
-            const value_casted = value as (GestureModifier | undefined)
-            this.getPeer()?.gestureModifierAttribute(value_casted)
+            if (value === undefined) {
+                InteropNativeModule._NativeLog("zcb gestureModifier value undefined");
+                return this;
+            }
+            const value_casted = value as GestureModifier
+            let gestureEvent = this.getOrCreateGestureEvent();
+            gestureEvent.clearGestures();
+            value_casted.applyGesture(gestureEvent);
             return this
         }
         return this

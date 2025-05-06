@@ -26,6 +26,7 @@
 #include "core/components_ng/gestures/rotation_gesture.h"
 #include "core/components_ng/gestures/swipe_gesture.h"
 #include "core/components_ng/gestures/tap_gesture.h"
+#include "core/components_ng/pattern/gesture/gesture_model_ng.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -42,8 +43,12 @@ Ark_NativePointer CreateTapGestureImpl(const Ark_Number* fingers, const Ark_Numb
 {
     int32_t fingerValue = Converter::Convert<int32_t>(*fingers);
     int32_t countValue = Converter::Convert<int32_t>(*count);
+    float distanceThresholdValue = Converter::Convert<float>(*distanceThreshold);
+    distanceThresholdValue =
+        distanceThresholdValue < 0 ? std::numeric_limits<double>::infinity() : distanceThresholdValue;
+    bool isFingerCountLimitedValue = Converter::Convert<bool>(isFingerCountLimited);
     auto tapGestureObject =
-        AceType::MakeRefPtr<TapGesture>(countValue, fingerValue, std::numeric_limits<double>::infinity());
+        AceType::MakeRefPtr<TapGesture>(countValue, fingerValue, distanceThresholdValue, isFingerCountLimitedValue);
     tapGestureObject->IncRefCount();
     return AceType::RawPtr(tapGestureObject);
 }
@@ -53,7 +58,9 @@ Ark_NativePointer CreateLongPressGestureImpl(
     int32_t fingerValue = Converter::Convert<int32_t>(*fingers);
     bool repeatValue = Converter::Convert<bool>(repeat);
     int32_t durationValue = Converter::Convert<int32_t>(*duration);
-    auto longPressGestureObject = AceType::MakeRefPtr<LongPressGesture>(fingerValue, repeatValue, durationValue);
+    bool isFingerCountLimitedValue = Converter::Convert<bool>(isFingerCountLimited);
+    auto longPressGestureObject = AceType::MakeRefPtr<LongPressGesture>(
+        fingerValue, repeatValue, durationValue, false, false, isFingerCountLimitedValue);
     longPressGestureObject->IncRefCount();
     return AceType::RawPtr(longPressGestureObject);
 }
@@ -65,7 +72,9 @@ Ark_NativePointer CreatePanGestureImpl(
     PanDirection panDirection;
     panDirection.type = PanDirection::ALL;
     double distanceValue = Converter::Convert<double>(*distance);
-    auto panGestureObject = AceType::MakeRefPtr<PanGesture>(fingerValue, panDirection, distanceValue);
+    bool isFingerCountLimitedValue = Converter::Convert<bool>(isFingerCountLimited);
+    auto panGestureObject =
+        AceType::MakeRefPtr<PanGesture>(fingerValue, panDirection, distanceValue, isFingerCountLimitedValue);
     panGestureObject->IncRefCount();
     return AceType::RawPtr(panGestureObject);
 }
@@ -74,7 +83,8 @@ Ark_NativePointer CreatePinchGestureImpl(
 {
     int32_t fingerValue = Converter::Convert<int32_t>(*fingers);
     double distanceValue = Converter::Convert<double>(*distance);
-    auto pinchGestureObject = AceType::MakeRefPtr<PinchGesture>(fingerValue, distanceValue);
+    bool isFingerCountLimitedValue = Converter::Convert<bool>(isFingerCountLimited);
+    auto pinchGestureObject = AceType::MakeRefPtr<PinchGesture>(fingerValue, distanceValue, isFingerCountLimitedValue);
     pinchGestureObject->IncRefCount();
     return AceType::RawPtr(pinchGestureObject);
 }
@@ -83,7 +93,9 @@ Ark_NativePointer CreateRotationGestureImpl(
 {
     int32_t fingerValue = Converter::Convert<int32_t>(*fingers);
     double angleValue = Converter::Convert<double>(*angle);
-    auto rotationGestureObject = AceType::MakeRefPtr<RotationGesture>(fingerValue, angleValue);
+    bool isFingerCountLimitedValue = Converter::Convert<bool>(isFingerCountLimited);
+    auto rotationGestureObject =
+        AceType::MakeRefPtr<RotationGesture>(fingerValue, angleValue, isFingerCountLimitedValue);
     rotationGestureObject->IncRefCount();
     return AceType::RawPtr(rotationGestureObject);
 }
@@ -95,7 +107,9 @@ Ark_NativePointer CreateSwipeGestureImpl(
     SwipeDirection swipeDirection;
     swipeDirection.type = SwipeDirection::ALL;
     double speedValue = Converter::Convert<double>(*speed);
-    auto swipeGestureObject = AceType::MakeRefPtr<SwipeGesture>(fingerValue, swipeDirection, speedValue);
+    bool isFingerCountLimitedValue = Converter::Convert<bool>(isFingerCountLimited);
+    auto swipeGestureObject =
+        AceType::MakeRefPtr<SwipeGesture>(fingerValue, swipeDirection, speedValue, isFingerCountLimitedValue);
     swipeGestureObject->IncRefCount();
     return AceType::RawPtr(swipeGestureObject);
 }
@@ -160,9 +174,7 @@ void SetOnCancelImpl(Ark_NativePointer gesture, const Callback_Void* onCancel)
 {
     auto* gesturePtr = reinterpret_cast<Gesture*>(gesture);
     CHECK_NULL_VOID(gesturePtr);
-    auto onCancelEvent = [callback = CallbackHelper(*onCancel)](GestureEvent& info) {
-        callback.InvokeSync();
-    };
+    auto onCancelEvent = [callback = CallbackHelper(*onCancel)](GestureEvent& info) { callback.InvokeSync(); };
     gesturePtr->SetOnActionCancelId(onCancelEvent);
 }
 void SetGestureTagImpl(Ark_NativePointer gesture, const Ark_String* tag)
@@ -172,20 +184,31 @@ void SetGestureTagImpl(Ark_NativePointer gesture, const Ark_String* tag)
     gestureObject->SetTag(Converter::Convert<std::string>(*tag));
 }
 void SetAllowedTypesImpl(Ark_NativePointer gesture, const Array_SourceTool* types) {}
-void AddGestureToNodeImpl(
-    Ark_NativePointer node, const Ark_Number* priority, Ark_GestureMask mask, Ark_NativePointer gesture)
+void AddGestureToNodeImpl(Ark_NativePointer node, const Ark_Number* priority, Ark_GestureMask mask,
+    Ark_NativePointer gesture, Ark_Boolean isModifier)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     auto gesturePtr = Referenced::Claim(reinterpret_cast<Gesture*>(gesture));
-
+    bool isModifierValue = Converter::Convert<bool>(isModifier);
     GesturePriority gesturePriority = static_cast<GesturePriority>(Converter::Convert<int32_t>(*priority));
     gesturePtr->SetPriority(gesturePriority);
 
     GestureMask gestureMask = Converter::Convert<std::optional<GestureMask>>(mask).value_or(GestureMask::Normal);
     gesturePtr->SetGestureMask(gestureMask);
-    gestureHub->AttachGesture(gesturePtr);
+    if (isModifierValue) {
+        gestureHub->AttachGesture(gesturePtr);
+    } else {
+        gestureHub->AddGesture(gesturePtr);
+        GestureEventFunc clickEvent = GestureModelNG::GetTapGestureEventFunc(gesturePtr);
+        if (clickEvent) {
+            auto focusHub = frameNode->GetOrCreateFocusHub();
+            CHECK_NULL_VOID(focusHub);
+            focusHub->SetFocusable(true, false);
+            focusHub->SetOnClickCallback(std::move(clickEvent));
+        }
+    }
     // Gesture ptr ref count is not decrease, so need to decrease after attach to gestureEventHub.
     gesturePtr->DecRefCount();
 }
@@ -197,6 +220,22 @@ void AddGestureToGroupImpl(Ark_NativePointer group, Ark_NativePointer gesture)
     CHECK_NULL_VOID(gesturePtr);
     gestureGroup->AddGesture(AceType::Claim(gesturePtr));
     gesturePtr->DecRefCount();
+}
+void RemoveGestureByTagImpl(Ark_NativePointer node, const Ark_String* tag)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    std::string gestureTag = Converter::Convert<std::string>(*tag);
+    gestureHub->RemoveGesturesByTag(gestureTag);
+}
+void ClearGesturesImpl(Ark_NativePointer node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    gestureHub->ClearModifierGesture();
 }
 } // namespace GestureOpsAccessor
 
@@ -220,6 +259,8 @@ const GENERATED_ArkUIGestureOpsAccessor* GetGestureOpsAccessor()
         GestureOpsAccessor::SetAllowedTypesImpl,
         GestureOpsAccessor::AddGestureToNodeImpl,
         GestureOpsAccessor::AddGestureToGroupImpl,
+        GestureOpsAccessor::RemoveGestureByTagImpl,
+        GestureOpsAccessor::ClearGesturesImpl,
     };
     return &GestureOpsAccessorImpl;
 }

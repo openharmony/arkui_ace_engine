@@ -12271,7 +12271,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void AddGestureToNodeImpl(Ark_NativePointer node,
                               const Ark_Number* priority,
                               Ark_GestureMask mask,
-                              Ark_NativePointer gesture)
+                              Ark_NativePointer gesture,
+                              Ark_Boolean isModifier)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
@@ -12287,6 +12288,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         //auto convValue = Converter::Convert<type>(group);
         //auto convValue = Converter::OptConvert<type>(group); // for enums
         //undefinedModelNG::SetAddGestureToGroup(frameNode, convValue);
+    }
+    void RemoveGestureByTagImpl(Ark_NativePointer node,
+                                const Ark_String* tag)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRemoveGestureByTag(frameNode, convValue);
+    }
+    void ClearGesturesImpl(Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetClearGestures(frameNode, convValue);
     }
     } // GestureOpsAccessor
     namespace FocusControllerAccessor {
@@ -20641,6 +20659,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GestureOpsAccessor::SetAllowedTypesImpl,
             GestureOpsAccessor::AddGestureToNodeImpl,
             GestureOpsAccessor::AddGestureToGroupImpl,
+            GestureOpsAccessor::RemoveGestureByTagImpl,
+            GestureOpsAccessor::ClearGesturesImpl,
         };
         return &GestureOpsAccessorImpl;
     }

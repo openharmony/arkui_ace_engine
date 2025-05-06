@@ -23112,9 +23112,13 @@ typedef struct GENERATED_ArkUIGestureOpsAccessor {
     void (*addGestureToNode)(Ark_NativePointer node,
                              const Ark_Number* priority,
                              Ark_GestureMask mask,
-                             Ark_NativePointer gesture);
+                             Ark_NativePointer gesture,
+                             Ark_Boolean isModifier);
     void (*addGestureToGroup)(Ark_NativePointer group,
                               Ark_NativePointer gesture);
+    void (*removeGestureByTag)(Ark_NativePointer node,
+                               const Ark_String* tag);
+    void (*clearGestures)(Ark_NativePointer node);
 } GENERATED_ArkUIGestureOpsAccessor;
 
 typedef struct GENERATED_ArkUIFocusControllerAccessor {

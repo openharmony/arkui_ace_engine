@@ -15,15 +15,19 @@
 
 import { PeerNode } from './PeerNode'
 import { ArkUINativeModule } from "#components"
-import { AnimateParam } from './component'
+import { AnimateParam, UIGestureEvent  } from './component'
 import { _animationEnd, _animationStart } from './handwritten'
 import { unsafeCast } from "@koalaui/common"
 
 export class ComponentBase {
     protected peer?: PeerNode
     protected isFirstBuild: boolean = true
+    protected gestureEvent: UIGestureEvent | undefined = undefined
     setPeer(peer: PeerNode) {
         this.peer = peer
+    }
+    setGestureEvent(gestureEvent: UIGestureEvent) {
+        this.gestureEvent = gestureEvent
     }
     protected checkPriority(name: string): boolean {
         return true
