@@ -2803,7 +2803,7 @@ void PipelineContext::OnTouchEvent(
     }
 
     if (scalePoint.type == TouchType::MOVE) {
-        if (isEventsPassThrough_) {
+        if (isEventsPassThrough_ || point.passThrough) {
             scalePoint.isPassThroughMode = true;
             eventManager_->FlushTouchEventsEnd({ scalePoint });
             eventManager_->DispatchTouchEvent(scalePoint);
@@ -3592,6 +3592,10 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
     }
     DispatchMouseToTouchEvent(event, node);
     if (event.action == MouseAction::MOVE) {
+        if (event.passThrough) {
+            DispatchMouseEvent(event, node);
+            return;
+        }
         if (dragDropManager_ && dragDropManager_->IsDragging() && event.pullAction != MouseAction::PULL_MOVE) {
             auto pointerEvent = DragPointerEvent(event.x, event.y, event.screenX, event.screenY);
             dragDropManager_->SetDragAnimationPointerEvent(pointerEvent);
@@ -3701,7 +3705,7 @@ void PipelineContext::DispatchMouseEvent(const MouseEvent& event, const RefPtr<F
     touchRestrict.sourceType = event.sourceType;
     touchRestrict.hitTestType = SourceType::MOUSE;
     touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
-    if (event.action != MouseAction::MOVE) {
+    if (event.action != MouseAction::MOVE || event.passThrough) {
         eventManager_->MouseTest(scaleEvent, node, touchRestrict);
         eventManager_->DispatchMouseEventNG(scaleEvent);
         eventManager_->DispatchMouseHoverEventNG(scaleEvent);

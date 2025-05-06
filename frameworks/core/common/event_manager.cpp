@@ -960,6 +960,9 @@ void EventManager::DispatchTouchEventToTouchTestResult(TouchEvent touchEvent,
 {
     bool isStopTouchEvent = false;
     for (const auto& entry : touchTestResult) {
+        if (touchEvent.passThrough) {
+            entry->SetIsPostEventResult(true);
+        }
         auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(entry);
         if (recognizer) {
             entry->HandleMultiContainerEvent(touchEvent);
@@ -1386,18 +1389,19 @@ bool EventManager::DispatchMouseEventInGreatOrEqualAPI13(const MouseEvent& event
 {
     MouseTestResult handledResults;
     bool isStopPropagation = false;
+    PressMouseInfo key{ event.id, event.button };
     if (event.button != MouseButton::NONE_BUTTON) {
-        if (auto mouseTargetIter = pressMouseTestResultsMap_.find(event.button);
+        if (auto mouseTargetIter = pressMouseTestResultsMap_.find(key);
             mouseTargetIter != pressMouseTestResultsMap_.end()) {
             DispatchMouseEventToPressResults(event, mouseTargetIter->second, handledResults, isStopPropagation);
         }
         if (event.action == MouseAction::PRESS) {
-            pressMouseTestResultsMap_[event.button] = currMouseTestResults_;
+            pressMouseTestResultsMap_[key] = currMouseTestResults_;
         }
     }
     auto result = DispatchMouseEventToCurResults(event, handledResults, isStopPropagation);
     if (event.action == MouseAction::RELEASE) {
-        DoSingleMouseActionRelease(event.button);
+        DoSingleMouseActionRelease(key);
     }
     return result;
 }
@@ -1450,7 +1454,8 @@ bool EventManager::DispatchMouseEventToCurResults(
             }
             continue;
         }
-        auto mouseTargetIter = pressMouseTestResultsMap_.find(event.button);
+        PressMouseInfo key{event.id, event.button};
+        auto mouseTargetIter = pressMouseTestResultsMap_.find(key);
         if ((mouseTargetIter != pressMouseTestResultsMap_.end() &&
             std::find(mouseTargetIter->second.begin(), mouseTargetIter->second.end(), mouseTarget) ==
             mouseTargetIter->second.end()) || mouseTargetIter == pressMouseTestResultsMap_.end()) {
@@ -1495,9 +1500,9 @@ void EventManager::DoMouseActionRelease()
     pressMouseTestResults_.clear();
 }
 
-void EventManager::DoSingleMouseActionRelease(MouseButton button)
+void EventManager::DoSingleMouseActionRelease(const PressMouseInfo& pressMouseInfo)
 {
-    pressMouseTestResultsMap_.erase(button);
+    pressMouseTestResultsMap_.erase(pressMouseInfo);
 }
 
 void EventManager::DispatchMouseHoverAnimationNG(const MouseEvent& event)
