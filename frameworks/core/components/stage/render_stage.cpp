@@ -22,6 +22,7 @@ namespace {
 
 constexpr double DRAG_LIMIT = 200.0;
 constexpr int32_t LEAST_DRAG_BACK_PAGES = 2;
+constexpr double ONE_PAGE_LIMIT = 100.0;
 
 RefPtr<StageElement> GetStageElement(const WeakPtr<PipelineContext>& contextWeak)
 {
@@ -80,7 +81,7 @@ void RenderStage::WatchDragToBack()
             return;
         }
         stage->GetControllers();
-        stage->HandleDragUpdate(info.GetMainDelta());
+        stage->HandleDragUpdate(info);
     });
     dragDetector_->SetOnDragEnd([weakRenderStage = WeakClaim(this)](const DragEndInfo& info) {
         auto stage = weakRenderStage.Upgrade();
@@ -101,7 +102,7 @@ void RenderStage::WatchDragToBack()
     });
 }
 
-void RenderStage::HandleDragUpdate(double deltaX)
+void RenderStage::HandleDragUpdate(const DragUpdateInfo& info)
 {
     if (forbidSwipeToRight_) {
         LOGE("Swipe to right is forbidden.");
@@ -114,15 +115,19 @@ void RenderStage::HandleDragUpdate(double deltaX)
         return;
     }
     double rootWidth = pipelineContext->GetRootWidth();
+    double rootHeight = pipelineContext->GetRootHeight();
     if (NearZero(rootWidth)) {
         LOGE("root width is zero.");
         return;
     }
+    auto deltaX = info.GetDelta().GetX();
+    auto deltaY = info.GetDelta().GetY();
     if (isRightToLeft_) {
         dragOffsetX_ = std::clamp(dragOffsetX_ + deltaX, -rootWidth, 0.0);
     } else {
         dragOffsetX_ = std::clamp(dragOffsetX_ + deltaX, 0.0, rootWidth);
     }
+    dragOffsetY_ = std::clamp(dragOffsetY_ + deltaY, -rootHeight, rootHeight);
 
     // calculate the time based on the drag distance
     tickTime_ = (rootWidth - fabs(dragOffsetX_)) / rootWidth * TRANSITION_WATCH_DURATION;
@@ -136,6 +141,7 @@ void RenderStage::HandleDragUpdate(double deltaX)
     auto children = stageElement->GetChildren();
     if (children.size() < LEAST_DRAG_BACK_PAGES) {
         LOGE("children size less than two.");
+        CheckNeedExitApp();
         return;
     }
     auto childIter = children.rbegin();
@@ -154,6 +160,7 @@ void RenderStage::HandleDragUpdate(double deltaX)
 
 void RenderStage::HandleDragStart()
 {
+    ResetDragOffset();
     if (forbidSwipeToRight_) {
         LOGE("Swipe to right is forbidden.");
         return;
@@ -241,8 +248,7 @@ void RenderStage::HandleDragEnd()
             SetPageHidden(nextTopElement, true);
         });
     }
-    // reset drag offset
-    dragOffsetX_ = 0.0;
+    ResetDragOffset();
 }
 
 void RenderStage::OnTouchTestHit(
@@ -285,6 +291,24 @@ void RenderStage::GetControllers()
     }
     controllerIn_ = transitionIn->GetTransitionController();
     controllerOut_ = transitionOut->GetTransitionController();
+}
+
+void RenderStage::CheckNeedExitApp()
+{
+    auto pipelineContext = context_.Upgrade();
+    CHECK_NULL_VOID(pipelineContext);
+    auto viewScale = pipelineContext->GetViewScale();
+    if (viewScale == 0) {
+        return;
+    }
+    auto dragLimit = ONE_PAGE_LIMIT / viewScale;
+    if (LessNotEqual(fabs(dragOffsetX_), fabs(dragOffsetY_))) {
+        // move angle is invalid
+        return;
+    }
+    if (GreatOrEqual(fabs(dragOffsetX_), dragLimit)) {
+        pipelineContext->Finish(false);
+    }
 }
 
 } // namespace OHOS::Ace
