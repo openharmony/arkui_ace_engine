@@ -39,13 +39,6 @@ const std::string BLOOM_COLOR_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloo
 const std::string ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME = "sys.float.ohos_id_point_light_illuminated_border_width";
 } // namespace
 
-void ViewAbstractModelStatic::BindMenuGesture(
-    std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam)
-{
-    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ViewAbstractModelStatic::BindMenuGesture(targetNode, std::move(params), std::move(buildFunc), menuParam);
-}
-
 void ViewAbstractModelStatic::BindMenuGesture(FrameNode* targetNode,
     std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam)
 {
