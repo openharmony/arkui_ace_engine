@@ -33,11 +33,7 @@ std::optional<SizeF> RadioLayoutAlgorithm::MeasureContent(
     auto pattern = host->GetPattern<RadioPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-            host->GetGeometryNode()->ResetContent();
-        } else {
-            host->GetGeometryNode()->Reset();
-        }
+        host->GetGeometryNode()->ResetContent();
         return std::nullopt;
     }
     InitializeParam(host);
