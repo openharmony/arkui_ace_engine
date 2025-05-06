@@ -2922,6 +2922,7 @@ void PipelineContext::OnTouchEvent(
 
     hasIdleTasks_ = true;
     RequestFrame();
+    passThroughResult_ = eventManager_->GetIsStopTouchEventRecored();
 }
 
 bool PipelineContext::CompensateTouchMoveEventFromUnhandledEvents(const TouchEvent& event)
@@ -3665,6 +3666,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         return;
     }
     DispatchMouseEvent(event, node);
+    passThroughResult_ = eventManager_->GetIsStopPropagationRecored();
 }
 
 void PipelineContext::DispatchMouseToTouchEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)

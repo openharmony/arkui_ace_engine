@@ -63,7 +63,7 @@ bool PostEventManager::PostTouchEvent(const RefPtr<NG::UINode>& uiNode, TouchEve
     touchEvent.passThrough = true;
     pipelineContext->OnTouchEvent(touchEvent, frameNode, false);
     touchEvent.passThrough = false;
-    return true;
+    return pipelineContext->GetPassThroughResult();
 }
 
 bool PostEventManager::PostMouseEvent(const RefPtr<NG::UINode>& uiNode, MouseEvent&& mouseEvent)
@@ -78,7 +78,7 @@ bool PostEventManager::PostMouseEvent(const RefPtr<NG::UINode>& uiNode, MouseEve
     mouseEvent.passThrough = true;
     pipelineContext->OnMouseEvent(mouseEvent, frameNode);
     mouseEvent.passThrough = false;
-    return true;
+    return pipelineContext->GetPassThroughResult();
 }
 
 bool PostEventManager::PostAxisEvent(const RefPtr<NG::UINode>& uiNode, AxisEvent&& axisEvent)
