@@ -2766,6 +2766,15 @@ void GenerateAccessibilityEventInfo(const AccessibilityEvent& accessibilityEvent
     eventInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
     eventInfo.SetBeginIndex(accessibilityEvent.startIndex);
     eventInfo.SetEndIndex(accessibilityEvent.endIndex);
+    if (accessibilityEvent.extraEventInfo.size() > 0) {
+         ExtraEventInfo extraEventInfo;
+        for (auto& info : accessibilityEvent.extraEventInfo) {
+            auto ret = extraEventInfo.SetExtraEventInfo(info.first, info.second);
+            TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "The result of SetExtraEventInfo:%{public}d, keyStr:%{public}s",
+                ret, info.first.c_str());
+        }
+        eventInfo.SetExtraEvent(extraEventInfo);
+    }
 }
 } // namespace
 

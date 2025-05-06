@@ -328,4 +328,34 @@ void TextGestureSelector::ResetGestureSelection()
     isSelecting_ = false;
     selectingFingerId_ = -1;
 }
+
+void TextBase::DetectTextDiff(const std::string& beforeText, const std::string& latestContent,
+    std::string& addedText, std::string& removedText)
+{
+    addedText.clear();
+    removedText.clear();
+    size_t prefixLen = 0;
+    size_t minLength = std::min(beforeText.length(), latestContent.length());
+    while (prefixLen < minLength && beforeText[prefixLen] == latestContent[prefixLen]) {
+        prefixLen++;
+    }
+    size_t suffixLen = 0;
+    size_t remainBefore = beforeText.length() - prefixLen;
+    size_t remainAfter = latestContent.length() - prefixLen;
+    size_t minSuffix = std::min(remainBefore, remainAfter);
+    while (suffixLen < minSuffix &&
+        beforeText[beforeText.length() - 1 - suffixLen] == latestContent[latestContent.length() - 1 - suffixLen]) {
+        suffixLen++;
+    }
+    size_t removeStart = prefixLen;
+    size_t removeEnd = beforeText.length() - suffixLen;
+    if (removeEnd > removeStart) {
+        removedText = beforeText.substr(removeStart, removeEnd - removeStart);
+    }
+    size_t addStart = prefixLen;
+    size_t addEnd = latestContent.length() - suffixLen;
+    if (addEnd > addStart) {
+        addedText = latestContent.substr(addStart, addEnd - addStart);
+    }
+}
 }

@@ -736,6 +736,7 @@ public:
     SelectionInfo FromStyledString(const RefPtr<SpanString>& spanString);
     bool BeforeAddSymbol(RichEditorChangeValue& changeValue, const SymbolSpanOptions& options);
     void AfterContentChange(RichEditorChangeValue& changeValue);
+    void ReportAfterContentChangeEvent();
     void DeleteToMaxLength(std::optional<int32_t> length);
     void DeleteContent(int32_t length);
 
@@ -1600,6 +1601,7 @@ private:
     void SetIsEnableSubWindowMenu();
     void OnReportRichEditorEvent(const std::string& event);
     void AsyncHandleOnCopyStyledStringHtml(RefPtr<SpanString>& subSpanString);
+    void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
