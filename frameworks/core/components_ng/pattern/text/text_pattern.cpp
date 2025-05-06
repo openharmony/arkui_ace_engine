@@ -2096,7 +2096,9 @@ bool TextPattern::HandleKeyEvent(const KeyEvent& keyEvent)
 {
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, false);
-    CHECK_NULL_RETURN(textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) != TextOverflow::MARQUEE, true);
+    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
+        return false;
+    }
     UpdateShiftFlag(keyEvent);
     if (keyEvent.action != KeyAction::DOWN) {
         return false;
