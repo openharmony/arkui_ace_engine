@@ -14,14 +14,8 @@
  */
 
 import { describe, beforeAll, it } from '@ohos/hypium'
-import { Driver,  } from '@kit.TestKit';
-import {
-  buttonClick,
-  radioClick,
-  Search,
-  searchParentBlock,
-  ToggleClick
-} from '../../../utils';
+import { Driver, } from '@kit.TestKit';
+import { buttonClick, radioClick, Search, searchParentBlock, ToggleClick } from '../../../utils';
 import { AlertDialogStart } from './AlertDialog';
 
 

@@ -82,6 +82,7 @@ public:
     static RefPtr<DragDropManager> GetDragDropManagerForDragAnimation(const RefPtr<PipelineBase>& context,
         const RefPtr<PipelineBase>& nodeContext, const RefPtr<Subwindow>& subWindow,
         bool isExpandDisplay, int32_t instanceId);
+    static void SetMenuSubWindowTouchable(bool touchable);
 
     // multi drag
     static bool IsSelectedItemNode(const RefPtr<UINode>& uiNode);

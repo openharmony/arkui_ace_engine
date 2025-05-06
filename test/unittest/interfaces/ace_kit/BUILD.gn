@@ -120,6 +120,13 @@ ohos_source_set("ace_kit_mock") {
     "googletest:gmock",
     "googletest:gtest_main",
   ]
+  if (current_os == "ohos") {
+    external_deps += [
+      "c_utils:utils",
+      "napi:ace_napi",
+      "skia:skia_canvaskit",
+    ]
+  }
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
 
@@ -141,10 +148,8 @@ ohos_unittest("ace_kit_test") {
     "$ace_root/interfaces/inner_api/ace_kit/src/view/draw/modifier_adapter.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/extend_pattern.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/layout/box_layout_algorithm.cpp",
-    "$ace_root/interfaces/inner_api/ace_kit/src/view/overlay/overlay_manager_impl.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/theme/theme_factory.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/theme/theme_style_impl.cpp",
-    "$ace_root/interfaces/inner_api/ace_kit/src/view/ui_context_impl.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/view.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view_factory/abstract_view_factory.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view_stack/view_stack_processor.cpp",
@@ -161,12 +166,14 @@ ohos_unittest("ace_kit_test") {
     "aging_adapation_dialog_util_test.cpp",
     "animation_kit_test.cpp",
     "box_layout_algorithm_test.cpp",
+    "color_test.cpp",
     "content_modifier_test.cpp",
+    "dimension_test.cpp",
     "frame_node_test.cpp",
     "property_test.cpp",
     "resource_parser_test.cpp",
-    "view_test.cpp",
     "view_stack_processor_test.cpp",
+    "view_test.cpp",
   ]
 
   cflags = [ "-fno-access-control" ]
@@ -198,6 +205,8 @@ ohos_unittest("ace_kit_test") {
   external_deps = [
     "googletest:gmock",
     "googletest:gtest_main",
+    "graphic_2d:2d_graphics",
+    "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "napi:ace_napi",
   ]

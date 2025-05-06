@@ -130,7 +130,7 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto paintProperty = pattern->GetPaintProperty<ToggleButtonPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
-    auto toggleButtonEventHub = frameNode->GetEventHub<ToggleButtonEventHub>();
+    auto toggleButtonEventHub = frameNode->GetOrCreateEventHub<ToggleButtonEventHub>();
     CHECK_NULL_VOID(toggleButtonEventHub);
 
     /**
@@ -287,7 +287,7 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest005, TestSize.Level1)
      * @tc.steps: step3. pattern OnModifyDone.
      * @tc.expected: step3. check whether the function is executed successfully.
      */
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabled(false);
     togglePattern->OnModifyDone();
@@ -518,7 +518,7 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest012, TestSize.Level1)
     togglebuttonPattern->OnTouchDown();
     togglebuttonPattern->OnTouchUp();
 
-    auto togglebuttonEventHub = togglebuttonNode->GetEventHub<ButtonEventHub>();
+    auto togglebuttonEventHub = togglebuttonNode->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(togglebuttonEventHub);
     togglebuttonEventHub->SetStateEffect(STATE_EFFECT);
     togglebuttonPattern->isSetClickedColor_ = false;

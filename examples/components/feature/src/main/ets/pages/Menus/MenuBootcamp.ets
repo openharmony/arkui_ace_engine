@@ -159,7 +159,6 @@ export struct MenuBootcamp {
   @State menuItemGroupDividerEndMargin: number = 16;
   @State enableSubMenuExpandingMode: boolean = false;
   @State subMenuExpandingMode: SubMenuExpandingMode = SubMenuExpandingMode.SIDE_EXPAND;
-
   //part1
   // size
   @State enableCompWidth: boolean = false;
@@ -510,7 +509,6 @@ export struct MenuBootcamp {
   @State compLinearGradientColorsNumber2: number = 0;
   @State enableCompLinearGradientRepeating: boolean = false;
   @State compLinearGradientRepeating: boolean = false;
-
   //Focus Control
   @State enableCompFocusable: boolean = false;
   @State compFocusable: boolean = false;
@@ -620,11 +618,9 @@ export struct MenuBootcamp {
   // Hit Test Control
   @State enableCompHitTestBehavior: boolean = false
   @State compHitTestBehavior: HitTestMode = HitTestMode.Default
-
   // Obscuring
   @State enableCompObscured: boolean = false
   @State compObscured: Array<ObscuredReasons> = []
-
   // Render Fit
   @State enableCompRenderFit: boolean = false
   @State compRenderFit: RenderFit = RenderFit.TOP_LEFT
@@ -638,7 +634,6 @@ export struct MenuBootcamp {
   @State enableCompUseEffect: boolean = false
   @State compUseEffect: boolean = false
   @State scrollShow: number = 0
-
   //compEvent
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
@@ -1667,6 +1662,7 @@ export struct MenuBootcamp {
   }
 
   @State selection: string | null = null;
+
   @Builder
   ListItemGroupHeaders(str: string) {
     Row() {
@@ -1678,7 +1674,7 @@ export struct MenuBootcamp {
         .fillColor($r('sys.color.ohos_id_color_fourth'))
         .height(24)
         .width(24)
-        .rotate({ angle: this.selection==str ? 90 : 0 })
+        .rotate({ angle: this.selection == str ? 90 : 0 })
         .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
     }
     .borderRadius(20)
@@ -1699,6 +1695,7 @@ export struct MenuBootcamp {
       }
     })
   }
+
   @Builder
   Generic() {
     Scroll(this.scroller) {

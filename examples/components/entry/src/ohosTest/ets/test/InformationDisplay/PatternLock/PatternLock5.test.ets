@@ -42,7 +42,6 @@ export default function PatternLock5() {
     })
 
 
-
     //focusable
     it('ArkUI_Progress_Comp_0461', 0, async (done: Function) => {
 
@@ -319,7 +318,6 @@ export default function PatternLock5() {
 
       done()
     })
-
 
 
   })

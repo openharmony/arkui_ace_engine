@@ -57,7 +57,8 @@ public:
     static void GetOffScreenTreeNodes(InspectorTreeMap& nodes);
     static void GetRecordAllPagesNodes(InspectorTreeMap& treesInfo);
     static uint32_t ParseWindowIdFromMsg(const std::string& message);
-
+    static RefPtr<UINode> GetInspectorByKey(
+        const RefPtr<FrameNode>& root, const std::string& key, bool notDetach = false);
 private:
     static RefPtr<RecNode> AddInspectorTreeNode(const RefPtr<NG::UINode>& uiNode, InspectorTreeMap& recNodes);
     static void GetInspectorTreeInfo(

@@ -1,6 +1,6 @@
-import { describe, beforeAll, it,  } from '@ohos/hypium'
+import { describe, beforeAll, it, } from '@ohos/hypium'
 import { abilityDelegatorRegistry, Driver } from '@kit.TestKit';
-import { ON, Point, Component,  } from '@ohos.UiTest';
+import { ON, Point, Component, } from '@ohos.UiTest';
 import {
   buttonClick,
   getToggle,

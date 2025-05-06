@@ -38,8 +38,14 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
     lastPointEvent_.reset();
     auto maxTimeStamp = TimeStamp::min().time_since_epoch().count();
     for (const auto& point : touchPoints_) {
+        if (inputEventType_ != InputEventType::AXIS &&
+            !CheckoutDownFingers(point.second.id) &&
+            lastRefereeState_ != RefereeState::PENDING &&
+            refereeState_ != RefereeState::PENDING) {
+            continue;
+        }
         PointF localPoint(point.second.x, point.second.y);
-        NGGestureRecognizer::Transform(
+        TransformForRecognizer(
             localPoint, GetAttachedNode(), false, isPostEventResult_, point.second.postEventNodeId);
         FingerInfo fingerInfo = { point.second.originalId, point.second.operatingHand, point.second.GetOffset(),
             Offset(localPoint.GetX(), localPoint.GetY()),
@@ -95,6 +101,7 @@ void MultiFingersRecognizer::CleanRecognizerState()
         refereeState_ == RefereeState::FAIL ||
         refereeState_ == RefereeState::DETECTING) &&
         currentFingers_ == 0) {
+        lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
     }

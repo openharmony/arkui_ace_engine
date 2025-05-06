@@ -36,7 +36,7 @@ export const dialogBoxesRoute: RouteGroup = {
   label: '弹窗',
   children: [
     { name: 'AlertDialog', label: '警告弹窗/AlertDialog' },
-    { name: 'ActionSheet', label: '列表选择弹窗/ActionSheet'},
+    { name: 'ActionSheet', label: '列表选择弹窗/ActionSheet' },
     { name: 'CustomDialog', label: '自定义弹窗/CustomDialog' },
     { name: 'CalendarpickerDialog', label: '日历选择器弹窗/CalendarpickerDialog' },
     { name: 'DatepickerDialog', label: '日期选择器弹窗/DatepickerDialog' },
@@ -56,34 +56,34 @@ export const dialogBoxesRoute: RouteGroup = {
 @Builder
 export function dialogBoxesDestination(name: string, route: Route) {
   if (name === 'DialogBoxes/AlertDialog') {
-    AlertDialogBootcamp({title: route.label})
-  }else if (name === 'DialogBoxes/ActionSheet'){
-    ActionSheetBootcamp({title: route.label})
-  }else if (name === 'DialogBoxes/CustomDialog'){
-    CustomDialogBootcamp({title: route.label})
-  }else if (name === 'DialogBoxes/CalendarpickerDialog'){
-    CalendarPickerDialogBootcamp({title: route.label})
-  }else if (name === 'DialogBoxes/DatepickerDialog'){
-    DatePickerDialogBootcamp({title: route.label})
-  }else if (name === 'DialogBoxes/TimePickerDialog'){
-    TimePickerDialogBootcamp({title: route.label})
-  }else if (name === 'DialogBoxes/TextpickerDialog'){
-    TextPickerDialogBootcamp({title: route.label})
-  }else if (name === 'DialogBoxes/BindContentCover'){
-    BindContentCoverBootcamp({title: route.label})
-  }else if (name === 'DialogBoxes/BindSheet'){
-    BindSheetBootcamp({title: route.label})
-  } else if (name === 'DialogBoxes/promptActionCustomDialog'){
-    promptActionCustomDialogBootcamp({title: route.label})
-  } else if (name === 'DialogBoxes/BindContextMenu'){
-    BindContextMenuBootcamp({title: route.label})
-  }else if (name === 'DialogBoxes/ActionMenu'){
-    ActionMenuBootcamp({title: route.label})
-  }else if (name === 'DialogBoxes/Menu'){
-    BindMenuBootcamp({title: route.label})
-  }else if (name === 'DialogBoxes/Dialog'){
-    DialogBootcamp({title: route.label})
-  }else if (name === 'DialogBoxes/bindPopup'){
-    BindPopupBootcamp({title: route.label})
+    AlertDialogBootcamp({ title: route.label })
+  } else if (name === 'DialogBoxes/ActionSheet') {
+    ActionSheetBootcamp({ title: route.label })
+  } else if (name === 'DialogBoxes/CustomDialog') {
+    CustomDialogBootcamp({ title: route.label })
+  } else if (name === 'DialogBoxes/CalendarpickerDialog') {
+    CalendarPickerDialogBootcamp({ title: route.label })
+  } else if (name === 'DialogBoxes/DatepickerDialog') {
+    DatePickerDialogBootcamp({ title: route.label })
+  } else if (name === 'DialogBoxes/TimePickerDialog') {
+    TimePickerDialogBootcamp({ title: route.label })
+  } else if (name === 'DialogBoxes/TextpickerDialog') {
+    TextPickerDialogBootcamp({ title: route.label })
+  } else if (name === 'DialogBoxes/BindContentCover') {
+    BindContentCoverBootcamp({ title: route.label })
+  } else if (name === 'DialogBoxes/BindSheet') {
+    BindSheetBootcamp({ title: route.label })
+  } else if (name === 'DialogBoxes/promptActionCustomDialog') {
+    promptActionCustomDialogBootcamp({ title: route.label })
+  } else if (name === 'DialogBoxes/BindContextMenu') {
+    BindContextMenuBootcamp({ title: route.label })
+  } else if (name === 'DialogBoxes/ActionMenu') {
+    ActionMenuBootcamp({ title: route.label })
+  } else if (name === 'DialogBoxes/Menu') {
+    BindMenuBootcamp({ title: route.label })
+  } else if (name === 'DialogBoxes/Dialog') {
+    DialogBootcamp({ title: route.label })
+  } else if (name === 'DialogBoxes/bindPopup') {
+    BindPopupBootcamp({ title: route.label })
   }
 }

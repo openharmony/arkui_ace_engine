@@ -446,28 +446,6 @@ void RepeatVirtualScrollCaches::ForEachL1IndexUINode(std::map<int32_t, RefPtr<UI
     }
 }
 
-void RepeatVirtualScrollCaches::RecycleItemsByIndex(int32_t index)
-{
-    if (!reusable_) {
-        return;
-    }
-    auto keyIter = key4index_.find(index);
-    if (keyIter != key4index_.end()) {
-        // STATE_MGMT_NOTE
-        // can not just remove from L1, also need to detach from tree!
-        // how to fix cause a call to RepeatVirtualScrollNode::DropFromL1 in
-        TAG_LOGD(
-            AceLogTag::ACE_REPEAT, "remove index %{public}d -> key %{public}s from L1", index, keyIter->second.c_str());
-
-        ACE_SCOPED_TRACE(
-            "RepeatVirtualScrollCaches::RecycleItemsByIndex index[%d] -> key [%s]", index, keyIter->second.c_str());
-
-        // don't fire OnRecycle here, as we manage reuse/recycle indepedently
-        RemoveKeyFromL1(keyIter->second, false);
-        isModified_ = true;
-    }
-}
-
 /**
  * iterate over all entries of L1 and call function for each entry
  * if function returns true, entry is added to rebuild L1

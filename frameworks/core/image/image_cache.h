@@ -45,13 +45,13 @@ class ImageObject;
 class ImageData;
 } // namespace NG
 
-class ACE_EXPORT ImageCache : public AceType {
+class ACE_FORCE_EXPORT ImageCache : public AceType {
     DECLARE_ACE_TYPE(ImageCache, AceType);
 
 public:
     static RefPtr<ImageCache> Create();
-    ImageCache() = default;
-    ~ImageCache() override = default;
+    ImageCache();
+    ~ImageCache() override;
 
     void CacheImage(const std::string& key, const std::shared_ptr<CachedImage>& image);
     std::shared_ptr<CachedImage> GetCacheImage(const std::string& key);

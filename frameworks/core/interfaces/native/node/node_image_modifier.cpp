@@ -54,6 +54,9 @@ constexpr int32_t IMAGE_CONTENT_HEIGHT_INDEX = 8;
 constexpr uint32_t MAX_COLOR_FILTER_SIZE = 20;
 constexpr uint32_t ERROR_UINT_CODE = -1;
 constexpr int32_t DEFAULT_FALSE = 0;
+constexpr float HDR_BRIGHTNESS_MIN = 0.0f;
+constexpr float HDR_BRIGHTNESS_MAX = 1.0f;
+constexpr float DEFAULT_HDR_BRIGHTNESS = 1.0f;
 const std::vector<ResizableOption> directions = { ResizableOption::TOP, ResizableOption::RIGHT,
     ResizableOption::BOTTOM, ResizableOption::LEFT };
 std::string g_strValue;
@@ -759,6 +762,23 @@ void SetDynamicRangeMode(ArkUINodeHandle node, ArkUI_Int32 dynamicRangeMode)
     ImageModelNG::SetDynamicRangeMode(frameNode, dynamicRangeModeValue);
 }
 
+void SetHdrBrightness(ArkUINodeHandle node, ArkUI_Float32 hdrBrightness)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (LessNotEqual(hdrBrightness, HDR_BRIGHTNESS_MIN) || GreatNotEqual(hdrBrightness, HDR_BRIGHTNESS_MAX)) {
+        hdrBrightness = DEFAULT_HDR_BRIGHTNESS;
+    }
+    ImageModelNG::SetHdrBrightness(frameNode, hdrBrightness);
+}
+
+void ResetHdrBrightness(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, HdrBrightness, frameNode);
+}
+
 int32_t GetFitOriginalSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1058,6 +1078,8 @@ const ArkUIImageModifier* GetImageModifier()
         .resetResizable = ResetResizable,
         .setDynamicRangeMode = SetDynamicRangeMode,
         .resetDynamicRangeMode = ResetDynamicRangeMode,
+        .setHdrBrightness = SetHdrBrightness,
+        .resetHdrBrightness = ResetHdrBrightness,
         .setImageRotateOrientation = SetImageRotateOrientation,
         .resetImageRotateOrientation = ResetImageRotateOrientation,
         .setEnhancedImageQuality = SetEnhancedImageQuality,

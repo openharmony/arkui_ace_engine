@@ -432,6 +432,8 @@ struct GridLayoutInfo {
 
     int32_t times_ = 0;
 
+    float endHeight_ = 0.0f;
+
 private:
     float GetCurrentOffsetOfRegularGrid(float mainGap) const;
     float GetContentHeightOfRegularGrid(float mainGap) const;

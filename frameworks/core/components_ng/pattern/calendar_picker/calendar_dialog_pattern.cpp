@@ -467,7 +467,7 @@ void CalendarDialogPattern::InitEntryChangeEvent()
 {
     auto entryNode = entryNode_.Upgrade();
     CHECK_NULL_VOID(entryNode);
-    auto eventHub = entryNode->GetEventHub<CalendarPickerEventHub>();
+    auto eventHub = entryNode->GetOrCreateEventHub<CalendarPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto callback = [weak = WeakClaim(this)](const std::string& info) {
         auto pattern = weak.Upgrade();
@@ -1149,7 +1149,7 @@ void CalendarDialogPattern::FireChangeByKeyEvent(PickerDate& selectedDay)
     CHECK_NULL_VOID(swiperPattern);
     auto monthNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperPattern->GetCurrentIndex()));
     CHECK_NULL_VOID(monthNode);
-    auto eventHub = monthNode->GetEventHub<CalendarEventHub>();
+    auto eventHub = monthNode->GetOrCreateEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateSelectedChangeEvent(selectedDay.ToString(true));
 }

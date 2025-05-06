@@ -78,6 +78,16 @@ public:
         weakButtonConfirm_ = buttonConfirmNode;
     }
 
+    void SetNextPrevButtonNode(WeakPtr<FrameNode> nextPrevButtonNode)
+    {
+        nextPrevButtonNode_ = nextPrevButtonNode;
+    }
+
+    void SetIsNext(bool isNext)
+    {
+        isNext_ = isNext;
+    }
+
     void updateFontConfigurationEvent(const std::function<void()>& closeDialogEvent)
     {
         closeDialogEvent_ = closeDialogEvent;
@@ -687,10 +697,8 @@ private:
     void UpdateNodePositionForUg();
     void MountSecondNode(const RefPtr<FrameNode>& stackSecondNode);
     void RemoveSecondNode();
-    void UpdateConfirmButtonMargin(
-        const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
-    void UpdateCancelButtonMargin(
-        const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
+    void UpdateButtonMargin(
+        const RefPtr<FrameNode>& buttonNode, const RefPtr<DialogTheme>& dialogTheme, const bool isConfirmOrNextNode);
     void CalcLeftTotalColumnWidth(const RefPtr<FrameNode>& host, float &leftTotalColumnWidth, float childSize);
     bool CheckFocusID(int32_t childSize);
     bool ParseDirectionKey(RefPtr<FrameNode>& host, RefPtr<TimePickerColumnPattern>& pattern, KeyCode& code,
@@ -722,6 +730,7 @@ private:
         const RefPtr<FrameNode>& columnFrameNode, bool isZeroPrefixTypeHide, uint32_t selectedTime);
     void InitFocusEvent();
     void SetCallBack();
+    void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext);
 
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
@@ -750,6 +759,8 @@ private:
     std::optional<int32_t> DividerId_;
     WeakPtr<FrameNode> weakButtonConfirm_;
     WeakPtr<FrameNode> weakButtonCancel_;
+    WeakPtr<FrameNode> nextPrevButtonNode_;
+    bool isNext_ = true;
     std::function<void()> closeDialogEvent_;
     bool hasSecond_ = false;
     bool wheelModeEnabled_ = true;

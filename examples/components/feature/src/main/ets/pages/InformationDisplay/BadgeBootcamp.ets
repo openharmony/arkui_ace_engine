@@ -45,7 +45,6 @@ import { CompEventMonopolizationBlocks } from '../../components/CompEventMonopol
 import { CompCursorControlBlocks } from '../../components/CompCursorControlBlocks'
 import { CompGradientColorBlocks } from '../../components/CompGradientColorBlocks';
 
-
 import { CompFocusControlBlocks } from '../../components/CompFocusControlBlocks';
 import { CompHoverEffectBlocks } from '../../components/CompHoverEffectBlocks';
 import { CompComponentIDBlocks } from '../../components/CompComponentIDBlocks';
@@ -482,7 +481,6 @@ export struct BadgeBootcamp {
   @State compLinearGradientColorsNumber2: number = 0;
   @State enableCompLinearGradientRepeating: boolean = false;
   @State compLinearGradientRepeating: boolean = false;
-
   //Focus Control
   @State enableCompFocusable: boolean = false;
   @State compFocusable: boolean = false;
@@ -553,7 +551,6 @@ export struct BadgeBootcamp {
   @State compAccessibilityDescription: string = `无障碍说明`;
   @State enableCompAccessibilityLevel: boolean = false;
   @State compAccessibilityLevel: string = 'auto';
-
   @State modifier: MyModifier = new MyModifier()
   @State enableCompAttributeModifier: boolean = false;
   @State compAttributeModifier: boolean = false;
@@ -592,7 +589,6 @@ export struct BadgeBootcamp {
   // Hit Test Control
   @State enableCompHitTestBehavior: boolean = false
   @State compHitTestBehavior: HitTestMode = HitTestMode.Default
-
   // Obscuring
   @State enableCompObscured: boolean = false
   @State compObscured: Array<ObscuredReasons> = []
@@ -678,10 +674,6 @@ export struct BadgeBootcamp {
     .hideTitleBar(true)
   }
 
-
-
-
-
   @Builder
   popupBuilder() {
     Row() {
@@ -693,9 +685,6 @@ export struct BadgeBootcamp {
   compBackground() {
     Text('123')
   }
-
-
-
 
   @Builder
   badgeParamWithNumber() {

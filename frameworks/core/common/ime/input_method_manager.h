@@ -28,7 +28,7 @@ public:
     void SetWindowFocus(bool windowFocus);
     bool NeedSoftKeyboard() const;
     // Close the keyboard in-process
-    void CloseKeyboard();
+    void CloseKeyboard(bool disableNeedToRequestKeyboard = true);
     void CloseKeyboardInProcess();
     void CloseKeyboardInPipelineDestroy();
     void CloseKeyboard(const RefPtr<NG::FrameNode>& focusNode);

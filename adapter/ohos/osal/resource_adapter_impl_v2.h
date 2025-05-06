@@ -90,6 +90,7 @@ public:
         const ResourceConfiguration& config, const ConfigurationChange& configurationChange) override;
 
 private:
+    std::unordered_map<std::string, uint32_t> patternNameMap_;
     std::string GetActualResourceName(const std::string& resName) const;
     bool NeedUpdateResConfig(const std::shared_ptr<Global::Resource::ResConfig>& oldResConfig,
         const std::shared_ptr<Global::Resource::ResConfig>& newResConfig);

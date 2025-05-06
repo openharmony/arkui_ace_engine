@@ -16,6 +16,7 @@
 export class BlockTag {
   public time: string = '';
   public description: string = '';
+
   constructor(nowTime: string, tagDes: string) {
     this.time = nowTime;
     this.description = tagDes;

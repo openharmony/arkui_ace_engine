@@ -50,7 +50,7 @@ export default function Marquee1() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id:'Marquee',
+        id: 'Marquee',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('start', JsonType.value),
@@ -70,7 +70,7 @@ export default function Marquee1() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id:'Marquee',
+        id: 'Marquee',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('start', JsonType.value),
@@ -159,7 +159,7 @@ export default function Marquee1() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id:'Marquee',
+        id: 'Marquee',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fromStart', JsonType.value),
@@ -179,7 +179,7 @@ export default function Marquee1() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id:'Marquee',
+        id: 'Marquee',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('fromStart', JsonType.value),

@@ -43,7 +43,6 @@ export default function Progress7() {
     })
 
 
-
     // hoverEffect
     it('ArkUI_Progress_Comp_0558', 0, async (done: Function) => {
 

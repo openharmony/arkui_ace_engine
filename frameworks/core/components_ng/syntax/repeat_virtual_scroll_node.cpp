@@ -481,11 +481,6 @@ void RepeatVirtualScrollNode::RecycleItems(int32_t from, int32_t to)
 
     offscreenItems_.from = from;
     offscreenItems_.to = to;
-    for (auto i = from; i < to; i++) {
-        if (i >= startIndex_ && i < startIndex_ + static_cast<int32_t>(totalCount_)) {
-            caches_.RecycleItemsByIndex(i - startIndex_);
-        }
-    }
 }
 
 void RepeatVirtualScrollNode::SetNodeIndexOffset(int32_t start, int32_t /*count*/)

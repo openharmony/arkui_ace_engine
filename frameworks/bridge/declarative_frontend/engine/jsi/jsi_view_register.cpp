@@ -669,6 +669,7 @@ panda::Local<panda::JSValueRef> JsGetFilteredInspectorTree(panda::JsiRuntimeCall
 
     NG::InspectorFilter filter;
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    bool isLayoutInspector = false;
     if (argc == PARAM_SIZE_ONE) {
         if (!firstArg->IsArray(vm)) {
             JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "invalid param type");
@@ -683,11 +684,15 @@ panda::Local<panda::JSValueRef> JsGetFilteredInspectorTree(panda::JsiRuntimeCall
                 return panda::StringRef::NewFromUtf8(vm, "");
             }
             auto itemVal = panda::Local<panda::StringRef>(subItemVal);
+            if (itemVal->ToString(vm) == "isLayoutInspector") {
+                isLayoutInspector = true;
+                continue;
+            }
             filter.AddFilterAttr(itemVal->ToString(vm));
         }
     }
     bool needThrow = false;
-    auto nodeInfos = NG::Inspector::GetInspector(false, filter, needThrow);
+    auto nodeInfos = NG::Inspector::GetInspector(isLayoutInspector, filter, needThrow);
     if (needThrow) {
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "get inspector failed");
         return panda::StringRef::NewFromUtf8(vm, "");

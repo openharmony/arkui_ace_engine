@@ -71,15 +71,15 @@ public:
     {
         return XComponentType::UNKNOWN;
     }
+    virtual void SetControllerOnCreated(SurfaceCreatedEvent&& onCreated) {}
+    virtual void SetControllerOnChanged(SurfaceChangedEvent&& onChanged) {}
+    virtual void SetControllerOnDestroyed(SurfaceDestroyedEvent&& onDestroyed) {}
     virtual std::optional<std::string> GetLibraryName()
     {
         return std::nullopt;
     }
     virtual void EnableAnalyzer(bool enable) {}
     virtual void SetImageAIOptions(void* options) {}
-    virtual void SetControllerOnCreated(SurfaceCreatedEvent&& onCreated) {}
-    virtual void SetControllerOnChanged(SurfaceChangedEvent&& onChanged) {}
-    virtual void SetControllerOnDestroyed(SurfaceDestroyedEvent&& onDestroyed) {}
     virtual void SetRenderFit(RenderFit renderFit) {}
     virtual void EnableSecure(bool isSecure) {}
     virtual void HdrBrightness(float hdrBrightness) {}

@@ -91,7 +91,7 @@ class MyModifier implements AttributeModifier<TextAttribute> {
 }
 
 class MyLoadingProgressStyle implements ContentModifier<LoadingProgressConfiguration> {
-  public  enableLoading: boolean = false
+  public enableLoading: boolean = false
 
   constructor(enableLoading: boolean) {
     this.enableLoading = enableLoading
@@ -102,7 +102,8 @@ class MyLoadingProgressStyle implements ContentModifier<LoadingProgressConfigura
   }
 }
 
-@Builder function buildLoadingProgress(config: LoadingProgressConfiguration) {
+@Builder
+function buildLoadingProgress(config: LoadingProgressConfiguration) {
   Column() {
     Button('' + ((config.contentModifier as MyLoadingProgressStyle).enableLoading))
       .onClick((event: ClickEvent) => {
@@ -114,6 +115,7 @@ class MyLoadingProgressStyle implements ContentModifier<LoadingProgressConfigura
       .backgroundColor(((config.contentModifier as MyLoadingProgressStyle).enableLoading) ? Color.Grey : 0x2577e3)
   }.width('50%')
 }
+
 class MyGestureModifier1 implements GestureModifier {
   applyGesture(event: UIGestureEvent): void {
     event.addGesture(
@@ -137,7 +139,6 @@ class MyGestureModifier2 implements GestureModifier {
 
 @Component
 export struct LoadingProgressBootcamp {
-
   @Require @Prop title: ResourceStr;
   @State showParameters: boolean = false;
   @State enableColor: boolean = false;
@@ -532,7 +533,6 @@ export struct LoadingProgressBootcamp {
   @State compRadialGradientColorsNumber2: number = 0;
   @State enableCompRadialGradientRepeating: boolean = false;
   @State compRadialGradientRepeating: boolean = false;
-
   //Focus Control
   @State enableCompFocusable: boolean = false;
   @State compFocusable: boolean = false;
@@ -605,7 +605,6 @@ export struct LoadingProgressBootcamp {
   @State compAccessibilityDescription: string = `无障碍说明`;
   @State enableCompAccessibilityLevel: boolean = false;
   @State compAccessibilityLevel: string = 'auto';
-
   @State modifier: MyModifier = new MyModifier()
   @State enableCompAttributeModifier: boolean = false;
   @State compAttributeModifier: boolean = false;
@@ -644,7 +643,6 @@ export struct LoadingProgressBootcamp {
   // Hit Test Control
   @State enableCompHitTestBehavior: boolean = false
   @State compHitTestBehavior: HitTestMode = HitTestMode.Default
-
   // Obscuring
   @State enableCompObscured: boolean = false
   @State compObscured: Array<ObscuredReasons> = []
@@ -685,7 +683,6 @@ export struct LoadingProgressBootcamp {
   //compEvent
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
-
   @State selection: string | null = null;
   scroller: Scroller = new Scroller()
 
@@ -731,7 +728,6 @@ export struct LoadingProgressBootcamp {
     Text('123')
   }
 
-
   build() {
     NavDestination() {
       Drawer({
@@ -759,7 +755,7 @@ export struct LoadingProgressBootcamp {
         .color(useEnabled(this.enableColor, this.color))
         .enableLoading(useEnabled(this.enableEnableLoading,
           this.enableLoading))
-        .contentModifier(this.enableContentModifier?new MyLoadingProgressStyle(this.contentModifier):null)
+        .contentModifier(this.enableContentModifier ? new MyLoadingProgressStyle(this.contentModifier) : null)
         .width(useEnabled(this.enableCompWidth, this.compWidth))
         .height(useEnabled(this.enableCompHeight, this.compHeight))
         .padding(useEnabled(this.enableCompPadding, this.compPadding))
@@ -1274,7 +1270,8 @@ export struct LoadingProgressBootcamp {
             this.compFocusBoxStrokeWidth)) : null,
         })
         .id(useEnabled(this.enableCompId, this.compId) ? useEnabled(this.enableCompId, this.compId) : null)
-        .key(useEnabled(this.enableCompKey, this.compKey) ? useEnabled(this.enableCompKey, this.compKey) : 'LoadingProgress')
+        .key(useEnabled(this.enableCompKey, this.compKey) ? useEnabled(this.enableCompKey, this.compKey) :
+          'LoadingProgress')
         .focusScopePriority(
           useEnabled(this.enableCompFocusScopePriorityScopeId, this.compFocusScopePriorityScopeId),
           useEnabled(this.enableCompFocusScopePriorityPriority, this.compFocusScopePriorityPriority)
@@ -2083,7 +2080,6 @@ export struct LoadingProgressBootcamp {
     .height('52%')
     .id('scroll')
   }
-
 
   @Builder
   ListItemGroupHeaders(str: string) {

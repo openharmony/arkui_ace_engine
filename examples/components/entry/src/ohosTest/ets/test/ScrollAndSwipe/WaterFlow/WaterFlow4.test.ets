@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 import { describe, beforeAll, it } from '@ohos/hypium'
-import { buttonClick,
+import {
+  buttonClick,
   JsonType,
   KeyStruct,
   radioClick,
@@ -28,6 +29,7 @@ import { WaterFlowStart } from './WaterFlow';
 import { Driver, ON } from '@kit.TestKit';
 
 const driver = Driver.create();
+
 export default function WaterFlow4() {
   describe('WaterFlow4', () => {
     beforeAll(async (done: Function) => {
@@ -781,7 +783,7 @@ export default function WaterFlow4() {
 
     it('ArkUI_WaterFlow_Comp_0315', 0, async (done: Function) => {
       // 获取不到
-      await titleSearch('基础属性','blendMode.type','通用属性2')
+      await titleSearch('基础属性', 'blendMode.type', '通用属性2')
       await radioClick({
         radioClickObj: 0,
         toggleClick: {
@@ -793,7 +795,7 @@ export default function WaterFlow4() {
     })
     it('ArkUI_WaterFlow_Comp_0316', 0, async (done: Function) => {
       // 获取不到
-      await titleSearch('基础属性','blendMode.type','通用属性2')
+      await titleSearch('基础属性', 'blendMode.type', '通用属性2')
       await radioClick({
         radioClickObj: 1,
         toggleClick: {

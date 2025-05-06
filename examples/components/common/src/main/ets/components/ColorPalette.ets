@@ -48,7 +48,7 @@ export struct ColorPalette {
         .width(32)
         .height(32)
         .enabled(this.isEnabled)
-        .clipShape(this.isEnabled?undefined : new Circle({ width: 32, height: 32 }))
+        .clipShape(this.isEnabled ? undefined : new Circle({ width: 32, height: 32 }))
         .onClick(() => {
           this.onChange?.(color);
         })

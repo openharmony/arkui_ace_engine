@@ -47,7 +47,7 @@ export const textAndInputRoute: RouteGroup = {
     { name: 'SymbolSpan', label: 'SymbolSpan' },
     { name: 'SymbolGlyph', label: 'SymbolGlyph' },
     { name: 'Hyperlink', label: '超链接/Hyperlink' },
-    { name: 'SelectionMenu', label: '文本选择菜单/SelectionMenu'},
+    { name: 'SelectionMenu', label: '文本选择菜单/SelectionMenu' },
     { name: 'richeditorSpanurl', label: '富文本超链接/RichEditor' },
     { name: 'TextSpanUrl', label: '超链接/TextSpanUrl' },
     { name: 'SearchCancel', label: '搜索框关闭/SearchCancel' },
@@ -57,35 +57,35 @@ export const textAndInputRoute: RouteGroup = {
 @Builder
 export function textAndInputDestination(name: string, route: Route) {
   if (name === 'TextAndInput/Text') {
-    TextBootcamp({title: route.label})
-  }else if (name === 'TextAndInput/TextArea'){
-    TextAreaBootcamp({title: route.label})
-  }else if (name === 'TextAndInput/TextInput'){
-    TextInputBootcamp({title: route.label})
+    TextBootcamp({ title: route.label })
+  } else if (name === 'TextAndInput/TextArea') {
+    TextAreaBootcamp({ title: route.label })
+  } else if (name === 'TextAndInput/TextInput') {
+    TextInputBootcamp({ title: route.label })
   } else if (name === 'TextAndInput/TextInputLine') {
-    TextInputLineBootcamp({title: route.label})
-  }else if (name === 'TextAndInput/RichEditor'){
-    RichEditorBootcamp({title: route.label})
-  }else if (name === 'TextAndInput/Search'){
-    SearchBootcamp({title: route.label})
-  }else if (name === 'TextAndInput/Span'){
-    SpanBootcamp({title: route.label})
-  }else if (name === 'TextAndInput/ImageSpan'){
-    ImageSpanBootcamp({title: route.label})
-  }else if (name === 'TextAndInput/ContainerSpan'){
-    ContainerSpanBootcamp({title: route.label})
-  }else if (name === 'TextAndInput/SymbolSpan'){
-    SymbolSpanBootcamp({title: route.label})
-  }else if (name === 'TextAndInput/SymbolGlyph'){
-    SymbolGlyphBootcamp({title: route.label})
-  }else if (name === 'TextAndInput/Hyperlink'){
-    HyperlinkBootcamp({title: route.label})
-  }else if (name === 'TextAndInput/SelectionMenu'){
-    SelectionMenuBootcamp({title: route.label})
-  }else if (name === 'TextAndInput/richeditorSpanurl'){
-    RichEditorSpanUrlBootcamp({title: route.label})
-  }else if (name === 'TextAndInput/TextSpanUrl'){
-    TextSpanUrlBootcamp({title: route.label})
+    TextInputLineBootcamp({ title: route.label })
+  } else if (name === 'TextAndInput/RichEditor') {
+    RichEditorBootcamp({ title: route.label })
+  } else if (name === 'TextAndInput/Search') {
+    SearchBootcamp({ title: route.label })
+  } else if (name === 'TextAndInput/Span') {
+    SpanBootcamp({ title: route.label })
+  } else if (name === 'TextAndInput/ImageSpan') {
+    ImageSpanBootcamp({ title: route.label })
+  } else if (name === 'TextAndInput/ContainerSpan') {
+    ContainerSpanBootcamp({ title: route.label })
+  } else if (name === 'TextAndInput/SymbolSpan') {
+    SymbolSpanBootcamp({ title: route.label })
+  } else if (name === 'TextAndInput/SymbolGlyph') {
+    SymbolGlyphBootcamp({ title: route.label })
+  } else if (name === 'TextAndInput/Hyperlink') {
+    HyperlinkBootcamp({ title: route.label })
+  } else if (name === 'TextAndInput/SelectionMenu') {
+    SelectionMenuBootcamp({ title: route.label })
+  } else if (name === 'TextAndInput/richeditorSpanurl') {
+    RichEditorSpanUrlBootcamp({ title: route.label })
+  } else if (name === 'TextAndInput/TextSpanUrl') {
+    TextSpanUrlBootcamp({ title: route.label })
   } else if (name === 'TextAndInput/SearchCancel') {
     SearchCancelBootcamp({ title: route.label })
   }

@@ -26,9 +26,7 @@ import {
   getToggle,
 } from '../../../utils';
 
-
 import { GaugeStart } from './Gauge';
-
 
 
 export default function Gauge8() {

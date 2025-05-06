@@ -54,6 +54,7 @@ public:
     void HandleReStartDrag(const GestureEvent& info);
     void HandleDragStart();
     void HandleDragEnd();
+    void HandlePreDragStatus(const PreDragStatus preDragStatus);
     void TransDragWindowToFwk();
 
     void RequestStatusTransition(int32_t nextStatus);
@@ -70,6 +71,7 @@ public:
         return static_cast<DragDropInitiatingStatus>(currentState_);
     }
 
+    bool DragInitStateIsNotEmpty();
 private:
     DragDropInitiatingParams dragDropInitiatingParams_;
     int32_t currentState_ = 0;

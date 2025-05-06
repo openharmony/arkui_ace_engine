@@ -2403,4 +2403,442 @@ HWTEST_F(TitleBarTestNg, TitleBarHoverModeTest002, TestSize.Level1)
     auto offset = NavigationTitleUtil::CalculateTitlebarOffset(frameNode_);
     EXPECT_EQ(offset, 0.0f);
 }
+
+/**
+ * @tc.name: createBarIemTextNode
+ * @tc.desc: noBranch
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, createBarIemTextNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set text value
+     */
+    std::string text = "hello";
+    auto barItemNode = NavigationTitleUtil::CreateBarItemTextNode(text);
+    ASSERT_NE(barItemNode, nullptr);
+
+    /**
+     * @tc.steps: step2. test content value, textAlign,
+     * @tc.expected: expect value equal text, textAlign equal CENTER
+     */
+    auto layoutProperty = barItemNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto barItemText = layoutProperty->GetContent().value_or(u"");
+    EXPECT_EQ(barItemText, UtfUtils::Str8DebugToStr16(text));
+    auto alignValue = static_cast<int32_t>(layoutProperty->GetTextAlign().value());
+    EXPECT_EQ(alignValue, 1);
+}
+
+/**
+ * @tc.name: CreateBarItemIconNode
+ * @tc.desc: if (greatOrEqualTargetApiVersion(PlatformVersion::VERSION_TWELVE))  true;
+ *           if (isButtonEnable) true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, CreateBarItemIconNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create barItem, theme, setApi version
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto navigationTheme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(navigationTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(navigationTheme));
+    ASSERT_NE(navigationTheme, nullptr);
+    BarItem barItem;
+    barItem.icon = "icon";
+    bool isButtonEnable = true;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    /**
+     * @tc.steps: step2. createBarItemIconNode
+     * @tc.expected: expect equal target value
+     */
+    auto iconNode = NavigationTitleUtil::CreateBarItemIconNode(barItem, isButtonEnable, navigationTheme);
+    ASSERT_NE(iconNode, nullptr);
+    auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    auto info = imageLayoutProperty->GetImageSourceInfo().value();
+    EXPECT_EQ(navigationTheme->GetIconColor(), info.GetFillColor());
+}
+
+/**
+ * @tc.name: CreateBarItemIconNod2
+ * @tc.desc: if (greatOrEqualTargetApiVersion(PlatformVersion::VERSION_TWELVE))  false;
+ *           if (isButtonEnable) true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, CreateBarItemIconNode2, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create barItem, theme, setApi version
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto navigationTheme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(navigationTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(navigationTheme));
+    ASSERT_NE(navigationTheme, nullptr);
+    BarItem barItem;
+    barItem.icon = "icon";
+    bool isButtonEnable = true;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+
+    /**
+     * @tc.steps: step2. createBarItemIconNode
+     * @tc.expected: expect equal target value
+     */
+    auto iconNode = NavigationTitleUtil::CreateBarItemIconNode(barItem, isButtonEnable, navigationTheme);
+    ASSERT_NE(iconNode, nullptr);
+    auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    auto info = imageLayoutProperty->GetImageSourceInfo().value();
+    EXPECT_EQ(navigationTheme->GetMenuIconColor(), info.GetFillColor());
+}
+
+/**
+ * @tc.name: CreateBarItemIconNod3
+ * @tc.desc: if (greatOrEqualTargetApiVersion(PlatformVersion::VERSION_TWELVE))  true;
+ *           if (isButtonEnable) false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, CreateBarItemIconNode3, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create barItem, theme, setApi version
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto navigationTheme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(navigationTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(navigationTheme));
+    ASSERT_NE(navigationTheme, nullptr);
+    BarItem barItem;
+    barItem.icon = "icon";
+    bool isButtonEnable = false;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    /**
+     * @tc.steps: step2. createBarItemIconNode
+     * @tc.expected: expect equal target value
+     */
+    auto iconNode = NavigationTitleUtil::CreateBarItemIconNode(barItem, isButtonEnable, navigationTheme);
+    ASSERT_NE(iconNode, nullptr);
+    auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    auto info = imageLayoutProperty->GetImageSourceInfo().value();
+    auto opacity = navigationTheme->GetIconDisableAlpha();
+    EXPECT_EQ(navigationTheme->GetIconColor().BlendOpacity(opacity), info.GetFillColor());
+}
+
+/**
+ * @tc.name: CreateBarItemIconNod4
+ * @tc.desc: if (greatOrEqualTargetApiVersion(PlatformVersion::VERSION_TWELVE))  false;
+ *           if (isButtonEnable) false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, CreateBarItemIconNode4, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create barItem, theme, setApi version
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto navigationTheme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(navigationTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(navigationTheme));
+    ASSERT_NE(navigationTheme, nullptr);
+    BarItem barItem;
+    barItem.icon = "icon";
+    bool isButtonEnable = false;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+
+    /**
+     * @tc.steps: step2. createBarItemIconNode
+     * @tc.expected: expect equal target value
+     */
+    auto iconNode = NavigationTitleUtil::CreateBarItemIconNode(barItem, isButtonEnable, navigationTheme);
+    ASSERT_NE(iconNode, nullptr);
+    auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    auto info = imageLayoutProperty->GetImageSourceInfo().value();
+    auto opacity = navigationTheme->GetAlphaDisabled();
+    EXPECT_EQ(navigationTheme->GetMenuIconColor().BlendOpacity(opacity), info.GetFillColor());
+}
+
+/**
+ * @tc.name: InitTitleBarButtonEvent
+ * @tc.desc: if (menuItem.action)  true;
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, InitTitleBarButtonEvent, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create barItem, buttonNode
+     */
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+    BarItem menuItem;
+    std::function<void()> func = []() {};
+    menuItem.action = func;
+    bool isButtonEnabled = false;
+
+    /**
+     * @tc.steps: step2. call func, test clickEvent and eventhub
+     */
+    NavigationTitleUtil::InitTitleBarButtonEvent(buttonNode, nullptr, false, menuItem, isButtonEnabled);
+    auto gestureEventhub = buttonNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventhub, nullptr);
+    EXPECT_EQ(gestureEventhub->IsClickEventsEmpty(), false);
+    EXPECT_EQ(isButtonEnabled, false);
+
+    auto eventHub = buttonNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_EQ(eventHub->IsEnabled(), false);
+}
+
+/**
+ * @tc.name: InitTitleBarButtonEvent
+ * @tc.desc: if (menuItem.action)  false;
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, InitTitleBarButtonEvent2, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create barItem, buttonNode
+     */
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+    BarItem menuItem;
+    menuItem.action = nullptr;
+    bool isButtonEnabled = true;
+
+    /**
+     * @tc.steps: step2. call func, test clickEvent and eventhub
+     */
+    NavigationTitleUtil::InitTitleBarButtonEvent(buttonNode, nullptr, false, menuItem, isButtonEnabled);
+    auto gestureEventhub = buttonNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventhub, nullptr);
+    EXPECT_EQ(gestureEventhub->IsClickEventsEmpty(), true);
+    EXPECT_EQ(isButtonEnabled, true);
+
+    auto eventHub = buttonNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_EQ(eventHub->IsEnabled(), true);
+}
+
+/**
+ * @tc.name: UpdatebarItemNodeWithItem
+ * @tc.desc: if (LessThanAPIVersion(10) && barItem.text.has_vlaue() && !barItem.text.value().empty)  true;
+ *           if (barItem.icon.has_value()) || (barItem.iconSymbol.has_value() && barItem.iconSymbol.value() != nullptr)
+ * true if (barItem.action) true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, UpdatebarItemNodeWithItem, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create barItem, buttonNode
+     */
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(V2::BAR_ITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(barItemNode, nullptr);
+    BarItem barItem;
+    bool isButtonEnabled = true;
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    /**
+     * @tc.steps: step2. set apiVersion, textnode
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+    std::optional<std::string> opt1 = "Hello";
+    barItem.text = opt1;
+
+    std::optional<std::string> icon = "icon";
+    barItem.icon = icon;
+
+    std::function<void()> func = []() {};
+    barItem.action = func;
+
+    NavigationTitleUtil::UpdateBarItemNodeWithItem(barItemNode, barItem, isButtonEnabled, theme);
+    auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    EXPECT_NE(barItemNode->GetTextNode(), nullptr);
+    EXPECT_NE(barItemNode->GetIconNode(), nullptr);
+    EXPECT_NE(eventHub->itemAction_, nullptr);
+}
+
+/**
+ * @tc.name: UpdatebarItemNodeWithItem1
+ * @tc.desc: if (LessThanAPIVersion(10) && barItem.text.has_vlaue() && !barItem.text.value().empty)  true;
+ *           if (barItem.icon.has_value()) || (barItem.iconSymbol.has_value() && barItem.iconSymbol.value() != nullptr)
+ * false if (barItem.action) true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, UpdatebarItemNodeWithItem1, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create barItem, buttonNode
+     */
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(V2::BAR_ITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(barItemNode, nullptr);
+    BarItem barItem;
+    bool isButtonEnabled = true;
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    /**
+     * @tc.steps: step2. set apiVersion, textnode
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+    std::optional<std::string> opt1 = "Hello";
+    barItem.text = opt1;
+
+    std::function<void()> func = []() {};
+    barItem.action = func;
+
+    NavigationTitleUtil::UpdateBarItemNodeWithItem(barItemNode, barItem, isButtonEnabled, theme);
+    auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
+
+    EXPECT_NE(barItemNode->GetTextNode(), nullptr);
+    EXPECT_EQ(barItemNode->GetIconNode(), nullptr);
+    EXPECT_NE(eventHub->itemAction_, nullptr);
+}
+
+/**
+ * @tc.name: UpdatebarItemNodeWithItem2
+ * @tc.desc: if (LessThanAPIVersion(10) && barItem.text.has_vlaue() && !barItem.text.value().empty)  true;
+ *           if (barItem.icon.has_value()) || (barItem.iconSymbol.has_value() && barItem.iconSymbol.value() != nullptr)
+ * true if (barItem.action) false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, UpdatebarItemNodeWithItem2, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create barItem, buttonNode
+     */
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(V2::BAR_ITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(barItemNode, nullptr);
+    BarItem barItem;
+    bool isButtonEnabled = true;
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    /**
+     * @tc.steps: step2. set apiVersion, textnode
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+    std::optional<std::string> opt1 = "Hello";
+    barItem.text = opt1;
+
+    std::optional<std::string> icon = "icon";
+    barItem.icon = icon;
+    NavigationTitleUtil::UpdateBarItemNodeWithItem(barItemNode, barItem, isButtonEnabled, theme);
+    auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
+
+    EXPECT_NE(barItemNode->GetTextNode(), nullptr);
+    EXPECT_NE(barItemNode->GetIconNode(), nullptr);
+    EXPECT_EQ(eventHub->itemAction_, nullptr);
+}
+
+/**
+ * @tc.name: CreateOrUpdateMainTitle
+ * @tc.desc: if (ignoreMainTitle) true  case1
+ *           if (ignoreMainTitle) false   if (!titleInfo.hasMainTitle) case2
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, CreateOrUpdateMainTitle, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create titleBarNode
+     */
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+    auto mainTitle = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(mainTitle, nullptr);
+    titleBarNode->SetTitle(mainTitle);
+
+    /**
+     * @tc.steps: step2. setIgnoreMaintitle , still has title
+     */
+    NG::NavigationTitleInfo info = { false, true, "sub", "main" };
+    NavigationTitleUtil::CreateOrUpdateMainTitle(titleBarNode, info, true);
+    EXPECT_EQ(titleBarNode->GetTitle(), mainTitle);
+
+    info.hasMainTitle = false;
+    NavigationTitleUtil::CreateOrUpdateMainTitle(titleBarNode, info, false);
+    EXPECT_EQ(titleBarNode->GetTitle(), nullptr);
+}
+
+/**
+ * @tc.name: CreateOrUpdateMainTitle1
+ * @tc.desc: if (ignoreMainTitle) false
+ *           if (!titleInfo.hasMainTitle) fasle
+ *           if (mainTitle) true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, CreateOrUpdateMainTitle1, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create titleBarNode
+     */
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+    auto mainTitle = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(mainTitle, nullptr);
+    titleBarNode->SetTitle(mainTitle);
+
+    /**
+     * @tc.steps: step2. settitle and update it
+     */
+    NG::NavigationTitleInfo info = { false, true, "sub", "main" };
+    auto textLayout = mainTitle->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayout, nullptr);
+    textLayout->UpdateContent("test");
+
+    NavigationTitleUtil::CreateOrUpdateMainTitle(titleBarNode, info, false);
+    auto value = textLayout->GetContent().value_or(u"");
+    EXPECT_EQ(value, UtfUtils::Str8DebugToStr16("main"));
+}
+
+/**
+ * @tc.name: CreateOrUpdateMainTitle2
+ * @tc.desc: if (ignoreMainTitle) false
+ *           if (!titleInfo.hasMainTitle) fasle
+ *           if (mainTitle) false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, CreateOrUpdateMainTitle2, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create titleBarNode
+     */
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+
+    /**
+     * @tc.steps: step2. createtitle and check it
+     */
+    NG::NavigationTitleInfo info = { false, true, "sub", "main" };
+
+    NavigationTitleUtil::CreateOrUpdateMainTitle(titleBarNode, info, false);
+    ASSERT_NE(titleBarNode->GetTitle(), nullptr);
+    auto text = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
+    auto textLayout = text->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayout, nullptr);
+    auto value = textLayout->GetContent().value_or(u"");
+    EXPECT_EQ(value, UtfUtils::Str8DebugToStr16("main"));
+}
 } // namespace OHOS::Ace::NG

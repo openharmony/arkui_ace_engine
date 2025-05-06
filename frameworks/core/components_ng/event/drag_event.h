@@ -146,6 +146,8 @@ public:
         std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo, const OffsetF& GatherNodeOffset);
     static void SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode);
     static void ExecutePreDragAction(const PreDragStatus preDragStatus, const RefPtr<FrameNode>& frameNode = nullptr);
+    static void ExecutePreDragFunc(const RefPtr<FrameNode>& node, const PreDragStatus preDragStatus,
+        const PreDragStatus onPreDragStatus);
     void SetPixelMap(const RefPtr<DragEventActuator>& actuator);
     void SetEventColumn(const RefPtr<DragEventActuator>& actuator);
     void HideFilter();
@@ -302,6 +304,7 @@ public:
     virtual void ResetPreScaledPixelMapForDragThroughTouch();
     virtual void NotifyDragStart() {};
     virtual void NotifyDragEnd() {};
+    virtual void NotifyPreDragStatus(const PreDragStatus preDragStatus) {};
 
     void SetIsThumbnailCallbackTriggered(bool isThumbnailCallbackTriggered)
     {

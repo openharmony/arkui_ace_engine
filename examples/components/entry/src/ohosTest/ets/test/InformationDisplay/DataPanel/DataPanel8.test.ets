@@ -616,7 +616,6 @@ export default function DataPanel8() {
     })
 
 
-
   })
 }
 

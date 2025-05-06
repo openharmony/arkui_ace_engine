@@ -17,10 +17,12 @@
 #include "interfaces/native/node/dialog_model.h"
 
 #include "base/error/error_code.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "frameworks/core/components/dialog/dialog_properties.h"
 #include "frameworks/core/components/theme/shadow_theme.h"
+#include "frameworks/core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG::CustomDialog {
@@ -113,7 +115,7 @@ ArkUIDialogHandle CreateDialog()
         .blurStyleOption = std::nullopt,
         .effectOption = std::nullopt,
         .keyboardAvoidMode = OHOS::Ace::KeyboardAvoidMode::DEFAULT,
-        .enableHoverMode = false,
+        .enableHoverMode = std::nullopt,
         .hoverModeAreaType = OHOS::Ace::HoverModeAreaType::TOP_SCREEN,
         .focusable = true,
     });
@@ -124,6 +126,10 @@ void DisposeDialog(ArkUIDialogHandle controllerHandler)
     CHECK_NULL_VOID(controllerHandler);
     auto* dialog = reinterpret_cast<FrameNode*>(controllerHandler->dialogHandle);
     if (dialog) {
+        auto dialogPattern = dialog->GetPattern<DialogPattern>();
+        if (dialogPattern) {
+            dialogPattern->SetIsDialogDisposed(true);
+        }
         dialog->DecRefCount();
     }
     controllerHandler->dialogHandle = nullptr;
@@ -363,7 +369,6 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     dialogProperties.blurStyleOption = controllerHandler->blurStyleOption;
     dialogProperties.effectOption = controllerHandler->effectOption;
     dialogProperties.keyboardAvoidMode = controllerHandler->keyboardAvoidMode;
-    dialogProperties.enableHoverMode = controllerHandler->enableHoverMode;
     dialogProperties.hoverModeArea = controllerHandler->hoverModeAreaType;
     if (controllerHandler->customShadow.has_value()) {
         dialogProperties.shadow = controllerHandler->customShadow;
@@ -426,7 +431,9 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
         AnimationOption animation;
         dialogProperties.closeAnimation = animation;
     }
-
+    if (controllerHandler->enableHoverMode.has_value()) {
+        dialogProperties.enableHoverMode = controllerHandler->enableHoverMode.value();
+    }
     ParseDialogKeyboardAvoidDistance(dialogProperties, controllerHandler);
     ParseDialogBorderWidth(dialogProperties, controllerHandler);
     ParseDialogBorderColor(dialogProperties, controllerHandler);
@@ -487,6 +494,7 @@ PromptDialogAttr ParseDialogPropertiesFromProps(const DialogProperties& dialogPr
         .onWillDisappear = dialogProps.onWillDisappear,
         .keyboardAvoidMode = dialogProps.keyboardAvoidMode,
         .dialogCallback = dialogProps.dialogCallback,
+        .keyboardAvoidDistance = dialogProps.keyboardAvoidDistance,
         .levelOrder = dialogProps.levelOrder,
         .dialogLevelMode = dialogProps.dialogLevelMode,
         .dialogLevelUniqueId = dialogProps.dialogLevelUniqueId,

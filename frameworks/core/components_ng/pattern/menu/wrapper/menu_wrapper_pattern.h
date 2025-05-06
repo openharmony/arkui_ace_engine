@@ -18,7 +18,6 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
@@ -86,7 +85,7 @@ public:
         return targetId_;
     }
 
-    void HideMenu();
+    void HideMenu(const HideMenuType& reason = HideMenuType::NORMAL);
 
     bool IsHide() const
     {
@@ -121,7 +120,6 @@ public:
     }
 
     void HideSubMenu();
-    RefPtr<FrameNode> MenuFocusViewShow();
     void HideStackExpandMenu(const RefPtr<UINode>& subMenu);
     void GetExpandingMode(const RefPtr<UINode>& subMenu, SubMenuExpandingMode& expandingMode, bool& hasAnimation);
     RefPtr<FrameNode> GetMenu() const
@@ -255,6 +253,26 @@ public:
     bool GetIsShowHoverImagePreviewStartDrag() const
     {
         return isShowHoverImagePreviewStartDrag_;
+    }
+
+    void SetOnMenuDisappear(bool isDisappear)
+    {
+        onMenuDisappear_ = isDisappear;
+    }
+
+    bool GetOnMenuDisappear() const
+    {
+        return onMenuDisappear_;
+    }
+
+    void SetOnPreviewDisappear(bool isDisappear)
+    {
+        onPreviewDisappear_ = isDisappear;
+    }
+
+    bool GetOnPreviewDisappear() const
+    {
+        return onPreviewDisappear_;
     }
 
     void RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam);
@@ -608,11 +626,14 @@ private:
     RefPtr<FrameNode> FindTouchedMenuItem(const RefPtr<UINode>& menuNode, const PointF& position);
     bool IsNeedSetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
 
-    void HideMenu(const RefPtr<FrameNode>& menu);
-    void HideMenu(const RefPtr<MenuPattern>& menuPattern, const RefPtr<FrameNode>& menu, const PointF& position);
+    void HideMenu(const RefPtr<FrameNode>& menu, const HideMenuType& reason = HideMenuType::NORMAL);
+    void HideMenu(const RefPtr<MenuPattern>& menuPattern, const RefPtr<FrameNode>& menu, const PointF& position,
+        const HideMenuType& reason = HideMenuType::NORMAL);
     void SetExitAnimation(const RefPtr<FrameNode>& host);
     void SendToAccessibility(const RefPtr<UINode>& subMenu, bool isShow);
     bool CheckPointInMenuZone(const RefPtr<FrameNode>& node, const PointF& point);
+    RefPtr<FrameNode> GetParentMenu(const RefPtr<UINode>& subMenu);
+    void MenuFocusViewShow(const RefPtr<FrameNode>& menuNode);
     std::function<void()> onAppearCallback_ = nullptr;
     std::function<void()> onDisappearCallback_ = nullptr;
     std::function<void()> aboutToAppearCallback_ = nullptr;
@@ -634,6 +655,8 @@ private:
     bool isShowHoverImage_ = false;
     bool isStopHoverImageAnimation_ = false;
     bool isShowHoverImagePreviewStartDrag_ = false;
+    bool onMenuDisappear_ = false;
+    bool onPreviewDisappear_ = false;
     MenuStatus menuStatus_ = MenuStatus::INIT;
     bool hasTransitionEffect_ = false;
     bool hasPreviewTransitionEffect_ = false;

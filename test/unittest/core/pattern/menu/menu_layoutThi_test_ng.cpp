@@ -1331,7 +1331,7 @@ HWTEST_F(MenuLayout3TestNg, SelectLayoutAvoidAlgorithm002, TestSize.Level1)
     layoutAlgorithm->targetSize_ = SizeF(OFFSET_X, TARGET_SIZE_HEIGHT);
     layoutAlgorithm->SelectLayoutAvoidAlgorithm(prop, menuPattern, size, didNeedArrow, layoutWrapper);
     auto select = layoutAlgorithm->SelectLayoutAvoidAlgorithm(prop, menuPattern, size, didNeedArrow, layoutWrapper);
-    EXPECT_EQ(select.x_, ZERO);
+    EXPECT_EQ(select.x_, OFFSET_X_NEW);
 }
 
 /**

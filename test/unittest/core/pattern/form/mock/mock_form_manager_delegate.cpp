@@ -136,4 +136,8 @@ bool FormManagerDelegate::IsFormBundleProtected(const std::string &bundleName, i
 {
     return false;
 }
+
+void FormManagerDelegate::AddFormUpdateDoneCallback(UpdateFormDoneCallback&& callback) {}
+
+void FormManagerDelegate::OnFormUpdateDone(const int64_t formId) {}
 } // namespace OHOS::Ace

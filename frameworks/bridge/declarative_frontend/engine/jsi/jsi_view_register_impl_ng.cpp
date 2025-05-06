@@ -333,8 +333,9 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
     const JSRef<JSVal> cleanUpIdleTask = globalObject->GetProperty("uiNodeCleanUpIdleTask");
     if (cleanUpIdleTask->IsFunction()) {
         const auto globalFunc = JSRef<JSFunc>::Cast(cleanUpIdleTask);
-        const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
-            jsFunc->Call(globalObject);
+        const auto callback = [jsFunc = globalFunc, globalObject = globalObject](int64_t maxTimeInNs) {
+            auto params = ConvertToJSValues(maxTimeInNs / 1e6);
+            jsFunc->Call(globalObject, params.size(), params.data());
         };
         ElementRegister::GetInstance()->RegisterJSCleanUpIdleTaskFunc(callback);
     }
@@ -472,10 +473,8 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSSlider::JSBind(globalObj);
     JSGridRow::JSBind(globalObj);
     JSGridCol::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
     JSStepper::JSBind(globalObj);
     JSStepperItem::JSBind(globalObj);
-#endif
     JSBlank::JSBind(globalObj);
     JSCalendar::JSBind(globalObj);
     JSShape::JSBind(globalObj);
@@ -521,9 +520,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSRenderingContextSettings::JSBind(globalObj);
     JSMatrix2d::JSBind(globalObj);
     JSSearch::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
     JSSelect::JSBind(globalObj);
-#endif
     JSSearchController::JSBind(globalObj);
     JSTextClockController::JSBind(globalObj);
     JSClipboard::JSBind(globalObj);
@@ -574,9 +571,9 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSPatternLockController::JSBind(globalObj);
 #endif
     // add missing binds to ng build
+    JSContextMenu::JSBind(globalObj);
 #ifndef CROSS_PLATFORM
     JSCalendarPicker::JSBind(globalObj);
-    JSContextMenu::JSBind(globalObj);
     JSTextMenu::JSBind(globalObj);
 #ifdef EFFECT_COMPONENT_SUPPORTED
     JSEffectComponent::JSBind(globalObj);

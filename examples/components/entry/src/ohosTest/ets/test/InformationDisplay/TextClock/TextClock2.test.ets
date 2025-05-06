@@ -1871,5 +1871,5 @@ export default function TextClock2() {
 
     })
 
-    })
+  })
 }

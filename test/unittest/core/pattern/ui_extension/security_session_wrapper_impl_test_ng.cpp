@@ -529,16 +529,16 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg009, 
     std::optional<AAFwk::Want> reply;
     sessionWrapper->OnExtensionDetachToDisplay();
     sessionWrapper->OnExtensionTimeout(0);
-    sessionWrapper->PostBusinessDataConsumeAsync(1, std::move(data));
-    sessionWrapper->PostBusinessDataConsumeSyncReply(1, std::move(data), reply);
+    sessionWrapper->PostBusinessDataConsumeAsync(1, data);
+    sessionWrapper->PostBusinessDataConsumeSyncReply(1, data, reply);
     sessionWrapper->OnConnect();
 
     sessionWrapper->session_->persistentId_ = 1;
     ASSERT_NE(sessionWrapper->hostPattern_.Upgrade()->GetSessionId(), sessionWrapper->GetSessionId());
     sessionWrapper->OnExtensionDetachToDisplay();
     sessionWrapper->OnExtensionTimeout(0);
-    sessionWrapper->PostBusinessDataConsumeAsync(1, std::move(data));
-    sessionWrapper->PostBusinessDataConsumeSyncReply(1, std::move(data), reply);
+    sessionWrapper->PostBusinessDataConsumeAsync(1, data);
+    sessionWrapper->PostBusinessDataConsumeSyncReply(1, data, reply);
     sessionWrapper->OnDisconnect(true);
     sessionWrapper->OnDisconnect(false);
     sessionWrapper->OnConnect();
@@ -599,12 +599,58 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg011, 
     AAFwk::Want reply;
     RSSubsystemId id = RSSubsystemId::ARKUI_UIEXT;
     BusinessDataSendType type = NG::BusinessDataSendType::ASYNC;
-    sessionWrapper->SendBusinessData(code, data, type, id);
-    sessionWrapper->SendBusinessDataSyncReply(code, data, reply, id);
+    auto ret = sessionWrapper->SendBusinessData(code, data, type, id);
+    EXPECT_EQ(ret, false);
+    ret = sessionWrapper->SendBusinessDataSyncReply(code, data, reply, id);
+    EXPECT_EQ(ret, false);
 
     code = UIContentBusinessCode::EVENT_PROXY;
-    sessionWrapper->SendBusinessData(code, data, type, id);
-    sessionWrapper->SendBusinessDataSyncReply(code, data, reply, id);
+    ret = sessionWrapper->SendBusinessData(code, data, type, id);
+    EXPECT_NE(ret, false);
+    ret = sessionWrapper->SendBusinessDataSyncReply(code, data, reply, id);
+    EXPECT_NE(ret, false);
+#endif
+}
+
+/**
+ * @tc.name: SecuritySessionWrapperImplTestNg012
+ * @tc.desc: Test the method DispatchExtensionDataToHostWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg012, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecuritySessionWrapperImpl
+     */
+    auto sessionWrapper = GenerateSecuritySessionWrapperImpl();
+    Rosen::SessionInfo sessionInfo;
+    sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
+    ASSERT_NE(sessionWrapper->taskExecutor_, nullptr);
+    sessionWrapper->hostPattern_ = CreateSecurityUEC();
+    ASSERT_NE(sessionWrapper->hostPattern_.Upgrade(), nullptr);
+    ASSERT_EQ(sessionWrapper->hostPattern_.Upgrade()->GetSessionId(), sessionWrapper->GetSessionId());
+
+    /**
+     * @tc.steps: step2. test DispatchExtensionDataToHostWindow and so on
+     */
+    AAFwk::Want data;
+    std::optional<AAFwk::Want> reply;
+    uint32_t customId = 1;
+    sessionWrapper->OnExtensionDetachToDisplay();
+    sessionWrapper->OnExtensionTimeout(0);
+    sessionWrapper->DispatchExtensionDataToHostWindow(customId, data);
+    sessionWrapper->OnConnect();
+
+    sessionWrapper->session_->persistentId_ = 1;
+    ASSERT_NE(sessionWrapper->hostPattern_.Upgrade()->GetSessionId(), sessionWrapper->GetSessionId());
+    sessionWrapper->OnExtensionDetachToDisplay();
+    sessionWrapper->OnExtensionTimeout(0);
+    customId = static_cast<uint32_t>(UIContentBusinessCode::WINDOW_CODE_BEGIN);
+    sessionWrapper->DispatchExtensionDataToHostWindow(customId, data);
+    sessionWrapper->OnDisconnect(true);
+    sessionWrapper->OnDisconnect(false);
+    sessionWrapper->OnConnect();
 #endif
 }
 } // namespace OHOS::Ace::NG

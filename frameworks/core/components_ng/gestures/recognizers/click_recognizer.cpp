@@ -32,6 +32,7 @@ constexpr int32_t MAX_THRESHOLD_MANYTAP = 60;
 constexpr int32_t MAX_TAP_FINGERS = 10;
 constexpr double MAX_THRESHOLD = 20.0;
 constexpr int32_t DEFAULT_TAP_FINGERS = 1;
+constexpr int32_t DOUBLE_CLICK_COUNT = 2;
 constexpr int32_t DEFAULT_LONGPRESS_DURATION = 800000000;
 
 } // namespace
@@ -46,6 +47,7 @@ void ClickRecognizer::ForceCleanRecognizer()
     tapDeadlineTimer_.Cancel();
     currentTouchPointsNum_ = 0;
     responseRegionBuffer_.clear();
+    localMatrix_.clear();
     paintRect_ = RectF();
 }
 
@@ -68,7 +70,7 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
     if (!frameNode.Invalid()) {
         auto host = frameNode.Upgrade();
         CHECK_NULL_RETURN(host, false);
-        NGGestureRecognizer::Transform(localPoint, frameNode, false, isPostEventResult_, event.postEventNodeId);
+        TransformForRecognizer(localPoint, frameNode, false, isPostEventResult_, event.postEventNodeId);
         localPoint = localPoint + paintRect_.GetOffset();
         if (!host->InResponseRegionList(localPoint, responseRegionBuffer_)) {
             TAG_LOGI(AceLogTag::ACE_GESTURE,
@@ -91,7 +93,7 @@ ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, double distance
     if (distanceThreshold_ <= 0) {
         distanceThreshold_ = std::numeric_limits<double>::infinity();
     }
-    
+
     SetOnAccessibility(GetOnAccessibilityEventFunc());
 }
 
@@ -120,7 +122,7 @@ ClickInfo ClickRecognizer::GetClickInfo()
     }
     ClickInfo info(touchPoint.id);
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+    TransformForRecognizer(localPoint, GetAttachedNode(), false,
         isPostEventResult_, touchPoint.postEventNodeId);
     Offset localOffset(localPoint.GetX(), localPoint.GetY());
     info.SetTimeStamp(touchPoint.time);
@@ -163,9 +165,10 @@ void ClickRecognizer::OnAccepted()
     firstInputTime_.reset();
 
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Click accepted, tag: %{public}s",
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Click accepted, tag: %{public}s",
         node ? node->GetTag().c_str() : "null");
     auto lastRefereeState = refereeState_;
+    lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
     ResSchedReport::GetInstance().ResSchedDataReport("click");
     if (backupTouchPointsForSucceedBlock_.has_value()) {
@@ -177,7 +180,9 @@ void ClickRecognizer::OnAccepted()
         touchPoint = touchPoints_.begin()->second;
     }
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+    localMatrix_ = NGGestureRecognizer::GetTransformMatrix(GetAttachedNode(), false,
+        isPostEventResult_, touchPoint.postEventNodeId);
+    TransformForRecognizer(localPoint, GetAttachedNode(), false,
         isPostEventResult_, touchPoint.postEventNodeId);
     Offset localOffset(localPoint.GetX(), localPoint.GetY());
     if (onClick_) {
@@ -213,6 +218,7 @@ void ClickRecognizer::OnAccepted()
 void ClickRecognizer::OnRejected()
 {
     SendRejectMsg();
+    lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::FAIL;
     firstInputTime_.reset();
     backupTouchPointsForSucceedBlock_.reset();
@@ -225,6 +231,12 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         firstInputTime_ = event.time;
     }
 
+    if (count_ == DOUBLE_CLICK_COUNT) {
+        if (tappedCount_ == 0 || tappedCount_ == 1) {
+            TAG_LOGD(AceLogTag::ACE_GESTURE, "Click recognizer handle touch down event current Click is %{public}d",
+                tappedCount_);
+        }
+    }
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     if (pipeline && pipeline->IsFormRenderExceptDynamicComponent()) {
         touchDownTime_ = event.time;
@@ -470,7 +482,7 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
         }
     }
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
+    TransformForRecognizer(localPoint, GetAttachedNode(), false,
         isPostEventResult_, touchPoint.postEventNodeId);
     info.SetTimeStamp(touchPoint.time);
     info.SetScreenLocation(touchPoint.GetScreenOffset());
@@ -601,6 +613,7 @@ bool ClickRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognize
         ResetStatus();
         return false;
     }
+    isLimitFingerCount_ = curr->isLimitFingerCount_;
 
     onAction_ = std::move(curr->onAction_);
     ReconcileGestureInfoFrom(recognizer);
@@ -630,6 +643,7 @@ void ClickRecognizer::CleanRecognizerState()
         refereeState_ == RefereeState::DETECTING) &&
         currentFingers_ == 0) {
         tappedCount_ = 0;
+        lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
     }

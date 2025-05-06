@@ -18,9 +18,16 @@ import { Component, Driver, ON } from '@kit.TestKit';
 import { GridStart } from '../../ScrollAndSwipe/Grid/Grid';
 import {
   buttonClick,
-  JsonType, KeyStruct, radioClick, Search,
+  JsonType,
+  KeyStruct,
+  radioClick,
+  Search,
   searchParentBlock,
-  Slide, sliderDrag, titleSearch, ToggleClick } from '../../../utils';
+  Slide,
+  sliderDrag,
+  titleSearch,
+  ToggleClick
+} from '../../../utils';
 import { HyperlinkStart } from './Hyperlink';
 
 const driver = Driver.create();
@@ -35,7 +42,7 @@ export default function Hyperlink5Test() {
     })
 
     // linearGradient.number2
-    it('ArkUI_Column_Comp_0350', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0350', 0, async (done: Function) => {
       await titleSearch('基础属性', 'linearGradient.number2', '通用属性3')
       //取不到值需要，设置颜色获取
       await sliderDrag({
@@ -56,7 +63,7 @@ export default function Hyperlink5Test() {
     })
 
     // linearGradient.repeating
-    it('ArkUI_Column_Comp_0351', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0351', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'linearGradient.repeating', '通用属性3')
 
@@ -65,7 +72,7 @@ export default function Hyperlink5Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('linearGradient', JsonType.obj),
@@ -78,7 +85,7 @@ export default function Hyperlink5Test() {
 
     })
 
-    it('ArkUI_Column_Comp_0352', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0352', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'linearGradient.repeating', '通用属性3')
 
@@ -87,7 +94,7 @@ export default function Hyperlink5Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('linearGradient', JsonType.obj),
@@ -102,7 +109,7 @@ export default function Hyperlink5Test() {
 
     // BindPopup
     // show.button
-    it('ArkUI_Column_Comp_0353', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0353', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'show.button', '通用属性3')
 
@@ -118,7 +125,7 @@ export default function Hyperlink5Test() {
 
     })
 
-    it('ArkUI_Column_Comp_0354', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0354', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'show.button', '通用属性3')
 
@@ -135,7 +142,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.arrowOffset
-    it('ArkUI_Column_Comp_0355', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0355', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.arrowOffset', '通用属性3')
 
@@ -158,7 +165,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.showInSubWindow
-    it('ArkUI_Column_Comp_0356', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0356', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.showInSubWindow', '通用属性3')
 
@@ -173,7 +180,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0357', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0357', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.showInSubWindow', '通用属性3')
 
@@ -189,7 +196,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.maskType
-    it('ArkUI_Column_Comp_0358', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0358', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.maskType', '通用属性3')
 
@@ -205,7 +212,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.maskType
-    it('ArkUI_Column_Comp_0359', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0359', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.maskType', '通用属性3')
 
@@ -221,7 +228,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.mask.color
-    it('ArkUI_Column_Comp_0360', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0360', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindPopup.mask.color'))
 
@@ -250,7 +257,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0361', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0361', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindPopup.mask.color'))
 
@@ -276,7 +283,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0362', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0362', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindPopup.mask.color'))
 
@@ -302,7 +309,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0363', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0363', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindPopup.mask.color'))
 
@@ -328,7 +335,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0364', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0364', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindPopup.mask.color'))
 
@@ -354,7 +361,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0365', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0365', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindPopup.mask.color'))
 
@@ -393,7 +400,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.mask.boolean
-    it('ArkUI_Column_Comp_0366', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0366', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.mask.boolean', '通用属性3')
 
@@ -408,7 +415,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0367', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0367', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.mask.boolean', '通用属性3')
 
@@ -424,7 +431,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.messageOptions.textColor
-    it('ArkUI_Column_Comp_0368', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0368', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.messageOptions.textColor', '通用属性3')
 
@@ -439,7 +446,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0369', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0369', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.messageOptions.textColor', '通用属性3')
 
@@ -451,7 +458,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0370', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0370', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.messageOptions.textColor', '通用属性3')
 
@@ -463,7 +470,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0371', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0371', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.messageOptions.textColor', '通用属性3')
 
@@ -475,7 +482,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0372', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0372', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.messageOptions.textColor', '通用属性3')
 
@@ -487,7 +494,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0373', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0373', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.messageOptions.textColor', '通用属性3')
 
@@ -503,7 +510,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.messageOptions.font.size
-    it('ArkUI_Column_Comp_0374', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0374', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.messageOptions.font.size', '通用属性3')
 
@@ -526,7 +533,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.messageOptions.font.weight
-    it('ArkUI_Column_Comp_0375', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0375', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.messageOptions.font.weight', '通用属性3')
 
@@ -541,7 +548,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0376', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0376', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.messageOptions.font.weight', '通用属性3')
 
@@ -553,7 +560,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0377', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0377', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.messageOptions.font.weight', '通用属性3')
 
@@ -565,7 +572,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0378', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0378', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.messageOptions.font.weight', '通用属性3')
 
@@ -577,7 +584,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0379', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0379', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.messageOptions.font.weight', '通用属性3')
 
@@ -589,7 +596,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0380', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0380', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.messageOptions.font.weight', '通用属性3')
 
@@ -605,7 +612,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.messageOptions.font.style
-    it('ArkUI_Column_Comp_0381', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0381', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.messageOptions.font.style', '通用属性3')
 
@@ -620,7 +627,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0382', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0382', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.messageOptions.font.style', '通用属性3')
 
@@ -636,7 +643,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.targetSpace
-    it('ArkUI_Column_Comp_0383', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0383', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.targetSpace', '通用属性3')
 
@@ -659,7 +666,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.placement
-    it('ArkUI_Column_Comp_0384', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0384', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
 
@@ -674,7 +681,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0385', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0385', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
 
@@ -686,7 +693,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0386', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0386', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
 
@@ -698,7 +705,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0387', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0387', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
 
@@ -710,7 +717,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0388', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0388', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
 
@@ -722,7 +729,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0389', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0389', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
 
@@ -734,7 +741,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0390', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0390', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
 
@@ -746,7 +753,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0391', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0391', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
 
@@ -758,7 +765,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0392', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0392', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
 
@@ -770,7 +777,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0393', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0393', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
 
@@ -786,7 +793,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.offsetX
-    it('ArkUI_Column_Comp_0394', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0394', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.offsetX', '通用属性3')
 
@@ -809,7 +816,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.offsetY
-    it('ArkUI_Column_Comp_0395', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0395', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.offsetY', '通用属性3')
 
@@ -832,7 +839,7 @@ export default function Hyperlink5Test() {
     })
 
     //bindPopup.enableArrow
-    it('ArkUI_Column_Comp_0396', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0396', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.enableArrow', '通用属性3')
 
@@ -847,7 +854,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0397', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0397', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.enableArrow', '通用属性3')
 
@@ -863,7 +870,7 @@ export default function Hyperlink5Test() {
     })
 
     //bindPopup.popupColor
-    it('ArkUI_Column_Comp_0398', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0398', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.popupColor', '通用属性3')
 
@@ -878,7 +885,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0399', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0399', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.popupColor', '通用属性3')
 
@@ -890,7 +897,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0400', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0400', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.popupColor', '通用属性3')
 
@@ -902,7 +909,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0401', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0401', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.popupColor', '通用属性3')
 
@@ -914,7 +921,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0402', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0402', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.popupColor', '通用属性3')
 
@@ -926,7 +933,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0403', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0403', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.popupColor', '通用属性3')
 
@@ -942,7 +949,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.autoCancel
-    it('ArkUI_Column_Comp_0404', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0404', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.autoCancel', '通用属性3')
 
@@ -957,7 +964,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0405', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0405', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.autoCancel', '通用属性3')
 
@@ -974,7 +981,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.width
-    it('ArkUI_Column_Comp_0406', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0406', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.width', '通用属性3')
 
@@ -997,7 +1004,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.arrowPointPosition
-    it('ArkUI_Column_Comp_0407', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0407', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.arrowPointPosition', '通用属性3')
 
@@ -1012,7 +1019,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0408', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0408', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.arrowPointPosition', '通用属性3')
 
@@ -1024,7 +1031,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0409', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0409', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.arrowPointPosition', '通用属性3')
 
@@ -1040,7 +1047,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.shadowType
-    it('ArkUI_Column_Comp_0410', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0410', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.shadowType', '通用属性3')
 
@@ -1056,7 +1063,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.shadowType
-    it('ArkUI_Column_Comp_0411', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0411', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.shadowType', '通用属性3')
 
@@ -1072,7 +1079,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.shadowType.shadowOptions.radius
-    it('ArkUI_Column_Comp_0412', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0412', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.radius'))
 
@@ -1110,7 +1117,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.shadowType.shadowOptions.type
-    it('ArkUI_Column_Comp_0413', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0413', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.type'))
 
@@ -1138,7 +1145,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0414', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0414', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.type'))
 
@@ -1167,7 +1174,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.shadowType.shadowOptions.color
-    it('ArkUI_Column_Comp_0415', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0415', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.type'))
 
@@ -1195,7 +1202,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0416', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0416', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.type'))
 
@@ -1221,7 +1228,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0417', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0417', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.type'))
 
@@ -1246,7 +1253,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0418', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0418', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.type'))
 
@@ -1272,7 +1279,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0419', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0419', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.type'))
 
@@ -1298,7 +1305,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0420', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0420', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.type'))
 
@@ -1328,7 +1335,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.shadowType.shadowOptions.offsetX
-    it('ArkUI_Column_Comp_0421', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0421', 0, async (done: Function) => {
       let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.offsetX'))
 
       if (!title) {
@@ -1363,7 +1370,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.shadowType.shadowOptions.offsetY
-    it('ArkUI_Column_Comp_0422', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0422', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.offsetY'))
 
@@ -1399,7 +1406,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.shadowType.shadowOptions.fill
-    it('ArkUI_Column_Comp_0423', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0423', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.fill'))
 
@@ -1427,7 +1434,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0424', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0424', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.fill'))
 
@@ -1467,7 +1474,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.shadowType.shadowStyle
-    it('ArkUI_Column_Comp_0425', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0425', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.shadowType.shadowStyle', '通用属性3')
 
@@ -1482,7 +1489,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0426', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0426', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.shadowType.shadowStyle', '通用属性3')
 
@@ -1494,7 +1501,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0427', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0427', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.shadowType.shadowStyle', '通用属性3')
 
@@ -1506,7 +1513,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0428', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0428', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.shadowType.shadowStyle', '通用属性3')
 
@@ -1518,7 +1525,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0429', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0429', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.shadowType.shadowStyle', '通用属性3')
 
@@ -1530,7 +1537,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0430', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0430', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.shadowType.shadowStyle', '通用属性3')
 
@@ -1546,7 +1553,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.BackgroundBlurStyle
-    it('ArkUI_Column_Comp_0431', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0431', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.BackgroundBlurStyle', '通用属性3')
 
@@ -1561,7 +1568,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0432', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0432', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.BackgroundBlurStyle', '通用属性3')
 
@@ -1573,7 +1580,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0433', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0433', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.BackgroundBlurStyle', '通用属性3')
 
@@ -1585,7 +1592,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0434', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0434', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.BackgroundBlurStyle', '通用属性3')
 
@@ -1597,7 +1604,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0435', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0435', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.BackgroundBlurStyle', '通用属性3')
 
@@ -1609,7 +1616,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0436', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0436', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.BackgroundBlurStyle', '通用属性3')
 
@@ -1621,7 +1628,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0437', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0437', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.BackgroundBlurStyle', '通用属性3')
 
@@ -1633,7 +1640,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0438', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0438', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.BackgroundBlurStyle', '通用属性3')
 
@@ -1645,7 +1652,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0439', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0439', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.BackgroundBlurStyle', '通用属性3')
 
@@ -1657,7 +1664,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0440', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0440', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.BackgroundBlurStyle', '通用属性3')
 
@@ -1669,7 +1676,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0441', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0441', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.BackgroundBlurStyle', '通用属性3')
 
@@ -1681,7 +1688,7 @@ export default function Hyperlink5Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0442', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0442', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.BackgroundBlurStyle', '通用属性3')
 
@@ -1697,7 +1704,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.transition.opacity
-    it('ArkUI_Column_Comp_0443', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0443', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.transition.opacity', '通用属性3')
 
@@ -1720,7 +1727,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.transition.translateX
-    it('ArkUI_Column_Comp_0444', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0444', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.transition.translateX', '通用属性3')
 
@@ -1743,7 +1750,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.transition.translateY
-    it('ArkUI_Column_Comp_0445', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0445', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.transition.translateY', '通用属性3')
 
@@ -1766,7 +1773,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.transition.translateZ
-    it('ArkUI_Column_Comp_0446', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0446', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.transition.translateZ', '通用属性3')
 
@@ -1789,7 +1796,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.transition.scaleX
-    it('ArkUI_Column_Comp_0447', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0447', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.transition.scaleX', '通用属性3')
 
@@ -1812,7 +1819,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.transition.scaleY
-    it('ArkUI_Column_Comp_0448', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0448', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.transition.scaleY', '通用属性3')
 
@@ -1835,7 +1842,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.transition.scaleZ
-    it('ArkUI_Column_Comp_0449', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0449', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.transition.scaleZ', '通用属性3')
 
@@ -1858,7 +1865,7 @@ export default function Hyperlink5Test() {
     })
 
     // bindPopup.transition.scale.centerX
-    it('ArkUI_Column_Comp_0450', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0450', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindPopup.transition.scale.centerX', '通用属性3')
 

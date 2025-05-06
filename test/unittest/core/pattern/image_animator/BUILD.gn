@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("image_animator_test_ng") {
   type = "new"
   sources = [
+    "controlled_animator_test_ng.cpp",
     "image_animator_pattern_test_ng.cpp",
     "image_animator_test_ng.cpp",
   ]

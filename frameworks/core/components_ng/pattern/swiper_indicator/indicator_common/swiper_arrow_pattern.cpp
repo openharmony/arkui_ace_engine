@@ -32,7 +32,7 @@ void SwiperArrowPattern::OnModifyDone()
         InitNavigationArrow();
         auto swiperNode = GetSwiperNode();
         CHECK_NULL_VOID(swiperNode);
-        auto swiperEventHub = swiperNode->GetEventHub<SwiperEventHub>();
+        auto swiperEventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(swiperEventHub);
         auto layoutProperty = GetSwiperArrowLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
@@ -153,12 +153,12 @@ void SwiperArrowPattern::InitEvent()
     CHECK_NULL_VOID(buttonNode);
 
     auto buttonGestureHub = buttonNode->GetOrCreateGestureEventHub();
-    auto touchCallback = [weak = WeakClaim(this), weakButton = WeakClaim(RawPtr(buttonNode))](
-                             const TouchEventInfo& info) {
+    auto touchCallback = [weak = WeakClaim(this), weakButton = WeakClaim(RawPtr(buttonNode))](TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto buttonNode = weakButton.Upgrade();
         CHECK_NULL_VOID(buttonNode);
+        info.SetStopPropagation(true);
         pattern->ButtonTouchEvent(buttonNode, info.GetTouches().front().GetTouchType());
     };
     buttonTouchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
@@ -373,7 +373,7 @@ std::tuple<bool, bool, bool> SwiperArrowPattern::CheckHoverStatus()
     auto displayCount = swiperPattern->GetDisplayCount();
     bool leftArrowIsHidden = (index_ == 0);
     bool rightArrowIsHidden = (index_ == swiperPattern->TotalCount() - displayCount);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && swiperPattern->IsSwipeByGroup()) {
+    if (!swiperPattern->IsAutoLinear() && swiperPattern->IsSwipeByGroup()) {
         leftArrowIsHidden = (index_ < displayCount);
         rightArrowIsHidden = (index_ >= swiperPattern->TotalCount() - displayCount);
     }
@@ -419,7 +419,11 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
     }
     renderContext->SetVisible(visible);
     // Set hit test mode BLOCK to make sure button respond to the touch events when visible.
-    arrowGestureHub->SetHitTestMode(visible ? HitTestMode::HTMBLOCK : HitTestMode::HTMTRANSPARENT);
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        arrowGestureHub->SetHitTestMode(visible ? HitTestMode::HTMBLOCK : HitTestMode::HTMTRANSPARENT);
+    } else {
+        arrowGestureHub->SetHitTestMode(visible ? HitTestMode::HTMDEFAULT : HitTestMode::HTMTRANSPARENT);
+    }
     if (arrowClickListener_) {
         arrowGestureHub->RemoveClickEvent(arrowClickListener_);
         if (visible) {
@@ -437,7 +441,10 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
     } else {
         accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
         arrowAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
-        swiperNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+        auto isArrowFocus = arrowAccessibilityProperty->GetAccessibilityFocusState();
+        if (isArrowFocus) {
+            swiperNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+        }
     }
 }
 

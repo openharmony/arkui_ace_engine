@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,7 +72,7 @@ export declare class OperationOption {
 export declare class SelectOptions {
   public options: Array<SelectOption>;
   public selected?: number;
-  public value?: string;
+  public value?: ResourceStr;
   public onSelect?: (index: number, value?: string) => void;
   public defaultFocus?: boolean;
 }
@@ -551,7 +551,7 @@ export struct SubHeader {
     }
     children.forEach((child) => {
       constraint.minHeight = Math.min(Number(this.getMinHeight()), Number(constraint.maxHeight));
-      result.height = child.measure(constraint).height;
+      result.height = child?.measure(constraint).height;
       result.width = Number(constraint.maxWidth);
     })
     return result;
@@ -1167,7 +1167,7 @@ class Util {
       return false;
     }
     let resource = resourceStr as Resource;
-    return resource.type === RESOURCE_TYPE_SYMBOL;
+    return resource?.type === RESOURCE_TYPE_SYMBOL;
   }
 
   /**
@@ -1302,7 +1302,7 @@ struct TextArrowLayout {
       minHeight: textArrowHeight,
       maxHeight: textArrowHeight,
     };
-    arrowChild.measure(arrowConstraint);
+    arrowChild?.measure(arrowConstraint);
     return { width: textArrowWidth, height: textArrowHeight };
   }
 

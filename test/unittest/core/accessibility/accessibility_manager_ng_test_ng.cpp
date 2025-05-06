@@ -254,11 +254,9 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest004, TestSize.L
     TimeStamp time;
     
     accessibilityManagerNg.HoverTestDebug(frameNode, hoverPoint, summary, detail);
-    auto result = accessibilityManagerNg.DeliverAccessibilityHoverEvent(frameNode, hoverPoint);
-    EXPECT_EQ(result, false);
     accessibilityManagerNg.IgnoreCurrentHoveringNode(frameNode);
 
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(false);
     accessibilityManagerNg.NotifyHoverEventToNodeSession(frameNode, frameNode,
         hoverPoint, SourceType::MOUSE, AccessibilityHoverEventType::ENTER, time);
@@ -266,7 +264,7 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest004, TestSize.L
     accessibilityManagerNg.NotifyHoverEventToNodeSession(frameNode, frameNode,
         hoverPoint, SourceType::MOUSE, AccessibilityHoverEventType::ENTER, time);
     PointF pointNode(hoverPoint);
-    result = accessibilityManagerNg.ConvertPointFromAncestorToNode(frameNode, frameNode, hoverPoint, pointNode);
+    auto result = accessibilityManagerNg.ConvertPointFromAncestorToNode(frameNode, frameNode, hoverPoint, pointNode);
     EXPECT_EQ(result, true);
     result = accessibilityManagerNg.ConvertPointFromAncestorToNode(frameNode, nullptr, hoverPoint, pointNode);
     EXPECT_EQ(result, false);

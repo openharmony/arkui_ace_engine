@@ -27,7 +27,6 @@
 #include "native_engine/impl/ark/ark_native_engine.h"
 
 #include "base/memory/ace_type.h"
-#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_page.h"
@@ -386,6 +385,10 @@ public:
 
     void SetJsContext(const std::shared_ptr<Framework::JsValue>& jsContext) override;
 
+    std::shared_ptr<void> SerializeValue(const std::shared_ptr<Framework::JsValue>& jsValue) override;
+
+    void SetJsContextWithDeserialize(const std::shared_ptr<void>& recoder) override;
+
     void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
 
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
@@ -504,6 +507,7 @@ private:
     bool ExecuteDynamicAbc(const std::string& fileName, const std::string& entryPoint);
     bool InnerExecuteIsolatedAbc(const std::string& fileName, const std::string& entryPoint);
     bool InnerExecuteDynamicAbc(const std::string& fileName, const std::string& entryPoint);
+    std::shared_ptr<JsValue> Deserialize(const std::shared_ptr<void>& recoder);
 
     RefPtr<JsiDeclarativeEngineInstance> engineInstance_;
 

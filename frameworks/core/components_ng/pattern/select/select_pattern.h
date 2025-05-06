@@ -311,6 +311,7 @@ private:
     void UpdateOptionsWidth(float selectWidth);
     void UpdateTargetSize();
     bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
+    void ShowScrollBar();
 
     std::vector<RefPtr<FrameNode>> options_;
     RefPtr<FrameNode> menuWrapper_ = nullptr;

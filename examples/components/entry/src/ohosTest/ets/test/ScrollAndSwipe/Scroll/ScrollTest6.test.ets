@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { describe, beforeAll} from '@ohos/hypium'
+import { describe, beforeAll } from '@ohos/hypium'
 import { ScrollTest } from './ScrollTest'
 
 export default function ScrollTest6() {

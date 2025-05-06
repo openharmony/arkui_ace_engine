@@ -61,15 +61,19 @@ class MyModifier implements AttributeModifier<MenuItemGroupAttribute> {
   applyNormalAttribute(instance: MenuItemGroupAttribute) {
     instance.backgroundColor('#0A59F7')
   }
+
   applyPressedAttribute(instance: MenuItemGroupAttribute) {
     instance.backgroundColor('#ED6F21')
   }
+
   applyFocusedAttribute(instance: MenuItemGroupAttribute) {
     instance.backgroundColor(Color.Gray)
   }
+
   applyDisabledAttribute(instance: MenuItemGroupAttribute) {
     instance.backgroundColor('#E5E5E5')
   }
+
   applySelectedAttribute(instance: MenuItemGroupAttribute) {
     instance.backgroundColor('#ffedea21')
   }
@@ -109,7 +113,6 @@ export struct MenuItemGroupBootcamp {
   @State labelNum: number = 2;
   @State enableLabelNum: boolean = false;
   @State showSecondaryMenu: boolean = false;
-
   //part1
   // size
   @State enableCompWidth: boolean = false;
@@ -460,7 +463,6 @@ export struct MenuItemGroupBootcamp {
   @State compLinearGradientColorsNumber2: number = 0;
   @State enableCompLinearGradientRepeating: boolean = false;
   @State compLinearGradientRepeating: boolean = false;
-
   //Focus Control
   @State enableCompFocusable: boolean = false;
   @State compFocusable: boolean = false;
@@ -570,12 +572,10 @@ export struct MenuItemGroupBootcamp {
   // Hit Test Control
   @State enableCompHitTestBehavior: boolean = false
   @State compHitTestBehavior: HitTestMode = HitTestMode.Default
-
   // Sheet Transition
   // Obscuring
   @State enableCompObscured: boolean = false
   @State compObscured: Array<ObscuredReasons> = []
-
   // // Render Fit
   @State enableCompRenderFit: boolean = false
   @State compRenderFit: RenderFit = RenderFit.TOP_LEFT
@@ -589,7 +589,6 @@ export struct MenuItemGroupBootcamp {
   @State enableCompUseEffect: boolean = false
   @State compUseEffect: boolean = false
   @State scrollShow: number = 0
-
   //compEvent
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
@@ -632,7 +631,6 @@ export struct MenuItemGroupBootcamp {
     }, 200)
   }
 
-
   build() {
     NavDestination() {
       Drawer({
@@ -653,12 +651,10 @@ export struct MenuItemGroupBootcamp {
     .hideTitleBar(true)
   }
 
-
   @Builder
   compBackground() {
     Text('123')
   }
-
 
   @Builder
   SubMenu() {
@@ -678,8 +674,10 @@ export struct MenuItemGroupBootcamp {
         builder: useEnabled<CustomBuilder>(this.showSecondaryMenu,
           this.showSecondaryMenu ? (): void => this.SubMenu() : undefined),
       })
-      MenuItemGroup({ header: '标题显示'
-      ,footer:'尾部显示'}){
+      MenuItemGroup({
+        header: '标题显示'
+      , footer: '尾部显示'
+      }) {
         MenuItem({
           startIcon: useEnabled<ResourceStr>(this.enableStartIcon, this.startIcon),
           content: '菜单选项2',
@@ -1119,8 +1117,8 @@ export struct MenuItemGroupBootcamp {
         bottom: useEnabled(this.enableCompPixelStretchEffectOptionsBottom,
           this.compPixelStretchEffectOptionsBottom)
       })
-      .freeze(useEnabled(this.enableCompFreeze, this.compFreeze))//part2
-      .linearGradient( {
+      .freeze(useEnabled(this.enableCompFreeze, this.compFreeze)) //part2
+      .linearGradient({
         angle: useEnabled(this.enableCompLinearGradientAngle, this.compLinearGradientAngle),
         direction: useEnabled(this.enableCompLinearGradientDirection, this.compLinearGradientDirection),
         colors: [
@@ -1199,7 +1197,7 @@ export struct MenuItemGroupBootcamp {
       .accessibilityLevel(useEnabled(this.enableCompAccessibilityLevel, this.compAccessibilityLevel))
       .bindMenu(this.MyMenu)
       .attributeModifier(useEnabled(this.enableCompAttributeModifier, this.compAttributeModifier) ?
-      this.modifier : null)//part3
+      this.modifier : null) //part3
       .gestureModifier(useEnabled(this.enableCompGestureModifier, this.compGestureModifier) ?
       this.myGestureModifier1 : this.myGestureModifier2)
       .outline({
@@ -1236,7 +1234,7 @@ export struct MenuItemGroupBootcamp {
           this.getUIContext().getCursorController().restoreDefault()
         }
       })
-      .useEffect(useEnabled(this.enableCompUseEffect, this.compUseEffect))//compEvent
+      .useEffect(useEnabled(this.enableCompUseEffect, this.compUseEffect)) //compEvent
       .onClick((event?: ClickEvent) => {
         this.compEventTriggeredLog('点击事件onClick触发');
       })
@@ -1384,6 +1382,7 @@ export struct MenuItemGroupBootcamp {
   }
 
   @State selection: string | null = null;
+
   @Builder
   ListItemGroupHeaders(str: string) {
     Row() {
@@ -1395,7 +1394,7 @@ export struct MenuItemGroupBootcamp {
         .fillColor($r('sys.color.ohos_id_color_fourth'))
         .height(24)
         .width(24)
-        .rotate({ angle: this.selection==str ? 90 : 0 })
+        .rotate({ angle: this.selection == str ? 90 : 0 })
         .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
     }
     .borderRadius(20)
@@ -1416,6 +1415,7 @@ export struct MenuItemGroupBootcamp {
       }
     })
   }
+
   @Builder
   Generic() {
     Scroll(this.scroller) {

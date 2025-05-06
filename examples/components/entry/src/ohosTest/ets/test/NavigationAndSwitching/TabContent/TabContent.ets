@@ -17,7 +17,7 @@ import { abilityDelegatorRegistry, Driver, Component, ON } from '@kit.TestKit';
 const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
 const driver = Driver.create();
 
-export async function TabContentStart(done:Function) {
+export async function TabContentStart(done: Function) {
   await delegator.startAbility({
     bundleName: 'cn.ohos.components',
     abilityName: 'EntryAbility'

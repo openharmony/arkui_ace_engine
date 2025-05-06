@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "ui/properties/tabs_effect_node_option.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/decoration.h"
@@ -43,6 +44,7 @@ public:
         value->propAxis_ = CloneAxis();
         value->propTabBarMode_ = CloneTabBarMode();
         value->propDivider_ = CloneDivider();
+        value->propEffectNodeOption_ = CloneEffectNodeOption();
         value->propBarWidth_ = CloneBarWidth();
         value->propBarHeight_ = CloneBarHeight();
         value->propIndex_ = CloneIndex();
@@ -62,6 +64,7 @@ public:
         ResetAxis();
         ResetTabBarMode();
         ResetDivider();
+        ResetEffectNodeOption();
         ResetBarWidth();
         ResetBarHeight();
         ResetIndex();
@@ -144,6 +147,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Axis, Axis, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TabBarMode, TabBarMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Divider, TabsItemDivider, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EffectNodeOption, TabsEffectNodeOption, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarWidth, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Index, int32_t, PROPERTY_UPDATE_NORMAL);

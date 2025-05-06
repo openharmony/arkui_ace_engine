@@ -821,7 +821,7 @@ export struct TextBootcamp {
           }
         )
         .fontFeature(useEnabled(this.enableTextFontFeature, this.textFontFeature))
-        .halfLeading(useEnabled(this.enableHalfLeading,this.halfLeading))
+        .halfLeading(useEnabled(this.enableHalfLeading, this.halfLeading))
         .lineSpacing({
           value: useEnabled(this.enableLineSpacingValue, this.lineSpacingValue),
           unit: useEnabled(this.enableLineSpacingUnit, this.lineSpacingUnit)

@@ -42,8 +42,6 @@ export default function Progress6() {
     })
 
 
-
-
     //focusable
     it('ArkUI_Progress_Comp_0461', 0, async (done: Function) => {
 
@@ -320,8 +318,6 @@ export default function Progress6() {
 
       done()
     })
-
-
 
 
   })

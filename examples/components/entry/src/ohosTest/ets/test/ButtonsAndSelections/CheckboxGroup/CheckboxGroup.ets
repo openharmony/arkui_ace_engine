@@ -21,7 +21,7 @@ const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorReg
 
 const driver = Driver.create();
 
-export async function CheckboxGroupStart(done:Function){
+export async function CheckboxGroupStart(done: Function) {
   console.info('beforeAll begin');
   try {
 
@@ -33,21 +33,21 @@ export async function CheckboxGroupStart(done:Function){
     await driver.delayMs(5000);
     console.info(TAG + 'CheckboxGroupBootcamp' + ' begin');
 
-    let atomDisplays:Component = await driver.findComponent(ON.text('按钮与选择'));
+    let atomDisplays: Component = await driver.findComponent(ON.text('按钮与选择'));
     await atomDisplays.click();
     await driver.delayMs(1000);
 
-    let ListItems:Component[] = await driver.findComponents(ON.type('ListItem'))
-    let width:Point = await ListItems[0].getBoundsCenter()
-    let width2:Point = await ListItems[1].getBoundsCenter()
+    let ListItems: Component[] = await driver.findComponents(ON.type('ListItem'))
+    let width: Point = await ListItems[0].getBoundsCenter()
+    let width2: Point = await ListItems[1].getBoundsCenter()
     await driver.swipe(width.x, width2.y, width.x, width.y, 500)
     await driver.delayMs(1000);
 
-    let scrollSearch:Component = await driver.findComponent(ON.text('勾选文本/CheckboxGroup'))
+    let scrollSearch: Component = await driver.findComponent(ON.text('勾选文本/CheckboxGroup'))
     await scrollSearch.click()
     await driver.delayMs(1000);
 
-    let Buttons:Component[] = await driver.findComponents(ON.type('Button'));
+    let Buttons: Component[] = await driver.findComponents(ON.type('Button'));
     await Buttons[1].click()
     await driver.delayMs(1000);
 

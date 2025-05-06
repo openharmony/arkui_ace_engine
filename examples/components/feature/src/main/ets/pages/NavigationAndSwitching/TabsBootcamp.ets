@@ -846,10 +846,10 @@ export struct TabsBootcamp {
         .onChange((index: number) => {
           this.compEventTriggeredLog('Tab页签切换事件onChange触发');
         })
-        .onTabBarClick((index: number)=>{
+        .onTabBarClick((index: number) => {
           this.compEventTriggeredLog('Tab页签点击事件onTabBarClick触发');
         })
-        .onAnimationStart( (index: number, targetIndex: number, event: TabsAnimationEvent) => {
+        .onAnimationStart((index: number, targetIndex: number, event: TabsAnimationEvent) => {
           this.compEventTriggeredLog('切换动画开始事件onAnimationStart触发');
         })
         .onAnimationEnd((index: number, event: TabsAnimationEvent) => {
@@ -1299,7 +1299,7 @@ export struct TabsBootcamp {
           bottom: useEnabled(this.enableCompPixelStretchEffectOptionsBottom,
             this.compPixelStretchEffectOptionsBottom)
         })
-        .freeze(useEnabled(this.enableCompFreeze, this.compFreeze))//part2
+        .freeze(useEnabled(this.enableCompFreeze, this.compFreeze)) //part2
         .sweepGradient(!this.enableCompLinearGradientColors1 && !this.enableCompRadialGradientColors1 ? {
           center: [
             useEnabled(this.enableCompSweepGradientCenterValue1, this.compSweepGradientCenterValue1),
@@ -1434,7 +1434,7 @@ export struct TabsBootcamp {
           this.compAccessibilityDescription))
         .accessibilityLevel(useEnabled(this.enableCompAccessibilityLevel, this.compAccessibilityLevel))
         .attributeModifier(useEnabled(this.enableCompAttributeModifier, this.compAttributeModifier) ?
-        this.modifier : null)//part3
+        this.modifier : null) //part3
         .gestureModifier(useEnabled(this.enableCompGestureModifier, this.compGestureModifier) ?
         this.myGestureModifier1 : this.myGestureModifier2)
         .outline({
@@ -1815,6 +1815,7 @@ export struct TabsBootcamp {
   }
 
   @State selection: string | null = null;
+
   @Builder
   ListItemGroupHeaders(str: string) {
     Row() {
@@ -1826,7 +1827,7 @@ export struct TabsBootcamp {
         .fillColor($r('sys.color.ohos_id_color_fourth'))
         .height(24)
         .width(24)
-        .rotate({ angle: this.selection==str ? 90 : 0 })
+        .rotate({ angle: this.selection == str ? 90 : 0 })
         .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
     }
     .borderRadius(20)
@@ -1847,11 +1848,12 @@ export struct TabsBootcamp {
       }
     })
   }
+
   @Builder
   Generic() {
     Scroll(this.scroller) {
       Column({ space: 8 }) {
-        List({space:8}){
+        List({ space: 8 }) {
           CompSizeBlocks({
             enableCompWidth: $enableCompWidth,
             compWidth: $compWidth,
@@ -2400,7 +2402,7 @@ export struct TabsBootcamp {
               })
               CompRenderFitBlocks({
                 enableCompRenderFit: $enableCompRenderFit, compRenderFit: $compRenderFit
-              })//
+              }) //
               CompEventMonopolizationBlocks({
                 enableCompMonopolizeEvents: $enableCompMonopolizeEvents,
                 compMonopolizeEvents: $compMonopolizeEvents
@@ -2433,7 +2435,6 @@ export struct TabsBootcamp {
   compBackground() {
     Text('123')
   }
-
 }
 
 @Preview

@@ -99,6 +99,14 @@ struct ActionParam {
     std::map<std::string, std::string> actionArguments;
 };
 
+struct AccessibilityFocusInfo {
+    int64_t currentFocusNodeId;
+    int64_t currentFocusVirtualNodeParentId;
+
+    explicit AccessibilityFocusInfo(int64_t nodeId = -1, int64_t parentId = -1)
+        : currentFocusNodeId(nodeId), currentFocusVirtualNodeParentId(parentId) {}
+};
+
 enum class DumpMode {
     TREE,
     NODE,
@@ -361,10 +369,7 @@ public:
     void RegisterUIExtBusinessConsumeCallback();
     void RegisterGetParentRectHandler();
 
-    bool IsScreenReaderEnabled() override
-    {
-        return isScreenReaderEnabled_;
-    }
+    bool IsScreenReaderEnabled() override;
 
     void UpdateAccessibilityNodeRect(const RefPtr<NG::FrameNode>& frameNode) override;
     void OnAccessbibilityDetachFromMainTree(const RefPtr<NG::FrameNode>& frameNode) override;
@@ -374,9 +379,13 @@ public:
         AccessibilityElementOperatorCallback& callback,
         const int32_t requestId);
 
-    void ReleasePageEvent(const RefPtr<NG::FrameNode>& node, bool deleteController) override;
+    void ReleasePageEvent(
+        const RefPtr<NG::FrameNode>& node,
+        bool deleteController = true,
+        bool releaseAll = false) override;
 
     void AddToPageEventController(const RefPtr<NG::FrameNode>& node) override;
+    bool CheckPageEventCached(const RefPtr<NG::FrameNode>& node, bool onlyCurrentPage) override;
 
     bool CheckAccessibilityVisible(const RefPtr<NG::FrameNode>& node) override;
 
@@ -394,7 +403,7 @@ private:
         explicit JsInteractionOperation(int32_t windowId) : windowId_(windowId) {}
         virtual ~JsInteractionOperation() = default;
         // Accessibility override.
-        void SearchElementInfoByAccessibilityId(const int64_t elementId, const int32_t requestId,
+        RetError SearchElementInfoByAccessibilityId(const int64_t elementId, const int32_t requestId,
             Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode) override;
         void SearchElementInfosByText(const int64_t elementId, const std::string& text, const int32_t requestId,
             Accessibility::AccessibilityElementOperatorCallback& callback) override;
@@ -435,7 +444,7 @@ private:
         explicit WebInteractionOperation(int32_t windowId) : windowId_(windowId) {}
         virtual ~WebInteractionOperation() = default;
         // Accessibility override.
-        void SearchElementInfoByAccessibilityId(const int64_t elementId, const int32_t requestId,
+        RetError SearchElementInfoByAccessibilityId(const int64_t elementId, const int32_t requestId,
             Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode) override;
         void SearchElementInfosByText(const int64_t elementId, const std::string& text, const int32_t requestId,
             Accessibility::AccessibilityElementOperatorCallback& callback) override;
@@ -696,7 +705,10 @@ private:
         int32_t pageId,
         const std::vector<RefPtr<NG::FrameNode>>& pageNodes,
         const std::vector<std::string> pagePaths);
-
+    
+    bool CheckPageEventValidInCache();
+    bool CheckPageEventByPageInCache(int32_t pageId);
+    void ReleaseAllCacheAccessibilityEvent();
     void ReleaseCacheAccessibilityEvent(const int32_t pageId);
 
     std::string callbackKey_;
@@ -707,6 +719,8 @@ private:
     float scaleY_ = 1.0f;
     int64_t currentFocusNodeId_ = -1;
     bool isScreenReaderEnabled_ = false;
+    int64_t currentFocusVirtualNodeParentId_ = -1;
+    bool isScreenReaderEnabledInitialized_ = false;
 
     int64_t lastElementId_ = -1;
     WeakPtr<NG::FrameNode> lastFrameNode_;

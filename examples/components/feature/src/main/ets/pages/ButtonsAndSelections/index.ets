@@ -53,31 +53,31 @@ export const buttonsAndSelectionsRoute: RouteGroup = {
 @Builder
 export function buttonsAndSelectionsDestination(name: string, route: Route) {
   if (name === 'ButtonsAndSelections/Button') {
-    ButtonBootcamp({title: route.label})
-  }else if (name === 'ButtonsAndSelections/SegmentButton'){
-    SegmentButtonBootcamp({title: route.label})
-  } else if (name === 'ButtonsAndSelections/Toggle'){
-    ToggleBootcamp({title: route.label})
-  }else if (name === 'ButtonsAndSelections/Checkbox'){
-    CheckboxBootcamp({title: route.label})
-  }else if (name === 'ButtonsAndSelections/CheckboxGroup'){
-    CheckboxGroupBootcamp({title: route.label})
-  }else if (name === 'ButtonsAndSelections/CalendarPicker'){
-    CalendarPickerBootcamp({title: route.label})
-  }else if (name === 'ButtonsAndSelections/DatePicker'){
-    DatePickerBootcamp({title: route.label})
-  }else if (name === 'ButtonsAndSelections/TextPicker'){
-    TextPickerBootcamp({title: route.label})
-  }else if (name === 'ButtonsAndSelections/TimePicker'){
-    TimePickerBootcamp({title: route.label})
-  }else if (name === 'ButtonsAndSelections/Radio'){
-    RadioBootcamp({title: route.label})
-  }else if (name === 'ButtonsAndSelections/Rating'){
-    RatingBootcamp({title: route.label})
-  }else if (name === 'ButtonsAndSelections/Slider'){
-    SliderBootcamp({title: route.label})
-  }else if (name === 'ButtonsAndSelections/Select'){
-    SelectBootcamp({title: route.label})
+    ButtonBootcamp({ title: route.label })
+  } else if (name === 'ButtonsAndSelections/SegmentButton') {
+    SegmentButtonBootcamp({ title: route.label })
+  } else if (name === 'ButtonsAndSelections/Toggle') {
+    ToggleBootcamp({ title: route.label })
+  } else if (name === 'ButtonsAndSelections/Checkbox') {
+    CheckboxBootcamp({ title: route.label })
+  } else if (name === 'ButtonsAndSelections/CheckboxGroup') {
+    CheckboxGroupBootcamp({ title: route.label })
+  } else if (name === 'ButtonsAndSelections/CalendarPicker') {
+    CalendarPickerBootcamp({ title: route.label })
+  } else if (name === 'ButtonsAndSelections/DatePicker') {
+    DatePickerBootcamp({ title: route.label })
+  } else if (name === 'ButtonsAndSelections/TextPicker') {
+    TextPickerBootcamp({ title: route.label })
+  } else if (name === 'ButtonsAndSelections/TimePicker') {
+    TimePickerBootcamp({ title: route.label })
+  } else if (name === 'ButtonsAndSelections/Radio') {
+    RadioBootcamp({ title: route.label })
+  } else if (name === 'ButtonsAndSelections/Rating') {
+    RatingBootcamp({ title: route.label })
+  } else if (name === 'ButtonsAndSelections/Slider') {
+    SliderBootcamp({ title: route.label })
+  } else if (name === 'ButtonsAndSelections/Select') {
+    SelectBootcamp({ title: route.label })
   }
 
 }

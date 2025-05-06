@@ -629,7 +629,6 @@ export struct TabContentBootcamp {
   // Special Effect Drawing Combination
   @State enableCompUseEffect: boolean = false
   @State compUseEffect: boolean = false
-
   //compEvent
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
@@ -1134,7 +1133,7 @@ export struct TabContentBootcamp {
           bottom: useEnabled(this.enableCompPixelStretchEffectOptionsBottom,
             this.compPixelStretchEffectOptionsBottom)
         })
-        .freeze(useEnabled(this.enableCompFreeze, this.compFreeze))//part2
+        .freeze(useEnabled(this.enableCompFreeze, this.compFreeze)) //part2
         .sweepGradient(!this.enableCompLinearGradientColors1 && !this.enableCompRadialGradientColors1 ? {
           center: [
             useEnabled(this.enableCompSweepGradientCenterValue1, this.compSweepGradientCenterValue1),
@@ -1269,7 +1268,7 @@ export struct TabContentBootcamp {
           this.compAccessibilityDescription))
         .accessibilityLevel(useEnabled(this.enableCompAccessibilityLevel, this.compAccessibilityLevel))
         .attributeModifier(useEnabled(this.enableCompAttributeModifier, this.compAttributeModifier) ?
-        this.modifier : null)//part3
+        this.modifier : null) //part3
         .gestureModifier(useEnabled(this.enableCompGestureModifier, this.compGestureModifier) ?
         this.myGestureModifier1 : this.myGestureModifier2)
         .outline({
@@ -1362,10 +1361,10 @@ export struct TabContentBootcamp {
             this.getUIContext().getCursorController().restoreDefault()
           }
         })
-        .onWillShow(()=>{
+        .onWillShow(() => {
           this.compEventTriggeredLog('TabContent将要显示时触发onWillShow事件');
         })
-        .onWillHide(()=>{
+        .onWillHide(() => {
           this.compEventTriggeredLog('TabContent将要隐藏时触发onWillHide事件');
         })
 
@@ -1388,7 +1387,8 @@ export struct TabContentBootcamp {
   @Builder
   Parameters() {
     Scroll() {
-      Column({ space: 8 }) {}.width('100%')
+      Column({ space: 8 }) {
+      }.width('100%')
     }
     .height('52%')
   }
@@ -1406,7 +1406,7 @@ export struct TabContentBootcamp {
         .fillColor($r('sys.color.ohos_id_color_fourth'))
         .height(24)
         .width(24)
-        .rotate({ angle: this.selection==str ? 90 : 0 })
+        .rotate({ angle: this.selection == str ? 90 : 0 })
         .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
     }
     .borderRadius(20)
@@ -1432,7 +1432,7 @@ export struct TabContentBootcamp {
   Generic() {
     Scroll(this.scroller) {
       Column({ space: 8 }) {
-        List({space:8}){
+        List({ space: 8 }) {
           CompSizeBlocks({
             enableCompWidth: $enableCompWidth,
             compWidth: $compWidth,
@@ -2022,7 +2022,6 @@ export struct TabContentBootcamp {
   compBackground() {
     Text('123')
   }
-
 }
 
 

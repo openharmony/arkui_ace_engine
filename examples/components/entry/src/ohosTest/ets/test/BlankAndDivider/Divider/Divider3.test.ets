@@ -1871,6 +1871,6 @@ export default function Divider3() {
 
     })
 
-    })
+  })
 
 }

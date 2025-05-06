@@ -24,7 +24,7 @@ const driver = Driver.create();
 
 const TAG = 'SelectBootcamp'
 
-export async function SelectStart(done:Function){
+export async function SelectStart(done: Function) {
   console.info('beforeAll begin');
   try {
     await delegator.startAbility({

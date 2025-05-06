@@ -58,6 +58,7 @@ private:
         const ImageDecoderConfig& imageDecoderConfig);
 
     static std::shared_mutex pixelMapMtx_;
+    // only support netWork image
     static std::unordered_map<std::string, WeakPtr<PixelMap>> weakPixelMapCache_;
 };
 } // namespace OHOS::Ace::NG

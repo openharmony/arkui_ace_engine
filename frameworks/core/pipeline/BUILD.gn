@@ -33,6 +33,7 @@ template("ace_core_pipeline_source_set") {
     # add common source file needed by all product platform here
     sources = [
       # context
+      "container_window_manager.cpp",
       "pipeline_base.cpp",
       "pipeline_context.cpp",
 

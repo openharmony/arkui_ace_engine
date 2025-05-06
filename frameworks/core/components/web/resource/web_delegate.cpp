@@ -20,6 +20,7 @@
 #include <iomanip>
 #include <optional>
 #include <sstream>
+#include <string>
 
 #include "event_handler.h"
 
@@ -32,6 +33,7 @@
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "base/perfmonitor/perf_monitor.h"
+#include "base/web/webview/interfaces/native/arkweb_net_error_list.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/web/render_web.h"
@@ -102,6 +104,7 @@ constexpr uint32_t DRAG_DELAY_MILLISECONDS = 300;
 constexpr uint32_t ACCESSIBILITY_DELAY_MILLISECONDS = 100;
 constexpr uint32_t DELAY_MILLISECONDS_1000 = 1000;
 constexpr uint32_t NO_NATIVE_FINGER_TYPE = 100;
+constexpr uint32_t ACCESSIBILITY_PAGE_CHANGE_DELAY_MILLISECONDS = 100;
 const std::string DEFAULT_NATIVE_EMBED_ID = "0";
 
 const std::vector<std::string> CANONICALENCODINGNAMES = {
@@ -1164,6 +1167,65 @@ void WebDelegate::UnRegisterNativeArkJSFunction(const std::string& objName)
     }
 }
 
+class NWebJsProxyMethodImpl : public OHOS::NWeb::NWebJsProxyMethod {
+public:
+    explicit NWebJsProxyMethodImpl(int size,
+        const std::vector<std::function<void(const std::vector<std::string>&)>>& func)
+        : size_(size), funcs_(func) {}
+    ~NWebJsProxyMethodImpl() = default;
+
+    int GetSize() override
+    {
+        return size_;
+    }
+
+    void OnHandle(int number, const std::vector<std::string>& param) override
+    {
+        if (number < 0 || number >= size_) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "jsProxy callback back error number %{public}d", number);
+            return;
+        }
+        if (!funcs_[number]) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "jsProxy callback is null in number %{public}d", number);
+            return;
+        }
+        TAG_LOGD(AceLogTag::ACE_WEB, "jsProxy callback success number %{public}d", number);
+        funcs_[number](param);
+    }
+
+private:
+    int size_ = 0;
+    std::vector<std::function<void(const std::vector<std::string>&)>> funcs_;
+};
+
+void WebDelegate::RegisterNativeJavaScriptProxy(const std::string& obj, const std::vector<std::string>& method,
+    std::vector<std::function<void(const std::vector<std::string>&)>> callbackImpl,
+    bool isAync, const std::string& permission, bool isNeedRefresh)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto executor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(executor);
+
+    executor->PostTask(
+        [weak = WeakClaim(this), obj, methods = method, callbacks = callbackImpl, isAync, permission, isNeedRefresh]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto nweb = delegate->GetNweb();
+            CHECK_NULL_VOID(nweb);
+
+            int len = callbacks.size();
+            TAG_LOGI(AceLogTag::ACE_WEB, "RegisterNativeJavaScriptProxy %{public}s have %{public}d callback",
+                obj.c_str(), len);
+            std::shared_ptr<NWebJsProxyMethodImpl> dataImpl = std::make_shared<NWebJsProxyMethodImpl>(len, callbacks);
+            nweb->RegisterNativeJavaScriptProxy(obj, methods, dataImpl, isAync, permission);
+            if (isNeedRefresh) {
+                nweb->Reload();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebRegisterNativeJavaScriptProxy");
+}
+    
 void WebDelegate::LoadDataWithBaseUrl(const std::string& baseUrl, const std::string& data, const std::string& mimeType,
     const std::string& encoding, const std::string& historyUrl)
 {
@@ -3171,7 +3233,9 @@ void WebDelegate::InitWebViewWithSurface()
             auto upgradeContext = context.Upgrade();
             CHECK_NULL_VOID(upgradeContext);
             auto window_id = upgradeContext->GetWindowId();
+            auto foucus_window_id = upgradeContext->GetFocusWindowId();
             delegate->nweb_->SetWindowId(window_id);
+            delegate->nweb_->SetFocusWindowId(foucus_window_id);
             delegate->SetToken();
             delegate->RegisterSurfaceOcclusionChangeFun();
             delegate->nweb_->SetDrawMode(renderMode);
@@ -3981,7 +4045,7 @@ void WebDelegate::OnConfigurationUpdated(const OHOS::AppExecFwk::Configuration& 
                 setting->PutForceDarkModeEnabled(false);
             }
             if (delegate->enableFollowSystemFontWeight_) {
-                setting->SetFontWeightScale(stof(weightScale));
+                setting->SetFontWeightScale(std::stof(weightScale));
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebConfigurationUpdated");
@@ -4772,8 +4836,15 @@ void WebDelegate::OnPageFinished(const std::string& param)
             webEventHub->FireOnPageFinishedEvent(std::make_shared<LoadWebPageFinishEvent>(param));
             webPattern->OnScrollEndRecursive(std::nullopt);
             delegate->RecordWebEvent(Recorder::EventType::WEB_PAGE_END, param);
+            auto pageUrl = delegate->GetUrl();
+            if (pageUrl != "about:blank") {
+                TAG_LOGI(AceLogTag::ACE_WEB, "OnPageFinished:Start to RunJsInit.");
+                webPattern->RunJsInit();
+            }
         },
         TaskExecutor::TaskType::JS, "ArkUIWebPageFinished");
+    
+    AccessibilitySendPageChange();
 }
 
 void WebDelegate::OnProgressChanged(int param)
@@ -5199,7 +5270,8 @@ void WebDelegate::OnAccessibilityEvent(
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     AccessibilityEvent event;
-    if (eventType == AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY) {
+    if (eventType == AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY ||
+        eventType == AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY_NOT_INTERRUPT) {
         event.textAnnouncedForAccessibility = argument;
     }
     auto webPattern = webPattern_.Upgrade();
@@ -5312,6 +5384,92 @@ void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequ
                     AceType::MakeRefPtr<WebError>(error->ErrorInfo(), error->ErrorCode())));
         },
         TaskExecutor::TaskType::JS, "ArkUIWebErrorReceive");
+    
+    if (error->ErrorCode() == ArkWeb_NetError::ARKWEB_ERR_INTERNET_DISCONNECTED) {
+        AccessibilityReleasePageEvent();
+    }
+}
+
+void WebDelegate::AccessibilitySendPageChange()
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostDelayedTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto context = AceType::DynamicCast<NG::PipelineContext>(delegate->context_.Upgrade());
+            CHECK_NULL_VOID(context);
+            auto webNode = webPattern->GetHost();
+            CHECK_NULL_VOID(webNode);
+            auto accessibilityManager = context->GetAccessibilityManager();
+            CHECK_NULL_VOID(accessibilityManager);
+            if (!accessibilityManager->IsScreenReaderEnabled()) {
+                return;
+            }
+            if (webNode->IsOnMainTree()) {
+                if (!accessibilityManager->CheckAccessibilityVisible(webNode)) {
+                    return;
+                }
+                if (accessibilityManager->CheckPageEventCached(webNode, false)) {
+                    TAG_LOGI(AceLogTag::ACE_WEB,
+                        "WebDelegate::AccessibilitySendPageChange CheckPageEventCached accessibilityId = "
+                        "%{public}" PRId64,
+                        webNode->GetAccessibilityId());
+                    accessibilityManager->ReleasePageEvent(webNode, true, true);
+                    return;
+                }
+                auto navigationMgr = context->GetNavigationManager();
+                if (navigationMgr && navigationMgr->IsNavigationInAnimation()) {
+                    TAG_LOGI(AceLogTag::ACE_WEB,
+                        "WebDelegate::AccessibilitySendPageChange IsNavigationInAnimation accessibilityId = "
+                        "%{public}" PRId64,
+                        webNode->GetAccessibilityId());
+                    accessibilityManager->ReleasePageEvent(webNode, true, true);
+                    return;
+                }
+                TAG_LOGI(AceLogTag::ACE_WEB,
+                    "WebDelegate::AccessibilitySendPageChange accessibilityId = %{public}" PRId64,
+                    webNode->GetAccessibilityId());
+                accessibilityManager->ReleasePageEvent(webNode, true, true);
+                AccessibilityEvent event;
+                event.nodeId = webNode->GetAccessibilityId();
+                event.type = AccessibilityEventType::PAGE_CHANGE;
+                accessibilityManager->SendAccessibilityAsyncEvent(event);
+            }
+        },
+        TaskExecutor::TaskType::UI, ACCESSIBILITY_PAGE_CHANGE_DELAY_MILLISECONDS,
+        "ArkUIWebAccessibilitySendPageChange");
+}
+
+void WebDelegate::AccessibilityReleasePageEvent()
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostDelayedTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto context = AceType::DynamicCast<NG::PipelineContext>(delegate->context_.Upgrade());
+            CHECK_NULL_VOID(context);
+            auto webNode = webPattern->GetHost();
+            CHECK_NULL_VOID(webNode);
+            auto accessibilityManager = context->GetAccessibilityManager();
+            CHECK_NULL_VOID(accessibilityManager);
+            if (!accessibilityManager->IsScreenReaderEnabled()) {
+                return;
+            }
+            if (webNode->IsOnMainTree()) {
+                TAG_LOGI(AceLogTag::ACE_WEB,
+                    "WebDelegate::AccessibilityReleasePageEvent accessibilityId = %{public}" PRId64,
+                    webNode->GetAccessibilityId());
+                accessibilityManager->ReleasePageEvent(webNode, true, true);
+            }
+        },
+        TaskExecutor::TaskType::UI, ACCESSIBILITY_PAGE_CHANGE_DELAY_MILLISECONDS,
+        "ArkUIWebAccessibilityReleasePageEvent");
 }
 
 void WebDelegate::ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart)
@@ -6334,11 +6492,11 @@ bool WebDelegate::GetPendingSizeStatus()
     return false;
 }
 
-void WebDelegate::HandleAccessibilityHoverEvent(int32_t x, int32_t y)
+void WebDelegate::HandleAccessibilityHoverEvent(int32_t x, int32_t y, bool isHoverEnter)
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
-        nweb_->SendAccessibilityHoverEvent(x, y);
+        nweb_->SendAccessibilityHoverEventV2(x, y, isHoverEnter);
     }
 }
 
@@ -7877,5 +8035,13 @@ void WebDelegate::RestoreRenderFit()
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     webPattern->RestoreRenderFit();
+}
+
+bool WebDelegate::IsNWebEx()
+{
+    if (!nweb_) {
+        return false;
+    }
+    return nweb_->IsNWebEx();
 }
 } // namespace OHOS::Ace

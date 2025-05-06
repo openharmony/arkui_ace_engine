@@ -82,7 +82,7 @@ void DragDropInitiatingStateBase::FireCustomerOnDragEnd()
     CHECK_NULL_VOID(frameNode);
     auto pipelineContext = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
-    auto eventHub = frameNode ->GetEventHub<EventHub>();
+    auto eventHub = frameNode ->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -135,7 +135,7 @@ bool DragDropInitiatingStateBase::IsAllowedDrag()
     CHECK_NULL_RETURN(frameNode, false);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, false);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     bool isAllowedDrag = gestureHub->IsAllowedDrag(eventHub);
     return isAllowedDrag;
@@ -303,7 +303,7 @@ void DragDropInitiatingStateBase::HideTextAnimation(bool startDrag, double globa
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     bool isAllowedDrag = gestureHub->IsAllowedDrag(eventHub);
     if (!gestureHub->GetTextDraggable() || !isAllowedDrag) {
@@ -405,5 +405,35 @@ void DragDropInitiatingStateBase::HandleTextDragStart(const RefPtr<FrameNode>& f
     }
     auto gestureEventInfo = info;
     gestureHub->HandleOnDragStart(gestureEventInfo);
+}
+
+void DragDropInitiatingStateBase::UpdatePointInfoForFinger(const TouchEvent& touchEvent)
+{
+    if (touchEvent.type == TouchType::MOVE) {
+        auto point = Point(touchEvent.x, touchEvent.y, touchEvent.screenX, touchEvent.screenY);
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto dragDropManager = pipeline->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->UpdatePointInfoForFinger(touchEvent.id, point);
+    }
+}
+
+void DragDropInitiatingStateBase::OnActionEnd(const GestureEvent& info)
+{
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger drag action end.");
+    DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    if (dragDropManager->IsAboutToPreview()) {
+        dragDropManager->ResetDragging();
+    }
+    dragDropManager->SetIsDragNodeNeedClean(false);
+    dragDropManager->SetIsDisableDefaultDropAnimation(true);
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
 }
 } // namespace OHOS::Ace::NG

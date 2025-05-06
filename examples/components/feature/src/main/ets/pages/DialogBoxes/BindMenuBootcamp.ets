@@ -57,21 +57,24 @@ import { CompAccessibilityBlocks } from '../../components/CompAccessibilityBlock
 import { CompAttributeModifierBlocks } from '../../components/CompAttributeModifierBlocks';
 
 
-
 //part2
 class MyModifier implements AttributeModifier<MenuItemAttribute> {
   applyNormalAttribute(instance: MenuItemAttribute) {
     instance.backgroundColor('#0A59F7')
   }
+
   applyPressedAttribute(instance: MenuItemAttribute) {
     instance.backgroundColor('#ED6F21')
   }
+
   applyFocusedAttribute(instance: MenuItemAttribute) {
     instance.backgroundColor(Color.Gray)
   }
+
   applyDisabledAttribute(instance: MenuItemAttribute) {
     instance.backgroundColor('#E5E5E5')
   }
+
   applySelectedAttribute(instance: MenuItemAttribute) {
     instance.backgroundColor('#ffedea21')
   }
@@ -148,7 +151,6 @@ export struct BindMenuBootcamp {
   @State enableMenuItemWidth: boolean = false;
   @State menuItemHeight: number = 250;
   @State enableMenuItemHeight: boolean = false;
-
   //part1
   // size
   @State enableCompWidth: boolean = false;
@@ -499,7 +501,6 @@ export struct BindMenuBootcamp {
   @State compLinearGradientColorsNumber2: number = 0;
   @State enableCompLinearGradientRepeating: boolean = false;
   @State compLinearGradientRepeating: boolean = false;
-
   //Focus Control
   @State enableCompFocusable: boolean = false;
   @State compFocusable: boolean = false;
@@ -609,7 +610,6 @@ export struct BindMenuBootcamp {
   // Hit Test Control
   @State enableCompHitTestBehavior: boolean = false
   @State compHitTestBehavior: HitTestMode = HitTestMode.Default
-
   // Sheet Transition
   // Obscuring
   @State enableCompObscured: boolean = false
@@ -627,7 +627,6 @@ export struct BindMenuBootcamp {
   @State enableCompUseEffect: boolean = false
   @State compUseEffect: boolean = false
   @State scrollShow: number = 0
-
   //compEvent
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
@@ -638,7 +637,6 @@ export struct BindMenuBootcamp {
   aboutToAppear(): void {
     AppStorage.setOrCreate('scroller', this.scroller)
   }
-
 
   compMaskColorChange() {
     this.progress.updateColor(this.compMaskColor);
@@ -673,7 +671,6 @@ export struct BindMenuBootcamp {
     }, 200)
   }
 
-
   build() {
     NavDestination() {
       Drawer({
@@ -694,15 +691,10 @@ export struct BindMenuBootcamp {
     .hideTitleBar(true)
   }
 
-
-
   @Builder
   compBackground() {
     Text('123')
   }
-
-
-
 
   @Builder
   SubMenu() {
@@ -738,8 +730,7 @@ export struct BindMenuBootcamp {
           weight: useEnabled<FontWeight>(this.enableMenuItemLabelFontWeight, this.menuItemLabelFontWeight),
           family: 'HarmonyOS Sans',
           style: useEnabled<FontStyle>(this.enableMenuItemLabelFontStyle, this.menuItemLabelFontStyle),
-        })
-          //part1
+        })//part1
         .width(useEnabled(this.enableCompWidth, this.compWidth))
         .height(useEnabled(this.enableCompHeight, this.compHeight))
         .padding(useEnabled(this.enableCompPadding, this.compPadding))
@@ -1164,7 +1155,7 @@ export struct BindMenuBootcamp {
             this.compPixelStretchEffectOptionsBottom)
         })
         .freeze(useEnabled(this.enableCompFreeze, this.compFreeze))//part2
-        .linearGradient( {
+        .linearGradient({
           angle: useEnabled(this.enableCompLinearGradientAngle, this.compLinearGradientAngle),
           direction: useEnabled(this.enableCompLinearGradientDirection, this.compLinearGradientDirection),
           colors: [
@@ -1370,7 +1361,7 @@ export struct BindMenuBootcamp {
           this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
           return HitTestMode.Default;
         })
-        .onChange(()=>{
+        .onChange(() => {
           this.compEventTriggeredLog('onChange触发')
         })
 
@@ -1397,8 +1388,7 @@ export struct BindMenuBootcamp {
           weight: useEnabled<FontWeight>(this.enableMenuItemLabelFontWeight, this.menuItemLabelFontWeight),
           family: 'HarmonyOS Sans',
           style: useEnabled<FontStyle>(this.enableMenuItemLabelFontStyle, this.menuItemLabelFontStyle),
-        })
-          //part1
+        })//part1
         .width(useEnabled(this.enableCompWidth, this.compWidth))
         .height(useEnabled(this.enableCompHeight, this.compHeight))
         .padding(useEnabled(this.enableCompPadding, this.compPadding))
@@ -1823,7 +1813,7 @@ export struct BindMenuBootcamp {
             this.compPixelStretchEffectOptionsBottom)
         })
         .freeze(useEnabled(this.enableCompFreeze, this.compFreeze))//part2
-        .linearGradient( {
+        .linearGradient({
           angle: useEnabled(this.enableCompLinearGradientAngle, this.compLinearGradientAngle),
           direction: useEnabled(this.enableCompLinearGradientDirection, this.compLinearGradientDirection),
           colors: [
@@ -2029,7 +2019,7 @@ export struct BindMenuBootcamp {
           this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
           return HitTestMode.Default;
         })
-        .onChange(()=>{
+        .onChange(() => {
           this.compEventTriggeredLog('onChange触发')
         })
 
@@ -2056,8 +2046,7 @@ export struct BindMenuBootcamp {
           weight: useEnabled<FontWeight>(this.enableMenuItemLabelFontWeight, this.menuItemLabelFontWeight),
           family: 'HarmonyOS Sans',
           style: useEnabled<FontStyle>(this.enableMenuItemLabelFontStyle, this.menuItemLabelFontStyle),
-        })
-          //part1
+        })//part1
         .width(useEnabled(this.enableCompWidth, this.compWidth))
         .height(useEnabled(this.enableCompHeight, this.compHeight))
         .padding(useEnabled(this.enableCompPadding, this.compPadding))
@@ -2482,7 +2471,7 @@ export struct BindMenuBootcamp {
             this.compPixelStretchEffectOptionsBottom)
         })
         .freeze(useEnabled(this.enableCompFreeze, this.compFreeze))//part2
-        .linearGradient( {
+        .linearGradient({
           angle: useEnabled(this.enableCompLinearGradientAngle, this.compLinearGradientAngle),
           direction: useEnabled(this.enableCompLinearGradientDirection, this.compLinearGradientDirection),
           colors: [
@@ -2688,7 +2677,7 @@ export struct BindMenuBootcamp {
           this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
           return HitTestMode.Default;
         })
-        .onChange(()=>{
+        .onChange(() => {
           this.compEventTriggeredLog('onChange触发')
         })
 
@@ -2715,8 +2704,7 @@ export struct BindMenuBootcamp {
           weight: useEnabled<FontWeight>(this.enableMenuItemLabelFontWeight, this.menuItemLabelFontWeight),
           family: 'HarmonyOS Sans',
           style: useEnabled<FontStyle>(this.enableMenuItemLabelFontStyle, this.menuItemLabelFontStyle),
-        })
-          //part1
+        })//part1
         .width(useEnabled(this.enableCompWidth, this.compWidth))
         .height(useEnabled(this.enableCompHeight, this.compHeight))
         .padding(useEnabled(this.enableCompPadding, this.compPadding))
@@ -3141,7 +3129,7 @@ export struct BindMenuBootcamp {
             this.compPixelStretchEffectOptionsBottom)
         })
         .freeze(useEnabled(this.enableCompFreeze, this.compFreeze))//part2
-        .linearGradient( {
+        .linearGradient({
           angle: useEnabled(this.enableCompLinearGradientAngle, this.compLinearGradientAngle),
           direction: useEnabled(this.enableCompLinearGradientDirection, this.compLinearGradientDirection),
           colors: [
@@ -3347,7 +3335,7 @@ export struct BindMenuBootcamp {
           this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
           return HitTestMode.Default;
         })
-        .onChange(()=>{
+        .onChange(() => {
           this.compEventTriggeredLog('onChange触发')
         })
 
@@ -3505,8 +3493,8 @@ export struct BindMenuBootcamp {
 
   }
 
-
   @State selection: string | null = null;
+
   @Builder
   ListItemGroupHeaders(str: string) {
     Row() {
@@ -3518,7 +3506,7 @@ export struct BindMenuBootcamp {
         .fillColor($r('sys.color.ohos_id_color_fourth'))
         .height(24)
         .width(24)
-        .rotate({ angle: this.selection==str ? 90 : 0 })
+        .rotate({ angle: this.selection == str ? 90 : 0 })
         .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
     }
     .borderRadius(20)
@@ -3539,6 +3527,7 @@ export struct BindMenuBootcamp {
       }
     })
   }
+
   @Builder
   Generic() {
     Scroll(this.scroller) {

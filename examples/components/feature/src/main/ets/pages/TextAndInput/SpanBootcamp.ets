@@ -568,7 +568,6 @@ export struct SpanBootcamp {
   @State compUseEffect: boolean = false;
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
-
   @State selection: string | null = null;
   scroller: Scroller = new Scroller()
 
@@ -616,7 +615,7 @@ export struct SpanBootcamp {
         content: () => {
           this.Content()
         },
-        generic:()=>{
+        generic: () => {
           this.Generic()
         },
         parameters: () => {
@@ -664,6 +663,7 @@ export struct SpanBootcamp {
       }
     })
   }
+
   @Builder
   Content() {
     Row() {
@@ -1463,6 +1463,7 @@ export struct SpanBootcamp {
       }
     }.height('52%').id('scroll')
   }
+
   @Builder
   Generic() {
     Scroll(this.scroller) {

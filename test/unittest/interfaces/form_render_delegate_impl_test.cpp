@@ -530,4 +530,21 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_022, TestSize.Le
     EXPECT_EQ(reUseAns, ERR_OK);
 }
 
+/*
+ * @tc.name: FormRenderDelegateImplTest_023
+ * @tc.desc: Test OnUpdateFormDone() function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_023, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FormRenderDelegateImplTest_023 start";
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+    EXPECT_EQ(renderDelegate->OnUpdateFormDone(-1), ERR_INVALID_DATA);
+
+    std::string onUpdateFormDoneKey;
+    auto onFormUpdate = [&onUpdateFormDoneKey](const int64_t) { onUpdateFormDoneKey = CHECK_KEY; };
+    renderDelegate->SetUpdateFormEventHandler(std::move(onFormUpdate));
+    EXPECT_EQ(renderDelegate->OnUpdateFormDone(1), ERR_OK);
+    GTEST_LOG_(INFO) << "FormRenderDelegateImplTest_023 end";
+}
 }

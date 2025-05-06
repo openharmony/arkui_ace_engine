@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { describe, beforeAll, it} from '@ohos/hypium'
+import { describe, beforeAll, it } from '@ohos/hypium'
 import { Driver, Component } from '@kit.TestKit';
 import { ON } from '@ohos.UiTest';
 import {
@@ -30,7 +30,7 @@ import { NavDestination } from './NavDestination';
 
 const driver = Driver.create();
 
-export default function NavDestination1(){
+export default function NavDestination1() {
   describe('NavDestination1', () => {
     beforeAll(async (done: Function) => {
       await NavDestination(done)

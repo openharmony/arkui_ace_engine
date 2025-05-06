@@ -119,7 +119,7 @@ protected:
 
     std::vector<std::list<RefPtr<SpanItem>>> spans_;
     RefPtr<ParagraphManager> paragraphManager_;
-    std::optional<TextStyle> textStyle_;
+    TextStyle textStyle_;
     TextStyle inheritTextStyle_;
     float baselineOffset_ = 0.0f;
     float shadowOffset_ = 0.0f;
@@ -142,9 +142,10 @@ private:
     void UpdateSymbolSpanEffect(
         RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph, const std::list<RefPtr<SpanItem>>& spans);
     void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
-    void UpdateTextColorIfForeground(const RefPtr<FrameNode>& frameNode, TextStyle& textStyle);
+    void UpdateTextColorIfForeground(const RefPtr<FrameNode>& frameNode, TextStyle& textStyle, const Color& textColor);
     void SetPropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,
-        const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode);
+        const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode,
+        const Color& textColor);
     void SetDecorationPropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,
         const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle);
     void SetFontSizePropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,

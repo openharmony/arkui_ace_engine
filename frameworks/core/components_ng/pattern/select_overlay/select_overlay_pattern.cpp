@@ -22,6 +22,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/offset.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
 #include "core/components/menu/menu_component.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
@@ -45,11 +46,14 @@ void SelectOverlayPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
 
     UpdateHandleHotZone();
     auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
     if (overlayMode_ == SelectOverlayMode::MENU_ONLY) {
         gesture->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
         return;
@@ -66,6 +70,7 @@ void SelectOverlayPattern::SetGestureEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
     clickEvent_ = MakeRefPtr<ClickEvent>([weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -113,7 +118,7 @@ void SelectOverlayPattern::InitMouseEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);

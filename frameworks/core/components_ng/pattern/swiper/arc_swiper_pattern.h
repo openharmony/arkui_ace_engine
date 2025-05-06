@@ -38,6 +38,7 @@ public:
     std::shared_ptr<SwiperArcDotParameters> GetSwiperArcDotParameters() const override;
     bool IsLoop() const override;
     void SetDisableTransitionAnimation(bool isDisable) override;
+    bool GetDisableFlushFocus() override;
 
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) override;
@@ -168,7 +169,7 @@ private:
     Axis axis_ = Axis::HORIZONTAL;
     bool disableTransitionAnimation_ = false;
 #ifdef SUPPORT_DIGITAL_CROWN
-    void HandleCrownActionBegin(double degree, double mainDelta, GestureEvent& info);
+    void HandleCrownActionBegin(double degree, double mainDelta, GestureEvent& info, const OffsetF& offset);
     void HandleCrownActionUpdate(double degree, double mainDelta, GestureEvent& info, const OffsetF& offset);
     void HandleCrownActionEnd(double degree, double mainDelta, GestureEvent& info, const OffsetF& offset);
     void HandleCrownActionCancel();
@@ -184,7 +185,10 @@ private:
     double crownVelocity_ = 0.0;
     double crownTurnVelocity_ = 0.0;
     bool isHandleCrownActionEnd_ = false;
+    int32_t oldCurrentIndex_ = -1;
+    bool isChanged_ = false;
 #endif
+    bool isDisableFlushFocus_ = false;
     bool canChangeDirectionFlag_ = false;
     bool scrollToLeft_ = false;
     bool scrollToTop_ = false;

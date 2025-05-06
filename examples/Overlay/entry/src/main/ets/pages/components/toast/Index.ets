@@ -26,6 +26,8 @@ export struct ToastIndex {
   pathStack: NavPathStack = new NavPathStack()
   paths: NavListItem[] = [
     { name: 'Toast', path: 'Toast' },
+    { name: 'showToastTest', path: 'showToastTest' },
+    { name: 'toastPositionTest', path: 'toastPositionTest' },
   ]
 
   build() {

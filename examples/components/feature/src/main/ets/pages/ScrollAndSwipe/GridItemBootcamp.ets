@@ -453,7 +453,6 @@ export struct GridItemBootcamp {
   @State compLinearGradientColorsNumber2: number = 0;
   @State enableCompLinearGradientRepeating: boolean = false;
   @State compLinearGradientRepeating: boolean = false;
-
   //Focus Control
   @State enableCompFocusable: boolean = false;
   @State compFocusable: boolean = false;
@@ -528,7 +527,6 @@ export struct GridItemBootcamp {
   @State modifier: MyModifier = new MyModifier()
   @State enableCompAttributeModifier: boolean = false;
   @State compAttributeModifier: boolean = false;
-
   // Gesture Modifier
   @State enableCompGestureModifier: boolean = false
   @State compGestureModifier: boolean = false
@@ -684,7 +682,7 @@ export struct GridItemBootcamp {
         content: () => {
           this.Content()
         },
-        generic: () =>{
+        generic: () => {
           this.Generic()
         },
         parameters: () => {
@@ -695,7 +693,6 @@ export struct GridItemBootcamp {
     .backgroundColor('#f1f3f5')
     .hideTitleBar(true)
   }
-
 
   @Builder
   Content() {
@@ -2064,6 +2061,7 @@ export struct GridItemBootcamp {
   }
 
   @State selection: string | null = null;
+
   @Builder
   ListItemGroupHeaders(str: string) {
     Row() {
@@ -2075,7 +2073,7 @@ export struct GridItemBootcamp {
         .fillColor($r('sys.color.ohos_id_color_fourth'))
         .height(24)
         .width(24)
-        .rotate({ angle: this.selection==str ? 90 : 0 })
+        .rotate({ angle: this.selection == str ? 90 : 0 })
         .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
     }
     .borderRadius(20)

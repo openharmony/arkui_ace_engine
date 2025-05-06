@@ -21,19 +21,6 @@
 namespace OHOS::Ace::NG {
 void DragDropInitiatingStateMoving::HandlePanOnActionEnd(const GestureEvent& info)
 {
-    TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger drag action end.");
-    DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    auto dragDropManager = pipelineContext->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    if (dragDropManager->IsAboutToPreview()) {
-        dragDropManager->ResetDragging();
-    }
-    dragDropManager->SetIsDragNodeNeedClean(false);
-    dragDropManager->SetIsDisableDefaultDropAnimation(true);
-    auto machine = GetStateMachine();
-    CHECK_NULL_VOID(machine);
-    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+    OnActionEnd(info);
 }
 } // namespace OHOS::Ace::NG

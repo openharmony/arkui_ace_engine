@@ -116,7 +116,7 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto eventHub = host->GetEventHub<ScrollEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     PrintOffsetLog(AceLogTag::ACE_SCROLL, host->GetId(), prevOffset_ - currentOffset_);
     FireOnDidScroll(prevOffset_ - currentOffset_);
@@ -235,7 +235,7 @@ void ScrollPattern::OnScrollEndCallback()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<ScrollEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto scrollEndEvent = eventHub->GetScrollEndEvent();
     if (scrollEndEvent) {
@@ -384,7 +384,7 @@ void ScrollPattern::ValidateOffset(int32_t source)
 
 void ScrollPattern::HandleScrollPosition(float scroll)
 {
-    auto eventHub = GetEventHub<ScrollEventHub>();
+    auto eventHub = GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onScroll = eventHub->GetOnScrollEvent();
     CHECK_NULL_VOID(onScroll);
@@ -403,7 +403,7 @@ void ScrollPattern::HandleScrollPosition(float scroll)
 
 float ScrollPattern::FireTwoDimensionOnWillScroll(float scroll)
 {
-    auto eventHub = GetEventHub<ScrollEventHub>();
+    auto eventHub = GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_RETURN(eventHub, scroll);
     auto onScroll = eventHub->GetOnWillScrollEvent();
     auto onJsFrameNodeScroll = eventHub->GetJSFrameNodeOnScrollWillScroll();
@@ -438,7 +438,7 @@ float ScrollPattern::FireTwoDimensionOnWillScroll(float scroll)
 void ScrollPattern::FireOnDidScroll(float scroll)
 {
     FireObserverOnDidScroll(scroll);
-    auto eventHub = GetEventHub<ScrollEventHub>();
+    auto eventHub = GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onScroll = eventHub->GetOnDidScrollEvent();
     auto onJSFrameNodeDidScroll = eventHub->GetJSFrameNodeOnScrollDidScroll();
@@ -548,7 +548,7 @@ void ScrollPattern::HandleCrashTop()
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     const auto& onScrollEdge = eventHub->GetScrollEdgeEvent();
     CHECK_NULL_VOID(onScrollEdge);
@@ -566,7 +566,7 @@ void ScrollPattern::HandleCrashBottom()
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     const auto& onScrollEdge = eventHub->GetScrollEdgeEvent();
     CHECK_NULL_VOID(onScrollEdge);
@@ -1111,13 +1111,10 @@ void ScrollPattern::CaleSnapOffsetsByPaginations(ScrollSnapAlign scrollSnapAlign
 
 bool ScrollPattern::NeedScrollSnapToSide(float delta)
 {
-    CHECK_NULL_RETURN(IsScrollSnap(), false);
-    auto finalPosition = currentOffset_ + delta;
-    if (IsEnablePagingValid() && GetEdgeEffect() != EdgeEffect::SPRING) {
-        return Positive(finalPosition) || LessNotEqual(finalPosition, -scrollableDistance_);
-    }
+    CHECK_NULL_RETURN(GetScrollSnapAlign() != ScrollSnapAlign::NONE, false);
     CHECK_NULL_RETURN(!IsSnapToInterval(), false);
     CHECK_NULL_RETURN(static_cast<int32_t>(snapOffsets_.size()) > 2, false);
+    auto finalPosition = currentOffset_ + delta;
     if (!enableSnapToSide_.first) {
         if (GreatOrEqual(currentOffset_, *(snapOffsets_.begin() + 1)) &&
             LessOrEqual(finalPosition, *(snapOffsets_.begin() + 1))) {
@@ -1190,22 +1187,17 @@ float ScrollPattern::GetSelectScrollWidth()
 float ScrollPattern::GetPagingOffset(float delta, float dragDistance, float velocity)  const
 {
     // handle last page
-    auto currentOffset = currentOffset_;
     if (GreatNotEqual(lastPageLength_, 0.f) &&
-        LessNotEqual(currentOffset - dragDistance, -scrollableDistance_ + lastPageLength_)) {
-        if (LessOrEqual(dragDistance, lastPageLength_)) {
-            return currentOffset - dragDistance + GetPagingDelta(dragDistance, velocity, lastPageLength_);
-        }
-        if (GreatNotEqual(dragDistance, lastPageLength_)) {
-            dragDistance -= lastPageLength_;
-        }
+        LessNotEqual(currentOffset_, -scrollableDistance_ + lastPageLength_)) {
+        auto offset = fmod(currentOffset_, lastPageLength_);
+        return currentOffset_ - offset + GetPagingDelta(offset, velocity, lastPageLength_);
     }
     // handle other pages
     float head = 0.0f;
     float tail = -scrollableDistance_;
-    dragDistance = fmod(dragDistance, viewPortLength_);
-    auto pagingPosition = currentOffset - dragDistance + GetPagingDelta(dragDistance, velocity, viewPortLength_);
-    auto finalPosition = currentOffset + delta;
+    auto offset = fmod(currentOffset_, viewPortLength_);
+    auto pagingPosition = currentOffset_ - offset + GetPagingDelta(offset, velocity, viewPortLength_);
+    auto finalPosition = currentOffset_ + delta;
     auto useFinalPosition = (GreatOrEqual(pagingPosition, head) && !GreatOrEqual(finalPosition, head)) ||
                       (LessOrEqual(pagingPosition, tail) && !LessOrEqual(finalPosition, tail));
     return useFinalPosition ? finalPosition : pagingPosition;
@@ -1316,7 +1308,7 @@ void ScrollPattern::DumpAdvanceInfo()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<ScrollEventHub>();
+    auto hub = host->GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(hub);
     ScrollablePattern::DumpAdvanceInfo();
     DumpLog::GetInstance().AddDesc(std::string("currentOffset: ").append(std::to_string(currentOffset_)));
@@ -1485,7 +1477,7 @@ void ScrollPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<ScrollEventHub>();
+    auto hub = host->GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(hub);
     ScrollablePattern::DumpAdvanceInfo(json);
     json->Put("currentOffset", std::to_string(currentOffset_).c_str());
@@ -1532,5 +1524,13 @@ SizeF ScrollPattern::GetChildrenExpandedSize()
         return SizeF(viewPortExtent_.Width(), viewPort_.Height());
     }
     return SizeF();
+}
+
+void ScrollPattern::TriggerScrollBarDisplay()
+{
+    auto scrollBar = GetScrollBar();
+    CHECK_NULL_VOID(scrollBar);
+    scrollBar->PlayScrollBarAppearAnimation();
+    scrollBar->ScheduleDisappearDelayTask();
 }
 } // namespace OHOS::Ace::NG

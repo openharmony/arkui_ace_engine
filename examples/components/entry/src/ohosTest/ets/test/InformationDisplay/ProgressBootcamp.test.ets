@@ -30,7 +30,7 @@ const driver = Driver.create();
 export default function ProgressBootcampTest() {
   describe('ProgressBootcampTest', () => {
     // Defines a test suite. Two parameters are supported: test suite name and test suite function.
-    beforeAll(async(done: Function) => {
+    beforeAll(async (done: Function) => {
       // Presets an action, which is performed only once before all test cases of the test suite start.
       // This API supports only one parameter: preset action function.
       console.info('beforeAll begin');
@@ -118,7 +118,7 @@ export default function ProgressBootcampTest() {
       await titleSearch('参数列表', 'progressOptions.type')
 
       await radioClick({
-        radioClickObj:0,
+        radioClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
@@ -137,7 +137,7 @@ export default function ProgressBootcampTest() {
       await titleSearch('参数列表', 'progressOptions.type')
 
       await radioClick({
-        radioClickObj:1,
+        radioClickObj: 1,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
@@ -156,7 +156,7 @@ export default function ProgressBootcampTest() {
       await titleSearch('参数列表', 'progressOptions.type')
 
       await radioClick({
-        radioClickObj:2,
+        radioClickObj: 2,
         id: 'Progress',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
@@ -172,7 +172,7 @@ export default function ProgressBootcampTest() {
       await titleSearch('参数列表', 'progressOptions.type')
 
       await radioClick({
-        radioClickObj:3,
+        radioClickObj: 3,
         id: 'Progress',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
@@ -188,7 +188,7 @@ export default function ProgressBootcampTest() {
       await titleSearch('参数列表', 'progressOptions.type')
 
       await radioClick({
-        radioClickObj:4,
+        radioClickObj: 4,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
@@ -862,7 +862,6 @@ export default function ProgressBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
           toggleClickObj: 'progressStyleOptions.scaleCount'
-
         }
       })
 

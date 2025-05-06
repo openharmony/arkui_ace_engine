@@ -20,6 +20,8 @@ import {
   JsonType,
   KeyStruct,
   radioClick,
+  Search,
+  searchParentBlock,
   Slide,
   sliderDrag,
   titleSearch,
@@ -35,7 +37,7 @@ export default function Swiper7Test() {
 
     })
     //focusable
-    it('ArkUI_Column_Comp_0461', 0, async (done: Function) => {
+    it('ArkUI_Swiper_Comp_0461', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'focusable', '通用属性3')
 
@@ -44,7 +46,7 @@ export default function Swiper7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Swiper',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('focusable', JsonType.value)
@@ -55,7 +57,7 @@ export default function Swiper7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0462', 0, async (done: Function) => {
+    it('ArkUI_Swiper_Comp_0462', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'focusable', '通用属性3')
 
@@ -64,7 +66,7 @@ export default function Swiper7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Swiper',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('focusable', JsonType.value)
@@ -76,7 +78,7 @@ export default function Swiper7Test() {
     })
 
     // defaultFocus
-    it('ArkUI_Column_Comp_0463', 0, async (done: Function) => {
+    it('ArkUI_Swiper_Comp_0463', 0, async (done: Function) => {
       //设置当前组件是否为当前页面上的默认焦点，仅在初次创建的页面第一次进入时生效。
       await titleSearch('基础属性', 'defaultFocus', '通用属性3')
 
@@ -90,7 +92,7 @@ export default function Swiper7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0464', 0, async (done: Function) => {
+    it('ArkUI_Swiper_Comp_0464', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'defaultFocus', '通用属性3')
 
@@ -105,7 +107,7 @@ export default function Swiper7Test() {
     })
 
     // groupDefaultFocus
-    it('ArkUI_Column_Comp_0465', 0, async (done: Function) => {
+    it('ArkUI_Swiper_Comp_0465', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'groupDefaultFocus', '通用属性3')
 
@@ -114,7 +116,7 @@ export default function Swiper7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Swiper',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('groupDefaultFocus', JsonType.value)
@@ -125,7 +127,7 @@ export default function Swiper7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0466', 0, async (done: Function) => {
+    it('ArkUI_Swiper_Comp_0466', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'groupDefaultFocus', '通用属性3')
 
@@ -134,7 +136,7 @@ export default function Swiper7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Swiper',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('groupDefaultFocus', JsonType.value)
@@ -146,7 +148,7 @@ export default function Swiper7Test() {
     })
 
     // focusOnTouch
-    it('ArkUI_Column_Comp_0467', 0, async (done: Function) => {
+    it('ArkUI_Swiper_Comp_0467', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'focusOnTouch', '通用属性3')
 
@@ -155,7 +157,7 @@ export default function Swiper7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Swiper',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('focusOnTouch', JsonType.value)
@@ -166,7 +168,7 @@ export default function Swiper7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0468', 0, async (done: Function) => {
+    it('ArkUI_Swiper_Comp_0468', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'focusOnTouch', '通用属性3')
 
@@ -175,7 +177,7 @@ export default function Swiper7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Swiper',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('focusOnTouch', JsonType.value)
@@ -187,7 +189,7 @@ export default function Swiper7Test() {
     })
 
     // focusBox.margin
-    it('ArkUI_Column_Comp_0469', 0, async (done: Function) => {
+    it('ArkUI_Swiper_Comp_0469', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'focusBox.margin', '通用属性3')
 
@@ -210,7 +212,7 @@ export default function Swiper7Test() {
     })
 
     // focusBox.strokeColor
-    it('ArkUI_Column_Comp_0470', 0, async (done: Function) => {
+    it('ArkUI_Swiper_Comp_0470', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'focusBox.strokeColor', '通用属性3')
 
@@ -225,7 +227,7 @@ export default function Swiper7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0471', 0, async (done: Function) => {
+    it('ArkUI_Swiper_Comp_0471', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'focusBox.strokeColor', '通用属性3')
 
@@ -237,7 +239,7 @@ export default function Swiper7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0472', 0, async (done: Function) => {
+    it('ArkUI_Swiper_Comp_0472', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'focusBox.strokeColor', '通用属性3')
 
@@ -249,7 +251,7 @@ export default function Swiper7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0473', 0, async (done: Function) => {
+    it('ArkUI_Swiper_Comp_0473', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'focusBox.strokeColor', '通用属性3')
 
@@ -261,7 +263,7 @@ export default function Swiper7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0474', 0, async (done: Function) => {
+    it('ArkUI_Swiper_Comp_0474', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'focusBox.strokeColor', '通用属性3')
 
@@ -273,7 +275,7 @@ export default function Swiper7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0475', 0, async (done: Function) => {
+    it('ArkUI_Swiper_Comp_0475', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'focusBox.strokeColor', '通用属性3')
 
@@ -289,7 +291,7 @@ export default function Swiper7Test() {
     })
 
     // focusBox.strokeWidth
-    it('ArkUI_Column_Comp_0476', 0, async (done: Function) => {
+    it('ArkUI_Swiper_Comp_0476', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'focusBox.strokeWidth', '通用属性3')
 

@@ -1781,6 +1781,6 @@ export default function TextClock3() {
       done();
     })
 
-    })
+  })
 
 }

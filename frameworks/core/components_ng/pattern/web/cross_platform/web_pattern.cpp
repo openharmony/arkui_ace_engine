@@ -118,7 +118,7 @@ void WebPattern::InitEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<WebEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
@@ -227,7 +227,7 @@ void WebPattern::HandleMouseEvent(MouseInfo& info)
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<WebEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto mouseEventCallback = eventHub->GetOnMouseEvent();
     CHECK_NULL_VOID(mouseEventCallback);
@@ -348,7 +348,7 @@ bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, ret);
-    auto eventHub = host->GetEventHub<WebEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_RETURN(eventHub, ret);
 
     KeyEventInfo info(keyEvent);
@@ -379,7 +379,7 @@ void WebPattern::WebRequestFocus()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<WebEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<WebEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);

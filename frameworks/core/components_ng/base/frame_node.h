@@ -146,6 +146,11 @@ public:
         checkboxFlag_ = checkboxFlag;
     }
 
+    void SetBindTips(bool hasBindTips)
+    {
+        hasBindTips_ = hasBindTips;
+    }
+
     bool GetCheckboxFlag() const
     {
         return checkboxFlag_;
@@ -365,14 +370,14 @@ public:
     template<typename T>
     RefPtr<T> GetEventHub()
     {
-        CreateEventHubInner();
-        CHECK_NULL_RETURN(eventHub_, nullptr);
         return DynamicCast<T>(eventHub_);
     }
 
     template<typename T>
-    RefPtr<T> GetEventHubOnly()
+    RefPtr<T> GetOrCreateEventHub()
     {
+        CreateEventHubInner();
+        CHECK_NULL_RETURN(eventHub_, nullptr);
         return DynamicCast<T>(eventHub_);
     }
 
@@ -550,7 +555,7 @@ public:
     std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(
         bool excludeSelf = false, bool checkBoundary = false) const;
 
-    OffsetF GetPaintRectOffsetToStage() const;
+    OffsetF GetPaintRectOffsetToPage() const;
 
     RectF GetPaintRectWithTransform() const;
 
@@ -1231,6 +1236,8 @@ public:
     void AddCustomProperty(const std::string& key, const std::string& value) override;
     void RemoveCustomProperty(const std::string& key) override;
 
+    void SetCustomPropertyMapFlagByKey(const std::string& key);
+
     void AddExtraCustomProperty(const std::string& key, void* extraData);
     void* GetExtraCustomProperty(const std::string& key) const;
     void RemoveExtraCustomProperty(const std::string& key);
@@ -1308,6 +1315,7 @@ public:
     }
 
     void SetFrameNodeDestructorCallback(const std::function<void(int32_t)>&& callback);
+    void SetMeasureCallback(const std::function<void(RefPtr<Kit::FrameNode>)>& measureCallback);
     void FireFrameNodeDestructorCallback();
 
     bool CheckTopWindowBoundary() const
@@ -1357,6 +1365,13 @@ public:
     }
 
     int32_t OnRecvCommand(const std::string& command) override;
+
+    void ResetLastFrameNodeRect()
+    {
+        if (lastFrameNodeRect_) {
+            lastFrameNodeRect_.reset();
+        }
+    }
 
 protected:
     void DumpInfo() override;
@@ -1498,7 +1513,14 @@ private:
     bool ProcessMouseTestHit(const PointF& globalPoint, const PointF& localPoint,
     TouchRestrict& touchRestrict, TouchTestResult& newComingTargets);
 
+    bool ProcessTipsMouseTestHit(const PointF& globalPoint, const PointF& localPoint,
+        TouchRestrict& touchRestrict, TouchTestResult& newComingTargets);
+
+    void TipsTouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
+        TouchRestrict& touchRestrict, TouchTestResult& result, ResponseLinkResult& responseLinkResult, bool isDispatch);
+
     void ResetPredictNodes();
+    void HandleAreaChangeDestruct();
 
     const char* GetPatternTypeName() const;
     const char* GetLayoutPropertyTypeName() const;
@@ -1606,6 +1628,7 @@ private:
     bool exposeInnerGestureFlag_ = false;
     bool isDeleteRsNode_ = false;
     bool hasPositionZ_ = false;
+    bool hasBindTips_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 
@@ -1617,7 +1640,7 @@ private:
 
     DragPreviewOption previewOption_;
 
-    std::unordered_map<std::string, std::string> customPropertyMap_;
+    std::unordered_map<std::string, std::vector<std::string>> customPropertyMap_;
 
     std::unordered_map<std::string, void*> extraCustomPropertyMap_;
 
@@ -1644,6 +1667,7 @@ private:
     VisibleAreaChangeTriggerReason visibleAreaChangeTriggerReason_ = VisibleAreaChangeTriggerReason::IDLE;
     float preOpacity_ = 1.0f;
     std::function<void(int32_t)> frameNodeDestructorCallback_;
+    std::function<void(RefPtr<Kit::FrameNode>&)> measureCallback_;
 
     bool topWindowBoundary_ = false;
 

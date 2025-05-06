@@ -99,6 +99,7 @@ void JSRefresh::JSBind(BindingTarget globalObj)
     JSClass<JSRefresh>::StaticMethod("onRefreshing", &JSRefresh::OnRefreshing);
     JSClass<JSRefresh>::StaticMethod("onOffsetChange", &JSRefresh::OnOffsetChange);
     JSClass<JSRefresh>::StaticMethod("pullDownRatio", &JSRefresh::SetPullDownRatio);
+    JSClass<JSRefresh>::StaticMethod("maxPullDownDistance", &JSRefresh::SetMaxPullDownDistance);
     JSClass<JSRefresh>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSRefresh>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRefresh>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
@@ -121,6 +122,26 @@ void JSRefresh::SetPullDownRatio(const JSCallbackInfo& info)
     }
     pulldownRatio = std::clamp(args->ToNumber<float>(), 0.f, 1.f);
     RefreshModel::GetInstance()->SetPullDownRatio(pulldownRatio);
+}
+
+void JSRefresh::SetMaxPullDownDistance(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+
+    auto args = info[0];
+    if (!args->IsNumber()) {
+        RefreshModel::GetInstance()->SetMaxPullDownDistance(std::nullopt);
+        return;
+    }
+    float maxPullDownDistance = args->ToNumber<float>();
+    if (std::isnan(maxPullDownDistance)) {
+        RefreshModel::GetInstance()->SetMaxPullDownDistance(std::nullopt);
+        return;
+    }
+    maxPullDownDistance = std::max(maxPullDownDistance, 0.0f);
+    RefreshModel::GetInstance()->SetMaxPullDownDistance(maxPullDownDistance);
 }
 
 void JSRefresh::JsRefreshOffset(const JSCallbackInfo& info)

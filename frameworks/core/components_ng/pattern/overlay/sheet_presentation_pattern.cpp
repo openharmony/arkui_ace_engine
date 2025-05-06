@@ -62,7 +62,8 @@ constexpr float SHEET_VISIABLE_ALPHA = 1.0f;
 constexpr float SHEET_INVISIABLE_ALPHA = 0.0f;
 constexpr int32_t SHEET_ENTRY_ANIMATION_DURATION = 250;
 constexpr int32_t SHEET_EXIT_ANIMATION_DURATION = 100;
-constexpr float SHEET_INVISIABLE_OFFSET = 8.0;
+constexpr float SHEET_INVISIABLE_OFFSET = 8.0f;
+constexpr float BOTTOM_STYLE_RATIO = 1.25f;
 constexpr int32_t SHEET_HALF_HEIGHT = 2;
 constexpr Dimension ARROW_VERTICAL_P1_OFFSET_X = 8.0_vp;
 constexpr Dimension ARROW_VERTICAL_P2_OFFSET_X = 1.5_vp;
@@ -78,6 +79,7 @@ constexpr Dimension SUBWINDOW_SHEET_TRANSLATION = 80.0_vp;
 } // namespace
 void SheetPresentationPattern::OnModifyDone()
 {
+    Pattern::CheckLocalized();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -199,9 +201,6 @@ void SheetPresentationPattern::InitPageHeight()
     if (!NearEqual(currentTopSafeArea, sheetTopSafeArea_)) {
         topSafeAreaChanged_ = true;
     }
-    auto sheetTheme = pipelineContext->GetTheme<SheetTheme>();
-    CHECK_NULL_VOID(sheetTheme);
-    sheetThemeType_ = sheetTheme->GetSheetType();
     InitSheetMode();
 }
 
@@ -274,13 +273,26 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
     return true;
 }
 
+void SheetPresentationPattern::SetBottomStyleHotAreaInSubwindow()
+{
+    if (IsShowInSubWindow() && IsSheetBottom()) {
+        auto host = GetHost();
+        auto paintRect = host->GetPaintRectWithTransform();
+        std::vector<Rect> rects;
+        auto rect =
+            Rect(paintRect.GetOffset().GetX(), paintRect.GetOffset().GetY(), paintRect.Width(), paintRect.Height());
+        rects.emplace_back(rect);
+        SubwindowManager::GetInstance()->SetHotAreas(rects, SubwindowType::TYPE_SHEET, host->GetId(), GetSubWindowId());
+    }
+}
+
 void SheetPresentationPattern::CheckBuilderChange()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto builderNode = GetFirstFrameNodeOfBuilder();
     CHECK_NULL_VOID(builderNode);
-    auto eventHub = builderNode->GetEventHub<EventHub>();
+    auto eventHub = builderNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     OnAreaChangedFunc onBuilderAreaChangedFunc = [sheetNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
                                                      const OffsetF& /* oldOrigin */, const RectF& /* rect */,
@@ -339,16 +351,19 @@ void SheetPresentationPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    scale_ = pipelineContext->GetFontScale();
     InitFoldState();
-    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
     CHECK_NULL_VOID(targetNode);
-    pipelineContext->AddOnAreaChangeNode(targetNode->GetId());
+    auto targetNodeContext = targetNode->GetContext();
+    CHECK_NULL_VOID(targetNodeContext);
+    auto sheetTheme = targetNodeContext->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    sheetThemeType_ = sheetTheme->GetSheetType();
+    scale_ = targetNodeContext->GetFontScale();
+    targetNodeContext->AddWindowSizeChangeCallback(host->GetId());
+    targetNodeContext->AddOnAreaChangeNode(targetNode->GetId());
     OnAreaChangedFunc onAreaChangedFunc = [sheetNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
                                               const OffsetF& /* oldOrigin */, const RectF& /* rect */,
                                               const OffsetF& /* origin */) {
@@ -362,7 +377,7 @@ void SheetPresentationPattern::OnAttachToFrameNode()
             sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     };
-    auto eventHub = targetNode->GetEventHub<EventHub>();
+    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 
@@ -385,7 +400,7 @@ void SheetPresentationPattern::OnDetachFromFrameNode(FrameNode* sheetNode)
     pipeline->RemoveWindowSizeChangeCallback(sheetNode->GetId());
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
     CHECK_NULL_VOID(targetNode);
-    auto eventHub = targetNode->GetEventHub<EventHub>();
+    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->RemoveInnerOnAreaChangedCallback(sheetNode->GetId());
     if (HasHoverModeChangedCallbackId()) {
@@ -477,7 +492,7 @@ void SheetPresentationPattern::InitPanEvent()
         return;
     }
 
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -1137,10 +1152,10 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
         ref->preDidHeight_ = ref->height_;
         ref->isSpringBack_ = false;
     };
-
     isAnimationProcess_ = true;
     HandleDragEndAccessibilityEvent();
     property_->Set(start_);
+    SetBottomStyleHotAreaInSubwindow();
     animation_ = AnimationUtils::StartAnimation(option,
         [weak = AceType::WeakClaim(this), renderContext, offset]() {
             auto ref = weak.Upgrade();
@@ -1164,7 +1179,8 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
  */
 float SheetPresentationPattern::GetMaxSheetHeightBeforeDragUpdate()
 {
-    if (IsCurSheetNeedHalfFoldHover() || sheetType_ == SheetType::SHEET_BOTTOM_OFFSET || IsShowInSubWindow()) {
+    if (IsCurSheetNeedHalfFoldHover() || sheetType_ == SheetType::SHEET_BOTTOM_OFFSET ||
+        IsNotBottomStyleInSubwindow()) {
         return GetPageHeightWithoutOffset() - sheetOffsetY_;
     }
     auto sheetDetentsSize = sheetDetentHeight_.size();
@@ -1186,7 +1202,8 @@ float SheetPresentationPattern::GetMaxSheetHeightBeforeDragUpdate()
  */
 float SheetPresentationPattern::GetSheetHeightBeforeDragUpdate()
 {
-    if (IsCurSheetNeedHalfFoldHover() || sheetType_ == SheetType::SHEET_BOTTOM_OFFSET || IsShowInSubWindow()) {
+    if (IsCurSheetNeedHalfFoldHover() || sheetType_ == SheetType::SHEET_BOTTOM_OFFSET ||
+        IsNotBottomStyleInSubwindow()) {
         return GetPageHeightWithoutOffset() - sheetOffsetY_;
     }
     // height_ : from the bottom of screen, after the sheet entry action has ended.
@@ -1264,6 +1281,9 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
             pattern->OnDisappear();
             overlayManager->RemoveSheet(host);
             pattern->FireCallback("false");
+            auto pipelineContext = host->GetContextWithCheck();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateOcclusionCullingStatus(false, nullptr);
         }
     });
     StartSheetTransitionAnimation(option, isTransitionIn, offset);
@@ -1610,11 +1630,24 @@ float SheetPresentationPattern::GetWrapperHeight()
     CHECK_NULL_RETURN(host, 0.0f);
     auto sheetWrapper = host->GetParent();
     CHECK_NULL_RETURN(sheetWrapper, 0.0f);
-    auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetWrapper->GetParent());
+    auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetWrapper);
     CHECK_NULL_RETURN(sheetWrapperNode, 0.0f);
     auto sheetWrapperGeometryNode = sheetWrapperNode->GetGeometryNode();
     CHECK_NULL_RETURN(sheetWrapperGeometryNode, 0.0f);
     return sheetWrapperGeometryNode->GetFrameSize().Height();
+}
+
+float SheetPresentationPattern::GetWrapperWidth()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto sheetWrapper = host->GetParent();
+    CHECK_NULL_RETURN(sheetWrapper, 0.0f);
+    auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetWrapper);
+    CHECK_NULL_RETURN(sheetWrapperNode, 0.0f);
+    auto sheetWrapperGeometryNode = sheetWrapperNode->GetGeometryNode();
+    CHECK_NULL_RETURN(sheetWrapperGeometryNode, 0.0f);
+    return sheetWrapperGeometryNode->GetFrameSize().Width();
 }
 
 bool SheetPresentationPattern::SheetHeightNeedChanged()
@@ -1625,6 +1658,19 @@ bool SheetPresentationPattern::SheetHeightNeedChanged()
     CHECK_NULL_RETURN(sheetGeometryNode, false);
     if (!NearEqual(sheetGeometryNode->GetFrameSize().Height(), sheetHeight_) ||
         !NearEqual(GetWrapperHeight(), wrapperHeight_)) {
+        return true;
+    }
+    return false;
+}
+
+bool SheetPresentationPattern::SheetWidthNeedChanged()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto sheetGeometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(sheetGeometryNode, false);
+    if (!NearEqual(sheetGeometryNode->GetFrameSize().Width(), sheetWidth_) ||
+        !NearEqual(GetWrapperWidth(), wrapperWidth_)) {
         return true;
     }
     return false;
@@ -1679,49 +1725,54 @@ void SheetPresentationPattern::FireCommonCallback()
     FireOnHeightDidChange();
 }
 
+void SheetPresentationPattern::PopupSheetChanged()
+{
+    if (SheetHeightNeedChanged() || SheetWidthNeedChanged() || typeChanged_) {
+        FireCommonCallback();
+        auto renderContext = GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateTransformTranslate({ 0.0f, Dimension(sheetOffsetY_), 0.0f });
+        typeChanged_ = false;
+    }
+}
+
 void SheetPresentationPattern::CheckSheetHeightChange()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto sheetGeometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(sheetGeometryNode);
-    if (isFirstInit_) {
-        sheetHeight_ = sheetGeometryNode->GetFrameSize().Height();
-        wrapperHeight_ = GetWrapperHeight();
-        isFirstInit_ = false;
-    } else {
-        if (sheetType_ != GetSheetType()) {
+    if (!isFirstInit_) {
+        if (typeChanged_) {
             if (sheetType_ == SheetType::SHEET_POPUP) {
                 MarkSheetPageNeedRender();
             }
             SetSheetBorderWidth();
         }
-        if (SheetHeightNeedChanged() || (sheetType_ != GetSheetType()) || windowChanged_ || topSafeAreaChanged_) {
-            sheetHeight_ = sheetGeometryNode->GetFrameSize().Height();
-            wrapperHeight_ = GetWrapperHeight();
+        if (sheetType_ == SheetType::SHEET_POPUP) {
+            PopupSheetChanged();
+        } else if (SheetHeightNeedChanged() || typeChanged_ || windowChanged_ || topSafeAreaChanged_) {
             const auto& overlayManager = GetOverlayManager();
             CHECK_NULL_VOID(overlayManager);
             auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
             CHECK_NULL_VOID(layoutProperty);
             auto sheetStyle = layoutProperty->GetSheetStyleValue();
             overlayManager->ComputeSheetOffset(sheetStyle, host);
-            if (sheetType_ == SheetType::SHEET_POPUP) {
-                auto renderContext = GetRenderContext();
-                CHECK_NULL_VOID(renderContext);
-                renderContext->UpdateTransformTranslate({ 0.0f, Dimension(sheetOffsetY_), 0.0f });
-                renderContext->UpdateOpacity(SHEET_VISIABLE_ALPHA);
-                FireCommonCallback();
-            } else {
-                overlayManager->PlaySheetTransition(host, true, false);
-            }
+            overlayManager->PlaySheetTransition(host, true, false);
             auto maskNode = overlayManager->GetSheetMask(host);
             if (maskNode) {
                 UpdateMaskBackgroundColorRender();
             }
             windowChanged_ = false;
             topSafeAreaChanged_ = false;
+            typeChanged_ = false;
         }
     }
+    sheetHeight_ = sheetGeometryNode->GetFrameSize().Height();
+    sheetWidth_ = sheetGeometryNode->GetFrameSize().Width();
+    wrapperHeight_ = GetWrapperHeight();
+    wrapperWidth_ = GetWrapperWidth();
+    isFirstInit_ = false;
     GetBuilderInitHeight();
 }
 
@@ -1856,7 +1907,7 @@ float SheetPresentationPattern::ComputeTransitionOffset(float sheetHeight)
     auto sheetType = GetSheetType();
     if (sheetType == SheetType::SHEET_POPUP ||
         sheetType == SheetType::SHEET_BOTTOM_OFFSET || IsCurSheetNeedHalfFoldHover()
-        || IsShowInSubWindow()) {
+        || IsNotBottomStyleInSubwindow()) {
         offset = GetSheetOffset();
     } else {
         offset = GetPageHeightWithoutOffset() - sheetHeight;
@@ -1864,7 +1915,7 @@ float SheetPresentationPattern::ComputeTransitionOffset(float sheetHeight)
     return offset;
 }
 
-int32_t SheetPresentationPattern::GetSubWindowId()
+int32_t SheetPresentationPattern::GetSubWindowId() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, INVALID_SUBWINDOW_ID);
@@ -1876,33 +1927,52 @@ int32_t SheetPresentationPattern::GetSubWindowId()
     return sheetWrapperPattern->GetSubWindowId();
 }
 
-SheetType SheetPresentationPattern::ComputeSheetTypeInSubWindow()
+SheetType SheetPresentationPattern::ComputeSheetTypeInSubWindow() const
 {
-    SheetType sheetType = SheetType::SHEET_CENTER;
     auto instanceId = SubwindowManager::GetInstance()->GetParentContainerId(GetSubWindowId());
     auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN(container, sheetType);
+    CHECK_NULL_RETURN(container, SheetType::SHEET_CENTER);
     auto mainWindowContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_RETURN(mainWindowContext, sheetType);
+    CHECK_NULL_RETURN(mainWindowContext, SheetType::SHEET_CENTER);
     auto windowWidth = mainWindowContext->GetDisplayWindowRectInfo().Width();
+    auto windowHeight = mainWindowContext->GetDisplayWindowRectInfo().Height();
+    auto manager = mainWindowContext->GetWindowManager();
     if (container->IsUIExtensionWindow()) {
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(GetSubWindowId(),
             SubwindowType::TYPE_SHEET);
-        CHECK_NULL_RETURN(subwindow, sheetType);
+        CHECK_NULL_RETURN(subwindow, SheetType::SHEET_CENTER);
         windowWidth = subwindow->GetUIExtensionHostWindowRect().Width();
-    }
-    if (GreatOrEqual(windowWidth, SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx())
-        && sheetKey_.hasValidTargetNode) {
-        sheetType =  SheetType::SHEET_POPUP;
+        windowHeight = subwindow->GetUIExtensionHostWindowRect().Height();
     }
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
-    CHECK_NULL_RETURN(layoutProperty, sheetType);
+    CHECK_NULL_RETURN(layoutProperty, SheetType::SHEET_CENTER);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto sheetType =  SheetType::SHEET_CENTER;
+    if (manager && manager->IsPcOrPadFreeMultiWindowMode()) {
+        // Two in one or pad free-window mode
+        if (sheetStyle.sheetType.has_value() &&
+            sheetStyle.sheetType.value() == SheetType::SHEET_POPUP && sheetKey_.hasValidTargetNode) {
+            return SheetType::SHEET_POPUP;
+        }
+        return sheetType;
+    }
+    if (LessOrEqual(windowWidth, SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx())) {
+        return SheetType::SHEET_BOTTOM;
+    }
+    if (LessOrEqual(windowWidth, SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) &&
+        GreatOrEqual(windowWidth, SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) &&
+        LessOrEqual(windowWidth, BOTTOM_STYLE_RATIO * windowHeight)) {
+        // phone in landsapce
+        if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM) {
+            return SheetType::SHEET_BOTTOM;
+        }
+        return SheetType::SHEET_BOTTOMLANDSPACE;
+    }
     if (sheetStyle.sheetType.has_value()) {
         sheetType = sheetStyle.sheetType.value();
     }
-    if (sheetType == SheetType::SHEET_POPUP && !sheetKey_.hasValidTargetNode) {
-        sheetType =  SheetType::SHEET_CENTER;
+    if (sheetStyle.sheetType.value() == SheetType::SHEET_POPUP && !sheetKey_.hasValidTargetNode) {
+        sheetType = SheetType::SHEET_CENTER;
     }
     return sheetType;
 }
@@ -1945,7 +2015,7 @@ void SheetPresentationPattern::SheetTransitionAction(float offset, bool isStart,
     }
 }
 
-SheetType SheetPresentationPattern::GetSheetType()
+SheetType SheetPresentationPattern::GetSheetType() const
 {
     if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         return SHEET_BOTTOM;
@@ -1989,10 +2059,17 @@ void SheetPresentationPattern::InitSheetMode()
     sheetEffectEdge_ = sheetStyle.sheetEffectEdge.value_or(SheetEffectEdge::ALL);
 }
 
-void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType)
+void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType) const
 {
-    auto rootHeight = PipelineContext::GetCurrentRootHeight();
-    auto rootWidth = PipelineContext::GetCurrentRootWidth();
+    double rootWidth = 0.0;
+    double rootHeight = 0.0;
+    if (windowSize_.has_value()) {
+        rootWidth = windowSize_.value().Width();
+        rootHeight = windowSize_.value().Height();
+    } else {
+        rootWidth = PipelineContext::GetCurrentRootWidth();
+        rootHeight = PipelineContext::GetCurrentRootHeight();
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
@@ -2021,7 +2098,7 @@ void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType)
     }
 }
 
-void SheetPresentationPattern::GetSheetTypeWithPopup(SheetType& sheetType)
+void SheetPresentationPattern::GetSheetTypeWithPopup(SheetType& sheetType) const
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     double rootWidth = 0.0;
@@ -2057,7 +2134,7 @@ void SheetPresentationPattern::GetSheetTypeWithPopup(SheetType& sheetType)
     }
 }
 
-void SheetPresentationPattern::GetSheetTypeWithCenter(SheetType& sheetType)
+void SheetPresentationPattern::GetSheetTypeWithCenter(SheetType& sheetType) const
 {
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -2217,7 +2294,7 @@ void SheetPresentationPattern::ResetToInvisible()
     renderContext->UpdateTransformTranslate({ 0.0f, Dimension(sheetOffsetY_ - SHEET_INVISIABLE_OFFSET), 0.0f });
 }
 
-bool SheetPresentationPattern::IsFoldExpand()
+bool SheetPresentationPattern::IsFoldExpand() const
 {
     bool isExpand = false;
     auto container = Container::Current();
@@ -2263,10 +2340,11 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
                 }
             },
             option.GetOnFinishEvent());
+        SetBottomStyleHotAreaInSubwindow();
     } else {
         host->OnAccessibilityEvent(
             AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-        sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
+        sheetParent->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
             HitTestMode::HTMTRANSPARENT);
         animation_ = AnimationUtils::StartAnimation(
             option,
@@ -2281,6 +2359,9 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
         const auto& overlayManager = GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->CleanSheet(host, GetSheetKey());
+        auto pipelineContext = host->GetContextWithCheck();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateOcclusionCullingStatus(true, host);
     }
 }
 
@@ -3326,6 +3407,7 @@ void SheetPresentationPattern::UpdateSheetWhenSheetTypeChanged()
             MarkSheetPageNeedRender();
         }
         sheetType_ = sheetType;
+        typeChanged_ = true;
         SetSheetBorderWidth();
     }
 }
@@ -3363,7 +3445,7 @@ bool SheetPresentationPattern::IsShowInSubWindowTwoInOne()
     return sheetTheme->IsOuterBorderEnable();
 }
 
-bool SheetPresentationPattern::IsShowInSubWindow()
+bool SheetPresentationPattern::IsShowInSubWindow() const
 {
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);

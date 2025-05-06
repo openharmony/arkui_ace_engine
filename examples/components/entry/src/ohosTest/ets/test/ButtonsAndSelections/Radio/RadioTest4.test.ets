@@ -30,7 +30,9 @@ import {
   getToggle
 } from '../../../utils';
 import { RadioTest } from './RadioTest.test'
+
 const driver = Driver.create();
+
 export default function RadioTest4() {
   describe('RadioTest4', () => {
     beforeAll(async (done: Function) => {
@@ -784,7 +786,7 @@ export default function RadioTest4() {
 
     it('ArkUI_Radio_Comp_0315', 0, async (done: Function) => {
       // 获取不到
-      await titleSearch('基础属性','blendMode.type','通用属性2')
+      await titleSearch('基础属性', 'blendMode.type', '通用属性2')
       await radioClick({
         radioClickObj: 0,
         toggleClick: {
@@ -796,7 +798,7 @@ export default function RadioTest4() {
     })
     it('ArkUI_Radio_Comp_0316', 0, async (done: Function) => {
       // 获取不到
-      await titleSearch('基础属性','blendMode.type','通用属性2')
+      await titleSearch('基础属性', 'blendMode.type', '通用属性2')
       await radioClick({
         radioClickObj: 1,
         toggleClick: {

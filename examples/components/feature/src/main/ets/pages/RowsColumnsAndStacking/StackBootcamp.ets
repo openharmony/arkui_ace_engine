@@ -565,13 +565,6 @@ export struct StackBootcamp {
   // Obscuring
   @State enableCompObscured: boolean = false
   @State compObscured: Array<ObscuredReasons> = []
-  // Universal Text Attributes
-  @State enableCompDecorationType: boolean = false
-  @State compDecorationType: TextDecorationType = TextDecorationType.None
-  @State enableCompDecorationColor: boolean = false
-  @State compDecorationColor: ResourceColor = Color.Black
-  @State enableCompDecorationStyle: boolean = false
-  @State compDecorationStyle: TextDecorationStyle = TextDecorationStyle.SOLID
   @State enableCompDraggable: boolean = false
   // Drag and Drop Control
   @State compDraggable: boolean = false
@@ -1357,7 +1350,6 @@ export struct StackBootcamp {
     Text('123')
   }
 
-
   @Builder
   Parameters() {
     Scroll(this.scroller) {
@@ -1374,38 +1366,6 @@ export struct StackBootcamp {
             { label: 'Bottom', value: Alignment.Bottom }
           ]
         })
-
-        RadioBlock({
-          title: 'decoration.value.type',
-          isEnabled: $enableCompDecorationType,
-          value: $compDecorationType,
-          dataSource: [
-            { label: 'None', value: TextDecorationType.None },
-            { label: 'Underline', value: TextDecorationType.Underline },
-            { label: 'Overline', value: TextDecorationType.Overline },
-            { label: 'LineThrough', value: TextDecorationType.LineThrough },
-          ]
-        })
-
-        ColorBlock({
-          title: 'decoration.value.color',
-          isEnabled: $enableCompDecorationColor,
-          color: $compDecorationColor
-        })
-
-        RadioBlock({
-          title: 'decoration.value.style',
-          isEnabled: $enableCompDecorationStyle,
-          value: $compDecorationStyle,
-          dataSource: [
-            { label: 'SOLID', value: TextDecorationStyle.SOLID },
-            { label: 'DOUBLE', value: TextDecorationStyle.DOUBLE },
-            { label: 'DOTTED', value: TextDecorationStyle.DOTTED },
-            { label: 'DASHED', value: TextDecorationStyle.DASHED },
-            { label: 'WAVY', value: TextDecorationStyle.WAVY },
-          ]
-        })
-
       }
       .width('100%')
     }

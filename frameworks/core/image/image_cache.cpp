@@ -28,6 +28,10 @@ RefPtr<ImageCache> ImageCache::Create()
     return MakeRefPtr<ImageCache>();
 }
 
+ImageCache::ImageCache() = default;
+
+ImageCache::~ImageCache() = default;
+
 // TODO: Create a real ImageCache later
 #ifdef FLUTTER_2_5
 class MockImageCache : public ImageCache {

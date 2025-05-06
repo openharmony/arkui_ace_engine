@@ -41,7 +41,7 @@ void AbilityComponentModelNG::SetOnConnect(std::function<void()>&& onConnect)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<AbilityComponentEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<AbilityComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnConnect(std::move(onConnect));
 }
@@ -50,7 +50,7 @@ void AbilityComponentModelNG::SetOnDisConnect(std::function<void()>&& onDisConne
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<AbilityComponentEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<AbilityComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDisConnect(std::move(onDisConnect));
 }

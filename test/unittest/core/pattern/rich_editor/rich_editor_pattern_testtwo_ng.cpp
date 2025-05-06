@@ -75,25 +75,6 @@ void RichEditorPatternTestTwoNg::TearDownTestSuite()
 }
 
 /**
- * @tc.name: CalcDragSpeed001
- * @tc.desc: test CalcDragSpeed
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, CalcDragSpeed001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    float speed = 0.0f;
-    float hotAreaStart = 1.1f;
-    float hotAreaEnd = 101.1f;
-    float point = 50.1f;
-    float result = 17.472723f;
-    speed = richEditorPattern->CalcDragSpeed(hotAreaStart, hotAreaEnd, point);
-    EXPECT_EQ(result, speed);
-}
-
-/**
  * @tc.name: CalcMoveDownPos001
  * @tc.desc: test CalcMoveDownPos
  * @tc.type: FUNC
@@ -189,6 +170,187 @@ HWTEST_F(RichEditorPatternTestTwoNg, IsResponseRegionExpandingNeededForStylus001
     bool ret = true;
     ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: TripleClickSection001
+ * @tc.desc: test TripleClickSection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, TripleClickSection001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->GetHost()->GetFocusHub()->SetFocusType(FocusType::DISABLE);
+    GestureEvent info = GestureEvent();
+    info.sourceTool_ = SourceTool::FINGER;
+    richEditorPattern->TripleClickSection(info, 1, 10, 2);
+    EXPECT_TRUE(richEditorPattern->showSelect_);
+}
+
+/**
+ * @tc.name: TripleClickSection002
+ * @tc.desc: test TripleClickSection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, TripleClickSection002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->GetHost()->GetFocusHub()->SetFocusType(FocusType::DISABLE);
+    GestureEvent info = GestureEvent();
+    info.sourceTool_ = SourceTool::FINGER;
+    richEditorPattern->TripleClickSection(info, 10, 10, 2);
+    EXPECT_TRUE(richEditorPattern->showSelect_);
+}
+
+/**
+ * @tc.name: ResetKeyboardIfNeed001
+ * @tc.desc: test ResetKeyboardIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, ResetKeyboardIfNeed001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto focusHub = richEditorPattern->GetFocusHub();
+    EXPECT_NE(focusHub, nullptr);
+
+    focusHub->currentFocus_ = true;
+    richEditorPattern->action_ = TextInputAction::UNSPECIFIED;
+    richEditorPattern->ResetKeyboardIfNeed();
+    EXPECT_NE(richEditorPattern->action_, TextInputAction::UNSPECIFIED);
+}
+
+/**
+ * @tc.name: ResetKeyboardIfNeed002
+ * @tc.desc: test ResetKeyboardIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, ResetKeyboardIfNeed002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto focusHub = richEditorPattern->GetFocusHub();
+    EXPECT_NE(focusHub, nullptr);
+
+    richEditorPattern->imeShown_ = false;
+    richEditorPattern->isCustomKeyboardAttached_ = true;
+    focusHub->currentFocus_ = false;
+    richEditorPattern->action_ = TextInputAction::SEARCH;
+    richEditorPattern->ResetKeyboardIfNeed();
+    EXPECT_NE(richEditorPattern->action_, TextInputAction::SEARCH);
+}
+
+/**
+ * @tc.name: ResetKeyboardIfNeed003
+ * @tc.desc: test ResetKeyboardIfNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, ResetKeyboardIfNeed003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto focusHub = richEditorPattern->GetFocusHub();
+    EXPECT_NE(focusHub, nullptr);
+
+    richEditorPattern->imeShown_ = false;
+    richEditorPattern->isCustomKeyboardAttached_ = false;
+    focusHub->currentFocus_ = true;
+    richEditorPattern->action_ = TextInputAction::SEARCH;
+    richEditorPattern->ResetKeyboardIfNeed();
+    EXPECT_NE(richEditorPattern->action_, TextInputAction::SEARCH);
+}
+
+/**
+ * @tc.name: DumpInfo001
+ * @tc.desc: test DumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, DumpInfo001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto richEditorOverlay = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
+    richEditorOverlay->caretHeight_->Set(0.0f);
+    richEditorPattern->DumpInfo();
+    richEditorOverlay->caretHeight_->Set(1.0f);
+    richEditorPattern->DumpInfo();
+    EXPECT_NE(richEditorPattern->selectOverlay_->HasRenderTransform(), true);
+}
+
+/**
+ * @tc.name: GetLineMetrics001
+ * @tc.desc: test GetLineMetrics
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, GetLineMetrics001, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    int32_t lineNumber = 3;
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(3));
+    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 2 });
+    richEditorPattern->richTextRect_.SetRect(1, 1, 1, 1);
+    auto lineMetrics1 = richEditorPattern->paragraphs_.GetLineMetrics(lineNumber);
+    auto ret1 = richEditorPattern->GetLineMetrics(lineNumber);
+    EXPECT_EQ(lineMetrics1.x, ret1.x);
+
+    lineNumber = 1;
+    richEditorPattern->richTextRect_.SetRect(1, 1, 1, 1);
+    auto lineMetrics2 = richEditorPattern->paragraphs_.GetLineMetrics(lineNumber);
+    auto ret2 = richEditorPattern->GetLineMetrics(lineNumber);
+    EXPECT_NE(lineMetrics2.x, ret2.x);
+}
+
+/**
+ * @tc.name: CalcCursorOffsetByPosition002
+ * @tc.desc: test CalcCursorOffsetByPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestTwoNg, CalcCursorOffsetByPosition002, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    float selectLineHeight = 0;
+    ClearSpan();
+    AddSpan("test");
+    auto host = richEditorPattern->GetHost();
+    EXPECT_NE(host, nullptr);
+    RefPtr<UINode> customNode = AceType::MakeRefPtr<SpanNode>(V2::IMAGE_ETS_TAG, -1);
+    std::list<RefPtr<UINode>> child = { customNode };
+    host->ModifyChildren() = child;
+    int32_t position = 2;
+    bool downStreamFirst = true;
+    bool needLineHighest = true;
+    auto startOffset = richEditorPattern->paragraphs_.ComputeCursorOffset(
+        position, selectLineHeight, downStreamFirst, needLineHighest);
+    auto offset =
+        richEditorPattern->CalcCursorOffsetByPosition(position, selectLineHeight, downStreamFirst, needLineHighest);
+    EXPECT_EQ(startOffset, offset);
 }
 
 /**
@@ -356,210 +518,6 @@ HWTEST_F(RichEditorPatternTestTwoNg, IsResponseRegionExpandingNeededForStylus005
     bool ret = true;
     ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
     EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name: TripleClickSection001
- * @tc.desc: test TripleClickSection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, TripleClickSection001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->GetHost()->GetFocusHub()->SetFocusType(FocusType::DISABLE);
-    GestureEvent info = GestureEvent();
-    info.sourceTool_ = SourceTool::FINGER;
-    richEditorPattern->TripleClickSection(info, 1, 10, 2);
-    EXPECT_TRUE(richEditorPattern->showSelect_);
-}
-
-/**
- * @tc.name: TripleClickSection002
- * @tc.desc: test TripleClickSection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, TripleClickSection002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->GetHost()->GetFocusHub()->SetFocusType(FocusType::DISABLE);
-    GestureEvent info = GestureEvent();
-    info.sourceTool_ = SourceTool::FINGER;
-    richEditorPattern->TripleClickSection(info, 10, 10, 2);
-    EXPECT_TRUE(richEditorPattern->showSelect_);
-}
-
-/**
- * @tc.name: HandleSelectParagraghPos001
- * @tc.desc: test HandleSelectParagraghPos
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, HandleSelectParagraghPos001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->spans_.clear();
-    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
-    auto it = richEditorPattern->spans_.front();
-    it->content = u"test\n123";
-    it->position = 4;
-    richEditorPattern->caretPosition_ = 0;
-    richEditorPattern->isSpanStringMode_ = true;
-    auto ret = richEditorPattern->HandleSelectParagraghPos(true);
-    EXPECT_EQ(ret, 0);
-    ret = richEditorPattern->HandleSelectParagraghPos(false);
-    EXPECT_EQ(ret, 0);
-}
-
-/**
- * @tc.name: ResetKeyboardIfNeed001
- * @tc.desc: test ResetKeyboardIfNeed
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, ResetKeyboardIfNeed001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    auto focusHub = richEditorPattern->GetFocusHub();
-    EXPECT_NE(focusHub, nullptr);
-
-    focusHub->currentFocus_ = true;
-    richEditorPattern->action_ = TextInputAction::UNSPECIFIED;
-    richEditorPattern->ResetKeyboardIfNeed();
-    EXPECT_NE(richEditorPattern->action_, TextInputAction::UNSPECIFIED);
-}
-
-/**
- * @tc.name: ResetKeyboardIfNeed002
- * @tc.desc: test ResetKeyboardIfNeed
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, ResetKeyboardIfNeed002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    auto focusHub = richEditorPattern->GetFocusHub();
-    EXPECT_NE(focusHub, nullptr);
-
-    richEditorPattern->imeShown_ = false;
-    richEditorPattern->isCustomKeyboardAttached_ = true;
-    focusHub->currentFocus_ = false;
-    richEditorPattern->action_ = TextInputAction::SEARCH;
-    richEditorPattern->ResetKeyboardIfNeed();
-    EXPECT_NE(richEditorPattern->action_, TextInputAction::SEARCH);
-}
-
-/**
- * @tc.name: ResetKeyboardIfNeed003
- * @tc.desc: test ResetKeyboardIfNeed
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, ResetKeyboardIfNeed003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    auto focusHub = richEditorPattern->GetFocusHub();
-    EXPECT_NE(focusHub, nullptr);
-
-    richEditorPattern->imeShown_ = false;
-    richEditorPattern->isCustomKeyboardAttached_ = false;
-    focusHub->currentFocus_ = true;
-    richEditorPattern->action_ = TextInputAction::SEARCH;
-    richEditorPattern->ResetKeyboardIfNeed();
-    EXPECT_NE(richEditorPattern->action_, TextInputAction::SEARCH);
-}
-
-/**
- * @tc.name: DumpInfo001
- * @tc.desc: test DumpInfo.
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, DumpInfo001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    ASSERT_NE(themeManager, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
-    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    auto richEditorOverlay = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
-    richEditorOverlay->caretHeight_->Set(0.0f);
-    richEditorPattern->DumpInfo();
-    richEditorOverlay->caretHeight_->Set(1.0f);
-    richEditorPattern->DumpInfo();
-    EXPECT_NE(richEditorPattern->selectOverlay_->HasRenderTransform(), true);
-}
-
-/**
- * @tc.name: GetLineMetrics001
- * @tc.desc: test GetLineMetrics
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, GetLineMetrics001, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    int32_t lineNumber = 3;
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(3));
-    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 2 });
-    richEditorPattern->richTextRect_.SetRect(1, 1, 1, 1);
-    auto lineMetrics1 = richEditorPattern->paragraphs_.GetLineMetrics(lineNumber);
-    auto ret1 = richEditorPattern->GetLineMetrics(lineNumber);
-    EXPECT_EQ(lineMetrics1.x, ret1.x);
-
-    lineNumber = 1;
-    richEditorPattern->richTextRect_.SetRect(1, 1, 1, 1);
-    auto lineMetrics2 = richEditorPattern->paragraphs_.GetLineMetrics(lineNumber);
-    auto ret2 = richEditorPattern->GetLineMetrics(lineNumber);
-    EXPECT_NE(lineMetrics2.x, ret2.x);
-}
-
-/**
- * @tc.name: CalcCursorOffsetByPosition002
- * @tc.desc: test CalcCursorOffsetByPosition
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, CalcCursorOffsetByPosition002, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    float selectLineHeight = 0;
-    ClearSpan();
-    AddSpan("test");
-    auto host = richEditorPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    RefPtr<UINode> customNode = AceType::MakeRefPtr<SpanNode>(V2::IMAGE_ETS_TAG, -1);
-    std::list<RefPtr<UINode>> child = { customNode };
-    host->ModifyChildren() = child;
-    int32_t position = 2;
-    bool downStreamFirst = true;
-    bool needLineHighest = true;
-    auto startOffset = richEditorPattern->paragraphs_.ComputeCursorOffset(
-        position, selectLineHeight, downStreamFirst, needLineHighest);
-    auto offset =
-        richEditorPattern->CalcCursorOffsetByPosition(position, selectLineHeight, downStreamFirst, needLineHighest);
-    EXPECT_EQ(startOffset, offset);
 }
 
 /**

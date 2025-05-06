@@ -18,24 +18,24 @@ import { ON } from '@ohos.UiTest';
 const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
 const driver = Driver.create();
 
-export async function NavigationStart(done:Function) {
-    await delegator.startAbility({
-      bundleName: 'cn.ohos.components',
-      abilityName: 'EntryAbility'
-    });
-    await driver.delayMs(5000);
+export async function NavigationStart(done: Function) {
+  await delegator.startAbility({
+    bundleName: 'cn.ohos.components',
+    abilityName: 'EntryAbility'
+  });
+  await driver.delayMs(5000);
 
-    let atomNavigates: Component = await driver.findComponent(ON.text('导航与切换'));
-    await atomNavigates.click();
-    await driver.delayMs(3500);
+  let atomNavigates: Component = await driver.findComponent(ON.text('导航与切换'));
+  await atomNavigates.click();
+  await driver.delayMs(3500);
 
-    let scrollSearch: Component = await driver.findComponent(ON.text('导航/Navigation'))
-    await scrollSearch.click()
-    await driver.delayMs(3500);
+  let scrollSearch: Component = await driver.findComponent(ON.text('导航/Navigation'))
+  await scrollSearch.click()
+  await driver.delayMs(3500);
 
-    let Buttons: Array<Component> = await driver.findComponents(ON.type('Button'));
-    await Buttons[1].click()
-    await driver.delayMs(3500);
-    done();
+  let Buttons: Array<Component> = await driver.findComponents(ON.type('Button'));
+  await Buttons[1].click()
+  await driver.delayMs(3500);
+  done();
 }
 

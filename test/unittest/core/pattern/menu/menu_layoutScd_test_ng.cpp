@@ -295,9 +295,10 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg4200, TestSize.Level1)
     menuAlgorithm->param_.menuWindowRect = Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
     menuAlgorithm->Layout(AceType::RawPtr(menuNode));
     auto expectPreviewOffset = OffsetF(OFFSET_FORTH, OFFSET_THIRD);
-    EXPECT_EQ(previewGeometryNode->GetFrameOffset(), OffsetF(OFFSET_FORTH, 0.0f));
+    EXPECT_EQ(previewGeometryNode->GetFrameOffset(), OffsetF(OFFSET_FORTH, OFFSET_THIRD));
     EXPECT_EQ(previewGeometryNode->GetFrameSize(), SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
-    auto expectMenuOffset = OffsetF(OFFSET_FORTH, OFFSET_THIRD / 2 + TARGET_SECURITY.ConvertToPx());
+    auto expectMenuOffset = OffsetF(OFFSET_FORTH, OFFSET_THIRD + TARGET_SIZE_HEIGHT + PLACEMENT_MENU_SPACE);
+    auto oldexpectMenuOffset = OffsetF(OFFSET_FORTH, OFFSET_THIRD / 2 + TARGET_SECURITY.ConvertToPx());
     EXPECT_EQ(menuGeometryNode->GetFrameOffset(), expectMenuOffset);
     EXPECT_EQ(menuGeometryNode->GetFrameSize(), SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
 
@@ -313,7 +314,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg4200, TestSize.Level1)
     layoutProperty->UpdateMenuPlacement(Placement::BOTTOM);
     menuAlgorithm->placement_ = Placement::BOTTOM;
     menuAlgorithm->Layout(AceType::RawPtr(menuNode));
-    expectMenuOffset = OffsetF(OFFSET_FORTH, TARGET_SIZE_HEIGHT + TARGET_SECURITY.ConvertToPx());
+    expectMenuOffset = OffsetF(OFFSET_FORTH, OFFSET_THIRD + TARGET_SIZE_HEIGHT + TARGET_SECURITY.ConvertToPx());
     EXPECT_EQ(menuGeometryNode->GetFrameOffset(), expectMenuOffset);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     EXPECT_EQ(menuPattern->endOffset_, expectMenuOffset);
@@ -1155,25 +1156,26 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5600, TestSize.Level1)
     menuAlgorithm->targetSize_ = SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
     menuAlgorithm->targetOffset_ = OffsetF(OFFSET_FORTH, FULL_SCREEN_HEIGHT - OFFSET_THIRD);
     menuAlgorithm->targetSecurity_ = TARGET_SECURITY.ConvertToPx();
+    menuAlgorithm->param_.previewMenuGap = TARGET_SECURITY.ConvertToPx();
     menuAlgorithm->previewScale_ = 1.0f;
 
     /**
      * @tc.steps: step2. the window can accommodate preview, placement is BOTTOM_LEFT, but menu is in top security
      * layout preview and menu
-     * @tc.expected: preview offset is fixed [OFFSET_FORTH + (TARGET_SIZE_WIDTH - PREVIEW_WIDTH) / 2, FULL_SCREEN_HEIGHT
-     * - PORTRAIT_BOTTOM_SECURITY.ConvertToPx() - OFFSET_FORTH - TARGET_SECURITY.ConvertToPx() - TARGET_SIZE_HEIGHT],
-     * menu offset is [OFFSET_FORTH + (TARGET_SIZE_WIDTH - PREVIEW_WIDTH) / 2, FULL_SCREEN_HEIGHT -
-     * PORTRAIT_BOTTOM_SECURITY.ConvertToPx() - OFFSET_FORTH]
+     * @tc.expected: preview offset is fixed [OFFSET_FORTH, FULL_SCREEN_HEIGHT - OFFSET_FORTH -
+     * TARGET_SECURITY.ConvertToPx() - TARGET_SIZE_HEIGHT], menu offset is [OFFSET_FORTH, FULL_SCREEN_HEIGHT -
+     * OFFSET_FORTH]
      */
     menuAlgorithm->param_.menuWindowRect = Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
     auto layoutProperty = AceType::DynamicCast<MenuLayoutProperty>(menuNode->GetLayoutProperty());
     menuAlgorithm->placement_ = Placement::BOTTOM_LEFT;
     layoutProperty->UpdateMenuPlacement(Placement::BOTTOM_LEFT);
     menuAlgorithm->Layout(AceType::RawPtr(menuNode));
-    auto expectPreviewOffset = OffsetF(OFFSET_FORTH, 0.0f);
+    auto expectPreviewOffset =
+        OffsetF(OFFSET_FORTH, FULL_SCREEN_HEIGHT - OFFSET_FORTH - TARGET_SECURITY.ConvertToPx() - TARGET_SIZE_HEIGHT);
     EXPECT_EQ(previewGeometryNode->GetFrameOffset(), expectPreviewOffset);
     EXPECT_EQ(previewGeometryNode->GetFrameSize(), SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
-    auto expectMenuOffset = OffsetF(OFFSET_FORTH, TARGET_SIZE_HEIGHT + TARGET_SECURITY.ConvertToPx());
+    auto expectMenuOffset = OffsetF(OFFSET_FORTH, FULL_SCREEN_HEIGHT - OFFSET_FORTH);
     EXPECT_EQ(menuGeometryNode->GetFrameOffset(), expectMenuOffset);
     EXPECT_EQ(menuGeometryNode->GetFrameSize(), SizeF(TARGET_SIZE_WIDTH, OFFSET_FORTH));
 }

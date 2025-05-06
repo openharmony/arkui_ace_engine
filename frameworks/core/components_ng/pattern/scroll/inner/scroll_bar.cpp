@@ -140,16 +140,13 @@ void ScrollBar::UpdateScrollBarRegion(
     auto checkAtEdge = (scrollSource == SCROLL_FROM_JUMP || scrollSource == SCROLL_FROM_FOCUS_JUMP) &&
         displayMode_ == DisplayMode::AUTO && isScrollable_;
     if (checkAtEdge) {
-        if (NearZero(GetMainOffset(lastOffset_)) && NearZero(GetMainOffset(lastOffset))) {
-            return;
+        auto atTop = NearZero(GetMainOffset(lastOffset_)) && NearZero(GetMainOffset(lastOffset));
+        auto atBottom = NearEqual(GetMainOffset(lastOffset_), estimatedHeight_ - GetMainSize(viewPortSize_)) &&
+                        NearEqual(GetMainOffset(lastOffset), estimatedHeight - GetMainSize(size));
+        if (!atTop && !atBottom) {
+            opacityAnimationType_  = OpacityAnimationType::APPEAR_WITHOUT_ANIMATION;
+            ScheduleDisappearDelayTask();
         }
-        auto lastIsAtBottom = NearEqual(GetMainOffset(lastOffset_), estimatedHeight_ - GetMainSize(viewPortSize_));
-        auto isAtBottom = NearEqual(GetMainOffset(lastOffset), estimatedHeight - GetMainSize(size));
-        if (lastIsAtBottom && isAtBottom) {
-            return;
-        }
-        opacityAnimationType_  = OpacityAnimationType::APPEAR_WITHOUT_ANIMATION;
-        ScheduleDisappearDelayTask();
     }
     if (!NearEqual(estimatedHeight_, estimatedHeight, 0.000001f) || viewPortSize_ != size) {
         needAddLayoutInfo = true;

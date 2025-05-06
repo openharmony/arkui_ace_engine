@@ -44,6 +44,8 @@ FormRendererDelegateStub::FormRendererDelegateStub()
         &FormRendererDelegateStub::HandleOnGetRectRelativeToWindow;
     memberFuncMap_[static_cast<uint32_t>(IFormRendererDelegate::Message::ON_CHECK_MANAGER_DELEGATE)] =
         &FormRendererDelegateStub::HandleOnCheckManagerDelegate;
+    memberFuncMap_[static_cast<uint32_t>(IFormRendererDelegate::Message::ON_UPDATE_FORM_DONE)] =
+        &FormRendererDelegateStub::HandleOnUpdateFormDone;
 }
 
 FormRendererDelegateStub::~FormRendererDelegateStub()
@@ -221,6 +223,14 @@ int32_t FormRendererDelegateStub::HandleOnCheckManagerDelegate(MessageParcel& da
     int32_t errCode = OnCheckManagerDelegate(checkFlag);
     reply.WriteInt32(errCode);
     reply.WriteBool(checkFlag);
+    return ERR_OK;
+}
+
+int32_t FormRendererDelegateStub::HandleOnUpdateFormDone(MessageParcel& data, MessageParcel& reply)
+{
+    int64_t formId = data.ReadInt64();
+    int32_t errCode = OnUpdateFormDone(formId);
+    reply.WriteInt32(errCode);
     return ERR_OK;
 }
 } // namespace Ace

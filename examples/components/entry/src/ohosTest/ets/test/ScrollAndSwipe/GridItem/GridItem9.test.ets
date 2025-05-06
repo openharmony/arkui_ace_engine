@@ -14,15 +14,8 @@
  */
 
 import { describe, beforeAll, it } from '@ohos/hypium'
-import { Driver} from '@kit.TestKit';
-import {
-  getToggle,
-  JsonType,
-  KeyStruct,
-  radioClick,
-  titleSearch,
-  ToggleClick
-} from '../../../utils';
+import { Driver } from '@kit.TestKit';
+import { getToggle, JsonType, KeyStruct, radioClick, titleSearch, ToggleClick } from '../../../utils';
 import { GridItemStart } from './GridItem';
 
 const driver = Driver.create();

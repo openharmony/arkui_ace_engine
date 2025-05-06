@@ -37,6 +37,7 @@ bool RichEditorSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     SetEnableHandleLevel(true);
     SetEnableSubWindowMenu(true);
     CheckEnableContainerModal();
+    IF_TRUE(request.requestCode == REQUEST_RECREATE, needRefreshMenu_ = false);
     return true;
 }
 

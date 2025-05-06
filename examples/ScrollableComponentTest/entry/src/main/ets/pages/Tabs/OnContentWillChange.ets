@@ -35,11 +35,11 @@ struct OnContentWillChange {
     Column() {
       Tabs({ index: this.currentIndex, controller: this.controller }) {
         TabContent() {
-          Web({ src: 'https://m.baidu.com/', controller: this.webController0 }).width('100%').height('100%').backgroundColor(Color.Green)
+          Web({ src: 'test', controller: this.webController0 }).width('100%').height('100%').backgroundColor(Color.Green)
         }.tabBar('green')
 
         TabContent() {
-          Web({ src: 'https://m.baidu.com/', controller: this.webController1 }).width('100%').height('100%').backgroundColor(Color.Blue)
+          Web({ src: 'test', controller: this.webController1 }).width('100%').height('100%').backgroundColor(Color.Blue)
         }.tabBar('blue')
 
         TabContent() {

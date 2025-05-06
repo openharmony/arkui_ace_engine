@@ -42,7 +42,6 @@ export default function DataPanel7() {
     })
 
 
-
     // hoverEffect
     it('ArkUI_DataPanel_Comp_0558', 0, async (done: Function) => {
 

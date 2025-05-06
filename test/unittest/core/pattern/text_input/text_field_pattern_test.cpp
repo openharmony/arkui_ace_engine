@@ -2654,7 +2654,7 @@ HWTEST_F(TextFieldPatternTest, HandleOnCopy001, TestSize.Level0)
     ASSERT_NE(pattern->selectController_, nullptr);
     pattern->selectController_->UpdateHandleIndex(0, 4);
 
-    auto eventHub = textFieldNode->GetEventHub<TextFieldEventHub>();
+    auto eventHub = textFieldNode->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     bool calledOnCopy = false;

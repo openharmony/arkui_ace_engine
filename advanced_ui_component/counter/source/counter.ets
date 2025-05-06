@@ -17,6 +17,7 @@ import { BusinessError, Callback } from '@ohos.base';
 import common from '@ohos.app.ability.common';
 import { accessibility } from '@kit.AccessibilityKit';
 import { intl } from '@kit.LocalizationKit';
+import i18n from '@ohos.i18n';
 
 export enum CounterType {
   LIST = 0,
@@ -295,7 +296,7 @@ export struct CounterComponent {
     return this.getDate(formattedDateMonth);
   }
 
-  getDateDay(value: number) : string {
+  getDateDay(value: number): string {
     let dateDayMap = new Map([
       [1, getContext().resourceManager.getStringByNameSync('First_counter_accessibility_text')],
       [2, getContext().resourceManager.getStringByNameSync('Second_counter_accessibility_text')],
@@ -1215,11 +1216,19 @@ export struct CounterComponent {
     return accessibilityResource;
   }
 
+  private getTextDirection() {
+    if (this.counterDirection === Direction.Auto) {
+      return i18n.isRTL(i18n.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr;
+    } else {
+      return this.counterDirection;
+    }
+  }
+
   build() {
     if (this.type === CounterType.LIST) {
       RelativeContainer() {
         Text(this.numberStyleOptions.label)
-          .direction(this.counterDirection)
+          .direction(this.getTextDirection())
           .fontSize(CounterResource.COUNTER_LIST_LABEL_SIZE)
           .maxFontScale(CounterResource.COUNTER_LABEL_MAX_FONT_SIZE_SCALE)
           .fontColor(CounterResource.COUNTER_TEXT_COLOR)
@@ -1243,6 +1252,7 @@ export struct CounterComponent {
             Button({ type: ButtonType.Circle, stateEffect: this.subBtnStateEffect })
               .accessibilityText($r('sys.string.reduce_used_for_accessibility_text'))
               .accessibilityDescription(this.value === this.min ? '' : this.reduceStr)
+              .accessibilityFocusDrawLevel(FocusDrawLevel.TOP)
               .direction(this.counterDirection)
               .width(CounterResource.COUNTER_LIST_BUTTON_SIZE)
               .height(CounterResource.COUNTER_LIST_BUTTON_SIZE)
@@ -1393,6 +1403,7 @@ export struct CounterComponent {
             Button({ type: ButtonType.Circle, stateEffect: this.addBtnStateEffect })
               .accessibilityText($r('sys.string.increase_used_for_accessibility_text'))
               .accessibilityDescription(this.value === this.max ? '' : this.increaseStr)
+              .accessibilityFocusDrawLevel(FocusDrawLevel.TOP)
               .direction(this.counterDirection)
               .width(CounterResource.COUNTER_LIST_BUTTON_SIZE)
               .height(CounterResource.COUNTER_LIST_BUTTON_SIZE)
@@ -1531,6 +1542,7 @@ export struct CounterComponent {
             Button({ type: ButtonType.Circle, stateEffect: this.subBtnStateEffect })
               .accessibilityText($r('sys.string.reduce_used_for_accessibility_text'))
               .accessibilityDescription(this.value === this.min ? '' : this.reduceStr)
+              .accessibilityFocusDrawLevel(FocusDrawLevel.TOP)
               .direction(this.counterDirection)
               .width(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
               .height(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
@@ -1679,6 +1691,7 @@ export struct CounterComponent {
             Button({ type: ButtonType.Circle, stateEffect: this.addBtnStateEffect })
               .accessibilityText($r('sys.string.increase_used_for_accessibility_text'))
               .accessibilityDescription(this.value === this.max ? '' : this.increaseStr)
+              .accessibilityFocusDrawLevel(FocusDrawLevel.TOP)
               .direction(this.counterDirection)
               .width(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
               .height(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)

@@ -23,7 +23,7 @@ const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorReg
 /*初始化与UI元素交互的驱动对象*/
 const driver = Driver.create();
 
-export async function DataPanelStart(done:Function){
+export async function DataPanelStart(done: Function) {
 
   // Presets an action, which is performed only once before all test cases of the test suite start.
   // This API supports only one parameter: preset action function.

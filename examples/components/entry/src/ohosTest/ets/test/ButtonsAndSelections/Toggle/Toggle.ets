@@ -20,7 +20,7 @@ const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorReg
 
 const driver = Driver.create();
 
-export async function ToggleStart(done:Function){
+export async function ToggleStart(done: Function) {
 
   try {
 
@@ -32,15 +32,15 @@ export async function ToggleStart(done:Function){
     await driver.delayMs(8000);
     console.info(TAG + 'ToggleBootcamp' + ' begin');
 
-    let atomDisplays:Component = await driver.findComponent(ON.text('按钮与选择'));
+    let atomDisplays: Component = await driver.findComponent(ON.text('按钮与选择'));
     await atomDisplays.click();
     await driver.delayMs(1000);
 
-    let scrollSearch:Component = await driver.findComponent(ON.text('切换按钮/Toggle'))
+    let scrollSearch: Component = await driver.findComponent(ON.text('切换按钮/Toggle'))
     await scrollSearch.click()
     await driver.delayMs(1000);
 
-    let Buttons:Component[] = await driver.findComponents(ON.type('Button'));
+    let Buttons: Component[] = await driver.findComponents(ON.type('Button'));
     await Buttons[1].click()
     await driver.delayMs(1000);
 

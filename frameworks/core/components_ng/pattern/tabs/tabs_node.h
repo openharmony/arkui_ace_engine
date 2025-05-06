@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@ namespace {
 constexpr int32_t SWIPER_INDEX = 0;
 constexpr int32_t DIVIDER_INDEX = 1;
 constexpr int32_t TAB_BAR_INDEX = 2;
+constexpr int32_t EFFECT_INDEX = 3;
 } // namespace
 class InspectorFilter;
 
@@ -81,6 +82,14 @@ public:
             dividerId_ = ElementRegister::GetInstance()->MakeUniqueId();
         }
         return dividerId_.value();
+    }
+
+    int32_t GetEffectId()
+    {
+        if (!effectId_.has_value()) {
+            effectId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return effectId_.value();
     }
 
     int32_t GetTabBarId()
@@ -139,6 +148,11 @@ public:
         return GetChildAtIndex(DIVIDER_INDEX);
     }
 
+    RefPtr<UINode> GetEffectNode()
+    {
+        return GetChildAtIndex(EFFECT_INDEX);
+    }
+
 private:
     bool Scrollable() const;
     int32_t GetAnimationDuration() const;
@@ -160,6 +174,7 @@ private:
     std::optional<int32_t> swiperId_;
     std::optional<int32_t> tabBarId_;
     std::optional<int32_t> dividerId_;
+    std::optional<int32_t> effectId_;
     std::optional<int32_t> selectedMaskId_;
     std::optional<int32_t> unselectedMaskId_;
     std::set<int32_t> swiperChildren_;

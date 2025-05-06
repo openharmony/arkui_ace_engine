@@ -18,8 +18,9 @@
 
 #include <deque>
 #include <vector>
+#include <memory>
+#include <mutex>
 
-#include "base/log/event_report.h"
 #include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
 #include "base/utils/macros.h"

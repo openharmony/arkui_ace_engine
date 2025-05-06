@@ -565,7 +565,6 @@ export struct ListBootcamp {
   // Obscuring
   @State enableCompObscured: boolean = false
   @State compObscured: Array<ObscuredReasons> = []
-
   // Drag and Drop Control
   @State compDraggable: boolean = false
   @State enableCompDragPreview: boolean = false
@@ -578,7 +577,6 @@ export struct ListBootcamp {
   @State compDragPreviewOptionsOptionsIsMultiSelectionEnabled: boolean = false
   @State enableCompDragPreviewOptionsOptionsDefaultAnimationBeforeLifting: boolean = false
   @State compDragPreviewOptionsOptionsDefaultAnimationBeforeLifting: boolean = false
-
   // Render Fit
   @State enableCompRenderFit: boolean = false
   @State compRenderFit: RenderFit = RenderFit.TOP_LEFT
@@ -666,7 +664,6 @@ export struct ListBootcamp {
   @State compFlexBasis: number | string = 'auto';
   @State enableCompDirection: boolean = false;
   @State compDirection: Direction = Direction.Auto;
-
   @State selection: string | null = null;
   scroller: Scroller = new Scroller()
 
@@ -1477,7 +1474,7 @@ export struct ListBootcamp {
       })
       .onScrollFrameBegin((offset: number, state: ScrollState) => {
         this.compEventTriggeredLog('onScrollFrameBegin,List惯性划动时每帧开始时触发')
-        return{ offsetRemain: offset }
+        return { offsetRemain: offset }
       })
       .onScrollStart(() => {
         this.compEventTriggeredLog('onScrollStart,列表滑动开始时触发')
@@ -1504,7 +1501,7 @@ export struct ListBootcamp {
       .onItemDrop((event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean) => {
         this.compEventTriggeredLog('onItemDrop,当在列表元素内停止拖拽时触发')
       })
-      .onScrollVisibleContentChange((start:VisibleListContentInfo	,end:VisibleListContentInfo	) => {
+      .onScrollVisibleContentChange((start: VisibleListContentInfo, end: VisibleListContentInfo) => {
         this.compEventTriggeredLog('onScrollVisibleContentChange,有子组件划入或划出List显示区域时触发')
       })
 
@@ -1515,6 +1512,7 @@ export struct ListBootcamp {
   compBackground() {
     Text('123')
   }
+
   @Builder
   Parameters() {
     Scroll(this.scroller) {
@@ -2399,7 +2397,6 @@ export struct ListBootcamp {
     .height('52%')
     .id('scroll')
   }
-
 
   @Builder
   ListItemGroupHeaders(str: string) {

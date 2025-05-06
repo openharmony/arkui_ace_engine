@@ -46,6 +46,7 @@ constexpr double TITLE_POPUP_DISTANCE = 37.0;     // 37vp height of title
 constexpr float TITLE_ITEM_HEIGT_S = 56.0;     // 56vp height of title
 constexpr float TITLE_ITEM_HEIGT_M = 64.0;     // 64vp height of title
 constexpr float TITLE_ITEM_HEIGT_L = 72.0;     // 72vp height of title
+constexpr uint8_t STAGE_BACKGROUND_COLOR_ALPHA = 255;
 } // namespace
 
 void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate)
@@ -346,6 +347,7 @@ void ContainerModalPattern::WindowFocus(bool isFocus)
     ChangeCustomTitle(isFocus);
     ChangeFloatingTitle(isFocus);
     ChangeControlButtons(isFocus);
+    UpdateContainerBgColor();
 }
 
 void ContainerModalPattern::ChangeCustomTitle(bool isFocus)
@@ -534,7 +536,7 @@ void ContainerModalPattern::SetCloseButtonStatus(bool isEnabled)
     // set closeButton enable or disable
     auto closeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsRow, CLOSE_BUTTON_INDEX));
     CHECK_NULL_VOID(closeButton);
-    auto buttonEvent = closeButton->GetEventHub<ButtonEventHub>();
+    auto buttonEvent = closeButton->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEvent);
     buttonEvent->SetEnabled(isEnabled);
     TAG_LOGI(AceLogTag::ACE_APPBAR, "Set close button status %{public}s", isEnabled ? "enable" : "disable");
@@ -605,7 +607,7 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
     CHECK_NULL_VOID(buttonsRow);
     buttonsRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
     UpdateGestureRowVisible();
-    TrimFloatingWindowLayout();
+    UpdateContainerBgColor();
 }
 
 bool ContainerModalPattern::GetContainerModalTitleVisible(bool isImmersive)
@@ -957,27 +959,6 @@ bool ContainerModalPattern::CanShowCustomTitle()
     CHECK_NULL_RETURN(buttonsRow, false);
     auto visibility = buttonsRow->GetLayoutProperty()->GetVisibilityValue(VisibleType::GONE);
     return visibility == VisibleType::VISIBLE;
-}
-
-void ContainerModalPattern::TrimFloatingWindowLayout()
-{
-    if (windowMode_ != WindowMode::WINDOW_MODE_FLOATING) {
-        return;
-    }
-    auto stack = GetStackNode();
-    CHECK_NULL_VOID(stack);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hostProp = host->GetLayoutProperty();
-    PaddingProperty padding;
-    auto customtitleRow = GetCustomTitleRow();
-    CHECK_NULL_VOID(customtitleRow);
-    auto customTitleRowProp = customtitleRow->GetLayoutProperty();
-    if (customTitleRowProp->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE) {
-        padding = { CalcLength(CONTENT_PADDING), CalcLength(CONTENT_PADDING), std::nullopt,
-            CalcLength(CONTENT_PADDING), std::nullopt, std::nullopt };
-    }
-    hostProp->UpdatePadding(padding);
 }
 
 bool ContainerModalPattern::OnDirtyLayoutWrapperSwap(
@@ -1566,5 +1547,29 @@ void ContainerModalPattern::AdjustContainerModalTitleHeight()
         titleHeight_ = Dimension(TITLE_ITEM_HEIGT_L, DimensionUnit::VP);
     }
     SetContainerModalTitleHeight(titleHeight_.ConvertToPx());
+}
+
+void ContainerModalPattern::UpdateContainerBgColor()
+{
+    if (isCustomColor_) {
+        return;
+    }
+    auto containerModal = GetHost();
+    CHECK_NULL_VOID(containerModal);
+    auto containerContext = containerModal->GetRenderContext();
+    CHECK_NULL_VOID(containerContext);
+    auto stackNode = GetContentNode();
+    CHECK_NULL_VOID(stackNode);
+    auto stackNodeContext = stackNode->GetRenderContext();
+    CHECK_NULL_VOID(stackNodeContext);
+    auto backgroundColorOpt = stackNodeContext->GetBackgroundColor();
+    if (!customTitleSettedShow_ && backgroundColorOpt.has_value() &&
+        stackNodeContext->GetBackgroundColorValue().GetAlpha() == STAGE_BACKGROUND_COLOR_ALPHA) {
+        auto pipelineContext = containerModal->GetContextRefPtr();
+        auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
+        containerContext->UpdateBackgroundColor(theme->GetWindowJaggedEdgeRenderColor());
+    } else {
+        containerContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -1079,7 +1079,7 @@ HWTEST_F(TextPickerColumnTestOneNg, InitPanEvent001, TestSize.Level1)
     auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerNodeLayout, nullptr);
     pickerNodeLayout->UpdateCanLoop(true);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     columnPattern->InitPanEvent(gestureHub);
     auto panEvent = columnPattern->panEvent_;
@@ -1775,6 +1775,8 @@ HWTEST_F(TextPickerColumnTestOneNg, SetOptionShiftDistance004, TestSize.Level1)
     ASSERT_NE(theme, nullptr);
     theme->showOptionCount_ = 7;
     columnPattern->isDisableTextStyleAnimation_ = true;
+    auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateDisableTextStyleAnimation(true);
 
     TextPickerOptionProperty prop1;
     prop1.height = 117.0f;

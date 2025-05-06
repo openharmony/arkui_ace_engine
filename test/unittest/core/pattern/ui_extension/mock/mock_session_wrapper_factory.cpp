@@ -21,7 +21,8 @@ RefPtr<SessionWrapper> SessionWrapperFactory::CreateSessionWrapper(SessionType s
     const WeakPtr<UIExtensionPattern>& hostPattern, int32_t instanceId, bool isTransferringCaller)
 {
     if (sessionType == SessionType::UI_EXTENSION_ABILITY || sessionType == SessionType::EMBEDDED_UI_EXTENSION) {
-        return RefPtr<SessionWrapper>();
+        auto ret = RefPtr<SessionWrapper>();
+        return ret;
     }
     return nullptr;
 }
@@ -30,9 +31,10 @@ RefPtr<SessionWrapper> SessionWrapperFactory::CreateSessionWrapper(
     SessionType sessionType, const SessionCreateParam& sessionCreateParam)
 {
     if (sessionType == SessionType::SECURITY_UI_EXTENSION_ABILITY) {
-        return AceType::MakeRefPtr<SecuritySessionWrapperImpl>(
+        auto ret = AceType::MakeRefPtr<SecuritySessionWrapperImpl>(
             sessionCreateParam.hostPattern, sessionCreateParam.instanceId,
             sessionCreateParam.isTransferringCaller, sessionType);
+        return ret;
     }
     return nullptr;
 }

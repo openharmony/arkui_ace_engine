@@ -1,0 +1,15 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/MenuItemDemo",
+    "pages/MenuBuilder",
+    "pages/MenuLongPress",
+    "pages/MenuRightClick",
+    "pages/MenuImagePreview",
+    "pages/MenuBuilderPreview",
+    "pages/ContextMenuIsShown",
+    "pages/ContextMenuTransition",
+    "pages/MenuSymbolIcon",
+    "pages/MenuHoverScale"
+  ]
+}

@@ -69,15 +69,19 @@ class MyModifier implements AttributeModifier<NavigationAttribute> {
   applyNormalAttribute(instance: NavigationAttribute) {
     instance.backgroundColor('#0A59F7')
   }
+
   applyPressedAttribute(instance: NavigationAttribute) {
     instance.backgroundColor('#ED6F21')
   }
+
   applyFocusedAttribute(instance: NavigationAttribute) {
     instance.backgroundColor(Color.Gray)
   }
+
   applyDisabledAttribute(instance: NavigationAttribute) {
     instance.backgroundColor('#E5E5E5')
   }
+
   applySelectedAttribute(instance: NavigationAttribute) {
     instance.backgroundColor('#ffedea21')
   }
@@ -165,14 +169,13 @@ export struct NavigationBootcamp {
   @State enableMinContentWidth: boolean = false;
   @State minContentWidth: Dimension = 360;
   @State enableIgnoreLayoutSafeAreaTypes: boolean = false;
-  @State ignoreLayoutSafeAreaTypes: Array <LayoutSafeAreaType> = [LayoutSafeAreaType.SYSTEM];
+  @State ignoreLayoutSafeAreaTypes: Array<LayoutSafeAreaType> = [LayoutSafeAreaType.SYSTEM];
   @State enableIgnoreLayoutSafeAreaEdges: boolean = false;
-  @State ignoreLayoutSafeAreaEdges: Array <LayoutSafeAreaEdge> = [
+  @State ignoreLayoutSafeAreaEdges: Array<LayoutSafeAreaEdge> = [
     LayoutSafeAreaEdge.TOP, LayoutSafeAreaEdge.BOTTOM
   ];
   @State enableSystemBarStyleStatusBarContentColor: boolean = false;
   @State systemBarStyleStatusBarContentColor: string = '#0xE5FFFFFF';
-
   /*通用属性方法和事件*/
   @State enableCompWidth: boolean = false;
   @State compWidth: Length = 300;
@@ -542,7 +545,6 @@ export struct NavigationBootcamp {
   @State compRadialGradientColorsNumber2: number = 0;
   @State enableCompRadialGradientRepeating: boolean = false;
   @State compRadialGradientRepeating: boolean = false;
-
   @State enableCompFocusable: boolean = false;
   @State compFocusable: boolean = false;
   @State enableCompDefaultFocus: boolean = false;
@@ -609,7 +611,6 @@ export struct NavigationBootcamp {
   @State compAccessibilityDescription: string = `无障碍说明`;
   @State enableCompAccessibilityLevel: boolean = false;
   @State compAccessibilityLevel: string = 'auto';
-
   @State modifier: MyModifier = new MyModifier();
   @State enableCompAttributeModifier: boolean = false;
   @State compAttributeModifier: boolean = false;
@@ -643,7 +644,6 @@ export struct NavigationBootcamp {
   @State compResponseRegionValueHeight: Length = '100%';
   @State enableCompHitTestBehavior: boolean = false;
   @State compHitTestBehavior: HitTestMode = HitTestMode.Default;
-
   @State enableCompObscured: boolean = false;
   @State compObscured: Array<ObscuredReasons> = [];
   @State enableCompFontColor: boolean = false;
@@ -688,12 +688,10 @@ export struct NavigationBootcamp {
   @State compCursorControl: pointer.PointerStyle = pointer.PointerStyle.DEFAULT;
   @State enableCompUseEffect: boolean = false;
   @State compUseEffect: boolean = false;
-
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
   private arr: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
   @State currentIndex: number = 0;
-
   scroller: Scroller = new Scroller()
 
   aboutToAppear(): void {
@@ -708,7 +706,7 @@ export struct NavigationBootcamp {
     this.progress.updateProgress(this.compMaskValue);
   }
 
-  eventTriggeredLog(value: string){
+  eventTriggeredLog(value: string) {
     let time = formatDate(new Date(Date.now()))
     this.listEventTriggeredTagsTemp.push(new BlockTag(time, value))
     setTimeout(() => {
@@ -746,13 +744,15 @@ export struct NavigationBootcamp {
     .hideTitleBar(true)
   }
 
-  @Builder popupBuilder() {
+  @Builder
+  popupBuilder() {
     Row() {
       Text('自定义气泡').fontSize(10)
     }.height(50).padding(5)
   }
 
-  @Builder compBackground() {
+  @Builder
+  compBackground() {
     Text('123')
   }
 
@@ -1292,7 +1292,7 @@ export struct NavigationBootcamp {
         bottom: useEnabled(this.enableCompPixelStretchEffectOptionsBottom,
           this.compPixelStretchEffectOptionsBottom)
       })
-      .freeze(useEnabled(this.enableCompFreeze, this.compFreeze))//part2
+      .freeze(useEnabled(this.enableCompFreeze, this.compFreeze)) //part2
       .linearGradient(!this.enableCompRadialGradientColors1 && !this.enableCompSweepGradientColors1 ? {
         angle: useEnabled(this.enableCompLinearGradientAngle, this.compLinearGradientAngle),
         direction: useEnabled(this.enableCompLinearGradientDirection, this.compLinearGradientDirection),
@@ -1377,7 +1377,7 @@ export struct NavigationBootcamp {
         this.compAccessibilityDescription))
       .accessibilityLevel(useEnabled(this.enableCompAccessibilityLevel, this.compAccessibilityLevel))
       .attributeModifier(useEnabled(this.enableCompAttributeModifier, this.compAttributeModifier) ?
-      this.modifier : null)//part3
+      this.modifier : null) //part3
       .gestureModifier(useEnabled(this.enableCompGestureModifier, this.compGestureModifier) ?
       this.myGestureModifier1 : this.myGestureModifier2)
       .outline({
@@ -1430,7 +1430,7 @@ export struct NavigationBootcamp {
           this.getUIContext().getCursorController().restoreDefault()
         }
       })
-      .useEffect(useEnabled(this.enableCompUseEffect, this.compUseEffect))//compEvent
+      .useEffect(useEnabled(this.enableCompUseEffect, this.compUseEffect)) //compEvent
       .onTitleModeChange((titleModel: NavigationTitleMode) => {
         this.eventTriggeredLog('可滚动组件的滑动标题栏模式发生变化事件触发')
       })
@@ -1870,6 +1870,7 @@ export struct NavigationBootcamp {
   }
 
   @State selection: string | null = null;
+
   @Builder
   ListItemGroupHeaders(str: string) {
     Row() {
@@ -1881,7 +1882,7 @@ export struct NavigationBootcamp {
         .fillColor($r('sys.color.ohos_id_color_fourth'))
         .height(24)
         .width(24)
-        .rotate({ angle: this.selection==str ? 90 : 0 })
+        .rotate({ angle: this.selection == str ? 90 : 0 })
         .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
     }
     .borderRadius(20)
@@ -1902,11 +1903,12 @@ export struct NavigationBootcamp {
       }
     })
   }
+
   @Builder
   Generic() {
     Scroll(this.scroller) {
       Column({ space: 8 }) {
-        List({space:8}){
+        List({ space: 8 }) {
           CompSizeBlocks({
             enableCompWidth: $enableCompWidth,
             compWidth: $compWidth,
@@ -2483,7 +2485,6 @@ export struct NavigationBootcamp {
     .id('scroll')
     .height('52%')
   }
-
 }
 
 @Preview

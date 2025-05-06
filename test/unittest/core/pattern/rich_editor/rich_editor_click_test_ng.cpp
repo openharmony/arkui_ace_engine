@@ -192,7 +192,7 @@ HWTEST_F(RichEditorClickTestNg, HandleEnabled, TestSize.Level1)
     /**
      * @tc.steps: step2. create richEditorEventHub and SetEnabled false.
      */
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabled(false);
 
@@ -211,47 +211,6 @@ HWTEST_F(RichEditorClickTestNg, HandleEnabled, TestSize.Level1)
      */
     richEditorPattern->HandleEnabled();
     EXPECT_TRUE(richEditorPattern->IsDisabled());
-}
-
-/**
- * @tc.name: OnVisibleChange
- * @tc.desc: test OnVisibleChange
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorClickTestNg, OnVisibleChange, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richeditor pattern and add text span
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. add text span and Select text
-     */
-    AddSpan(INIT_VALUE_1);
-    EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 1);
-    richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
-    richEditorPattern->textSelector_ = TextSelector(0, 2);
-
-    /**
-     * @tc.steps: step3. test OnVisibleChange
-     */
-    richEditorPattern->OnVisibleChange(false);
-    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
-    EXPECT_FALSE(richEditorPattern->caretTwinkling_);
-
-    /**
-     * @tc.steps: step4. change value and test again
-     */
-    richEditorPattern->caretTwinkling_ = true;
-    richEditorPattern->caretVisible_ = true;
-    richEditorPattern->OnVisibleChange(true);
-    EXPECT_FALSE(richEditorPattern->caretVisible_);
-    EXPECT_FALSE(richEditorPattern->caretTwinkling_);
 }
 
 /**
@@ -419,23 +378,37 @@ HWTEST_F(RichEditorClickTestNg, HandleSingleClickEvent001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ClickAISpan001
- * @tc.desc: test RichEditorPattern ClickAISpan
+ * @tc.name: HandleSingleClickEvent002
+ * @tc.desc: test RichEditorPattern HandleSingleClickEvent
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorClickTestNg, ClickAISpan001, TestSize.Level1)
+HWTEST_F(RichEditorClickTestNg, HandleSingleClickEvent002, TestSize.Level1)
 {
-    AISpan aiSpan;
-    aiSpan.start = 0;
-    aiSpan.end = 10;
-    aiSpan.content = "1234567";
-    aiSpan.type = TextDataDetectType::PHONE_NUMBER;
-    PointF textOffset = PointF(100, 100);
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    bool res = richEditorPattern->ClickAISpan(textOffset, aiSpan);
-    EXPECT_EQ(res, false);
+    GestureEvent info = GestureEvent();
+    richEditorNode_->focusHub_->focusType_ = FocusType::DISABLE;
+    richEditorPattern->caretVisible_ = false;
+    richEditorPattern->HandleSingleClickEvent(info);
+    EXPECT_FALSE(richEditorPattern->caretVisible_);
+}
+
+/**
+ * @tc.name: HandleSingleClickEvent003
+ * @tc.desc: test RichEditorPattern HandleSingleClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorClickTestNg, HandleSingleClickEvent003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    GestureEvent info = GestureEvent();
+    richEditorNode_.Reset();
+    richEditorPattern->caretVisible_ = false;
+    richEditorPattern->HandleSingleClickEvent(info);
+    EXPECT_FALSE(richEditorPattern->caretVisible_);
 }
 
 /**
@@ -455,6 +428,48 @@ HWTEST_F(RichEditorClickTestNg, TestRichEditorHandleTripleClickEvent001, TestSiz
     richEditorPattern->HandleTripleClickEvent(info);
     EXPECT_NE(richEditorPattern->GetFocusHub(), nullptr);
     EXPECT_EQ(richEditorPattern->GetFocusHub()->IsFocusable(), true);
+}
+
+/**
+ * @tc.name: HandleSingleClickEvent004
+ * @tc.desc: test RichEditorPattern HandleSingleClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorClickTestNg, HandleSingleClickEvent004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    RichEditorPattern::OperationRecord record;
+    AddSpan("hello1");
+
+    RectF rect(0, 0, 5, 5);
+    richEditorPattern->CreateHandles();
+    richEditorPattern->textSelector_.Update(0, 5);
+    richEditorPattern->DeleteSelectOperation(&record);
+
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
+}
+
+/**
+ * @tc.name: ClickAISpan001
+ * @tc.desc: test RichEditorPattern ClickAISpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorClickTestNg, ClickAISpan001, TestSize.Level1)
+{
+    AISpan aiSpan;
+    aiSpan.start = 0;
+    aiSpan.end = 10;
+    aiSpan.content = "1234567";
+    aiSpan.type = TextDataDetectType::PHONE_NUMBER;
+    PointF textOffset = PointF(100, 100);
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    bool res = richEditorPattern->ClickAISpan(textOffset, aiSpan);
+    EXPECT_EQ(res, false);
 }
 
 /**
@@ -562,6 +577,133 @@ HWTEST_F(RichEditorClickTestNg, ClickAISpan005, TestSize.Level1)
     richEditorPattern->paragraphs_.paragraphs_.emplace_back(info);
     ASSERT_NE(richEditorPattern, nullptr);
     EXPECT_TRUE(richEditorPattern->ClickAISpan(textOffset, aiSpan));
+}
+
+/**
+ * @tc.name: HandleUserClickEvent001
+ * @tc.desc: test HandleUserClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorClickTestNg, HandleUserClickEvent001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto gestureEventFunc = [](GestureEvent& info) { return true; };
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->onClick = std::move(gestureEventFunc);
+    richEditorPattern->spans_.push_back(spanItem);
+
+    AddSpan(EXCEPT_VALUE);
+    ASSERT_FALSE(richEditorPattern->spans_.empty());
+    auto firstSpanItem = richEditorPattern->spans_.front();
+    ASSERT_NE(firstSpanItem, nullptr);
+    firstSpanItem->leadingMargin = std::make_optional<NG::LeadingMargin>();
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 10 });
+    std::vector<RectF> rects { RectF(0, 0, 5, 5) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<THIRD_PARAM>(rects));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
+    GestureEvent info = GestureEvent();
+    info.SetLocalLocation(Offset(3, 3));
+    richEditorPattern->contentRect_ = RectF(0, 0, 20.0, 20.0);
+    auto gestureFunc = [](RefPtr<SpanItem> item, GestureEvent& info) -> bool { return true; };
+    richEditorPattern->HandleUserGestureEvent(info, std::move(gestureFunc));
+
+    bool ret = richEditorPattern->HandleUserClickEvent(info);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: HandleUserClickEvent002
+ * @tc.desc: test HandleUserClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorClickTestNg, HandleUserClickEvent002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    richEditorPattern->spans_.push_back(spanItem);
+
+    AddSpan(EXCEPT_VALUE);
+    ASSERT_FALSE(richEditorPattern->spans_.empty());
+    auto firstSpanItem = richEditorPattern->spans_.front();
+    ASSERT_NE(firstSpanItem, nullptr);
+    firstSpanItem->leadingMargin = std::make_optional<NG::LeadingMargin>();
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 10 });
+    std::vector<RectF> rects { RectF(0, 0, 5, 5) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<THIRD_PARAM>(rects));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
+    GestureEvent info = GestureEvent();
+    info.SetLocalLocation(Offset(3, 3));
+    richEditorPattern->contentRect_ = RectF(0, 0, 20.0, 20.0);
+    auto gestureFunc = [](RefPtr<SpanItem> item, GestureEvent& info) -> bool { return true; };
+    richEditorPattern->HandleUserGestureEvent(info, std::move(gestureFunc));
+
+    bool ret = richEditorPattern->HandleUserClickEvent(info);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: HandleUserClickEvent003
+ * @tc.desc: test HandleUserClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorClickTestNg, HandleUserClickEvent003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    AddSpan(EXCEPT_VALUE);
+    ASSERT_FALSE(richEditorPattern->spans_.empty());
+    auto firstSpanItem = richEditorPattern->spans_.front();
+    ASSERT_NE(firstSpanItem, nullptr);
+    firstSpanItem->leadingMargin = std::make_optional<NG::LeadingMargin>();
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 10 });
+    std::vector<RectF> rects { RectF(0, 0, 5, 5) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<THIRD_PARAM>(rects));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
+    GestureEvent info = GestureEvent();
+    info.SetLocalLocation(Offset(3, 3));
+    richEditorPattern->contentRect_ = RectF(0, 0, 20.0, 20.0);
+    auto gestureFunc = [](RefPtr<SpanItem> item, GestureEvent& info) -> bool { return true; };
+    richEditorPattern->HandleUserGestureEvent(info, std::move(gestureFunc));
+
+    bool ret = richEditorPattern->HandleUserClickEvent(info);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: HandleClickEvent002
+ * @tc.desc: test RichEditorPattern HandleClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorClickTestNg, HandleClickEvent003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    GestureEvent info;
+    info.localLocation_ = Offset(0, 0);
+    ParagraphStyle paragraphStyle;
+    auto paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    richEditorPattern->pManager_->AddParagraph({ .paragraph = paragraph, .paragraphStyle = paragraphStyle });
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    richEditorPattern->GetFocusHub()->focusType_ = FocusType::NODE;
+    richEditorPattern->dataDetectorAdapter_->hasClickedAISpan_ = true;
+    richEditorPattern->HandleClickEvent(info);
+    EXPECT_FALSE(richEditorPattern->dataDetectorAdapter_->hasClickedAISpan_);
 }
 
 } // namespace OHOS::Ace::NG

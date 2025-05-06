@@ -463,6 +463,7 @@ void ServiceCollaborationMenuAceHelper::SubMeunMountToMainMenu(
 {
     AddHoverEventToMainMenu(menuNode, menuWrapper, subDeviceMenuCreator);
     AddClickEventToMainMenu(menuNode, menuWrapper, subDeviceMenuCreator);
+    AddLongPressEventToMainMenu(menuNode, menuWrapper, subDeviceMenuCreator);
 }
 
 void ServiceCollaborationMenuAceHelper::AddHoverEventToMainMenu(
@@ -554,6 +555,46 @@ void ServiceCollaborationMenuAceHelper::AddClickEventToMainMenu(
     };
     auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickTask));
     gestureHub->AddClickEvent(clickEvent);
+}
+
+void ServiceCollaborationMenuAceHelper::AddLongPressEventToMainMenu(
+    const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& menuWrapper,
+    std::function<RefPtr<FrameNode>(void)> subDeviceMenuCreator)
+{
+    CHECK_NULL_VOID(menuNode && menuWrapper && subDeviceMenuCreator);
+    TAG_LOGI(AceLogTag::ACE_MENU, "Service Collaborationfwk mainMenu longPressTask enter");
+    auto gestureHub = menuNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+
+    auto longPressTask = [weakHelper = WeakClaim(this), weakMenuWrapper = WeakClaim(RawPtr(menuWrapper)),
+                          weakMenuNode = WeakClaim(RawPtr(menuNode)), subDeviceMenuCreator](GestureEvent& event) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "menuitem longPressTask enter");
+        auto menuItemNode = weakMenuNode.Upgrade();
+        auto menuWrapper = weakMenuWrapper.Upgrade();
+        auto helper = weakHelper.Upgrade();
+        CHECK_NULL_VOID(menuItemNode && menuWrapper && helper);
+        helper->subMenuIsShow_ = false;
+        if (!helper->subMenuIsShow_) {
+            TAG_LOGI(AceLogTag::ACE_MENU, "longPressTask create SubMenu enter.1");
+            auto subMenu = subDeviceMenuCreator();
+            CHECK_NULL_VOID(subMenu);
+            TAG_LOGI(AceLogTag::ACE_MENU, "longPressTask create SubMenu enter.2");
+            auto submenuPattern = subMenu->GetPattern<MenuPattern>();
+            CHECK_NULL_VOID(submenuPattern);
+            submenuPattern->SetParentMenuItem(menuItemNode);
+            subMenu->MountToParent(menuWrapper);
+            auto menuProps = subMenu->GetLayoutProperty<MenuLayoutProperty>();
+            CHECK_NULL_VOID(menuProps);
+            auto frameSize = menuItemNode->GetGeometryNode()->GetMarginFrameSize();
+            OffsetF position = menuItemNode->GetPaintRectOffset(false, true) + OffsetF(frameSize.Width(), 0.0);
+            menuProps->UpdateMenuOffset(position);
+            subMenu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+            helper->subMenuIsShow_ = true;
+        }
+    };
+
+    auto longPressEvent = AceType::MakeRefPtr<LongPressEvent>(std::move(longPressTask));
+    gestureHub->SetLongPressEvent(longPressEvent);
 }
 
 // Callback

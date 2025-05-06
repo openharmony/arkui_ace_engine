@@ -87,6 +87,18 @@ HWTEST_F(RichEditorMenuTestNg, TestRichEditorHandleOnShowMenu001, TestSize.Level
     auto tempOffset = richEditorPattern->selectionMenuOffsetByMouse_;
     richEditorPattern->parentGlobalOffset_.x_ = 10.0f;
     richEditorPattern->parentGlobalOffset_.y_ = 20.0f;
+    richEditorPattern->sourceType_ = SourceType::MOUSE;
+
+    /**
+     * @tc.steps: step2. add text and paragraph
+     */
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 6;
+    richEditorPattern->contentRect_ = { -500.0, -500.0, 500.0, 500.0 };
+
     richEditorPattern->HandleOnShowMenu();
     ASSERT_NE(richEditorPattern->selectionMenuOffsetByMouse_, tempOffset);
 }
@@ -625,7 +637,7 @@ HWTEST_F(RichEditorMenuTestNg, CloseSystemMenu002, TestSize.Level1)
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     focusHub->RequestFocusImmediately();
 
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     bool enabledCache = eventHub->IsEnabled();
@@ -728,6 +740,7 @@ HWTEST_F(RichEditorMenuTestNg, HandleMenuCallbackOnSelectAll001, TestSize.Level1
     richEditorPattern->selectOverlay_->isUsingMouse_ = true;
     EXPECT_EQ(richEditorPattern->selectOverlay_->IsUsingMouse(), true);
     richEditorPattern->HandleMenuCallbackOnSelectAll();
+    ASSERT_EQ(richEditorPattern->IsUsingMouse(), false);
 }
 
 /**
@@ -753,7 +766,7 @@ HWTEST_F(RichEditorMenuTestNg, HandleMenuCallbackOnSelectAll002, TestSize.Level1
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     focusHub->RequestFocusImmediately();
 
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     bool enabledCache = eventHub->IsEnabled();

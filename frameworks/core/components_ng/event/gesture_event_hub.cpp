@@ -1294,4 +1294,29 @@ void GestureEventHub::DumpVelocityInfoFroPanEvent(int32_t fingerId)
     CHECK_NULL_VOID(panEventActuator_);
     panEventActuator_->DumpVelocityInfo(fingerId);
 }
+
+GestureEvent GestureEventHub::GetGestureEventInfo()
+{
+    RefPtr<ClickRecognizer> clickRecognizer;
+    if (clickEventActuator_) {
+        clickRecognizer = clickEventActuator_->GetClickRecognizer();
+    } else {
+        clickRecognizer = GetAccessibilityRecognizer<ClickRecognizer>();
+    }
+    GestureEvent info;
+    CHECK_NULL_RETURN(clickRecognizer, info);
+    return clickRecognizer->GetGestureEventInfo();
+}
+
+ClickInfo GestureEventHub::GetClickInfo()
+{
+    RefPtr<ClickRecognizer> clickRecognizer;
+    if (clickEventActuator_) {
+        clickRecognizer = clickEventActuator_->GetClickRecognizer();
+    } else {
+        clickRecognizer = GetAccessibilityRecognizer<ClickRecognizer>();
+    }
+    CHECK_NULL_RETURN(clickRecognizer, ClickInfo(-1));
+    return clickRecognizer->GetClickInfo();
+}
 } // namespace OHOS::Ace::NG

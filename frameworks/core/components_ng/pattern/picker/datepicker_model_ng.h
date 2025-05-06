@@ -83,9 +83,7 @@ private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();
     static RefPtr<FrameNode> CreateButtonNode();
-    void createMonthOrDayColumnNode(const RefPtr<FrameNode>& columnNode,
-        const RefPtr<FrameNode>& dateNode, Color buttonBackgroundColor);
-    void createYearColumnNode(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& dateNode);
+    void CreateDateColumn(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& dateNode);
     std::string dateOrder = "";
     std::string dateTimeOrder = "";
 };

@@ -103,7 +103,6 @@ bool SystemProperties::navigationBlurEnabled_ = true;
 bool SystemProperties::gridCacheEnabled_ = false;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(false);
-std::atomic<bool> SystemProperties::asyncInitializeEnabled_(true);
 std::atomic<bool> SystemProperties::focusCanBeActive_(true);
 bool SystemProperties::aceCommercialLogEnable_ = false;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
@@ -118,6 +117,7 @@ bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
 int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
 int32_t SystemProperties::touchAccelarate_ = 0;
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
+bool SystemProperties::formSkeletonBlurEnabled_ = true;
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -403,6 +403,11 @@ bool SystemProperties::IsSuperFoldDisplayDevice()
 bool SystemProperties::IsPageTransitionFreeze()
 {
     return pageTransitionFrzEnabled_;
+}
+
+bool SystemProperties::IsFormSkeletonBlurEnabled()
+{
+    return formSkeletonBlurEnabled_;
 }
 
 } // namespace OHOS::Ace

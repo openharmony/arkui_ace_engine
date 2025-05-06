@@ -1882,6 +1882,6 @@ export default function QRCode3() {
       done();
 
     })
-    })
+  })
 
 }

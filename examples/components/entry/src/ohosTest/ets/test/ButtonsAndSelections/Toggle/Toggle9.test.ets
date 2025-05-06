@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 import { describe, beforeAll, it } from '@ohos/hypium'
-import {
-  getToggle,
-  JsonType, KeyStruct, radioClick,
-  titleSearch,
-  ToggleClick } from '../../../utils';
+import { getToggle, JsonType, KeyStruct, radioClick, titleSearch, ToggleClick } from '../../../utils';
 import { ToggleStart } from './Toggle';
 
 export default function Toggle9() {

@@ -49,7 +49,7 @@ constexpr float PERCENT = 0.01f; // Percent
 constexpr float FOLLOW_TO_RECYCLE_DURATION = 600.0f;
 constexpr float CUSTOM_BUILDER_ANIMATION_DURATION = 100.0f;
 constexpr float LOADING_ANIMATION_DURATION = 350.0f;
-constexpr float MAX_OFFSET = 100000.0f;
+constexpr float MAX_OFFSET = std::numeric_limits<float>::infinity();
 constexpr float HALF = 0.5f;
 constexpr float BASE_SCALE = 0.707f; // std::sqrt(2)/2
 constexpr Dimension TRIGGER_REFRESH_WITH_TEXT_DISTANCE = 96.0_vp;
@@ -107,7 +107,7 @@ void RefreshPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -223,7 +223,7 @@ void RefreshPattern::InitProgressNode()
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LoadingProgressPattern>());
     CHECK_NULL_VOID(progressChild_);
     host->AddChild(progressChild_, 0);
-    auto gestureHub = progressChild_->GetEventHub<EventHub>();
+    auto gestureHub = progressChild_->GetOrCreateEventHub<EventHub>();
     if (gestureHub) {
         gestureHub->SetEnabled(false);
     }
@@ -444,7 +444,7 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
             return { delta, true };
         }
         auto pullDownRatio = CalculatePullDownRatio();
-        scrollOffset_ = std::clamp(scrollOffset_ + delta * pullDownRatio, 0.0f, MAX_OFFSET);
+        scrollOffset_ = std::clamp(scrollOffset_ + delta * pullDownRatio, 0.0f, GetMaxPullDownDistance());
         UpdateFirstChildPlacement();
         FireOnOffsetChange(scrollOffset_);
         if (!isSourceFromAnimation_) {
@@ -512,6 +512,16 @@ float RefreshPattern::CalculatePullDownRatio()
     return exp(-ratio_.value() * gamma);
 }
 
+float RefreshPattern::GetMaxPullDownDistance()
+{
+    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    if (layoutProperty->GetMaxPullDownDistance().has_value()) {
+        return Dimension(layoutProperty->GetMaxPullDownDistance().value(), DimensionUnit::VP).ConvertToPx();
+    }
+    return MAX_OFFSET;
+}
+
 float RefreshPattern::GetFollowRatio()
 {
     auto loadingVisibleHeight = GetLoadingVisibleHeight();
@@ -525,7 +535,7 @@ float RefreshPattern::GetFollowRatio()
 
 void RefreshPattern::FireStateChange(int32_t value)
 {
-    auto refreshEventHub = GetEventHub<RefreshEventHub>();
+    auto refreshEventHub = GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(refreshEventHub);
     refreshEventHub->FireOnStateChange(value);
     if (refreshStatus_ == RefreshStatus::REFRESH && Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
@@ -544,14 +554,14 @@ void RefreshPattern::FireStateChange(int32_t value)
 
 void RefreshPattern::FireRefreshing()
 {
-    auto refreshEventHub = GetEventHub<RefreshEventHub>();
+    auto refreshEventHub = GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(refreshEventHub);
     refreshEventHub->FireOnRefreshing();
 }
 
 void RefreshPattern::FireChangeEvent(const std::string& value)
 {
-    auto refreshEventHub = GetEventHub<RefreshEventHub>();
+    auto refreshEventHub = GetOrCreateEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(refreshEventHub);
     refreshEventHub->FireChangeEvent(value);
 }
@@ -562,10 +572,29 @@ void RefreshPattern::FireOnOffsetChange(float value)
         value = 0.0f;
     }
     if (!NearEqual(lastScrollOffset_, value)) {
-        auto refreshEventHub = GetEventHub<RefreshEventHub>();
+        UpdateCustomBuilderVisibility();
+        auto refreshEventHub = GetOrCreateEventHub<RefreshEventHub>();
         CHECK_NULL_VOID(refreshEventHub);
         refreshEventHub->FireOnOffsetChange(Dimension(value).ConvertToVp());
         lastScrollOffset_ = value;
+    }
+}
+
+void RefreshPattern::UpdateCustomBuilderVisibility()
+{
+    if (!isCustomBuilderExist_) {
+        return;
+    }
+    CHECK_NULL_VOID(customBuilder_);
+    auto customBuilderLayoutProperty = customBuilder_->GetLayoutProperty();
+    CHECK_NULL_VOID(customBuilderLayoutProperty);
+    if (customBuilderLayoutProperty->IsUserSetVisibility()) {
+        return;
+    }
+    if (LessOrEqual(scrollOffset_, 0.0f)) {
+        customBuilderLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    } else {
+        customBuilderLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     }
 }
 
@@ -608,6 +637,7 @@ void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)
     }
     customBuilder_ = AceType::DynamicCast<FrameNode>(builder);
     isCustomBuilderExist_ = true;
+    UpdateCustomBuilderVisibility();
 }
 
 void RefreshPattern::SetAccessibilityAction()
@@ -710,9 +740,10 @@ void RefreshPattern::InitOffsetProperty()
         auto propertyCallback = [weak = AceType::WeakClaim(this)](float scrollOffset) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->scrollOffset_ = scrollOffset;
+            auto scrollOffsetLimit = std::clamp(scrollOffset, 0.0f, pattern->GetMaxPullDownDistance());
+            pattern->scrollOffset_ = scrollOffsetLimit;
             pattern->UpdateFirstChildPlacement();
-            pattern->FireOnOffsetChange(scrollOffset);
+            pattern->FireOnOffsetChange(scrollOffsetLimit);
         };
         offsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
         auto host = GetHost();
@@ -935,11 +966,20 @@ RefreshAnimationState RefreshPattern::GetLoadingProgressStatus()
 void RefreshPattern::ResetAnimation()
 {
     float currentOffset = scrollOffset_;
-    AnimationUtils::StopAnimation(animation_);
     if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
-        CHECK_NULL_VOID(offsetProperty_);
-        offsetProperty_->Set(currentOffset);
+        AnimationOption option;
+        option.SetCurve(DEFAULT_CURVE);
+        option.SetDuration(0);
+        animation_ =
+            AnimationUtils::StartAnimation(option, [weak = AceType::WeakClaim(this), offset = currentOffset]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                auto offsetProperty = pattern->offsetProperty_;
+                CHECK_NULL_VOID(offsetProperty);
+                offsetProperty->Set(offset);
+            });
     } else {
+        AnimationUtils::StopAnimation(animation_);
         CHECK_NULL_VOID(lowVersionOffset_);
         lowVersionOffset_->Set(currentOffset);
     }

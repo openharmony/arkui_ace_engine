@@ -281,6 +281,12 @@ HWTEST_F(FormTestNg, FormModelNGTest002, TestSize.Level1)
     formNG.SetOnLoad(std::move(onLoad));
     auto frameNodeonLoad = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNodeonLoad, nullptr);
+
+    std::string onUpdateValue;
+    auto onUpdate = [&onUpdateValue](const std::string& param) { onUpdateValue = param; };
+    formNG.SetOnUpdate(std::move(onUpdate));
+    auto frameNodeonUpdate = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNodeonUpdate, nullptr);
 }
 
 /**
@@ -663,7 +669,7 @@ HWTEST_F(FormTestNg, FireOnEvent, TestSize.Level1)
     RefPtr<FrameNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<FormEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     /**
@@ -726,6 +732,18 @@ HWTEST_F(FormTestNg, FireOnEvent, TestSize.Level1)
      */
     eventHub->SetOnLoad([](const std::string& string) { ASSERT_EQ(string, ""); });
     pattern->FireOnLoadEvent();
+
+    /**
+     * @tc.steps: step4.Call SetOnUpdate in FormEventHub.
+     * @tc.expected: Call FireOnUpdateFormDone in FormPattern.
+     */
+    eventHub->SetOnUpdate([](const std::string& string) {
+        auto json = JsonUtil::Create(true);
+        json->Put("id", std::to_string(FORM_ID_OF_TDD).c_str());
+        json->Put("idString", FORM_ID_STRING_OF_TDD.c_str());
+        ASSERT_EQ(string, json->ToString());
+    });
+    pattern->FireOnUpdateFormDone(FORM_ID_OF_TDD);
 }
 
 /**
@@ -741,7 +759,7 @@ HWTEST_F(FormTestNg, OnActionEvent, TestSize.Level1)
     RefPtr<FrameNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<FormEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<FormEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetOnRouter([](const std::string& string) {
         auto json = JsonUtil::Create(true);
@@ -1394,11 +1412,11 @@ HWTEST_F(FormTestNg, AddFormChildNode, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     ASSERT_NE(columnNode, nullptr);
     pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE, columnNode);
-    pattern->AddFormChildNode(FormChildNodeType::FORM_SPECIAL_STYLE_NODE, textNode);
+    pattern->AddFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE, textNode);
     RefPtr<FrameNode> disableStyleRootNode =
         pattern->GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
     RefPtr<FrameNode> disableStyleTextNode =
-        pattern->GetFormChildNode(FormChildNodeType::FORM_SPECIAL_STYLE_NODE);
+        pattern->GetFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE);
     EXPECT_EQ(disableStyleRootNode, columnNode);
     EXPECT_EQ(disableStyleTextNode, textNode);
 }
@@ -1420,13 +1438,13 @@ HWTEST_F(FormTestNg, RemoveFormChildNode, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     ASSERT_NE(columnNode, nullptr);
     pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE, columnNode);
-    pattern->AddFormChildNode(FormChildNodeType::FORM_SPECIAL_STYLE_NODE, textNode);
+    pattern->AddFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE, textNode);
     pattern->RemoveFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
-    pattern->RemoveFormChildNode(FormChildNodeType::FORM_SPECIAL_STYLE_NODE);
+    pattern->RemoveFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE);
     RefPtr<FrameNode> disableStyleRootNode =
         pattern->GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
     RefPtr<FrameNode> disableStyleTextNode =
-        pattern->GetFormChildNode(FormChildNodeType::FORM_SPECIAL_STYLE_NODE);
+        pattern->GetFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE);
     EXPECT_EQ(disableStyleRootNode, nullptr);
     EXPECT_EQ(disableStyleTextNode, nullptr);
 }
@@ -1446,17 +1464,17 @@ HWTEST_F(FormTestNg, GetTimeLimitFontSize, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetTimeLimitResource
- * @tc.desc: Test function GetTimeLimitResource in FormPattern.
+ * @tc.name: GetResourceContent
+ * @tc.desc: Test function GetResourceContent in FormPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(FormTestNg, GetTimeLimitResource, TestSize.Level1)
+HWTEST_F(FormTestNg, GetResourceContent, TestSize.Level1)
 {
     RefPtr<FrameNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
     ASSERT_NE(pattern, nullptr);
     std::string tmpStr = "action";
-    pattern->GetTimeLimitResource(tmpStr);
+    pattern->GetResourceContent("form_disable_time_limit", tmpStr);
     EXPECT_EQ(tmpStr.empty(), false);
 }
 
@@ -1477,11 +1495,11 @@ HWTEST_F(FormTestNg, OnLanguageConfigurationUpdate, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     ASSERT_NE(columnNode, nullptr);
     pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE, columnNode);
-    pattern->AddFormChildNode(FormChildNodeType::FORM_SPECIAL_STYLE_NODE, textNode);
+    pattern->AddFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE, textNode);
     RefPtr<FrameNode> disableStyleRootNode =
         pattern->GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
     RefPtr<FrameNode> disableStyleTextNode =
-        pattern->GetFormChildNode(FormChildNodeType::FORM_SPECIAL_STYLE_NODE);
+        pattern->GetFormChildNode(FormChildNodeType::TIME_LIMIT_TEXT_NODE);
     pattern->EnableDrag();
     LOGI("OnLanguageConfigurationUpdate");
     pattern->OnLanguageConfigurationUpdate();
@@ -1489,11 +1507,11 @@ HWTEST_F(FormTestNg, OnLanguageConfigurationUpdate, TestSize.Level1)
 }
 
 /**
- * @tc.name: CreateTimeLimitNode
- * @tc.desc: Test CreateTimeLimitNode in Form Pattern.
+ * @tc.name: CreateForbiddenTextNode
+ * @tc.desc: Test CreateForbiddenTextNode in Form Pattern.
  * @tc.type: FUNC
  */
-HWTEST_F(FormTestNg, CreateTimeLimitNode, TestSize.Level1)
+HWTEST_F(FormTestNg, CreateForbiddenTextNode, TestSize.Level1)
 {
     RefPtr<FrameNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
@@ -1505,7 +1523,7 @@ HWTEST_F(FormTestNg, CreateTimeLimitNode, TestSize.Level1)
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, nullptr);
     ASSERT_NE(layoutWrapper, nullptr);
     auto host = pattern->GetHost();
-    pattern->CreateTimeLimitNode();
+    pattern->CreateForbiddenTextNode("form_disable_time_limit", false);
     ASSERT_NE(host, nullptr);
 }
 

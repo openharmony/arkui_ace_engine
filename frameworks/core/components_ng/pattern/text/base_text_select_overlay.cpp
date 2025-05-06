@@ -1385,7 +1385,15 @@ bool BaseTextSelectOverlay::IsSupportMenuShare()
 bool BaseTextSelectOverlay::IsNeedMenuShare()
 {
     auto shareContent = GetSelectedText();
-    return !std::regex_match(shareContent, std::regex("^\\s*$"));
+    auto shareWord = std::regex_replace(shareContent, std::regex("^\\s+|\\s+$"), "");
+    if (shareWord.empty()) {
+        return false;
+    }
+    auto maxShareLength = TextShareAdapter::GetMaxTextShareLength();
+    if (shareWord.size() > maxShareLength) {
+        return false;
+    }
+    return true;
 }
 
 void BaseTextSelectOverlay::HandleOnShare()

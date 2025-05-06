@@ -22,27 +22,31 @@ const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES = {
     LineBreakStrategy::GREEDY, LineBreakStrategy::HIGH_QUALITY, LineBreakStrategy::BALANCED};
 TextStyle::TextStyle(const std::vector<std::string> &fontFamilies, double fontSize, FontWeight fontWeight,
     FontStyle fontStyle, const Color &textColor)
-    : propFontFamilies_(fontFamilies), propFontStyle_(fontStyle), propTextColor_(textColor), fontSize_(fontSize),
+    : propFontFamilies_(fontFamilies), propFontStyle_(fontStyle), propTextColor_(textColor),
       fontWeight_(fontWeight)
-{}
+{
+    SetFontSize(Dimension(fontSize));
+}
 
 bool TextStyle::operator==(const TextStyle &rhs) const
 {
     return propFontFamilies_ == rhs.propFontFamilies_ && fontFeatures_ == rhs.fontFeatures_ &&
            propTextDecorationStyle_ == rhs.propTextDecorationStyle_ && preferFontSizes_ == rhs.preferFontSizes_ &&
-           fontSize_ == rhs.fontSize_ && adaptMinFontSize_ == rhs.adaptMinFontSize_ &&
-           adaptMaxFontSize_ == rhs.adaptMaxFontSize_ && propAdaptFontSizeStep_ == rhs.propAdaptFontSizeStep_ &&
-           lineHeight_ == rhs.lineHeight_ && fontWeight_ == rhs.fontWeight_ && propFontStyle_ == rhs.propFontStyle_ &&
-           propTextBaseline_ == rhs.propTextBaseline_ && propTextOverflow_ == rhs.propTextOverflow_ &&
-           propTextAlign_ == rhs.propTextAlign_ && propTextColor_ == rhs.propTextColor_ &&
-           propTextDecoration_ == rhs.propTextDecoration_ && propTextShadows_ == rhs.propTextShadows_ &&
-           propLetterSpacing_ == rhs.propLetterSpacing_ && propMaxLines_ == rhs.propMaxLines_ &&
-           adaptTextSize_ == rhs.adaptTextSize_ && propAllowScale_ == rhs.propAllowScale_ &&
-           propWordBreak_ == rhs.propWordBreak_ && propTextDecorationColor_ == rhs.propTextDecorationColor_ &&
-           propTextCase_ == rhs.propTextCase_ && propBaselineOffset_ == rhs.propBaselineOffset_ &&
-           adaptHeight_ == rhs.adaptHeight_ && propTextIndent_ == rhs.propTextIndent_ &&
-           propTextVerticalAlign_ == rhs.propTextVerticalAlign_ && propWordSpacing_ == rhs.propWordSpacing_ &&
-           propEllipsisMode_ == rhs.propEllipsisMode_ && propLineBreakStrategy_ == rhs.propLineBreakStrategy_ &&
+           fontSize_.value == rhs.fontSize_.value && adaptMinFontSize_.value == rhs.adaptMinFontSize_.value &&
+           adaptMaxFontSize_.value == rhs.adaptMaxFontSize_.value &&
+           propAdaptFontSizeStep_.value == rhs.propAdaptFontSizeStep_.value &&
+           lineHeight_.value == rhs.lineHeight_.value && fontWeight_ == rhs.fontWeight_ &&
+           propFontStyle_ == rhs.propFontStyle_ && propTextBaseline_ == rhs.propTextBaseline_ &&
+           propTextOverflow_ == rhs.propTextOverflow_ && propTextAlign_ == rhs.propTextAlign_ &&
+           propTextColor_ == rhs.propTextColor_ && propTextDecoration_ == rhs.propTextDecoration_ &&
+           propTextShadows_ == rhs.propTextShadows_ && propLetterSpacing_.value == rhs.propLetterSpacing_.value &&
+           propMaxLines_ == rhs.propMaxLines_ && adaptTextSize_ == rhs.adaptTextSize_ &&
+           propAllowScale_ == rhs.propAllowScale_ && propWordBreak_ == rhs.propWordBreak_ &&
+           propTextDecorationColor_ == rhs.propTextDecorationColor_ && propTextCase_ == rhs.propTextCase_ &&
+           propBaselineOffset_.value == rhs.propBaselineOffset_.value && adaptHeight_ == rhs.adaptHeight_ &&
+           propTextIndent_.value == rhs.propTextIndent_.value && propTextVerticalAlign_ == rhs.propTextVerticalAlign_ &&
+           propWordSpacing_.value == rhs.propWordSpacing_.value && propEllipsisMode_ == rhs.propEllipsisMode_ &&
+           propLineBreakStrategy_ == rhs.propLineBreakStrategy_ &&
            propTextBackgroundStyle_ == rhs.propTextBackgroundStyle_;
 }
 
@@ -54,9 +58,9 @@ bool TextStyle::operator!=(const TextStyle &rhs) const
 void TextStyle::SetAdaptTextSize(
     const Dimension &maxFontSize, const Dimension &minFontSize, const Dimension &fontSizeStep)
 {
-    adaptMaxFontSize_ = maxFontSize;
-    adaptMinFontSize_ = minFontSize;
-    propAdaptFontSizeStep_ = fontSizeStep;
+    adaptMaxFontSize_.value = maxFontSize;
+    adaptMinFontSize_.value = minFontSize;
+    propAdaptFontSizeStep_.value = fontSizeStep;
     adaptTextSize_ = true;
 }
 
@@ -92,14 +96,14 @@ void TextStyle::UpdateColorByResourceId()
 std::string TextStyle::ToString() const
 {
     auto jsonValue = JsonUtil::Create(true);
-    JSON_STRING_PUT_STRINGABLE(jsonValue, fontSize_);
+    JSON_STRING_PUT_STRINGABLE(jsonValue, fontSize_.value);
     JSON_STRING_PUT_STRINGABLE(jsonValue, propTextColor_);
-    JSON_STRING_PUT_STRINGABLE(jsonValue, lineHeight_);
-    JSON_STRING_PUT_STRINGABLE(jsonValue, propBaselineOffset_);
-    JSON_STRING_PUT_STRINGABLE(jsonValue, propWordSpacing_);
-    JSON_STRING_PUT_STRINGABLE(jsonValue, propTextIndent_);
-    JSON_STRING_PUT_STRINGABLE(jsonValue, propLetterSpacing_);
-    JSON_STRING_PUT_STRINGABLE(jsonValue, lineSpacing_);
+    JSON_STRING_PUT_STRINGABLE(jsonValue, lineHeight_.value);
+    JSON_STRING_PUT_STRINGABLE(jsonValue, propBaselineOffset_.value);
+    JSON_STRING_PUT_STRINGABLE(jsonValue, propWordSpacing_.value);
+    JSON_STRING_PUT_STRINGABLE(jsonValue, propTextIndent_.value);
+    JSON_STRING_PUT_STRINGABLE(jsonValue, propLetterSpacing_.value);
+    JSON_STRING_PUT_STRINGABLE(jsonValue, lineSpacing_.value);
 
     JSON_STRING_PUT_INT(jsonValue, fontWeight_);
     JSON_STRING_PUT_INT(jsonValue, propFontStyle_);

@@ -162,5 +162,10 @@ protected:
     RefPtr<ListEventHub> eventHub_;
     RefPtr<ListLayoutProperty> layoutProperty_;
 };
+
+class ListItemGroupPatternTestNg : public TestNG {
+    void SetUp() override;
+    void TearDown() override;
+};
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_LIST_LIST_TEST_NG_H

@@ -308,9 +308,9 @@ struct CollapsibleMenuSection {
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxFontScale = uiContent.getMaxFontScale();
     } catch (exception) {
-      let code: number = (exception as BusinessError).code;
-      let message: string = (exception as BusinessError).message;
-      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+      let code: number = (exception as BusinessError)?.code;
+      let message: string = (exception as BusinessError)?.message;
+      hilog.error(0x3900, 'tabTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
     }
     this.menuItems.forEach((item, index) => {
       if (item.isEnabled && this.firstFocusableIndex === -1 &&
@@ -322,10 +322,16 @@ struct CollapsibleMenuSection {
   }
 
   decideFontScale(): number {
-    let uiContent: UIContext = this.getUIContext();
-    this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
-    if (!this.isFollowingSystemFontScale) {
-      return 1;
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+      if (!this.isFollowingSystemFontScale) {
+        return 1;
+      }
+    } catch (exception) {
+      let code: number = (exception as BusinessError)?.code;
+      let message: string = (exception as BusinessError)?.message;
+      hilog.error(0x3900, 'tabTitleBar', `Faild to getSystemFontScale,cause, code: ${code}, message: ${message}`);
     }
     return Math.min(this.systemFontScale, this.maxFontScale);
   }
@@ -576,7 +582,7 @@ struct TabContentItem {
                   .fontSize(TabContentItem.symbolSize)
                   .width(this.getImageLayoutWidth())
                   .height(TabContentItem.imageSize)
-                  .accessibilityText(this.toStringFormat(this.item.title))
+                  .accessibilityText(this.item.title as string)
                   .scale({
                     x: this.getImageScaleFactor(),
                     y: this.getImageScaleFactor()
@@ -592,7 +598,7 @@ struct TabContentItem {
                     .fontSize(TabContentItem.symbolSize)
                     .width(this.getImageLayoutWidth())
                     .height(TabContentItem.imageSize)
-                    .accessibilityText(this.toStringFormat(this.item.title))
+                    .accessibilityText(this.item.title as string)
                     .scale({
                       x: this.getImageScaleFactor(),
                       y: this.getImageScaleFactor()
@@ -606,7 +612,7 @@ struct TabContentItem {
                     .width(this.getImageLayoutWidth())
                     .height(TabContentItem.imageSize)
                     .objectFit(ImageFit.Fill)
-                    .accessibilityText(this.toStringFormat(this.item.title))
+                    .accessibilityText(this.item.title as string)
                     .scale({
                       x: this.getImageScaleFactor(),
                       y: this.getImageScaleFactor()
@@ -758,9 +764,9 @@ struct ImageMenuItem {
     if (this.item.value === PUBLIC_MORE) {
       return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
     } else if (this.item.accessibilityText) {
-      return this.toStringFormat(this.item.accessibilityText);
+      return this.item.accessibilityText as string;
     } else if (this.item.label) {
-      return this.toStringFormat(this.item.label);
+      return this.item.label as string;
     }
     return ' ';
   }
@@ -796,7 +802,7 @@ struct ImageMenuItem {
     }
     .accessibilityText(this.getAccessibilityReadText())
     .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
-    .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription))
+    .accessibilityDescription(this.item?.accessibilityDescription as string)
     .width(ImageMenuItem.imageHotZoneWidth)
     .height(ImageMenuItem.imageHotZoneWidth)
     .borderRadius(ImageMenuItem.buttonBorderRadius)
@@ -982,14 +988,21 @@ struct TabTitleBarDialog {
   }
 
   async aboutToAppear(): Promise<void> {
-    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    this.mainWindowStage = context.windowStage.getMainWindowSync();
-    let properties: window.WindowProperties = this.mainWindowStage.getWindowProperties();
-    let rect = properties.windowRect;
-    if (px2vp(rect.height) > this.screenWidth) {
-      this.maxLines = this.verticalScreenLines;
-    } else {
-      this.maxLines = this.horizontalsScreenLines;
+    try {
+      let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+      this.mainWindowStage = context.windowStage.getMainWindowSync();
+      let properties: window.WindowProperties = this.mainWindowStage.getWindowProperties();
+      let rect = properties.windowRect;
+      if (px2vp(rect.height) > this.screenWidth) {
+        this.maxLines = this.verticalScreenLines;
+      } else {
+        this.maxLines = this.horizontalsScreenLines;
+      }
+
+    } catch (exception) {
+      let code: number = (exception as BusinessError)?.code;
+      let message: string = (exception as BusinessError)?.message;
+      hilog.error(0x3900, 'tabTitleBar', `Faild to getMainWindowSync,cause, code: ${code}, message: ${message}`);
     }
   }
 }

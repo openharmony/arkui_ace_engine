@@ -16,6 +16,7 @@
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "water_flow_test_ng.h"
 
+#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
@@ -1389,5 +1390,29 @@ HWTEST_F(WaterFlowTopDownScrollerTestNg, ScrollEdge002, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 11), 600);
     EXPECT_EQ(GetChildHeight(frameNode_, 11), 200);
     EXPECT_EQ(isReachEnd, true);
+}
+
+/**
+ * @tc.name: ModeTransition001
+ * @tc.desc: measure in original mode first, then change to segment mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTopDownScrollerTestNg, ModeTransition001, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    CreateItemsInRepeat(0, [](int32_t i) { return 100.0f; });
+    CreateDone();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+
+    auto child = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), "test");
+    frameNode_->AddChild(child);
+    frameNode_->ChildrenUpdatedFrom(0);
+    std::vector<WaterFlowSections::Section> newSection = { WaterFlowSections::Section {
+        .itemsCount = 1,
+        .crossCount = 1,
+    } };
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, newSection);
+    FlushUITasks();
 }
 } // namespace OHOS::Ace::NG

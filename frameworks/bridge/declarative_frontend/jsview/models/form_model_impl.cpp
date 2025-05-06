@@ -110,6 +110,11 @@ void FormModelImpl::SetOnLoad(std::function<void(const std::string&)>&& onLoad)
     LOGE("Not support onLoad in old pipeline");
 }
 
+void FormModelImpl::SetOnUpdate(std::function<void(const std::string&)>&& onUpdate)
+{
+    LOGE("Not support onUpdate in old pipeline");
+}
+
 void FormModelImpl::SetObscured(const std::vector<ObscuredReasons>& reasons)
 {
     LOGE("Not support SetObscured in old pipeline");

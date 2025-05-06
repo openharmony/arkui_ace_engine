@@ -30,4 +30,9 @@ int32_t TextShareMgr::StartUpShareFunc(const std::shared_ptr<AbilityRuntime::Con
 {
     return -1;
 }
+
+uint64_t TextShareMgr::GetMaxTextLength()
+{
+    return 0;
+}
 } // namespace OHOS::Ace

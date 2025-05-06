@@ -760,7 +760,6 @@ export default function AlphabetIndexerBootcampTest() {
           new KeyStruct('fontSize', JsonType.value),
         ],
         assertEqual: '16.00fp'
-
       })
 
       await sliderDrag({
@@ -776,7 +775,6 @@ export default function AlphabetIndexerBootcampTest() {
           new KeyStruct('fontSize', JsonType.value),
         ],
         assertEqual: '4.00fp'
-
       })
 
 

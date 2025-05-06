@@ -40,6 +40,7 @@ public:
     void SetOnUninstall(std::function<void(const std::string&)>&& onUninstall) override;
     void SetOnRouter(std::function<void(const std::string&)>&& onRouter) override;
     void SetOnLoad(std::function<void(const std::string&)>&& onLoad) override;
+    void SetOnUpdate(std::function<void(const std::string&)>&& onUpdate) override;
     void SetVisible(VisibleType visible) override;
     void SetVisibility(VisibleType visible) override;
     void SetObscured(const std::vector<ObscuredReasons>& reasons) override;

@@ -31,8 +31,8 @@ namespace OHOS::Ace::Platform {
 DialogContainer::DialogContainer(int32_t instanceId, FrontendType type) : AceContainer(instanceId, type)
 {}
 
-void DialogContainer::ShowToast(int32_t instanceId, const std::string& message, int32_t duration,
-    const std::string& bottom, std::function<void(int32_t)>&& callback)
+void DialogContainer::ShowToast(int32_t instanceId, const NG::ToastInfo& toastInfo,
+    std::function<void(int32_t)>&& callback)
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_VOID(container);
@@ -45,13 +45,9 @@ void DialogContainer::ShowToast(int32_t instanceId, const std::string& message, 
             AceContainer::HideWindow(instanceId);
         }
     });
-    auto toastInfo = NG::ToastInfo { .message = message,
-        .duration = duration,
-        .bottom = bottom,
-        .showMode = NG::ToastShowMode::DEFAULT,
-        .alignment = -1,
-        .offset = std::nullopt };
-    delegate->ShowToast(toastInfo, std::move(callback));
+    auto toastInfoNew = toastInfo;
+    toastInfoNew.showMode = NG::ToastShowMode::DEFAULT;
+    delegate->ShowToast(toastInfoNew, std::move(callback));
 }
 
 void DialogContainer::CloseToast(int32_t instanceId, int32_t toastId, std::function<void(int32_t)>&& callback)

@@ -40,7 +40,7 @@ class BaseNode extends ViewBuildNodeBase {
         this.instanceId_ = uiContext.instanceId_;
     }
     create(builder, params, update, updateConfiguration, supportLazyBuild) {
-        return this.builderBaseNode_.create(builder.bind(this), params, update.bind(this), updateConfiguration.bind(this), supportLazyBuild);
+        return this.builderBaseNode_.create(builder.bind(this), params, update.bind(this), updateConfiguration.bind(this), supportLazyBuild, this);
     }
     finishUpdateFunc() {
         return this.builderBaseNode_.finishUpdateFunc();

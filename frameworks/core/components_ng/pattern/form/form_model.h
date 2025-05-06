@@ -37,6 +37,7 @@ public:
     virtual void SetOnUninstall(std::function<void(const std::string&)>&& onUninstall) = 0;
     virtual void SetOnRouter(std::function<void(const std::string&)>&& onRouter) = 0;
     virtual void SetOnLoad(std::function<void(const std::string&)>&& onLoad) = 0;
+    virtual void SetOnUpdate(std::function<void(const std::string&)>&& onUpdate) = 0;
     virtual void SetVisible(VisibleType visible) = 0;
     virtual void SetVisibility(VisibleType visible) = 0;
     virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;

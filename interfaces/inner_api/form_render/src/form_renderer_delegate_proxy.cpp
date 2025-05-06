@@ -321,5 +321,25 @@ int32_t FormRendererDelegateProxy::SendRequest(uint32_t code, MessageParcel &dat
     }
     return remote->SendRequest(code, data, reply, option);
 }
+
+int32_t FormRendererDelegateProxy::OnUpdateFormDone(const int64_t formId)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("failed to write interface token");
+        return ERR_INVALID_VALUE;
+    }
+    data.WriteInt64(formId);
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    int error = Remote()->SendRequest(
+        static_cast<uint32_t>(IFormRendererDelegate::Message::ON_UPDATE_FORM_DONE), data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("failed to SendRequest: %{public}d", error);
+        return error;
+    }
+
+    return reply.ReadInt32();
+}
 } // namespace Ace
 } // namespace OHOS

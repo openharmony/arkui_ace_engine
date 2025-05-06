@@ -528,7 +528,6 @@ export struct ImageAnimatorBootcamp {
   @State compAccessibilityDescription: string = `无障碍说明`;
   @State enableCompAccessibilityLevel: boolean = false;
   @State compAccessibilityLevel: string = 'auto';
-
   @State modifier: MyModifier = new MyModifier()
   @State enableCompAttributeModifier: boolean = false;
   @State compAttributeModifier: boolean = false;
@@ -562,7 +561,6 @@ export struct ImageAnimatorBootcamp {
   @State compResponseRegionValueHeight: Length = '100%'
   @State enableCompHitTestBehavior: boolean = false
   @State compHitTestBehavior: HitTestMode = HitTestMode.Default
-
   @State enableCompObscured: boolean = false
   @State compObscured: Array<ObscuredReasons> = []
   @State enableCompFontColor: boolean = false
@@ -645,7 +643,7 @@ export struct ImageAnimatorBootcamp {
   }
 
   aboutToAppear(): void {
-    AppStorage.setOrCreate('scroller',this.scroller)
+    AppStorage.setOrCreate('scroller', this.scroller)
   }
 
   build() {
@@ -668,15 +666,10 @@ export struct ImageAnimatorBootcamp {
     .hideTitleBar(true)
   }
 
-
-
-
   @Builder
   compBackground() {
     Text('123')
   }
-
-
 
   @Builder
   Content() {
@@ -1173,7 +1166,8 @@ export struct ImageAnimatorBootcamp {
             this.compFocusBoxStrokeWidth)) : null,
         })
         .id(useEnabled(this.enableCompId, this.compId) ? useEnabled(this.enableCompId, this.compId) : null)
-        .key(useEnabled(this.enableCompKey, this.compKey) ? useEnabled(this.enableCompKey, this.compKey) : 'ImageAnimator')
+        .key(useEnabled(this.enableCompKey, this.compKey) ? useEnabled(this.enableCompKey, this.compKey) :
+          'ImageAnimator')
         .focusScopePriority(
           useEnabled(this.enableCompFocusScopePriorityScopeId, this.compFocusScopePriorityScopeId),
           useEnabled(this.enableCompFocusScopePriorityPriority, this.compFocusScopePriorityPriority)
@@ -1491,7 +1485,7 @@ export struct ImageAnimatorBootcamp {
         .fillColor($r('sys.color.ohos_id_color_fourth'))
         .height(24)
         .width(24)
-        .rotate({ angle: this.selection==str ? 90 : 0 })
+        .rotate({ angle: this.selection == str ? 90 : 0 })
         .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
     }
     .borderRadius(20)
@@ -2098,7 +2092,6 @@ export struct ImageAnimatorBootcamp {
     .height('52%')
     .id('scroll')
   }
-
 }
 
 @Preview

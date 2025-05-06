@@ -40,14 +40,17 @@
 #include "system_ability_definition.h"
 #include "wm_common.h"
 
+#include "base/log/event_report.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
 #include "base/ressched/ressched_report.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/pipeline/container_window_manager.h"
 
 #if !defined(ACE_UNITTEST)
 #include "core/components_ng/base/transparent_node_detector.h"
@@ -93,8 +96,6 @@
 #include "base/log/log.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/thread/background_task_executor.h"
-#include "base/thread/task_dependency_manager.h"
 #include "base/utils/system_properties.h"
 #include "bridge/card_frontend/form_frontend_declarative.h"
 #include "core/common/ace_engine.h"
@@ -112,6 +113,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
+#include "core/components_ng/pattern/overlay/overlay_mask_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
@@ -275,6 +277,7 @@ bool CloseGlobalModalUIExtension(int32_t instanceId, int32_t sessionId, const st
     auto parentNode = modalPageNode->GetParent();
     if (parentNode) {
         parentNode->RemoveChild(modalPageNode);
+        parentNode->RebuildRenderContextTree();
     }
     modalPageNode->MountToParent(globalPipeline->GetRootElement());
     auto globalOverlay = globalPipeline->GetOverlayManager();
@@ -576,8 +579,6 @@ private:
         }
         bool isRotate = false;
         auto displayInfo = container->GetDisplayInfo();
-        uint32_t lastKeyboardHeight = pipeline->GetSafeAreaManager() ?
-            pipeline->GetSafeAreaManager()->GetKeyboardInset().Length() : 0;
         if (displayInfo) {
             auto dmRotation = static_cast<int32_t>(displayInfo->GetRotation());
             isRotate = lastRotation != -1 && lastRotation != dmRotation;
@@ -585,10 +586,11 @@ private:
         } else {
             lastRotation = -1;
         }
-        auto alreadyTriggerCallback = textFieldManager->GetFocusFieldAlreadyTriggerWsCallback();
-        textFieldManager->SetFocusFieldAlreadyTriggerWsCallback(false);
-        if (alreadyTriggerCallback && lastRotation == textFieldManager->GetFocusFieldOrientation()) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "input already trigger OnWindowSizeChange, go avoid");
+        auto triggerAvoidTaskOrientation = textFieldManager->GetContextTriggerAvoidTaskOrientation();
+        textFieldManager->SetContextTriggerAvoidTaskOrientation(-1);
+        if ((isRotate && lastRotation == triggerAvoidTaskOrientation) ||
+            (textFieldManager->GetLaterAvoid() && NearEqual(0.0f, keyboardRect.Height()))) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "no need to later avoid, trigger avoid now");
             textFieldManager->SetLaterAvoid(false);
             return false;
         }
@@ -598,10 +600,9 @@ private:
             return true;
         }
         // do not avoid immediately when device is in rotation, trigger it after context trigger root rect update
-        if ((textFieldManager->GetLaterAvoid() || isRotate) && !NearZero(lastKeyboardHeight)) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "rotation change to %{public}d,"
-                "later avoid %{public}s %{public}f %{public}f",
-                lastRotation, keyboardRect.ToString().c_str(), positionY, height);
+        if (textFieldManager->GetLaterAvoid() || isRotate) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "rotation change to %{public}d, later avoid %{public}s %{public}f"
+                "%{public}f", lastRotation, keyboardRect.ToString().c_str(), positionY, height);
             NG::LaterAvoidInfo laterAvoidInfo = {true, keyboardRect, positionY, height, lastRotation };
             textFieldManager->SetLaterAvoidArgs(laterAvoidInfo);
             return true;
@@ -645,7 +646,7 @@ public:
     {
         ACE_SCOPED_TRACE("OnAvoidAreaChanged: incoming avoidArea: %s, instanceId %d, type %d",
             avoidArea.ToString().c_str(), instanceId_, type);
-        TAG_LOGD(ACE_LAYOUT, "Avoid area changed, type:%{public}d, value:%{public}s; instanceId %{public}d", type,
+        TAG_LOGI(ACE_LAYOUT, "Avoid area changed, type:%{public}d, value:%{public}s; instanceId %{public}d", type,
             avoidArea.ToString().c_str(), instanceId_);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
@@ -1286,7 +1287,6 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
             AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
             CapabilityRegistry::Register();
             ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
-            ImageFileCache::GetInstance().SetCacheFileInfo();
         });
     }
 
@@ -1762,6 +1762,10 @@ void UIContentImpl::StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::C
     if (!fontWeightScale.empty()) {
         SystemProperties::SetFontWeightScale(string2float(fontWeightScale));
     }
+    auto deviceType = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::DEVICE_TYPE);
+    if (!deviceType.empty()) {
+        SystemProperties::SetConfigDeviceType(deviceType);
+    }
 }
 
 std::shared_ptr<Rosen::RSSurfaceNode> UIContentImpl::GetFormRootNode()
@@ -1803,7 +1807,6 @@ void UIContentImpl::SetAceApplicationInfo(std::shared_ptr<OHOS::AbilityRuntime::
     AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
     CapabilityRegistry::Register();
     ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
-    ImageFileCache::GetInstance().SetCacheFileInfo();
     XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
 
     auto task = [] {
@@ -2345,16 +2348,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         }
     }
 
-    std::string safeAreaTaskKey = "SafeArea";
-    TaskDependencyManager::GetInstance()->PostTaskToBg([container, this] {
-            OHOS::Ace::SetSkipBacktrace(true);
-            this->InitializeSafeArea(container);
-            OHOS::Ace::SetSkipBacktrace(false);
-        },
-        safeAreaTaskKey);
+    InitializeSafeArea(container);
 
     InitializeDisplayAvailableRect(container);
-    InitDragSummaryMap(container);
+    NG::OverlayMaskManager::GetInstance().RegisterOverlayHostMaskEventCallback();
 
     // set container temp dir
     if (abilityContext) {
@@ -2375,26 +2372,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
                                                      .append(",abilityName:")
                                                      .append(abilityName));
     UpdateFontScale(context->GetConfiguration());
-    std::string unimportantTaskKey = "UnimportantTask";
-    TaskDependencyManager::GetInstance()->PostTaskToBg([pipelineWeak = WeakPtr(pipeline)] {
-            auto thpExtraManager = AceType::MakeRefPtr<NG::THPExtraManagerImpl>();
-            if (thpExtraManager->Init()) {
-                auto pipeline = pipelineWeak.Upgrade();
-                CHECK_NULL_VOID(pipeline);
-                auto taskExecutor = pipeline->GetTaskExecutor();
-                CHECK_NULL_VOID(taskExecutor);
-                taskExecutor->PostTask(
-                    [pipelineWeak = WeakPtr(pipeline), thpExtraManager] () {
-                        auto pipeline = pipelineWeak.Upgrade();
-                        CHECK_NULL_VOID(pipeline);
-                        pipeline->SetTHPExtraManager(thpExtraManager);
-                    },
-                    TaskExecutor::TaskType::UI,
-                    "thpExtraManagerInitFinish");
-            }
-        },
-        unimportantTaskKey);
-    TaskDependencyManager::GetInstance()->Wait(safeAreaTaskKey);
+    auto thpExtraManager = AceType::MakeRefPtr<NG::THPExtraManagerImpl>();
+    if (thpExtraManager->Init()) {
+        pipeline->SetTHPExtraManager(thpExtraManager);
+    }
     return errorCode;
 }
 
@@ -2422,9 +2403,9 @@ void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& con
             auto systemInsets = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM);
             auto cutoutInsets = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT);
             auto navInsets = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
-            pipeline->UpdateSystemSafeArea(systemInsets);
-            pipeline->UpdateCutoutSafeArea(cutoutInsets);
-            pipeline->UpdateNavSafeArea(navInsets);
+            pipeline->UpdateSystemSafeAreaWithoutAnimation(systemInsets);
+            pipeline->UpdateCutoutSafeAreaWithoutAnimation(cutoutInsets);
+            pipeline->UpdateNavSafeAreaWithoutAnimation(navInsets);
             TAG_LOGI(ACE_LAYOUT,
                 "InitializeSafeArea systemInsets:%{public}s, cutoutInsets:%{public}s, navInsets:%{public}s",
                 systemInsets.ToString().c_str(), cutoutInsets.ToString().c_str(), navInsets.ToString().c_str());
@@ -2465,14 +2446,6 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
 
     if (!defaultDisplay) {
         TAG_LOGE(AceLogTag::ACE_WINDOW, "DisplayManager failed to get display by id: %{public}u", (uint32_t)displayId);
-    }
-}
-
-void UIContentImpl::InitDragSummaryMap(const RefPtr<Platform::AceContainer>& container)
-{
-    auto pipeline = container->GetPipelineContext();
-    if (pipeline && container->IsUIExtensionWindow()) {
-        pipeline->RequireSummary();
     }
 }
 
@@ -2957,7 +2930,7 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
     CHECK_NULL_VOID(config);
 
     RefPtr<ResourceAdapter> adapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(resourceManager, instanceId_);
-    ResourceManager::GetInstance().UpdateResourceAdapter(bundleName_, moduleName_, instanceId_, adapter);
+    ResourceManager::GetInstance().UpdateMainResourceAdapter(bundleName_, moduleName_, instanceId_, adapter);
 
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -3073,11 +3046,26 @@ void UIContentImpl::CacheAnimateInfo(const ViewportConfig& config,
 
 void UIContentImpl::ExecKeyFrameCachedAnimateAction()
 {
+    TAG_LOGD(AceLogTag::ACE_WINDOW, "exec keyframe cache in");
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
     if (cachedAnimateFlag_.load()) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "ExecKeyFrameCachedAnimateAction.");
-        UpdateViewportConfig(cachedConfig_, cachedReason_, cachedRsTransaction_, cachedAvoidAreas_);
-        cachedAnimateFlag_.store(false);
+        const uint32_t delay = 50;
+        auto task = [cachedConfig = cachedConfig_, cachedReason = cachedReason_,
+            cachedRsTransaction = cachedRsTransaction_, cachedAvoidAreas = cachedAvoidAreas_,
+            UICONTENT_IMPL_HELPER(content)] () {
+            UICONTENT_IMPL_HELPER_GUARD(content, return);
+            TAG_LOGD(AceLogTag::ACE_WINDOW, "exec keyframe cache");
+            UICONTENT_IMPL_PTR(content)->UpdateViewportConfig(cachedConfig, cachedReason,
+                cachedRsTransaction, cachedAvoidAreas);
+        };
+        taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, delay,
+            "ArkUIExecKeyFrameCachedAnimateTask", PriorityType::HIGH);
     }
+    cachedAnimateFlag_.store(false);
 }
 
 void UIContentImpl::KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context)
@@ -3147,6 +3135,7 @@ bool UIContentImpl::KeyFrameActionPolicy(const ViewportConfig& config,
             return true;
         case OHOS::Rosen::WindowSizeChangeReason::DRAG_END:
             rosenRenderContext->SetIsDraggingFlag(false);
+            [[fallthrough]];
         case OHOS::Rosen::WindowSizeChangeReason::DRAG:
             animateRes = rosenRenderContext->SetCanvasNodeOpacityAnimation(
                 config.GetKeyFrameConfig().animationDuration_,
@@ -3190,7 +3179,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(),
             static_cast<uint32_t>(reason), rsTransaction == nullptr, stringifiedMap.c_str());
     }
-    TAG_LOGD(ACE_LAYOUT,
+    TAG_LOGI(ACE_LAYOUT,
         "[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %{public}d, is "
         "rsTransaction nullptr %{public}d, %{public}s",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(), static_cast<uint32_t>(reason),
@@ -3384,6 +3373,9 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         }
         viewportConfigMgr_->UpdateConfigSync(aceViewportConfig, std::move(task));
         if (rsTransaction != nullptr) {
+            viewportConfigMgr_->CancelAllPromiseTaskLocked();
+        } else if (reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC) {
+            viewportConfigMgr_->CancelUselessTaskLocked();
             viewportConfigMgr_->CancelAllPromiseTaskLocked();
         }
     } else if (rsTransaction != nullptr || !avoidAreas.empty()) {
@@ -3691,6 +3683,7 @@ void UIContentImpl::UpdateDialogResourceConfiguration(RefPtr<Container>& contain
         auto resourceManager = context->GetResourceManager();
         if (resourceManager != nullptr) {
             resourceManager->GetResConfig(*resConfig);
+            CHECK_NULL_VOID(resConfig);
             if (resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK) {
                 dialogContainer->SetColorMode(ColorMode::DARK);
             } else {
@@ -4711,12 +4704,13 @@ void UIContentImpl::SetContainerButtonStyle(const Rosen::DecorButtonStyle& butto
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    Ace::DecorButtonStyle decorButtonStyle;
+    ConvertDecorButtonStyle(buttonStyle, decorButtonStyle);
     taskExecutor->PostTask(
-        [container, buttonStyle]() {
+        [container, decorButtonStyle]() {
             auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_VOID(pipelineContext);
-            NG::ContainerModalViewEnhance::SetContainerButtonStyle(pipelineContext, buttonStyle.buttonBackgroundSize,
-                buttonStyle.spacingBetweenButtons, buttonStyle.closeButtonRightMargin, buttonStyle.colorMode);
+            NG::ContainerModalViewEnhance::SetContainerButtonStyle(pipelineContext, decorButtonStyle);
         },
         TaskExecutor::TaskType::UI, "SetContainerButtonStyle");
 }
@@ -5266,5 +5260,16 @@ void UIContentImpl::ChangeDisplayAvailableAreaListener(uint64_t displayId)
         listenedDisplayId_ = displayId;
         manager.RegisterAvailableAreaListener(availableAreaChangedListener_, listenedDisplayId_);
     }
+}
+
+void UIContentImpl::ConvertDecorButtonStyle(const Rosen::DecorButtonStyle& buttonStyle,
+    Ace::DecorButtonStyle& decorButtonStyle)
+{
+    decorButtonStyle.buttonBackgroundCornerRadius = buttonStyle.buttonBackgroundCornerRadius;
+    decorButtonStyle.buttonBackgroundSize = buttonStyle.buttonBackgroundSize;
+    decorButtonStyle.buttonIconSize = buttonStyle.buttonIconSize;
+    decorButtonStyle.closeButtonRightMargin = buttonStyle.closeButtonRightMargin;
+    decorButtonStyle.colorMode = buttonStyle.colorMode;
+    decorButtonStyle.spacingBetweenButtons = buttonStyle.spacingBetweenButtons;
 }
 } // namespace OHOS::Ace

@@ -565,7 +565,7 @@ HWTEST_F(TextInputUpdateTestNg, OnDragStart, TestSize.Level1)
      * @tc.steps: step3. mock drag start.
      */
     auto gestureHub = pattern_->
-        GetHost()->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+        GetHost()->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub();
     gestureHub->SetIsTextDraggable(true);
     pattern_->OnDragStart().operator()(dragEvent, "");
     EXPECT_FALSE(pattern_->showSelect_);

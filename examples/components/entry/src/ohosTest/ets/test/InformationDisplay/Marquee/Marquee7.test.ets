@@ -42,7 +42,6 @@ export default function Marquee7() {
     })
 
 
-
     // hoverEffect
     it('ArkUI_Marquee_Comp_0558', 0, async (done: Function) => {
 

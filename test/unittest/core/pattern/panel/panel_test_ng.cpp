@@ -236,7 +236,7 @@ HWTEST_F(PanelTestNg, PanelTestNg001, TestSize.Level1)
     EXPECT_FALSE(slidingPanelLayoutProperty == nullptr);
     auto layoutAlgorithm = slidingPanelPattern->CreateLayoutAlgorithm();
     EXPECT_FALSE(layoutAlgorithm == nullptr);
-    auto eventHub = slidingPanelPattern->GetEventHub<SlidingPanelEventHub>();
+    auto eventHub = slidingPanelPattern->GetOrCreateEventHub<SlidingPanelEventHub>();
     EXPECT_FALSE(eventHub == nullptr);
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -283,9 +283,9 @@ HWTEST_F(PanelTestNg, PanelTestNg002, TestSize.Level1)
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_FALSE(frameNode == nullptr);
-    auto heightEventHub = frameNode->GetEventHub<SlidingPanelEventHub>();
+    auto heightEventHub = frameNode->GetOrCreateEventHub<SlidingPanelEventHub>();
     CHECK_NULL_VOID(heightEventHub);
-    auto changeEvent = frameNode->GetEventHub<SlidingPanelEventHub>();
+    auto changeEvent = frameNode->GetOrCreateEventHub<SlidingPanelEventHub>();
     CHECK_NULL_VOID(changeEvent);
 
     /**
@@ -2522,7 +2522,7 @@ HWTEST_F(PanelTestNg, PanelTestNg0045, TestSize.Level1)
     ASSERT_NE(host, nullptr);
     auto layoutProperty = host->GetLayoutProperty<SlidingPanelLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    auto hub = frameNode->GetEventHub<EventHub>();
+    auto hub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -3027,7 +3027,7 @@ HWTEST_F(PanelTestNg, PanelTestNg0057, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     auto layoutAlgorithm = AceType::DynamicCast<SlidingPanelLayoutAlgorithm>(panelPattern->CreateLayoutAlgorithm());
     EXPECT_FALSE(layoutAlgorithm == nullptr);
-    auto hub = frameNode->GetEventHub<EventHub>();
+    auto hub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -3207,7 +3207,7 @@ HWTEST_F(PanelTestNg, PanelTestNg0062, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     auto layoutAlgorithm = AceType::DynamicCast<SlidingPanelLayoutAlgorithm>(panelPattern->CreateLayoutAlgorithm());
     EXPECT_FALSE(layoutAlgorithm == nullptr);
-    auto hub = frameNode->GetEventHub<EventHub>();
+    auto hub = frameNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);

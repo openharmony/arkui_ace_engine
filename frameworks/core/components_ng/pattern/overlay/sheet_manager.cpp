@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 
 #include "base/error/error_code.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
@@ -157,7 +158,7 @@ int32_t SheetManager::OpenBindSheetByUIContext(
 }
 
 int32_t SheetManager::UpdateBindSheetByUIContext(const RefPtr<NG::FrameNode>& sheetContentNode,
-    NG::SheetStyle& sheetStyle, bool isPartialUpdate, int32_t currentInstanceId)
+    const NG::SheetStyle& sheetStyle, bool isPartialUpdate, int32_t currentInstanceId)
 {
     CHECK_NULL_RETURN(sheetContentNode, ERROR_CODE_BIND_SHEET_CONTENT_ERROR);
     SheetContentKey sheetContentKey(currentInstanceId, sheetContentNode->GetId());
@@ -298,7 +299,7 @@ bool SheetManager::RemoveSheetByESC()
     }
     auto overlayManager = sheetPattern->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, false);
-    TAG_LOGI(AceLogTag::ACE_SHEET, "sheet will colse by esc, id is : %{public}d", sheetFocusId_.value());
+    TAG_LOGI(AceLogTag::ACE_SHEET, "sheet will close by esc, id is : %{public}d", sheetFocusId_.value());
     return overlayManager->RemoveModalInOverlay();
 }
 

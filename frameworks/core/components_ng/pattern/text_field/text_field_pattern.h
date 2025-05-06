@@ -919,9 +919,16 @@ public:
     std::string TextInputActionToString() const;
     std::string AutoCapTypeToString() const;
     std::string TextContentTypeToString() const;
-    std::string GetPlaceholderFont() const;
+    virtual std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
-    void InitTheme();
+    inline void InitTheme()
+    {
+        auto tmpHost = GetHost();
+        CHECK_NULL_VOID(tmpHost);
+        auto context = tmpHost->GetContext();
+        CHECK_NULL_VOID(context);
+        textFieldTheme_ = context->GetTheme<TextFieldTheme>(tmpHost->GetThemeScopeId());
+    }
     std::string GetTextColor() const;
     std::string GetCaretColor() const;
     std::string GetPlaceholderColor() const;
@@ -1289,7 +1296,19 @@ public:
     void ResetContextAttr();
     void RestoreDefaultMouseState();
 
-    void RegisterWindowSizeCallback();
+    inline void RegisterWindowSizeCallback()
+    {
+        if (isOritationListenerRegisted_) {
+            return;
+        }
+        isOritationListenerRegisted_ = true;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddWindowSizeChangeCallback(host->GetId());
+    }
+
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     bool IsTransparent()
@@ -1470,10 +1489,15 @@ public:
 
     void DeleteRange(int32_t start, int32_t end, bool isIME = true) override;
 
+    void DeleteTextRange(int32_t start, int32_t end, TextDeleteDirection direction);
+
     bool SetCaretOffset(int32_t caretPostion) override;
 
-    const RefPtr<MultipleClickRecognizer>& GetMultipleClickRecognizer() const
+    const RefPtr<MultipleClickRecognizer>& GetOrCreateMultipleClickRecognizer()
     {
+        if (!multipleClickRecognizer_) {
+            multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
+        }
         return multipleClickRecognizer_;
     }
 
@@ -1676,6 +1700,7 @@ private:
     void HandleLeftMouseMoveEvent(MouseInfo& info);
     void HandleLeftMouseReleaseEvent(MouseInfo& info);
     void StartVibratorByLongPress();
+    bool IsInResponseArea(const Offset& location);
     void HandleLongPress(GestureEvent& info);
     bool CanChangeSelectState();
     void UpdateCaretPositionWithClamp(const int32_t& pos);
@@ -2072,7 +2097,7 @@ private:
     bool isCaretTwinkling_ = false;
     bool isPasswordSymbol_ = true;
     bool isEnableHapticFeedback_ = true;
-    RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
+    RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = nullptr;
     WeakPtr<AIWriteAdapter> aiWriteAdapter_;
     std::optional<Dimension> adaptFontSize_;
     uint32_t longPressFingerNum_ = 0;

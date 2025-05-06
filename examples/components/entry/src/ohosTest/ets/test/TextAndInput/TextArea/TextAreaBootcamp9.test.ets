@@ -17,16 +17,17 @@ import { describe, beforeAll, it } from '@ohos/hypium';
 import { abilityDelegatorRegistry, Driver } from '@kit.TestKit';
 import { ON } from '@ohos.UiTest';
 import {
-    buttonClick,
-    getToggle,
-    JsonType,
-    KeyStruct,
-    radioClick,
-    Search, searchToggle,
-    Slide,
-    sliderDrag,
-    titleSearch,
-    ToggleClick
+  buttonClick,
+  getToggle,
+  JsonType,
+  KeyStruct,
+  radioClick,
+  Search,
+  searchToggle,
+  Slide,
+  sliderDrag,
+  titleSearch,
+  ToggleClick
 } from '../../../utils';
 import { textAreaBeforeAll } from './TextArea.test';
 

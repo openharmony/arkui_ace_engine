@@ -249,17 +249,16 @@ struct HandleInfoNG {
 };
 
 TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
-    const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme, bool isSymbol = false,
-    bool isRichEditor = false);
+    const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme, bool isSymbol = false);
 
 void CreateTextStyleUsingTheme(const RefPtr<TextLayoutProperty>& property, const RefPtr<TextTheme>& textTheme,
-    TextStyle& textStyle, bool isSymbol = false, bool isRichEditor = false);
+    TextStyle& textStyle, bool isSymbol = false);
 
 void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique_ptr<TextLineStyle>& textLineStyle,
-    TextStyle& textStyle, bool isSymbol = false, bool isRichEditor = false);
+    TextStyle& textStyle, bool isSymbol = false);
 
 void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle,
-    const RefPtr<TextTheme>& textTheme, bool isSymbol = false, bool isRichEditor = false);
+    const RefPtr<TextTheme>& textTheme, bool isSymbol = false);
 
 std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& value);
 std::string GetFontStyleInJson(const std::optional<Ace::FontStyle>& value);

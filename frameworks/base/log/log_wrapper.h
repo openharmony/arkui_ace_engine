@@ -312,8 +312,6 @@ private:
     static LogLevel level_;
 };
 
-void SetSkipBacktrace(bool inputFlag);
-
 bool LogBacktrace(size_t maxFrameNums = 256);
 } // namespace OHOS::Ace
 

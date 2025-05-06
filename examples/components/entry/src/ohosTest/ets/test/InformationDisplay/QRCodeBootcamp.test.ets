@@ -13,17 +13,24 @@
  * limitations under the License.
  */
 
-import { describe, beforeAll, it,  } from '@ohos/hypium'
-import { abilityDelegatorRegistry, Driver, ON ,Component} from '@kit.TestKit';
+import { describe, beforeAll, it, } from '@ohos/hypium'
+import { abilityDelegatorRegistry, Driver, ON, Component } from '@kit.TestKit';
 import { Point } from '@ohos.UiTest';
-import { buttonClick,
+import {
+  buttonClick,
   getToggle,
-  JsonType, KeyStruct,
+  JsonType,
+  KeyStruct,
   radioClick,
   Search,
   searchParentBlock,
   searchToggle,
-  Slide, sliderDrag, titleSearch, ToggleClick } from '../../utils';
+  Slide,
+  sliderDrag,
+  titleSearch,
+  ToggleClick
+} from '../../utils';
+
 const TAG = 'QRCodeBootcamp001'
 /*获取AbilityDelegator实例,管理Ability的生命周期和事件*/
 const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()

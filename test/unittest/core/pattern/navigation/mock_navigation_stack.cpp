@@ -341,7 +341,7 @@ int32_t MockNavigationStack::GetRecoveredDestinationMode(int32_t index)
         return 0;
     }
 
-    return mockPathArray_[index]->fromRecovery;
+    return mockPathArray_[index]->mode;
 }
 
 uint64_t MockNavigationStack::GetNavDestinationIdInt(int32_t index)

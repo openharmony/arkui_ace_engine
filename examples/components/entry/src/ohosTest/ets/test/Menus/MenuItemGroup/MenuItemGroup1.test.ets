@@ -14,7 +14,7 @@
  */
 
 import { describe, beforeAll, it } from '@ohos/hypium'
-import { Driver, ON,Component  } from '@kit.TestKit';
+import { Driver, ON, Component } from '@kit.TestKit';
 import {
   buttonClick,
   radioClick,
@@ -49,8 +49,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -58,8 +56,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -198,8 +194,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       done();
@@ -215,8 +209,6 @@ export default function MenuItemGroup1() {
       }
       await buttonClick({
         buttonClickObj: 1,
-
-
       })
 
       done();
@@ -232,7 +224,6 @@ export default function MenuItemGroup1() {
       }
       await buttonClick({
         buttonClickObj: 2,
-
       })
 
       done();
@@ -248,8 +239,6 @@ export default function MenuItemGroup1() {
       }
       await buttonClick({
         buttonClickObj: 3,
-
-
       })
 
       done();
@@ -265,8 +254,6 @@ export default function MenuItemGroup1() {
       }
       await buttonClick({
         buttonClickObj: 4,
-
-
       })
 
       done();
@@ -285,8 +272,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -328,7 +313,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -346,7 +330,6 @@ export default function MenuItemGroup1() {
       }
       await radioClick({
         radioClickObj: 1,
-
       })
 
       done();
@@ -364,7 +347,6 @@ export default function MenuItemGroup1() {
       }
       await radioClick({
         radioClickObj: 2,
-
       })
 
       done();
@@ -385,8 +367,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -418,8 +398,6 @@ export default function MenuItemGroup1() {
       }
       await radioClick({
         radioClickObj: 1,
-
-
       })
 
       done();
@@ -435,7 +413,6 @@ export default function MenuItemGroup1() {
       }
       await radioClick({
         radioClickObj: 2,
-
       })
 
       done();
@@ -454,7 +431,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -737,7 +713,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
       })
       done();
     })
@@ -793,7 +768,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
       })
       done();
     })
@@ -888,8 +862,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -897,8 +869,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -928,8 +898,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -937,8 +905,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -1058,8 +1024,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -1067,8 +1031,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -1090,8 +1052,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -1099,8 +1059,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -1122,7 +1080,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       await sliderDrag({
@@ -1130,8 +1087,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
       done();
 
@@ -1152,7 +1107,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -1177,8 +1131,6 @@ export default function MenuItemGroup1() {
       }
       await buttonClick({
         buttonClickObj: 1,
-
-
       })
 
       done();
@@ -1203,8 +1155,6 @@ export default function MenuItemGroup1() {
       }
       await buttonClick({
         buttonClickObj: 2,
-
-
       })
 
       done();
@@ -1229,7 +1179,6 @@ export default function MenuItemGroup1() {
       }
       await buttonClick({
         buttonClickObj: 3,
-
       })
 
       done();
@@ -1254,8 +1203,6 @@ export default function MenuItemGroup1() {
       }
       await buttonClick({
         buttonClickObj: 4,
-
-
       })
 
       done();
@@ -1284,7 +1231,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();
@@ -1306,8 +1252,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       done();
@@ -1335,8 +1279,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -1358,8 +1300,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -1367,8 +1307,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -1390,8 +1328,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -1399,8 +1335,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -1453,8 +1387,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -1462,8 +1394,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -1485,8 +1415,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -1494,8 +1422,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -1517,8 +1443,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -1526,8 +1450,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();
@@ -1549,8 +1471,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-
-
       })
 
       await sliderDrag({
@@ -1558,8 +1478,6 @@ export default function MenuItemGroup1() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
 
       done();

@@ -94,7 +94,7 @@ void TextTimerModelNG::SetOnTimer(std::function<void(int64_t, int64_t)> && onCha
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TextTimerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextTimerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnTimer(std::move(onChange));
 }
@@ -102,7 +102,7 @@ void TextTimerModelNG::SetOnTimer(std::function<void(int64_t, int64_t)> && onCha
 void TextTimerModelNG::SetOnTimer(FrameNode* frameNode, std::function<void(int64_t, int64_t)>&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TextTimerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextTimerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnTimer(std::move(onChange));
 }

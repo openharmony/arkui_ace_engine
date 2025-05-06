@@ -128,7 +128,6 @@ export struct FlexBootcamp {
   @State enableSpaceCrossLengthMetricsPx: boolean = false;
   @State spaceCrossLengthMetricsPx: number = 0;
   @State enableFlexComp: boolean = false;
-
   // size
   @State enableCompWidth: boolean = false;
   @State compWidth: Length = 300;
@@ -590,7 +589,6 @@ export struct FlexBootcamp {
   @State compAccessibilityDescription: string = `无障碍说明`;
   @State enableCompAccessibilityLevel: boolean = false;
   @State compAccessibilityLevel: string = 'auto';
-
   @State modifier: MyModifier = new MyModifier()
   @State enableCompAttributeModifier: boolean = false;
   @State compAttributeModifier: boolean = false;
@@ -644,11 +642,9 @@ export struct FlexBootcamp {
   // Special Effect Drawing Combination
   @State enableCompUseEffect: boolean = false
   @State compUseEffect: boolean = false
-
   //compEvent
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
-
   @State selection: string | null = null;
   scroller: Scroller = new Scroller()
 
@@ -668,7 +664,7 @@ export struct FlexBootcamp {
   compEventTriggeredLog(value: string) {
     let time = formatDate(new Date(Date.now()))
     this.listEventTriggeredTagsTemp.push(
-      new BlockTag(time,value)
+      new BlockTag(time, value)
     )
     setTimeout(() => {
       if (AppStorage.get('Block')) {
@@ -755,7 +751,10 @@ export struct FlexBootcamp {
           cross: useEnabled(this.enableSpaceCrossLengthMetricsPx, LengthMetrics.px(this.spaceCrossLengthMetricsPx))
         }
       }) {
-        Text('1').width('30%').height(50).backgroundColor(0xF5DEB3)
+        Text('1')
+          .width('30%')
+          .height(50)
+          .backgroundColor(0xF5DEB3)
           .flexBasis(useEnabled(this.enableFlexComp, 50))
           .flexGrow(useEnabled(this.enableFlexComp, 0))
           .flexShrink(useEnabled(this.enableFlexComp, 1))
@@ -1279,8 +1278,7 @@ export struct FlexBootcamp {
         margin: useEnabled(this.enableCompFocusBoxMargin, this.compFocusBoxMargin) ?
         LengthMetrics.vp(useEnabled(this.enableCompFocusBoxMargin, this.compFocusBoxMargin)) : null,
         strokeColor: useEnabled(this.enableCompFocusBoxStrokeColor, this.compFocusBoxStrokeColor) ?
-        ColorMetrics.
-        resourceColor(useEnabled(this.enableCompFocusBoxStrokeColor, this.compFocusBoxStrokeColor)) :
+        ColorMetrics.resourceColor(useEnabled(this.enableCompFocusBoxStrokeColor, this.compFocusBoxStrokeColor)) :
           null,
         strokeWidth: useEnabled(this.enableCompFocusBoxStrokeWidth, this.compFocusBoxStrokeWidth) ?
         LengthMetrics.vp(useEnabled(this.enableCompFocusBoxStrokeWidth,
@@ -1556,6 +1554,7 @@ export struct FlexBootcamp {
     .height('50%')
     .id('scroll')
   }
+
   @Builder
   Generic() {
     Scroll(this.scroller) {
@@ -2140,13 +2139,10 @@ export struct FlexBootcamp {
     .id('scroll')
   }
 
-
   @Builder
   compBackground() {
     Text('123')
   }
-
-
 }
 
 @Preview

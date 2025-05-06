@@ -67,7 +67,7 @@ struct _ArkUIDialog {
     std::optional<OHOS::Ace::BlurStyleOption> blurStyleOption;
     std::optional<OHOS::Ace::EffectOption> effectOption;
     OHOS::Ace::KeyboardAvoidMode keyboardAvoidMode;
-    ArkUI_Bool enableHoverMode;
+    std::optional<ArkUI_Bool> enableHoverMode;
     OHOS::Ace::HoverModeAreaType hoverModeAreaType;
     ArkUI_Int32 focusable;
 };

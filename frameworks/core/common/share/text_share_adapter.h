@@ -29,6 +29,8 @@ public:
 
     static void StartTextShareTask(const int32_t containerId, const NG::RectF& contentRect,
         const std::string& shareText);
+
+    static uint64_t GetMaxTextShareLength();
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_SHARE_TEXT_SHARE_ADAPTER_H

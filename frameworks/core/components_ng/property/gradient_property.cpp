@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,8 @@
  */
 
 #include "core/components_ng/property/gradient_property.h"
+#include "base/json/json_util.h"
+#include "base/log/log.h"
 
 namespace OHOS::Ace::NG {
 
@@ -26,6 +28,26 @@ void Gradient::ClearColors()
 {
     colors_.clear();
 }
+
+void Gradient::CreateGradientWithType(GradientType type)
+{
+    type_ = type;
+    switch (type_) {
+        case GradientType::LINEAR:
+            linearGradient_ = std::make_shared<LinearGradient>();
+            break;
+        case GradientType::RADIAL:
+            radialGradient_ = std::make_shared<RadialGradient>();
+            break;
+        case GradientType::SWEEP:
+            sweepGradient_ = std::make_shared<SweepGradient>();
+            break;
+        default:
+            LOGE("GradientType not supported");
+    }
+}
+
+namespace GradientJsonUtils {
 
 static void GetColorsAndRepeating(std::unique_ptr<JsonValue>& resultJson, const Gradient& gradient)
 {
@@ -44,19 +66,20 @@ static void GetColorsAndRepeating(std::unique_ptr<JsonValue>& resultJson, const 
     resultJson->Put("repeating", gradient.GetRepeat() ? "true" : "false");
 }
 
-std::unique_ptr<JsonValue> Gradient::LinearGradientToJson() const
+std::unique_ptr<JsonValue> LinearGradientToJson(const Gradient& data)
 {
     auto resultJson = JsonUtil::Create(true);
-    if (GradientType::LINEAR != GetType()) {
+    if (GradientType::LINEAR != data.GetType()) {
         return resultJson;
     }
-    CHECK_NULL_RETURN(linearGradient_, resultJson);
-    if (linearGradient_->angle.has_value()) {
-        resultJson->Put("angle", linearGradient_->angle->ToString().c_str());
+    auto linearGradient = data.GetLinearGradient();
+    CHECK_NULL_RETURN(linearGradient, resultJson);
+    if (linearGradient->angle.has_value()) {
+        resultJson->Put("angle", linearGradient->angle->ToString().c_str());
     }
 
-    auto linearX = linearGradient_->linearX;
-    auto linearY = linearGradient_->linearY;
+    auto linearX = linearGradient->linearX;
+    auto linearY = linearGradient->linearY;
     if (linearX == GradientDirection::LEFT) {
         if (linearY == GradientDirection::TOP) {
             resultJson->Put("direction", "GradientDirection.LeftTop");
@@ -82,20 +105,21 @@ std::unique_ptr<JsonValue> Gradient::LinearGradientToJson() const
             resultJson->Put("direction", "GradientDirection.None");
         }
     }
-    GetColorsAndRepeating(resultJson, *this);
+    GetColorsAndRepeating(resultJson, data);
     return resultJson;
 }
 
-std::unique_ptr<JsonValue> Gradient::SweepGradientToJson() const
+std::unique_ptr<JsonValue> SweepGradientToJson(const Gradient& data)
 {
     auto resultJson = JsonUtil::Create(true);
 
-    if (GradientType::SWEEP != GetType()) {
+    if (GradientType::SWEEP != data.GetType()) {
         return resultJson;
     }
-    CHECK_NULL_RETURN(sweepGradient_, resultJson);
-    auto radialCenterX = sweepGradient_->centerX;
-    auto radialCenterY = sweepGradient_->centerY;
+    auto sweepGradient = data.GetSweepGradient();
+    CHECK_NULL_RETURN(sweepGradient, resultJson);
+    auto radialCenterX = sweepGradient->centerX;
+    auto radialCenterY = sweepGradient->centerY;
     if (radialCenterX && radialCenterY) {
         auto jsPoint = JsonUtil::CreateArray(true);
         jsPoint->Put("0", radialCenterX->ToString().c_str());
@@ -103,8 +127,8 @@ std::unique_ptr<JsonValue> Gradient::SweepGradientToJson() const
         resultJson->Put("center", jsPoint);
     }
 
-    auto startAngle = sweepGradient_->startAngle;
-    auto endAngle = sweepGradient_->endAngle;
+    auto startAngle = sweepGradient->startAngle;
+    auto endAngle = sweepGradient->endAngle;
     if (startAngle) {
         resultJson->Put("start", startAngle->ToString().c_str());
     }
@@ -112,21 +136,22 @@ std::unique_ptr<JsonValue> Gradient::SweepGradientToJson() const
         resultJson->Put("end", endAngle->ToString().c_str());
     }
 
-    GetColorsAndRepeating(resultJson, *this);
+    GetColorsAndRepeating(resultJson, data);
 
     return resultJson;
 }
 
-std::unique_ptr<JsonValue> Gradient::RadialGradientToJson() const
+std::unique_ptr<JsonValue> RadialGradientToJson(const Gradient& data)
 {
     auto resultJson = JsonUtil::Create(true);
-    if (GradientType::RADIAL != GetType()) {
+    if (GradientType::RADIAL != data.GetType()) {
         return resultJson;
     }
-    CHECK_NULL_RETURN(radialGradient_, resultJson);
+    auto radialGradient = data.GetRadialGradient();
+    CHECK_NULL_RETURN(radialGradient, resultJson);
 
-    auto radialCenterX = radialGradient_->radialCenterX;
-    auto radialCenterY = radialGradient_->radialCenterY;
+    auto radialCenterX = radialGradient->radialCenterX;
+    auto radialCenterY = radialGradient->radialCenterY;
     if (radialCenterX && radialCenterY) {
         auto jsPoint = JsonUtil::CreateArray(true);
         jsPoint->Put("0", radialCenterX->ToString().c_str());
@@ -134,14 +159,15 @@ std::unique_ptr<JsonValue> Gradient::RadialGradientToJson() const
         resultJson->Put("center", jsPoint);
     }
 
-    auto radius = radialGradient_->radialVerticalSize;
+    auto radius = radialGradient->radialVerticalSize;
     if (radius) {
         resultJson->Put("radius", radius->ToString().c_str());
     }
 
-    GetColorsAndRepeating(resultJson, *this);
+    GetColorsAndRepeating(resultJson, data);
 
     return resultJson;
 }
+} // namespace GradientJsonUtils
 
 } // namespace OHOS::Ace::NG

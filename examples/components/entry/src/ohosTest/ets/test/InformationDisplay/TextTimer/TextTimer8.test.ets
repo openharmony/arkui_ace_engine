@@ -794,6 +794,6 @@ export default function TextTimer8() {
       })
       done();
     })
-    })
+  })
 
 }

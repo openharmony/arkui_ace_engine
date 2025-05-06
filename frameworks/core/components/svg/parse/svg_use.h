@@ -52,6 +52,7 @@ public:
 #endif
 
 private:
+    bool isCreateRenderRunning_ = false;
     RefPtr<SvgUseComponent> component_;
 };
 

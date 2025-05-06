@@ -84,7 +84,7 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem)
     touchPoint.force = static_cast<float>(pointerItem.GetPressure());
     touchPoint.tiltX = pointerItem.GetTiltX();
     touchPoint.tiltY = pointerItem.GetTiltY();
-    touchPoint.rollAngle = pointerItem.GetAngle();
+    touchPoint.rollAngle = pointerItem.GetTwist();
     touchPoint.sourceTool = GetSourceTool(pointerItem.GetToolType());
     touchPoint.originalId = pointerItem.GetOriginPointerId();
     touchPoint.width = pointerItem.GetWidth();
@@ -514,6 +514,93 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     for (const auto& curCode : pointerEvent->GetPressedKeys()) {
         event.pressedCodes.emplace_back(static_cast<KeyCode>(curCode));
     }
+}
+
+static TouchType ConvertRawAxisActionToTouch(int32_t rawAxisAction)
+{
+    switch (rawAxisAction) {
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN:
+            return TouchType::DOWN;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE:
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_UPDATE:
+            return TouchType::MOVE;
+        case MMI::PointerEvent::POINTER_ACTION_AXIS_END:
+        case MMI::PointerEvent::POINTER_ACTION_ROTATE_END:
+            return TouchType::UP;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
+            return TouchType::CANCEL;
+            break;
+        default:
+            return TouchType::UNKNOWN;
+    }
+}
+
+static void ConvertAxisEventToTouchPoint(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    MMI::PointerEvent::PointerItem& pointerItem, TouchPoint& touchPoint, PointerEvent& axisFakePntEvt)
+{
+    constexpr float FAKE_TOUCH_PRESSURE = 3.0f;
+    float cvtStep = SystemProperties::GetScrollCoefficients();
+    touchPoint.id = pointerItem.GetPointerId();
+    touchPoint.isPressed = !(pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_AXIS_END ||
+                             pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_ROTATE_END);
+    touchPoint.force = FAKE_TOUCH_PRESSURE;
+    touchPoint.tiltX = 0.0;
+    touchPoint.tiltY = 0.0;
+    touchPoint.rollAngle = 0.0;
+    touchPoint.sourceTool = SourceTool::FINGER;
+    touchPoint.originalId = pointerItem.GetOriginPointerId();
+    touchPoint.width = 0;
+    touchPoint.height = 0;
+    touchPoint.size = 0.0;
+    touchPoint.operatingHand = 0;
+
+    if (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN ||
+        pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN) {
+        axisFakePntEvt.time = TimeStamp(std::chrono::microseconds(pointerEvent->GetActionTime()));
+        touchPoint.x = pointerItem.GetWindowX();
+        touchPoint.y = pointerItem.GetWindowY();
+        touchPoint.screenX = pointerItem.GetDisplayX();
+        touchPoint.screenY = pointerItem.GetDisplayY();
+    } else {
+        const float xOffset =
+            cvtStep * pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL);
+        const float yOffset =
+            cvtStep * pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL);
+        touchPoint.x = axisFakePntEvt.x - xOffset;
+        touchPoint.y = axisFakePntEvt.y - yOffset;
+        touchPoint.screenX = axisFakePntEvt.screenX - xOffset;
+        touchPoint.screenY = axisFakePntEvt.screenY - yOffset;
+    }
+    axisFakePntEvt.x = touchPoint.x;
+    axisFakePntEvt.y = touchPoint.y;
+    axisFakePntEvt.screenX = touchPoint.screenX;
+    axisFakePntEvt.screenY = touchPoint.screenY;
+    touchPoint.downTime = axisFakePntEvt.time;
+}
+
+void ConvertAxisEventToTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, TouchEvent& touchEvt,
+    OHOS::Ace::PointerEvent& axisFakePntEvt)
+{
+    CHECK_NULL_VOID(pointerEvent);
+
+    int32_t pointerID = pointerEvent->GetPointerId();
+    MMI::PointerEvent::PointerItem pointerItem;
+    if (!pointerEvent->GetPointerItem(pointerID, pointerItem)) {
+        return;
+    }
+    TouchPoint touchPoint;
+    ConvertAxisEventToTouchPoint(pointerEvent, pointerItem, touchPoint, axisFakePntEvt);
+    touchEvt = ConvertTouchEventFromTouchPoint(touchPoint);
+    touchEvt.SetSourceType(SourceType::TOUCH)
+        .SetType(ConvertRawAxisActionToTouch(pointerEvent->GetPointerAction()))
+        .SetPullType(TouchType::UNKNOWN)
+        .SetTime(TimeStamp(std::chrono::microseconds(pointerEvent->GetActionTime())))
+        .SetDeviceId(pointerEvent->GetDeviceId())
+        .SetTargetDisplayId(pointerEvent->GetTargetDisplayId())
+        .SetTouchEventId(pointerEvent->GetId());
+
+    touchEvt.pointers.emplace_back(std::move(touchPoint));
 }
 
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event)

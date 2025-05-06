@@ -161,9 +161,7 @@ class CalendarPickerBorderRadiusModifier extends ModifierWithKey<Length | Border
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       if ((Object.keys(this.value).indexOf('topStart') >= 0) ||
           (Object.keys(this.value).indexOf('topEnd') >= 0) ||
           (Object.keys(this.value).indexOf('bottomStart') >= 0) ||
@@ -218,9 +216,7 @@ class CalendarPickerBorderColorModifier extends ModifierWithKey<ResourceColor | 
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       if ((Object.keys(this.value).indexOf('start') >= 0) ||
           (Object.keys(this.value).indexOf('end') >= 0)) {
         return !((this.stageValue as LocalizedEdgeColors).start === (this.value as LocalizedEdgeColors).start &&

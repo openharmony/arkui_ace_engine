@@ -185,14 +185,15 @@ RefPtr<FrameNode> NavigationManager::GetNavDestContentFrameNode(const RefPtr<Fra
 
 void NavigationManager::UpdatePreNavNodeRenderGroupProperty()
 {
-    CHECK_NULL_VOID(preNavNode_);
-    auto preNavDestContentNode = GetNavDestContentFrameNode(preNavNode_);
+    auto preNavNode = preNavNode_.Upgrade();
+    CHECK_NULL_VOID(preNavNode);
+    auto preNavDestContentNode = GetNavDestContentFrameNode(preNavNode);
     CHECK_NULL_VOID(preNavDestContentNode);
     auto state = CheckNodeNeedCache(preNavDestContentNode);
     UpdateAnimationCachedRenderGroup(preNavDestContentNode, state);
     preNodeAnimationCached_ = state;
     preNodeNeverSet_ = false;
-    auto preNavPattern = preNavNode_->GetPattern<NavDestinationPattern>();
+    auto preNavPattern = preNavNode->GetPattern<NavDestinationPattern>();
     auto name = preNavPattern == nullptr ? "NavBar" : preNavPattern->GetName();
     TAG_LOGD(AceLogTag::ACE_NAVIGATION, "Cache PreNavNode, name=%{public}s, will cache? %{public}s", name.c_str(),
         state ? "yes" : "no");
@@ -200,14 +201,15 @@ void NavigationManager::UpdatePreNavNodeRenderGroupProperty()
 
 void NavigationManager::UpdateCurNavNodeRenderGroupProperty()
 {
-    CHECK_NULL_VOID(curNavNode_);
-    auto curNavDestContentNode = GetNavDestContentFrameNode(curNavNode_);
+    auto curNavNode = curNavNode_.Upgrade();
+    CHECK_NULL_VOID(curNavNode);
+    auto curNavDestContentNode = GetNavDestContentFrameNode(curNavNode);
     CHECK_NULL_VOID(curNavDestContentNode);
     auto state = CheckNodeNeedCache(curNavDestContentNode);
     UpdateAnimationCachedRenderGroup(curNavDestContentNode, state);
     curNodeAnimationCached_ = state;
     currentNodeNeverSet_ = false;
-    auto curNavPattern = curNavNode_->GetPattern<NavDestinationPattern>();
+    auto curNavPattern = curNavNode->GetPattern<NavDestinationPattern>();
     auto name = curNavPattern == nullptr ? "NavBar" : curNavPattern->GetName();
     TAG_LOGD(AceLogTag::ACE_NAVIGATION, "Cache CurNavNode, name=%{public}s, will cache? %{public}s", name.c_str(),
         state ? "yes" : "no");
@@ -215,8 +217,9 @@ void NavigationManager::UpdateCurNavNodeRenderGroupProperty()
 
 void NavigationManager::ResetCurNavNodeRenderGroupProperty()
 {
-    CHECK_NULL_VOID(curNavNode_);
-    auto curNavDestContentNode = GetNavDestContentFrameNode(curNavNode_);
+    auto curNavNode = curNavNode_.Upgrade();
+    CHECK_NULL_VOID(curNavNode);
+    auto curNavDestContentNode = GetNavDestContentFrameNode(curNavNode);
     CHECK_NULL_VOID(curNavDestContentNode);
     UpdateAnimationCachedRenderGroup(curNavDestContentNode, false);
     curNodeAnimationCached_ = false;
@@ -518,44 +521,5 @@ void NavigationManager::OnOrientationChanged()
             task();
         }
     }
-}
-
-void NavigationManager::SetStatusBarConfig(const std::optional<std::pair<bool, bool>>& config)
-{
-    auto pipeline = pipeline_.Upgrade();
-    CHECK_NULL_VOID(pipeline);
-    auto container = Container::GetContainer(pipeline->GetInstanceId());
-    CHECK_NULL_VOID(container);
-    bool enable = false;
-    bool animated = false;
-    if (config.has_value()) {
-        // developer set statusBar config to NavDestination
-        enable = config.value().first;
-        animated = config.value().second;
-    } else {
-        // developer didn't use interface of NavDestination, fallback to setting in window.d.ts
-        enable = statusBarConfigByWindowApi_.first;
-        animated = statusBarConfigByWindowApi_.second;
-    }
-
-    container->SetSystemBarEnabled(SystemBarType::STATUS, enable, animated);
-}
-
-void NavigationManager::SetNavigationIndicatorConfig(std::optional<bool> config)
-{
-    auto pipeline = pipeline_.Upgrade();
-    CHECK_NULL_VOID(pipeline);
-    auto container = Container::GetContainer(pipeline->GetInstanceId());
-    CHECK_NULL_VOID(container);
-    bool enable = false;
-    if (config.has_value()) {
-        // developer set navigationIndicator config to NavDestination
-        enable = config.value();
-    } else {
-        // developer didn't use interface of NavDestination, fallback to setting in window.d.ts
-        enable = navigationIndicatorConfigByWindowApi_;
-    }
-
-    container->SetSystemBarEnabled(SystemBarType::NAVIGATION_INDICATOR, enable, false);
 }
 } // namespace OHOS::Ace::NG

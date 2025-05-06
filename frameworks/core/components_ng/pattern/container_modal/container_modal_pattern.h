@@ -279,7 +279,6 @@ protected:
 
     bool CanShowFloatingTitle();
     bool CanShowCustomTitle();
-    void TrimFloatingWindowLayout();
     Color GetContainerColor(bool isFocus);
 
     WindowMode windowMode_;
@@ -316,6 +315,7 @@ protected:
     virtual void InitButtonsLayoutProperty();
     virtual void NotifyButtonsRectChange(const RectF& containerModal, const RectF& buttonsRect) {}
 
+    void UpdateContainerBgColor();
     std::string appLabel_;
     RefPtr<PanEvent> panEvent_ = nullptr;
 

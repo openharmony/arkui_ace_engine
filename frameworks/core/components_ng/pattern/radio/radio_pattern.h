@@ -20,6 +20,7 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/overlay/group_manager.h"
 #include "core/components_ng/pattern/radio/radio_accessibility_property.h"
 #include "core/components_ng/pattern/radio/radio_event_hub.h"
 #include "core/components_ng/pattern/radio/radio_layout_algorithm.h"
@@ -146,7 +147,7 @@ public:
         }
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto radioEventHub = host->GetEventHub<NG::RadioEventHub>();
+        auto radioEventHub = host->GetOrCreateEventHub<NG::RadioEventHub>();
         auto value = radioEventHub ? radioEventHub->GetValue() : "";
         auto group = radioEventHub ? radioEventHub->GetGroup() : "";
         json->PutExtAttr("value", value.c_str(), filter);

@@ -38,64 +38,26 @@ namespace OHOS::Ace::NG {
         }                                                                         \
     } while (false)
 
-#define UPDATE_TEXT_STYLE_DIMENSION_TYPE(group, name, styleName)                                                       \
-    do {                                                                                                               \
-        if ((group)->prop##name.has_value()) {                                                                         \
-            auto value = (group)->prop##name.value();                                                                  \
-            if (value.Unit() != DimensionUnit::PERCENT) {                                                              \
-                textStyle.Set##styleName(                                                                              \
-                    Dimension(value.ConvertToPxDistribute(                                                             \
-                                  textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale()), \
-                        DimensionUnit::PX));                                                                           \
-            } else {                                                                                                   \
-                textStyle.Set##styleName(value);                                                                       \
-            }                                                                                                          \
-        }                                                                                                              \
-    } while (false)
-
-#define UPDATE_TEXT_STYLE_DIMENSION_TYPE_WITH_THEME(group, name, styleName)                                        \
-    do {                                                                                                           \
-        Dimension value;                                                                                           \
-        if (group) {                                                                                               \
-            value = (group)->prop##name.value_or(textTheme->GetTextStyle().Get##styleName());                      \
-        } else {                                                                                                   \
-            value = textTheme->GetTextStyle().Get##styleName();                                                    \
-        }                                                                                                          \
-        if (value.Unit() != DimensionUnit::PERCENT) {                                                              \
-            textStyle.Set##styleName(                                                                              \
-                Dimension(value.ConvertToPxDistribute(                                                             \
-                              textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale()), \
-                    DimensionUnit::PX));                                                                           \
-        } else {                                                                                                   \
-            textStyle.Set##styleName(value);                                                                       \
-        }                                                                                                          \
-    } while (false)
-
 TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
-    const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme, bool isSymbol,
-    bool isRichEditor)
+    const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme, bool isSymbol)
 {
     TextStyle textStyle = textTheme ? textTheme->GetTextStyle() : TextStyle();
-#if defined(IOS_PLATFORM) || defined(ANDROID_PLATFORM)
+#ifndef OHOS_STANDARD_SYSTEM
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(defaultFontFamily);
 #endif
-    UseSelfStyle(fontStyle, textLineStyle, textStyle, isSymbol, isRichEditor);
+    UseSelfStyle(fontStyle, textLineStyle, textStyle, isSymbol);
     return textStyle;
 }
 
 void CreateTextStyleUsingTheme(const RefPtr<TextLayoutProperty>& property, const RefPtr<TextTheme>& textTheme,
-    TextStyle& textStyle, bool isSymbol, bool isRichEditor)
+    TextStyle& textStyle, bool isSymbol)
 {
-#if defined(IOS_PLATFORM) || defined(ANDROID_PLATFORM)
-    const std::vector<std::string> defaultFontFamily = {"sans-serif"};
-    textStyle.SetFontFamilies(defaultFontFamily);
-#endif
-    UseSelfStyleWithTheme(property, textStyle, textTheme, isSymbol, isRichEditor);
+    UseSelfStyleWithTheme(property, textStyle, textTheme, isSymbol);
 }
 
 void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle,
-    const RefPtr<TextTheme>& textTheme, bool isSymbol, bool isRichEditor)
+    const RefPtr<TextTheme>& textTheme, bool isSymbol)
 {
     CHECK_NULL_VOID(textTheme);
     auto& fontStyle = property->GetFontStyle();
@@ -106,19 +68,11 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, MinFontScale, MinFontScale);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, MaxFontScale, MaxFontScale);
 
-    if (!isRichEditor) {
-        UPDATE_TEXT_STYLE_DIMENSION_TYPE_WITH_THEME(fontStyle, FontSize, FontSize);
-        UPDATE_TEXT_STYLE_DIMENSION_TYPE_WITH_THEME(fontStyle, AdaptMinFontSize, AdaptMinFontSize);
-        UPDATE_TEXT_STYLE_DIMENSION_TYPE_WITH_THEME(fontStyle, AdaptMaxFontSize, AdaptMaxFontSize);
-        UPDATE_TEXT_STYLE_DIMENSION_TYPE_WITH_THEME(fontStyle, LetterSpacing, LetterSpacing);
-    } else {
-        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, FontSize, FontSize);
-        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, AdaptMinFontSize, AdaptMinFontSize);
-        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, AdaptMaxFontSize, AdaptMaxFontSize);
-        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, LetterSpacing, LetterSpacing);
-    }
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, FontSize, FontSize);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, AdaptMinFontSize, AdaptMinFontSize);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, AdaptMaxFontSize, AdaptMaxFontSize);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, LetterSpacing, LetterSpacing);
 
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, TextColor, TextColor);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, TextShadow, TextShadows);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, ItalicFontStyle, FontStyle);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, FontWeight, FontWeight);
@@ -138,17 +92,10 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
         UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolType, SymbolType);
     }
 
-    if (!isRichEditor) {
-        UPDATE_TEXT_STYLE_DIMENSION_TYPE_WITH_THEME(textLineStyle, LineHeight, LineHeight);
-        UPDATE_TEXT_STYLE_DIMENSION_TYPE_WITH_THEME(textLineStyle, BaselineOffset, BaselineOffset);
-        UPDATE_TEXT_STYLE_DIMENSION_TYPE_WITH_THEME(textLineStyle, TextIndent, TextIndent);
-        UPDATE_TEXT_STYLE_DIMENSION_TYPE_WITH_THEME(textLineStyle, LineSpacing, LineSpacing);
-    } else {
-        UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineHeight, LineHeight);
-        UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, BaselineOffset, BaselineOffset);
-        UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextIndent, TextIndent);
-        UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineSpacing, LineSpacing);
-    }
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineHeight, LineHeight);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, BaselineOffset, BaselineOffset);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextIndent, TextIndent);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineSpacing, LineSpacing);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextBaseline, TextBaseline);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextOverflow, TextOverflow);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextAlign, TextAlign);
@@ -160,7 +107,7 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
 }
 
 void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique_ptr<TextLineStyle>& textLineStyle,
-    TextStyle& textStyle, bool isSymbol, bool isRichEditor)
+    TextStyle& textStyle, bool isSymbol)
 {
     if (textLineStyle) {
         UPDATE_TEXT_STYLE(textLineStyle, AllowScale, SetAllowScale);
@@ -170,17 +117,12 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
         // depend on its value.
         UPDATE_TEXT_STYLE(fontStyle, MinFontScale, SetMinFontScale);
         UPDATE_TEXT_STYLE(fontStyle, MaxFontScale, SetMaxFontScale);
-        if (!isRichEditor) {
-            UPDATE_TEXT_STYLE_DIMENSION_TYPE(fontStyle, FontSize, FontSize);
-            UPDATE_TEXT_STYLE_DIMENSION_TYPE(fontStyle, AdaptMinFontSize, AdaptMinFontSize);
-            UPDATE_TEXT_STYLE_DIMENSION_TYPE(fontStyle, AdaptMaxFontSize, AdaptMaxFontSize);
-            UPDATE_TEXT_STYLE_DIMENSION_TYPE(fontStyle, LetterSpacing, LetterSpacing);
-        } else {
-            UPDATE_TEXT_STYLE(fontStyle, FontSize, SetFontSize);
-            UPDATE_TEXT_STYLE(fontStyle, AdaptMinFontSize, SetAdaptMinFontSize);
-            UPDATE_TEXT_STYLE(fontStyle, AdaptMaxFontSize, SetAdaptMaxFontSize);
-            UPDATE_TEXT_STYLE(fontStyle, LetterSpacing, SetLetterSpacing);
-        }
+
+        UPDATE_TEXT_STYLE(fontStyle, FontSize, SetFontSize);
+        UPDATE_TEXT_STYLE(fontStyle, AdaptMinFontSize, SetAdaptMinFontSize);
+        UPDATE_TEXT_STYLE(fontStyle, AdaptMaxFontSize, SetAdaptMaxFontSize);
+        UPDATE_TEXT_STYLE(fontStyle, LetterSpacing, SetLetterSpacing);
+
         UPDATE_TEXT_STYLE(fontStyle, TextColor, SetTextColor);
         UPDATE_TEXT_STYLE(fontStyle, TextShadow, SetTextShadows);
         UPDATE_TEXT_STYLE(fontStyle, ItalicFontStyle, SetFontStyle);
@@ -204,17 +146,11 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
         }
     }
     if (textLineStyle) {
-        if (!isRichEditor) {
-            UPDATE_TEXT_STYLE_DIMENSION_TYPE(textLineStyle, LineHeight, LineHeight);
-            UPDATE_TEXT_STYLE_DIMENSION_TYPE(textLineStyle, BaselineOffset, BaselineOffset);
-            UPDATE_TEXT_STYLE_DIMENSION_TYPE(textLineStyle, TextIndent, TextIndent);
-            UPDATE_TEXT_STYLE_DIMENSION_TYPE(textLineStyle, LineSpacing, LineSpacing);
-        } else {
-            UPDATE_TEXT_STYLE(textLineStyle, LineHeight, SetLineHeight);
-            UPDATE_TEXT_STYLE(textLineStyle, BaselineOffset, SetBaselineOffset);
-            UPDATE_TEXT_STYLE(textLineStyle, TextIndent, SetTextIndent);
-            UPDATE_TEXT_STYLE(textLineStyle, LineSpacing, SetLineSpacing);
-        }
+        UPDATE_TEXT_STYLE(textLineStyle, LineHeight, SetLineHeight);
+        UPDATE_TEXT_STYLE(textLineStyle, BaselineOffset, SetBaselineOffset);
+        UPDATE_TEXT_STYLE(textLineStyle, TextIndent, SetTextIndent);
+        UPDATE_TEXT_STYLE(textLineStyle, LineSpacing, SetLineSpacing);
+        
         UPDATE_TEXT_STYLE(textLineStyle, HalfLeading, SetHalfLeading);
         UPDATE_TEXT_STYLE(textLineStyle, TextBaseline, SetTextBaseline);
         UPDATE_TEXT_STYLE(textLineStyle, TextOverflow, SetTextOverflow);

@@ -1992,4 +1992,71 @@ HWTEST_F(TextTimerBuilderTestNg, TextTimerTest042, TestSize.Level1)
     pattern->SetBuilderFunc(thirdNode);
     pattern->BuildContentModifierNode();
 }
+
+/**
+ * @tc.name: TextTimerTest043
+ * @tc.desc: Test the SetBuilderFunc and get value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerBuilderTestNg, TextTimerTest043, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create texttimer frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.inputCount = std::make_optional(20000.0);
+    testProperty.isCountDown = std::make_optional(true);
+    auto frameNode = CreateTextTimerParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->InitTimerDisplay();
+
+    /**
+     * @tc.steps: step2. make builderFunc callback
+     */
+    auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(true, config.isCountDown_);
+                EXPECT_EQ(20000.0, config.count_);
+                EXPECT_EQ(false, config.started_);
+                return nullptr;
+            };
+
+    /**
+     * @tc.steps: step3. set parameters to pattern builderFunc and call BuildContentModifierNode
+     */
+    pattern->SetBuilderFunc(node);
+    pattern->BuildContentModifierNode();
+
+    /**
+     * @tc.steps: step4. make nextNode callback
+     */
+    auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(true, config.isCountDown_);
+                EXPECT_EQ(20000.0, config.count_);
+                EXPECT_TRUE(config.started_);
+                return nullptr;
+            };
+
+    /**
+     * @tc.steps: step5. start timer and check value.
+     */
+    pattern->HandleStart();
+    pattern->SetBuilderFunc(nextNode);
+    pattern->BuildContentModifierNode();
+    /**
+     * @tc.steps: step5. make thirdNode callback
+     */
+    auto thirdNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(1500.0, config.elapsedTime_);
+                return nullptr;
+            };
+
+    /**
+     * @tc.steps: step6. Tick timer and check value.
+     */
+    pattern->Tick(1500.0);
+    pattern->SetBuilderFunc(thirdNode);
+    pattern->BuildContentModifierNode();
+}
 } // namespace OHOS::Ace::NG

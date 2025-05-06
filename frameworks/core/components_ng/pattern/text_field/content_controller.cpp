@@ -365,7 +365,7 @@ bool ContentController::FilterWithEvent(const std::u16string& filter, std::u16st
         CHECK_NULL_RETURN(textField, false);
         auto host = textField->GetHost();
         CHECK_NULL_RETURN(host, false);
-        auto eventHub = host->GetEventHub<TextFieldEventHub>();
+        auto eventHub = host->GetOrCreateEventHub<TextFieldEventHub>();
         CHECK_NULL_RETURN(eventHub, false);
         eventHub->FireOnInputFilterError(errorValue);
         auto textFieldAccessibilityProperty = host->GetAccessibilityProperty<TextFieldAccessibilityProperty>();

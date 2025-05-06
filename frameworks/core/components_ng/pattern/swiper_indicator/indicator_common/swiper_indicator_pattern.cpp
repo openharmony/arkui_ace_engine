@@ -48,11 +48,7 @@ void SwiperIndicatorPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indicatorTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_VOID(indicatorTheme);
-    host->GetRenderContext()->SetClipToBounds(indicatorTheme->GetClipEdge());
+    host->GetRenderContext()->SetClipToBounds(false);
 }
 
 void SwiperIndicatorPattern::OnModifyDone()
@@ -138,7 +134,7 @@ void SwiperIndicatorPattern::RegisterIndicatorChangeEvent()
     RefPtr<SwiperPattern> swiperPattern = GetSwiperPattern();
     CHECK_NULL_VOID(swiperPattern);
 
-    auto swiperEventHub = swiperPattern->GetEventHub<SwiperEventHub>();
+    auto swiperEventHub = swiperPattern->GetOrCreateEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
 
     swiperEventHub->SetIndicatorOnChange(
@@ -411,7 +407,7 @@ void SwiperIndicatorPattern::InitHoverMouseEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -579,8 +575,7 @@ std::pair<int32_t, int32_t> SwiperIndicatorPattern::CalMouseClickIndexStartAndEn
     if (IsHorizontalAndRightToLeft()) {
         end = currentIndex >= 0 ? loopCount * itemCount - 1 : -(loopCount + 1) * itemCount - 1;
         start = currentIndex >= 0 ? (loopCount + 1) * itemCount - 1 : -loopCount * itemCount - 1;
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
-            swiperPattern->IsSwipeByGroup()) {
+        if (!swiperPattern->IsAutoLinear() && swiperPattern->IsSwipeByGroup()) {
             start += (1 - swiperPattern->GetDisplayCount());
         }
     }
@@ -775,7 +770,7 @@ void SwiperIndicatorPattern::SetIndicatorInteractive(bool isInteractive)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     if (isInteractive) {
         eventHub->SetEnabled(true);
@@ -1002,8 +997,7 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
     swiperPattern->SetTurnPageRate(turnPageRate);
     swiperPattern->SetGroupTurnPageRate(turnPageRate);
     if (std::abs(turnPageRate) >= 1) {
-        int32_t step = (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
-                                swiperPattern->IsSwipeByGroup()
+        int32_t step = (!swiperPattern->IsAutoLinear() && swiperPattern->IsSwipeByGroup()
                             ? swiperPattern->GetDisplayCount()
                             : 1);
 
@@ -1381,8 +1375,7 @@ int32_t SwiperIndicatorPattern::GetCurrentIndex() const
     auto indicatorCount = swiperPattern->DisplayIndicatorTotalCount();
     auto displayCount = swiperPattern->GetDisplayCount();
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) &&
-        swiperPattern->IsSwipeByGroup() && displayCount != 0) {
+    if (!swiperPattern->IsAutoLinear() && swiperPattern->IsSwipeByGroup() && displayCount != 0) {
         currentIndex /= displayCount;
     }
 

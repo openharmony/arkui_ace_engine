@@ -119,7 +119,7 @@ void DragEventTestNgBase::InitTestFrameNodeStatus(
             dragDropInfo.extraInfo = dragStartInfo.extraInfo;
             return dragDropInfo;
         };
-        auto eventHub = frameNode->GetEventHub<EventHub>();
+        auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
         ASSERT_NE(eventHub, nullptr);
         eventHub->SetOnDragStart(std::move(onDragStart));
     }
@@ -172,7 +172,7 @@ void DragEventTestNgBase::MockTouchDown(const RefPtr<DragEventActuator>& actuato
     ASSERT_NE(gestureHub, nullptr);
     auto frameNode = gestureHub->GetFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
     ASSERT_NE(getEventTargetImpl, nullptr);
@@ -186,8 +186,17 @@ void DragEventTestNgBase::MockTouchDown(const RefPtr<DragEventActuator>& actuato
 void DragEventTestNgBase::MockDragPanSuccess(const RefPtr<DragEventActuator>& actuator, GestureEvent info)
 {
     ASSERT_NE(actuator, nullptr);
-    if (actuator->actionStart_) {
-        actuator->actionStart_(info);
+    if (actuator->GetIsNewFwk()) {
+        if (actuator->panRecognizer_ && actuator->panRecognizer_->onActionStart_) {
+            auto callback = *(actuator->panRecognizer_->onActionStart_);
+            if (callback) {
+                callback(info);
+            }
+        }
+    } else {
+        if (actuator->actionStart_) {
+            actuator->actionStart_(info);
+        }
     }
 }
 
@@ -426,7 +435,7 @@ HWTEST_F(DragEventTestNgBase, DragEventTestNGBase004, TestSize.Level1)
     auto onDragEnd = [&dragStartInfo](const RefPtr<OHOS::Ace::DragEvent>& info) {
         dragStartInfo.dragResult = info->GetResult();
     };
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetOnDragEnd(std::move(onDragEnd));
 

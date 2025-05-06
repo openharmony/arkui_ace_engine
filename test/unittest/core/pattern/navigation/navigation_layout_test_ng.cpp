@@ -1440,7 +1440,7 @@ HWTEST_F(NavigationLayoutTestNg, TransitionWithReplace001, TestSize.Level1)
 /**
  * @tc.name: DealNavigationExit001
  * @tc.desc: Test DealNavigationExit and make the logic as follows:
- *               GetEventHub return false
+ *               GetOrCreateEventHub return false
  *               isNavBar is false
  *               shallowBuilder is false
  *               GetContentNode is false
@@ -1459,7 +1459,7 @@ HWTEST_F(NavigationLayoutTestNg, DealNavigationExit001, TestSize.Level1)
     preNode->eventHub_ = nullptr;
     bool isNavBar = false;
 
-    EXPECT_EQ(preNode->GetEventHubOnly<EventHub>(), nullptr);
+    EXPECT_EQ(preNode->GetEventHub<EventHub>(), nullptr);
     EXPECT_FALSE(isNavBar);
     // Make sure navDestination is true
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
@@ -1473,7 +1473,7 @@ HWTEST_F(NavigationLayoutTestNg, DealNavigationExit001, TestSize.Level1)
 /**
  * @tc.name: DealNavigationExit002
  * @tc.desc: Test DealNavigationExit and make the logic as follows:
- *               GetEventHub return true
+ *               GetOrCreateEventHub return true
  *               isNavBar is true
  *               isAnimated is false
  *               shallowBuilder is true
@@ -1496,7 +1496,7 @@ HWTEST_F(NavigationLayoutTestNg, DealNavigationExit002, TestSize.Level1)
     preNode->contentNode_ = FrameNode::CreateFrameNode("button", 401, AceType::MakeRefPtr<ButtonPattern>());
     bool isNavBar = true, isAnimated = false;
 
-    EXPECT_NE(preNode->GetEventHub<EventHub>(), nullptr);
+    EXPECT_NE(preNode->GetOrCreateEventHub<EventHub>(), nullptr);
     EXPECT_TRUE(isNavBar && !isAnimated);
     // Make sure navDestination is true
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
@@ -1595,7 +1595,7 @@ HWTEST_F(NavigationLayoutTestNg, UpdateNavigationMode002, TestSize.Level1)
 /**
  * @tc.name: DealNavigationExit003
  * @tc.desc: Test DealNavigationExit and make the logic as follows:
- *               GetEventHub return true
+ *               GetOrCreateEventHub return true
  *               isNavBar is true
  *               isAnimated is true
  * @tc.type: FUNC
@@ -1612,7 +1612,7 @@ HWTEST_F(NavigationLayoutTestNg, DealNavigationExit003, TestSize.Level1)
         "navDestinationNode", 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     bool isNavBar = true, isAnimated = true;
 
-    EXPECT_NE(preNode->GetEventHub<EventHub>(), nullptr);
+    EXPECT_NE(preNode->GetOrCreateEventHub<EventHub>(), nullptr);
     EXPECT_TRUE(isNavBar && isAnimated);
     navigationNode->DealNavigationExit(preNode, isNavBar, isAnimated);
 }

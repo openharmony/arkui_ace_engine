@@ -24,43 +24,30 @@ struct BindContextMenuExample {
   pathStack: NavPathStack = new NavPathStack()
 
   @Builder
-  MyMenu() {
-    Menu() {
-      MenuItem({ startIcon: $r('app.media.app_icon'), content: '菜单选项' })
-      MenuItem({ startIcon: $r('app.media.app_icon'), content: '菜单选项' })
-      MenuItem({ startIcon: $r('app.media.app_icon'), content: '菜单选项' })
-    }
-  }
-
-  @Builder
-  MyPreview() {
-    Column() {
-      Image($r('app.media.app_icon'))
+  MenuBuilder() {
+    Flex({ direction: FlexDirection.Column, justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
+      Text('Test menu item 1')
+        .fontSize(20)
         .width(100)
-        .height(100)
-    }
+        .height(50)
+        .textAlign(TextAlign.Center)
+      Divider().height(10)
+      Text('Test menu item 2')
+        .fontSize(20)
+        .width(100)
+        .height(50)
+        .textAlign(TextAlign.Center)
+    }.width(100)
   }
 
   build() {
     NavDestination() {
-      Column({ space: 5 }) {
-        Text('bindContextMenu + 长按弹出')
-          .fontColor(Color.Gray)
-          .width('100%')
-          .padding(10)
-
-        Image($r('app.media.app_icon'))
-          .width(100)
-          .height(100)
-          .bindContextMenu(this.MyMenu, ResponseType.LongPress,
-            {
-              preview: this.MyPreview,
-              previewAnimationOptions: {
-                scale: [1.0, 1.5]
-              }
-            })
-
-      }.width('100%').margin({ top: 5 })
+      Column() {
+        Text('LongPress for menu')
+      }
+      .width('100%')
+      .margin({ top: 5 })
+      .bindContextMenu(this.MenuBuilder, ResponseType.LongPress)
     }
     .title('BindContextMenu')
     .onBackPressed(() => {

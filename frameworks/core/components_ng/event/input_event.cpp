@@ -102,6 +102,30 @@ void InputEventActuator::OnCollectHoverEvent(
     result.emplace_back(hoverEventTarget_);
 }
 
+void InputEventActuator::OnCollectHoverEventForTips(
+    const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
+{
+    if (inputEvents_.empty()) {
+        return;
+    }
+
+    auto onHoverCallback = [weak = WeakClaim(this)](bool info, HoverInfo& hoverInfo) {
+        auto actuator = weak.Upgrade();
+        CHECK_NULL_VOID(actuator);
+        auto innerEvents = actuator->inputEvents_;
+        for (const auto& callback : innerEvents) {
+            if (callback && callback->GetIstips()) {
+                (*callback)(info);
+                (*callback)(info, hoverInfo);
+            }
+        }
+    };
+    hoverEventTarget_->SetCallback(onHoverCallback);
+    hoverEventTarget_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+    hoverEventTarget_->SetGetEventTargetImpl(getEventTargetImpl);
+    result.emplace_back(hoverEventTarget_);
+}
+
 void InputEventActuator::OnCollectPenHoverEvent(const OffsetF& coordinateOffset,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result,
     const RefPtr<FrameNode>& host)

@@ -412,7 +412,7 @@ HWTEST_F(CheckBoxPatternSubTestNG, CheckBoxPatternTest056, TestSize.Level1)
     EXPECT_NE(layoutProperty, nullptr);
     EXPECT_EQ(layoutProperty->GetVisibility(), VisibleType::VISIBLE);
     EXPECT_NEAR(opacity, 1.0f, DBL_EPSILON);
-    auto eventHub = pattern->builderNode_->GetEventHub<EventHub>();
+    auto eventHub = pattern->builderNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_EQ(eventHub->IsEnabled(), true);
 }
@@ -478,7 +478,7 @@ HWTEST_F(CheckBoxPatternSubTestNG, CheckBoxPatternTest058, TestSize.Level1)
     auto opacity = renderContext->GetOpacityValue();
     EXPECT_NE(layoutProperty, nullptr);
     EXPECT_NEAR(opacity, 0.0f, DBL_EPSILON);
-    auto eventHub = pattern->builderNode_->GetEventHub<EventHub>();
+    auto eventHub = pattern->builderNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_NE(eventHub->IsEnabled(), true);
 }
@@ -513,7 +513,7 @@ HWTEST_F(CheckBoxPatternSubTestNG, CheckBoxPatternTest059, TestSize.Level1)
     EXPECT_NE(layoutProperty, nullptr);
     EXPECT_NE(layoutProperty->GetVisibility(), VisibleType::VISIBLE);
     EXPECT_NEAR(opacity, 0.0f, DBL_EPSILON);
-    auto eventHub = pattern->builderNode_->GetEventHub<EventHub>();
+    auto eventHub = pattern->builderNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_NE(eventHub->IsEnabled(), true);
 }
@@ -549,7 +549,7 @@ HWTEST_F(CheckBoxPatternSubTestNG, CheckBoxPatternTest060, TestSize.Level1)
     EXPECT_NE(layoutProperty, nullptr);
     EXPECT_NE(layoutProperty->GetVisibility(), VisibleType::VISIBLE);
     EXPECT_NEAR(opacity, 0.0f, DBL_EPSILON);
-    auto eventHub = pattern->builderNode_->GetEventHub<EventHub>();
+    auto eventHub = pattern->builderNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_NE(eventHub->IsEnabled(), true);
 }

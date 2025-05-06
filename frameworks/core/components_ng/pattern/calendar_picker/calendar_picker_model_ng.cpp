@@ -89,7 +89,7 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateButtonChild(
     auto buttonNode =
         FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, id, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_RETURN(buttonNode, nullptr);
-    auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
+    auto buttonEventHub = buttonNode->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonEventHub, nullptr);
     buttonEventHub->SetStateEffect(true);
 
@@ -314,7 +314,7 @@ void CalendarPickerModelNG::SetOnChange(SelectedChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<CalendarPickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<CalendarPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(onChange));
 }
@@ -323,7 +323,7 @@ void CalendarPickerModelNG::SetChangeEvent(SelectedChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<CalendarPickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<CalendarPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(onChange));
 }
@@ -770,7 +770,7 @@ PickerDate CalendarPickerModelNG::GetSelectDateWithNode(FrameNode* frameNode)
 void CalendarPickerModelNG::SetOnChangeWithNode(FrameNode* frameNode, SelectedChangeEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<CalendarPickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<CalendarPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(onChange));
 }

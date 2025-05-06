@@ -76,7 +76,9 @@
 #include "bridge/declarative_frontend/jsview/js_image_span.h"
 #include "bridge/declarative_frontend/jsview/js_indexer.h"
 #include "bridge/declarative_frontend/jsview/js_indicator.h"
+#if defined(DYNAMIC_COMPONENT_SUPPORT)
 #include "bridge/declarative_frontend/jsview/js_isolated_component.h"
+#endif
 #include "bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
 #include "bridge/declarative_frontend/jsview/js_layout_manager.h"
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach.h"
@@ -594,10 +596,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ScrollBar", JSScrollBar::JSBind },
     { "GridRow", JSGridRow::JSBind },
     { "GridCol", JSGridCol::JSBind },
-#ifndef ARKUI_WEARABLE
     { "Stepper", JSStepper::JSBind },
     { "StepperItem", JSStepperItem::JSBind },
-#endif
     { "Toggle", JSToggle::JSBind },
     { "ToolBarItem", JSToolBarItem::JSBind },
     { "Blank", JSBlank::JSBind },
@@ -627,10 +627,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
     { "PageTransitionEnter", JSPageTransition::JSBind },
     { "PageTransitionExit", JSPageTransition::JSBind },
-#ifndef ARKUI_WEARABLE
     { "RowSplit", JSRowSplit::JSBind },
     { "ColumnSplit", JSColumnSplit::JSBind },
-#endif
     { "AlphabetIndexer", JSIndexer::JSBind },
     { "Hyperlink", JSHyperlink::JSBind },
     { "Radio", JSRadio::JSBind },
@@ -736,9 +734,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
 #endif
     { "Search", JSSearch::JSBind },
-#ifndef ARKUI_WEARABLE
     { "Select", JSSelect::JSBind },
-#endif
     { "SearchController", JSSearchController::JSBind },
     { "TextClockController", JSTextClockController::JSBind },
     { "Sheet", JSSheet::JSBind },
@@ -760,9 +756,14 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LinearGradient", JSLinearGradient::JSBind },
     { "ImageSpan", JSImageSpan::JSBind },
 #ifdef PREVIEW
+    { "AbilityComponent", JSAbilityComponent::JSBind },
+    { "Component3D", JSSceneView::JSBind },
+    { "EmbeddedComponent", JSEmbeddedComponent::JSBind },
     { "FormComponent", JSForm::JSBind },
+    { "IsolatedComponent", JSIsolatedComponent::JSBind },
     { "XComponent", JSXComponent::JSBind },
     { "XComponentController", JSXComponentController::JSBind },
+    { "RemoteWindow", JSRemoteWindow::JSBind },
     { "RichText", JSRichText::JSBind },
     { "Web", JSWeb::JSBind },
     { "WebController", JSWebController::JSBind },
@@ -1015,8 +1016,9 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
     if (cleanUpIdleTask->IsFunction()) {
         LOGI("CleanUpIdleTask is a valid function");
         const auto globalFunc = JSRef<JSFunc>::Cast(cleanUpIdleTask);
-        const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
-            jsFunc->Call(globalObject);
+        const auto callback = [jsFunc = globalFunc, globalObject = globalObject](int64_t maxTimeInNs) {
+            auto params = ConvertToJSValues(maxTimeInNs / 1e6);
+            jsFunc->Call(globalObject, params.size(), params.data());
         };
         ElementRegister::GetInstance()->RegisterJSCleanUpIdleTaskFunc(callback);
     }

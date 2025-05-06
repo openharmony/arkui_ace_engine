@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+
 #include <cmath>
 #include <cstdlib>
-#include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
 #include "interfaces/native/event/ui_input_event_impl.h"
 #include "interfaces/native/ui_input_event.h"
@@ -43,7 +44,11 @@
 #endif
 #ifdef ENABLE_ROSEN_BACKEND
 #include "feature/anco_manager/rs_ext_node_operation.h"
+
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#endif
+#ifdef RENDER_EXTRACT_SUPPORTED
+#include "core/components_ng/render/adapter/render_surface_impl.h"
 #endif
 
 #include "core/components_ng/event/input_event.h"
@@ -51,6 +56,7 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_session_adapter.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_utils.h"
 #include "core/event/event_info_convertor.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
@@ -59,112 +65,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+
 const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
-
-std::string XComponentRenderFitToString(RenderFit renderFit)
-{
-    static const std::string renderFitStyles[] = { "RenderFit.CENTER", "RenderFit.TOP", "RenderFit.BOTTOM",
-        "RenderFit.LEFT", "RenderFit.RIGHT", "RenderFit.TOP_LEFT", "RenderFit.TOP_RIGHT", "RenderFit.BOTTOM_LEFT",
-        "RenderFit.BOTTOM_RIGHT", "RenderFit.RESIZE_FILL", "RenderFit.RESIZE_CONTAIN",
-        "RenderFit.RESIZE_CONTAIN_TOP_LEFT", "RenderFit.RESIZE_CONTAIN_BOTTOM_RIGHT", "RenderFit.RESIZE_COVER",
-        "RenderFit.RESIZE_COVER_TOP_LEFT", "RenderFit.RESIZE_COVER_BOTTOM_RIGHT" };
-    return renderFitStyles[static_cast<int>(renderFit)];
-}
-
-OH_NativeXComponent_TouchEventType ConvertNativeXComponentTouchEvent(const TouchType& touchType)
-{
-    switch (touchType) {
-        case TouchType::DOWN:
-            return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_DOWN;
-        case TouchType::UP:
-            return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_UP;
-        case TouchType::MOVE:
-            return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_MOVE;
-        case TouchType::CANCEL:
-            return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_CANCEL;
-        default:
-            return OH_NativeXComponent_TouchEventType::OH_NATIVEXCOMPONENT_UNKNOWN;
-    }
-}
-
-OH_NativeXComponent_TouchPointToolType ConvertNativeXComponentTouchToolType(const SourceTool& toolType)
-{
-    switch (toolType) {
-        case SourceTool::FINGER:
-            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_FINGER;
-        case SourceTool::PEN:
-            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_PEN;
-        case SourceTool::RUBBER:
-            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_RUBBER;
-        case SourceTool::BRUSH:
-            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_BRUSH;
-        case SourceTool::PENCIL:
-            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_PENCIL;
-        case SourceTool::AIRBRUSH:
-            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_AIRBRUSH;
-        case SourceTool::MOUSE:
-            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_MOUSE;
-        case SourceTool::LENS:
-            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_LENS;
-        default:
-            return OH_NativeXComponent_TouchPointToolType::OH_NATIVEXCOMPONENT_TOOL_TYPE_UNKNOWN;
-    }
-}
-
-OH_NativeXComponent_KeyAction ConvertNativeXComponentKeyAction(const KeyAction& keyAction)
-{
-    switch (keyAction) {
-        case KeyAction::DOWN:
-            return OH_NativeXComponent_KeyAction::OH_NATIVEXCOMPONENT_KEY_ACTION_DOWN;
-        case KeyAction::UP:
-            return OH_NativeXComponent_KeyAction::OH_NATIVEXCOMPONENT_KEY_ACTION_UP;
-        default:
-            return OH_NativeXComponent_KeyAction::OH_NATIVEXCOMPONENT_KEY_ACTION_UNKNOWN;
-    }
-}
-
-OH_NativeXComponent_EventSourceType ConvertNativeXComponentEventSourceType(const SourceType& sourceType)
-{
-    switch (sourceType) {
-        case SourceType::MOUSE:
-            return OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_MOUSE;
-        case SourceType::TOUCH:
-            return OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_TOUCHSCREEN;
-        case SourceType::TOUCH_PAD:
-            return OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_TOUCHPAD;
-        case SourceType::KEYBOARD:
-            return OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_KEYBOARD;
-        default:
-            return OH_NativeXComponent_EventSourceType::OH_NATIVEXCOMPONENT_SOURCE_TYPE_UNKNOWN;
-    }
-}
-
-OH_NativeXComponent_KeyEvent ConvertNativeXComponentKeyEvent(const KeyEvent& event)
-{
-    OH_NativeXComponent_KeyEvent nativeKeyEvent;
-    nativeKeyEvent.action = ConvertNativeXComponentKeyAction(event.action);
-    nativeKeyEvent.code = static_cast<OH_NativeXComponent_KeyCode>(event.code);
-    nativeKeyEvent.sourceType = ConvertNativeXComponentEventSourceType(event.sourceType);
-    nativeKeyEvent.deviceId = event.deviceId;
-    nativeKeyEvent.timestamp = event.timeStamp.time_since_epoch().count();
-    return nativeKeyEvent;
-}
-
-ArkUI_XComponent_ImageAnalyzerState ConvertNativeXComponentAnalyzerStatus(const ImageAnalyzerState state)
-{
-    switch (state) {
-        case ImageAnalyzerState::UNSUPPORTED:
-            return ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_UNSUPPORTED;
-        case ImageAnalyzerState::ONGOING:
-            return ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_ONGOING;
-        case ImageAnalyzerState::STOPPED:
-            return ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_STOPPED;
-        case ImageAnalyzerState::FINISHED:
-            return ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_FINISHED;
-        default:
-            return ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_DISABLED;
-    }
-}
 } // namespace
 
 XComponentPattern::XComponentPattern(const std::optional<std::string>& id, XComponentType type,
@@ -443,7 +345,7 @@ void XComponentPattern::RequestFocus()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<XComponentEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -472,13 +374,9 @@ void XComponentPattern::OnModifyDone()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
-    auto bkColor = renderContext->GetBackgroundColor();
-    if (bkColor.has_value()) {
-        bool isTransparent = bkColor.value().GetAlpha() < UINT8_MAX;
-        handlingSurfaceRenderContext_->UpdateBackgroundColor(isTransparent ? Color::TRANSPARENT : bkColor.value());
-    } else {
-        handlingSurfaceRenderContext_->UpdateBackgroundColor(Color::BLACK);
-    }
+    auto bkColor = renderContext->GetBackgroundColor().value_or(Color::BLACK);
+    handlingSurfaceRenderContext_->UpdateBackgroundColor(
+        (bkColor.GetAlpha() < UINT8_MAX) ? Color::TRANSPARENT : bkColor);
 }
 
 void XComponentPattern::OnAreaChangedInner()
@@ -524,8 +422,8 @@ void XComponentPattern::SetSurfaceNodeToGraphic()
     std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode = std::static_pointer_cast<Rosen::RSSurfaceNode>(rsNode);
     CHECK_NULL_VOID(rsSurfaceNode);
 
-    Rosen::RSExtNodeOperation::GetInstance().ProcessRSExtNode(GetId(), parentNode->GetId(),
-        canvasRect.GetX(), canvasRect.GetY(), rsSurfaceNode);
+    Rosen::RSExtNodeOperation::GetInstance().ProcessRSExtNode(
+        GetId(), parentNode->GetId(), canvasRect.GetX(), canvasRect.GetY(), rsSurfaceNode);
 #endif
 }
 
@@ -563,7 +461,7 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         }
         if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
             OnSurfaceDestroyed();
-            auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+            auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
             CHECK_NULL_VOID(eventHub);
             {
                 ACE_SCOPED_TRACE("XComponent[%s] FireDestroyEvent", GetId().c_str());
@@ -667,7 +565,8 @@ void XComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->PutExtAttr("enableTransparentLayer", isTransparentLayer_ ? "true" : "false", filter);
     json->PutExtAttr("screenId", screenId_.has_value() ? std::to_string(screenId_.value()).c_str() : "", filter);
     if (type_ == XComponentType::SURFACE) {
-        json->PutExtAttr("renderFit", XComponentRenderFitToString(GetSurfaceRenderFit()).c_str(), filter);
+        json->PutExtAttr(
+            "renderFit", XComponentUtils::XComponentRenderFitToString(GetSurfaceRenderFit()).c_str(), filter);
     }
 }
 
@@ -692,8 +591,7 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
     CHECK_NULL_VOID(geometryNode);
     drawSize_ = geometryNode->GetContentSize();
     if (!drawSize_.IsPositive()) {
-        TAG_LOGW(
-            AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s]'s size is not positive", GetId().c_str());
+        TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s]'s size is not positive", GetId().c_str());
         return;
     }
     globalPosition_ = geometryNode->GetFrameOffset();
@@ -720,8 +618,8 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
             static_cast<int32_t>(transformRelativeOffset.GetY() + localPosition_.GetY()),
             static_cast<int32_t>(drawSize_.Width()), static_cast<int32_t>(drawSize_.Height()));
     }
-#endif
     HandleSurfaceChangeEvent(false, offsetChanged, sizeChanged, needFireNativeEvent, config.frameOffsetChange);
+#endif
     if (type_ == XComponentType::SURFACE && renderType_ == NodeRenderType::RENDER_TYPE_TEXTURE) {
         AddAfterLayoutTaskForExportTexture();
     }
@@ -811,10 +709,11 @@ void XComponentPattern::XComponentSizeInit()
     
 #ifdef RENDER_EXTRACT_SUPPORTED
     if (xcomponentController_ && renderSurface_) {
-        xcomponentController_->SetSurfaceId(renderSurface_->GetUniqueId());
+        surfaceId_ = renderSurface_->GetUniqueId();
+        xcomponentController_->SetSurfaceId(surfaceId_);
     }
 #endif
-    auto eventHub = host->GetEventHub<XComponentEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] triggers onLoad and OnSurfaceCreated callback",
         GetId().c_str());
@@ -960,7 +859,7 @@ bool XComponentPattern::OnAccessibilityChildTreeDeregister()
 void XComponentPattern::OnSetAccessibilityChildTree(
     int32_t childWindowId, int32_t childTreeId)
 {
-    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "OnAccessibilityChildTreeDeregister, "
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "OnSetAccessibilityChildTree, "
         "windowId: %{public}d, treeId: %{public}d.", childWindowId, childTreeId);
     windowId_ = static_cast<uint32_t>(childWindowId);
     treeId_ = childTreeId;
@@ -1036,15 +935,15 @@ void XComponentPattern::InitNativeNodeCallbacks()
         host->RemoveChild(node);
     };
 
-    nativeXComponentImpl_->registerNativeNodeCallbacks(std::move(OnAttachRootNativeNode),
-        std::move(OnDetachRootNativeNode));
+    nativeXComponentImpl_->registerNativeNodeCallbacks(
+        std::move(OnAttachRootNativeNode), std::move(OnDetachRootNativeNode));
 }
 
 void XComponentPattern::InitEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<XComponentEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (id_.has_value()) {
         eventHub->SetOnSurfaceInitEvent(CreateExternalEvent());
@@ -1106,7 +1005,7 @@ bool XComponentPattern::HandleKeyEvent(const KeyEvent& event)
     CHECK_NULL_RETURN(nativeXComponent_, false);
     CHECK_NULL_RETURN(nativeXComponentImpl_, false);
 
-    OH_NativeXComponent_KeyEvent keyEvent = ConvertNativeXComponentKeyEvent(event);
+    OH_NativeXComponent_KeyEvent keyEvent = XComponentUtils::ConvertNativeXComponentKeyEvent(event);
     nativeXComponentImpl_->SetKeyEvent(keyEvent);
 
     auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
@@ -1163,20 +1062,18 @@ void XComponentPattern::InitAxisEvent(const RefPtr<InputEventHub>& inputHub)
 
 void XComponentPattern::InitOnTouchIntercept(const RefPtr<GestureEventHub>& gestureHub)
 {
-    gestureHub->SetOnTouchIntercept(
-        [weak = WeakClaim(this)](
-            const TouchEventInfo& touchEvent) -> HitTestMode {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_RETURN(pattern, NG::HitTestMode::HTMDEFAULT);
-            auto hostNode = pattern->GetHost();
-            CHECK_NULL_RETURN(hostNode, NG::HitTestMode::HTMDEFAULT);
-            CHECK_NULL_RETURN(pattern->nativeXComponentImpl_, hostNode->GetHitTestMode());
-            const auto onTouchInterceptCallback = pattern->nativeXComponentImpl_->GetOnTouchInterceptCallback();
-            CHECK_NULL_RETURN(onTouchInterceptCallback, hostNode->GetHitTestMode());
-            auto event = touchEvent.ConvertToTouchEvent();
-            ArkUI_UIInputEvent uiEvent { ARKUI_UIINPUTEVENT_TYPE_TOUCH, TOUCH_EVENT_ID, &event };
-            return static_cast<NG::HitTestMode>(onTouchInterceptCallback(pattern->nativeXComponent_.get(), &uiEvent));
-        });
+    gestureHub->SetOnTouchIntercept([weak = WeakClaim(this)](const TouchEventInfo& touchEvent) -> HitTestMode {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, NG::HitTestMode::HTMDEFAULT);
+        auto hostNode = pattern->GetHost();
+        CHECK_NULL_RETURN(hostNode, NG::HitTestMode::HTMDEFAULT);
+        CHECK_NULL_RETURN(pattern->nativeXComponentImpl_, hostNode->GetHitTestMode());
+        const auto onTouchInterceptCallback = pattern->nativeXComponentImpl_->GetOnTouchInterceptCallback();
+        CHECK_NULL_RETURN(onTouchInterceptCallback, hostNode->GetHitTestMode());
+        auto event = touchEvent.ConvertToTouchEvent();
+        ArkUI_UIInputEvent uiEvent { ARKUI_UIINPUTEVENT_TYPE_TOUCH, TOUCH_EVENT_ID, &event };
+        return static_cast<NG::HitTestMode>(onTouchInterceptCallback(pattern->nativeXComponent_.get(), &uiEvent));
+    });
 }
 
 void XComponentPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
@@ -1232,7 +1129,7 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     const auto timeStamp = info.GetTimeStamp().time_since_epoch().count();
     touchEventPoint_.timeStamp = timeStamp;
     auto touchType = touchInfoList.front().GetTouchType();
-    touchEventPoint_.type = ConvertNativeXComponentTouchEvent(touchType);
+    touchEventPoint_.type = XComponentUtils::ConvertNativeXComponentTouchEvent(touchType);
     TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "HandleTouchEvent[%{public}f,%{public}f,%{public}d,%{public}zu,%{public}u]",
         localOffset.GetX(), localOffset.GetY(), touchInfo.GetFingerId(), touchInfoList.front().GetTouchType(),
         static_cast<uint32_t>(touchInfo.GetSize()));
@@ -1240,8 +1137,8 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
 
     if (nativeXComponent_ && nativeXComponentImpl_) {
         nativeXComponentImpl_->SetHistoricalPoint(SetHistoryPoint(info.GetHistory()));
-        nativeXComponentImpl_->SetCurrentSourceType(
-            { touchInfo.GetFingerId(), ConvertNativeXComponentEventSourceType(info.GetSourceDevice()) });
+        nativeXComponentImpl_->SetCurrentSourceType({ touchInfo.GetFingerId(),
+            XComponentUtils::ConvertNativeXComponentEventSourceType(info.GetSourceDevice()) });
     }
     NativeXComponentDispatchTouchEvent(touchEventPoint_, nativeXComponentTouchPoints_);
 
@@ -1259,43 +1156,8 @@ void XComponentPattern::HandleMouseEvent(const MouseInfo& info)
     mouseEventPoint.y = static_cast<float>(info.GetLocalLocation().GetY());
     mouseEventPoint.screenX = static_cast<float>(info.GetScreenLocation().GetX());
     mouseEventPoint.screenY = static_cast<float>(info.GetScreenLocation().GetY());
-    switch (info.GetAction()) {
-        case MouseAction::PRESS:
-            mouseEventPoint.action = OH_NativeXComponent_MouseEventAction::OH_NATIVEXCOMPONENT_MOUSE_PRESS;
-            break;
-        case MouseAction::RELEASE:
-            mouseEventPoint.action = OH_NativeXComponent_MouseEventAction::OH_NATIVEXCOMPONENT_MOUSE_RELEASE;
-            break;
-        case MouseAction::MOVE:
-            mouseEventPoint.action = OH_NativeXComponent_MouseEventAction::OH_NATIVEXCOMPONENT_MOUSE_MOVE;
-            break;
-        case MouseAction::CANCEL:
-            mouseEventPoint.action = OH_NativeXComponent_MouseEventAction::OH_NATIVEXCOMPONENT_MOUSE_CANCEL;
-            break;
-        default:
-            mouseEventPoint.action = OH_NativeXComponent_MouseEventAction::OH_NATIVEXCOMPONENT_MOUSE_NONE;
-            break;
-    }
-    switch (info.GetButton()) {
-        case MouseButton::LEFT_BUTTON:
-            mouseEventPoint.button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_LEFT_BUTTON;
-            break;
-        case MouseButton::RIGHT_BUTTON:
-            mouseEventPoint.button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_RIGHT_BUTTON;
-            break;
-        case MouseButton::MIDDLE_BUTTON:
-            mouseEventPoint.button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_MIDDLE_BUTTON;
-            break;
-        case MouseButton::BACK_BUTTON:
-            mouseEventPoint.button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_BACK_BUTTON;
-            break;
-        case MouseButton::FORWARD_BUTTON:
-            mouseEventPoint.button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_FORWARD_BUTTON;
-            break;
-        default:
-            mouseEventPoint.button = OH_NativeXComponent_MouseEventButton::OH_NATIVEXCOMPONENT_NONE_BUTTON;
-            break;
-    }
+    mouseEventPoint.action = XComponentUtils::ConvertNativeXComponentMouseEventAction(info.GetAction());
+    mouseEventPoint.button = XComponentUtils::ConvertNativeXComponentMouseEventButton(info.GetButton());
     mouseEventPoint.timestamp = info.GetTimeStamp().time_since_epoch().count();
     NativeXComponentDispatchMouseEvent(mouseEventPoint);
 }
@@ -1361,7 +1223,7 @@ void XComponentPattern::SetTouchPoint(
         ohTouchPoint.screenY = static_cast<float>(pointWindowOffset.GetY());
         ohTouchPoint.x = static_cast<float>(pointLocalOffset.GetX());
         ohTouchPoint.y = static_cast<float>(pointLocalOffset.GetY());
-        ohTouchPoint.type = ConvertNativeXComponentTouchEvent(touchType);
+        ohTouchPoint.type = XComponentUtils::ConvertNativeXComponentTouchEvent(touchType);
         ohTouchPoint.size = pointTouchInfo.GetSize();
         ohTouchPoint.force = pointTouchInfo.GetForce();
         ohTouchPoint.timeStamp = timeStamp;
@@ -1375,7 +1237,8 @@ void XComponentPattern::SetTouchPoint(
         xcomponentTouchPoint.windowY = static_cast<float>(pointWindowOffset.GetY());
         xcomponentTouchPoint.displayX = static_cast<float>(pointDisplayOffset.GetX());
         xcomponentTouchPoint.displayY = static_cast<float>(pointDisplayOffset.GetY());
-        xcomponentTouchPoint.sourceToolType = ConvertNativeXComponentTouchToolType(pointTouchInfo.GetSourceTool());
+        xcomponentTouchPoint.sourceToolType =
+            XComponentUtils::ConvertNativeXComponentTouchToolType(pointTouchInfo.GetSourceTool());
         nativeXComponentTouchPoints_.emplace_back(xcomponentTouchPoint);
     }
     while (index < OH_MAX_TOUCH_POINTS_NUMBER) {
@@ -1418,8 +1281,8 @@ std::vector<OH_NativeXComponent_HistoricalPoint> XComponentPattern::SetHistoryPo
     return historicalPoints;
 }
 
-void XComponentPattern::FireExternalEvent(RefPtr<NG::PipelineContext> context,
-    const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
+void XComponentPattern::FireExternalEvent(
+    RefPtr<NG::PipelineContext> context, const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
     CHECK_NULL_VOID(context);
 #ifdef NG_BUILD
@@ -1691,6 +1554,14 @@ void XComponentPattern::HandleSurfaceChangeEvent(
     if (renderSurface_) {
         renderSurface_->SetSurfaceDefaultSize(
             static_cast<int32_t>(paintRect_.Width()), static_cast<int32_t>(paintRect_.Height()));
+#ifdef RENDER_EXTRACT_SUPPORTED
+        if (!renderSurface_->IsTexture()) {
+            auto impl = AceType::DynamicCast<RenderSurfaceImpl>(renderSurface_);
+            if (impl != nullptr) {
+                impl->SetSurfaceRect(paintRect_.GetX(), paintRect_.GetY(), paintRect_.Width(), paintRect_.Height());
+            }
+        }
+#endif
     }
     if (needForceRender) {
         auto host = GetHost();
@@ -1736,7 +1607,7 @@ void XComponentPattern::LoadNative()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<XComponentEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireSurfaceInitEvent(id_.value_or(""), host->GetId());
     OnNativeLoad(reinterpret_cast<FrameNode*>(AceType::RawPtr(host)));
@@ -1746,7 +1617,7 @@ void XComponentPattern::OnNativeLoad(FrameNode* frameNode)
 {
     hasLoadNativeDone_ = true;
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     {
         ACE_SCOPED_TRACE("XComponent[%s] FireLoadEvent", GetId().c_str());
@@ -1758,7 +1629,7 @@ void XComponentPattern::OnNativeUnload(FrameNode* frameNode)
 {
     hasLoadNativeDone_ = false;
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     {
         ACE_SCOPED_TRACE("XComponent[%s] FireDestroyEvent", GetId().c_str());
@@ -1786,7 +1657,7 @@ void XComponentPattern::OnSurfaceCreated()
     } else {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto eventHub = host->GetEventHub<XComponentEventHub>();
+        auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
         {
             ACE_SCOPED_TRACE("XComponent[%s] FireControllerCreatedEvent", GetId().c_str());
@@ -1819,7 +1690,7 @@ void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect, bool needResi
             callback->OnSurfaceChanged(nativeXComponent_.get(), surface);
         }
     } else {
-        auto eventHub = host->GetEventHub<XComponentEventHub>();
+        auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
         {
             ACE_SCOPED_TRACE("XComponent[%s] FireControllerChangedEvent[w:%f,h:%f]", GetId().c_str(), width, height);
@@ -1849,7 +1720,7 @@ void XComponentPattern::OnSurfaceDestroyed(FrameNode* frameNode)
             CHECK_NULL_VOID(host);
             frameNode = Referenced::RawPtr(host);
         }
-        auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+        auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
         {
             ACE_SCOPED_TRACE("XComponent[%s] FireControllerDestroyedEvent", GetId().c_str());
@@ -1954,6 +1825,82 @@ void XComponentPattern::OnWindowShow()
     hasReleasedSurface_ = false;
 }
 
+RectF XComponentPattern::AdjustPaintRect(float positionX, float positionY, float width, float height, bool isRound)
+{
+    RectF rect;
+    float relativeLeft = positionX;
+    float relativeTop = positionY;
+    float nodeWidth = width;
+    float nodeHeight = height;
+    float absoluteRight = relativeLeft + nodeWidth;
+    float absoluteBottom = relativeTop + nodeHeight;
+    float roundToPixelErrorX = 0;
+    float roundToPixelErrorY = 0;
+
+    float nodeLeftI = RoundValueToPixelGrid(relativeLeft, isRound, false, false);
+    float nodeTopI = RoundValueToPixelGrid(relativeTop, isRound, false, false);
+    roundToPixelErrorX += nodeLeftI - relativeLeft;
+    roundToPixelErrorY += nodeTopI - relativeTop;
+    rect.SetLeft(nodeLeftI);
+    rect.SetTop(nodeTopI);
+
+    float nodeWidthI = RoundValueToPixelGrid(absoluteRight, isRound, false, false) - nodeLeftI;
+    float nodeWidthTemp = RoundValueToPixelGrid(nodeWidth, isRound, false, false);
+    roundToPixelErrorX += nodeWidthI - nodeWidth;
+    if (roundToPixelErrorX > 0.5f) {
+        nodeWidthI -= 1.0f;
+        roundToPixelErrorX -= 1.0f;
+    }
+    if (roundToPixelErrorX < -0.5f) {
+        nodeWidthI += 1.0f;
+        roundToPixelErrorX += 1.0f;
+    }
+    if (nodeWidthI < nodeWidthTemp) {
+        roundToPixelErrorX += nodeWidthTemp - nodeWidthI;
+        nodeWidthI = nodeWidthTemp;
+    }
+
+    float nodeHeightI = RoundValueToPixelGrid(absoluteBottom, isRound, false, false) - nodeTopI;
+    float nodeHeightTemp = RoundValueToPixelGrid(nodeHeight, isRound, false, false);
+    roundToPixelErrorY += nodeHeightI - nodeHeight;
+    if (roundToPixelErrorY > 0.5f) {
+        nodeHeightI -= 1.0f;
+        roundToPixelErrorY -= 1.0f;
+    }
+    if (roundToPixelErrorY < -0.5f) {
+        nodeHeightI += 1.0f;
+        roundToPixelErrorY += 1.0f;
+    }
+    if (nodeHeightI < nodeHeightTemp) {
+        roundToPixelErrorY += nodeHeightTemp - nodeHeightI;
+        nodeHeightI = nodeHeightTemp;
+    }
+
+    rect.SetWidth(nodeWidthI);
+    rect.SetHeight(nodeHeightI);
+    return rect;
+}
+
+float XComponentPattern::RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor)
+{
+    float fractials = fmod(value, 1.0f);
+    if (fractials < 0.0f) {
+        ++fractials;
+    }
+    if (forceCeil) {
+        return (value - fractials + 1.0f);
+    } else if (forceFloor) {
+        return (value - fractials);
+    } else if (isRound) {
+        if (NearEqual(fractials, 1.0f) || GreatOrEqual(fractials, 0.50f)) {
+            return (value - fractials + 1.0f);
+        } else {
+            return (value - fractials);
+        }
+    }
+    return value;
+}
+
 void XComponentPattern::EnableAnalyzer(bool enable)
 {
     isEnableAnalyzer_ = enable;
@@ -1968,7 +1915,7 @@ void XComponentPattern::EnableAnalyzer(bool enable)
     imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(host, ImageAnalyzerHolder::XCOMPONENT);
 }
 
-void XComponentPattern::SetImageAIOptions(void *options)
+void XComponentPattern::SetImageAIOptions(void* options)
 {
     if (!imageAnalyzerManager_) {
         imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::XCOMPONENT);
@@ -2047,7 +1994,6 @@ void XComponentPattern::UpdateAnalyzerOverlay()
 void XComponentPattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
 {
     if (IsSupportImageAnalyzerFeature()) {
-        CHECK_NULL_VOID(imageAnalyzerManager_);
         imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
     }
 }
@@ -2064,82 +2010,6 @@ void XComponentPattern::ReleaseImageAnalyzer()
     imageAnalyzerManager_->ReleaseImageAnalyzer();
 }
 
-RectF XComponentPattern::AdjustPaintRect(float positionX, float positionY, float width, float height, bool isRound)
-{
-    RectF rect;
-    float relativeLeft = positionX;
-    float relativeTop = positionY;
-    float nodeWidth = width;
-    float nodeHeight = height;
-    float absoluteRight = relativeLeft + nodeWidth;
-    float absoluteBottom = relativeTop + nodeHeight;
-    float roundToPixelErrorX = 0;
-    float roundToPixelErrorY = 0;
-
-    float nodeLeftI = RoundValueToPixelGrid(relativeLeft, isRound, false, false);
-    float nodeTopI = RoundValueToPixelGrid(relativeTop, isRound, false, false);
-    roundToPixelErrorX += nodeLeftI - relativeLeft;
-    roundToPixelErrorY += nodeTopI - relativeTop;
-    rect.SetLeft(nodeLeftI);
-    rect.SetTop(nodeTopI);
-
-    float nodeWidthI = RoundValueToPixelGrid(absoluteRight, isRound, false, false) - nodeLeftI;
-    float nodeWidthTemp = RoundValueToPixelGrid(nodeWidth, isRound, false, false);
-    roundToPixelErrorX += nodeWidthI - nodeWidth;
-    if (roundToPixelErrorX > 0.5f) {
-        nodeWidthI -= 1.0f;
-        roundToPixelErrorX -= 1.0f;
-    }
-    if (roundToPixelErrorX < -0.5f) {
-        nodeWidthI += 1.0f;
-        roundToPixelErrorX += 1.0f;
-    }
-    if (nodeWidthI < nodeWidthTemp) {
-        roundToPixelErrorX += nodeWidthTemp - nodeWidthI;
-        nodeWidthI = nodeWidthTemp;
-    }
-
-    float nodeHeightI = RoundValueToPixelGrid(absoluteBottom, isRound, false, false) - nodeTopI;
-    float nodeHeightTemp = RoundValueToPixelGrid(nodeHeight, isRound, false, false);
-    roundToPixelErrorY += nodeHeightI - nodeHeight;
-    if (roundToPixelErrorY > 0.5f) {
-        nodeHeightI -= 1.0f;
-        roundToPixelErrorY -= 1.0f;
-    }
-    if (roundToPixelErrorY < -0.5f) {
-        nodeHeightI += 1.0f;
-        roundToPixelErrorY += 1.0f;
-    }
-    if (nodeHeightI < nodeHeightTemp) {
-        roundToPixelErrorY += nodeHeightTemp - nodeHeightI;
-        nodeHeightI = nodeHeightTemp;
-    }
-
-    rect.SetWidth(nodeWidthI);
-    rect.SetHeight(nodeHeightI);
-    return rect;
-}
-
-float XComponentPattern::RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor)
-{
-    float fractials = fmod(value, 1.0f);
-    if (fractials < 0.0f) {
-        ++fractials;
-    }
-    if (forceCeil) {
-        return (value - fractials + 1.0f);
-    } else if (forceFloor) {
-        return (value - fractials);
-    } else if (isRound) {
-        if (NearEqual(fractials, 1.0f) || GreatOrEqual(fractials, 0.50f)) {
-            return (value - fractials + 1.0f);
-        } else {
-            return (value - fractials);
-        }
-    }
-    return value;
-}
-
 void XComponentPattern::SetSurfaceRotation(bool isLock)
 {
     if (type_ != XComponentType::SURFACE) {
@@ -2149,6 +2019,21 @@ void XComponentPattern::SetSurfaceRotation(bool isLock)
 
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
     handlingSurfaceRenderContext_->SetSurfaceRotation(isLock);
+#ifdef RENDER_EXTRACT_SUPPORTED
+    CHECK_NULL_VOID(renderSurface_);
+    if (!renderSurface_->IsTexture()) {
+        auto impl = AceType::DynamicCast<RenderSurfaceImpl>(renderSurface_);
+        CHECK_NULL_VOID(impl);
+        impl->SetSurfaceRotation(isLock);
+    }
+#endif
+}
+
+void XComponentPattern::SetRenderFit(RenderFit renderFit)
+{
+    CHECK_NULL_VOID(handlingSurfaceRenderContext_);
+    renderFit_ = renderFit;
+    handlingSurfaceRenderContext_->SetRenderFit(renderFit);
 }
 
 void XComponentPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
@@ -2165,13 +2050,6 @@ void XComponentPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     if (renderSurface_) {
         renderSurface_->DumpInfo(json);
     }
-}
-
-void XComponentPattern::SetRenderFit(RenderFit renderFit)
-{
-    CHECK_NULL_VOID(handlingSurfaceRenderContext_);
-    renderFit_ = renderFit;
-    handlingSurfaceRenderContext_->SetRenderFit(renderFit);
 }
 
 void XComponentPattern::SetScreenId(uint64_t screenId)
@@ -2242,7 +2120,7 @@ void XComponentPattern::NativeStartImageAnalyzer(std::function<void(int32_t)>& c
         CHECK_NULL_VOID(callback);
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto statusCode = ConvertNativeXComponentAnalyzerStatus(state);
+        auto statusCode = XComponentUtils::ConvertNativeXComponentAnalyzerStatus(state);
         callback(statusCode);
         pattern->isNativeImageAnalyzing_ = false;
     };
@@ -2261,6 +2139,6 @@ void XComponentPattern::NativeStartImageAnalyzer(std::function<void(int32_t)>& c
             CHECK_NULL_VOID(pattern);
             pattern->CreateAnalyzerOverlay();
         },
-        "ArkUIXComponentCreateAnalyzerOverlay", PriorityType::VIP);
+        "ArkUIXComponentCreateAnalyzerOverlay");
 }
 } // namespace OHOS::Ace::NG

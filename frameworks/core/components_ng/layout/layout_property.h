@@ -299,6 +299,10 @@ public:
 public:
     void UpdateVisibility(const VisibleType& value, bool allowTransition = false, bool isUserSet = false);
     void OnVisibilityUpdate(VisibleType visible, bool allowTransition = false, bool isUserSet = false);
+    bool IsUserSetVisibility()
+    {
+        return isUserSetVisibility_;
+    }
 
     void UpdateLayoutConstraint(const RefPtr<LayoutProperty>& layoutProperty);
 
@@ -483,6 +487,7 @@ private:
     bool needPositionLocalizedEdges_ = false;
     bool needOffsetLocalizedEdges_ = false;
     bool needLazyLayout_ = false;
+    bool isUserSetVisibility_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);
 };

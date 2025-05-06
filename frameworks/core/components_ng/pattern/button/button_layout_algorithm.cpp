@@ -75,7 +75,6 @@ void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     }
     PerformMeasureSelf(layoutWrapper);
-    MarkNeedFlushMouseEvent(layoutWrapper);
 }
 
 void ButtonLayoutAlgorithm::HandleChildLayoutConstraint(
@@ -361,21 +360,6 @@ float ButtonLayoutAlgorithm::GetDefaultBorderRadius(LayoutWrapper* layoutWrapper
     CHECK_NULL_RETURN(buttonTheme, 0.0f);
     ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
     return static_cast<float>(buttonTheme->GetBorderRadius(controlSize).ConvertToPx());
-}
-
-void ButtonLayoutAlgorithm::MarkNeedFlushMouseEvent(LayoutWrapper* layoutWrapper)
-{
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pattern = host->GetPattern<ButtonPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    if (frameSize != pattern->GetPreFrameSize()) {
-        pattern->SetPreFrameSize(frameSize);
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        context->MarkNeedFlushMouseEvent(MockFlushEventType::REJECT);
-    }
 }
 
 bool ButtonLayoutAlgorithm::NeedAgingMeasure(LayoutWrapper* layoutWrapper)

@@ -214,7 +214,7 @@ std::unique_ptr<JsonValue> AccessibilityProperty::CreateNodeSearchInfo(const Ref
     nodeInfo->Put("hoverPoint", selfPoint.ToString().c_str());
     nodeInfo->Put("clip", renderContext->GetClipEdge().value_or(false));
 
-    auto eventHub = node->GetEventHub<EventHub>();
+    auto eventHub = node->GetOrCreateEventHub<EventHub>();
     nodeInfo->Put("enabled", eventHub->IsEnabled());
 
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
@@ -511,7 +511,7 @@ std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefP
                 }
             }
         }
-        auto eventHub = node->GetEventHub<EventHub>();
+        auto eventHub = node->GetOrCreateEventHub<EventHub>();
         if (!eventHub->IsEnabled()) {
             shouldSearchChildren = false;
             // Fall through to update `shouldSearchSelf`
@@ -595,7 +595,7 @@ bool AccessibilityProperty::IsAccessibilityFocusableDebug(const RefPtr<FrameNode
         info->Put("hasAction", accessibilityProperty->HasAction());
     }
 
-    auto eventHub = node->GetEventHub<EventHub>();
+    auto eventHub = node->GetOrCreateEventHub<EventHub>();
     info->Put("enabled", eventHub->IsEnabled());
     auto gestureEventHub = eventHub->GetGestureEventHub();
     if (gestureEventHub != nullptr) {
@@ -633,7 +633,7 @@ bool AccessibilityProperty::IsAccessibilityFocusable(const RefPtr<FrameNode>& no
             }
         }
 
-        auto eventHub = node->GetEventHub<EventHub>();
+        auto eventHub = node->GetOrCreateEventHub<EventHub>();
         if (!eventHub->IsEnabled()) {
             focusable = true;
             break;

@@ -221,11 +221,6 @@ public:
         return OffsetF();
     }
 
-    TextSelector GetTextSelector() const
-    {
-        return textSelector_;
-    }
-
     virtual void GetSelectIndex(int32_t& start, int32_t& end) const
     {
         start = textSelector_.GetTextStart();

@@ -176,7 +176,7 @@ void SlidingPanelModelNG::SetOnSizeChange(ChangeEvent&& changeEvent)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<SlidingPanelEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SlidingPanelEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSizeChange(std::move(changeEvent));
 }
@@ -185,7 +185,7 @@ void SlidingPanelModelNG::SetOnHeightChange(HeightChangeEvent&& onHeightChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<SlidingPanelEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SlidingPanelEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnHeightChange(std::move(onHeightChange));
 }
@@ -214,7 +214,7 @@ void SlidingPanelModelNG::SetModeChangeEvent(ChangeEvent&& modeChangeEvent)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<SlidingPanelEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SlidingPanelEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetModeChangeEvent(std::move(modeChangeEvent));
 }

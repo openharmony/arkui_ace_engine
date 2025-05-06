@@ -73,9 +73,40 @@ const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
 
 inline FontWeight ConvertFontWeight(FontWeight fontWeight)
 {
-    return FONT_WEIGHT_CONVERT_MAP[static_cast<int>(fontWeight)];
+    int index = static_cast<int>(fontWeight);
+    if (index >= 0 && index < static_cast<int>(sizeof(FONT_WEIGHT_CONVERT_MAP) / sizeof(FontWeight))) {
+        return FONT_WEIGHT_CONVERT_MAP[index];
+    }
+    // 返回默认值，例如 FontWeight::W400
+    return FontWeight::W400;
 }
-}
+} // namespace
+
+struct DimensionWithActual {
+    constexpr DimensionWithActual() = default;
+    explicit DimensionWithActual(const Dimension& variable, float actual) : value(variable), actualValue(actual) {}
+    bool operator==(const DimensionWithActual& rhs) const
+    {
+        return NearEqual(value, rhs.value) && NearEqual(actualValue, rhs.actualValue, 0.00001f);
+    }
+
+    std::string ToString()
+    {
+        std::stringstream ss;
+        ss << "value: " << value.ToString();
+        ss << " actualValue: " << std::to_string(actualValue);
+        return ss.str();
+    }
+
+    void Reset()
+    {
+        value.Reset();
+        actualValue = 0.0f;
+    }
+
+    Dimension value;
+    float actualValue = 0.0f;
+};
 
 constexpr uint32_t DEFAULT_MAX_FONT_FAMILY_LENGTH = Infinity<uint32_t>();
 
@@ -329,6 +360,9 @@ enum class ParagraphStyleAttribute {
     ELLIPSIS = 21,
     ELLIPSE_MODAL = 22,
     TEXT_ALIGN = 23,
+    SPACING = 24,
+    SPACING_IS_END = 25,
+    TEXT_HEIGHT_BEHAVIOR = 26,
 
     MAX_TEXT_STYLE
 };
@@ -349,51 +383,71 @@ enum class SymbolStyleAttribute {
 };
 
 // For textStyle
-#define ACE_DEFINE_TEXT_STYLE(name, type, changeflag) \
-public:                                               \
-    const type& Get##name() const                     \
-    {                                                 \
-        return prop##name##_;                         \
-    }                                                 \
-    void Set##name(const type& newValue)              \
-    {                                                 \
-        if (NearEqual(prop##name##_, newValue)) {     \
-            return;                                   \
-        }                                             \
-        auto flag = static_cast<int32_t>(changeflag); \
-        if (GreatOrEqual(flag, 0)) {                  \
-            reLayoutTextStyleBitmap_.set(flag);       \
-        } else {                                      \
-            needReCreateParagraph_ = true;            \
-        }                                             \
-        prop##name##_ = newValue;                     \
-    }                                                 \
-                                                      \
-private:                                              \
+#define ACE_DEFINE_TEXT_STYLE_FUNC(name, type, changeflag) \
+public:                                                    \
+    const type& Get##name() const                          \
+    {                                                      \
+        return prop##name##_;                              \
+    }                                                      \
+    void Set##name(const type& newValue)                   \
+    {                                                      \
+        if (NearEqual(prop##name##_, newValue)) {          \
+            return;                                        \
+        }                                                  \
+        auto flag = static_cast<int32_t>(changeflag);      \
+        if (GreatOrEqual(flag, 0)) {                       \
+            reLayoutTextStyleBitmap_.set(flag);            \
+        } else {                                           \
+            needReCreateParagraph_ = true;                 \
+        }                                                  \
+        prop##name##_ = newValue;                          \
+    }
+
+#define ACE_DEFINE_TEXT_STYLE(name, type, changeflag)  \
+    ACE_DEFINE_TEXT_STYLE_FUNC(name, type, changeflag) \
+private:                                               \
     type prop##name##_;
 
 #define ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(name, type, value, changeflag) \
-public:                                                                         \
-    const type& Get##name() const                                               \
-    {                                                                           \
-        return prop##name##_;                                                   \
-    }                                                                           \
-    void Set##name(const type& newValue)                                        \
-    {                                                                           \
-        if (NearEqual(prop##name##_, newValue)) {                               \
-            return;                                                             \
-        }                                                                       \
-        auto flag = static_cast<int32_t>(changeflag);                           \
-        if (GreatOrEqual(flag, 0)) {                                            \
-            reLayoutTextStyleBitmap_.set(flag);                                 \
-        } else {                                                                \
-            needReCreateParagraph_ = true;                                      \
-        }                                                                       \
-        prop##name##_ = newValue;                                               \
-    }                                                                           \
+    ACE_DEFINE_TEXT_STYLE_FUNC(name, type, changeflag)                          \
                                                                                 \
 private:                                                                        \
     type prop##name##_ = value;
+// For textStyle
+#define ACE_DEFINE_TEXT_DIMENSION_STYLE_FUNC(name, changeflag)                                                \
+public:                                                                                                       \
+    const Dimension& Get##name() const                                                                        \
+    {                                                                                                         \
+        return prop##name##_.value;                                                                           \
+    }                                                                                                         \
+    void Set##name(const Dimension& value)                                                                    \
+    {                                                                                                         \
+        auto actualValue = value.ConvertToPxDistribute(GetMinFontScale(), GetMaxFontScale(), IsAllowScale()); \
+        auto newValue = DimensionWithActual(value, static_cast<float>(actualValue));                          \
+        if (NearEqual(prop##name##_, newValue)) {                                                             \
+            return;                                                                                           \
+        }                                                                                                     \
+        auto flag = static_cast<int32_t>(changeflag);                                                         \
+        if (GreatOrEqual(flag, 0)) {                                                                          \
+            reLayoutTextStyleBitmap_.set(flag);                                                               \
+        } else {                                                                                              \
+            needReCreateParagraph_ = true;                                                                    \
+        }                                                                                                     \
+        prop##name##_ = newValue;                                                                             \
+    }
+
+// For textStyle
+#define ACE_DEFINE_TEXT_DIMENSION_STYLE(name, changeflag)  \
+    ACE_DEFINE_TEXT_DIMENSION_STYLE_FUNC(name, changeflag) \
+                                                           \
+private:                                                   \
+    DimensionWithActual prop##name##_;
+// For textStyle
+#define ACE_DEFINE_TEXT_DIMENSION_STYLE_WITH_DEFAULT_VALUE(name, defaultValue, actualDefaultValue, changeflag) \
+    ACE_DEFINE_TEXT_DIMENSION_STYLE_FUNC(name, changeflag)                                                     \
+                                                                                                               \
+private:                                                                                                       \
+    DimensionWithActual prop##name##_ { defaultValue, actualDefaultValue };
 
 #define ACE_DEFINE_TEXT_STYLE_OPTIONAL_TYPE(name, type, changeflag)   \
 public:                                                               \
@@ -486,50 +540,50 @@ private:                                                                        
     type prop##name##_ = value;
 
 // For symbol
-#define ACE_DEFINE_SYMBOL_STYLE(name, type, changeflag)    \
-public:                                                    \
-    const type& Get##name() const                          \
-    {                                                      \
-        return prop##name##_;                              \
-    }                                                      \
-    void Set##name(const type& newValue)                   \
-    {                                                      \
-        if (NearEqual(prop##name##_, newValue)) {          \
-            return;                                        \
-        }                                                  \
-        auto flag = static_cast<int32_t>(changeflag);      \
-        if (GreatOrEqual(flag, 0)) {                       \
-            reLayoutSymbolStyleBitmap_.set(flag);          \
-        } else {                                           \
-            needReCreateParagraph_ = true;                 \
-        }                                                  \
-        prop##name##_ = newValue;                          \
-    }                                                      \
-                                                           \
-private:                                                   \
+#define ACE_DEFINE_SYMBOL_STYLE(name, type, changeflag) \
+public:                                                 \
+    const type& Get##name() const                       \
+    {                                                   \
+        return prop##name##_;                           \
+    }                                                   \
+    void Set##name(const type& newValue)                \
+    {                                                   \
+        if (NearEqual(prop##name##_, newValue)) {       \
+            return;                                     \
+        }                                               \
+        auto flag = static_cast<int32_t>(changeflag);   \
+        if (GreatOrEqual(flag, 0)) {                    \
+            reLayoutSymbolStyleBitmap_.set(flag);       \
+        } else {                                        \
+            needReCreateParagraph_ = true;              \
+        }                                               \
+        prop##name##_ = newValue;                       \
+    }                                                   \
+                                                        \
+private:                                                \
     type prop##name##_;
- 
-#define ACE_DEFINE_SYMBOL_STYLE_WITH_DEFAULT_VALUE(name, type, value, changeflag)    \
-public:                                                                              \
-    const type& Get##name() const                                                    \
-    {                                                                                \
-        return prop##name##_;                                                        \
-    }                                                                                \
-    void Set##name(const type& newValue)                                             \
-    {                                                                                \
-        if (NearEqual(prop##name##_, newValue)) {                                    \
-            return;                                                                  \
-        }                                                                            \
-        auto flag = static_cast<int32_t>(changeflag);                                \
-        if (GreatOrEqual(flag, 0)) {                                                 \
-            reLayoutSymbolStyleBitmap_.set(flag);                                    \
-        } else {                                                                     \
-            needReCreateParagraph_ = true;                                           \
-        }                                                                            \
-        prop##name##_ = newValue;                                                    \
-    }                                                                                \
-                                                                                     \
-private:                                                                             \
+
+#define ACE_DEFINE_SYMBOL_STYLE_WITH_DEFAULT_VALUE(name, type, value, changeflag) \
+public:                                                                           \
+    const type& Get##name() const                                                 \
+    {                                                                             \
+        return prop##name##_;                                                     \
+    }                                                                             \
+    void Set##name(const type& newValue)                                          \
+    {                                                                             \
+        if (NearEqual(prop##name##_, newValue)) {                                 \
+            return;                                                               \
+        }                                                                         \
+        auto flag = static_cast<int32_t>(changeflag);                             \
+        if (GreatOrEqual(flag, 0)) {                                              \
+            reLayoutSymbolStyleBitmap_.set(flag);                                 \
+        } else {                                                                  \
+            needReCreateParagraph_ = true;                                        \
+        }                                                                         \
+        prop##name##_ = newValue;                                                 \
+    }                                                                             \
+                                                                                  \
+private:                                                                          \
     type prop##name##_ = value;
 
 class ACE_EXPORT TextStyle final {
@@ -537,7 +591,10 @@ public:
     TextStyle() = default;
     TextStyle(const std::vector<std::string>& fontFamilies, double fontSize, FontWeight fontWeight, FontStyle fontStyle,
         const Color& textColor);
-    TextStyle(double fontSize) : fontSize_(fontSize) {}
+    TextStyle(double fontSize)
+    {
+        SetFontSize(Dimension(fontSize));
+    }
     TextStyle(const Color& textColor) : propTextColor_(textColor) {}
     ~TextStyle() = default;
 
@@ -546,7 +603,7 @@ public:
 
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         TextBaseline, TextBaseline, TextBaseline::ALPHABETIC, TextStyleAttribute::RE_CREATE);
-    ACE_DEFINE_TEXT_STYLE(BaselineOffset, Dimension, TextStyleAttribute::BASELINE_SHIFT);
+    ACE_DEFINE_TEXT_DIMENSION_STYLE(BaselineOffset, TextStyleAttribute::BASELINE_SHIFT);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         TextDecoration, TextDecoration, TextDecoration::NONE, TextStyleAttribute::DECRATION);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
@@ -562,13 +619,13 @@ public:
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         EnableVariableFontWeight, bool, false, TextStyleAttribute::FONT_VARIATIONS);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(TextColor, Color, Color::BLACK, TextStyleAttribute::FONT_COLOR);
-    ACE_DEFINE_TEXT_STYLE(WordSpacing, Dimension, TextStyleAttribute::WORD_SPACING);
-    ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
-        TextIndent, Dimension, Dimension(0.0f, DimensionUnit::PX), TextStyleAttribute::RE_CREATE);
-    ACE_DEFINE_TEXT_STYLE(LetterSpacing, Dimension, TextStyleAttribute::LETTER_SPACING);
+    ACE_DEFINE_TEXT_DIMENSION_STYLE(WordSpacing, TextStyleAttribute::WORD_SPACING);
+    ACE_DEFINE_TEXT_DIMENSION_STYLE_WITH_DEFAULT_VALUE(
+        TextIndent, Dimension(0.0f, DimensionUnit::PX), 0.0f, TextStyleAttribute::RE_CREATE);
+    ACE_DEFINE_TEXT_DIMENSION_STYLE(LetterSpacing, TextStyleAttribute::LETTER_SPACING);
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(MaxLines, uint32_t, UINT32_MAX, ParagraphStyleAttribute::MAXLINES);
     // Must use with SetAdaptMinFontSize and SetAdaptMaxFontSize.
-    ACE_DEFINE_TEXT_STYLE(AdaptFontSizeStep, Dimension, TextStyleAttribute::FONT_SIZE);
+    ACE_DEFINE_TEXT_DIMENSION_STYLE(AdaptFontSizeStep, TextStyleAttribute::FONT_SIZE);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(AllowScale, bool, true, TextStyleAttribute::RE_CREATE);
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
         TextOverflow, TextOverflow, TextOverflow::CLIP, ParagraphStyleAttribute::ELLIPSIS);
@@ -603,13 +660,15 @@ public:
 public:
     void SetFontSize(const Dimension& fontSize)
     {
-        if (NearEqual(fontSize, fontSize_)) {
+        auto actualValue = fontSize.ConvertToPxDistribute(GetMinFontScale(), GetMaxFontScale(), IsAllowScale());
+        auto newValue = DimensionWithActual(fontSize, static_cast<float>(actualValue));
+        if (NearEqual(newValue, fontSize_)) {
             return;
         }
-        fontSize_ = fontSize;
+        fontSize_ = newValue;
         reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::FONT_SIZE));
         reLayoutParagraphStyleBitmap_.set(static_cast<int32_t>(ParagraphStyleAttribute::FONT_SIZE));
-        if (lineSpacing_.IsValid() || hasHeightOverride_) {
+        if (lineSpacing_.value.IsValid() || hasHeightOverride_) {
             reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::HEIGHT_SCALE));
             reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::HEIGHT_ONLY));
         }
@@ -617,7 +676,7 @@ public:
 
     const Dimension& GetFontSize() const
     {
-        return fontSize_;
+        return fontSize_.value;
     }
     void ResetTextBaselineOffset()
     {
@@ -658,17 +717,19 @@ public:
 
     const Dimension& GetLineHeight() const
     {
-        return lineHeight_;
+        return lineHeight_.value;
     }
 
     void SetLineHeight(const Dimension& lineHeight, bool hasHeightOverride = true)
     {
-        if (NearEqual(lineHeight, lineHeight_)) {
+        auto actualValue = lineHeight.ConvertToPxDistribute(GetMinFontScale(), GetMaxFontScale(), IsAllowScale());
+        auto newValue = DimensionWithActual(lineHeight, static_cast<float>(actualValue));
+        if (NearEqual(newValue, lineHeight_)) {
             return;
         }
         reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::HEIGHT_SCALE));
         reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::HEIGHT_ONLY));
-        lineHeight_ = lineHeight;
+        lineHeight_ = newValue;
         hasHeightOverride_ = hasHeightOverride;
     }
 
@@ -688,17 +749,19 @@ public:
 
     const Dimension& GetLineSpacing() const
     {
-        return lineSpacing_;
+        return lineSpacing_.value;
     }
 
     void SetLineSpacing(const Dimension& lineSpacing)
     {
-        if (NearEqual(lineSpacing, lineSpacing_)) {
+        auto actualValue = lineSpacing.ConvertToPxDistribute(GetMinFontScale(), GetMaxFontScale(), IsAllowScale());
+        auto newValue = DimensionWithActual(lineSpacing, static_cast<float>(actualValue));
+        if (NearEqual(newValue, lineSpacing_)) {
             return;
         }
         reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::HEIGHT_SCALE));
         reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::HEIGHT_ONLY));
-        lineSpacing_ = lineSpacing;
+        lineSpacing_ = newValue;
     }
 
     bool HasHeightOverride() const
@@ -761,32 +824,36 @@ public:
     // Must use with SetAdaptMaxFontSize.
     void SetAdaptMinFontSize(const Dimension& adaptMinFontSize)
     {
-        if (NearEqual(adaptMinFontSize, adaptMinFontSize_)) {
+        auto actualValue = adaptMinFontSize.ConvertToPxDistribute(GetMinFontScale(), GetMaxFontScale(), IsAllowScale());
+        auto newValue = DimensionWithActual(adaptMinFontSize, static_cast<float>(actualValue));
+        if (NearEqual(newValue, adaptMinFontSize_)) {
             return;
         }
         reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::FONT_SIZE));
-        adaptMinFontSize_ = adaptMinFontSize;
+        adaptMinFontSize_ = newValue;
         adaptTextSize_ = true;
     }
     // Must use with SetAdaptMinFontSize.
     void SetAdaptMaxFontSize(const Dimension& adaptMaxFontSize)
     {
-        if (NearEqual(adaptMaxFontSize, adaptMaxFontSize_)) {
+        auto actualValue = adaptMaxFontSize.ConvertToPxDistribute(GetMinFontScale(), GetMaxFontScale(), IsAllowScale());
+        auto newValue = DimensionWithActual(adaptMaxFontSize, static_cast<float>(actualValue));
+        if (NearEqual(newValue, adaptMaxFontSize_)) {
             return;
         }
         reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::FONT_SIZE));
-        adaptMaxFontSize_ = adaptMaxFontSize;
+        adaptMaxFontSize_ = newValue;
         adaptTextSize_ = true;
     }
 
     const Dimension& GetAdaptMinFontSize() const
     {
-        return adaptMinFontSize_;
+        return adaptMinFontSize_.value;
     }
 
     const Dimension& GetAdaptMaxFontSize() const
     {
-        return adaptMaxFontSize_;
+        return adaptMaxFontSize_.value;
     }
 
     bool IsAllowScale() const
@@ -821,7 +888,7 @@ public:
         const std::optional<NG::SymbolEffectOptions>& oldOptions);
     void SetWhenOnlyOneOptionIsValid(const std::optional<NG::SymbolEffectOptions>& options);
     void SetSymbolEffectOptions(const std::optional<NG::SymbolEffectOptions>& symbolEffectOptions);
- 
+
     const std::optional<NG::SymbolEffectOptions> GetSymbolEffectOptions() const
     {
         return symbolEffectOptions_;
@@ -879,7 +946,7 @@ public:
     {
         return symbolUid_;
     }
- 
+
     void SetSymbolUid(int32_t symbolUid)
     {
         symbolUid_ = symbolUid;
@@ -896,13 +963,13 @@ private:
     std::vector<Dimension> preferFontSizes_;
     std::vector<TextSizeGroup> preferTextSizeGroups_;
     // use 14px for normal font size.
-    Dimension fontSize_ { 14, DimensionUnit::PX };
+    DimensionWithActual fontSize_ { Dimension(14, DimensionUnit::PX), 14.0f };
     FontWeight fontWeight_ { FontWeight::NORMAL };
 
-    Dimension adaptMinFontSize_;
-    Dimension adaptMaxFontSize_;
-    Dimension lineHeight_;
-    Dimension lineSpacing_;
+    DimensionWithActual adaptMinFontSize_;
+    DimensionWithActual adaptMaxFontSize_;
+    DimensionWithActual lineHeight_;
+    DimensionWithActual lineSpacing_;
     Dimension paragraphSpacing_ { 0.0f, DimensionUnit::PX };
     bool hasHeightOverride_ = false;
     bool adaptTextSize_ = false;

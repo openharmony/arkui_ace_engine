@@ -30,8 +30,6 @@ bool MouseStyleManager::SetMouseFormat(int32_t windowId, int32_t nodeId, MouseFo
         "nodeId = " SEC_PLD(%{public}d) ", "
         "mouseFormat = %{public}d, reason = %{public}d", windowId,
         SEC_PARAM(nodeId), mouseFormat, reason);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(pipelineContext, false);
     if (isByPass) {
         return false;
     }
@@ -41,9 +39,6 @@ bool MouseStyleManager::SetMouseFormat(int32_t windowId, int32_t nodeId, MouseFo
     if (!userSetCursor_ && (!mouseStyleNodeId_.has_value() ||
         mouseStyleNodeId_.value() != nodeId)) {
         return false;
-    }
-    if (!windowId) {
-        windowId = static_cast<int32_t>(pipelineContext->GetFocusWindowId());
     }
 
     MouseStyleChangeLog mouseStyleChangeLog;

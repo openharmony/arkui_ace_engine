@@ -75,8 +75,6 @@ public:
     // iterate over L1 keys, not allowed to modify L1
     void ForEachL1IndexUINode(std::map<int32_t, RefPtr<UINode>>& children);
 
-    void RecycleItemsByIndex(int32_t index);
-
     /**
      * for given index get key
      * fetch from TS if not in cache (if allowFetch == true)

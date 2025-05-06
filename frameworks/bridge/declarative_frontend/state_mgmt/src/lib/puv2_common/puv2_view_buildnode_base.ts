@@ -27,6 +27,9 @@ abstract class ViewBuildNodeBase {
     protected childrenWeakrefMap_ = new Map<number, WeakRef<IView>>();
     protected updateFuncByElmtId = new UpdateFuncsByElmtId();
     protected id_: number;
+    // Map elmtId -> Repeat instance in ViewPU or ViewV2
+    protected elmtId2Repeat_: Map<number, RepeatAPI<Object | null | undefined>> =
+        new Map<number, RepeatAPI<Object | null | undefined>>();
     protected static arkThemeScopeManager: ArkThemeScopeManager | undefined = undefined;
   
     public abstract ifElseBranchUpdateFunctionDirtyRetaken(): void;
@@ -141,6 +144,10 @@ abstract class ViewBuildNodeBase {
         for (const reservedChildElmtId of reservedChildElmtIds) {
             this.updateFuncByElmtId.get(reservedChildElmtId)?.setPending(true);
         }
+
+        removedChildElmtIds.forEach((id) => {
+            this.elmtId2Repeat_.delete(id);
+        });
 
         //un-registers the removed child elementIDs using proxy
         UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);

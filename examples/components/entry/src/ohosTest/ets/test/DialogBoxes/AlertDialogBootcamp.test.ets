@@ -56,17 +56,17 @@ export default function AlertDialogBootcampTest() {
         await driver.delayMs(3500);
         console.info(TAG + 'AlertDialogBootcamp001' + ' begin');
 
-        let ListItemGroup :Component[] = await driver.findComponents(ON.type('ListItemGroup'))
-        let width:Point = await ListItemGroup[0].getBoundsCenter()
-        let width2:Point = await ListItemGroup[5].getBoundsCenter()
+        let ListItemGroup: Component[] = await driver.findComponents(ON.type('ListItemGroup'))
+        let width: Point = await ListItemGroup[0].getBoundsCenter()
+        let width2: Point = await ListItemGroup[5].getBoundsCenter()
         await driver.swipe(width.x, width2.y, width.x, width.y, 500)
         await driver.delayMs(2000);
 
-        let atomDisplays:Component = await driver.findComponent(ON.text('弹窗'));
+        let atomDisplays: Component = await driver.findComponent(ON.text('弹窗'));
         await atomDisplays.click();
         await driver.delayMs(2000);
         await driver.swipe(width.x, width2.y, width.x, width.y, 500)
-        
+
 
         let scrollSearch: Component = await driver.findComponent(ON.text('警告弹窗/AlertDialog'))
         await scrollSearch.click()
@@ -1841,7 +1841,6 @@ export default function AlertDialogBootcampTest() {
       })
       done();
     })
-
 
 
   })

@@ -162,6 +162,11 @@ public:
         prevContentMainSize_ = prevContentSize;
     }
 
+    float GetListContentSize() const
+    {
+        return endPos_ - startPos_;
+    }
+
     void ModifyReferencePos(int32_t index, float pos);
 
     void SetNeedAdjustRefPos(bool needAdjust)

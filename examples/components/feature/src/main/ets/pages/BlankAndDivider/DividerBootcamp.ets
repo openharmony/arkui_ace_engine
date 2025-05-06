@@ -1075,7 +1075,7 @@ export struct DividerBootcamp {
             ) + '%'
           }) : null
         )
-        .mask(new ProgressMask(
+        .mask(this.enableCompMask ? new ProgressMask(
           useEnabled(
             this.enableCompMaskValue,
             this.compMaskValue
@@ -1085,7 +1085,8 @@ export struct DividerBootcamp {
             this.enableCompMaskColor,
             this.compMaskColor
           )
-        ))
+        ) : undefined
+        )
         .maskShape(this.enableCompMaskShape ? new Circle({
           width: useEnabled(
             this.enableCompMaskShapeWidth,
@@ -1396,7 +1397,7 @@ export struct DividerBootcamp {
           this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
           return HitTestMode.Default;
         })
-    }
+    }.padding({ left: 10, right: 10 })
   }
 
   @Builder

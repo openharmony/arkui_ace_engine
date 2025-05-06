@@ -267,6 +267,8 @@
       OHOS::Ace::PipelineBase::GetSystemFontList*;
       OHOS::Ace::PipelineBase::GetSystemFont*;
       OHOS::Ace::PipelineBase::GetUIFontConfig*;
+      OHOS::Ace::PipelineBase::GetImageCache*;
+      OHOS::Ace::ImageCache::ClearCacheImgObj*;
       OHOS::Ace::NG::ViewAbstract::*;
       OHOS::Ace::NG::Inspector::*;
       OHOS::Ace::V2::Inspector::*;
@@ -315,6 +317,7 @@
       OHOS::Ace::NG::ServiceCollaborationMenuAceHelper::*;
       OHOS::Ace::NG::ServiceCollaborationAceCallback::*;
       OHOS::Ace::DumpLog::*;
+      OHOS::Ace::NG::UIExtensionAdapter::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;
@@ -392,6 +395,7 @@
       OHOS::Ace::BorderImage::*;
       OHOS::Ace::ContainerScope::*;
       OHOS::Ace::Dimension::*;
+      OHOS::Ace::ImageSource::*;
       OHOS::Ace::ImageSourceInfo::*;
       OHOS::Ace::JsonUtil::*;
       OHOS::Ace::Recorder::*;
@@ -535,6 +539,7 @@
       OHOS::Ace::NG::NGGestureRecognizer::IsInResponseLinkRecognizers*;
       OHOS::Ace::TouchEventTarget::GetAttachedNode*;
       "OHOS::Ace::CheckThread(OHOS::Ace::TaskExecutor::TaskType)";
+      OHOS::Ace::NG::PanRecognizer::GetDistance*;
     };
   local:
     *;

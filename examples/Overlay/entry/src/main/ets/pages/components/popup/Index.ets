@@ -26,6 +26,14 @@ export struct PopupIndex {
   pathStack: NavPathStack = new NavPathStack()
   paths: NavListItem[] = [
     { name: 'Popup', path: 'Popup' },
+    { name: 'popupPositionTest', path: 'popupPositionTest' },
+    { name: 'PopupStyleBuilder', path: 'PopupStyleBuilder' },
+    { name: 'PopupDismissTest', path: 'PopupDismissTest' },
+    { name: 'PopupAdvancedTest', path: 'PopupAdvancedTest' },
+    { name: 'PopupAnimateTest', path: 'PopupAnimateTest' },
+    { name: 'PopupTipTest', path: 'PopupTipTest' },
+    { name: 'PopupDragTest', path: 'PopupDragTest' },
+    { name: 'PopupMessageTest', path: 'PopupMessageTest' },
   ]
 
   build() {

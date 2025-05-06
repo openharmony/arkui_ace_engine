@@ -117,6 +117,7 @@ ace_unittest("accessibility_adapter_test_ng") {
     "js_third_provider_interaction_operation_test.cpp",
     "mock_js_accessibility_manager.cpp",
     "utils/accessibitlity_action_function_utils_test.cpp",
+    "utils/accessibitlity_rect_info_utils_test.cpp",
   ]
   if (is_ohos_standard_system) {
     defines = [ "OHOS_STANDARD_SYSTEM" ]

@@ -62,11 +62,6 @@ public:
         dialogChangeEvent_ = std::move(onChange);
     }
 
-    bool HasSetDialogChange() const
-    {
-        return (dialogChangeEvent_ != nullptr) || (dialogDateChangeEvent_ != nullptr);
-    }
-
     void FireDialogChangeEvent(const std::string& info) const
     {
         if (dialogChangeEvent_) {

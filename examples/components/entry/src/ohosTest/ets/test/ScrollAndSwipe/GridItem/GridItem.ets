@@ -1,5 +1,5 @@
-import { abilityDelegatorRegistry, Driver,Component,ON} from '@kit.TestKit';
-import {Point } from '@ohos.UiTest';
+import { abilityDelegatorRegistry, Driver, Component, ON } from '@kit.TestKit';
+import { Point } from '@ohos.UiTest';
 
 const TAG = 'GridItemBootcamp001'
 
@@ -9,7 +9,7 @@ const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorReg
 /*初始化与UI元素交互的驱动对象*/
 const driver = Driver.create();
 
-export async function GridItemStart(done:Function) {
+export async function GridItemStart(done: Function) {
   await delegator.startAbility({
     bundleName: 'cn.ohos.components',
     abilityName: 'EntryAbility'

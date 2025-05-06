@@ -168,7 +168,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest001, TestSize.Level1)
     FlushUITasks(listNode);
 
     auto listPattern = listNode->GetPattern<ListPattern>();
-    auto eventHub = listNode->GetEventHub<ListEventHub>();
+    auto eventHub = listNode->GetOrCreateEventHub<ListEventHub>();
     eventHub->SetOnScrollFrameBegin([weak = AceType::WeakClaim(AceType::RawPtr(listPattern))]
         (Dimension dy, ScrollState state) {
         auto pattern = weak.Upgrade();
@@ -248,7 +248,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest002, TestSize.Level1)
 
     auto listNode = GetChildFrameNode(rootNode, 1);
     auto listPattern = listNode->GetPattern<ListPattern>();
-    auto eventHub = listNode->GetEventHub<ListEventHub>();
+    auto eventHub = listNode->GetOrCreateEventHub<ListEventHub>();
     eventHub->SetOnScrollFrameBegin([weak = AceType::WeakClaim(AceType::RawPtr(listPattern))]
         (Dimension dy, ScrollState state) {
         auto pattern = weak.Upgrade();
@@ -985,8 +985,11 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest002, TestSize.Level1)
     FlushUITasks(rootNode);
     FlushUITasks(listNode);
     MockAnimationManager::GetInstance().Tick();
+    // skip large offset when backToTop
+    EXPECT_TRUE(listPattern->isNeedCheckOffset_);
     FlushUITasks(rootNode);
     FlushUITasks(listNode);
+    EXPECT_FALSE(listPattern->isNeedCheckOffset_);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -200);
 

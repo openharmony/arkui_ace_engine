@@ -26,6 +26,7 @@ export struct IconBlock {
   @Link icon: ResourceStr;
   @StorageLink('Block') listIconBlockTags: Array<BlockTag> = [];
   @State listIconBlockTagsTemp: Array<BlockTag> = [];
+
   build() {
     Block({
       title: this.title,
@@ -34,7 +35,7 @@ export struct IconBlock {
       IconPalette({
         icon: this.icon,
         title: this.title,
-        onChange: (icon,index) => {
+        onChange: (icon, index) => {
           this.icon = icon;
           if (this.isEnabled) {
             let time = formatDate(new Date(Date.now()))

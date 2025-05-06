@@ -43,6 +43,10 @@ class ArkRefreshComponent extends ArkComponent implements RefreshAttribute {
     modifierWithKey(this._modifiersWithKeys, RefreshOnOffsetChangeModifier.identity, RefreshOnOffsetChangeModifier, callback);
     return this;
   }
+  maxPullDownDistance(value: number): this {
+    modifierWithKey(this._modifiersWithKeys, MaxPullDownDistanceModifier.identity, MaxPullDownDistanceModifier, value);
+    return this;
+  }
 }
 
 class RefreshOffsetModifier extends ModifierWithKey<number> {
@@ -124,6 +128,22 @@ class RefreshOnRefreshingModifier extends ModifierWithKey<() => void> {
     } else {
       getUINativeModule().refresh.setOnRefreshing(node, this.value);
     }
+  }
+}
+class MaxPullDownDistanceModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('maxPullDownDistance');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().refresh.resetMaxPullDownDistance(node);
+    } else {
+      getUINativeModule().refresh.setMaxPullDownDistance(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 // @ts-ignore

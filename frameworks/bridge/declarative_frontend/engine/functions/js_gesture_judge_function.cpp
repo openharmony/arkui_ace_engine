@@ -194,6 +194,8 @@ JSRef<JSObject> JsGestureJudgeFunction::CreateGestureEventObject(
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info->GetSourceTool()));
     obj->SetProperty<double>("deviceId", static_cast<int32_t>(info->GetDeviceId()));
     obj->SetProperty<int32_t>("targetDisplayId", info->GetTargetDisplayId());
+    obj->SetProperty<float>("axisVertical", info->GetVerticalAxis());
+    obj->SetProperty<float>("axisHorizontal", info->GetHorizontalAxis());
 
     JSRef<JSArray> fingerArr = JSRef<JSArray>::New();
     const std::list<FingerInfo>& fingerList = info->GetFingerList();

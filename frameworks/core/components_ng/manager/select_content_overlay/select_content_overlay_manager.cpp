@@ -130,9 +130,14 @@ void SelectContentOverlayManager::FocusFirstFocusableChildInMenu()
     CHECK_NULL_VOID(menuNode);
     auto context = menuNode->GetContext();
     CHECK_NULL_VOID(context);
-    context->AddAfterLayoutTask([weakNode = menuNode_]() {
+    context->AddAfterLayoutTask([weakNode = menuNode_, weakManager = WeakClaim(this)]() {
         auto menuNode = weakNode.Upgrade();
         CHECK_NULL_VOID(menuNode);
+        auto manager = weakManager.Upgrade();
+        CHECK_NULL_VOID(manager);
+        if (!manager->IsMenuShow()) {
+            return;
+        }
         auto firstChild = menuNode->GetFirstChild();
         CHECK_NULL_VOID(firstChild);
         auto focusableNode = FindAccessibleFocusNode(firstChild);
@@ -152,9 +157,14 @@ void SelectContentOverlayManager::NotifyAccessibilityOwner()
     CHECK_NULL_VOID(selectOverlayHolder_);
     auto owner = selectOverlayHolder_->GetOwner();
     CHECK_NULL_VOID(owner);
-    context->AddAfterLayoutTask([weakNode = WeakClaim(RawPtr(owner))]() {
+    context->AddAfterLayoutTask([weakNode = WeakClaim(RawPtr(owner)), weakManager = WeakClaim(this)]() {
         auto owner = weakNode.Upgrade();
         CHECK_NULL_VOID(owner);
+        auto manager = weakManager.Upgrade();
+        CHECK_NULL_VOID(manager);
+        if (!manager->IsMenuShow()) {
+            return;
+        }
         owner->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
     });
 }
@@ -806,14 +816,12 @@ void SelectContentOverlayManager::DestroySelectOverlayNode(const RefPtr<FrameNod
         SubwindowManager::GetInstance()->DeleteSelectOverlayHotAreas(pattern->GetContainerId(), overlay->GetId());
         SubwindowManager::GetInstance()->HideSelectOverlay(pattern->GetContainerId());
     } else {
-        if (shareOverlayInfo_->isUsingMouse && !shareOverlayInfo_->menuInfo.menuBuilder) {
-            auto menuWrapperPattern = overlay->GetPattern<MenuWrapperPattern>();
-            CHECK_NULL_VOID(menuWrapperPattern);
-            if (menuWrapperPattern->GetIsSelectOverlaySubWindowWrapper()) {
-                SubwindowManager::GetInstance()->DeleteSelectOverlayHotAreas(
-                    menuWrapperPattern->GetContainerId(), overlay->GetId());
-                SubwindowManager::GetInstance()->HideSelectOverlay(menuWrapperPattern->GetContainerId());
-            }
+        auto menuWrapperPattern = overlay->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        if (menuWrapperPattern->GetIsSelectOverlaySubWindowWrapper()) {
+            SubwindowManager::GetInstance()->DeleteSelectOverlayHotAreas(
+                menuWrapperPattern->GetContainerId(), overlay->GetId());
+            SubwindowManager::GetInstance()->HideSelectOverlay(menuWrapperPattern->GetContainerId());
         }
     }
 }

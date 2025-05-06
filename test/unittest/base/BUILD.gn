@@ -26,6 +26,7 @@ ace_unittest("geometry_test") {
     "quaternion_test.cpp",
     "subwindow_manager_test.cpp",
     "transform_util_test.cpp",
+    "size_t_test.cpp",
   ]
 }
 
@@ -41,7 +42,11 @@ ace_unittest("util_test") {
     "utf_helper_testone_ng.cpp",
   ]
 
-  external_deps = [ "bounds_checking_function:libsec_shared" ]
+  external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "icu:shared_icui18n",
+    "icu:shared_icuuc",
+  ]
 }
 
 group("base_unittest") {

@@ -3,11 +3,17 @@ import { abilityDelegatorRegistry, Component, Driver, ON } from '@kit.TestKit';
 import {
   buttonClick,
   getToggle,
-  JsonType, KeyStruct, radioClick,
+  JsonType,
+  KeyStruct,
+  radioClick,
   Search,
   searchParentBlock,
   searchToggle,
-  Slide, sliderDrag, titleSearch, ToggleClick } from '../../utils';
+  Slide,
+  sliderDrag,
+  titleSearch,
+  ToggleClick
+} from '../../utils';
 
 const TAG = 'ListItemBootcamp'
 

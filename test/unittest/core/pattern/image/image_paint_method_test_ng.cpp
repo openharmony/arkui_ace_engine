@@ -311,4 +311,44 @@ HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_NormalizeRadius, TestSiz
     EXPECT_NE(imagePaintWrapperRaw_, nullptr);
     imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperRaw_, imageDfxConfig);
 }
+
+/**
+ * @tc.name: ImagePaintMethodTestNg_HdrBrightness
+ * @tc.desc: Test hdrBrightness.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_HdrBrightness, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. create image object
+     */
+    auto frameNode = ImagePaintMethodTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    EXPECT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    EXPECT_NE(imageRenderProperty, nullptr);
+    imageRenderProperty->UpdateHdrBrightness(0.5f);
+    /**
+     * @tc.steps: step2. create ImagePaintMethod.
+     */
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(pattern, nullptr);
+    EXPECT_NE(pattern->loadingCtx_, nullptr);
+    pattern->image_ = pattern->loadingCtx_->MoveCanvasImage();
+    EXPECT_NE(pattern->image_, nullptr);
+    ImagePaintMethodConfig imagePaintMethodConfig_;
+    RefPtr<ImagePaintMethod> imagePaintMethod_ =
+        AceType::MakeRefPtr<ImagePaintMethod>(pattern->image_, imagePaintMethodConfig_);
+    EXPECT_NE(imagePaintMethod_, nullptr);
+    auto imagePaintWrapper_ = frameNode->CreatePaintWrapper();
+    EXPECT_NE(imagePaintWrapper_, nullptr);
+    /**
+     * @tc.steps: step3. call function.
+     */
+    PaintWrapper* imagePaintWrapperRaw_ = AceType::RawPtr(imagePaintWrapper_);
+    EXPECT_NE(imagePaintWrapperRaw_, nullptr);
+    imagePaintMethod_->UpdatePaintConfig(imagePaintWrapperRaw_);
+    auto config = pattern->image_->GetPaintConfig();
+    EXPECT_EQ(config.dynamicMode, DynamicRangeMode::HIGH);
+}
 } // namespace OHOS::Ace::NG

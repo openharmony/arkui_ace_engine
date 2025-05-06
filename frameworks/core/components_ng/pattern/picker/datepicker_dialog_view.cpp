@@ -49,11 +49,9 @@ constexpr double TIME_WIDTH_PERCENT_TWO = 0.6363;
 constexpr Dimension BUTTON_BOTTOM_TOP_MARGIN = 10.0_vp;
 constexpr Dimension LUNARSWITCH_HEIGHT = 48.0_vp;
 constexpr Dimension CHECKBOX_SIZE = 24.0_vp;
-constexpr Dimension PICKER_DIALOG_MARGIN_FORM_EDGE = 24.0_vp;
 constexpr Dimension TITLE_HEIGHT = 40.0_vp;
 constexpr Dimension TITLE_BUTTON_HEIGHT = 32.0_vp;
 constexpr Dimension TITLE_PADDING_HORIZONTAL = 16.0_vp;
-constexpr Dimension PICKER_MARGIN_FROM_TITLE_AND_BUTTON = 8.0_vp;
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
 constexpr int32_t RATIO_SEVEN = 7;
@@ -786,7 +784,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     UpdateConfirmButtonTextLayoutProperty(textLayoutProperty, pickerTheme);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
-    auto buttonConfirmEventHub = buttonConfirmNode->GetEventHub<ButtonEventHub>();
+    auto buttonConfirmEventHub = buttonConfirmNode->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonConfirmEventHub, nullptr);
     buttonConfirmEventHub->SetStateEffect(true);
 
@@ -807,7 +805,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
         CHECK_NULL_VOID(dateNode);
         auto pickerPattern = dateNode->GetPattern<DatePickerPattern>();
         CHECK_NULL_VOID(pickerPattern);
-        auto datePickerEventHub = pickerPattern->GetEventHub<DatePickerEventHub>();
+        auto datePickerEventHub = pickerPattern->GetOrCreateEventHub<DatePickerEventHub>();
         CHECK_NULL_VOID(datePickerEventHub);
         datePickerEventHub->FireDialogAcceptEvent(pickerPattern->GetSelectedObject(true));
     };
@@ -1231,7 +1229,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     CHECK_NULL_RETURN(eventCancelHub, nullptr);
     eventCancelHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(std::move(cancelEvent)));
 
-    auto buttonCancelEventHub = buttonCancelNode->GetEventHub<ButtonEventHub>();
+    auto buttonCancelEventHub = buttonCancelNode->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonCancelEventHub, nullptr);
     buttonCancelEventHub->SetStateEffect(true);
 
@@ -1300,7 +1298,7 @@ void DatePickerDialogView::CreateLunarswitchNode(const RefPtr<FrameNode>& conten
     auto checkbox = FrameNode::CreateFrameNode(
         V2::CHECK_BOX_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<CheckBoxPattern>());
     CHECK_NULL_VOID(checkbox);
-    auto eventHub = checkbox->GetEventHub<CheckBoxEventHub>();
+    auto eventHub = checkbox->GetOrCreateEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(changeEvent));
     auto checkboxPaintProps = checkbox->GetPaintProperty<CheckBoxPaintProperty>();
@@ -1311,18 +1309,22 @@ void DatePickerDialogView::CreateLunarswitchNode(const RefPtr<FrameNode>& conten
     auto checkboxLayoutProps = checkbox->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(checkboxLayoutProps);
     MarginProperty marginCheckbox;
-    marginCheckbox.left = CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE);
-    marginCheckbox.right = CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON);
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    marginCheckbox.left = isRtl ? CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON)
+                                : CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE);
+    marginCheckbox.right = isRtl ? CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE)
+                                 : CalcLength(PICKER_MARGIN_FROM_TITLE_AND_BUTTON);
     checkboxLayoutProps->UpdateMargin(marginCheckbox);
     checkboxLayoutProps->UpdateUserDefinedIdealSize(CalcSize(CalcLength(CHECKBOX_SIZE), CalcLength(CHECKBOX_SIZE)));
     checkbox->MarkModifyDone();
     checkbox->MountToParent(contentRow);
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->SetLunarSwitchCheckbox(checkbox);
 
     auto textNode = CreateLunarSwitchTextNode();
     CHECK_NULL_VOID(textNode);
     textNode->MountToParent(contentRow);
-    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
-    CHECK_NULL_VOID(datePickerPattern);
     datePickerPattern->SetLunarSwitchTextNode(textNode);
 
     contentRow->MountToParent(contentColumn);
@@ -1378,7 +1380,7 @@ void DatePickerDialogView::SetShowLunar(const RefPtr<FrameNode>& frameNode, bool
 void DatePickerDialogView::SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<DatePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDialogChange(std::move(onChange));
 }
@@ -1386,7 +1388,7 @@ void DatePickerDialogView::SetDialogChange(const RefPtr<FrameNode>& frameNode, D
 void DatePickerDialogView::SetDialogDateChange(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<DatePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDialogDateChange(std::move(onChange));
 }
@@ -1394,7 +1396,7 @@ void DatePickerDialogView::SetDialogDateChange(const RefPtr<FrameNode>& frameNod
 void DatePickerDialogView::SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<DatePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDialogAcceptEvent(std::move(onChange));
 }
@@ -1402,7 +1404,7 @@ void DatePickerDialogView::SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNo
 void DatePickerDialogView::SetDialogDateAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<DatePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDialogDateAcceptEvent(std::move(onChange));
 }
@@ -1519,7 +1521,7 @@ void DatePickerDialogView::SetTitleMouseHoverEvent(const RefPtr<FrameNode>& titl
 {
     auto titleButtonNode = AceType::DynamicCast<FrameNode>(titleRow->GetFirstChild());
     CHECK_NULL_VOID(titleButtonNode);
-    auto eventHub = titleButtonNode->GetEventHub<EventHub>();
+    auto eventHub = titleButtonNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     auto mouseTask = [weak = WeakPtr<FrameNode>(titleButtonNode)](bool isHover) {
@@ -1668,7 +1670,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountTimeNode(const DatePickerS
     const RefPtr<FrameNode>& monthDaysNode, const RefPtr<FrameNode>& pickerRow)
 {
     auto timeNode = CreateTimeNode(settingData.timePickerProperty, settingData.properties, settingData.useMilitary);
-    auto timePickerEventHub = timeNode->GetEventHub<TimePickerEventHub>();
+    auto timePickerEventHub = timeNode->GetOrCreateEventHub<TimePickerEventHub>();
     CHECK_NULL_RETURN(timePickerEventHub, nullptr);
     auto timePickerRowPattern = timeNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_RETURN(timePickerRowPattern, nullptr);
@@ -1694,7 +1696,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountTimeNode(const DatePickerS
         auto pickerPattern = monthDaysNode->GetPattern<DatePickerPattern>();
         CHECK_NULL_VOID(pickerPattern);
         auto str = pickerPattern->GetSelectedObject(true);
-        auto datePickerEventHub = pickerPattern->GetEventHub<DatePickerEventHub>();
+        auto datePickerEventHub = pickerPattern->GetOrCreateEventHub<DatePickerEventHub>();
         CHECK_NULL_VOID(datePickerEventHub);
         datePickerEventHub->FireDialogChangeEvent(str);
     };
@@ -1997,6 +1999,7 @@ void DatePickerDialogView::UpdateButtonDefaultFocus(
 RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<void()>& switchEvent,
     const RefPtr<FrameNode>& dateNode, const std::vector<ButtonInfo>& buttonInfos, const RefPtr<FrameNode>& contentRow)
 {
+    CHECK_NULL_RETURN(dateNode, nullptr);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
@@ -2009,13 +2012,16 @@ RefPtr<FrameNode> DatePickerDialogView::CreateNextPrevButtonNode(std::function<v
     CHECK_NULL_RETURN(textNextPrevNode, nullptr);
     auto textLayoutProperty = textNextPrevNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_RETURN(datePickerPattern, nullptr);
+    datePickerPattern->SetNextPrevButtonNode(nextPrevButtonNode);
     textLayoutProperty->UpdateContent(GetDialogAgingButtonText(true));
     textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     textLayoutProperty->UpdateFontSize(
         ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize()));
     textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
     textNextPrevNode->MountToParent(nextPrevButtonNode);
-    auto nextPrevEventHub = nextPrevButtonNode->GetEventHub<ButtonEventHub>();
+    auto nextPrevEventHub = nextPrevButtonNode->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(nextPrevEventHub, nullptr);
     nextPrevEventHub->SetStateEffect(true);
     auto buttonNextPrevLayoutProperty = nextPrevButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
@@ -2073,6 +2079,8 @@ std::function<void(const GestureEvent&)> DatePickerDialogView::CreateNextPrevCli
         CHECK_NULL_VOID(nextPrevButtonNode);
         auto dialogTheme = dialogThemeWeak.Upgrade();
         CHECK_NULL_VOID(dialogTheme);
+        auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+        CHECK_NULL_VOID(datePickerPattern);
         auto buttonNextPrevLayoutProperty
                                 = nextPrevButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
         if (!switchFlag_ && isShowTime_) {
@@ -2086,6 +2094,7 @@ std::function<void(const GestureEvent&)> DatePickerDialogView::CreateNextPrevCli
             }
             UpdateCancelButtonMargin(buttonNextPrevLayoutProperty, dialogTheme);
             textLayoutProperty->UpdateContent(GetDialogAgingButtonText(false));
+            datePickerPattern->SetIsNext(false);
         } else {
             if (!isShowTime_) {
                 ShowContentRowButton(contentRow, true);

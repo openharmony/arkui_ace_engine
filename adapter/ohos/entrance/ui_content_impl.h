@@ -438,8 +438,6 @@ private:
     void InitializeSafeArea(const RefPtr<Platform::AceContainer>& container);
     void InitializeDisplayAvailableRect(const RefPtr<Platform::AceContainer>& container);
 
-    void InitDragSummaryMap(const RefPtr<Platform::AceContainer>& container);
-
     RefPtr<PopupParam> CreateCustomPopupParam(bool isShow, const CustomPopupUIExtensionConfig& config);
     void OnPopupStateChange(const std::string& event, const CustomPopupUIExtensionConfig& config, int32_t nodeId);
     void SetCustomPopupConfig(int32_t nodeId, const CustomPopupUIExtensionConfig& config, int32_t popupId);
@@ -455,6 +453,8 @@ private:
     bool GetWindowSizeChangeReason(OHOS::Rosen::WindowSizeChangeReason lastReason,
         OHOS::Rosen::WindowSizeChangeReason reason);
     void ChangeDisplayAvailableAreaListener(uint64_t displayId);
+    void ConvertDecorButtonStyle(const Rosen::DecorButtonStyle& buttonStyle,
+        Ace::DecorButtonStyle& decorButtonStyle);
     void SetAceApplicationInfo(std::shared_ptr<OHOS::AbilityRuntime::Context> &context);
     void SetDeviceProperties();
     RefPtr<Platform::AceContainer> CreateContainer(

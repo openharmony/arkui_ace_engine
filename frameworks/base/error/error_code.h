@@ -101,6 +101,13 @@ constexpr int32_t ERROR_CODE_TOAST_NOT_FOUND = 103401;
 // XComponent error code
 constexpr int32_t ERROR_CODE_XCOMPONENT_STATE_INVALID = 103501;
 
+// Video error Code
+constexpr int32_t ERROR_CODE_VIDEO_CREATE_PLAYER_FAILED = 103601;
+constexpr int32_t ERROR_CODE_VIDEO_SOURCE_INVALID = 103602;
+
+// Canvas error code
+constexpr int32_t ERROR_CODE_CANVAS_PARAM_INVALID = 103701;
+
 // BindSheet error code
 constexpr int32_t ERROR_CODE_BIND_SHEET_CONTENT_ERROR = 120001;
 constexpr int32_t ERROR_CODE_BIND_SHEET_CONTENT_ALREADY_EXIST = 120002;

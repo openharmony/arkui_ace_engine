@@ -268,7 +268,7 @@ void SwiperModelNG::SetOnGestureSwipe(GestureSwipeEvent&& onGestureSwipe)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(swiperNode);
-    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    auto eventHub = swiperNode->GetOrCreateEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     eventHub->SetGestureSwipeEvent(
@@ -855,7 +855,7 @@ void SwiperModelNG::SetOnAnimationEnd(FrameNode* frameNode, AnimationEndEvent&& 
 void SwiperModelNG::SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& onGestureSwipe)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<SwiperEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetGestureSwipeEvent(
         [event = std::move(onGestureSwipe)](int32_t index, const AnimationCallbackInfo& info) {

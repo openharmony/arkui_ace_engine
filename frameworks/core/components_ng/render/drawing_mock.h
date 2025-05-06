@@ -113,6 +113,7 @@ using RSColorSpace = Testing::TestingColorSpace;
 using RSData = Testing::TestingData;
 using RSRecordingCanvas = Testing::TestingRecordingCanvas;
 using RSDrawCmdList = Testing::TestingDrawCmdList;
+using RSHybridRenderType = Testing::TestingHybridRenderType;
 using RSFilterMode = Testing::FilterMode;
 using RSMipmapMode = Testing::MipmapMode;
 using RSRecordingPath = Testing::TestingPath;

@@ -72,7 +72,7 @@ void ImageAnimatorPattern::SetShowingIndex(int32_t index)
     CHECK_NULL_VOID(imageFrameNode);
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    if (index >= static_cast<int32_t>(images_.size())) {
+    if (index >= static_cast<int32_t>(images_.size()) || index < 0) {
         LOGW("ImageAnimator update index error, index: %{public}d, size: %{public}zu", index, images_.size());
         return;
     }
@@ -410,7 +410,7 @@ void ImageAnimatorPattern::OnAttachToFrameNode()
 
 void ImageAnimatorPattern::UpdateEventCallback()
 {
-    auto eventHub = GetEventHub<ImageAnimatorEventHub>();
+    auto eventHub = GetOrCreateEventHub<ImageAnimatorEventHub>();
     CHECK_NULL_VOID(eventHub);
 
     controlledAnimator_->ClearAllListeners();
@@ -532,7 +532,7 @@ int32_t ImageAnimatorPattern::GetNextIndex(int32_t preIndex)
 void ImageAnimatorPattern::AddImageLoadSuccessEvent(const RefPtr<FrameNode>& imageFrameNode)
 {
     CHECK_NULL_VOID(imageFrameNode);
-    auto eventHub = imageFrameNode->GetEventHub<ImageEventHub>();
+    auto eventHub = imageFrameNode->GetOrCreateEventHub<ImageEventHub>();
     eventHub->SetOnComplete(
         [weakImage = WeakPtr<FrameNode>(imageFrameNode), weak = WeakClaim(this)](const LoadImageSuccessEvent& info) {
             if (info.GetLoadingStatus() != 1) {

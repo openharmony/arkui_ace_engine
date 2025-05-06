@@ -988,18 +988,28 @@ class ImageMenuItem extends ViewPU {
             return m30;
         }
     }
+
     getAccessibilityReadText() {
         if (this.item.value === PUBLIC_BACK) {
-            return getContext()?.resourceManager?.getStringByNameSync('icon_back');
-        }
-        else if (this.item.value === PUBLIC_MORE) {
-            return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
-        }
-        else if (this.item.accessibilityText) {
-            return this.toStringFormat(this.item.accessibilityText);
-        }
-        else if (this.item.label) {
-            return this.toStringFormat(this.item.label);
+            try {
+                return getContext()?.resourceManager?.getStringByNameSync('icon_back');
+            } catch (n30) {
+                let o30 = n30?.code;
+                let p30 = n30?.message;
+                hilog.error(0x3900, 'Ace', `Faild to SelectTitleBar toStringFormat icon_back,code: ${o30},message:${p30}`);
+            }
+        } else if (this.item.value === PUBLIC_MORE) {
+            try {
+                return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
+            } catch (n30) {
+                let o30 = n30?.code;
+                let p30 = n30?.message;
+                hilog.error(0x3900, 'Ace', `Faild to SelectTitleBar toStringFormat ohos_toolbar_more,code: ${o30},message:${p30}`);
+            }
+        } else if (this.item.accessibilityText) {
+            return this.item.accessibilityText;
+        } else if (this.item.label) {
+            return this.item.label;
         }
         return ' ';
     }
@@ -1021,7 +1031,7 @@ class ImageMenuItem extends ViewPU {
                         Button.createWithChild({ type: ButtonType.Normal, stateEffect: this.item.isEnabled });
                         Button.accessibilityText(this.getAccessibilityReadText());
                         Button.accessibilityLevel(this.item?.accessibilityLevel ?? 'auto');
-                        Button.accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription));
+                        Button.accessibilityDescription(this.item?.accessibilityDescription);
                         Button.width(ImageMenuItem.imageHotZoneWidth);
                         Button.height(ImageMenuItem.imageHotZoneWidth);
                         Button.borderRadius(ImageMenuItem.buttonBorderRadius);
@@ -1145,7 +1155,7 @@ class ImageMenuItem extends ViewPU {
                         Button.createWithChild({ type: ButtonType.Normal, stateEffect: this.item.isEnabled });
                         Button.accessibilityText(this.getAccessibilityReadText());
                         Button.accessibilityLevel(this.item?.accessibilityLevel ?? 'auto');
-                        Button.accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription));
+                        Button.accessibilityDescription(this.item?.accessibilityDescription);
                         Button.width(ImageMenuItem.imageHotZoneWidth);
                         Button.height(ImageMenuItem.imageHotZoneWidth);
                         Button.borderRadius(ImageMenuItem.buttonBorderRadius);

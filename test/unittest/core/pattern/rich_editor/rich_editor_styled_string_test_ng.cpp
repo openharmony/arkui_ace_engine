@@ -45,7 +45,7 @@ HWTEST_F(RichEditorStyledStringTestNg, RichEditorModel001, TestSize.Level1)
     ASSERT_NE(richEditorNode, nullptr);
     auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     /**
@@ -917,30 +917,6 @@ HWTEST_F(RichEditorStyledStringTestNg, UpdateSpanStyle001, TestSize.Level1)
     ImageSpanAttribute imageStyle;
     richEditorController->UpdateSpanStyle(5, 10, textStyle, imageStyle);
     EXPECT_FALSE(richEditorPattern->updateSpanStyle_.useThemeFontColor);
-}
-
-/**
- * @tc.name: HandleOnDragDropStyledString001
- * @tc.desc: test HandleOnDragDropStyledString
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorStyledStringTestNg, HandleOnDragDropStyledString001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    ASSERT_NE(event, nullptr);
-    RefPtr<UnifiedData> unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
-    ASSERT_NE(unifiedData, nullptr);
-    std::string selectedStr = "test123";
-    OHOS::Ace::UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
-    event->SetData(unifiedData);
-    richEditorPattern->HandleOnDragDropStyledString(event);
-    EXPECT_NE(event->GetData(), nullptr);
 }
 
 /**

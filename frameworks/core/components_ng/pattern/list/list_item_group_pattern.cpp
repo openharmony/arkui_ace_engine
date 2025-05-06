@@ -120,7 +120,7 @@ RefPtr<NodePaintMethod> ListItemGroupPattern::CreateNodePaintMethod()
     auto divider = layoutProperty->GetDivider().value_or(itemDivider);
     auto drawVertical = (axis_ == Axis::HORIZONTAL);
     ListItemGroupPaintInfo listItemGroupPaintInfo { layoutDirection_, mainSize_, drawVertical, lanes_,
-        spaceWidth_, laneGutter_, itemTotalCount_ };
+        spaceWidth_, laneGutter_, itemTotalCount_, listContentSize_ };
     return MakeRefPtr<ListItemGroupPaintMethod>(
         divider, listItemGroupPaintInfo, itemPosition_, cachedItemPosition_, pressedItem_);
 }
@@ -171,6 +171,7 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     endFooterPos_ = layoutAlgorithm->GetEndFooterPos();
     adjustRefPos_ = layoutAlgorithm->GetAdjustReferenceDelta();
     adjustTotalSize_ = layoutAlgorithm->GetAdjustTotalSize();
+    listContentSize_ = layoutAlgorithm->GetListContentSize();
     layouted_ = true;
     CheckListDirectionInCardStyle();
     auto host = GetHost();
@@ -180,7 +181,7 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
         accessibilityProperty->SetCollectionItemCounts(layoutAlgorithm->GetTotalItemCount());
     }
     auto listLayoutProperty = host->GetLayoutProperty<ListItemGroupLayoutProperty>();
-    return listLayoutProperty && listLayoutProperty->GetDivider().has_value() && !itemPosition_.empty();
+    return listLayoutProperty && listLayoutProperty->GetDivider().has_value();
 }
 
 float ListItemGroupPattern::GetPaddingAndMargin() const

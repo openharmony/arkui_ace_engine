@@ -18,7 +18,7 @@
 #include "test/mock/base/mock_subwindow.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_interaction_interface.h"
-
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 
 using namespace testing;
@@ -1302,5 +1303,106 @@ HWTEST_F(GestureEventHubTestNg, CheckNeedDragDropFrameworkStatus_001, TestSize.L
     guestureEventHub->InitDragDropEvent();
     auto frameNode1 = guestureEventHub->GetFrameNode();
     EXPECT_EQ(frameNode1->GetTag(), "Web");
+}
+
+/**
+ * @tc.name: UpdateMenuNode001
+ * @tc.desc: Test UpdateMenuNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, UpdateMenuNode001, TestSize.Level1)
+{
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto targetNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(targetNode, nullptr);
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    targetNode->MountToParent(rootNode);
+    textNode->MountToParent(targetNode);
+    MenuParam menuParam;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.previewMode = MenuPreviewMode::CUSTOM;
+    auto customNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(customNode, nullptr);
+    auto customGeometryNode = customNode->GetGeometryNode();
+    ASSERT_NE(customGeometryNode, nullptr);
+    customGeometryNode->SetFrameSize(SizeF(0.0f, 0.0f));
+    auto menuWrapperNode =
+        MenuView::Create(textNode, targetNode->GetId(), V2::TEXT_ETS_TAG, menuParam, true, customNode);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto menuPreviewNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(menuPreviewNode, nullptr);
+    PreparedInfoForDrag data;
+    DragPreviewOption previewOption;
+    previewOption.sizeChangeEffect = DraggingSizeChangeEffect::DEFAULT;
+    frameNode->SetDragPreviewOptions(previewOption);
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    guestureEventHub->UpdateMenuNode(menuWrapperNode, data, frameNode);
+    previewOption.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_TRANSITION;
+    frameNode->SetDragPreviewOptions(previewOption);
+    data.menuPreviewNode = menuPreviewNode;
+    guestureEventHub->UpdateMenuNode(menuWrapperNode, data, frameNode);
+    RectF RECT(0.0f, 0.0f, 0.0f, 0.0f);
+    EXPECT_EQ(data.frameNodeRect, RECT);
+    EXPECT_EQ(data.menuRect, RECT);
+    EXPECT_EQ(data.menuPositionLeft, 0.0f);
+    EXPECT_EQ(data.menuPositionTop, 0.0f);
+    EXPECT_EQ(data.menuPositionRight, 0.0f);
+    EXPECT_EQ(data.menuPositionBottom, 0.0f);
+}
+
+/**
+ * @tc.name: UpdateMenuNode002
+ * @tc.desc: Test UpdateMenuNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, UpdateMenuNode002, TestSize.Level1)
+{
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto targetNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(targetNode, nullptr);
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    targetNode->MountToParent(rootNode);
+    textNode->MountToParent(targetNode);
+    MenuParam menuParam;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.previewMode = MenuPreviewMode::CUSTOM;
+    auto customNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(customNode, nullptr);
+    auto customGeometryNode = customNode->GetGeometryNode();
+    ASSERT_NE(customGeometryNode, nullptr);
+    customGeometryNode->SetFrameSize(SizeF(0.0f, 0.0f));
+    auto menuWrapperNode =
+        MenuView::Create(textNode, targetNode->GetId(), V2::TEXT_ETS_TAG, menuParam, true, customNode);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    PreparedInfoForDrag data;
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    DragPreviewOption previewOption;
+    previewOption.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_TRANSITION;
+    frameNode->SetDragPreviewOptions(previewOption);
+    guestureEventHub->UpdateMenuNode(menuWrapperNode, data, frameNode);
+    RectF RECT(0.0f, 0.0f, 0.0f, 0.0f);
+    EXPECT_EQ(data.frameNodeRect, RECT);
+    EXPECT_EQ(data.menuRect, RECT);
+    EXPECT_EQ(data.menuPositionLeft, 0.0f);
+    EXPECT_EQ(data.menuPositionTop, 0.0f);
+    EXPECT_EQ(data.menuPositionRight, 0.0f);
+    EXPECT_EQ(data.menuPositionBottom, 0.0f);
 }
 } // namespace OHOS::Ace::NG

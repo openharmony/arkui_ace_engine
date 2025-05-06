@@ -56,24 +56,23 @@ export default function BindMenuBootcampTest() {
         await driver.delayMs(3500);
         console.info(TAG + 'BindMenuBootcamp001' + ' begin');
 
-        let ListItemGroup :Component[] = await driver.findComponents(ON.type('ListItemGroup'))
-        let width:Point = await ListItemGroup[0].getBoundsCenter()
-        let width2:Point = await ListItemGroup[5].getBoundsCenter()
+        let ListItemGroup: Component[] = await driver.findComponents(ON.type('ListItemGroup'))
+        let width: Point = await ListItemGroup[0].getBoundsCenter()
+        let width2: Point = await ListItemGroup[5].getBoundsCenter()
         await driver.swipe(width.x, width2.y, width.x, width.y, 500)
         await driver.delayMs(2000);
 
-        let atomDisplays:Component = await driver.findComponent(ON.text('弹窗'));
+        let atomDisplays: Component = await driver.findComponent(ON.text('弹窗'));
         await atomDisplays.click();
         await driver.delayMs(2000);
         await driver.swipe(width.x, width2.y, width.x, width.y, 500)
 
 
-        let ListItemGroup1 :Component[] = await driver.findComponents(ON.type('ListItem'))
-        let width3:Point = await ListItemGroup1[0].getBoundsCenter()
-        let width4:Point = await ListItemGroup1[5].getBoundsCenter()
+        let ListItemGroup1: Component[] = await driver.findComponents(ON.type('ListItem'))
+        let width3: Point = await ListItemGroup1[0].getBoundsCenter()
+        let width4: Point = await ListItemGroup1[5].getBoundsCenter()
         await driver.swipe(width3.x, width4.y, width3.x, width3.y, 500)
         await driver.delayMs(2000);
-
 
 
         let scrollSearch: Component = await driver.findComponent(ON.text('菜单/Menu'))

@@ -46,6 +46,7 @@ private:
     void InitConnectServer();
     void CloseConnectServerSo();
     bool CheckDebugVersion();
+    bool InitSuccess() const;
     std::string GetInstanceMapMessage(const char* messageType, int32_t instanceId, const std::string& language = "");
 
     mutable std::mutex mutex_;

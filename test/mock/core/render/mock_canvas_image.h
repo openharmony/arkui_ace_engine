@@ -31,6 +31,11 @@ public:
     MOCK_CONST_METHOD0(GetWidth, int32_t());
     MOCK_CONST_METHOD0(GetHeight, int32_t());
 
+    bool IsHdrPixelMap() override
+    {
+        return true;
+    }
+
     void SetRedrawCallback(std::function<void()>&& callback)  override
     {
         redrawCallback_ = callback;

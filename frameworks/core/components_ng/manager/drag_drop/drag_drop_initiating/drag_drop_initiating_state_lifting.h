@@ -42,6 +42,7 @@ public:
     void HandleSequenceOnActionCancel(const GestureEvent& info) override;
     void HandleTouchEvent(const TouchEvent& touchEvent) override;
     void HandleReStartDrag(const GestureEvent& info) override;
+    void HandlePreDragStatus(const PreDragStatus preDragStatus) override;
 
     void Init(int32_t currentState) override;
 
@@ -57,7 +58,6 @@ private:
     void SetPixelMap();
     void SetGatherAnimation(const RefPtr<PipelineBase>& context);
     void SetGatherAnimation();
-    void ResetNodeInMultiDrag();
     void SetTextAnimation();
 };
 } // namespace OHOS::Ace::NG

@@ -115,7 +115,7 @@ public:
                 swiperPattern->GetAttr<Color>("indicator_color_focused_selected", Color::TRANSPARENT);
             theme->scaleSwiper_ = swiperPattern->GetAttr<double>("indicator_scale_swiper", INDICATOR_ZOOM_IN_SCALE);
             theme->indicatorFocusedPadding_ = swiperPattern->GetAttr<Dimension>("indicator_focused_padding", 0.0_vp);
-            theme->clipToBounds_ = static_cast<bool>(swiperPattern->GetAttr<int>("clip_bounds", 0));
+            theme->clipToBounds_ = static_cast<bool>(swiperPattern->GetAttr<int>("clip_bounds", 1));
             theme->focusStyleType_ = swiperPattern->GetAttr<int>("swiper_focus_style_type", 0);
             theme->size_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_size", 0.0_vp);
             theme->selectedSize_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_selected_size", 0.0_vp);
@@ -686,7 +686,7 @@ private:
     float scaleSwiper_ = INDICATOR_ZOOM_IN_SCALE;
     Dimension indicatorPaddingDot_;
     Dimension indicatorFocusedPadding_;
-    bool clipToBounds_ = false;
+    bool clipToBounds_ = true;
     int focusStyleType_ = 0;
 #ifdef SUPPORT_DIGITAL_CROWN
     double slowVelocityThreshold_ = 0.0f;

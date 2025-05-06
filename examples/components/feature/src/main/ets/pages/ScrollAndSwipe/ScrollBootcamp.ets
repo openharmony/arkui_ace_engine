@@ -1509,6 +1509,7 @@ export struct ScrollBootcamp {
           .onScrollStop(() => {
             this.compEventTriggeredLog('滚动停止时触发,onScrollStop事件')
           })
+
           // .backToTop(useEnabled(this.enableBackToTop, this.backToTop))
         }.tabBar(this.tabBuilder(0, '竖直布局'))
 
@@ -2237,6 +2238,7 @@ export struct ScrollBootcamp {
           .onScrollStop(() => {
             this.compEventTriggeredLog('滚动停止时触发,onScrollStop事件')
           })
+
           // .backToTop(useEnabled(this.enableBackToTop, this.backToTop))
         }.tabBar(this.tabBuilder(1, '水平布局'))
       }
@@ -3041,6 +3043,7 @@ export struct ScrollBootcamp {
     .id('scroll')
     .height('52%')
   }
+
   @Builder
   popupBuilder() {
     Row() {

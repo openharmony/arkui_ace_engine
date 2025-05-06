@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@ export struct PopupBootcamp {
   @Require @Prop title: ResourceStr;
   @State showParameters: boolean = false;
   @State isShow: boolean = false;
-  @State enableIconImage: boolean = false;
+  @State enableIconImage: boolean = true;
   @State iconImage: ResourceStr = $r('app.media.startIcon');
   @State enableIconWidth: boolean = false;
   @State iconWidth: number = 32;
@@ -32,6 +32,8 @@ export struct PopupBootcamp {
   @State iconFillColor: Color = Color.White;
   @State enableIconBorderRadius: boolean = false;
   @State iconBorderRadius: number = 16;
+  @State enableTitle: boolean = true;
+  @State showTitle: string = 'This is a popup with PopupOptions';
   @State enableTitleFontWeight: boolean = false;
   @State titleFontWeight: FontWeight = FontWeight.Normal;
   @State enableTitleFontSize: boolean = false;
@@ -44,6 +46,10 @@ export struct PopupBootcamp {
   @State messageFontColor: Color = Color.Black;
   @State enableShowClose: boolean = false;
   @State showClose: boolean = false;
+  @State enableButtonsConfirm: boolean = true;
+  @State showButtonsConfirmText: string = 'confirm';
+  @State enableButtonsCancel: boolean = true;
+  @State showButtonsCancelText: string = 'cancel';
   @State enableButtonsConfirmFontSize: boolean = false;
   @State buttonsConfirmFontSize: number = 15;
   @State enableButtonsConfirmFontColor: boolean = false;
@@ -52,6 +58,7 @@ export struct PopupBootcamp {
   @State buttonsCancelFontSize: number = 15;
   @State enableButtonsCancelFontColor: boolean = false;
   @State buttonsCancelFontColor: ResourceColor = Color.Black;
+  @State currentDirection: Direction = Direction.Rtl
   @State scrollShow: number = 0
   scroller: Scroller = new Scroller()
 
@@ -84,6 +91,7 @@ export struct PopupBootcamp {
     Row() {
       Popup({
         //PopupIconOptions 类型设置图标内容
+        direction: this.currentDirection,
         icon: {
           image: useEnabled(this.enableIconImage, this.iconImage),
           width: useEnabled(this.enableIconWidth, this.iconWidth),
@@ -93,7 +101,7 @@ export struct PopupBootcamp {
         } as PopupIconOptions,
         // PopupTextOptions 类型设置文字内容
         title: {
-          text: 'This is a popup with PopupOptions',
+          text: useEnabled(this.enableTitle, this.showTitle),
           fontSize: useEnabled(this.enableTitleFontSize, this.titleFontSize),
           fontColor: useEnabled(this.enableTitleFontColor, this.titleFontColor),
           fontWeight: useEnabled(this.enableTitleFontWeight, this.titleFontWeight),
@@ -110,7 +118,7 @@ export struct PopupBootcamp {
         },
         // PopupButtonOptions 类型设置按钮内容
         buttons: [{
-          text: 'confirm',
+          text: useEnabled(this.enableButtonsConfirm, this.showButtonsConfirmText),
           action: () => {
             console.info('confirm button click')
           },
@@ -118,13 +126,13 @@ export struct PopupBootcamp {
           fontColor: useEnabled(this.enableButtonsConfirmFontColor, this.buttonsConfirmFontColor),
         },
           {
-            text: 'cancel',
+            text: useEnabled(this.enableButtonsCancel, this.showButtonsCancelText),
             action: () => {
               console.info('cancel button click')
             },
             fontSize: useEnabled(this.enableButtonsCancelFontSize, this.buttonsCancelFontSize),
             fontColor: useEnabled(this.enableButtonsCancelFontColor, this.buttonsCancelFontColor),
-          },] as [PopupButtonOptions?, PopupButtonOptions?],
+          }] as [PopupButtonOptions?, PopupButtonOptions?],
       })
     }.justifyContent(FlexAlign.Center)
   }
@@ -177,6 +185,12 @@ export struct PopupBootcamp {
           max: 24,
         })
 
+        RadioBlock({
+          title: 'title',
+          isEnabled: $enableTitle,
+          value: $showTitle
+        })
+
         ColorBlock({
           title: 'title.fontColor',
           isEnabled: $enableTitleFontColor,
@@ -217,6 +231,18 @@ export struct PopupBootcamp {
           value: $messageFontSize,
           min: 0,
           max: 24,
+        })
+
+        RadioBlock({
+          title: 'buttons.confirm',
+          isEnabled: $enableButtonsConfirm,
+          value: $showButtonsConfirmText
+        })
+
+        RadioBlock({
+          title: 'buttons.cancel',
+          isEnabled: $enableButtonsCancel,
+          value: $showButtonsCancelText
         })
 
         ColorBlock({

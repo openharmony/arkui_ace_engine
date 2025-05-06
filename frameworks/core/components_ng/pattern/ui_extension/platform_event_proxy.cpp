@@ -61,7 +61,7 @@ void PlatformEventProxy::SetEventProxyFlag(int32_t flag)
 {
     auto host = host_.Upgrade();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);

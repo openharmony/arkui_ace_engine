@@ -30,7 +30,9 @@ import {
   getToggle
 } from '../../../utils';
 import { RadioTest } from './RadioTest.test'
+
 const driver = Driver.create();
+
 export default function RadioTest1() {
   describe('RadioTest1', () => {
     beforeAll(async (done: Function) => {

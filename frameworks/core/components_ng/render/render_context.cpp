@@ -48,7 +48,7 @@ void RenderContext::RequestNextFrame() const
         requestFrame_();
         auto node = GetHost();
         CHECK_NULL_VOID(node);
-        auto eventHub = node->GetEventHubOnly<NG::EventHub>();
+        auto eventHub = node->GetEventHub<NG::EventHub>();
         if (node->GetInspectorId().has_value() || (eventHub && eventHub->HasNDKDrawCompletedCallback())) {
             auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
             CHECK_NULL_VOID(pipeline);

@@ -1567,7 +1567,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternhasSceneChanged, TestSize.Level1)
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(imagePattern, nullptr);
     bool b = imagePattern->hasSceneChanged();
-    EXPECT_FALSE(b);
+    EXPECT_TRUE(b);
 }
 
 /**
@@ -1717,7 +1717,7 @@ void ImagePatternMethods01()
     EXPECT_EQ(imagePattern->IsSupportImageAnalyzerFeature(), false);
     auto frameNodePtr = AceType::Claim(frameNode);
     imagePattern->AddImageLoadSuccessEvent(frameNodePtr);
-    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ImageEventHub>();
     EXPECT_NE(eventHub->completeEvent_, nullptr);
     LoadImageSuccessEvent loadImageSuccessEvent(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT, WIDTH, HEIGHT);
     eventHub->FireCompleteEvent(loadImageSuccessEvent);
@@ -1935,6 +1935,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternControlAnimation0053, TestSize.Level1)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
+    frameNode->onMainTree_ = true;
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     imagePattern->status_ = AnimatorStatus::IDLE;
     imagePattern->ControlAnimation(2);

@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_modifier.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_method.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
+#include "core/components_ng/pattern/overlay/group_manager.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -60,7 +61,7 @@ public:
         CHECK_NULL_RETURN(host, nullptr);
         auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
         paintProperty->SetHost(host);
-        auto eventHub = host->GetEventHub<EventHub>();
+        auto eventHub = host->GetOrCreateEventHub<EventHub>();
         CHECK_NULL_RETURN(eventHub, nullptr);
         auto enabled = eventHub->IsEnabled();
         if (!checkBoxGroupModifier_) {
@@ -154,7 +155,7 @@ public:
         }
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto checkBoxEventHub = host->GetEventHub<NG::CheckBoxGroupEventHub>();
+        auto checkBoxEventHub = host->GetOrCreateEventHub<NG::CheckBoxGroupEventHub>();
         auto group = checkBoxEventHub ? checkBoxEventHub->GetGroupName() : "";
         json->PutExtAttr("group", group.c_str(), filter);
     }

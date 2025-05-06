@@ -120,7 +120,7 @@ void ImageAnimatorPatternTestNg::GetInstance()
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     pattern_ = frameNode_->GetPattern<ImageAnimatorPattern>();
-    eventHub_ = frameNode_->GetEventHub<ImageAnimatorEventHub>();
+    eventHub_ = frameNode_->GetOrCreateEventHub<ImageAnimatorEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty();
 }
 
@@ -324,7 +324,7 @@ HWTEST_F(ImageAnimatorPatternTestNg, AddImageLoadSuccessEvent, TestSize.Level1)
     LoadImageSuccessEvent loadImageSuccessEvent(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT, WIDTH, HEIGHT, 1);
     LoadImageSuccessEvent loadImageSuccessEventError(IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT, WIDTH, HEIGHT, 0);
     pattern_->AddImageLoadSuccessEvent(newImageNode);
-    auto imageEventHub = newImageNode->GetEventHub<NG::ImageEventHub>();
+    auto imageEventHub = newImageNode->GetOrCreateEventHub<NG::ImageEventHub>();
     imageEventHub->FireCompleteEvent(loadImageSuccessEvent);
     imageEventHub->FireCompleteEvent(loadImageSuccessEventError);
     pattern_->nowImageIndex_ = 10;

@@ -375,6 +375,9 @@ void Scrollable::HandleCrownEvent(const CrownEvent& event, const OffsetF& center
 
 void Scrollable::HandleCrownActionBegin(const TimeStamp& timeStamp, double mainDelta, GestureEvent& info)
 {
+    if (isDragging_) {
+        return;
+    }
     accumulativeCrownPx_.Reset();
     crownVelocityTracker_.Reset();
     UpdateCrownVelocity(timeStamp, mainDelta, false);
@@ -1462,7 +1465,7 @@ double Scrollable::CalcNextStep(double position, double mainDelta)
         return nextStep_.value();
     }
     if (LessOrEqual(std::abs(mainDelta), SCROLL_SNAP_MIN_STEP)) {
-        nextStep_ = Positive(mainDelta) ? SCROLL_SNAP_MIN_STEP : -SCROLL_SNAP_MIN_STEP;
+        nextStep_ = Positive(finalDelta) ? SCROLL_SNAP_MIN_STEP : -SCROLL_SNAP_MIN_STEP;
         mainDelta = nextStep_.value();
     }
     return mainDelta;
@@ -1494,6 +1497,7 @@ void Scrollable::ProcessScrollMotion(double position, int32_t source)
     if (!moved_) {
         ResetContinueDragCount();
         StopFrictionAnimation();
+        StopSnapAnimation();
     }
     currentPos_ = position;
 #ifdef SUPPORT_DIGITAL_CROWN

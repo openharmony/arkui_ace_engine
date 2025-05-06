@@ -1985,8 +1985,8 @@ void ParseContentPreviewAnimationOptionsParam(NativeOptionCallBack preview,
                 menuParam.previewTransition = nativeTransitionEffect->effect;
             }
         }
-        if (menuParam.previewMode != MenuPreviewMode::CUSTOM || menuParam.hasPreviewTransitionEffect ||
-            menuParam.hasTransitionEffect ||
+        if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) != MenuPreviewMode::CUSTOM ||
+            menuParam.hasPreviewTransitionEffect || menuParam.hasTransitionEffect ||
             menuParam.contextMenuRegisterType == NG::ContextMenuRegisterType::CUSTOM_TYPE) {
             return;
         }
@@ -2197,7 +2197,7 @@ void FfiOHOSAceFrameworkViewAbstractBindContextMenuOption(
         menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
     }
     // arrow is disabled for contextMenu with preview
-    if (menuParam.previewMode != MenuPreviewMode::NONE) {
+    if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) != MenuPreviewMode::NONE) {
         menuParam.enableArrow = false;
     }
     menuParam.type = NG::MenuType::CONTEXT_MENU;

@@ -178,8 +178,6 @@ private:
         LayoutWrapper* layoutWrapper = nullptr);
     OffsetF FitToScreen(const OffsetF& position, const SizeF& childSize, bool didNeedArrow = false);
     bool CheckPosition(const OffsetF& position, const SizeF& childSize);
-    OffsetF HandleNoValidPlacement(const OffsetF& topPosition, const OffsetF& bottomPosition,
-        LayoutWrapper* layoutWrapper = nullptr);
 
     OffsetF GetPositionWithPlacementTop(const SizeF&, const OffsetF&, const OffsetF&);
     OffsetF GetPositionWithPlacementTopLeft(const SizeF&, const OffsetF&, const OffsetF&);

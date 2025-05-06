@@ -228,6 +228,9 @@ public:
     {
         return currHideToolBar_;
     }
+
+    void OnColorConfigurationUpdate() override;
+
     void HideOrShowToolBarImmediately(const RefPtr<NavDestinationNodeBase>& hostNode, bool hide);
     void OnToolBarAnimationFinish();
     void OnTitleBarAnimationFinish();
@@ -282,6 +285,10 @@ public:
     }
     virtual void OnCoordScrollEnd() {};
     virtual bool NeedCoordWithScroll()
+    {
+        return false;
+    }
+    virtual bool IsNeedHandleScroll() const
     {
         return false;
     }

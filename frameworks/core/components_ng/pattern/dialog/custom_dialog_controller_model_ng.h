@@ -19,7 +19,7 @@
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/memory/ace_type.h"
-#include "base/subwindow/subwindow_manager.h"
+
 namespace OHOS::Ace::NG {
 class ACE_EXPORT CustomDialogControllerModelNG : public OHOS::Ace::CustomDialogControllerModel {
 public:

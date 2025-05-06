@@ -50,7 +50,7 @@ void SliderModelNG::SetSliderValue(float value)
     auto pattern = frameNode->GetPattern<SliderPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->UpdateValue(value);
-    auto sliderEventHub = frameNode->GetEventHub<SliderEventHub>();
+    auto sliderEventHub = frameNode->GetOrCreateEventHub<SliderEventHub>();
     CHECK_NULL_VOID(sliderEventHub);
     sliderEventHub->SetValue(value);
 }
@@ -232,7 +232,7 @@ void SliderModelNG::SetOnChange(SliderOnChangeEvent&& eventOnChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(eventOnChange));
 }
@@ -241,7 +241,7 @@ void SliderModelNG::SetOnChangeEvent(SliderOnValueChangeEvent&& onChangeEvent)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(onChangeEvent));
 }
@@ -539,7 +539,7 @@ RefPtr<FrameNode> SliderModelNG::CreateFrameNode(int32_t nodeId)
 void SliderModelNG::SetOnChange(FrameNode* frameNode, SliderOnChangeEvent&& eventOnChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(eventOnChange));
 }

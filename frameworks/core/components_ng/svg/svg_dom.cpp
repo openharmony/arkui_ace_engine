@@ -321,7 +321,7 @@ void SvgDom::SetAnimationOnFinishCallback(const std::function<void()>& onFinishC
 std::string SvgDom::GetDumpInfo()
 {
     if (svgContext_) {
-        return svgContext_->GetDumpInfo().ToString();
+        return svgContext_->GetDumpInfo();
     }
     return "";
 }
@@ -349,8 +349,8 @@ void SvgDom::DrawImage(
     // viewBox scale and imageFit scale
     FitImage(canvas, imageFit, layout);
     FitViewPort(layout);
-    svgContext_->CreateDumpInfo(SvgDumpInfo(svgContext_->GetContentSize(),
-        svgContext_->GetCurrentTimeString()));
+    svgContext_->SetGetHasRecordedPath(false);
+    svgContext_->CreateDumpInfo(SvgDumpInfo(svgContext_->GetContentSize(), svgContext_->GetCurrentTimeString()));
     // draw svg tree
     if (GreatNotEqual(smoothEdge_, 0.0f)) {
         root_->SetSmoothEdge(smoothEdge_);

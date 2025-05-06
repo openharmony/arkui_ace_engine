@@ -721,6 +721,10 @@ export struct GridBootcamp {
     return Array.from({ length: this.totalCount }, (_: ESObject, index: number) => `${index}`);
   }
 
+  aboutToAppear(): void {
+    AppStorage.setOrCreate('scroller', this.scroller)
+  }
+
   build() {
     NavDestination() {
       Drawer({
@@ -2236,6 +2240,7 @@ export struct GridBootcamp {
   compBackground() {
     Text('123')
   }
+
   @Builder
   Parameters() {
     Scroll(this.scroller) {

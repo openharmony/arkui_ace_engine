@@ -929,6 +929,6 @@ export default function TextTimer1() {
       done();
     })
 
-    })
+  })
 
 }

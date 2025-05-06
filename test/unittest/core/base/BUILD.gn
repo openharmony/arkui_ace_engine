@@ -69,6 +69,7 @@ ace_unittest("view_abstract_test_ng") {
   sources = [
     "view_abstract_test_ng.cpp",
     "view_abstract_test_ng_for_property_config.cpp",
+    "view_abstract_test_ng_for_visual_effect.cpp",
     "view_abstract_test_ng_new.cpp",
   ]
 }

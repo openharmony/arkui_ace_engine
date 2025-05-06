@@ -20,6 +20,7 @@
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/common/page_viewport_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
@@ -221,6 +222,11 @@ std::shared_ptr<NavigationController> PipelineContext::GetNavigationController(c
 void PipelineContext::AddOrReplaceNavigationNode(const std::string& id, const WeakPtr<FrameNode>& node) {}
 
 void PipelineContext::DeleteNavigationNode(const std::string& id) {}
+
+void PipelineContext::SetHostParentOffsetToWindow(const Offset& offset)
+{
+    lastHostParentOffsetToWindow_ = offset;
+}
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 {
@@ -809,6 +815,36 @@ void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool 
     safeAreaManager_->UpdateNavSafeArea(navSafeArea);
 }
 
+void PipelineContext::UpdateSystemSafeAreaWithoutAnimation(
+    const SafeAreaInsets& systemSafeArea, bool checkSceneBoardWindow)
+{
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbSystemSafeArea(systemSafeArea);
+        return;
+    }
+    safeAreaManager_->UpdateSystemSafeArea(systemSafeArea);
+}
+
+void PipelineContext::UpdateCutoutSafeAreaWithoutAnimation(
+    const SafeAreaInsets& cutoutSafeArea, bool checkSceneBoardWindow)
+{
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbCutoutSafeArea(cutoutSafeArea);
+        return;
+    }
+    safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea);
+}
+
+void PipelineContext::UpdateNavSafeAreaWithoutAnimation(
+    const SafeAreaInsets& navSafeArea, bool checkSceneBoardWindow)
+{
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbNavSafeArea(navSafeArea);
+        return;
+    }
+    safeAreaManager_->UpdateNavSafeArea(navSafeArea);
+}
+
 KeyBoardAvoidMode PipelineContext::GetEnableKeyBoardAvoidMode()
 {
     return KeyBoardAvoidMode::OFFSET;
@@ -1283,6 +1319,8 @@ bool NG::PipelineContext::GetContainerControlButtonVisible()
 
 void NG::PipelineContext::SetEnableSwipeBack(bool isEnable) {}
 
+void NG::PipelineContext::UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode) {}
+
 RefPtr<Kit::UIContext> NG::PipelineContext::GetUIContext()
 {
     return nullptr;
@@ -1315,3 +1353,26 @@ void NG::PipelineContext::SetWindowSizeChangeReason(WindowSizeChangeReason reaso
 }
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================
+
+// WindowManager ===============================================================
+namespace OHOS::Ace {
+RefPtr<PageViewportConfig> WindowManager::GetCurrentViewportConfig()
+{
+    if (getCurrentViewportConfigCallback_) {
+        return getCurrentViewportConfigCallback_();
+    }
+    return nullptr;
+}
+
+RefPtr<PageViewportConfig> WindowManager::GetTargetViewportConfig(
+    std::optional<Orientation> orientation, std::optional<bool> enableStatusBar,
+    std::optional<bool> statusBarAnimation, std::optional<bool> enableNavIndicator)
+{
+    if (getTargetViewportConfigCallback_) {
+        return getTargetViewportConfigCallback_(
+            orientation, enableStatusBar, statusBarAnimation, enableNavIndicator);
+    }
+    return nullptr;
+}
+} // namespace OHOS::Ace
+// WindowManager ===============================================================

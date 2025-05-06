@@ -50,7 +50,9 @@ void ImagePaintMethod::UpdateBorderRadius(PaintWrapper* paintWrapper, ImageDfxCo
     auto renderCtx = paintWrapper->GetRenderContext();
     CHECK_NULL_VOID(renderCtx);
     auto borderRadius = renderCtx->GetBorderRadius();
-
+    if (!borderRadius.has_value()) {
+        return;
+    }
     BorderRadiusArray radiusXY = BorderRadiusArray();
 
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
@@ -98,7 +100,6 @@ void ImagePaintMethod::UpdateBorderRadius(PaintWrapper* paintWrapper, ImageDfxCo
     NormalizeRadius(radiusXY, paintWrapper->GetContentSize());
     auto&& config = canvasImage_->GetPaintConfig();
     config.borderRadiusXY_ = std::make_shared<BorderRadiusArray>(radiusXY);
-    imageDfxConfig.borderRadiusValue_ = borderRadius->ToString();
 }
 
 void ImagePaintMethod::UpdatePaintConfig(PaintWrapper* paintWrapper)

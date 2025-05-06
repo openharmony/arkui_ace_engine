@@ -13,12 +13,17 @@
  * limitations under the License.
  */
 import { describe, beforeAll, it } from '@ohos/hypium'
-import { buttonClick,
-  JsonType, KeyStruct, radioClick,
+import {
+  buttonClick,
+  JsonType,
+  KeyStruct,
+  radioClick,
   Search,
   searchParentBlock,
-  Slide, sliderDrag,
-  ToggleClick } from '../../../utils';
+  Slide,
+  sliderDrag,
+  ToggleClick
+} from '../../../utils';
 import { TextPickerStart } from './TextPicker';
 
 export default function TimePicker3() {

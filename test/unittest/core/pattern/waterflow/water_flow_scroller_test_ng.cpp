@@ -553,21 +553,6 @@ HWTEST_F(WaterFlowScrollerTestNg, Refresh001, TestSize.Level1)
     EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "245.45px");
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
     EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
-
-    MockAnimationManager::GetInstance().TickByVelocity(200.0f);
-    FlushUITasks();
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
-    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "445.45px");
-
-    MockAnimationManager::GetInstance().Tick();
-    FlushUITasks();
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
-    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 64);
-
-    MockAnimationManager::GetInstance().Tick();
-    FlushUITasks();
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
-    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 64);
 }
 
 /**
@@ -744,7 +729,7 @@ HWTEST_F(WaterFlowScrollerTestNg, Focus002, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr");
     CreateFocusableWaterFlowItems(30);
     CreateDone();
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     auto focusHub = eventHub->GetOrCreateFocusHub();
     focusHub->SetFocusDependence(FocusDependence::AUTO);
 

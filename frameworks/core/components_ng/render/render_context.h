@@ -802,6 +802,7 @@ public:
 
     virtual void SetDrawNode() {}
 
+    virtual void UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode) {}
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;

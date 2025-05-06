@@ -79,6 +79,7 @@ export struct promptActionCustomDialogBootcamp {
   @State enableShadowOptionsFill: boolean = false;
   @State shadowOptionsFill: boolean = false;
   scroller: Scroller = new Scroller();
+
   aboutToAppear(): void {
     AppStorage.setOrCreate('scroller', this.scroller)
   }
@@ -335,7 +336,6 @@ export struct promptActionCustomDialogBootcamp {
           min: 100,
           max: 400
         })
-
 
 
         RadioBlock({

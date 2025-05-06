@@ -438,14 +438,14 @@ public:
         return exp(-ratio * gamma);
     }
 
-    SheetType GetSheetType();
+    SheetType GetSheetType() const;
     bool IsPhoneInLandScape();
     bool IsShowCloseIcon();
     ScrollSizeMode GetScrollSizeMode();
     void InitSheetMode();
-    void GetSheetTypeWithAuto(SheetType& sheetType);
-    void GetSheetTypeWithPopup(SheetType& sheetType);
-    void GetSheetTypeWithCenter(SheetType& sheetType);
+    void GetSheetTypeWithAuto(SheetType& sheetType) const;
+    void GetSheetTypeWithPopup(SheetType& sheetType) const;
+    void GetSheetTypeWithCenter(SheetType& sheetType) const;
 
     void SetUIFirstSwitch(bool isFirstTransition, bool isNone);
 
@@ -461,7 +461,7 @@ public:
 
     void ResetToInvisible();
 
-    bool IsFoldExpand();
+    bool IsFoldExpand() const;
 
     void SetSheetKey(const SheetKey& sheetKey)
     {
@@ -530,12 +530,12 @@ public:
     }
 
     bool IsShowInSubWindowTwoInOne();
-    bool IsShowInSubWindow();
-    SheetType ComputeSheetTypeInSubWindow();
+    bool IsShowInSubWindow() const;
+    SheetType ComputeSheetTypeInSubWindow() const;
     void SheetTransitionAction(float offset, bool isStart, bool isTransitionIn);
     float ComputeTransitionOffset(float sheetHeight);
     void InitSheetTransitionAction(float offset);
-    int32_t GetSubWindowId();
+    int32_t GetSubWindowId() const;
 
     OffsetF GetSheetArrowOffset() const
     {
@@ -655,7 +655,11 @@ public:
 
     void UpdateSheetType()
     {
-        sheetType_ = GetSheetType();
+        auto sheetType = GetSheetType();
+        if (sheetType_ != sheetType) {
+            sheetType_ = sheetType;
+            typeChanged_ = true;
+        }
     }
 
     // Used for isolation of SHEET_BOTTOMLANDSPACE after version 12, such as support for height setting callback,
@@ -671,7 +675,7 @@ public:
     }
 
     // If has dispute about version isolation, suggest use the following. And it does not support SHEET_BOTTOM_OFFSET
-    bool IsSheetBottom()
+    bool IsSheetBottom() const
     {
         auto sheetType = GetSheetType();
         return !(sheetType == SheetType::SHEET_CENTER || sheetType == SheetType::SHEET_POPUP ||
@@ -751,6 +755,12 @@ public:
         auto scrollNode = scrolNode_.Upgrade();
         return scrollNode;
     }
+    void SetBottomStyleHotAreaInSubwindow();
+
+    bool IsNotBottomStyleInSubwindow() const
+    {
+        return IsShowInSubWindow() && !IsSheetBottom();
+    }
 
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
@@ -780,7 +790,10 @@ private:
     bool PostTask(const TaskExecutor::Task& task, const std::string& name);
     void CheckSheetHeightChange();
     float GetWrapperHeight();
+    float GetWrapperWidth();
     bool SheetHeightNeedChanged();
+    bool SheetWidthNeedChanged();
+    void PopupSheetChanged();
     void InitSheetDetents();
     void InitDetents(SheetStyle sheetStyle, float height, double mediumSize, float largeHeightOfTheme,
         double largeHeight);
@@ -865,7 +878,9 @@ private:
     float sheetHeightUp_ = 0.0f; // sheet offset to move up when avoiding keyboard
     float height_ = 0.0f; // sheet height, start from the bottom, before avoiding keyboard
     float sheetHeight_ = 0.0f; // sheet frameSize Height
+    float sheetWidth_ = 0.0f; // sheet frameSize Width
     float wrapperHeight_ = 0.0f; // sheetWrapper frameSize Height
+    float wrapperWidth_ = 0.0f; // sheetWrapper frameSize Width
     float pageHeight_ = 0.0f; // root Height, = maxSize.Height()
     float scrollHeight_ = 0.0f;
     float preWidth_ = 0.0f;
@@ -891,6 +906,7 @@ private:
     bool windowChanged_ = false;
     bool isDirectionUp_ = true;
     bool topSafeAreaChanged_ = false;
+    bool typeChanged_ = false;
     ScrollSizeMode scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT;
     SheetEffectEdge sheetEffectEdge_ = SheetEffectEdge::ALL;
 

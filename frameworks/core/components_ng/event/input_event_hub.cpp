@@ -50,6 +50,16 @@ bool InputEventHub::ProcessMouseTestHit(const OffsetF& coordinateOffset, TouchTe
     return false;
 }
 
+bool InputEventHub::ProcessTipsMouseTestHit(const OffsetF& coordinateOffset, TouchTestResult& result)
+{
+    auto eventHub = eventHub_.Upgrade();
+    auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
+    if (hoverEventActuator_) {
+        hoverEventActuator_->OnCollectHoverEventForTips(coordinateOffset, getEventTargetImpl, result);
+    }
+    return false;
+}
+
 bool InputEventHub::ProcessPenHoverTestHit(const OffsetF& coordinateOffset, TouchTestResult& result)
 {
     auto eventHub = eventHub_.Upgrade();

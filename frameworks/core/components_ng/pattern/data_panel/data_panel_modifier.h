@@ -167,7 +167,7 @@ public:
             }
             shadowColors_[i]->Set(GradientArithmetic(valueColors[i]));
         }
-        shadowColorsLastLength_ = shadowColorsLastLength;
+        shadowColorsLastLength_ = std::min(shadowColorsLastLength, valuesLastLength_);
     };
 
     void SetUseContentModifier(bool useContentModifier)

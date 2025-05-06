@@ -263,7 +263,8 @@ void SessionWrapperImpl::SendDataAsync(const AAFwk::WantParams& params) const
 {
 }
 
-int32_t SessionWrapperImpl::SendDataSync(const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) const
+int32_t SessionWrapperImpl::SendDataSync(
+    const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) const
 {
     return 1;
 }
@@ -296,4 +297,8 @@ bool SessionWrapperImpl::SendBusinessData(
 void SessionWrapperImpl::NotifyHostWindowMode(int32_t mode) {}
 
 void SessionWrapperImpl::ReDispatchWantParams() {}
+
+void SessionWrapperImpl::DispatchExtensionDataToHostWindow(uint32_t customId, const AAFwk::Want& data)
+{
+}
 } // namespace OHOS::Ace::NG

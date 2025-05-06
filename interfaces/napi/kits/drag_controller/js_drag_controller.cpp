@@ -35,6 +35,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/subwindow/subwindow.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
@@ -995,6 +996,7 @@ void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t&
     Msdp::DeviceStatus::ShadowInfo shadowInfo;
     asyncCtxData = {asyncCtx->instanceId, asyncCtx->hasTouchPoint, asyncCtx->dragPointerEvent,
         asyncCtx->dragPreviewOption, asyncCtx->touchPoint, asyncCtx->pixelMapList};
+    auto subWindow = NG::DragControllerFuncWrapper::SubWindowShow(pipeline);
     for (auto& pixelMap: asyncCtx->pixelMapList) {
         if (!pixelMap) {
             TAG_LOGD(AceLogTag::ACE_DRAG, "Skipping null pixelMap");
@@ -1006,7 +1008,6 @@ void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t&
         }
         shadowInfos.push_back(shadowInfo);
     }
-    auto subWindow = NG::DragControllerFuncWrapper::SubWindowShow(pipeline);
     std::optional<Msdp::DeviceStatus::DragData> dragData;
     if (!EnvelopedDragData(asyncCtx, dragData, shadowInfos)) {
         return;
@@ -1026,8 +1027,7 @@ void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t&
         std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
 #endif
     if (ret == 0) {
-        asyncCtxData = {asyncCtx->instanceId, asyncCtx->hasTouchPoint, asyncCtx->dragPointerEvent,
-            asyncCtx->dragPreviewOption, asyncCtx->touchPoint, asyncCtx->pixelMapList};
+        asyncCtxData.dragPointerEvent = asyncCtx->dragPointerEvent;
         if (NG::DragControllerFuncWrapper::TryDoDragStartAnimation(subWindow, data, asyncCtxData)) {
             asyncCtx->isSwitchedToSubWindow = true;
         }
@@ -1204,11 +1204,11 @@ bool TryToStartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     Msdp::DeviceStatus::ShadowInfo shadowInfo;
     asyncCtxData = {asyncCtx->instanceId, asyncCtx->hasTouchPoint, asyncCtx->dragPointerEvent,
         asyncCtx->dragPreviewOption, asyncCtx->touchPoint, asyncCtx->pixelMapList};
+    auto subWindow = NG::DragControllerFuncWrapper::SubWindowShow(pipeline);
     auto ret = CreatePreviewNodeAndScale(asyncCtx, data, asyncCtxData, shadowInfo, asyncCtx->pixelMap);
     if (!ret) {
         return false;
     }
-    auto subWindow = NG::DragControllerFuncWrapper::SubWindowShow(pipeline);
     Msdp::DeviceStatus::DragData dragData;
     if (!PrepareDragData(asyncCtx, dragData, shadowInfo)) {
         TAG_LOGW(AceLogTag::ACE_DRAG, "prepare drag data failed!");
@@ -1967,6 +1967,12 @@ static napi_value JSCreateDragAction(napi_env env, napi_callback_info info)
     napi_create_object(env, &result);
     DragAction* dragAction = new DragAction(dragAsyncContext);
     dragAction->NapiSerializer(env, result);
+    if (!result) {
+        dragAction->DeleteRef();
+        delete dragAction;
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
     dragAsyncContext->dragAction = dragAction;
     napi_escape_handle(env, scope, result, &result);
     napi_close_escapable_handle_scope(env, scope);
@@ -1979,6 +1985,10 @@ static napi_value JSGetDragPreview(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     napi_create_object(env, &result);
     dragPreview->NapiSerializer(env, result);
+    if (!result) {
+        delete dragPreview;
+        return nullptr;
+    }
     return result;
 }
 #else

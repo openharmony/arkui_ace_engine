@@ -36,7 +36,7 @@ public:
         std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
         int32_t currentInstanceId, int32_t targetId);
     int32_t UpdateBindSheetByUIContext(
-        const RefPtr<NG::FrameNode>& sheetContentNode, NG::SheetStyle& sheetStyle, bool isPartialUpdate,
+        const RefPtr<NG::FrameNode>& sheetContentNode, const NG::SheetStyle& sheetStyle, bool isPartialUpdate,
         int32_t currentInstanceId);
     int32_t CloseBindSheetByUIContext(const RefPtr<NG::FrameNode>& sheetContentNode, int32_t currentInstanceId);
     void CleanBindSheetMap(int32_t instanceId, int32_t sheetContentNodeId)

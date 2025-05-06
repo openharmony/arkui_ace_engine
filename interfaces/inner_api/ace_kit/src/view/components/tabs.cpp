@@ -77,6 +77,15 @@ void Tabs::UpdateTabBarBrightness(const BrightnessOption& brightnessOption)
     NG::ViewAbstract::SetBgDynamicBrightness(Referenced::RawPtr(tabBarNode), brightnessOption);
 }
 
+void Tabs::UpdateEffectNodeBrightness(const BrightnessOption& brightnessOption)
+{
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_VOID(tabsNode);
+    auto effectNode = AceType::DynamicCast<NG::FrameNode>(tabsNode->GetEffectNode());
+    CHECK_NULL_VOID(effectNode);
+    NG::ViewAbstract::SetBgDynamicBrightness(Referenced::RawPtr(effectNode), brightnessOption);
+}
+
 auto GetTabBarFrameRect(const RefPtr<FrameNode>& node)
 {
     auto tabsNode = GetTabsNode(node);
@@ -86,6 +95,27 @@ auto GetTabBarFrameRect(const RefPtr<FrameNode>& node)
     auto geometryNode = tabBarNode->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, NG::RectF {});
     return geometryNode->GetFrameRect();
+}
+
+void Tabs::SetBarBackgroundBlurStyle(const BlurStyleOption& styleOption)
+{
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_VOID(tabsNode);
+    NG::TabsModelNG::SetBarBackgroundBlurStyle(Referenced::RawPtr(tabsNode), styleOption);
+}
+
+void Tabs::SetBarBackgroundColor(const Color& backgroundColor)
+{
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_VOID(tabsNode);
+    NG::TabsModelNG::SetBarBackgroundColor(Referenced::RawPtr(tabsNode), backgroundColor);
+}
+
+void Tabs::SetBarBackgroundEffect(const EffectOption& effectOption)
+{
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_VOID(tabsNode);
+    NG::TabsModelNG::SetBarBackgroundEffect(Referenced::RawPtr(tabsNode), effectOption);
 }
 
 double Tabs::GetTabBarTop()
@@ -98,6 +128,20 @@ double Tabs::GetTabBarBottom()
 {
     const auto tabBarRect = GetTabBarFrameRect(node_);
     return tabBarRect.Bottom();
+}
+
+void Tabs::SetTabBarWidth(const Dimension& tabBarWidth)
+{
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_VOID(tabsNode);
+    NG::TabsModelNG::SetTabBarWidth(Referenced::RawPtr(tabsNode), tabBarWidth);
+}
+
+void Tabs::SetTabBarHeight(const Dimension& tabBarHeight)
+{
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_VOID(tabsNode);
+    NG::TabsModelNG::SetTabBarHeight(Referenced::RawPtr(tabsNode), tabBarHeight);
 }
 
 void Tabs::SetDivider(const TabsItemDivider& divider)
@@ -114,6 +158,27 @@ void Tabs::SetDivider(const TabsItemDivider& divider)
     NG::TabsModelNG::SetDivider(Referenced::RawPtr(tabsNode), aceDivider);
 }
 
+void Tabs::SetEffectNodeOption(const TabsEffectNodeOption& option)
+{
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_VOID(tabsNode);
+    NG::TabsModelNG::SetEffectNodeOption(Referenced::RawPtr(tabsNode), option);
+}
+
+void Tabs::SetTabBarMode(const TabBarMode& barMode)
+{
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_VOID(tabsNode);
+    NG::TabsModelNG::SetTabBarMode(Referenced::RawPtr(tabsNode), barMode);
+}
+
+void Tabs::SetScrollableBarModeOptions(const ScrollableBarModeOptions& option)
+{
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_VOID(tabsNode);
+    NG::TabsModelNG::SetScrollableBarModeOptions(Referenced::RawPtr(tabsNode), option);
+}
+
 RefPtr<FrameNode> Tabs::GetTabBar()
 {
     auto tabsNode = GetTabsNode(node_);
@@ -121,6 +186,15 @@ RefPtr<FrameNode> Tabs::GetTabBar()
     auto tabBarNode = AceType::DynamicCast<NG::FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_RETURN(tabBarNode, nullptr);
     return AceType::MakeRefPtr<FrameNodeImpl>(Referenced::RawPtr(tabBarNode));
+}
+
+RefPtr<FrameNode> Tabs::GetEffectNode()
+{
+    auto tabsNode = GetTabsNode(node_);
+    CHECK_NULL_RETURN(tabsNode, nullptr);
+    auto effectNode = AceType::DynamicCast<NG::FrameNode>(tabsNode->GetEffectNode());
+    CHECK_NULL_RETURN(effectNode, nullptr);
+    return AceType::MakeRefPtr<FrameNodeImpl>(Referenced::RawPtr(effectNode));
 }
 
 void Tabs::SetOnChange(OnChangeEvent onChangeEvent)

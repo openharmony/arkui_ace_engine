@@ -159,7 +159,7 @@ void TextDragOverlayModifier::PaintBackground(const RSPath& path, RSCanvas& canv
     canvas.ClipPath(path, RSClipOp::INTERSECT, true);
     std::shared_ptr<RSPath> selPath = textDragPattern->GetSelBackgroundPath();
     RSBrush selBrush;
-    Color selColor = Color::WHITE;
+    Color selColor = pattern->GetDragBackgroundColor();
     if (type_ == DragAnimType::FLOATING) {
         selColor = selColor.BlendOpacity(selectedBackgroundOpacity_->Get());
     }

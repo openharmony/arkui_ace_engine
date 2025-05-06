@@ -38,6 +38,7 @@ struct ListItemGroupPaintInfo {
     float spaceWidth = 0.0f;
     float laneGutter = 0.0f;
     int32_t totalItemCount = 0;
+    float listContentSize = FLT_MAX;
 };
 
 enum ListItemGroupArea {
@@ -376,6 +377,7 @@ private:
     float endFooterPos_ = 0.0f;
     TextDirection layoutDirection_ = TextDirection::LTR;
     float mainSize_ = 0.0f;
+    float listContentSize_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(ListItemGroupPattern);
     bool isStackFromEnd_ = false;
 };

@@ -18,6 +18,7 @@ ace_unittest("pipeline_context_test_ng") {
   module_output = "pipeline"
   flutter_skia = true
   external_deps = [
+    "c_utils:utils",
     "graphic_2d:2d_graphics",
     "napi:ace_napi",
   ]
@@ -30,6 +31,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/frameworks/core/components_ng/manager/form_event/form_event_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/form_gesture/form_gesture_manager.cpp",
     "$ace_root/frameworks/core/event/resample_algo.cpp",
+    "$ace_root/frameworks/core/pipeline/container_window_manager.cpp",
     "$ace_root/frameworks/core/pipeline/pipeline_base.cpp",
     "$ace_root/frameworks/core/pipeline_ng/pipeline_context.cpp",
     "$ace_root/test/mock/adapter/mock_input_manager.cpp",

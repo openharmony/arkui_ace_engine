@@ -320,9 +320,6 @@ export default function Counter5() {
     })
 
 
-
-
-
   })
 }
 

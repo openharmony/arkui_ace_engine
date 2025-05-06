@@ -247,12 +247,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts101, TestS
     richEditorPattern->HandleSelect(CaretMoveIntent::RightWord);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 21);
     richEditorPattern->SetCaretPosition(20);
-    richEditorPattern->HandleSelect(CaretMoveIntent::ParagraghBegin);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
-    richEditorPattern->SetCaretPosition(20);
-    richEditorPattern->HandleSelect(CaretMoveIntent::ParagraghEnd);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), textOptions.value.length());
-    richEditorPattern->SetCaretPosition(20);
     richEditorPattern->HandleSelect(CaretMoveIntent::LineBegin);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
 }
@@ -446,7 +440,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeAddImage101, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateEventHub();
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto tempFunc1 = [](const RichEditorChangeValue&) { return true; };
     std::function<bool(const RichEditorChangeValue&)> func1 = tempFunc1;
@@ -478,7 +472,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeChangeText101, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateEventHub();
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto tempFunc1 = [](const RichEditorChangeValue&) { return true; };
     std::function<bool(const RichEditorChangeValue&)> func1 = tempFunc1;
@@ -695,32 +689,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, CheckTripClickEvent001, TestSize.Leve
 }
 
 /**
- * @tc.name: HandleSelectParagraghPos001
- * @tc.desc: test HandleSelectParagraghPos
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleSelectParagraghPos001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->spans_.clear();
-    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
-    auto it = richEditorPattern->spans_.front();
-    it->content = u"test\n123";
-    it->position = 4;
-    richEditorPattern->caretPosition_ = 1;
-    richEditorPattern->isSpanStringMode_ = true;
-    auto ret = richEditorPattern->HandleSelectParagraghPos(true);
-    EXPECT_EQ(ret, 0);
-    ret = richEditorPattern->HandleSelectParagraghPos(false);
-    EXPECT_EQ(ret, 0);
-}
-
-/**
  * @tc.name: HandleSelectPosition001
  * @tc.desc: test HandleSelectPosition
  * @tc.type: FUNC
@@ -808,7 +776,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeAddImage102, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateEventHub();
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto tempFunc1 = [](const RichEditorChangeValue&) { return true; };
     std::function<bool(const RichEditorChangeValue&)> func1 = tempFunc1;
@@ -852,7 +820,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, BeforeChangeText102, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateEventHub();
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto tempFunc1 = [](const RichEditorChangeValue&) { return true; };
     std::function<bool(const RichEditorChangeValue&)> func1 = tempFunc1;
@@ -979,6 +947,8 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetSelectArea101, TestSize.Level1)
     auto res = richEditorPattern->GetSelectArea(SelectRectsType::ALL_LINES);
     EXPECT_TRUE(res.IsValid());
     res = richEditorPattern->GetSelectArea(SelectRectsType::LEFT_TOP_POINT);
+    EXPECT_TRUE(res.IsValid());
+    res = richEditorPattern->GetSelectArea(SelectRectsType::RIGHT_BOTTOM_POINT);
     EXPECT_TRUE(res.IsValid());
 }
 

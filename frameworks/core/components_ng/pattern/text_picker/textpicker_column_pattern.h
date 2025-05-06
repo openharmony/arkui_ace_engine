@@ -534,6 +534,7 @@ private:
     void UnregisterWindowStateChangedCallback(FrameNode* frameNode);
 
     void HandleEnterSelectedArea(double scrollDelta, float shiftDistance, ScrollDirection dir);
+    bool IsDisableTextStyleAnimation() const;
 
     bool isFocusColumn_ = false;
     bool isTextFadeOut_ = false;

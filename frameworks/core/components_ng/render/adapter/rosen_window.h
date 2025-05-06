@@ -77,27 +77,32 @@ public:
 
     bool FlushAnimation(uint64_t timeStamp) override
     {
+        CHECK_NULL_RETURN(rsUIDirector_, false);
         int64_t vsyncPeriod = GetVSyncPeriod();
         return rsUIDirector_->FlushAnimation(timeStamp, vsyncPeriod);
     }
 
     bool HasFirstFrameAnimation() override
     {
+        CHECK_NULL_RETURN(rsUIDirector_, false);
         return rsUIDirector_->HasFirstFrameAnimation();
     }
 
     void FlushAnimationStartTime(uint64_t timeStamp) override
     {
+        CHECK_NULL_VOID(rsUIDirector_);
         rsUIDirector_->FlushAnimationStartTime(timeStamp);
     }
 
     void FlushModifier() override
     {
+        CHECK_NULL_VOID(rsUIDirector_);
         rsUIDirector_->FlushModifier();
     }
 
     bool HasUIRunningAnimation() override
     {
+        CHECK_NULL_RETURN(rsUIDirector_, false);
         return rsUIDirector_->HasUIRunningAnimation();
     }
 
@@ -117,11 +122,13 @@ public:
 
     int32_t GetCurrentRefreshRateMode() const override
     {
+        CHECK_NULL_RETURN(rsUIDirector_, -1);
         return rsUIDirector_->GetCurrentRefreshRateMode();
     }
 
     int32_t GetAnimateExpectedRate() const override
     {
+        CHECK_NULL_RETURN(rsUIDirector_, 0);
         return rsUIDirector_->GetAnimateExpectedRate();
     }
 

@@ -31,8 +31,8 @@ export const menusRoute: RouteGroup = {
 @Builder
 export function menusDestination(name: string, route: Route) {
   if (name === 'Menus/Menu') {
-    MenuBootcamp({title: route.label})
-  }else if (name === 'Menus/MenuItemGroup'){
-    MenuItemGroupBootcamp({title: route.label})
+    MenuBootcamp({ title: route.label })
+  } else if (name === 'Menus/MenuItemGroup') {
+    MenuItemGroupBootcamp({ title: route.label })
   }
 }

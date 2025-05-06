@@ -658,7 +658,6 @@ export struct RefreshBootcamp {
   @State compUseEffect: boolean = false
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
-
   scroller: Scroller = new Scroller()
 
   aboutToAppear(): void {
@@ -697,6 +696,7 @@ export struct RefreshBootcamp {
       }
     }, 200)
   }
+
   @Builder
   popupBuilder() {
     Row() {
@@ -1540,6 +1540,7 @@ export struct RefreshBootcamp {
   }
 
   @State selection: string | null = null;
+
   @Builder
   ListItemGroupHeaders(str: string) {
     Row() {
@@ -1551,7 +1552,7 @@ export struct RefreshBootcamp {
         .fillColor($r('sys.color.ohos_id_color_fourth'))
         .height(24)
         .width(24)
-        .rotate({ angle: this.selection==str ? 90 : 0 })
+        .rotate({ angle: this.selection == str ? 90 : 0 })
         .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
     }
     .borderRadius(20)
@@ -1572,11 +1573,12 @@ export struct RefreshBootcamp {
       }
     })
   }
+
   @Builder
   Generic() {
     Scroll(this.scroller) {
       Column({ space: 8 }) {
-        List({space:8}){
+        List({ space: 8 }) {
           CompSizeBlocks({
             enableCompWidth: $enableCompWidth,
             compWidth: $compWidth,
@@ -2153,7 +2155,6 @@ export struct RefreshBootcamp {
     .id('scroll')
     .height('52%')
   }
-
 }
 
 @Preview

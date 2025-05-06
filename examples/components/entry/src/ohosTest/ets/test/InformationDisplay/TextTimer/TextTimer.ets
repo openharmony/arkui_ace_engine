@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import { abilityDelegatorRegistry, Driver,Component,ON} from '@kit.TestKit';
-import {Point } from '@ohos.UiTest';
+import { abilityDelegatorRegistry, Driver, Component, ON } from '@kit.TestKit';
+import { Point } from '@ohos.UiTest';
 
 const TAG = 'TextTimerBootcamp001'
 
@@ -24,7 +24,7 @@ const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorReg
 /*初始化与UI元素交互的驱动对象*/
 const driver = Driver.create();
 
-export async function TextTimerStart(done:Function) {
+export async function TextTimerStart(done: Function) {
   await delegator.startAbility({
     bundleName: 'cn.ohos.components',
     abilityName: 'EntryAbility'
@@ -55,7 +55,6 @@ export async function TextTimerStart(done:Function) {
   let width4: Point = await ListItems1[4].getBoundsCenter()
   await driver.swipe(width3.x, width4.y, width3.x, width3.y, 1000)
   await driver.delayMs(2000);
-
 
 
   let scrollSearch: Component = await driver.findComponent(ON.text('文本计时器/TextTimer'))

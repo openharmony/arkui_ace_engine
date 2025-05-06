@@ -34,6 +34,8 @@ struct WaterFlowMainPage {
   @State arr: TextList[] = [
     new TextList(1, 'Back', 'pages/Index'),
     new TextList(2, '延迟改变高度重叠现象', 'pages/waterflow/demo01/WaterFlowDemo'),
+    new TextList(3, 'WaterFlowPinchToZoom1', 'pages/waterflow/demo01/WaterFlowPinchToZoom1'),
+    new TextList(4, 'WaterFlowPinchToZoom2', 'pages/waterflow/demo01/WaterFlowPinchToZoom2'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

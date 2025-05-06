@@ -29,6 +29,7 @@
 #include "core/common/window.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
+#include "core/components_ng/pattern/toast/toast_layout_property.h"
 
 namespace OHOS::Ace::Platform {
 class DialogContainer : public AceContainer {
@@ -43,7 +44,7 @@ public:
         return true;
     }
 
-    static void ShowToast(int32_t instanceId, const std::string& message, int32_t duration, const std::string& bottom,
+    static void ShowToast(int32_t instanceId, const NG::ToastInfo& toastInfo,
         std::function<void(int32_t)>&& callback);
     static void CloseToast(int32_t instanceId, const int32_t toastId, std::function<void(int32_t)>&& callback);
     static void ShowDialog(int32_t instanceId, const std::string& title, const std::string& message,

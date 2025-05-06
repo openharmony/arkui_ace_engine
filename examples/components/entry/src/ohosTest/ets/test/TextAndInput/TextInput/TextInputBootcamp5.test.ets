@@ -16,12 +16,15 @@
 import { describe, beforeAll, it } from '@ohos/hypium';
 import { abilityDelegatorRegistry, Driver } from '@kit.TestKit';
 import {
-    buttonClick, JsonType,
-    KeyStruct,
-    radioClick,
-    Search,
-    searchParentBlock, Slide,
-    sliderDrag, ToggleClick
+  buttonClick,
+  JsonType,
+  KeyStruct,
+  radioClick,
+  Search,
+  searchParentBlock,
+  Slide,
+  sliderDrag,
+  ToggleClick
 } from '../../../utils';
 import { textInputBeforeAll } from './TextInput.test';
 

@@ -14,14 +14,19 @@
  */
 import { describe, beforeAll, it } from '@ohos/hypium'
 import { Driver, ON } from '@kit.TestKit';
-import { buttonClick,
+import {
+  buttonClick,
   getToggle,
-  JsonType, KeyStruct, radioClick,
+  JsonType,
+  KeyStruct,
+  radioClick,
   Search,
   searchToggle,
-  Slide, sliderDrag,
+  Slide,
+  sliderDrag,
   titleSearch,
-  ToggleClick } from '../../../utils';
+  ToggleClick
+} from '../../../utils';
 import { ButtonStart } from './Button';
 
 /*初始化与UI元素交互的驱动对象*/

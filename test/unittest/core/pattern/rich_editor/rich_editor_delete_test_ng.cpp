@@ -526,7 +526,7 @@ HWTEST_F(RichEditorDeleteTestNg, DoDeleteActions001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto aboutToDeleteFunc = [](const RichEditorDeleteValue&) { return false; };
     eventHub->SetAboutToDelete(std::move(aboutToDeleteFunc));
@@ -747,7 +747,7 @@ HWTEST_F(RichEditorDeleteTestNg, DeleteSpans001, TestSize.Level1)
     RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
     richEditorPattern->spans_.push_back(spanItem);
     richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_3);
-    auto eventHub = richEditorNode_->GetEventHub<RichEditorEventHub>();
+    auto eventHub = richEditorNode_->GetOrCreateEventHub<RichEditorEventHub>();
     eventHub->SetOnWillChange([](const RichEditorChangeValue& value) -> bool { return false; });
     richEditorPattern->redoOperationRecords_.emplace_back();
     richEditorPattern->DeleteSpans(options);

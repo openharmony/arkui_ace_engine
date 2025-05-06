@@ -1549,7 +1549,6 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetRollAngle, TestSize.Level1)
     event.inputEvent = nullptr;
     ArkUITouchEvent touchEvent;
     touchEvent.actionTouchPoint.rollAngle = 3.0;
-    touchEvent.rollAngle = 4.0;
     touchEvent.touchPointSize = 0;
     touchEvent.subKind = ON_AXIS;
     ret = OH_ArkUI_PointerEvent_GetRollAngle(&event, &rollAngle);
@@ -1558,15 +1557,18 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetRollAngle, TestSize.Level1)
     ret = OH_ArkUI_PointerEvent_GetRollAngle(&event, &rollAngle);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
     touchEvent.touchPointSize = 3;
+    ArkUITouchPoint pointes[3];
+    pointes[2].rollAngle = 4.0;
+    touchEvent.touchPointes = pointes;
     event.inputEvent = &touchEvent;
     ret = OH_ArkUI_PointerEvent_GetRollAngle(&event, &rollAngle);
-    EXPECT_EQ(rollAngle, 4.0);
+    EXPECT_FLOAT_EQ(rollAngle, 4.0);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
     touchEvent.subKind = ON_HOVER_MOVE;
     event.inputEvent = &touchEvent;
     ret = OH_ArkUI_PointerEvent_GetRollAngle(&event, &rollAngle);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
-    EXPECT_EQ(rollAngle, 3.0);
+    EXPECT_FLOAT_EQ(rollAngle, 3.0);
 
     event.eventTypeId = C_HOVER_EVENT_ID;
     event.inputEvent = nullptr;
@@ -1576,7 +1578,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetRollAngle, TestSize.Level1)
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
     event.inputEvent = &hoverEvent;
     ret = OH_ArkUI_PointerEvent_GetRollAngle(&event, &rollAngle);
-    EXPECT_EQ(rollAngle, 2.2);
+    EXPECT_FLOAT_EQ(rollAngle, 2.2);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
 }
 } // namespace OHOS::Ace

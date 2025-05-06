@@ -21,6 +21,14 @@
 #include "testing_canvas.h"
 #include "testing_rect.h"
 namespace OHOS::Ace::Testing {
+enum class TestingHybridRenderType : uint32_t {
+    NONE,
+    TEXT,
+    SVG,
+    HMSYMBOL,
+    CANVAS
+};
+
 class TestingDrawCmdList {
 public:
     TestingDrawCmdList() = default;
@@ -57,6 +65,8 @@ public:
     }
 
     void Playback(TestingCanvas& canvas, const TestingRect* rect = nullptr) {}
+
+    void SetHybridRenderType(Testing::TestingHybridRenderType HybridRenderType) {}
 
 private:
     int32_t width_ = 0;

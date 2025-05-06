@@ -14,7 +14,7 @@
  */
 
 import { describe, beforeAll, it } from '@ohos/hypium'
-import { Driver, ON,Component  } from '@kit.TestKit';
+import { Driver, ON, Component } from '@kit.TestKit';
 import {
   buttonClick,
   getToggle,

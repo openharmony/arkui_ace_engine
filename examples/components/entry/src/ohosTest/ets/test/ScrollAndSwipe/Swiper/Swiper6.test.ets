@@ -16,14 +16,17 @@
 import { describe, beforeAll, it } from '@ohos/hypium'
 import { SwiperStart } from './Swiper'
 import {
+  buttonClick,
   JsonType,
   KeyStruct,
   radioClick,
+  Search,
+  searchParentBlock,
   Slide,
   sliderDrag,
   titleSearch,
   ToggleClick
-  } from '../../../utils';
+} from '../../../utils';
 
 export default function Swiper6Test() {
   describe('Swiper6Test', () => {
@@ -34,7 +37,7 @@ export default function Swiper6Test() {
 
     })
     // linearGradient.number2
-    it('ArkUI_Column_Comp_0350', 0, async (done: Function) => {
+    it('ArkUI_Swiper_Comp_0350', 0, async (done: Function) => {
       await titleSearch('基础属性', 'linearGradient.number2', '通用属性3')
       //取不到值需要，设置颜色获取
       await sliderDrag({
@@ -55,7 +58,7 @@ export default function Swiper6Test() {
     })
 
     // linearGradient.repeating
-    it('ArkUI_Column_Comp_0351', 0, async (done: Function) => {
+    it('ArkUI_Swiper_Comp_0351', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'linearGradient.repeating', '通用属性3')
 
@@ -64,7 +67,7 @@ export default function Swiper6Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Swiper',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('linearGradient', JsonType.obj),
@@ -77,7 +80,7 @@ export default function Swiper6Test() {
 
     })
 
-    it('ArkUI_Column_Comp_0352', 0, async (done: Function) => {
+    it('ArkUI_Swiper_Comp_0352', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'linearGradient.repeating', '通用属性3')
 
@@ -86,7 +89,7 @@ export default function Swiper6Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Swiper',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('linearGradient', JsonType.obj),

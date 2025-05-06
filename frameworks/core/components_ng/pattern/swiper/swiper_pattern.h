@@ -58,6 +58,12 @@ enum class PageFlipMode {
     SINGLE,
 };
 
+enum class MoveStep {
+    NEXT = 0,
+    PREV,
+    NONE
+};
+
 using SwiperHoverFlag = uint32_t;
 constexpr SwiperHoverFlag HOVER_NONE = 0;
 constexpr SwiperHoverFlag HOVER_SWIPER = 1;
@@ -253,7 +259,7 @@ public:
     {
         if (!changeEvent_) {
             changeEvent_ = std::make_shared<ChangeEvent>(event);
-            auto eventHub = GetEventHub<SwiperEventHub>();
+            auto eventHub = GetOrCreateEventHub<SwiperEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->AddOnChangeEvent(changeEvent_);
         } else {
@@ -265,7 +271,7 @@ public:
     {
         if (!onIndexChangeEvent_) {
             onIndexChangeEvent_ = std::make_shared<ChangeEvent>(event);
-            auto eventHub = GetEventHub<SwiperEventHub>();
+            auto eventHub = GetOrCreateEventHub<SwiperEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->AddOnChangeEvent(onIndexChangeEvent_);
         } else {
@@ -277,7 +283,7 @@ public:
     {
         if (!animationStartEvent_) {
             animationStartEvent_ = std::make_shared<AnimationStartEvent>(event);
-            auto eventHub = GetEventHub<SwiperEventHub>();
+            auto eventHub = GetOrCreateEventHub<SwiperEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->AddAnimationStartEvent(animationStartEvent_);
         } else {
@@ -289,7 +295,7 @@ public:
     {
         if (!animationEndEvent_) {
             animationEndEvent_ = std::make_shared<AnimationEndEvent>(event);
-            auto eventHub = GetEventHub<SwiperEventHub>();
+            auto eventHub = GetOrCreateEventHub<SwiperEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->AddAnimationEndEvent(animationEndEvent_);
         } else {
@@ -301,7 +307,7 @@ public:
     {
         if (!selectedEvent_) {
             selectedEvent_ = std::make_shared<ChangeEvent>(event);
-            auto eventHub = GetEventHub<SwiperEventHub>();
+            auto eventHub = GetOrCreateEventHub<SwiperEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->AddOnSlectedEvent(selectedEvent_);
         } else {
@@ -313,7 +319,7 @@ public:
     {
         if (!unselectedEvent_) {
             unselectedEvent_ = std::make_shared<ChangeEvent>(event);
-            auto eventHub = GetEventHub<SwiperEventHub>();
+            auto eventHub = GetOrCreateEventHub<SwiperEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->AddOnUnselectedEvent(unselectedEvent_);
         } else {
@@ -606,6 +612,7 @@ public:
     int32_t RealTotalCount() const;
     bool IsSwipeByGroup() const;
     int32_t DisplayIndicatorTotalCount() const;
+    bool IsAutoLinear() const;
     std::pair<int32_t, int32_t> CalculateStepAndItemCount() const;
     int32_t GetDisplayCount() const;
     int32_t GetCachedCount() const;
@@ -673,7 +680,7 @@ public:
     virtual void SetIsCrownSpring(bool isCrownSpring) {}
 #endif
     int32_t GetMaxDisplayCount() const;
-
+    virtual bool GetDisableFlushFocus() { return false; }
     virtual void SaveCircleDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode) {}
     bool GetPrevMarginIgnoreBlank()
     {
@@ -906,6 +913,8 @@ private:
     bool IsFocusNodeInItemPosition(const RefPtr<FocusHub>& targetFocusHub);
     void FlushFocus(const RefPtr<FrameNode>& curShowFrame);
     WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
+    bool FindFocusableContentIndex(MoveStep moveStep);
+    bool IsContentChildFocusable(int32_t childIndex) const;
 
     // Init indicator
     void InitIndicator();
@@ -1027,7 +1036,6 @@ private:
     void StopSpringAnimationAndFlushImmediately();
     void ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex);
     int32_t GetLoopIndex(int32_t index, int32_t childrenSize) const;
-    bool IsAutoLinear() const;
     bool AutoLinearAnimationNeedReset(float translate) const;
     void TriggerCustomContentTransitionEvent(int32_t fromIndex, int32_t toIndex);
     /**
@@ -1182,6 +1190,7 @@ private:
     }
 
     void ResetOnForceMeasure();
+    void ResetTabBar();
     void UpdateTabBarIndicatorCurve();
     bool CheckDragOutOfBoundary(double dragVelocity);
     void UpdateCurrentFocus();
@@ -1247,6 +1256,7 @@ private:
     void ReportTraceOnDragEnd() const;
     void UpdateBottomTypeOnMultiple(int32_t currentFirstIndex);
     void UpdateBottomTypeOnMultipleRTL(int32_t currentFirstIndex);
+    void CheckTargetPositon(float& correctOffset);
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;
@@ -1348,6 +1358,7 @@ private:
     float endMainPos_ = 0.0f;
     float contentMainSize_ = 0.0f;
     float oldContentMainSize_ = 0.0f;
+    float contentMainSizeBeforeAni_ = 0.0f;
     float contentCrossSize_ = 0.0f;
     bool crossMatchChild_ = false;
 

@@ -19,6 +19,7 @@
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
 #include "adapter/ohos/entrance/pa_engine/engine/common/js_backend_engine_loader.h"
 #include "adapter/ohos/entrance/pa_engine/pa_backend.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 
 namespace OHOS::Ace::Platform {

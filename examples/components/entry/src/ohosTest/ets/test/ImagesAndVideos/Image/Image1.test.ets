@@ -17,9 +17,16 @@ import { describe, beforeAll, it } from '@ohos/hypium'
 import { Component, Driver, ON } from '@kit.TestKit';
 import {
   buttonClick,
-  JsonType, KeyStruct, radioClick, Search,
+  JsonType,
+  KeyStruct,
+  radioClick,
+  Search,
   searchParentBlock,
-  Slide, sliderDrag, titleSearch, ToggleClick } from '../../../utils';
+  Slide,
+  sliderDrag,
+  titleSearch,
+  ToggleClick
+} from '../../../utils';
 import { ImageStart } from './Image';
 
 const driver = Driver.create();
@@ -149,7 +156,6 @@ export default function Image1Test() {
           toggleClickObj: 'colorFilter',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -181,7 +187,6 @@ export default function Image1Test() {
           toggleClickObj: 'draggable',
           toggleClickType: ToggleClick.Open
         },
-
       })
 
       done();
@@ -196,7 +201,6 @@ export default function Image1Test() {
           toggleClickObj: 'draggable',
           toggleClickType: ToggleClick.Close
         },
-
       })
 
       done();

@@ -1262,6 +1262,159 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest076, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BaseUtilsTest077
+ * @tc.desc: Test FormatString with basic format strings
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest077, TestSize.Level1)
+{
+    EXPECT_EQ(StringUtils::FormatString("Hello %s", "world"), "Hello world");
+    EXPECT_EQ(StringUtils::FormatString("%d", 42), "42");
+    EXPECT_EQ(StringUtils::FormatString("%.2f", 3.14159), "3.14");
+    EXPECT_EQ(StringUtils::FormatString("%p", reinterpret_cast<void*>(42)), "0x2a");
+}
+
+/**
+ * @tc.name: BaseUtilsTest078
+ * @tc.desc: Test FormatString with no arguments
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest078, TestSize.Level1)
+{
+    EXPECT_EQ(StringUtils::FormatString("Hello"), "Hello");
+    EXPECT_EQ(StringUtils::FormatString("No vars"), "No vars");
+}
+
+/**
+ * @tc.name: BaseUtilsTest079
+ * @tc.desc: Test FormatString with max size boundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest079, TestSize.Level1)
+{
+    std::string longStr(MAX_STRING_SIZE - 1, 'a');
+    std::string result = StringUtils::FormatString("%s", longStr.c_str());
+    EXPECT_EQ(result, longStr);
+}
+
+/**
+ * @tc.name: BaseUtilsTest080
+ * @tc.desc: Test FormatString exceeding max size
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest080, TestSize.Level1)
+{
+    std::string input(300, 'B');
+    std::string result = StringUtils::FormatString("%s", input.c_str());
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: BaseUtilsTest081
+ * @tc.desc: Test FormatString with invalid format specifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest081, TestSize.Level1)
+{
+    EXPECT_TRUE(StringUtils::FormatString("%q").empty());
+    EXPECT_TRUE(StringUtils::FormatString("%z", 123).empty());
+    EXPECT_TRUE(StringUtils::FormatString("%", 123).empty());
+}
+
+/**
+ * @tc.name: BaseUtilsTest082
+ * @tc.desc: Test FormatString with escape characters
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest082, TestSize.Level1)
+{
+    EXPECT_EQ(StringUtils::FormatString("Hello\tworld\n"), "Hello\tworld\n");
+    EXPECT_EQ(StringUtils::FormatString("%c", '\0'), "\0");
+}
+
+/**
+ * @tc.name: BaseUtilsTest083
+ * @tc.desc: Test FormatString with multiple arguments
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest083, TestSize.Level1)
+{
+    std::string result = StringUtils::FormatString("%d + %f = %s", 2, 3.0, "5");
+    EXPECT_EQ(result, "2 + 3.000000 = 5");
+}
+
+/**
+ * @tc.name: BaseUtilsTest084
+ * @tc.desc: Test FormatString with empty format
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest084, TestSize.Level1)
+{
+    std::string result = StringUtils::FormatString("%999s", "test");
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: BaseUtilsTest085
+ * @tc.desc: Test FormatString with pointer formatting
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest085, TestSize.Level1)
+{
+    int x = 42;
+    std::string result = StringUtils::FormatString("%p", &x);
+    EXPECT_FALSE(result.empty());
+    EXPECT_TRUE(result.length() > 2);
+    EXPECT_EQ(result.c_str()[0], '0');
+    EXPECT_EQ(result.c_str()[1], 'x');
+}
+
+/**
+ * @tc.name: BaseUtilsTest086
+ * @tc.desc: Test FormatString with mixed types
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest086, TestSize.Level1)
+{
+    std::string result = StringUtils::FormatString("%d %f %s %c", 123, 45.67, "test", 'K');
+    EXPECT_EQ(result, "123 45.670000 test K");
+}
+
+/**
+ * @tc.name: BaseUtilsTest087
+ * @tc.desc: Test FormatString with special characters
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest087, TestSize.Level1)
+{
+    std::string result = StringUtils::FormatString("100%%");
+    EXPECT_EQ(result, "100%");
+}
+
+/**
+ * @tc.name: BaseUtilsTest088
+ * @tc.desc: Test FormatString with float formatting
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest088, TestSize.Level1)
+{
+    std::string result = StringUtils::FormatString("%.2f", 3.1415);
+    EXPECT_EQ(result, "3.14");
+}
+
+/**
+ * @tc.name: BaseUtilsTest089
+ * @tc.desc: Test FormatString with integer padding
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest089, TestSize.Level1)
+{
+    std::string expected(255, '0');
+    std::string result = StringUtils::FormatString("%0255d", 0);
+    EXPECT_EQ(result, expected);
+}
+
+/**
  * @tc.name: StringExpressionTest001
  * @tc.desc: InitMapping()
  * @tc.type: FUNC
@@ -1463,6 +1616,160 @@ HWTEST_F(BaseUtilsTest, StringUtilsTest001, TestSize.Level1)
     str = "中文";
     bool ret2 = StringUtils::IsAscii(str);
     EXPECT_EQ(ret2, false);
+}
+
+/**
+ * @tc.name: StringUtilsTest002
+ * @tc.desc: Test Empty String
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest002, TestSize.Level1)
+{
+    std::string emptyStr = "";
+    EXPECT_FALSE(IsUTF8(emptyStr));
+}
+
+/**
+ * @tc.name: StringUtilsTest003
+ * @tc.desc: Test One Ascii Character String
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest003, TestSize.Level1)
+{
+    std::string asciiA = "a";
+    EXPECT_TRUE(IsUTF8(asciiA));
+}
+
+/**
+ * @tc.name: StringUtilsTest004
+ * @tc.desc: Test String "a + é + €"
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest004, TestSize.Level1)
+{
+    std::string validStr = "a\xC3\xA9\xE2\x82\xAC";
+    EXPECT_TRUE(IsUTF8(validStr));
+}
+
+/**
+ * @tc.name: StringUtilsTest005
+ * @tc.desc: Test String "é"
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest005, TestSize.Level1)
+{
+    std::string twoByteStr = "\xC3\xA9";
+    EXPECT_TRUE(IsUTF8(twoByteStr));
+}
+
+/**
+ * @tc.name: StringUtilsTest006
+ * @tc.desc: Test Half Long Character String
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest006, TestSize.Level1)
+{
+    std::string halfTwoByteStr = "\xC3";
+    EXPECT_FALSE(IsUTF8(halfTwoByteStr));
+}
+
+/**
+ * @tc.name: StringUtilsTest007
+ * @tc.desc: Test String with Invalid Continuation
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest007, TestSize.Level1)
+{
+    std::string invalidStr = "\xC3\x40";
+    EXPECT_FALSE(IsUTF8(invalidStr));
+}
+
+/**
+ * @tc.name: StringUtilsTest008
+ * @tc.desc: Test Three Byte String
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest008, TestSize.Level1)
+{
+    std::string threeByteStr = "\xE2\x82\xAC";
+    EXPECT_TRUE(IsUTF8(threeByteStr));
+}
+
+/**
+ * @tc.name: StringUtilsTest009
+ * @tc.desc: Test Three Byte String with Invalid Continuation
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest009, TestSize.Level1)
+{
+    std::string missingThirdStr = "\xE2\x82";
+    EXPECT_FALSE(IsUTF8(missingThirdStr));
+}
+
+/**
+ * @tc.name: StringUtilsTest010
+ * @tc.desc: Test Three Byte String with One Invalid Character
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest010, TestSize.Level1)
+{
+    std::string invalidStr = "\xE2\x40\xAC";
+    EXPECT_FALSE(IsUTF8(invalidStr));
+}
+
+/**
+ * @tc.name: StringUtilsTest011
+ * @tc.desc: Test Four Byte Stringg Smile Face
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest011, TestSize.Level1)
+{
+    std::string fourByteStr = "\xF0\x9F\x98\x8A";
+    EXPECT_TRUE(IsUTF8(fourByteStr));
+}
+
+/**
+ * @tc.name: StringUtilsTest012
+ * @tc.desc: Test Four Byte String without Continuation
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest012, TestSize.Level1)
+{
+    std::string missingFourth = "\xF0\x9F\x98";
+    EXPECT_FALSE(IsUTF8(missingFourth));
+}
+
+/**
+ * @tc.name: StringUtilsTest013
+ * @tc.desc: Test Four Byte String with Invalid Character
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest013, TestSize.Level1)
+{
+    std::string invalidSecond = "\xF0\xC0\x80\x80";
+    EXPECT_FALSE(IsUTF8(invalidSecond));
+}
+
+/**
+ * @tc.name: StringUtilsTest014
+ * @tc.desc: Test Four Byte String with Invalid Start Character
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest014, TestSize.Level1)
+{
+    std::string invalidStart = "\xF8\x80\x80\x80";
+    EXPECT_FALSE(IsUTF8(invalidStart));
+}
+
+/**
+ * @tc.name: StringUtilsTest015
+ * @tc.desc: Test String Mixed with Invalid Character
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest015, TestSize.Level1)
+{
+    std::string mixedStr = "a\xC3\xA9\xE2\x82";
+    EXPECT_FALSE(IsUTF8(mixedStr));
 }
 
 /**

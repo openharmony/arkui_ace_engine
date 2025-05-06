@@ -160,7 +160,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest001, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
     sliderPaintProperty->UpdateValue(10.0f);
@@ -197,7 +197,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest002, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
     sliderPaintProperty->UpdateMin(10.0f);
@@ -234,7 +234,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest003, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
     sliderPaintProperty->UpdateMax(200.0f);
@@ -271,7 +271,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest004, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
     sliderPaintProperty->UpdateStep(10.0f);
@@ -308,7 +308,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest005, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
     sliderPaintProperty->UpdateValue(20.0f);
@@ -346,7 +346,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest006, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
     sliderPaintProperty->UpdateValue(10.0f);
@@ -384,7 +384,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest007, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
     sliderPaintProperty->UpdateValue(10.0f);
@@ -422,7 +422,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest008, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
     sliderPaintProperty->UpdateMin(10.0f);
@@ -460,7 +460,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest009, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
     sliderPaintProperty->UpdateMin(10.0f);
@@ -498,7 +498,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest010, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
     sliderPaintProperty->UpdateMax(150.0f);
@@ -536,7 +536,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest011, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
     sliderPaintProperty->UpdateValue(20.0f);
@@ -575,7 +575,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest012, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
     sliderPaintProperty->UpdateValue(20.0f);
@@ -614,7 +614,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest013, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
     sliderPaintProperty->UpdateValue(20.0f);
@@ -653,7 +653,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest014, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
     sliderPaintProperty->UpdateValue(20.0f);
@@ -1184,7 +1184,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest029, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     sliderPaintProperty->UpdateValue(10.0f);
@@ -1221,7 +1221,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest030, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     sliderPaintProperty->UpdateMin(10.0f);
@@ -1258,7 +1258,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest031, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     sliderPaintProperty->UpdateMax(200.0f);
@@ -1295,7 +1295,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest032, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     sliderPaintProperty->UpdateStep(10.0f);
@@ -1332,7 +1332,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest033, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     sliderPaintProperty->UpdateValue(20.0f);
@@ -1370,7 +1370,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest034, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     sliderPaintProperty->UpdateValue(10.0f);
@@ -1408,7 +1408,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest035, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     sliderPaintProperty->UpdateValue(10.0f);
@@ -1446,7 +1446,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest036, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     sliderPaintProperty->UpdateMin(10.0f);
@@ -1484,7 +1484,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest037, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     sliderPaintProperty->UpdateMin(10.0f);
@@ -1522,7 +1522,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest038, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     sliderPaintProperty->UpdateMax(150.0f);
@@ -1560,7 +1560,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest039, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     sliderPaintProperty->UpdateValue(20.0f);
@@ -1599,7 +1599,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest040, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     sliderPaintProperty->UpdateValue(20.0f);
@@ -1638,7 +1638,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest041, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     sliderPaintProperty->UpdateValue(20.0f);
@@ -1677,7 +1677,7 @@ HWTEST_F(SliderBuilderTestNg, SliderContentModifierBuilderTest042, TestSize.Leve
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(false);
     sliderPaintProperty->UpdateValue(20.0f);

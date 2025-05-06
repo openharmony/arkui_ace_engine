@@ -1130,7 +1130,9 @@ void RosenRenderImage::UpdateData(const std::string& uri, const std::vector<uint
 #ifndef USE_ROSEN_DRAWING
     auto codec = SkCodec::MakeFromData(skData);
 #else
-    auto skData = SkData::MakeWithoutCopy(rsData->GetData(), rsData->GetSize());
+    RSDataWrapper* wrapper = new RSDataWrapper{rsData};
+    auto skData =
+        SkData::MakeWithProc(rsData->GetData(), rsData->GetSize(), RSDataWrapperReleaseProc, wrapper);
     auto codec = SkCodec::MakeFromData(skData);
 #endif
     if (!codec) {

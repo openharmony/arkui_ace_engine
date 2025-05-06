@@ -260,6 +260,7 @@ HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue001, TestSize.Level1)
         ASSERT_NE(eventHub, nullptr);
         auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
         ASSERT_NE(gestureEventHub, nullptr);
+        eventHub->gestureEventHub_ = gestureEventHub;
         gestureEventHub->SetDragForbiddenForcely(testCase.dragInfo.isDragForbidden);
         auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
             AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
@@ -273,6 +274,7 @@ HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue001, TestSize.Level1)
         ASSERT_NE(frameNode, nullptr);
         frameNode->draggable_ = testCase.dragInfo.isDraggable;
         frameNode->customerSet_ = testCase.dragInfo.isCustomerSet;
+        frameNode->eventHub_ = eventHub;
         TouchRestrict dragTouchRestrict = { TouchRestrict::NONE };
         dragTouchRestrict.inputEventType = testCase.inputEventType;
         auto status = dragEventActuator->IsCurrentNodeStatusSuitableForDragging(frameNode, dragTouchRestrict);
@@ -297,6 +299,7 @@ HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue002, TestSize.Level1)
         ASSERT_NE(eventHub, nullptr);
         auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
         ASSERT_NE(gestureEventHub, nullptr);
+        eventHub->gestureEventHub_ = gestureEventHub;
         gestureEventHub->SetDragForbiddenForcely(testCase.dragInfo.isDragForbidden);
         gestureEventHub->SetTextDraggable(true);
         auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
@@ -311,6 +314,7 @@ HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue002, TestSize.Level1)
         ASSERT_NE(frameNode, nullptr);
         frameNode->draggable_ = testCase.dragInfo.isDraggable;
         frameNode->customerSet_ = testCase.dragInfo.isCustomerSet;
+        frameNode->eventHub_ = eventHub;
         auto textPattern = frameNode->GetPattern<TextBase>();
         ASSERT_NE(textPattern, nullptr);
         if (testCase.dragInfo.textIsSelected) {
@@ -474,4 +478,613 @@ HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue006, TestSize.Level1)
     }
 };
 
+/**
+ * @tc.name: DragEventTestNGIssue007
+ * @tc.desc: Test HideSubwindowDragNode function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get overlayManager and dragDropManager.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto overlayManager = pipeline->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    dragDropManager->subwindowOverlayManager_ = overlayManager;
+
+    /**
+     * @tc.steps: step2. create frameNode.
+     */
+    auto rootNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(rootNode, nullptr);
+    {
+        auto gatherNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        ASSERT_NE(gatherNode, nullptr);
+        auto pixmapColumnNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        ASSERT_NE(pixmapColumnNode, nullptr);
+        auto dragPixmapColumnNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        ASSERT_NE(dragPixmapColumnNode, nullptr);
+
+        overlayManager->gatherNodeWeak_ = gatherNode;
+        overlayManager->pixmapColumnNodeWeak_ = pixmapColumnNode;
+        overlayManager->dragPixmapColumnNodeWeak_ = dragPixmapColumnNode;
+        gatherNode->MountToParent(rootNode);
+        pixmapColumnNode->MountToParent(rootNode);
+        dragPixmapColumnNode->MountToParent(rootNode);
+    }
+    overlayManager->hasDragPixelMap_ = true;
+    overlayManager->hasPixelMap_ = true;
+    overlayManager->hasGatherNode_ = true;
+
+    /**
+     * @tc.steps: step3. call HideSubwindowDragNode.
+     */
+    dragDropManager->HideSubwindowDragNode();
+
+    EXPECT_EQ(overlayManager->gatherNodeWeak_.Upgrade(), nullptr);
+    EXPECT_EQ(overlayManager->pixmapColumnNodeWeak_.Upgrade(), nullptr);
+    EXPECT_EQ(overlayManager->dragPixmapColumnNodeWeak_.Upgrade(), nullptr);
+    EXPECT_EQ(overlayManager->hasDragPixelMap_, false);
+    EXPECT_EQ(overlayManager->hasPixelMap_, false);
+    EXPECT_EQ(overlayManager->hasGatherNode_, false);
+}
+
+/**
+ * @tc.name: DragEventTestNGIssue008
+ * @tc.desc: Test OnDragPullCancel function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get dragDropManager.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. create frameNode.
+     */
+    auto preTargetFrameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(preTargetFrameNode, nullptr);
+    dragDropManager->preTargetFrameNode_ = preTargetFrameNode;
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    preTargetFrameNode->eventHub_ = eventHub;
+
+    /**
+     * @tc.steps: step3. trigger OnDragPullCancel.
+     */
+    auto pointerEvent = DragPointerEvent();
+    dragDropManager->OnDragPullCancel(pointerEvent);
+    EXPECT_EQ(dragDropManager->preTargetFrameNode_, nullptr);
+}
+
+/**
+ * @tc.name: DragEventTestNGIssue009
+ * @tc.desc: Test OnDragPullCancel function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue009, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. get dragDropManager.
+    */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+    * @tc.steps: step2. create frameNode.
+    */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+    * @tc.steps: step3. set drag status.
+    */
+    const int32_t pullId = 10000;
+    dragDropManager->currentPullId_ = pullId;
+    dragDropManager->previewRect_ = Rect(1, 1, 1, 1);
+    dragDropManager->extraInfo_ = "test";
+    dragDropManager->velocityTracker_.lastPosition_ = Offset(1.0f, 1.0f);
+    dragDropManager->dragDropState_ = DragDropMgrState::DRAGGING;
+    dragDropManager->draggedFrameNode_ = frameNode;
+    dragDropManager->menuWrapperNode_ = frameNode;
+    dragDropManager->preMovePoint_ = Point(1, 1);
+    dragDropManager->hasNotifiedTransformation_ = true;
+    dragDropManager->badgeNumber_ = 1;
+    dragDropManager->isDragWithContextMenu_ = true;
+    dragDropManager->isDragNodeNeedClean_ = true;
+    dragDropManager->isAnyDraggableHit_ = true;
+    dragDropManager->isPullThrow_ = true;
+
+    /**
+    * @tc.steps: step4. trigger OnDragPullCancel.
+    */
+    auto pointerEvent = DragPointerEvent();
+    dragDropManager->OnDragPullCancel(pointerEvent);
+    EXPECT_EQ(dragDropManager->currentPullId_, -1);
+    EXPECT_EQ(dragDropManager->previewRect_, Rect(-1, -1, -1, -1));
+    EXPECT_EQ(dragDropManager->extraInfo_, "");
+    EXPECT_EQ(dragDropManager->velocityTracker_.lastPosition_, Offset(0.0f, 0.0f));
+    EXPECT_EQ(dragDropManager->dragDropState_, DragDropMgrState::IDLE);
+    EXPECT_EQ(dragDropManager->draggedFrameNode_, nullptr);
+    EXPECT_EQ(dragDropManager->GetMenuWrapperNode(), nullptr);
+    EXPECT_EQ(dragDropManager->preMovePoint_, Point(0, 0));
+    EXPECT_EQ(dragDropManager->hasNotifiedTransformation_, false);
+    EXPECT_EQ(dragDropManager->badgeNumber_, -1);
+    EXPECT_EQ(dragDropManager->isDragWithContextMenu_, false);
+    EXPECT_EQ(dragDropManager->isDragNodeNeedClean_, false);
+    EXPECT_EQ(dragDropManager->isAnyDraggableHit_, false);
+    EXPECT_EQ(dragDropManager->isPullThrow_, false);
+}
+
+/**
+ * @tc.name: DragEventTestNGIssue010
+ * @tc.desc: Test OnDragPullCancel function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue010, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. get dragDropManager.
+    */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+    * @tc.steps: step2. create frameNode.
+    */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+    * @tc.steps: step3. set drag status.
+    */
+    const Point dragMoveLastPoint = Point(1, 1, 1, 1);
+    dragDropManager->fingerPointInfo_[0] = dragMoveLastPoint;
+    DragDropGlobalController::GetInstance().UpdateDragDropInitiatingStatus(frameNode,
+        DragDropInitiatingStatus::MOVING);
+
+    bool isInMoving = DragDropGlobalController::GetInstance().IsInMoving();
+    EXPECT_EQ(isInMoving, true);
+
+    /**
+    * @tc.steps: step4. trigger OnDragPullCancel.
+    */
+    auto pointerEvent = DragPointerEvent();
+    dragDropManager->OnDragPullCancel(pointerEvent);
+    int32_t fingerPointInfoSize = dragDropManager->fingerPointInfo_.size();
+    EXPECT_EQ(fingerPointInfoSize, 0);
+    isInMoving = DragDropGlobalController::GetInstance().IsInMoving();
+    EXPECT_EQ(isInMoving, false);
+}
+
+/**
+ * @tc.name: DragEventTestNGIssue011
+ * @tc.desc: Test CheckIsUIExtensionBoundary function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get dragDropManager.
+     */
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    container->pipelineContext_ = pipeline;
+    auto dragDropManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. test is not UIExtension inner.
+     */
+    container->isUIExtensionWindow_ = false;
+    float x = 0.0f;
+    float y = 0.0f;
+    float width = pipeline->rootWidth_;
+    float height = pipeline->rootHeight_;
+    bool isUIExtensionBoundary = false;
+
+    x = width / 2.0f;
+    y = height / 2.0f;
+    isUIExtensionBoundary = dragDropManager->CheckIsUIExtensionBoundary(x, y, 0);
+    EXPECT_EQ(isUIExtensionBoundary, false);
+
+    x = 0.0f;
+    y = 1.0f;
+    isUIExtensionBoundary = dragDropManager->CheckIsUIExtensionBoundary(x, y, 0);
+    EXPECT_EQ(isUIExtensionBoundary, false);
+
+    x = 1.0f;
+    y = 0.0f;
+    isUIExtensionBoundary = dragDropManager->CheckIsUIExtensionBoundary(x, y, 0);
+    EXPECT_EQ(isUIExtensionBoundary, false);
+
+    x = width - 1.0f;
+    y = 0.0f;
+    isUIExtensionBoundary = dragDropManager->CheckIsUIExtensionBoundary(x, y, 0);
+    EXPECT_EQ(isUIExtensionBoundary, false);
+
+    x = 0.0f;
+    y = height - 1.0f;
+    isUIExtensionBoundary = dragDropManager->CheckIsUIExtensionBoundary(x, y, 0);
+    EXPECT_EQ(isUIExtensionBoundary, false);
+
+    x = width - 1.0f;
+    y = height - 1.0f;
+    isUIExtensionBoundary = dragDropManager->CheckIsUIExtensionBoundary(x, y, 0);
+    EXPECT_EQ(isUIExtensionBoundary, false);
+}
+
+/**
+ * @tc.name: DragEventTestNGIssue012
+ * @tc.desc: Test CheckIsUIExtensionBoundary function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue012, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. get dragDropManager.
+    */
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    container->pipelineContext_ = pipeline;
+    auto dragDropManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+    * @tc.steps: step2. test is not UIExtension outer.
+    */
+    container->isUIExtensionWindow_ = false;
+    float x = 0.0f;
+    float y = 0.0f;
+    float width = pipeline->rootWidth_;
+    float height = pipeline->rootHeight_;
+    bool isUIExtensionBoundary = false;
+
+    x = 0.0f;
+    y = -1.0f;
+    isUIExtensionBoundary = dragDropManager->CheckIsUIExtensionBoundary(x, y, 0);
+    EXPECT_EQ(isUIExtensionBoundary, false);
+
+    x = -1.0f;
+    y = 0.0f;
+    isUIExtensionBoundary = dragDropManager->CheckIsUIExtensionBoundary(x, y, 0);
+    EXPECT_EQ(isUIExtensionBoundary, false);
+
+    x = width + 1.0f;
+    y = 0.0f;
+    isUIExtensionBoundary = dragDropManager->CheckIsUIExtensionBoundary(x, y, 0);
+    EXPECT_EQ(isUIExtensionBoundary, false);
+
+    x = 0.0f;
+    y = height + 1.0f;
+    isUIExtensionBoundary = dragDropManager->CheckIsUIExtensionBoundary(x, y, 0);
+    EXPECT_EQ(isUIExtensionBoundary, false);
+
+    x = width + 1.0f;
+    y = height + 1.0f;
+    isUIExtensionBoundary = dragDropManager->CheckIsUIExtensionBoundary(x, y, 0);
+    EXPECT_EQ(isUIExtensionBoundary, false);
+}
+
+/**
+ * @tc.name: DragEventTestNGIssue013
+ * @tc.desc: Test CheckIsUIExtensionBoundary function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue013, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. get dragDropManager.
+    */
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    container->pipelineContext_ = pipeline;
+    auto dragDropManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+    * @tc.steps: step2. test is UIExtension inner.
+    */
+    container->isUIExtensionWindow_ = true;
+    float x = 0.0f;
+    float y = 0.0f;
+    float width = pipeline->rootWidth_;
+    float height = pipeline->rootHeight_;
+    bool isUIExtensionBoundary = false;
+
+    x = width / 2.0f;
+    y = height / 2.0f;
+    isUIExtensionBoundary = dragDropManager->CheckIsUIExtensionBoundary(x, y, 0);
+    EXPECT_EQ(isUIExtensionBoundary, false);
+
+    x = 0.0f;
+    y = 1.0f;
+    isUIExtensionBoundary = dragDropManager->CheckIsUIExtensionBoundary(x, y, 0);
+    EXPECT_EQ(isUIExtensionBoundary, true);
+
+    x = 1.0f;
+    y = 0.0f;
+    isUIExtensionBoundary = dragDropManager->CheckIsUIExtensionBoundary(x, y, 0);
+    EXPECT_EQ(isUIExtensionBoundary, true);
+
+    x = width - 1.0f;
+    y = 0.0f;
+    isUIExtensionBoundary = dragDropManager->CheckIsUIExtensionBoundary(x, y, 0);
+    EXPECT_EQ(isUIExtensionBoundary, true);
+
+    x = 0.0f;
+    y = height - 1.0f;
+    isUIExtensionBoundary = dragDropManager->CheckIsUIExtensionBoundary(x, y, 0);
+    EXPECT_EQ(isUIExtensionBoundary, true);
+
+    x = width - 1.0f;
+    y = height - 1.0f;
+    isUIExtensionBoundary = dragDropManager->CheckIsUIExtensionBoundary(x, y, 0);
+    EXPECT_EQ(isUIExtensionBoundary, true);
+}
+
+/**
+ * @tc.name: DragEventTestNGIssue014
+ * @tc.desc: Test CheckIsUIExtensionBoundary function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue014, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. get dragDropManager.
+    */
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    container->pipelineContext_ = pipeline;
+    auto dragDropManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+    * @tc.steps: step2. test is UIExtension outer.
+    */
+    container->isUIExtensionWindow_ = true;
+    float x = 0.0f;
+    float y = 0.0f;
+    float width = pipeline->rootWidth_;
+    float height = pipeline->rootHeight_;
+    bool isUIExtensionBoundary = false;
+
+    x = 0.0f;
+    y = -1.0f;
+    isUIExtensionBoundary = dragDropManager->CheckIsUIExtensionBoundary(x, y, 0);
+    EXPECT_EQ(isUIExtensionBoundary, true);
+
+    x = -1.0f;
+    y = 0.0f;
+    isUIExtensionBoundary = dragDropManager->CheckIsUIExtensionBoundary(x, y, 0);
+    EXPECT_EQ(isUIExtensionBoundary, true);
+
+    x = width + 1.0f;
+    y = 0.0f;
+    isUIExtensionBoundary = dragDropManager->CheckIsUIExtensionBoundary(x, y, 0);
+    EXPECT_EQ(isUIExtensionBoundary, true);
+
+    x = 0.0f;
+    y = height + 1.0f;
+    isUIExtensionBoundary = dragDropManager->CheckIsUIExtensionBoundary(x, y, 0);
+    EXPECT_EQ(isUIExtensionBoundary, true);
+
+    x = width + 1.0f;
+    y = height + 1.0f;
+    isUIExtensionBoundary = dragDropManager->CheckIsUIExtensionBoundary(x, y, 0);
+    EXPECT_EQ(isUIExtensionBoundary, true);
+}
+
+/**
+ * @tc.name: DragEventTestNGIssue015
+ * @tc.desc: Test CheckIsNewDrag function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue015, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. get dragDropManager.
+    */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    const int32_t pullId = 10000;
+    dragDropManager->currentPullId_ = pullId;
+
+    /**
+    * @tc.steps: step2. create dragPointEvent.
+    */
+    auto pointerEvent = DragPointerEvent();
+
+    /**
+    * @tc.steps: step3. call CheckIsNewDrag.
+    */
+    pointerEvent.pullId = -1;
+    bool result = false;
+    result = dragDropManager->CheckIsNewDrag(pointerEvent);
+    EXPECT_EQ(result, false);
+
+    pointerEvent.pullId = pullId;
+    result = dragDropManager->CheckIsNewDrag(pointerEvent);
+    EXPECT_EQ(result, false);
+
+    const int32_t newPullId = 10001;
+    pointerEvent.pullId = newPullId;
+    result = dragDropManager->CheckIsNewDrag(pointerEvent);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: DragEventTestNGIssue016
+ * @tc.desc: Test InitDragAnimationPointerEvent function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue016, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. get dragDropManager.
+    */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+    * @tc.steps: step2. create GestureEvent.
+    */
+    auto gestureEvent = GestureEvent();
+    const Offset globalLocation = Offset(0, 0);
+    const Offset screenLocation = Offset(10, 10);
+    gestureEvent.globalLocation_ = globalLocation;
+    gestureEvent.screenLocation_ = screenLocation;
+    gestureEvent.pointerId_ = 0;
+
+    /**
+    * @tc.steps: step3. set fingerPointInfo.
+    */
+    const Point dragMoveLastPoint = Point(1, 1, 11, 11);
+    dragDropManager->fingerPointInfo_[0] = dragMoveLastPoint;
+
+
+    /**
+    * @tc.steps: step4. call InitDragAnimationPointerEvent.
+    */
+    dragDropManager->InitDragAnimationPointerEvent(gestureEvent, false);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 0);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowY, 0);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.displayX, 10);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.displayY, 10);
+
+    dragDropManager->InitDragAnimationPointerEvent(gestureEvent, true);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 1);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowY, 1);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.displayX, 11);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.displayY, 11);
+
+    gestureEvent.pointerId_ = 1;
+    dragDropManager->InitDragAnimationPointerEvent(gestureEvent, true);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 0);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowY, 0);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.displayX, 0);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.displayY, 0);
+}
+
+/**
+ * @tc.name: DragEventTestNGIssue017
+ * @tc.desc: Test RequestDragEndCallback function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set DragDropGlobalController init status.
+     */
+    const int32_t requestId = 10000;
+    DragDropGlobalController::GetInstance().requestId_ = -1;
+    DragDropGlobalController::GetInstance().dragResult_ = DragRet::DRAG_FAIL;
+    DragDropGlobalController::GetInstance().isOnOnDropPhase_ = true;
+    auto finalDragResult = DragRet::DRAG_FAIL;
+    auto callback = [&finalDragResult](const DragRet& dragResult) {
+        finalDragResult = dragResult;
+    };
+
+    /**
+     * @tc.steps: step2. call RequestDragEndCallback.
+     */
+    bool result = DragDropGlobalController::GetInstance().RequestDragEndCallback(-1, DragRet::DRAG_SUCCESS, callback);
+    EXPECT_EQ(result, false);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().requestId_, -1);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
+
+    result = DragDropGlobalController::GetInstance().RequestDragEndCallback(requestId,
+        DragRet::DRAG_SUCCESS, nullptr);
+    EXPECT_EQ(result, false);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().requestId_, -1);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
+
+    result = DragDropGlobalController::GetInstance().RequestDragEndCallback(-1, DragRet::DRAG_SUCCESS, nullptr);
+    EXPECT_EQ(result, false);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().requestId_, -1);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
+
+    DragDropGlobalController::GetInstance().isOnOnDropPhase_ = false;
+    result = DragDropGlobalController::GetInstance().RequestDragEndCallback(requestId,
+        DragRet::DRAG_SUCCESS, callback);
+    EXPECT_EQ(result, false);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().requestId_, -1);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
+
+    DragDropGlobalController::GetInstance().isOnOnDropPhase_ = true;
+    result = DragDropGlobalController::GetInstance().RequestDragEndCallback(requestId,
+        DragRet::DRAG_SUCCESS, callback);
+    EXPECT_EQ(result, true);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().requestId_, requestId);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_SUCCESS);
+}
+
+/**
+ * @tc.name: DragEventTestNGIssue018
+ * @tc.desc: Test NotifyDragEndPendingDone function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set DragDropGlobalController init status.
+     */
+    const int32_t requestId = 10000;
+    DragDropGlobalController::GetInstance().requestId_ = -1;
+    DragDropGlobalController::GetInstance().dragResult_ = DragRet::DRAG_FAIL;
+    DragDropGlobalController::GetInstance().isOnOnDropPhase_ = true;
+    auto finalDragResult = DragRet::DRAG_FAIL;
+    auto callback = [&finalDragResult](const DragRet& dragResult) {
+        finalDragResult = dragResult;
+    };
+
+    /**
+     * @tc.steps: step2. call RequestDragEndCallback.
+     */
+    auto result = DragDropGlobalController::GetInstance().RequestDragEndCallback(requestId,
+        DragRet::DRAG_SUCCESS, callback);
+    EXPECT_EQ(result, true);
+
+    /**
+     * @tc.steps: step3. call NotifyDragEndPendingDone.
+     */
+    DragDropGlobalController::GetInstance().dragResult_ = DragRet::DRAG_CANCEL;
+    DragDropGlobalController::GetInstance().NotifyDragEndPendingDone(requestId);
+    EXPECT_EQ(finalDragResult, DragRet::DRAG_CANCEL);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().stopDragCallback_, nullptr);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
+}
 } // namespace OHOS::Ace::NG

@@ -72,7 +72,7 @@ enum {
 /**
  * @brief Status code for AI analyzer.
  *
- * @since 16
+ * @since 18
  * @version 1.0
  */
 typedef enum {
@@ -863,7 +863,7 @@ int32_t OH_NativeXComponent_RegisterKeyEventCallbackWithResult(
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} the execution is successful.\n
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} component is nullptr or callback is nullptr,
  *         or the type of node is not XComponent.\n
- * @since 16
+ * @since 18
  */
 int32_t OH_ArkUI_XComponent_StartImageAnalyzer(ArkUI_NodeHandle node, void* userData,
     void (*callback)(ArkUI_NodeHandle node, ArkUI_XComponent_ImageAnalyzerState statusCode, void* userData));
@@ -876,14 +876,14 @@ int32_t OH_ArkUI_XComponent_StartImageAnalyzer(ArkUI_NodeHandle node, void* user
  * @return Returns the status code of the execution.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} the execution is successful.\n
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} component is nullptr or the type of node is not XComponent.\n
- * @since 16
+ * @since 18
  */
 int32_t OH_ArkUI_XComponent_StopImageAnalyzer(ArkUI_NodeHandle node);
 
 /**
  * @brief Provides an encapsulated <b>OH_ArkUI_SurfaceHolder</b> instance.
  *
- * @since 16
+ * @since 18
  */
 typedef struct OH_ArkUI_SurfaceHolder OH_ArkUI_SurfaceHolder;
 
@@ -892,7 +892,7 @@ typedef struct OH_ArkUI_SurfaceHolder OH_ArkUI_SurfaceHolder;
  *
  * @param node Indicates the pointer to the XComponent node.
  * @return Returns the created <b>OH_ArkUI_SurfaceHolder</b> object's pointer.
- * @since 16
+ * @since 18
  */
 OH_ArkUI_SurfaceHolder* OH_ArkUI_SurfaceHolder_Create(ArkUI_NodeHandle node);
 
@@ -900,7 +900,7 @@ OH_ArkUI_SurfaceHolder* OH_ArkUI_SurfaceHolder_Create(ArkUI_NodeHandle node);
  * @brief Disposes of a <b>OH_ArkUI_SurfaceHolder</b> object.
  *
  * @param node Indicates the pointer to <b>OH_ArkUI_SurfaceHolder</b> object needed to dispose.
- * @since 16
+ * @since 18
  */
 void OH_ArkUI_SurfaceHolder_Dispose(OH_ArkUI_SurfaceHolder* surfaceHolder);
 
@@ -913,7 +913,7 @@ void OH_ArkUI_SurfaceHolder_Dispose(OH_ArkUI_SurfaceHolder* surfaceHolder);
  * @return Returns the error code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
- * @since 16
+ * @since 18
  */
 int32_t OH_ArkUI_SurfaceHolder_SetUserData(OH_ArkUI_SurfaceHolder* surfaceHolder, void* userData);
 
@@ -922,14 +922,14 @@ int32_t OH_ArkUI_SurfaceHolder_SetUserData(OH_ArkUI_SurfaceHolder* surfaceHolder
  *
  * @param surfaceHolder Indicates the target <b>OH_ArkUI_SurfaceHolder</b> instance.
  * @return Returns the custom data.
- * @since 16
+ * @since 18
  */
 void* OH_ArkUI_SurfaceHolder_GetUserData(OH_ArkUI_SurfaceHolder* surfaceHolder);
 
 /**
  * @brief Define the surface lifecycle callback.
  *
- * @since 16
+ * @since 18
  */
 typedef struct OH_ArkUI_SurfaceCallback OH_ArkUI_SurfaceCallback;
 
@@ -937,7 +937,7 @@ typedef struct OH_ArkUI_SurfaceCallback OH_ArkUI_SurfaceCallback;
  * @brief Create a <b>OH_ArkUI_SurfaceCallback</b> object.
  *
  * @return Returns the created <b>OH_ArkUI_SurfaceCallback</b> object's pointer.
- * @since 16
+ * @since 18
  */
 OH_ArkUI_SurfaceCallback* OH_ArkUI_SurfaceCallback_Create(void);
 
@@ -945,7 +945,7 @@ OH_ArkUI_SurfaceCallback* OH_ArkUI_SurfaceCallback_Create(void);
  * @brief Disposes of a <b>OH_ArkUI_SurfaceCallback</b> object.
  *
  * @param callback Indicates the pointer to <b>OH_ArkUI_SurfaceCallback</b> object needed to dispose.
- * @since 16
+ * @since 18
  */
 void OH_ArkUI_SurfaceCallback_Dispose(OH_ArkUI_SurfaceCallback* callback);
 
@@ -955,7 +955,7 @@ void OH_ArkUI_SurfaceCallback_Dispose(OH_ArkUI_SurfaceCallback* callback);
  * @param callback Indicated the pointer to the surface callback.
  * @param onSurfaceCreated Indicates the surface created callback event
  *        which will called when the surface is created.
- * @since 16
+ * @since 18
  */
 void OH_ArkUI_SurfaceCallback_SetSurfaceCreatedEvent(
     OH_ArkUI_SurfaceCallback* callback,
@@ -967,7 +967,7 @@ void OH_ArkUI_SurfaceCallback_SetSurfaceCreatedEvent(
  * @param callback Indicated the pointer to the surface callback.
  * @param onSurfaceChanged Indicates the surface changed callback event
  *        which will called when the surface is changed.
- * @since 16
+ * @since 18
  */
 void OH_ArkUI_SurfaceCallback_SetSurfaceChangedEvent(
     OH_ArkUI_SurfaceCallback* callback,
@@ -979,7 +979,7 @@ void OH_ArkUI_SurfaceCallback_SetSurfaceChangedEvent(
  * @param callback Indicated the pointer to the surface callback.
  * @param onSurfaceDestroyed Indicates the surface destroyed callback event
  *        which will called when the surface is destroyed.
- * @since 16
+ * @since 18
  */
 void OH_ArkUI_SurfaceCallback_SetSurfaceDestroyedEvent(
     OH_ArkUI_SurfaceCallback* callback,
@@ -993,7 +993,7 @@ void OH_ArkUI_SurfaceCallback_SetSurfaceDestroyedEvent(
  * @return Returns the status code of the execution.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} the execution is successful.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
- * @since 16
+ * @since 18
  */
 int32_t OH_ArkUI_SurfaceHolder_AddSurfaceCallback(
     OH_ArkUI_SurfaceHolder* surfaceHolder,
@@ -1008,7 +1008,7 @@ int32_t OH_ArkUI_SurfaceHolder_AddSurfaceCallback(
  * @return Returns the status code of the execution.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} the execution is successful.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
- * @since 16
+ * @since 18
  */
 int32_t OH_ArkUI_SurfaceHolder_RemoveSurfaceCallback(
     OH_ArkUI_SurfaceHolder* surfaceHolder,
@@ -1017,7 +1017,7 @@ int32_t OH_ArkUI_SurfaceHolder_RemoveSurfaceCallback(
 /**
  * @brief Forward declaration of OHNativeWindow.
  *
- * @since 16
+ * @since 18
  */
 typedef struct NativeWindow OHNativeWindow;
 
@@ -1026,7 +1026,7 @@ typedef struct NativeWindow OHNativeWindow;
  *
  * @param surfaceHolder Indicates the pointer to this <b>OH_ArkUI_SurfaceHolder</b> instance.
  * @return Returns the nativeWindow associated with this <b>OH_ArkUI_SurfaceHolder</b> instance.
- * @since 16
+ * @since 18
  */
 OHNativeWindow* OH_ArkUI_XComponent_GetNativeWindow(OH_ArkUI_SurfaceHolder* surfaceHolder);
 
@@ -1041,7 +1041,7 @@ OHNativeWindow* OH_ArkUI_XComponent_GetNativeWindow(OH_ArkUI_SurfaceHolder* surf
  * @return Returns the status code of the execution.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} the execution is successful.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the node is invalid.
- * @since 16
+ * @since 18
  */
 int32_t OH_ArkUI_XComponent_SetAutoInitialize(ArkUI_NodeHandle node, bool autoInitialize);
 
@@ -1053,7 +1053,7 @@ int32_t OH_ArkUI_XComponent_SetAutoInitialize(ArkUI_NodeHandle node, bool autoIn
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} the execution is successful.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the node is invalid.
  *         {@link ARKUI_ERROR_CODE_XCOMPONENT_STATE_INVALID} if the node has initialized.
- * @since 16
+ * @since 18
  */
 int32_t OH_ArkUI_XComponent_Initialize(ArkUI_NodeHandle node);
 
@@ -1065,7 +1065,7 @@ int32_t OH_ArkUI_XComponent_Initialize(ArkUI_NodeHandle node);
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} the execution is successful.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the node is invalid.
  *         {@link ARKUI_ERROR_CODE_XCOMPONENT_STATE_INVALID} if the node has finalized.
- * @since 16
+ * @since 18
  */
 int32_t OH_ArkUI_XComponent_Finalize(ArkUI_NodeHandle node);
 
@@ -1077,7 +1077,7 @@ int32_t OH_ArkUI_XComponent_Finalize(ArkUI_NodeHandle node);
  * @return Returns the status code of the execution.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} the execution is successful.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the node is invalid.
- * @since 16
+ * @since 18
  */
 int32_t OH_ArkUI_XComponent_IsInitialized(ArkUI_NodeHandle node, bool* isInitialized);
 

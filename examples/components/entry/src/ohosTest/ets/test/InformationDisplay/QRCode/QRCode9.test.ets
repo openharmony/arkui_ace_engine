@@ -790,6 +790,6 @@ export default function QRCode9() {
       })
       done();
     })
-    })
+  })
 
 }

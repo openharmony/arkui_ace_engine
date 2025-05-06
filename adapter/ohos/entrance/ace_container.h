@@ -60,6 +60,12 @@ class FontManager;
 }
 
 namespace OHOS::Ace::Platform {
+#ifdef ACE_ENABLE_VK
+namespace {
+class HighContrastObserver;
+}
+#endif
+
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AbilityOnQueryCallback = std::function<void(const std::string& queryWord)>;
@@ -298,6 +304,8 @@ public:
 
     std::shared_ptr<Framework::JsValue> GetJsContext();
     void SetJsContext(const std::shared_ptr<Framework::JsValue>& jsContext);
+    std::shared_ptr<void> SerializeValue(const std::shared_ptr<Framework::JsValue>& jsValue);
+    void SetJsContextWithDeserialize(const std::shared_ptr<void>& recoder);
     std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityContext();
 
     void SetOrientation(Orientation orientation) override
@@ -307,11 +315,10 @@ public:
         uiWindow_->SetRequestedOrientation(dmOrientation);
     }
 
-    RefPtr<PageViewportConfig> GetCurrentViewportConfig() const override;
-    RefPtr<PageViewportConfig> GetTargetViewportConfig(Orientation orientation,
-        bool enableStatusBar, bool statusBarAnimated, bool enableNavigationIndicator) override;
-    void SetRequestedOrientation(Orientation orientation, bool needAnimation = true) override;
-    Orientation GetRequestedOrientation() override;
+    RefPtr<PageViewportConfig> GetCurrentViewportConfig() const;
+    RefPtr<PageViewportConfig> GetTargetViewportConfig(
+        std::optional<Orientation> orientation, std::optional<bool> enableStatusBar,
+        std::optional<bool> statusBarAnimation, std::optional<bool> enableNavIndicator) const;
 
     uint64_t GetDisplayId() const override
     {
@@ -842,6 +849,8 @@ public:
         foldStatusFromListener_ = GetCurrentFoldStatus();
     }
 
+    void DispatchExtensionDataToHostWindow(uint32_t code, const AAFwk::Want& data, int32_t persistenId);
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
@@ -878,17 +887,10 @@ private:
 
     void RegisterAvoidInfoCallback();
     void RegisterAvoidInfoDataProcessCallback();
-
-    void RegisterOrientationUpdateListener();
     void RegisterOrientationChangeListener();
-    void InitSystemBarConfig();
-    bool IsPcOrPadFreeMultiWindowMode() const override;
-    bool IsFullScreenWindow() const override
-    {
-        CHECK_NULL_RETURN(uiWindow_, false);
-        return uiWindow_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN;
-    }
-    bool SetSystemBarEnabled(SystemBarType type, bool enable, bool animation) override;
+
+    static bool SetSystemBarEnabled(const sptr<OHOS::Rosen::Window>& window, SystemBarType type,
+        std::optional<bool> enable, std::optional<bool> animation);
 
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
@@ -970,6 +972,14 @@ private:
     std::vector<std::string> paramUie_;
 
     SingleHandTransform singleHandTransform_;
+
+    bool lastThemeHasSkin_ = false;
+
+#ifdef ACE_ENABLE_VK
+    void SubscribeHighContrastChange();
+    void UnsubscribeHighContrastChange();
+    std::shared_ptr<HighContrastObserver> highContrastObserver_ = nullptr;
+#endif
 };
 
 } // namespace OHOS::Ace::Platform

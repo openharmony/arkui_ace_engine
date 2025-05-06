@@ -14,7 +14,7 @@
  */
 
 import { describe, beforeAll, it } from '@ohos/hypium'
-import { Driver, ON,Component  } from '@kit.TestKit';
+import { Driver, ON, Component } from '@kit.TestKit';
 import {
   buttonClick,
   getToggle,
@@ -48,9 +48,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 0,
-
-
-
       })
       done();
     })
@@ -62,7 +59,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 1,
-
       })
       done();
     })
@@ -74,7 +70,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 2,
-
       })
       done();
     })
@@ -86,7 +81,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 3,
-
       })
       done();
     })
@@ -98,7 +92,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 4,
-
       })
       done();
     })
@@ -110,7 +103,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 5,
-
       })
       done();
     })
@@ -122,7 +114,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 6,
-
       })
       done();
     })
@@ -134,7 +125,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 7,
-
       })
       done();
     })
@@ -146,7 +136,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 8,
-
       })
       done();
     })
@@ -158,7 +147,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 9,
-
       })
       done();
     })
@@ -170,7 +158,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 10,
-
       })
       done();
     })
@@ -193,7 +180,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 12,
-
       })
       done();
     })
@@ -205,7 +191,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 13,
-
       })
       done();
     })
@@ -217,7 +202,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 14,
-
       })
       done();
     })
@@ -232,7 +216,6 @@ export default function MenuItemGroup5() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
       })
       done();
     })
@@ -245,7 +228,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'monopolizeEvents', '通用属性7')
       await radioClick({
         radioClickObj: 0,
-
       })
       done();
     })
@@ -257,7 +239,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'monopolizeEvents', '通用属性7')
       await radioClick({
         radioClickObj: 1,
-
       })
       done();
     })
@@ -340,8 +321,6 @@ export default function MenuItemGroup5() {
         toggleClick: {
           toggleClickObj: 'hitTestBehavior'
         },
-
-
       })
       done();
     })
@@ -356,8 +335,6 @@ export default function MenuItemGroup5() {
         toggleClick: {
           toggleClickObj: 'hitTestBehavior'
         },
-
-
       })
       done();
     })
@@ -372,8 +349,6 @@ export default function MenuItemGroup5() {
         toggleClick: {
           toggleClickObj: 'hitTestBehavior'
         },
-
-
       })
       done();
     })
@@ -389,8 +364,6 @@ export default function MenuItemGroup5() {
           toggleClickType: ToggleClick.Close,
           toggleClickObj: 'hitTestBehavior'
         },
-
-
       })
       done();
     })
@@ -429,9 +402,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 0,
-
-
-
       })
       done();
     })
@@ -443,7 +413,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 1,
-
       })
       done();
     })
@@ -455,7 +424,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 2,
-
       })
       done();
     })
@@ -467,7 +435,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 3,
-
       })
       done();
     })
@@ -479,7 +446,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 4,
-
       })
       done();
     })
@@ -491,7 +457,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 5,
-
       })
       done();
     })
@@ -503,7 +468,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 6,
-
       })
       done();
     })
@@ -515,7 +479,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 7,
-
       })
       done();
     })
@@ -527,7 +490,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 8,
-
       })
       done();
     })
@@ -539,7 +501,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 9,
-
       })
       done();
     })
@@ -551,7 +512,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 10,
-
       })
       done();
     })
@@ -574,7 +534,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 12,
-
       })
       done();
     })
@@ -586,7 +545,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 13,
-
       })
       done();
     })
@@ -598,7 +556,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
         radioClickObj: 14,
-
       })
       done();
     })
@@ -613,7 +570,6 @@ export default function MenuItemGroup5() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
       })
       done();
     })
@@ -626,7 +582,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'monopolizeEvents', '通用属性7')
       await radioClick({
         radioClickObj: 0,
-
       })
       done();
     })
@@ -638,7 +593,6 @@ export default function MenuItemGroup5() {
       await titleSearch('基础属性', 'monopolizeEvents', '通用属性7')
       await radioClick({
         radioClickObj: 1,
-
       })
       done();
     })

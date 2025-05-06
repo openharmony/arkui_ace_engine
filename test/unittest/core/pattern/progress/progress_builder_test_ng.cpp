@@ -144,7 +144,7 @@ void ProgressBuilderTestNg::GetProgress()
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     pattern_ = frameNode_->GetPattern<ProgressPattern>();
-    eventHub_ = frameNode_->GetEventHub<EventHub>();
+    eventHub_ = frameNode_->GetOrCreateEventHub<EventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<ProgressLayoutProperty>();
     paintProperty_ = frameNode_->GetPaintProperty<ProgressPaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<ProgressAccessibilityProperty>();
@@ -177,7 +177,7 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest001, TestSize.Level1)
     model.SetShowText(true);
     model.SetBackgroundColor(Color::GRAY);
     CreateDone();
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -221,7 +221,7 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest002, TestSize.Level1)
     model.SetBackgroundColor(Color::GRAY);
     CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -265,7 +265,7 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest003, TestSize.Level1)
     model.SetBackgroundColor(Color::GRAY);
     CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -306,7 +306,7 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest004, TestSize.Level1)
     CreateProgress(MIN_VALUE, MAX_NEG_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
     CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -350,7 +350,7 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest005, TestSize.Level1)
     model.SetBackgroundColor(BG_COLOR);
     CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -394,7 +394,7 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest006, TestSize.Level1)
     model.SetBackgroundColor(BG_COLOR);
     CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -438,7 +438,7 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest007, TestSize.Level1)
     model.SetBackgroundColor(BG_COLOR);
     CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -482,7 +482,7 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest008, TestSize.Level1)
     model.SetBackgroundColor(BG_COLOR);
     CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -526,7 +526,7 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest009, TestSize.Level1)
     model.SetBackgroundColor(BG_COLOR);
     CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -569,7 +569,7 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest010, TestSize.Level1)
     model.SetShowText(true);
     model.SetBackgroundColor(Color::GRAY);
     CreateDone();
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -613,7 +613,7 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest011, TestSize.Level1)
     model.SetBackgroundColor(Color::GRAY);
     CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -657,7 +657,7 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest012, TestSize.Level1)
     model.SetBackgroundColor(Color::GRAY);
     CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -698,7 +698,7 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest013, TestSize.Level1)
     CreateProgress(MIN_VALUE, MAX_NEG_VALUE_OF_PROGRESS, PROGRESS_TYPE_SCALE);
     CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -742,7 +742,7 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest014, TestSize.Level1)
     model.SetBackgroundColor(BG_COLOR);
     CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -786,7 +786,7 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest015, TestSize.Level1)
     model.SetBackgroundColor(BG_COLOR);
     CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -830,7 +830,7 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest016, TestSize.Level1)
     model.SetBackgroundColor(BG_COLOR);
     CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -874,7 +874,7 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest017, TestSize.Level1)
     model.SetBackgroundColor(BG_COLOR);
     CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -918,7 +918,7 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest018, TestSize.Level1)
     model.SetBackgroundColor(BG_COLOR);
     CreateDone();
 
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -958,7 +958,7 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest019, TestSize.Level1)
      */
     CreateProgress(MAX_VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_MOON);
     CreateDone();
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -998,7 +998,7 @@ HWTEST_F(ProgressBuilderTestNg, ProgressHandleFocusEventTest001, TestSize.Level1
     */
     CreateProgress(MAX_VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_MOON);
     CreateDone();
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -1028,7 +1028,7 @@ HWTEST_F(ProgressBuilderTestNg, ProgressHandleFocusEventTest002, TestSize.Level1
     */
     CreateProgress(MAX_VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_MOON);
     CreateDone();
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -1063,7 +1063,7 @@ HWTEST_F(ProgressBuilderTestNg, ProgressHandleFocusEventTest003, TestSize.Level1
     */
     CreateProgress(MAX_VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_MOON);
     CreateDone();
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -1099,7 +1099,7 @@ HWTEST_F(ProgressBuilderTestNg, ProgressHandleBlurEventTest001, TestSize.Level1)
     */
     CreateProgress(MAX_VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_MOON);
     CreateDone();
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 
@@ -1134,7 +1134,7 @@ HWTEST_F(ProgressBuilderTestNg, ProgressHandleBlurEventTest002, TestSize.Level1)
     */
     CreateProgress(MAX_VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_MOON);
     CreateDone();
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(true);
 

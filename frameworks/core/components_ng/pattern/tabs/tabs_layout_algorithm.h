@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,10 +41,13 @@ private:
     TabsItemDivider GetDivider(LayoutWrapper* layoutWrapper) const;
     float MeasureDivider(const RefPtr<TabsLayoutProperty>& layoutProperty,
         const RefPtr<LayoutWrapper>& dividerWrapper, const SizeF& idealSize);
+    void MeasureEffectNode(const RefPtr<TabsLayoutProperty>& layoutProperty,
+        const RefPtr<LayoutWrapper>& effectNodeWrapper, const SizeF& idealSize);
     SizeF MeasureSwiper(const RefPtr<TabsLayoutProperty>& layoutProperty, RefPtr<LayoutWrapper>& swiperWrapper,
         const SizeF& idealSize, const SizeF& tabBarSize, const float dividerWidth);
     std::vector<OffsetF> LayoutOffsetList(
-        LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& tabBarWrapper, const SizeF& frameSize) const;
+        LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& tabBarWrapper,
+        const RefPtr<LayoutWrapper>& effectNodeWrapper, const SizeF& frameSize) const;
 };
 
 } // namespace OHOS::Ace::NG

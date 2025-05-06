@@ -929,7 +929,7 @@ HWTEST_F(ListCommonTestNg, EventHub002, TestSize.Level1)
     CreateList();
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
-    auto itemEventHub = GetChildFrameNode(frameNode_, 0)->GetEventHub<ListItemEventHub>();
+    auto itemEventHub = GetChildFrameNode(frameNode_, 0)->GetOrCreateEventHub<ListItemEventHub>();
     auto jsonStr = itemEventHub->GetDragExtraParams("", Point(0, 250.f), DragEventType::START);
     EXPECT_EQ(jsonStr, "{\"selectedIndex\":0}");
     jsonStr = itemEventHub->GetDragExtraParams("info", Point(0, 250.f), DragEventType::MOVE);
@@ -1054,7 +1054,7 @@ HWTEST_F(ListCommonTestNg, ListSelectForCardModeTest003, TestSize.Level1)
     bool isFifthItemSelected = false;
     auto selectCallback = [&isFifthItemSelected](bool) { isFifthItemSelected = true; };
     GetChildPattern<ListItemPattern>(group, 3)->SetSelectable(false);
-    GetChildFrameNode(group, 4)->GetEventHub<ListItemEventHub>()->SetOnSelect(std::move(selectCallback));
+    GetChildFrameNode(group, 4)->GetOrCreateEventHub<ListItemEventHub>()->SetOnSelect(std::move(selectCallback));
 
     /**
      * @tc.steps: step2. Select zone.
@@ -1425,7 +1425,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag006, TestSize.Level1)
     auto forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
     auto syntaxItem = AceType::DynamicCast<SyntaxItem>(forEachNode->GetChildAtIndex(0));
     auto listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
-    auto listItemEventHub = listItem->GetEventHub<ListItemEventHub>();
+    auto listItemEventHub = listItem->GetOrCreateEventHub<ListItemEventHub>();
     auto gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
     EXPECT_EQ(gestureHub->GetDragEventActuator(), nullptr);
 }
@@ -1447,7 +1447,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag007, TestSize.Level1)
     auto forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
     auto syntaxItem = AceType::DynamicCast<SyntaxItem>(forEachNode->GetChildAtIndex(0));
     auto listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
-    auto listItemEventHub = listItem->GetEventHub<ListItemEventHub>();
+    auto listItemEventHub = listItem->GetOrCreateEventHub<ListItemEventHub>();
     auto gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
     EXPECT_NE(gestureHub->GetDragEventActuator()->userCallback_, nullptr);
 
@@ -1460,7 +1460,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag007, TestSize.Level1)
     forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
     syntaxItem = AceType::DynamicCast<SyntaxItem>(forEachNode->GetChildAtIndex(0));
     listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
-    listItemEventHub = listItem->GetEventHub<ListItemEventHub>();
+    listItemEventHub = listItem->GetOrCreateEventHub<ListItemEventHub>();
     gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
     EXPECT_EQ(gestureHub->GetDragEventActuator()->userCallback_, nullptr);
 }
@@ -1657,7 +1657,7 @@ HWTEST_F(ListCommonTestNg, InitDragDropEvent001, TestSize.Level1)
     auto listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
     auto listItemPattern = listItem->GetPattern<ListItemPattern>();
     auto dragManager = listItemPattern->dragManager_;
-    auto listItemEventHub = listItem->GetEventHub<ListItemEventHub>();
+    auto listItemEventHub = listItem->GetOrCreateEventHub<ListItemEventHub>();
     auto gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
     // InitDragDropEvent
     auto dragEvent = gestureHub->dragEventActuator_->userCallback_;
@@ -2565,6 +2565,101 @@ HWTEST_F(ListCommonTestNg, RepeatNodeItemDragEventHandler003, TestSize.Level1)
     EXPECT_EQ(actualonMoveThroughFrom, -1);
     EXPECT_EQ(actualonMoveThroughTo, -1);
     EXPECT_EQ(actualOnDropIndex, -1);
+}
+
+/**
+ * @tc.name: ChainAnimation001
+ * @tc.desc: The SpaceDelta will be cleared before the layout list crosses the boundary.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ChainAnimation001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    model.SetChainAnimation(true);
+    model.SetChainAnimationOptions({ Dimension(0), Dimension(20), 0, 1, 0, DEFAULT_STIFFNESS, DEFAULT_DAMPING });
+    CreateListItems(5);
+    CreateDone();
+
+    pattern_->chainAnimation_->SetEdgeEffectIntensity(1);
+    pattern_->chainAnimation_->SetDelta(0, 10);
+
+    EXPECT_EQ(pattern_->GetChainDelta(1), -10);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetChainDelta(1), 0);
+}
+
+/**
+ * @tc.name: ChainAnimation002
+ * @tc.desc: When the list is layout from the end, The SpaceDelta will be cleared before
+ * the layout list crosses the boundary.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ChainAnimation002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    model.SetChainAnimation(true);
+    model.SetChainAnimationOptions({ Dimension(0), Dimension(20), 0, 1, 0, DEFAULT_STIFFNESS, DEFAULT_DAMPING });
+    model.SetStackFromEnd(true);
+    CreateListItems(5);
+    CreateDone();
+
+    pattern_->chainAnimation_->SetEdgeEffectIntensity(1);
+    pattern_->chainAnimation_->SetDelta(0, 10);
+
+    EXPECT_EQ(pattern_->GetChainDelta(1), -10);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetChainDelta(1), 0);
+}
+
+/**
+ * @tc.name: ChainAnimation003
+ * @tc.desc: When the screen is not full, the SpaceDelta will be cleared before the layout list crosses the boundary.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ChainAnimation003, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    model.SetChainAnimation(true);
+    model.SetChainAnimationOptions({ Dimension(0), Dimension(20), 0, 1, 0, DEFAULT_STIFFNESS, DEFAULT_DAMPING });
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateListItems(2);
+    CreateDone();
+
+    pattern_->chainAnimation_->SetEdgeEffectIntensity(1);
+    pattern_->chainAnimation_->SetDelta(0, 10);
+
+    EXPECT_EQ(pattern_->GetChainDelta(1), -10);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetChainDelta(1), 0);
+}
+
+/**
+ * @tc.name: ChainAnimation004
+ * @tc.desc: When the screen is not full and the list is layout from the end, the SpaceDelta will
+ * be cleared before the layout list crosses the boundary.
+ * repeat and itemDragEvents are null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ChainAnimation004, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    model.SetChainAnimation(true);
+    model.SetChainAnimationOptions({ Dimension(0), Dimension(20), 0, 1, 0, DEFAULT_STIFFNESS, DEFAULT_DAMPING });
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetStackFromEnd(true);
+    CreateListItems(2);
+    CreateDone();
+
+    pattern_->chainAnimation_->SetEdgeEffectIntensity(1);
+    pattern_->chainAnimation_->SetDelta(0, 10);
+
+    EXPECT_EQ(pattern_->GetChainDelta(1), -10);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetChainDelta(1), 0);
 }
 
 void ListCommonTestNg::MapEventInLazyForEachForItemDragEvent(int32_t* actualDragStartIndex, int32_t* actualOnDropIndex,

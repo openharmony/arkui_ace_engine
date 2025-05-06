@@ -1,4 +1,4 @@
-import { describe, beforeAll, it} from '@ohos/hypium'
+import { describe, beforeAll, it } from '@ohos/hypium'
 import { abilityDelegatorRegistry, Driver, Component } from '@kit.TestKit';
 import { ON, Point } from '@ohos.UiTest';
 import {
@@ -30,7 +30,7 @@ export default function SteeperItemBootcampTest() {
           bundleName: 'cn.ohos.components',
           abilityName: 'EntryAbility'
         });
-        
+
         await driver.delayMs(5000);
 
         let atomDisplays: Component = await driver.findComponent(ON.text('导航与切换'));

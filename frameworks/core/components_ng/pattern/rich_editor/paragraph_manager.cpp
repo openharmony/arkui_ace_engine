@@ -379,7 +379,7 @@ std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end, RectHe
     return res;
 }
 
-ParagraphManager::ParagraphInfo ParagraphManager::GetParagrahInfo(int32_t position) const
+ParagraphManager::ParagraphInfo ParagraphManager::GetParagraphInfo(int32_t position) const
 {
     CHECK_EQUAL_RETURN(paragraphs_.empty(), true, {});
     auto it = std::find_if(paragraphs_.begin(), paragraphs_.end(), [position](const ParagraphInfo& info) {

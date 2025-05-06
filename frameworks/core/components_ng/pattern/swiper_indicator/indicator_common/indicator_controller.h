@@ -56,6 +56,10 @@ public:
     void ResetIndicatorControllor(
         const RefPtr<IndicatorController>& controller, const RefPtr<FrameNode>& indicatorNode);
 
+    void UpdateIndicatorNode();
+
+    RefPtr<FrameNode> GetIndicatorNode();
+
 private:
     std::function<void()> resetFunc_;
     WeakPtr<IndicatorPattern> indicatorPattern_;

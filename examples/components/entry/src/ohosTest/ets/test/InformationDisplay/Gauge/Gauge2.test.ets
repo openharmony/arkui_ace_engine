@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import { describe, beforeAll, it } from '@ohos/hypium'
-import { Driver} from '@kit.TestKit';
+import { Driver } from '@kit.TestKit';
 import {
   JsonType,
   Search,
@@ -24,7 +24,6 @@ import {
   ToggleClick,
   searchParentBlock
 } from '../../../utils';
-
 
 import { GaugeStart } from './Gauge';
 
@@ -1867,7 +1866,6 @@ export default function Gauge2() {
       done();
 
     })
-
 
 
   })

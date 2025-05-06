@@ -1672,7 +1672,7 @@ void SetLinearGradientBlur(ArkUINodeHandle node, ArkUI_Float32 blurRadius, const
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    blurRadius = std::clamp(blurRadius, 0.0f, 60.0f); // 60.0 represents largest blur radius;
+    blurRadius = std::max(0.0f, blurRadius);
     std::vector<std::pair<float, float>> fractionStops;
     if ((stopsLength & 0x1) == 0) {
         float tmpPos = -1.0f;
@@ -5828,6 +5828,29 @@ void GetTranslate(ArkUINodeHandle node, ArkUI_Float32 (*values)[3], ArkUI_Int32 
     (*values)[NUM_2] = translate.z.GetNativeValue(static_cast<DimensionUnit>(unit));
 }
 
+void GetTranslateWithPercentage(
+    ArkUINodeHandle node, ArkUI_Float32 (*values)[3], ArkUI_Int32 (*units)[2], ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto translate = ViewAbstract::GetTranslate(frameNode);
+    if (translate.x.Unit() != DimensionUnit::PERCENT) {
+        (*units)[0] = NUM_0;
+        (*values)[0] = translate.x.GetNativeValue(static_cast<DimensionUnit>(unit));
+    } else {
+        (*units)[0] = NUM_1;
+        (*values)[0] = translate.x.Value();
+    }
+    if (translate.y.Unit() != DimensionUnit::PERCENT) {
+        (*units)[1] = NUM_0;
+        (*values)[1] = translate.y.GetNativeValue(static_cast<DimensionUnit>(unit));
+    } else {
+        (*units)[1] = NUM_1;
+        (*values)[1] = translate.y.Value();
+    }
+    (*values)[NUM_2] = translate.z.GetNativeValue(static_cast<DimensionUnit>(unit));
+}
+
 ArkUI_Float32 GetAspectRatio(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -7364,6 +7387,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .getMargin = GetMargin,
         .getMarginDimension = GetMarginDimension,
         .getTranslate = GetTranslate,
+        .getTranslateWithPercentage = GetTranslateWithPercentage,
         .setMoveTransition = SetMoveTransition,
         .getMoveTransition = GetMoveTransition,
         .resetMask = ResetMask,
@@ -7786,6 +7810,7 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .getMargin = GetMargin,
         .getMarginDimension = GetMarginDimension,
         .getTranslate = GetTranslate,
+        .getTranslateWithPercentage = GetTranslateWithPercentage,
         .setMoveTransition = SetMoveTransition,
         .getMoveTransition = GetMoveTransition,
         .resetMask = ResetMask,
@@ -8321,6 +8346,7 @@ void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkU
     touchPoint.contactAreaHeight = locationInfo.GetSize();
     touchPoint.tiltX = locationInfo.GetTiltX().value_or(0.0f);
     touchPoint.tiltY = locationInfo.GetTiltY().value_or(0.0f);
+    touchPoint.rollAngle = locationInfo.GetRollAngle().value_or(0.0f);
     touchPoint.toolType = static_cast<int32_t>(locationInfo.GetSourceTool());
     touchPoint.pressedTime = locationInfo.GetPressedTime().time_since_epoch().count();
     touchPoint.operatingHand = locationInfo.GetOperatingHand();
@@ -8356,6 +8382,7 @@ void ConvertTouchPointsToPoints(std::vector<TouchPoint>& touchPointes,
         points[i].pressure = touchPoint.force;
         points[i].tiltX = touchPoint.tiltX.value_or(0.0f);
         points[i].tiltY = touchPoint.tiltY.value_or(0.0f);
+        points[i].rollAngle = touchPoint.rollAngle.value_or(0.0f);
         points[i].pressedTime = touchPoint.downTime.time_since_epoch().count();
         points[i].toolType = static_cast<int32_t>(historyLoaction.GetSourceTool());
         points[i].operatingHand = touchPoint.operatingHand;

@@ -2450,7 +2450,7 @@ HWTEST_F(DatePickerTestNg, DatePickerEventTest001, TestSize.Level1)
     DatePickerModelNG datePickerModelNG;
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<DatePickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
     datePickerModelNG.SetOnChange(frameNode, [](const BaseEventInfo* info) {});
     EXPECT_NE(eventHub->changeEvent_, nullptr);

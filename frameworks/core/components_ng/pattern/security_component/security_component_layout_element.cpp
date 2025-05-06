@@ -120,8 +120,8 @@ void TextLayoutElement::UpdateFontSize()
     auto textStyle = layoutAlgorithm->GetTextStyle();
     auto textProp = AceType::DynamicCast<TextLayoutProperty>(textWrap_->GetLayoutProperty());
     CHECK_NULL_VOID(textProp);
-    if (isAdaptive_ && !NearEqual(textStyle->GetFontSize().Value(), 0.0f)) {
-        Dimension fontSize(textStyle->GetFontSize().ConvertToFp(), DimensionUnit::FP);
+    if (isAdaptive_ && !NearEqual(textStyle.GetFontSize().Value(), 0.0f)) {
+        Dimension fontSize(textStyle.GetFontSize().ConvertToFp(), DimensionUnit::FP);
         textProp->UpdateFontSize(fontSize);
     }
 }

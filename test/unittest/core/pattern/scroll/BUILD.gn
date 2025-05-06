@@ -17,6 +17,7 @@ ace_unittest("scroll_test_ng") {
   type = "new"
   sources = [
     "scroll_accessibility_test_ng.cpp",
+    "scroll_bar_overlay_test_ng.cpp",
     "scroll_controller_test_ng.cpp",
     "scroll_dump_test_ng.cpp",
     "scroll_effect_test_ng.cpp",
@@ -24,7 +25,9 @@ ace_unittest("scroll_test_ng") {
     "scroll_inner_event_test_ng.cpp",
     "scroll_inner_layout_test_ng.cpp",
     "scroll_layout_test_ng.cpp",
+    "scroll_model_test_ng.cpp",
     "scroll_nested_test_ng.cpp",
+    "scroll_pattern_test_ng.cpp",
     "scroll_test_ng.cpp",
   ]
 

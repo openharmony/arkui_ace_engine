@@ -27,9 +27,11 @@ export struct ContainerSpanBootcamp {
   @State textBackgroundStyleRadius: number = 0;
   @State selection: string | null = null;
   scroller: Scroller = new Scroller()
+
   aboutToAppear(): void {
-    AppStorage.setOrCreate('scroller',this.scroller)
+    AppStorage.setOrCreate('scroller', this.scroller)
   }
+
   build() {
     NavDestination() {
       Drawer({
@@ -53,8 +55,8 @@ export struct ContainerSpanBootcamp {
   @Builder
   Content() {
     Row() {
-      Text(){
-        ContainerSpan(){
+      Text() {
+        ContainerSpan() {
           ImageSpan($r('app.media.app_icon'))
             .width('40vp')
             .height('40vp')
@@ -63,11 +65,11 @@ export struct ContainerSpanBootcamp {
             .fontSize('16fp')
             .fontColor(Color.White)
         }
-          .textBackgroundStyle({
-            color: useEnabled(this.enableTextBackgroundStyleColor, this.textBackgroundStyleColor),
-            radius: useEnabled(this.enableTextBackgroundStyleRadius, this.textBackgroundStyleRadius)
-          })
-         
+        .textBackgroundStyle({
+          color: useEnabled(this.enableTextBackgroundStyleColor, this.textBackgroundStyleColor),
+          radius: useEnabled(this.enableTextBackgroundStyleRadius, this.textBackgroundStyleRadius)
+        })
+
       }
 
     }.justifyContent(FlexAlign.Start)
@@ -109,7 +111,7 @@ export struct ContainerSpanBootcamp {
         .fillColor($r('sys.color.ohos_id_color_fourth'))
         .height(24)
         .width(24)
-        .rotate({ angle: this.selection==str ? 90 : 0 })
+        .rotate({ angle: this.selection == str ? 90 : 0 })
         .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
     }
     .borderRadius(20)

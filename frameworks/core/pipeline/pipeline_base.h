@@ -1072,6 +1072,15 @@ public:
 
     virtual void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool checkSceneBoardWindow = false) {}
 
+    virtual void UpdateSystemSafeAreaWithoutAnimation(const SafeAreaInsets& systemSafeArea,
+        bool checkSceneBoardWindow = false) {}
+
+    virtual void UpdateCutoutSafeAreaWithoutAnimation(const SafeAreaInsets& cutoutSafeArea,
+        bool checkSceneBoardWindow = false) {}
+
+    virtual void UpdateNavSafeAreaWithoutAnimation(const SafeAreaInsets& navSafeArea,
+        bool checkSceneBoardWindow = false) {}
+
     virtual void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
 
     virtual void SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) {}
@@ -1404,6 +1413,10 @@ public:
     }
 
     virtual bool IsDensityChanged() const = 0;
+
+    virtual bool IsNeedReloadDensity() const = 0;
+
+    virtual void SetIsNeedReloadDensity(bool isNeedReloadDensity) = 0;
 
     virtual std::string GetResponseRegion(const RefPtr<NG::FrameNode>& rootNode)
     {
@@ -1739,6 +1752,7 @@ private:
     float maxAppFontScale_ = static_cast<float>(INT32_MAX);
     float dragNodeGrayscale_ = 0.0f;
     int32_t apiTargetVersion_ = 0;
+    bool lastUiDvsyncStatus_ = false;
 
     // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker thread.
     std::mutex densityChangeMutex_;

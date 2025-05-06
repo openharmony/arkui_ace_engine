@@ -612,7 +612,6 @@ export struct CounterBootcamp {
   // Hit Test Control
   @State enableCompHitTestBehavior: boolean = false
   @State compHitTestBehavior: HitTestMode = HitTestMode.Default
-
   // Obscuring
   @State enableCompObscured: boolean = false
   @State compObscured: Array<ObscuredReasons> = []
@@ -653,7 +652,6 @@ export struct CounterBootcamp {
   //compEvent
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
-
   @State selection: string | null = null;
   scroller: Scroller = new Scroller()
 
@@ -665,11 +663,9 @@ export struct CounterBootcamp {
     this.progress.updateProgress(this.compMaskValue);
   }
 
-
   compMaskColorChange() {
     this.progress.updateColor(this.compMaskColor);
   }
-
 
   //compEvent
   compEventTriggeredLog(value: string) {

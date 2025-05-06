@@ -243,6 +243,11 @@ void FormRenderer::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
         formJsInfo.imageDataMap.size = %{public}zu.",
         formJsInfo.formData.size(),
         formJsInfo.imageDataMap.size());
+    if (!formRendererDelegate_) {
+        HILOG_ERROR("form renderer delegate is null!");
+        return;
+    }
+    formRendererDelegate_->OnUpdateFormDone(formJsInfo.formId);
 }
 
 void FormRenderer::RemoveFormDeathRecipient()

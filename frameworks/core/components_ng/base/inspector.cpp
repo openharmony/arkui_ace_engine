@@ -46,26 +46,6 @@ const char INSPECTOR_STATE_VAR[] = "state";
 const uint32_t LONG_PRESS_DELAY = 1000;
 RectF deviceRect;
 
-RefPtr<UINode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::string& key, bool notDetach = false)
-{
-    std::queue<RefPtr<UINode>> elements;
-    elements.push(root);
-    RefPtr<UINode> inspectorElement;
-    while (!elements.empty()) {
-        auto current = elements.front();
-        elements.pop();
-        if (key == current->GetInspectorId().value_or("")) {
-            return current;
-        }
-
-        const auto& children = current->GetChildren(notDetach);
-        for (const auto& child : children) {
-            elements.push(child);
-        }
-    }
-    return nullptr;
-}
-
 TouchEvent GetUpPoint(const TouchEvent& downPoint)
 {
     return TouchEvent {}
@@ -276,11 +256,16 @@ void GetCustomNodeInfo(const RefPtr<NG::UINode> &customNode, std::unique_ptr<OHO
     jsonNode->Put(INSPECTOR_COMPONENT_TYPE, "custom");
     auto node = AceType::DynamicCast<CustomNode>(customNode);
     CHECK_NULL_VOID(node);
+    auto nodeExtraInfo = node->GetExtraInfo();
+    std::stringstream ss;
+    ss << nodeExtraInfo.page << "(" << nodeExtraInfo.line << ":" << nodeExtraInfo.col << ")";
+    auto jsonJumpLine = JsonUtil::Create(true);
+    jsonJumpLine->Put("$line", ss.str().c_str());
     auto parentNode = AceType::DynamicCast<FrameNode>(hostNode);
     jsonNode->Put(INSPECTOR_STATE_VAR, node->GetStateInspectorInfo());
     RectF rect = parentNode->GetTransformRectRelativeToWindow();
     jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
-    jsonNode->Put(INSPECTOR_DEBUGLINE, customNode->GetDebugLine().c_str());
+    jsonNode->Put(INSPECTOR_DEBUGLINE, jsonJumpLine->ToString().c_str());
     jsonNode->Put(INSPECTOR_CUSTOM_VIEW_TAG, node->GetCustomTag().c_str());
 }
 
@@ -625,6 +610,26 @@ std::string Inspector::GetInspectorOfNode(RefPtr<NG::UINode> node)
     }
 
     return jsonRoot->ToString();
+}
+
+RefPtr<UINode> Inspector::GetInspectorByKey(const RefPtr<FrameNode>& root, const std::string& key, bool notDetach)
+{
+    std::queue<RefPtr<UINode>> elements;
+    elements.push(root);
+    RefPtr<UINode> inspectorElement;
+    while (!elements.empty()) {
+        auto current = elements.front();
+        elements.pop();
+        if (key == current->GetInspectorId().value_or("")) {
+            return current;
+        }
+
+        const auto& children = current->GetChildren(notDetach);
+        for (const auto& child : children) {
+            elements.push(child);
+        }
+    }
+    return nullptr;
 }
 
 std::string Inspector::GetSubWindowInspector(bool isLayoutInspector)

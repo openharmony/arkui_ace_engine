@@ -13,12 +13,7 @@
  * limitations under the License.
  */
 import { describe, beforeAll, it } from '@ohos/hypium'
-import {
-  getToggle,
-  radioClick,
-  titleSearch,
-  ToggleClick,
-} from '../../../utils';
+import { getToggle, radioClick, titleSearch, ToggleClick, } from '../../../utils';
 import { TabContentStart } from './TabContent';
 
 export default function TabContent8() {

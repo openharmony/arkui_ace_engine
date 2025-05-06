@@ -54,7 +54,7 @@ void BuildMenu(const RefPtr<NavDestinationGroupNode>& navDestinationGroupNode, c
         auto toolBarMenuItems = navDestinationPattern->GetToolBarMenuItems();
 
         bool isButtonEnabled = false;
-        auto hub = navDestinationGroupNode->GetEventHub<EventHub>();
+        auto hub = navDestinationGroupNode->GetOrCreateEventHub<EventHub>();
         if (hub) {
             isButtonEnabled = hub->IsEnabled();
         }
@@ -780,7 +780,7 @@ void NavDestinationPattern::OnCoordScrollStart()
 {
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(navDestinationGroupNode);
-    auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
+    auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->FireOnCoordScrollStartAction();
 }
@@ -789,7 +789,7 @@ float NavDestinationPattern::OnCoordScrollUpdate(float offset, float currentOffs
 {
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_RETURN(navDestinationGroupNode, 0.0f);
-    auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
+    auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
     CHECK_NULL_RETURN(navDestinationEventHub, 0.0f);
     navDestinationEventHub->FireOnCoordScrollUpdateAction(currentOffset);
     return 0.0f;
@@ -799,7 +799,7 @@ void NavDestinationPattern::OnCoordScrollEnd()
 {
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(navDestinationGroupNode);
-    auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
+    auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->FireOnCoordScrollEndAction();
 }
@@ -844,18 +844,13 @@ void NavDestinationPattern::CheckIfOrientationChanged()
 
     if (hostNode->IsOnAnimation()) {
         StopAnimation();
+    } else {
+        auto context = hostNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto windowMgr = context->GetWindowManager();
+        CHECK_NULL_VOID(windowMgr);
+        windowMgr->SetRequestedOrientation(curOri, true);
     }
-
-    auto context = hostNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto container = Container::GetContainer(context->GetInstanceId());
-    CHECK_NULL_VOID(container);
-    if (!curOri.has_value()) {
-        auto mgr = context->GetNavigationManager();
-        CHECK_NULL_VOID(mgr);
-        curOri = mgr->GetOrientationByWindowApi();
-    }
-    container->SetRequestedOrientation(curOri.value(), true);
 }
 
 void NavDestinationPattern::StopAnimation()
@@ -899,9 +894,15 @@ void NavDestinationPattern::CheckIfStatusBarConfigChanged()
 
     auto context = hostNode->GetContext();
     CHECK_NULL_VOID(context);
-    auto mgr = context->GetNavigationManager();
+    auto mgr = context->GetWindowManager();
     CHECK_NULL_VOID(mgr);
-    mgr->SetStatusBarConfig(curConfig);
+    std::optional<bool> enable;
+    std::optional<bool> animated;
+    if (curConfig.has_value()) {
+        enable = curConfig.value().first;
+        animated = curConfig.value().second;
+    }
+    mgr->SetWindowSystemBarEnabled(SystemBarType::STATUS, enable, animated);
 }
 
 void NavDestinationPattern::CheckIfNavigationIndicatorConfigChagned()
@@ -936,8 +937,12 @@ void NavDestinationPattern::CheckIfNavigationIndicatorConfigChagned()
 
     auto context = hostNode->GetContext();
     CHECK_NULL_VOID(context);
-    auto mgr = context->GetNavigationManager();
+    auto mgr = context->GetWindowManager();
     CHECK_NULL_VOID(mgr);
-    mgr->SetNavigationIndicatorConfig(curConfig);
+    std::optional<bool> enable;
+    if (curConfig.has_value()) {
+        enable = curConfig.value();
+    }
+    mgr->SetWindowSystemBarEnabled(SystemBarType::NAVIGATION_INDICATOR, enable, std::nullopt);
 }
 } // namespace OHOS::Ace::NG

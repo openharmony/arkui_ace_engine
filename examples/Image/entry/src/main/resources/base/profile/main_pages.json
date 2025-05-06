@@ -1,14 +1,23 @@
 {
   "src": [
     "pages/Index",
-    "pages/counter/CounterExample",
-    "pages/badge/BadgeExample",
-    "pages/datapanel/DataPanelExample",
-    "pages/gauge/GaugeExample",
-    "pages/loadingProgress/LoadingProgressExample",
-    "pages/progress/ProgressExample",
-    "pages/qrcode/QrcodeExample",
-    "pages/textclock/TextClockExample",
-    "pages/texttimer/TextTimerExample"
+    "pages/example/ImageExample001",
+    "pages/example/ImageExample002",
+    "pages/example/ImageExample003",
+    "pages/example/ImageExample004",
+    "pages/example/ImageExample005",
+    "pages/example/ImageExample006",
+    "pages/example/ImageExample007",
+    "pages/example/ImageExample008",
+    "pages/testcase/ImageModifierTestCase001",
+    "pages/testcase/ImageModifierTestCase002",
+    "pages/testcase/ImageTestcase001",
+    "pages/testcase/ImageTestcase002",
+    "pages/testcase/ImageTestcase003",
+    "pages/testcase/ImageTestcase004",
+    "pages/testcase/ImageTestcase005",
+    "pages/testcase/ImageTestcase006",
+    "pages/testcase/ImageTestcase007",
+    "pages/testcase/ImageTestcase008"
   ]
 }

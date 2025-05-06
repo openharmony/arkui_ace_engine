@@ -73,7 +73,7 @@ public:
     void SetName(const std::string& name)
     {
         name_ = name;
-        auto eventHub = GetEventHub<NavDestinationEventHub>();
+        auto eventHub = GetOrCreateEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetName(name);
     }
@@ -162,7 +162,7 @@ public:
 
     NavDestinationState GetNavDestinationState() const
     {
-        auto eventHub = GetEventHub<NavDestinationEventHub>();
+        auto eventHub = GetOrCreateEventHub<NavDestinationEventHub>();
         CHECK_NULL_RETURN(eventHub, NavDestinationState::NONE);
         auto state = eventHub->GetState();
         return state;
@@ -271,7 +271,16 @@ public:
     void OnCoordScrollEnd() override;
     bool NeedCoordWithScroll() override
     {
-        return true;
+        return IsNeedHandleScroll();
+    }
+
+    bool IsNeedHandleScroll() const override
+    {
+        auto eventHub = GetOrCreateEventHub<NavDestinationEventHub>();
+        if (eventHub && eventHub->HasOnCoordScrollStartAction()) {
+            return true;
+        }
+        return false;
     }
     
     float GetTitleBarHeightLessThanMaxBarHeight() const override
@@ -281,7 +290,7 @@ public:
     
     bool CanCoordScrollUp(float offset) const override
     {
-        return true;
+        return IsNeedHandleScroll();
     }
 
     void SetIsActive(bool isActive)

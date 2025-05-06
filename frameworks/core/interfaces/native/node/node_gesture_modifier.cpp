@@ -286,6 +286,24 @@ void ConvertIMMEventToTouchEvent(GestureEvent& info, ArkUITouchEvent& touchEvent
     touchEvent.targetDisplayId = info.GetTargetDisplayId();
 }
 
+SourceTool ConvertCInputEventToolTypeToSourceTool(int32_t cInputEventToolType)
+{
+    switch (cInputEventToolType) {
+        case static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_FINGER):
+            return SourceTool::FINGER;
+        case static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_PEN):
+            return SourceTool::PEN;
+        case static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_MOUSE):
+            return SourceTool::MOUSE;
+        case static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_TOUCHPAD):
+            return SourceTool::TOUCHPAD;
+        case static_cast<int32_t>(UI_INPUT_EVENT_TOOL_TYPE_JOYSTICK):
+            return SourceTool::JOYSTICK;
+        default:
+            return SourceTool::UNKNOWN;
+    }
+}
+
 void GetGestureEvent(ArkUIAPIEventGestureAsyncEvent& ret, GestureEvent& info)
 {
     ret.repeat = info.GetRepeat();
@@ -317,7 +335,7 @@ void GetGestureEvent(ArkUIAPIEventGestureAsyncEvent& ret, GestureEvent& info)
 }
 
 void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& rawInputEvent,
-    const std::shared_ptr<BaseGestureEvent>& info)
+    const std::shared_ptr<BaseGestureEvent>& info, std::array<ArkUITouchPoint, MAX_POINTS>& points)
 {
     rawInputEvent.sourceType = static_cast<ArkUI_Int32>(info->GetSourceDevice());
     rawInputEvent.timeStamp = info->GetTimeStamp().time_since_epoch().count();
@@ -326,7 +344,6 @@ void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& r
     rawInputEvent.actionTouchPoint.rollAngle = info->GetRollAngle().value_or(0.0f);
     rawInputEvent.actionTouchPoint.toolType = static_cast<ArkUI_Int32>(info->GetSourceTool());
     rawInputEvent.actionTouchPoint.pressure = info->GetForce();
-    std::array<ArkUITouchPoint, MAX_POINTS> points;
     auto fingerList = info->GetFingerList();
     auto fingureIterator = std::begin(fingerList);
     rawInputEvent.targetDisplayId = info->GetTargetDisplayId();
@@ -742,7 +759,8 @@ void setGestureInterrupterToNodeWithUserData(
         CHECK_NULL_RETURN(node, GestureJudgeResult::CONTINUE);
         ArkUIAPIEventGestureAsyncEvent gestureEvent;
         ArkUITouchEvent rawInputEvent;
-        GetBaseGestureEvent(&gestureEvent, rawInputEvent, info);
+        std::array<ArkUITouchPoint, MAX_POINTS> points;
+        GetBaseGestureEvent(&gestureEvent, rawInputEvent, info, points);
         auto gestureInfo = current->GetGestureInfo();
         CHECK_NULL_RETURN(gestureInfo, GestureJudgeResult::CONTINUE);
         GetUniqueGestureEvent(&gestureEvent, gestureInfo->GetRecognizerType(), info);
@@ -750,7 +768,8 @@ void setGestureInterrupterToNodeWithUserData(
         interruptInfo.isSystemGesture = gestureInfo->IsSystemGesture();
         interruptInfo.systemRecognizerType = static_cast<ArkUI_Int32>(gestureInfo->GetType());
         interruptInfo.event = &gestureEvent;
-        interruptInfo.userData = userData ? userData : gestureInfo->GetUserData();
+        interruptInfo.customUserData = userData;
+        interruptInfo.userData = gestureInfo->GetUserData();
         ArkUIGestureRecognizer* currentArkUIGestureRecognizer = NodeModifier::CreateGestureRecognizer(current);
         interruptInfo.userData = reinterpret_cast<void*>(currentArkUIGestureRecognizer);
         auto count = static_cast<int32_t>(others.size());
@@ -1037,9 +1056,13 @@ ArkUI_Int32 getTapGestureDistanceThreshold(ArkUIGestureRecognizer* recognizer, d
 
 ArkUI_Int32 setDistanceMap(ArkUIGesture* gesture, int size, int* toolTypeArray, double* distanceArray)
 {
-    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() } };
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.Value() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.Value() } };
     for (int i = 0; i < size; i++) {
-        distanceMap[static_cast<SourceTool>(toolTypeArray[i])] = distanceArray[i];
+        SourceTool st = ConvertCInputEventToolTypeToSourceTool(toolTypeArray[i]);
+        if (st >= SourceTool::UNKNOWN && st <= SourceTool::JOYSTICK && GreatOrEqual(distanceArray[i], 0.0)) {
+            distanceMap[st] = distanceArray[i];
+        }
     }
     auto gestureForDistanceMap = Referenced::Claim(reinterpret_cast<PanGesture*>(gesture));
     CHECK_NULL_RETURN(gestureForDistanceMap, ERROR_CODE_PARAM_INVALID);
@@ -1055,7 +1078,7 @@ ArkUI_Int32 getDistanceByToolType(ArkUIGestureRecognizer* recognizer, int toolTy
     auto panRecognizer = AceType::DynamicCast<PanRecognizer>(gestureRecognizer);
     CHECK_NULL_RETURN(panRecognizer, ERROR_CODE_PARAM_INVALID);
     PanDistanceMap distanceMap = panRecognizer->GetDistanceMap();
-    auto iter = distanceMap.find(static_cast<SourceTool>(toolType));
+    auto iter = distanceMap.find(ConvertCInputEventToolTypeToSourceTool(toolType));
     if (iter == distanceMap.end()) {
         return ERROR_CODE_PARAM_INVALID;
     }

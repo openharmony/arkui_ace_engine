@@ -1288,6 +1288,7 @@ void JsiDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
             "ArkUISetNativeEngineLoop");
     };
     nativeEngine_->SetPostTask(postTask);
+    nativeEngine_->SetInstanceId(instanceId_);
 }
 
 void JsiDeclarativeEngine::RegisterInitWorkerFunc()
@@ -2242,6 +2243,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         CHECK_NULL_VOID(nativeXComponentImpl);
 
         nativeXComponentImpl->SetXComponentId(componentId);
+
 #ifdef XCOMPONENT_SUPPORTED
         xcPattern->SetExpectedRateRangeInit();
         xcPattern->OnFrameEventInit();
@@ -2257,7 +2259,6 @@ void JsiDeclarativeEngine::FireExternalEvent(
         if (status != napi_ok) {
             return;
         }
-
         std::string arguments;
         auto soPath = xcPattern->GetSoPath().value_or("");
         auto runtime = engineInstance_->GetJsRuntime();
@@ -2269,6 +2270,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
             napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
             return;
         }
+
         auto objContext = JsiObject(objXComp);
         JSRef<JSObject> obj = JSRef<JSObject>::Make(objContext);
         OHOS::Ace::Framework::XComponentClient::GetInstance().AddJsValToJsValMap(componentId, obj);
@@ -2636,6 +2638,127 @@ std::shared_ptr<Framework::JsValue> JsiDeclarativeEngine::GetJsContext()
 void JsiDeclarativeEngine::SetJsContext(const std::shared_ptr<Framework::JsValue>& jsContext)
 {
     JsiContextModule::AddContext(instanceId_, jsContext);
+}
+
+std::shared_ptr<void> JsiDeclarativeEngine::SerializeValue(
+    const std::shared_ptr<Framework::JsValue>& jsValue)
+{
+#ifdef USE_ARK_ENGINE
+    ContainerScope scope(instanceId_);
+    if (!jsValue) {
+        LOGW("SerializeValue jsValue is null.");
+        return nullptr;
+    }
+
+    if (!engineInstance_) {
+        LOGW("SerializeValue engineInstance is null.");
+        return nullptr;
+    }
+
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
+    if (!arkRuntime) {
+        LOGW("SerializeValue arkRuntime is null.");
+        return nullptr;
+    }
+
+    auto vm = arkRuntime->GetEcmaVm();
+    if (!vm) {
+        LOGW("SerializeValue vm is null.");
+        return nullptr;
+    }
+
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(jsValue);
+    if (!arkJSValue) {
+        LOGW("SerializeValue arkJSValue is null.");
+        return nullptr;
+    }
+
+    panda::LocalScope jsScope(vm);
+    Local<panda::JSValueRef> value = arkJSValue->GetValue(arkRuntime);
+    if (value->IsUndefined()) {
+        LOGW("SerializeValue value is null.");
+        return nullptr;
+    }
+
+    void* serializationData = panda::JSNApi::SerializeValue(vm, value, panda::JSValueRef::Undefined(vm),
+        panda::JSValueRef::Undefined(vm), false, false);
+    if (serializationData == nullptr) {
+        LOGW("SerializeValue serializationData is null.");
+        return nullptr;
+    }
+
+    return { serializationData, &panda::JSNApi::DeleteSerializationData };
+#else
+    return nullptr;
+#endif
+}
+
+std::shared_ptr<JsValue> JsiDeclarativeEngine::Deserialize(const std::shared_ptr<void>& recoder)
+{
+#ifdef USE_ARK_ENGINE
+    ContainerScope scope(instanceId_);
+    if (!recoder) {
+        LOGW("DeserializeValue recoder is null.");
+        return nullptr;
+    }
+
+    if (!engineInstance_) {
+        LOGW("DeserializeValue engineInstance is null.");
+        return nullptr;
+    }
+
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
+    if (!arkRuntime) {
+        LOGW("DeserializeValue arkRuntime is null.");
+        return nullptr;
+    }
+
+    auto vm = arkRuntime->GetEcmaVm();
+    if (!vm) {
+        LOGW("DeserializeValue vm is null.");
+        return nullptr;
+    }
+
+    auto engine = GetNativeEngine();
+    if (!engine) {
+        LOGW("DeserializeValue nativeEngine is null.");
+        return nullptr;
+    }
+
+    panda::LocalScope jsScope(vm);
+    Local<panda::JSValueRef> localRef = panda::JSNApi::DeserializeValue(
+        vm, recoder.get(), reinterpret_cast<void*>(engine));
+    if (localRef->IsUndefined()) {
+        LOGW("DeserializeValue localRef is null.");
+        return nullptr;
+    }
+
+    return std::make_shared<ArkJSValue>(arkRuntime, localRef);
+#else
+    return nullptr;
+#endif
+}
+
+void JsiDeclarativeEngine::SetJsContextWithDeserialize(const std::shared_ptr<void>& recoder)
+{
+#ifdef USE_ARK_ENGINE
+    ContainerScope scope(instanceId_);
+    if (!engineInstance_) {
+        LOGW("SetJsContextWithDeserialize engineInstance is null.");
+        return;
+    }
+
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
+    if (!arkRuntime) {
+        LOGW("SetJsContextWithDeserialize arkRuntime is null.");
+        return;
+    }
+
+    std::shared_ptr<JsValue> jsValue = Deserialize(recoder);
+    if (jsValue != nullptr && jsValue->IsObject(arkRuntime)) {
+        JsiContextModule::AddContext(instanceId_, jsValue);
+    }
+#endif
 }
 
 void JsiDeclarativeEngine::SetContext(int32_t instanceId, NativeReference* nativeValue)

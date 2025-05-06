@@ -93,7 +93,7 @@ void ToggleButtonPattern::OnModifyDone()
         HandleOnOffStyle(!isOn_.value(), isFocus_);
     }
     if (changed) {
-        auto toggleButtonEventHub = GetEventHub<ToggleButtonEventHub>();
+        auto toggleButtonEventHub = GetOrCreateEventHub<ToggleButtonEventHub>();
         CHECK_NULL_VOID(toggleButtonEventHub);
         toggleButtonEventHub->UpdateChangeEvent(isOn_.value());
     }
@@ -142,7 +142,7 @@ void ToggleButtonPattern::InitHoverEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<ToggleButtonEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<ToggleButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -168,7 +168,7 @@ void ToggleButtonPattern::HandleHoverEvent(bool isHover)
     isHover_ = isHover;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     auto inputEventHub = host->GetOrCreateInputEventHub();
@@ -460,7 +460,7 @@ void ToggleButtonPattern::MarkIsSelected(bool isSelected)
         return;
     }
     isOn_ = isSelected;
-    auto eventHub = GetEventHub<ToggleButtonEventHub>();
+    auto eventHub = GetOrCreateEventHub<ToggleButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateChangeEvent(isSelected);
     auto host = GetHost();
@@ -522,7 +522,7 @@ void ToggleButtonPattern::OnTouchDown()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto buttonEventHub = GetEventHub<ButtonEventHub>();
+    auto buttonEventHub = GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     if (buttonEventHub->GetStateEffect()) {
         auto renderContext = host->GetRenderContext();
@@ -549,7 +549,7 @@ void ToggleButtonPattern::OnTouchUp()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto buttonEventHub = GetEventHub<ButtonEventHub>();
+    auto buttonEventHub = GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     if (buttonEventHub->GetStateEffect()) {
         auto renderContext = host->GetRenderContext();
@@ -611,7 +611,7 @@ void ToggleButtonPattern::OnClick()
     paintProperty->UpdateIsOn(!isLastSelected);
     isOn_ = !isLastSelected;
     renderContext->UpdateBackgroundColor(selectedColor);
-    auto buttonEventHub = GetEventHub<ToggleButtonEventHub>();
+    auto buttonEventHub = GetOrCreateEventHub<ToggleButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     buttonEventHub->UpdateChangeEvent(!isLastSelected);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -758,7 +758,7 @@ void ToggleButtonPattern::SetButtonPress(bool isSelected)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
     if (!enabled) {
@@ -807,7 +807,7 @@ RefPtr<FrameNode> ToggleButtonPattern::BuildContentModifierNode()
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     auto enabled = eventHub->IsEnabled();
     auto paintProperty = host->GetPaintProperty<ToggleButtonPaintProperty>();

@@ -104,8 +104,8 @@ void LazyGridLayoutTest::CreateWaterFlow(WaterFlowLayoutMode mode)
     ViewAbstract::SetHeight(CalcLength(SCROLL_HEIGHT));
     ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
     model.SetLayoutMode(mode);
-    auto frameNode = GetMainFrameNode();
-    scrollablePattern_ = frameNode->GetPattern<ScrollablePattern>();
+    scrollableFrameNode_ = GetMainFrameNode();
+    scrollablePattern_ = scrollableFrameNode_->GetPattern<ScrollablePattern>();
 }
 
 PaddingProperty LazyGridLayoutTest::CreatePadding(float left, float top, float right, float bottom)
@@ -361,6 +361,142 @@ HWTEST_F(LazyGridLayoutTest, PaddingMarginTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RTLTest001
+ * @tc.desc: Test RTL layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, RTLTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create lazy grid layout
+     */
+    CreateWaterFlow();
+    CreateLazyGridLayout();
+    CreateContent(30);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Update padding top and bottom.
+     * @tc.expected: start and end index updated
+     */
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    FlushUITasks();
+    EXPECT_EQ(GetChildX(frameNode_, 0), 100);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 0);
+    EXPECT_EQ(GetChildX(frameNode_, 2), 100);
+    EXPECT_EQ(GetChildX(frameNode_, 3), 0);
+}
+
+/**
+ * @tc.name: WidthHeightTest001
+ * @tc.desc: Test LazyGrid set width height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, WidthHeightTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create lazy grid layout
+     */
+    CreateWaterFlow();
+    CreateLazyGridLayout();
+    CreateContent(30);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Update width and height.
+     * @tc.expected: width and height updated
+     */
+    auto size = CalcSize(CalcLength(160), CalcLength(750));
+    layoutProperty_->UpdateUserDefinedIdealSize(size);
+    FlushUITasks();
+    EXPECT_EQ(GetChildWidth(scrollableFrameNode_, 0), 160);
+    EXPECT_EQ(GetChildHeight(scrollableFrameNode_, 0), 750);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 9);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 80);
+
+    /**
+     * @tc.steps: step3. Update width and height.
+     * @tc.expected: width and height updated
+     */
+    size = CalcSize(CalcLength(240), CalcLength(150));
+    layoutProperty_->UpdateUserDefinedIdealSize(size);
+    FlushUITasks();
+    EXPECT_EQ(GetChildWidth(scrollableFrameNode_, 0), 240);
+    EXPECT_EQ(GetChildHeight(scrollableFrameNode_, 0), 150);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 9);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 120);
+
+    /**
+     * @tc.steps: step4. Reset user defined ideal size.
+     * @tc.expected: width and height updated
+     */
+    layoutProperty_->ClearUserDefinedIdealSize(true, true);
+    FlushUITasks();
+    EXPECT_EQ(GetChildWidth(scrollableFrameNode_, 0), 200);
+    EXPECT_EQ(GetChildHeight(scrollableFrameNode_, 0), 1500);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 9);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 100);
+}
+
+/**
+ * @tc.name: SizeConstraintTest001
+ * @tc.desc: Test LazyGrid set size constraint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, SizeConstraintTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create lazy grid layout
+     */
+    CreateWaterFlow();
+    CreateLazyGridLayout();
+    CreateContent(30);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Update max size.
+     * @tc.expected: width and height updated
+     */
+    auto size = CalcSize(CalcLength(160), CalcLength(750));
+    layoutProperty_->UpdateCalcMaxSize(size);
+    FlushUITasks();
+    EXPECT_EQ(GetChildWidth(scrollableFrameNode_, 0), 160);
+    EXPECT_EQ(GetChildHeight(scrollableFrameNode_, 0), 750);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 9);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 80);
+
+    /**
+     * @tc.steps: step3. Update min size.
+     * @tc.expected: width and height updated
+     */
+    layoutProperty_->ResetCalcMaxSize();
+    size = CalcSize(CalcLength(240), CalcLength(1800));
+    layoutProperty_->UpdateCalcMinSize(size);
+    FlushUITasks();
+    EXPECT_EQ(GetChildWidth(scrollableFrameNode_, 0), 240);
+    EXPECT_EQ(GetChildHeight(scrollableFrameNode_, 0), 1800);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 9);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 120);
+
+    /**
+     * @tc.steps: step4. reset min size.
+     * @tc.expected: width and height updated
+     */
+    layoutProperty_->ResetCalcMinSize();
+    FlushUITasks();
+    EXPECT_EQ(GetChildWidth(scrollableFrameNode_, 0), 200);
+    EXPECT_EQ(GetChildHeight(scrollableFrameNode_, 0), 1500);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 9);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 100);
+}
+
+/**
  * @tc.name: WaterFlowLayoutTest001
  * @tc.desc: Lazy layout in WaterFlow
  * @tc.type: FUNC
@@ -416,7 +552,7 @@ HWTEST_F(LazyGridLayoutTest, WaterFlowLayoutTest001, TestSize.Level1)
 
 /**
  * @tc.name: WaterFlowLayoutTest002
- * @tc.desc: Lazy layout in WaterFlow
+ * @tc.desc: Lazy layout in WaterFlow, waterFlow adjust offset.
  * @tc.type: FUNC
  */
 HWTEST_F(LazyGridLayoutTest, WaterFlowLayoutTest002, TestSize.Level1)
@@ -461,6 +597,465 @@ HWTEST_F(LazyGridLayoutTest, WaterFlowLayoutTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: WaterFlowLayoutTest003
+ * @tc.desc: Lazy layout in WaterFlow SW mode, update LazyGrid column template above display area.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, WaterFlowLayoutTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create lazy grid layout
+     * @tc.expected: layout visible items and predict items
+     */
+    CreateWaterFlow(WaterFlowLayoutMode::SLIDING_WINDOW);
+    CreateLazyGridLayout();
+    CreateContent(19);
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateLazyGridLayout();
+    CreateContent(19);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Update refences position
+     * @tc.expected: start and end index updated
+     */
+    scrollablePattern_->UpdateCurrentOffset(-420, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    auto pattern0 = GetChildPattern<LazyGridLayoutPattern>(scrollableFrameNode_, 0);
+    auto pattern1 = GetChildPattern<LazyGridLayoutPattern>(scrollableFrameNode_, 1);
+    EXPECT_EQ(pattern0->layoutInfo_->startIndex_, 8);
+    EXPECT_EQ(pattern0->layoutInfo_->endIndex_, 17);
+    EXPECT_EQ(pattern1->layoutInfo_->startIndex_, -1);
+    EXPECT_EQ(pattern1->layoutInfo_->endIndex_, -1);
+    FlushIdleTask(pattern0);
+    EXPECT_EQ(pattern0->layoutInfo_->cachedStartIndex_, 2);
+    EXPECT_EQ(pattern0->layoutInfo_->cachedEndIndex_, 18);
+    EXPECT_EQ(pattern0->layoutInfo_->layoutedStartIndex_, 2);
+    EXPECT_EQ(pattern0->layoutInfo_->layoutedEndIndex_, 18);
+
+    /**
+     * @tc.steps: step3. Update refences position, LazyGrid0 out of view.
+     * @tc.expected: start and end index updated
+     */
+    scrollablePattern_->UpdateCurrentOffset(-600, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_EQ(pattern1->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern1->layoutInfo_->endIndex_, 9);
+
+    /**
+     * @tc.steps: step3. Update LazyGrid0 lanes and scroll backward.
+     * @tc.expected: start and end index updated
+     */
+    auto layoutProperty0 = pattern0->GetLayoutProperty<LazyGridLayoutProperty>();
+    layoutProperty0->UpdateColumnsTemplate("1fr 1fr 1fr");
+    scrollablePattern_->UpdateCurrentOffset(300, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_EQ(pattern0->layoutInfo_->startIndex_, 12);
+    EXPECT_EQ(pattern0->layoutInfo_->endIndex_, 18);
+    EXPECT_EQ(pattern1->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern1->layoutInfo_->endIndex_, 3);
+}
+
+/**
+ * @tc.name: WaterFlowLayoutTest004
+ * @tc.desc: Lazy layout in WaterFlow SW mode, update LazyGrid row gap above display area.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, WaterFlowLayoutTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create lazy grid layout
+     * @tc.expected: layout visible items and predict items
+     */
+    CreateWaterFlow(WaterFlowLayoutMode::SLIDING_WINDOW);
+    CreateLazyGridLayout();
+    CreateContent(19);
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateLazyGridLayout();
+    CreateContent(19);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Update refences position
+     * @tc.expected: start and end index updated
+     */
+    scrollablePattern_->UpdateCurrentOffset(-420, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    auto pattern0 = GetChildPattern<LazyGridLayoutPattern>(scrollableFrameNode_, 0);
+    auto pattern1 = GetChildPattern<LazyGridLayoutPattern>(scrollableFrameNode_, 1);
+    EXPECT_EQ(pattern0->layoutInfo_->startIndex_, 8);
+    EXPECT_EQ(pattern0->layoutInfo_->endIndex_, 17);
+    EXPECT_EQ(pattern1->layoutInfo_->startIndex_, -1);
+    EXPECT_EQ(pattern1->layoutInfo_->endIndex_, -1);
+    FlushIdleTask(pattern0);
+    EXPECT_EQ(pattern0->layoutInfo_->cachedStartIndex_, 2);
+    EXPECT_EQ(pattern0->layoutInfo_->cachedEndIndex_, 18);
+    EXPECT_EQ(pattern0->layoutInfo_->layoutedStartIndex_, 2);
+    EXPECT_EQ(pattern0->layoutInfo_->layoutedEndIndex_, 18);
+
+    /**
+     * @tc.steps: step3. Update refences position, LazyGrid0 out of view.
+     * @tc.expected: start and end index updated
+     */
+    scrollablePattern_->UpdateCurrentOffset(-600, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_EQ(pattern1->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern1->layoutInfo_->endIndex_, 9);
+
+    /**
+     * @tc.steps: step3. Update LazyGrid0 lanes and scroll backward.
+     * @tc.expected: start and end index updated
+     */
+    auto layoutProperty0 = pattern0->GetLayoutProperty<LazyGridLayoutProperty>();
+    layoutProperty0->UpdateRowGap(Dimension(10));
+    scrollablePattern_->UpdateCurrentOffset(300, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_EQ(pattern0->layoutInfo_->startIndex_, 14);
+    EXPECT_EQ(pattern0->layoutInfo_->endIndex_, 18);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 1), 280);
+    EXPECT_EQ(pattern1->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern1->layoutInfo_->endIndex_, 3);
+}
+
+/**
+ * @tc.name: WaterFlowLayoutTest005
+ * @tc.desc: First LazyGird only display bottom padding, Update column template.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, WaterFlowLayoutTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create lazy grid layout
+     */
+    CreateWaterFlow(WaterFlowLayoutMode::SLIDING_WINDOW);
+    CreateLazyGridLayout();
+    PaddingProperty padding = CreatePadding(0, 100, 0, 100);;
+    layoutProperty_->UpdatePadding(padding);
+    CreateContent(19);
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateLazyGridLayout();
+    CreateContent(19);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Update padding top and bottom.
+     * @tc.expected: start and end index updated
+     */
+    auto pattern0 = GetChildPattern<LazyGridLayoutPattern>(scrollableFrameNode_, 0);
+    auto pattern1 = GetChildPattern<LazyGridLayoutPattern>(scrollableFrameNode_, 1);
+    FlushUITasks();
+    EXPECT_EQ(pattern0->GetHost()->GetGeometryNode()->GetFrameSize().Height(), 1200);
+    EXPECT_EQ(pattern0->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern0->layoutInfo_->endIndex_, 7);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), 0);
+
+    /**
+     * @tc.steps: step3. Update refences position
+     * @tc.expected: start and end index updated
+     */
+    scrollablePattern_->UpdateCurrentOffset(-520, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_EQ(pattern0->layoutInfo_->startIndex_, 8);
+    EXPECT_EQ(pattern0->layoutInfo_->endIndex_, 17);
+    EXPECT_EQ(pattern1->layoutInfo_->startIndex_, -1);
+    EXPECT_EQ(pattern1->layoutInfo_->endIndex_, -1);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), -520);
+
+    /**
+     * @tc.steps: step4. Update refences position
+     * @tc.expected: LazyGrid0 out of view.
+     */
+    scrollablePattern_->UpdateCurrentOffset(-600, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_EQ(pattern0->layoutInfo_->startIndex_, 19);
+    EXPECT_EQ(pattern0->layoutInfo_->endIndex_, 19);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 1), 80);
+    EXPECT_EQ(pattern1->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern1->layoutInfo_->endIndex_, 7);
+
+    /**
+     * @tc.steps: step5. Update columns template
+     * @tc.expected: Display content not change.
+     */
+    auto layoutProperty0 = pattern0->GetLayoutProperty<LazyGridLayoutProperty>();
+    layoutProperty0->UpdateColumnsTemplate("1fr 1fr 1fr");
+    FlushUITasks();
+    EXPECT_EQ(pattern0->layoutInfo_->startIndex_, 19);
+    EXPECT_EQ(pattern0->layoutInfo_->endIndex_, 19);
+    EXPECT_EQ(pattern1->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern1->layoutInfo_->endIndex_, 7);
+
+    /**
+     * @tc.steps: step6. Scroll backward.
+     * @tc.expected:  start and end index updated.
+     */
+    scrollablePattern_->UpdateCurrentOffset(300, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_EQ(pattern0->layoutInfo_->startIndex_, 12);
+    EXPECT_EQ(pattern0->layoutInfo_->endIndex_, 18);
+    EXPECT_EQ(pattern1->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern1->layoutInfo_->endIndex_, 1);
+}
+
+/**
+ * @tc.name: WaterFlowLayoutTest006
+ * @tc.desc: First LazyGird only display bottom padding, Update rows gap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, WaterFlowLayoutTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create lazy grid layout
+     */
+    CreateWaterFlow(WaterFlowLayoutMode::SLIDING_WINDOW);
+    CreateLazyGridLayout();
+    PaddingProperty padding = CreatePadding(0, 100, 0, 100);;
+    layoutProperty_->UpdatePadding(padding);
+    CreateContent(19);
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateLazyGridLayout();
+    CreateContent(19);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Update padding top and bottom.
+     * @tc.expected: start and end index updated
+     */
+    auto pattern0 = GetChildPattern<LazyGridLayoutPattern>(scrollableFrameNode_, 0);
+    auto pattern1 = GetChildPattern<LazyGridLayoutPattern>(scrollableFrameNode_, 1);
+    FlushUITasks();
+    EXPECT_EQ(pattern0->GetHost()->GetGeometryNode()->GetFrameSize().Height(), 1200);
+    EXPECT_EQ(pattern0->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern0->layoutInfo_->endIndex_, 7);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), 0);
+
+    /**
+     * @tc.steps: step3. Update refences position
+     * @tc.expected: start and end index updated
+     */
+    scrollablePattern_->UpdateCurrentOffset(-520, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_EQ(pattern0->layoutInfo_->startIndex_, 8);
+    EXPECT_EQ(pattern0->layoutInfo_->endIndex_, 17);
+    EXPECT_EQ(pattern1->layoutInfo_->startIndex_, -1);
+    EXPECT_EQ(pattern1->layoutInfo_->endIndex_, -1);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), -520);
+
+    /**
+     * @tc.steps: step4. Update refences position
+     * @tc.expected: LazyGrid0 out of view.
+     */
+    scrollablePattern_->UpdateCurrentOffset(-600, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_EQ(pattern0->layoutInfo_->startIndex_, 19);
+    EXPECT_EQ(pattern0->layoutInfo_->endIndex_, 19);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 1), 80);
+    EXPECT_EQ(pattern1->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern1->layoutInfo_->endIndex_, 7);
+
+    /**
+     * @tc.steps: step5. Update columns template
+     * @tc.expected: Display content not change.
+     */
+    auto layoutProperty0 = pattern0->GetLayoutProperty<LazyGridLayoutProperty>();
+    layoutProperty0->UpdateRowGap(Dimension(10));
+    FlushUITasks();
+    EXPECT_EQ(GetChildHeight(scrollableFrameNode_, 0), 1290);
+    EXPECT_EQ(pattern0->layoutInfo_->startIndex_, 19);
+    EXPECT_EQ(pattern0->layoutInfo_->endIndex_, 19);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 1), 80);
+    EXPECT_EQ(pattern1->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern1->layoutInfo_->endIndex_, 7);
+
+    /**
+     * @tc.steps: step6. Scroll backward.
+     * @tc.expected:  start and end index updated.
+     */
+    scrollablePattern_->UpdateCurrentOffset(300, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_EQ(pattern0->layoutInfo_->startIndex_, 14);
+    EXPECT_EQ(pattern0->layoutInfo_->endIndex_, 18);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 1), 380);
+    EXPECT_EQ(pattern1->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern1->layoutInfo_->endIndex_, 1);
+}
+
+/**
+ * @tc.name: WaterFlowLayoutTest007
+ * @tc.desc: Lazy layout in WaterFlow SW mode, update LazyGrid all children height above display area.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, WaterFlowLayoutTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create lazy grid layout
+     * @tc.expected: layout visible items and predict items
+     */
+    CreateWaterFlow(WaterFlowLayoutMode::SLIDING_WINDOW);
+    CreateLazyGridLayout();
+    CreateContent(19);
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateLazyGridLayout();
+    CreateContent(19);
+    CreateDone();
+    auto pattern0 = GetChildPattern<LazyGridLayoutPattern>(scrollableFrameNode_, 0);
+    auto pattern1 = GetChildPattern<LazyGridLayoutPattern>(scrollableFrameNode_, 1);
+    EXPECT_EQ(GetChildHeight(scrollableFrameNode_, 0), 1000);
+    /**
+     * @tc.steps: step2. Update refences position
+     * @tc.expected: start and end index updated
+     */
+    scrollablePattern_->UpdateCurrentOffset(-420, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_EQ(pattern0->layoutInfo_->startIndex_, 8);
+    EXPECT_EQ(pattern0->layoutInfo_->endIndex_, 17);
+    EXPECT_EQ(pattern1->layoutInfo_->startIndex_, -1);
+    EXPECT_EQ(pattern1->layoutInfo_->endIndex_, -1);
+
+    /**
+     * @tc.steps: step3. Update refences position, LazyGrid0 out of view.
+     * @tc.expected: start and end index updated
+     */
+    scrollablePattern_->UpdateCurrentOffset(-600, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_EQ(pattern1->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern1->layoutInfo_->endIndex_, 9);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 1), -20);
+
+    /**
+     * @tc.steps: step3. Update LazyGrid0 lanes and scroll backward.
+     * @tc.expected: start and end index updated
+     */
+    auto frameNode0 = GetChildFrameNode(scrollableFrameNode_, 0);
+    for (auto& child : frameNode0->GetChildren()) {
+        auto property = AceType::DynamicCast<FrameNode>(child)->GetLayoutProperty();
+        property->UpdateUserDefinedIdealSize(CalcSize(CalcLength(SCROLL_WIDTH), CalcLength(200.f)));
+    }
+    scrollablePattern_->UpdateCurrentOffset(200, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_EQ(pattern0->layoutInfo_->startIndex_, 18);
+    EXPECT_EQ(pattern0->layoutInfo_->endIndex_, 18);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 1), 180);
+    scrollablePattern_->UpdateCurrentOffset(200, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_EQ(pattern0->layoutInfo_->startIndex_, 16);
+    EXPECT_EQ(pattern0->layoutInfo_->endIndex_, 18);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 1), 380);
+    scrollablePattern_->UpdateCurrentOffset(200, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_EQ(pattern0->layoutInfo_->startIndex_, 14);
+    EXPECT_EQ(pattern0->layoutInfo_->endIndex_, 18);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 1), 580);
+}
+
+/**
+ * @tc.name: WaterFlowLayoutTest008
+ * @tc.desc: Test LazyGrid child different height
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, WaterFlowLayoutTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create lazy grid layout
+     * @tc.expected: layout visible items and predict items
+     */
+    CreateWaterFlow(WaterFlowLayoutMode::SLIDING_WINDOW);
+    CreateLazyGridLayout();
+    layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr");
+    float itemHeight[3] = {80, 100, 90};
+    for (int32_t i = 0; i < 10; i++) {
+        for (int32_t j = 0; j < 3; j++) {
+            StackModelNG stackModel;
+            stackModel.Create();
+            ViewAbstract::SetWidth(CalcLength(1, DimensionUnit::PERCENT));
+            ViewAbstract::SetHeight(CalcLength(itemHeight[j]));
+            ViewStackProcessor::GetInstance()->Pop();
+        }
+    }
+    CreateDone();
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Height(), 1000);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 14);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->layoutInfo_->cachedStartIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->cachedEndIndex_, 20);
+    EXPECT_EQ(pattern_->layoutInfo_->layoutedStartIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->layoutedEndIndex_, 20);
+    EXPECT_EQ(pattern_->layoutInfo_->layoutedEnd_, 700);
+
+    /**
+     * @tc.steps: step2. Update refences position.
+     * @tc.expected: start and end index updated
+     */
+    scrollablePattern_->UpdateCurrentOffset(-420, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 12);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 26);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->layoutInfo_->cachedStartIndex_, 3);
+    EXPECT_EQ(pattern_->layoutInfo_->cachedEndIndex_, 29);
+    EXPECT_EQ(pattern_->layoutInfo_->layoutedStartIndex_, 3);
+    EXPECT_EQ(pattern_->layoutInfo_->layoutedStart_, 100);
+    EXPECT_EQ(pattern_->layoutInfo_->layoutedEndIndex_, 29);
+    EXPECT_EQ(pattern_->layoutInfo_->layoutedEnd_, 1000);
+}
+
+/**
+ * @tc.name: WaterFlowLayoutTest009
+ * @tc.desc: Test LazyGrid child different height, predict backward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, WaterFlowLayoutTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create lazy grid layout
+     * @tc.expected: layout visible items and predict items
+     */
+    CreateWaterFlow(WaterFlowLayoutMode::SLIDING_WINDOW);
+    CreateLazyGridLayout();
+    layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr");
+    float itemHeight[3] = {80, 100, 90};
+    for (int32_t i = 0; i < 10; i++) {
+        for (int32_t j = 0; j < 3; j++) {
+            StackModelNG stackModel;
+            stackModel.Create();
+            ViewAbstract::SetWidth(CalcLength(1, DimensionUnit::PERCENT));
+            ViewAbstract::SetHeight(CalcLength(itemHeight[j]));
+            ViewStackProcessor::GetInstance()->Pop();
+        }
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateLazyGridLayout();
+    CreateContent(20);
+    CreateDone();
+    auto pattern0 = GetChildPattern<LazyGridLayoutPattern>(scrollableFrameNode_, 0);
+    auto pattern1 = GetChildPattern<LazyGridLayoutPattern>(scrollableFrameNode_, 1);
+    EXPECT_EQ(pattern0->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern0->layoutInfo_->endIndex_, 14);
+
+    scrollablePattern_->ScrollToIndex(1);
+    FlushUITasks();
+    EXPECT_EQ(pattern1->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern1->layoutInfo_->endIndex_, 9);
+
+    /**
+     * @tc.steps: step2. Update refences position.
+     * @tc.expected: start and end index updated
+     */
+    scrollablePattern_->UpdateCurrentOffset(220, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_EQ(pattern0->layoutInfo_->startIndex_, 21);
+    EXPECT_EQ(pattern0->layoutInfo_->endIndex_, 29);
+    FlushIdleTask(pattern0);
+    EXPECT_EQ(pattern0->layoutInfo_->cachedStartIndex_, 15);
+    EXPECT_EQ(pattern0->layoutInfo_->cachedEndIndex_, 29);
+    EXPECT_EQ(pattern0->layoutInfo_->layoutedStartIndex_, 15);
+    EXPECT_EQ(pattern0->layoutInfo_->layoutedStart_, 500);
+    EXPECT_EQ(pattern0->layoutInfo_->layoutedEndIndex_, 29);
+    EXPECT_EQ(pattern0->layoutInfo_->layoutedEnd_, 1000);
+}
+
+/**
  * @tc.name: AddDelChildrenTest001
  * @tc.desc: Test add and del children in LazyVGridLayout
  * @tc.type: FUNC
@@ -502,5 +1097,49 @@ HWTEST_F(LazyGridLayoutTest, AddDelChildrenTest001, TestSize.Level1)
     FlushUITasks();
     EXPECT_EQ(pattern_->layoutInfo_->totalMainSize_, 1300);
     EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 26);
+}
+
+/**
+ * @tc.name: AddDelChildrenTest002
+ * @tc.desc: Test add and del all children in LazyVGridLayout
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, AddDelChildrenTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create lazy grid layout
+     */
+    CreateWaterFlow();
+    CreateLazyGridLayout();
+    CreateDone();
+    EXPECT_EQ(pattern_->layoutInfo_->totalMainSize_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 0);
+    EXPECT_EQ(GetChildHeight(scrollableFrameNode_, 0), 0);
+
+    /**
+     * @tc.steps: step2. Add 6 children
+     * @tc.expected: totalMainSize_ and totalItemCount_ index updated
+     */
+    for (int32_t i = 0; i < 6; i++) {
+        AddChild();
+    }
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->totalMainSize_, 300);
+    EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 6);
+    EXPECT_EQ(GetChildHeight(scrollableFrameNode_, 0), 300);
+
+    /**
+     * @tc.steps: step3. Remove 6 children
+     * @tc.expected: totalMainSize_ and totalItemCount_ index updated
+     */
+    for (int32_t i = 0; i < 6; i++) {
+        frameNode_->RemoveChildAtIndex(0);
+    }
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->layoutInfo_->totalMainSize_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 0);
+    EXPECT_EQ(GetChildHeight(scrollableFrameNode_, 0), 0);
 }
 } // namespace OHOS::Ace::NG

@@ -118,6 +118,21 @@ int32_t FormRendererDelegateImpl::OnCheckManagerDelegate(bool &checkFlag)
     return ERR_OK;
 }
 
+int32_t FormRendererDelegateImpl::OnUpdateFormDone(const int64_t formId)
+{
+    if (formId < 0) {
+        HILOG_ERROR("invalid formId");
+        return ERR_INVALID_DATA;
+    }
+
+    if (!updateFormEventHandler_) {
+        HILOG_ERROR("updateFormEventHandler_ is null");
+        return ERR_INVALID_DATA;
+    }
+    updateFormEventHandler_(formId);
+    return ERR_OK;
+}
+
 void FormRendererDelegateImpl::SetSurfaceCreateEventHandler(
     std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&, const OHOS::AppExecFwk::FormJsInfo&,
         const AAFwk::Want&)>&& listener)
@@ -163,6 +178,11 @@ void FormRendererDelegateImpl::SetGetRectRelativeToWindowHandler(
 void FormRendererDelegateImpl::SetCheckManagerDelegate(std::function<void(bool&)>&& listener)
 {
     checkManagerDelegate_ = std::move(listener);
+}
+
+void FormRendererDelegateImpl::SetUpdateFormEventHandler(std::function<void(const int64_t)>&& listener)
+{
+    updateFormEventHandler_ = std::move(listener);
 }
 } // namespace Ace
 } // namespace OHOS

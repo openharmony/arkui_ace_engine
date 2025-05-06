@@ -115,7 +115,9 @@ void CanvasPaintMethod::UpdateRecordingCanvas(float width, float height)
     CHECK_NULL_VOID(rsCanvas_);
     rsCanvas_->Save();
     FireRSCanvasCallback(width, height);
-    ResetStates();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        ResetStates();
+    }
     needMarkDirty_ = true;
 }
 
@@ -130,6 +132,7 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
     if (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) {
         rsCanvas_->SaveLayer(layerOps);
     }
+
     if (state_.globalState.HasGlobalAlpha()) {
         imageBrush_.SetAlphaF(state_.globalState.GetAlpha());
     }

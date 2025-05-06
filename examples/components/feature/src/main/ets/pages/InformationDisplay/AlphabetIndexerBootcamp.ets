@@ -55,7 +55,6 @@ import { CompEventMonopolizationBlocks } from '../../components/CompEventMonopol
 import { CompCursorControlBlocks } from '../../components/CompCursorControlBlocks'
 import { CompGradientColorBlocks } from '../../components/CompGradientColorBlocks';
 
-
 import { CompFocusControlBlocks } from '../../components/CompFocusControlBlocks';
 import { CompHoverEffectBlocks } from '../../components/CompHoverEffectBlocks';
 import { CompComponentIDBlocks } from '../../components/CompComponentIDBlocks';
@@ -72,15 +71,19 @@ class MyModifier implements AttributeModifier<AlphabetIndexerAttribute> {
   applyNormalAttribute(instance: AlphabetIndexerAttribute) {
     instance.backgroundColor('#0A59F7')
   }
+
   applyPressedAttribute(instance: AlphabetIndexerAttribute) {
     instance.backgroundColor('#ED6F21')
   }
+
   applyFocusedAttribute(instance: AlphabetIndexerAttribute) {
     instance.backgroundColor(Color.Gray)
   }
+
   applyDisabledAttribute(instance: AlphabetIndexerAttribute) {
     instance.backgroundColor('#E5E5E5')
   }
+
   applySelectedAttribute(instance: AlphabetIndexerAttribute) {
     instance.backgroundColor('#ffedea21')
   }
@@ -109,7 +112,6 @@ class MyGestureModifier2 implements GestureModifier {
 
 @Component
 export struct AlphabetIndexerBootcamp {
-
   private value: string[] = ['#', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
     'H', 'I', 'J', 'K', 'L', 'M', 'N',
     'O', 'P', 'Q', 'R', 'S', 'T', 'U',
@@ -644,7 +646,6 @@ export struct AlphabetIndexerBootcamp {
   // Hit Test Control
   @State enableCompHitTestBehavior: boolean = false
   @State compHitTestBehavior: HitTestMode = HitTestMode.Default
-
   // Obscuring
   @State enableCompObscured: boolean = false
   @State compObscured: Array<ObscuredReasons> = []
@@ -656,7 +657,6 @@ export struct AlphabetIndexerBootcamp {
   @State compDecorationColor: ResourceColor = Color.Black
   @State enableCompDecorationStyle: boolean = false
   @State compDecorationStyle: TextDecorationStyle = TextDecorationStyle.SOLID
-
   // Render Fit
   @State enableCompRenderFit: boolean = false
   @State compRenderFit: RenderFit = RenderFit.TOP_LEFT
@@ -669,13 +669,11 @@ export struct AlphabetIndexerBootcamp {
   // Special Effect Drawing Combination
   @State enableCompUseEffect: boolean = false
   @State compUseEffect: boolean = false
-
   //compEvent
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
   @State selection: string | null = null;
   scroller: Scroller = new Scroller()
-
 
   compMaskColorChange() {
     this.progress.updateColor(this.compMaskColor);
@@ -689,7 +687,7 @@ export struct AlphabetIndexerBootcamp {
   compEventTriggeredLog(value: string) {
     let time = formatDate(new Date(Date.now()))
     this.listEventTriggeredTagsTemp.push(
-      new BlockTag(time,value)
+      new BlockTag(time, value)
     )
     setTimeout(() => {
       if (AppStorage.get('Block')) {
@@ -711,7 +709,7 @@ export struct AlphabetIndexerBootcamp {
   }
 
   aboutToAppear(): void {
-    AppStorage.setOrCreate('scroller',this.scroller)
+    AppStorage.setOrCreate('scroller', this.scroller)
   }
 
   build() {
@@ -734,18 +732,10 @@ export struct AlphabetIndexerBootcamp {
     .hideTitleBar(true)
   }
 
-
-
-
-
   @Builder
   compBackground() {
     Text('123')
   }
-
-
-
-
 
   @Builder
   Content() {
@@ -766,15 +756,18 @@ export struct AlphabetIndexerBootcamp {
         .selectedFont({
           size: useEnabled(this.enableAlphabetIndexerSelectedFontSize, this.alphabetIndexerSelectedFontSize),
           style: useEnabled(this.enableAlphabetIndexerSelectedFontStyle, this.alphabetIndexerSelectedFontStyle),
-          weight: useEnabled(this.enableAlphabetIndexerSelectedFontWeight, this.alphabetIndexerSelectedFontWeight)})
+          weight: useEnabled(this.enableAlphabetIndexerSelectedFontWeight, this.alphabetIndexerSelectedFontWeight)
+        })
         .popupFont({
           size: useEnabled(this.enableAlphabetIndexerPopupFontSize, this.alphabetIndexerPopupFontSize),
           style: useEnabled(this.enableAlphabetIndexerPopupFontStyle, this.alphabetIndexerPopupFontStyle),
-          weight: useEnabled(this.enableAlphabetIndexerPopupFontWeight, this.alphabetIndexerPopupFontWeight)})
+          weight: useEnabled(this.enableAlphabetIndexerPopupFontWeight, this.alphabetIndexerPopupFontWeight)
+        })
         .font({
           size: useEnabled(this.enableAlphabetIndexerFontSize, this.alphabetIndexerFontSize),
           style: useEnabled(this.enableAlphabetIndexerFontStyle, this.alphabetIndexerFontStyle),
-          weight: useEnabled(this.enableAlphabetIndexerFontWeight, this.alphabetIndexerFontWeight)})
+          weight: useEnabled(this.enableAlphabetIndexerFontWeight, this.alphabetIndexerFontWeight)
+        })
         .itemSize(useEnabled(this.enableAlphabetIndexerItemSize, this.alphabetIndexerItemSize))
         .alignStyle(
           useEnabled(this.enableAlphabetIndexerAlignStyleIndexerAlign, this.alphabetIndexerAlignStyleIndexerAlign),
@@ -782,7 +775,8 @@ export struct AlphabetIndexerBootcamp {
         .selected(useEnabled(this.enableAlphabetIndexerSelected, this.alphabetIndexerSelected))
         .popupPosition({
           x: useEnabled(this.enableAlphabetIndexerPopupPositionX, this.alphabetIndexerPopupPositionX),
-          y: useEnabled(this.enableAlphabetIndexerPopupPositionY, this.alphabetIndexerPopupPositionY)})
+          y: useEnabled(this.enableAlphabetIndexerPopupPositionY, this.alphabetIndexerPopupPositionY)
+        })
         .popupSelectedColor(
           useEnabled(this.enableAlphabetIndexerPopupSelectedColor, this.alphabetIndexerPopupSelectedColor))
         .popupUnselectedColor(
@@ -790,7 +784,8 @@ export struct AlphabetIndexerBootcamp {
         .popupItemFont({
           size: useEnabled(this.enableAlphabetIndexerPopupItemFontSize, this.alphabetIndexerPopupItemFontSize),
           style: useEnabled(this.enableAlphabetIndexerPopupItemFontStyle, this.alphabetIndexerPopupItemFontStyle),
-          weight: useEnabled(this.enableAlphabetIndexerPopupItemFontWeight, this.alphabetIndexerPopupItemFontWeight)})
+          weight: useEnabled(this.enableAlphabetIndexerPopupItemFontWeight, this.alphabetIndexerPopupItemFontWeight)
+        })
         .popupItemBackgroundColor(
           useEnabled(this.enableAlphabetIndexerPopupItemBackgroundColor, this.alphabetIndexerPopupItemBackgroundColor))
         .autoCollapse(
@@ -1230,7 +1225,7 @@ export struct AlphabetIndexerBootcamp {
             this.compPixelStretchEffectOptionsBottom)
         })
         .freeze(useEnabled(this.enableCompFreeze, this.compFreeze))
-        .linearGradient( {
+        .linearGradient({
           angle: useEnabled(this.enableCompLinearGradientAngle, this.compLinearGradientAngle),
           direction: useEnabled(this.enableCompLinearGradientDirection, this.compLinearGradientDirection),
           colors: [
@@ -1262,7 +1257,8 @@ export struct AlphabetIndexerBootcamp {
             this.compFocusBoxStrokeWidth)) : null,
         })
         .id(useEnabled(this.enableCompId, this.compId) ? useEnabled(this.enableCompId, this.compId) : null)
-        .key(useEnabled(this.enableCompKey, this.compKey) ? useEnabled(this.enableCompKey, this.compKey) : 'AlphabetIndexer')
+        .key(useEnabled(this.enableCompKey, this.compKey) ? useEnabled(this.enableCompKey, this.compKey) :
+          'AlphabetIndexer')
         .focusScopePriority(
           useEnabled(this.enableCompFocusScopePriorityScopeId, this.compFocusScopePriorityScopeId),
           useEnabled(this.enableCompFocusScopePriorityPriority, this.compFocusScopePriorityPriority)
@@ -1437,10 +1433,10 @@ export struct AlphabetIndexerBootcamp {
           this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
           return HitTestMode.Default;
         })
-        .onSelect((index:number)=>{
+        .onSelect((index: number) => {
           this.compEventTriggeredLog('索引项选中事件onSelect触发')
         })
-        .onRequestPopupData((index:number)=>{
+        .onRequestPopupData((index: number) => {
           this.compEventTriggeredLog('弹窗二级索引项内容事件onRequestPopupData触发')
           if (this.value[index] == 'A') {
             return this.arrayA
@@ -1454,7 +1450,7 @@ export struct AlphabetIndexerBootcamp {
             return []
           }
         })
-        .onPopupSelect((index:number)=>{
+        .onPopupSelect((index: number) => {
           this.compEventTriggeredLog('弹窗二级索引选中事件onPopupSelect触发')
         })
 
@@ -1661,7 +1657,7 @@ export struct AlphabetIndexerBootcamp {
         })
         RadioBlock({
           title: 'popupItemFont.weight',
-          isEnabled:$enableAlphabetIndexerPopupItemFontWeight,
+          isEnabled: $enableAlphabetIndexerPopupItemFontWeight,
           value: $alphabetIndexerPopupItemFontWeight,
           dataSource: [
             { label: 'Lighter', value: FontWeight.Lighter },
@@ -1739,6 +1735,7 @@ export struct AlphabetIndexerBootcamp {
     .height('52%')
     .id('scroll')
   }
+
   @Builder
   ListItemGroupHeaders(str: string) {
     Row() {
@@ -1750,7 +1747,7 @@ export struct AlphabetIndexerBootcamp {
         .fillColor($r('sys.color.ohos_id_color_fourth'))
         .height(24)
         .width(24)
-        .rotate({ angle: this.selection==str ? 90 : 0 })
+        .rotate({ angle: this.selection == str ? 90 : 0 })
         .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
     }
     .borderRadius(20)
@@ -2365,7 +2362,7 @@ export struct AlphabetIndexerBootcamp {
 struct ButtonBootcampPreviewer {
   build() {
     AlphabetIndexerBootcamp({
-      title:'索引条/AlphabetIndexer'
+      title: '索引条/AlphabetIndexer'
     })
   }
 }

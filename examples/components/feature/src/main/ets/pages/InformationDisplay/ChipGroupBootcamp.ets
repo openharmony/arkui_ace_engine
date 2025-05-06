@@ -19,7 +19,6 @@ import { ChipSize, ChipGroup } from '@kit.ArkUI'
 
 @Component
 export struct ChipGroupBootcamp {
-
   @Require @Prop title: ResourceStr;
   @State showParameters: boolean = false;
   @State enableChipGroupItemStyleSize: boolean = false
@@ -46,7 +45,6 @@ export struct ChipGroupBootcamp {
   @State chipGroupChipGroupPaddingTop: number = 14
   @State enableChipGroupChipGroupPaddingBottom: boolean = false
   @State chipGroupChipGroupPaddingBottom: number = 14
-
   @State selection: string | null = null;
   scroller: Scroller = new Scroller()
 
@@ -62,7 +60,7 @@ export struct ChipGroupBootcamp {
         content: () => {
           this.Content()
         },
-        generic:() =>{
+        generic: () => {
           this.Generic()
         },
         parameters: () => {
@@ -77,7 +75,7 @@ export struct ChipGroupBootcamp {
   @Builder
   Content() {
     Column() {
-        ChipGroup({
+      ChipGroup({
         items: [
           {
             prefixIcon: { src: $r('app.media.app_icon') },
@@ -151,12 +149,13 @@ export struct ChipGroupBootcamp {
             this.chipGroupChipGroupPaddingTop) as number,
           bottom:
           useEnabled(this.enableChipGroupChipGroupPaddingBottom,
-            this.chipGroupChipGroupPaddingBottom) as number },
-        onChange: (activatedChipsIndex:Array<number>) => {
+            this.chipGroupChipGroupPaddingBottom) as number
+        },
+        onChange: (activatedChipsIndex: Array<number>) => {
           console.log('chips on clicked, activated index ' + activatedChipsIndex)
         },
       })
-          .id('ChipGroup')
+        .id('ChipGroup')
     }
   }
 
@@ -199,8 +198,8 @@ export struct ChipGroupBootcamp {
           value: this.chipGroupSelectedIndexes,
           dataSource: [
             { label: 'selectAll', value: [0, 1, 2, 3, 4, 5] },
-            { label: '024', value: [0 ,2, 4,] },
-            { label: '135', value: [1 ,3, 5,] }
+            { label: '024', value: [0, 2, 4,] },
+            { label: '135', value: [1, 3, 5,] }
           ]
         })
         RadioBlock({
@@ -212,7 +211,7 @@ export struct ChipGroupBootcamp {
             { label: 'false', value: false }
           ]
         })
-        
+
         SliderBlock({
           title: 'options.chipGroupSpace.itemSpace',
           isEnabled: this.enableChipGroupChipGroupSpaceItemSpace,
@@ -256,7 +255,7 @@ export struct ChipGroupBootcamp {
 
   @Builder
   Generic() {
-    Column(){
+    Column() {
 
     }
     .height('52%')

@@ -177,6 +177,32 @@ void TextFieldManagerNG::GetOnFocusTextFieldInfo(const WeakPtr<Pattern>& onFocus
     TAG_LOGI(ACE_KEYBOARD, "isScrollableChild_: %{public}d", isScrollableChild_);
 }
 
+RefPtr<FrameNode> TextFieldManagerNG::FindCorrectScrollNode(const SafeAreaInsets::Inset& bottomInset,
+    bool isShowKeyboard)
+{
+    auto node = onFocusTextField_.Upgrade();
+    CHECK_NULL_RETURN(node, nullptr);
+    auto frameNode = node->GetHost();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto parent = frameNode->GetAncestorNodeOfFrame(true);
+    while (parent) {
+        auto pattern = parent->GetPattern<ScrollablePattern>();
+        if (!pattern) {
+            parent = parent->GetAncestorNodeOfFrame(true);
+            continue;
+        }
+        if (!pattern->IsScrollToSafeAreaHelper() || pattern->GetAxis() == Axis::HORIZONTAL) {
+            return nullptr;
+        }
+        auto scrollableRect = parent->GetTransformRectRelativeToWindow();
+        if (!isShowKeyboard || LessNotEqual(scrollableRect.Top(), bottomInset.start)) {
+            return parent;
+        }
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return nullptr;
+}
+
 bool TextFieldManagerNG::ScrollToSafeAreaHelper(
     const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard)
 {
@@ -188,7 +214,7 @@ bool TextFieldManagerNG::ScrollToSafeAreaHelper(
     CHECK_NULL_RETURN(textBase, false);
     textBase->OnVirtualKeyboardAreaChanged();
 
-    auto scrollableNode = FindScrollableOfFocusedTextField(frameNode);
+    auto scrollableNode = FindCorrectScrollNode(bottomInset, isShowKeyboard);
     CHECK_NULL_RETURN(scrollableNode, false);
     auto scrollPattern = scrollableNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(scrollPattern && scrollPattern->IsScrollToSafeAreaHelper(), false);

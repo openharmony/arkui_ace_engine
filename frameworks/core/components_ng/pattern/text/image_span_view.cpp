@@ -145,7 +145,7 @@ void ImageSpanView::SetOnComplete(
     FrameNode* frameNode, std::function<void(const LoadImageSuccessEvent& info)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ImageEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnComplete(std::move(callback));
 }
@@ -153,7 +153,7 @@ void ImageSpanView::SetOnComplete(
 void ImageSpanView::SetOnError(FrameNode* frameNode, std::function<void(const LoadImageFailEvent& info)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ImageEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnError(std::move(callback));
 }

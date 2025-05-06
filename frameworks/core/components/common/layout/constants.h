@@ -791,12 +791,6 @@ enum class RefreshType {
     PULL_DOWN,
 };
 
-enum class TabBarMode {
-    FIXED,
-    SCROLLABLE,
-    FIXED_START,
-};
-
 enum class TabAnimateMode {
     CONTENT_FIRST = 0,
     ACTION_FIRST,

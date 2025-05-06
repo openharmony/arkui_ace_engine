@@ -241,7 +241,7 @@ void GridRowLayoutAlgorithm::OnBreakPointChange(LayoutWrapper* layoutWrapper, co
         auto sizeTypeString = GridRowLayoutAlgorithm::ConvertSizeTypeToString(sizeType);
         auto hostLayoutProperty = host->GetLayoutProperty<GridRowLayoutProperty>();
         CHECK_NULL_VOID(hostLayoutProperty);
-        auto hostEventHub = host->GetEventHub<GridRowEventHub>();
+        auto hostEventHub = host->GetOrCreateEventHub<GridRowEventHub>();
         CHECK_NULL_VOID(hostEventHub);
         hostLayoutProperty->UpdateSizeType(sizeType);
         TAG_LOGD(AceLogTag::ACE_GRIDROW,
@@ -271,7 +271,7 @@ bool GridRowLayoutAlgorithm::GetSizeTypeAndMaxSize(LayoutWrapper* layoutWrapper,
     CHECK_NULL_RETURN(windowManager, false);
     auto mode = windowManager->GetWindowMode();
     sizeType = GridContainerUtils::ProcessGridSizeType(layoutProperty->GetBreakPointsValue(),
-        Size(maxSize.Width(), maxSize.Height()), mode, PipelineBase::GetCurrentContext());
+        Size(maxSize.Width(), maxSize.Height()), mode, PipelineBase::GetCurrentContextSafelyWithCheck());
     return true;
 }
 

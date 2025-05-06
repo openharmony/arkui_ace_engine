@@ -13,12 +13,17 @@
  * limitations under the License.
  */
 import { describe, beforeAll, it } from '@ohos/hypium'
-import { buttonClick,
+import {
+  buttonClick,
   getToggle,
-  JsonType, KeyStruct, radioClick,
-  Slide, sliderDrag,
+  JsonType,
+  KeyStruct,
+  radioClick,
+  Slide,
+  sliderDrag,
   titleSearch,
-  ToggleClick } from '../../../utils';
+  ToggleClick
+} from '../../../utils';
 import { ButtonStart } from './Button';
 
 export default function Button9() {
@@ -277,14 +282,14 @@ export default function Button9() {
     })
 
     // fontColor
-    it('ArkUI_Button_Comp_0828', 0, async (done:Function) => {
+    it('ArkUI_Button_Comp_0828', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'fontColor', '通用属性7')
 
       await buttonClick({
-        buttonClickObj:0,
-        toggleClick:{
-          toggleClickObj:'fontColor'
+        buttonClickObj: 0,
+        toggleClick: {
+          toggleClickObj: 'fontColor'
         },
         id: 'Button',
         arr: [
@@ -297,14 +302,14 @@ export default function Button9() {
       done();
     })
 
-    it('ArkUI_Button_Comp_0829', 0, async (done:Function) => {
+    it('ArkUI_Button_Comp_0829', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'fontColor', '通用属性7')
 
       await buttonClick({
-        buttonClickObj:1,
-        toggleClick:{
-          toggleClickObj:'fontColor'
+        buttonClickObj: 1,
+        toggleClick: {
+          toggleClickObj: 'fontColor'
         },
         id: 'Button',
         arr: [
@@ -317,14 +322,14 @@ export default function Button9() {
       done();
     })
 
-    it('ArkUI_Button_Comp_0830', 0, async (done:Function) => {
+    it('ArkUI_Button_Comp_0830', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'fontColor', '通用属性7')
 
       await buttonClick({
-        buttonClickObj:2,
-        toggleClick:{
-          toggleClickObj:'fontColor'
+        buttonClickObj: 2,
+        toggleClick: {
+          toggleClickObj: 'fontColor'
         },
         id: 'Button',
         arr: [
@@ -337,14 +342,14 @@ export default function Button9() {
       done();
     })
 
-    it('ArkUI_Button_Comp_0831', 0, async (done:Function) => {
+    it('ArkUI_Button_Comp_0831', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'fontColor', '通用属性7')
 
       await buttonClick({
-        buttonClickObj:3,
-        toggleClick:{
-          toggleClickObj:'fontColor'
+        buttonClickObj: 3,
+        toggleClick: {
+          toggleClickObj: 'fontColor'
         },
         id: 'Button',
         arr: [
@@ -357,14 +362,14 @@ export default function Button9() {
       done();
     })
 
-    it('ArkUI_Button_Comp_0832', 0, async (done:Function) => {
+    it('ArkUI_Button_Comp_0832', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'fontColor', '通用属性7')
 
       await buttonClick({
-        buttonClickObj:4,
-        toggleClick:{
-          toggleClickObj:'fontColor'
+        buttonClickObj: 4,
+        toggleClick: {
+          toggleClickObj: 'fontColor'
         },
         id: 'Button',
         arr: [
@@ -377,15 +382,15 @@ export default function Button9() {
       done();
     })
 
-    it('ArkUI_Button_Comp_0833', 0, async (done:Function) => {
+    it('ArkUI_Button_Comp_0833', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'fontColor', '通用属性7')
 
       await buttonClick({
-        buttonClickObj:5,
-        toggleClick:{
-          toggleClickObj:'fontColor',
-          toggleClickType:ToggleClick.Close
+        buttonClickObj: 5,
+        toggleClick: {
+          toggleClickObj: 'fontColor',
+          toggleClickType: ToggleClick.Close
         },
         id: 'Button',
         arr: [
@@ -399,14 +404,14 @@ export default function Button9() {
     })
 
     // fontSize
-    it('ArkUI_Button_Comp_0834', 0, async (done:Function) => {
+    it('ArkUI_Button_Comp_0834', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'fontSize', '通用属性7')
 
       await sliderDrag({
-        slideStar:Slide.start,
+        slideStar: Slide.start,
         toggleClick: {
-          toggleClickObj:'fontSize'
+          toggleClickObj: 'fontSize'
         },
         id: 'Button',
         arr: [
@@ -417,9 +422,9 @@ export default function Button9() {
       })
 
       await sliderDrag({
-        slideStar:Slide.end,
+        slideStar: Slide.end,
         toggleClick: {
-          toggleClickObj:'fontSize',
+          toggleClickObj: 'fontSize',
           toggleClickType: ToggleClick.Close,
         },
         id: 'Button',
@@ -434,14 +439,14 @@ export default function Button9() {
     })
 
     // fontStyle
-    it('ArkUI_Button_Comp_0835', 0, async (done:Function) => {
+    it('ArkUI_Button_Comp_0835', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'fontStyle', '通用属性7')
 
       await radioClick({
         radioClickObj: 1,
         toggleClick: {
-          toggleClickObj:'fontStyle'
+          toggleClickObj: 'fontStyle'
         },
         id: 'Button',
         arr: [
@@ -454,15 +459,15 @@ export default function Button9() {
       done();
     })
 
-    it('ArkUI_Button_Comp_0836', 0, async (done:Function) => {
+    it('ArkUI_Button_Comp_0836', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'fontStyle', '通用属性7')
 
       await radioClick({
         radioClickObj: 0,
         toggleClick: {
-          toggleClickObj:'fontStyle',
-          toggleClickType:ToggleClick.Close
+          toggleClickObj: 'fontStyle',
+          toggleClickType: ToggleClick.Close
         },
         id: 'Button',
         arr: [
@@ -476,14 +481,14 @@ export default function Button9() {
     })
 
     // fontWeight
-    it('ArkUI_Button_Comp_0837', 0, async (done:Function) => {
+    it('ArkUI_Button_Comp_0837', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'fontWeight', '通用属性7')
 
       await radioClick({
         radioClickObj: 2,
         toggleClick: {
-          toggleClickObj:'fontWeight'
+          toggleClickObj: 'fontWeight'
         },
         id: 'Button',
         arr: [
@@ -496,14 +501,14 @@ export default function Button9() {
       done();
     })
 
-    it('ArkUI_Button_Comp_0838', 0, async (done:Function) => {
+    it('ArkUI_Button_Comp_0838', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'fontWeight', '通用属性7')
 
       await radioClick({
         radioClickObj: 3,
         toggleClick: {
-          toggleClickObj:'fontWeight'
+          toggleClickObj: 'fontWeight'
         },
         id: 'Button',
         arr: [
@@ -516,14 +521,14 @@ export default function Button9() {
       done();
     })
 
-    it('ArkUI_Button_Comp_0839', 0, async (done:Function) => {
+    it('ArkUI_Button_Comp_0839', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'fontWeight', '通用属性7')
 
       await radioClick({
         radioClickObj: 4,
         toggleClick: {
-          toggleClickObj:'fontWeight'
+          toggleClickObj: 'fontWeight'
         },
         id: 'Button',
         arr: [
@@ -536,14 +541,14 @@ export default function Button9() {
       done();
     })
 
-    it('ArkUI_Button_Comp_0840', 0, async (done:Function) => {
+    it('ArkUI_Button_Comp_0840', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'fontWeight', '通用属性7')
 
       await radioClick({
         radioClickObj: 5,
         toggleClick: {
-          toggleClickObj:'fontWeight'
+          toggleClickObj: 'fontWeight'
         },
         id: 'Button',
         arr: [
@@ -556,14 +561,14 @@ export default function Button9() {
       done();
     })
 
-    it('ArkUI_Button_Comp_0841', 0, async (done:Function) => {
+    it('ArkUI_Button_Comp_0841', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'fontWeight', '通用属性7')
 
       await radioClick({
         radioClickObj: 0,
         toggleClick: {
-          toggleClickObj:'fontWeight'
+          toggleClickObj: 'fontWeight'
         },
         id: 'Button',
         arr: [
@@ -576,15 +581,15 @@ export default function Button9() {
       done();
     })
 
-    it('ArkUI_Button_Comp_0842', 0, async (done:Function) => {
+    it('ArkUI_Button_Comp_0842', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'fontWeight', '通用属性7')
 
       await radioClick({
         radioClickObj: 1,
         toggleClick: {
-          toggleClickObj:'fontWeight',
-          toggleClickType:ToggleClick.Close
+          toggleClickObj: 'fontWeight',
+          toggleClickType: ToggleClick.Close
         },
         id: 'Button',
         arr: [

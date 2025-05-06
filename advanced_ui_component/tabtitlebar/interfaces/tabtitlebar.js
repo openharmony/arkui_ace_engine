@@ -577,8 +577,8 @@ class CollapsibleMenuSection extends ViewPU {
             this.maxFontScale = c44.getMaxFontScale();
         }
         catch (z43) {
-            let a44 = z43.code;
-            let b44 = z43.message;
+            let a44 = z43?.code;
+            let b44 = z43?.message;
             hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${a44}, message: ${b44}`);
         }
         this.menuItems.forEach((x43, y43) => {
@@ -590,10 +590,16 @@ class CollapsibleMenuSection extends ViewPU {
         this.fontSize = this.decideFontScale();
     }
     decideFontScale() {
-        let w43 = this.getUIContext();
-        this.systemFontScale = w43.getHostContext()?.config?.fontSizeScale ?? 1;
-        if (!this.isFollowingSystemFontScale) {
-            return 1;
+        try {
+            let w43 = this.getUIContext();
+            this.systemFontScale = w43.getHostContext()?.config?.fontSizeScale ?? 1;
+            if (!this.isFollowingSystemFontScale) {
+                return 1;
+            }
+        } catch (z43) {
+            let a44 = z43?.code;
+            let b44 = z43?.message;
+            hilog.error(0x3900, 'tabTitleBar', `Faild to getSystemFontScale,cause, code: ${a44}, message: ${b44}`);
         }
         return Math.min(this.systemFontScale, this.maxFontScale);
     }
@@ -1087,7 +1093,7 @@ class TabContentItem extends ViewPU {
                                     SymbolGlyph.fontSize(TabContentItem.symbolSize);
                                     SymbolGlyph.width(this.getImageLayoutWidth());
                                     SymbolGlyph.height(TabContentItem.imageSize);
-                                    SymbolGlyph.accessibilityText(this.toStringFormat(this.item.title));
+                                    SymbolGlyph.accessibilityText(this.item.title);
                                     SymbolGlyph.scale({
                                         x: this.getImageScaleFactor(),
                                         y: this.getImageScaleFactor()
@@ -1112,7 +1118,7 @@ class TabContentItem extends ViewPU {
                                                 SymbolGlyph.fontSize(TabContentItem.symbolSize);
                                                 SymbolGlyph.width(this.getImageLayoutWidth());
                                                 SymbolGlyph.height(TabContentItem.imageSize);
-                                                SymbolGlyph.accessibilityText(this.toStringFormat(this.item.title));
+                                                SymbolGlyph.accessibilityText(this.item.title);
                                                 SymbolGlyph.scale({
                                                     x: this.getImageScaleFactor(),
                                                     y: this.getImageScaleFactor()
@@ -1132,7 +1138,7 @@ class TabContentItem extends ViewPU {
                                                 Image.width(this.getImageLayoutWidth());
                                                 Image.height(TabContentItem.imageSize);
                                                 Image.objectFit(ImageFit.Fill);
-                                                Image.accessibilityText(this.toStringFormat(this.item.title));
+                                                Image.accessibilityText(this.item.title);
                                                 Image.scale({
                                                     x: this.getImageScaleFactor(),
                                                     y: this.getImageScaleFactor()
@@ -1318,10 +1324,10 @@ class ImageMenuItem extends ViewPU {
             return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
         }
         else if (this.item.accessibilityText) {
-            return this.toStringFormat(this.item.accessibilityText);
+            return this.item.accessibilityText;
         }
         else if (this.item.label) {
-            return this.toStringFormat(this.item.label);
+            return this.item.label;
         }
         return ' ';
     }
@@ -1330,7 +1336,7 @@ class ImageMenuItem extends ViewPU {
             Button.createWithChild({ type: ButtonType.Normal, stateEffect: this.item.isEnabled });
             Button.accessibilityText(this.getAccessibilityReadText());
             Button.accessibilityLevel(this.item?.accessibilityLevel ?? 'auto');
-            Button.accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription));
+            Button.accessibilityDescription(this.item?.accessibilityDescription);
             Button.width(ImageMenuItem.imageHotZoneWidth);
             Button.height(ImageMenuItem.imageHotZoneWidth);
             Button.borderRadius(ImageMenuItem.buttonBorderRadius);
@@ -1736,15 +1742,20 @@ class TabTitleBarDialog extends ViewPU {
         If.pop();
     }
     async aboutToAppear() {
-        let r36 = this.getUIContext().getHostContext();
-        this.mainWindowStage = r36.windowStage.getMainWindowSync();
-        let s36 = this.mainWindowStage.getWindowProperties();
-        let t36 = s36.windowRect;
-        if (px2vp(t36.height) > this.screenWidth) {
-            this.maxLines = this.verticalScreenLines;
-        }
-        else {
-            this.maxLines = this.horizontalsScreenLines;
+        try {
+            let r36 = this.getUIContext().getHostContext();
+            this.mainWindowStage = r36.windowStage.getMainWindowSync();
+            let s36 = this.mainWindowStage.getWindowProperties();
+            let t36 = s36.windowRect;
+            if (px2vp(t36.height) > this.screenWidth) {
+                this.maxLines = this.verticalScreenLines;
+            } else {
+                this.maxLines = this.horizontalsScreenLines;
+            }
+        } catch (z43) {
+            let a44 = z43?.code;
+            let b44 = z43?.message;
+            hilog.error(0x3900, 'tabTitleBar', `Faild to getSystemFontScale,cause, code: ${a44}, message: ${b44}`);
         }
     }
     rerender() {

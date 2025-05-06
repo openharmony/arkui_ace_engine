@@ -437,6 +437,11 @@ void CJPageRouterNG::BackCheckAlert(const RouterPageInfo& target, const std::str
     CHECK_NULL_VOID(currentPage);
     auto pagePattern = currentPage->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && pagePattern->GetPageInTransition()) {
+        LOGI("page is in transition");
+        return;
+    }
+
     auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
     CHECK_NULL_VOID(pageInfo);
     if (pageInfo->GetAlertCallback()) {
@@ -809,7 +814,7 @@ std::vector<CJPageRouterAbstract::RouterState> CJPageRouterNG::GetStateByUrl(con
         if (name == url) {
             path = pageInfo->GetPagePath();
             params = GetParams();
-            ret.push_back({ index + 1, CopyStr(name), CopyStr(path), CopyStr(params) });
+            ret.push_back({ static_cast<int32_t>(index + 1), CopyStr(name), CopyStr(path), CopyStr(params) });
         }
         index++;
     }

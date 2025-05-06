@@ -153,8 +153,6 @@ export default function Progress5() {
     })
 
 
-
-
   })
 }
 

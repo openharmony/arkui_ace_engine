@@ -26,6 +26,7 @@ public:
     int32_t StartUpShareFunc(const std::shared_ptr<AbilityRuntime::Context>& context,
         const Rosen::Rect& anchorRect, const std::string& windowName,
         const std::string& textContent) override;
+    uint64_t GetMaxTextLength() override;
 
 protected:
     ~TextShareMgr() = default;

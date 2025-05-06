@@ -304,35 +304,4 @@ bool AceContainer::IsCrossAxisWindow()
 {
     return false;
 }
-
-RefPtr<PageViewportConfig> AceContainer::GetCurrentViewportConfig() const
-{
-    return nullptr;
-}
-
-RefPtr<PageViewportConfig> AceContainer::GetTargetViewportConfig(Orientation orientation,
-    bool enableStatusBar, bool statusBarAnimated, bool enableNavigationIndicator)
-{
-    return nullptr;
-}
-
-void AceContainer::SetRequestedOrientation(
-    Orientation orientation, bool needAnimation)
-{
-}
-
-Orientation AceContainer::GetRequestedOrientation()
-{
-    return Orientation::UNSPECIFIED;
-}
-
-bool AceContainer::IsPcOrPadFreeMultiWindowMode() const
-{
-    return false;
-}
-
-bool AceContainer::SetSystemBarEnabled(SystemBarType type, bool enable, bool animation)
-{
-    return true;
-}
 } // namespace OHOS::Ace::Platform

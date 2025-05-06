@@ -29,10 +29,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 138
+#define ARKUI_FULL_API_VERSION 140
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 138
+#define ARKUI_NODE_API_VERSION 140
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -95,6 +95,8 @@ struct _ArkUIRSNode;
 struct _ArkUI_OEMVisualEffectFunc;
 struct ArkUI_TextPickerRangeContentArray;
 struct ArkUI_TextCascadePickerRangeContentArray;
+struct ArkUI_EmbeddedComponentItem;
+struct AbilityBase_Want;
 
 typedef _ArkUINode* ArkUINodeHandle;
 typedef _ArkUIVMContext* ArkUIVMContext;
@@ -138,6 +140,7 @@ typedef ArkUI_ListChildrenMainSize* ArkUIListChildrenMainSize;
 
 typedef ArkUI_TextPickerRangeContentArray* ArkUITextPickerRangeContentArray;
 typedef ArkUI_TextCascadePickerRangeContentArray* ArkUITextCascadePickerRangeContentArray;
+typedef ArkUI_EmbeddedComponentItem* ArkUIEmbeddedComponentItemHandle;
 struct _ArkUICurve;
 typedef _ArkUICurve* ArkUICurveHandle;
 
@@ -964,6 +967,7 @@ enum ArkUINodeType {
     ARKUI_RATING,
     ARKUI_XCOMPONENT_TEXTURE,
     ARKUI_ARC_ALPHABET_INDEXER,
+    ARKUI_EMBEDDED_COMPONENT,
 };
 
 enum ArkUIEventCategory {
@@ -2333,6 +2337,8 @@ struct ArkUICommonModifier {
     void (*getMargin)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 length, ArkUI_Int32 unit);
     void (*getMarginDimension)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 (*units)[4]);
     void (*getTranslate)(ArkUINodeHandle node, ArkUI_Float32 (*values)[3], ArkUI_Int32 unit);
+    void (*getTranslateWithPercentage)(
+        ArkUINodeHandle node, ArkUI_Float32 (*values)[3], ArkUI_Int32 (*units)[2], ArkUI_Int32 unit);
     void (*setMoveTransition)(ArkUINodeHandle node, ArkUI_Int32 value, const ArkUIAnimationOptionType* opacityOption);
     ArkUIMoveTransitionType (*getMoveTransition)(ArkUINodeHandle node);
     void (*resetMask)(ArkUINodeHandle node);
@@ -2751,6 +2757,8 @@ struct ArkUIImageModifier {
     void (*resetResizable)(ArkUINodeHandle node);
     void (*setDynamicRangeMode)(ArkUINodeHandle node, ArkUI_Int32 dynamicRangeMode);
     void (*resetDynamicRangeMode)(ArkUINodeHandle node);
+    void (*setHdrBrightness)(ArkUINodeHandle node, ArkUI_Float32 hdrBrightness);
+    void (*resetHdrBrightness)(ArkUINodeHandle node);
     void (*setImageRotateOrientation)(ArkUINodeHandle node, ArkUI_Int32 orientation);
     void (*resetImageRotateOrientation)(ArkUINodeHandle node);
     void (*setEnhancedImageQuality)(ArkUINodeHandle node, ArkUI_Int32 imageQuality);
@@ -3158,6 +3166,11 @@ struct ArkUILazyGridLayoutModifier {
     void (*resetRowsGap)(ArkUINodeHandle node);
     void (*setColumnsTemplate)(ArkUINodeHandle node, ArkUI_CharPtr columnsTemplate);
     void (*resetColumnsTemplate)(ArkUINodeHandle node);
+};
+
+struct ArkUIEmbeddedComponentModifier {
+    void (*setEmbeddedComponentWant)(ArkUINodeHandle node, AbilityBase_Want* want);
+    void (*setEmbeddedComponentOption)(ArkUINodeHandle node, ArkUIEmbeddedComponentItemHandle option);
 };
 
 struct ArkUITimepickerModifier {
@@ -3586,6 +3599,7 @@ struct ArkUIGestureInterruptInfo {
     bool isSystemGesture;
     ArkUI_Int32 systemRecognizerType;
     ArkUIAPIEventGestureAsyncEvent* event = nullptr;
+    void* customUserData = nullptr;
     void* userData = nullptr;
     void* inputEvent = nullptr;
     void* gestureEvent = nullptr;
@@ -4658,6 +4672,9 @@ struct ArkUIRefreshModifier {
     void (*resetOnRefreshingCallback)(ArkUINodeHandle node);
     void (*setRefreshOnOffsetChangeCallback)(ArkUINodeHandle node, void* callback);
     void (*resetRefreshOnOffsetChangeCallback)(ArkUINodeHandle node);
+    void (*setMaxPullDownDistance)(ArkUINodeHandle node, ArkUI_Float32 distance);
+    void (*resetMaxPullDownDistance)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getMaxPullDownDistance)(ArkUINodeHandle node);
 };
 
 struct ArkUIHyperlinkModifier {
@@ -6129,6 +6146,7 @@ struct ArkUINodeModifiers {
     const ArkUILinearIndicatorModifier* (*getLinearIndicatorModifier)();
     const ArkUIIndicatorComponentModifier* (*getIndicatorComponentModifier)();
     const ArkUILazyGridLayoutModifier* (*getLazyGridLayoutModifier)();
+    const ArkUIEmbeddedComponentModifier* (*getEmbeddedComponentModifier)();
 };
 
 // same as inner defines in property.h

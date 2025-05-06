@@ -61,7 +61,7 @@ void BindFunc(const Framework::JSCallbackInfo& info, const RefPtr<NG::FrameNode>
     auto global = JSNApi::GetGlobalObject(vm);
     auto funcName = panda::StringRef::NewFromUtf8(vm, "__RemoveFromNodeControllerMap__");
     auto obj = global->Get(vm, funcName);
-    auto nodeContainerEventHub = frameNode->GetEventHub<NG::NodeContainerEventHub>();
+    auto nodeContainerEventHub = frameNode->GetOrCreateEventHub<NG::NodeContainerEventHub>();
     auto weakEventHub = AceType::WeakClaim(AceType::RawPtr(nodeContainerEventHub));
     if (obj->IsFunction(vm)) {
         frameNode->SetOnNodeDestroyCallback([vm, weakEventHub](int32_t nodeId) {

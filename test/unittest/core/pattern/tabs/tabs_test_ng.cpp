@@ -310,6 +310,12 @@ void TabsTestNg::MockPaintRect(const RefPtr<FrameNode>& frameNode)
     mockRenderContext->paintRect_ = RectF(0.f, 0.f, TABS_WIDTH, TABS_HEIGHT);
 }
 
+void TabsTestNg::MockPaintRectSmallSize(const RefPtr<FrameNode>& frameNode)
+{
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(frameNode->renderContext_);
+    mockRenderContext->paintRect_ = RectF(0.f, 0.f, TABS_WIDTH, 0.f);
+}
+
 /**
  * @tc.name: InitSurfaceChangedCallback001
  * @tc.desc: test InitSurfaceChangedCallback
@@ -481,7 +487,8 @@ HWTEST_F(TabsTestNg, TabsNodeToJsonValue002, TestSize.Level2)
     json = JsonUtil::Create(true);
     frameNode_->ToJsonValue(json, filter);
     EXPECT_TRUE(filter.IsFastFilter());
-    EXPECT_EQ(json->ToString(), "{\"id\":\"\"}");
+    EXPECT_EQ(json->ToString(), "{\"id\":\"\",\"isLayoutDirtyMarked\":false,\"isRenderDirtyMarked\":false,"
+    "\"isMeasureBoundary\":false,\"hasPendingRequest\":false,\"isFirstBuilding\":false}");
 }
 
 /**

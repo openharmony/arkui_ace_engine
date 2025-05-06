@@ -281,7 +281,7 @@ void JSTextEditableController::GetText(const JSCallbackInfo& info)
             JSRef<JSVal> end = rangeObj->GetProperty("end");
             if (end->IsNumber()) {
                 endIndex = end->ToNumber<int32_t>();
-                endIndex = endIndex < 0 ? content.length() : endIndex;
+                endIndex = endIndex < 0 ? static_cast<int32_t>(content.length()) : endIndex;
                 endIndex = std::clamp(endIndex, 0, static_cast<int32_t>(content.length()));
             }
             if (startIndex > endIndex) {

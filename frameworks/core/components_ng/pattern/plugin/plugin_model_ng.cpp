@@ -41,7 +41,7 @@ void PluginModelNG::SetOnComplete(std::function<void(const std::string&)>&& OnCo
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<PluginEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<PluginEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnComplete(std::move(OnComplete));
 };
@@ -50,7 +50,7 @@ void PluginModelNG::SetOnError(std::function<void(const std::string&)>&& OnError
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<PluginEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<PluginEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnError(std::move(OnError));
 };

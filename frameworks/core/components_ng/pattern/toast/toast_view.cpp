@@ -69,7 +69,8 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const ToastInfo& toastInfo)
         StringUtils::StringToDimensionWithThemeValue(toastInfo.bottom, true, toastTheme->GetBottom()));
     toastProperty->UpdateShowMode(toastInfo.showMode);
     toastProperty->UpdateHoverModeArea(toastInfo.hoverModeArea);
-    toastNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
+    toastNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub()
+        ->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
     toastNode->MarkModifyDone();
     return toastNode;
 }
@@ -88,7 +89,7 @@ void ToastView::UpdateTextLayoutProperty(
     auto padding = toastTheme->GetPadding();
     auto fontWeight = toastTheme->GetTextStyle().GetFontWeight();
     auto defaultColor = toastTheme->GetTextStyle().GetTextColor();
-    textLayoutProperty->UpdateMaxFontScale(MAX_TOAST_SCALE);
+    textLayoutProperty->UpdateMaxFontScale(std::min(MAX_TOAST_SCALE, context->GetMaxAppFontScale()));
     PaddingProperty paddings;
     paddings.top = NG::CalcLength(padding.Top());
     paddings.bottom = NG::CalcLength(padding.Bottom());

@@ -23,12 +23,13 @@
 
 #include "adapter/ohos/osal/pixel_map_ohos.h"
 #include "adapter/ohos/entrance/subwindow/subwindow_ohos.h"
+#include "base/log/ace_checker.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
+#include "base/websocket/websocket_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/common/connect_server_manager.h"
 #include "core/components_v2/inspector/inspector.h"
-#include "base/websocket/websocket_manager.h"
-#include "frameworks/base/log/ace_checker.h"
 
 namespace OHOS::Ace {
 
@@ -219,12 +220,9 @@ void LayoutInspector::SetCallback(int32_t instanceId)
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_VOID(container);
     if (container->IsUseStageModel()) {
-        AddInstanceCallBack addInstanceCallBack = [](int32_t id) {
-            WebSocketManager::SetProfilerCallBack(
-                [](bool status) { return SetStateProfilerStatus(status); });
-            WebSocketManager::SetSwitchCallback([](int32_t containerId) { return CreateLayoutInfo(containerId); }, id);
-        };
-        WebSocketManager::RegisterAddInstanceCallback(addInstanceCallBack);
+        WebSocketManager::SetProfilerCallBack([](bool status) { return SetStateProfilerStatus(status); });
+        WebSocketManager::SetSwitchCallback(
+            [](int32_t containerId) { return CreateLayoutInfo(containerId); }, instanceId);
         WebSocketManager::SetRecordCallback(LayoutInspector::HandleStartRecord, LayoutInspector::HandleStopRecord);
         WebSocketManager::RegisterConnectServerCallback(LayoutInspector::ConnectServerCallback);
         isUseStageModel_ = true;

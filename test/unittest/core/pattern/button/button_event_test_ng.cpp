@@ -306,7 +306,7 @@ HWTEST_F(ButtonEventTestNg, ButtonEventTest001, TestSize.Level1)
     buttonPattern->HandleNormalStyle();
 
     // frameNode SetStateEffect
-    auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
+    auto buttonEventHub = frameNode->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     buttonEventHub->SetStateEffect(STATE_EFFECT);
     buttonPattern->isSetClickedColor_ = true;
@@ -553,7 +553,7 @@ HWTEST_F(ButtonEventTestNg, ButtonEventTest006, TestSize.Level1)
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
     buttonPattern->InitTouchEvent();
-    auto eventHub = frameNode->GetEventHub<ButtonEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ButtonEventHub>();
     ASSERT_NE(eventHub, nullptr);
     std::function<void(UIState)>& touchListener = buttonPattern->GetTouchListener();
     ASSERT_NE(touchListener, nullptr);
@@ -605,7 +605,7 @@ HWTEST_F(ButtonEventTestNg, ButtonEventTest007, TestSize.Level1)
 
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     /**
      * @tc.steps: step3. make button disable.
      */
@@ -669,7 +669,7 @@ HWTEST_F(ButtonEventTestNg, ButtonEventTest009, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     /**
      * @tc.steps: step2. change button disable and call HandleHoverEvent.
      * @tc.expected: step2. the hover status is as expected.

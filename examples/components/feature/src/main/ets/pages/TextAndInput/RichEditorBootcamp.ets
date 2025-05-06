@@ -589,7 +589,6 @@ export struct RichEditorBootcamp {
   @State compUseEffect: boolean = false
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
-
   @State selection: string | null = null;
   scroller: Scroller = new Scroller()
 
@@ -899,6 +898,7 @@ export struct RichEditorBootcamp {
       end = this.controller.getCaretOffset();
     }
   }
+
   @Builder
   Content() {
     Column() {
@@ -1434,7 +1434,8 @@ export struct RichEditorBootcamp {
               this.compFocusBoxStrokeWidth)) : null,
           })
           .id(useEnabled(this.enableCompId, this.compId) ? useEnabled(this.enableCompId, this.compId) : null)
-          .key(useEnabled(this.enableCompKey, this.compKey) ? useEnabled(this.enableCompKey, this.compKey) : 'RichEditor')
+          .key(useEnabled(this.enableCompKey, this.compKey) ? useEnabled(this.enableCompKey, this.compKey) :
+            'RichEditor')
           .focusScopePriority(
             useEnabled(this.enableCompFocusScopePriorityScopeId, this.compFocusScopePriorityScopeId),
             useEnabled(this.enableCompFocusScopePriorityPriority, this.compFocusScopePriorityPriority)
@@ -1629,6 +1630,7 @@ export struct RichEditorBootcamp {
       }
     }
   }
+
   @Builder
   Parameters() {
     Scroll(this.scroller) {
@@ -1835,6 +1837,7 @@ export struct RichEditorBootcamp {
     .height('52%')
     .id('scroll')
   }
+
   @Builder
   Generic() {
     Scroll(this.scroller) {

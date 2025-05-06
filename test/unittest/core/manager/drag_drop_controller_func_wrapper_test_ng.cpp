@@ -153,7 +153,7 @@ HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest003, Test
         NG::DragControllerFuncWrapper::GetPixelMapScaledOffset(pointPosition, data, asyncCtxData);
     EXPECT_EQ(pixelMapScaledOffset, NG::OffsetF(90, 90));
     auto originNodeOffset = NG::DragControllerFuncWrapper::GetOriginNodeOffset(data, asyncCtxData);
-    EXPECT_EQ(originNodeOffset, NG::OffsetF(90, 90));
+    EXPECT_EQ(originNodeOffset, NG::OffsetF(0, 0));
 
     /**
      * @tc.steps: step3. call GetOriginNodeOffset when hasTouchPoint is false.
@@ -166,7 +166,7 @@ HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest003, Test
     pixelMapScaledOffset = NG::DragControllerFuncWrapper::GetPixelMapScaledOffset(pointPosition, data, asyncCtxData);
     EXPECT_EQ(pixelMapScaledOffset, NG::OffsetF(100, 100));
     originNodeOffset = NG::DragControllerFuncWrapper::GetOriginNodeOffset(data, asyncCtxData);
-    EXPECT_EQ(originNodeOffset, NG::OffsetF(100, 100));
+    EXPECT_EQ(originNodeOffset, NG::OffsetF(0, 0));
 }
 
 /**

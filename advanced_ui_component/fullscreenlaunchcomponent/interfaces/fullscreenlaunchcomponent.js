@@ -21,6 +21,7 @@ const abilityManager = requireNapi('app.ability.abilityManager');
 const commonEventManager = requireNapi('commonEventManager');
 const t = 100014;
 const u = 801;
+const atomicServiceDataTag = "ohos.atomicService.window";
 
 export class FullScreenLaunchComponent extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
@@ -36,6 +37,7 @@ export class FullScreenLaunchComponent extends ViewPU {
         this.subscriber = null;
         this.onError = undefined;
         this.onTerminated = undefined;
+        this.onReceive = undefined;
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
@@ -63,6 +65,9 @@ export class FullScreenLaunchComponent extends ViewPU {
         }
         if (params.onTerminated !== undefined) {
             this.onTerminated = params.onTerminated;
+        }
+        if (params.onReceive !== undefined) {
+            this.onReceive = params.onReceive;
         }
     }
     updateStateVars(params) {
@@ -217,6 +222,18 @@ export class FullScreenLaunchComponent extends ViewPU {
                 this.isShow = false;
                 if (this.onTerminated != undefined) {
                     this.onTerminated(info);
+                }
+            });
+            UIExtensionComponent.onReceive(data => {
+                if (this.onReceive !== undefined) {
+                    const sourceKeys = Object.keys(data);
+                    let atomicServiceData = {};
+                    for (let i = 0; i < sourceKeys.length; i++) {
+                        if (sourceKeys[i].includes(atomicServiceDataTag)) {
+                            atomicServiceData[sourceKeys[i]] = data[sourceKeys[i]];
+                        }
+                    }
+                    this.onReceive(atomicServiceData);
                 }
             });
         }, UIExtensionComponent);

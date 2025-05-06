@@ -815,12 +815,12 @@ const ArkUISelectModifier* GetSelectModifier()
         .resetSelectDirection = ResetSelectDirection,
         .setSelectDividerStyle = SetSelectDividerStyle,
         .resetSelectDividerStyle = ResetSelectDividerStyle,
+        .setAvoidance = SetAvoidance,
+        .resetAvoidance = ResetAvoidance,
         .setOnSelect = SetOnSelectExt,
         .setMenuOutline = SetMenuOutline,
         .resetMenuOutline = ResetMenuOutline,
         .setSelectSymbolValue = SetSelectSymbolValue,
-        .setAvoidance = SetAvoidance,
-        .resetAvoidance = ResetAvoidance,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -881,10 +881,10 @@ const CJUISelectModifier* GetCJUISelectModifier()
         .resetSelectDividerNull = ResetSelectDividerNull,
         .setSelectDirection = SetSelectDirection,
         .resetSelectDirection = ResetSelectDirection,
-        .setMenuOutline = SetMenuOutline,
-        .resetMenuOutline = ResetMenuOutline,
         .setAvoidance = SetAvoidance,
         .resetAvoidance = ResetAvoidance,
+        .setMenuOutline = SetMenuOutline,
+        .resetMenuOutline = ResetMenuOutline,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

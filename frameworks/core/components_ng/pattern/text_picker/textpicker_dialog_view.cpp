@@ -545,7 +545,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     UpdateConfirmButtonTextLayoutProperty(textConfirmNode, pickerTheme);
     auto textPattern = textPickerNode->GetPattern<TextPickerPattern>();
     textPattern->SetConfirmNode(buttonConfirmNode);
-    auto buttonConfirmEventHub = buttonConfirmNode->GetEventHub<ButtonEventHub>();
+    auto buttonConfirmEventHub = buttonConfirmNode->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonConfirmEventHub, nullptr);
     buttonConfirmEventHub->SetStateEffect(true);
     UpdateButtonConfirmLayoutProperty(buttonConfirmNode, pickerTheme);
@@ -567,7 +567,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
         auto pickerPattern = dateNode->GetPattern<TextPickerPattern>();
         CHECK_NULL_VOID(pickerPattern);
         auto str = pickerPattern->GetSelectedObject(false);
-        auto textPickerEventHub = pickerPattern->GetEventHub<TextPickerEventHub>();
+        auto textPickerEventHub = pickerPattern->GetOrCreateEventHub<TextPickerEventHub>();
         CHECK_NULL_VOID(textPickerEventHub);
         textPickerEventHub->FireDialogAcceptEvent(str);
         if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
@@ -834,7 +834,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     auto recordEventPtr = AceType::MakeRefPtr<ClickEvent>(std::move(recordEvent));
     eventCancelHub->AddClickEvent(recordEventPtr);
 
-    auto buttonCancelEventHub = buttonCancelNode->GetEventHub<ButtonEventHub>();
+    auto buttonCancelEventHub = buttonCancelNode->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonCancelEventHub, nullptr);
     buttonCancelEventHub->SetStateEffect(true);
 
@@ -1064,7 +1064,7 @@ void TextPickerDialogView::SetDefaultTextStyle(const NG::PickerTextStyle& value)
 void TextPickerDialogView::SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDialogChange(std::move(onChange));
 }
@@ -1072,7 +1072,7 @@ void TextPickerDialogView::SetDialogChange(const RefPtr<FrameNode>& frameNode, D
 void TextPickerDialogView::SetDialogScrollStop(const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onScrollStop)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDialogScrollStop(std::move(onScrollStop));
 }
@@ -1081,7 +1081,7 @@ void TextPickerDialogView::SetDialogEnterSelectedArea(
     const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onEnterSelectedArea)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDialogEnterSelectedArea(std::move(onEnterSelectedArea));
 }
@@ -1094,7 +1094,7 @@ void TextPickerDialogView::SetDefaultPickerItemHeight(const Dimension& value)
 void TextPickerDialogView::SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDialogAcceptEvent(std::move(onChange));
 }
@@ -1166,8 +1166,9 @@ RefPtr<FrameNode> TextPickerDialogView::CreateForwardNode(NG::DialogGestureEvent
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textForwardNode, nullptr);
     UpdateForwardButtonTextLayoutProperty(textForwardNode, pickerTheme);
-    auto textPattern = textPickerNode->GetPattern<TextPickerPattern>();
-    textPattern->SetForwardNode(buttonForwardNode);
+    auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, nullptr);
+    textPickerPattern->SetForwardNode(buttonForwardNode);
     textForwardNode->MountToParent(buttonForwardNode);
     auto eventForwardHub = buttonForwardNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventForwardHub, nullptr);
@@ -1182,7 +1183,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateForwardNode(NG::DialogGestureEvent
     auto recordEventPtr = AceType::MakeRefPtr<ClickEvent>(std::move(recordEvent));
     eventForwardHub->AddClickEvent(recordEventPtr);
 
-    auto buttonForwardEventHub = buttonForwardNode->GetEventHub<ButtonEventHub>();
+    auto buttonForwardEventHub = buttonForwardNode->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonForwardEventHub, nullptr);
     buttonForwardEventHub->SetStateEffect(true);
 
@@ -1213,8 +1214,9 @@ RefPtr<FrameNode> TextPickerDialogView::CreateBackwardNode(NG::DialogGestureEven
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textBackwardNode, nullptr);
     UpdateBackwardButtonTextLayoutProperty(textBackwardNode, pickerTheme);
-    auto textPattern = textPickerNode->GetPattern<TextPickerPattern>();
-    textPattern->SetBackwardNode(buttonBackwardNode);
+    auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, nullptr);
+    textPickerPattern->SetBackwardNode(buttonBackwardNode);
     textBackwardNode->MountToParent(buttonBackwardNode);
     auto eventBackwardHub = buttonBackwardNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventBackwardHub, nullptr);
@@ -1229,7 +1231,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateBackwardNode(NG::DialogGestureEven
     auto recordEventPtr = AceType::MakeRefPtr<ClickEvent>(std::move(recordEvent));
     eventBackwardHub->AddClickEvent(recordEventPtr);
 
-    auto buttonBackwardEventHub = buttonBackwardNode->GetEventHub<ButtonEventHub>();
+    auto buttonBackwardEventHub = buttonBackwardNode->GetOrCreateEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(buttonBackwardEventHub, nullptr);
     buttonBackwardEventHub->SetStateEffect(true);
 

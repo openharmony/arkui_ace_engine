@@ -315,7 +315,9 @@ void NativeRichEditorController::ParseRichEditorImageSpanResult(
     nativeImageResult.spanPosition = spanPosition;
     nativeImageResult.offsetInSpanStart = spanObject.offsetInSpan[0];
     nativeImageResult.offsetInSpanEnd = spanObject.offsetInSpan[1];
-    nativeImageResult.valueResourceStr = Utils::MallocCString(std::to_string(spanObject.valueResource->GetId()));
+    if (spanObject.valueResource) {
+        nativeImageResult.valueResourceStr = Utils::MallocCString(std::to_string(spanObject.valueResource->GetId()));
+    }
 
     auto valuePixelMap = spanObject.valuePixelMap;
     if (valuePixelMap) {

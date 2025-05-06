@@ -32,10 +32,12 @@ void ProcessTexCoords(RSPoint* texsPoint, int32_t row, int32_t column, float wid
         }
         float x = 0;
         for (int j = 0; j < column; j++) {
+            CHECK_NULL_VOID(texsPit);
             texsPit->Set(x, y);
             ++texsPit;
             x += dx;
         }
+        CHECK_NULL_VOID(texsPit);
         texsPit->Set(width, y);
         ++texsPit;
         y += dy;
@@ -207,6 +209,7 @@ void DrawingPainter::DrawPixelMapMesh(
         return;
     }
 
+    CHECK_NULL_VOID(pixelMap);
     ProcessTexCoords(builder.TexCoords(), row, column, static_cast<float>(pixelMap->GetWidth()),
         static_cast<float>(pixelMap->GetHeight()));
     ProcessIndices(builder.Indices(), row, column);

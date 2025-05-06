@@ -1,7 +1,8 @@
 import { describe, beforeAll, it } from '@ohos/hypium'
 import { abilityDelegatorRegistry, Driver, Component, ON } from '@kit.TestKit';
 import { Point } from '@ohos.UiTest';
-import { buttonClick,
+import {
+  buttonClick,
   getToggle,
   JsonType,
   KeyStruct,
@@ -13,7 +14,7 @@ import { buttonClick,
   titleSearch,
   ToggleClick,
   Search
-} from '../utils';
+} from '../../utils';
 
 const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
 const driver = Driver.create();

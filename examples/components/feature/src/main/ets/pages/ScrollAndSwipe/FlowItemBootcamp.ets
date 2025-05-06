@@ -699,11 +699,11 @@ export struct FlowItemBootcamp {
 
   @Builder
   Content() {
-    Column({space: 10}) {
+    Column({ space: 10 }) {
       WaterFlow({ scroller: this.scroller }) {
         ForEach(this.getElements(), (item: number) => {
           FlowItem() {
-            Column(){
+            Column() {
               Text('item').width('100%').height('100%').backgroundColor(0xF5DEB3)
             }
           }
@@ -1410,6 +1410,7 @@ export struct FlowItemBootcamp {
   }
 
   @State selection: string | null = null;
+
   @Builder
   ListItemGroupHeaders(str: string) {
     Row() {
@@ -1421,7 +1422,7 @@ export struct FlowItemBootcamp {
         .fillColor($r('sys.color.ohos_id_color_fourth'))
         .height(24)
         .width(24)
-        .rotate({ angle: this.selection==str ? 90 : 0 })
+        .rotate({ angle: this.selection == str ? 90 : 0 })
         .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
     }
     .borderRadius(20)
@@ -1442,11 +1443,12 @@ export struct FlowItemBootcamp {
       }
     })
   }
+
   @Builder
   Generic() {
     Scroll(this.scroller1) {
       Column({ space: 8 }) {
-        List({space:8}){
+        List({ space: 8 }) {
           CompLocationBlocks({
             enableCompPosition: $enableCompPosition,
             enableCompPositionTop: $enableCompPositionTop,

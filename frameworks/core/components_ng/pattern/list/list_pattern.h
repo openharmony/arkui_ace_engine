@@ -475,6 +475,7 @@ protected:
     float scrollSnapVelocity_ = 0.0f;
     bool isStackFromEnd_ = true;
 private:
+    void CheckAndUpdateAnimateTo(float relativeOffset, float prevOffset);
     void OnScrollEndCallback() override;
     void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override;
     void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override;
@@ -502,6 +503,7 @@ private:
 
     SizeF GetContentSize() const;
     void ProcessEvent(bool indexChanged, float finalOffset, bool isJump);
+    void FireOnScrollWithVersionCheck(float finalOffset, OnScrollEvent& onScroll);
     void CheckScrollable();
     void HandleScrollEffect(float offset);
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);

@@ -41,6 +41,7 @@ constexpr float WATER_FLOW_HEIGHT = 800.f;
 constexpr int32_t TOTAL_LINE_NUMBER = 10;
 constexpr int32_t VIEW_LINE_NUMBER = 8;
 constexpr float BIG_ITEM_MAIN_SIZE = ITEM_MAIN_SIZE * 2;
+#define TOP_TO_DOWN pattern_->layoutInfo_->Mode() == WaterFlowLayoutMode::TOP_DOWN
 
 class WaterFlowMockLazy : public Framework::MockLazyForEachBuilder {
 public:

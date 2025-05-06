@@ -89,220 +89,220 @@ public:
     void SetColors(const JSRef<JSArray>& colors)
     {
         for (int i = 0; i < COLORS_NUMBER; i++) {
-            colors_.push_back(ConvertJsValueToColor(colors->GetValueAt(i)));
+            colors_.push_back(colors->GetValueAt(i));
         }
     }
 
     Color Brand() const
     {
-        return colors_[BRAND];
+        return ConvertJsValueToColor(colors_[BRAND]);
     }
     Color Warning() const
     {
-        return colors_[WARNING];
+        return ConvertJsValueToColor(colors_[WARNING]);
     }
     Color Alert() const
     {
-        return colors_[ALERT];
+        return ConvertJsValueToColor(colors_[ALERT]);
     }
     Color Confirm() const
     {
-        return colors_[CONFIRM];
+        return ConvertJsValueToColor(colors_[CONFIRM]);
     }
 
     Color FontPrimary() const
     {
-        return colors_[FONT_PRIMARY];
+        return ConvertJsValueToColor(colors_[FONT_PRIMARY]);
     }
     Color FontSecondary() const
     {
-        return colors_[FONT_SECONDARY];
+        return ConvertJsValueToColor(colors_[FONT_SECONDARY]);
     }
     Color FontTertiary() const
     {
-        return colors_[FONT_TERTIARY];
+        return ConvertJsValueToColor(colors_[FONT_TERTIARY]);
     }
     Color FontFourth() const
     {
-        return colors_[FONT_FOURTH];
+        return ConvertJsValueToColor(colors_[FONT_FOURTH]);
     }
     Color FontEmphasize() const
     {
-        return colors_[FONT_EMPHASIZE];
+        return ConvertJsValueToColor(colors_[FONT_EMPHASIZE]);
     }
 
     Color FontOnPrimary() const
     {
-        return colors_[FONT_ON_PRIMARY];
+        return ConvertJsValueToColor(colors_[FONT_ON_PRIMARY]);
     }
     Color FontOnSecondary() const
     {
-        return colors_[FONT_ON_SECONDARY];
+        return ConvertJsValueToColor(colors_[FONT_ON_SECONDARY]);
     }
     Color FontOnTertiary() const
     {
-        return colors_[FONT_ON_TERTIARY];
+        return ConvertJsValueToColor(colors_[FONT_ON_TERTIARY]);
     }
     Color FontOnFourth() const
     {
-        return colors_[FONT_ON_FOURTH];
+        return ConvertJsValueToColor(colors_[FONT_ON_FOURTH]);
     }
 
     Color IconPrimary() const
     {
-        return colors_[ICON_PRIMARY];
+        return ConvertJsValueToColor(colors_[ICON_PRIMARY]);
     }
     Color IconSecondary() const
     {
-        return colors_[ICON_SECONDARY];
+        return ConvertJsValueToColor(colors_[ICON_SECONDARY]);
     }
     Color IconTertiary() const
     {
-        return colors_[ICON_TERTIARY];
+        return ConvertJsValueToColor(colors_[ICON_TERTIARY]);
     }
     Color IconFourth() const
     {
-        return colors_[ICON_FOURTH];
+        return ConvertJsValueToColor(colors_[ICON_FOURTH]);
     }
     Color IconEmphasize() const
     {
-        return colors_[ICON_EMPHASIZE];
+        return ConvertJsValueToColor(colors_[ICON_EMPHASIZE]);
     }
     Color IconSubEmphasize() const
     {
-        return colors_[ICON_SUB_EMPHASIZE];
+        return ConvertJsValueToColor(colors_[ICON_SUB_EMPHASIZE]);
     }
 
     Color IconOnPrimary() const
     {
-        return colors_[ICON_ON_PRIMARY];
+        return ConvertJsValueToColor(colors_[ICON_ON_PRIMARY]);
     }
     Color IconOnSecondary() const
     {
-        return colors_[ICON_ON_SECONDARY];
+        return ConvertJsValueToColor(colors_[ICON_ON_SECONDARY]);
     }
     Color IconOnTertiary() const
     {
-        return colors_[ICON_ON_TERTIARY];
+        return ConvertJsValueToColor(colors_[ICON_ON_TERTIARY]);
     }
     Color IconOnFourth() const
     {
-        return colors_[ICON_ON_FOURTH];
+        return ConvertJsValueToColor(colors_[ICON_ON_FOURTH]);
     }
 
     Color BackgroundPrimary() const
     {
-        return colors_[BACKGROUND_PRIMARY];
+        return ConvertJsValueToColor(colors_[BACKGROUND_PRIMARY]);
     }
     Color BackgroundSecondary() const
     {
-        return colors_[BACKGROUND_SECONDARY];
+        return ConvertJsValueToColor(colors_[BACKGROUND_SECONDARY]);
     }
     Color BackgroundTertiary() const
     {
-        return colors_[BACKGROUND_TERTIARY];
+        return ConvertJsValueToColor(colors_[BACKGROUND_TERTIARY]);
     }
     Color BackgroundFourth() const
     {
-        return colors_[BACKGROUND_FOURTH];
+        return ConvertJsValueToColor(colors_[BACKGROUND_FOURTH]);
     }
     Color BackgroundEmphasize() const
     {
-        return colors_[BACKGROUND_EMPHASIZE];
+        return ConvertJsValueToColor(colors_[BACKGROUND_EMPHASIZE]);
     }
 
     Color CompForegroundPrimary() const
     {
-        return colors_[COMP_FOREGROUND_PRIMARY];
+        return ConvertJsValueToColor(colors_[COMP_FOREGROUND_PRIMARY]);
     }
     Color CompBackgroundPrimary() const
     {
-        return colors_[COMP_BACKGROUND_PRIMARY];
+        return ConvertJsValueToColor(colors_[COMP_BACKGROUND_PRIMARY]);
     }
     Color CompBackgroundPrimaryTran() const
     {
-        return colors_[COMP_BACKGROUND_PRIMARY_TRAN];
+        return ConvertJsValueToColor(colors_[COMP_BACKGROUND_PRIMARY_TRAN]);
     }
     Color CompBackgroundPrimaryContrary() const
     {
-        return colors_[COMP_BACKGROUND_PRIMARY_CONTRARY];
+        return ConvertJsValueToColor(colors_[COMP_BACKGROUND_PRIMARY_CONTRARY]);
     }
     Color CompBackgroundGray() const
     {
-        return colors_[COMP_BACKGROUND_GRAY];
+        return ConvertJsValueToColor(colors_[COMP_BACKGROUND_GRAY]);
     }
     Color CompBackgroundSecondary() const
     {
-        return colors_[COMP_BACKGROUND_SECONDARY];
+        return ConvertJsValueToColor(colors_[COMP_BACKGROUND_SECONDARY]);
     }
     Color CompBackgroundTertiary() const
     {
-        return colors_[COMP_BACKGROUND_TERTIARY];
+        return ConvertJsValueToColor(colors_[COMP_BACKGROUND_TERTIARY]);
     }
     Color CompBackgroundEmphasize() const
     {
-        return colors_[COMP_BACKGROUND_EMPHASIZE];
+        return ConvertJsValueToColor(colors_[COMP_BACKGROUND_EMPHASIZE]);
     }
     Color CompBackgroundNeutral() const
     {
-        return colors_[COMP_BACKGROUND_NEUTRAL];
+        return ConvertJsValueToColor(colors_[COMP_BACKGROUND_NEUTRAL]);
     }
     Color CompEmphasizeSecondary() const
     {
-        return colors_[COMP_EMPHASIZE_SECONDARY];
+        return ConvertJsValueToColor(colors_[COMP_EMPHASIZE_SECONDARY]);
     }
     Color CompEmphasizeTertiary() const
     {
-        return colors_[COMP_EMPHASIZE_TERTIARY];
+        return ConvertJsValueToColor(colors_[COMP_EMPHASIZE_TERTIARY]);
     }
     Color CompDivider() const
     {
-        return colors_[COMP_DIVIDER];
+        return ConvertJsValueToColor(colors_[COMP_DIVIDER]);
     }
     Color CompCommonContrary() const
     {
-        return colors_[COMP_COMMON_CONTRARY];
+        return ConvertJsValueToColor(colors_[COMP_COMMON_CONTRARY]);
     }
     Color CompBackgroundFocus() const
     {
-        return colors_[COMP_BACKGROUND_FOCUS];
+        return ConvertJsValueToColor(colors_[COMP_BACKGROUND_FOCUS]);
     }
     Color CompFocusedPrimary() const
     {
-        return colors_[COMP_FOCUSED_PRIMARY];
+        return ConvertJsValueToColor(colors_[COMP_FOCUSED_PRIMARY]);
     }
     Color CompFocusedSecondary() const
     {
-        return colors_[COMP_FOCUSED_SECONDARY];
+        return ConvertJsValueToColor(colors_[COMP_FOCUSED_SECONDARY]);
     }
     Color CompFocusedTertiary() const
     {
-        return colors_[COMP_FOCUSED_TERTIARY];
+        return ConvertJsValueToColor(colors_[COMP_FOCUSED_TERTIARY]);
     }
 
     Color InteractiveHover() const
     {
-        return colors_[INTERACTIVE_HOVER];
+        return ConvertJsValueToColor(colors_[INTERACTIVE_HOVER]);
     }
     Color InteractivePressed() const
     {
-        return colors_[INTERACTIVE_PRESSED];
+        return ConvertJsValueToColor(colors_[INTERACTIVE_PRESSED]);
     }
     Color InteractiveFocus() const
     {
-        return colors_[INTERACTIVE_FOCUS];
+        return ConvertJsValueToColor(colors_[INTERACTIVE_FOCUS]);
     }
     Color InteractiveActive() const
     {
-        return colors_[INTERACTIVE_ACTIVE];
+        return ConvertJsValueToColor(colors_[INTERACTIVE_ACTIVE]);
     }
     Color InteractiveSelect() const
     {
-        return colors_[INTERACTIVE_SELECT];
+        return ConvertJsValueToColor(colors_[INTERACTIVE_SELECT]);
     }
     Color InteractiveClick() const
     {
-        return colors_[INTERACTIVE_CLICK];
+        return ConvertJsValueToColor(colors_[INTERACTIVE_CLICK]);
     }
 private:
     Color ConvertJsValueToColor(const JSRef<JSVal>& jsValue) const
@@ -312,7 +312,7 @@ private:
         return color;
     }
 
-    std::vector<Color> colors_;
+    std::vector<JSRef<JSVal>> colors_;
 };
 
 class JSTheme {

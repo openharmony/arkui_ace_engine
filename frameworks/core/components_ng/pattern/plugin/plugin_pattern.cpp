@@ -316,7 +316,7 @@ void PluginPattern::FireOnCompleteEvent() const
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<PluginEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<PluginEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto json = JsonUtil::Create(true);
     eventHub->FireOnComplete(json->ToString());
@@ -328,7 +328,7 @@ void PluginPattern::FireOnErrorEvent(const std::string& code, const std::string&
     TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "code: %{public}s, msg: %{public}s", code.c_str(), msg.c_str());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<PluginEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<PluginEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto json = JsonUtil::Create(true);
     json->Put("errcode", code.c_str());

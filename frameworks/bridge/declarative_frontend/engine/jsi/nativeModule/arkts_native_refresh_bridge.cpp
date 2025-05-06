@@ -208,4 +208,40 @@ ArkUINativeModuleValue RefreshBridege::ResetOnOffsetChange(ArkUIRuntimeCallInfo*
     GetArkUINodeModifiers()->getRefreshModifier()->resetRefreshOnOffsetChangeCallback(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+ArkUINativeModuleValue RefreshBridege::SetMaxPullDownDistance(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    auto refreshModifier = nodeModifiers->getRefreshModifier();
+    CHECK_NULL_RETURN(refreshModifier, panda::JSValueRef::Undefined(vm));
+    if (valueArg->IsNumber()) {
+        float value = static_cast<float>(valueArg->ToNumber(vm)->Value());
+        value = std::max(value, 0.0f);
+        refreshModifier->setMaxPullDownDistance(nativeNode, value);
+    } else {
+        refreshModifier->resetMaxPullDownDistance(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue RefreshBridege::ResetMaxPullDownDistance(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    auto refreshModifier = nodeModifiers->getRefreshModifier();
+    CHECK_NULL_RETURN(refreshModifier, panda::JSValueRef::Undefined(vm));
+    refreshModifier->resetMaxPullDownDistance(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

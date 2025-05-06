@@ -92,6 +92,7 @@ public:
     using FoldDisplayModeChangedCallbackMap = std::unordered_map<int32_t, std::function<void(FoldDisplayMode)>>;
     using TransformHintChangedCallbackMap = std::unordered_map<int32_t, std::function<void(uint32_t)>>;
     using PredictTask = std::function<void(int64_t, bool)>;
+    using RotationEndCallbackMap = std::unordered_map<int32_t, std::function<void()>>;
     PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
         const RefPtr<Frontend>& frontend, int32_t instanceId);
@@ -395,6 +396,15 @@ public:
     void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea, bool checkSystemWindow = false) override;
     void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea, bool checkSystemWindow = false) override;
     void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool checkSystemWindow = false) override;
+
+    void UpdateSystemSafeAreaWithoutAnimation(const SafeAreaInsets& systemSafeArea,
+        bool checkSceneBoardWindow = false) override;
+
+    void UpdateCutoutSafeAreaWithoutAnimation(const SafeAreaInsets& cutoutSafeArea,
+        bool checkSceneBoardWindow = false) override;
+
+    void UpdateNavSafeAreaWithoutAnimation(const SafeAreaInsets& navSafeArea,
+        bool checkSceneBoardWindow = false) override;
 
     void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) override;
 
@@ -1035,6 +1045,16 @@ public:
         return isDensityChanged_;
     }
 
+    bool IsNeedReloadDensity() const override
+    {
+        return isNeedReloadDensity_;
+    }
+
+    void SetIsNeedReloadDensity(bool isNeedReloadDensity) override
+    {
+        isNeedReloadDensity_ = isNeedReloadDensity;
+    }
+
     void GetInspectorTree(bool onlyNeedVisible);
     void NotifyAllWebPattern(bool isRegister);
     void AddFrameNodeChangeListener(const WeakPtr<FrameNode>& node);
@@ -1084,6 +1104,7 @@ public:
 
     void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
     bool CheckThreadSafe();
+    void UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode);
 
     bool IsHoverModeChange() const
     {
@@ -1177,6 +1198,20 @@ public:
         return aiWriteAdapter_;
     }
 
+    int32_t RegisterRotationEndCallback(std::function<void()>&& callback)
+    {
+        if (callback) {
+            rotationEndCallbackMap_.emplace(++callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
+
+    void UnregisterRotationEndCallback(int32_t callbackId)
+    {
+        rotationEndCallbackMap_.erase(callbackId);
+    }
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1185,6 +1220,8 @@ protected:
     void StartFullToMultWindowAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
     void StartSplitWindowAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+    void MaximizeInImplictAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
 
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
@@ -1296,6 +1333,7 @@ private:
     void DumpElement(const std::vector<std::string>& params, bool hasJson) const;
     void DumpData(const RefPtr<FrameNode>& node, const std::vector<std::string>& params, bool hasJson) const;
     void OnDumpInjection(const std::vector<std::string>& params) const;
+    void OnRotationAnimationEnd();
     template<typename T>
     struct NodeCompare {
         bool operator()(const T& nodeLeft, const T& nodeRight) const
@@ -1346,8 +1384,8 @@ private:
 
     std::list<TouchEvent> touchEvents_;
 
-    std::map<RefPtr<FrameNode>, std::list<DragPointerEvent>> dragEvents_;
-    std::map<RefPtr<FrameNode>, std::list<MouseEvent>> mouseEvents_;
+    std::map<WeakPtr<FrameNode>, std::list<DragPointerEvent>> dragEvents_;
+    std::map<WeakPtr<FrameNode>, std::list<MouseEvent>> mouseEvents_;
     std::vector<std::function<void(const std::vector<std::string>&)>> dumpListeners_;
 
     RefPtr<FrameNode> rootNode_;
@@ -1411,6 +1449,7 @@ private:
     bool canUseLongPredictTask_ = false;
     bool isWindowSceneConsumed_ = false;
     bool isDensityChanged_ = false;
+    bool isNeedReloadDensity_ = false;
     bool isBeforeDragHandleAxis_ = false;
     WeakPtr<FrameNode> activeNode_;
     bool isWindowAnimation_ = false;
@@ -1446,8 +1485,8 @@ private:
     std::list<DelayedTask> delayedTasks_;
     RefPtr<PostEventManager> postEventManager_;
 
-    std::map<RefPtr<FrameNode>, std::vector<MouseEvent>> nodeToMousePoints_;
-    std::map<RefPtr<FrameNode>, std::vector<DragPointerEvent>> nodeToPointEvent_;
+    std::map<WeakPtr<FrameNode>, std::vector<MouseEvent>> nodeToMousePoints_;
+    std::map<WeakPtr<FrameNode>, std::vector<DragPointerEvent>> nodeToPointEvent_;
     std::vector<Ace::RectF> overlayNodePositions_;
     std::function<void(std::vector<Ace::RectF>)> overlayNodePositionUpdateCallback_;
 
@@ -1490,9 +1529,10 @@ private:
     std::unordered_set<UINode*> attachedNodeSet_;
     std::list<std::function<void()>> afterReloadAnimationTasks_;
     Offset lastHostParentOffsetToWindow_ { 0, 0 };
-
+    int32_t frameCountForNotCallJSCleanUp_ = 0;
     RefPtr<Kit::UIContextImpl> uiContextImpl_;
     std::shared_ptr<UiTranslateManagerImpl> uiTranslateManager_;
+    RotationEndCallbackMap rotationEndCallbackMap_ {};
     friend class ScopedLayout;
     friend class FormGestureManager;
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = nullptr;

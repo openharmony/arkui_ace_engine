@@ -151,6 +151,16 @@ void NavToolbarPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestur
     longPressRecognizer->SetOnActionEnd(longPressActionEnd);
 }
 
+void NavToolbarPattern::UpdateBarItemBackgroundColor(const RefPtr<FrameNode>& toolBarItemNode,
+    const RefPtr<ButtonTheme>& buttonTheme)
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        auto renderContext = toolBarItemNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateBackgroundColor(buttonTheme->GetClickedColor());
+    }
+}
+
 void NavToolbarPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
@@ -172,15 +182,15 @@ void NavToolbarPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
             CHECK_NULL_VOID(buttonTheme);
             auto buttonPattern = toolBarItemNode->GetPattern<ButtonPattern>();
             CHECK_NULL_VOID(buttonPattern);
-            buttonPattern->SetClickedColor(buttonTheme->GetClickedColor());
+            if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+                buttonPattern->SetClickedColor(buttonTheme->GetClickedColor());
+            }
             if (!toolBarPattern->moveIndex_.has_value()) {
                 toolBarPattern->moveIndex_ = index;
             }
 
             if (toolBarPattern->moveIndex_ != index) {
-                auto renderContext = toolBarItemNode->GetRenderContext();
-                CHECK_NULL_VOID(renderContext);
-                renderContext->UpdateBackgroundColor(buttonTheme->GetClickedColor());
+                toolBarPattern->UpdateBarItemBackgroundColor(toolBarItemNode, buttonTheme);
                 toolBarPattern->HandleLongPressActionEnd();
                 toolBarPattern->moveIndex_ = index;
                 auto barItemNode = AceType::DynamicCast<BarItemNode>(toolBarItemNode->GetFirstChild());
@@ -208,13 +218,15 @@ void NavToolbarPattern::HandleLongPressEvent(const GestureEvent& info)
     CHECK_NULL_VOID(barItemNode);
     ShowDialogWithNode(barItemNode);
     moveIndex_ = containerNode->GetChildIndex(toolBarItem);
-    auto pipeline = hostNode->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
-    CHECK_NULL_VOID(buttonTheme);
-    auto buttonPattern = toolBarItem->GetPattern<ButtonPattern>();
-    CHECK_NULL_VOID(buttonPattern);
-    buttonPattern->SetClickedColor(buttonTheme->GetClickedColor());
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        auto pipeline = hostNode->GetContextWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+        CHECK_NULL_VOID(buttonTheme);
+        auto buttonPattern = toolBarItem->GetPattern<ButtonPattern>();
+        CHECK_NULL_VOID(buttonPattern);
+        buttonPattern->SetClickedColor(buttonTheme->GetClickedColor());
+    }
 }
 
 void NavToolbarPattern::HandleLongPressActionEnd()

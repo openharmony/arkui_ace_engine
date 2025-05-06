@@ -169,8 +169,10 @@ RefPtr<DragWindow> DragWindow::CreateTextDragWindow(
     int32_t halfHeight = static_cast<int32_t>(height + Window_EXTERN.ConvertToPx() * 2) / 2;
 
     OHOS::sptr<OHOS::Rosen::WindowOption> option = new OHOS::Rosen::WindowOption();
-    option->SetWindowRect({ x - Window_EXTERN.ConvertToPx(), y - Window_EXTERN.ConvertToPx(),
-        width + Window_EXTERN.ConvertToPx() * 2, height + Window_EXTERN.ConvertToPx() * 2 });
+    option->SetWindowRect({ static_cast<int32_t>(x - Window_EXTERN.ConvertToPx()),
+        static_cast<int32_t>(y - Window_EXTERN.ConvertToPx()),
+        static_cast<int32_t>(width + Window_EXTERN.ConvertToPx() * 2),
+        static_cast<int32_t>(height + Window_EXTERN.ConvertToPx() * 2) });
     option->SetHitOffset(halfWidth, halfHeight);
     option->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_DRAGGING_EFFECT);
     option->SetWindowMode(OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING);

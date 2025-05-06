@@ -45,8 +45,7 @@ ExtensionSession::~ExtensionSession()
 
 std::shared_ptr<IDataHandler> ExtensionSession::GetExtensionDataHandler() const
 {
-    auto handler = std::make_shared<OHOS::Rosen::MockDataHandler>();
-    return handler;
+    return std::make_shared<OHOS::Rosen::MockDataHandler>();
 }
 
 sptr<ExtensionSession::ExtensionSessionEventCallback> ExtensionSession::GetExtensionSessionEventCallback()

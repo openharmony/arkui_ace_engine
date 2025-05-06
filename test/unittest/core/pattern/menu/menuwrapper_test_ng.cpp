@@ -310,6 +310,10 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg003, TestSize.Level1)
         FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
     auto subMenu = FrameNode::CreateFrameNode(
         V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    auto subMenuPattern = subMenu->GetPattern<MenuPattern>();
+    subMenuPattern->SetParentMenuItem(menuItemNode);
     mainMenu->MountToParent(wrapperNode);
     wrapperPattern->HideSubMenu();
     subMenu->MountToParent(wrapperNode);
@@ -753,14 +757,15 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg015, TestSize.Level1)
     model.Create();
     auto menu2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(menu2, nullptr);
-    auto mainMenu = FrameNode::CreateFrameNode("", 1, AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MENU));
-    auto subMenu = FrameNode::CreateFrameNode(
-        "", 11, AceType::MakeRefPtr<MenuPattern>(11, "", MenuType::SUB_MENU));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MENU));
+    auto subMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 11, AceType::MakeRefPtr<MenuPattern>(11, "", MenuType::SUB_MENU));
 
     mainMenu->MountToParent(wrapperNode);
     subMenu->MountToParent(wrapperNode);
     wrapperPattern->HideSubMenu();
-    EXPECT_EQ(wrapperNode->GetChildren().size(), 1);
+    EXPECT_EQ(wrapperNode->GetChildren().size(), 2);
 
     subMenu->MountToParent(wrapperNode);
     menu->MountToParent(mainMenu);
@@ -772,6 +777,8 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg015, TestSize.Level1)
     auto menuItemNode2 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 2, AceType::MakeRefPtr<MenuItemPattern>());
     menuItemNode2->MountToParent(menu2);
 
+    auto subMenuPattern = subMenu->GetPattern<MenuPattern>();
+    subMenuPattern->SetParentMenuItem(menuItemNode1);
     wrapperPattern->HideSubMenu();
     EXPECT_EQ(wrapperNode->GetChildren().size(), 1);
 
@@ -890,9 +897,9 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg018, TestSize.Level1)
     auto menu2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(menu2, nullptr);
     auto mainMenuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MENU);
-    auto mainMenu = FrameNode::CreateFrameNode("", 1, mainMenuPattern);
+    auto mainMenu = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, mainMenuPattern);
     auto subMenuPattern = AceType::MakeRefPtr<MenuPattern>(11, "", MenuType::SUB_MENU);
-    auto subMenu = FrameNode::CreateFrameNode("", 11, subMenuPattern);
+    auto subMenu = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 11, subMenuPattern);
 
     mainMenu->MountToParent(wrapperNode);
     subMenu->MountToParent(wrapperNode);
@@ -917,6 +924,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg018, TestSize.Level1)
     wrapperPattern->HideMenu(mainMenuPattern, mainMenu, PointF(0, 0));
     EXPECT_EQ(wrapperNode->GetChildren().size(), 2);
 
+    subMenuPattern->SetParentMenuItem(menuItemNode1);
     wrapperPattern->HideMenu(subMenuPattern, subMenu, PointF(0, 0));
     EXPECT_EQ(wrapperNode->GetChildren().size(), 1);
     subMenu->MountToParent(wrapperNode);

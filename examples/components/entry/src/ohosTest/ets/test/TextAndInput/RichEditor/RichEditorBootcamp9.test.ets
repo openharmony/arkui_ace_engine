@@ -16,18 +16,18 @@
 import { describe, beforeAll, it } from '@ohos/hypium';
 import { abilityDelegatorRegistry, Driver } from '@kit.TestKit';
 import {
-    buttonClick,
-    getToggle,
-    JsonType,
-    KeyStruct,
-    radioClick,
-    Search,
-    searchParentBlock,
-    searchToggle,
-    Slide,
-    sliderDrag,
-    titleSearch,
-    ToggleClick
+  buttonClick,
+  getToggle,
+  JsonType,
+  KeyStruct,
+  radioClick,
+  Search,
+  searchParentBlock,
+  searchToggle,
+  Slide,
+  sliderDrag,
+  titleSearch,
+  ToggleClick
 } from '../../../utils';
 import { richEditorBeforeAll } from './RichEditor.test';
 

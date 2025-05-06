@@ -16,6 +16,7 @@
 #include "core/components_ng/manager/focus/focus_manager.h"
 
 #include "base/log/dump_log.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components/theme/app_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -520,7 +521,7 @@ bool FocusManager::SetIsFocusActive(bool isFocusActive, FocusActiveReason reason
     if (!NeedChangeFocusAvtive(isFocusActive, reason, autoFocusInactive)) {
         return false;
     }
-    TAG_LOGI(AceLogTag::ACE_FOCUS, "focusActive turns:%{public}d, reson:%{public}d", isFocusActive, reason);
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "focusActive turns:%{public}d, reason:%{public}d", isFocusActive, reason);
     isFocusActive_ = isFocusActive;
 
     auto pipeline = pipeline_.Upgrade();

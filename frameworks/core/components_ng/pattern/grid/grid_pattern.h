@@ -297,7 +297,7 @@ private:
      */
     void SyncLayoutBeforeSpring();
 
-    void FireOnScrollStart() override;
+    void FireOnScrollStart(bool withPerfMonitor = true) override;
     void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override;
     void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override;
     void FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex);

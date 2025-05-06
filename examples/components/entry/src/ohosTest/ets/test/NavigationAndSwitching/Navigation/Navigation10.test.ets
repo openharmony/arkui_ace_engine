@@ -12,13 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { describe, beforeAll, it} from '@ohos/hypium'
-import {
-  radioClick,
-  ToggleClick,
-  titleSearch,
-  getToggle
-} from '../../../utils';
+import { describe, beforeAll, it } from '@ohos/hypium'
+import { radioClick, ToggleClick, titleSearch, getToggle } from '../../../utils';
 import { NavigationStart } from './Navigation';
 
 export default function Navigation10() {

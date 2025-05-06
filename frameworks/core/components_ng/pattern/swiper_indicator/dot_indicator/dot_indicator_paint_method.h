@@ -69,6 +69,11 @@ public:
         itemCount_ = itemCount;
     }
 
+    void SetIsAutoLinear(bool isAutoLinear)
+    {
+        isAutoLinear_ = isAutoLinear;
+    }
+
     void SetTotalItemCount(int32_t totalItemCount)
     {
         totalItemCount_ = totalItemCount;
@@ -236,6 +241,7 @@ protected:
     int32_t itemCount_ = 0;
     int32_t totalItemCount_ = 0;
     int32_t displayCount_ = 1;
+    bool isAutoLinear_ = false;
     float turnPageRate_ = 0.0f;
     float groupTurnPageRate_ = 0.0f;
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;

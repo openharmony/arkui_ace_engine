@@ -115,7 +115,7 @@ enum class SelectorAdjustPolicy { INCLUDE = 0, EXCLUDE };
 enum class HandleType { FIRST = 0, SECOND };
 enum class SelectType { SELECT_FORWARD = 0, SELECT_BACKWARD, SELECT_NOTHING };
 enum class CaretAffinityPolicy { DEFAULT = 0, UPSTREAM_FIRST, DOWNSTREAM_FIRST };
-enum class OperationType { DEFAULT = 0, DRAG, IME };
+enum class OperationType { DEFAULT = 0, DRAG, IME, FINISH_PREVIEW };
 const std::map<std::pair<HandleType, SelectorAdjustPolicy>, MoveDirection> SELECTOR_ADJUST_DIR_MAP = {
     {{ HandleType::FIRST, SelectorAdjustPolicy::INCLUDE }, MoveDirection::BACKWARD },
     {{ HandleType::FIRST, SelectorAdjustPolicy::EXCLUDE }, MoveDirection::FORWARD },
@@ -524,7 +524,6 @@ public:
     void ResetBeforePaste();
     void ResetAfterPaste();
 
-    void OnVisibleChange(bool isVisible) override;
     void OnModifyDone() override;
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -590,6 +589,12 @@ public:
     void UpdateShiftFlag(const KeyEvent& keyEvent)override;
     bool HandleOnEscape() override;
     void HandleOnUndoAction() override;
+
+    void HandleOnExtendUndoAction() override
+    {
+        HandleOnUndoAction();
+    }
+
     void HandleOnRedoAction() override;
     void CursorMove(CaretMoveIntent direction) override;
     void HandleSetSelection(int32_t start, int32_t end, bool showHandle) override;
@@ -622,7 +627,6 @@ public:
     void HandleSelectFontStyleWrapper(KeyCode code, TextStyle& spanStyle);
     void HandleOnShowMenu() override;
     int32_t HandleKbVerticalSelection(bool isUp);
-    int32_t HandleSelectParagraghPos(bool direction);
     PositionType GetPositionTypeFromLine();
     int32_t HandleSelectWrapper(CaretMoveIntent direction, int32_t fixedPos);
     void AIDeleteComb(int32_t start, int32_t end, int32_t& aiPosition, bool direction);
@@ -635,6 +639,12 @@ public:
     int32_t GetParagraphEndPosition(int32_t caretPosition);
     int32_t CaretPositionSelectEmoji(CaretMoveIntent direction);
     void HandleSelect(CaretMoveIntent direction) override;
+
+    void HandleSelectExtend(CaretMoveIntent direction) override
+    {
+        HandleSelect(direction);
+    }
+
     void SetCaretPositionWithAffinity(PositionWithAffinity positionWithAffinity);
     bool SetCaretPosition(int32_t pos, bool needNotifyImf = true);
     int32_t GetCaretPosition();
@@ -1195,6 +1205,19 @@ public:
         return keyboardAppearance_;
     }
 
+    void SetSupportStyledUndo(bool enabled)
+    {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SupportStyledUndo:%{public}d->%{public}d", isStyledUndoSupported_, enabled);
+        CHECK_NULL_VOID(!isSpanStringMode_ && (isStyledUndoSupported_ != enabled));
+        ClearOperationRecords();
+        isStyledUndoSupported_ = enabled;
+    }
+
+    bool IsSupportStyledUndo() const
+    {
+        return isSpanStringMode_ || isStyledUndoSupported_;
+    }
+
     bool IsDragging() const override
     {
         return status_ == Status::DRAGGING || status_ == Status::FLOATING;
@@ -1276,7 +1299,7 @@ private:
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub) override;
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
     void HandleBlurEvent();
-    void HandleFocusEvent();
+    void HandleFocusEvent(FocusReason focusReason = FocusReason::DEFAULT);
     void OnFocusNodeChange(FocusReason focusReason) override;
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
@@ -1342,6 +1365,7 @@ private:
     void StartFloatingCaretLand();
     void ResetTouchAndMoveCaretState(bool needAnimation = true);
     void ResetTouchSelectState();
+    void ScheduleFirstClickResetAfterWindowFocus();
     void HandleTouchUpAfterLongPress();
     void HandleTouchCancelAfterLongPress();
     void HandleTouchMove(const TouchLocationInfo& info);
@@ -1408,7 +1432,7 @@ private:
     int32_t GetParagraphLength(const std::list<RefPtr<UINode>>& spans) const;
     // REQUIRES: 0 <= start < end
     std::vector<RefPtr<SpanNode>> GetParagraphNodes(int32_t start, int32_t end) const;
-    void OnHover(bool isHover);
+    void OnHover(bool isHover, HoverInfo& hoverInfo);
     void ChangeMouseStyle(MouseFormat format, bool freeMouseHoldNode = false);
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard,
         SourceType sourceType = SourceType::NONE);
@@ -1520,6 +1544,7 @@ private:
     void AdjustSelectRects(SelectRectsType pos, std::vector<RectF>& selectRects);
     RectF GetSelectArea(SelectRectsType pos);
     void AppendSelectRect(std::vector<RectF>& selectRects);
+    RectF CreateNewLineRect(const int32_t position, const bool downStreamFirst);
     bool IsTouchInFrameArea(const PointF& touchPoint);
     void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& event, bool isCopy = false);
     void DeleteForward(int32_t currentPosition, int32_t length);
@@ -1737,6 +1762,7 @@ private:
     std::optional<int32_t> maxLength_ = std::nullopt;
     std::unique_ptr<OneStepDragController> oneStepDragController_;
     std::unique_ptr<RichEditorUndoManager> undoManager_;
+    bool isStyledUndoSupported_ = false;
     std::list<WeakPtr<ImageSpanNode>> imageNodes;
     std::list<WeakPtr<PlaceholderSpanNode>> builderNodes;
     bool isStopBackPress_ = true;
@@ -1745,6 +1771,9 @@ private:
     LRUMap<std::uintptr_t, RefPtr<Paragraph>> paragraphCache_;
     SysScale lastSysScale_;
     std::map<int32_t, AISpan> lastAISpanMap_;
+    // Used to avoid show single handle by first click after window focus
+    bool firstClickAfterWindowFocus_ = false;
+    CancelableCallback<void()> firstClickResetTask_;
 };
 } // namespace OHOS::Ace::NG
 

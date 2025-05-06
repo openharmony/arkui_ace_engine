@@ -74,15 +74,19 @@ class MyModifier implements AttributeModifier<TextAttribute> {
   applyNormalAttribute(instance: TextAttribute) {
     instance.backgroundColor('#0A59F7')
   }
+
   applyPressedAttribute(instance: TextAttribute) {
     instance.backgroundColor('#ED6F21')
   }
+
   applyFocusedAttribute(instance: TextAttribute) {
     instance.backgroundColor(Color.Gray)
   }
+
   applyDisabledAttribute(instance: TextAttribute) {
     instance.backgroundColor('#E5E5E5')
   }
+
   applySelectedAttribute(instance: TextAttribute) {
     instance.backgroundColor('#ffedea21')
   }
@@ -670,7 +674,6 @@ export struct ImageBootcamp {
   // Special Effect Drawing Combination
   @State enableCompUseEffect: boolean = false
   @State compUseEffect: boolean = false
-
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
   @State selection: string | null = null;
@@ -687,7 +690,7 @@ export struct ImageBootcamp {
   compEventTriggeredLog(value: string) {
     let time = formatDate(new Date(Date.now()))
     this.listEventTriggeredTagsTemp.push(
-      new BlockTag(time,value)
+      new BlockTag(time, value)
     )
     setTimeout(() => {
       if (AppStorage.get('Block')) {
@@ -708,9 +711,8 @@ export struct ImageBootcamp {
     }, 200)
   }
 
-
   aboutToAppear(): void {
-    AppStorage.setOrCreate('scroller',this.scroller)
+    AppStorage.setOrCreate('scroller', this.scroller)
   }
 
   build() {
@@ -732,6 +734,7 @@ export struct ImageBootcamp {
     .backgroundColor($r('sys.color.ohos_id_color_sub_background'))
     .hideTitleBar(true)
   }
+
   @Builder
   compBackground() {
     Text('123')
@@ -740,26 +743,26 @@ export struct ImageBootcamp {
   @Builder
   Content() {
     Column() {
-      Row({space:20}) {
-        Column(){
+      Row({ space: 20 }) {
+        Column() {
           Image(useEnabled(this.enableImage, this.image))
             .borderRadius(useEnabled(this.enableBorderRadius, this.imageBorderRadius))
-            .objectFit(useEnabled(this.enableObjectFit,this.objectFit))
-            .objectRepeat(useEnabled(this.enableObjectRepeat,this.objectRepeat))
-            .interpolation(useEnabled(this.enableInterpolation,this.interpolation))
-            .renderMode(useEnabled(this.enableRenderMode,this.renderMode))
+            .objectFit(useEnabled(this.enableObjectFit, this.objectFit))
+            .objectRepeat(useEnabled(this.enableObjectRepeat, this.objectRepeat))
+            .interpolation(useEnabled(this.enableInterpolation, this.interpolation))
+            .renderMode(useEnabled(this.enableRenderMode, this.renderMode))
             .sourceSize({
               width: useEnabled(this.enableImageSourceSizeWidth, this.imageSourceSizeWidth),
               height: useEnabled(this.enableImageSourceSizeHeight, this.imageSourceSizeHeight)
             })
-            .matchTextDirection(useEnabled(this.enableMatchTextDirection,this.matchTextDirection))
-            .fitOriginalSize(useEnabled(this.enableFitOriginalSize,this.fitOriginalSize))
-            .fillColor(useEnabled(this.enableFillColor,this.fillColor))
-            .autoResize(useEnabled(this.enableAutoResize,this.autoResize))
-            .syncLoad(useEnabled(this.enableSyncLoad,this.syncLoad))
-            .copyOption(useEnabled(this.enableCopyOption,this.copyOption))
-            .draggable(useEnabled(this.enableDraggable,this.eDraggable))
-            .enableAnalyzer(useEnabled(this.enableEnableAnalyzer,this.enableAnalyzer))
+            .matchTextDirection(useEnabled(this.enableMatchTextDirection, this.matchTextDirection))
+            .fitOriginalSize(useEnabled(this.enableFitOriginalSize, this.fitOriginalSize))
+            .fillColor(useEnabled(this.enableFillColor, this.fillColor))
+            .autoResize(useEnabled(this.enableAutoResize, this.autoResize))
+            .syncLoad(useEnabled(this.enableSyncLoad, this.syncLoad))
+            .copyOption(useEnabled(this.enableCopyOption, this.copyOption))
+            .draggable(useEnabled(this.enableDraggable, this.eDraggable))
+            .enableAnalyzer(useEnabled(this.enableEnableAnalyzer, this.enableAnalyzer))
             .resizable({
               slice: {
                 top: useEnabled(this.enableResizableSliceTop, this.resizableSliceTop),
@@ -768,8 +771,8 @@ export struct ImageBootcamp {
                 left: useEnabled(this.enableResizableSliceLeft, this.resizableSliceLeft)
               }
             })
-            .privacySensitive(useEnabled(this.enablePrivacySensitive,this.privacySensitive))
-            .dynamicRangeMode(useEnabled(this.enableDynamicRangeMode,this.dynamicRangeMode))
+            .privacySensitive(useEnabled(this.enablePrivacySensitive, this.privacySensitive))
+            .dynamicRangeMode(useEnabled(this.enableDynamicRangeMode, this.dynamicRangeMode))
             .width(useEnabled(this.enableCompWidth, this.compWidth))
             .height(useEnabled(this.enableCompHeight, this.compHeight))
             .padding(useEnabled(this.enableCompPadding, this.compPadding))
@@ -1193,7 +1196,7 @@ export struct ImageBootcamp {
                 this.compPixelStretchEffectOptionsBottom)
             })
             .freeze(useEnabled(this.enableCompFreeze, this.compFreeze))
-            .linearGradient( {
+            .linearGradient({
               angle: useEnabled(this.enableCompLinearGradientAngle, this.compLinearGradientAngle),
               direction: useEnabled(this.enableCompLinearGradientDirection, this.compLinearGradientDirection),
               colors: [
@@ -1411,25 +1414,26 @@ export struct ImageBootcamp {
               this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
               return HitTestMode.Default;
             })
-            .onComplete((event?:undefined)=>{
+            .onComplete((event?: undefined) => {
               this.compEventTriggeredLog('图片数据加载成功和解码成功onComplete触发，图片尺寸加载成功')
             })
-            .onError((error:ImageError)=>{
+            .onError((error: ImageError) => {
               this.compEventTriggeredLog('图片加载异常onError触发')
             })
-            .onFinish(()=>{
+            .onFinish(() => {
               this.compEventTriggeredLog('svg动效播放完成onFinish触发')
             })
 
 
         }
-        if(this.enableColorFilter){
-          Column(){
+
+        if (this.enableColorFilter) {
+          Column() {
             Text('colorFilter.example')
             Image(useEnabled(this.enableImage, this.image))
 
               .colorFilter(this.colorFilter)
-              .onClick(()=>{
+              .onClick(() => {
                 this.colorFilter = new ColorFilter(this.colorFilterMatrix);
               })
           }
@@ -1468,7 +1472,7 @@ export struct ImageBootcamp {
             { label: 'Fill', value: ImageFit.Fill },
             { label: 'ScaleDown', value: ImageFit.ScaleDown },
             { label: 'None', value: ImageFit.None },
-            { label: 'TOP_START', value: ImageFit.TOP_START},
+            { label: 'TOP_START', value: ImageFit.TOP_START },
             { label: 'TOP', value: ImageFit.TOP },
             { label: 'TOP_END', value: ImageFit.TOP_END },
             { label: 'START', value: ImageFit.START },
@@ -1686,7 +1690,7 @@ export struct ImageBootcamp {
         .fillColor($r('sys.color.ohos_id_color_fourth'))
         .height(24)
         .width(24)
-        .rotate({ angle: this.selection==str ? 90 : 0 })
+        .rotate({ angle: this.selection == str ? 90 : 0 })
         .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
     }
     .borderRadius(20)
@@ -2290,7 +2294,6 @@ export struct ImageBootcamp {
     .height('52%')
     .id('scroll')
   }
-
 }
 
 @Preview

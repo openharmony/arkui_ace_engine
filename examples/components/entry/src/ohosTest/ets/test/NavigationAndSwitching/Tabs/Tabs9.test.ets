@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { describe, beforeAll, it} from '@ohos/hypium'
+import { describe, beforeAll, it } from '@ohos/hypium'
 import {
   buttonClick,
   JsonType,
@@ -27,8 +27,8 @@ import {
 } from '../../../utils';
 import { TabsStart } from './Tabs';
 
-export default function Tabs7() {
-  describe('Tabs7', () => {
+export default function Tabs9() {
+  describe('Tabs9', () => {
     /**
      * 打开应用
      */

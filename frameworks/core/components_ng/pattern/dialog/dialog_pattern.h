@@ -69,7 +69,7 @@ public:
 
     bool ShouldDismiss() const
     {
-        if (onWillDismiss_) {
+        if (onWillDismiss_ && !isDialogDisposed_) {
             return true;
         }
         return false;
@@ -90,7 +90,7 @@ public:
 
     void CallOnWillDismiss(const int32_t reason, const int32_t instanceId)
     {
-        if (onWillDismiss_) {
+        if (onWillDismiss_ && !isDialogDisposed_) {
             onWillDismiss_(reason, instanceId);
         }
     }
@@ -311,13 +311,50 @@ public:
         return true;
     }
 
+    void SetIsDialogDisposed(bool isDialogDisposed)
+    {
+        isDialogDisposed_ = isDialogDisposed;
+    }
+
     bool IsShowInFreeMultiWindow();
     bool IsWaterfallWindowMode();
     bool IsShowInFloatingWindow();
     void AddExtraMaskNode(const DialogProperties& props);
 
+    int32_t getTransitionNodeCount()
+    {
+        return transitionNodeCount_;
+    }
+
+    void addTransitionNodeCount()
+    {
+        transitionNodeCount_++;
+    }
+
     void OverlayDismissDialog(const RefPtr<FrameNode>& dialogNode);
     RefPtr<OverlayManager> GetEmbeddedOverlay(const RefPtr<OverlayManager>& context);
+    void MountUECMask();
+    void CloseDialog();
+    void CloseDialogByEvent(DialogDismissReason reason = DialogDismissReason::DIALOG_TOUCH_OUTSIDE);
+    void SetUECHostMaskInfo(UECHostMaskInfo maskInfo)
+    {
+        hostMaskInfo_ = maskInfo;
+    }
+
+    UECHostMaskInfo GetUECHostMaskInfo()
+    {
+        return hostMaskInfo_;
+    }
+
+    void SetUECMaskNode(const RefPtr<FrameNode>& dialogNode)
+    {
+        uecMaskNode_ = dialogNode;
+    }
+
+    const RefPtr<FrameNode> GetUECMaskNode()
+    {
+        return uecMaskNode_.Upgrade();
+    }
 
 private:
     bool AvoidKeyboard() const override
@@ -380,6 +417,8 @@ private:
     void UpdateButtonsPropertyForEachButton(RefPtr<FrameNode> buttonFrameNode, int32_t btnindex);
     void UpdateButtonsProperty();
     void UpdateNodeContent(const RefPtr<FrameNode>& node, std::string& text);
+    void UpdateTitleAndContentColor();
+    void UpdateDialogTextColor(const RefPtr<FrameNode>& textNode, const TextStyle& textStyle);
     void UpdateAlignmentAndOffset();
     void DumpBoolProperty();
     void DumpBoolProperty(std::unique_ptr<JsonValue>& json);
@@ -397,6 +436,7 @@ private:
     void CheckScrollHeightIsNegative(const RefPtr<UINode>& contentColumn, const DialogProperties& props);
     RefPtr<OverlayManager> GetOverlayManager(const RefPtr<FrameNode>& host);
     void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;
@@ -428,6 +468,7 @@ private:
     float fontScaleForElderly_ = 1.0f;
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
     RefPtr<FrameNode> titleContainer_;
+    int32_t transitionNodeCount_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogPattern);
 
@@ -437,7 +478,10 @@ private:
     std::function<void()> onWillDisappearCallback_ = nullptr;
     std::unordered_map<DialogContentNode, RefPtr<FrameNode>> contentNodeMap_;
     bool isUIExtensionSubWindow_ = false;
+    bool isDialogDisposed_ = false;
     RectF hostWindowRect_;
+    UECHostMaskInfo hostMaskInfo_;
+    WeakPtr<FrameNode> uecMaskNode_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -18,6 +18,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components/button/button_theme.h"
@@ -123,7 +124,7 @@ void UpdateTextProperties(const RefPtr<PopupParam>& param, const RefPtr<TextLayo
 
 void SetHitTestMode(RefPtr<FrameNode>& popupNode, bool isBlockEvent)
 {
-    auto hub = popupNode->GetEventHub<BubbleEventHub>();
+    auto hub = popupNode->GetOrCreateEventHub<BubbleEventHub>();
     if (hub) {
         auto ges = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(ges);
@@ -170,7 +171,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
     auto useCustom = param->IsUseCustom();
 
     // onstateChange.
-    auto bubbleHub = popupNode->GetEventHub<BubbleEventHub>();
+    auto bubbleHub = popupNode->GetOrCreateEventHub<BubbleEventHub>();
     if (bubbleHub) {
         bubbleHub->SetOnStateChange(param->GetOnStateChange());
     }
@@ -324,18 +325,15 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
     auto renderContext = child->GetRenderContext();
     if (renderContext) {
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-            IsSupportBlurStyle(renderContext, param->IsShowInSubWindow())) {
+            IsSupportBlurStyle(renderContext, param->IsShowInSubWindow(), param->IsTips())) {
             auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(popupTheme->GetDefaultBGColor());
             renderContext->UpdateBackgroundColor(backgroundColor);
             BlurStyleOption styleOption;
-            if (param->IsTips() && param->EnableArrow()) {
-                styleOption.blurStyle = static_cast<BlurStyle>(static_cast<int>(BlurStyle::BACKGROUND_REGULAR));
-            } else if (param->IsTips() && !(param->EnableArrow())) {
-                styleOption.blurStyle = static_cast<BlurStyle>(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
+            if (param->IsTips()) {
+                styleOption.blurStyle = BlurStyle::COMPONENT_REGULAR;
             } else {
                 styleOption.blurStyle = param->GetBlurStyle();
             }
-            styleOption.blurStyle = param->GetBlurStyle();
             styleOption.colorMode = static_cast<ThemeColorMode>(popupTheme->GetBgThemeColorMode());
             renderContext->UpdateBackBlurStyle(styleOption);
         } else {
@@ -366,7 +364,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
     auto popupNode =
         FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
-    auto bubbleHub = popupNode->GetEventHub<BubbleEventHub>();
+    auto bubbleHub = popupNode->GetOrCreateEventHub<BubbleEventHub>();
     if (bubbleHub) {
         bubbleHub->SetOnStateChange(param->GetOnStateChange());
     }
@@ -445,7 +443,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
         auto popupTheme = GetPopupTheme();
         CHECK_NULL_RETURN(popupTheme, nullptr);
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-            IsSupportBlurStyle(columnRenderContext, param->IsShowInSubWindow())) {
+            IsSupportBlurStyle(columnRenderContext, param->IsShowInSubWindow(), param->IsTips())) {
             auto backgroundColor = popupPaintProps->GetBackgroundColor().value_or(popupTheme->GetDefaultBGColor());
             columnRenderContext->UpdateBackgroundColor(backgroundColor);
             BlurStyleOption styleOption;
@@ -672,7 +670,7 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
 {
     auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupId);
     CHECK_NULL_VOID(popupNode);
-    auto bubbleHub = popupNode->GetEventHub<BubbleEventHub>();
+    auto bubbleHub = popupNode->GetOrCreateEventHub<BubbleEventHub>();
     if (bubbleHub && (!(param->GetIsPartialUpdate().has_value()))) {
         bubbleHub->SetOnStateChange(param->GetOnStateChange());
     }
@@ -745,17 +743,25 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
         auto popupTheme = GetPopupTheme();
         CHECK_NULL_VOID(popupTheme);
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-            IsSupportBlurStyle(renderContext, param->IsShowInSubWindow())) {
+            IsSupportBlurStyle(renderContext, param->IsShowInSubWindow(), param->IsTips())) {
             auto defaultBGcolor = popupTheme->GetDefaultBGColor();
             auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(defaultBGcolor);
             renderContext->UpdateBackgroundColor(backgroundColor);
             BlurStyleOption styleOption;
-            styleOption.blurStyle = param->GetBlurStyle();
+            if (param->IsTips()) {
+                styleOption.blurStyle = BlurStyle::COMPONENT_REGULAR;
+            } else {
+                styleOption.blurStyle = param->GetBlurStyle();
+            }
             styleOption.colorMode = static_cast<ThemeColorMode>(popupTheme->GetBgThemeColorMode());
             renderContext->UpdateBackBlurStyle(styleOption);
         } else {
             renderContext->UpdateBackgroundColor(
                 popupPaintProp->GetBackgroundColor().value_or(popupTheme->GetBackgroundColor()));
+        }
+        if (param->IsTips()) {
+            auto shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultSM);
+            renderContext->UpdateBackShadow(shadow);
         }
     }
     RefPtr<BubblePattern> bubblePattern = popupNode->GetPattern<BubblePattern>();
@@ -1121,8 +1127,11 @@ RefPtr<FrameNode> BubbleView::CreateButton(ButtonProperties& buttonParam, int32_
     return buttonNode;
 }
 
-bool BubbleView::IsSupportBlurStyle(RefPtr<RenderContext>& renderContext, bool isShowInSubWindow)
+bool BubbleView::IsSupportBlurStyle(RefPtr<RenderContext>& renderContext, bool isShowInSubWindow, bool isTips)
 {
+    if (isTips) {
+        return true;
+    }
     if (isShowInSubWindow) {
         return renderContext->IsUniRenderEnabled();
     }

@@ -1867,6 +1867,6 @@ export default function TextTimer3() {
       await searchParentBlock('transform', false, '基础属性', '通用属性1')
       done();
     })
-    })
+  })
 
 }

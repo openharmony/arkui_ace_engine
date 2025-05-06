@@ -1,13 +1,7 @@
 import { describe, beforeAll, beforeEach, afterEach, afterAll, it, expect } from '@ohos/hypium'
 import { abilityDelegatorRegistry, Component, Driver, ON } from '@kit.TestKit';
 
-import {
-  radioClick,
-  Slide,
-  sliderDrag,
-  ToggleClick,
-  titleSearch,
-} from '../../utils';
+import { radioClick, Slide, sliderDrag, ToggleClick, titleSearch, } from '../../utils';
 import { Point } from '@ohos.UiTest';
 
 
@@ -314,7 +308,7 @@ export default function AdvancedCounterBootcampTest() {
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
-          toggleClickObj:'year'
+          toggleClickObj: 'year'
         },
       })
 
@@ -322,7 +316,7 @@ export default function AdvancedCounterBootcampTest() {
         slideStar: Slide.end,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
-          toggleClickObj:'year'
+          toggleClickObj: 'year'
         },
       })
 
@@ -339,7 +333,7 @@ export default function AdvancedCounterBootcampTest() {
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
-          toggleClickObj:'month'
+          toggleClickObj: 'month'
         },
       })
 
@@ -347,7 +341,7 @@ export default function AdvancedCounterBootcampTest() {
         slideStar: Slide.end,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
-          toggleClickObj:'month'
+          toggleClickObj: 'month'
         },
       })
 
@@ -364,7 +358,7 @@ export default function AdvancedCounterBootcampTest() {
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
-          toggleClickObj:'day'
+          toggleClickObj: 'day'
         },
       })
 
@@ -372,15 +366,13 @@ export default function AdvancedCounterBootcampTest() {
         slideStar: Slide.end,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
-          toggleClickObj:'day'
+          toggleClickObj: 'day'
         },
       })
 
       done();
 
     })
-
-
 
 
   })

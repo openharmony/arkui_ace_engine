@@ -31,9 +31,10 @@ struct Rect;
 namespace Ace {
 class TextShareInterface {
 public:
-    virtual int32_t StartUpShareFunc(const std::shared_ptr<AbilityRuntime::Context> &context,
-        const Rosen::Rect &anchorRect, const std::string &windowName,
-        const std::string &textContent) = 0;
+    virtual int32_t StartUpShareFunc(const std::shared_ptr<AbilityRuntime::Context>& context,
+        const Rosen::Rect& anchorRect, const std::string& windowName,
+        const std::string& textContent) = 0;
+    virtual uint64_t GetMaxTextLength() = 0;
 
 protected:
     virtual ~TextShareInterface() {}

@@ -14,13 +14,18 @@
  */
 import { describe, beforeAll, it } from '@ohos/hypium'
 import { Component, Driver, ON } from '@kit.TestKit';
-import { buttonClick,
-  JsonType, KeyStruct, radioClick,
+import {
+  buttonClick,
+  JsonType,
+  KeyStruct,
+  radioClick,
   searchParentBlock,
-  Slide, sliderDrag,
+  Slide,
+  sliderDrag,
   titleSearch,
   Search,
-  ToggleClick } from '../../../utils';
+  ToggleClick
+} from '../../../utils';
 import { CheckboxStart } from './Checkbox';
 
 /*初始化与UI元素交互的驱动对象*/

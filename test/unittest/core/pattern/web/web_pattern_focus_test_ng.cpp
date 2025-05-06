@@ -250,7 +250,7 @@ public:
         return false;
     }
     void OnScrollStartCallback() override {}
-    void FireOnScrollStart() override {}
+    void FireOnScrollStart(bool withPerfMonitor) override {}
     void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override {}
     void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override {}
 
@@ -527,9 +527,8 @@ HWTEST_F(WebPatternFocusTestNg, OnAccessibilityHoverEvent, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     PointF point(20.0f, 100.0f);
-    bool web = webPattern->OnAccessibilityHoverEvent(point);
+    webPattern->OnAccessibilityHoverEvent(point, true);
     ASSERT_NE(webPattern->delegate_, nullptr);
-    ASSERT_FALSE(web);
 #endif
 }
 

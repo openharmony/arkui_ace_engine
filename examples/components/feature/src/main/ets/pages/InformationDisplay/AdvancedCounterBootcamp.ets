@@ -46,7 +46,6 @@ export struct AdvancedCounterBootcamp {
   //compEvent
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
-
   @State selection: string | null = null;
   scroller: Scroller = new Scroller()
 
@@ -115,7 +114,7 @@ export struct AdvancedCounterBootcamp {
               focusable: useEnabled(this.enabledFocusable, this.counterFocusable),
               onFocusIncrease: () => {
                 this.compEventTriggeredLog('onFocusIncrease,当前Counter组件增加按钮获取焦点时触发的回调');
-                console.log('11111','asd');
+                console.log('11111', 'asd');
               },
               onFocusDecrease: () => {
                 this.compEventTriggeredLog('onFocusDecrease,当前Counter组件减小按钮获取焦点时触发的回调');

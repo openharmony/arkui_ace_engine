@@ -67,12 +67,16 @@ public:
     }
 
     void ChangeIndex(const JSCallbackInfo& args);
+
     void SetController(const RefPtr<NG::IndicatorController>& controller, RefPtr<NG::FrameNode>& indicatorNode)
     {
-        auto resetFunc = [wp = WeakClaim(this)]() {
+        auto resetFunc = [wp = WeakClaim(this), indicatorNode]() {
             auto JSController = wp.Upgrade();
             if (JSController) {
-                JSController->controller_ = nullptr;
+                auto host = JSController->controller_.Upgrade()->GetIndicatorNode();
+                if (host == indicatorNode) {
+                    JSController->controller_ = nullptr;
+                }
             }
         };
         if (controller_.Upgrade()) {
@@ -92,13 +96,19 @@ public:
     {
         if (controller_.Upgrade()) {
             controller_.Upgrade()->SetSwiperNode(node);
+            controller_.Upgrade()->UpdateIndicatorNode();
         }
         if (node != swiperNode_) {
             swiperNode_ = node;
-            return [wp = WeakClaim(this)]() {
+            return [wp = WeakClaim(this), node]() {
                 auto JSController = wp.Upgrade();
                 if (JSController) {
-                    JSController->swiperNode_ = nullptr;
+                    if (node == JSController->swiperNode_) {
+                        JSController->swiperNode_ = nullptr;
+                    }
+                    auto controller = JSController->controller_.Upgrade();
+                    CHECK_NULL_VOID(controller);
+                    controller->UpdateIndicatorNode();
                 }
             };
         }

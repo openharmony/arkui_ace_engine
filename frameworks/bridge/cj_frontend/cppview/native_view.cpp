@@ -60,6 +60,13 @@ RefPtr<AceType> NativeView::CreateUI()
             ContainerScope scope(self->instanceId_);
             self->cjView_->OnAppear();
         },
+        .didBuildFunc =
+            [weakThis]() {
+                auto self = weakThis.promote();
+                CHECK_NULL_VOID(self);
+                ContainerScope scope(self->instanceId_);
+                self->cjView_->OnDidBuild();
+            },
         .renderFunc = [weakThis](int64_t deadline, bool& isTimeout) -> RefPtr<AceType> {
             auto self = weakThis.promote();
             CHECK_NULL_RETURN(self, nullptr);
@@ -97,36 +104,12 @@ RefPtr<AceType> NativeView::CreateUI()
             ContainerScope scope(self->instanceId_);
             self->cjView_->Reload(deep);
         },
-        .didBuildFunc =
-            [weakThis]() {
-                auto self = weakThis.promote();
-                CHECK_NULL_VOID(self);
-                ContainerScope scope(self->instanceId_);
-                self->cjView_->OnDidBuild();
-            },
         .completeReloadFunc = [weakThis](int64_t deadline, bool& isTimeout) -> RefPtr<AceType> {
             auto view = weakThis.promote();
             CHECK_NULL_RETURN(view, nullptr);
             ContainerScope scope(view->instanceId_);
             return view->InitialUIRender();
         },
-        .recycleFunc =
-            [weakThis]() {
-                auto self = weakThis.promote();
-                CHECK_NULL_VOID(self);
-                ContainerScope scope(self->instanceId_);
-                self->cjView_->AboutToRecycle();
-            },
-        .reuseFunc =
-            [weakThis](void* params) {
-                auto self = weakThis.promote();
-                CHECK_NULL_VOID(self);
-                ContainerScope scope(self->instanceId_);
-                // only support string yet in cj
-                std::string* val = static_cast<std::string*>(params);
-                CHECK_NULL_VOID(val);
-                self->cjView_->AboutToReuse(*val);
-            },
         .recycleCustomNodeFunc = [weakThis](const RefPtr<NG::CustomNodeBase>& recycleNode) -> void {
             auto self = weakThis.promote();
             CHECK_NULL_VOID(self);
@@ -145,6 +128,23 @@ RefPtr<AceType> NativeView::CreateUI()
             }
             recycleNode->ResetRecycle();
         },
+        .recycleFunc =
+            [weakThis]() {
+                auto self = weakThis.promote();
+                CHECK_NULL_VOID(self);
+                ContainerScope scope(self->instanceId_);
+                self->cjView_->AboutToRecycle();
+            },
+        .reuseFunc =
+            [weakThis](void* params) {
+                auto self = weakThis.promote();
+                CHECK_NULL_VOID(self);
+                ContainerScope scope(self->instanceId_);
+                // only support string yet in cj
+                std::string* val = static_cast<std::string*>(params);
+                CHECK_NULL_VOID(val);
+                self->cjView_->AboutToReuse(*val);
+            },
     };
     auto node = ViewPartialUpdateModel::GetInstance()->CreateNode(std::move(partialUpdateCallbacks));
     node_ = node;

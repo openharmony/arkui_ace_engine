@@ -1147,6 +1147,12 @@ let RichEditorResponseType;
   RichEditorResponseType[RichEditorResponseType.DEFAULT = 3] = 'DEFAULT';
 })(RichEditorResponseType || (RichEditorResponseType = {}));
 
+let UndoStyle;
+(function (UndoStyle) {
+  UndoStyle[UndoStyle.CLEAR_STYLE = 0] = 'CLEAR_STYLE';
+  UndoStyle[UndoStyle.KEEP_STYLE = 1] = 'KEEP_STYLE';
+})(UndoStyle || (UndoStyle = {}));
+
 let MenuType;
 (function (MenuType) {
   MenuType[MenuType.SELECTION_MENU = 0] = 'SELECTION_MENU';
@@ -3933,3 +3939,10 @@ let RichEditorDeleteDirection;
   RichEditorDeleteDirection[RichEditorDeleteDirection.BACKWARD = 0] = 'BACKWARD';
   RichEditorDeleteDirection[RichEditorDeleteDirection.FORWARD = 1] = 'FORWARD';
 })(RichEditorDeleteDirection || (RichEditorDeleteDirection = {}));
+
+let InteractionHand;
+(function (InteractionHand) {
+  InteractionHand[InteractionHand.NONE = 0] = 'NONE';
+  InteractionHand[InteractionHand.LEFT = 1] = 'LEFT';
+  InteractionHand[InteractionHand.RIGHT = 2] = 'RIGHT';
+})(InteractionHand || (InteractionHand = {}));

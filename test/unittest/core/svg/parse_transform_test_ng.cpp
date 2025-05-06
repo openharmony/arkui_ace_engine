@@ -72,9 +72,9 @@
 #include "core/components_ng/svg/parse/svg_stop.h"
 #include "core/components_ng/svg/parse/svg_style.h"
 #include "core/components_ng/svg/parse/svg_svg.h"
+#include "core/components_ng/svg/parse/svg_transform.h"
 #include "core/components_ng/svg/parse/svg_use.h"
 #include "core/components_ng/svg/svg_dom.h"
-#include "core/components_ng/svg/parse/svg_transform.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -93,6 +93,13 @@ const std::string TRANSFORM_SCALE_SVG_LABEL =
     "<rect x=\"60px\" y=\"200px\" width=\"50px\" height=\"50px\" fill=\"red\" opacity=\"0.5\" stroke=\"blue\" "
     "stroke-width=\"1\" stroke-opacity=\"0.3\" id=\"circleId\" transform=\"scale(0.8, 0.8)\" "
     "transform-origin=\"123.45px 99.99%\"/></svg>";
+
+const std::string ERROR_SVG =
+    "2224676..m,n<1111svg width=\"400px\" height=\"400px\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\">"
+    "<rect x=\"60px\" y=\"200px\" width=\"50px\" height=\"50px\" fill=\"red\" opacity=\"0.5\" stroke=\"blue\" "
+    "stroke-width=\"1\" stroke-opacity=\"0.3\" id=\"circleId\" transform=\"scale(0.8, 0.8)\" "
+    "transform-origin=\"123.45px 99.99%\"/></svg>"
+    "transform-origin=\"123.45px 99.99%\"/></svg22233tt766gfhgh////000";
 
 const std::string TRANSFORM_SKEW_SVG_LABEL =
     "<svg width=\"400px\" height=\"400px\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\">"
@@ -636,7 +643,7 @@ HWTEST_F(SvgTransformTestNg, ApplyTransformTest002, TestSize.Level1)
     Testing::TestingPath rSPath;
     std::vector<std::string> paramVec;
     paramVec.push_back("100");
-    NG::TransformInfo transformInfo {"translate", paramVec};
+    NG::TransformInfo transformInfo { "translate", paramVec };
     svgNode->attributes_.transformVec.push_back(transformInfo);
     svgNode->ApplyTransform(rSPath, rule);
 }
@@ -660,6 +667,37 @@ HWTEST_F(SvgTransformTestNg, SvgFeOffsetTest001, TestSize.Level1)
     feOffset->filterContext_.primitiveRule_.lengthScaleUnit_ = SvgLengthScaleUnit::USER_SPACE_ON_USE;
     feOffset->OnAsImageFilter(imageFilter, srcColor, currentColor, resultHash, true);
     EXPECT_NE(imageFilter, nullptr);
+}
+
+/**
+ * @tc.name: animationTest
+ * @tc.desc: Verify the property animation process for type double
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, SvgFeOffsetTest002, TestSize.Level1)
+{
+    auto svgFeOffset = AceType::DynamicCast<SvgFeOffset>(SvgFeOffset::Create());
+    EXPECT_NE(svgFeOffset, nullptr);
+
+    std::shared_ptr<RSImageFilter> imageFilter = nullptr;
+    SvgColorInterpolationType type = SvgColorInterpolationType::SRGB;
+    SvgColorInterpolationType colorInterpolationType = SvgColorInterpolationType::SRGB;
+    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>> resultHash;
+    Rect rect(10, 10, 50, 50);
+    Size size(80, 80);
+    SvgLengthScaleRule rule(rect, size, SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    svgFeOffset->GetFilterContext().SetPrimitiveRule(rule);
+    svgFeOffset->OnAsImageFilter(imageFilter, type, colorInterpolationType, resultHash, true);
+    auto res = svgFeOffset->ParseAndSetSpecializedAttr("dx", "1");
+    EXPECT_TRUE(res);
+
+    Rect rect1(10, 10, 50, 50);
+    Size size1(80, 80);
+    SvgLengthScaleRule rule1(rect1, size1, SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
+    svgFeOffset->GetFilterContext().SetPrimitiveRule(rule1);
+    svgFeOffset->OnAsImageFilter(imageFilter, type, colorInterpolationType, resultHash, true);
+    res = svgFeOffset->ParseAndSetSpecializedAttr("dx", "1");
+    EXPECT_TRUE(res);
 }
 
 /**
@@ -1126,5 +1164,697 @@ HWTEST_F(SvgTransformTestNg, SvgAnimationTest004, TestSize.Level1)
     animation->calcMode_ = static_cast<CalcMode>(100);
     animation->CreatePropertyAnimation<double>(19.0f, callback);
     EXPECT_NE(animation->animator_, nullptr);
+}
+
+/**
+ * @tc.name: ParseTransformTestScale
+ * @tc.desc: parse transform-origin label
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, SvgDomTest001, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(ERROR_SVG.c_str(), ERROR_SVG.length());
+    EXPECT_NE(svgStream, nullptr);
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    EXPECT_EQ(svgDom, nullptr);
+}
+
+/**
+ * @tc.name: animationTest
+ * @tc.desc: Verify the property animation process for type double
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, SvgUseTest001, TestSize.Level1)
+{
+    auto svgUse = AceType::DynamicCast<SvgUse>(SvgUse::Create());
+    EXPECT_NE(svgUse, nullptr);
+
+    svgUse->useAttr_.x = 1.0_px;
+    svgUse->useAttr_.y = 2.0_px;
+
+    svgUse->OnInitStyle();
+    EXPECT_EQ(svgUse->useOffsetX_, 1.0);
+    EXPECT_EQ(svgUse->useOffsetY_, 2.0);
+}
+
+/**
+ * @tc.name: animationTest
+ * @tc.desc: Verify the property animation process for type double
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, SvgUseTest002, TestSize.Level1)
+{
+    auto svgUse = AceType::DynamicCast<SvgUse>(SvgUse::Create());
+    EXPECT_NE(svgUse, nullptr);
+
+    Rect rect(10, 10, 50, 50);
+    Size size(80, 80);
+    SvgLengthScaleRule rule(rect, size, SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    svgUse->SetContext(svgContext);
+    auto path = svgUse->AsPath(rule);
+    EXPECT_TRUE(path.BuildFromSVGString(""));
+
+    svgUse->attributes_.href = "href";
+    svgUse->isDrawingPath_ = false;
+    path = svgUse->AsPath(rule);
+    EXPECT_TRUE(path.BuildFromSVGString(""));
+
+    svgUse->attributes_.href = "href";
+    svgUse->isDrawingPath_ = true;
+    path = svgUse->AsPath(rule);
+    EXPECT_TRUE(path.BuildFromSVGString(""));
+
+    auto svgPattern = AceType::MakeRefPtr<SvgPattern>();
+    EXPECT_NE(svgPattern, nullptr);
+    svgContext->Push("href", svgPattern);
+    svgUse->SetContext(svgContext);
+    path = svgUse->AsPath(rule);
+    EXPECT_TRUE(path.BuildFromSVGString(""));
+}
+
+/**
+ * @tc.name: SvgGTest001
+ * @tc.desc: parse polygon and polyline label
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, SvgUseTest003, TestSize.Level1)
+{
+    auto svgUse = AceType::DynamicCast<SvgUse>(SvgUse::Create());
+    EXPECT_NE(svgUse, nullptr);
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    svgUse->SetContext(svgContext);
+
+    SvgLengthScaleRule lengthRule;
+    RSCanvas canvas;
+    svgUse->attributes_.hasOpacity = false;
+    svgUse->ApplyOpacity(canvas);
+
+    svgUse->attributes_.hasOpacity = true;
+    svgUse->ApplyOpacity(canvas);
+    svgUse->attributes_.href = "";
+    svgUse->OnDraw(canvas, lengthRule);
+    svgUse->attributes_.href = "href";
+
+    auto svgPattern = AceType::MakeRefPtr<SvgPattern>();
+    EXPECT_NE(svgPattern, nullptr);
+    svgContext->Push("href", svgPattern);
+    svgUse->useAttr_.x = 0.0_px;
+    svgUse->useAttr_.y = 0.0_px;
+    Size size;
+    auto result = svgUse->AsPath(size);
+    EXPECT_TRUE(result.BuildFromSVGString(""));
+    result = svgUse->AsPath(lengthRule);
+    EXPECT_TRUE(result.BuildFromSVGString(""));
+}
+
+/**
+ * @tc.name: SvgGTest001
+ * @tc.desc: parse polygon and polyline label
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, SvgUseTest004, TestSize.Level1)
+{
+    auto svgUse = AceType::DynamicCast<SvgUse>(SvgUse::Create());
+    EXPECT_NE(svgUse, nullptr);
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    svgUse->SetContext(svgContext);
+    SvgLengthScaleRule lengthRule;
+    RSCanvas canvas;
+    svgUse->attributes_.href = "";
+    svgUse->OnDraw(canvas, lengthRule);
+    svgUse->attributes_.href = "href";
+
+    auto svgPattern = AceType::MakeRefPtr<SvgPattern>();
+    EXPECT_NE(svgPattern, nullptr);
+    svgContext->Push("href", svgPattern);
+    svgUse->useAttr_.x = 0.0_px;
+    svgUse->useAttr_.y = 0.0_px;
+    svgUse->SetContext(svgContext);
+    svgUse->OnDraw(canvas, lengthRule);
+
+    svgUse->useAttr_.x = 1.0_px;
+    svgUse->useAttr_.y = 0.0_px;
+    svgUse->OnDraw(canvas, lengthRule);
+
+    svgUse->useAttr_.x = 0.0_px;
+    svgUse->useAttr_.y = 1.0_px;
+    svgUse->OnDraw(canvas, lengthRule);
+
+    svgUse->useAttr_.x = 1.0_px;
+    svgUse->useAttr_.y = 10.0_px;
+    svgUse->OnDraw(canvas, lengthRule);
+    EXPECT_FALSE(lengthRule.GetPathTransform());
+    auto res = svgUse->ParseAndSetSpecializedAttr("automirror", "true");
+    EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: ParseTransformOriginInvalidTest002
+ * @tc.desc: parse transform-origin label
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, SvgFeBlendTest002, TestSize.Level1)
+{
+    auto feBlend = AceType::DynamicCast<SvgFeBlend>(SvgFeBlend::Create());
+    EXPECT_NE(feBlend, nullptr);
+    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>> resultHash;
+    std::shared_ptr<RSImageFilter> imageFilter = nullptr;
+    SvgColorInterpolationType srcColor = SvgColorInterpolationType::SRGB;
+    SvgColorInterpolationType currentColor = SvgColorInterpolationType::LINEAR_RGB;
+    feBlend->filterContext_.primitiveRule_.lengthScaleUnit_ = SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
+    feBlend->OnAsImageFilter(imageFilter, srcColor, currentColor, resultHash, true);
+
+    feBlend->filterContext_.primitiveRule_.lengthScaleUnit_ = SvgLengthScaleUnit::USER_SPACE_ON_USE;
+    feBlend->OnAsImageFilter(imageFilter, srcColor, currentColor, resultHash, true);
+    EXPECT_NE(imageFilter, nullptr);
+}
+
+/**
+ * @tc.name: ParseTransformOriginInvalidTest002
+ * @tc.desc: parse transform-origin label
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, SvgClipPathTest001, TestSize.Level1)
+{
+    auto svgClipPath = AceType::DynamicCast<SvgClipPath>(SvgClipPath::Create());
+    EXPECT_NE(svgClipPath, nullptr);
+    RefPtr<SvgNode> svgNode2 = SvgPattern::Create();
+    svgNode2->drawTraversed_ = false;
+    RefPtr<SvgNode> svgNode3 = SvgPattern::Create();
+    svgNode3->drawTraversed_ = true;
+    svgClipPath->children_.emplace_back(svgNode2);
+    svgClipPath->children_.emplace_back(svgNode3);
+    Rect rect(10, 10, 50, 50);
+    Size size(80, 80);
+    SvgLengthScaleRule rule(rect, size, SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    svgClipPath->attributes_.clipState.SetClipRule(SvgRuleType::SVG_RULE_EVENODD);
+    auto path = svgClipPath->AsPath(rule);
+    EXPECT_TRUE(path.BuildFromSVGString(""));
+
+    svgClipPath->attributes_.clipState.SetClipRule(SvgRuleType::SVG_RULE_NONEZERO);
+    path = svgClipPath->AsPath(rule);
+    EXPECT_TRUE(path.BuildFromSVGString(""));
+}
+
+/**
+ * @tc.name: ParseTransformOriginInvalidTest002
+ * @tc.desc: parse transform-origin label
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, SvgImageTest002, TestSize.Level1)
+{
+    auto svgImage = AceType::DynamicCast<SvgImage>(SvgImage::Create());
+    EXPECT_NE(svgImage, nullptr);
+    RSCanvas canvas;
+    Rect rect(10, 10, 50, 50);
+    Size size(80, 80);
+    SvgLengthScaleRule rule(rect, size, SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    svgImage->imageAttr_.href = "";
+    svgImage->OnDraw(canvas, rule);
+    svgImage->imageAttr_.href = "href";
+    svgImage->imageAttr_.x = 0.0_px;
+    svgImage->imageAttr_.y = 0.0_px;
+    svgImage->OnDraw(canvas, rule);
+
+    svgImage->imageAttr_.x = 0.0_px;
+    svgImage->imageAttr_.y = 1.0_px;
+    svgImage->OnDraw(canvas, rule);
+
+    svgImage->imageAttr_.x = 1.0_px;
+    svgImage->imageAttr_.y = 0.0_px;
+    svgImage->OnDraw(canvas, rule);
+
+    svgImage->imageAttr_.x = 1.0_px;
+    svgImage->imageAttr_.y = 10.0_px;
+    svgImage->OnDraw(canvas, rule);
+
+    svgImage->imageAttr_.href = "http://href";
+    svgImage->OnDraw(canvas, rule);
+
+    svgImage->imageAttr_.href = "https://href";
+    svgImage->OnDraw(canvas, rule);
+
+    svgImage->imageAttr_.href = "data:image/jpeg;base64";
+    svgImage->OnDraw(canvas, rule);
+    auto path = svgImage->AsPath(rule);
+    EXPECT_TRUE(path.BuildFromSVGString(""));
+    auto res = svgImage->ParseAndSetSpecializedAttr("xlink:href", "https://www.bilibili.com");
+    EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: CalcDstRect001
+ * @tc.desc: test function of SvgImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, SvgImageTest003, TestSize.Level1)
+{
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    auto svgImage = AceType::DynamicCast<SvgImage>(SvgImage::Create());
+    EXPECT_NE(svgImage, nullptr);
+    Size realSize(0.0f, 0.0f);
+    Rect viewBox(10.0f, 10.0f, 100.0f, 100.0f);
+    RSRect ret = svgImage->CalcDstRect(realSize, viewBox);
+    realSize.SetSize(Size(0.0f, 1.0f));
+    ret = svgImage->CalcDstRect(realSize, viewBox);
+    realSize.SetSize(Size(1.0f, 0.0f));
+    ret = svgImage->CalcDstRect(realSize, viewBox);
+    realSize.SetSize(Size(1.0f, 1.0f));
+    ret = svgImage->CalcDstRect(realSize, viewBox);
+    EXPECT_NE(ret.left_, 0.0f);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: CalcDstRect001
+ * @tc.desc: test function of SvgImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, SvgNodeTest001, TestSize.Level1)
+{
+    auto svgNode = AceType::MakeRefPtr<SvgNode>();
+    EXPECT_NE(svgNode, nullptr);
+    svgNode->SetAttr("clipPathUnits", "objectBoundingBox");
+    EXPECT_EQ(svgNode->attributes_.clipState.GetClipPathUnits(), SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
+    svgNode->SetAttr("clipPathUnits", "objectBoundingBox222");
+    EXPECT_EQ(svgNode->attributes_.clipState.GetClipPathUnits(), SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    svgNode->SetAttr("stroke", "objectBoundingBox222");
+    svgNode->SetAttr("transform", "(aaa(bbb)ccc)");
+    EXPECT_EQ(svgNode->attributes_.transform, "(aaa(bbb)ccc)");
+    svgNode->SetAttr("transform", "aaa(bbb)ccc)");
+    EXPECT_EQ(svgNode->attributes_.transform, "aaa(bbb)ccc)");
+    svgNode->SetAttr("transform", "");
+    EXPECT_EQ(svgNode->attributes_.transform, "");
+    svgNode->SetAttr("transform", "33432423");
+    EXPECT_EQ(svgNode->attributes_.transform, "33432423");
+    svgNode->SetAttr("transform", "412sfdsfdgdfcccc((()))");
+    EXPECT_EQ(svgNode->attributes_.transform, "412sfdsfdgdfcccc((()))");
+}
+
+/**
+ * @tc.name: CalcDstRect001
+ * @tc.desc: test function of SvgImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, SvgNodeTest002, TestSize.Level1)
+{
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    auto svgNode = AceType::MakeRefPtr<SvgNode>();
+    EXPECT_NE(svgNode, nullptr);
+    svgNode->SetAttr("clipPathUnits", "objectBoundingBox");
+    EXPECT_EQ(svgNode->attributes_.clipState.GetClipPathUnits(), SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
+    svgNode->SetAttr("clipPathUnits", "objectBoundingBox222");
+    EXPECT_EQ(svgNode->attributes_.clipState.GetClipPathUnits(), SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    svgNode->SetAttr("stroke", "url(https://www.baidu.com)");
+    svgNode->SetAttr("stroke", "aliceblue");
+    svgNode->SetAttr("stroke", "none");
+    EXPECT_EQ(svgNode->attributes_.strokeState.GetHref(), "url(https://www.baidu.com)");
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: CalcDstRect001
+ * @tc.desc: test function of SvgImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, SvgNodeTest003, TestSize.Level1)
+{
+    auto svgNode = AceType::MakeRefPtr<SvgNode>();
+    EXPECT_NE(svgNode, nullptr);
+    SvgBaseAttribute attr;
+    svgNode->InitStyleDfs(nullptr, attr);
+    svgNode->isDrawing_ = true;
+    Size size(10, 10);
+    Color color = Color::TRANSPARENT;
+    RSCanvas canvas;
+    svgNode->Draw(canvas, size, color);
+    svgNode->hrefFilterId_ = "href";
+    svgNode->Draw(canvas, size, color);
+    svgNode->isDrawing_ = false;
+    svgNode->Draw(canvas, size, color);
+    auto svgNode1 = AceType::MakeRefPtr<SvgNode>();
+    EXPECT_NE(svgNode, nullptr);
+    auto svgNode2 = AceType::MakeRefPtr<SvgNode>();
+    EXPECT_NE(svgNode, nullptr);
+    auto svgNode3 = AceType::MakeRefPtr<SvgNode>();
+    EXPECT_NE(svgNode, nullptr);
+    svgNode1->AppendChild(nullptr);
+    svgNode1->AppendChild(svgNode2);
+    svgNode1->AppendChild(svgNode3);
+    svgNode1->AppendChild(nullptr);
+    SvgInitStyleProcessInfo info;
+    info.svgNode = svgNode1;
+    std::stack<std::pair<SvgInitStyleProcessInfo, const SvgBaseAttribute*>> stack;
+    auto res = svgNode->ProcessChildStyle(info, stack);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: CalcDstRect001
+ * @tc.desc: test function of SvgImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, SvgNodeTest004, TestSize.Level1)
+{
+    auto svgNode = AceType::MakeRefPtr<SvgNode>();
+    EXPECT_NE(svgNode, nullptr);
+    svgNode->isDrawing_ = true;
+    RSCanvas canvas;
+    Rect rect(10, 10, 50, 50);
+    Size size(80, 80);
+    SvgLengthScaleRule rule(rect, size, SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    svgNode->Draw(canvas, rule);
+    svgNode->isDrawing_ = false;
+    svgNode->Draw(canvas, rule);
+    svgNode->hrefClipPath_ = "111";
+    svgNode->Draw(canvas, rule);
+    svgNode->hrefClipPath_ = "";
+    svgNode->isRootNode_ = false;
+    svgNode->Draw(canvas, rule);
+    svgNode->isRootNode_ = true;
+    svgNode->Draw(canvas, rule);
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    EXPECT_NE(svgContext, nullptr);
+    svgNode->SetContext(svgContext);
+    svgNode->isRootNode_ = true;
+    svgNode->Draw(canvas, rule);
+    svgNode->transform_ = "";
+    svgNode->Draw(canvas, rule);
+    svgNode->transform_ = "33";
+    svgNode->Draw(canvas, rule);
+    svgNode->transform_ = "";
+    std::vector<float> vec;
+    svgNode->animateTransform_.insert({ "hrefMap", vec });
+    svgNode->Draw(canvas, rule);
+    svgNode->transform_ = "href";
+    svgNode->Draw(canvas, rule);
+    svgNode->hrefMaskId_ = "";
+    svgNode->Draw(canvas, rule);
+    svgNode->hrefMaskId_ = "href";
+    svgNode->Draw(canvas, rule);
+    svgNode->hrefFilterId_ = "";
+    svgNode->Draw(canvas, rule);
+    svgNode->hrefFilterId_ = "href";
+    svgNode->Draw(canvas, rule);
+    auto path = svgNode->AsPath(rule);
+    EXPECT_TRUE(path.BuildFromSVGString(""));
+    auto res = svgNode->ParseAndSetSpecializedAttr("xlink:href", "https://www.bilibili.com");
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: CalcDstRect001
+ * @tc.desc: test function of SvgImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, SvgNodeTest006, TestSize.Level1)
+{
+    auto svgNode = AceType::MakeRefPtr<SvgNode>();
+    EXPECT_NE(svgNode, nullptr);
+    RSCanvas canvas;
+    Rect rect(10, 10, 50, 50);
+    Size size(80, 80);
+    SvgLengthScaleRule rule(rect, size, SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    RefPtr<SvgNode> svgNode2 = SvgPattern::Create();
+    svgNode2->drawTraversed_ = false;
+    RefPtr<SvgNode> svgNode3 = SvgPattern::Create();
+    svgNode3->drawTraversed_ = true;
+    svgNode->children_.emplace_back(nullptr);
+    svgNode->children_.emplace_back(svgNode2);
+    svgNode->children_.emplace_back(svgNode3);
+    svgNode->OnDrawTraversed(canvas, rule);
+    svgNode->smoothEdge_ = 10.0f;
+    svgNode->OnDrawTraversed(canvas, rule);
+    EXPECT_EQ(svgNode->children_.size(), 3);
+}
+
+/**
+ * @tc.name: CalcDstRect001
+ * @tc.desc: test function of SvgImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, SvgNodeTest005, TestSize.Level1)
+{
+    auto svgNode = AceType::MakeRefPtr<SvgNode>();
+    EXPECT_NE(svgNode, nullptr);
+    RSCanvas canvas;
+    Rect rect(10, 12, 13, 15);
+    Size size(10, 10);
+    SvgCoordinateSystemContext context(rect, size);
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    EXPECT_NE(svgContext, nullptr);
+    RefPtr<SvgNode> svgNode2 = SvgPattern::Create();
+    EXPECT_NE(svgNode2, nullptr);
+    svgContext->Push("href", svgNode2);
+    svgNode->SetContext(svgContext);
+    svgNode->hrefClipPath_ = "href";
+    svgNode->OnClipPath(canvas, context);
+    svgNode->hrefClipPath_ = "href22";
+    svgNode->OnClipPath(canvas, context);
+    EXPECT_EQ(svgNode->hrefClipPath_, "href22");
+}
+
+/**
+ * @tc.name: CalcDstRect001
+ * @tc.desc: test function of SvgImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, SvgNodeTest007, TestSize.Level1)
+{
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_NINE);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    auto svgNode = AceType::MakeRefPtr<SvgNode>();
+    EXPECT_NE(svgNode, nullptr);
+    RSCanvas canvas;
+    Size size(10, 40);
+    svgNode->OnFilter(canvas, size);
+    EXPECT_EQ(size.Width(), 10);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: CalcDstRect001
+ * @tc.desc: test function of SvgImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, SvgNodeTest008, TestSize.Level1)
+{
+    auto svgNode = AceType::MakeRefPtr<SvgNode>();
+    EXPECT_NE(svgNode, nullptr);
+    RSCanvas canvas;
+    Size size(10, 10);
+
+    svgNode->hrefFilterId_ = "href";
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    EXPECT_NE(svgContext, nullptr);
+    RefPtr<SvgNode> svgNode2 = SvgPattern::Create();
+    EXPECT_NE(svgNode2, nullptr);
+    svgContext->Push("href", svgNode2);
+    svgNode->SetContext(svgContext);
+    svgNode->OnFilter(canvas, size);
+    EXPECT_EQ(size.Width(), 10);
+}
+
+/**
+ * @tc.name: CalcDstRect001
+ * @tc.desc: test function of SvgImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, SvgNodeTest009, TestSize.Level1)
+{
+    auto svgNode = AceType::MakeRefPtr<SvgNode>();
+    EXPECT_NE(svgNode, nullptr);
+    RSCanvas canvas;
+    Rect rect(10, 12, 13, 15);
+    Size size(10, 10);
+    SvgCoordinateSystemContext context(rect, size);
+
+    svgNode->hrefFilterId_ = "href";
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    EXPECT_NE(svgContext, nullptr);
+    RefPtr<SvgNode> svgNode2 = SvgPattern::Create();
+    EXPECT_NE(svgNode2, nullptr);
+    svgContext->Push("href", svgNode2);
+    svgNode->SetContext(svgContext);
+    svgNode->OnFilter(canvas, context);
+
+    svgNode->OnMask(canvas, size);
+    EXPECT_EQ(size.Width(), 10);
+}
+
+/**
+ * @tc.name: CalcDstRect001
+ * @tc.desc: test function of SvgImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, SvgNodeTest010, TestSize.Level1)
+{
+    auto svgNode = AceType::MakeRefPtr<SvgNode>();
+    EXPECT_NE(svgNode, nullptr);
+    RSCanvas canvas;
+    Rect rect(10, 12, 13, 15);
+    Size size(10, 10);
+    SvgCoordinateSystemContext context(rect, size);
+    svgNode->hrefMaskId_ = "href";
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    EXPECT_NE(svgContext, nullptr);
+    svgNode->SetContext(svgContext);
+    svgNode->OnMask(canvas, context);
+
+    RefPtr<SvgNode> svgNode2 = SvgPattern::Create();
+    EXPECT_NE(svgNode2, nullptr);
+    svgContext->Push("href", svgNode2);
+    svgNode->SetContext(svgContext);
+
+    svgNode->OnMask(canvas, context);
+    EXPECT_EQ(size.Width(), 10);
+}
+
+/**
+ * @tc.name: CalcDstRect001
+ * @tc.desc: test function of SvgImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, SvgNodeTest011, TestSize.Level1)
+{
+    auto svgNode = AceType::MakeRefPtr<SvgNode>();
+    EXPECT_NE(svgNode, nullptr);
+    RSCanvas canvas;
+    Rect rect(10, 10, 50, 50);
+    Size size(80, 80);
+    SvgLengthScaleRule rule(rect, size, SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    svgNode->attributes_.href = "";
+    svgNode->OnTransform(canvas, rule);
+
+    svgNode->attributes_.href = "href";
+    svgNode->OnTransform(canvas, rule);
+
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    EXPECT_NE(svgContext, nullptr);
+    svgNode->SetContext(svgContext);
+    svgNode->attributes_.href = "";
+    svgNode->OnTransform(canvas, rule);
+
+    svgNode->attributes_.href = "href";
+    svgNode->OnTransform(canvas, rule);
+    EXPECT_EQ(size.Width(), 80);
+}
+
+/**
+ * @tc.name: CalcDstRect001
+ * @tc.desc: test function of SvgImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, SvgNodeTest012, TestSize.Level1)
+{
+    auto svgNode = AceType::MakeRefPtr<SvgNode>();
+    EXPECT_NE(svgNode, nullptr);
+    RSCanvas canvas;
+    Rect rect(10, 10, 50, 50);
+    Size size(80, 80);
+    SvgLengthScaleRule rule(rect, size, SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
+    svgNode->attributes_.href = "";
+    svgNode->OnTransform(canvas, rule);
+
+    svgNode->attributes_.href = "href";
+    svgNode->OnTransform(canvas, rule);
+
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    EXPECT_NE(svgContext, nullptr);
+    svgNode->SetContext(svgContext);
+    svgNode->attributes_.href = "";
+    svgNode->OnTransform(canvas, rule);
+
+    svgNode->attributes_.href = "href";
+    svgNode->OnTransform(canvas, rule);
+
+    auto svgPattern = AceType::MakeRefPtr<SvgPattern>();
+    EXPECT_NE(svgPattern, nullptr);
+    svgContext->Push("href", svgPattern);
+    svgNode->OnTransform(canvas, rule);
+    EXPECT_EQ(size.Width(), 80);
+}
+
+/**
+ * @tc.name: CalcDstRect001
+ * @tc.desc: test function of SvgImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, SvgNodeTest013, TestSize.Level1)
+{
+    auto svgNode = AceType::MakeRefPtr<SvgNode>();
+    EXPECT_NE(svgNode, nullptr);
+    Rect rect(10, 10, 50, 50);
+    Size size(80, 80);
+    Dimension dimension = 1.0_vp;
+
+    SvgLengthScaleRule rule(rect, size, SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
+    auto length = svgNode->GetMeasuredLength(dimension, rule, SvgLengthType::HORIZONTAL);
+    EXPECT_EQ(length, 0.0f);
+    length = svgNode->GetMeasuredLength(dimension, rule, SvgLengthType::VERTICAL);
+    EXPECT_EQ(length, 0.0f);
+
+    length = svgNode->GetMeasuredLength(dimension, rule, SvgLengthType::OTHER);
+    EXPECT_EQ(length, 0.0f);
+    length = svgNode->GetMeasuredLength(dimension, rule, static_cast<SvgLengthType>(-1));
+    EXPECT_EQ(length, 0.0f);
+    SvgLengthScaleRule rule1(rect, size, SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    length = svgNode->GetMeasuredLength(dimension, rule, SvgLengthType::VERTICAL);
+    EXPECT_EQ(length, 0.0f);
+}
+
+/**
+ * @tc.name: CalcDstRect001
+ * @tc.desc: test function of SvgImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, SvgNodeTest014, TestSize.Level1)
+{
+    auto svgNode = AceType::MakeRefPtr<SvgNode>();
+    EXPECT_NE(svgNode, nullptr);
+    auto rect = svgNode->GetSvgContainerRect();
+    EXPECT_EQ(rect.Width(), 0.0f);
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    EXPECT_NE(svgContext, nullptr);
+    svgNode->SetContext(svgContext);
+    rect = svgNode->GetSvgContainerRect();
+    EXPECT_EQ(rect.Width(), 0.0f);
+}
+
+/**
+ * @tc.name: CalcDstRect001
+ * @tc.desc: test function of SvgImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, SvgNodeTest015, TestSize.Level1)
+{
+    auto svgNode = AceType::MakeRefPtr<SvgNode>();
+    EXPECT_NE(svgNode, nullptr);
+    Dimension firstDimension(0.5f, DimensionUnit::PERCENT);
+    Dimension secondDimension(0.5f, DimensionUnit::PERCENT);
+    std::pair<Dimension, Dimension> transformOrigin = { firstDimension, secondDimension };
+    SvgLengthScaleRule lengthRule;
+    auto offset = svgNode->CalcGlobalPivot(transformOrigin, lengthRule);
+    EXPECT_EQ(offset.GetX(), 0.0f);
+
+    Dimension firstDimension1(0.5f, DimensionUnit::PX);
+    Dimension secondDimension2(0.5f, DimensionUnit::PX);
+    std::pair<Dimension, Dimension> transformOrigin1 = { firstDimension1, secondDimension2 };
+    SvgLengthScaleRule lengthRule2;
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    EXPECT_NE(svgContext, nullptr);
+    Rect rootRect(0, 0, 10, 10);
+    svgContext->SetRootViewBox(rootRect);
+    svgNode->SetContext(svgContext);
+    offset = svgNode->CalcGlobalPivot(transformOrigin1, lengthRule2);
+    EXPECT_EQ(offset.GetX(), 0.5f);
 }
 } // namespace OHOS::Ace::NG

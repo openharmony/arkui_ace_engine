@@ -285,7 +285,7 @@ public:
     void OnHover(bool isHover);
     void NotifyPressStatus(bool isPress);
     void SetBgColor(const Color& color);
-    void SetFontColor(const Color& color);
+    void SetFontColor(const Color& color, bool isNeedRecord = true);
     void SetFontFamily(const std::vector<std::string>& value);
     void SetFontSize(const Dimension& value);
     void SetFontWeight(const FontWeight& value);
@@ -381,33 +381,9 @@ public:
     {
         pasteButton_ = pasteButton;
     }
-    inline void SetIsBGColorSetByUser(bool isSet)
-    {
-        isBGColorSetByUser_ = isSet;
-    }
-    inline void SetIsTextColorSetByUser(bool isSet)
-    {
-        isTextColorSetByUser_ = isSet;
-    }
-    inline void SetIsOptionFontColorSetByUser(bool isSet)
-    {
-        isOptionFontColorSetByUser_ = isSet;
-    }
-    inline void SetSelectFontColor(const Color& color)
-    {
-        selectFontColor_ = color;
-    }
     inline void SetOptionFontColor(const Color& color)
     {
         optionFontColor_ = color;
-    }
-    inline void SetIsOptionBgColorSetByUser(bool isSet)
-    {
-        isOptionBgColorSetByUser_ = isSet;
-    }
-    inline void SetOptionBgColor(const Color& color)
-    {
-        optionBgColor_ = color;
     }
     void AttachBottomDivider();
     void RemoveBottomDivider();
@@ -527,6 +503,9 @@ private:
         return !(config.skipMeasure && config.skipLayout);
     }
 
+    void HandleOptionBackgroundColor();
+    void HandleOptionFontColor();
+
     std::list<TouchRegion> hoverRegions_;
 
     RefPtr<InputEvent> wrapperMouseEvent_;
@@ -574,9 +553,8 @@ private:
 
     Color bgBlendColor_ = Color::TRANSPARENT;
     std::optional<Color> bgColor_;
-    std::optional<Color> selectFontColor_;
+    std::optional<Color> fontColor_;
     std::optional<Color> optionFontColor_;
-    std::optional<Color> optionBgColor_;
     std::function<void(bool)> isFocusActiveUpdateEvent_;
     // src of icon image, used in XTS inspector
     std::string iconSrc_;
@@ -598,10 +576,6 @@ private:
     bool isFocusShadowSet_ = false;
     bool isFocusBGColorSet_ = false;
     bool isTextFadeOut_ = false;
-    bool isBGColorSetByUser_ = false;
-    bool isTextColorSetByUser_ = false;
-    bool isOptionFontColorSetByUser_ = false;
-    bool isOptionBgColorSetByUser_ = false;
     int32_t rowSelected_ = -1;
     CancelableCallback<void()> showTask_;
     CancelableCallback<void()> hideTask_;

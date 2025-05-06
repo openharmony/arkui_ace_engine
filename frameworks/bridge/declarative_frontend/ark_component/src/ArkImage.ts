@@ -195,6 +195,23 @@ class ImageDynamicRangeModeModifier extends ModifierWithKey<DynamicRangeMode> {
   }
 }
 
+class ImageHdrBrightnessModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('hdrBrightness');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetHdrBrightness(node);
+    } else {
+      getUINativeModule().image.setHdrBrightness(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+
 class ImageEnhancedImageQualityModifier extends ModifierWithKey<AIImageQuality> {
   constructor(value: ResolutionQuality) {
     super(value);
@@ -377,9 +394,7 @@ class ImageBorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses>
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       return !((this.stageValue as BorderRadiuses).topLeft === (this.value as BorderRadiuses).topLeft &&
         (this.stageValue as BorderRadiuses).topRight === (this.value as BorderRadiuses).topRight &&
         (this.stageValue as BorderRadiuses).bottomLeft === (this.value as BorderRadiuses).bottomLeft &&
@@ -838,6 +853,10 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
   dynamicRangeMode(value: DynamicRangeMode): this {
     modifierWithKey(
       this._modifiersWithKeys, ImageDynamicRangeModeModifier.identity, ImageDynamicRangeModeModifier, value);
+    return this;
+  }
+  hdrBrightness(value: number): this {
+    modifierWithKey(this._modifiersWithKeys, ImageHdrBrightnessModifier.identity, ImageHdrBrightnessModifier, value);
     return this;
   }
   orientation(value: ImageRotateOrientaion): this {

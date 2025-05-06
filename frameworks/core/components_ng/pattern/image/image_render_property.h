@@ -26,6 +26,10 @@
 
 namespace OHOS::Ace::NG {
 
+namespace RenderConstants {
+    constexpr float DEFAULT_HDR_BRIGHTNESS = 1.0f;
+} // namespace
+
 struct ImagePaintStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ImageResizableSlice, ImageResizableSlice);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ImageRenderMode, ImageRenderMode);
@@ -64,6 +68,7 @@ struct ImagePaintStyle {
             colorFilter += std::to_string(num) + " ";
         }
         json->PutExtAttr("colorFilter", colorFilter.c_str(), filter);
+        json->PutExtAttr("hdrBrightness", propHdrBrightness.value_or(RenderConstants::DEFAULT_HDR_BRIGHTNESS), filter);
     }
 };
 

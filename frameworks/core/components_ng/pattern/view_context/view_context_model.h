@@ -38,7 +38,7 @@ public:
         std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
         int32_t currentInstanceId, int32_t targetId) = 0;
     virtual int32_t UpdateBindSheet(
-        const RefPtr<NG::FrameNode>& bindContentNode, NG::SheetStyle& sheetStyle, bool isPartialUpdate,
+        const RefPtr<NG::FrameNode>& bindContentNode, const NG::SheetStyle& sheetStyle, bool isPartialUpdate,
         int32_t currentInstanceId) = 0;
     virtual int32_t CloseBindSheet(const RefPtr<NG::FrameNode>& bindContentNode, int32_t currentInstanceId) = 0;
 

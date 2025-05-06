@@ -1370,10 +1370,10 @@ HWTEST_F(EventManagerTestNg, EventManagerTest074, TestSize.Level1)
     frameNodeAlt->SetActive(true);
     frameNodeCtrlShift->SetActive(true);
 
-    auto eventHubCtrl = frameNodeCtrl->GetEventHub<NG::EventHub>();
-    auto eventHubShift = frameNodeShift->GetEventHub<NG::EventHub>();
-    auto eventHubAlt = frameNodeAlt->GetEventHub<NG::EventHub>();
-    auto eventHubCtrlShift = frameNodeCtrlShift->GetEventHub<NG::EventHub>();
+    auto eventHubCtrl = frameNodeCtrl->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHubShift = frameNodeShift->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHubAlt = frameNodeAlt->GetOrCreateEventHub<NG::EventHub>();
+    auto eventHubCtrlShift = frameNodeCtrlShift->GetOrCreateEventHub<NG::EventHub>();
 
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeCtrl));
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeShift));
@@ -1403,7 +1403,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest075, TestSize.Level2)
     EXPECT_FALSE(eventManager->DispatchKeyboardShortcut(event));
 
     auto frameNodeCtrl = FrameNode::GetOrCreateFrameNode(CTRL, NODEID, nullptr);
-    auto eventHubCtrl = frameNodeCtrl->GetEventHub<NG::EventHub>();
+    auto eventHubCtrl = frameNodeCtrl->GetOrCreateEventHub<NG::EventHub>();
     frameNodeCtrl->SetActive(true);
 
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeCtrl));

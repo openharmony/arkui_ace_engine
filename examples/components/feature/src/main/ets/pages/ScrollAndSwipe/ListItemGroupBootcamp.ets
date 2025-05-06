@@ -57,6 +57,7 @@ import { CompMotionBlurBlocks } from '../../components/CompMotionBlurBlocks';
 import { CompClickEffectBlocks } from '../../components/CompClickEffectBlocks';
 import { CompAccessibilityBlocks } from '../../components/CompAccessibilityBlocks';
 import { CompAttributeModifierBlocks } from '../../components/CompAttributeModifierBlocks';
+
 //part2
 class MyModifier implements AttributeModifier<ListItemGroupAttribute> {
   applyNormalAttribute(instance: ListItemGroupAttribute) {
@@ -707,7 +708,6 @@ export struct ListItemGroupBootcamp {
     .hideTitleBar(true)
   }
 
-
   @Builder
   ListItemGroupHeaders(str: string) {
     Row() {
@@ -1284,7 +1284,8 @@ export struct ListItemGroupBootcamp {
               this.compFocusBoxStrokeWidth)) : null,
           })
           .id(useEnabled(this.enableCompId, this.compId) ? useEnabled(this.enableCompId, this.compId) : null)
-          .key(useEnabled(this.enableCompKey, this.compKey) ? useEnabled(this.enableCompKey, this.compKey) : 'ListItemGroup')
+          .key(useEnabled(this.enableCompKey, this.compKey) ? useEnabled(this.enableCompKey, this.compKey) :
+            'ListItemGroup')
           .focusScopePriority(
             useEnabled(this.enableCompFocusScopePriorityScopeId, this.compFocusScopePriorityScopeId),
             useEnabled(this.enableCompFocusScopePriorityPriority, this.compFocusScopePriorityPriority)
@@ -1489,6 +1490,7 @@ export struct ListItemGroupBootcamp {
       .scrollBar(useEnabled(this.enableScrollBar, this.scrollBar))
     }
   }
+
   @Builder
   compBackground() {
     Text('123')

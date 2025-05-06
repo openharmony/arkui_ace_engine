@@ -29,7 +29,8 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/web/resource/web_delegate.h"
-#include "core/components_ng/pattern/web/web_pattern.cpp"
+#include "core/components_ng/pattern/web/web_accessibility_child_tree_callback.h"
+#include "core/components_ng/pattern/web/web_pattern.h"
 #undef protected
 #undef private
 #include "test/mock/core/common/mock_udmf.h"

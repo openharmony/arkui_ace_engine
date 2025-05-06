@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { describe, beforeAll, it} from '@ohos/hypium'
-import {  Driver, Component } from '@kit.TestKit';
+import { describe, beforeAll, it } from '@ohos/hypium'
+import { Driver, Component } from '@kit.TestKit';
 import { ON } from '@ohos.UiTest';
 import {
   buttonClick,

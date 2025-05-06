@@ -877,7 +877,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc050, TestSize.Level1)
 
     auto state = false;
     auto callback = [&state](const InsertValueInfo&){ state = true; };
-    pattern->GetHost()->GetEventHub<TextFieldEventHub>()->SetOnDidInsertValueEvent(callback);
+    pattern->GetHost()->GetOrCreateEventHub<TextFieldEventHub>()->SetOnDidInsertValueEvent(callback);
     std::u16string insertValue;
     pattern->AfterIMEInsertValue(insertValue);
     EXPECT_TRUE(state);
@@ -894,7 +894,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc051, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
 
     auto state = false;
-    auto eventHub = pattern->GetHost()->GetEventHub<TextFieldEventHub>();
+    auto eventHub = pattern->GetHost()->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto callback = [&state](const InsertValueInfo& info){ return (state = true); };
     eventHub->SetOnWillInsertValueEvent(callback);
@@ -916,7 +916,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc052, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     ASSERT_NE(pattern->selectController_, nullptr);
 
-    auto eventHub = pattern->GetHost()->GetEventHub<TextFieldEventHub>();
+    auto eventHub = pattern->GetHost()->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto state = false;
     auto callback = [&state](const InsertValueInfo&){ return (state = true); };
@@ -942,7 +942,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc053, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     ASSERT_NE(pattern->selectController_, nullptr);
 
-    auto eventHub = pattern->GetHost()->GetEventHub<TextFieldEventHub>();
+    auto eventHub = pattern->GetHost()->GetOrCreateEventHub<TextFieldEventHub>();
     auto state = false;
     auto callback = [&state](const DeleteValueInfo&){ state = true; };
     eventHub->SetOnDidDeleteEvent(callback);
@@ -1808,23 +1808,6 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc089, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextPatternFunc090
- * @tc.desc: test OnAreaChangedInner.
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc090, TestSize.Level1)
-{
-    auto keyboard = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<KeyboardPattern>(2));
-    ASSERT_NE(keyboard, nullptr);
-    auto pattern = keyboard->GetPattern<KeyboardPattern>();
-    ASSERT_NE(pattern, nullptr);
-    pattern->SetKeyboardOption(false);
-    pattern->keyboardHeight_ = 5.0f;
-    pattern->OnAreaChangedInner();
-    EXPECT_EQ(pattern->keyboardHeight_, 5.0f);
-}
-
-/**
  * @tc.name: TextPatternFunc091
  * @tc.desc: test OnAreaChangedInner.
  * @tc.type: FUNC
@@ -1857,7 +1840,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc092, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
 
     auto state = false;
-    auto eventHub = pattern->GetHost()->GetEventHub<TextFieldEventHub>();
+    auto eventHub = pattern->GetHost()->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto callback = [&state](const ChangeValueInfo& info){ return (state = true); };
     eventHub->SetOnWillChangeEvent(callback);
@@ -2044,6 +2027,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextFieldSelectOverlay001, TestSize.Level1)
     pattern->selectOverlay_->OnOverlayClick(event, true);
     pattern->selectOverlay_->isSingleHandle_ = true;
     pattern->selectOverlay_->OnOverlayClick(event, true);
+    pattern->multipleClickRecognizer_ = pattern->GetOrCreateMultipleClickRecognizer();
     pattern->multipleClickRecognizer_->clickCountTask_.Reset([] {});
     pattern->selectOverlay_->OnOverlayClick(event, true);
     pattern->multipleClickRecognizer_->lastClickPosition_ = Offset(0.0f, 0.0f);

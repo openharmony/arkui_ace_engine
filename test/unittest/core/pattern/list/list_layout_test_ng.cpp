@@ -2250,7 +2250,7 @@ HWTEST_F(ListLayoutTestNg, ListCacheCount001, TestSize.Level1)
     UpdateCurrentOffset(-250);
     FlushIdleTask(listPattern);
     childrenCount = repeat->GetChildren().size();
-    EXPECT_EQ(childrenCount, 5);
+    EXPECT_EQ(childrenCount, 6);
 
     /**
      * @tc.steps: step3. Flush Idle Task

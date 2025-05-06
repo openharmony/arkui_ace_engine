@@ -529,7 +529,6 @@ export struct PatternLockBootcamp {
   @State compRadialGradientColorsNumber2: number = 0;
   @State enableCompRadialGradientRepeating: boolean = false;
   @State compRadialGradientRepeating: boolean = false;
-
   //Focus Control
   @State enableCompFocusable: boolean = false;
   @State compFocusable: boolean = false;
@@ -602,7 +601,6 @@ export struct PatternLockBootcamp {
   @State compAccessibilityDescription: string = `无障碍说明`;
   @State enableCompAccessibilityLevel: boolean = false;
   @State compAccessibilityLevel: string = 'auto';
-
   @State modifier: MyModifier = new MyModifier()
   @State enableCompAttributeModifier: boolean = false;
   @State compAttributeModifier: boolean = false;
@@ -641,8 +639,6 @@ export struct PatternLockBootcamp {
   // Hit Test Control
   @State enableCompHitTestBehavior: boolean = false
   @State compHitTestBehavior: HitTestMode = HitTestMode.Default
-
-
   // Obscuring
   @State enableCompObscured: boolean = false
   @State compObscured: Array<ObscuredReasons> = []
@@ -683,7 +679,6 @@ export struct PatternLockBootcamp {
   //compEvent
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
-
   @State selection: string | null = null;
   scroller: Scroller = new Scroller()
 
@@ -724,15 +719,10 @@ export struct PatternLockBootcamp {
     }, 200)
   }
 
-
-
-
   @Builder
   compBackground() {
     Text('123')
   }
-
-
 
   build() {
     NavDestination() {
@@ -742,7 +732,7 @@ export struct PatternLockBootcamp {
         content: () => {
           this.Content()
         },
-        generic:() => {
+        generic: () => {
           this.Generic()
         },
         parameters: () => {
@@ -1297,7 +1287,8 @@ export struct PatternLockBootcamp {
             this.compFocusBoxStrokeWidth)) : null,
         })
         .id(useEnabled(this.enableCompId, this.compId) ? useEnabled(this.enableCompId, this.compId) : null)
-        .key(useEnabled(this.enableCompKey, this.compKey) ? useEnabled(this.enableCompKey, this.compKey) : 'PatternLock')
+        .key(useEnabled(this.enableCompKey, this.compKey) ? useEnabled(this.enableCompKey, this.compKey) :
+          'PatternLock')
         .focusScopePriority(
           useEnabled(this.enableCompFocusScopePriorityScopeId, this.compFocusScopePriorityScopeId),
           useEnabled(this.enableCompFocusScopePriorityPriority, this.compFocusScopePriorityPriority)

@@ -110,6 +110,10 @@ void CJLazyForEachBuilder::RegisterDataChangeListener(const RefPtr<V2::DataChang
         return;
     }
     listenerManager = FFIData::Create<CJDataChangeListener>();
+    if (!listenerManager) {
+        LOGW("LazyForEach::RegisterDataChangeListener fail, listenerManager is null.");
+        return;
+    }
     listenerManager->AddListener(listener);
     weakListenerManager_ = listenerManager;
     cjBuilder_->RegisterListenerFunc(listenerManager);

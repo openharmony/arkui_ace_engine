@@ -23,7 +23,7 @@ const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorReg
 /*初始化与UI元素交互的驱动对象*/
 const driver = Driver.create();
 
-export async function ProgressStart(done:Function){
+export async function ProgressStart(done: Function) {
 
   console.info('beforeAll begin');
 

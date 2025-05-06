@@ -236,8 +236,11 @@ void PagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipelineContext->GetMemoryManager()->RemoveRecyclePageNode(frameNode->GetId());
 }
 
-void PagePattern::OnWindowSizeChanged(int32_t /*width*/, int32_t /*height*/, WindowSizeChangeReason /*type*/)
+void PagePattern::OnWindowSizeChanged(int32_t /*width*/, int32_t /*height*/, WindowSizeChangeReason type)
 {
+    if (type == WindowSizeChangeReason::RESIZE) {
+        return;
+    }
     if (!isPageInTransition_) {
         return;
     }
@@ -885,7 +888,7 @@ void PagePattern::FinishOutPage(const int32_t animationId, PageTransitionType ty
         TAG_LOGI(AceLogTag::ACE_ROUTER, "animation id is different");
         return;
     }
-    outPage->GetEventHub<EventHub>()->SetEnabled(true);
+    outPage->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     if (type != PageTransitionType::EXIT_PUSH && type != PageTransitionType::EXIT_POP) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "current transition type is invalid");
         return;
@@ -926,7 +929,7 @@ void PagePattern::FinishInPage(const int32_t animationId, PageTransitionType typ
         TAG_LOGI(AceLogTag::ACE_ROUTER, "animation id in inPage is invalid");
         return;
     }
-    inPage->GetEventHub<EventHub>()->SetEnabled(true);
+    inPage->GetOrCreateEventHub<EventHub>()->SetEnabled(true);
     if (type != PageTransitionType::ENTER_PUSH && type != PageTransitionType::ENTER_POP) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "inPage transition type is invalid");
         return;

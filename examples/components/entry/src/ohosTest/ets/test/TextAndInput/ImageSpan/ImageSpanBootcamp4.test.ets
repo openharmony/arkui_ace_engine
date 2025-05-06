@@ -16,14 +16,16 @@
 import { describe, beforeAll, it } from '@ohos/hypium';
 import { abilityDelegatorRegistry, Driver } from '@kit.TestKit';
 import {
-    buttonClick, JsonType,
-    KeyStruct,
-    radioClick,
-    Search,
-    searchParentBlock, Slide,
-    sliderDrag,
-    titleSearch,
-    ToggleClick
+  buttonClick,
+  JsonType,
+  KeyStruct,
+  radioClick,
+  Search,
+  searchParentBlock,
+  Slide,
+  sliderDrag,
+  titleSearch,
+  ToggleClick
 } from '../../../utils';
 import { imageSpanBeforeAll } from './ImageSpan.test';
 

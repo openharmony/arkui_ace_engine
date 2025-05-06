@@ -1196,7 +1196,7 @@ napi_value ObserverProcess::ProcessAfterPanStartUnRegister(napi_env env, napi_ca
     GET_PARAMS(env, info, PARAM_SIZE_THREE);
 
     if (argc == PARAM_SIZE_ONE) {
-        UIObserver::UnRegisterBeforePanStartCallback(0, nullptr);
+        UIObserver::UnRegisterAfterPanStartCallback(0, nullptr);
     }
 
     if (argc == PARAM_SIZE_TWO) {

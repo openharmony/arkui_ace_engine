@@ -445,6 +445,7 @@ public:
     Matrix4 GetRevertMatrix() override;
     void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) override;
     void SetOpacityMultiplier(float opacity) override;
+    void UpdateOcclusionCullingStatus(bool enable, const RefPtr<FrameNode>& keyOcclusionNode) override;
     bool IsDisappearing() const override
     {
         return isDisappearing_;
@@ -456,6 +457,7 @@ public:
     bool AddNodeToRsTree() override;
     static std::shared_ptr<Rosen::RSNode> GetRsNodeByFrame(const RefPtr<FrameNode>& frameNode);
     RefPtr<FrameNode> GetFrameNodeById(int32_t frameNodeId);
+    bool CanNodeBeDeleted(const RefPtr<FrameNode>& node) const;
     void GetLiveChildren(const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes);
     void AddRsNodeForCapture();
     static bool initDrawNodeChangeCallback_;

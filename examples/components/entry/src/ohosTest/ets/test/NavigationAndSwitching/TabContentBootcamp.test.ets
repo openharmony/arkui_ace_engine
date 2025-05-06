@@ -13,7 +13,7 @@ import {
   ToggleClick,
   getToggle,
   searchToggle
-} from '../utils';
+} from '../../utils';
 import { Point } from '@ohos.UiTest';
 
 const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()

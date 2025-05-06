@@ -28,6 +28,7 @@ ace_unittest("navdestination_test_ng") {
   sources = [
     "$ace_root/test/unittest/core/pattern/navigation/mock_navigation_stack.cpp",
     "navdestination_group_node_test_ng.cpp",
+    "navdestination_model_test_ng.cpp",
     "navdestination_pattern_test_ng.cpp",
   ]
 }

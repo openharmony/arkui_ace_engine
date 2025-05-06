@@ -449,27 +449,14 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto listEventHub = host->GetEventHub<ListEventHub>();
+    auto listEventHub = host->GetOrCreateEventHub<ListEventHub>();
     CHECK_NULL_VOID(listEventHub);
     paintStateFlag_ = !NearZero(finalOffset) && !isJump;
     isFramePaintStateValid_ = true;
     auto onScroll = listEventHub->GetOnScroll();
     PrintOffsetLog(AceLogTag::ACE_LIST, host->GetId(), finalOffset);
     if (onScroll) {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-            FireOnScroll(finalOffset, onScroll);
-        } else {
-            if (!NearZero(finalOffset)) {
-                auto offsetPX = Dimension(finalOffset);
-                auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
-                auto source = GetScrollSource();
-                if (source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR ||
-                    source == SCROLL_FROM_ANIMATION_CONTROLLER) {
-                    source = SCROLL_FROM_NONE;
-                }
-                onScroll(offsetVP, GetScrollState(source));
-            }
-        }
+        FireOnScrollWithVersionCheck(finalOffset, onScroll);
     }
     FireObserverOnDidScroll(finalOffset);
     auto onDidScroll = listEventHub->GetOnDidScroll();
@@ -495,6 +482,23 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
     auto onJSFrameNodeReachEnd = listEventHub->GetJSFrameNodeOnReachEnd();
     FireOnReachEnd(onReachEnd, onJSFrameNodeReachEnd);
     OnScrollStop(listEventHub->GetOnScrollStop(), listEventHub->GetJSFrameNodeOnScrollStop());
+}
+
+void ListPattern::FireOnScrollWithVersionCheck(float finalOffset, OnScrollEvent& onScroll)
+{
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+        FireOnScroll(finalOffset, onScroll);
+    } else {
+        if (!NearZero(finalOffset)) {
+            auto offsetPX = Dimension(finalOffset);
+            auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
+            auto source = GetScrollSource();
+            if (source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR || source == SCROLL_FROM_ANIMATION_CONTROLLER) {
+                source = SCROLL_FROM_NONE;
+            }
+            onScroll(offsetVP, GetScrollState(source));
+        }
+    }
 }
 
 void ListPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart)
@@ -1690,6 +1694,7 @@ void ListPattern::ScrollTo(float position)
 void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
+    // When snap align scrolling with the mouse wheel, do not interrupt the animation.
     if (!smooth && !lastSnapTargetIndex_.has_value()) {
         StopAnimate();
         targetIndex_.reset();
@@ -2196,7 +2201,7 @@ bool ListPattern::CalculateJumpOffset()
         if (pos.second.groupInfo && !pos.second.groupInfo.value().atStart) {
             continue;
         }
-        PositionInfo info = posMap_->GetPositionInfo(pos.first);
+        ListPositionInfo info = posMap_->GetPositionInfo(pos.first);
         if (!Negative(info.mainSize)) {
             currentOffset_ = info.mainPos - pos.second.startPos;
             return true;
@@ -2232,24 +2237,36 @@ float ListPattern::UpdateTotalOffset(const RefPtr<ListLayoutAlgorithm>& listLayo
         }
         CalculateCurrentOffset(relativeOffset, listLayoutAlgorithm->GetRecycledItemPosition());
     }
-    if (scrollTarget_) {
-        auto& target = scrollTarget_.value();
-        auto posInfo = posMap_->GetPositionInfo(target.index);
-        if (!Negative(posInfo.mainPos)) {
-            float startPos = posInfo.mainPos - currentOffset_;
-            float targetPos = 0.0f;
-            GetListItemAnimatePos(startPos + target.extraOffset, startPos + posInfo.mainSize + target.extraOffset,
-                target.align, targetPos);
-            targetPos += currentOffset_;
-            const float epsilon = 0.1f;
-            if (!NearEqual(relativeOffset + prevOffset, currentOffset_, epsilon) ||
-                !NearEqual(target.targetOffset, targetPos, epsilon)) {
-                target.targetOffset = targetPos;
-                AnimateTo(targetPos, -1, nullptr, true, false, false);
-            }
+    CheckAndUpdateAnimateTo(relativeOffset, prevOffset);
+    
+    return currentOffset_ - prevOffset;
+}
+
+void ListPattern::CheckAndUpdateAnimateTo(float relativeOffset, float prevOffset)
+{
+    if (!scrollTarget_) {
+        return;
+    }
+    auto& target = scrollTarget_.value();
+    auto posInfo = posMap_->GetPositionInfo(target.index);
+    if (Negative(posInfo.mainPos)) {
+        return;
+    }
+    float startPos = posInfo.mainPos - currentOffset_;
+    float targetPos = 0.0f;
+    GetListItemAnimatePos(startPos + target.extraOffset, startPos + posInfo.mainSize + target.extraOffset,
+        target.align, targetPos);
+    targetPos += currentOffset_;
+    const float epsilon = 0.1f;
+    if (!NearEqual(relativeOffset + prevOffset, currentOffset_, epsilon) ||
+        !NearEqual(target.targetOffset, targetPos, epsilon)) {
+        target.targetOffset = targetPos;
+        if (NearEqual(currentOffset_, targetPos)) {
+            StopAnimate();
+        } else {
+            AnimateTo(targetPos, -1, nullptr, true, false, false);
         }
     }
-    return currentOffset_ - prevOffset;
 }
 
 void ListPattern::CalculateCurrentOffset(float delta, const ListLayoutAlgorithm::PositionMap& recycledItemPosition)
@@ -2982,7 +2999,7 @@ void ListPattern::GetEventDumpInfo()
     ScrollablePattern::GetEventDumpInfo();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<ListEventHub>();
+    auto hub = host->GetOrCreateEventHub<ListEventHub>();
     CHECK_NULL_VOID(hub);
     auto onScrollIndex = hub->GetOnScrollIndex();
     onScrollIndex ? DumpLog::GetInstance().AddDesc("hasOnScrollIndex: true")
@@ -3004,7 +3021,7 @@ void ListPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
     ScrollablePattern::GetEventDumpInfo(json);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<ListEventHub>();
+    auto hub = host->GetOrCreateEventHub<ListEventHub>();
     CHECK_NULL_VOID(hub);
     auto onScrollIndex = hub->GetOnScrollIndex();
     json->Put("hasOnScrollIndex", onScrollIndex ? "true" : "false");
@@ -3131,6 +3148,9 @@ void ListPattern::NotifyDataChange(int32_t index, int32_t count)
 {
     if (!maintainVisibleContentPosition_ || itemPosition_.empty() || count == 0) {
         return;
+    }
+    if (index == 0 && count > 0 && IsBackToTopRunning()) {
+        SetUseTotalOffset(false);
     }
     auto startIndex = itemPosition_.begin()->first;
     auto endIndex = itemPosition_.rbegin()->first;

@@ -223,10 +223,11 @@ HWTEST_F(RichEditorMouseTest, OnHover001, TestSize.Level1)
     auto id = host->GetId();
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
-    richEditorPattern->OnHover(true);
+    HoverInfo hoverInfo;
+    richEditorPattern->OnHover(true, hoverInfo);
     auto mouseStyleManager = pipeline->eventManager_->GetMouseStyleManager();
     EXPECT_EQ(mouseStyleManager->mouseStyleNodeId_.value(), id);
-    richEditorPattern->OnHover(false);
+    richEditorPattern->OnHover(false, hoverInfo);
     EXPECT_FALSE(mouseStyleManager->mouseStyleNodeId_.has_value());
 }
 
@@ -285,7 +286,7 @@ HWTEST_F(RichEditorMouseTest, RichEditorPatternTestInitMouseEvent001, TestSize.L
 
     auto host = richEditorPattern->GetHost();
     ASSERT_NE(host, nullptr);
-    auto eventHub = host->GetEventHub<EventHub>();
+    auto eventHub = host->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     ASSERT_NE(inputHub, nullptr);
@@ -302,7 +303,8 @@ HWTEST_F(RichEditorMouseTest, RichEditorPatternTestInitMouseEvent001, TestSize.L
     ASSERT_NE(hoverEventActuator, nullptr);
     auto hoverInputEvents = hoverEventActuator->inputEvents_;
     for (auto input : hoverInputEvents) {
-        input->GetOnHoverEventFunc()(true);
+        CHECK_NULL_CONTINUE(input);
+        (*input)(true);
     }
 
     ASSERT_EQ(richEditorPattern->mouseEventInitialized_, true);
@@ -916,6 +918,10 @@ HWTEST_F(RichEditorMouseTest, HandleMouseEvent005, TestSize.Level1)
     info.SetAction(MouseAction::PRESS);
     richEditorPattern->HandleMouseEvent(info);
     EXPECT_TRUE(info.GetAction() == MouseAction::PRESS);
+
+    richEditorPattern->textResponseType_ = TextResponseType::RIGHT_CLICK;
+    richEditorPattern->selectOverlay_->ProcessOverlay({ .animation = false });
+    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
 }
 
 /**

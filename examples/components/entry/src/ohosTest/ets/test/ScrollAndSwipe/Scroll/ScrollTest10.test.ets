@@ -13,15 +13,8 @@
  * limitations under the License.
  */
 
-import { describe, beforeAll, it,} from '@ohos/hypium'
-import {
-  JsonType,
-  KeyStruct,
-  radioClick,
-  ToggleClick,
-  titleSearch,
-  getToggle,
-} from '../../../utils';
+import { describe, beforeAll, it, } from '@ohos/hypium'
+import { JsonType, KeyStruct, radioClick, ToggleClick, titleSearch, getToggle, } from '../../../utils';
 import { ScrollTest } from './ScrollTest'
 
 export default function ScrollTest10() {

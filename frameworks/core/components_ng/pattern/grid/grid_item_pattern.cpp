@@ -57,7 +57,7 @@ void GridItemPattern::MarkIsSelected(bool isSelected)
 {
     if (isSelected_ != isSelected) {
         isSelected_ = isSelected;
-        auto eventHub = GetEventHub<GridItemEventHub>();
+        auto eventHub = GetOrCreateEventHub<GridItemEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireSelectChangeEvent(isSelected);
         auto host = GetHost();
@@ -150,7 +150,7 @@ void GridItemPattern::InitHoverEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<GridItemEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<GridItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -222,7 +222,7 @@ void GridItemPattern::InitDisableStyle()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<GridItemEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<GridItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);

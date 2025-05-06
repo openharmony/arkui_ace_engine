@@ -32,6 +32,8 @@ const std::string EVENT_NAME_BUTTON_SPACING_CHANGE = "arkui_button_spacing_chang
 const std::string EVENT_NAME_COLOR_CONFIGURATION_LOCKED = "arkui_color_mode_locked";
 const std::string EVENT_NAME_BUTTON_SIZE_CHANGE = "arkui_button_size_change";
 const std::string EVENT_NAME_BUTTON_RIGHT_OFFSET_CHANGE = "arkui_button_right_offset_change";
+const std::string EVENT_NAME_BUTTON_ICON_SIZE_CHANGE = "arkui_button_icon_size_change";
+const std::string EVENT_NAME_BUTTON_BACKGROUND_CORNER_RADIUS_CHANGE = "arkui_button_background_corner_radius_change";
 
 namespace {
 inline std::string BoolToString(bool value)

@@ -15,8 +15,10 @@
 
 #include "core/components_ng/pattern/search/search_text_field.h"
 
-#include "core/components_ng/pattern/search/search_event_hub.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
+#include "core/components/search/search_theme.h"
+#include "core/components_ng/pattern/search/search_event_hub.h"
 
 namespace OHOS::Ace::NG {
 
@@ -38,7 +40,7 @@ void SearchTextFieldPattern::PerformAction(TextInputAction action, bool forceClo
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
-    auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
+    auto eventHub = parentFrameNode->GetOrCreateEventHub<SearchEventHub>();
     CHECK_NULL_VOID(eventHub);
     // Enter key type callback
     TextFieldCommonEvent event;
@@ -178,5 +180,22 @@ float SearchTextFieldPattern::FontSizeConvertToPx(const Dimension& fontSize)
     } else {
         return fontSize.ConvertToPx();
     }
+}
+
+std::string SearchTextFieldPattern::GetPlaceholderFont() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "");
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, "");
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, "");
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_RETURN(searchTheme, "");
+    auto jsonString = TextFieldPattern::GetPlaceholderFont();
+    auto jsonValue = JsonUtil::ParseJsonString(jsonString);
+    jsonValue->Replace(
+        "size", layoutProperty->GetPlaceholderFontSizeValue(searchTheme->GetFontSize()).ToString().c_str());
+    return jsonValue->ToString();
 }
 } // namespace OHOS::Ace::NG

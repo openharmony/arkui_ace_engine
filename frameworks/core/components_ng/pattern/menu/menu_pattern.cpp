@@ -17,6 +17,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/log/dump_log.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
@@ -184,7 +185,7 @@ void MenuPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipelineContext);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
     CHECK_NULL_VOID(targetNode);
-    auto eventHub = targetNode->GetEventHub<EventHub>();
+    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     halfFoldHoverCallbackId_ = RegisterHalfFoldHover(targetNode);
     OnAreaChangedFunc onAreaChangedFunc = [menuNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
@@ -198,13 +199,16 @@ void MenuPattern::OnAttachToFrameNode()
         CHECK_NULL_VOID(menuWarpper);
         auto warpperPattern = menuWarpper->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(warpperPattern);
-        if (!warpperPattern->IsHide()) {
+        auto isMenuHide = warpperPattern->IsHide();
+        TAG_LOGI(AceLogTag::ACE_MENU, "the area of target node is changed, isMenuHide: %{public}d", isMenuHide);
+        if (!isMenuHide) {
             menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     };
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 
-    auto foldModeChangeCallback = [weak = WeakClaim(this)](FoldDisplayMode foldDisplayMode) {
+    auto foldStatusChangeCallback = [weak = WeakClaim(this)](FoldStatus foldStatus) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "foldStatus is changed: %{public}d", foldStatus);
         auto menuPattern = weak.Upgrade();
         CHECK_NULL_VOID(menuPattern);
         auto menuWrapper = menuPattern->GetMenuWrapper();
@@ -212,9 +216,10 @@ void MenuPattern::OnAttachToFrameNode()
         auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(wrapperPattern);
         wrapperPattern->SetHasFoldModeChangedTransition(true);
+        SubwindowManager::GetInstance()->HideMenuNG(false);
     };
-    foldDisplayModeChangedCallbackId_ =
-        pipelineContext->RegisterFoldDisplayModeChangedCallback(std::move(foldModeChangeCallback));
+    foldStatusChangedCallbackId_ =
+        pipelineContext->RegisterFoldStatusChangedCallback(std::move(foldStatusChangeCallback));
 }
 
 int32_t MenuPattern::RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode)
@@ -253,14 +258,14 @@ void MenuPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(frameNode);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
     CHECK_NULL_VOID(targetNode);
-    auto eventHub = targetNode->GetEventHub<EventHub>();
+    auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->RemoveInnerOnAreaChangedCallback(frameNode->GetId());
 
-    if (foldDisplayModeChangedCallbackId_.has_value()) {
+    if (foldStatusChangedCallbackId_.has_value()) {
         auto pipeline = frameNode->GetContext();
         CHECK_NULL_VOID(pipeline);
-        pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));
+        pipeline->UnRegisterFoldStatusChangedCallback(foldStatusChangedCallbackId_.value_or(-1));
     }
 }
 
@@ -306,11 +311,41 @@ void MenuPattern::OnModifyDone()
         CHECK_NULL_VOID(node);
         auto scroll = AceType::DynamicCast<FrameNode>(node);
         CHECK_NULL_VOID(scroll);
-        auto hub = scroll->GetEventHub<EventHub>();
+        auto hub = scroll->GetOrCreateEventHub<EventHub>();
         CHECK_NULL_VOID(hub);
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         InitPanEvent(gestureHub);
+    }
+}
+
+void MenuPattern::UpdateMenuBorderAndBackgroundBlur()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    if (!renderContext->HasBorderColor()) {
+        BorderColorProperty borderColor;
+        borderColor.SetColor(theme->GetMenuNormalBorderColor());
+        renderContext->UpdateBorderColor(borderColor);
+    }
+    if (!renderContext->HasBorderWidth()) {
+        auto menuLayoutProperty = GetLayoutProperty<MenuLayoutProperty>();
+        auto menuBorderWidth = theme->GetMenuNormalBorderWidth();
+        BorderWidthProperty borderWidth;
+        borderWidth.SetBorderWidth(menuBorderWidth);
+        menuLayoutProperty->UpdateBorderWidth(borderWidth);
+        renderContext->UpdateBorderWidth(borderWidth);
+        auto scroll = DynamicCast<FrameNode>(host->GetFirstChild());
+        CHECK_NULL_VOID(scroll);
+        auto scrollRenderContext = scroll->GetRenderContext();
+        CHECK_NULL_VOID(scrollRenderContext);
+        scrollRenderContext->UpdateOffset(OffsetT<Dimension>(menuBorderWidth, menuBorderWidth));
     }
 }
 
@@ -485,6 +520,31 @@ void InnerMenuPattern::OnModifyDone()
     }
 }
 
+void InnerMenuPattern::InitDefaultBorder(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto menuTheme = context->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    if (!renderContext->HasBorderColor()) {
+        BorderColorProperty borderColorProperty;
+        borderColorProperty.SetColor(menuTheme->GetBorderColor());
+        renderContext->UpdateBorderColor(borderColorProperty);
+    }
+
+    if (!renderContext->HasBorderWidth()) {
+        auto layoutProperty = host->GetLayoutProperty<MenuLayoutProperty>();
+        BorderWidthProperty widthProp;
+        widthProp.SetBorderWidth(menuTheme->GetBorderWidth());
+        layoutProperty->UpdateBorderWidth(widthProp);
+        renderContext->UpdateBorderWidth(widthProp);
+    }
+}
+
 void MenuPattern::RemoveLastNodeDivider(const RefPtr<UINode>& lastNode)
 {
     CHECK_NULL_VOID(lastNode);
@@ -540,7 +600,7 @@ void MenuPattern::OnTouchEvent(const TouchEventInfo& info)
             auto position = OffsetF(static_cast<float>(touchGlobalLocation.GetX()),
                 static_cast<float>(touchGlobalLocation.GetY()));
             TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, position is %{public}s.", position.ToString().c_str());
-            HideMenu(true, position);
+            HideMenu(true, position, HideMenuType::MENU_TOUCH_UP);
         }
         lastTouchOffset_.reset();
     }
@@ -736,7 +796,7 @@ void MenuPattern::UpdateDividerProperty(
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position) const
+void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position, const HideMenuType& reason) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -757,7 +817,7 @@ void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position) const
         return;
     }
     if (((IsContextMenu() || (expandDisplay && isShowInSubWindow))) && (targetTag_ != V2::SELECT_ETS_TAG)) {
-        TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d.", targetId_);
+        TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d. reason %{public}d", targetId_, reason);
         SubwindowManager::GetInstance()->HideMenuNG(wrapper, targetId_);
         return;
     }
@@ -769,7 +829,7 @@ void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position) const
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d.", targetId_);
-    overlayManager->HideMenu(wrapper, targetId_, isMenuOnTouch);
+    overlayManager->HideMenu(wrapper, targetId_, isMenuOnTouch, reason);
     overlayManager->EraseMenuInfo(targetId_);
 }
 
@@ -1997,7 +2057,7 @@ void MenuPattern::HandleDragEnd(float offsetX, float offsetY, float velocity)
     auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
     TAG_LOGI(AceLogTag::ACE_DRAG, "will hide menu.");
-    wrapperPattern->HideMenu();
+    wrapperPattern->HideMenu(HideMenuType::MENU_DRAG_END);
 }
 
 void MenuPattern::HandleScrollDragEnd(float offsetX, float offsetY, float velocity)
@@ -2011,7 +2071,7 @@ void MenuPattern::HandleScrollDragEnd(float offsetX, float offsetY, float veloci
     auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
     TAG_LOGI(AceLogTag::ACE_DRAG, "will hide menu.");
-    wrapperPattern->HideMenu();
+    wrapperPattern->HideMenu(HideMenuType::SCROLL_DRAG_END);
 }
 
 void MenuPattern::DumpInfo()
@@ -2109,16 +2169,18 @@ void MenuPattern::HandlePrevPressed(const RefPtr<UINode>& parent, int32_t index,
         }
     } else {
         auto syntaxNode = GetSyntaxNode(parent);
-        if (parent->GetParent()->GetChildIndex(parent) == 0 && syntaxNode) {
+        auto grandParent = parent->GetParent();
+        CHECK_NULL_VOID(grandParent);
+        if (grandParent->GetChildIndex(parent) == 0 && syntaxNode) {
             prevNode = GetForEachMenuItem(syntaxNode, false);
         }
         bool matchFirstItemInIfElse = parent->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG &&
-            parent->GetParent()->GetChildIndex(parent) == 0 &&
-            parent->GetParent()->GetTag() == V2::JS_IF_ELSE_ETS_TAG;
+            grandParent->GetChildIndex(parent) == 0 &&
+            grandParent->GetTag() == V2::JS_IF_ELSE_ETS_TAG;
         if (matchFirstItemInIfElse) { // the first item in first group in ifElse
-            prevNode = GetOutsideForEachMenuItem(parent->GetParent(), false);
+            prevNode = GetOutsideForEachMenuItem(grandParent, false);
         }
-        bool notFirstGroupInMenu = parent->GetParent()->GetChildIndex(parent) > 0 &&
+        bool notFirstGroupInMenu = grandParent->GetChildIndex(parent) > 0 &&
             parent->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG;
         if (notFirstGroupInMenu) {
             prevNode = GetOutsideForEachMenuItem(parent, false);

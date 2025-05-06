@@ -29,7 +29,7 @@ const driver = Driver.create();
 export default function ChipGroupBootcampTest() {
   describe('ChipGroupBootcampTest', () => {
     // Defines a test suite. Two parameters are supported: test suite name and test suite function.
-    beforeAll(async (done:Function) => {
+    beforeAll(async (done: Function) => {
       // Presets an action, which is performed only once before all test cases of the test suite start.
       // This API supports only one parameter: preset action function.
       console.info('beforeAll begin');
@@ -79,7 +79,7 @@ export default function ChipGroupBootcampTest() {
     })
 
     // options.itemStyle.size
-    it('ArkUI_ChipGroup_001', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_001', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.size')
       // options.itemStyle.size无法获取
       await radioClick({
@@ -93,7 +93,7 @@ export default function ChipGroupBootcampTest() {
 
     })
 
-    it('ArkUI_ChipGroup_002', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_002', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.size')
       // options.itemStyle.size无法获取
       await radioClick({
@@ -107,7 +107,7 @@ export default function ChipGroupBootcampTest() {
 
     })
     // options.itemStyle.backgroundColor
-    it('ArkUI_ChipGroup_003', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_003', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.backgroundColor')
       // options.itemStyle.backgroundColor无法获取
       await buttonClick({
@@ -121,7 +121,7 @@ export default function ChipGroupBootcampTest() {
 
     })
 
-    it('ArkUI_ChipGroup_004', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_004', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.backgroundColor')
       // options.itemStyle.backgroundColor无法获取
       await buttonClick({
@@ -132,7 +132,7 @@ export default function ChipGroupBootcampTest() {
 
     })
 
-    it('ArkUI_ChipGroup_005', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_005', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.backgroundColor')
       // options.itemStyle.backgroundColor无法获取
       await buttonClick({
@@ -143,7 +143,7 @@ export default function ChipGroupBootcampTest() {
 
     })
 
-    it('ArkUI_ChipGroup_006', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_006', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.backgroundColor')
       // options.itemStyle.backgroundColor无法获取
       await buttonClick({
@@ -154,7 +154,7 @@ export default function ChipGroupBootcampTest() {
 
     })
 
-    it('ArkUI_ChipGroup_007', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_007', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.backgroundColor')
       // options.itemStyle.backgroundColor无法获取
       await buttonClick({
@@ -165,7 +165,7 @@ export default function ChipGroupBootcampTest() {
 
     })
 
-    it('ArkUI_ChipGroup_008', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_008', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.backgroundColor')
       // options.itemStyle.backgroundColor无法获取
       await buttonClick({
@@ -180,7 +180,7 @@ export default function ChipGroupBootcampTest() {
     })
 
     // options.itemStyle.fontColor
-    it('ArkUI_ChipGroup_009', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_009', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.fontColor')
       // options.itemStyle.fontColor 属性无法获取
       await buttonClick({
@@ -194,7 +194,7 @@ export default function ChipGroupBootcampTest() {
 
     })
 
-    it('ArkUI_ChipGroup_010', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_010', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.fontColor')
       // options.itemStyle.fontColor 属性无法获取
       await buttonClick({
@@ -205,7 +205,7 @@ export default function ChipGroupBootcampTest() {
 
     })
 
-    it('ArkUI_ChipGroup_011', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_011', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.fontColor')
       // options.itemStyle.fontColor 属性无法获取
       await buttonClick({
@@ -216,7 +216,7 @@ export default function ChipGroupBootcampTest() {
 
     })
 
-    it('ArkUI_ChipGroup_012', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_012', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.fontColor')
       // options.itemStyle.fontColor 属性无法获取
       await buttonClick({
@@ -227,7 +227,7 @@ export default function ChipGroupBootcampTest() {
 
     })
 
-    it('ArkUI_ChipGroup_013', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_013', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.fontColor')
       // options.itemStyle.fontColor 属性无法获取
       await buttonClick({
@@ -238,7 +238,7 @@ export default function ChipGroupBootcampTest() {
 
     })
 
-    it('ArkUI_ChipGroup_014', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_014', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.fontColor')
       // options.itemStyle.fontColor 属性无法获取
       await buttonClick({
@@ -253,7 +253,7 @@ export default function ChipGroupBootcampTest() {
     })
 
     // options.itemStyle.selectedFontColor
-    it('ArkUI_ChipGroup_015', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_015', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.selectedFontColor')
       // options.itemStyle.selectedFontColor 属性无法获取
       await buttonClick({
@@ -267,7 +267,7 @@ export default function ChipGroupBootcampTest() {
 
     })
 
-    it('ArkUI_ChipGroup_016', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_016', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.selectedFontColor')
       // options.itemStyle.selectedFontColor 属性无法获取
       await buttonClick({
@@ -278,7 +278,7 @@ export default function ChipGroupBootcampTest() {
 
     })
 
-    it('ArkUI_ChipGroup_017', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_017', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.selectedFontColor')
       // options.itemStyle.selectedFontColor 属性无法获取
       await buttonClick({
@@ -289,7 +289,7 @@ export default function ChipGroupBootcampTest() {
 
     })
 
-    it('ArkUI_ChipGroup_018', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_018', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.selectedFontColor')
       // options.itemStyle.selectedFontColor 属性无法获取
       await buttonClick({
@@ -300,7 +300,7 @@ export default function ChipGroupBootcampTest() {
 
     })
 
-    it('ArkUI_ChipGroup_019', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_019', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.selectedFontColor')
       // options.itemStyle.selectedFontColor 属性无法获取
       await buttonClick({
@@ -311,7 +311,7 @@ export default function ChipGroupBootcampTest() {
 
     })
 
-    it('ArkUI_ChipGroup_020', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_020', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.selectedFontColor')
       // options.itemStyle.selectedFontColor 属性无法获取
       await buttonClick({
@@ -326,7 +326,7 @@ export default function ChipGroupBootcampTest() {
     })
 
     // options.itemStyle.selectedBackgroundColor
-    it('ArkUI_ChipGroup_021', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_021', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.selectedBackgroundColor')
       // options.itemStyle.selectedBackgroundColor 属性无法获取
       await buttonClick({
@@ -340,7 +340,7 @@ export default function ChipGroupBootcampTest() {
 
     })
 
-    it('ArkUI_ChipGroup_022', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_022', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.selectedBackgroundColor')
       // options.itemStyle.selectedBackgroundColor 属性无法获取
       await buttonClick({
@@ -351,7 +351,7 @@ export default function ChipGroupBootcampTest() {
 
     })
 
-    it('ArkUI_ChipGroup_023', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_023', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.selectedBackgroundColor')
       // options.itemStyle.selectedBackgroundColor 属性无法获取
       await buttonClick({
@@ -362,7 +362,7 @@ export default function ChipGroupBootcampTest() {
 
     })
 
-    it('ArkUI_ChipGroup_024', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_024', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.selectedBackgroundColor')
       // options.itemStyle.selectedBackgroundColor 属性无法获取
       await buttonClick({
@@ -373,7 +373,7 @@ export default function ChipGroupBootcampTest() {
 
     })
 
-    it('ArkUI_ChipGroup_025', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_025', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.selectedBackgroundColor')
       // options.itemStyle.selectedBackgroundColor 属性无法获取
       await buttonClick({
@@ -384,7 +384,7 @@ export default function ChipGroupBootcampTest() {
 
     })
 
-    it('ArkUI_ChipGroup_026', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_026', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.itemStyle.selectedBackgroundColor')
       // options.itemStyle.selectedBackgroundColor 属性无法获取
       await buttonClick({
@@ -399,7 +399,7 @@ export default function ChipGroupBootcampTest() {
     })
 
     // options.selectedIndexes
-    it('ArkUI_ChipGroup_027', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_027', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.selectedIndexes')
       // options.selectedIndexes无法获取
       await radioClick({
@@ -413,7 +413,7 @@ export default function ChipGroupBootcampTest() {
 
     })
 
-    it('ArkUI_ChipGroup_028', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_028', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.selectedIndexes')
       // options.selectedIndexes无法获取
       await radioClick({
@@ -424,7 +424,7 @@ export default function ChipGroupBootcampTest() {
 
     })
 
-    it('ArkUI_ChipGroup_029', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_029', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.selectedIndexes')
       // options.selectedIndexes无法获取
       await radioClick({
@@ -439,7 +439,7 @@ export default function ChipGroupBootcampTest() {
     })
 
     // options.multiple
-    it('ArkUI_ChipGroup_030', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_030', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.multiple')
       // options.multiple 无法获取
       await radioClick({
@@ -453,7 +453,7 @@ export default function ChipGroupBootcampTest() {
 
     })
 
-    it('ArkUI_ChipGroup_031', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_031', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.multiple')
       // options.multiple 无法获取
       await radioClick({
@@ -468,7 +468,7 @@ export default function ChipGroupBootcampTest() {
     })
 
     // options.chipGroupSpace.itemSpace
-    it('ArkUI_ChipGroup_032', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_032', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.chipGroupSpace.itemSpace')
       // options.chipGroupSpace.itemSpace 无法获取
       await sliderDrag({
@@ -489,7 +489,7 @@ export default function ChipGroupBootcampTest() {
     })
 
     // options.chipGroupSpace.startSpace
-    it('ArkUI_ChipGroup_033', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_033', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.chipGroupSpace.startSpace')
       // options.chipGroupSpace.startSpace 无法获取
       await sliderDrag({
@@ -510,7 +510,7 @@ export default function ChipGroupBootcampTest() {
     })
 
     // options.chipGroupSpace.endSpace
-    it('ArkUI_ChipGroup_034', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_034', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.chipGroupSpace.endSpace')
       // options.chipGroupSpace.endSpace 无法获取
       await sliderDrag({
@@ -531,7 +531,7 @@ export default function ChipGroupBootcampTest() {
     })
 
     // options.chipGroupSpace.top
-    it('ArkUI_ChipGroup_035', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_035', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.ChipGroupPadding.top')
       // options.chipGroupSpace.top 无法获取
       await sliderDrag({
@@ -552,7 +552,7 @@ export default function ChipGroupBootcampTest() {
     })
 
     // options.chipGroupSpace.bottom
-    it('ArkUI_ChipGroup_036', 0, async  (done:Function) => {
+    it('ArkUI_ChipGroup_036', 0, async (done: Function) => {
       await titleSearch('参数列表', 'options.ChipGroupPadding.bottom')
       // options.chipGroupSpace.bottom 无法获取
       await sliderDrag({
@@ -571,7 +571,7 @@ export default function ChipGroupBootcampTest() {
 
       done();
     })
-    
+
 
   })
 }

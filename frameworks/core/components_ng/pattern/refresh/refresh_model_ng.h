@@ -37,6 +37,7 @@ public:
     void SetChangeEvent(RefreshChangeEvent&& changeEvent) override;
     void SetOnOffsetChange(OffsetChangeEvent&& dragOffset) override;
     void ResetOnOffsetChange() override;
+    void SetMaxPullDownDistance(const std::optional<float>& maxDistance) override;
     void SetPullDownRatio(const std::optional<float>& pullDownRatio) override;
     void SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder) override;
     void SetLoadingText(const std::string& loadingText) override;
@@ -69,6 +70,8 @@ public:
     static void SetOnRefreshing(FrameNode* frameNode, RefreshingEvent&& refreshing);
     static void SetRefreshOffset(FrameNode* frameNode, const Dimension& offset);
     static void SetPullToRefresh(FrameNode* frameNode, bool isPullToRefresh);
+    static void SetMaxPullDownDistance(FrameNode* frameNode, const std::optional<float>& maxDistance);
+    static float GetMaxPullDownDistance(FrameNode* frameNode);
     static void SetPullDownRatio(FrameNode* frameNode, const std::optional<float>& pullDownRatio);
     static float GetPullDownRatio(FrameNode* frameNode);
     static Dimension GetRefreshOffset(FrameNode* frameNode);

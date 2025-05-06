@@ -49,27 +49,27 @@ export const scrollAndSwipeRoute: RouteGroup = {
 @Builder
 export function scrollAndSwipeDestination(name: string, route: Route) {
   if (name === 'ScrollAndSwipe/List') {
-    ListBootcamp({title: route.label})
-  }else if (name === 'ScrollAndSwipe/ListItem'){
-    ListItemBootcamp({title: route.label})
-  }else if (name === 'ScrollAndSwipe/ListItemGroup'){
-    ListItemGroupBootcamp({title: route.label})
-  }else if (name === 'ScrollAndSwipe/Grid'){
-    GridBootcamp({title: route.label})
-  }else if (name === 'ScrollAndSwipe/GridItem'){
-    GridItemBootcamp({title: route.label})
-  }else if (name === 'ScrollAndSwipe/Scroll'){
-    ScrollBootcamp({title: route.label})
-  }else if (name === 'ScrollAndSwipe/Swiper'){
-    SwiperBootcamp({title: route.label})
-  }else if (name === 'ScrollAndSwipe/WaterFlow'){
-    WaterFlowBootcamp({title: route.label})
-  }else  if (name === 'ScrollAndSwipe/FlowItem'){
-    FlowItemBootcamp({title: route.label})
-  }else if (name === 'ScrollAndSwipe/Scrollbar'){
-    ScrollBarBootcamp({title: route.label})
-  }else if (name === 'ScrollAndSwipe/Refresh'){
-    RefreshBootcamp({title: route.label})
+    ListBootcamp({ title: route.label })
+  } else if (name === 'ScrollAndSwipe/ListItem') {
+    ListItemBootcamp({ title: route.label })
+  } else if (name === 'ScrollAndSwipe/ListItemGroup') {
+    ListItemGroupBootcamp({ title: route.label })
+  } else if (name === 'ScrollAndSwipe/Grid') {
+    GridBootcamp({ title: route.label })
+  } else if (name === 'ScrollAndSwipe/GridItem') {
+    GridItemBootcamp({ title: route.label })
+  } else if (name === 'ScrollAndSwipe/Scroll') {
+    ScrollBootcamp({ title: route.label })
+  } else if (name === 'ScrollAndSwipe/Swiper') {
+    SwiperBootcamp({ title: route.label })
+  } else if (name === 'ScrollAndSwipe/WaterFlow') {
+    WaterFlowBootcamp({ title: route.label })
+  } else if (name === 'ScrollAndSwipe/FlowItem') {
+    FlowItemBootcamp({ title: route.label })
+  } else if (name === 'ScrollAndSwipe/Scrollbar') {
+    ScrollBarBootcamp({ title: route.label })
+  } else if (name === 'ScrollAndSwipe/Refresh') {
+    RefreshBootcamp({ title: route.label })
   }
 
 }

@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/navigation/navdestination_node_base.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -427,5 +428,18 @@ bool NavDestinationPatternBase::CustomizeExpandSafeArea()
     auto host = AceType::DynamicCast<NavDestinationNodeBase>(GetHost());
     CHECK_NULL_RETURN(host, false);
     return host->CustomizeExpandSafeArea();
+}
+
+void NavDestinationPatternBase::OnColorConfigurationUpdate()
+{
+    auto node = AceType::DynamicCast<NavDestinationNodeBase>(GetHost());
+    CHECK_NULL_VOID(node);
+    auto dividerNode = AceType::DynamicCast<FrameNode>(node->GetToolBarDividerNode());
+    CHECK_NULL_VOID(dividerNode);
+    auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_VOID(dividerRenderProperty);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    dividerRenderProperty->UpdateDividerColor(theme->GetToolBarDividerColor());
 }
 } // namespace OHOS::Ace::NG

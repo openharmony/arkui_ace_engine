@@ -15,6 +15,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_controller_func_wrapper.h"
 
 #include "base/image/pixel_map.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
@@ -95,7 +96,16 @@ OffsetF DragControllerFuncWrapper::GetOriginNodeOffset(
     PreparedInfoForDrag& data, PreparedAsyncCtxForAnimate& asyncCtxData)
 {
     CHECK_NULL_RETURN(data.pixelMap, OffsetF());
-    auto pointPosition = DragDropFuncWrapper::GetPointRelativeToMainWindow(asyncCtxData.dragPointerEvent.GetPoint());
+    OffsetF pointPosition(static_cast<float>(asyncCtxData.dragPointerEvent.displayX),
+        static_cast<float>(asyncCtxData.dragPointerEvent.displayY));
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+        asyncCtxData.containerId >= MIN_SUBCONTAINER_ID
+            ? SubwindowManager::GetInstance()->GetParentContainerId(asyncCtxData.containerId)
+            : asyncCtxData.containerId,
+        SubwindowType::TYPE_MENU);
+    CHECK_NULL_RETURN(subwindow, OffsetF());
+    auto subwindowOffset = subwindow->GetWindowRect().GetOffset();
+    pointPosition -= subwindowOffset;
     auto pixelMapScaledOffset = GetPixelMapScaledOffset(pointPosition, data, asyncCtxData);
     auto offsetX = pixelMapScaledOffset.GetX() +
         (data.pixelMap->GetWidth() * data.previewScale) / 2.0f -data.pixelMap->GetWidth() / 2.0f;

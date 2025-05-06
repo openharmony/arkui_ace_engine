@@ -14,7 +14,7 @@
  */
 
 import { describe, beforeAll, it } from '@ohos/hypium'
-import { Driver, ON,Component  } from '@kit.TestKit';
+import { Driver, ON, Component } from '@kit.TestKit';
 import {
   buttonClick,
   getToggle,
@@ -111,8 +111,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-
-
       })
 
       done()
@@ -124,8 +122,6 @@ export default function MenuItemGroup4() {
 
       await radioClick({
         radioClickObj: 2,
-
-
       })
 
       done()
@@ -138,8 +134,6 @@ export default function MenuItemGroup4() {
 
       await radioClick({
         radioClickObj: 3,
-
-
       })
 
       done()
@@ -154,8 +148,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-
-
       })
 
       done()
@@ -204,7 +196,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-
       })
 
       done()
@@ -220,8 +211,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-
-
       })
 
       done()
@@ -301,7 +290,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-
       })
 
       await sliderDrag({
@@ -309,8 +297,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-
-
       })
 
       done()
@@ -600,8 +586,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-
-
       })
 
       await sliderDrag({
@@ -609,8 +593,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-
-
       })
 
       done()
@@ -626,8 +608,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-
-
       })
 
       await sliderDrag({
@@ -635,7 +615,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-
       })
 
       done()
@@ -651,8 +630,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-
-
       })
 
       await sliderDrag({
@@ -660,7 +637,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-
       })
 
       done()
@@ -721,8 +697,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-
-
       })
 
       done()
@@ -749,8 +723,6 @@ export default function MenuItemGroup4() {
 
       await radioClick({
         radioClickObj: 2,
-
-
       })
 
       done()
@@ -810,8 +782,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-
-
       })
 
       await sliderDrag({
@@ -819,8 +789,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-
-
       })
 
       await Search('基础属性', 'clickEffect', '通用属性5')
@@ -846,8 +814,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-
-
       })
 
       done()
@@ -862,8 +828,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-
-
       })
 
       done()
@@ -879,8 +843,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-
-
       })
 
       done()
@@ -895,8 +857,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-
-
       })
 
       done()
@@ -912,8 +872,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-
-
       })
 
       done()
@@ -928,8 +886,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-
-
       })
 
       done()
@@ -946,8 +902,6 @@ export default function MenuItemGroup4() {
           toggleClickType: ToggleClick.Open,
           toggleClickObj: 'accessibilityLevel'
         },
-
-
       })
 
       done()
@@ -962,8 +916,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickObj: 'accessibilityLevel'
         },
-
-
       })
 
       done()
@@ -978,8 +930,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickObj: 'accessibilityLevel'
         },
-
-
       })
 
       done()
@@ -995,8 +945,6 @@ export default function MenuItemGroup4() {
           toggleClickType: ToggleClick.Close,
           toggleClickObj: 'accessibilityLevel'
         },
-
-
       })
 
       done()
@@ -1067,14 +1015,10 @@ export default function MenuItemGroup4() {
       await titleSearch('基础属性', 'outline.value.width', '通用属性6')
       await sliderDrag({
         slideStar: Slide.start,
-
-
       })
 
       await sliderDrag({
         slideStar: Slide.end,
-
-
       })
       done();
     })
@@ -1087,8 +1031,6 @@ export default function MenuItemGroup4() {
       await titleSearch('基础属性', 'outline.value.color', '通用属性6')
       await buttonClick({
         buttonClickObj: 0,
-
-
       })
       done();
     })
@@ -1100,8 +1042,6 @@ export default function MenuItemGroup4() {
       await titleSearch('基础属性', 'outline.value.color', '通用属性6')
       await buttonClick({
         buttonClickObj: 1,
-
-
       })
       done();
     })
@@ -1113,8 +1053,6 @@ export default function MenuItemGroup4() {
       await titleSearch('基础属性', 'outline.value.color', '通用属性6')
       await buttonClick({
         buttonClickObj: 2,
-
-
       })
 
       done();
@@ -1128,8 +1066,6 @@ export default function MenuItemGroup4() {
       await titleSearch('基础属性', 'outline.value.color', '通用属性6')
       await buttonClick({
         buttonClickObj: 3,
-
-
       })
       done();
     })
@@ -1141,8 +1077,6 @@ export default function MenuItemGroup4() {
       await titleSearch('基础属性', 'outline.value.color', '通用属性6')
       await buttonClick({
         buttonClickObj: 4,
-
-
       })
       done();
     })
@@ -1157,8 +1091,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-
-
       })
       done();
     })
@@ -1170,8 +1102,6 @@ export default function MenuItemGroup4() {
       await titleSearch('基础属性', 'outline.value.radius', '通用属性6')
       await sliderDrag({
         slideStar: Slide.start,
-
-
       })
       await sliderDrag({
         slideStar: Slide.end,
@@ -1179,7 +1109,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-
       })
 
       done();
@@ -1193,8 +1122,6 @@ export default function MenuItemGroup4() {
       await titleSearch('基础属性', 'outline.value.style', '通用属性6')
       await radioClick({
         radioClickObj: 0,
-
-
       })
       done();
     })
@@ -1206,8 +1133,6 @@ export default function MenuItemGroup4() {
       await titleSearch('基础属性', 'outline.value.style', '通用属性6')
       await radioClick({
         radioClickObj: 1,
-
-
       })
       done();
     })
@@ -1222,8 +1147,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-
-
       })
       done();
     })
@@ -1526,8 +1449,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickObj: 'hitTestBehavior'
         },
-
-
       })
       done();
     })
@@ -1542,8 +1463,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickObj: 'hitTestBehavior'
         },
-
-
       })
       done();
     })
@@ -1558,8 +1477,6 @@ export default function MenuItemGroup4() {
         toggleClick: {
           toggleClickObj: 'hitTestBehavior'
         },
-
-
       })
       done();
     })
@@ -1575,8 +1492,6 @@ export default function MenuItemGroup4() {
           toggleClickType: ToggleClick.Close,
           toggleClickObj: 'hitTestBehavior'
         },
-
-
       })
       done();
     })

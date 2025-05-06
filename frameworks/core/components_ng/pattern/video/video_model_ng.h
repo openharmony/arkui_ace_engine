@@ -58,8 +58,6 @@ public:
     static void SetMuted(FrameNode* frameNode, bool muted);
     static void SetSurfaceBackgroundColor(FrameNode* frameNode, Color color);
     static void SetShortcutKeyEnabled(FrameNode* frameNode, bool isEnableShortcutKey);
-
 };
-
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_VIDEO_VIDEO_MODEL_NG_H

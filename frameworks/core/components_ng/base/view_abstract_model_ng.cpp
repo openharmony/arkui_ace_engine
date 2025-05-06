@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/view_abstract_model_ng.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -50,7 +51,8 @@ void StartVirator(const MenuParam& menuParam, bool isMenu, const std::string& me
     if (isMenu) {
         return;
     }
-    if (menuParam.hapticFeedbackMode == HapticFeedbackMode::AUTO && menuParam.previewMode != MenuPreviewMode::NONE) {
+    if (menuParam.hapticFeedbackMode == HapticFeedbackMode::AUTO &&
+        menuParam.previewMode.value_or(MenuPreviewMode::NONE) != MenuPreviewMode::NONE) {
         VibratorUtils::StartViratorDirectly(menuHapticFeedback);
     }
 }
@@ -200,7 +202,7 @@ bool ViewAbstractModelNG::CheckMenuIsShow(
     }
     if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow && !wrapperPattern->GetIsOpenMenu()) {
         TAG_LOGI(AceLogTag::ACE_MENU, "execute hide menu.");
-        overlayManager->HideMenu(menuNode, targetId, false);
+        overlayManager->HideMenu(menuNode, targetId, false, HideMenuType::IS_SHOW);
     }
     return true;
 }
@@ -276,7 +278,7 @@ void CreateCustomMenuWithPreview(
     if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) == MenuPreviewMode::IMAGE) {
         auto context = targetNode->GetRenderContext();
         CHECK_NULL_VOID(context);
-        auto gestureHub = targetNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+        auto gestureHub = targetNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         auto pixelMap = context->GetThumbnailPixelMap();
         gestureHub->SetPixelMap(pixelMap);
@@ -423,7 +425,7 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
             CHECK_NULL_VOID(inputHub);
             inputHub->BindContextMenu(std::move(event));
         } else if (type == ResponseType::LONG_PRESS) {
-            auto gestureHub = targetNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+            auto gestureHub = targetNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub();
             CHECK_NULL_VOID(gestureHub);
             gestureHub->SetPreviewMode(menuParam.previewMode.value_or(MenuPreviewMode::NONE));
             // create or show menu on long press
@@ -449,7 +451,7 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
                             menuParam.isShowHoverImage) {
                             auto context = targetNode->GetRenderContext();
                             CHECK_NULL_VOID(context);
-                            auto gestureHub = targetNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+                            auto gestureHub = targetNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub();
                             CHECK_NULL_VOID(gestureHub);
                             auto pixelMap = context->GetThumbnailPixelMap();
                             gestureHub->SetPixelMap(pixelMap);

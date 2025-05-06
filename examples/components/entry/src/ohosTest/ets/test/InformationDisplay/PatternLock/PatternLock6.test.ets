@@ -706,7 +706,7 @@ export default function PatternLock6() {
 
       done()
     })
-    
+
   })
 }
 

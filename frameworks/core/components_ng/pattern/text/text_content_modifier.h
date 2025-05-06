@@ -75,7 +75,7 @@ public:
 
     void ContentChange();
 
-    void ModifyTextStyle(TextStyle& textStyle);
+    void ModifyTextStyle(TextStyle& textStyle, Color& textColor);
 
     void StartTextRace(const MarqueeOption& option);
     void StopTextRace();
@@ -100,7 +100,6 @@ public:
     }
 
     bool NeedMeasureUpdate(PropertyChangeFlag& flag);
-    void AnimationMeasureUpdate(const RefPtr<FrameNode>& host);
 
     void SetClip(bool clip);
 
@@ -113,6 +112,10 @@ public:
     }
     void TextColorModifier(const Color& value);
     void ContentModifierDump();
+#ifdef ACE_ENABLE_VK
+    void SetHybridRenderTypeIfNeeded(DrawingContext& drawingContext, const RefPtr<ParagraphManager>& pManager,
+        RefPtr<FrameNode>& host);
+#endif
 
 protected:
     OffsetF GetPaintOffset() const
@@ -151,7 +154,7 @@ private:
     void ModifyAdaptMinFontSizeInTextStyle(TextStyle& textStyle);
     void ModifyAdaptMaxFontSizeInTextStyle(TextStyle& textStyle);
     void ModifyFontWeightInTextStyle(TextStyle& textStyle);
-    void ModifyTextColorInTextStyle(TextStyle& textStyle);
+    void ModifyTextColorInTextStyle(Color& textColor);
     void ModifySymbolColorInTextStyle(TextStyle& textStyle);
     std::vector<Color> Convert2VectorColor(const LinearVector<LinearColor>& colorList);
     void ModifyTextShadowsInTextStyle(TextStyle& textStyle);
@@ -226,7 +229,6 @@ private:
     std::vector<ShadowProp> shadows_;
 
     std::optional<TextDecoration> textDecoration_;
-    TextDecoration lastTextDecoration_;
     std::optional<Color> textDecorationColor_;
     Color lastTextDecorationColor_;
     RefPtr<AnimatablePropertyFloat> textDecorationColorAlpha_;

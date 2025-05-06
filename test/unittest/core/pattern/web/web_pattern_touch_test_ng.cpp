@@ -19,6 +19,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "test/mock/core/common/mock_udmf.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/web/mock_web_delegate.h"
 
 #include "base/memory/ace_type.h"
@@ -431,6 +432,56 @@ HWTEST_F(WebPatternTouchTestNg, SuggestionSelected_002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnShowAutofillPopup_001
+ * @tc.desc: OnShowAutofillPopup
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTouchTestNg, OnShowAutofillPopup_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    MockPipelineContext::SetUp();
+    std::vector<std::string> menu_items;
+    webPattern->OnShowAutofillPopup(0, 0, menu_items);
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
+ * @tc.name: OnShowAutofillPopupV2_001
+ * @tc.desc: OnShowAutofillPopupV2
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTouchTestNg, OnShowAutofillPopupV2_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    MockPipelineContext::SetUp();
+    std::vector<std::string> menu_items;
+    webPattern->OnShowAutofillPopupV2(0, 0, 10, 10, menu_items);
+    MockPipelineContext::TearDown();
+#endif
+}
+
+/**
  * @tc.name: OnHideAutofillPopup_001
  * @tc.desc: OnHideAutofillPopup.
  * @tc.type: FUNC
@@ -448,9 +499,11 @@ HWTEST_F(WebPatternTouchTestNg, OnHideAutofillPopup_001, TestSize.Level1)
     auto webPattern = frameNode->GetPattern<WebPattern>();
     webPattern->OnModifyDone();
     EXPECT_NE(webPattern, nullptr);
+    MockPipelineContext::SetUp();
     webPattern->isShowAutofillPopup_ = false;
     webPattern->OnHideAutofillPopup();
     EXPECT_EQ(webPattern->isShowAutofillPopup_, false);
+    MockPipelineContext::TearDown();
 #endif
 }
 

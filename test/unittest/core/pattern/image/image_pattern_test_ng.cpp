@@ -42,7 +42,7 @@ HWTEST_F(ImagePatternTestNg, TriggerVisibleAreaChangeForChild001, TestSize.Level
     for (auto& child : frameNode->GetChildren()) {
         auto childNode = AceType::DynamicCast<FrameNode>(child);
         EXPECT_NE(childNode, nullptr);
-        childNode->GetEventHub<EventHub>()->GetVisibleAreaCallback(true).callback = callback;
+        childNode->GetOrCreateEventHub<EventHub>()->GetVisibleAreaCallback(true).callback = callback;
     }
     auto testNode = TestNode::CreateTestNode(ElementRegister::GetInstance()->MakeUniqueId());
     frameNode->AddChild(testNode);
@@ -295,7 +295,7 @@ HWTEST_F(ImagePatternTestNg, AddImageLoadSuccessEvent001, TestSize.Level1)
     imagePattern->cacheImages_.emplace_back(cacheImageStruct);
     LoadImageSuccessEvent info(300, 200, 400, 500);
     info.loadingStatus_ = 1;
-    auto eventHub = imageNode->GetEventHub<ImageEventHub>();
+    auto eventHub = imageNode->GetOrCreateEventHub<ImageEventHub>();
     EXPECT_NE(eventHub, nullptr);
     eventHub->FireCompleteEvent(info);
     auto ret = imagePattern->GetNextIndex(0);
@@ -490,10 +490,11 @@ HWTEST_F(ImagePatternTestNg, TriggerFirstVisibleAreaChange001, TestSize.Level1)
 {
     auto frameNode = CreatePixelMapAnimator();
     EXPECT_NE(frameNode, nullptr);
+    frameNode->onMainTree_ = true;
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     imagePattern->isComponentSnapshotNode_ = true;
     imagePattern->TriggerFirstVisibleAreaChange();
-    EXPECT_FALSE(imagePattern->isFormAnimationStart_);
+    EXPECT_TRUE(imagePattern->isFormAnimationStart_);
 }
 
 /**
@@ -529,7 +530,7 @@ HWTEST_F(ImagePatternTestNg, DumpRenderInfo001, TestSize.Level1)
     EXPECT_EQ(imagePattern->IsSupportImageAnalyzerFeature(), false);
     auto frameNodePtr = AceType::Claim(frameNode);
     imagePattern->AddImageLoadSuccessEvent(frameNodePtr);
-    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ImageEventHub>();
     EXPECT_NE(eventHub->completeEvent_, nullptr);
     std::vector<float> matrix = { 1.1f };
     ImageModelNG::SetColorFilterMatrix(frameNode, matrix);
@@ -630,12 +631,14 @@ HWTEST_F(ImagePatternTestNg, UpdateFormDurationByRemainder001, TestSize.Level1)
 {
     auto frameNode = CreatePixelMapAnimator();
     ASSERT_NE(frameNode, nullptr);
+    frameNode->onMainTree_ = true;
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(imagePattern, nullptr);
     auto pipeline = MockPipelineContext::GetCurrentContext();
     pipeline->SetIsFormRender(true);
     EXPECT_EQ(imagePattern->IsFormRender(), true);
     imagePattern->animator_->duration_ = 2000;
+    imagePattern->ResetFormAnimationStartTime();
     imagePattern->UpdateFormDurationByRemainder();
     ASSERT_NE(imagePattern->animator_->duration_, 2000);
 }
@@ -1220,7 +1223,7 @@ HWTEST_F(ImagePatternTestNg, ImageRemoveAreaChangeInner001, TestSize.Level1)
     imagePattern->cacheImages_.emplace_back(cacheImageStruct);
     LoadImageSuccessEvent info(300, 200, 400, 500);
     info.loadingStatus_ = 1;
-    auto eventHub = imageNode->GetEventHub<ImageEventHub>();
+    auto eventHub = imageNode->GetOrCreateEventHub<ImageEventHub>();
     EXPECT_NE(eventHub, nullptr);
     bool flag = false;
     OnAreaChangedFunc onAreaChanged = [&flag](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect,
@@ -1256,7 +1259,7 @@ HWTEST_F(ImagePatternTestNg, CheckCallback002, TestSize.Level1)
     };
     imagePattern->SetOnProgressCallback(std::move(onProgress));
     imagePattern->onProgressCallback_(uint32_t(0), uint32_t(1));
-    imagePattern->LoadImage(ImageSourceInfo(""), PROPERTY_UPDATE_NORMAL, VisibleType::GONE);
+    imagePattern->LoadImage(ImageSourceInfo(""), false);
     EXPECT_EQ(testData, 1);
 }
 

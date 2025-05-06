@@ -64,9 +64,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   // Set of elmtIds retaken by IF that need re-render
   protected dirtRetakenElementIds_: Set<number> = new Set<number>();
 
-  // Map elmtId -> Repeat instance in this ViewPU
-  protected elmtId2Repeat_: Map<number, RepeatAPI<any>> = new Map<number, RepeatAPI<any>>();
-
   protected parent_: IView | undefined = undefined;
 
   // static flag for paused rendering
@@ -393,6 +390,10 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     // see which elmtIds are managed by this View
     // and clean up all book keeping for them
     this.purgeDeletedElmtIds();
+
+    // forceCompleteRerender() might have been called externally,
+    // ensure all pending book keeping is finished to prevent unwanted element updates
+    ObserveV2.getObserve()?.runIdleTasks();
 
     Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
 

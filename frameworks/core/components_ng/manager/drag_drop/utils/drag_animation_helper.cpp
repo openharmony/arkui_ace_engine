@@ -275,7 +275,7 @@ void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode
 void DragAnimationHelper::ShowMenuHideAnimation(const RefPtr<FrameNode>& imageNode, const PreparedInfoForDrag& data)
 {
     CHECK_NULL_VOID(imageNode);
-    if (imageNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT || data.hasTransition) {
+    if (imageNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT) {
         return;
     }
     auto menuNode = data.menuNode;
@@ -454,6 +454,7 @@ void DragAnimationHelper::ShowGatherAnimationWithMenu(const RefPtr<FrameNode>& m
         auto menuNode = menuWrapperPattern->GetMenu();
         CHECK_NULL_VOID(menuNode);
         auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        DragAnimationHelper::HideDragNodeCopy(manager);
         DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
         DragAnimationHelper::CalcBadgeTextPosition(menuPattern, manager, imageNode, textNode);
         DragAnimationHelper::ShowBadgeAnimation(textNode);
@@ -559,7 +560,10 @@ RefPtr<FrameNode> DragAnimationHelper::CreateGatherNode(const RefPtr<FrameNode>&
         }
         GatherNodeChildInfo gatherNodeChildInfo;
         auto imageNode = CreateGatherImageNode(itemFrameNode, gatherNodeChildInfo);
-        CHECK_NULL_RETURN(imageNode, nullptr);
+        if (!imageNode) {
+            TAG_LOGW(AceLogTag::ACE_DRAG, "Create gather image node failed");
+            continue;
+        }
         stackNode->AddChild(imageNode);
         gatherNodeInfo.push_back(gatherNodeChildInfo);
     }
@@ -690,7 +694,7 @@ bool DragAnimationHelper::ShowGatherNodeAnimation(const RefPtr<FrameNode>& frame
     AddDragNodeCopy(manager, frameNode, gatherNode);
     MarkDirtyNode(gatherNode);
     
-    pipeline->FlushSyncGeometryNodeTasks();
+    pipeline->FlushPipelineImmediately();
     manager->SetIsGatherWithMenu(false);
 
     //do gather animation before lifting
@@ -1212,10 +1216,6 @@ void DragAnimationHelper::UpdateStartAnimation(const RefPtr<OverlayManager>& ove
     const RefPtr<NodeAnimatablePropertyFloat>& animateProperty, Point point,
     const DragDropManager::DragPreviewInfo& info, const Offset& newOffset)
 {
-    CHECK_NULL_VOID(info.relativeContainerNode);
-    auto relativeContainerRenderContext = info.relativeContainerNode->GetRenderContext();
-    CHECK_NULL_VOID(relativeContainerRenderContext);
-    relativeContainerRenderContext->UpdateTransformTranslate({ newOffset.GetX(), newOffset.GetY(), 0.0f });
     auto offset = OffsetF(point.GetX(), point.GetY());
     auto menuWrapperNode = DragAnimationHelper::GetMenuWrapperNodeFromDrag();
     auto menuPosition = overlayManager->CalculateMenuPosition(menuWrapperNode, offset);
@@ -1234,6 +1234,10 @@ void DragAnimationHelper::UpdateStartAnimation(const RefPtr<OverlayManager>& ove
     if (animateProperty) {
         animateProperty->Set(1.0f);
     }
+    CHECK_NULL_VOID(info.relativeContainerNode);
+    auto relativeContainerRenderContext = info.relativeContainerNode->GetRenderContext();
+    CHECK_NULL_VOID(relativeContainerRenderContext);
+    relativeContainerRenderContext->UpdateTransformTranslate({ newOffset.GetX(), newOffset.GetY(), 0.0f });
     UpdateStartTransitionOptionAnimation(info);
 }
 

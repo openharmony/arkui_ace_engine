@@ -38,7 +38,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     CHECK_NULL_VOID(page);
     auto pagePattern = page->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
-    auto eventHub = page->GetEventHub<EventHub>();
+    auto eventHub = page->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (transitionType == PageTransitionType::EXIT_POP) {
@@ -129,7 +129,7 @@ void StageManager::PageChangeCloseKeyboard()
         }
         if (!container->IsSceneBoardWindow()) {
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Container not SceneBoardWindow.");
-            InputMethodManager::GetInstance()->CloseKeyboard();
+            InputMethodManager::GetInstance()->CloseKeyboard(false);
         }
     }
 #endif
@@ -336,11 +336,12 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
     if (popSize == 0) {
         return true;
     }
-    auto outPageNode = AceType::DynamicCast<FrameNode>(srcPageNode_.Upgrade());
+
     if (needTransition) {
         pipeline->FlushPipelineImmediately();
     }
     bool firstPageTransition = true;
+    auto outPageNode = AceType::DynamicCast<FrameNode>(srcPageNode_.Upgrade());
     auto iter = children.rbegin();
     for (int32_t current = 0; current < popSize; ++current) {
         auto pageNode = *iter;
@@ -588,7 +589,7 @@ RefPtr<FrameNode> StageManager::GetPrevPageWithTransition() const
         return nullptr;
     }
     if (stageInTrasition_) {
-        return DynamicCast<FrameNode>(animationSrcPage_.Upgrade());
+        return DynamicCast<FrameNode>(srcPageNode_.Upgrade());
     }
     return DynamicCast<FrameNode>(children.front());
 }

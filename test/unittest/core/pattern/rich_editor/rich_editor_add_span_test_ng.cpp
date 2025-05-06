@@ -23,6 +23,13 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+    const auto BUILDER_NODE_1 = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    int32_t testNumber1 = 1;
+    int32_t testNumber2 = 2;
+} // namespace
 const std::string SYMBOL_FONT_FAMILY = "Symbol_Test_CustomSymbol";
 class RichEditorAddSpanTestNg : public RichEditorCommonTestNg {
 public:
@@ -399,6 +406,41 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSpans002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AddSpans003
+ * @tc.desc: Test the function AddTextSpan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAddSpanTestNg, AddSpans003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    struct UpdateSpanStyle typingStyle;
+    TextStyle textStyle(5);
+    richEditorPattern->SetTypingStyle(typingStyle, textStyle);
+    std::string insertValue = "hello";
+    RichEditorPattern::OperationRecord record;
+    richEditorPattern->InsertValueOperation(StringUtils::Str8ToStr16(insertValue), &record, OperationType::DEFAULT);
+    int32_t maxLength = 5;
+    richEditorPattern->SetMaxLength(maxLength);
+    richEditorPattern->AddImageSpan(IMAGE_SPAN_OPTIONS_1);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 5);
+
+    // 0: AddTextSpan
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 5);
+
+    // 1: AddSymbolSpan
+    richEditorPattern->AddSymbolSpan(SYMBOL_SPAN_OPTIONS_1);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 5);
+
+    // 2: AddPlaceholderSpan
+    richEditorPattern->AddPlaceholderSpan(BUILDER_NODE_1, {});
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 5);
+}
+
+/**
  * @tc.name: AddSpanByPasteData001
  * @tc.desc: Test add span by pasteData.
  * @tc.type: FUNC
@@ -517,4 +559,49 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSpansAndReplacePlaceholder001, TestSize.Lev
     richEditorPattern->ClearOperationRecords();
 }
 
+/**
+ * @tc.name: AddSpanByPasteData002
+ * @tc.desc: test AddSpanByPasteData
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAddSpanTestNg, AddSpanByPasteData002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto spanString = AceType::MakeRefPtr<SpanString>(INIT_VALUE_1);
+    ASSERT_NE(spanString, nullptr);
+
+    richEditorPattern->SetSpanStringMode(true);
+    richEditorPattern->AddSpanByPasteData(spanString);
+    richEditorPattern->SetSpanStringMode(false);
+
+    auto start = richEditorPattern->operationRecords_.size();
+    richEditorPattern->AddSpanByPasteData(spanString);
+    EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + testNumber1);
+
+    auto imageSpanItem = AceType::MakeRefPtr<NG::ImageSpanItem>();
+    spanString->AppendSpanItem(imageSpanItem);
+    start = richEditorPattern->operationRecords_.size();
+    richEditorPattern->AddSpanByPasteData(spanString);
+    EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + testNumber2);
+}
+
+/**
+ * @tc.name: ResetSelectionAfterAddSpan001
+ * @tc.desc: test ResetSelectionAfterAddSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAddSpanTestNg, ResetSelectionAfterAddSpan001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->textSelector_.baseOffset = 1;
+    richEditorPattern->textSelector_.destinationOffset = 1;
+    richEditorPattern->isEditing_ = true;
+    richEditorPattern->ResetSelectionAfterAddSpan(false);
+    EXPECT_TRUE(richEditorPattern->caretTwinklingTask_.Cancel());
+}
 } // namespace OHOS::Ace::NG

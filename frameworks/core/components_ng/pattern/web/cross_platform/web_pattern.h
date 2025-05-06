@@ -280,7 +280,7 @@ public:
 
     RefPtr<WebEventHub> GetWebEventHub()
     {
-        return GetEventHub<WebEventHub>();
+        return GetOrCreateEventHub<WebEventHub>();
     }
 
     FocusPattern GetFocusPattern() const override

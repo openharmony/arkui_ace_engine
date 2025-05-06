@@ -820,7 +820,7 @@ void JSSpanString::Marshalling(const JSCallbackInfo& info)
 void JSSpanString::MarshallingExtSpan(const JSCallbackInfo& info, std::vector<uint8_t>& buff)
 {
     if (info.Length() != 2 || !info[1]->IsFunction() || !info[0]->IsObject()) {
-        // marshalling only support one or two params
+        // marshalling only support two params: spanString and callback function
         return;
     }
     auto* spanString = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>();
@@ -937,9 +937,15 @@ void JSSpanString::Unmarshalling(const JSCallbackInfo& info)
         asyncContext->execContext = info.GetExecutionContext();
     }
     auto engine = EngineHelper::GetCurrentEngineSafely();
-    CHECK_NULL_VOID(engine);
+    if (!engine) {
+        free(asyncContext);
+        return;
+    }
     NativeEngine* nativeEngine = engine->GetNativeEngine();
-    CHECK_NULL_VOID(nativeEngine);
+    if (!nativeEngine) {
+        free(asyncContext);
+        return;
+    }
     asyncContext->env = reinterpret_cast<napi_env>(nativeEngine);
     napi_value promise = nullptr;
     napi_create_promise(asyncContext->env, &asyncContext->deferred, &promise);
