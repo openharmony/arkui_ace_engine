@@ -31,6 +31,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_accessibility_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
@@ -7399,7 +7400,14 @@ ArkUINativeModuleValue CommonBridge::SetOnClick(ArkUIRuntimeCallInfo* runtimeCal
         panda::Local<panda::JSValueRef> params[1] = { obj };
         function->Call(vm, function.ToLocal(), params, 1);
     };
-    NG::ViewAbstract::SetOnClick(frameNode, std::move(onClick));
+    // The click event of the text component requires special integration.
+    // If the onClick callback function is modified,
+    // the SetOnClick function in the arkts_native_text_bridge.cpp file must also be updated accordingly.
+    if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
+        TextModelNG::SetOnClick(frameNode, std::move(onClick));
+    } else {
+        NG::ViewAbstract::SetOnClick(frameNode, std::move(onClick));
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

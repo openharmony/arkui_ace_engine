@@ -179,7 +179,7 @@ void TxtParagraph::Layout(float width)
         id = Container::CurrentId();
     }
     OTHER_DURATION(id);
-    ACE_TEXT_SCOPED_TRACE("TxtParagraph::Layout");
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::Layout, width:%f", width);
     CHECK_NULL_VOID(!hasExternalParagraph_ && paragraph_);
     paragraph_->Layout(width);
 }
@@ -200,8 +200,8 @@ void TxtParagraph::ReLayout(float width, const ParagraphStyle& paraStyle, const 
         txtStyles.emplace_back(txtStyle);
     }
     nodeID << "]";
-    ACE_TEXT_SCOPED_TRACE("TxtParagraph::ReLayout node Size:%d nodeID:%s paraStyle id:%d",
-        static_cast<uint32_t>(txtStyles.size()), nodeID.str().c_str(), paraStyle.textStyleUid);
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::ReLayout node Size:%d nodeID:%s paraStyle id:%d width:%f",
+        static_cast<uint32_t>(txtStyles.size()), nodeID.str().c_str(), paraStyle.textStyleUid, width);
     Rosen::TypographyStyle style;
     ConvertTypographyStyle(style, paraStyle_);
     style.relayoutChangeBitmap = textStyles.front().GetReLayoutParagraphStyleBitmap();
