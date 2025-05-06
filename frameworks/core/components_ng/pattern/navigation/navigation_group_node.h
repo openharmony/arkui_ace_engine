@@ -203,11 +203,12 @@ public:
     void StartDialogtransition(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
         bool isTransitionIn);
 
-    void InitPopPreList(const RefPtr<FrameNode>& preNode, std::vector<WeakPtr<FrameNode>>& preNavList);
+    void InitPopPreList(const RefPtr<FrameNode>& preNode, std::vector<WeakPtr<FrameNode>>& preNavList,
+        const std::vector<WeakPtr<FrameNode>>& curNavList);
     void InitPopCurList(const RefPtr<FrameNode>& curNode, std::vector<WeakPtr<FrameNode>>& curNavList,
         bool isNavbarNeedAnimation);
     void InitPushPreList(const RefPtr<FrameNode>& preNode, std::vector<WeakPtr<FrameNode>>& prevNavList,
-        bool isNavbarNeedAnimation);
+        const std::vector<WeakPtr<FrameNode>>& curNavList, bool isNavbarNeedAnimation);
     void InitPushCurList(const RefPtr<FrameNode>& curNode, std::vector<WeakPtr<FrameNode>>& curNavList);
 
     std::vector<WeakPtr<NavDestinationGroupNode>> FindNodesPoped(const RefPtr<FrameNode>& preNode,
