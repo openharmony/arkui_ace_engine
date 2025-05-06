@@ -99,6 +99,8 @@ public:
         float& surfaceWidth, float& surfaceHeight);
     static bool GetXComponentEnableAnalyzer(FrameNode* frameNode);
     static void SetScreenId(FrameNode* frameNode, uint64_t screenId);
+    static RefPtr<FrameNode> CreateFrameNodePeer(int32_t nodeId, const std::optional<std::string>& id,
+        XComponentType type, const std::optional<std::string>& libraryname);
 
 private:
     static XComponentType GetTypeImpl(const RefPtr<FrameNode>& frameNode);

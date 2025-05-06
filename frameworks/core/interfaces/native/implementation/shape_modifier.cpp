@@ -21,6 +21,11 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
+#if defined(PIXEL_MAP_SUPPORTED)
+#include "pixel_map_ani.h"
+#include "pixel_map.h"
+#include "base/image/pixel_map.h"
+#endif
 
 static const double STROKE_MITER_LIMIT_MIN_VALUE = 1.0;
 
@@ -67,7 +72,11 @@ void SetShapeOptions0Impl(Ark_NativePointer node,
     ViewAbstract::SetFocusable(frameNode, true);
     RefPtr<PixelMap> pixelMap;
 #if !defined(PREVIEW) && defined(PIXEL_MAP_SUPPORTED)
-    pixelMap = Converter::Convert<RefPtr<PixelMap>>(value);
+    Media::PixelMapAni* pixelMapAni = reinterpret_cast<Media::PixelMapAni*>(value);
+    CHECK_NULL_VOID(pixelMapAni);
+    auto nativePixelMap = pixelMapAni->nativePixelMap_;
+    CHECK_NULL_VOID(nativePixelMap);
+    pixelMap = PixelMap::CreatePixelMap(&nativePixelMap);
 #endif
     ShapeModelNG::InitBox(frameNode, pixelMap);
 }
@@ -122,7 +131,7 @@ void StrokeDashArrayImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<std::vector<Dimension>>(*value);
     if (!convValue) {
-        // TODO: Reset value
+        ShapeModelNG::SetStrokeDashArray(frameNode, {});
         return;
     }
     auto dashArray = *convValue;
