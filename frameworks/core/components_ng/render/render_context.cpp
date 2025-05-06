@@ -54,6 +54,13 @@ void RenderContext::RequestNextFrame() const
             CHECK_NULL_VOID(pipeline);
             pipeline->SetNeedRenderNode(WeakPtr<FrameNode>(node));
         }
+        if (node->IsObservedByDrawChildren()) {
+            auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+            CHECK_NULL_VOID(pipeline);
+
+            auto frameNode = AceType::DynamicCast<FrameNode>(node->GetObserverParentForDrawChildren());
+            pipeline->SetNeedRenderForDrawChildrenNode(WeakPtr<FrameNode>(frameNode));
+        }
     }
 }
 

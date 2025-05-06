@@ -121,7 +121,9 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
     const DestroyPageCallback& destroyPageCallback, const DestroyApplicationCallback& destroyApplicationCallback,
     const UpdateApplicationStateCallback& updateApplicationStateCallback, const TimerCallback& timerCallback,
     const MediaQueryCallback& mediaQueryCallback, const LayoutInspectorCallback& layoutInpsectorCallback,
-    const DrawInspectorCallback& drawInpsectorCallback, const RequestAnimationCallback& requestAnimationCallback,
+    const DrawInspectorCallback& drawInpsectorCallback,
+    const DrawChildrenInspectorCallback& drawChildrenInspectorCallback,
+    const RequestAnimationCallback& requestAnimationCallback,
     const JsCallback& jsCallback, const OnWindowDisplayModeChangedCallBack& onWindowDisplayModeChangedCallBack,
     const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack,
     const OnSaveAbilityStateCallBack& onSaveAbilityStateCallBack,
@@ -135,7 +137,8 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
       resetStagingPage_(resetLoadingPageCallback), destroyPage_(destroyPageCallback),
       destroyApplication_(destroyApplicationCallback), updateApplicationState_(updateApplicationStateCallback),
       timer_(timerCallback), mediaQueryCallback_(mediaQueryCallback), layoutInspectorCallback_(layoutInpsectorCallback),
-      drawInspectorCallback_(drawInpsectorCallback), requestAnimationCallback_(requestAnimationCallback),
+      drawInspectorCallback_(drawInpsectorCallback), drawChildrenInspectorCallback_(drawChildrenInspectorCallback),
+      requestAnimationCallback_(requestAnimationCallback),
       jsCallback_(jsCallback), onWindowDisplayModeChanged_(onWindowDisplayModeChangedCallBack),
       onConfigurationUpdated_(onConfigurationUpdatedCallBack), onSaveAbilityState_(onSaveAbilityStateCallBack),
       onRestoreAbilityState_(onRestoreAbilityStateCallBack), onNewWant_(onNewWantCallBack),
@@ -2533,6 +2536,33 @@ void FrontendDelegateDeclarative::OnDrawCompleted(const std::string& componentId
             delegate->drawInspectorCallback_(componentId);
         },
         TaskExecutor::TaskType::JS, "ArkUIInspectorDrawCompleted");
+}
+
+void FrontendDelegateDeclarative::OnDrawChildrenCompleted(const std::string& componentId)
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    if (!engine->IsDrawChildrenCallbackFuncExist(componentId)) {
+        return;
+    }
+
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this), componentId] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            delegate->drawChildrenInspectorCallback_(componentId);
+        },
+        TaskExecutor::TaskType::JS, "ArkUIInspectorDrawChildrenCompleted");
+}
+
+bool FrontendDelegateDeclarative::IsDrawChildrenCallbackFuncExist(const std::string& componentId)
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, false);
+
+    return engine->IsDrawChildrenCallbackFuncExist(componentId);
 }
 
 void FrontendDelegateDeclarative::OnPageReady(

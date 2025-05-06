@@ -77,6 +77,18 @@ void FrontendDelegateDeclarativeNG::SetDrawInspectorCallback(const DrawInspector
     drawInspectorCallback_ = drawInspectorCallback;
 }
 
+void FrontendDelegateDeclarativeNG::SetDrawChildrenInspectorCallback(
+    const DrawChildrenInspectorCallback& drawChildrenInspectorCallback)
+{
+    drawChildrenInspectorCallback_ = drawChildrenInspectorCallback;
+}
+
+void FrontendDelegateDeclarativeNG::SetIsDrawChildrenCallbackFuncExistCallback(
+    const IsDrawChildrenCallbackFuncExistCallback& IsDrawChildrenCallbackFuncExistCallback)
+{
+    isDrawChildrenCallbackFuncExistCallback_ = IsDrawChildrenCallbackFuncExistCallback;
+}
+
 void FrontendDelegateDeclarativeNG::SetOnStartContinuationCallBack(
     OnStartContinuationCallBack&& onStartContinuationCallBack)
 {
@@ -1048,6 +1060,24 @@ void FrontendDelegateDeclarativeNG::OnDrawCompleted(const std::string& component
             delegate->drawInspectorCallback_(componentId);
         },
         TaskExecutor::TaskType::JS, "ArkUIDrawCompleted");
+}
+
+void FrontendDelegateDeclarativeNG::OnDrawChildrenCompleted(const std::string& componentId)
+{
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this), componentId] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            delegate->drawChildrenInspectorCallback_(componentId);
+        },
+        TaskExecutor::TaskType::JS, "ArkUIDrawChildrenCompleted");
+}
+
+bool FrontendDelegateDeclarativeNG::IsDrawChildrenCallbackFuncExist(const std::string& componentId)
+{
+    return isDrawChildrenCallbackFuncExistCallback_(componentId);
 }
 
 void FrontendDelegateDeclarativeNG::SetColorMode(ColorMode colorMode)

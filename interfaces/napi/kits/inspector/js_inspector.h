@@ -28,6 +28,7 @@ using namespace OHOS::Ace::Framework;
 enum class CalloutType {
     LAYOUTCALLOUT = 0,
     DRAWCALLOUT,
+    DRAWCHILDRENCALLOUT,
     UNKNOW,
 };
 
@@ -48,9 +49,11 @@ public:
 
     RefPtr<InspectorEvent> layoutEvent_;
     RefPtr<InspectorEvent> drawEvent_;
+    RefPtr<InspectorEvent> drawChildrenEvent_;
     std::string componentId_;
     std::list<napi_ref> cbLayoutList_;
     std::list<napi_ref> cbDrawList_;
+    std::list<napi_ref> cbDrawChildrenList_;
     void SetEngine(const RefPtr<Framework::JsEngine>& engine)
     {
         weakEngine_ = engine;

@@ -136,6 +136,24 @@ void DeclarativeFrontendNG::InitializeDelegate(const RefPtr<TaskExecutor>& taskE
         jsEngine->DrawInspectorCallback(componentId);
     };
 
+    auto drawChildrenInspectorCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+        const std::string& componentId) {
+            auto jsEngine = weakEngine.Upgrade();
+            if (!jsEngine) {
+                return;
+            }
+            jsEngine->DrawChildrenInspectorCallback(componentId);
+    };
+
+    auto isDrawChildrenCallBackFuncExist = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+        const std::string& componentId) {
+            auto jsEngine = weakEngine.Upgrade();
+            if (!jsEngine) {
+                return false;
+            }
+            return jsEngine->IsDrawChildrenCallbackFuncExist(componentId);
+    };
+
     auto onStartContinuationCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() -> bool {
         auto jsEngine = weakEngine.Upgrade();
         if (!jsEngine) {
@@ -249,6 +267,8 @@ void DeclarativeFrontendNG::InitializeDelegate(const RefPtr<TaskExecutor>& taskE
     delegate_->SetMediaQueryCallback(std::move(mediaQueryCallback));
     delegate_->SetLayoutInspectorCallback(std::move(layoutInspectorCallback));
     delegate_->SetDrawInspectorCallback(std::move(drawInspectorCallback));
+    delegate_->SetDrawChildrenInspectorCallback(std::move(drawChildrenInspectorCallback));
+    delegate_->SetIsDrawChildrenCallbackFuncExistCallback(std::move(isDrawChildrenCallBackFuncExist));
     delegate_->SetOnStartContinuationCallBack(std::move(onStartContinuationCallBack));
     delegate_->SetOnCompleteContinuationCallBack(std::move(onCompleteContinuationCallBack));
     delegate_->SetOnSaveDataCallBack(std::move(onSaveDataCallBack));
@@ -546,6 +566,21 @@ void DeclarativeFrontendNG::OnDrawCompleted(const std::string& componentId)
     if (delegate_) {
         delegate_->OnDrawCompleted(componentId);
     }
+}
+
+void DeclarativeFrontendNG::OnDrawChildrenCompleted(const std::string& componentId)
+{
+    if (delegate_) {
+        delegate_->OnDrawChildrenCompleted(componentId);
+    }
+}
+
+bool DeclarativeFrontendNG::IsDrawChildrenCallbackFuncExist(const std::string& componentId)
+{
+    if (delegate_) {
+        return delegate_->IsDrawChildrenCallbackFuncExist(componentId);
+    }
+    return false;
 }
 
 void DeclarativeFrontendNG::DumpFrontend() const
