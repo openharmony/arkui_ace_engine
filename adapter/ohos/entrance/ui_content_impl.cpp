@@ -1176,7 +1176,6 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
             AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
             CapabilityRegistry::Register();
             ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
-            ImageFileCache::GetInstance().SetCacheFileInfo();
         });
     }
 
@@ -1699,7 +1698,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
         CapabilityRegistry::Register();
         ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
-        ImageFileCache::GetInstance().SetCacheFileInfo();
         XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
 
         auto task = [] {
