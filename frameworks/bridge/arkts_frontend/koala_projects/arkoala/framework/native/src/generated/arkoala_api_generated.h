@@ -472,6 +472,8 @@ typedef struct Ark_Offset_componentutils Ark_Offset_componentutils;
 typedef struct Opt_Offset_componentutils Opt_Offset_componentutils;
 typedef struct Ark_OffsetResult Ark_OffsetResult;
 typedef struct Opt_OffsetResult Opt_OffsetResult;
+typedef struct Ark_ScrollResult Ark_ScrollResult;
+typedef struct Opt_ScrollResult Opt_ScrollResult;
 typedef struct Ark_OnAudioStateChangedEvent Ark_OnAudioStateChangedEvent;
 typedef struct Opt_OnAudioStateChangedEvent Opt_OnAudioStateChangedEvent;
 typedef struct Ark_OnConsoleEvent Ark_OnConsoleEvent;
@@ -1210,6 +1212,8 @@ typedef struct Callback_Object_Void Callback_Object_Void;
 typedef struct Opt_Callback_Object_Void Opt_Callback_Object_Void;
 typedef struct Callback_OffsetResult_Void Callback_OffsetResult_Void;
 typedef struct Opt_Callback_OffsetResult_Void Opt_Callback_OffsetResult_Void;
+typedef struct Callback_ScrollResult_Void Callback_ScrollResult_Void;
+typedef struct Opt_Callback_ScrollResult_Void Opt_Callback_ScrollResult_Void;
 typedef struct Callback_OnAlertEvent_Boolean Callback_OnAlertEvent_Boolean;
 typedef struct Opt_Callback_OnAlertEvent_Boolean Opt_Callback_OnAlertEvent_Boolean;
 typedef struct Callback_OnAudioStateChangedEvent_Void Callback_OnAudioStateChangedEvent_Void;
@@ -1568,6 +1572,8 @@ typedef struct ScrollOnScrollCallback ScrollOnScrollCallback;
 typedef struct Opt_ScrollOnScrollCallback Opt_ScrollOnScrollCallback;
 typedef struct ScrollOnWillScrollCallback ScrollOnWillScrollCallback;
 typedef struct Opt_ScrollOnWillScrollCallback Opt_ScrollOnWillScrollCallback;
+typedef struct OnWillScrollCallback OnWillScrollCallback;
+typedef struct Opt_OnWillScrollCallback Opt_OnWillScrollCallback;
 typedef struct SearchSubmitCallback SearchSubmitCallback;
 typedef struct Opt_SearchSubmitCallback Opt_SearchSubmitCallback;
 typedef struct SelectedCallback SelectedCallback;
@@ -7066,6 +7072,13 @@ typedef struct Opt_OffsetResult {
     Ark_Tag tag;
     Ark_OffsetResult value;
 } Opt_OffsetResult;
+typedef struct Ark_ScrollResult {
+    Ark_Number offsetRemain;
+} Ark_ScrollResult;
+typedef struct Opt_ScrollResult {
+    Ark_Tag tag;
+    Ark_ScrollResult value;
+} Opt_ScrollResult;
 typedef struct Ark_OnAudioStateChangedEvent {
     Ark_Boolean playing;
 } Ark_OnAudioStateChangedEvent;
@@ -9650,6 +9663,15 @@ typedef struct Opt_Callback_OffsetResult_Void {
     Ark_Tag tag;
     Callback_OffsetResult_Void value;
 } Opt_Callback_OffsetResult_Void;
+typedef struct Callback_ScrollResult_Void {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_ScrollResult value);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_ScrollResult value);
+} Callback_ScrollResult_Void;
+typedef struct Opt_Callback_ScrollResult_Void {
+    Ark_Tag tag;
+    Callback_ScrollResult_Void value;
+} Opt_Callback_ScrollResult_Void;
 typedef struct Callback_OnAlertEvent_Boolean {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_OnAlertEvent parameter, const Callback_Boolean_Void continuation);
@@ -11261,6 +11283,15 @@ typedef struct Opt_ScrollOnWillScrollCallback {
     Ark_Tag tag;
     ScrollOnWillScrollCallback value;
 } Opt_ScrollOnWillScrollCallback;
+typedef struct OnWillScrollCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState, Ark_ScrollSource scrollSource, const Callback_ScrollResult_Void continuation);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState, Ark_ScrollSource scrollSource, const Callback_ScrollResult_Void continuation);
+} OnWillScrollCallback;
+typedef struct Opt_OnWillScrollCallback {
+    Ark_Tag tag;
+    OnWillScrollCallback value;
+} Opt_OnWillScrollCallback;
 typedef struct SearchSubmitCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_String searchContent, const Opt_SubmitEvent event);
@@ -20204,6 +20235,10 @@ typedef struct GENERATED_ArkUIGridModifier {
                             const Opt_Callback_Void* value);
     void (*setOnScrollFrameBegin)(Ark_NativePointer node,
                                   const Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain* value);
+    void (*setOnWillScroll)(Ark_NativePointer node,
+                            const Opt_OnWillScrollCallback* value);
+    void (*setOnDidScroll)(Ark_NativePointer node,
+                           const Opt_OnScrollCallback* value);
     void (*setEdgeEffect)(Ark_NativePointer node,
                           const Opt_EdgeEffect* value,
                           const Opt_EdgeEffectOptions* options);
@@ -20500,6 +20535,10 @@ typedef struct GENERATED_ArkUIListModifier {
                           const Opt_Callback_ItemDragInfo_Number_Number_Boolean_Void* value);
     void (*setOnScrollFrameBegin)(Ark_NativePointer node,
                                   const Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain* value);
+    void (*setOnWillScroll)(Ark_NativePointer node,
+                            const Opt_OnWillScrollCallback* value);
+    void (*setOnDidScroll)(Ark_NativePointer node,
+                           const Opt_OnScrollCallback* value);
     void (*setLanes)(Ark_NativePointer node,
                      const Opt_Union_Number_LengthConstrain* value,
                      const Opt_Length* gutter);
@@ -22914,6 +22953,10 @@ typedef struct GENERATED_ArkUIWaterFlowModifier {
                                   const Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain* value);
     void (*setOnScrollIndex)(Ark_NativePointer node,
                              const Opt_Callback_Number_Number_Void* value);
+    void (*setOnWillScroll)(Ark_NativePointer node,
+                            const Opt_OnWillScrollCallback* value);
+    void (*setOnDidScroll)(Ark_NativePointer node,
+                           const Opt_OnScrollCallback* value);
 } GENERATED_ArkUIWaterFlowModifier;
 
 typedef struct GENERATED_ArkUIUIExtensionComponentModifier {

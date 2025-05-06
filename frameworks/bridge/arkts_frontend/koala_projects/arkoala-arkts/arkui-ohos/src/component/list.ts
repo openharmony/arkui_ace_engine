@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkScrollableCommonMethodPeer, ScrollableCommonMethod, NestedScrollOptions, ChildrenMainSize, ItemDragInfo, CustomBuilder, EdgeEffectOptions, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, UIScrollableCommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, UICommonMethod, RectResult } from "./common"
+import { ArkScrollableCommonMethodPeer, ScrollableCommonMethod, NestedScrollOptions, ChildrenMainSize, ItemDragInfo, CustomBuilder, EdgeEffectOptions, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, UIScrollableCommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, UICommonMethod, RectResult, OnWillScrollCallback, OnScrollCallback } from "./common"
 import { Axis, BarState, EdgeEffect } from "./enums"
 import { Resource } from "global/resource"
 import { Callback_Number_Number_Void, Callback_ItemDragInfo_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Number_Number_Boolean_Void, Callback_Number_ScrollState_Literal_Number_offsetRemain, Literal_Number_offsetRemain } from "./grid"
@@ -496,6 +496,30 @@ export class ArkListPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._ListAttribute_onScrollFrameBegin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    onWillScrollAttribute(value: OnWillScrollCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._ListAttribute_onWillScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onDidScrollAttribute(value: OnScrollCallback | undefined): void {
+        const thisSerializer: Serializer = Serializer.hold();
+        let value_type: int32 = RuntimeType.UNDEFINED;
+        value_type = runtimeType(value);
+        thisSerializer.writeInt8(value_type as int32);
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value = value!;
+            thisSerializer.holdAndWriteCallback(value_value);
+        }
+        ArkUIGeneratedNativeModule._ListAttribute_onDidScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length());
+        thisSerializer.release();
+    }
     lanesAttribute(value: number | LengthConstrain | undefined, gutter?: Dimension): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -654,6 +678,8 @@ export interface ListAttribute extends ScrollableCommonMethod {
     onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this
     onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this
     onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this
+    onWillScroll(value: OnWillScrollCallback | undefined): this
+    onDidScroll(value: OnScrollCallback | undefined): this
     lanes(value: number | LengthConstrain | undefined, gutter?: Dimension): this
     edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this
 }
@@ -727,6 +753,10 @@ export interface UIListAttribute extends UIScrollableCommonMethod {
     /** @memo */
     onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this
     /** @memo */
+    onWillScroll(value: OnWillScrollCallback | undefined): this
+    /** @memo */
+    onDidScroll(value: OnScrollCallback | undefined): this
+    /** @memo */
     lanes(value: number | LengthConstrain | undefined, gutter?: Dimension): this
     /** @memo */
     edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions): this
@@ -767,6 +797,8 @@ export class ArkListStyle extends ArkScrollableCommonMethodStyle implements List
     onItemDragLeave_value?: ((event: ItemDragInfo,itemIndex: number) => void) | undefined
     onItemDrop_value?: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined
     onScrollFrameBegin_value?: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined
+    onWillScroll_value?: OnWillScrollCallback | undefined
+    onDidScroll_value?: OnScrollCallback | undefined
     public alignListItem(value: ListItemAlign | undefined): this {
         return this
     }
@@ -867,6 +899,12 @@ export class ArkListStyle extends ArkScrollableCommonMethodStyle implements List
         return this
     }
     public onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this {
+        return this
+    }
+    public onWillScroll(value: OnWillScrollCallback | undefined): this {
+        return this
+    }
+    public onDidScroll(value: OnScrollCallback | undefined): this {
         return this
     }
     public lanes(value: number | LengthConstrain | undefined, gutter?: Dimension): this {
@@ -1203,6 +1241,24 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         if (this.checkPriority("onScrollFrameBegin")) {
             const value_casted = value as (((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined)
             this.getPeer()?.onScrollFrameBeginAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    /** @memo */
+    public onWillScroll(value?: OnWillScrollCallback | undefined): this {
+        if (this.checkPriority("onWillScroll")) {
+            const value_casted = value as (OnWillScrollCallback | undefined)
+            this.getPeer()?.onWillScrollAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    /** @memo */
+    public onDidScroll(value?: OnScrollCallback | undefined): this {
+        if (this.checkPriority("onDidScroll")) {
+            const value_casted = value as (OnScrollCallback | undefined)
+            this.getPeer()?.onDidScrollAttribute(value_casted)
             return this
         }
         return this

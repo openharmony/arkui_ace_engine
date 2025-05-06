@@ -7492,6 +7492,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void OnWillScrollImpl(Ark_NativePointer node,
+                         const Opt_OnWillScrollCallback* value)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("OnWillScroll(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void OnDidScrollImpl(Ark_NativePointer node,
+                         const Opt_OnScrollCallback* value)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("onDidScroll(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void EdgeEffectImpl(Ark_NativePointer node,
                         const Opt_EdgeEffect* value,
                         const Opt_EdgeEffectOptions* options)
@@ -8902,6 +8922,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         if (!needGroupedLog(1))
             return;
         string out("onScrollFrameBegin(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void OnWillScrollImpl(Ark_NativePointer node,
+                         const Opt_OnWillScrollCallback* value)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("OnWillScroll(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void OnDidScrollImpl(Ark_NativePointer node,
+                         const Opt_OnScrollCallback* value)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("onDidScroll(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -20515,6 +20555,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void OnWillScrollImpl(Ark_NativePointer node,
+                         const Opt_OnWillScrollCallback* value)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("OnWillScroll(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void OnDidScrollImpl(Ark_NativePointer node,
+                         const Opt_OnScrollCallback* value)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("onDidScroll(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // WaterFlowAttributeModifier
     namespace UIExtensionComponentModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -21539,6 +21599,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GridAttributeModifier::OnScrollStartImpl,
             GridAttributeModifier::OnScrollStopImpl,
             GridAttributeModifier::OnScrollFrameBeginImpl,
+            GridAttributeModifier::OnWillScrollImpl,
+            GridAttributeModifier::OnDidScrollImpl,
             GridAttributeModifier::EdgeEffectImpl,
         };
         return &ArkUIGridModifierImpl;
@@ -21752,6 +21814,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ListAttributeModifier::OnItemDragLeaveImpl,
             ListAttributeModifier::OnItemDropImpl,
             ListAttributeModifier::OnScrollFrameBeginImpl,
+            ListAttributeModifier::OnWillScrollImpl,
+            ListAttributeModifier::OnDidScrollImpl,
             ListAttributeModifier::LanesImpl,
             ListAttributeModifier::EdgeEffectImpl,
         };
@@ -23303,6 +23367,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WaterFlowAttributeModifier::OnReachEndImpl,
             WaterFlowAttributeModifier::OnScrollFrameBeginImpl,
             WaterFlowAttributeModifier::OnScrollIndexImpl,
+            WaterFlowAttributeModifier::OnWillScrollImpl,
+            WaterFlowAttributeModifier::OnDidScrollImpl,
         };
         return &ArkUIWaterFlowModifierImpl;
     }
