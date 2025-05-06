@@ -43,12 +43,37 @@ export interface DisplaySyncResult {
     stop(): void;
 }
 
+class Cleaner {
+    private ptr: long = 0;
+    constructor(ptr: long) {
+        this.ptr = ptr;
+    }
+    native clean(): void;
+}
+
+function callback(cleaner: Cleaner): void {
+    cleaner.clean()
+}
+
+let destroyRegister = new FinalizationRegistry<Cleaner>(callback)
+let unregisterToken = new object()
+
 class DisplaySyncResultInner implements DisplaySyncResult {
-    displaySync: long = 0
+    displaySync: long = 0;
+    private cleaner: Cleaner | null = null;
     constructor(result: long) {
         if (this.displaySync == 0) {
             this.displaySync = result;
         }
+        this.registerCleaner(this.displaySync)
+    }
+
+    registerCleaner(ptr: long): void {
+        this.cleaner = new Cleaner(ptr)
+        destroyRegister.register(this, this.cleaner!, unregisterToken);
+    }
+    unregisterCleaner(): void {
+        destroyRegister.unregister(unregisterToken);
     }
 
     public native setExpectedFrameRateRange(rateRange: ExpectedFrameRateRange) : void;
@@ -56,4 +81,5 @@ class DisplaySyncResultInner implements DisplaySyncResult {
     public native off(callbackType: string, callback?: (intervalInfo: IntervalInfo) => void): void;
     public native start(): void;
     public native stop(): void;
+    public native clean(): void;
 }

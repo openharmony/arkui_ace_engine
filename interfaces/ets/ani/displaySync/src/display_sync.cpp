@@ -231,6 +231,14 @@ ani_object ANICreate(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_u
     return displaySync_obj;
 }
 
+static void clean([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object) {
+    ani_long ptr;
+    if (ANI_OK != env->Object_GetFieldByName_Long(object, "ptr", &ptr)) {
+        return;
+    }
+    delete reinterpret_cast<DisplaySync *>(ptr);
+}
+
 ani_status BindDisplaySync(ani_env *env)
 {
     static const char *className = "L@ohos/graphic/displaySync/DisplaySync;";
@@ -273,6 +281,20 @@ ani_status BindDisplaySyncResult(ani_env *env)
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
         TAG_LOGI(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] bind native method fail");
         return ANI_ERROR;
+    };
+
+    static const char *cleanerName = "L@ohos/graphic/displaySync/Cleaner;";
+    ani_class cleanerCls;
+    if (ANI_OK != env->FindClass(cleanerName, &cleanerCls)) {
+        return (ani_status)ANI_ERROR;
+    }
+
+    std::array cleanerMethods = {
+        ani_native_function {"clean", nullptr, reinterpret_cast<void *>(clean) },
+    };
+
+    if (ANI_OK != env->Class_BindNativeMethods(cleanerCls, cleanerMethods.data(), cleanerMethods.size())) {
+        return (ani_status)ANI_ERROR;
     };
     return ANI_OK;
 }
