@@ -219,6 +219,39 @@ static void Off([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object objec
     observer->RemoveCallbackToList(observer->GetCbListByType(typeStr), fnObjGlobalRef, typeStr, env);
 }
 
+static ani_boolean AniSendEventByKey([[maybe_unused]] ani_env *env, ani_string id, ani_double action, ani_string params)
+{
+    std::string keyStr = ANIUtils_ANIStringToStdString(env, id);
+    if (keyStr.empty()) {
+        LOGE("inspector-ani id is empty.");
+        return ANI_FALSE;
+    }
+    std::string paramsStr = ANIUtils_ANIStringToStdString(env, params);
+    ContainerScope scope {Container::CurrentIdSafelyWithCheck()};
+    bool result = NG::Inspector::SendEventByKey(keyStr, action, paramsStr);
+    if (result) {
+        return ANI_TRUE;
+    }
+    return ANI_FALSE;
+}
+
+static ani_object AniGetInspectorTree([[maybe_unused]] ani_env *env)
+{
+    ContainerScope scope {Container::CurrentIdSafelyWithCheck()};
+    std::string resultStr = NG::Inspector::GetInspector(false);
+    if (resultStr.empty()) {
+        LOGE("inspector-ani inspector tree is empty.");
+        return nullptr;
+    }
+    ani_string aniResult;
+    ani_status status = env->String_NewUTF8(resultStr.c_str(), resultStr.size(), &aniResult);
+    if (ANI_OK != status) {
+        LOGE("inspector-ani Can not convert string to ani_string.");
+        return nullptr;
+    }
+    return aniResult;
+}
+
 static ani_string AniGetInspectorByKey([[maybe_unused]] ani_env *env, ani_string key)
 {
     std::string keyStr = ANIUtils_ANIStringToStdString(env, key);
@@ -310,6 +343,10 @@ bool ANI_ConstructorForAni(ani_env *env)
             reinterpret_cast<void *>(OHOS::Ace::CreateComponentObserverForAni)},
         ani_native_function {"getInspectorByKey", nullptr,
             reinterpret_cast<void *>(OHOS::Ace::AniGetInspectorByKey)},
+        ani_native_function {"sendEventByKey", nullptr,
+            reinterpret_cast<void *>(OHOS::Ace::AniSendEventByKey)},
+        ani_native_function {"getInspectorTree", nullptr,
+            reinterpret_cast<void *>(OHOS::Ace::AniGetInspectorTree)},
     };
     
     if (ANI_OK != env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size())) {

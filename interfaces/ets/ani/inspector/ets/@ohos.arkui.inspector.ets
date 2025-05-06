@@ -17,6 +17,8 @@
     
     export native function createComponentObserver(id: string): ComponentObserver;
     export native function getInspectorByKey(id: string): string;
+    export native function sendEventByKey(id: string, action: number, params: string): boolean;
+    export native function getInspectorTree(): Object;
     
     export default interface ComponentObserver
     {
