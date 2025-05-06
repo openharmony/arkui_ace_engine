@@ -52,9 +52,13 @@ void AddNodeContainerRootNodeImpl(Ark_NativePointer self, Ark_NativePointer chil
 {
     auto nodeContainer = reinterpret_cast<FrameNode*>(self);
     auto* childPeer = reinterpret_cast<Ark_FrameNode>(childNode);
-    auto child = childPeer->node;
     auto pattern = nodeContainer->GetPattern<NodeContainerPattern>();
     CHECK_NULL_VOID(pattern);
+    if (!childPeer) {
+        pattern->AddBaseNode(nullptr);
+        return;
+    }
+    auto child = childPeer->node;
     pattern->AddBaseNode(child);
 }
 
