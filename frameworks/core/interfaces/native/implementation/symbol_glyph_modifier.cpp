@@ -18,6 +18,7 @@
 #include "core/interfaces/native/implementation/symbol_effect_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/components_ng/pattern/symbol/symbol_model_ng.h"
+#include "core/components_ng/pattern/symbol/symbol_model_static.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
 
@@ -109,7 +110,7 @@ void MinFontScaleImpl(Ark_NativePointer node,
     auto convValue = value ? Converter::OptConvert<float>(*value) : std::nullopt;
     Validator::ValidatePositive(convValue);
     Validator::ValidateLessOrEqual(convValue, SCALE_LIMIT);
-    SymbolModelNG::SetMinFontScale(frameNode, convValue);
+    SymbolModelStatic::SetMinFontScale(frameNode, convValue);
 }
 void MaxFontScaleImpl(Ark_NativePointer node,
                       const Opt_Union_Number_Resource* value)
@@ -119,7 +120,7 @@ void MaxFontScaleImpl(Ark_NativePointer node,
     auto convValue = value ? Converter::OptConvert<float>(*value) : std::nullopt;
     Validator::ValidatePositive(convValue);
     Validator::ValidateGreatOrEqual(convValue, SCALE_LIMIT);
-    SymbolModelNG::SetMaxFontScale(frameNode, convValue);
+    SymbolModelStatic::SetMaxFontScale(frameNode, convValue);
 }
 bool ParseSymbolEffectOptions(NG::SymbolEffectOptions& options, Ark_SymbolEffect symbolEffect)
 {
