@@ -212,6 +212,11 @@
       "buildFunction": "PopupMessageBuilder"
     },
     {
+      "name": "PopupComplexTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupComplexTest.ets",
+      "buildFunction": "PopupComplexBuilder"
+    },
+    {
       "name": "ToastIndex",
       "pageSourceFile": "src/main/ets/pages/components/toast/Index.ets",
       "buildFunction": "ToastIndexBuilder"
