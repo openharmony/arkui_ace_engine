@@ -61,7 +61,10 @@ void JSPath::SetCommands(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    if (info[0]->IsObject()) {
+
+    if (info[0]->IsUndefined()) {
+        PathModel::GetInstance()->SetCommands("undefined");
+    } else if (info[0]->IsObject()) {
         JSRef<JSObject> commandsObj = JSRef<JSObject>::Cast(info[0]);
         std::string strRet;
         if (ParseJsString(commandsObj, strRet)) {
