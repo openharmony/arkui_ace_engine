@@ -585,7 +585,7 @@ RefPtr<FrameNode> BuildMoreOrBackButton(int32_t overlayId, bool isMoreButton)
     auto buttonWidth = textOverlayTheme->GetMenuButtonWidth();
     auto top = menuPadding.Top();
     auto responseHeight = top.Value() + menuPadding.Bottom().Value() + textOverlayTheme->GetMenuButtonHeight().Value();
-    auto responseWidth = std::max(menuPadding.Left() + menuPadding.Right() + buttonWidth, MIN_HOTSPOT_WIDTH);
+    auto responseWidth = std::max(buttonWidth, MIN_HOTSPOT_WIDTH);
     constexpr int32_t centerDivider = 2;
     vector.emplace_back(DimensionRect(responseWidth, Dimension(responseHeight, DimensionUnit::VP),
         DimensionOffset(
