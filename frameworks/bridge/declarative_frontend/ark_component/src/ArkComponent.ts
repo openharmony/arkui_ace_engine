@@ -726,6 +726,20 @@ class AlignModifier extends ModifierWithKey<number | string> {
   }
 }
 
+class LayoutGravityModifier extends ModifierWithKey<string> {
+    constructor(value: string) {
+      super(value);
+    }
+    static identity: Symbol = Symbol('layoutGravity');
+    applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+        getUINativeModule().common.resetLayoutGravity(node);
+      } else {
+        getUINativeModule().common.setLayoutGravity(node, this.value);
+      }
+    }
+  }
+
 class BackdropBlurModifier extends ModifierWithKey<ArkBlurOptions> {
   constructor(value: ArkBlurOptions) {
     super(value);
@@ -5038,6 +5052,15 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, undefined);
     } else {
       modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, value);
+    }
+    return this;
+  }
+
+  layoutGravity(value:string): this {
+    if (!isString(value)) {
+      modifierWithKey(this._modifiersWithKeys, LayoutGravityModifier.identity, LayoutGravityModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, LayoutGravityModifier.identity, LayoutGravityModifier, value);
     }
     return this;
   }

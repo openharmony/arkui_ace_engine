@@ -316,6 +316,7 @@ public:
     // layout
     static void SetAlign(Alignment alignment);
     static void SetAlign(std::string localizedAlignment);
+    static void SetLayoutGravity(Alignment alignment);
     static void SetIsMirrorable(bool isMirrorable);
     static void SetAlignRules(const std::map<AlignDirection, AlignRule> &alignRules);
     static void SetChainStyle(const ChainInfo& chainInfo);
@@ -660,6 +661,7 @@ public:
     static void SetOpacity(FrameNode* frameNode, double opacity);
     static void SetZIndex(FrameNode* frameNode, int32_t value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
+    static void SetLayoutGravity(FrameNode* frameNode, Alignment alignment);
     static void SetBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption& blurOption,
         const SysOptions& sysOptions = SysOptions());
     static void SetNodeBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption& blurOption);

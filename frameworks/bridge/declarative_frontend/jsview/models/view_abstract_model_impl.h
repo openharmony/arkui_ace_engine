@@ -111,6 +111,7 @@ public:
     void ResetAspectRatio() override {};
     void SetAlign(const Alignment& alignment) override;
     void SetAlign(const std::string& localizedAlignment) override {}
+    void SetLayoutGravity(const Alignment& alignment) override {}
     void SetIsMirrorable(const bool& isMirrorable) override {}
     void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) override;
     void SetChainStyle(const ChainInfo& chainInfo) override {}

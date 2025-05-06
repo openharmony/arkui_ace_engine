@@ -648,8 +648,8 @@ public:
         layoutProperty->CheckLocalizedBorderImageSlice(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageWidth(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageOutset(layoutDirection);
-        // Reset for safeAreaExpand's Cache in GeometryNode
         layoutProperty->CheckLocalizedAlignment(layoutDirection);
+        // Reset for safeAreaExpand's Cache in GeometryNode
         host->ResetSafeAreaPadding();
         layoutProperty->CheckLocalizedSafeAreaPadding(layoutDirection);
         layoutProperty->CheckIgnoreLayoutSafeArea(layoutDirection);

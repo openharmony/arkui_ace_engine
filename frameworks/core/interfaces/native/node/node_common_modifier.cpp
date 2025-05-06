@@ -1217,6 +1217,21 @@ void ResetAlign(ArkUINodeHandle node)
     ViewAbstract::SetAlign(frameNode, Alignment::CENTER);
 }
 
+void SetLayoutGravity(ArkUINodeHandle node, ArkUI_CharPtr align)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Alignment alignment = BoxLayoutAlgorithm::MapLocalizedToAlignment(align);
+    ViewAbstract::SetLayoutGravity(frameNode, alignment);
+}
+
+void ResetLayoutGravity(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLayoutGravity(frameNode, Alignment::CENTER);
+}
+
 void SetBackdropBlur(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues,
     ArkUI_Int32 blurValuesSize, ArkUI_Bool disableSystemAdaptation)
 {
@@ -7539,6 +7554,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .setAlign = SetAlign,
         .setLocalizedAlign = SetLocalizedAlign,
         .resetAlign = ResetAlign,
+        .setLayoutGravity = SetLayoutGravity,
+        .resetLayoutGravity = ResetLayoutGravity,
         .setBackdropBlur = SetBackdropBlur,
         .resetBackdropBlur = ResetBackdropBlur,
         .setHueRotate = SetHueRotate,
@@ -8002,6 +8019,8 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .resetOpacity = ResetOpacity,
         .setAlign = SetAlign,
         .resetAlign = ResetAlign,
+        .setLayoutGravity = SetLayoutGravity,
+        .resetLayoutGravity = ResetLayoutGravity,
         .setBackdropBlur = SetBackdropBlur,
         .resetBackdropBlur = ResetBackdropBlur,
         .setHueRotate = SetHueRotate,
