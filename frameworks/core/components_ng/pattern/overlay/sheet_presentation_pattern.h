@@ -134,8 +134,8 @@ public:
 
     void OnDisappear()
     {
+        TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onDisappear state.");
         if (onDisappear_) {
-            TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onDisappear state.");
             isExecuteOnDisappear_ = true;
             onDisappear_();
         }
@@ -156,8 +156,8 @@ public:
 
     void OnAppear()
     {
+        TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onAppear state.");
         if (onAppear_) {
-            TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onAppear state.");
             onAppear_();
         }
     }
@@ -761,6 +761,11 @@ public:
     {
         return IsShowInSubWindow() && !IsSheetBottom();
     }
+    void SetWindowUseImplicitAnimation(FrameNode* sheetNode, bool useImplicit);
+    void SendMessagesBeforeFirstTransitionIn(bool isFirstTransition);
+    void SendMessagesAfterFirstTransitionIn(bool isFirstTransition);
+    void SendMessagesBeforeTransitionOut();
+    void SendMessagesAfterTransitionOut(FrameNode* sheetNode);
 
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;

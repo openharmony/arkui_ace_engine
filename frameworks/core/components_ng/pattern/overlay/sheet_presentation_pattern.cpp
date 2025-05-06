@@ -398,15 +398,17 @@ void SheetPresentationPattern::OnDetachFromFrameNode(FrameNode* sheetNode)
     auto pipeline = sheetNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(sheetNode->GetId());
+    if (HasHoverModeChangedCallbackId()) {
+        pipeline->UnRegisterHalfFoldHoverChangedCallback(hoverModeChangedCallbackId_.value_or(-1));
+    }
+    UnRegisterAvoidInfoChangeListener(sheetNode);
+    SendMessagesAfterTransitionOut(sheetNode);
+
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
     CHECK_NULL_VOID(targetNode);
     auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->RemoveInnerOnAreaChangedCallback(sheetNode->GetId());
-    if (HasHoverModeChangedCallbackId()) {
-        pipeline->UnRegisterHalfFoldHoverChangedCallback(hoverModeChangedCallbackId_.value_or(-1));
-    }
-    UnRegisterAvoidInfoChangeListener(sheetNode);
 }
 
 void SheetPresentationPattern::RegisterHoverModeChangeCallback()
@@ -2172,6 +2174,21 @@ void SheetPresentationPattern::SetUIFirstSwitch(bool isFirstTransition, bool isN
 #endif
 }
 
+void SheetPresentationPattern::SetWindowUseImplicitAnimation(FrameNode* sheetNode, bool useImplicit)
+{
+    CHECK_NULL_VOID(sheetNode);
+    if (IsShowInSubWindow()) {
+        TAG_LOGD(AceLogTag::ACE_SHEET, "UseImplicitAnimation ShowInSubWindow");
+        return;
+    }
+    auto pipelineContext = sheetNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto windowManager = pipelineContext->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    TAG_LOGI(AceLogTag::ACE_SHEET, "WindowUseImplicitAnimation: %{public}d", useImplicit);
+    windowManager->SetWindowUseImplicitAnimation(useImplicit);
+}
+
 void SheetPresentationPattern::BubbleStyleSheetTransition(bool isTransitionIn)
 {
     auto host = this->GetHost();
@@ -2328,8 +2345,6 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
     isAnimationProcess_ = true;
     auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
-    auto sheetParent = DynamicCast<FrameNode>(host->GetParent());
-    CHECK_NULL_VOID(sheetParent);
     if (isTransitionIn) {
         HandleDragEndAccessibilityEvent();
         animation_ = AnimationUtils::StartAnimation(
@@ -2342,10 +2357,7 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
             option.GetOnFinishEvent());
         SetBottomStyleHotAreaInSubwindow();
     } else {
-        host->OnAccessibilityEvent(
-            AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-        sheetParent->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
-            HitTestMode::HTMTRANSPARENT);
+        SendMessagesBeforeTransitionOut();
         animation_ = AnimationUtils::StartAnimation(
             option,
             [context, weak = WeakClaim(this), offset, isTransitionIn]() {
@@ -2870,7 +2882,7 @@ void SheetPresentationPattern::FireOnDetentsDidChange(float height)
 {
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     if (!IsSheetBottomStyle() || NearEqual(preDetentsHeight_, height) ||
         LessOrEqual(sheetStyle.detents.size(), 0)) {
         return;
@@ -3858,8 +3870,8 @@ void SheetPresentationPattern::RecoverScrollOrResizeAvoidStatus()
 
 void SheetPresentationPattern::OnWillDisappear()
 {
+    TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onWillDisappear state.");
     if (onWillDisappear_) {
-        TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onWillDisappear state.");
         onWillDisappear_();
     }
     auto hostNode = GetHost();
@@ -3910,5 +3922,79 @@ void SheetPresentationPattern::UnRegisterAvoidInfoChangeListener(FrameNode* host
     auto mgr = pipeline->GetAvoidInfoManager();
     CHECK_NULL_VOID(mgr);
     mgr->RemoveAvoidInfoListener(WeakClaim(this));
+}
+
+/**
+ * @brief Update and Send messages in other fields before the sheet entrance animation starts.
+ * Its timing is equivalent to the callback "onWillAppear".
+ */
+void SheetPresentationPattern::SendMessagesBeforeFirstTransitionIn(bool isFirstTransition)
+{
+    if (!isFirstTransition) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // Close UIFirst
+    SetUIFirstSwitch(isFirstTransition, false);
+    // WindowMaximize
+    SetWindowUseImplicitAnimation(RawPtr(host), true);
+    auto sheetParent = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(sheetParent);
+    const auto& overlayManager = GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto levelOrder = overlayManager->GetLevelOrder(sheetParent);
+    if (overlayManager->IsTopOrder(levelOrder)) {
+        host->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN,
+            WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+    }
+    ACE_SCOPED_TRACE("Sheet BeforeFirstTransitionIn end");
+}
+
+/**
+ * @brief Update and Send messages in other fields after the sheet entrance animation ends.
+ * Its timing is equivalent to the callback "onAppear".
+ */
+void SheetPresentationPattern::SendMessagesAfterFirstTransitionIn(bool isFirstTransition)
+{
+    if (!isFirstTransition) {
+        return;
+    }
+    SetUIFirstSwitch(isFirstTransition, true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateOcclusionCullingStatus(false, nullptr);
+    ACE_SCOPED_TRACE("Sheet AfterFirstTransitionIn end");
+}
+
+/**
+ * @brief Update and Send messages in other fields before the sheet exit animation starts.
+ * Its timing is equivalent to the callback "onWillDisappear".
+ */
+void SheetPresentationPattern::SendMessagesBeforeTransitionOut()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnAccessibilityEvent(
+        AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+    // supports Gesture durring transition
+    auto sheetParent = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(sheetParent);
+    sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
+    ACE_SCOPED_TRACE("Sheet BeforeTransitionOut end");
+}
+
+/**
+ * @brief Update and Send messages in other fields after the sheet exit animation ends.
+ * Its timing is equivalent to the callback "onDisappear".
+ */
+void SheetPresentationPattern::SendMessagesAfterTransitionOut(FrameNode* sheetNode)
+{
+    CHECK_NULL_VOID(sheetNode);
+    // WindowMaximize
+    SetWindowUseImplicitAnimation(sheetNode, false);
+    ACE_SCOPED_TRACE("Sheet AfterTransitionOut end");
 }
 } // namespace OHOS::Ace::NG

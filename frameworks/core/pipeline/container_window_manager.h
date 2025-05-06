@@ -400,6 +400,18 @@ public:
         return false;
     }
 
+    void SetWindowUseImplicitAnimationCallBack(std::function<void(bool)>&& callback)
+    {
+        useImplicitAnimationCallback_ = std::move(callback);
+    }
+
+    void SetWindowUseImplicitAnimation(bool useImplicit)
+    {
+        if (useImplicitAnimationCallback_) {
+            useImplicitAnimationCallback_(useImplicit);
+        }
+    }
+
 private:
     int32_t appLabelId_ = 0;
     int32_t appIconId_ = 0;
@@ -430,6 +442,7 @@ private:
     IsPcOrPadFreeMultiWindowModeCallback isPcOrPadFreeMultiWindowModeCallback_;
     GetFreeMultiWindowModeEnabledStateCallback getFreeMultiWindowModeEnabledStateCallback_;
     WindowCallNativeCallback callNativeCallback_;
+    std::function<void(bool)> useImplicitAnimationCallback_;
 };
 
 } // namespace OHOS::Ace
