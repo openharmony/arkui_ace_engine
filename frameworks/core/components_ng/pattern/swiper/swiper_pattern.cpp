@@ -449,9 +449,7 @@ void SwiperPattern::OnModifyDone()
     }
 
     if (isBindIndicator_) {
-        auto refUINode = indicatorNode_.Upgrade();
-        CHECK_NULL_VOID(refUINode);
-        auto frameNode = DynamicCast<NG::FrameNode>(refUINode);
+        auto frameNode = indicatorNode_.Upgrade();
         CHECK_NULL_VOID(frameNode);
         auto indicatorPattern = frameNode->GetPattern<SwiperIndicatorPattern>();
         CHECK_NULL_VOID(indicatorPattern);
@@ -7247,7 +7245,7 @@ RefPtr<FrameNode> SwiperPattern::GetCommonIndicatorNode()
     }
 }
 
-void SwiperPattern::SetIndicatorNode(const WeakPtr<NG::UINode>& indicatorNode)
+void SwiperPattern::SetIndicatorNode(const RefPtr<FrameNode>& indicatorNode)
 {
     if (isBindIndicator_) {
         indicatorNode_ = indicatorNode;
@@ -7259,5 +7257,15 @@ void SwiperPattern::SetIndicatorNode(const WeakPtr<NG::UINode>& indicatorNode)
         CHECK_NULL_VOID(frameIndicatorNode);
         frameIndicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+}
+
+void SwiperPattern::ResetIndicatorNode()
+{
+    auto frameNode = indicatorNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto indicatorPattern = frameNode->GetPattern<IndicatorPattern>();
+    CHECK_NULL_VOID(indicatorPattern);
+    indicatorPattern->ResetSwiperNode();
+    indicatorNode_ = nullptr;
 }
 } // namespace OHOS::Ace::NG
