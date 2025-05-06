@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
+#include "core/components_ng/pattern/toggle/toggle_model_static.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -131,12 +132,12 @@ void SwitchStyleImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvert<Converter::SwitchStyle>(*value).value_or(Converter::SwitchStyle{});
     Validator::ValidateNonNegative(convValue.pointRadius);
     Validator::ValidateNonPercent(convValue.pointRadius);
-    ToggleModelNG::SetPointRadius(frameNode, convValue.pointRadius);
-    ToggleModelNG::SetUnselectedColor(frameNode, convValue.unselectedColor);
+    ToggleModelStatic::SetPointRadius(frameNode, convValue.pointRadius);
+    ToggleModelStatic::SetUnselectedColor(frameNode, convValue.unselectedColor);
     ToggleModelNG::SetSwitchPointColor(frameNode, convValue.pointColor);
     Validator::ValidateNonNegative(convValue.trackBorderRadius);
     Validator::ValidateNonPercent(convValue.trackBorderRadius);
-    ToggleModelNG::SetTrackBorderRadius(frameNode, convValue.trackBorderRadius);
+    ToggleModelStatic::SetTrackBorderRadius(frameNode, convValue.trackBorderRadius);
 }
 void _onChangeEvent_isOnImpl(Ark_NativePointer node,
                              const Callback_Boolean_Void* callback)

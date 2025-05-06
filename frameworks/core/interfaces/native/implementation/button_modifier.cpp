@@ -16,7 +16,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/pattern/button/button_model_ng.h"
+#include "core/components_ng/pattern/button/button_model_static.h"
 #include "core/components_ng/pattern/button/button_request_data.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -83,7 +83,7 @@ namespace ButtonModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = ButtonModelNG::CreateFrameNode(id);
+    auto frameNode = ButtonModelStatic::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -103,19 +103,19 @@ void SetButtonOptions1Impl(Ark_NativePointer node,
     auto buttonOptions = Converter::Convert<ButtonOptions>(*options);
     if (buttonOptions.type) {
         auto typeInt = EnumToInt(buttonOptions.type);
-        ButtonModelNG::SetType(frameNode, typeInt);
+        ButtonModelStatic::SetType(frameNode, typeInt);
     }
     if (buttonOptions.stateEffect) {
-        ButtonModelNG::SetStateEffect(frameNode, buttonOptions.stateEffect.value());
+        ButtonModelStatic::SetStateEffect(frameNode, buttonOptions.stateEffect.value());
     }
     if (buttonOptions.role) {
-        ButtonModelNG::SetRole(frameNode, buttonOptions.role);
+        ButtonModelStatic::SetRole(frameNode, buttonOptions.role);
     }
     if (buttonOptions.controlSize) {
-        ButtonModelNG::SetControlSize(frameNode, buttonOptions.controlSize);
+        ButtonModelStatic::SetControlSize(frameNode, buttonOptions.controlSize);
     }
     if (buttonOptions.buttonStyle) {
-        ButtonModelNG::SetButtonStyle(frameNode, buttonOptions.buttonStyle);
+        ButtonModelStatic::SetButtonStyle(frameNode, buttonOptions.buttonStyle);
     }
 }
 void SetButtonOptions2Impl(Ark_NativePointer node,
@@ -131,7 +131,7 @@ void SetButtonOptions2Impl(Ark_NativePointer node,
         }
     }
     auto labelString = Converter::OptConvert<std::string>(*label);
-    ButtonModelNG::SetLabel(frameNode, labelString.value_or("").c_str());
+    ButtonModelStatic::SetLabel(frameNode, labelString.value_or("").c_str());
 }
 } // ButtonInterfaceModifier
 namespace ButtonAttributeModifier {
@@ -141,7 +141,7 @@ void TypeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto typeInt = EnumToInt(Converter::OptConvert<ButtonType>(*value));
-    ButtonModelNG::SetType(frameNode, typeInt);
+    ButtonModelStatic::SetType(frameNode, typeInt);
 }
 void StateEffectImpl(Ark_NativePointer node,
                      const Opt_Boolean* value)
@@ -149,39 +149,35 @@ void StateEffectImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    ButtonModelNG::SetStateEffect(frameNode, *convValue);
+    ButtonModelStatic::SetStateEffect(frameNode, *convValue);
 }
 void ButtonStyleImpl(Ark_NativePointer node,
                      const Opt_ButtonStyleMode* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetButtonStyle(frameNode, Converter::OptConvert<ButtonStyleMode>(*value));
+    ButtonModelStatic::SetButtonStyle(frameNode, Converter::OptConvert<ButtonStyleMode>(*value));
 }
 void ControlSizeImpl(Ark_NativePointer node,
                      const Opt_ControlSize* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetControlSize(frameNode, Converter::OptConvert<ControlSize>(*value));
+    ButtonModelStatic::SetControlSize(frameNode, Converter::OptConvert<ControlSize>(*value));
 }
 void RoleImpl(Ark_NativePointer node,
               const Opt_ButtonRole* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetRole(frameNode, Converter::OptConvert<ButtonRole>(*value));
+    ButtonModelStatic::SetRole(frameNode, Converter::OptConvert<ButtonRole>(*value));
 }
 void FontColorImpl(Ark_NativePointer node,
                    const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetFontColor(frameNode, Converter::OptConvert<Color>(*value));
+    ButtonModelStatic::SetFontColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void FontSizeImpl(Ark_NativePointer node,
                   const Opt_Length* value)
@@ -191,21 +187,21 @@ void FontSizeImpl(Ark_NativePointer node,
     auto fontSize = Converter::OptConvert<Dimension>(*value);
     Validator::ValidatePositive(fontSize);
     Validator::ValidateNonPercent(fontSize);
-    ButtonModelNG::SetFontSize(frameNode, fontSize);
+    ButtonModelStatic::SetFontSize(frameNode, fontSize);
 }
 void FontWeightImpl(Ark_NativePointer node,
                     const Opt_Union_Number_FontWeight_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetFontWeight(frameNode, Converter::OptConvert<Ace::FontWeight>(*value));
+    ButtonModelStatic::SetFontWeight(frameNode, Converter::OptConvert<Ace::FontWeight>(*value));
 }
 void FontStyleImpl(Ark_NativePointer node,
                    const Opt_FontStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetFontStyle(frameNode, Converter::OptConvert<Ace::FontStyle>(*value));
+    ButtonModelStatic::SetFontStyle(frameNode, Converter::OptConvert<Ace::FontStyle>(*value));
 }
 void FontFamilyImpl(Ark_NativePointer node,
                     const Opt_Union_String_Resource* value)
@@ -216,7 +212,7 @@ void FontFamilyImpl(Ark_NativePointer node,
     if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(*value); fontfamiliesOpt) {
         families = fontfamiliesOpt->families;
     }
-    ButtonModelNG::SetFontFamily(frameNode, families);
+    ButtonModelStatic::SetFontFamily(frameNode, families);
 }
 void ContentModifierImpl(Ark_NativePointer node,
                          const Opt_ContentModifier* value)
@@ -232,7 +228,7 @@ void LabelStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto parameters = Converter::OptConvert<ButtonParameters>(*value);
-    ButtonModelNG::SetLabelStyle(frameNode, parameters);
+    ButtonModelStatic::SetLabelStyle(frameNode, parameters);
 }
 void MinFontScaleImpl(Ark_NativePointer node,
                       const Opt_Union_Number_Resource* value)
@@ -242,7 +238,7 @@ void MinFontScaleImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvert<float>(*value);
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateLessOrEqual(convValue, SCALE_LIMIT);
-    ButtonModelNG::SetMinFontScale(frameNode, convValue);
+    ButtonModelStatic::SetMinFontScale(frameNode, convValue);
 }
 void MaxFontScaleImpl(Ark_NativePointer node,
                       const Opt_Union_Number_Resource* value)
@@ -252,7 +248,7 @@ void MaxFontScaleImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvert<float>(*value);
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateGreatOrEqual(convValue, SCALE_LIMIT);
-    ButtonModelNG::SetMaxFontScale(frameNode, convValue);
+    ButtonModelStatic::SetMaxFontScale(frameNode, convValue);
 }
 } // ButtonAttributeModifier
 const GENERATED_ArkUIButtonModifier* GetButtonModifier()
