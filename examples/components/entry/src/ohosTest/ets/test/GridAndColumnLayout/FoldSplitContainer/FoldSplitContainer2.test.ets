@@ -23,7 +23,7 @@ import {
   sliderDrag,
   titleSearch,
   ToggleClick,
-} from '../../utils';
+} from '../../../utils';
 import { FoldSplitContainerStart } from './FoldSplitContainer';
 
 export default function FoldSplitContainer2() {

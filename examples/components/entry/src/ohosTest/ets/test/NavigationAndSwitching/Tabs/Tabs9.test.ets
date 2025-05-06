@@ -27,8 +27,8 @@ import {
 } from '../../../utils';
 import { TabsStart } from './Tabs';
 
-export default function Tabs7() {
-  describe('Tabs7', () => {
+export default function Tabs9() {
+  describe('Tabs9', () => {
     /**
      * 打开应用
      */

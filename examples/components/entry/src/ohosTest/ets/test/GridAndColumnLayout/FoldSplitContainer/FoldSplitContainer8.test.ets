@@ -22,11 +22,10 @@ import {
   sliderDrag,
   titleSearch,
   ToggleClick,
-  Search,
   searchToggle,
   getToggle,
   buttonClick
-} from '../../utils';
+} from '../../../utils';
 import { FoldSplitContainerStart } from './FoldSplitContainer';
 import { Driver } from '@kit.TestKit';
 
