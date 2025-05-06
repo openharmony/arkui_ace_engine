@@ -47,7 +47,11 @@ export class ArkNodeContainerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._NodeContainerInterface_setNodeContainerOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    addNodeContainerRootNode(child: FrameNode) {
+    addNodeContainerRootNode(child: FrameNode | null) {
+        if (!child) {
+            ArkUIGeneratedNativeModule._NodeContainerInterface_addNodeContainerRootNode(this.peer.ptr, 0)
+            return
+        }
         ArkUIGeneratedNativeModule._NodeContainerInterface_addNodeContainerRootNode(this.peer.ptr, child.getPeer()?.ptr as pointer)
     }
     aboutToAppearAttribute(value: (() => void)) {
@@ -118,10 +122,6 @@ export class ArkNodeContainerComponent extends ArkCommonMethodComponent implemen
             controller.onWillBind(this.getPeer().getId())
             this.controller = controller
             this.controller!.setNodeContainer(this)
-            // makeNode
-            const makeNodeFunc = controller.__makeNode__
-            const child = makeNodeFunc(new UIContext(100000))
-            this.getPeer().addNodeContainerRootNode(child!)
             // aboutToAppear
             const aboutToAppearFunc = controller.aboutToAppear
             this.getPeer().aboutToAppearAttribute(aboutToAppearFunc)
@@ -142,6 +142,10 @@ export class ArkNodeContainerComponent extends ArkCommonMethodComponent implemen
             this.getPeer().onDetachAttribute(onDetach)
 
             controller.onBind(this.getPeer().getId())
+            // makeNode
+            const makeNodeFunc = controller.__makeNode__
+            const child = makeNodeFunc(new UIContext(100000))
+            this.getPeer().addNodeContainerRootNode(child)
         }
         return this
     }
@@ -154,7 +158,7 @@ export class ArkNodeContainerComponent extends ArkCommonMethodComponent implemen
         if (this.controller) {
             const makeNodeFunc = this.controller!.__makeNode__
             const child = makeNodeFunc(new UIContext(100000))
-            this.getPeer().addNodeContainerRootNode(child!)
+            this.getPeer().addNodeContainerRootNode(child)
         }
     }
 }
