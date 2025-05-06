@@ -4942,7 +4942,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest067, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    int32_t abnormalType = static_cast<int32_t>(ARKUI_NODE_CUSTOM_SPAN) + 1;
+    int32_t abnormalType = static_cast<int32_t>(ARKUI_NODE_EMBEDDED_COMPONENT) + 1;
     EXPECT_EQ(nodeAPI->createNode(static_cast<ArkUI_NodeType>(abnormalType)), nullptr);
     nodeAPI->disposeNode(nullptr);
     EXPECT_EQ(nodeAPI->addChild(nullptr, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
