@@ -371,7 +371,7 @@ RefPtr<RenderContext> GetRenderContext(RefPtr<FrameNode>& node, bool checkProxy 
 
 RefPtr<OHOS::Ace::BasicShape> GetBasicShape(Ark_BaseShape peer)
 {
-    return nullptr;
+    return peer ? peer->shape : nullptr;
 }
 
 void DestroyPeerImpl(Ark_RenderNode peer)
@@ -977,7 +977,7 @@ Ark_ShapeMask GetShapeMaskImpl(Ark_RenderNode peer)
 {
     CHECK_NULL_RETURN(peer && peer->node, nullptr);
     auto value = ViewAbstract::GetMask(Referenced::RawPtr(peer->node));
-    return PeerUtils::CreatePeer<ShapeMaskPeer>();
+    return PeerUtils::CreatePeer<ShapeMaskPeer>(value);
 }
 void SetShapeMaskImpl(Ark_RenderNode peer,
                       Ark_ShapeMask shapeMask)
@@ -990,7 +990,7 @@ Ark_ShapeClip GetShapeClipImpl(Ark_RenderNode peer)
 {
     CHECK_NULL_RETURN(peer && peer->node, nullptr);
     auto value = ViewAbstract::GetClipShape(Referenced::RawPtr(peer->node));
-    return PeerUtils::CreatePeer<ShapeClipPeer>();
+    return PeerUtils::CreatePeer<ShapeClipPeer>(value);
 }
 void SetShapeClipImpl(Ark_RenderNode peer,
                       Ark_ShapeClip shapeClip)
