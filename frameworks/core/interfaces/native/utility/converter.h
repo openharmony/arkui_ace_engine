@@ -541,6 +541,7 @@ namespace Converter {
     template<> RefPtr<BasicShape> Convert(const Ark_PathShape& src);
     template<> RefPtr<BasicShape> Convert(const Ark_RectShape& src);
     template<> RefPtr<ChainedTransitionEffect> Convert(const Ark_TransitionEffect& src);
+    template<> ScrollFrameResult Convert<ScrollFrameResult>(const Ark_ScrollResult& src);
     template<> RefPtr<Circle> Convert(const Ark_Circle& src);
     template<> RefPtr<Curve> Convert(const Ark_Curve& src);
     template<> RefPtr<Curve> Convert(const Ark_ICurve& src);

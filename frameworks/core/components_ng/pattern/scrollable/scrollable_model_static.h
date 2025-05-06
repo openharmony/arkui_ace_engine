@@ -44,6 +44,7 @@ public:
             const std::optional<Dimension>& fadingEdgeLength);
 
     static void SetOnWillScroll(FrameNode* frameNode, OnWillScrollEvent&& onScroll);
+    static void SetOnDidScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
     static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);

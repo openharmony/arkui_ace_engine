@@ -25,7 +25,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkScrollableCommonMethodPeer, ScrollableCommonMethod, NestedScrollOptions, CustomBuilder, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, UIScrollableCommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, UICommonMethod } from "./common"
+import { ArkScrollableCommonMethodPeer, ScrollableCommonMethod, NestedScrollOptions, CustomBuilder, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, UIScrollableCommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, UICommonMethod, OnWillScrollCallback, OnScrollCallback } from "./common"
 import { ConstraintSizeOptions, Length, Dimension, Padding } from "./units"
 import { FlexDirection } from "./enums"
 import { Resource } from "global/resource"
@@ -355,6 +355,30 @@ export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._WaterFlowAttribute_onScrollIndex(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    onWillScrollAttribute(value: OnWillScrollCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._GridAttribute_onWillScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onDidScrollAttribute(value: OnScrollCallback | undefined): void {
+        const thisSerializer: Serializer = Serializer.hold();
+        let value_type: int32 = RuntimeType.UNDEFINED;
+        value_type = runtimeType(value);
+        thisSerializer.writeInt8(value_type as int32);
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value = value!;
+            thisSerializer.holdAndWriteCallback(value_value);
+        }
+        ArkUIGeneratedNativeModule._GridAttribute_onDidScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length());
+        thisSerializer.release();
+    }
 }
 export type GetItemMainSizeByIndex = (index: number) => number;
 export interface SectionOptions {
@@ -392,6 +416,8 @@ export interface WaterFlowAttribute extends ScrollableCommonMethod {
     onReachEnd(value: (() => void) | undefined): this
     onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this
     onScrollIndex(value: ((first: number,last: number) => void) | undefined): this
+    onWillScroll(value: OnWillScrollCallback | undefined): this
+    onDidScroll(value: OnScrollCallback | undefined): this
 }
 export interface UIWaterFlowAttribute extends UIScrollableCommonMethod {
     /** @memo */
@@ -423,6 +449,10 @@ export interface UIWaterFlowAttribute extends UIScrollableCommonMethod {
     /** @memo */
     onScrollIndex(value: ((first: number,last: number) => void) | undefined): this
     /** @memo */
+    onWillScroll(value: OnWillScrollCallback | undefined): this
+    /** @memo */
+    onDidScroll(value: OnScrollCallback | undefined): this
+    /** @memo */
 }
 export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements WaterFlowAttribute {
     columnsTemplate_value?: string | undefined
@@ -439,6 +469,8 @@ export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements
     onReachEnd_value?: (() => void) | undefined
     onScrollFrameBegin_value?: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined
     onScrollIndex_value?: ((first: number,last: number) => void) | undefined
+    onWillScroll_value?: OnWillScrollCallback | undefined
+    onDidScroll_value?: OnScrollCallback | undefined
     public columnsTemplate(value: string | undefined): this {
         return this
     }
@@ -480,7 +512,13 @@ export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements
     }
     public onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
         return this
-        }
+    }
+    public onWillScroll(value: OnWillScrollCallback | undefined): this {
+        return this
+    }
+    public onDidScroll(value: OnScrollCallback | undefined): this {
+        return this
+    }
 }
 /** @memo:stable */
 export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent implements UIWaterFlowAttribute {
@@ -629,6 +667,24 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         if (this.checkPriority("onScrollIndex")) {
             const value_casted = value as (((first: number,last: number) => void) | undefined)
             this.getPeer()?.onScrollIndexAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    /** @memo */
+    public onWillScroll(value?: OnWillScrollCallback | undefined): this {
+        if (this.checkPriority("onWillScroll")) {
+            const value_casted = value as (OnWillScrollCallback | undefined)
+            this.getPeer()?.onWillScrollAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    /** @memo */
+    public onDidScroll(value?: OnScrollCallback | undefined): this {
+        if (this.checkPriority("onDidScroll")) {
+            const value_casted = value as (OnScrollCallback | undefined)
+            this.getPeer()?.onDidScrollAttribute(value_casted)
             return this
         }
         return this

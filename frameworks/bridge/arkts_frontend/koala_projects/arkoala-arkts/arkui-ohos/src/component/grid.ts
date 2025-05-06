@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkScrollableCommonMethodPeer, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, UIScrollableCommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, UICommonMethod } from "./common"
+import { ArkScrollableCommonMethodPeer, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, UIScrollableCommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, UICommonMethod, OnWillScrollCallback, OnScrollCallback } from "./common"
 import { Length } from "./units"
 import { Color, BarState, EdgeEffect } from "./enums"
 import { GridAttribute_onItemDragStart_event_type } from "./type-replacements"
@@ -506,6 +506,30 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridAttribute_onScrollFrameBegin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    onWillScrollAttribute(value: OnWillScrollCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._GridAttribute_onWillScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onDidScrollAttribute(value: OnScrollCallback | undefined): void {
+        const thisSerializer: Serializer = Serializer.hold();
+        let value_type: int32 = RuntimeType.UNDEFINED;
+        value_type = runtimeType(value);
+        thisSerializer.writeInt8(value_type as int32);
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value = value!;
+            thisSerializer.holdAndWriteCallback(value_value);
+        }
+        ArkUIGeneratedNativeModule._GridAttribute_onDidScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length());
+        thisSerializer.release();
+    }
     edgeEffectAttribute(value: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -602,6 +626,8 @@ export interface GridAttribute extends ScrollableCommonMethod {
     onScrollStart(value: (() => void) | undefined): this
     onScrollStop(value: (() => void) | undefined): this
     onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this
+    onWillScroll(value: OnWillScrollCallback | undefined): this
+    onDidScroll(value: OnScrollCallback | undefined): this
     edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this
 }
 export interface UIGridAttribute extends UIScrollableCommonMethod {
@@ -670,6 +696,10 @@ export interface UIGridAttribute extends UIScrollableCommonMethod {
     /** @memo */
     onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this
     /** @memo */
+    onWillScroll(value: OnWillScrollCallback | undefined): this
+    /** @memo */
+    onDidScroll(value: OnScrollCallback | undefined): this
+    /** @memo */
     edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this
     /** @memo */
 }
@@ -706,6 +736,8 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
     onScrollStart_value?: (() => void) | undefined
     onScrollStop_value?: (() => void) | undefined
     onScrollFrameBegin_value?: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined
+    onWillScroll_value?: OnWillScrollCallback | undefined
+    onDidScroll_value?: OnScrollCallback | undefined
     public columnsTemplate(value: string | undefined): this {
         return this
     }
@@ -800,6 +832,12 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
         return this
     }
     public onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this {
+        return this
+    }
+    public onWillScroll(value: OnWillScrollCallback | undefined): this {
+        return this
+    }
+    public onDidScroll(value: OnScrollCallback | undefined): this {
         return this
     }
     public edgeEffect(value: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this {
@@ -1116,6 +1154,24 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
         if (this.checkPriority("onScrollFrameBegin")) {
             const value_casted = value as (((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined)
             this.getPeer()?.onScrollFrameBeginAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    /** @memo */
+    public onWillScroll(value?: OnWillScrollCallback | undefined): this {
+        if (this.checkPriority("onWillScroll")) {
+            const value_casted = value as (OnWillScrollCallback | undefined)
+            this.getPeer()?.onWillScrollAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    /** @memo */
+    public onDidScroll(value?: OnScrollCallback | undefined): this {
+        if (this.checkPriority("onDidScroll")) {
+            const value_casted = value as (OnScrollCallback | undefined)
+            this.getPeer()?.onDidScrollAttribute(value_casted)
             return this
         }
         return this

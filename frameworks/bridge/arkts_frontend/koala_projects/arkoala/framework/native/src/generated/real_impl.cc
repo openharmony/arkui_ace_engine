@@ -3633,6 +3633,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                 const Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain* value)
     {
     }
+    void OnWillScrollImpl(Ark_NativePointer node,
+                          const Opt_OnWillScrollCallback* value)
+    {
+    }
+    void OnDidScrollImpl(Ark_NativePointer node,
+                         const Opt_OnScrollCallback* value)
+    {
+    }
     void EdgeEffectImpl(Ark_NativePointer node,
                         const Opt_EdgeEffect* value,
                         const Opt_EdgeEffectOptions* options)
@@ -4229,6 +4237,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void OnScrollFrameBeginImpl(Ark_NativePointer node,
                                 const Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain* value)
+    {
+    }
+    void OnWillScrollImpl(Ark_NativePointer node,
+                          const Opt_OnWillScrollCallback* value)
+    {
+    }
+    void OnDidScrollImpl(Ark_NativePointer node,
+                         const Opt_OnScrollCallback* value)
     {
     }
     void LanesImpl(Ark_NativePointer node,
@@ -9050,6 +9066,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                            const Opt_Callback_Number_Number_Void* value)
     {
     }
+    void OnWillScrollImpl(Ark_NativePointer node,
+                          const Opt_OnWillScrollCallback* value)
+    {
+    }
+    void OnDidScrollImpl(Ark_NativePointer node,
+                         const Opt_OnScrollCallback* value)
+    {
+    }
     } // WaterFlowAttributeModifier
     namespace UIExtensionComponentModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -9986,6 +10010,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GridAttributeModifier::OnScrollStartImpl,
             GridAttributeModifier::OnScrollStopImpl,
             GridAttributeModifier::OnScrollFrameBeginImpl,
+            GridAttributeModifier::OnWillScrollImpl,
+            GridAttributeModifier::OnDidScrollImpl,
             GridAttributeModifier::EdgeEffectImpl,
         };
         return &ArkUIGridModifierImpl;
@@ -10199,6 +10225,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ListAttributeModifier::OnItemDragLeaveImpl,
             ListAttributeModifier::OnItemDropImpl,
             ListAttributeModifier::OnScrollFrameBeginImpl,
+            ListAttributeModifier::OnWillScrollImpl,
+            ListAttributeModifier::OnDidScrollImpl,
             ListAttributeModifier::LanesImpl,
             ListAttributeModifier::EdgeEffectImpl,
         };
@@ -11750,6 +11778,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WaterFlowAttributeModifier::OnReachEndImpl,
             WaterFlowAttributeModifier::OnScrollFrameBeginImpl,
             WaterFlowAttributeModifier::OnScrollIndexImpl,
+            WaterFlowAttributeModifier::OnWillScrollImpl,
+            WaterFlowAttributeModifier::OnDidScrollImpl,
         };
         return &ArkUIWaterFlowModifierImpl;
     }

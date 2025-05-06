@@ -1228,6 +1228,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _GridAttribute_onScrollFrameBegin(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _GridAttribute_onWillScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void 
+    @ani.unsafe.Quick
+    native static _GridAttribute_onDidScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void 
+    @ani.unsafe.Quick
     native static _GridAttribute_edgeEffect(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _GridItem_construct(id: KInt, flags: KInt): KPointer
@@ -1486,6 +1490,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ListAttribute_onScrollFrameBegin(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _ListAttribute_onWillScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void 
+    @ani.unsafe.Quick
+    native static _ListAttribute_onDidScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void 
+    @ani.unsafe.Quick
     native static _ListAttribute_lanes(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ListAttribute_edgeEffect(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -3664,6 +3672,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WaterFlowAttribute_onScrollIndex(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _WaterFlowAttribute_onWillScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void 
+    @ani.unsafe.Quick
+    native static _WaterFlowAttribute_onDidScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void 
+    @ani.unsafe.Quick
     native static _UIExtensionComponent_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _UIExtensionComponentInterface_setUIExtensionComponentOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void

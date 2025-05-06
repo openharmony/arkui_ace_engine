@@ -20,7 +20,7 @@ import { int32, int64, float32 } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, wrapCallback } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { GestureJudgeResult, GestureRecognizer } from "./gesture"
-import { TouchResult, CustomBuilder, DragItemInfo } from "./common"
+import { TouchResult, CustomBuilder, DragItemInfo, ScrollResult } from "./common"
 import { HitTestMode } from "./enums"
 import { NavigationAnimatedTransition } from "./navigation"
 import { Tuple_Number_Number } from "./arkui-synthetics"
@@ -49,6 +49,7 @@ export type Callback_Literal_Number_offsetRemain_Void = (value: Literal_Number_o
 export type Callback_Opt_Array_NavDestinationTransition_Void = (value: Array<NavDestinationTransition> | undefined) => void;
 export type Callback_OnScrollFrameBeginHandlerResult_Void = (value: OnScrollFrameBeginHandlerResult) => void;
 export type Callback_OffsetResult_Void = (value: OffsetResult) => void;
+export type Callback_ScrollResult_Void = (value: ScrollResult) => void;
 export type Callback_Opt_TabContentAnimatedTransition_Void = (value: TabContentAnimatedTransition | undefined) => void;
 export type Callback_Array_TextMenuItem_Void = (value: Array<TextMenuItem>) => void;
 export type Callback_WithThemeAttribute_Void = (value: WithThemeAttribute) => void;
