@@ -28,11 +28,7 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
     auto pattern = frameNode->GetPattern<SwitchPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-            frameNode->GetGeometryNode()->ResetContent();
-        } else {
-            frameNode->GetGeometryNode()->Reset();
-        }
+        frameNode->GetGeometryNode()->ResetContent();
         return std::nullopt;
     }
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
