@@ -1550,6 +1550,86 @@ void AssignCast(std::optional<float>& dst, const Ark_String& src)
     }
 }
 
+Dimension ConvertFromString(const std::string& str, DimensionUnit unit)
+{
+    static const int32_t percentUnit = 100;
+    static const std::unordered_map<std::string, DimensionUnit> uMap {
+        { "px", DimensionUnit::PX },
+        { "vp", DimensionUnit::VP },
+        { "fp", DimensionUnit::FP },
+        { "%", DimensionUnit::PERCENT },
+        { "lpx", DimensionUnit::LPX },
+        { "auto", DimensionUnit::AUTO },
+    };
+
+    double value = 0.0;
+
+    if (str.empty()) {
+        LOGE("UITree |ERROR| empty string");
+        return Dimension(value, unit);
+    }
+
+    for (int32_t i = static_cast<int32_t>(str.length() - 1); i >= 0; --i) {
+        if (str[i] >= '0' && str[i] <= '9') {
+            value = StringUtils::StringToDouble(str.substr(0, i + 1));
+            auto subStr = str.substr(i + 1);
+            auto iter = uMap.find(subStr);
+            if (iter != uMap.end()) {
+                unit = iter->second;
+            }
+            value = unit == DimensionUnit::PERCENT ? value / percentUnit : value;
+            break;
+        }
+    }
+    return Dimension(value, unit);
+}
+
+std::optional<Dimension> OptConvertFromArkResource(const Ark_Resource& src, DimensionUnit defaultUnit)
+{
+    ResourceConverter converter(src);
+    std::optional<Dimension> dimension;
+    ResourceType type = static_cast<ResourceType>(OptConvert<int>(src.type).value_or(0));
+    if (type == ResourceType::FLOAT) {
+        dimension = converter.ToDimension();
+    } else if (type == ResourceType::STRING) {
+        std::optional<std::string> optStr = converter.ToString();
+        if (optStr.has_value()) {
+            dimension = ConvertFromString(optStr.value(), defaultUnit);
+        }
+    } else if (type == ResourceType::INTEGER) {
+        std::optional<int32_t> intValue = converter.ToInt();
+        if (intValue.has_value()) {
+            dimension = Dimension(intValue.value(), defaultUnit);
+        }
+    } else {
+        LOGE("Unexpected converter type: %{public}d\n", type);
+    }
+    return dimension;
+}
+
+std::optional<Dimension> OptConvertFromArkNumStrRes(const Ark_Union_Number_String_Resource& src,
+    DimensionUnit defaultUnit)
+{
+    std::optional<Dimension> dimension;
+    auto selector = src.selector;
+    if (selector == NUM_0) {
+        std::optional<float> optValue = Converter::OptConvert<float>(src.value0);
+        if (optValue.has_value()) {
+            dimension = Dimension(optValue.value(), defaultUnit);
+        }
+    } else if (selector == NUM_1) {
+        std::optional<std::string> optStr = Converter::OptConvert<std::string>(src.value1);
+        if (optStr.has_value()) {
+            dimension = ConvertFromString(optStr.value(), defaultUnit);
+        }
+    } else if (selector == NUM_2) {
+        dimension = OptConvertFromArkResource(src.value2, defaultUnit);
+    } else {
+        LOGE("Unexpected converter type: %{public}d\n", selector);
+    }
+    return dimension;
+}
+
 template<>
 void AssignCast(std::optional<std::u16string>& dst, const Ark_Resource& src)
 {

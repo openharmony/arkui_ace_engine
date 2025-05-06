@@ -20572,7 +20572,7 @@ typedef struct GENERATED_ArkUIMarqueeModifier {
     void (*setFontColor)(Ark_NativePointer node,
                          const Opt_ResourceColor* value);
     void (*setFontSize)(Ark_NativePointer node,
-                        const Opt_Length* value);
+                        const Opt_Union_Number_String_Resource* value);
     void (*setAllowScale)(Ark_NativePointer node,
                           const Opt_Boolean* value);
     void (*setFontWeight)(Ark_NativePointer node,

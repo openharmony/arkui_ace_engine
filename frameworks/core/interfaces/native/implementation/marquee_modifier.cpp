@@ -105,11 +105,14 @@ void FontColorImpl(Ark_NativePointer node,
     MarqueeModelNG::SetTextColor(frameNode, convValue);
 }
 void FontSizeImpl(Ark_NativePointer node,
-                  const Opt_Length* value)
+                  const Opt_Union_Number_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Dimension>(*value);
+    std::optional<Dimension> convValue = std::nullopt;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        convValue = Converter::OptConvertFromArkNumStrRes(value->value);
+    }
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateNonPercent(convValue);
     MarqueeModelNG::SetFontSize(frameNode, convValue);

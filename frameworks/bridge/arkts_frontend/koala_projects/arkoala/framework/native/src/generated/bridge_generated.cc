@@ -13616,14 +13616,32 @@ void impl_MarqueeAttribute_fontSize(Ark_NativePointer thisPtr, KSerializerBuffer
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
         const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Length value_value_buf = {};
+        Opt_Union_Number_String_Resource value_value_buf = {};
         value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
         {
-            value_value_buf.value = thisDeserializer.readLength();
+            const Ark_Int8 value_value_buf__selector = thisDeserializer.readInt8();
+            Ark_Union_Number_String_Resource value_value_buf_ = {};
+            value_value_buf_.selector = value_value_buf__selector;
+            if (value_value_buf__selector == 0) {
+                value_value_buf_.selector = 0;
+                value_value_buf_.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            }
+            else if (value_value_buf__selector == 1) {
+                value_value_buf_.selector = 1;
+                value_value_buf_.value1 = static_cast<Ark_String>(thisDeserializer.readString());
+            }
+            else if (value_value_buf__selector == 2) {
+                value_value_buf_.selector = 2;
+                value_value_buf_.value2 = thisDeserializer.readResource();
+            }
+            else {
+                INTEROP_FATAL("One of the branches for value_value_buf_ has to be chosen through deserialisation.");
+            }
+            value_value_buf.value = static_cast<Ark_Union_Number_String_Resource>(value_value_buf_);
         }
-        Opt_Length value_value = value_value_buf;;
-        GetNodeModifiers()->getMarqueeModifier()->setFontSize(self, (const Opt_Length*)&value_value);
+        Opt_Union_Number_String_Resource value_value = value_value_buf;
+        GetNodeModifiers()->getMarqueeModifier()->setFontSize(self, (const Opt_Union_Number_String_Resource*)&value_value);
 }
 KOALA_INTEROP_DIRECT_V3(MarqueeAttribute_fontSize, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_MarqueeAttribute_allowScale(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
