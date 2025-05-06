@@ -819,6 +819,10 @@ void FrameNode::DumpCommonInfo()
         DumpLog::GetInstance().AddDesc(
             std::string("Border: ").append(layoutProperty_->GetBorderWidthProperty()->ToString().c_str()));
     }
+    if (renderContext_->HasBorderRadius()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("BorderRadius: ").append(renderContext_->GetBorderRadius()->ToString().c_str()));
+    }
     if (layoutProperty_->GetMarginProperty()) {
         DumpLog::GetInstance().AddDesc(
             std::string("Margin: ").append(layoutProperty_->GetMarginProperty()->ToString().c_str()));
@@ -4756,6 +4760,15 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
             isLayoutDirtyMarked_ = true;
         }
         needSyncRsNode = false;
+    } else {
+        auto borderRadius = renderContext_->GetBorderRadius();
+        if (borderRadius.has_value()) {
+            renderContext_->SetBorderRadius(borderRadius.value());
+        }
+        auto outerBorderRadius = renderContext_->GetOuterBorderRadius();
+        if (outerBorderRadius.has_value()) {
+            renderContext_->SetOuterBorderRadius(outerBorderRadius.value());
+        }
     }
     if (GetTag() != V2::PAGE_ETS_TAG) {
         renderContext_->SavePaintRect(true, layoutProperty_->GetPixelRound());

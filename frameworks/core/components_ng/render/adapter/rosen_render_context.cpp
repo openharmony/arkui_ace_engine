@@ -255,10 +255,6 @@ RosenRenderContext::~RosenRenderContext()
 
 void RosenRenderContext::DetachModifiers()
 {
-    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
-    if (pipeline && densityChangedCallbackId_ != DEFAULT_CALLBACK_ID) {
-        pipeline->UnregisterDensityChangedCallback(densityChangedCallbackId_);
-    }
     CHECK_NULL_VOID(rsNode_ && rsNode_->GetType() == Rosen::RSUINodeType::SURFACE_NODE);
     if (transitionEffect_) {
         transitionEffect_->Detach(this);
@@ -290,6 +286,7 @@ void RosenRenderContext::DetachModifiers()
     if (baseRotateInZ_) {
         rsNode_->RemoveModifier(baseRotateInZ_);
     }
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
     if (pipeline) {
         pipeline->RequestFrame();
     }
@@ -2437,30 +2434,8 @@ void RosenRenderContext::SetBorderRadius(const BorderRadiusProperty& value)
     RequestNextFrame();
 }
 
-void RosenRenderContext::RegisterDensityChangedCallback()
-{
-    if (densityChangedCallbackId_ == DEFAULT_CALLBACK_ID) {
-        auto context = GetPipelineContext();
-        CHECK_NULL_VOID(context);
-        densityChangedCallbackId_ = context->RegisterDensityChangedCallback(
-            [self = WeakClaim(this)](double density) {
-            auto renderContext = self.Upgrade();
-            CHECK_NULL_VOID(renderContext);
-            auto borderRadius = renderContext->GetBorderRadius();
-            if (borderRadius.has_value()) {
-                renderContext->SetBorderRadius(borderRadius.value());
-            }
-            auto outerBorderRadius = renderContext->GetOuterBorderRadius();
-            if (outerBorderRadius.has_value()) {
-                renderContext->SetOuterBorderRadius(outerBorderRadius.value());
-            }
-        });
-    }
-}
-
 void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
 {
-    RegisterDensityChangedCallback();
     CHECK_NULL_VOID(isSynced_);
     SetBorderRadius(value);
 }
@@ -2554,7 +2529,6 @@ void RosenRenderContext::SetDashWidth(const BorderWidthProperty& value)
 
 void RosenRenderContext::OnOuterBorderRadiusUpdate(const BorderRadiusProperty& value)
 {
-    RegisterDensityChangedCallback();
     SetOuterBorderRadius(value);
 }
 
