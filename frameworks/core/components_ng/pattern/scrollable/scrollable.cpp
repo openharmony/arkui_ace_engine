@@ -1450,7 +1450,7 @@ double Scrollable::CalcNextStep(double position, double mainDelta)
         return nextStep_.value();
     }
     if (LessOrEqual(std::abs(mainDelta), SCROLL_SNAP_MIN_STEP)) {
-        nextStep_ = Positive(mainDelta) ? SCROLL_SNAP_MIN_STEP : -SCROLL_SNAP_MIN_STEP;
+        nextStep_ = Positive(finalDelta) ? SCROLL_SNAP_MIN_STEP : -SCROLL_SNAP_MIN_STEP;
         mainDelta = nextStep_.value();
     }
     return mainDelta;
