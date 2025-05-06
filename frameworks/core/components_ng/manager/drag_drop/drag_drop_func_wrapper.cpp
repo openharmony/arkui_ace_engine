@@ -42,7 +42,7 @@ using DragNotifyMsg = OHOS::Ace::DragNotifyMsg;
 using OnDragCallback = std::function<void(const DragNotifyMsg&)>;
 using StopDragCallback = std::function<void()>;
 constexpr int32_t MOUSE_POINTER_ID = 1001;
-constexpr int32_t SOURCE_TOOL_PEN = 2;
+constexpr int32_t SOURCE_TOOL_PEN = 1;
 constexpr int32_t SOURCE_TYPE_TOUCH = 2;
 constexpr int32_t PEN_POINTER_ID = 102;
 constexpr int32_t SOURCE_TYPE_MOUSE = 1;
@@ -182,8 +182,7 @@ void EnvelopedDragData(
     arkExtraInfoJson->Put("event_id", dragAction->dragPointerEvent.pointerEventId);
     NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, dragAction->previewOption);
     dragData = { shadowInfos, {}, udKey, dragAction->extraParams, arkExtraInfoJson->ToString(),
-        dragAction->dragPointerEvent.sourceType, recordSize, pointerId,
-        static_cast<int32_t>(dragAction->dragPointerEvent.sourceTool), dragAction->dragPointerEvent.displayX,
+        dragAction->dragPointerEvent.sourceType, recordSize, pointerId, dragAction->dragPointerEvent.displayX,
         dragAction->dragPointerEvent.displayY, dragAction->dragPointerEvent.displayId, windowId, true, false,
         summary };
 }
