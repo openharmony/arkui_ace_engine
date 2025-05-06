@@ -22,8 +22,16 @@ namespace {
 }
 
 namespace OHOS::Ace {
+static MeasureContext s_MeasureCtx;
+
 Size MeasureUtil::MeasureTextSize(const MeasureContext& context)
 {
+    s_MeasureCtx = context;
     return Size(TEXT_SIZE_WIDTH, TEXT_SIZE_HEIGHT);
+}
+
+MeasureContext* MeasureUtilGetMeasureCtx()
+{
+    return &s_MeasureCtx;
 }
 } // namespace OHOS::Ace
