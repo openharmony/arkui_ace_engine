@@ -48,7 +48,6 @@ constexpr int32_t PEN_POINTER_ID = 102;
 constexpr int32_t SOURCE_TYPE_MOUSE = 1;
 constexpr size_t SHORT_KEY_LENGTH = 8;
 constexpr size_t PLAINTEXT_LENGTH = 4;
-constexpr size_t  CONVERT_TIME_BASE = 1000;
 #if defined(PIXEL_MAP_SUPPORTED)
 constexpr int32_t CREATE_PIXELMAP_TIME = 80;
 #endif
@@ -936,21 +935,6 @@ RefPtr<PixelMap> DragDropFuncWrapper::GetGatherNodePreviewPixelMap(const RefPtr<
     return pixelMap;
 }
 
-void DragDropFuncWrapper::TrySetDraggableStateAsync(
-    const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    if (frameNode->GetTag() == V2::TEXT_ETS_TAG && !gestureHub->GetIsTextDraggable()) {
-        return;
-    }
-    int64_t downTime = static_cast<int64_t>(touchRestrict.touchEvent.time.time_since_epoch().count());
-    if (DragDropGlobalController::GetInstance().IsAppGlobalDragEnabled()) {
-        InteractionInterface::GetInstance()->SetDraggableStateAsync(true, downTime / CONVERT_TIME_BASE);
-    }
-}
-
 /**
  * check the current node's status to decide if it can initiate one drag operation
  */
@@ -973,7 +957,6 @@ bool DragDropFuncWrapper::IsCurrentNodeStatusSuitableForDragging(
     if (gestureHub->GetTextDraggable()) {
         auto pattern = frameNode->GetPattern<TextBase>();
         if (pattern && !pattern->IsSelected()) {
-            TrySetDraggableStateAsync(frameNode, touchRestrict);
             TAG_LOGI(AceLogTag::ACE_DRAG, "No need to collect drag gestures result, text is not selected.");
             return false;
         }
