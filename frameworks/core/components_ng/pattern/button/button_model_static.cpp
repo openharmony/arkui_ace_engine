@@ -362,14 +362,6 @@ bool ButtonModelStatic::GetAutoDisable(FrameNode* frameNode)
     return value;
 }
 
-void ButtonModelStatic::SetBuilderFunc(FrameNode* frameNode, NG::ButtonMakeCallback&& makeFunc)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ButtonPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetBuilderFunc(std::move(makeFunc));
-}
-
 void ButtonModelStatic::TriggerClick(FrameNode* frameNode, double xPos, double yPos)
 {
     auto pattern = frameNode->GetPattern<ButtonPattern>();
@@ -381,11 +373,6 @@ void ButtonModelStatic::TriggerClick(FrameNode* frameNode, double xPos, double y
         return;
     }
     pattern->SetButtonPress(xPos, yPos);
-}
-
-void ButtonModelStatic::ResetBorderRadius()
-{
-    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(ButtonLayoutProperty, BorderRadius, PROPERTY_UPDATE_MEASURE);
 }
 
 ButtonType ButtonModelStatic::GetType(FrameNode* frameNode)
@@ -475,5 +462,22 @@ float ButtonModelStatic::GetMaxFontScale(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, MaxFontScale, maxFontScale, frameNode,
         static_cast<float>(INT32_MAX));
     return maxFontScale;
+}
+
+void ButtonModelStatic::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const std::string& label)
+{
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto context = textNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto buttonTheme = context->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    auto textStyle = buttonTheme->GetTextStyle();
+    textLayoutProperty->UpdateContent(label);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    textLayoutProperty->UpdateMaxLines(buttonTheme->GetTextMaxLines());
+    textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
+    textLayoutProperty->UpdateAdaptFontSizeStep(Dimension(1.0, DimensionUnit::FP));
 }
 } // namespace OHOS::Ace::NG
