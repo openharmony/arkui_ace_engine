@@ -362,8 +362,8 @@ export struct ChipComponent {
     defaultSymbol: {
       normalFontColor: [$r('sys.color.ohos_id_color_secondary')],
       activatedFontColor: [$r('sys.color.ohos_id_color_text_primary_contrary')],
-      smallSymbolFontSize: LengthMetrics.resource($r('sys.float.chip_normal_icon_size')).value as Length,
-      normalSymbolFontSize: LengthMetrics.resource($r('sys.float.chip_small_icon_size')).value as Length,
+      smallSymbolFontSize: LengthMetrics.resource($r('sys.float.chip_small_icon_size')).value as Length,
+      normalSymbolFontSize: LengthMetrics.resource($r('sys.float.chip_normal_icon_size')).value as Length,
       defaultEffect: -1,
     },
     chipNode: {
@@ -1292,6 +1292,7 @@ export struct ChipComponent {
           })
           .focusable(this.getSuffixIconFocusable())
           .hoverEffect(this.setHoverEffect())
+          .stateEffect(this.setPressEffect())
         } else if (this.allowClose ?? true) {
           Button({ type: ButtonType.Normal }) {
             SymbolGlyph($r('sys.symbol.xmark'))
@@ -1317,6 +1318,7 @@ export struct ChipComponent {
           })
           .focusable(!this.isSuffixIconFocusStyleCustomized)
           .hoverEffect(this.setHoverEffect())
+          .stateEffect(this.setPressEffect())
         }
       }
       .direction(this.chipDirection)
@@ -1386,6 +1388,10 @@ export struct ChipComponent {
 
   private setHoverEffect(): HoverEffect | undefined {
     return this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined;
+  }
+
+  private setPressEffect(): boolean | undefined {
+    return this.isSuffixIconFocusStyleCustomized ? false : undefined;
   }
 
   private chipZoomOut() {
