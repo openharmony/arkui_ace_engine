@@ -38,7 +38,8 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
     lastPointEvent_.reset();
     auto maxTimeStamp = TimeStamp::min().time_since_epoch().count();
     for (const auto& point : touchPoints_) {
-        if (!CheckoutDownFingers(point.second.id) &&
+        if (inputEventType_ != InputEventType::AXIS &&
+            !CheckoutDownFingers(point.second.id) &&
             lastRefereeState_ != RefereeState::PENDING &&
             refereeState_ != RefereeState::PENDING) {
             continue;
