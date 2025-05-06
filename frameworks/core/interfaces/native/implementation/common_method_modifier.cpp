@@ -2611,7 +2611,7 @@ void OnAccessibilityHoverImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        ViewAbstract::DisableOnAccessibilityHover(frameNode));
+        ViewAbstract::DisableOnAccessibilityHover(frameNode);
         return;
     }
     auto weakNode = AceType::WeakClaim(frameNode);
