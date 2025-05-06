@@ -19,6 +19,7 @@
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
+#include "core/components_ng/pattern/rating/rating_model_static.h"
 #include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG {
@@ -70,12 +71,12 @@ void SetRatingOptionsImpl(Ark_NativePointer node,
     std::optional<double> dRating {std::nullopt};
     std::optional<bool> indicator {std::nullopt};
     if (!options) {
-        RatingModelNG::SetRatingOptions(frameNode, dRating, indicator);
+        RatingModelStatic::SetRatingOptions(frameNode, dRating, indicator);
         return;
     }
     auto optOptions = Converter::OptConvert<Ark_RatingOptions>(*options);
     if (!optOptions.has_value()) {
-        RatingModelNG::SetRatingOptions(frameNode, dRating, indicator);
+        RatingModelStatic::SetRatingOptions(frameNode, dRating, indicator);
         return;
     }
     auto arkOptions = optOptions.value();
@@ -83,7 +84,7 @@ void SetRatingOptionsImpl(Ark_NativePointer node,
     indicator = Converter::OptConvert<bool>(arkOptions.indicator);
     Validator::ValidateNonNegative(rating);
     dRating = FloatToDouble(rating);
-    RatingModelNG::SetRatingOptions(frameNode, dRating, indicator);
+    RatingModelStatic::SetRatingOptions(frameNode, dRating, indicator);
 }
 } // RatingInterfaceModifier
 namespace RatingAttributeModifier {
@@ -101,7 +102,7 @@ void Stars1Impl(Ark_NativePointer node,
     auto convVal = arkVal.has_value() ? Converter::OptConvert<float>(arkVal.value()) : std::nullopt;
     Validator::ValidateNonNegative(convVal);
     auto optdVal = FloatToDouble(convVal);
-    RatingModelNG::SetStars(frameNode,  optdVal);
+    RatingModelStatic::SetStars(frameNode,  optdVal);
 }
 void StepSize0Impl(Ark_NativePointer node,
                    const Opt_Number* value)
@@ -118,7 +119,7 @@ void StepSize1Impl(Ark_NativePointer node,
     static const float stepSizeMin = 0.1;
     Validator::ValidateGreatOrEqual(convVal, stepSizeMin);
     auto optdVal = FloatToDouble(convVal);
-    RatingModelNG::SetStepSize(frameNode,  optdVal);
+    RatingModelStatic::SetStepSize(frameNode,  optdVal);
 }
 void StarStyle0Impl(Ark_NativePointer node,
                     const Opt_StarStyleOptions* value)
@@ -152,7 +153,7 @@ void OnChange0Impl(Ark_NativePointer node,
             arkCallback.Invoke(convValue);
         };
     }
-    RatingModelNG::SetOnChange(frameNode, std::move(onChange));
+    RatingModelStatic::SetOnChange(frameNode, std::move(onChange));
 }
 void OnChange1Impl(Ark_NativePointer node,
                    const Opt_OnRatingChangeCallback* value)
@@ -167,7 +168,7 @@ void OnChange1Impl(Ark_NativePointer node,
             arkCallback.Invoke(convValue);
         };
     }
-    RatingModelNG::SetOnChange(frameNode, std::move(onChange));
+    RatingModelStatic::SetOnChange(frameNode, std::move(onChange));
 }
 void ContentModifier0Impl(Ark_NativePointer node,
                           const Opt_ContentModifier* value)
@@ -198,7 +199,7 @@ void _onChangeEvent_ratingImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(weakNode);
         arkCallback.Invoke(nValue);
     };
-    RatingModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
+    RatingModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
 } // RatingAttributeModifier
 const GENERATED_ArkUIRatingModifier* GetRatingModifier()

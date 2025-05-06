@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
+#include "core/components_ng/pattern/radio/radio_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -59,7 +60,7 @@ void SetRadioOptionsImpl(Ark_NativePointer node,
     RadioModelNG::SetRadioValue(frameNode, radioValue);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto indicatorType = Converter::OptConvert<RadioIndicatorType>(options->indicatorType);
-        RadioModelNG::SetRadioIndicatorType(frameNode, EnumToInt(indicatorType));
+        RadioModelStatic::SetRadioIndicatorType(frameNode, EnumToInt(indicatorType));
     }
     auto arkBuilder = Converter::OptConvert<CustomNodeBuilder>(options->indicatorBuilder);
     if (arkBuilder.has_value()) {
@@ -67,7 +68,7 @@ void SetRadioOptionsImpl(Ark_NativePointer node,
             auto builderNode = callback.BuildSync(node);
             NG::ViewStackProcessor::GetInstance()->Push(builderNode);
         };
-        RadioModelNG::SetBuilder(frameNode, std::move(builder));
+        RadioModelStatic::SetBuilder(frameNode, std::move(builder));
     }
 }
 } // RadioInterfaceModifier
@@ -78,7 +79,7 @@ void Checked0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto isChecked = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
-    RadioModelNG::SetChecked(frameNode, isChecked);
+    RadioModelStatic::SetChecked(frameNode, isChecked);
 }
 void Checked1Impl(Ark_NativePointer node,
                   const Opt_Boolean* value)
@@ -122,13 +123,13 @@ void RadioStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto style = value ? Converter::OptConvert<Converter::RadioStyle>(*value) : std::nullopt;
     if (style) {
-        RadioModelNG::SetCheckedBackgroundColor(frameNode, style->checkedBackgroundColor);
-        RadioModelNG::SetUncheckedBorderColor(frameNode, style->uncheckedBorderColor);
-        RadioModelNG::SetIndicatorColor(frameNode, style->indicatorColor);
+        RadioModelStatic::SetCheckedBackgroundColor(frameNode, style->checkedBackgroundColor);
+        RadioModelStatic::SetUncheckedBorderColor(frameNode, style->uncheckedBorderColor);
+        RadioModelStatic::SetIndicatorColor(frameNode, style->indicatorColor);
     } else {
-        RadioModelNG::SetCheckedBackgroundColor(frameNode, std::nullopt);
-        RadioModelNG::SetUncheckedBorderColor(frameNode, std::nullopt);
-        RadioModelNG::SetIndicatorColor(frameNode, std::nullopt);
+        RadioModelStatic::SetCheckedBackgroundColor(frameNode, std::nullopt);
+        RadioModelStatic::SetUncheckedBorderColor(frameNode, std::nullopt);
+        RadioModelStatic::SetIndicatorColor(frameNode, std::nullopt);
     }
 }
 void ContentModifier0Impl(Ark_NativePointer node,
@@ -159,7 +160,7 @@ void _onChangeEvent_checkedImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(weakNode);
         arkCallback.Invoke(Converter::ArkValue<Opt_Boolean>(check));
     };
-    RadioModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
+    RadioModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
 } // RadioAttributeModifier
 const GENERATED_ArkUIRadioModifier* GetRadioModifier()
