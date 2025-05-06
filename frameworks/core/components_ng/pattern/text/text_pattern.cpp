@@ -689,9 +689,8 @@ void TextPattern::AsyncHandleOnCopySpanStringHtml(RefPtr<SpanString>& subSpanStr
     std::list<RefPtr<SpanItem>> spans = GetSpanSelectedContent();
     taskExecutor->PostTask(
         [spans, subSpanString, weak = WeakClaim(this), task = WeakClaim(RawPtr(taskExecutor))]() {
-            std::vector<uint8_t> tlvData;
-            subSpanString->EncodeTlv(tlvData);
             auto multiTypeRecordImpl = AceType::MakeRefPtr<MultiTypeRecordImpl>();
+            subSpanString->EncodeTlv(multiTypeRecordImpl->GetSpanStringBuffer());
             multiTypeRecordImpl->SetPlainText(subSpanString->GetString());
             std::string htmlText = HtmlUtils::ToHtml(spans);
             multiTypeRecordImpl->SetHtmlText(htmlText);
@@ -699,12 +698,10 @@ void TextPattern::AsyncHandleOnCopySpanStringHtml(RefPtr<SpanString>& subSpanStr
             auto uiTaskExecutor = task.Upgrade();
             CHECK_NULL_VOID(uiTaskExecutor);
             uiTaskExecutor->PostTask(
-                [weak, multiTypeRecordImpl, tlvData]() {
+                [weak, multiTypeRecordImpl]() {
                     auto textPattern = weak.Upgrade();
                     CHECK_NULL_VOID(textPattern);
                     RefPtr<PasteDataMix> pasteData = textPattern->clipboard_->CreatePasteDataMix();
-                    std::vector<uint8_t> tlvDataCopy = tlvData;
-                    textPattern->clipboard_->AddSpanStringRecord(pasteData, tlvDataCopy);
                     textPattern->clipboard_->AddMultiTypeRecord(pasteData, multiTypeRecordImpl);
                     textPattern->clipboard_->SetData(pasteData, textPattern->copyOption_);
                 }, TaskExecutor::TaskType::UI, "AsyncHandleOnCopySpanStringHtmlSetClipboardData");
