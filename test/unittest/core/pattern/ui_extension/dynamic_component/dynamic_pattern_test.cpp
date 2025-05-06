@@ -407,7 +407,7 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest009, TestSize.Level1)
 
 /**
  * @tc.name: DynamicPatternTest010
- * @tc.desc: Test DynamicPattern OnVisibleChange/OnWindowShow/OnWindowHide
+ * @tc.desc: Test DynamicPattern HandleVisibleAreaChange
  * @tc.type: FUNC
  */
 HWTEST_F(DynamicPatternTestNg, DynamicPatternTest010, TestSize.Level1)
@@ -428,20 +428,16 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest010, TestSize.Level1)
     EXPECT_TRUE(dynamicPattern->isVisible_);
 
     /**
-     * @tc.steps: step2. test OnVisibleChange(false)
+     * @tc.steps: step2. test HandleVisibleAreaChange(false, 0.0)
      */
-    dynamicPattern->OnVisibleChange(false);
+    dynamicPattern->HandleVisibleAreaChange(false, 0.0);
     EXPECT_FALSE(dynamicPattern->isVisible_);
-    dynamicPattern->OnWindowShow();
-    dynamicPattern->OnWindowHide();
 
     /**
-     * @tc.steps: step3. test OnVisibleChange(true)
+     * @tc.steps: step3. test HandleVisibleAreaChange(true, 1.0)
      */
-    dynamicPattern->OnVisibleChange(true);
+    dynamicPattern->HandleVisibleAreaChange(false, 1.0);
     EXPECT_TRUE(dynamicPattern->isVisible_);
-    dynamicPattern->OnWindowShow();
-    dynamicPattern->OnWindowHide();
 #endif
 }
 
