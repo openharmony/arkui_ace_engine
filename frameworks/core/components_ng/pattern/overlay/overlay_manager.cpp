@@ -3859,9 +3859,6 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     modalPagePattern->SetProhibitedRemoveByNavigation(modalStyle.prohibitedRemoveByNavigation);
     modalPagePattern->SetHasTransitionEffect(contentCoverParam.transitionEffect != nullptr);
     modalNode->GetRenderContext()->UpdateChainedTransition(contentCoverParam.transitionEffect);
-    modalStack_.push(WeakClaim(RawPtr(modalNode)));
-    modalList_.emplace_back(WeakClaim(RawPtr(modalNode)));
-    SaveLastModalNode();
     if (targetId < 0) {
         // modaluiextention node mounting
         modalNode->MountToParent(rootNode, DEFAULT_NODE_SLOT, false, false, true);
@@ -3869,18 +3866,26 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
         MountToParentWithService(rootNode, modalNode);
     }
     modalNode->AddChild(builder);
-    if (!isAllowedBeCovered_ && modalNode->GetParent()) {
+    auto modalNodeParent = modalNode->GetParent();
+     if (!modalNodeParent) {
+        TAG_LOGE(AceLogTag::ACE_SHEET, "ModalPage MountToParent error");
+           return;
+    }
+    modalStack_.push(WeakClaim(RawPtr(modalNode)));
+    modalList_.emplace_back(WeakClaim(RawPtr(modalNode)));
+    SaveLastModalNode();
+    if (!isAllowedBeCovered_) {
         TAG_LOGI(AceLogTag::ACE_OVERLAY,
             "modalNode->GetParent() %{public}d mark IsProhibitedAddChildNode when sessionId %{public}d,"
             "prohibitedRemoveByRouter: %{public}d.",
-            modalNode->GetParent()->GetId(), targetId, modalStyle.prohibitedRemoveByRouter);
+            modalNodeParent->GetId(), targetId, modalStyle.prohibitedRemoveByRouter);
         if (AddCurSessionId(targetId)) {
-            modalNode->GetParent()->UpdateModalUiextensionCount(true);
+            modalNodeParent->UpdateModalUiextensionCount(true);
         }
     }
 
     FireModalPageShow();
-    modalNode->GetParent()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    modalNodeParent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     if (contentCoverParam.transitionEffect != nullptr) {
         PlayTransitionEffectIn(modalNode);
         return;
