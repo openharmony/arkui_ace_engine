@@ -26,7 +26,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, LayoutSafeAreaType, LayoutSafeAreaEdge, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, LayoutSafeAreaType, LayoutSafeAreaEdge, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod, Callback } from "./common"
 import { Callback_Void } from "./abilityComponent"
 import { ResourceStr, Length } from "./units"
 import { PixelMap } from "./arkui-pixelmap"
@@ -821,10 +821,10 @@ export interface NavDestinationAttribute extends CommonMethod {
     backButtonIcon(icon: ResourceStr | PixelMap | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this
     menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this
     onReady(value: ((parameter: NavDestinationContext) => void) | undefined): this
-    onWillAppear(value: (() => void) | undefined): this
-    onWillDisappear(value: (() => void) | undefined): this
-    onWillShow(value: (() => void) | undefined): this
-    onWillHide(value: (() => void) | undefined): this
+    onWillAppear(value: Callback<void> | undefined): this
+    onWillDisappear(value: Callback<void> | undefined): this
+    onWillShow(value: Callback<void> | undefined): this
+    onWillHide(value: Callback<void> | undefined): this
     systemBarStyle(value: SystemBarStyle | undefined): this
     recoverable(value: boolean | undefined): this
     systemTransition(value: NavigationSystemTransitionType | undefined): this
@@ -864,13 +864,13 @@ export interface UINavDestinationAttribute extends UICommonMethod {
     /** @memo */
     onReady(value: ((parameter: NavDestinationContext) => void) | undefined): this
     /** @memo */
-    onWillAppear(value: (() => void) | undefined): this
+    onWillAppear(value: Callback<void> | undefined): this
     /** @memo */
-    onWillDisappear(value: (() => void) | undefined): this
+    onWillDisappear(value: Callback<void> | undefined): this
     /** @memo */
-    onWillShow(value: (() => void) | undefined): this
+    onWillShow(value: Callback<void> | undefined): this
     /** @memo */
-    onWillHide(value: (() => void) | undefined): this
+    onWillHide(value: Callback<void> | undefined): this
     /** @memo */
     systemBarStyle(value: SystemBarStyle | undefined): this
     /** @memo */
@@ -916,10 +916,10 @@ export class ArkNavDestinationStyle extends ArkCommonMethodStyle implements NavD
     backButtonIcon_value?: ResourceStr | PixelMap | SymbolGlyphModifier | undefined
     menus_value?: Array<NavigationMenuItem> | CustomBuilder | undefined
     onReady_value?: ((parameter: NavDestinationContext) => void) | undefined
-    onWillAppear_value?: (() => void) | undefined
-    onWillDisappear_value?: (() => void) | undefined
-    onWillShow_value?: (() => void) | undefined
-    onWillHide_value?: (() => void) | undefined
+    onWillAppear_value?: Callback<void> | undefined
+    onWillDisappear_value?: Callback<void> | undefined
+    onWillShow_value?: Callback<void> | undefined
+    onWillHide_value?: Callback<void> | undefined
     systemBarStyle_value?: SystemBarStyle | undefined
     recoverable_value?: boolean | undefined
     systemTransition_value?: NavigationSystemTransitionType | undefined
@@ -961,16 +961,16 @@ export class ArkNavDestinationStyle extends ArkCommonMethodStyle implements NavD
     public onReady(value: ((parameter: NavDestinationContext) => void) | undefined): this {
         return this
     }
-    public onWillAppear(value: (() => void) | undefined): this {
+    public onWillAppear(value: Callback<void> | undefined): this {
         return this
     }
-    public onWillDisappear(value: (() => void) | undefined): this {
+    public onWillDisappear(value: Callback<void> | undefined): this {
         return this
     }
-    public onWillShow(value: (() => void) | undefined): this {
+    public onWillShow(value: Callback<void> | undefined): this {
         return this
     }
-    public onWillHide(value: (() => void) | undefined): this {
+    public onWillHide(value: Callback<void> | undefined): this {
         return this
     }
     public systemBarStyle(value: SystemBarStyle | undefined): this {
@@ -1164,7 +1164,7 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         return this
     }
     /** @memo */
-    public onWillAppear(value: (() => void) | undefined): this {
+    public onWillAppear(value: Callback<void> | undefined): this {
         if (this.checkPriority("onWillAppear")) {
             const value_casted = value as ((() => void) | undefined)
             this.getPeer()?.onWillAppearAttribute(value_casted)
@@ -1173,7 +1173,7 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         return this
     }
     /** @memo */
-    public onWillDisappear(value: (() => void) | undefined): this {
+    public onWillDisappear(value: Callback<void> | undefined): this {
         if (this.checkPriority("onWillDisappear")) {
             const value_casted = value as ((() => void) | undefined)
             this.getPeer()?.onWillDisappearAttribute(value_casted)
@@ -1182,7 +1182,7 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         return this
     }
     /** @memo */
-    public onWillShow(value: (() => void) | undefined): this {
+    public onWillShow(value: Callback<void> | undefined): this {
         if (this.checkPriority("onWillShow")) {
             const value_casted = value as ((() => void) | undefined)
             this.getPeer()?.onWillShowAttribute(value_casted)
@@ -1191,7 +1191,7 @@ export class ArkNavDestinationComponent extends ArkCommonMethodComponent impleme
         return this
     }
     /** @memo */
-    public onWillHide(value: (() => void) | undefined): this {
+    public onWillHide(value: Callback<void> | undefined): this {
         if (this.checkPriority("onWillHide")) {
             const value_casted = value as ((() => void) | undefined)
             this.getPeer()?.onWillHideAttribute(value_casted)
