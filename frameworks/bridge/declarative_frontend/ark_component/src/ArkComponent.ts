@@ -2589,6 +2589,48 @@ class AccessibilityHoverTransparentModifier extends ModifierWithKey<Accessibilit
   }
 }
 
+class AccessibilityTextHintModifier extends ModifierWithKey<string> {
+  constructor(value: string) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityTextHint');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityTextHint(node);
+    } else {
+      getUINativeModule().common.setAccessibilityTextHint(node, this.value);
+    }
+  }
+}
+
+class AccessibilityCheckedModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityChecked');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityChecked(node);
+    } else {
+      getUINativeModule().common.setAccessibilityChecked(node, this.value);
+    }
+  }
+}
+
+class AccessibilitySelectedModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilitySelected');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilitySelected(node);
+    } else {
+      getUINativeModule().common.setAccessibilitySelected(node, this.value);
+    }
+  }
+}
+
 class AllowDropModifier extends ModifierWithKey<Array<UniformDataType>> {
   constructor(value: Array<UniformDataType>) {
     super(value);
@@ -5488,6 +5530,37 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       modifierWithKey(this._modifiersWithKeys, AccessibilityScrollTriggerableModifier.identity, AccessibilityScrollTriggerableModifier, value);
     } else {
       modifierWithKey(this._modifiersWithKeys, AccessibilityScrollTriggerableModifier.identity, AccessibilityScrollTriggerableModifier, undefined);
+    }
+    return this;
+  }
+
+  accessibilityTextHint(value: string): this {
+    if (typeof value === 'string') {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityTextHintModifier.identity, AccessibilityTextHintModifier, value);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityTextHintModifier.identity, AccessibilityTextHintModifier, undefined);
+    }
+    return this;
+  }
+
+  accessibilityVirtualNode(builder: CustomBuilder): this {
+    throw new Error('Method not implemented.');
+  }
+
+  accessibilityChecked(isCheck: boolean): this {
+    if (typeof isCheck === 'boolean') {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityCheckedModifier.identity, AccessibilityCheckedModifier, isCheck);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityCheckedModifier.identity, AccessibilityCheckedModifier, undefined);
+    }
+    return this;
+  }
+  
+  accessibilitySelected(isCheck: boolean): this {
+    if (typeof isCheck === 'boolean') {
+      modifierWithKey(this._modifiersWithKeys, AccessibilitySelectedModifier.identity, AccessibilitySelectedModifier, isCheck);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, AccessibilitySelectedModifier.identity, AccessibilitySelectedModifier, undefined);
     }
     return this;
   }
