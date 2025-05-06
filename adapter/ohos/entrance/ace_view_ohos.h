@@ -235,6 +235,11 @@ private:
         }
     }
 
+    bool ProcessMouseEventWithTouch(const MouseEvent& event, const RefPtr<OHOS::Ace::NG::FrameNode>& node,
+        const std::function<void()>& markProcess);
+    void ProcessAxisEventWithTouch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node, bool isInjected);
+
     TouchEventCallback touchEventCallback_;
     MouseEventCallback mouseEventCallback_;
     AxisEventCallback axisEventCallback_;
@@ -266,6 +271,8 @@ private:
     std::unordered_map<int32_t, TouchPointInfo> touchPointInfoMap_;
 
     std::unique_ptr<ThreadModelImpl> threadModelImpl_;
+
+    OHOS::Ace::PointerEvent axisFakePntEvt_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceViewOhos);
 };
