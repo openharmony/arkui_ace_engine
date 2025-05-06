@@ -43,6 +43,7 @@
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/property/layout_policy_property.h"
 #include "core/event/ace_events.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
@@ -68,6 +69,7 @@ public:
     // basic size
     virtual void SetWidth(const CalcDimension& width) = 0;
     virtual void SetHeight(const CalcDimension& height) = 0;
+    virtual void UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPolicy, bool isWidth) = 0;
     virtual void ClearWidthOrHeight(bool isWidth) = 0;
     virtual void SetMinWidth(const CalcDimension& minWidth) = 0;
     virtual void SetMinHeight(const CalcDimension& minHeight) = 0;

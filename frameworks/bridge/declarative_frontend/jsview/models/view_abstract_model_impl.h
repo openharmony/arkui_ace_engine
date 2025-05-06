@@ -252,6 +252,7 @@ public:
     void SetObscured(const std::vector<ObscuredReasons>& reasons) override {};
     void SetPrivacySensitive(bool flag) override {};
     void SetMonopolizeEvents(bool monopolizeEvents) override {};
+    void UpdateLayoutPolicyProperty(const LayoutCalPolicy layoutPolicy, bool isWidth) override {};
 
     // Disable event.
     void DisableOnClick() override {};

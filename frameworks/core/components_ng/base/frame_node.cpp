@@ -858,6 +858,13 @@ void FrameNode::DumpCommonInfo()
         CHECK_NULL_VOID(pipeline);
         DumpLog::GetInstance().AddDesc(std::string("dpi: ").append(std::to_string(pipeline->GetDensity())));
     }
+    auto layoutPolicy = layoutProperty_->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value()) {
+        std::string layoutPolicyStr = layoutPolicy.value().ToString();
+        if (layoutPolicyStr.length() > 0) {
+            DumpLog::GetInstance().AddDesc(layoutPolicyStr);
+        }
+    }
     DumpAlignRulesInfo();
     DumpDragInfo();
     DumpOverlayInfo();

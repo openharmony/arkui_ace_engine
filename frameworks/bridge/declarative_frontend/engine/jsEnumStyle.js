@@ -674,6 +674,14 @@ class LayoutPolicy {
   static get matchParent() {
     return new LayoutPolicy('matchParent');
   }
+
+  static get wrapContent() {
+    return new LayoutPolicy('wrapContent');
+  }
+
+  static get fixIdealSize() {
+    return new LayoutPolicy('fixAtIdealSize');
+  }
 }
 
 var BlurStyle;

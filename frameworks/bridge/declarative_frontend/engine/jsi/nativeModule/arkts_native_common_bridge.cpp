@@ -1715,6 +1715,20 @@ ArkUINativeModuleValue CommonBridge::ResetBorderRadius(ArkUIRuntimeCallInfo *run
     return panda::JSValueRef::Undefined(vm);
 }
 
+LayoutCalPolicy CommonBridge::ParseLayoutPolicy(const std::string& layoutPolicy)
+{
+    if (layoutPolicy == "matchParent") {
+        return LayoutCalPolicy::MATCH_PARENT;
+    }
+    if (layoutPolicy == "wrapContent") {
+        return LayoutCalPolicy::WRAP_CONTENT;
+    }
+    if (layoutPolicy == "fixAtIdealSize") {
+        return LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    }
+    return LayoutCalPolicy::NO_MATCH;
+}
+
 ArkUINativeModuleValue CommonBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -1722,15 +1736,24 @@ ArkUINativeModuleValue CommonBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCallI
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(NUM_1);
-
     CalcDimension width;
     std::string calcStr;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, width)) {
         GetArkUINodeModifiers()->getCommonModifier()->resetWidth(nativeNode);
+        if (jsValue->IsObject(vm)) {
+            auto obj = jsValue->ToObject(vm);
+            auto layoutPolicy = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id_"));
+            if (layoutPolicy->IsString(vm)) {
+                auto policy = ParseLayoutPolicy(layoutPolicy->ToString(vm)->ToString(vm));
+                ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, true);
+                return panda::JSValueRef::Undefined(vm);
+            }
+        }
     } else {
         if (LessNotEqual(width.Value(), 0.0)) {
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
                 GetArkUINodeModifiers()->getCommonModifier()->resetWidth(nativeNode);
+                ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
                 return panda::JSValueRef::Undefined(vm);
             }
             width.SetValue(0.0);
@@ -1744,6 +1767,7 @@ ArkUINativeModuleValue CommonBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCallI
                 nativeNode, width.Value(), static_cast<int32_t>(width.Unit()), calcStr.c_str());
         }
     }
+    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1768,10 +1792,20 @@ ArkUINativeModuleValue CommonBridge::SetHeight(ArkUIRuntimeCallInfo* runtimeCall
     std::string calcStr;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height)) {
         GetArkUINodeModifiers()->getCommonModifier()->resetHeight(nativeNode);
+        if (jsValue->IsObject(vm)) {
+            auto obj = jsValue->ToObject(vm);
+            auto layoutPolicy = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id_"));
+            if (layoutPolicy->IsString(vm)) {
+                auto policy = ParseLayoutPolicy(layoutPolicy->ToString(vm)->ToString(vm));
+                ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, false);
+                return panda::JSValueRef::Undefined(vm);
+            }
+        }
     } else {
         if (LessNotEqual(height.Value(), 0.0)) {
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
                 GetArkUINodeModifiers()->getCommonModifier()->resetHeight(nativeNode);
+                ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
                 return panda::JSValueRef::Undefined(vm);
             }
             height.SetValue(0.0);
@@ -1784,6 +1818,7 @@ ArkUINativeModuleValue CommonBridge::SetHeight(ArkUIRuntimeCallInfo* runtimeCall
                 nativeNode, height.Value(), static_cast<int32_t>(height.Unit()), calcStr.c_str());
         }
     }
+    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
     return panda::JSValueRef::Undefined(vm);
 }
 

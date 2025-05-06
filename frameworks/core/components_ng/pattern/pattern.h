@@ -118,6 +118,21 @@ public:
         return false;
     }
 
+    virtual bool IsEnableMatchParent()
+    {
+        return false;
+    }
+
+    virtual bool IsEnableChildrenMatchParent()
+    {
+        return false;
+    }
+
+    virtual bool IsEnableWrap()
+    {
+        return false;
+    }
+
     virtual std::optional<RenderContext::ContextParam> GetContextParam() const
     {
         return std::nullopt;
