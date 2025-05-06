@@ -1093,18 +1093,14 @@ export struct ArcSlider {
 
   onDigitalCrownEvent(event: CrownEvent) {
     this.timeCur = systemDateTime.getTime(false);
+    const isVibEnabled: boolean = this.isEnlarged && (event.action === CrownAction.BEGIN ||
+      this.isTouchAnimatorFinished && event.action === CrownAction.UPDATE);
     if (event.action === CrownAction.BEGIN && !this.isEnlarged) {
       this.clearTimeout();
       this.isEnlarged = true;
       this.startTouchAnimator();
       this.calcBlur();
-    } else if ((event.action === CrownAction.BEGIN) && this.isEnlarged) {
-      this.clearTimeout();
-      this.crownDeltaAngle = this.getUIContext().px2vp(-event.degree *
-      this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.radius;
-      this.calcCrownValue(this.crownDeltaAngle);
-      this.setVibration();
-    } else if ((this.isEnlarged) && (this.isTouchAnimatorFinished) && (event.action === CrownAction.UPDATE)) {
+    } else if (isVibEnabled) {
       this.clearTimeout();
       this.crownDeltaAngle = this.getUIContext().px2vp(-event.degree *
       this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.radius;
