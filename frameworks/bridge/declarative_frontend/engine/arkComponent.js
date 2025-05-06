@@ -27253,6 +27253,19 @@ class SubMenuExpandingModeModifier extends ModifierWithKey {
   }
 }
 SubMenuExpandingModeModifier.identity = Symbol('subMenuExpandingMode');
+class SubMenuExpandSymbolModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !this.value) {
+      getUINativeModule().menu.resetSubMenuExpandSymbol(node);
+    } else {
+      getUINativeModule().menu.setSubMenuExpandSymbol(node, this.value);
+    }
+  }
+}
+SubMenuExpandSymbolModifier.identity = Symbol('subMenuExpandSymbol');
 class ArkMenuComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -27287,6 +27300,10 @@ class ArkMenuComponent extends ArkComponent {
   }
   subMenuExpandingMode(value) {
     modifierWithKey(this._modifiersWithKeys, SubMenuExpandingModeModifier.identity, SubMenuExpandingModeModifier, value);
+    return this;
+  }
+  subMenuExpandSymbol(value) {
+    modifierWithKey(this._modifiersWithKeys, SubMenuExpandSymbolModifier.identity, SubMenuExpandSymbolModifier, value);
     return this;
   }
 }
