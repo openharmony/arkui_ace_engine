@@ -529,6 +529,10 @@ int32_t GetCAxisEventDeviceId(ArkUI_UIInputEvent* event)
     if (!axisEvent) {
         return -1;
     }
+    if (axisEvent->subKind == ON_AXIS &&
+        event->apiVersion < static_cast<int32_t>(OHOS::Ace::PlatformVersion::VERSION_TWENTY)) {
+        return 0;
+    }
     return static_cast<int32_t>(axisEvent->deviceId);
 }
 
