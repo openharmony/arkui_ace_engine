@@ -583,6 +583,11 @@ public:
         ViewAbstract::SetAlign(localizedAlignment);
     }
 
+    void SetLayoutGravity(const Alignment& alignment) override
+    {
+        ViewAbstract::SetLayoutGravity(alignment);
+    }
+
     void SetIsMirrorable(const bool& isMirrorable) override
     {
         ViewAbstract::SetIsMirrorable(isMirrorable);

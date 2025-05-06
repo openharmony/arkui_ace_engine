@@ -627,6 +627,7 @@ public:
         layoutProperty->CheckLocalizedBorderImageWidth(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageOutset(layoutDirection);
         layoutProperty->CheckLocalizedAlignment(layoutDirection);
+        layoutProperty->CheckLayoutGravity(layoutDirection);
         host->ResetSafeAreaPadding();
         layoutProperty->CheckLocalizedSafeAreaPadding(layoutDirection);
     }

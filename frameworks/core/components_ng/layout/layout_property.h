@@ -160,6 +160,8 @@ public:
 
     void UpdateLocalizedAlignment(std::string value);
 
+    void UpdateLayoutGravity(Alignment value);
+
     void UpdateIsMirrorable(bool value);
 
     void UpdateLayoutWeight(float value);
@@ -417,12 +419,15 @@ public:
     void CheckLocalizedBorderImageOutset(const TextDirection& direction);
     void CheckLocalizedSafeAreaPadding(const TextDirection& direction);
     void CheckLocalizedAlignment(const TextDirection& direction);
+    void CheckLayoutGravity(const TextDirection& direction);
 
     virtual void OnPropertyChangeMeasure() {}
 
     std::string LayoutInfoToString();
 
     std::string GetAlignmentStringFromLocalized(TextDirection layoutDirection, std::string localizedAlignment);
+
+    Alignment GetLayoutGravityAlignment(TextDirection layoutDirection, Alignment alignment);
 
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);

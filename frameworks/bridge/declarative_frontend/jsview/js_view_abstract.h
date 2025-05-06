@@ -424,6 +424,7 @@ public:
     static void JsLayoutWeight(const JSCallbackInfo& info);
 
     static void JsAlign(const JSCallbackInfo& info);
+    static void JsLayoutGravity(const JSCallbackInfo& info);
     static void JsPosition(const JSCallbackInfo& info);
     static void JsMarkAnchor(const JSCallbackInfo& info);
     static void JsOffset(const JSCallbackInfo& info);
@@ -432,6 +433,7 @@ public:
     static void JsOverlay(const JSCallbackInfo& info);
     static Alignment ParseAlignment(int32_t align);
     static LayoutCalPolicy ParseLayoutPolicy(const std::string& layoutPolicy);
+    static Alignment ParseLocalizedAlignment(std::string localizedAlignment);
     static void JsAlignRules(const JSCallbackInfo& info);
     static void JsChainMode(const JSCallbackInfo& info);
 
