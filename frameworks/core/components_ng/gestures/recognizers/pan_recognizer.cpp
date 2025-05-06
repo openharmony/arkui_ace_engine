@@ -870,6 +870,7 @@ bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
     distance_ = curr->distance_;
     newDistance_ = curr->newDistance_;
     mouseDistance_ = curr->mouseDistance_;
+    isLimitFingerCount_ = curr->isLimitFingerCount_;
 
     onActionStart_ = std::move(curr->onActionStart_);
     onActionUpdate_ = std::move(curr->onActionUpdate_);
