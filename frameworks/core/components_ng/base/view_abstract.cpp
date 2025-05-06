@@ -2215,9 +2215,6 @@ void ViewAbstract::AddHoverEventForTips(
     auto popupId = tipsInfo.popupId;
     auto popupNode = tipsInfo.popupNode;
     CHECK_NULL_VOID(popupNode);
-    auto bubbleRenderProp = popupNode->GetPaintProperty<BubbleRenderProperty>();
-    CHECK_NULL_VOID(bubbleRenderProp);
-    bubbleRenderProp->UpdateAutoCancel(false);
     auto targetId = targetNode->GetId();
     auto context = targetNode->GetContext();
     CHECK_NULL_VOID(context);
