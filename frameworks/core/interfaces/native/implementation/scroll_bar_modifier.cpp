@@ -15,7 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/components_ng/pattern/scroll_bar/scroll_bar_model_static.h"
+#include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
 #include "core/interfaces/native/implementation/scroller_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -23,7 +23,7 @@ namespace ScrollBarModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = ScrollBarModelStatic::CreateFrameNode(id);
+    auto frameNode = ScrollBarModelNG::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -37,13 +37,13 @@ void SetScrollBarOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     if (value) {
         auto scrollerPeer = value->scroller;
-        auto scrollProxy = ScrollBarModelStatic::SetScrollBarProxy(frameNode, scrollerPeer->GetScrollBarProxy());
+        auto scrollProxy = ScrollBarModelNG::SetScrollBarProxy(frameNode, scrollerPeer->GetScrollBarProxy());
         scrollerPeer->SetScrollBarProxy(scrollProxy);
     }
     const auto direction = value ? Converter::OptConvert<Axis>(value->direction) : std::nullopt;
-    ScrollBarModelStatic::SetDirection(frameNode, direction);
+    ScrollBarModelNG::SetDirection(frameNode, direction);
     const auto state = value ? Converter::OptConvert<DisplayMode>(value->state) : std::nullopt;
-    ScrollBarModelStatic::SetState(frameNode, state);
+    ScrollBarModelNG::SetState(frameNode, state);
 }
 } // ScrollBarInterfaceModifier
 namespace ScrollBarAttributeModifier {
@@ -54,7 +54,7 @@ void EnableNestedScrollImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<bool>(*value);
-    ScrollBarModelStatic::SetEnableNestedScroll(frameNode, convValue);
+    ScrollBarModelNG::SetEnableNestedScroll(frameNode, convValue);
 }
 } // ScrollBarAttributeModifier
 const GENERATED_ArkUIScrollBarModifier* GetScrollBarModifier()
