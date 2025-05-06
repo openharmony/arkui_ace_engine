@@ -79,7 +79,8 @@ void LongPressRecognizer::OnAccepted()
         StartRepeatTimer();
     }
     if (onAccessibilityEventFunc_) {
-        onAccessibilityEventFunc_(AccessibilityEventType::LONG_PRESS);
+        auto onAccessibilityEventFunc = onAccessibilityEventFunc_;
+        onAccessibilityEventFunc(AccessibilityEventType::LONG_PRESS);
     }
 }
 
