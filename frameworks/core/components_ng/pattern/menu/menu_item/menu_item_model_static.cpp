@@ -95,7 +95,15 @@ void MenuItemModelStatic::AddRowChild(FrameNode* frameNode, const MenuItemProper
 void MenuItemModelStatic::UpdateMenuProperty(FrameNode* frameNode, const MenuItemProperties& menuItemProps)
 {
     CHECK_NULL_VOID(frameNode);
-    UpdateMenuProperty(frameNode, menuItemProps);
+    auto menuProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_VOID(menuProperty);
+
+    menuProperty->UpdateStartIcon(menuItemProps.startIcon.value_or(ImageSourceInfo("")));
+    menuProperty->UpdateContent(menuItemProps.content);
+    menuProperty->UpdateEndIcon(menuItemProps.endIcon.value_or(ImageSourceInfo("")));
+    menuProperty->UpdateLabel(menuItemProps.labelInfo.value_or(""));
+    menuProperty->SetStartSymbol(menuItemProps.startApply);
+    menuProperty->SetEndSymbol(menuItemProps.endApply);
 }
 
 RefPtr<FrameNode> MenuItemModelStatic::CreateFrameNode(int32_t nodeId)
@@ -255,5 +263,13 @@ void MenuItemModelStatic::SetSelectIconSymbol(FrameNode* frameNode,
         CHECK_NULL_VOID(menuProperty);
         menuProperty->SetSelectSymbol(symbolApply);
     }
+}
+
+void MenuItemModelStatic::SetOnChange(FrameNode* frameNode, std::function<void(bool)>&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<MenuItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onChange));
 }
 } // namespace OHOS::Ace::NG
