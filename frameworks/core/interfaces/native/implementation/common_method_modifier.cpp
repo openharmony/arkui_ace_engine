@@ -25,6 +25,7 @@
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "core/components_ng/pattern/counter/counter_node.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
@@ -5340,14 +5341,14 @@ void BindMenuBase(Ark_NativePointer node,
     Converter::VisitUnion(*content,
         [frameNode, menuParam](const Array_MenuElement& value) {
             auto optionsParam = Converter::Convert<std::vector<OptionParam>>(value);
-            ViewAbstractModelNG::BindMenu(frameNode, std::move(optionsParam), nullptr, menuParam);
+            ViewAbstractModelStatic::BindMenu(frameNode, std::move(optionsParam), nullptr, menuParam);
         },
         [frameNode, node, menuParam](const CustomNodeBuilder& value) {
             CallbackHelper(value).BuildAsync([frameNode, node, menuParam](const RefPtr<UINode>& uiNode) {
                 auto builder = [uiNode]() {
                     ViewStackProcessor::GetInstance()->Push(uiNode);
                 };
-                ViewAbstractModelNG::BindMenu(frameNode, {}, std::move(builder), menuParam);
+                ViewAbstractModelStatic::BindMenu(frameNode, {}, std::move(builder), menuParam);
                 }, node);
         },
         []() {});
@@ -5388,9 +5389,9 @@ void BindContextMenuBase(Ark_NativePointer node,
                     PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
                     ViewStackProcessor::GetInstance()->Push(uiNode);
                 };
-                ViewAbstractModelNG::BindContextMenuStatic(
+                ViewAbstractModelStatic::BindContextMenuStatic(
                     AceType::Claim(frameNode), type, std::move(builder), menuParam, std::move(previewFuncCopy));
-                ViewAbstractModelNG::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
+                ViewAbstractModelStatic::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
             }, node);
     };
     menuParam.previewMode = MenuPreviewMode::NONE;
