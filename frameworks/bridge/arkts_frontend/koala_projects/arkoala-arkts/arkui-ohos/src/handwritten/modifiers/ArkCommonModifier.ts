@@ -18,8 +18,7 @@ import { AccessibilityCallback, AlignRuleOption, AnimateParam, BackgroundBlurSty
 import { Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from '../../component/enums'
 import { ResourceColor, ConstraintSizeOptions, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from '../../component/units'
 import { Resource } from "global/resource"
-import { LengthMetrics } from "../../Graphics"
-import { Edges } from "../../component/arkui-graphics"
+import { LengthMetrics, Edges } from "../../Graphics"
 import { PixelMap } from '../../component/arkui-pixelmap'
 import { ResizableOptions } from "../../component/image"
 import { VisualEffect, Filter, BrightnessBlender } from "../../component/arkui-uieffect"

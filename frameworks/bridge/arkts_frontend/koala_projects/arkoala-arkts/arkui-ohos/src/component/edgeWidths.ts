@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { Edges } from "./arkui-graphics"
+import { Edges } from "./../Graphics"
 import { GlobalScope } from "./GlobalScope"
 export function edgeWidths(all: number): Edges {
     return GlobalScope.edgeWidths(all)

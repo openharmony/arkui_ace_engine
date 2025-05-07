@@ -93,6 +93,8 @@ import { PluginErrorCallback, PluginErrorData } from "./../pluginComponent"
 import { SaveButtonCallback, SaveButtonOnClickResult } from "./../saveButton"
 import { SelectedCallback } from "./../griditemops"
 import { TypeChecker } from "#components"
+import { DrawCallback } from "./../../RenderNode"
+import { DrawContext } from "../../Graphics"
 export function deserializeAndCallAccessibilityCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as AccessibilityCallback)
@@ -1556,6 +1558,12 @@ export function deserializeAndCallCustomNodeBuilder(thisDeserializer: Deserializ
     const _callResult  = _call(parentNode)
     _continuation(_callResult)
 }
+export function deserializeAndCallDrawCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as DrawCallback)
+    let context : DrawContext = thisDeserializer.readDrawContext()
+    _call(context)
+}
 export function deserializeAndCallEditableTextOnChangeCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as EditableTextOnChangeCallback)
@@ -2682,6 +2690,7 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case -2146044511/*CallbackKind.Kind_ContentWillScrollCallback*/: return deserializeAndCallContentWillScrollCallback(thisDeserializer);
         case 260483890/*CallbackKind.Kind_Context_getGroupDir_Callback*/: return deserializeAndCallContext_getGroupDir_Callback(thisDeserializer);
         case 1766817632/*CallbackKind.Kind_CustomNodeBuilder*/: return deserializeAndCallCustomNodeBuilder(thisDeserializer);
+        case -177744805/*CallbackKind.Kind_DrawCallback*/: return deserializeAndCallDrawCallback(thisDeserializer);
         case -1729563209/*CallbackKind.Kind_EditableTextOnChangeCallback*/: return deserializeAndCallEditableTextOnChangeCallback(thisDeserializer);
         case -1936519453/*CallbackKind.Kind_ErrorCallback*/: return deserializeAndCallErrorCallback(thisDeserializer);
         case -2119548940/*CallbackKind.Kind_GestureRecognizerJudgeBeginCallback*/: return deserializeAndCallGestureRecognizerJudgeBeginCallback(thisDeserializer);

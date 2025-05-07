@@ -13,41 +13,43 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/render_node/render_node_pattern.h"
+#include "core/interfaces/native/implementation/render_node_peer_impl.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RenderNodeAccessor {
-void DestroyPeerImpl(Ark_RenderNode peer)
+void DestroyPeerImpl(Ark_RenderNode peer) {}
+Ark_RenderNode CtorImpl(Ark_Int32 nodeId, const DrawCallbackFunc* callback)
 {
-}
-Ark_RenderNode CtorImpl()
-{
-    return nullptr;
+    auto frameNode = NG::FrameNode::GetOrCreateFrameNode(
+        V2::RENDER_NODE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NG::RenderNodePattern>(); });
+    frameNode->SetIsArkTsRenderNode(true);
+    auto renderNodePeer = RenderNodePeer::Create(frameNode);
+
+    auto drawCallbackFunc = [callback = CallbackHelper(*callback)](const DrawingContext& context) -> void {
+
+    };
+    auto pattern = frameNode->GetPattern<NG::RenderNodePattern>();
+    if (pattern) {
+        pattern->SetDrawCallback(drawCallbackFunc);
+    }
+
+    return renderNodePeer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
+    return reinterpret_cast<void*>(&DestroyPeerImpl);
 }
-void AppendChildImpl(Ark_RenderNode peer,
-                     Ark_RenderNode node)
-{
-}
-void InsertChildAfterImpl(Ark_RenderNode peer,
-                          Ark_RenderNode child,
-                          const Ark_Union_RenderNode_Undefined* sibling)
-{
-}
-void RemoveChildImpl(Ark_RenderNode peer,
-                     Ark_RenderNode node)
-{
-}
-void ClearChildrenImpl(Ark_RenderNode peer)
-{
-}
-Ark_Union_RenderNode_Undefined GetChildImpl(Ark_RenderNode peer,
-                                            const Ark_Number* index)
+void AppendChildImpl(Ark_RenderNode peer, Ark_RenderNode node) {}
+void InsertChildAfterImpl(Ark_RenderNode peer, Ark_RenderNode child, const Ark_Union_RenderNode_Undefined* sibling) {}
+void RemoveChildImpl(Ark_RenderNode peer, Ark_RenderNode node) {}
+void ClearChildrenImpl(Ark_RenderNode peer) {}
+Ark_Union_RenderNode_Undefined GetChildImpl(Ark_RenderNode peer, const Ark_Number* index)
 {
     return {};
 }
@@ -63,217 +65,135 @@ Ark_Union_RenderNode_Undefined GetPreviousSiblingImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void DrawImpl(Ark_RenderNode peer,
-              const Ark_DrawContext* context)
-{
-}
-void InvalidateImpl(Ark_RenderNode peer)
-{
-}
-void DisposeImpl(Ark_RenderNode peer)
-{
-}
+void DrawImpl(Ark_RenderNode peer, const Ark_DrawContext* context) {}
+void InvalidateImpl(Ark_RenderNode peer) {}
+void DisposeImpl(Ark_RenderNode peer) {}
 Ark_Number GetBackgroundColorImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void SetBackgroundColorImpl(Ark_RenderNode peer,
-                            const Ark_Number* backgroundColor)
-{
-}
+void SetBackgroundColorImpl(Ark_RenderNode peer, const Ark_Number* backgroundColor) {}
 Ark_Boolean GetClipToFrameImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void SetClipToFrameImpl(Ark_RenderNode peer,
-                        Ark_Boolean clipToFrame)
-{
-}
+void SetClipToFrameImpl(Ark_RenderNode peer, Ark_Boolean clipToFrame) {}
 Ark_Number GetOpacityImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void SetOpacityImpl(Ark_RenderNode peer,
-                    const Ark_Number* opacity)
-{
-}
+void SetOpacityImpl(Ark_RenderNode peer, const Ark_Number* opacity) {}
 Ark_Size GetSizeImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void SetSizeImpl(Ark_RenderNode peer,
-                 const Ark_Size* size)
-{
-}
+void SetSizeImpl(Ark_RenderNode peer, const Ark_Size* size) {}
 Ark_Position GetPositionImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void SetPositionImpl(Ark_RenderNode peer,
-                     const Ark_Position* position)
-{
-}
+void SetPositionImpl(Ark_RenderNode peer, const Ark_Position* position) {}
 Ark_Frame GetFrameImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void SetFrameImpl(Ark_RenderNode peer,
-                  const Ark_Frame* frame)
-{
-}
+void SetFrameImpl(Ark_RenderNode peer, const Ark_Frame* frame) {}
 Ark_Vector2 GetPivotImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void SetPivotImpl(Ark_RenderNode peer,
-                  const Ark_Vector2* pivot)
-{
-}
+void SetPivotImpl(Ark_RenderNode peer, const Ark_Vector2* pivot) {}
 Ark_Vector2 GetScaleImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void SetScaleImpl(Ark_RenderNode peer,
-                  const Ark_Vector2* scale)
-{
-}
+void SetScaleImpl(Ark_RenderNode peer, const Ark_Vector2* scale) {}
 Ark_Vector2 GetTranslationImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void SetTranslationImpl(Ark_RenderNode peer,
-                        const Ark_Vector2* translation)
-{
-}
+void SetTranslationImpl(Ark_RenderNode peer, const Ark_Vector2* translation) {}
 Ark_Vector3 GetRotationImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void SetRotationImpl(Ark_RenderNode peer,
-                     const Ark_Vector3* rotation)
-{
-}
+void SetRotationImpl(Ark_RenderNode peer, const Ark_Vector3* rotation) {}
 Ark_Matrix4 GetTransformImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void SetTransformImpl(Ark_RenderNode peer,
-                      const Ark_Matrix4* transform)
-{
-}
+void SetTransformImpl(Ark_RenderNode peer, const Ark_Matrix4* transform) {}
 Ark_Number GetShadowColorImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void SetShadowColorImpl(Ark_RenderNode peer,
-                        const Ark_Number* shadowColor)
-{
-}
+void SetShadowColorImpl(Ark_RenderNode peer, const Ark_Number* shadowColor) {}
 Ark_Vector2 GetShadowOffsetImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void SetShadowOffsetImpl(Ark_RenderNode peer,
-                         const Ark_Vector2* shadowOffset)
-{
-}
+void SetShadowOffsetImpl(Ark_RenderNode peer, const Ark_Vector2* shadowOffset) {}
 Ark_String GetLabelImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void SetLabelImpl(Ark_RenderNode peer,
-                  const Ark_String* label)
-{
-}
+void SetLabelImpl(Ark_RenderNode peer, const Ark_String* label) {}
 Ark_Number GetShadowAlphaImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void SetShadowAlphaImpl(Ark_RenderNode peer,
-                        const Ark_Number* shadowAlpha)
-{
-}
+void SetShadowAlphaImpl(Ark_RenderNode peer, const Ark_Number* shadowAlpha) {}
 Ark_Number GetShadowElevationImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void SetShadowElevationImpl(Ark_RenderNode peer,
-                            const Ark_Number* shadowElevation)
-{
-}
+void SetShadowElevationImpl(Ark_RenderNode peer, const Ark_Number* shadowElevation) {}
 Ark_Number GetShadowRadiusImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void SetShadowRadiusImpl(Ark_RenderNode peer,
-                         const Ark_Number* shadowRadius)
-{
-}
+void SetShadowRadiusImpl(Ark_RenderNode peer, const Ark_Number* shadowRadius) {}
 Ark_EdgeStyles GetBorderStyleImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void SetBorderStyleImpl(Ark_RenderNode peer,
-                        const Ark_EdgeStyles* borderStyle)
-{
-}
+void SetBorderStyleImpl(Ark_RenderNode peer, const Ark_EdgeStyles* borderStyle) {}
 Ark_Edges GetBorderWidthImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void SetBorderWidthImpl(Ark_RenderNode peer,
-                        const Ark_Edges* borderWidth)
-{
-}
+void SetBorderWidthImpl(Ark_RenderNode peer, const Ark_Edges* borderWidth) {}
 Ark_Edges GetBorderColorImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void SetBorderColorImpl(Ark_RenderNode peer,
-                        const Ark_Edges* borderColor)
-{
-}
+void SetBorderColorImpl(Ark_RenderNode peer, const Ark_Edges* borderColor) {}
 Ark_BorderRadiuses_graphics GetBorderRadiusImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void SetBorderRadiusImpl(Ark_RenderNode peer,
-                         const Ark_BorderRadiuses_graphics* borderRadius)
-{
-}
+void SetBorderRadiusImpl(Ark_RenderNode peer, const Ark_BorderRadiuses_graphics* borderRadius) {}
 Ark_ShapeMask GetShapeMaskImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void SetShapeMaskImpl(Ark_RenderNode peer,
-                      Ark_ShapeMask shapeMask)
-{
-}
+void SetShapeMaskImpl(Ark_RenderNode peer, Ark_ShapeMask shapeMask) {}
 Ark_ShapeClip GetShapeClipImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void SetShapeClipImpl(Ark_RenderNode peer,
-                      Ark_ShapeClip shapeClip)
-{
-}
+void SetShapeClipImpl(Ark_RenderNode peer, Ark_ShapeClip shapeClip) {}
 Ark_Boolean GetMarkNodeGroupImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void SetMarkNodeGroupImpl(Ark_RenderNode peer,
-                          Ark_Boolean markNodeGroup)
-{
-}
+void SetMarkNodeGroupImpl(Ark_RenderNode peer, Ark_Boolean markNodeGroup) {}
 Ark_LengthMetricsUnit GetLengthMetricsUnitImpl(Ark_RenderNode peer)
 {
     return {};
 }
-void SetLengthMetricsUnitImpl(Ark_RenderNode peer,
-                              Ark_LengthMetricsUnit lengthMetricsUnit)
-{
-}
-} // RenderNodeAccessor
+void SetLengthMetricsUnitImpl(Ark_RenderNode peer, Ark_LengthMetricsUnit lengthMetricsUnit) {}
+} // namespace RenderNodeAccessor
 const GENERATED_ArkUIRenderNodeAccessor* GetRenderNodeAccessor()
 {
     static const GENERATED_ArkUIRenderNodeAccessor RenderNodeAccessorImpl {
@@ -345,4 +265,4 @@ const GENERATED_ArkUIRenderNodeAccessor* GetRenderNodeAccessor()
     return &RenderNodeAccessorImpl;
 }
 
-}
+} // namespace OHOS::Ace::NG::GeneratedModifier
