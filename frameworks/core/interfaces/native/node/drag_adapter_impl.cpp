@@ -84,7 +84,13 @@ ArkUI_Int32 StartDrag(ArkUIDragAction* dragAction)
     }
     internalDragAction->callback = callbacks;
     DragActionConvert(dragAction, internalDragAction);
-    OHOS::Ace::NG::DragDropFuncWrapper::StartDragAction(internalDragAction);
+    auto ret = OHOS::Ace::NG::DragDropFuncWrapper::StartDragAction(internalDragAction);
+    if (ret == -1) {
+        DragNotifyMsg dragNotifyMsg;
+        dragNotifyMsg.result = DragRet::DRAG_CANCEL;
+        OHOS::Ace::NG::DragDropFuncWrapper::HandleCallback(internalDragAction,
+            dragNotifyMsg, NG::DragAdapterStatus::ENDED);
+    }
     return 0;
 }
 
