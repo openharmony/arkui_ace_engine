@@ -1830,7 +1830,8 @@ int32_t PostAsyncUITask(ArkUI_Int32 contextId,
         }
         onFinish(asyncUITaskData);
     };
-    if (!MultiThreadBuildManager::GetInstance().PostAsyncUITask(contextId, asyncUITaskFunc, onFinishFunc)) {
+    if (!MultiThreadBuildManager::GetInstance().PostAsyncUITask(
+        contextId, std::move(asyncUITaskFunc), std::move(onFinishFunc))) {
         return ERROR_CODE_PARAM_INVALID;
     }
     return ERROR_CODE_NO_ERROR;
@@ -1844,7 +1845,7 @@ int32_t PostUITask(ArkUI_Int32 contextId, void* taskData, void(*task)(void* task
         }
         task(taskData);
     };
-    if (!MultiThreadBuildManager::GetInstance().PostUITask(contextId, taskFunc)) {
+    if (!MultiThreadBuildManager::GetInstance().PostUITask(contextId, std::move(taskFunc))) {
         return ERROR_CODE_PARAM_INVALID;
     }
     return ERROR_CODE_NO_ERROR;

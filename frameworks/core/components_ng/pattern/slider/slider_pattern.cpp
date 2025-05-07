@@ -549,10 +549,15 @@ void SliderPattern::CancelExceptionValue(float& min, float& max, float& step)
         CHECK_NULL_VOID(host);
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
-        context->AddAfterRenderTask([weak = WeakClaim(this)]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->FireChangeEvent(SliderChangeMode::End);
+        MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host),
+            [weak = WeakClaim(this), instanceId = context->GetInstanceId()]() {
+            auto context = NG::PipelineContext::GetContextByContainerId(instanceId);
+            CHECK_NULL_VOID(context);
+            context->AddAfterRenderTask([weak]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->FireChangeEvent(SliderChangeMode::End);
+            });
         });
     }
 }
@@ -1930,7 +1935,7 @@ void SliderPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    MultiThreadBuildManager::TryExecuteUnSafeTask(host, [weak = WeakClaim(this)]() {
+    MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host), [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->RegisterVisibleAreaChange();

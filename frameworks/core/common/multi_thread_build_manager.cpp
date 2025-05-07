@@ -80,12 +80,11 @@ bool MultiThreadBuildManager::CheckNodeOnValidThread(NG::UINode* node)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "CheckNodeOnValidThread failed. node is nullptr");
         return false;
     }
-    auto uiNode = AceType::Claim(node);
-    if (!uiNode->IsMultiThreadNode() && !MultiThreadBuildManager::IsOnUIThread()) {
+    if (!node->IsMultiThreadNode() && !MultiThreadBuildManager::IsOnUIThread()) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "CheckNodeOnValidThread failed. node not run on main thread");
         return false;
     }
-    if (uiNode->IsMultiThreadNode() && uiNode->IsOnMainTree() && !MultiThreadBuildManager::IsOnUIThread()) {
+    if (node->IsMultiThreadNode() && node->IsOnMainTree() && !MultiThreadBuildManager::IsOnUIThread()) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE,
             "CheckNodeOnValidThread failed. multi thread node attached to main tree not run on main thread");
         return false;
@@ -113,31 +112,31 @@ bool MultiThreadBuildManager::IsThreadSafeScopeOnSubThread()
     return IsThreadSafeScope() && !IsOnUIThread();
 }
 
-bool MultiThreadBuildManager::NeedPostUnSafeTask(const RefPtr<NG::UINode>& node)
+bool MultiThreadBuildManager::NeedPostUnSafeTask(NG::UINode* node)
 {
     return IsThreadSafeScope() && node && node->IsMultiThreadNode() && !node->IsOnMainTree();
 }
 
-void MultiThreadBuildManager::TryExecuteUnSafeTask(const RefPtr<NG::UINode>& node, const std::function<void()>& task)
+void MultiThreadBuildManager::TryExecuteUnSafeTask(NG::UINode* node, std::function<void()>&& task)
 {
     if (NeedPostUnSafeTask(node)) {
-        node->PostAfterAttachMainTreeTask(task);
-    } else {
+        node->PostAfterAttachMainTreeTask(std::move(task));
+    } else if (task) {
         task();
     }
 }
 
-bool MultiThreadBuildManager::TryPostUnSafeTask(const RefPtr<NG::UINode>& node, const std::function<void()>& task)
+bool MultiThreadBuildManager::TryPostUnSafeTask(NG::UINode* node, std::function<void()>&& task)
 {
     if (NeedPostUnSafeTask(node)) {
-        node->PostAfterAttachMainTreeTask(task);
+        node->PostAfterAttachMainTreeTask(std::move(task));
         return true;
     }
     return false;
 }
 
-bool MultiThreadBuildManager::PostAsyncUITask(int32_t contextId, const std::function<void()>& asyncUITask,
-    const std::function<void()>& onFinishTask)
+bool MultiThreadBuildManager::PostAsyncUITask(int32_t contextId, std::function<void()>&& asyncUITask,
+    std::function<void()>&& onFinishTask)
 {
 #ifdef FFRT_SUPPORT
     if (!aysncUITaskQueue) {
@@ -179,7 +178,7 @@ bool MultiThreadBuildManager::PostAsyncUITask(int32_t contextId, const std::func
 #endif
 }
 
-bool MultiThreadBuildManager::PostUITask(int32_t contextId, const std::function<void()>& uiTask)
+bool MultiThreadBuildManager::PostUITask(int32_t contextId, std::function<void()>&& uiTask)
 {
     ContainerScope scope(contextId);
     auto container = Container::Current();

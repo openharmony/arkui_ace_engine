@@ -362,7 +362,7 @@ void NavDestinationPattern::OnAttachToFrameNode()
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
     isRightToLeft_ = AceApplicationInfo::GetInstance().IsRightToLeft();
-    MultiThreadBuildManager::TryExecuteUnSafeTask(host, [weak = WeakPtr(host)]() {
+    MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host), [weak = WeakPtr(host)]() {
         auto host = weak.Upgrade();
         CHECK_NULL_VOID(host);
         auto id = host->GetId();

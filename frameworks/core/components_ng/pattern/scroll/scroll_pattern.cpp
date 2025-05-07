@@ -655,9 +655,11 @@ void ScrollPattern::ScrollBy(float pixelX, float pixelY, bool smooth, const std:
         return;
     }
     float position = currentOffset_ + distance;
-    MultiThreadBuildManager::TryExecuteUnSafeTask(GetHost(),
+    auto host = GetHost();
+    MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host),
         [position, distance, smooth, weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         if (smooth) {
             pattern->AnimateTo(-position, fabs(distance) * UNIT_CONVERT / SCROLL_BY_SPEED,
                 Curves::EASE_OUT, true, false, false);

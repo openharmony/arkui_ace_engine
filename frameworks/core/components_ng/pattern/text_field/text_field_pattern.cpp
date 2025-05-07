@@ -3962,7 +3962,12 @@ void TextFieldPattern::InitEditingValueText(std::u16string content)
     contentController_->SetTextValueOnly(std::move(content));
     selectController_->UpdateCaretIndex(GetTextUtf16Value().length());
     if (GetIsPreviewText() && GetTextUtf16Value().empty()) {
-        FinishTextPreviewOperation();
+        auto host = GetHost();
+        MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host), [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->FinishTextPreviewOperation();
+        });
     }
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -6537,6 +6542,14 @@ void TextFieldPattern::HandleSelectionEnd()
 
 void TextFieldPattern::SetCaretPosition(int32_t position, bool moveContent)
 {
+    auto host = GetHost();
+    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(host), [weak = WeakClaim(this), position, moveContent]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetCaretPosition(position, moveContent);
+    })) {
+        return;
+    }
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Set caret position to %{public}d", position);
     selectController_->MoveCaretToContentRect(position, TextAffinity::DOWNSTREAM, true, moveContent);
     UpdateCaretInfoToController();
@@ -6557,7 +6570,7 @@ bool TextFieldPattern::SetCaretOffset(int32_t caretPostion)
     return true;
 }
 
-void TextFieldPattern::SetSelectionFlag(
+void TextFieldPattern::SetSelectionFlagInner(
     int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options, bool isForward)
 {
     if (!HasFocus() || GetIsPreviewText()) {
@@ -6602,6 +6615,18 @@ void TextFieldPattern::SetSelectionFlag(
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextFieldPattern::SetSelectionFlag(
+    int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options, bool isForward)
+{
+    auto host = GetHost();
+    MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host),
+        [weak = WeakClaim(this), selectionStart, selectionEnd, options, isForward]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetSelectionFlagInner(selectionStart, selectionEnd, options, isForward);
+    });
 }
 
 void TextFieldPattern::SetSelection(int32_t start, int32_t end,
@@ -7870,10 +7895,17 @@ void TextFieldPattern::SetAccessibilityErrotText()
 
 void TextFieldPattern::StopEditing()
 {
+    auto host = GetHost();
+    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(host), [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->StopEditing();
+    })) {
+        return;
+    }
     if (!HasFocus()) {
         return;
     }
-    auto host = GetHost();
     CHECK_NULL_VOID(host);
     ContainerScope scope(host->GetInstanceId());
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d Stop Editing", host->GetId());
@@ -8293,8 +8325,9 @@ void TextFieldPattern::OnAttachToFrameNode()
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    if (MultiThreadBuildManager::TryPostUnSafeTask(frameNode, [weak = WeakClaim(this)]() {
+    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(frameNode), [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         pattern->OnAttachToFrameNode();
     })) {
         return;
@@ -9531,6 +9564,14 @@ void TextFieldPattern::SetShowKeyBoardOnFocus(bool value)
     showKeyBoardOnFocus_ = value;
 
     if (!HasFocus()) {
+        return;
+    }
+    auto host = GetHost();
+    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(host), [weak = WeakClaim(this), value]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetShowKeyBoardOnFocus(value);
+    })) {
         return;
     }
 
@@ -10962,6 +11003,14 @@ void TextFieldPattern::SetCustomKeyboard(const std::function<void()>&& keyboardB
 
 void TextFieldPattern::SetCustomKeyboardWithNode(const RefPtr<UINode>& keyboardBuilder)
 {
+    auto host = GetHost();
+    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(host), [weak = WeakClaim(this), keyboardBuilder]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetCustomKeyboardWithNode(keyboardBuilder);
+    })) {
+        return;
+    }
     if (customKeyboard_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
         // close customKeyboard and request system keyboard
         CloseCustomKeyboard();

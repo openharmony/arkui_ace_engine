@@ -559,7 +559,7 @@ void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign ali
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (MultiThreadBuildManager::TryPostUnSafeTask(host,
+    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(host),
         [weak = WeakClaim(this), index, smooth, align, extraOffset]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);

@@ -42,7 +42,7 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
     apiVersion_ = Container::GetCurrentApiTargetVersion();
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
-        MultiThreadBuildManager::TryExecuteUnSafeTask(Claim(this), [nodeId = nodeId_]() {
+        MultiThreadBuildManager::TryExecuteUnSafeTask(this, [nodeId = nodeId_]() {
             auto container = Container::Current();
             CHECK_NULL_BREAK(container);
             auto distributedUI = container->GetDistributedUI();

@@ -28,6 +28,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/theme/shadow_theme.h"
@@ -3930,13 +3931,18 @@ void ViewAbstract::ReSetMagnifier(FrameNode* frameNode)
 void ViewAbstract::SetBackgroundBlurStyle(
     FrameNode* frameNode, const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions)
 {
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    if (bgBlurStyle.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
-        pipeline->AddWindowFocusChangedCallback(frameNode->GetId());
-    } else {
-        pipeline->RemoveWindowFocusChangedCallback(frameNode->GetId());
-    }
+    MultiThreadBuildManager::TryExecuteUnSafeTask(frameNode,
+        [weak = AceType::WeakClaim(frameNode), bgBlurStyle]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        if (bgBlurStyle.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+            pipeline->AddWindowFocusChangedCallback(frameNode->GetId());
+        } else {
+            pipeline->RemoveWindowFocusChangedCallback(frameNode->GetId());
+        }
+    });
     auto target = frameNode->GetRenderContext();
     if (target) {
         if (target->GetBackgroundEffect().has_value()) {
@@ -4829,10 +4835,15 @@ void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(con
     const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
     frameNode->SetOnAreaChangeCallback(std::move(onAreaChanged));
-    pipeline->AddOnAreaChangeNode(frameNode->GetId());
+    MultiThreadBuildManager::TryExecuteUnSafeTask(frameNode,
+        [weak = AceType::WeakClaim(frameNode)]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddOnAreaChangeNode(frameNode->GetId());
+    });
 }
 
 void ViewAbstract::SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback)
@@ -6071,10 +6082,15 @@ void ViewAbstract::SetOnVisibleChange(FrameNode* frameNode, std::function<void(b
     const std::vector<double> &ratioList)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
     frameNode->CleanVisibleAreaUserCallback();
-    pipeline->AddVisibleAreaChangeNode(AceType::Claim<FrameNode>(frameNode), ratioList, onVisibleChange);
+    MultiThreadBuildManager::TryExecuteUnSafeTask(frameNode,
+        [weak = AceType::WeakClaim(frameNode), ratioList, onVisibleChange]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddVisibleAreaChangeNode(frameNode, ratioList, onVisibleChange);
+    });
 }
 
 void ViewAbstract::SetOnVisibleAreaApproximateChange(FrameNode* frameNode,
@@ -6094,7 +6110,14 @@ void ViewAbstract::SetOnVisibleAreaApproximateChange(FrameNode* frameNode,
     callback.callback = std::move(onVisibleChange);
     callback.isCurrentVisible = false;
     callback.period = static_cast<uint32_t>(expectedUpdateInterval);
-    pipeline->AddVisibleAreaChangeNode(frameNode->GetId());
+    MultiThreadBuildManager::TryExecuteUnSafeTask(frameNode,
+        [weak = AceType::WeakClaim(frameNode)]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddVisibleAreaChangeNode(frameNode->GetId());
+    });
     frameNode->SetVisibleAreaUserCallback(ratioList, callback);
 }
 

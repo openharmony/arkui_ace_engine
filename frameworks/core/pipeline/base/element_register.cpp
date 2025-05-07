@@ -253,7 +253,10 @@ void ElementRegister::Clear()
     itemMap_.clear();
     removedItems_.clear();
     geometryTransitionMap_.clear();
-    pendingRemoveNodes_.clear();
+    {
+        std::lock_guard<std::mutex> lock(pendingRemoveNodesMutex_);
+        pendingRemoveNodes_.clear();
+    }
     {
         std::lock_guard<std::mutex> lock(itemSafeMapMutex_);
         itemSafeMap_.clear();
@@ -294,23 +297,28 @@ void ElementRegister::DumpGeometryTransition()
 
 void ElementRegister::ReSyncGeometryTransition(const WeakPtr<NG::FrameNode>& trigger, const AnimationOption& option)
 {
-    for (auto iter = geometryTransitionMap_.begin(); iter != geometryTransitionMap_.end();) {
-        if (!iter->second || iter->second->IsInAndOutEmpty()) {
-            iter = geometryTransitionMap_.erase(iter);
-        } else {
-            iter->second->OnReSync(trigger, option);
-            ++iter;
+    auto node = trigger.Upgrade();
+    MultiThreadBuildManager::TryExecuteUnSafeTask(AceType::RawPtr(node), [this, trigger, option]() {
+        for (auto iter = geometryTransitionMap_.begin(); iter != geometryTransitionMap_.end();) {
+            if (!iter->second || iter->second->IsInAndOutEmpty()) {
+                iter = geometryTransitionMap_.erase(iter);
+            } else {
+                iter->second->OnReSync(trigger, option);
+                ++iter;
+            }
         }
-    }
+    });
 }
 
 void ElementRegister::AddPendingRemoveNode(const RefPtr<NG::UINode>& node)
 {
+    std::lock_guard<std::mutex> lock(pendingRemoveNodesMutex_);
     pendingRemoveNodes_.emplace_back(node);
 }
 
 void ElementRegister::ClearPendingRemoveNodes()
 {
+    std::lock_guard<std::mutex> lock(pendingRemoveNodesMutex_);
     pendingRemoveNodes_.clear();
 }
 

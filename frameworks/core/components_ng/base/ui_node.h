@@ -932,7 +932,7 @@ public:
         isMultiThreadNode_ = isMultiThreadNode;
     }
 
-    void PostAfterAttachMainTreeTask(const std::function<void()>& task)
+    void PostAfterAttachMainTreeTask(std::function<void()>&& task)
     {
         if (IsOnMainTree()) {
             return;
@@ -943,7 +943,9 @@ public:
     void ExecuteAfterAttachMainTreeTasks()
     {
         for (auto& task : afterAttachMainTreeTasks_) {
-            task();
+            if (task) {
+                task();
+            }
         }
         afterAttachMainTreeTasks_.clear();
     }

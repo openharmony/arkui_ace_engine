@@ -1130,11 +1130,13 @@ public:
 
     void AddPositionZNode(int32_t nodeId)
     {
+        std::unique_lock<std::shared_mutex> lock(positionZNodesMutex_);
         positionZNodes_.insert(nodeId);
     }
 
     void DeletePositionZNode(int32_t nodeId)
     {
+        std::unique_lock<std::shared_mutex> lock(positionZNodesMutex_);
         auto it = positionZNodes_.find(nodeId);
         if (it != positionZNodes_.end()) {
             positionZNodes_.erase(it);
@@ -1143,11 +1145,13 @@ public:
 
     std::set<int32_t> GetPositionZNodes()
     {
+        std::shared_lock<std::shared_mutex> lock(positionZNodesMutex_);
         return positionZNodes_;
     }
 
     void ClearPositionZNodes()
     {
+        std::unique_lock<std::shared_mutex> lock(positionZNodesMutex_);
         positionZNodes_.clear();
     }
     bool IsWindowSizeDragging() const
@@ -1420,6 +1424,7 @@ private:
     std::unordered_map<int32_t, std::vector<WeakPtr<UINode>>> pageToNavigationNodes_;
     std::unordered_map<int32_t, std::vector<TouchEvent>> historyPointsById_;
 
+    std::shared_mutex positionZNodesMutex_;
     std::set<int32_t> positionZNodes_;
 
     std::list<FrameInfo> dumpFrameInfos_;

@@ -19,6 +19,7 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/log/event_report.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/platform_container_handler.h"
@@ -7672,6 +7673,14 @@ AccessibilityParentRectInfo JsAccessibilityManager::GetTransformRectInfoRelative
 
 void JsAccessibilityManager::UpdateAccessibilityNodeRect(const RefPtr<NG::FrameNode>& frameNode)
 {
+    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(frameNode),
+        [weak = WeakClaim(this), weakNode = WeakPtr(frameNode)]() {
+        auto jsAccessibilityManager = weak.Upgrade();
+        CHECK_NULL_VOID(jsAccessibilityManager);
+        jsAccessibilityManager->UpdateAccessibilityNodeRect(weakNode.Upgrade());
+    })) {
+        return;
+    }
     auto accessibilityWorkMode = GenerateAccessibilityWorkMode();
     if (!accessibilityWorkMode.isTouchExplorationEnabled) {
         return;

@@ -1180,6 +1180,7 @@ public:
 
     void OnSyncGeometryFrameFinish(const RectF& paintRect);
     void AddFrameNodeChangeInfoFlag(FrameNodeChangeInfoFlag changeFlag = FRAME_NODE_CHANGE_INFO_NONE);
+    void AddFrameNodeChangeInfoFlagInner(FrameNodeChangeInfoFlag changeFlag);
     void RegisterNodeChangeListener();
     void UnregisterNodeChangeListener();
     void ProcessFrameNodeChangeFlag();

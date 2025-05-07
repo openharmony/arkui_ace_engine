@@ -1031,15 +1031,18 @@ public:
     using configChangedCallback = std::function<void()>;
     void SetConfigChangedCallback(int32_t nodeId, configChangedCallback&& listener)
     {
+        std::unique_lock<std::shared_mutex> lock(configChangedCallbackMutex_);
         configChangedCallback_.emplace(make_pair(nodeId, std::move(listener)));
     }
     void RemoveConfigChangedCallback(int32_t nodeId)
     {
+        std::unique_lock<std::shared_mutex> lock(configChangedCallbackMutex_);
         configChangedCallback_.erase(nodeId);
     }
 
     void NotifyConfigurationChange()
     {
+        std::shared_lock<std::shared_mutex> lock(configChangedCallbackMutex_);
         for (const auto& [nodeId, callback] : configChangedCallback_) {
             if (callback) {
                 callback();
@@ -1592,6 +1595,7 @@ protected:
     
     bool MarkUpdateSubwindowKeyboardInsert(int32_t instanceId, double keyboardHeight, int32_t type);
 
+    std::shared_mutex configChangedCallbackMutex_;
     std::map<int32_t, configChangedCallback> configChangedCallback_;
     std::map<int32_t, virtualKeyBoardCallback> virtualKeyBoardCallback_;
     std::list<foldStatusChangedCallback> foldStatusChangedCallback_;
