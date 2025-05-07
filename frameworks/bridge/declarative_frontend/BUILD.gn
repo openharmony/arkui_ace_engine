@@ -281,6 +281,7 @@ template("declarative_js_engine") {
       "jsview/js_circle_shape.cpp",
       "jsview/js_clipboard.cpp",
       "jsview/js_column.cpp",
+      "jsview/js_column_split.cpp",
       "jsview/js_common_view.cpp",
       "jsview/js_container_base.cpp",
       "jsview/js_container_modal_view.cpp",
@@ -365,6 +366,7 @@ template("declarative_js_engine") {
       "jsview/js_repeat_virtual_scroll.cpp",
       "jsview/js_richeditor.cpp",
       "jsview/js_row.cpp",
+      "jsview/js_row_split.cpp",
       "jsview/js_save_button.cpp",
       "jsview/js_scope_util.cpp",
       "jsview/js_scroll.cpp",
@@ -459,6 +461,7 @@ template("declarative_js_engine") {
       "jsview/models/indexer_model_impl.cpp",
       "jsview/models/lazy_for_each_model_impl.cpp",
       "jsview/models/line_model_impl.cpp",
+      "jsview/models/linear_split_model_impl.cpp",
       "jsview/models/list_item_group_model_impl.cpp",
       "jsview/models/list_item_model_impl.cpp",
       "jsview/models/list_model_impl.cpp",
@@ -510,13 +513,10 @@ template("declarative_js_engine") {
 
     if (!ace_engine_feature_wearable) {
       sources += [
-        "jsview/js_column_split.cpp",
         "jsview/js_folder_stack.cpp",
-        "jsview/js_row_split.cpp",
         "jsview/js_select.cpp",
         "jsview/js_stepper.cpp",
         "jsview/js_stepper_item.cpp",
-        "jsview/models/linear_split_model_impl.cpp",
         "jsview/models/select_model_impl.cpp",
         "jsview/models/stepper_item_model_impl.cpp",
         "jsview/models/stepper_model_impl.cpp",
@@ -855,6 +855,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_circle_shape.cpp",
       "jsview/js_clipboard.cpp",
       "jsview/js_column.cpp",
+      "jsview/js_column_split.cpp",
       "jsview/js_common_view.cpp",
       "jsview/js_container_base.cpp",
       "jsview/js_container_modal_view.cpp",
@@ -932,6 +933,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_repeat_virtual_scroll.cpp",
       "jsview/js_richeditor.cpp",
       "jsview/js_row.cpp",
+      "jsview/js_row_split.cpp",
       "jsview/js_save_button.cpp",
       "jsview/js_scope_util.cpp",
       "jsview/js_scroll.cpp",
@@ -983,9 +985,7 @@ template("declarative_js_engine_ng") {
 
     if (!ace_engine_feature_wearable) {
       sources += [
-        "jsview/js_column_split.cpp",
         "jsview/js_folder_stack.cpp",
-        "jsview/js_row_split.cpp",
         "jsview/js_select.cpp",
         "jsview/js_stepper.cpp",
         "jsview/js_stepper_item.cpp",

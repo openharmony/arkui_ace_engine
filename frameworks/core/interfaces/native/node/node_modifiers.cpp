@@ -131,7 +131,7 @@
 
 using namespace OHOS::Ace::NG;
 
-#define MODIFIER_COUNTS 12
+#define MODIFIER_COUNTS 10
 #define BLANK_LINES 6
 
 extern "C" {
@@ -144,11 +144,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getCheckboxGroupModifier = NodeModifier::GetCheckboxGroupModifier,
         .getCounterModifier = NodeModifier::GetCounterModifier,
         .getRowModifier = NodeModifier::GetRowModifier,
-    #ifndef ARKUI_WEARABLE
         .getRowSplitModifier = NodeModifier::GetRowSplitModifier,
-    #else
-        .getRowSplitModifier = nullptr,
-    #endif
         .getTextModifier = NodeModifier::GetTextModifier,
         .getButtonModifier = NodeModifier::GetButtonModifier,
         .getToggleModifier = NodeModifier::GetToggleModifier,
@@ -189,11 +185,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getNavRouterModifier = NodeModifier::GetNavRouterModifier,
         .getNodeContainerModifier = NodeModifier::GetNodeContainerModifier,
         .getPatternLockModifier = NodeModifier::GetPatternLockModifier,
-    #ifndef ARKUI_WEARABLE
         .getColumnSplitModifier = NodeModifier::GetColumnSplitModifier,
-    #else
-        .getColumnSplitModifier = nullptr,
-    #endif
         .getLineModifier = NodeModifier::GetLineModifier,
         .getPathModifier = NodeModifier::GetPathModifier,
         .getPolygonModifier = NodeModifier::GetPolygonModifier,
@@ -311,11 +303,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getCheckboxGroupModifier = NodeModifier::GetCJUICheckboxGroupModifier,
         .getCounterModifier = NodeModifier::GetCJUICounterModifier,
         .getRowModifier = NodeModifier::GetCJUIRowModifier,
-    #ifndef ARKUI_WEARABLE
         .getRowSplitModifier = NodeModifier::GetCJUIRowSplitModifier,
-    #else
-        .getRowSplitModifier = nullptr,
-    #endif
         .getTextModifier = NodeModifier::GetCJUITextModifier,
         .getButtonModifier = NodeModifier::GetCJUIButtonModifier,
         .getToggleModifier = NodeModifier::GetCJUIToggleModifier,
@@ -356,11 +344,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getNavRouterModifier = NodeModifier::GetCJUINavRouterModifier,
         .getNodeContainerModifier = NodeModifier::GetCJUINodeContainerModifier,
         .getPatternLockModifier = NodeModifier::GetCJUIPatternLockModifier,
-    #ifndef ARKUI_WEARABLE
         .getColumnSplitModifier = NodeModifier::GetCJUIColumnSplitModifier,
-    #else
-        .getColumnSplitModifier = nullptr,
-    #endif
         .getLineModifier = NodeModifier::GetCJUILineModifier,
         .getPathModifier = NodeModifier::GetCJUIPathModifier,
         .getPolygonModifier = NodeModifier::GetCJUIPolygonModifier,
