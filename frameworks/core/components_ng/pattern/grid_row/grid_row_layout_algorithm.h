@@ -59,6 +59,8 @@ public:
     }
 
 private:
+    OptionalSizeF MeasureSelfByLayoutPolicy(LayoutWrapper* layoutWrapper, float childHeight,
+        LayoutCalPolicy widthLayoutPolicy, LayoutCalPolicy heightLayoutPolicy);
     void MeasureSelf(LayoutWrapper* layoutWrapper, float childHeight, float selfHeight);
     float MeasureChildren(LayoutWrapper* layoutWrapper, double columnUnitWidth, double childHeightLimit,
         std::pair<double, double>& gutter, V2::GridSizeType sizeType, int32_t columnNum);
