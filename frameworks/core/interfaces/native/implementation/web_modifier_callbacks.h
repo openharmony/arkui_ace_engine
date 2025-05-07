@@ -116,8 +116,8 @@ void OnLargestContentfulPaint(const CallbackHelper<OnLargestContentfulPaintCallb
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
 bool OnLoadIntercept(const CallbackHelper<Callback_OnLoadInterceptEvent_Boolean>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
-void OnControllerAttached(const CallbackHelper<Callback_Void>& arkCallback, WeakPtr<FrameNode> weakNode,
-    int32_t instanceId);
+void OnControllerAttached(const CallbackHelper<Callback_Void>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId);
 void OnOverScroll(const CallbackHelper<Callback_OnOverScrollEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnSafeBrowsingCheckResult(const CallbackHelper<OnSafeBrowsingCheckResultCallback>& arkCallback,
@@ -149,3 +149,4 @@ void OnAdsBlocked(const CallbackHelper<OnAdsBlockedCallback>& arkCallback,
 #endif // WEB_SUPPORTED
 
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_WEB_MODIFIER_CALLBACKS_H
+
