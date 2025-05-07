@@ -156,6 +156,7 @@ private:
     void UpdateSelectMenuOptions();
     bool isShowHandle_ = false;
     bool needResetHandleReverse_ = false;
+    bool isSelectAll_ = false;
     SelectOverlayInfo webSelectInfo_;
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle_ = nullptr;
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle_ = nullptr;
