@@ -3120,4 +3120,31 @@ bool DragDropManager::CheckIsUIExtensionBoundary(float x, float y, int32_t insta
         std::min(y - rect.Top(), rect.Bottom() - y));
     return distance < MIN_UI_EXTENSION_BOUNDARY_DISTANCE;
 }
+
+void DragDropManager::HandleTouchEvent(const TouchEvent& event)
+{
+    if (event.type == TouchType::MOVE && event.pullType != TouchType::PULL_MOVE) {
+        if (!IsDragging() || !IsSameDraggingPointer(event.id)) {
+            return;
+        }
+        auto pointerEvent = DragPointerEvent(event.x, event.y, event.screenX, event.screenY);
+        SetDragAnimationPointerEvent(pointerEvent);
+    } else if ((event.type == TouchType::UP) || (event.type == TouchType::CANCEL)) {
+        ResetDraggingStatus(event);
+    }
+}
+
+void DragDropManager::HandleMouseEvent(const MouseEvent& event)
+{
+    bool cancelDrag = (event.button == MouseButton::RIGHT_BUTTON &&
+        (event.action == MouseAction::PRESS || event.action == MouseAction::PULL_UP));
+    SetIsDragCancel(cancelDrag);
+}
+
+void DragDropManager::HandlePipelineOnHide()
+{
+    if (IsItemDragging()) {
+        CancelItemDrag();
+    }
+}
 } // namespace OHOS::Ace::NG

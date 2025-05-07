@@ -657,6 +657,10 @@ public:
 
     void UpdatePointInfoForFinger(int32_t pointerId, Point point);
 
+    void HandleTouchEvent(const TouchEvent& event);
+    void HandleMouseEvent(const MouseEvent& event);
+    void HandlePipelineOnHide();
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
