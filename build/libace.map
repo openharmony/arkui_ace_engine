@@ -464,6 +464,11 @@
       OHOS::Ace::NG::NavigationGroupNode::*;
       OHOS::Ace::NavDestinationModel::*;
       OHOS::Ace::NavDestinationModelNG::*;
+      OHOS::Ace::NG::AtomicServicePattern::*;
+      OHOS::Ace::NG::SetRegisterBeforeCreateLayoutBuilder*;
+      OHOS::Ace::NG::BuildMenuBarRow*;
+      OHOS::Ace::RegistAppBarNodeBuilder*;
+      OHOS::Ace::RegisterBeforeCreateLayoutBuilder*;
 
       vtable?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
       VTT?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;

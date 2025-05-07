@@ -614,7 +614,10 @@ build_component_ng("pattern_ng") {
   ]
 
   # Add Cangjie application window registration
-  sources += [ "$ace_root/frameworks/bridge/cj_frontend/frontend/container_modal_cj_utils.cpp" ]
+  sources += [ 
+    "$ace_root/frameworks/bridge/cj_frontend/frontend/container_modal_cj_utils.cpp",
+    "$ace_root/frameworks/bridge/cj_frontend/frontend/cj_app_bar_utils.cpp"
+    ]
 
   if (!ace_engine_feature_wearable) {
     sources += [
