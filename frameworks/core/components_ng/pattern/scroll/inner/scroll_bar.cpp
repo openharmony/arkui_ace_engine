@@ -62,14 +62,14 @@ void ScrollBar::InitTheme()
     SetForegroundPressedBlendColor(theme->GetForegroundPressedBlendColor());
     SetPadding(theme->GetPadding());
     SetHoverWidth(theme);
-    SetNormalBackgroundWidth(theme->GetNormalBackgroundWidth());
-    SetActiveBackgroundWidth(theme->GetActiveBackgroundWidth());
-    SetNormalStartAngle(theme->GetNormalStartAngle());
-    SetActiveStartAngle(theme->GetActiveStartAngle());
-    SetNormaMaxOffsetAngle(theme->GetNormaMaxOffsetAngle());
-    SetActiveMaxOffsetAngle(theme->GetActiveMaxOffsetAngle());
-    SetNormalScrollBarWidth(theme->GetNormalScrollBarWidth());
-    SetActiveScrollBarWidth(theme->GetActiveScrollBarWidth());
+    SetArcNormalBackgroundWidth(theme->GetArcNormalBackgroundWidth());
+    SetArcActiveBackgroundWidth(theme->GetArcActiveBackgroundWidth());
+    SetArcNormalStartAngle(theme->GetArcNormalStartAngle());
+    SetArcActiveStartAngle(theme->GetArcActiveStartAngle());
+    SetArcNormaMaxOffsetAngle(theme->GetArcNormaMaxOffsetAngle());
+    SetArcActiveMaxOffsetAngle(theme->GetArcActiveMaxOffsetAngle());
+    SetArcNormalScrollBarWidth(theme->GetArcNormalScrollBarWidth());
+    SetArcActiveScrollBarWidth(theme->GetArcActiveScrollBarWidth());
     SetArcForegroundColor(theme->GetArcForegroundColor());
     SetArcBackgroundColor(theme->GetArcBackgroundColor());
 }
