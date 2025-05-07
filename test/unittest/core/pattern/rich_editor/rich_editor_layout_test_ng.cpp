@@ -16,8 +16,10 @@
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -164,7 +166,8 @@ HWTEST_F(RichEditorLayoutTestNg, OnDirtyLayoutWrapper002, TestSize.Level1)
  */
 HWTEST_F(RichEditorLayoutTestNg, OnDirtyLayoutWrapper003, TestSize.Level1)
 {
-    auto richEditorPattern = GetRichEditorPattern();
+    CHECK_NULL_VOID(richEditorNode_);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto rendenContext = richEditorNode_->GetRenderContext();
     ASSERT_NE(rendenContext, nullptr);
@@ -250,9 +253,24 @@ HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm001, TestSize.Level1)
     auto paragraphManager = AceType::MakeRefPtr<ParagraphManager>();
     layoutAlgorithm->paragraphManager_ = paragraphManager;
 
+    ParagraphStyle testStyle = {};
+    EXPECT_CALL(*paragraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(testStyle));
     AddSpan(INIT_VALUE_1);
     layoutAlgorithm->spans_.emplace_back(richEditorPattern->spans_);
     layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+
+    ASSERT_NE(layoutAlgorithm->spans_.size(), 0);
+    for (const auto& group : layoutAlgorithm->spans_) {
+        for (const auto& child : group) {
+            if (!child) {
+                continue;
+            }
+            child->ResetReLayout();
+            child->MarkReCreateParagraph();
+        }
+    }
+    auto size = layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+    EXPECT_NE(size.value().Width(), 1.0f);
 
     layoutAlgorithm->spans_.clear();
     auto size1 = layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));

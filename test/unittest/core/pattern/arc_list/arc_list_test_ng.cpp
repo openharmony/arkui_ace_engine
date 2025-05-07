@@ -80,7 +80,7 @@ void ArcListTestNg::GetList()
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     pattern_ = frameNode_->GetPattern<ArcListPattern>();
 
-    eventHub_ = frameNode_->GetEventHub<ListEventHub>();
+    eventHub_ = frameNode_->GetOrCreateEventHub<ListEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<ArcListLayoutProperty>();
     paintProperty_ = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<ListAccessibilityProperty>();

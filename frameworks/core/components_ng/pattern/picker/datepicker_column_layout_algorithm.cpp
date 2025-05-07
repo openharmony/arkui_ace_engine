@@ -29,10 +29,12 @@ const int32_t DIVIDER_SIZE = 2;
 const float ITEM_HEIGHT_HALF = 2.0f;
 const int32_t BUFFER_NODE_NUMBER = 2;
 const int32_t HIDENODE = 3;
-constexpr double PERCENT_100 = 100.0;
+constexpr double PERCENT_100 = 100.0f;
 constexpr double PERCENT_120 = 1.2f;
 constexpr double SPACE_CALC_TIME = 2.0;
 constexpr Dimension LUNARSWITCH_HEIGHT = 48.0_vp;
+constexpr float DEFAULT_FONT_SCALE = 1.f;
+
 GradientColor CreatePercentGradientColor(float percent, Color color)
 {
     NG::GradientColor gredient = GradientColor(color);
@@ -40,6 +42,7 @@ GradientColor CreatePercentGradientColor(float percent, Color color)
     return gredient;
 }
 } // namespace
+
 void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -52,9 +55,9 @@ void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(buttonTheme);
     SizeF frameSize = { -1.0f, -1.0f };
 
-    uint32_t showCount_ = pickerTheme->GetShowCountPortrait() + BUFFER_NODE_NUMBER;
+    uint32_t showCount = pickerTheme->GetShowCountPortrait() + BUFFER_NODE_NUMBER;
     if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-        showCount_ = pickerTheme->GetShowCountLandscape() + BUFFER_NODE_NUMBER;
+        showCount = pickerTheme->GetShowCountLandscape() + BUFFER_NODE_NUMBER;
     }
 
     auto columnNode = layoutWrapper->GetHostNode();
@@ -84,7 +87,7 @@ void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         gradientFontScale_ = ReCalcItemHeightScale(datePickerPattern->GetGradientHeight(), false);
     }
     auto height = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * gradientFontScale_ *
-         (showCount_ - HIDENODE) + pickerTheme->GetDividerSpacing().ConvertToPx() * dividerSpacingFontScale_);
+         (showCount - HIDENODE) + pickerTheme->GetDividerSpacing().ConvertToPx() * dividerSpacingFontScale_);
 
     auto pickerMaxHeight = layoutConstraint->maxSize.Height();
     if (datePickerPattern->GetIsShowInDialog()) {
@@ -99,7 +102,7 @@ void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto gradientHeight = pickerTheme->GetGradientHeight().ConvertToPx() * gradientFontScale_;
         auto dividerSpacingHeight = pickerTheme->GetDividerSpacing().ConvertToPx() * dividerSpacingFontScale_;
         datePickerPattern->SetPaintDividerSpacing(dividerSpacingFontScale_);
-        auto columnHeight = gradientHeight * (showCount_ - 1) + dividerSpacingHeight;
+        auto columnHeight = gradientHeight * (showCount - 1) + dividerSpacingHeight;
         datePickerPattern->SetResizePickerItemHeight(
             dividerSpacingHeight / columnHeight * std::min(height, pickerMaxHeight));
         datePickerPattern->SetResizeFlag(true);
@@ -122,6 +125,7 @@ void DatePickerColumnLayoutAlgorithm::InitGradient(const float& gradientPercent,
     auto columnRenderContext = columnNode->GetRenderContext();
     CHECK_NULL_VOID(blendRenderContext);
     CHECK_NULL_VOID(columnRenderContext);
+
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
     gradient.AddColor(CreatePercentGradientColor(0, Color::TRANSPARENT));
@@ -178,6 +182,7 @@ void DatePickerColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
+
     auto size = geometryNode->GetFrameSize();
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
@@ -210,10 +215,7 @@ bool DatePickerColumnLayoutAlgorithm::NeedAdaptForAging()
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, false);
 
-    if (GreatOrEqual(pipeline->GetFontScale(), pickerTheme->GetMaxOneFontScale())) {
-        return true;
-    }
-    return false;
+    return GreatOrEqual(pipeline->GetFontScale(), pickerTheme->GetMaxOneFontScale());
 }
 
 const Dimension DatePickerColumnLayoutAlgorithm::AdjustFontSizeScale(const Dimension& fontSizeValue, double fontScale)
@@ -234,18 +236,18 @@ const Dimension DatePickerColumnLayoutAlgorithm::AdjustFontSizeScale(const Dimen
 
 float DatePickerColumnLayoutAlgorithm::ReCalcItemHeightScale(const Dimension& userSetHeight, bool isDividerSpacing)
 {
-    auto fontScale = 1.0f;
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(pipeline, fontScale);
+    CHECK_NULL_RETURN(pipeline, DEFAULT_FONT_SCALE);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-    CHECK_NULL_RETURN(pickerTheme, fontScale);
+    CHECK_NULL_RETURN(pickerTheme, DEFAULT_FONT_SCALE);
+
     auto systemFontScale = static_cast<double>(pipeline->GetFontScale());
     auto themePadding = pickerTheme->GetPickerDialogFontPadding();
     auto userSetHeightValue = AdjustFontSizeScale(userSetHeight, systemFontScale).ConvertToPx();
     double adjustedScale =
         std::clamp(systemFontScale, pickerTheme->GetNormalFontScale(), pickerTheme->GetMaxTwoFontScale());
     if (NearZero(adjustedScale)) {
-        return fontScale;
+        return DEFAULT_FONT_SCALE;
     }
     userSetHeightValue = userSetHeightValue / adjustedScale * PERCENT_120 + (themePadding.ConvertToPx() * DIVIDER_SIZE);
     auto themeHeightLimit =
@@ -258,11 +260,10 @@ float DatePickerColumnLayoutAlgorithm::ReCalcItemHeightScale(const Dimension& us
     }
 
     if (NearZero(themeHeight.ConvertToPx())) {
-        return fontScale;
+        return DEFAULT_FONT_SCALE;
     }
 
-    fontScale = std::max(static_cast<float>(userSetHeightValue / themeHeight.ConvertToPx()), fontScale);
-    return fontScale;
+    return std::max(static_cast<float>(userSetHeightValue / themeHeight.ConvertToPx()), DEFAULT_FONT_SCALE);
 }
 
 void DatePickerColumnLayoutAlgorithm::MeasureText(LayoutWrapper* layoutWrapper, const RefPtr<PickerTheme>& pickerTheme,
@@ -270,19 +271,17 @@ void DatePickerColumnLayoutAlgorithm::MeasureText(LayoutWrapper* layoutWrapper, 
 {
     auto totalChild = layoutWrapper->GetTotalChildCount();
     CHECK_EQUAL_VOID(totalChild, 0);
+
     auto selectedIndex = totalChild / 2;
     auto layoutChildConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-
     const float dividerHeight = static_cast<float>(pickerTheme->GetDividerSpacing().ConvertToPx() * \
         dividerSpacingFontScale_);
     const float gradientHeight = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * \
         gradientFontScale_);
-    const float parentWidth = size.Width();
 
     for (auto index = 0; index < totalChild; index++) {
         auto child = layoutWrapper->GetOrCreateChildByIndex(index);
-        SizeF frameSize = { -1.0f, -1.0f };
-        frameSize.SetWidth(parentWidth);
+        SizeF frameSize = { size.Width(), -1.0f };
         if (index == selectedIndex) {
             frameSize.SetHeight(dividerHeight);
         } else {

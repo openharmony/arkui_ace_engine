@@ -657,7 +657,6 @@ void SubwindowManager::HideSheetSubWindow(int32_t containerId)
         subwindow->HideSubWindowNG();
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "fail to hide sheet subwindow, instanceId is %{public}d.", containerId);
 }
 
 RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
@@ -1640,7 +1639,7 @@ const RefPtr<Subwindow> SubwindowManager::GetSubwindowByType(int32_t instanceId,
     std::lock_guard<std::mutex> lock(subwindowMutex_);
     auto result = subwindowMap_.find(searchKey);
     if (result != subwindowMap_.end()) {
-        return result->second;
+        return CheckSubwindowDisplayId(searchKey, result->second);
     } else {
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in subwindowMap_, searchKey is %{public}s.",
             searchKey.ToString().c_str());
@@ -1730,12 +1729,28 @@ RefPtr<Subwindow> SubwindowManager::GetSubwindowBySearchKey(const SubwindowKey& 
     std::lock_guard<std::mutex> lock(subwindowMutex_);
     auto result = subwindowMap_.find(searchKey);
     if (result != subwindowMap_.end()) {
-        return result->second;
+        return CheckSubwindowDisplayId(searchKey, result->second);
     } else {
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in subwindowMap_, searchKey is %{public}s.",
             searchKey.ToString().c_str());
         return nullptr;
     }
+}
+
+RefPtr<Subwindow> SubwindowManager::CheckSubwindowDisplayId(const SubwindowKey& searchKey,
+    const RefPtr<Subwindow>& subwindow)
+{
+    CHECK_NULL_RETURN(subwindow, nullptr);
+    if (searchKey.displayId != subwindow->GetDisplayId() && !subwindow->GetShown()) {
+        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Remove subwindow by displayId changed, "
+            "searchKey: %{public}s, subwindowId: %{public}d, newDisplayId: %{public}u, oldDisplayId: %{public}u",
+            searchKey.ToString().c_str(), subwindow->GetSubwindowId(), (uint32_t)searchKey.displayId,
+            (uint32_t)subwindow->GetDisplayId());
+        subwindowMap_.erase(searchKey);
+        subwindow->DestroyWindow();
+        return nullptr;
+    }
+    return subwindow;
 }
 
 void SubwindowManager::RemoveSubwindowBySearchKey(const SubwindowKey& searchKey)
@@ -1760,5 +1775,71 @@ void SubwindowManager::AddSubwindowBySearchKey(const SubwindowKey& searchKey, co
         return;
     }
     AddInstanceSubwindowMap(subwindow->GetChildContainerId(), subwindow);
+}
+
+void SubwindowManager::AddMaskSubwindowMap(int32_t dialogId, const RefPtr<Subwindow>& subwindow)
+{
+    std::lock_guard<std::mutex> lock(maskSubwindowMutex_);
+    maskSubWindowMap_.try_emplace(dialogId, subwindow);
+}
+
+void SubwindowManager::RemoveMaskSubwindowMap(int32_t dialogId)
+{
+    std::lock_guard<std::mutex> lock(maskSubwindowMutex_);
+    maskSubWindowMap_.erase(dialogId);
+}
+
+const RefPtr<Subwindow> SubwindowManager::GetMaskSubwindow(int32_t dialogId)
+{
+    std::lock_guard<std::mutex> lock(maskSubwindowMutex_);
+    auto result = maskSubWindowMap_.find(dialogId);
+    if (result != maskSubWindowMap_.end()) {
+        return result->second;
+    } else {
+        return nullptr;
+    }
+}
+
+void SubwindowManager::ShowDialogMaskNG(const RefPtr<NG::FrameNode>& dialog)
+{
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show dialog mask ng enter");
+    CHECK_NULL_VOID(dialog);
+    auto dialogId = dialog->GetId();
+    auto maskSubwindow = GetMaskSubwindow(dialogId);
+    if (maskSubwindow) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "maskSubwindow is exist, dialogId: %{public}d, subContainerId: %{public}d",
+            dialogId, maskSubwindow->GetChildContainerId());
+        return;
+    }
+
+    auto pipeline = NG::PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    auto subwindow = Subwindow::CreateSubwindow(pipeline->GetInstanceId());
+    CHECK_NULL_VOID(subwindow);
+    subwindow->InitContainer();
+    CHECK_NULL_VOID(subwindow->GetIsRosenWindowCreate());
+    AddMaskSubwindowMap(dialogId, subwindow);
+    AddInstanceSubwindowMap(subwindow->GetChildContainerId(), subwindow);
+    subwindow->ShowDialogMaskNG(dialog);
+}
+
+void SubwindowManager::CloseDialogMaskNG(const RefPtr<NG::FrameNode>& dialog)
+{
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "close dialog mask ng enter");
+    CHECK_NULL_VOID(dialog);
+    auto maskSubwindow = GetMaskSubwindow(dialog->GetId());
+    CHECK_NULL_VOID(maskSubwindow);
+    maskSubwindow->CloseDialogMaskNG(dialog);
+}
+
+void SubwindowManager::CloseMaskSubwindow(int32_t dialogId)
+{
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "close mask subwindow enter, dialogId: %{public}d", dialogId);
+    auto maskSubwindow = GetMaskSubwindow(dialogId);
+    CHECK_NULL_VOID(maskSubwindow);
+
+    if (maskSubwindow->Close()) {
+        RemoveMaskSubwindowMap(dialogId);
+    }
 }
 } // namespace OHOS::Ace

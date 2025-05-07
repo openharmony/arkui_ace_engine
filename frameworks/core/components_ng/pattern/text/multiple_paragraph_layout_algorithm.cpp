@@ -470,8 +470,8 @@ ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(const TextSty
         .ellipsisMode = textStyle.GetEllipsisMode(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow(),
-        .halfLeading = textStyle.GetHalfLeading(),
         .indent = textStyle.GetTextIndent(),
+        .halfLeading = textStyle.GetHalfLeading(),
         .paragraphSpacing = textStyle.GetParagraphSpacing()
         };
 }

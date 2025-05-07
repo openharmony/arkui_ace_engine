@@ -199,7 +199,7 @@ void BarItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     float textHeight = 0.0f;
     auto textNode = hostNode->GetTextNode();
-    if (textNode) {
+    if (textNode && !hostNode->IsHideText()) {
         auto index = hostNode->GetChildIndexById(textNode->GetId());
         auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         CHECK_NULL_VOID(textWrapper);

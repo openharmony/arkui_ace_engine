@@ -140,7 +140,7 @@ HWTEST_F(WebPatternEventTest, WebPatternTestNg_003, TestSize.Level1)
     g_webPattern->OnModifyDone();
     auto host = g_webPattern->GetHost();
     EXPECT_NE(host, nullptr);
-    auto eventHub = host->GetEventHub<WebEventHub>();
+    auto eventHub = host->GetOrCreateEventHub<WebEventHub>();
     EXPECT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     EXPECT_NE(focusHub, nullptr);

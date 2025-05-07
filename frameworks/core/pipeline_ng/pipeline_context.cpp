@@ -83,6 +83,8 @@ constexpr int32_t DEFAULT_RECORD_SECOND = 5;
 constexpr int32_t SECOND_TO_MILLISEC = 1000;
 constexpr int32_t USED_ID_FIND_FLAG = 3;
 constexpr int32_t USED_JSON_PARAM = 4;
+constexpr int32_t MAX_FRAME_COUNT_WITHOUT_JS_UNREGISTRATION = 100;
+constexpr int32_t  RATIO_OF_VSYNC_PERIOD = 2;
 constexpr char PID_FLAG[] = "pidflag";
 } // namespace
 
@@ -542,7 +544,12 @@ void PipelineContext::FlushDragEvents()
     }
     canUseLongPredictTask_ = false;
     for (auto iter = dragEvents.begin(); iter != dragEvents.end(); ++iter) {
-        FlushDragEvents(manager, extraInfo, iter->first, iter->second);
+        if (!iter->first.Invalid()) {
+            RefPtr<FrameNode> node = iter->first.Upgrade();
+            if (node) {
+                FlushDragEvents(manager, extraInfo, node, iter->second);
+            }
+        }
     }
 }
 
@@ -590,7 +597,7 @@ void PipelineContext::FlushDragEvents(const RefPtr<DragDropManager>& manager,
     std::unordered_map<int, DragPointerEvent> &idToPoints,
     const RefPtr<FrameNode>& node)
 {
-    std::map<RefPtr<FrameNode>, std::vector<DragPointerEvent>> nodeToPointEvent;
+    std::map<WeakPtr<FrameNode>, std::vector<DragPointerEvent>> nodeToPointEvent;
     std::list<DragPointerEvent> dragPoint;
     for (const auto& iter : idToPoints) {
         auto lastDispatchTime = eventManager_->GetLastDispatchTime();
@@ -1612,6 +1619,10 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             StartSplitWindowAnimation(width, height, type, rsTransaction);
             break;
         }
+        case WindowSizeChangeReason::MAXIMIZE_IN_IMPLICT: {
+            MaximizeInImplictAnimation(width, height, type, rsTransaction);
+            break;
+        }
         case WindowSizeChangeReason::ROTATION: {
             safeAreaManager_->UpdateKeyboardOffset(0.0);
             SetRootRect(width, height, 0.0);
@@ -1657,19 +1668,24 @@ void PipelineContext::PostKeyboardAvoidTask()
         return;
     }
     auto container = Container::Current();
-    if (container && textFieldManager->GetLaterAvoid()) {
+    int32_t orientation = -1;
+    if (container) {
         auto displayInfo = container->GetDisplayInfo();
-        if (displayInfo && textFieldManager->GetLaterOrientation() != (int32_t)displayInfo->GetRotation()) {
+        orientation = displayInfo ? (int32_t)displayInfo->GetRotation() : -1;
+        if (textFieldManager->GetLaterAvoid() && textFieldManager->GetLaterOrientation() != orientation) {
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "orientation not match, clear laterAvoid");
             textFieldManager->SetLaterAvoid(false);
             return;
         }
     }
     taskExecutor_->PostTask(
-        [weakContext = WeakClaim(this), weakManager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
+        [weakContext = WeakClaim(this), weakManager = WeakPtr<TextFieldManagerNG>(textFieldManager), orientation] {
             auto manager = weakManager.Upgrade();
             CHECK_NULL_VOID(manager);
-            CHECK_NULL_VOID(manager->GetLaterAvoid());
+            if (!manager->GetLaterAvoid()) {
+                manager->SetContextTriggerAvoidTaskOrientation(orientation);
+                return;
+            }
             auto context = weakContext.Upgrade();
             CHECK_NULL_VOID(context);
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "after rotation set root, trigger avoid now");
@@ -1678,7 +1694,6 @@ void PipelineContext::PostKeyboardAvoidTask()
             auto height = manager->GetLaterAvoidHeight();
             context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, nullptr, true);
             manager->SetLaterAvoid(false);
-            manager->SetFocusFieldAlreadyTriggerWsCallback(false);
         },
         TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
 }
@@ -1782,6 +1797,34 @@ void PipelineContext::StartSplitWindowAnimation(int32_t width, int32_t height, W
 #endif
 }
 
+void PipelineContext::MaximizeInImplictAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+        "Maximize window in implict animation, type = %{public}d, width = %{public}d, height = %{public}d", type,
+        width, height);
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        FlushMessages();
+        rsTransaction->Begin();
+    }
+#endif
+    auto curve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 300.0f, 33.0f);
+    AnimationOption option;
+    option.SetCurve(curve);
+    Animate(option, curve, [width, height, weak = WeakClaim(this)]() {
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SetRootRect(width, height, 0.0);
+        pipeline->FlushUITasks();
+    });
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        rsTransaction->Commit();
+    }
+#endif
+}
+
 void PipelineContext::SetRootRect(double width, double height, double offset)
 {
     CHECK_RUN_ON(UI);
@@ -1862,6 +1905,45 @@ void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool 
     CHECK_NULL_VOID(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
     if (safeAreaManager_->UpdateNavSafeArea(navSafeArea)) {
         AnimateOnSafeAreaUpdate();
+    }
+}
+
+void PipelineContext::UpdateSystemSafeAreaWithoutAnimation(const SafeAreaInsets& systemSafeArea,
+    bool checkSceneBoardWindow)
+{
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbSystemSafeArea(systemSafeArea);
+        return;
+    }
+    CHECK_NULL_VOID(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
+    if (safeAreaManager_->UpdateSystemSafeArea(systemSafeArea)) {
+        SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_AVOID_AREA);
+    }
+}
+
+void PipelineContext::UpdateCutoutSafeAreaWithoutAnimation(const SafeAreaInsets& cutoutSafeArea,
+    bool checkSceneBoardWindow)
+{
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbCutoutSafeArea(cutoutSafeArea);
+        return;
+    }
+    CHECK_NULL_VOID(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
+    if (safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea)) {
+        SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_AVOID_AREA);
+    }
+}
+
+void PipelineContext::UpdateNavSafeAreaWithoutAnimation(const SafeAreaInsets& navSafeArea,
+    bool checkSceneBoardWindow)
+{
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbNavSafeArea(navSafeArea);
+        return;
+    }
+    CHECK_NULL_VOID(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
+    if (safeAreaManager_->UpdateNavSafeArea(navSafeArea)) {
+        SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_AVOID_AREA);
     }
 }
 
@@ -2667,6 +2749,9 @@ void PipelineContext::OnTouchEvent(
         formEventMgr->HandleEtsCardTouchEvent(point, etsSerializedGesture);
     }
 
+    if (point.type != TouchType::DOWN && !eventManager_->touchDelegatesMap_.empty()) {
+        eventManager_->DelegateTouchEvent(point);
+    }
     auto oriPoint = point;
     auto scalePoint = point.CreateScalePoint(GetViewScale());
     eventManager_->CheckDownEvent(scalePoint);
@@ -2726,6 +2811,9 @@ void PipelineContext::OnTouchEvent(
             formEventMgr->HandleEtsCardTouchEvent(oriPoint, etsSerializedGesture);
         }
 
+        if (!eventManager_->touchDelegatesMap_.empty()) {
+            eventManager_->DelegateTouchEvent(point);
+        }
         if (etsSerializedGesture.data.size() != 0) {
             GestureGroup rebirth(GestureMode::Exclusive);
             rebirth.Deserialize(etsSerializedGesture.data.data());
@@ -2839,6 +2927,9 @@ void PipelineContext::OnTouchEvent(
         touchPluginPipelineContext_.clear();
         if (formEventMgr) {
             formEventMgr->RemoveEtsCardTouchEventCallback(point.id);
+        }
+        if (!eventManager_->touchDelegatesMap_.empty()) {
+            eventManager_->UnregisterTouchDelegate(point.id);
         }
         if (scalePoint.type == TouchType::CANCEL) {
             dragEvents_.clear();
@@ -3307,6 +3398,11 @@ void PipelineContext::DumpPipelineInfo() const
 void PipelineContext::CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents)
 {
     auto targetTimeStamp = compensationValue_ > 0 ? GetVsyncTime() - compensationValue_ : GetVsyncTime();
+    if (touchEvents_.size() >= 40) { // TP:140Hz, vsync:30Hz, Fingers:10
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
+            "Too many touch events in current vsync.(vsync: %{public}" PRIu64 ", eventsCnt: %{public}u)",
+            GetVsyncTime(), static_cast<uint32_t>(touchEvents_.size()));
+    }
     for (auto iter = touchEvents_.begin(); iter != touchEvents_.end();) {
         auto timeStamp = std::chrono::duration_cast<std::chrono::nanoseconds>(iter->time.time_since_epoch()).count();
         if (targetTimeStamp < static_cast<uint64_t>(timeStamp)) {
@@ -3742,7 +3838,12 @@ void PipelineContext::OnFlushMouseEvent(TouchRestrict& touchRestrict)
     }
     canUseLongPredictTask_ = false;
     for (auto iter = mouseEvents.begin(); iter != mouseEvents.end(); ++iter) {
-        OnFlushMouseEvent(iter->first, iter->second, touchRestrict);
+        if (!iter->first.Invalid()) {
+            RefPtr<FrameNode> node = iter->first.Upgrade();
+            if (node) {
+                OnFlushMouseEvent(node, iter->second, touchRestrict);
+            }
+        }
     }
 }
 
@@ -3757,7 +3858,7 @@ void PipelineContext::OnFlushMouseEvent(
     std::unordered_map<int, MouseEvent> idToMousePoints;
     bool needInterpolation = true;
     std::unordered_map<int32_t, MouseEvent> newIdMousePoints;
-    std::map<RefPtr<FrameNode>, std::vector<MouseEvent>> nodeToMousePoints;
+    std::map<WeakPtr<FrameNode>, std::vector<MouseEvent>> nodeToMousePoints;
     for (auto iter = mouseEvents.rbegin(); iter != mouseEvents.rend(); ++iter) {
         auto scaleEvent = (*iter).CreateScaleEvent(GetViewScale());
         idToMousePoints.emplace(scaleEvent.id, scaleEvent);
@@ -4799,7 +4900,19 @@ void PipelineContext::OnIdle(int64_t deadline)
     currentTime = GetSysTimestamp();
     if (currentTime < deadline) {
         ElementRegister::GetInstance()->CallJSCleanUpIdleTaskFunc(deadline - currentTime);
+        frameCountForNotCallJSCleanUp_ = 0;
+    } else {
+        frameCountForNotCallJSCleanUp_++;
     }
+
+    // Check if there is more than 100 frame which does not execute the CallJSCleanUpIdleTaskFunc
+    // Force to invoke CallJSCleanUpIdleTaskFunc to make sure no OOM in JS side
+    if (frameCountForNotCallJSCleanUp_ >= MAX_FRAME_COUNT_WITHOUT_JS_UNREGISTRATION) {
+        // The longest execution time is half of vsync period
+        ElementRegister::GetInstance()->CallJSCleanUpIdleTaskFunc(window_->GetVSyncPeriod() / RATIO_OF_VSYNC_PERIOD);
+        frameCountForNotCallJSCleanUp_ = 0;
+    }
+
     TriggerIdleCallback(deadline);
 }
 

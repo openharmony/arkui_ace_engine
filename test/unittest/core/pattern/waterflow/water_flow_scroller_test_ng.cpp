@@ -729,7 +729,7 @@ HWTEST_F(WaterFlowScrollerTestNg, Focus002, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr");
     CreateFocusableWaterFlowItems(30);
     CreateDone();
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     auto focusHub = eventHub->GetOrCreateFocusHub();
     focusHub->SetFocusDependence(FocusDependence::AUTO);
 

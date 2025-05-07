@@ -2659,6 +2659,7 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
 #ifdef PREVIEW
     // unable to use the subWindow in the Previewer.
     menuParam.type = MenuType::MENU;
+    menuParam.previewMode = MenuPreviewMode::NONE;
 #endif
     TAG_LOGD(AceLogTag::ACE_DIALOG, "bind menu with custom node enter %{public}d", menuParam.type);
     auto pipeline = PipelineBase::GetCurrentContext();

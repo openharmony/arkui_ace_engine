@@ -138,7 +138,7 @@ using OnPanDirectionFunc = EventCallback<void(const PanDirection& direction)>;
 using PanDirectionFuncType = OnPanDirectionFunc::FunctionType;
 using OnPanDistanceFunc = EventCallback<void(double distance)>;
 using PanDistanceFuncType = OnPanDistanceFunc::FunctionType;
-using PanDistanceMap = std::unordered_map<SourceTool, float>;
+using PanDistanceMap = std::unordered_map<SourceTool, double>;
 
 class PanGestureOption : public AceType {
     DECLARE_ACE_TYPE(PanGestureOption, AceType);

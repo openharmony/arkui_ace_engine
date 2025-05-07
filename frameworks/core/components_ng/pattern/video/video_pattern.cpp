@@ -356,8 +356,10 @@ void VideoPattern::ResetMediaPlayerOnBg()
         uiTaskExecutor.PostSyncTask([weak, id] {
             auto videoPattern = weak.Upgrade();
             CHECK_NULL_VOID(videoPattern);
+            ContainerScope scope(id);
             videoPattern->PrepareSurface();
             }, "ArkUIVideoPrepareSurface");
+
         mediaPlayer->SetRenderFirstFrame(showFirstFrame);
         if (mediaPlayer->PrepareAsync() != 0) {
             TAG_LOGE(AceLogTag::ACE_VIDEO, "Player prepare failed");
@@ -1201,6 +1203,7 @@ void VideoPattern::AddChild()
     auto column = AceType::DynamicCast<FrameNode>(video->GetMediaColumn());
     CHECK_NULL_VOID(column);
     auto renderContext = column->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     renderContext->AddChild(renderContextForMediaPlayer_, 0);
 }
 
@@ -1222,6 +1225,7 @@ void VideoPattern::RemoveMediaPlayerSurfaceNode()
     auto column = AceType::DynamicCast<FrameNode>(video->GetMediaColumn());
     CHECK_NULL_VOID(column);
     auto renderContext = column->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     renderContext->RemoveChild(renderContextForMediaPlayer_);
 }
 
@@ -2057,7 +2061,8 @@ bool VideoPattern::IsSupportImageAnalyzer()
     return isEnableAnalyzer_ && !needControlBar && imageAnalyzerManager_->IsSupportImageAnalyzerFeature();
 }
 
-bool VideoPattern::ShouldUpdateImageAnalyzer() {
+bool VideoPattern::ShouldUpdateImageAnalyzer()
+{
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     const auto& constraint = layoutProperty->GetCalcLayoutConstraint();

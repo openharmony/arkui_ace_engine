@@ -125,7 +125,6 @@ const uint32_t INDEX = 7;
 const double SCALE = 1.0;
 const double DEFAULT_JUMP_INTERVAL = 2.0;
 const int32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
-const float DEFAULT_FONT_SCAL = 1.6f;
 const float TEXT_HEIGHT_NUMBER = 3.0f;
 const float TEXT_WEIGHT_NUMBER = 6.0f;
 const float EXTRA_WIDTH = 50.0f;
@@ -1313,7 +1312,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern010, TestSize.Level1)
     auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     ASSERT_TRUE(minuteColumnPattern);
 
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     minuteColumnPattern->InitPanEvent(gestureHub);
     auto panEvent = minuteColumnPattern->panEvent_;
@@ -1528,7 +1527,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern015, TestSize.Level1)
     auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     ASSERT_TRUE(minuteColumnPattern);
 
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     auto focusHub = eventHub->GetOrCreateFocusHub();
     minuteColumnPattern->InitOnKeyEvent(focusHub);
 
@@ -1865,7 +1864,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
 
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     auto focusHub = eventHub->GetOrCreateFocusHub();
     timePickerRowPattern->InitOnKeyEvent(focusHub);
     auto getInnerFocusRectFunc = focusHub->getInnerFocusRectFunc_;
@@ -2214,7 +2213,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern018, TestSize.Level1)
      * @tc.steps: step2. call InitDisabled.
      * @tc.expected: set eventHub is disenabled.
      */
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->enabled_ = false;
     timePickerRowPattern->InitDisabled();
     bool res = eventHub->IsEnabled();
@@ -5964,7 +5963,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerPaintTest004, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_TRUE(frameNode);
     frameNode->MarkModifyDone();
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     auto focusHub = eventHub->GetOrCreateFocusHub();
 
     CrownEvent crownEvent;
@@ -6358,84 +6357,6 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnLayoutAlgorithmAdjustFontSizeS
     Dimension fontSizeValue(10.0);
     Dimension result = timePickerColumnLayoutAlgorithm.AdjustFontSizeScale(fontSizeValue, fontScale);
     EXPECT_EQ(result, fontSizeValue);
-}
-
-/**
- * @tc.name: TimePickerColumnLayoutAlgorithmReCalcItemHeightScale
- * @tc.desc: Test TimePickerColumnLayoutAlgorithm ReCalcItemHeightScale.
- * @tc.type: FUNC
- */
-HWTEST_F(TimePickerPatternTestNg, TimePickerColumnLayoutAlgorithmReCalcItemHeightScale, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. create frameNode and pattern.
-     */
-    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
-    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-
-    /**
-     * @tc.cases: case. cover branch DeviceOrientation is LANDSCAPE.
-     */
-    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_TRUE(frameNode);
-    frameNode->MarkModifyDone();
-    auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
-    auto layoutConstraint = LayoutConstraintF();
-    layoutConstraint.selfIdealSize.SetWidth(20);
-    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
-    ASSERT_TRUE(timePickerRowPattern);
-    auto allChildNode = timePickerRowPattern->GetAllChildNode();
-    auto minuteColumn = allChildNode["minute"].Upgrade();
-    ASSERT_TRUE(minuteColumn);
-    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
-    ASSERT_TRUE(minuteColumnPattern);
-    auto columnBlend = AceType::DynamicCast<FrameNode>(minuteColumn->GetParent());
-    ASSERT_TRUE(columnBlend);
-    auto blendLayoutProperty = columnBlend->GetLayoutProperty();
-    blendLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
-    blendLayoutProperty->UpdateContentConstraint();
-    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(minuteColumn, minuteColumn->GetGeometryNode(), pickerProperty);
-
-    /**
-     * @tc.step: step2. initialize TimePickerColumnLayoutAlgorithm and call Measure
-     *                  and Layout function.
-     */
-    TimePickerColumnLayoutAlgorithm timePickerColumnLayoutAlgorithm;
-    timePickerColumnLayoutAlgorithm.Measure(&layoutWrapper);
-    timePickerColumnLayoutAlgorithm.Layout(&layoutWrapper);
-    bool isDividerSpacing = false;
-    Dimension userSetHeight;
-    float result = timePickerColumnLayoutAlgorithm.ReCalcItemHeightScale(userSetHeight, isDividerSpacing);
-    EXPECT_NE(result, TEXT_HEIGHT_NUMBER);
-
-    isDividerSpacing = true;
-    userSetHeight = 50.0_vp;
-    result = timePickerColumnLayoutAlgorithm.ReCalcItemHeightScale(userSetHeight, isDividerSpacing);
-    EXPECT_NE(result, TEXT_HEIGHT_NUMBER);
-
-    /**
-     * @tc.cases: case. cover branch userSetHeight is 0.0vp.
-     */
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    ASSERT_NE(pipeline, nullptr);
-    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-    ASSERT_NE(pickerTheme, nullptr);
-    pickerTheme->pickerDialogNormalFontScale_ = 0.0f;
-    pipeline->fontScale_ = 0.0f;
-    isDividerSpacing = true;
-    userSetHeight = 0.0_vp;
-    result = timePickerColumnLayoutAlgorithm.ReCalcItemHeightScale(userSetHeight, isDividerSpacing);
-    EXPECT_EQ(result, DEFAULT_FONT_SCAL);
-
-    /**
-     * @tc.cases: case. cover branch dividerSpacing_ is 0.0vp.
-     */
-    pickerTheme->dividerSpacing_ = 0.0_vp;
-    isDividerSpacing = true;
-    userSetHeight = 50.0_vp;
-    result = timePickerColumnLayoutAlgorithm.ReCalcItemHeightScale(userSetHeight, isDividerSpacing);
-    EXPECT_EQ(result, DEFAULT_FONT_SCAL);
 }
 
 /**

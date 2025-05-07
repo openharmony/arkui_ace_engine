@@ -31,6 +31,9 @@ public:
     static RefPtr<DynamicNode> GetOrCreateDynamicNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     void DumpTree(int32_t depth, bool hasJson = false) override;
+    HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
+        TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId, ResponseLinkResult& responseLinkResult,
+        bool isDispatch = false) override;
 };
 
 } // namespace OHOS::Ace::NG

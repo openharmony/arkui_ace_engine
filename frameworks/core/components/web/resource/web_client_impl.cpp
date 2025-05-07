@@ -1323,8 +1323,9 @@ bool WebClientImpl::OnSslErrorRequestByJSV2(std::shared_ptr<NWeb::NWebJSSslError
 
 void WebClientImpl::OnAccessibilityEventV2(int64_t accessibilityId, int32_t eventType, const std::string& argument)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "OnAccessibilityEvent accessibilityId: %{public}" PRId64 ", eventType: %{public}d",
-        accessibilityId, eventType);
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "OnAccessibilityEvent accessibilityId: %{public}" PRId64 ", eventType: %{public}d, argument: %{public}s",
+        accessibilityId, eventType, argument.c_str());
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());

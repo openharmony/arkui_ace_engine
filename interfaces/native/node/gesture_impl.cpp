@@ -346,7 +346,7 @@ void* OH_ArkUI_GestureInterrupter_GetUserData(ArkUI_GestureInterruptInfo* event)
     if (!event) {
         return nullptr;
     }
-    return event->interruptData.userData;
+    return event->interruptData.customUserData;
 }
 
 ArkUI_GestureRecognizer* OH_ArkUI_ParallelInnerGestureEvent_GetCurrentRecognizer(ArkUI_ParallelInnerGestureEvent* event)

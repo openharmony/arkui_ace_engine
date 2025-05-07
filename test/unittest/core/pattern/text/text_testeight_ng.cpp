@@ -1191,7 +1191,7 @@ HWTEST_F(TextTestEightNg, HandleLongPress001, TestSize.Level1)
     pattern->HandleLongPress(info);
     auto host = pattern->GetHost();
     ASSERT_NE(host, nullptr);
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     auto gestureHub = hub->GetGestureEventHub();
     EXPECT_EQ(gestureHub, nullptr);
 }

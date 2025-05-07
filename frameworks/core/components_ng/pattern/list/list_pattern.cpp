@@ -453,8 +453,6 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
     CHECK_NULL_VOID(listEventHub);
     paintStateFlag_ = !NearZero(finalOffset) && !isJump;
     isFramePaintStateValid_ = true;
-    ACE_SCOPED_TRACE("processed offset:%f, id:%d, tag:%s", finalOffset,
-        static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
     auto onScroll = listEventHub->GetOnScroll();
     PrintOffsetLog(AceLogTag::ACE_LIST, host->GetId(), finalOffset);
     if (onScroll) {
@@ -2203,7 +2201,7 @@ bool ListPattern::CalculateJumpOffset()
         if (pos.second.groupInfo && !pos.second.groupInfo.value().atStart) {
             continue;
         }
-        PositionInfo info = posMap_->GetPositionInfo(pos.first);
+        ListPositionInfo info = posMap_->GetPositionInfo(pos.first);
         if (!Negative(info.mainSize)) {
             currentOffset_ = info.mainPos - pos.second.startPos;
             return true;

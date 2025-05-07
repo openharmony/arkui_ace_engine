@@ -85,7 +85,7 @@ void parseGenericList(FontConfigJsonInfo fontConfigJsonInfo, std::vector<NativeU
         for (auto alias : generic.aliasSet) {
             NativeUIFontAliasInfo nativeAlias = NativeUIFontAliasInfo {
                 .name = Utils::MallocCString(alias.familyName),
-                .weight = alias.weight
+                .weight = static_cast<uint32_t>(alias.weight)
             };
             aliasInfoList->push_back(nativeAlias);
         }
@@ -97,8 +97,8 @@ void parseGenericList(FontConfigJsonInfo fontConfigJsonInfo, std::vector<NativeU
         }
         for (auto adjust : generic.adjustSet) {
             NativeUIFontAdjustInfo nativeAdjust = NativeUIFontAdjustInfo {
-                .weight = adjust.origValue,
-                .to = adjust.newValue
+                .weight = static_cast<uint32_t>(adjust.origValue),
+                .to = static_cast<uint32_t>(adjust.newValue)
             };
             adjustInfoList->push_back(nativeAdjust);
         }

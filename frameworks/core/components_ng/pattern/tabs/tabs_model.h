@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,13 +32,9 @@
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
 #include "core/event/ace_events.h"
 #include "core/pipeline/pipeline_context.h"
+#include "ui/view/components/tabs/tabs_data.h"
 
 namespace OHOS::Ace {
-enum class LayoutStyle {
-    ALWAYS_CENTER,
-    ALWAYS_AVERAGE_SPLIT,
-    SPACE_BETWEEN_OR_CENTER,
-};
 
 enum class TabsCacheMode {
     CACHE_BOTH_SIDE = 0,
@@ -95,19 +91,6 @@ struct BarGridColumnOptions final {
     {
         return (sm == option.sm) && (md == option.md) && (lg == option.lg) && (margin == option.margin) &&
                (gutter == option.gutter);
-    }
-};
-
-struct ScrollableBarModeOptions final {
-    Dimension margin = 0.0_vp;
-    std::optional<LayoutStyle> nonScrollableLayoutStyle = std::nullopt;
-
-    bool operator==(const ScrollableBarModeOptions& option) const
-    {
-        return (margin == option.margin) &&
-               (nonScrollableLayoutStyle.has_value() == option.nonScrollableLayoutStyle.has_value()) &&
-               (nonScrollableLayoutStyle.value_or(LayoutStyle::ALWAYS_CENTER) ==
-                   option.nonScrollableLayoutStyle.value_or(LayoutStyle::ALWAYS_CENTER));
     }
 };
 

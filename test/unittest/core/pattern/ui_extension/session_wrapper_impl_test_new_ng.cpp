@@ -1153,7 +1153,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg032, TestSize.L
     int32_t callSessionId = sessionWrapper->GetSessionId();
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 
-    sessionWrapper->PostBusinessDataConsumeAsync(customId, std::move(data));
+    sessionWrapper->PostBusinessDataConsumeAsync(customId, data);
 }
 
 /**
@@ -1180,7 +1180,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg033, TestSize.L
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
     int32_t callSessionId = sessionWrapper->GetSessionId();
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    sessionWrapper->PostBusinessDataConsumeSyncReply(customId, std::move(data), reply);
+    sessionWrapper->PostBusinessDataConsumeSyncReply(customId, data, reply);
     EXPECT_NE(patternUpgrade, nullptr);
 }
 
@@ -1293,5 +1293,36 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg038, TestSize.L
 
     bool ret = sessionWrapper->RegisterDataConsumer();
     EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: SessionWrapperImplNewTestNg039
+ * @tc.desc: Test the method DispatchExtensionDataToHostWindow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg039, TestSize.Level1)
+{
+    auto sessionWrapper = GenerateSessionWrapperImpl();
+    uint32_t customId = 1;
+    AAFwk::Want data;
+    std::optional<AAFwk::Want> reply;
+
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    sessionWrapper->hostPattern_ = AceType::WeakClaim(AceType::RawPtr(pattern));
+    auto patternUpgrade = sessionWrapper->hostPattern_.Upgrade();
+    EXPECT_NE(patternUpgrade, nullptr);
+
+    Rosen::SessionInfo sessionInfo;
+    sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
+    int32_t callSessionId = sessionWrapper->GetSessionId();
+    sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    sessionWrapper->DispatchExtensionDataToHostWindow(customId, data);
+    EXPECT_NE(patternUpgrade, nullptr);
+    customId = static_cast<uint32_t>(UIContentBusinessCode::WINDOW_CODE_BEGIN);
+    sessionWrapper->DispatchExtensionDataToHostWindow(customId, data);
+    EXPECT_NE(patternUpgrade, nullptr);
 }
 } // namespace OHOS::Ace::NG

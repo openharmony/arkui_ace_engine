@@ -1225,6 +1225,7 @@ void TextFieldModelNG::SetTextColor(FrameNode* frameNode, const Color& value)
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, TextColorFlagByUser, value, frameNode);
 }
 
 void TextFieldModelNG::ResetTextColor(FrameNode* frameNode)
@@ -1232,6 +1233,7 @@ void TextFieldModelNG::ResetTextColor(FrameNode* frameNode)
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextColor, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorFlag, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, TextColorFlagByUser, frameNode);
 }
 
 void TextFieldModelNG::SetCaretPosition(FrameNode* frameNode, const int32_t& value)

@@ -1142,7 +1142,7 @@ HWTEST_F(TitleBarPatternTestNg, InitMenuDragEvent001, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     ASSERT_NE(titleBarPattern, nullptr);
-    auto eventHub = titleBarNode->GetEventHub<EventHub>();
+    auto eventHub = titleBarNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
@@ -1182,7 +1182,7 @@ HWTEST_F(TitleBarPatternTestNg, InitMenuDragEvent002, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     ASSERT_NE(titleBarPattern, nullptr);
-    auto eventHub = titleBarNode->GetEventHub<EventHub>();
+    auto eventHub = titleBarNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
@@ -1230,7 +1230,7 @@ HWTEST_F(TitleBarPatternTestNg, InitMenuDragEvent003, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     ASSERT_NE(titleBarPattern, nullptr);
-    auto eventHub = titleBarNode->GetEventHub<EventHub>();
+    auto eventHub = titleBarNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);

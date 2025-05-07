@@ -22,6 +22,7 @@ import Base from '@ohos.base';
 
 const errCodeAbnormal: number = 100014;
 const errCodeCapabilityNotSupported: number = 801;
+const atomicServiceDataTag: string = "ohos.atomicService.window";
 @Component
 export struct FullScreenLaunchComponent {
   @BuilderParam content: Callback<void> = this.doNothingBuilder;
@@ -32,6 +33,7 @@ export struct FullScreenLaunchComponent {
   private subscriber: commonEventManager.CommonEventSubscriber | null = null;
   onError?: ErrorCallback;
   onTerminated?: Callback<TerminationInfo>;
+  onReceive?: Callback<Record<string, Object>>;
 
   aboutToAppear() {
     let subscribeInfo: commonEventManager.CommonEventSubscribeInfo = {
@@ -175,6 +177,18 @@ export struct FullScreenLaunchComponent {
         this.isShow = false;
         if (this.onTerminated != undefined) {
           this.onTerminated(info)
+        }
+      })
+      .onReceive(data => {
+        if (this.onReceive !== undefined) {
+            const sourceKeys = Object.keys(data);
+            let atomicServiceData: Record<string, Object> = {};
+            for (let i = 0; i < sourceKeys.length; i++) {
+                if (sourceKeys[i].includes(atomicServiceDataTag)) {
+                    atomicServiceData[sourceKeys[i]] = data[sourceKeys[i]];
+                }
+            }
+            this.onReceive(atomicServiceData);
         }
       })
   }

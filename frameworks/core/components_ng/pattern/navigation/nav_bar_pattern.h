@@ -61,7 +61,15 @@ public:
 
     bool NeedCoordWithScroll() override
     {
-        return !isHideTitlebar_;
+        return !isHideTitlebar_ && (titleMode_ == NavigationTitleMode::FREE || IsNeedHandleScroll());
+    }
+    bool IsNeedHandleScroll() const override
+    {
+        auto eventHub = GetOrCreateEventHub<NavBarEventHub>();
+        if (eventHub && eventHub->HasOnCoordScrollStartAction()) {
+            return true;
+        }
+        return false;
     }
     OffsetF GetShowMenuOffset(const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& menuNode);
 

@@ -194,19 +194,32 @@ void PlatformPattern::HandleTouchEvent(const TouchEventInfo& info)
     CHECK_NULL_VOID(pointerEvent);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto newPointerEvent = PlatformUtils::CopyPointerEventWithExtraProperty(pointerEvent, tag_);
-    CHECK_NULL_VOID(newPointerEvent);
-    Platform::CalculatePointerEvent(newPointerEvent, host);
-    AceExtraInputData::InsertInterpolatePoints(info);
     const auto& changedTouches = info.GetChangedTouches();
     if (!changedTouches.empty() && changedTouches.back().GetTouchType() == TouchType::DOWN) {
         auto focusHub = host->GetFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->RequestFocusImmediately();
     }
+
+    if (tag_ != AceLogTag::ACE_DYNAMIC_COMPONENT) {
+        bool ret = HandleTouchEvent(pointerEvent);
+        if (ret) {
+            AceExtraInputData::InsertInterpolatePoints(info);
+        }
+    }
+}
+
+bool PlatformPattern::HandleTouchEvent(
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    CHECK_NULL_RETURN(pointerEvent, false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto newPointerEvent = PlatformUtils::CopyPointerEventWithExtraProperty(pointerEvent, tag_);
+    CHECK_NULL_RETURN(newPointerEvent, false);
+    Platform::CalculatePointerEvent(newPointerEvent, host);
     DispatchPointerEvent(newPointerEvent);
+    return true;
 }
 
 void PlatformPattern::HandleMouseEvent(const MouseInfo& info)

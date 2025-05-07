@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
@@ -49,6 +50,11 @@ constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::NO_FORC
                                 static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_TOP) |
                                 static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END) |
                                 static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
+
+constexpr int32_t SWIPER_Z_INDEX = 0;
+constexpr int32_t DIVIDER_Z_INDEX = 2;
+constexpr int32_t TAB_BAR_Z_INDEX = 3;
+constexpr int32_t EFFECT_Z_INDEX = 1;
 } // namespace
 
 void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<TabController>& /*tabController*/,
@@ -126,6 +132,27 @@ void TabsModelNG::InitUnselectedMaskNode(const RefPtr<FrameNode>& unselectedMask
     unselectedMaskRenderContext->SetClipToBounds(true);
 }
 
+RefPtr<OHOS::Ace::NG::FrameNode> InitEffectNode(RefPtr<TabsNode> tabsNode)
+{
+    auto effectNode = FrameNode::GetOrCreateFrameNode(
+        V2::STACK_ETS_TAG, tabsNode->GetEffectId(), []() { return AceType::MakeRefPtr<StackPattern>(); });
+
+    auto accessibilityProperty = effectNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, effectNode);
+    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+
+    auto effectNodeLayoutProperty = effectNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(effectNodeLayoutProperty, effectNode);
+    if (!effectNodeLayoutProperty->GetSafeAreaExpandOpts()) {
+        effectNodeLayoutProperty->UpdateSafeAreaExpandOpts(
+            { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM });
+    }
+    auto effectNodeContext = effectNode->GetRenderContext();
+    CHECK_NULL_RETURN(effectNodeContext, effectNode);
+    effectNodeContext->UpdateClipEdge(false);
+    return effectNode;
+}
+
 void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController)
 {
     bool hasSwiperNode = tabsNode->HasSwiperNode();
@@ -133,25 +160,18 @@ void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperCon
     bool hasDividerNode = tabsNode->HasDividerNode();
     bool hasSelectedMaskNode = tabsNode->HasSelectedMaskNode();
     bool hasUnselectedMaskNode = tabsNode->HasUnselectedMaskNode();
-    auto swiperId = tabsNode->GetSwiperId();
-    auto tabBarId = tabsNode->GetTabBarId();
-    auto dividerId = tabsNode->GetDividerId();
-    auto selectedMaskId = tabsNode->GetSelectedMaskId();
-    auto unselectedMaskId = tabsNode->GetUnselectedMaskId();
 
     // Create Swiper node to contain TabContent.
     auto swiperNode = FrameNode::GetOrCreateFrameNode(
-        V2::SWIPER_ETS_TAG, swiperId, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
-    auto controller = GetSwiperController(swiperNode, swiperController);
+        V2::SWIPER_ETS_TAG, tabsNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     auto dividerNode = FrameNode::GetOrCreateFrameNode(
-        V2::DIVIDER_ETS_TAG, dividerId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+        V2::DIVIDER_ETS_TAG, tabsNode->GetDividerId(), []() { return AceType::MakeRefPtr<DividerPattern>(); });
 
     // Create TabBar to contain TabBar of TabContent.
     auto tabBarNode = FrameNode::GetOrCreateFrameNode(
-        V2::TAB_BAR_ETS_TAG, tabBarId, []() { return AceType::MakeRefPtr<TabBarPattern>(); });
-    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-    if (tabBarPattern) {
-        tabBarPattern->SetController(controller);
+        V2::TAB_BAR_ETS_TAG, tabsNode->GetTabBarId(), []() { return AceType::MakeRefPtr<TabBarPattern>(); });
+    if (auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>(); tabBarPattern) {
+        tabBarPattern->SetController(GetSwiperController(swiperNode, swiperController));
     }
 
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty();
@@ -160,11 +180,11 @@ void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperCon
         tabBarLayoutProperty->UpdatePixelRound(PIXEL_ROUND);
     }
 
-    auto selectedMaskNode = FrameNode::GetOrCreateFrameNode(
-        V2::COLUMN_ETS_TAG, selectedMaskId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto selectedMaskNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabsNode->GetSelectedMaskId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
 
-    auto unselectedMaskNode = FrameNode::GetOrCreateFrameNode(
-        V2::COLUMN_ETS_TAG, unselectedMaskId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto unselectedMaskNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabsNode->GetUnselectedMaskId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
 
     if (!hasSwiperNode) {
         swiperNode->MountToParent(tabsNode);
@@ -467,9 +487,9 @@ void TabsModelNG::SetOnSelected(FrameNode* frameNode, std::function<void(const B
 
 void TabsModelNG::SetDivider(const TabsItemDivider& divider)
 {
-    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(tabsNode);
-    auto dividerNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(1));
+    auto dividerNode = AceType::DynamicCast<FrameNode>(tabsNode->GetDivider());
     CHECK_NULL_VOID(dividerNode);
     auto dividerRenderContext = dividerNode->GetRenderContext();
     CHECK_NULL_VOID(dividerRenderContext);
@@ -728,7 +748,9 @@ void TabsModelNG::SetOnUnselected(FrameNode* frameNode, std::function<void(const
 void TabsModelNG::SetDivider(FrameNode* frameNode, const TabsItemDivider& divider)
 {
     CHECK_NULL_VOID(frameNode);
-    auto dividerNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(1));
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto dividerNode = AceType::DynamicCast<FrameNode>(tabsNode->GetDivider());
     CHECK_NULL_VOID(dividerNode);
     auto dividerRenderContext = dividerNode->GetRenderContext();
     CHECK_NULL_VOID(dividerRenderContext);
@@ -744,6 +766,38 @@ void TabsModelNG::SetDivider(FrameNode* frameNode, const TabsItemDivider& divide
         dividerRenderContext->UpdateOpacity(1.0f);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, divider, frameNode);
     }
+}
+
+void TabsModelNG::SetEffectNodeOption(FrameNode* frameNode, const TabsEffectNodeOption& option)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(AceType::Claim(frameNode));
+    CHECK_NULL_VOID(tabsNode);
+    auto effectNode = AceType::DynamicCast<FrameNode>(tabsNode->GetEffectNode());
+    if (option.isNull) {
+        if (effectNode) {
+            tabsNode->RemoveChild(effectNode);
+        }
+    } else {
+        if (!effectNode) {
+            effectNode = InitEffectNode(tabsNode);
+            effectNode->MountToParent(tabsNode);
+            ViewAbstract::SetZIndex(AceType::RawPtr(effectNode), EFFECT_Z_INDEX);
+
+            auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+            CHECK_NULL_VOID(swiperNode);
+            ViewAbstract::SetZIndex(AceType::RawPtr(swiperNode), SWIPER_Z_INDEX);
+
+            auto dividerNode = AceType::DynamicCast<FrameNode>(tabsNode->GetDivider());
+            CHECK_NULL_VOID(dividerNode);
+            ViewAbstract::SetZIndex(AceType::RawPtr(dividerNode), DIVIDER_Z_INDEX);
+
+            auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+            CHECK_NULL_VOID(tabBarNode);
+            ViewAbstract::SetZIndex(AceType::RawPtr(tabBarNode), TAB_BAR_Z_INDEX);
+        }
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, EffectNodeOption, option, frameNode);
 }
 
 void TabsModelNG::SetFadingEdge(FrameNode* frameNode, bool fadingEdge)

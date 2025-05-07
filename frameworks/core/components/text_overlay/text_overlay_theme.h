@@ -137,6 +137,10 @@ public:
             theme->translateLabel_ = pattern->GetAttr<std::string>("text_overlay_menu_translate_label", "Translate");
             theme->shareLabel_ = pattern->GetAttr<std::string>("text_overlay_menu_share_label", "Share");
             theme->searchLabel_ = pattern->GetAttr<std::string>("text_overlay_menu_search_label", "Search");
+            theme->moreAccessibilityText_ = pattern->GetAttr<std::string>(
+                "text_overlay_menu_more_accessibility_text", "more");
+            theme->backAccessibilityText_ = pattern->GetAttr<std::string>(
+                "text_overlay_menu_back_accessibility_text", "back");
         }
     };
 
@@ -407,6 +411,16 @@ public:
         return searchLabel_;
     }
 
+    const std::string& GetMoreAccessibilityText() const
+    {
+        return moreAccessibilityText_;
+    }
+
+    const std::string& GetBackAccessibilityText() const
+    {
+        return backAccessibilityText_;
+    }
+
 protected:
     TextOverlayTheme() = default;
 
@@ -445,6 +459,8 @@ private:
     std::string translateLabel_;
     std::string shareLabel_;
     std::string searchLabel_;
+    std::string moreAccessibilityText_;
+    std::string backAccessibilityText_;
 
     InternalResource::ResourceId backResourceId_ = InternalResource::ResourceId::NO_ID;
     InternalResource::ResourceId moreResourceId_ = InternalResource::ResourceId::NO_ID;

@@ -70,9 +70,9 @@ private:
     void MeasureText(LayoutWrapper* layoutWrapper, const RefPtr<PickerTheme>& pickerTheme, const SizeF& size);
 
     float pickerItemHeight_ = 0.0f;
-    std::vector<int32_t> currentOffset_;
     float dividerSpacingFontScale_ = 1.0f;
     float gradientFontScale_ = 1.0f;
+    std::vector<int32_t> currentOffset_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnLayoutAlgorithm);
 };

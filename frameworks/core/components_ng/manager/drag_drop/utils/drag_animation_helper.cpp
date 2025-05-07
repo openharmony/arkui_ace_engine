@@ -454,6 +454,7 @@ void DragAnimationHelper::ShowGatherAnimationWithMenu(const RefPtr<FrameNode>& m
         auto menuNode = menuWrapperPattern->GetMenu();
         CHECK_NULL_VOID(menuNode);
         auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        DragAnimationHelper::HideDragNodeCopy(manager);
         DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
         DragAnimationHelper::CalcBadgeTextPosition(menuPattern, manager, imageNode, textNode);
         DragAnimationHelper::ShowBadgeAnimation(textNode);
@@ -559,7 +560,10 @@ RefPtr<FrameNode> DragAnimationHelper::CreateGatherNode(const RefPtr<FrameNode>&
         }
         GatherNodeChildInfo gatherNodeChildInfo;
         auto imageNode = CreateGatherImageNode(itemFrameNode, gatherNodeChildInfo);
-        CHECK_NULL_RETURN(imageNode, nullptr);
+        if (!imageNode) {
+            TAG_LOGW(AceLogTag::ACE_DRAG, "Create gather image node failed");
+            continue;
+        }
         stackNode->AddChild(imageNode);
         gatherNodeInfo.push_back(gatherNodeChildInfo);
     }

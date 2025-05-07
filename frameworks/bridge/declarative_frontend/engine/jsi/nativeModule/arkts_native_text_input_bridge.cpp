@@ -1678,7 +1678,8 @@ void TextInputBridge::SetCancelButtonImage(ArkUIRuntimeCallInfo* runtimeCallInfo
         srcStr = "";
     }
 
-    struct ArkUISizeType size = { iconSize.Value(), static_cast<int8_t>(iconSize.Unit()), nullptr };
+    struct ArkUISizeType size = { static_cast<ArkUI_Float32>(iconSize.Value()),
+        static_cast<int8_t>(iconSize.Unit()), nullptr };
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputCancelButton(nativeNode,
         style, &size, color, srcStr.c_str());
 }

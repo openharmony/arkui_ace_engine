@@ -1238,4 +1238,8 @@ void WebDelegate::UnRegisterWebWindowFocusChangedListener() {}
 void WebDelegate::OnDragAttach() {}
 bool WebDelegate::IsNWebEx() { return false; }
 void WebDelegate::SetNativeInnerWeb(bool isInnerWeb) {}
+bool WebDelegate::GetAccessibilityVisible(int64_t accessibilityId)
+{
+    return false;
+}
 } // namespace OHOS::Ace

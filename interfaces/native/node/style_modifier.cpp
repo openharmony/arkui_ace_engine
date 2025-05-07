@@ -268,6 +268,7 @@ std::unordered_map<uint32_t, std::string> ACCESSIBILITY_ROLE_CONVERT_PROPERTY_MA
     { static_cast<uint32_t>(ARKUI_NODE_GRID_ITEM), "GridItem" },
     { static_cast<uint32_t>(ARKUI_NODE_CUSTOM_SPAN), "CustomSpan" },
     { static_cast<uint32_t>(ARKUI_NODE_XCOMPONENT_TEXTURE), "XComponentTexture" },
+    { static_cast<uint32_t>(ARKUI_NODE_EMBEDDED_COMPONENT), "EmbeddedComponent" },
 };
 
 std::unordered_map<std::string, uint32_t> ACCESSIBILITY_ROLE_CONVERT_NATIVE_MAP = {
@@ -308,6 +309,7 @@ std::unordered_map<std::string, uint32_t> ACCESSIBILITY_ROLE_CONVERT_NATIVE_MAP 
     { "GridItem", static_cast<uint32_t>(ARKUI_NODE_GRID_ITEM) },
     { "CustomSpan", static_cast<uint32_t>(ARKUI_NODE_CUSTOM_SPAN) },
     { "XComponentTexture", static_cast<uint32_t>(ARKUI_NODE_XCOMPONENT_TEXTURE) },
+    { "EmbeddedComponent", static_cast<uint32_t>(ARKUI_NODE_EMBEDDED_COMPONENT) },
 };
 
 void ResetAttributeItem()
@@ -1226,6 +1228,64 @@ const ArkUI_AttributeItem* GetMargin(ArkUI_NodeHandle node)
     g_numberValues[NUM_1].f32 = margins[NUM_1];
     g_numberValues[NUM_2].f32 = margins[NUM_2];
     g_numberValues[NUM_3].f32 = margins[NUM_3];
+    return &g_attributeItem;
+}
+
+int32_t SetTranslateWithPercentage(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_THREE_PARAM);
+    if (actualSize < NUM_3 || actualSize > NUM_5) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (actualSize == NUM_4) {
+        if (item->value[NUM_3].i32 != 0 && item->value[NUM_3].i32 != 1) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+    } else if (actualSize == NUM_5) {
+        if ((item->value[NUM_3].i32 != 0 && item->value[NUM_3].i32 != 1) ||
+            (item->value[NUM_4].i32 != 0 && item->value[NUM_4].i32 != 1)) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
+    }
+    auto fullImpl = GetFullImpl();
+    ArkUI_Float32 values[NUM_3];
+    ArkUI_Int32 units[NUM_3];
+    int32_t unit = GetDefaultUnit(node, UNIT_VP);
+    for (int i = 0; i < NUM_2; ++i) {
+        if (i < item->size - NUM_3 && item->value[i + NUM_3].i32 == 0) {
+            values[i] = item->value[i].f32;
+            units[i] = unit;
+        } else {
+            values[i] = item->value[i].f32;
+            units[i] = UNIT_PERCENT;
+        }
+    }
+    values[NUM_2] = item->value[NUM_2].f32;
+    units[NUM_2] = unit;
+    fullImpl->getNodeModifiers()->getCommonModifier()->setTranslate(node->uiNodeHandle, values, units, NUM_3);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetTranslateWithPercentage(ArkUI_NodeHandle node)
+{
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetTranslate(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetTranslateWithPercentage(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    ArkUI_Float32 translate[NUM_3];
+    ArkUI_Int32 units[NUM_2];
+    ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_VP);
+    fullImpl->getNodeModifiers()->getCommonModifier()->getTranslateWithPercentage(node->uiNodeHandle, &translate, &units, unit);
+    g_numberValues[NUM_0].f32 = translate[NUM_0];
+    g_numberValues[NUM_1].f32 = translate[NUM_1];
+    g_numberValues[NUM_2].f32 = translate[NUM_2];
+    g_numberValues[NUM_3].i32 = units[NUM_0];
+    g_numberValues[NUM_4].i32 = units[NUM_1];
+    g_attributeItem.size = REQUIRED_FIVE_PARAM;
     return &g_attributeItem;
 }
 
@@ -6753,6 +6813,28 @@ void ResetTextAreaSelectionMenuHidden(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getTextAreaModifier()->resetTextAreaSelectionMenuHidden(node->uiNodeHandle);
+}
+
+int32_t SetEmbeddedComponentWant(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (node == nullptr || item == nullptr || item->object == nullptr) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    auto* CWant = reinterpret_cast<AbilityBase_Want*>(item->object);
+    fullImpl->getNodeModifiers()->getEmbeddedComponentModifier()->setEmbeddedComponentWant(node->uiNodeHandle, CWant);
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t SetEmbeddedComponentOption(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (node == nullptr || item == nullptr || item->object == nullptr) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* EmbeddedComponentOption = reinterpret_cast<ArkUIEmbeddedComponentItemHandle>(item->object);
+    GetFullImpl()->getNodeModifiers()->getEmbeddedComponentModifier()->setEmbeddedComponentOption(
+        node->uiNodeHandle, EmbeddedComponentOption);
+    return ERROR_CODE_NO_ERROR;
 }
 
 // button
@@ -14667,6 +14749,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetBackgroundImageResizableWithSlice,
         SetNextFocus,
         SetAreaChangeApproximateOptions,
+        SetTranslateWithPercentage,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -14781,6 +14864,7 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetBackgroundImageResizableWithSlice,
         nullptr,
         GetAreaChangeApproximateOptions,
+        GetTranslateWithPercentage,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -14899,6 +14983,7 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetBackgroundImageResizableWithSlice,
         ResetNextFocus,
         ResetAreaChangeApproximateOptions,
+        ResetTranslateWithPercentage,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -15253,6 +15338,16 @@ void ResetButtonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         return;
     }
     return resetters[subTypeId](node);
+}
+
+int32_t SetEmbeddedComponentAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
+{
+    static Setter* setters[] = { SetEmbeddedComponentWant, SetEmbeddedComponentOption };
+    if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "embeddedComponent node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
+    }
+    return setters[subTypeId](node, item);
 }
 
 int32_t SetProgressAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
@@ -16181,7 +16276,7 @@ int32_t SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, co
         SetXComponentAttribute, SetCheckboxGroupAttribute, SetStackAttribute, SetSwiperAttribute, SetScrollAttribute,
         SetListAttribute, SetListItemAttribute, SetListItemGroupAttribute, SetColumnAttribute, SetRowAttribute,
         SetFlexAttribute, SetRefreshAttribute, SetWaterFlowAttribute, nullptr, SetRelativeContainerAttribute,
-        SetGridAttribute };
+        SetGridAttribute, nullptr, nullptr, SetEmbeddedComponentAttribute };
     int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
     int32_t nodeSubTypeClass =

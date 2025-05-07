@@ -254,16 +254,6 @@ public:
     void UpdateTextFieldInfo(const TextFieldInfo& textFieldInfo);
     bool HasAutoFillPasswordNodeInContainer(const int32_t& autoFillContainerNodeId, const int32_t& nodeId);
 
-
-    bool GetFocusFieldAlreadyTriggerWsCallback() const
-    {
-        return focusFieldAlreadyTriggerWsCallback_;
-    }
-
-    void SetFocusFieldAlreadyTriggerWsCallback(bool focusFieldAlreadyTriggerWsCallback) {
-        focusFieldAlreadyTriggerWsCallback_ = focusFieldAlreadyTriggerWsCallback;
-    }
-
     int32_t GetFocusFieldOrientation() const
     {
         return focusFieldOrientation_;
@@ -294,10 +284,24 @@ public:
 
     void OnAfterAvoidKeyboard(bool isCustomKeyboard);
 
+    int32_t GetContextTriggerAvoidTaskOrientation() const
+    {
+        return contextTriggerAvoidTaskOrientation_;
+    }
+
+    void SetContextTriggerAvoidTaskOrientation(int32_t contextTriggerAvoidTaskOrientation)
+    {
+        contextTriggerAvoidTaskOrientation_ = contextTriggerAvoidTaskOrientation;
+    }
+
+
 private:
     bool ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
     RefPtr<FrameNode> FindNavNode(const RefPtr<FrameNode>& textField);
     bool IsAutoFillPasswordType(const TextFieldInfo& textFieldInfo);
+
+    RefPtr<FrameNode> FindCorrectScrollNode(const SafeAreaInsets::Inset& bottomInset,
+        bool isShowKeyboard);
 
     bool focusFieldIsInline_ = false;
     double inlinePositionY_ = 0.0f;
@@ -307,7 +311,7 @@ private:
     bool usingCustomKeyboardAvoid_ = false;
     bool uiExtensionImeShow_ = false;
     bool prevHasTextFieldPattern_ = true;
-    bool focusFieldAlreadyTriggerWsCallback_ = false;
+    int32_t contextTriggerAvoidTaskOrientation_ = -1;
     int32_t focusFieldOrientation_ = -1;
     Offset position_;
     float clickPositionOffset_ = 0.0f;

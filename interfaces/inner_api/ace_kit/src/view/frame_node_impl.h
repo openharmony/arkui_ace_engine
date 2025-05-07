@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,6 +67,14 @@ public:
     void AddExtraCustomProperty(const std::string& key, void* extraData) override;
     void* GetExtraCustomProperty(const std::string& key) const override;
     void SetClipEdge(bool isClip) override;
+    void SetPadding(const NG::PaddingPropertyT<NG::CalcLength>& value) override;
+    void SetSafeAreaPadding(const NG::CalcLength& value) override;
+    void ResetSafeAreaPadding() override;
+    void SetLinearGradient(const NG::Gradient& gradient) override;
+    void SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara) override;
+    void SetMeasureCallback(const std::function<void(RefPtr<FrameNode>)>& callback) override;
+    int32_t GetMeasureWidth() override;
+    int32_t GetMeasureHeight() override;
 
 private:
     void PushAceNode(const RefPtr<AceNode>& node);

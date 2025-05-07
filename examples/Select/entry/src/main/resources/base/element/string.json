@@ -1,0 +1,52 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "label"
+    },
+    {
+      "name": "Select_Option_1",
+      "value": "选项一"
+    },
+    {
+      "name": "Select_Option_2",
+      "value": "选项二"
+    },
+    {
+      "name": "Select_Option_3",
+      "value": "选项三"
+    },
+    {
+      "name": "Select_Option_4",
+      "value": "选项四"
+    },
+    {
+      "name": "Select_Option_5",
+      "value": "选项五"
+    },
+    {
+      "name": "Select_Option_6",
+      "value": "选项六"
+    },
+    {
+      "name": "Select_Option_7",
+      "value": "选项七"
+    },
+    {
+      "name": "Select_Option_8",
+      "value": "选项八"
+    },
+    {
+      "name": "Select_Option_9",
+      "value": "选项九"
+    }
+  ]
+}

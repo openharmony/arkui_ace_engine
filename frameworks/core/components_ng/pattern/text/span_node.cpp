@@ -226,6 +226,7 @@ void SpanNode::SetTextBackgroundStyle(const TextBackgroundStyle& style)
 {
     BaseSpan::SetTextBackgroundStyle(style);
     spanItem_->backgroundStyle = GetTextBackgroundStyle();
+    spanItem_->MarkReLayoutParagraph();
 }
 
 void SpanNode::UpdateTextBackgroundFromParent(const std::optional<TextBackgroundStyle>& style)

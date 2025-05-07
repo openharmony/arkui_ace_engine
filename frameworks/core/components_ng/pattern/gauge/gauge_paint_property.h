@@ -111,6 +111,7 @@ public:
         json->PutExtAttr("startAngle", StringUtils::DoubleToString(propStartAngle_.value_or(0)).c_str(), filter);
         json->PutExtAttr("endAngle", StringUtils::DoubleToString(propEndAngle_.value_or(360)).c_str(), filter);
         json->PutExtAttr("isSensitive", std::to_string(GetIsSensitive().value_or(false)).c_str(), filter);
+        json->PutExtAttr("privacySensitive", GetIsSensitive().value_or(false)? "true": "false", filter);
         if (propStrokeWidth_.has_value()) {
             json->PutExtAttr("strokeWidth", propStrokeWidth_.value().ToString().c_str(), filter);
         } else {

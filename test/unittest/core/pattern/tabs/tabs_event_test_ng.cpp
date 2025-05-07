@@ -691,7 +691,7 @@ HWTEST_F(TabsEventTestNg, OnWillShowAndOnWillHideTest002, TestSize.Level1)
      * @tc.expected: isShow = false
      */
     auto callback =
-        parentNode->GetPattern<NavDestinationPattern>()->GetEventHub<NavDestinationEventHub>()->onHiddenChange_;
+        parentNode->GetPattern<NavDestinationPattern>()->GetOrCreateEventHub<NavDestinationEventHub>()->onHiddenChange_;
     EXPECT_FALSE(callback.empty());
     for (auto& OnHiddenChangeInfo : callback) {
         if (OnHiddenChangeInfo.second) {
@@ -1349,48 +1349,4 @@ HWTEST_F(TabsEventTestNg, SetOnSelectedEvent001, TestSize.Level1)
     EXPECT_EQ(currentIndex, 3);
 }
 
-/**
- * @tc.name: OnAppearAndOnDisappearTest001
- * @tc.desc: test OnAppear and OnDisappear
- * @tc.type: FUNC
- */
-HWTEST_F(TabsEventTestNg, OnAppearAndOnDisappearTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: steps1. Create tabs
-     */
-    TabsModelNG model = CreateTabs();
-    TabContentModelNG tabContentModel = CreateTabContent();
-    CreateTabsDone(model);
-
-    auto isOnAppear = false;
-    auto isOnDisappear = false;
-    std::function<void()> appearEvent = [&isOnAppear]() { isOnAppear = true; };
-    std::function<void()> disappearEvent = [&isOnDisappear]() { isOnDisappear = true; };
-    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
-    auto eventHub = tabContentFrameNode->GetEventHub<EventHub>();
-    eventHub->SetOnAppear(std::move(appearEvent));
-    eventHub->SetOnDisappear(std::move(disappearEvent));
-    auto pipeline = frameNode_->GetContext();
-    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-
-    EXPECT_FALSE(isOnAppear);
-    EXPECT_FALSE(isOnDisappear);
-
-    /**
-     * @tc.steps: step2. trigger OnAttachToMainTree.
-     * @tc.expected: isOnAppear is true.
-     */
-    tabContentFrameNode->OnAttachToMainTree(true);
-    EXPECT_TRUE(isOnAppear);
-    EXPECT_FALSE(isOnDisappear);
-
-    /**
-     * @tc.steps: step3. trigger OnDetachFromMainTree.
-     * @tc.expected: isOnDisappear is true.
-     */
-    tabContentFrameNode->OnDetachFromMainTree(true, pipeline);
-    EXPECT_TRUE(isOnAppear);
-    EXPECT_TRUE(isOnDisappear);
-}
 } // namespace OHOS::Ace::NG

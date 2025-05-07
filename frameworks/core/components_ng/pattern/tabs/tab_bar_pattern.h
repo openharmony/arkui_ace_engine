@@ -647,6 +647,7 @@ private:
     bool CheckSwiperDisable() const;
     void SetSwiperCurve(const RefPtr<Curve>& curve) const;
     void InitTurnPageRateEvent();
+    void SetTurnPageRateCallback();
     void GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset, RectF& tabBarItemRect);
     void CalculateIndicatorStyle(
         int32_t startIndex, int32_t nextIndex, IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset);

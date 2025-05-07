@@ -28,6 +28,7 @@ public:
     virtual ~CanvasModel() = default;
 
     virtual RefPtr<AceType> Create() = 0;
+    virtual RefPtr<AceType> GetTaskPool(RefPtr<AceType>& pattern) { return pattern; };
     virtual void SetOnReady(std::function<void(uint32_t)>&& onReady) {};
     virtual void SetOnReady(std::function<void()>&& onReady) {};
     virtual void EnableAnalyzer(bool enable) {};

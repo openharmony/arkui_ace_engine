@@ -36,6 +36,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t INVALID_ANIMATION_ID = -1;
 constexpr int32_t TRANSITION_COMBINATIONS = 6;
+const std::string TITLE_BAR_NODE_MENU = "menu";
 
 RefPtr<NavigationGroupNode> CreateNavigationNode(const RefPtr<MockNavigationStack>& stack)
 {
@@ -100,6 +101,331 @@ HWTEST_F(NavDestinationGroupNodeTestNg, SetSystemTransitionTest001, TestSize.Lev
     ASSERT_NE(navDestination->navDestinationTransitionDelegate_, nullptr);
     navdestinationModel.SetSystemTransitionType(NavigationSystemTransitionType::DEFAULT);
     ASSERT_EQ(navDestination->navDestinationTransitionDelegate_, nullptr);
+}
+
+/**
+ * @tc.name: CreateEmpty
+ * @tc.desc: cover CreateEmpty
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, CreateEmpty001, TestSize.Level1)
+{
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.CreateEmpty();
+    navdestinationModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    navdestinationModel.SetHideTitleBar(frameNode, false, false);
+    navdestinationModel.SetHideBackButton(frameNode, false);
+    navdestinationModel.SetBackgroundColor(Color::RED, false);
+    navdestinationModel.SetBackgroundColor(Color::RED, true);
+    navdestinationModel.SetBackgroundColor(frameNode, Color::RED, false);
+    navdestinationModel.SetBackgroundColor(frameNode, Color::RED, true);
+    NavigationTitleInfo param;
+    param.hasSubTitle = true;
+    param.hasMainTitle = true;
+    navdestinationModel.ParseCommonTitle(frameNode, param);
+
+    param.hasSubTitle = false;
+    navdestinationModel.ParseCommonTitle(frameNode, param);
+
+    param.hasMainTitle = false;
+    navdestinationModel.ParseCommonTitle(frameNode, param);
+    EXPECT_TRUE(!param.hasSubTitle && !param.hasMainTitle);
+}
+
+/**
+ * @tc.name: ParseCommonTitle001
+ * @tc.desc: Test NavDestinationGroupNodeTestNg and make the logic as follows:
+ *               GetPrevTitleIsCustomValue return false
+ *               hasMainTitle is false
+ *               !hasSubTitle is false
+ *               subTitle is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, ParseCommonTitle001, TestSize.Level1)
+{
+    NavDestinationModelNG navDestinationModel;
+    navDestinationModel.Create();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
+    navDestinationNode->titleBarNode_ = titleBarNode;
+    // Make GetPrevTitleIsCustomValue return false
+    navDestinationNode->propPrevTitleIsCustom_ = false;
+    stack->Push(navDestinationNode);
+
+    // Make sure hasMainTitle is false and !hasSubTitle is false
+    NavigationTitleInfo param;
+    param.hasSubTitle = true;
+    param.hasMainTitle = false;
+    EXPECT_FALSE(!param.hasSubTitle);
+    EXPECT_FALSE(param.hasMainTitle);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNodeTest = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationNodeTest, nullptr);
+    auto titleBarNodeTest = AceType::DynamicCast<TitleBarNode>(navDestinationNodeTest->GetTitleBarNode());
+    ASSERT_NE(titleBarNodeTest, nullptr);
+    // Make sure GetPrevTitleIsCustomValue return false
+    EXPECT_FALSE(navDestinationNodeTest->GetPrevTitleIsCustomValue(false));
+    ASSERT_EQ(AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle()), nullptr);
+    navDestinationModel.ParseCommonTitle(frameNode, param);
+    ASSERT_NE(AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle()), nullptr);
+}
+
+/**
+ * @tc.name: ParseCommonTitle002
+ * @tc.desc: Test NavDestinationGroupNodeTestNg and make the logic as follows:
+ *               GetPrevTitleIsCustomValue return true
+ *               HasTitleHeight return false
+ *               hasMainTitle is true
+ *               mainTitle is false
+ *               !hasSubTitle is false
+ *               subTitle is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, ParseCommonTitle002, TestSize.Level1)
+{
+    NavDestinationModelNG navDestinationModel;
+    navDestinationModel.Create();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
+    auto subTitle = FrameNode::CreateFrameNode("SubTitle", 36, AceType::MakeRefPtr<TextPattern>());
+    titleBarNode->subtitle_ = subTitle;
+    navDestinationNode->titleBarNode_ = titleBarNode;
+    // Make GetPrevTitleIsCustomValue return true
+    navDestinationNode->propPrevTitleIsCustom_ = true;
+    stack->Push(navDestinationNode);
+
+    // Make sure hasMainTitle is true and !hasSubTitle is false
+    NavigationTitleInfo param;
+    param.hasSubTitle = true;
+    param.hasMainTitle = true;
+    EXPECT_FALSE(!param.hasSubTitle);
+    EXPECT_TRUE(param.hasMainTitle);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNodeTest = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationNodeTest, nullptr);
+    auto titleBarNodeTest = AceType::DynamicCast<TitleBarNode>(navDestinationNodeTest->GetTitleBarNode());
+    ASSERT_NE(titleBarNodeTest, nullptr);
+    // Make sure GetPrevTitleIsCustomValue return true
+    EXPECT_TRUE(navDestinationNodeTest->GetPrevTitleIsCustomValue(false));
+    // Make sure HasTitleHeight return false
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    EXPECT_FALSE(titleBarLayoutProperty->HasTitleHeight());
+    // Make sure mainTitle is false
+    EXPECT_EQ(AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle()), nullptr);
+    // subTitle is true
+    auto subTitleTest = AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
+    navDestinationModel.ParseCommonTitle(frameNode, param);
+    EXPECT_NE(AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle()), nullptr);
+}
+
+/**
+ * @tc.name: ParseCommonTitle003
+ * @tc.desc: Test NavDestinationGroupNodeTestNg and make the logic as follows:
+ *               GetPrevTitleIsCustomValue return true
+ *               HasTitleHeight return true
+ *               hasMainTitle is true
+ *               mainTitle is true
+ *               !hasSubTitle is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, ParseCommonTitle003, TestSize.Level1)
+{
+    NavDestinationModelNG navDestinationModel;
+    navDestinationModel.Create();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
+    auto title = FrameNode::CreateFrameNode("SubTitle", 36, AceType::MakeRefPtr<TextPattern>());
+    titleBarNode->title_ = title;
+    // Make HasTitleHeight return true
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    titleBarLayoutProperty->propTitleHeight_ = NG::DOUBLE_LINE_TITLEBAR_HEIGHT;
+    navDestinationNode->titleBarNode_ = titleBarNode;
+    // Make GetPrevTitleIsCustomValue return true
+    navDestinationNode->propPrevTitleIsCustom_ = true;
+    stack->Push(navDestinationNode);
+
+    // Make sure hasMainTitle is true and !hasSubTitle is true
+    NavigationTitleInfo param;
+    param.hasSubTitle = false;
+    param.hasMainTitle = true;
+    EXPECT_TRUE(!param.hasSubTitle);
+    EXPECT_TRUE(param.hasMainTitle);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNodeTest = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationNodeTest, nullptr);
+    auto titleBarNodeTest = AceType::DynamicCast<TitleBarNode>(navDestinationNodeTest->GetTitleBarNode());
+    ASSERT_NE(titleBarNodeTest, nullptr);
+    // Make sure GetPrevTitleIsCustomValue return true
+    EXPECT_TRUE(navDestinationNodeTest->GetPrevTitleIsCustomValue(false));
+    // Make sure HasTitleHeight return true
+    auto titleBarLayoutPropertyTest = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    EXPECT_TRUE(titleBarLayoutPropertyTest->HasTitleHeight());
+    // Make sure mainTitle is true
+    navDestinationModel.ParseCommonTitle(frameNode, param);
+    EXPECT_NE(AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle()), nullptr);
+}
+
+/**
+ * @tc.name: SetMenuItems001
+ * @tc.desc: Test SetMenuItems function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, SetMenuItems001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    NavDestinationModelNG navDestinationModel;
+    navDestinationModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationGroupNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+
+    NG::BarItem bar;
+    std::vector<NG::BarItem> barItems;
+    barItems.push_back(bar);
+
+    /**
+     * @tc.steps: step2. Call SetMenuItems when UpdatePrevMenuIsCustom is true.
+     */
+    navDestinationGroupNode->UpdatePrevMenuIsCustom(true);
+    navDestinationModel.SetMenuItems(frameNode, std::move(barItems));
+    EXPECT_FALSE(navDestinationGroupNode->GetPrevMenuIsCustomValue(false));
+    EXPECT_EQ(navDestinationGroupNode->GetMenuNodeOperationValue(), ChildNodeOperation::REPLACE);
+
+    /**
+     * @tc.steps: step3. Call SetMenuItems when UpdatePrevMenuIsCustom is false.
+     * and navDestinationGroupNode has no menu
+     */
+    navDestinationGroupNode->UpdatePrevMenuIsCustom(false);
+    navDestinationModel.SetMenuItems(frameNode, std::move(barItems));
+    EXPECT_FALSE(navDestinationGroupNode->GetPrevMenuIsCustomValue(false));
+    EXPECT_EQ(navDestinationGroupNode->GetMenuNodeOperationValue(), ChildNodeOperation::ADD);
+
+    /**
+     * @tc.steps: step4. Call SetMenuItems when UpdatePrevMenuIsCustom is false
+     * and navDestinationGroupNode has menu
+     */
+    navDestinationGroupNode->UpdatePrevMenuIsCustom(false);
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto menuNode = AceType::MakeRefPtr<FrameNode>(TITLE_BAR_NODE_MENU, nodeId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(menuNode, nullptr);
+    navDestinationGroupNode->SetMenu(menuNode);
+    navDestinationModel.SetMenuItems(frameNode, std::move(barItems));
+    EXPECT_FALSE(navDestinationGroupNode->GetPrevMenuIsCustomValue(false));
+    EXPECT_EQ(navDestinationGroupNode->GetMenuNodeOperationValue(), ChildNodeOperation::REPLACE);
+}
+
+/**
+ * @tc.name: SetCustomTitle001
+ * @tc.desc: Test NavDestinationGroupNodeTestNg and make the logic as follows:
+ *               GetPrevTitleIsCustomValue return false
+ *               currentTitle is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, SetCustomTitle001, TestSize.Level1)
+{
+    NavDestinationModelNG navDestinationModel;
+    navDestinationModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    // Make GetPrevTitleIsCustomValue return false
+    navDestinationNode->propPrevTitleIsCustom_ = false;
+
+    auto customNode = FrameNode::CreateFrameNode("Title", 99, AceType::MakeRefPtr<CustomNodePattern>());
+    EXPECT_NE(customNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    // Make sure GetPrevTitleIsCustomValue return false
+    EXPECT_FALSE(navDestinationNode->GetPrevTitleIsCustomValue(false));
+    // Make sure currentTitle is false
+    EXPECT_EQ(titleBarNode->GetTitle(), nullptr);
+    navDestinationModel.SetCustomTitle(frameNode, customNode);
+}
+
+/**
+ * @tc.name: SetCustomTitle002
+ * @tc.desc: Test NavDestinationGroupNodeTestNg and make the logic as follows:
+ *               GetPrevTitleIsCustomValue return true
+ *               currentTitle is true
+ *               GetId is not GetId
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, SetCustomTitle002, TestSize.Level1)
+{
+    NavDestinationModelNG navDestinationModel;
+    navDestinationModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    // Make GetPrevTitleIsCustomValue return true
+    navDestinationNode->propPrevTitleIsCustom_ = true;
+    // Make currentTitle true
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
+    auto title = FrameNode::CreateFrameNode("Title", 36, AceType::MakeRefPtr<TextPattern>());
+    titleBarNode->title_ = title;
+    navDestinationNode->titleBarNode_ = titleBarNode;
+
+    auto customNode = FrameNode::CreateFrameNode("Title", 99, AceType::MakeRefPtr<CustomNodePattern>());
+    EXPECT_NE(customNode, nullptr);
+    auto titleBarNodeTest = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNodeTest, nullptr);
+    // Make sure GetPrevTitleIsCustomValue return true
+    EXPECT_TRUE(navDestinationNode->GetPrevTitleIsCustomValue(false));
+    // Make sure currentTitle is true
+    auto currentTitle = titleBarNodeTest->GetTitle();
+    EXPECT_NE(currentTitle, nullptr);
+    // Make sure GetId is not GetId
+    EXPECT_NE(currentTitle->GetId(), customNode->GetId());
+    navDestinationModel.SetCustomTitle(frameNode, customNode);
+}
+
+/**
+ * @tc.name: SetCustomTitle003
+ * @tc.desc: Test NavDestinationGroupNodeTestNg and make the logic as follows:
+ *               GetPrevTitleIsCustomValue return true
+ *               currentTitle is true
+ *               GetId is GetId
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, SetCustomTitle003, TestSize.Level1)
+{
+    NavDestinationModelNG navDestinationModel;
+    navDestinationModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    // Make GetPrevTitleIsCustomValue return true
+    navDestinationNode->propPrevTitleIsCustom_ = true;
+    // Make currentTitle true
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
+    auto title = FrameNode::CreateFrameNode("Title", 36, AceType::MakeRefPtr<TextPattern>());
+    titleBarNode->title_ = title;
+    navDestinationNode->titleBarNode_ = titleBarNode;
+
+    auto titleBarNodeTest = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNodeTest, nullptr);
+    // Make sure GetPrevTitleIsCustomValue return true
+    EXPECT_TRUE(navDestinationNode->GetPrevTitleIsCustomValue(false));
+    // Make sure currentTitle is true
+    auto currentTitle = titleBarNodeTest->GetTitle();
+    EXPECT_NE(currentTitle, nullptr);
+    // Make sure GetId is GetId
+    EXPECT_EQ(currentTitle->GetId(), title->GetId());
+    navDestinationModel.SetCustomTitle(frameNode, title);
 }
 
 /**
@@ -259,7 +585,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemFadeTransition001, TestSize.Leve
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navDestinationNode->inCurrentStack_ = true;
-    auto eventHub = navDestinationNode->GetEventHub<EventHub>();
+    auto eventHub = navDestinationNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(true);
 
@@ -283,7 +609,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemFadeTransition002, TestSize.Leve
     navDestinationNode->pattern_ = nullptr;
 
     navDestinationNode->DoSystemFadeTransition(true);
-    EXPECT_EQ(navDestinationNode->GetEventHub<EventHub>(), nullptr);
+    EXPECT_EQ(navDestinationNode->GetOrCreateEventHub<EventHub>(), nullptr);
     navDestinationNode->pattern_ = navDestinationPattern;
 }
 
@@ -298,7 +624,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemFadeTransition003, TestSize.Leve
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navDestinationNode->inCurrentStack_ = false;
-    auto eventHub = navDestinationNode->GetEventHub<EventHub>();
+    auto eventHub = navDestinationNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(true);
 
@@ -318,7 +644,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemSlideTransition001, TestSize.Lev
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navDestinationNode->inCurrentStack_ = true;
-    auto eventHub = navDestinationNode->GetEventHub<EventHub>();
+    auto eventHub = navDestinationNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(true);
     auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
@@ -352,7 +678,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemSlideTransition002, TestSize.Lev
     navDestinationRenderContext->translateXY_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(100.0f, 60.0f));
 
     navDestinationNode->DoSystemSlideTransition(NavigationOperation::PUSH, true);
-    EXPECT_EQ(navDestinationNode->GetEventHub<EventHub>(), nullptr);
+    EXPECT_EQ(navDestinationNode->GetOrCreateEventHub<EventHub>(), nullptr);
     EXPECT_EQ(navDestinationRenderContext->GetTranslateXYProperty().GetX(), 0.0f);
     EXPECT_EQ(navDestinationRenderContext->GetTranslateXYProperty().GetY(), 0.0f);
     navDestinationNode->pattern_ = navDestinationPattern;
@@ -372,7 +698,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemSlideTransition003, TestSize.Lev
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navDestinationNode->inCurrentStack_ = false;
-    auto eventHub = navDestinationNode->GetEventHub<EventHub>();
+    auto eventHub = navDestinationNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(true);
     auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
@@ -399,7 +725,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemEnterExplodeTransition001, TestS
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navDestinationNode->inCurrentStack_ = true;
-    auto eventHub = navDestinationNode->GetEventHub<EventHub>();
+    auto eventHub = navDestinationNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(true);
     auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
@@ -431,7 +757,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemEnterExplodeTransition002, TestS
     navDestinationRenderContext->SetActualForegroundColor(Color::RED);
 
     navDestinationNode->DoSystemEnterExplodeTransition(NavigationOperation::PUSH);
-    EXPECT_EQ(navDestinationNode->GetEventHub<EventHub>(), nullptr);
+    EXPECT_EQ(navDestinationNode->GetOrCreateEventHub<EventHub>(), nullptr);
     EXPECT_EQ(navDestinationRenderContext->actualForegroundColor_, Color::RED);
     navDestinationNode->pattern_ = navDestinationPattern;
 }
@@ -448,7 +774,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemEnterExplodeTransition003, TestS
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navDestinationNode->inCurrentStack_ = false;
-    auto eventHub = navDestinationNode->GetEventHub<EventHub>();
+    auto eventHub = navDestinationNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(true);
     auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
@@ -472,7 +798,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemExitExplodeTransition001, TestSi
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navDestinationNode->inCurrentStack_ = true;
-    auto eventHub = navDestinationNode->GetEventHub<EventHub>();
+    auto eventHub = navDestinationNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(true);
     auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
@@ -504,7 +830,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemExitExplodeTransition002, TestSi
     navDestinationRenderContext->SetActualForegroundColor(Color::RED);
 
     navDestinationNode->DoSystemExitExplodeTransition(NavigationOperation::POP);
-    EXPECT_EQ(navDestinationNode->GetEventHub<EventHub>(), nullptr);
+    EXPECT_EQ(navDestinationNode->GetOrCreateEventHub<EventHub>(), nullptr);
     EXPECT_EQ(navDestinationRenderContext->actualForegroundColor_, Color::RED);
     navDestinationNode->pattern_ = navDestinationPattern;
 }
@@ -521,7 +847,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemExitExplodeTransition003, TestSi
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navDestinationNode->inCurrentStack_ = false;
-    auto eventHub = navDestinationNode->GetEventHub<EventHub>();
+    auto eventHub = navDestinationNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(true);
     auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
@@ -978,7 +1304,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoCustomTransition002, TestSize.Level1)
         return std::nullopt;
     };
     navDestinationNode->inCurrentStack_ = true;
-    auto navDestinationEventHub = navDestinationNode->GetEventHub<EventHub>();
+    auto navDestinationEventHub = navDestinationNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(navDestinationEventHub, nullptr);
     navDestinationEventHub->SetEnabledInternal(true);
 
@@ -1060,7 +1386,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoCustomTransition004, TestSize.Level1)
         return allTransitions;
     };
     navDestinationNode->inCurrentStack_ = false;
-    auto navDestinationEventHub = navDestinationNode->GetEventHub<EventHub>();
+    auto navDestinationEventHub = navDestinationNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(navDestinationEventHub, nullptr);
     navDestinationNode->animationId_ = 0;
 

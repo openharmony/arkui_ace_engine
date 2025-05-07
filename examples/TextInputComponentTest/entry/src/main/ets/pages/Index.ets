@@ -1,38 +1,66 @@
 /*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an 'AS IS' BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
+import router from '@ohos.router';
+
+class TextList {
+  public id: number;
+  public text: string;
+  public url: string;
+
+  constructor(id: number, text: string, url: string) {
+    this.id = id;
+    this.text = text;
+    this.url = url;
+  }
+}
+
 @Entry
 @Component
-struct Index {
-  @State message: string = 'Hello World';
+struct struct_index {
+  scroll: Scroller = new Scroller()
+  @State arr: TextList[] = [
+    new TextList(1, '01-style', 'pages/01-style/Index',),
+    new TextList(2, '02-layout', 'pages/02-layout/Index',),
+    new TextList(3, '03-menuHandleSelect', 'pages/03-menuHandleSelect/Index',),
+    new TextList(5, '05-focusKeyboard', 'pages/05-focusKeyboard/Index',),
+    new TextList(6, '06-password', 'pages/06-password/Index',),
+    new TextList(7, '07-content', 'pages/07-content/Index',),
+    new TextList(8, '08-event', 'pages/08-event/Index',),
+    new TextList(9, '09-font', 'pages/09-font/Index',),
+  ]
+  @State fontSize: Resource | undefined = undefined
 
   build() {
-    RelativeContainer() {
-      Text(this.message)
-        .id('HelloWorld')
-        .fontSize($r('app.float.page_text_font_size'))
-        .fontWeight(FontWeight.Bold)
-        .alignRules({
-          center: { anchor: '__container__', align: VerticalAlign.Center },
-          middle: { anchor: '__container__', align: HorizontalAlign.Center }
-        })
-        .onClick(() => {
-          this.message = 'Welcome';
-        })
+    Column() {
+      Scroll(this.scroll) {
+        Flex({ direction: FlexDirection.Column, alignItems: ItemAlign.Center, justifyContent: FlexAlign.Center }) {
+          ForEach(this.arr, (item: TextList) => {
+            Button(item.text)
+              .width(300)
+              .height(50)
+              .margin(10)
+              .padding({ top: 5, bottom: 5 })
+              .onClick(() => {
+                router.pushUrl({ url: item.url })
+              })
+          }, (item: TextList) => JSON.stringify(item.id))
+        }
+        .width('100%')
+      }
+      .scrollBar(BarState.Off)
     }
-    .height('100%')
-    .width('100%')
   }
 }

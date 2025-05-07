@@ -15,14 +15,15 @@
 
 #include "bridge/cj_frontend/frontend/cj_frontend_abstract.h"
 
+#include "securec.h"
+
 #include "base/subwindow/subwindow_manager.h"
 #include "bridge/cj_frontend/frontend/cj_frontend_loader.h"
 #include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
 #include "bridge/common/accessibility/accessibility_node_manager.h"
 #include "core/common/font_manager.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "securec.h"
 #include "core/components/dialog/dialog_theme.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 using namespace OHOS::Ace::NG;
 using namespace OHOS::Ace;
@@ -194,7 +195,9 @@ void CJFrontendAbstract::CallRouterBack()
 void CJFrontendAbstract::InternalRunPage(const std::string& url, const std::string& params)
 {
     LOGI("InternalRunPage %{public}s", url.c_str());
-    pageRouterManager_->RunPage(url, params);
+    taskExecutor_->PostTask(
+        [pageRouterManager = pageRouterManager_, url, params] { pageRouterManager->RunPage(url, params); },
+        TaskExecutor::TaskType::UI, "CJFrontendInternalRunPage");
 }
 
 double CJFrontendAbstract::MeasureText(const MeasureContext& context)

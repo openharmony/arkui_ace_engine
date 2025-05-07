@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_touch_delegate.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -64,5 +65,26 @@ void DynamicNode::DumpTree(int32_t depth, bool hasJson)
     auto pattern = GetPattern<DynamicPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->DumpDynamicRenderer(depth + DC_DEPTH, hasJson);
+}
+
+HitTestResult DynamicNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+    const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
+    ResponseLinkResult& responseLinkResult, bool isDispatch)
+{
+    auto testResult = FrameNode::TouchTest(
+        globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, result, touchId, responseLinkResult);
+    if (testResult == HitTestResult::OUT_OF_REGION) {
+        return HitTestResult::OUT_OF_REGION;
+    }
+
+    auto pattern = GetPattern<DynamicPattern>();
+    CHECK_NULL_RETURN(pattern, testResult);
+    auto context = GetContext();
+    CHECK_NULL_RETURN(context, testResult);
+    auto eventManager = context->GetEventManager();
+    CHECK_NULL_RETURN(eventManager, testResult);
+    auto delegate = AceType::MakeRefPtr<DynamicTouchDelegate>(pattern);
+    eventManager->RegisterTouchDelegate(touchRestrict.touchEvent.id, delegate);
+    return testResult;
 }
 } // namespace OHOS::Ace::NG

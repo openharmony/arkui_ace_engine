@@ -681,4 +681,300 @@ HWTEST_F(ListItemGroupAlgorithmTestNg, MeasureAuto002, TestSize.Level1)
     listItemGroupLayoutAlgorithm->MeasureAuto(&layoutWrapper, layoutConstraint, 2);
     EXPECT_EQ(listItemGroupLayoutAlgorithm->totalMainSize_, 92.0f);
 }
+
+/**
+ * @tc.name: GetChildMaxCrossSize001
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm GetChildMaxCrossSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, GetChildMaxCrossSize001, TestSize.Level1)
+{
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    listItemGroupLayoutAlgorithm->itemPosition_.clear();
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listItemPattern);
+    ASSERT_NE(frameNode, nullptr);
+    listItemPattern->frameNode_ = frameNode;
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    frameNode->layoutProperty_ = listLayoutProperty;
+    listItemPattern->frameNode_ = frameNode;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    GeometryProperty geometryProperty;
+    geometryNode->frame_ = geometryProperty;
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapper.geometryNode_ = geometryNode;
+    frameNode->geometryNode_ = geometryNode;
+    layoutWrapper.currentChildCount_ = 0;
+    listItemGroupLayoutAlgorithm->isStackFromEnd_ = false;
+    listItemGroupLayoutAlgorithm->itemStartIndex_ = 2;
+    listItemGroupLayoutAlgorithm->spaceWidth_ = 1.0f;
+    ListItemGroupInfo listItemGroupInfo { 2, 2.0f, 2.0f, true };
+    listItemGroupLayoutAlgorithm->itemPosition_[0] = listItemGroupInfo;
+    listItemGroupLayoutAlgorithm->cachedItemPosition_[0] = listItemGroupInfo;
+    auto result = listItemGroupLayoutAlgorithm->GetChildMaxCrossSize(&layoutWrapper, Axis::FREE);
+    EXPECT_EQ(result, 0.0f);
+}
+
+/**
+ * @tc.name: GetChildMaxCrossSize002
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm GetChildMaxCrossSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, GetChildMaxCrossSize002, TestSize.Level1)
+{
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    listItemGroupLayoutAlgorithm->itemPosition_.clear();
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listItemPattern);
+    ASSERT_NE(frameNode, nullptr);
+    listItemPattern->frameNode_ = frameNode;
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    frameNode->layoutProperty_ = listLayoutProperty;
+    listItemPattern->frameNode_ = frameNode;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    geometryNode->margin_ = std::make_unique<MarginPropertyF>();
+    geometryNode->margin_->left = 6.0f;
+    geometryNode->margin_->right = 3.0f;
+    geometryNode->margin_->top = 20.0f;
+    geometryNode->margin_->bottom = 8.0f;
+    GeometryProperty geometryProperty;
+    geometryProperty.rect_ = RectF(10.0f, 300.0f, 50.0f, 50.0f);
+    geometryNode->frame_ = geometryProperty;
+    RefPtr<LayoutWrapperNode> layoutWrapperNode =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapperNode->SetActive();
+    layoutWrapperNode->needForceMeasureAndLayout_ = false;
+    layoutWrapperNode->geometryNode_ = geometryNode;
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapper.geometryNode_ = geometryNode;
+    frameNode->geometryNode_ = geometryNode;
+    layoutWrapper.currentChildCount_ = 6;
+    layoutWrapper.childrenMap_[2] = layoutWrapperNode;
+    listItemGroupLayoutAlgorithm->isStackFromEnd_ = false;
+    listItemGroupLayoutAlgorithm->itemStartIndex_ = 2;
+    listItemGroupLayoutAlgorithm->spaceWidth_ = 1.0f;
+    ListItemGroupInfo listItemGroupInfo { 2, 2.0f, 2.0f, true };
+    listItemGroupLayoutAlgorithm->itemPosition_[0] = listItemGroupInfo;
+    listItemGroupLayoutAlgorithm->cachedItemPosition_[0] = listItemGroupInfo;
+    auto result = listItemGroupLayoutAlgorithm->GetChildMaxCrossSize(&layoutWrapper, Axis::FREE);
+    EXPECT_EQ(result, 59.0f);
+}
+
+/**
+ * @tc.name: GetChildMaxCrossSize003
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm GetChildMaxCrossSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, GetChildMaxCrossSize003, TestSize.Level1)
+{
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    listItemGroupLayoutAlgorithm->itemPosition_.clear();
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listItemPattern);
+    ASSERT_NE(frameNode, nullptr);
+    listItemPattern->frameNode_ = frameNode;
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    frameNode->layoutProperty_ = listLayoutProperty;
+    listItemPattern->frameNode_ = frameNode;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapperNode =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapperNode->needForceMeasureAndLayout_ = false;
+    layoutWrapperNode->geometryNode_ = nullptr;
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapper.geometryNode_ = geometryNode;
+    frameNode->geometryNode_ = geometryNode;
+    layoutWrapper.currentChildCount_ = 6;
+    layoutWrapper.childrenMap_[2] = layoutWrapperNode;
+    listItemGroupLayoutAlgorithm->isStackFromEnd_ = false;
+    listItemGroupLayoutAlgorithm->itemStartIndex_ = 2;
+    listItemGroupLayoutAlgorithm->spaceWidth_ = 1.0f;
+    ListItemGroupInfo listItemGroupInfo { 2, 2.0f, 2.0f, true };
+    listItemGroupLayoutAlgorithm->itemPosition_[0] = listItemGroupInfo;
+    listItemGroupLayoutAlgorithm->cachedItemPosition_[0] = listItemGroupInfo;
+    auto result = listItemGroupLayoutAlgorithm->GetChildMaxCrossSize(&layoutWrapper, Axis::FREE);
+    EXPECT_EQ(result, 0.0f);
+}
+
+/**
+ * @tc.name: SetActiveChildRange001
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm SetActiveChildRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, SetActiveChildRange001, TestSize.Level1)
+{
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    listItemGroupLayoutAlgorithm->itemPosition_.clear();
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listItemPattern);
+    ASSERT_NE(frameNode, nullptr);
+    listItemPattern->frameNode_ = frameNode;
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    frameNode->layoutProperty_ = listLayoutProperty;
+    listItemPattern->frameNode_ = frameNode;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    ListItemGroupInfo listItemGroupInfo { 2, 2.0f, 2.0f, true };
+    listItemGroupLayoutAlgorithm->cachedItemPosition_[0] = listItemGroupInfo;
+    listItemGroupLayoutAlgorithm->cachedItemPosition_[3] = listItemGroupInfo;
+    listItemGroupLayoutAlgorithm->SetActiveChildRange(&layoutWrapper, 2, true);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->cachedItemPosition_[0].startPos, 2.0f);
+}
+
+/**
+ * @tc.name: SetActiveChildRange002
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm SetActiveChildRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, SetActiveChildRange002, TestSize.Level1)
+{
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    listItemGroupLayoutAlgorithm->itemPosition_.clear();
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listItemPattern);
+    ASSERT_NE(frameNode, nullptr);
+    listItemPattern->frameNode_ = frameNode;
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    frameNode->layoutProperty_ = listLayoutProperty;
+    listItemPattern->frameNode_ = frameNode;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    listItemGroupLayoutAlgorithm->totalItemCount_ = 4;
+    ListItemGroupInfo listItemGroupInfo { 2, 2.0f, 2.0f, true };
+    listItemGroupLayoutAlgorithm->cachedItemPosition_[1] = listItemGroupInfo;
+    listItemGroupLayoutAlgorithm->cachedItemPosition_[3] = listItemGroupInfo;
+    listItemGroupLayoutAlgorithm->SetActiveChildRange(&layoutWrapper, 2, true);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->cachedItemPosition_[1].startPos, 2.0f);
+}
+
+/**
+ * @tc.name: SetActiveChildRange003
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm SetActiveChildRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, SetActiveChildRange003, TestSize.Level1)
+{
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    listItemGroupLayoutAlgorithm->itemPosition_.clear();
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listItemPattern);
+    ASSERT_NE(frameNode, nullptr);
+    listItemPattern->frameNode_ = frameNode;
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    frameNode->layoutProperty_ = listLayoutProperty;
+    listItemPattern->frameNode_ = frameNode;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    listItemGroupLayoutAlgorithm->totalItemCount_ = 2;
+    ListItemGroupInfo listItemGroupInfo { 2, 2.0f, 2.0f, true };
+    listItemGroupLayoutAlgorithm->cachedItemPosition_[1] = listItemGroupInfo;
+    listItemGroupLayoutAlgorithm->cachedItemPosition_[3] = listItemGroupInfo;
+    listItemGroupLayoutAlgorithm->SetActiveChildRange(&layoutWrapper, 2, true);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->cachedItemPosition_[1].startPos, 2.0f);
+}
+
+/**
+ * @tc.name: SetActiveChildRange004
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm SetActiveChildRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, SetActiveChildRange004, TestSize.Level1)
+{
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    listItemGroupLayoutAlgorithm->itemPosition_.clear();
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listItemPattern);
+    ASSERT_NE(frameNode, nullptr);
+    listItemPattern->frameNode_ = frameNode;
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    frameNode->layoutProperty_ = listLayoutProperty;
+    listItemPattern->frameNode_ = frameNode;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    LayoutConstraintF layoutConstraint;
+    geometryNode->margin_ = std::make_unique<MarginPropertyF>();
+    geometryNode->margin_->left = 6.0f;
+    geometryNode->margin_->right = 3.0f;
+    geometryNode->margin_->top = 20.0f;
+    geometryNode->margin_->bottom = 8.0f;
+    GeometryProperty geometryProperty;
+    geometryProperty.rect_ = RectF(10.0f, 300.0f, 50.0f, 50.0f);
+    geometryNode->frame_ = geometryProperty;
+    geometryNode->parentLayoutConstraint_ = layoutConstraint;
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapper.geometryNode_ = geometryNode;
+    listItemGroupLayoutAlgorithm->listLayoutProperty_ = listLayoutProperty;
+    ListItemGroupInfo listItemGroupInfo { 2, 4.0f, 8.0f, true };
+    listItemGroupLayoutAlgorithm->cachedItemPosition_[0] = listItemGroupInfo;
+    listItemGroupLayoutAlgorithm->cachedItemPosition_[3] = listItemGroupInfo;
+    listItemGroupLayoutAlgorithm->SetActiveChildRange(&layoutWrapper, 2, false);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->cachedItemPosition_[0].startPos, 4.0f);
+}
+
+/**
+ * @tc.name: SetActiveChildRange005
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm SetActiveChildRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, SetActiveChildRange005, TestSize.Level1)
+{
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    listItemGroupLayoutAlgorithm->itemPosition_.clear();
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listItemPattern);
+    ASSERT_NE(frameNode, nullptr);
+    listItemPattern->frameNode_ = frameNode;
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    frameNode->layoutProperty_ = listLayoutProperty;
+    listItemPattern->frameNode_ = frameNode;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    LayoutConstraintF layoutConstraint;
+    geometryNode->margin_ = std::make_unique<MarginPropertyF>();
+    geometryNode->margin_->left = 6.0f;
+    geometryNode->margin_->right = 3.0f;
+    geometryNode->margin_->top = 20.0f;
+    geometryNode->margin_->bottom = 8.0f;
+    GeometryProperty geometryProperty;
+    geometryProperty.rect_ = RectF(10.0f, 300.0f, 50.0f, 50.0f);
+    geometryNode->frame_ = geometryProperty;
+    geometryNode->parentLayoutConstraint_ = layoutConstraint;
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapper.geometryNode_ = geometryNode;
+    listLayoutProperty->layoutConstraint_ = layoutConstraint;
+    listItemGroupLayoutAlgorithm->listLayoutProperty_ = listLayoutProperty;
+    listItemGroupLayoutAlgorithm->cachedItemPosition_.clear();
+    listItemGroupLayoutAlgorithm->SetActiveChildRange(&layoutWrapper, 2, true);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->cachedItemPosition_.size(), 0);
+}
 } // namespace OHOS::Ace::NG

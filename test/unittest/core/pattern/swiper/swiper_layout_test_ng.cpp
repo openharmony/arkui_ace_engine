@@ -411,4 +411,961 @@ HWTEST_F(SwiperLayoutTestNg, CalcCurrentPageStatusOnRTL001, TestSize.Level1)
     pageRate = pattern_->CalcCurrentPageStatusOnRTL(additionalOffset, isTouchBottom).first;
     EXPECT_EQ(pageRate, -0.5f);
 }
+
+/**
+ * @tc.name: AdjustOffsetOnBackward001
+ * @tc.desc: Test AdjustOffsetOnBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, AdjustOffsetOnBackward001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_NE(swiperLayoutAlgorithm, nullptr);
+    swiperLayoutAlgorithm->canOverScroll_ = false;
+    swiperLayoutAlgorithm->currentOffset_ = 0.f;
+    float currentStartPos = 2.0f;
+    swiperLayoutAlgorithm->AdjustOffsetOnBackward(currentStartPos);
+    EXPECT_EQ(swiperLayoutAlgorithm->currentOffset_, 2.f);
+}
+
+/**
+ * @tc.name: AdjustOffsetOnBackward002
+ * @tc.desc: Test AdjustOffsetOnBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, AdjustOffsetOnBackward002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_NE(swiperLayoutAlgorithm, nullptr);
+    swiperLayoutAlgorithm->canOverScroll_ = true;
+    swiperLayoutAlgorithm->jumpIndex_ = 10;
+    swiperLayoutAlgorithm->currentOffset_ = 0.f;
+    float currentStartPos = 2.0f;
+    swiperLayoutAlgorithm->AdjustOffsetOnBackward(currentStartPos);
+    EXPECT_EQ(swiperLayoutAlgorithm->currentOffset_, 2.f);
+}
+
+/**
+ * @tc.name: AdjustOffsetOnBackward003
+ * @tc.desc: Test AdjustOffsetOnBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, AdjustOffsetOnBackward003, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_NE(swiperLayoutAlgorithm, nullptr);
+    swiperLayoutAlgorithm->canOverScroll_ = true;
+    swiperLayoutAlgorithm->jumpIndex_ = 10;
+    swiperLayoutAlgorithm->currentOffset_ = 0.f;
+    swiperLayoutAlgorithm->contentMainSize_ = -10.f;
+    swiperLayoutAlgorithm->mainSizeIsDefined_ = true;
+    swiperLayoutAlgorithm->totalItemCount_ = 10;
+    float currentStartPos = 20.0f;
+    swiperLayoutAlgorithm->AdjustOffsetOnBackward(currentStartPos);
+    EXPECT_EQ(swiperLayoutAlgorithm->endMainPos_, 10.f);
+}
+
+/**
+ * @tc.name: AdjustOffsetOnBackward004
+ * @tc.desc: Test AdjustOffsetOnBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, AdjustOffsetOnBackward004, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_NE(swiperLayoutAlgorithm, nullptr);
+    swiperLayoutAlgorithm->canOverScroll_ = true;
+    swiperLayoutAlgorithm->jumpIndex_ = 10;
+    swiperLayoutAlgorithm->currentOffset_ = 0.f;
+    swiperLayoutAlgorithm->contentMainSize_ = -10.f;
+    swiperLayoutAlgorithm->mainSizeIsDefined_ = false;
+    swiperLayoutAlgorithm->totalItemCount_ = 10;
+    float currentStartPos = 20.0f;
+    swiperLayoutAlgorithm->AdjustOffsetOnBackward(currentStartPos);
+    EXPECT_EQ(swiperLayoutAlgorithm->endMainPos_, 10.f);
+}
+
+/**
+ * @tc.name: AdjustOffsetOnBackward005
+ * @tc.desc: Test AdjustOffsetOnBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, AdjustOffsetOnBackward005, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_NE(swiperLayoutAlgorithm, nullptr);
+    swiperLayoutAlgorithm->canOverScroll_ = true;
+    swiperLayoutAlgorithm->jumpIndex_ = 10;
+    swiperLayoutAlgorithm->currentOffset_ = 0.f;
+    swiperLayoutAlgorithm->contentMainSize_ = -10.f;
+    swiperLayoutAlgorithm->mainSizeIsDefined_ = false;
+    swiperLayoutAlgorithm->totalItemCount_ = 2;
+    float currentStartPos = 20.0f;
+    swiperLayoutAlgorithm->AdjustOffsetOnBackward(currentStartPos);
+    EXPECT_EQ(swiperLayoutAlgorithm->endMainPos_, 10.f);
+}
+
+/**
+ * @tc.name: AdjustOffsetOnForward001
+ * @tc.desc: Test AdjustOffsetOnForward
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, AdjustOffsetOnForward001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_NE(swiperLayoutAlgorithm, nullptr);
+    SwiperLayoutAlgorithm::PositionMap itemPosition;
+    auto nodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node1 = FrameNode::CreateFrameNode("node", nodeId1, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item1;
+    item1.startPos = 0;
+    item1.endPos = 20;
+    item1.node = node1;
+    auto nodeId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node2 = FrameNode::CreateFrameNode("node", nodeId2, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item2;
+    item2.startPos = 21;
+    item2.endPos = 40;
+    item2.node = node2;
+    itemPosition.insert(std::make_pair(0, item1));
+    itemPosition.insert(std::make_pair(1, item2));
+    swiperLayoutAlgorithm->itemPosition_ = itemPosition;
+    swiperLayoutAlgorithm->contentMainSize_ = 10.f;
+    swiperLayoutAlgorithm->canOverScroll_ = false;
+    float currentEndPos = 100.0f;
+    swiperLayoutAlgorithm->AdjustOffsetOnBackward(currentEndPos);
+    EXPECT_EQ(swiperLayoutAlgorithm->currentOffset_, 100);
+}
+
+/**
+ * @tc.name: AdjustOffsetOnForward002
+ * @tc.desc: Test AdjustOffsetOnForward
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, AdjustOffsetOnForward002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_NE(swiperLayoutAlgorithm, nullptr);
+    SwiperLayoutAlgorithm::PositionMap itemPosition;
+    auto nodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node1 = FrameNode::CreateFrameNode("node", nodeId1, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item1;
+    item1.startPos = 0;
+    item1.endPos = 20;
+    item1.node = node1;
+    auto nodeId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node2 = FrameNode::CreateFrameNode("node", nodeId2, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item2;
+    item2.startPos = 21;
+    item2.endPos = 40;
+    item2.node = node2;
+    itemPosition.insert(std::make_pair(0, item1));
+    itemPosition.insert(std::make_pair(1, item2));
+    swiperLayoutAlgorithm->itemPosition_ = itemPosition;
+    swiperLayoutAlgorithm->contentMainSize_ = 10.f;
+    swiperLayoutAlgorithm->canOverScroll_ = true;
+    swiperLayoutAlgorithm->jumpIndex_ = 10;
+    float currentEndPos = 100.0f;
+    swiperLayoutAlgorithm->AdjustOffsetOnBackward(currentEndPos);
+    EXPECT_EQ(swiperLayoutAlgorithm->currentOffset_, 100);
+}
+
+/**
+ * @tc.name: AdjustOffsetOnForward003
+ * @tc.desc: Test AdjustOffsetOnForward
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, AdjustOffsetOnForward003, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_NE(swiperLayoutAlgorithm, nullptr);
+    SwiperLayoutAlgorithm::PositionMap itemPosition;
+    auto nodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node1 = FrameNode::CreateFrameNode("node", nodeId1, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item1;
+    item1.startPos = 0;
+    item1.endPos = 20;
+    item1.node = node1;
+    auto nodeId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node2 = FrameNode::CreateFrameNode("node", nodeId2, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item2;
+    item2.startPos = 21;
+    item2.endPos = 40;
+    item2.node = node2;
+    itemPosition.insert(std::make_pair(0, item1));
+    itemPosition.insert(std::make_pair(1, item2));
+    swiperLayoutAlgorithm->itemPosition_ = itemPosition;
+    swiperLayoutAlgorithm->contentMainSize_ = 100.f;
+    swiperLayoutAlgorithm->canOverScroll_ = true;
+    swiperLayoutAlgorithm->mainSizeIsDefined_ = true;
+    float currentEndPos = 30.0f;
+    swiperLayoutAlgorithm->AdjustOffsetOnBackward(currentEndPos);
+    EXPECT_EQ(swiperLayoutAlgorithm->startMainPos_, 30);
+    EXPECT_EQ(swiperLayoutAlgorithm->contentMainSize_, 100);
+}
+
+/**
+ * @tc.name: AdjustOffsetOnForward004
+ * @tc.desc: Test AdjustOffsetOnForward
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, AdjustOffsetOnForward004, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_NE(swiperLayoutAlgorithm, nullptr);
+    SwiperLayoutAlgorithm::PositionMap itemPosition;
+    auto nodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node1 = FrameNode::CreateFrameNode("node", nodeId1, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item1;
+    item1.startPos = 0;
+    item1.endPos = 20;
+    item1.node = node1;
+    auto nodeId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node2 = FrameNode::CreateFrameNode("node", nodeId2, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item2;
+    item2.startPos = 21;
+    item2.endPos = 40;
+    item2.node = node2;
+    itemPosition.insert(std::make_pair(0, item1));
+    itemPosition.insert(std::make_pair(1, item2));
+    swiperLayoutAlgorithm->itemPosition_ = itemPosition;
+    swiperLayoutAlgorithm->contentMainSize_ = 100.f;
+    swiperLayoutAlgorithm->canOverScroll_ = false;
+    swiperLayoutAlgorithm->mainSizeIsDefined_ = false;
+    float currentEndPos = 30.0f;
+    swiperLayoutAlgorithm->AdjustOffsetOnBackward(currentEndPos);
+    EXPECT_EQ(swiperLayoutAlgorithm->startMainPos_, 30);
+    EXPECT_EQ(swiperLayoutAlgorithm->contentMainSize_, 100);
+}
+
+/**
+ * @tc.name: AdjustStartInfoOnSwipeByGroup001
+ * @tc.desc: Test AdjustStartInfoOnSwipeByGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, AdjustStartInfoOnSwipeByGroup001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_NE(swiperLayoutAlgorithm, nullptr);
+    SwiperLayoutAlgorithm::PositionMap itemPosition;
+    auto nodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node1 = FrameNode::CreateFrameNode("node", nodeId1, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item1;
+    item1.startPos = 0;
+    item1.endPos = 20;
+    item1.node = node1;
+    auto nodeId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node2 = FrameNode::CreateFrameNode("node", nodeId2, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item2;
+    item2.startPos = 21;
+    item2.endPos = 40;
+    item2.node = node2;
+    itemPosition.insert(std::make_pair(0, item1));
+    itemPosition.insert(std::make_pair(1, item2));
+    swiperLayoutAlgorithm->swipeByGroup_ = true;
+    swiperLayoutAlgorithm->isFrameAnimation_ = true;
+    int32_t startIndex = 0;
+    int32_t startIndexInVisibleWindow = 0;
+    float startPos = 0.0f;
+    swiperLayoutAlgorithm->AdjustStartInfoOnSwipeByGroup(startIndex, itemPosition, startIndexInVisibleWindow, startPos);
+    EXPECT_EQ(startPos, 0.f);
+}
+
+/**
+ * @tc.name: AdjustStartInfoOnSwipeByGroup002
+ * @tc.desc: Test AdjustStartInfoOnSwipeByGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, AdjustStartInfoOnSwipeByGroup002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_NE(swiperLayoutAlgorithm, nullptr);
+    SwiperLayoutAlgorithm::PositionMap itemPosition;
+    auto nodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node1 = FrameNode::CreateFrameNode("node", nodeId1, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item1;
+    item1.startPos = 10;
+    item1.endPos = 20;
+    item1.node = node1;
+    auto nodeId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node2 = FrameNode::CreateFrameNode("node", nodeId2, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item2;
+    item2.startPos = 21;
+    item2.endPos = 40;
+    item2.node = node2;
+    itemPosition.insert(std::make_pair(0, item1));
+    itemPosition.insert(std::make_pair(1, item2));
+    swiperLayoutAlgorithm->swipeByGroup_ = true;
+    swiperLayoutAlgorithm->isFrameAnimation_ = false;
+    int32_t startIndex = 3;
+    int32_t startIndexInVisibleWindow = 0;
+    float startPos = 0.0f;
+    swiperLayoutAlgorithm->AdjustStartInfoOnSwipeByGroup(startIndex, itemPosition, startIndexInVisibleWindow, startPos);
+    EXPECT_EQ(startPos, 0.f);
+}
+
+/**
+ * @tc.name: AdjustItemPositionOnCachedShow001
+ * @tc.desc: Test AdjustItemPositionOnCachedShow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, AdjustItemPositionOnCachedShow001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_NE(swiperLayoutAlgorithm, nullptr);
+    SwiperLayoutAlgorithm::PositionMap itemPosition;
+    auto nodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node1 = FrameNode::CreateFrameNode("node", nodeId1, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item1;
+    item1.startPos = 0;
+    item1.endPos = 20;
+    item1.node = node1;
+    auto nodeId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node2 = FrameNode::CreateFrameNode("node", nodeId2, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item2;
+    item2.startPos = 21;
+    item2.endPos = 40;
+    item2.node = node2;
+    itemPosition.insert(std::make_pair(0, item1));
+    itemPosition.insert(std::make_pair(1, item2));
+    swiperLayoutAlgorithm->cachedShow_ = true;
+    swiperLayoutAlgorithm->itemPosition_ = itemPosition;
+    swiperLayoutAlgorithm->cachedStartIndex_ = 1;
+    swiperLayoutAlgorithm->AdjustItemPositionOnCachedShow();
+    EXPECT_EQ(swiperLayoutAlgorithm->itemPosition_.size(), 0);
+}
+
+/**
+ * @tc.name: AdjustItemPositionOnCachedShow002
+ * @tc.desc: Test AdjustItemPositionOnCachedShow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, AdjustItemPositionOnCachedShow002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_NE(swiperLayoutAlgorithm, nullptr);
+    SwiperLayoutAlgorithm::PositionMap itemPosition;
+    auto nodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node1 = FrameNode::CreateFrameNode("node", nodeId1, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item1;
+    item1.startPos = 0;
+    item1.endPos = 20;
+    item1.node = node1;
+    auto nodeId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node2 = FrameNode::CreateFrameNode("node", nodeId2, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item2;
+    item2.startPos = 21;
+    item2.endPos = 40;
+    item2.node = node2;
+    itemPosition.insert(std::make_pair(0, item1));
+    itemPosition.insert(std::make_pair(1, item2));
+    swiperLayoutAlgorithm->cachedShow_ = true;
+    swiperLayoutAlgorithm->itemPosition_ = itemPosition;
+    swiperLayoutAlgorithm->cachedStartIndex_ = 0;
+    swiperLayoutAlgorithm->cachedEndIndex_ = 0;
+    swiperLayoutAlgorithm->AdjustItemPositionOnCachedShow();
+    EXPECT_EQ(swiperLayoutAlgorithm->itemPosition_.size(), 1);
+}
+
+/**
+ * @tc.name: SwiperLayoutGetHeightForDigit002
+ * @tc.desc: Test SwiperLayoutGetHeightForDigit
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, SwiperLayoutGetHeightForDigit002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_NE(swiperLayoutAlgorithm, nullptr);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF { 10.f, 20.f });
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode_, geometryNode, frameNode_->GetLayoutProperty());
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(swiperLayoutAlgorithm));
+    SwiperLayoutAlgorithm::PositionMap itemPosition;
+    swiperLayoutAlgorithm->itemPosition_ = itemPosition;
+    swiperLayoutAlgorithm->currentIndex_ = 50.f;
+    float height = swiperLayoutAlgorithm->GetCurrentFirstIndexInWindow(&layoutWrapper);
+    EXPECT_EQ(height, 50.f);
+}
+
+/**
+ * @tc.name: GetCurrentLastIndexInWindow001
+ * @tc.desc: Test GetCurrentLastIndexInWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, GetCurrentLastIndexInWindow001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_NE(swiperLayoutAlgorithm, nullptr);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF { 10.f, 20.f });
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode_, geometryNode, frameNode_->GetLayoutProperty());
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(swiperLayoutAlgorithm));
+    SwiperLayoutAlgorithm::PositionMap itemPosition;
+    swiperLayoutAlgorithm->itemPosition_ = itemPosition;
+    swiperLayoutAlgorithm->currentIndex_ = 50.f;
+    float height = swiperLayoutAlgorithm->GetCurrentLastIndexInWindow(&layoutWrapper);
+    EXPECT_EQ(height, 50.f);
+}
+
+/**
+ * @tc.name: LayoutBackwardItem001
+ * @tc.desc: Test LayoutBackwardItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, LayoutBackwardItem001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default swiper
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. contentMainSize need to be transmitted back to the pattern
+     */
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode_, geometryNode, frameNode_->GetLayoutProperty());
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(swiperLayoutAlgorithm));
+    LayoutConstraintF layoutConstraint;
+    float sizeTmp = 720.f;
+    layoutConstraint.selfIdealSize = OptionalSizeF(sizeTmp, sizeTmp);
+    layoutConstraint.maxSize = SizeF(sizeTmp, sizeTmp);
+    layoutConstraint.percentReference = SizeF(sizeTmp, sizeTmp);
+    layoutConstraint.parentIdealSize.SetSize(SizeF(sizeTmp, sizeTmp));
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    swiperLayoutAlgorithm->mainSizeIsMeasured_ = false;
+    swiperLayoutAlgorithm->hasCachedCapture_ = false;
+    swiperLayoutAlgorithm->isLoop_ = true;
+    swiperLayoutAlgorithm->totalItemCount_ = 20;
+    swiperLayoutAlgorithm->isMeasureOneMoreItem_ = true;
+    int32_t currentIndex = 1;
+    float endPos = 0.0f;
+    float startPos = 0.0f;
+    auto result =
+        swiperLayoutAlgorithm->LayoutBackwardItem(&layoutWrapper, layoutConstraint, currentIndex, endPos, startPos);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: LayoutBackwardItem002
+ * @tc.desc: Test LayoutBackwardItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, LayoutBackwardItem002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default swiper
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. contentMainSize need to be transmitted back to the pattern
+     */
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode_, geometryNode, frameNode_->GetLayoutProperty());
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(swiperLayoutAlgorithm));
+    LayoutConstraintF layoutConstraint;
+    float sizeTmp = 720.f;
+    layoutConstraint.selfIdealSize = OptionalSizeF(sizeTmp, sizeTmp);
+    layoutConstraint.maxSize = SizeF(sizeTmp, sizeTmp);
+    layoutConstraint.percentReference = SizeF(sizeTmp, sizeTmp);
+    layoutConstraint.parentIdealSize.SetSize(SizeF(sizeTmp, sizeTmp));
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    SwiperLayoutAlgorithm::PositionMap itemPosition;
+    auto nodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node1 = FrameNode::CreateFrameNode("node", nodeId1, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item1;
+    item1.startPos = 0;
+    item1.endPos = 20;
+    item1.node = node1;
+    auto nodeId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node2 = FrameNode::CreateFrameNode("node", nodeId2, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item2;
+    item2.startPos = 21;
+    item2.endPos = 40;
+    item2.node = node2;
+    itemPosition.insert(std::make_pair(0, item1));
+    itemPosition.insert(std::make_pair(1, item2));
+    swiperLayoutAlgorithm->itemPosition_ = itemPosition;
+    swiperLayoutAlgorithm->mainSizeIsMeasured_ = false;
+    swiperLayoutAlgorithm->hasCachedCapture_ = false;
+    swiperLayoutAlgorithm->isLoop_ = true;
+    swiperLayoutAlgorithm->totalItemCount_ = 20;
+    swiperLayoutAlgorithm->isMeasureOneMoreItem_ = true;
+    int32_t currentIndex = 1;
+    float endPos = 0.0f;
+    float startPos = 0.0f;
+    auto result =
+        swiperLayoutAlgorithm->LayoutBackwardItem(&layoutWrapper, layoutConstraint, currentIndex, endPos, startPos);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: LayoutBackwardItem003
+ * @tc.desc: Test LayoutBackwardItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, LayoutBackwardItem003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default swiper
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. contentMainSize need to be transmitted back to the pattern
+     */
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode_, geometryNode, frameNode_->GetLayoutProperty());
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(swiperLayoutAlgorithm));
+    LayoutConstraintF layoutConstraint;
+    float sizeTmp = 720.f;
+    layoutConstraint.selfIdealSize = OptionalSizeF(sizeTmp, sizeTmp);
+    layoutConstraint.maxSize = SizeF(sizeTmp, sizeTmp);
+    layoutConstraint.percentReference = SizeF(sizeTmp, sizeTmp);
+    layoutConstraint.parentIdealSize.SetSize(SizeF(sizeTmp, sizeTmp));
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    SwiperLayoutAlgorithm::PositionMap itemPosition;
+    auto nodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node1 = FrameNode::CreateFrameNode("node", nodeId1, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item1;
+    item1.startPos = 0;
+    item1.endPos = 20;
+    item1.node = node1;
+    auto nodeId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node2 = FrameNode::CreateFrameNode("node", nodeId2, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item2;
+    item2.startPos = 21;
+    item2.endPos = 40;
+    item2.node = node2;
+    itemPosition.insert(std::make_pair(0, item1));
+    itemPosition.insert(std::make_pair(0, item2));
+    swiperLayoutAlgorithm->itemPosition_ = itemPosition;
+    swiperLayoutAlgorithm->mainSizeIsMeasured_ = false;
+    swiperLayoutAlgorithm->hasCachedCapture_ = false;
+    swiperLayoutAlgorithm->isLoop_ = true;
+    swiperLayoutAlgorithm->totalItemCount_ = 20;
+    swiperLayoutAlgorithm->isMeasureOneMoreItem_ = true;
+    int32_t currentIndex = 1;
+    float endPos = 0.0f;
+    float startPos = 0.0f;
+    auto result =
+        swiperLayoutAlgorithm->LayoutBackwardItem(&layoutWrapper, layoutConstraint, currentIndex, endPos, startPos);
+    EXPECT_FALSE(result);
+}
+
+
+/**
+ * @tc.name: LayoutForwardItem001
+ * @tc.desc: Test LayoutForwardItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, LayoutForwardItem001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default swiper
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. contentMainSize need to be transmitted back to the pattern
+     */
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode_, geometryNode, frameNode_->GetLayoutProperty());
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(swiperLayoutAlgorithm));
+    LayoutConstraintF layoutConstraint;
+    float sizeTmp = 720.f;
+    layoutConstraint.selfIdealSize = OptionalSizeF(sizeTmp, sizeTmp);
+    layoutConstraint.maxSize = SizeF(sizeTmp, sizeTmp);
+    layoutConstraint.percentReference = SizeF(sizeTmp, sizeTmp);
+    layoutConstraint.parentIdealSize.SetSize(SizeF(sizeTmp, sizeTmp));
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    swiperLayoutAlgorithm->mainSizeIsMeasured_ = false;
+    swiperLayoutAlgorithm->hasCachedCapture_ = false;
+    swiperLayoutAlgorithm->isLoop_ = true;
+    swiperLayoutAlgorithm->totalItemCount_ = 20;
+    swiperLayoutAlgorithm->isMeasureOneMoreItem_ = true;
+    SwiperLayoutAlgorithm::PositionMap itemPosition;
+    swiperLayoutAlgorithm->itemPosition_ = itemPosition;
+    int32_t currentIndex = 1;
+    float endPos = 0.0f;
+    float startPos = 0.0f;
+    auto result =
+        swiperLayoutAlgorithm->LayoutForwardItem(&layoutWrapper, layoutConstraint, currentIndex, endPos, startPos);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: LayoutForwardItem002
+ * @tc.desc: Test LayoutForwardItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, LayoutForwardItem002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default swiper
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. contentMainSize need to be transmitted back to the pattern
+     */
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode_, geometryNode, frameNode_->GetLayoutProperty());
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(swiperLayoutAlgorithm));
+    LayoutConstraintF layoutConstraint;
+    float sizeTmp = 720.f;
+    layoutConstraint.selfIdealSize = OptionalSizeF(sizeTmp, sizeTmp);
+    layoutConstraint.maxSize = SizeF(sizeTmp, sizeTmp);
+    layoutConstraint.percentReference = SizeF(sizeTmp, sizeTmp);
+    layoutConstraint.parentIdealSize.SetSize(SizeF(sizeTmp, sizeTmp));
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    SwiperLayoutAlgorithm::PositionMap itemPosition;
+    auto nodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node1 = FrameNode::CreateFrameNode("node", nodeId1, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item1;
+    item1.startPos = 0;
+    item1.endPos = 20;
+    item1.node = node1;
+    auto nodeId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node2 = FrameNode::CreateFrameNode("node", nodeId2, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item2;
+    item2.startPos = 21;
+    item2.endPos = 40;
+    item2.node = node2;
+    itemPosition.insert(std::make_pair(0, item1));
+    itemPosition.insert(std::make_pair(1, item2));
+    swiperLayoutAlgorithm->itemPosition_ = itemPosition;
+    swiperLayoutAlgorithm->mainSizeIsMeasured_ = false;
+    swiperLayoutAlgorithm->hasCachedCapture_ = false;
+    swiperLayoutAlgorithm->isLoop_ = true;
+    swiperLayoutAlgorithm->totalItemCount_ = 20;
+    swiperLayoutAlgorithm->isMeasureOneMoreItem_ = true;
+    int32_t currentIndex = 1;
+    float endPos = 0.0f;
+    float startPos = 0.0f;
+    auto result =
+        swiperLayoutAlgorithm->LayoutForwardItem(&layoutWrapper, layoutConstraint, currentIndex, endPos, startPos);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: LayoutForwardItem003
+ * @tc.desc: Test LayoutForwardItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, LayoutForwardItem003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default swiper
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. contentMainSize need to be transmitted back to the pattern
+     */
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode_, geometryNode, frameNode_->GetLayoutProperty());
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(swiperLayoutAlgorithm));
+    LayoutConstraintF layoutConstraint;
+    float sizeTmp = 720.f;
+    layoutConstraint.selfIdealSize = OptionalSizeF(sizeTmp, sizeTmp);
+    layoutConstraint.maxSize = SizeF(sizeTmp, sizeTmp);
+    layoutConstraint.percentReference = SizeF(sizeTmp, sizeTmp);
+    layoutConstraint.parentIdealSize.SetSize(SizeF(sizeTmp, sizeTmp));
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    SwiperLayoutAlgorithm::PositionMap itemPosition;
+    auto nodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node1 = FrameNode::CreateFrameNode("node", nodeId1, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item1;
+    item1.startPos = 0;
+    item1.endPos = 20;
+    item1.node = node1;
+    auto nodeId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node2 = FrameNode::CreateFrameNode("node", nodeId2, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item2;
+    item2.startPos = 21;
+    item2.endPos = 40;
+    item2.node = node2;
+    itemPosition.insert(std::make_pair(2, item1));
+    itemPosition.insert(std::make_pair(2, item2));
+    swiperLayoutAlgorithm->itemPosition_ = itemPosition;
+    swiperLayoutAlgorithm->mainSizeIsMeasured_ = false;
+    swiperLayoutAlgorithm->hasCachedCapture_ = false;
+    swiperLayoutAlgorithm->isLoop_ = true;
+    swiperLayoutAlgorithm->totalItemCount_ = 20;
+    swiperLayoutAlgorithm->isMeasureOneMoreItem_ = true;
+    int32_t currentIndex = 1;
+    float endPos = 0.0f;
+    float startPos = 0.0f;
+    auto result =
+        swiperLayoutAlgorithm->LayoutForwardItem(&layoutWrapper, layoutConstraint, currentIndex, endPos, startPos);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: SwiperLayoutAlgorithmSetInactive002
+ * @tc.desc: SetInactive
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmSetInactive002, TestSize.Level1)
+{
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, layoutProperty_);
+    float startMainPos = 0.1f;
+    float endMainPos = 10.0f;
+    swiperLayoutAlgorithm->measured_ = true;
+    swiperLayoutAlgorithm->currentOffset_ = 0.0f;
+    swiperLayoutAlgorithm->itemPosition_.emplace(std::make_pair(1, SwiperItemInfo { 1, 2 }));
+    swiperLayoutAlgorithm->itemPosition_.emplace(std::make_pair(2, SwiperItemInfo { 1, 2 }));
+    swiperLayoutAlgorithm->prevMargin_ = 0.0;
+    swiperLayoutAlgorithm->nextMargin_ = 0.0;
+
+    /**
+     * @tc.steps: step2. call SetInactive.
+     * @tc.expected: Related function runs ok.
+     */
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            swiperLayoutAlgorithm->SetInactive(&layoutWrapper, startMainPos, endMainPos, std::nullopt);
+            startMainPos = 3;
+        }
+        swiperLayoutAlgorithm->prevMargin_ = 1.0;
+    }
+
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            swiperLayoutAlgorithm->SetInactive(&layoutWrapper, startMainPos, endMainPos, std::nullopt);
+            endMainPos = 3;
+        }
+        swiperLayoutAlgorithm->nextMargin_ = 1.0;
+    }
+    EXPECT_TRUE(frameNode_);
+}
+
+/**
+ * @tc.name: GetLoopIndex001
+ * @tc.desc: GetLoopIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, GetLoopIndex001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_NE(swiperLayoutAlgorithm, nullptr);
+    swiperLayoutAlgorithm->totalItemCount_ = 0;
+    int32_t originalIndex = 10;
+    int32_t result = swiperLayoutAlgorithm->GetLoopIndex(originalIndex);
+    EXPECT_EQ(result, 10);
+}
+
+/**
+ * @tc.name: CaptureMeasure001
+ * @tc.desc: CaptureMeasure
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, CaptureMeasure001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default swiper
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. contentMainSize need to be transmitted back to the pattern
+     */
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode_, geometryNode, frameNode_->GetLayoutProperty());
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(swiperLayoutAlgorithm));
+
+    LayoutConstraintF layoutConstraint;
+    float sizeTmp = 480.f;
+    layoutConstraint.selfIdealSize = OptionalSizeF(sizeTmp, sizeTmp);
+    layoutConstraint.maxSize = SizeF(sizeTmp, sizeTmp);
+    layoutConstraint.percentReference = SizeF(sizeTmp, sizeTmp);
+    layoutConstraint.parentIdealSize.SetSize(SizeF(sizeTmp, sizeTmp));
+
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    SwiperLayoutAlgorithm::PositionMap itemPosition;
+    auto nodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node1 = FrameNode::CreateFrameNode("node", nodeId1, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item1;
+    item1.startPos = 0;
+    item1.endPos = 20;
+    item1.node = node1;
+    auto nodeId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node2 = FrameNode::CreateFrameNode("node", nodeId2, AceType::MakeRefPtr<ArcSwiperPattern>());
+    SwiperItemInfo item2;
+    item2.startPos = 21;
+    item2.endPos = 40;
+    item2.node = node2;
+    itemPosition.insert(std::make_pair(2, item1));
+    itemPosition.insert(std::make_pair(2, item2));
+    swiperLayoutAlgorithm->itemPosition_ = itemPosition;
+    swiperLayoutAlgorithm->hasCachedCapture_ = true;
+    swiperLayoutAlgorithm->isCaptureReverse_ = true;
+    swiperLayoutAlgorithm->CaptureMeasure(&layoutWrapper, layoutConstraint);
+    EXPECT_EQ(pattern_->contentMainSize_, sizeTmp);
+}
+
+/**
+ * @tc.name: CaptureMeasure002
+ * @tc.desc: CaptureMeasure
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, CaptureMeasure002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default swiper
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. contentMainSize need to be transmitted back to the pattern
+     */
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode_, geometryNode, frameNode_->GetLayoutProperty());
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(swiperLayoutAlgorithm));
+
+    LayoutConstraintF layoutConstraint;
+    float sizeTmp = 480.f;
+    layoutConstraint.selfIdealSize = OptionalSizeF(sizeTmp, sizeTmp);
+    layoutConstraint.maxSize = SizeF(sizeTmp, sizeTmp);
+    layoutConstraint.percentReference = SizeF(sizeTmp, sizeTmp);
+    layoutConstraint.parentIdealSize.SetSize(SizeF(sizeTmp, sizeTmp));
+
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    SwiperLayoutAlgorithm::PositionMap itemPosition;
+    swiperLayoutAlgorithm->itemPosition_ = itemPosition;
+    swiperLayoutAlgorithm->hasCachedCapture_ = true;
+    swiperLayoutAlgorithm->CaptureMeasure(&layoutWrapper, layoutConstraint);
+    EXPECT_EQ(pattern_->contentMainSize_, sizeTmp);
+}
 } // namespace OHOS::Ace::NG

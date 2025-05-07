@@ -652,7 +652,8 @@ void DialogLayoutAlgorithm::AvoidScreen(
     OffsetF& topLeftPoint, const RefPtr<DialogLayoutProperty>& dialogProp, SizeF childSize)
 {
     CHECK_NULL_VOID(dialogProp);
-    auto availableRect = OverlayManager::GetDisplayAvailableRect(dialogProp->GetHost());
+    auto availableRect = OverlayManager::GetDisplayAvailableRect(
+        dialogProp->GetHost(), static_cast<int32_t>(SubwindowType::TYPE_DIALOG));
     auto overScreen = LessNotEqual(availableRect.Width(), childSize.Width()) ||
                       LessNotEqual(availableRect.Height(), childSize.Height());
     auto needAvoidScreen = SystemProperties::IsSuperFoldDisplayDevice() && isUIExtensionSubWindow_ && !overScreen;

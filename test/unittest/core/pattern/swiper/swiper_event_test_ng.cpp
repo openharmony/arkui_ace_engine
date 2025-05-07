@@ -1330,10 +1330,6 @@ HWTEST_F(SwiperEventTestNg, HandleTouchBottomLoop004, TestSize.Level1)
     CreateSwiperDone();
     EXPECT_EQ(pattern_->TotalCount(), 6);
 
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
-
     pattern_->currentFirstIndex_ = pattern_->TotalCount() - 2;
     pattern_->currentIndex_ = 0;
     pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
@@ -1345,7 +1341,6 @@ HWTEST_F(SwiperEventTestNg, HandleTouchBottomLoop004, TestSize.Level1)
     pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
     pattern_->HandleTouchBottomLoop();
     EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1641,7 +1636,8 @@ HWTEST_F(SwiperEventTestNg, AttrPageFlipModeTest001, TestSize.Level1)
     info.SetInputEventType(InputEventType::AXIS);
     info.SetSourceTool(SourceTool::MOUSE);
     info.SetMainDelta(-10.f);
-    auto panEvent = frameNode_->GetEventHub<EventHub>()->gestureEventHub_->panEventActuator_->panEvents_.front();
+    auto panEvent = frameNode_->GetOrCreateEventHub<EventHub>()
+        ->gestureEventHub_->panEventActuator_->panEvents_.front();
     panEvent->actionStart_(info);
     EXPECT_TRUE(pattern_->isFirstAxisAction_);
     panEvent->actionUpdate_(info);
@@ -1669,7 +1665,8 @@ HWTEST_F(SwiperEventTestNg, AttrPageFlipModeTest002, TestSize.Level1)
     info.SetInputEventType(InputEventType::AXIS);
     info.SetSourceTool(SourceTool::MOUSE);
     info.SetMainDelta(-10.f);
-    auto panEvent = frameNode_->GetEventHub<EventHub>()->gestureEventHub_->panEventActuator_->panEvents_.front();
+    auto panEvent = frameNode_->GetOrCreateEventHub<EventHub>()
+        ->gestureEventHub_->panEventActuator_->panEvents_.front();
     panEvent->actionStart_(info);
     EXPECT_TRUE(pattern_->isFirstAxisAction_);
     // axis update event will flip page, and isFirstAxisAction_ will be marked

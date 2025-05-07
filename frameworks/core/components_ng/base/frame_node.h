@@ -370,8 +370,6 @@ public:
     template<typename T>
     RefPtr<T> GetEventHub()
     {
-        CreateEventHubInner();
-        CHECK_NULL_RETURN(eventHub_, nullptr);
         return DynamicCast<T>(eventHub_);
     }
 
@@ -380,12 +378,6 @@ public:
     {
         CreateEventHubInner();
         CHECK_NULL_RETURN(eventHub_, nullptr);
-        return DynamicCast<T>(eventHub_);
-    }
-
-    template<typename T>
-    RefPtr<T> GetEventHubOnly()
-    {
         return DynamicCast<T>(eventHub_);
     }
 
@@ -563,7 +555,7 @@ public:
     std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(
         bool excludeSelf = false, bool checkBoundary = false) const;
 
-    OffsetF GetPaintRectOffsetToStage() const;
+    OffsetF GetPaintRectOffsetToPage() const;
 
     RectF GetPaintRectWithTransform() const;
 
@@ -1244,6 +1236,8 @@ public:
     void AddCustomProperty(const std::string& key, const std::string& value) override;
     void RemoveCustomProperty(const std::string& key) override;
 
+    void SetCustomPropertyMapFlagByKey(const std::string& key);
+
     void AddExtraCustomProperty(const std::string& key, void* extraData);
     void* GetExtraCustomProperty(const std::string& key) const;
     void RemoveExtraCustomProperty(const std::string& key);
@@ -1321,6 +1315,7 @@ public:
     }
 
     void SetFrameNodeDestructorCallback(const std::function<void(int32_t)>&& callback);
+    void SetMeasureCallback(const std::function<void(RefPtr<Kit::FrameNode>)>& measureCallback);
     void FireFrameNodeDestructorCallback();
 
     bool CheckTopWindowBoundary() const
@@ -1645,7 +1640,7 @@ private:
 
     DragPreviewOption previewOption_;
 
-    std::unordered_map<std::string, std::string> customPropertyMap_;
+    std::unordered_map<std::string, std::vector<std::string>> customPropertyMap_;
 
     std::unordered_map<std::string, void*> extraCustomPropertyMap_;
 
@@ -1672,6 +1667,7 @@ private:
     VisibleAreaChangeTriggerReason visibleAreaChangeTriggerReason_ = VisibleAreaChangeTriggerReason::IDLE;
     float preOpacity_ = 1.0f;
     std::function<void(int32_t)> frameNodeDestructorCallback_;
+    std::function<void(RefPtr<Kit::FrameNode>&)> measureCallback_;
 
     bool topWindowBoundary_ = false;
 

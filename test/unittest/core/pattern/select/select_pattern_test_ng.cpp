@@ -1939,20 +1939,20 @@ HWTEST_F(SelectPatternTestNg, SelectPatternTest002, TestSize.Level1)
         optionPattern->textTheme_ = AceType::MakeRefPtr<TextTheme>();
         EXPECT_EQ(optionPattern->GetText(), CREATE_VALUE[i].text);
         pattern->SetOptionBgColor(BG_COLOR_VALUE);
+        pattern->OnModifyDone();
         EXPECT_EQ(optionPattern->bgColor_, BG_COLOR_VALUE);
-        EXPECT_EQ(optionPattern->optionBgColor_, BG_COLOR_VALUE);
-        EXPECT_TRUE(optionPattern->isBGColorSetByUser_);
-        EXPECT_TRUE(optionPattern->isOptionBgColorSetByUser_);
         pattern->SetSelectedOptionBgColor(SELECT_BG_COLOR_VALUE);
+        optionPattern->isSelected_ = true;
+        pattern->OnModifyDone();
         EXPECT_EQ(optionPattern->bgColor_, SELECT_BG_COLOR_VALUE);
-        EXPECT_TRUE(optionPattern->isBGColorSetByUser_);
         pattern->SetOptionFontColor(TEXT_COLOR_VALUE);
+        optionPattern->isSelected_ = false;
+        pattern->OnModifyDone();
         EXPECT_EQ(optionPattern->GetFontColor(), TEXT_COLOR_VALUE);
-        EXPECT_EQ(optionPattern->optionFontColor_, TEXT_COLOR_VALUE);
-        EXPECT_TRUE(optionPattern->isOptionFontColorSetByUser_);
         pattern->SetSelectedOptionFontColor(SELECT_TEXT_COLOR_VALUE);
-        EXPECT_EQ(optionPattern->selectFontColor_, SELECT_TEXT_COLOR_VALUE);
-        EXPECT_TRUE(optionPattern->isTextColorSetByUser_);
+        optionPattern->isSelected_ = true;
+        pattern->OnModifyDone();
+        EXPECT_EQ(optionPattern->GetFontColor(), SELECT_TEXT_COLOR_VALUE);
         pattern->InitSelected();
     }
 }

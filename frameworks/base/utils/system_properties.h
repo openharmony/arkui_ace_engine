@@ -490,6 +490,20 @@ public:
         return isDeviceAccess_;
     }
 
+    static void SetConfigDeviceType(const std::string& type)
+    {
+        configDeviceType_ = type;
+    }
+
+    static const std::string& GetConfigDeviceType()
+    {
+        return configDeviceType_;
+    }
+
+    static float GetScrollCoefficients();
+
+    static bool GetTransformEnabled();
+
     static void InitMccMnc(int32_t mcc, int32_t mnc);
 
     static ScreenShape GetScreenShape()
@@ -682,11 +696,6 @@ public:
 
     static bool IsNeedResampleTouchPoints();
 
-    static bool GetAsyncInitializeEnabled()
-    {
-        return asyncInitializeEnabled_.load();
-    }
-
     static bool IsNeedSymbol();
 
     static bool GetTaskPriorityAdjustmentEnable()
@@ -746,6 +755,9 @@ private:
     static bool rosenBackendEnabled_;
     static bool windowAnimationEnabled_;
     static bool debugEnabled_;
+    static std::string configDeviceType_;
+    static bool transformEnabled_;
+    static float scrollCoefficients_;
     static DebugFlags debugFlags_;
     static bool containerDeleteFlag_;
     static bool layoutDetectEnabled_;
@@ -770,7 +782,6 @@ private:
     static bool sideBarContainerBlurEnable_;
     static std::atomic<bool> stateManagerEnable_;
     static std::atomic<bool> acePerformanceMonitorEnable_;
-    static std::atomic<bool> asyncInitializeEnabled_;
     static std::atomic<bool> focusCanBeActive_;
     static bool aceCommercialLogEnable_;
     static bool faultInjectEnabled_;

@@ -171,3 +171,17 @@ HWTEST_F(ArcSwiperIndicatorPatternTest, GetEndAngle009, TestSize.Level1)
     auto angle = arcSwiperIndicatorPattern_->GetEndAngle(center, point, -30.0f);
     EXPECT_EQ(angle, -30);
 }
+
+/**
+ * @tc.name: SetArcIndicatorHotRegion001
+ * @tc.desc: Test SetArcIndicatorHotRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperIndicatorPatternTest, SetArcIndicatorHotRegion001, TestSize.Level1)
+{
+    DirtySwapConfig config;
+    config.skipMeasure = true;
+    config.skipLayout = true;
+    auto result = arcSwiperIndicatorPattern_->SetArcIndicatorHotRegion(nullptr, config);
+    EXPECT_FALSE(result);
+}

@@ -29,6 +29,7 @@ struct NavIndex {
     { name: 'Menu', path: 'MenuIndex' },
     { name: 'Popup', path: 'PopupIndex' },
     { name: 'Toast', path: 'ToastIndex' },
+    { name: 'Overlay', path: 'OverlayIndex' },
   ]
 
   build() {

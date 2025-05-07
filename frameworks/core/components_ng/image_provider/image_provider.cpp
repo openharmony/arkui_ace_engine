@@ -59,7 +59,7 @@ bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
     auto lock = imageObj->GetPrepareImageDataLock();
     if (!lock.owns_lock()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "Failed to acquire lock within timeout. %{private}s-%{public}s.",
-            dfxConfig.imageSrc_.c_str(), dfxConfig.ToStringWithoutSrc().c_str());
+            dfxConfig.GetImageSrc().c_str(), dfxConfig.ToStringWithoutSrc().c_str());
         return false;
     }
     // data already loaded
@@ -70,7 +70,7 @@ bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
     auto container = Container::Current();
     if (container && container->IsSubContainer()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "%{private}s-%{public}s. subContainer's pipeline's dataProviderManager is null.",
-            dfxConfig.imageSrc_.c_str(), dfxConfig.ToStringWithoutSrc().c_str());
+            dfxConfig.GetImageSrc().c_str(), dfxConfig.ToStringWithoutSrc().c_str());
         auto currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = Container::GetContainer(currentId);
     }
@@ -81,7 +81,7 @@ bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
     auto imageLoader = ImageLoader::CreateImageLoader(imageObj->GetSourceInfo());
     if (!imageLoader) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "Failed to create loader in prepareImageData. %{public}s-[%{private}s]",
-            dfxConfig.ToStringWithoutSrc().c_str(), dfxConfig.imageSrc_.c_str());
+            dfxConfig.ToStringWithoutSrc().c_str(), dfxConfig.GetImageSrc().c_str());
         return false;
     }
     auto newLoadedData = imageLoader->GetImageData(imageObj->GetSourceInfo(), WeakClaim(RawPtr(pipeline)));
@@ -450,7 +450,7 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
     auto imageDfxConfig = src.GetImageDfxConfig();
     if (!data) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "data is null when try ParseImageObjectType, [%{private}s]-%{public}s.",
-            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
+            imageDfxConfig.GetImageSrc().c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
     if (src.IsSvg()) {
@@ -464,10 +464,10 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
     auto rosenImageData = DynamicCast<DrawingImageData>(data);
     if (!rosenImageData) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "rosenImageData null, [%{private}s]-%{public}s.",
-            imageDfxConfig.imageSrc_.c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
+            imageDfxConfig.GetImageSrc().c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
-    rosenImageData->SetDfxConfig(imageDfxConfig.nodeId_, imageDfxConfig.accessibilityId_);
+    rosenImageData->SetDfxConfig(imageDfxConfig.GetNodeId(), imageDfxConfig.GetAccessibilityId());
     auto codec = rosenImageData->Parse();
     if (!codec.imageSize.IsPositive()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,

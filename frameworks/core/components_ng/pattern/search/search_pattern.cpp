@@ -1625,14 +1625,16 @@ void SearchPattern::HandleBlurEvent()
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    if (isFocusTextColorSet_) {
+    auto textFieldPaintProperty = textFieldFrameNode->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textFieldPaintProperty);
+    if (isFocusTextColorSet_ && !textFieldPaintProperty->HasTextColorFlagByUser()) {
         textFieldLayoutProperty->UpdateTextColor(searchTheme->GetTextColor());
-        isFocusTextColorSet_ = false;
     }
-    if (isFocusPlaceholderColorSet_) {
+    if (isFocusPlaceholderColorSet_ && !textFieldPaintProperty->GetPlaceholderColorFlagByUserValue(false)) {
         textFieldLayoutProperty->UpdatePlaceholderTextColor(searchTheme->GetPlaceholderColor());
-        isFocusPlaceholderColorSet_ = false;
     }
+    isFocusTextColorSet_ = false;
+    isFocusPlaceholderColorSet_ = false;
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->HandleBlurEvent();
@@ -2017,6 +2019,11 @@ void SearchPattern::OnColorConfigurationUpdate()
     auto searchTheme = GetTheme();
     CHECK_NULL_VOID(searchTheme);
     UpdateCancelButtonColorMode();
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) ||
+        !SystemProperties::IsNeedSymbol()) {
+        UpdateImageIconNode(IMAGE_INDEX);
+        UpdateImageIconNode(CANCEL_IMAGE_INDEX);
+    }
     auto buttonNode = buttonNode_.Upgrade();
     if (buttonNode) {
         auto buttonRenderContext = buttonNode->GetRenderContext();
@@ -2671,11 +2678,13 @@ void SearchPattern::UpdateSymbolIconProperties(RefPtr<FrameNode>& iconFrameNode,
         auto iconSymbol = layoutProperty->GetSearchIconSymbol();
         if (iconSymbol != nullptr) {
             iconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconFrameNode)));
+            symbolLayoutProperty->OnPropertyChangeMeasure();
         }
     } else {
         auto iconSymbol = layoutProperty->GetCancelIconSymbol();
         if (iconSymbol != nullptr) {
             iconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconFrameNode)));
+            symbolLayoutProperty->OnPropertyChangeMeasure();
         }
     }
     // reset symbol effect

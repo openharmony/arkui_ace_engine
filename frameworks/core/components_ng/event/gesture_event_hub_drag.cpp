@@ -54,7 +54,7 @@ namespace {
 constexpr int32_t CREATE_PIXELMAP_TIME = 30;
 constexpr int32_t MAX_BUILDER_DEPTH = 5;
 #endif
-constexpr uint32_t EXTRA_INFO_MAX_LENGTH = 200;
+constexpr uint32_t EXTRA_INFO_MAX_LENGTH = 1024;
 constexpr int32_t DEFAULT_DRAG_DROP_STATUS = 0;
 constexpr int32_t NEW_DRAG_DROP_STATUS = 1;
 constexpr int32_t OLD_DRAG_DROP_STATUS = 3;
@@ -579,10 +579,6 @@ void GestureEventHub::HandleDragThroughMouse(const RefPtr<FrameNode> frameNode)
 
 bool GestureEventHub::IsNeedSwitchToSubWindow(const PreparedInfoForDrag& dragInfoData) const
 {
-    auto frameNode = GetFrameNode();
-    CHECK_NULL_RETURN(frameNode, false);
-    auto focusHub = frameNode->GetFocusHub();
-    CHECK_NULL_RETURN(focusHub, false);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto dragDropManager = pipeline->GetDragDropManager();
@@ -705,6 +701,7 @@ void GestureEventHub::DoOnDragStartHandling(const GestureEvent& info, const RefP
     DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event, DragDropInfo dragPreviewInfo,
     const RefPtr<PipelineContext>& pipeline)
 {
+    CHECK_NULL_VOID(frameNode);
     GetUnifiedData(frameNode->GetTag(), dragDropInfo, event);
     // set drag pointer status
     auto dragDropManager = pipeline->GetDragDropManager();
@@ -904,7 +901,6 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
                                                       : HandleDragThroughTouch(frameNode);
     }
     SetDragGatherPixelMaps(info);
-    dragDropManager->SetIsMouseDrag(info.GetInputEventType() == InputEventType::MOUSE_BUTTON);
     bool isMenuShow = DragDropGlobalController::GetInstance().IsMenuShowing();
     if (isMenuShow) {
         dragDropManager->SetIsDragWithContextMenu(true);
@@ -959,7 +955,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto width = pixelMapDuplicated->GetWidth();
     auto height = pixelMapDuplicated->GetHeight();
     auto extraInfoLimited = dragDropInfo.extraInfo.size() > EXTRA_INFO_MAX_LENGTH
-                                ? dragDropInfo.extraInfo.substr(EXTRA_INFO_MAX_LENGTH + 1)
+                                ? dragDropInfo.extraInfo.substr(0, EXTRA_INFO_MAX_LENGTH)
                                 : dragDropInfo.extraInfo;
     auto innerRect = ParseInnerRect(extraInfoLimited, SizeF(width, height));
     auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), data, scale, innerRect);
@@ -1014,6 +1010,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     dragEventActuator_->NotifyDragStart();
     DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::DRAG_START_SUCCESS);
     bool isSwitchedToSubWindow = false;
+    dragDropManager->SetIsMouseDrag(info.GetInputEventType() == InputEventType::MOUSE_BUTTON);
     if (!needChangeFwkForLeaveWindow && subWindow && TryDoDragStartAnimation(context, subWindow, info, data)) {
         dragDropManager->SetIsReDragStart(pipeline != dragNodePipeline);
         isSwitchedToSubWindow = true;

@@ -53,6 +53,11 @@ RefPtr<RenderNode> SvgUse::CreateRender(
         LOGE("href is empty");
         return nullptr;
     }
+    if (isCreateRenderRunning_) {
+        LOGW("Render creation already in progress, skipping current operation to avoid infinite loop.");
+        return nullptr;
+    }
+    isCreateRenderRunning_ = true;
     auto refSvgNode = svgContext->GetSvgNodeById(declaration->GetHref());
     if (!refSvgNode) {
         LOGE("refSvgNode is null");
@@ -79,6 +84,7 @@ RefPtr<RenderNode> SvgUse::CreateRender(
     renderNode->Update(component_);
     renderNode->AddChild(refRenderNode, 0);
     renderNode->Layout(layoutParam);
+    isCreateRenderRunning_ = false;
     if (!useBox || declaration->GetClipPathHref().empty()) {
         LOGW("use of svg tag skip box create");
         return renderNode;

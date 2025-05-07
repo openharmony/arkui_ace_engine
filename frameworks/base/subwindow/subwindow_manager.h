@@ -217,6 +217,12 @@ public:
     const RefPtr<Subwindow> GetSubwindowByType(int32_t instanceId, SubwindowType windowType);
     void AddSubwindow(int32_t instanceId, SubwindowType windowType, RefPtr<Subwindow> subwindow);
     const std::vector<RefPtr<Subwindow>> GetSortSubwindow(int32_t instanceId);
+    void AddMaskSubwindowMap(int32_t dialogId, const RefPtr<Subwindow>& subwindow);
+    void RemoveMaskSubwindowMap(int32_t dialogId);
+    const RefPtr<Subwindow> GetMaskSubwindow(int32_t dialogId);
+    void ShowDialogMaskNG(const RefPtr<NG::FrameNode>& dialog);
+    void CloseDialogMaskNG(const RefPtr<NG::FrameNode>& dialog);
+    void CloseMaskSubwindow(int32_t dialogId);
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
@@ -229,6 +235,7 @@ private:
     void MarkSetSubwindowRect(const NG::RectF& rect, int32_t instanceId, SubwindowType type);
     void AddInstanceSubwindowMap(int32_t subInstanceId, RefPtr<Subwindow> subwindow);
     RefPtr<Subwindow> GetSubwindowBySearchKey(const SubwindowKey& searchKey);
+    RefPtr<Subwindow> CheckSubwindowDisplayId(const SubwindowKey& searchKey, const RefPtr<Subwindow>& subwindow);
     void RemoveSubwindowBySearchKey(const SubwindowKey& searchKey);
     void AddSubwindowBySearchKey(const SubwindowKey& searchKey, const RefPtr<Subwindow>& subwindow);
     static std::mutex instanceMutex_;
@@ -255,6 +262,10 @@ private:
     RefPtr<Subwindow> currentDialogSubwindow_;
     Rect uiExtensionWindowRect_;
     bool isSuperFoldDisplayDevice_ = false;
+
+    std::mutex maskSubwindowMutex_;
+    std::unordered_map<int32_t, RefPtr<Subwindow>> maskSubWindowMap_;
+
 };
 
 } // namespace OHOS::Ace

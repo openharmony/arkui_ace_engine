@@ -1262,6 +1262,159 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest076, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BaseUtilsTest077
+ * @tc.desc: Test FormatString with basic format strings
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest077, TestSize.Level1)
+{
+    EXPECT_EQ(StringUtils::FormatString("Hello %s", "world"), "Hello world");
+    EXPECT_EQ(StringUtils::FormatString("%d", 42), "42");
+    EXPECT_EQ(StringUtils::FormatString("%.2f", 3.14159), "3.14");
+    EXPECT_EQ(StringUtils::FormatString("%p", reinterpret_cast<void*>(42)), "0x2a");
+}
+
+/**
+ * @tc.name: BaseUtilsTest078
+ * @tc.desc: Test FormatString with no arguments
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest078, TestSize.Level1)
+{
+    EXPECT_EQ(StringUtils::FormatString("Hello"), "Hello");
+    EXPECT_EQ(StringUtils::FormatString("No vars"), "No vars");
+}
+
+/**
+ * @tc.name: BaseUtilsTest079
+ * @tc.desc: Test FormatString with max size boundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest079, TestSize.Level1)
+{
+    std::string longStr(MAX_STRING_SIZE - 1, 'a');
+    std::string result = StringUtils::FormatString("%s", longStr.c_str());
+    EXPECT_EQ(result, longStr);
+}
+
+/**
+ * @tc.name: BaseUtilsTest080
+ * @tc.desc: Test FormatString exceeding max size
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest080, TestSize.Level1)
+{
+    std::string input(300, 'B');
+    std::string result = StringUtils::FormatString("%s", input.c_str());
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: BaseUtilsTest081
+ * @tc.desc: Test FormatString with invalid format specifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest081, TestSize.Level1)
+{
+    EXPECT_TRUE(StringUtils::FormatString("%q").empty());
+    EXPECT_TRUE(StringUtils::FormatString("%z", 123).empty());
+    EXPECT_TRUE(StringUtils::FormatString("%", 123).empty());
+}
+
+/**
+ * @tc.name: BaseUtilsTest082
+ * @tc.desc: Test FormatString with escape characters
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest082, TestSize.Level1)
+{
+    EXPECT_EQ(StringUtils::FormatString("Hello\tworld\n"), "Hello\tworld\n");
+    EXPECT_EQ(StringUtils::FormatString("%c", '\0'), "\0");
+}
+
+/**
+ * @tc.name: BaseUtilsTest083
+ * @tc.desc: Test FormatString with multiple arguments
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest083, TestSize.Level1)
+{
+    std::string result = StringUtils::FormatString("%d + %f = %s", 2, 3.0, "5");
+    EXPECT_EQ(result, "2 + 3.000000 = 5");
+}
+
+/**
+ * @tc.name: BaseUtilsTest084
+ * @tc.desc: Test FormatString with empty format
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest084, TestSize.Level1)
+{
+    std::string result = StringUtils::FormatString("%999s", "test");
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: BaseUtilsTest085
+ * @tc.desc: Test FormatString with pointer formatting
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest085, TestSize.Level1)
+{
+    int x = 42;
+    std::string result = StringUtils::FormatString("%p", &x);
+    EXPECT_FALSE(result.empty());
+    EXPECT_TRUE(result.length() > 2);
+    EXPECT_EQ(result.c_str()[0], '0');
+    EXPECT_EQ(result.c_str()[1], 'x');
+}
+
+/**
+ * @tc.name: BaseUtilsTest086
+ * @tc.desc: Test FormatString with mixed types
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest086, TestSize.Level1)
+{
+    std::string result = StringUtils::FormatString("%d %f %s %c", 123, 45.67, "test", 'K');
+    EXPECT_EQ(result, "123 45.670000 test K");
+}
+
+/**
+ * @tc.name: BaseUtilsTest087
+ * @tc.desc: Test FormatString with special characters
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest087, TestSize.Level1)
+{
+    std::string result = StringUtils::FormatString("100%%");
+    EXPECT_EQ(result, "100%");
+}
+
+/**
+ * @tc.name: BaseUtilsTest088
+ * @tc.desc: Test FormatString with float formatting
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest088, TestSize.Level1)
+{
+    std::string result = StringUtils::FormatString("%.2f", 3.1415);
+    EXPECT_EQ(result, "3.14");
+}
+
+/**
+ * @tc.name: BaseUtilsTest089
+ * @tc.desc: Test FormatString with integer padding
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest089, TestSize.Level1)
+{
+    std::string expected(255, '0');
+    std::string result = StringUtils::FormatString("%0255d", 0);
+    EXPECT_EQ(result, expected);
+}
+
+/**
  * @tc.name: StringExpressionTest001
  * @tc.desc: InitMapping()
  * @tc.type: FUNC

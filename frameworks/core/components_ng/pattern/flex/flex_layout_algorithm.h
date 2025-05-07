@@ -83,7 +83,7 @@ private:
     FlexAlign GetSelfAlign(const RefPtr<LayoutWrapper>& layoutWrapper) const;
     float GetStretchCrossAxisLimit() const;
     void MeasureOutOfLayoutChildren(LayoutWrapper* layoutWrapper);
-    void MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrapper, SizeF& realSize);
+    void MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrapper, const SizeF& realSize);
     void MeasureAndCleanMagicNodes(LayoutWrapper* containerLayoutWrapper, FlexItemProperties& flexItemProperties);
     bool HandleBlankFirstTimeMeasure(const MagicLayoutNode& child, FlexItemProperties& flexItemProperties);
     void UpdateFlexProperties(FlexItemProperties& flexItemProperties, const RefPtr<LayoutWrapper>& layoutWrapper);

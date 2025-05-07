@@ -70,68 +70,6 @@ std::optional<std::u16string> OptionalStr8ToStr16(const std::optional<std::strin
     }
     return std::nullopt;
 }
-
-std::function<std::vector<NG::MenuOptionsParam>(const std::vector<NG::MenuItemParam>& menuItem)> FormatOnCreateMenu(
-    SearchTextMenuItemHandle (*callbackOnCreateMenu)(SearchTextMenuItemHandle vecTextMenuItem))
-{
-    std::function<std::vector<NG::MenuOptionsParam>(const std::vector<NG::MenuItemParam>& menuItem)> result =
-        [ffiOnAction = CJLambda::Create(callbackOnCreateMenu)](
-            const std::vector<NG::MenuItemParam>& menuItem) -> std::vector<NG::MenuOptionsParam> {
-        std::vector<NG::MenuItemParam> menuItemCopy = menuItem;
-        std::vector<FFiSearchTextMenuItem> arr;
-        auto size = menuItemCopy.size();
-        arr.resize(size);
-        for (size_t i = 0; i < size; ++i) {
-            arr[i].content = menuItemCopy[i].menuOptionsParam.content.has_value()
-                                 ? const_cast<char*>(menuItemCopy[i].menuOptionsParam.content.value().c_str())
-                                 : nullptr;
-            arr[i].icon = menuItemCopy[i].menuOptionsParam.icon.has_value()
-                              ? const_cast<char*>(menuItemCopy[i].menuOptionsParam.icon.value().c_str())
-                              : nullptr;
-            arr[i].id = const_cast<char*>(menuItemCopy[i].menuOptionsParam.id.c_str());
-        }
-        SearchTextMenuItemHandle vectorTextMenuItemHandle = &arr;
-        SearchTextMenuItemHandle newVectorTextMenuItemHandle = ffiOnAction(vectorTextMenuItemHandle);
-        auto newTextMenuItem = *reinterpret_cast<std::vector<FFiSearchTextMenuItem>*>(newVectorTextMenuItemHandle);
-        std::vector<NG::MenuOptionsParam> vecMenuOptionsParam;
-        auto sizeCallback = newTextMenuItem.size();
-        vecMenuOptionsParam.resize(sizeCallback);
-        for (size_t i = 0; i < sizeCallback; ++i) {
-            vecMenuOptionsParam[i].content =
-                newTextMenuItem[i].content ? std::make_optional<std::string>(newTextMenuItem[i].content) : std::nullopt;
-            vecMenuOptionsParam[i].icon =
-                newTextMenuItem[i].icon ? std::make_optional<std::string>(newTextMenuItem[i].icon) : std::nullopt;
-            vecMenuOptionsParam[i].id = newTextMenuItem[i].id;
-            vecMenuOptionsParam[i].action = [](const std::string& arg) {};
-            for (auto menuItem : menuItemCopy) {
-                if (newTextMenuItem[i].id == menuItem.menuOptionsParam.id) {
-                    vecMenuOptionsParam[i].action = menuItem.menuOptionsParam.action;
-                    break;
-                }
-            }
-        }
-        return vecMenuOptionsParam;
-    };
-    return result;
-}
-
-std::function<bool(const NG::MenuItemParam& menuItemParam)> FormatOnMenuItemClick(
-    bool (*callbackOnMenuItemClick)(FFiSearchTextMenuItem textMenuItem, int32_t start, int32_t end))
-{
-    std::function<bool(const NG::MenuItemParam& menuItemParam)> result =
-        [ffiOnAction = CJLambda::Create(callbackOnMenuItemClick)](const NG::MenuItemParam& menuItemParam) -> bool {
-        auto menuItem =
-            FFiSearchTextMenuItem { menuItemParam.menuOptionsParam.content.has_value()
-                                        ? const_cast<char*>(menuItemParam.menuOptionsParam.content.value().c_str())
-                                        : nullptr,
-                menuItemParam.menuOptionsParam.icon.has_value()
-                    ? const_cast<char*>(menuItemParam.menuOptionsParam.icon.value().c_str())
-                    : nullptr,
-                const_cast<char*>(menuItemParam.menuOptionsParam.id.c_str()) };
-        return ffiOnAction(menuItem, menuItemParam.start, menuItemParam.end);
-    };
-    return result;
-}
 } // namespace
 
 extern "C" {
@@ -584,17 +522,12 @@ void FfiOHOSAceFrameworkSearchSetCustomKeyboard(void (*callback)(), bool options
     SearchModel::GetInstance()->SetCustomKeyboard(std::move(builderFunc), options);
 }
 
-void FfiOHOSAceFrameworkSearchEditMenuOptions(
-    SearchTextMenuItemHandle (*callbackOnCreateMenu)(SearchTextMenuItemHandle vecTextMenuItem),
-    bool (*callbackOnMenuItemClick)(FFiSearchTextMenuItem textMenuItem, int32_t start, int32_t end))
+void FfiOHOSAceFrameworkSearchEditMenuOptions(CjOnCreateMenu cjOnCreateMenu, CjOnMenuItemClick cjOnMenuItemClick)
 {
-    auto onCreateMenu = [func = FormatOnCreateMenu(callbackOnCreateMenu)](
-                            const std::vector<NG::MenuItemParam>& val) -> std::vector<NG::MenuOptionsParam> {
-        return func(val);
-    };
-    auto onMenuItemClick = [func = FormatOnMenuItemClick(callbackOnMenuItemClick)](
-                               const NG::MenuItemParam& val) -> bool { return func(val); };
-    SearchModel::GetInstance()->SetSelectionMenuOptions(std::move(onCreateMenu), std::move(onMenuItemClick));
+    NG::OnCreateMenuCallback onCreateMenuCallback;
+    NG::OnMenuItemClickCallback onMenuItemClick;
+    ViewAbstract::ParseEditMenuOptions(cjOnCreateMenu, cjOnMenuItemClick, onCreateMenuCallback, onMenuItemClick);
+    SearchModel::GetInstance()->SetSelectionMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 
 SearchTextMenuItemHandle FfiOHOSAceFrameworkSearchCreateTextMenuItem(int64_t size)

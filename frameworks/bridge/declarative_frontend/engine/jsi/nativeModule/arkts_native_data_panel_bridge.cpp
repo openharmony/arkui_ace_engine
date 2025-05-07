@@ -106,7 +106,8 @@ void SetTrackShadowObject(ArkUINodeHandle nativeNode, std::vector<OHOS::Ace::NG:
         linearLength[i] = shadowColors[i].GetColors().size();
         for (uint32_t j = 0; j < linearLength[i]; j++) {
             allColor.emplace_back(shadowColors[i].GetColors()[j].GetLinearColor().GetValue());
-            allOffset.emplace_back(ArkUILengthType { .number = shadowColors[i].GetColors()[j].GetDimension().Value(),
+            allOffset.emplace_back(ArkUILengthType {
+                .number = static_cast<ArkUI_Float32>(shadowColors[i].GetColors()[j].GetDimension().Value()),
                 .unit = static_cast<int8_t>(shadowColors[i].GetColors()[j].GetDimension().Unit()) });
         }
     }
@@ -154,7 +155,8 @@ ArkUINativeModuleValue DataPanelBridge::SetValueColors(ArkUIRuntimeCallInfo* run
         linearLength[i] = shadowColors[i].GetColors().size();
         for (uint32_t j = 0; j < linearLength[i]; j++) {
             allColor.emplace_back(shadowColors[i].GetColors()[j].GetLinearColor().GetValue());
-            allOffset.emplace_back(ArkUILengthType { .number = shadowColors[i].GetColors()[j].GetDimension().Value(),
+            allOffset.emplace_back(ArkUILengthType {
+                .number = static_cast<ArkUI_Float32>(shadowColors[i].GetColors()[j].GetDimension().Value()),
                 .unit = static_cast<int8_t>(shadowColors[i].GetColors()[j].GetDimension().Unit()) });
         }
     }

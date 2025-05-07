@@ -2304,6 +2304,7 @@ frameworks/core/image/ @arkui_image
 frameworks/core/image/test/ @arkui_image
 frameworks/core/pipeline/base/ @arkuiframework
 frameworks/core/pipeline/BUILD.gn @arkui_architecture
+frameworks/core/pipeline/container_window_manager.cpp @arkuiframework
 frameworks/core/pipeline/container_window_manager.h @arkuiframework
 frameworks/core/pipeline/layers/ @arkuiframework
 frameworks/core/pipeline/LICENSE @arkuiframework
@@ -2628,7 +2629,7 @@ frameworks/core/components_ng/render/adapter/drawing_decoration_painter.cpp @ark
 frameworks/core/components_ng/render/adapter/drawing_decoration_painter.h @arkui_superman
 frameworks/core/components_ng/render/adapter/drawing_image.cpp @arkui_image
 frameworks/core/components_ng/render/adapter/drawing_image.h @arkui_image
-frameworks/core/components_ng/render/adapter/drawing_painter.cpp @arkui_image
+frameworks/core/components_ng/render/adapter/drawing_painter.cpp @arkuilayout
 frameworks/core/components_ng/render/adapter/drawing_painter.h @arkui_image
 frameworks/core/components_ng/render/adapter/rosen_media_player.cpp @arkuilayout
 frameworks/core/components_ng/render/adapter/rosen_media_player.h @arkuilayout

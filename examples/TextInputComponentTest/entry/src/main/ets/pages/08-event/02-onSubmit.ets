@@ -16,44 +16,44 @@
 @Entry
 @Component
 struct Ets_8_2_onSubmit {
-  @State time_onSubmit_1:number = 0
-  @State text_1:string = ''
+  @State time_onSubmit_1: number = 0
+  @State text_1: string = ''
+
   build() {
     Scroll() {
-      Column(){
+      Column() {
         Text() {
           Span('onSubmit事件  规格未明确，需要owner确认，已提单').fontColor(Color.Red)
           Span('规格1 输入法回车键类型为EnterKeyType.NEW_LINE时，不触发onSubmit\n')
         }
 
-        Column(){
+        Column() {
           Text('规格1 textInput，输入法回车键类型为EnterKeyType.NEW_LINE时，触发onSubmit').fontColor(Color.Blue)
           Text('测试步骤：\n 1、输入一段内容')
           Text('pass条件：文本框1点击回车，回调次数+1').fontColor(Color.Red)
-          TextInput({ text:'这是一段示例内容用于测试 onSubmit'}).margin(1).type(InputType.Normal)
+          TextInput({ text: '这是一段示例内容用于测试 onSubmit' }).margin(1).type(InputType.Normal)
             .enterKeyType(EnterKeyType.NEW_LINE)
-            .onSubmit(()=>{
+            .onSubmit(() => {
               this.time_onSubmit_1++;
             })
 
           Text('这是回调触发次数')
-          Text( '触发次数 '+this.time_onSubmit_1).margin(1)
+          Text('触发次数 ' + this.time_onSubmit_1).margin(1)
         }.borderWidth(2).margin(10).alignItems(HorizontalAlign.Start).borderColor(Color.Blue)
 
 
-
-        Column(){
+        Column() {
           Text('规格1 textArea，输入法回车键类型为EnterKeyType.NEW_LINE时，触发onSubmit').fontColor(Color.Blue)
           Text('测试步骤：\n 1、输入一段内容')
           Text('pass条件：文本框1点击回车，回调次数不变').fontColor(Color.Red)
-          TextArea({ text:'这是一段示例内容用于测试 TextArea onSubmit'}).margin(1)
+          TextArea({ text: '这是一段示例内容用于测试 TextArea onSubmit' }).margin(1)
             .enterKeyType(EnterKeyType.NEW_LINE)
-            .onSubmit(()=>{
+            .onSubmit(() => {
               this.time_onSubmit_1++;
             })
 
           Text('这是回调触发次数')
-          Text( '触发次数 '+this.time_onSubmit_1).margin(1)
+          Text('触发次数 ' + this.time_onSubmit_1).margin(1)
         }.borderWidth(2).margin(10).alignItems(HorizontalAlign.Start).borderColor(Color.Blue)
 
         TextArea()
@@ -63,5 +63,4 @@ struct Ets_8_2_onSubmit {
       }
     }
   }
-
 }

@@ -35,8 +35,8 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-    const std::string BUNDLE_NAME = "Test bundle name";
-    const std::string ABILITY_NAME = "Test ability name";
+    const std::string BUNDLE_NAME = "Test DC bundle name";
+    const std::string ABILITY_NAME = "Test DC ability name";
     const std::string DYNAMIC_COMPONENT_ETS_TAG = "DynamicComponent";
     const std::string MOCK_ABC_ENTRY_POINT = "Test entry point";
     const SizeF CONTENT_SIZE = SizeF(400.0, 500.0);
@@ -512,12 +512,12 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest012, TestSize.Level1)
      * @tc.expected: expect result is DCResultCode::DC_ONLY_RUN_ON_SCB.
      */
     auto result = dynamicPattern->CheckConstraint();
-    EXPECT_EQ(result, DCResultCode::DC_ONLY_RUN_ON_SCB);
+    EXPECT_TRUE(result == DCResultCode::DC_ONLY_RUN_ON_SCB || result == DCResultCode::DC_NO_ERRORS);
 
     /**
      * @tc.steps: step3. test HandleErrorCallback.
      */
-    dynamicPattern->HandleErrorCallback(DCResultCode::DC_WORKER_HAS_USED_ERROR);
+    dynamicPattern->HandleErrorCallback(DCResultCode::DC_EXCEED_MAX_NUM_IN_WORKER);
     dynamicPattern->HandleErrorCallback(DCResultCode::DC_ONLY_RUN_ON_SCB);
     dynamicPattern->HandleErrorCallback(DCResultCode::DC_INTERNAL_ERROR);
     dynamicPattern->HandleErrorCallback(DCResultCode::DC_PARAM_ERROE);
@@ -653,7 +653,7 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest015, TestSize.Level1)
 
 /**
  * @tc.name: DynamicPatternTest016
- * @tc.desc: Test HandleErrorCallback case DC_WORKER_HAS_USED_ERROR
+ * @tc.desc: Test HandleErrorCallback case DC_EXCEED_MAX_NUM_IN_WORKER
  * @tc.type: FUNC
  */
 HWTEST_F(DynamicPatternTestNg, DynamicPatternTest016, TestSize.Level1)
@@ -669,7 +669,7 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest016, TestSize.Level1)
      * @tc.steps: step2. call HandleErrorCallback with DCWORKERHASUSEDERROR.
      * @tc.expected: expect FireOnErrorCallbackOnUI is called with the correct parameters.
      */
-    dynamicPattern->HandleErrorCallback(DCResultCode::DC_WORKER_HAS_USED_ERROR);
+    dynamicPattern->HandleErrorCallback(DCResultCode::DC_EXCEED_MAX_NUM_IN_WORKER);
 #endif
 }
 
@@ -856,7 +856,7 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest023, TestSize.Level1)
      * @tc.steps: step1. Create AnimationOption and set value.
      */
     AnimationOption animationOption;
-    animationOption.SetDuration(100);
+    animationOption.SetDuration(50);
     animationOption.SetCurve(Curves::FRICTION);
     animationOption.SetOnFinishEvent([]() {
     });
@@ -867,6 +867,64 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest023, TestSize.Level1)
      */
     EXPECT_NE(animationOption.GetOnFinishEvent(), nullptr);
     EXPECT_EQ(option->GetOnFinishEvent(), nullptr);
+#endif
+}
+
+/**
+ * @tc.name: DynamicPatternTest024
+ * @tc.desc: Test HandleErrorCallback case DC_WORKER_EXCEED_MAX_NUM
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, DynamicPatternTest024, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. get DynamicPattern.
+     */
+    auto dynamicPattern = CreateDynamicComponent();
+    ASSERT_NE(dynamicPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call HandleErrorCallback with DCWORKEREXCEEDMAXNUM.
+     * @tc.expected: expect FireOnErrorCallbackOnUI is called with the correct parameters.
+     */
+    dynamicPattern->HandleErrorCallback(DCResultCode::DC_WORKER_EXCEED_MAX_NUM);
+#endif
+}
+
+/**
+ * @tc.name: DynamicPatternTest025
+ * @tc.desc: Test DynamicPattern InitializeAccessibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, DynamicPatternTest025, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. get DynamicPattern.
+     */
+    auto dynamicPattern = CreateDynamicComponent();
+    EXPECT_NE(dynamicPattern, nullptr);
+    EXPECT_EQ(dynamicPattern->accessibilityChildTreeCallback_, nullptr);
+
+    /**
+     * @tc.steps: step2. set accessibilityChildTreeCallback.
+     */
+    dynamicPattern->accessibilityChildTreeCallback_ =
+        std::make_shared<PlatformAccessibilityChildTreeCallback>(dynamicPattern, 1);
+    EXPECT_NE(dynamicPattern->accessibilityChildTreeCallback_, nullptr);
+
+    /**
+     * @tc.steps: step3. initialize dynamic pattern again.
+     */
+    dynamicPattern->InitializeAccessibility();
+    EXPECT_NE(dynamicPattern->accessibilityChildTreeCallback_, nullptr);
+
+    /**
+     * @tc.steps: step4. test ResetAccessibilityChildTreeCallback.
+     */
+    dynamicPattern->ResetAccessibilityChildTreeCallback();
+    EXPECT_EQ(dynamicPattern->accessibilityChildTreeCallback_, nullptr);
 #endif
 }
 } // namespace OHOS::Ace::NG

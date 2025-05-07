@@ -53,6 +53,8 @@ class FormSpecialStyle {
 public:
     void SetIsForbiddenByParentControl(bool isForbiddenByParentControl);
     void SetIsLockedByAppLock(bool isLockedByAppLock);
+    bool IsForbidden() const;
+    bool IsLocked() const;
     const char* GetResource();
     [[nodiscard]] FormStyleAttribution GetFormStyleAttribution() const;
     FormOperation GetOperationToNewFormStyle(const FormSpecialStyle& formSpecialStyle);

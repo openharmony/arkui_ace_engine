@@ -65,6 +65,7 @@ public:
     ~SvgGraphic() override = default;
     void OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule) override;
     void OnDraw(RSCanvas& canvas, const Size& layout, const std::optional<Color>& color) override;
+    void DumpDrawPathInfo(const RSRecordingPath& path);
 protected:
     void OnGraphicFill()
     {
@@ -77,6 +78,7 @@ protected:
             if (!path_->IsValid()) {
                 TAG_LOGW(AceLogTag::ACE_IMAGE, "svg path is invalid");
             }
+            DumpDrawPathInfo(path_.value());
             if (GreatNotEqual(smoothEdge, 0.0f)) {
                 RSFilter filter;
                 filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
@@ -112,6 +114,8 @@ protected:
             LOGW("OnGraphicFill call InitBrush paint type :%{public}d failed ", paintType);
             return;
         }
+        DumpDrawPathInfo(rsPath);
+
         canvas.AttachBrush(brush);
         canvas.DrawPath(rsPath);
         canvas.DetachBrush();
@@ -133,6 +137,7 @@ protected:
             LOGW("OnGraphicStroke call InitBrush paint type :%{public}d failed ", paintType);
             return;
         }
+        DumpDrawPathInfo(rsPath);
         SetPenStyle(rsPen);
         canvas.AttachPen(rsPen);
         canvas.DrawPath(rsPath);
@@ -161,6 +166,7 @@ protected:
             } else {
                 rsCanvas_->AttachPen(strokePen_);
             }
+            DumpDrawPathInfo(path_.value());
             rsCanvas_->DrawPath(path_.value());
             rsCanvas_->DetachPen();
         }

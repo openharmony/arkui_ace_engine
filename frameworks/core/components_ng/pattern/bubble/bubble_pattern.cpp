@@ -864,8 +864,11 @@ void BubblePattern::OnColorConfigurationUpdate()
         auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(defaultBGcolor);
         renderContext->UpdateBackgroundColor(backgroundColor);
         BlurStyleOption styleOption;
+        styleOption.blurStyle = BlurStyle::COMPONENT_REGULAR;
         styleOption.colorMode = static_cast<ThemeColorMode>(popupTheme->GetBgThemeColorMode());
         renderContext->UpdateBackBlurStyle(styleOption);
+        auto shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultSM);
+        renderContext->UpdateBackShadow(shadow);
     }
 }
 

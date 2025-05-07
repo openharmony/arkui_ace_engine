@@ -88,7 +88,7 @@ void ListTestNg::GetList()
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     pattern_ = frameNode_->GetPattern<ListPattern>();
-    eventHub_ = frameNode_->GetEventHub<ListEventHub>();
+    eventHub_ = frameNode_->GetOrCreateEventHub<ListEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<ListLayoutProperty>();
     paintProperty_ = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
     positionController_ = AceType::DynamicCast<ListPositionController>(pattern_->GetPositionController());

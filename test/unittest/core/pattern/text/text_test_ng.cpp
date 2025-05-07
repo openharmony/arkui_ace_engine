@@ -201,7 +201,7 @@ HWTEST_F(TextTestNg, SetTextDetectEnable003, TestSize.Level1)
     std::u16string eventValue;
     auto onCopyResult = [&eventValue](const std::u16string& param) { eventValue = param; };
 
-    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<TextEventHub>();
     textModelNG.SetOnCopy(frameNode, onCopyResult);
     EXPECT_NE(eventHub->onCopy_, nullptr);
 

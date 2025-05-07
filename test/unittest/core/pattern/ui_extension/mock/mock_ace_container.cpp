@@ -297,34 +297,8 @@ bool AceContainer::IsCrossAxisWindow()
 
 void AceContainer::GetExtensionConfig(AAFwk::WantParams& want) {}
 
-RefPtr<PageViewportConfig> AceContainer::GetCurrentViewportConfig() const
+void AceContainer::DispatchExtensionDataToHostWindow(
+    uint32_t code, const AAFwk::Want& data, int32_t persistenId)
 {
-    return nullptr;
-}
-
-RefPtr<PageViewportConfig> AceContainer::GetTargetViewportConfig(Orientation orientation,
-    bool enableStatusBar, bool statusBarAnimated, bool enableNavigationIndicator)
-{
-    return nullptr;
-}
-
-void AceContainer::SetRequestedOrientation(
-    Orientation orientation, bool needAnimation)
-{
-}
-
-Orientation AceContainer::GetRequestedOrientation()
-{
-    return Orientation::UNSPECIFIED;
-}
-
-bool AceContainer::IsPcOrPadFreeMultiWindowMode() const
-{
-    return false;
-}
-
-bool AceContainer::SetSystemBarEnabled(SystemBarType type, bool enable, bool animation)
-{
-    return true;
 }
 } // namespace OHOS::Ace::NG

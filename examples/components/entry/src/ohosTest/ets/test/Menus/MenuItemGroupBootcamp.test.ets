@@ -26,7 +26,7 @@ import {
   sliderDrag,
   titleSearch,
   ToggleClick
-} from '../utils';
+} from '../../utils';
 
 
 const TAG = 'MenuItemGroupBootcamp001'

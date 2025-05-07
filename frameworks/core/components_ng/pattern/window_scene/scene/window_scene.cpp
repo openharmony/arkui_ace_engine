@@ -99,6 +99,67 @@ std::shared_ptr<Rosen::RSSurfaceNode> WindowScene::CreateLeashWindowNode()
     return surfaceNode;
 }
 
+bool WindowScene::IsMainSessionRecent()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto parent = host->GetParentFrameNode();
+    CHECK_NULL_RETURN(parent, false);
+    auto pattern = parent->GetPattern();
+    CHECK_NULL_RETURN(pattern, false);
+    auto windowScene = AceType::DynamicCast<WindowScene>(pattern);
+    CHECK_NULL_RETURN(windowScene, false);
+    CHECK_NULL_RETURN(windowScene->session_, false);
+    
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "IsMainSessionRecent id:%{public}d, nodeId:%{public}d,"
+        "type:%{public}d, recent:%{public}d", windowScene->session_->GetPersistentId(), host->GetId(),
+        windowScene->session_->GetWindowType(), windowScene->session_->GetShowRecent());
+    if (windowScene->session_->GetShowRecent()) {
+        windowScene->weakSubSessions_.push_back(wptr(session_));
+        return true;
+    }
+    return false;
+}
+
+void WindowScene::SubWindowAttachToFrameNode(sptr<Rosen::Session>& session)
+{
+    CHECK_NULL_VOID(session);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto surfaceNode = session->GetSurfaceNode();
+    CHECK_NULL_VOID(surfaceNode);
+    auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
+    CHECK_NULL_VOID(context);
+    context->SetRSNode(surfaceNode);
+    surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
+    SetSubWindowBufferAvailableCallback(surfaceNode);
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+        "SubWindowAttachToFrameNode id:%{public}d, nodeId:%{public}d, type:%{public}d, name:%{public}s",
+        session->GetPersistentId(), host->GetId(), session->GetWindowType(), session->GetWindowName().c_str());
+}
+ 
+void WindowScene::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(session_);
+    auto windowName = IsMainWindow() ? session_->GetSessionInfo().bundleName_ : session_->GetWindowName();
+    ACE_SCOPED_TRACE("OnAttachToMainTree[id:%d][self:%d][type:%d][name:%s]",
+        session_->GetPersistentId(), host->GetId(), session_->GetWindowType(), windowName.c_str());
+    if (IsMainWindow()) {
+        return;
+    }
+    if (IsMainSessionRecent()) {
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+            "OnAttachToMainTree id:%{public}d, nodeId:%{public}d, type:%{public}d, name:%{public}s",
+            session_->GetPersistentId(), host->GetId(), session_->GetWindowType(), windowName.c_str());
+        auto surfaceNode = session_->GetSurfaceNode();
+        if (surfaceNode) {
+            surfaceNode->SetVisible(false);
+        }
+    }
+}
+
 RefPtr<RosenRenderContext> WindowScene::GetContextByDisableDelegator(bool isAbilityHook, bool isBufferAvailable)
 {
     if (isAbilityHook) {
@@ -402,6 +463,25 @@ void WindowScene::BufferAvailableCallbackForBlank(bool fromMainThread)
         std::move(uiTask), "ArkUIBufferAvailableCallbackForBlank", TaskExecutor::TaskType::UI);
 }
 
+void WindowScene::SetSubSessionVisible()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    for (auto& weakSubSession : weakSubSessions_) {
+        auto subSession = weakSubSession.promote();
+        if (subSession) {
+            auto surfaceNode = subSession->GetSurfaceNode();
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+                "SetSubSessionVisible id:%{public}d, nodeId:%{public}d, name:%{public}s",
+                subSession->GetPersistentId(), host->GetId(), subSession->GetSessionInfo().bundleName_.c_str());
+            if (surfaceNode) {
+                surfaceNode->SetVisible(true);
+            }
+        }
+    }
+    weakSubSessions_.clear();
+}
+
 void WindowScene::BufferAvailableCallbackForSnapshot()
 {
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
@@ -422,6 +502,7 @@ void WindowScene::BufferAvailableCallbackForSnapshot()
         self->RemoveChild(host, self->snapshotWindow_, self->snapshotWindowName_);
         self->snapshotWindow_.Reset();
         self->session_->SetNeedSnapshot(true);
+        self->SetSubSessionVisible();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
 
@@ -466,6 +547,7 @@ void WindowScene::OnActivation()
             self->newAppWindow_.Reset();
             self->session_->SetNeedSnapshot(true);
             self->blankWindow_.Reset();
+            self->SetSubSessionVisible();
             self->OnAttachToFrameNode();
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         } else if (showingInRecents &&
@@ -473,6 +555,7 @@ void WindowScene::OnActivation()
             self->RemoveChild(host, self->snapshotWindow_, self->snapshotWindowName_);
             self->snapshotWindow_.Reset();
             self->session_->SetNeedSnapshot(true);
+            self->SetSubSessionVisible();
             self->CreateStartingWindow();
             self->AddChild(host, self->startingWindow_, self->startingWindowName_);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -484,9 +567,8 @@ void WindowScene::OnActivation()
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             surfaceNode->SetBufferAvailableCallback(self->callback_);
         } else if (self->snapshotWindow_) {
+            self->session_->SetEnableAddSnapshot(true);
             self->DisposeSnapshotAndBlankWindow();
-            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-                     "OnActivation removeSnapshot, id: %{public}d", self->session_->GetPersistentId());
         }
     };
 
@@ -499,6 +581,7 @@ void WindowScene::OnActivation()
 void WindowScene::DisposeSnapshotAndBlankWindow()
 {
     CHECK_NULL_VOID(session_);
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "DisposeSnapshotAndBlankWindow id: %{public}d", session_->GetPersistentId());
     if (session_->GetBlank()) {
         return;
     }
@@ -515,6 +598,7 @@ void WindowScene::DisposeSnapshotAndBlankWindow()
     RemoveChild(host, snapshotWindow_, snapshotWindowName_);
     snapshotWindow_.Reset();
     session_->SetNeedSnapshot(true);
+    SetSubSessionVisible();
     if (!blankWindow_) {
         CreateBlankWindow(blankWindow_);
         AddChild(host, blankWindow_, blankWindowName_);
@@ -651,6 +735,7 @@ void WindowScene::OnDrawingCompleted()
         self->RemoveChild(host, self->snapshotWindow_, self->snapshotWindowName_);
         self->snapshotWindow_.Reset();
         self->session_->SetNeedSnapshot(true);
+        self->SetSubSessionVisible();
         self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
@@ -683,6 +768,7 @@ void WindowScene::OnAddSnapshot()
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
         CHECK_NULL_VOID(self->session_);
+        CHECK_EQUAL_VOID(self->session_->GetEnableAddSnapshot(), false);
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         if (self->snapshotWindow_ || self->startingWindow_ || self->blankWindow_) {
@@ -788,6 +874,7 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     RemoveChild(host, snapshotWindow_, snapshotWindowName_);
     snapshotWindow_.Reset();
     session_->SetNeedSnapshot(true);
+    SetSubSessionVisible();
     RemoveChild(host, startingWindow_, startingWindowName_);
     startingWindow_.Reset();
     AddChild(host, appWindow_, appWindowName_, 0);

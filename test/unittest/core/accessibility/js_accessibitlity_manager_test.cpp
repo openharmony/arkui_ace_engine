@@ -1512,7 +1512,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     auto context = NG::PipelineContext::GetCurrentContext();
     int64_t elementId = 0;
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->GetOrCreateGestureEventHub();
     auto gesture = eventHub->GetGestureEventHub();
@@ -1570,7 +1570,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     auto context = NG::PipelineContext::GetCurrentContext();
     int64_t elementId = 0;
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->GetOrCreateGestureEventHub();
     auto gesture = eventHub->GetGestureEventHub();
@@ -1617,7 +1617,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     auto context = NG::PipelineContext::GetCurrentContext();
     int64_t elementId = 0;
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->GetOrCreateGestureEventHub();
     auto gesture = eventHub->GetGestureEventHub();
@@ -1649,5 +1649,217 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
     EXPECT_EQ(frameNode->GetNodeName(), "Click_DidClick");
     NG::UIObserverHandler::GetInstance().SetWillClickFunc(nullptr);
     NG::UIObserverHandler::GetInstance().SetDidClickFunc(nullptr);
+}
+
+/**
+ * @tc.name: ConvertActionTypeToBoolen004
+ * @tc.desc: Test clear currentFocusNodeId when elementId equals to currentFocusNodeId
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen004, TestSize.Level1)
+{
+    int64_t elementId = 2LL;
+    auto context = NG::PipelineContext::GetCurrentContext();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode->GetRenderContext(), nullptr);
+
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->currentFocusNodeId_ = 2LL;
+    jsAccessibilityManager->currentFocusVirtualNodeParentId_ = 3LL;
+
+    bool ret = jsAccessibilityManager->ConvertActionTypeToBoolen(
+        ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS, frameNode, elementId, context);
+    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, -1LL);
+    EXPECT_EQ(jsAccessibilityManager->currentFocusVirtualNodeParentId_, 3LL);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: ConvertActionTypeToBoolen005
+ * @tc.desc: Test clear currentFocusNodeId when elementId not equals to currentFocusNodeId
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen005, TestSize.Level1)
+{
+    int64_t elementId = 6LL;
+    auto context = NG::PipelineContext::GetCurrentContext();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode->GetRenderContext(), nullptr);
+
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->currentFocusNodeId_ = 4LL;
+    jsAccessibilityManager->currentFocusVirtualNodeParentId_ = 5LL;
+
+    bool ret = jsAccessibilityManager->ConvertActionTypeToBoolen(
+        ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS, frameNode, elementId, context);
+    EXPECT_EQ(jsAccessibilityManager->currentFocusNodeId_, 4LL);
+    EXPECT_EQ(jsAccessibilityManager->currentFocusVirtualNodeParentId_, 5LL);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: ConvertActionTypeToBoolen006
+ * @tc.desc: Test focusing action
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, ConvertActionTypeToBoolen006, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. construct JsAccessibilityManager
+    */
+    int64_t elementId = 0;
+    auto jsAccessibilityManager = AceType::MakeRefPtr<MockJsAccessibilityManager>();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->GetOrCreateGestureEventHub();
+    auto gesture = eventHub->GetGestureEventHub();
+    ASSERT_NE(gesture, nullptr);
+    std::string nodeName = "Click";
+    frameNode->SetNodeName(nodeName);
+
+    /**
+    * @tc.steps: step2. test with nothing, expect return nodeName Click
+    */
+    NG::UIObserverHandler::WillClickHandleFunc willClickHandleFunc = [](
+        AbilityContextInfo&, const GestureEvent&, const ClickInfo&,
+        const RefPtr<FrameNode>& frameNode) -> void {};
+    ASSERT_NE(willClickHandleFunc, nullptr);
+    NG::UIObserverHandler::GetInstance().SetWillClickFunc(willClickHandleFunc);
+
+    NG::UIObserverHandler::DidClickHandleFunc didClickHandleFunc = [](
+        AbilityContextInfo&, const GestureEvent&, const ClickInfo&,
+        const RefPtr<FrameNode>& frameNode) -> void {};
+    ASSERT_NE(didClickHandleFunc, nullptr);
+    NG::UIObserverHandler::GetInstance().SetDidClickFunc(didClickHandleFunc);
+    jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLICK,
+        frameNode, elementId, context);
+    EXPECT_EQ(frameNode->GetNodeName(), "Click");
+    NG::UIObserverHandler::GetInstance().SetWillClickFunc(nullptr);
+    NG::UIObserverHandler::GetInstance().SetDidClickFunc(nullptr);
+}
+
+/**
+* @tc.name: JsAccessibilityManager031
+* @tc.desc: IsUpdateWindowSceneInfo
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    
+    /**
+     * @tc.steps: step2. node is nullptr, expect return false
+     */
+    RefPtr<FrameNode> node = nullptr;
+    NG::WindowSceneInfo windowSceneInfo;
+    bool ret = jsAccessibilityManager->IsUpdateWindowSceneInfo(node, windowSceneInfo);
+    EXPECT_FALSE(ret);
+}
+
+/**
+* @tc.name: JsAccessibilityManager032
+* @tc.desc: IsUpdateWindowSceneInfo
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager, test node
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    
+    auto rootNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNode1 = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    rootNode->AddChild(frameNode1);
+    auto frameNode2 = FrameNode::CreateFrameNode("frameNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    frameNode1->AddChild(frameNode2);
+    NG::WindowSceneInfo windowSceneInfo;
+    /**
+     * @tc.steps: step2. check root node, expect return false
+     */
+    bool ret1 = jsAccessibilityManager->IsUpdateWindowSceneInfo(rootNode, windowSceneInfo);
+    EXPECT_FALSE(ret1);
+    
+    bool ret2 = jsAccessibilityManager->IsUpdateWindowSceneInfo(frameNode2, windowSceneInfo);
+    EXPECT_FALSE(ret2);
+}
+
+/**
+* @tc.name: JsAccessibilityManager033
+* @tc.desc: IsUpdateWindowSceneInfo
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager, test node
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    
+    auto rootNode = FrameNode::CreateFrameNode("frameNode0",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNode1 = FrameNode::CreateFrameNode("frameNode1",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    rootNode->AddChild(frameNode1);
+    NG::WindowSceneInfo windowSceneInfo;
+    /**
+     * @tc.steps: step2. check frameNode1, expect return false
+     */
+    bool ret1 = jsAccessibilityManager->IsUpdateWindowSceneInfo(frameNode1, windowSceneInfo);
+    EXPECT_FALSE(ret1);
+}
+
+/**
+* @tc.name: JsAccessibilityManager034
+* @tc.desc: UpdateElementInfosTreeId
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager, test node
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    /**
+     * @tc.steps: step2. check empty infos
+     */
+    std::list<Accessibility::AccessibilityElementInfo> infos;
+    EXPECT_NO_THROW(jsAccessibilityManager->UpdateElementInfosTreeId(infos));
+    EXPECT_TRUE(infos.empty());
+
+    /**
+     * @tc.steps: step3. check info with treeId < 0
+     */
+    Accessibility::AccessibilityElementInfo info;
+    info.SetBelongTreeId(0);
+    info.SetAccessibilityId(100);
+    infos.push_back(info);
+    EXPECT_NO_THROW(jsAccessibilityManager->UpdateElementInfosTreeId(infos));
+
+    /**
+     * @tc.steps: step4. check info with treeId > 0
+     */
+    infos.clear();
+    info.SetBelongTreeId(1);
+    info.SetAccessibilityId(100);
+    info.SetParent(10);
+    infos.push_back(info);
+    EXPECT_NO_THROW(jsAccessibilityManager->UpdateElementInfosTreeId(infos));
 }
 } // namespace OHOS::Ace::NG

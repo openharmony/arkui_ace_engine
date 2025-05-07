@@ -1146,24 +1146,20 @@ export class ArcSlider extends ViewV2 {
 
     onDigitalCrownEvent(event) {
         this.timeCur = systemDateTime.getTime(false);
+        const isVibEnabled = this.isEnlarged && (event.action === CrownAction.BEGIN ||
+            this.isTouchAnimatorFinished && event.action === CrownAction.UPDATE);
         if (event.action === CrownAction.BEGIN && !this.isEnlarged) {
             this.clearTimeout();
             this.isEnlarged = true;
             this.startTouchAnimator();
             this.calcBlur();
         }
-        else if ((event.action === CrownAction.BEGIN || CrownAction.UPDATE) && this.isEnlarged) {
+        else if (isVibEnabled) {
             this.clearTimeout();
             this.crownDeltaAngle = this.getUIContext().px2vp(-event.degree *
             this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.radius;
             this.calcCrownValue(this.crownDeltaAngle);
             this.setVibration();
-        }
-        else if ((this.isEnlarged) && (this.isTouchAnimatorFinished) && (event.action === CrownAction.UPDATE)) {
-            this.clearTimeout();
-            this.crownDeltaAngle = this.getUIContext().px2vp(-event.degree *
-            this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.radius;
-            this.calcCrownValue(this.crownDeltaAngle);
         }
         else if (this.isEnlarged && event.action === CrownAction.END) {
             this.clearTimeout();
@@ -1257,8 +1253,9 @@ export class ArcSlider extends ViewV2 {
             Button.focusable(true);
             Button.focusOnTouch(true);
             Button.onDigitalCrown((event) => {
-                if (event && this.isFocus) {
+                if (event) {
                     this.onDigitalCrownEvent(event);
+                    event.stopPropagation();
                 }
                 this.options.onChange?.(this.options.valueOptions.progress);
             });

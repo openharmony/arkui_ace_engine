@@ -25,6 +25,17 @@ constexpr float GESTURE_EVENT_PROPERTY_DEFAULT_VALUE = 0.0;
 constexpr float GESTURE_EVENT_PROPERTY_VALUE = 10.0;
 constexpr int64_t DEFAULT_MOVE_TIME = 1000000000;
 const std::string TEST_EXTRA_INFO = "Reject: received cancel and succeed.";
+constexpr double DEFAULT_LONGPRESS_DURATION = 500.0;
+struct MockLongPressRecognizerCase {
+    int32_t fingers;
+    double duration;
+    int32_t time;
+    RefereeState refereeState;
+    int32_t expectedFingers;
+    double expectedDuration;
+    RefereeState expectedRefereeState;
+    std::vector<TouchEvent> inputTouchEvents;
+};
 } // namespace
 
 class LongPressRecognizerTestNg : public GesturesCommonTestNg {
@@ -1914,5 +1925,155 @@ HWTEST_F(LongPressRecognizerTestNg, StartRepeatTimerTest001, TestSize.Level1)
     ASSERT_NE(taskExecutor, nullptr);
     longPressRecognizer->StartRepeatTimer();
     EXPECT_EQ(longPressRecognizer->touchPoints_.size(), 0);
+}
+/**
+ * @tc.name: GetOnAccessibilityEventFunc001
+ * @tc.desc: Test LongPressRecognizer function: GetOnAccessibilityEventFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, GetOnAccessibilityEventFunc001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer.
+     */
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+
+    /**
+     * @tc.steps: step2. check callback function.
+     * @tc.expected: callback function is not null.
+     */
+    ASSERT_NE(longPressRecognizer->onAccessibilityEventFunc_, nullptr);
+}
+
+/**
+ * @tc.name: LongPressRecognizerBasicInfoTest001
+ * @tc.desc: Test case basic input info check.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerBasicInfoTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create basic info testCases.
+     * @tc.expected: set longPressRecognizer basic info correct.
+     */
+    const std::vector<MockLongPressRecognizerCase> mockLongPressRecognizerCases = {
+        {1, DEFAULT_LONGPRESS_DURATION, DEFAULT_LONGPRESS_DURATION, RefereeState::READY,
+            1, DEFAULT_LONGPRESS_DURATION, RefereeState::READY, {}},
+        {1, -1, DEFAULT_LONGPRESS_DURATION, RefereeState::READY,
+            1, DEFAULT_LONGPRESS_DURATION, RefereeState::READY, {}},
+        {-1, DEFAULT_LONGPRESS_DURATION, DEFAULT_LONGPRESS_DURATION, RefereeState::READY,
+            1, DEFAULT_LONGPRESS_DURATION, RefereeState::READY, {}},
+    };
+    for (auto i = 0; i < mockLongPressRecognizerCases.size(); i++) {
+        RefPtr<LongPressRecognizer> longPressRecognizer = AceType::MakeRefPtr<LongPressRecognizer>(
+            mockLongPressRecognizerCases[i].duration, mockLongPressRecognizerCases[i].fingers);
+        longPressRecognizer->refereeState_ = mockLongPressRecognizerCases[i].refereeState;
+        EXPECT_EQ(longPressRecognizer->duration_, mockLongPressRecognizerCases[i].expectedDuration);
+        EXPECT_EQ(longPressRecognizer->fingers_, mockLongPressRecognizerCases[i].expectedFingers);
+        EXPECT_EQ(longPressRecognizer->refereeState_, mockLongPressRecognizerCases[i].expectedRefereeState);
+    }
+}
+ 
+/**
+ * @tc.name: LongPressRecognizerInjectEventsTest001
+ * @tc.desc: Test case inject events.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerInjectEventsTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create basic info testCases.
+     * @tc.expected: set clickRecognizer basic info correct.
+     */
+    TouchEvent downEvent = TouchEvent();
+    downEvent.type = TouchType::DOWN;
+    TouchEvent moveEvent = TouchEvent();
+    moveEvent.type = TouchType::MOVE;
+    TouchEvent upEvent = TouchEvent();
+    upEvent.type = TouchType::UP;
+ 
+    const std::vector<MockLongPressRecognizerCase> mockLongPressRecognizerCases = {
+        {1, DEFAULT_LONGPRESS_DURATION, DEFAULT_LONGPRESS_DURATION, RefereeState::READY,
+            1, DEFAULT_LONGPRESS_DURATION, RefereeState::DETECTING, {downEvent}},
+        {1, DEFAULT_LONGPRESS_DURATION, DEFAULT_LONGPRESS_DURATION, RefereeState::READY,
+            1, DEFAULT_LONGPRESS_DURATION, RefereeState::DETECTING, {downEvent, moveEvent}},
+        {1, -1, DEFAULT_LONGPRESS_DURATION, RefereeState::READY,
+            1, DEFAULT_LONGPRESS_DURATION, RefereeState::FAIL, {downEvent, moveEvent, upEvent}},
+        {-1, DEFAULT_LONGPRESS_DURATION, DEFAULT_LONGPRESS_DURATION, RefereeState::READY,
+            1, DEFAULT_LONGPRESS_DURATION, RefereeState::FAIL, {downEvent, moveEvent, upEvent}},
+    };
+    for (auto i = 0; i < mockLongPressRecognizerCases.size(); i++) {
+        RefPtr<LongPressRecognizer> longPressRecognizer = AceType::MakeRefPtr<LongPressRecognizer>(
+            mockLongPressRecognizerCases[i].duration, mockLongPressRecognizerCases[i].fingers, true);
+        longPressRecognizer->refereeState_ = mockLongPressRecognizerCases[i].refereeState;
+        for (auto j = 0; j < mockLongPressRecognizerCases[i].inputTouchEvents.size(); j++) {
+            longPressRecognizer->ProcessTouchEvent(mockLongPressRecognizerCases[i].inputTouchEvents[j]);
+            std::this_thread::sleep_for(std::chrono::milliseconds(mockLongPressRecognizerCases[i].time));
+        }
+        EXPECT_EQ(longPressRecognizer->duration_, mockLongPressRecognizerCases[i].expectedDuration);
+        EXPECT_EQ(longPressRecognizer->fingers_, mockLongPressRecognizerCases[i].expectedFingers);
+        EXPECT_EQ(longPressRecognizer->refereeState_, mockLongPressRecognizerCases[i].expectedRefereeState);
+    }
+}
+ 
+/**
+ * @tc.name: LongPressRecognizerInjectEventsTest002
+ * @tc.desc: Test case inject events.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerInjectEventsTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create basic info testCases.
+     * @tc.expected: set clickRecognizer basic info correct.
+     */
+    TouchEvent downEventFinger0 = TouchEvent();
+    TouchEvent downEventFinger1 = TouchEvent();
+    downEventFinger0.type = TouchType::DOWN;
+    downEventFinger1.type = TouchType::DOWN;
+    downEventFinger0.id = 0;
+    downEventFinger1.id = 1;
+     
+    TouchEvent moveEventFinger0 = TouchEvent();
+    TouchEvent moveEventFinger1 = TouchEvent();
+    moveEventFinger0.type = TouchType::MOVE;
+    moveEventFinger1.type = TouchType::MOVE;
+    moveEventFinger0.id = 0;
+    moveEventFinger1.id = 1;
+ 
+    TouchEvent upEventFinger0 = TouchEvent();
+    TouchEvent upEventFinger1 = TouchEvent();
+    upEventFinger0.type = TouchType::UP;
+    upEventFinger1.type = TouchType::UP;
+    upEventFinger0.id = 0;
+    upEventFinger1.id = 1;
+ 
+    const std::vector<MockLongPressRecognizerCase> mockLongPressRecognizerCases = {
+        {2, DEFAULT_LONGPRESS_DURATION, DEFAULT_LONGPRESS_DURATION, RefereeState::READY,
+            2, DEFAULT_LONGPRESS_DURATION, RefereeState::DETECTING, {downEventFinger0, downEventFinger1}},
+        {2, DEFAULT_LONGPRESS_DURATION, DEFAULT_LONGPRESS_DURATION, RefereeState::READY, 2, DEFAULT_LONGPRESS_DURATION,
+            RefereeState::DETECTING, {downEventFinger0, downEventFinger1, moveEventFinger0, moveEventFinger1}},
+        {2, DEFAULT_LONGPRESS_DURATION, DEFAULT_LONGPRESS_DURATION, RefereeState::READY,
+            2, DEFAULT_LONGPRESS_DURATION, RefereeState::FAIL,
+            {downEventFinger0, downEventFinger1, moveEventFinger0, moveEventFinger1, upEventFinger0, upEventFinger1}},
+        {2, -1, DEFAULT_LONGPRESS_DURATION, RefereeState::READY, 2, DEFAULT_LONGPRESS_DURATION, RefereeState::FAIL,
+            {downEventFinger0, downEventFinger1, moveEventFinger0, moveEventFinger1, upEventFinger0, upEventFinger1}},
+        {-1, DEFAULT_LONGPRESS_DURATION, DEFAULT_LONGPRESS_DURATION, RefereeState::READY,
+            1, DEFAULT_LONGPRESS_DURATION, RefereeState::FAIL,
+            {downEventFinger0, downEventFinger1, moveEventFinger0, moveEventFinger1, upEventFinger0, upEventFinger1}},
+    };
+    for (auto i = 0; i < mockLongPressRecognizerCases.size(); i++) {
+        RefPtr<LongPressRecognizer> longPressRecognizer = AceType::MakeRefPtr<LongPressRecognizer>(
+            mockLongPressRecognizerCases[i].duration, mockLongPressRecognizerCases[i].fingers, false);
+        longPressRecognizer->refereeState_ = mockLongPressRecognizerCases[i].refereeState;
+        for (auto j = 0; j < mockLongPressRecognizerCases[i].inputTouchEvents.size(); j++) {
+            longPressRecognizer->ProcessTouchEvent(mockLongPressRecognizerCases[i].inputTouchEvents[j]);
+            std::this_thread::sleep_for(std::chrono::milliseconds(mockLongPressRecognizerCases[i].time));
+        }
+        EXPECT_EQ(longPressRecognizer->duration_, mockLongPressRecognizerCases[i].expectedDuration);
+        EXPECT_EQ(longPressRecognizer->fingers_, mockLongPressRecognizerCases[i].expectedFingers);
+        EXPECT_EQ(longPressRecognizer->refereeState_, mockLongPressRecognizerCases[i].expectedRefereeState);
+    }
 }
 } // namespace OHOS::Ace::NG

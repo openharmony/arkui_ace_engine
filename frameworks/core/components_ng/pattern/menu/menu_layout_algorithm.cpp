@@ -2139,22 +2139,41 @@ OffsetF MenuLayoutAlgorithm::SelectLayoutAvoidAlgorithm(const RefPtr<MenuLayoutP
     CHECK_NULL_RETURN(menuProp, OffsetF(0, 0));
     CHECK_NULL_RETURN(menuPattern, OffsetF(0, 0));
     CHECK_NULL_RETURN(layoutWrapper, OffsetF(0, 0));
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, OffsetF(0, 0));
     float x = 0.0f;
     float y = 0.0f;
+    float selectMenuHeight = geometryNode->GetFrameSize().Height();
+    Rect targetRect(targetOffset_.GetX(), targetOffset_.GetY(), targetSize_.Width(), targetSize_.Height());
+    float bottomSpace = wrapperRect_.Bottom() - targetRect.Bottom() - targetSecurity_ - paddingBottom_;
+
+    float xMinAvoid = paddingStart_;
+    float xMaxAvoid = wrapperRect_.Right() - size.Width() - paddingEnd_;
+    float yMinAvoid = wrapperRect_.Top() + paddingTop_;
+    float yMaxAvoid = wrapperRect_.Bottom() - paddingBottom_ - size.Height();
+
     if (GreatNotEqual(targetSize_.Width(), 0.0) || GreatNotEqual(targetSize_.Height(), 0.0)) {
         placement_ = Placement::BOTTOM_LEFT;
         ComputePlacementByAlignType(menuProp);
         if (layoutWrapper != nullptr) {
             PlacementRTL(layoutWrapper, placement_);
         }
-        auto selectChildOffset = GetSelectChildPosition(size, didNeedArrow, layoutWrapper);
+        OffsetF selectChildOffset = GetSelectChildPosition(size, didNeedArrow, layoutWrapper);
         x = selectChildOffset.GetX();
         y = selectChildOffset.GetY();
+        OffsetF computedOffset = selectChildOffset + ComputeMenuPositionByOffset(menuProp, geometryNode);
+        bool isXOut = LessOrEqual(computedOffset.GetX(), xMinAvoid) ||
+            GreatOrEqual(computedOffset.GetX(), xMaxAvoid);
+        bool isYOut = LessOrEqual(computedOffset.GetY(), yMinAvoid) ||
+            GreatOrEqual(computedOffset.GetY(), yMaxAvoid);
+        bool hasEnoughSpace = GreatOrEqual(bottomSpace, selectMenuHeight);
+        if (!isXOut && !isYOut && hasEnoughSpace) {
+            x = computedOffset.GetX();
+            y = computedOffset.GetY();
+            return { x, y };
+        }
     }
-    x = std::clamp(static_cast<double>(x), static_cast<double>(paddingStart_),
-        static_cast<double>(wrapperRect_.Right() - size.Width() - paddingEnd_));
-    float yMinAvoid = wrapperRect_.Top() + paddingTop_;
-    float yMaxAvoid = wrapperRect_.Bottom() - paddingBottom_ - size.Height();
+    x = std::clamp(x, xMinAvoid, xMaxAvoid);
     y = std::clamp(y, yMinAvoid, yMaxAvoid);
     return { x, y };
 }
@@ -3187,7 +3206,8 @@ Rect MenuLayoutAlgorithm::GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuP
     displayWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
     TAG_LOGI(AceLogTag::ACE_MENU, "GetDisplayWindowRectInfo : %{public}s", displayWindowRect_.ToString().c_str());
     menuWindowRect = Rect(rect.Left(), rect.Top(), rect.Width(), rect.Height());
-    auto availableRect = OverlayManager::GetDisplayAvailableRect(menuPattern->GetHost());
+    auto availableRect = OverlayManager::GetDisplayAvailableRect(
+        menuPattern->GetHost(), static_cast<int32_t>(SubwindowType::TYPE_MENU));
     TAG_LOGI(AceLogTag::ACE_MENU, "GetDisplayAvailableRect : %{public}s", availableRect.ToString().c_str());
     if (canExpandCurrentWindow_ && isExpandDisplay_) {
         menuWindowRect = Rect(availableRect.Left(), availableRect.Top(), availableRect.Width(), availableRect.Height());

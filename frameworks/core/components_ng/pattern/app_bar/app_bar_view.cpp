@@ -35,6 +35,8 @@
 #include "core/components_ng/base/inspector.h"
 
 namespace OHOS::Ace::NG {
+std::function<RefPtr<FrameNode>(NG::AppBarView* appBar, const RefPtr<FrameNode>& stage)>
+    AppBarView::appBarNodeBuilder_ = nullptr;
 namespace {
 
 constexpr int32_t ATOMIC_SERVICE_MENU_BAR_WIDTH = 96;
@@ -71,11 +73,21 @@ void AssembleUiExtensionParams(
 #endif
 } // namespace
 
+void AppBarView::RegistAppBarNodeBuilder(
+    std::function<RefPtr<FrameNode>(NG::AppBarView* appBar, const RefPtr<FrameNode>& stage)> appBarNodeBuilder)
+{
+    appBarNodeBuilder_ = appBarNodeBuilder;
+}
+
 RefPtr<FrameNode> AppBarView::Create(const RefPtr<FrameNode>& stage)
 {
     auto atom = FrameNode::CreateFrameNode(V2::ATOMIC_SERVICE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<AtomicServicePattern>());
     // add children
+    if (appBarNodeBuilder_) {
+        // app bar builder for cj frontend
+        return appBarNodeBuilder_(this, stage);
+    }
     contentStage_ = stage;
     atomicService_ = atom;
     BindJSContainer();

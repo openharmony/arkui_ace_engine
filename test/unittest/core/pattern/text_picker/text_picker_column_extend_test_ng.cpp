@@ -1115,7 +1115,7 @@ HWTEST_F(TextPickerColumnExtendTestNg, UpdateColumnChildPositionTest001, TestSiz
     EXPECT_EQ(pickerAudioHapticController->playThreadStatus_, MockPickerAudioHapticImpl::ThreadStatus::NONE);
     textPickerColumnPattern->isShow_ = true;
     textPickerColumnPattern->UpdateColumnChildPosition(offset);
-    EXPECT_EQ(pickerAudioHapticController->playThreadStatus_, MockPickerAudioHapticImpl::ThreadStatus::HANDLE_DELTA);
+    EXPECT_EQ(pickerAudioHapticController->playThreadStatus_, MockPickerAudioHapticImpl::ThreadStatus::NONE);
     textPickerColumnPattern->isEnableHaptic_ = false;
     pickerAudioHapticController->playThreadStatus_ = MockPickerAudioHapticImpl::ThreadStatus::NONE;
     textPickerColumnPattern->UpdateColumnChildPosition(offset);

@@ -65,6 +65,7 @@ void SwitchModifier::InitializeParam(int32_t themeScopeId)
     inactiveColor_ = switchTheme->GetInactiveColor();
     clickEffectColor_ = switchTheme->GetInteractivePressedColor();
     hoverColor_ = switchTheme->GetInteractiveHoverColor();
+    focusColor_ = switchTheme->GetFocusedBGColorUnselected();
     userActiveColor_ = activeColor_;
     hoverDuration_ = switchTheme->GetHoverDuration();
     hoverToTouchDuration_ = switchTheme->GetHoverToTouchDuration();

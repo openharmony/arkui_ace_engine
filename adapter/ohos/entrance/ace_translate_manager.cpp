@@ -29,6 +29,7 @@ void UiTranslateManagerImpl::AddTranslateListener(const WeakPtr<NG::FrameNode> n
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
     listenerMap_[nodeId] = node;
+    LOGI("AddTranslateListener WebView nodeId:%{public}d", nodeId);
 }
 void UiTranslateManagerImpl::RemoveTranslateListener(int32_t nodeId)
 {

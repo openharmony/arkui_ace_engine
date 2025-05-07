@@ -27,8 +27,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr char DC_DEPTH_PREFIX[] = "dcDepth_";
-constexpr char PARAM_NAME_WORKER_HAS_USED[] = "workerHasUsed";
-constexpr char PARAM_MSG_WORKER_HAS_USED[] = "Two worker are not allowed to run at the same time";
+constexpr char PARAM_NAME_DC_EXCEED_MAX_NUM[] = "dcExceedMaxNumInWorker";
+constexpr char PARAM_MSG_DC_EXCEED_MAX_NUM[] = "Dc exceed max num in the worker";
 constexpr char PARAM_NAME_DC_ONLY_ON_SCB[] = "onlyRunOnSCB";
 constexpr char PARAM_MSG_DC_ONLY_ON_SCB[] = "DC only run on SCB";
 constexpr char PARAM_NAME_INTERNAL_ERROR[] = "internalError";
@@ -89,9 +89,9 @@ void DynamicPattern::InitializeDynamicComponent(
 void DynamicPattern::HandleErrorCallback(DCResultCode resultCode)
 {
     switch (resultCode) {
-        case DCResultCode::DC_WORKER_HAS_USED_ERROR:
+        case DCResultCode::DC_EXCEED_MAX_NUM_IN_WORKER:
             FireOnErrorCallbackOnUI(
-                resultCode, PARAM_NAME_WORKER_HAS_USED, PARAM_MSG_WORKER_HAS_USED);
+                resultCode, PARAM_NAME_DC_EXCEED_MAX_NUM, PARAM_MSG_DC_EXCEED_MAX_NUM);
             break;
         case DCResultCode::DC_ONLY_RUN_ON_SCB:
             FireOnErrorCallbackOnUI(
@@ -150,12 +150,12 @@ DCResultCode DynamicPattern::CheckConstraint()
 bool DynamicPattern::CheckDynamicRendererConstraint(void* runtime)
 {
     CHECK_NULL_RETURN(dynamicComponentRenderer_, false);
-    if (dynamicComponentRenderer_->HasWorkerUsing(runtime)) {
-        HandleErrorCallback(DCResultCode::DC_WORKER_HAS_USED_ERROR);
+    if (!dynamicComponentRenderer_->CheckDCMaxConstraintInWorker(runtime)) {
+        HandleErrorCallback(DCResultCode::DC_EXCEED_MAX_NUM_IN_WORKER);
         return false;
     }
 
-    if (!dynamicComponentRenderer_->CheckWorkerMaxConstraint()) {
+    if (!dynamicComponentRenderer_->CheckWorkerMaxConstraint(runtime)) {
         HandleErrorCallback(DCResultCode::DC_WORKER_EXCEED_MAX_NUM);
         return false;
     }

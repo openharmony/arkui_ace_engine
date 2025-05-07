@@ -29,11 +29,11 @@ class TextList {
 
 @Entry
 @Component
-struct struct_03_layout_index {
+struct struct_06_password_index {
   scroll: Scroller = new Scroller()
   @State arr: TextList[] = [
-    new TextList(1, '06-password', 'pages/06-password/01-showPasswordIcon',),
-    new TextList(2, '06-password', 'pages/06-password/02-selectionValid',),
+    new TextList(1, '01-showPasswordIcon', 'pages/06-password/01-showPasswordIcon',),
+    new TextList(2, '02-selectionValid', 'pages/06-password/02-selectionValid',),
   ]
   @State fontSize: Resource | undefined = undefined
 

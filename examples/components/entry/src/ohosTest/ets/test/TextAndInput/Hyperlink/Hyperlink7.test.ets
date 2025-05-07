@@ -43,7 +43,7 @@ export default function Hyperlink7Test() {
 
     })
     // bindMenu.是否显示选中图标
-    it('ArkUI_Column_Comp_0545', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0545', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
 
@@ -71,7 +71,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0546', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0546', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
 
@@ -97,7 +97,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0547', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0547', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
 
@@ -123,7 +123,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0548', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0548', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
 
@@ -148,7 +148,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0549', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0549', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
 
@@ -173,7 +173,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0550', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0550', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
 
@@ -211,7 +211,7 @@ export default function Hyperlink7Test() {
     })
 
     // bindMenu.item中是否显示右侧图标
-    it('ArkUI_Column_Comp_0551', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0551', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindMenu.item中是否显示右侧图标', '通用属性4')
 
@@ -226,7 +226,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0552', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0552', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindMenu.item中是否显示右侧图标', '通用属性4')
 
@@ -242,7 +242,7 @@ export default function Hyperlink7Test() {
     })
 
     // bindMenu.Opacity
-    it('ArkUI_Column_Comp_0553', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0553', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindMenu.Opacity', '通用属性4')
 
@@ -265,7 +265,7 @@ export default function Hyperlink7Test() {
     })
 
     // bindMenu.Visibility
-    it('ArkUI_Column_Comp_0554', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0554', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindMenu.Visibility', '通用属性4')
 
@@ -280,7 +280,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0555', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0555', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindMenu.Visibility', '通用属性4')
 
@@ -296,7 +296,7 @@ export default function Hyperlink7Test() {
 
     })
     // bindMenu.Padding
-    it('ArkUI_Column_Comp_0556', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0556', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindMenu.Padding', '通用属性4')
 
@@ -319,7 +319,7 @@ export default function Hyperlink7Test() {
     })
 
     // bindMenu.Margin
-    it('ArkUI_Column_Comp_0557', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0557', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindMenu.Margin', '通用属性4')
 
@@ -342,7 +342,7 @@ export default function Hyperlink7Test() {
     })
 
     // hoverEffect
-    it('ArkUI_Column_Comp_0558', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0558', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'hoverEffect', '通用属性4')
 
@@ -351,7 +351,7 @@ export default function Hyperlink7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('hoverEffect', JsonType.value)
@@ -362,13 +362,13 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0559', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0559', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'hoverEffect', '通用属性4')
 
       await radioClick({
         radioClickObj: 2,
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('hoverEffect', JsonType.value)
@@ -379,14 +379,14 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0560', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0560', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'hoverEffect', '通用属性4')
 
 
       await radioClick({
         radioClickObj: 3,
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('hoverEffect', JsonType.value)
@@ -397,7 +397,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0561', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0561', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'hoverEffect', '通用属性4')
 
@@ -406,7 +406,7 @@ export default function Hyperlink7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('hoverEffect', JsonType.value)
@@ -418,7 +418,7 @@ export default function Hyperlink7Test() {
     })
 
     // id
-    it('ArkUI_Column_Comp_0562', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0562', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'id', '通用属性4')
 
@@ -434,7 +434,7 @@ export default function Hyperlink7Test() {
 
     })
 
-    it('ArkUI_Column_Comp_0563', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0563', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'id', '通用属性4')
 
@@ -451,7 +451,7 @@ export default function Hyperlink7Test() {
     })
 
     // key
-    it('ArkUI_Column_Comp_0564', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0564', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'key', '通用属性4')
 
@@ -472,7 +472,7 @@ export default function Hyperlink7Test() {
 
     })
 
-    it('ArkUI_Column_Comp_0565', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0565', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'key', '通用属性4')
 
@@ -493,7 +493,7 @@ export default function Hyperlink7Test() {
     })
 
     // reuseId
-    it('ArkUI_Column_Comp_0566', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0566', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'reuseId', '通用属性4')
 
@@ -508,7 +508,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0567', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0567', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'reuseId', '通用属性4')
 
@@ -524,7 +524,7 @@ export default function Hyperlink7Test() {
     })
 
     // restoreId
-    it('ArkUI_Column_Comp_0568', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0568', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'restoreId', '通用属性4')
 
@@ -540,7 +540,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0569', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0569', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'restoreId', '通用属性4')
 
@@ -557,7 +557,7 @@ export default function Hyperlink7Test() {
     })
 
     // foregroundEffect.radius
-    it('ArkUI_Column_Comp_0570', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0570', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundEffect.radius', '通用属性5')
 
@@ -566,7 +566,7 @@ export default function Hyperlink7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('foregroundEffect', JsonType.obj),
@@ -580,7 +580,7 @@ export default function Hyperlink7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('foregroundEffect', JsonType.obj),
@@ -593,7 +593,7 @@ export default function Hyperlink7Test() {
     })
 
     // foregroundBlurStyle.value
-    it('ArkUI_Column_Comp_0571', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0571', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
 
@@ -608,7 +608,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0572', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0572', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
 
@@ -620,7 +620,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0573', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0573', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
 
@@ -632,7 +632,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0574', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0574', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
 
@@ -644,7 +644,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0575', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0575', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
 
@@ -656,7 +656,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0576', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0576', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
 
@@ -668,7 +668,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0577', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0577', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
 
@@ -680,7 +680,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0578', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0578', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
 
@@ -692,7 +692,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0579', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0579', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
 
@@ -704,7 +704,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0580', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0580', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
 
@@ -717,7 +717,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0581', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0581', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
 
@@ -730,7 +730,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0582', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0582', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
 
@@ -747,7 +747,7 @@ export default function Hyperlink7Test() {
     })
 
     // foregroundBlurStyle.options.colorMode
-    it('ArkUI_Column_Comp_0583', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0583', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.options.colorMode', '通用属性5')
 
@@ -762,7 +762,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0584', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0584', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.options.colorMode', '通用属性5')
 
@@ -774,7 +774,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0585', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0585', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.options.colorMode', '通用属性5')
 
@@ -790,7 +790,7 @@ export default function Hyperlink7Test() {
     })
 
     // foregroundBlurStyle.options.adaptiveColor
-    it('ArkUI_Column_Comp_0586', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0586', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.options.adaptiveColor', '通用属性5')
 
@@ -805,7 +805,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0587', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0587', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.options.adaptiveColor', '通用属性5')
 
@@ -821,7 +821,7 @@ export default function Hyperlink7Test() {
     })
 
     // foregroundBlurStyle.options.blurOptions
-    it('ArkUI_Column_Comp_0588', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0588', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.options.blurOptions', '通用属性5')
 
@@ -844,7 +844,7 @@ export default function Hyperlink7Test() {
     })
 
     // foregroundBlurStyle.options.scale
-    it('ArkUI_Column_Comp_0589', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0589', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.options.blurOptions', '通用属性5')
 
@@ -867,7 +867,7 @@ export default function Hyperlink7Test() {
     })
 
     // motionBlur.radius
-    it('ArkUI_Column_Comp_0590', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0590', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'motionBlur.radius', '通用属性5')
 
@@ -876,7 +876,7 @@ export default function Hyperlink7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('motionBlur', JsonType.obj),
@@ -890,7 +890,7 @@ export default function Hyperlink7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('motionBlur', JsonType.obj),
@@ -903,7 +903,7 @@ export default function Hyperlink7Test() {
     })
 
     // motionBlur.anchorX
-    it('ArkUI_Column_Comp_0591', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0591', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'motionBlur.anchorX', '通用属性5')
 
@@ -912,7 +912,7 @@ export default function Hyperlink7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('motionBlur', JsonType.obj),
@@ -927,7 +927,7 @@ export default function Hyperlink7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('motionBlur', JsonType.obj),
@@ -941,7 +941,7 @@ export default function Hyperlink7Test() {
     })
 
     // motionBlur.anchorY
-    it('ArkUI_Column_Comp_0592', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0592', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'motionBlur.anchorY', '通用属性5')
 
@@ -950,7 +950,7 @@ export default function Hyperlink7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('motionBlur', JsonType.obj),
@@ -965,7 +965,7 @@ export default function Hyperlink7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('motionBlur', JsonType.obj),
@@ -979,7 +979,7 @@ export default function Hyperlink7Test() {
     })
 
     // clickEffect
-    it('ArkUI_Column_Comp_0593', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0593', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'clickEffect', '通用属性5')
 
@@ -993,7 +993,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0594', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0594', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'clickEffect', '通用属性5')
 
@@ -1008,7 +1008,7 @@ export default function Hyperlink7Test() {
     })
 
     //clickEffect.level
-    it('ArkUI_Column_Comp_0595', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0595', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('clickEffect.level'))
 
@@ -1033,7 +1033,7 @@ export default function Hyperlink7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('clickEffect', JsonType.obj),
@@ -1045,7 +1045,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0596', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0596', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('clickEffect.level'))
 
@@ -1066,7 +1066,7 @@ export default function Hyperlink7Test() {
 
       await radioClick({
         radioClickObj: 2,
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('clickEffect', JsonType.obj),
@@ -1078,7 +1078,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0597', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0597', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('clickEffect.level'))
 
@@ -1102,7 +1102,7 @@ export default function Hyperlink7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('clickEffect', JsonType.obj),
@@ -1115,7 +1115,7 @@ export default function Hyperlink7Test() {
     })
 
     // clickEffect.scale
-    it('ArkUI_Column_Comp_0598', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0598', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('clickEffect.scale'))
 
@@ -1139,7 +1139,7 @@ export default function Hyperlink7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('clickEffect', JsonType.obj),
@@ -1153,7 +1153,7 @@ export default function Hyperlink7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('clickEffect', JsonType.obj),
@@ -1176,7 +1176,7 @@ export default function Hyperlink7Test() {
     })
 
     // accessibilityGroup
-    it('ArkUI_Column_Comp_0599', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0599', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'accessibilityGroup', '通用属性5')
 
@@ -1185,7 +1185,7 @@ export default function Hyperlink7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('accessibilityGroup', JsonType.value),
@@ -1196,7 +1196,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0600', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0600', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'accessibilityGroup', '通用属性5')
 
@@ -1205,7 +1205,7 @@ export default function Hyperlink7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('accessibilityGroup', JsonType.value),
@@ -1217,7 +1217,7 @@ export default function Hyperlink7Test() {
     })
 
     //accessibilityText
-    it('ArkUI_Column_Comp_0601', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0601', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'accessibilityText', '通用属性5')
 
@@ -1226,7 +1226,7 @@ export default function Hyperlink7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('accessibilityText', JsonType.value),
@@ -1237,7 +1237,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0602', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0602', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'accessibilityText', '通用属性5')
 
@@ -1246,7 +1246,7 @@ export default function Hyperlink7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('accessibilityText', JsonType.value),
@@ -1258,7 +1258,7 @@ export default function Hyperlink7Test() {
     })
 
     // accessibilityDescription
-    it('ArkUI_Column_Comp_0603', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0603', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'accessibilityDescription', '通用属性5')
 
@@ -1267,7 +1267,7 @@ export default function Hyperlink7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('accessibilityDescription', JsonType.value),
@@ -1278,7 +1278,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0604', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0604', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'accessibilityDescription', '通用属性5')
 
@@ -1287,7 +1287,7 @@ export default function Hyperlink7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('accessibilityDescription', JsonType.value),
@@ -1299,7 +1299,7 @@ export default function Hyperlink7Test() {
     })
 
     // accessibilityLevel
-    it('ArkUI_Column_Comp_0605', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0605', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'accessibilityLevel', '通用属性5')
 
@@ -1309,7 +1309,7 @@ export default function Hyperlink7Test() {
           toggleClickType: ToggleClick.Open,
           toggleClickObj: 'accessibilityLevel'
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('accessibilityLevel', JsonType.value),
@@ -1320,7 +1320,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0606', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0606', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'accessibilityLevel', '通用属性5')
 
@@ -1329,7 +1329,7 @@ export default function Hyperlink7Test() {
         toggleClick: {
           toggleClickObj: 'accessibilityLevel'
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('accessibilityLevel', JsonType.value),
@@ -1340,7 +1340,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0607', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0607', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'accessibilityLevel', '通用属性5')
 
@@ -1349,7 +1349,7 @@ export default function Hyperlink7Test() {
         toggleClick: {
           toggleClickObj: 'accessibilityLevel'
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('accessibilityLevel', JsonType.value),
@@ -1360,7 +1360,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0608', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0608', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'accessibilityLevel', '通用属性5')
 
@@ -1370,7 +1370,7 @@ export default function Hyperlink7Test() {
           toggleClickType: ToggleClick.Close,
           toggleClickObj: 'accessibilityLevel'
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('accessibilityLevel', JsonType.value),
@@ -1382,7 +1382,7 @@ export default function Hyperlink7Test() {
     })
 
     // attributeModifier
-    it('ArkUI_Column_Comp_0609', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0609', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'attributeModifier', '通用属性5')
 
@@ -1398,7 +1398,7 @@ export default function Hyperlink7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0610', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0610', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'attributeModifier', '通用属性5')
 
@@ -1418,7 +1418,7 @@ export default function Hyperlink7Test() {
     /*
     * 测试组件gestureModifier支持设置为true且获取属性正确
     */
-    it('ArkUI_Column_Comp_0611', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0611', 0, async (done: Function) => {
       // 无法取到属性值
       await titleSearch('基础属性', 'gestureModifier', '通用属性6')
       await radioClick({
@@ -1429,7 +1429,7 @@ export default function Hyperlink7Test() {
     /*
     *测试组件gestureModifier支持设置包含单个子组件为false且获取属性正确
     */
-    it('ArkUI_Column_Comp_0612', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0612', 0, async (done: Function) => {
       // 无法取到属性值
       await titleSearch('基础属性', 'gestureModifier', '通用属性6')
       await radioClick({
@@ -1441,11 +1441,11 @@ export default function Hyperlink7Test() {
       done();
     })
     //outline.value.width
-    it('ArkUI_Column_Comp_0613', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0613', 0, async (done: Function) => {
       await titleSearch('基础属性', 'outline.value.width', '通用属性6')
       await sliderDrag({
         slideStar: Slide.start,
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('outlineWidth', JsonType.value)
@@ -1455,7 +1455,7 @@ export default function Hyperlink7Test() {
 
       await sliderDrag({
         slideStar: Slide.end,
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('outlineWidth', JsonType.value)
@@ -1468,11 +1468,11 @@ export default function Hyperlink7Test() {
     /**
      * 测试组件outline.value.color支持设置量规图的颜色为1号色显示且获取属性正确
      */
-    it('ArkUI_Column_Comp_0614', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0614', 0, async (done: Function) => {
       await titleSearch('基础属性', 'outline.value.color', '通用属性6')
       await buttonClick({
         buttonClickObj: 0,
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('outlineColor', JsonType.value),
@@ -1484,11 +1484,11 @@ export default function Hyperlink7Test() {
     /*
      * 测试组件outline.value.color支持设置量规图的颜色为2号色显示且获取属性正确
     */
-    it('ArkUI_Column_Comp_0615', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0615', 0, async (done: Function) => {
       await titleSearch('基础属性', 'outline.value.color', '通用属性6')
       await buttonClick({
         buttonClickObj: 1,
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('outlineColor', JsonType.value),
@@ -1500,11 +1500,11 @@ export default function Hyperlink7Test() {
     /**
      * 测试组件outline.value.color支持设置量规图的颜色为3号色显示且获取属性正确
      * */
-    it('ArkUI_Column_Comp_0616', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0616', 0, async (done: Function) => {
       await titleSearch('基础属性', 'outline.value.color', '通用属性6')
       await buttonClick({
         buttonClickObj: 2,
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('outlineColor', JsonType.value),
@@ -1518,11 +1518,11 @@ export default function Hyperlink7Test() {
     /*
      * 测试组件outline.value.color支持设置量规图的颜色为4号色显示且获取属性正确
     */
-    it('ArkUI_Column_Comp_0617', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0617', 0, async (done: Function) => {
       await titleSearch('基础属性', 'outline.value.color', '通用属性6')
       await buttonClick({
         buttonClickObj: 3,
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('outlineColor', JsonType.value),
@@ -1534,11 +1534,11 @@ export default function Hyperlink7Test() {
     /**
      * 测试组件outline.value.color支持设置量规图的颜色为5号色显示且获取属性正确
      * */
-    it('ArkUI_Column_Comp_0618', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0618', 0, async (done: Function) => {
       await titleSearch('基础属性', 'outline.value.color', '通用属性6')
       await buttonClick({
         buttonClickObj: 4,
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('outlineColor', JsonType.value),
@@ -1550,14 +1550,14 @@ export default function Hyperlink7Test() {
     /**
      * 测试组件outline.value.color支持设置量规图的颜色为6号色显示且获取属性正确
      */
-    it('ArkUI_Column_Comp_0619', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0619', 0, async (done: Function) => {
       await titleSearch('基础属性', 'outline.value.color', '通用属性6')
       await buttonClick({
         buttonClickObj: 5,
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('outlineColor', JsonType.value),
@@ -1569,11 +1569,11 @@ export default function Hyperlink7Test() {
     /*
      * outline.value.radius
     */
-    it('ArkUI_Column_Comp_0620', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0620', 0, async (done: Function) => {
       await titleSearch('基础属性', 'outline.value.radius', '通用属性6')
       await sliderDrag({
         slideStar: Slide.start,
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('outlineRadius', JsonType.value)
@@ -1582,7 +1582,7 @@ export default function Hyperlink7Test() {
       })
       await sliderDrag({
         slideStar: Slide.end,
-        id: 'Column',
+        id: 'Hyperlink',
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
@@ -1599,11 +1599,11 @@ export default function Hyperlink7Test() {
     /*
      * 测试组件outline.value.style支持设置SOLID且获取属性正确
     */
-    it('ArkUI_Column_Comp_0621', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0621', 0, async (done: Function) => {
       await titleSearch('基础属性', 'outline.value.style', '通用属性6')
       await radioClick({
         radioClickObj: 0,
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('outlineStyle', JsonType.value)
@@ -1615,11 +1615,11 @@ export default function Hyperlink7Test() {
     /*
     *测试组件outline.value.style支持设置DASHED且获取属性正确
     */
-    it('ArkUI_Column_Comp_0622', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0622', 0, async (done: Function) => {
       await titleSearch('基础属性', 'outline.value.style', '通用属性6')
       await radioClick({
         radioClickObj: 1,
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('outlineStyle', JsonType.value)
@@ -1631,14 +1631,14 @@ export default function Hyperlink7Test() {
     /*
     *测试组件outline.value.style支持设置DOTTED且获取属性正确
     */
-    it('ArkUI_Column_Comp_0623', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0623', 0, async (done: Function) => {
       await titleSearch('基础属性', 'outline.value.style', '通用属性6')
       await radioClick({
         radioClickObj: 2,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Hyperlink',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('outlineStyle', JsonType.value)
@@ -1650,7 +1650,7 @@ export default function Hyperlink7Test() {
     /*
      * outline.value.width展开属性测试完成，关闭outline.value.width，无需断言
      * */
-    it('ArkUI_Column_Comp_0624', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0624', 0, async (done: Function) => {
       await titleSearch('基础属性', 'outline.value.width', '通用属性6')
       await getToggle(ToggleClick.Close)
       done();
@@ -1659,7 +1659,7 @@ export default function Hyperlink7Test() {
     /*
      *测试组件visualEffect支持设置true且获取属性正确
     */
-    it('ArkUI_Column_Comp_0625', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0625', 0, async (done: Function) => {
       // 无法取到属性值进行断言
       await titleSearch('基础属性', 'visualEffect', '通用属性6')
       await radioClick({
@@ -1670,7 +1670,7 @@ export default function Hyperlink7Test() {
     /*
     *测试组件visualEffect支持设置false且获取属性正确
    */
-    it('ArkUI_Column_Comp_0626', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0626', 0, async (done: Function) => {
       // 无法取到属性值进行断言
       await titleSearch('基础属性', 'visualEffect', '通用属性6')
       await radioClick({
@@ -1685,7 +1685,7 @@ export default function Hyperlink7Test() {
     /*
     *测试组件backgroundFilter支持设置true且获取属性正确
     */
-    it('ArkUI_Column_Comp_0627', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0627', 0, async (done: Function) => {
       // 无法取到属性值进行断言
       await titleSearch('基础属性', 'backgroundFilter', '通用属性6')
       await radioClick({
@@ -1696,7 +1696,7 @@ export default function Hyperlink7Test() {
     /*
     *测试组件backgroundFilter支持设置false且获取属性正确
     */
-    it('ArkUI_Column_Comp_0628', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0628', 0, async (done: Function) => {
       // 无法取到属性值进行断言
       await titleSearch('基础属性', 'backgroundFilter', '通用属性6')
       await radioClick({
@@ -1711,7 +1711,7 @@ export default function Hyperlink7Test() {
     /*
     *测试组件foregroundFilter支持设置true且获取属性正确
     */
-    it('ArkUI_Column_Comp_0629', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0629', 0, async (done: Function) => {
       // 无法取到属性值进行断言
       await titleSearch('基础属性', 'foregroundFilter', '通用属性6')
       await radioClick({
@@ -1722,7 +1722,7 @@ export default function Hyperlink7Test() {
     /*
     *测试组件foregroundFilter支持设置false且获取属性正确
     */
-    it('ArkUI_Column_Comp_0630', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0630', 0, async (done: Function) => {
       // 无法取到属性值进行断言
       await titleSearch('基础属性', 'foregroundFilter', '通用属性6')
       await radioClick({
@@ -1737,7 +1737,7 @@ export default function Hyperlink7Test() {
     /*
     *测试组件compositingFilter支持设置true且获取属性正确
     */
-    it('ArkUI_Column_Comp_0631', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0631', 0, async (done: Function) => {
       // 无法取到属性值进行断言
       await titleSearch('基础属性', 'compositingFilter', '通用属性6')
       await radioClick({
@@ -1748,7 +1748,7 @@ export default function Hyperlink7Test() {
     /*
     *测试组件compositingFilter支持设置false且获取属性正确
     */
-    it('ArkUI_Column_Comp_0632', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0632', 0, async (done: Function) => {
       // 无法取到属性值进行断言
       await titleSearch('基础属性', 'compositingFilter', '通用属性6')
       await radioClick({
@@ -1760,7 +1760,7 @@ export default function Hyperlink7Test() {
       done();
     })
     //responseRegion.value.x
-    it('ArkUI_Column_Comp_0633', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0633', 0, async (done: Function) => {
       //需要前置条件responseRegion.value.x、responseRegion.value.y、responseRegion.value.width、responseRegion.value.height四个toggle打开，获取不到参数值
       await titleSearch('基础属性', 'responseRegion.value.x', '通用属性6')
       await sliderDrag({
@@ -1775,7 +1775,7 @@ export default function Hyperlink7Test() {
       done();
     })
     //responseRegion.value.y
-    it('ArkUI_Column_Comp_0634', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0634', 0, async (done: Function) => {
       //需要前置条件responseRegion.value.x、responseRegion.value.y、responseRegion.value.width、responseRegion.value.height四个toggle打开，获取不到参数值
       await titleSearch('基础属性', 'responseRegion.value.y', '通用属性6')
       await sliderDrag({
@@ -1793,7 +1793,7 @@ export default function Hyperlink7Test() {
     /*
     * 测试组件responseRegion.value.width支持设置0%且获取属性正确
     */
-    it('ArkUI_Column_Comp_0635', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0635', 0, async (done: Function) => {
       //需要前置条件responseRegion.value.x、responseRegion.value.y、responseRegion.value.width、responseRegion.value.height四个toggle打开，获取不到参数值
       await titleSearch('基础属性', 'responseRegion.value.width', '通用属性6')
       await radioClick({
@@ -1807,7 +1807,7 @@ export default function Hyperlink7Test() {
     /*
     * 测试组件responseRegion.value.width支持设置30%且获取属性正确
     */
-    it('ArkUI_Column_Comp_0636', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0636', 0, async (done: Function) => {
       //需要前置条件responseRegion.value.x、responseRegion.value.y、responseRegion.value.width、responseRegion.value.height四个toggle打开，获取不到参数值
       await titleSearch('基础属性', 'responseRegion.value.width', '通用属性6')
       await radioClick({
@@ -1821,7 +1821,7 @@ export default function Hyperlink7Test() {
     /*
      * 测试组件responseRegion.value.width支持设置60%且获取属性正确
      */
-    it('ArkUI_Column_Comp_0637', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0637', 0, async (done: Function) => {
       //需要前置条件responseRegion.value.x、responseRegion.value.y、responseRegion.value.width、responseRegion.value.height四个toggle打开，获取不到参数值
       await titleSearch('基础属性', 'responseRegion.value.width', '通用属性6')
       await radioClick({
@@ -1835,7 +1835,7 @@ export default function Hyperlink7Test() {
     /*
      * 测试组件responseRegion.value.width支持设置90%且获取属性正确
      */
-    it('ArkUI_Column_Comp_0638', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0638', 0, async (done: Function) => {
       //需要前置条件responseRegion.value.x、responseRegion.value.y、responseRegion.value.width、responseRegion.value.height四个toggle打开，获取不到参数值
       await titleSearch('基础属性', 'responseRegion.value.width', '通用属性6')
       await radioClick({
@@ -1849,7 +1849,7 @@ export default function Hyperlink7Test() {
     /*
      * 测试组件responseRegion.value.width支持设置100%且获取属性正确
      */
-    it('ArkUI_Column_Comp_0639', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0639', 0, async (done: Function) => {
       //需要前置条件responseRegion.value.x、responseRegion.value.y、responseRegion.value.width、responseRegion.value.height四个toggle打开，获取不到参数值
       await titleSearch('基础属性', 'responseRegion.value.width', '通用属性6')
       await radioClick({
@@ -1865,7 +1865,7 @@ export default function Hyperlink7Test() {
     /*
     * 测试组件responseRegion.value.height支持设置0%且获取属性正确
     */
-    it('ArkUI_Column_Comp_0640', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0640', 0, async (done: Function) => {
       //需要前置条件responseRegion.value.x、responseRegion.value.y、responseRegion.value.width、responseRegion.value.height四个toggle打开，获取不到参数值
       await titleSearch('基础属性', 'responseRegion.value.height', '通用属性6')
       await radioClick({
@@ -1879,7 +1879,7 @@ export default function Hyperlink7Test() {
     /*
     * 测试组件responseRegion.value.height支持设置30%且获取属性正确
     */
-    it('ArkUI_Column_Comp_0641', 0, async (done: Function) => {
+    it('ArkUI_Hyperlink_Comp_0641', 0, async (done: Function) => {
       //需要前置条件responseRegion.value.x、responseRegion.value.y、responseRegion.value.width、responseRegion.value.height四个toggle打开，获取不到参数值
       await titleSearch('基础属性', 'responseRegion.value.height', '通用属性6')
       await radioClick({

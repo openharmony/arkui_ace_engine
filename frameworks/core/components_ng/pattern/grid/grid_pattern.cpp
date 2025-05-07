@@ -583,8 +583,6 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     CHECK_NULL_VOID(host);
     auto gridEventHub = host->GetOrCreateEventHub<GridEventHub>();
     CHECK_NULL_VOID(gridEventHub);
-    ACE_SCOPED_TRACE("processed offset:%f, id:%d, tag:%s", finalOffset,
-        static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
     auto onScroll = gridEventHub->GetOnScroll();
     PrintOffsetLog(AceLogTag::ACE_GRID, host->GetId(), finalOffset);
     if (onScroll) {

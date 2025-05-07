@@ -271,7 +271,16 @@ public:
     void OnCoordScrollEnd() override;
     bool NeedCoordWithScroll() override
     {
-        return true;
+        return IsNeedHandleScroll();
+    }
+
+    bool IsNeedHandleScroll() const override
+    {
+        auto eventHub = GetOrCreateEventHub<NavDestinationEventHub>();
+        if (eventHub && eventHub->HasOnCoordScrollStartAction()) {
+            return true;
+        }
+        return false;
     }
     
     float GetTitleBarHeightLessThanMaxBarHeight() const override
@@ -281,7 +290,7 @@ public:
     
     bool CanCoordScrollUp(float offset) const override
     {
-        return true;
+        return IsNeedHandleScroll();
     }
 
     void SetIsActive(bool isActive)

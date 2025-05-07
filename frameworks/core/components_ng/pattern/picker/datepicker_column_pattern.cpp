@@ -1024,6 +1024,9 @@ void DatePickerColumnPattern::HandleDragMove(const GestureEvent& event)
     auto offsetY =
         event.GetGlobalPoint().GetY() + (event.GetInputEventType() == InputEventType::AXIS ? event.GetOffsetY() : 0.0);
     if (NearEqual(offsetY, yLast_, 1.0)) { // if changing less than 1.0, no need to handle
+        if (hapticController_) {
+            hapticController_->Stop();
+        }
         return;
     }
     toss->SetEnd(offsetY);
@@ -1037,6 +1040,7 @@ void DatePickerColumnPattern::HandleDragEnd()
 {
     if (hapticController_) {
         hapticController_->Stop();
+        isHapticPlayOnce_ = false;
     }
     pressed_ = false;
     CHECK_NULL_VOID(GetToss());
@@ -1346,14 +1350,14 @@ void DatePickerColumnPattern::SetOptionShiftDistance()
 void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 {
     int32_t dragDelta = offsetY - yLast_;
-    if (hapticController_ && isShow_) {
-        if (isEnableHaptic_ && !stopHaptic_) {
-            hapticController_->HandleDelta(dragDelta);
-        }
-    }
     yLast_ = offsetY;
     if (!CanMove(LessNotEqual(dragDelta, 0))) {
         return;
+    }
+    if (hapticController_ && isShow_) {
+        if (isEnableHaptic_ && !stopHaptic_ && !isHapticPlayOnce_) {
+            hapticController_->HandleDelta(dragDelta);
+        }
     }
     offsetCurSet_ = 0.0;
     auto midIndex = GetShowCount() / 2;
@@ -1362,9 +1366,6 @@ void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
                                                                 : optionProperties_[midIndex].nextDistance;
     // the abs of drag delta is less than jump interval.
     dragDelta = dragDelta + yOffset_;
-    if (hapticController_) {
-        hapticController_->Stop();
-    }
     if (GreatOrEqual(std::abs(dragDelta), std::abs(shiftDistance))) {
         InnerHandleScroll(LessNotEqual(dragDelta, 0.0), true, false);
         dragDelta = dragDelta % static_cast<int>(std::abs(shiftDistance));
@@ -1457,6 +1458,10 @@ void DatePickerColumnPattern::OnAroundButtonClick(RefPtr<DatePickerEventParam> p
             AnimationUtils::StopAnimation(animation_);
             yLast_ = 0.0;
             yOffset_ = 0.0;
+        }
+        if (hapticController_) {
+            isHapticPlayOnce_ = true;
+            hapticController_->Stop();
         }
         auto distance =
             (step > 0 ? optionProperties_[middleIndex].prevDistance : optionProperties_[middleIndex].nextDistance) *

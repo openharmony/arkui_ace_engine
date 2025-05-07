@@ -113,16 +113,21 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         FillCacheLineAtEnd(mainSize, crossSize, layoutWrapper);
         AddCacheItemsInFront(info_.startIndex_, layoutWrapper, cacheCnt, predictBuildList_);
         if (!predictBuildList_.empty()) {
-            GridLayoutUtils::PreloadGridItems(layoutWrapper->GetHostNode()->GetPattern<GridPattern>(),
-                std::move(predictBuildList_),
-                [param = GridPredictLayoutParam { cachedChildConstraint_, itemsCrossSize_, crossGap_ }](
-                    const RefPtr<FrameNode>& host, int32_t itemIdx) {
-                    CHECK_NULL_RETURN(host, false);
-                    return PredictBuildItem(*host, itemIdx, param);
-                });
+            PreloadItems(layoutWrapper);
             predictBuildList_.clear();
         }
     }
+}
+
+void GridScrollLayoutAlgorithm::PreloadItems(LayoutWrapper* layoutWrapper)
+{
+    GridLayoutUtils::PreloadGridItems(layoutWrapper->GetHostNode()->GetPattern<GridPattern>(),
+        std::move(predictBuildList_),
+        [param = GridPredictLayoutParam { cachedChildConstraint_, itemsCrossSize_, crossGap_ }](
+            const RefPtr<FrameNode>& host, int32_t itemIdx) {
+            CHECK_NULL_RETURN(host, false);
+            return PredictBuildItem(*host, itemIdx, param);
+        });
 }
 
 void GridScrollLayoutAlgorithm::UpdateOffsetOnVirtualKeyboardHeightChange(LayoutWrapper* layoutWrapper, float mainSize)
@@ -1059,6 +1064,7 @@ void GridScrollLayoutAlgorithm::UpdateCurrentOffsetForJumpTo(float mainSize)
     }
     if (info_.extraOffset_.has_value() && !info_.targetIndex_.has_value()) {
         info_.currentOffset_ += info_.extraOffset_.value();
+        info_.prevOffset_ = info_.currentOffset_;
     }
 }
 

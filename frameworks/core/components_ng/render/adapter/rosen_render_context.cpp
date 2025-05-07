@@ -317,7 +317,7 @@ void RosenRenderContext::OnNodeAppear(bool recursive)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // restore eventHub state when node appears.
-    auto eventHub = host->GetEventHubOnly<EventHub>();
+    auto eventHub = host->GetEventHub<EventHub>();
     if (eventHub) {
         eventHub->RestoreEnabled();
     }
@@ -3499,7 +3499,8 @@ void RosenRenderContext::OnePixelRounding(uint16_t flag)
         nodeWidthI -= 1.0f;
         roundToPixelErrorX -= 1.0f;
     }
-    if (roundToPixelErrorX < -0.5f && !floorLeft && !floorRight) {
+    bool enableForceFloorX = SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE && (floorLeft || floorRight);
+    if (roundToPixelErrorX < -0.5f && !enableForceFloorX) {
         nodeWidthI += 1.0f;
         roundToPixelErrorX += 1.0f;
     }
@@ -3515,7 +3516,8 @@ void RosenRenderContext::OnePixelRounding(uint16_t flag)
         nodeHeightI -= 1.0f;
         roundToPixelErrorY -= 1.0f;
     }
-    if (roundToPixelErrorY < -0.5f && !floorTop && !floorBottom) {
+    bool enableForceFloorY = SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE && (floorTop || floorBottom);
+    if (roundToPixelErrorY < -0.5f && !enableForceFloorY) {
         nodeHeightI += 1.0f;
         roundToPixelErrorY += 1.0f;
     }
@@ -5897,6 +5899,7 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    host->NotifyTransformInfoChanged();
     host->OnNodeTransitionInfoUpdate();
 }
 

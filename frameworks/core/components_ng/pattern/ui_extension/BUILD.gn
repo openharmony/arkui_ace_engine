@@ -41,6 +41,7 @@ build_component_ng("ui_extension_pattern_ng") {
     "ui_extension_component/modal_ui_extension_proxy_impl.cpp",
     "ui_extension_component/session_wrapper_impl.cpp",
     "ui_extension_component/ui_extension_accessibility_child_tree_callback.cpp",
+    "ui_extension_component/ui_extension_adapter.cpp",
     "ui_extension_component/ui_extension_pattern.cpp",
     "ui_extension_component/ui_extension_proxy.cpp",
   ]
@@ -51,6 +52,7 @@ build_component_ng("ui_extension_pattern_ng") {
     "dynamic_component/dynamic_model.cpp",
     "dynamic_component/dynamic_node.cpp",
     "dynamic_component/dynamic_pattern.cpp",
+    "dynamic_component/dynamic_touch_delegate.cpp",
   ]
 
   # isolated_component

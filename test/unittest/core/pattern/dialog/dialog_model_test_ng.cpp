@@ -123,7 +123,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg001, TestSize.Level1)
      * @tc.steps: step2. Create EventHub.
      * @tc.expected: EventHub created successfully.
      */
-    auto eventHub = pattern->GetEventHub<DialogEventHub>();
+    auto eventHub = pattern->GetOrCreateEventHub<DialogEventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->MarkModifyDone();
     /**
@@ -1366,13 +1366,13 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg034, TestSize.Level1)
      * @tc.steps: step2. Create DialogNode.
      * @tc.expected: DialogNode created successfully
      */
+    CHECK_NULL_VOID(rootNode);
     rootNode->GetRenderContext()->UpdateChainedTransition(dialogProps.dialogTransitionEffect);
     ASSERT_NE(rootNode, nullptr);
-    CHECK_NULL_VOID(rootNode);
 
+    CHECK_NULL_VOID(rootNode);
     rootNode->GetRenderContext()->UpdateChainedTransition(dialogProps.maskTransitionEffect);
     ASSERT_NE(rootNode, nullptr);
-    CHECK_NULL_VOID(rootNode);
 }
  
  /**
@@ -1383,6 +1383,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg034, TestSize.Level1)
  HWTEST_F(DialogModelTestNg, DialogModelTestNg036, TestSize.Level1)
 {
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    CHECK_NULL_VOID(rootNode);
     AnimationOption animationOption;
     animationOption.SetDelay(10);
 
@@ -1404,10 +1405,12 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg034, TestSize.Level1)
      * @tc.expected: DialogNode created successfully
      */
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    CHECK_NULL_VOID(overlayManager);
     auto customDialog = DialogView::CreateDialogNode(dialogProps, nullptr);
     ASSERT_NE(customDialog, nullptr);
 
     auto customDialogPattern = customDialog->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(customDialogPattern);
     ASSERT_NE(customDialogPattern, nullptr);
     customDialogPattern->SetDialogProperties(dialogProps);
 

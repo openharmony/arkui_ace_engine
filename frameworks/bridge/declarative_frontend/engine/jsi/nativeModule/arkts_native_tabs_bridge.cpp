@@ -428,7 +428,7 @@ ArkUINativeModuleValue TabsBridge::SetBarBackgroundBlurStyle(ArkUIRuntimeCallInf
     BlurOption blurOption;
     ArkUITabBarBackgroundBlurStyle styleOption = { static_cast<int32_t>(BlurStyle::NO_MATERIAL),
         static_cast<int32_t>(ThemeColorMode::SYSTEM), static_cast<int32_t>(AdaptiveColor::DEFAULT),
-        1.0, blurOption.grayscale.data(), blurOption.grayscale.size(),
+        1.0, blurOption.grayscale.data(), static_cast<ArkUI_Int32>(blurOption.grayscale.size()),
         static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE), Color::TRANSPARENT.GetValue(),
         false, static_cast<int32_t>(BlurType::WITHIN_WINDOW) };
     if (blurStyleArg->IsNumber()) {
@@ -533,9 +533,10 @@ ArkUINativeModuleValue TabsBridge::SetBarBackgroundEffect(ArkUIRuntimeCallInfo* 
     auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
     BlurOption blurOption;
     ArkUITabBarBackgroundEffect effectOption = { 0.0f, 1.0f, 1.0f, Color::TRANSPARENT.GetValue(),
-        static_cast<int32_t>(AdaptiveColor::DEFAULT), blurOption.grayscale.data(), blurOption.grayscale.size(),
+        static_cast<int32_t>(AdaptiveColor::DEFAULT), blurOption.grayscale.data(),
+        static_cast<int32_t>(blurOption.grayscale.size()),
         static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE), static_cast<int32_t>(BlurType::WITHIN_WINDOW),
-        Color::TRANSPARENT.GetValue(), false };
+        static_cast<ArkUI_Bool>(Color::TRANSPARENT.GetValue()), false };
     CalcDimension radius;
     if (!ArkTSUtils::ParseJsDimensionVp(vm, radiusArg, radius) || LessNotEqual(radius.Value(), 0.0f)) {
         radius.SetValue(0.0f);

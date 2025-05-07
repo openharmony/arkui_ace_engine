@@ -199,13 +199,16 @@ void MenuPattern::OnAttachToFrameNode()
         CHECK_NULL_VOID(menuWarpper);
         auto warpperPattern = menuWarpper->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(warpperPattern);
-        if (!warpperPattern->IsHide()) {
+        auto isMenuHide = warpperPattern->IsHide();
+        TAG_LOGI(AceLogTag::ACE_MENU, "the area of target node is changed, isMenuHide: %{public}d", isMenuHide);
+        if (!isMenuHide) {
             menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     };
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 
-    auto foldModeChangeCallback = [weak = WeakClaim(this)](FoldDisplayMode foldDisplayMode) {
+    auto foldStatusChangeCallback = [weak = WeakClaim(this)](FoldStatus foldStatus) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "foldStatus is changed: %{public}d", foldStatus);
         auto menuPattern = weak.Upgrade();
         CHECK_NULL_VOID(menuPattern);
         auto menuWrapper = menuPattern->GetMenuWrapper();
@@ -213,9 +216,10 @@ void MenuPattern::OnAttachToFrameNode()
         auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(wrapperPattern);
         wrapperPattern->SetHasFoldModeChangedTransition(true);
+        SubwindowManager::GetInstance()->HideMenuNG(false);
     };
-    foldDisplayModeChangedCallbackId_ =
-        pipelineContext->RegisterFoldDisplayModeChangedCallback(std::move(foldModeChangeCallback));
+    foldStatusChangedCallbackId_ =
+        pipelineContext->RegisterFoldStatusChangedCallback(std::move(foldStatusChangeCallback));
 }
 
 int32_t MenuPattern::RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode)
@@ -258,10 +262,10 @@ void MenuPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(eventHub);
     eventHub->RemoveInnerOnAreaChangedCallback(frameNode->GetId());
 
-    if (foldDisplayModeChangedCallbackId_.has_value()) {
+    if (foldStatusChangedCallbackId_.has_value()) {
         auto pipeline = frameNode->GetContext();
         CHECK_NULL_VOID(pipeline);
-        pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));
+        pipeline->UnRegisterFoldStatusChangedCallback(foldStatusChangedCallbackId_.value_or(-1));
     }
 }
 
@@ -312,6 +316,36 @@ void MenuPattern::OnModifyDone()
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         InitPanEvent(gestureHub);
+    }
+}
+
+void MenuPattern::UpdateMenuBorderAndBackgroundBlur()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    if (!renderContext->HasBorderColor()) {
+        BorderColorProperty borderColor;
+        borderColor.SetColor(theme->GetMenuNormalBorderColor());
+        renderContext->UpdateBorderColor(borderColor);
+    }
+    if (!renderContext->HasBorderWidth()) {
+        auto menuLayoutProperty = GetLayoutProperty<MenuLayoutProperty>();
+        auto menuBorderWidth = theme->GetMenuNormalBorderWidth();
+        BorderWidthProperty borderWidth;
+        borderWidth.SetBorderWidth(menuBorderWidth);
+        menuLayoutProperty->UpdateBorderWidth(borderWidth);
+        renderContext->UpdateBorderWidth(borderWidth);
+        auto scroll = DynamicCast<FrameNode>(host->GetFirstChild());
+        CHECK_NULL_VOID(scroll);
+        auto scrollRenderContext = scroll->GetRenderContext();
+        CHECK_NULL_VOID(scrollRenderContext);
+        scrollRenderContext->UpdateOffset(OffsetT<Dimension>(menuBorderWidth, menuBorderWidth));
     }
 }
 
@@ -483,6 +517,31 @@ void InnerMenuPattern::OnModifyDone()
     CHECK_NULL_VOID(selecTheme);
     if (selecTheme->GetMenuNeedFocus()) {
         InitDefaultBorder(host);
+    }
+}
+
+void InnerMenuPattern::InitDefaultBorder(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto menuTheme = context->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    if (!renderContext->HasBorderColor()) {
+        BorderColorProperty borderColorProperty;
+        borderColorProperty.SetColor(menuTheme->GetBorderColor());
+        renderContext->UpdateBorderColor(borderColorProperty);
+    }
+
+    if (!renderContext->HasBorderWidth()) {
+        auto layoutProperty = host->GetLayoutProperty<MenuLayoutProperty>();
+        BorderWidthProperty widthProp;
+        widthProp.SetBorderWidth(menuTheme->GetBorderWidth());
+        layoutProperty->UpdateBorderWidth(widthProp);
+        renderContext->UpdateBorderWidth(widthProp);
     }
 }
 

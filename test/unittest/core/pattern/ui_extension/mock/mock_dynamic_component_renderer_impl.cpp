@@ -40,7 +40,8 @@ void DynamicComponentRendererImpl::DestroyContent() {}
 void DynamicComponentRendererImpl::UpdateViewportConfig(const SizeF& size, float density,
     int32_t orientation, AnimationOption animationOpt, const OffsetF& offset) {}
 
-void DynamicComponentRendererImpl::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
+void DynamicComponentRendererImpl::TransferPointerEvent(
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
 
 bool DynamicComponentRendererImpl::TransferKeyEvent(const KeyEvent& event)
 {
@@ -51,7 +52,7 @@ void DynamicComponentRendererImpl::SetUIContentType(UIContentType uIContentType)
 
 bool DynamicComponentRendererImpl::IsRestrictedWorkerThread() { return false; }
 
-bool DynamicComponentRendererImpl::HasWorkerUsing(void *worker) { return false; }
+bool DynamicComponentRendererImpl::CheckDCMaxConstraintInWorker(void *worker) { return false; }
 
 void DynamicComponentRendererImpl::AddWorkerUsing(void *worker) {}
 
@@ -112,7 +113,7 @@ bool DynamicComponentRendererImpl::GetBackgroundTransparent() const
     return true;
 }
 
-bool DynamicComponentRendererImpl::CheckWorkerMaxConstraint()
+bool DynamicComponentRendererImpl::CheckWorkerMaxConstraint(void *worker)
 {
     return true;
 }

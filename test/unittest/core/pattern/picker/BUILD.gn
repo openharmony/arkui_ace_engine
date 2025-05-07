@@ -26,5 +26,6 @@ ace_unittest("date_picker_test_ng") {
     "date_picker_test_toss.cpp",
     "date_picker_test_two.cpp",
     "date_picker_test_update.cpp",
+    "date_picker_column_layout_algorithm_test_ng.cpp",
   ]
 }

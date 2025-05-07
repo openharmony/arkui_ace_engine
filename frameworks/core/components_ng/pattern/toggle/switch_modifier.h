@@ -111,6 +111,9 @@ public:
             case TouchHoverAnimationType::PRESS:
                 SetBoardColor(LinearColor(clickEffectColor_), hoverDuration_, Curves::FRICTION);
                 break;
+            case TouchHoverAnimationType::FOCUS:
+                SetBoardColor(LinearColor(focusColor_), hoverDuration_, Curves::FRICTION);
+                break;
             default:
                 break;
         }
@@ -297,6 +300,7 @@ private:
     const Dimension radiusGap_ = 2.0_vp;
     Color clickEffectColor_;
     Color hoverColor_;
+    Color focusColor_;
     Color activeColor_;
     Color inactiveColor_;
     Color userActiveColor_;

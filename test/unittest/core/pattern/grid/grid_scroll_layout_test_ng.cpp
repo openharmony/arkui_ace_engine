@@ -667,7 +667,7 @@ HWTEST_F(GridScrollLayoutTestNg, GridScrollTest006, TestSize.Level1)
 
     auto pattern = frameNode_->GetPattern<GridPattern>();
     EXPECT_TRUE(pattern->isConfigScrollable_);
-    auto eventHub = frameNode_->GetEventHub<GridEventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<GridEventHub>();
     EXPECT_FALSE(eventHub->onScrollToIndex_);
 }
 

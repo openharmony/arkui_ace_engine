@@ -16,7 +16,6 @@
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
 
 #include "base/i18n/localization.h"
-#include "base/thread/task_dependency_manager.h"
 #include "base/ressched/ressched_report.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
@@ -286,7 +285,7 @@ void PageRouterManager::PushNamedRouteInner(const RouterPageInfo& target)
     if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
         TAG_LOGW(AceLogTag::ACE_ROUTER, "PushNamedRoute exceeds maxStackSize.");
         if (target.errorCallback != nullptr) {
-            target.errorCallback("The pages are pushed too much.", ERROR_CODE_PAGE_STACK_FULL);
+            target.errorCallback("Page stack error. Too many pages are pushed.", ERROR_CODE_PAGE_STACK_FULL);
         }
         return;
     }
@@ -1147,7 +1146,7 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target)
     if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
         TAG_LOGW(AceLogTag::ACE_ROUTER, "PushOhmUrl exceeds maxStackSize.");
         if (target.errorCallback != nullptr) {
-            target.errorCallback("The pages are pushed too much.", ERROR_CODE_PAGE_STACK_FULL);
+            target.errorCallback("Page stack error. Too many pages are pushed.", ERROR_CODE_PAGE_STACK_FULL);
         }
         return;
     }
@@ -1214,7 +1213,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
     if (GetStackSize() >= MAX_ROUTER_STACK_SIZE && !context->GetForceSplitEnable()) {
         TAG_LOGW(AceLogTag::ACE_ROUTER, "StartPush exceeds maxStackSize.");
         if (target.errorCallback != nullptr) {
-            target.errorCallback("The pages are pushed too much.", ERROR_CODE_PAGE_STACK_FULL);
+            target.errorCallback("Page stack error. Too many pages are pushed.", ERROR_CODE_PAGE_STACK_FULL);
         }
         return;
     }
@@ -1223,7 +1222,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
     if (info.path.empty()) {
         TAG_LOGW(AceLogTag::ACE_ROUTER, "empty path found in StartPush with url: %{public}s", info.url.c_str());
         if (info.errorCallback != nullptr) {
-            info.errorCallback("The uri of router is not exist.", ERROR_CODE_URI_ERROR);
+            info.errorCallback("The URI of the page to redirect is incorrect or does not exist.", ERROR_CODE_URI_ERROR);
         }
         return;
     }
@@ -1321,7 +1320,9 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target)
     if (info.path.empty()) {
         TAG_LOGW(AceLogTag::ACE_ROUTER, "empty path found in StartReplace with url: %{public}s", info.url.c_str());
         if (info.errorCallback != nullptr) {
-            info.errorCallback("The uri of router is not exist.", ERROR_CODE_URI_ERROR_LITE);
+            info.errorCallback(
+                "Uri error. The URI of the page to be used for replacement is incorrect or does not exist.",
+                ERROR_CODE_URI_ERROR_LITE);
         }
         return;
     }
@@ -1457,9 +1458,6 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     ACE_SCOPED_TRACE_COMMERCIAL("load page: %s(id:%d)", target.url.c_str(), pageId);
     CHECK_RUN_ON(JS);
     auto pageNode = CreatePage(pageId, target);
-
-    TaskDependencyManager::GetInstance()->Sync();
-
     if (!pageNode) {
         TAG_LOGE(AceLogTag::ACE_ROUTER, "failed to create page in LoadPage");
         return;
@@ -1548,7 +1546,7 @@ RefPtr<FrameNode> PageRouterManager::CreatePage(int32_t pageId, const RouterPage
         if (!target.isNamedRouterMode) {
             result = updateRootComponent_();
         } else if (target.errorCallback) {
-            target.errorCallback("The named route is not exist.", ERROR_CODE_NAMED_ROUTE_ERROR);
+            target.errorCallback("Named route error. The named route does not exist.", ERROR_CODE_NAMED_ROUTE_ERROR);
         }
     }
 
@@ -1556,7 +1554,11 @@ RefPtr<FrameNode> PageRouterManager::CreatePage(int32_t pageId, const RouterPage
         TAG_LOGE(AceLogTag::ACE_ROUTER, "Update RootComponent Failed or LoadNamedRouter Failed");
 #if !defined(PREVIEW)
         if (!target.isNamedRouterMode && target.url.substr(0, strlen(BUNDLE_TAG)) != BUNDLE_TAG) {
-            ThrowError("Load Page Failed: " + target.url, ERROR_CODE_INTERNAL_ERROR);
+            const std::string errorMsg =
+                "Load Page Failed: " + target.url + ", probably caused by reasons as follows:\n"
+                "1. there is a js error in target page;\n"
+                "2. invalid moduleName or bundleName in target page.";
+            ThrowError(errorMsg, ERROR_CODE_INTERNAL_ERROR);
         }
 #endif
         pageRouterStack_.pop_back();
@@ -1854,7 +1856,8 @@ void PageRouterManager::StartRestorePageWithTarget(const RouterPageInfo& target,
             TAG_LOGW(AceLogTag::ACE_ROUTER,
                 "empty path found in StartRestorePageWithTarget with url: %{public}s", info.url.c_str());
             if (info.errorCallback != nullptr) {
-                info.errorCallback("The uri of router is not exist.", ERROR_CODE_URI_ERROR);
+                info.errorCallback("The URI of the page to redirect is incorrect or does not exist.",
+                    ERROR_CODE_URI_ERROR);
             }
             return;
         }

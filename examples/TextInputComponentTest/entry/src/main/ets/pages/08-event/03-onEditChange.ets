@@ -16,11 +16,12 @@
 @Entry
 @Component
 struct Ets_8_3_onEditChange {
-  @State time_onEditChange_1:number = 0
-  @State boolean_1:boolean = false
+  @State time_onEditChange_1: number = 0
+  @State boolean_1: boolean = false
+
   build() {
     Scroll() {
-      Column(){
+      Column() {
         Text() {
           Span('onSubmit事件\n')
           Span('规格1 获焦返回true，失焦返回false\n')
@@ -28,21 +29,21 @@ struct Ets_8_3_onEditChange {
           Span('规格3 获焦状态关应用会有一次false回调\n')
         }
 
-        Column(){
+        Column() {
           Text('规格1 获焦返回true，失焦返回false').fontColor(Color.Blue)
           Text('测试步骤：\n 1、点击 \n 2、收起键盘\n  3、点击 \n 4、拉起任务中心\n ')
           Text('pass条件：点击true，收起键盘false，点击true，拉起任务中心不变').fontColor(Color.Red)
-          TextInput({ text:'这是一段示例内容用于测试 onEditChange'}).margin(1).type(InputType.Normal)
+          TextInput({ text: '这是一段示例内容用于测试 onEditChange' }).margin(1).type(InputType.Normal)
             .enterKeyType(EnterKeyType.NEW_LINE)
-            .onEditChange((isEditing:boolean)=>{
-              this.boolean_1 =isEditing
+            .onEditChange((isEditing: boolean) => {
+              this.boolean_1 = isEditing
               this.time_onEditChange_1++
             })
 
           Text('这是回调触发次数')
-          Text( '触发次数 '+this.time_onEditChange_1).margin(1)
+          Text('触发次数 ' + this.time_onEditChange_1).margin(1)
           Text('这是回调返回值')
-          Text( '返回值 '+this.boolean_1).margin(1)
+          Text('返回值 ' + this.boolean_1).margin(1)
         }.borderWidth(2).margin(10).alignItems(HorizontalAlign.Start).borderColor(Color.Blue)
 
         TextArea()
@@ -52,5 +53,4 @@ struct Ets_8_3_onEditChange {
       }
     }
   }
-
 }

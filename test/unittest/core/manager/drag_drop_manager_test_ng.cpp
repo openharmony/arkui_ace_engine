@@ -344,7 +344,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest008, TestSize.Level1)
      * @tc.steps: step2. construct a frameNode whose tag is Grid set its ItemDragEvent and GeometryNode
      */
     auto frameNode = AceType::MakeRefPtr<FrameNode>(GRID_TAG, -1, AceType::MakeRefPtr<GridPattern>());
-    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
     ASSERT_TRUE(eventHub);
     RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     GestureEvent gestureEvent;
@@ -420,7 +420,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest008, TestSize.Level1)
     preGridTargetNode = dragDropManager->preGridTargetFrameNode_;
     EXPECT_TRUE(preGridTargetNode);
     // Set newFrameNode's onDragLeave callback
-    auto eventHubNew = newFrameNode->GetEventHub<GridEventHub>();
+    auto eventHubNew = newFrameNode->GetOrCreateEventHub<GridEventHub>();
     ASSERT_TRUE(eventHubNew);
     std::string itemInfoLeaveNew;
     auto onItemDragLeaveNew = [&itemInfoLeaveNew](const ItemDragInfo& /* dragInfo */, int32_t /* itemIndex */) {
@@ -450,7 +450,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest009, TestSize.Level1)
      * @tc.steps: step2. construct a frameNode whose tag is List set its ItemDragEvent and GeometryNode
      */
     auto frameNode = AceType::MakeRefPtr<FrameNode>(LIST_TAG, -1, AceType::MakeRefPtr<ListPattern>());
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
     ASSERT_TRUE(eventHub);
 
     // Set OnItemDragLeave callback
@@ -528,7 +528,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest009, TestSize.Level1)
     dragDropManager->OnItemDragStart(GLOBAL_X, GLOBAL_Y, newFrameNode);
     EXPECT_TRUE(dragDropManager->preGridTargetFrameNode_);
     // Set newFrameNode's onDragLeave callback
-    auto eventHubNew = newFrameNode->GetEventHub<ListEventHub>();
+    auto eventHubNew = newFrameNode->GetOrCreateEventHub<ListEventHub>();
     ASSERT_TRUE(eventHubNew);
     std::string itemInfoLeaveNew;
     auto onItemDragLeaveNew = [&itemInfoLeaveNew](const ItemDragInfo& /* dragInfo */, int32_t /* itemIndex */) {
@@ -571,7 +571,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest011, TestSize.Level1)
      * @tc.steps: step2. construct a frameNode which type is grid and set its GeometryNode
      */
     auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<GridPattern>());
-    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
     ASSERT_TRUE(eventHub);
 
     // Set geometry node to make sure (GLOBAL_X, GLOBAL_Y) in geoNode.frameRect_
@@ -591,7 +591,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest011, TestSize.Level1)
 
     // case: gridDragFrameNodes_ is empty & preGridTargetFrameNode_ is not null
     auto preGridTargetNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<GridPattern>());
-    auto preGridEvent = preGridTargetNode->GetEventHub<GridEventHub>();
+    auto preGridEvent = preGridTargetNode->GetOrCreateEventHub<GridEventHub>();
     std::string preGridDropInfo;
     auto onPreGridItemDrop = [&preGridDropInfo](const ItemDragInfo& /* dragInfo */, int32_t /* itemIndex */,
                                  int32_t /* insertIndex */, bool /* isSuccess */) { preGridDropInfo = EXTRA_INFO; };
@@ -661,7 +661,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest012, TestSize.Level1)
      * @tc.steps: step2. construct a frameNode which type is list and set its GeometryNode
      */
     auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<ListPattern>());
-    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();
     ASSERT_TRUE(eventHub);
 
     // Set geometry node to make sure (GLOBAL_X, GLOBAL_Y) in geoNode.frameRect_
@@ -737,7 +737,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest013, TestSize.Level1)
      * @tc.expected: step3. FireOnDrop will be called
      */
     auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     std::string onDropInfo;
     auto onDrop = [&onDropInfo](const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */, const std::string& /* info */) {
         onDropInfo = EXTRA_INFO;
@@ -757,7 +757,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest013, TestSize.Level1)
      */
     ItemDragInfo itemDragInfo;
     auto gridNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<GridPattern>());
-    auto gridEvent = gridNode->GetEventHub<GridEventHub>();
+    auto gridEvent = gridNode->GetOrCreateEventHub<GridEventHub>();
     std::string onItemDropInfo;
     ItemDropFunc onItemDrop = [&onItemDropInfo](const ItemDragInfo& /* dragInfo */, int32_t /* itemIndex */,
                                   int32_t /* insertIndex */, bool /* isSuccess */) { onItemDropInfo = EXTRA_INFO; };
@@ -766,7 +766,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest013, TestSize.Level1)
     EXPECT_EQ(onItemDropInfo, EXTRA_INFO);
 
     auto listNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<ListPattern>());
-    auto listEvent = listNode->GetEventHub<ListEventHub>();
+    auto listEvent = listNode->GetOrCreateEventHub<ListEventHub>();
     std::string onItemDropInfoList;
     ItemDropFunc onItemDropList = [&onItemDropInfoList](const ItemDragInfo& /* dragInfo */, int32_t /* itemIndex */,
                                       int32_t /* insertIndex */,
@@ -1197,7 +1197,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest0291, TestSize.Level1)
      * * @tc.expected: listEventHub is TRUE.
      */
     dragDropManager->CancelItemDrag();
-    auto listEventHub = dragDropManager->draggedGridFrameNode_->GetEventHub<ListEventHub>();
+    auto listEventHub = dragDropManager->draggedGridFrameNode_->GetOrCreateEventHub<ListEventHub>();
     EXPECT_TRUE(listEventHub);
 }
 
@@ -1233,7 +1233,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest0292, TestSize.Level1)
      * * @tc.expected: gridEventHub is TRUE.
      */
     dragDropManager->CancelItemDrag();
-    auto gridEventHub = dragDropManager->draggedGridFrameNode_->GetEventHub<GridEventHub>();
+    auto gridEventHub = dragDropManager->draggedGridFrameNode_->GetOrCreateEventHub<GridEventHub>();
     EXPECT_TRUE(gridEventHub);
 }
 
@@ -1265,7 +1265,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest030, TestSize.Level1)
      */
     OHOS::Ace::ItemDragInfo itemDragInfo;
     dragDropManager->FireOnItemDragEvent(gridFrameNode, DragType::GRID, itemDragInfo, DragEventType::ENTER, 0, 0);
-    auto eventHub = gridFrameNode->GetEventHub<GridEventHub>();
+    auto eventHub = gridFrameNode->GetOrCreateEventHub<GridEventHub>();
     EXPECT_TRUE(eventHub);
 
     /**
@@ -1467,7 +1467,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest037, TestSize.Level1)
      * @tc.steps: step4. construct a GridEventHub and updates OnItemDrop and AttachHost.
      */
     ItemDragInfo itemDragInfo;
-    auto gridEvent = gridNode->GetEventHub<GridEventHub>();
+    auto gridEvent = gridNode->GetOrCreateEventHub<GridEventHub>();
     std::string onItemDropInfo;
     ItemDropFunc onItemDrop = [&onItemDropInfo](const ItemDragInfo& /* dragInfo */, int32_t /* itemIndex */,
                                   int32_t /* insertIndex */, bool /* isSuccess */) { onItemDropInfo = EXTRA_INFO; };
@@ -1566,7 +1566,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest039, TestSize.Level1)
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     frameNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE, true);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     eventHub->SetEnabled(true);
 
     /**

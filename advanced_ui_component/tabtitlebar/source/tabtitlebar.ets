@@ -308,9 +308,9 @@ struct CollapsibleMenuSection {
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
       this.maxFontScale = uiContent.getMaxFontScale();
     } catch (exception) {
-      let code: number = (exception as BusinessError).code;
-      let message: string = (exception as BusinessError).message;
-      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+      let code: number = (exception as BusinessError)?.code;
+      let message: string = (exception as BusinessError)?.message;
+      hilog.error(0x3900, 'tabTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
     }
     this.menuItems.forEach((item, index) => {
       if (item.isEnabled && this.firstFocusableIndex === -1 &&
@@ -322,10 +322,16 @@ struct CollapsibleMenuSection {
   }
 
   decideFontScale(): number {
-    let uiContent: UIContext = this.getUIContext();
-    this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
-    if (!this.isFollowingSystemFontScale) {
-      return 1;
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+      if (!this.isFollowingSystemFontScale) {
+        return 1;
+      }
+    } catch (exception) {
+      let code: number = (exception as BusinessError)?.code;
+      let message: string = (exception as BusinessError)?.message;
+      hilog.error(0x3900, 'tabTitleBar', `Faild to getSystemFontScale,cause, code: ${code}, message: ${message}`);
     }
     return Math.min(this.systemFontScale, this.maxFontScale);
   }
@@ -982,14 +988,21 @@ struct TabTitleBarDialog {
   }
 
   async aboutToAppear(): Promise<void> {
-    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-    this.mainWindowStage = context.windowStage.getMainWindowSync();
-    let properties: window.WindowProperties = this.mainWindowStage.getWindowProperties();
-    let rect = properties.windowRect;
-    if (px2vp(rect.height) > this.screenWidth) {
-      this.maxLines = this.verticalScreenLines;
-    } else {
-      this.maxLines = this.horizontalsScreenLines;
+    try {
+      let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+      this.mainWindowStage = context.windowStage.getMainWindowSync();
+      let properties: window.WindowProperties = this.mainWindowStage.getWindowProperties();
+      let rect = properties.windowRect;
+      if (px2vp(rect.height) > this.screenWidth) {
+        this.maxLines = this.verticalScreenLines;
+      } else {
+        this.maxLines = this.horizontalsScreenLines;
+      }
+
+    } catch (exception) {
+      let code: number = (exception as BusinessError)?.code;
+      let message: string = (exception as BusinessError)?.message;
+      hilog.error(0x3900, 'tabTitleBar', `Faild to getMainWindowSync,cause, code: ${code}, message: ${message}`);
     }
   }
 }

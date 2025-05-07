@@ -166,6 +166,13 @@ void DragDropInitiatingStateMachine::HandleReStartDrag(const GestureEvent& info)
     }
 }
 
+void DragDropInitiatingStateMachine::HandlePreDragStatus(const PreDragStatus preDragStatus)
+{
+    if (DragInitStateIsNotEmpty()) {
+        dragDropInitiatingState_[currentState_]->HandlePreDragStatus(preDragStatus);
+    }
+}
+
 bool DragDropInitiatingStateMachine::DragInitStateIsNotEmpty()
 {
     return !dragDropInitiatingState_.empty() && dragDropInitiatingState_[currentState_] ?

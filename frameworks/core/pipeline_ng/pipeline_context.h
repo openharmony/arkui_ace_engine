@@ -397,6 +397,15 @@ public:
     void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea, bool checkSystemWindow = false) override;
     void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool checkSystemWindow = false) override;
 
+    void UpdateSystemSafeAreaWithoutAnimation(const SafeAreaInsets& systemSafeArea,
+        bool checkSceneBoardWindow = false) override;
+
+    void UpdateCutoutSafeAreaWithoutAnimation(const SafeAreaInsets& cutoutSafeArea,
+        bool checkSceneBoardWindow = false) override;
+
+    void UpdateNavSafeAreaWithoutAnimation(const SafeAreaInsets& navSafeArea,
+        bool checkSceneBoardWindow = false) override;
+
     void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) override;
 
     float GetPageAvoidOffset() override;
@@ -1212,6 +1221,8 @@ protected:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
     void StartSplitWindowAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+    void MaximizeInImplictAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
 
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
@@ -1373,8 +1384,8 @@ private:
 
     std::list<TouchEvent> touchEvents_;
 
-    std::map<RefPtr<FrameNode>, std::list<DragPointerEvent>> dragEvents_;
-    std::map<RefPtr<FrameNode>, std::list<MouseEvent>> mouseEvents_;
+    std::map<WeakPtr<FrameNode>, std::list<DragPointerEvent>> dragEvents_;
+    std::map<WeakPtr<FrameNode>, std::list<MouseEvent>> mouseEvents_;
     std::vector<std::function<void(const std::vector<std::string>&)>> dumpListeners_;
 
     RefPtr<FrameNode> rootNode_;
@@ -1474,8 +1485,8 @@ private:
     std::list<DelayedTask> delayedTasks_;
     RefPtr<PostEventManager> postEventManager_;
 
-    std::map<RefPtr<FrameNode>, std::vector<MouseEvent>> nodeToMousePoints_;
-    std::map<RefPtr<FrameNode>, std::vector<DragPointerEvent>> nodeToPointEvent_;
+    std::map<WeakPtr<FrameNode>, std::vector<MouseEvent>> nodeToMousePoints_;
+    std::map<WeakPtr<FrameNode>, std::vector<DragPointerEvent>> nodeToPointEvent_;
     std::vector<Ace::RectF> overlayNodePositions_;
     std::function<void(std::vector<Ace::RectF>)> overlayNodePositionUpdateCallback_;
 
@@ -1518,7 +1529,7 @@ private:
     std::unordered_set<UINode*> attachedNodeSet_;
     std::list<std::function<void()>> afterReloadAnimationTasks_;
     Offset lastHostParentOffsetToWindow_ { 0, 0 };
-
+    int32_t frameCountForNotCallJSCleanUp_ = 0;
     RefPtr<Kit::UIContextImpl> uiContextImpl_;
     std::shared_ptr<UiTranslateManagerImpl> uiTranslateManager_;
     RotationEndCallbackMap rotationEndCallbackMap_ {};

@@ -1889,6 +1889,7 @@ export class CounterComponent extends ViewPU {
               moduleName: '__harDefaultModuleName__',
             });
             Button.accessibilityDescription(this.value === this.min ? '' : this.reduceStr);
+            Button.accessibilityFocusDrawLevel(FocusDrawLevel.TOP);
             Button.direction(this.counterDirection);
             Button.width(CounterResource.COUNTER_LIST_BUTTON_SIZE);
             Button.height(CounterResource.COUNTER_LIST_BUTTON_SIZE);
@@ -2073,6 +2074,7 @@ export class CounterComponent extends ViewPU {
               moduleName: '__harDefaultModuleName__',
             });
             Button.accessibilityDescription(this.value === this.max ? '' : this.increaseStr);
+            Button.accessibilityFocusDrawLevel(FocusDrawLevel.TOP);
             Button.direction(this.counterDirection);
             Button.width(CounterResource.COUNTER_LIST_BUTTON_SIZE);
             Button.height(CounterResource.COUNTER_LIST_BUTTON_SIZE);
@@ -2226,6 +2228,7 @@ export class CounterComponent extends ViewPU {
               moduleName: '__harDefaultModuleName__',
             });
             Button.accessibilityDescription(this.value === this.min ? '' : this.reduceStr);
+            Button.accessibilityFocusDrawLevel(FocusDrawLevel.TOP);
             Button.direction(this.counterDirection);
             Button.width(CounterResource.COUNTER_COMPACT_BUTTON_SIZE);
             Button.height(CounterResource.COUNTER_COMPACT_BUTTON_SIZE);
@@ -2408,6 +2411,7 @@ export class CounterComponent extends ViewPU {
               moduleName: '__harDefaultModuleName__',
             });
             Button.accessibilityDescription(this.value === this.max ? '' : this.increaseStr);
+            Button.accessibilityFocusDrawLevel(FocusDrawLevel.TOP);
             Button.direction(this.counterDirection);
             Button.width(CounterResource.COUNTER_COMPACT_BUTTON_SIZE);
             Button.height(CounterResource.COUNTER_COMPACT_BUTTON_SIZE);

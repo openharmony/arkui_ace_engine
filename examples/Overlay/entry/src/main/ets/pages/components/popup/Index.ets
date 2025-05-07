@@ -33,16 +33,20 @@ export struct PopupIndex {
     { name: 'PopupAnimateTest', path: 'PopupAnimateTest' },
     { name: 'PopupTipTest', path: 'PopupTipTest' },
     { name: 'PopupDragTest', path: 'PopupDragTest' },
+    { name: 'PopupMessageTest', path: 'PopupMessageTest' },
+    { name: 'PopupComplexTest', path: 'PopupComplexTest' },
   ]
 
   build() {
     NavDestination() {
-      NavList({
-        pages: this.paths,
-        onPathChange: (item: NavListItem) => {
-          this.pathStack.pushPath( { name: item.path } )
-        }
-      })
+      Scroll() {
+        NavList({
+          pages: this.paths,
+          onPathChange: (item: NavListItem) => {
+            this.pathStack.pushPath( { name: item.path } )
+          }
+        })
+      }
     }
     .title('Popup')
     .onBackPressed(() => {

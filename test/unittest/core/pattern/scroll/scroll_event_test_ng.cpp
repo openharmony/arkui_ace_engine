@@ -1323,13 +1323,13 @@ HWTEST_F(ScrollEventTestNg, EnablePaging001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. dragDistance and dragSpeed less than threshold
-     * @tc.expected: predictSnapOffset.value() less than 0
+     * @tc.expected: stay on the current page
      */
     auto dragDistance = viewPortLength * 0.5 - 1;
     auto dragSpeed = SCROLL_PAGING_SPEED_THRESHOLD - 1;
     auto predictSnapOffset = pattern_->CalcPredictSnapOffset(0.f, dragDistance, dragSpeed, SnapDirection::NONE);
     EXPECT_TRUE(predictSnapOffset.has_value());
-    EXPECT_LT(predictSnapOffset.value(), 0);
+    EXPECT_EQ(predictSnapOffset.value(), 10.f);
 
     /**
      * @tc.steps: step3. dragDistance and dragSpeed larger than threshold

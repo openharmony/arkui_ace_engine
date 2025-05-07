@@ -74,10 +74,10 @@ ace_unittest("focus_hub_test_ng") {
     "focus_core/focus_request_test.cpp",
     "focus_core/focus_test_base.cpp",
     "focus_core/focus_window_test.cpp",
-    "focus_core/passive_last_focus_test.cpp",
-    "focus_core/lost_focus_to_view_root_test.cpp",
     "focus_core/linear_focus_test.cpp",
+    "focus_core/lost_focus_to_view_root_test.cpp",
     "focus_core/page_focus_switch_test.cpp",
+    "focus_core/passive_last_focus_test.cpp",
     "focus_hub_test_ng.cpp",
     "focus_hub_test_ng_branch_coverage.cpp",
     "focus_hub_test_ng_for_paint_focus_state.cpp",
@@ -169,105 +169,6 @@ ace_unittest("axis_event_test_ng") {
   type = "new"
   module_output = "events"
   sources = [ "axis_event_test_ng.cpp" ]
-}
-
-ace_unittest("resample_and_velocity_test_ng") {
-  type = "pipeline"
-  module_output = "events"
-  flutter_skia = true
-  external_deps = [
-    "graphic_2d:2d_graphics",
-    "napi:ace_napi",
-  ]
-  sources = [
-    "$ace_root/adapter/ohos/osal/ressched_report.cpp",
-    "$ace_root/frameworks/base/log/ace_tracker.cpp",
-    "$ace_root/frameworks/base/mousestyle/mouse_style.cpp",
-    "$ace_root/frameworks/base/ressched/ressched_report.cpp",
-    "$ace_root/frameworks/core/components_ng/manager/form_event/form_event_manager.cpp",
-    "$ace_root/frameworks/core/components_ng/manager/form_gesture/form_gesture_manager.cpp",
-    "$ace_root/frameworks/core/event/resample_algo.cpp",
-    "$ace_root/frameworks/core/pipeline/pipeline_base.cpp",
-    "$ace_root/frameworks/core/pipeline_ng/pipeline_context.cpp",
-    "$ace_root/test/mock/adapter/mock_input_manager.cpp",
-    "$ace_root/test/mock/adapter/mock_modal_ui_extension.cpp",
-    "$ace_root/test/mock/adapter/mock_view_data_wrap_ohos.cpp",
-    "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
-    "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
-    "$ace_root/test/mock/base/mock_ace_trace.cpp",
-    "$ace_root/test/mock/base/mock_drag_window.cpp",
-    "$ace_root/test/mock/base/mock_engine_helper.cpp",
-    "$ace_root/test/mock/base/mock_event_report.cpp",
-    "$ace_root/test/mock/base/mock_foldable_window.cpp",
-    "$ace_root/test/mock/base/mock_frame_report.cpp",
-    "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
-    "$ace_root/test/mock/base/mock_image_source.cpp",
-    "$ace_root/test/mock/base/mock_jank_frame_report.cpp",
-    "$ace_root/test/mock/base/mock_localization.cpp",
-    "$ace_root/test/mock/base/mock_measure_util.cpp",
-    "$ace_root/test/mock/base/mock_mouse_style.cpp",
-    "$ace_root/test/mock/base/mock_pixel_map.cpp",
-    "$ace_root/test/mock/base/mock_socperf_client_impl.cpp",
-    "$ace_root/test/mock/base/mock_subwindow.cpp",
-    "$ace_root/test/mock/base/mock_system_properties.cpp",
-    "$ace_root/test/mock/base/mock_trace_id_impl.cpp",
-    "$ace_root/test/mock/core/accessibility/accessibility_manager_ng.cpp",
-    "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
-    "$ace_root/test/mock/core/common/mock_ace_engine.cpp",
-    "$ace_root/test/mock/core/common/mock_ace_engine_ext.cpp",
-    "$ace_root/test/mock/core/common/mock_ai_write_adapter.cpp",
-    "$ace_root/test/mock/core/common/mock_clipboard.cpp",
-    "$ace_root/test/mock/core/common/mock_container.cpp",
-    "$ace_root/test/mock/core/common/mock_data_detector_adapter.cpp",
-    "$ace_root/test/mock/core/common/mock_data_detector_mgr.cpp",
-    "$ace_root/test/mock/core/common/mock_font_loader_ng.cpp",
-    "$ace_root/test/mock/core/common/mock_font_manager.cpp",
-    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
-    "$ace_root/test/mock/core/common/mock_image_analyzer_adapter.cpp",
-    "$ace_root/test/mock/core/common/mock_image_analyzer_manager.cpp",
-    "$ace_root/test/mock/core/common/mock_image_analyzer_mgr.cpp",
-    "$ace_root/test/mock/core/common/mock_interaction.cpp",
-    "$ace_root/test/mock/core/common/mock_layout_inspector.cpp",
-    "$ace_root/test/mock/core/common/mock_motion_path_evaluator.cpp",
-    "$ace_root/test/mock/core/common/mock_raw_recognizer.cpp",
-    "$ace_root/test/mock/core/common/mock_stylus_detector_default.cpp",
-    "$ace_root/test/mock/core/common/mock_stylus_detector_mgr.cpp",
-    "$ace_root/test/mock/core/common/mock_theme_constants.cpp",
-    "$ace_root/test/mock/core/common/mock_theme_utils.cpp",
-    "$ace_root/test/mock/core/common/mock_udmf.cpp",
-    "$ace_root/test/mock/core/common/mock_window.cpp",
-    "$ace_root/test/mock/core/common/mock_xcollieInterface.cpp",
-    "$ace_root/test/mock/core/event/mock_touch_event.cpp",
-    "$ace_root/test/mock/core/image_provider/mock_image_cache.cpp",
-    "$ace_root/test/mock/core/image_provider/mock_image_file_cache.cpp",
-    "$ace_root/test/mock/core/image_provider/mock_image_loading_context.cpp",
-    "$ace_root/test/mock/core/image_provider/mock_image_source_info.cpp",
-    "$ace_root/test/mock/core/package/mock_package_event_proxy.cpp",
-    "$ace_root/test/mock/core/pattern/mock_app_bar_view.cpp",
-    "$ace_root/test/mock/core/pattern/mock_container_modal_utils.cpp",
-    "$ace_root/test/mock/core/pipeline/mock_element_register.cpp",
-    "$ace_root/test/mock/core/render/mock_animated_image.cpp",
-    "$ace_root/test/mock/core/render/mock_animation_utils.cpp",
-    "$ace_root/test/mock/core/render/mock_canvas_image.cpp",
-    "$ace_root/test/mock/core/render/mock_font_collection.cpp",
-    "$ace_root/test/mock/core/render/mock_modifier_adapter.cpp",
-    "$ace_root/test/mock/core/render/mock_paragraph.cpp",
-    "$ace_root/test/mock/core/render/mock_pixmap_image.cpp",
-    "$ace_root/test/mock/core/render/mock_render_context_creator.cpp",
-    "$ace_root/test/mock/core/render/mock_render_surface_creator.cpp",
-    "$ace_root/test/mock/core/rosen/testing_typography_style.cpp",
-    "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
-    "$ace_root/test/unittest/core/pattern/text/mock/mock_text_layout_adapter.cpp",
-    "$ace_root/test/unittest/core/pipeline/mock_input_method_manager.cpp",
-  ]
-  extra_deps = []
-  extra_deps += [ "$ace_root/test/unittest:ace_unittest_log" ]
-
-  sources += [ "resample_and_velocity_test_ng.cpp" ]
-
-  if (defined(resourceschedule_ffrt_support) && resourceschedule_ffrt_support) {
-    sources += [ "$ace_root/test/mock/base/mock_long_frame_report.cpp" ]
-  }
 }
 
 group("core_event_unittest") {

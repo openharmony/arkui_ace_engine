@@ -183,6 +183,11 @@ template("ace_core_interfaces_native_node") {
       ]
     }
 
+    if (defined(config.window_scene_support) &&
+        config.window_scene_support) {
+      sources += [ "node/embeddedComponent_modifier.cpp" ]
+    }
+
     external_deps = [
       "graphic_2d:drawing_napi_impl",
       "graphic_2d:librender_service_client",
@@ -193,6 +198,13 @@ template("ace_core_interfaces_native_node") {
     }
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
+    }
+    if (defined(config.window_scene_support) &&
+        config.window_scene_support) {
+      external_deps += [
+        "ability_base:ability_base_want",
+        "ability_base:want",
+      ]
     }
 
     cflags_cc = []

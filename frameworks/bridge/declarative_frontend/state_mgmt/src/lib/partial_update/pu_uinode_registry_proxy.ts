@@ -52,7 +52,6 @@ function uiNodeCleanUpIdleTask(maxTimeInMs: number): void {
     UINodeRegisterProxy.obtainDeletedElmtIds();
     UINodeRegisterProxy.unregisterElmtIdsFromIViews();
     ObserveV2.getObserve().runIdleTasks(deadline);
-    ObserveV2.getObserve().runIdleCleanup(deadline);
 }
 
 class UINodeRegisterProxy {

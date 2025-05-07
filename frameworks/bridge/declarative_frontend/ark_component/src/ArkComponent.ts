@@ -148,13 +148,8 @@ function isResource(variable: any): variable is Resource {
   return (variable as Resource)?.bundleName !== undefined;
 }
 
-function isResourceEqual(stageValue: Resource, value: Resource): boolean {
-  return false;
-}
 function isBaseOrResourceEqual(stageValue: any, value: any): boolean {
-  if (isResource(stageValue) && isResource(value)) {
-    return isResourceEqual(stageValue, value);
-  } else if (!isResource(stageValue) && !isResource(value)) {
+  if (!isResource(stageValue) && !isResource(value)) {
     return (stageValue === value);
   }
   return false;
@@ -357,9 +352,7 @@ class BorderWidthModifier extends ModifierWithKey<Length | EdgeWidths> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       if ((Object.keys(this.value).indexOf('start') >= 0) ||
           (Object.keys(this.value).indexOf('end') >= 0)) {
         return !((this.stageValue as LocalizedEdgeWidths).start === (this.value as LocalizedEdgeWidths).start &&
@@ -446,9 +439,7 @@ class BorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses | Loc
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       if ((Object.keys(this.value).indexOf('topStart') >= 0) ||
           (Object.keys(this.value).indexOf('topEnd') >= 0) ||
           (Object.keys(this.value).indexOf('bottomStart') >= 0) ||
@@ -542,9 +533,7 @@ class BorderColorModifier extends ModifierWithKey<ResourceColor | EdgeColors | L
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       if ((Object.keys(this.value).indexOf('start') >= 0) ||
           (Object.keys(this.value).indexOf('end') >= 0)) {
         return !((this.stageValue as LocalizedEdgeColors).start === (this.value as LocalizedEdgeColors).start &&
@@ -1159,9 +1148,7 @@ class OutlineColorModifier extends ModifierWithKey<ResourceColor | EdgeColors> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       return !((this.stageValue as EdgeColors).left === (this.value as EdgeColors).left &&
         (this.stageValue as EdgeColors).right === (this.value as EdgeColors).right &&
         (this.stageValue as EdgeColors).top === (this.value as EdgeColors).top &&
@@ -1192,9 +1179,7 @@ class OutlineRadiusModifier extends ModifierWithKey<Dimension | OutlineRadiuses>
     }
   }
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       return !((this.stageValue as BorderRadiuses).topLeft === (this.value as BorderRadiuses).topLeft &&
         (this.stageValue as BorderRadiuses).topRight === (this.value as BorderRadiuses).topRight &&
         (this.stageValue as BorderRadiuses).bottomLeft === (this.value as BorderRadiuses).bottomLeft &&
@@ -1255,9 +1240,7 @@ class OutlineWidthModifier extends ModifierWithKey<Dimension | EdgeOutlineWidths
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       return !((this.stageValue as EdgeOutlineWidths).left === (this.value as EdgeOutlineWidths).left &&
         (this.stageValue as EdgeOutlineWidths).right === (this.value as EdgeOutlineWidths).right &&
         (this.stageValue as EdgeOutlineWidths).top === (this.value as EdgeOutlineWidths).top &&
@@ -1805,17 +1788,14 @@ class ForegroundColorModifier extends ModifierWithKey<ResourceColor | ColoringSt
 
 declare type ClickCallback = (event: ClickEvent) => void;
 class OnClickModifier extends ModifierWithKey<ClickCallback> {
-  private _clickEvent: ClickCallback = null;
   constructor(value: ClickCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onClick');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      this._clickEvent = null;
       getUINativeModule().common.resetOnClick(node);
     } else {
-      this._clickEvent = this.value;
       getUINativeModule().common.setOnClick(node, this.value);
     }
   }
@@ -1913,17 +1893,14 @@ class DragEndModifier extends ModifierWithKey<DragEndCallback> {
 
 declare type TouchCallback = (event: TouchEvent) => void;
 class OnTouchModifier extends ModifierWithKey<TouchCallback> {
-  private _touchEvent: TouchCallback = null;
   constructor(value: TouchCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onTouch');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      this._touchEvent = null;
       getUINativeModule().common.resetOnTouch(node);
     } else {
-      this._touchEvent = this.value;
       getUINativeModule().common.setOnTouch(node, this.value);
     }
   }
@@ -1931,68 +1908,56 @@ class OnTouchModifier extends ModifierWithKey<TouchCallback> {
 
 declare type VoidCallback = () => void;
 class OnAppearModifier extends ModifierWithKey<VoidCallback> {
-  private _onAppearEvent: VoidCallback = null;
   constructor(value: VoidCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onAppear');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      this._onAppearEvent = null;
       getUINativeModule().common.resetOnAppear(node);
     } else {
-      this._onAppearEvent = this.value;
       getUINativeModule().common.setOnAppear(node, this.value);
     }
   }
 }
 
 class OnDisappearModifier extends ModifierWithKey<VoidCallback> {
-  private _onDisappearEvent: VoidCallback = null;
   constructor(value: VoidCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onDisappear');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      this._onDisappearEvent = null;
       getUINativeModule().common.resetOnDisappear(node);
     } else {
-      this._onDisappearEvent = this.value;
       getUINativeModule().common.setOnDisappear(node, this.value);
     }
   }
 }
 
 class OnAttachModifier extends ModifierWithKey<VoidCallback> {
-  private _onAttach: VoidCallback = null;
   constructor(value: VoidCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onAttach');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      this._onAttach = null;
       getUINativeModule().common.resetOnAttach(node);
     } else {
-      this._onAttach = this.value;
       getUINativeModule().common.setOnAttach(node, this.value);
     }
   }
 }
 
 class OnDetachModifier extends ModifierWithKey<VoidCallback> {
-  private _onDetach: VoidCallback = null;
   constructor(value: VoidCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onDetach');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      this._onDetach = null;
       getUINativeModule().common.resetOnDetach(node);
     } else {
-      this._onDetach = this.value;
       getUINativeModule().common.setOnDetach(node, this.value);
     }
   }
@@ -2000,68 +1965,73 @@ class OnDetachModifier extends ModifierWithKey<VoidCallback> {
 
 declare type KeyEventCallback = (event: KeyEvent) => void;
 class OnKeyEventModifier extends ModifierWithKey<KeyEventCallback> {
-  private _onKeyEvent: KeyEventCallback = null;
   constructor(value: KeyEventCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onKeyEvent');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      this._onKeyEvent = null;
       getUINativeModule().common.resetOnKeyEvent(node);
     } else {
-      this._onKeyEvent = this.value;
       getUINativeModule().common.setOnKeyEvent(node, this.value);
     }
   }
 }
 
 class OnKeyPreImeModifier extends ModifierWithKey<Callback<KeyEvent, boolean>> {
-  private _onKeyPreIme: Callback<KeyEvent, boolean> = null;
   constructor(value: Callback<KeyEvent, boolean>) {
     super(value);
   }
   static identity: Symbol = Symbol('onKeyPreIme');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      this._onKeyPreIme = null;
       getUINativeModule().common.resetOnKeyPreIme(node);
     } else {
-      this._onKeyPreIme = this.value;
       getUINativeModule().common.setOnKeyPreIme(node, this.value);
     }
   }
 }
 
+class OnKeyEventDispatchModifier extends ModifierWithKey<Callback<KeyEvent, boolean>> {
+  private _onKeyEventDispatch: Callback<KeyEvent, boolean> = null;
+  constructor(value: Callback<KeyEvent, boolean>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onKeyEventDispatch');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      this._onKeyEventDispatch = null;
+      getUINativeModule().common.resetOnKeyEventDispatch(node);
+    } else {
+      this._onKeyEventDispatch = this.value;
+      getUINativeModule().common.setOnKeyEventDispatch(node, this.value);
+    }
+  }
+}
+
 class OnFocusModifier extends ModifierWithKey<VoidCallback> {
-  private _onFocus: VoidCallback = null;
   constructor(value: VoidCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onFocus');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      this._onFocus = null;
       getUINativeModule().common.resetOnFocus(node);
     } else {
-      this._onFocus = this.value;
       getUINativeModule().common.setOnFocus(node, this.value);
     }
   }
 }
 
 class OnBlurModifier extends ModifierWithKey<VoidCallback> {
-  private _onBlur: VoidCallback = null;
   constructor(value: VoidCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onBlur');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      this._onBlur = null;
       getUINativeModule().common.resetOnBlur(node);
     } else {
-      this._onBlur = this.value;
       getUINativeModule().common.setOnBlur(node, this.value);
     }
   }
@@ -2069,17 +2039,14 @@ class OnBlurModifier extends ModifierWithKey<VoidCallback> {
 
 declare type HoverEventCallback = (isHover: boolean, event: HoverEvent) => void;
 class OnHoverModifier extends ModifierWithKey<HoverEventCallback> {
-  private _onHover: HoverEventCallback = null;
   constructor(value: HoverEventCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onHover');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      this._onHover = null;
       getUINativeModule().common.resetOnHover(node);
     } else {
-      this._onHover = this.value;
       getUINativeModule().common.setOnHover(node, this.value);
     }
   }
@@ -2087,17 +2054,14 @@ class OnHoverModifier extends ModifierWithKey<HoverEventCallback> {
 
 declare type HoverMoveEventCallback = (event: HoverEvent) => void;
 class OnHoverMoveModifier extends ModifierWithKey<HoverMoveEventCallback> {
-  private _onHoverMove: HoverMoveEventCallback = null;
   constructor(value: HoverMoveEventCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onHoverMove');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      this._onHoverMove = null;
       getUINativeModule().common.resetOnHoverMove(node);
     } else {
-      this._onHoverMove = this.value;
       getUINativeModule().common.setOnHoverMove(node, this.value);
     }
   }
@@ -2105,17 +2069,14 @@ class OnHoverMoveModifier extends ModifierWithKey<HoverMoveEventCallback> {
 
 declare type MouseEventCallback = (event: MouseEvent) => void;
 class OnMouseModifier extends ModifierWithKey<MouseEventCallback> {
-  private _onMouse: MouseEventCallback = null;
   constructor(value: MouseEventCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onMouse');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      this._onMouse = null;
       getUINativeModule().common.resetOnMouse(node);
     } else {
-      this._onMouse = this.value;
       getUINativeModule().common.setOnMouse(node, this.value);
     }
   }
@@ -2123,17 +2084,14 @@ class OnMouseModifier extends ModifierWithKey<MouseEventCallback> {
 
 declare type AxisEventCallback = (event: AxisEvent) => void;
 class OnAxisEventModifier extends ModifierWithKey<AxisEventCallback> {
-  private _onAxis: AxisEventCallback = null;
   constructor(value: AxisEventCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onAxisEvent');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      this._onAxis = null;
       getUINativeModule().common.resetOnAxisEvent(node);
     } else {
-      this._onAxis = this.value;
       getUINativeModule().common.setOnAxisEvent(node, this.value);
     }
   }
@@ -2141,17 +2099,14 @@ class OnAxisEventModifier extends ModifierWithKey<AxisEventCallback> {
 
 declare type SizeChangeEventCallback = (oldValue: SizeOptions, newValue: SizeOptions) => void;
 class OnSizeChangeModifier extends ModifierWithKey<SizeChangeEventCallback> {
-  private _onSizeChange: SizeChangeEventCallback = null;
   constructor(value: SizeChangeEventCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onSizeChange');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      this._onSizeChange = null;
       getUINativeModule().common.resetOnSizeChange(node);
     } else {
-      this._onSizeChange = this.value;
       getUINativeModule().common.setOnSizeChange(node, this.value);
     }
   }
@@ -2159,17 +2114,14 @@ class OnSizeChangeModifier extends ModifierWithKey<SizeChangeEventCallback> {
 
 declare type AreaChangeEventCallback = (oldValue: Area, newValue: Area) => void;
 class OnAreaChangeModifier extends ModifierWithKey<AreaChangeEventCallback> {
-  private _onAreaChange: AreaChangeEventCallback = null;
   constructor(value: AreaChangeEventCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onAreaChange');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      this._onAreaChange = null;
       getUINativeModule().common.resetOnAreaChange(node);
     } else {
-      this._onAreaChange = this.value;
       getUINativeModule().common.setOnAreaChange(node, this.value);
     }
   }
@@ -2177,17 +2129,14 @@ class OnAreaChangeModifier extends ModifierWithKey<AreaChangeEventCallback> {
 
 declare type GestureJudgeBeginCallback = (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult;
 class OnGestureJudgeBeginModifier extends ModifierWithKey<GestureJudgeBeginCallback> {
-  private _onGestureJudgeBegin: GestureJudgeBeginCallback = null;
   constructor(value: GestureJudgeBeginCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onGestureJudgeBegin');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      this._onGestureJudgeBegin = null;
       getUINativeModule().common.resetOnGestureJudgeBegin(node);
     } else {
-      this._onGestureJudgeBegin = this.value;
       getUINativeModule().common.setOnGestureJudgeBegin(node, this.value);
     }
   }
@@ -2195,17 +2144,14 @@ class OnGestureJudgeBeginModifier extends ModifierWithKey<GestureJudgeBeginCallb
 
 declare type GestureRecognizerJudgeBeginCallback = (event: BaseGestureEvent, current: GestureRecognizer, recognizers: Array<GestureRecognizer>) => GestureJudgeResult;
 class OnGestureRecognizerJudgeBeginModifier extends ModifierWithKey<GestureRecognizerJudgeBeginCallback> {
-  private _onGestureRecognizerJudgeBegin: GestureRecognizerJudgeBeginCallback = null;
   constructor(value: GestureRecognizerJudgeBeginCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onGestureRecognizerJudgeBegin');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      this._onGestureRecognizerJudgeBegin = null;
       getUINativeModule().common.resetOnGestureRecognizerJudgeBegin(node);
     } else {
-      this._onGestureRecognizerJudgeBegin = this.value;
       getUINativeModule().common.setOnGestureRecognizerJudgeBegin(node, this.value);
     }
   }
@@ -2213,17 +2159,14 @@ class OnGestureRecognizerJudgeBeginModifier extends ModifierWithKey<GestureRecog
 
 declare type ShouldBuiltInRecognizerParallelWithCallback = (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer;
 class ShouldBuiltInRecognizerParallelWithModifier extends ModifierWithKey<ShouldBuiltInRecognizerParallelWithCallback> {
-  private _shouldBuiltInRecognizerParallelWith: ShouldBuiltInRecognizerParallelWithCallback = null;
   constructor(value: ShouldBuiltInRecognizerParallelWithCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('shouldBuiltInRecognizerParallelWith');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      this._shouldBuiltInRecognizerParallelWith = null;
       getUINativeModule().common.resetShouldBuiltInRecognizerParallelWith(node);
     } else {
-      this._shouldBuiltInRecognizerParallelWith = this.value;
       getUINativeModule().common.setShouldBuiltInRecognizerParallelWith(node, this.value);
     }
   }
@@ -2231,18 +2174,15 @@ class ShouldBuiltInRecognizerParallelWithModifier extends ModifierWithKey<Should
 
 declare type FocusAxisEventCallback = (event: FocusAxisEvent) => void;
 class OnFocusAxisEventModifier extends ModifierWithKey<FocusAxisEventCallback> {
-  private _onFocusAxisEvent: FocusAxisEventCallback = null;
   constructor(value: FocusAxisEventCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onFocusAxisEvent');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      this._onFocusAxisEvent = null;
-      getUINativeModule().common.resetOnFocusAxisEvent(node);
+      getUINativeModule().common.resetOnKeyEvent(node);
     } else {
-      this._onFocusAxisEvent = this.value;
-      getUINativeModule().common.setOnFocusAxisEvent(node, this.value);
+      getUINativeModule().common.setOnKeyEvent(node, this.value);
     }
   }
 }
@@ -3647,6 +3587,27 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   _gestureEvent: UIGestureEvent;
   _instanceId: number;
   _needDiff: boolean;
+  private _clickEvent: ClickCallback = null;
+  private _touchEvent: TouchCallback = null;
+  private _onAppearEvent: VoidCallback = null;
+  private _onDisappearEvent: VoidCallback = null;
+  private _onAttach: VoidCallback = null;
+  private _onDetach: VoidCallback = null;
+  private _onKeyEvent: KeyEventCallback = null;
+  private _onKeyPreIme: Callback<KeyEvent, boolean> = null;
+  private _onKeyEventDispatch: Callback<KeyEvent, boolean> = null;
+  private _onFocus: VoidCallback = null;
+  private _onBlur: VoidCallback = null;
+  private _onHover: HoverEventCallback = null;
+  private _onHoverMove: HoverMoveEventCallback = null;
+  private _onMouse: MouseEventCallback = null;
+  private _onAxis: AxisEventCallback = null;
+  private _onSizeChange: SizeChangeEventCallback = null;
+  private _onAreaChange: AreaChangeEventCallback = null;
+  private _onGestureJudgeBegin: GestureJudgeBeginCallback = null;
+  private _onGestureRecognizerJudgeBegin: GestureRecognizerJudgeBeginCallback = null;
+  private _shouldBuiltInRecognizerParallelWith: ShouldBuiltInRecognizerParallelWithCallback = null;
+  private _onFocusAxisEvent: FocusAxisEventCallback = null;
 
   constructor(nativePtr: KNode, classType?: ModifierType) {
     this.nativePtr = nativePtr;
@@ -3737,18 +3698,22 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     });
   }
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
+    this._onGestureJudgeBegin = callback;
     modifierWithKey(this._modifiersWithKeys, OnGestureJudgeBeginModifier.identity, OnGestureJudgeBeginModifier, callback);
     return this;
   }
   onGestureRecognizerJudgeBegin(callback: (event: BaseGestureEvent, current: GestureRecognizer, recognizers: Array<GestureRecognizer>) => GestureJudgeResult): this {
+    this._onGestureRecognizerJudgeBegin = callback;
     modifierWithKey(this._modifiersWithKeys, OnGestureRecognizerJudgeBeginModifier.identity, OnGestureRecognizerJudgeBeginModifier, callback);
     return this;
   }
   shouldBuiltInRecognizerParallelWith(callback: (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer): this {
+    this._shouldBuiltInRecognizerParallelWith = callback;
     modifierWithKey(this._modifiersWithKeys, ShouldBuiltInRecognizerParallelWithModifier.identity, ShouldBuiltInRecognizerParallelWithModifier, callback);
     return this;
   }
   onSizeChange(callback: (oldValue: SizeOptions, newValue: SizeOptions) => void): this {
+    this._onSizeChange = callback;
     modifierWithKey(this._modifiersWithKeys, OnSizeChangeModifier.identity, OnSizeChangeModifier, callback);
     return this;
   }
@@ -4248,16 +4213,19 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   onClick(event: (event?: ClickEvent) => void): this {
+    this._clickEvent = event;
     modifierWithKey(this._modifiersWithKeys, OnClickModifier.identity, OnClickModifier, event);
     return this;
   }
 
   onHover(event: (isHover?: boolean, event?: HoverEvent) => void): this {
+    this._onHover = event;
     modifierWithKey(this._modifiersWithKeys, OnHoverModifier.identity, OnHoverModifier, event);
     return this;
   }
 
   onHoverMove(event: (event?: HoverMoveEvent) => void): this {
+    this._onHoverMove = event;
     modifierWithKey(this._modifiersWithKeys, OnHoverMoveModifier.identity, OnHoverMoveModifier, event);
     return this;
   }
@@ -4268,31 +4236,43 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   onMouse(event: (event?: MouseEvent) => void): this {
+    this._onMouse = event;
     modifierWithKey(this._modifiersWithKeys, OnMouseModifier.identity, OnMouseModifier, event);
     return this;
   }
 
   onAxisEvent(event: (event?: AxisEvent) => void): this {
+    this._onAxis = event;
     modifierWithKey(this._modifiersWithKeys, OnAxisEventModifier.identity, OnAxisEventModifier, event);
     return this;
   }
   
   onTouch(event: (event?: TouchEvent) => void): this {
+    this._touchEvent = event;
     modifierWithKey(this._modifiersWithKeys, OnTouchModifier.identity, OnTouchModifier, event);
     return this;
   }
 
   onKeyEvent(event: (event?: KeyEvent) => void): this {
+    this._onKeyEvent = event;
     modifierWithKey(this._modifiersWithKeys, OnKeyEventModifier.identity, OnKeyEventModifier, event);
     return this;
   }
 
   onKeyPreIme(event: Callback<KeyEvent, boolean>): this {
+    this._onKeyPreIme = event;
     modifierWithKey(this._modifiersWithKeys, OnKeyPreImeModifier.identity, OnKeyPreImeModifier, event);
     return this;
   }
 
+  onKeyEventDispatch(event: Callback<KeyEvent, boolean>): this {
+    this._onKeyEventDispatch = event;
+    modifierWithKey(this._modifiersWithKeys, OnKeyEventDispatchModifier.identity, OnKeyEventDispatchModifier, event);
+    return this;
+  }
+
   onFocusAxisEvent(event: (event?: FocusAxisEvent) => void): this {
+    this._onFocusAxisEvent = event;
     modifierWithKey(this._modifiersWithKeys, OnFocusAxisEventModifier.identity, OnFocusAxisEventModifier, event);
     return this;
   }
@@ -4316,11 +4296,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   onFocus(event: () => void): this {
+    this._onFocus = event;
     modifierWithKey(this._modifiersWithKeys, OnFocusModifier.identity, OnFocusModifier, event);
     return this;
   }
 
   onBlur(event: () => void): this {
+    this._onBlur = event;
     modifierWithKey(this._modifiersWithKeys, OnBlurModifier.identity, OnBlurModifier, event);
     return this;
   }
@@ -4532,25 +4514,30 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   onAppear(event: () => void): this {
+    this._onAppearEvent = event;
     modifierWithKey(this._modifiersWithKeys, OnAppearModifier.identity, OnAppearModifier, event);
     return this;
   }
 
   onDisAppear(event: () => void): this {
+    this._onDisappearEvent = event;
     modifierWithKey(this._modifiersWithKeys, OnDisappearModifier.identity, OnDisappearModifier, event);
     return this;
   }
 
   onAttach(event: () => void): this {
+    this._onAttach = event;
     modifierWithKey(this._modifiersWithKeys, OnAttachModifier.identity, OnAttachModifier, event);
     return this;
   }
 
   onDetach(event: () => void): this {
+    this._onDetach = event;
     modifierWithKey(this._modifiersWithKeys, OnDetachModifier.identity, OnDetachModifier, event);
     return this;
   }
   onAreaChange(event: (oldValue: Area, newValue: Area) => void): this {
+    this._onAreaChange = event;
     modifierWithKey(this._modifiersWithKeys, OnAreaChangeModifier.identity, OnAreaChangeModifier, event);
     return this;
   }

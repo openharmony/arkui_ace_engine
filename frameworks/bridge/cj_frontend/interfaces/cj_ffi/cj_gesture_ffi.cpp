@@ -239,11 +239,11 @@ std::function<void(const GestureEvent& event)> FormatGestureEvenFunctionV2(void 
         ffiGestureEvent.timestamp = event.GetTimeStamp().time_since_epoch().count();
         ffiGestureEvent.repeat = event.GetRepeat();
         ffiGestureEvent.source = static_cast<int32_t>(event.GetSourceDevice());
-        ffiGestureEvent.offsetX = event.GetOffsetX();
-        ffiGestureEvent.offsetY = event.GetOffsetY();
+        ffiGestureEvent.offsetX = PipelineBase::Px2VpWithCurrentDensity(event.GetOffsetX());
+        ffiGestureEvent.offsetY = PipelineBase::Px2VpWithCurrentDensity(event.GetOffsetY());
         ffiGestureEvent.scale = event.GetScale();
-        ffiGestureEvent.pinchCenterX = event.GetPinchCenter().GetX();
-        ffiGestureEvent.pinchCenterY = event.GetPinchCenter().GetY();
+        ffiGestureEvent.pinchCenterX = PipelineBase::Px2VpWithCurrentDensity(event.GetPinchCenter().GetX());
+        ffiGestureEvent.pinchCenterY = PipelineBase::Px2VpWithCurrentDensity(event.GetPinchCenter().GetY());
         ffiGestureEvent.angle = event.GetAngle();
         ffiGestureEvent.speed = event.GetSpeed();
         ffiGestureEvent.tiltX = event.GetTiltX().value_or(0.0f);

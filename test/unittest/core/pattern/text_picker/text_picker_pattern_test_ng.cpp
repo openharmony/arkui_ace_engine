@@ -403,7 +403,7 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest001, TestSize.Level1)
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto focusHub = frameNode->GetEventHub<NG::TextPickerEventHub>()->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetOrCreateEventHub<NG::TextPickerEventHub>()->GetOrCreateFocusHub();
     frameNode->MarkModifyDone();
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
@@ -435,7 +435,7 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest002, TestSize.Level1)
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto focusHub = frameNode->GetEventHub<NG::TextPickerEventHub>()->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetOrCreateEventHub<NG::TextPickerEventHub>()->GetOrCreateFocusHub();
     frameNode->MarkModifyDone();
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
@@ -2079,7 +2079,7 @@ HWTEST_F(TextPickerPatternTestNg, InitDisabled001, TestSize.Level1)
     InitTextPickerPatternTestNg();
     ASSERT_NE(textPickerPattern_, nullptr);
     ASSERT_NE(frameNode_, nullptr);
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(false);
     textPickerPattern_->InitDisabled();
@@ -2178,7 +2178,7 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest018, TestSize.Level1)
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto focusHub = frameNode->GetEventHub<NG::TextPickerEventHub>()->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetOrCreateEventHub<NG::TextPickerEventHub>()->GetOrCreateFocusHub();
     frameNode->MarkModifyDone();
     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);

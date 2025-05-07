@@ -451,8 +451,8 @@ HWTEST_F(ListLanesLayoutTestNg, MeasureAndGetChildHeight003, TestSize.Level1)
     layoutWrapper.childrenMap_[4] = layoutWrapperNode;
     RefPtr<ListChildrenMainSize> listChildrenMainSize = AceType::MakeRefPtr<ListChildrenMainSize>();
     RefPtr<ListPositionMap> listPositionMap = AceType::MakeRefPtr<ListPositionMap>();
-    PositionInfo positionInfo { 20.0f, 4.0f, true };
-    PositionInfo info { 30.0f, 4.0f, true };
+    ListPositionInfo positionInfo { 20.0f, 4.0f, true };
+    ListPositionInfo info { 30.0f, 4.0f, true };
     listPositionMap->posMap_[0] = info;
     listPositionMap->posMap_[1] = info;
     listPositionMap->posMap_[2] = info;

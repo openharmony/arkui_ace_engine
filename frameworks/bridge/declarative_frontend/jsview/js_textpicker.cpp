@@ -231,7 +231,7 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
 void JSTextPicker::SetDisableTextStyleAnimation(const JSCallbackInfo& info)
 {
     bool value = false;
-    if (info[0]->IsBoolean()) {
+    if (info.Length() >= 1 && info[0]->IsBoolean()) {
         value = info[0]->ToBoolean();
     }
     TextPickerModel::GetInstance()->SetDisableTextStyleAnimation(value);
@@ -242,7 +242,7 @@ void JSTextPicker::SetDefaultTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    if (info[0]->IsObject()) {
+    if (info.Length() >= 1 && info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "defaultTextStyle");
     }
     TextPickerModel::GetInstance()->SetDefaultTextStyle(theme, textStyle);
@@ -362,10 +362,10 @@ void ParseTextPickerSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal
 
 void JSTextPicker::Create(const JSCallbackInfo& info)
 {
+    ParseTextArrayParam param;
+    NG::TextCascadePickerOptionsAttr optionsAttr;
     if (info.Length() >= 1 && info[0]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
-        ParseTextArrayParam param;
-        NG::TextCascadePickerOptionsAttr optionsAttr;
         bool optionsMultiContentCheckErr = false;
         bool optionsCascadeContentCheckErr = false;
         auto isSingleRange = ProcessSingleRangeValue(paramObject, param);
@@ -389,22 +389,22 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
                 return;
             }
         }
-        auto theme = GetTheme<PickerTheme>();
-        CHECK_NULL_VOID(theme);
-        if (!param.result.empty()) {
-            CreateSingle(theme, param);
-        } else {
-            CreateMulti(theme, optionsAttr, param);
-        }
-        TextPickerModel::GetInstance()->SetDefaultAttributes(theme);
-        JSInteractableView::SetFocusable(true);
-        JSInteractableView::SetFocusNode(true);
-        if (param.valueChangeEventVal->IsFunction()) {
-            ParseTextPickerValueObject(info, param.valueChangeEventVal);
-        }
-        if (param.selectedChangeEventVal->IsFunction()) {
-            ParseTextPickerSelectedObject(info, param.selectedChangeEventVal);
-        }
+    }
+    auto theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    if (!param.result.empty()) {
+        CreateSingle(theme, param);
+    } else {
+        CreateMulti(theme, optionsAttr, param);
+    }
+    TextPickerModel::GetInstance()->SetDefaultAttributes(theme);
+    JSInteractableView::SetFocusable(true);
+    JSInteractableView::SetFocusNode(true);
+    if (param.valueChangeEventVal->IsFunction()) {
+        ParseTextPickerValueObject(info, param.valueChangeEventVal);
+    }
+    if (param.selectedChangeEventVal->IsFunction()) {
+        ParseTextPickerSelectedObject(info, param.selectedChangeEventVal);
     }
 }
 
@@ -1076,7 +1076,7 @@ void JSTextPicker::SetGradientHeight(const JSCallbackInfo& info)
 void JSTextPicker::SetCanLoop(const JSCallbackInfo& info)
 {
     bool value = true;
-    if (info[0]->IsBoolean()) {
+    if (info.Length() >= 1 && info[0]->IsBoolean()) {
         value = info[0]->ToBoolean();
     }
     TextPickerModel::GetInstance()->SetCanLoop(value);
@@ -1096,7 +1096,7 @@ void JSTextPicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    if (info[0]->IsObject()) {
+    if (info.Length() >= 1 && info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "disappearTextStyle");
     }
     TextPickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
@@ -1107,7 +1107,7 @@ void JSTextPicker::SetTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    if (info[0]->IsObject()) {
+    if (info.Length() >= 1 && info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "textStyle");
     }
     TextPickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
@@ -1118,7 +1118,7 @@ void JSTextPicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
-    if (info[0]->IsObject()) {
+    if (info.Length() >= 1 && info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "selectedTextStyle");
     }
     TextPickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
@@ -1437,7 +1437,7 @@ void JSTextPicker::OnEnterSelectedArea(const JSCallbackInfo& info)
 void JSTextPicker::SetEnableHapticFeedback(const JSCallbackInfo& info)
 {
     bool isEnableHapticFeedback = DEFAULT_ENABLE_HAPTIC_FEEDBACK;
-    if (info[0]->IsBoolean()) {
+    if (info.Length() >= 1 && info[0]->IsBoolean()) {
         isEnableHapticFeedback = info[0]->ToBoolean();
     }
     TextPickerModel::GetInstance()->SetEnableHapticFeedback(isEnableHapticFeedback);

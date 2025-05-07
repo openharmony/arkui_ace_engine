@@ -464,7 +464,9 @@ bool ScrollablePattern::CoordinateWithNavigation(double& offset, int32_t source,
         float handledByNav = ProcessNavBarReactOnUpdate(offsetCoordinate);
         if (NearEqual(handledByNav, offsetCoordinate) && !NearZero(offset)) {
             // All offsets are handled by Navigation, list cannot scroll over.
-            SetCanOverScroll(false);
+            if (!navBarPattern_->IsNeedHandleScroll()) {
+                SetCanOverScroll(false);
+            }
             offset = offsetRemain;
         } else {
             offset = offsetRemain + (offsetCoordinate - handledByNav);
@@ -1117,8 +1119,8 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
             if (isRoundScroll_) {
                 scrollBar_->SetNormalWidth(Dimension(ARC_INITWIDTH_VAL));
                 scrollBar_->SetInactiveWidth(Dimension(ARC_INITWIDTH_VAL));
-                scrollBar_->SetActiveBackgroundWidth(barWidth.value());
-                scrollBar_->SetActiveScrollBarWidth(barWidth.value() - Dimension(ARC_INITWIDTH_HALF_VAL));
+                scrollBar_->SetArcActiveBackgroundWidth(barWidth.value());
+                scrollBar_->SetArcActiveScrollBarWidth(barWidth.value() - Dimension(ARC_INITWIDTH_HALF_VAL));
             } else {
                 scrollBar_->SetInactiveWidth(barWidth.value());
                 scrollBar_->SetNormalWidth(barWidth.value());
@@ -1955,10 +1957,9 @@ float ScrollablePattern::GetOutOfScrollableOffset() const
     auto offset = 0.0f;
     auto mouseMainOffset = static_cast<float>(
         axis_ == Axis::VERTICAL ? lastMouseMove_.GetLocalLocation().GetY() : lastMouseMove_.GetLocalLocation().GetX());
-    auto hostSize = GetHostFrameSize();
-    CHECK_NULL_RETURN(hostSize.has_value(), offset);
+    auto hostSize = GetViewSizeMinusPadding();
     auto mainTop = 0.0f;
-    auto mainBottom = hostSize->MainSize(axis_);
+    auto mainBottom = hostSize.MainSize(axis_);
     if (GreatOrEqual(mouseMainOffset, mainTop) && LessOrEqual(mouseMainOffset, mainBottom)) {
         return offset;
     }
@@ -2239,7 +2240,7 @@ ScrollResult ScrollablePattern::HandleScrollSelfFirst(float& offset, int32_t sou
     // triggering overScroll, parent always handle it first
     auto overRes = parent->HandleScroll(result.remain, source, NestedState::CHILD_OVER_SCROLL, GetVelocity());
     offset += LessNotEqual(std::abs(overOffset), std::abs(result.remain)) ? overOffset : overRes.remain;
-    bool parentEdgeEffect = result.reachEdge && NearZero(offset);
+    bool parentEdgeEffect = (result.reachEdge || overRes.reachEdge) && NearZero(offset);
     SetCanOverScroll((!NearZero(overOffset) && HasEdgeEffect(offset)) || parentEdgeEffect);
     return { 0, GetCanOverScroll() };
 }
@@ -2255,7 +2256,7 @@ ScrollResult ScrollablePattern::HandleScrollSelfOnly(float& offset, int32_t sour
     remainOffset += overOffset;
     if (NearZero(remainOffset)) {
         SetCanOverScroll(false);
-        return { 0, false };
+        return { 0, IsEnablePagingValid() };
     }
     bool canOverScroll = false;
     if (state == NestedState::CHILD_SCROLL) {
@@ -2664,7 +2665,7 @@ void ScrollablePattern::ResetBackToTop()
 
 void ScrollablePattern::OnStatusBarClick()
 {
-    if (!backToTop_) {
+    if (!backToTop_ || isBackToTopRunning_) {
         return;
     }
 
@@ -4158,7 +4159,7 @@ void ScrollablePattern::OnColorConfigurationUpdate()
     scrollBar_->SetBackgroundColor(theme->GetBackgroundColor());
 }
 
-SizeF ScrollablePattern::GetViewSizeMinusPadding()
+SizeF ScrollablePattern::GetViewSizeMinusPadding() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, SizeF());
@@ -4198,7 +4199,8 @@ void ScrollablePattern::GetRepeatCountInfo(
         if (AceType::InstanceOf<RepeatVirtualScroll2Node>(child)) {
             auto repeat2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(child);
             auto repeatRealCount = repeat2->FrameCount();
-            auto repeatVirtualCount = repeat2->GetTotalCount();
+            auto repeatVirtualCount =
+                (repeat2->GetTotalCount() <= INT_MAX) ? static_cast<int32_t>(repeat2->GetTotalCount()) : INT_MAX;
             if (repeatVirtualCount > static_cast<uint32_t>(repeatRealCount) && firstRepeatCount == 0) {
                 firstRepeatCount = totalChildCount + repeatRealCount;
             }

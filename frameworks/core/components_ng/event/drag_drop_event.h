@@ -48,6 +48,7 @@ public:
     void NotifyTransDragWindowToFwk() override;
     void NotifyMenuShow(bool isMenuShow) override;
     void NotifyDragEnd() override;
+    void NotifyPreDragStatus(const PreDragStatus preDragStatus) override;
 
 private:
     void InitPanAction();

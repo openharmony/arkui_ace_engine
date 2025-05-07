@@ -32,7 +32,7 @@ public:
         std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
         int32_t currentInstanceId, int32_t targetId) override { return 0; };
     int32_t UpdateBindSheet(const RefPtr<NG::FrameNode>& sheetContentNode,
-        NG::SheetStyle& sheetStyle, bool isPartialUpdate, int32_t currentInstanceId) override { return 0; }
+        const NG::SheetStyle& sheetStyle, bool isPartialUpdate, int32_t currentInstanceId) override { return 0; }
     int32_t CloseBindSheet(const RefPtr<NG::FrameNode>& sheetContentNode,
         int32_t currentInstanceId) override { return 0; }
 };

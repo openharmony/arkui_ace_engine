@@ -218,8 +218,8 @@ export struct SelectTitleBar {
       this.messageDesc =
         resourceManager?.getPluralStringByNameSync('selecttitlebar_accessibility_message_desc_new', this.badgeValue);
     } catch (exception) {
-      let code: number = (exception as BusinessError).code;
-      let message: string = (exception as BusinessError).message;
+      let code: number = (exception as BusinessError)?.code;
+      let message: string = (exception as BusinessError)?.message;
       hilog.error(0x3900, 'Ace', `Faild to getPluralStringByNameSync,cause, code: ${code}, message: ${message}`);
     }
   }
@@ -535,9 +535,21 @@ struct ImageMenuItem {
 
   private getAccessibilityReadText(): string | undefined {
     if (this.item.value === PUBLIC_BACK) {
-      return getContext()?.resourceManager?.getStringByNameSync('icon_back');
+      try {
+        return getContext()?.resourceManager?.getStringByNameSync('icon_back');
+      } catch (err) {
+        let code: number = (err as BusinessError)?.code;
+        let message: string = (err as BusinessError)?.message;
+        hilog.error(0x3900, 'Ace', `Faild to SelectTitleBar toStringFormat,code: ${code},message:${message}`);
+      }
     } else if (this.item.value === PUBLIC_MORE) {
-      return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
+      try {
+        return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
+      } catch (err) {
+        let code: number = (err as BusinessError)?.code;
+        let message: string = (err as BusinessError)?.message;
+        hilog.error(0x3900, 'Ace', `Faild to SelectTitleBar toStringFormat,code: ${code},message:${message}`);
+      }
     } else if (this.item.accessibilityText) {
       return this.item.accessibilityText as string;
     } else if (this.item.label) {

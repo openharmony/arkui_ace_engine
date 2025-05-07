@@ -82,8 +82,8 @@ struct DialogStrings {
 
 DialogStrings GetDialogStrings()
 {
-    DialogStrings strs = {"", ""};
-    auto context = NG::PipelineContext::GetCurrentContext();
+    DialogStrings strs = {"OK", "Cancel"};
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, strs);
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, strs);
@@ -1798,17 +1798,17 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
         .enableHoverMode = dialogAttr.enableHoverMode,
-        .maskRect = dialogAttr.maskRect,
-        .levelOrder = dialogAttr.levelOrder,
-        .dialogLevelMode = dialogAttr.dialogLevelMode,
-        .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
-        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
         .blurStyleOption = dialogAttr.blurStyleOption,
         .effectOption = dialogAttr.effectOption,
+        .maskRect = dialogAttr.maskRect,
         .onDidAppear = dialogAttr.onDidAppear,
         .onDidDisappear = dialogAttr.onDidDisappear,
         .onWillAppear = dialogAttr.onWillAppear,
-        .onWillDisappear = dialogAttr.onWillDisappear
+        .onWillDisappear = dialogAttr.onWillDisappear,
+        .levelOrder = dialogAttr.levelOrder,
+        .dialogLevelMode = dialogAttr.dialogLevelMode,
+        .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {

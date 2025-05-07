@@ -410,13 +410,15 @@ void MenuItemPattern::SetFocusStyle()
         isFocusShadowSet_ = true;
     }
 
-    if (!isOptionBgColorSetByUser_ && !isBGColorSetByUser_) {
+    auto paintProperty = GetPaintProperty<MenuItemPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!paintProperty->HasOptionBgColor() && !paintProperty->HasSelectedOptionBgColor()) {
         renderContext->UpdateBackgroundColor(selectTheme_->GetOptionFocusedBackgroundColor());
     }
-    if (!isOptionFontColorSetByUser_ && !isTextColorSetByUser_) {
-        SetFontColor(selectTheme_->GetOptionFocusedFontColor());
+    if (!paintProperty->HasOptionFontColor() && !paintProperty->HasSelectedOptionFontColor()) {
+        auto color = selectTheme_->GetOptionFocusedFontColor();
+        SetFontColor(color, false);
     }
-    text_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void MenuItemPattern::ClearFocusStyle()
@@ -429,26 +431,19 @@ void MenuItemPattern::ClearFocusStyle()
     if (!selectTheme_->GetoptionApplyFocusedStyle()) {
         return;
     }
-    if (!isBGColorSetByUser_) {
-        renderContext->UpdateBackgroundColor(rowSelected_ == index_ ? selectTheme_->GetSelectedColor() :
-            (isOptionBgColorSetByUser_ ? optionBgColor_.value() : Color::TRANSPARENT));
-    } else {
-        renderContext->UpdateBackgroundColor(rowSelected_ == index_ ? bgColor_.value() :
-            (isOptionBgColorSetByUser_ ? optionBgColor_.value() : Color::TRANSPARENT));
-    }
     if (isFocusShadowSet_) {
         renderContext->ResetBackShadow();
         renderContext->SetShadowRadius(0.0f);
         isFocusShadowSet_ = false;
     }
-    if (!isTextColorSetByUser_) {
-        SetFontColor(rowSelected_ == index_ ? selectTheme_->GetSelectedColorText() :
-            (isOptionFontColorSetByUser_ ? optionFontColor_.value() : selectTheme_->GetMenuFontColor()));
-    } else {
-        SetFontColor(rowSelected_ == index_ ? selectFontColor_.value() :
-            (isOptionFontColorSetByUser_ ? optionFontColor_.value() : selectTheme_->GetMenuFontColor()));
+    auto paintProperty = GetPaintProperty<MenuItemPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!paintProperty->HasOptionBgColor() && !paintProperty->HasSelectedOptionBgColor()) {
+        renderContext->UpdateBackgroundColor(bgColor_.value_or(selectTheme_->GetBackgroundColor()));
     }
-    text_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (!paintProperty->HasOptionFontColor() && !paintProperty->HasSelectedOptionFontColor()) {
+        SetFontColor(fontColor_.value_or(selectTheme_->GetMenuFontColor()));
+    }
 }
 
 void MenuItemPattern::HandleFocusEvent()
@@ -2592,13 +2587,16 @@ void MenuItemPattern::SetBgColor(const Color& color)
     bgColor_ = color;
 }
 
-void MenuItemPattern::SetFontColor(const Color& color)
+void MenuItemPattern::SetFontColor(const Color& color, bool isNeedRecord)
 {
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     text_->MarkModifyDone();
     props->UpdateTextColor(color);
+    if (isNeedRecord) {
+        fontColor_ = color;
+    }
     auto context = text_->GetRenderContext();
     CHECK_NULL_VOID(context);
     context->UpdateForegroundColor(color);
@@ -2978,6 +2976,8 @@ void MenuItemPattern::UpdatePasteFontColor(const Color& fontColor)
 
 void MenuItemPattern::OptionOnModifyDone(const RefPtr<FrameNode>& host)
 {
+    HandleOptionBackgroundColor();
+    HandleOptionFontColor();
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     textTheme_ = context->GetTheme<TextTheme>();
@@ -3014,6 +3014,42 @@ void MenuItemPattern::OptionOnModifyDone(const RefPtr<FrameNode>& host)
     CHECK_NULL_VOID(textProperty);
     textProperty->UpdateTextAlign(textAlign);
     text_->MarkModifyDone();
+}
+
+void MenuItemPattern::HandleOptionBackgroundColor()
+{
+    auto property = GetPaintProperty<MenuItemPaintProperty>();
+    CHECK_NULL_VOID(property);
+    auto hasOptionBgColor = property->HasOptionBgColor();
+    auto hasSelectedOptionBgColor = property->HasSelectedOptionBgColor();
+    if (!hasOptionBgColor && !hasSelectedOptionBgColor) {
+        return;
+    }
+    if (isSelected_ && hasSelectedOptionBgColor) {
+        SetBgColor(property->GetSelectedOptionBgColor().value());
+        return;
+    }
+    if (!isSelected_ && hasOptionBgColor) {
+        SetBgColor(property->GetOptionBgColor().value());
+    }
+}
+ 
+void MenuItemPattern::HandleOptionFontColor()
+{
+    auto property = GetPaintProperty<MenuItemPaintProperty>();
+    CHECK_NULL_VOID(property);
+    auto hasOptionFontColor = property->HasOptionFontColor();
+    auto hasSelectedOptionFontColor = property->HasSelectedOptionFontColor();
+    if (!hasOptionFontColor && !hasSelectedOptionFontColor) {
+        return;
+    }
+    if (isSelected_ && hasSelectedOptionFontColor) {
+        SetFontColor(property->GetSelectedOptionFontColor().value());
+        return;
+    }
+    if (!isSelected_ && hasOptionFontColor) {
+        SetFontColor(property->GetOptionFontColor().value());
+    }
 }
 
 void MenuItemPattern::UpdatePasteDisabledOpacity(const double disabledColorAlpha)

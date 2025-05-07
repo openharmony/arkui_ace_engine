@@ -182,7 +182,7 @@ bool InputMethodManager::NeedSoftKeyboard() const
     return pattern->NeedSoftKeyboard() && pattern->NeedToRequestKeyboardOnFocus();
 }
 
-void InputMethodManager::CloseKeyboard()
+void InputMethodManager::CloseKeyboard(bool disableNeedToRequestKeyboard)
 {
     ACE_LAYOUT_SCOPED_TRACE("CloseKeyboard");
     auto currentFocusNode = curFocusNode_.Upgrade();
@@ -195,7 +195,9 @@ void InputMethodManager::CloseKeyboard()
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Ime Not Shown, Ime Not Attached, No need to close keyboard");
         return;
     }
-    textFieldManager->SetNeedToRequestKeyboard(false);
+    if (disableNeedToRequestKeyboard) {
+        textFieldManager->SetNeedToRequestKeyboard(false);
+    }
 #if defined(ENABLE_STANDARD_INPUT)
     // If pushpage, close it
     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "PageChange CloseKeyboard FrameNode notNeedSoftKeyboard.");

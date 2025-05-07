@@ -1093,22 +1093,19 @@ export struct ArcSlider {
 
   onDigitalCrownEvent(event: CrownEvent) {
     this.timeCur = systemDateTime.getTime(false);
+    const isVibEnabled: boolean = this.isEnlarged && (event.action === CrownAction.BEGIN ||
+      this.isTouchAnimatorFinished && event.action === CrownAction.UPDATE);
     if (event.action === CrownAction.BEGIN && !this.isEnlarged) {
       this.clearTimeout();
       this.isEnlarged = true;
       this.startTouchAnimator();
       this.calcBlur();
-    } else if ((event.action === CrownAction.BEGIN || CrownAction.UPDATE) && this.isEnlarged) {
+    } else if (isVibEnabled) {
       this.clearTimeout();
       this.crownDeltaAngle = this.getUIContext().px2vp(-event.degree *
       this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.radius;
       this.calcCrownValue(this.crownDeltaAngle);
       this.setVibration();
-    } else if ((this.isEnlarged) && (this.isTouchAnimatorFinished) && (event.action === CrownAction.UPDATE)) {
-      this.clearTimeout();
-      this.crownDeltaAngle = this.getUIContext().px2vp(-event.degree *
-      this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.radius;
-      this.calcCrownValue(this.crownDeltaAngle);
     } else if (this.isEnlarged && event.action === CrownAction.END) {
       this.clearTimeout();
       this.meter = setTimeout(() => {
@@ -1188,8 +1185,9 @@ export struct ArcSlider {
         .focusable(true)
         .focusOnTouch(true)
         .onDigitalCrown((event: CrownEvent) => {
-          if (event && this.isFocus) {
+          if (event) {
             this.onDigitalCrownEvent(event);
+            event.stopPropagation();
           }
           this.options.onChange?.(this.options.valueOptions.progress);
         })

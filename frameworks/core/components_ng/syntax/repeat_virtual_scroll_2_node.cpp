@@ -658,7 +658,9 @@ void RepeatVirtualScroll2Node::PostIdleTask()
 
         TAG_LOGD(AceLogTag::ACE_REPEAT, "idle task calls Purge");
         node->Purge();
-        node->FreezeSpareNode();
+        if (node->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+            node->FreezeSpareNode();
+        }
 
         TAG_LOGD(AceLogTag::ACE_REPEAT, " ============ after caches.purge ============= ");
         TAG_LOGD(AceLogTag::ACE_REPEAT, "%{public}s", node->caches_.DumpUINodeCache().c_str());

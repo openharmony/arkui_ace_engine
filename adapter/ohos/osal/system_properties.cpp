@@ -248,6 +248,17 @@ bool IsDebugEnabled()
     return (system::GetParameter("persist.ace.debug.enabled", "0") == "1");
 }
 
+bool IsMouseTransformEnable()
+{
+    return (system::GetParameter("persist.ace.event.transform.enable", "1") == "1");
+}
+
+float ReadScrollCoefficients()
+{
+    auto ret = system::GetParameter("persist.ace.scroll.coefficeient", "2.0");
+    return StringUtils::StringToFloat(ret);
+}
+
 int64_t GetDebugFlags()
 {
     return system::GetIntParameter<int64_t>("persist.ace.debug.flags", 0);
@@ -436,11 +447,6 @@ int32_t ReadTouchAccelarateMode()
     return system::GetIntParameter("debug.ace.touch.accelarate", 0);
 }
 
-bool IsAsyncInitializeEnabled()
-{
-    return system::GetBoolParameter("persist.ace.async.initialize", true);
-}
-
 std::string InitSysBrand()
 {
     const char* res = ::GetBrand();
@@ -500,7 +506,6 @@ std::string InitSysDeviceType()
     return SystemProperties::INVALID_PARAM;
 }
 
-std::atomic<bool> SystemProperties::asyncInitializeEnabled_(IsAsyncInitializeEnabled()); 
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
 std::atomic<bool> SystemProperties::layoutTraceEnable_(IsLayoutTraceEnabled() && developerModeOn_);
@@ -550,6 +555,9 @@ bool SystemProperties::recycleImageEnabled_ = IsRecycleImageEnabled();
 bool SystemProperties::debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
 ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 ACE_WEAK_SYM bool SystemProperties::debugEnabled_ = IsDebugEnabled();
+std::string SystemProperties::configDeviceType_ = "";
+ACE_WEAK_SYM bool SystemProperties::transformEnabled_ = IsMouseTransformEnable();
+float SystemProperties::scrollCoefficients_ = ReadScrollCoefficients();
 ACE_WEAK_SYM DebugFlags SystemProperties::debugFlags_ = GetDebugFlags();
 ACE_WEAK_SYM bool SystemProperties::containerDeleteFlag_ = IsContainerDeleteFlag();
 ACE_WEAK_SYM bool SystemProperties::layoutDetectEnabled_ = IsLayoutDetectEnabled();
@@ -702,6 +710,7 @@ void SystemProperties::InitDeviceInfo(
     deviceHeight_ = deviceHeight;
     needAvoidWindow_ = system::GetBoolParameter(PROPERTY_NEED_AVOID_WINDOW, false);
     debugEnabled_ = IsDebugEnabled();
+    transformEnabled_ = IsMouseTransformEnable();
     debugFlags_ = GetDebugFlags();
     layoutDetectEnabled_ = IsLayoutDetectEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
@@ -729,7 +738,6 @@ void SystemProperties::InitDeviceInfo(
     gridCacheEnabled_ = IsGridCacheEnabled();
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
     acePerformanceMonitorEnable_.store(IsAcePerformanceMonitorEnabled());
-    asyncInitializeEnabled_.store(IsAsyncInitializeEnabled());
     focusCanBeActive_.store(IsFocusCanBeActive());
     faultInjectEnabled_  = IsFaultInjectEnabled();
     windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
@@ -1114,6 +1122,16 @@ double SystemProperties::GetSrollableFriction()
 double SystemProperties::GetScrollableDistance()
 {
     return scrollableDistance_;
+}
+
+ACE_WEAK_SYM float SystemProperties::GetScrollCoefficients()
+{
+    return scrollCoefficients_;
+}
+
+ACE_WEAK_SYM bool SystemProperties::GetTransformEnabled()
+{
+    return transformEnabled_;
 }
 
 bool SystemProperties::GetWebDebugMaximizeResizeOptimize()

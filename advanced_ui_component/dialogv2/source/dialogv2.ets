@@ -692,8 +692,8 @@ export struct ConfirmDialogV2 {
     this.checkedInner = monitor.value<boolean>('checked')?.now;
   }
 
-  @Param primaryButton?: AdvancedDialogV2Button = undefined;
-  @Param secondaryButton?: AdvancedDialogV2Button = undefined;
+  @Param primaryButton?: AdvancedDialogV2Button = new AdvancedDialogV2Button({ content: '' });
+  @Param secondaryButton?: AdvancedDialogV2Button = new AdvancedDialogV2Button({ content: '' });
   @Local fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @Param onCheckedChange?: AdvancedDialogV2OnCheckedChange = undefined;
   private contentScroller: Scroller = new Scroller();
@@ -1048,8 +1048,8 @@ struct CustomDialogContentComponent {
   private primaryTitleMinFontSize: Length = `${BODY_L}fp`;
   private secondaryTitleMaxFontSize: Length = `${SUBTITLE_S}fp`;
   private secondaryTitleMinFontSize: Length = `${BODY_S}fp`;
-  @Param@once isHasDefaultFocus: boolean = false;
-  @Param@once isAllFocusFalse: boolean = false;
+  @Param@Once isHasDefaultFocus: boolean = false;
+  @Param@Once isAllFocusFalse: boolean = false;
 
   build() {
     Scroll() {

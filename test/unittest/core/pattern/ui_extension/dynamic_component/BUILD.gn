@@ -16,7 +16,10 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 group("dynamic_component_test_group") {
   testonly = true
-  deps = [ ":dynamic_pattern_test" ]
+  deps = [
+    ":dynamic_pattern_manager_test_ng",
+    ":dynamic_pattern_test",
+  ]
 }
 
 ace_unittest("dynamic_pattern_test") {
@@ -30,6 +33,7 @@ ace_unittest("dynamic_pattern_test") {
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_model.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_touch_delegate.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/platform_container_handler.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/platform_event_proxy.cpp",
@@ -77,6 +81,55 @@ ace_unittest("dynamic_pattern_test") {
       "ipc:ipc_single",
       "napi:ace_napi",
       "relational_store:native_rdb",
+      "window_manager:libdm",
+      "window_manager:libwm",
+      "window_manager:scene_session",
+      "window_manager:scene_session_manager",
+    ]
+
+    if (defined(global_parts_info) && defined(
+            global_parts_info.atomicservicedistribution_atomicservice_basic_engine)) {
+      external_deps += [ "atomicservice_basic_engine:hagserviceability_client" ]
+      defines += [ "ATOMIC_SERVICE_ATTRIBUTION_ENABLE" ]
+    }
+  }
+}
+
+ace_unittest("dynamic_pattern_manager_test_ng") {
+  type = "new"
+  sources = [
+    "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",
+    "$ace_root/adapter/ohos/osal/want_wrap_ohos.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_model.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_touch_delegate.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/platform_container_handler.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/platform_event_proxy.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/platform_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/platform_utils.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/ui_extension_model_ng.cpp",
+    "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_ace_container.cpp",
+    "dynamic_component_manager_test_ng.cpp",
+  ]
+  if (is_ohos_standard_system) {
+    defines = [
+      "OHOS_STANDARD_SYSTEM",
+      "WINDOW_SCENE_SUPPORTED",
+    ]
+    external_deps = [
+      "ability_base:want",
+      "ability_runtime:abilitykit_native",
+      "accessibility:accessibility_common",
+      "c_utils:utils",
+      "ffrt:libffrt",
+      "graphic_2d:librender_service_client",
+      "hilog:libhilog",
+      "init:libbegetutil",
+      "input:libmmi-client",
+      "ipc:ipc_single",
+      "napi:ace_napi",
       "window_manager:libdm",
       "window_manager:libwm",
       "window_manager:scene_session",

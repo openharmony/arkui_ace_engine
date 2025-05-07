@@ -97,7 +97,7 @@ void WaterFlowTestNg::GetWaterFlow()
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     frameNode_->isConstraintNotChanged_ = true;
     pattern_ = frameNode_->GetPattern<WaterFlowPattern>();
-    eventHub_ = frameNode_->GetEventHub<WaterFlowEventHub>();
+    eventHub_ = frameNode_->GetOrCreateEventHub<WaterFlowEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<WaterFlowLayoutProperty>();
     paintProperty_ = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<WaterFlowAccessibilityProperty>();

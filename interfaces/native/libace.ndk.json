@@ -3322,5 +3322,21 @@
     {
         "first_introduced": "18",
         "name": "OH_ArkUI_PanGesture_GetDistanceByToolType"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_EmbeddedComponentItem_Create"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_EmbeddedComponentItem_Dispose"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_EmbeddedComponentItem_SetOnError"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_EmbeddedComponentItem_SetOnTerminated"
     }
 ]

@@ -96,8 +96,6 @@
 #include "base/log/log.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/thread/background_task_executor.h"
-#include "base/thread/task_dependency_manager.h"
 #include "base/utils/system_properties.h"
 #include "bridge/card_frontend/form_frontend_declarative.h"
 #include "core/common/ace_engine.h"
@@ -581,8 +579,6 @@ private:
         }
         bool isRotate = false;
         auto displayInfo = container->GetDisplayInfo();
-        uint32_t lastKeyboardHeight = pipeline->GetSafeAreaManager() ?
-            pipeline->GetSafeAreaManager()->GetKeyboardInset().Length() : 0;
         if (displayInfo) {
             auto dmRotation = static_cast<int32_t>(displayInfo->GetRotation());
             isRotate = lastRotation != -1 && lastRotation != dmRotation;
@@ -590,10 +586,11 @@ private:
         } else {
             lastRotation = -1;
         }
-        auto alreadyTriggerCallback = textFieldManager->GetFocusFieldAlreadyTriggerWsCallback();
-        textFieldManager->SetFocusFieldAlreadyTriggerWsCallback(false);
-        if (alreadyTriggerCallback && lastRotation == textFieldManager->GetFocusFieldOrientation()) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "input already trigger OnWindowSizeChange, go avoid");
+        auto triggerAvoidTaskOrientation = textFieldManager->GetContextTriggerAvoidTaskOrientation();
+        textFieldManager->SetContextTriggerAvoidTaskOrientation(-1);
+        if ((isRotate && lastRotation == triggerAvoidTaskOrientation) ||
+            (textFieldManager->GetLaterAvoid() && NearEqual(0.0f, keyboardRect.Height()))) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "no need to later avoid, trigger avoid now");
             textFieldManager->SetLaterAvoid(false);
             return false;
         }
@@ -603,10 +600,9 @@ private:
             return true;
         }
         // do not avoid immediately when device is in rotation, trigger it after context trigger root rect update
-        if ((textFieldManager->GetLaterAvoid() || isRotate) && !NearZero(lastKeyboardHeight)) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "rotation change to %{public}d,"
-                "later avoid %{public}s %{public}f %{public}f",
-                lastRotation, keyboardRect.ToString().c_str(), positionY, height);
+        if (textFieldManager->GetLaterAvoid() || isRotate) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "rotation change to %{public}d, later avoid %{public}s %{public}f"
+                "%{public}f", lastRotation, keyboardRect.ToString().c_str(), positionY, height);
             NG::LaterAvoidInfo laterAvoidInfo = {true, keyboardRect, positionY, height, lastRotation };
             textFieldManager->SetLaterAvoidArgs(laterAvoidInfo);
             return true;
@@ -1291,7 +1287,6 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
             AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
             CapabilityRegistry::Register();
             ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
-            ImageFileCache::GetInstance().SetCacheFileInfo();
         });
     }
 
@@ -1767,6 +1762,10 @@ void UIContentImpl::StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::C
     if (!fontWeightScale.empty()) {
         SystemProperties::SetFontWeightScale(string2float(fontWeightScale));
     }
+    auto deviceType = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::DEVICE_TYPE);
+    if (!deviceType.empty()) {
+        SystemProperties::SetConfigDeviceType(deviceType);
+    }
 }
 
 std::shared_ptr<Rosen::RSSurfaceNode> UIContentImpl::GetFormRootNode()
@@ -1808,7 +1807,6 @@ void UIContentImpl::SetAceApplicationInfo(std::shared_ptr<OHOS::AbilityRuntime::
     AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
     CapabilityRegistry::Register();
     ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
-    ImageFileCache::GetInstance().SetCacheFileInfo();
     XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
 
     auto task = [] {
@@ -2350,13 +2348,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         }
     }
 
-    std::string safeAreaTaskKey = "SafeArea";
-    TaskDependencyManager::GetInstance()->PostTaskToBg([container, this] {
-            OHOS::Ace::SetSkipBacktrace(true);
-            this->InitializeSafeArea(container);
-            OHOS::Ace::SetSkipBacktrace(false);
-        },
-        safeAreaTaskKey);
+    InitializeSafeArea(container);
 
     InitializeDisplayAvailableRect(container);
     NG::OverlayMaskManager::GetInstance().RegisterOverlayHostMaskEventCallback();
@@ -2380,26 +2372,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
                                                      .append(",abilityName:")
                                                      .append(abilityName));
     UpdateFontScale(context->GetConfiguration());
-    std::string unimportantTaskKey = "UnimportantTask";
-    TaskDependencyManager::GetInstance()->PostTaskToBg([pipelineWeak = WeakPtr(pipeline)] {
-            auto thpExtraManager = AceType::MakeRefPtr<NG::THPExtraManagerImpl>();
-            if (thpExtraManager->Init()) {
-                auto pipeline = pipelineWeak.Upgrade();
-                CHECK_NULL_VOID(pipeline);
-                auto taskExecutor = pipeline->GetTaskExecutor();
-                CHECK_NULL_VOID(taskExecutor);
-                taskExecutor->PostTask(
-                    [pipelineWeak = WeakPtr(pipeline), thpExtraManager] () {
-                        auto pipeline = pipelineWeak.Upgrade();
-                        CHECK_NULL_VOID(pipeline);
-                        pipeline->SetTHPExtraManager(thpExtraManager);
-                    },
-                    TaskExecutor::TaskType::UI,
-                    "thpExtraManagerInitFinish");
-            }
-        },
-        unimportantTaskKey);
-    TaskDependencyManager::GetInstance()->Wait(safeAreaTaskKey);
+    auto thpExtraManager = AceType::MakeRefPtr<NG::THPExtraManagerImpl>();
+    if (thpExtraManager->Init()) {
+        pipeline->SetTHPExtraManager(thpExtraManager);
+    }
     return errorCode;
 }
 
@@ -2427,9 +2403,9 @@ void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& con
             auto systemInsets = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM);
             auto cutoutInsets = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT);
             auto navInsets = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
-            pipeline->UpdateSystemSafeArea(systemInsets);
-            pipeline->UpdateCutoutSafeArea(cutoutInsets);
-            pipeline->UpdateNavSafeArea(navInsets);
+            pipeline->UpdateSystemSafeAreaWithoutAnimation(systemInsets);
+            pipeline->UpdateCutoutSafeAreaWithoutAnimation(cutoutInsets);
+            pipeline->UpdateNavSafeAreaWithoutAnimation(navInsets);
             TAG_LOGI(ACE_LAYOUT,
                 "InitializeSafeArea systemInsets:%{public}s, cutoutInsets:%{public}s, navInsets:%{public}s",
                 systemInsets.ToString().c_str(), cutoutInsets.ToString().c_str(), navInsets.ToString().c_str());
@@ -2954,7 +2930,7 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
     CHECK_NULL_VOID(config);
 
     RefPtr<ResourceAdapter> adapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(resourceManager, instanceId_);
-    ResourceManager::GetInstance().UpdateResourceAdapter(bundleName_, moduleName_, instanceId_, adapter);
+    ResourceManager::GetInstance().UpdateMainResourceAdapter(bundleName_, moduleName_, instanceId_, adapter);
 
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);

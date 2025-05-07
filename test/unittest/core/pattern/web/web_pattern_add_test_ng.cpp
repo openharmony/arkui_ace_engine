@@ -29,6 +29,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/web/resource/web_delegate.h"
+#include "core/components_ng/pattern/web/web_accessibility_child_tree_callback.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #undef protected
 #undef private
@@ -1012,6 +1013,148 @@ HWTEST_F(WebPatternAddTestNg, HandleOnDragStart_002, TestSize.Level1)
     RefPtr<OHOS::Ace::DragEvent> info = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     webPattern->HandleOnDragStart(info);
     EXPECT_FALSE(webPattern->isDragEndMenuShow_);
+#endif
+}
+
+/**
+ * @tc.name: OnDeregister_001
+ * @tc.desc: OnDeregister.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, OnDeregister_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    auto accessibilityChildTreeCallback = std::make_shared<WebAccessibilityChildTreeCallback>(nullptr, 1);
+    bool ret = accessibilityChildTreeCallback->OnDeregister();
+    EXPECT_FALSE(ret);
+#endif
+}
+
+/**
+ * @tc.name: OnSetChildTree001
+ * @tc.desc: OnSetChildTree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, OnSetChildTree_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    auto accessibilityChildTreeCallback = std::make_shared<WebAccessibilityChildTreeCallback>(nullptr, 1);
+    bool ret = accessibilityChildTreeCallback->OnSetChildTree(1, 1);
+    EXPECT_FALSE(ret);
+#endif
+}
+
+/**
+ * @tc.name: OnDumpChildInfo_001
+ * @tc.desc: OnDumpChildInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, OnDumpChildInfo_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    auto accessibilityChildTreeCallback = std::make_shared<WebAccessibilityChildTreeCallback>(nullptr, 1);
+    std::vector<std::string> params = { "params1", "params2" };
+    std::vector<std::string> info = { "info1", "info2" };
+    bool ret = accessibilityChildTreeCallback->OnDumpChildInfo(params, info);
+    EXPECT_FALSE(ret);
+#endif
+}
+
+/**
+ * @tc.name: OnClearRegisterFlag_001
+ * @tc.desc: OnClearRegisterFlag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, OnClearRegisterFlag_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    auto accessibilityChildTreeCallback = std::make_shared<WebAccessibilityChildTreeCallback>(nullptr, 1);
+    accessibilityChildTreeCallback->OnClearRegisterFlag();
+    EXPECT_FALSE(accessibilityChildTreeCallback->isReg_);
+#endif
+}
+
+/**
+ * @tc.name: GetAccessibilityVisible_001
+ * @tc.desc: GetAccessibilityVisible.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, GetAccessibilityVisible_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebPattern webpattern;
+    webpattern.delegate_ = nullptr;
+    ASSERT_EQ(webpattern.delegate_, nullptr);
+    bool ret = webpattern.GetAccessibilityVisible(1);
+    EXPECT_TRUE(ret);
+#endif
+}
+
+/**
+ * @tc.name: GetAccessibilityVisible_002
+ * @tc.desc: GetAccessibilityVisible.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, GetAccessibilityVisible_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    bool ret = webPattern->GetAccessibilityVisible(1);
+    EXPECT_FALSE(ret);
 #endif
 }
 } // namespace OHOS::Ace::NG

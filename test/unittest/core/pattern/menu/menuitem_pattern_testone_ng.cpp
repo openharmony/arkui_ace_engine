@@ -535,7 +535,7 @@ HWTEST_F(MenuItemPatternTestOneNg, HandleOnChange001, TestSize.Level1)
     EXPECT_TRUE(pattern->isSelected_);
 
     auto host = pattern->GetHost();
-    auto hub = host->GetEventHub<MenuItemEventHub>();
+    auto hub = host->GetOrCreateEventHub<MenuItemEventHub>();
     ASSERT_NE(hub, nullptr);
 
     bool isSelected = true;
@@ -920,7 +920,7 @@ HWTEST_F(MenuItemPatternTestOneNg, MarkIsSelected001, TestSize.Level1)
 
     bool isSelected = true;
     menuItemPattern->isSelected_ = true;
-    auto eventHub = menuItemPattern->GetEventHub<MenuItemEventHub>();
+    auto eventHub = menuItemPattern->GetOrCreateEventHub<MenuItemEventHub>();
     auto changeEvent = [&isSelected](bool select) { isSelected = select; };
     eventHub->SetOnChange(changeEvent);
     eventHub->SetSelectedChangeEvent(changeEvent);

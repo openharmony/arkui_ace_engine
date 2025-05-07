@@ -18,6 +18,7 @@
 #include "ui/base/ace_type.h"
 #include "ui/base/referenced.h"
 #include "ui/base/utils/utils.h"
+#include "ui/properties/ng/measure_property.h"
 #include "ui/view/frame_node.h"
 #include "ui/view/pattern.h"
 #include "ui/view/ui_context.h"
@@ -248,6 +249,32 @@ int32_t FrameNodeImpl::GetId() const
     return frameNode_->GetId();
 }
 
+void FrameNodeImpl::SetMeasureCallback(const std::function<void(RefPtr<FrameNode>)>& measureCallback)
+{
+    CHECK_NULL_VOID(frameNode_);
+    auto frameNode = frameNode_;
+    auto onMeasureCallback = [frameNode, measureCallback](int32_t nodeId) {
+        RefPtr<FrameNode> node = frameNode->GetKitNode();
+        if (!node) {
+            node = AceType::MakeRefPtr<FrameNodeImpl>(frameNode);
+        }
+        measureCallback(node);
+    };
+    frameNode_->SetMeasureCallback(std::move(onMeasureCallback));
+}
+
+int32_t FrameNodeImpl::GetMeasureWidth()
+{
+    CHECK_NULL_RETURN(frameNode_, 0);
+    return frameNode_->GetGeometryNode()->GetFrameSize().Width();
+}
+
+int32_t FrameNodeImpl::GetMeasureHeight()
+{
+    CHECK_NULL_RETURN(frameNode_, 0);
+    return frameNode_->GetGeometryNode()->GetFrameSize().Height();
+}
+
 void FrameNodeImpl::SetOnNodeDestroyCallback(const std::function<void(RefPtr<FrameNode>)>& destroyCallback)
 {
     CHECK_NULL_VOID(frameNode_);
@@ -284,6 +311,36 @@ void FrameNodeImpl::SetClipEdge(bool isClip)
 {
     CHECK_NULL_VOID(frameNode_);
     NG::ViewAbstract::SetClipEdge(frameNode_, isClip);
+}
+
+void FrameNodeImpl::SetPadding(const NG::PaddingPropertyT<NG::CalcLength>& value)
+{
+    CHECK_NULL_VOID(frameNode_);
+    NG::ViewAbstract::SetPadding(frameNode_, value);
+}
+
+void FrameNodeImpl::SetSafeAreaPadding(const NG::CalcLength& value)
+{
+    CHECK_NULL_VOID(frameNode_);
+    NG::ViewAbstract::SetSafeAreaPadding(frameNode_, value);
+}
+
+void FrameNodeImpl::ResetSafeAreaPadding()
+{
+    CHECK_NULL_VOID(frameNode_);
+    NG::ViewAbstract::ResetSafeAreaPadding();
+}
+
+void FrameNodeImpl::SetLinearGradient(const NG::Gradient& gradient)
+{
+    CHECK_NULL_VOID(frameNode_);
+    NG::ViewAbstract::SetLinearGradient(frameNode_, gradient);
+}
+
+void FrameNodeImpl::SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara)
+{
+    CHECK_NULL_VOID(frameNode_);
+    NG::ViewAbstract::SetLinearGradientBlur(frameNode_, blurPara);
 }
 
 } // namespace OHOS::Ace::Kit

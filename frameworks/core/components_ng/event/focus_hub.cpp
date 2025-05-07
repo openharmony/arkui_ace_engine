@@ -35,7 +35,8 @@ namespace OHOS::Ace::NG {
 constexpr uint32_t DELAY_TIME_FOR_RESET_UEC = 50;
 namespace {
 template <bool isReverse>
-bool AnyOfUINode(const RefPtr<UINode>& node, const std::function<bool(const RefPtr<FocusHub>&)>& operation)
+bool AnyOfUINode(const RefPtr<UINode>& node, const std::function<bool(const RefPtr<FocusHub>&)>& operation,
+    bool checkOnMainTree = true)
 {
     const auto& children = node->GetChildren(true);
     using IterType = std::conditional_t<isReverse, decltype(children.crbegin()), decltype(children.cbegin())>;
@@ -49,7 +50,7 @@ bool AnyOfUINode(const RefPtr<UINode>& node, const std::function<bool(const RefP
     }
     for (auto iter = begin; iter != end; ++iter) {
         const auto& uiChild = *iter;
-        if (!uiChild || !uiChild->IsOnMainTree()) {
+        if (!uiChild || (checkOnMainTree && !uiChild->IsOnMainTree())) {
             continue;
         }
         auto frameChild = AceType::DynamicCast<FrameNode>(uiChild);
@@ -58,7 +59,7 @@ bool AnyOfUINode(const RefPtr<UINode>& node, const std::function<bool(const RefP
             if (focusHub && operation(focusHub)) {
                 return true;
             }
-        } else if (AnyOfUINode<isReverse>(uiChild, operation)) {
+        } else if (AnyOfUINode<isReverse>(uiChild, operation, checkOnMainTree)) {
             return true;
         }
     }
@@ -212,7 +213,8 @@ bool FocusHub::AnyChildFocusHub(const std::function<bool(const RefPtr<FocusHub>&
     return isReverse ? AnyOfUINode<true>(node, operation) : AnyOfUINode<false>(node, operation);
 }
 
-bool FocusHub::AllChildFocusHub(const std::function<void(const RefPtr<FocusHub>&)>& operation, bool isReverse)
+bool FocusHub::AllChildFocusHub(
+    const std::function<void(const RefPtr<FocusHub>&)>& operation, bool isReverse, bool checkOnMainTree)
 {
     RefPtr<UINode> node = GetFrameNode();
     CHECK_NULL_RETURN(node, false);
@@ -220,7 +222,8 @@ bool FocusHub::AllChildFocusHub(const std::function<void(const RefPtr<FocusHub>&
         operation(focusHub);
         return false;
     };
-    return isReverse ? AnyOfUINode<true>(node, wrappedOpration) : AnyOfUINode<false>(node, wrappedOpration);
+    return isReverse ? AnyOfUINode<true>(node, wrappedOpration, checkOnMainTree)
+                     : AnyOfUINode<false>(node, wrappedOpration, checkOnMainTree);
 }
 
 bool FocusHub::AllChildFocusHubInMainTree(
@@ -248,8 +251,12 @@ std::list<RefPtr<FocusHub>>::iterator FocusHub::FlushChildrenFocusHub(std::list<
     auto lastFocusNode = lastWeakFocusNode_.Upgrade();
     decltype(focusNodes.begin()) lastIter;
     bool hasLastFocus = false;
-    AllChildFocusHubInMainTree(
+    AllChildFocusHub(
         [&focusNodes, &lastIter, &hasLastFocus, lastFocusNode](const RefPtr<FocusHub>& child) {
+            auto host = child->GetFrameNode();
+            if (host && !host->IsOnMainTree() && lastFocusNode != child) {
+                return false;
+            }
             auto iter = focusNodes.emplace(focusNodes.end(), child);
             if (child && lastFocusNode == child) {
                 lastIter = iter;
@@ -257,7 +264,7 @@ std::list<RefPtr<FocusHub>>::iterator FocusHub::FlushChildrenFocusHub(std::list<
             }
             return false;
         },
-        lastFocusNode);
+        false, false);
     return hasLastFocus ? lastIter : focusNodes.end();
 }
 
@@ -738,7 +745,7 @@ bool FocusHub::IsSyncRequestFocusableNode()
 bool FocusHub::IsEnabled() const
 {
     auto frameNode = frameNode_.Upgrade();
-    auto eventHub = frameNode ? frameNode->GetEventHubOnly<EventHub>() : eventHub_.Upgrade();
+    auto eventHub = frameNode ? frameNode->GetEventHub<EventHub>() : eventHub_.Upgrade();
     return eventHub ? eventHub->IsEnabled() : true;
 }
 
@@ -1472,7 +1479,7 @@ void FocusHub::OnBlurNode()
 void FocusHub::CheckFocusStateStyle(bool onFocus)
 {
     auto frameNode = frameNode_.Upgrade();
-    auto eventHub = frameNode ? frameNode->GetEventHubOnly<EventHub>() : eventHub_.Upgrade();
+    auto eventHub = frameNode ? frameNode->GetEventHub<EventHub>() : eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
     if (onFocus) {
         eventHub->UpdateCurrentUIState(UI_STATE_FOCUSED);
@@ -1484,7 +1491,7 @@ void FocusHub::CheckFocusStateStyle(bool onFocus)
 bool FocusHub::HasFocusStateStyle()
 {
     auto frameNode = frameNode_.Upgrade();
-    auto eventHub = frameNode ? frameNode->GetEventHubOnly<EventHub>() : eventHub_.Upgrade();
+    auto eventHub = frameNode ? frameNode->GetEventHub<EventHub>() : eventHub_.Upgrade();
     CHECK_NULL_RETURN(eventHub, false);
     return eventHub->HasStateStyle(UI_STATE_FOCUSED);
 }

@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "frameworks/core/components/dialog/dialog_properties.h"
 #include "frameworks/core/components/theme/shadow_theme.h"
+#include "frameworks/core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG::CustomDialog {
@@ -125,6 +126,10 @@ void DisposeDialog(ArkUIDialogHandle controllerHandler)
     CHECK_NULL_VOID(controllerHandler);
     auto* dialog = reinterpret_cast<FrameNode*>(controllerHandler->dialogHandle);
     if (dialog) {
+        auto dialogPattern = dialog->GetPattern<DialogPattern>();
+        if (dialogPattern) {
+            dialogPattern->SetIsDialogDisposed(true);
+        }
         dialog->DecRefCount();
     }
     controllerHandler->dialogHandle = nullptr;

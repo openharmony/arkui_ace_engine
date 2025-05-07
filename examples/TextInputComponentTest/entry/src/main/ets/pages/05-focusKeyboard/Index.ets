@@ -29,11 +29,11 @@ class TextList {
 
 @Entry
 @Component
-struct struct_03_layout_index {
+struct struct_05_focusKeyboard_index {
   scroll: Scroller = new Scroller()
   @State arr: TextList[] = [
-    new TextList(1, '05-focusKeyboard', 'pages/05-focusKeyboard/01-enableKeyboardOnFocus',),
-    new TextList(2, '05-focusKeyboard', 'pages/05-focusKeyboard/02-enterKeyType',),
+    new TextList(1, '01-enableKeyboardOnFocus', 'pages/05-focusKeyboard/01-enableKeyboardOnFocus',),
+    new TextList(2, '02-enterKeyType', 'pages/05-focusKeyboard/02-enterKeyType',),
   ]
   @State fontSize: Resource | undefined = undefined
 

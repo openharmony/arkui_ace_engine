@@ -31,6 +31,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_accessibility_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
@@ -346,9 +347,9 @@ void PushDimensionsToVector(std::vector<ArkUIStringAndFloat>& results,
                 value.value = optDimension.value().Value();
             }
         }
-        results.push_back(ArkUIStringAndFloat { static_cast<double>(hasValue), nullptr });
+        results.push_back(ArkUIStringAndFloat { static_cast<ArkUI_Float32>(hasValue), nullptr });
         results.push_back(value);
-        results.push_back(ArkUIStringAndFloat { static_cast<double>(unit), nullptr });
+        results.push_back(ArkUIStringAndFloat { static_cast<ArkUI_Float32>(unit), nullptr });
     }
 }
 
@@ -402,8 +403,8 @@ bool ParseBorderImageRepeat(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t& off
             repeatValue = BorderImageRepeat::STRETCH;
         }
     }
-    options.push_back(ArkUIStringAndFloat { static_cast<double>(repeatHasValue), nullptr });
-    options.push_back(ArkUIStringAndFloat { static_cast<double>(repeatValue), nullptr });
+    options.push_back(ArkUIStringAndFloat { static_cast<ArkUI_Float32>(repeatHasValue), nullptr });
+    options.push_back(ArkUIStringAndFloat { static_cast<ArkUI_Float32>(repeatValue), nullptr });
     if (repeatHasValue) {
         bitsets |= BorderImage::REPEAT_BIT;
     }
@@ -421,8 +422,8 @@ bool ParseBorderImageFill(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t& offse
     auto fillArg = runtimeCallInfo->GetCallArgRef(offset);
     auto hasValue = fillArg->IsBoolean();
     auto fill = (hasValue) ? fillArg->BooleaValue(runtimeCallInfo->GetVM()) : false;
-    options.push_back(ArkUIStringAndFloat {static_cast<double>(hasValue), nullptr });
-    options.push_back(ArkUIStringAndFloat {static_cast<double>(fill), nullptr });
+    options.push_back(ArkUIStringAndFloat {static_cast<ArkUI_Float32>(hasValue), nullptr });
+    options.push_back(ArkUIStringAndFloat {static_cast<ArkUI_Float32>(fill), nullptr });
     offset += NUM_1;
     return true;
 }
@@ -2345,7 +2346,7 @@ ArkUINativeModuleValue CommonBridge::SetInvert(ArkUIRuntimeCallInfo *runtimeCall
     if (!invertValueArg->IsUndefined()) {
         double invertValue = 0.0;
         if (ArkTSUtils::ParseJsDouble(vm, invertValueArg, invertValue)) {
-            ArkUI_Float32 invert[] = { invertValue };
+            ArkUI_Float32 invert[] = { static_cast<ArkUI_Float32>(invertValue) };
             GetArkUINodeModifiers()->getCommonModifier()->setInvert(nativeNode, invert, NUM_1);
         } else {
             GetArkUINodeModifiers()->getCommonModifier()->resetInvert(nativeNode);
@@ -2588,12 +2589,12 @@ ArkUINativeModuleValue CommonBridge::SetLinearGradient(ArkUIRuntimeCallInfo *run
     ParseGradientAngle(vm, angleArg, values);
     int32_t direction = static_cast<int32_t>(GradientDirection::NONE);
     ParseJsInt32(vm, directionArg, direction);
-    values.push_back({.i32 = static_cast<ArkUI_Float32>(direction)});
+    values.push_back({.i32 = static_cast<ArkUI_Int32>(direction)});
 
     std::vector<ArkUIInt32orFloat32> colors;
     ParseGradientColorStops(vm, colorsArg, colors);
     auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue(vm) : false;
-    values.push_back({.i32 = static_cast<ArkUI_Float32>(repeating)});
+    values.push_back({.i32 = static_cast<ArkUI_Int32>(repeating)});
     GetArkUINodeModifiers()->getCommonModifier()->setLinearGradient(nativeNode, values.data(), values.size(),
         colors.data(), colors.size());
     return panda::JSValueRef::Undefined(vm);
@@ -2766,7 +2767,7 @@ ArkUINativeModuleValue CommonBridge::SetBorderImage(ArkUIRuntimeCallInfo* runtim
     ParseBorderImageOutset(runtimeCallInfo, offset, outsetDimensions, bitsets); // use 4 args
     PushDimensionsToVector(options, outsetDimensions);
     ParseBorderImageFill(runtimeCallInfo, offset, options); // use 1 args
-    options.push_back(ArkUIStringAndFloat { static_cast<double>(bitsets), nullptr });
+    options.push_back(ArkUIStringAndFloat { static_cast<ArkUI_Float32>(bitsets), nullptr });
     GetArkUINodeModifiers()->getCommonModifier()->setBorderImage(nativeNode,
         src.c_str(), options.data(), options.size());
     ResetCalcDimensions(sliceDimensions);
@@ -3755,7 +3756,8 @@ ArkUINativeModuleValue CommonBridge::SetPixelStretchEffect(ArkUIRuntimeCallInfo 
     ArkTSUtils::ParseJsDimensionVp(vm, topArg, top);
     CalcDimension bottom;
     ArkTSUtils::ParseJsDimensionVp(vm, bottomArg, bottom);
-    ArkUI_Float32 values[] = { left.Value(), top.Value(), right.Value(), bottom.Value() };
+    ArkUI_Float32 values[] = { static_cast<ArkUI_Float32>(left.Value()), static_cast<ArkUI_Float32>(top.Value()),
+        static_cast<ArkUI_Float32>(right.Value()), static_cast<ArkUI_Float32>(bottom.Value()) };
     int units[] = { static_cast<int>(left.Unit()), static_cast<int>(top.Unit()), static_cast<int>(right.Unit()),
                     static_cast<int>(bottom.Unit()) };
     GetArkUINodeModifiers()->getCommonModifier()->setPixelStretchEffect(nativeNode, values, units,
@@ -7398,7 +7400,14 @@ ArkUINativeModuleValue CommonBridge::SetOnClick(ArkUIRuntimeCallInfo* runtimeCal
         panda::Local<panda::JSValueRef> params[1] = { obj };
         function->Call(vm, function.ToLocal(), params, 1);
     };
-    NG::ViewAbstract::SetOnClick(frameNode, std::move(onClick));
+    // The click event of the text component requires special integration.
+    // If the onClick callback function is modified,
+    // the SetOnClick function in the arkts_native_text_bridge.cpp file must also be updated accordingly.
+    if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
+        TextModelNG::SetOnClick(frameNode, std::move(onClick));
+    } else {
+        NG::ViewAbstract::SetOnClick(frameNode, std::move(onClick));
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -7934,14 +7943,15 @@ ArkUINativeModuleValue CommonBridge::SetOnKeyPreIme(ArkUIRuntimeCallInfo* runtim
         CHECK_NULL_RETURN(!function.IsEmpty(), false);
         CHECK_NULL_RETURN(function->IsFunction(vm), false);
         PipelineContext::SetCallBackNode(node);
-        const char* keys[] = { "type", "keyCode", "keyText", "keySource", "deviceId", "metaKey", "timestamp",
-            "stopPropagation", "getModifierKeyState", "intentionCode", "isNumLockOn", "isCapsLockOn",
+        const char* keys[] = { "type", "keyCode", "keyText", "keySource", "deviceId", "metaKey", "unicode",
+            "timestamp", "stopPropagation", "getModifierKeyState", "intentionCode", "isNumLockOn", "isCapsLockOn",
             "isScrollLockOn" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyType())),
             panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyCode())),
             panda::StringRef::NewFromUtf8(vm, info.GetKeyText()),
             panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeySource())),
             panda::NumberRef::New(vm, info.GetDeviceId()), panda::NumberRef::New(vm, info.GetMetaKey()),
+            panda::NumberRef::New(vm, info.GetUnicode()),
             panda::NumberRef::New(vm, static_cast<double>(info.GetTimeStamp().time_since_epoch().count())),
             panda::FunctionRef::New(vm, Framework::JsStopPropagation),
             panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
@@ -7970,6 +7980,67 @@ ArkUINativeModuleValue CommonBridge::ResetOnKeyPreIme(ArkUIRuntimeCallInfo* runt
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     NG::ViewAbstractModelNG::DisableOnKeyPreIme(frameNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetOnKeyEventDispatch(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    auto obj = secondeArg->ToObject(vm);
+    auto containerId = Container::CurrentId();
+    panda::Local<panda::FunctionRef> func = obj;
+    auto flag = FrameNodeBridge::IsCustomFrameNode(frameNode);
+    auto onKeyEventDispatch = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+                                  node = AceType::WeakClaim(frameNode), containerId](KeyEventInfo& info) -> bool {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_RETURN(!function.IsEmpty(), false);
+        CHECK_NULL_RETURN(function->IsFunction(vm), false);
+        PipelineContext::SetCallBackNode(node);
+        const char* keys[] = { "type", "keyCode", "keyText", "keySource", "deviceId", "metaKey", "unicode", "timestamp",
+            "stopPropagation", "getModifierKeyState", "intentionCode", "isNumLockOn", "isCapsLockOn",
+            "isScrollLockOn" };
+        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyType())),
+            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyCode())),
+            panda::StringRef::NewFromUtf8(vm, info.GetKeyText()),
+            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeySource())),
+            panda::NumberRef::New(vm, info.GetDeviceId()), panda::NumberRef::New(vm, info.GetMetaKey()),
+            panda::NumberRef::New(vm, info.GetUnicode()),
+            panda::NumberRef::New(vm, static_cast<double>(info.GetTimeStamp().time_since_epoch().count())),
+            panda::FunctionRef::New(vm, Framework::JsStopPropagation),
+            panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
+            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyIntention())),
+            panda::BooleanRef::New(vm, info.GetNumLock()),
+            panda::BooleanRef::New(vm, info.GetCapsLock()),
+            panda::BooleanRef::New(vm, info.GetScrollLock()) };
+        auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+        obj->SetNativePointerFieldCount(vm, 1);
+        obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
+        panda::Local<panda::JSValueRef> params[] = { obj };
+        auto ret = function->Call(vm, function.ToLocal(), params, 1);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean(vm)->Value();
+        }
+        return false;
+    };
+    NG::ViewAbstract::SetOnKeyEventDispatch(frameNode, std::move(onKeyEventDispatch));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetOnKeyEventDispatch(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    NG::ViewAbstract::DisableOnKeyEventDispatch(frameNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -358,7 +358,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
 void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& context, Rosen::TextStyle& txtStyle)
 {
     txtStyle.relayoutChangeBitmap = textStyle.GetReLayoutTextStyleBitmap();
-    txtStyle.textStyleUid  = textStyle.GetTextStyleUid();
+    txtStyle.textStyleUid  = static_cast<unsigned long>(textStyle.GetTextStyleUid());
     txtStyle.color = ConvertSkColor(textStyle.GetTextColor());
     txtStyle.fontWeight = ConvertTxtFontWeight(textStyle.GetFontWeight());
     txtStyle.symbol.SetSymbolType(ConvertTxtSymbolType(textStyle.GetSymbolType()));

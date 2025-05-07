@@ -106,8 +106,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkSearchOnTextSelectionChange(
 CJ_EXPORT void FfiOHOSAceFrameworkSearchOnEditChange(void (*callback)(bool value));
 CJ_EXPORT void FfiOHOSAceFrameworkSearchSetInputFilter(const char* value, void (*callback)(const char* value));
 CJ_EXPORT void FfiOHOSAceFrameworkSearchSetCustomKeyboard(void (*callback)(), bool options);
-CJ_EXPORT void FfiOHOSAceFrameworkSearchEditMenuOptions(void* (*callbackOnCreateMenu)(void* vecTextMenuItem),
-    bool (*callbackOnMenuItemClick)(FFiSearchTextMenuItem textMenuItem, int32_t start, int32_t end));
+CJ_EXPORT void FfiOHOSAceFrameworkSearchEditMenuOptions(
+    CjOnCreateMenu cjOnCreateMenu, CjOnMenuItemClick cjOnMenuItemClick);
 CJ_EXPORT SearchTextMenuItemHandle FfiOHOSAceFrameworkSearchCreateTextMenuItem(int64_t size);
 CJ_EXPORT void FfiOHOSAceFrameworkSearchTextMenuItemDelete(SearchTextMenuItemHandle vec);
 CJ_EXPORT void FfiOHOSAceFrameworkSearchTextMenuItemSetElement(

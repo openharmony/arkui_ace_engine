@@ -844,7 +844,8 @@ HWTEST_F(ScrollBarEventTestNg, HandleOnHover001, TestSize.Level1)
     pattern_->SetScrollBar(DisplayMode::AUTO);
     HoverInfo info;
     auto inputHub = pattern_->GetInputHub();
-    auto& inputEvents = pattern_->GetEventHub<EventHub>()->GetInputEventHub()->hoverEventActuator_->inputEvents_;
+    auto& inputEvents =
+        pattern_->GetOrCreateEventHub<EventHub>()->GetInputEventHub()->hoverEventActuator_->inputEvents_;
     EXPECT_TRUE(inputEvents.size() > 1);
     for (const auto& callback : inputEvents) {
         if (callback) {
@@ -999,7 +1000,7 @@ HWTEST_F(ScrollBarEventTestNg, OnScrollStartStop001, TestSize.Level1)
         }
         isScrollStopCalled++;
     };
-    auto eventHub = scrollNode_->GetEventHub<ScrollEventHub>();
+    auto eventHub = scrollNode_->GetOrCreateEventHub<ScrollEventHub>();
     EXPECT_NE(eventHub, nullptr);
     eventHub->SetOnScrollStart(std::move(scrollStart));
     eventHub->SetOnScrollStop(std::move(scrollStop));

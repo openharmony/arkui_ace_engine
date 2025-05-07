@@ -89,7 +89,7 @@ public:
 
     void CheckTabAnimateMode()
     {
-        if (!shallowBuilder_ || !firstTimeLayout_) {
+        if (!shallowBuilder_ || !(firstTimeLayout_ || secondTimeLayout_)) {
             return;
         }
 
@@ -134,23 +134,26 @@ public:
             return;
         }
         host->Clean();
-        firstTimeLayout_ = true;
+        secondTimeLayout_ = true;
         CHECK_NULL_VOID(shallowBuilder_);
         shallowBuilder_->MarkIsExecuteDeepRenderDone(false);
     }
 
     void BeforeCreateLayoutWrapper() override
     {
-        if (firstTimeLayout_) {
+        if (firstTimeLayout_ || secondTimeLayout_) {
             CheckTabAnimateMode();
         }
 
         if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
             shallowBuilder_->ExecuteDeepRender();
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        } else if (firstTimeLayout_ && shallowBuilder_ && shallowBuilder_->IsExecuteDeepRenderDone()) {
+            if (secondTimeLayout_) {
+                auto host = GetHost();
+                CHECK_NULL_VOID(host);
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            }
+        } else if ((firstTimeLayout_ || secondTimeLayout_) && shallowBuilder_ &&
+                   shallowBuilder_->IsExecuteDeepRenderDone()) {
             auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
             if (!pipeline) {
                 shallowBuilder_->MarkIsExecuteDeepRenderDone(false);
@@ -168,6 +171,7 @@ public:
             });
         }
         firstTimeLayout_ = false;
+        secondTimeLayout_ = false;
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -400,6 +404,7 @@ private:
     TabBarSymbol symbol_;
 
     bool firstTimeLayout_ = true;
+    bool secondTimeLayout_ = false;
     bool useLocalizedPadding_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TabContentPattern);

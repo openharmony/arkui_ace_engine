@@ -1169,7 +1169,7 @@ HWTEST_F(GaugeBuilderTestNg, GaugePatternTest031, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
     ASSERT_NE(gaugePaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(ENABLED_TRUE);
     gaugePaintProperty->UpdateValue(g_testValue);
@@ -1210,7 +1210,7 @@ HWTEST_F(GaugeBuilderTestNg, GaugePatternTest032, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
     ASSERT_NE(gaugePaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(ENABLED_TRUE);
     gaugePaintProperty->UpdateValue(g_testValue);
@@ -1251,7 +1251,7 @@ HWTEST_F(GaugeBuilderTestNg, GaugePatternTest033, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
     ASSERT_NE(gaugePaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(ENABLED_TRUE);
     gaugePaintProperty->UpdateValue(g_testValue);
@@ -1292,7 +1292,7 @@ HWTEST_F(GaugeBuilderTestNg, GaugePatternTest034, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
     ASSERT_NE(gaugePaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(ENABLED_TRUE);
     gaugePaintProperty->UpdateValue(g_testValue);
@@ -1333,7 +1333,7 @@ HWTEST_F(GaugeBuilderTestNg, GaugePatternTest035, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
     ASSERT_NE(gaugePaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(ENABLED_TRUE);
     gaugePaintProperty->UpdateValue(g_testValue);
@@ -1374,7 +1374,7 @@ HWTEST_F(GaugeBuilderTestNg, GaugePatternTest036, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
     ASSERT_NE(gaugePaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(ENABLED_TRUE);
     gaugePaintProperty->UpdateValue(g_testValue);
@@ -1415,7 +1415,7 @@ HWTEST_F(GaugeBuilderTestNg, GaugePatternTest037, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
     ASSERT_NE(gaugePaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(ENABLED_TRUE);
     gaugePaintProperty->UpdateValue(g_testValue);
@@ -1456,7 +1456,7 @@ HWTEST_F(GaugeBuilderTestNg, GaugePatternTest038, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
     ASSERT_NE(gaugePaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(ENABLED_TRUE);
     gaugePaintProperty->UpdateValue(g_testValue);
@@ -1497,7 +1497,7 @@ HWTEST_F(GaugeBuilderTestNg, GaugePatternTest039, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
     ASSERT_NE(gaugePaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(ENABLED_TRUE);
     gaugePaintProperty->UpdateValue(g_testValue);
@@ -1538,7 +1538,7 @@ HWTEST_F(GaugeBuilderTestNg, GaugePatternTest040, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
     ASSERT_NE(gaugePaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(ENABLED_TRUE);
     gaugePaintProperty->UpdateValue(g_testValue);
@@ -1579,7 +1579,7 @@ HWTEST_F(GaugeBuilderTestNg, GaugePatternTest041, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
     ASSERT_NE(gaugePaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(ENABLED_TRUE);
     gaugePaintProperty->UpdateValue(g_testValue);
@@ -1620,7 +1620,7 @@ HWTEST_F(GaugeBuilderTestNg, GaugePatternTest042, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
     ASSERT_NE(gaugePaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(ENABLED_TRUE);
     gaugePaintProperty->UpdateValue(g_testValue);
@@ -1660,7 +1660,7 @@ HWTEST_F(GaugeBuilderTestNg, GaugePatternTest043, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
     ASSERT_NE(gaugePaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(ENABLED_TRUE);
     gaugePaintProperty->UpdateValue(g_testValue);
@@ -1699,7 +1699,7 @@ HWTEST_F(GaugeBuilderTestNg, GaugePatternTest044, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
     ASSERT_NE(gaugePaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(ENABLED_TRUE);
     gaugePaintProperty->UpdateValue(g_testValue);
@@ -1737,7 +1737,7 @@ HWTEST_F(GaugeBuilderTestNg, GaugePatternTest045, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
     ASSERT_NE(gaugePaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(ENABLED_TRUE);
     gaugePaintProperty->UpdateValue(g_testValue);
@@ -1774,7 +1774,7 @@ HWTEST_F(GaugeBuilderTestNg, GaugePatternTest046, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
     ASSERT_NE(gaugePaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(ENABLED_TRUE);
     gaugePaintProperty->UpdateValue(g_testValue);
@@ -1813,7 +1813,7 @@ HWTEST_F(GaugeBuilderTestNg, GaugePatternTest047, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
     ASSERT_NE(gaugePaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(ENABLED_TRUE);
     gaugePaintProperty->UpdateValue(g_testValue);
@@ -1854,7 +1854,7 @@ HWTEST_F(GaugeBuilderTestNg, GaugePatternTest048, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
     ASSERT_NE(gaugePaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(ENABLED_TRUE);
     gaugePaintProperty->UpdateValue(g_testValue);
@@ -1895,7 +1895,7 @@ HWTEST_F(GaugeBuilderTestNg, GaugePatternTest049, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
     ASSERT_NE(gaugePaintProperty, nullptr);
-    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(ENABLED_TRUE);
     gaugePaintProperty->UpdateValue(g_testValue);

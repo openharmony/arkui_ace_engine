@@ -270,7 +270,7 @@ HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg006, Test
      * @tc.steps: step2. Set ToggleConfiguration
      */
     pattern->SetCheckBoxSelect(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -318,7 +318,7 @@ HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg007, Test
      * @tc.steps: step2. Set ToggleConfiguration
      */
     pattern->SetCheckBoxSelect(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -366,7 +366,7 @@ HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg008, Test
      * @tc.steps: step2. Set ToggleConfiguration
      */
     pattern->SetCheckBoxSelect(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -414,7 +414,7 @@ HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg009, Test
      * @tc.steps: step2. Set ToggleConfiguration
      */
     pattern->SetCheckBoxSelect(IS_ON);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -462,7 +462,7 @@ HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg010, Test
      * @tc.steps: step2. Set ToggleConfiguration
      */
     pattern->SetCheckBoxSelect(1);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -510,7 +510,7 @@ HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg011, Test
      * @tc.steps: step2. Set ToggleConfiguration
      */
     pattern->SetCheckBoxSelect(BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -558,7 +558,7 @@ HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg012, Test
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetCheckBoxSelect(NEGATIVE_BIG_INT);
-    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -598,7 +598,7 @@ HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg013, Test
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetButtonPress(IS_ON);
-    auto eventHub = frameNode->GetEventHub<NG::ToggleButtonEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::ToggleButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -638,7 +638,7 @@ HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg014, Test
      * @tc.steps: step2. Set toggleConfiguration
      */
     pattern->SetSwitchIsOn(IS_ON);
-    auto eventHub = frameNode->GetEventHub<NG::SwitchEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NG::SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabled(IS_ON);
     /**
@@ -865,7 +865,7 @@ HWTEST_F(ToggleContentModifierAddTestNg, ToggleContentModifierAddTestNg020, Test
      * @tc.steps: step3. call the event entry function.
      * @tc.expected: step3. check whether the value is correct.
      */
-    auto eventHub = switchFrameNode->GetEventHub<SwitchEventHub>();
+    auto eventHub = switchFrameNode->GetOrCreateEventHub<SwitchEventHub>();
     EXPECT_NE(eventHub, nullptr);
     eventHub->UpdateChangeEvent(true);
     EXPECT_EQ(stateChange, true);

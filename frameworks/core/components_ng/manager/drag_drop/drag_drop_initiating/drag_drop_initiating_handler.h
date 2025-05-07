@@ -56,6 +56,7 @@ public:
     void NotifyTransDragWindowToFwk();
     void NotifyMenuShow(bool isMenuShow);
     void NotifyDragEnd();
+    void NotifyPreDragStatus(const PreDragStatus preDragStatus);
 
     bool IsNeedGather();
 

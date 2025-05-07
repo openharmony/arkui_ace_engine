@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "ui/properties/tabs_effect_node_option.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
@@ -82,6 +83,7 @@ public:
     static void SetBarGridAlign(FrameNode* frameNode, const BarGridColumnOptions& BarGridColumnOptions);
     static void SetOnUnselected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onUnselected);
     static void SetDivider(FrameNode* frameNode, const TabsItemDivider& divider);
+    static void SetEffectNodeOption(FrameNode* frameNode, const TabsEffectNodeOption& option);
     static void SetFadingEdge(FrameNode* frameNode, bool fadingEdge);
     static void SetBarBackgroundColor(FrameNode* frameNode, const Color& backgroundColor);
     static void SetBarBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& styleOption);

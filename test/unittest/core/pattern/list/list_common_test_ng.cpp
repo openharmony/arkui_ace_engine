@@ -929,7 +929,7 @@ HWTEST_F(ListCommonTestNg, EventHub002, TestSize.Level1)
     CreateList();
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
-    auto itemEventHub = GetChildFrameNode(frameNode_, 0)->GetEventHub<ListItemEventHub>();
+    auto itemEventHub = GetChildFrameNode(frameNode_, 0)->GetOrCreateEventHub<ListItemEventHub>();
     auto jsonStr = itemEventHub->GetDragExtraParams("", Point(0, 250.f), DragEventType::START);
     EXPECT_EQ(jsonStr, "{\"selectedIndex\":0}");
     jsonStr = itemEventHub->GetDragExtraParams("info", Point(0, 250.f), DragEventType::MOVE);
@@ -1054,7 +1054,7 @@ HWTEST_F(ListCommonTestNg, ListSelectForCardModeTest003, TestSize.Level1)
     bool isFifthItemSelected = false;
     auto selectCallback = [&isFifthItemSelected](bool) { isFifthItemSelected = true; };
     GetChildPattern<ListItemPattern>(group, 3)->SetSelectable(false);
-    GetChildFrameNode(group, 4)->GetEventHub<ListItemEventHub>()->SetOnSelect(std::move(selectCallback));
+    GetChildFrameNode(group, 4)->GetOrCreateEventHub<ListItemEventHub>()->SetOnSelect(std::move(selectCallback));
 
     /**
      * @tc.steps: step2. Select zone.
@@ -1425,7 +1425,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag006, TestSize.Level1)
     auto forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
     auto syntaxItem = AceType::DynamicCast<SyntaxItem>(forEachNode->GetChildAtIndex(0));
     auto listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
-    auto listItemEventHub = listItem->GetEventHub<ListItemEventHub>();
+    auto listItemEventHub = listItem->GetOrCreateEventHub<ListItemEventHub>();
     auto gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
     EXPECT_EQ(gestureHub->GetDragEventActuator(), nullptr);
 }
@@ -1447,7 +1447,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag007, TestSize.Level1)
     auto forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
     auto syntaxItem = AceType::DynamicCast<SyntaxItem>(forEachNode->GetChildAtIndex(0));
     auto listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
-    auto listItemEventHub = listItem->GetEventHub<ListItemEventHub>();
+    auto listItemEventHub = listItem->GetOrCreateEventHub<ListItemEventHub>();
     auto gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
     EXPECT_NE(gestureHub->GetDragEventActuator()->userCallback_, nullptr);
 
@@ -1460,7 +1460,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag007, TestSize.Level1)
     forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
     syntaxItem = AceType::DynamicCast<SyntaxItem>(forEachNode->GetChildAtIndex(0));
     listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
-    listItemEventHub = listItem->GetEventHub<ListItemEventHub>();
+    listItemEventHub = listItem->GetOrCreateEventHub<ListItemEventHub>();
     gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
     EXPECT_EQ(gestureHub->GetDragEventActuator()->userCallback_, nullptr);
 }
@@ -1657,7 +1657,7 @@ HWTEST_F(ListCommonTestNg, InitDragDropEvent001, TestSize.Level1)
     auto listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
     auto listItemPattern = listItem->GetPattern<ListItemPattern>();
     auto dragManager = listItemPattern->dragManager_;
-    auto listItemEventHub = listItem->GetEventHub<ListItemEventHub>();
+    auto listItemEventHub = listItem->GetOrCreateEventHub<ListItemEventHub>();
     auto gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
     // InitDragDropEvent
     auto dragEvent = gestureHub->dragEventActuator_->userCallback_;

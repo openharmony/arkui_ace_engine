@@ -1225,6 +1225,8 @@ private:
     void TextBlurReportByFocusEvent(int64_t accessibilityId);
     void WebComponentClickReport(int64_t accessibilityId);
     void TextBlurReportByBlurEvent(int64_t accessibilityId);
+    void AccessibilityReleasePageEvent();
+    void AccessibilitySendPageChange();
 
 #ifdef OHOS_STANDARD_SYSTEM
     sptr<OHOS::Rosen::Window> CreateWindow();

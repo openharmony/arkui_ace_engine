@@ -522,17 +522,23 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         return nullptr;
     }
     int32_t alignment = -1;
+    int32_t updateAlignment = 0;
+    const int32_t steps = 2; // 2: alignment from theme
     auto pipelineContext = PipelineBase::GetCurrentContext();
     if (pipelineContext) {
         auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
+        updateAlignment = steps - 1;
         if (toastTheme) {
             alignment = toastTheme->GetAlign();
+            updateAlignment = steps;
         }
     }
     auto toastInfo = NG::ToastInfo { .duration = -1, .showMode = NG::ToastShowMode::DEFAULT, .alignment = alignment };
     if (!GetToastParams(env, argv, toastInfo)) {
         return nullptr;
     }
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "The show toast process: parameters are prased successfully, "
+        "updateAlignment is %{public}d", updateAlignment);
     std::function<void(int32_t)> toastCallback = nullptr;
     ShowToast(env, toastInfo, toastCallback);
     return nullptr;
@@ -605,6 +611,7 @@ void CloseToast(napi_env env, int32_t toastId, NG::ToastShowMode showMode)
 
 napi_value JSPromptCloseToast(napi_env env, napi_callback_info info)
 {
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "closeToast enter");
     size_t argc = 1;
     napi_value args[1];
     napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
@@ -809,11 +816,15 @@ bool ParseButtonsPara(napi_env env, std::shared_ptr<PromptAsyncContext>& context
         return false;
     }
     if (isShowActionMenu) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, false);
-        auto theme = pipeline->GetTheme<ButtonTheme>();
-        CHECK_NULL_RETURN(theme, false);
-        ButtonInfo buttonInfo = { .text = theme->GetCancelText(),
+        std::string buttonCancelText = "Cancel";
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+        if (pipeline) {
+            auto theme = pipeline->GetTheme<ButtonTheme>();
+            if (theme) {
+                buttonCancelText = theme->GetCancelText();
+            }
+        }
+        ButtonInfo buttonInfo = { .text = buttonCancelText,
             .textColor = "", .isPrimary = primaryButtonNum == 0 ? true : false};
         context->buttons.emplace_back(buttonInfo);
     }
@@ -2502,6 +2513,7 @@ void OpenCustomDialog(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncCo
 
 napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info)
 {
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "openCustomDialog enter");
     size_t argc = 2;
     napi_value argv[2] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -2622,6 +2634,7 @@ std::function<void(RefPtr<NG::FrameNode> dialogNode)> GetDialogCallback(PromptDi
 
 napi_value JSPromptOpenCustomDialogWithController(napi_env env, napi_callback_info info)
 {
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "openCustomDialogWithController enter");
     size_t argc = OPEN_CUSTOM_DIALOG_WITH_CONTROLLER_PARAM_TOTAL;
     napi_value argv[OPEN_CUSTOM_DIALOG_WITH_CONTROLLER_PARAM_TOTAL] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -2696,6 +2709,7 @@ void ParseDialogOptions(napi_env env, napi_value arg, std::shared_ptr<PromptAsyn
 
 napi_value JSPromptPresentCustomDialog(napi_env env, napi_callback_info info)
 {
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "presentCustomDialog enter");
     size_t argc = PRESENT_CUSTOM_DIALOG_PARAM_TOTAL;
     napi_value argv[PRESENT_CUSTOM_DIALOG_PARAM_TOTAL] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -2794,6 +2808,7 @@ void CloseCustomDialog(napi_env env, std::shared_ptr<PromptAsyncContext>& asyncC
 
 napi_value JSPromptCloseCustomDialog(napi_env env, napi_callback_info info)
 {
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "closeCustomDialog enter");
     size_t argc = 1;
     napi_value argv[1] = { 0 };
     int32_t dialogId = -1;
@@ -2878,6 +2893,7 @@ void UpdateCustomDialog(napi_env env, std::shared_ptr<PromptAsyncContext>& async
 
 napi_value JSPromptUpdateCustomDialog(napi_env env, napi_callback_info info)
 {
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "updateCustomDialog enter");
     size_t argc = CUSTOM_DIALOG_PARAM_NUM;
     napi_value argv[CUSTOM_DIALOG_PARAM_NUM] = { nullptr };
     WeakPtr<NG::UINode> nodeWk;

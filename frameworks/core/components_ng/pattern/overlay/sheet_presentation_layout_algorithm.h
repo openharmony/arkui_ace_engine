@@ -97,6 +97,7 @@ private:
     void UpdateTranslateOffsetWithPlacement(OffsetF& translate);
     void AddArrowHeightToSheetSize();
     void RemeasureForPopup(const RefPtr<LayoutWrapper>& layoutWrapper);
+    void MinusSubwindowDistance(const RefPtr<FrameNode>& sheetWrapper);
     float GetCenterDefaultWidth(const RefPtr<FrameNode>& host) const;
     void MeasureOperation(LayoutWrapper* layoutWrapper, LayoutConstraintF constraint);
     void MeasureCloseIcon(LayoutWrapper* layoutWrapper, LayoutConstraintF constraint);

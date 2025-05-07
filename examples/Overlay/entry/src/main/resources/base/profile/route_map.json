@@ -131,6 +131,21 @@
       "buildFunction": "BindMenuBackgroundEffectBuilder"
     },
     {
+      "name": "MenuDivider",
+      "pageSourceFile": "src/main/ets/pages/components/menu/menuDivider.ets",
+      "buildFunction": "MenuDividerBuilder"
+    },
+    {
+      "name": "MenuExpand",
+      "pageSourceFile": "src/main/ets/pages/components/menu/menuExpand.ets",
+      "buildFunction": "MenuExpandBuilder"
+    },
+    {
+      "name": "MenuPressStatus",
+      "pageSourceFile": "src/main/ets/pages/components/menu/menuPressStatus.ets",
+      "buildFunction": "MenuPressStatusBuilder"
+    },
+    {
       "name": "OverlayIndex",
       "pageSourceFile": "src/main/ets/pages/components/overlay/Index.ets",
       "buildFunction": "OverlayIndexBuilder"
@@ -140,6 +155,12 @@
       "pageSourceFile": "src/main/ets/pages/components/overlay/overlayLevelOrder.ets",
       "buildFunction": "OverlayLevelOrderBuilder"
     },
+    {
+      "name": "OverlayManagerHitTest",
+      "pageSourceFile": "src/main/ets/pages/components/overlay/overlayManagerHitTest.ets",
+      "buildFunction": "OverlayManagerHitBuilder"
+    },
+
     {
       "name": "PopupIndex",
       "pageSourceFile": "src/main/ets/pages/components/popup/Index.ets",
@@ -184,6 +205,16 @@
       "name": "PopupDragTest",
       "pageSourceFile": "src/main/ets/pages/components/popup/popupDragTest.ets",
       "buildFunction": "PopupDragBuilder"
+    },
+    {
+      "name": "PopupMessageTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupMessageTest.ets",
+      "buildFunction": "PopupMessageBuilder"
+    },
+    {
+      "name": "PopupComplexTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupComplexTest.ets",
+      "buildFunction": "PopupComplexBuilder"
     },
     {
       "name": "ToastIndex",

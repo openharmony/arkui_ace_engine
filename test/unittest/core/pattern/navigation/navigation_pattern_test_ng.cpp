@@ -559,7 +559,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_015, TestSize.Level1)
      * @tc.steps: step2. get inputHub.
      * @tc.expected: hoverEvent_ is not nullptr.
      */
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(hub, nullptr);
     auto inputHub = hub->GetOrCreateInputEventHub();
     ASSERT_NE(inputHub, nullptr);
@@ -600,7 +600,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_016, TestSize.Level1)
      * @tc.steps: step2. get gestureHub.
      * @tc.expected: pattern is not nullptr.
      */
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(hub, nullptr);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
@@ -814,7 +814,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationModelNGTest003, TestSize.Level1)
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
+    auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetOrCreateEventHub<EventHub>());
     ASSERT_NE(navigationEventHub, nullptr);
     navigationEventHub->SetOnNavBarStateChange(std::move(onChange));
     EXPECT_TRUE(isSelected);
@@ -1208,7 +1208,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationModelNG006, TestSize.Level1)
     auto newNavDestinationPattern = newTopNavDestination->GetPattern<NavDestinationPattern>();
     ASSERT_NE(newNavDestinationPattern, nullptr);
     preNavDestinationPattern->isOnShow_ = true;
-    ASSERT_NE(preTopNavDestination->GetEventHub<NavDestinationEventHub>(), nullptr);
+    ASSERT_NE(preTopNavDestination->GetOrCreateEventHub<NavDestinationEventHub>(), nullptr);
 
     navigationPattern->CheckTopNavPathChange(preTopNavPath, newTopNavPath);
     ASSERT_FALSE(preNavDestinationPattern->isOnShow_);
@@ -1395,7 +1395,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationToolbarConfigurationTest002, TestSiz
      * @tc.steps: step5. barItem is disable.
      * @tc.expected: IsEnabled function return false.
      */
-    auto itemEventHub = barItemNode->GetEventHub<BarItemEventHub>();
+    auto itemEventHub = barItemNode->GetOrCreateEventHub<BarItemEventHub>();
     EXPECT_NE(itemEventHub, nullptr);
     EXPECT_FALSE(itemEventHub->IsEnabled());
 }

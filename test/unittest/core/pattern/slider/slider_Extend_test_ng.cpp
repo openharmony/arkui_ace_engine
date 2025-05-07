@@ -936,7 +936,7 @@ HWTEST_F(SliderExTestNg, SliderPatternChangeEventTestNg001, TestSize.Level1)
     sliderModelNG.SetOnChangeEvent(std::move(eventOnChange));
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    auto sliderEventHub = frameNode->GetEventHub<NG::SliderEventHub>();
+    auto sliderEventHub = frameNode->GetOrCreateEventHub<NG::SliderEventHub>();
     ASSERT_NE(sliderEventHub, nullptr);
     ASSERT_NE(sliderEventHub->onChangeEvent_, nullptr);
     sliderEventHub->FireChangeEvent(1.0, 1);

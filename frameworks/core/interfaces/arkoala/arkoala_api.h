@@ -95,6 +95,8 @@ struct _ArkUIRSNode;
 struct _ArkUI_OEMVisualEffectFunc;
 struct ArkUI_TextPickerRangeContentArray;
 struct ArkUI_TextCascadePickerRangeContentArray;
+struct ArkUI_EmbeddedComponentItem;
+struct AbilityBase_Want;
 
 typedef _ArkUINode* ArkUINodeHandle;
 typedef _ArkUIVMContext* ArkUIVMContext;
@@ -138,6 +140,7 @@ typedef ArkUI_ListChildrenMainSize* ArkUIListChildrenMainSize;
 
 typedef ArkUI_TextPickerRangeContentArray* ArkUITextPickerRangeContentArray;
 typedef ArkUI_TextCascadePickerRangeContentArray* ArkUITextCascadePickerRangeContentArray;
+typedef ArkUI_EmbeddedComponentItem* ArkUIEmbeddedComponentItemHandle;
 struct _ArkUICurve;
 typedef _ArkUICurve* ArkUICurveHandle;
 
@@ -964,6 +967,7 @@ enum ArkUINodeType {
     ARKUI_RATING,
     ARKUI_XCOMPONENT_TEXTURE,
     ARKUI_ARC_ALPHABET_INDEXER,
+    ARKUI_EMBEDDED_COMPONENT,
 };
 
 enum ArkUIEventCategory {
@@ -2333,6 +2337,8 @@ struct ArkUICommonModifier {
     void (*getMargin)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 length, ArkUI_Int32 unit);
     void (*getMarginDimension)(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 (*units)[4]);
     void (*getTranslate)(ArkUINodeHandle node, ArkUI_Float32 (*values)[3], ArkUI_Int32 unit);
+    void (*getTranslateWithPercentage)(
+        ArkUINodeHandle node, ArkUI_Float32 (*values)[3], ArkUI_Int32 (*units)[2], ArkUI_Int32 unit);
     void (*setMoveTransition)(ArkUINodeHandle node, ArkUI_Int32 value, const ArkUIAnimationOptionType* opacityOption);
     ArkUIMoveTransitionType (*getMoveTransition)(ArkUINodeHandle node);
     void (*resetMask)(ArkUINodeHandle node);
@@ -3162,6 +3168,11 @@ struct ArkUILazyGridLayoutModifier {
     void (*resetColumnsTemplate)(ArkUINodeHandle node);
 };
 
+struct ArkUIEmbeddedComponentModifier {
+    void (*setEmbeddedComponentWant)(ArkUINodeHandle node, AbilityBase_Want* want);
+    void (*setEmbeddedComponentOption)(ArkUINodeHandle node, ArkUIEmbeddedComponentItemHandle option);
+};
+
 struct ArkUITimepickerModifier {
     ArkUI_CharPtr (*getTimepickerSelected)(ArkUINodeHandle node);
     void (*setTimepickerSelected)(ArkUINodeHandle node, ArkUI_Uint32 hour, ArkUI_Uint32 minute);
@@ -3588,6 +3599,7 @@ struct ArkUIGestureInterruptInfo {
     bool isSystemGesture;
     ArkUI_Int32 systemRecognizerType;
     ArkUIAPIEventGestureAsyncEvent* event = nullptr;
+    void* customUserData = nullptr;
     void* userData = nullptr;
     void* inputEvent = nullptr;
     void* gestureEvent = nullptr;
@@ -6134,6 +6146,7 @@ struct ArkUINodeModifiers {
     const ArkUILinearIndicatorModifier* (*getLinearIndicatorModifier)();
     const ArkUIIndicatorComponentModifier* (*getIndicatorComponentModifier)();
     const ArkUILazyGridLayoutModifier* (*getLazyGridLayoutModifier)();
+    const ArkUIEmbeddedComponentModifier* (*getEmbeddedComponentModifier)();
 };
 
 // same as inner defines in property.h

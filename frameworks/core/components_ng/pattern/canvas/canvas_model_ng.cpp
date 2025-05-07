@@ -17,6 +17,7 @@
 
 #include <mutex>
 
+#include "base/log/log_wrapper.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
@@ -35,13 +36,9 @@ RefPtr<AceType> CanvasModelNG::Create()
     return frameNode->GetPattern<CanvasPattern>();
 }
 
-void CanvasModelNG::DetachRenderContext()
+RefPtr<AceType> CanvasModelNG::GetTaskPool(RefPtr<AceType>& pattern)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<CanvasPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->DetachRenderContext();
+    return pattern;
 }
 
 void CanvasModelNG::SetOnReady(std::function<void()>&& onReady)
@@ -72,6 +69,15 @@ void CanvasModelNG::SetImageAIOptions(void* options)
     auto pattern = frameNode->GetPattern<CanvasPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetImageAIOptions(options);
+}
+
+void CanvasModelNG::DetachRenderContext()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->DetachRenderContext();
 }
 
 void CanvasModelNG::SetOnReady(FrameNode* frameNode, std::function<void()>&& onReady)

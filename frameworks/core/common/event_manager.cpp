@@ -170,7 +170,7 @@ void EventManager::LogTouchTestResultInfo(const TouchEvent& touchPoint, const Re
 #endif
         resultInfo.append(", depth: ").append(std::to_string(item.second.depth)).append(" };");
     }
-    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "InputTracking id:%{public}d, touch test hitted node info: %{public}s",
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "InputTracking id:%{public}d, touch test hitted node info: %{public}s",
         touchPoint.touchEventId, resultInfo.c_str());
     if (touchTestResultInfo.empty()) {
         TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "Touch test result is empty.");
@@ -312,14 +312,12 @@ void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result, 
         }
     }
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "%{public}s", hittedRecognizerTypeInfo.c_str());
-    if (hittedRecognizerInfo.empty()) {
+    if (hittedRecognizerInfo.empty() && !SystemProperties::GetAceCommercialLogEnabled()) {
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Hitted recognizer info is empty.");
         std::list<std::pair<int32_t, std::string>> dumpList;
         eventTree_.Dump(dumpList, 0, DUMP_START_NUMBER);
         for (auto& item : dumpList) {
-            if (!SystemProperties::GetAceCommercialLogEnabled()) {
-                TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
-            }
+            TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
         }
     }
 }
@@ -858,7 +856,7 @@ void EventManager::LogTouchTestRecognizerStates(int32_t touchEventId)
         gestureLog += "}";
         log += gestureLog;
     }
-    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "id: %{public}d, log: %{public}s", touchEventId, log.c_str());
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "id: %{public}d, log: %{public}s", touchEventId, log.c_str());
 }
 
 void EventManager::DispatchTouchEventAndCheck(const TouchEvent& event, bool sendOnTouch)
@@ -1720,6 +1718,7 @@ bool EventManager::DispatchRotationEvent(
 
 void EventManager::ClearResults()
 {
+    FlushCursorStyleRequests();
     touchTestResults_.clear();
     postEventTouchTestResults_.clear();
     mouseTestResults_.clear();
@@ -2303,6 +2302,62 @@ void EventManager::DumpEventWithCount(const std::vector<std::string>& params, NG
                 DumpLog::GetInstance().Print(item.first, item.second);
             }
         }
+    }
+}
+
+TouchDelegateHdl EventManager::RegisterTouchDelegate(const int32_t touchId, const RefPtr<NG::TouchDelegate> delegater)
+{
+    touchDelegatesMap_[touchId].emplace_back(delegater);
+    TouchDelegatesIter iter = std::prev(touchDelegatesMap_[touchId].end());
+    LOGD("RegisterTouchDelegate successful");
+    TouchDelegateHdl handler(touchId, iter);
+    return handler;
+}
+
+void EventManager::UnregisterTouchDelegate(TouchDelegateHdl handler)
+{
+    if (handler.touchId < 0) {
+        LOGI("Unaviliable touchId is %{public}d", handler.touchId);
+        return;
+    }
+    auto iter = touchDelegatesMap_.find(handler.touchId);
+    if (iter == touchDelegatesMap_.end()) {
+        LOGI("touchId not found in delegateMap");
+        return;
+    }
+    TouchDelegates delegates = iter->second;
+    auto item = delegates.begin();
+    for (item = delegates.begin(); item != delegates.end();) {
+        if (item == handler.iter) {
+            item = delegates.erase(item);
+            LOGI("UnregisterTouchDelegate successful");
+            break;
+        }
+    }
+}
+
+void EventManager::UnregisterTouchDelegate(int32_t touchId)
+{
+    auto iter = touchDelegatesMap_.find(touchId);
+    if (iter == touchDelegatesMap_.end()) {
+        return;
+    }
+    iter->second.clear();
+    touchDelegatesMap_.erase(iter);
+}
+
+void EventManager::DelegateTouchEvent(const TouchEvent& touchEvent)
+{
+    if (touchEvent.id < 0) {
+        return;
+    }
+    auto iter = touchDelegatesMap_.find(touchEvent.id);
+    if (iter == touchDelegatesMap_.end()) {
+        return;
+    }
+    TouchDelegates delegateVector = iter->second;
+    for (auto item : delegateVector) {
+        item->DelegateTouchEvent(touchEvent);
     }
 }
 } // namespace OHOS::Ace

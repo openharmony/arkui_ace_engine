@@ -236,6 +236,7 @@ private:
     bool isSelect_ = true;
     Color clickEffectColor_ = Color::WHITE;
     Color hoverColor_ = Color::WHITE;
+    Color focusColor_ = Color::WHITE;
     Dimension hoverRadius_ = 8.0_vp;
     bool showHoverEffect_ = true;
     bool useContentModifier_ = false;

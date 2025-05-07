@@ -72,7 +72,6 @@ bool SystemProperties::gridCacheEnabled_ = true;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 std::atomic<bool> SystemProperties::stateManagerEnable_(false);
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(false);
-std::atomic<bool> SystemProperties::asyncInitializeEnabled_(true);
 std::atomic<bool> SystemProperties::focusCanBeActive_(true);
 bool SystemProperties::aceCommercialLogEnable_ = false;
 std::atomic<bool> SystemProperties::debugBoundaryEnabled_(false);
@@ -93,6 +92,7 @@ bool SystemProperties::formSkeletonBlurEnabled_ = true;
 
 bool g_irregularGrid = true;
 bool g_segmentedWaterflow = true;
+bool g_isNeedSymbol = true;
 
 float SystemProperties::GetFontWeightScale()
 {
@@ -263,7 +263,7 @@ bool SystemProperties::IsNeedResampleTouchPoints()
 
 bool SystemProperties::IsNeedSymbol()
 {
-    return true;
+    return g_isNeedSymbol;
 }
 
 bool SystemProperties::GetResourceDecoupling()

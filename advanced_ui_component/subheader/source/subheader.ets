@@ -551,7 +551,7 @@ export struct SubHeader {
     }
     children.forEach((child) => {
       constraint.minHeight = Math.min(Number(this.getMinHeight()), Number(constraint.maxHeight));
-      result.height = child.measure(constraint).height;
+      result.height = child?.measure(constraint).height;
       result.width = Number(constraint.maxWidth);
     })
     return result;
@@ -1167,7 +1167,7 @@ class Util {
       return false;
     }
     let resource = resourceStr as Resource;
-    return resource.type === RESOURCE_TYPE_SYMBOL;
+    return resource?.type === RESOURCE_TYPE_SYMBOL;
   }
 
   /**
@@ -1302,7 +1302,7 @@ struct TextArrowLayout {
       minHeight: textArrowHeight,
       maxHeight: textArrowHeight,
     };
-    arrowChild.measure(arrowConstraint);
+    arrowChild?.measure(arrowConstraint);
     return { width: textArrowWidth, height: textArrowHeight };
   }
 

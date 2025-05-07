@@ -253,6 +253,47 @@ BubbleLayoutAlgorithm::BubbleLayoutAlgorithm(int32_t id, const std::string& tag,
         Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT };
 }
 
+void BubbleLayoutAlgorithm::FitAvaliableRect(LayoutWrapper* layoutWrapper, bool showInSubWindow)
+{
+    auto bubbleNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(bubbleNode);
+    auto pipelineContext = bubbleNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
+    auto containerId = Container::CurrentId();
+    auto container = AceEngine::Get().GetContainer(containerId);
+    if (containerId >= MIN_SUBCONTAINER_ID) {
+        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+        container = AceEngine::Get().GetContainer(parentContainerId);
+    }
+    CHECK_NULL_VOID(container);
+    auto isFreeMultiWindow = container->IsFreeMultiWindow();
+    CHECK_EQUAL_VOID(expandDisplay || isFreeMultiWindow, false);
+    auto availableRect = OverlayManager::GetDisplayAvailableRect(bubbleNode,
+        static_cast<int32_t>(SubwindowType::TYPE_POPUP));
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "popup currentId: %{public}d, displayAvailableRect: %{public}s",
+        containerId, availableRect.ToString().c_str());
+    if (showInSubWindow) {
+        CHECK_EQUAL_VOID(container->IsSceneBoardWindow(), true);
+        marginTop_ = std::max(marginTop_, static_cast<float>(availableRect.Top()));
+        marginBottom_ = std::max(marginBottom_, static_cast<float>(wrapperSize_.Height()
+            - availableRect.Top() - availableRect.Height()));
+    } else {
+        auto displayWindowRect = pipelineContext->GetDisplayWindowRectInfo();
+        auto wrapperOffset = layoutWrapper->GetParentGlobalOffsetWithSafeArea();
+        auto realWrapperRect = Rect(wrapperOffset.GetX() + displayWindowRect.Left(),
+                                    wrapperOffset.GetY() + displayWindowRect.Top(),
+                                    wrapperSize_.Width(), wrapperSize_.Height());
+        auto commonRect = availableRect.IntersectRect(realWrapperRect);
+        wrapperSize_.SetHeight(commonRect.Top() + commonRect.Height() - realWrapperRect.Top());
+        wrapperSize_.SetWidth(commonRect.Left() + commonRect.Width() - realWrapperRect.Left());
+        marginTop_ = std::max(marginTop_, static_cast<float>(commonRect.Top() -
+            realWrapperRect.Top()));
+        marginStart_ = std::max(marginStart_, static_cast<float>(commonRect.Left() -
+            realWrapperRect.Left() + marginStart_));
+    }
+}
+
 void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -266,6 +307,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     InitProps(bubbleProp, showInSubWindow, layoutWrapper);
     auto bubbleNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(bubbleNode);
+    FitAvaliableRect(layoutWrapper, showInSubWindow);
     const auto& layoutConstraint = bubbleLayoutProperty->GetLayoutConstraint();
     if (!layoutConstraint) {
         LOGE("fail to measure bubble due to layoutConstraint is nullptr");

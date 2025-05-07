@@ -193,6 +193,7 @@ public:
         return dismissDialogId_;
     }
 
+    void RemoveDialogFromMapForcefully(const RefPtr<FrameNode>& node);
     void ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
     void HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch = false,
         const HideMenuType& reason = HideMenuType::NORMAL);
@@ -215,7 +216,7 @@ public:
     void ShowToast(const NG::ToastInfo& toastInfo, const std::function<void(int32_t)>& callback);
     void CloseToast(int32_t toastId, const std::function<void(int32_t)>& callback);
 
-    void FireAutoSave(const RefPtr<FrameNode>& ContainerNode);
+    void FireAutoSave(const RefPtr<FrameNode>& containerNode);
 
     std::unordered_map<int32_t, RefPtr<FrameNode>> GetDialogMap()
     {
@@ -283,6 +284,8 @@ public:
      */
     bool RemoveOverlay(bool isBackPressed, bool isPageRouter = false);
     bool RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed, bool isPageRouter = false);
+    bool RemoveDialogWithContent(
+        const RefPtr<FrameNode>& overlay, const DialogProperties& props, bool isBackPressed, bool isPageRouter = false);
     bool RemoveBubble(const RefPtr<FrameNode>& overlay);
     bool RemoveMenu(const RefPtr<FrameNode>& overlay);
     bool RemoveDragPreview(const RefPtr<FrameNode>& overlay);
@@ -520,7 +523,7 @@ public:
         std::function<void(const int32_t, const int32_t)> cleanViewContextMapCallback,
         const RefPtr<FrameNode>& targetNode);
     void UpdateBindSheetByUIContext(const RefPtr<NG::FrameNode>& sheetContentNode,
-        NG::SheetStyle& sheetStyle, int32_t targetId, bool isPartialUpdate);
+        const NG::SheetStyle& sheetStyle, int32_t targetId, bool isPartialUpdate);
     void CloseBindSheetByUIContext(const RefPtr<NG::FrameNode>& sheetContentNode, int32_t targetId);
     void SetDismissTarget(const DismissTarget& dismissTarget)
     {
@@ -604,11 +607,11 @@ public:
 
     void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true);
 
-    void ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
+    void ComputeSheetOffset(const NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
 
-    void ComputeSingleGearSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
+    void ComputeSingleGearSheetOffset(const NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
 
-    void ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
+    void ComputeDetentsSheetOffset(const NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
 
     void CheckDeviceInLandscape(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode, float& sheetTopSafeArea);
 
@@ -734,7 +737,7 @@ public:
     static SafeAreaInsets GetSafeAreaInsets(const RefPtr<FrameNode>& frameNode, bool useCurrentWindow = false);
     RefPtr<FrameNode> GetLastChildNotRemoving(const RefPtr<UINode>& rootNode);
     bool IsCurrentNodeProcessRemoveOverlay(const RefPtr<FrameNode>& currentNode, bool skipModal);
-    static Rect GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode);
+    static Rect GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode, int32_t type);
     void SkipMenuShow(int32_t targetId);
     void ResumeMenuShow(int32_t targetId);
     bool CheckSkipMenuShow(int32_t targetId);
@@ -762,8 +765,9 @@ private:
         const RefPtr<FrameNode>& sheetPageNode, const RefPtr<UINode>& sheetContentNode,
         const RefPtr<FrameNode>& targetNode, bool isStartByUIContext);
     bool CheckTargetIdIsValid(int32_t targetId);
-    void UpdateSheetRender(const RefPtr<FrameNode>& sheetPageNode, NG::SheetStyle& sheetStyle, bool isPartialUpdate);
-    void UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& sheetStyle,
+    void UpdateSheetRender(
+        const RefPtr<FrameNode>& sheetPageNode, const NG::SheetStyle& sheetStyle, bool isPartialUpdate);
+    void UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const NG::SheetStyle& sheetStyle,
         int32_t targetId, bool isStartByUIContext = false, bool isPartialUpdate = false,
         std::function<void()>&& onAppear = nullptr, std::function<void()>&& onDisappear = nullptr,
         std::function<void()>&& shouldDismiss = nullptr, std::function<void(const int32_t)>&& onWillDismiss = nullptr,
@@ -775,7 +779,8 @@ private:
         std::function<void()>&& sheetSpringBack = nullptr);
     SheetStyle UpdateSheetStyle(
         const RefPtr<FrameNode>& sheetNode, const SheetStyle& sheetStyle, bool isPartialUpdate);
-    void UpdateSheetProperty(const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& currentStyle, bool isPartialUpdate);
+    void UpdateSheetProperty(
+        const RefPtr<FrameNode>& sheetNode, const NG::SheetStyle& currentStyle, bool isPartialUpdate);
     void UpdateSheetMaskBackgroundColor(const RefPtr<FrameNode>& maskNode,
         const RefPtr<RenderContext>& maskRenderContext, const SheetStyle& sheetStyle);
     void UpdateSheetMask(const RefPtr<FrameNode>& maskNode,
@@ -823,6 +828,7 @@ private:
     void OpenDialogAnimationInner(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps);
     void OpenDialogAnimation(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps);
     void CloseDialogAnimation(const RefPtr<FrameNode>& node);
+    void UpdateChildVisible(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& childNode);
     void SetTransitionCallbacks(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& contentNode,
         const RefPtr<FrameNode>& maskNode, const DialogProperties& dialogProps);
     void SetDialogTransitionEffect(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps);
@@ -857,12 +863,10 @@ private:
     RefPtr<FrameNode> GetPrevNodeWithOrder(std::optional<double> levelOrder);
     RefPtr<FrameNode> GetBottomOrderFirstNode(std::optional<double> levelOrder);
     RefPtr<FrameNode> GetTopOrderNode();
-    int32_t GetTopOrderNodeId();
     bool GetNodeFocusable(const RefPtr<FrameNode>& node);
     RefPtr<FrameNode> GetTopFocusableNode();
-    int32_t GetTopFocusableNodeId();
-    void FocusNextOrderNode(int32_t topNodeId);
-    void SendAccessibilityEventToNextOrderNode(int32_t topNodeId);
+    void FocusNextOrderNode(const RefPtr<FrameNode>& topNode);
+    void SendAccessibilityEventToNextOrderNode(const RefPtr<FrameNode>& topNode);
     bool IsTopOrder(std::optional<double> levelOrder);
     void RemoveDialogFromMap(const RefPtr<FrameNode>& node);
     void RemoveMaskFromMap(const RefPtr<FrameNode>& dialogNode);

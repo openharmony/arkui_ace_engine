@@ -385,34 +385,6 @@ void SliderPattern::InitAccessibilityVirtualNodeTask()
                 CHECK_NULL_VOID(sliderPattern);
                 sliderPattern->isInitAccessibilityVirtualNode_ = sliderPattern->InitAccessibilityVirtualNode();
             });
-        auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
-        CHECK_NULL_VOID(sliderPaintProperty);
-        float step = sliderPaintProperty->GetStep().value_or(1.0f);
-        float min = sliderPaintProperty->GetMin().value_or(SLIDER_MIN);
-        float max = sliderPaintProperty->GetMax().value_or(SLIDER_MAX);
-        float initValue = sliderPaintProperty->GetValue().value_or(min);
-
-        if (NearZero(step)) {
-            return;
-        }
-    
-        auto validSlideRange = sliderPaintProperty->GetValidSlideRange();
-        if (validSlideRange.has_value() && validSlideRange.value()->HasValidValues()) {
-            value_ =
-                std::clamp(initValue, validSlideRange.value()->GetFromValue(), validSlideRange.value()->GetToValue());
-            if (NearEqual(value_, validSlideRange.value()->GetToValue())) {
-                sliderPaintProperty->UpdateValue(value_);
-                return;
-            }
-        } else {
-            value_ = std::clamp(initValue, min, max);
-            if (NearEqual(value_, max)) {
-                sliderPaintProperty->UpdateValue(value_);
-                return;
-            }
-        }
-        value_ = std::round((value_ - min) / step) * step + min;
-        sliderPaintProperty->UpdateValue(value_);
     }
 }
 
@@ -644,6 +616,9 @@ void SliderPattern::SetStepPointsAccessibilityVirtualNodeEvent(
             CHECK_NULL_VOID(pattern);
             pattern->FireChangeEvent(SliderChangeMode::Begin);
             auto offsetStep = index - pattern->GetCurrentStepIndex();
+            if (offsetStep > 0) {
+                offsetStep += 1;
+            }
             pattern->MoveStep(offsetStep);
             pattern->FireChangeEvent(SliderChangeMode::End);
             if (pattern->showTips_) {
@@ -793,10 +768,6 @@ bool SliderPattern::UpdateParameters()
                                         : theme->GetInsetHotBlockShadowWidth();
 
     auto direction = sliderLayoutProperty->GetDirectionValue(Axis::HORIZONTAL);
-    if (direction_ != direction && isAccessibilityOn_) {
-        ClearSliderVirtualNode();
-        direction_ = direction;
-    }
     auto blockLength = direction == Axis::HORIZONTAL ? blockSize_.Width() : blockSize_.Height();
 
     hotBlockShadowWidth_ = static_cast<float>(hotBlockShadowWidth.ConvertToPx());
@@ -1332,7 +1303,13 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         return;
     }
     if (direction_ == GetDirection() && panEvent_) return;
-    direction_ = GetDirection();
+    auto direction = GetDirection();
+    if (direction_ != direction && isInitAccessibilityVirtualNode_) {
+        ClearSliderVirtualNode();
+        InitAccessibilityVirtualNodeTask();
+        InitAccessibilityHoverEvent();
+    }
+    direction_ = direction;
 
     if (panEvent_) {
         gestureHub->RemovePanEvent(panEvent_);

@@ -1126,4 +1126,142 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest046, TestSize.Level1)
     ASSERT_NE(renderFit, std::nullopt);
     EXPECT_EQ(renderFit.value(), RenderFit::CENTER);
 }
+
+/**
+ * @tc.name: UpdateTransformTranslate001
+ * @tc.desc: Test UpdateTransformTranslate Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, UpdateTransformTranslate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create node and check basic infomation.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    auto rsNode = rosenRenderContext->rsNode_;
+    ASSERT_NE(rsNode, nullptr);
+    /**
+     * @tc.steps: step2. Set a TranslateOptions value whose unit is px.
+     * @tc.expected: step2. Translate value in RSNode is correct.
+     */
+    constexpr float translateX = 30.0f;
+    constexpr float translateY = -10.0f;
+    constexpr float translateZ = 3.0f;
+    Rosen::Vector2f translateRS;
+    float translateZRS = 0.0f;
+    TranslateOptions options { Dimension(translateX), Dimension(translateY), Dimension(translateZ) };
+    rosenRenderContext->UpdateTransformTranslate(options);
+    translateRS = rsNode->GetStagingProperties().GetTranslate();
+    translateZRS = rsNode->GetStagingProperties().GetTranslateZ();
+    EXPECT_TRUE(NearEqual(translateRS[0], translateX));
+    EXPECT_TRUE(NearEqual(translateRS[1], translateY));
+    EXPECT_TRUE(NearEqual(translateRS[2], translateZ));
+    /**
+     * @tc.steps: step3. Set a TranslateOptions value whose unit is percent. The node need have size.
+     * @tc.expected: step3. Translate value in RSNode is correct.
+     */
+    constexpr float width = 200.0f;
+    constexpr float height = 100.0f;
+    constexpr float translateXPercent1 = 0.1f;
+    constexpr float translateYPercent1 = 0.0f;
+    RectF frame { 0, 0, width, height };
+    rosenRenderContext->UpdatePaintRect(frame);
+    rosenRenderContext->SyncGeometryProperties(frame);
+    TranslateOptions options1 { Dimension(translateXPercent1, DimensionUnit::PERCENT),
+        Dimension(translateYPercent1, DimensionUnit::PERCENT), Dimension(translateZ) };
+    rosenRenderContext->UpdateTransformTranslate(options1);
+    translateRS = rsNode->GetStagingProperties().GetTranslate();
+    EXPECT_TRUE(NearEqual(translateRS[0], translateXPercent1 * width));
+    EXPECT_TRUE(NearEqual(translateRS[1], translateYPercent1 * height));
+}
+
+/**
+ * @tc.name: UpdateTransformRotate001
+ * @tc.desc: Test UpdateTransformRotate Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, UpdateTransformRotate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create node and check basic infomation.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    auto rsNode = rosenRenderContext->rsNode_;
+    ASSERT_NE(rsNode, nullptr);
+    constexpr float angle = 90.0f;
+    constexpr float angleZero = 0.0f;
+    /**
+     * @tc.steps: step2. Set rotationX.
+     * @tc.expected: step2. RotationX value in RSNode is correct.
+     */
+    Vector5F vecX { 1.0f, 0.0f, 0.0f, angle, 0.0f };
+    rosenRenderContext->UpdateTransformRotate(vecX);
+    // ignore the sign
+    EXPECT_TRUE(NearEqual(std::abs(rsNode->GetStagingProperties().GetRotationX()), angle));
+    EXPECT_TRUE(NearEqual(rsNode->GetStagingProperties().GetRotationY(), angleZero));
+    EXPECT_TRUE(NearEqual(rsNode->GetStagingProperties().GetRotation(), angleZero));
+    /**
+     * @tc.steps: step3. Set rotationY.
+     * @tc.expected: step3. RotationY value in RSNode is correct.
+     */
+    Vector5F vecY { 0.0f, 1.0f, 0.0f, angle, 0.0f };
+    rosenRenderContext->UpdateTransformRotate(vecY);
+    EXPECT_TRUE(NearEqual(rsNode->GetStagingProperties().GetRotationX(), angleZero));
+    EXPECT_TRUE(NearEqual(std::abs(rsNode->GetStagingProperties().GetRotationY()), angle));
+    EXPECT_TRUE(NearEqual(rsNode->GetStagingProperties().GetRotation(), angleZero));
+    /**
+     * @tc.steps: step4. Set rotationZ.
+     * @tc.expected: step4. RotationZ value in RSNode is correct.
+     */
+    Vector5F vecZ { 0.0f, 0.0f, 1.0f, angle, 0.0f };
+    rosenRenderContext->UpdateTransformRotate(vecZ);
+    EXPECT_TRUE(NearEqual(rsNode->GetStagingProperties().GetRotationX(), angleZero));
+    EXPECT_TRUE(NearEqual(rsNode->GetStagingProperties().GetRotationY(), angleZero));
+    EXPECT_TRUE(NearEqual(std::abs(rsNode->GetStagingProperties().GetRotation()), angle));
+}
+
+/**
+ * @tc.name: UpdateTransformScale001
+ * @tc.desc: Test UpdateTransformScale Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, UpdateTransformScale001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create node and check basic infomation.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    auto rsNode = rosenRenderContext->rsNode_;
+    ASSERT_NE(rsNode, nullptr);
+    constexpr float scale1 = 2.0f;
+    constexpr float scale2 = -2.0f;
+    Rosen::Vector2f rsScale;
+    /**
+     * @tc.steps: step2. Set positive scale.
+     * @tc.expected: step2. Scale value in RSNode is correct.
+     */
+    VectorF vecScale1 { scale1, scale1 };
+    rosenRenderContext->UpdateTransformScale(vecScale1);
+    rsScale = rsNode->GetStagingProperties().GetScale();
+    EXPECT_TRUE(NearEqual(rsScale[0], scale1));
+    EXPECT_TRUE(NearEqual(rsScale[1], scale1));
+    /**
+     * @tc.steps: step3. Set negative scale.
+     * @tc.expected: step3. Scale value in RSNode is correct.
+     */
+    VectorF vecScale2 { scale2, scale2 };
+    rosenRenderContext->UpdateTransformScale(vecScale2);
+    rsScale = rsNode->GetStagingProperties().GetScale();
+    EXPECT_TRUE(NearEqual(rsScale[0], scale2));
+    EXPECT_TRUE(NearEqual(rsScale[1], scale2));
+}
 } // namespace OHOS::Ace::NG

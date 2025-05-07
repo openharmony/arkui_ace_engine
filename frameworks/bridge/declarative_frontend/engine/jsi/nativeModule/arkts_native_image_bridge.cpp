@@ -122,9 +122,9 @@ void PushDimensionsToVector(
                 value.value = optDimension.value().Value();
             }
         }
-        results.push_back(ArkUIStringAndFloat { static_cast<double>(hasValue), nullptr });
+        results.push_back(ArkUIStringAndFloat { static_cast<ArkUI_Float32>(hasValue), nullptr });
         results.push_back(value);
-        results.push_back(ArkUIStringAndFloat { static_cast<double>(unit), nullptr });
+        results.push_back(ArkUIStringAndFloat { static_cast<ArkUI_Float32>(unit), nullptr });
     }
 }
 

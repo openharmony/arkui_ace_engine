@@ -1764,7 +1764,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg184, TestSize.Level1)
      * @tc.steps2: set focus type to SCOPE and call FlushFocus function.
      * @tc.expected: The dirtyFocusNode_ is changed to nullptr.
      */
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    auto eventHub = frameNode_->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto focusHub = eventHub->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
