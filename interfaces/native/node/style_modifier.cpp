@@ -6296,6 +6296,45 @@ const ArkUI_AttributeItem* GetScrollBackToTop(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetScrollBarMargin(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    double marginStart = 0.0;
+    if (item->size > NUM_0) {
+        if (GreatOrEqual(item->value[0].f32, 0.0f)) {
+            marginStart = item->value[0].f32;
+        }
+    }
+    double marginEnd = 0.0;
+    if (item->size > NUM_1) {
+        if (GreatOrEqual(item->value[1].f32, 0.0f)) {
+            marginEnd = item->value[1].f32;
+        }
+    }
+    GetFullImpl()->getNodeModifiers()->getScrollableModifier()->setScrollBarMargin(
+        node->uiNodeHandle, marginStart, marginEnd);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetScrollBarMargin(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    if (!node || !fullImpl) {
+        return;
+    }
+    GetFullImpl()->getNodeModifiers()->getScrollableModifier()->resetScrollBarMargin(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetScrollBarMargin(ArkUI_NodeHandle node)
+{
+    ArkUIInt32orFloat32 values[NUM_2];
+    GetFullImpl()->getNodeModifiers()->getScrollableModifier()->getScrollBarMargin(node->uiNodeHandle, &values);
+    int index = 0;
+    g_numberValues[index++].f32 = values[NUM_0].i32;
+    g_numberValues[index++].f32 = values[NUM_1].f32;
+    g_attributeItem.size = index;
+    return &g_attributeItem;
+}
+
 const ArkUI_AttributeItem* GetListDirection(ArkUI_NodeHandle node)
 {
     auto value = GetFullImpl()->getNodeModifiers()->getListModifier()->getListDirection(node->uiNodeHandle);
@@ -16265,7 +16304,7 @@ int32_t SetScrollAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetScrollScrollable, SetScrollEdgeEffect, SetScrollEnableScrollInteraction, SetScrollFriction,
         SetScrollScrollSnap, SetScrollNestedScroll, SetScrollTo, SetScrollEdge, SetScrollEnablePaging, SetScrollPage,
         SetScrollBy, SetScrollFling, SetScrollFadingEdge, nullptr, SetContentStartOffset, SetContentEndOffset,
-        SetFlingSpeedLimit, SetScrollContentClip, SetScrollBackToTop };
+        SetFlingSpeedLimit, SetScrollContentClip, SetScrollBackToTop, SetScrollBarMargin };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "scroll node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -16279,7 +16318,7 @@ const ArkUI_AttributeItem* GetScrollAttribute(ArkUI_NodeHandle node, int32_t sub
         GetScrollScrollable, GetScrollEdgeEffect, GetScrollEnableScrollInteraction, GetScrollFriction,
         GetScrollScrollSnap, GetScrollNestedScroll, GetScrollOffset, GetScrollEdge, GetScrollEnablePaging, nullptr,
         nullptr, nullptr, GetScrollFadingEdge, GetScrollContentSize, GetContentStartOffset, GetContentEndOffset,
-        GetFlingSpeedLimit, GetScrollContentClip, GetScrollBackToTop };
+        GetFlingSpeedLimit, GetScrollContentClip, GetScrollBackToTop, GetScrollBarMargin };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "slider node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -16294,7 +16333,7 @@ void ResetScrollAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetScrollScrollable, ResetScrollEdgeEffect, ResetScrollEnableScrollInteraction, ResetScrollFriction,
         ResetScrollScrollSnap, ResetScrollNestedScroll, ResetScrollTo, ResetScrollEdge, ResetScrollEnablePaging,
         nullptr, nullptr, nullptr, ResetScrollFadingEdge, nullptr, ResetContentStartOffset, ResetContentEndOffset,
-        ResetFlingSpeedLimit, ResetScrollContentClip, ResetScrollBackToTop };
+        ResetFlingSpeedLimit, ResetScrollContentClip, ResetScrollBackToTop, ResetScrollBarMargin };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

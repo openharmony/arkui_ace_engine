@@ -20,6 +20,9 @@
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t CALL_ARG_0 = 0;
+constexpr int32_t CALL_ARG_1 = 1;
+constexpr int32_t CALL_ARG_2 = 2;
 ArkUINativeModuleValue ScrollableBridge::SetContentClip(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -496,6 +499,57 @@ ArkUINativeModuleValue ScrollableBridge::ResetBackToTop(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getScrollableModifier()->resetBackToTop(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ScrollableBridge::SetScrollBarMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> marginStartArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    Local<JSValueRef> marginEndArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_2);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    auto scrollableModifier = nodeModifiers->getScrollableModifier();
+    CHECK_NULL_RETURN(scrollableModifier, panda::JSValueRef::Undefined(vm));
+    CalcDimension marginStart;
+    CalcDimension marginEnd;
+    if (marginStartArg->IsObject(vm)) {
+        if (ArkTSUtils::ParseJsDimensionVpNG(vm, marginStartArg, marginStart)) {
+            if (LessNotEqual(marginStart.Value(), 0.0)) {
+                marginStart.SetValue(0.0);
+            }
+        }
+    }
+    if (marginEndArg->IsObject(vm)) {
+        if (ArkTSUtils::ParseJsDimensionVpNG(vm, marginEndArg, marginEnd)) {
+            if (LessNotEqual(marginEnd.Value(), 0.0)) {
+                marginEnd.SetValue(0.0);
+            }
+        }
+    }
+
+    GetArkUINodeModifiers()->getScrollableModifier()->setScrollBarMargin(
+        nativeNode, marginStart.Value(), marginEnd.Value());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ScrollableBridge::ResetScrollBarMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    auto scrollableModifier = nodeModifiers->getScrollableModifier();
+    CHECK_NULL_RETURN(scrollableModifier, panda::JSValueRef::Undefined(vm));
+    scrollableModifier->resetScrollBarMargin(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG
