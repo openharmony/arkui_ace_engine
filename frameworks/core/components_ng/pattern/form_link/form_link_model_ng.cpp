@@ -22,8 +22,7 @@ namespace OHOS::Ace::NG {
 void FormLinkModelNG::Create(const std::string& action)
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    if (stack == nullptr)
-    {
+    if (stack == nullptr) {
         LOGE("stack is nullptr");
         return;
     }
@@ -39,8 +38,7 @@ void FormLinkModelNG::Create(const std::string& action)
 RefPtr<FrameNode> FormLinkModelNG::StsCreateFrameNode()
 {
     auto* stack = ViewStackProcessor::GetInstance();
-    if (stack == nullptr)
-    {
+    if (stack == nullptr) {
         LOGE("stack is nullptr");
         return;
     }
