@@ -799,6 +799,20 @@ void PipelineContext::InspectDrew()
             eventHub->FireDrawCompletedNDKCallback(this);
         }
     }
+    if (!needRenderForDrawChildrenNodes_.empty()) {
+        std::unique_lock lock(needRenderForDrawChildrenNodesMutex_);
+        auto needRenderNodes = std::move(needRenderForDrawChildrenNodes_);
+        for (auto&& nodeWeak : needRenderNodes) {
+            auto node = nodeWeak.Upgrade();
+            if (node == nullptr) {
+                continue;
+            }
+            if (node->GetInspectorId().has_value()) {
+                OnDrawChildrenCompleted(node->GetInspectorId().value());
+            }
+        }
+        needRenderForDrawChildrenNodes_.clear();
+    }
 }
 
 void PipelineContext::ProcessDelayTasks()
@@ -995,6 +1009,13 @@ void PipelineContext::SetNeedRenderNode(const WeakPtr<FrameNode>& node)
 {
     CHECK_RUN_ON(UI);
     needRenderNode_.insert(node);
+}
+
+void PipelineContext::SetNeedRenderForDrawChildrenNode(const WeakPtr<NG::UINode>& node)
+{
+    CHECK_NULL_VOID(node.Upgrade());
+    std::unique_lock lock(needRenderForDrawChildrenNodesMutex_);
+    needRenderForDrawChildrenNodes_.emplace(node);
 }
 
 void PipelineContext::FlushFocus()
@@ -1514,6 +1535,15 @@ void PipelineContext::OnDrawCompleted(const std::string& componentId)
     auto frontend = weakFrontend_.Upgrade();
     if (frontend) {
         frontend->OnDrawCompleted(componentId);
+    }
+}
+
+void PipelineContext::OnDrawChildrenCompleted(const std::string& componentId)
+{
+    CHECK_RUN_ON(UI);
+    auto frontend = weakFrontend_.Upgrade();
+    if (frontend) {
+        frontend->OnDrawChildrenCompleted(componentId);
     }
 }
 

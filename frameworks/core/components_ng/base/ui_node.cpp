@@ -532,6 +532,24 @@ void UINode::DoAddChild(
         }
     }
 
+    if (GetInspectorId().has_value()) {
+        auto pipeline = GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        auto front = pipeline->GetFrontend();
+        if (front) {
+            auto hasDrawChildCallback = front->IsDrawChildrenCallbackFuncExist(GetInspectorId().value_or(""));
+            if (hasDrawChildCallback) {
+                child->SetObserverParentForDrawChildren(Claim(this));
+            }
+        }
+    }
+    if (IsObservedByDrawChildren()) {
+        auto parentForObserverDrawChildren = GetObserverParentForDrawChildren();
+        if (parentForObserverDrawChildren) {
+            child->SetObserverParentForDrawChildren(parentForObserverDrawChildren);
+        }
+    }
+
     child->SetParent(Claim(this), false);
     auto themeScopeId = GetThemeScopeId();
     if (child->IsAllowUseParentTheme() && child->GetThemeScopeId() != themeScopeId) {
@@ -2096,5 +2114,15 @@ bool UINode::LessThanAPITargetVersion(PlatformVersion version) const
         return apiVersion_ < static_cast<int32_t>(version);
     }
     return context_->LessThanAPITargetVersion(version);
+}
+
+void UINode::SetObserverParentForDrawChildren(const RefPtr<UINode>& parent)
+{
+    CHECK_NULL_VOID(parent);
+    isObservedByDrawChildren_ = true;
+    drawChildrenParent_ = parent;
+    for (const auto& child : GetChildren()) {
+        child->SetObserverParentForDrawChildren(parent);
+    }
 }
 } // namespace OHOS::Ace::NG

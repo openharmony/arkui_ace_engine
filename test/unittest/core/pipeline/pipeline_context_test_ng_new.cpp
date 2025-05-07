@@ -2350,5 +2350,97 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg206, TestSize.Level1)
     EXPECT_EQ(res, "pageFour");
 }
 
+/**
+ * @tc.name: PipelineContextTestNg234
+ * @tc.desc: Test the function SetNeedRenderForDrawChildrenNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg234, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    ASSERT_TRUE(context_->needRenderForDrawChildrenNodes_.empty());
+    /**
+     * @tc.steps2: Call the function FlushAnimation with unempty scheduleTasks_.
+     * @tc.expected: The nanoTimestamp of scheduleTask is equal to NANO_TIME_STAMP.
+     */
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+    auto frameNode = FrameNode::CreateFrameNode(TEST_TAG, 3, pattern);
+    context_->SetNeedRenderForDrawChildrenNode(WeakPtr<FrameNode>(frameNode));
+    EXPECT_EQ(context_->needRenderForDrawChildrenNodes_.count(WeakPtr<FrameNode>(frameNode)), 1);
+
+    /**
+     * @tc.steps3: Call the function FlushPipelineImmediately.
+     * @tc.expected: The nanoTimestamp of scheduleTask is equal to NANO_TIME_STAMP.
+     */
+    context_->FlushPipelineImmediately();
+    EXPECT_TRUE(context_->isRebuildFinished_);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg235
+ * @tc.desc: Test the function SetNeedRenderForDrawChildrenNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg235, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    auto needRenderNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto needRenderNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, needRenderNodeId, nullptr);
+    context_->SetNeedRenderForDrawChildrenNode(WeakPtr<FrameNode>(needRenderNode));
+    EXPECT_EQ(context_->needRenderForDrawChildrenNodes_.count(WeakPtr<FrameNode>(needRenderNode)), 1);
+    context_->InspectDrew();
+    EXPECT_EQ(context_->needRenderForDrawChildrenNodes_.count(WeakPtr<FrameNode>(needRenderNode)), 0);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg236
+ * @tc.desc: Test the function OnDrawChildrenCompleted.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg236, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters and call OnDrawChildrenCompleted function.
+     * @tc.expected: weakFrontend_.Upgrade() is null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->OnDrawChildrenCompleted(TEST_TAG);
+    EXPECT_EQ(context_->weakFrontend_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg237
+ * @tc.desc: Test the function OnDrawChildrenCompleted.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg237, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: frontend-ptr is non-null.
+     */
+
+    ContainerScope scope(DEFAULT_INSTANCE_ID);
+    ASSERT_NE(context_, nullptr);
+    auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    context_->weakFrontend_ = frontend;
+
+    /**
+     * @tc.steps4: test the function OnDrawChildrenCompleted by TEST_TAG.
+     * @tc.expected: frontend componentId_ is TEST_TAG
+     */
+    context_->OnDrawChildrenCompleted(TEST_TAG);
+    EXPECT_EQ(frontend->GetComponentId(), TEST_TAG);
+    context_->weakFrontend_.Reset();
+}
 } // namespace NG
 } // namespace OHOS::Ace
