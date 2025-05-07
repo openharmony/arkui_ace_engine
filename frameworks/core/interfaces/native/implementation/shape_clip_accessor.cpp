@@ -37,35 +37,37 @@ void SetRectShapeImpl(Ark_ShapeClip peer,
                       const Ark_Rect* rect)
 {
     if (peer && rect) {
-        peer->SetRectShape(Converter::Convert<RefPtr<Ace::ShapeRect>>(*rect));
+        peer->shape = Converter::Convert<RefPtr<Ace::ShapeRect>>(*rect);
     }
 }
 void SetRoundRectShapeImpl(Ark_ShapeClip peer,
                            const Ark_RoundRect* roundRect)
 {
     if (peer && roundRect) {
-        peer->SetRoundRectShape(Converter::Convert<RefPtr<Ace::ShapeRect>>(*roundRect));
+        peer->shape = Converter::Convert<RefPtr<Ace::ShapeRect>>(*roundRect);
     }
 }
 void SetCircleShapeImpl(Ark_ShapeClip peer,
                         const Ark_Circle* circle)
 {
     if (peer && circle) {
-        peer->SetCircleShape(Converter::Convert<RefPtr<Ace::Circle>>(*circle));
+        peer->shape = Converter::Convert<RefPtr<Ace::Circle>>(*circle);
     }
 }
 void SetOvalShapeImpl(Ark_ShapeClip peer,
                       const Ark_Rect* oval)
 {
     if (peer && oval) {
-        peer->SetOvalShape(Converter::Convert<RefPtr<Ace::ShapeRect>>(*oval));
+        peer->shape = Converter::Convert<RefPtr<Ace::Ellipse>>(*oval);
     }
 }
 void SetCommandPathImpl(Ark_ShapeClip peer,
                         const Ark_CommandPath* path)
 {
     if (peer && path) {
-        peer->SetCommandPath(Converter::Convert<std::string>(*path));
+        auto pathShape = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::Path>();
+        pathShape->SetValue(Converter::Convert<std::string>(*path));
+        peer->shape = pathShape;
     }
 }
 } // ShapeClipAccessor

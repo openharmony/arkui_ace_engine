@@ -827,7 +827,7 @@ HWTEST_F(RenderNodeAccessorTest, DISABLED_GetShapeClipTest, TestSize.Level1)
     // default value
     ASSERT_NE(accessor_->getShapeClip, nullptr);
     auto checkValue = accessor_->getShapeClip(peer_);
-    EXPECT_NE(checkValue->rect, nullptr);
+    EXPECT_NE(checkValue->shape, nullptr);
 
     // valid value
     auto basicShape = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::BasicShape>();
@@ -835,7 +835,7 @@ HWTEST_F(RenderNodeAccessorTest, DISABLED_GetShapeClipTest, TestSize.Level1)
     ASSERT_NE(fnode, nullptr);
     ViewAbstract::SetClipShape(fnode, basicShape);
     checkValue = accessor_->getShapeClip(peer_);
-    EXPECT_EQ(checkValue->rect, basicShape);
+    EXPECT_EQ(checkValue->shape, basicShape);
 
     // invalid value
     checkValue = accessor_->getShapeClip(nullptr);
@@ -876,7 +876,7 @@ HWTEST_F(RenderNodeAccessorTest, DISABLED_GetShapeMaskTest, TestSize.Level1)
     ASSERT_NE(accessor_->getShapeMask, nullptr);
     // default value
     auto checkValue = accessor_->getShapeMask(peer_);
-    EXPECT_EQ(checkValue->rect, nullptr);
+    EXPECT_EQ(checkValue->shape, nullptr);
 
     // valid value
     auto basicShape = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::BasicShape>();
@@ -884,7 +884,7 @@ HWTEST_F(RenderNodeAccessorTest, DISABLED_GetShapeMaskTest, TestSize.Level1)
     ASSERT_NE(fnode, nullptr);
     ViewAbstract::SetMask(fnode, basicShape);
     checkValue = accessor_->getShapeMask(peer_);
-    EXPECT_EQ(checkValue->rect, basicShape);
+    EXPECT_EQ(checkValue->shape, basicShape);
 
     // invalid value
     checkValue = accessor_->getShapeMask(nullptr);
