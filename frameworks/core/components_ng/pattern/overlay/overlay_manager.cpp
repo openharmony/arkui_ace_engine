@@ -5492,17 +5492,11 @@ void OverlayManager::PlaySheetTransition(
     CHECK_NULL_VOID(context);
     context->UpdateRenderGroup(true, false, true);
     TAG_LOGD(AceLogTag::ACE_SHEET, "UpdateRenderGroup start");
-    auto sheetParent = DynamicCast<FrameNode>(sheetNode->GetParent());
-    CHECK_NULL_VOID(sheetParent);
     if (isTransitionIn) {
         sheetPattern->SetCurrentHeight(sheetHeight_);
         float offset = sheetPattern->ComputeTransitionOffset(sheetHeight_);
         if (isFirstTransition) {
-            auto levelOrder = GetLevelOrder(sheetParent);
-            if (IsTopOrder(levelOrder)) {
-                sheetNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN,
-                    WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-            }
+            sheetPattern->SendMessagesBeforeFirstTransitionIn(true);
             sheetPattern->SheetTransitionAction(offset, true, isTransitionIn);
             auto pipelineContext = sheetNode->GetContextWithCheck();
             CHECK_NULL_VOID(pipelineContext);
@@ -5526,13 +5520,10 @@ void OverlayManager::PlaySheetTransition(
                 context->UpdateRenderGroup(false, false, true);
                 TAG_LOGD(AceLogTag::ACE_SHEET, "UpdateRenderGroup finished");
                 auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
-                pattern->SetUIFirstSwitch(isFirst, true);
                 if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
                     isFirst) {
                     pattern->OnAppear();
-                    auto pipelineContext = sheetNode->GetContextWithCheck();
-                    CHECK_NULL_VOID(pipelineContext);
-                    pipelineContext->UpdateOcclusionCullingStatus(false, nullptr);
+                    pattern->SendMessagesAfterFirstTransitionIn(true);
                 }
                 pattern->AvoidAiBar();
                 auto overlay = weak.Upgrade();
@@ -5541,7 +5532,6 @@ void OverlayManager::PlaySheetTransition(
                 pattern->FireOnHeightDidChange();
             });
         ACE_SCOPED_TRACE("Sheet start admission");
-        sheetPattern->SetUIFirstSwitch(isFirstTransition, false);
         sheetPattern->UpdateAccessibilityDetents(sheetHeight_);
         sheetPattern->SetBottomStyleHotAreaInSubwindow();
         AnimationUtils::Animate(
@@ -5555,8 +5545,7 @@ void OverlayManager::PlaySheetTransition(
             },
             option.GetOnFinishEvent());
     } else {
-        sheetNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE,
-            WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+        sheetPattern->SendMessagesBeforeTransitionOut();
         option.SetOnFinishEvent(
             [rootWeak = rootNodeWeak_, sheetWK = WeakClaim(RawPtr(sheetNode)), weakOverlayManager = WeakClaim(this)] {
                 auto sheet = sheetWK.Upgrade();
@@ -5572,8 +5561,6 @@ void OverlayManager::PlaySheetTransition(
                 pipelineContext->UpdateOcclusionCullingStatus(false, nullptr);
             });
         float offset = sheetPattern->ComputeTransitionOffset(sheetHeight_);
-        sheetParent->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub()
-            ->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
         AnimationUtils::Animate(
             option,
             [sheetWK = WeakClaim(RawPtr(sheetNode)), offset, isTransitionIn]() {
@@ -5839,8 +5826,8 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
     CHECK_NULL_VOID(sheetNodePattern);
     sheetNodePattern->UpdateIndexByDetentSelection(sheetStyle, true);
     ComputeSheetOffset(sheetStyle, sheetNode);
+    TAG_LOGI(AceLogTag::ACE_SHEET, "bindSheet lifecycle change to onWillAppear state.");
     if (onWillAppear) {
-        TAG_LOGI(AceLogTag::ACE_SHEET, "bindSheet lifecycle change to onWillAppear state.");
         onWillAppear();
     }
     // fire navigation onActive

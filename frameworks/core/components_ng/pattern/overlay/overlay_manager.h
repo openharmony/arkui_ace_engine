@@ -741,6 +741,8 @@ public:
     void SkipMenuShow(int32_t targetId);
     void ResumeMenuShow(int32_t targetId);
     bool CheckSkipMenuShow(int32_t targetId);
+    bool IsTopOrder(std::optional<double> levelOrder);
+    std::optional<double> GetLevelOrder(const RefPtr<FrameNode>& node, std::optional<double> levelOrder = std::nullopt);
 
 private:
     void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
@@ -857,7 +859,6 @@ private:
     bool SheetPageExitProcess(const RefPtr<FrameNode>& topModalNode);
 
     void BeforeShowDialog(const RefPtr<FrameNode>& dialogNode);
-    std::optional<double> GetLevelOrder(const RefPtr<FrameNode>& node, std::optional<double> levelOrder = std::nullopt);
     void PutLevelOrder(const RefPtr<FrameNode>& node, std::optional<double> levelOrder);
     void PopLevelOrder(int32_t nodeId);
     RefPtr<FrameNode> GetPrevNodeWithOrder(std::optional<double> levelOrder);
@@ -867,7 +868,6 @@ private:
     RefPtr<FrameNode> GetTopFocusableNode();
     void FocusNextOrderNode(const RefPtr<FrameNode>& topNode);
     void SendAccessibilityEventToNextOrderNode(const RefPtr<FrameNode>& topNode);
-    bool IsTopOrder(std::optional<double> levelOrder);
     void RemoveDialogFromMap(const RefPtr<FrameNode>& node);
     void RemoveMaskFromMap(const RefPtr<FrameNode>& dialogNode);
     bool DialogInMapHoldingFocus();

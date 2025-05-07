@@ -2888,6 +2888,12 @@ void AceContainer::InitWindowCallback()
     windowManager->SetWindowCallNativeCallback([window = uiWindow_](const std::string& name, const std::string& value) {
         window->OnContainerModalEvent(name, value);
     });
+
+    windowManager->SetWindowUseImplicitAnimationCallBack([window = uiWindow_](bool useImplicit) {
+        TAG_LOGI(AceLogTag::ACE_SHEET, "useImplicit : %{public}d", useImplicit);
+        window->UseImplicitAnimation(useImplicit);
+    });
+
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
         Rect rect;
         CHECK_NULL_RETURN(window, rect);
