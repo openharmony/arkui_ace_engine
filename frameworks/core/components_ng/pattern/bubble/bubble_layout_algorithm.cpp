@@ -667,6 +667,7 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     auto popupTheme = pipeline->GetTheme<PopupTheme>();
     CHECK_NULL_VOID(popupTheme);
     padding_ = isTips_ ? popupTheme->GetTipsPadding() : popupTheme->GetPadding();
+    doubleBorderEnable_ = popupTheme->GetPopupDoubleBorderEnable();
     CHECK_NULL_VOID(layoutProp);
     userSetTargetSpace_ = layoutProp->GetTargetSpace().value_or(Dimension(0.0f));
     borderRadius_ = layoutProp->GetRadius().value_or(popupTheme->GetRadius().GetX());
@@ -1436,6 +1437,10 @@ OffsetF BubbleLayoutAlgorithm::AddOffset(const OffsetF& position)
     auto y = position.GetY();
     x += positionOffset_.GetX();
     y += positionOffset_.GetY();
+    if (doubleBorderEnable_) {
+        x = std::round(x);
+        y = std::round(y);
+    }
     return OffsetF(x, y);
 }
 
@@ -1919,6 +1924,9 @@ std::string BubbleLayoutAlgorithm::ClipBubbleWithPath()
     if (enableArrow_ && showArrow_) {
         GetArrowBuildPlacement(arrowBuildplacement);
         arrowBuildPlacement_ = arrowBuildplacement;
+    }
+    if (doubleBorderEnable_) {
+        arrowOffset = std::round(arrowOffset);
     }
     if ((arrowBuildplacement == Placement::TOP_LEFT) || (arrowBuildplacement == Placement::LEFT_TOP)) {
         path += MoveTo(childOffset_.GetX(), childOffset_.GetY());

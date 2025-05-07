@@ -323,6 +323,7 @@ private:
     float foldCreaseTop_ = 0.0f;
     float foldCreaseBottom_ = 0.0f;
     bool isHalfFoldHover_ = false;
+    bool doubleBorderEnable_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUBBLE_BUBBLE_LAYOUT_ALGORITHM_H
