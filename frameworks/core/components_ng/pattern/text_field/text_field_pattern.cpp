@@ -3656,11 +3656,38 @@ bool TextFieldPattern::IsDisabled()
     return !eventHub->IsEnabled();
 }
 
+Edge TextFieldPattern::GetUnderlinePadding(const RefPtr<TextFieldTheme>& theme,
+    bool processLeftPadding, bool processRightPadding) const
+{
+    auto themePadding = theme->GetUnderlinePadding();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, themePadding);
+    if (!IsUnderlineAndButtonMode() || host->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        return themePadding;
+    }
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, themePadding);
+    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    if (isRTL) {
+        themePadding.SetLeft(theme->GetPadding().Left());
+    } else {
+        themePadding.SetRight(theme->GetPadding().Right());
+    }
+    if (processLeftPadding) {
+        themePadding.SetLeft(theme->GetPadding().Left());
+    }
+    if (processRightPadding) {
+        themePadding.SetRight(theme->GetPadding().Right());
+    }
+    return themePadding;
+}
+
 void TextFieldPattern::ProcessInnerPadding()
 {
     auto textFieldTheme = GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
-    auto themePadding = IsUnderlineMode() ? textFieldTheme->GetUnderlinePadding() : textFieldTheme->GetPadding();
+    auto themePadding = IsUnderlineMode() ? GetUnderlinePadding(textFieldTheme, false, false) :
+        textFieldTheme->GetPadding();
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     PaddingPropertyF utilPadding;
@@ -9125,7 +9152,7 @@ void TextFieldPattern::SetThemeAttr()
     }
 
     if (!paintProperty->HasPaddingByUser()) {
-        auto themePadding = IsUnderlineMode() ? theme->GetUnderlinePadding() : theme->GetPadding();
+        auto themePadding = IsUnderlineMode() ? GetUnderlinePadding(theme, false, false) : theme->GetPadding();
         PaddingProperty padding;
         padding.top = CalcLength(CalcLength(themePadding.Top()).GetDimension());
         padding.bottom = CalcLength(CalcLength(themePadding.Bottom()).GetDimension());
@@ -10320,7 +10347,8 @@ float TextFieldPattern::GetPaddingLeft() const
     }
     auto textFieldTheme = GetTheme();
     CHECK_NULL_RETURN(textFieldTheme, 0.0f);
-    auto themePadding = IsUnderlineMode() ? textFieldTheme->GetUnderlinePadding() : textFieldTheme->GetPadding();
+    auto themePadding = IsUnderlineMode() ? GetUnderlinePadding(textFieldTheme, true, false) :
+        textFieldTheme->GetPadding();
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, themePadding.Left().ConvertToPx());
     const auto& paddingProperty = layoutProperty->GetPaddingProperty();
@@ -10336,7 +10364,8 @@ float TextFieldPattern::GetPaddingRight() const
     }
     auto textFieldTheme = GetTheme();
     CHECK_NULL_RETURN(textFieldTheme, 0.0f);
-    auto themePadding = IsUnderlineMode() ? textFieldTheme->GetUnderlinePadding() : textFieldTheme->GetPadding();
+    auto themePadding = IsUnderlineMode() ? GetUnderlinePadding(textFieldTheme, false, true) :
+        textFieldTheme->GetPadding();
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, themePadding.Right().ConvertToPx());
     const auto& paddingProperty = layoutProperty->GetPaddingProperty();
