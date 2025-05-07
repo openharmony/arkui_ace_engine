@@ -116,6 +116,16 @@ public:
         return pluginNode_;
     }
 
+    void SetPageNode(const WeakPtr<NG::FrameNode>& pageNode)
+    {
+        pageNode_ = pageNode;
+    }
+
+    WeakPtr<NG::FrameNode> GetPageNode() const
+    {
+        return pageNode_;
+    }
+
     void FlushReload() const
     {
         auto pattern = pluginPattern_.Upgrade();
@@ -181,6 +191,7 @@ private:
     onPluginUpdateWithValueParams onUpdateWithValueParams_;
     WeakPtr<NG::PluginPattern> pluginPattern_;
     WeakPtr<NG::FrameNode> pluginNode_;
+    WeakPtr<NG::FrameNode> pageNode_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PLUGIN_SUB_CONTAINER_H

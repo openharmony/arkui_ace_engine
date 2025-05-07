@@ -55,4 +55,8 @@ void PluginPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     auto data = pluginLayoutProperty->GetData();
     json->PutExtAttr("data", data ? data->c_str() : "", filter);
 }
+
+void PluginPattern::FlushReload() const
+{
+}
 }
