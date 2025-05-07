@@ -41,6 +41,8 @@ LongPressRecognizer::LongPressRecognizer(
     if (duration_ <= 0) {
         duration_ = DEFAULT_LONGPRESS_DURATION;
     }
+
+    SetOnAccessibility(GetOnAccessibilityEventFunc());
 }
 
 void LongPressRecognizer::OnAccepted()
@@ -54,12 +56,13 @@ void LongPressRecognizer::OnAccepted()
         ACE_SCOPED_TRACE("UserEvent InputTime:%lld AcceptTime:%lld InputType:LongPressGesture",
             static_cast<long long>(inputTime), static_cast<long long>(acceptTime));
     }
-    
+
     auto node = GetAttachedNode().Upgrade();
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "LongPress accepted, tag = %{public}s",
         node ? node->GetTag().c_str() : "null");
     if (onAccessibilityEventFunc_) {
-        onAccessibilityEventFunc_(AccessibilityEventType::LONG_PRESS);
+        auto onAccessibilityEventFunc = onAccessibilityEventFunc_;
+        onAccessibilityEventFunc(AccessibilityEventType::LONG_PRESS);
     }
     refereeState_ = RefereeState::SUCCEED;
     if (!touchPoints_.empty() && touchPoints_.begin()->second.sourceType == SourceType::MOUSE) {
@@ -566,6 +569,18 @@ RefPtr<DragEventActuator> LongPressRecognizer::GetDragEventActuator()
     auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureEventHub, nullptr);
     return gestureEventHub->GetDragEventActuator();
+}
+
+OnAccessibilityEventFunc LongPressRecognizer::GetOnAccessibilityEventFunc()
+{
+    auto callback = [weak = WeakClaim(this)](AccessibilityEventType eventType) {
+        auto recognizer = weak.Upgrade();
+        CHECK_NULL_VOID(recognizer);
+        auto node = recognizer->GetAttachedNode().Upgrade();
+        CHECK_NULL_VOID(node);
+        node->OnAccessibilityEvent(eventType);
+    };
+    return callback;
 }
 
 } // namespace OHOS::Ace::NG

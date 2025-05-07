@@ -95,7 +95,7 @@ ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, double distance
     if (distanceThreshold_ <= 0) {
         distanceThreshold_ = std::numeric_limits<double>::infinity();
     }
-    
+
     SetOnAccessibility(GetOnAccessibilityEventFunc());
 }
 
