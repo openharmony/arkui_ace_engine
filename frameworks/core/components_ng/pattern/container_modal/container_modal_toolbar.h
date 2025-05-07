@@ -56,10 +56,6 @@ public:
     void UpdateTargetNodesBarMargin(bool reset = false);
     void ExpandStackNodeLayout(bool reset = false);
     void ResetExpandStackNode();
-    void SetIsFloatingMode(bool isFloatingMode)
-    {
-        isFloatingMode_ = isFloatingMode;
-    }
 
 protected:
     void UpdateTitleAfterRemove();
@@ -131,7 +127,6 @@ private:
     bool hasNavOrSideBarNodes_ = false;
     bool hasSetOnchangeCallback_ = false;
 
-    bool isFloatingMode_ = false;
     bool hasSetUpdateSideTitleBgColor_ = false;
     bool isUpdateTargetNode_ = false;
 };

@@ -540,12 +540,11 @@ void ContainerModalPattern::SetWindowContainerColor(const Color& activeColor, co
     isCustomColor_ = true;
     renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
 
-    auto titleMgr = GetTitleManager();
-    CHECK_NULL_VOID(titleMgr);
+    CHECK_NULL_VOID(titleMgr_);
     if (IsContainerModalTransparent()) {
-        titleMgr->UpdateTargetNodesBarMargin();
+        titleMgr_->UpdateTargetNodesBarMargin();
     } else {
-        titleMgr->ResetExpandStackNode();
+        titleMgr_->ResetExpandStackNode();
     }
 }
 
