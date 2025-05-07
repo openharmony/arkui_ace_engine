@@ -32,6 +32,13 @@ MultiFingersRecognizer::MultiFingersRecognizer(int32_t fingers, bool isLimitFing
     isLimitFingerCount_ = isLimitFingerCount;
 }
 
+bool CheckRefereeState(RefereeState refereeState)
+{
+    return refereeState != RefereeState::PENDING &&
+        refereeState != RefereeState::PENDING_BLOCKED &&
+        refereeState != RefereeState::SUCCEED_BLOCKED;
+}
+
 void MultiFingersRecognizer::UpdateFingerListInfo()
 {
     fingerList_.clear();
@@ -40,8 +47,8 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
     for (const auto& point : touchPoints_) {
         if (inputEventType_ != InputEventType::AXIS &&
             !CheckoutDownFingers(point.second.id) &&
-            lastRefereeState_ != RefereeState::PENDING &&
-            refereeState_ != RefereeState::PENDING) {
+            CheckRefereeState(lastRefereeState_) &&
+            CheckRefereeState(refereeState_)) {
             continue;
         }
         PointF localPoint(point.second.x, point.second.y);
