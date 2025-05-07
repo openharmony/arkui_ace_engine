@@ -913,7 +913,7 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
             }
         }
         if (once != true && this.once) throw new Error("prohibited to create scope(" + KoalaCallsiteKeys.asString(id) + ") within the remember scope(" + KoalaCallsiteKeys.asString(this.id) + ")")
-        let reused = reuseKey ? this.nodeRef?.reuse(reuseKey) : undefined
+        let reused = reuseKey ? this.nodeRef?.reuse(reuseKey, id) : undefined
         const scope = reused ? reused as ScopeImpl<Value> : new ScopeImpl<Value>(id, paramCount, compute, cleanup, reuseKey)
         scope.manager = manager
         if (reused) {
@@ -1072,7 +1072,7 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
     }
 
     private recycleOrDispose(child: ManagedScope): void {
-        const recycled = child.reuseKey !== undefined && this._nodeRef?.recycle(child.reuseKey!!, child) == true
+        const recycled = child.reuseKey !== undefined && this._nodeRef?.recycle(child.reuseKey!!, child, child.id) == true
         if (recycled) {
             // if parent node is also disposed, the recycled scopes would dispose in the ReusablePool
             if (!child.node) throw Error("reusable scope doesn't have a node")
