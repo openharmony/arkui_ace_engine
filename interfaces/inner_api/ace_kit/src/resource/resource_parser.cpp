@@ -203,4 +203,18 @@ bool ResourceParser::GetSymbol(const ResourceInfo& resourceInfo, uint32_t& symbo
     return true;
 }
 
+bool ResourceParser::GetMediaData(const ResourceInfo& resourceInfo, size_t& len, std::unique_ptr<uint8_t[]>& dest)
+{
+    auto resourceWrapper = CreateResourceWrapper(resourceInfo);
+    if (!resourceWrapper) {
+        return false;
+    }
+
+    // resourceId is invalid
+    if (resourceInfo.resId == UNKNOWN_RESOURCE_ID) {
+        return resourceWrapper->GetMediaData(resourceInfo.params[0].c_str(), len, dest);
+    }
+    return resourceWrapper->GetMediaData(resourceInfo.resId, len, dest);
+}
+
 } // namespace OHOS::Ace::Kit
