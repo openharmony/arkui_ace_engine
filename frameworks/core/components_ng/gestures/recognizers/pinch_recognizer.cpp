@@ -63,6 +63,7 @@ void PinchRecognizer::OnAccepted()
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Pinch accepted, tag = %{public}s",
         node ? node->GetTag().c_str() : "null");
     ResSchedReport::GetInstance().ResSchedDataReport("click");
+    lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
     isLastPinchFinished_ = false;
     SendCallbackMsg(onActionStart_);
@@ -74,6 +75,7 @@ void PinchRecognizer::OnRejected()
         return;
     }
     SendRejectMsg();
+    lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::FAIL;
     firstInputTime_.reset();
 }
@@ -90,6 +92,7 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         "state: %{public}d", event.touchEventId, event.id, refereeState_);
     extraInfo_ = "";
     if (touchPoints_.size() == 1 && refereeState_ == RefereeState::FAIL) {
+        lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
     }
     touchPoints_[event.id] = event;
@@ -114,6 +117,7 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     if (static_cast<int32_t>(activeFingers_.size()) >= fingers_ && refereeState_ != RefereeState::FAIL) {
         initialDev_ = ComputeAverageDeviation();
         pinchCenter_ = ComputePinchCenter();
+        lastRefereeState_ = refereeState_;
         refereeState_ = RefereeState::DETECTING;
     }
 }
@@ -137,6 +141,7 @@ void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     if (refereeState_ == RefereeState::READY && (NearEqual(event.pinchAxisScale, 1.0) || IsCtrlBeingPressed(event))) {
         scale_ = 1.0f;
         pinchCenter_ = Offset(event.x, event.y);
+        lastRefereeState_ = refereeState_;
         refereeState_ = RefereeState::DETECTING;
     }
 }
@@ -329,6 +334,7 @@ void PinchRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
     if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(activeFingers_.size()) == fingers_) {
         SendCancelMsg();
+        lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
     }
 }

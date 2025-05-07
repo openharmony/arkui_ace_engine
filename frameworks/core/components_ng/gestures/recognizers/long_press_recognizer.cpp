@@ -68,6 +68,7 @@ void LongPressRecognizer::OnAccepted()
     if (onAccessibilityEventFunc_) {
         onAccessibilityEventFunc_(AccessibilityEventType::LONG_PRESS);
     }
+    lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
     if (onLongPress_ && !touchPoints_.empty()) {
         TouchEvent trackPoint = touchPoints_.begin()->second;
@@ -96,6 +97,7 @@ void LongPressRecognizer::OnRejected()
         return;
     }
     SendRejectMsg();
+    lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::FAIL;
     firstInputTime_.reset();
 }
@@ -172,6 +174,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     lastTouchEvent_ = event;
     UpdateFingerListInfo();
     if (GetValidFingersCount() == fingers_) {
+        lastRefereeState_ = refereeState_;
         refereeState_ = RefereeState::DETECTING;
         if (useCatchMode_) {
             DeadlineTimer(curDuration, true);
@@ -258,6 +261,7 @@ void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     }
     if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) == 0) {
         SendCancelMsg();
+        lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
         extraInfo_ += "Reject: received cancel and succeed.";
     } else {
