@@ -14,11 +14,23 @@
  */
 
 import { ComponentBase } from "../../ComponentBase";
-import { AccessibilityCallback, AlignRuleOption, AnimateParam, BackgroundBlurStyleOptions, BackgroundBrightnessOptions, BackgroundEffectOptions, BlendApplyType, BlurOptions, BlurStyle, BorderImageOption, ChainStyle, ClickEffect, ClickEvent, CommonAttribute, ContentCoverOptions, ContextMenuOptions, CustomBuilder, CustomPopupOptions, DragEvent, DragInteractionOptions, DragItemInfo, DragPreviewOptions, DrawModifier, EffectType, ForegroundBlurStyleOptions, ForegroundEffectOptions, GeometryTransitionOptions, GestureModifier, GestureRecognizerJudgeBeginCallback, HoverEvent, InvertOptions, KeyEvent, LinearGradientBlurOptions, Literal_Alignment_align, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, LocalizedAlignRuleOptions, MenuElement, MenuOptions, ModalTransition, MotionBlurOptions, MotionPathOptions, MouseEvent, OutlineStyle, OverlayOptions, PixelRoundPolicy, PixelStretchEffectOptions, PopupOptions, PreDragStatus, ProgressMask, Rectangle, RotateOptions, SafeAreaEdge, SafeAreaType, ScaleOptions, ShadowOptions, ShadowStyle, SheetOptions, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, StateStyles, TouchEvent, TouchResult, TouchTestInfo, TransitionEffect, TransitionFinishCallback, TransitionOptions, TranslateOptions, Type_CommonMethod_linearGradient_value, Type_CommonMethod_radialGradient_value, Type_CommonMethod_sweepGradient_value, VisibleAreaChangeCallback, sharedTransitionOptions } from "../../component/common";
-import { AccessibilityFocusCallback, AccessibilityOptions, AccessibilityRoleType, AccessibilitySamePageMode, Alignment, Area, ArkCommonMethodPeer, Axis, AxisEvent, BackgroundImageOptions, BaseGestureEvent, BlendMode, Blender, BorderOptions, BorderRadiuses, BorderStyle, BrightnessBlender, ChainWeightOptions, CircleShape, Color, ColoringStrategy, CommonMethod, ComponentContent, ConstraintSizeOptions, CrownEvent, Dimension, Direction, DropOptions, EdgeColors, EdgeOutlineStyles, EdgeOutlineWidths, EdgeStyles, EdgeWidths, EllipseShape, Filter, FocusAxisEvent, FocusBoxStyle, FocusDrawLevel, FocusMovement, FocusPriority, FunctionKey, GestureInfo, GestureJudgeResult, GestureMask, GestureType, HitTestMode, HoverEffect, ImageRepeat, ImageSize, ItemAlign, LayoutPolicy, Length, LinearGradientOptions, LocalizedBorderRadiuses, LocalizedEdgeColors, LocalizedEdgeWidths, LocalizedEdges, LocalizedPadding, LocalizedPosition, ModifierKey, ObscuredReasons, OnDragEventCallback, OutlineOptions, OutlineRadiuses, Padding, PathShape, PixelMap, Position, PreviewConfiguration, RadialGradientOptions, RectShape, RenderFit, ResizableOptions, ResourceColor, ResourceStr, ResponseType, ReuseOptions, SizeOptions, SweepGradientOptions, SystemAdaptiveOptions, TipsMessageType, TipsOptions, TransformationMatrix, UniformDataType, Visibility, VisibleAreaEventOptions, VisualEffect } from "../../component";
+import { AccessibilityCallback, AlignRuleOption, AnimateParam, BackgroundBlurStyleOptions, BackgroundBrightnessOptions, BackgroundEffectOptions, BlendApplyType, BlurOptions, BlurStyle, BorderImageOption, ChainStyle, ClickEffect, ClickEvent, CommonAttribute, ContentCoverOptions, ContextMenuOptions, CustomBuilder, CustomPopupOptions, DragEvent, DragInteractionOptions, DragItemInfo, DragPreviewOptions, DrawModifier, EffectType, ForegroundBlurStyleOptions, ForegroundEffectOptions, GeometryTransitionOptions, GestureModifier, GestureRecognizerJudgeBeginCallback, HoverEvent, InvertOptions, KeyEvent, LinearGradientBlurOptions, Literal_Alignment_align, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, LocalizedAlignRuleOptions, MenuElement, MenuOptions, ModalTransition, MotionBlurOptions, MotionPathOptions, MouseEvent, OutlineStyle, OverlayOptions, PixelRoundPolicy, PixelStretchEffectOptions, PopupOptions, PreDragStatus, ProgressMask, Rectangle, RotateOptions, SafeAreaEdge, SafeAreaType, ScaleOptions, ShadowOptions, ShadowStyle, SheetOptions, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, StateStyles, TouchEvent, TouchResult, TouchTestInfo, TransitionEffect, TransitionFinishCallback, TransitionOptions, TranslateOptions, VisibleAreaChangeCallback, sharedTransitionOptions, BackgroundImageOptions, ArkCommonMethodPeer, SystemAdaptiveOptions, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, LinearGradientOptions, OnDragEventCallback, LayoutPolicy, PreviewConfiguration, DropOptions, SweepGradientOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, ReuseOptions, TipsMessageType, TipsOptions, VisibleAreaEventOptions, RadialGradientOptions} from "../../component/common";
+import { Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from '../../component/enums'
+import { ResourceColor, ConstraintSizeOptions, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from '../../component/units'
 import { Resource } from "global/resource"
 import { LengthMetrics } from "../../Graphics"
 import { Edges } from "../../component/arkui-graphics"
+import { PixelMap } from '../../component/arkui-pixelmap'
+import { ResizableOptions } from "../../component/image"
+import { VisualEffect, Filter, BrightnessBlender } from "../../component/arkui-uieffect"
+import { EdgeStyles, CircleShape, EllipseShape, PathShape, RectShape } from "../../component/arkui-external"
+import { FocusBoxStyle, FocusPriority } from "../../component/focus"
+import { TransformationMatrix } from "../../component/arkui-common"
+import { UniformDataType } from "../../component/arkui-uniformtypedescriptor"
+import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "../../component/gesture"
+import { ComponentContent } from "../../component/arkui-custom"
+import { BlendMode } from "../../component/arkui-drawing"
+
 export class ArkBaseNode extends ComponentBase implements CommonAttribute {
 
     constructParam(...param: Object[]): this {
@@ -37,7 +49,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public mouseResponseRegion(value: Array<Rectangle> | Rectangle | undefined): this {
         return this
     }
-  
+
     public constraintSize(value: ConstraintSizeOptions | undefined): this {
         return this
     }
@@ -134,7 +146,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public foregroundColor(value: ResourceColor | ColoringStrategy | undefined): this {
         return this
     }
-    public onHover(value: ((isHover: boolean,event: HoverEvent) => void) | undefined): this {
+    public onHover(value: ((isHover: boolean, event: HoverEvent) => void) | undefined): this {
         return this
     }
     public onHoverMove(value: ((parameter: HoverEvent) => void) | undefined): this {
@@ -275,7 +287,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public onDetach(value: (() => void) | undefined): this {
         return this
     }
-    public onAreaChange(value: ((oldValue: Area,newValue: Area) => void) | undefined): this {
+    public onAreaChange(value: ((oldValue: Area, newValue: Area) => void) | undefined): this {
         return this
     }
     public visibility(value: Visibility | undefined): this {
@@ -326,22 +338,22 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public clickEffect(value: ClickEffect | undefined): this {
         return this
     }
-    public onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
+    public onDragStart(value: ((event: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
         return this
     }
-    public onDragEnter(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
+    public onDragEnter(value: ((event: DragEvent, extraParams?: string) => void) | undefined): this {
         return this
     }
-    public onDragMove(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
+    public onDragMove(value: ((event: DragEvent, extraParams?: string) => void) | undefined): this {
         return this
     }
-    public onDragLeave(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
+    public onDragLeave(value: ((event: DragEvent, extraParams?: string) => void) | undefined): this {
         return this
     }
-    public onDrop(eventCallback: ((event: DragEvent,extraParams?: string) => void) | undefined | OnDragEventCallback | undefined, dropOptions?: DropOptions): this {
+    public onDrop(eventCallback: ((event: DragEvent, extraParams?: string) => void) | undefined | OnDragEventCallback | undefined, dropOptions?: DropOptions): this {
         return this
     }
-    public onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
+    public onDragEnd(value: ((event: DragEvent, extraParams?: string) => void) | undefined): this {
         return this
     }
     public allowDrop(value: Array<UniformDataType> | undefined): this {
@@ -467,7 +479,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public backgroundBrightness(value: BackgroundBrightnessOptions | undefined): this {
         return this
     }
-    public onGestureJudgeBegin(value: ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult) | undefined): this {
+    public onGestureJudgeBegin(value: ((gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult) | undefined): this {
         return this
     }
     public onGestureRecognizerJudgeBegin(callback_: GestureRecognizerJudgeBeginCallback | undefined, exposeInnerGesture?: boolean): this {
@@ -578,7 +590,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this {
         return this
     }
- 
+
     width(value: Length | undefined | Length | LayoutPolicy | undefined | undefined): this {
         if (value != null) {
             this.getPeer().width0Attribute(value as Length);
@@ -593,7 +605,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     }
     backgroundColor(value: ResourceColor | undefined): this {
         if (value != null) {
-            this.getPeer().backgroundColor1Attribute( value as ResourceColor );
+            this.getPeer().backgroundColor1Attribute(value as ResourceColor);
         }
         return this;
     }
@@ -601,7 +613,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         this.getPeer().onClick0Attribute(event);
         return this;
     }
-    zIndex(value: number|undefined): this {
+    zIndex(value: number | undefined): this {
         this.getPeer().zIndexAttribute(value);
         return this;
     }
