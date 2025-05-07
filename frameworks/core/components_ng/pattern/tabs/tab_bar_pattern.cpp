@@ -3204,19 +3204,7 @@ void TabBarPattern::ApplyTurnPageRateToIndicator(float turnPageRate)
 
 void TabBarPattern::InitTurnPageRateEvent()
 {
-    auto turnPageRateCallback = [weak = WeakClaim(this)](int32_t swipingIndex, float turnPageRate) {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            if (!pattern->CheckSwiperDisable() && pattern->axis_ == Axis::HORIZONTAL && pattern->isTouchingSwiper_) {
-                pattern->swiperStartIndex_ = swipingIndex;
-                pattern->ApplyTurnPageRateToIndicator(turnPageRate);
-            } else if (!pattern->isAnimating_) {
-                pattern->turnPageRate_ = 0.0f;
-            }
-        }
-    };
-    swiperController_->SetTurnPageRateCallback(std::move(turnPageRateCallback));
-
+    SetTurnPageRateCallback();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
@@ -3253,6 +3241,23 @@ void TabBarPattern::InitTurnPageRateEvent()
         animationEndEvent_ = std::make_shared<AnimationEndEvent>(std::move(animationEndEvent));
         eventHub->AddAnimationEndEvent(animationEndEvent_);
     }
+}
+
+void TabBarPattern::SetTurnPageRateCallback()
+{
+    CHECK_NULL_VOID(swiperController_);
+    auto turnPageRateCallback = [weak = WeakClaim(this)](int32_t swipingIndex, float turnPageRate) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            if (!pattern->CheckSwiperDisable() && pattern->axis_ == Axis::HORIZONTAL && pattern->isTouchingSwiper_) {
+                pattern->swiperStartIndex_ = swipingIndex;
+                pattern->ApplyTurnPageRateToIndicator(turnPageRate);
+            } else if (!pattern->isAnimating_) {
+                pattern->turnPageRate_ = 0.0f;
+            }
+        }
+    };
+    swiperController_->SetTurnPageRateCallback(std::move(turnPageRateCallback));
 }
 
 void TabBarPattern::HandleBottomTabBarAnimation(int32_t index)
