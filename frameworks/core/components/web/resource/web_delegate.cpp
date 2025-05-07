@@ -7604,6 +7604,24 @@ std::string WebDelegate::GetSelectInfo() const
     return nweb_->GetSelectInfo();
 }
 
+std::string WebDelegate::GetAllTextInfo() const
+{
+    CHECK_NULL_RETURN(nweb_, std::string());
+    return nweb_->GetAllTextInfo();
+}
+
+int WebDelegate::GetSelectStartIndex() const
+{
+    CHECK_NULL_RETURN(nweb_, 0);
+    return nweb_->GetSelectStartIndex();
+}
+
+int WebDelegate::GetSelectEndIndex() const
+{
+    CHECK_NULL_RETURN(nweb_, 0);
+    return nweb_->GetSelectEndIndex();
+}
+
 Offset WebDelegate::GetPosition(const std::string& embedId)
 {
     auto iter = embedDataInfo_.find(embedId);
