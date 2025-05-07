@@ -271,8 +271,8 @@ bool RichEditorLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPt
         CHECK_NULL_CONTINUE(paragraph);
         std::vector<TextStyle> textStyles;
         auto& group = *groupIter;
-        bool needReLayout;
-        bool needReLayoutParagraph;
+        bool needReLayout = false;
+        bool needReLayoutParagraph = false;
         ReLayoutParagraphBySpan(layoutWrapper, textStyles, group, needReLayout, needReLayoutParagraph);
         if (!needReLayout && needReLayoutParagraph) {
             paragraph->ReLayout(maxSize.Width(), pIter->paragraphStyle, textStyles);
@@ -296,8 +296,6 @@ void RichEditorLayoutAlgorithm::ReLayoutParagraphBySpan(LayoutWrapper* layoutWra
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
-    needReLayout = false;
-    needReLayoutParagraph = false;
     for (const auto& child : group) {
         if (!child) {
             continue;
