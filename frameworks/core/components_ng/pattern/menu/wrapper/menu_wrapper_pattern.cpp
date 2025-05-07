@@ -673,7 +673,7 @@ void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
     // If container is UIExtensionWindow, set hotArea size equals to subwindow's filterColumnNode's size
     if (IsContextMenu() && GetPreviewMode() != MenuPreviewMode::NONE) {
         auto filterNode = GetFilterColumnNode();
-        if (filterNode) {
+        if (filterNode && GetIsFilterInSubwindow()) {
             auto filterNodeGeometryNode = filterNode->GetGeometryNode();
             CHECK_NULL_VOID(filterNodeGeometryNode);
             auto frameRect = filterNodeGeometryNode->GetFrameRect();

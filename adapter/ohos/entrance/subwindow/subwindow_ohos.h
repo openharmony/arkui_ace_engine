@@ -258,7 +258,6 @@ private:
         std::function<void(int32_t)>&& callback);
     void ContainerModalUnFocus();
 
-    void HideFilter(bool isInSubWindow);
     void HidePixelMap(bool startDrag = false, double x = 0, double y = 0, bool showAnimation = true);
     void HideEventColumn();
     Rosen::WindowType GetToastRosenType(bool IsSceneBoardEnabled);
