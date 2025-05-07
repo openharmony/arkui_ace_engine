@@ -30,7 +30,7 @@ public:
 
     virtual void Create(const std::string& action) = 0;
     virtual RefPtr<OHOS::Ace::NG::FrameNode> StsCreateFrameNode() = 0;
-    virtual void StsSetAction(OHOS::Ace::NG::FrameNode* frameNode, std::string& action) = 0;
+    virtual void StsSetAction(OHOS::Ace::NG::FrameNode* frameNode, const std::string& action) = 0;
 
 private:
     static std::unique_ptr<FormLinkModel> instance_;
