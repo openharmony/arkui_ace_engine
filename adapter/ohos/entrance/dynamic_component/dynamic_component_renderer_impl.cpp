@@ -30,8 +30,8 @@ namespace {
 constexpr int32_t INVALID_WINDOW_ID = -1;
 constexpr int32_t WORKER_ERROR = 10002;
 constexpr size_t WORKER_MAX_NUM = 1;
-constexpr size_t WORKER_SIZE_ONE = 1;
-constexpr size_t DC_MAX_NUM_IN_WORKER = 1;
+constexpr int32_t WORKER_SIZE_ONE = 1;
+constexpr int32_t DC_MAX_NUM_IN_WORKER = 1;
 }
 
 void ApplyAccessibilityElementInfoOffset(Accessibility::AccessibilityElementInfo& output, const OffsetF& offset)
