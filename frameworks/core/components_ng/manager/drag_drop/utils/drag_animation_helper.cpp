@@ -386,6 +386,9 @@ void DragAnimationHelper::UpdateBadgeLayoutAndRenderContext(
     int64_t textWidth = BADGE_DEFAULT_SIZE.ConvertToPx() + (BADGE_RELATIVE_OFFSET.ConvertToPx() * (badgeLength - 1));
     auto textSize = CalcSize(NG::CalcLength(textWidth), NG::CalcLength(BADGE_DEFAULT_SIZE.ConvertToPx()));
     textLayoutProperty->UpdateUserDefinedIdealSize(textSize);
+    textLayoutProperty->UpdateMinFontScale(1.0f);
+    textLayoutProperty->UpdateMaxFontScale(1.0f);
+    textLayoutProperty->UpdateEnableVariableFontWeight(true);
 
     auto textRenderContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(textRenderContext);
