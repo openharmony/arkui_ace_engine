@@ -87,8 +87,7 @@ import { Matrix2D, Matrix2DInternal } from "./../matrix2d"
 import { ColorMode, LayoutDirection } from "./../stateManagement"
 import { Component3DAttribute, ModelType, SceneOptions } from "./../component3d"
 import { CustomDialogController, CustomDialogControllerInternal, CustomDialogControllerOptions } from "./../customDialogController"
-import { DrawContext, Rect, LengthMetricsUnit, LengthUnit, ShapeClip, ShapeClipInternal, RoundRect, Circle, CommandPath, ShapeMask, ShapeMaskInternal, Vector2, Vector3, BorderRadiuses_graphics, CornerRadius, Edges, Matrix4 } from "./../arkui-graphics"
-import { LengthMetrics, LengthMetricsInternal, ColorMetrics, ColorMetricsInternal, Frame, Size } from "../../Graphics"
+import { LengthMetrics, LengthMetricsInternal, ColorMetrics, ColorMetricsInternal, Frame, Size, DrawContext, Rect, LengthMetricsUnit, LengthUnit, ShapeClip, ShapeClipInternal, RoundRect, Circle, CommandPath, ShapeMask, ShapeMaskInternal, Vector2, Vector3, BorderRadiuses_graphics, CornerRadius, Edges, Matrix4 } from "../../Graphics"
 import { DataOperationType } from "./../lazyForEach"
 import { DataPanelType, LinearGradient, LinearGradientInternal, ColorStop, DataPanelOptions, DataPanelShadowOptions } from "./../dataPanel"
 import { DatePickerMode, Callback_DatePickerResult_Void, DatePickerResult, DatePickerOptions, LunarSwitchStyle, DatePickerDialogOptions } from "./../datePicker"
@@ -159,7 +158,7 @@ import { MarqueeOptions } from "./../marquee"
 import { PathOptions } from "./../path"
 import { PolygonOptions } from "./../polygon"
 import { PolylineOptions } from "./../polyline"
-import { RenderNode, RenderNodeInternal } from "./../arkui-rendernode"
+import { DrawCallback, RenderNode, RenderNodeInternal } from "../../RenderNode"
 import { RoundedRectOptions, RectOptions, RadiusItem } from "./../rect"
 import { RowOptions, RowOptionsV2 } from "./../row"
 import { StackOptions } from "./../stack"
@@ -4215,6 +4214,21 @@ export class Deserializer extends DeserializerBase {
     (isSync) ? (InteropNativeModule._CallCallbackSync(1766817632, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1766817632, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as KPointer); }
+    }
+    readDrawCallback(isSync: boolean = false): DrawCallback {
+        const _resource: CallbackResource = this.readCallbackResource()
+        const _call: KPointer = this.readPointer()
+        const _callSync: KPointer = this.readPointer()
+        return (context: DrawContext): void => {
+            const _argsSerializer: Serializer = Serializer.hold();
+            _argsSerializer.writeInt32(_resource.resourceId);
+            _argsSerializer.writePointer(_call);
+            _argsSerializer.writePointer(_callSync);
+            _argsSerializer.writeDrawContext(context);
+            (isSync) ? (InteropNativeModule._CallCallbackSync(-177744805, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-177744805, _argsSerializer.asBuffer(), _argsSerializer.length()));
+            _argsSerializer.release();
+            return;
+        }
     }
     readEditableTextOnChangeCallback(isSync: boolean = false): EditableTextOnChangeCallback {
         const _resource : CallbackResource = this.readCallbackResource()

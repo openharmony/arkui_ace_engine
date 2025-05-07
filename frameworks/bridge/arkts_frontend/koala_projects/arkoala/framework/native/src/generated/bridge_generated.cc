@@ -34213,10 +34213,12 @@ Ark_Boolean impl_PixelMap_getIsStrideAlignment(Ark_NativePointer thisPtr) {
         return GetAccessors()->getPixelMapAccessor()->getIsStrideAlignment(self);
 }
 KOALA_INTEROP_DIRECT_1(PixelMap_getIsStrideAlignment, Ark_Boolean, Ark_NativePointer)
-Ark_NativePointer impl_RenderNode_ctor() {
-        return GetAccessors()->getRenderNodeAccessor()->ctor();
+Ark_NativePointer impl_RenderNode_ctor(Ark_Int32 nodeId, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        DrawCallbackFunc callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_DrawContext context)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_DrawCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_DrawContext context)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_DrawCallback))))};;
+        return GetAccessors()->getRenderNodeAccessor()->ctor(nodeId, (const DrawCallbackFunc*)&callback_value);
 }
-KOALA_INTEROP_DIRECT_0(RenderNode_ctor, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_3(RenderNode_ctor, Ark_NativePointer, Ark_Int32, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_RenderNode_getFinalizer() {
         return GetAccessors()->getRenderNodeAccessor()->getFinalizer();
 }

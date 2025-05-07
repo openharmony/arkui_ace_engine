@@ -4322,7 +4322,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _PixelMap_getIsStrideAlignment(ptr: KPointer): boolean
     @ani.unsafe.Direct
-    native static _RenderNode_ctor(): KPointer
+    native static _RenderNode_ctor(id: int32, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _RenderNode_getFinalizer(): KPointer
     @ani.unsafe.Direct

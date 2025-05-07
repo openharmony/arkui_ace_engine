@@ -4126,6 +4126,24 @@ void deserializeAndCallSyncCustomNodeBuilder(Ark_VMContext vmContext, KSerialize
     Callback_Pointer_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Pointer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Pointer_Void))))};
     _callSync(vmContext, _resourceId, parentNode, _continuation);
 }
+void deserializeAndCallDrawCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_DrawContext context)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_DrawContext context = thisDeserializer.readDrawContext();
+    _call(_resourceId, context);
+}
+void deserializeAndCallSyncDrawCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_DrawContext context)>(thisDeserializer.readPointer());
+    Ark_DrawContext context = thisDeserializer.readDrawContext();
+    _callSync(vmContext, _resourceId, context);
+}
 void deserializeAndCallEditableTextOnChangeCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
@@ -6905,6 +6923,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case -2146044511/*Kind_ContentWillScrollCallback*/: return deserializeAndCallContentWillScrollCallback(thisArray, thisLength);
         case 260483890/*Kind_Context_getGroupDir_Callback*/: return deserializeAndCallContext_getGroupDir_Callback(thisArray, thisLength);
         case 1766817632/*Kind_CustomNodeBuilder*/: return deserializeAndCallCustomNodeBuilder(thisArray, thisLength);
+        case -177744805/*Kind_DrawCallback*/: return deserializeAndCallDrawCallback(thisArray, thisLength);
         case -1729563209/*Kind_EditableTextOnChangeCallback*/: return deserializeAndCallEditableTextOnChangeCallback(thisArray, thisLength);
         case -1936519453/*Kind_ErrorCallback*/: return deserializeAndCallErrorCallback(thisArray, thisLength);
         case -2119548940/*Kind_GestureRecognizerJudgeBeginCallback*/: return deserializeAndCallGestureRecognizerJudgeBeginCallback(thisArray, thisLength);
@@ -7198,6 +7217,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case -2146044511/*Kind_ContentWillScrollCallback*/: return deserializeAndCallSyncContentWillScrollCallback(vmContext, thisArray, thisLength);
         case 260483890/*Kind_Context_getGroupDir_Callback*/: return deserializeAndCallSyncContext_getGroupDir_Callback(vmContext, thisArray, thisLength);
         case 1766817632/*Kind_CustomNodeBuilder*/: return deserializeAndCallSyncCustomNodeBuilder(vmContext, thisArray, thisLength);
+        case -177744805/*Kind_DrawCallback*/: return deserializeAndCallSyncDrawCallback(vmContext, thisArray, thisLength);
         case -1729563209/*Kind_EditableTextOnChangeCallback*/: return deserializeAndCallSyncEditableTextOnChangeCallback(vmContext, thisArray, thisLength);
         case -1936519453/*Kind_ErrorCallback*/: return deserializeAndCallSyncErrorCallback(vmContext, thisArray, thisLength);
         case -2119548940/*Kind_GestureRecognizerJudgeBeginCallback*/: return deserializeAndCallSyncGestureRecognizerJudgeBeginCallback(vmContext, thisArray, thisLength);

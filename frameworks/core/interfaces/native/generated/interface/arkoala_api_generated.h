@@ -3139,6 +3139,8 @@ typedef struct Ark_WithThemeOptions Ark_WithThemeOptions;
 typedef struct Opt_WithThemeOptions Opt_WithThemeOptions;
 typedef struct Ark_RichEditorSpan Ark_RichEditorSpan;
 typedef struct Opt_RichEditorSpan Opt_RichEditorSpan;
+typedef struct DrawCallbackFunc DrawCallbackFunc;
+typedef struct Opt_DrawCallbackFunc Opt_DrawCallbackFunc;
 typedef Ark_Object Ark_ContentModifier;
 typedef Opt_Object Opt_ContentModifier;
 typedef enum Ark_AccessibilityHoverType {
@@ -11545,6 +11547,15 @@ typedef struct WithThemeInterface {
     void (*call)(const Ark_Int32 resourceId, const Ark_WithThemeOptions options, const Callback_WithThemeAttribute_Void continuation);
     void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_WithThemeOptions options, const Callback_WithThemeAttribute_Void continuation);
 } WithThemeInterface;
+typedef struct DrawCallbackFunc {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_DrawContext context);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_DrawContext drawContext);
+} DrawCallbackFunc;
+typedef struct Opt_DrawCallbackFunc {
+    Ark_Tag tag;
+    DrawCallbackFunc value;
+} Opt_DrawCallbackFunc;
 typedef struct Opt_WithThemeInterface {
     Ark_Tag tag;
     WithThemeInterface value;
@@ -23854,7 +23865,7 @@ typedef struct GENERATED_ArkUIPixelMapAccessor {
 
 typedef struct GENERATED_ArkUIRenderNodeAccessor {
     void (*destroyPeer)(Ark_RenderNode peer);
-    Ark_RenderNode (*ctor)();
+    Ark_RenderNode (*ctor)(Ark_Int32 nodeId, const DrawCallbackFunc* callback);
     Ark_NativePointer (*getFinalizer)();
     void (*appendChild)(Ark_RenderNode peer,
                         Ark_RenderNode node);
