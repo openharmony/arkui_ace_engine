@@ -24,7 +24,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT FormLinkModelNG : public OHOS::Ace::FormLinkModel {
 public:
     void Create(const std::string& action) override;
-    
+
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetAction(FrameNode* frameNode, const std::string& action);
     RefPtr<FrameNode> StsCreateFrameNode() override;
