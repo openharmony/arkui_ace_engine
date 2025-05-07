@@ -513,7 +513,7 @@ void SetScrollFling(ArkUINodeHandle node, ArkUI_Float64 value)
         return;
     }
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    MultiThreadBuildManager::TryExecuteUnSafeTask(AceType::Claim(frameNode),
+    MultiThreadBuildManager::TryExecuteUnSafeTask(frameNode,
         [weak = AceType::WeakClaim(frameNode), value]() {
         auto host = weak.Upgrade();
         CHECK_NULL_VOID(host);

@@ -16,6 +16,7 @@
 #include "core/components_ng/event/focus_hub.h"
 
 #include "base/log/dump_log.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
@@ -504,12 +505,19 @@ void FocusHub::LostSelfFocus()
 
 void FocusHub::RemoveSelf(BlurReason reason)
 {
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(frameNode), [weak = WeakClaim(this)]() {
+        auto focusHub = weak.Upgrade();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->RemoveSelf();
+    })) {
+        return;
+    }
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d) " remove self focus.",
             GetFrameName().c_str(), SEC_PARAM(GetFrameId()));
     }
-    auto frameNode = GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
     auto focusView = frameNode->GetPattern<FocusView>();
     auto* pipeline = frameNode->GetContext();
     auto screenNode = pipeline ? pipeline->GetScreenNode() : nullptr;

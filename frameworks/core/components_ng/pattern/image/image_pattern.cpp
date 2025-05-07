@@ -269,6 +269,14 @@ void ImagePattern::SetRedrawCallback(const RefPtr<CanvasImage>& image)
 
 void ImagePattern::RegisterVisibleAreaChange(bool isCalcClip)
 {
+    auto host = GetHost();
+    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(host), [weak = WeakClaim(this), isCalcClip]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->RegisterVisibleAreaChange(isCalcClip);
+    })) {
+        return;
+    }
     auto pipeline = GetContext();
     // register to onVisibleAreaChange
     CHECK_NULL_VOID(pipeline);
@@ -277,7 +285,6 @@ void ImagePattern::RegisterVisibleAreaChange(bool isCalcClip)
         CHECK_NULL_VOID(self);
         self->OnVisibleAreaChange(visible, ratio);
     };
-    auto host = GetHost();
     CHECK_NULL_VOID(host);
     // add visibleAreaChangeNode(inner callback)
     std::vector<double> ratioList = { 0.0 };
@@ -1400,7 +1407,7 @@ void ImagePattern::OnAttachToFrameNode()
 
         // register image frame node to pipeline context to receive memory level notification and window state change
         // notification
-        MultiThreadBuildManager::TryExecuteUnSafeTask(host, [weak = WeakPtr(host)]() {
+        MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host), [weak = WeakPtr(host)]() {
             auto host = weak.Upgrade();
             CHECK_NULL_VOID(host);
             auto pipeline = host->GetContext();

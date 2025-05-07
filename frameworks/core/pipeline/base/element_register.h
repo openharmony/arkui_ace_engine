@@ -178,6 +178,7 @@ private:
 
     std::unordered_map<std::string, RefPtr<NG::GeometryTransition>> geometryTransitionMap_;
 
+    std::mutex pendingRemoveNodesMutex_;
     std::list<RefPtr<NG::UINode>> pendingRemoveNodes_;
 
     std::function<void(int64_t)> jsCleanUpIdleTaskCallback_;

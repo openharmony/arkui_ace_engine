@@ -564,8 +564,9 @@ void ScrollablePattern::AddScrollEvent()
     InitTouchEvent(gestureHub);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    MultiThreadBuildManager::TryExecuteUnSafeTask(host, [weak = WeakClaim(this)]() {
+    MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host), [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         pattern->RegisterWindowStateChangedCallback();
     });
     if (!clickRecognizer_) {
@@ -1404,7 +1405,7 @@ void ScrollablePattern::StopAnimate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (MultiThreadBuildManager::TryPostUnSafeTask(host, [weak = WeakClaim(this)]() {
+    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(host), [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->StopAnimate();
@@ -2665,11 +2666,15 @@ void ScrollablePattern::SetBackToTop(bool backToTop)
         return;
     }
     backToTop_ = backToTop;
-    if (backToTop_) {
-        eventProxy->Register(WeakClaim(this));
-    } else {
-        eventProxy->UnRegister(WeakClaim(this));
-    }
+    auto host = GetHost();
+    MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host),
+        [weak = WeakClaim(this), eventProxy, backToTop = backToTop_]() {
+        if (backToTop) {
+            eventProxy->Register(weak);
+        } else {
+            eventProxy->UnRegister(weak);
+        }
+    });
 }
 
 void ScrollablePattern::ResetBackToTop()
@@ -2731,7 +2736,7 @@ void ScrollablePattern::Fling(double flingVelocity)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (MultiThreadBuildManager::TryPostUnSafeTask(host, [weak = WeakClaim(this), flingVelocity]() {
+    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(host), [weak = WeakClaim(this), flingVelocity]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->Fling(flingVelocity);
@@ -3378,7 +3383,7 @@ void ScrollablePattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrol
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (MultiThreadBuildManager::TryPostUnSafeTask(host,
+    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(host),
         [weak = WeakClaim(this), reverse, smooth, scrollType]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);

@@ -934,10 +934,11 @@ int32_t SetLengthMetricUnit(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit uni
 int32_t SetLengthMetricUnitSafely(ArkUI_NodeHandle nodePtr, ArkUI_LengthMetricUnit unit)
 {
     auto* impl = GetFullImpl();
-    if (impl->getMultiThreadManagerAPI()->checkOnUIThread()) {
-        return SetLengthMetricUnit(nodePtr, unit);
+    if (!impl->getMultiThreadManagerAPI()->checkNodeOnValidThread(nodePtr->uiNodeHandle)) {
+        return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
     }
-    return ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD;
+    ThreadSafeScope threadSafeScope;
+    return SetLengthMetricUnit(nodePtr, unit);
 }
 
 void ApplyModifierFinish(ArkUI_NodeHandle nodePtr)

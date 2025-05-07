@@ -20,6 +20,7 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "core/common/layout_inspector.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -1709,6 +1710,15 @@ void Scrollable::StopFrictionAnimation()
 
 void Scrollable::StopSpringAnimation(bool reachFinalPosition)
 {
+    auto host = weakHost_.Upgrade();
+    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(host),
+        [weak = WeakClaim(this), reachFinalPosition]() {
+        auto scrollable = weak.Upgrade();
+        CHECK_NULL_VOID(scrollable);
+        scrollable->StopSpringAnimation(reachFinalPosition);
+    })) {
+        return;
+    }
     if (state_ == AnimationState::SPRING) {
         ACE_SCOPED_TRACE(
             "StopSpringAnimation, reachFinalPosition:%u, id:%d, tag:%s", reachFinalPosition, nodeId_, nodeTag_.c_str());

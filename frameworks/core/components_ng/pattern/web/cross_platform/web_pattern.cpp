@@ -84,7 +84,7 @@ void WebPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    MultiThreadBuildManager::TryExecuteUnSafeTask(host, [weak = WeakPtr(host)]() {
+    MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host), [weak = WeakPtr(host)]() {
         auto host = weak.Upgrade();
         CHECK_NULL_VOID(host);
         auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();

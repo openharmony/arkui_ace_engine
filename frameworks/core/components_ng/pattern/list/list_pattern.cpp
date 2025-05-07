@@ -18,6 +18,7 @@
 #include "base/geometry/rect.h"
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/list/list_theme.h"
 #include "core/components/scroll/scroll_bar_theme.h"
@@ -1736,6 +1737,15 @@ void ListPattern::ScrollTo(float position)
 
 void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
 {
+    auto host = GetHost();
+    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(host),
+        [weak = WeakClaim(this), index, smooth, align, extraOffset]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->ScrollToIndex(index, smooth, align, extraOffset);
+    })) {
+        return;
+    }
     SetScrollSource(SCROLL_FROM_JUMP);
     if (!smooth) {
         StopAnimate();
@@ -1792,6 +1802,15 @@ bool ListPattern::CheckTargetValid(int32_t index, int32_t indexInGroup)
 
 void ListPattern::ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align)
 {
+    auto host = GetHost();
+    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(host),
+        [weak = WeakClaim(this), index, indexInGroup, smooth, align]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->ScrollToItemInGroup(index, indexInGroup, smooth, align);
+    })) {
+        return;
+    }
     SetScrollSource(SCROLL_FROM_JUMP);
     if (!smooth) {
         StopAnimate();

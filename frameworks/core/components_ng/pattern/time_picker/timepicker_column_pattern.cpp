@@ -78,7 +78,7 @@ void TimePickerColumnPattern::OnAttachToFrameNode()
     InitPanEvent(gestureHub);
     host->GetRenderContext()->SetClipToFrame(true);
     InitHapticController(host);
-    MultiThreadBuildManager::TryExecuteUnSafeTask(host, [weak = WeakClaim(this)]() {
+    MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host), [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->RegisterWindowStateChangedCallback();

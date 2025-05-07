@@ -129,12 +129,14 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
     pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     std::function<void ()> buildTask = [weakPattern = WeakPtr(pattern), weakFrameNode = WeakPtr(frameNode)]() {
-        auto frameNode = weakFrameNode.Upgrade();
         auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
         pattern->InitSurfaceChangedCallback();
         pattern->InitSurfacePositionChangedCallback();
         pattern->RegisterWindowSizeCallback();
         pattern->InitTheme();
+        auto frameNode = weakFrameNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         auto pipeline = frameNode->GetContext();
         CHECK_NULL_VOID(pipeline);
         if (pipeline->GetHasPreviewTextOption()) {
@@ -142,7 +144,7 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
         }
         ProcessDefaultStyleAndBehaviors(frameNode);
     };
-    MultiThreadBuildManager::TryExecuteUnSafeTask(frameNode, buildTask);
+    MultiThreadBuildManager::TryExecuteUnSafeTask(AceType::RawPtr(frameNode), std::move(buildTask));
     return frameNode;
 }
 

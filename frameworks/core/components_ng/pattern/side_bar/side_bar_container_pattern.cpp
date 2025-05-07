@@ -91,7 +91,7 @@ void SideBarContainerPattern::OnAttachToFrameNode()
     auto layoutProperty = host->GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     userSetSidebarWidth_ = layoutProperty->GetSideBarWidth().value_or(SIDEBAR_WIDTH_NEGATIVE);
-    MultiThreadBuildManager::TryExecuteUnSafeTask(host, [weak = WeakPtr(host)]() {
+    MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host), [weak = WeakPtr(host)]() {
         auto host = weak.Upgrade();
         CHECK_NULL_VOID(host);
         auto pipelineContext = host->GetContext();

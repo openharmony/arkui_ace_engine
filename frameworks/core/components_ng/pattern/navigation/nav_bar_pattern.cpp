@@ -360,8 +360,9 @@ void NavBarPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (MultiThreadBuildManager::TryPostUnSafeTask(host, [weak = WeakClaim(this)]() {
+    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(host), [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         pattern->OnAttachToFrameNode();
     })) {
         return;

@@ -122,7 +122,7 @@ void SwiperPattern::OnAttachToFrameNode()
     auto indicatorTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(indicatorTheme);
     renderContext->UpdateClipEdge(indicatorTheme->GetClipEdge());
-    MultiThreadBuildManager::TryExecuteUnSafeTask(host, [weak = WeakClaim(this)]() {
+    MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host), [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->InitSurfaceChangedCallback();
@@ -2127,7 +2127,7 @@ void SwiperPattern::ChangeIndex(int32_t index, SwiperAnimationMode mode)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (MultiThreadBuildManager::TryPostUnSafeTask(host, [weak = WeakClaim(this), index, mode]() {
+    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(host), [weak = WeakClaim(this), index, mode]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->ChangeIndex(index, mode);
@@ -2180,6 +2180,14 @@ bool SwiperPattern::ComputeTargetIndex(int32_t index, int32_t& targetIndex) cons
 
 void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
 {
+    auto host = GetHost();
+    if (MultiThreadBuildManager::TryPostUnSafeTask(RawPtr(host), [weak = WeakClaim(this), index, useAnimation]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->ChangeIndex(index, useAnimation);
+    })) {
+        return;
+    }
     int32_t targetIndex = 0;
     if (!ComputeTargetIndex(index, targetIndex)) {
         return;

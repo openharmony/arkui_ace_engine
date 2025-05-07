@@ -36,15 +36,15 @@ public:
     static void SetIsThreadSafeScope(bool isThreadSafeScope);
     static bool IsThreadSafeScope();
     static bool IsThreadSafeScopeOnSubThread();
-    static void TryExecuteUnSafeTask(const RefPtr<NG::UINode>& node, const std::function<void()>& task);
-    static bool TryPostUnSafeTask(const RefPtr<NG::UINode>& node, const std::function<void()>& task);
-    bool PostAsyncUITask(int32_t contextId, const std::function<void()>& asyncUITask,
-        const std::function<void()>& onFinishTask);
-    bool PostUITask(int32_t contextId, const std::function<void()>& uiTask);
+    static void TryExecuteUnSafeTask(NG::UINode* node, std::function<void()>&& task);
+    static bool TryPostUnSafeTask(NG::UINode* node, std::function<void()>&& task);
+    bool PostAsyncUITask(int32_t contextId, std::function<void()>&& asyncUITask,
+        std::function<void()>&& onFinishTask);
+    bool PostUITask(int32_t contextId, std::function<void()>&& uiTask);
 private:
     MultiThreadBuildManager();
     void InitAysncUITaskQueue();
-    static bool NeedPostUnSafeTask(const RefPtr<NG::UINode>& node);
+    static bool NeedPostUnSafeTask(NG::UINode* node);
     static thread_local bool isThreadSafeScope_;
     static thread_local bool isUIThread_;
     ACE_DISALLOW_COPY_AND_MOVE(MultiThreadBuildManager);

@@ -1875,6 +1875,8 @@ private:
     void ProcessAutoFillOnFocus();
     bool IsStopEditWhenCloseKeyboard();
     void SetIsEnableSubWindowMenu();
+    void SetSelectionFlagInner(int32_t selectionStart, int32_t selectionEnd,
+        const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false);
 
     RectF frameRect_;
     RectF textRect_;

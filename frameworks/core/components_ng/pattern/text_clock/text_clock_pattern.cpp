@@ -105,8 +105,9 @@ void TextClockPattern::OnAttachToFrameNode()
     InitTextClockController();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    MultiThreadBuildManager::TryExecuteUnSafeTask(host, [weak = WeakClaim(this)]() {
+    MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host), [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         pattern->InitUpdateTimeTextCallBack();
         auto* eventProxy = TimeEventProxy::GetInstance();
         if (eventProxy) {

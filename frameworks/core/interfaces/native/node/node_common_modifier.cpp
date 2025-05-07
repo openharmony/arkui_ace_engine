@@ -22,6 +22,7 @@
 #include "core/animation/animation_pub.h"
 #include "core/animation/curves.h"
 #include "core/common/ime/text_input_type.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/color.h"
@@ -5144,7 +5145,11 @@ void SetNeedFocus(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetNeedFocus(frameNode, value);
+    MultiThreadBuildManager::TryPostUnSafeTask(frameNode, [weak = AceType::WeakClaim(frameNode), value]() {
+        auto host = weak.Upgrade();
+        CHECK_NULL_VOID(host);
+        ViewAbstract::SetNeedFocus(AceType::RawPtr(host), value);
+    });
 }
 
 ArkUI_Bool GetNeedFocus(ArkUINodeHandle node)

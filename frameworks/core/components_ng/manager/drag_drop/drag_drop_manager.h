@@ -69,24 +69,20 @@ public:
 
     void AddDragFrameNode(int32_t id, const WeakPtr<FrameNode>& dragFrameNode)
     {
-        dragFrameNodes_.try_emplace(id, dragFrameNode);
     }
 
-    void RemoveDragFrameNode(int32_t id);
+    void RemoveDragFrameNode(int32_t id) {};
 
     void AddGridDragFrameNode(int32_t id, const WeakPtr<FrameNode>& dragFrameNode)
     {
-        gridDragFrameNodes_.try_emplace(id, dragFrameNode);
     }
 
     void AddListDragFrameNode(int32_t id, const WeakPtr<FrameNode>& dragFrameNode)
     {
-        listDragFrameNodes_.try_emplace(id, dragFrameNode);
     }
 
     void AddTextFieldDragFrameNode(int32_t id, const WeakPtr<FrameNode>& dragFrameNode)
     {
-        textFieldDragFrameNodes_.try_emplace(id, dragFrameNode);
     }
 
     void SetEventStrictReportingEnabled(bool dragEventStrictReportingEnabled)

@@ -78,7 +78,7 @@ void TextPickerColumnPattern::OnAttachToFrameNode()
     InitPanEvent(gestureHub);
     host->GetRenderContext()->SetClipToFrame(true);
     InitHapticController(host);
-    MultiThreadBuildManager::TryExecuteUnSafeTask(host, [weak = WeakClaim(this)]() {
+    MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host), [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->RegisterWindowStateChangedCallback();
@@ -1521,15 +1521,24 @@ void TextPickerColumnPattern::HandleEnterSelectedArea(double scrollDelta, float 
         isDragReverse = true;
     }
     enterDelta_ = (NearEqual(scrollDelta, shiftDistance)) ? 0.0 : scrollDelta;
+    auto host = GetHost();
     if (GreatOrEqual(std::abs(scrollDelta), std::abs(shiftThreshold)) && GetEnterIndex() != currentEnterIndex &&
         !isOverScroll) {
         SetEnterIndex(currentEnterIndex);
-        HandleEnterSelectedAreaEventCallback(true);
+        MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host), [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleEnterSelectedAreaEventCallback(true);
+        });
     }
     if (isDragReverse && LessOrEqual(std::abs(scrollDelta), std::abs(shiftThreshold)) &&
         GetEnterIndex() != GetCurrentIndex() && !isOverScroll) {
         SetEnterIndex(GetCurrentIndex());
-        HandleEnterSelectedAreaEventCallback(true);
+        MultiThreadBuildManager::TryExecuteUnSafeTask(RawPtr(host), [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleEnterSelectedAreaEventCallback(true);
+        });
     }
 }
 
