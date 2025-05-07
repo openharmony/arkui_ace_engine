@@ -230,12 +230,9 @@ void SetSubMenuExpandSymbol(ArkUINodeHandle node, void* symbolFunction)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (symbolFunction) {
-        auto symbolCallback = reinterpret_cast<std::function<void(WeakPtr<NG::FrameNode>)>*>(symbolFunction);
-        MenuModelNG::SetExpandSymbol(frameNode, std::move(*symbolCallback));
-    } else {
-        MenuModelNG::SetExpandSymbol(frameNode, nullptr);
-    }
+    CHECK_NULL_VOID(symbolFunction);
+    auto symbolCallback = reinterpret_cast<std::function<void(WeakPtr<NG::FrameNode>)>*>(symbolFunction);
+    MenuModelNG::SetExpandSymbol(frameNode, std::move(*symbolCallback));
 }
 
 void ResetSubMenuExpandSymbol(ArkUINodeHandle node)
