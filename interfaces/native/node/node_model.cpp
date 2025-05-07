@@ -47,6 +47,16 @@ int32_t OH_ArkUI_PostUITask(ArkUI_ContextHandle context, void* taskData, void(*t
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     return impl->getMultiThreadManagerAPI()->postUITask(contextPtr->id, taskData, task);
 }
+
+int32_t OH_ArkUI_PostUITaskAndWait(ArkUI_ContextHandle context, void* taskData, void(*task)(void* taskData))
+{
+    if (!context || !task) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* contextPtr = reinterpret_cast<ArkUI_Context*>(context);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    return impl->getMultiThreadManagerAPI()->postUITaskAndWait(contextPtr->id, taskData, task);
+}
 #ifdef __cplusplus
 };
 #endif
