@@ -121,6 +121,7 @@ void SymbolModelNG::SetFontSize(FrameNode* frameNode, const std::optional<Dimens
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
             TextLayoutProperty, FontSize, PROPERTY_UPDATE_MEASURE, frameNode);
+        frameNode->GetLayoutProperty<TextLayoutProperty>()->OnPropertyChangeMeasure();
     }
 }
 
@@ -131,6 +132,7 @@ void SymbolModelNG::SetFontWeight(FrameNode* frameNode, const std::optional<Font
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, fontWeight.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, FontWeight, PROPERTY_UPDATE_MEASURE, frameNode);
+        frameNode->GetLayoutProperty<TextLayoutProperty>()->OnPropertyChangeMeasure();
     }
 }
 
@@ -142,7 +144,8 @@ void SymbolModelNG::SetRenderingStrategy(FrameNode* frameNode, const std::option
             TextLayoutProperty, SymbolRenderingStrategy, renderingStrategy.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
-            TextLayoutProperty, SymbolRenderingStrategy, PROPERTY_UPDATE_MEASURE, frameNode);
+            TextLayoutProperty, SymbolRenderingStrategy, PROPERTY_UPDATE_MEASURE_SELF, frameNode);
+        frameNode->GetLayoutProperty<TextLayoutProperty>()->OnPropertyChangeMeasure();
     }
 }
 
@@ -153,7 +156,8 @@ void SymbolModelNG::SetSymbolEffect(FrameNode* frameNode, const std::optional<ui
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolEffectStrategy, effectStrategy.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, SymbolEffectStrategy,
-            PROPERTY_UPDATE_MEASURE, frameNode);
+            PROPERTY_UPDATE_MEASURE_SELF, frameNode);
+        frameNode->GetLayoutProperty<TextLayoutProperty>()->OnPropertyChangeMeasure();
     }
 }
 
