@@ -301,7 +301,7 @@ void GetGestureEvent(ArkUIAPIEventGestureAsyncEvent& ret, GestureEvent& info)
 }
 
 void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& rawInputEvent,
-    const std::shared_ptr<BaseGestureEvent>& info)
+    const std::shared_ptr<BaseGestureEvent>& info, std::array<ArkUITouchPoint, MAX_POINTS>& points)
 {
     rawInputEvent.sourceType = static_cast<ArkUI_Int32>(info->GetSourceDevice());
     rawInputEvent.timeStamp = info->GetTimeStamp().time_since_epoch().count();
@@ -309,7 +309,6 @@ void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& r
     rawInputEvent.actionTouchPoint.tiltY = info->GetTiltY().value_or(0.0f);
     rawInputEvent.actionTouchPoint.toolType = static_cast<ArkUI_Int32>(info->GetSourceTool());
     rawInputEvent.actionTouchPoint.pressure = info->GetForce();
-    std::array<ArkUITouchPoint, MAX_POINTS> points;
     auto fingerList = info->GetFingerList();
     auto fingureIterator = std::begin(fingerList);
     rawInputEvent.targetDisplayId = info->GetTargetDisplayId();
@@ -682,7 +681,8 @@ void setGestureInterrupterToNode(
         CHECK_NULL_RETURN(node, GestureJudgeResult::CONTINUE);
         ArkUIAPIEventGestureAsyncEvent gestureEvent;
         ArkUITouchEvent rawInputEvent;
-        GetBaseGestureEvent(&gestureEvent, rawInputEvent, info);
+        std::array<ArkUITouchPoint, MAX_POINTS> points;
+        GetBaseGestureEvent(&gestureEvent, rawInputEvent, info, points);
         auto gestureInfo = current->GetGestureInfo();
         CHECK_NULL_RETURN(gestureInfo, GestureJudgeResult::CONTINUE);
         GetUniqueGestureEvent(&gestureEvent, gestureInfo->GetRecognizerType(), info);
