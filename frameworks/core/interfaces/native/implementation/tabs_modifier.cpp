@@ -175,7 +175,7 @@ void VerticalImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
-        // TODO: Reset value
+        TabsModelNG::SetIsVertical(frameNode, false);
         return;
     }
     TabsModelNG::SetIsVertical(frameNode, *convValue);
@@ -194,7 +194,7 @@ void ScrollableImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
-        // TODO: Reset value
+        TabsModelNG::SetScrollable(frameNode, true);
         return;
     }
     TabsModelNG::SetScrollable(frameNode, *convValue);
@@ -257,7 +257,7 @@ void AnimationDurationImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<float>(*value);
     if (!convValue) {
-        // TODO: Reset value
+        TabsModelNG::SetAnimationDuration(frameNode, -1);
         return;
     }
     TabsModelNG::SetAnimationDuration(frameNode, *convValue);
@@ -286,7 +286,7 @@ void OnChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        TabsModelNG::SetOnChange(frameNode, nullptr);
         return;
     }
     auto onChange = [arkCallback = CallbackHelper(*optValue)](const BaseEventInfo* info) {
@@ -307,7 +307,7 @@ void OnSelectedImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        TabsModelNG::SetOnSelected(frameNode, nullptr);
         return;
     }
     auto onSelected = [arkCallback = CallbackHelper(*optValue), node = AceType::WeakClaim(frameNode)](
@@ -330,7 +330,7 @@ void OnTabBarClickImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        TabsModelNG::SetOnTabBarClick(frameNode, nullptr);
         return;
     }
     auto onTabBarClick = [arkCallback = CallbackHelper(*optValue)](const BaseEventInfo* info) {
@@ -351,7 +351,7 @@ void OnUnselectedImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        TabsModelNG::SetOnUnselected(frameNode, nullptr);
         return;
     }
     auto onUnselected = [arkCallback = CallbackHelper(*optValue), node = AceType::WeakClaim(frameNode)](
@@ -374,7 +374,7 @@ void OnAnimationStartImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        TabsModelNG::SetOnAnimationStart(frameNode, nullptr);
         return;
     }
     auto onAnimationStart = [arkCallback = CallbackHelper(*optValue)](
@@ -396,7 +396,7 @@ void OnAnimationEndImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        TabsModelNG::SetOnAnimationEnd(frameNode, nullptr);
         return;
     }
     auto onAnimationEnd = [arkCallback = CallbackHelper(*optValue)](int32_t index, const AnimationCallbackInfo& info) {
@@ -416,7 +416,7 @@ void OnGestureSwipeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        TabsModelNG::SetOnGestureSwipe(frameNode, nullptr);
         return;
     }
     auto onGestureSwipe = [arkCallback = CallbackHelper(*optValue)](int32_t index, const AnimationCallbackInfo& info) {
@@ -436,7 +436,7 @@ void FadingEdgeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
-        // TODO: Reset value
+        TabsModelNG::SetFadingEdge(frameNode, true);
         return;
     }
     TabsModelNG::SetFadingEdge(frameNode, *convValue);
@@ -458,7 +458,7 @@ void BarOverlapImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
-        // TODO: Reset value
+        TabsModelNG::SetBarOverlap(frameNode, false);
         return;
     }
     TabsModelNG::SetBarOverlap(frameNode, *convValue);
@@ -475,12 +475,12 @@ void BarGridAlignImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    BarGridColumnOptions columnOption;
     auto convValue = Converter::OptConvert<BarGridColumnOptions>(*value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
+    if (convValue) {
+        columnOption = convValue.value();
     }
-    TabsModelNG::SetBarGridAlign(frameNode, *convValue);
+    TabsModelNG::SetBarGridAlign(frameNode, columnOption);
 }
 void CustomContentTransitionImpl(Ark_NativePointer node,
                                  const Opt_TabsCustomContentTransitionCallback* value)
@@ -489,7 +489,8 @@ void CustomContentTransitionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        TabsModelNG::SetIsCustomAnimation(frameNode, false);
+        TabsModelNG::SetOnCustomAnimation(frameNode, nullptr);
         return;
     }
     auto accessor = GetTabContentTransitionProxyAccessor();
@@ -537,25 +538,28 @@ void BarBackgroundBlurStyle1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto option = Converter::OptConvert<BlurStyleOption>(*options);
-    if (!option) {
-        // TODO: Reset value
-        return;
+    BlurStyleOption option;
+    auto blurStyle = Converter::OptConvert<BlurStyle>(*style);
+    auto bluroption = Converter::OptConvert<BlurStyleOption>(*options);
+    if (bluroption) {
+        option = bluroption.value();
     }
-    // TODO: style parameter?
-    TabsModelNG::SetBarBackgroundBlurStyle(frameNode, *option);
+    if (blurStyle) {
+        option.blurStyle = blurStyle.value();
+    }
+    TabsModelNG::SetBarBackgroundBlurStyle(frameNode, option);
 }
 void BarBackgroundEffectImpl(Ark_NativePointer node,
                              const Opt_BackgroundEffectOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    EffectOption option;
     auto convValue = Converter::OptConvert<EffectOption>(*value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
+    if (convValue) {
+        option = convValue.value();
     }
-    TabsModelNG::SetBarBackgroundEffect(frameNode, *convValue);
+    TabsModelNG::SetBarBackgroundEffect(frameNode, option);
 }
 void PageFlipModeImpl(Ark_NativePointer node,
                       const Opt_PageFlipMode* value)
@@ -573,7 +577,7 @@ void OnContentWillChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        TabsModelNG::SetOnContentWillChange(frameNode, nullptr);
         return;
     }
     auto callback = [callback = CallbackHelper(*optValue)](
