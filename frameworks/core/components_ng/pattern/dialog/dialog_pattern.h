@@ -69,7 +69,7 @@ public:
 
     bool ShouldDismiss() const
     {
-        if (onWillDismiss_) {
+        if (onWillDismiss_ && !isDialogDisposed_) {
             return true;
         }
         return false;
@@ -90,7 +90,7 @@ public:
 
     void CallOnWillDismiss(const int32_t reason)
     {
-        if (onWillDismiss_) {
+        if (onWillDismiss_ && !isDialogDisposed_) {
             onWillDismiss_(reason);
         }
     }
@@ -310,6 +310,11 @@ public:
         return true;
     }
 
+    void SetIsDialogDisposed(bool isDialogDisposed)
+    {
+        isDialogDisposed_ = isDialogDisposed;
+    }
+
     bool IsShowInFreeMultiWindow();
 
     void OverlayDismissDialog(const RefPtr<FrameNode>& dialogNode);
@@ -428,6 +433,7 @@ private:
     std::function<void()> onWillDisappearCallback_ = nullptr;
     std::unordered_map<DialogContentNode, RefPtr<FrameNode>> contentNodeMap_;
     bool isUIExtensionSubWindow_ = false;
+    bool isDialogDisposed_ = false;
     RectF hostWindowRect_;
 };
 } // namespace OHOS::Ace::NG
