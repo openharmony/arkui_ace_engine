@@ -164,7 +164,6 @@ import { RoundedRectOptions, RectOptions } from "./../rect"
 import { RowOptions, RowOptionsV2 } from "./../row"
 import { StackOptions } from "./../stack"
 import { TransformationMatrix } from "./../arkui-common"
-import { VirtualScrollOptions, VirtualScrollOptionsInternal } from "./../repeat"
 import { FlexSpaceOptions, FlexOptions } from "./../flex"
 import { ImageFrameInfo } from "./../imageAnimator"
 import { MenuItemGroupOptions } from "./../menuItemGroup"
@@ -11921,11 +11920,6 @@ export class Deserializer extends DeserializerBase {
         const height_result : number | string | undefined = height_buf
         let value : ViewportRect = ({x: x_result, y: y_result, width: width_result, height: height_result} as ViewportRect)
         return value
-    }
-    readVirtualScrollOptions(): VirtualScrollOptions {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return VirtualScrollOptionsInternal.fromPtr(ptr)
     }
     readVisibleAreaEventOptions(): VisibleAreaEventOptions {
         let valueDeserializer : Deserializer = this

@@ -163,7 +163,6 @@ import { RoundedRectOptions, RectOptions } from "./../rect"
 import { RowOptions, RowOptionsV2 } from "./../row"
 import { StackOptions } from "./../stack"
 import { TransformationMatrix } from "./../arkui-common"
-import { VirtualScrollOptions, VirtualScrollOptionsInternal } from "./../repeat"
 import { FlexSpaceOptions, FlexOptions } from "./../flex"
 import { ImageFrameInfo } from "./../imageAnimator"
 import { MenuItemGroupOptions } from "./../menuItemGroup"
@@ -7388,10 +7387,6 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeString(value_height_value_1)
             }
         }
-    }
-    writeVirtualScrollOptions(value: VirtualScrollOptions): void {
-        let valueSerializer : Serializer = this
-        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeVisibleAreaEventOptions(value: VisibleAreaEventOptions): void {
         let valueSerializer : Serializer = this
