@@ -83,6 +83,14 @@ std::string ConvertOrientationToString(ImageRotateOrientation orientation)
             return "DOWN";
         case ImageRotateOrientation::LEFT:
             return "LEFT";
+        case ImageRotateOrientation::UP_MIRROR:
+            return "UP_MIRROR";
+        case ImageRotateOrientation::RIGHT_MIRROR:
+            return "RIGHT_MIRROR";
+        case ImageRotateOrientation::DOWN_MIRROR:
+            return "DOWN_MIRROR";
+        case ImageRotateOrientation::LEFT_MIRROR:
+            return "LEFT_MIRROR";
         case ImageRotateOrientation::AUTO:
             return "AUTO";
         default:
@@ -517,7 +525,7 @@ void ImagePattern::UpdateOrientation()
         return;
     }
     imageObj->SetUserOrientation(userOrientation_);
-    auto selfOrientation_ = imageObj->GetOrientation();
+    selfOrientation_ = imageObj->GetOrientation();
     if (userOrientation_ == ImageRotateOrientation::UP) {
         joinOrientation_ = ImageRotateOrientation::UP;
         return;
