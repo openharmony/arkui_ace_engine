@@ -538,6 +538,9 @@ public:
 
     bool SetIsFocusActive(bool isFocusActive,
         FocusActiveReason reason = FocusActiveReason::KEYBOARD_EVENT, bool autoFocusInactive = true);
+    bool SyncWindowsFocus(
+        bool isFocusActive, FocusActiveReason reason = FocusActiveReason::KEYBOARD_EVENT,
+        bool autoFocusInactive = true);
 
     void AddIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback);
     void RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node);
