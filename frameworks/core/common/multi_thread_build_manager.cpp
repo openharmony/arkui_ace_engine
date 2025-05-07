@@ -190,4 +190,17 @@ bool MultiThreadBuildManager::PostUITask(int32_t contextId, std::function<void()
         uiTask();
         }, TaskExecutor::TaskType::UI, "ArkUISyncUITask");
 }
+
+bool MultiThreadBuildManager::PostUITaskAndWait(int32_t contextId, std::function<void()>&& uiTask)
+{
+    ContainerScope scope(contextId);
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, false);
+    return taskExecutor->PostSyncTask([contextId, uiTask = std::move(uiTask)]() {
+        ContainerScope scope(contextId);
+        uiTask();
+        }, TaskExecutor::TaskType::UI, "ArkUISyncTaskAndWait");
+}
 } // namespace OHOS::Ace
