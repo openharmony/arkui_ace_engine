@@ -20,6 +20,7 @@
 #include <cmath>
 #include <mutex>
 #include <thread>
+#include <deque>
 
 #include "adapter/ohos/entrance/picker/picker_haptic_interface.h"
 #include "core/components/common/layout/screen_system_manager.h"
@@ -59,14 +60,19 @@ private:
     bool IsThreadNone();
     double ConvertPxToMillimeters(double px) const;
     size_t GetCurrentSpeedInMm();
+    int8_t GetPlayStatus();
 
+    bool isInHapticLoop_ = false;
+    bool isLoopReadyToStop_ = false;
+    bool isHapticCanLoopPlay_ = false;
     ThreadStatus playThreadStatus_ = ThreadStatus::NONE;
     std::recursive_mutex threadMutex_;
     std::condition_variable_any threadCv_;
     VelocityTracker velocityTracker_;
-    double scrollValue_ = 0.0;
     int32_t effectSourceId_ = -1;
     size_t absSpeedInMm_ = 0;
+    uint64_t  lastHandleDeltaTime_ = 0;
+    std::deque<double> recentSpeeds_;
     std::shared_ptr<Media::AudioHapticPlayer> effectAudioHapticPlayer_ = nullptr;
     std::shared_ptr<Media::AudioHapticManager> audioHapticManager_ = nullptr;
     std::unique_ptr<std::thread> playThread_ = nullptr;

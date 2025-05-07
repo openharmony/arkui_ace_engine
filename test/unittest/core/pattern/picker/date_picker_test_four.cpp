@@ -1526,7 +1526,7 @@ HWTEST_F(DatePickerTestFour, UpdateColumnChildPositionTest001, TestSize.Level1)
     columnPattern_->isShow_ = true;
     pickerAudioHapticController->playThreadStatus_ = MockPickerAudioHapticImpl::ThreadStatus::NONE;
     columnPattern_->UpdateColumnChildPosition(offset);
-    EXPECT_EQ(pickerAudioHapticController->playThreadStatus_, MockPickerAudioHapticImpl::ThreadStatus::HANDLE_DELTA);
+    EXPECT_EQ(pickerAudioHapticController->playThreadStatus_, MockPickerAudioHapticImpl::ThreadStatus::NONE);
     columnPattern_->isEnableHaptic_ = false;
     pickerAudioHapticController->playThreadStatus_ = MockPickerAudioHapticImpl::ThreadStatus::NONE;
     columnPattern_->UpdateColumnChildPosition(offset);

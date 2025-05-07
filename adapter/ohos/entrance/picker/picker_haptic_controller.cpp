@@ -14,15 +14,20 @@
  */
 
 #include "adapter/ohos/entrance/picker/picker_haptic_controller.h"
+#include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 using std::chrono_literals::operator""s;
 using std::chrono_literals::operator""ms;
 const std::string AUDIO_TEST_URI = "/system/etc/arkui/timepicker.ogg";
-const std::string EFFECT_ID_NAME = "haptic.clock.timer";
-constexpr size_t SPEED_THRESHOLD_156_MM_PER_SEC = 156;
-constexpr size_t SPEED_PLAY_ONCE_5_MM_PER_SEC = 5;
+const std::string EFFECT_ID_NAME = "haptic.slide";
+constexpr size_t SPEED_PLAY_ONCE = 0;
+constexpr size_t SPEED_MAX = 5000;
+constexpr size_t SPEED_THRESHOLD = 1560;
+constexpr size_t TREND_COUNT = 3;
+constexpr std::chrono::milliseconds DEFAULT_DELAY(40);
+constexpr std::chrono::milliseconds EXTENDED_DELAY(50);
 } // namespace
 
 PickerHapticController::PickerHapticController(const std::string& uri, const std::string& effectId) noexcept
@@ -119,42 +124,51 @@ void PickerHapticController::ThreadLoop()
     while (!IsThreadNone()) {
         {
             std::unique_lock<std::recursive_mutex> lock(threadMutex_);
-            threadCv_.wait(lock, [this]() { return IsThreadPlaying() || IsThreadPlayOnce() || IsThreadNone(); });
+            threadCv_.wait(lock, [this]() { return IsThreadPlaying() || IsThreadPlayOnce(); });
             if (IsThreadNone()) {
                 return;
             }
         }
         CHECK_NULL_VOID(audioGroupMngr_);
         CHECK_NULL_VOID(effectAudioHapticPlayer_);
+        isInHapticLoop_ = true;
         auto vol = audioGroupMngr_->GetVolume(AudioStandard::AudioVolumeType::STREAM_RING);
         auto userVolume = audioGroupMngr_->GetSystemVolumeInDb(
             AudioStandard::AudioVolumeType::STREAM_RING, vol, AudioStandard::DEVICE_TYPE_SPEAKER);
 
         // Set different volumes for different sliding speeds:
         //    sound effect loudness
-        //    (dB) = sound effect dB set by the user + (0.0066 screen movement speed (mm/s) - 0.01)
+        //    (dB) = 0.6f + (maxVolume - 0.6f) *
+        //                  ((screen movement speed (mm/s) - SPEED_THRESHOLD) / (SPEED_MAX - SPEED_THRESHOLD))
         //    the range of volume interface setting is [0.0f, 1.0f]
-        float volume = userVolume + 0.0066 * absSpeedInMm_ - 0.01;
-        volume = std::clamp(volume, 0.0f, 1.0f);
+        float maxVolume = 0.6f + 0.4f * userVolume;
+        float volume = 0.6f + (maxVolume - 0.6f) * ((static_cast<float>(absSpeedInMm_) - SPEED_THRESHOLD) /
+                                                       (SPEED_MAX - SPEED_THRESHOLD));
+        volume = std::clamp(volume, 0.6f, 1.f);
 
         // Different vibration parameters for different sliding speeds:
         //    the frequency is between 260~300Hz and fixed, the vibration amount
-        //    (g) = (0.007 * screen movement speed (mm/s) + 0.3) * 100
-        //    the range of haptic intensity interface setting is [1.0f, 100.0f]
-        float haptic = ((absSpeedInMm_ == 0) ? 0 : absSpeedInMm_ * 0.007 + 0.3) * 100;
-        haptic = std::clamp(haptic, 1.0f, 100.0f);
-
-        auto startTime = std::chrono::high_resolution_clock::now();
+        //    (g) = screen movement speed (mm/s) * 0.01f + 50.f
+        //    the range of haptic intensity interface setting is [50.0f, 98.0f]
+        float haptic = absSpeedInMm_ * 0.01f + 50.f;
+        haptic = std::clamp(haptic, 50.f, 98.f);
         effectAudioHapticPlayer_->SetVolume(volume);
         effectAudioHapticPlayer_->SetHapticIntensity(haptic);
         effectAudioHapticPlayer_->Start();
-        if (IsThreadPlaying()) {
+
+        {
+            auto startTime = std::chrono::high_resolution_clock::now();
             std::unique_lock<std::recursive_mutex> lock(threadMutex_);
-            threadCv_.wait_until(lock, startTime + 40ms);
-        } else if (IsThreadPlayOnce()) {
-            std::unique_lock<std::recursive_mutex> lock(threadMutex_);
-            playThreadStatus_ = ThreadStatus::READY;
+            std::chrono::milliseconds delayTime = DEFAULT_DELAY;
+            if (IsThreadPlayOnce() && isLoopReadyToStop_) { // 50ms delay after 40ms loop ends
+                delayTime = EXTENDED_DELAY;
+            }
+            threadCv_.wait_until(lock, startTime + delayTime);
+            if (IsThreadPlayOnce() || isLoopReadyToStop_) {
+                playThreadStatus_ = ThreadStatus::READY;
+            }
         }
+        isInHapticLoop_ = false;
     }
 }
 
@@ -163,7 +177,7 @@ void PickerHapticController::Play(size_t speed)
     if (!playThread_) {
         InitPlayThread();
     }
-    bool needNotify = !IsThreadPlaying();
+    bool needNotify = !IsThreadPlaying() && !IsThreadPlayOnce();
     {
         std::lock_guard<std::recursive_mutex> guard(threadMutex_);
         absSpeedInMm_ = speed;
@@ -179,13 +193,20 @@ void PickerHapticController::PlayOnce()
     if (IsThreadPlaying()) {
         return;
     }
+    if (!playThread_) {
+        InitPlayThread();
+    }
 
+    bool needNotify = !IsThreadPlaying() && !IsThreadPlayOnce();
     {
         std::lock_guard<std::recursive_mutex> guard(threadMutex_);
         playThreadStatus_ = ThreadStatus::PLAY_ONCE;
-        absSpeedInMm_ = SPEED_PLAY_ONCE_5_MM_PER_SEC;
+        absSpeedInMm_ = SPEED_PLAY_ONCE;
     }
-    threadCv_.notify_one();
+    if (needNotify) {
+        threadCv_.notify_one();
+    }
+    isHapticCanLoopPlay_ = true;
 }
 
 void PickerHapticController::Stop()
@@ -195,19 +216,38 @@ void PickerHapticController::Stop()
         playThreadStatus_ = ThreadStatus::READY;
     }
     threadCv_.notify_one();
-    scrollValue_ = 0.0;
+    lastHandleDeltaTime_ = 0;
 }
 
 void PickerHapticController::HandleDelta(double dy)
 {
-    auto startTime = std::chrono::high_resolution_clock::now();
-    scrollValue_ += dy;
-    velocityTracker_.UpdateTrackerPoint(0, scrollValue_, startTime);
-    auto scrollSpeed = GetCurrentSpeedInMm();
-    if (GreatOrEqual(scrollSpeed, SPEED_THRESHOLD_156_MM_PER_SEC)) {
+    uint64_t currentTime = GetMilliseconds();
+    uint64_t intervalTime = currentTime - lastHandleDeltaTime_;
+    CHECK_EQUAL_VOID(intervalTime, 0);
+
+    lastHandleDeltaTime_ = currentTime;
+    auto scrollSpeed = std::abs(ConvertPxToMillimeters(dy) / intervalTime) * 1000;
+    if (scrollSpeed > SPEED_MAX) {
+        scrollSpeed = SPEED_MAX;
+    }
+    recentSpeeds_.push_back(scrollSpeed);
+    if (recentSpeeds_.size() > TREND_COUNT) {
+        recentSpeeds_.pop_front();
+    }
+
+    if (!isInHapticLoop_ && isLoopReadyToStop_) {
+        // play haptic after 40ms 1oop
+        isLoopReadyToStop_ = false;
+        playThreadStatus_ = ThreadStatus::READY;
+        PlayOnce();
+    } else if (isHapticCanLoopPlay_ && GetPlayStatus() == 1) { // 40ms 1oop
         Play(scrollSpeed);
-    } else {
-        Stop();
+    } else if (GetPlayStatus() == -1 && IsThreadPlaying() && !isLoopReadyToStop_) {
+        // judging the time of next haptic after 40ms loop ends
+        isLoopReadyToStop_ = true;
+        isHapticCanLoopPlay_ = false;
+        recentSpeeds_.clear();
+        absSpeedInMm_ = scrollSpeed;
     }
 }
 
@@ -223,4 +263,22 @@ size_t PickerHapticController::GetCurrentSpeedInMm()
     return std::abs(ConvertPxToMillimeters(velocityInPixels));
 }
 
+int8_t PickerHapticController::GetPlayStatus()
+{
+    if (recentSpeeds_.size() < TREND_COUNT) {
+        return 0;
+    }
+    bool allAbove = true;
+    bool allBelow = true;
+    for (size_t i = 0; i < TREND_COUNT; ++i) {
+        const double speed = recentSpeeds_[i];
+        if (speed <= SPEED_THRESHOLD) {
+            allAbove = false;
+        }
+        if (speed >= SPEED_THRESHOLD) {
+            allBelow = false;
+        }
+    }
+    return allAbove ? 1 : (allBelow ? -1 : 0); // 1 : play  -1 : playnoce  0 : other
+}
 } // namespace OHOS::Ace::NG
