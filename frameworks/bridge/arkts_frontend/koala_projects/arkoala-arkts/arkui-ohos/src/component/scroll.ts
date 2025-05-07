@@ -58,47 +58,46 @@ export class Scroller implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._Scroller_getFinalizer()
     }
-    public scrollTo(options: ScrollOptions): void {
+    public scrollTo(options: ScrollOptions): undefined {
         const options_casted = options as (ScrollOptions)
-        this.scrollTo_serialize(options_casted)
-        return
+        return this.scrollTo_serialize(options_casted)
     }
-    public scrollEdge(value: Edge, options?: ScrollEdgeOptions): void {
+    public scrollEdge(value: Edge, options?: ScrollEdgeOptions): undefined {
         const value_casted = value as (Edge)
         const options_casted = options as (ScrollEdgeOptions | undefined)
-        this.scrollEdge_serialize(value_casted, options_casted)
-        return
+        return this.scrollEdge_serialize(value_casted, options_casted)
     }
     public fling(velocity: number): void {
         const velocity_casted = velocity as (number)
         this.fling_serialize(velocity_casted)
         return
     }
-    public scrollPage(value: ScrollPageOptions): void {
+    public scrollPage(value: ScrollPageOptions | Literal_Boolean_next_Axis_direction): undefined {
         const value_type = runtimeType(value)
         if (TypeChecker.isScrollPageOptions(value, true, false)) {
             const value_casted = value as (ScrollPageOptions)
-            this.scrollPage0_serialize(value_casted)
-            return
+            return this.scrollPage0_serialize(value_casted)
+        }
+        if (((RuntimeType.OBJECT) == (value_type)) && (TypeChecker.isLiteral_Boolean_next_Axis_direction(value, true, false))) {
+            const value_casted = value as (Literal_Boolean_next_Axis_direction)
+            return this.scrollPage1_serialize(value_casted)
         }
         throw new Error("Can not select appropriate overload")
     }
     public currentOffset(): OffsetResult {
         return this.currentOffset_serialize()
     }
-    public scrollToIndex(value: number, smooth?: boolean, align?: ScrollAlign, options?: ScrollToIndexOptions): void {
+    public scrollToIndex(value: number, smooth?: boolean, align?: ScrollAlign, options?: ScrollToIndexOptions): undefined {
         const value_casted = value as (number)
         const smooth_casted = smooth as (boolean | undefined)
         const align_casted = align as (ScrollAlign | undefined)
         const options_casted = options as (ScrollToIndexOptions | undefined)
-        this.scrollToIndex_serialize(value_casted, smooth_casted, align_casted, options_casted)
-        return
+        return this.scrollToIndex_serialize(value_casted, smooth_casted, align_casted, options_casted)
     }
-    public scrollBy(dx: Length, dy: Length): void {
+    public scrollBy(dx: Length, dy: Length): undefined {
         const dx_casted = dx as (Length)
         const dy_casted = dy as (Length)
-        this.scrollBy_serialize(dx_casted, dy_casted)
-        return
+        return this.scrollBy_serialize(dx_casted, dy_casted)
     }
     public isAtEnd(): boolean {
         return this.isAtEnd_serialize()
