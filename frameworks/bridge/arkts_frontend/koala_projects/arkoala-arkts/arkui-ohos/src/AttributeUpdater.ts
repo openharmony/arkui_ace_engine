@@ -48,4 +48,10 @@ export class AttributeUpdater<T, C = Initializer<T>> implements AttributeModifie
     public get updateConstructorParams(): C {
         return this.constructorParams!;
     }
+    public currentState:CurrentStateEnum = CurrentStateEnum.INIT;
+}
+
+export enum CurrentStateEnum {
+    INIT,
+    UPDATE
 }

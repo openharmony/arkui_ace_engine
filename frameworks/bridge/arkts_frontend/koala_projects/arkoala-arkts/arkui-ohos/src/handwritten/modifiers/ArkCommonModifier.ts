@@ -104,6 +104,17 @@ export function applyUIAttributes<T>(modifier: AttributeModifier<T>, nativeNode:
    modifier.applySelectedAttribute(nativeNode._attributeSet! as T);
 }
 
+export function applyUIAttributesUpdate<T>(modifier: AttributeModifier<T>, nativeNode: ArkCommonMethodPeer): void {
+    //let status = ArkUIGeneratedNativeModule._UIStateGet(nativeNode.peer.ptr);
+    //applyNormalAttribute if status is normal
+    modifier.applyNormalAttribute(nativeNode._attributeSet! as T);
+    modifier.applyPressedAttribute(nativeNode._attributeSet! as T);
+    modifier.applyFocusedAttribute(nativeNode._attributeSet! as T);
+    modifier.applyDisabledAttribute(nativeNode._attributeSet! as T);
+    modifier.applySelectedAttribute(nativeNode._attributeSet! as T);
+ }
+ 
+
 export class ModifierWithKey<T> extends BaseModifier {
    stageValue: T | undefined;
    value: T | undefined;
