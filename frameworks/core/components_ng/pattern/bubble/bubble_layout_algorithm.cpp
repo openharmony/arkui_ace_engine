@@ -266,10 +266,13 @@ void BubbleLayoutAlgorithm::FitAvaliableRect(LayoutWrapper* layoutWrapper, bool 
         auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
         container = AceEngine::Get().GetContainer(parentContainerId);
     }
+    CHECK_NULL_VOID(container);
     auto isFreeMultiWindow = container->IsFreeMultiWindow();
     CHECK_EQUAL_VOID(expandDisplay || isFreeMultiWindow, false);
     auto availableRect = OverlayManager::GetDisplayAvailableRect(bubbleNode,
         static_cast<int32_t>(SubwindowType::TYPE_POPUP));
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "popup currentId: %{public}d, displayAvailableRect: %{public}s",
+        containerId, availableRect.ToString().c_str());
     if (showInSubWindow) {
         CHECK_EQUAL_VOID(container->IsSceneBoardWindow(), true);
         marginTop_ = std::max(marginTop_, static_cast<float>(availableRect.Top()));
