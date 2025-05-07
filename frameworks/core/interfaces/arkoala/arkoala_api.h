@@ -4279,6 +4279,9 @@ struct ArkUITextInputModifier {
     void (*setTextInputStrokeColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetTextInputStrokeColor)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTextInputStrokeColor)(ArkUINodeHandle node);
+    void (*setTextInputEnableAutoFillAnimation)(ArkUINodeHandle node, ArkUI_Uint32 enableAutoFillAnimation);
+    ArkUI_Int32 (*getTextInputEnableAutoFillAnimation)(ArkUINodeHandle node);
+    void (*resetTextInputEnableAutoFillAnimation)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {

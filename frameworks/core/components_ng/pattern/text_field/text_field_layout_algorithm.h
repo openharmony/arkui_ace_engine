@@ -111,6 +111,8 @@ protected:
         const std::u16string& content, bool needObscureText, CreateParagraphData paragraphData);
     void CreateInlineParagraph(const TextStyle& textStyle, std::u16string content, bool needObscureText,
         int32_t nakedCharPosition, CreateParagraphData paragraphData);
+    void CreateAutoFillParagraph(const TextStyle& textStyle, std::u16string content, bool needObscureText,
+        int32_t nakedCharPosition, CreateParagraphData paragraphData);
     void SetPropertyToModifier(const TextStyle& textStyle, RefPtr<TextFieldContentModifier> modifier);
 
     float GetTextFieldDefaultHeight();

@@ -3186,6 +3186,19 @@ typedef enum {
     NODE_TEXT_INPUT_KEYBOARD_APPEARANCE = 7035,
 
     /**
+     * @brief Set whether to enable the auto fill animation or not.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: Whether to enable the auto fill animation.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .value[0].i32: Get the flag of whether the auto fill animation is enabled.\n
+     *
+     * @since 20
+     */
+     NODE_TEXT_INPUT_ENABLE_FILL_ANIMATION = 7036,
+
+    /**
      * @brief Set the line height of the input node.
      * This attribute can be set, reset, and obtained as required through APIs.
      *

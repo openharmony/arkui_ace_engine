@@ -75,6 +75,7 @@ public:
         ResetSelectionMenuHidden();
         ResetPasswordRules();
         ResetEnableAutoFill();
+        ResetEnableAutoFillAnimation();
         ResetCleanNodeStyle();
         ResetIconSize();
         ResetIconSrc();
@@ -103,6 +104,7 @@ public:
         json->PutExtAttr("showUnderline", propShowUnderline_.value_or(false), filter);
         json->PutExtAttr("passwordRules", propPasswordRules_.value_or("").c_str(), filter);
         json->PutExtAttr("enableAutoFill", propEnableAutoFill_.value_or(true), filter);
+        json->PutExtAttr("enableAutoFillAnimation", propEnableAutoFillAnimation_.value_or(true), filter);
         auto jsonCancelButton = JsonUtil::Create(true);
         jsonCancelButton->Put("style", static_cast<int32_t>(propCleanNodeStyle_.value_or(CleanNodeStyle::INPUT)));
         auto jsonIconOptions = JsonUtil::Create(true);
@@ -251,6 +253,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectionMenuHidden, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PasswordRules, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableAutoFill, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableAutoFillAnimation, bool, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectAllValue, bool, PROPERTY_UPDATE_NORMAL);
 
@@ -297,6 +300,7 @@ protected:
         value->propSelectionMenuHidden_ = CloneSelectionMenuHidden();
         value->propPasswordRules_ = ClonePasswordRules();
         value->propEnableAutoFill_ = CloneEnableAutoFill();
+        value->propEnableAutoFillAnimation_ = CloneEnableAutoFillAnimation();
         value->propShowPasswordText_ = CloneShowPasswordText();
         value->propCleanNodeStyle_ = CloneCleanNodeStyle();
         value->propIconSize_ = CloneIconSize();
