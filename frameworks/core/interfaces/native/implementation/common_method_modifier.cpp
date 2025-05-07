@@ -1759,6 +1759,10 @@ int64_t GetFormAnimationTimeInterval(const RefPtr<PipelineBase>& pipelineContext
     // return (GetMicroTickCount() - pipelineContext->GetFormAnimationStartTime()) / MICROSEC_TO_MILLISEC;
     return 0;
 }
+void RequestFrameImpl()
+{
+    ViewAbstract::RequestFrame();
+}
 void WidthImpl(Ark_NativePointer node,
                const Ark_Length* value)
 {
@@ -4637,6 +4641,7 @@ void KeyboardShortcutImpl(Ark_NativePointer node,
 const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
 {
     static const GENERATED_ArkUICommonMethodModifier ArkUICommonMethodModifierImpl {
+        CommonMethodModifier::RequestFrameImpl,
         CommonMethodModifier::ConstructImpl,
         CommonMethodModifier::WidthImpl,
         CommonMethodModifier::HeightImpl,

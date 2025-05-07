@@ -18,6 +18,7 @@ import { DataOperation, DataOperationType, DataAddOperation, DataDeleteOperation
 import { int32 } from "@koalaui/common"
 import { MutableState } from "@koalaui/runtime";
 import { DataChangeListener } from "./component/lazyForEach";
+import { requestFrame } from "./stateManagement";
 
 export class InternalListener implements DataChangeListener {
     parent: pointer
@@ -86,6 +87,7 @@ export class InternalListener implements DataChangeListener {
         if (index < 0) return
         this.startIndex = Math.min(this.startIndex, index);
         ++this.version.value
+        requestFrame()
     }
 
     onDatasetChange(dataOperations: DataOperation[]): void {

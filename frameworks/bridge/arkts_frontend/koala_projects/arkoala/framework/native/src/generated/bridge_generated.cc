@@ -1364,6 +1364,10 @@ Ark_NativePointer impl_CommonMethod_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getCommonMethodModifier()->construct(id, flags);
 }
 KOALA_INTEROP_DIRECT_2(CommonMethod_construct, Ark_NativePointer, Ark_Int32, Ark_Int32)
+void impl_CommonMethod_requestFrame() {
+    GetNodeModifiers()->getCommonMethodModifier()->requestFrame();
+}
+KOALA_INTEROP_DIRECT_V0(CommonMethod_requestFrame)
 void impl_CommonMethod_width(Ark_NativePointer thisPtr, const KLength& value) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         GetNodeModifiers()->getCommonMethodModifier()->setWidth(self, (const Ark_Length*)&value);

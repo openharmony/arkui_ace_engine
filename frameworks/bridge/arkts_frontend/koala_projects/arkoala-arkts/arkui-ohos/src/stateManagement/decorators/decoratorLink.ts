@@ -16,6 +16,7 @@
 import { DecoratedV1VariableBase, IDecoratedMutableVariable } from '../base/decoratorBase';
 import { setObservationDepth } from '../base/iObservedObject';
 import { WatchFunc, WatchFuncType } from './decoratorWatch';
+import { requestFrame } from "../tools/requestFrame";
 /** 
 * implementation of V1 @Link
 * 
@@ -86,6 +87,7 @@ export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
             // a @Link set  truggers a meta.fireChange on the source XXXDecoratedVariable
             // set also get above.
             this.sourceSet_!(newValue);
+            requestFrame();
         }
     }
 }

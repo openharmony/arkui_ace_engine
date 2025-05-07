@@ -21,6 +21,7 @@ import { DecoratedV1VariableBase, IDecoratedMutableVariable } from '../base/deco
 import { setObservationDepth } from '../base/iObservedObject';
 
 import { AppStorage } from '../storages/appStorage';
+import { requestFrame } from "../tools/requestFrame";
 
 
 export class StorageLinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
@@ -51,6 +52,7 @@ export class StorageLinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
             this.unregisterWatchFromObservedObjectChanges(oldValue);
             this.registerWatchForObservedObjectChanges(newValue);
             this.asLink!.set(newValue as NullableObject);
+            requestFrame();
         }
     }
 }
