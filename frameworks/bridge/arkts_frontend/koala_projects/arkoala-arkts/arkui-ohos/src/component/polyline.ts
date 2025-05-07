@@ -23,10 +23,12 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, UICommonShapeMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, UICommonMethod } from "./common"
+import { Length } from "./units"
 import { Point } from "./point"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ShapePoint } from './line'
 
 export class ArkPolylinePeer extends ArkCommonShapeMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -51,7 +53,7 @@ export class ArkPolylinePeer extends ArkCommonShapeMethodPeer {
         ArkUIGeneratedNativeModule._PolylineInterface_setPolylineOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    pointsAttribute(value: Array<Point> | undefined): void {
+    pointsAttribute(value: Array<ShapePoint> | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -60,8 +62,11 @@ export class ArkPolylinePeer extends ArkCommonShapeMethodPeer {
             const value_value  = value!
             thisSerializer.writeInt32(value_value.length as int32)
             for (let i = 0; i < value_value.length; i++) {
-                const value_value_element : Point = value_value[i]
-                thisSerializer.writePoint(value_value_element)
+                const value_value_element : [ Length, Length ] = value_value[i]
+                const value_value_element_0  = value_value_element[0]
+                thisSerializer.writeLength(value_value_element_0)
+                const value_value_element_1  = value_value_element[1]
+                thisSerializer.writeLength(value_value_element_1)
             }
         }
         ArkUIGeneratedNativeModule._PolylineAttribute_points(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -74,16 +79,16 @@ export interface PolylineOptions {
 }
 export type PolylineInterface = (options?: PolylineOptions) => PolylineAttribute;
 export interface PolylineAttribute extends CommonShapeMethod {
-    points(value: Array<Point> | undefined): this
+    points(value: Array<ShapePoint> | undefined): this
 }
 export interface UIPolylineAttribute extends UICommonShapeMethod {
     /** @memo */
-    points(value: Array<Point> | undefined): this
+    points(value: Array<ShapePoint> | undefined): this
     /** @memo */
 }
 export class ArkPolylineStyle extends ArkCommonShapeMethodStyle implements PolylineAttribute {
-    points_value?: Array<Point> | undefined
-    public points(value: Array<Point> | undefined): this {
+    points_value?: Array<ShapePoint> | undefined
+    public points(value: Array<ShapePoint> | undefined): this {
         return this
         }
 }
@@ -102,9 +107,9 @@ export class ArkPolylineComponent extends ArkCommonShapeMethodComponent implemen
         return this
     }
     /** @memo */
-    public points(value: Array<Point> | undefined): this {
+    public points(value: Array<ShapePoint> | undefined): this {
         if (this.checkPriority("points")) {
-            const value_casted = value as (Array<Point> | undefined)
+            const value_casted = value as (Array<ShapePoint> | undefined)
             this.getPeer()?.pointsAttribute(value_casted)
             return this
         }

@@ -390,6 +390,12 @@ export interface Type_XComponentInterface_callable1_value {
     libraryname?: string;
     controller?: XComponentController;
 }
+export interface XComponentParameter {
+    id: string;
+    type: XComponentType;
+    libraryname?: string;
+    controller?: XComponentController;
+}
 export type OnNativeLoadCallback = (event?: Object) => void;
 export type Callback_String_SurfaceRect_Void = (surfaceId: string, rect: SurfaceRect) => void;
 export interface XComponentAttribute extends CommonMethod {
@@ -447,7 +453,7 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
         return (this.peer as ArkXComponentPeer)
     }
     /** @memo */
-    public setXComponentOptions(value: Type_XComponentInterface_callable0_value | Type_XComponentInterface_callable1_value | XComponentOptions | NativeXComponentParameters): this {
+    public setXComponentOptions(value: XComponentParameter | XComponentOptions | NativeXComponentParameters): this {
         if (this.checkPriority("setXComponentOptions")) {
             const value_type = runtimeType(value)
             if (TypeChecker.isXComponentOptions(value, true, true, true, false)) {
@@ -455,19 +461,14 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
                 this.getPeer()?.setXComponentOptions2Attribute(options_casted)
                 return this
             }
-            if (RuntimeType.OBJECT == value_type) {
-                const value_casted = value as (Type_XComponentInterface_callable0_value)
-                this.getPeer()?.setXComponentOptions0Attribute(value_casted)
+            if (TypeChecker.isNativeXComponentParameters(value, true, true)) {
+                const params_casted = value as (NativeXComponentParameters)
+                this.getPeer()?.setXComponentOptions3Attribute(params_casted)
                 return this
             }
             if (RuntimeType.OBJECT == value_type) {
                 const value_casted = value as (Type_XComponentInterface_callable1_value)
                 this.getPeer()?.setXComponentOptions1Attribute(value_casted)
-                return this
-            }
-            if (TypeChecker.isNativeXComponentParameters(value, true, true)) {
-                const params_casted = value as (NativeXComponentParameters)
-                this.getPeer()?.setXComponentOptions3Attribute(params_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
@@ -538,7 +539,7 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
 export function XComponent(
     /** @memo */
     style: ((attributes: UIXComponentAttribute) => void) | undefined,
-    value: Type_XComponentInterface_callable0_value | Type_XComponentInterface_callable1_value | XComponentOptions | NativeXComponentParameters,
+    value: XComponentParameter | XComponentOptions | NativeXComponentParameters,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {

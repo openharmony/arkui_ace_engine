@@ -1349,6 +1349,17 @@ ShapePoint Convert(const Ark_Point& src)
 }
 
 template<>
+ShapePoint Convert(const Ark_ShapePoint& src)
+{
+    ShapePoint point = {0.0_vp, 0.0_vp};
+    auto x = Converter::OptConvert<Dimension>(src.value0);
+    auto y = Converter::OptConvert<Dimension>(src.value1);
+    point.first = x.value_or(0.0_vp);
+    point.second = y.value_or(0.0_vp);
+    return point;
+}
+
+template<>
 MenuOptionsParam Convert(const Ark_TextMenuItem& src)
 {
     MenuOptionsParam param;
@@ -2562,6 +2573,14 @@ void AssignCast(std::optional<NavigationTitlebarOptions>& dst, const Ark_Navigat
     }
     if (value.paddingStart.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         dst->brOptions.paddingStart = Converter::OptConvert<Dimension>(value.paddingStart);
+    }
+}
+
+template<>
+void AssignCast(std::optional<ShapePoint>& dst, const Opt_ShapePoint& src)
+{
+    if (src.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        dst = Converter::Convert<ShapePoint>(src.value);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

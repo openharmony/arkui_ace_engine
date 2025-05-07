@@ -134,14 +134,12 @@ void SetXComponentOptions2Impl(Ark_NativePointer node,
     LOGE("XComponentInterfaceModifier::SetXComponentOptions2Impl - Ark_ImageAIOptions is not supported");
     XComponentModelNG::SetImageAIOptions(frameNode, nullptr);
 
-#ifdef WRONG_MERGE
     auto peerPtr = options->controller;
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl>(peerPtr);
+    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peerPtr);
     XComponentModelNG::SetXComponentController(frameNode, peerImpl->controller);
     XComponentModelNG::SetControllerOnCreated(frameNode, peerImpl->GetOnSurfaceCreatedEvent());
     XComponentModelNG::SetControllerOnChanged(frameNode, peerImpl->GetOnSurfaceChangedEvent());
     XComponentModelNG::SetControllerOnDestroyed(frameNode, peerImpl->GetOnSurfaceDestroyedEvent());
-#endif
 #endif // XCOMPONENT_SUPPORTED
 }
 void SetXComponentOptions3Impl(Ark_NativePointer node,

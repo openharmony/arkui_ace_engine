@@ -159,7 +159,7 @@ import { PathOptions } from "./../path"
 import { PolygonOptions } from "./../polygon"
 import { PolylineOptions } from "./../polyline"
 import { RenderNode, RenderNodeInternal } from "./../arkui-rendernode"
-import { RoundedRectOptions, RectOptions } from "./../rect"
+import { RoundedRectOptions, RectOptions, RadiusItem } from "./../rect"
 import { RowOptions, RowOptionsV2 } from "./../row"
 import { StackOptions } from "./../stack"
 import { TransformationMatrix } from "./../arkui-common"
@@ -14374,34 +14374,21 @@ export class Serializer extends SerializerBase {
             const value_radius_value  = value_radius!
             let value_radius_value_type : int32 = RuntimeType.UNDEFINED
             value_radius_value_type = runtimeType(value_radius_value)
-            if (RuntimeType.NUMBER == value_radius_value_type) {
+            if (((RuntimeType.NUMBER) == (value_radius_value_type)) || ((RuntimeType.STRING) == (value_radius_value_type)) || (((RuntimeType.OBJECT) == (value_radius_value_type)) && (TypeChecker.isResource(value_radius_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
-                const value_radius_value_0  = value_radius_value as number
-                valueSerializer.writeNumber(value_radius_value_0)
+                const value_radius_value_0  = value_radius_value as Length
+                valueSerializer.writeLength(value_radius_value_0)
             }
-            else if (RuntimeType.STRING == value_radius_value_type) {
+            else if (((RuntimeType.OBJECT) == (value_radius_value_type)) && (Array.isArray(value_radius_value))) {
                 valueSerializer.writeInt8(1 as int32)
-                const value_radius_value_1  = value_radius_value as string
-                valueSerializer.writeString(value_radius_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_radius_value_type) {
-                valueSerializer.writeInt8(2 as int32)
-                const value_radius_value_2  = value_radius_value as Array<number | string>
-                valueSerializer.writeInt32(value_radius_value_2.length as int32)
-                for (let i = 0; i < value_radius_value_2.length; i++) {
-                    const value_radius_value_2_element : number | string = value_radius_value_2[i]
-                    let value_radius_value_2_element_type : int32 = RuntimeType.UNDEFINED
-                    value_radius_value_2_element_type = runtimeType(value_radius_value_2_element)
-                    if (RuntimeType.NUMBER == value_radius_value_2_element_type) {
-                        valueSerializer.writeInt8(0 as int32)
-                        const value_radius_value_2_element_0  = value_radius_value_2_element as number
-                        valueSerializer.writeNumber(value_radius_value_2_element_0)
-                    }
-                    else if (RuntimeType.STRING == value_radius_value_2_element_type) {
-                        valueSerializer.writeInt8(1 as int32)
-                        const value_radius_value_2_element_1  = value_radius_value_2_element as string
-                        valueSerializer.writeString(value_radius_value_2_element_1)
-                    }
+                const value_radius_value_1  = value_radius_value as Array<RadiusItem>
+                valueSerializer.writeInt32(value_radius_value_1.length as int32)
+                for (let i = 0; i < value_radius_value_1.length; i++) {
+                    const value_radius_value_1_element : RadiusItem = value_radius_value_1[i]
+                    const value_radius_value_1_element_0  = value_radius_value_1_element[0]
+                    valueSerializer.writeLength(value_radius_value_1_element_0)
+                    const value_radius_value_1_element_1  = value_radius_value_1_element[1]
+                    valueSerializer.writeLength(value_radius_value_1_element_1)
                 }
             }
         }
