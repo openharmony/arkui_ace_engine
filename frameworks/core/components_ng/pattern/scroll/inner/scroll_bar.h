@@ -391,14 +391,14 @@ public:
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json);
     void StopFlingAnimation();
 
-    void SetActiveBackgroundWidth(const Dimension& activeBackgroundWidth)
+    void SetArcActiveBackgroundWidth(const Dimension& activeBackgroundWidth)
     {
-        activeBackgroundWidth_ = activeBackgroundWidth;
+        arcActiveBackgroundWidth_ = activeBackgroundWidth;
     }
-
-    void SetActiveScrollBarWidth(const Dimension& activeScrollBarWidth)
+ 
+    void SetArcActiveScrollBarWidth(const Dimension& activeScrollBarWidth)
     {
-        activeScrollBarWidth_ = activeScrollBarWidth;
+        arcActiveScrollBarWidth_ = activeScrollBarWidth;
     }
 
     void SetArcBackgroundColor(const Color& backgroundColor)
@@ -526,80 +526,80 @@ protected:
         offsetScale_ = offsetScale;
     }
     
-    void SetNormalBackgroundWidth(const Dimension& normalBackgroundWidth)
+    void SetArcNormalBackgroundWidth(const Dimension& normalBackgroundWidth)
     {
-        normalBackgroundWidth_ = normalBackgroundWidth;
+        arcNormalBackgroundWidth_ = normalBackgroundWidth;
     }
-
-    const Dimension& GetNormalBackgroundWidth() const
+ 
+    const Dimension& GetArcNormalBackgroundWidth() const
     {
-        return normalBackgroundWidth_;
+        return arcNormalBackgroundWidth_;
     }
-
-    const Dimension& GetActiveBackgroundWidth() const
+ 
+    const Dimension& GetArcActiveBackgroundWidth() const
     {
-        return activeBackgroundWidth_;
+        return arcActiveBackgroundWidth_;
     }
-
-    void SetNormaMaxOffsetAngle(double normaMaxOffsetAngle)
+ 
+    void SetArcNormaMaxOffsetAngle(double normaMaxOffsetAngle)
     {
-        normaMaxOffsetAngle_ = normaMaxOffsetAngle;
+        arcNormaMaxOffsetAngle_ = normaMaxOffsetAngle;
     }
-
-    double GetNormaMaxOffsetAngle() const
+ 
+    double GetArcNormaMaxOffsetAngle() const
     {
-        return normaMaxOffsetAngle_;
+        return arcNormaMaxOffsetAngle_;
     }
-
-    void SetNormalStartAngle(double normalStartAngle)
+ 
+    void SetArcNormalStartAngle(double normalStartAngle)
     {
-        normalStartAngle_ = normalStartAngle;
+        arcNormalStartAngle_ = normalStartAngle;
     }
-
-    double GetNormalStartAngle() const
+ 
+    double GetArcNormalStartAngle() const
     {
         if (positionMode_ == PositionMode::LEFT) {
-            return -normalStartAngle_ - STRAIGHT_ANGLE;
+            return -arcNormalStartAngle_ - STRAIGHT_ANGLE;
         }
-        return normalStartAngle_;
+        return arcNormalStartAngle_;
     }
-
-    void SetActiveStartAngle(double activeStartAngle)
+ 
+    void SetArcActiveStartAngle(double activeStartAngle)
     {
-        activeStartAngle_ = activeStartAngle;
+        arcActiveStartAngle_ = activeStartAngle;
     }
-
-    double GetActiveStartAngle() const
+ 
+    double GetArcActiveStartAngle() const
     {
         if (positionMode_ == PositionMode::LEFT) {
-            return -activeStartAngle_ - STRAIGHT_ANGLE;
+            return -arcActiveStartAngle_ - STRAIGHT_ANGLE;
         }
-        return activeStartAngle_;
+        return arcActiveStartAngle_;
     }
-
-    void SetActiveMaxOffsetAngle(double activeMaxOffsetAngle)
+ 
+    void SetArcActiveMaxOffsetAngle(double activeMaxOffsetAngle)
     {
-        activeMaxOffsetAngle_ = activeMaxOffsetAngle;
+        arcActiveMaxOffsetAngle_ = activeMaxOffsetAngle;
     }
-
-    double GetActiveMaxOffsetAngle() const
+ 
+    double GetArcActiveMaxOffsetAngle() const
     {
-        return activeMaxOffsetAngle_;
+        return arcActiveMaxOffsetAngle_;
     }
-
-    void SetNormalScrollBarWidth(const Dimension& normalScrollBarWidth)
+ 
+    void SetArcNormalScrollBarWidth(const Dimension& normalScrollBarWidth)
     {
-        normalScrollBarWidth_ = normalScrollBarWidth;
+        arcNormalScrollBarWidth_ = normalScrollBarWidth;
     }
-
-    const Dimension& GetNormalScrollBarWidth() const
+ 
+    const Dimension& GetArcNormalScrollBarWidth() const
     {
-        return normalScrollBarWidth_;
+        return arcNormalScrollBarWidth_;
     }
-
-    const Dimension& GetActiveScrollBarWidth() const
+ 
+    const Dimension& GetArcActiveScrollBarWidth() const
     {
-        return activeScrollBarWidth_;
+        return arcActiveScrollBarWidth_;
     }
 
     double GetMinAngle() const
@@ -701,14 +701,15 @@ private:
     bool needAddLayoutInfo = false;
     bool isMousePressed_ = false;
 
-    Dimension normalBackgroundWidth_;
-    Dimension activeBackgroundWidth_;
-    double normalStartAngle_ = 0.0;
-    double activeStartAngle_ = 0.0;
-    double normaMaxOffsetAngle_ = 0.0;
-    double activeMaxOffsetAngle_ = 0.0;
-    Dimension normalScrollBarWidth_;
-    Dimension activeScrollBarWidth_;
+    // arcScrollBar info
+    Dimension arcNormalBackgroundWidth_;
+    Dimension arcActiveBackgroundWidth_;
+    double arcNormalStartAngle_ = 0.0;
+    double arcActiveStartAngle_ = 0.0;
+    double arcNormaMaxOffsetAngle_ = 0.0;
+    double arcActiveMaxOffsetAngle_ = 0.0;
+    Dimension arcNormalScrollBarWidth_;
+    Dimension arcActiveScrollBarWidth_;
     Color arcBackgroundColor_;
     Color arcForegroundColor_;
 };

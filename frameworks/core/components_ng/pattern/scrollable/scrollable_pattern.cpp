@@ -1119,8 +1119,8 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
             if (isRoundScroll_) {
                 scrollBar_->SetNormalWidth(Dimension(ARC_INITWIDTH_VAL));
                 scrollBar_->SetInactiveWidth(Dimension(ARC_INITWIDTH_VAL));
-                scrollBar_->SetActiveBackgroundWidth(barWidth.value());
-                scrollBar_->SetActiveScrollBarWidth(barWidth.value() - Dimension(ARC_INITWIDTH_HALF_VAL));
+                scrollBar_->SetArcActiveBackgroundWidth(barWidth.value());
+                scrollBar_->SetArcActiveScrollBarWidth(barWidth.value() - Dimension(ARC_INITWIDTH_HALF_VAL));
             } else {
                 scrollBar_->SetInactiveWidth(barWidth.value());
                 scrollBar_->SetNormalWidth(barWidth.value());
