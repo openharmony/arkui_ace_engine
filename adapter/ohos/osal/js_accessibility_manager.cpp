@@ -2928,7 +2928,6 @@ void JsAccessibilityManager::InitializeCallback()
     CHECK_NULL_VOID(client);
     bool isEnabled = false;
     client->IsEnabled(isEnabled);
-    client->IsScreenReaderEnabled(isScreenReaderEnabled_);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(isEnabled);
 
     auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
@@ -6636,6 +6635,7 @@ void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const 
                 AceApplicationInfo::GetInstance().SetAccessibilityEnabled(state);
                 jsAccessibilityManager->NotifyAccessibilitySAStateChange(state);
             } else if (eventType == AccessibilityStateEventType::EVENT_SCREEN_READER_STATE_CHANGED) {
+                jsAccessibilityManager->isScreenReaderEnabledInitialized_ = true;
                 jsAccessibilityManager->isScreenReaderEnabled_ = state;
             }
         },
@@ -7653,5 +7653,17 @@ void JsAccessibilityManager::OnAccessbibilityDetachFromMainTree(const RefPtr<NG:
         paintNodePattern->OnDetachFromFocusNode();
         RemoveAccessibilityFocusPaint(focusNode);
     }
+}
+
+bool JsAccessibilityManager::IsScreenReaderEnabled()
+{
+    if (!isScreenReaderEnabledInitialized_) {
+        auto client = AccessibilitySystemAbilityClient::GetInstance();
+        if (client) {
+            client->IsScreenReaderEnabled(isScreenReaderEnabled_);
+            isScreenReaderEnabledInitialized_ = true;
+        }
+    }
+    return isScreenReaderEnabled_;
 }
 } // namespace OHOS::Ace::Framework
