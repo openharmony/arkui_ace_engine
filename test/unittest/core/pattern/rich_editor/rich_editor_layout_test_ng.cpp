@@ -18,6 +18,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -28,6 +29,7 @@ class RichEditorLayoutTestNg : public RichEditorCommonTestNg {
 public:
     void SetUp() override;
     void TearDown() override;
+    RefPtr<RichEditorPattern> GetRichEditorPattern();
     static void TearDownTestSuite();
 };
 
@@ -60,6 +62,11 @@ void RichEditorLayoutTestNg::TearDownTestSuite()
     TestNG::TearDownTestSuite();
 }
 
+RefPtr<RichEditorPattern> RichEditorLayoutTestNg::GetRichEditorPattern()
+{
+    CHECK_NULL_RETURN(richEditorNode_, nullptr);
+    return richEditorNode_->GetPattern<RichEditorPattern>();
+}
 
 /**
  * @tc.name: OnDirtyLayoutWrapper001
@@ -250,9 +257,24 @@ HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm001, TestSize.Level1)
     auto paragraphManager = AceType::MakeRefPtr<ParagraphManager>();
     layoutAlgorithm->paragraphManager_ = paragraphManager;
 
+    ParagraphStyle testStyle = {};
+    EXPECT_CALL(*paragraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(testStyle));
     AddSpan(INIT_VALUE_1);
     layoutAlgorithm->spans_.emplace_back(richEditorPattern->spans_);
     layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+
+    ASSERT_NE(layoutAlgorithm->spans_.size(), 0);
+    for (const auto& group : layoutAlgorithm->spans_) {
+        for (const auto& child : group) {
+            if (!child) {
+                continue;
+            }
+            child->ResetReLayout();
+            child->MarkReCreateParagraph();
+        }
+    }
+    auto size = layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+    EXPECT_NE(size.value().Width(), 1.0f);
 
     layoutAlgorithm->spans_.clear();
     auto size1 = layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
