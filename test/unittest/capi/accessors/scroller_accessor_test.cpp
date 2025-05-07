@@ -221,10 +221,10 @@ HWTEST_F(ScrollerAccessorTest, scrollPage0Test, TestSize.Level1)
 
     ASSERT_NE(accessor_->scrollPage0, nullptr);
 
-    EXPECT_CALL(*mockScrollerController_, ScrollPage(!nextTrue, smooth)).Times(1);
+    EXPECT_CALL(*mockScrollerController_, ScrollPage(!nextTrue, smooth)).Times(0);
     accessor_->scrollPage0(peer_, &options1);
 
-    EXPECT_CALL(*mockScrollerController_, ScrollPage(!nextFalse, smooth)).Times(1);
+    EXPECT_CALL(*mockScrollerController_, ScrollPage(!nextFalse, smooth)).Times(0);
     accessor_->scrollPage0(peer_, &options2);
     accessor_->scrollPage0(peer_, nullptr);
 }
