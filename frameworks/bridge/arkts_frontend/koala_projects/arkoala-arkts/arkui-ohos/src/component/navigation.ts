@@ -513,8 +513,15 @@ export class NavPathStack implements MaterializedBase {
         thisSerializer.release()
     }
     private getAllPathName_serialize(): Array<string> {
-        const retval  = ArkUIGeneratedNativeModule._NavPathStack_getAllPathName(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._NavPathStack_getAllPathName(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<string> = new Array<string>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -524,8 +531,15 @@ export class NavPathStack implements MaterializedBase {
         return returnResult
     }
     private getIndexByName_serialize(name: string): Array<number> {
-        const retval  = ArkUIGeneratedNativeModule._NavPathStack_getIndexByName(this.peer!.ptr, name)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._NavPathStack_getIndexByName(this.peer!.ptr, name) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<number> = new Array<number>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -552,8 +566,15 @@ export class NavPathStack implements MaterializedBase {
         thisSerializer.release()
     }
     private getPathStack_serialize(): Array<NavPathInfo> {
-        const retval  = ArkUIGeneratedNativeModule._NavPathStack_getPathStack(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._NavPathStack_getPathStack(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<NavPathInfo> = new Array<NavPathInfo>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -1980,41 +2001,30 @@ export function Navigation(
                         })
                         manager.frozen = frozen
                     })
-                    InteropNativeModule._NativeLog("tongshijia current node is " + nodeState.value.toString())
                     let curNode = nodeState.value
                     let child = curNode.firstChild
                     while (child) {
-                        InteropNativeModule._NativeLog("tongshijia current node is " + child.toString())
                         child = child.firstChild
                     }
                     return nodeState.value
                 }
                 const value_casted = updater as ((name: string, param: object|undefined) => PeerNode)
                 NavExtender.setUpdateStackCallback(pathInfos!, () => {
-                    InteropNativeModule._NativeLog("tongshijia trigger navextender update")
                     addPartialUpdate(() => {
-                        InteropNativeModule._NativeLog("tongshijia start partial update callback")
                         if (!receiver.isNeedSync()) {
                             return
                         }
-                        InteropNativeModule._NativeLog("tongshijia trigger sync stack")
                         receiver.updateNeedSync(false)
                         let size: int32 = pathInfos!.size() as int32
                         let names: Array<string> = pathInfos!.getAllPathName()
-                        InteropNativeModule._NativeLog("tongshijia trigger get all pathname " + size)
                         for (let index: int32 = 0; index < size; index++) {
-                            InteropNativeModule._NativeLog("tongshijia check need create node index: " + index)
                             if (NavExtender.checkNeedCreate(receiver.getPeer().peer.ptr, index)) {
                                 let param = pathInfos!.getParamByIndex(index)
-                                InteropNativeModule._NativeLog("tongshijia trigger get navigation param")
                                 let node = value_casted(names[index], param)
-                                InteropNativeModule._NativeLog("tongshijia trigger add navigation node")
                                 NavExtender.setNavDestinationNode(pathInfos!, index, node.peer.ptr)
-                                InteropNativeModule._NativeLog("tongshijia trigger set navdestination node finish")
                             }
                         }
                         NavExtender.syncStack(pathInfos!)
-                        InteropNativeModule._NativeLog("tongshijia trigger sync stack finish")
                     }, __context, (isBefore: boolean) => {})
                     receiver.updateNeedSync(true)
                 })
