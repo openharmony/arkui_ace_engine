@@ -1061,22 +1061,6 @@ public:
     void RemoveFrameNodeChangeListener(int32_t nodeId);
     bool AddChangedFrameNode(const WeakPtr<FrameNode>& node);
     void RemoveChangedFrameNode(int32_t nodeId);
-    void SetForceSplitEnable(bool isForceSplit, const std::string& homePage)
-    {
-        TAG_LOGI(AceLogTag::ACE_ROUTER, "set force split %{public}s", isForceSplit ? "enable" : "disable");
-        isForceSplit_ = isForceSplit;
-        homePageConfig_ = homePage;
-    }
-
-    bool GetForceSplitEnable() const
-    {
-        return isForceSplit_;
-    }
-
-    std::string GetHomePageConfig() const
-    {
-        return homePageConfig_;
-    }
 
     bool CatchInteractiveAnimations(const std::function<void()>& animationCallback) override;
 
@@ -1512,8 +1496,6 @@ private:
     bool isShowTitle_ = false;
     int32_t lastAnimatorExpectedFrameRate_ = -1;
     bool isDoKeyboardAvoidAnimate_ = true;
-    bool isForceSplit_ = false;
-    std::string homePageConfig_;
 
     std::list<FrameCallbackFuncFromCAPI> frameCallbackFuncsFromCAPI_;
     std::list<FrameCallbackFunc> frameCallbackFuncs_;
