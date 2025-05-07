@@ -40,7 +40,7 @@ RefPtr<FrameNode> FormLinkModelNG::StsCreateFrameNode()
     auto* stack = ViewStackProcessor::GetInstance();
     if (stack == nullptr) {
         LOGE("stack is nullptr");
-        return;
+        return nullptr;
     }
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::FORM_LINK_ETS_TAG, nodeId);
