@@ -538,8 +538,8 @@ void OnPageEndImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onPageEnd = [value = *optValue, weakNode, instanceId] (const BaseEventInfo* info) {
-        OnPageEnd(&value, weakNode, instanceId, info);
+    auto onPageEnd = [callback = CallbackHelper(*optValue), weakNode, instanceId] (const BaseEventInfo* info) {
+        OnPageEnd(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnPageFinish(frameNode, std::move(onPageEnd));
 #endif // WEB_SUPPORTED
@@ -557,8 +557,8 @@ void OnPageBeginImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onPageBegin = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) {
-        OnPageBegin(&value, weakNode, instanceId, info);
+    auto onPageBegin = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+        OnPageBegin(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnPageStart(frameNode, onPageBegin);
 #endif // WEB_SUPPORTED
@@ -576,8 +576,8 @@ void OnProgressChangeImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onProgressChange = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) {
-        OnProgressChange(&value, weakNode, instanceId, info);
+    auto onProgressChange = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+        OnProgressChange(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnProgressChange(frameNode, onProgressChange);
 #endif // WEB_SUPPORTED
@@ -595,8 +595,8 @@ void OnTitleReceiveImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onTitleReceive = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) {
-        OnTitleReceive(&value, weakNode, instanceId, info);
+    auto onTitleReceive = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+        OnTitleReceive(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnTitleReceive(frameNode, onTitleReceive);
 #endif // WEB_SUPPORTED
@@ -614,8 +614,8 @@ void OnGeolocationHideImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onGeolocationHide = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) {
-        OnGeolocationHide(&value, weakNode, instanceId, info);
+    auto onGeolocationHide = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+        OnGeolocationHide(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnGeolocationHide(frameNode, onGeolocationHide);
 #endif // WEB_SUPPORTED
@@ -633,8 +633,8 @@ void OnGeolocationShowImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onGeolocationShow = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) {
-        OnGeolocationShow(&value, weakNode, instanceId, info);
+    auto onGeolocationShow = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+        OnGeolocationShow(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnGeolocationShow(frameNode, onGeolocationShow);
 #endif // WEB_SUPPORTED
@@ -651,8 +651,8 @@ void OnRequestSelectedImpl(Ark_NativePointer node,
         return;
     }
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onRequestSelected = [value = *optValue, weakNode](const BaseEventInfo* info) {
-        OnRequestSelected(&value, weakNode, info);
+    auto onRequestSelected = [callback = CallbackHelper(*optValue), weakNode](const BaseEventInfo* info) {
+        OnRequestSelected(callback, weakNode, info);
     };
     WebModelNG::SetOnRequestFocus(frameNode, onRequestSelected);
 #endif // WEB_SUPPORTED
@@ -670,8 +670,8 @@ void OnAlertImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onAlert = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) -> bool {
-        return OnAlert(&value, weakNode, instanceId, info);
+    auto onAlert = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) -> bool {
+        return OnAlert(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnCommonDialog(frameNode, onAlert, DialogEventType::DIALOG_EVENT_ALERT);
 #endif // WEB_SUPPORTED
@@ -689,8 +689,9 @@ void OnBeforeUnloadImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onBeforeUnload = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) -> bool {
-        return OnBeforeUnload(&value, weakNode, instanceId, info);
+    auto onBeforeUnload = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) -> bool {
+        return OnBeforeUnload(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnCommonDialog(frameNode, onBeforeUnload, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD);
 #endif // WEB_SUPPORTED
@@ -708,8 +709,8 @@ void OnConfirmImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onConfirm = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) -> bool {
-        return OnConfirm(&value, weakNode, instanceId, info);
+    auto onConfirm = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) -> bool {
+        return OnConfirm(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnCommonDialog(frameNode, onConfirm, DialogEventType::DIALOG_EVENT_CONFIRM);
 #endif // WEB_SUPPORTED
@@ -727,8 +728,8 @@ void OnPromptImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onPrompt = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) -> bool {
-        return OnPrompt(&value, weakNode, instanceId, info);
+    auto onPrompt = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) -> bool {
+        return OnPrompt(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnCommonDialog(frameNode, onPrompt, DialogEventType::DIALOG_EVENT_PROMPT);
 #endif // WEB_SUPPORTED
@@ -745,8 +746,8 @@ void OnConsoleImpl(Ark_NativePointer node,
         return;
     }
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onConsole = [value = *optValue, weakNode](const BaseEventInfo* info) -> bool {
-        return OnConsole(&value, weakNode, info);
+    auto onConsole = [callback = CallbackHelper(*optValue), weakNode](const BaseEventInfo* info) -> bool {
+        return OnConsole(callback, weakNode, info);
     };
     WebModelNG::SetOnConsoleLog(frameNode, onConsole);
 #endif // WEB_SUPPORTED
@@ -764,8 +765,8 @@ void OnErrorReceiveImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onErrorReceive = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) {
-        OnErrorReceive(&value, weakNode, instanceId, info);
+    auto onErrorReceive = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+        OnErrorReceive(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnErrorReceive(frameNode, onErrorReceive);
 #endif // WEB_SUPPORTED
@@ -783,8 +784,8 @@ void OnHttpErrorReceiveImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onHttpErrorReceive = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) {
-        OnHttpErrorReceive(&value, weakNode, instanceId, info);
+    auto onHttpErrorReceive = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+        OnHttpErrorReceive(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnHttpErrorReceive(frameNode, onHttpErrorReceive);
 #endif // WEB_SUPPORTED
@@ -802,8 +803,8 @@ void OnDownloadStartImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onDownloadStart = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) {
-        OnDownloadStart(&value, weakNode, instanceId, info);
+    auto onDownloadStart = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+        OnDownloadStart(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnDownloadStart(frameNode, onDownloadStart);
 #endif // WEB_SUPPORTED
@@ -821,8 +822,9 @@ void OnRefreshAccessedHistoryImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onRefreshAccessedHistory = [value =*optValue, weakNode, instanceId](const BaseEventInfo* info) {
-        OnRefreshAccessedHistory(&value, weakNode, instanceId, info);
+    auto onRefreshAccessedHistory = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
+        OnRefreshAccessedHistory(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetRefreshAccessedHistoryId(frameNode, onRefreshAccessedHistory);
 #endif // WEB_SUPPORTED
@@ -840,8 +842,9 @@ void OnUrlLoadInterceptImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onUrlLoadIntercept = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) -> bool {
-        return OnUrlLoadIntercept(&value, weakNode, instanceId, info);
+    auto onUrlLoadIntercept = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) -> bool {
+        return OnUrlLoadIntercept(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnUrlLoadIntercept(frameNode, onUrlLoadIntercept);
 #endif // WEB_SUPPORTED
@@ -864,9 +867,9 @@ void OnRenderExited0Impl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onRenderExited = [value = *optValue, weakNode, instanceId]
+    auto onRenderExited = [callback = CallbackHelper(*optValue), weakNode, instanceId]
         (const BaseEventInfo* info) {
-        OnRenderExited(&value, weakNode, instanceId, info);
+        OnRenderExited(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetRenderExitedId(frameNode, onRenderExited);
 #endif // WEB_SUPPORTED
@@ -889,8 +892,9 @@ void OnShowFileSelectorImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onShowFileSelector = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) -> bool {
-        return OnShowFileSelector(&value, weakNode, instanceId, info);
+    auto onShowFileSelector = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) -> bool {
+        return OnShowFileSelector(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnFileSelectorShow(frameNode, onShowFileSelector);
 #endif // WEB_SUPPORTED
@@ -913,8 +917,8 @@ void OnResourceLoadImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onResourceLoad = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) {
-        OnResourceLoad(&value, weakNode, instanceId, info);
+    auto onResourceLoad = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+        OnResourceLoad(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetResourceLoadId(frameNode, onResourceLoad);
 #endif // WEB_SUPPORTED
@@ -932,8 +936,8 @@ void OnFullScreenExitImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onFullScreenExit = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) {
-        OnFullScreenExit(&value, weakNode, instanceId, info);
+    auto onFullScreenExit = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+        OnFullScreenExit(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnFullScreenExit(frameNode, onFullScreenExit);
 #endif // WEB_SUPPORTED
@@ -951,8 +955,8 @@ void OnFullScreenEnterImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onFullScreenEnter = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) {
-        OnFullScreenEnter(&value, weakNode, instanceId, info);
+    auto onFullScreenEnter = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+        OnFullScreenEnter(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnFullScreenEnter(frameNode, onFullScreenEnter);
 #endif // WEB_SUPPORTED
@@ -970,8 +974,8 @@ void OnScaleChangeImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onScaleChange = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) {
-        OnScaleChange(&value, weakNode, instanceId, info);
+    auto onScaleChange = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+        OnScaleChange(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetScaleChangeId(frameNode, onScaleChange);
 #endif // WEB_SUPPORTED
@@ -989,8 +993,9 @@ void OnHttpAuthRequestImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onHttpAuthRequest = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) -> bool {
-        return OnHttpAuthRequest(&value, weakNode, instanceId, info);
+    auto onHttpAuthRequest = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) -> bool {
+        return OnHttpAuthRequest(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnHttpAuthRequest(frameNode, onHttpAuthRequest);
 #endif // WEB_SUPPORTED
@@ -1008,8 +1013,9 @@ void OnInterceptRequestImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onInterceptRequest = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) -> RefPtr<WebResponse> {
-        return OnInterceptRequest(&value, weakNode, instanceId, info);
+    auto onInterceptRequest = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) -> RefPtr<WebResponse> {
+        return OnInterceptRequest(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnInterceptRequest(frameNode, onInterceptRequest);
 #endif // WEB_SUPPORTED
@@ -1027,8 +1033,8 @@ void OnPermissionRequestImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onPermissionRequest = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) {
-        OnPermissionRequest(&value, weakNode, instanceId, info);
+    auto onPermissionRequest = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+        OnPermissionRequest(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetPermissionRequestEventId(frameNode, onPermissionRequest);
 #endif // WEB_SUPPORTED
@@ -1046,8 +1052,9 @@ void OnScreenCaptureRequestImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onScreenCaptureRequest = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) {
-        OnScreenCaptureRequest(&value, weakNode, instanceId, info);
+    auto onScreenCaptureRequest = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
+        OnScreenCaptureRequest(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetScreenCaptureRequestEventId(frameNode, onScreenCaptureRequest);
 #endif // WEB_SUPPORTED
@@ -1065,8 +1072,9 @@ void OnContextMenuShowImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onContextMenuShow = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) -> bool {
-        return OnContextMenuShow(&value, weakNode, instanceId, info);
+    auto onContextMenuShow = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) -> bool {
+        return OnContextMenuShow(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnContextMenuShow(frameNode, onContextMenuShow);
 #endif // WEB_SUPPORTED
@@ -1084,8 +1092,8 @@ void OnContextMenuHideImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onContextMenuHide = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) {
-        OnContextMenuHide(&value, weakNode, instanceId, info);
+    auto onContextMenuHide = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+        OnContextMenuHide(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnContextMenuHide(frameNode, onContextMenuHide);
 #endif // WEB_SUPPORTED
@@ -1117,8 +1125,9 @@ void OnSearchResultReceiveImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onSearchResultReceive = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) {
-        OnSearchResultReceive(&value, weakNode, instanceId, info);
+    auto onSearchResultReceive = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
+        OnSearchResultReceive(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetSearchResultReceiveEventId(frameNode, onSearchResultReceive);
 #endif // WEB_SUPPORTED
@@ -1136,8 +1145,8 @@ void OnScrollImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onScroll = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) {
-        OnScroll(&value, weakNode, instanceId, info);
+    auto onScroll = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+        OnScroll(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetScrollId(frameNode, onScroll);
 #endif // WEB_SUPPORTED
@@ -1155,8 +1164,9 @@ void OnSslErrorEventReceiveImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onSslErrorEventReceive = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) -> bool {
-        return OnSslErrorEventReceive(&value, weakNode, instanceId, info);
+    auto onSslErrorEventReceive = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) -> bool {
+        return OnSslErrorEventReceive(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnSslErrorRequest(frameNode, onSslErrorEventReceive);
 #endif // WEB_SUPPORTED
@@ -1174,8 +1184,9 @@ void OnSslErrorEventImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onSslErrorEvent = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) -> bool {
-        return OnSslError(&value, weakNode, instanceId, info);
+    auto onSslErrorEvent = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) -> bool {
+        return OnSslError(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnAllSslErrorRequest(frameNode, onSslErrorEvent);
 #endif // WEB_SUPPORTED
@@ -1193,8 +1204,9 @@ void OnClientAuthenticationRequestImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onClientAuthenticationRequest = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) -> bool {
-        return OnClientAuthentication(&value, weakNode, instanceId, info);
+    auto onClientAuthenticationRequest = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) -> bool {
+        return OnClientAuthentication(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnSslSelectCertRequest(frameNode, onClientAuthenticationRequest);
 #endif // WEB_SUPPORTED
@@ -1212,8 +1224,9 @@ void OnWindowNewImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onWindowNew = [value = *optValue, weakNode, instanceId](const std::shared_ptr<BaseEventInfo>& info) {
-        OnWindowNew(&value, weakNode, instanceId, info);
+    auto onWindowNew = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const std::shared_ptr<BaseEventInfo>& info) {
+        OnWindowNew(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetWindowNewEvent(frameNode, onWindowNew);
 #endif // WEB_SUPPORTED
@@ -1231,8 +1244,8 @@ void OnWindowExitImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onWindowExit = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) {
-        OnWindowExit(&value, weakNode, instanceId, info);
+    auto onWindowExit = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+        OnWindowExit(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetWindowExitEventId(frameNode, onWindowExit);
 #endif // WEB_SUPPORTED
@@ -1263,8 +1276,8 @@ void OnInterceptKeyEventImpl(Ark_NativePointer node,
         return;
     }
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onInterceptKeyEvent = [value = *optValue, weakNode](KeyEventInfo& keyEventInfo) -> bool {
-        return OnInterceptKey(&value, weakNode, keyEventInfo);
+    auto onInterceptKeyEvent = [callback = CallbackHelper(*optValue), weakNode](KeyEventInfo& keyEventInfo) -> bool {
+        return OnInterceptKey(callback, weakNode, keyEventInfo);
     };
     WebModelNG::SetOnInterceptKeyEventCallback(frameNode, onInterceptKeyEvent);
 #endif // WEB_SUPPORTED
@@ -1493,8 +1506,9 @@ void OnTouchIconUrlReceivedImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onTouchIconUrlReceived = [value = *optValue, weakNode, instanceId](const std::shared_ptr<BaseEventInfo>& info) {
-        OnTouchIconUrlReceived(&value, weakNode, instanceId, info);
+    auto onTouchIconUrlReceived = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const std::shared_ptr<BaseEventInfo>& info) {
+        OnTouchIconUrlReceived(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetTouchIconUrlId(frameNode, onTouchIconUrlReceived);
 #endif // WEB_SUPPORTED
@@ -1512,8 +1526,9 @@ void OnFaviconReceivedImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onFaviconReceived = [value = *optValue, weakNode, instanceId](const std::shared_ptr<BaseEventInfo>& info) {
-        OnFaviconReceived(&value, weakNode, instanceId, info);
+    auto onFaviconReceived = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const std::shared_ptr<BaseEventInfo>& info) {
+        OnFaviconReceived(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetFaviconReceivedId(frameNode, onFaviconReceived);
 #endif // WEB_SUPPORTED
@@ -1531,8 +1546,9 @@ void OnPageVisibleImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onPageVisible = [value = *optValue, weakNode, instanceId](const std::shared_ptr<BaseEventInfo>& info) {
-        OnPageVisible(&value, weakNode, instanceId, info);
+    auto onPageVisible = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const std::shared_ptr<BaseEventInfo>& info) {
+        OnPageVisible(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetPageVisibleId(frameNode, std::move(onPageVisible));
 #endif // WEB_SUPPORTED
@@ -1550,8 +1566,9 @@ void OnDataResubmittedImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onDataResubmitted = [value = *optValue, weakNode, instanceId](const std::shared_ptr<BaseEventInfo>& info) {
-        OnDataResubmitted(&value, weakNode, instanceId, info);
+    auto onDataResubmitted = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const std::shared_ptr<BaseEventInfo>& info) {
+        OnDataResubmitted(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnDataResubmitted(frameNode, onDataResubmitted);
 #endif // WEB_SUPPORTED
@@ -1597,8 +1614,9 @@ void OnAudioStateChangedImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onAudioStateChanged = [value = *optValue, weakNode, instanceId](const std::shared_ptr<BaseEventInfo>& info) {
-        OnAudioStateChanged(&value, weakNode, instanceId, info);
+    auto onAudioStateChanged = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const std::shared_ptr<BaseEventInfo>& info) {
+        OnAudioStateChanged(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetAudioStateChangedId(frameNode, onAudioStateChanged);
 #endif // WEB_SUPPORTED
@@ -1616,8 +1634,9 @@ void OnFirstContentfulPaintImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onFirstContentfulPaint = [value = *optValue, weakNode, instanceId](const std::shared_ptr<BaseEventInfo>& info) {
-        OnFirstContentfulPaint(&value, weakNode, instanceId, info);
+    auto onFirstContentfulPaint = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const std::shared_ptr<BaseEventInfo>& info) {
+        OnFirstContentfulPaint(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetFirstContentfulPaintId(frameNode, std::move(onFirstContentfulPaint));
 #endif // WEB_SUPPORTED
@@ -1635,8 +1654,9 @@ void OnFirstMeaningfulPaintImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onFirstMeaningfulPaint = [value = *optValue, weakNode, instanceId](const std::shared_ptr<BaseEventInfo>& info) {
-        OnFirstMeaningfulPaint(&value, weakNode, instanceId, info);
+    auto onFirstMeaningfulPaint = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const std::shared_ptr<BaseEventInfo>& info) {
+        OnFirstMeaningfulPaint(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetFirstMeaningfulPaintId(frameNode, std::move(onFirstMeaningfulPaint));
 #endif // WEB_SUPPORTED
@@ -1654,8 +1674,9 @@ void OnLargestContentfulPaintImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onLargestContentfulPaint = [value = *optValue, weakNode, instanceId](const std::shared_ptr<BaseEventInfo>& info) {
-        OnLargestContentfulPaint(&value, weakNode, instanceId, info);
+    auto onLargestContentfulPaint = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const std::shared_ptr<BaseEventInfo>& info) {
+        OnLargestContentfulPaint(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetLargestContentfulPaintId(frameNode, std::move(onLargestContentfulPaint));
 #endif // WEB_SUPPORTED
@@ -1673,8 +1694,9 @@ void OnLoadInterceptImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onLoadIntercept = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) -> bool {
-        return OnLoadIntercept(&value, weakNode, instanceId, info);
+    auto onLoadIntercept = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) -> bool {
+        return OnLoadIntercept(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnLoadIntercept(frameNode, std::move(onLoadIntercept));
 #endif // WEB_SUPPORTED
@@ -1692,8 +1714,8 @@ void OnControllerAttachedImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onControllerAttached = [value = *optValue, weakNode, instanceId]() {
-        OnControllerAttached(&value, weakNode, instanceId);
+    auto onControllerAttached = [callback = CallbackHelper(*optValue), weakNode, instanceId]() {
+        OnControllerAttached(callback, weakNode, instanceId);
     };
     WebModelNG::SetOnControllerAttached(frameNode, std::move(onControllerAttached));
 #endif // WEB_SUPPORTED
@@ -1711,8 +1733,8 @@ void OnOverScrollImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onOverScroll = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) {
-        OnOverScroll(&value, weakNode, instanceId, info);
+    auto onOverScroll = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+        OnOverScroll(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOverScrollId(frameNode, onOverScroll);
 #endif // WEB_SUPPORTED
@@ -1730,8 +1752,9 @@ void OnSafeBrowsingCheckResultImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onSafeBrowsingCheckResult = [value = *optValue, weakNode, instanceId](const std::shared_ptr<BaseEventInfo>& info) {
-        OnSafeBrowsingCheckResult(&value, weakNode, instanceId, info);
+    auto onSafeBrowsingCheckResult = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const std::shared_ptr<BaseEventInfo>& info) {
+        OnSafeBrowsingCheckResult(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetSafeBrowsingCheckResultId(frameNode, std::move(onSafeBrowsingCheckResult));
 #endif // WEB_SUPPORTED
@@ -1749,8 +1772,9 @@ void OnNavigationEntryCommittedImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onNavigationEntryCommitted = [value = *optValue, weakNode, instanceId](const std::shared_ptr<BaseEventInfo>& info) {
-        OnNavigationEntryCommitted(&value, weakNode, instanceId, info);
+    auto onNavigationEntryCommitted = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const std::shared_ptr<BaseEventInfo>& info) {
+        OnNavigationEntryCommitted(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetNavigationEntryCommittedId(frameNode, std::move(onNavigationEntryCommitted));
 #endif // WEB_SUPPORTED
@@ -1768,9 +1792,9 @@ void OnIntelligentTrackingPreventionResultImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onIntelligentTrackingPreventionResult = [value = *optValue, weakNode, instanceId](
+    auto onIntelligentTrackingPreventionResult = [callback = CallbackHelper(*optValue), weakNode, instanceId](
         const std::shared_ptr<BaseEventInfo>& info) {
-        OnIntelligentTrackingPrevention(&value, weakNode, instanceId, info);
+        OnIntelligentTrackingPrevention(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetIntelligentTrackingPreventionResultId(frameNode, std::move(onIntelligentTrackingPreventionResult));
 #endif // WEB_SUPPORTED
@@ -1849,8 +1873,8 @@ void OnNativeEmbedLifecycleChangeImpl(Ark_NativePointer node,
         return;
     }
     auto instanceId = Container::CurrentId();
-    auto onNativeEmbedLifecycleChange = [value = *optValue, instanceId](const BaseEventInfo* info) {
-        OnNativeEmbedDataInfo(&value, instanceId, info);
+    auto onNativeEmbedLifecycleChange = [callback = CallbackHelper(*optValue), instanceId](const BaseEventInfo* info) {
+        OnNativeEmbedDataInfo(callback, instanceId, info);
     };
     WebModelNG::SetNativeEmbedLifecycleChangeId(frameNode, onNativeEmbedLifecycleChange);
 #endif // WEB_SUPPORTED
@@ -1867,8 +1891,8 @@ void OnNativeEmbedVisibilityChangeImpl(Ark_NativePointer node,
         return;
     }
     auto instanceId = Container::CurrentId();
-    auto onNativeEmbedVisibilityChange = [value = *optValue, instanceId](const BaseEventInfo* info) {
-        OnNativeEmbedVisibilityChange(&value, instanceId, info);
+    auto onNativeEmbedVisibilityChange = [callback = CallbackHelper(*optValue), instanceId](const BaseEventInfo* info) {
+        OnNativeEmbedVisibilityChange(callback, instanceId, info);
     };
     WebModelNG::SetNativeEmbedVisibilityChangeId(frameNode, onNativeEmbedVisibilityChange);
 #endif // WEB_SUPPORTED
@@ -1885,8 +1909,8 @@ void OnNativeEmbedGestureEventImpl(Ark_NativePointer node,
         return;
     }
     auto instanceId = Container::CurrentId();
-    auto onNativeEmbedGestureEvent = [value = *optValue, instanceId](const BaseEventInfo* info) {
-        OnNativeEmbedTouchInfo(&value, instanceId, info);
+    auto onNativeEmbedGestureEvent = [callback = CallbackHelper(*optValue), instanceId](const BaseEventInfo* info) {
+        OnNativeEmbedTouchInfo(callback, instanceId, info);
     };
     WebModelNG::SetNativeEmbedGestureEventId(frameNode, onNativeEmbedGestureEvent);
 #endif // WEB_SUPPORTED
@@ -1914,8 +1938,9 @@ void OnOverrideUrlLoadingImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onOverrideUrlLoading = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) -> bool {
-        return OnOverrideUrlLoading(&value, weakNode, instanceId, info);
+    auto onOverrideUrlLoading = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) -> bool {
+        return OnOverrideUrlLoading(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnOverrideUrlLoading(frameNode, std::move(onOverrideUrlLoading));
 #endif // WEB_SUPPORTED
@@ -1963,8 +1988,9 @@ void OnRenderProcessNotRespondingImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onRenderProcessNotResponding = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) {
-        OnRenderProcessNotResponding(&value, weakNode, instanceId, info);
+    auto onRenderProcessNotResponding = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
+        OnRenderProcessNotResponding(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetRenderProcessNotRespondingId(frameNode, onRenderProcessNotResponding);
 #endif // WEB_SUPPORTED
@@ -1982,8 +2008,9 @@ void OnRenderProcessRespondingImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onRenderProcessResponding = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) {
-        OnRenderProcessResponding(&value, weakNode, instanceId, info);
+    auto onRenderProcessResponding = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
+        OnRenderProcessResponding(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetRenderProcessRespondingId(frameNode, onRenderProcessResponding);
 #endif // WEB_SUPPORTED
@@ -2033,8 +2060,9 @@ void OnViewportFitChangedImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onViewportFitChanged = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) {
-        OnViewportFitChanged(&value, weakNode, instanceId, info);
+    auto onViewportFitChanged = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
+        OnViewportFitChanged(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetViewportFitChangedId(frameNode, onViewportFitChanged);
 #endif // WEB_SUPPORTED
@@ -2052,8 +2080,9 @@ void OnInterceptKeyboardAttachImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onInterceptKeyboardAttach = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) -> WebKeyboardOption {
-        return OnWebKeyboard(&value, weakNode, instanceId, info);
+    auto onInterceptKeyboardAttach = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) -> WebKeyboardOption {
+        return OnWebKeyboard(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetOnInterceptKeyboardAttach(frameNode, std::move(onInterceptKeyboardAttach));
 #endif // WEB_SUPPORTED
@@ -2071,8 +2100,8 @@ void OnAdsBlockedImpl(Ark_NativePointer node,
     }
     auto instanceId = Container::CurrentId();
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onAdsBlocked = [value = *optValue, weakNode, instanceId](const BaseEventInfo* info) {
-        OnAdsBlocked(&value, weakNode, instanceId, info);
+    auto onAdsBlocked = [callback = CallbackHelper(*optValue), weakNode, instanceId](const BaseEventInfo* info) {
+        OnAdsBlocked(callback, weakNode, instanceId, info);
     };
     WebModelNG::SetAdsBlockedEventId(frameNode, onAdsBlocked);
 #endif // WEB_SUPPORTED
