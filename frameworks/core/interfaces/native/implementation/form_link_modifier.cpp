@@ -13,10 +13,35 @@
  * limitations under the License.
  */
 
+#include "base/json/json_util.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/form_link/form_link_model_ng.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/utility/converter.h"
+
+namespace OHOS::Ace {
+std::unique_ptr<FormLinkModel> FormLinkModel::sts_instance_ = nullptr;
+std::mutex FormLinkModel::sts_mutex_;
+
+FormLinkModel *FormLinkModel::StsGetInstance()
+{
+    if (!sts_instance_) {
+        std::lock_guard<std::mutex> lock(sts_mutex_);
+        if (!sts_instance_) {
+#ifdef NG_BUILD
+            sts_instance_.reset(new NG::FormLinkModelNG());
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                sts_instance_.reset(new NG::FormLinkModelNG());
+            } else {
+                sts_instance_.reset(nullptr);
+            }
+#endif
+        }
+    }
+    return sts_instance_.get();
+}
+}  // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -29,51 +54,81 @@ struct FormLinkOptions {
 };
 }
 
-
 namespace Converter {
-template<>
-FormLinkOptions Convert(const Ark_FormLinkOptions& src)
+template <>
+FormLinkOptions Convert(const Ark_FormLinkOptions &src)
 {
-    return {
-        .action = Convert<std::string>(src.action),
+    return {.action = Convert<std::string>(src.action),
         .moduleName = Converter::OptConvert<std::string>(src.moduleName),
         .bundleName = Converter::OptConvert<std::string>(src.bundleName),
         .abilityName = Converter::OptConvert<std::string>(src.abilityName),
-        .uri = Converter::OptConvert<std::string>(src.uri)
-    };
+        .uri = Converter::OptConvert<std::string>(src.uri)};
 }
-} // namespace Converter
-} // namespace OHOS::Ace::NG
+}  // namespace Converter
+}  // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FormLinkModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                Ark_Int32 flags)
+Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
 {
-    auto frameNode = FormLinkModelNG::CreateFrameNode(id);
+    LOGI("id is: %{public}d", id);
+    auto frameNode = FormLinkModel::GetInstance()->StsCreateFrameNode();
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
-} // FormLinkModifier
+}  // namespace FormLinkModifier
+
 namespace FormLinkInterfaceModifier {
-void SetFormLinkOptionsImpl(Ark_NativePointer node,
-                            const Ark_FormLinkOptions* options)
+std::string ToString(FormLinkOptions formLinkOptions)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto json = JsonUtil::Create(true);
+    json->Put("action", formLinkOptions.action.c_str());
+    if (formLinkOptions.moduleName) {
+        json->Put("moduleName", formLinkOptions.moduleName.value().c_str());
+    } else {
+        json->Put("moduleName", "");
+    }
+    if (formLinkOptions.bundleName) {
+        json->Put("bundleName", formLinkOptions.bundleName.value().c_str());
+    } else {
+        json->Put("bundleName", "");
+    }
+    if (formLinkOptions.abilityName) {
+        json->Put("abilityName", formLinkOptions.abilityName.value().c_str());
+    } else {
+        json->Put("abilityName", "");
+    }
+    if (formLinkOptions.uri) {
+        json->Put("uri", formLinkOptions.uri.value().c_str());
+    } else {
+        json->Put("uri", "");
+    }
+    return json->ToString();
+}
+
+void SetFormLinkOptionsImpl(Ark_NativePointer node, const Ark_FormLinkOptions *options)
+{
+    LOGI("Call");
+    auto frameNode = reinterpret_cast<FrameNode *>(node);  // RefPtr<OHOS::Ace::NG::FrameNode>
+
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     FormLinkOptions formLinkOptions = Converter::Convert<FormLinkOptions>(*options);
-    FormLinkModelNG::SetAction(frameNode, formLinkOptions.action);
+    std::string info = ToString(formLinkOptions);
+
+    LOGI("End, StsSetAction: %{public}s", info.c_str());
+    FormLinkModel::GetInstance()->StsSetAction(frameNode, info);
 }
-} // FormLinkInterfaceModifier
-const GENERATED_ArkUIFormLinkModifier* GetFormLinkModifier()
+}  // namespace FormLinkInterfaceModifier
+
+const GENERATED_ArkUIFormLinkModifier *GetFormLinkModifier()
 {
-    static const GENERATED_ArkUIFormLinkModifier ArkUIFormLinkModifierImpl {
+    LOGI("Call");
+    static const GENERATED_ArkUIFormLinkModifier ArkUIFormLinkModifierImpl{
         FormLinkModifier::ConstructImpl,
         FormLinkInterfaceModifier::SetFormLinkOptionsImpl,
     };
     return &ArkUIFormLinkModifierImpl;
 }
-
-}
+}  // namespace OHOS::Ace::NG::GeneratedModifier

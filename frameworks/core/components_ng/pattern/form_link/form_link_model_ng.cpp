@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,13 +31,20 @@ void FormLinkModelNG::Create(const std::string& action)
     stack->Push(frameNode);
 }
 
-RefPtr<FrameNode> FormLinkModelNG::CreateFrameNode(int32_t nodeId)
+RefPtr<FrameNode> FormLinkModelNG::StsCreateFrameNode()
 {
-    auto frameNode = FrameNode::CreateFrameNode(V2::FORM_LINK_ETS_TAG, nodeId, AceType::MakeRefPtr<FormLinkPattern>());
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::FORM_LINK_ETS_TAG, nodeId);
+
+    LOGE("nodeId is %{public}d ", nodeId);
+
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::FORM_LINK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<FormLinkPattern>(); });
     return frameNode;
 }
 
-void FormLinkModelNG::SetAction(FrameNode* frameNode, const std::string& action)
+void FormLinkModelNG::StsSetAction(OHOS::Ace::NG::FrameNode* frameNode, std::string action)
 {
     auto pattern = frameNode->GetPattern<FormLinkPattern>();
     pattern->SetAction(action);
