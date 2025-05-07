@@ -410,6 +410,10 @@ public:
     {
         optionBgColor_ = color;
     }
+    inline bool IsExpanded() const
+    {
+        return isExpanded_;
+    }
     void AttachBottomDivider();
     void RemoveBottomDivider();
     void SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply);
