@@ -21,6 +21,7 @@
 #include "base/memory/ace_type.h"
 #include "base/geometry/animatable_dimension.h"
 #include "base/utils/macros.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
 
@@ -181,12 +182,35 @@ public:
 
     std::string ToString() const;
 
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, BackgroundImagePosition&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = { resObj, std::move(updateFunc) };
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.obj, *this);
+        }
+    }
+
 private:
     BackgroundImagePositionType typeX_ { BackgroundImagePositionType::PX };
     BackgroundImagePositionType typeY_ { BackgroundImagePositionType::PX };
     AnimatableDimension valueX_ = AnimatableDimension(-1.0);
     AnimatableDimension valueY_ = AnimatableDimension(0.0);
     bool isAlign_ = false;
+    struct ResourceUpdater {
+        RefPtr<ResourceObject> obj;
+        std::function<void(const RefPtr<ResourceObject>&, BackgroundImagePosition&)> updateFunc;
+    };
+    std::unordered_map<std::string, ResourceUpdater> resMap_;
 };
 
 class ImageObjectPosition final : public BackgroundImagePosition {};

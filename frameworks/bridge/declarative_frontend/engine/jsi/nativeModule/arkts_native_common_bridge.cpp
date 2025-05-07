@@ -1491,10 +1491,12 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundColor(ArkUIRuntimeCallInfo *ru
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> backgroundColorResObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, backgroundColorResObj)) {
         GetArkUINodeModifiers()->getCommonModifier()->resetBackgroundColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getCommonModifier()->setBackgroundColor(nativeNode, color.GetValue());
+        auto bgColorRawPtr = AceType::RawPtr(backgroundColorResObj);
+        GetArkUINodeModifiers()->getCommonModifier()->setBackgroundColor(nativeNode, color.GetValue(), bgColorRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -3143,6 +3145,8 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImagePosition(ArkUIRuntimeCall
     DimensionUnit typeX = DimensionUnit::PX;
     DimensionUnit typeY = DimensionUnit::PX;
     bool isAlign = false;
+    RefPtr<ResourceObject> resObjX;
+    RefPtr<ResourceObject> resObjY;
 
     if (secondArg->IsNumber()) {
         int32_t align = secondArg->ToNumber(vm)->Value();
@@ -3151,8 +3155,8 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImagePosition(ArkUIRuntimeCall
     } else {
         CalcDimension x(0, DimensionUnit::VP);
         CalcDimension y(0, DimensionUnit::VP);
-        ArkTSUtils::ParseJsDimensionVp(vm, xArg, x);
-        ArkTSUtils::ParseJsDimensionVp(vm, yArg, y);
+        ArkTSUtils::ParseJsDimensionVp(vm, xArg, x, resObjX);
+        ArkTSUtils::ParseJsDimensionVp(vm, yArg, y, resObjY);
         valueX = x.ConvertToPx();
         valueY = y.ConvertToPx();
         if (x.Unit() == DimensionUnit::PERCENT) {
@@ -3172,8 +3176,10 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImagePosition(ArkUIRuntimeCall
     values[NUM_1] = static_cast<ArkUI_Float32>(valueY);
     types[NUM_1] = static_cast<int32_t>(typeY);
 
+    auto bgImageXRawPtr = AceType::RawPtr(resObjX);
+    auto bgImageYRawPtr = AceType::RawPtr(resObjY);
     GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImagePosition(nativeNode, values, types, isAlign,
-        SIZE_OF_TWO);
+        SIZE_OF_TWO, bgImageXRawPtr, bgImageYRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -3308,14 +3314,17 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImage(ArkUIRuntimeCallInfo *ru
     } else {
         GetArkUINodeModifiers()->getCommonModifier()->resetBackgroundImageSyncMode(nativeNode);
     }
+    RefPtr<ResourceObject> backgroundImageResObj;
+    auto bgImageRawPtr = AceType::RawPtr(backgroundImageResObj);
     if (srcArg->IsString(vm)) {
         src = srcArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImage(
-            nativeNode, src.c_str(), bundle.c_str(), module.c_str(), repeatIndex);
-    } else if (ArkTSUtils::ParseJsMedia(vm, srcArg, src)) {
+            nativeNode, src.c_str(), bundle.c_str(), module.c_str(), repeatIndex, bgImageRawPtr);
+    } else if (ArkTSUtils::ParseJsMedia(vm, srcArg, src, backgroundImageResObj)) {
         ArkTSUtils::GetJsMediaBundleInfo(vm, srcArg, bundle, module);
+        bgImageRawPtr = AceType::RawPtr(backgroundImageResObj);
         GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImage(
-            nativeNode, src.c_str(), bundle.c_str(), module.c_str(), repeatIndex);
+            nativeNode, src.c_str(), bundle.c_str(), module.c_str(), repeatIndex, bgImageRawPtr);
     } else {
 #if defined(PIXEL_MAP_SUPPORTED)
         if (ArkTSUtils::IsDrawable(vm, srcArg)) {

@@ -80,7 +80,7 @@ const SafeAreaExpandOpts safeAreaExpandOpts = SafeAreaExpandOpts();
 const std::vector<ObscuredReasons> reasonsVector = { ObscuredReasons::PLACEHOLDER };
 
 const BackgroundImageSize BACKGROUNDSIZE { BackgroundImageSizeType::AUTO, 1.0 };
-const BackgroundImagePosition BACKGROUNDPOSITION { BackgroundImagePositionType::PERCENT, -1.0,
+BackgroundImagePosition BACKGROUNDPOSITION { BackgroundImagePositionType::PERCENT, -1.0,
     BackgroundImagePositionType::PERCENT, 0.0 };
 
 constexpr char TAG_ROOT[] = "root";

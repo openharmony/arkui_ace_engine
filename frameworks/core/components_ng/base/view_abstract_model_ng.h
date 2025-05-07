@@ -130,9 +130,20 @@ public:
         ViewAbstract::SetBackgroundColor(color);
     }
 
+    void SetBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj) override
+    {
+        ViewAbstract::SetBackgroundColorWithResourceObj(resObj);
+    }
+
     void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) override
     {
         ViewAbstract::SetBackgroundImage(src);
+    }
+
+    void SetBackgroundImageWithResourceObj(const RefPtr<ResourceObject> &resObj, std::string &bundleName,
+        std::string &moduleName, RefPtr<ThemeConstants> themeConstant) override
+    {
+        ViewAbstract::SetBackgroundImageWithResourceObj(resObj, bundleName, moduleName);
     }
 
     void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) override
@@ -150,7 +161,7 @@ public:
         ViewAbstract::SetBackgroundImageSize(bgImgSize);
     }
 
-    void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) override
+    void SetBackgroundImagePosition(BackgroundImagePosition& bgImgPosition) override
     {
         ViewAbstract::SetBackgroundImagePosition(bgImgPosition);
     }

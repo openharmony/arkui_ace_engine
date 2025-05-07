@@ -899,7 +899,7 @@ int32_t SetBackgroundColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
             node->uiNodeHandle, item->value[NUM_0].u32);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundColor(
-            node->uiNodeHandle, item->value[NUM_0].u32);
+            node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -998,7 +998,7 @@ int32_t SetBackgroundImage(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
     int repeat = item->size == NUM_1 ? item->value[NUM_0].i32 : ARKUI_IMAGE_REPEAT_NONE;
     if (item->string) {
         fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundImage(
-            node->uiNodeHandle, item->string, bundle.c_str(), module.c_str(), repeat);
+            node->uiNodeHandle, item->string, bundle.c_str(), module.c_str(), repeat, nullptr);
     } else {
         auto drawableDescriptor = reinterpret_cast<ArkUI_DrawableDescriptor*>(item->object);
         if (!drawableDescriptor->drawableDescriptor) {
@@ -2642,7 +2642,7 @@ int32_t SetBackgroundImagePosition(ArkUI_NodeHandle node, const ArkUI_AttributeI
     ArkUI_Int32 units[] = { unit, unit };
 
     fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundImagePosition(
-        node->uiNodeHandle, values, units, false, NUM_2);
+        node->uiNodeHandle, values, units, false, NUM_2, nullptr, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
