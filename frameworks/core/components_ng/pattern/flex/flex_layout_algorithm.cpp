@@ -344,7 +344,7 @@ void FlexLayoutAlgorithm::MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWra
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
-    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY) || host->GetTag() == V2::FLEX_ETS_TAG) {
         auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
         MinusPaddingToNonNegativeSize(padding, realSize);
     }
