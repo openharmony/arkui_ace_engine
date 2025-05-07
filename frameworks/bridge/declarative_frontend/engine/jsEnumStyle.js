@@ -679,7 +679,7 @@ class LayoutPolicy {
     return new LayoutPolicy('wrapContent');
   }
 
-  static get fixIdealSize() {
+  static get fixAtIdealSize() {
     return new LayoutPolicy('fixAtIdealSize');
   }
 }
