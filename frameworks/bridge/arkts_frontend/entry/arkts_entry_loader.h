@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ARKTS_FRONTEND_ENTRY_ARKTS_ENTRY_LOADER_H
 
 #include <string>
-
+#include <vector>
 #include <ani.h>
 
 namespace OHOS::Ace {
@@ -32,6 +32,27 @@ private:
     std::string url_;
     ani_env* env_;
 };
+
+namespace NG {
+class EntryLoader {
+public:
+    EntryLoader(ani_env* env, const std::string& abcModulePath);
+    EntryLoader(ani_env* env, const std::vector<uint8_t>& abcContent);
+    ~EntryLoader() = default;
+
+    ani_object GetPageEntryObj(const std::string& entryPath) const;
+
+    operator bool() const
+    {
+        return loadClass_;
+    }
+
+private:
+    ani_env* env_ {};
+    ani_object runtimeLinkerObj_ {};
+    ani_method loadClass_ {};
+};
+}
 }
 
 #endif

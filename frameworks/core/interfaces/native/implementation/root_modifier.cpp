@@ -17,12 +17,27 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/common/plugin_manager.h"
+#include "core/components_ng/pattern/common_view/common_view_model_ng.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RootModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+    if (Container::CurrentId() >= MIN_PLUGIN_SUBCONTAINER_ID) {
+        auto pluginContainer = PluginManager::GetInstance().GetPluginSubContainer(Container::CurrentId());
+        CHECK_NULL_RETURN(pluginContainer, nullptr);
+        auto pluginNode = pluginContainer->GetPluginNode().Upgrade();
+        auto frameNode = CommonViewModelNG::CreateFrameNode(id);
+        CHECK_NULL_RETURN(frameNode, AceType::RawPtr(pluginNode));
+        frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+        frameNode->MountToParent(pluginNode);
+        pluginContainer->SetPageNode(frameNode);
+        return AceType::RawPtr(frameNode);
+    }
+#endif
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, nullptr);
     RefPtr<PipelineBase> pipeline;

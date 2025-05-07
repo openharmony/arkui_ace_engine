@@ -175,6 +175,10 @@ void PipelineContext::FlushBuild()
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACK();
     ACE_FUNCTION_TRACE();
+    if (vsyncListener_) {
+        ACE_SCOPED_TRACE("arkoala build");
+        vsyncListener_();
+    }
 
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushBuild();
