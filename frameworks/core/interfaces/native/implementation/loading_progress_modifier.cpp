@@ -15,7 +15,6 @@
 
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
-#include "core/components_ng/pattern/loading_progress/loading_progress_model_static.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/utility/converter.h"
 
@@ -47,7 +46,7 @@ void ColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto color = Converter::OptConvert<Color>(*value);
-    LoadingProgressModelStatic::SetColor(frameNode, color);
+    LoadingProgressModelNG::SetColor(frameNode, color);
 }
 void EnableLoadingImpl(Ark_NativePointer node,
                        const Opt_Boolean* value)
