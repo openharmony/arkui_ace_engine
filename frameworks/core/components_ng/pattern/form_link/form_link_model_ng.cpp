@@ -64,7 +64,7 @@ void FormLinkModelNG::SetAction(FrameNode* frameNode, const std::string& action)
     pattern->SetAction(action);
 }
 
-void FormLinkModelNG::StsSetAction(OHOS::Ace::NG::FrameNode* frameNode, std::string& action)
+void FormLinkModelNG::StsSetAction(OHOS::Ace::NG::FrameNode* frameNode, const std::string& action)
 {
     auto pattern = frameNode->GetPattern<FormLinkPattern>();
     pattern->SetAction(action);
