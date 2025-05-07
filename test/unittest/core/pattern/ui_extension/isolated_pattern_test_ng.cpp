@@ -28,6 +28,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "adapter/ohos/entrance/ace_container.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -48,7 +49,7 @@ namespace {
     const std::string TAG = "Test node tag";
 } // namespace
 
-class IsolatedPatternTestNg : public testing::Test {
+class IsolatedPatternTestNg : public Test {
 public:
     void SetUp() override;
     void TearDown() override;
