@@ -2432,6 +2432,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
         UiSessionManager::GetInstance()->SaveTranslateManager(uiTranslateManager);
         if (pipeline) {
+            LOGI("set translateManager to pipeline, instanceId:%{public}d", pipeline->GetInstanceId());
             pipeline->SaveTranslateManager(uiTranslateManager);
         } else {
             LOGE("pipeline invalid,only new ArkUI pipeline support UIsession");
@@ -2449,6 +2450,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
     UiSessionManager::GetInstance()->SaveTranslateManager(uiTranslateManager);
     if (pipeline) {
+        LOGI("set translateManager to pipeline, instanceId:%{public}d", pipeline->GetInstanceId());
         pipeline->SaveTranslateManager(uiTranslateManager);
     } else {
         LOGE("pipeline invalid,only new ArkUI pipeline support UIsession");
