@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <optional>
+
 #include "gtest/gtest.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
@@ -976,5 +978,712 @@ HWTEST_F(ListItemGroupAlgorithmTestNg, SetActiveChildRange005, TestSize.Level1)
     listItemGroupLayoutAlgorithm->cachedItemPosition_.clear();
     listItemGroupLayoutAlgorithm->SetActiveChildRange(&layoutWrapper, 2, true);
     EXPECT_EQ(listItemGroupLayoutAlgorithm->cachedItemPosition_.size(), 0);
+}
+
+/**
+ * @tc.name: ModifyReferencePos001
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm ModifyReferencePos
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, ModifyReferencePos001, TestSize.Level1)
+{
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    std::vector<float> mainSize = { 2.0f, 2.0f, 2.0f };
+    RefPtr<ListChildrenMainSize> childrenSize = AceType::MakeRefPtr<ListChildrenMainSize>(mainSize, 2.0f);
+    RefPtr<ListPositionMap> posMap = AceType::MakeRefPtr<ListPositionMap>();
+    posMap->prevTotalHeight_ = 2.0f;
+    posMap->totalItemCount_ = 1.0f;
+    posMap->space_ = 1.0f;
+    posMap->posMap_[2] = { 2.0f, 4.0f, true };
+    posMap->posMap_[3] = { 4.0f, 6.0f, true };
+    listItemGroupLayoutAlgorithm->childrenSize_ = childrenSize;
+    listItemGroupLayoutAlgorithm->needAdjustRefPos_ = true;
+    listItemGroupLayoutAlgorithm->forwardLayout_ = false;
+    listItemGroupLayoutAlgorithm->prevContentMainSize_ = 4.0f;
+    listItemGroupLayoutAlgorithm->posMap_ = posMap;
+    listItemGroupLayoutAlgorithm->referencePos_ = 20.0f;
+    listItemGroupLayoutAlgorithm->startPos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->endPos_ = 4.0f;
+    listItemGroupLayoutAlgorithm->totalMainSize_ = 6.0f;
+    listItemGroupLayoutAlgorithm->refPos_ = 3.0f;
+    listItemGroupLayoutAlgorithm->ModifyReferencePos(2, 4.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->refPos_, 6.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->referencePos_, 23.0f);
+}
+
+/**
+ * @tc.name: ModifyReferencePos002
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm ModifyReferencePos
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, ModifyReferencePos002, TestSize.Level1)
+{
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    std::vector<float> mainSize = { 2.0f, 2.0f, 2.0f };
+    RefPtr<ListChildrenMainSize> childrenSize = AceType::MakeRefPtr<ListChildrenMainSize>(mainSize, 2.0f);
+    RefPtr<ListPositionMap> posMap = AceType::MakeRefPtr<ListPositionMap>();
+    posMap->prevTotalHeight_ = 2.0f;
+    posMap->totalItemCount_ = 1.0f;
+    posMap->space_ = 1.0f;
+    posMap->posMap_[2] = { 2.0f, 4.0f, true };
+    posMap->posMap_[3] = { 4.0f, 6.0f, true };
+    listItemGroupLayoutAlgorithm->childrenSize_ = childrenSize;
+    listItemGroupLayoutAlgorithm->needAdjustRefPos_ = true;
+    listItemGroupLayoutAlgorithm->forwardLayout_ = true;
+    listItemGroupLayoutAlgorithm->prevContentMainSize_ = 4.0f;
+    listItemGroupLayoutAlgorithm->posMap_ = posMap;
+    listItemGroupLayoutAlgorithm->referencePos_ = 20.0f;
+    listItemGroupLayoutAlgorithm->startPos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->endPos_ = 4.0f;
+    listItemGroupLayoutAlgorithm->totalMainSize_ = 6.0f;
+    listItemGroupLayoutAlgorithm->refPos_ = 3.0f;
+    listItemGroupLayoutAlgorithm->ModifyReferencePos(2, 4.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->refPos_, 3.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->referencePos_, 20.0f);
+}
+
+/**
+ * @tc.name: ModifyReferencePos003
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm ModifyReferencePos
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, ModifyReferencePos003, TestSize.Level1)
+{
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    std::vector<float> mainSize = { 2.0f, 2.0f, 2.0f };
+    RefPtr<ListChildrenMainSize> childrenSize = AceType::MakeRefPtr<ListChildrenMainSize>(mainSize, 2.0f);
+    RefPtr<ListPositionMap> posMap = AceType::MakeRefPtr<ListPositionMap>();
+    posMap->prevTotalHeight_ = 2.0f;
+    posMap->totalItemCount_ = 1.0f;
+    posMap->space_ = 1.0f;
+    posMap->posMap_[2] = { 2.0f, 4.0f, true };
+    posMap->posMap_[3] = { 4.0f, 6.0f, true };
+    listItemGroupLayoutAlgorithm->childrenSize_ = childrenSize;
+    listItemGroupLayoutAlgorithm->needAdjustRefPos_ = true;
+    listItemGroupLayoutAlgorithm->forwardLayout_ = false;
+    listItemGroupLayoutAlgorithm->prevContentMainSize_ = 4.0f;
+    listItemGroupLayoutAlgorithm->posMap_ = posMap;
+    listItemGroupLayoutAlgorithm->referencePos_ = -8.0f;
+    listItemGroupLayoutAlgorithm->startPos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->endPos_ = 4.0f;
+    listItemGroupLayoutAlgorithm->totalMainSize_ = 6.0f;
+    listItemGroupLayoutAlgorithm->refPos_ = 3.0f;
+    listItemGroupLayoutAlgorithm->ModifyReferencePos(2, 4.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->refPos_, 3.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->referencePos_, -8.0f);
+}
+
+/**
+ * @tc.name: MeasureForward001
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm MeasureForward
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, MeasureForward001, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listItemPattern);
+    ASSERT_NE(frameNode, nullptr);
+    LayoutConstraintF layoutConstraint;
+    GeometryProperty geometryProperty;
+    RectT rect(20.0f, 20.0f, 80.0f, 80.0f);
+    geometryProperty.rect_ = rect;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    geometryNode->frame_ = geometryProperty;
+    RefPtr<LayoutWrapperNode> layoutWrapperNode =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapperNode->SetActive();
+    layoutWrapperNode->geometryNode_ = geometryNode;
+    layoutWrapperNode->hostNode_ = frameNode;
+    layoutWrapperNode->hostNode_.Upgrade()->tag_ = V2::LIST_ITEM_GROUP_COMPONENT_TAG;
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(listItemGroupLayoutAlgorithm);
+    layoutWrapperNode->layoutAlgorithm_ = layoutAlgorithmWrapper;
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapper.currentChildCount_ = 8;
+    layoutWrapper.childrenMap_[4] = layoutWrapperNode;
+    listItemGroupLayoutAlgorithm->lanes_ = 4;
+    listItemGroupLayoutAlgorithm->itemStartIndex_ = 2;
+    listItemGroupLayoutAlgorithm->isStackFromEnd_ = false;
+    listItemGroupLayoutAlgorithm->totalItemCount_ = 5;
+    listItemGroupLayoutAlgorithm->startPos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->endPos_ = 8.0f;
+    listItemGroupLayoutAlgorithm->prevStartPos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->prevEndPos_ = 4.0f;
+    listItemGroupLayoutAlgorithm->targetIndex_ = 1;
+    listItemGroupLayoutAlgorithm->referencePos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->itemPosition_[2] = { 1, 1.0f, 6.0f, true };
+    listItemGroupLayoutAlgorithm->MeasureForward(&layoutWrapper, layoutConstraint, 2, 2.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->startPos_, 2.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->endPos_, 4.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->itemPosition_[2].startPos, 2.0f);
+    EXPECT_FALSE(listItemGroupLayoutAlgorithm->targetIndex_.has_value());
+}
+
+/**
+ * @tc.name: MeasureForward002
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm MeasureForward
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, MeasureForward002, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listItemPattern);
+    ASSERT_NE(frameNode, nullptr);
+    LayoutConstraintF layoutConstraint;
+    GeometryProperty geometryProperty;
+    RectT rect(20.0f, 20.0f, 80.0f, 80.0f);
+    geometryProperty.rect_ = rect;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    geometryNode->frame_ = geometryProperty;
+    RefPtr<LayoutWrapperNode> layoutWrapperNode =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapperNode->SetActive();
+    layoutWrapperNode->geometryNode_ = geometryNode;
+    layoutWrapperNode->hostNode_ = frameNode;
+    layoutWrapperNode->hostNode_.Upgrade()->tag_ = V2::LIST_ITEM_GROUP_COMPONENT_TAG;
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(listItemGroupLayoutAlgorithm);
+    layoutWrapperNode->layoutAlgorithm_ = layoutAlgorithmWrapper;
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapper.currentChildCount_ = 8;
+    layoutWrapper.childrenMap_[4] = layoutWrapperNode;
+    listItemGroupLayoutAlgorithm->lanes_ = 4;
+    listItemGroupLayoutAlgorithm->itemStartIndex_ = 2;
+    listItemGroupLayoutAlgorithm->isStackFromEnd_ = false;
+    listItemGroupLayoutAlgorithm->totalItemCount_ = 5;
+    listItemGroupLayoutAlgorithm->startPos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->endPos_ = 8.0f;
+    listItemGroupLayoutAlgorithm->prevStartPos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->prevEndPos_ = 4.0f;
+    listItemGroupLayoutAlgorithm->targetIndex_ = 4;
+    listItemGroupLayoutAlgorithm->referencePos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->itemPosition_[2] = { 1, 3.0f, 6.0f, true };
+    listItemGroupLayoutAlgorithm->MeasureForward(&layoutWrapper, layoutConstraint, 2, 2.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->startPos_, 2.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->endPos_, 8.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->itemPosition_[2].startPos, 2.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->targetIndex_, 4);
+}
+
+/**
+ * @tc.name: MeasureForward003
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm MeasureForward
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, MeasureForward003, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listItemPattern);
+    ASSERT_NE(frameNode, nullptr);
+    LayoutConstraintF layoutConstraint;
+    GeometryProperty geometryProperty;
+    RectT rect(20.0f, 20.0f, 80.0f, 80.0f);
+    geometryProperty.rect_ = rect;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    geometryNode->frame_ = geometryProperty;
+    RefPtr<LayoutWrapperNode> layoutWrapperNode =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapperNode->geometryNode_ = geometryNode;
+    layoutWrapperNode->hostNode_ = frameNode;
+    layoutWrapperNode->hostNode_.Upgrade()->tag_ = V2::LIST_ITEM_GROUP_COMPONENT_TAG;
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(listItemGroupLayoutAlgorithm);
+    layoutWrapperNode->layoutAlgorithm_ = layoutAlgorithmWrapper;
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapper.currentChildCount_ = 8;
+    layoutWrapper.childrenMap_[4] = layoutWrapperNode;
+    listItemGroupLayoutAlgorithm->lanes_ = 4;
+    listItemGroupLayoutAlgorithm->itemStartIndex_ = 2;
+    listItemGroupLayoutAlgorithm->isStackFromEnd_ = false;
+    listItemGroupLayoutAlgorithm->totalItemCount_ = 5;
+    listItemGroupLayoutAlgorithm->startPos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->endPos_ = 8.0f;
+    listItemGroupLayoutAlgorithm->prevStartPos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->prevEndPos_ = 4.0f;
+    listItemGroupLayoutAlgorithm->targetIndex_ = std::nullopt;
+    listItemGroupLayoutAlgorithm->referencePos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->itemPosition_[2] = { 1, 1.0f, 6.0f, true };
+    listItemGroupLayoutAlgorithm->MeasureForward(&layoutWrapper, layoutConstraint, 2, 2.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->startPos_, 2.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->endPos_, 8.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->itemPosition_[2].startPos, 2.0f);
+    EXPECT_FALSE(listItemGroupLayoutAlgorithm->targetIndex_.has_value());
+}
+
+/**
+ * @tc.name: MeasureForward004
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm MeasureForward
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, MeasureForward004, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listItemPattern);
+    ASSERT_NE(frameNode, nullptr);
+    LayoutConstraintF layoutConstraint;
+    GeometryProperty geometryProperty;
+    RectT rect(20.0f, 20.0f, 80.0f, 80.0f);
+    geometryProperty.rect_ = rect;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    geometryNode->frame_ = geometryProperty;
+    RefPtr<LayoutWrapperNode> layoutWrapperNode =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapperNode->SetActive();
+    layoutWrapperNode->geometryNode_ = geometryNode;
+    layoutWrapperNode->hostNode_ = frameNode;
+    layoutWrapperNode->hostNode_.Upgrade()->tag_ = V2::LIST_ITEM_GROUP_COMPONENT_TAG;
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(listItemGroupLayoutAlgorithm);
+    layoutWrapperNode->layoutAlgorithm_ = layoutAlgorithmWrapper;
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapper.currentChildCount_ = 8;
+    layoutWrapper.childrenMap_[4] = layoutWrapperNode;
+    listItemGroupLayoutAlgorithm->lanes_ = 4;
+    listItemGroupLayoutAlgorithm->itemStartIndex_ = 2;
+    listItemGroupLayoutAlgorithm->isStackFromEnd_ = false;
+    listItemGroupLayoutAlgorithm->totalItemCount_ = 5;
+    listItemGroupLayoutAlgorithm->startPos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->endPos_ = 8.0f;
+    listItemGroupLayoutAlgorithm->prevStartPos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->prevEndPos_ = 4.0f;
+    listItemGroupLayoutAlgorithm->targetIndex_ = std::nullopt;
+    listItemGroupLayoutAlgorithm->referencePos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->itemPosition_[2] = { 1, 1.0f, 6.0f, true };
+    listItemGroupLayoutAlgorithm->MeasureForward(&layoutWrapper, layoutConstraint, 3, 2.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->startPos_, 2.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->endPos_, 8.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->itemPosition_[2].endPos, 2.0f);
+    EXPECT_FALSE(listItemGroupLayoutAlgorithm->targetIndex_.has_value());
+}
+
+/**
+ * @tc.name: CalculateLanes001
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm CalculateLanes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, CalculateLanes001, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    listLayoutProperty->propLanes_ = 4;
+    listLayoutProperty->propLaneMinLength_ = std::nullopt;
+    listLayoutProperty->propLaneMaxLength_ = std::nullopt;
+    Dimension dimension(2.F);
+    listLayoutProperty->propLaneGutter_ = dimension;
+    LayoutConstraintF layoutConstraint;
+    std::optional<float> crossSizeOptional = 2.0f;
+    listItemGroupLayoutAlgorithm->minLaneLength_ = 3.0f;
+    listItemGroupLayoutAlgorithm->maxLaneLength_ = 5.0f;
+    listItemGroupLayoutAlgorithm->laneGutter_ = 5.0f;
+    listItemGroupLayoutAlgorithm->lanes_ = 2;
+    listItemGroupLayoutAlgorithm->CalculateLanes(listLayoutProperty, layoutConstraint, crossSizeOptional, Axis::FREE);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->laneGutter_, 2.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->lanes_, 1);
+}
+
+/**
+ * @tc.name: CalculateLanes002
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm CalculateLanes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, CalculateLanes002, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    listLayoutProperty->propLanes_ = 4;
+    listLayoutProperty->propLaneMinLength_ = std::nullopt;
+    listLayoutProperty->propLaneMaxLength_ = std::nullopt;
+    Dimension dimension(2.F);
+    listLayoutProperty->propLaneGutter_ = dimension;
+    LayoutConstraintF layoutConstraint;
+    std::optional<float> crossSizeOptional = std::nullopt;
+    listItemGroupLayoutAlgorithm->minLaneLength_ = 3.0f;
+    listItemGroupLayoutAlgorithm->maxLaneLength_ = 5.0f;
+    listItemGroupLayoutAlgorithm->laneGutter_ = 5.0f;
+    listItemGroupLayoutAlgorithm->lanes_ = 2;
+    listItemGroupLayoutAlgorithm->CalculateLanes(listLayoutProperty, layoutConstraint, crossSizeOptional, Axis::FREE);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->laneGutter_, 5.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->lanes_, 4);
+}
+
+/**
+ * @tc.name: MeasureCacheItem001
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm MeasureCacheItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, MeasureCacheItem001, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listItemPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    ListItemGroupCacheParam cacheParam;
+    cacheParam.forward = false;
+    listItemGroupLayoutAlgorithm->cacheParam_ = cacheParam;
+    listItemGroupLayoutAlgorithm->cachedItemPosition_.clear();
+    listItemGroupLayoutAlgorithm->adjustReferenceDelta_ = 2.0f;
+    listItemGroupLayoutAlgorithm->MeasureCacheItem(&layoutWrapper);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->adjustReferenceDelta_, 2.0f);
+}
+
+/**
+ * @tc.name: MeasureCacheItem002
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm MeasureCacheItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, MeasureCacheItem002, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listItemPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    ListItemGroupCacheParam cacheParam;
+    cacheParam.forward = false;
+    listItemGroupLayoutAlgorithm->cacheParam_ = cacheParam;
+    listItemGroupLayoutAlgorithm->cachedItemPosition_.clear();
+    listItemGroupLayoutAlgorithm->cachedItemPosition_[0] = { 1, 2.0f, 4.0f, true };
+    listItemGroupLayoutAlgorithm->cachedItemPosition_[1] = { 2, 2.0f, 6.0f, true };
+    listItemGroupLayoutAlgorithm->itemPosition_[0] = { 1, 2.0f, 4.0f, true };
+    listItemGroupLayoutAlgorithm->itemPosition_[1] = { 2, 2.0f, 6.0f, true };
+    listItemGroupLayoutAlgorithm->totalMainSize_ = 8.0f;
+    listItemGroupLayoutAlgorithm->headerMainSize_ = 8.0f;
+    listItemGroupLayoutAlgorithm->adjustReferenceDelta_ = 2.0f;
+    listItemGroupLayoutAlgorithm->MeasureCacheItem(&layoutWrapper);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->adjustReferenceDelta_, -6.0f);
+}
+
+/**
+ * @tc.name: MeasureCacheItem003
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm MeasureCacheItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, MeasureCacheItem003, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listItemPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    ListItemGroupCacheParam cacheParam;
+    cacheParam.forward = false;
+    listItemGroupLayoutAlgorithm->cacheParam_ = cacheParam;
+    listItemGroupLayoutAlgorithm->cachedItemPosition_.clear();
+    listItemGroupLayoutAlgorithm->cachedItemPosition_[0] = { 1, 2.0f, 3.0f, true };
+    listItemGroupLayoutAlgorithm->cachedItemPosition_[1] = { 2, 2.0f, 4.0f, true };
+    listItemGroupLayoutAlgorithm->itemPosition_[0] = { 1, 2.0f, 4.0f, true };
+    listItemGroupLayoutAlgorithm->itemPosition_[1] = { 2, 2.0f, 3.0f, true };
+    listItemGroupLayoutAlgorithm->totalMainSize_ = 8.0f;
+    listItemGroupLayoutAlgorithm->headerMainSize_ = 1.0f;
+    listItemGroupLayoutAlgorithm->adjustReferenceDelta_ = 2.0f;
+    listItemGroupLayoutAlgorithm->MeasureCacheItem(&layoutWrapper);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->adjustReferenceDelta_, 1.0f);
+}
+
+/**
+ * @tc.name: UpdateLayoutedItemInfo001
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm UpdateLayoutedItemInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, UpdateLayoutedItemInfo001, TestSize.Level1)
+{
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    listItemGroupLayoutAlgorithm->itemPosition_.clear();
+    listItemGroupLayoutAlgorithm->itemPosition_[4] = { 1, 4.0f, 6.0f, true };
+    listItemGroupLayoutAlgorithm->itemPosition_[5] = { 2, 2.0f, 4.0f, true };
+    listItemGroupLayoutAlgorithm->layoutedItemInfo_ = { 2, 2.0f, 8, 3.0f };
+    listItemGroupLayoutAlgorithm->UpdateLayoutedItemInfo();
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->layoutedItemInfo_->endIndex, 5);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->layoutedItemInfo_->endPos, 4.0f);
+}
+
+/**
+ * @tc.name: UpdateLayoutedItemInfo002
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm UpdateLayoutedItemInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, UpdateLayoutedItemInfo002, TestSize.Level1)
+{
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    listItemGroupLayoutAlgorithm->itemPosition_.clear();
+    listItemGroupLayoutAlgorithm->itemPosition_[4] = { 1, 4.0f, 6.0f, true };
+    listItemGroupLayoutAlgorithm->itemPosition_[5] = { 2, 2.0f, 3.0f, true };
+    listItemGroupLayoutAlgorithm->layoutedItemInfo_ = { 2, 2.0f, 8, 4.0f };
+    listItemGroupLayoutAlgorithm->totalItemCount_ = 10;
+    listItemGroupLayoutAlgorithm->UpdateLayoutedItemInfo();
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->layoutedItemInfo_->startIndex, 2);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->layoutedItemInfo_->startPos, 2.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->layoutedItemInfo_->endIndex, 8);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->layoutedItemInfo_->endPos, 4.0f);
+}
+
+/**
+ * @tc.name: MeasureBackward001
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm MeasureBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, MeasureBackward001, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listItemPattern);
+    ASSERT_NE(frameNode, nullptr);
+    LayoutConstraintF layoutConstraint;
+    GeometryProperty geometryProperty;
+    RectT rect(20.0f, 20.0f, 80.0f, 80.0f);
+    geometryProperty.rect_ = rect;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    geometryNode->frame_ = geometryProperty;
+    RefPtr<LayoutWrapperNode> layoutWrapperNode =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapperNode->geometryNode_ = geometryNode;
+    layoutWrapperNode->hostNode_ = frameNode;
+    layoutWrapperNode->hostNode_.Upgrade()->tag_ = V2::LIST_ITEM_GROUP_COMPONENT_TAG;
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(listItemGroupLayoutAlgorithm);
+    layoutWrapperNode->layoutAlgorithm_ = layoutAlgorithmWrapper;
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapper.currentChildCount_ = 8;
+    layoutWrapper.childrenMap_[4] = layoutWrapperNode;
+    listItemGroupLayoutAlgorithm->lanes_ = 4;
+    listItemGroupLayoutAlgorithm->itemStartIndex_ = 2;
+    listItemGroupLayoutAlgorithm->isStackFromEnd_ = false;
+    listItemGroupLayoutAlgorithm->totalItemCount_ = 5;
+    listItemGroupLayoutAlgorithm->startPos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->endPos_ = 8.0f;
+    listItemGroupLayoutAlgorithm->prevStartPos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->prevEndPos_ = 4.0f;
+    listItemGroupLayoutAlgorithm->targetIndex_ = 4;
+    listItemGroupLayoutAlgorithm->referencePos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->totalMainSize_ = 1.0f;
+    listItemGroupLayoutAlgorithm->itemPosition_[2] = { 1, 1.0f, 6.0f, true };
+    listItemGroupLayoutAlgorithm->MeasureBackward(&layoutWrapper, layoutConstraint, 2, 2.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->startPos_, 2.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->endPos_, 4.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->itemPosition_[2].endPos, 2.0f);
+    EXPECT_FALSE(listItemGroupLayoutAlgorithm->targetIndex_.has_value());
+}
+
+/**
+ * @tc.name: MeasureBackward002
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm MeasureBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, MeasureBackward002, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    std::vector<float> mainSize = { 2.0f };
+    listItemGroupLayoutAlgorithm->childrenSize_ = AceType::MakeRefPtr<ListChildrenMainSize>(mainSize, 2.0f);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listItemPattern);
+    ASSERT_NE(frameNode, nullptr);
+    LayoutConstraintF layoutConstraint;
+    GeometryProperty geometryProperty;
+    RectT rect(20.0f, 20.0f, 80.0f, 80.0f);
+    geometryProperty.rect_ = rect;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    geometryNode->frame_ = geometryProperty;
+    RefPtr<LayoutWrapperNode> layoutWrapperNode =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapperNode->geometryNode_ = geometryNode;
+    layoutWrapperNode->hostNode_ = frameNode;
+    layoutWrapperNode->hostNode_.Upgrade()->tag_ = V2::LIST_ITEM_GROUP_COMPONENT_TAG;
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(listItemGroupLayoutAlgorithm);
+    layoutWrapperNode->layoutAlgorithm_ = layoutAlgorithmWrapper;
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapper.currentChildCount_ = 8;
+    layoutWrapper.childrenMap_[4] = layoutWrapperNode;
+    listItemGroupLayoutAlgorithm->lanes_ = 4;
+    listItemGroupLayoutAlgorithm->itemStartIndex_ = 2;
+    listItemGroupLayoutAlgorithm->isStackFromEnd_ = false;
+    listItemGroupLayoutAlgorithm->totalItemCount_ = 5;
+    listItemGroupLayoutAlgorithm->startPos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->endPos_ = 8.0f;
+    listItemGroupLayoutAlgorithm->prevStartPos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->prevEndPos_ = 4.0f;
+    listItemGroupLayoutAlgorithm->targetIndex_ = 1;
+    listItemGroupLayoutAlgorithm->referencePos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->totalMainSize_ = 1.0f;
+    listItemGroupLayoutAlgorithm->itemPosition_[2] = { 1, 1.0f, 6.0f, true };
+    listItemGroupLayoutAlgorithm->MeasureBackward(&layoutWrapper, layoutConstraint, 2, 2.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->startPos_, 2.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->endPos_, 8.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->itemPosition_[2].endPos, 2.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->targetIndex_, 1);
+}
+
+/**
+ * @tc.name: MeasureBackward003
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm MeasureBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, MeasureBackward003, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    std::vector<float> mainSize = { 2.0f };
+    listItemGroupLayoutAlgorithm->childrenSize_ = AceType::MakeRefPtr<ListChildrenMainSize>(mainSize, 2.0f);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listItemPattern);
+    ASSERT_NE(frameNode, nullptr);
+    LayoutConstraintF layoutConstraint;
+    GeometryProperty geometryProperty;
+    RectT rect(20.0f, 20.0f, 80.0f, 80.0f);
+    geometryProperty.rect_ = rect;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    geometryNode->frame_ = geometryProperty;
+    RefPtr<LayoutWrapperNode> layoutWrapperNode =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapperNode->geometryNode_ = geometryNode;
+    layoutWrapperNode->hostNode_ = frameNode;
+    layoutWrapperNode->hostNode_.Upgrade()->tag_ = V2::LIST_ITEM_GROUP_COMPONENT_TAG;
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(listItemGroupLayoutAlgorithm);
+    layoutWrapperNode->layoutAlgorithm_ = layoutAlgorithmWrapper;
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapper.currentChildCount_ = 8;
+    layoutWrapper.childrenMap_[4] = layoutWrapperNode;
+    listItemGroupLayoutAlgorithm->lanes_ = 4;
+    listItemGroupLayoutAlgorithm->itemStartIndex_ = 2;
+    listItemGroupLayoutAlgorithm->isStackFromEnd_ = false;
+    listItemGroupLayoutAlgorithm->totalItemCount_ = 5;
+    listItemGroupLayoutAlgorithm->startPos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->endPos_ = 8.0f;
+    listItemGroupLayoutAlgorithm->prevStartPos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->prevEndPos_ = 4.0f;
+    listItemGroupLayoutAlgorithm->targetIndex_ = std::nullopt;
+    listItemGroupLayoutAlgorithm->referencePos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->totalMainSize_ = 1.0f;
+    listItemGroupLayoutAlgorithm->itemPosition_[2] = { 1, 1.0f, 6.0f, true };
+    listItemGroupLayoutAlgorithm->MeasureBackward(&layoutWrapper, layoutConstraint, 2, 2.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->startPos_, 2.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->endPos_, 8.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->itemPosition_[2].endPos, 2.0f);
+    EXPECT_FALSE(listItemGroupLayoutAlgorithm->targetIndex_.has_value());
+}
+
+/**
+ * @tc.name: MeasureBackward004
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm MeasureBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, MeasureBackward004, TestSize.Level1)
+{
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
+        AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(2, 2, 2);
+    std::vector<float> mainSize = { 2.0f };
+    listItemGroupLayoutAlgorithm->childrenSize_ = AceType::MakeRefPtr<ListChildrenMainSize>(mainSize, 2.0f);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listItemPattern);
+    ASSERT_NE(frameNode, nullptr);
+    LayoutConstraintF layoutConstraint;
+    GeometryProperty geometryProperty;
+    RectT rect(20.0f, 20.0f, 80.0f, 80.0f);
+    geometryProperty.rect_ = rect;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    geometryNode->frame_ = geometryProperty;
+    RefPtr<LayoutWrapperNode> layoutWrapperNode =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapperNode->geometryNode_ = geometryNode;
+    layoutWrapperNode->hostNode_ = frameNode;
+    layoutWrapperNode->hostNode_.Upgrade()->tag_ = V2::LIST_ITEM_GROUP_COMPONENT_TAG;
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(listItemGroupLayoutAlgorithm);
+    layoutWrapperNode->layoutAlgorithm_ = layoutAlgorithmWrapper;
+    LayoutWrapperNode layoutWrapper(frameNode, geometryNode, listLayoutProperty);
+    layoutWrapper.currentChildCount_ = 8;
+    layoutWrapper.childrenMap_[6] = layoutWrapperNode;
+    listItemGroupLayoutAlgorithm->lanes_ = 4;
+    listItemGroupLayoutAlgorithm->itemStartIndex_ = 2;
+    listItemGroupLayoutAlgorithm->isStackFromEnd_ = false;
+    listItemGroupLayoutAlgorithm->totalItemCount_ = 7;
+    listItemGroupLayoutAlgorithm->startPos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->endPos_ = 8.0f;
+    listItemGroupLayoutAlgorithm->prevStartPos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->prevEndPos_ = 4.0f;
+    listItemGroupLayoutAlgorithm->targetIndex_ = std::nullopt;
+    listItemGroupLayoutAlgorithm->referencePos_ = 2.0f;
+    listItemGroupLayoutAlgorithm->totalMainSize_ = 1.0f;
+    listItemGroupLayoutAlgorithm->itemPosition_[4] = { 1, 4.0f, 6.0f, true };
+    listItemGroupLayoutAlgorithm->MeasureBackward(&layoutWrapper, layoutConstraint, 3, 2.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->startPos_, 2.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->endPos_, 8.0f);
+    EXPECT_EQ(listItemGroupLayoutAlgorithm->itemPosition_[4].startPos, 2.0f);
+    EXPECT_FALSE(listItemGroupLayoutAlgorithm->targetIndex_.has_value());
 }
 } // namespace OHOS::Ace::NG
