@@ -58,9 +58,7 @@ void ScrollPage0Impl(Ark_Scroller peer,
                      const Ark_ScrollPageOptions* value)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(value);
-    bool next = Converter::Convert<bool>(value->next);
-    peer->TriggerScrollPage0(next);
+    peer->TriggerScrollPage0(value);
 }
 void ScrollPage1Impl(Ark_Scroller peer,
                      const Ark_Literal_Boolean_next_Axis_direction* value)
