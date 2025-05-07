@@ -15,6 +15,13 @@
 
 /// <reference path='./import.ts' />
 /// <reference path="./ArkCommonShape.ts" />
+interface RectOptionsParam {
+  width?: Length;
+  height?: Length;
+  radius?: Length | Array<Length>;
+  radiusWidth?: Length;
+  radiusHeight?: Length;
+}
 class RectRadiusWidthModifier extends ModifierWithKey<Length> {
   constructor(value: Length) {
     super(value);
@@ -72,6 +79,71 @@ class ArkRectComponent extends ArkCommonShapeComponent implements RectAttribute 
   }
   radius(value: Length | Array<any>): this {
     modifierWithKey(this._modifiersWithKeys, RectRadiusModifier.identity, RectRadiusModifier, value);
+    return this;
+  }
+  resetRectOptions(): void {
+    modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
+      CommonShapeWidthModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
+      CommonShapeHeightModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, RectRadiusModifier.identity,
+      RectRadiusModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, RectRadiusWidthModifier.identity,
+      RectRadiusWidthModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, RectRadiusHeightModifier.identity,
+      RectRadiusHeightModifier, undefined);
+  }
+  initializeRoundedRectOptions(value: RectOptionsParam): void {
+    if (isUndefined(value) || isNull(value)) {
+      return;
+    }
+    if ((isUndefined(value.radiusWidth) || isNull(value.radiusWidth)) &&
+          (isUndefined(value.radiusHeight) || isNull(value.radiusHeight))) {
+        modifierWithKey(this._modifiersWithKeys, RectRadiusModifier.identity,
+          RectRadiusModifier, undefined);
+          return;
+    }
+    if (!isUndefined(value.radiusWidth) && !isNull(value.radiusWidth)) {
+      modifierWithKey(this._modifiersWithKeys, RectRadiusWidthModifier.identity,
+        RectRadiusWidthModifier, value.radiusWidth);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, RectRadiusWidthModifier.identity,
+        RectRadiusWidthModifier, undefined);
+    }
+    if (!isUndefined(value.radiusHeight) && !isNull(value.radiusHeight)) {
+      modifierWithKey(this._modifiersWithKeys, RectRadiusHeightModifier.identity,
+        RectRadiusHeightModifier, value.radiusHeight);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, RectRadiusHeightModifier.identity,
+        RectRadiusHeightModifier, undefined);
+    }
+  }
+  initialize(value: Object[]): this {
+    if (isUndefined(value[0]) || isNull(value[0])) {
+      this.resetRectOptions();
+      return this;
+    }
+    const value_casted = value[0] as RectOptionsParam;
+    if (!isUndefined(value_casted.width) && !isNull(value_casted.width)) {
+      modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
+        CommonShapeWidthModifier, value_casted.width);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
+        CommonShapeWidthModifier, undefined);
+    }
+    if (!isUndefined(value_casted.height) && !isNull(value_casted.height)) {
+      modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
+        CommonShapeHeightModifier, value_casted.height);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
+        CommonShapeHeightModifier, undefined);
+    }
+    if (!isUndefined(value_casted.radius) && !isNull(value_casted.radius)) {
+      modifierWithKey(this._modifiersWithKeys, RectRadiusModifier.identity,
+        RectRadiusModifier, value_casted.radius);
+    } else {
+      this.initializeRoundedRectOptions(value_casted);
+    }
     return this;
   }
 }

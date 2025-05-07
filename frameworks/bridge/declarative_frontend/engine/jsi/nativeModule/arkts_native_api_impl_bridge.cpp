@@ -5423,6 +5423,10 @@ void ArkUINativeModule::RegisterShapeAttributes(Local<panda::ObjectRef> object, 
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ShapeBridge::SetMesh));
     shape->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShapeMesh"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ShapeBridge::ResetMesh));
+    shape->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShapeInitialize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ShapeBridge::SetShapeInitialize));
+    shape->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShapeInitialize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ShapeBridge::ResetShapeInitialize));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "shape"), shape);
 }
 

@@ -89,6 +89,20 @@ class ShapeWidthModifier extends ModifierWithKey<Length> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+class ShapeInitializeModifier extends ModifierWithKey<PixelMap> {
+  constructor(value: PixelMap) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('shapeInitialize');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().shape.resetShapeInitialize(node);
+    } else {
+      getUINativeModule().shape.setShapeInitialize(node, this.value);
+    }
+  }
+}
 class ArkShapeComponent extends ArkCommonShapeComponent implements ShapeAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -121,6 +135,16 @@ class ArkShapeComponent extends ArkCommonShapeComponent implements ShapeAttribut
   }
   width(value: Length): this {
     modifierWithKey(this._modifiersWithKeys, ShapeWidthModifier.identity, ShapeWidthModifier, value);
+    return this;
+  }
+  initialize(value: Object[]): this {
+    if (!isUndefined(value[0]) && !isNull(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, ShapeInitializeModifier.identity,
+        ShapeInitializeModifier, value[0] as PixelMap);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, ShapeInitializeModifier.identity,
+        ShapeInitializeModifier, undefined);
+    }
     return this;
   }
 }
