@@ -137,6 +137,8 @@ public:
 
     virtual bool Activate(bool isActive, bool autoInactive = true);
 
+    virtual bool GetFocusActive();
+
     virtual void SetAutoFocusTransfer(bool autoFocusTransfer);
 
     virtual void SetKeyProcessingMode(int32_t keyProcessingMode);

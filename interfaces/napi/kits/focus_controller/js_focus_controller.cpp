@@ -147,6 +147,19 @@ static napi_value JSActivate(napi_env env, napi_callback_info info)
     return obj;
 }
 
+static napi_value JSIsActive(napi_env env, napi_callback_info info)
+{
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (!delegate) {
+        return nullptr;
+    }
+
+    bool isActive = delegate->GetFocusActive();
+    napi_value result = nullptr;
+    napi_get_boolean(env, isActive, &result);
+    return result;
+}
+
 static napi_value JsSetKeyProcessingMode(napi_env env, napi_callback_info info)
 {
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
@@ -170,6 +183,7 @@ static napi_value registerFunc(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("clearFocus", JSClearFocus),
         DECLARE_NAPI_FUNCTION("requestFocus", JSRequestFocus),
         DECLARE_NAPI_FUNCTION("activate", JSActivate),
+        DECLARE_NAPI_FUNCTION("isActive", JSIsActive),
         DECLARE_NAPI_FUNCTION("setAutoFocusTransfer", JsSetAutoFocusTransfer),
         DECLARE_NAPI_FUNCTION("configWindowMask", JsConfigWindowMask),
         DECLARE_NAPI_FUNCTION("setKeyProcessingMode", JsSetKeyProcessingMode),

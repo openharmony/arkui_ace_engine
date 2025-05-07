@@ -974,6 +974,16 @@ class FocusController {
         }
     }
 
+    isActive() {
+        if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
+            return;
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let result = this.ohos_focusController.isActive();
+        __JSScopeUtil__.restoreInstanceId();
+        return result;
+    }
+
     setAutoFocusTransfer(value) {
         if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
             return;
