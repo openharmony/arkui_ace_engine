@@ -63,6 +63,10 @@ private:
         const std::unique_ptr<GeometryProperty>& content);
     void UpdateTextRect(const UpdateTextRectParams& params);
     bool IsFontSizeNonPositive(const TextStyle& textStyle) const;
+    void MeasureAutoFillIcon(LayoutWrapper* layoutWrapper);
+    void LayoutAutoFillIcon(LayoutWrapper* layoutWrapper);
+    
+    SizeF autoFillIconSizeMeasure_;
 };
 } // namespace OHOS::Ace::NG
 

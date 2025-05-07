@@ -92,6 +92,7 @@ public:
     void SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance = false) override {};
     void SetPasswordRules(const std::string& passwordRules) override {};
     void SetEnableAutoFill(bool enableAutoFill) override {};
+    void SetEnableAutoFillAnimation(bool enableAutoFill) override {};
     void SetCleanNodeStyle(CleanNodeStyle cleanNodeStyle) override {};
     void SetCancelIconSize(const CalcDimension& iconSize) override {};
     void SetCanacelIconSrc(
