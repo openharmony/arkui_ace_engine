@@ -20,26 +20,22 @@
 #include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace {
-std::unique_ptr<FormLinkModel> FormLinkModel::sts_instance_ = nullptr;
-std::mutex FormLinkModel::sts_mutex_;
+std::unique_ptr<FormLinkModel> FormLinkModel::stsInstance_ = nullptr;
+std::mutex FormLinkModel::stsMutex_;
 
-FormLinkModel *FormLinkModel::StsGetInstance()
+FormLinkModel *FormLinkModel::GetStsInstance()
 {
-    if (!sts_instance_) {
-        std::lock_guard<std::mutex> lock(sts_mutex_);
-        if (!sts_instance_) {
+    if (!stsInstance_) {
+        std::lock_guard<std::mutex> lock(stsMutex_);
+        if (!stsInstance_) {
 #ifdef NG_BUILD
-            sts_instance_.reset(new NG::FormLinkModelNG());
+            stsInstance_.reset(new NG::FormLinkModelNG());
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                sts_instance_.reset(new NG::FormLinkModelNG());
-            } else {
-                sts_instance_.reset(nullptr);
-            }
+            stsInstance_.reset(Container::IsCurrentUseNewPipeline() ? new NG::FormLinkModelNG() : nullptr);
 #endif
         }
     }
-    return sts_instance_.get();
+    return stsInstance_.get();
 }
 }  // namespace OHOS::Ace
 
@@ -80,30 +76,15 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
 }  // namespace FormLinkModifier
 
 namespace FormLinkInterfaceModifier {
-std::string ToString(FormLinkOptions formLinkOptions)
+std::string ToString(const FormLinkOptions& formLinkOptions)
 {
     auto json = JsonUtil::Create(true);
     json->Put("action", formLinkOptions.action.c_str());
-    if (formLinkOptions.moduleName) {
-        json->Put("moduleName", formLinkOptions.moduleName.value().c_str());
-    } else {
-        json->Put("moduleName", "");
-    }
-    if (formLinkOptions.bundleName) {
-        json->Put("bundleName", formLinkOptions.bundleName.value().c_str());
-    } else {
-        json->Put("bundleName", "");
-    }
-    if (formLinkOptions.abilityName) {
-        json->Put("abilityName", formLinkOptions.abilityName.value().c_str());
-    } else {
-        json->Put("abilityName", "");
-    }
-    if (formLinkOptions.uri) {
-        json->Put("uri", formLinkOptions.uri.value().c_str());
-    } else {
-        json->Put("uri", "");
-    }
+    json->Put("moduleName", formLinkOptions.moduleName ? formLinkOptions.moduleName.value().c_str() : "");
+    json->Put("bundleName", formLinkOptions.bundleName ? formLinkOptions.bundleName.value().c_str() : "");
+    json->Put("abilityName", formLinkOptions.abilityName ? formLinkOptions.abilityName.value().c_str() : "");
+    json->Put("uri", formLinkOptions.uri ? formLinkOptions.uri.value().c_str() : "");
+
     return json->ToString();
 }
 

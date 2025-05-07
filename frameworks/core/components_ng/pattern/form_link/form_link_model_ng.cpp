@@ -22,6 +22,11 @@ namespace OHOS::Ace::NG {
 void FormLinkModelNG::Create(const std::string& action)
 {
     auto* stack = ViewStackProcessor::GetInstance();
+    if (stack == nullptr)
+    {
+        LOGE("stack is nullptr");
+        return;
+    }
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::FORM_LINK_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
@@ -34,17 +39,22 @@ void FormLinkModelNG::Create(const std::string& action)
 RefPtr<FrameNode> FormLinkModelNG::StsCreateFrameNode()
 {
     auto* stack = ViewStackProcessor::GetInstance();
+    if (stack == nullptr)
+    {
+        LOGE("stack is nullptr");
+        return;
+    }
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::FORM_LINK_ETS_TAG, nodeId);
 
-    LOGE("nodeId is %{public}d ", nodeId);
+    LOGI("nodeId is %{public}d ", nodeId);
 
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::FORM_LINK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<FormLinkPattern>(); });
     return frameNode;
 }
 
-void FormLinkModelNG::StsSetAction(OHOS::Ace::NG::FrameNode* frameNode, std::string action)
+void FormLinkModelNG::StsSetAction(OHOS::Ace::NG::FrameNode* frameNode, std::string& action)
 {
     auto pattern = frameNode->GetPattern<FormLinkPattern>();
     pattern->SetAction(action);
