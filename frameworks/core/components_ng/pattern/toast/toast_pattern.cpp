@@ -275,8 +275,7 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     bool needResizeBottom = false;
     AdjustOffsetForKeyboard(offsetY, defaultBottom_.ConvertToPx(), textHeight, needResizeBottom);
     needResizeBottom = needResizeBottom || (!toastProp->HasToastAlignment() && toastInfo_.bottom.empty());
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && needResizeBottom &&
-        !GreatNotEqual(offsetY.Value(), 0)) {
+    if (needResizeBottom && !GreatNotEqual(offsetY.Value(), 0)) {
         return limitPos_ + toastProp->GetToastOffsetValue(DimensionOffset()).GetY();
     }
     return offsetY + toastProp->GetToastOffsetValue(DimensionOffset()).GetY();
@@ -316,9 +315,8 @@ void ToastPattern::AdjustOffsetForKeyboard(
             }
         }
     }
-    if (((IsDefaultToast() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) ||
-            IsTopMostToast()) &&
-        GreatNotEqual(keyboardInset, 0) && (offsetY.Value() + textHeight > keyboardOffset)) {
+    if ((IsDefaultToast() || IsTopMostToast()) && GreatNotEqual(keyboardInset, 0) &&
+        (offsetY.Value() + textHeight > keyboardOffset)) {
         needResizeBottom = true;
         offsetY = Dimension(keyboardOffset - toastBottom - textHeight);
     }
@@ -352,10 +350,6 @@ double ToastPattern::GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper)
 
 void ToastPattern::BeforeCreateLayoutWrapper()
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        PopupBasePattern::BeforeCreateLayoutWrapper();
-    }
-
     auto toastNode = GetHost();
     CHECK_NULL_VOID(toastNode);
     auto pipelineContext = IsDefaultToast() ? toastNode->GetContextRefPtr() : GetMainPipelineContext();
