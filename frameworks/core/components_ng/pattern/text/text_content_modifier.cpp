@@ -414,7 +414,7 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
         paintOffset_.GetY(), contentRect.ToString().c_str());
 
 #ifdef ACE_ENABLE_VK
-    SetHybridRenderTypeIfNeeded(drawingContext, pManager, host);
+    SetHybridRenderTypeIfNeeded(drawingContext, textPattern, pManager, host);
 #endif
     PropertyChangeFlag flag = 0;
     if (NeedMeasureUpdate(flag)) {
@@ -457,7 +457,7 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
 
 #ifdef ACE_ENABLE_VK
 void TextContentModifier::SetHybridRenderTypeIfNeeded(DrawingContext& drawingContext,
-    const RefPtr<ParagraphManager>& pManager, RefPtr<FrameNode>& host)
+    const RefPtr<TextPattern>& textPattern, const RefPtr<ParagraphManager>& pManager, RefPtr<FrameNode>& host)
 {
     RSRecordingCanvas* recordingCanvas = static_cast<RSRecordingCanvas*>(&drawingContext.canvas);
     if (recordingCanvas != nullptr && recordingCanvas->GetDrawCmdList() != nullptr) {
@@ -469,10 +469,13 @@ void TextContentModifier::SetHybridRenderTypeIfNeeded(DrawingContext& drawingCon
             if (Rosen::RSSystemProperties::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::TEXTBLOB) != 0 &&
                 static_cast<uint32_t>(pManager->GetLineCount()) >=
                 Rosen::RSSystemProperties::GetHybridRenderTextBlobLenCount()) {
-                    recordingCanvas->GetDrawCmdList()->SetHybridRenderType(RSHybridRenderType::TEXT);
-                    auto paragraphWidth = pManager->GetMaxWidth();
-                    auto paragraphHeight = pManager->GetHeight();
-                    recordingCanvas->ResetHybridRenderSize(paragraphWidth, paragraphHeight);
+                recordingCanvas->GetDrawCmdList()->SetHybridRenderType(RSHybridRenderType::TEXT);
+                auto baselineOffset = LessOrEqual(textPattern->GetBaselineOffset(), 0.0) ?
+                    std::fabs(textPattern->GetBaselineOffset()) : 0.0;
+                const RectF& contentRect = textPattern->GetTextRect();
+                RectF boundsRect;
+                pManager->GetPaintRegion(boundsRect, contentRect.GetX(), contentRect.GetY() + baselineOffset);
+                recordingCanvas->ResetHybridRenderSize(paragraphWidth, paragraphHeight);
             }
         }
     }

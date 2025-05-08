@@ -905,7 +905,7 @@ public:
         return true;
     }
 
-    const RectF& GetTextRect() override
+    const RectF& GetTextRect() const override
     {
         return richTextRect_;
     }
