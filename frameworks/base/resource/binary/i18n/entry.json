@@ -8,8 +8,7 @@
             "next":"下一步"
         },
         "refresh":{
-            "last_updated":"上次更新时间：%s",
-            "loading":"正在刷新…"
+            "last_updated":"上次更新时间：%s"
         },
         "textoverlay":{
             "copy":"复制",
@@ -78,8 +77,7 @@
             "next":"Next"
         },
         "refresh":{
-            "last_updated":"Last updated: %s",
-            "loading":"Refreshing…"
+            "last_updated":"Last updated: %s"
         },
         "textoverlay":{
             "copy":"Copy",
@@ -134,8 +132,7 @@
             "translate":"വിവർത്തനം ചെയ്യുക"
         },
         "refresh":{
-            "last_updated":"അവസാനം അപ്‌ഡേറ്റ് ചെയ്തത്: %s",
-            "loading":"റിഫ്രഷ് ചെയ്യുന്നു…"
+            "last_updated":"അവസാനം അപ്‌ഡേറ്റ് ചെയ്തത്: %s"
         },
         "switch":{
             "on":"ഓൺ",
@@ -163,8 +160,7 @@
             "translate":"Çeviri"
         },
         "refresh":{
-            "last_updated":"Son güncelleme: %s",
-            "loading":"Yenileniyor..."
+            "last_updated":"Son güncelleme: %s"
         },
         "switch":{
             "on":"Açık",
@@ -192,8 +188,7 @@
             "translate":"Prevedi"
         },
         "refresh":{
-            "last_updated":"Zadnja posodobitev: %s",
-            "loading":"Osveževanje …"
+            "last_updated":"Zadnja posodobitev: %s"
         },
         "switch":{
             "on":"Vklopljeno",
@@ -221,8 +216,7 @@
             "translate":"Oversett"
         },
         "refresh":{
-            "last_updated":"Siste oppdatering: %s",
-            "loading":"Oppdaterer ..."
+            "last_updated":"Siste oppdatering: %s"
         },
         "switch":{
             "on":"På",
@@ -250,8 +244,7 @@
             "translate":"Prevedi"
         },
         "refresh":{
-            "last_updated":"Posljednje ažuriranje: %s",
-            "loading":"Osvježavanje…"
+            "last_updated":"Posljednje ažuriranje: %s"
         },
         "switch":{
             "on":"Uključeno",
@@ -279,8 +272,7 @@
             "translate":"Translate"
         },
         "refresh":{
-            "last_updated":"Last updated: %s",
-            "loading":"Refreshing…"
+            "last_updated":"Last updated: %s"
         },
         "switch":{
             "on":"On",
@@ -308,8 +300,7 @@
             "translate":"Tərcümə edin"
         },
         "refresh":{
-            "last_updated":"Sonuncu dəfə yenilənib: %s",
-            "loading":"Təzələnir…"
+            "last_updated":"Sonuncu dəfə yenilənib: %s"
         },
         "switch":{
             "on":"Yanılı",
@@ -337,8 +328,7 @@
             "translate":"અનુવાદ કરો"
         },
         "refresh":{
-            "last_updated":"છેલ્લે અપડેટ કર્યું: %s",
-            "loading":"રિફ્રેશ કરી રહ્યું છે..."
+            "last_updated":"છેલ્લે અપડેટ કર્યું: %s"
         },
         "switch":{
             "on":"ચાલુ",
@@ -366,8 +356,7 @@
             "translate":"Traducir"
         },
         "refresh":{
-            "last_updated":"Última actualización: %s",
-            "loading":"Actualizando..."
+            "last_updated":"Última actualización: %s"
         },
         "switch":{
             "on":"Activado",
@@ -395,8 +384,7 @@
             "translate":"ተርጉም"
         },
         "refresh":{
-            "last_updated":"መጨረሻ የተዘመነው፦ %s",
-            "loading":"በማደስ ላይ..."
+            "last_updated":"መጨረሻ የተዘመነው፦ %s"
         },
         "switch":{
             "on":"በርቷል",
@@ -424,8 +412,7 @@
             "translate":"Превод"
         },
         "refresh":{
-            "last_updated":"Последна актуализация: %s",
-            "loading":"Опресняване..."
+            "last_updated":"Последна актуализация: %s"
         },
         "switch":{
             "on":"Включено",
@@ -453,8 +440,7 @@
             "translate":"Traducere"
         },
         "refresh":{
-            "last_updated":"Ultima actualizare: %s",
-            "loading":"Se reîmprospătează…"
+            "last_updated":"Ultima actualizare: %s"
         },
         "switch":{
             "on":"Pornit",
@@ -482,8 +468,7 @@
             "translate":"Traduir"
         },
         "refresh":{
-            "last_updated":"Última actualització: %s",
-            "loading":"S\\'està actualitzant…"
+            "last_updated":"Última actualització: %s"
         },
         "switch":{
             "on":"Encès",
@@ -511,8 +496,7 @@
             "translate":"Whakamāori"
         },
         "refresh":{
-            "last_updated":"Whakahōunga whakamutunga: %s",
-            "loading":"Tāmata ana..."
+            "last_updated":"Whakahōunga whakamutunga: %s"
         },
         "switch":{
             "on":"Kā",
@@ -540,8 +524,7 @@
             "translate":"Tarjima"
         },
         "refresh":{
-            "last_updated":"Oxirgi yangilanish: %s",
-            "loading":"Yangilanmoqda…"
+            "last_updated":"Oxirgi yangilanish: %s"
         },
         "switch":{
             "on":"Yoniq",
@@ -569,8 +552,7 @@
             "translate":"Prevedi"
         },
         "refresh":{
-            "last_updated":"Poslednji put ažurirano: %s",
-            "loading":"Osvežavanje…"
+            "last_updated":"Poslednji put ažurirano: %s"
         },
         "switch":{
             "on":"Uključeno",
@@ -598,8 +580,7 @@
             "translate":"ترجمة"
         },
         "refresh":{
-            "last_updated":"آخر تحديث: %s",
-            "loading":"جاري تجديد المحتوى..."
+            "last_updated":"آخر تحديث: %s"
         },
         "switch":{
             "on":"مشغّل",
@@ -627,8 +608,7 @@
             "translate":"Traducir"
         },
         "refresh":{
-            "last_updated":"Última actualización: %s",
-            "loading":"Actualizando..."
+            "last_updated":"Última actualización: %s"
         },
         "switch":{
             "on":"Sí",
@@ -656,8 +636,7 @@
             "translate":"ဘာသာျပန္"
         },
         "refresh":{
-            "last_updated":"ေနာက္ဆုံး အပ္ဒိတ္လုပ္ခဲ့မႈ- %s",
-            "loading":"ျပန္လည္လုပ္ေဆာင္ေနဆဲ…"
+            "last_updated":"ေနာက္ဆုံး အပ္ဒိတ္လုပ္ခဲ့မႈ- %s"
         },
         "switch":{
             "on":"ဖြင့္",
@@ -685,8 +664,7 @@
             "translate":"Itzuli"
         },
         "refresh":{
-            "last_updated":"Azken eguneratzea: %s",
-            "loading":"Freskatzen…"
+            "last_updated":"Azken eguneratzea: %s"
         },
         "switch":{
             "on":"Aktibatuta",
@@ -714,8 +692,7 @@
             "translate":"បកប្រែ"
         },
         "refresh":{
-            "last_updated":"បានធ្វើ​បច្ចុប្បន្នភាព​ចុងក្រោយនៅ៖ %s",
-            "loading":"កំពុងធ្វើឲ្យថ្មីឡើងវិញ…"
+            "last_updated":"បានធ្វើ​បច្ចុប្បន្នភាព​ចុងក្រោយនៅ៖ %s"
         },
         "switch":{
             "on":"បើក",
@@ -746,8 +723,7 @@
             "translate":"ཡིག་སྒྱུར།"
         },
         "refresh":{
-            "last_updated":"ཐེངས་སྔོན་མའི་གསར་སྒྱུར་དུས་ཚོད། %s",
-            "loading":"གསར་འདོན་བྱེད་བཞིན་ཡོད།"
+            "last_updated":"ཐེངས་སྔོན་མའི་གསར་སྒྱུར་དུས་ཚོད། %s"
         },
         "switch":{
             "on":"ཕྱེ།",
@@ -789,8 +765,7 @@
             "translate":"अनुवाद करू"
         },
         "refresh":{
-            "last_updated":"अंतिम बेर कयल गेल अपडेट: %s",
-            "loading":"रिफ्रेश कए रहल अछि..."
+            "last_updated":"अंतिम बेर कयल गेल अपडेट: %s"
         },
         "switch":{
             "on":"चालू",
@@ -818,8 +793,7 @@
             "translate":"Versti"
         },
         "refresh":{
-            "last_updated":"Paskutinis atnaujinimas: %s",
-            "loading":"Atnaujinama…"
+            "last_updated":"Paskutinis atnaujinimas: %s"
         },
         "switch":{
             "on":"Įjungta",
@@ -847,8 +821,7 @@
             "translate":"Terjemahkan"
         },
         "refresh":{
-            "last_updated":"Terakhir diperbarui: %s",
-            "loading":"Menyegarkan…"
+            "last_updated":"Terakhir diperbarui: %s"
         },
         "switch":{
             "on":"Hidup",
@@ -876,8 +849,7 @@
             "translate":"अनुवाद करा"
         },
         "refresh":{
-            "last_updated":"शेवटचे अद्यतनित केले: %s",
-            "loading":"रिफ्रेश करीत आहे..."
+            "last_updated":"शेवटचे अद्यतनित केले: %s"
         },
         "switch":{
             "on":"चालू",
@@ -905,8 +877,7 @@
             "translate":"ಅನುವಾದಿಸಿ"
         },
         "refresh":{
-            "last_updated":"ಕೊನೆಯದಾಗಿ ನವೀಕರಿಸಿದ್ದು: %s",
-            "loading":"ರಿಫ್ರೆಶ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ…"
+            "last_updated":"ಕೊನೆಯದಾಗಿ ನವೀಕರಿಸಿದ್ದು: %s"
         },
         "switch":{
             "on":"ಆನ್",
@@ -934,8 +905,7 @@
             "translate":"ଅନୁବାଦ କରନ୍ତୁ"
         },
         "refresh":{
-            "last_updated":"ଶେଷ ଅପଡେଟ୍ ହୋଇଥିଲା: %s",
-            "loading":"ସତେଜ କରାଯାଉଛି..."
+            "last_updated":"ଶେଷ ଅପଡେଟ୍ ହୋଇଥିଲା: %s"
         },
         "switch":{
             "on":"ଅନ୍‌ କରନ୍ତୁ",
@@ -963,8 +933,7 @@
             "translate":"Översätt"
         },
         "refresh":{
-            "last_updated":"Senast uppdaterad: %s",
-            "loading":"Uppdaterar …"
+            "last_updated":"Senast uppdaterad: %s"
         },
         "switch":{
             "on":"På",
@@ -992,8 +961,7 @@
             "translate":"Traduzir"
         },
         "refresh":{
-            "last_updated":"Última atualização: %s",
-            "loading":"Atualizando…"
+            "last_updated":"Última atualização: %s"
         },
         "switch":{
             "on":"Ligado",
@@ -1021,8 +989,7 @@
             "translate":"Орчуулах"
         },
         "refresh":{
-            "last_updated":"Сүүлд шинэчилсэн: %s",
-            "loading":"Шинэчилж байна..."
+            "last_updated":"Сүүлд шинэчилсэн: %s"
         },
         "switch":{
             "on":"Асаах",
@@ -1050,8 +1017,7 @@
             "translate":"ترجمہ کریں"
         },
         "refresh":{
-            "last_updated":"آخری بار اپ ڈیٹ کی گئی: %s",
-            "loading":"ریفریش ہو رہا ہے…"
+            "last_updated":"آخری بار اپ ڈیٹ کی گئی: %s"
         },
         "switch":{
             "on":"آن",
@@ -1079,8 +1045,7 @@
             "translate":"Vertalen"
         },
         "refresh":{
-            "last_updated":"Laatst bijgewerkt op: %s",
-            "loading":"Bezig met vernieuwen…"
+            "last_updated":"Laatst bijgewerkt op: %s"
         },
         "switch":{
             "on":"Aan",
@@ -1108,8 +1073,7 @@
             "translate":"Tłumacz"
         },
         "refresh":{
-            "last_updated":"Ostatnia aktualizacja: %s",
-            "loading":"Odświeżanie…"
+            "last_updated":"Ostatnia aktualizacja: %s"
         },
         "switch":{
             "on":"Włączono",
@@ -1137,8 +1101,7 @@
             "translate":"Isalin"
         },
         "refresh":{
-            "last_updated":"Huling na-update: %s",
-            "loading":"Nire-refresh…"
+            "last_updated":"Huling na-update: %s"
         },
         "switch":{
             "on":"I-on",
@@ -1166,8 +1129,7 @@
             "translate":"Аудару"
         },
         "refresh":{
-            "last_updated":"Соңғы жаңартылған: %s",
-            "loading":"Жаңартылуда…"
+            "last_updated":"Соңғы жаңартылған: %s"
         },
         "switch":{
             "on":"Қосулы",
@@ -1195,8 +1157,7 @@
             "translate":"แปลภาษา"
         },
         "refresh":{
-            "last_updated":"ปรับปรุงล่าสุด: %s",
-            "loading":"กำลังรีเฟรช…"
+            "last_updated":"ปรับปรุงล่าสุด: %s"
         },
         "switch":{
             "on":"เปิด",
@@ -1224,8 +1185,7 @@
             "translate":"පරිවර්තනය කරන්න"
         },
         "refresh":{
-            "last_updated":"අවසන් වරට යාවත් කළේ: %s",
-            "loading":"නැවුම් කරමින්…"
+            "last_updated":"අවසන් වරට යාවත් කළේ: %s"
         },
         "switch":{
             "on":"සක්‍රීය කරන්න",
@@ -1253,8 +1213,7 @@
             "translate":"অনুবাদ কৰক"
         },
         "refresh":{
-            "last_updated":"অন্তিমবাৰ আপডেট হৈছিল: %s",
-            "loading":"সতেজ কৰি আছে…"
+            "last_updated":"অন্তিমবাৰ আপডেট হৈছিল: %s"
         },
         "switch":{
             "on":"অন",
@@ -1282,8 +1241,7 @@
             "translate":"Přeložit"
         },
         "refresh":{
-            "last_updated":"Poslední aktualizace: %s",
-            "loading":"Obnovování..."
+            "last_updated":"Poslední aktualizace: %s"
         },
         "switch":{
             "on":"Zapnuto",
@@ -1311,8 +1269,7 @@
             "translate":"Fordítás"
         },
         "refresh":{
-            "last_updated":"Utolsó frissítés: %s",
-            "loading":"Frissítés…"
+            "last_updated":"Utolsó frissítés: %s"
         },
         "switch":{
             "on":"Be",
@@ -1340,8 +1297,7 @@
             "translate":"Traducir"
         },
         "refresh":{
-            "last_updated":"Última actualización: %s",
-            "loading":"Actualizando..."
+            "last_updated":"Última actualización: %s"
         },
         "switch":{
             "on":"Sí",
@@ -1369,8 +1325,7 @@
             "translate":"תרגום"
         },
         "refresh":{
-            "last_updated":"עדכון אחרון: %s",
-            "loading":"מרענן..."
+            "last_updated":"עדכון אחרון: %s"
         },
         "switch":{
             "on":"מופעל",
@@ -1398,8 +1353,7 @@
             "translate":"Terjemahkan"
         },
         "refresh":{
-            "last_updated":"Kemas kini terakhir: %s",
-            "loading":"Menyegarkan..."
+            "last_updated":"Kemas kini terakhir: %s"
         },
         "switch":{
             "on":"Buka",
@@ -1427,8 +1381,7 @@
             "translate":"Перакласці"
         },
         "refresh":{
-            "last_updated":"Апошняе абнаўленне: %s",
-            "loading":"Абнаўленне…"
+            "last_updated":"Апошняе абнаўленне: %s"
         },
         "switch":{
             "on":"Укл.",
@@ -1456,8 +1409,7 @@
             "translate":"Käännä"
         },
         "refresh":{
-            "last_updated":"Päivitetty viimeksi: %s",
-            "loading":"Päivitetään..."
+            "last_updated":"Päivitetty viimeksi: %s"
         },
         "switch":{
             "on":"Päällä",
@@ -1485,8 +1437,7 @@
             "translate":"Перевести"
         },
         "refresh":{
-            "last_updated":"Обновлено: %s",
-            "loading":"Обновление…"
+            "last_updated":"Обновлено: %s"
         },
         "switch":{
             "on":"Включить",
@@ -1514,8 +1465,7 @@
             "translate":"번역"
         },
         "refresh":{
-            "last_updated":"마지막 업데이트: %s",
-            "loading":"새로 고침 중..."
+            "last_updated":"마지막 업데이트: %s"
         },
         "switch":{
             "on":"사용",
@@ -1543,8 +1493,7 @@
             "translate":"Tafsiri"
         },
         "refresh":{
-            "last_updated":"Mara ya mwisho kusasishwa: %s",
-            "loading":"Inaonyesha upya…"
+            "last_updated":"Mara ya mwisho kusasishwa: %s"
         },
         "switch":{
             "on":"Waka",
@@ -1572,8 +1521,7 @@
             "translate":"Übersetzen"
         },
         "refresh":{
-            "last_updated":"Letzte Aktualisierung: %s",
-            "loading":"Aktualisieren ..."
+            "last_updated":"Letzte Aktualisierung: %s"
         },
         "switch":{
             "on":"Ein",
@@ -1601,8 +1549,7 @@
             "translate":"अनुवाद करें"
         },
         "refresh":{
-            "last_updated":"पिछली बार अद्यतन किया गया: %s",
-            "loading":"रीफ़्रेश किया जा रहा है…"
+            "last_updated":"पिछली बार अद्यतन किया गया: %s"
         },
         "switch":{
             "on":"चालू",
@@ -1630,8 +1577,7 @@
             "translate":"ဘာသာပြန်"
         },
         "refresh":{
-            "last_updated":"နောက်ဆုံး အပ်ဒိတ်လုပ်ခဲ့မှု- %s",
-            "loading":"ပြန်လည်လုပ်ဆောင်နေဆဲ…"
+            "last_updated":"နောက်ဆုံး အပ်ဒိတ်လုပ်ခဲ့မှု- %s"
         },
         "switch":{
             "on":"ဖွင့်",
@@ -1659,8 +1605,7 @@
             "translate":"Oversæt"
         },
         "refresh":{
-            "last_updated":"Sidst opdateret: %s",
-            "loading":"Opdaterer…"
+            "last_updated":"Sidst opdateret: %s"
         },
         "switch":{
             "on":"Til",
@@ -1688,8 +1633,7 @@
             "translate":"Преведи"
         },
         "refresh":{
-            "last_updated":"Последно ажурирање: %s",
-            "loading":"Се освежува…"
+            "last_updated":"Последно ажурирање: %s"
         },
         "switch":{
             "on":"Вклучено",
@@ -1717,8 +1661,7 @@
             "translate":"ترجمه"
         },
         "refresh":{
-            "last_updated":"آخرین به‌روزرسانی: %s",
-            "loading":"درحال تازه کردن…"
+            "last_updated":"آخرین به‌روزرسانی: %s"
         },
         "switch":{
             "on":"روشن",
@@ -1746,8 +1689,7 @@
             "translate":"翻訳"
         },
         "refresh":{
-            "last_updated":"最終更新：%s",
-            "loading":"再読み込み中..."
+            "last_updated":"最終更新：%s"
         },
         "switch":{
             "on":"オン",
@@ -1775,8 +1717,7 @@
             "translate":"თარგმნა"
         },
         "refresh":{
-            "last_updated":"ბოლო გაახლება: %s",
-            "loading":"მიმდინარეობს განახლება..."
+            "last_updated":"ბოლო გაახლება: %s"
         },
         "switch":{
             "on":"ჩართვა",
@@ -1804,8 +1745,7 @@
             "translate":"अनुवाद गर्नुहोस्"
         },
         "refresh":{
-            "last_updated":"पछिल्लो अद्यावधिक: %s",
-            "loading":"ताजा गर्दैछ..."
+            "last_updated":"पछिल्लो अद्यावधिक: %s"
         },
         "switch":{
             "on":"अन",
@@ -1833,8 +1773,7 @@
             "translate":"Traduzir"
         },
         "refresh":{
-            "last_updated":"Última atualização: %s",
-            "loading":"A atualizar..."
+            "last_updated":"Última atualização: %s"
         },
         "switch":{
             "on":"Ativado",
@@ -1862,8 +1801,7 @@
             "translate":"Preložiť"
         },
         "refresh":{
-            "last_updated":"Posledná aktualizácia: %s",
-            "loading":"Obnovuje sa…"
+            "last_updated":"Posledná aktualizácia: %s"
         },
         "switch":{
             "on":"Zapnuté",
@@ -1891,8 +1829,7 @@
             "translate":"Перекласти"
         },
         "refresh":{
-            "last_updated":"Останнє оновлення: %s",
-            "loading":"Оновлення…"
+            "last_updated":"Останнє оновлення: %s"
         },
         "switch":{
             "on":"Увімк.",
@@ -1920,8 +1857,7 @@
             "translate":"Dịch"
         },
         "refresh":{
-            "last_updated":"Cập nhật mới nhất: %s",
-            "loading":"Đang làm mới…"
+            "last_updated":"Cập nhật mới nhất: %s"
         },
         "switch":{
             "on":"Bật",
@@ -1949,8 +1885,7 @@
             "translate":"Jarwakake"
         },
         "refresh":{
-            "last_updated":"Dianyarake pungkasan tanggal: %s",
-            "loading":"Mbukak maneh..."
+            "last_updated":"Dianyarake pungkasan tanggal: %s"
         },
         "switch":{
             "on":"Urip",
@@ -1978,8 +1913,7 @@
             "translate":"ਅਨੁਵਾਦ ਕਰੋ"
         },
         "refresh":{
-            "last_updated":"ਪਿਛਲੀ ਵਾਰ ਅੱਪਡੇਟ ਕੀਤਾ ਗਿਆ: %s",
-            "loading":"ਤਾਜ਼ਾ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ..."
+            "last_updated":"ਪਿਛਲੀ ਵਾਰ ਅੱਪਡੇਟ ਕੀਤਾ ਗਿਆ: %s"
         },
         "switch":{
             "on":"ਚਾਲੂ",
@@ -2007,8 +1941,7 @@
             "translate":"అనువదించు"
         },
         "refresh":{
-            "last_updated":"చివరిగా అప్‌డేట్ చేసినది: %s",
-            "loading":"రీఫ్రెష్ చేస్తోంది…"
+            "last_updated":"చివరిగా అప్‌డేట్ చేసినది: %s"
         },
         "switch":{
             "on":"ఆన్",
@@ -2039,8 +1972,7 @@
             "translate":"تەرجىمە"
         },
         "refresh":{
-            "last_updated":"يېڭىلانغان ۋاقىت: %s",
-            "loading":"يېڭىلىنىۋاتىدۇ..."
+            "last_updated":"يېڭىلانغان ۋاقىت: %s"
         },
         "switch":{
             "on":"ئوچۇق",
@@ -2082,8 +2014,7 @@
             "translate":"Tõlgi"
         },
         "refresh":{
-            "last_updated":"Viimane värskendus: %s",
-            "loading":"Värskendamine..."
+            "last_updated":"Viimane värskendus: %s"
         },
         "switch":{
             "on":"Sees",
@@ -2111,8 +2042,7 @@
             "translate":"மொழிபெயர்"
         },
         "refresh":{
-            "last_updated":"கடைசியாகப் புதுப்பித்தது: %s",
-            "loading":"புதுப்பிக்கிறது…"
+            "last_updated":"கடைசியாகப் புதுப்பித்தது: %s"
         },
         "switch":{
             "on":"ஆன்",
@@ -2140,8 +2070,7 @@
             "translate":"Traduci"
         },
         "refresh":{
-            "last_updated":"Ultimo aggiornamento: %s",
-            "loading":"Aggiornamento..."
+            "last_updated":"Ultimo aggiornamento: %s"
         },
         "switch":{
             "on":"On",
@@ -2169,8 +2098,7 @@
             "translate":"অনুবাদ করুন"
         },
         "refresh":{
-            "last_updated":"শেষবার আপডেট করা হয়েছে: %s",
-            "loading":"রিফ্রেশ করা হচ্ছে…"
+            "last_updated":"শেষবার আপডেট করা হয়েছে: %s"
         },
         "switch":{
             "on":"চালু",
@@ -2198,8 +2126,7 @@
             "translate":"Traduire"
         },
         "refresh":{
-            "last_updated":"Dernière mise à jour : %s",
-            "loading":"Actualisation en cours."
+            "last_updated":"Dernière mise à jour : %s"
         },
         "switch":{
             "on":"Activé",
@@ -2230,8 +2157,7 @@
             "translate":"翻譯"
         },
         "refresh":{
-            "last_updated":"上次更新時間：%s",
-            "loading":"重新整理中..."
+            "last_updated":"上次更新時間：%s"
         },
         "switch":{
             "on":"啟用",
@@ -2276,8 +2202,7 @@
             "translate":"翻譯"
         },
         "refresh":{
-            "last_updated":"上次更新時間：%s",
-            "loading":"正在重新整理..."
+            "last_updated":"上次更新時間：%s"
         },
         "switch":{
             "on":"開",
@@ -2319,8 +2244,7 @@
             "translate":"Prevedi"
         },
         "refresh":{
-            "last_updated":"Zadnje ažuriranje: %s",
-            "loading":"Osvježavanje…"
+            "last_updated":"Zadnje ažuriranje: %s"
         },
         "switch":{
             "on":"Uključeno",
@@ -2348,8 +2272,7 @@
             "translate":"Tulkot"
         },
         "refresh":{
-            "last_updated":"Pēdējoreiz atjaunināts: %s",
-            "loading":"Notiek atsvaidzināšana..."
+            "last_updated":"Pēdējoreiz atjaunināts: %s"
         },
         "switch":{
             "on":"Iesl.",
@@ -2377,8 +2300,7 @@
             "translate":"Μετάφραση"
         },
         "refresh":{
-            "last_updated":"Τελευταία ενημέρωση: %s",
-            "loading":"Ανανέωση..."
+            "last_updated":"Τελευταία ενημέρωση: %s"
         },
         "switch":{
             "on":"Ενεργό",
@@ -2406,8 +2328,7 @@
             "translate":"ແປ​ພາ​ສາ"
         },
         "refresh":{
-            "last_updated":"ອັບເດດຫຼ້າສຸດ: %s",
-            "loading":"ກໍາລັງຣີເຟຣຊ…"
+            "last_updated":"ອັບເດດຫຼ້າສຸດ: %s"
         },
         "switch":{
             "on":"ເປີດ",
@@ -2438,8 +2359,7 @@
             "translate":"[TS_954627]_Translate"
         },
         "refresh":{
-            "last_updated":"[TS_954615]_Last updated: %s",
-            "loading":"[TS_954633]_Refreshing…"
+            "last_updated":"[TS_954615]_Last updated: %s"
         },
         "switch":{
             "on":"[TS_954636]_On",
