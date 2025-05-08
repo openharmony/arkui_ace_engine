@@ -28,7 +28,7 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
     if (type == IconNodeType::TEXT) {
         auto dialogNode = OHOS::Ace::NG::AgingAdapationDialogUtil::ShowLongPressDialog(UtfUtils::Str8ToStr16(message));
         CHECK_NULL_RETURN(dialogNode, nullptr);
-        RefPtr<FrameNode> node = AceType::MakeRefPtr<FrameNodeImpl>(AceType::RawPtr(dialogNode));
+        RefPtr<FrameNode> node = AceType::MakeRefPtr<FrameNodeImpl>(dialogNode);
         dialogNode->SetKitNode(node);
         return node;
     }
