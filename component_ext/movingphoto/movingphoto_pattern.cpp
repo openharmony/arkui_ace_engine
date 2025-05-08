@@ -1017,10 +1017,8 @@ void MovingPhotoPattern::GetXmageHeight()
         return;
     }
 
-    int32_t imageW = 0;
-    auto resW = std::from_chars(imageWidth.data(), imageWidth.data() + imageWidth.size(), imageW);
-    CHECK_NULL_VOID(resW.ec == std::errc());
-    int32_t imageL = 0;
+    float imageW = StringUtils::StringToFloat(imageWidth);
+    float imageL = StringUtils::StringToFloat(imageLength);
     auto resL = std::from_chars(imageLength.data(), imageLength.data() + imageLength.size(), imageL);
     CHECK_NULL_VOID(resL.ec == std::errc());
 
@@ -1033,10 +1031,7 @@ void MovingPhotoPattern::GetXmageHeight()
             TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto bottomValue is null");
             return;
         }
-        int32_t bottomV = 0;
-        auto resB = std::from_chars(bottomValue.data(), bottomValue.data() + bottomValue.size(), bottomV);
-        CHECK_NULL_VOID(resB.ec == std::errc());
-        imageSize = SizeF(imageW, bottomV);
+        float bottomV = StringUtils::StringToFloat(bottomValue);
         ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, XmageHeight, imageL - bottomV);
     } else {
         imageSize = SizeF(imageW, imageL);
