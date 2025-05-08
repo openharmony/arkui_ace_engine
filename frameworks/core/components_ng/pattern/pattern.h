@@ -128,7 +128,7 @@ public:
         return false;
     }
 
-    virtual bool IsEnableWrap()
+    virtual bool IsEnableFix()
     {
         return false;
     }

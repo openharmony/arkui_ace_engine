@@ -98,11 +98,13 @@ private:
     bool MarginOnMainAxisNegative(LayoutWrapper* layoutWrapper);
     bool IsKeepMinSize(const RefPtr<LayoutWrapper>& childLayoutWrapper, float& flexSize);
     bool CheckSetConstraint(const std::unique_ptr<MeasureProperty>& propertyPtr);
-    void CheckMainAxisSizeAuto(const std::unique_ptr<MeasureProperty>& calcLayoutConstraint);
+    void CheckMainAxisSizeAuto(
+        LayoutWrapper* layoutWrapper, const std::unique_ptr<MeasureProperty>& calcLayoutConstraint);
     void ApplyPatternOperation(LayoutWrapper* layoutWrapper, FlexOperatorType operation, uintptr_t addr = 0,
         FlexLayoutResult layoutResult = {});
     void SetInitMainAxisSize(LayoutWrapper* layoutWrapper);
-    void SetFinalRealSize(LayoutWrapper* layoutWrapper, SizeF& realSize);
+    void SetFinalRealSize(
+        LayoutWrapper* layoutWrapper, SizeF& realSize, std::optional<NG::LayoutPolicyProperty> layoutPolicy);
     void SetCrossPos(const RefPtr<LayoutWrapper>& layoutWrapper, float& crossPos);
     void AddElementIntoMagicNodes(int32_t childDisplayPriority, MagicLayoutNode node, float childLayoutWeight);
     bool AddElementIntoLayoutPolicyChildren(LayoutWrapper* layoutWrapper, RefPtr<LayoutWrapper> child);

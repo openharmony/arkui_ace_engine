@@ -57,36 +57,45 @@ struct LayoutPolicyProperty {
     std::optional<LayoutCalPolicy> widthLayoutPolicy_;
     std::optional<LayoutCalPolicy> heightLayoutPolicy_;
 
-    bool isWidthAdaptive()
+    bool IsWidthWrap()
     {
-        return widthLayoutPolicy_.has_value() && (widthLayoutPolicy_.value() == LayoutCalPolicy::WRAP_CONTENT ||
-                                                     widthLayoutPolicy_.value() == LayoutCalPolicy::FIX_AT_IDEAL_SIZE);
+        return widthLayoutPolicy_.has_value() && widthLayoutPolicy_.value() == LayoutCalPolicy::WRAP_CONTENT;
     }
-    bool isHeightAdaptive()
+    bool IsHeightWrap()
     {
-        return heightLayoutPolicy_.has_value() &&
-               (heightLayoutPolicy_.value() == LayoutCalPolicy::WRAP_CONTENT ||
-                   heightLayoutPolicy_.value() == LayoutCalPolicy::FIX_AT_IDEAL_SIZE);
+        return heightLayoutPolicy_.has_value() && heightLayoutPolicy_.value() == LayoutCalPolicy::WRAP_CONTENT;
     }
-    bool isAdaptive()
+    bool IsWidthFix()
     {
-        return isWidthAdaptive() || isHeightAdaptive();
+        return widthLayoutPolicy_.has_value() && widthLayoutPolicy_.value() == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
     }
-    bool isWidthMatch()
+    bool IsHeightFix()
+    {
+        return heightLayoutPolicy_.has_value() && heightLayoutPolicy_.value() == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    }
+    bool IsWrap()
+    {
+        return IsWidthWrap() || IsHeightWrap();
+    }
+    bool IsFix()
+    {
+        return IsWidthFix() || IsHeightFix();
+    }
+    bool IsWidthMatch()
     {
         return widthLayoutPolicy_.has_value() && widthLayoutPolicy_.value() == LayoutCalPolicy::MATCH_PARENT;
     }
-    bool isHeightMatch()
+    bool IsHeightMatch()
     {
         return heightLayoutPolicy_.has_value() && heightLayoutPolicy_.value() == LayoutCalPolicy::MATCH_PARENT;
     }
-    bool isMatch()
+    bool IsMatch()
     {
-        return isWidthMatch() || isHeightMatch();
+        return IsWidthMatch() || IsHeightMatch();
     }
-    bool isAllMatch()
+    bool IsAllMatch()
     {
-        return isWidthMatch() && isHeightMatch();
+        return IsWidthMatch() && IsHeightMatch();
     }
 };
 
