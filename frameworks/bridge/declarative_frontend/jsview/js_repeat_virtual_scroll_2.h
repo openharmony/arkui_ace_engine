@@ -33,6 +33,7 @@ public:
     static void NotifyContainerLayoutChange(const JSCallbackInfo& info);
     static void UpdateL1Rid4Index(const JSCallbackInfo& info);
 
+    static void IsInAnimation(const JSCallbackInfo& info);
     static void OnMove(const JSCallbackInfo& info);
     static void SetCreateByTemplate(const JSCallbackInfo& info);
     static void JsParseItemDragEventHandler(

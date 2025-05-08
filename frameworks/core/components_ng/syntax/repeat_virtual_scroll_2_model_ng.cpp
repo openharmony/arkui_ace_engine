@@ -128,4 +128,9 @@ void RepeatVirtualScroll2ModelNG::SetCreateByTemplate(bool isCreatedByTemplate)
         childOfRepeat->SetAllowReusableV2Descendant(!isCreatedByTemplate);
     }
 }
+
+bool RepeatVirtualScroll2ModelNG::IsInAnimation()
+{
+    return AnimationUtils::IsImplicitAnimationOpen();
+}
 } // namespace OHOS::Ace::NG

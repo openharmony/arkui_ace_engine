@@ -101,4 +101,5 @@ declare class RepeatVirtualScroll2Native {
   // drag and drop
   static onMove(repeatElmtId: number, handler: (from: number, to: number) => void, eventHandler?: ItemDragEventHandler);
   static setCreateByTemplate(isCreatedByTemplate: boolean): void;
+  static isInAnimation(): boolean;
 }
