@@ -903,6 +903,7 @@ void UIObserverListener::AddGestureEventInfoThree(napi_value objValueEvent, cons
     napi_create_double(env_, gestureEventInfo.GetTargetDisplayId(), &napiTargetDisplayId);
     napi_set_named_property(env_, objValueEvent, "targetDisplayId", napiTargetDisplayId);
     AddFingerListInfo(objValueEvent, gestureEventInfo);
+    AddFingerInfosInfo(objValueEvent, gestureEventInfo);
     AddTapLocationInfo(objValueEvent, gestureEventInfo);
     napi_close_handle_scope(env_, scope);
 }
@@ -998,6 +999,72 @@ void UIObserverListener::AddFingerListInfo(napi_value objValueClickEvent, const 
     }
     napi_set_named_property(env_, objValueClickEvent, "fingerList", napiFingerList);
     napi_close_handle_scope(env_, scope);
+}
+
+void UIObserverListener::AddFingerInfosInfo(napi_value objValueClickEvent, const GestureEvent& gestureEventInfo)
+{
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
+
+    napi_value napiFingerInfos = nullptr;
+    napi_create_array(env_, &napiFingerInfos);
+    bool isArray = false;
+    if (napi_is_array(env_, napiFingerInfos, &isArray) != napi_ok || !isArray) {
+        return;
+    }
+    
+    int32_t index = 0;
+
+    for (auto& finger : gestureEventInfo.GetFingerList()) {
+        if (finger.sourceType_ == SourceType::TOUCH && finger.sourceTool_ != SourceTool::FINGER) {
+            continue;
+        }
+        napi_value napiFinger = nullptr;
+        napi_create_object(env_, &napiFinger);
+        AddFingerObjectInfo(napiFinger, finger);
+        napi_set_element(env_, napiFingerInfos, index++, napiFinger);
+    }
+    
+    napi_set_named_property(env_, objValueClickEvent, "fingerInfos", napiFingerInfos);
+    napi_close_handle_scope(env_, scope);
+}
+
+void UIObserverListener::AddFingerObjectInfo(napi_value napiFinger, const FingerInfo& finger)
+{
+    double scale = Dimension(1.0, DimensionUnit::VP).ConvertToPx();
+    if (NearZero(scale)) {
+        scale = 1.0;
+    }
+    napi_value napiId = nullptr;
+    napi_create_double(env_, finger.fingerId_, &napiId);
+    napi_set_named_property(env_, napiFinger, "id", napiId);
+    napi_value napiHand = nullptr;
+    napi_create_int32(env_, finger.operatingHand_, &napiHand);
+    napi_set_named_property(env_, napiFinger, "hand", napiHand);
+    const OHOS::Ace::Offset& globalLocation = finger.globalLocation_;
+    const OHOS::Ace::Offset& localLocation = finger.localLocation_;
+    const OHOS::Ace::Offset& screenLocaltion = finger.screenLocation_;
+    napi_value napiGlobalX = nullptr;
+    napi_create_double(env_, globalLocation.GetX() / scale, &napiGlobalX);
+    napi_set_named_property(env_, napiFinger, "globalX", napiGlobalX);
+    napi_value napiGlobalY = nullptr;
+    napi_create_double(env_, globalLocation.GetY() / scale, &napiGlobalY);
+    napi_set_named_property(env_, napiFinger, "globalY", napiGlobalY);
+    napi_value napiLocalX = nullptr;
+    napi_create_double(env_, localLocation.GetX() / scale, &napiLocalX);
+    napi_set_named_property(env_, napiFinger, "localX", napiLocalX);
+    napi_value napiLocalY = nullptr;
+    napi_create_double(env_, localLocation.GetY() / scale, &napiLocalY);
+    napi_set_named_property(env_, napiFinger, "localY", napiLocalY);
+    napi_value napiDisplayX = nullptr;
+    napi_create_double(env_, screenLocaltion.GetX() / scale, &napiDisplayX);
+    napi_set_named_property(env_, napiFinger, "displayX", napiDisplayX);
+    napi_value napiDisplayY = nullptr;
+    napi_create_double(env_, screenLocaltion.GetY() / scale, &napiDisplayY);
+    napi_set_named_property(env_, napiFinger, "displayY", napiDisplayY);
 }
 
 void UIObserverListener::AddClickEventInfoOne(napi_value objValueClickEvent, const ClickInfo& clickInfo)
