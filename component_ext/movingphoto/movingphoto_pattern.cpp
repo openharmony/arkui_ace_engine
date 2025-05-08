@@ -14,7 +14,6 @@
  */
 
 #include <unistd.h>
-#include <charconv>
 
 #include "movingphoto_pattern.h"
 #include "movingphoto_node.h"
@@ -1019,8 +1018,6 @@ void MovingPhotoPattern::GetXmageHeight()
 
     float imageW = StringUtils::StringToFloat(imageWidth);
     float imageL = StringUtils::StringToFloat(imageLength);
-    auto resL = std::from_chars(imageLength.data(), imageLength.data() + imageLength.size(), imageL);
-    CHECK_NULL_VOID(resL.ec == std::errc());
 
     std::string modeValue = imageSrc->GetProperty(HW_MNOTE_XMAGE_MODE);
     SizeF imageSize = SizeF(-1, -1);
