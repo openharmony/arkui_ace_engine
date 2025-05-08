@@ -48,6 +48,12 @@ RefPtr<LazyForEachNode> LazyForEachNode::CreateLazyForEachNode(
     return node;
 }
 
+void LazyForEachNode::NotifyColorModeChange(uint32_t colorMode)
+{
+    CHECK_NULL_VOID(builder_);
+    builder_->NotifyColorModeChange(colorMode, GetRerenderable());
+}
+
 void LazyForEachNode::AdjustLayoutWrapperTree(
     const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout)
 {
