@@ -21,6 +21,10 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SymbolModelStatic {
 public:
+    static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize);
+    static void SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& fontWeight);
+    static void SetRenderingStrategy(FrameNode* frameNode, const std::optional<uint32_t>& renderingStrategy);
+    static void SetSymbolEffect(FrameNode* frameNode, const std::optional<uint32_t>& effectStrategy);
     static void SetMinFontScale(FrameNode* frameNode, const std::optional<float>& value);
     static void SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& value);
 };

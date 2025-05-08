@@ -116,17 +116,11 @@ void HyperlinkModelNG::SetDraggable(bool draggable)
     frameNode->SetDraggable(draggable);
 }
 
-void HyperlinkModelNG::SetColor(FrameNode* frameNode, const std::optional<Color>& value)
+void HyperlinkModelNG::SetColor(FrameNode* frameNode, const Color& value)
 {
-    if (value.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, TextColor, value.value(), frameNode);
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, Color, value.value(), frameNode);
-        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, TextColor, frameNode);
-        ACE_RESET_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, Color, frameNode);
-        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, TextColor, value, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(HyperlinkLayoutProperty, Color, value, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
 }
 
 void HyperlinkModelNG::SetDraggable(FrameNode* frameNode, bool draggable)
