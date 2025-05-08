@@ -976,8 +976,6 @@ void SubwindowOhos::HideMenuNG(bool showPreviewAnimation, bool startDrag)
     overlay->HideMenuInSubWindow(showPreviewAnimation, startDrag);
     HideEventColumn();
     HidePixelMap(startDrag, 0, 0, false);
-    HideFilter(false);
-    HideFilter(true);
 }
 
 void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId)
@@ -992,8 +990,6 @@ void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t target
     overlay->HideMenuInSubWindow(menu, targetId);
     HideEventColumn();
     HidePixelMap(false, 0, 0, false);
-    HideFilter(false);
-    HideFilter(true);
 }
 
 void SubwindowOhos::UpdatePreviewPosition()
@@ -1048,10 +1044,8 @@ void SubwindowOhos::ClearMenuNG(int32_t targetId, bool inWindow, bool showAnimat
     CHECK_NULL_VOID(overlay);
     if (showAnimation) {
         overlay->CleanMenuInSubWindowWithAnimation();
-        HideFilter(true);
     } else {
         overlay->CleanMenuInSubWindow(targetId);
-        overlay->RemoveFilter();
     }
     HideWindow();
     if (overlay->GetMenuNode(targetId)) {
@@ -1062,7 +1056,6 @@ void SubwindowOhos::ClearMenuNG(int32_t targetId, bool inWindow, bool showAnimat
         HideEventColumn();
     }
     HidePixelMap(false, 0, 0, false);
-    HideFilter(false);
 }
 
 void SubwindowOhos::ClearPopupNG()
@@ -2058,27 +2051,6 @@ bool SubwindowOhos::IsFocused()
 {
     CHECK_NULL_RETURN(window_, false);
     return window_->IsFocused();
-}
-
-void SubwindowOhos::HideFilter(bool isInSubWindow)
-{
-    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "HideFilter enter, subWindow: %{public}d", isInSubWindow);
-    RefPtr<Container> aceContainer = nullptr;
-    if (isInSubWindow) {
-        aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
-    } else {
-        aceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-    }
-
-    CHECK_NULL_VOID(aceContainer);
-    auto pipelineContext = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
-    CHECK_NULL_VOID(pipelineContext);
-    auto overlayManager = pipelineContext->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-
-    auto containerId = isInSubWindow ? childContainerId_ : parentContainerId_;
-    ContainerScope scope(containerId);
-    overlayManager->RemoveFilterAnimation();
 }
 
 void SubwindowOhos::HidePixelMap(bool startDrag, double x, double y, bool showAnimation)

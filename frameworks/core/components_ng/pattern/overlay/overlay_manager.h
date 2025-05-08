@@ -418,6 +418,11 @@ public:
     void RemoveFilter();
     void RemoveFilterWithNode(const RefPtr<FrameNode>& filterNode);
     void RemoveFilterAnimation();
+    void RemoveMenuFilter(const RefPtr<FrameNode>& menuWrapper, bool hasAnimation = true);
+    void ShowFilterDisappearAnimation(const RefPtr<FrameNode>& filterNode);
+    void AddFilterOnDisappear(int32_t filterId);
+    void RemoveFilterOnDisappear(int32_t filterId);
+    bool IsFilterOnDisappear(int32_t filterId) const;
     void RemoveEventColumn();
     void UpdatePixelMapPosition(bool isSubwindowOverlay = false);
     void UpdateContextMenuDisappearPosition(const NG::OffsetF& offset, float menuScale = 1.0f,
@@ -1024,6 +1029,7 @@ private:
     std::set<int32_t> curSessionIds_;
     std::set<int32_t> skipTargetIds_;
     std::optional<OverlayManagerInfo> overlayInfo_;
+    std::unordered_set<int32_t> onDisappearFilterIds_;
 };
 } // namespace OHOS::Ace::NG
 

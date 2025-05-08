@@ -400,6 +400,16 @@ public:
         return filterColumnNode_;
     }
 
+    void SetIsFilterInSubwindow(bool inSubwindow)
+    {
+        isFilterInSubWindow_ = inSubwindow;
+    }
+
+    bool GetIsFilterInSubwindow() const
+    {
+        return isFilterInSubWindow_;
+    }
+
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
@@ -663,6 +673,7 @@ private:
     bool hasFoldModeChangeTransition_ = false;
     OffsetF previewDisappearStartOffset_;
     RefPtr<FrameNode> filterColumnNode_;
+    bool isFilterInSubWindow_ = false; 
     MenuDumpInfo dumpInfo_;
     bool hasCustomRadius_ = false;
     PreviewMenuAnimationInfo animationInfo_;

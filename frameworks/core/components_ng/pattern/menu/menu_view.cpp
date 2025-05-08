@@ -806,8 +806,25 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
     geometryNode->SetFrameOffset(imageOffset);
 }
 
-void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& menuWrapperNode)
+static RefPtr<FrameNode> CreateFilterColumnNode()
 {
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    CHECK_NULL_RETURN(columnNode, nullptr);
+    auto layoutProperty = columnNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto accessibilityProperty = columnNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    if (accessibilityProperty) {
+        accessibilityProperty->SetAccessibilityHoverPriority(true); // consume barrierfree hover event
+    }
+
+    return columnNode;
+}
+
+static void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& menuWrapperNode)
+{
+    CHECK_NULL_VOID(targetNode && menuWrapperNode);
     auto parent = targetNode->GetParent();
     CHECK_NULL_VOID(parent);
     while (parent->GetDepth() != 1) {
@@ -831,24 +848,19 @@ void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& men
         bool isBindOverlayValue = targetNode->GetLayoutProperty()->GetIsBindOverlayValue(false);
         CHECK_NULL_VOID(isBindOverlayValue && menuTheme->GetHasFilter());
         // insert columnNode to rootNode
-        auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            AceType::MakeRefPtr<LinearLayoutPattern>(true));
-        columnNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        auto accessibilityProperty = columnNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-        if (accessibilityProperty) {
-            accessibilityProperty->SetAccessibilityHoverPriority(true); // consume barrierfree hover event
-        }
+        auto columnNode = CreateFilterColumnNode();
+        CHECK_NULL_VOID(columnNode);
         // set filter
+        auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        menuWrapperPattern->SetFilterColumnNode(columnNode);
         if (container->IsSceneBoardWindow()) {
             auto windowScene = manager->FindWindowScene(targetNode);
             manager->MountFilterToWindowScene(columnNode, windowScene);
             manager->ShowFilterAnimation(columnNode);
         } else if (container->IsUIExtensionWindow()) {
             // mount filter node on subwindow to ensure filter node's size equals to host window's size
-            CHECK_NULL_VOID(menuWrapperNode);
-            auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
-            CHECK_NULL_VOID(menuWrapperPattern);
-            menuWrapperPattern->SetFilterColumnNode(columnNode);
+            menuWrapperPattern->SetIsFilterInSubwindow(true);
         } else {
             columnNode->MountToParent(parent);
             columnNode->OnMountToParentDone();
@@ -902,11 +914,13 @@ void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<Fram
         // if filter set in subwindow, need to adjust zOrder to show in back.
         auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(menuWrapperPattern);
-        auto columnNode = menuWrapperPattern->GetFilterColumnNode();
-        CHECK_NULL_VOID(columnNode);
-        auto columnRenderContext = columnNode->GetRenderContext();
-        CHECK_NULL_VOID(columnRenderContext);
-        columnRenderContext->UpdateZIndex(-1);
+        if (menuWrapperPattern->GetIsFilterInSubwindow()) {
+            auto columnNode = menuWrapperPattern->GetFilterColumnNode();
+            CHECK_NULL_VOID(columnNode);
+            auto columnRenderContext = columnNode->GetRenderContext();
+            CHECK_NULL_VOID(columnRenderContext);
+            columnRenderContext->UpdateZIndex(-1);
+        }
     }
 }
 
