@@ -34,6 +34,7 @@ constexpr InputStyle DEFAULT_INPUT_STYLE = InputStyle::DEFAULT;
 constexpr bool DEFAULT_SELECTION_MENU_HIDDEN = false;
 constexpr bool DEFAULT_SHOW_UNDER_LINE = false;
 constexpr bool DEFAULT_ENABLE_AUTO_FILL = true;
+constexpr bool DEFAULT_ENABLE_AUTO_FILL_ANIMATION = true;
 constexpr bool DEFAULT_REQUEST_KEYBOARD_ON_FOCUS = true;
 constexpr DisplayMode DEFAULT_BAR_STATE = DisplayMode::AUTO;
 constexpr FontWeight DEFAULT_FONT_WEIGHT = FontWeight::NORMAL;
@@ -333,6 +334,27 @@ void ResetTextInputEnableAutoFill(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetEnableAutoFill(frameNode, DEFAULT_ENABLE_AUTO_FILL);
+}
+
+void SetTextInputEnableAutoFillAnimation(ArkUINodeHandle node, ArkUI_Uint32 enableAutoFillAnimation)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEnableAutoFillAnimation(frameNode, static_cast<bool>(enableAutoFillAnimation));
+}
+
+ArkUI_Int32 GetTextInputEnableAutoFillAnimation(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetEnableAutoFillAnimation(frameNode));
+}
+
+void ResetTextInputEnableAutoFillAnimation(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEnableAutoFillAnimation(frameNode, DEFAULT_ENABLE_AUTO_FILL_ANIMATION);
 }
 
 ArkUI_Int32 GetTextInputSelectAll(ArkUINodeHandle node)
@@ -2219,6 +2241,9 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .setTextInputStrokeColor = SetTextInputStrokeColor,
         .resetTextInputStrokeColor = ResetTextInputStrokeColor,
         .getTextInputStrokeColor = GetTextInputStrokeColor,
+        .setTextInputEnableAutoFillAnimation = SetTextInputEnableAutoFillAnimation,
+        .getTextInputEnableAutoFillAnimation = GetTextInputEnableAutoFillAnimation,
+        .resetTextInputEnableAutoFillAnimation = ResetTextInputEnableAutoFillAnimation,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
