@@ -620,4 +620,19 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_024, TestSize.Level1)
     EXPECT_EQ(2.0, requestWant2.GetFloatParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, 0.0f));
     GTEST_LOG_(INFO) << "FormRenderGroupTest_024 end";
 }
+
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_025, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_025 start";
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_025");
+    ASSERT_TRUE(eventRunner);
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto group = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
+    EXPECT_TRUE(group);
+    OHOS::AAFwk::Want want;
+    std::string compId = "comp1";
+    want.SetParam(FORM_RENDERER_COMP_ID, compId);
+    EXPECT_TRUE(group->IsManagerDelegateValid(want));
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_025 end";
+}
 }
