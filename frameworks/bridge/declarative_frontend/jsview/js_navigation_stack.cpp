@@ -1222,7 +1222,7 @@ std::string JSNavigationStack::ErrorToMessage(int32_t code)
 {
     switch (code) {
         case ERROR_CODE_INTERNAL_ERROR:
-            return "Internal error.";
+            return "Internal error. Create NavDestination failed, probably caused by wrong UIContext.";
         case ERROR_CODE_DESTINATION_NOT_FOUND:
             return "NavDestination not found.";
         case ERROR_CODE_BUILDER_FUNCTION_NOT_REGISTERED:
