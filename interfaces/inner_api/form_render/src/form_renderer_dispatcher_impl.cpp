@@ -65,6 +65,7 @@ void FormRendererDispatcherImpl::DispatchPointerEvent(
 
         std::shared_ptr<FormSerializedResultData> serializedResultData = std::make_shared<FormSerializedResultData>();
         auto callback = [serializedResultData]() {
+            HILOG_INFO("dowm event process callback");
             std::unique_lock<std::mutex> lock(serializedResultData->mtx);
             serializedResultData->cv.notify_all();
         };
