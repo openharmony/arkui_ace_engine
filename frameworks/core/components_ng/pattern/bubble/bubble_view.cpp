@@ -899,10 +899,11 @@ RefPtr<FrameNode> BubbleView::CreateButtons(const RefPtr<PopupParam>& param, int
     }
     auto popupTheme = GetPopupTheme();
     CHECK_NULL_RETURN(popupTheme, nullptr);
+    auto littlePadding = popupTheme->GetLittlePadding();
     PaddingProperty rowPadding;
     rowPadding.top = CalcLength(popupTheme->GetButtonTopMargin());
     rowPadding.left = CalcLength(popupTheme->GetButtonLeftMargin());
-    rowPadding.right = CalcLength(popupTheme->GetButtonRightMargin());
+    rowPadding.right = CalcLength(littlePadding);
     rowPadding.bottom = CalcLength(popupTheme->GetButtonBottomMargin());
     if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
         auto layoutProps = layoutNode->GetLayoutProperty<LinearLayoutProperty>();
@@ -934,26 +935,6 @@ void UpdateButtonFontSize(RefPtr<TextLayoutProperty>& textLayoutProps)
     textLayoutProps->UpdateFontSize(fontSize);
 }
 
-void UpdateForButtonBackgroundGradientStyle(const RefPtr<RenderContext> &renderContext)
-{
-    Gradient gradient;
-    gradient.CreateGradientWithType(NG::GradientType::RADIAL);
-    auto popupTheme = GetPopupTheme();
-    CHECK_NULL_VOID(popupTheme);
-    GradientColor beginGredientColor = GradientColor(popupTheme->GetSecondaryButtonBeginGredientColor());
-    GradientColor endGredientColor = GradientColor(popupTheme->GetSecondaryButtonEndGredientColor());
-    const int beginGredientColorNumber = 0;
-    const int endGredientColorNumber = 100;
-    beginGredientColor.SetDimension(CalcDimension(beginGredientColorNumber, DimensionUnit::PERCENT));
-    endGredientColor.SetDimension(CalcDimension(endGredientColorNumber, DimensionUnit::PERCENT));
-    gradient.AddColor(beginGredientColor);
-    gradient.AddColor(endGredientColor);
-    if (gradient.IsValid()) {
-        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        renderContext->UpdateRadialGradient(gradient);
-    }
-}
-
 void UpdateButtonTextColorForDiff(const RefPtr<TextLayoutProperty>& textLayoutProperty,
     const int32_t buttonNumber)
 {
@@ -966,34 +947,6 @@ void UpdateButtonTextColorForDiff(const RefPtr<TextLayoutProperty>& textLayoutPr
     } else {
         textLayoutProperty->UpdateTextColor(popupTheme->GetButtonFontColor());
     }
-}
-
-void UpdateButtonStyleForCar(const RefPtr<RenderContext> &renderContext,
-    const RefPtr<ButtonLayoutProperty>& buttonProp, const int32_t buttonNumber)
-{
-    auto popupTheme = GetPopupTheme();
-    CHECK_NULL_VOID(popupTheme);
-    if (buttonNumber == PRIMARY_BUTTON_NUMBER) {
-        renderContext->UpdateBackgroundColor(popupTheme->GetPrimaryButtonBackgroundColor());
-    } else if (buttonNumber == SECONDARY_BUTTON_NUMBER) {
-        UpdateForButtonBackgroundGradientStyle(renderContext);
-        renderContext->UpdateBackgroundColor(popupTheme->GetSecondaryButtonBackgroundColor());
-        auto secondaryButtonShadow = popupTheme->GetSecondaryButtonShadow();
-        if (secondaryButtonShadow.IsValid()) {
-            renderContext->UpdateBackShadow(secondaryButtonShadow);
-        }
-    } else {
-        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    }
-    BorderWidthProperty borderWidthProperty;
-    borderWidthProperty.SetBorderWidth(popupTheme->GetButtonBorderWidth());
-    buttonProp->UpdateBorderWidth(borderWidthProperty);
-    BorderColorProperty borderColorProperty;
-    borderColorProperty.leftColor = popupTheme->GetInnerBorderBeginGredientColor();
-    borderColorProperty.rightColor = popupTheme->GetInnerBorderBeginGredientColor();
-    borderColorProperty.topColor = popupTheme->GetInnerBorderBeginGredientColor();
-    borderColorProperty.bottomColor = popupTheme->GetInnerBorderEndGredientColor();
-    renderContext->UpdateBorderColor(borderColorProperty);
 }
 
 RefPtr<FrameNode> BubbleView::CreateButton(ButtonProperties& buttonParam, int32_t popupId,
@@ -1019,8 +972,6 @@ RefPtr<FrameNode> BubbleView::CreateButton(ButtonProperties& buttonParam, int32_
     CHECK_NULL_RETURN(buttonPattern, nullptr);
 
     auto buttonProp = AceType::DynamicCast<ButtonLayoutProperty>(buttonNode->GetLayoutProperty());
-    auto popupButtonFlexGrow = popupTheme->GetPopupButtonFlexGrow();
-    buttonProp->UpdateFlexGrow(popupButtonFlexGrow);
     auto isUseCustom = param->IsUseCustom();
 
     auto buttonTextNode = BubbleView::CreateMessage(buttonParam.value, isUseCustom);
@@ -1070,8 +1021,10 @@ RefPtr<FrameNode> BubbleView::CreateButton(ButtonProperties& buttonParam, int32_
     buttonProp->UpdateCalcMinSize(CalcSize(CalcLength(buttonMiniMumWidth), std::nullopt));
     auto renderContext = buttonNode->GetRenderContext();
     if (renderContext) {
-        if (popupTheme->GetPopupButtonIsCarStyle()) {
-            UpdateButtonStyleForCar(renderContext, buttonProp, buttonNumber);
+        if (buttonNumber == PRIMARY_BUTTON_NUMBER) {
+            renderContext->UpdateBackgroundColor(popupTheme->GetPrimaryButtonBackgroundColor());
+        } else if (buttonNumber == SECONDARY_BUTTON_NUMBER) {
+            renderContext->UpdateBackgroundColor(popupTheme->GetSecondaryButtonBackgroundColor());
         } else {
             renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         }
