@@ -541,14 +541,14 @@ protected:
         return arcActiveBackgroundWidth_;
     }
  
-    void SetArcNormaMaxOffsetAngle(double normaMaxOffsetAngle)
+    void SetArcNormalMaxOffsetAngle(double normalMaxOffsetAngle)
     {
-        arcNormaMaxOffsetAngle_ = normaMaxOffsetAngle;
+        arcNormalMaxOffsetAngle_ = normalMaxOffsetAngle;
     }
  
-    double GetArcNormaMaxOffsetAngle() const
+    double GetArcNormalMaxOffsetAngle() const
     {
-        return arcNormaMaxOffsetAngle_;
+        return arcNormalMaxOffsetAngle_;
     }
  
     void SetArcNormalStartAngle(double normalStartAngle)
@@ -706,7 +706,7 @@ private:
     Dimension arcActiveBackgroundWidth_;
     double arcNormalStartAngle_ = 0.0;
     double arcActiveStartAngle_ = 0.0;
-    double arcNormaMaxOffsetAngle_ = 0.0;
+    double arcNormalMaxOffsetAngle_ = 0.0;
     double arcActiveMaxOffsetAngle_ = 0.0;
     Dimension arcNormalScrollBarWidth_;
     Dimension arcActiveScrollBarWidth_;
