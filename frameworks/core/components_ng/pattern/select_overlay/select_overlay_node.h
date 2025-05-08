@@ -194,7 +194,7 @@ private:
     static std::pair<std::vector<MenuOptionsParam>, bool> HandleCollaborationMenuItem(
         const std::vector<MenuOptionsParam>& params);
 
-    void NotifyUpdateToolBar(bool itemChanged);
+    void NotifyUpdateToolBar(bool itemChanged, bool withoutAnimation);
     void SetSelectMenuInnerSize();
 
     using ExecuteStateFunc = void (SelectOverlayNode::*)(FrameNodeType type, FrameNodeTrigger trigger);

@@ -334,7 +334,7 @@ void SelectOverlayPattern::HandlePanStart(GestureEvent& info)
     orignMenuIsShow_ = info_->menuInfo.menuIsShow;
     if (info_->menuInfo.menuIsShow) {
         info_->menuInfo.menuIsShow = false;
-        host->UpdateToolBar(false);
+        host->UpdateToolBar(false, true);
     }
     if (info_->isSingleHandle) {
         StopHiddenHandleTask();
