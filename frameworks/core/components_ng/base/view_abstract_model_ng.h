@@ -1674,6 +1674,26 @@ public:
     static std::string GetAccessibilityDescription(FrameNode* frameNode);
     static std::string GetAccessibilityImportance(FrameNode* frameNode);
     static bool CheckSkipMenuShow(const RefPtr<FrameNode>& targetNode);
+    static void SetFreeze(FrameNode* frameNode, bool freeze)
+    {
+        ViewAbstract::SetFreeze(frameNode, freeze);
+    }
+    static void SetVisualEffect(FrameNode* frameNode, const OHOS::Rosen::VisualEffect* visualEffect)
+    {
+        ViewAbstract::SetVisualEffect(frameNode, visualEffect);
+    }
+    static void SetBackgroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* backgroundFilter)
+    {
+        ViewAbstract::SetBackgroundFilter(frameNode, backgroundFilter);
+    }
+    static void SetForegroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* foregroundFilter)
+    {
+        ViewAbstract::SetForegroundFilter(frameNode, foregroundFilter);
+    }
+    static void SetCompositingFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* compositingFilter)
+    {
+        ViewAbstract::SetCompositingFilter(frameNode, compositingFilter);
+    }
 
 private:
     bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);

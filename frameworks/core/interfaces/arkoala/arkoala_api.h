@@ -2434,6 +2434,16 @@ struct ArkUICommonModifier {
     void (*resetPrivacySensitive)(ArkUINodeHandle node);
     void (*freezeUINodeById)(ArkUI_CharPtr id, ArkUI_Bool isFreeze);
     void (*freezeUINodeByUniqueId)(ArkUI_Int32 uniqueId, ArkUI_Bool isFreeze);
+    void (*setVisualEffect)(ArkUINodeHandle node, void* visualEffect);
+    void (*resetVisualEffect)(ArkUINodeHandle node);
+    void (*setBackgroundFilter)(ArkUINodeHandle node, void* backgroundFilter);
+    void (*resetBackgroundFilter)(ArkUINodeHandle node);
+    void (*setForegroundFilter)(ArkUINodeHandle node, void* foregroundFilter);
+    void (*resetForegroundFilter)(ArkUINodeHandle node);
+    void (*setCompositingFilter)(ArkUINodeHandle node, void* compositingFilter);
+    void (*resetCompositingFilter)(ArkUINodeHandle node);
+    void (*setFreeze)(ArkUINodeHandle node, ArkUI_Bool freeze);
+    void (*resetFreeze)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
