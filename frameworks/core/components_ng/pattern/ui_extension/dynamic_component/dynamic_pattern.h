@@ -78,14 +78,12 @@ public:
 
     void SetBackgroundTransparent(bool backgroundTransparent);
 
-    void OnVisibleChange(bool visible) override;
-    void OnWindowShow() override;
-    void OnWindowHide() override;
-
     bool HasDynamicRenderer() const
     {
         return dynamicComponentRenderer_ != nullptr;
     }
+
+    void HandleVisibleAreaChange(bool visible, double ratio);
 
 private:
     void InitializeRender(void* runtime);
@@ -105,6 +103,8 @@ private:
 
     void AddToPageEventController();
     void ReleasePageEvent() const;
+
+    void RegisterVisibleAreaChange();
 
     RefPtr<DynamicComponentRenderer> dynamicComponentRenderer_;
     bool adaptiveWidth_ = false;

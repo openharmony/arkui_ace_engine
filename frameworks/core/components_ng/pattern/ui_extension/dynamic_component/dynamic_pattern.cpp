@@ -40,6 +40,8 @@ constexpr char PARAM_MSG_NOT_SUPPORT_UI_CONTENT_TYPE[] = "Not support uIContent 
 constexpr char PARAM_NAME_EXCEED_MAX_NUM[] = "exceedMaxNum";
 constexpr char PARAM_MSG_EXCEED_MAX_NUM[] = "Workers exceed Max Num";
 const char ENABLE_DEBUG_DC_KEY[] = "persist.ace.debug.dc.enabled";
+constexpr double SHOW_START = 0.0;
+constexpr double SHOW_FULL = 1.0;
 
 bool IsDebugDCEnabled()
 {
@@ -84,6 +86,7 @@ void DynamicPattern::InitializeDynamicComponent(
 
     curDynamicInfo_.entryPoint = entryPoint;
     InitializeRender(runtime);
+    RegisterVisibleAreaChange();
 }
 
 void DynamicPattern::HandleErrorCallback(DCResultCode resultCode)
@@ -544,34 +547,35 @@ void DynamicPattern::ResetAccessibilityChildTreeCallback()
     accessibilityChildTreeCallback_ = nullptr;
 }
 
-void DynamicPattern::OnVisibleChange(bool visible)
+void DynamicPattern::RegisterVisibleAreaChange()
 {
-    PLATFORM_LOGI("The component is changing from '%{public}s' to '%{public}s'.",
-        isVisible_ ? "visible" : "invisible", visible ? "visible" : "invisible");
-    isVisible_ = visible;
-    CHECK_NULL_VOID(dynamicComponentRenderer_);
-    if (isVisible_) {
-        dynamicComponentRenderer_->NotifyForeground();
-    } else {
-        dynamicComponentRenderer_->NotifyBackground();
-    }
+    PLATFORM_LOGI("Register visible area change.");
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleVisibleAreaChange(visible, ratio);
+    };
+    std::vector<double> ratioList = { SHOW_START, SHOW_FULL };
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
 }
 
-void DynamicPattern::OnWindowShow()
+void DynamicPattern::HandleVisibleAreaChange(bool visible, double ratio)
 {
-    PLATFORM_LOGI("The window is being shown and the component is %{public}s.", isVisible_ ? "visible" : "invisible");
-    if (isVisible_) {
+    PLATFORM_LOGI("HandleVisibleAreaChange visible: %{public}d, curVisible: %{public}d, "
+        "ratio: %{public}f.", visible, isVisible_, ratio);
+    bool curVisible = !NearEqual(ratio, SHOW_START);
+    if (isVisible_ != curVisible) {
+        isVisible_ = curVisible;
         CHECK_NULL_VOID(dynamicComponentRenderer_);
-        dynamicComponentRenderer_->NotifyForeground();
-    }
-}
-
-void DynamicPattern::OnWindowHide()
-{
-    PLATFORM_LOGI("The window is being hidden and the component is %{public}s.", isVisible_ ? "visible" : "invisible");
-    if (isVisible_) {
-        CHECK_NULL_VOID(dynamicComponentRenderer_);
-        dynamicComponentRenderer_->NotifyBackground();
+        if (isVisible_) {
+            dynamicComponentRenderer_->NotifyForeground();
+        } else {
+            dynamicComponentRenderer_->NotifyBackground();
+        }
     }
 }
 } // namespace OHOS::Ace::NG
