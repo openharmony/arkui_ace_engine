@@ -79,6 +79,7 @@ public:
     static void ResetControlButtonLeft(FrameNode* frameNode);
     static void ResetControlButtonIconInfo(FrameNode* frameNode);
     static bool IsDoubleBindBlock(const RefPtr<SideBarContainerPattern>& sideBarContainerPattern);
+    static void SetOnChange(FrameNode* frameNode, std::function<void(const bool)>&& onChange);
 private:
     void MarkNeedInitRealSideBarWidth() override;
     static void MarkNeedInitRealSideBarWidth(FrameNode* frameNode);

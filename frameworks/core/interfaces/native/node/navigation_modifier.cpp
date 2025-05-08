@@ -503,6 +503,112 @@ void ResetEnableToolBarAdaptation(ArkUINodeHandle node)
     NavigationModelNG::SetEnableToolBarAdaptation(frameNode, false);
 }
 
+void SetOnNavigationModeChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onModeChange = reinterpret_cast<std::function<void(NG::NavigationMode)>*>(callback);
+        NavigationModelNG::SetOnNavigationModeChange(frameNode, std::move(*onModeChange));
+    } else {
+        NavigationModelNG::SetOnNavigationModeChange(frameNode, nullptr);
+    }
+}
+
+void ResetOnNavigationModeChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetOnNavigationModeChange(frameNode, nullptr);
+}
+
+void SetOnTitleModeChange(ArkUINodeHandle node, void* callback, void* eventInfoFunc)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback && eventInfoFunc) {
+        auto onTitleModeChange = reinterpret_cast<std::function<void(NG::NavigationTitleMode)>*>(callback);
+        auto eventInfo = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(eventInfoFunc);
+        NavigationModelNG::SetOnTitleModeChange(frameNode, std::move(*onTitleModeChange), std::move(*eventInfo));
+    } else {
+        NavigationModelNG::SetOnTitleModeChange(frameNode, nullptr, nullptr);
+    }
+}
+
+void ResetOnTitleModeChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetOnTitleModeChange(frameNode, nullptr, nullptr);
+}
+
+void SetNavigationIsCustomAnimation(ArkUINodeHandle node, ArkUI_Bool isCustom)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetIsCustomAnimation(frameNode, isCustom);
+}
+
+void ResetNavigationIsCustomAnimation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetIsCustomAnimation(frameNode, false);
+}
+
+void SetToolBar(ArkUINodeHandle node, ArkUIBarItem* items, ArkUI_Uint32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(items);
+    std::vector<NG::BarItem> toolBarItems;
+    for (uint32_t i = 0; i < length; i++) {
+        NG::BarItem menuItem;
+        if (items[i].text.isSet) {
+            menuItem.text = items[i].text.value;
+        }
+        if (items[i].icon.isSet) {
+            menuItem.icon = items[i].icon.value;
+        }
+        toolBarItems.push_back(menuItem);
+        if (items[i].text.value) {
+            delete[] items[i].text.value;
+            items[i].text.value = nullptr;
+        }
+        if (items[i].icon.value) {
+            delete[] items[i].icon.value;
+            items[i].icon.value = nullptr;
+        }
+    }
+    NavigationModelNG::SetToolBarItems(frameNode, std::move(toolBarItems));
+}
+
+void ResetToolBar(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<NG::BarItem> toolBarItems;
+    NavigationModelNG::SetToolBarItems(frameNode, std::move(toolBarItems));
+}
+
+void SetOnNavBarStateChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onNavBarStateChange = reinterpret_cast<std::function<void(bool)>*>(callback);
+        NavigationModelNG::SetOnNavBarStateChange(frameNode, std::move(*onNavBarStateChange));
+    } else {
+        NavigationModelNG::SetOnNavBarStateChange(frameNode, nullptr);
+    }
+}
+
+void ResetOnNavBarStateChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetOnNavBarStateChange(frameNode, nullptr);
+}
 namespace NodeModifier {
 const ArkUINavigationModifier* GetNavigationModifier()
 {
@@ -556,6 +662,16 @@ const ArkUINavigationModifier* GetNavigationModifier()
         .setSystemBarStyle = SetSystemBarStyle,
         .setEnableToolBarAdaptation = SetEnableToolBarAdaptation,
         .resetEnableToolBarAdaptation = ResetEnableToolBarAdaptation,
+        .setOnNavigationModeChange = SetOnNavigationModeChange,
+        .resetOnNavigationModeChange = ResetOnNavigationModeChange,
+        .setOnTitleModeChange = SetOnTitleModeChange,
+        .resetOnTitleModeChange = ResetOnTitleModeChange,
+        .setNavigationIsCustomAnimation = SetNavigationIsCustomAnimation,
+        .resetNavigationIsCustomAnimation = ResetNavigationIsCustomAnimation,
+        .setToolBar = SetToolBar,
+        .resetToolBar = ResetToolBar,
+        .setOnNavBarStateChange = SetOnNavBarStateChange,
+        .resetOnNavBarStateChange = ResetOnNavBarStateChange,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
