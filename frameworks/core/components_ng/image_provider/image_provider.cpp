@@ -344,10 +344,12 @@ RefPtr<ImageData> ImageProvider::QueryDataFromCache(const ImageSourceInfo& src)
 
 void ImageProvider::DownLoadImage(const UriDownLoadConfig& downLoadConfig)
 {
+    ACE_SCOPED_TRACE("PerformDownload %s", downLoadConfig.imageDfxConfig.ToStringWithSrc().c_str());
     auto queryData = QueryDataFromCache(downLoadConfig.src);
     if (queryData) {
         RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(downLoadConfig.src, queryData);
         if (imageObj) {
+            ACE_SCOPED_TRACE("Hit network image cache %s", downLoadConfig.imageDfxConfig.ToStringWithSrc().c_str());
             ImageProvider::DownLoadSuccessCallback(
                 imageObj, downLoadConfig.taskKey, downLoadConfig.sync, downLoadConfig.src.GetContainerId());
             return;
