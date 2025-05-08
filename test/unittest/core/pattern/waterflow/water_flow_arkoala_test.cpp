@@ -57,7 +57,10 @@ HWTEST_F(WaterFlowArkoalaTest, Basic001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr");
     InitMockLazy(100);
     CreateDone();
-
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(480.0f), CalcLength(1000.0f)));
+    FlushUITasks(frameNode_);
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(WATER_FLOW_WIDTH), CalcLength(WATER_FLOW_HEIGHT)));
+    FlushUITasks(frameNode_);
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(lazy_.GetRange(), std::pair(0, 8));
     EXPECT_EQ(GetChildY(frameNode_, 6), 587);
