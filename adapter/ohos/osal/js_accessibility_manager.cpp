@@ -1484,6 +1484,10 @@ bool ScrollByOffset(const RefPtr<NG::FrameNode>& curFrameNode)
     auto parentFrameNode = curFrameNode->GetParentFrameNode();
 
     while (parentFrameNode) {
+        auto accessibilityProperty = parentFrameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        if (accessibilityProperty && !accessibilityProperty->IsUserScrollTriggerable()) {
+            return false;
+        }
         if (ScrollByOffsetToParent(curFrameNode, parentFrameNode)) {
             ret = true;
         }
