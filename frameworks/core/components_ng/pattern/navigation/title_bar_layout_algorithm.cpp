@@ -741,10 +741,9 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         // full mode
         if (isCustom) {
             // custom title margin is (0.0f, menuOccupiedHeight_)
-            auto customOffsetY = NearZero(menuOccupiedWidth_) ? 0.0f : menuOccupiedHeight_;
             float customOffsetX = 0.0f;
             customOffsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, customOffsetX);
-            geometryNode->SetMarginFrameOffset(OffsetF { customOffsetX, customOffsetY});
+            geometryNode->SetMarginFrameOffset(OffsetF { customOffsetX, menuOccupiedHeight_});
             titleWrapper->Layout();
             return;
         }
@@ -762,10 +761,9 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
     if (isCustom) {
         isInitialTitle_ = false;
         // customBuilder and NavigationCustomTitle offset is (0.0f, menuOccupiedHeight_)
-        auto customOffsetY = NearZero(menuOccupiedWidth_) ? 0.0f : menuOccupiedHeight_;
         auto customOffsetX = 0.0f;
         customOffsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, customOffsetX);
-        geometryNode->SetMarginFrameOffset(OffsetF { customOffsetX, customOffsetY});
+        geometryNode->SetMarginFrameOffset(OffsetF { customOffsetX, menuOccupiedHeight_});
         titleWrapper->Layout();
         return;
     }
