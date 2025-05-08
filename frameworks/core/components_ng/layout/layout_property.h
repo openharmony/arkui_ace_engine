@@ -160,6 +160,8 @@ public:
 
     void UpdateLocalizedAlignment(std::string value);
 
+    void UpdateLayoutGravity(Alignment value);
+
     void UpdateIsMirrorable(bool value);
 
     void UpdateLayoutWeight(float value);

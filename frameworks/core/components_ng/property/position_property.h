@@ -23,6 +23,7 @@
 namespace OHOS::Ace::NG {
 struct PositionProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Alignment, Alignment);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LayoutGravity, Alignment);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LocalizedAlignment, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(IsMirrorable, bool);
 
@@ -34,6 +35,8 @@ struct PositionProperty {
         }
         json->PutExtAttr("align",
             propAlignment.value_or(Alignment::CENTER).GetAlignmentStr(TextDirection::LTR).c_str(), filter);
+        json->PutExtAttr("layoutGravity",
+            propLayoutGravity.value_or(Alignment::CENTER).GetAlignmentStr(TextDirection::LTR).c_str(), filter);
         json->PutExtAttr("localizedAlignment",
             propLocalizedAlignment.value_or("center").c_str(), filter);
     }

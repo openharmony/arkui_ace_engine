@@ -1124,6 +1124,16 @@ void LayoutProperty::UpdateLocalizedAlignment(std::string value)
     }
 }
 
+void LayoutProperty::UpdateLayoutGravity(Alignment value)
+{
+    if (!positionProperty_) {
+        positionProperty_ = std::make_unique<PositionProperty>();
+    }
+    if (positionProperty_->UpdateLayoutGravity(value)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT;
+    }
+}
+
 void LayoutProperty::UpdateIsMirrorable(bool value)
 {
     if (!positionProperty_) {
