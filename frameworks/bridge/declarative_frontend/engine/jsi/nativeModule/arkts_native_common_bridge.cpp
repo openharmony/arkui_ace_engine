@@ -1202,10 +1202,32 @@ void GetJsAngle(const EcmaVM* vm, const Local<JSValueRef>& angleArg, std::option
     }
 }
 
+void GetJsAngleWithDefault(
+    const EcmaVM* vm, const Local<JSValueRef>& angleArg, std::optional<float>& angle, float defaultValue)
+{
+    if (angleArg->IsString(vm)) {
+        double temp = 0.0;
+        if (StringUtils::StringToDegree(angleArg->ToString(vm)->ToString(vm), temp)) {
+            angle = static_cast<float>(temp);
+        } else {
+            angle = defaultValue;
+        }
+    } else if (angleArg->IsNumber()) {
+        angle = static_cast<float>(angleArg->ToNumber(vm)->Value());
+    }
+}
+
 void ParseCenterDimension(const EcmaVM* vm, const Local<JSValueRef>& centerArg, CalcDimension& centerDimension)
 {
     if (!ArkTSUtils::ParseJsDimensionVp(vm, centerArg, centerDimension, false)) {
         centerDimension = Dimension(0.5f, DimensionUnit::PERCENT);
+    }
+}
+
+void ParseCenterZDimension(const EcmaVM* vm, const Local<JSValueRef>& centerArg, CalcDimension& centerDimension)
+{
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, centerArg, centerDimension, false)) {
+        centerDimension = Dimension(0.0f, DimensionUnit::VP);
     }
 }
 
@@ -1226,18 +1248,24 @@ bool ParseRotateAngle(ArkUIRuntimeCallInfo *runtimeCallInfo, ArkUI_Float32 value
     float angleX = 0.0f;
     float angleY = 0.0f;
     float angleZ = 0.0f;
+    std::optional<float> angleXOptional;
+    std::optional<float> angleYOptional;
+    std::optional<float> angleZOptional;
     CalcDimension centerX = 0.5_pct;
     CalcDimension centerY = 0.5_pct;
     CalcDimension centerZ = CalcDimension(0.0f, DimensionUnit::VP);
+    GetJsAngleWithDefault(vm, angleXArg, angleXOptional, 0.0f);
+    GetJsAngleWithDefault(vm, angleYArg, angleYOptional, 0.0f);
+    GetJsAngleWithDefault(vm, angleZArg, angleZOptional, 0.0f);
 
     double perspective = 0.0;
 
-    ParseDirection(vm, angleXArg, angleX);
-    ParseDirection(vm, angleYArg, angleY);
-    ParseDirection(vm, angleZArg, angleZ);
+    angleX = angleXOptional.value_or(0.0f);
+    angleY = angleYOptional.value_or(0.0f);
+    angleZ = angleZOptional.value_or(0.0f);
     ParseCenterDimension(vm, centerXArg, centerX);
     ParseCenterDimension(vm, centerYArg, centerY);
-    ParseCenterDimension(vm, centerZArg, centerZ);
+    ParseCenterZDimension(vm, centerZArg, centerZ);
     ArkTSUtils::ParseJsDouble(vm, perspectiveArg, perspective);
     values[NUM_0] = static_cast<ArkUI_Float32>(centerX.Value());
     units[NUM_0] = static_cast<int>(centerX.Unit());

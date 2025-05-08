@@ -66,7 +66,6 @@ public:
     void ScaleZ(float z, const AnimationOption& animationOption = AnimationOption());
     // rotate
     void Rotate(float dx, float dy, float dz, float angle, const AnimationOption& animationOption = AnimationOption());
-    void RotateAngle(float dx, float dy, float dz, const AnimationOption& animationOption = AnimationOption());
     void RotateX(float angle, const AnimationOption& animationOption = AnimationOption());
     void RotateY(float angle, const AnimationOption& animationOption = AnimationOption());
     void RotateZ(float angle, const AnimationOption& animationOption = AnimationOption());

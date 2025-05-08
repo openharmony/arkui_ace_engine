@@ -761,6 +761,13 @@ struct ArkUIRotateType {
     ArkUI_Float32 sightDistance;
 };
 
+struct ArkUIRotateAngleType {
+    ArkUI_Float32 angleX;
+    ArkUI_Float32 angleY;
+    ArkUI_Float32 angleZ;
+    ArkUI_Float32 sightDistance;
+};
+
 struct ArkUIBlurStyleOptionType {
     ArkUI_Int32 blurStyle;
     ArkUI_Int32 colorMode;
@@ -2048,6 +2055,7 @@ struct ArkUICommonModifier {
         ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength);
     void (*resetRotate)(ArkUINodeHandle node);
     void (*resetRotateAngle)(ArkUINodeHandle node);
+    void (*resetRotateAngleWithoutTransformCenter)(ArkUINodeHandle node);
     void (*setGeometryTransition)(
         ArkUINodeHandle node, ArkUI_CharPtr id, const ArkUIGeometryTransitionOptions* options);
     void (*resetGeometryTransition)(ArkUINodeHandle node);
@@ -2314,6 +2322,7 @@ struct ArkUICommonModifier {
     ArkUI_Float32 (*getLayoutWeight)(ArkUINodeHandle node);
     void (*getScale)(ArkUINodeHandle node, ArkUIScaleType* scaleType);
     void (*getRotate)(ArkUINodeHandle node, ArkUIRotateType* rotateType);
+    void (*getRotateAngle)(ArkUINodeHandle node, ArkUIRotateAngleType* rotateType);
     ArkUI_Float32 (*getBrightness)(ArkUINodeHandle node);
     ArkUI_Float32 (*getSaturate)(ArkUINodeHandle node);
     void (*getBackgroundImagePosition)(ArkUINodeHandle node, ArkUIPositionOptions* position, ArkUI_Int32 unit);

@@ -1955,14 +1955,7 @@ void ViewAbstract::SetRotate(const NG::Vector5F& value)
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (renderContext->HasTransformRotateAngle()) {
-        renderContext->ResetTransformRotate();
-        renderContext->ResetTransformRotateAngle();
-    }
-    ACE_UPDATE_RENDER_CONTEXT(TransformRotate, value);
+    SetRotate(frameNode, value);
 }
 
 void ViewAbstract::SetRotateAngle(const NG::Vector4F& value)
@@ -1971,6 +1964,23 @@ void ViewAbstract::SetRotateAngle(const NG::Vector4F& value)
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetRotateAngle(frameNode, value);
+}
+
+void ViewAbstract::SetRotate(FrameNode* frameNode, const NG::Vector5F& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->HasTransformRotateAngle()) {
+        renderContext->ResetTransformRotate();
+        renderContext->ResetTransformRotateAngle();
+    }
+    renderContext->UpdateTransformRotate(value);
+}
+
+void ViewAbstract::SetRotateAngle(FrameNode* frameNode, const NG::Vector4F& value)
+{
     CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -1978,29 +1988,7 @@ void ViewAbstract::SetRotateAngle(const NG::Vector4F& value)
         renderContext->ResetTransformRotate();
         renderContext->ResetTransformRotateAngle();
     }
-    ACE_UPDATE_RENDER_CONTEXT(TransformRotateAngle, value);
-}
-
-void ViewAbstract::SetRotate(FrameNode* frameNode, const NG::Vector5F& value)
-{
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (renderContext->HasTransformRotateAngle()) {
-        renderContext->ResetTransformRotate();
-        renderContext->ResetTransformRotateAngle();
-    }
-    ACE_UPDATE_NODE_RENDER_CONTEXT(TransformRotate, value, frameNode);
-}
-
-void ViewAbstract::SetRotateAngle(FrameNode* frameNode, const NG::Vector4F& value)
-{
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (renderContext->HasTransformRotate()) {
-        renderContext->ResetTransformRotate();
-        renderContext->ResetTransformRotateAngle();
-    }
-    ACE_UPDATE_NODE_RENDER_CONTEXT(TransformRotateAngle, value, frameNode);
+    renderContext->UpdateTransformRotateAngle(value);
 }
 
 void ViewAbstract::SetTransformMatrix(const Matrix4& matrix)
@@ -5190,6 +5178,15 @@ NG::Vector5F ViewAbstract::GetRotate(FrameNode* frameNode)
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, defaultVector);
     return renderContext->GetTransformRotate().value_or(defaultVector);
+}
+
+NG::Vector4F ViewAbstract::GetRotateAngle(FrameNode* frameNode)
+{
+    NG::Vector4F defaultVector { 0.0f, 0.0f, 0.0f, 0.0f };
+    CHECK_NULL_RETURN(frameNode, defaultVector);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, defaultVector);
+    return renderContext->GetTransformRotateAngle().value_or(defaultVector);
 }
 
 Dimension ViewAbstract::GetBrightness(FrameNode* frameNode)

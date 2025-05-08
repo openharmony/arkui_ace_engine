@@ -2194,6 +2194,17 @@ void GetRotate(ArkUINodeHandle node, ArkUIRotateType* rotateType)
     rotateType->sightDistance = rotate.v;
 }
 
+void GetRotateAngle(ArkUINodeHandle node, ArkUIRotateAngleType* rotateType)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto rotateAngle = ViewAbstract::GetRotateAngle(frameNode);
+    rotateType->angleX = rotateAngle.x;
+    rotateType->angleY = rotateAngle.y;
+    rotateType->angleZ = rotateAngle.z;
+    rotateType->sightDistance = rotateAngle.w;
+}
+
 ArkUI_Float32 GetBrightness(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2342,7 +2353,7 @@ void SetRotateAngleWithoutTransformCenter(ArkUINodeHandle node, const ArkUI_Floa
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
-    if (valLength != NUM_4) {
+    if (valLength < NUM_4) {
         return;
     }
 
@@ -2381,6 +2392,15 @@ void ResetRotateAngle(ArkUINodeHandle node)
         center.SetZ(rotate.centerZ);
     }
     ViewAbstract::SetPivot(frameNode, center);
+}
+
+void ResetRotateAngleWithoutTransformCenter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::RotateAngleOptions rotateAngle(0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct, 0.0f, 0.0f);
+    ViewAbstract::SetRotateAngle(
+        frameNode, NG::Vector4F(rotateAngle.angleX, rotateAngle.angleY, rotateAngle.angleZ, rotateAngle.perspective));
 }
 
 void SetGeometryTransition(ArkUINodeHandle node, ArkUI_CharPtr id, const ArkUIGeometryTransitionOptions* options)
@@ -7192,6 +7212,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .setRotateAngle = SetRotateAngle,
         .setRotateWithoutTransformCenter = SetRotateWithoutTransformCenter,
         .setRotateAngleWithoutTransformCenter = SetRotateAngleWithoutTransformCenter,
+        .resetRotateAngleWithoutTransformCenter = ResetRotateAngleWithoutTransformCenter,
         .resetRotate = ResetRotate,
         .resetRotateAngle = ResetRotateAngle,
         .setGeometryTransition = SetGeometryTransition,
@@ -7423,6 +7444,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .getLayoutWeight = GetLayoutWeight,
         .getScale = GetScale,
         .getRotate = GetRotate,
+        .getRotateAngle = GetRotateAngle,
         .getBrightness = GetBrightness,
         .getSaturate = GetSaturate,
         .getBackgroundImagePosition = GetBackgroundImagePosition,

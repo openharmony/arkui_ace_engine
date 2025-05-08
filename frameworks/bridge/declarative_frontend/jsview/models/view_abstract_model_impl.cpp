@@ -675,20 +675,7 @@ void ViewAbstractModelImpl::SetRotate(float x, float y, float z, float angle, fl
     transform->Rotate(x, y, z, angle, option);
 }
 
-void ViewAbstractModelImpl::SetRotateAngle(float x, float y, float z, float perspective)
-{
-    RefPtr<TransformComponent> transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
-    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
-    if (!option.IsValid()) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        if (pipeline) {
-            option = pipeline->GetSyncAnimationOption();
-        }
-    }
-
-    option.SetAllowRunningAsynchronously(false);
-    transform->RotateAngle(x, y, z, option);
-}
+void ViewAbstractModelImpl::SetRotateAngle(float x, float y, float z, float perspective) {}
 
 void ViewAbstractModelImpl::SetTransformMatrix(const std::vector<float>& matrix)
 {

@@ -1992,6 +1992,7 @@ typedef enum {
      * .value[2].f32: rotation angle of the Z-axis direction.\n
      * .value[3].f32: line of sight, that is, the distance from the viewpoint to the z=0 plane, in px. \n
      *
+     * @since 20
      */
     NODE_ROTATE_ANGLE = 104,
     
