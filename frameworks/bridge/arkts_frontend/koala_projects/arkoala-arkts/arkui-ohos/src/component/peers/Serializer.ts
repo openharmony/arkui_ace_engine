@@ -105,7 +105,7 @@ import { FrictionMotion, FrictionMotionInternal, ScrollMotion, ScrollMotionInter
 import { FullscreenInfo, PlaybackInfo, PlaybackSpeed, PreparedInfo, SeekMode, VideoController, VideoControllerInternal, Callback_FullscreenInfo_Void, Callback_PlaybackInfo_Void, Callback_PreparedInfo_Void, PosterOptions, VideoOptions } from "./../video"
 import { GridAttribute, Callback_Number_Number_ComputedBarAttribute, ComputedBarAttribute, Callback_Number_Number_Void, GridDirection, Callback_ItemDragInfo_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Number_Number_Boolean_Void, GridItemAlignment, Callback_Number_ScrollState_Literal_Number_offsetRemain, Literal_Number_offsetRemain, Callback_Number_Tuple_Number_Number, Callback_Number_Tuple_Number_Number_Number_Number, Tuple_Number_Number_Number_Number, GridLayoutOptions } from "./../grid"
 import { GridAttribute_onItemDragStart_event_type, ListAttribute_onItemDragStart_event_type, TextTimerAttribute_onTimer_event_type, AnimationRange_Number } from "./../type-replacements"
-import { GridItemStyle, GridItemOptions } from "./../griditem"
+import { GridItemStyle, GridItemOptions } from "./../gridItem"
 import { ImageAnalyzerController, ImageAnalyzerControllerInternal, ImageAnalyzerType, ImageAnalyzerConfig, ImageAIOptions } from "./../imageCommon"
 import { IndicatorComponentController, IndicatorComponentControllerInternal } from "./../indicatorcomponent"
 import { ItemState } from "./../stepperItem"

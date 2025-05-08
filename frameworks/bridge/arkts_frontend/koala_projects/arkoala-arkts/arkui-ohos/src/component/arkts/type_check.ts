@@ -76,7 +76,7 @@ import { GridAttribute, Callback_Number_Number_ComputedBarAttribute, ComputedBar
 import { GridAttribute_onItemDragStart_event_type, ListAttribute_onItemDragStart_event_type, AnimationRange_Number } from "./../type-replacements"
 import { Resource } from "global/resource"
 import { WebviewController as WebviewControllerAni } from "#external"
-import { GridItemStyle, GridItemOptions } from "./../griditem"
+import { GridItemStyle, GridItemOptions } from "./../gridItem"
 import { ImageAnalyzerType, ImageAnalyzerController, ImageAnalyzerConfig, ImageAIOptions } from "./../imageCommon"
 import { IndicatorComponentController } from "./../indicatorcomponent"
 import { ItemState } from "./../stepperItem"
