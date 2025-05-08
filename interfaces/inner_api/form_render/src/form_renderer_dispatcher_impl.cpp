@@ -165,7 +165,7 @@ void FormRendererDispatcherImpl::HandleSurfaceChangeEvent(const std::shared_ptr<
     protocol.SetDuration(DEFAULT_FORM_ROTATION_ANIM_DURATION);
     auto curve = Rosen::RSAnimationTimingCurve::LINEAR;
     Rosen::RSNode::OpenImplicitAnimation(protocol, curve, []() {});
-    
+
     float uiWidth = width - borderWidth * DOUBLE;
     float uiHeight = height - borderWidth * DOUBLE;
     uiContent->SetFormWidth(uiWidth);
