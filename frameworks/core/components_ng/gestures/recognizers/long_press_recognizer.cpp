@@ -56,6 +56,10 @@ void LongPressRecognizer::OnAccepted()
     auto node = GetAttachedNode().Upgrade();
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "LongPress accepted, tag = %{public}s",
         node ? node->GetTag().c_str() : "null");
+    if (onAccessibilityEventFunc_) {
+        auto onAccessibilityEventFunc = onAccessibilityEventFunc_;
+        onAccessibilityEventFunc(AccessibilityEventType::LONG_PRESS);
+    }
     lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
     if (!touchPoints_.empty() && touchPoints_.begin()->second.sourceType == SourceType::MOUSE) {
@@ -77,10 +81,6 @@ void LongPressRecognizer::OnAccepted()
     if (repeat_) {
         hasRepeated_ = true;
         StartRepeatTimer();
-    }
-    if (onAccessibilityEventFunc_) {
-        auto onAccessibilityEventFunc = onAccessibilityEventFunc_;
-        onAccessibilityEventFunc(AccessibilityEventType::LONG_PRESS);
     }
 }
 
