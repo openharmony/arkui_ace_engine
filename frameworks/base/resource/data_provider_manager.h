@@ -24,6 +24,7 @@
 #include <string>
 #include <type_traits>
 
+#include "base/image/image_defines.h"
 #include "base/memory/ace_type.h"
 #include "base/resource/data_ability_helper.h"
 #include "base/utils/noncopyable.h"
@@ -60,7 +61,8 @@ public:
     DataProviderManagerInterface() = default;
     ~DataProviderManagerInterface() override = default;
 
-    virtual std::unique_ptr<DataProviderRes> GetDataProviderResFromUri(const std::string& uriStr) = 0;
+    virtual std::unique_ptr<DataProviderRes> GetDataProviderResFromUri(
+        const std::string& uriStr, ImageErrorInfo& errorInfo) = 0;
     virtual void* GetDataProviderThumbnailResFromUri(const std::string& uriStr) = 0;
     virtual int32_t GetDataProviderFile(const std::string& uriStr, const std::string& mode) = 0;
 
@@ -74,7 +76,8 @@ public:
     explicit DataProviderManager(DataProviderImpl dataProvider) : platformImpl_(std::move(dataProvider)) {}
     ~DataProviderManager() override = default;
 
-    std::unique_ptr<DataProviderRes> GetDataProviderResFromUri(const std::string& uriStr) override;
+    std::unique_ptr<DataProviderRes> GetDataProviderResFromUri(
+        const std::string& uriStr, ImageErrorInfo& errorInfo) override;
     void* GetDataProviderThumbnailResFromUri(const std::string& /* uriStr */) override
     {
         return nullptr;
@@ -101,7 +104,8 @@ public:
 
     ~DataProviderManagerStandard() override = default;
 
-    std::unique_ptr<DataProviderRes> GetDataProviderResFromUri(const std::string& uriStr) override;
+    std::unique_ptr<DataProviderRes> GetDataProviderResFromUri(
+        const std::string& uriStr, ImageErrorInfo& errorInfo) override;
     void* GetDataProviderThumbnailResFromUri(const std::string& uriStr) override;
 
     int32_t GetDataProviderFile(const std::string& uriStr, const std::string& mode) override;

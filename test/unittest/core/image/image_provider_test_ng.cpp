@@ -210,7 +210,7 @@ HWTEST_F(ImageProviderTestNg, NotifiersTest001, TestSize.Level1)
         callbackFlag = 2;
         return;
     };
-    auto callback3 = [](const ImageSourceInfo& src, const std::string& errorMsg) {
+    auto callback3 = [](const ImageSourceInfo& src, const std::string& errorMsg, int32_t errorCode) {
         callbackFlag = 3;
         return;
     };
@@ -492,19 +492,20 @@ HWTEST_F(ImageProviderTestNg, ImageProviderTestNg005, TestSize.Level1)
 HWTEST_F(ImageProviderTestNg, ImageProviderTestNg006, TestSize.Level1)
 {
     auto src = ImageSourceInfo(SRC_JPG);
-    EXPECT_FALSE(ImageProvider::BuildImageObject(src, nullptr));
+    ImageErrorInfo errorInfo;
+    EXPECT_FALSE(ImageProvider::BuildImageObject(src, errorInfo, nullptr));
 
     auto data = AceType::MakeRefPtr<DrawingImageData>(nullptr, 0);
-    auto imageObject = ImageProvider::BuildImageObject(src, data);
+    auto imageObject = ImageProvider::BuildImageObject(src, errorInfo, data);
     EXPECT_TRUE(AceType::DynamicCast<StaticImageObject>(imageObject));
 
     data = AceType::MakeRefPtr<DrawingImageData>(nullptr, 2);
-    imageObject = ImageProvider::BuildImageObject(src, data);
+    imageObject = ImageProvider::BuildImageObject(src, errorInfo, data);
     EXPECT_TRUE(AceType::DynamicCast<AnimatedImageObject>(imageObject));
 
     // thumbnail src with mismatched data
     src = ImageSourceInfo(SRC_THUMBNAIL);
-    EXPECT_FALSE(ImageProvider::BuildImageObject(src, data));
+    EXPECT_FALSE(ImageProvider::BuildImageObject(src, errorInfo, data));
 }
 
 /**
@@ -634,7 +635,7 @@ HWTEST_F(ImageProviderTestNg, NotifiersTest002, TestSize.Level1)
         callbackFlag = 2;
         return;
     };
-    auto callback3 = [](const ImageSourceInfo& src, const std::string& errorMsg) {
+    auto callback3 = [](const ImageSourceInfo& src, const std::string& errorMsg, int32_t errorCode) {
         callbackFlag = 3;
         return;
     };

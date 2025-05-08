@@ -433,7 +433,7 @@ private:
     bool CheckIfNeedLayout();
     void OnImageDataReady();
     void OnCompleteInDataReady();
-    void OnImageLoadFail(const std::string& errorMsg);
+    void OnImageLoadFail(const std::string& errorMsg, int32_t errorCode);
     void OnImageLoadSuccess();
     void ApplyAIModificationsToImage();
     void SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect,

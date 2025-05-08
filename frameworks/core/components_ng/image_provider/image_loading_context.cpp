@@ -105,7 +105,7 @@ void ImageLoadingContext::OnLoadSuccess()
 void ImageLoadingContext::OnLoadFail()
 {
     if (notifiers_.onLoadFail_) {
-        notifiers_.onLoadFail_(src_, errorMsg_);
+        notifiers_.onLoadFail_(src_, errorMsg_, errorCode_);
     }
 }
 
@@ -229,8 +229,9 @@ void ImageLoadingContext::SuccessCallback(const RefPtr<CanvasImage>& canvasImage
     stateManager_->HandleCommand(ImageLoadingCommand::MAKE_CANVAS_IMAGE_SUCCESS);
 }
 
-void ImageLoadingContext::FailCallback(const std::string& errorMsg)
+void ImageLoadingContext::FailCallback(const std::string& errorMsg, int32_t errorCode)
 {
+    errorCode_ = errorCode;
     errorMsg_ = errorMsg;
     needErrorCallBack_ = true;
     TAG_LOGD(AceLogTag::ACE_IMAGE, "ImageLoadFail-%{private}s-%{public}s-%{public}s", src_.ToString().c_str(),

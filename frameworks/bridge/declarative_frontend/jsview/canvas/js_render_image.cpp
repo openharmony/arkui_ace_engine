@@ -337,7 +337,8 @@ void JSRenderImage::LoadImage(const ImageSourceInfo& sourceInfo)
         CHECK_NULL_VOID(jsRenderImage);
         jsRenderImage->OnImageLoadSuccess();
     };
-    auto loadFailCallback = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo, const std::string& errorMsg) {
+    auto loadFailCallback = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo, const std::string& errorMsg,
+                                int32_t /* errorCode */) {
         auto jsRenderImage = weak.Upgrade();
         CHECK_NULL_VOID(jsRenderImage);
         jsRenderImage->OnImageLoadFail(errorMsg);
