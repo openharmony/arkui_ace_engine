@@ -681,5 +681,18 @@ void FormRenderer::SetRunFormPageInnerTimeStamp(int64_t timeStamp)
 {
     runFormPageInnerTimeStamp_ = timeStamp;
 }
+
+bool FormRenderer::IsManagerDelegateValid(const OHOS::AAFwk::Want& want)
+{
+    sptr<IRemoteObject> hostRemoteObj = want.GetRemoteObject(FORM_RENDERER_PROCESS_ON_ADD_SURFACE);
+    auto renderRemoteObj = iface_cast<IFormRendererDelegate>(hostRemoteObj);
+    if (renderRemoteObj == nullptr) {
+        return true;
+    }
+    bool checkFlag = true;
+    renderRemoteObj->OnCheckManagerDelegate(checkFlag);
+    HILOG_INFO("checkFlag:%{public}d", checkFlag);
+    return checkFlag;
+}
 } // namespace Ace
 } // namespace OHOS

@@ -85,6 +85,7 @@ public:
     void RecycleForm(std::string& statusData) const;
     void RecoverRenderer(const std::vector<FormRequest>& formRequests, size_t currentCompIndex);
     void UpdateFormSizeOfFormRequests(double width, double height, float borderWidth);
+    bool IsManagerDelegateValid(const OHOS::AAFwk::Want& want);
 private:
     enum class FormRendererInitState {
         UNINITIALIZED,

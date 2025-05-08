@@ -72,6 +72,7 @@ public:
     void ResizeFormAgain(float borderWidth, float width, float height);
     int64_t GetRunFormPageInnerTimeStamp();
     void SetRunFormPageInnerTimeStamp(int64_t timeStamp);
+    bool IsManagerDelegateValid(const OHOS::AAFwk::Want& want);
 
 private:
     void InitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
