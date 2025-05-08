@@ -3312,6 +3312,10 @@
         "name": "OH_ArkUI_TextCascadePickerRangeContentArray_SetChildAtIndex"
     },
     {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_RunTaskInScope"
+    },
+    {
         "first_introduced": "18",
         "name": "OH_ArkUI_TextCascadePickerRangeContentArray_Destroy"
     },

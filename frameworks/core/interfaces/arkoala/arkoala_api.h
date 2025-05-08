@@ -5859,6 +5859,7 @@ struct ArkUIFrameNodeModifier {
     ArkUI_Bool (*checkIfCanCrossLanguageAttributeSetting)(ArkUINodeHandle node);
     void (*setKeyProcessingMode)(ArkUI_Int32 instanceId, ArkUI_Int32 mode);
     EventBindingInfo (*getInteractionEventBindingInfo)(ArkUINodeHandle node, int type);
+    void (*runScopedTask)(ArkUI_Int32 instanceId, void* userData, void (*callback)(void* userData));
 };
 
 struct ArkUINodeContentEvent {
