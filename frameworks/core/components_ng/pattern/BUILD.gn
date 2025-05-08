@@ -418,6 +418,7 @@ build_component_ng("pattern_ng") {
     "search/search_gesture_event_hub.cpp",
     "search/search_layout_algorithm.cpp",
     "search/search_model_ng.cpp",
+    "search/search_model_static.cpp",
     "search/search_node.cpp",
     "search/search_pattern.cpp",
     "search/search_text_field.cpp",
