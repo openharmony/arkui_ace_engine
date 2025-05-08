@@ -99,5 +99,17 @@ HWTEST_F(PanRecognizerVelocityTestNg, PanRecognizerHandleTouchUpVelocityTest001,
     panRecognizer->fingers_ = 1;
     panRecognizer->HandleTouchUpEvent(triggerTouchEvent);
     EXPECT_EQ(panRecognizer->panVelocity_.trackerMap_[0].xAxis_.GetTrackNum(), 1);
+
+    
+    /**
+     * @tc.steps: step5. test panVelocity_.Reset.
+     * @tc.expected: if not last finger up, reset finger's velocity.
+     */
+    panRecognizer->refereeState_ = RefereeState::FAIL;
+    TouchEvent moveEvent;
+    moveEvent.type = TouchType::MOVE;
+    EXPECT_EQ(panRecognizer->panVelocity_.trackerMap_[0].xAxis_.GetTrackNum(), 1);
+    panRecognizer->HandleTouchMoveEvent(moveEvent);
+    EXPECT_EQ(panRecognizer->panVelocity_.trackerMap_[0].xAxis_.GetTrackNum(), 1);
 }
 } // namespace OHOS::Ace::NG
