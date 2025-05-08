@@ -45,7 +45,7 @@ import { PixelMap } from "./arkui-pixelmap"
 import { BlendMode } from "./arkui-drawing"
 import { StyledString } from "./styledString"
 import { Callback_Number_Number_Void } from "./grid"
-import { NodeAttach, remember } from "@koalaui/runtime"
+import { memo, NodeAttach, remember } from "@koalaui/runtime"
 import { Tuple_Number_Number } from "./arkui-synthetics"
 import { ButtonType, ButtonStyleMode, ButtonRole } from "./button"
 import { Callback_Number_Void } from "./alphabetIndexer"
@@ -57,6 +57,7 @@ import { ArkCommonAttributeSet, applyUIAttributes, applyUIAttributesUpdate } fro
 import { CommonModifier } from "../CommonModifier"
 import { AttributeUpdater } from "../ohos.arkui.modifier"
 import { ArkBaseNode } from "../handwritten/modifiers/ArkBaseNode"
+import { hookStateStyleImpl } from "../handwritten/ArkStateStyle"
 import { CurrentStateEnum } from "../AttributeUpdater"
 export interface ICurve {
     interpolate(fraction: number): number
@@ -910,6 +911,16 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         obj.peer = new Finalizable(ptr, DragEventInternal.getFinalizer())
         return obj
     }
+}
+
+export type CustomStyles =  (instance: CommonMethod) => void;
+export interface StateStyles {
+    normal?: CustomStyles;
+    pressed?: CustomStyles;
+    disabled?: CustomStyles;
+    focused?: CustomStyles;
+    clicked?: CustomStyles;
+    selected?: CustomStyles;
 }
 export interface KeyEvent {
     type: KeyType
@@ -7624,14 +7635,7 @@ export interface SheetOptions extends BindOptions {
     placement?: Placement;
     placementOnTarget?: boolean;
 }
-export interface StateStyles {
-    normal?: object;
-    pressed?: object;
-    disabled?: object;
-    focused?: object;
-    clicked?: object;
-    selected?: Object;
-}
+
 export interface PopupMessageOptions {
     textColor?: ResourceColor;
     font?: Font;
@@ -11253,7 +11257,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
     public stateStyles(value: StateStyles | undefined): this {
         if (this.checkPriority("stateStyles")) {
             const value_casted = value as (StateStyles | undefined)
-            this.getPeer()?.stateStylesAttribute(value_casted)
+            hookStateStyleImpl(this.getPeer(), value_casted)
             return this
         }
         return this

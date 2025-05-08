@@ -155,6 +155,7 @@ typedef enum CallbackKind {
     Kind_Callback_SheetDismiss_Void = 22609082,
     Kind_Callback_SheetType_Void = -224451112,
     Kind_Callback_SpringBackAction_Void = 1536231691,
+    Kind_Callback_StateStylesChange = -1872286415,
     Kind_Callback_String_Number_Void = -879490874,
     Kind_Callback_String_Opt_Object_Void = -716524508,
     Kind_Callback_String_PasteEvent_Void = -683652998,

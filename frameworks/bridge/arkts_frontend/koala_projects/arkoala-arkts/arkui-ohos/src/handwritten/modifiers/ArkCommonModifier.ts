@@ -187,7 +187,7 @@ class BackgroundColorModifier extends ModifierWithKey<ResourceColor> {
       if (reset) {
          // commomPeerNode.resetBackgroundColor();
       } else {
-         node.backgroundColor1Attribute(this.value!);
+         node.backgroundColor0Attribute(this.value!);
       }
    }
    static factory(value: ResourceColor): BackgroundColorModifier {

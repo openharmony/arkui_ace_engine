@@ -11013,53 +11013,7 @@ export class Deserializer extends DeserializerBase {
         let value : StarStyleOptions = ({backgroundUri: backgroundUri_result, foregroundUri: foregroundUri_result, secondaryUri: secondaryUri_result} as StarStyleOptions)
         return value
     }
-    readStateStyles(): StateStyles {
-        let valueDeserializer : Deserializer = this
-        const normal_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let normal_buf : object | undefined
-        if ((RuntimeType.UNDEFINED) != (normal_buf_runtimeType))
-        {
-            normal_buf = (valueDeserializer.readObject() as object)
-        }
-        const normal_result : object | undefined = normal_buf
-        const pressed_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let pressed_buf : object | undefined
-        if ((RuntimeType.UNDEFINED) != (pressed_buf_runtimeType))
-        {
-            pressed_buf = (valueDeserializer.readObject() as object)
-        }
-        const pressed_result : object | undefined = pressed_buf
-        const disabled_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let disabled_buf : object | undefined
-        if ((RuntimeType.UNDEFINED) != (disabled_buf_runtimeType))
-        {
-            disabled_buf = (valueDeserializer.readObject() as object)
-        }
-        const disabled_result : object | undefined = disabled_buf
-        const focused_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let focused_buf : object | undefined
-        if ((RuntimeType.UNDEFINED) != (focused_buf_runtimeType))
-        {
-            focused_buf = (valueDeserializer.readObject() as object)
-        }
-        const focused_result : object | undefined = focused_buf
-        const clicked_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let clicked_buf : object | undefined
-        if ((RuntimeType.UNDEFINED) != (clicked_buf_runtimeType))
-        {
-            clicked_buf = (valueDeserializer.readObject() as object)
-        }
-        const clicked_result : object | undefined = clicked_buf
-        const selected_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let selected_buf : Object | undefined
-        if ((RuntimeType.UNDEFINED) != (selected_buf_runtimeType))
-        {
-            selected_buf = (valueDeserializer.readObject() as Object)
-        }
-        const selected_result : Object | undefined = selected_buf
-        let value : StateStyles = ({normal: normal_result, pressed: pressed_result, disabled: disabled_result, focused: focused_result, clicked: clicked_result, selected: selected_result} as StateStyles)
-        return value
-    }
+    
     readStyledStringChangedListener(): StyledStringChangedListener {
         let valueDeserializer : Deserializer = this
         const onWillChange_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
