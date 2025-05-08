@@ -64,6 +64,7 @@ constexpr char FORM_DIMENSION_SPLITTER = '*';
 constexpr int32_t FORM_SHAPE_CIRCLE = 2;
 constexpr double TIME_LIMIT_FONT_SIZE_BASE = 14.0;
 constexpr double FORBIDDEN_ICON_STYLE = 32.0;
+constexpr double FORBIDDEN_ICON_STYLE_1_2 = 24.0;
 constexpr double TIBETAN_TIME_LIMIT_FONT_SIZE_BASE = 9.0;
 constexpr double ONE_DIMENSION_TIME_LIMIT_FONT_SIZE_BASE = 14.0;
 constexpr float MAX_FONT_SCALE = 1.3f;
@@ -1077,16 +1078,16 @@ void FormPattern::LoadDisableFormStyle(const RequestFormInfo& info, bool isRefre
     UpdateChildNodeOpacity(FormChildNodeType::FORM_SKELETON_NODE, TRANSPARENT_VAL);
 }
 
-RefPtr<FrameNode> FormPattern::CreateIconNode()
+RefPtr<FrameNode> FormPattern::CreateIconNode(bool isRowStyle)
 {
     auto attribution = formSpecialStyle_.GetFormStyleAttribution();
     RefPtr<FrameNode> imageNode = nullptr;
     if (attribution == FormStyleAttribution::PARENT_CONTROL) {
-        imageNode = CreateForbiddenImageNode(InternalResource::ResourceId::IC_TIME_LIMIT_SVG);
+        imageNode = CreateForbiddenImageNode(InternalResource::ResourceId::IC_TIME_LIMIT_SVG, isRowStyle);
         AddFormChildNode(FormChildNodeType::TIME_LIMIT_IMAGE_NODE, imageNode);
     }
     if (attribution == FormStyleAttribution::APP_LOCK) {
-        imageNode = CreateForbiddenImageNode(InternalResource::ResourceId::APP_LOCK_SVG);
+        imageNode = CreateForbiddenImageNode(InternalResource::ResourceId::APP_LOCK_SVG, isRowStyle);
         AddFormChildNode(FormChildNodeType::APP_LOCKED_IMAGE_NODE, imageNode);
     }
     return imageNode;
@@ -1264,7 +1265,7 @@ RefPtr<FrameNode> FormPattern::CreateForbiddenTextNode(std::string resourceName,
     return textNode;
 }
 
-RefPtr<FrameNode> FormPattern::CreateForbiddenImageNode(InternalResource::ResourceId resourceId)
+RefPtr<FrameNode> FormPattern::CreateForbiddenImageNode(InternalResource::ResourceId resourceId, bool isRowStyle)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
@@ -1283,8 +1284,9 @@ RefPtr<FrameNode> FormPattern::CreateForbiddenImageNode(InternalResource::Resour
     auto imageRenderProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_RETURN(imageRenderProperty, nullptr);
     imageRenderProperty->UpdateSvgFillColor(newColor);
-    CalcSize idealSize = { CalcLength(FORBIDDEN_ICON_STYLE, DimensionUnit::VP),
-        CalcLength(FORBIDDEN_ICON_STYLE, DimensionUnit::VP) };
+    double iconSize = isRowStyle ? FORBIDDEN_ICON_STYLE_1_2 : FORBIDDEN_ICON_STYLE;
+    CalcSize idealSize = { CalcLength(iconSize, DimensionUnit::VP),
+        CalcLength(iconSize, DimensionUnit::VP) };
     imageLayoutProperty->UpdateUserDefinedIdealSize(idealSize);
     auto externalContext = DynamicCast<NG::RosenRenderContext>(imageNode->GetRenderContext());
     CHECK_NULL_RETURN(externalContext, nullptr);
@@ -1354,14 +1356,14 @@ RefPtr<FrameNode> FormPattern::CreateRowNode(FormChildNodeType formChildNodeType
     auto layoutProperty = rowNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     PaddingProperty padding;
-    padding.left = CalcLength(FORBIDDEN_STYLE_PADDING);
-    padding.right = CalcLength(FORBIDDEN_STYLE_PADDING);
+    padding.left = CalcLength(FORBIDDEN_STYLE_PADDING, DimensionUnit::VP);
+    padding.right = CalcLength(FORBIDDEN_STYLE_PADDING, DimensionUnit::VP);
     layoutProperty->UpdatePadding(padding);
-    layoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
+    layoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
     auto space = Dimension(FORBIDDEN_STYLE_SPACE, DimensionUnit::VP);
     layoutProperty->UpdateSpace(space);
 
-    rowNode->AddChild(CreateIconNode());
+    rowNode->AddChild(CreateIconNode(true));
     rowNode->AddChild(CreateTextNode(true));
     host->AddChild(rowNode);
     return rowNode;
@@ -1391,7 +1393,7 @@ RefPtr<FrameNode> FormPattern::CreateColumnNode(FormChildNodeType formChildNodeT
         auto space = Dimension(8, DimensionUnit::VP);
         layoutProperty->UpdateSpace(space);
 
-        columnNode->AddChild(CreateIconNode());
+        columnNode->AddChild(CreateIconNode(false));
         columnNode->AddChild(CreateTextNode(false));
     } else {
         layoutProperty->UpdateCrossAxisAlign(FlexAlign::FLEX_START);

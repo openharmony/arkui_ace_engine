@@ -231,8 +231,8 @@ private:
     RefPtr<FrameNode> CreateColumnNode(FormChildNodeType formChildNodeType);
     RefPtr<FrameNode> CreateRowNode(FormChildNodeType formChildNodeType);
     RefPtr<FrameNode> CreateTextNode(bool isRowStyle);
-    RefPtr<FrameNode> CreateIconNode();
-    RefPtr<FrameNode> CreateForbiddenImageNode(InternalResource::ResourceId resourceId);
+    RefPtr<FrameNode> CreateIconNode(bool isRowStyle);
+    RefPtr<FrameNode> CreateForbiddenImageNode(InternalResource::ResourceId resourceId, bool isRowStyle);
     RefPtr<FrameNode> CreateForbiddenTextNode(std::string resourceName, bool isRowStyle);
     RefPtr<FrameNode> CreateRectNode(const RefPtr<FrameNode>& parent, const CalcSize& idealSize,
         const MarginProperty& margin, uint32_t fillColor, double opacity);
