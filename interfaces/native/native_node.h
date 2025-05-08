@@ -9193,6 +9193,19 @@ int32_t OH_ArkUI_PostAsyncUITask(ArkUI_ContextHandle context, void* asyncUITaskD
  */
 int32_t OH_ArkUI_PostUITask(ArkUI_ContextHandle context, void* taskData, void (*task)(void* taskData));
 
+/**
+ * @brief Post UI task to UI thread and wait until finished executing.
+ *
+ * @param context UIContext pointer of the page where the UI task located.
+ * @param taskData Parameter of task.
+ * @param task Function executed by UI thread.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 18
+ */
+int32_t OH_ArkUI_PostUITaskAndWait(ArkUI_ContextHandle context, void* taskData, void (*task)(void* taskData));
+
 #ifdef __cplusplus
 };
 #endif
