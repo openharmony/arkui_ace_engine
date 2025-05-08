@@ -1011,6 +1011,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorController021, TestSize.Level1)
     auto textStyle = info.selection_.resultObjects.begin()->textStyle;
     EXPECT_EQ(textStyle.wordBreak, int(WordBreak::NORMAL));
     EXPECT_EQ(textStyle.textAlign, int(TextAlign::END));
+    EXPECT_NE(textStyle.paragraphSpacing, std::nullopt);
     EXPECT_EQ(textStyle.paragraphSpacing.value().Value(), 10.0f);
 }
 
