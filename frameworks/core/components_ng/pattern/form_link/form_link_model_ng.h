@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_LINK_MODEL_NG_H
 
 #include "base/utils/macros.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/form_link/form_link_model.h"
 
 namespace OHOS::Ace::NG {
@@ -25,8 +24,6 @@ class ACE_EXPORT FormLinkModelNG : public OHOS::Ace::FormLinkModel {
 public:
     void Create(const std::string& action) override;
 
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetAction(FrameNode* frameNode, const std::string& action);
     RefPtr<FrameNode> StsCreateFrameNode() override;
     void StsSetAction(OHOS::Ace::NG::FrameNode* frameNode, const std::string& action) override;
 };

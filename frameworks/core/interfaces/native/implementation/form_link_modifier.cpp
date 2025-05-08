@@ -69,7 +69,7 @@ namespace FormLinkModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
 {
     LOGI("id is: %{public}d", id);
-    auto frameNode = FormLinkModel::GetInstance()->StsCreateFrameNode();
+    auto frameNode = FormLinkModel::GetStsInstance()->StsCreateFrameNode();
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
