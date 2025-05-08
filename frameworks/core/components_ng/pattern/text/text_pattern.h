@@ -1037,6 +1037,9 @@ private:
     void PauseSymbolAnimation();
     void ResumeSymbolAnimation();
     bool IsLocationInFrameRegion(const Offset& localOffset) const;
+    void RegisterFormVisibleChangeCallback();
+    void HandleFormVisibleChange(bool visible);
+    void RemoveFormVisibleChangeCallback(int32_t id);
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
@@ -1091,6 +1094,7 @@ private:
     // Used to record original caret position for "shift + up/down"
     // Less than 0 is invalid, initialized as invalid in constructor
     OffsetF originCaretPosition_;
+    bool hasRegisterFormVisibleCallback_ = false;
 };
 } // namespace OHOS::Ace::NG
 
