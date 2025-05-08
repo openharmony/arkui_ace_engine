@@ -631,6 +631,7 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
+    RegisterParentAccessibilityCallback();
     auto customNode = BuildSubMenuCustomNode();
     CHECK_NULL_VOID(customNode);
     UpdateSubmenuExpandingMode(customNode);
@@ -3347,5 +3348,14 @@ bool MenuItemPattern::OnThemeScopeUpdate(int32_t themeScopeId)
         }
     }
     return result;
+}
+
+void MenuItemPattern::RegisterParentAccessibilityCallback()
+{
+    auto menuNode = GetMenu(false);
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->RegisterAccessibilityChildActionNotify();
 }
 } // namespace OHOS::Ace::NG
