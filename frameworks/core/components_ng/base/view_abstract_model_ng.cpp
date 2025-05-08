@@ -51,8 +51,7 @@ void StartVirator(const MenuParam& menuParam, bool isMenu, const std::string& me
     if (isMenu) {
         return;
     }
-    if (menuParam.hapticFeedbackMode == HapticFeedbackMode::AUTO &&
-        menuParam.previewMode.value_or(MenuPreviewMode::NONE) != MenuPreviewMode::NONE) {
+    if (menuParam.hapticFeedbackMode == HapticFeedbackMode::AUTO && menuParam.previewMode != MenuPreviewMode::NONE) {
         VibratorUtils::StartViratorDirectly(menuHapticFeedback);
     }
 }
@@ -275,7 +274,7 @@ void CreateCustomMenuWithPreview(
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(targetNode);
-    if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) == MenuPreviewMode::IMAGE) {
+    if (menuParam.previewMode == MenuPreviewMode::IMAGE) {
         auto context = targetNode->GetRenderContext();
         CHECK_NULL_VOID(context);
         auto gestureHub = targetNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub();
@@ -427,7 +426,7 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
         } else if (type == ResponseType::LONG_PRESS) {
             auto gestureHub = targetNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub();
             CHECK_NULL_VOID(gestureHub);
-            gestureHub->SetPreviewMode(menuParam.previewMode.value_or(MenuPreviewMode::NONE));
+            gestureHub->SetPreviewMode(menuParam.previewMode);
             // create or show menu on long press
             auto event =
                 [builderF = buildFunc, weakTarget, menuParam, previewBuildFunc](const GestureEvent& info) mutable {
@@ -447,8 +446,7 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
                             TAG_LOGI(AceLogTag::ACE_MENU, "TargetNode is dragging, menu is no longer show");
                             return;
                         }
-                        if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) == MenuPreviewMode::IMAGE ||
-                            menuParam.isShowHoverImage) {
+                        if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.isShowHoverImage) {
                             auto context = targetNode->GetRenderContext();
                             CHECK_NULL_VOID(context);
                             auto gestureHub = targetNode->GetOrCreateEventHub<EventHub>()->GetOrCreateGestureEventHub();
@@ -503,12 +501,11 @@ void ViewAbstractModelNG::BindDragWithContextMenuParams(FrameNode* targetNode, c
     auto gestureHub = targetNode->GetOrCreateGestureEventHub();
     if (gestureHub) {
         if (menuParam.contextMenuRegisterType == ContextMenuRegisterType::CUSTOM_TYPE) {
-            gestureHub->SetBindMenuStatus(
-                true, menuParam.isShow, menuParam.previewMode.value_or(MenuPreviewMode::NONE));
+            gestureHub->SetBindMenuStatus(true, menuParam.isShow, menuParam.previewMode);
         } else if (menuParam.menuBindType == MenuBindingType::LONG_PRESS) {
-            gestureHub->SetBindMenuStatus(false, false, menuParam.previewMode.value_or(MenuPreviewMode::NONE));
+            gestureHub->SetBindMenuStatus(false, false, menuParam.previewMode);
         }
-        gestureHub->SetPreviewMode(menuParam.previewMode.value_or(MenuPreviewMode::NONE));
+        gestureHub->SetPreviewMode(menuParam.previewMode);
         gestureHub->SetContextMenuShowStatus(menuParam.isShow);
         gestureHub->SetMenuBindingType(menuParam.menuBindType);
         // set menu preview scale to drag.
