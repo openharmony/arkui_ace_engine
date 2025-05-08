@@ -555,6 +555,16 @@ enum class ImageRotateOrientation {
     RIGHT = 2,
     DOWN = 3,
     LEFT = 4,
+    UP_MIRROR = 5,    // Reflected across x-axis
+    RIGHT_MIRROR = 6, // Reflected across x-axis, Rotated 90 CW
+    DOWN_MIRROR = 7,  // Reflected across y-axis
+    LEFT_MIRROR = 8,  // Reflected across x-axis, Rotated 90 CCW
+};
+
+enum class OrientationFit {
+    NONE = 0,
+    HORIZONTAL_FLIP = 1,
+    VERTICAL_FILP = 2
 };
 
 enum class ImageRenderMode {

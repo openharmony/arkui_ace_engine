@@ -108,12 +108,40 @@ RefPtr<SvgDomBase> DrawingImageData::MakeSvgDom(const ImageSourceInfo& src)
     return svgDom_;
 }
 
+ImageRotateOrientation GetImageRotateOrientation(SkEncodedOrigin origin)
+{
+    switch (origin) {
+        case SkEncodedOrigin::kTopRight_SkEncodedOrigin:
+            // Reflected across y-axis
+            return ImageRotateOrientation::DOWN_MIRROR;
+        case SkEncodedOrigin::kBottomRight_SkEncodedOrigin:
+            // Rotated 180
+            return ImageRotateOrientation::DOWN;
+        case SkEncodedOrigin::kBottomLeft_SkEncodedOrigin:
+            // Reflected across x-axis
+            return ImageRotateOrientation::UP_MIRROR;
+        case SkEncodedOrigin::kLeftTop_SkEncodedOrigin:
+            // Reflected across x-axis, Rotated 90 CCW
+            return ImageRotateOrientation::LEFT_MIRROR;
+        case SkEncodedOrigin::kRightTop_SkEncodedOrigin:
+            // Rotated 90 CW
+            return ImageRotateOrientation::RIGHT;
+        case SkEncodedOrigin::kRightBottom_SkEncodedOrigin:
+            // Reflected across x-axis, Rotated 90 CW
+            return ImageRotateOrientation::RIGHT_MIRROR;
+        case SkEncodedOrigin::kLeftBottom_SkEncodedOrigin:
+            // Rotated 90 CCW
+            return ImageRotateOrientation::LEFT;
+        default:
+            return ImageRotateOrientation::UP;
+    }
+}
+
 ImageCodec DrawingImageData::Parse() const
 {
     auto rsData = GetRSData();
     CHECK_NULL_RETURN(rsData, {});
     SizeF imageSize;
-    ImageRotateOrientation orientation = ImageRotateOrientation::UP;
     if (ImageSource::IsAstc(static_cast<const uint8_t*>(rsData->GetData()), rsData->GetSize())) {
         ImageSource::Size astcSize =
             ImageSource::GetASTCInfo(static_cast<const uint8_t*>(rsData->GetData()), rsData->GetSize());
@@ -136,23 +164,7 @@ ImageCodec DrawingImageData::Parse() const
             static_cast<int32_t>(rsData->GetSize()), nodeId_, static_cast<long long>(accessibilityId_));
         return {};
     }
-    switch (codec->getOrigin()) {
-        case SkEncodedOrigin::kRightBottom_SkEncodedOrigin:
-        case SkEncodedOrigin::kRightTop_SkEncodedOrigin:
-            // right-handed 90°
-            orientation = ImageRotateOrientation::RIGHT;
-            break;
-        case SkEncodedOrigin::kLeftBottom_SkEncodedOrigin:
-        case SkEncodedOrigin::kLeftTop_SkEncodedOrigin:
-            // left-handed 90°
-            orientation = ImageRotateOrientation::LEFT;
-            break;
-        case SkEncodedOrigin::kBottomRight_SkEncodedOrigin:
-            orientation = ImageRotateOrientation::DOWN;
-            break;
-        default:
-            orientation = ImageRotateOrientation::UP;
-    }
+    auto orientation = GetImageRotateOrientation(codec->getOrigin());
     imageSize.SetSizeT(SizeF(codec->dimensions().fWidth, codec->dimensions().fHeight));
     return { imageSize, codec->getFrameCount(), orientation };
 }

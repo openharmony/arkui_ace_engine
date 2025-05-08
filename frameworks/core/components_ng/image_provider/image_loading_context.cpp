@@ -345,7 +345,8 @@ SizeF ImageLoadingContext::GetImageSize() const
     CHECK_NULL_RETURN(imageObj_, SizeF(-1.0, -1.0));
     auto imageSize = imageObj_->GetImageSize();
     auto orientation = imageObj_->GetOrientation();
-    if (orientation == ImageRotateOrientation::LEFT || orientation == ImageRotateOrientation::RIGHT) {
+    if (orientation == ImageRotateOrientation::LEFT || orientation == ImageRotateOrientation::RIGHT ||
+        orientation == ImageRotateOrientation::LEFT_MIRROR || orientation == ImageRotateOrientation::RIGHT_MIRROR) {
         return { imageSize.Height(), imageSize.Width() };
     }
     return imageSize;

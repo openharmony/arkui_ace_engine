@@ -127,12 +127,28 @@ void UpdateRSFilter(const ImagePaintConfig& config, RSFilter& filter)
     }
 }
 
+OrientationFit CalculateFlip(ImageRotateOrientation orientation)
+{
+    switch (orientation) {
+        case ImageRotateOrientation::LEFT_MIRROR:
+        case ImageRotateOrientation::RIGHT_MIRROR:
+        case ImageRotateOrientation::UP_MIRROR:
+            return OrientationFit::HORIZONTAL_FLIP;
+        case ImageRotateOrientation::DOWN_MIRROR:
+            return OrientationFit::VERTICAL_FILP;
+        default:
+            return OrientationFit::NONE;
+    }
+}
+
 int32_t CalculateRotateDegree(ImageRotateOrientation orientation)
 {
     switch (orientation) {
         case ImageRotateOrientation::LEFT:
+        case ImageRotateOrientation::LEFT_MIRROR:
             return -DEGREE_NINETY;
         case ImageRotateOrientation::RIGHT:
+        case ImageRotateOrientation::RIGHT_MIRROR:
             return DEGREE_NINETY;
         case ImageRotateOrientation::DOWN:
             return DEGREE_HUNDRED_EIGHTY;
@@ -341,6 +357,7 @@ void PixelMapImage::DrawToRSCanvas(
         1.0, 0, 0, 0, static_cast<int32_t>(config.dynamicMode) };
     rsImageInfo.fitMatrix = ToDrawingMatrix(config.imageMatrix_);
     rsImageInfo.rotateDegree = CalculateRotateDegree(config.orientation_);
+    rsImageInfo.orientationNum = static_cast<int32_t>(CalculateFlip(config.orientation_));
     recordingCanvas.AttachBrush(brush);
     if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE, "pixmap, %{public}s-[%{public}d * %{public}d]-[%{public}s]",

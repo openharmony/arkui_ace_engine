@@ -168,7 +168,8 @@ void ImageDecoder::SwapDecodeSize(const RefPtr<ImageObject>& obj, int32_t& width
         return;
     }
     auto orientation = obj->GetOrientation();
-    if (orientation == ImageRotateOrientation::LEFT || orientation == ImageRotateOrientation::RIGHT) {
+    if (orientation == ImageRotateOrientation::LEFT || orientation == ImageRotateOrientation::RIGHT ||
+        orientation == ImageRotateOrientation::LEFT_MIRROR || orientation == ImageRotateOrientation::RIGHT_MIRROR) {
         std::swap(width, height);
     }
 }
