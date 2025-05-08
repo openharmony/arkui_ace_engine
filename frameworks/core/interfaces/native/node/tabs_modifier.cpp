@@ -14,6 +14,7 @@
  */
 #include "core/interfaces/native/node/tabs_modifier.h"
 
+#include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -27,6 +28,8 @@ constexpr int DEFAULT_LENGTH = 3;
 constexpr int DEFAULT_LENGTH_OF_BAR_GRID_ALIGN = 5;
 constexpr int DEFAULT_LENGTH_OF_BAR_GRID_ALIGN_VALUES = 2;
 constexpr int DEFAULT_ANIMATION_DURATION = 300;
+constexpr int ANIMATION_CURVE_TYPE_STR = 1;
+constexpr int ANIMATION_CURVE_TYPE_FUNC = 2;
 
 void SetTabBarMode(ArkUINodeHandle node, ArkUI_Int32 tabsBarMode)
 {
@@ -206,6 +209,20 @@ void SetTabBarHeight(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit
     TabsModelNG::SetTabBarHeight(frameNode, width);
 }
 
+void SetAnimationCurve(ArkUINodeHandle node, ArkUI_Uint32 type, ArkUI_CharPtr curveChar, void* curveCallback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<Curve> curve;
+    if (type == ANIMATION_CURVE_TYPE_STR && curveChar != nullptr) {
+        curve = Framework::CreateCurve(curveChar, false);
+    } else if (type == ANIMATION_CURVE_TYPE_FUNC && curveCallback != nullptr) {
+        auto callback = reinterpret_cast<std::function<float(float)>*>(curveCallback);
+        curve = Framework::CreateCurve(*callback);
+    }
+    TabsModelNG::SetAnimationCurve(frameNode, curve);
+}
+
 void SetAnimationDuration(ArkUINodeHandle node, ArkUI_Float32 duration)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -325,6 +342,14 @@ void ResetTabBarHeight(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     CalcDimension width = Dimension(-1.0, DimensionUnit::VP);
     TabsModelNG::SetTabBarHeight(frameNode, width);
+}
+
+void ResetAnimationCurve(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<Curve> curve;
+    TabsModelNG::SetAnimationCurve(frameNode, curve);
 }
 
 void ResetAnimationDuration(ArkUINodeHandle node)
@@ -660,6 +685,7 @@ const ArkUITabsModifier* GetTabsModifier()
         .setTabBarWidth = SetTabBarWidth,
         .setTabBarHeight = SetTabBarHeight,
         .setBarAdaptiveHeight = SetBarAdaptiveHeight,
+        .setAnimationCurve = SetAnimationCurve,
         .setAnimationDuration = SetAnimationDuration,
         .resetTabBarMode = ResetTabBarMode,
         .resetScrollableBarModeOptions = ResetScrollableBarModeOptions,
@@ -677,6 +703,7 @@ const ArkUITabsModifier* GetTabsModifier()
         .resetTabBarWidth = ResetTabBarWidth,
         .resetTabBarHeight = ResetTabBarHeight,
         .resetBarAdaptiveHeight = ResetBarAdaptiveHeight,
+        .resetAnimationCurve = ResetAnimationCurve,
         .resetAnimationDuration = ResetAnimationDuration,
         .setTabClip = SetTabClip,
         .resetTabClip = ResetTabClip,
