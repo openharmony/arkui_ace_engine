@@ -2595,6 +2595,18 @@ bool PipelineContext::SetIsFocusActive(bool isFocusActive, FocusActiveReason rea
         TAG_LOGI(AceLogTag::ACE_FOCUS, "FocusActive false");
         return false;
     }
+    if (reason == FocusActiveReason::USE_API) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "autoFocusInactive turns to %{public}d", autoFocusInactive);
+        autoFocusInactive_ = autoFocusInactive;
+    }
+    if (!isFocusActive && reason == FocusActiveReason::POINTER_EVENT && !autoFocusInactive_) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "focus cannot be deactived automaticly by pointer event");
+        return false;
+    }
+
+    if (isFocusActive_ == isFocusActive) {
+        return false;
+    }
     SyncWindowsFocus(isFocusActive, reason, autoFocusInactive);
     auto focusManager = GetOrCreateFocusManager();
     CHECK_NULL_RETURN(focusManager, false);
