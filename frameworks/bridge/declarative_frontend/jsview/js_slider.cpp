@@ -237,11 +237,24 @@ void JSSlider::SetBlockColor(const JSCallbackInfo& info)
         return;
     }
     Color colorVal;
-    if (!ParseJsColor(info[0], colorVal)) {
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        bool state = ParseJsColor(info[0], colorVal, resObj);
+        if (state) {
+            if (resObj) {
+                SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::BLOCK_COLOR);
+            }
+            SliderModel::GetInstance()->SetBlockColor(colorVal);
+            return;
+        }
         SliderModel::GetInstance()->ResetBlockColor();
-        return;
+    } else {
+        if (!ParseJsColor(info[0], colorVal)) {
+            SliderModel::GetInstance()->ResetBlockColor();
+            return;
+        }
+        SliderModel::GetInstance()->SetBlockColor(colorVal);
     }
-    SliderModel::GetInstance()->SetBlockColor(colorVal);
 }
 
 void JSSlider::SetTrackColor(const JSCallbackInfo& info)
@@ -253,9 +266,15 @@ void JSSlider::SetTrackColor(const JSCallbackInfo& info)
     bool isResourceColor = false;
     if (!ConvertGradientColor(info[0], gradient)) {
         Color colorVal;
-        if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal)) {
+        RefPtr<ResourceObject> resObj;
+        if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal, resObj)) {
             SliderModel::GetInstance()->ResetTrackColor();
             return;
+        }
+        if (SystemProperties::ConfigChangePerform()) {
+            if (resObj) {
+                SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::TRACK_COLOR);
+            }
         }
         isResourceColor = true;
         gradient = NG::SliderModelNG::CreateSolidGradient(colorVal);
@@ -306,9 +325,15 @@ void JSSlider::SetSelectedColor(const JSCallbackInfo& info)
     bool isResourceColor = false;
     if (!ConvertGradientColor(info[0], gradient)) {
         Color colorVal;
-        if (!ParseJsColor(info[0], colorVal)) {
+        RefPtr<ResourceObject> resObj;
+        if (!ParseJsColor(info[0], colorVal, resObj)) {
             SliderModel::GetInstance()->ResetSelectColor();
             return;
+        }
+        if (SystemProperties::ConfigChangePerform()) {
+            if (resObj) {
+                SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::SELECT_COLOR);
+            }
         }
         isResourceColor = true;
         gradient = NG::SliderModelNG::CreateSolidGradient(colorVal);
@@ -425,10 +450,16 @@ void JSSlider::SetShowTips(const JSCallbackInfo& info)
     }
 
     std::optional<std::string> content;
+    RefPtr<ResourceObject> resObj;
     if (info.Length() == SLIDER_SHOW_TIPS_MAX_PARAMS) {
         std::string str;
-        if (ParseJsString(info[1], str)) {
+        if (ParseJsString(info[1], str, resObj)) {
             content = str;
+        }
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        if (resObj) {
+            SliderModel::GetInstance()->CreateWithStringResourceObj(resObj, showTips);
         }
     }
 
@@ -442,9 +473,15 @@ void JSSlider::SetBlockBorderColor(const JSCallbackInfo& info)
     }
 
     Color colorVal;
-    if (!ParseJsColor(info[0], colorVal)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsColor(info[0], colorVal, resObj)) {
         SliderModel::GetInstance()->ResetBlockBorderColor();
         return;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        if (resObj) {
+            SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::BLOCK_BORDER_COLOR);
+        }
     }
     SliderModel::GetInstance()->SetBlockBorderColor(colorVal);
 }
@@ -474,9 +511,15 @@ void JSSlider::SetStepColor(const JSCallbackInfo& info)
     }
 
     Color colorVal;
-    if (!ParseJsColor(info[0], colorVal)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsColor(info[0], colorVal, resObj)) {
         SliderModel::GetInstance()->ResetStepColor();
         return;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        if (resObj) {
+            SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::STEP_COLOR);
+        }
     }
     SliderModel::GetInstance()->SetStepColor(colorVal);
 }
@@ -564,14 +607,20 @@ void JSSlider::SetBlockStyle(const JSCallbackInfo& info)
     auto type = static_cast<SliderModel::BlockStyleType>(getType->ToNumber<int32_t>());
     if (type == SliderModel::BlockStyleType::IMAGE) {
         std::string src;
+        RefPtr<ResourceObject> resObj;
         auto image = jsObj->GetProperty("image");
-        if (!ParseJsMedia(image, src)) {
+        if (!ParseJsMedia(image, src, resObj)) {
             ResetBlockStyle();
             return;
         }
         std::string bundleName;
         std::string moduleName;
         GetJsMediaBundleInfo(image, bundleName, moduleName);
+        if (SystemProperties::ConfigChangePerform()) {
+            if (resObj) {
+                SliderModel::GetInstance()->CreateWithMediaResourceObj(resObj, bundleName, moduleName);
+            }
+        }
         SliderModel::GetInstance()->SetBlockImage(src, bundleName, moduleName);
     } else if (type == SliderModel::BlockStyleType::SHAPE) {
         auto shape = jsObj->GetProperty("shape");

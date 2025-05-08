@@ -766,6 +766,76 @@ bool SliderPattern::UpdateParameters()
     return true;
 }
 
+void SliderPattern::UpdateSliderComponentColor(const Color& color, const SliderColorType sliderColorType,
+    const Gradient& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto* pipelineContext = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (sliderColorType) {
+            case SliderColorType::BLOCK_COLOR:
+                paintProperty->UpdateBlockColor(color);
+                break;
+            case SliderColorType::TRACK_COLOR:
+                paintProperty->UpdateTrackBackgroundColor(value);
+                paintProperty->UpdateTrackBackgroundIsResourceColor(true);
+                break;
+            case SliderColorType::SELECT_COLOR:
+                paintProperty->UpdateSelectColor(color);
+                paintProperty->UpdateSelectGradientColor(value);
+                paintProperty->UpdateSelectIsResourceColor(true);
+                break;
+            case SliderColorType::BLOCK_BORDER_COLOR:
+                paintProperty->UpdateBlockBorderColor(color);
+                break;
+            case SliderColorType::STEP_COLOR:
+                paintProperty->UpdateStepColor(color);
+                break;
+        }
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void SliderPattern::UpdateSliderComponentMedia()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        UpdateBlock();
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void SliderPattern::UpdateSliderComponentString(const bool isShowTips, const std::string& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        paintProperty->UpdateShowTips(isShowTips);
+        paintProperty->UpdateCustomContent(value);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
 void SliderPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     if (type == WindowSizeChangeReason::ROTATION &&
