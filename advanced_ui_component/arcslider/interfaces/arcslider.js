@@ -1259,6 +1259,7 @@ export class ArcSlider extends ViewV2 {
             Button.onDigitalCrown((event) => {
                 if (event && this.isFocus) {
                     this.onDigitalCrownEvent(event);
+                    event.stopPropagation();
                 }
                 this.options.onChange?.(this.options.valueOptions.progress);
             });
