@@ -100,7 +100,7 @@ void SetFormLinkOptionsImpl(Ark_NativePointer node, const Ark_FormLinkOptions* o
     std::string info = ToString(formLinkOptions);
 
     LOGI("End, StsSetAction: %{public}s", info.c_str());
-    FormLinkModel::GetInstance()->StsSetAction(frameNode, info);
+    FormLinkModel::GetStsInstance()->StsSetAction(frameNode, info);
 }
 } // namespace FormLinkInterfaceModifier
 
