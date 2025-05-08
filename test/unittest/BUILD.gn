@@ -208,6 +208,7 @@ ohos_source_set("ace_components_base") {
   part_name = ace_engine_part
   sources = [
     "$ace_root/frameworks/core/common/resource/resource_manager.cpp",
+    "$ace_root/frameworks/core/common/resource/resource_wrapper.cpp",
     "$ace_root/frameworks/core/common/resource/pattern_resource_manager.cpp",
     "$ace_root/frameworks/core/common/resource/resource_parse_utils.cpp",
     "$ace_root/frameworks/core/components/theme/shadow_theme.cpp",
