@@ -1271,6 +1271,8 @@ struct CJUIScrollBarModifier {
     void (*setScrollBarScroller)(ArkUINodeHandle node, ArkUINodeHandle controller);
     void (*setScrollBarEnableNestedScroll)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetScrollBarEnableNestedScroll)(ArkUINodeHandle node);
+    void (*setScrollBarScrollBarColor)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetScrollBarScrollBarColor)(ArkUINodeHandle node);
 };
 
 struct CJUIScrollerModifier {

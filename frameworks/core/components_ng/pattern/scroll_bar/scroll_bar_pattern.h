@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_accessibility_property.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_layout_property.h"
+#include "core/components_ng/pattern/scroll_bar/scroll_bar_paint_property.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_paint_method.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -56,6 +57,11 @@ public:
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<ScrollBarLayoutProperty>();
+    }
+
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        return MakeRefPtr<ScrollBarPaintProperty>();
     }
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override

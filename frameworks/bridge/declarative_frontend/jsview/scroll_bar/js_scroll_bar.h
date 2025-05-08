@@ -28,6 +28,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
     static void JsSetEnableNestedScroll(const JSCallbackInfo& args);
+    static void JsSetScrollBarColor(const JSCallbackInfo& args);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_SCROLL_BAR_JS_SCROLL_BAR_H

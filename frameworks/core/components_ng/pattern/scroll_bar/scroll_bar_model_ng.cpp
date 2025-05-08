@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
+
 #include "core/components_ng/pattern/arc_scroll_bar/arc_scroll_bar_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
+#include "core/components_ng/pattern/scroll_bar/scroll_bar_paint_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -138,5 +141,25 @@ void ScrollBarModelNG::SetEnableNestedScroll(FrameNode* frameNode, bool enableNe
     if (enableNestedSroll == false && enableNestedSroll != enableNested) {
         UnSetNestedScroll(node, pattern);
     }
+}
+
+void ScrollBarModelNG::SetScrollBarColor(const Color& color)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ScrollBarPaintProperty, ScrollBarColor, color);
+}
+
+void ScrollBarModelNG::SetScrollBarColor(FrameNode* frameNode, Color color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollBarPaintProperty, ScrollBarColor, color, frameNode);
+}
+
+void ScrollBarModelNG::ResetScrollBarColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ScrollBarPaintProperty, ScrollBarColor, PROPERTY_UPDATE_RENDER);
+}
+
+void ScrollBarModelNG::ResetScrollBarColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ScrollBarPaintProperty, ScrollBarColor, PROPERTY_UPDATE_RENDER, frameNode);
 }
 } // namespace OHOS::Ace::NG
