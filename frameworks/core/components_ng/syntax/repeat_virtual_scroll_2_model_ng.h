@@ -50,6 +50,7 @@ public:
         std::function<void(int32_t)>&& onDragStart, std::function<void(int32_t, int32_t)>&& onMoveThrough,
         std::function<void(int32_t)>&& onDrop) override;
     void SetCreateByTemplate(bool isCreatedByTemplate) override;
+    bool IsInAnimation() override;
 };
 
 } // namespace OHOS::Ace::NG
