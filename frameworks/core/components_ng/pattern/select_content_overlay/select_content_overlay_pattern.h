@@ -46,6 +46,7 @@ public:
 protected:
     void CheckHandleReverse() override;
     void UpdateHandleHotZone() override;
+    void UpdateMouseHotZone();
 
 private:
     bool UpdateHandleHotZoneWithPoint();
