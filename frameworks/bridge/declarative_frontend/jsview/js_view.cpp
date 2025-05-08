@@ -1132,6 +1132,9 @@ void JSViewPartialUpdate::JSGetNavigationInfo(const JSCallbackInfo& info)
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty<std::string>("navigationId", result->navigationId);
     obj->SetPropertyObject("pathStack", navPathStackObj);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        obj->SetProperty<int32_t>("uniqueId", result->uniqueId);
+    }
     info.SetReturnValue(obj);
 }
 
