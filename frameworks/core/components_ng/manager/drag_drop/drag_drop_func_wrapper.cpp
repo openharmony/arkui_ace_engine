@@ -189,7 +189,7 @@ void EnvelopedDragData(
         summary };
 }
 
-void HandleCallback(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction,
+void DragDropFuncWrapper::HandleCallback(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction,
     const OHOS::Ace::DragNotifyMsg& dragNotifyMsg, const DragAdapterStatus& dragStatus)
 {
     TAG_LOGI(AceLogTag::ACE_DRAG, "drag notify message result is %{public}d.", dragNotifyMsg.result);
@@ -274,9 +274,6 @@ int32_t DragDropFuncWrapper::StartDragAction(std::shared_ptr<OHOS::Ace::NG::ArkU
     int32_t ret = InteractionInterface::GetInstance()->StartDrag(dragData.value(), callback);
     if (ret != 0) {
         manager->GetDragAction()->dragState = DragAdapterState::INIT;
-        DragNotifyMsg dragNotifyMsg;
-        dragNotifyMsg.result = DragRet::DRAG_CANCEL;
-        HandleCallback(dragAction, dragNotifyMsg, DragAdapterStatus::ENDED);
         TAG_LOGE(AceLogTag::ACE_DRAG, "msdp start drag failed.");
         return -1;
     }

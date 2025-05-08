@@ -37,6 +37,8 @@ struct PixelMapInfo {
 
 class ACE_FORCE_EXPORT DragDropFuncWrapper {
 public:
+    static void HandleCallback(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction,
+        const OHOS::Ace::DragNotifyMsg& dragNotifyMsg, const DragAdapterStatus& dragStatus);
     static int32_t StartDragAction(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction);
     static void SetDraggingPointerAndPressedState(int32_t currentPointerId, int32_t containerId);
     static int32_t RequestDragEndPending();
