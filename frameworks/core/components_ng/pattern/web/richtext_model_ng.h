@@ -25,6 +25,10 @@ public:
     void SetOnPageStart(std::function<void(const BaseEventInfo*)>&& onStarted) override;
     void SetOnPageFinish(std::function<void(const BaseEventInfo*)>&& onFinish) override;
 
+    static RefPtr<NG::FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetRichTextOptions(FrameNode *frameNode, const std::string& options);
+    static void SetOnPageStart(FrameNode *frameNode, std::function<void(const BaseEventInfo*)>&& onStarted);
+    static void SetOnPageFinish(FrameNode *frameNode, std::function<void(const BaseEventInfo*)>&& onFinish);
 private:
     bool isDataEmpty_ = true;
 };

@@ -14,7 +14,6 @@
  */
 #ifdef WEB_SUPPORTED
 
-#include "core/interfaces/native/implementation/web_modifier_callbacks.h"
 #ifndef PREVIEW
 #ifdef ARKUI_CAPI_UNITTEST
 #include "base/image/pixel_map.h"
@@ -28,6 +27,8 @@
 #endif // PREVIEW
 
 #include "core/components_ng/pattern/web/web_model_ng.h"
+#include "core/interfaces/native/implementation/web_modifier_callbacks.h"
+
 #include "core/interfaces/native/implementation/console_message_peer_impl.h"
 #include "core/interfaces/native/implementation/controller_handler_peer_impl.h"
 #include "core/interfaces/native/implementation/client_authentication_handler_peer_impl.h"
@@ -50,6 +51,7 @@
 #include "core/interfaces/native/implementation/web_resource_request_peer_impl.h"
 #include "core/interfaces/native/implementation/web_resource_response_peer_impl.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier {
@@ -582,8 +584,7 @@ bool OnSslErrorEventReceive(const CallbackHelper<Callback_OnSslErrorEventReceive
     Ark_OnSslErrorEventReceiveEvent parameter;
     parameter.error = Converter::ArkValue<Ark_SslError>(static_cast<Converter::SslError>(eventInfo->GetError()));
     Converter::ArkArrayHolder<Array_Buffer> vecHolder(eventInfo->GetCertChainData());
-    auto tempValue = vecHolder.ArkValue();
-    parameter.certChainData = Converter::ArkValue<Opt_Array_Buffer>(tempValue);
+    parameter.certChainData = vecHolder.OptValue<Opt_Array_Buffer>();
     auto peer = new SslErrorHandlerPeer();
     peer->handler = eventInfo->GetResult();
     parameter.handler = peer;
@@ -611,7 +612,6 @@ bool OnSslError(const CallbackHelper<OnSslErrorEventCallback>& arkCallback,
     auto url = eventInfo->GetUrl();
     parameter.url = Converter::ArkValue<Ark_String>(url);
     auto peer = new SslErrorHandlerPeer();
-    // need check
     peer->handler = eventInfo->GetResult();
     parameter.handler = peer;
     arkCallback.Invoke(parameter);
@@ -782,7 +782,6 @@ void OnFaviconReceived(const CallbackHelper<Callback_OnFaviconReceivedEvent_Void
         CHECK_NULL_VOID(parameter.favicon);
         parameter.favicon->pixelMap = PixelMap::Create(std::move(pixelMap));
         CHECK_NULL_VOID(parameter.favicon->pixelMap);
-        LOGE("WebAttributeModifier::OnFaviconReceivedImpl PixelMap supporting is not implemented yet");
         arkCallback.Invoke(parameter);
     };
 #ifdef ARKUI_CAPI_UNITTEST
@@ -941,8 +940,8 @@ bool OnLoadIntercept(const CallbackHelper<Callback_OnLoadInterceptEvent_Boolean>
     return result.value_or(false);
 }
 
-void OnControllerAttached(const CallbackHelper<Callback_Void>& arkCallback,
-                          WeakPtr<FrameNode> weakNode, int32_t instanceId)
+void OnControllerAttached(const CallbackHelper<Callback_Void>& arkCallback, WeakPtr<FrameNode> weakNode,
+    int32_t instanceId)
 {
     ContainerScope scope(instanceId);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -1236,4 +1235,3 @@ void OnAdsBlocked(const CallbackHelper<OnAdsBlockedCallback>& arkCallback,
 
 } // namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier
 #endif // WEB_SUPPORTED
-

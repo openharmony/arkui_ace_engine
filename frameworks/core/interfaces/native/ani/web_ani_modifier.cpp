@@ -18,7 +18,7 @@
 #include "base/log/log.h"
 #include "core/components_ng/base/frame_node.h"
 #ifdef WEB_SUPPORTED
-#include "core/components_ng/pattern/web/web_model_static.h"
+#include "core/components_ng/pattern/web/web_model_ng.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -30,8 +30,8 @@ void SetWebOptions(ArkUINodeHandle node,
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    WebModelStatic::SetWebIdCallback(frameNode, std::move(onNWebId));
-    WebModelStatic::SetHapPathCallback(frameNode, std::move(onHapPath));
+    WebModelNG::SetWebIdCallback(frameNode, std::move(onNWebId));
+    WebModelNG::SetHapPathCallback(frameNode, std::move(onHapPath));
 #endif // WEB_SUPPORTED
 }
 
