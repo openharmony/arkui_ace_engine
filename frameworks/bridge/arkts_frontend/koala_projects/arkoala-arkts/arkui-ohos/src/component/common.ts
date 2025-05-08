@@ -8105,8 +8105,8 @@ export interface CommonMethod {
     advancedBlendMode(effect: BlendMode | BrightnessBlender | undefined, type?: BlendApplyType): this
     bindTips(message: TipsMessageType | undefined, options?: TipsOptions): this
     bindPopup(show: boolean | undefined, popup: PopupOptions | CustomPopupOptions | undefined): this
-    bindMenu(isShow: Array<MenuElement> | CustomBuilder | undefined | boolean | undefined, content?: MenuOptions | Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this
-    bindContextMenu(content: CustomBuilder | undefined | boolean | undefined, responseType: ResponseType | undefined | CustomBuilder | undefined, options?: ContextMenuOptions): this
+    bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this
+    bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this
     bindContentCover(isShow: boolean | undefined, builder: CustomBuilder | undefined, type?: ModalTransition | ContentCoverOptions): this
     bindSheet(isShow: boolean | undefined, builder: CustomBuilder | undefined, options?: SheetOptions): this
     onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this
@@ -8479,9 +8479,9 @@ export interface UICommonMethod {
     /** @memo */
     bindPopup(show: boolean | undefined, popup: PopupOptions | CustomPopupOptions | undefined): this
     /** @memo */
-    bindMenu(isShow: Array<MenuElement> | CustomBuilder | undefined | boolean | undefined, content?: MenuOptions | Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this
+    bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this
     /** @memo */
-    bindContextMenu(content: CustomBuilder | undefined | boolean | undefined, responseType: ResponseType | undefined | CustomBuilder | undefined, options?: ContextMenuOptions): this
+    bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this
     /** @memo */
     bindContentCover(isShow: boolean | undefined, builder: CustomBuilder | undefined, type?: ModalTransition | ContentCoverOptions): this
     /** @memo */
@@ -9201,10 +9201,10 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public bindPopup(show: boolean | undefined, popup: PopupOptions | CustomPopupOptions | undefined): this {
         return this
     }
-    public bindMenu(isShow: Array<MenuElement> | CustomBuilder | undefined | boolean | undefined, content?: MenuOptions | Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
+    public bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this {
         return this
     }
-    public bindContextMenu(content: CustomBuilder | undefined | boolean | undefined, responseType: ResponseType | undefined | CustomBuilder | undefined, options?: ContextMenuOptions): this {
+    public bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this {
         return this
     }
     public bindContentCover(isShow: boolean | undefined, builder: CustomBuilder | undefined, type?: ModalTransition | ContentCoverOptions): this {
@@ -11970,22 +11970,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         return this
     }
     /** @memo */
-    public bindMenu(isShow: Array<MenuElement> | CustomBuilder | undefined | boolean | undefined, content?: MenuOptions | Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
+    public bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this {
         if (this.checkPriority("bindMenu")) {
-            const isShow_type = runtimeType(isShow)
             const content_type = runtimeType(content)
             const options_type = runtimeType(options)
-            if (((RuntimeType.OBJECT == isShow_type) || (RuntimeType.FUNCTION == isShow_type) || (RuntimeType.UNDEFINED == isShow_type)) && ((RuntimeType.OBJECT == content_type) || (RuntimeType.UNDEFINED == content_type))) {
-                const content_casted = isShow as (Array<MenuElement> | CustomBuilder | undefined)
-                const options_casted = content as (MenuOptions)
-                this.getPeer()?.bindMenu0Attribute(content_casted, options_casted)
-                return this
-            }
-            if (((RuntimeType.BOOLEAN == isShow_type) || (RuntimeType.UNDEFINED == isShow_type)) && ((RuntimeType.OBJECT == content_type) || (RuntimeType.FUNCTION == content_type) || (RuntimeType.UNDEFINED == content_type))) {
-                const isShow_casted = isShow as (boolean | undefined)
+            if (((RuntimeType.OBJECT == content_type) || (RuntimeType.FUNCTION == content_type)) || ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type))) {
                 const content_casted = content as (Array<MenuElement> | CustomBuilder | undefined)
-                const options_casted = options as (MenuOptions)
-                this.getPeer()?.bindMenu1Attribute(isShow_casted, content_casted, options_casted)
+                const options_casted = options as (MenuOptions | undefined)
+                this.getPeer()?.bindMenu0Attribute(content_casted, options_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
@@ -11993,23 +11985,16 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
         return this
     }
     /** @memo */
-    public bindContextMenu(content: CustomBuilder | undefined | boolean | undefined, responseType: ResponseType | undefined | CustomBuilder | undefined, options?: ContextMenuOptions): this {
+    public bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this {
         if (this.checkPriority("bindContextMenu")) {
             const content_type = runtimeType(content)
             const responseType_type = runtimeType(responseType)
             const options_type = runtimeType(options)
-            if (((RuntimeType.FUNCTION == content_type) || (RuntimeType.UNDEFINED == content_type)) && ((RuntimeType.OBJECT == responseType_type) || (RuntimeType.OBJECT == responseType_type))) {
+            if ((RuntimeType.FUNCTION == content_type) && (TypeChecker.isResponseType(responseType)) && ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type))) {
                 const content_casted = content as (CustomBuilder | undefined)
                 const responseType_casted = responseType as (ResponseType | undefined)
-                const options_casted = options as (ContextMenuOptions)
+                const options_casted = options as (ContextMenuOptions | undefined)
                 this.getPeer()?.bindContextMenu0Attribute(content_casted, responseType_casted, options_casted)
-                return this
-            }
-            if (((RuntimeType.BOOLEAN == content_type) || (RuntimeType.UNDEFINED == content_type)) && ((RuntimeType.FUNCTION == responseType_type) || (RuntimeType.UNDEFINED == responseType_type))) {
-                const isShown_casted = content as (boolean | undefined)
-                const content_casted = responseType as (CustomBuilder | undefined)
-                const options_casted = options as (ContextMenuOptions)
-                this.getPeer()?.bindContextMenu1Attribute(isShown_casted, content_casted, options_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")

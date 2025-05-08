@@ -557,10 +557,10 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public bindPopup(show: boolean | undefined, popup: PopupOptions | CustomPopupOptions | undefined): this {
         return this
     }
-    public bindMenu(isShow: Array<MenuElement> | CustomBuilder | undefined | boolean | undefined, content?: MenuOptions | Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
+    public bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this {
         return this
     }
-    public bindContextMenu(content: CustomBuilder | undefined | boolean | undefined, responseType: ResponseType | undefined | CustomBuilder | undefined, options?: ContextMenuOptions): this {
+    public bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this {
         return this
     }
     public bindContentCover(isShow: boolean | undefined, builder: CustomBuilder | undefined, type?: ModalTransition | ContentCoverOptions): this {

@@ -70,7 +70,7 @@ namespace MenuModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = MenuModelNG::CreateFrameNode(id);
+    auto frameNode = MenuModelStatic::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
