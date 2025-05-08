@@ -78,7 +78,7 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
         case SEND_IMAGES: {
             std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> result;
             int32_t size = data.ReadInt32();
-            for (int i = 0; i < size; i++) {
+            for (int32_t i = 0; i < size; i++) {
                 int32_t nodeId = data.ReadInt32();
                 sptr<Ashmem> ashMem = data.ReadAshmem();
                 if (ashMem == nullptr) {
