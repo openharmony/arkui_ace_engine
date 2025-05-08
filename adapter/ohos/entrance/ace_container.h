@@ -760,6 +760,7 @@ public:
     }
     void RenderLayoutBoundary(bool isDebugBoundary);
     void AddWatchSystemParameter();
+    void RemoveSaveGetCurrentInstanceId();
     void RemoveWatchSystemParameter();
 
     const std::vector<std::string>& GetUieParams() const
