@@ -197,7 +197,7 @@ int32_t StaggeredFillAlgorithm::GetMarkIndex()
     for (auto& section : sections_) {
         section.PruneFront(0.0f);
     }
-    return StartIdx().value_or(-1);
+    return StartIdx().value_or(0);
 }
 
 void StaggeredFillAlgorithm::UpdateSyncCachedCnt()
