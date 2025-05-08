@@ -427,7 +427,15 @@ void JSTabs::SetBarHeight(const JSCallbackInfo& info)
     }
     CalcDimension height = Dimension(-1.0, DimensionUnit::VP);
     bool adaptiveHeight = false;
+    bool noMinHeightLimit = false;
     auto barHeightInfo = info[0];
+    if (info.Length() == 2) {
+        auto minHeightLimitInfo = info[1];
+        if (minHeightLimitInfo->IsBoolean()) {
+            noMinHeightLimit = minHeightLimitInfo->ToBoolean();
+        }
+    }
+
     if (barHeightInfo->IsString() && barHeightInfo->ToString() == "auto") {
         adaptiveHeight = true;
     } else {
@@ -440,6 +448,7 @@ void JSTabs::SetBarHeight(const JSCallbackInfo& info)
         }
     }
     TabsModel::GetInstance()->SetBarAdaptiveHeight(adaptiveHeight);
+    TabsModel::GetInstance()->SetNoMinHeightLimit(noMinHeightLimit);
     TabsModel::GetInstance()->SetTabBarHeight(height);
 }
 
