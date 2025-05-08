@@ -14,7 +14,7 @@
  */
 
 #include "navigation_context.h"
-#include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
+#include "core/components_ng/pattern/navrouter/navdestination_model_static.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -562,19 +562,22 @@ bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>
     auto pathInfo = PathStack::GetPathInfo(index);
     CHECK_NULL_RETURN(pathInfo, false);
     auto name = pathInfo->name_;
-    auto param = pathInfo->param_;
     auto isEntry = pathInfo->isEntry_;
     RefPtr<NG::UINode> targetNode;
     RefPtr<NG::NavDestinationGroupNode> desNode;
-    int32_t errorCode = LoadDestination(name, param, customNode, targetNode, desNode);
-    // isRemove true, set destination info, false, current destination create failed
-    bool isRemove = true; // Remove of destination may be here
-    if (!isRemove) {
-        return false;
+    int32_t errorCode = ERROR_CODE_DESTINATION_NOT_FOUND;
+    for (auto iter = nodes_.begin(); iter != nodes_.end(); iter++) {
+        if (iter->first == index) {
+            targetNode = iter->second;
+            break;
+        }
+    }
+    if (GetNavDestinationNodeInUINode(targetNode, desNode)) {
+        errorCode = ERROR_CODE_NO_ERROR;
     }
     if (errorCode != ERROR_CODE_NO_ERROR) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't find target destination by index, create empty node");
-        node = AceType::DynamicCast<NG::UINode>(NavDestinationModelNG::CreateFrameNode(0));
+        node = AceType::DynamicCast<NG::UINode>(NavDestinationModelStatic::CreateFrameNode(0));
         return true;
     }
     node = targetNode;
@@ -598,7 +601,7 @@ RefPtr<NG::UINode> NavigationStack::CreateNodeByRouteInfo(const RefPtr<NG::Route
     auto extRouteInfo = AceType::DynamicCast<RouteInfo>(routeInfo);
     if (!extRouteInfo) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "route info is invalid");
-        return AceType::DynamicCast<NG::UINode>(NavDestinationModelNG::CreateFrameNode(0));
+        return AceType::DynamicCast<NG::UINode>(NavDestinationModelStatic::CreateFrameNode(0));
     }
     auto name = extRouteInfo->GetName();
     auto param = ParamType(); // getting of the external specific type parameter may be here
@@ -615,7 +618,7 @@ RefPtr<NG::UINode> NavigationStack::CreateNodeByRouteInfo(const RefPtr<NG::Route
         }
         return node;
     }
-    return AceType::DynamicCast<NG::UINode>(NavDestinationModelNG::CreateFrameNode(0));
+    return AceType::DynamicCast<NG::UINode>(NavDestinationModelStatic::CreateFrameNode(0));
 }
 
 std::string NavigationStack::GetNameByIndex(int32_t index) const
