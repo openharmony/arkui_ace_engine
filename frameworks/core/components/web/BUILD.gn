@@ -51,6 +51,7 @@ build_component("web") {
       "napi:ace_napi",
       "opengles:libGLES",
       "webview:libnweb",
+      "webview:cj_webview_ffi",
       "window_manager:libwm",
     ]
   }
