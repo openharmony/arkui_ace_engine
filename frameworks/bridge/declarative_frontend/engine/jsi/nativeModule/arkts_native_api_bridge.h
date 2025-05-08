@@ -73,9 +73,7 @@ private:
     static void RegisterDatePickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterAlphabetIndexerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterGaugeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-#ifndef ARKUI_WEARABLE
     static void RegisterSelectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-#endif
     static void RegisterRadioAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSliderAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRatingAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
