@@ -160,6 +160,7 @@ void RegisterToolbarHotZoneEvent(const RefPtr<FrameNode>& buttonNode, const RefP
             return;
         }
         auto barItemNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(barItemNode);
         auto eventHub = barItemNode->GetOrCreateEventHub<BarItemEventHub>();
         CHECK_NULL_VOID(eventHub);
         auto pattern = barItemNode->GetPattern<BarItemPattern>();
