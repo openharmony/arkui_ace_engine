@@ -1399,6 +1399,15 @@ void FocusHub::OnBlur()
     }
 }
 
+void FocusHub::HandleAccessibilityEvent()
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ACE_EVENT_SCOPED_TRACE(
+        "HandleFocusAccessibilityEvent Node:[%s][%d]", frameNode->GetTag().c_str(), frameNode->GetId());
+    frameNode->OnAccessibilityEvent(AccessibilityEventType::FOCUS);
+}
+
 void FocusHub::OnFocusNode(bool currentHasFocused)
 {
     if (currentHasFocused || !IsCurrentFocus()) {
@@ -1407,6 +1416,7 @@ void FocusHub::OnFocusNode(bool currentHasFocused)
     TAG_LOGD(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d) " focus",
         GetFrameName().c_str(), SEC_PARAM(GetFrameId()));
     if (onFocusInternal_) {
+        ACE_EVENT_SCOPED_TRACE("HandleFocusEventInternal Node[%s][%d]", GetFrameName().c_str(), GetFrameId());
         onFocusInternal_(focusReason_);
     }
     auto node = GetFrameNode();
@@ -1429,13 +1439,7 @@ void FocusHub::OnFocusNode(bool currentHasFocused)
     if (parentFocusHub) {
         parentFocusHub->SetLastFocusNodeIndex(AceType::Claim(this));
     }
-
-    auto focusManager = pipeline->GetOrCreateFocusManager();
-    CHECK_NULL_VOID(focusManager);
-
-    auto frameNode = GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    frameNode->OnAccessibilityEvent(AccessibilityEventType::FOCUS);
+    HandleAccessibilityEvent();
 
     pipeline->RequestFrame();
 }
@@ -1445,11 +1449,13 @@ void FocusHub::OnBlurNode()
     TAG_LOGD(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d) " blur by %{public}d",
         GetFrameName().c_str(), SEC_PARAM(GetFrameId()), blurReason_);
     if (onBlurInternal_) {
+        ACE_EVENT_SCOPED_TRACE("HandleBlurEventInternal Node[%s][%d]", GetFrameName().c_str(), GetFrameId());
         onBlurInternal_();
     }
     if (onBlurReasonInternal_) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d) "trigger onBlurReasonInternal by %{public}d",
             GetFrameName().c_str(), SEC_PARAM(GetFrameId()), blurReason_);
+        ACE_EVENT_SCOPED_TRACE("HandleBlurReasonEventInternal Node[%s][%d]", GetFrameName().c_str(), GetFrameId());
         onBlurReasonInternal_(blurReason_);
     }
     auto frameNode = GetFrameNode();

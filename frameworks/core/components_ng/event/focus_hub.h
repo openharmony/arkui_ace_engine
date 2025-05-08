@@ -913,6 +913,8 @@ protected:
         OnFocus();
     }
 
+    void HandleAccessibilityEvent();
+
 private:
     friend class FocusView;
 
