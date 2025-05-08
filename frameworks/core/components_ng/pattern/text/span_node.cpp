@@ -868,6 +868,7 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
     sameSpan->urlOnRelease = urlOnRelease;
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
+    sameSpan->onTouch = onTouch;
     return sameSpan;
 }
 

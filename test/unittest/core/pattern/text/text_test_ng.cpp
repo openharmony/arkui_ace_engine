@@ -662,6 +662,44 @@ HWTEST_F(TextTestNg, ActTextOnClick001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleUserTouchEvent001
+ * @tc.desc: test HandleUserTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, HandleUserTouchEvent001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(u"h\n");
+    spanModelNG.SetFontSize(FONT_SIZE_VALUE);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
+    spanNode->MountToParent(textFrameNode, textFrameNode->children_.size());
+    textPattern->spans_.emplace_back(spanNode->spanItem_);
+    textPattern->childNodes_.push_back(spanNode);
+    ASSERT_FALSE(textPattern->spans_.empty());
+    auto firstSpanItem = textPattern->spans_.front();
+    ASSERT_NE(firstSpanItem, nullptr);
+    bool isTouchTrigger = false;
+    firstSpanItem->position = 2;
+    firstSpanItem->onTouch = [&isTouchTrigger](TouchEventInfo& info) { isTouchTrigger = true; };
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 10 });
+    std::vector<RectF> rects { RectF(0, 0, 5, 5) };
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
+    TouchEventInfo info = TouchEventInfo("default");
+    TouchLocationInfo locationInfo = TouchLocationInfo(0);
+    locationInfo.SetLocalLocation(Offset(3, 3));
+    info.AddTouchLocationInfo(std::move(locationInfo));
+    textPattern->contentRect_ = RectF(0, 0, 20.0, 20.0);
+    textPattern->HandleSpanStringTouchEvent(info);
+}
+
+
+/**
  * @tc.name: ShowSelectOverlay001
  * @tc.desc: Test TextPattern ShowSelectOverlay when SelectOverlayProxy is not nullptr.
  * @tc.type: FUNC

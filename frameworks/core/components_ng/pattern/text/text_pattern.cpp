@@ -2285,7 +2285,7 @@ void TextPattern::InitTouchEvent()
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
 
-    auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+    auto touchTask = [weak = WeakClaim(this)](TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->sourceType_ = info.GetSourceDevice();
@@ -2314,6 +2314,24 @@ void TextPattern::InitUrlTouchEvent()
     urlTouchEventInitialized_ = true;
 }
 
+void TextPattern::InitSpanStringTouchEvent()
+{
+    CHECK_NULL_VOID(!spanStringTouchInitialized_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+
+    auto touchTask = [weak = WeakClaim(this)](TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleSpanStringTouchEvent(info);
+    };
+    auto touchListener = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
+    gesture->AddTouchEvent(touchListener);
+    spanStringTouchInitialized_ = true;
+}
+
 void TextPattern::MarkDirtySelf()
 {
     auto host = GetHost();
@@ -2325,6 +2343,38 @@ void TextPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     DoGestureSelection(info);
     ResetOriginCaretPosition();
+}
+
+void TextPattern::HandleSpanStringTouchEvent(TouchEventInfo& info)
+{
+    CHECK_NULL_VOID(!info.GetTouches().empty());
+    auto touchOffset = info.GetTouches().front().GetLocalLocation();
+    auto contentRect = GetTextRect();
+    PointF textOffset = { static_cast<float>(touchOffset.GetX()) - contentRect.GetX(),
+        static_cast<float>(touchOffset.GetY()) - contentRect.GetY() };
+    auto touchedSpan = FindSpanItemByOffset(textOffset);
+    if (touchedSpan && touchedSpan->onTouch) {
+        touchedSpan->onTouch(info);
+    }
+}
+
+RefPtr<SpanItem> TextPattern::FindSpanItemByOffset(const PointF& textOffset)
+{
+    int32_t start = 0;
+    for (const auto& item : spans_) {
+        if (!item) {
+            continue;
+        }
+        auto end = isSpanStringMode_ && item->position == -1 ? item->interval.second : item->position;
+        auto selectedRects = GetSelectedRects(start, end);
+        start = end;
+        for (auto&& rect : selectedRects) {
+            if (rect.IsInRegion(textOffset)) {
+                return item;
+            }
+        }
+    }
+    return nullptr;
 }
 
 void TextPattern::InitKeyEvent()
@@ -5313,6 +5363,9 @@ void TextPattern::ProcessSpanString()
             hasUrlSpan_ = true;
             InitUrlMouseEvent();
             InitUrlTouchEvent();
+        }
+        if (span->onTouch) {
+            InitSpanStringTouchEvent();
         }
         textForDisplay_ += span->content;
     }

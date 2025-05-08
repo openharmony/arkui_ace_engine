@@ -826,7 +826,7 @@ protected:
 
     void SetImageNodeGesture(RefPtr<ImageSpanNode> imageNode);
     virtual std::pair<int32_t, int32_t> GetStartAndEnd(int32_t start, const RefPtr<SpanItem>& spanItem);
-
+    void HandleSpanStringTouchEvent(TouchEventInfo& info);
     bool enabled_ = true;
     Status status_ = Status::NONE;
     bool contChange_ = false;
@@ -902,6 +902,7 @@ private:
     void InitUrlTouchEvent();
     void HandleUrlMouseEvent(const MouseInfo& info);
     void HandleUrlTouchEvent(const TouchEventInfo& info);
+    void InitSpanStringTouchEvent();
     void URLOnHover(bool isHover);
     bool HandleUrlClick();
     Color GetUrlHoverColor();
@@ -968,6 +969,7 @@ private:
     void EncodeTlvFontStyleNoChild(std::vector<uint8_t>& buff);
     void EncodeTlvTextLineStyleNoChild(std::vector<uint8_t>& buff);
     void EncodeTlvSpanItems(const std::string& pasteData, std::vector<uint8_t>& buff);
+    RefPtr<SpanItem> FindSpanItemByOffset(const PointF& textOffset);
     void UpdateMarqueeStartPolicy();
     void ProcessVisibleAreaCallback();
     void PauseSymbolAnimation();
@@ -995,6 +997,7 @@ private:
 
     bool urlTouchEventInitialized_ = false;
     bool urlMouseEventInitialized_ = false;
+    bool spanStringTouchInitialized_ = false;
     bool moveOverClickThreshold_ = false;
     bool isMarqueeRunning_ = false;
 

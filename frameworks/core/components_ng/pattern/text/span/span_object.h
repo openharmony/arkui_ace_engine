@@ -86,6 +86,7 @@ public:
 struct GestureStyle {
     std::optional<GestureEventFunc> onClick;
     std::optional<GestureEventFunc> onLongPress;
+    std::optional<std::function<void(TouchEventInfo&)>> onTouch;
 
     bool IsEqual(const GestureStyle& other) const
     {

@@ -26,6 +26,7 @@
 #include "base/memory/ace_type.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
@@ -660,14 +661,13 @@ RefPtr<GestureSpan> JSGestureSpan::ParseJSGestureSpan(const JSCallbackInfo& args
 {
     GestureStyle gestureInfo;
     if (args.Length() <= 0 || !args[0]->IsObject()) {
-        gestureInfo.onClick = std::nullopt;
-        gestureInfo.onLongPress = std::nullopt;
+        gestureInfo = { std::nullopt, std::nullopt, std::nullopt };
         return AceType::MakeRefPtr<GestureSpan>(gestureInfo);
     }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(args[0]);
 
     auto clickFunc = object->GetProperty("onClick");
-    if (!clickFunc->IsFunction() || clickFunc->IsUndefined()) {
+    if (clickFunc->IsUndefined() || !clickFunc->IsFunction()) {
         gestureInfo.onClick = std::nullopt;
     } else {
         auto jsOnClickFunc = AceType::MakeRefPtr<JsWeakClickFunction>(JSRef<JSFunc>::Cast(clickFunc));
@@ -682,7 +682,7 @@ RefPtr<GestureSpan> JSGestureSpan::ParseJSGestureSpan(const JSCallbackInfo& args
     }
 
     auto longPressFunc = object->GetProperty("onLongPress");
-    if (!longPressFunc->IsFunction() || longPressFunc->IsUndefined()) {
+    if (longPressFunc->IsUndefined() || !longPressFunc->IsFunction()) {
         gestureInfo.onLongPress = std::nullopt;
     } else {
         auto jsOnLongPressFunc = AceType::MakeRefPtr<JsWeakClickFunction>(JSRef<JSFunc>::Cast(longPressFunc));
@@ -696,6 +696,19 @@ RefPtr<GestureSpan> JSGestureSpan::ParseJSGestureSpan(const JSCallbackInfo& args
         gestureInfo.onLongPress = std::move(tmpLongPressFunc);
     }
 
+    auto touchFunc = object->GetProperty("onTouch");
+    if (touchFunc->IsUndefined() || !touchFunc->IsFunction()) {
+        gestureInfo.onTouch = std::nullopt;
+    } else {
+        auto jsOnTouchWeakFunc = AceType::MakeRefPtr<JsWeakFunction>(JSRef<JSFunc>::Cast(touchFunc));
+        auto onTouch = [execCtx = args.GetExecutionContext(), func = jsOnTouchWeakFunc](TouchEventInfo& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("SpanString.onTouch");
+            JSRef<JSVal> param = JSRef<JSObject>::Cast(JsTouchFunction::CreateJSEventInfo(info));
+            func->ExecuteJS(1, &param);
+        };
+        gestureInfo.onTouch = std::move(onTouch);
+    }
     return AceType::MakeRefPtr<GestureSpan>(gestureInfo);
 }
 
