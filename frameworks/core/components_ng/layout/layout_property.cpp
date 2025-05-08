@@ -2146,16 +2146,6 @@ void LayoutProperty::CheckLocalizedAlignment(const TextDirection& direction)
     }
 }
 
-void LayoutProperty::CheckLayoutGravity(const TextDirection& direction)
-{
-    CHECK_NULL_VOID(GetPositionProperty());
-    if (GetPositionProperty()->HasLayoutGravity()) {
-        auto layoutGravity = GetPositionProperty()->GetLayoutGravity().value_or(Alignment::CENTER);
-        auto alignment = GetLayoutGravityAlignment(direction, layoutGravity);
-        GetPositionProperty()->UpdateLayoutGravity(alignment);
-    }
-}
-
 std::string LayoutProperty::LayoutInfoToString()
 {
     std::stringstream ss;
@@ -2198,19 +2188,5 @@ std::string LayoutProperty::GetAlignmentStringFromLocalized(
         return layoutDirection == TextDirection::LTR ? it->second.first : it->second.second;
     }
     return "center";
-}
-
-Alignment LayoutProperty::GetLayoutGravityAlignment(TextDirection layoutDirection, Alignment alignment)
-{
-    static const std::map<Alignment, Alignment> alignmentMap = { { Alignment::TOP_LEFT, Alignment::TOP_RIGHT },
-        { Alignment::TOP_CENTER, Alignment::TOP_CENTER }, { Alignment::TOP_RIGHT, Alignment::TOP_LEFT },
-        { Alignment::CENTER_LEFT, Alignment::CENTER_RIGHT }, { Alignment::CENTER, Alignment::CENTER },
-        { Alignment::CENTER_RIGHT, Alignment::CENTER_LEFT }, { Alignment::BOTTOM_LEFT, Alignment::BOTTOM_RIGHT },
-        { Alignment::BOTTOM_CENTER, Alignment::BOTTOM_CENTER }, { Alignment::BOTTOM_RIGHT, Alignment::BOTTOM_LEFT } };
-    auto it = alignmentMap.find(alignment);
-    if (it != alignmentMap.end()) {
-        return layoutDirection == TextDirection::LTR ? it->first : it->second;
-    }
-    return Alignment::CENTER;
 }
 } // namespace OHOS::Ace::NG

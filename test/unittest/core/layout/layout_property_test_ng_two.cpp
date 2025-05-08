@@ -1186,22 +1186,4 @@ HWTEST_F(LayoutPropertyTestNgTwo, UpdateIsMirrorable001, TestSize.Level1)
     auto isMirrorable1 = layoutProperty->GetPositionProperty()->GetIsMirrorable().value_or(false);
     EXPECT_EQ(isMirrorable1, false);
 }
-
-/**
- * @tc.name:CheckLayoutGravity
- * @tc.desc: Test cast to CheckLayoutGravity
- * @tc.type: FUNC
- */
-HWTEST_F(LayoutPropertyTestNgTwo, CheckLayoutGravity, TestSize.Level1)
-{
-    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
-    layoutProperty->UpdateIsMirrorable(true);
-    layoutProperty->GetPositionProperty()->UpdateLayoutGravity(Alignment::TOP_LEFT);
-
-    layoutProperty->CheckLayoutGravity(TextDirection::LTR);
-    EXPECT_EQ(layoutProperty->GetPositionProperty()->GetLayoutGravity().value(), Alignment::TOP_LEFT);
-
-    layoutProperty->CheckLayoutGravity(TextDirection::RTL);
-    EXPECT_EQ(layoutProperty->GetPositionProperty()->GetLayoutGravity().value(), Alignment::TOP_RIGHT);
-}
 }

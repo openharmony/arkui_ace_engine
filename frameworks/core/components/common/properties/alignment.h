@@ -52,14 +52,6 @@ public:
         return !operator==(other);
     }
 
-    bool operator<(const Alignment& other) const
-    {
-        if (horizontal_ != other.horizontal_) {
-            return horizontal_ < other.horizontal_;
-        }
-        return vertical_ < other.vertical_;
-    }
-
     static Offset GetAlignPosition(const Size& parentSize, const Size& childSize, const Alignment& alignment);
     static NG::OffsetF GetAlignPosition(
         const NG::SizeF& parentSize, const NG::SizeF& childSize, const Alignment& alignment);
