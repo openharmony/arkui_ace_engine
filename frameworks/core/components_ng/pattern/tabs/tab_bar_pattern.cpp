@@ -314,10 +314,10 @@ void TabBarPattern::UpdateTabBarHiddenOffset(float offset)
     } else {
         translate = std::clamp(preTranslate + offset, 0.0f, size);
     }
-    renderContext->UpdateTransformTranslate(TranslateOptions(0.0f, translate, 0.0f));
+    SetTabBarTranslate(TranslateOptions(0.0f, translate, 0.0f));
     float opacity = renderContext->GetOpacityValue(1.0f);
     opacity = std::clamp(opacity - offset / size, 0.0f, 1.0f);
-    renderContext->UpdateOpacity(opacity);
+    SetTabBarOpacity(opacity);
     auto threshold = Dimension(TRANSLATE_THRESHOLD, DimensionUnit::VP).ConvertToPx();
     if (Positive(offset) && LessNotEqual(std::abs(preTranslate), threshold) &&
         GreatOrEqual(std::abs(translate), threshold)) {
@@ -335,6 +335,13 @@ void TabBarPattern::SetTabBarTranslate(const TranslateOptions& options)
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateTransformTranslate(options);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_VOID(tabsNode);
+    auto divider = AceType::DynamicCast<FrameNode>(tabsNode->GetDivider());
+    CHECK_NULL_VOID(divider);
+    auto dividerRenderContext = divider->GetRenderContext();
+    CHECK_NULL_VOID(dividerRenderContext);
+    dividerRenderContext->UpdateTransformTranslate(options);
 }
 
 void TabBarPattern::SetTabBarOpacity(float opacity)
@@ -344,6 +351,13 @@ void TabBarPattern::SetTabBarOpacity(float opacity)
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateOpacity(opacity);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_VOID(tabsNode);
+    auto divider = AceType::DynamicCast<FrameNode>(tabsNode->GetDivider());
+    CHECK_NULL_VOID(divider);
+    auto dividerRenderContext = divider->GetRenderContext();
+    CHECK_NULL_VOID(dividerRenderContext);
+    dividerRenderContext->UpdateOpacity(opacity);
 }
 
 void FindTextAndImageNode(
