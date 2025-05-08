@@ -1019,9 +1019,6 @@ void UIObserverListener::AddFingerInfosInfo(napi_value objValueClickEvent, const
     int32_t index = 0;
 
     for (auto& finger : gestureEventInfo.GetFingerList()) {
-        if (finger.sourceType_ == SourceType::TOUCH && finger.sourceTool_ != SourceTool::FINGER) {
-            continue;
-        }
         napi_value napiFinger = nullptr;
         napi_create_object(env_, &napiFinger);
         AddFingerObjectInfo(napiFinger, finger);
