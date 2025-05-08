@@ -1952,14 +1952,13 @@ void NavigationModelNG::SetOnCoordScrollEndAction(FrameNode* frameNode, std::fun
     navBarEventHub->SetOnCoordScrollEndAction(std::move(onCoordScrollEnd));
 }
 
-void NavigationModelNG::SetSystemBarStyle(FrameNode* frameNode, const Color& contentColor)
+void NavigationModelNG::SetSystemBarStyle(FrameNode* frameNode, const RefPtr<SystemBarStyle>& style)
 {
     CHECK_NULL_VOID(frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
     auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(pattern);
-    RefPtr<SystemBarStyle> style = SystemBarStyle::CreateStyleFromColor(contentColor.GetValue());
     pattern->SetSystemBarStyle(style);
 }
 

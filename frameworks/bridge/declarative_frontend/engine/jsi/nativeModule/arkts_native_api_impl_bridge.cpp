@@ -2895,6 +2895,46 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetEnableNavigationIndicator));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableNavigationIndicator"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetEnableNavigationIndicator));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSystemBarStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetSystemBarStyle));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSystemBarStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetSystemBarStyle));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnShown"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetOnShown));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnShown"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetOnShown));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnHidden"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetOnHidden));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnHidden"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetOnHidden));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnWillHide"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetOnWillHide));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWillHide"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetOnWillHide));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnWillAppear"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetOnWillAppear));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWillAppear"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetOnWillAppear));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnWillShow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetOnWillShow));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWillShow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetOnWillShow));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnWillDisappear"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetOnWillDisappear));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnWillDisappear"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetOnWillDisappear));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnBackPressed"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetOnBackPressed));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnBackPressed"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetOnBackPressed));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnReady"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetOnReady));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnReady"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetOnReady));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setToolBarConfiguration"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetToolBarConfiguration));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetToolBarConfiguration"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetToolBarConfiguration));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navDestination"), navDestination);
 
     auto particle = panda::ObjectRef::New(vm);
@@ -4003,6 +4043,10 @@ void ArkUINativeModule::RegisterNavigationAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetOnNavBarStateChange));
     navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnNavBarStateChange"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetOnNavBarStateChange));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSystemBarStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetSystemBarStyle));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSystemBarStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetSystemBarStyle));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navigation"), navigation);
 }
 

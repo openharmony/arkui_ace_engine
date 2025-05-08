@@ -3874,6 +3874,7 @@ struct ArkUINavDestinationModifier {
     void (*setNavDestinationOnCoordScrollEndAction)(ArkUINodeHandle node,
         void (*onCoordScrollEndAction)(ArkUINodeHandle node));
     void (*setNavDestinationSystemBarStyle)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetNavDestinationSystemBarStyle)(ArkUINodeHandle node);
     void (*setCustomBackButtonNode)(ArkUINodeHandle node, ArkUINodeHandle backButtonNode);
     void (*setPreferredOrientation)(ArkUINodeHandle node, ArkUI_Int32 orientation);
     void (*resetPreferredOrientation)(ArkUINodeHandle node);
@@ -3881,6 +3882,22 @@ struct ArkUINavDestinationModifier {
     void (*resetEnableStatusBar)(ArkUINodeHandle node);
     void (*setEnableNavigationIndicator)(ArkUINodeHandle node, ArkUIOptionalBool enable);
     void (*resetEnableNavigationIndicator)(ArkUINodeHandle node);
+    void (*setNavDestinationOnShown)(ArkUINodeHandle node, void* callback);
+    void (*resetNavDestinationOnShown)(ArkUINodeHandle node);
+    void (*setNavDestinationOnHidden)(ArkUINodeHandle node, void* callback);
+    void (*resetNavDestinationOnHidden)(ArkUINodeHandle node);
+    void (*setNavDestinationOnWillHide)(ArkUINodeHandle node, void* callback);
+    void (*resetNavDestinationOnWillHide)(ArkUINodeHandle node);
+    void (*setNavDestinationOnWillAppear)(ArkUINodeHandle node, void* callback);
+    void (*resetNavDestinationOnWillAppear)(ArkUINodeHandle node);
+    void (*setNavDestinationOnWillShow)(ArkUINodeHandle node, void* callback);
+    void (*resetNavDestinationOnWillShow)(ArkUINodeHandle node);
+    void (*setNavDestinationOnWillDisappear)(ArkUINodeHandle node, void* callback);
+    void (*resetNavDestinationOnWillDisappear)(ArkUINodeHandle node);
+    void (*setNavDestinationOnBackPressed)(ArkUINodeHandle node, void* callback);
+    void (*resetNavDestinationOnBackPressed)(ArkUINodeHandle node);
+    void (*setNavDestinationOnReady)(ArkUINodeHandle node, void* callback);
+    void (*resetNavDestinationOnReady)(ArkUINodeHandle node);
 };
 
 struct ArkUITextAreaModifier {
@@ -4658,6 +4675,7 @@ struct ArkUINavigationModifier {
         void (*onCoordScrollUpdateAction)(ArkUINodeHandle node, ArkUI_Float32 currentOffset));
     void (*setOnCoordScrollEndAction)(ArkUINodeHandle node, void (*onCoordScrollEndAction)(ArkUINodeHandle node));
     void (*setSystemBarStyle)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetSystemBarStyle)(ArkUINodeHandle node);
     void (*setEnableToolBarAdaptation)(ArkUINodeHandle node, ArkUI_Bool enbale);
     void (*resetEnableToolBarAdaptation)(ArkUINodeHandle node);
     void (*setOnNavigationModeChange)(ArkUINodeHandle node, void* callback);
