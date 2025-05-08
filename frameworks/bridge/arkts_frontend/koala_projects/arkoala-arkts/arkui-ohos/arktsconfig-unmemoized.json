@@ -22,10 +22,10 @@
             "@koalaui/arkui-common": [
                 "../../../../../arkoala/arkui-common/build/unmemoized/src"
             ],
-            "@ohos/arkui": [
+            "arkui": [
                 "./"
             ],
-            "@ohos/arkui/*": [
+            "arkui/*": [
                 "./*"
             ],
             "@koalaui/interop": [

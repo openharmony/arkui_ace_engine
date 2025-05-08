@@ -47,6 +47,7 @@ class Paths:
         self.ohos_ets_arkts_path = None
         self.arklink_path = None
         self.ets_stdlib_path = None
+        self.innerkits_path = None
         self.check_install_path = None
         self.check_bin_path = None
         self.dist_path = None
@@ -74,6 +75,7 @@ def parse_argv(argv) -> Paths:
     path.ohos_ets_arkts_path = os.path.abspath(argv[7])
     path.arklink_path = os.path.abspath(argv[8])
     path.ets_stdlib_path = os.path.abspath(argv[9])
+    path.innerkits_path = os.path.abspath(argv[10])
     path.check_install_path = os.path.join(path.project_path, "arkoala-arkts", "node_modules")
     path.check_bin_path = os.path.join(path.check_install_path, ".bin")
     path.check_fast_arktsc = os.path.join(path.check_bin_path, "fast-arktsc")
@@ -303,6 +305,51 @@ def copy_akoala_abc(path: Paths):
         sys.exit(1)
 
 
+def resolve_innerkis_config(path: Paths, config_file, output_file):
+    config_file_path = os.path.join(path.arkui_ohos_path, config_file)
+    with open(path.logfile, "a+") as f:
+        f.write("\n")
+        f.write("resolve config path: " + config_file_path + " \n")
+        f.close()
+
+    try:
+        with open(config_file_path, 'r', encoding='utf-8') as file:
+            with open(path.logfile, "a+") as f:
+                f.write("resolved path file opend \n")
+                f.close()
+            json_data = json.load(file)
+
+            # 获取 baseUrl
+            base_url = json_data['compilerOptions']['baseUrl']
+
+            # 获取配置文件的目录路径
+            config_dir = os.path.dirname(config_file_path)
+
+            # 将 baseUrl 解析为绝对路径（相对于配置文件）
+            absolute_base_url = os.path.abspath(os.path.join(config_dir, base_url))
+
+            # 获取 paths
+            paths = json_data['compilerOptions']['paths']
+
+            # 处理 paths 中的相对路径
+            resolved_paths = {}
+            for key, value in paths.items():
+                resolved_value = [os.path.abspath(os.path.join(absolute_base_url, path)) for path in value]
+                resolved_paths[key] = resolved_value
+            if not os.path.exists(path.innerkits_path):
+                os.makedirs(path.innerkits_path)
+            with open(output_file, 'w', encoding='utf-8') as f:
+                json.dump({"paths": resolved_paths}, f, indent=2, ensure_ascii=False)
+            with open(path.logfile, "a+") as f:
+                f.write("output_file generated:" + output_file + " \n")
+                f.close()
+    except Exception as e:
+        with open(path.logfile, "a+") as f:
+            f.write("Error: Failed to generate innerkit path file: " + e + " \n")
+            f.close()
+        sys.exit(1)
+
+
 def main(argv):
     path = parse_argv(argv)
     prebuilt_dist(path)
@@ -315,6 +362,7 @@ def main(argv):
     run_build_arkoala(env, path)
     env["PATH"] = env_old_path
     copy_akoala_abc(path)
+    resolve_innerkis_config(path, "arktsconfig-unmemoized-merged.json", os.path.join(path.innerkits_path, "arkts_paths.json"))
 
 
 if __name__ == '__main__':
