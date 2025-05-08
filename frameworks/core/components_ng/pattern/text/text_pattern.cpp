@@ -3032,12 +3032,15 @@ void TextPattern::OnModifyDone()
             host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, UtfUtils::Str16DebugToStr8(textCache),
                 UtfUtils::Str16DebugToStr8(textForDisplay_));
             dataDetectorAdapter_->aiDetectInitialized_ = false;
-            CloseSelectOverlay();
-            ResetSelection();
         }
 
         if (CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
             ParseOriText(textForDisplay_);
+        }
+
+        if (textCache != textForDisplay_) { // textForDisplay_ is updated by ParseOriText
+            CloseSelectOverlay();
+            ResetSelection();
         }
     }
     RecoverCopyOption();
