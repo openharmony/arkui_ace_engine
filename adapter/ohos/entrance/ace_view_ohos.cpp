@@ -404,23 +404,24 @@ void AceViewOhos::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& po
             markEnabled);
     };
 
-    if (NG::EventInfoConvertor::IfNeedMouseTransform() && ProcessMouseEventWithTouch(event, node, markProcess)) {
+    if (NG::EventInfoConvertor::IfNeedMouseTransform() &&
+        ProcessMouseEventWithTouch(pointerEvent, event, node, markProcess)) {
         return;
     }
     CHECK_NULL_VOID(mouseEventCallback_);
     mouseEventCallback_(event, markProcess, node);
 }
 
-bool AceViewOhos::ProcessMouseEventWithTouch(
+bool AceViewOhos::ProcessMouseEventWithTouch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     const MouseEvent& event, const RefPtr<OHOS::Ace::NG::FrameNode>& node, const std::function<void()>& markProcess)
 {
     if (event.button == MouseButton::LEFT_BUTTON) {
         // Only process PRESS/MOVE/RELEASE/CANCEL event
-        switch (event.action) {
-            case MouseAction::PRESS:
-            case MouseAction::RELEASE:
-            case MouseAction::CANCEL:
-            case MouseAction::MOVE:
+        switch (pointerEvent->GetPointerAction()) {
+            case OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN:
+            case OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
+            case OHOS::MMI::PointerEvent::POINTER_ACTION_CANCEL:
+            case OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE:
                 break;
             default:
                 return false;

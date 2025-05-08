@@ -259,6 +259,16 @@ public:
         return reusedNodeSkipMeasure_;
     }
 
+    void SetMouseTransformEnable(bool mouseTransformEnable)
+    {
+        mouseTransformEnable_ = mouseTransformEnable;
+    }
+
+    bool IsMouseTransformEnable()
+    {
+        return mouseTransformEnable_;
+    }
+
 protected:
     std::string countryOrRegion_;
     std::string language_;
@@ -292,6 +302,7 @@ protected:
     mutable std::shared_mutex eventsPassMutex_;
     TouchPassMode touchPassMode_ = TouchPassMode::DEFAULT;
     bool reusedNodeSkipMeasure_ = false;
+    bool mouseTransformEnable_ = false;
 };
 
 } // namespace OHOS::Ace
