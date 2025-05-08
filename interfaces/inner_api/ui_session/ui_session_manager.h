@@ -68,10 +68,14 @@ public:
     virtual void ReportComponentChangeEvent(const std::string& key, const std::string& value) {};
 
     /**
+     * @description: remove instanceId when destroy
+     */
+    virtual void RemoveSaveGetCurrentInstanceId(int32_t instanceId) {};
+
+     /**
      * @description: execute click callback when page some component change occurs
      */
-    virtual void ReportComponentChangeEvent(
-        int32_t nodeId, const std::string& key, const std::shared_ptr<InspectorJsonValue>& value) {};
+    virtual void ReportComponentChangeEvent(const std::string& key, const std::string& value) {};
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     /**
      * @description: save report communication stub side
@@ -122,7 +126,9 @@ public:
     virtual void SaveBaseInfo(const std::string& info) {};
     virtual void SendBaseInfo(int32_t processId) {};
     virtual void SaveGetPixelMapFunction(GetPixelMapFunction&& function) {};
-    virtual void SaveTranslateManager(std::shared_ptr<UiTranslateManager> uiTranslateManager) {};
+    virtual void SaveTranslateManager(std::shared_ptr<UiTranslateManager> uiTranslateManager,
+        int32_t instanceId) {};
+    virtual void SaveGetCurrentInstanceIdCallback(std::function<int32_t()>&& callback) {};
     virtual void GetWebViewLanguage() {};
     virtual void RegisterPipeLineGetCurrentPageName(std::function<std::string()>&& callback) {};
     virtual void GetCurrentPageName() {};
@@ -166,7 +172,9 @@ protected:
     std::shared_ptr<InspectorJsonValue> jsonValue_ = nullptr;
     std::atomic<int32_t> webTaskNums_ = 0;
     std::string baseInfo_;
+    std::map<int32_t, std::shared_ptr<UiTranslateManager>> translateManagerMap_;
     std::shared_ptr<UiTranslateManager> translateManager_ = nullptr;
+    std::function<int32_t()> getInstanceIdCallback_;
     static std::shared_mutex translateManagerMutex_;
     std::function<std::string()> pipelineContextPageNameCallback_;
     SendCommandFunction sendCommandFunction_ = 0;

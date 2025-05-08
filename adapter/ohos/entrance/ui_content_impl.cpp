@@ -5152,6 +5152,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
     RegisterGetCurrentPageName(pipeline);
     InitSendCommandFunctionsCallbacks(pipeline);
     sendCommandCallbackInner(pipeline);
+    SaveGetCurrentInstanceId();
 }
 
 void UIContentImpl::SetupGetPixelMapCallback(RefPtr<PipelineBase> pipeline)
@@ -5170,6 +5171,19 @@ void UIContentImpl::SetupGetPixelMapCallback(RefPtr<PipelineBase> pipeline)
             TaskExecutor::TaskType::UI, "UiSessionGetPixelMap");
     };
     UiSessionManager::GetInstance()->SaveGetPixelMapFunction(getPixelMapCallback);
+}
+
+void UIContentImpl::SaveGetCurrentInstanceId()
+{
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, []() {
+        auto saveInstanceIdCallback = []() -> int32_t {
+            auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+            CHECK_NULL_RETURN(pipeline, -1);
+            return pipeline->GetInstanceId();
+        };
+        UiSessionManager::GetInstance()->SaveGetCurrentInstanceIdCallback(saveInstanceIdCallback);
+    });
 }
 
 void UIContentImpl::RegisterGetCurrentPageName(const RefPtr<PipelineBase>& pipeline)
