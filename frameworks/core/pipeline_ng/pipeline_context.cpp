@@ -544,12 +544,7 @@ void PipelineContext::FlushDragEvents()
     }
     canUseLongPredictTask_ = false;
     for (auto iter = dragEvents.begin(); iter != dragEvents.end(); ++iter) {
-        if (!iter->first.Invalid()) {
-            RefPtr<FrameNode> node = iter->first.Upgrade();
-            if (node) {
-                FlushDragEvents(manager, extraInfo, node, iter->second);
-            }
-        }
+        FlushDragEvents(manager, extraInfo, iter->first, iter->second);
     }
 }
 
@@ -3841,12 +3836,7 @@ void PipelineContext::OnFlushMouseEvent(TouchRestrict& touchRestrict)
     }
     canUseLongPredictTask_ = false;
     for (auto iter = mouseEvents.begin(); iter != mouseEvents.end(); ++iter) {
-        if (!iter->first.Invalid()) {
-            RefPtr<FrameNode> node = iter->first.Upgrade();
-            if (node) {
-                OnFlushMouseEvent(node, iter->second, touchRestrict);
-            }
-        }
+        OnFlushMouseEvent(iter->first, iter->second, touchRestrict);
     }
 }
 
