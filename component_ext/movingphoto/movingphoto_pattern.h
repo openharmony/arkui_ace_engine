@@ -180,7 +180,7 @@ private:
     SizeF MeasureContentLayout(const SizeF& layoutSize, const RefPtr<MovingPhotoLayoutProperty>& layoutProperty);
     SizeF MeasureModeContentLayout(const SizeF& layoutSize, const RefPtr<MovingPhotoLayoutProperty>& layoutProperty);
     SizeF GetRawImageSize();
-    int32_t GetImageFd();
+    int32_t GetImageFd() const;
 
     void PrepareMediaPlayer();
     void ResetMediaPlayer();

@@ -977,7 +977,7 @@ SizeF MovingPhotoPattern::GetRawImageSize()
     return imagePattern->GetRawImageSize();
 }
 
-int32_t MovingPhotoPattern::GetImageFd()
+int32_t MovingPhotoPattern::GetImageFd() const
 {
     if (!isPlayWithMask_) {
         TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto GetImageFd.%{public}d", isPlayWithMask_);
