@@ -519,7 +519,7 @@ export class SubHeader extends ViewPU {
     updateFontScale() {
         try {
             let g15 = this.getUIContext();
-            let h15 = g15.getHostContext()?.config?.fontSizeScale ?? 1;
+            let h15 = g15?.getHostContext()?.config?.fontSizeScale ?? 1;
             if (!this.isFollowingSystemFontScale) {
                 return 1;
             }
@@ -1075,7 +1075,7 @@ export class SubHeader extends ViewPU {
 
     onMeasureSize(c12, d12, e12) {
         let f12 = { width: c12.width, height: c12.height };
-        let g12 = this.getUIContext().getHostContext();
+        let g12 = this.getUIContext()?.getHostContext();
         this.fontSize = this.updateFontScale();
         if (this.isSuitableAging()) {
             this.ageing = true;
