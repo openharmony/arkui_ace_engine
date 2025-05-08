@@ -2244,9 +2244,9 @@ HWTEST_F(TextTestFiveNg, UpdateTextStyle002, TestSize.Level1)
      * @tc.steps: step6. call UpdateTextStyle
      * @tc.expected: update text style when selStart and selEnd is invalid.
      */
-    EXPECT_CALL(*paragraph, AddText).Times(0);
-    EXPECT_CALL(*paragraph, PushStyle).Times(0);
-    EXPECT_CALL(*paragraph, PopStyle).Times(0);
+    EXPECT_CALL(*paragraph, AddText).Times(1);
+    EXPECT_CALL(*paragraph, PushStyle).Times(2);
+    EXPECT_CALL(*paragraph, PopStyle).Times(2);
     spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, -1, -1);
 }
 
