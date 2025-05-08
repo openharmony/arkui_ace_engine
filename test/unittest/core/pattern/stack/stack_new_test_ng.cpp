@@ -90,4 +90,25 @@ HWTEST_F(StackNewTestNG, Example, TestSize.Level1)
     EXPECT_EQ(frameNode->GetChildByIndex(SECOND_CHILD)->GetGeometryNode()->GetFrameOffset().GetX(), 45.0f);
     EXPECT_EQ(frameNode->GetChildByIndex(SECOND_CHILD)->GetGeometryNode()->GetFrameOffset().GetY(), 120.0f);
 }
+
+/**
+ * @tc.name: LayoutGravityTest
+ * @tc.desc: Test stack Layout with LayoutGravityTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, LayoutGravityTest, TestSize.Level1)
+{
+    auto frameNode = CreateStack([this](StackModelNG model) {
+        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::BOTTOM_CENTER);
+        auto text = CreateText(
+            u"First child", [this](TextModelNG model) { ViewAbstract::SetLayoutGravity(Alignment::CENTER_RIGHT); });
+    });
+    CreateLayoutTask(frameNode);
+    auto textFrameNode = frameNode->GetChildByIndex(FIRST_CHILD);
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    ASSERT_NE(textLayoutProperty->GetPositionProperty(), nullptr);
+    EXPECT_EQ(textLayoutProperty->GetPositionProperty()->GetLayoutGravity().value(), Alignment::CENTER_RIGHT);
+}
 } // namespace OHOS::Ace::NG
