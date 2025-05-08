@@ -244,6 +244,15 @@ void* CustomNodeBase::FireThisFunc()
     return nullptr;
 }
 
+void CustomNodeBase::FireClearAllRecycleFunc()
+{
+    if (clearAllRecycleFunc_) {
+        ACE_SCOPED_TRACE("CustomNode:FireClearAllRecycleFunc %s", GetJSViewName().c_str());
+        RecycleManager::ClearAll();
+        clearAllRecycleFunc_();
+    }
+}
+
 std::string CustomNodeBase::FireOnDumpInspectorFunc()
 {
     if (onDumpInspectorFunc_) {
@@ -309,6 +318,11 @@ void CustomNodeBase::SetOnDumpInfoFunc(std::function<void(const std::vector<std:
 void CustomNodeBase::SetOnDumpInspectorFunc(std::function<std::string()>&& func)
 {
     onDumpInspectorFunc_ = func;
+}
+
+void CustomNodeBase::SetClearAllRecycleFunc(std::function<void()>&& func)
+{
+    clearAllRecycleFunc_ = func;
 }
 
 void CustomNodeBase::SetOnRecycleFunc(std::function<void()>&& func)
