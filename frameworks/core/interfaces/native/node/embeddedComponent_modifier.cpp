@@ -49,12 +49,18 @@ void TransformToCWantElement(AbilityBase_Element& element, AAFwk::Want want)
     element.bundleName = new char[want.GetElement().GetBundleName().length() + 1];
     element.moduleName = new char[want.GetElement().GetModuleName().length() + 1];
     element.abilityName = new char[want.GetElement().GetAbilityName().length() + 1];
-    strcpy_s(
-        element.bundleName, want.GetElement().GetBundleName().length() + 1, want.GetElement().GetBundleName().c_str());
-    strcpy_s(
-        element.moduleName, want.GetElement().GetModuleName().length() + 1, want.GetElement().GetModuleName().c_str());
-    strcpy_s(element.abilityName, want.GetElement().GetAbilityName().length() + 1,
-        want.GetElement().GetAbilityName().c_str());
+    if (strcpy_s(element.bundleName, want.GetElement().GetBundleName().length() + 1,
+        want.GetElement().GetBundleName().c_str()) != 0) {
+        return;
+    }
+    if (strcpy_s(element.moduleName, want.GetElement().GetModuleName().length() + 1,
+        want.GetElement().GetModuleName().c_str()) != 0) {
+        return;
+    }
+    if (strcpy_s(element.abilityName, want.GetElement().GetAbilityName().length() + 1,
+        want.GetElement().GetAbilityName().c_str()) != 0) {
+        return;
+    }
 }
 
 void DestoryCWantElement(AbilityBase_Element& element)
