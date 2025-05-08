@@ -664,6 +664,7 @@ frameworks/bridge/declarative_frontend/ark_modifier/src/slider_modifier.ts @arku
 frameworks/bridge/declarative_frontend/ark_modifier/src/span_modifier.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_modifier/src/stack_modifier.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_modifier/src/stepper_item_modifier.ts @arkui_superman
+frameworks/bridge/declarative_frontend/ark_modifier/src/stepper_modifier.ts @arkui_superman
 frameworks/bridge/declarative_frontend/ark_modifier/src/swiper_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/src/symbol_glyph_modifier.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_modifier/src/symbol_span_modifier.ts @huawei_g_five
@@ -942,6 +943,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stac
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stack_bridge.h @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stepper_item_bridge.cpp @arkui_superman
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stepper_item_bridge.h @arkui_superman
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stepper_bridge.cpp @arkui_superman
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stepper_bridge.h @arkui_superman
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_swiper_bridge.cpp @arkuiscroll
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_swiper_bridge.h @arkuiscroll
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symbol_glyph_bridge.cpp @huawei_g_five
@@ -2903,6 +2906,8 @@ frameworks/core/interfaces/native/node/side_bar_container_modifier.cpp @arkui_su
 frameworks/core/interfaces/native/node/side_bar_container_modifier.h @arkui_superman
 frameworks/core/interfaces/native/node/stepper_item_modifier.cpp @arkui_superman
 frameworks/core/interfaces/native/node/stepper_item_modifier.h @arkui_superman
+frameworks/core/interfaces/native/node/stepper_modifier.cpp @arkui_superman
+frameworks/core/interfaces/native/node/stepper_modifier.h @arkui_superman
 frameworks/core/interfaces/native/node/swiper_controller_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/node/swiper_controller_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/node/tab_content_modifier.cpp @arkuiscroll

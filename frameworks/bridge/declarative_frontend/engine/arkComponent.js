@@ -28802,28 +28802,108 @@ class ArkStepperComponent extends ArkComponent {
     super(nativePtr, classType);
   }
   onFinish(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, StepperOnFinishModifier.identity, StepperOnFinishModifier, callback);
+    return this;
   }
   onSkip(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, StepperOnSkipModifier.identity, StepperOnSkipModifier, callback);
+    return this;
   }
   onChange(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, StepperOnChangeModifier.identity, StepperOnChangeModifier, callback);
+    return this;
   }
   onNext(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, StepperOnNextModifier.identity, StepperOnNextModifier, callback);
+    return this;
   }
   onPrevious(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, StepperOnPreviousModifier.identity, StepperOnPreviousModifier, callback);
+    return this;
   }
 }
+
+class StepperOnFinishModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().stepper.resetOnFinish(node);
+    }
+    else {
+      getUINativeModule().stepper.setOnFinish(node, this.value);
+    }
+  }
+}
+StepperOnFinishModifier.identity = Symbol('onFinish');
+
+class StepperOnSkipModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().stepper.resetOnSkip(node);
+    }
+    else {
+      getUINativeModule().stepper.setOnSkip(node, this.value);
+    }
+  }
+}
+StepperOnSkipModifier.identity = Symbol('onSkip');
+
+class StepperOnChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().stepper.resetOnChange(node);
+    }
+    else {
+      getUINativeModule().stepper.setOnChange(node, this.value);
+    }
+  }
+}
+StepperOnChangeModifier.identity = Symbol('onChange');
+
+class StepperOnNextModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().stepper.resetOnNext(node);
+    }
+    else {
+      getUINativeModule().stepper.setOnNext(node, this.value);
+    }
+  }
+}
+StepperOnNextModifier.identity = Symbol('onNext');
+
+class StepperOnPreviousModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().stepper.resetOnPrevious(node);
+    }
+    else {
+      getUINativeModule().stepper.setOnPrevious(node, this.value);
+    }
+  }
+}
+StepperOnPreviousModifier.identity = Symbol('onPrevious');
 // @ts-ignore
 if (globalThis.Stepper !== undefined) {
   globalThis.Stepper.attributeModifier = function (modifier) {
     attributeModifierFunc.call(this, modifier, (nativePtr) => {
       return new ArkStepperComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.CommonModifier(nativePtr, classType);
+      return new modifierJS.StepperModifier(nativePtr, classType);
     });
   };
 }

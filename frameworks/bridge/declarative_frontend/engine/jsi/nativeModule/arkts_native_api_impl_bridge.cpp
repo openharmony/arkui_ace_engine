@@ -83,6 +83,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_timepicker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rich_editor_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_video_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stepper_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stepper_item_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_marquee_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_tabcontent_bridge.h"
@@ -3072,6 +3073,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
 #endif
     RegisterLazyVGridLayoutAttributes(object, vm);
     RegisterCanvasAttributes(object, vm);
+    RegisterStepperAttributes(object, vm);
     return object;
 }
 
@@ -6535,5 +6537,31 @@ auto video = panda::ObjectRef::New(vm);
     video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTransition"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetTransition));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "video"), video);
+}
+
+void ArkUINativeModule::RegisterStepperAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto stepper = panda::ObjectRef::New(vm);
+    stepper->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnFinish"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperBridge::SetOnFinish));
+    stepper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnFinish"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperBridge::ResetOnFinish));
+    stepper->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSkip"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperBridge::SetOnSkip));
+    stepper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSkip"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperBridge::ResetOnSkip));
+    stepper->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperBridge::SetOnChange));
+    stepper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperBridge::ResetOnChange));
+    stepper->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnNext"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperBridge::SetOnNext));
+    stepper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnNext"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperBridge::ResetOnNext));
+    stepper->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnPrevious"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperBridge::SetOnPrevious));
+    stepper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnPrevious"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperBridge::ResetOnPrevious));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "stepper"), stepper);
 }
 } // namespace OHOS::Ace::NG
