@@ -58,18 +58,16 @@ NativeFontInfo4Font* FfiFontManagerGetFontByName(const char* fontName)
         LOGE("Can not get system font.");
         return nullptr;
     }
-    return new NativeFontInfo4Font {
-            .path = Utils::MallocCString(fontInfo.path),
-            .postScriptName = Utils::MallocCString(fontInfo.postScriptName),
-            .fullName = Utils::MallocCString(fontInfo.fullName),
-            .family = Utils::MallocCString(fontInfo.family),
-            .subfamily = Utils::MallocCString(fontInfo.subfamily),
-            .weight = fontInfo.weight,
-            .width = fontInfo.width,
-            .italic = fontInfo.italic,
-            .monoSpace = fontInfo.monoSpace,
-            .symbolic = fontInfo.symbolic
-        };
+    return new NativeFontInfo4Font { .path = Utils::MallocCString(fontInfo.path),
+        .postScriptName = Utils::MallocCString(fontInfo.postScriptName),
+        .fullName = Utils::MallocCString(fontInfo.fullName),
+        .family = Utils::MallocCString(fontInfo.family),
+        .subfamily = Utils::MallocCString(fontInfo.subfamily),
+        .weight = fontInfo.weight,
+        .width = fontInfo.width,
+        .italic = fontInfo.italic,
+        .monoSpace = fontInfo.monoSpace,
+        .symbolic = fontInfo.symbolic };
 }
 
 void parseGenericList(FontConfigJsonInfo fontConfigJsonInfo, std::vector<NativeUIFontGenericInfo>* genericList)
@@ -83,10 +81,8 @@ void parseGenericList(FontConfigJsonInfo fontConfigJsonInfo, std::vector<NativeU
             return;
         }
         for (auto alias : generic.aliasSet) {
-            NativeUIFontAliasInfo nativeAlias = NativeUIFontAliasInfo {
-                .name = Utils::MallocCString(alias.familyName),
-                .weight = static_cast<uint32_t>(alias.weight)
-            };
+            NativeUIFontAliasInfo nativeAlias = NativeUIFontAliasInfo { .name = Utils::MallocCString(alias.familyName),
+                .weight = static_cast<uint32_t>(alias.weight) };
             aliasInfoList->push_back(nativeAlias);
         }
         nativeGeneric.alias = aliasInfoList;
@@ -96,10 +92,9 @@ void parseGenericList(FontConfigJsonInfo fontConfigJsonInfo, std::vector<NativeU
             return;
         }
         for (auto adjust : generic.adjustSet) {
-            NativeUIFontAdjustInfo nativeAdjust = NativeUIFontAdjustInfo {
-                .weight = static_cast<uint32_t>(adjust.origValue),
-                .to = static_cast<uint32_t>(adjust.newValue)
-            };
+            NativeUIFontAdjustInfo nativeAdjust =
+                NativeUIFontAdjustInfo { .weight = static_cast<uint32_t>(adjust.origValue),
+                    .to = static_cast<uint32_t>(adjust.newValue) };
             adjustInfoList->push_back(nativeAdjust);
         }
         nativeGeneric.adjust = adjustInfoList;
@@ -107,8 +102,8 @@ void parseGenericList(FontConfigJsonInfo fontConfigJsonInfo, std::vector<NativeU
     }
 }
 
-void parseFallbackGroupList(FontConfigJsonInfo fontConfigJsonInfo,
-    std::vector<NativeUIFontFallbackGroupInfo>* fallbackGroupList)
+void parseFallbackGroupList(
+    FontConfigJsonInfo fontConfigJsonInfo, std::vector<NativeUIFontFallbackGroupInfo>* fallbackGroupList)
 {
     for (auto fallbackGroup : fontConfigJsonInfo.fallbackGroupSet) {
         NativeUIFontFallbackGroupInfo nativeFallbackGroup = NativeUIFontFallbackGroupInfo();
@@ -119,10 +114,9 @@ void parseFallbackGroupList(FontConfigJsonInfo fontConfigJsonInfo,
             return;
         }
         for (auto fallbackInfo : fallbackGroup.fallbackInfoSet) {
-            NativeUIFontFallbackInfo nativeFallbackInfo = NativeUIFontFallbackInfo {
-                .language = Utils::MallocCString(fallbackInfo.font),
-                .family = Utils::MallocCString(fallbackInfo.familyName)
-            };
+            NativeUIFontFallbackInfo nativeFallbackInfo =
+                NativeUIFontFallbackInfo { .language = Utils::MallocCString(fallbackInfo.font),
+                    .family = Utils::MallocCString(fallbackInfo.familyName) };
             fallbackList->push_back(nativeFallbackInfo);
         }
         nativeFallbackGroup.fallback = fallbackList;
@@ -135,11 +129,9 @@ NativeUIFontConfig FfiFontManagerGetUIFontConfig()
     auto container = Container::Current();
     if (!container || !container->GetPipelineContext()) {
         LOGE("Can not get pipelineContext.");
-        return NativeUIFontConfig {
-            .fontDir = new std::vector<std::string>(),
+        return NativeUIFontConfig { .fontDir = new std::vector<std::string>(),
             .generic = new std::vector<NativeUIFontGenericInfo>(),
-            .fallbackGroups = new std::vector<NativeUIFontFallbackGroupInfo>()
-        };
+            .fallbackGroups = new std::vector<NativeUIFontFallbackGroupInfo>() };
     }
     auto pipelineContext = container->GetPipelineContext();
     FontConfigJsonInfo fontConfigJsonInfo;
@@ -153,10 +145,6 @@ NativeUIFontConfig FfiFontManagerGetUIFontConfig()
         std::string fontDir = dir.c_str();
         fontDirList->push_back(fontDir);
     }
-    return NativeUIFontConfig {
-        .fontDir = fontDirList,
-        .generic = genericList,
-        .fallbackGroups = fallbackGroupList
-    };
+    return NativeUIFontConfig { .fontDir = fontDirList, .generic = genericList, .fallbackGroups = fallbackGroupList };
 }
 }

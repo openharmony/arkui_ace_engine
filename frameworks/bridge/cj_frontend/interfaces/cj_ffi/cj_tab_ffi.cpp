@@ -14,6 +14,7 @@
  */
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_tab_ffi.h"
+#include "bridge/common/utils/utils.h"
 
 #include "cj_lambda.h"
 #include "cj_view_abstract_ffi.h"

@@ -487,7 +487,6 @@ void CJNavPathStack::SetPathArray(std::vector<CJNavPathInfo> pathArray)
 } // namespace OHOS::Ace::Framework
 
 namespace {
-
 CJNavPathInfoFFi ConvertCJ2FFi(CJNavPathInfo info)
 {
     CJNavPathInfoFFi ret = CJNavPathInfoFFi();
@@ -528,8 +527,7 @@ CJNavPathInfo ConvertFFi2CJ(CJNavPathInfoFFi info)
     ret.valid = info.valid;
     return ret;
 }
-
-}
+} //namespace
 
 extern "C" {
 int64_t FfiOHOSAceFrameworkNavPathStackCreate()
