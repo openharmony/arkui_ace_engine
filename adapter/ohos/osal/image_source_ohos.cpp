@@ -58,9 +58,8 @@ RefPtr<ImageSource> ImageSource::Create(int32_t fd)
     return MakeRefPtr<ImageSourceOhos>(std::move(src));
 }
 
-RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size)
+RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size, uint32_t& errorCode)
 {
-    uint32_t errorCode;
     Media::SourceOptions options;
     auto src = Media::ImageSource::CreateImageSource(data, size, options, errorCode);
     if (errorCode != Media::SUCCESS) {
@@ -106,17 +105,17 @@ std::string ImageSourceOhos::GetProperty(const std::string& key)
 }
 
 RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(
-    const Size& size, AIImageQuality imageQuality, bool isHdrDecoderNeed, PixelFormat photoDecodeFormat)
+    const Size& size, uint32_t& errorCode, const PixelMapConfig& pixelMapConfig)
 {
-    return CreatePixelMap(0, size, imageQuality, isHdrDecoderNeed, photoDecodeFormat);
+    return CreatePixelMap(0, size, errorCode, pixelMapConfig);
 }
 
 RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(
-    uint32_t index, const Size& size, AIImageQuality imageQuality, bool isHdrDecoderNeed, PixelFormat photoDecodeFormat)
+    uint32_t index, const Size& size, uint32_t& errorCode, const PixelMapConfig& pixelMapConfig)
 {
     Media::DecodeOptions options;
-    InitDecodeOptions(options, size, imageQuality, isHdrDecoderNeed, photoDecodeFormat);
-    uint32_t errorCode;
+    InitDecodeOptions(
+        options, size, pixelMapConfig.imageQuality, pixelMapConfig.isHdrDecoderNeed, pixelMapConfig.photoDecodeFormat);
     auto pixmap = imageSource_->CreatePixelMapEx(index, options, errorCode);
     if (errorCode != Media::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,

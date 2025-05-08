@@ -1197,10 +1197,13 @@ ArkUINativeModuleValue ImageBridge::SetOnError(ArkUIRuntimeCallInfo* runtimeCall
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        const char* keys[] = { "componentWidth", "componentHeight", "message" };
+        const char* errKeys[] = { "code" };
+        Local<JSValueRef> errValues[] = { panda::NumberRef::New(vm, event.GetErrorCode()) };
+        auto errObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(errKeys), errKeys, errValues);
+        const char* keys[] = { "componentWidth", "componentHeight", "message", "error" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, event.GetComponentWidth()),
             panda::NumberRef::New(vm, event.GetComponentHeight()),
-            panda::StringRef::NewFromUtf8(vm, event.GetErrorMessage().c_str()) };
+            panda::StringRef::NewFromUtf8(vm, event.GetErrorMessage().c_str()), errObject };
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         eventObject->SetNativePointerFieldCount(vm, 1);
         eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&event));

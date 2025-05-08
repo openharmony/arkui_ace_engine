@@ -153,8 +153,9 @@ RefPtr<NG::ImageData> ImageFileCache::GetDataFromCacheFile(const std::string& ur
     if (filePath == "") {
         return nullptr;
     }
+    ImageErrorInfo errorInfo;
     auto cacheFileLoader = AceType::MakeRefPtr<FileImageLoader>();
-    auto rsData = cacheFileLoader->LoadImageData(ImageSourceInfo(std::string("file:/").append(filePath)));
+    auto rsData = cacheFileLoader->LoadImageData(ImageSourceInfo(std::string("file:/").append(filePath)), errorInfo);
 #ifndef USE_ROSEN_DRAWING
     return NG::ImageData::MakeFromDataWrapper(&rsData);
 #else
@@ -280,7 +281,8 @@ void ImageFileCache::ConvertToAstcAndWriteToFile(const std::string& fileCacheKey
     RefPtr<ImagePacker> imagePacker = ImagePacker::Create();
     PackOption option;
     option.format = CONVERT_ASTC_FORMAT;
-    auto pixelMap = imageSource->CreatePixelMap({-1, -1});
+    uint32_t errorCode = 0;
+    auto pixelMap = imageSource->CreatePixelMap({ -1, -1 }, errorCode);
     if (pixelMap == nullptr) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "Get pixel map failed, will not convert to astc. %{private}s",
             fileCacheKey.c_str());

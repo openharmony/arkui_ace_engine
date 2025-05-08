@@ -20,10 +20,12 @@
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
 
 namespace OHOS::Ace::NG {
-RefPtr<SvgImageObject> SvgImageObject::Create(const ImageSourceInfo& src, const RefPtr<ImageData>& data)
+RefPtr<SvgImageObject> SvgImageObject::Create(
+    const ImageSourceInfo& src, ImageErrorInfo& errorInfo, const RefPtr<ImageData>& data)
 {
     auto obj = AceType::MakeRefPtr<SvgImageObject>(src, SizeF());
     if (!obj->MakeSvgDom(data, src)) {
+        errorInfo = { ImageErrorCode::BUILD_IMAGE_MAKE_SVG_DOM_FAILED, "make svg dom failed." };
         return nullptr;
     }
     return obj;

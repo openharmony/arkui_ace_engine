@@ -273,7 +273,8 @@ DataReadyNotifyTask GaugePattern::CreateDataReadyCallback()
 
 LoadFailNotifyTask GaugePattern::CreateLoadFailCallback()
 {
-    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& /* sourceInfo */, const std::string& msg) {
+    auto task = [weak = WeakClaim(this)](
+                    const ImageSourceInfo& /* sourceInfo */, const std::string& msg, int32_t /* errorCode */) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->OnImageLoadFail();

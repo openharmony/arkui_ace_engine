@@ -20,6 +20,8 @@
 
 #include "base/network/download_manager.h"
 
+#include "base/image/image_defines.h"
+
 #define ACE_FORCE_EXPORT __attribute__((visibility("default")))
 
 #define ACE_CURL_EASY_SET_OPTION(handle, opt, data)            \
@@ -184,7 +186,8 @@ public:
                 if (response.GetResponseCode() != NetStack::HttpClient::ResponseCode::OK) {
                     std::string errorMsg = "Http task of url " + request.GetURL() + " failed, response code " +
                                            std::to_string(response.GetResponseCode());
-                    failCallback(errorMsg, true, instanceId);
+                    failCallback(
+                        errorMsg, static_cast<int32_t>(ImageErrorCode::GET_IMAGE_ASYNC_HTTP_FAILED), true, instanceId);
                     RemoveDownloadTask(url, nodeId, false);
                     return;
                 }
@@ -197,7 +200,8 @@ public:
                            const NetStackRequest& request, const NetStackResponse& response) {
             LOGI("Async Http task of url [%{private}s] cancelled by netStack", request.GetURL().c_str());
             std::string errorMsg = "Http task of url " + request.GetURL() + " cancelled by netStack";
-            cancelCallback(errorMsg, true, instanceId);
+            cancelCallback(
+                errorMsg, static_cast<int32_t>(ImageErrorCode::GET_IMAGE_ASYNC_HTTP_CANCELLED), true, instanceId);
             RemoveDownloadTask(url, nodeId, false);
         });
         task->OnFail([this, failCallback = downloadCallback.failCallback, instanceId, url, nodeId](
@@ -208,7 +212,7 @@ public:
             std::string errorMsg = "Http task of url " + request.GetURL() + " failed, response code " +
                                    std::to_string(response.GetResponseCode()) +
                                    ", msg from netStack: " + error.GetErrorMessage();
-            failCallback(errorMsg, true, instanceId);
+            failCallback(errorMsg, static_cast<int32_t>(ImageErrorCode::GET_IMAGE_ASYNC_HTTP_FAILED), true, instanceId);
             RemoveDownloadTask(url, nodeId, false);
         });
         if (downloadCallback.onProgressCallback) {
@@ -286,8 +290,11 @@ public:
                 true, instanceId);
             RemoveDownloadTaskWithPreload(url, false);
         };
-        innerCallback->OnCancel = [this, cancelCallback = downloadCallback.cancelCallback, url]() {
+        innerCallback->OnCancel = [this, cancelCallback = downloadCallback.cancelCallback, instanceId, url]() {
             LOGI("Async Http task of url [%{private}s] cancelled", url.c_str());
+            std::string errorMsg = "Http task of url " + url + " canceled";
+            cancelCallback(
+                errorMsg, static_cast<int32_t>(ImageErrorCode::GET_IMAGE_ASYNC_HTTP_CANCELLED), true, instanceId);
             RemoveDownloadTaskWithPreload(url, false);
         };
         innerCallback->OnFail = [this, failCallback = downloadCallback.failCallback, instanceId, url](
@@ -296,7 +303,7 @@ public:
                 taskId.c_str(), error.GetMessage().c_str());
             std::string errorMsg = "Http task of url " + url + " failed, response code " +
                                    std::to_string(error.GetCode()) + ", msg from netStack: " + error.GetMessage();
-            failCallback(errorMsg, true, instanceId);
+            failCallback(errorMsg, static_cast<int32_t>(ImageErrorCode::GET_IMAGE_ASYNC_HTTP_FAILED), true, instanceId);
             RemoveDownloadTaskWithPreload(url, false);
         };
 
@@ -350,6 +357,7 @@ public:
                 downloadCondition->errorMsg.append("Http task of url ");
                 downloadCondition->errorMsg.append(url.c_str());
                 downloadCondition->errorMsg.append(" cancelled by netStack");
+                downloadCondition->errorCode = static_cast<int32_t>(ImageErrorCode::GET_IMAGE_SYNC_HTTP_CANCELLED);
                 downloadCondition->downloadSuccess = false;
             }
             downloadCondition->cv.notify_all();
@@ -363,6 +371,8 @@ public:
                 std::unique_lock<std::mutex> taskLock(downloadCondition->downloadMutex);
                 std::string errorMsg = "Http task of url " + url + " failed, response code " +
                                        std::to_string(error.GetCode()) + ", msg from netStack: " + error.GetMessage();
+                downloadCondition->errorMsg = errorMsg;
+                downloadCondition->errorCode = static_cast<int32_t>(ImageErrorCode::GET_IMAGE_SYNC_HTTP_FAILED);
                 downloadCondition->downloadSuccess = false;
             }
             downloadCondition->cv.notify_all();
@@ -467,7 +477,7 @@ private:
         if (downloadCondition->downloadSuccess.value_or(false)) {
             downloadCallback.successCallback(std::move(downloadCondition->dataOut), false, instanceId);
         } else {
-            downloadCallback.failCallback(downloadCondition->errorMsg, false, instanceId);
+            downloadCallback.failCallback(downloadCondition->errorMsg, downloadCondition->errorCode, false, instanceId);
         }
         return true;
     }

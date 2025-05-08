@@ -84,7 +84,8 @@ bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
             dfxConfig.ToStringWithoutSrc().c_str(), dfxConfig.imageSrc_.c_str());
         return false;
     }
-    auto newLoadedData = imageLoader->GetImageData(imageObj->GetSourceInfo(), WeakClaim(RawPtr(pipeline)));
+    ImageErrorInfo errorInfo;
+    auto newLoadedData = imageLoader->GetImageData(imageObj->GetSourceInfo(), errorInfo, WeakClaim(RawPtr(pipeline)));
     CHECK_NULL_RETURN(newLoadedData, false);
     // load data success
     imageObj->SetData(newLoadedData);
@@ -122,17 +123,16 @@ RefPtr<ImageObject> ImageProvider::QueryImageObjectFromCache(const ImageSourceIn
 }
 
 void ImageProvider::FailCallback(
-    const std::string& key, const std::string& errorMsg, bool sync, int32_t containerId)
+    const std::string& key, const std::string& errorMsg, int32_t errorCode, bool sync, int32_t containerId)
 {
     auto ctxs = EndTask(key);
-
-    auto notifyLoadFailTask = [ctxs, errorMsg] {
+    auto notifyLoadFailTask = [ctxs, errorMsg, errorCode] {
         for (auto&& it : ctxs) {
             auto ctx = it.Upgrade();
             if (!ctx) {
                 continue;
             }
-            ctx->FailCallback(errorMsg);
+            ctx->FailCallback(errorMsg, errorCode);
         }
     };
 
@@ -170,23 +170,29 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
 {
     const ImageDfxConfig& imageDfxConfig = src.GetImageDfxConfig();
     ACE_SCOPED_TRACE("CreateImageObj %s", imageDfxConfig.ToStringWithSrc().c_str());
+    ImageErrorInfo errorInfo;
     // load image data
     auto imageLoader = ImageLoader::CreateImageLoader(src);
     if (!imageLoader) {
-        FailCallback(src.GetTaskKey(), "Failed to create image loader.", sync, src.GetContainerId());
+        FailCallback(src.GetTaskKey(), "unknown source type.",
+            static_cast<int32_t>(ImageErrorCode::CREATE_IMAGE_UNKNOWN_SOURCE_TYPE), sync, src.GetContainerId());
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
-    RefPtr<ImageData> data = imageLoader->GetImageData(src, WeakClaim(RawPtr(pipeline)));
+    RefPtr<ImageData> data = imageLoader->GetImageData(src, errorInfo, WeakClaim(RawPtr(pipeline)));
     if (!data) {
-        FailCallback(src.GetTaskKey(), "Failed to load image data", sync, src.GetContainerId());
+        FailCallback(src.GetTaskKey(),
+            errorInfo.errorCode == ImageErrorCode::DEFAULT ? "Failed to load image data" : errorInfo.errorMessage,
+            static_cast<int32_t>(errorInfo.errorCode), sync, src.GetContainerId());
         return;
     }
 
     // build ImageObject
-    RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(src, data);
+    RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(src, errorInfo, data);
     if (!imageObj) {
-        FailCallback(src.GetTaskKey(), "Failed to build image object", sync, src.GetContainerId());
+        FailCallback(src.GetTaskKey(),
+            (errorInfo.errorCode == ImageErrorCode::DEFAULT ? "Failed to build image object" : errorInfo.errorMessage),
+            static_cast<int32_t>(errorInfo.errorCode), sync, src.GetContainerId());
         return;
     }
 
@@ -346,7 +352,8 @@ void ImageProvider::DownLoadImage(const UriDownLoadConfig& downLoadConfig)
 {
     auto queryData = QueryDataFromCache(downLoadConfig.src);
     if (queryData) {
-        RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(downLoadConfig.src, queryData);
+        ImageErrorInfo errorInfo;
+        RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(downLoadConfig.src, errorInfo, queryData);
         if (imageObj) {
             ImageProvider::DownLoadSuccessCallback(
                 imageObj, downLoadConfig.taskKey, downLoadConfig.sync, downLoadConfig.src.GetContainerId());
@@ -361,23 +368,25 @@ void ImageProvider::DownLoadImage(const UriDownLoadConfig& downLoadConfig)
             imageData.size());
         if (!GreatNotEqual(imageData.size(), 0)) {
             ImageProvider::FailCallback(downLoadConfig.taskKey, "The length of imageData from netStack is not positive",
-                downLoadConfig.sync, containerId);
+                static_cast<int32_t>(ImageErrorCode::DEFAULT), downLoadConfig.sync, containerId);
             return;
         }
         auto data = ImageData::MakeFromDataWithCopy(imageData.data(), imageData.size());
-        RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(downLoadConfig.src, data);
+        ImageErrorInfo errorInfo;
+        RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(downLoadConfig.src, errorInfo, data);
         if (!imageObj) {
-            ImageProvider::FailCallback(downLoadConfig.taskKey, "After download successful, imageObject Create fail",
-                downLoadConfig.sync, containerId);
+            ImageProvider::FailCallback(downLoadConfig.taskKey, (errorInfo.errorCode == ImageErrorCode::DEFAULT ?
+                "After download successful, imageObject Create fail" : errorInfo.errorMessage),
+                static_cast<int32_t>(errorInfo.errorCode), downLoadConfig.sync, containerId);
             return;
         }
         ImageProvider::DownLoadSuccessCallback(imageObj, downLoadConfig.taskKey, downLoadConfig.sync, containerId);
     };
     downloadCallback.failCallback = [taskKey = downLoadConfig.taskKey, sync = downLoadConfig.sync,
                                         containerId = downLoadConfig.src.GetContainerId()](
-                                        std::string errorMessage, bool async, int32_t instanceId) {
+                                        std::string errorMessage, int32_t errorCode, bool async, int32_t instanceId) {
         ContainerScope scope(instanceId);
-        ImageProvider::FailCallback(taskKey, errorMessage, sync, containerId);
+        ImageProvider::FailCallback(taskKey, errorMessage, errorCode, sync, containerId);
     };
     downloadCallback.cancelCallback = downloadCallback.failCallback;
     if (downLoadConfig.hasProgressCallback) {
@@ -445,7 +454,8 @@ void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<
     }
 }
 
-RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, const RefPtr<ImageData>& data)
+RefPtr<ImageObject> ImageProvider::BuildImageObject(
+    const ImageSourceInfo& src, ImageErrorInfo& errorInfo, const RefPtr<ImageData>& data)
 {
     auto imageDfxConfig = src.GetImageDfxConfig();
     if (!data) {
@@ -455,7 +465,7 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
     }
     if (src.IsSvg()) {
         // SVG object needs to make SVG dom during creation
-        return SvgImageObject::Create(src, data);
+        return SvgImageObject::Create(src, errorInfo, data);
     }
     if (src.IsPixmap()) {
         return PixelMapImageObject::Create(src, data);
@@ -475,6 +485,9 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
             "%{private}s, frameCount is %{public}d, nodeId = %{public}s.",
             src.ToString().c_str(), static_cast<int32_t>(data->GetSize()), codec.imageSize.ToString().c_str(),
             codec.frameCount, imageDfxConfig.ToStringWithoutSrc().c_str());
+        if (errorInfo.errorCode == ImageErrorCode::DEFAULT) {
+            errorInfo = { ImageErrorCode::BUILD_IMAGE_DATA_SIZE_INVALID, "Image Data is invalid." };
+        }
         return nullptr;
     }
     RefPtr<ImageObject> imageObject;
@@ -530,9 +543,10 @@ void ImageProvider::MakeCanvasImageHelper(const RefPtr<ImageObject>& obj, const 
         .isHdrDecoderNeed_ = imageDecoderOptions.isHdrDecoderNeed,
         .photoDecodeFormat_ = imageDecoderOptions.photoDecodeFormat,
     };
+    ImageErrorInfo errorInfo;
     // preview and ohos platform
     if (SystemProperties::GetImageFrameworkEnabled()) {
-        image = ImageDecoder::MakePixmapImage(obj, imageDecoderConfig);
+        image = ImageDecoder::MakePixmapImage(obj, imageDecoderConfig, errorInfo);
     } else {
         image = ImageDecoder::MakeDrawingImage(obj, imageDecoderConfig);
     }
@@ -540,7 +554,9 @@ void ImageProvider::MakeCanvasImageHelper(const RefPtr<ImageObject>& obj, const 
     if (image) {
         SuccessCallback(image, key, imageDecoderOptions.sync, obj->GetSourceInfo().GetContainerId());
     } else {
-        FailCallback(key, "Failed to decode image", imageDecoderOptions.sync, obj->GetSourceInfo().GetContainerId());
+        FailCallback(key,
+            (errorInfo.errorCode == ImageErrorCode::DEFAULT ? "Failed to decode image" : errorInfo.errorMessage),
+            static_cast<int32_t>(errorInfo.errorCode), imageDecoderOptions.sync, obj->GetSourceInfo().GetContainerId());
     }
 }
 } // namespace OHOS::Ace::NG

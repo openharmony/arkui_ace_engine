@@ -1413,8 +1413,8 @@ void RosenRenderContext::LoadParticleImage(const std::string& src, Dimension& wi
         auto imagePtr = imageContext->MoveCanvasImage();
         renderContent->OnParticleImageLoaded(imageSrc, imagePtr);
     };
-    auto loadingErrorCallback = [weak = WeakClaim(this), imageSrc = src](
-                                    const ImageSourceInfo& sourceInfo, const std::string& errorMsg) {
+    auto loadingErrorCallback = [weak = WeakClaim(this), imageSrc = src](const ImageSourceInfo& sourceInfo,
+                                    const std::string& errorMsg, int32_t /* errorCode */) {
         auto renderContent = weak.Upgrade();
         CHECK_NULL_VOID(renderContent);
         renderContent->OnParticleImageLoaded(imageSrc, nullptr);

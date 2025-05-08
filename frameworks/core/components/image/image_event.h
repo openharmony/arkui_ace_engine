@@ -97,7 +97,12 @@ class ACE_EXPORT LoadImageFailEvent : public BaseEventInfo {
 public:
     LoadImageFailEvent(double componentWidth, double componentHeight, std::string errorMessage)
         : BaseEventInfo("LoadImageFailEvent"), componentWidth_(componentWidth), componentHeight_(componentHeight),
-        errorMessage_(std::move(errorMessage)) {}
+          errorMessage_(std::move(errorMessage))
+    {}
+    LoadImageFailEvent(double componentWidth, double componentHeight, std::string errorMessage, int32_t errorCode)
+        : BaseEventInfo("LoadImageFailEvent"), componentWidth_(componentWidth), componentHeight_(componentHeight),
+          errorMessage_(std::move(errorMessage)), errorCode_(errorCode)
+    {}
     ~LoadImageFailEvent() override = default;
 
     double GetComponentWidth() const
@@ -115,10 +120,16 @@ public:
         return errorMessage_;
     }
 
+    int32_t GetErrorCode() const
+    {
+        return errorCode_;
+    }
+
 private:
     double componentWidth_ = 0.0;
     double componentHeight_ = 0.0;
     std::string errorMessage_;
+    int32_t errorCode_ = -1;
 };
 
 } // namespace OHOS::Ace
