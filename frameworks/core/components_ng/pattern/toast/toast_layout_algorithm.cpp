@@ -162,8 +162,7 @@ LayoutConstraintF ToastLayoutAlgorithm::GetTextLayoutConstraint(LayoutWrapper* l
             }
         }
     }
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && GreatNotEqual(keyboardInset, 0) &&
-        (toastPattern->IsDefaultToast() || toastPattern->IsTopMostToast())) {
+    if (GreatNotEqual(keyboardInset, 0) && (toastPattern->IsDefaultToast() || toastPattern->IsTopMostToast())) {
         auto maxHeight = keyboardOffset - toastPattern->GetLimitPos().Value() - LIMIT_SPACING.ConvertToPx();
         layoutConstraint.maxSize.SetHeight(maxHeight);
     }
