@@ -1029,6 +1029,7 @@ void MovingPhotoPattern::GetXmageHeight()
             return;
         }
         float bottomV = StringUtils::StringToFloat(bottomValue);
+        imageSize = SizeF(imageW, bottomV);
         ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, XmageHeight, imageL - bottomV);
     } else {
         imageSize = SizeF(imageW, imageL);
