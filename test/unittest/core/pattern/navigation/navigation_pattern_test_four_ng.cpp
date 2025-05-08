@@ -81,7 +81,7 @@ void NavigationPatternTestFourNg::SetIsPageLevelConfigEnabled(bool value, RefPtr
     if (value) {
         auto container = Container::Current();
         ASSERT_NE(container, nullptr);
-        container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+        container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINETEEN));
         ASSERT_NE(navigationNode, nullptr);
         auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
         navigationLayoutProperty->propUsrNavigationMode_ = NavigationMode::STACK;
@@ -754,7 +754,7 @@ HWTEST_F(NavigationPatternTestFourNg, IsEquivalentToStackMode001, TestSize.Level
 
 /**
  * @tc.name: IsPageLevelConfigEnabled001
- * @tc.desc: Branch: if (!Container::GreatOrEqualAPITargetVersion(VERSION_EIGHTEEN)) = true
+ * @tc.desc: Branch: if (!Container::GreatOrEqualAPITargetVersion(VERSION_NINETEEN)) = true
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationPatternTestFourNg, IsPageLevelConfigEnabled001, TestSize.Level1)
@@ -777,7 +777,7 @@ HWTEST_F(NavigationPatternTestFourNg, IsPageLevelConfigEnabled001, TestSize.Leve
 
 /**
  * @tc.name: IsPageLevelConfigEnabled002
- * @tc.desc: Branch: if (!Container::GreatOrEqualAPITargetVersion(VERSION_EIGHTEEN)) = false
+ * @tc.desc: Branch: if (!Container::GreatOrEqualAPITargetVersion(VERSION_NINETEEN)) = false
  *           Branch: if (!IsEquivalentToStackMode()) = true
  * @tc.type: FUNC
  */
@@ -792,7 +792,7 @@ HWTEST_F(NavigationPatternTestFourNg, IsPageLevelConfigEnabled002, TestSize.Leve
     navigationPattern->SetNavigationStack(navigationStack);
     auto container = Container::Current();
     ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINETEEN));
     auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
     navigationLayoutProperty->propUsrNavigationMode_ = NavigationMode::SPLIT;
     navigationLayoutProperty->propHideNavBar_ = false;
@@ -805,7 +805,7 @@ HWTEST_F(NavigationPatternTestFourNg, IsPageLevelConfigEnabled002, TestSize.Leve
 
 /**
  * @tc.name: IsPageLevelConfigEnabled003
- * @tc.desc: Branch: if (!Container::GreatOrEqualAPITargetVersion(VERSION_EIGHTEEN)) = false
+ * @tc.desc: Branch: if (!Container::GreatOrEqualAPITargetVersion(VERSION_NINETEEN)) = false
  *           Branch: if (!IsEquivalentToStackMode()) = false
  *           Branch: if (considerSize && !isFullPageNavigation_) = false
  *           Condition: considerSize = false
@@ -823,7 +823,7 @@ HWTEST_F(NavigationPatternTestFourNg, IsPageLevelConfigEnabled003, TestSize.Leve
     navigationPattern->SetNavigationStack(navigationStack);
     auto container = Container::Current();
     ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINETEEN));
     auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
     navigationLayoutProperty->propUsrNavigationMode_ = NavigationMode::STACK;
     auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG,
@@ -840,7 +840,7 @@ HWTEST_F(NavigationPatternTestFourNg, IsPageLevelConfigEnabled003, TestSize.Leve
 
 /**
  * @tc.name: IsPageLevelConfigEnabled004
- * @tc.desc: Branch: if (!Container::GreatOrEqualAPITargetVersion(VERSION_EIGHTEEN)) = false
+ * @tc.desc: Branch: if (!Container::GreatOrEqualAPITargetVersion(VERSION_NINETEEN)) = false
  *           Branch: if (!IsEquivalentToStackMode()) = false
  *           Branch: if (considerSize && !isFullPageNavigation_) = false
  *           Condition: considerSize = true, !isFullPageNavigation_ = false
@@ -858,7 +858,7 @@ HWTEST_F(NavigationPatternTestFourNg, IsPageLevelConfigEnabled004, TestSize.Leve
     navigationPattern->SetNavigationStack(navigationStack);
     auto container = Container::Current();
     ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINETEEN));
     auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
     navigationLayoutProperty->propUsrNavigationMode_ = NavigationMode::STACK;
     navigationPattern->isFullPageNavigation_ = true;
@@ -871,7 +871,7 @@ HWTEST_F(NavigationPatternTestFourNg, IsPageLevelConfigEnabled004, TestSize.Leve
 
 /**
  * @tc.name: IsPageLevelConfigEnabled005
- * @tc.desc: Branch: if (!Container::GreatOrEqualAPITargetVersion(VERSION_EIGHTEEN)) = false
+ * @tc.desc: Branch: if (!Container::GreatOrEqualAPITargetVersion(VERSION_NINETEEN)) = false
  *           Branch: if (!IsEquivalentToStackMode()) = false
  *           Branch: if (considerSize && !isFullPageNavigation_) = true
  * @tc.type: FUNC
@@ -887,7 +887,7 @@ HWTEST_F(NavigationPatternTestFourNg, IsPageLevelConfigEnabled005, TestSize.Leve
     navigationPattern->SetNavigationStack(navigationStack);
     auto container = Container::Current();
     ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINETEEN));
     auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
     navigationLayoutProperty->propUsrNavigationMode_ = NavigationMode::STACK;
     navigationPattern->isFullPageNavigation_ = false;
@@ -899,7 +899,7 @@ HWTEST_F(NavigationPatternTestFourNg, IsPageLevelConfigEnabled005, TestSize.Leve
 
 /**
  * @tc.name: IsPageLevelConfigEnabled006
- * @tc.desc: Branch: if (!Container::GreatOrEqualAPITargetVersion(VERSION_EIGHTEEN)) = false
+ * @tc.desc: Branch: if (!Container::GreatOrEqualAPITargetVersion(VERSION_NINETEEN)) = false
  *           Branch: if (!IsEquivalentToStackMode()) = false
  *           Branch: if (considerSize && !isFullPageNavigation_) = false
  *           Condition: considerSize = false
@@ -919,7 +919,7 @@ HWTEST_F(NavigationPatternTestFourNg, IsPageLevelConfigEnabled006, TestSize.Leve
     navigationPattern->SetNavigationStack(navigationStack);
     auto container = Container::Current();
     ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINETEEN));
     auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
     navigationLayoutProperty->propUsrNavigationMode_ = NavigationMode::STACK;
     auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG,
@@ -937,7 +937,7 @@ HWTEST_F(NavigationPatternTestFourNg, IsPageLevelConfigEnabled006, TestSize.Leve
 
 /**
  * @tc.name: IsPageLevelConfigEnabled007
- * @tc.desc: Branch: if (!Container::GreatOrEqualAPITargetVersion(VERSION_EIGHTEEN)) = false
+ * @tc.desc: Branch: if (!Container::GreatOrEqualAPITargetVersion(VERSION_NINETEEN)) = false
  *           Branch: if (!IsEquivalentToStackMode()) = false
  *           Branch: if (considerSize && !isFullPageNavigation_) = false
  *           Condition: considerSize = false
@@ -956,7 +956,7 @@ HWTEST_F(NavigationPatternTestFourNg, IsPageLevelConfigEnabled007, TestSize.Leve
     navigationPattern->SetNavigationStack(navigationStack);
     auto container = Container::Current();
     ASSERT_NE(container, nullptr);
-    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINETEEN));
     auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
     navigationLayoutProperty->propUsrNavigationMode_ = NavigationMode::STACK;
     auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG,
