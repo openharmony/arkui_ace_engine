@@ -1574,8 +1574,9 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow, Layo
     auto pipelineContext = expandDisplay ? targetNode->GetContextRefPtr() : GetMainPipelineContext(layoutWrapper);
     CHECK_NULL_VOID(pipelineContext);
 
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "popup targetOffset_: %{public}s, targetSize_: %{public}s",
-        targetOffset_.ToString().c_str(), targetSize_.ToString().c_str());
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "popup targetOffset_: %{public}s, targetSize_: %{public}s, "
+        "followTransformOfTarget_: %{public}d",
+        targetOffset_.ToString().c_str(), targetSize_.ToString().c_str(), followTransformOfTarget_);
     // Show in SubWindow
     if (showInSubWindow) {
         auto displayWindowOffset = OffsetF(pipelineContext->GetDisplayWindowRectInfo().GetOffset().GetX(),

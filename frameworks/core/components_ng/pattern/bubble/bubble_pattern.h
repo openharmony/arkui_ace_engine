@@ -220,7 +220,7 @@ public:
     void CallOnWillDismiss(int32_t reason)
     {
         if (onWillDismiss_) {
-            TAG_LOGD(AceLogTag::ACE_OVERLAY,
+            TAG_LOGI(AceLogTag::ACE_OVERLAY,
                 "Popup CallOnWillDismiss, reason: %{public}d", reason);
             onWillDismiss_(reason);
         }
