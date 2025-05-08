@@ -1003,7 +1003,7 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
                 break;
         }
     }
-    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_NINETEEN)) {
         sameSpan->textLineStyle->ResetParagraphSpacing();
     }
     return sameSpan;
