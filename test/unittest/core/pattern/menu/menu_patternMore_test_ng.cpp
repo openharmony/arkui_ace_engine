@@ -68,6 +68,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const InspectorFilter filter;
 constexpr int32_t TARGET_ID = 3;
+constexpr int NODE_ID = 1;
 constexpr float TARGET_FONT = 25.0f;
 constexpr MenuType TYPE = MenuType::MENU;
 constexpr float TARGET_SIZE_WIDTH = 100.0f;
@@ -76,6 +77,7 @@ const V2::ItemDivider ITEM_DIVIDER = { Dimension(5.f), Dimension(10), Dimension(
 constexpr float OFFSET_FIRST = 20.0f;
 constexpr float OFFSET_SECOND = 5.0f;
 constexpr float PAN_MAX_VELOCITY = 2000.0f;
+const std::string MENU_TAG = "menu";
 } // namespace
 class MenuPattern2TestNg : public testing::Test {
 public:
@@ -1241,5 +1243,60 @@ HWTEST_F(MenuPattern2TestNg, DuplicateMenuNode002, TestSize.Level1)
     auto duplicateMenuRenderContext = duplicateMenuNode->GetRenderContext();
     ASSERT_NE(duplicateMenuRenderContext, nullptr);
     EXPECT_EQ(duplicateMenuRenderContext->GetBackgroundColor().value_or(Color::TRANSPARENT), Color::RED);
+}
+
+/**
+ * @tc.name: BuildContentModifierNode001
+ * @tc.desc: Test BuildContentModifierNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, BuildContentModifierNode001, TestSize.Level1)
+{
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, MENU_TAG, TYPE);
+    menuPattern->ResetBuilderFunc();
+    EXPECT_EQ(menuPattern->BuildContentModifierNode(0), nullptr);
+}
+
+/**
+ * @tc.name: OnKeyEvent001
+ * @tc.desc: Test OnKeyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, OnKeyEvent001, TestSize.Level1)
+{
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, MENU_TAG, TYPE);
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_HOME;
+    EXPECT_FALSE(menuPattern->OnKeyEvent(event));
+    menuPattern->type_ = MenuType::DESKTOP_MENU;
+    EXPECT_FALSE(menuPattern->OnKeyEvent(event));
+    menuPattern->type_ = MenuType::MULTI_MENU;
+    EXPECT_FALSE(menuPattern->OnKeyEvent(event));
+}
+
+/**
+ * @tc.name: FindSiblingMenuCount001
+ * @tc.desc: Test FindSiblingMenuCount.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, FindSiblingMenuCount001, TestSize.Level1)
+{
+    auto innerMenuPattern = AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, MENU_TAG, TYPE);
+    auto innerMenuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, MENU_TAG, TYPE));
+    ASSERT_NE(innerMenuNode, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", NODE_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto childrenOne = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, MENU_TAG, TYPE));
+    ASSERT_NE(childrenOne, nullptr);
+    auto childrenTwo = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, MENU_TAG, TYPE));
+    ASSERT_NE(childrenTwo, nullptr);
+    frameNode->children_ = { childrenOne, childrenTwo };
+    innerMenuNode->parent_ = std::move(frameNode);
+    innerMenuPattern->frameNode_ = std::move(innerMenuNode);
+    EXPECT_EQ(innerMenuPattern->FindSiblingMenuCount(), 1);
 }
 } // namespace OHOS::Ace::NG

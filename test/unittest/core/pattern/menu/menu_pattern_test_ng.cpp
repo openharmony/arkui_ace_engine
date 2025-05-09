@@ -1624,4 +1624,73 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTest089, TestSize.Level1)
     auto width = menuPattern->GetSelectMenuWidthFromTheme();
     EXPECT_EQ(width, 108);
 }
+
+/**
+ * @tc.name: MenuPatternTest090
+ * @tc.desc: Test HandleNextPressed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTest090, TestSize.Level1)
+{
+    auto parent = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_GROUP_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, V2::JS_IF_ELSE_ETS_TAG, MenuType::MENU));
+    auto childrenOne =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(2, "menu", MenuType::MENU));
+    auto childrenTwo = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, TARGET_ID, AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "text", MenuType::MULTI_MENU));
+    auto childrenThree = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 4, AceType::MakeRefPtr<MenuPattern>(4, "menuItem", MenuType::SUB_MENU));
+    parent->children_ = { childrenOne, childrenTwo, childrenThree };
+    parent->tag_ = V2::JS_IF_ELSE_ETS_TAG;
+    int32_t index = 1;
+    bool press = true;
+    bool hover = true;
+    auto menuPattern = parent->GetPattern<MenuPattern>();
+    menuPattern->HandleNextPressed(parent, index, press, hover);
+    EXPECT_NE(parent->GetChildAtIndex(index + 1), nullptr);
+    index = 2;
+    childrenOne->tag_ = V2::JS_IF_ELSE_ETS_TAG;
+    auto uiNode = AceType::DynamicCast<UINode>(childrenOne);
+    uiNode->children_ = { childrenOne, childrenTwo, childrenThree };
+    ASSERT_NE(uiNode, nullptr);
+    parent->parent_ = uiNode;
+    menuPattern->HandleNextPressed(parent, index, press, hover);
+    EXPECT_NE(menuPattern->GetOutsideForEachMenuItem(parent, true), nullptr);
+}
+
+/**
+ * @tc.name: MenuPatternTest091
+ * @tc.desc: Test HandlePrevPressed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTest091, TestSize.Level1)
+{
+    auto parent = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_GROUP_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, V2::JS_IF_ELSE_ETS_TAG, MenuType::MENU));
+    auto childrenOne =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(2, "menu", MenuType::MENU));
+    auto childrenTwo = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, TARGET_ID, AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "text", MenuType::MULTI_MENU));
+    auto childrenThree = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 4, AceType::MakeRefPtr<MenuPattern>(4, "menuItem", MenuType::SUB_MENU));
+    parent->children_ = { childrenOne, childrenTwo, childrenThree };
+    parent->tag_ = V2::MENU_ITEM_GROUP_ETS_TAG;
+    int32_t index = -1;
+    bool press = true;
+    auto uiNode = AceType::DynamicCast<UINode>(childrenOne);
+    uiNode->tag_ = V2::JS_IF_ELSE_ETS_TAG;
+    ASSERT_NE(uiNode, nullptr);
+    parent->parent_ = uiNode;
+    auto menuPattern = parent->GetPattern<MenuPattern>();
+    menuPattern->HandlePrevPressed(parent, index, press);
+    EXPECT_EQ(parent->GetParent()->GetChildIndex(parent), -1);
+    uiNode->children_ = { parent };
+    parent->parent_ = uiNode;
+    menuPattern->HandlePrevPressed(parent, index, press);
+    EXPECT_EQ(menuPattern->GetOutsideForEachMenuItem(parent->GetParent(), false), nullptr);
+    uiNode->children_ = { childrenTwo, parent };
+    parent->parent_ = uiNode;
+    menuPattern->HandlePrevPressed(parent, index, press);
+    EXPECT_NE(menuPattern->GetOutsideForEachMenuItem(parent, false), nullptr);
+}
 } // namespace OHOS::Ace::NG
