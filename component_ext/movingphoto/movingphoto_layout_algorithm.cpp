@@ -70,7 +70,7 @@ void MovingPhotoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 xmageHeight = layoutProperty->GetXmageHeight().value();
                 TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "Measure xmageHeight.%{public}f, GetRatio.%{public}f",
                     xmageHeight, ratio);
-                columnSize.SetHeight(contentSize.Height() - xmageHeight * ratio);
+                columnSize.SetHeight(contentSize.Height() - xmageHeight * ratio + 1);
             }
             layoutConstraintForColumn.UpdateSelfMarginSizeWithCheck(OptionalSizeF(columnSize));
             layoutConstraintForColumn.UpdateMaxSizeWithCheck(columnSize);
