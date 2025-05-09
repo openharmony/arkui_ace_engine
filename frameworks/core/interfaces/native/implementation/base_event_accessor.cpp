@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <optional>
 #include <vector>
 
 #include "core/components_ng/base/frame_node.h"
@@ -138,8 +139,10 @@ void SetAxisHorizontalImpl(Ark_BaseEvent peer,
 }
 Opt_Number GetAxisVerticalImpl(Ark_BaseEvent peer)
 {
-    LOGE("BaseEventAccessor.GetAxisVerticalImpl does nothing");
-    return {};
+    auto invalid = Converter::ArkValue<Opt_Number>();
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
+    int32_t value = peer->GetBaseInfo()->GetVerticalAxis();
+    return Converter::ArkValue<Opt_Number>(value);
 }
 void SetAxisVerticalImpl(Ark_BaseEvent peer,
                          const Ark_Number* axisVertical)
@@ -186,7 +189,13 @@ void SetTiltYImpl(Ark_BaseEvent peer,
 }
 Opt_Number GetRollAngleImpl(Ark_BaseEvent peer)
 {
-    return {};
+    auto invalid = Converter::ArkValue<Opt_Number>();
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
+    if (peer->GetBaseInfo()->GetRollAngle() == std::nullopt) {
+        return invalid;
+    }
+    float value = peer->GetBaseInfo()->GetRollAngle().value_or(0.0f);
+    return Converter::ArkValue<Opt_Number>(value);
 }
 void SetRollAngleImpl(Ark_BaseEvent peer,
                       const Ark_Number* rollAngle)

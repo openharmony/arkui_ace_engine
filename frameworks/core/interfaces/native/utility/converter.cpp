@@ -2348,7 +2348,8 @@ EventTarget Convert(const Ark_EventTarget& src)
         DimensionOffset(offsetX.value_or(Zero), offsetY.value_or(Zero)));
     auto globX = Converter::OptConvert<Dimension>(src.area.globalPosition.x);
     auto globY = Converter::OptConvert<Dimension>(src.area.globalPosition.y);
-    return EventTarget { "", "", area,
+    auto id = Converter::OptConvert<std::string>(src.id);
+    return EventTarget { id.value_or(""), "", area,
         DimensionOffset(globX.value_or(Zero), globY.value_or(Zero)) };
 }
 

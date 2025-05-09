@@ -35055,16 +35055,16 @@ void impl_BaseEvent_setTarget(Ark_NativePointer thisPtr, KSerializerBuffer thisA
         GetAccessors()->getBaseEventAccessor()->setTarget(self, (const Ark_EventTarget*)&target_value);
 }
 KOALA_INTEROP_DIRECT_V3(BaseEvent_setTarget, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_Int32 impl_BaseEvent_getTimestamp(Ark_NativePointer thisPtr) {
+Ark_Int64 impl_BaseEvent_getTimestamp(Ark_NativePointer thisPtr) {
         Ark_BaseEvent self = reinterpret_cast<Ark_BaseEvent>(thisPtr);
         return GetAccessors()->getBaseEventAccessor()->getTimestamp(self);
 }
-KOALA_INTEROP_DIRECT_1(BaseEvent_getTimestamp, Ark_Int32, Ark_NativePointer)
-void impl_BaseEvent_setTimestamp(Ark_NativePointer thisPtr, KLong timestamp) {
+KOALA_INTEROP_DIRECT_1(BaseEvent_getTimestamp, Ark_Int64, Ark_NativePointer)
+void impl_BaseEvent_setTimestamp(Ark_NativePointer thisPtr, Ark_Int64 timestamp) {
         Ark_BaseEvent self = reinterpret_cast<Ark_BaseEvent>(thisPtr);
         GetAccessors()->getBaseEventAccessor()->setTimestamp(self, timestamp);
 }
-KOALA_INTEROP_DIRECT_V2(BaseEvent_setTimestamp, Ark_NativePointer, KLong)
+KOALA_INTEROP_DIRECT_V2(BaseEvent_setTimestamp, Ark_NativePointer, Ark_Int64)
 Ark_Int32 impl_BaseEvent_getSource(Ark_NativePointer thisPtr) {
         Ark_BaseEvent self = reinterpret_cast<Ark_BaseEvent>(thisPtr);
         return GetAccessors()->getBaseEventAccessor()->getSource(self);
