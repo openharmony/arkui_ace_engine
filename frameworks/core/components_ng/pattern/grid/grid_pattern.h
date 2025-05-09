@@ -153,12 +153,12 @@ public:
 
     bool IsAtTopWithDelta() const override
     {
-        return info_.reachStart_ || EstimateHeight() < 0;
+        return info_.reachStart_ || LessNotEqual(EstimateHeight(), 0);
     }
 
     bool IsAtBottomWithDelta() const override
     {
-        return info_.offsetEnd_ || (EstimateHeight() + info_.lastMainSize_ > GetTotalHeight());
+        return info_.offsetEnd_ || GreatNotEqual(EstimateHeight() + info_.lastMainSize_, GetTotalHeight());
     }
 
     bool IsFadingBottom() const override;
