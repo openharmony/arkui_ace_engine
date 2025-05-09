@@ -136,7 +136,7 @@ std::list<RefPtr<NG::SpanItem>>::iterator MutableSpanString::HandleSpanOperation
     auto wContent = (*it)->content;
 
     if (spanItemStart == start && op == SpanStringOperation::REPLACE) {
-        if ((*it)->spanItemType == NG::SpanItemType::IMAGE || (*it)->spanItemType == NG::SpanItemType::CustomSpan) {
+        if ((*it)->spanItemType == SpanItemType::IMAGE || (*it)->spanItemType == SpanItemType::CustomSpan) {
             auto newSpan = MakeRefPtr<NG::SpanItem>();
             newSpan->UpdateContent(other);
             newSpan->interval.first = spanItemStart;

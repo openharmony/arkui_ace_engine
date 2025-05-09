@@ -186,7 +186,7 @@ void TxtParagraph::Layout(float width)
 
 void TxtParagraph::ReLayout(float width, const ParagraphStyle& paraStyle, const std::vector<TextStyle>& textStyles)
 {
-    CHECK_NULL_VOID(paragraph_);
+    CHECK_NULL_VOID(!hasExternalParagraph_ && paragraph_);
     paraStyle_ = paraStyle;
     std::stringstream nodeID;
     nodeID << "[";
@@ -200,8 +200,12 @@ void TxtParagraph::ReLayout(float width, const ParagraphStyle& paraStyle, const 
         txtStyles.emplace_back(txtStyle);
     }
     nodeID << "]";
-    ACE_TEXT_SCOPED_TRACE("TxtParagraph::ReLayout node Size:%d nodeID:%s paraStyle id:%d width:%f",
-        static_cast<uint32_t>(txtStyles.size()), nodeID.str().c_str(), paraStyle.textStyleUid, width);
+    if (SystemProperties::GetTextTraceEnabled() && !txtStyles.empty()) {
+        ACE_TEXT_SCOPED_TRACE(
+            "TxtParagraph::ReLayout node size:%d id:%s paraStyle id:%d paragraphStyleBitmap:%s width:%f",
+            static_cast<uint32_t>(txtStyles.size()), nodeID.str().c_str(), paraStyle.textStyleUid,
+            textStyles.front().GetReLayoutParagraphStyleBitmap().to_string().c_str(), width);
+    }
     Rosen::TypographyStyle style;
     ConvertTypographyStyle(style, paraStyle_);
     style.relayoutChangeBitmap = textStyles.front().GetReLayoutParagraphStyleBitmap();
@@ -972,6 +976,10 @@ void TxtParagraph::UpdateColor(size_t from, size_t to, const Color& color)
 {
     auto paragrah = GetParagraph();
     CHECK_NULL_VOID(paragrah);
+    if (SystemProperties::GetTextTraceEnabled()) {
+        ACE_TEXT_SCOPED_TRACE("TxtParagraph::UpdateColor[id:%d][from:%d][to:%d][color:%s]", paraStyle_.textStyleUid,
+            static_cast<int32_t>(from), static_cast<int32_t>(to), color.ColorToString().c_str());
+    }
     auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(paragrah);
     CHECK_NULL_VOID(paragraphTxt);
     paragraphTxt->UpdateColor(from, to, ToRSColor(color));

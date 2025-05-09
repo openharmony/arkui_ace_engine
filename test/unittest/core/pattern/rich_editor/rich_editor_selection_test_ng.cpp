@@ -1592,7 +1592,7 @@ HWTEST_F(RichEditorSelectionTestNg, GetSelectSpansPositionInfo002, TestSize.Leve
     ClearSpan();
     AddSpan(INIT_VALUE_2);
     spanItem = richEditorPattern->spans_.back();
-    spanItem->spanItemType = NG::SpanItemType::CustomSpan;
+    spanItem->spanItemType = SpanItemType::CustomSpan;
     start = 1;
     end = 2;
     richEditorPattern->GetSelectSpansPositionInfo(start, end, startPositionSpanInfo, endPositionSpanInfo);

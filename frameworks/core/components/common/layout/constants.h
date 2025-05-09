@@ -338,12 +338,12 @@ namespace StringUtils {
 inline std::string ToString(const TextAlign& textAlign)
 {
     static const LinearEnumMapNode<TextAlign, std::string> table[] = {
+        { TextAlign::START, "START" },
+        { TextAlign::CENTER, "CENTER" },
+        { TextAlign::END, "END" },
+        { TextAlign::JUSTIFY, "JUSTIFY" },
         { TextAlign::LEFT, "LEFT" },
         { TextAlign::RIGHT, "RIGHT" },
-        { TextAlign::CENTER, "CENTER" },
-        { TextAlign::JUSTIFY, "JUSTIFY" },
-        { TextAlign::START, "START" },
-        { TextAlign::END, "END" },
     };
     auto iter = BinarySearchFindIndex(table, ArraySize(table), textAlign);
     return iter != -1 ? table[iter].value : "";
@@ -397,6 +397,19 @@ enum class TextSelectableMode {
     SELECTABLE_FOCUSABLE,
     UNSELECTABLE,
 };
+
+namespace StringUtils {
+inline std::string ToString(const TextSelectableMode& textSelectableMode)
+{
+    static const LinearEnumMapNode<TextSelectableMode, std::string> table[] = {
+        { TextSelectableMode::SELECTABLE_UNFOCUSABLE, "SELECTABLE_UNFOCUSABLE" },
+        { TextSelectableMode::SELECTABLE_FOCUSABLE, "SELECTABLE_FOCUSABLE" },
+        { TextSelectableMode::UNSELECTABLE, "UNSELECTABLE" }
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), textSelectableMode);
+    return iter != -1 ? table[iter].value : "";
+}
+} // namespace StringUtils
 
 namespace StringUtils {
 inline std::string ToString(const TextOverflow& textOverflow)
@@ -461,6 +474,23 @@ enum class TextDecorationStyle {
     INITIAL,
     INHERIT,
 };
+
+namespace StringUtils {
+inline std::string ToString(const TextDecorationStyle& textDecorationStyle)
+{
+    static const LinearEnumMapNode<TextDecorationStyle, std::string> table[] = {
+        { TextDecorationStyle::SOLID, "SOLID" },
+        { TextDecorationStyle::DOUBLE, "DOUBLE" },
+        { TextDecorationStyle::DOTTED, "DOTTED" },
+        { TextDecorationStyle::DASHED, "DASHED" },
+        { TextDecorationStyle::WAVY, "WAVY" },
+        { TextDecorationStyle::INITIAL, "INITIAL" },
+        { TextDecorationStyle::INHERIT, "INHERIT" }
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), textDecorationStyle);
+    return iter != -1 ? table[iter].value : "";
+}
+} // namespace StringUtils
 
 enum class TextHeightAdaptivePolicy {
     MAX_LINES_FIRST,
@@ -891,6 +921,20 @@ enum class CopyOptions {
     Local,
     Distributed,
 };
+
+namespace StringUtils {
+inline std::string ToString(const CopyOptions& copyOptions)
+{
+    static const LinearEnumMapNode<CopyOptions, std::string> table[] = {
+        { CopyOptions::None, "None" },
+        { CopyOptions::InApp, "InApp" },
+        { CopyOptions::Local, "Local" },
+        { CopyOptions::Distributed, "Distributed" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), copyOptions);
+    return iter != -1 ? table[iter].value : "";
+}
+} // namespace StringUtils
 
 enum class VisibleType {
     VISIBLE = 0,

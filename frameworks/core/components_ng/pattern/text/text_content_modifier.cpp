@@ -514,6 +514,10 @@ void TextContentModifier::ChangeParagraphColor(const RefPtr<Paragraph>& paragrap
 {
     CHECK_NULL_VOID(paragraph);
     if (onlyTextColorAnimation_ && animatableTextColor_) {
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE("TextContentModifier::ChangeParagraphColor[animatableTextColor:%s]",
+                Color(animatableTextColor_->Get().GetValue()).ColorToString().c_str());
+        }
         auto length = paragraph->GetParagraphText().length();
         paragraph->UpdateColor(0, length, Color(animatableTextColor_->Get().GetValue()));
     }
@@ -710,6 +714,11 @@ void TextContentModifier::UpdateFontSizeMeasureFlag(PropertyChangeFlag& flag)
     if (fontSize_.has_value() && fontSizeFloat_ &&
         CheckNeedMeasure(fontSize_.value().Value(), lastFontSize_, fontSizeFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE(
+                "TextContentModifier::UpdateFontSizeMeasureFlag[fontSize:%f][lastFontSize:%f][fontSizeFloat:%f]",
+                fontSize_.value().Value(), lastFontSize_, fontSizeFloat_->Get());
+        }
         lastFontSize_ = fontSizeFloat_->Get();
     }
 }
@@ -719,6 +728,11 @@ void TextContentModifier::UpdateAdaptMinFontSizeMeasureFlag(PropertyChangeFlag& 
     if (adaptMinFontSize_.has_value() && adaptMinFontSizeFloat_ &&
         CheckNeedMeasure(adaptMinFontSize_.value().Value(), lastMinFontSize_, adaptMinFontSizeFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE("TextContentModifier::UpdateAdaptMinFontSizeMeasureFlag[adaptMinFontSize:%f]["
+                                  "lastMinFontSize:%f][adaptMinFontSizeFloat:%f]",
+                adaptMinFontSize_.value().Value(), lastMinFontSize_, adaptMinFontSizeFloat_->Get());
+        }
         lastMinFontSize_ = adaptMinFontSizeFloat_->Get();
     }
 }
@@ -728,6 +742,11 @@ void TextContentModifier::UpdateAdaptMaxFontSizeMeasureFlag(PropertyChangeFlag& 
     if (adaptMaxFontSize_.has_value() && adaptMaxFontSizeFloat_ &&
         CheckNeedMeasure(adaptMaxFontSize_.value().Value(), lastMaxFontSize_, adaptMaxFontSizeFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE("TextContentModifier::UpdateAdaptMaxFontSizeMeasureFlag[adaptMaxFontSize:%f]["
+                                  "lastMaxFontSize:%f][adaptMaxFontSizeFloat:%f]",
+                adaptMaxFontSize_.value().Value(), lastMaxFontSize_, adaptMaxFontSizeFloat_->Get());
+        }
         lastMaxFontSize_ = adaptMaxFontSizeFloat_->Get();
     }
 }
@@ -738,6 +757,11 @@ void TextContentModifier::UpdateFontWeightMeasureFlag(PropertyChangeFlag& flag)
         CheckNeedMeasure(
             static_cast<float>(static_cast<int>(fontWeight_.value())), lastFontWeight_, fontWeightFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE("TextContentModifier::UpdateFontWeightMeasureFlag[fontWeight:%f][lastFontWeight:%f]["
+                                  "fontWeightFloat:%f]",
+                static_cast<float>(static_cast<int>(fontWeight_.value())), lastFontWeight_, fontWeightFloat_->Get());
+        }
         lastFontWeight_ = fontWeightFloat_->Get();
     }
 }
@@ -748,6 +772,12 @@ void TextContentModifier::UpdateTextColorMeasureFlag(PropertyChangeFlag& flag)
         (textColor_->GetValue() != animatableTextColor_->Get().GetValue() ||
             lastTextColor_.GetValue() != animatableTextColor_->Get().GetValue())) {
         flag |= PROPERTY_UPDATE_MEASURE_SELF;
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE("TextContentModifier::UpdateTextColorMeasureFlag[textColor:%s][lastTextColor:%s]["
+                                  "animatableTextColor:%s]",
+                textColor_->ColorToString().c_str(), lastTextColor_.ColorToString().c_str(),
+                Color(animatableTextColor_->Get().GetValue()).ColorToString().c_str());
+        }
         lastTextColor_.SetValue(animatableTextColor_->Get().GetValue());
     }
 }
@@ -771,6 +801,10 @@ void TextContentModifier::UpdateSymbolColorMeasureFlag(PropertyChangeFlag& flag)
     if (symbolColors_.has_value() && animatableSymbolColor_ &&
         (symbolColors_ != animatableSymbolColor_->Get() || lastSymbolColors_ != animatableSymbolColor_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE_SELF;
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE(
+                "TextContentModifier::UpdateSymbolColorMeasureFlag");
+        }
         lastSymbolColors_ = animatableSymbolColor_->Get();
     }
 }
@@ -785,6 +819,10 @@ void TextContentModifier::UpdateTextShadowMeasureFlag(PropertyChangeFlag& flag)
         auto compareShadow = Shadow(blurRadius, 0, Offset(offsetX, offsetY), Color(color.GetValue()));
         if (shadow.shadow != compareShadow || shadow.lastShadow != compareShadow) {
             flag |= PROPERTY_UPDATE_MEASURE;
+            if (SystemProperties::GetTextTraceEnabled()) {
+                ACE_TEXT_SCOPED_TRACE(
+                    "TextContentModifier::UpdateTextShadowMeasureFlag");
+            }
             shadow.lastShadow = compareShadow;
             return;
         }
@@ -798,9 +836,13 @@ void TextContentModifier::UpdateTextDecorationMeasureFlag(PropertyChangeFlag& fl
         if (textDecoration_.value() == TextDecoration::UNDERLINE &&
             (alpha != textDecorationColor_.value().GetAlpha() ||
                 !NearEqual(textDecorationColorAlpha_->Get(), lastTextDecorationColorAlpha_))) {
+            ACE_TEXT_SCOPED_TRACE(
+                "TextContentModifier::UpdateTextDecorationMeasureFlag UNDERLINE");
             flag |= PROPERTY_UPDATE_MEASURE;
         } else if (textDecoration_.value() == TextDecoration::NONE &&
                    (alpha != 0.0 || !NearZero(lastTextDecorationColorAlpha_))) {
+            ACE_TEXT_SCOPED_TRACE(
+                "TextContentModifier::UpdateTextDecorationMeasureFlag NONE");
             flag |= PROPERTY_UPDATE_MEASURE;
         }
         lastTextDecorationColorAlpha_ = textDecorationColorAlpha_->Get();
@@ -812,6 +854,11 @@ void TextContentModifier::UpdateBaselineOffsetMeasureFlag(PropertyChangeFlag& fl
     if (baselineOffset_.has_value() && baselineOffsetFloat_ &&
         CheckNeedMeasure(baselineOffset_.value().Value(), lastBaselineOffsetFloat_, baselineOffsetFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE("TextContentModifier::UpdateBaselineOffsetMeasureFlag[baselineOffset:%f]["
+                                  "lastBaselineOffsetFloat:%f][baselineOffsetFloat:%f]",
+                baselineOffset_.value().Value(), lastBaselineOffsetFloat_, baselineOffsetFloat_->Get());
+        }
         lastBaselineOffsetFloat_ = baselineOffsetFloat_->Get();
     }
 }
@@ -821,6 +868,11 @@ void TextContentModifier::UpdateLineHeightMeasureFlag(PropertyChangeFlag& flag)
     if (lineHeight_.has_value() && lineHeightFloat_ &&
         CheckNeedMeasure(lineHeight_.value().Value(), lastLineHeight_, lineHeightFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
+        if (SystemProperties::GetTextTraceEnabled()) {
+            ACE_TEXT_SCOPED_TRACE("TextContentModifier::UpdateLineHeightMeasureFlag[lineHeight:%f][lastLineHeight:%f]["
+                                  "lineHeightFloat:%f]",
+                lineHeight_.value().Value(), lastLineHeight_, lineHeightFloat_->Get());
+        }
         lastLineHeight_ = lineHeightFloat_->Get();
     }
 }

@@ -239,35 +239,12 @@ void SpanNode::UpdateTextBackgroundFromParent(const std::optional<TextBackground
 void SpanNode::DumpInfo()
 {
     auto& dumpLog = DumpLog::GetInstance();
-    dumpLog.AddDesc(
-        std::string("Content: ").append("\"").append(UtfUtils::Str16DebugToStr8(spanItem_->content)).append("\""));
-    auto textStyle = spanItem_->GetTextStyle();
-    if (!textStyle) {
-        return;
-    }
-    dumpLog.AddDesc(std::string("FontSize: ").append(textStyle->GetFontSize().ToString()));
-    dumpLog.AddDesc(std::string("LineHeight: ").append(textStyle->GetLineHeight().ToString()));
-    dumpLog.AddDesc(std::string("LineSpacing: ").append(textStyle->GetLineSpacing().ToString()));
-    dumpLog.AddDesc(std::string("BaselineOffset: ").append(textStyle->GetBaselineOffset().ToString()));
-    dumpLog.AddDesc(std::string("WordSpacing: ").append(textStyle->GetWordSpacing().ToString()));
-    dumpLog.AddDesc(std::string("TextIndent: ").append(textStyle->GetTextIndent().ToString()));
-    dumpLog.AddDesc(std::string("LetterSpacing: ").append(textStyle->GetLetterSpacing().ToString()));
-    dumpLog.AddDesc(std::string("TextColor: ").append(textStyle->GetTextColor().ColorToString()));
-    if (spanItem_ && spanItem_->fontStyle) {
-        dumpLog.AddDesc(std::string("SpanTextColor: ")
-                            .append(spanItem_->fontStyle->GetTextColor().value_or(Color::FOREGROUND).ColorToString()));
-    }
-    dumpLog.AddDesc(std::string("FontWeight: ").append(StringUtils::ToString(textStyle->GetFontWeight())));
-    dumpLog.AddDesc(std::string("FontStyle: ").append(StringUtils::ToString(textStyle->GetFontStyle())));
-    dumpLog.AddDesc(std::string("TextBaseline: ").append(StringUtils::ToString(textStyle->GetTextBaseline())));
-    dumpLog.AddDesc(std::string("TextOverflow: ").append(StringUtils::ToString(textStyle->GetTextOverflow())));
-    dumpLog.AddDesc(std::string("VerticalAlign: ").append(StringUtils::ToString(textStyle->GetTextVerticalAlign())));
-    dumpLog.AddDesc(std::string("TextAlign: ").append(StringUtils::ToString(textStyle->GetTextAlign())));
-    dumpLog.AddDesc(std::string("WordBreak: ").append(StringUtils::ToString(textStyle->GetWordBreak())));
-    dumpLog.AddDesc(std::string("TextCase: ").append(StringUtils::ToString(textStyle->GetTextCase())));
-    dumpLog.AddDesc(std::string("EllipsisMode: ").append(StringUtils::ToString(textStyle->GetEllipsisMode())));
-    dumpLog.AddDesc(std::string("HalfLeading: ").append(std::to_string(textStyle->GetHalfLeading())));
+    spanItem_->SpanDumpInfo();
     if (GetTag() == V2::SYMBOL_SPAN_ETS_TAG) {
+        auto textStyle = spanItem_->GetTextStyle();
+        if (!textStyle) {
+            return;
+        }
         dumpLog.AddDesc(std::string("SymbolColor:").append(spanItem_->SymbolColorToString()));
         dumpLog.AddDesc(std::string("RenderStrategy: ").append(std::to_string(textStyle->GetRenderStrategy())));
         dumpLog.AddDesc(std::string("EffectStrategy: ").append(std::to_string(textStyle->GetEffectStrategy())));
@@ -276,37 +253,63 @@ void SpanNode::DumpInfo()
     }
 }
 
+#define ADD_FONT_STYLE_DESC_UTILS(name, property)                                                  \
+    do {                                                                                           \
+        dumpLog.AddDesc(std::string(#name ": ")                                                    \
+                            .append(StringUtils::ToString(textStyle->Get##name()))                 \
+                            .append(" self: ")                                                     \
+                            .append(fontStyle && fontStyle->Has##property()                        \
+                                        ? StringUtils::ToString(fontStyle->Get##property##Value()) \
+                                        : "Na"));                                                  \
+    } while (0)
+
+#define ADD_FONT_STYLE_DESC(name)                                                                                \
+    do {                                                                                                         \
+        dumpLog.AddDesc(                                                                                         \
+            std::string(#name ": ")                                                                              \
+                .append(textStyle->Get##name().ToString())                                                       \
+                .append(" self: ")                                                                               \
+                .append(fontStyle && fontStyle->Has##name() ? fontStyle->Get##name##Value().ToString() : "Na")); \
+    } while (0)
+
+#define ADD_LINE_STYLE_DESC_UTILS(name, property)                                                      \
+    do {                                                                                               \
+        dumpLog.AddDesc(std::string(#name ": ")                                                        \
+                            .append(StringUtils::ToString(textStyle->Get##name()))                     \
+                            .append(" self: ")                                                         \
+                            .append(textLineStyle && textLineStyle->Has##property()                    \
+                                        ? StringUtils::ToString(textLineStyle->Get##property##Value()) \
+                                        : "Na"));                                                      \
+    } while (0)
+
+#define ADD_LINE_STYLE_DESC(name)                                                                                  \
+    do {                                                                                                           \
+        dumpLog.AddDesc(                                                                                           \
+            std::string(#name ": ")                                                                                \
+                .append(textStyle->Get##name().ToString())                                                         \
+                .append(" self: ")                                                                                 \
+                .append(textLineStyle && textLineStyle->Has##name() ? textLineStyle->Get##name##Value().ToString() \
+                                                                    : "Na"));                                      \
+    } while (0)
+
 void SpanItem::SpanDumpInfo()
 {
     auto& dumpLog = DumpLog::GetInstance();
-    dumpLog.AddDesc(
-        std::string("---Content length: ").append(std::to_string(content.length())));
+    dumpLog.AddDesc(std::string("--------Content: ")
+                        .append("\"")
+                        .append(UtfUtils::Str16DebugToStr8(content))
+                        .append("\"")
+                        .append(",spanItemType:")
+                        .append(StringUtils::ToString(spanItemType)));
     auto textStyle = textStyle_;
-    if (!textStyle) {
+    if (!textStyle || (spanItemType != SpanItemType::NORMAL && spanItemType != SpanItemType::SYMBOL)) {
         return;
     }
-    dumpLog.AddDesc(
-        std::string("FontSize: ")
-            .append(textStyle->GetFontSize().ToString())
-            .append(" self: ")
-            .append(fontStyle && fontStyle->HasFontSize() ? fontStyle->GetFontSizeValue().ToString() : "Na"));
-    dumpLog.AddDesc(
-        std::string("TextColor: ")
-            .append(textStyle->GetTextColor().ColorToString())
-            .append(" self: ")
-            .append(fontStyle && fontStyle->HasTextColor() ? fontStyle->GetTextColorValue().ColorToString() : "Na"));
-    dumpLog.AddDesc(
-        std::string("LineHeight: ")
-            .append(textStyle->GetLineHeight().ToString())
-            .append(" self: ")
-            .append(textLineStyle
-                        ? textLineStyle->GetLineHeight().value_or(Dimension(0.0, DimensionUnit::FP)).ToString()
-                        : "Na"));
-    dumpLog.AddDesc(std::string("BaselineOffset: ")
-                        .append(textStyle->GetBaselineOffset().ToString())
-                        .append(textLineStyle && textLineStyle->HasBaselineOffset()
-                                    ? textLineStyle->GetBaselineOffsetValue().ToString()
-                                    : "Na"));
+    ADD_LINE_STYLE_DESC(BaselineOffset);
+    ADD_LINE_STYLE_DESC_UTILS(EllipsisMode, EllipsisMode);
+    ADD_FONT_STYLE_DESC(FontSize);
+    ADD_FONT_STYLE_DESC_UTILS(FontWeight, FontWeight);
+    ADD_FONT_STYLE_DESC_UTILS(FontStyle, ItalicFontStyle);
     dumpLog.AddDesc(std::string("HalfLeading: ").append(std::to_string(textStyle->GetHalfLeading())));
     SpanDumpInfoAdvance();
 }
@@ -319,34 +322,39 @@ void SpanItem::SpanDumpInfoAdvance()
     if (!textStyle) {
         return;
     }
-    dumpLog.AddDesc(std::string("WordSpacing: ").append(textStyle->GetWordSpacing().ToString()));
+    ADD_LINE_STYLE_DESC(LineHeight);
+    ADD_FONT_STYLE_DESC(LetterSpacing);
+    ADD_LINE_STYLE_DESC(LineSpacing);
+    ADD_LINE_STYLE_DESC_UTILS(TextAlign, TextAlign);
+    ADD_LINE_STYLE_DESC(TextIndent);
     dumpLog.AddDesc(
-        std::string("TextIndent: ")
-            .append(textStyle->GetTextIndent().ToString())
+        std::string("TextColor: ")
+            .append(textStyle->GetTextColor().ColorToString())
             .append(" self: ")
-            .append(textLineStyle && textLineStyle->HasTextIndent() ? textLineStyle->GetTextIndentValue().ToString()
-                                                                    : "Na"));
-    dumpLog.AddDesc(
-        std::string("LetterSpacing: ")
-            .append(textStyle->GetLetterSpacing().ToString())
-            .append(" self: ")
-            .append(fontStyle ? fontStyle->GetLetterSpacing().value_or(Dimension(0.0, DimensionUnit::FP)).ToString()
-                              : "Na"));
-    dumpLog.AddDesc(
-        std::string("FontWeight: ")
-            .append(StringUtils::ToString(textStyle->GetFontWeight()))
-            .append(" self: ")
-            .append(fontStyle && fontStyle->HasFontWeight() ? StringUtils::ToString(fontStyle->GetFontWeightValue())
-                                                            : "Na"));
-    dumpLog.AddDesc(std::string("FontStyle: ")
-                        .append(StringUtils::ToString(textStyle->GetFontStyle()))
+            .append(fontStyle && fontStyle->HasTextColor() ? fontStyle->GetTextColorValue().ColorToString() : "Na"));
+    ADD_FONT_STYLE_DESC_UTILS(TextCase, TextCase);
+    ADD_LINE_STYLE_DESC_UTILS(TextOverflow, TextOverflow);
+    ADD_LINE_STYLE_DESC_UTILS(WordBreak, WordBreak);
+    dumpLog.AddDesc(std::string("WordSpacing: ")
+                        .append(textStyle->GetWordSpacing().ToString())
+                        .append(" Decoration: ")
+                        .append(StringUtils::ToString(textStyle->GetTextDecoration()))
+                        .append(" ")
+                        .append(StringUtils::ToString(textStyle->GetTextDecorationStyle()))
+                        .append(" ")
+                        .append(textStyle->GetTextDecorationColor().ColorToString())
                         .append(" self: ")
-                        .append(fontStyle && fontStyle->HasItalicFontStyle()
-                                    ? StringUtils::ToString(fontStyle->GetItalicFontStyleValue())
+                        .append(fontStyle && fontStyle->HasTextDecoration()
+                                    ? StringUtils::ToString(fontStyle->GetTextDecorationValue())
+                                    : "Na")
+                        .append(" ")
+                        .append(fontStyle && fontStyle->HasTextDecorationStyle()
+                                    ? StringUtils::ToString(fontStyle->GetTextDecorationStyleValue())
+                                    : "Na")
+                        .append(" ")
+                        .append(fontStyle && fontStyle->HasTextDecorationColor()
+                                    ? fontStyle->GetTextDecorationColorValue().ColorToString()
                                     : "Na"));
-    dumpLog.AddDesc(std::string("WordBreak: ").append(StringUtils::ToString(textStyle->GetWordBreak())));
-    dumpLog.AddDesc(std::string("TextCase: ").append(StringUtils::ToString(textStyle->GetTextCase())));
-    dumpLog.AddDesc(std::string("EllipsisMode: ").append(StringUtils::ToString(textStyle->GetEllipsisMode())));
 }
 
 int32_t SpanItem::UpdateParagraph(
@@ -1321,6 +1329,11 @@ bool SpanItem::UpdateSpanTextColor(Color color)
     auto paragraphInfo = *iter;
     auto paragraph = paragraphInfo.paragraph;
     CHECK_NULL_RETURN(paragraph, false);
+    CHECK_NULL_RETURN(paragraph, false);
+    if (SystemProperties::GetTextTraceEnabled()) {
+        ACE_TEXT_SCOPED_TRACE("UpdateSpanTextColor[id:%d][color:%s][position:%d][length:%d]", nodeId_,
+            color.ColorToString().c_str(), position, length);
+    }
     paragraph->UpdateColor(position - length, position, color);
     textPattern->MarkDirtyNodeRender();
     return true;

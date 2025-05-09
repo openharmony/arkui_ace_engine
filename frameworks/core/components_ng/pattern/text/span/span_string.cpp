@@ -774,8 +774,8 @@ void SpanString::RemoveSpecialSpan(int32_t start, int32_t end, SpanType type)
     count = 0;
     for (auto iter = spans_.begin(); iter != spans_.end();) {
         if ((*iter)->interval.first >= start && (*iter)->interval.first < end - count
-            && ((type == SpanType::Image && (*iter)->spanItemType == NG::SpanItemType::IMAGE)
-                || (type == SpanType::CustomSpan && (*iter)->spanItemType == NG::SpanItemType::CustomSpan))) {
+            && ((type == SpanType::Image && (*iter)->spanItemType == SpanItemType::IMAGE)
+                || (type == SpanType::CustomSpan && (*iter)->spanItemType == SpanItemType::CustomSpan))) {
             UpdateSpansWithOffset((*iter)->interval.first, -1);
             iter = spans_.erase(iter);
             ++count;
@@ -862,8 +862,8 @@ bool SpanString::EncodeTlv(std::vector<uint8_t>& buff)
     TLVUtil::WriteInt32(buff, spans_.size());
     for (auto it = spans_.begin(); it != spans_.end(); ++it) {
         auto spanItem = (*it);
-        if (spanItem->spanItemType == NG::SpanItemType::CustomSpan) {
-            TLVUtil::WriteInt32(buff, static_cast<int32_t>(NG::SpanItemType::NORMAL));
+        if (spanItem->spanItemType == SpanItemType::CustomSpan) {
+            TLVUtil::WriteInt32(buff, static_cast<int32_t>(SpanItemType::NORMAL));
             auto placeHolderSpan = AceType::MakeRefPtr<NG::SpanItem>();
             placeHolderSpan->content = u" ";
             placeHolderSpan->interval = spanItem->interval;
@@ -966,7 +966,7 @@ void SpanString::DecodeSpanItemListExt(std::vector<uint8_t>& buff, int32_t& curs
     int32_t spanLength = TLVUtil::ReadInt32(buff, cursor);
     for (auto i = 0; i < spanLength; i++) {
         auto spanItemType = TLVUtil::ReadInt32(buff, cursor);
-        if (spanItemType == static_cast<int32_t>(NG::SpanItemType::IMAGE)) {
+        if (spanItemType == static_cast<int32_t>(SpanItemType::IMAGE)) {
             auto imageSpanItem = NG::ImageSpanItem::DecodeTlv(buff, cursor);
             spanStr->AppendSpanItem(imageSpanItem);
         } else {
@@ -993,9 +993,9 @@ void SpanString::UpdateSpansMap()
         auto start = spanItem->interval.first;
         auto end = spanItem->interval.second;
         std::list<RefPtr<SpanBase>> spanBases;
-        if (spanItem->spanItemType == NG::SpanItemType::IMAGE) {
+        if (spanItem->spanItemType == SpanItemType::IMAGE) {
             spanBases = { ToImageSpan(spanItem, start, end) };
-        } else if (spanItem->spanItemType == NG::SpanItemType::NORMAL)
+        } else if (spanItem->spanItemType == SpanItemType::NORMAL)
             spanBases = { ToFontSpan(spanItem, start, end),
                 ToDecorationSpan(spanItem, start, end),
                 ToBaselineOffsetSpan(spanItem, start, end),

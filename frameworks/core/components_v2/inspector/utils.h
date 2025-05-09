@@ -568,10 +568,10 @@ inline std::string ConvertWrapWordBreakToString(WordBreak wordBreak)
 inline std::string ConvertTextDirectionToString(TextDirection direction)
 {
     static const LinearEnumMapNode<TextDirection, std::string> textDirectionTable[] = {
-        { TextDirection::AUTO, "AUTO" },
-        { TextDirection::INHERIT, "INHERIT" },
         { TextDirection::LTR, "LTR" },
         { TextDirection::RTL, "RTL" },
+        { TextDirection::INHERIT, "INHERIT" },
+        { TextDirection::AUTO, "AUTO" },
     };
 
     auto index = BinarySearchFindIndex(textDirectionTable, ArraySize(textDirectionTable), direction);

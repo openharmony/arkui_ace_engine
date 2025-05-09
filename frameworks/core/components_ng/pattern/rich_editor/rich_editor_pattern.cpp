@@ -2450,7 +2450,7 @@ void RichEditorPattern::GetSelectSpansPositionInfo(
     CHECK_NULL_VOID(host);
     std::find_if(spans_.begin(), spans_.end(), [&start, &end, &isText](const RefPtr<SpanItem>& spanItem) {
         if ((spanItem->rangeStart <= start) && (start < spanItem->position) && start < end) {
-            if (spanItem->spanItemType == NG::SpanItemType::NORMAL && spanItem->unicode == 0) {
+            if (spanItem->spanItemType == SpanItemType::NORMAL && spanItem->unicode == 0) {
                 isText = true;
                 return true;
             }
@@ -2461,7 +2461,7 @@ void RichEditorPattern::GetSelectSpansPositionInfo(
     CHECK_EQUAL_VOID(isText, false);
     std::find_if(spans_.rbegin(), spans_.rend(), [&end](const RefPtr<SpanItem>& spanItem) {
         if ((spanItem->rangeStart < end) && (end <= spanItem->position)) {
-            if (spanItem->spanItemType == NG::SpanItemType::NORMAL && spanItem->unicode == 0) {
+            if (spanItem->spanItemType == SpanItemType::NORMAL && spanItem->unicode == 0) {
                 return true;
             }
             end = spanItem->rangeStart;
@@ -4567,9 +4567,9 @@ void RichEditorPattern::SetSubMap(RefPtr<SpanString>& spanString)
         auto start = spanItem->rangeStart;
         auto end = spanItem->position;
         std::list<RefPtr<SpanBase>> spanBases;
-        if (spanItem->spanItemType == NG::SpanItemType::IMAGE) {
+        if (spanItem->spanItemType == SpanItemType::IMAGE) {
             spanBases = { spanString->ToImageSpan(spanItem, start, end) };
-        } else if (spanItem->spanItemType == NG::SpanItemType::NORMAL) {
+        } else if (spanItem->spanItemType == SpanItemType::NORMAL) {
             spanBases = { spanString->ToFontSpan(spanItem, start, end),
                 spanString->ToDecorationSpan(spanItem, start, end),
                 spanString->ToBaselineOffsetSpan(spanItem, start, end),

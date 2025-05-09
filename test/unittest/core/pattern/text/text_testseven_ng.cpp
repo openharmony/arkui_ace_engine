@@ -306,7 +306,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString007, TestSize.Level1)
     std::vector<uint8_t> buff;
     TLVUtil::WriteUint8(buff, TLV_SPAN_STRING_SPANS);
     TLVUtil::WriteInt32(buff, 1);
-    TLVUtil::WriteInt32(buff, static_cast<int32_t>(NG::SpanItemType::NORMAL));
+    TLVUtil::WriteInt32(buff, static_cast<int32_t>(SpanItemType::NORMAL));
     span1->EncodeTlv(buff);
     TLVUtil::WriteUint8(buff, TLV_SPANITEM_END_TAG);
     TLVUtil::WriteUint8(buff, TLV_SPAN_STRING_CONTENT);
@@ -375,7 +375,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString008, TestSize.Level1)
     std::vector<uint8_t> buff;
     TLVUtil::WriteUint8(buff, TLV_SPAN_STRING_SPANS);
     TLVUtil::WriteInt32(buff, 1);
-    TLVUtil::WriteInt32(buff, static_cast<int32_t>(NG::SpanItemType::IMAGE));
+    TLVUtil::WriteInt32(buff, static_cast<int32_t>(SpanItemType::IMAGE));
     span1->EncodeTlv(buff);
     TLVUtil::WriteUint8(buff, TLV_SPANITEM_END_TAG);
     TLVUtil::WriteUint8(buff, TLV_SPAN_STRING_CONTENT);
@@ -441,7 +441,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString009, TestSize.Level1)
     std::vector<uint8_t> buff;
     TLVUtil::WriteUint8(buff, TLV_SPAN_STRING_SPANS);
     TLVUtil::WriteInt32(buff, 1);
-    TLVUtil::WriteInt32(buff, static_cast<int32_t>(NG::SpanItemType::IMAGE));
+    TLVUtil::WriteInt32(buff, static_cast<int32_t>(SpanItemType::IMAGE));
     span1->EncodeTlv(buff);
     TLVUtil::WriteUint8(buff, TLV_SPANITEM_END_TAG);
     TLVUtil::WriteUint8(buff, TLV_SPAN_STRING_CONTENT);
