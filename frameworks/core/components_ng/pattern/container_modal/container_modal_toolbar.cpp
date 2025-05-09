@@ -117,7 +117,7 @@ void ContainerModalToolBar::SetToolbarBuilder(const RefPtr<FrameNode>& parent, s
     CHECK_NULL_VOID(pattern);
     auto pipeline = pattern->GetContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->AddAfterRenderTask([weak = WeakClaim(this), frame = WeakClaim(RawPtr(parent))]() {
+    pipeline->AddAfterRenderTask([weak = WeakClaim(this)]() {
         auto toolbar = weak.Upgrade();
         CHECK_NULL_VOID(toolbar);
         if (!(toolbar->HasNavOrSideBarNodes())) {
@@ -555,13 +555,22 @@ void ContainerModalToolBar::OnToolBarLayoutChange()
     if (!toolbarManager_) {
         return;
     }
-    AdjustTitleNodeWidth();
-    if (toolbarManager_->GetNavBarInfo().isShow) {
-        AdjustNavbarRowWidth();
-    }
-    if (toolbarManager_->GetNavDestInfo().isShow) {
-        AdjustNavDestRowWidth();
-    }
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto pipeline = pattern->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAfterRenderTask([weak = WeakClaim(this), toolbarMgr = toolbarManager_]() {
+        auto toolbar = weak.Upgrade();
+        CHECK_NULL_VOID(toolbar);
+        toolbar->AdjustTitleNodeWidth();
+        CHECK_NULL_VOID(toolbarMgr);
+        if (toolbarMgr->GetNavBarInfo().isShow) {
+            toolbar->AdjustNavbarRowWidth();
+        }
+        if (toolbarMgr->GetNavDestInfo().isShow) {
+            toolbar->AdjustNavDestRowWidth();
+        }
+    });
 }
 
 void ContainerModalToolBar::AdjustTitleNodeWidth()
