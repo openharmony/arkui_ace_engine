@@ -31,7 +31,7 @@ enum ExpandMode {
 
 declare type UIStatesChangeHandler = (currentUIStates: number) => void;
 
-class FrameNode {
+class FrameNode extends Disposable {
   public _nodeId: number;
   protected _commonAttribute: ArkComponent;
   protected _commonEvent: UICommonEvent;
@@ -46,6 +46,7 @@ class FrameNode {
   protected instanceId_?: number;
   private nodeAdapterRef_?: NodeAdapter;
   constructor(uiContext: UIContext, type: string, options?: object) {
+    super();
     if (uiContext === undefined) {
       throw Error('Node constructor error, param uiContext error');
     } else {
@@ -149,11 +150,17 @@ class FrameNode {
     }
   }
   dispose(): void {
+    super.dispose();
     this.renderNode_?.dispose();
     FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
     this._nodeId = -1;
     this._nativeRef = null;
     this.nodePtr_ = null;
+  }
+  
+  isDisposed(): boolean {
+    return super.isDisposed() && (this._nativeRef === undefined ||
+     this._nativeRef === null || this._nativeRef instanceof NativeWeakRef && this._nativeRef.invalid());
   }
 
   static disposeTreeRecursively(node: FrameNode | null): void {
@@ -716,6 +723,7 @@ class ProxyFrameNode extends ImmutableFrameNode {
     return this.nodePtr_;
   }
   dispose(): void {
+    this.isDisposed_ = true;
     this.renderNode_?.dispose();
     FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
     this._nodeId = -1;
