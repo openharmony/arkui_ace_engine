@@ -14,7 +14,7 @@
  */
 
 #include "adapter/ohos/entrance/picker/picker_haptic_controller.h"
-#include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
+#include "core/common/vibrator/vibrator_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -22,12 +22,16 @@ using std::chrono_literals::operator""s;
 using std::chrono_literals::operator""ms;
 const std::string AUDIO_TEST_URI = "/system/etc/arkui/timepicker.ogg";
 const std::string EFFECT_ID_NAME = "haptic.slide";
-constexpr size_t SPEED_PLAY_ONCE = 0;
 constexpr size_t SPEED_MAX = 5000;
 constexpr size_t SPEED_THRESHOLD = 1560;
 constexpr size_t TREND_COUNT = 3;
 constexpr std::chrono::milliseconds DEFAULT_DELAY(40);
 constexpr std::chrono::milliseconds EXTENDED_DELAY(50);
+#ifdef SUPPORT_DIGITAL_CROWN
+constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength2";
+#else
+constexpr size_t SPEED_PLAY_ONCE = 0;
+#endif
 } // namespace
 
 PickerHapticController::PickerHapticController(const std::string& uri, const std::string& effectId) noexcept
@@ -108,6 +112,7 @@ bool PickerHapticController::IsThreadNone()
 
 void PickerHapticController::InitPlayThread()
 {
+#ifndef SUPPORT_DIGITAL_CROWN
     ThreadRelease();
     playThreadStatus_ = ThreadStatus::START;
     playThread_ = std::make_unique<std::thread>(&PickerHapticController::ThreadLoop, this);
@@ -117,6 +122,7 @@ void PickerHapticController::InitPlayThread()
     } else {
         playThreadStatus_ = ThreadStatus::NONE;
     }
+#endif
 }
 
 void PickerHapticController::ThreadLoop()
@@ -190,6 +196,9 @@ void PickerHapticController::Play(size_t speed)
 
 void PickerHapticController::PlayOnce()
 {
+#ifdef SUPPORT_DIGITAL_CROWN
+    VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
+#else
     if (IsThreadPlaying()) {
         return;
     }
@@ -207,6 +216,7 @@ void PickerHapticController::PlayOnce()
         threadCv_.notify_one();
     }
     isHapticCanLoopPlay_ = true;
+#endif
 }
 
 void PickerHapticController::Stop()
@@ -221,6 +231,7 @@ void PickerHapticController::Stop()
 
 void PickerHapticController::HandleDelta(double dy)
 {
+#ifndef SUPPORT_DIGITAL_CROWN
     uint64_t currentTime = GetMilliseconds();
     uint64_t intervalTime = currentTime - lastHandleDeltaTime_;
     CHECK_EQUAL_VOID(intervalTime, 0);
@@ -249,6 +260,7 @@ void PickerHapticController::HandleDelta(double dy)
         recentSpeeds_.clear();
         absSpeedInMm_ = scrollSpeed;
     }
+#endif
 }
 
 double PickerHapticController::ConvertPxToMillimeters(double px) const

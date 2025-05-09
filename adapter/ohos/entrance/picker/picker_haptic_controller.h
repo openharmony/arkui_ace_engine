@@ -62,9 +62,11 @@ private:
     size_t GetCurrentSpeedInMm();
     int8_t GetPlayStatus();
 
+#ifndef SUPPORT_DIGITAL_CROWN
+    bool isHapticCanLoopPlay_ = false;
+#endif
     bool isInHapticLoop_ = false;
     bool isLoopReadyToStop_ = false;
-    bool isHapticCanLoopPlay_ = false;
     ThreadStatus playThreadStatus_ = ThreadStatus::NONE;
     std::recursive_mutex threadMutex_;
     std::condition_variable_any threadCv_;
