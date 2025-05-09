@@ -401,6 +401,7 @@ void PinchRecognizer::OnResetStatus()
     isPinchEnd_ = false;
     isLastPinchFinished_ = true;
     localMatrix_.clear();
+    pinchCenter_ = Offset();
 }
 
 void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
