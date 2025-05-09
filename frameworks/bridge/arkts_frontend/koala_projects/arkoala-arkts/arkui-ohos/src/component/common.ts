@@ -351,7 +351,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         return this.peer
     }
     get target(): EventTarget {
-        throw new Error("Not implemented")
+        return this.getTarget();
     }
     set target(target: EventTarget) {
         this.setTarget(target)
@@ -550,8 +550,15 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         return retval
     }
     private getTarget_serialize(): EventTarget {
-        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTarget(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTarget(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : EventTarget = retvalDeserializer.readEventTarget()
         return returnResult
     }
@@ -576,15 +583,43 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         ArkUIGeneratedNativeModule._BaseEvent_setSource(this.peer!.ptr, TypeChecker.SourceType_ToNumeric(source))
     }
     private getAxisHorizontal_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getAxisHorizontal(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getAxisHorizontal(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType))
+        {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setAxisHorizontal_serialize(axisHorizontal: number): void {
         ArkUIGeneratedNativeModule._BaseEvent_setAxisHorizontal(this.peer!.ptr, axisHorizontal)
     }
     private getAxisVertical_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getAxisVertical(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getAxisVertical(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType))
+        {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setAxisVertical_serialize(axisVertical: number): void {
         ArkUIGeneratedNativeModule._BaseEvent_setAxisVertical(this.peer!.ptr, axisVertical)
@@ -611,8 +646,22 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         ArkUIGeneratedNativeModule._BaseEvent_setTiltY(this.peer!.ptr, tiltY)
     }
     private getRollAngle_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getRollAngle(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getRollAngle(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType))
+        {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setRollAngle_serialize(rollAngle: number): void {
         ArkUIGeneratedNativeModule._BaseEvent_setRollAngle(this.peer!.ptr, rollAngle)
@@ -625,15 +674,43 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         ArkUIGeneratedNativeModule._BaseEvent_setSourceTool(this.peer!.ptr, TypeChecker.SourceTool_ToNumeric(sourceTool))
     }
     private getDeviceId_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getDeviceId(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getDeviceId(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType))
+        {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setDeviceId_serialize(deviceId: number): void {
         ArkUIGeneratedNativeModule._BaseEvent_setDeviceId(this.peer!.ptr, deviceId)
     }
     private getTargetDisplayId_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTargetDisplayId(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTargetDisplayId(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType))
+        {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setTargetDisplayId_serialize(targetDisplayId: number): void {
         ArkUIGeneratedNativeModule._BaseEvent_setTargetDisplayId(this.peer!.ptr, targetDisplayId)
@@ -9588,7 +9665,6 @@ export class UIGestureEvent {
         this.peer = peer
     }
     addGesture(gesture: GestureHandler, priority?: GesturePriority, mask?: GestureMask): void {
-        InteropNativeModule._NativeLog("zcb UIGestureEvent addGesture");
         if (gesture instanceof GestureGroupHandler) {
             let gestureGroup = gesture as GestureGroupHandler;
             gestureGroup.addGestureGroupToNode(priority ?? GesturePriority.NORMAL, this.peer, mask)
@@ -9597,7 +9673,6 @@ export class UIGestureEvent {
         }
     }
     addParallelGesture(gesture: GestureHandler, mask?: GestureMask): void {
-        InteropNativeModule._NativeLog("zcb UIGestureEvent addParallelGesture");
         if (gesture instanceof GestureGroupHandler) {
             let gestureGroup = gesture as GestureGroupHandler;
             gestureGroup.addGestureGroupToNode(2, this.peer, mask)
@@ -11525,7 +11600,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements UICommonM
     public gestureModifier(value: GestureModifier | undefined): this {
         if (this.checkPriority("gestureModifier")) {
             if (value === undefined) {
-                InteropNativeModule._NativeLog("zcb gestureModifier value undefined");
                 return this;
             }
             const value_casted = value as GestureModifier
