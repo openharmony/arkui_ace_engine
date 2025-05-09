@@ -560,6 +560,7 @@ public:
     int32_t CalculateDeleteLength(int32_t length, bool isBackward);
     void DeleteBackward(int32_t length = 1) override;
     std::u16string DeleteBackwardOperation(int32_t length);
+    void DeleteForward(int32_t length = 1) override;
     void DeleteForward(int32_t currentPosition, int32_t length);
     std::u16string DeleteForwardOperation(int32_t length, bool isIME = true);
     void SetInputMethodStatus(bool keyboardShown) override;
