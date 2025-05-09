@@ -31,6 +31,7 @@ public:
     void SetSelectedDate(const PickerDate& value) override;
     void SetMode(const DatePickerMode& value) override;
     void SetShowLunar(bool lunar) override;
+    void SetCanLoop(bool isLoop) override {};
     void SetSelectedTime(const PickerTime& selectedTime) override;
     void SetHour24(bool value) override;
     void SetOnChange(DateChangeEvent&& onChange) override;

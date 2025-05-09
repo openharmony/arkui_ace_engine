@@ -37,6 +37,8 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 
 namespace {
+constexpr int32_t START_YEAR = 1980;
+const InspectorFilter filter;
 RefPtr<Theme> GetTheme(ThemeType type)
 {
     if (type == IconTheme::TypeId()) {
@@ -309,5 +311,224 @@ HWTEST_F(DatePickerTestTwoNg, CreateDatePicker002, TestSize.Level1)
     auto ret = ViewStackProcessor::GetInstance()->GetMainElementNode();
     AceApplicationInfo::GetInstance().language_ = tmpLanguage;
     ASSERT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.name: DatePickerCanLoopTest001
+ * @tc.desc: Test SetCanLoop.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest001, TestSize.Level1)
+ {
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    DatePickerModel::GetInstance()->SetCanLoop(false);
+    EXPECT_FALSE(pickerProperty->GetCanLoopValue());
+ }
+
+ /**
+ * @tc.name: DatePickerCanLoopTest002
+ * @tc.desc: Test DatePickerColumnPattern CanMove when canLoop is true and false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create columnNode and columnPattern.
+     */
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+    auto options = columnPattern_->GetOptions();
+    auto pickerDates = options[columnNode_];
+    pickerDates.clear();
+    pickerDates.emplace_back(PickerDateF::CreateYear(START_YEAR));
+    pickerDates.emplace_back(PickerDateF::CreateYear(START_YEAR));
+    pickerDates.emplace_back(PickerDateF::CreateYear(START_YEAR));
+    options[columnNode_] = pickerDates;
+    columnPattern_->options_ = options;
+    columnPattern_->showCount_ = pickerDates.size();
+
+    /**
+     * @tc.steps: step2. Call CanMove while canLoop is false.
+     * @tc.expected: CanMove returns false when scrolled down at column end.
+     */
+    DatePickerModel::GetInstance()->SetCanLoop(false);
+    columnPattern_->SetCurrentIndex(2);
+    EXPECT_FALSE(columnPattern_->CanMove(true));
+    columnPattern_->SetCurrentIndex(1);
+    EXPECT_TRUE(columnPattern_->CanMove(true));
+
+    /**
+     * @tc.steps: step3. Call CanMove while canLoop is true.
+     * @tc.expected: CanMove returns true when scrolled down at column end.
+     */
+    DatePickerModel::GetInstance()->SetCanLoop(true);
+    columnPattern_->SetCurrentIndex(2);
+    EXPECT_TRUE(columnPattern_->CanMove(true));
+}
+
+/**
+ * @tc.name: DatePickerCanLoopTest003
+ * @tc.desc: test ToJsonValue contains canLoop
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest003, TestSize.Level1)
+{
+    /**
+    * @tc.step: step1. create picker framenode and pattern.
+    */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto jsonValue = JsonUtil::Create(true);
+    auto jsonValue2 = JsonUtil::Create(true);
+    auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    auto rowLayoutProperty = pickerPattern->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(rowLayoutProperty, nullptr);
+    /**
+    * @tc.step: step2. call pattern's ToJsonValue method.
+    * @tc.expected: jsonValue2->GetBool("canLoop") is not nullptr.
+    */
+    rowLayoutProperty->ToJsonValue(jsonValue, filter);
+    ASSERT_NE(jsonValue->GetValue("canLoop"), nullptr);
+    ASSERT_EQ(jsonValue->GetValue("canLoop")->GetString(), "true");
+    /**
+    * cover branch canLoop == false
+    */
+    DatePickerModel::GetInstance()->SetCanLoop(false);
+    rowLayoutProperty->ToJsonValue(jsonValue2, filter);
+    ASSERT_NE(jsonValue2->GetValue("canLoop"), nullptr);
+    ASSERT_EQ(jsonValue2->GetValue("canLoop")->GetString(), "false");
+}
+
+/**
+ * @tc.name: DatePickerCanLoopTest004
+ * @tc.desc: Test DatePickerColumnPattern scroll option.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest004, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create columnNode and columnPattern.
+    */
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnNode_, nullptr);
+    ASSERT_NE(columnPattern_, nullptr);
+    DatePickerModel::GetInstance()->SetCanLoop(false);
+    columnPattern_->showCount_ = 3;
+    columnPattern_->UpdateTextPropertiesLinear(true, 2.0f);
+    auto options = columnPattern_->GetOptions();
+    auto pickerDates = options[columnNode_];
+    pickerDates.clear();
+    pickerDates.emplace_back(PickerDateF::CreateYear(START_YEAR));
+    pickerDates.emplace_back(PickerDateF::CreateYear(START_YEAR+1));
+    pickerDates.emplace_back(PickerDateF::CreateYear(START_YEAR+2));
+    options[columnNode_] = pickerDates;
+    columnPattern_->options_ = options;
+    columnPattern_->SetCurrentIndex(2);
+    columnPattern_->OnModifyDone();
+
+    /**
+    * @tc.steps: step2. Call HandleDragMove while inputEventType is AXIS and sourceTool is FINGER.
+    * @tc.expected: index is reduced.
+    */
+    auto eventHub = columnNode_->GetOrCreateEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureHub = eventHub->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    columnPattern_->InitPanEvent(gestureHub);
+    EXPECT_EQ(columnPattern_->GetCurrentIndex(), 2);
+
+    auto actionEndTask = columnPattern_->panEvent_->actionEnd_;
+    GestureEvent info;
+    info.SetSourceTool(SourceTool::FINGER);
+    info.SetInputEventType(InputEventType::AXIS);
+    actionEndTask(info);
+    Point globalPoint(1.0f, 1.0f);
+    info.SetGlobalPoint(globalPoint);
+    info.SetOffsetX(1.0f);
+    info.SetOffsetY(200.0f);
+    columnPattern_->yLast_ = 0.0f;
+    columnPattern_->pressed_ = true;
+    columnPattern_->HandleDragMove(info);
+    EXPECT_FLOAT_EQ(columnPattern_->yLast_, 201.0f);
+    EXPECT_EQ(columnPattern_->GetCurrentIndex(), 1);
+    
+    info.SetOffsetY(400.0f);
+    columnPattern_->yLast_ = 0.0f;
+    columnPattern_->pressed_ = true;
+    columnPattern_->HandleDragMove(info);
+    EXPECT_FLOAT_EQ(columnPattern_->yLast_, 401.0f);
+    EXPECT_EQ(columnPattern_->GetCurrentIndex(), 0);
+
+    info.SetOffsetY(600.0f);
+    columnPattern_->yLast_ = 0.0f;
+    columnPattern_->pressed_ = true;
+    columnPattern_->HandleDragMove(info);
+    EXPECT_FLOAT_EQ(columnPattern_->yLast_, 601.0f);
+    EXPECT_EQ(columnPattern_->GetCurrentIndex(), 0);
+}
+
+/**
+ * @tc.name: DatePickerCanLoopTest005
+ * @tc.desc: test Reset canLoop
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest005, TestSize.Level1)
+{
+    /**
+    * @tc.step: step1. create picker framenode and pattern.
+    */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    auto rowLayoutProperty = pickerPattern->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(rowLayoutProperty, nullptr);
+    DatePickerModel::GetInstance()->SetCanLoop(false);
+    ASSERT_FALSE(rowLayoutProperty->GetCanLoopValue(true));
+    /**
+    * @tc.step: step2. call pattern's Reset method.
+    * @tc.expected: rowLayoutProperty->GetCanLoopValue is false.
+    */
+    rowLayoutProperty->Reset();
+    ASSERT_TRUE(rowLayoutProperty->GetCanLoopValue(true));
+}
+
+/**
+ * @tc.name: DatePickerCanLoopTest006
+ * @tc.desc: test Clone canLoop
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestTwoNg, DatePickerCanLoopTest006, TestSize.Level1)
+{
+    /**
+    * @tc.step: step1. create picker framenode and pattern.
+    */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    auto rowLayoutProperty = pickerPattern->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(rowLayoutProperty, nullptr);
+    DatePickerModel::GetInstance()->SetCanLoop(false);
+    ASSERT_FALSE(rowLayoutProperty->GetCanLoopValue(true));
+    /**
+    * @tc.step: step2. call pattern's Clone method.
+    * @tc.expected: rowLayoutProperty2->GetCanLoopValue is false.
+    */
+    auto rowLayoutProperty2 = AceType::DynamicCast<DataPickerRowLayoutProperty>(rowLayoutProperty->Clone());
+    ASSERT_FALSE(rowLayoutProperty2->GetCanLoopValue(true));
 }
 } // namespace OHOS::Ace::NG

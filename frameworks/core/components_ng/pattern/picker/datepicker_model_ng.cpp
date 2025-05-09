@@ -155,16 +155,16 @@ void DatePickerModelNG::CreateDatePicker(RefPtr<PickerTheme> pickerTheme)
 
 void DatePickerModelNG::CreateDateColumn(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& dateNode)
 {
-    auto stackYearNode = CreateStackNode();
-    auto blendYearNode = CreateColumnNode();
-    auto buttonYearNode = CreateButtonNode();
-    buttonYearNode->MountToParent(stackYearNode);
-    columnNode->MountToParent(blendYearNode);
-    blendYearNode->MountToParent(stackYearNode);
-    auto layoutProperty = stackYearNode->GetLayoutProperty<LayoutProperty>();
+    auto stackNode = CreateStackNode();
+    auto blendNode = CreateColumnNode();
+    auto buttonNode = CreateButtonNode();
+    buttonNode->MountToParent(stackNode);
+    columnNode->MountToParent(blendNode);
+    blendNode->MountToParent(stackNode);
+    auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
     layoutProperty->UpdateAlignment(Alignment::CENTER);
     layoutProperty->UpdateLayoutWeight(1);
-    stackYearNode->MountToParent(dateNode);
+    stackNode->MountToParent(dateNode);
 }
 
 RefPtr<FrameNode> DatePickerModelNG::CreateStackNode()
@@ -297,6 +297,27 @@ RefPtr<FrameNode> DatePickerModelNG::CreateFrameNode(int32_t nodeId)
 void DatePickerModelNG::SetShowLunar(bool lunar)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, Lunar, lunar);
+}
+
+void DatePickerModelNG::SetCanLoop(bool isLoop)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, CanLoop, isLoop);
+}
+
+void DatePickerModelNG::SetCanLoop(FrameNode* frameNode, bool isLoop)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->SetCanLoop(isLoop);
+}
+
+bool DatePickerModelNG::GetCanLoop(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, true);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_RETURN(datePickerPattern, true);
+    return datePickerPattern->GetCanLoop();
 }
 
 void DatePickerModelNG::SetStartDate(const PickerDate& value)

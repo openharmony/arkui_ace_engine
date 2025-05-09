@@ -442,6 +442,27 @@ void ResetDatePickerDigitalCrownSensitivity(ArkUINodeHandle node)
     DatePickerModelNG::SetDigitalCrownSensitivity(frameNode, DEFAULT_CROWNSENSITIVITY);
 }
 
+ArkUI_Bool GetCanLoop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return DatePickerModelNG::GetCanLoop(frameNode);
+}
+
+void SetCanLoop(ArkUINodeHandle node, int isLoop)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetCanLoop(frameNode, isLoop);
+}
+
+void ResetCanLoop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetCanLoop(frameNode, true);
+}
+
 void SetDatePickerOnDateChangeExt(ArkUINodeHandle node, void* callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -511,6 +532,9 @@ const ArkUIDatePickerModifier* GetDatePickerModifier()
         .resetEnableHapticFeedback = ResetEnableHapticFeedback,
         .setDatePickerDigitalCrownSensitivity = SetDatePickerDigitalCrownSensitivity,
         .resetDatePickerDigitalCrownSensitivity = ResetDatePickerDigitalCrownSensitivity,
+        .getCanLoop = GetCanLoop,
+        .setCanLoop = SetCanLoop,
+        .resetCanLoop = ResetCanLoop,
         .setDatePickerOnDateChange = SetDatePickerOnDateChangeExt,
         .resetDatePickerOnDateChange = ResetDatePickerOnDateChange,
         .setDatePickerOnChange = SetDatePickerOnChangeExt,
@@ -555,6 +579,9 @@ const CJUIDatePickerModifier* GetCJUIDatePickerModifier()
         .getEnableHapticFeedback = GetEnableHapticFeedback,
         .setEnableHapticFeedback = SetEnableHapticFeedback,
         .resetEnableHapticFeedback = ResetEnableHapticFeedback,
+        .getCanLoop = GetCanLoop,
+        .setCanLoop = SetCanLoop,
+        .resetCanLoop = ResetCanLoop,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

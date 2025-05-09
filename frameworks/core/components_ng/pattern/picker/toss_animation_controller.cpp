@@ -133,6 +133,7 @@ void TossAnimationController::StopTossAnimation()
     auto weak = AceType::WeakClaim(this);
     auto ref = weak.Upgrade();
     CHECK_NULL_VOID(ref);
+    CHECK_NULL_VOID(ref->property_);
     auto column = AceType::DynamicCast<DatePickerColumnPattern>(ref->column_.Upgrade());
     CHECK_NULL_VOID(column);
     column->SetTossStatus(false);

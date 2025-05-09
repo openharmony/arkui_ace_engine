@@ -25882,6 +25882,10 @@ class ArkDatePickerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, DatePickerEnableHapticFeedbackModifier.identity, DatePickerEnableHapticFeedbackModifier, value);
     return this;
   }
+  canLoop(value) {
+    modifierWithKey(this._modifiersWithKeys, DatePickerCanLoopModifier.identity, DatePickerCanLoopModifier, value);
+    return this;
+  }
 }
 
 class DatePickerDigitalCrownSensitivityModifier extends ModifierWithKey {
@@ -26098,6 +26102,20 @@ class DatePickerEnableHapticFeedbackModifier extends ModifierWithKey {
   }
 }
 DatePickerEnableHapticFeedbackModifier.identity = Symbol('datePickerEnableHapticFeedback');
+class DatePickerCanLoopModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().datePicker.resetCanLoop(node);
+    }
+    else {
+      getUINativeModule().datePicker.setCanLoop(node, this.value);
+    }
+  }
+}
+DatePickerCanLoopModifier.identity = Symbol('canLoop');
 
 //@ts-ignore
 if (globalThis.DatePicker !== undefined) {

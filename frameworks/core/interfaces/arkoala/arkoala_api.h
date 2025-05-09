@@ -5235,6 +5235,9 @@ struct ArkUIDatePickerModifier {
     void (*resetDatePickerOnDateChange)(ArkUINodeHandle node);
     void (*setDatePickerOnChange)(ArkUINodeHandle node, void* callback);
     void (*resetDatePickerOnChange)(ArkUINodeHandle node);
+    ArkUI_Bool (*getCanLoop)(ArkUINodeHandle node);
+    void (*setCanLoop)(ArkUINodeHandle node, ArkUI_Bool isLoop);
+    void (*resetCanLoop)(ArkUINodeHandle node);
 };
 
 struct ArkUISpanModifier {
