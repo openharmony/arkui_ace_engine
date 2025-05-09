@@ -624,6 +624,9 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest011, TestSize.Level1)
      * @tc.steps: step3. Test DisplaySync's animator status.
      */
     int32_t mgrAnimatorRate = displaySyncManager->GetAnimatorRate();
+    if (mgrAnimatorRate > 0) {
+        mgrAnimatorRate = mgrAnimatorRate >> ACE_ANIMATOR_OFFSET;
+    }
     EXPECT_EQ(-1, mgrAnimatorRate);
     EXPECT_TRUE(displaySyncManager->IsAnimatorStopped());
     int32_t animatorExpectedRate = displaySync->GetAnimatorExpectedRate();
@@ -631,6 +634,9 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest011, TestSize.Level1)
 
     displaySync->RegisterOnFrameWithTimestamp([](uint64_t timestamp) {});
     mgrAnimatorRate = displaySyncManager->GetAnimatorRate();
+    if (mgrAnimatorRate > 0) {
+        mgrAnimatorRate = mgrAnimatorRate >> ACE_ANIMATOR_OFFSET;
+    }
     EXPECT_EQ(0, mgrAnimatorRate);
     EXPECT_FALSE(displaySyncManager->IsAnimatorStopped());
     animatorExpectedRate = displaySync->GetAnimatorExpectedRate();
@@ -638,6 +644,9 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest011, TestSize.Level1)
 
     displaySync->SetExpectedFrameRateRange({0, 120, 60});
     mgrAnimatorRate = displaySyncManager->GetAnimatorRate();
+    if (mgrAnimatorRate > 0) {
+        mgrAnimatorRate = mgrAnimatorRate >> ACE_ANIMATOR_OFFSET;
+    }
     EXPECT_EQ(60, mgrAnimatorRate);
     EXPECT_FALSE(displaySyncManager->IsAnimatorStopped());
     animatorExpectedRate = displaySync->GetAnimatorExpectedRate();
