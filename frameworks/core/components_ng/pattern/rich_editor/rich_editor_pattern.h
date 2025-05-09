@@ -561,7 +561,6 @@ public:
     void DeleteBackward(int32_t length = 1) override;
     std::u16string DeleteBackwardOperation(int32_t length);
     void DeleteForward(int32_t currentPosition, int32_t length);
-    int32_t HandleOnDragDeleteForward(int32_t currentPosition);
     std::u16string DeleteForwardOperation(int32_t length, bool isIME = true);
     void SetInputMethodStatus(bool keyboardShown) override;
     bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan) override;
@@ -1554,7 +1553,7 @@ private:
     void AppendSelectRect(std::vector<RectF>& selectRects);
     bool IsTouchInFrameArea(const PointF& touchPoint);
     void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& event, bool isCopy = false);
-    int32_t HandleOnDragDeleteForward();
+    int32_t HandleOnDragDeleteForward(int32_t currentPosition);
     void HandleOnDragDropTextOperation(const std::u16string& insertValue, bool isDeleteSelect, bool isCopy = false);
     void UndoDrag(const OperationRecord& record);
     void RedoDrag(const OperationRecord& record);
