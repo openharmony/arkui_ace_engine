@@ -8901,6 +8901,14 @@ void JSViewAbstract::JsOnFocusAxisEvent(const JSCallbackInfo& args)
 bool JSViewAbstract::CheckColor(
     const JSRef<JSVal>& jsValue, Color& result, const char* componentName, const char* propName)
 {
+    RefPtr<ResourceObject> resourceObject;
+    return CheckColor(jsValue, result, componentName, propName, resourceObject);
+}
+
+bool JSViewAbstract::CheckColor(
+    const JSRef<JSVal>& jsValue, Color& result, const char* componentName, const char* propName,
+    RefPtr<ResourceObject>& resourceObject)
+{
     // Color is undefined or null
     if (jsValue->IsUndefined() || jsValue->IsNull()) {
         return false;
@@ -8910,7 +8918,7 @@ bool JSViewAbstract::CheckColor(
         return false;
     }
     // Correct type, incorrect value parsing
-    if (!ParseJsColor(jsValue, result)) {
+    if (!ParseJsColor(jsValue, result, resourceObject)) {
         return false;
     }
     return true;
@@ -8918,6 +8926,14 @@ bool JSViewAbstract::CheckColor(
 
 bool JSViewAbstract::CheckLength(
     const JSRef<JSVal>& jsValue, CalcDimension& result, const char* componentName, const char* propName)
+{
+    RefPtr<ResourceObject> resourceObject;
+    return CheckLength(jsValue, result, componentName, propName, resourceObject);
+}
+
+bool JSViewAbstract::CheckLength(
+    const JSRef<JSVal>& jsValue, CalcDimension& result, const char* componentName, const char* propName,
+    RefPtr<ResourceObject>& resourceObject)
 {
     // Length is undefined or null
     if (jsValue->IsUndefined() || jsValue->IsNull()) {
@@ -8928,10 +8944,10 @@ bool JSViewAbstract::CheckLength(
         return false;
     }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        return ParseJsDimensionVpNG(jsValue, result);
+        return ParseJsDimensionVpNG(jsValue, result, resourceObject);
     }
     // Correct type, incorrect value parsing
-    if (!ParseJsDimensionVp(jsValue, result)) {
+    if (!ParseJsDimensionVp(jsValue, result, resourceObject)) {
         return false;
     }
     return true;

@@ -716,8 +716,14 @@ public:
     }
 
     static bool CheckColor(const JSRef<JSVal>& jsValue, Color& result, const char* componentName, const char* propName);
+    static bool CheckColor(
+        const JSRef<JSVal>& jsValue, Color& result, const char* componentName, const char* propName,
+        RefPtr<ResourceObject>& resourceObject);
     static bool CheckLength(
         const JSRef<JSVal>& jsValue, CalcDimension& result, const char* componentName, const char* propName);
+    static bool CheckLength(
+        const JSRef<JSVal>& jsValue, CalcDimension& result, const char* componentName, const char* propName,
+        RefPtr<ResourceObject>& resourceObject);
     static bool CheckResource(RefPtr<ResourceObject> resourceObject,
         RefPtr<ResourceWrapper> resourceWrapper);
     static bool CheckCustomSymbolId(RefPtr<ResourceWrapper> resourceWrapper, JSRef<JSVal>& resId,
