@@ -527,7 +527,7 @@ private:
     {
         return !(config.skipMeasure && config.skipLayout);
     }
-    void RegisterParentAccessibilityCallback();
+    void RegisterAccessibilityChildActionNotify();
     std::list<TouchRegion> hoverRegions_;
 
     RefPtr<InputEvent> wrapperMouseEvent_;

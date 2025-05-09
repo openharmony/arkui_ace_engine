@@ -174,6 +174,7 @@ void ShowMenuOpacityAnimation(const RefPtr<MenuTheme>& menuTheme, const RefPtr<R
 void MenuPattern::OnAttachToFrameNode()
 {
     RegisterOnTouch();
+    RegisterAccessibilityChildActionNotify();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetOrCreateFocusHub();
@@ -2466,7 +2467,7 @@ void MenuPattern::RegisterAccessibilityChildActionNotify()
             event.time = time;
             result = gesture->TriggerTouchEvent(event) ?
                 AccessibilityActionResult::ACTION_OK : AccessibilityActionResult::ACTION_ERROR;
-            TAG_LOGI(AceLogTag::ACE_MENU, "trigger notify child action.");
+            TAG_LOGI(AceLogTag::ACE_MENU, "trigger notify child action, node id :%{public}d.", frameNode->GetId());
             return result;
     });
 }
