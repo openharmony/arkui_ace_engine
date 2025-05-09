@@ -24,7 +24,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkSecurityComponentMethodPeer, SecurityComponentMethod, ArkSecurityComponentMethodComponent, ArkSecurityComponentMethodStyle, UISecurityComponentMethod } from "./securityComponent"
 import { ClickEvent } from "./common"
-import { BusinessError } from "./base"
+import { BusinessError } from "#external"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -114,11 +114,12 @@ export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent 
     }
     /** @memo */
     public setSaveButtonOptions(options?: SaveButtonOptions): this {
-        if (this.checkPriority("setSaveButtonOptions")) {
+        if (options) {
             const options_type = runtimeType(options)
-            this.getPeer()?.setSaveButtonOptions0Attribute()
+            this.getPeer()?.setSaveButtonOptions1Attribute(options as SaveButtonOptions)
             return this
         }
+        this.getPeer()?.setSaveButtonOptions0Attribute()
         return this
     }
     /** @memo */

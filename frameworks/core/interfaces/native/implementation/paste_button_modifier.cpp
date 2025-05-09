@@ -89,8 +89,10 @@ void OnClickImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    auto onEvent = [arkCallback = CallbackHelper(*optValue), frameNode](GestureEvent& info) {
+    auto onEvent = [arkCallback = CallbackHelper(value->value), frameNode](GestureEvent& info) {
         auto res = SecurityComponentHandleResult::CLICK_GRANT_FAILED;
+        std::string message;
+        int32_t code = 0;
 #ifdef SECURITY_COMPONENT_ENABLE
         auto secEventValue = info.GetSecCompHandleEvent();
         if (secEventValue != nullptr) {
@@ -99,11 +101,20 @@ void OnClickImpl(Ark_NativePointer node,
             if (res == SecurityComponentHandleResult::DROP_CLICK) {
                 return;
             }
+            code = secEventValue->GetInt("code", code);
+            message = secEventValue->GetString("message", message);
         }
 #endif
         const auto event = Converter::ArkClickEventSync(info);
         auto arkResult = Converter::ArkValue<Ark_PasteButtonOnClickResult>(res);
-        auto error = Converter::ArkValue<Opt_BusinessError>();
+        auto error = Opt_BusinessError{
+            .value = Ark_BusinessError{
+                .name = Converter::ArkValue<Ark_String>("", Converter::FC),
+                .message = Converter::ArkValue<Ark_String>(message, Converter::FC),
+                .stack = Converter::ArkValue<Opt_String>("", Converter::FC),
+                .code = Converter::ArkValue<Ark_Number>(code)
+            }
+        };
         arkCallback.InvokeSync(event.ArkValue(), arkResult, error);
     };
     ViewAbstract::SetOnClick(frameNode, std::move(onEvent));

@@ -143,7 +143,7 @@ import { Callback_Array_String_Void, Callback_Array_TextMenuItem_Void, Callback_
 import { Callback_DismissDialogAction_Void, DismissDialogAction, ImmersiveMode, LevelMode, ActionSheetButtonOptions, ActionSheetOffset, SheetInfo, ActionSheetOptions } from "./../actionSheet"
 import { Want } from "./../ohos.app.ability"
 import { Callback_TerminationInfo_Void, TerminationInfo } from "./../embeddedComponent"
-import { BusinessError } from "./../base"
+import { BusinessError } from "#external"
 import { Profiler } from "./../inspector"
 import { ASTCResource } from "./../mediaCachedImage"
 import { CircleOptions } from "./../circle"

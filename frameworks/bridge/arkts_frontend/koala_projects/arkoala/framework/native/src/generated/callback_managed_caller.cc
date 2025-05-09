@@ -6106,13 +6106,6 @@ void callManagedPasteButtonCallback(Ark_Int32 resourceId, Ark_ClickEvent event, 
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeClickEvent(event);
     argsSerializer.writeInt32(static_cast<Ark_PasteButtonOnClickResult>(result));
-    Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
-    error_type = runtimeType(error);
-    argsSerializer.writeInt8(error_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_type)) {
-        const auto error_value = error.value;
-        argsSerializer.writeBusinessError(error_value);
-    }
     enqueueCallback(&_buffer);
 }
 void callManagedPasteButtonCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_ClickEvent event, Ark_PasteButtonOnClickResult result, Opt_BusinessError error)
@@ -6123,13 +6116,6 @@ void callManagedPasteButtonCallbackSync(Ark_VMContext vmContext, Ark_Int32 resou
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeClickEvent(event);
     argsSerializer.writeInt32(static_cast<Ark_PasteButtonOnClickResult>(result));
-    Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
-    error_type = runtimeType(error);
-    argsSerializer.writeInt8(error_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_type)) {
-        const auto error_value = error.value;
-        argsSerializer.writeBusinessError(error_value);
-    }
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
 void callManagedPasteEventCallback(Ark_Int32 resourceId, Opt_PasteEvent event)
@@ -6330,13 +6316,6 @@ void callManagedSaveButtonCallback(Ark_Int32 resourceId, Ark_ClickEvent event, A
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeClickEvent(event);
     argsSerializer.writeInt32(static_cast<Ark_SaveButtonOnClickResult>(result));
-    Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
-    error_type = runtimeType(error);
-    argsSerializer.writeInt8(error_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_type)) {
-        const auto error_value = error.value;
-        argsSerializer.writeBusinessError(error_value);
-    }
     enqueueCallback(&_buffer);
 }
 void callManagedSaveButtonCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_ClickEvent event, Ark_SaveButtonOnClickResult result, Opt_BusinessError error)
@@ -6347,13 +6326,6 @@ void callManagedSaveButtonCallbackSync(Ark_VMContext vmContext, Ark_Int32 resour
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeClickEvent(event);
     argsSerializer.writeInt32(static_cast<Ark_SaveButtonOnClickResult>(result));
-    Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
-    error_type = runtimeType(error);
-    argsSerializer.writeInt8(error_type);
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_type)) {
-        const auto error_value = error.value;
-        argsSerializer.writeBusinessError(error_value);
-    }
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
 void callManagedScrollOnScrollCallback(Ark_Int32 resourceId, Ark_Number xOffset, Ark_Number yOffset, Ark_ScrollState scrollState)

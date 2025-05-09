@@ -19,9 +19,5 @@
 import { int32, int64, float32 } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, wrapCallback } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
-export interface BusinessError<T = void> {
-    name: string;
-    message: string;
-    stack?: string;
-    code: number;
-}
+import { BusinessError } from "#external"
+export { BusinessError }

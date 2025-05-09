@@ -14,4 +14,3 @@
  */
 
 export type AbilityWant = undefined
-export type BusinessError = any;

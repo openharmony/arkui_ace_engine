@@ -5599,13 +5599,7 @@ void deserializeAndCallPasteButtonCallback(KSerializerBuffer thisArray, Ark_Int3
     thisDeserializer.readPointer();
     Ark_ClickEvent event = static_cast<Ark_ClickEvent>(thisDeserializer.readClickEvent());
     Ark_PasteButtonOnClickResult result = static_cast<Ark_PasteButtonOnClickResult>(thisDeserializer.readInt32());
-    const auto error_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_BusinessError error_buf = {};
-    error_buf.tag = error_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_buf_runtimeType))
-    {
-        error_buf.value = thisDeserializer.readBusinessError();
-    }
     Opt_BusinessError error = error_buf;
     _call(_resourceId, event, result, error);
 }
@@ -5617,13 +5611,7 @@ void deserializeAndCallSyncPasteButtonCallback(Ark_VMContext vmContext, KSeriali
     const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ClickEvent event, Ark_PasteButtonOnClickResult result, const Opt_BusinessError error)>(thisDeserializer.readPointer());
     Ark_ClickEvent event = static_cast<Ark_ClickEvent>(thisDeserializer.readClickEvent());
     Ark_PasteButtonOnClickResult result = static_cast<Ark_PasteButtonOnClickResult>(thisDeserializer.readInt32());
-    const auto error_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_BusinessError error_buf = {};
-    error_buf.tag = error_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_buf_runtimeType))
-    {
-        error_buf.value = thisDeserializer.readBusinessError();
-    }
     Opt_BusinessError error = error_buf;
     _callSync(vmContext, _resourceId, event, result, error);
 }
@@ -5811,13 +5799,7 @@ void deserializeAndCallSaveButtonCallback(KSerializerBuffer thisArray, Ark_Int32
     thisDeserializer.readPointer();
     Ark_ClickEvent event = static_cast<Ark_ClickEvent>(thisDeserializer.readClickEvent());
     Ark_SaveButtonOnClickResult result = static_cast<Ark_SaveButtonOnClickResult>(thisDeserializer.readInt32());
-    const auto error_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_BusinessError error_buf = {};
-    error_buf.tag = error_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_buf_runtimeType))
-    {
-        error_buf.value = thisDeserializer.readBusinessError();
-    }
     Opt_BusinessError error = error_buf;
     _call(_resourceId, event, result, error);
 }
@@ -5829,13 +5811,7 @@ void deserializeAndCallSyncSaveButtonCallback(Ark_VMContext vmContext, KSerializ
     const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ClickEvent event, Ark_SaveButtonOnClickResult result, const Opt_BusinessError error)>(thisDeserializer.readPointer());
     Ark_ClickEvent event = static_cast<Ark_ClickEvent>(thisDeserializer.readClickEvent());
     Ark_SaveButtonOnClickResult result = static_cast<Ark_SaveButtonOnClickResult>(thisDeserializer.readInt32());
-    const auto error_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
     Opt_BusinessError error_buf = {};
-    error_buf.tag = error_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-    if ((INTEROP_RUNTIME_UNDEFINED) != (error_buf_runtimeType))
-    {
-        error_buf.value = thisDeserializer.readBusinessError();
-    }
     Opt_BusinessError error = error_buf;
     _callSync(vmContext, _resourceId, event, result, error);
 }

@@ -21,7 +21,7 @@ import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, wrapCallback } from
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { RestrictedWorker } from "./arkui-custom"
 import { ErrorCallback } from "./ohos.base"
-import { BusinessError } from "./base"
+import { BusinessError } from "#external"
 import { Want } from "./ohos.app.ability"
 export interface IsolatedOptions {
     want: Want;
