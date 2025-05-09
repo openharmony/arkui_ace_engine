@@ -1159,4 +1159,22 @@ std::shared_ptr<SwiperDigitalParameters> SwiperModelNG::GetDigitIndicator(FrameN
     CHECK_NULL_RETURN(pattern, nullptr);
     return pattern->GetSwiperDigitalParameters();
 }
+
+void SwiperModelNG::SetMaintainVisibleContentPosition(bool value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, MaintainVisibleContentPosition, value);
+}
+
+void SwiperModelNG::SetMaintainVisibleContentPosition(FrameNode* frameNode, bool value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, MaintainVisibleContentPosition, value, frameNode);
+}
+
+bool SwiperModelNG::GetMaintainVisibleContentPosition(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        SwiperLayoutProperty, MaintainVisibleContentPosition, value, frameNode, value);
+    return value;
+}
 } // namespace OHOS::Ace::NG

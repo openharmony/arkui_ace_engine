@@ -572,7 +572,9 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
 
     if (lastCurrentIndex != currentIndex_ || (itemPosition_.empty() && !isVoluntarilyClear_)
         || hadCachedCapture != hasCachedCapture_) {
-        jumpIndex_ = GetLoopIndex(currentIndex_);
+        jumpIndex_ = (!isInit_ && GetMaintainVisibleContentPosition())
+                         ? jumpIndex_.value_or(GetLoopIndex(currentIndex_))
+                         : GetLoopIndex(currentIndex_);
         currentFirstIndex_ = jumpIndex_.value_or(0);
         turnPageRate_ = 0.0f;
         SetIndicatorJumpIndex(jumpIndex_);
@@ -7358,5 +7360,17 @@ void SwiperPattern::ReportComponentChangeEvent(
     result->Put("nodeId", nodeId);
     result->Put("event", json);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString());
+}
+
+void SwiperPattern::NotifyDataChange(int32_t index, int32_t count)
+{
+    ACE_SCOPED_TRACE("Swiper NotifyDataChange index %d count %d", index, count);
+    if (!oldChildrenSize_.has_value() || count == 0) {
+        return;
+    }
+    auto curretIndex = GetLoopIndex(currentIndex_, oldChildrenSize_.value());
+    if (GetMaintainVisibleContentPosition() && index < curretIndex) {
+        jumpIndex_ = jumpIndex_.value_or(CheckIndexRange(curretIndex + count));
+    }
 }
 } // namespace OHOS::Ace::NG

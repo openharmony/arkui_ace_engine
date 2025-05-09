@@ -182,6 +182,7 @@ public:
     virtual void SetBindIndicator(bool bind) {}
     virtual void SetJSIndicatorController(std::function<void()> resetFunc) {}
     virtual void SetOnSelected(std::function<void(const BaseEventInfo* info)>&& onSelected) {}
+    virtual void SetMaintainVisibleContentPosition(bool value) {}
 
 private:
     static std::unique_ptr<SwiperModel> instance_;

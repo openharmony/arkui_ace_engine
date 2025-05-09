@@ -31576,6 +31576,10 @@ class ArkSwiperComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SwiperOnContentWillScrollModifier.identity, SwiperOnContentWillScrollModifier, value);
     return this;
   }
+  maintainVisibleContentPosition(value) {
+    modifierWithKey(this._modifiersWithKeys, SwiperMaintainVisibleContentPositionModifier.identity, SwiperMaintainVisibleContentPositionModifier, value);
+    return this;
+  }
 }
 class SwiperInitializeModifier extends ModifierWithKey {
   applyPeer(node, reset) {
@@ -32235,6 +32239,22 @@ class SwiperOnContentWillScrollModifier extends ModifierWithKey {
   }
 }
 SwiperOnContentWillScrollModifier.identity = Symbol('swiperOnContentWillScroll');
+class SwiperMaintainVisibleContentPositionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperMaintainVisibleContentPosition(node);
+    } else {
+      getUINativeModule().swiper.setSwiperMaintainVisibleContentPosition(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SwiperMaintainVisibleContentPositionModifier.identity = Symbol('swiperMaintainVisibleContentPosition');
 // @ts-ignore
 if (globalThis.Swiper !== undefined) {
   globalThis.Swiper.attributeModifier = function (modifier) {
