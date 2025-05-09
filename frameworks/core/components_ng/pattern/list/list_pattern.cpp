@@ -275,7 +275,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CheckRestartSpring(sizeDiminished);
 
     DrivenRender(dirty);
-    UpdateLayoutRange(GetAxis(), !isInitialized_);
+    OnLayoutFinished(GetAxis(), !isInitialized_);
 
     SetScrollSource(SCROLL_FROM_NONE);
     isInitialized_ = true;

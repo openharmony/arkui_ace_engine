@@ -346,7 +346,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     layoutInfo_->jumpForRecompose_ = EMPTY_JUMP_INDEX;
     UpdateScrollBarOffset();
     CheckScrollable();
-    UpdateLayoutRange(layoutInfo_->axis_, !isInitialized_);
+    OnLayoutFinished(layoutInfo_->axis_, !isInitialized_);
 
     isInitialized_ = true;
 

@@ -51,7 +51,7 @@ protected:
     /**
      * @brief Pass latest layout viewport to adapter.
      */
-    void UpdateLayoutRange(Axis axis, bool firstLayout);
+    void OnLayoutFinished(Axis axis, bool firstLayout);
 
     /**
      * @brief Pass scroll offset to adapter.

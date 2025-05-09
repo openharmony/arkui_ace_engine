@@ -64,17 +64,19 @@ HWTEST_F(WaterFlowArkoalaTest, Basic001, TestSize.Level1)
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(lazy_.GetRange(), std::pair(0, 8));
     EXPECT_EQ(GetChildY(frameNode_, 6), 587);
+    std::cout << "67\n";
 
-    UpdateCurrentOffset(-400.0f);
+    pattern_->UpdateCurrentOffset(-400.0f, SCROLL_FROM_UPDATE);
     IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(2, 12));
+    EXPECT_EQ(lazy_.GetRange(), std::pair(0, 12));
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 2);
     EXPECT_EQ(GetChildRect(frameNode_, 12).ToString(), "RectT (0.00, 670.00) - [240.00 x 137.00]");
     EXPECT_EQ(GetChildRect(frameNode_, 3).ToString(), "RectT (240.00, -100.00) - [240.00 x 287.00]");
+    std::cout << "74\n";
 
-    UpdateCurrentOffset(-500.0f);
+    pattern_->UpdateCurrentOffset(-500.0f, SCROLL_FROM_UPDATE);
     IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(7, 18));
+    EXPECT_EQ(lazy_.GetRange(), std::pair(2, 18));
     EXPECT_EQ(GetChildRect(frameNode_, 10).ToString(), "RectT (0.00, 52.00) - [240.00 x 118.00]");
     EXPECT_EQ(GetChildRect(frameNode_, 15).ToString(), "RectT (0.00, 476.00) - [240.00 x 234.00]");
 
@@ -83,13 +85,13 @@ HWTEST_F(WaterFlowArkoalaTest, Basic001, TestSize.Level1)
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(lazy_.GetRange(), std::pair(7, 22));
     EXPECT_EQ(GetChildRect(frameNode_, 19).ToString(), "RectT (0.00, 918.00) - [240.00 x 270.00]");
-
-    UpdateCurrentOffset(300.0f);
+    std::cout << "86\n";
+    pattern_->UpdateCurrentOffset(300.0f, SCROLL_FROM_UPDATE);
     IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(5, 18));
+    EXPECT_EQ(lazy_.GetRange(), std::pair(5, 22));
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 4));
 
-    UpdateCurrentOffset(-51.0f);
+    pattern_->UpdateCurrentOffset(-51.0f, SCROLL_FROM_UPDATE);
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(lazy_.GetRange(), std::pair(5, 20));
 
@@ -141,7 +143,6 @@ HWTEST_F(WaterFlowArkoalaTest, Reset001, TestSize.Level1)
     }
 
     pattern_->ScrollToIndex(50);
-    FlushUITasks(frameNode_);
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(lazy_.GetRange(), std::pair(50, 59));
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 50);

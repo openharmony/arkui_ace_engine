@@ -26,7 +26,7 @@ bool LazyContainer::UpdateOffset(float delta)
     return false;
 }
 
-void LazyContainer::UpdateLayoutRange(Axis axis, bool firstLayout)
+void LazyContainer::OnLayoutFinished(Axis axis, bool firstLayout)
 {
     if (!adapter_) {
         return;
@@ -39,7 +39,7 @@ void LazyContainer::UpdateLayoutRange(Axis axis, bool firstLayout)
     if (geo->GetContentSize().IsPositive()) {
         size = geo->GetContentSize();
     }
-    adapter_->UpdateViewport(size, axis);
+    adapter_->OnLayoutFinished(size, axis);
     if (firstLayout) {
         adapter_->PrepareReset(0);
     }

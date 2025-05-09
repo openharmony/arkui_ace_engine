@@ -537,7 +537,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CheckScrollable();
     MarkSelectedItems();
 
-    UpdateLayoutRange(info_.axis_, !isInitialized_);
+    OnLayoutFinished(info_.axis_, !isInitialized_);
     isInitialized_ = true;
     if (AceType::InstanceOf<GridScrollLayoutAlgorithm>(gridLayoutAlgorithm)) {
         CheckGridItemRange(DynamicCast<GridScrollLayoutAlgorithm>(gridLayoutAlgorithm)->GetItemAdapterRange());

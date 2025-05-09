@@ -213,8 +213,10 @@ void ScrollWindowAdapter::Prepare(uint32_t offset)
     fillAlgorithm_->Prepare(size_, axis_, totalCount_);
 }
 
-void ScrollWindowAdapter::UpdateViewport(const SizeF& size, Axis axis)
+void ScrollWindowAdapter::OnLayoutFinished(const SizeF& size, Axis axis)
 {
+    fillAlgorithm_->OnLayoutFinished(size_, axis_);
+
     if (size == size_ && axis == axis_) {
         return;
     }

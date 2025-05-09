@@ -98,6 +98,13 @@ void StaggeredFillAlgorithm::Prepare(const SizeF& viewport, Axis axis, int32_t t
     UpdateCachedCnt();
     LayoutSynchronizer::Sync(props_, *this);
     for (auto& section : sections_) {
+        std::cout << "curren tsection = " << section.ToString() << "\n";
+    }
+}
+
+void StaggeredFillAlgorithm::OnLayoutFinished(const SizeF& viewport, Axis axis)
+{
+    for (auto& section : sections_) {
         section.PruneFront(0.0f);
         section.PruneBack(viewport.MainSize(axis));
     }
@@ -195,9 +202,6 @@ void StaggeredFillAlgorithm::OnSlidingOffsetUpdate(float delta)
 
 int32_t StaggeredFillAlgorithm::GetMarkIndex()
 {
-    for (auto& section : sections_) {
-        section.PruneFront(0.0f);
-    }
     return StartIdx().value_or(0);
 }
 
@@ -208,6 +212,7 @@ void StaggeredFillAlgorithm::UpdateCachedCnt()
         cacheCnt_ = 1;
     }
 }
+
 std::optional<float> StaggeredFillAlgorithm::StartPos() const
 {
     for (const auto& section : sections_) {
