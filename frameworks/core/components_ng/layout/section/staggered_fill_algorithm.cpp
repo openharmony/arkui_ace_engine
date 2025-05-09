@@ -207,4 +207,13 @@ void StaggeredFillAlgorithm::UpdateCachedCnt()
         cacheCnt_ = 1;
     }
 }
+std::optional<float> StaggeredFillAlgorithm::StartPos() const
+{
+    for (const auto& section : sections_) {
+        if (!section.IsEmpty()) {
+            return section.StartPos();
+        }
+    }
+    return std::nullopt;
+}
 } // namespace OHOS::Ace::NG

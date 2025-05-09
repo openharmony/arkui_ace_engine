@@ -52,6 +52,10 @@ public:
 
     void MarkJump() override;
 
+    std::optional<int32_t> StartIdx() const;
+    std::optional<int32_t> EndIdx() const;
+    std::optional<float> StartPos() const;
+
 private:
     bool CanFillMoreAtEnd(float viewportBound, Axis axis);
 
