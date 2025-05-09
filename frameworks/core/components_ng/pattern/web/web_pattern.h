@@ -57,9 +57,9 @@
 #include "ui/rs_surface_node.h"
 #include "core/components_ng/pattern/web/web_select_overlay.h"
 #include "core/components_ng/pattern/text_field/text_select_controller.h"
-#include "foundation/arkui/ace_engine/frameworks/core/common/ai/ai_write_adapter.h"
-#include "foundation/arkui/ace_engine/frameworks/core/common/ime/text_input_client.h"
-#include "foundation/arkui/ace_engine/frameworks/core/text/text_emoji_processor.h"
+#include "core/common/ai/ai_write_adapter.h"
+#include "core/common/ime/text_input_client.h"
+#include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace {
 class WebDelegateObserver;
