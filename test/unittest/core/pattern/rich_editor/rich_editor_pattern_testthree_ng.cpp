@@ -1370,7 +1370,7 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleSelect002, TestSize.Level1)
  * @tc.desc: test HandleSelect(Ctrl+Shift+Up/Down)
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectionTestNg, HandleSelect003, TestSize.Level1)
+HWTEST_F(RichEditorPatternTestThreeNg, HandleSelect003, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
