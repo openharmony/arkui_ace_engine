@@ -5736,7 +5736,7 @@ void RichEditorPattern::ProcessInsertValueMore(const std::u16string& text, Opera
         record.deleteCaretPostion = dragRange_.first;
     }
     IF_TRUE(shouldCommitInput,
-        undoManager_->RecordOperationAfterChange(rangeStart.start, static_cast<int32_t>(text.length()), styledRecord))
+        undoManager_->RecordOperationAfterChange(rangeStart.start, static_cast<int32_t>(text.length()), styledRecord));
     AddOperationRecord(record);
     AfterContentChange(changeValue);
 }
