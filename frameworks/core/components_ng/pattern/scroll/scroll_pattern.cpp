@@ -599,11 +599,6 @@ void ScrollPattern::StartVibrateFeedback()
 
 bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
 {
-#ifdef SUPPORT_DIGITAL_CROWN
-    if (source == SCROLL_FROM_CROWN && !ReachStart(true) && !ReachEnd(true)) {
-        StartVibrateFeedback();
-    }
-#endif
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -622,6 +617,13 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
     currentOffset_ -= userOffset;
     ValidateOffset(source);
     HandleScrollPosition(userOffset);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    MarkScrollBarProxyDirty();
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (source == SCROLL_FROM_CROWN && !ReachStart(true) && !ReachEnd(true)) {
+        StartVibrateFeedback();
+    }
+#endif
     if (IsCrashTop()) {
         TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "UpdateCurrentOffset==>[HandleCrashTop();]");
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -640,8 +642,6 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
         SetReachBoundary(false);
     }
 #endif
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    MarkScrollBarProxyDirty();
     return true;
 }
 
