@@ -596,7 +596,7 @@ public:
     float GetBorderBottom(BorderWidthProperty border) const;
     float GetBorderRight(BorderWidthProperty border) const;
 
-    const RectF& GetTextRect() override
+    const RectF& GetTextRect() const override
     {
         return textRect_;
     }

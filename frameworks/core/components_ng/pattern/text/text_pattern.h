@@ -304,7 +304,7 @@ public:
         return false;
     }
 
-    const RectF& GetTextRect() override
+    const RectF& GetTextRect() const override
     {
         return contentRect_;
     }

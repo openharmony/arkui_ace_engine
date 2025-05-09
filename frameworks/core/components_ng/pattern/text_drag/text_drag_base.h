@@ -36,7 +36,7 @@ public:
 
     virtual bool IsTextArea() const = 0;
 
-    virtual const RectF& GetTextRect() = 0;
+    virtual const RectF& GetTextRect() const = 0;
     virtual RectF GetTextContentRect(bool isActualText = false) const = 0;
     virtual float GetLineHeight() const = 0;
 
