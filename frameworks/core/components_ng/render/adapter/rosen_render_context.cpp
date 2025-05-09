@@ -683,6 +683,7 @@ void RosenRenderContext::SyncAdditionalGeometryProperties(const RectF& paintRect
             OnParticleOptionArrayUpdate(propParticleOptionArray_.value());
         }
     }
+    OnEmitterPropertyUpdate();
 }
 
 void RosenRenderContext::PaintDebugBoundary(bool flag)
@@ -1179,6 +1180,31 @@ void RosenRenderContext::OnParticleOptionArrayUpdate(const std::list<ParticleOpt
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnEmitterPropertyUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    auto particlePattern = AceType::DynamicCast<ParticlePattern>(pattern);
+    CHECK_NULL_VOID(particlePattern);
+    auto property = particlePattern->GetEmitterProperty();
+    if (property.empty()) {
+        return;
+    }
+    for (const auto& prop : property) {
+        if (!prop.annulusRegion.has_value()) {
+            continue;
+        }
+        const auto& annulusRegion = prop.annulusRegion.value();
+        if (annulusRegion.center_.first.Unit() == DimensionUnit::PERCENT ||
+            annulusRegion.center_.second.Unit() == DimensionUnit::PERCENT) {
+            particlePattern->updateEmitterPosition(property);
+            return;
+        }
+    }
+}
+
 void RosenRenderContext::OnClickEffectLevelUpdate(const ClickEffectInfo& info)
 {
     if (HasClickEffectLevel()) {
@@ -1324,6 +1350,23 @@ Rosen::EmitterConfig RosenRenderContext::ConvertParticleEmitterOption(
     auto shapeInt = static_cast<int32_t>(shapeOpt.value_or(ParticleEmitterShape::RECTANGLE));
     auto lifeTimeRange = OHOS::Rosen::Range<int64_t>(
         lifeTimeMin.value_or(PARTICLE_DEFAULT_LIFETIME), lifeTimeMax.value_or(PARTICLE_DEFAULT_LIFETIME));
+
+    // The default value for the centerXY axis is 50 percent,
+    // for the innerRadius or outerRadius is 0,
+    // for the startAngle is 0, for the endAngle is 360.
+    std::shared_ptr<Rosen::AnnulusRegion> rsAnnulusRegion = std::make_shared<Rosen::AnnulusRegion>(
+        OHOS::Rosen::Vector2f(DEFAULT_CENTER_VALUE.ConvertToPxWithSize(rect.Width()),
+        DEFAULT_CENTER_VALUE.ConvertToPxWithSize(rect.Height())),
+        DEFAULT_RADIUS_VALUE, DEFAULT_RADIUS_VALUE, DEFAULT_START_ANGLE_VALUE, DEFAULT_END_ANGLE_VALUE);
+    auto annulusRegionOpt = emitterOption.GetAnnulusRegion();
+    if (annulusRegionOpt.has_value() && shapeInt == static_cast<int32_t>(ParticleEmitterShape::ANNULUS)) {
+        auto annulusRegion = annulusRegionOpt.value();
+        auto center = annulusRegion.center_;
+        auto rsCenter = OHOS::Rosen::Vector2f(center.first.ConvertToPxWithSize(rect.Width()),
+            center.second.ConvertToPxWithSize(rect.Height()));
+        rsAnnulusRegion = std::make_shared<Rosen::AnnulusRegion>(rsCenter, annulusRegion.innerRadius_.ConvertToPx(),
+            annulusRegion.outerRadius_.ConvertToPx(), annulusRegion.startAngle_, annulusRegion.endAngle_);
+    }
     if (particleType == ParticleType::IMAGE) {
         auto imageParameter = particleConfig.GetImageParticleParameter();
         auto imageSource = imageParameter.GetImageSource();
@@ -1336,16 +1379,20 @@ Rosen::EmitterConfig RosenRenderContext::ConvertParticleEmitterOption(
         }
         rsImagePtr->SetImageFit(static_cast<int32_t>(imageParameter.GetImageFit().value_or(ImageFit::COVER)));
         OHOS::Rosen::Vector2f rsImageSize(imageWidth.ConvertToPx(), imageHeight.ConvertToPx());
-        return OHOS::Rosen::EmitterConfig(emitterRateOpt.value_or(PARTICLE_DEFAULT_EMITTER_RATE),
+        auto emitterConfig =  OHOS::Rosen::EmitterConfig(emitterRateOpt.value_or(PARTICLE_DEFAULT_EMITTER_RATE),
             static_cast<OHOS::Rosen::ShapeType>(shapeInt), rsPoint, rsSize, particleCount, lifeTimeRange,
             OHOS::Rosen::ParticleType::IMAGES, 0.0f, rsImagePtr, rsImageSize);
+        emitterConfig.SetConfigShape(rsAnnulusRegion);
+        return emitterConfig;
     } else {
         auto pointParameter = particleConfig.GetPointParticleParameter();
         auto radius = pointParameter.GetRadius();
-        return OHOS::Rosen::EmitterConfig(emitterRateOpt.value_or(PARTICLE_DEFAULT_EMITTER_RATE),
+        auto emitterConfig =  OHOS::Rosen::EmitterConfig(emitterRateOpt.value_or(PARTICLE_DEFAULT_EMITTER_RATE),
             static_cast<OHOS::Rosen::ShapeType>(shapeInt), rsPoint, rsSize, particleCount, lifeTimeRange,
             OHOS::Rosen::ParticleType::POINTS, radius, std::make_shared<OHOS::Rosen::RSImage>(),
             OHOS::Rosen::Vector2f());
+        emitterConfig.SetConfigShape(rsAnnulusRegion);
+        return emitterConfig;
     }
 }
 

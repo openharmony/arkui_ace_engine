@@ -1692,6 +1692,30 @@ struct ArkUIAnimator {
     void* animatorOption;
 };
 
+struct ArkEmitterPropertyOptions {
+    ArkUI_Int32 index;
+    ArkUI_Int32 isSetEmitRate;
+    ArkUI_Int32 emitRate;
+    ArkUI_Int32 isSetPosition;
+    ArkUI_Float32 positionX;
+    ArkUI_Float32 positionY;
+    ArkUI_Int32 isSetSize;
+    ArkUI_Float32 sizeWidth;
+    ArkUI_Float32 sizeHeight;
+    ArkUI_Int32 isSetAnnulusRegion;
+    ArkUI_Int32 isSetCenter;
+    ArkUIDimensionType centerX;
+    ArkUIDimensionType centerY;
+    ArkUI_Int32 isSetInnerRadius;
+    ArkUIDimensionType innerRadius;
+    ArkUI_Int32 isSetOuterRadius;
+    ArkUIDimensionType outerRadius;
+    ArkUI_Int32 isSetStartAngle;
+    ArkUI_Float32 startAngle;
+    ArkUI_Int32 isSetEndAngle;
+    ArkUI_Float32 endAngle;
+};
+
 typedef struct {
     ArkUIDragEvent* dragEvent;
     ArkUI_Int32 status;
@@ -3005,7 +3029,7 @@ struct ArkUIListItemGroupModifier {
 struct ArkUIParticleModifier {
     void (*SetDisturbanceField)(ArkUINodeHandle node, const ArkUIInt32orFloat32* valuesArray, ArkUI_Int32 length);
     void (*ResetDisturbanceField)(ArkUINodeHandle node);
-    void (*SetEmitter)(ArkUINodeHandle node, const ArkUIInt32orFloat32* valuesArray, ArkUI_Int32 length);
+    void (*SetEmitter)(ArkUINodeHandle node, const ArkEmitterPropertyOptions* valuesArray, ArkUI_Int32 length);
     void (*ResetEmitter)(ArkUINodeHandle node);
 };
 
