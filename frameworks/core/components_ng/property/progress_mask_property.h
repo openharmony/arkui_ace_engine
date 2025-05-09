@@ -17,9 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_PROGRESS_MASK_PROPERTY_H
 
 #include <vector>
-
+#include <functional>
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::NG {
 class ProgressMaskProperty : public AceType {
@@ -42,6 +43,11 @@ public:
     Color GetColor() const
     {
         return color_;
+    }
+
+    RefPtr<ResourceObject> GetResObj()
+    {
+        return resObj_;
     }
 
     bool GetEnableBreathe() const
@@ -69,6 +75,10 @@ public:
         enableBreathe_ = enableBreathe;
     }
 
+    void SetResObj(const RefPtr<ResourceObject> resObj)
+    {
+        resObj_ = resObj;
+    }
     bool operator==(const ProgressMaskProperty& other) const
     {
         return  (value_ == other.GetValue() &&
@@ -91,6 +101,7 @@ private:
     float maxValue_ = 100.0f;
     Color color_ = Color(0x99182431);
     bool enableBreathe_ = false;
+    RefPtr<ResourceObject> resObj_;
 };
 } // namespace OHOS::Ace::NG {
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_PROGRESS_MASK_PROPERTY_H

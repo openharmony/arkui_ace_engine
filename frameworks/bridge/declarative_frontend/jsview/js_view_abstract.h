@@ -156,15 +156,28 @@ public:
     static void JsBackgroundImagePosition(const JSCallbackInfo& info);
     static void ParseBlurOption(const JSRef<JSObject>& jsBlurOption, BlurOption& blurOption);
     static void ParseBackgroundImageOption(const JSCallbackInfo& jsOption, int32_t& repeatIndex, bool& syncMode);
+    static void ParseInactiveColor(const JSRef<JSObject>& jsOption, BlurStyleOption& styleOption);
     static void ParseBlurStyleOption(const JSRef<JSObject>& jsOption, BlurStyleOption& styleOption);
     static void ParseSysOptions(const JSRef<JSObject>& jsSysOptions, SysOptions& sysOptions);
     static void JsBackgroundBlurStyle(const JSCallbackInfo& info);
     static void JsBackgroundEffect(const JSCallbackInfo& info);
+    static void GetEffectOptionColor(const JSRef<JSObject>& jsOption, EffectOption& effectOption);
+    static void GetEffectOptionInactiveColorUpdate(const RefPtr<ResourceObject>& inactiveColorObj,
+        EffectOption& effectOption);
+    static void GetEffectOptionInactiveColor(const JSRef<JSObject>& jsOption, EffectOption& effectOption);
     static void ParseEffectOption(const JSRef<JSObject>& jsObj, EffectOption& effectOption);
     static void ParseBrightnessOption(const JSRef<JSObject>& jsObj, BrightnessOption& brightnessOption);
     static void JsForegroundBlurStyle(const JSCallbackInfo& info);
     static void JsForegroundEffect(const JSCallbackInfo& info);
     static void JsSphericalEffect(const JSCallbackInfo& info);
+    static void GetPixelStretchEffectLeftObj(
+        const JSRef<JSObject>& jsObject, CalcDimension& left, PixStretchEffectOption& option);
+    static void GetPixelStretchEffectRightObj(
+        const JSRef<JSObject>& jsObject, CalcDimension& right, PixStretchEffectOption& option);
+    static void GetPixelStretchEffectTopObj(
+        const JSRef<JSObject>& jsObject, CalcDimension& top, PixStretchEffectOption& option);
+    static void GetPixelStretchEffectBottomObj(
+        const JSRef<JSObject>& jsObject, CalcDimension& bottom, PixStretchEffectOption& option);
     static void JsPixelStretchEffect(const JSCallbackInfo& info);
     static bool InitPixStretchEffect(
         CalcDimension& left, CalcDimension& right, CalcDimension& top, CalcDimension bottom);
@@ -302,8 +315,13 @@ public:
     // outer border
     static void ParseOuterBorderColor(const JSRef<JSVal>& args);
     static void ParseOuterBorderWidth(const JSRef<JSVal>& args);
+    static void ParseOuterBorderWidthNew(const JSRef<JSVal>& args);
     static void ParseOuterBorderRadius(const JSRef<JSVal>& args);
     static void ParseOuterBorderStyle(const JSRef<JSVal>& args);
+    static void ParseEdgeOutlineWidthLeft(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidth);
+    static void ParseEdgeOutlineWidthRight(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidth);
+    static void ParseEdgeOutlineWidthTop(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidth);
+    static void ParseEdgeOutlineWidthBottom(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidth);
 
     // response region
     static void JsResponseRegion(const JSCallbackInfo& info);
@@ -405,6 +423,7 @@ public:
     static bool ParseJsLengthMetricsArray(const JSRef<JSVal>& jsValue, std::vector<Dimension>& result);
     static bool IsGetResourceByName(const JSRef<JSObject>& jsObj);
     static bool GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName);
+    static void ParseShadowPropsUpdate(const JSRef<JSObject>& jsObj, double& radius, Shadow& shadow);
     static bool ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shadow);
     static void ParseShadowOffsetXY(const JSRef<JSObject>& jsObj, Shadow& shadow);
     static bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
@@ -476,6 +495,7 @@ public:
     static void JsClip(const JSCallbackInfo& info);
     static void JsClipShape(const JSCallbackInfo& info);
 
+    static void ParseJsMaskProperty(const JSRef<JSObject>& paramObject);
     static void JsMask(const JSCallbackInfo& info);
     static void JsMaskShape(const JSCallbackInfo& info);
 
@@ -783,6 +803,15 @@ private:
     static JSRef<JSVal> CreateJsSystemMenuItems(const std::vector<NG::MenuItemParam>& systemMenuItems);
     static void CompleteResourceObjectInner(
         JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resIdValue);
+    static bool ParseAllBorderRadiusesForOutLine(JSRef<JSObject>& object, NG::BorderRadiusProperty& borderRadius);
+    static void GetBorderRadiusTopLeft(const JSRef<JSVal>& jsValue, NG::BorderRadiusProperty& borderRadius);
+    static void GetBorderRadiusTopRight(const JSRef<JSVal>& jsValue, NG::BorderRadiusProperty& borderRadius);
+    static void GetBorderRadiusBottomLeft(const JSRef<JSVal>& jsValue, NG::BorderRadiusProperty& borderRadius);
+    static void GetBorderRadiusBottomRight(const JSRef<JSVal>& jsValue, NG::BorderRadiusProperty& borderRadius);
+    static void ParseSweepGradientCenter(NG::Gradient& newGradient, const JSRef<JSArray> centerArray);
+    static void ParseRadialGradientCenter(NG::Gradient& newGradient, const JSRef<JSArray> centerArray);
+    static void NewParseGradientColor(NG::Gradient& gradient, JSRef<JSArray>& subArray,
+        NG::GradientColor& gradientColor, size_t& i, size_t& length);
 };
 } // namespace OHOS::Ace::Framework
 #endif // JS_VIEW_ABSTRACT_H

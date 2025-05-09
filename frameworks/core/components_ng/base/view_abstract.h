@@ -204,6 +204,7 @@ public:
     static void SetDashWidth(const Dimension &value);
     static void SetDashWidth(const BorderWidthProperty &value);
     static void SetOpacity(double opacity);
+    static void CreateWithOpacityResourceObj(const RefPtr<ResourceObject>& resobj);
     static void SetAllowDrop(const std::set<std::string> &allowDrop);
     static void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier);
     static void* GetFrameNode();
@@ -262,6 +263,7 @@ public:
     static void SetInvert(const InvertVariant &value);
     static void SetHueRotate(float value);
     static void SetColorBlend(const Color &value);
+    static void CreateWithColorBlendResourceObj(const RefPtr<ResourceObject>& resobj);
     static void SetSystemBarEffect(bool systemBarEffect);
     static void SetSystemBarEffect(FrameNode *frameNode, bool enable);
 
@@ -269,6 +271,14 @@ public:
     static void SetLinearGradient(const NG::Gradient &gradient);
     static void SetSweepGradient(const NG::Gradient &gradient);
     static void SetRadialGradient(const NG::Gradient &gradient);
+
+    static void CreateWithForegroundColorResourceObj(const RefPtr<ResourceObject>& resObj);
+    static void CreateWithOuterBorderColorResourceObj(const RefPtr<ResourceObject>& resObj);
+    static void CreateWithOuterBorderRadiusResourceObj(const RefPtr<ResourceObject>& resObj);
+    static void CreateWithLightColorResourceObj(const RefPtr<ResourceObject>& resObj);
+    static void CreateWithOuterBorderWidthResourceObj(const RefPtr<ResourceObject>& resObj);
+    static void SetLightPosition(FrameNode* frameNode, const NG::TranslateOptions& options);
+    static void SetLightPosition(const NG::TranslateOptions& options);
 
     // layout
     static void SetAlign(Alignment alignment);
@@ -701,6 +711,7 @@ public:
         NG::TransitionFinishCallback&& finishCallback = nullptr);
     static void SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMaskProperty>& progress);
+    static void CreateWithMaskResourceObj(const RefPtr<NG::ProgressMaskProperty>& progress);
     static void SetEnabled(FrameNode* frameNode, bool enabled);
     static void SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching);
     static void SetBlendMode(FrameNode* frameNode, BlendMode blendMode);

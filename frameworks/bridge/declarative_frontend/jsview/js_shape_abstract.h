@@ -53,7 +53,9 @@ public:
     {
         basicShape_ = basicShape;
     }
-
+    void ObjectOffsetUpdate(const RefPtr<ResourceObject>& xResObj, RefPtr<ResourceObject> yResObj);
+    void ObjectFillUpdate(const RefPtr<ResourceObject>& fillResObj);
+    void ObjectHeightUpdate(const RefPtr<ResourceObject>& heightResObj);
     void ObjectWidth(const JSCallbackInfo& info);
     void ObjectHeight(const JSCallbackInfo& info);
     void ObjectSize(const JSCallbackInfo& info);

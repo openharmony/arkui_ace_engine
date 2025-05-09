@@ -41,6 +41,7 @@
 #include "core/animation/native_curve_helper.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/blur_style_theme.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/overlay/accessibility_focus_paint_node_pattern.h"
 #include "core/components_ng/pattern/particle/particle_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -1028,6 +1029,43 @@ bool RosenRenderContext::UpdateBlurBackgroundColor(const std::optional<EffectOpt
     return blurEnable;
 }
 
+void RosenRenderContext::UpdateBlurStyleForColorMode(
+    const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [weak = AceType::WeakClaim(this), bgBlurStyle, sysOptions](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto render = weak.Upgrade();
+        CHECK_NULL_VOID(render->rsNode_);
+        const auto& groupProperty = render->GetOrCreateBackground();
+        if (groupProperty->CheckBlurStyleOption(bgBlurStyle) && groupProperty->CheckSystemAdaptationSame(sysOptions)) {
+            // Same with previous value.
+            // If colorMode is following system and has valid blurStyle, still needs updating
+            if (bgBlurStyle->colorMode != ThemeColorMode::SYSTEM) {
+                return;
+            }
+            if (bgBlurStyle->blurOption.grayscale.size() > 1) {
+                Rosen::Vector2f grayScale(bgBlurStyle->blurOption.grayscale[0], bgBlurStyle->blurOption.grayscale[1]);
+                render->rsNode_->SetGreyCoef(grayScale);
+            }
+        } else {
+            groupProperty->propBlurStyleOption = bgBlurStyle;
+            groupProperty->propSysOptions = sysOptions;
+        }
+        if (!render->UpdateBlurBackgroundColor(bgBlurStyle)) {
+            render->rsNode_->SetBackgroundFilter(nullptr);
+            return;
+        }
+        render->SetBackBlurFilter();
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("backgroundBlurStyle.blurStyle", resObj, std::move(updateFunc));
+}
+
 void RosenRenderContext::UpdateBackBlurStyle(
     const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions)
 {
@@ -1047,7 +1085,7 @@ void RosenRenderContext::UpdateBackBlurStyle(
         groupProperty->propBlurStyleOption = bgBlurStyle;
         groupProperty->propSysOptions = sysOptions;
     }
-
+    UpdateBlurStyleForColorMode(bgBlurStyle, sysOptions);
     if (!UpdateBlurBackgroundColor(bgBlurStyle)) {
         rsNode_->SetBackgroundFilter(nullptr);
         return;
