@@ -31,7 +31,7 @@ void LayoutSynchronizer::Sync(const RefPtr<LayoutProperty>& props, const Stagger
         auto pattern = host->GetPattern<WaterFlowPattern>();
         int32_t startIdx = pattern->GetBeginIndex();
         int32_t endIdx = pattern->GetEndIndex();
-        float offset = pattern->GetStoredOffset();
+        float startPos = pattern->GetStoredOffset() + pattern->GetPendingDelta();
         if (startIdx != fillAlgo.StartIdx()) {
             std::cout << "WARNING startIdx = " << startIdx << " " << fillAlgo.StartIdx().value_or(-1) << "\n";
         }
@@ -39,8 +39,8 @@ void LayoutSynchronizer::Sync(const RefPtr<LayoutProperty>& props, const Stagger
             std::cout << "WARNING endIdx = " << endIdx << " " << fillAlgo.EndIdx().value_or(-1) << "\n";
 
         }
-        if (offset != fillAlgo.StartPos()) {
-            std::cout << "WARNING offset = " << offset << " " << fillAlgo.StartPos().value_or(0.0f) << "\n";
+        if (startPos != fillAlgo.StartPos()) {
+            std::cout << "WARNING offset = " << startPos << " " << fillAlgo.StartPos().value_or(0.0f) << "\n";
             
         }
     } else if (auto p = AceType::DynamicCast<ListLayoutProperty>(props); p) {

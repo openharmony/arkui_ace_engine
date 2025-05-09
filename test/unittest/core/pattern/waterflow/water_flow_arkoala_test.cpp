@@ -64,7 +64,6 @@ HWTEST_F(WaterFlowArkoalaTest, Basic001, TestSize.Level1)
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(lazy_.GetRange(), std::pair(0, 8));
     EXPECT_EQ(GetChildY(frameNode_, 6), 587);
-    std::cout << "67\n";
 
     pattern_->UpdateCurrentOffset(-400.0f, SCROLL_FROM_UPDATE);
     IncrementAndLayout(__LINE__);
@@ -72,7 +71,6 @@ HWTEST_F(WaterFlowArkoalaTest, Basic001, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 2);
     EXPECT_EQ(GetChildRect(frameNode_, 12).ToString(), "RectT (0.00, 670.00) - [240.00 x 137.00]");
     EXPECT_EQ(GetChildRect(frameNode_, 3).ToString(), "RectT (240.00, -100.00) - [240.00 x 287.00]");
-    std::cout << "74\n";
 
     pattern_->UpdateCurrentOffset(-500.0f, SCROLL_FROM_UPDATE);
     IncrementAndLayout(__LINE__);
@@ -85,7 +83,6 @@ HWTEST_F(WaterFlowArkoalaTest, Basic001, TestSize.Level1)
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(lazy_.GetRange(), std::pair(7, 22));
     EXPECT_EQ(GetChildRect(frameNode_, 19).ToString(), "RectT (0.00, 918.00) - [240.00 x 270.00]");
-    std::cout << "86\n";
     pattern_->UpdateCurrentOffset(300.0f, SCROLL_FROM_UPDATE);
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(lazy_.GetRange(), std::pair(5, 22));

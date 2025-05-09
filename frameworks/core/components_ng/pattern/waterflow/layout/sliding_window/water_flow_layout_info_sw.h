@@ -47,6 +47,11 @@ public:
         return startIndex_;
     }
 
+    float GetPendingDelta() const override
+    {
+        return delta_;
+    }
+
     void UpdateOffset(float delta) override
     {
         delta_ += delta;
