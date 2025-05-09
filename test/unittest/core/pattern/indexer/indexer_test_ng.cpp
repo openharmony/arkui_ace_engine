@@ -156,8 +156,7 @@ HWTEST_F(IndexerTestNg, IndexerPatternCoverage001, TestSize.Level1)
      * has no condition that has no popListData when showPopup.
      */
     pattern_->MoveIndexBySearch("C");
-    std::vector<std::string> bubbleData = std::vector<std::string>();
-    pattern_->UpdateBubbleSize(bubbleData);
+    pattern_->UpdateBubbleSize();
 }
 
 /**
