@@ -2751,6 +2751,8 @@ frameworks/core/interfaces/native/node/extension_companion_node.cpp @arkuiframew
 frameworks/core/interfaces/native/node/extension_companion_node.h @arkuiframework
 frameworks/core/interfaces/native/node/extension_custom_node.cpp @arkuiframework
 frameworks/core/interfaces/native/node/extension_custom_node.h @arkuiframework
+frameworks/core/interfaces/native/node/embeddedComponent_modifier.cpp @arkuiabilitygroup
+frameworks/core/interfaces/native/node/embeddedComponent_modifier.h @arkuiabilitygroup
 frameworks/core/interfaces/native/node/flex_modifier.cpp @arkuilayout
 frameworks/core/interfaces/native/node/flex_modifier.h @arkuilayout
 frameworks/core/interfaces/native/node/form_component_modifier.cpp @arondave

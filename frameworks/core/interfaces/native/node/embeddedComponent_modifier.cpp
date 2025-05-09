@@ -14,6 +14,9 @@
  */
 #include "core/interfaces/native/node/embeddedComponent_modifier.h"
 
+#include <securec.h>
+#include <cstring>
+
 #include "interfaces/native/node/embeddedComponent_option.h"
 #include "want_manager.h"
 
@@ -41,45 +44,115 @@ void SetEmbeddedComponentWant(ArkUINodeHandle node, AbilityBase_Want* cwant)
     UIExtensionAdapter::SetEmbeddedComponentWant(frameNode, want);
 }
 
-void SetEmbeddedComponentOption(ArkUINodeHandle node, ArkUIEmbeddedComponentItemHandle option)
+void TransformToCWantElement(AbilityBase_Element& element, AAFwk::Want want)
 {
-    CHECK_NULL_VOID(option);
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (option->onError) {
-        auto onError = [option](int32_t code, const std::string& name, const std::string& message) {
-            if (option == nullptr || option->onError == nullptr) {
-                TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "option is null, set EmbeddedComponent onError failed");
-                return;
-            }
-            onErrorFuncType func = reinterpret_cast<onErrorFuncType>(option->onError);
-            if (func == nullptr) {
-                TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "func is null, set EmbeddedComponent onError failed");
-                return;
-            }
-            func(code, name.c_str(), message.c_str());
-        };
-        UIExtensionAdapter::SetEmbeddedComponentOnError(frameNode, std::move(onError));
+    element.bundleName = new char[want.GetElement().GetBundleName().length() + 1];
+    element.moduleName = new char[want.GetElement().GetModuleName().length() + 1];
+    element.abilityName = new char[want.GetElement().GetAbilityName().length() + 1];
+    if (strcpy_s(element.bundleName, want.GetElement().GetBundleName().length() + 1,
+        want.GetElement().GetBundleName().c_str()) != 0) {
+        return;
+    }
+    if (strcpy_s(element.moduleName, want.GetElement().GetModuleName().length() + 1,
+        want.GetElement().GetModuleName().c_str()) != 0) {
+        return;
+    }
+    if (strcpy_s(element.abilityName, want.GetElement().GetAbilityName().length() + 1,
+        want.GetElement().GetAbilityName().c_str()) != 0) {
+        return;
+    }
+}
+
+void DestoryCWantElement(AbilityBase_Element& element)
+{
+    if (element.bundleName) {
+        delete[] element.bundleName;
+    }
+    if (element.moduleName) {
+        delete[] element.moduleName;
+    }
+    if (element.abilityName) {
+        delete[] element.abilityName;
+    }
+}
+
+void SetEmbeddedComponentOnError(FrameNode* frameNode, ArkUIEmbeddedComponentItemHandle option)
+{
+    if (option->onError == nullptr) {
+        return;
     }
 
-    if (option->onTerminated) {
-        auto onTerminated = [option](int32_t code, const RefPtr<WantWrap>& wantWrap) {
-            if (option == nullptr || option->onTerminated == nullptr) {
-                TAG_LOGE(
-                    AceLogTag::ACE_UIEXTENSIONCOMPONENT, "option is null, set EmbeddedComponent onTerminated failed");
-                return;
-            }
-            AbilityBase_Want want;
-            onTerminatedFuncType func = reinterpret_cast<onTerminatedFuncType>(option->onTerminated);
-            if (func == nullptr) {
-                TAG_LOGE(
-                    AceLogTag::ACE_UIEXTENSIONCOMPONENT, "func is null, set EmbeddedComponent onTerminated failed");
-                return;
-            }
-            func(code, &want);
-        };
-        UIExtensionAdapter::SetEmbeddedComponentOnTerminated(frameNode, std::move(onTerminated));
+    auto onError = [option](int32_t code, const std::string& name, const std::string& message) {
+        if (option == nullptr || option->onError == nullptr) {
+            TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "option is null, set EmbeddedComponent onError failed");
+            return;
+        }
+
+        onErrorFuncType func = reinterpret_cast<onErrorFuncType>(option->onError);
+        if (func == nullptr) {
+            TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "func is null, set EmbeddedComponent onError failed");
+            return;
+        }
+
+        func(code, name.c_str(), message.c_str());
+    };
+
+    UIExtensionAdapter::SetEmbeddedComponentOnError(frameNode, std::move(onError));
+}
+
+void SetEmbeddedComponentOnTerminated(FrameNode* frameNode, ArkUIEmbeddedComponentItemHandle option)
+{
+    if (option->onTerminated == nullptr) {
+        return;
     }
+
+    auto onTerminated = [option](int32_t code, const RefPtr<WantWrap>& wantWrap) {
+        if (option == nullptr || option->onTerminated == nullptr) {
+            TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "option is null, set EmbeddedComponent onTerminated failed");
+            return;
+        }
+
+        onTerminatedFuncType func = reinterpret_cast<onTerminatedFuncType>(option->onTerminated);
+        if (func == nullptr) {
+            TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "func is null, set EmbeddedComponent onTerminated failed");
+            return;
+        }
+
+        if (wantWrap) {
+            AbilityBase_Want cwant;
+            auto errCode = AAFwk::CWantManager::TransformToCWantWithoutElement(wantWrap->GetWant(), false, cwant);
+            if (errCode != ABILITY_BASE_ERROR_CODE_NO_ERROR) {
+                TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                    "Get EmbeddedComponent cWant failed, error code is %{public}d", errCode);
+                return;
+            }
+
+            AbilityBase_Element element;
+            TransformToCWantElement(element, wantWrap->GetWant());
+            cwant.element = element;
+            func(code, &cwant);
+            DestoryCWantElement(element);
+        } else {
+            func(code, nullptr);
+        }
+    };
+
+    UIExtensionAdapter::SetEmbeddedComponentOnTerminated(frameNode, std::move(onTerminated));
+}
+
+void SetEmbeddedComponentOption(ArkUINodeHandle node, ArkUIEmbeddedComponentItemHandle option)
+{
+    if (option == nullptr) {
+        return;
+    }
+
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    if (frameNode == nullptr) {
+        return;
+    }
+
+    SetEmbeddedComponentOnError(frameNode, option);
+    SetEmbeddedComponentOnTerminated(frameNode, option);
 }
 } // namespace
 
