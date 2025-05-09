@@ -1373,20 +1373,20 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest005, TestSize.Level1)
     checkBoxModifier->hoverColor_ = Color::RED;
     checkBoxModifier->clickEffectColor_ = Color::BLUE;
     checkBoxModifier->touchHoverType_ = TouchHoverAnimationType::HOVER;
-    checkBoxModifier->UpdateAnimatableProperty();
+    checkBoxModifier->UpdateAnimatableProperty(true);
     checkBoxModifier->animateTouchHoverColor_ =
         AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
     checkBoxModifier->touchHoverType_ = TouchHoverAnimationType::PRESS_TO_HOVER;
-    checkBoxModifier->UpdateAnimatableProperty();
+    checkBoxModifier->UpdateAnimatableProperty(true);
     EXPECT_EQ(checkBoxModifier->animateTouchHoverColor_->Get(), LinearColor(Color::RED));
     checkBoxModifier->touchHoverType_ = TouchHoverAnimationType::NONE;
-    checkBoxModifier->UpdateAnimatableProperty();
+    checkBoxModifier->UpdateAnimatableProperty(true);
     EXPECT_EQ(checkBoxModifier->animateTouchHoverColor_->Get(), LinearColor(Color::RED.BlendOpacity(0)));
     checkBoxModifier->touchHoverType_ = TouchHoverAnimationType::HOVER_TO_PRESS;
-    checkBoxModifier->UpdateAnimatableProperty();
+    checkBoxModifier->UpdateAnimatableProperty(true);
     EXPECT_EQ(checkBoxModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
     checkBoxModifier->touchHoverType_ = TouchHoverAnimationType::PRESS;
-    checkBoxModifier->UpdateAnimatableProperty();
+    checkBoxModifier->UpdateAnimatableProperty(true);
     EXPECT_EQ(checkBoxModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
 }
 
