@@ -235,8 +235,8 @@ private:
         }
     }
 
-    bool ProcessMouseEventWithTouch(const MouseEvent& event, const RefPtr<OHOS::Ace::NG::FrameNode>& node,
-        const std::function<void()>& markProcess);
+    bool ProcessMouseEventWithTouch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const MouseEvent& event,
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node, const std::function<void()>& markProcess);
     void ProcessAxisEventWithTouch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const RefPtr<OHOS::Ace::NG::FrameNode>& node, bool isInjected);
 

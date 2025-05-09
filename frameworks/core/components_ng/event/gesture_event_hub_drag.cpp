@@ -980,6 +980,10 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(),
         static_cast<int32_t>(info.GetSourceTool()), dragMoveLastPoint.GetScreenX(),
         dragMoveLastPoint.GetScreenY(), info.GetTargetDisplayId(), windowId, true, false, summary };
+    if (AceApplicationInfo::GetInstance().IsMouseTransformEnable() && (info.GetSourceTool() == SourceTool::MOUSE) &&
+        (info.GetSourceDevice() == SourceType::TOUCH)) {
+        dragData.sourceType = static_cast<int32_t>(SourceType::MOUSE);
+    }
     std::string summarys = DragDropFuncWrapper::GetSummaryString(summary);
     DragDropBehaviorReporter::GetInstance().UpdateSummaryType(summarys);
     TAG_LOGI(AceLogTag::ACE_DRAG,
