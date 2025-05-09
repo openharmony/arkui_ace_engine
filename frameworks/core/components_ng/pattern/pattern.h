@@ -85,6 +85,8 @@ public:
         return false;
     }
 
+    virtual void OnForegroundColorUpdate() {}
+
     virtual void ProcessSafeAreaPadding() {}
 
     virtual bool IsNeedPercent() const

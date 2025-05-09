@@ -90,6 +90,13 @@ protected:
         return DynamicCast<ShapePaintProperty>(propertiesFromAncestor.Clone());
     }
 
+    void OnForegroundColorUpdate() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+
     void UpdateForeground(RefPtr<FrameNode> parentFrameNode, RefPtr<FrameNode> childFrameNode)
     {
         auto renderContext = parentFrameNode->GetRenderContext();
