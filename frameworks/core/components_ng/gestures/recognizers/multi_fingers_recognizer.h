@@ -79,6 +79,7 @@ public:
         disposal_ = GestureDisposal::NONE;
         lastPointEvent_.reset();
         backupTouchPointsForSucceedBlock_.reset();
+        preventDefault_ = false;
     }
 
     void CleanRecognizerState() override;
@@ -134,6 +135,7 @@ protected:
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
         backupTouchPointsForSucceedBlock_.reset();
+        preventDefault_ = false;
     }
 
     bool IsNeedResetStatus();

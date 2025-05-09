@@ -1525,6 +1525,7 @@ private:
     const char* GetPatternTypeName() const;
     const char* GetLayoutPropertyTypeName() const;
     const char* GetPaintPropertyTypeName() const;
+    void AddNodeToRegisterTouchTest();
 
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.

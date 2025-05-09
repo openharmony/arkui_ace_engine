@@ -367,6 +367,7 @@ public:
 
     void DelegateTouchEvent(const TouchEvent& point);
 
+    void AddTouchDoneFrameNode(const WeakPtr<NG::FrameNode>& frameNode);
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     bool TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
         TouchRestrict& touchRestrict, const Offset& offset = Offset(), float viewScale = 1.0f,
@@ -408,6 +409,7 @@ private:
     bool DispatchMouseEventToCurResultsInLessAPI13(
         const MouseEvent& event, const MouseTestResult& handledResults, bool isStopPropagation);
     void CheckMousePendingRecognizersState(const TouchEvent& event);
+    void ExecuteTouchTestDoneCallback(const TouchEvent& touchEvent, const ResponseLinkResult& responseLinkRecognizers);
     bool innerEventWin_ = false;
     std::unordered_map<size_t, TouchTestResult> mouseTestResults_;
     MouseTestResult currMouseTestResults_;
@@ -466,6 +468,7 @@ private:
     std::unordered_map<int32_t, TouchEvent> idToTouchPoints_;
     std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
     std::vector<WeakPtr<NG::NGGestureRecognizer>> mousePendingRecognizers_;
+    std::vector<WeakPtr<NG::FrameNode>> onTouchTestDoneFrameNodeList_;
 };
 
 } // namespace OHOS::Ace
