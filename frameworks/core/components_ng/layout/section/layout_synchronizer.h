@@ -20,6 +20,7 @@ namespace OHOS::Ace::NG {
 class LayoutProperty;
 class StaggeredFillAlgorithm;
 class LayoutSynchronizer {
+public:
     static void Sync(const RefPtr<LayoutProperty>& props, const StaggeredFillAlgorithm& fillAlgo);
 };
 } // namespace OHOS::Ace::NG

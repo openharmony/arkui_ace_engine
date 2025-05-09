@@ -21,6 +21,7 @@
 #include "staggered_section_filler.h"
 
 #include "core/components_ng/base/fill_algorithm.h"
+#include "core/components_ng/layout/section/layout_synchronizer.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 
 namespace OHOS::Ace::NG {

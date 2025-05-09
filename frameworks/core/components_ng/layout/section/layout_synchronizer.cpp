@@ -33,12 +33,14 @@ void LayoutSynchronizer::Sync(const RefPtr<LayoutProperty>& props, const Stagger
         int32_t endIdx = pattern->GetEndIndex();
         float offset = pattern->GetStoredOffset();
         if (startIdx != fillAlgo.StartIdx()) {
-
+            std::cout << "WARNING startIdx = " << startIdx << " " << fillAlgo.StartIdx().value_or(-1) << "\n";
         }
         if (endIdx != fillAlgo.EndIdx()) {
+            std::cout << "WARNING endIdx = " << endIdx << " " << fillAlgo.EndIdx().value_or(-1) << "\n";
 
         }
         if (offset != fillAlgo.StartPos()) {
+            std::cout << "WARNING offset = " << offset << " " << fillAlgo.StartPos().value_or(0.0f) << "\n";
             
         }
     } else if (auto p = AceType::DynamicCast<ListLayoutProperty>(props); p) {
