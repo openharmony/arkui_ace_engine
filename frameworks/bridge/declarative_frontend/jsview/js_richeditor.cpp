@@ -1415,6 +1415,16 @@ void JSRichEditor::SetKeyboardAppearance(const JSCallbackInfo& info)
         SetKeyboardAppearance(static_cast<KeyboardAppearance>(keyboardAppearance));
 }
 
+void JSRichEditor::SetUndoStyle(const JSCallbackInfo& info)
+{
+    bool enable = false;
+    if (info.Length() >= 1 && info[0]->IsNumber()) {
+        auto undoStyle = info[0]->ToNumber<int32_t>();
+        enable = (undoStyle == static_cast<int32_t>(UndoStyle::KEEP_STYLE));
+    }
+    RichEditorModel::GetInstance()->SetSupportStyledUndo(enable);
+}
+
 void JSRichEditor::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditor>::Declare("RichEditor");
@@ -1463,6 +1473,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("maxLines", &JSRichEditor::SetMaxLines);
     JSClass<JSRichEditor>::StaticMethod("stopBackPress", &JSRichEditor::SetStopBackPress);
     JSClass<JSRichEditor>::StaticMethod("keyboardAppearance", &JSRichEditor::SetKeyboardAppearance);
+    JSClass<JSRichEditor>::StaticMethod("undoStyle", &JSRichEditor::SetUndoStyle);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
