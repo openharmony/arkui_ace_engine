@@ -35,6 +35,7 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "base/window/foldable_window.h"
+#include "base/ressched/ressched_report.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/ace_application_info.h"
@@ -7374,6 +7375,7 @@ void OverlayManager::CreateOverlayNode()
 
 void OverlayManager::AddFrameNodeToOverlay(const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index)
 {
+    OHOS::Ace::ResSchedReport::GetInstance().ResSchedDataReport("overlay_add");
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "add FrameNode to the overlay node enter");
     CHECK_NULL_VOID(node);
     int32_t level = -1;
@@ -7470,6 +7472,7 @@ void OverlayManager::AddFrameNodeWithOrder(const RefPtr<FrameNode>& node, std::o
 
 void OverlayManager::RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
 {
+    OHOS::Ace::ResSchedReport::GetInstance().ResSchedDataReport("overlay_remove");
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "delete the FrameNode on the overlay node enter");
     RemoveFrameNodeWithOrder(node);
     CHECK_NULL_VOID(node);
