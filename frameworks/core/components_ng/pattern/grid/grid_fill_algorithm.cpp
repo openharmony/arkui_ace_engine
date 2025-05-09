@@ -26,7 +26,7 @@
 #include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
-void GridFillAlgorithm::PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt)
+void GridFillAlgorithm::Prepare(const SizeF& viewport, Axis axis, int32_t totalCnt)
 {
     Init(viewport, axis, totalCnt);
 }

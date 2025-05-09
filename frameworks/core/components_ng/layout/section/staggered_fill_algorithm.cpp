@@ -83,7 +83,7 @@ bool StaggeredFillAlgorithm::CanFillMoreAtEnd(float viewportBound, Axis axis)
     return filler.CanFill();
 }
 
-void StaggeredFillAlgorithm::PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt)
+void StaggeredFillAlgorithm::Prepare(const SizeF& viewport, Axis axis, int32_t totalCnt)
 {
     InitSections(totalCnt, axis, viewport);
 
@@ -96,7 +96,7 @@ void StaggeredFillAlgorithm::PreFill(const SizeF& viewport, Axis axis, int32_t t
         axis, viewport);
 
     UpdateCachedCnt();
-
+    LayoutSynchronizer::Sync(props_, *this);
     for (auto& section : sections_) {
         section.PruneFront(0.0f);
         section.PruneBack(viewport.MainSize(axis));
