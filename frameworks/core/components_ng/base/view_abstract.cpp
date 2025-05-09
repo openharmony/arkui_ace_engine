@@ -3262,12 +3262,34 @@ void ViewAbstract::SetVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect
     }
 }
 
+void ViewAbstract::SetVisualEffect(FrameNode* frameNode, const OHOS::Rosen::VisualEffect* visualEffect)
+{
+    CHECK_NULL_VOID(frameNode);
+    std::lock_guard<std::mutex> lock(visualEffectMutex_);
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    if (!oemVisualEffectFunc) {
+        target->UpdateVisualEffect(visualEffect);
+    } else {
+        Rosen::VisualEffect* graphicVisualEffect = oemVisualEffectFunc(visualEffect);
+        target->UpdateVisualEffect(graphicVisualEffect);
+    }
+}
+
 void ViewAbstract::SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(BackgroundFilter, backgroundFilter);
+}
+
+void ViewAbstract::SetBackgroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* backgroundFilter)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    target->UpdateBackgroundFilter(backgroundFilter);
 }
 
 void ViewAbstract::SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter)
@@ -3278,12 +3300,28 @@ void ViewAbstract::SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilt
     ACE_UPDATE_RENDER_CONTEXT(ForegroundFilter, foregroundFilter);
 }
 
+void ViewAbstract::SetForegroundFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* foregroundFilter)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    target->UpdateForegroundFilter(foregroundFilter);
+}
+
 void ViewAbstract::SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(CompositingFilter, compositingFilter);
+}
+
+void ViewAbstract::SetCompositingFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* compositingFilter)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    target->UpdateCompositingFilter(compositingFilter);
 }
 
 void ViewAbstract::SetOverlay(const OverlayOptions& overlay)
@@ -3422,6 +3460,14 @@ void ViewAbstract::SetFreeze(bool freeze)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(Freeze, freeze);
+}
+
+void ViewAbstract::SetFreeze(FrameNode* frameNode, bool freeze)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    target->UpdateFreeze(freeze);
 }
 
 void ViewAbstract::SetUseShadowBatching(bool useShadowBatching)

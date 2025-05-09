@@ -3366,6 +3366,79 @@ class OnChildTouchTestModifier extends ModifierWithKey {
   }
 }
 OnChildTouchTestModifier.identity = Symbol('onChildTouchTest');
+class VisualEffectModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetVisualEffect(node);
+    }
+    else {
+      getUINativeModule().common.setVisualEffect(node, this.value);
+    }
+  }
+}
+VisualEffectModifier.identity = Symbol('visualEffect');
+class BackgroundFilterModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetBackgroundFilter(node);
+    }
+    else {
+      getUINativeModule().common.setBackgroundFilter(node, this.value);
+    }
+  }
+}
+BackgroundFilterModifier.identity = Symbol('backgroundFilter');
+class ForegroundFilterModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetForegroundFilter(node);
+    }
+    else {
+      getUINativeModule().common.setForegroundFilter(node, this.value);
+    }
+  }
+}
+ForegroundFilterModifier.identity = Symbol('foregroundFilter');
+class CompositingFilterModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetCompositingFilter(node);
+    }
+    else {
+      getUINativeModule().common.setCompositingFilter(node, this.value);
+    }
+  }
+}
+CompositingFilterModifier.identity = Symbol('compositingFilter');
+class FreezeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetFreeze(node);
+    }
+    else {
+      getUINativeModule().common.setFreeze(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+FreezeModifier.identity = Symbol('freeze');
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 const isString = (val) => typeof val === 'string';
 const isNumber = (val) => typeof val === 'number';
@@ -4911,6 +4984,26 @@ class ArkComponent {
   }
   nextFocus(value) {
     modifierWithKey(this._modifiersWithKeys, NextFocusModifier.identity, NextFocusModifier, value);
+    return this;
+  }
+  visualEffect(effect) {
+    modifierWithKey(this._modifiersWithKeys, VisualEffectModifier.identity, VisualEffectModifier, effect);
+    return this;
+  }
+  backgroundFilter(filter) {
+    modifierWithKey(this._modifiersWithKeys, BackgroundFilterModifier.identity, BackgroundFilterModifier, filter);
+    return this;
+  }
+  foregroundFilter(filter) {
+    modifierWithKey(this._modifiersWithKeys, ForegroundFilterModifier.identity, ForegroundFilterModifier, filter);
+    return this;
+  }
+  compositingFilter(filter) {
+    modifierWithKey(this._modifiersWithKeys, CompositingFilterModifier.identity, CompositingFilterModifier, filter);
+    return this;
+  }
+  freeze(value) {
+    modifierWithKey(this._modifiersWithKeys, FreezeModifier.identity, FreezeModifier, value);
     return this;
   }
 }

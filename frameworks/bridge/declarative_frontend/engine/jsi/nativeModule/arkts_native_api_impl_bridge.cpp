@@ -1151,6 +1151,26 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnChildTouchTest));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnChildTouchTest"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnChildTouchTest));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setVisualEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetVisualEffect));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetVisualEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetVisualEffect));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackgroundFilter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetBackgroundFilter));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackgroundFilter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetBackgroundFilter));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setForegroundFilter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetForegroundFilter));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetForegroundFilter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetForegroundFilter));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCompositingFilter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetCompositingFilter));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCompositingFilter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetCompositingFilter));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFreeze"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetFreeze));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFreeze"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetFreeze));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "common"), common);
 
     auto nativeUtils = panda::ObjectRef::New(vm);

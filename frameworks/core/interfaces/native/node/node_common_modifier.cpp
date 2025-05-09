@@ -7074,6 +7074,79 @@ void FreezeUINodeByUniqueId(ArkUI_Int32 uniqueId, ArkUI_Bool isFreeze)
     ViewAbstract::FreezeUINodeByUniqueId(uniqueId, isFreeze);
 }
 
+void SetVisualEffect(ArkUINodeHandle node, void* visualEffect)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto visualEffectPtr = static_cast<Rosen::VisualEffect*>(visualEffect);
+    ViewAbstractModelNG::SetVisualEffect(frameNode, visualEffectPtr);
+}
+
+void ResetVisualEffect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetVisualEffect(frameNode, nullptr);
+}
+
+void SetBackgroundFilter(ArkUINodeHandle node, void* backgroundFilter)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto backgroundFilterPtr = static_cast<Rosen::Filter*>(backgroundFilter);
+    ViewAbstractModelNG::SetBackgroundFilter(frameNode, backgroundFilterPtr);
+}
+
+void ResetBackgroundFilter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetBackgroundFilter(frameNode, nullptr);
+}
+
+void SetForegroundFilter(ArkUINodeHandle node, void* foregroundFilter)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto foregroundFilterPtr = static_cast<Rosen::Filter*>(foregroundFilter);
+    ViewAbstractModelNG::SetForegroundFilter(frameNode, foregroundFilterPtr);
+}
+
+void ResetForegroundFilter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetForegroundFilter(frameNode, nullptr);
+}
+
+void SetCompositingFilter(ArkUINodeHandle node, void* compositingFilter)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto compositingFilterPtr = static_cast<Rosen::Filter*>(compositingFilter);
+    ViewAbstractModelNG::SetCompositingFilter(frameNode, compositingFilterPtr);
+}
+
+void ResetCompositingFilter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetCompositingFilter(frameNode, nullptr);
+}
+
+void SetFreeze(ArkUINodeHandle node, ArkUI_Bool freeze)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetFreeze(frameNode, freeze);
+}
+
+void ResetFreeze(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetFreeze(frameNode, false);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -7517,6 +7590,16 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetPrivacySensitive = ResetPrivacySensitve,
         .freezeUINodeById = FreezeUINodeById,
         .freezeUINodeByUniqueId = FreezeUINodeByUniqueId,
+        .setVisualEffect = SetVisualEffect,
+        .resetVisualEffect = ResetVisualEffect,
+        .setBackgroundFilter = SetBackgroundFilter,
+        .resetBackgroundFilter = ResetBackgroundFilter,
+        .setForegroundFilter = SetForegroundFilter,
+        .resetForegroundFilter = ResetForegroundFilter,
+        .setCompositingFilter = SetCompositingFilter,
+        .resetCompositingFilter = ResetCompositingFilter,
+        .setFreeze = SetFreeze,
+        .resetFreeze = ResetFreeze,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
