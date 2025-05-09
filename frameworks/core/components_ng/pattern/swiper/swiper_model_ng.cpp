@@ -521,6 +521,24 @@ void SwiperModelNG::SetOnContentDidScroll(FrameNode* frameNode, ContentDidScroll
     pattern->SetOnContentDidScroll(std::move(onContentDidScroll));
 }
 
+void SwiperModelNG::SetIndicatorController(Framework::JSIndicatorController *controller)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIndicatorController(controller);
+}
+
+Framework::JSIndicatorController* SwiperModelNG::GetIndicatorController()
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(swiperNode, nullptr);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetIndicatorController();
+}
+
 void SwiperModelNG::SetOnContentWillScroll(ContentWillScrollEvent&& onContentWillScroll)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

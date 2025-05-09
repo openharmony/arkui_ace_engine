@@ -87,6 +87,11 @@ public:
         controller->SetSwiperNode(swiperNode_.Upgrade());
     }
 
+    void ResetSwiperNode()
+    {
+        swiperNode_ = nullptr;
+    }
+
     void SetInstanceId(int32_t id)
     {
         instanceId_ = id;
