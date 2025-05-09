@@ -593,6 +593,7 @@ struct KeyEvent final : public NonPointerEvent {
     std::vector<uint8_t> enhanceData;
     std::shared_ptr<MMI::KeyEvent> rawKeyEvent;
     std::string msg = "";
+    std::optional<bool> activeMark;
 
     std::string ToString() const
     {

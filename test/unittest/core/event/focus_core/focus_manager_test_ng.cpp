@@ -871,4 +871,87 @@ HWTEST_F(FocusManagerTestNg, FocusManagerTest023, TestSize.Level1)
     auto keyProcessingMode = focusManager->GetKeyProcessingMode();
     EXPECT_EQ(keyProcessingMode, KeyProcessingMode::FOCUS_NAVIGATION);
 }
+
+/**
+ * @tc.name: FocusManagerTest024
+ * @tc.desc: HandleKeyForExtendOrActivateFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusManagerTestNg, FocusManagerTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct components.
+     * - Page
+     *   - Column
+     *     - Button
+     *     - Button
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto focusManager = context->GetOrCreateFocusManager();
+    EXPECT_NE(focusManager, nullptr);
+    auto rootNode = FrameNodeOnTree::CreateFrameNode(V2::ROOT_ETS_TAG, -1, AceType::MakeRefPtr<RootPattern>());
+    auto rootFocusHub = rootNode->GetOrCreateFocusHub();
+
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    auto pageNode = FrameNodeOnTree::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern);
+    auto pageFocusHub = pageNode->GetOrCreateFocusHub();
+    rootNode->AddChild(pageNode);
+
+    auto columnPattern = AceType::MakeRefPtr<LinearLayoutPattern>(true);
+    auto columnNode = FrameNodeOnTree::CreateFrameNode(V2::COLUMN_ETS_TAG, -1, columnPattern);
+    auto columnFocusHub = columnNode->GetOrCreateFocusHub();
+
+    auto buttonPattern1 = AceType::MakeRefPtr<ButtonPattern>();
+    auto buttonNode1 = FrameNodeOnTree::CreateFrameNode(V2::BUTTON_ETS_TAG, -1, buttonPattern1);
+    auto buttonFocusHub1 = buttonNode1->GetOrCreateFocusHub();
+
+    auto buttonPattern2 = AceType::MakeRefPtr<ButtonPattern>();
+    auto buttonNode2 = FrameNodeOnTree::CreateFrameNode(V2::BUTTON_ETS_TAG, -1, buttonPattern2);
+    auto buttonFocusHub2 = buttonNode2->GetOrCreateFocusHub();
+
+    pageNode->AddChild(columnNode);
+    columnNode->AddChild(buttonNode1);
+    columnNode->AddChild(buttonNode2);
+
+    EXPECT_EQ(pagePattern->GetViewRootScope(), columnFocusHub);
+    pagePattern->FocusViewShow();
+    PipelineContext::GetCurrentContext()->FlushFocusView();
+    EXPECT_EQ(pagePattern->GetIsViewRootScopeFocused(), true);
+    EXPECT_TRUE(columnFocusHub->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step2. sendKeyEvent down and mark true.
+     * expected: active and button1 focus
+     */
+    KeyEvent event;
+    event.activeMark = true;
+    event.action = KeyAction::DOWN;
+    auto curFocusView = focusManager ? focusManager->GetLastFocusView().Upgrade() : nullptr;
+    focusManager->HandleKeyForExtendOrActivateFocus(event, curFocusView);
+    EXPECT_EQ(focusManager->GetIsFocusActive(), true);
+    EXPECT_EQ(buttonFocusHub1->IsCurrentFocus(), true);
+
+    /**
+     * @tc.steps: step3. sendKeyEvent down and mark false.
+     * expected: unactive
+     */
+    event.activeMark = false;
+    event.action = KeyAction::DOWN;
+    focusManager->HandleKeyForExtendOrActivateFocus(event, curFocusView);
+    EXPECT_EQ(focusManager->GetIsFocusActive(), false);
+
+    /**
+     * @tc.steps: step4. sendKeyEvent down and Tab without mark.
+     * expected: active and button1 focus
+     */
+    FocusHub::LostFocusToViewRoot();
+    EXPECT_EQ(buttonFocusHub1->IsCurrentFocus(), false);
+    event.activeMark = std::nullopt;
+    event.pressedCodes = { KeyCode::KEY_TAB };
+    event.action = KeyAction::DOWN;
+    focusManager->HandleKeyForExtendOrActivateFocus(event, curFocusView);
+    EXPECT_EQ(focusManager->GetIsFocusActive(), true);
+    EXPECT_EQ(buttonFocusHub1->IsCurrentFocus(), true);
+}
 } // namespace OHOS::Ace::NG

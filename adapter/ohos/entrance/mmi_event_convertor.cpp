@@ -646,6 +646,11 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     }
     event.enableCapsLock = keyEvent->GetFunctionKey(MMI::KeyEvent::CAPS_LOCK_FUNCTION_KEY);
     event.numLock = keyEvent->GetFunctionKey(MMI::KeyEvent::NUM_LOCK_FUNCTION_KEY);
+    if (keyEvent->IsFlag(OHOS::MMI::InputEvent::EVENT_FLAG_KEYBOARD_ENTER_FOCUS)) {
+        event.activeMark = true;
+    } else if (keyEvent->IsFlag(OHOS::MMI::InputEvent::EVENT_FLAG_KEYBOARD_EXIT_FOCUS)) {
+        event.activeMark = false;
+    }
 }
 
 void ConvertFocusAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, NG::FocusAxisEvent& event)
