@@ -122,8 +122,15 @@ export class NavExtender {
         return ArkUIGeneratedNativeModule._NavExtender_getIdByIndex(toPeerPtr(pathStack), index)
     }
     private static getIdByName_serialize(pathStack: NavPathStack, name: string): Array<string> {
-        const retval = ArkUIGeneratedNativeModule._NavExtender_getIdByName(toPeerPtr(pathStack), name)
-        let retvalDeserializer: Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._NavExtender_getIdByName(toPeerPtr(pathStack), name) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer: Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const buffer_length: int32 = retvalDeserializer.readInt32()
         let buffer: Array<string> = new Array<string>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {

@@ -3473,11 +3473,11 @@ void VisibilityImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<VisibleType>(*value);
-    if (!convValue) {
+    if (convValue.has_value()) {
         // TODO: Reset value
         return;
     }
-    ViewAbstract::SetVisibility(frameNode, *convValue);
+    ViewAbstract::SetVisibility(frameNode, convValue.value());
 }
 void FlexGrowImpl(Ark_NativePointer node,
                   const Opt_Number* value)

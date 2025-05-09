@@ -28,10 +28,6 @@ export class PathStackUtils {
         info.navDestinationId = navDestinationId
         PathStackUtils.infoMaps.set(navDestinationId, info)
     }
-    static getNavPathInfo(info: KPointer): NavPathInfo | undefined {
-        // const navDestinationId: string = ArkUIGeneratedNativeModule._NavPathInfo_getNavDestinationId(info)
-        return PathStackUtils.getNavPathInfoById("")
-    }
     static getNavPathInfoById(navDestinationId: string): NavPathInfo | undefined {
         if (PathStackUtils.infoMaps.has(navDestinationId)) {
             return PathStackUtils.infoMaps.get(navDestinationId)
@@ -46,6 +42,7 @@ export class PathStackUtils {
         } else if (animated_type !== RuntimeType.UNDEFINED) {
             options = animated as NavigationOptions
         }
+        PathStackUtils.addNavPathInfo(info)
         NavExtender.pushPath(pathStack, info, options)
     }
 
@@ -97,10 +94,7 @@ export class PathStackUtils {
     }
     static getParamByIndex(pathStack: NavPathStack, index: number): Object | undefined {
         const navDestinationId: string = NavExtender.getIdByIndex(pathStack, index as (int32));
-        if (PathStackUtils.infoMaps.has(navDestinationId)) {
-            return undefined;
-        }
-        let pathInfo = PathStackUtils.infoMaps.get(navDestinationId)
+        let pathInfo = PathStackUtils.getNavPathInfoById(navDestinationId)
         return pathInfo?.param
     }
     static getParamByName(pathStack: NavPathStack, name: string): Array<object | undefined> {
