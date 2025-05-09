@@ -731,7 +731,7 @@ protected:
     bool firstTransitionIn_ = false;
     bool isBreakingPoint_ = false;
     bool isBackBlurChanged_ = false;
-    bool needDebugBoundary_ = false;
+    bool needDebugBoundary_ = true;
     bool isDisappearing_ = false;
     bool hasDefaultTransition_ = false;
     bool measureTriggered_ = false;
