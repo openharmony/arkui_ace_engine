@@ -42,7 +42,7 @@ public:
         ~Builder() = default;
         RefPtr<IndexerTheme> Build(const RefPtr<ThemeConstants>& themeConstants)
         {
-            RefPtr<IndexerTheme> theme = AceType::Claim(new IndexerTheme());
+            RefPtr<IndexerTheme> theme = AceType::MakeRefPtr<IndexerTheme>();
             if (!themeConstants) {
                 LOGE("Build AppTheme error, themeConstants is null!");
                 return theme;

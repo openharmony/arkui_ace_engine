@@ -62,7 +62,7 @@ public:
 
         RefPtr<SelectTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<SelectTheme> theme = AceType::Claim(new SelectTheme());
+            RefPtr<SelectTheme> theme = AceType::MakeRefPtr<SelectTheme>();
             if (!themeConstants) {
                 return theme;
             }
@@ -388,7 +388,7 @@ public:
 
     RefPtr<SelectTheme> clone()
     {
-        RefPtr<SelectTheme> theme = AceType::Claim(new SelectTheme());
+        RefPtr<SelectTheme> theme = AceType::MakeRefPtr<SelectTheme>();
         ClonePartOne(theme);
         ClonePartTwo(theme);
         ClonePartThree(theme);

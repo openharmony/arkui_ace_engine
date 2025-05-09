@@ -38,7 +38,7 @@ public:
 
         RefPtr<PieceTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<PieceTheme> theme = AceType::Claim(new PieceTheme());
+            RefPtr<PieceTheme> theme = AceType::MakeRefPtr<PieceTheme>();
             if (!themeConstants) {
                 return theme;
             }

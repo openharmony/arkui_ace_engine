@@ -52,7 +52,7 @@ public:
 
         RefPtr<PatternLockTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<PatternLockTheme> theme = AceType::Claim(new PatternLockTheme());
+            RefPtr<PatternLockTheme> theme = AceType::MakeRefPtr<PatternLockTheme>();
             if (!themeConstants) {
                 return theme;
             }

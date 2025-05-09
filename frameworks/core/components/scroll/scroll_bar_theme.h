@@ -46,7 +46,7 @@ public:
 
         RefPtr<ScrollBarTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<ScrollBarTheme> theme = AceType::Claim(new ScrollBarTheme());
+            RefPtr<ScrollBarTheme> theme = AceType::MakeRefPtr<ScrollBarTheme>();
             if (!themeConstants) {
                 return theme;
             }

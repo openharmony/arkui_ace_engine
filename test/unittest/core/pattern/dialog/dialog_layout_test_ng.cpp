@@ -73,7 +73,7 @@ public:
 
         RefPtr<MockDialogTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<MockDialogTheme> theme = AceType::Claim(new MockDialogTheme());
+            RefPtr<MockDialogTheme> theme = AceType::MakeRefPtr<MockDialogTheme>();
             return theme;
         }
     };

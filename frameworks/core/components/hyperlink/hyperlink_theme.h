@@ -39,7 +39,7 @@ public:
 
         RefPtr<HyperlinkTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<HyperlinkTheme> theme = AceType::Claim(new HyperlinkTheme());
+            RefPtr<HyperlinkTheme> theme = AceType::MakeRefPtr<HyperlinkTheme>();
             if (!themeConstants) {
                 return theme;
             }

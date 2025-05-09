@@ -33,7 +33,7 @@ public:
 
         RefPtr<ScrollableTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<ScrollableTheme> theme = AceType::Claim(new ScrollableTheme());
+            RefPtr<ScrollableTheme> theme = AceType::MakeRefPtr<ScrollableTheme>();
             if (!themeConstants) {
                 return theme;
             }

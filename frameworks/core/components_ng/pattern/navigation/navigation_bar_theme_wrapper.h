@@ -32,7 +32,7 @@ public:
 
         RefPtr<TokenThemeWrapper> BuildWrapper(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            auto theme = AceType::Claim(new NavigationBarThemeWrapper());
+            auto theme = AceType::MakeRefPtr<NavigationBarThemeWrapper>();
             InitTheme(theme, themeConstants);
             return theme;
         }

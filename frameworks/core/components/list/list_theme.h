@@ -37,7 +37,7 @@ public:
 
         RefPtr<ListTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<ListTheme> theme = AceType::Claim(new ListTheme());
+            RefPtr<ListTheme> theme = AceType::MakeRefPtr<ListTheme>();
             if (!themeConstants) {
                 return theme;
             }

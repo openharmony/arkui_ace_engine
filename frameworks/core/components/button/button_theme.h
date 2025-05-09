@@ -39,7 +39,7 @@ public:
 
         RefPtr<ButtonTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<ButtonTheme> theme = AceType::Claim(new ButtonTheme());
+            RefPtr<ButtonTheme> theme = AceType::MakeRefPtr<ButtonTheme>();
             if (!themeConstants) {
                 return theme;
             }

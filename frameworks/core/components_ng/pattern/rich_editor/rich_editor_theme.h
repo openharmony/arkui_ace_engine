@@ -45,7 +45,7 @@ public:
 
         RefPtr<RichEditorTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<RichEditorTheme> theme = AceType::Claim(new RichEditorTheme());
+            RefPtr<RichEditorTheme> theme = AceType::MakeRefPtr<RichEditorTheme>();
             if (!themeConstants) {
                 return theme;
             }

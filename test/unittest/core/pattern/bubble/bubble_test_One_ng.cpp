@@ -117,7 +117,7 @@ public:
 
         RefPtr<MockBubbleTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<MockBubbleTheme> theme = AceType::Claim(new MockBubbleTheme());
+            RefPtr<MockBubbleTheme> theme = AceType::MakeRefPtr<MockBubbleTheme>();
             return theme;
         }
     };

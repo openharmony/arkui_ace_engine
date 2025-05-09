@@ -43,7 +43,7 @@ public:
 
         RefPtr<TextTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<TextTheme> theme = AceType::Claim(new TextTheme());
+            RefPtr<TextTheme> theme = AceType::MakeRefPtr<TextTheme>();
             if (!themeConstants) {
                 return theme;
             }

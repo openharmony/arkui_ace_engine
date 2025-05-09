@@ -35,7 +35,7 @@ public:
 
         RefPtr<TextClockTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<TextClockTheme> theme = AceType::Claim(new TextClockTheme());
+            RefPtr<TextClockTheme> theme = AceType::MakeRefPtr<TextClockTheme>();
             if (!themeConstants) {
                 return theme;
             }

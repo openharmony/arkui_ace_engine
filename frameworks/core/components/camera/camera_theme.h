@@ -41,7 +41,7 @@ public:
 
         RefPtr<CameraTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<CameraTheme> theme = AceType::Claim(new CameraTheme());
+            RefPtr<CameraTheme> theme = AceType::MakeRefPtr<CameraTheme>();
             if (!themeConstants) {
                 return theme;
             }

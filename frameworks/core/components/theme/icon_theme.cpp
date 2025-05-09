@@ -120,7 +120,7 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
 
 RefPtr<IconTheme> IconTheme::Builder::Build(const RefPtr<ThemeConstants>& themeConstants) const
 {
-    RefPtr<IconTheme>theme  = AceType::Claim(new IconTheme());
+    RefPtr<IconTheme>theme  = AceType::MakeRefPtr<IconTheme>();
     if (!themeConstants) {
         return theme;
     }

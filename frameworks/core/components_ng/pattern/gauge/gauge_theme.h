@@ -80,7 +80,7 @@ public:
 
         RefPtr<GaugeTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<GaugeTheme> theme = AceType::Claim(new GaugeTheme());
+            RefPtr<GaugeTheme> theme = AceType::MakeRefPtr<GaugeTheme>();
             if (!themeConstants) {
                 return theme;
             }

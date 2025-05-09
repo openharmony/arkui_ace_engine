@@ -37,7 +37,7 @@ public:
 
         RefPtr<NavigationBarTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<NavigationBarTheme> theme = AceType::Claim(new NavigationBarTheme());
+            RefPtr<NavigationBarTheme> theme = AceType::MakeRefPtr<NavigationBarTheme>();
             InitTheme(theme, themeConstants);
             return theme;
         }

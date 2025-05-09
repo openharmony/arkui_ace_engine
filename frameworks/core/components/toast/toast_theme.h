@@ -41,7 +41,7 @@ public:
 
         RefPtr<ToastTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            RefPtr<ToastTheme> theme = AceType::Claim(new ToastTheme());
+            RefPtr<ToastTheme> theme = AceType::MakeRefPtr<ToastTheme>();
             if (!themeConstants) {
                 return theme;
             }
