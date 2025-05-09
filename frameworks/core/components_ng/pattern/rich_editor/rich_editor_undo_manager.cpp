@@ -341,7 +341,8 @@ SpanOptions SpansUndoManager::CreateSpanOptionsBySpanObject(const ResultObject& 
         default:
             break;
     }
-    return SpanOptionBase{};
+    TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "CreateSpanOptions: Unhandled span type");
+    return TextSpanOptions{};
 }
 
 TextSpanOptions SpansUndoManager::CreateTextSpanOptions(const ResultObject& object)
@@ -374,7 +375,7 @@ ImageSpanOptions SpansUndoManager::CreateImageSpanOptions(const ResultObject& ob
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, {});
     auto spanItem = pattern->GetSpanItemByIndex(object.spanPosition.spanIndex);
-    return CreateImageSpanOptions(spanItem);
+    return CreateImageSpanOptions(AceType::DynamicCast<ImageSpanItem>(spanItem));
 }
 
 ImageSpanOptions SpansUndoManager::CreateImageSpanOptions(const RefPtr<ImageSpanItem>& item)
@@ -408,7 +409,7 @@ BuilderSpanOptions SpansUndoManager::CreateBuilderSpanOptions(const ResultObject
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, {});
     auto spanItem = pattern->GetSpanItemByIndex(object.spanPosition.spanIndex);
-    return CreateBuilderSpanOptions(spanItem);
+    return CreateBuilderSpanOptions(AceType::DynamicCast<PlaceholderSpanItem>(spanItem));
 }
 
 BuilderSpanOptions SpansUndoManager::CreateBuilderSpanOptions(const RefPtr<PlaceholderSpanItem>& item)
