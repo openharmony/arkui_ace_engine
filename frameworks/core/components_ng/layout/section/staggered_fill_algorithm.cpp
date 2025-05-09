@@ -94,7 +94,7 @@ void StaggeredFillAlgorithm::PreFill(const SizeF& viewport, Axis axis, int32_t t
         },
         axis, viewport);
 
-    UpdateSyncCachedCnt();
+    UpdateCachedCnt();
 
     for (auto& section : sections_) {
         section.PruneFront(0.0f);
@@ -117,7 +117,7 @@ bool StaggeredFillAlgorithm::CanFillMore(Axis axis, const SizeF& scrollWindowSiz
     if (!startIdx || !endIdx) {
         return true;
     }
-    return idx >= 0 && idx > *startIdx - syncCacheCnt_ && idx < *endIdx + syncCacheCnt_;
+    return idx >= 0 && idx > *startIdx - cacheCnt_ && idx < *endIdx + cacheCnt_;
 }
 
 void StaggeredFillAlgorithm::FillPrev(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index)
@@ -200,11 +200,11 @@ int32_t StaggeredFillAlgorithm::GetMarkIndex()
     return StartIdx().value_or(0);
 }
 
-void StaggeredFillAlgorithm::UpdateSyncCachedCnt()
+void StaggeredFillAlgorithm::UpdateCachedCnt()
 {
     if (InstanceOf<SwiperLayoutProperty>(props_)) {
         // SwiperLayout always measures 1 extra item in the opposite direction. set syncCache to 1 to adapt
-        syncCacheCnt_ = 1;
+        cacheCnt_ = 1;
     }
 }
 } // namespace OHOS::Ace::NG

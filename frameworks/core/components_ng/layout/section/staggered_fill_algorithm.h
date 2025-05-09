@@ -60,13 +60,10 @@ private:
     void InitSections(int32_t totalCnt, Axis axis, const SizeF& frameSize);
 
     /**
-     * @brief update syncCacheCnt_ from LayoutProperty
+     * @brief update cacheCnt_ from LayoutProperty
      *
      */
-    void UpdateSyncCachedCnt();
-
-    std::optional<int32_t> StartIdx() const;
-    std::optional<int32_t> EndIdx() const;
+    void UpdateCachedCnt();
 
     Section& GetSection(int32_t item);
 
@@ -74,7 +71,7 @@ private:
     const RefPtr<LayoutProperty> props_;
     RefPtr<Measurer> measurer_;
 
-    int32_t syncCacheCnt_ = 0; // cache items to load synchronously
+    int32_t cacheCnt_ = 0; // cache items to load synchronously
 };
 } // namespace OHOS::Ace::NG
 
