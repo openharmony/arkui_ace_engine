@@ -137,7 +137,6 @@ const RefPtr<InterpolatingSpring> MENU_ANIMATION_CURVE =
 const RefPtr<InterpolatingSpring> CUSTOM_PREVIEW_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 280.0f, 30.0f);
 const std::string HOVER_IMAGE_CLIP_DISAPPEAR_PROPERTY_NAME = "hoverImageClipDisAppear";
-constexpr double MENU_ORIGINAL_SCALE = 0.6f;
 constexpr int32_t DUMP_LOG_DEPTH_1 = 1;
 constexpr int32_t DUMP_LOG_DEPTH_2 = 2;
 
@@ -614,14 +613,28 @@ void FireMenuDisappear(AnimationOption& option, const RefPtr<MenuWrapperPattern>
     CHECK_NULL_VOID(menuNode);
     auto menuRenderContext = menuNode->GetRenderContext();
     CHECK_NULL_VOID(menuRenderContext);
-    MENU_ANIMATION_CURVE->UpdateMinimumAmplitudeRatio(MINIMUM_AMPLITUDE_RATION);
-    option.SetCurve(MENU_ANIMATION_CURVE);
-    AnimationUtils::Animate(option, [menuRenderContext]() {
-        if (menuRenderContext) {
-            menuRenderContext->UpdateTransformScale(VectorF(MENU_ORIGINAL_SCALE, MENU_ORIGINAL_SCALE));
-            menuRenderContext->UpdateOpacity(0.0f);
-        }
-    }, option.GetOnFinishEvent());
+    auto pipelineContext = menuNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto menuTheme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    if (menuTheme->GetMenuAnimationDuration()) {
+        option.SetDuration(menuTheme->GetMenuAnimationDuration());
+        option.SetCurve(menuTheme->GetMenuAnimationCurve());
+    } else {
+        MENU_ANIMATION_CURVE->UpdateMinimumAmplitudeRatio(MINIMUM_AMPLITUDE_RATION);
+        option.SetCurve(MENU_ANIMATION_CURVE);
+    }
+    AnimationUtils::Animate(
+        option,
+        [menuRenderContext, menuTheme]() {
+            if (menuRenderContext) {
+                CHECK_NULL_VOID(menuTheme);
+                menuRenderContext->UpdateTransformScale(
+                    VectorF(menuTheme->GetMenuAnimationScale(), menuTheme->GetMenuAnimationScale()));
+                menuRenderContext->UpdateOpacity(0.0f);
+            }
+        },
+        option.GetOnFinishEvent());
 }
 } // namespace
 
@@ -1283,16 +1296,7 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
         return;
     }
     AnimationOption option;
-    option.SetCurve(Curves::FAST_OUT_SLOW_IN);
-    option.SetDuration(MENU_ANIMATION_DURATION);
-    option.SetFillMode(FillMode::FORWARDS);
-    option.SetOnFinishEvent(
-        [weak = WeakClaim(this), menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId()] {
-            auto overlayManager = weak.Upgrade();
-            CHECK_NULL_VOID(overlayManager);
-            overlayManager->OnShowMenuAnimationFinished(menuWK, weak, id);
-            overlayManager->SendToAccessibility(menuWK, true);
-        });
+    UpdateMenuAnimationOptions(menu, option);
     if (wrapperPattern->GetPreviewMode() == MenuPreviewMode::CUSTOM) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
@@ -1303,6 +1307,29 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
     }
     wrapperPattern->SetAniamtinOption(option);
     SetPatternFirstShow(menu);
+}
+
+void OverlayManager::UpdateMenuAnimationOptions(const RefPtr<FrameNode>& menu, AnimationOption& option)
+{
+    CHECK_NULL_VOID(menu);
+    auto pipelineContext = menu->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto menuTheme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    if (menuTheme->GetMenuAnimationDuration()) {
+        option.SetDuration(menuTheme->GetMenuAnimationDuration());
+    } else {
+        option.SetDuration(MENU_ANIMATION_DURATION);
+    }
+    option.SetCurve(menuTheme->GetMenuAnimationCurve());
+    option.SetFillMode(FillMode::FORWARDS);
+    option.SetOnFinishEvent(
+        [weak = WeakClaim(this), menuWK = WeakClaim(RawPtr(menu)), id = pipelineContext->GetInstanceId()] {
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->OnShowMenuAnimationFinished(menuWK, weak, id);
+            overlayManager->SendToAccessibility(menuWK, true);
+        });
 }
 
 void OverlayManager::SendToAccessibility(const WeakPtr<FrameNode> node, bool isShow)
@@ -1429,8 +1456,16 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
     }
 
     AnimationOption option;
-    option.SetCurve(Curves::FAST_OUT_SLOW_IN);
-    option.SetDuration(MENU_ANIMATION_DURATION);
+    auto pipelineContext = menu->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto menuTheme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    if (menuTheme->GetMenuAnimationDuration()) {
+        option.SetDuration(menuTheme->GetMenuAnimationDuration());
+    } else {
+        option.SetDuration(MENU_ANIMATION_DURATION);
+    }
+    option.SetCurve(menuTheme->GetMenuAnimationCurve());
     option.SetFillMode(FillMode::FORWARDS);
     if (!startDrag) {
         DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LANDING_STARTED);
@@ -1511,22 +1546,26 @@ void OverlayManager::ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper
     CHECK_NULL_VOID(outterMenuPattern);
     bool isShow = outterMenuPattern->GetDisappearAnimation();
     bool isPreviewModeNone = menuWrapperPattern->GetPreviewMode() == MenuPreviewMode::NONE;
-    if (!isPreviewModeNone
-        || (isPreviewModeNone && IsContextMenuBindedOnOrigNode() && !showPreviewAnimation && startDrag)) {
-        if (!showPreviewAnimation) {
-            CleanPreviewInSubWindow();
-        } else {
-            ShowPreviewDisappearAnimation(menuWrapperPattern);
-        }
+    auto menuTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    if (!isPreviewModeNone ||
+        (isPreviewModeNone && IsContextMenuBindedOnOrigNode() && !showPreviewAnimation && startDrag)) {
+        showPreviewAnimation ? ShowPreviewDisappearAnimation(menuWrapperPattern) : CleanPreviewInSubWindow();
         ShowContextMenuDisappearAnimation(option, menuWrapperPattern, startDrag);
     } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && isShow) {
         FireMenuDisappear(option, menuWrapperPattern);
     } else {
         AnimationUtils::Animate(
             option,
-            [context, menuAnimationOffset]() {
+            [context, menuAnimationOffset, menuTheme]() {
+                CHECK_NULL_VOID(context);
                 context->UpdateOpacity(0.0);
                 context->UpdateOffset(menuAnimationOffset);
+                CHECK_NULL_VOID(menuTheme);
+                if (menuTheme->GetMenuAnimationDuration()) {
+                    context->UpdateTransformScale(
+                        VectorF(menuTheme->GetMenuAnimationScale(), menuTheme->GetMenuAnimationScale()));
+                }
             },
             option.GetOnFinishEvent());
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)

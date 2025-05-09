@@ -497,6 +497,7 @@ private:
     void UpdateDividerSelectedStatus(bool isSelected);
     void UpdateDividerHoverStatus(bool isHover);
     void UpdateDividerPressStatus(bool isPress);
+    void ShowSubMenuWithAnimation(const RefPtr<FrameNode>& subMenu);
     inline bool IsOptionPattern()
     {
         return isOptionPattern_;

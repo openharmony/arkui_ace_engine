@@ -386,6 +386,9 @@ public:
             theme->menuMaxWidthRatio_ = pattern->GetAttr<double>("menu_max_width_ratio", 0.67f);
             theme->menuBackgroundBlurStyle_ =
                 pattern->GetAttr<int>("menu_background_blur_style", static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
+            theme->menuAnimationDuration_ = pattern->GetAttr<int>("menu_animation_duration", 0);
+            theme->menuAnimationScale_ = pattern->GetAttr<double>("menu_animation_scale", 0.6f);
+            theme->menuAnimationCurve_ = pattern->GetAttr<std::string>("menu_animation_curve", "fast_out_slow_in");
         }
     };
 
@@ -1499,6 +1502,25 @@ public:
         return menuWordBreak_;
     }
     
+    int32_t GetMenuAnimationDuration() const
+    {
+        return menuAnimationDuration_;
+    }
+
+    double GetMenuAnimationScale() const
+    {
+        return menuAnimationScale_;
+    }
+
+    RefPtr<Curve> GetMenuAnimationCurve() const
+    {
+        if (menuAnimationCurve_ == "smooth") {
+            return Curves::SMOOTH;
+        } else {
+            return Curves::FAST_OUT_SLOW_IN;
+        }
+    }
+
 private:
     Color disabledColor_;
     Color clickedColor_;
@@ -1669,6 +1691,9 @@ private:
     bool menuNeedFocus_ = false;
     int menuBackgroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
     WordBreak menuWordBreak_ = WordBreak::BREAK_WORD;
+    int32_t menuAnimationDuration_ = 0;
+    double menuAnimationScale_ = 0.6;
+    std::string menuAnimationCurve_;
 };
 
 } // namespace OHOS::Ace

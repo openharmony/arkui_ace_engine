@@ -665,7 +665,41 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     if (type == ShowSubMenuType::LONG_PRESS && expandingMode_ == SubMenuExpandingMode::STACK) {
         CleanParentMenuItemBgColor();
     }
+    ShowSubMenuWithAnimation(subMenu);
     SendSubMenuOpenToAccessibility(subMenu, type);
+}
+
+void MenuItemPattern::ShowSubMenuWithAnimation(const RefPtr<FrameNode>& subMenu)
+{
+    CHECK_NULL_VOID(subMenu);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    if (menuTheme->GetMenuAnimationDuration()) {
+        auto renderContext = subMenu->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateTransformCenter(DimensionOffset(Offset()));
+        renderContext->UpdateOpacity(MENU_ANIMATION_MIN_OPACITY);
+        renderContext->UpdateTransformScale(
+            VectorF(menuTheme->GetMenuAnimationScale(), menuTheme->GetMenuAnimationScale()));
+        auto animationOption = AnimationOption();
+        animationOption.SetDuration(menuTheme->GetMenuAnimationDuration());
+        animationOption.SetCurve(menuTheme->GetMenuAnimationCurve());
+        AnimationUtils::Animate(
+            animationOption,
+            [weak = WeakClaim(RawPtr(subMenu))]() {
+                auto subMenuNode = weak.Upgrade();
+                CHECK_NULL_VOID(subMenuNode);
+                auto renderContext = subMenuNode->GetRenderContext();
+                CHECK_NULL_VOID(renderContext);
+                renderContext->UpdateTransformScale(VectorF(MENU_ANIMATION_MAX_SCALE, MENU_ANIMATION_MAX_SCALE));
+                renderContext->UpdateOpacity(MENU_ANIMATION_MAX_OPACITY);
+            },
+            animationOption.GetOnFinishEvent());
+    }
 }
 
 void MenuItemPattern::SendSubMenuOpenToAccessibility(RefPtr<FrameNode>& subMenu, ShowSubMenuType type)
