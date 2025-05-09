@@ -541,7 +541,10 @@ template("ace_core_source_set") {
         if (ace_use_rosen_drawing) {
           external_deps += [ "graphic_2d:2d_graphics" ]
         }
-        external_deps += [ "graphic_2d:librender_service_client" ]
+        external_deps += [
+          "graphic_2d:librender_service_client",
+          "graphic_2d:rosen_text",
+        ]
       }
     }
 
