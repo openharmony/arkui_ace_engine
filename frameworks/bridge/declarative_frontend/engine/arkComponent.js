@@ -33848,8 +33848,15 @@ class ArkCommonShapeComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  resetCommonShapeOptions() {
+    modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
+      CommonShapeWidthModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
+      CommonShapeHeightModifier, undefined);
+  }
   initialize(value) {
     if (value[0] === undefined || value[0] === null) {
+      this.resetCommonShapeOptions();
       return this;
     }
     if (value[0].width !== undefined && value[0].width !== null) {
@@ -34372,8 +34379,17 @@ class ArkPathComponent extends ArkCommonShapeComponent {
     modifierWithKey(this._modifiersWithKeys, CommandsModifier.identity, CommandsModifier, value);
     return this;
   }
+  resetPathOptions() {
+    modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
+      CommonShapeWidthModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
+      CommonShapeHeightModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, CommandsModifier.identity,
+      CommandsModifier, undefined);
+  }
   initialize(value) {
     if (value[0] === undefined || value[0] === null) {
+      this.resetPathOptions();
       return this;
     }
     if (value[0].width !== undefined && value[0].width !== null) {
@@ -34491,6 +34507,18 @@ class ArkRectComponent extends ArkCommonShapeComponent {
     modifierWithKey(this._modifiersWithKeys, RectRadiusModifier.identity, RectRadiusModifier, value);
     return this;
   }
+  resetRectOptions() {
+    modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity,
+      CommonShapeWidthModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity,
+      CommonShapeHeightModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, RectRadiusModifier.identity,
+      RectRadiusModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, RectRadiusWidthModifier.identity,
+      RectRadiusWidthModifier, undefined);
+    modifierWithKey(this._modifiersWithKeys, RectRadiusHeightModifier.identity,
+      RectRadiusHeightModifier, undefined);
+  }
   initializeRoundedRectOptions(value) {
     if (value === undefined || value === null) {
       return;
@@ -34518,6 +34546,7 @@ class ArkRectComponent extends ArkCommonShapeComponent {
   }
   initialize(value) {
     if (value[0] === undefined || value[0] === null) {
+      this.resetRectOptions();
       return this;
     }
     if (value[0].width !== undefined && value[0].width !== null) {
