@@ -1276,6 +1276,18 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
 
     auto context = context_.lock();
     static std::once_flag onceFlag;
+    auto configuration = context->GetConfiguration();
+    std::unordered_map<std::string, DeviceType> typeMap = { { "phone", DeviceType::PHONE }, { "tv", DeviceType::TV },
+        { "watch", DeviceType::WATCH }, { "car", DeviceType::CAR }, { "tablet", DeviceType::TABLET },
+        { "2in1", DeviceType::TWO_IN_ONE }, { "wearable", DeviceType::WEARABLE }, { "UNKNOWN", DeviceType::UNKNOWN } };
+    if (configuration) {
+        auto type = configuration->GetItem(OHOS::AAFwk::GlobalConfigurationKey::DEVICE_TYPE);
+        if (typeMap.find(type) != typeMap.end()) {
+            SystemProperties::SetDeviceType(typeMap[type]);
+        }
+    } else {
+        LOGD("configuration is nullptr,use default type");
+    }
     if (!isFormRender_) {
         std::call_once(onceFlag, [&context]() {
             SetHwIcuDirectory();
@@ -1908,6 +1920,18 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     }
     auto context = context_.lock();
     CHECK_NULL_RETURN(context, UIContentErrorCode::NULL_POINTER);
+    auto configuration = context->GetConfiguration();
+    std::unordered_map<std::string, DeviceType> typeMap = { { "phone", DeviceType::PHONE }, { "tv", DeviceType::TV },
+        { "watch", DeviceType::WATCH }, { "car", DeviceType::CAR }, { "tablet", DeviceType::TABLET },
+        { "2in1", DeviceType::TWO_IN_ONE }, { "wearable", DeviceType::WEARABLE }, { "UNKNOWN", DeviceType::UNKNOWN } };
+    if (configuration) {
+        auto type = configuration->GetItem(OHOS::AAFwk::GlobalConfigurationKey::DEVICE_TYPE);
+        if (typeMap.find(type) != typeMap.end()) {
+            SystemProperties::SetDeviceType(typeMap[type]);
+        }
+    } else {
+        LOGD("configuration is nullptr,use default type");
+    }
     static std::once_flag onceFlag;
     std::call_once(onceFlag, std::bind(&UIContentImpl::SetAceApplicationInfo, this, std::ref(context)));
     AceNewPipeJudgement::InitAceNewPipeConfig();
