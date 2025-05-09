@@ -210,7 +210,7 @@ void ViewAbstractModelStatic::BindMenu(FrameNode* frameNode,
     auto targetNode = AceType::Claim(frameNode);
     CHECK_NULL_VOID(targetNode);
     auto targetId = targetNode->GetId();
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true, frameNode);
     if (CheckMenuIsShow(menuParam, targetId, targetNode)) {
         TAG_LOGI(AceLogTag::ACE_MENU, "hide menu done %{public}d %{public}d.", menuParam.isShowInSubWindow, targetId);
     } else if (menuParam.isShow) {

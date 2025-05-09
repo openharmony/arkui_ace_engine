@@ -5327,7 +5327,7 @@ void BindMenuBase(Ark_NativePointer node,
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     menuParam.isShowInSubWindow = theme->GetExpandDisplay();
-    menuParam.setShow = true;
+    menuParam.setShow = false;
     menuParam.isShow = Converter::OptConvert<bool>(*isShow).value_or(menuParam.isShow);
     auto menuOptions = options ? OptConvert<Ark_MenuOptions>(*options) : std::nullopt;
     if (menuOptions) {
