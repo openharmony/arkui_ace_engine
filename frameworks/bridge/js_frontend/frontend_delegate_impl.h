@@ -45,6 +45,8 @@ using ResetStagingPageCallback = std::function<void()>;
 using MediaQueryCallback = std::function<void(const std::string& callbackId, const std::string& args)>;
 using LayoutInspectorCallback = std::function<void(const std::string& componedId)>;
 using DrawInspectorCallback = std::function<void(const std::string& componedId)>;
+using DrawChildrenInspectorCallback = std::function<void(const std::string& componedId)>;
+using IsDrawChildrenCallbackFuncExistCallback = std::function<bool(const std::string& componedId)>;
 using DestroyPageCallback = std::function<void(int32_t pageId)>;
 using DestroyApplicationCallback = std::function<void(const std::string& packageName)>;
 using UpdateApplicationStateCallback = std::function<void(const std::string& packageName, Frontend::State state)>;
@@ -217,6 +219,8 @@ public:
     void OnSurfaceChanged();
     void OnLayoutCompleted(const std::string& componentId);
     void OnDrawCompleted(const std::string& componentId);
+    void OnDrawChildrenCompleted(const std::string& componentId);
+    bool IsDrawChildrenCallbackFuncExist(const std::string& componentId);
     // JsEventHandler delegate functions.
     void FireAsyncEvent(const std::string& eventId, const std::string& param, const std::string& jsonArgs);
     bool FireSyncEvent(const std::string& eventId, const std::string& param, const std::string& jsonArgs);

@@ -416,6 +416,15 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         jsEngine->DrawInspectorCallback(componentId);
     };
 
+    const auto& drawChildrenInspectorCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                                    const std::string& componentId) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->DrawChildrenInspectorCallback(componentId);
+    };
+
     const auto& requestAnimationCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                                const std::string& callbackId, uint64_t timeStamp) {
         auto jsEngine = weakEngine.Upgrade();
@@ -493,7 +502,8 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         delegate_ = AceType::MakeRefPtr<Framework::FormFrontendDelegateDeclarative>(taskExecutor, loadCallback,
             setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
             resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
-            timerCallback, mediaQueryCallback, layoutInspectorCallback, drawInspectorCallback, requestAnimationCallback,
+            timerCallback, mediaQueryCallback, layoutInspectorCallback, drawInspectorCallback,
+            drawChildrenInspectorCallback, requestAnimationCallback,
             jsCallback, onWindowDisplayModeChangedCallBack, onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack,
             onRestoreAbilityStateCallBack, onNewWantCallBack, onMemoryLevelCallBack, onStartContinuationCallBack,
             onCompleteContinuationCallBack, onRemoteTerminatedCallBack, onSaveDataCallBack, onRestoreDataCallBack,
@@ -502,7 +512,8 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateDeclarative>(taskExecutor, loadCallback,
             setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
             resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
-            timerCallback, mediaQueryCallback, layoutInspectorCallback, drawInspectorCallback, requestAnimationCallback,
+            timerCallback, mediaQueryCallback, layoutInspectorCallback, drawInspectorCallback,
+            drawChildrenInspectorCallback, requestAnimationCallback,
             jsCallback, onWindowDisplayModeChangedCallBack, onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack,
             onRestoreAbilityStateCallBack, onNewWantCallBack, onMemoryLevelCallBack, onStartContinuationCallBack,
             onCompleteContinuationCallBack, onRemoteTerminatedCallBack, onSaveDataCallBack, onRestoreDataCallBack,
@@ -1086,6 +1097,21 @@ void DeclarativeFrontend::OnDrawCompleted(const std::string& componentId)
     if (delegate_) {
         delegate_->OnDrawCompleted(componentId);
     }
+}
+
+void DeclarativeFrontend::OnDrawChildrenCompleted(const std::string& componentId)
+{
+    if (delegate_) {
+        delegate_->OnDrawChildrenCompleted(componentId);
+    }
+}
+
+bool DeclarativeFrontend::IsDrawChildrenCallbackFuncExist(const std::string& componentId)
+{
+    if (delegate_) {
+        return delegate_->IsDrawChildrenCallbackFuncExist(componentId);
+    }
+    return false;
 }
 
 void DeclarativeFrontend::HotReload()

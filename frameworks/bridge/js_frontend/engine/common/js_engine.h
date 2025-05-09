@@ -283,6 +283,16 @@ public:
         }
     }
 
+    void DrawChildrenInspectorCallback(const std::string& componentId)
+    {
+        auto iter = drawChildrenEvents_.find(componentId);
+        if (iter != drawChildrenEvents_.end()) {
+            for (auto&& observer : iter->second) {
+                (*observer)();
+            }
+        }
+    }
+
     virtual void RequestAnimationCallback(const std::string& callbackId, uint64_t timeStamp) = 0;
 
     virtual void JsCallback(const std::string& callbackId, const std::string& args) = 0;
@@ -427,6 +437,24 @@ public:
         }
     }
 
+    void ACE_EXPORT RegisterDrawChildrenInspectorCallback(
+        const RefPtr<InspectorEvent>& drawChildrenEvent, const std::string& componentId)
+    {
+        drawChildrenEvents_[componentId].emplace(drawChildrenEvent);
+    }
+
+    void ACE_EXPORT UnregisterDrawChildrenInspectorCallback(
+        const RefPtr<InspectorEvent>& drawChildrenEvent, const std::string& componentId)
+    {
+        auto iter = drawChildrenEvents_.find(componentId);
+        if (iter != drawChildrenEvents_.end()) {
+            iter->second.erase(drawChildrenEvent);
+            if (iter->second.empty()) {
+                drawChildrenEvents_.erase(componentId);
+            }
+        }
+    }
+
     bool IsLayoutCallBackFuncExist(const std::string& componentId) const
     {
         if (layoutEvents_.find(componentId) != layoutEvents_.end()) {
@@ -438,6 +466,14 @@ public:
     bool IsDrawCallBackFuncExist(const std::string& componentId) const
     {
         if (drawEvents_.find(componentId) != drawEvents_.end()) {
+            return true;
+        }
+        return false;
+    }
+
+    bool IsDrawChildrenCallbackFuncExist(const std::string& componentId) const
+    {
+        if (drawChildrenEvents_.find(componentId) != drawChildrenEvents_.end()) {
             return true;
         }
         return false;
@@ -497,6 +533,7 @@ protected:
     std::function<void(JsEngine*)> mediaUpdateCallback_;
     std::map<std::string, std::set<RefPtr<InspectorEvent>>> layoutEvents_;
     std::map<std::string, std::set<RefPtr<InspectorEvent>>> drawEvents_;
+    std::map<std::string, std::set<RefPtr<InspectorEvent>>> drawChildrenEvents_;
     bool needUpdate_ = false;
     PageUrlCheckFunc pageUrlCheckFunc_;
 

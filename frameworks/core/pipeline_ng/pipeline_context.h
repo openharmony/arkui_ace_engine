@@ -334,6 +334,7 @@ public:
 
     void OnLayoutCompleted(const std::string& componentId);
     void OnDrawCompleted(const std::string& componentId);
+    void OnDrawChildrenCompleted(const std::string& componentId);
 
     void OnSurfacePositionChanged(int32_t posX, int32_t posY) override;
 
@@ -1178,6 +1179,7 @@ public:
     }
 
     const RefPtr<NodeRenderStatusMonitor>& GetNodeRenderStatusMonitor();
+    void SetNeedRenderForDrawChildrenNode(const WeakPtr<NG::UINode>& node);
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -1501,6 +1503,8 @@ private:
     friend class ScopedLayout;
     friend class FormGestureManager;
     RefPtr<NodeRenderStatusMonitor> nodeRenderStatusMonitor_;
+    std::set<WeakPtr<NG::UINode>> needRenderForDrawChildrenNodes_;
+    std::mutex needRenderForDrawChildrenNodesMutex_;
 };
 
 /**

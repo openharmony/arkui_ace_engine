@@ -93,6 +93,16 @@ public:
         componentId_ = componentId;
     }
 
+    void OnDrawChildrenCompleted(const std::string& componentId) override
+    {
+        componentId_ = componentId;
+    }
+
+    bool IsDrawChildrenCallbackFuncExist(const std::string& componentId) override
+    {
+        return false;
+    }
+
     int32_t GetWidth() const
     {
         return width_;

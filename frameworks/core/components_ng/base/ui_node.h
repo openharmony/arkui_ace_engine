@@ -967,6 +967,16 @@ public:
         return true;
     }
 
+    bool IsObservedByDrawChildren() const
+    {
+        return isObservedByDrawChildren_;
+    }
+
+    RefPtr<UINode> GetObserverParentForDrawChildren() const
+    {
+        return drawChildrenParent_.Upgrade();
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -1056,6 +1066,16 @@ private:
         bool addDefaultTransition = false);
     bool CanAddChildWhenTopNodeIsModalUec(std::list<RefPtr<UINode>>::iterator& curIter);
 
+    void SetObserverParentForDrawChildren(const RefPtr<UINode>& parent);
+    void ClearObserverParentForDrawChildren()
+    {
+        drawChildrenParent_.Reset();
+        isObservedByDrawChildren_ = false;
+        for (const auto& child : GetChildren()) {
+            child->ClearObserverParentForDrawChildren();
+        }
+    }
+
     std::list<RefPtr<UINode>> children_;
     // disappearingChild、index、branchId
     std::list<std::tuple<RefPtr<UINode>, uint32_t, int32_t>> disappearingChildren_;
@@ -1124,6 +1144,8 @@ private:
     bool isMoving_ = false;
     bool isCrossLanguageAttributeSetting_ = false;
     std::optional<bool> userFreeze_;
+    WeakPtr<UINode> drawChildrenParent_;
+    bool isObservedByDrawChildren_ = false;
 };
 
 } // namespace OHOS::Ace::NG
