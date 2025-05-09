@@ -1455,7 +1455,6 @@ void UINode::OnRecycle()
 
 void UINode::NotifyColorModeChange(uint32_t colorMode)
 {
-    // 清理customNode中cached节点
     if (CheckShouldClearCache()) {
         auto customNode = DynamicCast<CustomNode>(this);
         if (customNode) {
