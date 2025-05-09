@@ -50,7 +50,7 @@ public:
         PaintCheckBox(canvas, offset_->Get(), size_->Get());
     }
 
-    void UpdateAnimatableProperty()
+    void UpdateAnimatableProperty(bool needAnimation)
     {
         switch (touchHoverType_) {
             case TouchHoverAnimationType::HOVER:
@@ -70,6 +70,17 @@ public:
                 break;
             default:
                 break;
+        }
+        if (!needAnimation) {
+            animatableBoardColor_->Set(
+                isSelect_->Get() ? LinearColor(userActiveColor_) : LinearColor(inactivePointColor_));
+            animatableCheckColor_->Set(
+                isSelect_->Get() ? LinearColor(pointColor_) : LinearColor(pointColor_.BlendOpacity(0)));
+            animatableBorderColor_->Set(
+                isSelect_->Get() ? LinearColor(Color::TRANSPARENT) : LinearColor(inactiveColor_));
+            animatableShadowColor_->Set(
+                isSelect_->Get() ? LinearColor(shadowColor_) : LinearColor(shadowColor_.BlendOpacity(0)));
+            return;
         }
         AnimationOption option = AnimationOption();
         option.SetDuration(colorAnimationDuration_);

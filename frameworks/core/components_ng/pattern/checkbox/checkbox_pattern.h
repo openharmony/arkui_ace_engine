@@ -187,6 +187,7 @@ private:
     void HandleBlurEvent();
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
+    void RegisterVisibleAreaChange();
     void OnIsFocusActiveUpdate(bool isFocusAcitve);
     void CheckPageNode();
     void LoadBuilder();
@@ -217,6 +218,7 @@ private:
         const RefPtr<CheckBoxGroupPaintProperty>& groupPaintProperty, const std::list<RefPtr<FrameNode>>& list);
     void UpdateCheckBoxGroupStatus(RefPtr<FrameNode> checkBoxGroupNode, const std::list<RefPtr<FrameNode>>& list);
     void UpdatePaintPropertyBySettingData(RefPtr<CheckBoxPaintProperty> paintProp);
+    void SetNeedAnimation(bool needAnimation);
 
     CheckboxSettingData checkboxSettingData_;
 
@@ -237,6 +239,7 @@ private:
     bool isFirstCreated_ = true;
     bool isUserSetResponseRegion_ = false;
     bool focusEventInitialized_ = false;
+    bool visible_ = true;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;

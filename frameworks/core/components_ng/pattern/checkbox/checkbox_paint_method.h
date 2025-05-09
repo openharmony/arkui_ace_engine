@@ -91,12 +91,18 @@ public:
         return checkboxModifier_;
     }
 
+    void SetNeedAnimation(bool needAnimation)
+    {
+        needAnimation_ = needAnimation;
+    }
+
 private:
     bool enabled_ = true;
     float totalScale_ = 1.0f;
     float pointScale_ = 0.5f;
     bool hasBuilder_ = false;
     bool useContentModifier_ = false;
+    bool needAnimation_ = true;
     CheckBoxStyle checkBoxStyle_ = CheckBoxStyle::CIRCULAR_STYLE;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;

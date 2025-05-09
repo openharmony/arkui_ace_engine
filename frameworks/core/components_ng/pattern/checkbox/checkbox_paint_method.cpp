@@ -127,7 +127,7 @@ void CheckBoxPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     checkboxModifier_->SetOffset(offset);
     checkboxModifier_->SetEnabled(enabled_);
     checkboxModifier_->SetTouchHoverAnimationType(touchHoverType_);
-    checkboxModifier_->UpdateAnimatableProperty();
+    checkboxModifier_->UpdateAnimatableProperty(needAnimation_);
     if (paintProperty->HasCheckBoxUnSelectedColor()) {
         auto pipeline = PipelineBase::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipeline);

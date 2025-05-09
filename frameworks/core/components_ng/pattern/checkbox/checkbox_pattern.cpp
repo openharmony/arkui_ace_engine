@@ -36,6 +36,7 @@ RefPtr<NodePaintMethod> CheckBoxPattern::CreateNodePaintMethod()
     paintProperty->SetHost(host);
     if (!paintMethod_) {
         paintMethod_ = MakeRefPtr<CheckBoxPaintMethod>();
+        paintMethod_->SetNeedAnimation(visible_);
     }
     CheckBoxStyle checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -126,6 +127,7 @@ void CheckBoxPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
+    RegisterVisibleAreaChange();
 }
 
 void CheckBoxPattern::SetBuilderNodeHidden()
@@ -515,6 +517,9 @@ void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(groupNode);
     auto checkboxList = groupManager->GetCheckboxList(group);
     UpdateCheckBoxGroupStatus(groupNode, checkboxList);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
 }
 
 void CheckBoxPattern::CheckPageNode()
@@ -1205,5 +1210,27 @@ void CheckBoxPattern::ReportChangeEvent(bool selectStatus)
     auto id = host->GetId();
     json->Put("nodeId", id);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", json->ToString().c_str());
+}
+
+void CheckBoxPattern::RegisterVisibleAreaChange()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetNeedAnimation(visible);
+    };
+    std::vector<double> ratioList = {0.0};
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
+}
+
+void CheckBoxPattern::SetNeedAnimation(bool visible)
+{
+    visible_ = visible;
+    CHECK_NULL_VOID(paintMethod_);
+    paintMethod_->SetNeedAnimation(visible);
 }
 } // namespace OHOS::Ace::NG
