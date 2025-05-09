@@ -475,7 +475,7 @@ void TextContentModifier::SetHybridRenderTypeIfNeeded(DrawingContext& drawingCon
                 const RectF& contentRect = textPattern->GetTextRect();
                 RectF boundsRect;
                 pManager->GetPaintRegion(boundsRect, contentRect.GetX(), contentRect.GetY() + baselineOffset);
-                recordingCanvas->ResetHybridRenderSize(paragraphWidth, paragraphHeight);
+                recordingCanvas->ResetHybridRenderSize(boundsRect.Width(), boundsRect.Height());
             }
         }
     }
