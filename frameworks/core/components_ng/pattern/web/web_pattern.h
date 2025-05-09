@@ -634,7 +634,6 @@ public:
     bool ExecuteAction(int64_t accessibilityId, AceAction action,
         const std::map<std::string, std::string>& actionArguments) const;
     void SetAccessibilityState(bool state, bool isDelayed = false);
-    void UpdateScrollBarWithBorderRadius();
     void UpdateFocusedAccessibilityId(int64_t accessibilityId = -1);
     void ClearFocusedAccessibilityId();
     void OnTooltip(const std::string& tooltip);
