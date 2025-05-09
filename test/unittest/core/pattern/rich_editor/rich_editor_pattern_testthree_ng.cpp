@@ -1366,6 +1366,62 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleSelect002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleSelect003
+ * @tc.desc: test HandleSelect(Ctrl+Shift+Up/Down)
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, HandleSelect003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    // Init paragraphs with test content
+    std::vector<std::u16string> initValues = { INIT_VALUE_1, INIT_VALUE_2, INIT_VALUE_3 };
+    ParagraphManager::ParagraphInfo info;
+    for (const auto& value : initValues) {
+        auto insertValue = value + TEST_INSERT_LINE_SEP;
+        AddSpan(insertValue);
+        info.start = info.end;
+        info.end = info.start + insertValue.length();
+        info.paragraph = AceType::MakeRefPtr<MockParagraph>();
+        richEditorPattern->paragraphs_.paragraphs_.emplace_back(info);
+    }
+
+    // caret at paragraph start
+    richEditorPattern->caretPosition_ = 7;
+    richEditorPattern->HandleSelect(CaretMoveIntent::ParagraghBegin);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 7);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
+    richEditorPattern->HandleSelect(CaretMoveIntent::ParagraghEnd);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 7);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 7);
+    richEditorPattern->HandleSelect(CaretMoveIntent::ParagraghEnd);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 7);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 14);
+
+    // caret in paragraph middle
+    richEditorPattern->ResetSelection();
+    richEditorPattern->caretPosition_ = 11;
+    richEditorPattern->HandleSelect(CaretMoveIntent::ParagraghBegin);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 11);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 7);
+    richEditorPattern->HandleSelect(CaretMoveIntent::ParagraghEnd);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 11);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 14);
+
+    // caret at paragraph end
+    richEditorPattern->ResetSelection();
+    richEditorPattern->caretPosition_ = 13;
+    richEditorPattern->HandleSelect(CaretMoveIntent::ParagraghBegin);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 13);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 7);
+    richEditorPattern->HandleSelect(CaretMoveIntent::ParagraghEnd);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 13);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 14);
+}
+
+/**
  * @tc.name: HandleDraggableFlag
  * @tc.desc: test HandleDraggableFlag
  * @tc.type: FUNC

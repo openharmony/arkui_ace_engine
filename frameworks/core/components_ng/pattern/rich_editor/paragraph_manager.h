@@ -59,7 +59,7 @@ public:
 
     virtual std::vector<RectF> GetRects(int32_t start, int32_t end,
         RectHeightPolicy rectHeightPolicy = RectHeightPolicy::COVER_LINE) const;
-    ParagraphManager::ParagraphInfo GetParagrahInfo(int32_t position) const;
+    ParagraphManager::ParagraphInfo GetParagraphInfo(int32_t position) const;
     std::vector<std::pair<std::vector<RectF>, TextDirection>> GetParagraphsRects(
         int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy = RectHeightPolicy::COVER_LINE) const;
     std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> GetTextBoxesForSelect(

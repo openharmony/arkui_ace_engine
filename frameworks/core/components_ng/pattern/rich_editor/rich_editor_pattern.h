@@ -585,6 +585,12 @@ public:
     void UpdateShiftFlag(const KeyEvent& keyEvent)override;
     bool HandleOnEscape() override;
     void HandleOnUndoAction() override;
+
+    void HandleOnExtendUndoAction() override
+    {
+        HandleOnUndoAction();
+    }
+
     void HandleOnRedoAction() override;
     void CursorMove(CaretMoveIntent direction) override;
     void HandleExtendAction(int32_t action) override;
@@ -616,7 +622,6 @@ public:
     void HandleSelectFontStyleWrapper(KeyCode code, TextStyle& spanStyle);
     void HandleOnShowMenu() override;
     int32_t HandleKbVerticalSelection(bool isUp);
-    int32_t HandleSelectParagraghPos(bool direction);
     PositionType GetPositionTypeFromLine();
     int32_t HandleSelectWrapper(CaretMoveIntent direction, int32_t fixedPos);
     void AIDeleteComb(int32_t start, int32_t end, int32_t& aiPosition, bool direction);
@@ -629,6 +634,12 @@ public:
     int32_t GetParagraphEndPosition(int32_t caretPosition);
     int32_t CaretPositionSelectEmoji(CaretMoveIntent direction);
     void HandleSelect(CaretMoveIntent direction) override;
+
+    void HandleSelectExtend(CaretMoveIntent direction) override
+    {
+        HandleSelect(direction);
+    }
+
     void SetCaretPositionWithAffinity(PositionWithAffinity positionWithAffinity);
     bool SetCaretPosition(int32_t pos, bool needNotifyImf = true);
     int32_t GetCaretPosition();

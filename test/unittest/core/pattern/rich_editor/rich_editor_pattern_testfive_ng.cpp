@@ -617,66 +617,6 @@ HWTEST_F(RichEditorPatternTestFiveNg, AddSpanHoverEven001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleSelectParagraghPos001
- * @tc.desc: test HandleSelectParagraghPos
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, HandleSelectParagraghPos001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->styledString_->text_ = u"HandleSelectParagraghPos";
-    richEditorPattern->caretPosition_ = 1;
-    EXPECT_EQ(richEditorPattern->HandleSelectParagraghPos(true), 0);
-}
-
-/**
- * @tc.name: HandleSelectParagraghPos002
- * @tc.desc: test HandleSelectParagraghPos
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, HandleSelectParagraghPos002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->isSpanStringMode_ = true;
-    EXPECT_EQ(richEditorPattern->HandleSelectParagraghPos(true), 0);
-}
-
-/**
- * @tc.name: HandleSelectParagraghPos003
- * @tc.desc: test HandleSelectParagraghPos
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, HandleSelectParagraghPos003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->styledString_->text_ = u"HandleSelectParagraghPos";
-    richEditorPattern->caretPosition_ = 1;
-    EXPECT_EQ(richEditorPattern->HandleSelectParagraghPos(false), 2);
-}
-
-/**
- * @tc.name: HandleSelectParagraghPos004
- * @tc.desc: test HandleSelectParagraghPos
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, HandleSelectParagraghPos004, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->isSpanStringMode_ = true;
-    EXPECT_EQ(richEditorPattern->HandleSelectParagraghPos(false), 0);
-}
-
-/**
  * @tc.name: CursorMoveLineBegin001
  * @tc.desc: test CursorMoveLineBegin
  * @tc.type: FUNC
