@@ -29,7 +29,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { Want } from "./ohos.app.ability"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { ErrorCallback } from "./ohos.base"
-import { BusinessError } from "./base"
+import { BusinessError } from "#external"
 import { Callback_TerminationInfo_Void, TerminationInfo } from "./embeddedComponent"
 import { Callback_Void } from "./abilityComponent"
 import { NodeAttach, remember } from "@koalaui/runtime"

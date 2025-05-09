@@ -74,7 +74,7 @@ import { WithThemeAttribute, WithThemeInterface, WithThemeOptions } from "./../w
 import { Callback_WrappedBuilder_Args_Void, CommonConfiguration } from "./../arkui-wrapper-builder"
 import { CustomNodeBuilder } from "./../customBuilder"
 import { ErrorCallback } from "./../ohos.base"
-import { BusinessError } from "./../base"
+import { BusinessError } from "#external"
 import { GetItemMainSizeByIndex } from "./../waterFlow"
 import { GridAttribute_onItemDragStart_event_type, ListAttribute_onItemDragStart_event_type, TextTimerAttribute_onTimer_event_type } from "./../type-replacements"
 import { ImageCompleteCallback, ImageLoadResult } from "./../imageSpan"
@@ -2088,12 +2088,7 @@ export function deserializeAndCallPasteButtonCallback(thisDeserializer: Deserial
     const _call  = (ResourceHolder.instance().get(_resourceId) as PasteButtonCallback)
     let event : ClickEvent = (thisDeserializer.readClickEvent() as ClickEvent)
     let result : PasteButtonOnClickResult = TypeChecker.PasteButtonOnClickResult_FromNumeric(thisDeserializer.readInt32())
-    const error_buf_runtimeType  = (thisDeserializer.readInt8() as int32)
     let error_buf : BusinessError<void> | undefined
-    if ((RuntimeType.UNDEFINED) != (error_buf_runtimeType))
-    {
-        error_buf = thisDeserializer.readBusinessError()
-    }
     let error : BusinessError<void> | undefined = error_buf
     _call(event, result, error)
 }
@@ -2165,12 +2160,7 @@ export function deserializeAndCallSaveButtonCallback(thisDeserializer: Deseriali
     const _call  = (ResourceHolder.instance().get(_resourceId) as SaveButtonCallback)
     let event : ClickEvent = (thisDeserializer.readClickEvent() as ClickEvent)
     let result : SaveButtonOnClickResult = TypeChecker.SaveButtonOnClickResult_FromNumeric(thisDeserializer.readInt32())
-    const error_buf_runtimeType  = (thisDeserializer.readInt8() as int32)
     let error_buf : BusinessError<void> | undefined
-    if ((RuntimeType.UNDEFINED) != (error_buf_runtimeType))
-    {
-        error_buf = thisDeserializer.readBusinessError()
-    }
     let error : BusinessError<void> | undefined = error_buf
     _call(event, result, error)
 }

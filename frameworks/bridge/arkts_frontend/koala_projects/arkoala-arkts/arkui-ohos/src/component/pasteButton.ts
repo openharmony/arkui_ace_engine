@@ -24,7 +24,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkSecurityComponentMethodPeer, SecurityComponentMethod, ArkSecurityComponentMethodComponent, ArkSecurityComponentMethodStyle, UISecurityComponentMethod } from "./securityComponent"
 import { ClickEvent } from "./common"
-import { BusinessError } from "./base"
+import { BusinessError } from "#external"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -100,11 +100,12 @@ export class ArkPasteButtonComponent extends ArkSecurityComponentMethodComponent
     }
     /** @memo */
     public setPasteButtonOptions(options?: PasteButtonOptions): this {
-        if (this.checkPriority("setPasteButtonOptions")) {
+        if (options) {
             const options_type = runtimeType(options)
-            this.getPeer()?.setPasteButtonOptions0Attribute()
+            this.getPeer()?.setPasteButtonOptions1Attribute(options as PasteButtonOptions)
             return this
         }
+        this.getPeer()?.setPasteButtonOptions0Attribute()
         return this
     }
     /** @memo */
