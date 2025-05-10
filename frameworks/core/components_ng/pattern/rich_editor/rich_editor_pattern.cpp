@@ -158,11 +158,7 @@ RichEditorPattern::RichEditorPattern(bool isStyledStringMode) :
     twinklingInterval_ = SystemProperties::GetDebugEnabled()
         ? RICH_EDITOR_TWINKLING_INTERVAL_MS_DEBUG : RICH_EDITOR_TWINKLING_INTERVAL_MS;
     floatingCaretState_.UpdateOriginCaretColor(GetDisplayColorMode());
-    if (isSpanStringMode_) {
-        undoManager_ = std::make_unique<StyledStringUndoManager>(WeakClaim(this));
-    } else {
-        undoManager_ = std::make_unique<SpansUndoManager>(WeakClaim(this));
-    }
+    undoManager_ = RichEditorUndoManager::Create(isSpanStringMode_, WeakClaim(this));
 }
 
 RichEditorPattern::~RichEditorPattern()
