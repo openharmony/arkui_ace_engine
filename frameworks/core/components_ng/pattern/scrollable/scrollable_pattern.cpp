@@ -2650,7 +2650,7 @@ void ScrollablePattern::ResetBackToTop()
 
 void ScrollablePattern::OnStatusBarClick()
 {
-    if (!backToTop_) {
+    if (!backToTop_ || isBackToTopRunning_ || IsAtTop()) {
         return;
     }
 
