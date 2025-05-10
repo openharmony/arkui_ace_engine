@@ -39,11 +39,11 @@ HWTEST_F(RichEditorStyledStringTestNg, RichEditorModel001, TestSize.Level1)
      * @tc.steps: step1. create richEditorModel in styledString mode
      */
     RichEditorModelNG richEditorModel;
-    richEditorModel.Create(true);
+    richEditorModel.Create();
     richEditorModel.isStyledStringMode_ = true;
     auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(richEditorNode, nullptr);
-    auto richEditorPattern = richEditorNode->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -94,7 +94,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController001, TestSize.Level
      * @tc.steps: step2. get richEditor styledString controller
      */
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto styledStringController = richEditorPattern->GetRichEditorStyledStringController();
     ASSERT_NE(styledStringController, nullptr);
@@ -147,7 +147,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController002, TestSize.Level
      * @tc.steps: step2. get richEditor styledString controller
      */
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto styledStringController = richEditorPattern->GetRichEditorStyledStringController();
     ASSERT_NE(styledStringController, nullptr);
@@ -191,7 +191,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController003, TestSize.Level
      * @tc.steps: step2. get richEditor styledString controller
      */
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto styledStringController = richEditorPattern->GetRichEditorStyledStringController();
     ASSERT_NE(styledStringController, nullptr);
@@ -225,7 +225,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController004, TestSize.Level
      * @tc.steps: step2. get richEditor styledString controller
      */
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto styledStringController = richEditorPattern->GetRichEditorStyledStringController();
     ASSERT_NE(styledStringController, nullptr);
@@ -260,7 +260,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController005, TestSize.Level
      * @tc.steps: step2. get richEditor styledString controller and set styledString
      */
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto styledStringController = richEditorPattern->GetRichEditorStyledStringController();
     ASSERT_NE(styledStringController, nullptr);
@@ -310,7 +310,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController006, TestSize.Level
      * @tc.steps: step2. get richEditor styledString controller and set styledString
      */
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto styledStringController = richEditorPattern->GetRichEditorStyledStringController();
     ASSERT_NE(styledStringController, nullptr);
@@ -370,7 +370,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController007, TestSize.Level
      * @tc.steps: step2. get richEditor styledString controller and set styledString
      */
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto styledStringController = richEditorPattern->GetRichEditorStyledStringController();
     ASSERT_NE(styledStringController, nullptr);
@@ -426,7 +426,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController008, TestSize.Level
      * @tc.steps: step2. get richEditor styledString controller and set styledString
      */
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto styledStringController = richEditorPattern->GetRichEditorStyledStringController();
     ASSERT_NE(styledStringController, nullptr);
@@ -471,7 +471,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController009, TestSize.Level
      * @tc.steps: step2. get richEditor styledString controller and set styledString
      */
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto styledStringController = richEditorPattern->GetRichEditorStyledStringController();
     ASSERT_NE(styledStringController, nullptr);
@@ -522,7 +522,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringInsertValue001, TestSize.Leve
      * @tc.steps: step2. set styledString
      */
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->SetStyledString(mutableStr);
 
@@ -562,7 +562,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringInsertValue002, TestSize.Leve
      * @tc.steps: step2. set styledString
      */
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->SetStyledString(mutableStr);
 
@@ -600,7 +600,7 @@ HWTEST_F(RichEditorStyledStringTestNg, CustomSpan001, TestSize.Level1)
      * @tc.steps: step2. set styledString
      */
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->SetStyledString(mutableStr);
 
@@ -649,7 +649,7 @@ HWTEST_F(RichEditorStyledStringTestNg, FromStyledString001, TestSize.Level1)
      * @tc.steps: step2. get richEditor styledString controller and set styledString
      */
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto styledStringController = richEditorPattern->GetRichEditorStyledStringController();
     ASSERT_NE(styledStringController, nullptr);
@@ -726,7 +726,7 @@ HWTEST_F(RichEditorStyledStringTestNg, CopySpanStyle003, TestSize.Level1)
 HWTEST_F(RichEditorStyledStringTestNg, CopySpanStyle004, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
     ASSERT_NE(layoutAlgorithm, nullptr);
@@ -765,7 +765,7 @@ HWTEST_F(RichEditorStyledStringTestNg, GetSelection001, TestSize.Level1)
      * @tc.steps: step2. get richEditor styledString controller , set styledString and GetSelection
      */
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto styledStringController = richEditorPattern->GetRichEditorStyledStringController();
     ASSERT_NE(styledStringController, nullptr);
@@ -781,7 +781,7 @@ HWTEST_F(RichEditorStyledStringTestNg, GetSelection001, TestSize.Level1)
 HWTEST_F(RichEditorStyledStringTestNg, InsertValueInStyledString001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
     TextStyle style;
@@ -822,7 +822,7 @@ HWTEST_F(RichEditorStyledStringTestNg, InsertValueInStyledString001, TestSize.Le
 HWTEST_F(RichEditorStyledStringTestNg, DeleteValueInStyledString001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"abc");
     richEditorPattern->caretVisible_ = false;
@@ -878,7 +878,7 @@ HWTEST_F(RichEditorStyledStringTestNg, InsertStyledStringByPaste001, TestSize.Le
      * @tc.steps: step1. get richEditor pattern and controller
      */
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
     auto richEditorController = richEditorPattern->GetRichEditorController();
@@ -906,7 +906,7 @@ HWTEST_F(RichEditorStyledStringTestNg, InsertStyledStringByPaste001, TestSize.Le
 HWTEST_F(RichEditorStyledStringTestNg, UpdateSpanStyle001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
@@ -927,7 +927,7 @@ HWTEST_F(RichEditorStyledStringTestNg, UpdateSpanStyle001, TestSize.Level1)
 HWTEST_F(RichEditorStyledStringTestNg, FromStyledString002, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
     Selection selection;
@@ -951,6 +951,37 @@ HWTEST_F(RichEditorStyledStringTestNg, FromStyledString002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ToStyledString001
+ * @tc.desc: Test spans to styledString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, ToStyledString001, TestSize.Level1)
+{
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step1. init spans
+     */
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+    richEditorController->AddTextSpan(options);
+    options.value = INIT_VALUE_2;
+    richEditorController->AddTextSpan(options);
+
+    /**
+     * @tc.steps: step2. test ToStyledString
+     */
+    auto spanString = richEditorPattern->ToStyledString(0, 8);
+    ASSERT_NE(spanString, nullptr);
+    EXPECT_EQ(spanString->GetSpanItems().size(), 2);
+}
+
+/**
  * @tc.name: ToStyledString002
  * @tc.desc: test ToStyledString
  * @tc.type: FUNC
@@ -958,7 +989,7 @@ HWTEST_F(RichEditorStyledStringTestNg, FromStyledString002, TestSize.Level1)
 HWTEST_F(RichEditorStyledStringTestNg, ToStyledString002, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
     int32_t start = 3;
@@ -979,7 +1010,7 @@ HWTEST_F(RichEditorStyledStringTestNg, CreateStyledStringByTextStyle, TestSize.L
      * @tc.steps: step1. get richEditor pattern
      */
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
     /**
@@ -1036,7 +1067,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteBackward001, TestSize.L
      * @tc.steps: step2. set styledString
      */
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->SetStyledString(mutableStr);
 
@@ -1076,7 +1107,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteBackward002, TestSize.L
      * @tc.steps: step2. set styledString
      */
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->SetStyledString(mutableStr);
 
@@ -1119,7 +1150,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteForward001, TestSize.Le
      * @tc.steps: step2. set styledString
      */
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->SetStyledString(mutableStr);
 
@@ -1159,7 +1190,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteForward002, TestSize.Le
      * @tc.steps: step2. set styledString
      */
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->SetStyledString(mutableStr);
 
@@ -1187,7 +1218,7 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringDeleteForward002, TestSize.Le
 HWTEST_F(RichEditorStyledStringTestNg, DeleteValueInStyledString002, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_3);
     richEditorPattern->previewLongPress_ = true;
@@ -1196,111 +1227,4 @@ HWTEST_F(RichEditorStyledStringTestNg, DeleteValueInStyledString002, TestSize.Le
     richEditorPattern->DeleteValueInStyledString(0, 10, true, false);
     EXPECT_FALSE(richEditorPattern->previewLongPress_);
 }
-
-
-/**
- * @tc.name: CreateDecorationSpanByTextStyle001
- * @tc.desc: test RichEditorPattern CreateDecorationSpanByTextStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorStyledStringTestNg, CreateDecorationSpanByTextStyle001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    UpdateSpanStyle updateSpanStyle;
-    updateSpanStyle.updateTextDecorationStyle = TextDecorationStyle::DASHED;
-    TextStyle style;
-    style.SetLineHeight(LINE_HEIGHT_VALUE);
-    style.SetLetterSpacing(LETTER_SPACING);
-    style.SetFontFeatures(TEXT_FONTFEATURE);
-    RefPtr<DecorationSpan> span = richEditorPattern->CreateDecorationSpanByTextStyle(updateSpanStyle, style, 0);
-    ASSERT_NE(span, nullptr);
-}
-
-
-/**
- * @tc.name: ProcessStyledString001
- * @tc.desc: test ProcessStyledString
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorStyledStringTestNg, ProcessStyledString001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
-
-    richEditorPattern->textDetectEnable_ = true;
-    richEditorPattern->dataDetectorAdapter_->aiDetectInitialized_ = true;
-    richEditorPattern->ProcessStyledString();
-
-    richEditorPattern->dataDetectorAdapter_->aiDetectInitialized_ = false;
-    richEditorPattern->ProcessStyledString();
-
-    ASSERT_EQ(richEditorPattern->spans_.empty(), true);
-}
-
-/**
- * @tc.name: ProcessStyledString002
- * @tc.desc: test ProcessStyledString
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorStyledStringTestNg, ProcessStyledString002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(INIT_VALUE_1);
-    richEditorPattern->textDetectEnable_ = true;
-    bool ret = false;
-    ret = richEditorPattern->CanStartAITask();
-    EXPECT_TRUE(ret);
-
-    richEditorPattern->textForDisplay_ = INIT_VALUE_1;
-    richEditorPattern->dataDetectorAdapter_->aiDetectInitialized_ = true;
-    richEditorPattern->ProcessStyledString();
-
-    EXPECT_FALSE(richEditorPattern->spans_.empty());
-}
-
-/**
- * @tc.name: ProcessStyledString003
- * @tc.desc: test ProcessStyledString
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorStyledStringTestNg, ProcessStyledString003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(INIT_VALUE_1);
-    richEditorPattern->textDetectEnable_ = true;
-    bool ret = false;
-    ret = richEditorPattern->CanStartAITask();
-    EXPECT_TRUE(ret);
-
-    richEditorPattern->dataDetectorAdapter_->aiDetectInitialized_ = false;
-    richEditorPattern->ProcessStyledString();
-
-    EXPECT_FALSE(richEditorPattern->spans_.empty());
-}
-
-/**
- * @tc.name: InsertValueInStyledString002
- * @tc.desc: test InsertValueInStyledString
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorStyledStringTestNg, InsertValueInStyledString002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<StyledStringRichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_3);
-    richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->InsertValueInStyledString(PREVIEW_TEXT_VALUE1);
-    EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
-}
-
 } // namespace OHOS::Ace::NG

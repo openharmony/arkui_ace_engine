@@ -101,12 +101,6 @@ void RichEditorAccessibilityTestNg::TearDownTestSuite()
 void RichEditorAccessibilityTestNg::SetSpanStringMode(bool isSpanStringMode)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    using PatternCreator = std::function<RefPtr<Pattern>(void)>;
-    PatternCreator ssPatternCreator = []() { return AceType::MakeRefPtr<StyledStringRichEditorPattern>(); };
-    PatternCreator oldPatternCreator = []() { return AceType::MakeRefPtr<RichEditorPattern>(); };
-    PatternCreator patternCreator = isSpanStringMode ? ssPatternCreator : oldPatternCreator;
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    richEditorNode_ = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_ETS_TAG, nodeId, patternCreator);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     if (isSpanStringMode) {
         richEditorPattern->SetSpanStringMode(true);

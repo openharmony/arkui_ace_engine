@@ -157,35 +157,35 @@ void RichEditorUndoManager::RecordInsertOperation(const UndoRedoRecord& record)
 
 bool StyledStringUndoManager::IsStyledUndoRedoSupported()
 {
-    auto pattern = AceType::DynamicCast<StyledStringRichEditorPattern>(pattern_.Upgrade());
+    auto pattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, false);
     return pattern->IsStyledStringModeEnabled();
 }
 
 bool StyledStringUndoManager::BeforeChangeByRecord(const UndoRedoRecord& record, bool isUndo)
 {
-    auto pattern = AceType::DynamicCast<StyledStringRichEditorPattern>(pattern_.Upgrade());
+    auto pattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, false);
     return pattern->BeforeStyledStringChange(record, isUndo);
 }
 
 void StyledStringUndoManager::AfterChangeByRecord(const UndoRedoRecord& record, bool isUndo)
 {
-    auto pattern = AceType::DynamicCast<StyledStringRichEditorPattern>(pattern_.Upgrade());
+    auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     pattern->AfterStyledStringChange(record, isUndo);
 }
 
 void StyledStringUndoManager::ExecuteUndo(const UndoRedoRecord& record)
 {
-    auto pattern = AceType::DynamicCast<StyledStringRichEditorPattern>(pattern_.Upgrade());
+    auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     pattern->HandleUndoInStyledString(record);
 }
 
 void StyledStringUndoManager::ExecuteRedo(const UndoRedoRecord& record)
 {
-    auto pattern = AceType::DynamicCast<StyledStringRichEditorPattern>(pattern_.Upgrade());
+    auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     pattern->HandleRedoInStyledString(record);
 }
@@ -193,7 +193,7 @@ void StyledStringUndoManager::ExecuteRedo(const UndoRedoRecord& record)
 void StyledStringUndoManager::ApplyOperationToRecord(
     int32_t start, int32_t length, const std::u16string& string, UndoRedoRecord& record)
 {
-    auto pattern = AceType::DynamicCast<StyledStringRichEditorPattern>(pattern_.Upgrade());
+    auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     CHECK_NULL_VOID(pattern->IsStyledStringModeEnabled());
     auto styledString = pattern->CreateStyledStringByStyleBefore(start, string);
@@ -203,7 +203,7 @@ void StyledStringUndoManager::ApplyOperationToRecord(
 void StyledStringUndoManager::ApplyOperationToRecord(
     int32_t start, int32_t length, const RefPtr<SpanString>& styledString, UndoRedoRecord& record)
 {
-    auto pattern = AceType::DynamicCast<StyledStringRichEditorPattern>(pattern_.Upgrade());
+    auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     CHECK_NULL_VOID(pattern->IsStyledStringModeEnabled());
     UpdateRecordBeforeChange(start, length, record);
@@ -216,7 +216,7 @@ void StyledStringUndoManager::ApplyOperationToRecord(
 void StyledStringUndoManager::SetOperationBefore(
     TextRange range, TextRange selection, CaretAffinityPolicy caretAffinity, UndoRedoRecord& record)
 {
-    auto pattern = AceType::DynamicCast<StyledStringRichEditorPattern>(pattern_.Upgrade());
+    auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto styledStringBefore = pattern->GetStyledString()->GetSubSpanString(range.start, range.GetLength());
     record.SetOperationBefore(range, styledStringBefore, selection, caretAffinity);
@@ -224,7 +224,7 @@ void StyledStringUndoManager::SetOperationBefore(
 
 void StyledStringUndoManager::UpdateRecordAfterChange(int32_t start, int32_t length, UndoRedoRecord& record)
 {
-    auto pattern = AceType::DynamicCast<StyledStringRichEditorPattern>(pattern_.Upgrade());
+    auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     CHECK_NULL_VOID(pattern->IsStyledStringModeEnabled());
     auto styledString = pattern->GetStyledString()->GetSubSpanString(start, length);

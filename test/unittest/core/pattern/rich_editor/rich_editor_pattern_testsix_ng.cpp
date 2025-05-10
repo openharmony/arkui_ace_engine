@@ -100,6 +100,22 @@ HWTEST_F(RichEditorPatternTestSixNg, AnalyzeUrls001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InsertValueInStyledString001
+ * @tc.desc: test InsertValueInStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSixNg, InsertValueInStyledString001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_3);
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->InsertValueInStyledString(PREVIEW_TEXT_VALUE1);
+    EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
+}
+
+/**
  * @tc.name: OnModifyDone001
  * @tc.desc: test OnModifyDone
  * @tc.type: FUNC

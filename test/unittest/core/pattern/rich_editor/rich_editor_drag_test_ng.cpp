@@ -775,7 +775,7 @@ HWTEST_F(RichEditorDragTestNg, RichEditorPatternTestResetDragSpanItems001, TestS
 HWTEST_F(RichEditorDragTestNg, HandleOnDragInsertStyledString001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = AceType::MakeRefPtr<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     RefPtr<SpanString> spanStringRef = AceType::MakeRefPtr<SpanString>(PREVIEW_TEXT_VALUE2);
     richEditorPattern->HandleOnDragInsertStyledString(spanStringRef);
@@ -790,7 +790,7 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragInsertStyledString001, TestSize.Level
 HWTEST_F(RichEditorDragTestNg, HandleOnDragInsertStyledString002, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = AceType::MakeRefPtr<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     RefPtr<SpanString> spanStringRef = AceType::MakeRefPtr<SpanString>(PREVIEW_TEXT_VALUE2);
     richEditorPattern->isDragSponsor_ = true;
@@ -807,7 +807,7 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragInsertStyledString002, TestSize.Level
 HWTEST_F(RichEditorDragTestNg, HandleOnDragInsertStyledString003, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = AceType::MakeRefPtr<StyledStringRichEditorPattern>();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     RefPtr<SpanString> spanStringRef = AceType::MakeRefPtr<SpanString>(PREVIEW_TEXT_VALUE2);
     richEditorPattern->isDragSponsor_ = true;
@@ -944,6 +944,45 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragDropStyledString001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleOnDragDropStyledString002
+ * @tc.desc: test HandleOnDragDropStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDragTestNg, HandleOnDragDropStyledString002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(event, nullptr);
+    RefPtr<MockUnifiedData> unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
+
+    ASSERT_NE(unifiedData, nullptr);
+    std::vector<uint8_t> expectedReturnUnint8_t = { 1, 2, 3 };
+
+    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_SPAN_STRING_CONTENT);
+    TLVUtil::WriteString(expectedReturnUnint8_t, "Some string content");
+    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_SPAN_STRING_SPANS);
+    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_SPAN_STRING_CONTENT);
+    TLVUtil::WriteString(expectedReturnUnint8_t, "Some string content");
+    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_SPAN_STRING_SPANS);
+    TLVUtil::WriteUint8(expectedReturnUnint8_t, TLV_END);
+
+    UdmfClient* client = UdmfClient::GetInstance();
+    MockUdmfClient* mockClient = static_cast<MockUdmfClient*>(client);
+    EXPECT_CALL(*mockClient, GetSpanStringRecord(_)).WillRepeatedly(Return(expectedReturnUnint8_t));
+
+    std::string selectedStr = "test123";
+    OHOS::Ace::UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
+    event->SetData(unifiedData);
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->HandleOnDragDropStyledString(event);
+    EXPECT_NE(event->GetData(), nullptr);
+    auto host = richEditorPattern->GetHost();
+    EXPECT_FALSE(host->isRestoreInfoUsed_);
+}
+
+/**
  * @tc.name: HandleOnDragDropStyledString003
  * @tc.desc: test HandleOnDragDropStyledString
  * @tc.type: FUNC
@@ -1023,11 +1062,8 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragDropStyledString004, TestSize.Level1)
  */
 HWTEST_F(RichEditorDragTestNg, HandleOnDragDropStyledString005, TestSize.Level1)
 {
-    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
-    auto richEditorNode = FrameNode::GetOrCreateFrameNode(
-        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StyledStringRichEditorPattern>(); });
-    ASSERT_NE(richEditorNode, nullptr);
-    auto richEditorPattern = richEditorNode->GetPattern<StyledStringRichEditorPattern>();
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     ASSERT_NE(event, nullptr);

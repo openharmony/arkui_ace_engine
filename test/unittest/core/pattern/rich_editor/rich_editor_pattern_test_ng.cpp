@@ -315,10 +315,8 @@ HWTEST_F(RichEditorPatternTestNg, UpdateChildrenOffset001, TestSize.Level1)
     /**
      * @tc.steps: step1. init and call function.
      */
-    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
-    auto richEditorNode = FrameNode::GetOrCreateFrameNode(
-        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StyledStringRichEditorPattern>(); });
-    auto richEditorPattern = richEditorNode->GetPattern<StyledStringRichEditorPattern>();
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
     EXPECT_NE(richEditorPattern->contentMod_, nullptr);
@@ -364,7 +362,8 @@ HWTEST_F(RichEditorPatternTestNg, NeedAiAnalysis001, TestSize.Level1)
     /**
      * @tc.steps: step1. init and call function.
      */
-    auto richEditorPattern = AceType::MakeRefPtr<StyledStringRichEditorPattern>();
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
     EXPECT_NE(richEditorPattern->contentMod_, nullptr);
@@ -398,7 +397,8 @@ HWTEST_F(RichEditorPatternTestNg, AdjustCursorPosition001, TestSize.Level1)
     /**
      * @tc.steps: step1. init and call function.
      */
-    auto richEditorPattern = AceType::MakeRefPtr<StyledStringRichEditorPattern>();
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateNodePaintMethod();
     EXPECT_NE(richEditorPattern->contentMod_, nullptr);
