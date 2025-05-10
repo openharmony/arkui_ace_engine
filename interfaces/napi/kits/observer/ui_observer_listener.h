@@ -68,8 +68,10 @@ private:
     void AddGestureEventInfoFour(napi_value objValueEvent, const GestureEvent& gestureEventInfo);
     void AddTapLocationInfo(napi_value objTapGestureEventInfo, const GestureEvent& gestureEventInfo);
     void AddFingerListInfo(napi_value objValueClickEvent, const GestureEvent& gestureEventInfo);
+    void AddFingerInfosInfo(napi_value objValueClickEvent, const GestureEvent& gestureEventInfo);
     void AddClickEventInfoOne(napi_value objValueClickEvent, const ClickInfo& clickInfo);
     void AddClickEventInfoTwo(napi_value objValueClickEvent, const ClickInfo& clickInfo);
+    void AddFingerObjectInfo(napi_value napiFinger, const FingerInfo& finger);
     void AddGestureRecognizerInfo(napi_value objValueGestureRecognizer, const RefPtr<NG::PanRecognizer>& current);
     void AddTargetObject(napi_value objValueEvent, const BaseEventInfo& baseEventInfo);
     napi_env env_ = nullptr;
