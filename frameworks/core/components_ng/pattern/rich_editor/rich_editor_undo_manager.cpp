@@ -18,6 +18,15 @@
 namespace OHOS::Ace::NG {
 constexpr uint32_t RECORD_MAX_LENGTH = 20;
 
+std::unique_ptr<RichEditorUndoManager> RichEditorUndoManager::Create(
+    bool isSpanStringMode, const WeakPtr<RichEditorPattern>& pattern)
+{
+    if (isSpanStringMode) {
+        return std::make_unique<StyledStringUndoManager>(pattern);
+    }
+    return std::make_unique<SpansUndoManager>(pattern);
+}
+
 void RichEditorUndoManager::UndoByRecords()
 {
     CHECK_NULL_VOID(!undoRecords_.empty());
