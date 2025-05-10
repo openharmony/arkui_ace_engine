@@ -448,14 +448,14 @@ export class ChipComponent extends ViewPU {
         smallSymbolFontSize: LengthMetrics.resource({
           id: -1,
           type: 10002,
-          params: ['sys.float.chip_normal_icon_size'],
+          params: ['sys.float.chip_small_icon_size'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         }).value,
         normalSymbolFontSize: LengthMetrics.resource({
           id: -1,
           type: 10002,
-          params: ['sys.float.chip_small_icon_size'],
+          params: ['sys.float.chip_normal_icon_size'],
           bundleName: '__harDefaultBundleName__',
           moduleName: '__harDefaultModuleName__',
         }).value,
@@ -2041,6 +2041,7 @@ export class ChipComponent extends ViewPU {
             });
             Button.focusable(this.getSuffixIconFocusable());
             Button.hoverEffect(this.setHoverEffect());
+            Button.stateEffect(this.setPressEffect());
           }, Button);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(this.getSuffixIconSrc());
@@ -2081,6 +2082,7 @@ export class ChipComponent extends ViewPU {
             });
             Button.focusable(!this.isSuffixIconFocusStyleCustomized);
             Button.hoverEffect(this.setHoverEffect());
+            Button.stateEffect(this.setPressEffect());
           }, Button);
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             SymbolGlyph.create({
@@ -2109,6 +2111,9 @@ export class ChipComponent extends ViewPU {
   }
   setHoverEffect() {
     return this.isSuffixIconFocusStyleCustomized ? HoverEffect.None : undefined;
+  }
+  setPressEffect() {
+    return this.isSuffixIconFocusStyleCustomized ? false : undefined;
   }
   chipZoomOut() {
     if (this.isSuffixIconFocusStyleCustomized) {
