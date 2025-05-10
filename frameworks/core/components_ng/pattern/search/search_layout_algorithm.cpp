@@ -236,6 +236,12 @@ void SearchLayoutAlgorithm::UpdateFontFeature(LayoutWrapper* layoutWrapper)
     }
     if (layoutProperty->HasStrokeColor()) {
         textFieldLayoutProperty->UpdateStrokeColor(layoutProperty->GetStrokeColor().value());
+    } else {
+        if (textFieldLayoutProperty->HasTextColor()) {
+            textFieldLayoutProperty->UpdateStrokeColor(textFieldLayoutProperty->GetTextColor().value());
+        } else {
+            textFieldLayoutProperty->ResetStrokeColor();
+        }
     }
 }
 

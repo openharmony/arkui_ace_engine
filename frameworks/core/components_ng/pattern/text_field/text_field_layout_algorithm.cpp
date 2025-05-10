@@ -556,7 +556,7 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
     textStyle.SetFontWeight(layoutProperty->GetFontWeightValue(theme->GetFontWeight()));
 
     UpdateTextStyleSetTextColor(frameNode, layoutProperty, theme, textStyle, isDisabled, isTextColorByUser);
-    if (layoutProperty->HasStrokeWidth() && layoutProperty->GetStrokeWidth()->Value() != 0.0f) {
+    if (layoutProperty->HasStrokeWidth()) {
         textStyle.SetStrokeWidth(layoutProperty->GetStrokeWidth().value());
         textStyle.SetStrokeColor(layoutProperty->GetStrokeColor().value_or(textStyle.GetTextColor()));
     }
