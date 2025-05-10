@@ -473,36 +473,9 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSpanByPasteData001, TestSize.Level1)
     auto spanString = richEditorPattern->ToStyledString(0, 8);
     ASSERT_NE(spanString, nullptr);
     richEditorPattern->spans_.clear();
+    richEditorPattern->isSpanStringMode_ = false;
     richEditorPattern->AddSpanByPasteData(spanString);
     EXPECT_EQ(richEditorPattern->spans_.size(), 2);
-}
-
-/**
- * @tc.name: ToStyledString001
- * @tc.desc: Test spans to styledString.
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorAddSpanTestNg, ToStyledString001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    /**
-     * @tc.steps: step1. init spans
-     */
-    TextSpanOptions options;
-    options.value = INIT_VALUE_1;
-    richEditorPattern->AddTextSpan(options);
-    options.value = INIT_VALUE_2;
-    richEditorPattern->AddTextSpan(options);
-
-    /**
-     * @tc.steps: step2. test ToStyledString
-     */
-    auto spanString = richEditorPattern->ToStyledString(0, 8);
-    ASSERT_NE(spanString, nullptr);
-    EXPECT_EQ(spanString->GetSpanItems().size(), 2);
 }
 
 /**

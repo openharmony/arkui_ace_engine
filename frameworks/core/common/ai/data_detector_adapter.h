@@ -37,7 +37,6 @@ namespace OHOS::Ace {
 namespace NG {
 class TextPattern;
 class RichEditorPattern;
-class StyledStringRichEditorPattern;
 }
 
 struct AISpan {
@@ -97,7 +96,6 @@ public:
 private:
     friend class NG::TextPattern;
     friend class NG::RichEditorPattern;
-    friend class NG::StyledStringRichEditorPattern;
 
     std::function<void()> GetDetectDelayTask(const std::map<int32_t, AISpan>& aiSpanMap);
     void OnClickAIMenuOption(const AISpan& aiSpan, const std::pair<std::string, FuncVariant>& menuOption,

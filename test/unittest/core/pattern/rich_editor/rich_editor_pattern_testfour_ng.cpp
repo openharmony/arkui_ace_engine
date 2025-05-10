@@ -616,6 +616,74 @@ HWTEST_F(RichEditorPatternTestFourNg, ProcessInsertValue001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ProcessStyledString001
+ * @tc.desc: test ProcessStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, ProcessStyledString001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
+
+    richEditorPattern->textDetectEnable_ = true;
+    richEditorPattern->dataDetectorAdapter_->aiDetectInitialized_ = true;
+    richEditorPattern->ProcessStyledString();
+
+    richEditorPattern->dataDetectorAdapter_->aiDetectInitialized_ = false;
+    richEditorPattern->ProcessStyledString();
+
+    ASSERT_EQ(richEditorPattern->spans_.empty(), true);
+}
+
+/**
+ * @tc.name: ProcessStyledString002
+ * @tc.desc: test ProcessStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, ProcessStyledString002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
+    richEditorPattern->textDetectEnable_ = true;
+    bool ret = false;
+    ret = richEditorPattern->CanStartAITask();
+    EXPECT_TRUE(ret);
+
+    richEditorPattern->textForDisplay_ = INIT_VALUE_1;
+    richEditorPattern->dataDetectorAdapter_->aiDetectInitialized_ = true;
+    richEditorPattern->ProcessStyledString();
+
+    EXPECT_FALSE(richEditorPattern->spans_.empty());
+}
+
+/**
+ * @tc.name: ProcessStyledString003
+ * @tc.desc: test ProcessStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, ProcessStyledString003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
+    richEditorPattern->textDetectEnable_ = true;
+    bool ret = false;
+    ret = richEditorPattern->CanStartAITask();
+    EXPECT_TRUE(ret);
+
+    richEditorPattern->dataDetectorAdapter_->aiDetectInitialized_ = false;
+    richEditorPattern->ProcessStyledString();
+
+    EXPECT_FALSE(richEditorPattern->spans_.empty());
+}
+
+/**
  * @tc.name: SetSelection007
  * @tc.desc: test SetSelection
  * @tc.type: FUNC

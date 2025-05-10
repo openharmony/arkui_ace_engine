@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_UNDO_MANAGER_H
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
-#include "core/components_ng/pattern/rich_editor/styled_string_rich_editor_pattern.h"
 
 namespace OHOS::Ace::NG {
 struct UndoRedoRecord {
@@ -185,8 +184,7 @@ protected:
 
 class StyledStringUndoManager : public RichEditorUndoManager {
 public:
-    explicit StyledStringUndoManager(const WeakPtr<StyledStringRichEditorPattern>& pattern)
-        : RichEditorUndoManager(pattern) {}
+    StyledStringUndoManager(const WeakPtr<RichEditorPattern>& pattern): RichEditorUndoManager(pattern) {}
     bool IsStyledUndoRedoSupported() override;
     bool BeforeChangeByRecord(const UndoRedoRecord& record, bool isUndo = false) override;
     void AfterChangeByRecord(const UndoRedoRecord& record, bool isUndo = false) override;
