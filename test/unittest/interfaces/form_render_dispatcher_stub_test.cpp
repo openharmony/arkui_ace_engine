@@ -44,7 +44,7 @@ HWTEST_F(FormRendererDispatcherStubTest, FormRendererDispatcherStubTest_001, Tes
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    uint32_t code = 9;
+    uint32_t code = 10;
     std::u16string name = u"form_render_dispatcher_stub";
     data.WriteInterfaceToken(name);
     EXPECT_EQ(renderDispather->OnRemoteRequest(code, data, reply, option), ERR_INVALID_VALUE);

@@ -2063,7 +2063,7 @@ bool AceContainer::DumpCommon(const std::vector<std::string>& params, std::vecto
     CHECK_NULL_RETURN(ostream, false);
     DumpLog::GetInstance().SetDumpFile(std::move(ostream));
     if (IsUIExtensionWindow()) {
-        DumpLog::GetInstance().SetSeparator(";");
+        DumpLog::GetInstance().SetUIExtFlag(true);
     }
     auto context = runtimeContext_.lock();
     DumpLog::GetInstance().Print("bundleName:" + context->GetHapModuleInfo()->bundleName);

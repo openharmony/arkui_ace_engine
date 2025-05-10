@@ -37,6 +37,8 @@ FormRendererDispatcherStub::FormRendererDispatcherStub()
         &FormRendererDispatcherStub::HandleOnAccessibilityDumpChildInfo;
     memberFuncMap_[static_cast<uint32_t>(IFormRendererDispatcher::Message::ACCESSIBILITY_TRANSFER_HOVER_EVENT)] =
         &FormRendererDispatcherStub::HandleOnAccessibilityTransferHoverEvent;
+    memberFuncMap_[static_cast<uint32_t>(IFormRendererDispatcher::Message::NOTIFY_DUMP_INFO)] =
+        &FormRendererDispatcherStub::HandleOnNotifyDumpInfo;
 }
 
 FormRendererDispatcherStub::~FormRendererDispatcherStub()
@@ -167,6 +169,22 @@ int32_t FormRendererDispatcherStub::HandleOnAccessibilityTransferHoverEvent(Mess
     };
     OnAccessibilityTransferHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
     reply.WriteInt32(ERR_OK);
+    return ERR_OK;
+}
+
+int32_t FormRendererDispatcherStub::HandleOnNotifyDumpInfo(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<std::string> params;
+    if (!data.ReadStringVector(&params)) {
+        HILOG_ERROR("%{public}s, Read params failed.", __func__);
+        return ERR_INVALID_VALUE;
+    }
+    std::vector<std::string> info;
+    OnNotifyDumpInfo(params, info);
+    if (!reply.WriteStringVector(info)) {
+        HILOG_ERROR("WriteStringVector<dumpInfos> failed");
+        return ERR_INVALID_VALUE;
+    }
     return ERR_OK;
 }
 }  // namespace Ace
