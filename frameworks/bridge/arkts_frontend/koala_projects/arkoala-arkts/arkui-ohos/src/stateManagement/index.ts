@@ -7,6 +7,7 @@ export * from './base/stateUpdateLoop';
 export * from './decorators/decoratorState';
 export * from './decorators/decoratorProp';
 export * from './decorators/decoratorLink';
+export * from './decorators/decoratorObjectLink';
 export * from './decorators/decoratorProvide';
 export * from './decorators/decoratorConsume';
 export * from './decorators/decoratorWatch';
