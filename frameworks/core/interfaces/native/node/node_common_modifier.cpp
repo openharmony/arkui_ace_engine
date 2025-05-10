@@ -22,6 +22,9 @@
 #include "core/animation/animation_pub.h"
 #include "core/animation/curves.h"
 #include "core/common/ime/text_input_type.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_wrapper.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/color.h"
@@ -31,6 +34,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
@@ -697,11 +701,17 @@ void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, Ar
     bgImgPosition.SetSizeY(animatableDimensionY);
 }
 
-void SetBackgroundColor(ArkUINodeHandle node, uint32_t color)
+void SetBackgroundColor(ArkUINodeHandle node, uint32_t color, void* bgColorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetBackgroundColor(frameNode, Color(color));
+    if (!SystemProperties::ConfigChangePerform() || !bgColorRawPtr) {
+        ViewAbstract::SetBackgroundColor(frameNode, Color(color));
+    } else {
+        auto* bgColor = reinterpret_cast<ResourceObject*>(bgColorRawPtr);
+        auto backgroundColorResObj = AceType::Claim(bgColor);
+        ViewAbstract::SetBackgroundColor(frameNode, Color(color), backgroundColorResObj);
+    }
 }
 
 void ResetBackgroundColor(ArkUINodeHandle node)
@@ -1952,8 +1962,52 @@ void ResetBorder(ArkUINodeHandle node)
     ViewAbstract::SetDashWidth(frameNode, Dimension(-1));
 }
 
-void SetBackgroundImagePosition(
-    ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* types, ArkUI_Bool isAlign, ArkUI_Int32 size)
+void SetBackgroundImagePositionUpdateFunc(
+    BackgroundImagePosition& bgImgPosition, void* bgImageXRawPtr, void* bgImageYRawPtr)
+{
+    CHECK_NULL_VOID(bgImageXRawPtr);
+    auto* bgImageX = reinterpret_cast<ResourceObject*>(bgImageXRawPtr);
+    auto resObjX = AceType::Claim(bgImageX);
+    auto&& updateFuncX = [](const RefPtr<ResourceObject>& resObj, BackgroundImagePosition& position) {
+        CalcDimension x;
+        double valueX;
+        DimensionUnit typeX;
+        ResourceParseUtils::ParseResDimensionVp(resObj, x);
+        if (x.Unit() == DimensionUnit::PERCENT) {
+            valueX = x.Value();
+            typeX = DimensionUnit::PERCENT;
+        } else {
+            valueX = x.ConvertToPx();
+            typeX = DimensionUnit::PX;
+        }
+        AnimationOption option = ViewStackModel::GetInstance()->GetImplicitAnimationOption();
+        position.SetSizeX(AnimatableDimension(valueX, typeX, option));
+    };
+    bgImgPosition.AddResource("backgroundImagePositionX", resObjX, std::move(updateFuncX));
+
+    CHECK_NULL_VOID(bgImageYRawPtr);
+    auto* bgImageY = reinterpret_cast<ResourceObject*>(bgImageYRawPtr);
+    auto resObjY = AceType::Claim(bgImageY);
+    auto&& updateFuncY = [](const RefPtr<ResourceObject>& resObj, BackgroundImagePosition& position) {
+        CalcDimension y;
+        double valueY;
+        DimensionUnit typeY;
+        ResourceParseUtils::ParseResDimensionVp(resObj, y);
+        if (y.Unit() == DimensionUnit::PERCENT) {
+            valueY = y.Value();
+            typeY = DimensionUnit::PERCENT;
+        } else {
+            valueY = y.ConvertToPx();
+            typeY = DimensionUnit::PX;
+        }
+        AnimationOption option = ViewStackModel::GetInstance()->GetImplicitAnimationOption();
+        position.SetSizeY(AnimatableDimension(valueY, typeY, option));
+    };
+    bgImgPosition.AddResource("backgroundImagePositionY", resObjY, std::move(updateFuncY));
+}
+
+void SetBackgroundImagePosition(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* types,
+    ArkUI_Bool isAlign, ArkUI_Int32 size, void* bgImageXRawPtr, void* bgImageYRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1961,6 +2015,7 @@ void SetBackgroundImagePosition(
         return;
     }
     BackgroundImagePosition bgImgPosition;
+    SetBackgroundImagePositionUpdateFunc(bgImgPosition, bgImageXRawPtr, bgImageYRawPtr);
     double valueX = values[NUM_0];
     double valueY = values[NUM_1];
     DimensionUnit typeX = static_cast<OHOS::Ace::DimensionUnit>(types[NUM_0]);
@@ -2076,15 +2131,22 @@ void ResetBackgroundImageSize(ArkUINodeHandle node)
     ViewAbstract::SetBackgroundImageSize(frameNode, bgImgSize);
 }
 
-void SetBackgroundImage(
-    ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundle, ArkUI_CharPtr module, ArkUI_Int32 repeatIndex)
+void SetBackgroundImage(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundle,
+    ArkUI_CharPtr module, ArkUI_Int32 repeatIndex, void* bgImageRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::string srcStr(src);
     std::string bundleStr(bundle);
     std::string moduleStr(module);
-    ViewAbstract::SetBackgroundImage(frameNode, OHOS::Ace::ImageSourceInfo { srcStr, bundleStr, moduleStr });
+    if (!SystemProperties::ConfigChangePerform() || !bgImageRawPtr) {
+        ViewAbstract::SetBackgroundImage(frameNode, OHOS::Ace::ImageSourceInfo { srcStr, bundleStr, moduleStr });
+    } else {
+        auto* bgImage = reinterpret_cast<ResourceObject*>(bgImageRawPtr);
+        auto backgroundImageResObj = AceType::Claim(bgImage);
+        ViewAbstract::SetBackgroundImage(
+            frameNode, OHOS::Ace::ImageSourceInfo{srcStr, bundleStr, moduleStr}, backgroundImageResObj);
+    }
     auto repeat = static_cast<ImageRepeat>(repeatIndex);
     if (repeat >= OHOS::Ace::ImageRepeat::NO_REPEAT && repeat <= OHOS::Ace::ImageRepeat::REPEAT) {
         ViewAbstract::SetBackgroundImageRepeat(frameNode, repeat);

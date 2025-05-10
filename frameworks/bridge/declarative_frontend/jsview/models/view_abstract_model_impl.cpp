@@ -305,7 +305,7 @@ void ViewAbstractModelImpl::SetBackgroundImageSize(const BackgroundImageSize& bg
     decoration->SetImage(image);
 }
 
-void ViewAbstractModelImpl::SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition)
+void ViewAbstractModelImpl::SetBackgroundImagePosition(BackgroundImagePosition& bgImgPosition)
 {
     auto decoration = GetBackDecoration();
     auto image = decoration->GetImage();
