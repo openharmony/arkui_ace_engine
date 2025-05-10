@@ -54,6 +54,7 @@ constexpr char EVENT_KEY_PAGE_URL[] = "PAGE_URL";
 constexpr char EVENT_KEY_JANK_STATS[] = "JANK_STATS";
 constexpr char EVENT_KEY_JANK_STATS_VER[] = "JANK_STATS_VER";
 constexpr char EVENT_KEY_MODULE_NAME[] = "MODULE_NAME";
+constexpr char ACTION_NAME[] = "ACTION_NAME";
 constexpr char EVENT_KEY_PAGE_NODE_COUNT[] = "PAGE_NODE_COUNT";
 constexpr char EVENT_KEY_PAGE_NODE_THRESHOLD[] = "PAGE_NODE_THRESHOLD";
 constexpr char EVENT_KEY_PAGE_DEPTH[] = "PAGE_DEPTH";
