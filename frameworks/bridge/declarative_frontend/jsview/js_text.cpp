@@ -145,7 +145,6 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
     auto fontSize = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::SIZE));
     CalcDimension size;
     RefPtr<ResourceObject> fontSizeResObj;
-    RefPtr<ResourceObject> fontSizeResObj;
     if (ParseJsDimensionFpNG(fontSize, size, fontSizeResObj, false) && size.IsNonNegative()) {
         font.fontSize = size;
         if (SystemProperties::ConfigChangePerform() && fontSizeResObj) {
