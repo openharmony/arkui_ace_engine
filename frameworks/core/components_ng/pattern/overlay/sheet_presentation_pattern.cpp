@@ -622,9 +622,8 @@ void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)
         offset = pageHeight - sheetMaxHeight_;
         currentOffset_ = height - sheetMaxHeight_;
     }
-    bool isNeedChangeScrollHeight = scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && currentOffset_ < 0;
-    if (isNeedChangeScrollHeight) {
-        ChangeScrollHeight(height - currentOffset_);
+    if (IsNeedChangeScrollHeight(height - currentOffset_)) {
+        ChangeSheetPage(height - currentOffset_);
     }
     HandleFollowAccessibilityEvent(height - currentOffset_);
     auto renderContext = host->GetRenderContext();
@@ -776,13 +775,11 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
             } else {
                 detentsIndex_ = detentsLowerPos;
                 ChangeSheetHeight(downHeight);
-                ChangeSheetPage(height);
                 SheetTransition(true, std::abs(dragVelocity));
             }
         } else if (LessNotEqual(std::abs(currentSheetHeight - upHeight), std::abs(currentSheetHeight - downHeight))) {
             detentsIndex_ = detentsUpperPos;
             ChangeSheetHeight(upHeight);
-            ChangeSheetPage(height);
             SheetTransition(true, std::abs(dragVelocity));
         }
     } else {
@@ -793,13 +790,11 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
             } else {
                 detentsIndex_ = detentsLowerPos;
                 ChangeSheetHeight(downHeight);
-                ChangeSheetPage(height);
                 SheetTransition(true, std::abs(dragVelocity));
             }
         } else {
             detentsIndex_ = detentsUpperPos;
             ChangeSheetHeight(upHeight);
-            ChangeSheetPage(height);
             SheetTransition(true, std::abs(dragVelocity));
         }
     }
@@ -1145,10 +1140,11 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
             if (renderContext) {
                 renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
                 ref->property_->Set(ref->height_ + ref->sheetHeightUp_);
-                bool isNeedChangeScrollHeight =
-                    ref->scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && ref->isDirectionUp_;
-                if (isNeedChangeScrollHeight) {
-                    ref->ChangeScrollHeight(ref->height_);
+                if (ref->IsNeedChangeScrollHeight(ref->height_)) {
+                    ref->ChangeSheetPage(ref->height_);
+                    auto pipeline = PipelineBase::GetCurrentContext();
+                    CHECK_NULL_VOID(pipeline);
+                    pipeline->FlushUITasks(true);
                 }
             }
         },
@@ -2914,9 +2910,8 @@ ScrollResult SheetPresentationPattern::HandleScrollWithSheet(float scrollOffset)
         sheetOffsetInPage = pageHeight - sheetMaxHeight_;
         currentOffset_ = currentHeightPos - sheetMaxHeight_;
     }
-    bool isNeedChangeScrollHeight = scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && isDraggingUp;
-    if (isNeedChangeScrollHeight) {
-        ChangeScrollHeight(currentHeightPos - currentOffset_);
+    if (IsNeedChangeScrollHeight(currentHeightPos - currentOffset_)) {
+        ChangeSheetPage(currentHeightPos - currentOffset_);
     }
     HandleFollowAccessibilityEvent(currentHeightPos - currentOffset_);
     auto renderContext = host->GetRenderContext();
@@ -3769,6 +3764,14 @@ void SheetPresentationPattern::RecoverScrollOrResizeAvoidStatus()
     scrollHeight_ = 0.f;
     ScrollTo(0.f);
     isScrolling_ = false;
+}
+
+bool SheetPresentationPattern::IsNeedChangeScrollHeight(float height)
+{
+    float lowestDetentHeight = *std::min_element(sheetDetentHeight_.begin(), sheetDetentHeight_.end());
+    bool isNeedChangeScrollHeight =
+        scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && GreatOrEqual(height, lowestDetentHeight);
+    return isNeedChangeScrollHeight;
 }
 
 void SheetPresentationPattern::OnWillDisappear()
