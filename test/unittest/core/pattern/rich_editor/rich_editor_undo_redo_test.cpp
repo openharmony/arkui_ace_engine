@@ -264,7 +264,7 @@ HWTEST_F(RichEditorUndoRedoTest, HandleOnUndoAction001, TestSize.Level2)
     secondRecord.deleteCaretPostion = 3;
     richEditorPattern->operationRecords_.clear();
     richEditorPattern->operationRecords_.emplace_back(secondRecord);
-    richEditorPattern->HandleOnUndoAction();
+    richEditorPattern->HandleOnExtendUndoAction();
     EXPECT_TRUE(richEditorPattern->operationRecords_.empty());
 }
 

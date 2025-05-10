@@ -2027,7 +2027,7 @@ OffsetF RichEditorPattern::CalcCursorOffsetByPosition(
 
 void RichEditorPattern::HandleCurrentPositionParagraphInfo(float& lastLineTop, float& paragraphSpacing)
 {
-    auto paragraphInfo = paragraphs_.GetParagrahInfo(caretPosition_);
+    auto paragraphInfo = paragraphs_.GetParagraphInfo(caretPosition_);
     paragraphSpacing = paragraphInfo.paragraphStyle.paragraphSpacing.ConvertToPx();
     float lastLineHeight = 0.0f;
     CHECK_EQUAL_VOID(paragraphInfo.end - 1 >= paragraphInfo.start, false);
@@ -6704,7 +6704,6 @@ int32_t RichEditorPattern::CaretPositionSelectEmoji(CaretMoveIntent direction)
 
 void RichEditorPattern::HandleSelect(CaretMoveIntent direction)
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "direction=%{public}d", direction);
     CloseSelectOverlay();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -6714,6 +6713,8 @@ void RichEditorPattern::HandleSelect(CaretMoveIntent direction)
                                                                    : textSelector_.GetTextStart());
     }
     newPos = HandleSelectWrapper(direction, fixedPos);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleSelect [%{public}d-%{public}d] direction=%{public}d",
+        fixedPos, newPos, direction);
     if (newPos == -1) {
         return;
     }
@@ -11511,9 +11512,9 @@ int32_t RichEditorPattern::HandleSelectWrapper(CaretMoveIntent direction, int32_
             return endPosition;
         }
         case CaretMoveIntent::ParagraghBegin:
-            return HandleSelectParagraghPos(true);
+            return paragraphs_.GetParagraphInfo(index - 1).start;
         case CaretMoveIntent::ParagraghEnd:
-            return HandleSelectParagraghPos(false);
+            return paragraphs_.GetParagraphInfo(index).end;
         case CaretMoveIntent::LineBegin:
             return CalcSingleLineBeginPosition(fixedPos);
         case CaretMoveIntent::LineEnd:
@@ -11570,25 +11571,6 @@ int32_t RichEditorPattern::HandleKbVerticalSelection(bool isUp)
         OffsetF newCaretOffset = CalcCursorOffsetByPosition(newPos, newCaretHeight);
         CHECK_EQUAL_RETURN(!textSelector_.SelectNothing() && textSelector_.GetTextStart() == caretPosition_ &&
             selectEndOffset.GetY() == newCaretOffset.GetY(), true, textSelector_.GetTextEnd());
-    }
-    return newPos;
-}
-
-int32_t RichEditorPattern::HandleSelectParagraghPos(bool direction)
-{
-    int32_t newPos = 0;
-    CloseSelectOverlay();
-    ResetSelection();
-    if (direction) {
-        newPos = GetParagraphBeginPosition(caretPosition_);
-        if (newPos == caretPosition_ && caretPosition_ > 0) {
-            newPos = GetParagraphBeginPosition(caretPosition_ - 1);
-        }
-    } else {
-        newPos = GetParagraphEndPosition(caretPosition_);
-        if (newPos == caretPosition_ && caretPosition_ < static_cast<int32_t>(GetTextContentLength())) {
-            newPos = GetParagraphEndPosition(caretPosition_ + 1);
-        }
     }
     return newPos;
 }
