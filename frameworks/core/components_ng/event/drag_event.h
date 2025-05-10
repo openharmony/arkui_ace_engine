@@ -326,6 +326,8 @@ public:
 
     virtual void NotifyMenuShow(bool isMenuShow) {}
 
+    void CallTimerCallback(const RefPtr<FrameNode>& frameNode);
+    void SetExecTimerCallback(bool isExecCallback);
 protected:
     DragEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub);
 
@@ -337,7 +339,6 @@ private:
         const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
     void HandleTextDragCallback(Offset offset);
     void HandleOnPanActionCancel();
-
 protected:
     RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
@@ -383,6 +384,7 @@ private:
     bool isNewFwk_ = false;
     bool isRestartDrag_ = false;
     bool isForDragDrop_ = false;
+    bool isExecCallback_ = false;
 };
 
 } // namespace OHOS::Ace::NG
