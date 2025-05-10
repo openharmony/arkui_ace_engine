@@ -46,6 +46,40 @@ void MeasureDivider(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNo
     dividerWrapper->Measure(constraint);
 }
 
+void MeasureSplitPlaceholder(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
+    const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& splitPlaceholderSize)
+{
+    auto splitPlaceholder = hostNode->GetPlaceholderContentNode();
+    CHECK_NULL_VOID(splitPlaceholder);
+    auto index = hostNode->GetChildIndexById(splitPlaceholder->GetId());
+    auto splitPlaceholderWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(splitPlaceholderWrapper);
+    auto constraint = navigationLayoutProperty->CreateChildConstraint();
+    auto placeholderLayoutProperty = AceType::DynamicCast<FrameNode>(splitPlaceholder)->GetLayoutProperty();
+    CHECK_NULL_VOID(placeholderLayoutProperty);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
+    CHECK_NULL_VOID(navigationPattern);
+    auto navigationStack = navigationPattern->GetNavigationStack();
+    CHECK_NULL_VOID(navigationStack);
+    bool isHideNavBar = navigationLayoutProperty->GetHideNavBar().value_or(false);
+    // cases that require measure of placeholder content
+    // 1. navigation stack is empty
+    // 2. navigation mode is SPLIT
+    // 3. navBar is not hidden
+    if (navigationStack->Empty() && navigationPattern->GetNavigationMode() == NavigationMode::SPLIT && !isHideNavBar) {
+        placeholderLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        if (NavigationLayoutAlgorithm::IsAutoHeight(navigationLayoutProperty)) {
+            constraint.selfIdealSize.SetWidth(splitPlaceholderSize.Width());
+        } else {
+            constraint.selfIdealSize = OptionalSizeF(splitPlaceholderSize.Width(), splitPlaceholderSize.Height());
+        }
+    } else {
+        placeholderLayoutProperty->UpdateVisibility(VisibleType::GONE);
+        constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
+    }
+    splitPlaceholderWrapper->Measure(constraint);
+}
+
 void MeasureDragBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
     const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& dividerSize)
 {
@@ -206,6 +240,42 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     contentOffset.AddY(padding.top.value_or(0));
     geometryNode->SetMarginFrameOffset(contentOffset);
     contentWrapper->Layout();
+}
+
+void LayoutSplitPalceholderContent(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
+    const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, float splitPlaceholderOffsetX,
+    const NavBarPosition& position)
+{
+    CHECK_NULL_VOID(hostNode);
+    auto splitPlaceholder = hostNode->GetPlaceholderContentNode();
+    CHECK_NULL_VOID(splitPlaceholder);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
+    auto navigationStack = navigationPattern->GetNavigationStack();
+    CHECK_NULL_VOID(navigationStack);
+    bool isHideNavBar = navigationLayoutProperty->GetHideNavBar().value_or(false);
+    // cases that require layout of placeholder content
+    // 1. navigation stack is empty
+    // 2. navigation mode is SPLIT
+    // 3. navBar is not hidden
+    if (navigationStack->Empty() && navigationPattern->GetNavigationMode() == NavigationMode::SPLIT && !isHideNavBar) {
+        bool isNavBarInRight =
+            (position == NavBarPosition::END && !AceApplicationInfo::GetInstance().IsRightToLeft()) ||
+            (position == NavBarPosition::START && AceApplicationInfo::GetInstance().IsRightToLeft());
+        auto index = hostNode->GetChildIndexById(splitPlaceholder->GetId());
+        auto splitPlaceholderWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        CHECK_NULL_VOID(splitPlaceholderWrapper);
+        auto splitPlaceholderGeometryNode = splitPlaceholderWrapper->GetGeometryNode();
+        CHECK_NULL_VOID(splitPlaceholderGeometryNode);
+        if (isNavBarInRight) {
+            splitPlaceholderOffsetX = 0.0f;
+        }
+        auto splitPlaceholderOffset = OffsetT<float>(splitPlaceholderOffsetX, 0.0f);
+        const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
+        splitPlaceholderOffset.AddX(padding.left.value_or(0));
+        splitPlaceholderOffset.AddY(padding.top.value_or(0));
+        splitPlaceholderGeometryNode->SetMarginFrameOffset(splitPlaceholderOffset);
+        splitPlaceholderWrapper->Layout();
+    }
 }
 
 void FitScrollFullWindow(SizeF& frameSize)
@@ -623,6 +693,7 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MeasureContentChild(layoutWrapper, hostNode, navigationLayoutProperty, contentSize_);
     MeasureDivider(layoutWrapper, hostNode, navigationLayoutProperty, dividerSize_);
     MeasureDragBar(layoutWrapper, hostNode, navigationLayoutProperty, dividerSize_);
+    MeasureSplitPlaceholder(layoutWrapper, hostNode, navigationLayoutProperty, contentSize_);
 
     if (IsAutoHeight(navigationLayoutProperty)) {
         SetNavigationHeight(layoutWrapper, size);
@@ -646,6 +717,9 @@ void NavigationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     OffsetF navBarOffset(0.0, 0.0);
     float navBarWidth = LayoutNavBar(layoutWrapper, hostNode, navigationLayoutProperty, navBarPosition, navBarOffset);
     float dividerWidth = LayoutDivider(layoutWrapper, hostNode, navigationLayoutProperty, navBarWidth, navBarPosition);
+    auto splitPlaceholderOffsetX = navBarWidth + dividerWidth;
+    LayoutSplitPalceholderContent(
+        layoutWrapper, hostNode, navigationLayoutProperty, splitPlaceholderOffsetX, navBarPosition);
     LayoutContent(layoutWrapper, hostNode, navigationLayoutProperty, navBarWidth, dividerWidth, navBarPosition);
     LayoutDragBar(layoutWrapper, hostNode, navigationLayoutProperty, navBarWidth, navBarPosition);
 
